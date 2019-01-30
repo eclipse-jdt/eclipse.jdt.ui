@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,34 +13,27 @@
  *          (report 36180: Callers/Callees view)
  *   Stephan Herrmann (stephan@cs.tu-berlin.de):
  *          - bug 75800: [call hierarchy] should allow searches for fields
+ *   Red Hat Inc. - modified to use CallHierarchyCore instance
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.callhierarchy;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
-
-import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IModuleDescription;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
-import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
@@ -53,8 +46,12 @@ public class CallHierarchy {
 
     private static final String DEFAULT_IGNORE_FILTERS = "java.*,javax.*"; //$NON-NLS-1$
     private static CallHierarchy fgInstance;
-    private IJavaSearchScope fSearchScope;
+    private CallHierarchyCore fgCallHierarchyCore;
     private StringMatcher[] fFilters;
+
+    private CallHierarchy() {
+        fgCallHierarchyCore = CallHierarchyCore.getDefault();
+    }
 
     public static CallHierarchy getDefault() {
         if (fgInstance == null) {
@@ -75,7 +72,7 @@ public class CallHierarchy {
 
         settings.setValue(PREF_USE_IMPLEMENTORS, enabled);
     }
-    
+
     public boolean isFilterTestCode() {
         IPreferenceStore settings = JavaPlugin.getDefault().getPreferenceStore();
 
@@ -90,109 +87,31 @@ public class CallHierarchy {
 
 
     public Collection<IJavaElement> getImplementingMethods(IMethod method) {
-        if (isSearchUsingImplementorsEnabled()) {
-            IJavaElement[] result = Implementors.getInstance().searchForImplementors(new IJavaElement[] {
-                        method
-                    }, new NullProgressMonitor());
-
-            if ((result != null) && (result.length > 0)) {
-                return Arrays.asList(result);
-            }
-        }
-
-        return new ArrayList<>(0);
+        return fgCallHierarchyCore.getImplementingMethods(method);
     }
 
     public Collection<IJavaElement> getInterfaceMethods(IMethod method) {
-        if (isSearchUsingImplementorsEnabled()) {
-            IJavaElement[] result = Implementors.getInstance().searchForInterfaces(new IJavaElement[] {
-                        method
-                    }, new NullProgressMonitor());
-
-            if ((result != null) && (result.length > 0)) {
-                return Arrays.asList(result);
-            }
-        }
-
-        return new ArrayList<>(0);
+        return fgCallHierarchyCore.getInterfaceMethods(method);
     }
 
     public MethodWrapper[] getCallerRoots(IMember[] members) {
-    	return getRoots(members, true);
+        return fgCallHierarchyCore.getCallerRoots(members);
     }
 
     public MethodWrapper[] getCalleeRoots(IMember[] members) {
-    	return getRoots(members, false);
+        return fgCallHierarchyCore.getCalleeRoots(members);
     }
 
-	private MethodWrapper[] getRoots(IMember[] members, boolean callers) {
-		ArrayList<MethodWrapper> roots= new ArrayList<>();
-    	for (int i= 0; i < members.length; i++) {
-			IMember member= members[i];
-			if (member instanceof IType) {
-				IType type= (IType) member;
-				try {
-					if (! type.isAnonymous()) {
-						IMethod[] constructors= JavaElementUtil.getAllConstructors(type);
-						if (constructors.length == 0) {
-							addRoot(member, roots, callers); // IType is a stand-in for the non-existing default constructor
-						} else {
-							for (int j= 0; j < constructors.length; j++) {
-								IMethod constructor= constructors[j];
-								addRoot(constructor, roots, callers);
-							}
-						}
-					} else {
-						addRoot(member, roots, callers);
-					}
-				} catch (JavaModelException e) {
-					JavaPlugin.log(e);
-				}
-			} else {
-				addRoot(member, roots, callers);
-			}
-		}
-    	return roots.toArray(new MethodWrapper[roots.size()]);
-	}
-
-	private void addRoot(IMember member, ArrayList<MethodWrapper> roots, boolean callers) {
-		MethodCall methodCall= new MethodCall(member);
-		MethodWrapper root;
-		if (callers) {
-			root= new CallerMethodWrapper(null, methodCall);
-		} else {
-			root= new CalleeMethodWrapper(null, methodCall);
-		}
-		roots.add(root);
-	}
-
     public static CallLocation getCallLocation(Object element) {
-        CallLocation callLocation = null;
-
-        if (element instanceof MethodWrapper) {
-            MethodWrapper methodWrapper = (MethodWrapper) element;
-            MethodCall methodCall = methodWrapper.getMethodCall();
-
-            if (methodCall != null) {
-                callLocation = methodCall.getFirstCallLocation();
-            }
-        } else if (element instanceof CallLocation) {
-            callLocation = (CallLocation) element;
-        }
-
-        return callLocation;
+        return CallHierarchyCore.getCallLocation(element);
     }
 
     public IJavaSearchScope getSearchScope() {
-        if (fSearchScope == null) {
-            fSearchScope= SearchEngine.createWorkspaceScope();
-        }
-
-        return fSearchScope;
+        return fgCallHierarchyCore.getSearchScope();
     }
 
     public void setSearchScope(IJavaSearchScope searchScope) {
-        this.fSearchScope = searchScope;
+        fgCallHierarchyCore.setSearchScope(searchScope);
     }
 
 	/**
@@ -271,13 +190,7 @@ public class CallHierarchy {
     }
 
     public static boolean arePossibleInputElements(List<?> elements) {
-		if (elements.size() < 1)
-			return false;
-		for (Iterator<?> iter= elements.iterator(); iter.hasNext();) {
-			if (! isPossibleInputElement(iter.next()))
-				return false;
-		}
-		return true;
+        return CallHierarchyCore.arePossibleInputElements(elements);
 	}
 
 	/**
@@ -314,22 +227,6 @@ public class CallHierarchy {
     }
 
     public static boolean isPossibleInputElement(Object element){
-    	if (! (element instanceof IMember))
-    		return false;
-
-		if (element instanceof IModuleDescription) {
-			return false;
-		}
-
-    	if (element instanceof IType) {
-			IType type= (IType) element;
-			try {
-				return type.isClass() || type.isEnum();
-			} catch (JavaModelException e) {
-				return false;
-			}
-		}
-
-    	return true;
+        return CallHierarchyCore.isPossibleInputElement(element);
     }
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,6 +13,7 @@
  *          (report 36180: Callers/Callees view)
  *   Stephan Herrmann (stephan@cs.tu-berlin.de):
  *          - bug 206949: [call hierarchy] filter field accesses (only write or only read)
+ *   Red Hat Inc. - refactored to jdt.core.manipulation and modified
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.callhierarchy;
 
@@ -25,13 +26,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.PlatformObject;
 
-import org.eclipse.ui.model.IWorkbenchAdapter;
-
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
-
-import org.eclipse.jdt.internal.ui.callhierarchy.MethodWrapperWorkbenchAdapter;
 
 /**
  * This class represents the general parts of a method call (either to or from a
@@ -39,6 +35,18 @@ import org.eclipse.jdt.internal.ui.callhierarchy.MethodWrapperWorkbenchAdapter;
  *
  */
 public abstract class MethodWrapper extends PlatformObject {
+
+	public static IMethodWrapperDynamic fMethodWrapperCore= new MethodWrapperDynamicCore();
+
+	/**
+	 * Set the IMethodWrapperCore class to use in MethodWrapper
+	 *
+	 * @param core the IMethodWrapperCore class to store
+	 */
+	public static final void setMethodWrapperDynamic(IMethodWrapperDynamic core) {
+		fMethodWrapperCore= core;
+	}
+
     private Map<String, MethodCall> fElements = null;
 
     /*
@@ -71,16 +79,9 @@ public abstract class MethodWrapper extends PlatformObject {
         this.fParent = parent;
     }
 
-    @SuppressWarnings("unchecked")
-	@Override
+    @Override
 	public <T> T getAdapter(Class<T> adapter) {
-		if (adapter == IJavaElement.class) {
-	        return (T) getMember();
-	    } else if (adapter == IWorkbenchAdapter.class){
-	    	return (T) new MethodWrapperWorkbenchAdapter(this);
-	    } else {
-	    	return null;
-	    }
+        return fMethodWrapperCore.getAdapter(this, adapter);
 	}
 
     public MethodWrapper[] getCalls(IProgressMonitor progressMonitor) {
@@ -142,46 +143,7 @@ public abstract class MethodWrapper extends PlatformObject {
 
     @Override
 	public boolean equals(Object oth) {
-        if (this == oth) {
-            return true;
-        }
-
-        if (oth == null) {
-            return false;
-        }
-
-        if (oth instanceof MethodWrapperWorkbenchAdapter) {
-            //Note: A MethodWrapper is equal to a referring MethodWrapperWorkbenchAdapter and vice versa (bug 101677).
-        	oth= ((MethodWrapperWorkbenchAdapter) oth).getMethodWrapper();
-        }
-
-        if (oth.getClass() != getClass()) {
-            return false;
-        }
-
-        MethodWrapper other = (MethodWrapper) oth;
-
-        if (this.fParent == null) {
-            if (other.fParent != null) {
-                return false;
-            }
-        } else {
-            if (!this.fParent.equals(other.fParent)) {
-                return false;
-            }
-        }
-
-        if (this.getMethodCall() == null) {
-            if (other.getMethodCall() != null) {
-                return false;
-            }
-        } else {
-            if (!this.getMethodCall().equals(other.getMethodCall())) {
-                return false;
-            }
-        }
-
-        return true;
+        return fMethodWrapperCore.equals(this,  oth);
     }
 
     @Override
@@ -213,7 +175,7 @@ public abstract class MethodWrapper extends PlatformObject {
 
 	/**
 	 * Creates a method wrapper for the child of the receiver.
-	 * 
+	 *
 	 * @param methodCall the method call
 	 * @return the method wrapper
 	 */

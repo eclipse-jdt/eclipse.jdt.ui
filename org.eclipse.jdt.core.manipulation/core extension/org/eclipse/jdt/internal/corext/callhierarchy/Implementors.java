@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,6 +11,7 @@
  * Contributors:
  *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation
  * 			(report 36180: Callers/Callees view)
+ *   Red Hat Inc. - refactored to jdt.core.manipulation
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.callhierarchy;
 
@@ -26,7 +27,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 
 /**
  * The main plugin class to be used in the desktop.
@@ -78,7 +79,7 @@ public class Implementors {
                     }
                 }
             } catch (JavaModelException e) {
-                JavaPlugin.log(e);
+                JavaManipulationPlugin.log(e);
             }
         }
 

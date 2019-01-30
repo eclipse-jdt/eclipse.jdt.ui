@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,6 +11,7 @@
  * Contributors:
  *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation
  *          (report 36180: Callers/Callees view)
+ *   Red Hat Inc. - refactored to jdt.core.manipulation
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.callhierarchy;
 
@@ -25,7 +26,7 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 
 public class CallLocation implements IAdaptable {
     public static final int UNKNOWN_LINE_NUMBER= -1;
@@ -98,7 +99,7 @@ public class CallLocation implements IAdaptable {
             try {
                 fLineNumber= document.getLineOfOffset(fStart) + 1;
             } catch (BadLocationException e) {
-                JavaPlugin.log(e);
+                JavaManipulationPlugin.log(e);
             }
         }
     }
@@ -117,7 +118,7 @@ public class CallLocation implements IAdaptable {
                 buffer = openable.getBuffer();
             }
         } catch (JavaModelException e) {
-            JavaPlugin.log(e);
+            JavaManipulationPlugin.log(e);
         }
         return buffer;
     }

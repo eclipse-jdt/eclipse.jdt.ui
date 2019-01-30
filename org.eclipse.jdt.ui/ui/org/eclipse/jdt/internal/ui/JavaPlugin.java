@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -88,6 +88,8 @@ import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.manipulation.JavaManipulation;
 
 import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
+import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
+import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapperDynamic;
 import org.eclipse.jdt.internal.corext.fix.CleanUpRegistry;
 import org.eclipse.jdt.internal.corext.template.java.AbstractJavaContextType;
 import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
@@ -406,6 +408,9 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 		// must add here to guarantee that it is the first in the listener list
 		fMembersOrderPreferenceCache= new MembersOrderPreferenceCache();
 		fMembersOrderPreferenceCache.install(store);
+
+		// set core methods for MethodWrapper
+		MethodWrapper.setMethodWrapperDynamic(new MethodWrapperDynamic());
 
 		FormatterProfileStore.checkCurrentOptionsVersion();
 

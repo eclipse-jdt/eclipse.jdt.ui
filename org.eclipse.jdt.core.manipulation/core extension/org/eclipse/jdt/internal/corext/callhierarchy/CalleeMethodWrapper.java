@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,6 +11,7 @@
  * Contributors:
  *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation
  *          (report 36180: Callers/Callees view)
+ *   Red Hat Inc. - refactored to jdt.core.manipulation
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.callhierarchy;
 
@@ -89,7 +90,7 @@ class CalleeMethodWrapper extends MethodWrapper {
 	protected Map<String, MethodCall> findChildren(IProgressMonitor progressMonitor) {
     	IMember member= getMember();
 		if (member.exists()) {
-			CompilationUnit cu= CallHierarchy.getCompilationUnitNode(member, true);
+			CompilationUnit cu= CallHierarchyCore.getCompilationUnitNode(member, true);
 		    if (progressMonitor != null) {
 		        progressMonitor.worked(5);
 		    }

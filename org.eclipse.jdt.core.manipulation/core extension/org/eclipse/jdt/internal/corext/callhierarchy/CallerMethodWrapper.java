@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,6 +13,7 @@
  *          (report 36180: Callers/Callees view)
  *   Stephan Herrmann (stephan@cs.tu-berlin.de):
  *          - bug 206949: [call hierarchy] filter field accesses (only write or only read)
+ *   Red Hat Inc - refactored to jdt.core.manipulatio
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.callhierarchy;
 
@@ -38,10 +39,9 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
 
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class CallerMethodWrapper extends MethodWrapper {
 	/**
@@ -64,7 +64,7 @@ public class CallerMethodWrapper extends MethodWrapper {
 	}
 
     protected IJavaSearchScope getSearchScope() {
-        return CallHierarchy.getDefault().getSearchScope();
+        return CallHierarchyCore.getDefault().getSearchScope();
     }
 
     @Override
@@ -94,7 +94,7 @@ public class CallerMethodWrapper extends MethodWrapper {
 
 	/**
 	 * @return The result of the search for children
-	 * @see org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper#findChildren(org.eclipse.core.runtime.IProgressMonitor)
+	 * @see org.eclipse.jdt.internal.ui.callhierarchy.MethodWrapper#findChildren(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	@Override
 	protected Map<String, MethodCall> findChildren(IProgressMonitor progressMonitor) {
@@ -157,7 +157,7 @@ public class CallerMethodWrapper extends MethodWrapper {
 			return searchRequestor.getCallers();
 
 		} catch (CoreException e) {
-			JavaPlugin.log(e);
+			JavaManipulationPlugin.log(e);
 			return new HashMap<>(0);
 		}
 	}

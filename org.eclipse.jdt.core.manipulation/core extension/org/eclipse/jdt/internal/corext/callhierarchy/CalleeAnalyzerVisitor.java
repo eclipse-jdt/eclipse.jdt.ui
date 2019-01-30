@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,6 +11,7 @@
  * Contributors:
  *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation
  *          (report 36180: Callers/Callees view)
+ *   Red Hat Inc. - refactored to jdt.core.manipulation
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.callhierarchy;
 
@@ -43,11 +44,10 @@ import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 class CalleeAnalyzerVisitor extends HierarchicalASTVisitor {
     private final CallSearchResultCollector fSearchResults;
@@ -68,7 +68,7 @@ class CalleeAnalyzerVisitor extends HierarchicalASTVisitor {
             this.fMethodStartPosition = sourceRange.getOffset();
             this.fMethodEndPosition = fMethodStartPosition + sourceRange.getLength();
         } catch (JavaModelException jme) {
-            JavaPlugin.log(jme);
+            JavaManipulationPlugin.log(jme);
         }
     }
 
@@ -274,7 +274,7 @@ class CalleeAnalyzerVisitor extends HierarchicalASTVisitor {
 				fSearchResults.addMember(fMember, referencedMember, position, position + node.getLength(), number < 1 ? 1 : number);
             }
         } catch (JavaModelException jme) {
-            JavaPlugin.log(jme);
+            JavaManipulationPlugin.log(jme);
         }
     }
 
@@ -300,7 +300,7 @@ class CalleeAnalyzerVisitor extends HierarchicalASTVisitor {
     }
 
     private IJavaSearchScope getSearchScope() {
-        return CallHierarchy.getDefault().getSearchScope();
+        return CallHierarchyCore.getDefault().getSearchScope();
     }
 
     private boolean isNodeWithinMethod(ASTNode node) {
@@ -334,7 +334,7 @@ class CalleeAnalyzerVisitor extends HierarchicalASTVisitor {
     }
 
     private IMethod findImplementingMethods(IMethod calledMethod) {
-        Collection<IJavaElement> implementingMethods = CallHierarchy.getDefault()
+        Collection<IJavaElement> implementingMethods = CallHierarchyCore.getDefault()
                                                         .getImplementingMethods(calledMethod);
 
         if ((implementingMethods.size() == 0) || (implementingMethods.size() > 1)) {
