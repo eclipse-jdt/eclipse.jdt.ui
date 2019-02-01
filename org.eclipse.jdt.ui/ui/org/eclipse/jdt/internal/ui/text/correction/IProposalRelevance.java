@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2018 IBM Corporation and others.
+ * Copyright (c) 2012, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -8,6 +8,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Billy Huang <billyhuang31@gmail.com> - [quick assist] concatenate/merge string literals - https://bugs.eclipse.org/77632
@@ -292,6 +296,7 @@ public interface IProposalRelevance {
 	public static final int EXTRACT_LOCAL_ZERO_SELECTION= -1;
 	public static final int MAKE_VARIABLE_DECLARATION_FINAL= -1;
 
+	public static final int ENABLE_PREVIEW_FEATURES= -2;
 	public static final int ADD_SUPPRESSWARNINGS= -2;
 	public static final int VARIABLE_TYPE_PROPOSAL_2= -2;
 	public static final int EXTRACT_CONSTANT_ZERO_SELECTION= -2;

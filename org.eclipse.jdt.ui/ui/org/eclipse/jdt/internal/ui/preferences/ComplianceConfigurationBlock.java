@@ -239,7 +239,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		};
 	}
 
-	private static Key[] getKeys(boolean projectSpecific) {
+	public static Key[] getKeys(boolean projectSpecific) {
 		Key[] keys= new Key[] {
 				PREF_LOCAL_VARIABLE_ATTR, PREF_LINE_NUMBER_ATTR, PREF_SOURCE_FILE_ATTR, PREF_CODEGEN_UNUSED_LOCAL, PREF_CODEGEN_INLINE_JSR_BYTECODE, INTR_DEFAULT_COMPLIANCE,
 				PREF_COMPLIANCE, PREF_SOURCE_COMPATIBILITY,

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -7,6 +7,10 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -19,7 +23,7 @@ import org.eclipse.osgi.util.NLS;
 /**
  * Helper class to get NLSed messages.
  */
-final class JavaHoverMessages extends NLS {
+public final class JavaHoverMessages extends NLS {
 
 	private static final String BUNDLE_NAME= JavaHoverMessages.class.getName();
 
@@ -59,6 +63,8 @@ final class JavaHoverMessages extends NLS {
 	public static String ProblemHover_chooseSettingsTypeDialog_checkBox_dontShowAgain;
 	public static String ProblemHover_chooseSettingsTypeDialog_message;
 	public static String ProblemHover_chooseSettingsTypeDialog_title;
+	public static String ProblemHover_chooseCompilerSettingsTypeDialog_message;
+	public static String ProblemHover_chooseCompilerSettingsTypeDialog_title;
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, JavaHoverMessages.class);
