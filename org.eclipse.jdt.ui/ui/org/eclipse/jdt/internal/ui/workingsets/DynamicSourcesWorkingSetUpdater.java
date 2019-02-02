@@ -19,8 +19,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.eclipse.swt.widgets.Display;
-
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -36,7 +34,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetUpdater;
-import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.progress.WorkbenchJob;
 
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -97,12 +95,44 @@ public class DynamicSourcesWorkingSetUpdater implements IWorkingSetUpdater {
 		}
 	}
 
+	private class UpdateUIJob extends WorkbenchJob {
+
+		volatile Runnable task;
+
+		public UpdateUIJob() {
+			super(WorkingSetMessages.JavaSourcesWorkingSets_updating);
+		}
+
+		@Override
+		public IStatus runInUIThread(IProgressMonitor monitor) {
+			Runnable r = task;
+			if(r != null && !monitor.isCanceled() && !isDisposed.get()) {
+				r.run();
+			}
+			return Status.OK_STATUS;
+		}
+
+		void setTask(Runnable r){
+			cancel();
+			task = r;
+			if(r != null){
+				schedule();
+			}
+		}
+
+		Runnable getTask() {
+			return task;
+		}
+	}
+
 	private IElementChangedListener fJavaElementChangeListener;
 
 	private Set<IWorkingSet> fWorkingSets= new HashSet<>();
 
 	private Job fUpdateJob;
-	
+
+	private UpdateUIJob fUpdateUIJob;
+
 	private AtomicBoolean isDisposed= new AtomicBoolean();
 
 	public static final String TEST_OLD_NAME= "test"; //$NON-NLS-1$
@@ -136,6 +166,14 @@ public class DynamicSourcesWorkingSetUpdater implements IWorkingSetUpdater {
 	}
 
 	public DynamicSourcesWorkingSetUpdater() {
+		fUpdateJob= new Job(WorkingSetMessages.JavaSourcesWorkingSets_updating) {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				return updateElements(monitor);
+			}
+		};
+		fUpdateUIJob = new UpdateUIJob();
+		fUpdateJob.setSystem(true);
 		fResourceChangeListener= new ResourceChangeListener();
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(fResourceChangeListener, IResourceChangeEvent.POST_CHANGE);
 		fJavaElementChangeListener= new JavaElementChangeListener();
@@ -149,29 +187,19 @@ public class DynamicSourcesWorkingSetUpdater implements IWorkingSetUpdater {
 			ResourcesPlugin.getWorkspace().removeResourceChangeListener(fResourceChangeListener);
 			fResourceChangeListener= null;
 		}
-		if (fJavaElementChangeListener != null)
+		if (fJavaElementChangeListener != null) {
 			JavaCore.removeElementChangedListener(fJavaElementChangeListener);
+		}
+		fUpdateJob.cancel();
+		fUpdateUIJob.setTask(null);
 	}
 
 	public void triggerUpdate() {
-		synchronized (this) {
-			if (fUpdateJob != null) {
-				fUpdateJob.cancel();
-				fUpdateJob= null;
-			}
-			if(isDisposed.get()) {
-				return;
-			}
-
-			fUpdateJob= new Job(WorkingSetMessages.JavaSourcesWorkingSets_updating) {
-				@Override
-				protected IStatus run(IProgressMonitor monitor) {
-					return updateElements(monitor);
-				}
-			};
-			fUpdateJob.setSystem(true);
-			fUpdateJob.schedule(1000L);
+		if(isDisposed.get()) {
+			return;
 		}
+		fUpdateJob.cancel();
+		fUpdateJob.schedule(1000L);
 	}
 
 	public IStatus updateElements(IProgressMonitor monitor) {
@@ -184,7 +212,7 @@ public class DynamicSourcesWorkingSetUpdater implements IWorkingSetUpdater {
 
 	private IStatus updateElements(IWorkingSet[] workingSets, IProgressMonitor monitor) {
 		try {
-			if(isDisposed.get()) {
+			if(isDisposed.get() || monitor.isCanceled()) {
 				return Status.CANCEL_STATUS;
 			}
 			IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
@@ -212,20 +240,22 @@ public class DynamicSourcesWorkingSetUpdater implements IWorkingSetUpdater {
 			}
 			IAdaptable[] testArray= testResult.toArray(new IAdaptable[testResult.size()]);
 			IAdaptable[] productionArray= mainResult.toArray(new IAdaptable[mainResult.size()]);
-			if (PlatformUI.isWorkbenchRunning()) {
-				final Display display= PlatformUI.getWorkbench().getDisplay();
-				if (!display.isDisposed()) {
-					display.asyncExec(() -> {
-						for (IWorkingSet w : workingSets) {
-							if (MAIN_NAME.equals(w.getName())) {
-								w.setElements(productionArray);
-							} else if (TEST_NAME.equals(w.getName())) {
-								w.setElements(testArray);
-							}
+			fUpdateUIJob.setTask(new Runnable() {
+				@Override
+				public void run() {
+					for (IWorkingSet w : workingSets) {
+						// check if the next task is already in queue
+						if(this != fUpdateUIJob.getTask()) {
+							break;
 						}
-					});
+						if (MAIN_NAME.equals(w.getName())) {
+							w.setElements(productionArray);
+						} else if (TEST_NAME.equals(w.getName())) {
+							w.setElements(testArray);
+						}
+					}
 				}
-			}
+			});
 		} catch (Exception e) {
 			return Status.CANCEL_STATUS;
 		}
