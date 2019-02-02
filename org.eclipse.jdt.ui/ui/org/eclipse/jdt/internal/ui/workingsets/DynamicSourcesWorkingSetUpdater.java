@@ -82,7 +82,7 @@ public class DynamicSourcesWorkingSetUpdater implements IWorkingSetUpdater {
 		private boolean processJavaDelta(IJavaElementDelta delta) {
 			IJavaElement jElement= delta.getElement();
 			int type= jElement.getElementType();
-			if (type == IJavaElement.JAVA_PROJECT) {
+			if (type == IJavaElement.JAVA_PROJECT && delta.getAffectedChildren().length == 0) {
 				triggerUpdate();
 				return true;
 			}
