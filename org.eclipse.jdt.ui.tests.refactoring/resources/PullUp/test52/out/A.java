@@ -4,36 +4,24 @@ public class A implements PullUpToInterfaceBug.Foo {
 	public void b() {
 	}
 
-	/* (non-Javadoc)
-	 * @see p.PullUpToInterfaceBug.Foo#baz4()
-	 */
 	@Override
 	public void baz4() {
 		// TODO Auto-generated method stub
 		
 	}
 
-	/* (non-Javadoc)
-	 * @see p.PullUpToInterfaceBug.Foo#baz3()
-	 */
 	@Override
 	public void baz3() {
 		// TODO Auto-generated method stub
 		
 	}
 
-	/* (non-Javadoc)
-	 * @see p.PullUpToInterfaceBug.Foo#baz2()
-	 */
 	@Override
 	public void baz2() {
 		// TODO Auto-generated method stub
 		
 	}
 
-	/* (non-Javadoc)
-	 * @see p.PullUpToInterfaceBug.Foo#baz1()
-	 */
 	@Override
 	public void baz1() {
 		// TODO Auto-generated method stub

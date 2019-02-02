@@ -8,9 +8,6 @@ class X implements I {
 		this.value = value;
 	}
 
-	/* (non-Javadoc)
-	 * @see p.I#m1()
-	 */
 	public String m1() {
 		return value;
 	}
