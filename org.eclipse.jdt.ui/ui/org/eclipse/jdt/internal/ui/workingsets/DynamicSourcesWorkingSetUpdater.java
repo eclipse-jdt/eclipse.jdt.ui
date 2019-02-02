@@ -25,10 +25,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IResourceChangeEvent;
-import org.eclipse.core.resources.IResourceChangeListener;
-import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 
@@ -48,29 +44,6 @@ import org.eclipse.jdt.core.JavaCore;
 
 public class DynamicSourcesWorkingSetUpdater implements IWorkingSetUpdater {
 
-	private class ResourceChangeListener implements IResourceChangeListener {
-		@Override
-		public void resourceChanged(IResourceChangeEvent event) {
-			IResourceDelta delta= event.getDelta();
-			IResourceDelta[] affectedChildren= delta.getAffectedChildren(IResourceDelta.ADDED | IResourceDelta.REMOVED, IResource.PROJECT);
-			if (affectedChildren.length > 0) {
-				triggerUpdate();
-			} else {
-				affectedChildren= delta.getAffectedChildren(IResourceDelta.CHANGED, IResource.PROJECT);
-				for (int i= 0; i < affectedChildren.length; i++) {
-					IResourceDelta projectDelta= affectedChildren[i];
-					if ((projectDelta.getFlags() & IResourceDelta.DESCRIPTION) != 0) {
-						triggerUpdate();
-						// one is enough
-						return;
-					}
-				}
-			}
-		}
-	}
-
-	private IResourceChangeListener fResourceChangeListener;
-
 	private class JavaElementChangeListener implements IElementChangedListener {
 		@Override
 		public void elementChanged(ElementChangedEvent event) {
@@ -80,14 +53,29 @@ public class DynamicSourcesWorkingSetUpdater implements IWorkingSetUpdater {
 		private boolean processJavaDelta(IJavaElementDelta delta) {
 			IJavaElement jElement= delta.getElement();
 			int type= jElement.getElementType();
-			if (type == IJavaElement.JAVA_PROJECT && delta.getAffectedChildren().length == 0) {
-				triggerUpdate();
-				return true;
-			}
-			if (type == IJavaElement.JAVA_MODEL) {
-				IJavaElementDelta[] children= delta.getAffectedChildren();
-				for (int i= 0; i < children.length; i++) {
-					if (processJavaDelta(children[i]))
+			if (type == IJavaElement.PACKAGE_FRAGMENT_ROOT) {
+				int kind= delta.getKind();
+				if (kind == IJavaElementDelta.ADDED || kind == IJavaElementDelta.REMOVED) {
+					// this can happen without "classpath changed" event, if the directory corresponding to an optional source folder is created.
+					triggerUpdate();
+					return true;
+				}
+				// do not traverse into children
+			} else if (type == IJavaElement.JAVA_PROJECT) {
+				int kind= delta.getKind();
+				int flags= delta.getFlags();
+				if (kind == IJavaElementDelta.ADDED || kind == IJavaElementDelta.REMOVED
+						|| (flags & (IJavaElementDelta.F_OPENED | IJavaElementDelta.F_CLOSED | IJavaElementDelta.F_CLASSPATH_CHANGED)) != 0) {
+					triggerUpdate();
+					return true;
+				}
+				for (IJavaElementDelta element : delta.getAffectedChildren()) {
+					if (processJavaDelta(element))
+						return true;
+				}
+			} else if (type == IJavaElement.JAVA_MODEL) {
+				for (IJavaElementDelta element : delta.getAffectedChildren()) {
+					if (processJavaDelta(element))
 						return true;
 				}
 			}
@@ -174,8 +162,6 @@ public class DynamicSourcesWorkingSetUpdater implements IWorkingSetUpdater {
 		};
 		fUpdateUIJob = new UpdateUIJob();
 		fUpdateJob.setSystem(true);
-		fResourceChangeListener= new ResourceChangeListener();
-		ResourcesPlugin.getWorkspace().addResourceChangeListener(fResourceChangeListener, IResourceChangeEvent.POST_CHANGE);
 		fJavaElementChangeListener= new JavaElementChangeListener();
 		JavaCore.addElementChangedListener(fJavaElementChangeListener, ElementChangedEvent.POST_CHANGE);
 	}
@@ -183,10 +169,6 @@ public class DynamicSourcesWorkingSetUpdater implements IWorkingSetUpdater {
 	@Override
 	public void dispose() {
 		isDisposed.set(true);
-		if (fResourceChangeListener != null) {
-			ResourcesPlugin.getWorkspace().removeResourceChangeListener(fResourceChangeListener);
-			fResourceChangeListener= null;
-		}
 		if (fJavaElementChangeListener != null) {
 			JavaCore.removeElementChangedListener(fJavaElementChangeListener);
 		}
