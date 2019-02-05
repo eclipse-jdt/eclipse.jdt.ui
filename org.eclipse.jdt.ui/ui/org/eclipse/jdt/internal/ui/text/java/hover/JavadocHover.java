@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -987,18 +987,16 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	 * @return the constant value for the given field or <code>null</code> if none
 	 * @since 3.4
 	 */
-	private static String getConstantValue(IField field, ITypeRoot editorInputElement, IRegion hoverRegion) {
+	public static String getConstantValue(IField field, ITypeRoot editorInputElement, IRegion hoverRegion) {
 		if (!isStaticFinal(field))
 			return null;
 
 		Object constantValue;
-		if (editorInputElement == null || hoverRegion == null) {
-			constantValue= JavadocView.computeFieldConstantFromTypeAST(field, null);
-		} else {
-			ASTNode node= getHoveredASTNode(editorInputElement, hoverRegion);
-			if (node == null)
-				return null;
+		ASTNode node= getHoveredASTNode(editorInputElement, hoverRegion);
+		if (node != null) {
 			constantValue= getVariableBindingConstValue(node, field);
+		} else {
+			constantValue= JavadocView.computeFieldConstantFromTypeAST(field, null);
 		}
 		if (constantValue == null)
 			return null;
@@ -1011,7 +1009,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	}
 
 	private static ASTNode getHoveredASTNode(ITypeRoot editorInputElement, IRegion hoverRegion) {
-		if (editorInputElement == null)
+		if (editorInputElement == null || hoverRegion == null)
 			return null;
 
 		CompilationUnit unit= SharedASTProviderCore.getAST(editorInputElement, SharedASTProviderCore.WAIT_ACTIVE_ONLY, null);

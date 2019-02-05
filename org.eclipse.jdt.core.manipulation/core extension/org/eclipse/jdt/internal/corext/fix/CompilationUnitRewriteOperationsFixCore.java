@@ -32,6 +32,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
 import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
@@ -44,9 +45,9 @@ public class CompilationUnitRewriteOperationsFixCore extends AbstractFix {
 
 		public abstract void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModelCore linkedModel) throws CoreException;
 
-		protected Type importType(final ITypeBinding toImport, final ASTNode accessor, ImportRewrite imports, final CompilationUnit compilationUnit) {
+		protected Type importType(final ITypeBinding toImport, final ASTNode accessor, ImportRewrite imports, final CompilationUnit compilationUnit, TypeLocation location) {
 			ImportRewriteContext importContext= new ContextSensitiveImportRewriteContext(compilationUnit, accessor.getStartPosition(), imports);
-			return imports.addImport(toImport, compilationUnit.getAST(), importContext);
+			return imports.addImport(toImport, compilationUnit.getAST(), importContext, location);
 		}
 
 		protected TextEditGroup createTextEditGroup(String label, CompilationUnitRewrite rewrite) {

@@ -13,5 +13,28 @@
             sequence="COMMAND+SHIFT+ALT+CTRL+ARROW_DOWN">
       </key>
    </extension>
+   <extension
+         point="org.eclipse.ui.workbench.texteditor.codeMiningProviders">
+      <codeMiningProvider
+            class="org.eclipse.jdt.text.tests.CodeMiningTest$TestCodeMiningProvider"
+            id="org.eclipse.jdt.text.tests.codeMiningProvider"
+            label="test codemining provider">
+         <enabledWhen>
+            <test
+                  property="org.eclipse.jdt.text.tests.isOn">
+            </test>
+         </enabledWhen>
+      </codeMiningProvider>
+   </extension>
+   <extension
+         point="org.eclipse.core.expressions.propertyTesters">
+      <propertyTester
+            class="org.eclipse.jdt.text.tests.CodeMiningTest$TestCodeMiningProviderPropertyTester"
+            id="org.eclipse.jdt.text.tests.testCodeMiningProvider"
+            namespace="org.eclipse.jdt.text.tests"
+            properties="isOn"
+            type="java.lang.Object">
+      </propertyTester>
+   </extension>
 
 </plugin>

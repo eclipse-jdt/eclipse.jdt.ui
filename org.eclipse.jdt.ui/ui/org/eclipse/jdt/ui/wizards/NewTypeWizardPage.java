@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,12 +15,15 @@
 package org.eclipse.jdt.ui.wizards;
 
 import java.lang.reflect.InvocationTargetException;
+import java.math.BigDecimal;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.equinox.bidi.StructuredTextTypeHandlerFactory;
 
@@ -620,7 +623,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		if (selection != null) {
 			String text= selection.getText();
 			if (text != null && validateJavaTypeName(text, project).isOK()) {
-				typeName= text;
+				typeName= getUniqueJavaTypeName (pack, text);
 			}
 		}
 
@@ -633,6 +636,45 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		setSuperInterfaces(initSuperinterfaces, true);
 
 		setAddComments(StubUtility.doAddComments(project), true); // from project or workspace
+	}
+
+	/**
+	 * Generate a unique type name for some initially given name under the given package fragment.
+	 *
+	 * @param pack the package fragment under which to check for uniqueness
+	 * @param name the type name to check for uniqueness
+	 * @return a type name string that is unique under the given package fragment. If the initial
+	 *         type name is not unique, it is suffixed with a number greater than or equal to 2.
+	 * @since 3.17
+	 */
+	protected String getUniqueJavaTypeName(IPackageFragment pack, String name) {
+		String typeName= name;
+		if (pack != null) {
+			IResource resource= null;
+			boolean initial= true;
+			while (resource == null || resource.exists()) {
+				typeName= Signature.getSimpleName(typeName);
+				Pattern p= Pattern.compile("[0-9]+$"); //$NON-NLS-1$
+				Matcher m= p.matcher(typeName);
+				if (m.find()) {
+					// String ends with a number: increment it by 1
+					BigDecimal newNumber= null;
+					try {
+						newNumber= new BigDecimal(m.group()).add(new BigDecimal(1));
+						typeName= m.replaceFirst(newNumber.toPlainString());
+					} catch (NumberFormatException e) {
+						typeName= m.replaceFirst("2"); //$NON-NLS-1$
+					}
+				} else {
+					typeName+= (initial ? "" : "2"); //$NON-NLS-1$ //$NON-NLS-2$
+					initial= false;
+				}
+
+				ICompilationUnit cu= pack.getCompilationUnit(getCompilationUnitName(typeName));
+				resource= cu.getResource();
+			}
+		}
+		return typeName;
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Mateusz Matela and others.
+ * Copyright (c) 2018, 2019 Mateusz Matela and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -474,14 +474,18 @@ class MyClass extends OtherClass {
 //--PREVIEW--END--section-whitespace-expressions-calls
 
 //--PREVIEW--START--section-whitespace-expressions-assignments
-//--PREVIEW--START--section-whitespace-expressions-operators
+//--PREVIEW--START--section-whitespace-expressions-unaryoperators
+//--PREVIEW--START--section-whitespace-expressions-binaryoperators
 List list = new ArrayList();
 int a = -4 + -9;
-b = a++ / --number;
-c += 4;
-boolean value = true && false;
+int b = a++ / --number;
+b = (a++) / (--number) + (-9);
+String d = "a = " + a;
+if (a == b && a > c)
+	c += (a >> 5) & 0xFF;
 //--PREVIEW--END--section-whitespace-expressions-assignments
-//--PREVIEW--END--section-whitespace-expressions-operators
+//--PREVIEW--END--section-whitespace-expressions-unaryoperators
+//--PREVIEW--END--section-whitespace-expressions-binaryoperators
 
 //--PREVIEW--START--section-whitespace-expressions-parenexpr
 result = (a * (b + c + d) * (e + f));
@@ -838,25 +842,42 @@ class Example {SomeClass foo() {return SomeOtherClass.new SomeClass(100,
 500 );}}
 //--PREVIEW--END--org.eclipse.jdt.core.formatter.alignment_for_arguments_in_qualified_allocation_expression
 
-//--PREVIEW--START--org.eclipse.jdt.core.formatter.alignment_for_binary_expression
-class Example extends AnotherClass {int foo() {  int sum= 100
- + 200
- + 300
- + 400
- + 500
- + 600
- + 700
- + 800;  int product= 1
- * 2
- * 3
- * 4
- * 5
- * 6
- * 7
- * 8
- * 9
- * 10;  boolean val= true && false && true && false && true;  return product / sum;}}
-//--PREVIEW--END--org.eclipse.jdt.core.formatter.alignment_for_binary_expression
+//--PREVIEW--START--org.eclipse.jdt.core.formatter.alignment_for_multiplicative_operator
+//--PREVIEW--START--org.eclipse.jdt.core.formatter.alignment_for_additive_operator
+//--PREVIEW--START--org.eclipse.jdt.core.formatter.alignment_for_string_concatenation
+//--PREVIEW--START--org.eclipse.jdt.core.formatter.alignment_for_shift_operator
+//--PREVIEW--START--org.eclipse.jdt.core.formatter.alignment_for_relational_operator
+//--PREVIEW--START--org.eclipse.jdt.core.formatter.alignment_for_bitwise_operator
+//--PREVIEW--START--org.eclipse.jdt.core.formatter.alignment_for_logical_operator
+class Example {
+
+boolean firstIsGreater = 11111111 + 22222222 +
+33333333 + 44444444 +
+55555555 + 66666666
+>
+1.11111111 * 2.22222222 * 3.33333333
+* 4.44444444 * 5.55555555 * 6.66666666;
+
+String concatenatedString = "one two three four " + "five six seven eight " + "nine ten eleven twelve";
+
+int shiftedInteger = 0xCAFEFACE >>> 0x00000001
+		>>>
+		0x00000002
+		<<
+		0x00000003 >>> 0x00000004;
+
+int bitAritmetic = 0xCAFEFACE | 0x01010101 & 0x02020202 ^ 0x03030303 ^ 0x04040404 | 0x05050505;
+
+boolean multipleConditions = conditionOne && conditionTwo || conditionThree && conditionFour || conditionFive;
+
+}
+//--PREVIEW--END--org.eclipse.jdt.core.formatter.alignment_for_multiplicative_operator
+//--PREVIEW--END--org.eclipse.jdt.core.formatter.alignment_for_additive_operator
+//--PREVIEW--END--org.eclipse.jdt.core.formatter.alignment_for_string_concatenation
+//--PREVIEW--END--org.eclipse.jdt.core.formatter.alignment_for_shift_operator
+//--PREVIEW--END--org.eclipse.jdt.core.formatter.alignment_for_relational_operator
+//--PREVIEW--END--org.eclipse.jdt.core.formatter.alignment_for_bitwise_operator
+//--PREVIEW--END--org.eclipse.jdt.core.formatter.alignment_for_logical_operator
 
 //--PREVIEW--START--org.eclipse.jdt.core.formatter.alignment_for_conditional_expression
 class Example extends AnotherClass {int foo(boolean argument) {return argument ? 100000 : 200000;}}

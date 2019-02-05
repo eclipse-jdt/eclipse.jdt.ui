@@ -715,24 +715,6 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 		return null;
 	}
 
-	@Override
-	public void updateCodeMinings() {
-		// Here we disable this method which is called by AbstractTextEditor#installCodeMiningProviders which updates code mining (draw minings in the UI)
-		// In JDT code mining case, the update code mining must be done when ICompilationUnit is reconciled (and not when editor is opened).
-		// The update code mining is done by JavaCodeMiningReconciler which calls doUpdateCodeMinings:
-		// - on install
-		// - when compilation unit is reconciled
-	}
-
-	/**
-	 * Update java code minings.
-	 *
-	 * @since 3.16
-	 */
-	void doUpdateCodeMinings() {
-		super.updateCodeMinings();
-	}
-
 	/**
 	 * Reset the registered code mining providers.
 	 *
@@ -740,6 +722,5 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 	 */
 	void resetCodeMinings() {
 		super.setCodeMiningProviders(null);
-		doUpdateCodeMinings();
 	}
 }

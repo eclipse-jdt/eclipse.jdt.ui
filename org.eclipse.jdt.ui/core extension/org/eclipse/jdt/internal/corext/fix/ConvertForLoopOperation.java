@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ContinueStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
@@ -56,6 +57,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -420,6 +422,9 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 			body.accept(new GenericVisitor() {
 				@Override
 				protected boolean visitNode(ASTNode node) {
+					if (node instanceof ContinueStatement) {
+						return false;
+					}
 					if (node instanceof Name) {
 						Name name= (Name)node;
 						IBinding nameBinding= name.resolveBinding();
@@ -673,7 +678,8 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 		result.setName(name);
 
 		ITypeBinding arrayTypeBinding= arrayAccess.resolveTypeBinding();
-		Type type= importType(arrayTypeBinding.getElementType(), statement, importRewrite, compilationUnit);
+		Type type= importType(arrayTypeBinding.getElementType(), statement, importRewrite, compilationUnit,
+				arrayTypeBinding.getDimensions() == 1 ? TypeLocation.LOCAL_VARIABLE : TypeLocation.ARRAY_CONTENTS);
 		if (arrayTypeBinding.getDimensions() != 1) {
 			type= ast.newArrayType(type, arrayTypeBinding.getDimensions() - 1);
 		}

@@ -23,6 +23,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -132,6 +133,8 @@ public class GenerateHashCodeEqualsDialog extends SourceActionDialog {
 	private boolean fUseJ7HashEquals;
 	private IJavaProject fProject;
 
+	private boolean fNoFields;
+	
 	public GenerateHashCodeEqualsDialog(Shell shell, CompilationUnitEditor editor, IType type, IVariableBinding[] allFields, IVariableBinding[] selectedFields) throws JavaModelException {
 		super(shell, new BindingLabelProvider(), new GenerateHashCodeEqualsContentProvider(allFields), editor, type, false);
 		this.fProject = type.getJavaProject();
@@ -141,6 +144,7 @@ public class GenerateHashCodeEqualsDialog extends SourceActionDialog {
 
 		setTitle(JavaUIMessages.GenerateHashCodeEqualsDialog_dialog_title);
 		setMessage(JavaUIMessages.GenerateHashCodeEqualsDialog_select_fields_to_include);
+		fNoFields= allFields.length == 0;
 		setValidator(new GenerateHashCodeEqualsValidator(allFields.length));
 		setSize(60, 18);
 		setInput(new Object());
@@ -148,6 +152,7 @@ public class GenerateHashCodeEqualsDialog extends SourceActionDialog {
 		fUseInstanceOf= asBoolean(getDialogSettings().get(SETTINGS_INSTANCEOF), false);
 		fUseBlocks= asBoolean(getDialogSettings().get(SETTINGS_BLOCKS), false);
 		fUseJ7HashEquals= asBoolean(getDialogSettings().get(SETTINGS_J7_HASH_EQUALS), false);
+
 	}
 
 	@Override
@@ -246,5 +251,16 @@ public class GenerateHashCodeEqualsDialog extends SourceActionDialog {
 	protected void createButtonsForButtonBar(Composite parent) {
 		createButton(parent, IDialogConstants.OK_ID, JavaUIMessages.GenerateHashCodeEqualsDialog_generate, true);
 		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
+	}
+	
+	@Override
+	protected void updateOKStatus() {
+		if(fNoFields) {
+			updateStatus(new Status(IStatus.OK, PlatformUI.PLUGIN_ID,
+					IStatus.OK, "", //$NON-NLS-1$
+					null));
+			return;
+		}
+		super.updateOKStatus();
 	}
 }

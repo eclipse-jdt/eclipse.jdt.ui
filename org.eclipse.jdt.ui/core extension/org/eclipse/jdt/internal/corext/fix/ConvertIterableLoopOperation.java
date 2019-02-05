@@ -49,6 +49,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -319,7 +320,7 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 		pg.addPosition(astRewrite.track(simple), true);
 		declaration.setName(simple);
 		final ITypeBinding elementType= getElementType(fIteratorVariable.getType());
-		Type importType= importType(elementType, getForStatement(), importRewrite, getRoot());
+		Type importType= importType(elementType, getForStatement(), importRewrite, getRoot(), TypeLocation.LOCAL_VARIABLE);
 		remover.registerAddedImports(importType);
 		declaration.setType(importType);
 		if (fMakeFinal) {

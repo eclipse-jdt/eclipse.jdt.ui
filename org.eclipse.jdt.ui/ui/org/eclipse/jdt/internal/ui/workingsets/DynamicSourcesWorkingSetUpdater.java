@@ -19,24 +19,18 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.eclipse.swt.widgets.Display;
-
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IResourceChangeEvent;
-import org.eclipse.core.resources.IResourceChangeListener;
-import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetUpdater;
-import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.progress.WorkbenchJob;
 
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -50,29 +44,6 @@ import org.eclipse.jdt.core.JavaCore;
 
 public class DynamicSourcesWorkingSetUpdater implements IWorkingSetUpdater {
 
-	private class ResourceChangeListener implements IResourceChangeListener {
-		@Override
-		public void resourceChanged(IResourceChangeEvent event) {
-			IResourceDelta delta= event.getDelta();
-			IResourceDelta[] affectedChildren= delta.getAffectedChildren(IResourceDelta.ADDED | IResourceDelta.REMOVED, IResource.PROJECT);
-			if (affectedChildren.length > 0) {
-				triggerUpdate();
-			} else {
-				affectedChildren= delta.getAffectedChildren(IResourceDelta.CHANGED, IResource.PROJECT);
-				for (int i= 0; i < affectedChildren.length; i++) {
-					IResourceDelta projectDelta= affectedChildren[i];
-					if ((projectDelta.getFlags() & IResourceDelta.DESCRIPTION) != 0) {
-						triggerUpdate();
-						// one is enough
-						return;
-					}
-				}
-			}
-		}
-	}
-
-	private IResourceChangeListener fResourceChangeListener;
-
 	private class JavaElementChangeListener implements IElementChangedListener {
 		@Override
 		public void elementChanged(ElementChangedEvent event) {
@@ -82,18 +53,63 @@ public class DynamicSourcesWorkingSetUpdater implements IWorkingSetUpdater {
 		private boolean processJavaDelta(IJavaElementDelta delta) {
 			IJavaElement jElement= delta.getElement();
 			int type= jElement.getElementType();
-			if (type == IJavaElement.JAVA_PROJECT) {
-				triggerUpdate();
-				return true;
-			}
-			if (type == IJavaElement.JAVA_MODEL) {
-				IJavaElementDelta[] children= delta.getAffectedChildren();
-				for (int i= 0; i < children.length; i++) {
-					if (processJavaDelta(children[i]))
+			if (type == IJavaElement.PACKAGE_FRAGMENT_ROOT) {
+				int kind= delta.getKind();
+				if (kind == IJavaElementDelta.ADDED || kind == IJavaElementDelta.REMOVED) {
+					// this can happen without "classpath changed" event, if the directory corresponding to an optional source folder is created.
+					triggerUpdate();
+					return true;
+				}
+				// do not traverse into children
+			} else if (type == IJavaElement.JAVA_PROJECT) {
+				int kind= delta.getKind();
+				int flags= delta.getFlags();
+				if (kind == IJavaElementDelta.ADDED || kind == IJavaElementDelta.REMOVED
+						|| (flags & (IJavaElementDelta.F_OPENED | IJavaElementDelta.F_CLOSED | IJavaElementDelta.F_CLASSPATH_CHANGED)) != 0) {
+					triggerUpdate();
+					return true;
+				}
+				for (IJavaElementDelta element : delta.getAffectedChildren()) {
+					if (processJavaDelta(element))
+						return true;
+				}
+			} else if (type == IJavaElement.JAVA_MODEL) {
+				for (IJavaElementDelta element : delta.getAffectedChildren()) {
+					if (processJavaDelta(element))
 						return true;
 				}
 			}
 			return false;
+		}
+	}
+
+	private class UpdateUIJob extends WorkbenchJob {
+
+		volatile Runnable task;
+
+		public UpdateUIJob() {
+			super(WorkingSetMessages.JavaSourcesWorkingSets_updating);
+		}
+
+		@Override
+		public IStatus runInUIThread(IProgressMonitor monitor) {
+			Runnable r = task;
+			if(r != null && !monitor.isCanceled() && !isDisposed.get()) {
+				r.run();
+			}
+			return Status.OK_STATUS;
+		}
+
+		void setTask(Runnable r){
+			cancel();
+			task = r;
+			if(r != null){
+				schedule();
+			}
+		}
+
+		Runnable getTask() {
+			return task;
 		}
 	}
 
@@ -102,7 +118,9 @@ public class DynamicSourcesWorkingSetUpdater implements IWorkingSetUpdater {
 	private Set<IWorkingSet> fWorkingSets= new HashSet<>();
 
 	private Job fUpdateJob;
-	
+
+	private UpdateUIJob fUpdateUIJob;
+
 	private AtomicBoolean isDisposed= new AtomicBoolean();
 
 	public static final String TEST_OLD_NAME= "test"; //$NON-NLS-1$
@@ -136,8 +154,14 @@ public class DynamicSourcesWorkingSetUpdater implements IWorkingSetUpdater {
 	}
 
 	public DynamicSourcesWorkingSetUpdater() {
-		fResourceChangeListener= new ResourceChangeListener();
-		ResourcesPlugin.getWorkspace().addResourceChangeListener(fResourceChangeListener, IResourceChangeEvent.POST_CHANGE);
+		fUpdateJob= new Job(WorkingSetMessages.JavaSourcesWorkingSets_updating) {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				return updateElements(monitor);
+			}
+		};
+		fUpdateUIJob = new UpdateUIJob();
+		fUpdateJob.setSystem(true);
 		fJavaElementChangeListener= new JavaElementChangeListener();
 		JavaCore.addElementChangedListener(fJavaElementChangeListener, ElementChangedEvent.POST_CHANGE);
 	}
@@ -145,33 +169,19 @@ public class DynamicSourcesWorkingSetUpdater implements IWorkingSetUpdater {
 	@Override
 	public void dispose() {
 		isDisposed.set(true);
-		if (fResourceChangeListener != null) {
-			ResourcesPlugin.getWorkspace().removeResourceChangeListener(fResourceChangeListener);
-			fResourceChangeListener= null;
-		}
-		if (fJavaElementChangeListener != null)
+		if (fJavaElementChangeListener != null) {
 			JavaCore.removeElementChangedListener(fJavaElementChangeListener);
+		}
+		fUpdateJob.cancel();
+		fUpdateUIJob.setTask(null);
 	}
 
 	public void triggerUpdate() {
-		synchronized (this) {
-			if (fUpdateJob != null) {
-				fUpdateJob.cancel();
-				fUpdateJob= null;
-			}
-			if(isDisposed.get()) {
-				return;
-			}
-
-			fUpdateJob= new Job(WorkingSetMessages.JavaSourcesWorkingSets_updating) {
-				@Override
-				protected IStatus run(IProgressMonitor monitor) {
-					return updateElements(monitor);
-				}
-			};
-			fUpdateJob.setSystem(true);
-			fUpdateJob.schedule(1000L);
+		if(isDisposed.get()) {
+			return;
 		}
+		fUpdateJob.cancel();
+		fUpdateJob.schedule(1000L);
 	}
 
 	public IStatus updateElements(IProgressMonitor monitor) {
@@ -184,7 +194,7 @@ public class DynamicSourcesWorkingSetUpdater implements IWorkingSetUpdater {
 
 	private IStatus updateElements(IWorkingSet[] workingSets, IProgressMonitor monitor) {
 		try {
-			if(isDisposed.get()) {
+			if(isDisposed.get() || monitor.isCanceled()) {
 				return Status.CANCEL_STATUS;
 			}
 			IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
@@ -212,20 +222,22 @@ public class DynamicSourcesWorkingSetUpdater implements IWorkingSetUpdater {
 			}
 			IAdaptable[] testArray= testResult.toArray(new IAdaptable[testResult.size()]);
 			IAdaptable[] productionArray= mainResult.toArray(new IAdaptable[mainResult.size()]);
-			if (PlatformUI.isWorkbenchRunning()) {
-				final Display display= PlatformUI.getWorkbench().getDisplay();
-				if (!display.isDisposed()) {
-					display.asyncExec(() -> {
-						for (IWorkingSet w : workingSets) {
-							if (MAIN_NAME.equals(w.getName())) {
-								w.setElements(productionArray);
-							} else if (TEST_NAME.equals(w.getName())) {
-								w.setElements(testArray);
-							}
+			fUpdateUIJob.setTask(new Runnable() {
+				@Override
+				public void run() {
+					for (IWorkingSet w : workingSets) {
+						// check if the next task is already in queue
+						if(this != fUpdateUIJob.getTask()) {
+							break;
 						}
-					});
+						if (MAIN_NAME.equals(w.getName())) {
+							w.setElements(productionArray);
+						} else if (TEST_NAME.equals(w.getName())) {
+							w.setElements(testArray);
+						}
+					}
 				}
-			}
+			});
 		} catch (Exception e) {
 			return Status.CANCEL_STATUS;
 		}

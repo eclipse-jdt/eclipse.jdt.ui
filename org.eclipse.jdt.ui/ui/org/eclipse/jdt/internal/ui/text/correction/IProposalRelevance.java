@@ -147,6 +147,8 @@ public interface IProposalRelevance {
 	public static final int CHANGE_TO_RETURN= 5;
 	public static final int INCOMPATIBLE_FOREACH_TYPE= 5;
 	public static final int CHANGE_RETURN_TYPE_TO_VOID= 5;
+	public static final int CHANGE_TYPE_TO_VAR= 5;
+	public static final int CHANGE_TYPE_FROM_VAR= 5;
 	public static final int CHANGE_TO_CONSTRUCTOR= 5;
 	public static final int FIX_SUPPRESS_TOKEN= 5;
 	public static final int REMOVE_ANNOTATION= 5;

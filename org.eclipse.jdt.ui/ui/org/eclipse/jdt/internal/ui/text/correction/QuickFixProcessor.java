@@ -37,6 +37,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Name;
 
 import org.eclipse.jdt.internal.corext.fix.NullAnnotationsRewriteOperations.ChangeKind;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -298,6 +300,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.MissingNonNullByDefaultAnnotationOnPackage:
 			case IProblem.UndefinedModule:
 			case IProblem.PackageDoesNotExistOrIsEmpty:
+			case IProblem.NotAccessibleType:
 			case IProblem.PreviewFeatureDisabled:
 				return true;
 			default:
@@ -825,7 +828,12 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				break;
 			case IProblem.NotAccessibleType:
 				// Handle the case in an import statement, if a requires needs to be added.
-				ReorgCorrectionsSubProcessor.importNotFoundProposals(context, problem, proposals);
+				if (!ReorgCorrectionsSubProcessor.importNotFoundProposals(context, problem, proposals)) {
+					ASTNode node= context.getCoveredNode();
+					if (node instanceof Name) {
+						UnresolvedElementsSubProcessor.addRequiresModuleProposals(context.getCompilationUnit(), (Name) node, IProposalRelevance.IMPORT_NOT_FOUND_ADD_REQUIRES_MODULE, proposals, true);
+					}
+				}
 				break;
 			case IProblem.PackageDoesNotExistOrIsEmpty:
 				ModuleCorrectionsSubProcessor.getPackageDoesNotExistProposals(context, problem, proposals);

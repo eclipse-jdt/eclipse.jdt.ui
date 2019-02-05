@@ -48,9 +48,7 @@
  * ${tags}
  */</template>
 
-<template name="overridecomment" id="org.eclipse.jdt.ui.text.codetemplates.overridecomment" description="%CodeTemplates.overridecomment" context="overridecomment_context" enabled="true">/* %CodeTemplates.overridecomment.nonjd
- * ${see_to_overridden}
- */</template>
+<template name="overridecomment" id="org.eclipse.jdt.ui.text.codetemplates.overridecomment" description="%CodeTemplates.overridecomment" context="overridecomment_context" enabled="true"></template>
 
 <template name="delegatecomment" id="org.eclipse.jdt.ui.text.codetemplates.delegatecomment" description="%CodeTemplates.delegatecomment" context="delegatecomment_context" enabled="true">/**
  * ${tags}

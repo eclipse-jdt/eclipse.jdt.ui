@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -25,6 +25,11 @@ import org.eclipse.jdt.testplugin.StringAsserts;
 import org.eclipse.jdt.testplugin.TestOptions;
 
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.viewers.StructuredSelection;
+
+import org.eclipse.jface.text.TextSelection;
+
+import org.eclipse.ui.IEditorPart;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -45,6 +50,7 @@ import org.eclipse.jdt.ui.wizards.NewInterfaceWizardPage;
 import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -755,5 +761,36 @@ public class NewTypeWizardTest extends TestCase {
 			"annotationbodypackage",
 			"AnnotationBodyType",
 			"@interface" );
+	}
+
+	public void testAttemptCreateExistingClass() throws Exception
+	{
+		// Foo1.java and Foo2.java in test1
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n\n");
+		buf.append("public class Foo1 {\n\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Foo1.java", buf.toString(), false, null);
+		pack1.createCompilationUnit("Foo2.java", buf.toString(), false, null);
+
+		// Foo3.java in test2
+		pack1= fSourceFolder.createPackageFragment("test2", false, null);
+		buf= new StringBuffer();
+		buf.append("package test2;\n\n");
+		buf.append("public class Foo3 {\n\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("Foo3.java", buf.toString(), false, null);
+
+		IEditorPart part= EditorUtility.openInEditor(cu);
+		part.getSite().getSelectionProvider().setSelection(new TextSelection(29, 4)); // Foo1
+
+		NewClassWizardPage wizardPage= new NewClassWizardPage();
+		wizardPage.init(new StructuredSelection(cu));
+		wizardPage.createType(null);
+
+		// Foo3.java can still be unique in test1
+		String actual= wizardPage.getCreatedType().getCompilationUnit().getElementName();
+		assertEquals("Foo3.java", actual);
 	}
 }

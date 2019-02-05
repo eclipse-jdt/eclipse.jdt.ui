@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -479,7 +479,8 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		//set default and focus
 		String classUnderTest= getClassUnderTestText();
 		if (classUnderTest.length() > 0) {
-			setTypeName(Signature.getSimpleName(classUnderTest)+TEST_SUFFIX, true);
+			String typeName= getUniqueJavaTypeName(getPackageFragment(), Signature.getSimpleName(classUnderTest)+TEST_SUFFIX);
+			setTypeName(typeName, true);
 		}
 
 		Dialog.applyDialogFont(composite);

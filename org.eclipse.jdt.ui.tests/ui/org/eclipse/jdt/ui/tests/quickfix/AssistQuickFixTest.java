@@ -10657,6 +10657,51 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertProposalPreviewEquals(expectation.toString(), "Convert to static import (replace all occurrences)", proposals);
 	}
 
+	public void testDoesntOfferConvertToStaticImportForImportDeclarations() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class T {\n");
+		buf.append("    public static int bar = 1;\n");
+		buf.append("    public static void foo() { };\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("T.java", buf.toString(), false, null);
+
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
+		buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("\n");
+		buf.append("import static test1.T.bar;\n");
+		buf.append("import static test1.T.foo;\n");
+		buf.append("public class S {\n");
+		buf.append("    public S() {\n");
+		buf.append("        foo();\n");
+		buf.append("        System.out.println(bar);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack2.createCompilationUnit("S.java", buf.toString(), false, null);
+
+		String selection= "bar";
+		int offset= buf.toString().indexOf(selection);
+		AssistContext context= getCorrectionContext(cu, offset, selection.length());
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 1);
+		assertProposalDoesNotExist(proposals, "Convert to static import");
+		assertProposalDoesNotExist(proposals, "Convert to static import (replace all occurrences)");
+
+		selection= "foo";
+		offset= buf.toString().indexOf(selection);
+		context= getCorrectionContext(cu, offset, selection.length());
+		proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 0);
+		assertProposalDoesNotExist(proposals, "Convert to static import");
+		assertProposalDoesNotExist(proposals, "Convert to static import (replace all occurrences)");
+	}
+
 	public void testCreateJUnitTestCase() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();

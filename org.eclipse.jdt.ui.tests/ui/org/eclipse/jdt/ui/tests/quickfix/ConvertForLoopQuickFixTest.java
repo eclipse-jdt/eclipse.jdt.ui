@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1323,6 +1323,16 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		return proposals;
 	}
 
+	private List<IJavaCompletionProposal> fetchConvertingProposal2(StringBuffer buf, ICompilationUnit cu) throws Exception {
+		int offset= buf.toString().indexOf("for");
+		offset= buf.toString().indexOf("for", offset+3);
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		fConvertLoopProposal= (FixCorrectionProposal)findProposalByCommandId(QuickAssistProcessor.CONVERT_FOR_LOOP_ID, proposals);
+		return proposals;
+	}
+
 	public void testInitializerPrecondition01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -2318,6 +2328,88 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertNull(fConvertLoopProposal);
 
 		assertCorrectLabels(proposals);		
+	}
+
+	public void testBug542936() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer orig= new StringBuffer();
+
+		orig.append("package test1;\n");
+		orig.append("public class E1 {\n");
+		orig.append("    private Object[] array1;\n");
+		orig.append("    private Object[] array2;\n");
+		orig.append("    public void method() {\n");
+		orig.append("        outer:\n");
+		orig.append("        for (int i = 0; i < array1.length; i++) {\n");
+		orig.append("            Object o1= array1[i];\n");
+		orig.append("            for (int j = 0; j < array2.length; j++) {\n");
+		orig.append("                Object o2= array2[j];\n");
+		orig.append("                if (o2.equals(o1)) {\n");
+		orig.append("                    continue outer;\n");
+		orig.append("                }\n");
+		orig.append("            }\n");
+		orig.append("        }\n");
+		orig.append("    }\n");
+		orig.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", orig.toString(), false, null);
+
+		assertTrue(satisfiesPrecondition(cu));
+		
+		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(orig, cu);
+
+		assertNotNull(fConvertLoopProposal);
+
+		assertCorrectLabels(proposals);
+
+		String preview1= getPreviewContent(fConvertLoopProposal);
+
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    private Object[] array1;\n");
+		buf.append("    private Object[] array2;\n");
+		buf.append("    public void method() {\n");
+		buf.append("        outer:\n");
+		buf.append("        for (Object o1 : array1) {\n");
+		buf.append("            for (int j = 0; j < array2.length; j++) {\n");
+		buf.append("                Object o2= array2[j];\n");
+		buf.append("                if (o2.equals(o1)) {\n");
+		buf.append("                    continue outer;\n");
+		buf.append("                }\n");
+		buf.append("            }\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+		assertEqualString(preview1, expected);
+
+		proposals= fetchConvertingProposal2(orig, cu);
+
+		assertNotNull(fConvertLoopProposal);
+
+		assertCorrectLabels(proposals);
+
+		String preview2= getPreviewContent(fConvertLoopProposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    private Object[] array1;\n");
+		buf.append("    private Object[] array2;\n");
+		buf.append("    public void method() {\n");
+		buf.append("        outer:\n");
+		buf.append("        for (int i = 0; i < array1.length; i++) {\n");
+		buf.append("            Object o1= array1[i];\n");
+		buf.append("            for (Object o2 : array2) {\n");
+		buf.append("                if (o2.equals(o1)) {\n");
+		buf.append("                    continue outer;\n");
+		buf.append("                }\n");
+		buf.append("            }\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected= buf.toString();
+		assertEqualString(preview2, expected);
 	}
 
 	private boolean satisfiesPrecondition(ICompilationUnit cu) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2018 IBM Corporation and others.
+ * Copyright (c) 2005, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -12,6 +12,7 @@
  *     IBM Corporation - initial API and implementation
  *     Mateusz Matela <mateusz.matela@gmail.com> - [code manipulation] [dcr] toString() builder wizard - https://bugs.eclipse.org/bugs/show_bug.cgi?id=26070
  *     Pierre-Yves B. <pyvesdev@gmail.com> - Check whether enclosing instance implements hashCode and equals - https://bugs.eclipse.org/539900
+ *     Pierre-Yves B. <pyvesdev@gmail.com> - Allow hashCode and equals generation when no fields but a super/enclosing class that implements them - https://bugs.eclipse.org/539901
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
@@ -97,6 +98,9 @@ public final class GenerateHashCodeEqualsAction extends GenerateMethodAbstractAc
 
 	private ArrayList<ITypeBinding> alreadyCheckedMemberTypes;
 
+	private HashCodeEqualsInfo superClassInfo= new HashCodeEqualsInfo();
+	private HashCodeEqualsInfo enclosingClassInfo= new HashCodeEqualsInfo();
+
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call
 	 * this constructor.
@@ -174,10 +178,9 @@ public final class GenerateHashCodeEqualsAction extends GenerateMethodAbstractAc
 		return info;
 	}
 
-	private RefactoringStatus checkHashCodeEqualsExists(ITypeBinding someType, boolean checkFinalMethods, String concreteTypeWarning) {
+	private RefactoringStatus checkHashCodeEqualsExists(ITypeBinding someType, HashCodeEqualsInfo info, boolean checkFinalMethods, String concreteTypeWarning) {
 
 		RefactoringStatus status= new RefactoringStatus();
-		HashCodeEqualsInfo info= getTypeInfo(someType, true);
 
 		String concreteMethWarning= (someType.isInterface() || Modifier.isAbstract(someType.getModifiers()))
 				? ActionMessages.GenerateHashCodeEqualsAction_interface_does_not_declare_hashCode_equals_error
@@ -241,10 +244,15 @@ public final class GenerateHashCodeEqualsAction extends GenerateMethodAbstractAc
 					selectedFields.add(fCandidateFields[i]);
 			}
 		}
-		if (allFields.isEmpty()) {
-			return false;
-		}
-		return true;
+		
+		ITypeBinding superclass= fTypeBinding.getSuperclass();
+		if (!"java.lang.Object".equals(superclass.getQualifiedName())) //$NON-NLS-1$
+			superClassInfo= getTypeInfo(superclass, true);
+
+		if (fTypeBinding.isMember() && !Modifier.isStatic(fTypeBinding.getModifiers()))
+			enclosingClassInfo= getTypeInfo(fTypeBinding.getDeclaringClass(), true);
+
+		return !allFields.isEmpty() || foundHashCodeOrEqualsInEnclosingOrSuperClass();
 	}
 
 	@Override
@@ -255,13 +263,13 @@ public final class GenerateHashCodeEqualsAction extends GenerateMethodAbstractAc
 	}
 
 	@Override
-	RefactoringStatus checkSuperClass(ITypeBinding superclass) {
-		return checkHashCodeEqualsExists(superclass, true, ActionMessages.GenerateMethodAbstractAction_super_class);
+	RefactoringStatus checkSuperClass(ITypeBinding superClass) {
+		return checkHashCodeEqualsExists(superClass, superClassInfo, true, ActionMessages.GenerateMethodAbstractAction_super_class);
 	}
 
 	@Override
 	RefactoringStatus checkEnclosingClass(ITypeBinding enclosingClass) {
-		return checkHashCodeEqualsExists(enclosingClass, false, ActionMessages.GenerateMethodAbstractAction_enclosing_class);
+		return checkHashCodeEqualsExists(enclosingClass, enclosingClassInfo, false, ActionMessages.GenerateMethodAbstractAction_enclosing_class);
 	}
 
 	@Override
@@ -277,7 +285,7 @@ public final class GenerateHashCodeEqualsAction extends GenerateMethodAbstractAc
 		if (fieldsType.isArray())
 			fieldsType= fieldsType.getElementType();
 		if (!fieldsType.isPrimitive() && !fieldsType.isEnum() && !alreadyCheckedMemberTypes.contains(fieldsType) && !fieldsType.equals(fTypeBinding)) {
-			status.merge(checkHashCodeEqualsExists(fieldsType, false, ActionMessages.GenerateHashCodeEqualsAction_field_type));
+			status.merge(checkHashCodeEqualsExists(fieldsType, getTypeInfo(fieldsType, true), false, ActionMessages.GenerateHashCodeEqualsAction_field_type));
 			alreadyCheckedMemberTypes.add(fieldsType);
 		}
 		if (Modifier.isTransient(variableBinding.getModifiers()))
@@ -304,6 +312,11 @@ public final class GenerateHashCodeEqualsAction extends GenerateMethodAbstractAc
 	@Override
 	String getNoMembersError() {
 		return ActionMessages.GenerateHashCodeEqualsAction_no_nonstatic_fields_error;
+	}
+
+	private boolean foundHashCodeOrEqualsInEnclosingOrSuperClass() {
+		return enclosingClassInfo.foundHashCode || enclosingClassInfo.foundEquals
+				|| superClassInfo.foundHashCode || superClassInfo.foundEquals;
 	}
 
 }

@@ -61,7 +61,7 @@ public class NullTestUtils {
 	// note: use disableAnnotationBasedNullAnalysis, if the project is reused between test cases
 	public static void prepareNullTypeAnnotations(IPackageFragmentRoot sourceFolder) throws JavaModelException {
 		IJavaProject project=sourceFolder.getJavaProject();
-		Map<String, String> options= project.getOptions(true);
+		Map<String, String> options= project.getOptions(false);
 		options.put(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
 		options.put(JavaCore.COMPILER_NONNULL_ANNOTATION_NAME, "annots.NonNull");
 		options.put(JavaCore.COMPILER_NULLABLE_ANNOTATION_NAME, "annots.Nullable");
@@ -109,8 +109,12 @@ public class NullTestUtils {
 	
 	// for test classes where the project is not deleted for each test case
 	public static void disableAnnotationBasedNullAnalysis(IPackageFragmentRoot sourceFolder) {
-		Map<String, String> options= sourceFolder.getJavaProject().getOptions(true);
-		options.put(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.DISABLED);
-		sourceFolder.getJavaProject().setOptions(options);		
+		IJavaProject project= sourceFolder.getJavaProject();
+		Map<String, String> options= project.getOptions(false);
+		options.remove(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS);
+		options.remove(JavaCore.COMPILER_NONNULL_ANNOTATION_NAME);
+		options.remove(JavaCore.COMPILER_NULLABLE_ANNOTATION_NAME);
+		options.remove(JavaCore.COMPILER_NONNULL_BY_DEFAULT_ANNOTATION_NAME);
+		project.setOptions(options);
 	}
 }
