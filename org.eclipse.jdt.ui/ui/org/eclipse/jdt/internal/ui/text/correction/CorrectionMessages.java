@@ -275,6 +275,7 @@ public final class CorrectionMessages extends NLS {
 	public static String NewCUCompletionUsingWizardProposal_createnewinterface_inpackage_description;
 	public static String NewCUCompletionUsingWizardProposal_createnewannotation_inpackage_description;
 	public static String NewCUCompletionUsingWizardProposal_createnewenum_inpackage_description;
+	public static String ConfigureProblemSeveritySubProcessor_compiler_info;
 	public static String ConfigureProblemSeveritySubProcessor_info;
 	public static String ConfigureProblemSeveritySubProcessor_name;
 	public static String ConstructorFromSuperclassProposal_description;
