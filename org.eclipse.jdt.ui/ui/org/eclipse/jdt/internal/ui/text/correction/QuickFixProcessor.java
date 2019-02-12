@@ -848,6 +848,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				break;
 			case IProblem.PreviewFeatureDisabled:
 				PreviewFeaturesSubProcessor.getEnablePreviewFeaturesProposal(context, proposals);
+				PreviewFeaturesSubProcessor.getOpenCompliancePageToEnablePreviewFeaturesProposal(context, proposals);
 				break;
 			default:
 		}
