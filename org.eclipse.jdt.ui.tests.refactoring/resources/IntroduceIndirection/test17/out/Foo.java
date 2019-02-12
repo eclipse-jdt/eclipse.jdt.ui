@@ -9,6 +9,7 @@ public class Foo {
 	}
 
 	/**
+	 * @param <A>
 	 * @param xs
 	 * @return
 	 */

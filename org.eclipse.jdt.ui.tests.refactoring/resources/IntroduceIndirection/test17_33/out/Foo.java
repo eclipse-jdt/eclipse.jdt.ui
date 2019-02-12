@@ -8,6 +8,8 @@ interface I {
 public class Foo<T extends C & I> {
     
 	/**
+	 * @param <T>
+	 * @param <U>
 	 * @param foo
 	 * @return
 	 */
