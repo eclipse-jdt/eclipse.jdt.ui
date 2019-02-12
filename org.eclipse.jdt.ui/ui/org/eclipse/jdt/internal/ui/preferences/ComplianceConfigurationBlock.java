@@ -109,6 +109,9 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	/* see also BuildPathSupport#PREFS_COMPLIANCE */
 	private static final Key[] PREFS_COMPLIANCE= new Key[] { PREF_COMPLIANCE,
 		PREF_PB_ASSERT_AS_IDENTIFIER, PREF_PB_ENUM_AS_IDENTIFIER,
+		PREF_SOURCE_COMPATIBILITY, PREF_CODEGEN_TARGET_PLATFORM};
+	private static final Key[] PREFS_COMPLIANCE_11_OR_HIGHER= new Key[] { PREF_COMPLIANCE,
+		PREF_PB_ASSERT_AS_IDENTIFIER, PREF_PB_ENUM_AS_IDENTIFIER,
 		PREF_SOURCE_COMPATIBILITY, PREF_CODEGEN_TARGET_PLATFORM,
 		PREF_ENABLE_PREVIEW, PREF_PB_REPORT_PREVIEW};
 	
@@ -1160,6 +1163,12 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				return;
 			}
 		}
+		if (enablePreview == null) {
+			enablePreview= DISABLED;
+		}
+		if (reportPreview == null) {
+			reportPreview= WARNING;
+		}
 		setValue(PREF_ENABLE_PREVIEW, enablePreview);
 		setValue(PREF_PB_REPORT_PREVIEW, reportPreview);
 		setValue(PREF_PB_ASSERT_AS_IDENTIFIER, assertAsId);
@@ -1193,16 +1202,17 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		HashMap<String, String> defaultOptions= new HashMap<>();
 		JavaModelUtil.setComplianceOptions(defaultOptions, complianceLevel);
 		
-		if (complianceLevel.equals(defaultOptions.get(JavaCore.COMPILER_COMPLIANCE))
-				&& getValue(PREF_ENABLE_PREVIEW).equals(defaultOptions.get(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES))
-				&& getValue(PREF_PB_REPORT_PREVIEW).equals(defaultOptions.get(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES))
+		boolean isDefault= complianceLevel.equals(defaultOptions.get(JavaCore.COMPILER_COMPLIANCE))
 				&& getValue(PREF_SOURCE_COMPATIBILITY).equals(defaultOptions.get(JavaCore.COMPILER_SOURCE))
 				&& getValue(PREF_CODEGEN_TARGET_PLATFORM).equals(defaultOptions.get(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM))
 				&& getValue(PREF_PB_ASSERT_AS_IDENTIFIER).equals(defaultOptions.get(JavaCore.COMPILER_PB_ASSERT_IDENTIFIER))
-				&& getValue(PREF_PB_ENUM_AS_IDENTIFIER).equals(defaultOptions.get(JavaCore.COMPILER_PB_ENUM_IDENTIFIER))) {
-			return DEFAULT_CONF;
+				&& getValue(PREF_PB_ENUM_AS_IDENTIFIER).equals(defaultOptions.get(JavaCore.COMPILER_PB_ENUM_IDENTIFIER));
+		if (JavaCore.compareJavaVersions(complianceLevel, JavaCore.VERSION_10) > 0) {
+			isDefault= isDefault
+					&& getValue(PREF_ENABLE_PREVIEW).equals(defaultOptions.get(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES))
+					&& getValue(PREF_PB_REPORT_PREVIEW).equals(defaultOptions.get(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES));
 		}
-		return USER_CONF;
+		return isDefault ? DEFAULT_CONF : USER_CONF;
 	}
 
 	private IExecutionEnvironment getEE() {
@@ -1238,8 +1248,12 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		Map<String, String> options= BuildPathSupport.getEEOptions(ee);
 		if (options == null)
 			return DISABLED;
-		
-		return checkDefaults(PREFS_COMPLIANCE, options);
+		String complianceOption= options.get(JavaCore.COMPILER_COMPLIANCE);
+		if (JavaCore.compareJavaVersions(complianceOption, JavaCore.VERSION_10) > 0) {
+			return checkDefaults(PREFS_COMPLIANCE_11_OR_HIGHER, options);
+		} else {
+			return checkDefaults(PREFS_COMPLIANCE, options);
+		}
 	}
 
 	private String checkDefaults(Key[] keys, Map<String, String> options) {
@@ -1272,39 +1286,51 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	 */
 	private void setDefaultCompilerComplianceValues() {
 		IVMInstall defaultVMInstall= JavaRuntime.getDefaultVMInstall();
-		if (defaultVMInstall instanceof IVMInstall2 && isOriginalDefaultCompliance()) {
+		if (defaultVMInstall instanceof IVMInstall2) {
 			String complianceLevel= JavaModelUtil.getCompilerCompliance((IVMInstall2)defaultVMInstall, JavaCore.VERSION_1_4);
-			Map<String, String> complianceOptions= new HashMap<>();
-			JavaModelUtil.setComplianceOptions(complianceOptions, complianceLevel);
-			setDefaultValue(PREF_COMPLIANCE, complianceOptions.get(PREF_COMPLIANCE.getName()));
-			setDefaultValue(PREF_ENABLE_PREVIEW, complianceOptions.get(PREF_ENABLE_PREVIEW.getName()));
-			setDefaultValue(PREF_PB_REPORT_PREVIEW, complianceOptions.get(PREF_PB_REPORT_PREVIEW.getName()));
-			setDefaultValue(PREF_PB_ASSERT_AS_IDENTIFIER, complianceOptions.get(PREF_PB_ASSERT_AS_IDENTIFIER.getName()));
-			setDefaultValue(PREF_PB_ENUM_AS_IDENTIFIER, complianceOptions.get(PREF_PB_ENUM_AS_IDENTIFIER.getName()));
-			setDefaultValue(PREF_SOURCE_COMPATIBILITY, complianceOptions.get(PREF_SOURCE_COMPATIBILITY.getName()));
-			setDefaultValue(PREF_CODEGEN_TARGET_PLATFORM, complianceOptions.get(PREF_CODEGEN_TARGET_PLATFORM.getName()));
-			setDefaultValue(PREF_RELEASE, DISABLED);
+			if (isOriginalDefaultCompliance(complianceLevel)) {
+				Map<String, String> complianceOptions= new HashMap<>();
+				JavaModelUtil.setComplianceOptions(complianceOptions, complianceLevel);
+				setDefaultValue(PREF_COMPLIANCE, complianceOptions.get(PREF_COMPLIANCE.getName()));
+				setDefaultValue(PREF_PB_ASSERT_AS_IDENTIFIER, complianceOptions.get(PREF_PB_ASSERT_AS_IDENTIFIER.getName()));
+				setDefaultValue(PREF_PB_ENUM_AS_IDENTIFIER, complianceOptions.get(PREF_PB_ENUM_AS_IDENTIFIER.getName()));
+				setDefaultValue(PREF_SOURCE_COMPATIBILITY, complianceOptions.get(PREF_SOURCE_COMPATIBILITY.getName()));
+				setDefaultValue(PREF_CODEGEN_TARGET_PLATFORM, complianceOptions.get(PREF_CODEGEN_TARGET_PLATFORM.getName()));
+				setDefaultValue(PREF_RELEASE, DISABLED);
+				if (JavaCore.compareJavaVersions(complianceLevel, JavaCore.VERSION_10) > 0) {
+					setDefaultValue(PREF_ENABLE_PREVIEW, complianceOptions.get(PREF_ENABLE_PREVIEW.getName()));
+					setDefaultValue(PREF_PB_REPORT_PREVIEW, complianceOptions.get(PREF_PB_REPORT_PREVIEW.getName()));					
+				} else {
+					setDefaultValue(PREF_ENABLE_PREVIEW, DISABLED);
+					setDefaultValue(PREF_PB_REPORT_PREVIEW, WARNING);
+				}
+			}
 		}
 	}
 
 	/**
 	 * Tells whether the compliance option is the same as the original default.
+	 * @param complianceLevel the compliance level
 	 * 
 	 * @return <code>true</code> if the compliance is the same as the original default
 	 * @since 3.6
 	 */
-	private static final boolean isOriginalDefaultCompliance() {
+	private static final boolean isOriginalDefaultCompliance(String complianceLevel) {
 		Hashtable<String, String> options= JavaCore.getDefaultOptions();
 		Preferences bundleDefaults= BundleDefaultsScope.INSTANCE.getNode(JavaCore.PLUGIN_ID);
 
-		return equals(JavaCore.COMPILER_COMPLIANCE, bundleDefaults, options)
+		boolean isDefault= equals(JavaCore.COMPILER_COMPLIANCE, bundleDefaults, options)
 				&& equals(JavaCore.COMPILER_SOURCE, bundleDefaults, options)
 				&& equals(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, bundleDefaults, options)
 				&& equals(JavaCore.COMPILER_PB_ASSERT_IDENTIFIER, bundleDefaults, options)
 				&& equals(JavaCore.COMPILER_PB_ENUM_IDENTIFIER, bundleDefaults, options)
-				&& equals(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES, bundleDefaults, options)
-				&& equals(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, bundleDefaults, options)
 				&& equals(JavaCore.COMPILER_RELEASE, bundleDefaults, options);
+		if (JavaCore.compareJavaVersions(complianceLevel, JavaCore.VERSION_10) > 0) {
+			isDefault= isDefault
+					&& equals(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES, bundleDefaults, options)
+					&& equals(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, bundleDefaults, options);
+		}
+		return isDefault;
 	}
 
 	/**
