@@ -2,7 +2,7 @@
 
 <!--
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -190,7 +190,7 @@ void ${testName}() throws Exception {
 }</template>
 
 <template name="test_factory" description="%Templates.testfactory_junit5" id="org.eclipse.jdt.ui.templates.testfactory_junit5" context="java-members" enabled="true" autoinsert="false">@${testfactoryType:newType(org.junit.jupiter.api.TestFactory)}
-${returnType:link('Stream&lt;DynamicNode&gt;', 'Collection&lt;DynamicNode&gt;', 'Iterable&lt;DynamicNode&gt;', 'Iterator&lt;DynamicNode&gt;')} ${testFactoryName}() throws Exception {
+${returnType:link('DynamicNode', 'Stream&lt;DynamicNode&gt;', 'Collection&lt;DynamicNode&gt;', 'Iterable&lt;DynamicNode&gt;', 'Iterator&lt;DynamicNode&gt;')} ${testFactoryName}() throws Exception {
 	// ${todo}: generate dynamic test cases
 	${cursor}return null;${typeImports:import('org.junit.jupiter.api.DynamicNode')}${staticImports:importStatic('org.junit.jupiter.api.Assertions.*', 'org.junit.jupiter.api.DynamicContainer.*', 'org.junit.jupiter.api.DynamicTest.*')}
 }</template>
