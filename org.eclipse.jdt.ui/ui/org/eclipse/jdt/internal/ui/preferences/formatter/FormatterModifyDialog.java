@@ -1268,6 +1268,7 @@ public class FormatterModifyDialog extends ModifyDialog {
 						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_logical_operators, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_LOGICAL_OPERATOR))
 				.node(fTree.builder(FormatterMessages.FormatterModifyDialog_lineWrap_tree_expressions, null, modAll)
 						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_conditionals, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_CONDITIONAL_EXPRESSION)
+						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_chained_conditionals, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_CONDITIONAL_EXPRESSION_CHAIN)
 						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_assignments, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ASSIGNMENT)
 						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_array_init, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_EXPRESSIONS_IN_ARRAY_INITIALIZER))
 				.node(fTree.builder(FormatterMessages.FormatterModifyDialog_lineWrap_tree_statements, null, modAll)
