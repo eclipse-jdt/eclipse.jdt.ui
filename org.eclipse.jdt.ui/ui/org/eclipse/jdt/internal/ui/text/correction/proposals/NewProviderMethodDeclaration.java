@@ -78,7 +78,7 @@ public class NewProviderMethodDeclaration extends AbstractMethodCorrectionPropos
 		IPackageFragment pack= (IPackageFragment) compilationUnit.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
 		for (int i=0; i < typeProposals.size(); i++) {
 			IType t= typeProposals.get(i);
-			if (t.getCompilationUnit().equals(compilationUnit) || JavaModelUtil.isVisible(t, pack)) {
+			if (compilationUnit.equals(t.getCompilationUnit()) || JavaModelUtil.isVisible(t, pack)) {
 				if (typeBindings[i] != null && typeBindings[i] instanceof ITypeBinding) {
 					addLinkedPositionProposal("return_type", (ITypeBinding) typeBindings[i]); //$NON-NLS-1$
 				} else {

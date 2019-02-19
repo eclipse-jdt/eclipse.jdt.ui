@@ -217,34 +217,37 @@ public class QuickFixTest9 extends QuickFixTest {
 
 	public void testBasicNewServiceProvider() throws Exception {
 		StringBuffer buf= new StringBuffer();
+		buf.append("import java.sql.Driver;\n");
 		buf.append("module test {\n");
-		buf.append("provides test.IFoo with test.IFoo;\n");
+		buf.append("provides Driver with test.IFoo;\n");
 		buf.append("}\n");
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
 		ICompilationUnit cu= def.createCompilationUnit("module-info.java", buf.toString(), false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
 		buf= new StringBuffer();
+		buf.append("import java.sql.Driver;\n");
 		buf.append("package test;\n\n");
-		buf.append("public interface IFoo {\n");
+		buf.append("public interface IFoo extends Driver {\n");
 		buf.append("}\n");
 		pack.createCompilationUnit("IFoo.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1, 0);
-		String proposalStr= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_add_provider_method_description, "IFoo");
+		String proposalStr= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_add_provider_method_description, "Driver");
 		assertProposalExists(proposals, proposalStr);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String actual= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
+		buf.append("import java.sql.Driver;\n");
 		buf.append("package test;\n\n");
-		buf.append("public interface IFoo {\n\n");
+		buf.append("public interface IFoo extends Driver {\n\n");
 		buf.append("	/**\n");
 		buf.append("	 * @return\n");
 		buf.append("	 */\n");
-		buf.append("	public static IFoo provider() {\n");
+		buf.append("	public static Driver provider() {\n");
 		buf.append("		// TODO Auto-generated method stub\n");
 		buf.append("		return null;\n");
 		buf.append("	}\n");
