@@ -645,6 +645,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 			updateControls();
 			updateComplianceEnableState();
 			updatePreviewFeaturesState();
+			updatePreviewControls();
 			updateAssertEnumAsIdentifierEnableState();
 			updateInlineJSREnableState();
 			updateStoreMethodParamNamesEnableState();
@@ -948,6 +949,14 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 			boolean isLessThan11= JavaModelUtil.isVersionLessThan(compatibility, VERSION_11);
 			updateRememberedComplianceOption(PREF_ENABLE_PREVIEW, IDX_ENABLE_PREVIEW, !isLessThan11, null);
 			updateRememberedComplianceOption(PREF_PB_REPORT_PREVIEW, IDX_REPORT_PREVIEW, fEnablePreviewCheck.isEnabled() && fEnablePreviewCheck.getSelection(), WARNING);
+		}
+	}
+
+	private void updatePreviewControls() {
+		String compliance= getValue(PREF_COMPLIANCE);
+		if (JavaCore.compareJavaVersions(compliance, JavaCore.VERSION_10) <= 0) {
+			fEnablePreviewCheck.setSelection(false);
+			fReportPreviewCombo.select(0);
 		}
 	}
 
