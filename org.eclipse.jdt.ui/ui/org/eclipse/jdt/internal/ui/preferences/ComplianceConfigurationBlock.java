@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -674,10 +674,19 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 			} else {
 				install= JavaRuntime.getDefaultVMInstall();
 			}
+			boolean isJREUnsupportedAndGreater= false;
 			if (install instanceof IVMInstall2) {
+				String version= ((IVMInstall2) install).getJavaVersion();
 				String compilerCompliance= JavaModelUtil.getCompilerCompliance((IVMInstall2) install, compliance);
+				isJREUnsupportedAndGreater= isJREVersionUnsupportedAndGreater(version, compilerCompliance);
+				if (isJREUnsupportedAndGreater) {
+					version= getJREVersionString(version);
+				}
 				if (!compilerCompliance.equals(compliance)) { // Discourage using compiler with version other than compliance
 					String[] args= { getVersionLabel(compliance), getVersionLabel(compilerCompliance) };
+					if (isJREUnsupportedAndGreater) {
+						args[1]= getVersionLabel(version);
+					}
 					if (JavaModelUtil.is9OrHigher(compilerCompliance)) {
 						if (!JavaModelUtil.is16OrHigher(compliance) || !fComplierReleaseCheck.getSelection()) {
 							if (fProject == null) {
@@ -697,9 +706,24 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 						}
 					}
 					isVisible= true;
+				} else {
+					if (isJREUnsupportedAndGreater) {
+						String[] args= { getVersionLabel(compilerCompliance), getVersionLabel(version) };
+						if (fComplierReleaseCheck.getSelection()) {
+							fJRE50InfoText.setText(Messages.format(PreferencesMessages.ComplianceConfigurationBlock_jrecompliance_backwardcompatibility_info, args));
+							image= JFaceResources.getImage(Dialog.DLG_IMG_MESSAGE_INFO);
+						} else {
+							if (fProject == null) {
+								fJRE50InfoText.setText(Messages.format(PreferencesMessages.ComplianceConfigurationBlock_jrecompliance_info, args));
+							} else {
+								fJRE50InfoText.setText(Messages.format(PreferencesMessages.ComplianceConfigurationBlock_jrecompliance_info_project, args));
+							}
+						}
+						isVisible= true;
+					}
 				}
 			}
-			
+
 			fJRE50InfoText.setVisible(isVisible);
 			fJRE50InfoImage.setImage(isVisible ? image : null);
 			fJRE50InfoImage.getParent().layout();
@@ -721,6 +745,8 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 			}
 			if (install instanceof IVMInstall2) {
 				String compilerCompliance= JavaModelUtil.getCompilerCompliance((IVMInstall2) install, compliance);
+				String version= ((IVMInstall2) install).getJavaVersion();
+				boolean isJREUnsupportedAndGreater= isJREVersionUnsupportedAndGreater(version, compilerCompliance);
 				if (!compilerCompliance.equals(compliance)) { // Discourage using compiler with version other than compliance
 					if (JavaModelUtil.is9OrHigher(compilerCompliance)) {
 						if (!JavaModelUtil.is16OrHigher(compliance)) {
@@ -729,9 +755,8 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 							setValue(PREF_RELEASE, DISABLED);
 						} else {
 							if (fProject != null) {
-								fComplierReleaseCheck.setEnabled(checkValue(INTR_COMPLIANCE_FOLLOWS_EE, USER_CONF));
-							}
-							else {
+								fComplierReleaseCheck.setEnabled(checkValue(INTR_COMPLIANCE_FOLLOWS_EE, USER_CONF) || checkValue(INTR_COMPLIANCE_FOLLOWS_EE, DISABLED));
+							} else {
 								fComplierReleaseCheck.setEnabled(true);
 							}
 						}
@@ -740,7 +765,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 						fComplierReleaseCheck.setEnabled(false);
 						fComplierReleaseCheck.setSelection(false);
 						setValue(PREF_RELEASE, DISABLED);
-					}					
+					}
 				} else if (!JavaModelUtil.is9OrHigher(compilerCompliance)) {
 					fComplierReleaseCheck.setEnabled(false);
 					fComplierReleaseCheck.setSelection(false);
@@ -748,11 +773,44 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				} else {
 					if (fProject == null) {
 						fComplierReleaseCheck.setEnabled(true);
+					} else if (isJREUnsupportedAndGreater && JavaModelUtil.is16OrHigher(compliance)) {
+						fComplierReleaseCheck.setEnabled(true);
 					}
 					updateComplianceEnableSourceTargetState();
 				}
 			}
 		}
+	}
+
+	private boolean isJREVersionUnsupportedAndGreater(String version, String compilerCompliance) {
+		boolean isJREUnsupportedAndGreater= false;
+		String versionStr= version;
+		if (!JavaCore.isSupportedJavaVersion(versionStr)) {
+			try {
+				versionStr= getJREVersionString(versionStr);
+				int jreVersion= Integer.parseInt(versionStr);
+				int supportedVersion= Integer.parseInt(compilerCompliance);
+				if (jreVersion > supportedVersion) {
+					isJREUnsupportedAndGreater= true;
+				}
+			} catch (NumberFormatException e) {
+				//do nothing
+			}
+		}
+		return isJREUnsupportedAndGreater;
+	}
+
+	private String getJREVersionString(String version) {
+		String newVersion= version;
+		int index= newVersion.indexOf('.');
+		if (index != -1) {
+			newVersion= newVersion.substring(0, index);
+		} else {
+			index= newVersion.indexOf('-');
+			if (index != -1)
+				newVersion= newVersion.substring(0, index);
+		}
+		return newVersion;
 	}
 
 	private String getVersionLabel(String version) {
