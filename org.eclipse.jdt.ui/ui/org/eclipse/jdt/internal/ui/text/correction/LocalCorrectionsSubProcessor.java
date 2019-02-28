@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -50,6 +50,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.part.FileEditorInput;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
@@ -92,6 +93,7 @@ import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
+import org.eclipse.jdt.core.dom.ProvidesDirective;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -180,6 +182,7 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionPropos
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.MissingAnnotationAttributesProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.NewProviderMethodDeclaration;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewVariableCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.RefactoringCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ReplaceCorrectionProposal;
@@ -2057,5 +2060,28 @@ public class LocalCorrectionsSubProcessor {
 		}
 
 		proposals.add(proposal);
+	}
+
+	public static void addServiceProviderProposal (IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws CoreException {
+		ASTNode node= problem.getCoveredNode(context.getASTRoot());
+		if (! (node instanceof Name) && ! (node.getParent() instanceof ProvidesDirective)) {
+			return;
+		}
+
+		Name name= (Name) node;
+		ProvidesDirective prov= (ProvidesDirective) name.getParent();
+		ITypeBinding targetBinding= name.resolveTypeBinding();
+		ITypeBinding serviceBinding= prov.getName().resolveTypeBinding();
+		if (targetBinding != null && serviceBinding != null) {
+			ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(context.getCompilationUnit(), context.getASTRoot(), targetBinding);
+
+			IJavaProject proj= context.getCompilationUnit().getJavaProject();
+			IType type= proj.findType(serviceBinding.getQualifiedName());
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
+			proposals.add(new NewProviderMethodDeclaration(
+					Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_add_provider_method_description, type.getElementName()),
+					targetCU, context.getASTRoot(), targetBinding,
+					IProposalRelevance.CREATE_METHOD, image, type));
+		}
 	}
 }

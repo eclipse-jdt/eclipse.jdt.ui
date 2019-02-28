@@ -301,6 +301,9 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.UndefinedModule:
 			case IProblem.PackageDoesNotExistOrIsEmpty:
 			case IProblem.NotAccessibleType:
+			case IProblem.AbstractServiceImplementation:
+			case IProblem.ProviderMethodOrConstructorRequiredForServiceImpl:
+			case IProblem.ServiceImplDefaultConstructorNotPublic:
 			case IProblem.PreviewFeatureDisabled:
 				return true;
 			default:
@@ -837,6 +840,11 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				break;
 			case IProblem.PackageDoesNotExistOrIsEmpty:
 				ModuleCorrectionsSubProcessor.getPackageDoesNotExistProposals(context, problem, proposals);
+				break;
+			case IProblem.AbstractServiceImplementation:
+			case IProblem.ProviderMethodOrConstructorRequiredForServiceImpl:
+			case IProblem.ServiceImplDefaultConstructorNotPublic:
+				LocalCorrectionsSubProcessor.addServiceProviderProposal(context, problem, proposals);
 				break;
 			case IProblem.PreviewFeatureDisabled:
 				PreviewFeaturesSubProcessor.getEnablePreviewFeaturesProposal(context, proposals);

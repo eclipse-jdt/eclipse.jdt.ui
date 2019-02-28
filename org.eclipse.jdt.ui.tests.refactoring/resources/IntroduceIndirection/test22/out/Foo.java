@@ -15,6 +15,10 @@ public class Foo<E> {
 	}
 
 	/**
+	 * @param <E>
+	 * @param <F>
+	 * @param <G>
+	 * @param <H>
 	 * @param e
 	 * @param f
 	 * @param g

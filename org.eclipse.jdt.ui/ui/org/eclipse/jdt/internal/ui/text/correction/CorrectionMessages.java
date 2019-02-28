@@ -435,6 +435,7 @@ public final class CorrectionMessages extends NLS {
 	public static String LocalCorrectionsSubProcessor_override_method_description;
 	public static String LocalCorrectionsSubProcessor_replace_with_unqualified_enum_constant;
 	public static String LocalCorrectionsSubProcessor_throw_allocated_description;
+	public static String LocalCorrectionsSubProcessor_add_provider_method_description;
 	public static String SuppressWarningsSubProcessor_fix_suppress_token_label;
 	public static String SuppressWarningsSubProcessor_remove_annotation_label;
 	public static String VarargsWarningsSubProcessor_add_safevarargs_label;

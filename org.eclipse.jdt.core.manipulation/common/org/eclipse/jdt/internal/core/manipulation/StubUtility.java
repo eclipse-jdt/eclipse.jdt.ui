@@ -19,7 +19,6 @@ import java.lang.reflect.Modifier;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -661,7 +660,7 @@ public class StubUtility {
 		}
 
 		IDocument textBuffer= new Document(str);
-		List<TypeParameter> typeParams= shouldGenerateMethodTypeParameterTags(cu.getJavaProject()) ? decl.typeParameters() : Collections.emptyList();
+		List<TypeParameter> typeParams= decl.typeParameters();
 		String[] typeParamNames= new String[typeParams.size()];
 		for (int i= 0; i < typeParamNames.length; i++) {
 			TypeParameter elem= typeParams.get(i);

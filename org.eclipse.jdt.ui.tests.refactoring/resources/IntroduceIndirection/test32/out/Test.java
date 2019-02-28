@@ -2,6 +2,7 @@ package p;
 
 public class Test<T extends Test<T>> {
     /**
+	 * @param <T>
 	 * @param test
 	 * @param t
 	 */

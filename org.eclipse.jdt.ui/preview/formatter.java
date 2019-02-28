@@ -880,8 +880,16 @@ boolean multipleConditions = conditionOne && conditionTwo || conditionThree && c
 //--PREVIEW--END--org.eclipse.jdt.core.formatter.alignment_for_logical_operator
 
 //--PREVIEW--START--org.eclipse.jdt.core.formatter.alignment_for_conditional_expression
-class Example extends AnotherClass {int foo(boolean argument) {return argument ? 100000 : 200000;}}
+//--PREVIEW--START--org.eclipse.jdt.core.formatter.alignment_for_conditional_expression_chain
+class Example extends AnotherClass {int foo(boolean argument) {
+	boolean someValue = condition1() ? value1
+	        : condition2() ? value2
+	        : condition3 ? value3
+	        : value4;
+	return argument ? 100000 : 200000;
+}}
 //--PREVIEW--END--org.eclipse.jdt.core.formatter.alignment_for_conditional_expression
+//--PREVIEW--END--org.eclipse.jdt.core.formatter.alignment_for_conditional_expression_chain
 
 //--PREVIEW--START--org.eclipse.jdt.core.formatter.alignment_for_expressions_in_array_initializer
 class Example {int [] fArray= {1,

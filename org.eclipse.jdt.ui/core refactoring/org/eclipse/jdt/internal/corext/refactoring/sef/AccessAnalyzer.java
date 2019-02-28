@@ -49,6 +49,7 @@ import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
@@ -284,6 +285,8 @@ class AccessAnalyzer extends ASTVisitor {
 			return ((QualifiedName)expression).resolveBinding();
 		else if (expression instanceof FieldAccess)
 			return ((FieldAccess)expression).getName().resolveBinding();
+		else if (expression instanceof SuperFieldAccess)
+			return ((SuperFieldAccess) expression).getName().resolveBinding();
 		else if (expression instanceof ParenthesizedExpression)
 			return resolveBinding(((ParenthesizedExpression) expression).getExpression());
 		return null;

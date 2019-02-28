@@ -620,6 +620,10 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	}
 
 	private void addConstantOrDefaultValue(StringBuilder buffer, IJavaElement element) throws JavaModelException {
+		int elementType= element.getElementType();
+		if (!(elementType == IJavaElement.FIELD || elementType == IJavaElement.METHOD)) {
+			return;
+		}
 		ITypeRoot typeRoot= null;
 		Region nameRegion= null;
 		if (element instanceof IMember) {
@@ -632,7 +636,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 				nameRegion= new Region(nameRange.getOffset(), nameRange.getLength());
 			}
 		}
-		if (element.getElementType() == IJavaElement.FIELD) {
+		if (elementType == IJavaElement.FIELD) {
 			String constantValue= JavadocHover.getConstantValue((IField) element, typeRoot, nameRegion);
 			if (constantValue != null) {
 				constantValue= HTMLPrinter.convertToHTMLContentWithWhitespace(constantValue);
@@ -644,7 +648,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 				buffer.append(constantValue);
 				buffer.append(JavadocContentAccess2.BlOCK_TAG_ENTRY_END);
 			}
-		} else if (element.getElementType() == IJavaElement.METHOD) {
+		} else if (elementType == IJavaElement.METHOD) {
 			String defaultValue;
 			try {
 				defaultValue= JavadocHover.getAnnotationMemberDefaultValue((IMethod) element, typeRoot, nameRegion);

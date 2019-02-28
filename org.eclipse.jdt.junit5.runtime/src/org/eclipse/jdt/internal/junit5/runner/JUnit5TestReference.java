@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 IBM Corporation and others.
+ * Copyright (c) 2016, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -86,7 +86,7 @@ public class JUnit5TestReference implements ITestReference {
 
 	@Override
 	public void run(TestExecution execution) {
-		fLauncher.execute(fRequest, new JUnit5TestListener(execution.getListener(), fRemoteTestRunner));
+		fLauncher.execute(fTestPlan, new JUnit5TestListener(execution.getListener(), fRemoteTestRunner));
 	}
 
 	@Override

@@ -3,6 +3,7 @@ package p;
 public class MultiGenerics<E> {
 
 	/**
+	 * @param <E>
 	 * @param multiGenerics
 	 * @param e
 	 */

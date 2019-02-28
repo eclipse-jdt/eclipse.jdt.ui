@@ -3,6 +3,7 @@ package p;
 public class Foo<T> {
 	
 	/**
+	 * @param <T>
 	 * @param foo
 	 */
 	public static <T> void foo(Foo<T> foo) {

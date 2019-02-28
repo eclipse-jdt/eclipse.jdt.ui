@@ -270,7 +270,7 @@ public class CodeGeneration {
 	public static String getMethodComment(IMethod method, IMethod overridden, String lineDelimiter) throws CoreException {
 		String retType= method.isConstructor() ? null : method.getReturnType();
 		String[] paramNames= method.getParameterNames();
-		String[] typeParameterNames= StubUtility.shouldGenerateMethodTypeParameterTags(method.getJavaProject()) ? StubUtility.getTypeParameterNames(method.getTypeParameters()) : new String[0];
+		String[] typeParameterNames= StubUtility.getTypeParameterNames(method.getTypeParameters());
 
 		return StubUtility.getMethodComment(method.getCompilationUnit(), method.getDeclaringType().getElementName(),
 			method.getElementName(), paramNames, method.getExceptionTypes(), retType, typeParameterNames, overridden, false, lineDelimiter);

@@ -15,7 +15,6 @@ package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -39,14 +38,12 @@ import org.eclipse.ui.ISharedImages;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -72,7 +69,6 @@ import org.eclipse.jdt.core.manipulation.CodeGeneration;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
-import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 
@@ -249,12 +245,6 @@ public class JavadocTagsSubProcessor {
 		 	ListRewrite tagsRewriter= rewriter.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY);
 
 		 	List<TypeParameter> typeParams= methodDecl.typeParameters();
-		 	ASTNode root= methodDecl.getRoot();
-		 	if (root instanceof CompilationUnit) {
-		 		ITypeRoot typeRoot= ((CompilationUnit) root).getTypeRoot();
-		 		if (typeRoot != null && !StubUtility.shouldGenerateMethodTypeParameterTags(typeRoot.getJavaProject()))
-		 			typeParams= Collections.emptyList();
-		 	}
 		 	List<String> typeParamNames= new ArrayList<>();
 		 	for (int i= typeParams.size() - 1; i >= 0 ; i--) {
 		 		TypeParameter decl= typeParams.get(i);
