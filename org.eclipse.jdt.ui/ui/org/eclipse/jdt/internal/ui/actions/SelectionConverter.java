@@ -245,13 +245,6 @@ public class SelectionConverter {
 		return null;
 	}
 
-	public static IClassFile getInputAsClassFile(JavaEditor editor) {
-		Object editorInput= SelectionConverter.getInput(editor);
-		if (editorInput instanceof IClassFile)
-			return (IClassFile)editorInput;
-		return null;
-	}
-
 	private static IJavaElement[] performForkedCodeResolve(final ITypeRoot input, final ITextSelection selection) throws InvocationTargetException, InterruptedException {
 		final class CodeResolveRunnable implements IRunnableWithProgress {
 			IJavaElement[] result;
