@@ -82,8 +82,9 @@ public class TypeNameMatchCollector extends TypeNameMatchRequestor {
 				String curr= tok.nextToken();
 				if (curr.length() > 0) {
 					// Simulate '*', and '?' wildcards using '.*' and '.'
-					curr = curr.replaceAll("\\*", ".*"); //$NON-NLS-1$ //$NON-NLS-2$
-					curr = curr.replaceAll("\\?", "."); //$NON-NLS-1$ //$NON-NLS-2$
+					curr = curr.replace(".", "\\."); //$NON-NLS-1$ //$NON-NLS-2$
+					curr = curr.replace("*", ".*"); //$NON-NLS-1$ //$NON-NLS-2$
+					curr = curr.replace("?", "."); //$NON-NLS-1$ //$NON-NLS-2$
 					fStringMatchers[i]= Pattern.compile(curr);
 				}
 			}
