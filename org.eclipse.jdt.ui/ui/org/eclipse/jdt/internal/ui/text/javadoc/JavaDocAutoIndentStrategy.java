@@ -363,6 +363,8 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 			String comment= document.get(partition.getOffset(), partition.getLength());
 			if (comment.indexOf("/*", 2) != -1) //$NON-NLS-1$
 				return true; // enclosed another comment -> probably a new comment
+			if (comment.indexOf("*/", 2) != -1) //$NON-NLS-1$
+				return true; // enclosed another comment -> probably a new comment
 
 			return false;
 
