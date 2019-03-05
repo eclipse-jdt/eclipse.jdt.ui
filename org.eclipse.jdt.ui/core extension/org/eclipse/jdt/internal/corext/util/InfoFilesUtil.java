@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2018 IBM Corporation and others.
+ * Copyright (c) 2016, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -26,6 +26,8 @@ import org.eclipse.jdt.core.manipulation.CodeGeneration;
 
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileManager;
 
 public class InfoFilesUtil {
@@ -44,9 +46,9 @@ public class InfoFilesUtil {
 	public static void createInfoJavaFile(String fileName, String fileContent, IPackageFragment pack, IProgressMonitor monitor) throws CoreException {
 		String lineDelimiter= StubUtility.getLineDelimiterUsed(pack.getJavaProject());
 		StringBuilder content= new StringBuilder();
-		String fileComment= getFileComment(fileName, pack, lineDelimiter);
-		String typeComment= getTypeComment(fileName, pack, lineDelimiter);
-
+		boolean addComments= Boolean.valueOf(PreferenceConstants.getPreference(PreferenceConstants.CODEGEN_ADD_COMMENTS, pack.getJavaProject())).booleanValue();
+		String fileComment= addComments ? getFileComment(fileName, pack, lineDelimiter) : null;
+		String typeComment= addComments ? getTypeComment(fileName, pack, lineDelimiter) : null;
 		if (fileComment != null) {
 			content.append(fileComment);
 			content.append(lineDelimiter);
