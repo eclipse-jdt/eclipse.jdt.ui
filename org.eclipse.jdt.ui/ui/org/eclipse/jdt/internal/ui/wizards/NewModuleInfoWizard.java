@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2018 IBM Corporation and others.
+ * Copyright (c) 2017, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -160,7 +160,7 @@ public class NewModuleInfoWizard extends Wizard implements INewWizard {
 	private void createModuleInfoJava(IPackageFragmentRoot targetPkgFragmentRoot, IPackageFragmentRoot[] packageFragmentRoots) throws CoreException {
 		String fileContent= getModuleInfoFileContent(packageFragmentRoots);
 		IPackageFragment defaultPkg= targetPkgFragmentRoot.getPackageFragment(""); //$NON-NLS-1$
-		InfoFilesUtil.createInfoJavaFile(MODULE_INFO_JAVA_FILENAME, fileContent.toString(), defaultPkg, new NullProgressMonitor());
+		InfoFilesUtil.createInfoJavaFile(MODULE_INFO_JAVA_FILENAME, fileContent.toString(), defaultPkg, fPage.isAddComments(), new NullProgressMonitor());
 	}
 
 	private String getModuleInfoFileContent(IPackageFragmentRoot[] packageFragmentRoots) throws CoreException {

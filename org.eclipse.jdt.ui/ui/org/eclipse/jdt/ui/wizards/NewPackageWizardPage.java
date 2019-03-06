@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -25,10 +25,15 @@ import java.net.URI;
 import org.eclipse.equinox.bidi.StructuredTextTypeHandlerFactory;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.core.filesystem.EFS;
@@ -98,7 +103,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
  *
  * @noextend This class is not intended to be subclassed by clients.
  */
-public class NewPackageWizardPage extends NewContainerWizardPage {
+public class NewPackageWizardPage extends NewTypeWizardPage {
 
 	private static final String PACKAGE_INFO_JAVA_FILENAME= JavaModelUtil.PACKAGE_INFO_JAVA;
 
@@ -114,6 +119,8 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 
 	private SelectionButtonDialogField fCreatePackageInfoJavaDialogField;
 
+	private boolean fInitialCommentState;
+
 	/*
 	 * Status of last validation of the package field
 	 */
@@ -121,11 +128,13 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 
 	private IPackageFragment fCreatedPackageFragment;
 
+	private Link fLinkControl;
+
 	/**
 	 * Creates a new <code>NewPackageWizardPage</code>
 	 */
 	public NewPackageWizardPage() {
-		super(PAGE_NAME);
+		super(false, PAGE_NAME);
 
 		setTitle(NewWizardMessages.NewPackageWizardPage_title);
 		setDescription(NewWizardMessages.NewPackageWizardPage_description);
@@ -195,6 +204,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		}
 
 		updateStatus(new IStatus[] { fContainerStatus, fPackageStatus });
+		setAddComments(StubUtility.doAddComments(getJavaProject()), true); // from project or workspace
 	}
 
 	// -------- UI Creation ---------
@@ -223,6 +233,12 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 
 		createContainerControls(composite, nColumns);
 		createPackageControls(composite, nColumns);
+		fLinkControl= createCommentWithLinkControls(composite, nColumns, false);
+		if(fAddCommentButton!=null)
+			fAddCommentButton.setEnabled(fInitialCommentState);
+		if(fLinkControl!=null)
+			fLinkControl.setEnabled(fInitialCommentState);
+		enableCommentControl(true);
 
 		setControl(composite);
 		Dialog.applyDialogFont(composite);
@@ -243,12 +259,14 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 	/**
 	 * Sets the focus to the package name input field.
 	 */
+	@Override
 	protected void setFocus() {
 		fPackageDialogField.setFocus(false);
 	}
 
 
-	private void createPackageControls(Composite composite, int nColumns) {
+	@Override
+	protected void createPackageControls(Composite composite, int nColumns) {
 		fPackageDialogField.doFillIntoGrid(composite, nColumns - 1);
 		Text text= fPackageDialogField.getTextControl(null);
 		LayoutUtil.setWidthHint(text, getMaxFieldWidth());
@@ -256,8 +274,24 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		DialogField.createEmptySpace(composite);
 
 		TextFieldNavigationHandler.install(text);
-		
-		fCreatePackageInfoJavaDialogField.doFillIntoGrid(composite, nColumns);
+		Control[] doFillIntoGrid= fCreatePackageInfoJavaDialogField.doFillIntoGrid(composite, nColumns);
+		Button createPackageButton= (Button) doFillIntoGrid[0];
+		createPackageButton.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (fAddCommentButton != null)
+					fAddCommentButton.setEnabled(createPackageButton.getSelection());
+				if (fLinkControl != null)
+					fLinkControl.setEnabled(createPackageButton.getSelection());
+
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				//nothing to do
+			}
+		});
+		fInitialCommentState = createPackageButton.getSelection();
 		BidiUtils.applyBidiProcessing(fPackageDialogField.getTextControl(null), StructuredTextTypeHandlerFactory.JAVA);
 	}
 
@@ -527,7 +561,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		fileContent.append(fCreatedPackageFragment.getElementName());
 		fileContent.append(";"); //$NON-NLS-1$
 
-		InfoFilesUtil.createInfoJavaFile(PACKAGE_INFO_JAVA_FILENAME, fileContent.toString(), fCreatedPackageFragment, monitor);
+		InfoFilesUtil.createInfoJavaFile(PACKAGE_INFO_JAVA_FILENAME, fileContent.toString(), fCreatedPackageFragment,this.isAddComments(), monitor);
 	}
 
 	private void createPackageHtml(IPackageFragmentRoot root, IProgressMonitor monitor) throws CoreException {

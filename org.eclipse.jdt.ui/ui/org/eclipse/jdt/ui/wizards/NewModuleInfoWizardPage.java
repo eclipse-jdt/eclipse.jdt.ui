@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 IBM Corporation and others.
+ * Copyright (c) 2017, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -53,7 +54,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
  *
  * @noextend This class is not intended to be subclassed by clients.
  */
-public class NewModuleInfoWizardPage extends NewElementWizardPage {
+public class NewModuleInfoWizardPage extends NewTypeWizardPage{
 
 	private static final String PAGE_NAME= "NewModuleInfoWizardPage"; //$NON-NLS-1$
 
@@ -69,7 +70,7 @@ public class NewModuleInfoWizardPage extends NewElementWizardPage {
 	private IStatus fModuleNameStatus;
 
 	public NewModuleInfoWizardPage() {
-		super(PAGE_NAME);
+		super(false, PAGE_NAME);
 		String title= Messages.format(NewWizardMessages.NewModuleInfoWizardPage_title, MODULE_INFO_JAVA_FILENAME);
 		setTitle(title);
 		String description= Messages.format(NewWizardMessages.NewModuleInfoWizardPage_description, MODULE_INFO_JAVA_FILENAME);
@@ -114,6 +115,7 @@ public class NewModuleInfoWizardPage extends NewElementWizardPage {
 		} else {
 			setModuleText("", true); //$NON-NLS-1$
 		}
+		setAddComments(StubUtility.doAddComments(project), true); // from project or workspace
 
 	}
 
@@ -130,6 +132,8 @@ public class NewModuleInfoWizardPage extends NewElementWizardPage {
 		composite.setLayout(layout);
 
 		createModuleInfoControls(composite, nColumns);
+		createCommentWithLinkControls(composite, nColumns, true);
+		enableCommentControl(true);
 
 		setControl(composite);
 		Dialog.applyDialogFont(composite);
@@ -147,7 +151,8 @@ public class NewModuleInfoWizardPage extends NewElementWizardPage {
 	/**
 	 * Sets the focus to the module name field.
 	 */
-	private void setFocus() {
+	@Override
+	protected void setFocus() {
 		fModuleNameDialogField.setFocus();
 	}
 
@@ -177,7 +182,8 @@ public class NewModuleInfoWizardPage extends NewElementWizardPage {
 	 *
 	 * @return the recommended maximum width for text fields.
 	 */
-	private int getMaxFieldWidth() {
+	@Override
+	protected int getMaxFieldWidth() {
 		return convertWidthInCharsToPixels(25);
 	}
 
@@ -240,6 +246,10 @@ public class NewModuleInfoWizardPage extends NewElementWizardPage {
 	private void setModuleText(String moduleName, boolean canBeModified) {
 		fModuleNameDialogField.setText(moduleName);
 		fModuleNameDialogField.setEnabled(canBeModified);
+	}
+	@Override
+	public IJavaProject getJavaProject() {
+	 return fProject;
 	}
 
 }

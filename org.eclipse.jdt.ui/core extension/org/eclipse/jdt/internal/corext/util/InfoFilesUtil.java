@@ -26,8 +26,6 @@ import org.eclipse.jdt.core.manipulation.CodeGeneration;
 
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 
-import org.eclipse.jdt.ui.PreferenceConstants;
-
 import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileManager;
 
 public class InfoFilesUtil {
@@ -40,13 +38,13 @@ public class InfoFilesUtil {
 	 * @param fileName the name of the compilation unit
 	 * @param fileContent the contents of the compilation unit
 	 * @param pack the package fragment to create the compilation unit in
+	 * @param addComments whether to add comments
 	 * @param monitor the progress monitor
 	 * @throws CoreException when there is a problem while creating the compilation unit
 	 */
-	public static void createInfoJavaFile(String fileName, String fileContent, IPackageFragment pack, IProgressMonitor monitor) throws CoreException {
+	public static void createInfoJavaFile(String fileName, String fileContent, IPackageFragment pack, boolean addComments, IProgressMonitor monitor) throws CoreException {
 		String lineDelimiter= StubUtility.getLineDelimiterUsed(pack.getJavaProject());
 		StringBuilder content= new StringBuilder();
-		boolean addComments= Boolean.valueOf(PreferenceConstants.getPreference(PreferenceConstants.CODEGEN_ADD_COMMENTS, pack.getJavaProject())).booleanValue();
 		String fileComment= addComments ? getFileComment(fileName, pack, lineDelimiter) : null;
 		String typeComment= addComments ? getTypeComment(fileName, pack, lineDelimiter) : null;
 		if (fileComment != null) {

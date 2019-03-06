@@ -395,7 +395,10 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	private SelectionButtonDialogFieldGroup fAccMdfButtons;
 	private SelectionButtonDialogFieldGroup fOtherMdfButtons;
 
-	private SelectionButtonDialogField fAddCommentButton;
+	/**
+	 * @since 3.17
+	 */
+	protected SelectionButtonDialogField fAddCommentButton;
 	private boolean fUseAddCommentButtonValue; // used for compatibility: Wizards that don't show the comment button control
 	// will use the preferences settings
 
@@ -1060,6 +1063,29 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
     	link.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, false, false, nColumns, 1));
 		DialogField.createEmptySpace(composite);
 		fAddCommentButton.doFillIntoGrid(composite, nColumns - 1);
+	}
+	/**
+	  * Creates the comment and link in the single line for the preference page links. Expects a 
+	  * <code>GridLayout</code> with at least 2 columns.
+	 *
+	 * @param composite the parent composite
+	 * @param nColumns number of columns to span
+	 * @param isModule if it is module or package
+	 * @return link is returned
+	 * @since 3.17
+	 */
+	protected Link createCommentWithLinkControls(Composite composite, int nColumns, boolean isModule) {
+		if(isModule)
+			DialogField.createEmptySpace(composite);
+		fAddCommentButton.doFillIntoGridWithoutMargin(composite, nColumns, !isModule);
+		Link link= new Link(composite, SWT.NONE);
+		link.setText(NewWizardMessages.NewTypeWizardPage_addcomment_description2);
+		link.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, false, false));
+		if(!isModule) {
+			fAddCommentButton.setEnabled(false);
+		}
+		link.addSelectionListener(new TypeFieldsAdapter());
+		return link;
 	}
 
 
