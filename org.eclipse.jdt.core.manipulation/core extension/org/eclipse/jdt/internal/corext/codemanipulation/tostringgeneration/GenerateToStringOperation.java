@@ -26,6 +26,8 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.text.edits.TextEdit;
+
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -68,12 +70,20 @@ public class GenerateToStringOperation implements IWorkspaceRunnable {
 
 	private CompilationUnit fUnit;
 
-	private GenerateToStringOperation(IJavaElement insert, ToStringGenerationContext context, AbstractToStringGenerator generator, CompilationUnit unit, CompilationUnitRewrite rewrite) {
+	private boolean fApply= false;
+
+	private boolean fSave= false;
+
+	private TextEdit fEdit= null;
+
+	private GenerateToStringOperation(IJavaElement insert, ToStringGenerationContext context, AbstractToStringGenerator generator, CompilationUnit unit, CompilationUnitRewrite rewrite, boolean apply, boolean save) {
 		fInsert= insert;
 		fContext= context;
 		fRewrite= rewrite;
 		fUnit= unit;
 		fGenerator= generator;
+		fApply= apply;
+		fSave= save;
 	}
 
 	@Override
@@ -105,12 +115,24 @@ public class GenerateToStringOperation implements IWorkspaceRunnable {
 					}
 				}
 
-				JavaModelUtil.applyEdit((ICompilationUnit)fUnit.getJavaElement(), fRewrite.createChange(true).getEdit(), false, monitor);
+				fEdit= fRewrite.createChange(true).getEdit();
+				if (fApply) {
+					JavaModelUtil.applyEdit((ICompilationUnit)fUnit.getJavaElement(), fEdit, fSave, monitor);
+				}
 			}
 
 		} finally {
 			monitor.done();
 		}
+	}
+
+	/**
+	 * Returns the resulting text edit.
+	 *
+	 * @return the resulting edit
+	 */
+	public final TextEdit getResultingEdit() {
+		return fEdit;
 	}
 
 	/**
@@ -235,17 +257,19 @@ public class GenerateToStringOperation implements IWorkspaceRunnable {
 	 * @param unit a compilation unit containing the type
 	 * @param elementPosition at this position in the compilation unit created method will be added
 	 * @param settings the settings for toString() generator
+	 * @param apply <code>true</code> if the resulting edit should be applied, <code>false</code> otherwise
+	 * @param save <code>true</code> if the changed compilation unit should be saved, <code>false</code> otherwise
 	 * @return a ready to use <code>GenerateToStringOperation</code> object
 	 */
 	public static GenerateToStringOperation createOperation(ITypeBinding typeBinding, Object[] selectedBindings, CompilationUnit unit, IJavaElement elementPosition,
-			ToStringGenerationSettingsCore settings) {
+			ToStringGenerationSettingsCore settings, boolean apply, boolean save) {
 		AbstractToStringGenerator generator= createToStringGenerator(settings.toStringStyle);
 		ToStringTemplateParser parser= createTemplateParser(settings.toStringStyle);
 		parser.parseTemplate(settings.stringFormatTemplate);
 		CompilationUnitRewrite rewrite= new CompilationUnitRewrite((ICompilationUnit)unit.getTypeRoot(), unit);
 		ToStringGenerationContext context= new ToStringGenerationContext(parser, selectedBindings, settings, typeBinding, rewrite);
 		generator.setContext(context);
-		return new GenerateToStringOperation(elementPosition, context, generator, unit, rewrite);
+		return new GenerateToStringOperation(elementPosition, context, generator, unit, rewrite, apply, save);
 	}
 
 

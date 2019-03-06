@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2016 Mateusz Matela and others.
+ * Copyright (c) 2008, 2019 Mateusz Matela and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -160,7 +160,7 @@ public class GenerateToStringTest extends SourceTestCase {
 
 		AbstractTypeDeclaration decl= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(type, unit);
 		ITypeBinding binding= decl.resolveBinding();
-		GenerateToStringOperation op= GenerateToStringOperation.createOperation(binding, fKeys, unit, insertBefore, fSettings2);
+		GenerateToStringOperation op= GenerateToStringOperation.createOperation(binding, fKeys, unit, insertBefore, fSettings2, true, true);
 		op.run(new NullProgressMonitor());
 		JavaModelUtil.reconcile(type.getCompilationUnit());
 	}
