@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -7,6 +7,10 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -48,6 +52,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
@@ -386,14 +391,28 @@ public class Checks {
 	public static boolean isEnumCase(ASTNode node) {
 		if (node instanceof SwitchCase) {
 			final SwitchCase caze= (SwitchCase) node;
-			final Expression expression= caze.getExpression();
-			if (expression instanceof Name) {
-				final Name name= (Name) expression;
-				final IBinding binding= name.resolveBinding();
-				if (binding instanceof IVariableBinding) {
-					IVariableBinding variableBinding= (IVariableBinding) binding;
-					return variableBinding.isEnumConstant();
+			if (node.getAST().apiLevel() >= AST.JLS12) {
+				List<Expression> expressions= caze.expressions();
+				boolean isEnumConst= true;
+				for (Expression expression : expressions) {
+					isEnumConst= isEnumConst && isEnumConst(expression);
 				}
+				return isEnumConst;
+			} else {
+				Expression expression= caze.getExpression();
+				return isEnumConst(expression);
+			}
+		}
+		return false;
+	}
+
+	private static boolean isEnumConst(final Expression expression) {
+		if (expression instanceof Name) {
+			final Name name= (Name) expression;
+			final IBinding binding= name.resolveBinding();
+			if (binding instanceof IVariableBinding) {
+				IVariableBinding variableBinding= (IVariableBinding) binding;
+				return variableBinding.isEnumConstant();
 			}
 		}
 		return false;

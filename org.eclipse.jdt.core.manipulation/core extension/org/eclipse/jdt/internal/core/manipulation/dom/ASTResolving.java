@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -7,6 +7,10 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
+ * 
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -73,6 +77,7 @@ import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.SwitchCase;
+import org.eclipse.jdt.core.dom.SwitchExpression;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.TryStatement;
@@ -294,8 +299,15 @@ public class ASTResolving {
 			}
 			break;
 		case ASTNode.SWITCH_CASE:
-			if (node.equals(((SwitchCase) parent).getExpression()) && parent.getParent() instanceof SwitchStatement) {
-				return ((SwitchStatement) parent.getParent()).getExpression().resolveTypeBinding();
+			SwitchCase switchCase= (SwitchCase) parent;
+			if (node.equals(switchCase.getExpression()) || (switchCase.getAST().apiLevel() >= AST.JLS12 && switchCase.expressions().contains(node))) {
+				ASTNode caseParent= switchCase.getParent();
+				if (caseParent instanceof SwitchStatement) {
+					return ((SwitchStatement) caseParent).getExpression().resolveTypeBinding();
+				}
+				if (caseParent instanceof SwitchExpression) {
+					return ((SwitchExpression) caseParent).getExpression().resolveTypeBinding();
+				}
 			}
 			break;
 		case ASTNode.ASSERT_STATEMENT:

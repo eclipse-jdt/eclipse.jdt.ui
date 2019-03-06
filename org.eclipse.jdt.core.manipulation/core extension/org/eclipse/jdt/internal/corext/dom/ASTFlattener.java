@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -7,7 +7,11 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- *
+ * 
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -47,6 +51,8 @@ public class ASTFlattener extends GenericVisitor {
 	@Deprecated
 	private static final int JLS9= AST.JLS9;
 	
+	private static final int JLS12= AST.JLS12;
+
 	/**
 	 * The string buffer into which the serialized representation of the AST is
 	 * written.
@@ -373,6 +379,10 @@ public class ASTFlattener extends GenericVisitor {
 		if (node.getLabel() != null) {
 			this.fBuffer.append(" ");//$NON-NLS-1$
 			node.getLabel().accept(this);
+		}
+		if (node.getAST().apiLevel() >= JLS12 && node.getExpression() != null) {
+			this.fBuffer.append(" ");//$NON-NLS-1$
+			node.getExpression().accept(this);
 		}
 		this.fBuffer.append(";");//$NON-NLS-1$
 		return false;
@@ -1528,36 +1538,78 @@ public class ASTFlattener extends GenericVisitor {
 		return false;
 	}
 
-	/*
-	 * @see ASTVisitor#visit(SwitchCase)
-	 */
 	@Override
 	public boolean visit(SwitchCase node) {
-		if (node.isDefault()) {
-			this.fBuffer.append("default :");//$NON-NLS-1$
+		if (node.getAST().apiLevel() >= JLS12) {
+			if (!node.expressions().isEmpty()) {
+				for (Iterator<Expression> it= node.expressions().iterator(); it.hasNext();) {
+					Expression caseExpr= it.next();
+					if (node.isDefault()) {
+						if (node.isSwitchLabeledRule()) {
+							this.fBuffer.append("default ->");//$NON-NLS-1$
+						} else {
+							this.fBuffer.append("default :");//$NON-NLS-1$
+						}
+					} else {
+						this.fBuffer.append("case ");//$NON-NLS-1$
+						caseExpr.accept(this);
+						if (it.hasNext()) {
+							this.fBuffer.append(", ");//$NON-NLS-1$
+						} else {
+							if (node.isSwitchLabeledRule()) {
+								this.fBuffer.append("->");//$NON-NLS-1$
+							} else {
+								this.fBuffer.append(":");//$NON-NLS-1$
+							}
+						}
+					}
+				}
+			}
 		} else {
-			this.fBuffer.append("case ");//$NON-NLS-1$
-			node.getExpression().accept(this);
-			this.fBuffer.append(":");//$NON-NLS-1$
+			if (node.isDefault()) {
+				this.fBuffer.append("default :");//$NON-NLS-1$
+			} else {
+				this.fBuffer.append("case ");//$NON-NLS-1$
+				node.getExpression().accept(this);
+				this.fBuffer.append(":");//$NON-NLS-1$
+			}
 		}
 		return false;
 	}
 
-	/*
-	 * @see ASTVisitor#visit(SwitchStatement)
-	 */
 	@Override
 	public boolean visit(SwitchStatement node) {
+		visitSwitch(node);
+		return false;
+	}
+	
+	@Override
+	public boolean visit(SwitchExpression node) {
+		visitSwitch(node);
+		return false;
+	}
+
+	private void visitSwitch(ASTNode node) {
 		this.fBuffer.append("switch (");//$NON-NLS-1$
-		node.getExpression().accept(this);
+		if (node instanceof SwitchExpression) {
+			((SwitchExpression) node).getExpression().accept(this);
+		} else if (node instanceof SwitchStatement) {
+			((SwitchStatement) node).getExpression().accept(this);
+		}
 		this.fBuffer.append(") ");//$NON-NLS-1$
 		this.fBuffer.append("{");//$NON-NLS-1$
-		for (Iterator<Statement> it= node.statements().iterator(); it.hasNext();) {
-			Statement s= it.next();
-			s.accept(this);
+		if (node instanceof SwitchExpression) {
+			for (Iterator<Statement> it= ((SwitchExpression) node).statements().iterator(); it.hasNext();) {
+				Statement s= it.next();
+				s.accept(this);
+			}
+		} else if (node instanceof SwitchStatement) {
+			for (Iterator<Statement> it= ((SwitchStatement) node).statements().iterator(); it.hasNext();) {
+				Statement s= it.next();
+				s.accept(this);
+			}
 		}
-		this.fBuffer.append("}");//$NON-NLS-1$
-		return false;
+		this.fBuffer.append("}\n");//$NON-NLS-1$
 	}
 
 	/*

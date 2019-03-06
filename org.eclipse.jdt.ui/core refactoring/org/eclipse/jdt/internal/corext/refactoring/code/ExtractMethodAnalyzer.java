@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -7,6 +7,10 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -265,7 +269,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 			ASTNode node= nodes[0];
 			if (node instanceof Type) {
 				status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_type_reference, JavaStatusContext.create(fCUnit, node));
-			} else if (node.getLocationInParent() == SwitchCase.EXPRESSION_PROPERTY) {
+			} else if (node.getLocationInParent() == SwitchCase.EXPRESSION_PROPERTY || node.getLocationInParent() == SwitchCase.EXPRESSIONS2_PROPERTY) {
 				status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_switch_case, JavaStatusContext.create(fCUnit, node));
 			} else if (node instanceof Annotation || ASTNodes.getParent(node, Annotation.class) != null) {
 				status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_from_annotation, JavaStatusContext.create(fCUnit, node));
