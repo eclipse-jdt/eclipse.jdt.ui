@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -71,6 +71,9 @@ import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.manipulation.CodeGeneration;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
@@ -78,6 +81,7 @@ import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.ConvertLocalVariableDescriptor;
 
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.DimensionRewrite;
@@ -851,7 +855,16 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 		FieldDeclaration fieldDeclaration= ast.newFieldDeclaration(fragment);
 
 		VariableDeclarationStatement vds= getTempDeclarationStatement();
-		Type type= (Type)rewrite.createCopyTarget(vds.getType());
+		ITypeBinding binding= vds.getType().resolveBinding();
+		Type type;
+		// "var" type cannot be initialized separately, so change to inferred type
+		if (ASTNodes.isVarType(vds, fCompilationUnitNode) && binding != null) {
+			ImportRewrite importRewrite= StubUtility.createImportRewrite(fCompilationUnitNode, true);
+			ImportRewriteContext context= new ContextSensitiveImportRewriteContext(fCompilationUnitNode, importRewrite);
+			type= importRewrite.addImport(binding, getAST(), context, TypeLocation.FIELD);
+		} else {
+			type= (Type)rewrite.createCopyTarget(vds.getType());
+		}
 		fieldDeclaration.setType(type);
 		fieldDeclaration.modifiers().addAll(ASTNodeFactory.newModifiers(ast, getModifiers()));
 		return fieldDeclaration;
