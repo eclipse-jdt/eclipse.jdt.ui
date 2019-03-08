@@ -1848,11 +1848,10 @@ public class LocalCorrectionsSubProcessor {
 		ListRewrite listRewrite= astRewrite.getListRewrite(switchStatement, SwitchStatement.STATEMENTS_PROPERTY);
 		boolean isGreaterOrEqualTo12= ast.apiLevel() >= AST.JLS12;
 
-		if (isGreaterOrEqualTo12) {
-			return;
-		}
 		SwitchCase newSwitchCase= ast.newSwitchCase();
-		newSwitchCase.setExpression(null);
+		if (!isGreaterOrEqualTo12) {
+			newSwitchCase.setExpression(null);
+		}
 		listRewrite.insertLast(newSwitchCase, null);
 		listRewrite.insertLast(ast.newBreakStatement(), null);
 
