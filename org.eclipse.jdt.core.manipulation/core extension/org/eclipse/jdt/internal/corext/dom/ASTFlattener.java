@@ -1541,37 +1541,25 @@ public class ASTFlattener extends GenericVisitor {
 	@Override
 	public boolean visit(SwitchCase node) {
 		if (node.getAST().apiLevel() >= JLS12) {
-			if (!node.expressions().isEmpty()) {
+			if (node.isDefault()) {
+				this.fBuffer.append("default");//$NON-NLS-1$
+				this.fBuffer.append(node.isSwitchLabeledRule() ? "->" : ":");//$NON-NLS-1$ //$NON-NLS-2$
+			} else {
+				this.fBuffer.append("case ");//$NON-NLS-1$
 				for (Iterator<Expression> it= node.expressions().iterator(); it.hasNext();) {
-					Expression caseExpr= it.next();
-					if (node.isDefault()) {
-						if (node.isSwitchLabeledRule()) {
-							this.fBuffer.append("default ->");//$NON-NLS-1$
-						} else {
-							this.fBuffer.append("default :");//$NON-NLS-1$
-						}
-					} else {
-						this.fBuffer.append("case ");//$NON-NLS-1$
-						caseExpr.accept(this);
-						if (it.hasNext()) {
-							this.fBuffer.append(", ");//$NON-NLS-1$
-						} else {
-							if (node.isSwitchLabeledRule()) {
-								this.fBuffer.append("->");//$NON-NLS-1$
-							} else {
-								this.fBuffer.append(":");//$NON-NLS-1$
-							}
-						}
-					}
+					Expression t= it.next();
+					t.accept(this);
+					this.fBuffer.append(it.hasNext() ? ", " : //$NON-NLS-1$
+							node.isSwitchLabeledRule() ? "->" : ":");//$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}
 		} else {
 			if (node.isDefault()) {
-				this.fBuffer.append("default :");//$NON-NLS-1$
+				this.fBuffer.append("default :\n");//$NON-NLS-1$
 			} else {
 				this.fBuffer.append("case ");//$NON-NLS-1$
 				node.getExpression().accept(this);
-				this.fBuffer.append(":");//$NON-NLS-1$
+				this.fBuffer.append(":\n");//$NON-NLS-1$
 			}
 		}
 		return false;
@@ -1579,17 +1567,17 @@ public class ASTFlattener extends GenericVisitor {
 
 	@Override
 	public boolean visit(SwitchStatement node) {
-		visitSwitch(node);
+		visitSwitchNode(node);
 		return false;
 	}
 	
 	@Override
 	public boolean visit(SwitchExpression node) {
-		visitSwitch(node);
+		visitSwitchNode(node);
 		return false;
 	}
 
-	private void visitSwitch(ASTNode node) {
+	private void visitSwitchNode(ASTNode node) {
 		this.fBuffer.append("switch (");//$NON-NLS-1$
 		if (node instanceof SwitchExpression) {
 			((SwitchExpression) node).getExpression().accept(this);
@@ -1597,7 +1585,7 @@ public class ASTFlattener extends GenericVisitor {
 			((SwitchStatement) node).getExpression().accept(this);
 		}
 		this.fBuffer.append(") ");//$NON-NLS-1$
-		this.fBuffer.append("{");//$NON-NLS-1$
+		this.fBuffer.append("{\n");//$NON-NLS-1$
 		if (node instanceof SwitchExpression) {
 			for (Iterator<Statement> it= ((SwitchExpression) node).statements().iterator(); it.hasNext();) {
 				Statement s= it.next();
