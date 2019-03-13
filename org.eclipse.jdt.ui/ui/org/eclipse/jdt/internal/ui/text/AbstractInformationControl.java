@@ -43,12 +43,15 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 
+import org.eclipse.core.expressions.Expression;
+
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.bindings.TriggerSequence;
+import org.eclipse.jface.commands.ActionHandler;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.PopupDialog;
@@ -69,12 +72,12 @@ import org.eclipse.jface.text.IInformationControlExtension2;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchCommandConstants;
+import org.eclipse.ui.LegacyHandlerSubmissionExpression;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.commands.ActionHandler;
-import org.eclipse.ui.commands.HandlerSubmission;
 import org.eclipse.ui.commands.ICommand;
 import org.eclipse.ui.commands.ICommandManager;
-import org.eclipse.ui.commands.Priority;
+import org.eclipse.ui.handlers.IHandlerActivation;
+import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.keys.IBindingService;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -178,7 +181,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	private CustomFiltersActionGroup fCustomFiltersActionGroup;
 
 	private IAction fShowViewMenuAction;
-	private HandlerSubmission fShowViewMenuHandlerSubmission;
+	private IHandlerActivation fShowViewMenuHandlerActivation;
 
 	/**
 	 * Field for tree style since it must be remembered by the instance.
@@ -669,10 +672,10 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	 * @since 3.2
 	 */
 	protected void addHandlerAndKeyBindingSupport() {
-		// Register action with command support
-		if (fShowViewMenuHandlerSubmission == null) {
-			fShowViewMenuHandlerSubmission= new HandlerSubmission(null, getShell(), null, fShowViewMenuAction.getActionDefinitionId(), new ActionHandler(fShowViewMenuAction), Priority.MEDIUM);
-			PlatformUI.getWorkbench().getCommandSupport().addHandlerSubmission(fShowViewMenuHandlerSubmission);
+		if (fShowViewMenuHandlerActivation == null) {
+			IHandlerService handlerService= PlatformUI.getWorkbench().getService(IHandlerService.class);
+			Expression expression= new LegacyHandlerSubmissionExpression(null, getShell(), null);
+			fShowViewMenuHandlerActivation= handlerService.activateHandler(fShowViewMenuAction.getActionDefinitionId(), new ActionHandler(fShowViewMenuAction), expression);
 		}
 	}
 
@@ -682,9 +685,11 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	 * @since 3.2
 	 */
 	protected void removeHandlerAndKeyBindingSupport() {
-		// Remove handler submission
-		if (fShowViewMenuHandlerSubmission != null)
-			PlatformUI.getWorkbench().getCommandSupport().removeHandlerSubmission(fShowViewMenuHandlerSubmission);
+		if (fShowViewMenuHandlerActivation != null) {
+			IHandlerService handlerService= PlatformUI.getWorkbench().getService(IHandlerService.class);
+			handlerService.deactivateHandler(fShowViewMenuHandlerActivation);
+			fShowViewMenuHandlerActivation= null;
+		}
 
 	}
 
