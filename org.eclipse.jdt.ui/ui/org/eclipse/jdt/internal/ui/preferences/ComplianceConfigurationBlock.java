@@ -811,7 +811,8 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				boolean isJREUnsupportedAndGreater= isJREVersionUnsupportedAndGreater(version, compilerCompliance);
 				if (!compilerCompliance.equals(compliance)) { // Discourage using compiler with version other than compliance
 					if (JavaModelUtil.is9OrHigher(compilerCompliance)) {
-						if (!JavaModelUtil.is16OrHigher(compliance)) {
+						if (!JavaModelUtil.is16OrHigher(compliance) 
+								|| ( JavaModelUtil.is12OrHigher(compilerCompliance)) && !JavaModelUtil.is17OrHigher(compliance)) {
 							fComplierReleaseCheck.setEnabled(false);
 							fComplierReleaseCheck.setSelection(false);
 							setValue(PREF_RELEASE, DISABLED);
