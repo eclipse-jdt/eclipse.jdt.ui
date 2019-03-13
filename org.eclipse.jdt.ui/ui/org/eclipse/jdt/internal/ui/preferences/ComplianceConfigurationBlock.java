@@ -749,8 +749,12 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 								fJRE50InfoText.setText(Messages.format(PreferencesMessages.ComplianceConfigurationBlock_jrecompliance_info_project, args));
 							}
 						} else {
-							fJRE50InfoText.setText(Messages.format(PreferencesMessages.ComplianceConfigurationBlock_jrecompliance_backwardcompatibility_info, args));
-							image= JFaceResources.getImage(Dialog.DLG_IMG_MESSAGE_INFO);
+							if (JavaModelUtil.is10OrHigher(compilerCompliance) && !JavaModelUtil.is12OrHigher(compilerCompliance)) {
+								fJRE50InfoText.setText(Messages.format(PreferencesMessages.ComplianceConfigurationBlock_jrecompliance_backwardcompatibility_warning, args));
+							}
+							else {
+								fJRE50InfoText.setText(Messages.format(PreferencesMessages.ComplianceConfigurationBlock_jrecompliance_backwardcompatibility_info, args));
+								image= JFaceResources.getImage(Dialog.DLG_IMG_MESSAGE_INFO);							}
 						}
 					} else {
 						if (fProject == null) {

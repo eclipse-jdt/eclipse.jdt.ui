@@ -818,6 +818,7 @@ public final class PreferencesMessages extends NLS {
 	public static String ComplianceConfigurationBlock_jrecompliance_info;
 	public static String ComplianceConfigurationBlock_jrecompliance_info_project;
 	public static String ComplianceConfigurationBlock_jrecompliance_backwardcompatibility_info;
+	public static String ComplianceConfigurationBlock_jrecompliance_backwardcompatibility_warning;
 	public static String ComplianceConfigurationBlock_jrecompliance_backwardcompatibility_label;
 	public static String ProblemSeveritiesConfigurationBlock_section_generics;
 	public static String JavaBasePreferencePage_dialogs;
