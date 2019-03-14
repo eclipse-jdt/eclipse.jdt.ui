@@ -416,10 +416,15 @@ for (String s : names) {}
 //--PREVIEW--END--section-whitespace-statements-for
 
 //--PREVIEW--START--section-whitespace-statements-switch
-switch (number) { 
+Color newColor = switch(color) {
+case RED -> GREEN;
+case GREEN,BLUD->RED;
+default->BLACK;
+};
+
+switch (color) { 
 case RED:return GREEN;
-case GREEN:return BLUE;
-case BLUE:return RED;
+case GREEN,BLUE:return RED;
 default:return BLACK;
 }
 //--PREVIEW--END--section-whitespace-statements-switch

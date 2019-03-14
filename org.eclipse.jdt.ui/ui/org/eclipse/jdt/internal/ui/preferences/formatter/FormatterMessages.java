@@ -261,6 +261,8 @@ final class FormatterMessages extends NLS {
 	public static String FormatterModifyDialog_preview_show_whitespace_toggle;
 	public static String FormatterModifyDialog_preview_show_raw_source_toggle;
 	public static String FormatterModifyDialog_whiteSpace_pref_after_and_list;
+	public static String FormatterModifyDialog_whiteSpace_pref_after_arrow_in_case;
+	public static String FormatterModifyDialog_whiteSpace_pref_after_arrow_in_default;
 	public static String FormatterModifyDialog_whiteSpace_pref_after_arrow_operator;
 	public static String FormatterModifyDialog_whiteSpace_pref_after_assignment_operator;
 	public static String FormatterModifyDialog_whiteSpace_pref_after_at;
@@ -281,6 +283,7 @@ final class FormatterMessages extends NLS {
 	public static String FormatterModifyDialog_whiteSpace_pref_after_comma_fields;
 	public static String FormatterModifyDialog_whiteSpace_pref_after_comma_implements;
 	public static String FormatterModifyDialog_whiteSpace_pref_after_comma_in_alloc;
+	public static String FormatterModifyDialog_whiteSpace_pref_after_comma_in_case_expressions;
 	public static String FormatterModifyDialog_whiteSpace_pref_after_comma_in_method_args;
 	public static String FormatterModifyDialog_whiteSpace_pref_after_comma_in_params;
 	public static String FormatterModifyDialog_whiteSpace_pref_after_comma_in_qalloc;
@@ -300,6 +303,8 @@ final class FormatterMessages extends NLS {
 	public static String FormatterModifyDialog_whiteSpace_pref_after_semicolon;
 	public static String FormatterModifyDialog_whiteSpace_pref_after_unary_operators;
 	public static String FormatterModifyDialog_whiteSpace_pref_before_and_list;
+	public static String FormatterModifyDialog_whiteSpace_pref_before_arrow_in_case;
+	public static String FormatterModifyDialog_whiteSpace_pref_before_arrow_in_default;
 	public static String FormatterModifyDialog_whiteSpace_pref_before_arrow_operator;
 	public static String FormatterModifyDialog_whiteSpace_pref_before_assignment_operator;
 	public static String FormatterModifyDialog_whiteSpace_pref_before_at;
@@ -324,6 +329,7 @@ final class FormatterMessages extends NLS {
 	public static String FormatterModifyDialog_whiteSpace_pref_before_comma_fields;
 	public static String FormatterModifyDialog_whiteSpace_pref_before_comma_implements;
 	public static String FormatterModifyDialog_whiteSpace_pref_before_comma_in_alloc;
+	public static String FormatterModifyDialog_whiteSpace_pref_before_comma_in_case_expressions;
 	public static String FormatterModifyDialog_whiteSpace_pref_before_comma_in_method_args;
 	public static String FormatterModifyDialog_whiteSpace_pref_before_comma_in_params;
 	public static String FormatterModifyDialog_whiteSpace_pref_before_comma_in_qalloc;

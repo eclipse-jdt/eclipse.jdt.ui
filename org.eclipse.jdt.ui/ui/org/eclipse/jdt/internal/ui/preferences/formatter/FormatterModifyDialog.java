@@ -966,10 +966,16 @@ public class FormatterModifyDialog extends ModifyDialog {
 						.node(fTree.builder(FormatterMessages.FormatterModifyDialog_whiteSpace_tree_switch, "-switch", modAll) //$NON-NLS-1$
 								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_colon_case, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_CASE)
 								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_colon_default, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_DEFAULT)
-								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_opening_brace, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_SWITCH)
+								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_arrow_in_case, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ARROW_IN_SWITCH_CASE)
+								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_after_arrow_in_case, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_ARROW_IN_SWITCH_CASE)
+								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_arrow_in_default, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ARROW_IN_SWITCH_DEFAULT)
+								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_after_arrow_in_default, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_ARROW_IN_SWITCH_DEFAULT)
+								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_comma_in_case_expressions, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_SWITCH_CASE_EXPRESSIONS)
+								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_after_comma_in_case_expressions, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_SWITCH_CASE_EXPRESSIONS)
 								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_opening_paren, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_SWITCH)
 								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_after_opening_paren, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_SWITCH)
-								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_closing_paren, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_SWITCH))
+								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_closing_paren, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_SWITCH)
+								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_opening_brace, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACE_IN_SWITCH))
 						.node(fTree.builder(FormatterMessages.FormatterModifyDialog_whiteSpace_tree_do, "-while", modAll) //$NON-NLS-1$
 								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_opening_paren, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_WHILE)
 								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_after_opening_paren, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_WHILE)
