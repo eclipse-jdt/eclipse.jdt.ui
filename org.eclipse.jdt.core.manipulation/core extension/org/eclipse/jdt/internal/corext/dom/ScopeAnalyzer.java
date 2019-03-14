@@ -594,6 +594,13 @@ public class ScopeAnalyzer {
 		declaring= declaring.getTypeDeclaration();
 
 		int modifiers= binding.getModifiers();
+		int contextModifiers= context.getModifiers();
+		if (context.isClass() && Modifier.isStatic(contextModifiers)) {
+			if (binding.getKind() == IBinding.VARIABLE && !Modifier.isStatic(modifiers)) {
+				return context == declaring;
+			}
+		}
+
 		if (Modifier.isPublic(modifiers) || declaring.isInterface()) {
 			return true;
 		} else if (Modifier.isProtected(modifiers) || !Modifier.isPrivate(modifiers)) {
@@ -906,11 +913,11 @@ public class ScopeAnalyzer {
 
 	public Collection<String> getUsedVariableNames(int offset, int length) {
 		HashSet<String> result= new HashSet<>();
-		IBinding[] bindingsBefore= getDeclarationsInScope(offset, VARIABLES);
+		IBinding[] bindingsBefore= getDeclarationsInScope(offset, VARIABLES | CHECK_VISIBILITY);
 		for (int i= 0; i < bindingsBefore.length; i++) {
 			result.add(bindingsBefore[i].getName());
 		}
-		IBinding[] bindingsAfter= getDeclarationsAfter(offset + length, VARIABLES);
+		IBinding[] bindingsAfter= getDeclarationsAfter(offset + length, VARIABLES | CHECK_VISIBILITY);
 		for (int i= 0; i < bindingsAfter.length; i++) {
 			result.add(bindingsAfter[i].getName());
 		}
