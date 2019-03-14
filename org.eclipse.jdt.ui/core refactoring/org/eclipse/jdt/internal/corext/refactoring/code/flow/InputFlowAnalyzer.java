@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -17,6 +17,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code.flow;
 
+import java.util.List;
+
 import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.text.IRegion;
@@ -32,6 +34,7 @@ import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.SwitchExpression;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
@@ -245,20 +248,39 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 	public void endVisit(SwitchStatement node) {
 		if (skipNode(node))
 			return;
-		SwitchData data= createSwitchData(node);
+		SwitchData data= preEndVisit(node, node.statements(), node.getExpression());
+		if (data == null) {
+			return;
+		}
+		super.endVisit(node, data);
+	}
+
+	@Override
+	public void endVisit(SwitchExpression node) {
+		if (skipNode(node))
+			return;
+		SwitchData data= preEndVisit(node, node.statements(), node.getExpression());
+		if (data == null) {
+			return;
+		}
+		super.endVisit(node, data);
+	}
+
+	public SwitchData preEndVisit(ASTNode node, List<Statement> statements, Expression expression) {
+		SwitchData data= createSwitchData(statements);
 		IRegion[] ranges= data.getRanges();
 		for (int i= 0; i < ranges.length; i++) {
 			IRegion range= ranges[i];
 			if (fSelection.coveredBy(range)) {
 				GenericSequentialFlowInfo info= createSequential();
 				setFlowInfo(node, info);
-				info.merge(getFlowInfo(node.getExpression()), fFlowContext);
+				info.merge(getFlowInfo(expression), fFlowContext);
 				info.merge(data.getInfo(i), fFlowContext);
 				info.removeLabel(null);
-				return;
+				return null;
 			}
 		}
-		super.endVisit(node, data);
+		return data;
 	}
 
 	@Override

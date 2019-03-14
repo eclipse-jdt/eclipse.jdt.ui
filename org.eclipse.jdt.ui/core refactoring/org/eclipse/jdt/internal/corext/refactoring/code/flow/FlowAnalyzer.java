@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -92,6 +92,7 @@ import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.SwitchCase;
+import org.eclipse.jdt.core.dom.SwitchExpression;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.SynchronizedStatement;
 import org.eclipse.jdt.core.dom.ThisExpression;
@@ -337,18 +338,25 @@ abstract class FlowAnalyzer extends GenericVisitor {
 	//---- Helper to process switch statement ----------------------------------------
 
 	protected SwitchData createSwitchData(SwitchStatement node) {
+		return createSwitchData(node.statements());
+	}
+
+	protected SwitchData createSwitchData(SwitchExpression node) {
+		return createSwitchData(node.statements());
+	}
+
+	protected SwitchData createSwitchData(List<Statement> statements) {
 		SwitchData result= new SwitchData();
-		List<Statement> statements= node.statements();
-		if (statements.isEmpty())
+		if (statements == null || statements.isEmpty())
 			return result;
 
 		int start= -1, end= -1;
 		GenericSequentialFlowInfo info= null;
 
-		for (Iterator<Statement> iter= statements.iterator(); iter.hasNext(); ) {
+		for (Iterator<Statement> iter= statements.iterator(); iter.hasNext();) {
 			Statement statement= iter.next();
 			if (statement instanceof SwitchCase) {
-				SwitchCase switchCase= (SwitchCase)statement;
+				SwitchCase switchCase= (SwitchCase) statement;
 				if (switchCase.isDefault()) {
 					result.setHasDefaultCase();
 				}
@@ -372,9 +380,17 @@ abstract class FlowAnalyzer extends GenericVisitor {
 	}
 
 	protected void endVisit(SwitchStatement node, SwitchData data) {
+		preEndVisit(node, node.getExpression(), data);
+	}
+
+	protected void endVisit(SwitchExpression node, SwitchData data) {
+		preEndVisit(node, node.getExpression(), data);
+	}
+	
+	private void preEndVisit(ASTNode node, Expression expression, SwitchData data) {
 		SwitchFlowInfo switchFlowInfo= createSwitch();
 		setFlowInfo(node, switchFlowInfo);
-		switchFlowInfo.mergeTest(getFlowInfo(node.getExpression()), fFlowContext);
+		switchFlowInfo.mergeTest(getFlowInfo(expression), fFlowContext);
 		FlowInfo[] cases= data.getInfos();
 		for (int i= 0; i < cases.length; i++)
 			switchFlowInfo.mergeCase(cases[i], fFlowContext);
@@ -912,6 +928,13 @@ abstract class FlowAnalyzer extends GenericVisitor {
 
 	@Override
 	public void endVisit(SwitchStatement node) {
+		if (skipNode(node))
+			return;
+		endVisit(node, createSwitchData(node));
+	}
+
+	@Override
+	public void endVisit(SwitchExpression node) {
 		if (skipNode(node))
 			return;
 		endVisit(node, createSwitchData(node));
