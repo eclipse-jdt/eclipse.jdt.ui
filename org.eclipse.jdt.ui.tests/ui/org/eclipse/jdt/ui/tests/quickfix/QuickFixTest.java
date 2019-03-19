@@ -106,6 +106,7 @@ public class QuickFixTest extends TestCase {
 		suite.addTest(AssistQuickFixTest.suite());
 		suite.addTest(AssistQuickFixTest17.suite());
 		suite.addTest(AssistQuickFixTest18.suite());
+		suite.addTest(AssistQuickFixTest12.suite());
 		suite.addTest(ChangeNonStaticToStaticTest.suite());
 		suite.addTest(MarkerResolutionTest.suite());
 		suite.addTest(JavadocQuickFixTest.suite());

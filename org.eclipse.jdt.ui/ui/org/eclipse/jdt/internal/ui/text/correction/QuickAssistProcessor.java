@@ -117,6 +117,7 @@ import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodReference;
 import org.eclipse.jdt.core.dom.SwitchCase;
+import org.eclipse.jdt.core.dom.SwitchExpression;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.SynchronizedStatement;
 import org.eclipse.jdt.core.dom.ThisExpression;
@@ -275,7 +276,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				|| getConvertStringConcatenationProposals(context, null)
 				|| getInferDiamondArgumentsProposal(context, coveringNode, null, null)
 				|| getJUnitTestCaseProposal(context, coveringNode, null)
-				|| getAddStaticImportProposals(context, coveringNode, null);
+				|| getAddStaticImportProposals(context, coveringNode, null)
+				|| getSplitSwitchLabelProposal(context, coveringNode, null);
 		}
 		return false;
 	}
@@ -297,6 +299,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			getInferDiamondArgumentsProposal(context, coveringNode, locations, resultingCollections);
 			getGenerateForLoopProposals(context, coveringNode, locations, resultingCollections);
 			getJUnitTestCaseProposal(context, coveringNode, resultingCollections);
+			getSplitSwitchLabelProposal(context, coveringNode, resultingCollections);
 
 			if (noErrorsAtLocation) {
 				boolean problemsAtLocation= locations.length != 0;
@@ -4256,5 +4259,87 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			}
 		}
 		return false;
+	}
+
+	private boolean getSplitSwitchLabelProposal(IInvocationContext context, ASTNode coveringNode, Collection<ICommandAccess> proposals) {
+		AST ast= coveringNode.getAST();
+		// Only continue if >= JLS12 and selected node, or its parent is a SwitchCase
+		if (ast.apiLevel() < AST.JLS12 ||
+				!(coveringNode instanceof SwitchCase || coveringNode.getParent() instanceof SwitchCase)) {
+			return false;
+		}
+
+		SwitchCase scase= null;
+		ASTNode parent= null;
+
+		// If selected node not a SwitchCase, its parent must be a SwitchCase
+		if (coveringNode instanceof SwitchCase) {
+			scase= (SwitchCase) coveringNode;
+			parent= coveringNode.getParent();
+		} else {
+			scase= (SwitchCase) coveringNode.getParent();
+			parent= coveringNode.getParent().getParent();
+		}
+
+		if (proposals != null && scase.expressions().size() > 1) {
+			ASTRewrite astRewrite= ASTRewrite.create(ast);
+			ChildListPropertyDescriptor descriptor;
+			List<Statement> statements;
+			if (parent instanceof SwitchStatement) {
+				descriptor= SwitchStatement.STATEMENTS_PROPERTY;
+				statements= ((SwitchStatement) parent).statements();
+			} else {
+				descriptor= SwitchExpression.STATEMENTS_PROPERTY;
+				statements= ((SwitchExpression) parent).statements();
+			}
+			ListRewrite listRewrite= astRewrite.getListRewrite(parent, descriptor);
+
+			// Figure out the list index of the switch case in the statement list
+			// We care about duplicating the statement(s) occuring immediately after it
+			int statementIndex= 0;
+			for (Statement s : statements) {
+				if (scase.equals(s)) {
+					break;
+				}
+				statementIndex++;
+			}
+			statementIndex++;
+
+			// Switch Case Statement(s)
+			List<Statement> caseStatements= new ArrayList<>();
+			for (int i= statementIndex; i < statements.size(); i++) {
+				Statement curr= statements.get(i);
+				if (curr instanceof SwitchCase) {
+					break;
+				}
+				caseStatements.add(curr);
+			}
+
+			for (int i= 0; i < scase.expressions().size(); i++) {
+				Expression elem= (Expression) scase.expressions().get(i);
+				// SwitchCase
+				SwitchCase newSwitchCase= ast.newSwitchCase();
+				Expression newExpr= (Expression) astRewrite.createCopyTarget(elem);
+				newSwitchCase.setSwitchLabeledRule(scase.isSwitchLabeledRule());
+				newSwitchCase.expressions().add(newExpr);
+
+				// Preserve order from left -> right, top -> bottom
+				listRewrite.insertBefore(newSwitchCase, scase, null);
+				for (Statement statement : caseStatements) {
+					listRewrite.insertBefore(astRewrite.createCopyTarget(statement), scase, null);
+				}
+			}
+
+			listRewrite.remove(scase, null);
+			for (Statement statement : caseStatements) {
+				listRewrite.remove(statement, null);
+			}
+
+			String label= CorrectionMessages.QuickAssistProcessor_split_case_labels;
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			proposals.add(new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), astRewrite, IProposalRelevance.ADD_MISSING_CASE_STATEMENTS, image));
+		}
+
+		return true;
 	}
 }
