@@ -371,12 +371,18 @@ public class ASTFlattener extends GenericVisitor {
 	 */
 	@Override
 	public boolean visit(BreakStatement node) {
-		this.fBuffer.append("break");//$NON-NLS-1$
+		int apiLevel= node.getAST().apiLevel();
+		if (apiLevel >= JLS12 && node.isImplicit() && node.getExpression() == null) {
+			return false;
+		}
+		if (apiLevel < JLS12 || (apiLevel >= JLS12 && !node.isImplicit())) {
+			this.fBuffer.append("break");//$NON-NLS-1$
+		}
 		if (node.getLabel() != null) {
 			this.fBuffer.append(" ");//$NON-NLS-1$
 			node.getLabel().accept(this);
 		}
-		if (node.getAST().apiLevel() >= JLS12 && node.getExpression() != null) {
+		if (apiLevel >= JLS12 && node.getExpression() != null) {
 			this.fBuffer.append(" ");//$NON-NLS-1$
 			node.getExpression().accept(this);
 		}
