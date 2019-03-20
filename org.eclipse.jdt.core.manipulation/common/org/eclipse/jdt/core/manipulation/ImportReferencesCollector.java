@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -305,6 +305,10 @@ public class ImportReferencesCollector extends GenericVisitor {
 	
 	@Override
 	public boolean visit(BreakStatement node) {
+		int apiLevel= node.getAST().apiLevel();
+		if (apiLevel >= AST.JLS12) {
+			evalQualifyingExpression(node.getExpression(), null);			
+		}
 		return false;
 	}
 	

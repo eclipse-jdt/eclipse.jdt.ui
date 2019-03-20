@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- *
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Benjamin Muskalla <b.muskalla@gmx.net> - [quick fix] Quick fix for missing synchronized modifier - https://bugs.eclipse.org/bugs/show_bug.cgi?id=245250
@@ -271,6 +271,7 @@ public final class CorrectionMessages extends NLS {
 	public static String NewCUCompletionUsingWizardProposal_createnewinterface_inpackage_description;
 	public static String NewCUCompletionUsingWizardProposal_createnewannotation_inpackage_description;
 	public static String NewCUCompletionUsingWizardProposal_createnewenum_inpackage_description;
+	public static String ConfigureProblemSeveritySubProcessor_compiler_info;
 	public static String ConfigureProblemSeveritySubProcessor_info;
 	public static String ConfigureProblemSeveritySubProcessor_name;
 	public static String ConstructorFromSuperclassProposal_description;
@@ -438,4 +439,12 @@ public final class CorrectionMessages extends NLS {
 	public static String VarargsWarningsSubProcessor_remove_safevarargs_label;
 	public static String NullAnnotationsCorrectionProcessor_change_local_variable_to_nonNull;
 	public static String NullAnnotationsCorrectionProcessor_create_packageInfo_with_defaultnullness;
+	public static String PreviewFeaturesSubProcessor_enable_preview_features;
+	public static String PreviewFeaturesSubProcessor_enable_preview_features_workspace;
+	public static String PreviewFeaturesSubProcessor_enable_preview_features_info;
+	public static String PreviewFeaturesSubProcessor_enable_preview_features_workspace_info;
+	public static String PreviewFeaturesSubProcessor_open_compliance_page_enable_preview_features;
+	public static String PreviewFeaturesSubProcessor_open_compliance_page_enable_preview_features_info;
+	public static String PreviewFeaturesSubProcessor_open_compliance_properties_page_enable_preview_features;
+	public static String PreviewFeaturesSubProcessor_open_compliance_properties_page_enable_preview_features_info;
 }

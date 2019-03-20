@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -58,6 +58,7 @@ import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CharacterLiteral;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
@@ -399,7 +400,8 @@ public class ASTNodes {
 	public static boolean isLabel(SimpleName name) {
 		int parentType= name.getParent().getNodeType();
 		return parentType == ASTNode.LABELED_STATEMENT ||
-			parentType == ASTNode.BREAK_STATEMENT || parentType != ASTNode.CONTINUE_STATEMENT;
+				(parentType == ASTNode.BREAK_STATEMENT && name.getLocationInParent() == BreakStatement.LABEL_PROPERTY) ||
+				parentType != ASTNode.CONTINUE_STATEMENT;
 	}
 
 	public static boolean isStatic(BodyDeclaration declaration) {

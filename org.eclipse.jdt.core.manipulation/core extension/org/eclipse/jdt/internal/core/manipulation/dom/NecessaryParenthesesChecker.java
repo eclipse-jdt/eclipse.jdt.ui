@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 IBM Corporation and others.
+ * Copyright (c) 2011, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -92,6 +92,7 @@ public class NecessaryParenthesesChecker {
 				|| locationInParent == IfStatement.EXPRESSION_PROPERTY
 				|| locationInParent == SwitchStatement.EXPRESSION_PROPERTY
 				|| locationInParent == SwitchCase.EXPRESSION_PROPERTY
+				|| locationInParent == SwitchCase.EXPRESSIONS2_PROPERTY
 				|| locationInParent == ArrayAccess.INDEX_PROPERTY
 				|| locationInParent == ThrowStatement.EXPRESSION_PROPERTY
 				|| locationInParent == SynchronizedStatement.EXPRESSION_PROPERTY

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -18,6 +18,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
@@ -42,9 +43,11 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.SwitchCase;
+import org.eclipse.jdt.core.dom.SwitchExpression;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
@@ -375,8 +378,15 @@ public class ScopeAnalyzer {
 	public IBinding[] getDeclarationsInScope(SimpleName selector, int flags) {
 		try {
 			// special case for switch on enum
-			if (selector.getLocationInParent() == SwitchCase.EXPRESSION_PROPERTY) {
-				ITypeBinding binding= ((SwitchStatement) selector.getParent().getParent()).getExpression().resolveTypeBinding();
+			StructuralPropertyDescriptor locationInParent= selector.getLocationInParent();
+			if (locationInParent == SwitchCase.EXPRESSION_PROPERTY || locationInParent == SwitchCase.EXPRESSIONS2_PROPERTY) {
+				ASTNode caseParent= selector.getParent().getParent();
+				ITypeBinding binding= null;
+				if (caseParent instanceof SwitchStatement) {
+					binding= ((SwitchStatement) caseParent).getExpression().resolveTypeBinding();
+				} else if (caseParent instanceof SwitchExpression) {
+					binding= ((SwitchExpression) caseParent).getExpression().resolveTypeBinding();
+				}
 				if (binding != null && binding.isEnum()) {
 					return getEnumContants(binding);
 				}
@@ -466,8 +476,15 @@ public class ScopeAnalyzer {
 	public boolean isDeclaredInScope(IBinding declaration, SimpleName selector, int flags) {
 		try {
 			// special case for switch on enum
-			if (selector.getLocationInParent() == SwitchCase.EXPRESSION_PROPERTY) {
-				ITypeBinding binding= ((SwitchStatement) selector.getParent().getParent()).getExpression().resolveTypeBinding();
+			StructuralPropertyDescriptor locationInParent= selector.getLocationInParent();
+			if (locationInParent == SwitchCase.EXPRESSION_PROPERTY || locationInParent == SwitchCase.EXPRESSIONS2_PROPERTY) {
+				ASTNode caseParent= selector.getParent().getParent();
+				ITypeBinding binding= null;
+				if (caseParent instanceof SwitchStatement) {
+					binding= ((SwitchStatement) caseParent).getExpression().resolveTypeBinding();
+				} else if (caseParent instanceof SwitchExpression) {
+					binding= ((SwitchExpression) caseParent).getExpression().resolveTypeBinding();
+				}
 				if (binding != null && binding.isEnum()) {
 					return hasEnumContants(declaration, binding.getTypeDeclaration());
 				}
@@ -698,9 +715,31 @@ public class ScopeAnalyzer {
 		@Override
 		public boolean visit(SwitchCase node) {
 			// switch on enum allows to use enum constants without qualification
-			if (hasFlag(VARIABLES, fFlags) && !node.isDefault() && isInside(node.getExpression())) {
-				SwitchStatement switchStatement= (SwitchStatement) node.getParent();
-				ITypeBinding binding= switchStatement.getExpression().resolveTypeBinding();
+			if (hasFlag(VARIABLES, fFlags) && !node.isDefault()) {
+				if (node.getAST().apiLevel() >= AST.JLS12) {
+					List<Expression> expressions= node.expressions();
+					for (Expression expression : expressions) {
+						visitExpression(node, expression);
+					}
+				} else {
+					Expression expression= node.getExpression();
+					visitExpression(node, expression);
+				}
+			}
+			return false;
+		}
+
+		private void visitExpression(SwitchCase node, Expression expression) {
+			if (isInside(expression)) {
+				ASTNode caseParent= node.getParent();
+				ITypeBinding binding= null;
+				if (caseParent instanceof SwitchStatement) {
+					SwitchStatement switchStatement= (SwitchStatement) caseParent;
+					binding= switchStatement.getExpression().resolveTypeBinding();
+				} else if (caseParent instanceof SwitchExpression) {
+					SwitchExpression switchExpression= (SwitchExpression) caseParent;
+					binding= switchExpression.getExpression().resolveTypeBinding();
+				}
 				if (binding != null && binding.isEnum()) {
 					IVariableBinding[] declaredFields= binding.getDeclaredFields();
 					for (int i= 0; i < declaredFields.length; i++) {
@@ -708,12 +747,11 @@ public class ScopeAnalyzer {
 						if (curr.isEnumConstant()) {
 							fBreak= fRequestor.acceptBinding(curr);
 							if (fBreak)
-								return false;
+								return;
 						}
 					}
 				}
 			}
-			return false;
 		}
 
 		@Override

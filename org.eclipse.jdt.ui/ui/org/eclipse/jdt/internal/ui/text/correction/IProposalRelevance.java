@@ -294,6 +294,7 @@ public interface IProposalRelevance {
 	public static final int EXTRACT_LOCAL_ZERO_SELECTION= -1;
 	public static final int MAKE_VARIABLE_DECLARATION_FINAL= -1;
 
+	public static final int ENABLE_PREVIEW_FEATURES= -2;
 	public static final int ADD_SUPPRESSWARNINGS= -2;
 	public static final int VARIABLE_TYPE_PROPOSAL_2= -2;
 	public static final int EXTRACT_CONSTANT_ZERO_SELECTION= -2;

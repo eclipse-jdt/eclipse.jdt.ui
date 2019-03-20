@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -165,7 +165,7 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 				return;
 
 			StructuralPropertyDescriptor parentDescription= node.getLocationInParent();
-			if (parentDescription == VariableDeclarationFragment.NAME_PROPERTY || parentDescription == SwitchCase.EXPRESSION_PROPERTY)
+			if (parentDescription == VariableDeclarationFragment.NAME_PROPERTY || parentDescription == SwitchCase.EXPRESSION_PROPERTY || parentDescription == SwitchCase.EXPRESSIONS2_PROPERTY)
 				return;
 
 			IBinding binding= node.resolveBinding();

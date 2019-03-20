@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2018 IBM Corporation and others.
+ * Copyright (c) 2016, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- *
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -29,12 +29,15 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import org.eclipse.jdt.core.IJavaProject;
+
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
+import org.eclipse.jdt.internal.ui.preferences.ComplianceConfigurationBlock;
+import org.eclipse.jdt.internal.ui.preferences.CompliancePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaBuildConfigurationBlock;
 import org.eclipse.jdt.internal.ui.preferences.JavaBuildPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavadocProblemsConfigurationBlock;
@@ -51,7 +54,7 @@ import org.eclipse.jdt.internal.ui.preferences.ProblemSeveritiesPreferencePage;
  */
 public class ConfigureProblemSeverityAction extends Action {
 	public enum PreferencePage {
-		BUILDING, ERRORS_WARNINGS, JAVADOC
+		BUILDING, ERRORS_WARNINGS, JAVADOC, COMPILER
 	}
 
 	private static final String CONFIGURE_PROBLEM_SEVERITY_DIALOG_ID= "configure_problem_severity_dialog_id"; //$NON-NLS-1$
@@ -144,6 +147,16 @@ public class ConfigureProblemSeverityAction extends Action {
 				data.put(JavaBuildPreferencePage.DATA_SELECT_OPTION_KEY, fOptionId);
 				data.put(JavaBuildPreferencePage.DATA_SELECT_OPTION_QUALIFIER, fOptionQualifier);
 				break;
+			case COMPILER:
+				if (showPropertyPage) {
+					pageId= CompliancePreferencePage.PROP_ID;
+					data.put(CompliancePreferencePage.USE_PROJECT_SPECIFIC_OPTIONS, Boolean.TRUE);
+				} else {
+					pageId= CompliancePreferencePage.PREF_ID;
+				}
+				data.put(CompliancePreferencePage.DATA_SELECT_OPTION_KEY, fOptionId);
+				data.put(CompliancePreferencePage.DATA_SELECT_OPTION_QUALIFIER, fOptionQualifier);
+				break;
 			default:
 				return; // cannot happen
 		}
@@ -162,6 +175,9 @@ public class ConfigureProblemSeverityAction extends Action {
 	private boolean hasProjectSpecificOptions() {
 		Key[] keys;
 		switch(fPreferencePage) {
+			case COMPILER:
+				keys= ComplianceConfigurationBlock.getKeys(fProject != null);
+				break;
 			case BUILDING:
 				keys= JavaBuildConfigurationBlock.getKeys();
 				break;

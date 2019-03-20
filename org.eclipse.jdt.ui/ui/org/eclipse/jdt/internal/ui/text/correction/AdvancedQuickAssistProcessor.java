@@ -2454,6 +2454,9 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			Statement statement= iter.next();
 			if (statement instanceof SwitchCase) {
 				SwitchCase switchCase= (SwitchCase) statement;
+				if (ast.apiLevel() >= AST.JLS12 && switchCase.expressions().size() > 1) {
+					return false;
+				}
 				// special case: pass through
 				if (currentBlock != null) {
 					if (!hasStopAsLastExecutableStatement) {
@@ -2552,7 +2555,14 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 
 	private static Expression createSwitchCaseCondition(AST ast, ASTRewrite rewrite, ImportRewrite importRewrite, ImportRewriteContext importRewriteContext, Name switchExpression,
 			SwitchCase switchCase, boolean isStringsInSwitch, boolean preserveNPE) {
-		Expression expression= switchCase.getExpression();
+		Expression expression= null;
+		if (ast.apiLevel() >= AST.JLS12) {
+			if (switchCase.expressions().size() == 1) {
+				expression= (Expression) switchCase.expressions().get(0);
+			}
+		} else {
+			expression= switchCase.getExpression();
+		}
 		if (expression == null)
 			return null;
 		
@@ -2885,12 +2895,19 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		SwitchCase[] switchCaseStatements= new SwitchCase[len];
 		if (caseExpressions.size() == 0) {
 			switchCaseStatements[0]= ast.newSwitchCase();
-			switchCaseStatements[0].setExpression(null);
+			if (ast.apiLevel() < AST.JLS12) {
+				switchCaseStatements[0].setExpression(null);
+			}
 		} else {
 			for (int i= 0; i < caseExpressions.size(); i++) {
 				ASTNode astNode= caseExpressions.get(i);
 				switchCaseStatements[i]= ast.newSwitchCase();
-				switchCaseStatements[i].setExpression((Expression) rewrite.createCopyTarget(astNode));
+				Expression copyTarget= (Expression) rewrite.createCopyTarget(astNode);
+				if (ast.apiLevel() >= AST.JLS12) {
+					switchCaseStatements[i].expressions().add(copyTarget);
+				} else {
+					switchCaseStatements[i].setExpression(copyTarget);
+				}
 			}
 		}
 		return switchCaseStatements;

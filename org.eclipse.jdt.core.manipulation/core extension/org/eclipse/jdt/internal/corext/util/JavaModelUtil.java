@@ -77,7 +77,7 @@ public final class JavaModelUtil {
 	 */
 	public static final String VERSION_LATEST;
 	static {
-		VERSION_LATEST= JavaCore.VERSION_11; // make sure it is not inlined
+		VERSION_LATEST= JavaCore.VERSION_12; // make sure it is not inlined
 	}
 
 	public static final int VALIDATE_EDIT_CHANGED_CONTENT= 10003;
@@ -820,6 +820,10 @@ public final class JavaModelUtil {
 		return !isVersionLessThan(compliance, JavaCore.VERSION_11);
 	}
 
+	public static boolean is12OrHigher(String compliance) {
+		return !isVersionLessThan(compliance, JavaCore.VERSION_12);
+	}
+
 	/**
 	 * Checks if the given project or workspace has source compliance 1.5 or greater.
 	 *
@@ -915,6 +919,8 @@ public final class JavaModelUtil {
 		String version= vMInstall.getJavaVersion();
 		if (version == null) {
 			return defaultCompliance;
+		} else if (version.startsWith(JavaCore.VERSION_12)) {
+			return JavaCore.VERSION_12;
 		} else if (version.startsWith(JavaCore.VERSION_11)) {
 			return JavaCore.VERSION_11;
 		} else if (version.startsWith(JavaCore.VERSION_10)) {
@@ -951,7 +957,9 @@ public final class JavaModelUtil {
 		
 		// fallback:
 		String desc= executionEnvironment.getId();
-		if (desc.indexOf(JavaCore.VERSION_11) != -1) {
+		if (desc.indexOf(JavaCore.VERSION_12) != -1) {
+			return JavaCore.VERSION_12;
+		} else if (desc.indexOf(JavaCore.VERSION_11) != -1) {
 			return JavaCore.VERSION_11;
 		} else if (desc.indexOf(JavaCore.VERSION_10) != -1) {
 			return JavaCore.VERSION_10;

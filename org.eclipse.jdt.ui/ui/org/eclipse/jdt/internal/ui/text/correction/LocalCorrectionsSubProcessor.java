@@ -1745,11 +1745,25 @@ public class LocalCorrectionsSubProcessor {
 		for (int i= 0; i < statements.size(); i++) {
 			Statement curr= statements.get(i);
 			if (curr instanceof SwitchCase) {
-				Expression expression= ((SwitchCase) curr).getExpression();
-				if (expression instanceof SimpleName) {
-					enumConstNames.remove(((SimpleName) expression).getFullyQualifiedName());
-				} else if(expression== null){
-					hasDefault=true;
+				SwitchCase switchCase= (SwitchCase) curr;
+				if (switchCase.getAST().apiLevel() >= AST.JLS12) {
+					List<Expression> expressions= switchCase.expressions();
+					if (expressions.size() == 0) {
+						hasDefault= true;
+					} else {
+						for (Expression expression : expressions) {
+							if (expression instanceof SimpleName) {
+								enumConstNames.remove(((SimpleName) expression).getFullyQualifiedName());
+							}
+						}
+					}
+				} else {
+					Expression expression= ((SwitchCase) curr).getExpression();
+					if (expression instanceof SimpleName) {
+						enumConstNames.remove(((SimpleName) expression).getFullyQualifiedName());
+					} else if (expression == null) {
+						hasDefault= true;
+					}
 				}
 			}
 		}
@@ -1761,9 +1775,17 @@ public class LocalCorrectionsSubProcessor {
 		int defaultIndex= statements.size();
 		for (int i= 0; i < statements.size(); i++) {
 			Statement curr= statements.get(i);
-			if (curr instanceof SwitchCase && ((SwitchCase) curr).getExpression() == null) {
-				defaultIndex= i;
-				break;
+			if (curr instanceof SwitchCase) {
+				SwitchCase switchCase= (SwitchCase) curr;
+				if (switchCase.getAST().apiLevel() >= AST.JLS12) {
+					if (switchCase.expressions().size() == 0) {
+						defaultIndex= i;
+						break;
+					}
+				} else if (switchCase.getExpression() == null) {
+					defaultIndex= i;
+					break;
+				}
 			}
 		}
 		boolean hasDefault= defaultIndex < statements.size();
@@ -1776,7 +1798,12 @@ public class LocalCorrectionsSubProcessor {
 			ListRewrite listRewrite= astRewrite.getListRewrite(switchStatement, SwitchStatement.STATEMENTS_PROPERTY);
 			for (int i= 0; i < enumConstNames.size(); i++) {
 				SwitchCase newSwitchCase= ast.newSwitchCase();
-				newSwitchCase.setExpression(ast.newName(enumConstNames.get(i)));
+				Name newName= ast.newName(enumConstNames.get(i));
+				if (ast.apiLevel() >= AST.JLS12) {
+					newSwitchCase.expressions().add(newName);
+				} else {
+					newSwitchCase.setExpression(newName);
+				}
 				listRewrite.insertAt(newSwitchCase, defaultIndex, null);
 				defaultIndex++;
 				if (!hasDefault) {
@@ -1786,7 +1813,9 @@ public class LocalCorrectionsSubProcessor {
 			}
 			if (!hasDefault) {
 				SwitchCase newSwitchCase= ast.newSwitchCase();
-				newSwitchCase.setExpression(null);
+				if (ast.apiLevel() < AST.JLS12) {
+					newSwitchCase.setExpression(null);
+				}
 				listRewrite.insertAt(newSwitchCase, defaultIndex, null);
 				defaultIndex++;
 				listRewrite.insertAt(ast.newBreakStatement(), defaultIndex, null);
@@ -1817,9 +1846,12 @@ public class LocalCorrectionsSubProcessor {
 		AST ast= switchStatement.getAST();
 		ASTRewrite astRewrite= ASTRewrite.create(ast);
 		ListRewrite listRewrite= astRewrite.getListRewrite(switchStatement, SwitchStatement.STATEMENTS_PROPERTY);
+		boolean isGreaterOrEqualTo12= ast.apiLevel() >= AST.JLS12;
 
 		SwitchCase newSwitchCase= ast.newSwitchCase();
-		newSwitchCase.setExpression(null);
+		if (!isGreaterOrEqualTo12) {
+			newSwitchCase.setExpression(null);
+		}
 		listRewrite.insertLast(newSwitchCase, null);
 		listRewrite.insertLast(ast.newBreakStatement(), null);
 

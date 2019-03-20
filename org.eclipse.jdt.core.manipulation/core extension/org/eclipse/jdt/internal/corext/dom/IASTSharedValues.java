@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2018 IBM Corporation and others.
+ * Copyright (c) 2016, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -21,7 +21,7 @@ public interface IASTSharedValues {
 	 * This value is subject to change with every release. JDT-UI-internal code typically supports
 	 * the latest available {@link AST#apiLevel() AST level} exclusively.
 	 */
-	public static final int SHARED_AST_LEVEL= AST.JLS11;
+	public static final int SHARED_AST_LEVEL= AST.JLS12;
 
 	public static final boolean SHARED_AST_STATEMENT_RECOVERY= true;
 

@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- *
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Benjamin Muskalla <b.muskalla@gmx.net> - [quick fix] Quick fix for missing synchronized modifier - https://bugs.eclipse.org/bugs/show_bug.cgi?id=245250
@@ -300,6 +300,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.AbstractServiceImplementation:
 			case IProblem.ProviderMethodOrConstructorRequiredForServiceImpl:
 			case IProblem.ServiceImplDefaultConstructorNotPublic:
+			case IProblem.PreviewFeatureDisabled:
 				return true;
 			default:
 				return SuppressWarningsSubProcessor.hasSuppressWarningsProposal(cu.getJavaProject(), problemId)
@@ -840,6 +841,10 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.ProviderMethodOrConstructorRequiredForServiceImpl:
 			case IProblem.ServiceImplDefaultConstructorNotPublic:
 				LocalCorrectionsSubProcessor.addServiceProviderProposal(context, problem, proposals);
+				break;
+			case IProblem.PreviewFeatureDisabled:
+				PreviewFeaturesSubProcessor.getEnablePreviewFeaturesProposal(context, proposals);
+				PreviewFeaturesSubProcessor.getOpenCompliancePageToEnablePreviewFeaturesProposal(context, proposals);
 				break;
 			default:
 		}
