@@ -248,7 +248,8 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 					return 0;
 				}
 			}
-			if (e.getStatus().getCode() == IResourceStatus.MARKER_NOT_FOUND) {
+			int errorCode = e.getStatus().getCode();
+			if (errorCode == IResourceStatus.MARKER_NOT_FOUND || errorCode == IResourceStatus.RESOURCE_NOT_FOUND) {
 				return 0;
 			}
 
