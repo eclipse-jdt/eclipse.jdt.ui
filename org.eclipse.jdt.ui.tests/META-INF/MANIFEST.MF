@@ -5,7 +5,6 @@ Bundle-Name: %Plugin.name
 Bundle-SymbolicName: org.eclipse.jdt.ui.tests; singleton:=true
 Bundle-Version: 3.13.500.qualifier
 Bundle-Activator: org.eclipse.jdt.testplugin.JavaTestPlugin
-Bundle-ActivationPolicy: lazy
 Bundle-Vendor: %Plugin.providerName
 Bundle-Localization: plugin
 Export-Package: 
@@ -19,6 +18,7 @@ Export-Package:
  org.eclipse.jdt.ui.leaktest.example;x-internal:=true,
  org.eclipse.jdt.ui.leaktest.reftracker;x-internal:=true,
  org.eclipse.jdt.ui.tests;x-internal:=true,
+ org.eclipse.jdt.ui.tests.activation;x-internal:=true,
  org.eclipse.jdt.ui.tests.browsing;x-internal:=true,
  org.eclipse.jdt.ui.tests.buildpath;x-internal:=true,
  org.eclipse.jdt.ui.tests.callhierarchy;x-internal:=true,
@@ -71,3 +71,4 @@ Require-Bundle:
  org.junit;bundle-version="4.12.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Eclipse-BundleShape: dir
+Bundle-ActivationPolicy: lazy
