@@ -301,6 +301,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.ProviderMethodOrConstructorRequiredForServiceImpl:
 			case IProblem.ServiceImplDefaultConstructorNotPublic:
 			case IProblem.PreviewFeatureDisabled:
+			case IProblem.PreviewFeatureNotSupported:
 				return true;
 			default:
 				return SuppressWarningsSubProcessor.hasSuppressWarningsProposal(cu.getJavaProject(), problemId)
@@ -845,6 +846,9 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.PreviewFeatureDisabled:
 				PreviewFeaturesSubProcessor.getEnablePreviewFeaturesProposal(context, proposals);
 				PreviewFeaturesSubProcessor.getOpenCompliancePageToEnablePreviewFeaturesProposal(context, proposals);
+				break;
+			case IProblem.PreviewFeatureNotSupported:
+				PreviewFeaturesSubProcessor.getNeedHigherComplianceProposals(context, problem, proposals);
 				break;
 			default:
 		}
