@@ -35,11 +35,11 @@ import org.eclipse.jdt.core.ICompilationUnit;
  * In order to provide backward compatibility for clients of <code>IWorkingCopyManager</code>, extension
  * interfaces are used to provide a means of evolution. The following extension interfaces
  * exist:
+ * </p>
  * <ul>
  * <li> {@link org.eclipse.jdt.ui.IWorkingCopyManagerExtension} since version 2.1 introducing API
  *      to set and remove the working copy for a given editor input.</li>
  * </ul>
- * </p>
  * <p>
  * This interface is not intended to be implemented by clients.
  * </p>

@@ -116,7 +116,7 @@ public class SharedASTProviderCore {
 	 * @param waitFlag {@link #WAIT_YES}, {@link #WAIT_NO} or {@link #WAIT_ACTIVE_ONLY}
 	 * @param progressMonitor the progress monitor or <code>null</code>
 	 * @return the AST or <code>null</code>.
-	 *         <dl>
+	 *         <ul>
 	 *         <li>If {@link #WAIT_NO} has been specified <code>null</code> is returned if the
 	 *         element is not input of the current Java editor or no AST is available</li>
 	 *         <li>If {@link #WAIT_ACTIVE_ONLY} has been specified <code>null</code> is returned if
@@ -124,7 +124,7 @@ public class SharedASTProviderCore {
 	 *         <li>If {@link #WAIT_YES} has been specified either the shared AST is returned or a
 	 *         new AST is created.</li>
 	 *         <li><code>null</code> will be returned if the operation gets canceled.</li>
-	 *         </dl>
+	 *         </ul>
 	 */
 	public static CompilationUnit getAST(ITypeRoot element, WAIT_FLAG waitFlag, IProgressMonitor progressMonitor) {
 		CoreASTProvider.WAIT_FLAG finalWaitFlag = null;

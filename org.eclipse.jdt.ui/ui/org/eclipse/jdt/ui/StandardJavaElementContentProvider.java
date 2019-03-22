@@ -52,7 +52,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
  * own UI presentation.
  * <p>
  * The following Java element hierarchy is surfaced by this content provider:
- * <p>
  * <pre>
 Java model (<code>IJavaModel</code>)
    Java project (<code>IJavaProject</code>)
@@ -61,7 +60,6 @@ Java model (<code>IJavaModel</code>)
             compilation unit (<code>ICompilationUnit</code>)
             binary class file (<code>IClassFile</code>)
  * </pre>
- * </p>
  * <p>
  * Note that when the entire Java project is declared to be package fragment root,
  * the corresponding package fragment root element that normally appears between the

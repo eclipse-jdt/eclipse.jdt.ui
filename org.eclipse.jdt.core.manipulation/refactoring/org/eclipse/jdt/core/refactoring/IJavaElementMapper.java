@@ -30,13 +30,15 @@ import org.eclipse.jdt.core.IJavaElement;
 public interface IJavaElementMapper {
 
 	/**
+	 * <p>
 	 * Returns the refactored Java element for the given element.
 	 * The returned Java element might not yet exist when the method
 	 * is called.
 	 * </p>
+	 * <p>
 	 * Note that local variables <strong>cannot</strong> be mapped
 	 * using this method.
-	 * <p>
+	 * </p>
 	 *
 	 * @param element the element to be refactored
 	 *

@@ -126,12 +126,12 @@ public interface ITestElement {
 
 	/**
 	 * Returns the progress state of this test element.
-	 * <dl>
+	 * <ul>
 	 * <li>{@link ITestElement.ProgressState#NOT_STARTED}: the test has not yet started</li>
 	 * <li>{@link ITestElement.ProgressState#RUNNING}: the test is currently running</li>
 	 * <li>{@link ITestElement.ProgressState#STOPPED}: the test has stopped before being completed</li>
 	 * <li>{@link ITestElement.ProgressState#COMPLETED}: the test (and all its children) has completed</li>
-	 * </dl>
+	 * </ul>
 	 * @return returns one of {@link ITestElement.ProgressState#NOT_STARTED}, {@link ITestElement.ProgressState#RUNNING},
 	 * {@link ITestElement.ProgressState#STOPPED} or {@link ITestElement.ProgressState#COMPLETED}.
 	 */
@@ -139,13 +139,13 @@ public interface ITestElement {
 
 	/**
 	 * Returns the result of the test element.
-	 * <dl>
+	 * <ul>
 	 * <li>{@link ITestElement.Result#UNDEFINED}: the result is not yet evaluated</li>
 	 * <li>{@link ITestElement.Result#OK}: the test has succeeded</li>
 	 * <li>{@link ITestElement.Result#ERROR}: the test has returned an error</li>
 	 * <li>{@link ITestElement.Result#FAILURE}: the test has returned an failure</li>
 	 * <li>{@link ITestElement.Result#IGNORED}: the test has been ignored (skipped)</li>
-	 * </dl>
+	 * </ul>
 	 * @param includeChildren if <code>true</code>, the returned result is the combined
 	 * result of the test and its children (if it has any). If <code>false</code>,
 	 * only the test's result is returned.
@@ -185,7 +185,7 @@ public interface ITestElement {
 	 * {@link ITestElement.ProgressState#COMPLETED} test elements.
 	 * </p>
 	 * 
-	 * @return total execution time for the test element in seconds, or {@link Double#NaN}</code> if
+	 * @return total execution time for the test element in seconds, or {@link Double#NaN} if
 	 *         the state of the element is not {@link ITestElement.ProgressState#COMPLETED}
 	 * 
 	 * @since 3.4

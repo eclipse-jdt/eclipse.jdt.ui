@@ -15,14 +15,14 @@
      
   <h2> Package Specification</h2>
       The package provides API that allows clients to participate in Java searches. A Java search query is specified by a
-<TT>QuerySpecification</TT>
+<code>QuerySpecification</code>
 ; an
-<TT>ElementQuerySpecification</TT>
+<code>ElementQuerySpecification</code>
 if searching for a specific
-<TT>IJavaElement</TT>
+<code>IJavaElement</code>
 , a
-<TT>PatternQuerySpecification</TT>
+<code>PatternQuerySpecification</code>
 when searching for a string pattern.
-<P>Clients who want to participate in Java search queries should implement <TT>IQueryParticipant</TT>. A query participant interprets a <TT>QuerySpecification</TT> and reports matches to a <TT>ISearchRequestor</TT>. If a query participant wishes to report matches against elements that are not <TT>IResources</TT> or <TT>IJavaElements</TT>, it has to implement a <TT>IMatchPresentation</TT> to render these elements.</P>
+<P>Clients who want to participate in Java search queries should implement <code>IQueryParticipant</code>. A query participant interprets a <code>QuerySpecification</code> and reports matches to a <code>ISearchRequestor</code>. If a query participant wishes to report matches against elements that are not <code>IResources</code> or <code>IJavaElements</code>, it has to implement a <code>IMatchPresentation</code> to render these elements.</P>
 </body>
 </html>

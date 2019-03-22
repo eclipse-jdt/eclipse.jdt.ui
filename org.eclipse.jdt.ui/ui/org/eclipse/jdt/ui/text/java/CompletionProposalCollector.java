@@ -78,6 +78,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
  * <p>
  * The lifecycle of a <code>CompletionProposalCollector</code> instance is very
  * simple:
+ * </p>
  * <pre>
  * ICompilationUnit unit= ...
  * int offset= ...
@@ -89,6 +90,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
  *
  * &#x2f;&#x2f; display &#x2f; process proposals
  * </pre>
+ * <p>
  * Note that after a code completion operation, the collector will store any
  * received proposals, which may require a considerable amount of memory, so the
  * collector should not be kept as a reference after a completion operation.

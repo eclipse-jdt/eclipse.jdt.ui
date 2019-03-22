@@ -26,11 +26,11 @@ import org.eclipse.jface.text.source.ISharedTextColors;
  * <p>
  * In order to provide backward compatibility for clients of <code>IColorManager</code>, extension
  * interfaces are used to provide a means of evolution. The following extension interfaces exist:
+ * </p>
  * <ul>
  * <li>{@link org.eclipse.jdt.ui.text.IColorManagerExtension} since version 2.0 introducing
  * 		the ability to bind and un-bind colors.</li>
  * </ul>
- * </p>
  * <p>
  * This interface may be implemented by clients.
  * </p>

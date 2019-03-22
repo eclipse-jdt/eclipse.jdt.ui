@@ -30,19 +30,25 @@ import org.eclipse.core.resources.IFile;
  * JAR file which is about to be build.
  * <p>
  * The protocol defined by this interface is:
+ * </p>
  * <ul>
  * <li>open is called</li>
  * <li>addFile and addJar is called multiple times</li>
  * <li>close is called</li>
  * </ul>
+ * <p>
  * It is guaranteed that addFile and addJar is only called after
  * open is called and before close is called. Other methods may
- * be called any time.</p>
+ * be called any time.
+ * </p>
+ * <p>
  * Implementors must be prepared that an instance if the implementation
- * is reused multiple times.<p>
+ * is reused multiple times.
+ * </p>
  * <p>
  * In order to provide backward compatibility for clients of <code>IJarBuilder</code>, extension
  * interfaces are used to provide a means of evolution. The following extension interfaces exist:
+ * </p>
  * <ul>
  * <li>{@link org.eclipse.jdt.ui.jarpackager.IJarBuilderExtension} since version 3.5 introducing
  *		the following functions:
@@ -50,6 +56,7 @@ import org.eclipse.core.resources.IFile;
  *				<li>Write a file to the JAR to build</li>
  *			</ul>
  * </li>
+ * </ul>
  *
  * @see org.eclipse.jdt.ui.jarpackager.JarPackageData
  * @since 3.4

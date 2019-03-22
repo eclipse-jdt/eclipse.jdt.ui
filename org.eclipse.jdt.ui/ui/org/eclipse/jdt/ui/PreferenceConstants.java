@@ -195,6 +195,7 @@ public class PreferenceConstants {
 	 * Value is of type <code>String</code>: A comma separated list of the
 	 * following entries. Each entry must be in the list, no duplication. List
 	 * order defines the sort order.
+	 * </p>
 	 * <ul>
 	 * <li><b>T</b>: Types</li>
 	 * <li><b>C</b>: Constructors</li>
@@ -205,7 +206,6 @@ public class PreferenceConstants {
 	 * <li><b>SM</b>: Static Methods</li>
 	 * <li><b>SF</b>: Static Fields</li>
 	 * </ul>
-	 * </p>
 	 * @since 2.1
 	 */
 	public static final String APPEARANCE_MEMBER_SORT_ORDER= MembersOrderPreferenceCacheCommon.APPEARANCE_MEMBER_SORT_ORDER;
@@ -217,13 +217,13 @@ public class PreferenceConstants {
 	 * Value is of type <code>String</code>: A comma separated list of the
 	 * following entries. Each entry must be in the list, no duplication. List
 	 * order defines the sort order.
+	 * </p>
 	 * <ul>
 	 * <li><b>B</b>: Public</li>
 	 * <li><b>V</b>: Private</li>
 	 * <li><b>R</b>: Protected</li>
 	 * <li><b>D</b>: Default</li>
 	 * </ul>
-	 * </p>
 	 * @since 3.0
 	 */
 	public static final String APPEARANCE_VISIBILITY_SORT_ORDER= MembersOrderPreferenceCacheCommon.APPEARANCE_VISIBILITY_SORT_ORDER;
@@ -2341,7 +2341,6 @@ public class PreferenceConstants {
 	 * Value is of type <code>String</code>: possible values are <code>
 	 * EDITOR_NO_HOVER_CONFIGURED_ID</code> or the hover id of a hover
 	 * contributed as <code>javaEditorTextHovers</code>.
-	 * </p>
 	 * @since 2.1
 	 * @deprecated As of 3.0, replaced by {@link #EDITOR_TEXT_HOVER_MODIFIERS}
 	 */
@@ -3346,6 +3345,7 @@ public class PreferenceConstants {
 	 * A named preference that controls which the order of the specific code assist commands.
 	 * <p>
 	 * Value is of type <code>String</code>, a "\0"-separated list with categoryId:cycleState where
+	 * </p>
 	 * <ul>
 	 * <li>categoryId is the <code>String</code> holding the category ID</li>
 	 * <li>cycleState is an <code>int</code> which specifies the rank and the enablement:
@@ -3354,8 +3354,6 @@ public class PreferenceConstants {
 	 *		<li>rank= enabled ? cycleState : cycleState - 65535)</li>
 	 * </ul></li>
 	 * </ul>
-	 *
-	 * </p>
 	 *
 	 * @since 3.2
 	 */

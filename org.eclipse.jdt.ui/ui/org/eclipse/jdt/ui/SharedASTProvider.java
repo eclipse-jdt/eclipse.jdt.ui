@@ -30,15 +30,16 @@ import org.eclipse.jdt.core.manipulation.CoreASTProvider;
  * <p>For performance reasons, not more than one AST should be kept in memory at a time. Therefore, clients must
  * not keep any references to the shared AST or its nodes or bindings.
  * </p>
- * <p>Clients can make the following assumptions about the AST:
- * <dl>
+ * <p>Clients can make the following assumptions about the AST:</p>
+ * <ul>
  *    <li>the AST has a {@link ITypeRoot} as source: {@link CompilationUnit#getTypeRoot()} is not null.</li>
  *    <li>the {@link AST#apiLevel() AST API level} is {@link AST#JLS12 API level 12} or higher</li>
  *    <li>the AST has bindings resolved ({@link AST#hasResolvedBindings()})</li>
  *    <li>{@link AST#hasStatementsRecovery() statement} and {@link AST#hasBindingsRecovery() bindings}
  *           recovery are enabled
  *    </li>
- * </dl>
+ * </ul>
+ * <p>
  * It is possible that in the future a higher API level is used, or that future options will be enabled.
  * </p>
  * <p>
@@ -118,7 +119,7 @@ public final class SharedASTProvider {
 	 * @param waitFlag {@link #WAIT_YES}, {@link #WAIT_NO} or {@link #WAIT_ACTIVE_ONLY}
 	 * @param progressMonitor the progress monitor or <code>null</code>
 	 * @return the AST or <code>null</code>.
-	 *         <dl>
+	 *         <ul>
 	 *         <li>If {@link #WAIT_NO} has been specified <code>null</code> is returned if the
 	 *         element is not input of the current Java editor or no AST is available</li>
 	 *         <li>If {@link #WAIT_ACTIVE_ONLY} has been specified <code>null</code> is returned if
@@ -126,7 +127,7 @@ public final class SharedASTProvider {
 	 *         <li>If {@link #WAIT_YES} has been specified either the shared AST is returned or a
 	 *         new AST is created.</li>
 	 *         <li><code>null</code> will be returned if the operation gets canceled.</li>
-	 *         </dl>
+	 *         </ul>
 	 */
 	public static CompilationUnit getAST(ITypeRoot element, WAIT_FLAG waitFlag, IProgressMonitor progressMonitor) {
 		CoreASTProvider.WAIT_FLAG finalWaitFlag = null;

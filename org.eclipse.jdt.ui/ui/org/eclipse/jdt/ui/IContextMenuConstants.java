@@ -64,22 +64,22 @@ public interface IContextMenuConstants {
 	 * Pop-up menu: name of group for goto actions (value <code>"group.goto"</code>).
 	 * <p>
 	 * Examples for open actions are:
+	 * </p>
 	 * <ul>
 	 *  <li>Go Into</li>
 	 *  <li>Go To</li>
 	 * </ul>
-	 * </p>
 	 */
 	public static final String GROUP_GOTO=		ICommonMenuConstants.GROUP_GOTO;
 	/**
 	 * Pop-up menu: name of group for open actions (value <code>"group.open"</code>).
 	 * <p>
 	 * Examples for open actions are:
+	 * </p>
 	 * <ul>
 	 *  <li>Open To</li>
 	 *  <li>Open With</li>
 	 * </ul>
-	 * </p>
 	 */
 	public static final String GROUP_OPEN=		ICommonMenuConstants.GROUP_OPEN;
 
@@ -87,11 +87,11 @@ public interface IContextMenuConstants {
 	 * Pop-up menu: name of group for show actions (value <code>"group.show"</code>).
 	 * <p>
 	 * Examples for show actions are:
+	 * </p>
 	 * <ul>
 	 *  <li>Show in Navigator</li>
 	 *  <li>Show in Type Hierarchy</li>
 	 * </ul>
-	 * </p>
 	 */
 	public static final String GROUP_SHOW=		ICommonMenuConstants.GROUP_SHOW;
 
@@ -99,11 +99,11 @@ public interface IContextMenuConstants {
 	 * Pop-up menu: name of group for new actions (value <code>"group.new"</code>).
 	 * <p>
 	 * Examples for new actions are:
+	 * </p>
 	 * <ul>
 	 *  <li>Create new class</li>
 	 *  <li>Create new interface</li>
 	 * </ul>
-	 * </p>
 	 */
 	public static final String GROUP_NEW=		ICommonMenuConstants.GROUP_NEW;
 

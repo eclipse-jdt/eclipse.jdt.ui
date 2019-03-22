@@ -1006,13 +1006,13 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	 * <p>
 	 * Subclasses may extend or replace. The default implementation creates projection annotations
 	 * for the following elements:
+	 * </p>
 	 * <ul>
 	 * <li>true members (not for top-level types)</li>
 	 * <li>the javadoc comments of any member</li>
 	 * <li>header comments (javadoc or multi-line comments appearing before the first type's
 	 * javadoc or before the package or import declarations).</li>
 	 * </ul>
-	 * </p>
 	 *
 	 * @param element the java element to compute the folding structure for
 	 * @param ctx the computation context

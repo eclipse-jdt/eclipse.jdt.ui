@@ -165,7 +165,7 @@ public class RenameSupport {
 
 	/**
 	 * Executes the rename refactoring without showing a dialog to gather
-	 * additional user input (for example the new name of the <tt>IJavaElement</tt>).
+	 * additional user input (for example the new name of the <code>IJavaElement</code>).
 	 * Only an error dialog is shown (if necessary) to present the result
 	 * of the refactoring's full precondition checking.
 	 * <p>

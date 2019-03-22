@@ -119,9 +119,9 @@ public interface IRefactoringProcessorIds {
 	 *
 	 * <p>Since 3.2:</p>
 	 *
-	 * <p>Participants that declare <pre> &lt;param name="handlesSimilarDeclarations" value="false"/&gt; </pre>
+	 * Participants that declare <pre> &lt;param name="handlesSimilarDeclarations" value="false"/&gt; </pre>
 	 * in their extension contribution will not be loaded if the user selects the
-	 * "update similar declarations" feature.</p>
+	 * "update similar declarations" feature.
 	 *
 	 * <p>Rename type participants can retrieve information about similar declarations by casting the
 	 * RenameArguments to RenameTypeArguments. The new signatures of similar declarations
@@ -223,7 +223,7 @@ public interface IRefactoringProcessorIds {
 	 * element that gets deleted:
 	 * <ul>
 	 *   <li><code>IJavaProject</code>: participants registered for deleting <code>IJavaProject
-	 *       </code> and <code>IProject</code></li>.
+	 *       </code> and <code>IProject</code>.</li>
 	 *   <li><code>IPackageFragmentRoot</code>: participants registered for deleting
 	 *       <code>IPackageFragmentRoot</code> and <code>IFolder</code>.
 	 *   <li><code>IPackageFragment</code>: participants registered for deleting

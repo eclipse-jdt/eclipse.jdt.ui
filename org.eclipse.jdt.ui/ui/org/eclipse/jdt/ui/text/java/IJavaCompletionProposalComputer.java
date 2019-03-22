@@ -22,7 +22,7 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 
 /**
  * Computes completions and context information displayed by the Java editor content assistant.
- * Contributions to the <tt>org.eclipse.jdt.ui.javaCompletionProposalComputer</tt> extension point
+ * Contributions to the <code>org.eclipse.jdt.ui.javaCompletionProposalComputer</code> extension point
  * must implement this interface.
  *
  * @since 3.2

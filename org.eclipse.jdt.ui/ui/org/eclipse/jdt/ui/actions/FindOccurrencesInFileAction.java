@@ -54,7 +54,7 @@ import org.eclipse.jdt.internal.ui.search.SearchMessages;
  * fields, methods, types, and local variables) in a file.
  * <p>
  * Action is applicable to selections containing elements of type
- * <tt>IMember</tt>.
+ * <code>IMember</code>.
  *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.

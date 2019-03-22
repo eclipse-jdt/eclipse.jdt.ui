@@ -9,17 +9,17 @@
 <body>
 Provides classes and interfaces to generate a JAR file.
 This package provides the interfaces and classes for exporting a set of resources
-to a JAR file via runnable. It offers hooks to extend the <tt>JarPackageData</tt>
-to load and store the <tt>JarPackageData</tt> and to write the JAR itself.
+to a JAR file via runnable. It offers hooks to extend the <code>JarPackageData</code>
+to load and store the <code>JarPackageData</code> and to write the JAR itself.
 <h2>
 Package Specification</h2>
-The <tt>JarPackageData</tt> contains all necessary information to generate a
+The <code>JarPackageData</code> contains all necessary information to generate a
 JAR file. This class can be extended to provide additional data or to plug-in
-a custom <tt>JarWriter</tt>. The default runnable which creates the JAR can
-be replaced by implementing <tt>IJarExportRunnable</tt>. The same applies for the
-manifest provider (<tt>IManifestProvider</tt>) and the classes which save
-(<tt>IJarDescriptionWriter</tt>) and read (<tt>IJarDescriptionReader</tt>) the
-<tt>JarPackageData</tt>. 
+a custom <code>JarWriter</code>. The default runnable which creates the JAR can
+be replaced by implementing <code>IJarExportRunnable</code>. The same applies for the
+manifest provider (<code>IManifestProvider</code>) and the classes which save
+(<code>IJarDescriptionWriter</code>) and read (<code>IJarDescriptionReader</code>) the
+<code>JarPackageData</code>. 
 </body>
 </html>
 

@@ -34,7 +34,7 @@ import org.eclipse.jdt.internal.ui.actions.MultiFormatAction;
  * <p>
  * The action is applicable to selections containing elements of
  * type <code>ICompilationUnit</code>, <code>IPackage
- * </code>, <code>IPackageFragmentRoot/code> and
+ * </code>, <code>IPackageFragmentRoot</code> and
  * <code>IJavaProject</code>.
  * </p>
  * <p>

@@ -30,6 +30,7 @@ import org.eclipse.ui.texteditor.ITextEditor;
  * <p>
  * In order to provide backward compatibility for clients of <code>IJavaFoldingStructureProvider</code>, extension
  * interfaces are used to provide a means of evolution. The following extension interfaces exist:
+ * </p>
  * <ul>
  * <li>{@link org.eclipse.jdt.ui.text.folding.IJavaFoldingStructureProviderExtension} since version 3.2 introducing
  *		the following functions:
@@ -39,7 +40,6 @@ import org.eclipse.ui.texteditor.ITextEditor;
  *			</ul>
  * </li>
  * </ul>
- * </p>
  *
  * @since 3.0
  */

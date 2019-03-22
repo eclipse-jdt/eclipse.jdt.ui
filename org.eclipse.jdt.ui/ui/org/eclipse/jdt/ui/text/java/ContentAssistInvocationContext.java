@@ -154,6 +154,7 @@ public class ContentAssistInvocationContext {
 	 * necessarily cached values).
 	 * <p>
 	 * Example:
+	 * </p>
 	 *
 	 * <pre>
 	 * class MyContext extends ContentAssistInvocationContext {
@@ -171,7 +172,6 @@ public class ContentAssistInvocationContext {
 	 * }
 	 * </pre>
 	 *
-	 * </p>
 	 * <p>
 	 * Subclasses should also extend {@link Object#hashCode()}.
 	 * </p>
