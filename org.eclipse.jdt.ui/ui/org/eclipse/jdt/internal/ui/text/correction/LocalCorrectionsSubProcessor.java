@@ -100,6 +100,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.SwitchStatement;
@@ -1846,17 +1847,49 @@ public class LocalCorrectionsSubProcessor {
 		AST ast= switchStatement.getAST();
 		ASTRewrite astRewrite= ASTRewrite.create(ast);
 		ListRewrite listRewrite= astRewrite.getListRewrite(switchStatement, SwitchStatement.STATEMENTS_PROPERTY);
-		boolean isGreaterOrEqualTo12= ast.apiLevel() >= AST.JLS12;
+		String label= CorrectionMessages.LocalCorrectionsSubProcessor_add_default_case_description;
+		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), astRewrite, IProposalRelevance.ADD_MISSING_DEFAULT_CASE, image);
 
 		SwitchCase newSwitchCase= ast.newSwitchCase();
-		if (!isGreaterOrEqualTo12) {
-			newSwitchCase.setExpression(null);
-		}
 		listRewrite.insertLast(newSwitchCase, null);
-		listRewrite.insertLast(ast.newBreakStatement(), null);
 
-		String label= CorrectionMessages.LocalCorrectionsSubProcessor_add_default_case_description;
-		proposals.add(new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), astRewrite, IProposalRelevance.ADD_MISSING_DEFAULT_CASE, image));
+		if (ast.apiLevel() >= AST.JLS12) {
+			if (switchStatement.statements().size() > 0) {
+				Statement firstStatement= (Statement) switchStatement.statements().get(0);
+				SwitchCase switchCase= (SwitchCase) firstStatement;
+				boolean isArrow= switchCase.isSwitchLabeledRule();
+				if (isArrow) {
+					newSwitchCase.setSwitchLabeledRule(isArrow);
+					ThrowStatement newThrowStatement= getThrowForUnexpectedDefault(switchStatement.getExpression(), ast, astRewrite);
+					listRewrite.insertLast(newThrowStatement, null);
+					proposal.addLinkedPosition(astRewrite.track(newThrowStatement), true, null);
+				} else {
+					listRewrite.insertLast(ast.newBreakStatement(), null);
+				}
+			} else {
+				listRewrite.insertLast(ast.newBreakStatement(), null);
+			}
+		} else {
+			newSwitchCase.setExpression(null);
+			listRewrite.insertLast(ast.newBreakStatement(), null);
+		}
+
+		proposals.add(proposal);
+	}
+
+	private static ThrowStatement getThrowForUnexpectedDefault(Expression switchExpression, AST ast, ASTRewrite astRewrite) {
+		ThrowStatement newThrowStatement= ast.newThrowStatement();
+		ClassInstanceCreation newCic= ast.newClassInstanceCreation();
+		newCic.setType(ast.newSimpleType(ast.newSimpleName("IllegalArgumentException"))); //$NON-NLS-1$
+		InfixExpression newInfixExpr= ast.newInfixExpression();
+		StringLiteral newStringLiteral= ast.newStringLiteral();
+		newStringLiteral.setLiteralValue("Unexpected value: "); //$NON-NLS-1$
+		newInfixExpr.setLeftOperand(newStringLiteral);
+		newInfixExpr.setOperator(InfixExpression.Operator.PLUS);
+		newInfixExpr.setRightOperand((Expression) astRewrite.createCopyTarget(switchExpression));
+		newCic.arguments().add(newInfixExpr);
+		newThrowStatement.setExpression(newCic);
+		return newThrowStatement;
 	}
 
 	public static void addMissingHashCodeProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
