@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2019 IBM Corporation and others.
+ * Copyright (c) 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -27,6 +27,8 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.ui.tests.core.Java12ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
+import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
+
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 
 import junit.framework.Test;
@@ -63,19 +65,19 @@ public class QuickFixTest12 extends QuickFixTest {
 		if (fJProject1 != null) {
 			JavaProjectHelper.delete(fJProject1);
 		}
-		
+
 		super.tearDown();
 	}
 
 	public void testEnablePreviewsAndOpenCompilerPropertiesProposals() throws Exception {
-		
+
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(Java12ProjectTestSetup.getDefaultClasspath(), null);
 		JavaProjectHelper.set12CompilerOptions(fJProject1, false);
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		
+
 		StringBuffer buf= new StringBuffer();
 		buf.append("module test {\n");
 		buf.append("}\n");
@@ -104,7 +106,7 @@ public class QuickFixTest12 extends QuickFixTest {
 		buf.append("  }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
-		
+
 		buf= new StringBuffer();
 		buf= new StringBuffer();
 		buf.append("package test;\n");
@@ -118,26 +120,26 @@ public class QuickFixTest12 extends QuickFixTest {
 		buf.append("	SATURDAY\n");
 		buf.append("}\n");
 		pack.createCompilationUnit("Day.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 3, null);
 
 		assertNumberOfProposals(proposals, 2);
-		String label1= CorrectionMessages.PreviewFeaturesSubProcessor_enable_preview_features;		
+		String label1= CorrectionMessages.PreviewFeaturesSubProcessor_enable_preview_features;
 		assertProposalExists(proposals, label1);
 		String label2= CorrectionMessages.PreviewFeaturesSubProcessor_open_compliance_properties_page_enable_preview_features;
-		assertProposalExists(proposals, label2);		
-	}	
-	
-public void testNoEnablePreviewProposal() throws Exception {
-		
+		assertProposalExists(proposals, label2);
+	}
+
+	public void testNoEnablePreviewProposal() throws Exception {
+
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(Java12ProjectTestSetup.getDefaultClasspath(), null);
 		JavaProjectHelper.set12CompilerOptions(fJProject1, true);
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		
+
 		StringBuffer buf= new StringBuffer();
 		buf.append("module test {\n");
 		buf.append("}\n");
@@ -166,7 +168,7 @@ public void testNoEnablePreviewProposal() throws Exception {
 		buf.append("  }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
-		
+
 		buf= new StringBuffer();
 		buf= new StringBuffer();
 		buf.append("package test;\n");
@@ -180,10 +182,181 @@ public void testNoEnablePreviewProposal() throws Exception {
 		buf.append("	SATURDAY\n");
 		buf.append("}\n");
 		pack.createCompilationUnit("Day.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<ICompletionProposal> proposals= collectAllCorrections(cu, astRoot, 0);
 
-		assertNumberOfProposals(proposals, 0);		
+		assertNumberOfProposals(proposals, 0);
+	}
+
+	public void testAddDefaultCaseSwitchStatement1() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(Java12ProjectTestSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set12CompilerOptions(fJProject1, true);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		StringBuffer buf= new StringBuffer();
+		buf.append("module test {\n");
+		buf.append("}\n");
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class Cls {\n");
+		buf.append("    public static void foo(Day day) {\n");
+		buf.append("        switch (day) {\n");
+		buf.append("        case SATURDAY, SUNDAY -> System.out.println(\"Weekend\");\n");
+		buf.append("        case MONDAY, TUESDAY, WEDNESDAY -> System.out.println(\"Weekday\");\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("enum Day {\n");
+		buf.append("    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class Cls {\n");
+		buf.append("    public static void foo(Day day) {\n");
+		buf.append("        switch (day) {\n");
+		buf.append("        case SATURDAY, SUNDAY -> System.out.println(\"Weekend\");\n");
+		buf.append("        case MONDAY, TUESDAY, WEDNESDAY -> System.out.println(\"Weekday\");\n");
+		buf.append("			default->\n");
+		buf.append("				throw new IllegalArgumentException(\n");
+		buf.append("						\"Unexpected value: \" + day);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("enum Day {\n");
+		buf.append("    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
+	}
+
+	public void testAddDefaultCaseSwitchStatement2() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(Java12ProjectTestSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set12CompilerOptions(fJProject1, true);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		StringBuffer buf= new StringBuffer();
+		buf.append("module test {\n");
+		buf.append("}\n");
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class Cls {\n");
+		buf.append("    public static void foo(Day day) {\n");
+		buf.append("        switch (day) {\n");
+		buf.append("        case SATURDAY, SUNDAY: System.out.println(\"Weekend\");\n");
+		buf.append("        case MONDAY, TUESDAY, WEDNESDAY: System.out.println(\"Weekday\");\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("enum Day {\n");
+		buf.append("    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class Cls {\n");
+		buf.append("    public static void foo(Day day) {\n");
+		buf.append("        switch (day) {\n");
+		buf.append("        case SATURDAY, SUNDAY: System.out.println(\"Weekend\");\n");
+		buf.append("        case MONDAY, TUESDAY, WEDNESDAY: System.out.println(\"Weekday\");\n");
+		buf.append("			default :\n");
+		buf.append("				break;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("enum Day {\n");
+		buf.append("    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
+	}
+
+	public void testAddDefaultCaseSwitchStatement3() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(Java12ProjectTestSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set12CompilerOptions(fJProject1, true);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		StringBuffer buf= new StringBuffer();
+		buf.append("module test {\n");
+		buf.append("}\n");
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class Cls {\n");
+		buf.append("    public static void foo(Day day) {\n");
+		buf.append("        switch (day) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("enum Day {\n");
+		buf.append("    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 7);
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class Cls {\n");
+		buf.append("    public static void foo(Day day) {\n");
+		buf.append("        switch (day) {\n");
+		buf.append("			default :\n");
+		buf.append("				break;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("enum Day {\n");
+		buf.append("    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}
 }
