@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -242,6 +242,13 @@ public class ModifierCorrectionSubProcessor {
 		}
 		if (kind == TO_VISIBLE && bindingDecl.getKind() == IBinding.VARIABLE) {
 			UnresolvedElementsSubProcessor.getVariableProposals(context, problem, (IVariableBinding) bindingDecl, proposals);
+		} else if (kind == TO_STATIC && bindingDecl.getKind() == IBinding.VARIABLE
+				&& problem.getProblemId() == IProblem.InstanceFieldDuringConstructorInvocation) {
+			if (selectedNode.getNodeType() == ASTNode.SIMPLE_NAME) {
+				if (((SimpleName)selectedNode).getLocationInParent() == SuperConstructorInvocation.ARGUMENTS_PROPERTY) {
+					UnresolvedElementsSubProcessor.getVariableProposals(context, problem, (IVariableBinding) bindingDecl, proposals);
+				}
+			}
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2018 IBM Corporation and others.
+ * Copyright (c) 2013, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -2042,4 +2042,111 @@ public class QuickFixTest18 extends QuickFixTest {
 		buf.append("");
 		assertProposalPreviewEquals(buf.toString(), "Change return type of 'h(..)' to 'Map<? extends Number, Integer>[]'", proposals2);		
 	}
+
+	// bug 420116 : create parameter quickfix should be offered
+	public void testBug496103_createParam() throws Exception {
+		JavaProjectHelper.addLibrary(fJProject1, new Path(Java18ProjectTestSetup.getJdtAnnotations20Path()));
+
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
+
+
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("class E {\n");
+		buf.append("	protected final String param1;\n");
+		buf.append("	public E(String param1) {\n");
+		buf.append("		this.param1 = param1;\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		buf.append("public class F extends E {\n");
+		buf.append("	public F() {\n");
+		buf.append("		super(param1);\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		buf.append("");
+
+
+		ICompilationUnit cu= pack2.createCompilationUnit("F.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("class E {\n");
+		buf.append("	protected final static String param1;\n");
+		buf.append("	public E(String param1) {\n");
+		buf.append("		this.param1 = param1;\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		buf.append("public class F extends E {\n");
+		buf.append("	public F() {\n");
+		buf.append("		super(param1);\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		buf.append("");
+		String expected= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] {expected});
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("class E {\n");
+		buf.append("	protected final String param1;\n");
+		buf.append("	public E(String param1) {\n");
+		buf.append("		this.param1 = param1;\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		buf.append("public class F extends E {\n");
+		buf.append("	private static String param1;\n");
+		buf.append("\n");
+		buf.append("    public F() {\n");
+		buf.append("		super(param1);\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		buf.append("");
+		expected= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] {expected});
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("class E {\n");
+		buf.append("	protected final String param1;\n");
+		buf.append("	public E(String param1) {\n");
+		buf.append("		this.param1 = param1;\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		buf.append("public class F extends E {\n");
+		buf.append("	public F(String param1) {\n");
+		buf.append("		super(param1);\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		buf.append("");
+		expected= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] {expected});
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("class E {\n");
+		buf.append("	protected final String param1;\n");
+		buf.append("	public E(String param1) {\n");
+		buf.append("		this.param1 = param1;\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		buf.append("public class F extends E {\n");
+		buf.append("	private static final String param1 = null;\n");
+		buf.append("\n");
+		buf.append("    public F() {\n");
+		buf.append("		super(param1);\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		buf.append("");
+		expected= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] {expected});
+	}
+
 }
