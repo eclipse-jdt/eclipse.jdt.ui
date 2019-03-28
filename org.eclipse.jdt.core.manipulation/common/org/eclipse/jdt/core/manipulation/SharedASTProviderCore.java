@@ -31,14 +31,14 @@ import org.eclipse.jdt.core.manipulation.CoreASTProvider;
  * not keep any references to the shared AST or its nodes or bindings.
  * </p>
  * <p>Clients can make the following assumptions about the AST:
- * <dl>
+ * <ul>
  *    <li>the AST has a {@link ITypeRoot} as source: {@link CompilationUnit#getTypeRoot()} is not null.</li>
  *    <li>the {@link AST#apiLevel() AST API level} is {@link AST#JLS12 API level 12} or higher</li>
  *    <li>the AST has bindings resolved ({@link AST#hasResolvedBindings()})</li>
  *    <li>{@link AST#hasStatementsRecovery() statement} and {@link AST#hasBindingsRecovery() bindings}
  *           recovery are enabled
  *    </li>
- * </dl>
+ * </ul>
  * It is possible that in the future a higher API level is used, or that future options will be enabled.
  * </p>
  * <p>
