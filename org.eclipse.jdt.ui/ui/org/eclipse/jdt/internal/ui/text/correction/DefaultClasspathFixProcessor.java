@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2018 IBM Corporation and others.
+ * Copyright (c) 2007, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -283,6 +283,9 @@ public class DefaultClasspathFixProcessor extends ClasspathFixProcessor {
 
 	protected void addLibraryProposal(IJavaProject project, IPackageFragmentRoot root, IClasspathEntry entry, Collection<Object> addedClaspaths, Collection<DefaultClasspathFixProposal> proposals,
 			Change additionalChange) throws JavaModelException {
+		if (isJREContainer(entry.getPath()) && hasJREInClassPath(project)) {
+			return;
+		}
 		if (addedClaspaths.add(entry)) {
 			String label= getAddClasspathLabel(entry, root, project);
 			if (label != null) {
@@ -312,6 +315,31 @@ public class DefaultClasspathFixProcessor extends ClasspathFixProcessor {
 		return false;
 	}
 
+	protected boolean isJREContainer(IPath containerPath) {
+		if (containerPath != null && containerPath.segmentCount() > 0) {
+			String id= containerPath.segment(0);
+			if (id.equals(JavaRuntime.JRE_CONTAINER)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	protected boolean hasJREInClassPath(IJavaProject javaProject) {
+		if (javaProject != null) {
+			try {
+				IClasspathEntry[] oldClasspaths= javaProject.getRawClasspath();
+				for (int i= 0; i < oldClasspaths.length; i++) {
+					if (isJREContainer(oldClasspaths[i].getPath())) {
+						return true;
+					}
+				}
+			} catch (JavaModelException e) {
+				// do nothing
+			}
+		}
+		return false;
+	}
 
 	protected static String getAddClasspathLabel(IClasspathEntry entry, IPackageFragmentRoot root, IJavaProject project) {
 		switch (entry.getEntryKind()) {
