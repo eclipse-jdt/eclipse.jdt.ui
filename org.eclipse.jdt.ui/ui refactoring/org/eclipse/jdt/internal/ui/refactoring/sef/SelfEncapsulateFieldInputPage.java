@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -77,6 +77,12 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 	private Label fGetterInfo;
 	private Label fSetterInfo;
 
+	private String fOldSetterValue= ""; //$NON-NLS-1$
+	private String fOldGetterValue= ""; //$NON-NLS-1$
+
+	private Button fGenerateGetter;
+	private Button fGenerateSetter;
+
 	private static final String GENERATE_JAVADOC= "GenerateJavadoc";  //$NON-NLS-1$
 
 	public SelfEncapsulateFieldInputPage() {
@@ -106,47 +112,84 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		gridLayout.marginWidth= 0;
 
 		nameComposite.setLayout(gridLayout);
-
-		Label label= new Label(nameComposite, SWT.LEAD);
-		label.setText(RefactoringMessages.SelfEncapsulateFieldInputPage_getter_name);
+		fGenerateGetter= new Button(nameComposite, SWT.CHECK);
+		fGenerateGetter.setText(RefactoringMessages.SelfEncapsulateFieldInputPage_getter_name);
+		fGenerateGetter.setSelection(true);
+		fGenerateGetter.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (fGenerateGetter.getSelection()) {
+					fGetterName.setEnabled(true);
+					fGetterName.setText(fOldGetterValue);
+				} else {
+					fOldGetterValue= fGetterName.getText();
+					fGetterName.setText(""); //$NON-NLS-1$
+					fGetterName.setEnabled(false);
+				}
+				doGetterModified();
+			}
+		});
+		fGenerateGetter.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 
 		fGetterName= new Text(nameComposite, SWT.BORDER);
 		fGetterName.setText(fRefactoring.getGetterName());
-		TextFieldNavigationHandler.install(fGetterName);
+		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
+		gd.widthHint= convertWidthInCharsToPixels(25);
+		fGetterName.setLayoutData(gd);
 		fGetterName.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
 				doGetterModified();
 			}
 		});
+		TextFieldNavigationHandler.install(fGetterName);
 
-		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
-		gd.widthHint= convertWidthInCharsToPixels(25);
-		fGetterName.setLayoutData(gd);
 
-		fGetterInfo= new Label(nameComposite,SWT.LEAD);
+		fGetterInfo= new Label(nameComposite, SWT.LEAD);
 		fGetterInfo.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		updateUseGetter();
 
-		if (needsSetter()) {
-			label= new Label(nameComposite, SWT.LEAD);
-			label.setText(RefactoringMessages.SelfEncapsulateFieldInputPage_setter_name);
-
-			fSetterName= new Text(nameComposite, SWT.BORDER);
-			fSetterName.setText(fRefactoring.getSetterName());
-			fSetterName.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			fSetterName.addModifyListener(new ModifyListener() {
-				@Override
-				public void modifyText(ModifyEvent e) {
-					doSetterModified();
+		fGenerateSetter= new Button(nameComposite, SWT.CHECK);
+		fGenerateSetter.setText(RefactoringMessages.SelfEncapsulateFieldInputPage_setter_name);
+		fGenerateSetter.setEnabled(needsSetter());
+		fGenerateSetter.setSelection(needsSetter());
+		fGenerateSetter.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (fGenerateSetter.getSelection()) {
+					fSetterName.setEnabled(true);
+					fSetterName.setText(fOldSetterValue);
+				} else {
+					fOldSetterValue= fSetterName.getText();
+					fSetterName.setText(""); //$NON-NLS-1$
+					fSetterName.setEnabled(false);
 				}
-			});
-			TextFieldNavigationHandler.install(fSetterName);
+				doSetterModified();
+			}
+		});
+		fGenerateSetter.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 
-			fSetterInfo= new Label(nameComposite, SWT.LEAD);
-			fSetterInfo.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			updateUseSetter();
+		fSetterName= new Text(nameComposite, SWT.BORDER);
+		if(needsSetter()) {
+			fSetterName.setText(fRefactoring.getSetterName());
+		} else {
+			fSetterName.setText(""); //$NON-NLS-1$
+			fSetterName.setEnabled(false);
 		}
+		gd= new GridData(GridData.FILL_HORIZONTAL);
+		gd.widthHint= convertWidthInCharsToPixels(25);
+		fSetterName.setLayoutData(gd);
+		fSetterName.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				doSetterModified();
+			}
+		});
+		TextFieldNavigationHandler.install(fSetterName);
+
+		fSetterInfo= new Label(nameComposite, SWT.LEAD);
+		fSetterInfo.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		updateUseSetter();
 
 		Link link= new Link(nameComposite, SWT.NONE);
 		link.setText(RefactoringMessages.SelfEncapsulateFieldInputPage_configure_link);
@@ -162,10 +205,9 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		separator.setText(""); //$NON-NLS-1$
 		separator.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 3, 1));
 
-		// createSeparator(result, layouter);
 		createFieldAccessBlock(result);
 
-		label= new Label(result, SWT.LEFT);
+		Label label= new Label(result, SWT.LEFT);
 		label.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 		label.setText(RefactoringMessages.SelfEncapsulateFieldInputPage_insert_after);
 		fEnablements.add(label);
@@ -208,7 +250,15 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 	}
 
 	private void updateUseSetter() {
-		if (fRefactoring.isUsingLocalSetter())
+		if(!needsSetter()) {
+			fGenerateSetter.setSelection(false);
+			fGenerateSetter.setEnabled(false);
+			fSetterInfo.setText(RefactoringMessages.SelfEncapsulateFieldInputPage_final_field);
+		} else if (fGenerateSetter.getSelection() == false)
+			fSetterInfo.setText(RefactoringMessages.SelfEncapsulateFieldInputPage_no_setter_created);
+		else if (fSetterName.getText().isEmpty())
+			fSetterInfo.setText(RefactoringMessages.SelfEncapsulateFieldInputPage_no_setter_name);
+		else if (fRefactoring.isUsingLocalSetter())
 			fSetterInfo.setText(RefactoringMessages.SelfEncapsulateFieldInputPage_useexistingsetter_label);
 		else
 			fSetterInfo.setText(RefactoringMessages.SelfEncapsulateFieldInputPage_usenewgetter_label);
@@ -224,8 +274,12 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 	}
 
 	private void updateUseGetter() {
-		if (fRefactoring.isUsingLocalGetter())
+		if (fGenerateGetter.getSelection() == false)
+			fGetterInfo.setText(RefactoringMessages.SelfEncapsulateFieldInputPage_no_getter_created);
+		else if (fRefactoring.isUsingLocalGetter())
 			fGetterInfo.setText(RefactoringMessages.SelfEncapsulateFieldInputPage_useexistinggetter_label);
+		else if (fGetterName.getText().isEmpty())
+			fGetterInfo.setText(RefactoringMessages.SelfEncapsulateFieldInputPage_no_getter_name);
 		else
 			fGetterInfo.setText(RefactoringMessages.SelfEncapsulateFieldInputPage_usenewsetter_label);
 		updateEnablements();
@@ -363,6 +417,16 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		boolean valid= true;
 		if (status.hasFatalError()) {
 			message= status.getMessageMatchingSeverity(RefactoringStatus.FATAL);
+			valid= false;
+		}
+		if (fGenerateGetter.getSelection() && fGetterName.getText().isEmpty()) {
+			message= RefactoringMessages.SelfEncapsulateFieldInputPage_no_getter_name;
+			valid= false;
+		} else if (fGenerateSetter.getSelection() && fSetterName.getText().isEmpty()) {
+			message= RefactoringMessages.SelfEncapsulateFieldInputPage_no_setter_name;
+			valid= false;
+		} else if (!fGenerateGetter.getSelection() && !fGenerateSetter.getSelection()) {
+			message= RefactoringMessages.SelfEncapsulateFieldInputPage_please_choose_to_generate_a_getter_setter;
 			valid= false;
 		}
 		setErrorMessage(message);

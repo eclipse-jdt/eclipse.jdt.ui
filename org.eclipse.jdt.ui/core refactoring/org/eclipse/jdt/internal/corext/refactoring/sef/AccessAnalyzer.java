@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -133,28 +133,37 @@ class AccessAnalyzer extends ASTVisitor {
 		checkParent(node);
 		Expression rightHandSide= node.getRightHandSide();
 		if (!fIsFieldFinal) {
-			// Write access.
+			List<Expression> arguments= new ArrayList<>();
 			AST ast= node.getAST();
-			MethodInvocation invocation= ast.newMethodInvocation();
-			invocation.setName(ast.newSimpleName(fSetter));
-			fReferencingSetter= true;
 			Expression receiver= getReceiver(leftHandSide);
-			if (receiver != null)
-				invocation.setExpression((Expression)fRewriter.createCopyTarget(receiver));
-			List<Expression> arguments= invocation.arguments();
+
+			if (!fSetter.isEmpty()) {
+				// Write access.
+				MethodInvocation invocation= ast.newMethodInvocation();
+				invocation.setName(ast.newSimpleName(fSetter));
+				fReferencingSetter= true;
+				if (receiver != null) {
+					invocation.setExpression((Expression) fRewriter.createCopyTarget(receiver));
+				}
+				arguments= invocation.arguments();
+				fRewriter.replace(node, invocation, createGroupDescription(WRITE_ACCESS));
+			}
 			if (node.getOperator() == Assignment.Operator.ASSIGN) {
-				arguments.add((Expression)fRewriter.createCopyTarget(rightHandSide));
-			} else {
+				arguments.add((Expression) fRewriter.createCopyTarget(rightHandSide));
+			}
+
+			else if (!fGetter.isEmpty()) {
 				// This is the compound assignment case: field+= 10;
 				InfixExpression exp= ast.newInfixExpression();
 				exp.setOperator(ASTNodes.convertToInfixOperator(node.getOperator()));
 				MethodInvocation getter= ast.newMethodInvocation();
 				getter.setName(ast.newSimpleName(fGetter));
 				fReferencingGetter= true;
-				if (receiver != null)
-					getter.setExpression((Expression)fRewriter.createCopyTarget(receiver));
+				if (receiver != null) {
+					getter.setExpression((Expression) fRewriter.createCopyTarget(receiver));
+				}
 				exp.setLeftOperand(getter);
-				Expression rhs= (Expression)fRewriter.createCopyTarget(rightHandSide);
+				Expression rhs= (Expression) fRewriter.createCopyTarget(rightHandSide);
 				if (NecessaryParenthesesChecker.needsParenthesesForRightOperand(rightHandSide, exp, leftHandSide.resolveTypeBinding())) {
 					ParenthesizedExpression p= ast.newParenthesizedExpression();
 					p.setExpression(rhs);
@@ -162,8 +171,8 @@ class AccessAnalyzer extends ASTVisitor {
 				}
 				exp.setRightOperand(rhs);
 				arguments.add(exp);
+
 			}
-			fRewriter.replace(node, invocation, createGroupDescription(WRITE_ACCESS));
 		}
 		rightHandSide.accept(this);
 		return false;
@@ -172,11 +181,13 @@ class AccessAnalyzer extends ASTVisitor {
 	@Override
 	public boolean visit(SimpleName node) {
 		if (!node.isDeclaration() && considerBinding(node.resolveBinding(), node)) {
-			fReferencingGetter= true;
-			fRewriter.replace(
-				node,
-				fRewriter.createStringPlaceholder(fGetter + "()", ASTNode.METHOD_INVOCATION), //$NON-NLS-1$
-				createGroupDescription(READ_ACCESS));
+			if (!fGetter.isEmpty()) {
+				fReferencingGetter= true;
+				fRewriter.replace(
+						node,
+						fRewriter.createStringPlaceholder(fGetter + "()", ASTNode.METHOD_INVOCATION), //$NON-NLS-1$
+						createGroupDescription(READ_ACCESS));
+			}
 		}
 		return true;
 	}
