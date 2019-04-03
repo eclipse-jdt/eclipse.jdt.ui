@@ -1805,9 +1805,14 @@ public class LocalCorrectionsSubProcessor {
 		if (enumConstNames.size() > 0) {
 			ASTRewrite astRewrite= ASTRewrite.create(ast);
 			ListRewrite listRewrite= astRewrite.getListRewrite(switchStatement, SwitchStatement.STATEMENTS_PROPERTY);
+
+			String label= CorrectionMessages.LocalCorrectionsSubProcessor_add_missing_cases_description;
+			LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), astRewrite, IProposalRelevance.ADD_MISSING_CASE_STATEMENTS, image);
+
 			for (int i= 0; i < enumConstNames.size(); i++) {
 				SwitchCase newSwitchCase= ast.newSwitchCase();
-				Name newName= ast.newName(enumConstNames.get(i));
+				String enumConstName= enumConstNames.get(i);
+				Name newName= ast.newName(enumConstName);
 				if (ast.apiLevel() >= AST.JLS12) {
 					newSwitchCase.expressions().add(newName);
 				} else {
@@ -1816,27 +1821,77 @@ public class LocalCorrectionsSubProcessor {
 				listRewrite.insertAt(newSwitchCase, defaultIndex, null);
 				defaultIndex++;
 				if (!hasDefault) {
-					listRewrite.insertAt(ast.newBreakStatement(), defaultIndex, null);
+					if (ast.apiLevel() >= AST.JLS12) {
+						if (switchStatement.statements().size() > 0) {
+							Statement firstStatement= (Statement) switchStatement.statements().get(0);
+							SwitchCase switchCase= (SwitchCase) firstStatement;
+							boolean isArrow= switchCase.isSwitchLabeledRule();
+							if (isArrow) {
+								newSwitchCase.setSwitchLabeledRule(isArrow);
+								ThrowStatement newThrowStatement= getThrowForUnsupportedCase(switchStatement.getExpression(), ast, astRewrite);
+								listRewrite.insertLast(newThrowStatement, null);
+								proposal.addLinkedPosition(astRewrite.track(newThrowStatement), true, enumConstName);
+							} else {
+								listRewrite.insertAt(ast.newBreakStatement(), defaultIndex, null);
+							}
+						} else {
+							listRewrite.insertAt(ast.newBreakStatement(), defaultIndex, null);
+						}
+					} else {
+						listRewrite.insertAt(ast.newBreakStatement(), defaultIndex, null);
+					}
+
 					defaultIndex++;
 				}
 			}
 			if (!hasDefault) {
 				SwitchCase newSwitchCase= ast.newSwitchCase();
-				if (ast.apiLevel() < AST.JLS12) {
-					newSwitchCase.setExpression(null);
-				}
 				listRewrite.insertAt(newSwitchCase, defaultIndex, null);
 				defaultIndex++;
-				listRewrite.insertAt(ast.newBreakStatement(), defaultIndex, null);
+
+				if (ast.apiLevel() >= AST.JLS12) {
+					if (switchStatement.statements().size() > 0) {
+						Statement firstStatement= (Statement) switchStatement.statements().get(0);
+						SwitchCase switchCase= (SwitchCase) firstStatement;
+						boolean isArrow= switchCase.isSwitchLabeledRule();
+						if (isArrow) {
+							newSwitchCase.setSwitchLabeledRule(isArrow);
+							ThrowStatement newThrowStatement= getThrowForUnexpectedDefault(switchStatement.getExpression(), ast, astRewrite);
+							listRewrite.insertLast(newThrowStatement, null);
+							proposal.addLinkedPosition(astRewrite.track(newThrowStatement), true, "defaultCase"); //$NON-NLS-1$
+						} else {
+							listRewrite.insertAt(ast.newBreakStatement(), defaultIndex, null);
+						}
+					} else {
+						listRewrite.insertAt(ast.newBreakStatement(), defaultIndex, null);
+					}
+				} else {
+					newSwitchCase.setExpression(null);
+					listRewrite.insertAt(ast.newBreakStatement(), defaultIndex, null);
+				}
 			}
-			String label= CorrectionMessages.LocalCorrectionsSubProcessor_add_missing_cases_description;
-			proposals.add(new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), astRewrite, IProposalRelevance.ADD_MISSING_CASE_STATEMENTS, image));
+			proposals.add(proposal);
 		}
 		if (!hasDefault) {
 			createMissingDefaultProposal(context, switchStatement, image, proposals);
 		}
 	}
-	
+
+	private static ThrowStatement getThrowForUnsupportedCase(Expression switchExpr, AST ast, ASTRewrite astRewrite) {
+		ThrowStatement newThrowStatement= ast.newThrowStatement();
+		ClassInstanceCreation newCic= ast.newClassInstanceCreation();
+		newCic.setType(ast.newSimpleType(ast.newSimpleName("UnsupportedOperationException"))); //$NON-NLS-1$
+		InfixExpression newInfixExpr= ast.newInfixExpression();
+		StringLiteral newStringLiteral= ast.newStringLiteral();
+		newStringLiteral.setLiteralValue("Unimplemented case: "); //$NON-NLS-1$
+		newInfixExpr.setLeftOperand(newStringLiteral);
+		newInfixExpr.setOperator(InfixExpression.Operator.PLUS);
+		newInfixExpr.setRightOperand((Expression) astRewrite.createCopyTarget(switchExpr));
+		newCic.arguments().add(newInfixExpr);
+		newThrowStatement.setExpression(newCic);
+		return newThrowStatement;
+	}
+
 	public static void addMissingDefaultCaseProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
 		if (selectedNode instanceof Expression && selectedNode.getLocationInParent() == SwitchStatement.EXPRESSION_PROPERTY) {
