@@ -434,4 +434,102 @@ public class QuickFixTest9 extends QuickFixTest {
 		String[] choices= new String [] { "IFoo - test", "NonPublicFoo - test", };
 		assertLinkedChoices(proposal, "return_type", choices);
 	}
+
+	public void testServiceProviderConstructorProposal () throws Exception {
+		IJavaProject jProject1= JavaProjectHelper.createJavaProject("TestProject_1", "bin");
+		JavaProjectHelper.set9CompilerOptions(jProject1);
+		JavaProjectHelper.addRequiredModularProject(jProject1, Java9ProjectTestSetup.getProject());
+		IPackageFragmentRoot fProject1Src = JavaProjectHelper.addSourceContainer(jProject1, "src");
+
+		StringBuffer buf= new StringBuffer();
+		buf.append("module test {\n");
+		buf.append("provides test.IFoo with test.Foo;\n");
+		buf.append("}\n");
+		IPackageFragment def= fProject1Src.createPackageFragment("", false, null);
+		ICompilationUnit cu= def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+
+		IPackageFragment pack=fProject1Src.createPackageFragment("test", false, null);
+		buf= new StringBuffer();
+		buf.append("package test;\n\n");
+		buf.append("public interface IFoo {\n");
+		buf.append("}\n");
+		pack.createCompilationUnit("IFoo.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n\n");
+		buf.append("public class Foo implements test.IFoo {\n");
+		buf.append("public Foo (String arg) {\n");
+		buf.append("}\n");
+		buf.append("}\n");
+		fCus.add(pack.createCompilationUnit("Foo.java", buf.toString(), false, null));
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1, 0);
+		String proposalStr= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createconstructor_description, "Foo()");
+		assertProposalExists(proposals, proposalStr);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(1);
+		String actual= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n\n");
+		buf.append("public class Foo implements test.IFoo {\n");
+		buf.append("public Foo (String arg) {\n");
+		buf.append("}\n\n");
+		buf.append("/**\n");
+		buf.append(" * \n");
+		buf.append(" */\n");
+		buf.append("public Foo() {\n");
+		buf.append("\t// TODO Auto-generated constructor stub\n");
+		buf.append("}\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+		assertEquals(expected, actual);
+	}
+
+	public void testServiceProviderVisibilityProposal () throws Exception {
+		IJavaProject jProject1= JavaProjectHelper.createJavaProject("TestProject_1", "bin");
+		JavaProjectHelper.set9CompilerOptions(jProject1);
+		JavaProjectHelper.addRequiredModularProject(jProject1, Java9ProjectTestSetup.getProject());
+		IPackageFragmentRoot fProject1Src = JavaProjectHelper.addSourceContainer(jProject1, "src");
+
+		StringBuffer buf= new StringBuffer();
+		buf.append("module test {\n");
+		buf.append("provides test.IFoo with test.Foo;\n");
+		buf.append("}\n");
+		IPackageFragment def= fProject1Src.createPackageFragment("", false, null);
+		ICompilationUnit cu= def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+
+		IPackageFragment pack=fProject1Src.createPackageFragment("test", false, null);
+		buf= new StringBuffer();
+		buf.append("package test;\n\n");
+		buf.append("public interface IFoo {\n");
+		buf.append("}\n");
+		pack.createCompilationUnit("IFoo.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n\n");
+		buf.append("public class Foo implements test.IFoo {\n");
+		buf.append("private Foo () {\n");
+		buf.append("}\n");
+		buf.append("}\n");
+		fCus.add(pack.createCompilationUnit("Foo.java", buf.toString(), false, null));
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1, 0);
+		String proposalStr= CorrectionMessages.LocalCorrectionsSubProcessor_changeconstructor_public_description;
+		assertProposalExists(proposals, proposalStr);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(1);
+		String actual= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n\n");
+		buf.append("public class Foo implements test.IFoo {\n");
+		buf.append("public Foo () {\n");
+		buf.append("}\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+		assertEquals(expected, actual);
+	}
 }
