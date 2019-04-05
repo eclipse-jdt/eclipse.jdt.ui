@@ -133,9 +133,10 @@ public class BuildpathProblemQuickFixTest extends TestCase {
 		assertEquals("Project '1_Incomplete' is missing required Java project: '1_MissingProject'", (String) markers[0].getAttribute(IMarker.MESSAGE));
 		assertEquals(1, markers.length);
 		IMarkerResolution[] resolutions= sortResolutions(IDE.getMarkerHelpRegistry().getResolutions(markers[0]));
-		assertEquals(2, resolutions.length);
-		assertEquals("Configure build path...", resolutions[0].getLabel());
-		assertEquals("Configure problem severity", resolutions[1].getLabel());
+		assertEquals(3, resolutions.length);
+		assertEquals("Open required project '1_MissingProject'", resolutions[0].getLabel());
+		assertEquals("Configure build path...", resolutions[1].getLabel());
+		assertEquals("Configure problem severity", resolutions[2].getLabel());
 	}
 
 	public void test2Cyclic() throws CoreException, IOException {

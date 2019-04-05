@@ -16,6 +16,7 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.stream.Collectors;
 
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Shell;
@@ -26,6 +27,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IProject;
 
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -136,6 +138,18 @@ public class BuildpathProblemMarkerResolutionGenerator implements IMarkerResolut
 		}
 
 		if (project != null) {
+			try {
+				// add proposal only if there are at least one required closed project
+				IProject[] referencedProjects= marker.getResource().getProject().getReferencedProjects();
+				for (IProject iProject : referencedProjects) {
+					if (!iProject.isOpen()) {
+						resolutions.add(new OpenRequiredProjectMarkerResolution(marker));
+						break;
+					}
+				}
+			} catch (CoreException e) {
+				ExceptionHandler.handle(e, "Open project", "Failed to open project " + project.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$
+			}
 			resolutions.add(new OpenBuildPathMarkerResolution(project));
 		}
 
@@ -312,4 +326,58 @@ public class BuildpathProblemMarkerResolutionGenerator implements IMarkerResolut
 		}
 	}
 
+	private static class OpenRequiredProjectMarkerResolution implements IMarkerResolution2, IMarkerResolutionRelevance {
+
+		private final ArrayList<IProject> closedProjects= new ArrayList<>();
+		
+		public OpenRequiredProjectMarkerResolution(IMarker marker) {
+			try {
+				// collect required closed projects
+				IProject[] referencedProjects= marker.getResource().getProject().getReferencedProjects();
+				for (IProject iProject : referencedProjects) {
+					if (!iProject.isOpen()) {
+						closedProjects.add(iProject);
+					}
+				}
+			} catch (CoreException e) {
+				ExceptionHandler.handle(e, "Open project", "Failed to parse projects"); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+		}
+
+		@Override
+		public String getDescription() {
+			return "Open project"; //$NON-NLS-1$
+		}
+
+		@Override
+		public Image getImage() {
+			return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_ACCESSRULES_ATTRIB);
+		}
+
+		@Override
+		public String getLabel() {
+			String projects = closedProjects.stream().map(p -> p.getName()).collect(Collectors.joining("', '")); //$NON-NLS-1$
+			if(closedProjects.size() > 1) {
+				return Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_open_required_projects_description, projects);
+			}
+			return Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_open_required_project_description, projects);
+		}
+
+		@Override
+		public int getRelevanceForResolution() {
+			return 1;
+		}
+		@Override
+		public void run(IMarker marker) {
+			try {
+				for (IProject iProject : closedProjects) {
+					if (!iProject.isOpen()) {
+						iProject.open(null);
+					}
+				}
+			} catch (CoreException e) {
+				ExceptionHandler.handle(e, "Open project", "Failed to open project " + closedProjects.get(0).getName()); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+		}
+	}
 }
