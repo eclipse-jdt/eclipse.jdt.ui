@@ -1665,6 +1665,11 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 		returnTest();
 	}
 	
+	// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=285554
+	public void test735() throws Exception {
+		returnTest();
+	}
+
 	//---- Branch statements
 
 	public void test750() throws Exception {

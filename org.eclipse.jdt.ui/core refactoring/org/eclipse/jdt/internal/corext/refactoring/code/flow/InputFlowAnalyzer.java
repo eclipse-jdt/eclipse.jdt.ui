@@ -59,9 +59,6 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 			// Make sure that the whole return statement is selected or located before the selection.
 			return node.getStartPosition() + node.getLength() <= fSelection.getExclusiveEnd();
 		}
-		protected ASTNode getLoopNode() {
-			return fLoopNode;
-		}
 		public void process(ASTNode node) {
 			try {
 				fFlowContext.setLoopReentranceMode(true);
@@ -138,7 +135,6 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 
 	private Selection fSelection;
 	private boolean fDoLoopReentrance;
-	private LoopReentranceVisitor fLoopReentranceVisitor;
 
 	public InputFlowAnalyzer(FlowContext context, Selection selection, boolean doLoopReentrance) {
 		super(context);
@@ -163,35 +159,6 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 		// Make sure that the whole return statement is located after the selection. There can be cases like
 		// return i + [x + 10] * 10; In this case we must not create a return info node.
 		return node.getStartPosition() >= fSelection.getInclusiveEnd();
-	}
-
-	@Override
-	public boolean visit(DoStatement node) {
-		createLoopReentranceVisitor(node);
-		return super.visit(node);
-	}
-
-	@Override
-	public boolean visit(EnhancedForStatement node) {
-		createLoopReentranceVisitor(node);
-		return super.visit(node);
-	}
-
-	@Override
-	public boolean visit(ForStatement node) {
-		createLoopReentranceVisitor(node);
-		return super.visit(node);
-	}
-
-	@Override
-	public boolean visit(WhileStatement node) {
-		createLoopReentranceVisitor(node);
-		return super.visit(node);
-	}
-
-	private void createLoopReentranceVisitor(ASTNode node) {
-		if (fLoopReentranceVisitor == null && fDoLoopReentrance && fSelection.coveredBy(node))
-			fLoopReentranceVisitor= new LoopReentranceVisitor(fFlowContext, fSelection, node);
 	}
 
 	@Override
@@ -301,13 +268,13 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 	}
 
 	private void handleLoopReentrance(ASTNode node) {
-		if (fLoopReentranceVisitor == null || fLoopReentranceVisitor.getLoopNode() != node)
-			return;
-
-		fLoopReentranceVisitor.process(node);
-		GenericSequentialFlowInfo info= createSequential();
-		info.merge(getFlowInfo(node), fFlowContext);
-		info.merge(fLoopReentranceVisitor.getFlowInfo(node), fFlowContext);
-		setFlowInfo(node, info);
+		if (fDoLoopReentrance && fSelection.coveredBy(node) && !fSelection.covers(node)) {
+			LoopReentranceVisitor loopReentranceVisitor= new LoopReentranceVisitor(fFlowContext, fSelection, node);
+			loopReentranceVisitor.process(node);
+			GenericSequentialFlowInfo info= createSequential();
+			info.merge(getFlowInfo(node), fFlowContext);
+			info.merge(loopReentranceVisitor.getFlowInfo(node), fFlowContext);
+			setFlowInfo(node, info);
+		}
 	}
 }
