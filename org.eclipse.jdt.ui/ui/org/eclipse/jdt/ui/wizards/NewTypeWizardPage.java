@@ -396,7 +396,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	private SelectionButtonDialogFieldGroup fOtherMdfButtons;
 
 	/**
-	 * @since 3.17
+	 * @since 3.18
 	 */
 	protected SelectionButtonDialogField fAddCommentButton;
 	private boolean fUseAddCommentButtonValue; // used for compatibility: Wizards that don't show the comment button control
@@ -1072,7 +1072,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * @param nColumns number of columns to span
 	 * @param isModule if it is module or package
 	 * @return link is returned
-	 * @since 3.17
+	 * @since 3.18
 	 */
 	protected Link createCommentWithLinkControls(Composite composite, int nColumns, boolean isModule) {
 		if(isModule)
