@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.Assignment.Operator;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
@@ -137,6 +138,24 @@ class AccessAnalyzer extends ASTVisitor {
 			AST ast= node.getAST();
 			Expression receiver= getReceiver(leftHandSide);
 
+			Operator operator= node.getOperator();
+			if (operator != Operator.ASSIGN) {
+				// setter only selected
+				if (!fSetter.isEmpty() && fGetter.isEmpty()) {
+					InfixExpression argument= ast.newInfixExpression();
+					MethodInvocation invocation= ast.newMethodInvocation();
+					invocation.setName(ast.newSimpleName(fSetter));
+					if (receiver != null)
+						invocation.setExpression((Expression) fRewriter.createCopyTarget(receiver));
+					invocation.arguments().add(argument);
+					argument.setOperator(ASTNodes.convertToInfixOperator(node.getOperator()));
+					argument.setLeftOperand(ast.newSimpleName(leftHandSide.toString()));
+					Expression rhs= (Expression) fRewriter.createCopyTarget(rightHandSide);
+					argument.setRightOperand(rhs);
+					fRewriter.replace(node, invocation, createGroupDescription(WRITE_ACCESS));
+					return false;
+				}
+			}
 			if (!fSetter.isEmpty()) {
 				// Write access.
 				MethodInvocation invocation= ast.newMethodInvocation();
@@ -318,32 +337,82 @@ class AccessAnalyzer extends ASTVisitor {
 		return null;
 	}
 
-	private MethodInvocation createInvocation(AST ast, Expression operand, String operator) {
-		Expression receiver= getReceiver(operand);
-		MethodInvocation invocation= ast.newMethodInvocation();
-		invocation.setName(ast.newSimpleName(fSetter));
-		if (receiver != null)
-			invocation.setExpression((Expression)fRewriter.createCopyTarget(receiver));
-		InfixExpression argument= ast.newInfixExpression();
-		invocation.arguments().add(argument);
-		if ("++".equals(operator)) { //$NON-NLS-1$
-			argument.setOperator(InfixExpression.Operator.PLUS);
-		} else if ("--".equals(operator)) { //$NON-NLS-1$
-			argument.setOperator(InfixExpression.Operator.MINUS);
-		} else {
-			Assert.isTrue(false, "Should not happen"); //$NON-NLS-1$
+	private ASTNode createInvocation(AST ast, Expression operand, String operator) {
+		// set & get: f++ --> setF(getF() + 1)
+		if (!fSetter.isEmpty() && !fGetter.isEmpty()) {
+			Expression receiver= getReceiver(operand);
+			InfixExpression argument= ast.newInfixExpression();
+			MethodInvocation invocation= ast.newMethodInvocation();
+			invocation.setName(ast.newSimpleName(fSetter));
+			if (receiver != null)
+				invocation.setExpression((Expression) fRewriter.createCopyTarget(receiver));
+			invocation.arguments().add(argument);
+			if ("++".equals(operator)) { //$NON-NLS-1$
+				argument.setOperator(InfixExpression.Operator.PLUS);
+			} else if ("--".equals(operator)) { //$NON-NLS-1$
+				argument.setOperator(InfixExpression.Operator.MINUS);
+			} else {
+				Assert.isTrue(false, "Should not happen"); //$NON-NLS-1$
+			}
+			MethodInvocation getter= ast.newMethodInvocation();
+			getter.setName(ast.newSimpleName(fGetter));
+			if (receiver != null)
+				getter.setExpression((Expression) fRewriter.createCopyTarget(receiver));
+			argument.setLeftOperand(getter);
+			argument.setRightOperand(ast.newNumberLiteral("1")); //$NON-NLS-1$
+
+			fReferencingGetter= true;
+			fReferencingSetter= true;
+			return invocation;
 		}
-		MethodInvocation getter= ast.newMethodInvocation();
-		getter.setName(ast.newSimpleName(fGetter));
-		if (receiver != null)
-			getter.setExpression((Expression)fRewriter.createCopyTarget(receiver));
-		argument.setLeftOperand(getter);
-		argument.setRightOperand(ast.newNumberLiteral("1")); //$NON-NLS-1$
+		// getter only: f++ --> f = getF() + 1
+		if (fSetter.isEmpty() && !fGetter.isEmpty()) {
+			Expression receiver= getReceiver(operand);
+			InfixExpression argument= ast.newInfixExpression();
+			Assignment invocation= ast.newAssignment();
+			invocation.setLeftHandSide(ast.newSimpleName(operand.toString()));
+			if (receiver != null)
+				invocation.setLeftHandSide((Expression) fRewriter.createCopyTarget(receiver));
+			MethodInvocation getter= ast.newMethodInvocation();
+			getter.setName(ast.newSimpleName(fGetter));
+			if ("++".equals(operator)) { //$NON-NLS-1$
+				argument.setOperator(InfixExpression.Operator.PLUS);
+			} else if ("--".equals(operator)) { //$NON-NLS-1$
+				argument.setOperator(InfixExpression.Operator.MINUS);
+			} else {
+				Assert.isTrue(false, "Should not happen"); //$NON-NLS-1$
+			}
+			argument.setRightOperand(ast.newNumberLiteral("1")); //$NON-NLS-1$
+			argument.setLeftOperand(getter);
+			invocation.setRightHandSide(argument);
+			fReferencingGetter= true;
+			fReferencingSetter= false;
+			return invocation;
+		}
+		// setter only: f++ --> setF(f + 1)
+		if (!fSetter.isEmpty() && fGetter.isEmpty()) {
+			Expression receiver= getReceiver(operand);
+			InfixExpression argument= ast.newInfixExpression();
+			MethodInvocation invocation= ast.newMethodInvocation();
+			invocation.setName(ast.newSimpleName(fSetter));
+			if (receiver != null)
+				invocation.setExpression((Expression) fRewriter.createCopyTarget(receiver));
+			invocation.arguments().add(argument);
+			if ("++".equals(operator)) { //$NON-NLS-1$
+				argument.setOperator(InfixExpression.Operator.PLUS);
+			} else if ("--".equals(operator)) { //$NON-NLS-1$
+				argument.setOperator(InfixExpression.Operator.MINUS);
+			} else {
+				Assert.isTrue(false, "Should not happen"); //$NON-NLS-1$
+			}
+			argument.setLeftOperand(ast.newSimpleName(operand.toString()));
+			argument.setRightOperand(ast.newNumberLiteral("1")); //$NON-NLS-1$
 
-		fReferencingGetter= true;
-		fReferencingSetter= true;
-
-		return invocation;
+			fReferencingGetter= false;
+			fReferencingSetter= true;
+			return invocation;
+		}
+		return null;
 	}
 
 	private TextEditGroup createGroupDescription(String name) {

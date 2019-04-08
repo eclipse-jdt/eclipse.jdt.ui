@@ -615,7 +615,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			result.add(description);
 			rewrite.insertAt(createSetterMethod(ast, rewriter, lineDelimiter), position, description);
 		}
-		if (!JdtFlags.isPrivate(fField))
+		if (!JdtFlags.isPrivate(fField) && fCreateGetter && fCreateSetter)
 			result.add(makeDeclarationPrivate(rewriter, decl));
 		return result;
 	}
