@@ -107,7 +107,8 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 
 		@Override
 		public boolean visit(TypeDeclaration node) {
-			if (!fFindUnqualifiedStaticAccesses && !fFindUnqualifiedStaticMethodAccesses && node.isInterface())
+			if (!fFindUnqualifiedStaticAccesses && !fFindUnqualifiedStaticMethodAccesses
+					&& !fFindUnqualifiedAccesses && !fFindUnqualifiedMethodAccesses && node.isInterface())
 				return false;
 
 			return super.visit(node);

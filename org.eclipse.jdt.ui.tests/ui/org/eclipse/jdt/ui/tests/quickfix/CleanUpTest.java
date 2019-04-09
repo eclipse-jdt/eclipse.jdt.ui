@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -9243,6 +9243,48 @@ public class CleanUpTest extends CleanUpTestCase {
 		enable(CleanUpConstants.REMOVE_REDUNDANT_SEMICOLONS);
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 
+	}
+
+	public void testBug491087() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("interface A {\n");
+		buf.append("    class B {\n");
+		buf.append("        String field;\n");
+		buf.append("       B() { field = \"foo\"; }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("class C {\n");
+		buf.append("    class D {\n");
+		buf.append("       String field;\n");
+		buf.append("       D() { field = \"bar\"; }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		ICompilationUnit cu1= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("interface A {\n");
+		buf.append("    class B {\n");
+		buf.append("        String field;\n");
+		buf.append("       B() { this.field = \"foo\"; }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("class C {\n");
+		buf.append("    class D {\n");
+		buf.append("       String field;\n");
+		buf.append("       D() { this.field = \"bar\"; }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		String expected1= buf.toString();
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 
 }
