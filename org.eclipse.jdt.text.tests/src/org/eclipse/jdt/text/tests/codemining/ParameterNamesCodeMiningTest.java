@@ -36,9 +36,13 @@ import org.eclipse.jface.text.source.projection.ProjectionViewer;
 import org.eclipse.jface.text.tests.util.DisplayHelper;
 
 import org.eclipse.ui.IEditorReference;
+import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.internal.WorkbenchPlugin;
+import org.eclipse.ui.intro.IIntroManager;
+import org.eclipse.ui.intro.IIntroPart;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -70,6 +74,9 @@ public class ParameterNamesCodeMiningTest extends TestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
+		if(!welcomeClosed) {
+			closeIntro(PlatformUI.getWorkbench());
+		}
 		fProject= JavaProjectHelper.createJavaProject(getClass().getName(), "bin");
 		JavaProjectHelper.addRTJar(fProject);
 		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(fProject, "src");
@@ -226,6 +233,18 @@ public class ParameterNamesCodeMiningTest extends TestCase {
 			}.waitForCondition(widget.getDisplay(), 2000));
 		} finally {
 			preferenceStore.setValue(PreferenceConstants.EDITOR_MARK_OCCURRENCES, initial);
+		}
+	}
+
+	private static boolean welcomeClosed;
+	private static void closeIntro(final IWorkbench wb) {
+		IWorkbenchWindow window = wb.getActiveWorkbenchWindow();
+		if (window != null) {
+			IIntroManager im = wb.getIntroManager();
+			IIntroPart intro = im.getIntro();
+			if (intro != null) {
+				welcomeClosed = im.closeIntro(intro);
+			}
 		}
 	}
 }
