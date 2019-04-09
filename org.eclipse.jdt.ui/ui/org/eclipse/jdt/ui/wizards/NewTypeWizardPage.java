@@ -396,7 +396,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	private SelectionButtonDialogFieldGroup fOtherMdfButtons;
 
 	/**
-	 * @since 3.18
+	 * @noreference This field is not intended to be referenced by clients.
 	 */
 	protected SelectionButtonDialogField fAddCommentButton;
 	private boolean fUseAddCommentButtonValue; // used for compatibility: Wizards that don't show the comment button control
