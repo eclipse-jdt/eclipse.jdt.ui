@@ -10,6 +10,7 @@ Bundle-Vendor: %Plugin.providerName
 Bundle-Localization: plugin
 Export-Package: 
  org.eclipse.jdt.text.tests,
+ org.eclipse.jdt.text.tests.codemining,
  org.eclipse.jdt.text.tests.contentassist,
  org.eclipse.jdt.text.tests.performance,
  org.eclipse.jdt.text.tests.spelling,
