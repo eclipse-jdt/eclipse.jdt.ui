@@ -2,7 +2,7 @@
 
 <!--
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -45,6 +45,12 @@
  */</template>
  
 <template name="methodcomment" id="org.eclipse.jdt.ui.text.codetemplates.methodcomment" description="%CodeTemplates.nonoverridingcomment" context="methodcomment_context" enabled="true">/**
+ * ${tags}
+ */</template>
+
+<template name="modulecomment" id="org.eclipse.jdt.ui.text.codetemplates.modulecomment" description="%CodeTemplates.modulecomment" context="modulecomment_context" enabled="true">/**
+ * @author ${user}
+ *
  * ${tags}
  */</template>
 

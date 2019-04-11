@@ -19,6 +19,7 @@ package org.eclipse.jdt.internal.core.manipulation;
 
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.IModuleBinding;
 import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -300,6 +301,10 @@ public class BindingLabelProviderCore {
 		}
 	}
 
+	private static void getModuleLabel(IModuleBinding moduleBinding, @SuppressWarnings("unused") long flags, StringBuffer buffer) {
+		buffer.append(moduleBinding.getName());
+	}
+
 	/**
 	 * Returns the label for a Java element with the flags as defined by {@link JavaElementLabelsCore}.
 	 * @param binding The binding to render.
@@ -312,6 +317,8 @@ public class BindingLabelProviderCore {
 			getTypeLabel(((ITypeBinding) binding), flags, buffer);
 		} else if (binding instanceof IMethodBinding) {
 			getMethodLabel(((IMethodBinding) binding), flags, buffer);
+		} else if (binding instanceof IModuleBinding) {
+			getModuleLabel(((IModuleBinding) binding), flags, buffer);
 		} else if (binding instanceof IVariableBinding) {
 			final IVariableBinding variable= (IVariableBinding) binding;
 			if (variable.isField()) {

@@ -941,6 +941,8 @@ public class JavadocContentAccess2 {
 		List<TagElement> parameters= new ArrayList<>();
 		TagElement returnTag= null;
 		List<TagElement> exceptions= new ArrayList<>();
+		List<TagElement> provides= new ArrayList<>();
+		List<TagElement> uses= new ArrayList<>();
 		List<TagElement> versions= new ArrayList<>();
 		List<TagElement> authors= new ArrayList<>();
 		List<TagElement> sees= new ArrayList<>();
@@ -949,8 +951,6 @@ public class JavadocContentAccess2 {
 		List<TagElement> apinote= new ArrayList<>(1);
 		List<TagElement> implspec= new ArrayList<>(1);
 		List<TagElement> implnote= new ArrayList<>(1);
-		List<TagElement> uses= new ArrayList<>(1);
-		List<TagElement> provides= new ArrayList<>(1);
 		List<TagElement> hidden= new ArrayList<>(1);
 
 		List<TagElement> tags= fJavadoc.tags();
@@ -1010,6 +1010,10 @@ public class JavadocContentAccess2 {
 					}
 				}
 
+			} else if (TagElement.TAG_PROVIDES.equals(tagName)) {
+				provides.add(tag);
+			} else if (TagElement.TAG_USES.equals(tagName)) {
+				uses.add(tag);
 			} else if (TagElement.TAG_SINCE.equals(tagName)) {
 				since.add(tag);
 			} else if (TagElement.TAG_VERSION.equals(tagName)) {

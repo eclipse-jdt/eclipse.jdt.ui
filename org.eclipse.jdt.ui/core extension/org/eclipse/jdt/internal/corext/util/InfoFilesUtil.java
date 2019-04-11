@@ -13,6 +13,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.util;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -46,7 +49,9 @@ public class InfoFilesUtil {
 		String lineDelimiter= StubUtility.getLineDelimiterUsed(pack.getJavaProject());
 		StringBuilder content= new StringBuilder();
 		String fileComment= addComments ? getFileComment(fileName, pack, lineDelimiter) : null;
-		String typeComment= addComments ? getTypeComment(fileName, pack, lineDelimiter) : null;
+		String typeComment= addComments ?
+				(JavaModelUtil.MODULE_INFO_JAVA.equals(fileName) ? getModuleComment(fileName, pack, fileContent, lineDelimiter) : getTypeComment(fileName, pack, lineDelimiter))
+				: null;
 		if (fileComment != null) {
 			content.append(fileComment);
 			content.append(lineDelimiter);
@@ -99,6 +104,17 @@ public class InfoFilesUtil {
 		ICompilationUnit cu= pack.getCompilationUnit(fileName);
 		String typeName= fileName.substring(0, fileName.length() - JavaModelUtil.DEFAULT_CU_SUFFIX.length());
 		return CodeGeneration.getTypeComment(cu, typeName, lineDelimiterUsed);
+	}
+
+	public static String getModuleComment(String fileName, IPackageFragment pack, String fileContent, String lineDelimiterUsed) throws CoreException {
+		ICompilationUnit cu= pack.getCompilationUnit(fileName);
+		Pattern p= Pattern.compile("\\s*module\\s*(\\w*).*"); //$NON-NLS-1$
+		Matcher m= p.matcher(fileContent);
+		String moduleName= ""; //$NON-NLS-1$
+		if (m.matches()) {
+			moduleName= m.group(1);
+		}
+		return CodeGeneration.getModuleComment(cu, moduleName, new String[0], new String[0], lineDelimiterUsed);
 	}
 
 }

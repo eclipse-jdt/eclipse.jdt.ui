@@ -85,6 +85,7 @@ public class JavaManipulationMessages extends NLS {
 	public static String CodeTemplateContextType_variable_description_filecomment;
 	public static String CodeTemplateContextType_variable_description_packagename;
 	public static String CodeTemplateContextType_variable_description_projectname;
+	public static String CodeTemplateContextType_variable_description_enclosingmodule;
 
 	public static String CodeTemplateContextType_validate_unknownvariable;
 	public static String CodeTemplateContextType_validate_missingvariable;

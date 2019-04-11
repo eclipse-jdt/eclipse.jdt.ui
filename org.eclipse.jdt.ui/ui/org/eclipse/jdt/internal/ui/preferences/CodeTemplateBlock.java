@@ -197,6 +197,8 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 				return 8;
 			} else if (CodeTemplateContextType.SETTERCOMMENT_ID.equals(id)) {
 				return 9;
+			} else if (CodeTemplateContextType.MODULECOMMENT_ID.equals(id)) {
+				return 10;
 			}
 			return 1000;
 		}
@@ -255,6 +257,8 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 				return PreferencesMessages.CodeTemplateBlock_gettercomment_label;
 			} else if (CodeTemplateContextType.SETTERCOMMENT_ID.equals(id)) {
 				return PreferencesMessages.CodeTemplateBlock_settercomment_label;
+			} else if (CodeTemplateContextType.MODULECOMMENT_ID.equals(id)) {
+				return PreferencesMessages.CodeTemplateBlock_modulecomment_label;
 			}
 			return data.getTemplate().getDescription();
 		}

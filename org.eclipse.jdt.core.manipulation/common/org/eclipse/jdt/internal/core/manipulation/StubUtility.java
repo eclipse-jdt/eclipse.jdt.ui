@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -97,6 +97,7 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.formatter.IndentManipulation;
+import org.eclipse.jdt.core.manipulation.CodeGeneration;
 import org.eclipse.jdt.core.manipulation.CodeStyleConfiguration;
 import org.eclipse.jdt.core.manipulation.JavaManipulation;
 
@@ -504,6 +505,85 @@ public class StubUtility {
 		}
 		edit.apply(doc, 0);
 		return doc.get();
+	}
+
+	/*
+	 * Don't use this method directly, use CodeGeneration.
+	 * @see CodeGeneration#getModuleComment(IJavaProject, String, String, String[], String[], String[], String[], String[], String)
+	 */
+	public static String getModuleComment(ICompilationUnit cu, String moduleName, String[] providesNames,
+			String[] usesNames, String lineDelimiter) throws CoreException {
+		String templateName= CodeTemplateContextType.MODULECOMMENT_ID;
+		Template template= getCodeTemplate(templateName, cu.getJavaProject());
+		if (template == null) {
+			return null;
+		}
+		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeId(), cu.getJavaProject(), lineDelimiter);
+		context.setCompilationUnitVariables(cu);
+		context.setVariable(CodeTemplateContextType.ENCLOSING_MODULE, moduleName);
+		TemplateBuffer buffer;
+		try {
+			buffer= context.evaluate(template);
+		} catch (BadLocationException e) {
+			throw new CoreException(Status.CANCEL_STATUS);
+		} catch (TemplateException e) {
+			throw new CoreException(Status.CANCEL_STATUS);
+		}
+		String str= buffer.getString();
+		if (Strings.containsOnlyWhitespaces(str)) {
+			return null;
+		}
+
+		TemplateVariable position= findVariable(buffer, CodeTemplateContextType.TAGS); // look if Javadoc tags have to be added
+		if (position == null) {
+			return str;
+		}
+
+		IDocument document= new Document(str);
+		int[] tagOffsets= position.getOffsets();
+		for (int i= tagOffsets.length - 1; i >= 0; i--) { // from last to first
+			try {
+				insertModuleTags(document, tagOffsets[i], position.getLength(), providesNames, usesNames,
+						lineDelimiter);
+			} catch (BadLocationException e) {
+				throw new CoreException(new Status(IStatus.ERROR, JavaManipulationPlugin.getPluginId(), IStatus.ERROR, e.getMessage(), e));
+			}
+		}
+		return document.get();
+	}
+
+	private static void insertModuleTags(IDocument textBuffer, int offset, int length, String[] providesNames,
+			String[] usesNames, String lineDelimiter) throws BadLocationException {
+		IRegion region= textBuffer.getLineInformationOfOffset(offset);
+		if (region == null) {
+			return;
+		}
+		String lineStart= textBuffer.get(region.getOffset(), offset - region.getOffset());
+
+		StringBuilder buf= new StringBuilder();
+		for (int i= 0; i < providesNames.length; i++) {
+			if (buf.length() > 0) {
+				buf.append(lineDelimiter).append(lineStart);
+			}
+			buf.append("@provides ").append(providesNames[i]); //$NON-NLS-1$
+		}
+		for (int i= 0; i < usesNames.length; i++) {
+			if (buf.length() > 0) {
+				buf.append(lineDelimiter).append(lineStart);
+			}
+			buf.append("@uses ").append(usesNames[i]); //$NON-NLS-1$
+		}
+		if (buf.length() == 0 && isAllCommentWhitespace(lineStart)) {
+			int prevLine= textBuffer.getLineOfOffset(offset) - 1;
+			if (prevLine > 0) {
+				IRegion prevRegion= textBuffer.getLineInformation(prevLine);
+				int prevLineEnd= prevRegion.getOffset() + prevRegion.getLength();
+				// clear full line
+				textBuffer.replace(prevLineEnd, offset + length - prevLineEnd, ""); //$NON-NLS-1$
+				return;
+			}
+		}
+		textBuffer.replace(offset, length, buf.toString());
 	}
 
 	/*
