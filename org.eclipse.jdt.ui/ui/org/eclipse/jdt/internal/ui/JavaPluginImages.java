@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -444,6 +444,12 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OVR_CLASS= createUnManagedCached(T_OVR, "class_tsk.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_ABSTRACT_CLASS= createUnManagedCached(T_OVR, "class_abs_tsk.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_LIBRARY= createUnManagedCached(T_OVR, "library_ovr.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_SYSTEM_MOD= createUnManagedCached(T_OVR, "system_mod_ovr.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_AUTO_MOD= createUnManagedCached(T_OVR, "auto_mod_ovr.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_EXPORTS= createUnManagedCached(T_OVR, "exports_pkg_ovr.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_OPENS= createUnManagedCached(T_OVR, "opens_pkg_ovr.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_READS= createUnManagedCached(T_OVR, "reads_mod_ovr.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_PATCH= createUnManagedCached(T_OVR, "patch_ovr.png"); //$NON-NLS-1$
 	
     // Call Hierarchy
     public static final ImageDescriptor DESC_OVR_RECURSIVE= createUnManaged(T_OVR, "recursive_co.png");              //$NON-NLS-1$

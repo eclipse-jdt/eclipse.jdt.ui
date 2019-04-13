@@ -47,6 +47,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleEncapsulationDetail.LimitModules;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleEncapsulationDetail.ModuleAddExport;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleEncapsulationDetail.ModuleAddExpose;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleEncapsulationDetail.ModuleAddOpens;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleEncapsulationDetail.ModuleAddReads;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleEncapsulationDetail.ModulePatch;
 
@@ -251,6 +253,10 @@ public class CPListElement {
 					if (!encodedExports.isEmpty()) {
 						res.add(JavaCore.newClasspathAttribute(IClasspathAttribute.ADD_EXPORTS, encodedExports));
 					}
+					String encodedOpens= ModuleEncapsulationDetail.encodeFiltered(detailValue, ModuleAddOpens.class);
+					if (!encodedOpens.isEmpty()) {
+						res.add(JavaCore.newClasspathAttribute(IClasspathAttribute.ADD_OPENS, encodedOpens));
+					}
 					String encodedReads= ModuleEncapsulationDetail.encodeFiltered(detailValue, ModuleAddReads.class);
 					if (!encodedReads.isEmpty()) {
 						res.add(JavaCore.newClasspathAttribute(IClasspathAttribute.ADD_READS, encodedReads));
@@ -453,8 +459,10 @@ public class CPListElement {
 		}
 	}
 
-	private void createAttributeElement(String key, Object value, boolean builtIn) {
-		fChildren.add(new CPListElementAttribute(this, key, value, builtIn));
+	public CPListElementAttribute createAttributeElement(String key, Object value, boolean builtIn) {
+		CPListElementAttribute attribute= new CPListElementAttribute(this, key, value, builtIn);
+		fChildren.add(attribute);
+		return attribute;
 	}
 
 	private static boolean isFiltered(Object entry, String[] filteredKeys) {
@@ -782,9 +790,11 @@ public class CPListElement {
 			for (int j= 0; j < extraAttributes.length; j++) {
 				IClasspathAttribute otherAttrib= extraAttributes[j];
 				if (IClasspathAttribute.PATCH_MODULE.equals(otherAttrib.getName())) {
-					details.add(ModulePatch.fromString(attribElem, otherAttrib.getValue()));
+					details.addAll(ModulePatch.fromMultiString(attribElem, otherAttrib.getValue()));
 				} else if (IClasspathAttribute.ADD_EXPORTS.equals(otherAttrib.getName())) {
-					details.addAll(ModuleAddExport.fromMultiString(attribElem, otherAttrib.getValue()));
+					details.addAll(ModuleAddExpose.fromMultiString(attribElem, otherAttrib.getValue(), true));
+				} else if (IClasspathAttribute.ADD_OPENS.equals(otherAttrib.getName())) {
+					details.addAll(ModuleAddExpose.fromMultiString(attribElem, otherAttrib.getValue(), false));
 				} else if (IClasspathAttribute.ADD_READS.equals(otherAttrib.getName())) {
 					details.addAll(ModuleAddReads.fromMultiString(attribElem, otherAttrib.getValue()));
 				} else if (IClasspathAttribute.LIMIT_MODULES.equals(otherAttrib.getName())) {
@@ -799,7 +809,7 @@ public class CPListElement {
 
 	private static boolean isModuleAttribute(String attributeName) {
 		return Stream.of(IClasspathAttribute.MODULE, IClasspathAttribute.LIMIT_MODULES,
-					IClasspathAttribute.PATCH_MODULE, IClasspathAttribute.ADD_EXPORTS, IClasspathAttribute.ADD_READS)
+					IClasspathAttribute.PATCH_MODULE, IClasspathAttribute.ADD_EXPORTS, IClasspathAttribute.ADD_OPENS, IClasspathAttribute.ADD_READS)
 				.anyMatch(attributeName::equals);
 	}
 
@@ -880,6 +890,8 @@ public class CPListElement {
 									buf.append(IClasspathAttribute.PATCH_MODULE+':'+detail.toString()).append(';');
 								if (detail instanceof ModuleAddExport)
 									buf.append(IClasspathAttribute.ADD_EXPORTS+':'+detail.toString()).append(';');
+								if (detail instanceof ModuleAddOpens)
+									buf.append(IClasspathAttribute.ADD_OPENS+':'+detail.toString()).append(';');
 								if (detail instanceof ModuleAddReads)
 									buf.append(IClasspathAttribute.ADD_READS+':'+detail.toString()).append(';');
 								if (detail instanceof LimitModules)

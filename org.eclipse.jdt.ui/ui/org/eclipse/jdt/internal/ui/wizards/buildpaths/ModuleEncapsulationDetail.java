@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2018 GK Software SE, and others.
+ * Copyright (c) 2017, 2019 GK Software SE, and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,10 +13,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IPath;
@@ -87,10 +90,12 @@ public abstract class ModuleEncapsulationDetail {
 	}
 
 	public static String encodeFiltered(ModuleEncapsulationDetail[] details, Class<?> detailClass) {
+		// ModulePatch uses File.pathSeparator internally, which conflicts with single ":" on unix.
+		String separator= detailClass == ModulePatch.class ? "::" : ":";  //$NON-NLS-1$//$NON-NLS-2$
 		return Arrays.stream(details)
 				.filter(detailClass::isInstance)
 				.map(ModuleEncapsulationDetail::toString)
-				.collect(Collectors.joining(":")); //$NON-NLS-1$
+				.collect(Collectors.joining(separator));
 	}
 
 	/**
@@ -98,44 +103,131 @@ public abstract class ModuleEncapsulationDetail {
 	 */
 	static class ModulePatch extends ModuleEncapsulationDetail {
 
+		public static Collection<ModulePatch> fromMultiString(CPListElementAttribute attribElem, String values) {
+			List<ModulePatch> patches= new ArrayList<>();
+			for (String value : values.split("::")) { // see comment in #encodeFiltered(..) //$NON-NLS-1$
+				ModulePatch patch= fromString(attribElem, value);
+				if (patch != null)
+					patches.add(patch);
+			}
+			return patches;
+		}
+
 		public static ModulePatch fromString(CPListElementAttribute attribElem, String value) {
 			return new ModulePatch(value, attribElem);
 		}
 
 		public final String fModule;
+		public final String fPaths;
 		
-		public ModulePatch(String module, CPListElementAttribute attribElem) {
-			fModule= module;
+		public ModulePatch(String value, CPListElementAttribute attribElem) {
+			int eqIdx= value.indexOf('=');
+			if (eqIdx == -1) {
+				fModule= value;
+				fPaths= attribElem.getParent().getJavaProject().getPath().toString();
+			} else {
+				fModule= value.substring(0, eqIdx);
+				fPaths= value.substring(eqIdx + 1);
+			}
 			fAttribElem= attribElem;
+		}
+
+		public ModulePatch(String moduleName, String paths, CPListElementAttribute attribElem) {
+			fModule= moduleName;
+			fPaths= paths;
+			fAttribElem= attribElem;
+		}
+		
+		public ModulePatch addLocations(String newLocations) {
+			String mergedPaths= fPaths + File.pathSeparatorChar + newLocations;
+			return new ModulePatch(fModule, mergedPaths, fAttribElem);
+		}
+
+		public ModulePatch removeLocations(String locations) {
+			Set<String> toRemove= new HashSet<>(Arrays.asList(locations.split(File.pathSeparator)));
+			List<String> current= new ArrayList<>(Arrays.asList(fPaths.split(File.pathSeparator)));
+			current.removeAll(toRemove);
+			String newPaths= String.join(File.pathSeparator, current);
+			if (newPaths.isEmpty()) {
+				return null;
+			}
+			return new ModulePatch(fModule, newPaths, fAttribElem);
+		}
+
+		@Override
+		public boolean affects(String module) {
+			return module.equals(fModule);
+		}
+
+		public String[] getPathArray() {
+			return fPaths.split(File.pathSeparator);
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime= 31;
+			int result= 1;
+			result= prime * result + ((fModule == null) ? 0 : fModule.hashCode());
+			result= prime * result + ((fPaths == null) ? 0 : fPaths.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			ModulePatch other= (ModulePatch) obj;
+			if (fModule == null) {
+				if (other.fModule != null)
+					return false;
+			} else if (!fModule.equals(other.fModule))
+				return false;
+			if (fPaths == null) {
+				if (other.fPaths != null)
+					return false;
+			} else if (!fPaths.equals(other.fPaths))
+				return false;
+			return true;
 		}
 
 		@Override
 		public String toString() {
+			if (fPaths != null) {
+				return fModule + '=' + fPaths;
+			}
 			return fModule;
 		}
 	}
 
-	/**
-	 * Node in the tree of CPListElement et al, representing an add-exports module directive.
-	 */
-	static class ModuleAddExport extends ModuleEncapsulationDetail {
+	/** Shared implementation for ModuleAddExports & ModuleAddOpens (same structure). */
+	abstract static class ModuleAddExpose extends ModuleEncapsulationDetail {
 
-		public static ModuleAddExport fromString(CPListElementAttribute attribElem, String value) {
+		public static ModuleAddExpose fromString(CPListElementAttribute attribElem, String value, boolean isExports) {
 			int slash= value.indexOf('/');
 			int equals= value.indexOf('=');
 			if (slash != -1 && equals != -1 && equals > slash) {
-				return new ModuleAddExport(value.substring(0, slash),
+				if (isExports)
+					return new ModuleAddExport(value.substring(0, slash),
 											value.substring(slash+1, equals),
 											value.substring(equals+1),
 											attribElem);
+				else
+					return new ModuleAddOpens(value.substring(0, slash),
+							value.substring(slash+1, equals),
+							value.substring(equals+1),
+							attribElem);
 			}
 			return null;
 		}
 
-		public static Collection<ModuleAddExport> fromMultiString(CPListElementAttribute attribElem, String values) {
-			List<ModuleAddExport> exports= new ArrayList<>();
+		public static Collection<ModuleAddExpose> fromMultiString(CPListElementAttribute attribElem, String values, boolean isExports) {
+			List<ModuleAddExpose> exports= new ArrayList<>();
 			for (String value : values.split(":")) { //$NON-NLS-1$
-				ModuleAddExport export= fromString(attribElem, value);
+				ModuleAddExpose export= fromString(attribElem, value, isExports);
 				if (export != null)
 					exports.add(export);
 			}
@@ -146,7 +238,7 @@ public abstract class ModuleEncapsulationDetail {
 		public final String fPackage;
 		public final String fTargetModules;
 
-		public ModuleAddExport(String sourceModule, String aPackage, String targetModules, CPListElementAttribute attribElem) {
+		public ModuleAddExpose(String sourceModule, String aPackage, String targetModules, CPListElementAttribute attribElem) {
 			fSourceModule= sourceModule;
 			fPackage= aPackage;
 			fTargetModules= targetModules;
@@ -154,8 +246,68 @@ public abstract class ModuleEncapsulationDetail {
 		}
 
 		@Override
+		public boolean affects(String module) {
+			return module.equals(fSourceModule);
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime= 31;
+			int result= 1;
+			result= prime * result + ((fPackage == null) ? 0 : fPackage.hashCode());
+			result= prime * result + ((fSourceModule == null) ? 0 : fSourceModule.hashCode());
+			result= prime * result + ((fTargetModules == null) ? 0 : fTargetModules.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			ModuleAddExpose other= (ModuleAddExpose) obj;
+			if (fPackage == null) {
+				if (other.fPackage != null)
+					return false;
+			} else if (!fPackage.equals(other.fPackage))
+				return false;
+			if (fSourceModule == null) {
+				if (other.fSourceModule != null)
+					return false;
+			} else if (!fSourceModule.equals(other.fSourceModule))
+				return false;
+			if (fTargetModules == null) {
+				if (other.fTargetModules != null)
+					return false;
+			} else if (!fTargetModules.equals(other.fTargetModules))
+				return false;
+			return true;
+		}
+
+		@Override
 		public String toString() {
 			return fSourceModule+'/'+fPackage+'='+fTargetModules;
+		}
+	}
+
+	/**
+	 * Node in the tree of CPListElement et al, representing an add-exports module directive.
+	 */
+	static class ModuleAddExport extends ModuleAddExpose {
+		public ModuleAddExport(String sourceModule, String aPackage, String targetModules, CPListElementAttribute attribElem) {
+			super(sourceModule, aPackage, targetModules, attribElem);
+		}
+	}
+
+	/**
+	 * Node in the tree of CPListElement et al, representing an add-opens module directive.
+	 */
+	static class ModuleAddOpens extends ModuleAddExpose {
+		public ModuleAddOpens(String sourceModule, String aPackage, String targetModules, CPListElementAttribute attribElem) {
+			super(sourceModule, aPackage, targetModules, attribElem);
 		}
 	}
 
@@ -194,6 +346,42 @@ public abstract class ModuleEncapsulationDetail {
 		}
 
 		@Override
+		public boolean affects(String module) {
+			return module.equals(fSourceModule);
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime= 31;
+			int result= 1;
+			result= prime * result + ((fSourceModule == null) ? 0 : fSourceModule.hashCode());
+			result= prime * result + ((fTargetModule == null) ? 0 : fTargetModule.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			ModuleAddReads other= (ModuleAddReads) obj;
+			if (fSourceModule == null) {
+				if (other.fSourceModule != null)
+					return false;
+			} else if (!fSourceModule.equals(other.fSourceModule))
+				return false;
+			if (fTargetModule == null) {
+				if (other.fTargetModule != null)
+					return false;
+			} else if (!fTargetModule.equals(other.fTargetModule))
+				return false;
+			return true;
+		}
+
+		@Override
 		public String toString() {
 			return fSourceModule+'='+fTargetModule;
 		}
@@ -219,8 +407,64 @@ public abstract class ModuleEncapsulationDetail {
 			fAttribElem= attribElem;
 		}
 		@Override
+		public boolean affects(String module) {
+			return false; // no change on the module, just on the module graph / set of root modules
+		}
+		@Override
 		public String toString() {
 			return String.join(",", fExplicitlyIncludedModules); //$NON-NLS-1$
+		}
+	}
+
+	public abstract boolean affects(String module);
+
+	/**
+	 * Searches the given list of details for a {@link ModulePatch} element affecting the given {@code module}.
+	 * If found, replaces the found ModulePatch with a new value where given {@code newLocations} have been added.
+	 * If no matching {@link ModulePatch} if found, a new one will be created and added to the {@code details} list.
+	 * This operation modifies the given list of details.
+	 * @param details list representation of a module attribute value
+	 * @param module name of the module, for which a {@link ModulePatch} should be modified
+	 * @param newLocations paths (separated by {@link File#pathSeparator}) to be added to the {@link ModulePatch}.
+	 * @param attribElem parent attribute, to hold the resulting details (not updated during this operation)
+	 */
+	public static void addPatchLocations(List<ModuleEncapsulationDetail> details, String module, String newLocations, CPListElementAttribute attribElem) {
+		for (int i= 0; i < details.size(); i++) {
+			ModuleEncapsulationDetail detail= details.get(i);
+			if (detail instanceof ModulePatch) {
+				ModulePatch oldPatch= (ModulePatch) detail;
+				if (oldPatch.affects(module)) {
+					details.set(i, oldPatch.addLocations(newLocations));
+					return;
+				}
+			}
+		}
+		details.add(new ModulePatch(module, newLocations, attribElem));
+	}
+
+	/**
+	 * Searches the given list of details for a {@link ModulePatch} element affecting the given {@code module}.
+	 * If found, replaces the found {@link ModulePatch} with a new value where the given {@code paths} have been removed.
+	 * This operation modifies the given list of details.
+	 * @param details list representation of a module attribute value
+	 * @param module name of the module, for which a {@link ModulePatch} should be modified
+	 * @param paths paths (separated by {@link File#pathSeparator}) to be removed from the {@link ModulePatch}.
+	 */
+	public static void removePatchLocation(List<ModuleEncapsulationDetail> details, String module, String paths) {
+		for (int i= 0; i < details.size(); i++) {
+			ModuleEncapsulationDetail detail= details.get(i);
+			if (detail instanceof ModulePatch) {
+				ModulePatch oldPatch= (ModulePatch) detail;
+				if (oldPatch.affects(module)) {
+					ModulePatch updatedPatch= oldPatch.removeLocations(paths);
+					if (updatedPatch == null) {
+						details.remove(i);
+					} else {
+						details.set(i, updatedPatch);
+					}
+					break;
+				}
+			}
 		}
 	}
 }

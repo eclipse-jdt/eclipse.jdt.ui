@@ -143,6 +143,7 @@ public class BuildPathsBlock {
 	private BuildPathBasePage fSourceContainerPage;
 	private ProjectsWorkbookPage fProjectsPage;
 	private LibrariesWorkbookPage fLibrariesPage;
+	private ModuleDependenciesPage fModulesPage;
 
 	private BuildPathBasePage fCurrPage;
 
@@ -271,10 +272,18 @@ public class BuildPathsBlock {
 		item.setData(ordpage);
 		item.setControl(ordpage.getControl(folder));
 
+		fModulesPage= new ModuleDependenciesPage(fClassPathList, fPageContainer);
+		item= new TabItem(folder, SWT.NONE);
+		item.setText(NewWizardMessages.BuildPathsBlock_tab_modules);
+		item.setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_MODULE));
+		item.setData(fModulesPage);
+		item.setControl(fModulesPage.getControl(folder));
+
 		if (fCurrJProject != null) {
 			fSourceContainerPage.init(fCurrJProject);
 			fLibrariesPage.init(fCurrJProject);
 			fProjectsPage.init(fCurrJProject);
+			fModulesPage.init(fCurrJProject);
 			fIs9OrHigher= JavaModelUtil.is9OrHigher(fCurrJProject);
 		}
 
@@ -357,6 +366,7 @@ public class BuildPathsBlock {
 			fSourceContainerPage.init(fCurrJProject);
 			fProjectsPage.init(fCurrJProject);
 			fLibrariesPage.init(fCurrJProject);
+			fModulesPage.init(fCurrJProject);
 			fIs9OrHigher= JavaModelUtil.is9OrHigher(fCurrJProject);
 		}
 
@@ -392,6 +402,7 @@ public class BuildPathsBlock {
 			// update the library and project page if fis9OrHigher changed
 			fLibrariesPage.init(fCurrJProject);
 			fProjectsPage.init(fCurrJProject);
+			fModulesPage.init(fCurrJProject);
 			fIs9OrHigher= is9OrHigherAfter;
 		}
 		doStatusLineUpdate();

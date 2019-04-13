@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 GK Software AG, and others.
+ * Copyright (c) 2017, 2019 GK Software AG, and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -12,6 +12,8 @@
  *     Stephan Herrmann - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
+
+import java.util.Collection;
 
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
@@ -31,7 +33,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleEncapsulationDetail.ModuleAddExport;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleEncapsulationDetail.ModuleAddExpose;
 
 /**
  * A dialog to configure add-exports of a library.
@@ -47,9 +49,10 @@ public class ModuleAddExportsDialog extends StatusDialog {
 	 *
 	 * @param parent Parent shell for the dialog
 	 * @param sourceJavaElements java elements representing the source modules from where packages should be exported
+	 * @param possibleTargetModules modules to be offered in content assist, or {@code null}
 	 * @param value The value to edit.
 	 */
-	public ModuleAddExportsDialog(Shell parent, IJavaElement[] sourceJavaElements, ModuleAddExport value) {
+	public ModuleAddExportsDialog(Shell parent, IJavaElement[] sourceJavaElements, Collection<String> possibleTargetModules, ModuleAddExpose value) {
 		super(parent);
 
 		IStatusChangeListener listener= new IStatusChangeListener() {
@@ -58,7 +61,7 @@ public class ModuleAddExportsDialog extends StatusDialog {
 				updateStatus(status);
 			}
 		};
-		fAddExportsBlock= new ModuleAddExportsBlock(listener, sourceJavaElements, value);
+		fAddExportsBlock= new ModuleAddExportsBlock(listener, sourceJavaElements, possibleTargetModules, value);
 
 		setTitle(NewWizardMessages.AddExportsDialog_title);
 		if (sourceJavaElements == null)
@@ -121,7 +124,7 @@ public class ModuleAddExportsDialog extends StatusDialog {
 	 *
 	 * @return the configured export value, or {@code null} if no export was configured.
 	 */
-	public ModuleAddExport getExport(CPListElementAttribute parentAttribute) {
+	public ModuleAddExpose getExport(CPListElementAttribute parentAttribute) {
 		return fAddExportsBlock.getExport(parentAttribute);
 	}
 }

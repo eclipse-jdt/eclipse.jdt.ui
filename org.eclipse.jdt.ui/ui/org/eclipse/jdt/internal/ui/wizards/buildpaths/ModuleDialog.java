@@ -17,6 +17,7 @@ import static org.eclipse.swt.events.SelectionListener.widgetSelectedAdapter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -85,6 +86,7 @@ import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaPrecomputedName
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleEncapsulationDetail.LimitModules;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleEncapsulationDetail.ModuleAddExport;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleEncapsulationDetail.ModuleAddExpose;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleEncapsulationDetail.ModuleAddReads;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleEncapsulationDetail.ModulePatch;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -184,7 +186,7 @@ public class ModuleDialog extends StatusDialog {
 	private final SelectionButtonDialogField fIsPatchCheckbox;
 	private final StringDialogField fPatchedModule;
 	
-	private final ListDialogField<ModuleAddExport> fAddExportsList;
+	private final ListDialogField<ModuleAddExpose> fAddExportsList;
 
 	private final ListDialogField<ModuleAddReads> fAddReadsList;
 	
@@ -225,7 +227,7 @@ public class ModuleDialog extends StatusDialog {
 		fPatchedModule.setLabelText(NewWizardMessages.ModuleDialog_patched_module_label);
 		fPatchedModule.setDialogFieldListener(field -> validateDetails(field));
 
-		fAddExportsList= createDetailListContents(entryToEdit, NewWizardMessages.ModuleDialog_exports_label, new AddExportsAdapter(), ModuleAddExport.class);
+		fAddExportsList= createDetailListContents(entryToEdit, NewWizardMessages.ModuleDialog_exports_label, new AddExportsAdapter(), ModuleAddExpose.class);
 		fAddReadsList= createDetailListContents(entryToEdit, NewWizardMessages.ModuleDialog_reads_label, new AddReadsAdapter(), ModuleAddReads.class);
 
 		initializeValues();
@@ -522,7 +524,7 @@ public class ModuleDialog extends StatusDialog {
 		}
 	}
 
-	public static void configureModuleContentAssist(Text textControl, Set<String> moduleNames) {
+	public static void configureModuleContentAssist(Text textControl, Collection<String> moduleNames) {
 		if (moduleNames.size() == 1) {
 			textControl.setText(moduleNames.iterator().next());
 		} else if (!moduleNames.isEmpty()) {
@@ -635,7 +637,7 @@ public class ModuleDialog extends StatusDialog {
 			}
 		}
 		if (status.isOK()) {
-			for (ModuleAddExport export : fAddExportsList.getElements()) {
+			for (ModuleAddExpose export : fAddExportsList.getElements()) {
 				if (!packages.add(export.fPackage)) {
 					status.setError(Messages.format(NewWizardMessages.ModuleDialog_duplicatePackage_error, export.fPackage));
 					break;
@@ -917,24 +919,24 @@ public class ModuleDialog extends StatusDialog {
 		abstract void editEntry(ListDialogField<T> field, T detail);
 	}
 
-	private class AddExportsAdapter extends ListAdapter<ModuleAddExport> {
+	private class AddExportsAdapter extends ListAdapter<ModuleAddExpose> {
 
 		@Override
-		void addEntry(ListDialogField<ModuleAddExport> field) {
+		void addEntry(ListDialogField<ModuleAddExpose> field) {
 			ModuleAddExport initialValue= new ModuleAddExport(getSourceModuleName(), NO_NAME, getCurrentModuleName(), null);
-			ModuleAddExportsDialog dialog= new ModuleAddExportsDialog(getShell(), fJavaElements, initialValue);
+			ModuleAddExportsDialog dialog= new ModuleAddExportsDialog(getShell(), fJavaElements, null, initialValue);
 			if (dialog.open() == Window.OK) {
-				ModuleAddExport export= dialog.getExport(fCurrCPElement.findAttributeElement(CPListElement.MODULE));
+				ModuleAddExpose export= dialog.getExport(fCurrCPElement.findAttributeElement(CPListElement.MODULE));
 				if (export != null)
 					field.addElement(export);
 			}
 		}
 
 		@Override
-		void editEntry(ListDialogField<ModuleAddExport> field, ModuleAddExport export) {
-			ModuleAddExportsDialog dialog= new ModuleAddExportsDialog(getShell(), fJavaElements, export);
+		void editEntry(ListDialogField<ModuleAddExpose> field, ModuleAddExpose export) {
+			ModuleAddExportsDialog dialog= new ModuleAddExportsDialog(getShell(), fJavaElements, null, export);
 			if (dialog.open() == Window.OK) {
-				ModuleAddExport newExport= dialog.getExport(fCurrCPElement.findAttributeElement(CPListElement.MODULE));
+				ModuleAddExpose newExport= dialog.getExport(fCurrCPElement.findAttributeElement(CPListElement.MODULE));
 				if (newExport != null) {
 					field.replaceElement(export, newExport);
 				} else {
