@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Microsoft Corporation - refactored to jdt.core.manipulation
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
@@ -177,7 +178,7 @@ public final class AddCustomConstructorOperation implements IWorkspaceRunnable {
 
 			if (listRewriter != null) {
 				ImportRewriteContext context= new ContextSensitiveImportRewriteContext(typeDecl, importRewrite);
-				MethodDeclaration stub= StubUtility2.createConstructorStub(cu, astRewrite, importRewrite, context, fParentType, fOmitSuper ? null : fConstructorBinding, fFieldBindings, fVisibility, fSettings);
+				MethodDeclaration stub= StubUtility2Core.createConstructorStub(cu, astRewrite, importRewrite, context, fParentType, fOmitSuper ? null : fConstructorBinding, fFieldBindings, fVisibility, fSettings);
 				if (stub != null) {
 					ASTNode insertion= StubUtility2Core.getNodeToInsertBefore(listRewriter, fInsert);
 					if (insertion != null && insertion.getParent() == typeDecl) {

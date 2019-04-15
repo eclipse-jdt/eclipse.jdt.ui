@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -12,10 +12,10 @@
  *     IBM Corporation - initial API and implementation
  *     Stephan Herrmann - Contribution for Bug 463360 - [override method][null] generating method override should not create redundant null annotations
  *     Red Hat Inc. - removed some methods and put them in StubUtility2Core
+ *     Microsoft Corporation - move createConstructorStub methods to StubUtility2Core
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
-import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
@@ -29,10 +29,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -43,7 +41,6 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
@@ -72,135 +69,8 @@ public final class StubUtility2 {
 
 	/* This method should work with all AST levels. */
 	public static MethodDeclaration createConstructorStub(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports, ImportRewriteContext context, IMethodBinding binding, String type, int modifiers, boolean omitSuperForDefConst, boolean todo, CodeGenerationSettings settings) throws CoreException {
-		AST ast= rewrite.getAST();
-		MethodDeclaration decl= ast.newMethodDeclaration();
-		decl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, modifiers & ~Modifier.ABSTRACT & ~Modifier.NATIVE));
-		decl.setName(ast.newSimpleName(type));
-		decl.setConstructor(true);
-
-		StubUtility2Core.createTypeParameters(imports, context, ast, binding, decl);
-
-		List<SingleVariableDeclaration> parameters= StubUtility2Core.createParameters(unit.getJavaProject(), imports, context, ast, binding, null, decl);
-
-		StubUtility2Core.createThrownExceptions(decl, binding, imports, context, ast);
-
-		Block body= ast.newBlock();
-		decl.setBody(body);
-
-		String delimiter= StubUtility.getLineDelimiterUsed(unit);
-		String bodyStatement= ""; //$NON-NLS-1$
-		if (!omitSuperForDefConst || !parameters.isEmpty()) {
-			SuperConstructorInvocation invocation= ast.newSuperConstructorInvocation();
-			SingleVariableDeclaration varDecl= null;
-			for (Iterator<SingleVariableDeclaration> iterator= parameters.iterator(); iterator.hasNext();) {
-				varDecl= iterator.next();
-				invocation.arguments().add(ast.newSimpleName(varDecl.getName().getIdentifier()));
-			}
-			bodyStatement= ASTNodes.asFormattedString(invocation, 0, delimiter, FormatterProfileManager.getProjectSettings(unit.getJavaProject()));
-		}
-
-		if (todo) {
-			String placeHolder= CodeGeneration.getMethodBodyContent(unit, type, binding.getName(), true, bodyStatement, delimiter);
-			if (placeHolder != null) {
-				ReturnStatement todoNode= (ReturnStatement) rewrite.createStringPlaceholder(placeHolder, ASTNode.RETURN_STATEMENT);
-				body.statements().add(todoNode);
-			}
-		} else {
-			ReturnStatement statementNode= (ReturnStatement) rewrite.createStringPlaceholder(bodyStatement, ASTNode.RETURN_STATEMENT);
-			body.statements().add(statementNode);
-		}
-
-		if (settings != null && settings.createComments) {
-			String string= CodeGeneration.getMethodComment(unit, type, decl, binding, delimiter);
-			if (string != null) {
-				Javadoc javadoc= (Javadoc) rewrite.createStringPlaceholder(string, ASTNode.JAVADOC);
-				decl.setJavadoc(javadoc);
-			}
-		}
-		return decl;
+		return StubUtility2Core.createConstructorStub(unit, rewrite, imports, context, binding, type, modifiers, omitSuperForDefConst, todo, settings, FormatterProfileManager.getProjectSettings(unit.getJavaProject()));
 	}
-
-	public static MethodDeclaration createConstructorStub(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports, ImportRewriteContext context, ITypeBinding typeBinding, IMethodBinding superConstructor, IVariableBinding[] variableBindings, int modifiers, CodeGenerationSettings settings) throws CoreException {
-		AST ast= rewrite.getAST();
-
-		MethodDeclaration decl= ast.newMethodDeclaration();
-		decl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, modifiers & ~Modifier.ABSTRACT & ~Modifier.NATIVE));
-		decl.setName(ast.newSimpleName(typeBinding.getName()));
-		decl.setConstructor(true);
-
-		List<SingleVariableDeclaration> parameters= decl.parameters();
-		if (superConstructor != null) {
-			StubUtility2Core.createTypeParameters(imports, context, ast, superConstructor, decl);
-
-			StubUtility2Core.createParameters(unit.getJavaProject(), imports, context, ast, superConstructor, null, decl);
-
-			StubUtility2Core.createThrownExceptions(decl, superConstructor, imports, context, ast);
-		}
-
-		Block body= ast.newBlock();
-		decl.setBody(body);
-
-		String delimiter= StubUtility.getLineDelimiterUsed(unit);
-
-		if (superConstructor != null) {
-			SuperConstructorInvocation invocation= ast.newSuperConstructorInvocation();
-			SingleVariableDeclaration varDecl= null;
-			for (Iterator<SingleVariableDeclaration> iterator= parameters.iterator(); iterator.hasNext();) {
-				varDecl= iterator.next();
-				invocation.arguments().add(ast.newSimpleName(varDecl.getName().getIdentifier()));
-			}
-			body.statements().add(invocation);
-		}
-
-		List<String> prohibited= new ArrayList<>();
-		for (final Iterator<SingleVariableDeclaration> iterator= parameters.iterator(); iterator.hasNext();)
-			prohibited.add(iterator.next().getName().getIdentifier());
-		String param= null;
-		List<String> list= new ArrayList<>(prohibited);
-		String[] excluded= null;
-		for (int i= 0; i < variableBindings.length; i++) {
-			SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
-			var.setType(imports.addImport(variableBindings[i].getType(), ast, context, TypeLocation.PARAMETER));
-			excluded= new String[list.size()];
-			list.toArray(excluded);
-			param= suggestParameterName(unit, variableBindings[i], excluded);
-			list.add(param);
-			var.setName(ast.newSimpleName(param));
-			parameters.add(var);
-		}
-
-		list= new ArrayList<>(prohibited);
-		for (int i= 0; i < variableBindings.length; i++) {
-			excluded= new String[list.size()];
-			list.toArray(excluded);
-			final String paramName= suggestParameterName(unit, variableBindings[i], excluded);
-			list.add(paramName);
-			final String fieldName= variableBindings[i].getName();
-			Expression expression= null;
-			if (paramName.equals(fieldName) || settings.useKeywordThis) {
-				FieldAccess access= ast.newFieldAccess();
-				access.setExpression(ast.newThisExpression());
-				access.setName(ast.newSimpleName(fieldName));
-				expression= access;
-			} else
-				expression= ast.newSimpleName(fieldName);
-			Assignment assignment= ast.newAssignment();
-			assignment.setLeftHandSide(expression);
-			assignment.setRightHandSide(ast.newSimpleName(paramName));
-			assignment.setOperator(Assignment.Operator.ASSIGN);
-			body.statements().add(ast.newExpressionStatement(assignment));
-		}
-
-		if (settings != null && settings.createComments) {
-			String string= CodeGeneration.getMethodComment(unit, typeBinding.getName(), decl, superConstructor, delimiter);
-			if (string != null) {
-				Javadoc javadoc= (Javadoc) rewrite.createStringPlaceholder(string, ASTNode.JAVADOC);
-				decl.setJavadoc(javadoc);
-			}
-		}
-		return decl;
-	}
-
 
 	public static MethodDeclaration createImplementationStub(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports, ImportRewriteContext context,
 			IMethodBinding binding, ITypeBinding targetType, CodeGenerationSettings settings, boolean inInterface, ASTNode astNode) throws CoreException {

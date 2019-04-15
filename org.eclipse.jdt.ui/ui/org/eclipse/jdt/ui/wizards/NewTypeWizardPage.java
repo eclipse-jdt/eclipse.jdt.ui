@@ -2765,7 +2765,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				createImports(imports, operation.getCreatedImports());
 			}
 			if (doConstructors) {
-				AddUnimplementedConstructorsOperation operation= new AddUnimplementedConstructorsOperation(unit, binding, null, -1, false, true, false);
+				AddUnimplementedConstructorsOperation operation= new AddUnimplementedConstructorsOperation(unit, binding, null, -1, false, true, false, FormatterProfileManager.getProjectSettings(type.getJavaProject()));
 				operation.setOmitSuper(true);
 				operation.setCreateComments(isAddComments());
 				operation.run(monitor);

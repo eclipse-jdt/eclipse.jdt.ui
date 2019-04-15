@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,11 +10,13 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Microsoft Corporation - refactored to jdt.core.manipulation
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -29,6 +31,8 @@ import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -92,6 +96,12 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 	/** The visibility flags of the new constructor */
 	private int fVisibility;
 
+	/** The formatter settings of the new constructor */
+	private Map<String, String> fFormatSettings;
+
+	/** The resulting text edit */
+	private TextEdit fResultingEdit= null;
+
 	/**
 	 * Creates a new add unimplemented constructors operation.
 	 *
@@ -102,8 +112,9 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 	 * @param imports <code>true</code> if the import edits should be applied, <code>false</code> otherwise
 	 * @param apply <code>true</code> if the resulting edit should be applied, <code>false</code> otherwise
 	 * @param save <code>true</code> if the changed compilation unit should be saved, <code>false</code> otherwise
+	 * @param formatSettings The settings map to use for formatting with the default code formatter. Recognized options are documented on {@link JavaCore#getDefaultOptions()}. If set to <code>null</code>, then use the current project settings {@link IJavaProject#getOptions(boolean)}.
 	 */
-	public AddUnimplementedConstructorsOperation(CompilationUnit astRoot, ITypeBinding type, IMethodBinding[] constructorsToImplement, int insertPos, final boolean imports, final boolean apply, final boolean save) {
+	public AddUnimplementedConstructorsOperation(CompilationUnit astRoot, ITypeBinding type, IMethodBinding[] constructorsToImplement, int insertPos, final boolean imports, final boolean apply, final boolean save, Map<String, String> formatSettings) {
 		if (astRoot == null || !(astRoot.getJavaElement() instanceof ICompilationUnit)) {
 			throw new IllegalArgumentException("AST must not be null and has to be created from a ICompilationUnit"); //$NON-NLS-1$
 		}
@@ -126,6 +137,7 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 		fCreateComments= StubUtility.doAddComments(astRoot.getJavaElement().getJavaProject());
 		fVisibility= Modifier.PUBLIC;
 		fOmitSuper= false;
+		fFormatSettings= formatSettings;
 	}
 
 	/**
@@ -155,6 +167,15 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 	 */
 	public ISchedulingRule getSchedulingRule() {
 		return ResourcesPlugin.getWorkspace().getRoot();
+	}
+
+	/**
+	 * Returns the resulting text edit.
+	 *
+	 * @return the resulting text edit
+	 */
+	public final TextEdit getResultingEdit() {
+		return fResultingEdit;
 	}
 
 	/**
@@ -235,7 +256,7 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 				IMethodBinding curr= toImplement[i];
 				if (!curr.isDeprecated() || createDeprecated) {
 					ImportRewriteContext context= new ContextSensitiveImportRewriteContext(node, importRewrite);
-					MethodDeclaration stub= StubUtility2.createConstructorStub(cu, astRewrite, importRewrite, context, curr, currTypeBinding.getName(), fVisibility, fOmitSuper, true, settings);
+					MethodDeclaration stub= StubUtility2Core.createConstructorStub(cu, astRewrite, importRewrite, context, curr, currTypeBinding.getName(), fVisibility, fOmitSuper, true, settings, fFormatSettings);
 					if (stub != null) {
 						fCreatedMethods.add(curr.getKey());
 						if (insertion != null)
@@ -245,17 +266,17 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 					}
 				}
 			}
-			MultiTextEdit edit= new MultiTextEdit();
+			fResultingEdit= new MultiTextEdit();
 
 			TextEdit importEdits= importRewrite.rewriteImports(new SubProgressMonitor(monitor, 1));
 			fCreatedImports= importRewrite.getCreatedImports();
 			if (fImports) {
-				edit.addChild(importEdits);
+				fResultingEdit.addChild(importEdits);
 			}
-			edit.addChild(astRewrite.rewriteAST());
+			fResultingEdit.addChild(astRewrite.rewriteAST());
 
 			if (fApply) {
-				JavaModelUtil.applyEdit(cu, edit, fSave, new SubProgressMonitor(monitor, 1));
+				JavaModelUtil.applyEdit(cu, fResultingEdit, fSave, new SubProgressMonitor(monitor, 1));
 			}
 		} finally {
 			monitor.done();

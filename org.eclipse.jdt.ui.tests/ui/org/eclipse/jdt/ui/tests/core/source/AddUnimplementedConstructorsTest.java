@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -54,6 +54,7 @@ import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileManager;
 
 public class AddUnimplementedConstructorsTest extends CoreTests {
 
@@ -118,7 +119,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		ITypeBinding binding= declaration.resolveBinding();
 		assertNotNull("Binding for type declaration could not be resolved", binding);
 
-		return new AddUnimplementedConstructorsOperation(unit, binding, null, insertPos, true, true, true);
+		return new AddUnimplementedConstructorsOperation(unit, binding, null, insertPos, true, true, true, FormatterProfileManager.getProjectSettings(type.getJavaProject()));
 	}
 
 	private void initCodeTemplates() {
