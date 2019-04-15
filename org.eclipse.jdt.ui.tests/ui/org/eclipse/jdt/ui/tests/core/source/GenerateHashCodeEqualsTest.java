@@ -14,6 +14,7 @@
  *     Pierre-Yves B. <pyvesdev@gmail.com> - Different behaviour when generating hashCode and equals - https://bugs.eclipse.org/539589
  *     Pierre-Yves B. <pyvesdev@gmail.com> - Confusing name when generating hashCode and equals with outer type - https://bugs.eclipse.org/539872
  *     Pierre-Yves B. <pyvesdev@gmail.com> - Allow hashCode and equals generation when no fields but a super/enclosing class that implements them - https://bugs.eclipse.org/539901
+ *     Pierre-Yves B. <pyvesdev@gmail.com> - [hashcode/equals] Redundant null check when instanceof is used - https://bugs.eclipse.org/545424
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core.source;
 
@@ -757,8 +758,6 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"	public boolean equals(Object obj) {\r\n" +
 				"		if (this == obj)\r\n" +
 				"			return true;\r\n" +
-				"		if (obj == null)\r\n" +
-				"			return false;\r\n" +
 				"		if (!(obj instanceof A))\r\n" +
 				"			return false;\r\n" +
 				"		A other = (A) obj;\r\n" +
@@ -829,8 +828,6 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"	public boolean equals(Object obj) {\r\n" +
 				"		if (this == obj)\r\n" +
 				"			return true;\r\n" +
-				"		if (obj == null)\r\n" +
-				"			return false;\r\n" +
 				"		if (!(obj instanceof A))\r\n" +
 				"			return false;\r\n" +
 				"		A other = (A) obj;\r\n" +
@@ -890,8 +887,6 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"	public boolean equals(Object obj) {\r\n" +
 				"		if (this == obj)\r\n" +
 				"			return true;\r\n" +
-				"		if (obj == null)\r\n" +
-				"			return false;\r\n" +
 				"		if (!(obj instanceof A))\r\n" +
 				"			return false;\r\n" +
 				"		A other = (A) obj;\r\n" +
@@ -960,8 +955,6 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"	public boolean equals(Object obj) {\r\n" +
 				"		if (this == obj)\r\n" +
 				"			return true;\r\n" +
-				"		if (obj == null)\r\n" +
-				"			return false;\r\n" +
 				"		if (!(obj instanceof A))\r\n" +
 				"			return false;\r\n" +
 				"		A other = (A) obj;\r\n" +
@@ -1150,8 +1143,6 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"	public boolean equals(Object obj) {\r\n" +
 				"		if (this == obj)\r\n" +
 				"			return true;\r\n" +
-				"		if (obj == null)\r\n" +
-				"			return false;\r\n" +
 				"		if (!(obj instanceof A))\r\n" +
 				"			return false;\r\n" +
 				"		A other = (A) obj;\r\n" +
@@ -1729,8 +1720,6 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"		public boolean equals(Object obj) {\r\n" +
 				"			if (this == obj)\r\n" +
 				"				return true;\r\n" +
-				"			if (obj == null)\r\n" +
-				"				return false;\r\n" +
 				"			if (!(obj instanceof Inner))\r\n" +
 				"				return false;\r\n" +
 				"			Inner other = (Inner) obj;\r\n" +

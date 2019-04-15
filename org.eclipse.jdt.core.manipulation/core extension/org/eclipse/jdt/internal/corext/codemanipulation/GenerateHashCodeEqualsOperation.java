@@ -15,6 +15,7 @@
  *     Pierre-Yves B. <pyvesdev@gmail.com> - Confusing name when generating hashCode and equals with outer type - https://bugs.eclipse.org/539872
  *     Red Hat Inc. - refactored to jdt.core.manipulation
  *     Pierre-Yves B. <pyvesdev@gmail.com> - Allow hashCode and equals generation when no fields but a super/enclosing class that implements them - https://bugs.eclipse.org/539901
+ *     Pierre-Yves B. <pyvesdev@gmail.com> - [hashcode/equals] Redundant null check when instanceof is used - https://bugs.eclipse.org/545424
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
@@ -862,10 +863,11 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 				createReturningIfStatement(fAst.newThisExpression(), fAst.newSimpleName(VARIABLE_NAME_EQUALS_PARAM), Operator.EQUALS, true));
 
 		if (needsNoSuperCall(fType, METHODNAME_EQUALS, new ITypeBinding[] {fAst.resolveWellKnownType(JAVA_LANG_OBJECT)})) {
-			// if (obj == null) return false;
-			body.statements().add(
-					createReturningIfStatement(fAst.newSimpleName(VARIABLE_NAME_EQUALS_PARAM), fAst.newNullLiteral(), Operator.EQUALS, false));
-
+			if (!fUseInstanceOf) {
+				// if (obj == null) return false;
+				body.statements().add(
+						createReturningIfStatement(fAst.newSimpleName(VARIABLE_NAME_EQUALS_PARAM), fAst.newNullLiteral(), Operator.EQUALS, false));
+			}
 		} else {
 			// if (!super.equals(obj)) return false;
 			SuperMethodInvocation superEqualsCall= fAst.newSuperMethodInvocation();
