@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -35,6 +35,7 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SwitchCase;
+import org.eclipse.jdt.core.dom.SwitchExpression;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.SynchronizedStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
@@ -174,6 +175,22 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 	}
 
 	@Override
+	public void endVisit(SwitchExpression node) {
+		ASTNode[] selectedNodes= getSelectedNodes();
+		if (doAfterValidation(node, selectedNodes)) {
+			List<SwitchCase> cases= getSwitchCases(node);
+			for (int i= 0; i < selectedNodes.length; i++) {
+				ASTNode topNode= selectedNodes[i];
+				if (cases.contains(topNode)) {
+					invalidSelection(JavaManipulationMessages.StatementAnalyzer_switch_expression);
+					break;
+				}
+			}
+		}
+		super.endVisit(node);
+	}
+
+	@Override
 	public void endVisit(SynchronizedStatement node) {
 		ASTNode firstSelectedNode= getFirstSelectedNode();
 		if (getSelection().getEndVisitSelectionMode(node) == Selection.SELECTED) {
@@ -230,9 +247,15 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 		reset();
 	}
 
-	private static List<SwitchCase> getSwitchCases(SwitchStatement node) {
+	private static List<SwitchCase> getSwitchCases(ASTNode node) {
 		List<SwitchCase> result= new ArrayList<>();
-		for (Iterator<Statement> iter= node.statements().iterator(); iter.hasNext(); ) {
+		List<Statement> statements= new ArrayList<>();
+		if (node instanceof SwitchStatement) {
+			statements= ((SwitchStatement) node).statements();
+		} else if (node instanceof SwitchExpression) {
+			statements= ((SwitchExpression) node).statements();
+		}
+		for (Iterator<Statement> iter= statements.iterator(); iter.hasNext();) {
 			Object element= iter.next();
 			if (element instanceof SwitchCase)
 				result.add((SwitchCase) element);
