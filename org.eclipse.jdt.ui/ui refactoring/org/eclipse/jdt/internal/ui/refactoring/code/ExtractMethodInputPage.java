@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -109,6 +109,11 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 
 		fTextField= createTextInputField(result, SWT.BORDER);
 		fTextField.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		String methodName= fRefactoring.getMethodName();
+		if (methodName != null && !methodName.trim().isEmpty()) {
+			fTextField.setText(methodName);
+			fTextField.setSelection(0, methodName.length());
+		}
 
 		layouter.perform(label, fTextField, 1);
 
