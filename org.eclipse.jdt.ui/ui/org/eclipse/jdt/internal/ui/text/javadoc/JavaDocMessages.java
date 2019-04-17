@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -38,6 +38,11 @@ final class JavaDocMessages extends NLS {
 	public static String JavaDoc2HTMLTextReader_since_section;
 	public static String JavaDoc2HTMLTextReader_specified_by_section;
 	public static String JavaDoc2HTMLTextReader_version_section;
+	public static String JavaDoc2HTMLTextReader_api_note;
+	public static String JavaDoc2HTMLTextReader_impl_spec;
+	public static String JavaDoc2HTMLTextReader_impl_note;
+	public static String JavaDoc2HTMLTextReader_uses;
+	public static String JavaDoc2HTMLTextReader_provides;
 	public static String JavadocContentAccess2_getproperty_message;
 	public static String JavadocContentAccess2_setproperty_message;
 
