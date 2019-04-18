@@ -140,7 +140,7 @@ class AccessAnalyzer extends ASTVisitor {
 
 			Operator operator= node.getOperator();
 			if (operator != Operator.ASSIGN) {
-				// setter only selected
+				// setter only selected. Ex. f += 10; --> setF(f + 10);
 				if (!fSetter.isEmpty() && fGetter.isEmpty()) {
 					InfixExpression argument= ast.newInfixExpression();
 					MethodInvocation invocation= ast.newMethodInvocation();
@@ -153,8 +153,32 @@ class AccessAnalyzer extends ASTVisitor {
 					Expression rhs= (Expression) fRewriter.createCopyTarget(rightHandSide);
 					argument.setRightOperand(rhs);
 					fRewriter.replace(node, invocation, createGroupDescription(WRITE_ACCESS));
+					fReferencingSetter= true;
 					return false;
 				}
+				// getter only selected. Ex. f += 10; --> f = getF() + 10;
+				if (fSetter.isEmpty() && !fGetter.isEmpty()) {
+					Assignment assignment= ast.newAssignment();
+					assignment.setLeftHandSide(ast.newSimpleName(leftHandSide.toString()));
+					InfixExpression argument= ast.newInfixExpression();
+					MethodInvocation invocation= ast.newMethodInvocation();
+					invocation.setName(ast.newSimpleName(fGetter));
+					if (receiver != null)
+						invocation.setExpression((Expression) fRewriter.createCopyTarget(receiver));
+					argument.setOperator(ASTNodes.convertToInfixOperator(node.getOperator()));
+					argument.setLeftOperand(invocation);
+					Expression rhs= (Expression) fRewriter.createCopyTarget(rightHandSide);
+					argument.setRightOperand(rhs);
+					assignment.setRightHandSide(argument);
+					fRewriter.replace(node, assignment, createGroupDescription(READ_ACCESS));
+					fReferencingGetter= true;
+					return false;
+				}
+			} else if (fSetter.isEmpty() && !fGetter.isEmpty()) {
+				// assignment operator with getter only. Ex f = 10;
+				// the getter only will not affect the assignment expression
+				rightHandSide.accept(this);
+				return false;
 			}
 			if (!fSetter.isEmpty()) {
 				// Write access.
@@ -169,10 +193,7 @@ class AccessAnalyzer extends ASTVisitor {
 			}
 			if (node.getOperator() == Assignment.Operator.ASSIGN) {
 				arguments.add((Expression) fRewriter.createCopyTarget(rightHandSide));
-			}
-
-			else if (!fGetter.isEmpty()) {
-				// This is the compound assignment case: field+= 10;
+			} else if (!fGetter.isEmpty()) {
 				InfixExpression exp= ast.newInfixExpression();
 				exp.setOperator(ASTNodes.convertToInfixOperator(node.getOperator()));
 				MethodInvocation getter= ast.newMethodInvocation();
