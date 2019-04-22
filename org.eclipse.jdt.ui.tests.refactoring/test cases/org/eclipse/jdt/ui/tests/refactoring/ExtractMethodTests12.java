@@ -32,16 +32,21 @@ public class ExtractMethodTests12 extends ExtractMethodTests {
 		return fgTestSetup;
 	}
 
+	@Override
+	protected void invalidSelectionTest() throws Exception {
+		performTest(fgTestSetup.getInvalidSelectionPackage(), "A", INVALID_SELECTION, null);
+	}
+
 	protected void try12Test() throws Exception {
 		performTest(fgTestSetup.getTry12Package(), "A", COMPARE_WITH_OUTPUT, "try12_out");
 	}
 
-	//====================================================================================
-	// Testing var type 
-	//====================================================================================
-
 	public void testSwitchExpr1() throws Exception {
 		try12Test();
+	}
+
+	public void testSwitchExpr2() throws Exception {
+		invalidSelectionTest();
 	}
 
 }

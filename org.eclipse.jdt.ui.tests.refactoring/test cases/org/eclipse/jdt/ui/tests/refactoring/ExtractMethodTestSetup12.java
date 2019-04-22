@@ -23,6 +23,7 @@ import junit.framework.Test;
 public class ExtractMethodTestSetup12 extends Java12Setup {
 
 	private IPackageFragment fTry12Package;
+	private IPackageFragment fInvalidSelectionPackage;
 
 	public ExtractMethodTestSetup12(Test test) {
 		super(test);
@@ -36,9 +37,14 @@ public class ExtractMethodTestSetup12 extends Java12Setup {
 
 		IPackageFragmentRoot root= getDefaultSourceFolder();
 		fTry12Package= root.createPackageFragment("try12_in", true, null);
+		fInvalidSelectionPackage= root.createPackageFragment("invalidSelection12", true, null);
 	}
 
 	public IPackageFragment getTry12Package() {
 		return fTry12Package;
+	}
+
+	public IPackageFragment getInvalidSelectionPackage() {
+		return fInvalidSelectionPackage;
 	}
 }
