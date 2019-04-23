@@ -363,7 +363,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 			String message= count == 1 ? ActionMessages.FindStringsToExternalizeAction_non_externalized_singular : Messages.format(
 					ActionMessages.FindStringsToExternalizeAction_non_externalized_plural, new Object[] { Integer.valueOf(count) });
 			setMessage(message);
-			setContentProvider(new ArrayContentProvider());
+			setContentProvider(ArrayContentProvider.getInstance());
 			setLabelProvider(createLabelProvider());
 		}
 

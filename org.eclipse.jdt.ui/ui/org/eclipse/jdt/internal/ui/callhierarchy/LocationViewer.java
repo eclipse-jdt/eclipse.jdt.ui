@@ -59,7 +59,7 @@ class LocationViewer extends TableViewer {
     LocationViewer(Composite parent) {
         super(createTable(parent));
 
-        setContentProvider(new ArrayContentProvider());
+        setContentProvider(ArrayContentProvider.getInstance());
         setLabelProvider(new LocationLabelProvider());
         setInput(new ArrayList<CallLocation>());
 

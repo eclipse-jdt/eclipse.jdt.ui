@@ -114,7 +114,7 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 			createMessageArea(control);
 			fViewer= new TableViewer(control, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
 			fViewer.setLabelProvider(createLabelProvider());
-			fViewer.setContentProvider(new ArrayContentProvider());
+			fViewer.setContentProvider(ArrayContentProvider.getInstance());
 			fViewer.setComparator(new SupertypeSelectionViewerSorter());
 			fViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 				@Override
@@ -455,7 +455,7 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 		data.heightHint= SWTUtil.getTableHeightHint(fTableViewer.getTable(), 3);
 		fTableViewer.getTable().setLayoutData(data);
 		fTableViewer.setLabelProvider(createLabelProvider());
-		fTableViewer.setContentProvider(new ArrayContentProvider());
+		fTableViewer.setContentProvider(ArrayContentProvider.getInstance());
 		fTableViewer.setComparator(new JavaElementComparator());
 		fTypesToExtract.add(getDeclaringType());
 		fTableViewer.setInput(fTypesToExtract.toArray());

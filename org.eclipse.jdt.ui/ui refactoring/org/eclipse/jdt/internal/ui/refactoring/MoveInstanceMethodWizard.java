@@ -147,7 +147,7 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 			tableColumnLayout.setColumnData(columnName, new ColumnWeightData(40, true));
 			
 			final TableViewer viewer= new TableViewer(table);
-			viewer.setContentProvider(new ArrayContentProvider());
+			viewer.setContentProvider(ArrayContentProvider.getInstance());
 			viewer.setLabelProvider(new TargetLabelProvider());
 
 			final IVariableBinding[] candidateTargets= fProcessor.getCandidateTargets();

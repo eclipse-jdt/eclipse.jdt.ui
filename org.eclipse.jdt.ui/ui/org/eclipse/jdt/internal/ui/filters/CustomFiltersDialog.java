@@ -186,7 +186,7 @@ public class CustomFiltersDialog extends SelectionDialog {
 		fCheckBoxList.getTable().setLayoutData(data);
 
 		fCheckBoxList.setLabelProvider(createLabelPrivder());
-		fCheckBoxList.setContentProvider(new ArrayContentProvider());
+		fCheckBoxList.setContentProvider(ArrayContentProvider.getInstance());
 		Arrays.sort(fBuiltInFilters);
 		fCheckBoxList.setInput(fBuiltInFilters);
 		setInitialSelections((Object[]) getEnabledFilterDescriptors());

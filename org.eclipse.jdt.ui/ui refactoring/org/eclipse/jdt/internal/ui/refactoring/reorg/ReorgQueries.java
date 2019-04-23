@@ -180,7 +180,7 @@ public class ReorgQueries implements IReorgQueries {
 					ListDialog dialog= new YesNoListDialog(fShell, true);
 					dialog.setAddCancelButton(false);
 					dialog.setBlockOnOpen(true);
-					dialog.setContentProvider(new ArrayContentProvider());
+					dialog.setContentProvider(ArrayContentProvider.getInstance());
 					dialog.setLabelProvider(new JavaElementLabelProvider());
 					dialog.setTitle(fDialogTitle);
 					dialog.setMessage(question);
@@ -292,7 +292,7 @@ public class ReorgQueries implements IReorgQueries {
 					ListDialog dialog= new YesNoListDialog(fShell, false);
 					dialog.setAddCancelButton(false);
 					dialog.setBlockOnOpen(true);
-					dialog.setContentProvider(new ArrayContentProvider());
+					dialog.setContentProvider(ArrayContentProvider.getInstance());
 					dialog.setLabelProvider(new JavaElementLabelProvider());
 					dialog.setTitle(fDialogTitle);
 					dialog.setMessage(question);

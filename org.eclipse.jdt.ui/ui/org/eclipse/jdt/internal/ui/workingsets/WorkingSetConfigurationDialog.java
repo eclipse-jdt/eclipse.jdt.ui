@@ -226,7 +226,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		fTableViewer.getTable().setLayoutData(data);
 
 		fTableViewer.setLabelProvider(new WorkingSetLabelProvider());
-		fTableViewer.setContentProvider(new ArrayContentProvider());
+		fTableViewer.setContentProvider(ArrayContentProvider.getInstance());
 		fTableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {

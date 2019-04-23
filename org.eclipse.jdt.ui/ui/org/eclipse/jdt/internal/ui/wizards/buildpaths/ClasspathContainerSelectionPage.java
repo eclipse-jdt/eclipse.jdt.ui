@@ -84,7 +84,7 @@ public class ClasspathContainerSelectionPage extends WizardPage {
 	public void createControl(Composite parent) {
 		fListViewer= new ListViewer(parent, SWT.SINGLE | SWT.BORDER);
 		fListViewer.setLabelProvider(new ClasspathContainerLabelProvider());
-		fListViewer.setContentProvider(new ArrayContentProvider());
+		fListViewer.setContentProvider(ArrayContentProvider.getInstance());
 		fListViewer.setComparator(new ViewerComparator());
 		fListViewer.setInput(Arrays.asList(fContainers));
 		fListViewer.addSelectionChangedListener(new ISelectionChangedListener() {

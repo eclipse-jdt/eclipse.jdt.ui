@@ -570,7 +570,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 
 		fTableViewer= new PullPushCheckboxTableViewer(table);
 		fTableViewer.setUseHashlookup(true);
-		fTableViewer.setContentProvider(new ArrayContentProvider());
+		fTableViewer.setContentProvider(ArrayContentProvider.getInstance());
 		fTableViewer.setLabelProvider(new MemberActionInfoLabelProvider());
 		fTableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 

@@ -190,7 +190,7 @@ public class ClasspathFixSelectionDialog extends StatusDialog {
 			label.setText(Messages.format(NewWizardMessages.ClasspathFixSelectionDialog_proposals_message, args));
 
 			fFixSelectionTable= new TableViewer(composite, SWT.SINGLE | SWT.BORDER);
-			fFixSelectionTable.setContentProvider(new ArrayContentProvider());
+			fFixSelectionTable.setContentProvider(ArrayContentProvider.getInstance());
 			fFixSelectionTable.setLabelProvider(new ClasspathFixLabelProvider());
 			fFixSelectionTable.setComparator(new ViewerComparator() {
 				@Override
