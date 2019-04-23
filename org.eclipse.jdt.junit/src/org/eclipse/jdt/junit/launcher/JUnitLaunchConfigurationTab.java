@@ -244,7 +244,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		fTestLoaderViewer.getCombo().setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		ArrayList<TestKind> items= TestKindRegistry.getDefault().getAllKinds();
-		fTestLoaderViewer.setContentProvider(new ArrayContentProvider());
+		fTestLoaderViewer.setContentProvider(ArrayContentProvider.getInstance());
 		fTestLoaderViewer.setLabelProvider(new LabelProvider() {
 			@Override
 			public String getText(Object element) {
@@ -261,7 +261,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 			}
 		});
 	}
-	
+
 	private void setEnableTagsGroup(SelectionChangedEvent event) {
 		ISelection selection= event.getSelection();
 		if (selection instanceof IStructuredSelection) {

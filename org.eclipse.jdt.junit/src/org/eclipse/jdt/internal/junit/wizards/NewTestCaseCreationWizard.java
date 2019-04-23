@@ -266,7 +266,7 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 				fPerformFix.addSelectionListener(this);
 
 				fFixSelectionTable= new TableViewer(composite, SWT.SINGLE | SWT.BORDER);
-				fFixSelectionTable.setContentProvider(new ArrayContentProvider());
+				fFixSelectionTable.setContentProvider(ArrayContentProvider.getInstance());
 				fFixSelectionTable.setLabelProvider(new ClasspathFixLabelProvider());
 				fFixSelectionTable.setComparator(new ViewerComparator());
 				fFixSelectionTable.addDoubleClickListener(this);
