@@ -43,6 +43,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 
+import org.eclipse.core.commands.Command;
 import org.eclipse.core.expressions.Expression;
 
 import org.eclipse.core.runtime.CoreException;
@@ -74,8 +75,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchCommandConstants;
 import org.eclipse.ui.LegacyHandlerSubmissionExpression;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.commands.ICommand;
-import org.eclipse.ui.commands.ICommandManager;
+import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.handlers.IHandlerActivation;
 import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.keys.IBindingService;
@@ -168,7 +168,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	private TreeViewer fTreeViewer;
 	/** The current string matcher */
 	protected JavaElementPrefixPatternMatcher fPatternMatcher;
-	private ICommand fInvokingCommand;
+	private Command fInvokingCommand;
 	private TriggerSequence[] fInvokingCommandKeySequences;
 
 	/**
@@ -209,8 +209,8 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	public AbstractInformationControl(Shell parent, int shellStyle, int treeStyle, String invokingCommandId, boolean showStatusField) {
 		super(parent, shellStyle, true, true, false, true, true, null, null);
 		if (invokingCommandId != null) {
-			ICommandManager commandManager= PlatformUI.getWorkbench().getCommandSupport().getCommandManager();
-			fInvokingCommand= commandManager.getCommand(invokingCommandId);
+			ICommandService commandService= PlatformUI.getWorkbench().getService(ICommandService.class);
+			fInvokingCommand= commandService.getCommand(invokingCommandId);
 			if (fInvokingCommand != null && !fInvokingCommand.isDefined())
 				fInvokingCommand= null;
 			else
@@ -773,7 +773,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 		getShell().removeFocusListener(listener);
 	}
 
-	final protected ICommand getInvokingCommand() {
+	final protected Command getInvokingCommand() {
 		return fInvokingCommand;
 	}
 
