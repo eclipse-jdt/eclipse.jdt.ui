@@ -16,8 +16,11 @@ package org.eclipse.jdt.text.tests.codemining;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.LongSupplier;
 
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -72,6 +75,7 @@ public class ParameterNamesCodeMiningTest extends TestCase {
 	}
 
 	@Override
+	@Before
 	protected void setUp() throws Exception {
 		super.setUp();
 		if(!welcomeClosed) {
@@ -85,6 +89,7 @@ public class ParameterNamesCodeMiningTest extends TestCase {
 	}
 
 	@Override
+	@After
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		IWorkbenchPage workbenchPage= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
@@ -113,6 +118,34 @@ public class ParameterNamesCodeMiningTest extends TestCase {
 		fParameterNameCodeMiningProvider.setContext(editor);
 		ISourceViewer viewer = editor.getViewer();
 		assertEquals(2, fParameterNameCodeMiningProvider.provideCodeMinings(viewer, new NullProgressMonitor()).get().size());
+	}
+
+	public void testMultiLines() throws Exception {
+		String contents =
+				"class Foo {\n" +
+				"	long n = Math.max(System.currentTimeMillis(\n" +
+				"					), 0);\n" +
+				"}";
+		ICompilationUnit compilationUnit= fPackage.createCompilationUnit("Foo.java", contents, true, new NullProgressMonitor());
+		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(compilationUnit);
+		fParameterNameCodeMiningProvider.setContext(editor);
+		JavaSourceViewer viewer = (JavaSourceViewer)editor.getViewer();
+		viewer.setCodeMiningProviders(new ICodeMiningProvider[] {
+				fParameterNameCodeMiningProvider
+		});
+		assertEquals(2, fParameterNameCodeMiningProvider.provideCodeMinings(viewer, new NullProgressMonitor()).get().size());
+		//
+		StyledText widget = viewer.getTextWidget();
+		int charWidth = widget.getTextBounds(0, 1).width;
+		LongSupplier drawnCodeMiningsCount = () -> Arrays.stream(widget.getStyleRanges()).filter(style ->
+			style.metrics != null && style.metrics.width > charWidth).count();
+		new DisplayHelper() {
+			@Override
+			protected boolean condition() {
+				return drawnCodeMiningsCount.getAsLong() == 2;
+			}
+		}.waitForCondition(widget.getDisplay(), 500);
+		assertEquals(2, drawnCodeMiningsCount.getAsLong());
 	}
 
 	public void testUnresolvedMethodBinding() throws Exception {
