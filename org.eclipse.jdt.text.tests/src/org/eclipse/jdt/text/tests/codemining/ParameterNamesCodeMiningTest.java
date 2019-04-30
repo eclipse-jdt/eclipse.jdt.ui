@@ -34,7 +34,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.codemining.ICodeMiningProvider;
-import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.projection.ProjectionViewer;
 import org.eclipse.jface.text.tests.util.DisplayHelper;
 
@@ -55,7 +54,9 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaCodeMiningReconciler;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.javaeditor.codemining.JavaMethodParameterCodeMiningProvider;
@@ -69,6 +70,7 @@ public class ParameterNamesCodeMiningTest extends TestCase {
 	private IJavaProject fProject;
 	private IPackageFragment fPackage;
 	private JavaMethodParameterCodeMiningProvider fParameterNameCodeMiningProvider;
+	private boolean wasCodeMiningEnabled;
 
 	public static Test suite() {
 		return new TestSuite(ParameterNamesCodeMiningTest.class);
@@ -86,58 +88,75 @@ public class ParameterNamesCodeMiningTest extends TestCase {
 		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(fProject, "src");
 		fPackage= root.getPackageFragment("");
 		fParameterNameCodeMiningProvider= new JavaMethodParameterCodeMiningProvider();
+		wasCodeMiningEnabled= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_CODEMINING_ENABLED);
+		PreferenceConstants.getPreferenceStore().setValue(PreferenceConstants.EDITOR_CODEMINING_ENABLED, true);
 	}
 
 	@Override
 	@After
 	protected void tearDown() throws Exception {
 		super.tearDown();
+		PreferenceConstants.getPreferenceStore().setValue(PreferenceConstants.EDITOR_CODEMINING_ENABLED, wasCodeMiningEnabled);
 		IWorkbenchPage workbenchPage= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
 		for (IEditorReference ref : workbenchPage.getEditorReferences()) {
 			workbenchPage.closeEditor(ref.getEditor(false), false);
 		}
 	}
 
+	private void waitReconciled(JavaSourceViewer viewer) {
+		assertTrue("Editor not reconciled", new DisplayHelper() {
+			@Override
+			protected boolean condition() {
+				return JavaCodeMiningReconciler.isReconciled(viewer);
+			}
+		}.waitForCondition(viewer.getTextWidget().getDisplay(), 2000));
+	}
+
 	public void testParameterNamesOK() throws Exception {
 		String contents= "public class Foo {\n" +
-				"	int n = Math.max(1, 2);\n" +
+				"	int n= Math.max(1, 2);\n" +
 				"}\n";
 		ICompilationUnit compilationUnit= fPackage.createCompilationUnit("Foo.java", contents, true, new NullProgressMonitor());
 		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(compilationUnit);
 		fParameterNameCodeMiningProvider.setContext(editor);
-		ISourceViewer viewer = editor.getViewer();
+		JavaSourceViewer viewer= (JavaSourceViewer)editor.getViewer();
+		waitReconciled(viewer);
+
 		assertEquals(2, fParameterNameCodeMiningProvider.provideCodeMinings(viewer, new NullProgressMonitor()).get().size());
 	}
 
 	public void testVarargs() throws Exception {
 		String contents= "public class Foo {\n" +
-				"	String s = String.format(\"%d %d\", 1, 2);\n" +
+				"	String s= String.format(\"%d %d\", 1, 2);\n" +
 				"}\n";
 		ICompilationUnit compilationUnit= fPackage.createCompilationUnit("Foo.java", contents, true, new NullProgressMonitor());
 		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(compilationUnit);
 		fParameterNameCodeMiningProvider.setContext(editor);
-		ISourceViewer viewer = editor.getViewer();
+		JavaSourceViewer viewer= (JavaSourceViewer)editor.getViewer();
+		waitReconciled(viewer);
 		assertEquals(2, fParameterNameCodeMiningProvider.provideCodeMinings(viewer, new NullProgressMonitor()).get().size());
 	}
 
 	public void testMultiLines() throws Exception {
 		String contents =
 				"class Foo {\n" +
-				"	long n = Math.max(System.currentTimeMillis(\n" +
+				"	long n= Math.max(System.currentTimeMillis(\n" +
 				"					), 0);\n" +
 				"}";
 		ICompilationUnit compilationUnit= fPackage.createCompilationUnit("Foo.java", contents, true, new NullProgressMonitor());
-		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(compilationUnit);
+		CompilationUnitEditor editor= (CompilationUnitEditor) EditorUtility.openInEditor(compilationUnit);
 		fParameterNameCodeMiningProvider.setContext(editor);
-		JavaSourceViewer viewer = (JavaSourceViewer)editor.getViewer();
+		JavaSourceViewer viewer= (JavaSourceViewer)editor.getViewer();
 		viewer.setCodeMiningProviders(new ICodeMiningProvider[] {
 				fParameterNameCodeMiningProvider
 		});
+		waitReconciled(viewer);
+		StyledText widget= viewer.getTextWidget();
+		//
 		assertEquals(2, fParameterNameCodeMiningProvider.provideCodeMinings(viewer, new NullProgressMonitor()).get().size());
 		//
-		StyledText widget = viewer.getTextWidget();
-		int charWidth = widget.getTextBounds(0, 1).width;
-		LongSupplier drawnCodeMiningsCount = () -> Arrays.stream(widget.getStyleRanges()).filter(style ->
+		int charWidth= widget.getTextBounds(0, 1).width;
+		LongSupplier drawnCodeMiningsCount= () -> Arrays.stream(widget.getStyleRanges()).filter(style ->
 			style.metrics != null && style.metrics.width > charWidth).count();
 		new DisplayHelper() {
 			@Override
@@ -151,14 +170,15 @@ public class ParameterNamesCodeMiningTest extends TestCase {
 	public void testUnresolvedMethodBinding() throws Exception {
 		String contents= "public class Foo {\n" +
 		"	public void mehod() {\n" +
-		"		List<String> list = Arrays.asList(\"foo\", \"bar\");\n" +
+		"		List<String> list= Arrays.asList(\"foo\", \"bar\");\n" +
 		"		System.out.printf(\"%s %s\", list.get(0), list.get(1));\n" +
 		"	}\n" +
 		"}";
 		ICompilationUnit compilationUnit= fPackage.createCompilationUnit("Foo.java", contents, true, new NullProgressMonitor());
 		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(compilationUnit);
 		fParameterNameCodeMiningProvider.setContext(editor);
-		ISourceViewer viewer = editor.getViewer();
+		JavaSourceViewer viewer= (JavaSourceViewer)editor.getViewer();
+		waitReconciled(viewer);
 		// Only code mining on "printf" parameters
 		assertEquals(2, fParameterNameCodeMiningProvider.provideCodeMinings(viewer, new NullProgressMonitor()).get().size());
 	}
@@ -175,19 +195,20 @@ public class ParameterNamesCodeMiningTest extends TestCase {
 				" * aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n" +
 				" */" +
 				"public class Foo {\n" +
-				"	int n = Math.max(1, 2);\n" +
+				"	int n= Math.max(1, 2);\n" +
 				"}";
 		ICompilationUnit compilationUnit= fPackage.createCompilationUnit("Foo.java", contents, true, new NullProgressMonitor());
 		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(compilationUnit);
 		fParameterNameCodeMiningProvider.setContext(editor);
-		JavaSourceViewer viewer = (JavaSourceViewer)editor.getViewer();
+		JavaSourceViewer viewer= (JavaSourceViewer)editor.getViewer();
 		viewer.doOperation(ProjectionViewer.COLLAPSE_ALL);
 		viewer.setCodeMiningProviders(new ICodeMiningProvider[] {
 			fParameterNameCodeMiningProvider
 		});
+		waitReconciled(viewer);
 		//
 		ILog log= WorkbenchPlugin.getDefault().getLog();
-		AtomicReference<IStatus> errorInLog = new AtomicReference<>();
+		AtomicReference<IStatus> errorInLog= new AtomicReference<>();
 		ILogListener logListener= (status, plugin) -> {
 			if (status.getSeverity() == IStatus.ERROR) {
 				errorInLog.set(status);
@@ -207,18 +228,19 @@ public class ParameterNamesCodeMiningTest extends TestCase {
 				" *\n" +
 				" */" +
 				"public class Foo {\n" +
-				"	int n = Math.max(1, 2);\n" +
+				"	int n= Math.max(1, 2);\n" +
 				"}";
 		ICompilationUnit compilationUnit= fPackage.createCompilationUnit("Foo.java", contents, true, new NullProgressMonitor());
 		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(compilationUnit);
 		fParameterNameCodeMiningProvider.setContext(editor);
-		JavaSourceViewer viewer = (JavaSourceViewer)editor.getViewer();
+		JavaSourceViewer viewer= (JavaSourceViewer)editor.getViewer();
 		viewer.setCodeMiningProviders(new ICodeMiningProvider[] {
 			fParameterNameCodeMiningProvider
 		});
+		waitReconciled(viewer);
 		//
-		StyledText widget = viewer.getTextWidget();
-		int charWidth = widget.getTextBounds(0, 1).width;
+		StyledText widget= viewer.getTextWidget();
+		int charWidth= widget.getTextBounds(0, 1).width;
 		assertTrue("Code mining not available on expected chars", new DisplayHelper() {
 			@Override
 			protected boolean condition() {
@@ -238,13 +260,13 @@ public class ParameterNamesCodeMiningTest extends TestCase {
 		//
 		viewer.setSelectedRange(viewer.getDocument().get().indexOf("max") + 1, 0);
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
-		boolean initial = preferenceStore.getBoolean(PreferenceConstants.EDITOR_MARK_OCCURRENCES);
+		boolean initial= preferenceStore.getBoolean(PreferenceConstants.EDITOR_MARK_OCCURRENCES);
 		try {
 			preferenceStore.setValue(PreferenceConstants.EDITOR_MARK_OCCURRENCES, true);
 			assertTrue("Occurence annotation not added", new org.eclipse.jdt.text.tests.performance.DisplayHelper() {
 				@Override
 				protected boolean condition() {
-					AtomicInteger annotationCount = new AtomicInteger();
+					AtomicInteger annotationCount= new AtomicInteger();
 					viewer.getAnnotationModel().getAnnotationIterator().forEachRemaining(annotation -> {
 						if (annotation.getType().contains("occurrence")) {
 							annotationCount.incrementAndGet();
@@ -259,7 +281,7 @@ public class ParameterNamesCodeMiningTest extends TestCase {
 					return Arrays.stream(widget.getStyleRanges())
 							.filter(range -> range.metrics != null && range.metrics.width > charWidth)
 							.allMatch(style -> {
-								char c = widget.getText().charAt(style.start + 1);
+								char c= widget.getText().charAt(style.start + 1);
 								return c == '1' || c == '2';
 							});
 				}
@@ -271,12 +293,12 @@ public class ParameterNamesCodeMiningTest extends TestCase {
 
 	private static boolean welcomeClosed;
 	private static void closeIntro(final IWorkbench wb) {
-		IWorkbenchWindow window = wb.getActiveWorkbenchWindow();
+		IWorkbenchWindow window= wb.getActiveWorkbenchWindow();
 		if (window != null) {
-			IIntroManager im = wb.getIntroManager();
-			IIntroPart intro = im.getIntro();
+			IIntroManager im= wb.getIntroManager();
+			IIntroPart intro= im.getIntro();
 			if (intro != null) {
-				welcomeClosed = im.closeIntro(intro);
+				welcomeClosed= im.closeIntro(intro);
 			}
 		}
 	}

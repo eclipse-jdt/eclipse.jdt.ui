@@ -14,6 +14,7 @@
 package org.eclipse.jdt.internal.ui.javaeditor.codemining;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -22,6 +23,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.codemining.AbstractCodeMiningProvider;
 import org.eclipse.jface.text.codemining.ICodeMining;
+import org.eclipse.jface.text.source.ISourceViewerExtension5;
 
 import org.eclipse.ui.texteditor.ITextEditor;
 
@@ -35,6 +37,7 @@ import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaCodeMiningReconciler;
 
 /**
  * Java code mining provider to show method parameters code minings.
@@ -46,6 +49,13 @@ public class JavaMethodParameterCodeMiningProvider extends AbstractCodeMiningPro
 
 	@Override
 	public CompletableFuture<List<? extends ICodeMining>> provideCodeMinings(ITextViewer viewer, IProgressMonitor monitor) {
+		if (viewer instanceof ISourceViewerExtension5) {
+			ISourceViewerExtension5 codeMiningViewer= (ISourceViewerExtension5)viewer;
+			if (!JavaCodeMiningReconciler.isReconciled(codeMiningViewer)) {
+				// the provider isn't able to return code minings for non-reconciled viewers
+				return CompletableFuture.completedFuture(Collections.emptyList());
+			}
+		}
 		return CompletableFuture.supplyAsync(() -> {
 			monitor.isCanceled();
 			ITextEditor textEditor= super.getAdapter(ITextEditor.class);
@@ -57,6 +67,13 @@ public class JavaMethodParameterCodeMiningProvider extends AbstractCodeMiningPro
 				IJavaElement[] elements= unit.getChildren();
 				List<ICodeMining> minings= new ArrayList<>(elements.length);
 				collectLineContentCodeMinings(unit, minings);
+				if (viewer instanceof ISourceViewerExtension5) {
+					ISourceViewerExtension5 codeMiningViewer= (ISourceViewerExtension5)viewer;
+					if (!JavaCodeMiningReconciler.isReconciled(codeMiningViewer)) {
+						// the provider isn't able to return code minings for non-reconciled viewers
+						monitor.setCanceled(true);
+					}
+				}
 				monitor.isCanceled();
 				return minings;
 			} catch (JavaModelException e) {

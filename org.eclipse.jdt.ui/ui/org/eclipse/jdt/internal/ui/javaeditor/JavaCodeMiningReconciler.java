@@ -13,6 +13,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.text.source.ISourceViewer;
@@ -20,7 +23,6 @@ import org.eclipse.jface.text.source.ISourceViewerExtension5;
 
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
-import org.eclipse.jdt.internal.ui.javaeditor.codemining.JavaElementCodeMiningProvider;
 import org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener;
 
 /**
@@ -28,21 +30,32 @@ import org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener;
  */
 public class JavaCodeMiningReconciler implements IJavaReconcilingListener {
 
+	/**
+	 * Stores the set of viewers for which source is reconciled and requests
+	 * for references can be performed.
+	 */
+	private static final Set<ISourceViewerExtension5> reconciledViewers= new HashSet<>();
+
 	/** The Java editor this Java code mining reconciler is installed on */
 	private JavaEditor fEditor;
 
 	/** The source viewer this Java code mining reconciler is installed on */
 	private ISourceViewerExtension5 fSourceViewer;
 
+
 	@Override
 	public void reconciled(CompilationUnit ast, boolean forced, IProgressMonitor progressMonitor) {
-		JavaElementCodeMiningProvider.markReconciledViewer(fSourceViewer);
-		fSourceViewer.updateCodeMinings();
+		final ISourceViewerExtension5 sourceViewer= fSourceViewer; // take a copy as this can be null-ed in the meantime
+		if (sourceViewer != null) {
+			reconciledViewers.add(sourceViewer);
+			sourceViewer.updateCodeMinings();
+		}
 	}
 
 	@Override
 	public void aboutToBeReconciled() {
-		// Do nothing
+		// interrupt code minings if modification occurs
+		reconciledViewers.remove(fSourceViewer);
 	}
 
 	/**
@@ -70,12 +83,16 @@ public class JavaCodeMiningReconciler implements IJavaReconcilingListener {
 	 * Uninstall this reconciler from the editor.
 	 */
 	public void uninstall() {
-		JavaElementCodeMiningProvider.discardViewer(fSourceViewer);
+		reconciledViewers.remove(fSourceViewer);
 		if (fEditor instanceof CompilationUnitEditor) {
 			((CompilationUnitEditor) fEditor).removeReconcileListener(this);
 		}
 		fEditor= null;
 		fSourceViewer= null;
+	}
+
+	public static boolean isReconciled(ISourceViewerExtension5 viewer) {
+		return reconciledViewers.contains(viewer);
 	}
 
 }
