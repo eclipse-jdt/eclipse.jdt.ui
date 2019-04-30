@@ -1545,14 +1545,14 @@ public class ASTFlattener extends GenericVisitor {
 		if (node.getAST().apiLevel() >= JLS12) {
 			if (node.isDefault()) {
 				this.fBuffer.append("default");//$NON-NLS-1$
-				this.fBuffer.append(node.isSwitchLabeledRule() ? "->" : ":");//$NON-NLS-1$ //$NON-NLS-2$
+				this.fBuffer.append(node.isSwitchLabeledRule() ? " ->" : ":");//$NON-NLS-1$ //$NON-NLS-2$
 			} else {
 				this.fBuffer.append("case ");//$NON-NLS-1$
 				for (Iterator<Expression> it= node.expressions().iterator(); it.hasNext();) {
 					Expression t= it.next();
 					t.accept(this);
 					this.fBuffer.append(it.hasNext() ? ", " : //$NON-NLS-1$
-							node.isSwitchLabeledRule() ? "->" : ":");//$NON-NLS-1$ //$NON-NLS-2$
+							node.isSwitchLabeledRule() ? " ->" : ":");//$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}
 		} else {
