@@ -818,7 +818,6 @@ public final class PreferencesMessages extends NLS {
 	public static String ComplianceConfigurationBlock_jrecompliance_backwardcompatibility_label;
 	public static String ProblemSeveritiesConfigurationBlock_section_generics;
 	public static String JavaBasePreferencePage_dialogs;
-	public static String JavaBasePreferencePage_EnableNewJavaIndex;
 	public static String JavaBasePreferencePage_do_not_hide_description;
 	public static String JavaBasePreferencePage_do_not_hide_button;
 	public static String JavaBasePreferencePage_do_not_hide_dialog_title;
