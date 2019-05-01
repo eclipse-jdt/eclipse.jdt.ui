@@ -167,11 +167,11 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 	public final Map<String,String> fPatchMap= new HashMap<>();
 
 	private Control fSWTControl;
-	private final IWorkbenchPreferenceContainer fPageContainer; // for switching page (not yet used)
+//	private final IWorkbenchPreferenceContainer fPageContainer; // for switching page (not yet used)
 
 	public ModuleDependenciesPage(CheckedListDialogField<CPListElement> classPathList, IWorkbenchPreferenceContainer pageContainer) {
 		fClassPathList= classPathList;
-		fPageContainer= pageContainer;
+//		fPageContainer= pageContainer;
 		fSWTControl= null;
 		
 		String[] buttonLabels= new String[] {
