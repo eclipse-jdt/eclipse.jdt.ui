@@ -35,6 +35,7 @@ import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.manipulation.JavaManipulation;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
@@ -46,7 +47,13 @@ import org.eclipse.jdt.internal.ui.util.StringMatcher;
 
 public class CallHierarchyCore {
 
-    private static final String DEFAULT_IGNORE_FILTERS= ""; //$NON-NLS-1$
+    private static final String PREF_USE_IMPLEMENTORS= "PREF_USE_IMPLEMENTORS"; //$NON-NLS-1$
+    private static final String PREF_USE_FILTERS= "PREF_USE_FILTERS"; //$NON-NLS-1$
+    private static final String PREF_FILTERS_LIST= "PREF_FILTERS_LIST"; //$NON-NLS-1$
+    private static final String PREF_FILTER_TESTCODE= "PREF_FILTER_TESTCODE"; //$NON-NLS-1$
+
+    private String defaultIgnoreFilters= "java.*,javax.*"; //$NON-NLS-1$
+
     private static CallHierarchyCore fgInstance;
     private IJavaSearchScope fSearchScope;
     private StringMatcher[] fFilters;
@@ -60,11 +67,11 @@ public class CallHierarchyCore {
     }
 
     public boolean isSearchUsingImplementorsEnabled() {
-        return true;
+        return Boolean.parseBoolean(JavaManipulation.getPreference(PREF_USE_IMPLEMENTORS, null));
     }
 
     public boolean isFilterTestCode() {
-        return false;
+        return Boolean.parseBoolean(JavaManipulation.getPreference(PREF_FILTER_TESTCODE, null));
     }
 
     public Collection<IJavaElement> getImplementingMethods(IMethod method) {
@@ -195,7 +202,7 @@ public class CallHierarchyCore {
     }
 
     public boolean isFilterEnabled() {
-        return false;
+        return Boolean.parseBoolean(JavaManipulation.getPreference(PREF_USE_FILTERS, null));
     }
 
     /**
@@ -203,7 +210,26 @@ public class CallHierarchyCore {
      * @return returns the filters
      */
     public String getFilters() {
-        return null;
+        String pref= JavaManipulation.getPreference(PREF_FILTERS_LIST, null);
+        if (pref == null)
+        	return ""; //$NON-NLS-1$
+        return pref;
+    }
+
+    /**
+     * Set default ignore filters to use.
+     *
+     * @param defaultIgnoreFilters comma-separated filter string
+     */
+    public void setDefaultIgnoreFilters(String defaultIgnoreFilters) {
+    	this.defaultIgnoreFilters= defaultIgnoreFilters;
+    }
+
+    /**
+     * Reset filters variable to null.
+     */
+    public void resetFilters() {
+    	fFilters= null;
     }
 
     /**
@@ -211,7 +237,7 @@ public class CallHierarchyCore {
      *
      * @return StringMatcher[]
      */
-    private StringMatcher[] getIgnoreFilters() {
+    public StringMatcher[] getIgnoreFilters() {
         if (fFilters == null) {
             String filterString= null;
 
@@ -219,7 +245,7 @@ public class CallHierarchyCore {
                 filterString= getFilters();
 
                 if (filterString == null) {
-                    filterString= DEFAULT_IGNORE_FILTERS;
+                    filterString= defaultIgnoreFilters;
                 }
             }
 

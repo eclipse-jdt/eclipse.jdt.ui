@@ -17,10 +17,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.callhierarchy;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.StringTokenizer;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
@@ -44,10 +42,8 @@ public class CallHierarchy {
     private static final String PREF_FILTERS_LIST = "PREF_FILTERS_LIST"; //$NON-NLS-1$
     private static final String PREF_FILTER_TESTCODE= "PREF_FILTER_TESTCODE"; //$NON-NLS-1$
 
-    private static final String DEFAULT_IGNORE_FILTERS = "java.*,javax.*"; //$NON-NLS-1$
     private static CallHierarchy fgInstance;
     private CallHierarchyCore fgCallHierarchyCore;
-    private StringMatcher[] fFilters;
 
     private CallHierarchy() {
         fgCallHierarchyCore = CallHierarchyCore.getDefault();
@@ -156,7 +152,7 @@ public class CallHierarchy {
     }
 
     public void setFilters(String filters) {
-        fFilters = null;
+        fgCallHierarchyCore.resetFilters();
 
         IPreferenceStore settings = JavaPlugin.getDefault().getPreferenceStore();
         settings.setValue(PREF_FILTERS_LIST, filters);
@@ -168,50 +164,14 @@ public class CallHierarchy {
      * @return StringMatcher[]
      */
     private StringMatcher[] getIgnoreFilters() {
-        if (fFilters == null) {
-            String filterString = null;
-
-            if (isFilterEnabled()) {
-                filterString = getFilters();
-
-                if (filterString == null) {
-                    filterString = DEFAULT_IGNORE_FILTERS;
-                }
-            }
-
-            if (filterString != null) {
-                fFilters = parseList(filterString);
-            } else {
-                fFilters = null;
-            }
-        }
-
-        return fFilters;
+    	return fgCallHierarchyCore.getIgnoreFilters();
     }
 
     public static boolean arePossibleInputElements(List<?> elements) {
         return CallHierarchyCore.arePossibleInputElements(elements);
 	}
 
-	/**
-	 * Parses the comma separated string into an array of {@link StringMatcher} objects.
-	 *
-	 * @param listString the string to parse
-	 * @return an array of {@link StringMatcher} objects
-	 */
-    private static StringMatcher[] parseList(String listString) {
-        List<StringMatcher> list = new ArrayList<>(10);
-        StringTokenizer tokenizer = new StringTokenizer(listString, ","); //$NON-NLS-1$
-
-        while (tokenizer.hasMoreTokens()) {
-            String textFilter = tokenizer.nextToken().trim();
-            list.add(new StringMatcher(textFilter, false, false));
-        }
-
-        return list.toArray(new StringMatcher[list.size()]);
-    }
-
-    static CompilationUnit getCompilationUnitNode(IMember member, boolean resolveBindings) {
+	static CompilationUnit getCompilationUnitNode(IMember member, boolean resolveBindings) {
     	ITypeRoot typeRoot= member.getTypeRoot();
         try {
 	    	if (typeRoot.exists() && typeRoot.getBuffer() != null) {
