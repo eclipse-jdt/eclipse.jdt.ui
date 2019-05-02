@@ -327,6 +327,7 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 				case IClasspathEntry.CPE_CONTAINER:
 					ModuleKind kind= LibrariesWorkbookPage.isJREContainer(cpe.getPath()) ? ModuleKind.System : ModuleKind.Normal;
 					int shownModules= 0;
+					boolean isModular= cpe.getAttribute(CPListElement.MODULE) instanceof ModuleEncapsulationDetail[];
 					for (Object object : cpe.getChildren(true)) {
 						if (object instanceof CPListElement) {
 							CPListElement childElement= (CPListElement) object;
@@ -334,6 +335,15 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 							if (childModule != null) {
 								fModuleList.addModule(childModule, childElement, kind);
 								shownModules++;
+							} else if (isModular && kind != ModuleKind.System) {
+								for (IPackageFragmentRoot packageRoot : fCurrJProject.findUnfilteredPackageFragmentRoots(childElement.getClasspathEntry())) {
+									try {
+										IModuleDescription autoModule= JavaCore.getAutomaticModuleDescription(packageRoot);
+										recordModule(autoModule, recordedModules, childElement, ModuleKind.Automatic);
+									} catch (JavaModelException | IllegalArgumentException e) {
+										JavaPlugin.log(e);
+									}
+								}
 							}
 						}
 					}

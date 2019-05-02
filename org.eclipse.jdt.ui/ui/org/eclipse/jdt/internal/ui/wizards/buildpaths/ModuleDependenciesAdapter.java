@@ -174,14 +174,12 @@ class ModuleDependenciesAdapter implements IDialogFieldListener, ITreeListAdapte
 		}
 		
 		public Object[] getChildren() {
-			if (fKind == ModuleKind.System) {
-				// aggregate attribute is in the parent (corresponding to the JRE)
-				Object parent= fElem.getParentContainer();
-				if (parent instanceof CPListElement) {
-					Object attribute= ((CPListElement) parent).getAttribute(CPListElement.MODULE);
-					if (attribute instanceof ModuleEncapsulationDetail[]) {
-						return convertEncapsulationDetails((ModuleEncapsulationDetail[]) attribute, fFocusModule.getElementName());
-					}					
+			// For containers like JRE / Libraries: aggregate attribute is in the parent
+			Object parent= fElem.getParentContainer();
+			if (parent instanceof CPListElement) {
+				Object attribute= ((CPListElement) parent).getAttribute(CPListElement.MODULE);
+				if (attribute instanceof ModuleEncapsulationDetail[]) {
+					return convertEncapsulationDetails((ModuleEncapsulationDetail[]) attribute, fFocusModule.getElementName());
 				}
 			}
 			Object attribute= fElem.getAttribute(CPListElement.MODULE);

@@ -50,6 +50,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.window.Window;
 
+import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -131,12 +132,13 @@ public class ModuleSelectionDialog extends TrayDialog {
 		fAllIncluded= closureComputation.apply(shownModules);
 		fClosureComputation= closureComputation;
 		if (jreEntry != null) {  // searching only modules from this JRE entry (quick)
-			List<String> result= new ArrayList<>();
+			Set<String> result= new HashSet<>();
 			for (IPackageFragmentRoot root : fJavaProject.findUnfilteredPackageFragmentRoots(fJREEntry)) {
 				checkAddModule(result, root.getModuleDescription());
 			}
-			result.sort(String::compareTo);
-			fAvailableModules= result;
+			List<String> list= new ArrayList<>(result);
+			list.sort(String::compareTo);
+			fAvailableModules= list;
 		} else {  // searching all modules in the workspace (slow)
 			new Job(NewWizardMessages.ModuleSelectionDialog_searchModules_job) {
 				@Override
@@ -163,7 +165,7 @@ public class ModuleSelectionDialog extends TrayDialog {
 	}
 
 	private List<String> searchAvailableModules(IProgressMonitor monitor) throws CoreException {
-		List<String> result= new ArrayList<>();
+		Set<String> result= new HashSet<>();
 		SearchPattern pattern= SearchPattern.createPattern("*", IJavaSearchConstants.MODULE, IJavaSearchConstants.DECLARATIONS, SearchPattern.R_PATTERN_MATCH|SearchPattern.R_CASE_SENSITIVE); //$NON-NLS-1$
 		SearchRequestor requestor= new SearchRequestor() {
 			@Override
@@ -187,19 +189,44 @@ public class ModuleSelectionDialog extends TrayDialog {
 			}
 			for (IPackageFragmentRoot root : jPrj.getAllPackageFragmentRoots()) {
 				if (root.isArchive() && root.getModuleDescription() == null) {
-					checkAddModule(result, JavaCore.getAutomaticModuleDescription(root));
+					if (!isJREChild(jPrj, root)) { // don't show jars of non-modular JRE as auto modules
+						checkAddModule(result, JavaCore.getAutomaticModuleDescription(root));
+					}
 				}
 			}
 		}
-		result.sort(String::compareTo);
-		return result;
+		List<String> list= new ArrayList<>(result);
+		list.sort(String::compareTo);
+		return list;
+	}
+	
+	boolean isJREChild(IJavaProject jPrj, IPackageFragmentRoot root) {
+		try {
+			IClasspathEntry cpEntry= jPrj.getClasspathEntryFor(root.getPath());
+			for (IClasspathEntry rawEntry : jPrj.getRawClasspath()) {
+				if (LibrariesWorkbookPage.isJREContainer(rawEntry.getPath())) {
+					IClasspathContainer container= JavaCore.getClasspathContainer(rawEntry.getPath(), jPrj);
+					if (container != null) {
+						for (IClasspathEntry containerEntry : container.getClasspathEntries()) {
+							if (containerEntry.equals(cpEntry))
+								return true;
+						}
+					}
+					return false;
+				}
+			}
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e.getStatus());
+		}
+		return false;
 	}
 
-	void checkAddModule(List<String> result, IModuleDescription moduleDescription) {
-		if (moduleDescription == null)
+	void checkAddModule(Set<String> result, IModuleDescription moduleDescription) {
+		if (moduleDescription == null || moduleDescription.getElementName().isEmpty())
 			return;
 		if (!fAllIncluded.contains(moduleDescription.getElementName())) {
-			result.add(moduleDescription.getElementName());
+			if (!result.add(moduleDescription.getElementName()))
+				return;
 		}
 		fModulesByName.put(moduleDescription.getElementName(), moduleDescription); // hold on to module description to be used for getResult()
 		fKinds.put(moduleDescription.getElementName(), getKind(moduleDescription));
