@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -201,6 +202,11 @@ public abstract class ModuleEncapsulationDetail {
 			}
 			return fModule;
 		}
+
+		@Override
+		public String getAttributeName() {
+			return IClasspathAttribute.PATCH_MODULE;
+		}
 	}
 
 	/** Shared implementation for ModuleAddExports & ModuleAddOpens (same structure). */
@@ -300,6 +306,11 @@ public abstract class ModuleEncapsulationDetail {
 		public ModuleAddExport(String sourceModule, String aPackage, String targetModules, CPListElementAttribute attribElem) {
 			super(sourceModule, aPackage, targetModules, attribElem);
 		}
+
+		@Override
+		public String getAttributeName() {
+			return IClasspathAttribute.ADD_EXPORTS;
+		}
 	}
 
 	/**
@@ -308,6 +319,10 @@ public abstract class ModuleEncapsulationDetail {
 	static class ModuleAddOpens extends ModuleAddExpose {
 		public ModuleAddOpens(String sourceModule, String aPackage, String targetModules, CPListElementAttribute attribElem) {
 			super(sourceModule, aPackage, targetModules, attribElem);
+		}
+		@Override
+		public String getAttributeName() {
+			return IClasspathAttribute.ADD_OPENS;
 		}
 	}
 
@@ -385,6 +400,11 @@ public abstract class ModuleEncapsulationDetail {
 		public String toString() {
 			return fSourceModule+'='+fTargetModule;
 		}
+
+		@Override
+		public String getAttributeName() {
+			return IClasspathAttribute.ADD_READS;
+		}
 	}
 
 	/**
@@ -400,9 +420,9 @@ public abstract class ModuleEncapsulationDetail {
 			return new LimitModules(Arrays.asList(modules), attribElem);
 		}
 		
-		public final List<String> fExplicitlyIncludedModules;
+		public final Collection<String> fExplicitlyIncludedModules;
 
-		public LimitModules(List<String> explicitlyIncludedModules, CPListElementAttribute attribElem) {
+		public LimitModules(Collection<String> explicitlyIncludedModules, CPListElementAttribute attribElem) {
 			fExplicitlyIncludedModules= explicitlyIncludedModules;
 			fAttribElem= attribElem;
 		}
@@ -414,9 +434,15 @@ public abstract class ModuleEncapsulationDetail {
 		public String toString() {
 			return String.join(",", fExplicitlyIncludedModules); //$NON-NLS-1$
 		}
+		@Override
+		public String getAttributeName() {
+			return IClasspathAttribute.LIMIT_MODULES;
+		}
 	}
 
 	public abstract boolean affects(String module);
+
+	public abstract String getAttributeName();
 
 	/**
 	 * Searches the given list of details for a {@link ModulePatch} element affecting the given {@code module}.

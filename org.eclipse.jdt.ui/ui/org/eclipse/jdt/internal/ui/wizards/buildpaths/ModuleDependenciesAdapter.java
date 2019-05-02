@@ -17,6 +17,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +39,8 @@ import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -46,15 +49,18 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.Window;
 
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IModuleDescription;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
@@ -84,6 +90,8 @@ class ModuleDependenciesAdapter implements IDialogFieldListener, ITreeListAdapte
 	
 	private static final int IDX_EDIT= 7;
 
+	private static final int IDX_JPMS_OPTIONS= 9;
+
 	/** Supertype of the two synthetic toplevel tree nodes {@link DeclaredDetails} and {@link ConfiguredDetails} */ 
 	abstract static class Details {
 
@@ -108,7 +116,7 @@ class ModuleDependenciesAdapter implements IDialogFieldListener, ITreeListAdapte
 					return moduleDescription;
 				}
 			} catch (JavaModelException jme) {
-				JavaPlugin.log(jme.getStatus());
+				JavaPlugin.log(jme);
 			}
 			return null;
 		}
@@ -119,7 +127,7 @@ class ModuleDependenciesAdapter implements IDialogFieldListener, ITreeListAdapte
 					return moduleDescription.getElementName();
 				}
 			} catch (JavaModelException jme) {
-				JavaPlugin.log(jme.getStatus());
+				JavaPlugin.log(jme);
 			}
 			return ""; //$NON-NLS-1$
 		}
@@ -136,29 +144,55 @@ class ModuleDependenciesAdapter implements IDialogFieldListener, ITreeListAdapte
 			super(mod, elem);
 		}
 
-		/**
-		 * Answer all packages accessible to the context module (exports/opens) 
-		 * @return accessible packages represented by {@link AccessiblePackage}.
-		 */
-		public Object[] getPackages() {
+		public Object[] getChildren() {
+			List<Object> children= new ArrayList<>();
+			getRequires(children);
+			getPackages(children);
+			return children.toArray();
+		}
+		private void getRequires(List<Object> children) {
+			if (fFocusModule != null) {
+				if (!fFocusModule.isAutoModule()) {
+					try {
+						for (String required : fFocusModule.getRequiredModuleNames())
+							children.add(new ReadModule(required, this));
+					} catch (JavaModelException e) {
+						JavaPlugin.log(e);
+					}
+				}
+			}
+		}
+		private void getPackages(List<Object> result) {
 			try {
-				if (fFocusModule != null && !fFocusModule.isAutoModule()) {
-					IModuleDescription contextModule= getContextModule();
-					String[] exported= fFocusModule.getExportedPackageNames(contextModule);
-					List<AccessiblePackage> result= new ArrayList<>();
-					for (String export : exported) {
-						result.add(new AccessiblePackage(export, AccessiblePackage.Kind.Exports, fFocusModule.getElementName(), this));
+				if (fFocusModule != null) {
+					if (fFocusModule.isAutoModule()) {
+						IPackageFragmentRoot root= (IPackageFragmentRoot) fFocusModule.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+						if (root != null) {
+							// auto module exports all non-empty packages:
+							for (IJavaElement child : root.getChildren()) {
+								if (child instanceof IPackageFragment
+										&& !child.getElementName().isEmpty()
+										&& ((IPackageFragment) child).containsJavaResources())
+								{
+									result.add(new AccessiblePackage(child.getElementName(), AccessiblePackage.Kind.Exports, "", this)); //$NON-NLS-1$
+								}
+							}
+						}
+					} else {
+						IModuleDescription contextModule= getContextModule();
+						String[] exported= fFocusModule.getExportedPackageNames(contextModule);
+						for (String export : exported) {
+							result.add(new AccessiblePackage(export, AccessiblePackage.Kind.Exports, "", this)); //$NON-NLS-1$
+						}
+						String[] opened= fFocusModule.getOpenedPackageNames(contextModule);
+						for (String open : opened) {
+							result.add(new AccessiblePackage(open, AccessiblePackage.Kind.Opens, "", this)); //$NON-NLS-1$
+						}
 					}
-					String[] opened= fFocusModule.getOpenedPackageNames(contextModule);
-					for (String open : opened) {
-						result.add(new AccessiblePackage(open, AccessiblePackage.Kind.Opens, fFocusModule.getElementName(), this));
-					}
-					return result.toArray();
 				}
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);
 			}
-			return new Object[0];
 		}
 	}
 
@@ -259,7 +293,10 @@ class ModuleDependenciesAdapter implements IDialogFieldListener, ITreeListAdapte
 			CPListElement element= (container instanceof CPListElement) ? (CPListElement) container : fElem;
 			CPListElementAttribute moduleAttribute= element.findAttributeElement(CPListElement.MODULE);
 
-			IPackageFragmentRoot packRoot= (IPackageFragmentRoot) fFocusModule.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+			IJavaElement jContainer= fFocusModule.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+			if (jContainer == null) {
+				jContainer= fFocusModule.getJavaProject();
+			}
 			String packageName= selectedPackage != null ? selectedPackage.getName() : ""; //$NON-NLS-1$
 
 			ModuleAddExpose initial;
@@ -275,7 +312,7 @@ class ModuleDependenciesAdapter implements IDialogFieldListener, ITreeListAdapte
 
 			Set<String> possibleTargetModules= new HashSet<>(fDependenciesPage.getAllModules());
 			possibleTargetModules.remove(fFocusModule.getElementName());
-			ModuleAddExportsDialog dialog= new ModuleAddExportsDialog(shell, new IJavaElement[] { packRoot }, possibleTargetModules, initial);
+			ModuleAddExportsDialog dialog= new ModuleAddExportsDialog(shell, new IJavaElement[] { jContainer }, possibleTargetModules, initial);
 			if (dialog.open() == Window.OK) {
 				ModuleAddExpose expose= dialog.getExport(moduleAttribute);
 				if (expose != null) {
@@ -392,7 +429,7 @@ class ModuleDependenciesAdapter implements IDialogFieldListener, ITreeListAdapte
 			try {
 				irrelevantModules= Arrays.asList(fFocusModule.getRequiredModuleNames());
 			} catch (JavaModelException e) {
-				JavaPlugin.log(e.getStatus()); // not fatal
+				JavaPlugin.log(e); // not fatal
 				irrelevantModules= Collections.emptyList();
 			}
 			irrelevantModules= new ArrayList<>(irrelevantModules);
@@ -522,6 +559,7 @@ class ModuleDependenciesAdapter implements IDialogFieldListener, ITreeListAdapte
 		protected DetailNode(Details parent) {
 			fParent= parent;
 		}
+		protected abstract int rank();
 		public String getName() {
 			return fName;
 		}
@@ -556,6 +594,10 @@ class ModuleDependenciesAdapter implements IDialogFieldListener, ITreeListAdapte
 			fName= name;
 			fKind= kind;
 			fTargetModules= targetModules;
+		}
+		@Override
+		protected int rank() {
+			return 2;
 		}
 		public Kind getKind() {
 			return fKind;
@@ -639,7 +681,10 @@ class ModuleDependenciesAdapter implements IDialogFieldListener, ITreeListAdapte
 			super(parent);
 			fName= targetModule;
 		}
-
+		@Override
+		protected int rank() {
+			return 0;
+		}
 		@Override
 		public ModuleAddReads convertToCP(CPListElementAttribute attribElem) throws JavaModelException {
 			if (fParent instanceof ConfiguredDetails) {
@@ -658,7 +703,10 @@ class ModuleDependenciesAdapter implements IDialogFieldListener, ITreeListAdapte
 			fSource= source;
 			fName= source.getPath().makeRelative().toString();
 		}
-
+		@Override
+		protected int rank() {
+			return 1;
+		}
 		public String getPath() {
 			return fSource.getPath().toString();
 		}
@@ -725,6 +773,12 @@ class ModuleDependenciesAdapter implements IDialogFieldListener, ITreeListAdapte
 			if (e1 instanceof ConfiguredDetails) {
 				return e2 instanceof DeclaredDetails ? 1 : -1;
 			}
+			if (e1 instanceof DetailNode<?> && e2 instanceof DetailNode<?>) {
+				int rank1= ((DetailNode<?>) e1).rank();
+				int rank2= ((DetailNode<?>) e2).rank();
+				if (rank1 < rank2) return -1;
+				if (rank1 > rank2) return 1;
+			}
 			return super.compare(viewer, e1, e2);
 		}
 	}
@@ -772,6 +826,7 @@ class ModuleDependenciesAdapter implements IDialogFieldListener, ITreeListAdapte
 						field.refresh();
 					}
 				}
+				validate();
 				break;
 			case IDX_EDIT:
 				if (selectedElements.size() == 1 && selectedElements.get(0) instanceof AccessiblePackage) {
@@ -793,7 +848,11 @@ class ModuleDependenciesAdapter implements IDialogFieldListener, ITreeListAdapte
 			case IDX_PATCH:
 				if (getConfiguredDetails().addPatch(fModuleDependenciesPage.getShell(), fModuleDependenciesPage.fPatchMap)) {
 					field.refresh();
+					validate();
 				}
+				break;
+			case IDX_JPMS_OPTIONS:
+				fModuleDependenciesPage.showJMPSOptionsDialog();
 				break;
 			default:
 				throw new IllegalArgumentException("Non-existent button index "+index); //$NON-NLS-1$
@@ -903,6 +962,7 @@ class ModuleDependenciesAdapter implements IDialogFieldListener, ITreeListAdapte
 				List<Object> selectedElements= field.getSelectedElements();
 				if (getConfiguredDetails().remove(selectedElements)) {
 					field.refresh();
+					validate();
 				}
 			}
 		}
@@ -911,7 +971,7 @@ class ModuleDependenciesAdapter implements IDialogFieldListener, ITreeListAdapte
 	@Override
 	public Object[] getChildren(TreeListDialogField<Object> field, Object element) {
 		if (element instanceof DeclaredDetails) {
-			return ((DeclaredDetails) element).getPackages();
+			return ((DeclaredDetails) element).getChildren();
 		} else if (element instanceof ConfiguredDetails) {
 			return ((ConfiguredDetails) element).getChildren();
 		} else if (element instanceof AccessiblePackage) {
@@ -935,6 +995,57 @@ class ModuleDependenciesAdapter implements IDialogFieldListener, ITreeListAdapte
 		Object[] children= getChildren(field, element);
 		return children != null && children.length > 0;
 	}
+
+	void validate() {
+		IWorkspaceRoot wsRoot= ResourcesPlugin.getWorkspace().getRoot();
+		Map<IPath, Map<String,List<IResource>>> out2mod2src= new HashMap<>(); // output -> (module -> sources)
+		for (Entry<String, String> entry : fModuleDependenciesPage.fPatchMap.entrySet()) {
+			Path path= new Path(entry.getKey());
+			IResource resource= wsRoot.findMember(path);
+			IJavaProject javaProject= JavaCore.create(resource.getProject());
+			IPath output= findOutputFor(javaProject, resource.getFullPath());
+			if (output != null) {
+				Map<String, List<IResource>> module2source= out2mod2src.get(output);
+				if (module2source == null) {
+					out2mod2src.put(output, module2source= new HashMap<>());
+				}
+				List<IResource> sources= module2source.get(entry.getValue());
+				if (sources == null) {
+					module2source.put(entry.getValue(), sources= new ArrayList<>());
+				}
+				sources.add(resource);
+			}
+		}
+		for (Map<String, List<IResource>> mod2src : out2mod2src.values()) {
+			// does any output location map to more than one module?
+			if (mod2src.entrySet().size() > 1) {
+				fModuleDependenciesPage.setStatus(new StatusInfo(IStatus.ERROR,
+					MessageFormat.format(NewWizardMessages.ModuleDependenciesAdapter_patchOutputConflict_validationError,
+							mod2src.values().stream()
+							.flatMap(folders -> folders.stream().map(f -> f.getFullPath().makeRelative().toString()))
+							.collect(Collectors.joining(", "))))); //$NON-NLS-1$
+				return;
+			}
+		}
+		fModuleDependenciesPage.setStatus(StatusInfo.OK_STATUS);
+	}
+	private IPath findOutputFor(IJavaProject project, IPath source) {
+		try {
+			if (project.getPath().equals(source)) {
+				return project.getOutputLocation();
+			}
+			IClasspathEntry classpathEntry= project.getClasspathEntryFor(source);
+			if (classpathEntry != null) {
+				if (classpathEntry.getOutputLocation() != null)
+					return classpathEntry.getOutputLocation();
+				return project.getOutputLocation();
+			}
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+		}
+		return null;
+	}
+
 	// ---------- IDialogFieldListener --------
 
 	@Override

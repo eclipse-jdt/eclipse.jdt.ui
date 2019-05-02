@@ -141,19 +141,15 @@ class ModuleDependenciesList {
 		CPListElement element= fModule2Element.get(module);
 		if (element == null)
 			return false;
-		Object value= element.getAttribute(CPListElement.MODULE);
-		if (value instanceof ModuleEncapsulationDetail[] && ((ModuleEncapsulationDetail[]) value).length > 0) {
-			return true;
-		}
 		Object parent= element.getParentContainer();
 		if (parent instanceof CPListElement) {
 			element= (CPListElement) parent;
-			value= element.getAttribute(CPListElement.MODULE);
-			if (value instanceof ModuleEncapsulationDetail[]) {
-				for (ModuleEncapsulationDetail detail : (ModuleEncapsulationDetail[])value) {
-					if (detail.affects(module)) {
-						return true;
-					}
+		}
+		Object value= element.getAttribute(CPListElement.MODULE);
+		if (value instanceof ModuleEncapsulationDetail[]) {
+			for (ModuleEncapsulationDetail detail : (ModuleEncapsulationDetail[])value) {
+				if (detail.affects(module)) {
+					return true;
 				}
 			}
 		}

@@ -216,7 +216,7 @@ public class ModuleSelectionDialog extends TrayDialog {
 				}
 			}
 		} catch (JavaModelException e) {
-			JavaPlugin.log(e.getStatus());
+			JavaPlugin.log(e);
 		}
 		return false;
 	}

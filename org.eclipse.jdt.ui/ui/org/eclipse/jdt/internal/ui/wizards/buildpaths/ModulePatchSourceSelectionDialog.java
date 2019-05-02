@@ -144,7 +144,7 @@ public class ModulePatchSourceSelectionDialog extends TrayDialog {
 				}
 			}
 		} catch (JavaModelException e1) {
-			JavaPlugin.log(e1.getStatus());
+			JavaPlugin.log(e1);
 		}
 		for (IProject project : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
 			if (toSkip != null && toSkip.equals(project)) {
@@ -158,7 +158,7 @@ public class ModulePatchSourceSelectionDialog extends TrayDialog {
 					}
 				}
 			} catch (CoreException e) {
-				JavaPlugin.log(e.getStatus());
+				JavaPlugin.log(e);
 			}
 		}
 	}
@@ -175,7 +175,7 @@ public class ModulePatchSourceSelectionDialog extends TrayDialog {
 				}
 			}
 		} catch (JavaModelException e) {
-			JavaPlugin.log(e.getStatus());
+			JavaPlugin.log(e);
 		}
 	}
 

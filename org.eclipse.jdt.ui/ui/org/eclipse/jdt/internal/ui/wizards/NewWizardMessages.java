@@ -523,6 +523,7 @@ public final class NewWizardMessages extends NLS {
 	public static String ModuleDependenciesPage_modules_expose_package_button;
 	public static String ModuleDependenciesPage_modules_patch_button;
 	public static String ModuleDependenciesPage_modules_edit_button;
+	public static String ModuleDependenciesPage_showJPMSOptions_button;
 	// dialogs:
 	public static String ModuleSelectionDialog_add_button;
 	public static String ModuleSelectionDialog_addSystemModules_message;
@@ -536,6 +537,12 @@ public final class NewWizardMessages extends NLS {
 	public static String ModulePatchSourceSelectionDialog_patchSourceLocation_message;
 	public static String ModulePatchSourceSelectionDialog_patchSourceLocation_title;
 
+	public static String ShowJPMSOptionsDialog_dialog_title;
+	public static String ShowJPMSOptionsDialog_close_button;
+	public static String ShowJPMSOptionsDialog_copyAndCopy_button;
+	public static String ShowJPMSOptionsDialog_empty_message;
+	public static String ShowJPMSOptionsDialog_retrieve_error;
+
 	public static String ModuleDependenciesPage_removeModule_dialog_title;
 	public static String ModuleDependenciesPage_removingModule_message;
 	public static String ModuleDependenciesPage_removingModuleTransitive_message;
@@ -547,6 +554,7 @@ public final class NewWizardMessages extends NLS {
 	public static String ModuleDependenciesPage_removeSystemModule_error_hint;
 	public static String ModuleDependenciesAdapter_patchConflict_title;
 	public static String ModuleDependenciesAdapter_patchConflict_message;
+	public static String ModuleDependenciesAdapter_patchOutputConflict_validationError;
 	public static String ModuleDependenciesAdapter_project_kind;
 	public static String ModuleDependenciesAdapter_sourceFolder_kind;
 	public static String ModuleDependenciesAdapter_configure_error;

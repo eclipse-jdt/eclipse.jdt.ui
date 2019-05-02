@@ -16,6 +16,7 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -37,6 +38,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.core.resources.IProject;
 
@@ -60,6 +63,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleDependenciesList.ModuleKind;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleEncapsulationDetail.LimitModules;
@@ -76,13 +80,10 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.TreeListDialogField;
  * - module kind "Upgrade" of a System Library (incl. icon decoration)
  * - better help on how to remove non-JRE modules (module-info, modulepath)
  * RHS:
- * - DeclaredDetails:
- *   - show 'requires' module nodes (see DeclaredDetails.getPackages())
  * - PatchModule:
  *   - handle patch project w/o module-info (as soon as path-module is defined)
  *     - treat the patched module as the current context module (pinned)
  *   - prefer offering source folders of the context project for patch-module
- * - editing of elements other than AccessiblePackage (see ModuleDependenciesAdapter.customButtonPressed())
  * General:
  * - distinguish test/main dependencies
  * - special elements: ALL-UNNAMED, ALL-SYSTEM ...
@@ -151,6 +152,7 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 	}
 
 	private final ListDialogField<CPListElement> fClassPathList; // shared with other pages
+	private final IStatusChangeListener fContext;
 	private IJavaProject fCurrJProject;
 
 	// LHS list:
@@ -164,13 +166,18 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 	private Map<String,List<String>> fModule2RequiredModules;
 	private Map<String,List<String>> fModuleRequiredByModules;
 
+	// cached JRE content:
+	private IPackageFragmentRoot[] fAllSystemRoots; // unfiltered
+	private Collection<String> fAllDefaultSystemModules; // if current is unnamed module: transitive closure of default root modules (names)
+
 	public final Map<String,String> fPatchMap= new HashMap<>();
 
 	private Control fSWTControl;
 //	private final IWorkbenchPreferenceContainer fPageContainer; // for switching page (not yet used)
 
-	public ModuleDependenciesPage(CheckedListDialogField<CPListElement> classPathList, IWorkbenchPreferenceContainer pageContainer) {
+	public ModuleDependenciesPage(IStatusChangeListener context, CheckedListDialogField<CPListElement> classPathList, IWorkbenchPreferenceContainer pageContainer) {
 		fClassPathList= classPathList;
+		fContext= context;
 //		fPageContainer= pageContainer;
 		fSWTControl= null;
 		
@@ -182,7 +189,9 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 				/* */ null,
 				NewWizardMessages.ModuleDependenciesPage_modules_patch_button,
 				/* */ null,
-				NewWizardMessages.ModuleDependenciesPage_modules_edit_button
+				NewWizardMessages.ModuleDependenciesPage_modules_edit_button,
+				/* */ null,
+				NewWizardMessages.ModuleDependenciesPage_showJPMSOptions_button
 			};
 
 		fModuleList= new ModuleDependenciesList();
@@ -349,15 +358,22 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 					}
 					if (kind == ModuleKind.System) {
 						// additionally capture dependency information about all system module disregarding --limit-modules
-						IPackageFragmentRoot[] unfilteredPackageFragmentRoots= fCurrJProject.findUnfilteredPackageFragmentRoots(cpe.getClasspathEntry());
-						for (IPackageFragmentRoot packageRoot : unfilteredPackageFragmentRoots) {
+						fAllSystemRoots= fCurrJProject.findUnfilteredPackageFragmentRoots(cpe.getClasspathEntry());
+						for (IPackageFragmentRoot packageRoot : fAllSystemRoots) {
 							IModuleDescription module= packageRoot.getModuleDescription();
 							if (module != null) {
 								recordModule(module, recordedModules, null/*don't add to fModuleList*/, kind);
 							}
 						}
-						if (unfilteredPackageFragmentRoots.length == shownModules) {
+						if (fAllSystemRoots.length == shownModules) {
 							fAddSystemModuleButton.setEnabled(false);
+						}
+						try {
+							if (fCurrJProject.getModuleDescription() == null) { // cache default roots when compiling the unnamed module:
+								fAllDefaultSystemModules= closure(JavaCore.defaultRootModules(Arrays.asList(fAllSystemRoots)));
+							}
+						} catch (JavaModelException e) {
+							JavaPlugin.log(e);
 						}
 					}
 					break;
@@ -476,6 +492,10 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 		return true;
 	}
 
+	public void setStatus(IStatus status) {
+		fContext.statusChanged(status);
+	}
+
 	@Override
 	public void setFocus() {
     	fDetailsList.setFocus();
@@ -506,7 +526,7 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 			IClasspathEntry entry= fCurrJProject.getClasspathEntryFor(module.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT).getPath());
 			return CPListElement.create(parentCPE, entry, module, true, fCurrJProject);
 		} catch (JavaModelException e) {
-			JavaPlugin.log(e.getStatus());
+			JavaPlugin.log(e);
 			return null;
 		}
 	}
@@ -609,8 +629,24 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 	}
 
 	private void updateLimitModules(CPListElementAttribute moduleAttribute) {
-		LimitModules limitModules= new ModuleEncapsulationDetail.LimitModules(reduceNames(fModuleList.fNames), moduleAttribute);
 		Object value= moduleAttribute.getValue();
+		if (value instanceof ModuleEncapsulationDetail[]) {
+			Collection<String> allSystemModules= allDefaultSystemModules();
+			if (allSystemModules.size() == fModuleList.fNames.size() && allSystemModules.containsAll(fModuleList.fNames)) {
+				// no longer relevant, remove:
+				ModuleEncapsulationDetail[] details= (ModuleEncapsulationDetail[]) value;
+				int retainCount= 0;
+				for (int i= 0; i < details.length; i++) {
+					if (!(details[i] instanceof LimitModules)) {
+						details[retainCount++]= details[i];
+					}
+				}
+				if (retainCount < details.length)
+					moduleAttribute.setValue(Arrays.copyOf(details, retainCount));
+				return;
+			}
+		}
+		LimitModules limitModules= new ModuleEncapsulationDetail.LimitModules(reduceNames(fModuleList.fNames), moduleAttribute);
 		if (value instanceof ModuleEncapsulationDetail[]) {
 			ModuleEncapsulationDetail[] details= (ModuleEncapsulationDetail[]) value;
 			for (int i= 0; i < details.length; i++) {
@@ -632,8 +668,18 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 		// set as singleton detail:
 		moduleAttribute.setValue(new ModuleEncapsulationDetail[] { limitModules });
 	}
-	
-	List<String> reduceNames(List<String> names) {
+
+	private Collection<String> allDefaultSystemModules() {
+		if (fAllDefaultSystemModules != null) { // if current project is in the unnamed module
+			return fAllDefaultSystemModules;
+		}
+		if (fAllSystemRoots != null) {
+			return Arrays.stream(fAllSystemRoots).map(pfr -> pfr.getModuleDescription().getElementName()).collect(Collectors.toList());
+		}
+		return Collections.emptyList();
+	}
+
+	Collection<String> reduceNames(Collection<String> names) {
 		List<String> reduced= new ArrayList<>();
 		outer:
 		for (String name : names) {
@@ -641,7 +687,7 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 				List<String> dominators= fModuleRequiredByModules.get(name);
 				if (dominators != null) {
 					for (String dominator : dominators) {
-						if (fModuleList.fNames.contains(dominator)) {
+						if (names.contains(dominator)) {
 							continue outer;
 						}
 					}
@@ -650,6 +696,23 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 			}
 		}
 		return reduced;
+	}
+
+	Collection<String> closure(Collection<String> selected) {
+		HashSet<String> copy= new HashSet<>();
+		collectRequired(selected, copy);
+		return copy;
+	}
+
+	private void collectRequired(Collection<String> src, Set<String> tgt) {
+		for (String mod : src) {
+			if (tgt.add(mod)) {
+				List<String> required= fModule2RequiredModules.get(mod);
+				if (required != null) {
+					collectRequired(required, tgt);
+				}
+			}
+		}
 	}
 
 	/**
@@ -669,5 +732,9 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 			}
 		}
 		return null;
+	}
+	
+	public void showJMPSOptionsDialog() {
+		new ShowJPMSOptionsDialog(getShell(), fClassPathList, allDefaultSystemModules(), this::closure, this::reduceNames).open();
 	}
 }
