@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -378,8 +378,12 @@ public class JavadocConfigurationBlock {
 				File indexFile= new File(folder, "index.html"); //$NON-NLS-1$
 				if (indexFile.isFile()) {
 					File packageList= new File(folder, "package-list"); //$NON-NLS-1$
+					File elementList= new File(folder, "element-list"); //$NON-NLS-1$
 					if (packageList.exists()) {
-						showConfirmValidationDialog(indexFile.toURI().toURL());
+						showConfirmValidationDialog(indexFile.toURI().toURL(), false);
+						return;
+					} else if (elementList.exists()) {
+						showConfirmValidationDialog(indexFile.toURI().toURL(), true);
 						return;
 					}
 				}
@@ -391,19 +395,30 @@ public class JavadocConfigurationBlock {
 			URI path= URIUtil.toURI(location);
 			URI index = URIUtil.append(path, "index.html"); //$NON-NLS-1$
 			URI packagelist = URIUtil.append(path, "package-list"); //$NON-NLS-1$
+			URI elementlist= URIUtil.append(path, "element-list"); //$NON-NLS-1$
 			URL indexURL = URIUtil.toURL(index);
 			URL packagelistURL = URIUtil.toURL(packagelist);
+			URL elementlistURL= URIUtil.toURL(elementlist);
+			boolean suc= checkURLConnection(packagelistURL);
+			boolean foundElementList= false;
+			if (!suc) {
+				suc= checkURLConnection(elementlistURL);
+				foundElementList= true;
+			}
 			
-			boolean suc= checkURLConnection(indexURL) && checkURLConnection(packagelistURL);
+			suc= suc && checkURLConnection(indexURL);
 			if (suc) {
-				showConfirmValidationDialog(indexURL);
+				showConfirmValidationDialog(indexURL, foundElementList);
 			} else {
 				MessageDialog.openWarning(fShell, fTitle, fInvalidMessage);
 			}
 		}
 
-		private void showConfirmValidationDialog(URL url) {
-			String message= PreferencesMessages.JavadocConfigurationBlock_ValidLocation_message;
+		private void showConfirmValidationDialog(URL url, boolean foundElementList) {
+			String message= PreferencesMessages.JavadocConfigurationBlock_ValidPackageListJavadocLocation_message;
+			if (foundElementList) {
+				message= PreferencesMessages.JavadocConfigurationBlock_ValidElementListJavadocLocation_message;
+			}
 			String okLabel= PreferencesMessages.JavadocConfigurationBlock_OK_label;
 			String openLabel= PreferencesMessages.JavadocConfigurationBlock_Open_label;
 			MessageDialog dialog= new MessageDialog(fShell, fTitle, null, message, MessageDialog.INFORMATION, new String[] { okLabel, openLabel }, 0);

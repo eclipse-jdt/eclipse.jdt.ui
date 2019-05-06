@@ -259,7 +259,8 @@ public final class PreferencesMessages extends NLS {
 	public static String JavadocConfigurationBlock_MalformedURL_error;
 	public static String JavadocConfigurationBlock_validate_button;
 	public static String JavadocConfigurationBlock_InvalidLocation_message;
-	public static String JavadocConfigurationBlock_ValidLocation_message;
+	public static String JavadocConfigurationBlock_ValidPackageListJavadocLocation_message;
+	public static String JavadocConfigurationBlock_ValidElementListJavadocLocation_message;
 	public static String JavadocConfigurationBlock_OK_label;
 	public static String JavadocConfigurationBlock_Open_label;
 	public static String JavadocConfigurationBlock_UnableToValidateLocation_message;
