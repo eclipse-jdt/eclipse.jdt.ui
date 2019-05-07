@@ -30,6 +30,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
@@ -46,6 +47,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleEncapsulationDetail.ModulePatch;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 
 /**
@@ -102,20 +104,25 @@ public class ShowJPMSOptionsDialog extends Dialog {
 	protected Control createDialogArea(Composite parent) {
 		Composite comp= (Composite) super.createDialogArea(parent);
 		Font font= parent.getFont();
+		int widthHint= convertWidthInCharsToPixels(60);
+
+		Label message= new Label(comp, SWT.LEFT + SWT.WRAP);
+		message.setText(NewWizardMessages.ShowJPMSOptionsDialog_explanation_label);
+		GridData gdLabel= new GridData(SWT.FILL, SWT.NONE, true, false);
+		gdLabel.widthHint= widthHint;
+		message.setLayoutData(gdLabel);
 
 		Group group= new Group(comp, SWT.NONE);
 		GridLayout topLayout= new GridLayout();
 		group.setLayout(topLayout);
 		GridData gd= new GridData(GridData.FILL_BOTH);
 		gd.heightHint= convertHeightInCharsToPixels(15);
-		gd.widthHint= convertWidthInCharsToPixels(50);
+		gd.widthHint= widthHint;
 		group.setLayoutData(gd);
 		group.setFont(font);
 
 		fJPMSModuleOptionsText= new Text(group, SWT.MULTI | SWT.WRAP | SWT.BORDER | SWT.V_SCROLL);
 		gd= new GridData(GridData.FILL_BOTH);
-		gd.heightHint= convertHeightInCharsToPixels(10);
-		gd.widthHint= convertWidthInCharsToPixels(60);
 		fJPMSModuleOptionsText.setLayoutData(gd);
 
 		String command= getOptions();
@@ -158,9 +165,10 @@ public class ShowJPMSOptionsDialog extends Dialog {
 						case IClasspathAttribute.ADD_EXPORTS:
 						case IClasspathAttribute.ADD_OPENS:
 						case IClasspathAttribute.ADD_READS:
-							for (String value : detail.toString().split(COMMA)) {
-								buf.append(OPTION_START).append(optName).append(BLANK).append(value).append(BLANK);
-							}
+							buf.append(OPTION_START).append(optName).append(BLANK).append(detail.toString()).append(BLANK);
+							break;
+						case IClasspathAttribute.PATCH_MODULE:
+							buf.append(OPTION_START).append(optName).append(BLANK).append(((ModulePatch) detail).toAbsolutePathsString(cpElement.getJavaProject())).append(BLANK);
 							break;
 						case IClasspathAttribute.LIMIT_MODULES:
 							addLimitModules(buf, systemLibrary.getJavaProject(), detail.toString());

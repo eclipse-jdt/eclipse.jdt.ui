@@ -58,7 +58,9 @@ import org.eclipse.jdt.core.IModuleDescription;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.provisional.JavaModelAccess;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchParticipant;
@@ -66,6 +68,7 @@ import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleDependenciesList.ModuleKind;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleDependenciesList.ModulesLabelProvider;
@@ -83,10 +86,7 @@ public class ModuleSelectionDialog extends TrayDialog {
 	private SelectionButtonDialogField fSelectAllCheckbox;
 	
 	boolean fInSetSelection= false; // to avoid re-entrance -> StackOverflow
-
-	// input data:
-	private IJavaProject fJavaProject;
-	private IClasspathEntry fJREEntry;
+	boolean fWaitingForSearch= false;
 
 	// internal storage and a client-provided function:
 	private Set<String> fAllIncluded; 		// transitive closure over modules already shown
@@ -108,43 +108,45 @@ public class ModuleSelectionDialog extends TrayDialog {
 	 * @return the configured dialog
 	 */
 	public static ModuleSelectionDialog forSystemModules(Shell shell, IJavaProject javaProject, IClasspathEntry jreEntry, List<String> shownModules, Function<List<String>, Set<String>> closureComputation) {
-		return new ModuleSelectionDialog(shell, javaProject, jreEntry, shownModules, closureComputation,
+		return new ModuleSelectionDialog(shell, javaProject, jreEntry, false, shownModules, closureComputation,
 				NewWizardMessages.ModuleSelectionDialog_addSystemModules_title, NewWizardMessages.ModuleSelectionDialog_addSystemModules_message);
 	}
 	/**
 	 * Let the user select a module from all modules found in the workspace, except those in {@code irrelevantModules}.
 	 * @param shell for showing the dialog
 	 * @param javaProject the java project whose build path is being configured
+	 * @param jreEntry a classpath entry representing the JRE system library
 	 * @param irrelevantModules list of modules not relevant for selection
 	 * @return the configured dialog
 	 */
-	public static ModuleSelectionDialog forReads(Shell shell, IJavaProject javaProject, List<String> irrelevantModules) {
-		return new ModuleSelectionDialog(shell, javaProject, null, irrelevantModules, HashSet::new,
+	public static ModuleSelectionDialog forReads(Shell shell, IJavaProject javaProject, IClasspathEntry jreEntry, List<String> irrelevantModules) {
+		return new ModuleSelectionDialog(shell, javaProject, jreEntry, true, irrelevantModules, HashSet::new,
 				NewWizardMessages.ModuleSelectionDialog_selectModule_title, NewWizardMessages.ModuleSelectionDialog_selectReadModule_message);
 	}
-	private ModuleSelectionDialog(Shell shell, IJavaProject javaProject, IClasspathEntry jreEntry, List<String> shownModules, 
-			Function<List<String>, Set<String>> closureComputation, String title, String message) {
+	private ModuleSelectionDialog(Shell shell, IJavaProject javaProject, IClasspathEntry jreEntry, boolean searchWorkspace,
+			List<String> shownModules, Function<List<String>, Set<String>> closureComputation, String title, String message) {
 		super(shell);
 		fTitle= title;
 		fMessage= message;
-		fJavaProject= javaProject;
-		fJREEntry= jreEntry;
 		fAllIncluded= closureComputation.apply(shownModules);
 		fClosureComputation= closureComputation;
-		if (jreEntry != null) {  // searching only modules from this JRE entry (quick)
+		if (jreEntry != null) {  // find system modules from this JRE entry (quick)
 			Set<String> result= new HashSet<>();
-			for (IPackageFragmentRoot root : fJavaProject.findUnfilteredPackageFragmentRoots(fJREEntry)) {
+			for (IPackageFragmentRoot root : javaProject.findUnfilteredPackageFragmentRoots(jreEntry)) {
 				checkAddModule(result, root.getModuleDescription());
 			}
 			List<String> list= new ArrayList<>(result);
 			list.sort(String::compareTo);
 			fAvailableModules= list;
-		} else {  // searching all modules in the workspace (slow)
+		}
+		if (searchWorkspace) {  // searching all modules in the workspace (slow)
+			fWaitingForSearch= true;
 			new Job(NewWizardMessages.ModuleSelectionDialog_searchModules_job) {
 				@Override
 				public IStatus run(IProgressMonitor monitor) {
 					try {
-						fAvailableModules= searchAvailableModules(monitor);
+						fAvailableModules.addAll(searchAvailableModules(monitor));
+						fAvailableModules.sort(String::compareTo);
 						if (getReturnCode() == Window.CANCEL) {
 							return Status.CANCEL_STATUS;
 						}
@@ -172,17 +174,21 @@ public class ModuleSelectionDialog extends TrayDialog {
 			public void acceptSearchMatch(SearchMatch match) throws CoreException {
 				Object element= match.getElement();
 				if (element instanceof IModuleDescription) {
-					checkAddModule(result, (IModuleDescription) element);
+					IModuleDescription module= (IModuleDescription) element;
+					if (!JavaModelAccess.isSystemModule(module))
+						checkAddModule(result, module);
 				}
 			}
 		};
 		SearchParticipant[] participants= new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() };
-		new SearchEngine().search(pattern, participants, SearchEngine.createWorkspaceScope(), requestor, monitor);
+		IJavaSearchScope scope= JavaSearchScopeFactory.getInstance().createWorkspaceScope(false); // skip JRE modules, which are found directly via the jreEntry
+		new SearchEngine().search(pattern, participants, scope, requestor, monitor);
 		if (getReturnCode() == Window.CANCEL) { // should cancelPressed() actively abort the search?
 			return Collections.emptyList();
 		}
 		// also search for automatic modules:
 		for (IProject project : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
+			if (!project.isOpen()) continue;
 			IJavaProject jPrj= JavaCore.create(project);
 			if (jPrj.getModuleDescription() == null) {
 				checkAddModule(result, JavaCore.getAutomaticModuleDescription(jPrj));
@@ -195,9 +201,7 @@ public class ModuleSelectionDialog extends TrayDialog {
 				}
 			}
 		}
-		List<String> list= new ArrayList<>(result);
-		list.sort(String::compareTo);
-		return list;
+		return new ArrayList<>(result);
 	}
 	
 	boolean isJREChild(IJavaProject jPrj, IPackageFragmentRoot root) {
@@ -275,14 +279,16 @@ public class ModuleSelectionDialog extends TrayDialog {
 		gd.heightHint= converter.convertHeightInCharsToPixels(20);
 		tableViewer.getControl().setLayoutData(gd);
 
-		if (fAvailableModules == null) {
+		if (fWaitingForSearch) {
 			message.setText(NewWizardMessages.ModuleSelectionDialog_searchModules_temp_message);
 			fFlipMessage= () ->  {
 				message.setText(fMessage);
 			};
 		} else {
-			tableViewer.setInput(fAvailableModules);
 			message.setText(fMessage);
+		}
+		if (fAvailableModules != null) {
+			tableViewer.setInput(fAvailableModules);			
 		}
 		fViewer= tableViewer;
 		

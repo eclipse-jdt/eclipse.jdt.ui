@@ -272,7 +272,7 @@ public class BuildPathsBlock {
 		item.setData(ordpage);
 		item.setControl(ordpage.getControl(folder));
 
-		fModulesPage= new ModuleDependenciesPage(fContext, fClassPathList, fPageContainer);
+		fModulesPage= new ModuleDependenciesPage(fContext, fClassPathList);
 		item= new TabItem(folder, SWT.NONE);
 		item.setText(NewWizardMessages.BuildPathsBlock_tab_modules);
 		item.setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_MODULE));

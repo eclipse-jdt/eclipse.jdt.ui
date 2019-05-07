@@ -23,8 +23,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.core.IClasspathAttribute;
@@ -206,6 +209,79 @@ public abstract class ModuleEncapsulationDetail {
 		@Override
 		public String getAttributeName() {
 			return IClasspathAttribute.PATCH_MODULE;
+		}
+
+		public String toAbsolutePathsString(IJavaProject focusProject) {
+			String[] paths= fPaths.split(File.pathSeparator);
+			String[] absPaths= new String[paths.length];
+			IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
+			for (int i= 0; i < paths.length; i++) {
+				IResource resource= root.findMember(new Path(paths[i]));
+				try {
+					absPaths[i]= toAbsolutePath(resource, focusProject, root);
+				} catch (JavaModelException e) {
+					JavaPlugin.log(e);
+				}
+				if (absPaths[i] == null) {
+					absPaths[i]= paths[i];
+				}
+			}
+			String allPaths= String.join(File.pathSeparator, absPaths);
+			return fModule + '=' + allPaths;
+		}
+
+		private String toAbsolutePath(IResource resource, IJavaProject focusProject, IWorkspaceRoot root) throws JavaModelException {
+			if (resource instanceof IProject) {
+				if (resource.equals(focusProject.getProject())) {
+					// focus project: collect all source locations (pre-joined into one string):
+					StringBuilder allSources= new StringBuilder();
+					for (IClasspathEntry classpathEntry : focusProject.getRawClasspath()) {
+						if (classpathEntry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+							if (allSources.length() > 0) {
+								allSources.append(File.pathSeparator);
+							}
+							allSources.append(absPath(root, classpathEntry.getPath()));
+						}
+					}
+					return allSources.toString();
+				} else {
+					// other projects: use the default output locations:
+					return absPath(root, JavaCore.create((IProject) resource).getOutputLocation());
+				}
+			} else if (resource != null) {
+				if (isSourceFolderOf(resource, focusProject)) {
+					// within current project use source path:
+					return resource.getLocation().toString();
+				} else {
+					IJavaProject otherJProj= JavaCore.create(resource.getProject());
+					if (otherJProj.exists()) {
+						IClasspathEntry cpEntry= otherJProj.getClasspathEntryFor(resource.getFullPath());
+						if (cpEntry != null && cpEntry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+							// source of other project -> map to its output location:
+							IPath outputLocation= cpEntry.getOutputLocation();
+							if (outputLocation == null) {
+								outputLocation= otherJProj.getOutputLocation();
+							}
+							return absPath(root, outputLocation);
+						}
+					}
+					// non-source location as-is:
+					return resource.getLocation().toString(); 
+				}
+			}
+			return null;
+		}
+
+		private String absPath(IWorkspaceRoot root, IPath path) {
+			return root.findMember(path).getLocation().toString();
+		}
+
+		private boolean isSourceFolderOf(IResource resource, IJavaProject javaProject) throws JavaModelException {
+			IPackageFragmentRoot root= javaProject.findPackageFragmentRoot(resource.getFullPath());
+			if (root != null) {
+				return root.getKind() == IPackageFragmentRoot.K_SOURCE;
+			}
+			return false;
 		}
 	}
 

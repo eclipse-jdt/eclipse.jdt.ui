@@ -188,9 +188,31 @@ class ModuleDependenciesList {
 		return !fInitialNames.equals(fNames);
 	}
 
+	public void setFocusModule(String moduleName) {
+		fNamesComparator= new FocusAwareStringComparator(moduleName);
+		fKinds.put(fModule2Element.get(moduleName), ModuleKind.Focus);
+	}
+
+	public void unsetFocusModule(CPListElement elem) {
+		fNamesComparator= new FocusAwareStringComparator(""); //$NON-NLS-1$
+		// restore real kind:
+		Object topElem= elem.getParentContainer();
+		CPListElement topEntry= topElem instanceof CPListElement ? (CPListElement) topElem : elem;
+		ModuleKind kind= ModuleKind.Normal;
+		if (LibrariesWorkbookPage.isJREContainer(topEntry.getPath())) {
+			kind= ModuleKind.System; 
+		} else {
+			IModuleDescription module= fModules.get(elem);
+			if (module != null && module.isAutoModule()) {
+				kind= ModuleKind.Automatic;
+			}
+		}
+		fKinds.put(elem, kind);
+	}
+
 	public void refresh() {
 		fNames.sort(fNamesComparator);
-		fViewer.refresh();
+		fViewer.refresh(true, true);
 	}
 
 	public void setEnabled(boolean enable) {

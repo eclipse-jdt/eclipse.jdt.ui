@@ -98,7 +98,7 @@ public class ModulePatchSourceSelectionDialog extends TrayDialog {
 			if (e1.equals(fContextProject)) {
 				return -1;
 			}
-			if (e1.equals(fContextProject)) {
+			if (e2.equals(fContextProject)) {
 				return 1;
 			}
 			return super.compare(viewer, e1, e2);
@@ -151,7 +151,7 @@ public class ModulePatchSourceSelectionDialog extends TrayDialog {
 				continue;
 			}
 			try {
-				if (project.hasNature(JavaCore.NATURE_ID)) {
+				if (project.isOpen() && project.hasNature(JavaCore.NATURE_ID)) {
 					IJavaProject jProj= JavaCore.create(project);
 					if (jProj.getModuleDescription() == null) {
 						fProjects.add(jProj);

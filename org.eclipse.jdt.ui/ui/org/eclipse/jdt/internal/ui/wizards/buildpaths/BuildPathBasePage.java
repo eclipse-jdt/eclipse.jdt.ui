@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -344,7 +344,17 @@ public abstract class BuildPathBasePage {
 		}
 	}
 
-
+	protected void selectRootNode(TreeListDialogField<CPListElement> list, boolean modulePath) {
+		for (CPListElement cpListElement : list.getElements()) {
+			if (cpListElement instanceof RootCPListElement) {
+				RootCPListElement root= (RootCPListElement) cpListElement;
+				if (root.isModulePathRootNode() == modulePath) {
+					list.selectElements(new StructuredSelection(root));
+					return;
+				}
+			}
+		}
+	}
 
 	protected abstract class CPListAdapter implements IDialogFieldListener, ITreeListAdapter<CPListElement> {
 		private final Object[] EMPTY_ARR= new Object[0];

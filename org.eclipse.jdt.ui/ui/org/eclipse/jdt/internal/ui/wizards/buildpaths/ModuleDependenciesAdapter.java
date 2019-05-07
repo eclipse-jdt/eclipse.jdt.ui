@@ -16,6 +16,7 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -43,6 +44,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -57,6 +59,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.provisional.JavaModelAccess;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -314,6 +317,12 @@ class ModuleDependenciesAdapter implements IDialogFieldListener, ITreeListAdapte
 			possibleTargetModules.remove(fFocusModule.getElementName());
 			ModuleAddExportsDialog dialog= new ModuleAddExportsDialog(shell, new IJavaElement[] { jContainer }, possibleTargetModules, initial);
 			if (dialog.open() == Window.OK) {
+				try {
+					moduleAttribute = ensureModuleAttribute(moduleAttribute);
+				} catch (JavaModelException e) {
+					JavaPlugin.log(e);
+					return false;
+				}
 				ModuleAddExpose expose= dialog.getExport(moduleAttribute);
 				if (expose != null) {
 					Object attribute= moduleAttribute.getValue();
@@ -354,8 +363,9 @@ class ModuleDependenciesAdapter implements IDialogFieldListener, ITreeListAdapte
 		}
 		private boolean internalRemove(List<Object> selectedElements) throws JavaModelException {
 			CPListElementAttribute moduleAttribute;
-			if (fKind == ModuleKind.System) {
-				moduleAttribute= ((CPListElement) fElem.getParentContainer()).findAttributeElement(CPListElement.MODULE);
+			Object parentContainer= fElem.getParentContainer();
+			if (parentContainer instanceof CPListElement) {
+				moduleAttribute= ((CPListElement) parentContainer).findAttributeElement(CPListElement.MODULE);
 			} else {
 				moduleAttribute= fElem.findAttributeElement(CPListElement.MODULE);
 			}
@@ -375,6 +385,9 @@ class ModuleDependenciesAdapter implements IDialogFieldListener, ITreeListAdapte
 						// need to merge details:
 						PatchModule patch= (PatchModule) node;
 						ModuleEncapsulationDetail.removePatchLocation(details, fFocusModule.getElementName(), patch.getPath());
+						if (getContextProject().equals(patch.fSource.getAncestor(IJavaElement.JAVA_PROJECT))) {
+							fDependenciesPage.unsetFocusModule(fElem);
+						}
 						patchUpdated= true;
 					} else {
 						ModuleEncapsulationDetail med= ((DetailNode<?>) node).convertToCP(moduleAttribute);
@@ -416,7 +429,7 @@ class ModuleDependenciesAdapter implements IDialogFieldListener, ITreeListAdapte
 				return false;
 			}
 		}
-		private boolean internalAddReads(Shell shell) throws JavaModelException {
+		boolean internalAddReads(Shell shell) throws JavaModelException {
 			Object container= fElem.getParentContainer();
 			CPListElement element= (container instanceof CPListElement) ? (CPListElement) container : fElem;
 			CPListElementAttribute moduleAttribute= element.findAttributeElement(CPListElement.MODULE);
@@ -435,17 +448,18 @@ class ModuleDependenciesAdapter implements IDialogFieldListener, ITreeListAdapte
 			irrelevantModules= new ArrayList<>(irrelevantModules);
 			irrelevantModules.add(fFocusModule.getElementName());
 
-			ModuleSelectionDialog dialog= ModuleSelectionDialog.forReads(shell, fElem.getJavaProject(), irrelevantModules);
+			IClasspathEntry jreEntry= fDependenciesPage.findSystemLibraryElement().getClasspathEntry();
+			ModuleSelectionDialog dialog= ModuleSelectionDialog.forReads(shell, fElem.getJavaProject(), jreEntry, irrelevantModules);
 			if (dialog.open() != 0) {				
 				return false;
 			}
-
-			if (moduleAttribute == null) {
-				// initialize missing attribute for focus module (source folder)
-				moduleAttribute= fElem.createAttributeElement(CPListElement.MODULE, new ModuleEncapsulationDetail[0], true);
+			List<IModuleDescription> result= dialog.getResult();
+			if (!handleUnavailableModulesIfNeeded(shell, result, fDependenciesPage)) {
+				return false;
 			}
 
-			List<IModuleDescription> result= dialog.getResult();
+			moduleAttribute= ensureModuleAttribute(moduleAttribute);
+
 			ModuleEncapsulationDetail[] arrayValue= null;
 			int idx= 0;
 			Object attribute= moduleAttribute.getValue();
@@ -475,11 +489,7 @@ class ModuleDependenciesAdapter implements IDialogFieldListener, ITreeListAdapte
 		private boolean internalAddPatch(Shell shell, Map<String, String> patchMap) throws JavaModelException {
 			Object container= fElem.getParentContainer();
 			CPListElement element= (container instanceof CPListElement) ? (CPListElement) container : fElem;
-			CPListElementAttribute moduleAttribute= element.findAttributeElement(CPListElement.MODULE);
-			if (moduleAttribute == null) {
-				throwNewJavaModelException("module attribute is unexpectecly missing for : "+fElem); //$NON-NLS-1$
-				return false; // not reached
-			}
+			CPListElementAttribute moduleAttribute= ensureModuleAttribute(element.findAttributeElement(CPListElement.MODULE));
 			if (!(moduleAttribute.getValue() instanceof ModuleEncapsulationDetail[])) {
 				throwNewJavaModelException("Value of module attribute has unexpected type: "+moduleAttribute.getValue()); //$NON-NLS-1$
 				return false;
@@ -531,6 +541,7 @@ class ModuleDependenciesAdapter implements IDialogFieldListener, ITreeListAdapte
 			ModuleEncapsulationDetail.addPatchLocations(detailList, fFocusModule.getElementName(), newPaths, moduleAttribute);
 			element.setAttribute(CPListElement.MODULE, detailList.toArray(new ModuleEncapsulationDetail[detailList.size()]));
 			fDependenciesPage.buildPatchMap();
+			fDependenciesPage.refreshModulesList();
 			return true;
 		}
 
@@ -549,6 +560,17 @@ class ModuleDependenciesAdapter implements IDialogFieldListener, ITreeListAdapte
 			ModuleEncapsulationDetail.removePatchLocation(otherDetailList, moduleToUnpatch, oldPath);
 			otherAttribute.setValue(otherDetailList.toArray(new ModuleEncapsulationDetail[otherDetailList.size()]));
 			return true;
+		}
+
+		private CPListElementAttribute ensureModuleAttribute(CPListElementAttribute existing) throws JavaModelException {
+			if (existing != null) return existing;
+			if (fElem.getClasspathEntry().getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+				// initialize missing attribute for focus module (source folder)
+				return fElem.createAttributeElement(CPListElement.MODULE, new ModuleEncapsulationDetail[0], true);
+			} else {
+				throwNewJavaModelException("module attribute is unexpectecly missing for : "+fElem); //$NON-NLS-1$
+				return null; // not reached
+			}
 		}
 	}
 
@@ -783,15 +805,59 @@ class ModuleDependenciesAdapter implements IDialogFieldListener, ITreeListAdapte
 		}
 	}
 
-	public static void updateButtonEnablement(TreeListDialogField<?> list, boolean enableModify, boolean enableRemove) {
+	public static void updateButtonEnablement(TreeListDialogField<?> list, boolean enableModify, boolean enableRemove, boolean enableShow) {
 		list.enableButton(IDX_REMOVE, enableRemove);
 		list.enableButton(IDX_EXPOSE_PACKAGE, enableModify);
 		list.enableButton(IDX_READ_MODULE, enableModify);
 		list.enableButton(IDX_PATCH, enableModify);
+		list.enableButton(IDX_JPMS_OPTIONS, enableShow);
 	}
 
 	static void throwNewJavaModelException(String message) throws JavaModelException {
 		throw new JavaModelException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), message));
+	}
+
+	static boolean handleUnavailableModulesIfNeeded(Shell shell, List<IModuleDescription> result, ModuleDependenciesPage masterPage) {
+		List<IModuleDescription> unavailableSystemModules= new ArrayList<>();
+		Collection<String> allModules= masterPage.getAllModules();
+		for (IModuleDescription module : result) {
+			if (!allModules.contains(module.getElementName())) {
+				if (JavaModelAccess.isSystemModule(module)) {
+					unavailableSystemModules.add(module);
+				} else {
+					IPackageFragmentRoot pfr= (IPackageFragmentRoot) module.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+					boolean isLibrary= pfr != null && pfr.isArchive();
+					masterPage.offerSwitchToTab(shell,
+							NewWizardMessages.ModuleSelectionDialog_selectModule_title,
+							MessageFormat.format(NewWizardMessages.ModuleDependenciesAdapter_addReadsNotOnModulepath_error, module.getElementName()),
+							isLibrary);
+					return false; // the new add-reads is not yet handled
+				}
+			}
+		}
+		if (!unavailableSystemModules.isEmpty()) {
+			StringBuilder message= new StringBuilder();
+			message.append(NewWizardMessages.ModuleDependenciesAdapter_addSystemModules_question);
+			message.append(unavailableSystemModules.stream()
+					.map(IJavaElement::getElementName)
+					.sorted()
+					.collect(Collectors.joining("\n\t", "\t", ""))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			int answer= MessageDialog.open(MessageDialog.QUESTION, shell,
+					NewWizardMessages.ModuleDependenciesAdapter_addSystemModule_title, message.toString(), SWT.NONE,
+					NewWizardMessages.ModuleDependenciesAdapter_add_button, IDialogConstants.CANCEL_LABEL);
+			if (answer == 0) {
+				try {
+					masterPage.addToSystemModules(unavailableSystemModules);
+				} catch (JavaModelException e) {
+					JavaPlugin.log(e);
+					MessageDialog.openError(shell, NewWizardMessages.ModuleDependenciesAdapter_configure_error, e.getMessage());
+					return false;
+				}
+			} else {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	private final ModuleDependenciesPage fModuleDependenciesPage; // parent structure

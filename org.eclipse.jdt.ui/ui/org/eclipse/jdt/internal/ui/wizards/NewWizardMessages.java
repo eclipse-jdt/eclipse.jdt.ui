@@ -517,6 +517,7 @@ public final class NewWizardMessages extends NLS {
 	public static String ModuleDependenciesPage_modules_label;
 	public static String ModuleDependenciesPage_addSystemModule_button;
 	public static String ModuleDependenciesPage_details_label;
+	public static String ModuleDependenciesPage_nonModularProject_dummy;
 	// buttons:
 	public static String ModuleDependenciesPage_modules_remove_button;
 	public static String ModuleDependenciesPage_modules_read_button;
@@ -525,19 +526,28 @@ public final class NewWizardMessages extends NLS {
 	public static String ModuleDependenciesPage_modules_edit_button;
 	public static String ModuleDependenciesPage_showJPMSOptions_button;
 	// dialogs:
-	public static String ModuleSelectionDialog_add_button;
-	public static String ModuleSelectionDialog_addSystemModules_message;
 	public static String ModuleSelectionDialog_addSystemModules_title;
+	public static String ModuleSelectionDialog_addSystemModules_message;
+	public static String ModuleSelectionDialog_selectAll_button;
+	public static String ModuleSelectionDialog_add_button;
+
 	public static String ModuleSelectionDialog_selectModule_title;
 	public static String ModuleSelectionDialog_selectReadModule_message;
 	public static String ModuleSelectionDialog_searchModules_job;
 	public static String ModuleSelectionDialog_searchModules_temp_message;
-	public static String ModuleSelectionDialog_selectAll_button;
+
+	public static String ModuleDependenciesAdapter_addSystemModule_title;
+	public static String ModuleDependenciesAdapter_addSystemModules_question;
+	public static String ModuleDependenciesAdapter_add_button;
+	public static String ModuleDependenciesAdapter_addReadsNotOnModulepath_error;
+	public static String ModuleDependenciesAdapter_goToLibrariesTab_button;
+	public static String ModuleDependenciesAdapter_goToProjectsTab_button;
 
 	public static String ModulePatchSourceSelectionDialog_patchSourceLocation_message;
 	public static String ModulePatchSourceSelectionDialog_patchSourceLocation_title;
 
 	public static String ShowJPMSOptionsDialog_dialog_title;
+	public static String ShowJPMSOptionsDialog_explanation_label;
 	public static String ShowJPMSOptionsDialog_close_button;
 	public static String ShowJPMSOptionsDialog_copyAndCopy_button;
 	public static String ShowJPMSOptionsDialog_empty_message;
@@ -547,17 +557,17 @@ public final class NewWizardMessages extends NLS {
 	public static String ModuleDependenciesPage_removingModule_message;
 	public static String ModuleDependenciesPage_removingModuleTransitive_message;
 	public static String ModuleDependenciesPage_remove_button;
-	public static String ModuleDependenciesPage_cancel_button;
-	public static String ModuleDependenciesPage_nonModularProject_dummy;
 	public static String ModuleDependenciesPage_removeCurrentModule_error;
 	public static String ModuleDependenciesPage_removeModule_error_with_hint;
 	public static String ModuleDependenciesPage_removeSystemModule_error_hint;
+
 	public static String ModuleDependenciesAdapter_patchConflict_title;
 	public static String ModuleDependenciesAdapter_patchConflict_message;
 	public static String ModuleDependenciesAdapter_patchOutputConflict_validationError;
 	public static String ModuleDependenciesAdapter_project_kind;
 	public static String ModuleDependenciesAdapter_sourceFolder_kind;
 	public static String ModuleDependenciesAdapter_configure_error;
+
 	// detail tree:
 	public static String ModuleDependenciesAdapter_declared_node;
 	public static String ModuleDependenciesAdapter_configured_node;

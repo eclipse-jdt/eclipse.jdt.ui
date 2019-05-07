@@ -38,8 +38,11 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TabFolder;
+import org.eclipse.swt.widgets.TabItem;
 
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.resources.IProject;
 
@@ -49,8 +52,6 @@ import org.eclipse.jface.layout.PixelConverter;
 import org.eclipse.jface.resource.CompositeImageDescriptor;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.StructuredSelection;
-
-import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
@@ -75,22 +76,14 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.TreeListDialogField;
 
 /*
- * TODO: ("+" must have, "-" later)
+ * TODO:
  * LHS:
  * - module kind "Upgrade" of a System Library (incl. icon decoration)
- * - better help on how to remove non-JRE modules (module-info, modulepath)
- * RHS:
- * - PatchModule:
- *   - handle patch project w/o module-info (as soon as path-module is defined)
- *     - treat the patched module as the current context module (pinned)
- *   - prefer offering source folders of the context project for patch-module
  * General:
  * - distinguish test/main dependencies
  * - special elements: ALL-UNNAMED, ALL-SYSTEM ...
  * - Help pages and reference to it
  *    (add to ModuleSelectionDialog.configureShell(), ModuleDependenciesPage.getControl())
- * - Offer to switch to the corresponding tab when trying to remove a non-system module
- *    (see error scenarii in #removeModules() and also field #fPageContainer).
  */
 public class ModuleDependenciesPage extends BuildPathBasePage {
 
@@ -173,12 +166,10 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 	public final Map<String,String> fPatchMap= new HashMap<>();
 
 	private Control fSWTControl;
-//	private final IWorkbenchPreferenceContainer fPageContainer; // for switching page (not yet used)
 
-	public ModuleDependenciesPage(IStatusChangeListener context, CheckedListDialogField<CPListElement> classPathList, IWorkbenchPreferenceContainer pageContainer) {
+	public ModuleDependenciesPage(IStatusChangeListener context, CheckedListDialogField<CPListElement> classPathList) {
 		fClassPathList= classPathList;
 		fContext= context;
-//		fPageContainer= pageContainer;
 		fSWTControl= null;
 		
 		String[] buttonLabels= new String[] {
@@ -291,7 +282,7 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 			fAddSystemModuleButton.setEnabled(false);
 			fDetailsList.removeAllElements();
 			fDetailsList.refresh();
-			ModuleDependenciesAdapter.updateButtonEnablement(fDetailsList, false, false);
+			ModuleDependenciesAdapter.updateButtonEnablement(fDetailsList, false, false, false);
 			return;
 		}
 		fModuleList.setEnabled(true);
@@ -396,9 +387,9 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 					}
 			}
 		}
+		buildPatchMap();
 		fModuleList.captureInitial();
 		fModuleList.refresh();
-		buildPatchMap();
 	}
 
 	public Collection<String> getAllModules() {
@@ -415,6 +406,9 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 						ModulePatch patch= (ModulePatch) detail;
 						for (String path : patch.getPathArray()) {
 							fPatchMap.put(path, patch.fModule);
+							if (path.startsWith(fCurrJProject.getPath().toString())) {
+								fModuleList.setFocusModule(patch.fModule);
+							}
 						}
 					}
 				}
@@ -484,7 +478,7 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 			fDetailsList.addElement(configured);
 			fDetailsList.expandElement(configured, 1);
 		}
-		ModuleDependenciesAdapter.updateButtonEnablement(fDetailsList, elements.size() == 1, !elements.isEmpty());
+		ModuleDependenciesAdapter.updateButtonEnablement(fDetailsList, elements.size() == 1, !elements.isEmpty(), true);
 	}
 
 	@Override
@@ -501,20 +495,38 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
     	fDetailsList.setFocus();
 	}
 
+	public void unsetFocusModule(CPListElement elem) {
+		fModuleList.unsetFocusModule(elem);
+		fModuleList.refresh();
+	}
+
 	public void refreshModulesList() {
 		fModuleList.refresh();
 	}
 
 	void addSystemModules() {
-		CPListElement cpListElement= findSystemLibraryElement();
-		ModuleSelectionDialog dialog= ModuleSelectionDialog.forSystemModules(getShell(), fCurrJProject, cpListElement.getClasspathEntry(), fModuleList.fNames, this::computeForwardClosure);
-		if (dialog.open() == IDialogConstants.OK_ID) {
-			for (IModuleDescription addedModule : dialog.getResult()) {
-				fModuleList.addModule(addedModule, getOrCreateModuleCPE(cpListElement, addedModule), ModuleKind.System);
+		try {
+			CPListElement cpListElement= findSystemLibraryElement();
+			ModuleSelectionDialog dialog= ModuleSelectionDialog.forSystemModules(getShell(), fCurrJProject, cpListElement.getClasspathEntry(), fModuleList.fNames, this::computeForwardClosure);
+			if (dialog.open() == IDialogConstants.OK_ID) {
+				List<IModuleDescription> modulesToAdd= dialog.getResult();
+				addSystemModules(cpListElement, modulesToAdd);
 			}
-			updateLimitModules(cpListElement.findAttributeElement(CPListElement.MODULE));
-			fModuleList.refresh();
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
 		}
+	}
+
+	void addSystemModules(CPListElement cpListElement, List<IModuleDescription> modulesToAdd) {
+		for (IModuleDescription addedModule : modulesToAdd) {
+			fModuleList.addModule(addedModule, getOrCreateModuleCPE(cpListElement, addedModule), ModuleKind.System);
+		}
+		updateLimitModules(cpListElement.findAttributeElement(CPListElement.MODULE));
+		fModuleList.refresh();
+	}
+
+	public void addToSystemModules(List<IModuleDescription> modulesToAdd) throws JavaModelException {
+		addSystemModules(findSystemLibraryElement(), modulesToAdd);
 	}
 
 	CPListElement getOrCreateModuleCPE(CPListElement parentCPE, IModuleDescription module) {
@@ -524,18 +536,21 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 		}
 		try {
 			IClasspathEntry entry= fCurrJProject.getClasspathEntryFor(module.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT).getPath());
+			if (entry == null) {
+				return null;
+			}
 			return CPListElement.create(parentCPE, entry, module, true, fCurrJProject);
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 			return null;
 		}
 	}
-	private CPListElement findSystemLibraryElement() {
+	public CPListElement findSystemLibraryElement() throws JavaModelException {
 		for (CPListElement cpListElement : fClassPathList.getElements()) {
 			if (LibrariesWorkbookPage.isJREContainer(cpListElement.getPath()))
 				return cpListElement;
 		}
-		return null;
+		throw new JavaModelException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), "Project "+fCurrJProject.getElementName()+" has no system library"));  //$NON-NLS-1$//$NON-NLS-2$
 	}
 
 	void removeModules() {
@@ -550,9 +565,39 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 			}
 			IModuleDescription mod= selectedElement.getModule();
 			if (mod == null) {
-				MessageDialog.openError(getShell(), NewWizardMessages.ModuleDependenciesPage_removeModule_dialog_title,
+				// offer to switch to the suitable Modulepath tab, but need to collect some info, first:
+				IClasspathEntry selectedEntry= selectedElement.getClasspathEntry();
+				String moduleName= selectedElement.getPath().lastSegment();
+				boolean isLibrary;
+				switch (selectedEntry.getEntryKind()) {
+					case IClasspathEntry.CPE_LIBRARY:
+						for (IPackageFragmentRoot packageRoot : fCurrJProject.findPackageFragmentRoots(selectedEntry)) {
+							IModuleDescription module= packageRoot.getModuleDescription();
+							if (module == null) {
+								try {
+									module= JavaCore.getAutomaticModuleDescription(packageRoot);
+								} catch (JavaModelException | IllegalArgumentException e) {
+									// ignore
+								}
+							}
+							if (module != null) {
+								moduleName= module.getElementName();
+								break;
+							}
+						}
+						//$FALL-THROUGH$
+					case IClasspathEntry.CPE_CONTAINER:
+					case IClasspathEntry.CPE_VARIABLE:
+						isLibrary= true;
+						break;
+					default:
+						isLibrary= false;
+				}
+				offerSwitchToTab(getShell(),
+						NewWizardMessages.ModuleDependenciesPage_removeModule_dialog_title,
 						MessageFormat.format(NewWizardMessages.ModuleDependenciesPage_removeModule_error_with_hint,
-								selectedElement.getPath().lastSegment(), NewWizardMessages.ModuleDependenciesPage_removeSystemModule_error_hint));
+								moduleName, NewWizardMessages.ModuleDependenciesPage_removeSystemModule_error_hint),
+						isLibrary);
 				return;
 			}
 			String moduleName= mod.getElementName();
@@ -624,7 +669,9 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 	}
 	
 	private boolean confirmRemoveModule(String message) {
-		int answer= MessageDialog.open(MessageDialog.QUESTION, getShell(), NewWizardMessages.ModuleDependenciesPage_removeModule_dialog_title, message, SWT.NONE, NewWizardMessages.ModuleDependenciesPage_remove_button, NewWizardMessages.ModuleDependenciesPage_cancel_button);
+		int answer= MessageDialog.open(MessageDialog.QUESTION, getShell(),
+				NewWizardMessages.ModuleDependenciesPage_removeModule_dialog_title, message, SWT.NONE,
+				NewWizardMessages.ModuleDependenciesPage_remove_button, IDialogConstants.CANCEL_LABEL);
 		return answer == 0;
 	}
 
@@ -736,5 +783,43 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 	
 	public void showJMPSOptionsDialog() {
 		new ShowJPMSOptionsDialog(getShell(), fClassPathList, allDefaultSystemModules(), this::closure, this::reduceNames).open();
+	}
+
+	public void offerSwitchToTab(Shell shell, String dialogTitle, String dialogMessage, boolean isLibrary) {
+		String tabButton= isLibrary ? NewWizardMessages.ModuleDependenciesAdapter_goToLibrariesTab_button
+				: NewWizardMessages.ModuleDependenciesAdapter_goToProjectsTab_button;
+		MessageDialog dialog= new MessageDialog(shell,
+				dialogTitle, null, dialogMessage, MessageDialog.QUESTION, 0,
+				tabButton, IDialogConstants.CANCEL_LABEL);
+		if (dialog.open() == 0) {
+			TabFolder tabFolder= (TabFolder) fSWTControl.getParent();
+			if (isLibrary) {
+				showLibrariesPage(tabFolder);
+			} else {
+				showProjectsPage(tabFolder);
+			}
+		}
+	}
+
+	void showLibrariesPage(TabFolder tabFolder) {
+		for (TabItem tabItem : tabFolder.getItems()) {
+			if (tabItem.getData() instanceof LibrariesWorkbookPage) {
+				tabFolder.setSelection(tabItem);
+				LibrariesWorkbookPage page= (LibrariesWorkbookPage) tabItem.getData();
+				page.selectRootNode(true);
+				return;
+			}
+		}
+	}
+
+	void showProjectsPage(TabFolder tabFolder) {
+		for (TabItem tabItem : tabFolder.getItems()) {
+			if (tabItem.getData() instanceof ProjectsWorkbookPage) {
+				tabFolder.setSelection(tabItem);
+				ProjectsWorkbookPage page= (ProjectsWorkbookPage) tabItem.getData();
+				page.selectRootNode(true);
+				return;
+			}
+		}
 	}
 }
