@@ -33,7 +33,6 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -186,11 +185,6 @@ public final class StubUtility2 {
 		}
 
 		return decl;
-	}
-
-	private static String suggestParameterName(ICompilationUnit unit, IVariableBinding binding, String[] excluded) {
-		String name= StubUtility.getBaseName(binding, unit.getJavaProject());
-		return StubUtility.suggestArgumentName(unit.getJavaProject(), name, excluded);
 	}
 
 
