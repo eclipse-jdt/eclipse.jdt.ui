@@ -290,6 +290,31 @@ public class ParameterNamesCodeMiningTest extends TestCase {
 			preferenceStore.setValue(PreferenceConstants.EDITOR_MARK_OCCURRENCES, initial);
 		}
 	}
+	
+	public void testBug547232() throws Exception {
+		String contents= "public class Test {\n" + 
+				"    public final Object object;\n" + 
+				"    public final String string;\n" + 
+				"\n" + 
+				"    Test(Object object, String string) {\n" + 
+				"        this.object = object;\n" + 
+				"        this.string = string;\n" + 
+				"    }\n" + 
+				"\n" + 
+				"    void f() {\n" + 
+				"        new Test(null, \"test\");\n" + 
+				"    }\n" + 
+				"}\n" + 
+				"";
+		ICompilationUnit compilationUnit= fPackage.createCompilationUnit("Foo.java", contents, true, new NullProgressMonitor());
+		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(compilationUnit);
+		fParameterNameCodeMiningProvider.setContext(editor);
+		JavaSourceViewer viewer= (JavaSourceViewer)editor.getViewer();
+		waitReconciled(viewer);
+
+		assertEquals(2, fParameterNameCodeMiningProvider.provideCodeMinings(viewer, new NullProgressMonitor()).get().size());
+	}
+
 
 	private static boolean welcomeClosed;
 	private static void closeIntro(final IWorkbench wb) {

@@ -21,6 +21,7 @@ import org.eclipse.jface.text.codemining.ICodeMiningProvider;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -54,6 +55,19 @@ public class CalleeJavaMethodParameterVisitor extends HierarchicalASTVisitor {
 		return super.visit(constructorInvocation);
 	}
 
+
+	@Override
+	public boolean visit(ClassInstanceCreation classInstanceCreation) {
+		List<?> arguments= classInstanceCreation.arguments();
+		if (!arguments.isEmpty()) {
+			IMethodBinding constructorBinding= classInstanceCreation.resolveConstructorBinding();
+			if (constructorBinding != null) {
+				IMethod method = resolveMethodBinding(constructorBinding);
+				collectParameterNamesCodeMinings(method, arguments, constructorBinding.isVarargs());
+			}
+		}
+		return super.visit(classInstanceCreation);
+	}
 
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
