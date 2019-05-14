@@ -105,6 +105,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SwitchCase;
+import org.eclipse.jdt.core.dom.SwitchExpression;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
@@ -1894,22 +1895,51 @@ public class LocalCorrectionsSubProcessor {
 
 	public static void addMissingDefaultCaseProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
-		if (selectedNode instanceof Expression && selectedNode.getLocationInParent() == SwitchStatement.EXPRESSION_PROPERTY) {
-			SwitchStatement switchStatement= (SwitchStatement) selectedNode.getParent();
-			for (Statement statement : (List<Statement>) switchStatement.statements()) {
+		if (selectedNode instanceof Expression) {
+			StructuralPropertyDescriptor locationInParent= selectedNode.getLocationInParent();
+			ASTNode parent= selectedNode.getParent();
+			List<Statement> statements;
+			
+			if (locationInParent == SwitchStatement.EXPRESSION_PROPERTY) {
+				statements= ((SwitchStatement) parent).statements();
+			} else if (locationInParent == SwitchExpression.EXPRESSION_PROPERTY) {
+				statements= ((SwitchExpression) parent).statements();
+			} else {
+				return;
+			}
+
+			for (Statement statement : statements) {
 				if (statement instanceof SwitchCase && ((SwitchCase) statement).isDefault()) {
 					return;
 				}
 			}
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			createMissingDefaultProposal(context, switchStatement, image, proposals);
+			createMissingDefaultProposal(context, parent, image, proposals);
 		}
 	}
 
-	private static void createMissingDefaultProposal(IInvocationContext context, SwitchStatement switchStatement, Image image, Collection<ICommandAccess> proposals) {
-		AST ast= switchStatement.getAST();
+	private static void createMissingDefaultProposal(IInvocationContext context, ASTNode parent, Image image, Collection<ICommandAccess> proposals) {
+		List<Statement> statements;
+		Expression expression;
+		if (parent instanceof SwitchStatement) {
+			SwitchStatement switchStatement= (SwitchStatement) parent;
+			statements= switchStatement.statements();
+			expression= switchStatement.getExpression();
+		} else if (parent instanceof SwitchExpression) {
+			SwitchExpression switchExpression= (SwitchExpression) parent;
+			statements= switchExpression.statements();
+			expression= switchExpression.getExpression();
+		} else {
+			return;
+		}
+		AST ast= parent.getAST();
 		ASTRewrite astRewrite= ASTRewrite.create(ast);
-		ListRewrite listRewrite= astRewrite.getListRewrite(switchStatement, SwitchStatement.STATEMENTS_PROPERTY);
+		ListRewrite listRewrite;
+		if (parent instanceof SwitchStatement) {
+			listRewrite= astRewrite.getListRewrite(parent, SwitchStatement.STATEMENTS_PROPERTY);
+		} else {
+			listRewrite= astRewrite.getListRewrite(parent, SwitchExpression.STATEMENTS_PROPERTY);
+		}
 		String label= CorrectionMessages.LocalCorrectionsSubProcessor_add_default_case_description;
 		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), astRewrite, IProposalRelevance.ADD_MISSING_DEFAULT_CASE, image);
 
@@ -1917,13 +1947,13 @@ public class LocalCorrectionsSubProcessor {
 		listRewrite.insertLast(newSwitchCase, null);
 
 		if (ast.apiLevel() >= AST.JLS12) {
-			if (switchStatement.statements().size() > 0) {
-				Statement firstStatement= (Statement) switchStatement.statements().get(0);
+			if (statements.size() > 0) {
+				Statement firstStatement= statements.get(0);
 				SwitchCase switchCase= (SwitchCase) firstStatement;
 				boolean isArrow= switchCase.isSwitchLabeledRule();
-				if (isArrow) {
-					newSwitchCase.setSwitchLabeledRule(isArrow);
-					ThrowStatement newThrowStatement= getThrowForUnexpectedDefault(switchStatement.getExpression(), ast, astRewrite);
+				newSwitchCase.setSwitchLabeledRule(isArrow);
+				if (isArrow || parent instanceof SwitchExpression) {
+					ThrowStatement newThrowStatement= getThrowForUnexpectedDefault(expression, ast, astRewrite);
 					listRewrite.insertLast(newThrowStatement, null);
 					proposal.addLinkedPosition(astRewrite.track(newThrowStatement), true, null);
 				} else {

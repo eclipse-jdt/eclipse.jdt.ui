@@ -302,6 +302,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.ServiceImplDefaultConstructorNotPublic:
 			case IProblem.PreviewFeatureDisabled:
 			case IProblem.PreviewFeatureNotSupported:
+			case IProblem.SwitchExpressionMissingDefaultCase:
 				return true;
 			default:
 				return SuppressWarningsSubProcessor.hasSuppressWarningsProposal(cu.getJavaProject(), problemId)
@@ -729,6 +730,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				LocalCorrectionsSubProcessor.getMissingEnumConstantCaseProposals(context, problem, proposals);
 				break;
 			case IProblem.MissingDefaultCase:
+			case IProblem.SwitchExpressionMissingDefaultCase:
 				LocalCorrectionsSubProcessor.addMissingDefaultCaseProposal(context, problem, proposals);
 				break;
 			case IProblem.MissingEnumConstantCaseDespiteDefault:
