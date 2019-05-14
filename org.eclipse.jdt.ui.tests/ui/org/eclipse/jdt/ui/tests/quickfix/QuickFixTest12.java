@@ -417,4 +417,123 @@ public class QuickFixTest12 extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}
 
+	public void testAddDefaultCaseSwitchExpression1() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(Java12ProjectTestSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set12CompilerOptions(fJProject1, true);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		StringBuffer buf= new StringBuffer();
+		buf.append("module test {\n");
+		buf.append("}\n");
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class Cls {\n");
+		buf.append("    public static void bar3(int input) {\n");
+		buf.append("        int num = switch (input) {\n");
+		buf.append("        case 60, 600 -> 6;\n");
+		buf.append("        case 70 -> 7;\n");
+		buf.append("        case 80 -> 8;\n");
+		buf.append("        case 90, 900 -> {\n");
+		buf.append("            break 9;\n");
+		buf.append("        }\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class Cls {\n");
+		buf.append("    public static void bar3(int input) {\n");
+		buf.append("        int num = switch (input) {\n");
+		buf.append("        case 60, 600 -> 6;\n");
+		buf.append("        case 70 -> 7;\n");
+		buf.append("        case 80 -> 8;\n");
+		buf.append("        case 90, 900 -> {\n");
+		buf.append("            break 9;\n");
+		buf.append("        }\n");
+		buf.append("			default -> throw new IllegalArgumentException(\"Unexpected value: \" + input);\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
+	}
+
+	public void testAddDefaultCaseSwitchExpression2() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(Java12ProjectTestSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set12CompilerOptions(fJProject1, true);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		StringBuffer buf= new StringBuffer();
+		buf.append("module test {\n");
+		buf.append("}\n");
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class Cls {\n");
+		buf.append("    public static void bar4(int input) {\n");
+		buf.append("        int num = switch (input) {\n");
+		buf.append("        case 60, 600:\n");
+		buf.append("            break 6;\n");
+		buf.append("        case 70:\n");
+		buf.append("            break 7;\n");
+		buf.append("        case 80:\n");
+		buf.append("            break 8;\n");
+		buf.append("        case 90, 900:\n");
+		buf.append("            break 9;\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class Cls {\n");
+		buf.append("    public static void bar4(int input) {\n");
+		buf.append("        int num = switch (input) {\n");
+		buf.append("        case 60, 600:\n");
+		buf.append("            break 6;\n");
+		buf.append("        case 70:\n");
+		buf.append("            break 7;\n");
+		buf.append("        case 80:\n");
+		buf.append("            break 8;\n");
+		buf.append("        case 90, 900:\n");
+		buf.append("            break 9;\n");
+		buf.append("			default :\n");
+		buf.append("				throw new IllegalArgumentException(\n");
+		buf.append("						\"Unexpected value: \" + input);\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
+	}
 }
