@@ -223,6 +223,10 @@ public class LocalCorrectionsSubProcessor {
 		if (selectedNode == null) {
 			return;
 		}
+		boolean isSelectedNodeThrowStatement= false;
+		if (selectedNode instanceof  ThrowStatement) {
+			isSelectedNodeThrowStatement = true;
+		}
 
 		int offset= selectedNode.getStartPosition();
 		int length= selectedNode.getLength();
@@ -254,7 +258,7 @@ public class LocalCorrectionsSubProcessor {
 		}
 
 		refactoring.setLeaveDirty(true);
-		if (refactoring.checkActivationBasics(astRoot).isOK()) {
+		if (refactoring.checkActivationBasics(astRoot).isOK() && !isSelectedNodeThrowStatement) {
 			String label;
 			if ((vType != null) && (vName != null) && ASTNodes.isVarType(selectedNode, astRoot) && affectedLocals.contains(vName.getIdentifier())) {
 				label= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_surroundwith_trycatch_var_description, new Object[] { vName.getIdentifier(), vType.getName() });

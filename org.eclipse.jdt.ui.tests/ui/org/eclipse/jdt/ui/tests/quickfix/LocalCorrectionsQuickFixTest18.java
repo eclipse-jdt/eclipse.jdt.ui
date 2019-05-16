@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2018 IBM Corporation and others.
+ * Copyright (c) 2014, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -116,7 +116,7 @@ public class LocalCorrectionsQuickFixTest18 extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -135,26 +135,7 @@ public class LocalCorrectionsQuickFixTest18 extends QuickFixTest {
 		buf.append("@interface Marker { }\n");
 		String expected1= buf.toString();
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("import java.io.FileNotFoundException;\n");
-		buf.append("import java.lang.annotation.ElementType;\n");
-		buf.append("import java.lang.annotation.Target;\n");
-		buf.append("\n");
-		buf.append("public class E {\n");
-		buf.append("    void test(int a) {\n");
-		buf.append("        try {\n");
-		buf.append("            throw new @Marker FileNotFoundException();\n");
-		buf.append("        } catch (@Marker FileNotFoundException e) {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("@Target(ElementType.TYPE_USE)\n");
-		buf.append("@interface Marker { }\n");
-		String expected2= buf.toString();
-
-		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2 });
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
 	public void testUncaughtExceptionInLambda1() throws Exception {
@@ -526,33 +507,9 @@ public class LocalCorrectionsQuickFixTest18 extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 2);
 
-		String[] expected= new String[3];
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("import java.io.FileNotFoundException;\n");
-		buf.append("import java.io.InvalidClassException;\n");
-		buf.append("interface C7 {\n");
-		buf.append("    int foo(int i);\n");
-		buf.append("    default C7 method1() {\n");
-		buf.append("        return x -> {\n");
-		buf.append("            try {\n");
-		buf.append("                if (x == -1)\n");
-		buf.append("                    throw new InvalidClassException(\"ex\");\n");
-		buf.append("                if (x == 0)\n");
-		buf.append("                    try {\n");
-		buf.append("                        throw new FileNotFoundException();\n");
-		buf.append("                    } catch (FileNotFoundException e) {\n");
-		buf.append("                    }\n");
-		buf.append("            } catch (InvalidClassException e) {\n");
-		buf.append("            }\n");
-		buf.append("            return x;\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
-
+		String[] expected= new String[2];
 		buf= new StringBuffer();
 		buf.append("package test;\n");
 		buf.append("import java.io.FileNotFoundException;\n");
@@ -573,7 +530,7 @@ public class LocalCorrectionsQuickFixTest18 extends QuickFixTest {
 		buf.append("        };\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		expected[1]= buf.toString();
+		expected[0]= buf.toString();
 
 		buf= new StringBuffer();
 		buf.append("package test;\n");
@@ -594,7 +551,7 @@ public class LocalCorrectionsQuickFixTest18 extends QuickFixTest {
 		buf.append("        };\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		expected[2]= buf.toString();
+		expected[1]= buf.toString();
 
 		assertExpectedExistInProposals(proposals, expected);
 	}

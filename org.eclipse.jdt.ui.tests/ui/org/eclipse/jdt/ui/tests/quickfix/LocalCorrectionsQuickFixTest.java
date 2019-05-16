@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1195,7 +1195,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
 
@@ -1216,27 +1216,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 
-		proposal= (CUCorrectionProposal)proposals.get(1);
-		String preview2= getPreviewContent(proposal);
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo() {\n");
-		buf.append("        try {\n");
-		buf.append("            throw new IOException();\n");
-		buf.append("        } catch (IOException e) {\n");
-		buf.append("            try {\n");
-		buf.append("                throw new IOException();\n");
-		buf.append("            } catch (IOException e1) {\n");
-		buf.append("            }\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
-
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
+		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });
 	}
 
 	public void testUncaughtExceptionImportConflict() throws Exception {
@@ -1704,7 +1684,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
 
@@ -1719,25 +1699,9 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 
-		proposal= (CUCorrectionProposal) proposals.get(1);
-		String preview2= getPreviewContent(proposal);
-
 		String expected1 = buf.toString();
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E extends A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        try {\n");
-		buf.append("            throw new Exception();\n");
-		buf.append("        } catch (Exception e) {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-
-		String expected2 = buf.toString();
-
-		assertEqualStringsIgnoreOrder(new String[] {preview1, preview2}, new String[] {expected1, expected2});
+		assertEqualStringsIgnoreOrder(new String[] {preview1}, new String[] {expected1});
 	}
 
 	public void testUncaughtExceptionOnSuper5() throws Exception {
@@ -1756,7 +1720,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
 
@@ -1775,25 +1739,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		String expected1= buf.toString();
 
-		proposal= (CUCorrectionProposal)proposals.get(1);
-		String preview2= getPreviewContent(proposal);
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("import java.io.Closeable;\n");
-		buf.append("import java.io.FileNotFoundException;\n");
-		buf.append("public class A implements Closeable {\n");
-		buf.append("    public void close() {\n");
-		buf.append("        try {\n");
-		buf.append("            throw new FileNotFoundException();\n");
-		buf.append("        } catch (FileNotFoundException e) {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-
-		String expected2= buf.toString();
-
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
+		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });
 	}
 
 	public void testUncaughtExceptionOnSuper6() throws Exception {
@@ -1811,28 +1757,8 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 0);
 		assertCorrectLabels(proposals);
-
-
-		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
-		String preview1= getPreviewContent(proposal);
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("import java.io.Closeable;\n");
-		buf.append("public class A implements Closeable {\n");
-		buf.append("    public void close() {\n");
-		buf.append("        try {\n");
-		buf.append("            throw new Throwable();\n");
-		buf.append("        } catch (Throwable e) {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-
-		String expected1= buf.toString();
-
-		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });
 	}
 	public void testUncaughtExceptionOnThis() throws Exception {
 
