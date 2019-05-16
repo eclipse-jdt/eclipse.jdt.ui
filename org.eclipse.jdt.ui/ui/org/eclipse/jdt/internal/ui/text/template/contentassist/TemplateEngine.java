@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -39,10 +39,12 @@ import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateContextType;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContext;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContextType;
 import org.eclipse.jdt.internal.corext.template.java.SWTContextType;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -53,6 +55,9 @@ public class TemplateEngine {
 	private static final Pattern $_LINE_SELECTION_PATTERN= Pattern.compile("\\$\\{(.*:)?" + GlobalTemplateVariables.LineSelection.NAME + "(\\(.*\\))?\\}"); //$NON-NLS-1$ //$NON-NLS-2$
 
 	private static final Pattern $_WORD_SELECTION_PATTERN= Pattern.compile("\\$\\{(.*:)?" + GlobalTemplateVariables.WordSelection.NAME + "(\\(.*\\))?\\}"); //$NON-NLS-1$ //$NON-NLS-2$
+	
+	private static String Switch_Name = "switch"; //$NON-NLS-1$
+	private static String Switch_Default = "switch case statement"; //$NON-NLS-1$
 
 	/** The context type. */
 	private TemplateContextType fContextType;
@@ -130,11 +135,11 @@ public class TemplateEngine {
 		IRegion region= new Region(start, end - start);
 
 		Template[] templates= JavaPlugin.getDefault().getTemplateStore().getTemplates();
-
+		boolean needsCheck= !isJava12OrHigherProject(compilationUnit);
 		if (selection.y == 0) {
 			for (int i= 0; i != templates.length; i++) {
 				Template template= templates[i];
-				if (context.canEvaluate(template)) {
+				if (canEvaluate(context, template, needsCheck)) {
 					fProposals.add(new TemplateProposal(template, context, region, getImage()));
 				}
 			}
@@ -147,7 +152,7 @@ public class TemplateEngine {
 
 			for (int i= 0; i != templates.length; i++) {
 				Template template= templates[i];
-				if (context.canEvaluate(template))
+				if (canEvaluate(context, template, needsCheck))
 				{
 					Matcher wordSelectionMatcher= $_WORD_SELECTION_PATTERN.matcher(template.getPattern());
 					Matcher lineSelectionMatcher= $_LINE_SELECTION_PATTERN.matcher(template.getPattern());
@@ -172,6 +177,34 @@ public class TemplateEngine {
 			return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_SWT_TEMPLATE);
 		else
 			return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE);
+	}
+
+	private boolean isJava12OrHigherProject(ICompilationUnit compUnit) {
+		if (compUnit != null) {
+			IJavaProject javaProject= compUnit.getJavaProject();
+			return JavaModelUtil.is12OrHigher(javaProject);
+		}
+		return false;
+	}
+
+	private boolean isTemplateAllowed(Template template) {
+		if (Switch_Name.equals(template.getName())) {
+			if (Switch_Default.equals(template.getDescription())) {
+				return true;
+			}
+			return false;
+		}
+		return true;
+	}
+
+	private boolean canEvaluate(CompilationUnitContext context, Template template, boolean needsCheck) {
+		if (!needsCheck) {
+			return context.canEvaluate(template);
+		}
+		if (isTemplateAllowed(template)) {
+			return context.canEvaluate(template);
+		}
+		return false;
 	}
 
 	/**
