@@ -61,6 +61,33 @@
 		break;
 }</template>
 
+<template name="switch" description="%Templates.switch_labeled" id="org.eclipse.jdt.ui.templates.switch.labeled" context="java-statements" enabled="true" autoinsert="false">switch (${key}) {
+	case ${value} ->
+		${cursor}
+		
+
+	default ->
+		throw new IllegalArgumentException("Unexpected value: " + ${key});
+}</template>
+
+<template name="switch" description="%Templates.switch_case_expression" id="org.eclipse.jdt.ui.templates.switch.case.expression" context="java" enabled="true" autoinsert="false">switch (${key}) {
+	case ${value}:
+		${cursor}
+		break ${type};
+
+	default:
+		throw new IllegalArgumentException("Unexpected value: " + ${key});
+}</template>
+
+<template name="switch" description="%Templates.switch_labeled_expression" id="org.eclipse.jdt.ui.templates.switch.labeled.expression" context="java" enabled="true" autoinsert="false">switch (${key}) {
+	case ${value} ->
+		${cursor}
+		
+
+	default ->
+		throw new IllegalArgumentException("Unexpected value: " + ${key});
+}</template>
+
 <template name="if" description="%Templates.if" id="org.eclipse.jdt.ui.templates.if" context="java-statements" enabled="true" autoinsert="false">if (${condition:var(boolean)}) {
 	${line_selection}${cursor}
 }</template>
