@@ -434,9 +434,9 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 			isInDifferentCU= true;
 		}
 		ImportRewrite imports= createImportRewrite(astRoot);
-		ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(ASTResolving.findParentBodyDeclaration(node), imports);
 
 		if (newTypeDecl != null) {
+			ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(newTypeDecl, imports);
 			AST ast= newTypeDecl.getAST();
 
 			ASTRewrite rewrite= ASTRewrite.create(ast);

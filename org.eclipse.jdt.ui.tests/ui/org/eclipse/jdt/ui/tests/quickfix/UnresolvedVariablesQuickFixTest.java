@@ -2766,5 +2766,46 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
+	public void testBug547404() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("public class Y {\n");
+		buf.append("    void f(X x) {\n");
+		buf.append("         x.field= new ArrayList<String>();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("Y.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class X {\n");
+		buf.append("    class ArrayList{}\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("X.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu1);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu1, astRoot);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class X {\n");
+		buf.append("    class ArrayList{}\n");
+		buf.append("\n");
+		buf.append("    public java.util.ArrayList<String> field;\n");
+		buf.append("}\n");
+		buf.append("");
+		String expected= buf.toString();
+
+		assertEquals(expected, preview);
+	}
 
 }
