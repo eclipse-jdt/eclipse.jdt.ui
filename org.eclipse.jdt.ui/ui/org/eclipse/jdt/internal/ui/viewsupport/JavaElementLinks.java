@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IModuleDescription;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -395,7 +396,10 @@ public class JavaElementLinks {
 			if (element instanceof IAnnotation) {
 				element= element.getParent();
 			}
-			
+			if (element instanceof IModuleDescription) {
+				element = element.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
+				// continue below in branch IPackageFragment...
+			}
 			if (element instanceof ILocalVariable) {
 				element= ((ILocalVariable) element).getDeclaringMember();
 			} else if (element instanceof ITypeParameter) {

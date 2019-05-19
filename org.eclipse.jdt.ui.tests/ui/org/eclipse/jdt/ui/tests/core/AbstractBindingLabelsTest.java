@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -54,7 +56,7 @@ public abstract class AbstractBindingLabelsTest extends CoreTests {
 	}
 
 	protected String getBindingLabel(IJavaElement elem, long flags) {
-		ASTParser parser= ASTParser.newParser(AST.JLS8);
+		ASTParser parser= ASTParser.newParser(AST.JLS12);
 		parser.setResolveBindings(true);
 		parser.setProject(fJProject1);
 		IBinding binding= parser.createBindings(new IJavaElement[]{elem}, null)[0];
@@ -161,6 +163,13 @@ public abstract class AbstractBindingLabelsTest extends CoreTests {
 
 	protected String escape(String element) {
 		return element.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
+	}
+
+	protected URI extractURI(String label) throws URISyntaxException {
+		String anchor= "href='";
+		int start= label.indexOf(anchor)+anchor.length();
+		int end= label.indexOf('\'', start+1);
+		return new URI(label.substring(start+1, end));
 	}
 
 }

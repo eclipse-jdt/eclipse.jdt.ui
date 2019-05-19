@@ -36,6 +36,7 @@ import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMemberValuePair;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IModuleDescription;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
@@ -196,6 +197,9 @@ public class JavaElementLabelComposerCore {
 				break;
 			case IJavaElement.PACKAGE_FRAGMENT_ROOT:
 				appendPackageFragmentRootLabel((IPackageFragmentRoot) element, flags);
+				break;
+			case IJavaElement.JAVA_MODULE:
+				appendModuleLabel((IModuleDescription) element, flags);
 				break;
 			case IJavaElement.IMPORT_CONTAINER:
 			case IJavaElement.IMPORT_DECLARATION:
@@ -1194,6 +1198,18 @@ public class JavaElementLabelComposerCore {
 			appendArchiveLabel(root, flags);
 		} else {
 			appendFolderLabel(root, flags);
+		}
+	}
+
+	protected void appendModuleLabel(IModuleDescription module, long flags) {
+		fBuffer.append(module.getElementName());
+		// category
+		if (getFlag(flags, JavaElementLabelsCore.MOD_CATEGORY) && module.exists()) {
+			try {
+				appendCategoryLabel(module, flags);
+			} catch (JavaModelException e) {
+				// ignore
+			}	
 		}
 	}
 

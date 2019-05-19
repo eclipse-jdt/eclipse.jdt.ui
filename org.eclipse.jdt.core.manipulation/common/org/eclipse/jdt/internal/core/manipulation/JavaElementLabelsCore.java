@@ -302,11 +302,15 @@ public final class JavaElementLabelsCore {
 	 * Prepend first category (if any) to type.
 	 */
 	public final static long T_CATEGORY= 1L << 51;
+	/**
+	 * Prepend first category (if any) to module.
+	 */
+	public final static long MOD_CATEGORY= 1L << 52;
 
 	/**
 	 * Show category for all elements.
 	 */
-	public final static long ALL_CATEGORY= Long.valueOf(F_CATEGORY | M_CATEGORY | T_CATEGORY).longValue();
+	public final static long ALL_CATEGORY= Long.valueOf(F_CATEGORY | M_CATEGORY | T_CATEGORY | MOD_CATEGORY).longValue();
 
 	/**
 	 * Qualify all elements

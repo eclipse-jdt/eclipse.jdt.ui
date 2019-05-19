@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2018 GK Software AG and others.
+ * Copyright (c) 2015, 2019 GK Software AG and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -30,6 +30,7 @@ import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMemberValuePairBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.IModuleBinding;
 import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -101,6 +102,9 @@ public class BindingLinkedLabelComposer extends JavaElementLinkedLabelComposer {
 				return;
 			case IBinding.PACKAGE:
 				appendPackageLabel((IPackageBinding) binding, flags);
+				break;
+			case IBinding.MODULE:
+				appendModuleLabel((IModuleBinding) binding, flags);
 				break;
 			case IBinding.ANNOTATION:
 			case IBinding.MEMBER_VALUE_PAIR:
@@ -595,6 +599,11 @@ public class BindingLinkedLabelComposer extends JavaElementLinkedLabelComposer {
 		} else {
 			fBuffer.append("(default package)"); //$NON-NLS-1$
 		}
+	}
+
+	protected void appendModuleLabel(IModuleBinding binding, long flags) {
+		appendAnnotationLabels(binding.getAnnotations(), flags, false, true);
+		fBuffer.append(binding.getName());
 	}
 
 	// consider only relevant bounds / ignore j.l.Object
