@@ -151,16 +151,6 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	 * @since 3.0
 	 */
 	private static final String CODE_TEMPLATES_KEY= "org.eclipse.jdt.ui.text.custom_code_templates"; //$NON-NLS-1$
-	/**
-	 * The key to store whether the legacy templates have been migrated
-	 * @since 3.0
-	 */
-	private static final String TEMPLATES_MIGRATION_KEY= "org.eclipse.jdt.ui.text.templates_migrated"; //$NON-NLS-1$
-	/**
-	 * The key to store whether the legacy code templates have been migrated
-	 * @since 3.0
-	 */
-	private static final String CODE_TEMPLATES_MIGRATION_KEY= "org.eclipse.jdt.ui.text.code_templates_migrated"; //$NON-NLS-1$
 
 	public static boolean DEBUG_AST_PROVIDER;
 
@@ -802,14 +792,7 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	public TemplateStore getTemplateStore() {
 		if (fTemplateStore == null) {
 			final IPreferenceStore store= getPreferenceStore();
-			boolean alreadyMigrated= store.getBoolean(TEMPLATES_MIGRATION_KEY);
-			if (alreadyMigrated)
 				fTemplateStore= new ContributionTemplateStore(getTemplateContextRegistry(), store, TEMPLATES_KEY);
-			else {
-				fTemplateStore= new CompatibilityTemplateStore(getTemplateContextRegistry(), store, TEMPLATES_KEY, getOldTemplateStoreInstance());
-				store.setValue(TEMPLATES_MIGRATION_KEY, true);
-			}
-
 			try {
 				fTemplateStore.load();
 			} catch (IOException e) {
@@ -819,17 +802,6 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 		}
 
 		return fTemplateStore;
-	}
-
-	/**
-	 * Private deprecated method to avoid deprecation warnings
-	 * 
-	 * @return the deprecated template store
-	 * @deprecated to avoid deprecation warnings
-	 */
-	@Deprecated
-	private org.eclipse.jdt.internal.corext.template.java.Templates getOldTemplateStoreInstance() {
-		return org.eclipse.jdt.internal.corext.template.java.Templates.getInstance();
 	}
 
 	/**
@@ -859,13 +831,7 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	public TemplateStore getCodeTemplateStore() {
 		if (fCodeTemplateStore == null) {
 			IPreferenceStore store= getPreferenceStore();
-			boolean alreadyMigrated= store.getBoolean(CODE_TEMPLATES_MIGRATION_KEY);
-			if (alreadyMigrated)
-				fCodeTemplateStore= new ContributionTemplateStore(getCodeTemplateContextRegistry(), store, CODE_TEMPLATES_KEY);
-			else {
-				fCodeTemplateStore= new CompatibilityTemplateStore(getCodeTemplateContextRegistry(), store, CODE_TEMPLATES_KEY, getOldCodeTemplateStoreInstance());
-				store.setValue(CODE_TEMPLATES_MIGRATION_KEY, true);
-			}
+			fCodeTemplateStore= new ContributionTemplateStore(getCodeTemplateContextRegistry(), store, CODE_TEMPLATES_KEY);
 
 			try {
 				fCodeTemplateStore.load();
@@ -875,24 +841,9 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 
 			fCodeTemplateStore.startListeningForPreferenceChanges();
 
-			// compatibility / bug fixing code for duplicated templates
-			// TODO remove for 3.0
-			CompatibilityTemplateStore.pruneDuplicates(fCodeTemplateStore, true);
-
 		}
 
 		return fCodeTemplateStore;
-	}
-
-	/**
-	 * Private deprecated method to avoid deprecation warnings
-	 * 
-	 * @return the deprecated code template store
-	 * @deprecated to avoid deprecation warnings
-	 */
-	@Deprecated
-	private org.eclipse.jdt.internal.corext.template.java.CodeTemplates getOldCodeTemplateStoreInstance() {
-		return org.eclipse.jdt.internal.corext.template.java.CodeTemplates.getInstance();
 	}
 
 	private synchronized ImageDescriptorRegistry internalGetImageDescriptorRegistry() {
