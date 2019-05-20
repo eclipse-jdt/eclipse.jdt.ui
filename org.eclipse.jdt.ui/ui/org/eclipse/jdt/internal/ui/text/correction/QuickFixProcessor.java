@@ -302,6 +302,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.ServiceImplDefaultConstructorNotPublic:
 			case IProblem.PreviewFeatureDisabled:
 			case IProblem.PreviewFeatureNotSupported:
+			case IProblem.SwitchExpressionMissingEnumConstantCase:
 			case IProblem.SwitchExpressionMissingDefaultCase:
 				return true;
 			default:
@@ -727,6 +728,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				break;
 			case IProblem.MissingEnumConstantCase:
 			case IProblem.MissingEnumDefaultCase:
+			case IProblem.SwitchExpressionMissingEnumConstantCase:
 				LocalCorrectionsSubProcessor.getMissingEnumConstantCaseProposals(context, problem, proposals);
 				break;
 			case IProblem.MissingDefaultCase:

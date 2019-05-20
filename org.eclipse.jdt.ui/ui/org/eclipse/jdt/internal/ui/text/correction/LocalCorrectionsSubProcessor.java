@@ -1730,19 +1730,34 @@ public class LocalCorrectionsSubProcessor {
 		}
 		
 		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
-		if (selectedNode instanceof Expression && selectedNode.getLocationInParent() == SwitchStatement.EXPRESSION_PROPERTY) {
-			SwitchStatement statement= (SwitchStatement) selectedNode.getParent();
-			ITypeBinding binding= statement.getExpression().resolveTypeBinding();
+		if (selectedNode instanceof Expression) {
+			StructuralPropertyDescriptor locationInParent= selectedNode.getLocationInParent();
+			ASTNode parent= selectedNode.getParent();
+			ITypeBinding binding;
+			List<Statement> statements;
+
+			if (locationInParent == SwitchStatement.EXPRESSION_PROPERTY) {
+				SwitchStatement statement= (SwitchStatement) parent;
+				binding= statement.getExpression().resolveTypeBinding();
+				statements= statement.statements();
+			} else if (locationInParent == SwitchExpression.EXPRESSION_PROPERTY) {
+				SwitchExpression switchExpression= (SwitchExpression) parent;
+				binding= switchExpression.getExpression().resolveTypeBinding();
+				statements= switchExpression.statements();
+			} else {
+				return;
+			}
+
 			if (binding == null || !binding.isEnum()) {
 				return;
 			}
 
 			ArrayList<String> missingEnumCases= new ArrayList<>();
-			boolean hasDefault= evaluateMissingSwitchCases(binding, statement.statements(), missingEnumCases);
+			boolean hasDefault= evaluateMissingSwitchCases(binding, statements, missingEnumCases);
 			if (missingEnumCases.size() == 0 && hasDefault)
 				return;
 
-			createMissingCaseProposals(context, statement, missingEnumCases, proposals);
+			createMissingCaseProposals(context, parent, missingEnumCases, proposals);
 		}
 	}
 
@@ -1784,8 +1799,20 @@ public class LocalCorrectionsSubProcessor {
 		return hasDefault;
 	}
 
-	public static void createMissingCaseProposals(IInvocationContext context, SwitchStatement switchStatement, ArrayList<String> enumConstNames, Collection<ICommandAccess> proposals) {
-		List<Statement> statements= switchStatement.statements();
+	public static void createMissingCaseProposals(IInvocationContext context, ASTNode parent, ArrayList<String> enumConstNames, Collection<ICommandAccess> proposals) {
+		List<Statement> statements;
+		Expression expression;
+		if (parent instanceof SwitchStatement) {
+			SwitchStatement switchStatement= (SwitchStatement) parent;
+			statements= switchStatement.statements();
+			expression= switchStatement.getExpression();
+		} else if (parent instanceof SwitchExpression) {
+			SwitchExpression switchExpression= (SwitchExpression) parent;
+			statements= switchExpression.statements();
+			expression= switchExpression.getExpression();
+		} else {
+			return;
+		}
 		int defaultIndex= statements.size();
 		for (int i= 0; i < statements.size(); i++) {
 			Statement curr= statements.get(i);
@@ -1804,12 +1831,17 @@ public class LocalCorrectionsSubProcessor {
 		}
 		boolean hasDefault= defaultIndex < statements.size();
 
-		AST ast= switchStatement.getAST();
+		AST ast= parent.getAST();
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 
 		if (enumConstNames.size() > 0) {
 			ASTRewrite astRewrite= ASTRewrite.create(ast);
-			ListRewrite listRewrite= astRewrite.getListRewrite(switchStatement, SwitchStatement.STATEMENTS_PROPERTY);
+			ListRewrite listRewrite;
+			if (parent instanceof SwitchStatement) {
+				listRewrite= astRewrite.getListRewrite(parent, SwitchStatement.STATEMENTS_PROPERTY);
+			} else {
+				listRewrite= astRewrite.getListRewrite(parent, SwitchExpression.STATEMENTS_PROPERTY);
+			}
 
 			String label= CorrectionMessages.LocalCorrectionsSubProcessor_add_missing_cases_description;
 			LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), astRewrite, IProposalRelevance.ADD_MISSING_CASE_STATEMENTS, image);
@@ -1827,13 +1859,13 @@ public class LocalCorrectionsSubProcessor {
 				defaultIndex++;
 				if (!hasDefault) {
 					if (ast.apiLevel() >= AST.JLS12) {
-						if (switchStatement.statements().size() > 0) {
-							Statement firstStatement= (Statement) switchStatement.statements().get(0);
+						if (statements.size() > 0) {
+							Statement firstStatement= statements.get(0);
 							SwitchCase switchCase= (SwitchCase) firstStatement;
 							boolean isArrow= switchCase.isSwitchLabeledRule();
-							if (isArrow) {
-								newSwitchCase.setSwitchLabeledRule(isArrow);
-								ThrowStatement newThrowStatement= getThrowForUnsupportedCase(switchStatement.getExpression(), ast, astRewrite);
+							newSwitchCase.setSwitchLabeledRule(isArrow);
+							if (isArrow || parent instanceof SwitchExpression) {
+								ThrowStatement newThrowStatement= getThrowForUnsupportedCase(expression, ast, astRewrite);
 								listRewrite.insertLast(newThrowStatement, null);
 								proposal.addLinkedPosition(astRewrite.track(newThrowStatement), true, enumConstName);
 							} else {
@@ -1855,13 +1887,13 @@ public class LocalCorrectionsSubProcessor {
 				defaultIndex++;
 
 				if (ast.apiLevel() >= AST.JLS12) {
-					if (switchStatement.statements().size() > 0) {
-						Statement firstStatement= (Statement) switchStatement.statements().get(0);
+					if (statements.size() > 0) {
+						Statement firstStatement= statements.get(0);
 						SwitchCase switchCase= (SwitchCase) firstStatement;
 						boolean isArrow= switchCase.isSwitchLabeledRule();
-						if (isArrow) {
-							newSwitchCase.setSwitchLabeledRule(isArrow);
-							ThrowStatement newThrowStatement= getThrowForUnexpectedDefault(switchStatement.getExpression(), ast, astRewrite);
+						newSwitchCase.setSwitchLabeledRule(isArrow);
+						if (isArrow || parent instanceof SwitchExpression) {
+							ThrowStatement newThrowStatement= getThrowForUnexpectedDefault(expression, ast, astRewrite);
 							listRewrite.insertLast(newThrowStatement, null);
 							proposal.addLinkedPosition(astRewrite.track(newThrowStatement), true, "defaultCase"); //$NON-NLS-1$
 						} else {
@@ -1878,7 +1910,7 @@ public class LocalCorrectionsSubProcessor {
 			proposals.add(proposal);
 		}
 		if (!hasDefault) {
-			createMissingDefaultProposal(context, switchStatement, image, proposals);
+			createMissingDefaultProposal(context, parent, image, proposals);
 		}
 	}
 
