@@ -165,6 +165,7 @@ public class ChainFinder {
 
 	private static LinkedList<ChainElement> cloneChainAndAppendEdge(final LinkedList<ChainElement> chain,
 			final ChainElement newEdge) {
+		@SuppressWarnings("unchecked")
 		final LinkedList<ChainElement> chainCopy= (LinkedList<ChainElement>) chain.clone();
 		chainCopy.add(newEdge);
 		return chainCopy;
