@@ -23,7 +23,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -82,22 +81,20 @@ public final class TypeBindingAnalyzer {
     }
 
     public static Collection<IBinding> findVisibleInstanceFieldsAndRelevantInstanceMethods(final ITypeBinding type,
-            final IJavaElement invocationSite) {
-        return findFieldsAndMethods(type, invocationSite, NON_STATIC_FIELDS_ONLY_FILTER,
+            final ITypeBinding receiverType) {
+        return findFieldsAndMethods(type, receiverType, NON_STATIC_FIELDS_ONLY_FILTER,
                 RELEVANT_NON_STATIC_METHODS_ONLY_FILTER);
     }
 
     public static Collection<IBinding> findAllPublicStaticFieldsAndNonVoidNonPrimitiveStaticMethods(
-            final ITypeBinding type, final IJavaElement invocationSite) {
-        return findFieldsAndMethods(type, invocationSite, STATIC_FIELDS_ONLY_FILTER,
+            final ITypeBinding type, final ITypeBinding receiverType) {
+        return findFieldsAndMethods(type, receiverType, STATIC_FIELDS_ONLY_FILTER,
                 STATIC_NON_VOID_NON_PRIMITIVE_METHODS_ONLY_FILTER);
     }
 
-    private static Collection<IBinding> findFieldsAndMethods(final ITypeBinding type, final IJavaElement invocationSite,
+    private static Collection<IBinding> findFieldsAndMethods(final ITypeBinding type, final ITypeBinding receiverType,
             final Predicate<IVariableBinding> fieldFilter, final Predicate<IMethodBinding> methodFilter) {
         final Map<String, IBinding> tmp = new LinkedHashMap<>();
-        final IType invocationType = ((IMember) invocationSite).getCompilationUnit().findPrimaryType();
-        final ITypeBinding receiverType = getTypeBindingFrom(invocationType);
         for (final ITypeBinding cur : findAllSupertypesIncludingArgument(type)) {
             for (final IMethodBinding method : cur.getDeclaredMethods()) {
                 if (!methodFilter.test(method) || !methodCanBeSeenBy(method, receiverType)) {
@@ -215,7 +212,7 @@ public final class TypeBindingAnalyzer {
         final List<ITypeBinding> bindings = new LinkedList<>();
         final IType expectedTypeSig = getExpectedType(proj, ctx);
 		if (expectedTypeSig == null) {
-			ASTParser parser= createParser(cu);
+			ASTParser parser= createParser(cu, false);
 			AST ast= parser.createAST(null).getAST();
 			ITypeBinding binding= ast.resolveWellKnownType(TypeBindingAnalyzer.getExpectedFullyQualifiedTypeName(ctx));
 			int dim= TypeBindingAnalyzer.getArrayDimension(ctx.getExpectedTypesSignatures());
@@ -224,7 +221,7 @@ public final class TypeBindingAnalyzer {
 			}
 			bindings.add(binding);
 		} else {
-			IBinding[] res= resolveBindingsForTypes(cu, new IJavaElement[] { expectedTypeSig });
+			IBinding[] res= resolveBindingsForElements(cu, new IJavaElement[] { expectedTypeSig }, true);
 			if (res.length == 1 && res[0] instanceof ITypeBinding) {
 				bindings.add((ITypeBinding) res[0]);
 			}
@@ -263,8 +260,8 @@ public final class TypeBindingAnalyzer {
 		return 0;
 	}
 
-	private static ITypeBinding getTypeBindingFrom(IType type) {
-		IBinding[] res= resolveBindingsForTypes(type.getCompilationUnit(), new IJavaElement [] { type });
+	public static ITypeBinding getTypeBindingFrom(IType type) {
+		IBinding[] res= resolveBindingsForElements(type.getCompilationUnit(), new IJavaElement [] { type }, true);
 		if (res.length == 1 && res[0] instanceof ITypeBinding) {
 			return (ITypeBinding) res[0];
 		}
@@ -352,19 +349,24 @@ public final class TypeBindingAnalyzer {
 		return false;
 	}
 
-	public static IBinding[] resolveBindingsForTypes(ICompilationUnit cu, IJavaElement[] elements) {
-		ASTParser parser= createParser(cu);
+	public static IBinding[] resolveBindingsForElements(ICompilationUnit cu, IJavaElement[] elements, boolean ignoreMethodBodies) {
+		ASTParser parser= createParser(cu, ignoreMethodBodies);
 		return parser.createBindings(elements, null);
 	}
 
-	private static ASTParser createParser(ICompilationUnit cu) {
+	private static ASTParser createParser(ICompilationUnit cu, boolean ignoreMethodBodies) {
 		ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 		parser.setKind(ASTParser.K_COMPILATION_UNIT);
 		parser.setProject(cu.getJavaProject());
 		parser.setSource(cu);
-		parser.setResolveBindings(true);
-		parser.setBindingsRecovery(true);
-		parser.setStatementsRecovery(true);
+		if (ignoreMethodBodies) {
+			parser.setIgnoreMethodBodies(true);
+		} else {
+			parser.setResolveBindings(true);
+			parser.setBindingsRecovery(true);
+			parser.setStatementsRecovery(true);
+		}
 		return parser;
 	}
+
 }

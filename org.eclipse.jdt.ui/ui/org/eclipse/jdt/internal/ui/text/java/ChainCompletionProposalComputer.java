@@ -25,9 +25,15 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -74,9 +80,6 @@ public class ChainCompletionProposalComputer implements IJavaCompletionProposalC
 		if (!shouldPerformCompletionOnExpectedType()) {
 			return Collections.emptyList();
 		}
-		if (!findEntrypoints()) {
-			return Collections.emptyList();
-		}
 		return executeCallChainSearch();
 	}
 
@@ -107,33 +110,70 @@ public class ChainCompletionProposalComputer implements IJavaCompletionProposalC
 	}
 
 	private boolean findEntrypoints() {
-		excludedTypes= JavaManipulation.getPreference(PreferenceConstants.PREF_CHAIN_IGNORED_TYPES, ctx.getProject()).split("\\|"); //$NON-NLS-1$
-		for (int i= 0; i < excludedTypes.length; ++i) {
-			excludedTypes[i]= "L" + excludedTypes[i].replace('.', '/'); //$NON-NLS-1$
-		}
-
 		entrypoints= new LinkedList<>();
-		List<IJavaElement> elements= new LinkedList<>();
+		List<IJavaElement> nonTypeElements= new LinkedList<>();
+		List<IType> typeElements= new LinkedList<>();
 		for (IJavaCompletionProposal prop : collector.getJavaCompletionProposals()) {
 			if (prop instanceof AbstractJavaCompletionProposal) {
 				AbstractJavaCompletionProposal aprop= (AbstractJavaCompletionProposal) prop;
 				IJavaElement element= aprop.getJavaElement();
-				if (element != null) {
-					elements.add(element);
+				if (element != null && matchesExpectedPrefix(element)) {
+					if (element instanceof IType) {
+						if (hasPublicStaticNonPrimitiveMember((IType) element)) {
+							typeElements.add((IType) element);
+						}
+					} else {
+						if (element instanceof IMethod) {
+							if (isNonPrimitiveMethod((IMethod) element)) {
+								nonTypeElements.add(element);
+							}
+						} else if (element instanceof IField) {
+							if (isNonPrimitiveField((IField) element)) {
+								nonTypeElements.add(element);
+							}
+						} else {
+							nonTypeElements.add(element);
+						}
+					}
 				} else {
 					IJavaElement[] visibleElements= ctx.getCoreContext().getVisibleElements(null);
 					for (IJavaElement ve : visibleElements) {
-						if (ve.getElementName().equals(aprop.getReplacementString())) {
-							elements.add(ve);
+						if (ve.getElementName().equals(aprop.getReplacementString()) && matchesExpectedPrefix(ve)) {
+							if (ve instanceof IType ) {
+								if (hasPublicStaticNonPrimitiveMember((IType) ve)) {
+									typeElements.add((IType) ve);
+								}
+							} else {
+								if (ve instanceof IMethod) {
+									if (isNonPrimitiveMethod((IMethod) ve)) {
+										nonTypeElements.add(ve);
+									}
+								} else if (element instanceof IField) {
+									if (isNonPrimitiveField((IField) element)) {
+										nonTypeElements.add(ve);
+									}
+								} else {
+									nonTypeElements.add(ve);
+								}
+							}
 						}
 					}
 				}
 			}
 		}
 
-		IBinding[] bindings= TypeBindingAnalyzer.resolveBindingsForTypes(ctx.getCompilationUnit(), elements.toArray(new IJavaElement[0]));
+		List<IBinding> bindings= new LinkedList<>();
+		IBinding [] tmp;
+		if (!nonTypeElements.isEmpty()) {
+			tmp= TypeBindingAnalyzer.resolveBindingsForElements(ctx.getCompilationUnit(), nonTypeElements.toArray(new IJavaElement[0]), false);
+			bindings.addAll(Arrays.asList(tmp));
+		}
+		if (!typeElements.isEmpty()) {
+			tmp= TypeBindingAnalyzer.resolveBindingsForElements(ctx.getCompilationUnit(), typeElements.toArray(new IJavaElement[0]), true);
+			bindings.addAll(Arrays.asList(tmp));
+		}
 		for (IBinding b : bindings) {
-			if (b != null && matchesExpectedPrefix(b) && !ChainFinder.isFromExcludedType(Arrays.asList(excludedTypes), b)) {
+			if (b != null && !ChainFinder.isFromExcludedType(Arrays.asList(excludedTypes), b)) {
 				entrypoints.add(new ChainElement(b, false));
 			}
 		}
@@ -141,9 +181,62 @@ public class ChainCompletionProposalComputer implements IJavaCompletionProposalC
 		return !entrypoints.isEmpty();
 	}
 
-	private boolean matchesExpectedPrefix(final IBinding binding) {
+	private static boolean hasPublicStaticNonPrimitiveMember(IType element) {
+		try {
+			for (IMethod m : element.getMethods()) {
+				int flags= m.getFlags();
+				if (Flags.isStatic(flags) && Flags.isPublic(flags) && !Signature.SIG_VOID.equals(m.getReturnType())) {
+					int returnType= Signature.getTypeSignatureKind(m.getReturnType());
+					if (returnType != Signature.BASE_TYPE_SIGNATURE) {
+						return true;
+					}
+				}
+			}
+			for (IField f : element.getFields()) {
+				int flags= f.getFlags();
+				if (Flags.isStatic(flags) && Flags.isPublic(flags)) {
+					int typeSignature= Signature.getTypeSignatureKind(f.getTypeSignature());
+					if (typeSignature != Signature.BASE_TYPE_SIGNATURE) {
+						return true;
+					}
+				}
+			}
+		} catch (JavaModelException e) {
+			// do nothing
+		}
+
+		return false;
+    }
+
+	private static boolean isNonPrimitiveMethod (IMethod method) {
+		try {
+			if (!Signature.SIG_VOID.equals(method.getReturnType()) && !method.isConstructor()) {
+				int typeSignature= Signature.getTypeSignatureKind(method.getReturnType());
+				if (typeSignature != Signature.BASE_TYPE_SIGNATURE) {
+					return true;
+				}
+			}
+		} catch (JavaModelException e) {
+			// do nothing
+		}
+		return false;
+	}
+
+	private static boolean isNonPrimitiveField (IField field) {
+		try {
+			int typeSignature= Signature.getTypeSignatureKind(field.getTypeSignature());
+			if (typeSignature != Signature.BASE_TYPE_SIGNATURE) {
+				return true;
+			}
+		} catch (JavaModelException e) {
+			// do nothing
+		}
+		return false;
+	}
+
+	private boolean matchesExpectedPrefix(final IJavaElement element) {
 		String prefix= String.valueOf(ctx.getCoreContext().getToken());
-		return String.valueOf(binding.getName()).startsWith(prefix);
+		return String.valueOf(element.getElementName()).startsWith(prefix);
 	}
 
 	private List<ICompletionProposal> executeCallChainSearch() {
@@ -151,11 +244,23 @@ public class ChainCompletionProposalComputer implements IJavaCompletionProposalC
 		final int minDepth= Integer.parseInt(JavaManipulation.getPreference(PreferenceConstants.PREF_MIN_CHAIN_LENGTH, ctx.getProject()));
 		final int maxDepth= Integer.parseInt(JavaManipulation.getPreference(PreferenceConstants.PREF_MAX_CHAIN_LENGTH, ctx.getProject()));
 
+		excludedTypes= JavaManipulation.getPreference(PreferenceConstants.PREF_CHAIN_IGNORED_TYPES, ctx.getProject()).split("\\|"); //$NON-NLS-1$
+		for (int i= 0; i < excludedTypes.length; ++i) {
+			excludedTypes[i]= "L" + excludedTypes[i].replace('.', '/'); //$NON-NLS-1$
+		}
+
+		final IType invocationType= ((IMember) invocationSite).getCompilationUnit().findPrimaryType();
+		ITypeBinding receiverType= TypeBindingAnalyzer.getTypeBindingFrom(invocationType);
+
 		final List<ITypeBinding> expectedTypes= TypeBindingAnalyzer.resolveBindingsForExpectedTypes(ctx.getProject(), ctx.getCompilationUnit(), ctx.getCoreContext());
-		final ChainFinder finder= new ChainFinder(expectedTypes, Arrays.asList(excludedTypes), invocationSite);
+		final ChainFinder finder= new ChainFinder(expectedTypes, Arrays.asList(excludedTypes), receiverType);
 		try {
 			ExecutorService executor= Executors.newSingleThreadExecutor();
-			Future<?> future= executor.submit(() -> finder.startChainSearch(entrypoints, maxChains, minDepth, maxDepth));
+			Future<?> future= executor.submit(() -> {
+				if (findEntrypoints()) {
+					finder.startChainSearch(entrypoints, maxChains, minDepth, maxDepth);
+				}
+			});
 			long timeout= Long.parseLong(JavaManipulation.getPreference(PreferenceConstants.PREF_CHAIN_TIMEOUT, ctx.getProject()));
 			future.get(timeout, TimeUnit.SECONDS);
 		} catch (final Exception e) {

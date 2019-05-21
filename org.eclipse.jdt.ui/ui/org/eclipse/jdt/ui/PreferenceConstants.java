@@ -4090,7 +4090,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.PREF_MIN_CHAIN_LENGTH, 2);
 		store.setDefault(PreferenceConstants.PREF_MAX_CHAIN_LENGTH, 4);
 		store.setDefault(PreferenceConstants.PREF_MAX_CHAINS, 20);
-		store.setDefault(PreferenceConstants.PREF_CHAIN_TIMEOUT, 3);
+		store.setDefault(PreferenceConstants.PREF_CHAIN_TIMEOUT, 1);
 		store.setDefault(PreferenceConstants.PREF_CHAIN_IGNORED_TYPES, "java.lang.Object"); //$NON-NLS-1$
 
 		// Set the value for the deprecated color constants

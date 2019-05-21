@@ -18,7 +18,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
@@ -28,7 +27,7 @@ public class ChainFinder {
 
 	private final List<String> excludedTypes;
 
-	private final IJavaElement invocationSite;
+	private final ITypeBinding receiverType;
 
 	private final List<Chain> chains= new LinkedList<>();
 
@@ -39,10 +38,10 @@ public class ChainFinder {
 	private final Map<Map<ChainElement, ITypeBinding>, Boolean> assignableCache= new HashMap<>();
 
 	public ChainFinder(final List<ITypeBinding> expectedTypes, final List<String> excludedTypes,
-			final IJavaElement invocationSite) {
+			final ITypeBinding receiverType) {
 		this.expectedTypes= expectedTypes;
 		this.excludedTypes= excludedTypes;
-		this.invocationSite= invocationSite;
+		this.receiverType= receiverType;
 	}
 
 	public void startChainSearch(final List<ChainElement> entrypoints, final int maxChains, final int minDepth,
@@ -129,6 +128,7 @@ public class ChainFinder {
 		if (chain.getLast().getElementBinding().getKind() == IBinding.TYPE) {
 			staticOnly= true;
 		}
+
 		for (final IBinding element : findAllFieldsAndMethods(currentlyVisitedType, staticOnly)) {
 			final ChainElement newEdge= createEdge(element);
 			if (!chain.contains(newEdge)) {
@@ -142,8 +142,8 @@ public class ChainFinder {
 		if (cached == null) {
 			cached= new LinkedList<>();
 			Collection<IBinding> candidates= staticOnly
-					? TypeBindingAnalyzer.findAllPublicStaticFieldsAndNonVoidNonPrimitiveStaticMethods(chainElementType, invocationSite)
-					: TypeBindingAnalyzer.findVisibleInstanceFieldsAndRelevantInstanceMethods(chainElementType, invocationSite);
+					? TypeBindingAnalyzer.findAllPublicStaticFieldsAndNonVoidNonPrimitiveStaticMethods(chainElementType, receiverType)
+					: TypeBindingAnalyzer.findVisibleInstanceFieldsAndRelevantInstanceMethods(chainElementType, receiverType);
 			for (final IBinding binding : candidates) {
 				if (!ChainFinder.isFromExcludedType(excludedTypes, binding)) {
 					cached.add(binding);
