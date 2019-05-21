@@ -536,4 +536,76 @@ public class QuickFixTest12 extends QuickFixTest {
 
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}
+
+	public void testAddMissingCaseSwitchExpression() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(Java12ProjectTestSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set12CompilerOptions(fJProject1, true);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		StringBuffer buf= new StringBuffer();
+		buf.append("module test {\n");
+		buf.append("}\n");
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class Cls {\n");
+		buf.append("    public void bar1(Day day) {\n");
+		buf.append("        int len = switch (day) {\n");
+		buf.append("        case MONDAY, FRIDAY:\n");
+		buf.append("            break 6;\n");
+		buf.append("        case TUESDAY:\n");
+		buf.append("            break 7;\n");
+		buf.append("        case THURSDAY, SATURDAY:\n");
+		buf.append("            break 8;\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("enum Day {\n");
+		buf.append("    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class Cls {\n");
+		buf.append("    public void bar1(Day day) {\n");
+		buf.append("        int len = switch (day) {\n");
+		buf.append("        case MONDAY, FRIDAY:\n");
+		buf.append("            break 6;\n");
+		buf.append("        case TUESDAY:\n");
+		buf.append("            break 7;\n");
+		buf.append("        case THURSDAY, SATURDAY:\n");
+		buf.append("            break 8;\n");
+		buf.append("			case SUNDAY :\n");
+		buf.append("				throw new UnsupportedOperationException(\n");
+		buf.append("						\"Unimplemented case: \" + day);\n");
+		buf.append("			case WEDNESDAY :\n");
+		buf.append("				throw new UnsupportedOperationException(\n");
+		buf.append("						\"Unimplemented case: \" + day);\n");
+		buf.append("			default :\n");
+		buf.append("				throw new IllegalArgumentException(\n");
+		buf.append("						\"Unexpected value: \" + day);\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("enum Day {\n");
+		buf.append("    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
+	}
+
 }
