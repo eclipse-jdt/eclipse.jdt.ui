@@ -566,7 +566,7 @@ public final class PushDownWizard extends RefactoringWizard {
 
 				@Override
 				public void selectionChanged(final SelectionChangedEvent event) {
-					if (comboBoxCellEditor.getControl() == null & !table.isDisposed())
+					if (comboBoxCellEditor.getControl() == null && !table.isDisposed())
 						comboBoxCellEditor.create(table);
 					Assert.isTrue(event.getSelection() instanceof IStructuredSelection);
 					final IStructuredSelection ss= (IStructuredSelection) event.getSelection();

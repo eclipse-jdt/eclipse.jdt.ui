@@ -967,7 +967,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 
 			@Override
 			public void selectionChanged(final SelectionChangedEvent event) {
-				if (editor.getControl() == null & !table.isDisposed())
+				if (editor.getControl() == null && !table.isDisposed())
 					editor.create(table);
 				final ISelection sel= event.getSelection();
 				if (!(sel instanceof IStructuredSelection))

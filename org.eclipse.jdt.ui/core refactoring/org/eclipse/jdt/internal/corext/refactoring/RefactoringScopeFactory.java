@@ -128,7 +128,7 @@ public class RefactoringScopeFactory {
 	 * @throws JavaModelException if an error occurs
 	 */
 	public static IJavaSearchScope create(IJavaElement javaElement, boolean considerVisibility, boolean sourceReferencesOnly) throws JavaModelException {
-		if (considerVisibility & javaElement instanceof IMember) {
+		if (considerVisibility && javaElement instanceof IMember) {
 			IMember member= (IMember) javaElement;
 			if (JdtFlags.isPrivate(member)) {
 				if (member.getCompilationUnit() != null)

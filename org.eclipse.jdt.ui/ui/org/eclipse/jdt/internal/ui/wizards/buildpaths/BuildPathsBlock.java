@@ -635,7 +635,7 @@ public class BuildPathsBlock {
 					entryMissing= currElement;
 				}
 			}
-			if (entryDeprecated == null & currElement.isDeprecated()) {
+			if (entryDeprecated == null && currElement.isDeprecated()) {
 				entryDeprecated= currElement;
 			}
 		}
