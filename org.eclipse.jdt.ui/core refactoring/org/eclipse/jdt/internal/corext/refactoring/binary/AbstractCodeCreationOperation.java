@@ -163,7 +163,7 @@ public abstract class AbstractCodeCreationOperation implements IWorkspaceRunnabl
 						if (builder.charAt(index) == '.')
 							builder.setCharAt(index, '/');
 					}
-					store= store.getChild(new Path(builder.toString()));
+					store= store.getFileStore(new Path(builder.toString()));
 					if (!pack.startsWith(".")) //$NON-NLS-1$
 						createPackageFragment(store, pack, new SubProgressMonitor(subMonitor, 10));
 				} else
