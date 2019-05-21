@@ -107,7 +107,7 @@ public class ChainCompletionProposalComputer implements IJavaCompletionProposalC
 	}
 
 	private boolean findEntrypoints() {
-		excludedTypes= JavaManipulation.getPreference(PreferenceConstants.PREF_IGNORED_TYPES, ctx.getProject()).split("\\|"); //$NON-NLS-1$
+		excludedTypes= JavaManipulation.getPreference(PreferenceConstants.PREF_CHAIN_IGNORED_TYPES, ctx.getProject()).split("\\|"); //$NON-NLS-1$
 		for (int i= 0; i < excludedTypes.length; ++i) {
 			excludedTypes[i]= "L" + excludedTypes[i].replace('.', '/'); //$NON-NLS-1$
 		}
@@ -156,7 +156,7 @@ public class ChainCompletionProposalComputer implements IJavaCompletionProposalC
 		try {
 			ExecutorService executor= Executors.newSingleThreadExecutor();
 			Future<?> future= executor.submit(() -> finder.startChainSearch(entrypoints, maxChains, minDepth, maxDepth));
-			long timeout= Long.parseLong(JavaManipulation.getPreference(PreferenceConstants.PREF_TIMEOUT, ctx.getProject()));
+			long timeout= Long.parseLong(JavaManipulation.getPreference(PreferenceConstants.PREF_CHAIN_TIMEOUT, ctx.getProject()));
 			future.get(timeout, TimeUnit.SECONDS);
 		} catch (final Exception e) {
 			setError("Timeout during call chain computation."); //$NON-NLS-1$

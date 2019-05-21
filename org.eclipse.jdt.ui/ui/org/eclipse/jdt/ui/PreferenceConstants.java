@@ -3917,7 +3917,7 @@ public class PreferenceConstants {
      *
 	 * @since 3.18
 	 */
-    public static final String PREF_TIMEOUT = "recommenders.chain.timeout"; //$NON-NLS-1$
+    public static final String PREF_CHAIN_TIMEOUT = "recommenders.chain.timeout"; //$NON-NLS-1$
 
     /**
 	 * A named preference that stores a '|' separated list of types to exclude
@@ -3928,7 +3928,7 @@ public class PreferenceConstants {
 	 *
 	 * @since 3.18
 	 */
-    public static final String PREF_IGNORED_TYPES = "recommenders.chain.ignore_types"; //$NON-NLS-1$
+    public static final String PREF_CHAIN_IGNORED_TYPES = "recommenders.chain.ignore_types"; //$NON-NLS-1$
 
 	/**
 	 * Initializes the given preference store with the default values.
@@ -4090,8 +4090,8 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.PREF_MIN_CHAIN_LENGTH, 2);
 		store.setDefault(PreferenceConstants.PREF_MAX_CHAIN_LENGTH, 4);
 		store.setDefault(PreferenceConstants.PREF_MAX_CHAINS, 20);
-		store.setDefault(PreferenceConstants.PREF_TIMEOUT, 3);
-		store.setDefault(PreferenceConstants.PREF_IGNORED_TYPES, "java.lang.Object"); //$NON-NLS-1$
+		store.setDefault(PreferenceConstants.PREF_CHAIN_TIMEOUT, 3);
+		store.setDefault(PreferenceConstants.PREF_CHAIN_IGNORED_TYPES, "java.lang.Object"); //$NON-NLS-1$
 
 		// Set the value for the deprecated color constants
 		initializeDeprecatedColorConstants(store);
@@ -4106,7 +4106,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS, false);
 		store.setDefault(PreferenceConstants.CODEASSIST_PREFIX_COMPLETION, false);
 		store.setDefault(PreferenceConstants.CODEASSIST_EXCLUDED_CATEGORIES, "org.eclipse.jdt.ui.textProposalCategory\0org.eclipse.jdt.ui.javaTypeProposalCategory\0org.eclipse.jdt.ui.javaNoTypeProposalCategory\0org.eclipse.jdt.ui.javaChainProposalCategory\0"); //$NON-NLS-1$
-		store.setDefault(PreferenceConstants.CODEASSIST_CATEGORY_ORDER, "org.eclipse.jdt.ui.spellingProposalCategory:65545\0org.eclipse.jdt.ui.javaTypeProposalCategory:65540\0org.eclipse.jdt.ui.javaNoTypeProposalCategory:65539\0org.eclipse.jdt.ui.textProposalCategory:65541\0org.eclipse.jdt.ui.javaAllProposalCategory:65542\0org.eclipse.jdt.ui.templateProposalCategory:2\0org.eclipse.jdt.ui.swtProposalCategory:3\0"); //$NON-NLS-1$
+		store.setDefault(PreferenceConstants.CODEASSIST_CATEGORY_ORDER, "org.eclipse.jdt.ui.javaChainProposalCategory:65546\0org.eclipse.jdt.ui.spellingProposalCategory:65545\0org.eclipse.jdt.ui.javaTypeProposalCategory:65540\0org.eclipse.jdt.ui.javaNoTypeProposalCategory:65539\0org.eclipse.jdt.ui.textProposalCategory:65541\0org.eclipse.jdt.ui.javaAllProposalCategory:65542\0org.eclipse.jdt.ui.templateProposalCategory:2\0org.eclipse.jdt.ui.swtProposalCategory:3\0"); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.CODEASSIST_LRU_HISTORY, ""); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.CODEASSIST_SORTER, "org.eclipse.jdt.ui.RelevanceSorter"); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS, ""); //$NON-NLS-1$
