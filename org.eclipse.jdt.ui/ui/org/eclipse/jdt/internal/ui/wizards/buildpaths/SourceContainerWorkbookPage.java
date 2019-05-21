@@ -136,7 +136,6 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	private final ListDialogField<CPListElement> fClassPathList;
 	private IJavaProject fCurrJProject;
 
-	private Control fSWTControl;
 	private final TreeListDialogField<CPListElement> fFoldersList;
 
 	private final StringDialogField fOutputLocationField;

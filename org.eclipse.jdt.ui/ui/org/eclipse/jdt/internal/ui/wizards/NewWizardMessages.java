@@ -460,6 +460,9 @@ public final class NewWizardMessages extends NLS {
 	public static String ModuleDialog_errorOnContentsTab_error;
 	public static String ModuleDialog_errorOnDetailsTab_error;
 
+	public static String ModuleDialog_deprecated_warning;
+	public static String ModuleDialog_switchToTab_button;
+
 	public static String ModuleDialog_contents_tab;
 	public static String ModuleDialog_availableModules_list;
 	public static String ModuleDialog_availableModules_tooltip;

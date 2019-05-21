@@ -23,6 +23,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TabFolder;
+import org.eclipse.swt.widgets.TabItem;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -59,6 +61,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.TreeListDialogField;
 public abstract class BuildPathBasePage {
 
 	private final ClasspathAttributeConfigurationDescriptors fAttributeDescriptors;
+	protected Control fSWTControl;
 
 	public BuildPathBasePage() {
 		fAttributeDescriptors= JavaPlugin.getDefault().getClasspathAttributeConfigurationDescriptors();
@@ -108,7 +111,7 @@ public abstract class BuildPathBasePage {
 					throw new IllegalStateException(Messages.format(NewWizardMessages.BuildPathBasePage_unexpectedAnswer_error, String.valueOf(answer)));
 			}			
 		}
-		ModuleDialog dialog= new ModuleDialog(shell, selElement, selectedJavaElements);
+		ModuleDialog dialog= new ModuleDialog(shell, selElement, selectedJavaElements, this);
 		int res= dialog.open();
 		if (res == Window.OK) {
 			ModuleEncapsulationDetail[] newDetails= dialog.getAllDetails();
@@ -387,4 +390,18 @@ public abstract class BuildPathBasePage {
 		}
 	}
 
+	public BuildPathBasePage switchToTab(Class<? extends BuildPathBasePage> tabClass) {
+		if (fSWTControl == null) {
+			JavaPlugin.logErrorMessage("Page does not support tab switching: "+this.getClass()); //$NON-NLS-1$
+			return null;
+		}
+		TabFolder tabFolder= (TabFolder) fSWTControl.getParent();
+		for (TabItem tabItem : tabFolder.getItems()) {
+			if (tabClass.isInstance(tabItem.getData())) {
+				tabFolder.setSelection(tabItem);
+				return (BuildPathBasePage) tabItem.getData();
+			}
+		}
+		return null;
+	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2018 GK Software SE, and others.
+ * Copyright (c) 2017, 2019 GK Software SE, and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -29,6 +29,7 @@ import java.util.Set;
 import org.eclipse.equinox.bidi.StructuredTextTypeHandlerFactory;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -179,6 +180,8 @@ public class ModuleDialog extends StatusDialog {
 	private static final int IDX_INCLUDED= 1;
 	private static final int IDX_IMPLICITLY_INCLUDED= 2;
 	
+	private BuildPathBasePage fBasePage;
+
 	private Button fAddIncludedButton;
 	private Button fRemoveIncludedButton;
 	private Button fPromoteIncludedButton;
@@ -202,9 +205,10 @@ public class ModuleDialog extends StatusDialog {
 	private static final int IDX_REMOVE= 2;
 
 
-	public ModuleDialog(Shell parent, CPListElement entryToEdit, IJavaElement[] selectedElements) {
+	public ModuleDialog(Shell parent, CPListElement entryToEdit, IJavaElement[] selectedElements, BuildPathBasePage basePage) {
 		super(parent);
 
+		fBasePage= basePage;
 		fCurrCPElement= entryToEdit;
 		fJavaElements= selectedElements;
 
@@ -296,7 +300,20 @@ public class ModuleDialog extends StatusDialog {
 		tabFolder.addSelectionListener(widgetSelectedAdapter(e -> validateTab(e.widget, tabItemContents, tabItemDetails)));
 
 		applyDialogFont(composite);
+		updateStatus(new StatusInfo(IStatus.WARNING, NewWizardMessages.ModuleDialog_deprecated_warning));
 		return composite;
+	}
+	
+	@Override
+	protected void createButtonsForButtonBar(Composite parent) {
+		if (fBasePage.fSWTControl != null) {
+			Button switchButton= createButton(parent, 2, NewWizardMessages.ModuleDialog_switchToTab_button, false);
+			switchButton.addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> {
+				fBasePage.switchToTab(ModuleDependenciesPage.class);
+				cancelPressed();
+			}));
+		}
+		super.createButtonsForButtonBar(parent);
 	}
 
 	private String getDescriptionString() {

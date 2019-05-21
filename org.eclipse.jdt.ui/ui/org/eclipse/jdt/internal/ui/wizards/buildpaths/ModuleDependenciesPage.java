@@ -38,8 +38,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.TabFolder;
-import org.eclipse.swt.widgets.TabItem;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -164,8 +162,6 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 	private Collection<String> fAllDefaultSystemModules; // if current is unnamed module: transitive closure of default root modules (names)
 
 	public final Map<String,String> fPatchMap= new HashMap<>();
-
-	private Control fSWTControl;
 
 	public ModuleDependenciesPage(IStatusChangeListener context, CheckedListDialogField<CPListElement> classPathList) {
 		fClassPathList= classPathList;
@@ -792,34 +788,25 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 				dialogTitle, null, dialogMessage, MessageDialog.QUESTION, 0,
 				tabButton, IDialogConstants.CANCEL_LABEL);
 		if (dialog.open() == 0) {
-			TabFolder tabFolder= (TabFolder) fSWTControl.getParent();
 			if (isLibrary) {
-				showLibrariesPage(tabFolder);
+				showLibrariesPage();
 			} else {
-				showProjectsPage(tabFolder);
+				showProjectsPage();
 			}
 		}
 	}
 
-	void showLibrariesPage(TabFolder tabFolder) {
-		for (TabItem tabItem : tabFolder.getItems()) {
-			if (tabItem.getData() instanceof LibrariesWorkbookPage) {
-				tabFolder.setSelection(tabItem);
-				LibrariesWorkbookPage page= (LibrariesWorkbookPage) tabItem.getData();
-				page.selectRootNode(true);
-				return;
-			}
+	void showLibrariesPage() {
+		BuildPathBasePage newTab= switchToTab(LibrariesWorkbookPage.class);
+		if (newTab instanceof LibrariesWorkbookPage) {
+			((LibrariesWorkbookPage) newTab).selectRootNode(true);
 		}
 	}
 
-	void showProjectsPage(TabFolder tabFolder) {
-		for (TabItem tabItem : tabFolder.getItems()) {
-			if (tabItem.getData() instanceof ProjectsWorkbookPage) {
-				tabFolder.setSelection(tabItem);
-				ProjectsWorkbookPage page= (ProjectsWorkbookPage) tabItem.getData();
-				page.selectRootNode(true);
-				return;
-			}
+	void showProjectsPage() {
+		BuildPathBasePage newTab= switchToTab(ProjectsWorkbookPage.class);
+		if (newTab instanceof ProjectsWorkbookPage) {
+			((ProjectsWorkbookPage) newTab).selectRootNode(true);
 		}
 	}
 }

@@ -75,8 +75,6 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 
 	private final TreeListDialogField<CPListElement> fProjectsList;
 
-	private Control fSWTControl;
-
 	private final IWorkbenchPreferenceContainer fPageContainer;
 	
 	private boolean dragDropEnabled;

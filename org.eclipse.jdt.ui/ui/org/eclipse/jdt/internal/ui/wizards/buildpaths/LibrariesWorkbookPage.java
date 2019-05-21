@@ -102,7 +102,6 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 
 	private final TreeListDialogField<CPListElement> fLibrariesList;
 
-	private Control fSWTControl;
 	private final IWorkbenchPreferenceContainer fPageContainer;
 
 	private final int IDX_ADDJAR= 0;
