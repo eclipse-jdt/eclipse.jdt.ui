@@ -119,9 +119,17 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTRequestor;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.NodeFinder;
+import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.SwitchExpression;
+import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 import org.eclipse.jdt.ui.JavaUI;
 
@@ -389,7 +397,60 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 			// not interesting
 		}
 	}
-		
+
+	private static final class BreakStatementChecker extends ASTVisitor {
+
+		@Override
+		public boolean visit(BreakStatement node) {
+			try {
+				if (node != null && node.isImplicit() && isInSwitchExpressionOrStatement(node)) {
+					ASTNode parent= node.getParent();
+					List<Statement> statements= null;
+					if (parent instanceof Block) {
+						statements= ((Block) parent).statements();
+					} else if (parent instanceof SwitchExpression) {
+						statements= ((SwitchExpression) parent).statements();
+					} else if (parent instanceof SwitchStatement) {
+						statements= ((SwitchStatement) parent).statements();
+					}
+					if (statements == null) {
+						return true;
+					}
+					Expression exp= node.getExpression();
+					if (exp == null) {
+						statements.remove(node);
+						return false;
+					} else {
+						int index= statements.indexOf(node);
+						statements.remove(node);
+						node.setExpression(null);
+						ExpressionStatement exprStmt= node.getAST().newExpressionStatement(exp);
+						exprStmt.setSourceRange(node.getStartPosition(), node.getLength());
+						statements.add(index, exprStmt);
+						exprStmt.accept(this);
+						return false;
+					}
+				}
+			} catch (UnsupportedOperationException e) {
+				// do nothing
+			}
+			return true;
+		}
+
+		private boolean isInSwitchExpressionOrStatement(BreakStatement node) {
+			boolean result= false;
+			ASTNode parent= node;
+			while (parent != null) {
+				if (parent instanceof SwitchStatement || parent instanceof SwitchExpression) {
+					result= true;
+					break;
+				}
+				parent= parent.getParent();
+			}
+			return result;
+		}
+	}
+
 	private final static String SETTINGS_LINK_WITH_EDITOR= "link_with_editor"; //$NON-NLS-1$
 	private final static String SETTINGS_INPUT_KIND= "input_kind"; //$NON-NLS-1$
 	private final static String SETTINGS_NO_BINDINGS= "create_bindings"; //$NON-NLS-1$
@@ -657,7 +718,8 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 			endTime= System.currentTimeMillis();
 		}
 		if (root != null) {
-			updateContentDescription(input, root, endTime - startTime);
+			root.accept(new BreakStatementChecker());	
+			updateContentDescription(input, root, endTime - startTime);			
 		}
 		return root;
 	}
