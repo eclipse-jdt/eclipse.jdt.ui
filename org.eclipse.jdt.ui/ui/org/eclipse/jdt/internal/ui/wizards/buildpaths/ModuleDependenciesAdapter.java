@@ -1008,13 +1008,15 @@ class ModuleDependenciesAdapter implements IDialogFieldListener, ITreeListAdapte
 				TreeViewer treeViewer= fDetailsList.getTreeViewer();
 				boolean isExpanded= treeViewer.getExpandedState(selectedElements.get(0));
 				if (isExpanded) {
-					treeViewer.collapseToLevel(selectedElements.get(0), 1);				
+					treeViewer.collapseToLevel(selectedElements.get(0), 1);
 				} else {
 					treeViewer.expandToLevel(selectedElements.get(0), 1);
 				}
-				if (selected instanceof AccessiblePackage) {
-					if (getConfiguredDetails().addOrEditAccessiblePackage((AccessiblePackage) selected, fModuleDependenciesPage.getShell())) {
-						field.refresh();
+				if (isConfigurableNode(selected)) {
+					if (selected instanceof AccessiblePackage) {
+						if (getConfiguredDetails().addOrEditAccessiblePackage((AccessiblePackage) selected, fModuleDependenciesPage.getShell())) {
+							field.refresh();
+						}
 					}
 				}
 			}
