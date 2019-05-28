@@ -137,6 +137,15 @@ class ModuleDependenciesList {
 		fViewer= tableViewer;
 	}
 
+	public void clear() {
+		fNames.clear();
+		fModule2Element.clear();
+		fInitialNames.clear();
+		fElem2ModName.clear();
+		fModules.clear();
+		fKinds.clear();
+	}
+
 	private boolean hasConfiguredDetails(String module) {
 		CPListElement element= fModule2Element.get(module);
 		if (element == null)

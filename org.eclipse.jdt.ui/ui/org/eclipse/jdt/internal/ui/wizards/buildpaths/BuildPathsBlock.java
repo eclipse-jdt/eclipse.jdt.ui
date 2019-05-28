@@ -366,7 +366,7 @@ public class BuildPathsBlock {
 			fSourceContainerPage.init(fCurrJProject);
 			fProjectsPage.init(fCurrJProject);
 			fLibrariesPage.init(fCurrJProject);
-			fModulesPage.init(fCurrJProject);
+			// fModulesPage will be unconditionally initialized in updateUI() below
 			fIs9OrHigher= JavaModelUtil.is9OrHigher(fCurrJProject);
 		}
 
@@ -402,9 +402,9 @@ public class BuildPathsBlock {
 			// update the library and project page if fis9OrHigher changed
 			fLibrariesPage.init(fCurrJProject);
 			fProjectsPage.init(fCurrJProject);
-			fModulesPage.init(fCurrJProject);
 			fIs9OrHigher= is9OrHigherAfter;
 		}
+		fModulesPage.init(fCurrJProject); // always update, Apply might have made more modules visible
 		doStatusLineUpdate();
 	}
 

@@ -521,6 +521,7 @@ public final class NewWizardMessages extends NLS {
 	public static String ModuleDependenciesPage_addSystemModule_button;
 	public static String ModuleDependenciesPage_details_label;
 	public static String ModuleDependenciesPage_nonModularProject_dummy;
+	public static String ModuleDependenciesPage_outOfSync_warning;
 	// buttons:
 	public static String ModuleDependenciesPage_modules_remove_button;
 	public static String ModuleDependenciesPage_modules_read_button;

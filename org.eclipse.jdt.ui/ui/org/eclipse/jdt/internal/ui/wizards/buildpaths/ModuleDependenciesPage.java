@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TabFolder;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -62,6 +63,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleDependenciesList.ModuleKind;
@@ -242,6 +244,10 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 
 		fDetailsList.setViewerComparator(new CPListElementSorter());
 
+		((TabFolder) parent).addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> {
+			if (e.item.getData() == this && fCurrJProject != null)
+				init(fCurrJProject);
+		}));
 		fSWTControl= composite;
 
 		return composite;
@@ -270,7 +276,7 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 	}
 
 	protected void scanModules() {
-		fModuleList.fNames.clear();
+		fModuleList.clear();
 		if (!JavaModelUtil.is9OrHigher(fCurrJProject)) {
 			fModuleList.fNames.add(NewWizardMessages.ModuleDependenciesPage_nonModularProject_dummy);
 			fModuleList.refresh();
@@ -365,7 +371,12 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 					}
 					break;
 				default: // LIBRARY & VARIABLE:
-					for (IPackageFragmentRoot packageRoot : fCurrJProject.findPackageFragmentRoots(cpe.getClasspathEntry())) {
+					IPackageFragmentRoot[] roots= fCurrJProject.findPackageFragmentRoots(cpe.getClasspathEntry());
+					if (roots.length == 0) {
+						fContext.statusChanged(new StatusInfo(IStatus.WARNING, NewWizardMessages.ModuleDependenciesPage_outOfSync_warning));
+						break;
+					}
+					for (IPackageFragmentRoot packageRoot : roots) {
 						IModuleDescription module= packageRoot.getModuleDescription();
 						kind= ModuleKind.Normal;
 						if (module == null) {
