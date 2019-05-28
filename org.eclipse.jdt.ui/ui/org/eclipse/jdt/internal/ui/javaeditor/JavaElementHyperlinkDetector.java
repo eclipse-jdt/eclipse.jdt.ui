@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -42,6 +42,7 @@ import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SwitchCase;
+import org.eclipse.jdt.core.dom.SwitchExpression;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
@@ -267,10 +268,14 @@ public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 		SwitchCase caseNode= (SwitchCase) node;
 
 		ASTNode parent= caseNode.getParent();
-		if (!(parent instanceof SwitchStatement)) {
+		ASTNode switchNode;
+		if (parent instanceof SwitchStatement) {
+			switchNode= parent;
+		} else if (parent instanceof SwitchExpression) {
+			switchNode= parent;
+		} else {
 			return null;
 		}
-		SwitchStatement switchNode= (SwitchStatement) parent;
 
 		String description= Messages.format(SearchMessages.BreakContinueTargetFinder_occurrence_description, BasicElementLabels.getJavaElementName(ASTNodes.asString(caseNode)));
 		return new OccurrenceLocation(switchNode.getStartPosition(), 6, 0, description); // '6' is the length of 'switch'

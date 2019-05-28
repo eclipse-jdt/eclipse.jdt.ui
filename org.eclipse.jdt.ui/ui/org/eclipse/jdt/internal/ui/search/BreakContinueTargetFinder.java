@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -32,6 +32,7 @@ import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SwitchExpression;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
@@ -63,7 +64,7 @@ public class BreakContinueTargetFinder extends ASTVisitor implements IOccurrence
 	private CompilationUnit fASTRoot;
 
 	private static final Class<?>[] STOPPERS=        {MethodDeclaration.class, Initializer.class};
-	private static final Class<?>[] BREAKTARGETS=    {ForStatement.class, EnhancedForStatement.class, WhileStatement.class, DoStatement.class, SwitchStatement.class};
+	private static final Class<?>[] BREAKTARGETS=    {ForStatement.class, EnhancedForStatement.class, WhileStatement.class, DoStatement.class, SwitchStatement.class, SwitchExpression.class};
 	private static final Class<?>[] CONTINUETARGETS= {ForStatement.class, EnhancedForStatement.class, WhileStatement.class, DoStatement.class};
 	private static final int BRACE_LENGTH= 1;
 
