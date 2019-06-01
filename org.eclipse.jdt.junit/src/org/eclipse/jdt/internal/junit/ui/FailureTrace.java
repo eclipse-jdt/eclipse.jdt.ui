@@ -223,7 +223,7 @@ public class FailureTrace implements IMenuListener {
 	}
 
 	private void updateTable(String trace) {
-		if(trace == null || trace.trim().equals("")) { //$NON-NLS-1$
+		if(trace == null || trace.trim().isEmpty()) {
 			clear();
 			return;
 		}

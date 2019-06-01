@@ -92,7 +92,7 @@ public class JarRsrcLoader {
 					if (rsrcCP == null)
 						rsrcCP = JIJConstants.DEFAULT_REDIRECTED_CLASSPATH; 
 					result.rsrcClassPath = splitSpaces(rsrcCP);
-					if ((result.rsrcMainClass != null) && !result.rsrcMainClass.trim().equals(""))    //$NON-NLS-1$
+					if ((result.rsrcMainClass != null) && !result.rsrcMainClass.trim().isEmpty())
 							return result;
 				}
 			}

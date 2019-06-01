@@ -53,7 +53,7 @@ public class MoveInnerToTopWizard extends RefactoringWizard {
 			super(RefactoringMessages.MoveInnerToToplnputPage_description, true, initialValue);
 			final MoveInnerToTopRefactoring refactoring= getMoveRefactoring();
 			final boolean mandatory= refactoring.isCreatingInstanceFieldMandatory();
-			fInitialInputValid= (!initialValue.equals("")) || !mandatory; //$NON-NLS-1$
+			fInitialInputValid= (!initialValue.isEmpty()) || !mandatory;
 			if (!mandatory)
 				refactoring.setCreateInstanceField(false);
 		}
@@ -170,7 +170,7 @@ public class MoveInnerToTopWizard extends RefactoringWizard {
 			refactoring.setEnclosingInstanceName(text);
 			if (refactoring.isCreatingInstanceFieldMandatory())
 				return refactoring.checkEnclosingInstanceName(text);
-			else if (!text.equals("")) //$NON-NLS-1$
+			else if (!text.isEmpty())
 				return refactoring.checkEnclosingInstanceName(text);
 			else
 				return new RefactoringStatus();

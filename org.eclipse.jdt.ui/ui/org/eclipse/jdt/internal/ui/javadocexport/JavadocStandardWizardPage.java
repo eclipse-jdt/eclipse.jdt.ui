@@ -148,7 +148,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		SWTUtil.setAccessibilityText(fTitleText, JavadocExportMessages.JavadocStandardWizardPage_titlebutton_description);
 
 		String text= fStore.getTitle();
-		if (!text.equals("")) { //$NON-NLS-1$
+		if (!text.isEmpty()) {
 			fTitleText.setText(text);
 			fTitleButton.setSelection(true);
 		} else
@@ -205,7 +205,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		SWTUtil.setButtonDimensionHint(fStyleSheetBrowseButton);
 
 		String str= fStore.getStyleSheet();
-		if (str.equals("")) { //$NON-NLS-1$
+		if (str.isEmpty()) {
 			//default
 			fStyleSheetText.setEnabled(false);
 			fStyleSheetBrowseButton.setEnabled(false);

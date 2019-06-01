@@ -496,7 +496,7 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 
 		if (newText.equals(newText.trim()) == false)
 			errorMessage = WorkingSetMessages.JavaWorkingSetPage_warning_nameWhitespace;
-		if (newText.equals("")) { //$NON-NLS-1$
+		if (newText.isEmpty()) {
 			if (fFirstCheck) {
 				setPageComplete(false);
 				fFirstCheck= false;

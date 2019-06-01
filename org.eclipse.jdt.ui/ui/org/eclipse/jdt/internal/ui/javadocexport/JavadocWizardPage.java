@@ -102,7 +102,7 @@ public abstract class JavadocWizardPage extends NewElementWizardPage {
 		dialog.setText(title);
 		dialog.setFilterExtensions(extensions);
 		String dirName= text.getText();
-		if (!dirName.equals("")) { //$NON-NLS-1$
+		if (!dirName.isEmpty()) {
 			File path= new File(dirName);
 			if (path.exists())
 				dialog.setFilterPath(dirName);

@@ -109,7 +109,7 @@ public class FatJarManifestProvider implements IManifestProvider {
 	}
 
 	private void setManifestClasspath(Manifest ownManifest, String manifestClasspath) {
-		if ((manifestClasspath != null) && !manifestClasspath.trim().equals("")) { //$NON-NLS-1$
+		if ((manifestClasspath != null) && !manifestClasspath.trim().isEmpty()) {
 			Attributes mainAttr= ownManifest.getMainAttributes();
 			mainAttr.putValue("Class-Path", manifestClasspath); //$NON-NLS-1$
 		}

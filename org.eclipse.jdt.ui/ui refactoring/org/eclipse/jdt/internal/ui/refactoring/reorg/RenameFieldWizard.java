@@ -186,14 +186,14 @@ public class RenameFieldWizard extends RenameRefactoringWizard {
 			}
 		}
 		private String constructDisabledSetterRenamingLabel(String defaultLabel) {
-			if (fSetterRenamingErrorMessage.equals("")) //$NON-NLS-1$
+			if (fSetterRenamingErrorMessage.isEmpty())
 				return defaultLabel;
 			String[] keys= {defaultLabel, fSetterRenamingErrorMessage};
 			return Messages.format(RefactoringMessages.RenameFieldInputWizardPage_setter_label, keys);
 		}
 
 		private String constructDisabledGetterRenamingLabel(String defaultLabel) {
-			if (fGetterRenamingErrorMessage.equals("")) //$NON-NLS-1$
+			if (fGetterRenamingErrorMessage.isEmpty())
 				return defaultLabel;
 			String[] keys= {defaultLabel, fGetterRenamingErrorMessage};
 			return Messages.format(RefactoringMessages.RenameFieldInputWizardPage_getter_label, keys);

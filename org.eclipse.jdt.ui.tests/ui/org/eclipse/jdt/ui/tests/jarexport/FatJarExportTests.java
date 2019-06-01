@@ -589,7 +589,7 @@ public class FatJarExportTests extends TestCase {
 		for (int i= 0; i < xmlZipfilesets.getLength(); i++) {
 			String libName= ((Element)xmlZipfilesets.item(i)).getAttribute("includes"); //$NON-NLS-1$
 			boolean found= false;
-			if (libName.equals("")) { //$NON-NLS-1$
+			if (libName.isEmpty()) {
 				libName= ((Element)xmlZipfilesets.item(i)).getAttribute("src"); //$NON-NLS-1$
 				found= libName.equals(FatJarRsrcUrlBuilder.JAR_RSRC_LOADER_ZIP); //$NON-NLS-1$
 			}

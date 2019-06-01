@@ -183,7 +183,7 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 		DirectoryDialog dialog = new DirectoryDialog(getShell(), SWT.SHEET);
 		dialog.setMessage(LaunchingMessages.TomcatTab_4);
 		String currentWorkingDir = fTomcatDir.getText();
-		if (!currentWorkingDir.trim().equals("")) { //$NON-NLS-1$
+		if (!currentWorkingDir.trim().isEmpty()) {
 			File path = new File(currentWorkingDir);
 			if (path.exists()) {
 				dialog.setFilterPath(currentWorkingDir);

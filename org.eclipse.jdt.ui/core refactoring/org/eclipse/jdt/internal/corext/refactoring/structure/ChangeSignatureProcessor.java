@@ -551,7 +551,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			return;
 		}
 
-		if (info.getDefaultValue().trim().equals("")){ //$NON-NLS-1$
+		if (info.getDefaultValue().trim().isEmpty()){
 			String msg= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_default_value, BasicElementLabels.getJavaElementName(info.getNewName()));
 			result.addFatalError(msg);
 			return;

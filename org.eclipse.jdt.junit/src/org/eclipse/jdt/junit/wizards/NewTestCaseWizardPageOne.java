@@ -1282,7 +1282,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		String superClassName= getSuperClass();
 		JUnitStatus status= new JUnitStatus();
 		boolean isJUnit3= fJUnitVersion == JUnitVersion.VERSION_3;
-		if (superClassName == null || superClassName.trim().equals("")) { //$NON-NLS-1$
+		if (superClassName == null || superClassName.trim().isEmpty()) {
 			if (isJUnit3)
 				status.setError(WizardMessages.NewTestCaseWizardPageOne_error_superclass_empty);
 			return status;

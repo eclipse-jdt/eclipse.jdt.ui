@@ -367,7 +367,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 			Node packageNode= packageNodes.item(i);
 			if (packageNode.getNodeType() == Node.ELEMENT_NODE && packageNode.getNodeName().equals("package")) { //$NON-NLS-1$
 				String handleId= ((Element)packageNode).getAttribute("handleIdentifier"); //$NON-NLS-1$
-				if (handleId.equals("")) //$NON-NLS-1$
+				if (handleId.isEmpty())
 					throw new IOException(JarPackagerMessages.JarPackageReader_error_tagHandleIdentifierNotFoundOrEmpty);
 				IJavaElement je= JavaCore.create(handleId);
 				if (je != null && je.getElementType() == IJavaElement.PACKAGE_FRAGMENT)
@@ -381,7 +381,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 
 	private IType getMainClass(Element element) {
 		String handleId= element.getAttribute("mainClassHandleIdentifier"); //$NON-NLS-1$
-		if (handleId.equals("")) //$NON-NLS-1$
+		if (handleId.isEmpty())
 			return null;	// Main-Class entry is optional or can be empty
 		IJavaElement je= JavaCore.create(handleId);
 		if (je != null && je.getElementType() == IJavaElement.TYPE)

@@ -244,7 +244,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 			return new StatusInfo(IStatus.ERROR, PreferencesMessages.AppearancePreferencePage_packageNameAbbreviationPattern_error_isInvalid);
 		}
 
-		if (fCompressPackageNames.isSelected() && fPackageNamePattern.getText().equals("")) //$NON-NLS-1$
+		if (fCompressPackageNames.isSelected() && fPackageNamePattern.getText().isEmpty())
 			return new StatusInfo(IStatus.ERROR, PreferencesMessages.AppearancePreferencePage_packageNameCompressionPattern_error_isEmpty);
 
 		return new StatusInfo();

@@ -252,7 +252,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	 * @return the destination type
 	 */
 	public IType computeExtractedType(final String name) {
-		if (name != null && !name.equals("")) {//$NON-NLS-1$
+		if (name != null && !name.isEmpty()) {
 			final IType declaring= getDeclaringType();
 			try {
 				final ICompilationUnit[] units= declaring.getPackageFragment().getCompilationUnits(fOwner);
