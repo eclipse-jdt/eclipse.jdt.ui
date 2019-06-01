@@ -224,13 +224,15 @@ public class Checks {
 	}
 
 	public static boolean startsWithLowerCase(String s){
-		if (s == null)
+		if (null == s)
 			return false;
-		else if ("".equals(s)) //$NON-NLS-1$
+		else switch (s) {
+		case "": //$NON-NLS-1$
 			return false;
-		else
+		default:
 			//workaround for JDK bug (see 26529)
 			return s.charAt(0) == Character.toLowerCase(s.charAt(0));
+		}
 	}
 
 	public static boolean resourceExists(IPath resourcePath){

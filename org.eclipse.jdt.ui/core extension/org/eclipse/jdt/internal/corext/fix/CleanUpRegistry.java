@@ -471,11 +471,12 @@ public class CleanUpRegistry {
 	}
 
 	private static int getCleanUpKind(String kind) {
-		if (kind.equals(ATTRIBUTE_KIND_TYPE_CLEAN_UP)) {
+		switch (kind) {
+		case ATTRIBUTE_KIND_TYPE_CLEAN_UP:
 			return CleanUpConstants.DEFAULT_CLEAN_UP_OPTIONS;
-		} else if (kind.equals(ATTRIBUTE_KIND_TYPE_SAVE_ACTION)) {
+		case ATTRIBUTE_KIND_TYPE_SAVE_ACTION:
 			return CleanUpConstants.DEFAULT_SAVE_ACTION_OPTIONS;
-		} else {
+		default:
 			return -1;
 		}
 	}

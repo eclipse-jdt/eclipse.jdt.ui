@@ -249,14 +249,23 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 						fImage= fgQuickFixInfoImage;
 				} else {
 					String type= getType();
-					if (JavaMarkerAnnotation.TASK_ANNOTATION_TYPE.equals(type))
+					if (null != type)
+						switch (type) {
+					case JavaMarkerAnnotation.TASK_ANNOTATION_TYPE:
 						fImage= fgTaskImage;
-					else if (JavaMarkerAnnotation.INFO_ANNOTATION_TYPE.equals(type))
+						break;
+					case JavaMarkerAnnotation.INFO_ANNOTATION_TYPE:
 						fImage= fgInfoImage;
-					else if (JavaMarkerAnnotation.WARNING_ANNOTATION_TYPE.equals(type))
+						break;
+					case JavaMarkerAnnotation.WARNING_ANNOTATION_TYPE:
 						fImage= fgWarningImage;
-					else if (JavaMarkerAnnotation.ERROR_ANNOTATION_TYPE.equals(type))
+						break;
+					case JavaMarkerAnnotation.ERROR_ANNOTATION_TYPE:
 						fImage= fgErrorImage;
+						break;
+					default:
+						break;
+					}
 				}
 				fImageInitialized= true;
 			}

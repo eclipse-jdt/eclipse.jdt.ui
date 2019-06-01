@@ -632,26 +632,28 @@ public class JavadocOptionsManager {
 
 	public boolean getBoolean(String flag) {
 
-		if (flag.equals(AUTHOR))
+		switch (flag) {
+		case AUTHOR:
 			return fAuthor;
-		else if (flag.equals(VERSION))
+		case VERSION:
 			return fVersion;
-		else if (flag.equals(USE))
+		case USE:
 			return fUse;
-		else if (flag.equals(NODEPRECATED))
+		case NODEPRECATED:
 			return fNodeprecated;
-		else if (flag.equals(NODEPRECATEDLIST))
+		case NODEPRECATEDLIST:
 			return fNoDeprecatedlist;
-		else if (flag.equals(NOINDEX))
+		case NOINDEX:
 			return fNoindex;
-		else if (flag.equals(NOTREE))
+		case NOTREE:
 			return fNotree;
-		else if (flag.equals(SPLITINDEX))
+		case SPLITINDEX:
 			return fSplitindex;
-		else if (flag.equals(NONAVBAR))
+		case NONAVBAR:
 			return fNonavbar;
-		else
+		default:
 			return false;
+		}
 	}
 
 	private boolean loadBoolean(String value) {
@@ -1009,24 +1011,37 @@ public class JavadocOptionsManager {
 
 	public void setBoolean(String flag, boolean value) {
 
-		if (flag.equals(AUTHOR))
+		switch (flag) {
+		case AUTHOR:
 			fAuthor= value;
-		else if (flag.equals(USE))
+			break;
+		case USE:
 			fUse= value;
-		else if (flag.equals(VERSION))
+			break;
+		case VERSION:
 			fVersion= value;
-		else if (flag.equals(NODEPRECATED))
+			break;
+		case NODEPRECATED:
 			fNodeprecated= value;
-		else if (flag.equals(NODEPRECATEDLIST))
+			break;
+		case NODEPRECATEDLIST:
 			fNoDeprecatedlist= value;
-		else if (flag.equals(NOINDEX))
+			break;
+		case NOINDEX:
 			fNoindex= value;
-		else if (flag.equals(NOTREE))
+			break;
+		case NOTREE:
 			fNotree= value;
-		else if (flag.equals(SPLITINDEX))
+			break;
+		case SPLITINDEX:
 			fSplitindex= value;
-		else if (flag.equals(NONAVBAR))
+			break;
+		case NONAVBAR:
 			fNonavbar= value;
+			break;
+		default:
+			break;
+		}
 	}
 
 	public void setSource(String source) {

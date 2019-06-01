@@ -283,29 +283,40 @@ public class JavaElementLinks {
 				}
 
 				String scheme= uri == null ? null : uri.getScheme();
-				if (JavaElementLinks.JAVADOC_VIEW_SCHEME.equals(scheme)) {
-					IJavaElement linkTarget= JavaElementLinks.parseURI(uri);
-					if (linkTarget == null)
-						return;
-
-					handler.handleJavadocViewLink(linkTarget);
-				} else if (JavaElementLinks.JAVADOC_SCHEME.equals(scheme)) {
-					IJavaElement linkTarget= JavaElementLinks.parseURI(uri);
-					if (linkTarget == null)
-						return;
-
-					handler.handleInlineJavadocLink(linkTarget);
-				} else if (JavaElementLinks.OPEN_LINK_SCHEME.equals(scheme)) {
-					IJavaElement linkTarget= JavaElementLinks.parseURI(uri);
-					if (linkTarget == null)
-						return;
-
-					handler.handleDeclarationLink(linkTarget);
-				} else {
+				boolean nomatch= false;
+				if (scheme != null) switch (scheme) {
+				case JavaElementLinks.JAVADOC_VIEW_SCHEME:
+					{
+						IJavaElement linkTarget= JavaElementLinks.parseURI(uri);
+						if (linkTarget == null)
+							return;
+						handler.handleJavadocViewLink(linkTarget);
+						break;
+					}
+				case JavaElementLinks.JAVADOC_SCHEME:
+					{
+						IJavaElement linkTarget= JavaElementLinks.parseURI(uri);
+						if (linkTarget == null)
+							return;
+						handler.handleInlineJavadocLink(linkTarget);
+						break;
+					}
+				case JavaElementLinks.OPEN_LINK_SCHEME:
+					{
+						IJavaElement linkTarget= JavaElementLinks.parseURI(uri);
+						if (linkTarget == null)
+							return;
+						handler.handleDeclarationLink(linkTarget);
+						break;
+					}
+				default:
+					nomatch= true;
+					break;
+				}
+				if (nomatch) {
 					try {
 						if (handler.handleExternalLink(new URL(loc), event.display))
 							return;
-
 						event.doit= true;
 					} catch (MalformedURLException e) {
 						JavaPlugin.log(e);

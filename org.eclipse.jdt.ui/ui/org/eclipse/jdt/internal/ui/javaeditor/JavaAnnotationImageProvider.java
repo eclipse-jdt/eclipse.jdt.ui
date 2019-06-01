@@ -113,11 +113,19 @@ public class JavaAnnotationImageProvider implements IAnnotationImageProvider {
 			imageType= OVERLAY_IMAGE;
 		else if (!annotation.isMarkedDeleted()) {
 			if (showQuickFix(annotation)) {
-				if (JavaMarkerAnnotation.ERROR_ANNOTATION_TYPE.equals(annotation.getType())) {
+				boolean nomatch= false;
+				if (annotation.getType() != null) switch (annotation.getType()) {
+				case JavaMarkerAnnotation.ERROR_ANNOTATION_TYPE:
 					imageType= QUICKFIX_ERROR_IMAGE;
-				} else if (JavaMarkerAnnotation.WARNING_ANNOTATION_TYPE.equals(annotation.getType())) {
+					break;
+				case JavaMarkerAnnotation.WARNING_ANNOTATION_TYPE:
 					imageType= QUICKFIX_WARNING_IMAGE;
-				} else {
+					break;
+				default:
+					nomatch= true;
+					break;
+				}
+				if (nomatch) {
 					imageType= QUICKFIX_INFO_IMAGE;
 				}
 			}
@@ -155,12 +163,18 @@ public class JavaAnnotationImageProvider implements IAnnotationImageProvider {
 				break;
 			case GRAY_IMAGE: {
 				String annotationType= annotation.getType();
-				if (JavaMarkerAnnotation.ERROR_ANNOTATION_TYPE.equals(annotationType)) {
-					image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_ERROR_ALT);
-				} else if (JavaMarkerAnnotation.WARNING_ANNOTATION_TYPE.equals(annotationType)) {
-					image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_WARNING_ALT);
-				} else if (JavaMarkerAnnotation.INFO_ANNOTATION_TYPE.equals(annotationType)) {
-					image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_INFO_ALT);
+				if (null != annotationType) switch (annotationType) {
+					case JavaMarkerAnnotation.ERROR_ANNOTATION_TYPE:
+						image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_ERROR_ALT);
+						break;
+					case JavaMarkerAnnotation.WARNING_ANNOTATION_TYPE:
+						image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_WARNING_ALT);
+						break;
+					case JavaMarkerAnnotation.INFO_ANNOTATION_TYPE:
+						image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_INFO_ALT);
+						break;
+					default:
+						break;
 				}
 				fCachedImageType= -1;
 				break;

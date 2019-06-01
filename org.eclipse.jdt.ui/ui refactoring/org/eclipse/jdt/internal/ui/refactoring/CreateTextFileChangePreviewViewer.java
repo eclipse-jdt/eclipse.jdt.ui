@@ -256,15 +256,23 @@ public final class CreateTextFileChangePreviewViewer implements IChangePreviewVi
 		String textType= textFileChange.getTextType();
 		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
 		IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
-		if ("java".equals(textType)) { //$NON-NLS-1$
+		boolean nomatch= false;
+		if (textType != null) switch (textType) {
+		case "java": //$NON-NLS-1$
 			textTools.setupJavaDocumentPartitioner(document);
 			fSourceViewer.configure(new JavaSourceViewerConfiguration(textTools.getColorManager(), store, null, null));
 			fSourceViewer.getTextWidget().setOrientation(SWT.LEFT_TO_RIGHT);
-		} else if ("properties".equals(textType)) { //$NON-NLS-1$
+			break;
+		case "properties": //$NON-NLS-1$
 			PropertiesFileDocumentSetupParticipant.setupDocument(document);
 			fSourceViewer.configure(new PropertiesFileSourceViewerConfiguration(textTools.getColorManager(), store, null, IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING));
 			fSourceViewer.getTextWidget().setOrientation(SWT.LEFT_TO_RIGHT);
-		} else {
+			break;
+		default:
+			nomatch= true;
+			break;
+		}
+		if (nomatch) {
 			fSourceViewer.configure(new SourceViewerConfiguration());
 			fSourceViewer.getTextWidget().setOrientation(fSourceViewer.getTextWidget().getParent().getOrientation());
 		}

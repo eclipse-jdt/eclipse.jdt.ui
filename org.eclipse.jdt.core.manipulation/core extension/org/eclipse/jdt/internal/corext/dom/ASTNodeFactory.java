@@ -344,12 +344,18 @@ public class ASTNodeFactory {
 	public static Expression newDefaultExpression(AST ast, ITypeBinding type) {
 		if (type.isPrimitive()) {
 			String name= type.getName();
-			if ("boolean".equals(name)) { //$NON-NLS-1$
+			boolean nomatch= false;
+			if (name != null) switch (name) {
+			case "boolean": //$NON-NLS-1$
 				return ast.newBooleanLiteral(false);
-			} else if ("void".equals(name)) { //$NON-NLS-1$
+			case "void": //$NON-NLS-1$
 				return null;
-			} else {
-				return ast.newNumberLiteral("0"); //$NON-NLS-1$
+			default:
+				nomatch= true;
+				break;
+			}
+			if (nomatch) {
+				return ast.newNumberLiteral("0");//$NON-NLS-1$
 			}
 		}
 		return ast.newNullLiteral();

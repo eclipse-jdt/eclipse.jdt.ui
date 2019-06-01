@@ -297,32 +297,42 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 			if (element instanceof String) {
 				int visibility= Flags.AccPublic;
 				String s= (String) element;
-				if (s.equals(FIELDS)) {
+				switch (s) {
+				case FIELDS:
 					//0 will give the default field image
 					descriptor= JavaElementImageProvider.getFieldImageDescriptor(false, visibility);
-				} else if (s.equals(CONSTRUCTORS)) {
+					break;
+				case CONSTRUCTORS:
 					descriptor= JavaElementImageProvider.getMethodImageDescriptor(false, visibility);
 					//add a constructor adornment to the image descriptor
 					descriptor= new JavaElementImageDescriptor(descriptor, JavaElementImageDescriptor.CONSTRUCTOR, JavaElementImageProvider.SMALL_SIZE);
-				} else if (s.equals(METHODS)) {
+					break;
+				case METHODS:
 					descriptor= JavaElementImageProvider.getMethodImageDescriptor(false, visibility);
-				} else if (s.equals(STATIC_FIELDS)) {
+					break;
+				case STATIC_FIELDS:
 					descriptor= JavaElementImageProvider.getFieldImageDescriptor(false, visibility);
 					//add a static fields adornment to the image descriptor
 					descriptor= new JavaElementImageDescriptor(descriptor, JavaElementImageDescriptor.STATIC, JavaElementImageProvider.SMALL_SIZE);
-				} else if (s.equals(STATIC_METHODS)) {
+					break;
+				case STATIC_METHODS:
 					descriptor= JavaElementImageProvider.getMethodImageDescriptor(false, visibility);
 					//add a static methods adornment to the image descriptor
 					descriptor= new JavaElementImageDescriptor(descriptor, JavaElementImageDescriptor.STATIC, JavaElementImageProvider.SMALL_SIZE);
-				} else if (s.equals(INIT)) {
+					break;
+				case INIT:
 					descriptor= JavaElementImageProvider.getMethodImageDescriptor(false, visibility);
-				} else if (s.equals(STATIC_INIT)) {
+					break;
+				case STATIC_INIT:
 					descriptor= JavaElementImageProvider.getMethodImageDescriptor(false, visibility);
 					descriptor= new JavaElementImageDescriptor(descriptor, JavaElementImageDescriptor.STATIC, JavaElementImageProvider.SMALL_SIZE);
-				} else if (s.equals(TYPES)) {
+					break;
+				case TYPES:
 					descriptor= JavaElementImageProvider.getTypeImageDescriptor(true, false, Flags.AccPublic, false);
-				} else {
+					break;
+				default:
 					descriptor= JavaElementImageProvider.getMethodImageDescriptor(false, Flags.AccPublic);
+					break;
 				}
 				return registry.get(descriptor);
 			}
@@ -337,22 +347,25 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 
 			if (element instanceof String) {
 				String s= (String) element;
-				if (s.equals(FIELDS)) {
+				switch (s) {
+				case FIELDS:
 					return PreferencesMessages.MembersOrderPreferencePage_fields_label;
-				} else if (s.equals(METHODS)) {
+				case METHODS:
 					return PreferencesMessages.MembersOrderPreferencePage_methods_label;
-				} else if (s.equals(STATIC_FIELDS)) {
+				case STATIC_FIELDS:
 					return PreferencesMessages.MembersOrderPreferencePage_staticfields_label;
-				} else if (s.equals(STATIC_METHODS)) {
+				case STATIC_METHODS:
 					return PreferencesMessages.MembersOrderPreferencePage_staticmethods_label;
-				} else if (s.equals(CONSTRUCTORS)) {
+				case CONSTRUCTORS:
 					return PreferencesMessages.MembersOrderPreferencePage_constructors_label;
-				} else if (s.equals(INIT)) {
+				case INIT:
 					return PreferencesMessages.MembersOrderPreferencePage_initialisers_label;
-				} else if (s.equals(STATIC_INIT)) {
+				case STATIC_INIT:
 					return PreferencesMessages.MembersOrderPreferencePage_staticinitialisers_label;
-				} else if (s.equals(TYPES)) {
+				case TYPES:
 					return PreferencesMessages.MembersOrderPreferencePage_types_label;
+				default:
+					break;
 				}
 			}
 			return ""; //$NON-NLS-1$
@@ -376,14 +389,21 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 
 			if (element instanceof String) {
 				String s= (String) element;
-				if (s.equals(PUBLIC)) {
+				switch (s) {
+				case PUBLIC:
 					descriptor= JavaElementImageProvider.getMethodImageDescriptor(false, Flags.AccPublic);
-				} else if (s.equals(PRIVATE)) {
+					break;
+				case PRIVATE:
 					descriptor= JavaElementImageProvider.getMethodImageDescriptor(false, Flags.AccPrivate);
-				} else if (s.equals(PROTECTED)) {
+					break;
+				case PROTECTED:
 					descriptor= JavaElementImageProvider.getMethodImageDescriptor(false, Flags.AccProtected);
-				} else if (s.equals(DEFAULT)) {
+					break;
+				case DEFAULT:
 					descriptor= JavaElementImageProvider.getMethodImageDescriptor(false, Flags.AccDefault);
+					break;
+				default:
+					break;
 				}
 				return registry.get(descriptor);
 			}
@@ -398,14 +418,17 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 			if (element instanceof String) {
 				String s= (String) element;
 
-				if (s.equals(PUBLIC)) {
+				switch (s) {
+				case PUBLIC:
 					return PreferencesMessages.MembersOrderPreferencePage_public_label;
-				} else if (s.equals(PRIVATE)) {
+				case PRIVATE:
 					return PreferencesMessages.MembersOrderPreferencePage_private_label;
-				} else if (s.equals(PROTECTED)) {
+				case PROTECTED:
 					return PreferencesMessages.MembersOrderPreferencePage_protected_label;
-				} else if (s.equals(DEFAULT)) {
+				case DEFAULT:
 					return PreferencesMessages.MembersOrderPreferencePage_default_label;
+				default:
+					break;
 				}
 			}
 			return ""; //$NON-NLS-1$

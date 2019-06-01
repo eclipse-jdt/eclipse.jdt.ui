@@ -211,13 +211,16 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 	}
 
 	private static IPath decodePath(String str) {
-		if ("#".equals(str)) { //$NON-NLS-1$
+		if (str != null)switch (str) {
+		case "#": //$NON-NLS-1$
 			return null;
-		} else if ("&".equals(str)) { //$NON-NLS-1$
+		case "&": //$NON-NLS-1$
 			return Path.EMPTY;
-		} else {
-			return Path.fromPortableString(decode(str));
+		default:
+			// intentionally fall through
+			  break;
 		}
+		return Path.fromPortableString(decode(str));
 	}
 
 

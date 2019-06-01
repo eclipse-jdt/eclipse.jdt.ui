@@ -371,14 +371,22 @@ public final class CompletionProposalComputerRegistry {
 						category.setSeparateCommand(separate);
 						category.setSortOrder(r);
 					}
-					
+
 					String id= category.getId();
-					if ("org.eclipse.jdt.ui.javaAllProposalCategory".equals(id)) //$NON-NLS-1$
+					if (null != id)
+						switch (id) {
+					case "org.eclipse.jdt.ui.javaAllProposalCategory": //$NON-NLS-1$
 						allProposals= category;
-					else if ("org.eclipse.jdt.ui.javaTypeProposalCategory".equals(id)) //$NON-NLS-1$
+						break;
+					case "org.eclipse.jdt.ui.javaTypeProposalCategory": //$NON-NLS-1$
 						typeProposals= category;
-					else if ("org.eclipse.jdt.ui.javaNoTypeProposalCategory".equals(id)) //$NON-NLS-1$
+						break;
+					case "org.eclipse.jdt.ui.javaNoTypeProposalCategory": //$NON-NLS-1$
 						allButTypeProposals= category;
+						break;
+					default:
+						break;
+					}
 				}
 			} catch (InvalidRegistryObjectException x) {
 				/*

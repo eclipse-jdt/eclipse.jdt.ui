@@ -598,33 +598,36 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 
 		// Check for primitive types
 		String name= qualifiedName.substring(0, nameEndOffset);
-		if (name.equals("byte")) { //$NON-NLS-1$
+		switch (name) {
+		case "byte": //$NON-NLS-1$
 			signature.append('B');
 			return signature.toString();
-		} else if (name.equals("boolean")) { //$NON-NLS-1$
+		case "boolean": //$NON-NLS-1$
 			signature.append('Z');
 			return signature.toString();
-		} else if (name.equals("int")) { //$NON-NLS-1$
+		case "int": //$NON-NLS-1$
 			signature.append('I');
 			return signature.toString();
-		} else if (name.equals("double")) { //$NON-NLS-1$
+		case "double": //$NON-NLS-1$
 			signature.append('D');
 			return signature.toString();
-		} else if (name.equals("short")) { //$NON-NLS-1$
+		case "short": //$NON-NLS-1$
 			signature.append('S');
 			return signature.toString();
-		} else if (name.equals("char")) { //$NON-NLS-1$
+		case "char": //$NON-NLS-1$
 			signature.append('C');
 			return signature.toString();
-		} else if (name.equals("long")) { //$NON-NLS-1$
+		case "long": //$NON-NLS-1$
 			signature.append('J');
 			return signature.toString();
-		} else if (name.equals("float")) { //$NON-NLS-1$
+		case "float": //$NON-NLS-1$
 			signature.append('F');
 			return signature.toString();
-		} else if (name.equals("void")) { //$NON-NLS-1$
+		case "void": //$NON-NLS-1$
 			signature.append('V');
 			return signature.toString();
+		default:
+			break;
 		}
 
 		// Class type

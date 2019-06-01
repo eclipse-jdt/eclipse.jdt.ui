@@ -109,15 +109,19 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 		IClasspathEntry entry= null;
 		IClasspathEntry entry2= null;
 		String version= containerPath.segment(1);
-		if (JUNIT3_8_1.equals(version) || JUNIT3.equals(version)) {
+		if (null != version) switch (version) {
+		case JUNIT3_8_1:
+		case JUNIT3:
 			entry= BuildPathSupport.getJUnit3LibraryEntry();
 			if (entry == null) { // JUnit 4 includes most of JUnit 3, so let's cheat
 				entry= BuildPathSupport.getJUnit4as3LibraryEntry();
 			}
-		} else if (JUNIT4.equals(version)) {
+			break;
+		case JUNIT4:
 			entry= BuildPathSupport.getJUnit4LibraryEntry();
 			entry2= BuildPathSupport.getHamcrestCoreLibraryEntry();
-		} else if (JUNIT5.equals(version)) {
+			break;
+		case JUNIT5:
 			entriesList.add(BuildPathSupport.getJUnitJupiterApiLibraryEntry());
 			entriesList.add(BuildPathSupport.getJUnitJupiterEngineLibraryEntry());
 			entriesList.add(BuildPathSupport.getJUnitJupiterMigrationSupportLibraryEntry());
@@ -132,6 +136,9 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 			entriesList.add(BuildPathSupport.getJUnitApiGuardianLibraryEntry());
 			entriesList.add(BuildPathSupport.getJUnit4LibraryEntry());
 			entriesList.add(BuildPathSupport.getHamcrestCoreLibraryEntry());
+			break;
+		default:
+			break;
 		}
 		IClasspathEntry[] entries;
 		if (!entriesList.isEmpty() ) {
@@ -290,12 +297,16 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 	public String getDescription(IPath containerPath, IJavaProject project) {
 		if (isValidJUnitContainerPath(containerPath)) {
 			String version= containerPath.segment(1);
-			if (JUNIT3_8_1.equals(version) || JUNIT3.equals(version)) {
+			if (null != version) switch (version) {
+			case JUNIT3_8_1:
+			case JUNIT3:
 				return JUnitMessages.JUnitContainerInitializer_description_initializer_junit3;
-			} else if (JUNIT4.equals(version)) {
+			case JUNIT4:
 				return JUnitMessages.JUnitContainerInitializer_description_initializer_junit4;
-			} else if (JUNIT5.equals(version)) {
+			case JUNIT5:
 				return JUnitMessages.JUnitContainerInitializer_description_initializer_junit5;
+			default:
+				break;
 			}
 		}
 		return JUnitMessages.JUnitContainerInitializer_description_initializer_unresolved;

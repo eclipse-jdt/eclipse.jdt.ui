@@ -99,7 +99,8 @@ public class TestRunHandler extends DefaultHandler {
 		if (Thread.interrupted())
 			throw new OperationCanceledException();
 		
-		if (qName.equals(IXMLTags.NODE_TESTRUN)) {
+		switch (qName) {
+		case IXMLTags.NODE_TESTRUN:
 			if (fTestRunSession == null) {
 				String name= attributes.getValue(IXMLTags.ATTR_NAME);
 				String project= attributes.getValue(IXMLTags.ATTR_PROJECT);
@@ -125,86 +126,85 @@ public class TestRunHandler extends DefaultHandler {
 				fTestRunSession.reset();
 			}
 			fTestSuite= fTestRunSession.getTestRoot();
-
-		} else if (qName.equals(IXMLTags.NODE_TESTSUITES)) {
-			// support Ant's 'junitreport' task; create suite from NODE_TESTSUITE
-
-		} else if (qName.equals(IXMLTags.NODE_TESTSUITE)) {
-			String name= attributes.getValue(IXMLTags.ATTR_NAME);
-
-			if (fTestRunSession == null) {
-				// support standalone suites and Ant's 'junitreport' task:
-				fTestRunSession= new TestRunSession(name, null);
-				fTestSuite= fTestRunSession.getTestRoot();
+			break;
+		// support Ant's 'junitreport' task; create suite from NODE_TESTSUITE
+		case IXMLTags.NODE_TESTSUITES:
+			break;
+		case IXMLTags.NODE_TESTSUITE:
+			{
+				String name= attributes.getValue(IXMLTags.ATTR_NAME);
+				if (fTestRunSession == null) {
+					// support standalone suites and Ant's 'junitreport' task:
+					fTestRunSession= new TestRunSession(name, null);
+					fTestSuite= fTestRunSession.getTestRoot();
+				}	String pack= attributes.getValue(IXMLTags.ATTR_PACKAGE);
+				String suiteName= pack == null ? name : pack + "." + name; //$NON-NLS-1$
+				String displayName= attributes.getValue(IXMLTags.ATTR_DISPLAY_NAME);
+				String paramTypesStr= attributes.getValue(IXMLTags.ATTR_PARAMETER_TYPES);
+				String[] paramTypes;
+				if (paramTypesStr != null && !paramTypesStr.trim().isEmpty()) {
+					paramTypes= paramTypesStr.split(","); //$NON-NLS-1$
+					Arrays.parallelSetAll(paramTypes, i -> paramTypes[i].trim());
+				} else {
+					paramTypes= null;
+				}	String uniqueId= attributes.getValue(IXMLTags.ATTR_UNIQUE_ID);
+				if (uniqueId != null && uniqueId.trim().isEmpty()) {
+					uniqueId= null;
+				}	fTestSuite= (TestSuiteElement) fTestRunSession.createTestElement(fTestSuite, getNextId(), suiteName, true, 0, false, displayName, paramTypes, uniqueId);
+				readTime(fTestSuite, attributes);
+				fNotRun.push(Boolean.valueOf(attributes.getValue(IXMLTags.ATTR_INCOMPLETE)));
+				break;
 			}
-
-			String pack= attributes.getValue(IXMLTags.ATTR_PACKAGE);
-			String suiteName= pack == null ? name : pack + "." + name; //$NON-NLS-1$
-			String displayName= attributes.getValue(IXMLTags.ATTR_DISPLAY_NAME);
-			String paramTypesStr= attributes.getValue(IXMLTags.ATTR_PARAMETER_TYPES);
-			String[] paramTypes;
-			if (paramTypesStr != null && !paramTypesStr.trim().isEmpty()) {
-				paramTypes= paramTypesStr.split(","); //$NON-NLS-1$
-				Arrays.parallelSetAll(paramTypes, i -> paramTypes[i].trim());
-			} else {
-				paramTypes= null;
+		// not interested
+		case IXMLTags.NODE_PROPERTIES:
+		case IXMLTags.NODE_PROPERTY:
+			break;
+		case IXMLTags.NODE_TESTCASE:
+			{
+				String name= attributes.getValue(IXMLTags.ATTR_NAME);
+				String classname= attributes.getValue(IXMLTags.ATTR_CLASSNAME);
+				String testName= name + '(' + classname + ')';
+				boolean isDynamicTest= Boolean.valueOf(attributes.getValue(IXMLTags.ATTR_DYNAMIC_TEST)).booleanValue();
+				String displayName= attributes.getValue(IXMLTags.ATTR_DISPLAY_NAME);
+				String paramTypesStr= attributes.getValue(IXMLTags.ATTR_PARAMETER_TYPES);
+				String[] paramTypes;
+				if (paramTypesStr != null && !paramTypesStr.trim().isEmpty()) {
+					paramTypes= paramTypesStr.split(","); //$NON-NLS-1$
+					Arrays.parallelSetAll(paramTypes, i -> paramTypes[i].trim());
+				} else {
+					paramTypes= null;
+				}	String uniqueId= attributes.getValue(IXMLTags.ATTR_UNIQUE_ID);
+				if (uniqueId != null && uniqueId.trim().isEmpty()) {
+					uniqueId= null;
+				}	fTestCase= (TestCaseElement) fTestRunSession.createTestElement(fTestSuite, getNextId(), testName, false, 0, isDynamicTest, displayName, paramTypes, uniqueId);
+				fNotRun.push(Boolean.valueOf(attributes.getValue(IXMLTags.ATTR_INCOMPLETE)));
+				fTestCase.setIgnored(Boolean.valueOf(attributes.getValue(IXMLTags.ATTR_IGNORED)).booleanValue());
+				readTime(fTestCase, attributes);
+				break;
 			}
-			String uniqueId= attributes.getValue(IXMLTags.ATTR_UNIQUE_ID);
-			if (uniqueId != null && uniqueId.trim().isEmpty()) {
-				uniqueId= null;
-			}
-			fTestSuite= (TestSuiteElement) fTestRunSession.createTestElement(fTestSuite, getNextId(), suiteName, true, 0, false, displayName, paramTypes, uniqueId);
-			readTime(fTestSuite, attributes);
-			fNotRun.push(Boolean.valueOf(attributes.getValue(IXMLTags.ATTR_INCOMPLETE)));
-
-		} else if (qName.equals(IXMLTags.NODE_PROPERTIES) || qName.equals(IXMLTags.NODE_PROPERTY)) {
-			// not interested
-
-		} else if (qName.equals(IXMLTags.NODE_TESTCASE)) {
-			String name= attributes.getValue(IXMLTags.ATTR_NAME);
-			String classname= attributes.getValue(IXMLTags.ATTR_CLASSNAME);
-			String testName= name + '(' + classname + ')';
-			boolean isDynamicTest= Boolean.valueOf(attributes.getValue(IXMLTags.ATTR_DYNAMIC_TEST)).booleanValue();
-			String displayName= attributes.getValue(IXMLTags.ATTR_DISPLAY_NAME);
-			String paramTypesStr= attributes.getValue(IXMLTags.ATTR_PARAMETER_TYPES);
-			String[] paramTypes;
-			if (paramTypesStr != null && !paramTypesStr.trim().isEmpty()) {
-				paramTypes= paramTypesStr.split(","); //$NON-NLS-1$
-				Arrays.parallelSetAll(paramTypes, i -> paramTypes[i].trim());
-			} else {
-				paramTypes= null;
-			}
-			String uniqueId= attributes.getValue(IXMLTags.ATTR_UNIQUE_ID);
-			if (uniqueId != null && uniqueId.trim().isEmpty()) {
-				uniqueId= null;
-			}
-			fTestCase= (TestCaseElement) fTestRunSession.createTestElement(fTestSuite, getNextId(), testName, false, 0, isDynamicTest, displayName, paramTypes, uniqueId);
-			fNotRun.push(Boolean.valueOf(attributes.getValue(IXMLTags.ATTR_INCOMPLETE)));
-			fTestCase.setIgnored(Boolean.valueOf(attributes.getValue(IXMLTags.ATTR_IGNORED)).booleanValue());
-			readTime(fTestCase, attributes);
-
-		} else if (qName.equals(IXMLTags.NODE_ERROR)) {
+		case IXMLTags.NODE_ERROR:
 			//TODO: multiple failures: https://bugs.eclipse.org/bugs/show_bug.cgi?id=125296
 			fStatus= Status.ERROR;
 			fFailureBuffer= new StringBuffer();
-
-		} else if (qName.equals(IXMLTags.NODE_FAILURE)) {
+			break;
+		case IXMLTags.NODE_FAILURE:
 			//TODO: multiple failures: https://bugs.eclipse.org/bugs/show_bug.cgi?id=125296
 			fStatus= Status.FAILURE;
 			fFailureBuffer= new StringBuffer();
-
-		} else if (qName.equals(IXMLTags.NODE_EXPECTED)) {
+			break;
+		case IXMLTags.NODE_EXPECTED:
 			fInExpected= true;
 			fExpectedBuffer= new StringBuffer();
-
-		} else if (qName.equals(IXMLTags.NODE_ACTUAL)) {
+			break;
+		case IXMLTags.NODE_ACTUAL:
 			fInActual= true;
 			fActualBuffer= new StringBuffer();
-
-		} else if (qName.equals(IXMLTags.NODE_SYSTEM_OUT) || qName.equals(IXMLTags.NODE_SYSTEM_ERR)) {
-			// not interested
-
-		} else if (qName.equals(IXMLTags.NODE_SKIPPED)) {
+			break;
+		// not interested
+		case IXMLTags.NODE_SYSTEM_OUT:
+		case IXMLTags.NODE_SYSTEM_ERR:
+			break;
+		case IXMLTags.NODE_SKIPPED:
 			// before Ant 1.9.0: not an Ant JUnit tag, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=276068
 			// later: child of <suite> or <test>, see https://issues.apache.org/bugzilla/show_bug.cgi?id=43969
 			fStatus= Status.OK;
@@ -213,8 +213,8 @@ public class TestRunHandler extends DefaultHandler {
 			if (message != null) {
 				fFailureBuffer.append(message).append('\n');
 			}
-
-		} else {
+			break;
+		default:
 			throw new SAXParseException("unknown node '" + qName + "'", fLocator);  //$NON-NLS-1$//$NON-NLS-2$
 		}
 	}
@@ -244,64 +244,70 @@ public class TestRunHandler extends DefaultHandler {
 
 	@Override
 	public void endElement(String uri, String localName, String qName) throws SAXException {
-		if (qName.equals(IXMLTags.NODE_TESTRUN)) {
-			// OK
-
-		} else if (qName.equals(IXMLTags.NODE_TESTSUITES)) {
-			// OK
-
-		} else if (qName.equals(IXMLTags.NODE_TESTSUITE)) {
+		switch (qName) {
+		// OK
+		case IXMLTags.NODE_TESTRUN:
+			break;
+		// OK
+		case IXMLTags.NODE_TESTSUITES:
+			break;
+		case IXMLTags.NODE_TESTSUITE:
 			handleTestElementEnd(fTestSuite);
 			fTestSuite= fTestSuite.getParent();
 			//TODO: end suite: compare counters?
-
-		} else if (qName.equals(IXMLTags.NODE_PROPERTIES) || qName.equals(IXMLTags.NODE_PROPERTY)) {
-			// OK
-
-		} else if (qName.equals(IXMLTags.NODE_TESTCASE)) {
+			break;
+		// OK
+		case IXMLTags.NODE_PROPERTIES:
+		case IXMLTags.NODE_PROPERTY:
+			break;
+		case IXMLTags.NODE_TESTCASE:
 			handleTestElementEnd(fTestCase);
 			fTestCase= null;
-
-		} else if (qName.equals(IXMLTags.NODE_FAILURE) || qName.equals(IXMLTags.NODE_ERROR)) {
-			TestElement testElement= fTestCase;
-			if (testElement == null)
-				testElement= fTestSuite;
-			handleFailure(testElement);
-
-		} else if (qName.equals(IXMLTags.NODE_EXPECTED)) {
+			break;
+		case IXMLTags.NODE_FAILURE:
+		case IXMLTags.NODE_ERROR:
+			{
+				TestElement testElement= fTestCase;
+				if (testElement == null)
+					testElement= fTestSuite;
+				handleFailure(testElement);
+				break;
+			}
+		case IXMLTags.NODE_EXPECTED:
 			fInExpected= false;
 			if (fFailureBuffer != null) {
 				// skip whitespace from before <expected> and <actual> nodes
 				fFailureBuffer.setLength(0);
 			}
-
-		} else if (qName.equals(IXMLTags.NODE_ACTUAL)) {
+			break;
+		case IXMLTags.NODE_ACTUAL:
 			fInActual= false;
 			if (fFailureBuffer != null) {
 				// skip whitespace from before <expected> and <actual> nodes
 				fFailureBuffer.setLength(0);
 			}
-
-		} else if (qName.equals(IXMLTags.NODE_SYSTEM_OUT) || qName.equals(IXMLTags.NODE_SYSTEM_ERR)) {
-			// OK
-
-		} else if (qName.equals(IXMLTags.NODE_SKIPPED)) {
-			TestElement testElement= fTestCase;
-			if (testElement == null)
-				testElement= fTestSuite;
-			
-			if (fFailureBuffer != null && fFailureBuffer.length() > 0) {
-				handleFailure(testElement);
-				testElement.setAssumptionFailed(true);
-			} else if (fTestCase != null) {
-				fTestCase.setIgnored(true);
-			} else { // not expected
-				testElement.setAssumptionFailed(true);
+			break;
+		// OK
+		case IXMLTags.NODE_SYSTEM_OUT:
+		case IXMLTags.NODE_SYSTEM_ERR:
+			break;
+		case IXMLTags.NODE_SKIPPED:
+			{
+				TestElement testElement= fTestCase;
+				if (testElement == null)
+					testElement= fTestSuite;
+				if (fFailureBuffer != null && fFailureBuffer.length() > 0) {
+					handleFailure(testElement);
+					testElement.setAssumptionFailed(true);
+				} else if (fTestCase != null) {
+					fTestCase.setIgnored(true);
+				} else { // not expected
+					testElement.setAssumptionFailed(true);
+				}	break;
 			}
-
-		} else {
-
+		default:
 			handleUnknownNode(qName);
+			break;
 		}
 	}
 

@@ -1422,32 +1422,28 @@ public class Bindings {
 	}
 
 	private static String getBoxedTypeName(String primitiveName) {
-		if ("long".equals(primitiveName)) //$NON-NLS-1$
-			return "java.lang.Long"; //$NON-NLS-1$
-
-		else if ("int".equals(primitiveName)) //$NON-NLS-1$
-			return "java.lang.Integer"; //$NON-NLS-1$
-
-		else if ("short".equals(primitiveName)) //$NON-NLS-1$
-			return "java.lang.Short"; //$NON-NLS-1$
-
-		else if ("char".equals(primitiveName)) //$NON-NLS-1$
-			return "java.lang.Character"; //$NON-NLS-1$
-
-		else if ("byte".equals(primitiveName)) //$NON-NLS-1$
-			return "java.lang.Byte"; //$NON-NLS-1$
-
-		else if ("boolean".equals(primitiveName)) //$NON-NLS-1$
-			return "java.lang.Boolean"; //$NON-NLS-1$
-
-		else if ("float".equals(primitiveName)) //$NON-NLS-1$
-			return "java.lang.Float"; //$NON-NLS-1$
-
-		else if ("double".equals(primitiveName)) //$NON-NLS-1$
-			return "java.lang.Double"; //$NON-NLS-1$
-
-		else
+		if (null == primitiveName)
 			return null;
+		else switch (primitiveName) {
+		case "long": //$NON-NLS-1$
+			return "java.lang.Long"; //$NON-NLS-1$
+		case "int": //$NON-NLS-1$
+			return "java.lang.Integer"; //$NON-NLS-1$
+		case "short": //$NON-NLS-1$
+			return "java.lang.Short"; //$NON-NLS-1$
+		case "char": //$NON-NLS-1$
+			return "java.lang.Character"; //$NON-NLS-1$
+		case "byte": //$NON-NLS-1$
+			return "java.lang.Byte"; //$NON-NLS-1$
+		case "boolean": //$NON-NLS-1$
+			return "java.lang.Boolean"; //$NON-NLS-1$
+		case "float": //$NON-NLS-1$
+			return "java.lang.Float"; //$NON-NLS-1$
+		case "double": //$NON-NLS-1$
+			return "java.lang.Double"; //$NON-NLS-1$
+		default:
+			return null;
+		}
 	}
 
 	/**
@@ -1471,34 +1467,30 @@ public class Bindings {
 	}
 	
 	private static String getUnboxedTypeName(String boxedName) {
-		if ("java.lang.Long".equals(boxedName)) //$NON-NLS-1$
-			return "long"; //$NON-NLS-1$
-		
-		else if ("java.lang.Integer".equals(boxedName)) //$NON-NLS-1$
-			return "int"; //$NON-NLS-1$
-		
-		else if ("java.lang.Short".equals(boxedName)) //$NON-NLS-1$
-			return "short"; //$NON-NLS-1$
-		
-		else if ("java.lang.Character".equals(boxedName)) //$NON-NLS-1$
-			return "char"; //$NON-NLS-1$
-		
-		else if ("java.lang.Byte".equals(boxedName)) //$NON-NLS-1$
-			return "byte"; //$NON-NLS-1$
-		
-		else if ("java.lang.Boolean".equals(boxedName)) //$NON-NLS-1$
-			return "boolean"; //$NON-NLS-1$
-		
-		else if ("java.lang.Float".equals(boxedName)) //$NON-NLS-1$
-			return "float"; //$NON-NLS-1$
-		
-		else if ("java.lang.Double".equals(boxedName)) //$NON-NLS-1$
-			return "double"; //$NON-NLS-1$
-		
-		else
+		if (null == boxedName)
 			return null;
+		else switch (boxedName) {
+		case "java.lang.Long": //$NON-NLS-1$
+			return "long"; //$NON-NLS-1$
+		case "java.lang.Integer": //$NON-NLS-1$
+			return "int"; //$NON-NLS-1$
+		case "java.lang.Short": //$NON-NLS-1$
+			return "short"; //$NON-NLS-1$
+		case "java.lang.Character": //$NON-NLS-1$
+			return "char"; //$NON-NLS-1$
+		case "java.lang.Byte": //$NON-NLS-1$
+			return "byte"; //$NON-NLS-1$
+		case "java.lang.Boolean": //$NON-NLS-1$
+			return "boolean"; //$NON-NLS-1$
+		case "java.lang.Float": //$NON-NLS-1$
+			return "float"; //$NON-NLS-1$
+		case "java.lang.Double": //$NON-NLS-1$
+			return "double"; //$NON-NLS-1$
+		default:
+			return null;
+		}
 	}
-	
+
 	/**
 	 * Resolve the binding (<em>not</em> the type binding) for the expression or a nested expression
 	 * (e.g. nested in parentheses, cast, ...).

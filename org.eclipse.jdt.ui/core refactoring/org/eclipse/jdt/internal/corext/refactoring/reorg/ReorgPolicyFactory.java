@@ -4148,16 +4148,19 @@ public final class ReorgPolicyFactory {
 	public static ICopyPolicy createCopyPolicy(RefactoringStatus status, JavaRefactoringArguments arguments) {
 		final String policy= arguments.getAttribute(ATTRIBUTE_POLICY);
 		if (policy != null && !"".equals(policy)) { //$NON-NLS-1$
-			if (CopyFilesFoldersAndCusPolicy.POLICY_COPY_RESOURCE.equals(policy)) {
+			switch (policy) {
+			case CopyFilesFoldersAndCusPolicy.POLICY_COPY_RESOURCE:
 				return new CopyFilesFoldersAndCusPolicy(null, null, null);
-			} else if (CopyPackageFragmentRootsPolicy.POLICY_COPY_ROOTS.equals(policy)) {
+			case CopyPackageFragmentRootsPolicy.POLICY_COPY_ROOTS:
 				return new CopyPackageFragmentRootsPolicy(null);
-			} else if (CopyPackagesPolicy.POLICY_COPY_PACKAGES.equals(policy)) {
+			case CopyPackagesPolicy.POLICY_COPY_PACKAGES:
 				return new CopyPackagesPolicy(null);
-			} else if (CopySubCuElementsPolicy.POLICY_COPY_MEMBERS.equals(policy)) {
+			case CopySubCuElementsPolicy.POLICY_COPY_MEMBERS:
 				return new CopySubCuElementsPolicy(null);
-			} else
+			default:
 				status.merge(RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new String[] { policy, ATTRIBUTE_POLICY})));
+				break;
+			}
 		} else
 			status.merge(RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_POLICY)));
 		return null;
@@ -4170,18 +4173,21 @@ public final class ReorgPolicyFactory {
 	public static IMovePolicy createMovePolicy(RefactoringStatus status, JavaRefactoringArguments arguments) {
 			final String policy= arguments.getAttribute(ATTRIBUTE_POLICY);
 			if (policy != null && !"".equals(policy)) { //$NON-NLS-1$
-				if (MoveFilesFoldersAndCusPolicy.POLICY_MOVE_RESOURCES.equals(policy)) {
+				switch (policy) {
+				case MoveFilesFoldersAndCusPolicy.POLICY_MOVE_RESOURCES:
 					return new MoveFilesFoldersAndCusPolicy(null, null, null);
-				} else if (MovePackageFragmentRootsPolicy.POLICY_MOVE_ROOTS.equals(policy)) {
+				case MovePackageFragmentRootsPolicy.POLICY_MOVE_ROOTS:
 					return new MovePackageFragmentRootsPolicy(null);
-				} else if (MovePackagesPolicy.POLICY_MOVE_PACKAGES.equals(policy)) {
+				case MovePackagesPolicy.POLICY_MOVE_PACKAGES:
 					return new MovePackagesPolicy(null);
-				} else if (MoveMembersPolicy.POLICY_MOVE_MEMBERS.equals(policy)) {
+				case MoveMembersPolicy.POLICY_MOVE_MEMBERS:
 					return new MoveMembersPolicy(null);
-				} else if (MoveImportDeclarationsPolicy.POLICY_MOVE_IMPORT_DECLARATIONS.equals(policy)) {
+				case MoveImportDeclarationsPolicy.POLICY_MOVE_IMPORT_DECLARATIONS:
 					return new MoveImportDeclarationsPolicy(null);
-				} else
+				default:
 					status.merge(RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new String[] { policy, ATTRIBUTE_POLICY})));
+					break;
+				}
 			} else
 				status.merge(RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_POLICY)));
 		return null;

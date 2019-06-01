@@ -265,15 +265,23 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 				if (selectedNode.getNodeType() != Node.ELEMENT_NODE)
 					continue;
 				Element selectedElement= (Element)selectedNode;
-				if (selectedElement.getNodeName().equals("file")) //$NON-NLS-1$
+				switch (selectedElement.getNodeName()) {
+				case "file": //$NON-NLS-1$
 					addFile(elementsToExport, selectedElement);
-				else if (selectedElement.getNodeName().equals("folder")) //$NON-NLS-1$
+					break;
+				case "folder": //$NON-NLS-1$
 					addFolder(elementsToExport,selectedElement);
-				else if (selectedElement.getNodeName().equals("project")) //$NON-NLS-1$
+					break;
+				case "project": //$NON-NLS-1$
 					addProject(elementsToExport ,selectedElement);
-				else if (selectedElement.getNodeName().equals("javaElement")) //$NON-NLS-1$
+					break;
+				case "javaElement": //$NON-NLS-1$
 					addJavaElement(elementsToExport, selectedElement);
-				// Note: Other file types are not handled by this writer
+					// Note: Other file types are not handled by this writer
+					break;
+				default:
+					break;
+				}
 			}
 			jarPackage.setElements(elementsToExport.toArray());
 		}

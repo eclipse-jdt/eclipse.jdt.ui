@@ -265,28 +265,32 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 	 */
 	private boolean checkId(final String id) {
 		Assert.isNotNull(id);
-		if (id.equals(IJavaRefactorings.RENAME_COMPILATION_UNIT))
+		switch (id) {
+		case IJavaRefactorings.RENAME_COMPILATION_UNIT:
 			return true;
-		else if (id.equals(IJavaRefactorings.RENAME_ENUM_CONSTANT))
+		case IJavaRefactorings.RENAME_ENUM_CONSTANT:
 			return true;
-		else if (id.equals(IJavaRefactorings.RENAME_FIELD))
+		case IJavaRefactorings.RENAME_FIELD:
 			return true;
-		else if (id.equals(IJavaRefactorings.RENAME_JAVA_PROJECT))
+		case IJavaRefactorings.RENAME_JAVA_PROJECT:
 			return true;
-		else if (id.equals(IJavaRefactorings.RENAME_LOCAL_VARIABLE))
+		case IJavaRefactorings.RENAME_LOCAL_VARIABLE:
 			return true;
-		else if (id.equals(IJavaRefactorings.RENAME_METHOD))
+		case IJavaRefactorings.RENAME_METHOD:
 			return true;
-		else if (id.equals(IJavaRefactorings.RENAME_PACKAGE))
+		case IJavaRefactorings.RENAME_PACKAGE:
 			return true;
-		else if (id.equals(RENAME_RESOURCE))
+		case RENAME_RESOURCE:
 			return true;
-		else if (id.equals(IJavaRefactorings.RENAME_SOURCE_FOLDER))
+		case IJavaRefactorings.RENAME_SOURCE_FOLDER:
 			return true;
-		else if (id.equals(IJavaRefactorings.RENAME_TYPE))
+		case IJavaRefactorings.RENAME_TYPE:
 			return true;
-		else if (id.equals(IJavaRefactorings.RENAME_TYPE_PARAMETER))
+		case IJavaRefactorings.RENAME_TYPE_PARAMETER:
 			return true;
+		default:
+			break;
+		}
 		return false;
 	}
 

@@ -169,7 +169,8 @@ public final class MoveDescriptor extends JavaRefactoringDescriptor {
 		if (fDestination == null)
 			fDestination= JavaRefactoringDescriptorUtil.getResourcePath(fArguments, ATTRIBUTE_TARGET, project);
 
-		if (POLICY_MOVE_RESOURCES.equals(fMovePolicy)) {
+		if (null != fMovePolicy) switch (fMovePolicy) {
+		case POLICY_MOVE_RESOURCES:
 			fReferences= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_REFERENCES, fReferences);
 			fQualified= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_QUALIFIED, fQualified);
 			fPatterns= JavaRefactoringDescriptorUtil.getString(fArguments, ATTRIBUTE_PATTERNS, true);
@@ -179,12 +180,18 @@ public final class MoveDescriptor extends JavaRefactoringDescriptor {
 			fFolders= JavaRefactoringDescriptorUtil.getResourcePathArray(fArguments, ATTRIBUTE_FOLDERS, ATTRIBUTE_ELEMENT, offset, project);
 			offset+= fFolders.length;
 			fUnits= (ICompilationUnit[]) JavaRefactoringDescriptorUtil.getJavaElementArray(fArguments, ATTRIBUTE_UNITS, ATTRIBUTE_ELEMENT, offset, project, ICompilationUnit.class);
-		} else if (POLICY_MOVE_ROOTS.equals(fMovePolicy)) {
+			break;
+		case POLICY_MOVE_ROOTS:
 			fRoots= (IPackageFragmentRoot[]) JavaRefactoringDescriptorUtil.getJavaElementArray(fArguments, ATTRIBUTE_ROOTS, ATTRIBUTE_ELEMENT, 1, project, IPackageFragmentRoot.class);
-		} else if (POLICY_MOVE_PACKAGES.equals(fMovePolicy)) {
+			break;
+		case POLICY_MOVE_PACKAGES:
 			fFragments= (IPackageFragment[]) JavaRefactoringDescriptorUtil.getJavaElementArray(fArguments, ATTRIBUTE_FRAGMENTS, ATTRIBUTE_ELEMENT, 1, project, IPackageFragment.class);
-		} else if (POLICY_MOVE_MEMBERS.equals(fMovePolicy)) {
+			break;
+		case POLICY_MOVE_MEMBERS:
 			fMembers= (IMember[]) JavaRefactoringDescriptorUtil.getJavaElementArray(fArguments, ATTRIBUTE_MEMBERS, ATTRIBUTE_ELEMENT, 1, project, IMember.class);
+			break;
+		default:
+			break;
 		}
 	}
 
@@ -197,7 +204,8 @@ public final class MoveDescriptor extends JavaRefactoringDescriptor {
 			JavaRefactoringDescriptorUtil.setJavaElement(fArguments, ATTRIBUTE_DESTINATION, project, (IJavaElement) fDestination);
 		else if (fDestination instanceof IPath)
 			JavaRefactoringDescriptorUtil.setResourcePath(fArguments, ATTRIBUTE_TARGET, project, (IPath) fDestination);
-		if (POLICY_MOVE_RESOURCES.equals(fMovePolicy)) {
+		if (null != fMovePolicy) switch (fMovePolicy) {
+		case POLICY_MOVE_RESOURCES:
 			JavaRefactoringDescriptorUtil.setBoolean(fArguments, ATTRIBUTE_REFERENCES, fReferences);
 			JavaRefactoringDescriptorUtil.setBoolean(fArguments, ATTRIBUTE_QUALIFIED, fQualified);
 			JavaRefactoringDescriptorUtil.setString(fArguments, ATTRIBUTE_PATTERNS, fPatterns);
@@ -207,12 +215,18 @@ public final class MoveDescriptor extends JavaRefactoringDescriptor {
 			JavaRefactoringDescriptorUtil.setResourcePathArray(fArguments, ATTRIBUTE_FOLDERS, ATTRIBUTE_ELEMENT, project, fFolders, offset);
 			offset+= fFolders.length;
 			JavaRefactoringDescriptorUtil.setJavaElementArray(fArguments, ATTRIBUTE_UNITS, ATTRIBUTE_ELEMENT, project, fUnits, offset);
-		} else if (POLICY_MOVE_ROOTS.equals(fMovePolicy)) {
+			break;
+		case POLICY_MOVE_ROOTS:
 			JavaRefactoringDescriptorUtil.setJavaElementArray(fArguments, ATTRIBUTE_ROOTS, ATTRIBUTE_ELEMENT, project, fRoots, 1);
-		} else if (POLICY_MOVE_PACKAGES.equals(fMovePolicy)) {
+			break;
+		case POLICY_MOVE_PACKAGES:
 			JavaRefactoringDescriptorUtil.setJavaElementArray(fArguments, ATTRIBUTE_FRAGMENTS, ATTRIBUTE_ELEMENT, project, fFragments, 1);
-		} else if (POLICY_MOVE_MEMBERS.equals(fMovePolicy)) {
+			break;
+		case POLICY_MOVE_MEMBERS:
 			JavaRefactoringDescriptorUtil.setJavaElementArray(fArguments, ATTRIBUTE_MEMBERS, ATTRIBUTE_ELEMENT, project, fMembers, 1);
+			break;
+		default:
+			break;
 		}
 	}
 

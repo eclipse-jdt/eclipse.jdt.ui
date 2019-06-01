@@ -336,14 +336,19 @@ public class JdtFlags {
 
 	public static int getVisibilityCode(String visibilityString) {
 		Assert.isNotNull(visibilityString);
-		if (VISIBILITY_STRING_PACKAGE.equals(visibilityString))
+		if (null != visibilityString)
+			switch (visibilityString) {
+		case VISIBILITY_STRING_PACKAGE:
 			return 0;
-		else if (VISIBILITY_STRING_PRIVATE.equals(visibilityString))
+		case VISIBILITY_STRING_PRIVATE:
 			return Modifier.PRIVATE;
-		else if (VISIBILITY_STRING_PROTECTED.equals(visibilityString))
+		case VISIBILITY_STRING_PROTECTED:
 			return Modifier.PROTECTED;
-		else if (VISIBILITY_STRING_PUBLIC.equals(visibilityString))
+		case VISIBILITY_STRING_PUBLIC:
 			return Modifier.PUBLIC;
+		default:
+			break;
+		}
 		return VISIBILITY_CODE_INVALID;
 	}
 

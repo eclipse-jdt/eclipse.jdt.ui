@@ -89,31 +89,29 @@ public class ProfileStore {
 		@Override
 		public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
 
-			if (qName.equals(XML_NODE_SETTING)) {
-
+			switch (qName) {
+			case XML_NODE_SETTING:
 				final String key= attributes.getValue(XML_ATTRIBUTE_ID);
 				final String value= attributes.getValue(XML_ATTRIBUTE_VALUE);
 				fSettings.put(key, value);
-
-			} else if (qName.equals(XML_NODE_PROFILE)) {
-
+				break;
+			case XML_NODE_PROFILE:
 				fName= attributes.getValue(XML_ATTRIBUTE_NAME);
 				fKind= attributes.getValue(XML_ATTRIBUTE_PROFILE_KIND);
 				if (fKind == null) //Can only be an CodeFormatterProfile created pre 3.3M2
 					fKind= ProfileVersioner.CODE_FORMATTER_PROFILE_KIND;
-
 				fSettings= new HashMap<>(200);
-
-			}
-			else if (qName.equals(XML_NODE_ROOT)) {
-
+				break;
+			case XML_NODE_ROOT:
 				fProfiles= new ArrayList<>();
 				try {
 					fVersion= Integer.parseInt(attributes.getValue(XML_ATTRIBUTE_VERSION));
 				} catch (NumberFormatException ex) {
 					throw new SAXException(ex);
 				}
-
+				break;
+			default:
+				break;
 			}
 		}
 

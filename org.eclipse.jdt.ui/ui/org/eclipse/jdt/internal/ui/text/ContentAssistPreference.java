@@ -173,16 +173,24 @@ public class ContentAssistPreference {
 		if (jcp == null)
 			return;
 
-		if (AUTOACTIVATION_TRIGGERS_JAVA.equals(key)) {
+		if (null != key) switch (key) {
+		case AUTOACTIVATION_TRIGGERS_JAVA:
 			String triggers= store.getString(AUTOACTIVATION_TRIGGERS_JAVA);
 			if (triggers != null)
 				jcp.setCompletionProposalAutoActivationCharacters(triggers.toCharArray());
-		} else if (SHOW_VISIBLE_PROPOSALS.equals(key)) {
+			break;
+		case SHOW_VISIBLE_PROPOSALS:{
 			boolean enabled= store.getBoolean(SHOW_VISIBLE_PROPOSALS);
 			jcp.restrictProposalsToVisibility(enabled);
-		} else if (CASE_SENSITIVITY.equals(key)) {
+				break;
+			}
+		case CASE_SENSITIVITY:{
 			boolean enabled= store.getBoolean(CASE_SENSITIVITY);
 			jcp.restrictProposalsToMatchingCases(enabled);
+				break;
+			}
+		default:
+			break;
 		}
 	}
 

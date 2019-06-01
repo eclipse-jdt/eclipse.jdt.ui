@@ -93,12 +93,16 @@ public class JavaElementPropertyTester extends PropertyTester {
 			return false;
 		}
 		IJavaElement res = (IJavaElement) receiver;
-		if (method.equals(NAME)) {
+		switch (method) {
+		case NAME:
 			return Pattern.matches(toString(expectedValue), res.getElementName());
-		} else if (method.equals(IS_IN_JAVA_PROJECT)) {
+		case IS_IN_JAVA_PROJECT:
+		{
 			IJavaProject javaProject= res.getJavaProject();
 			return javaProject != null && javaProject.exists() && javaProject.getProject().isOpen();
-		} else if (method.equals(IS_IN_JAVA_PROJECT_WITH_NATURE)) {
+		}
+		case IS_IN_JAVA_PROJECT_WITH_NATURE:
+		{
 			IJavaProject javaProject= res.getJavaProject();
 			if (javaProject != null && javaProject.exists() && javaProject.getProject().isOpen() ) {
 				if (expectedValue != null) {
@@ -110,13 +114,17 @@ public class JavaElementPropertyTester extends PropertyTester {
 				}
 			}
 			return false;
-		} else if (method.equals(IS_ON_CLASSPATH)) {
+		}
+		case IS_ON_CLASSPATH:
+		{
 			IJavaProject javaProject= res.getJavaProject();
 			if (javaProject != null && javaProject.exists()) {
 				return javaProject.isOnClasspath(res);
 			}
 			return false;
-		} else if (method.equals(IN_SOURCE_FOLDER)) {
+		}
+		case IN_SOURCE_FOLDER:
+		{
 			IJavaElement root= res.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 			if (root != null) {
 				try {
@@ -126,19 +134,25 @@ public class JavaElementPropertyTester extends PropertyTester {
 				}
 			}
 			return false;
-		} else if (method.equals(IN_ARCHIVE)) {
+		}
+		case IN_ARCHIVE:
+		{
 			IJavaElement root= res.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 			if (root != null) {
 				return ((IPackageFragmentRoot) root).isArchive();
 			}
 			return false;
-		} else if (method.equals(IN_EXTERNAL_ARCHIVE)) {
+		}
+		case IN_EXTERNAL_ARCHIVE:
+		{
 			IJavaElement root= res.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 			if (root != null) {
 				return ((IPackageFragmentRoot) root).isExternal();
 			}
 			return false;
-		} else if (method.equals(PROJECT_OPTION)) {
+		}
+		case PROJECT_OPTION:
+		{
 			IJavaProject project= res.getJavaProject();
 			if (project != null) {
 				if (args.length == 2) {
@@ -149,7 +163,9 @@ public class JavaElementPropertyTester extends PropertyTester {
 				}
 			}
 			return false;
-		} else if (method.equals(HAS_TYPE_ON_CLASSPATH)) {
+		}
+		case HAS_TYPE_ON_CLASSPATH:
+		{
 			IJavaProject javaProject= res.getJavaProject();
 			if (javaProject != null && javaProject.exists()) {
 				try {
@@ -157,7 +173,10 @@ public class JavaElementPropertyTester extends PropertyTester {
 				} catch (JavaModelException e) {
 					return false;
 				}
-			}
+			}	break;
+		}
+		default:
+			break;
 		}
 		return false;
 	}

@@ -368,11 +368,19 @@ class AccessAnalyzer extends ASTVisitor {
 			if (receiver != null)
 				invocation.setExpression((Expression) fRewriter.createCopyTarget(receiver));
 			invocation.arguments().add(argument);
-			if ("++".equals(operator)) { //$NON-NLS-1$
+			boolean nomatch= false;
+			if (operator != null) switch (operator) {
+			case "++": //$NON-NLS-1$
 				argument.setOperator(InfixExpression.Operator.PLUS);
-			} else if ("--".equals(operator)) { //$NON-NLS-1$
+				break;
+			case "--": //$NON-NLS-1$
 				argument.setOperator(InfixExpression.Operator.MINUS);
-			} else {
+				break;
+			default:
+				nomatch= true;
+				break;
+			}
+			if (nomatch) {
 				Assert.isTrue(false, "Should not happen"); //$NON-NLS-1$
 			}
 			MethodInvocation getter= ast.newMethodInvocation();
@@ -396,11 +404,19 @@ class AccessAnalyzer extends ASTVisitor {
 				invocation.setLeftHandSide((Expression) fRewriter.createCopyTarget(receiver));
 			MethodInvocation getter= ast.newMethodInvocation();
 			getter.setName(ast.newSimpleName(fGetter));
-			if ("++".equals(operator)) { //$NON-NLS-1$
+			boolean nomatch= false;
+			if (operator != null) switch (operator) {
+			case "++": //$NON-NLS-1$
 				argument.setOperator(InfixExpression.Operator.PLUS);
-			} else if ("--".equals(operator)) { //$NON-NLS-1$
+				break;
+			case "--": //$NON-NLS-1$
 				argument.setOperator(InfixExpression.Operator.MINUS);
-			} else {
+				break;
+			default:
+				nomatch= true;
+				break;
+			}
+			if (nomatch) {
 				Assert.isTrue(false, "Should not happen"); //$NON-NLS-1$
 			}
 			argument.setRightOperand(ast.newNumberLiteral("1")); //$NON-NLS-1$
@@ -419,11 +435,19 @@ class AccessAnalyzer extends ASTVisitor {
 			if (receiver != null)
 				invocation.setExpression((Expression) fRewriter.createCopyTarget(receiver));
 			invocation.arguments().add(argument);
-			if ("++".equals(operator)) { //$NON-NLS-1$
+			boolean nomatch= false;
+			if (operator != null) switch (operator) {
+			case "++": //$NON-NLS-1$
 				argument.setOperator(InfixExpression.Operator.PLUS);
-			} else if ("--".equals(operator)) { //$NON-NLS-1$
+				break;
+			case "--": //$NON-NLS-1$
 				argument.setOperator(InfixExpression.Operator.MINUS);
-			} else {
+				break;
+			default:
+				nomatch= true;
+				break;
+			}
+			if (nomatch) {
 				Assert.isTrue(false, "Should not happen"); //$NON-NLS-1$
 			}
 			argument.setLeftOperand(ast.newSimpleName(operand.toString()));
