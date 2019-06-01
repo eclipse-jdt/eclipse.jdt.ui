@@ -37,10 +37,12 @@ public class RsrcURLStreamHandler extends java.net.URLStreamHandler {
     	this.classLoader = classLoader;
 	}
 
+	@Override
 	protected java.net.URLConnection openConnection(URL u) throws IOException {
     	return new RsrcURLConnection(u, classLoader);
     }
 
+	@Override
     protected void parseURL(URL url, String spec, int start, int limit) {
     	String file;
     	if (spec.startsWith(JIJConstants.INTERNAL_URL_PROTOCOL_WITH_COLON))  
