@@ -216,7 +216,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		@Override
 		public Image getColumnImage(Object object, int column) {
 			String name= ((Filter) object).getName();
-			if (name.indexOf(".*") != - 1 || name.equals(JUnitMessages.JUnitMainTab_label_defaultpackage)) {  //$NON-NLS-1$
+			if (name.contains(".*") || name.equals(JUnitMessages.JUnitMainTab_label_defaultpackage)) {  //$NON-NLS-1$
 				//package
 				return IMG_PKG;
 			} else if ("".equals(name)) { //$NON-NLS-1$

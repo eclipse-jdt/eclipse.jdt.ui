@@ -139,7 +139,7 @@ public class QuickFixTest extends TestCase {
 		for (int i= 0; i < proposals.size(); i++) {
 			ICompletionProposal proposal= proposals.get(i);
 			String name= proposal.getDisplayString();
-			if (name == null || name.length() == 0 || name.charAt(0) == '!' || name.indexOf("{0}") != -1 || name.indexOf("{1}") != -1) {
+			if (name == null || name.length() == 0 || name.charAt(0) == '!' || name.contains("{0}") || name.contains("{1}")) {
 				assertTrue("wrong proposal label: " + name, false);
 			}
 			if (proposal.getImage() == null) {

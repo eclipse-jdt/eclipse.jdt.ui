@@ -176,7 +176,7 @@ public class Checks {
 	 */
 	public static RefactoringStatus checkTypeName(String name, IJavaElement context) {
 		//fix for: 1GF5Z0Z: ITPJUI:WINNT - assertion failed after renameType refactoring
-		if (name.indexOf(".") != -1) //$NON-NLS-1$
+		if (name.contains(".")) //$NON-NLS-1$
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.Checks_no_dot);
 		else
 			return checkName(name, JavaConventionsUtil.validateJavaTypeName(name, context));

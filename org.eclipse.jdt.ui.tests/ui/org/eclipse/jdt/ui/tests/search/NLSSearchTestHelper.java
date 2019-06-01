@@ -71,7 +71,7 @@ public class NLSSearchTestHelper {
 			if (match.getElement() instanceof ICompilationUnit) {
 				ICompilationUnit unit= (ICompilationUnit)match.getElement();
 				String field= unit.getSource().substring(match.getOffset(), match.getOffset() + match.getLength());
-				if ((isAccessor && field.indexOf(key) != -1) || (!isAccessor && field.equals(key)))
+				if ((isAccessor && field.contains(key)) || (!isAccessor && field.equals(key)))
 					return;
 			}
 		}
@@ -84,13 +84,13 @@ public class NLSSearchTestHelper {
 			if (match.getElement() instanceof CompilationUnitEntry) {
 				ICompilationUnit unit= ((CompilationUnitEntry)match.getElement()).getCompilationUnit();
 				String field= unit.getSource().substring(match.getOffset(), match.getOffset() + match.getLength());
-				if ((isAccessor && field.indexOf(key) != -1) || (!isAccessor && field.equals(key)))
+				if ((isAccessor && field.contains(key)) || (!isAccessor && field.equals(key)))
 					return;
 			} else if (match.getElement() instanceof FileEntry) {
 				FileEntry entry= (FileEntry)match.getElement();
 				String content= getContent(entry.getPropertiesFile());
 				String propkey= content.substring(match.getOffset(), match.getOffset() + match.getLength());
-				if ((isAccessor && propkey.indexOf(key) != -1) || (!isAccessor && propkey.equals(key)))
+				if ((isAccessor && propkey.contains(key)) || (!isAccessor && propkey.equals(key)))
 					return;
 			}
 		}

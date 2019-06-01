@@ -171,7 +171,7 @@ public final class DefaultPhoneticHashProvider implements IPhoneticHashProvider 
 
 		for (int index= 0; index < candidates.length; index++) {
 
-			if (token.indexOf(candidates[index]) >= 0)
+			if (token.contains(candidates[index]))
 				return true;
 		}
 		return false;

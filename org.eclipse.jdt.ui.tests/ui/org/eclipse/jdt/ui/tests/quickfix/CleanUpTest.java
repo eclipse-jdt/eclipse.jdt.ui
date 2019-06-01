@@ -8158,7 +8158,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		assertTrue(entries.length == 1);
 		String message= entries[0].getMessage();
 		assertTrue(message, entries[0].isInfo());
-		assertTrue(message, message.indexOf("ambiguous") != -1);
+		assertTrue(message, message.contains("ambiguous"));
 	}
 
 	public void testOrganizeImports02() throws Exception {
@@ -8177,7 +8177,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		assertTrue(entries.length == 1);
 		String message= entries[0].getMessage();
 		assertTrue(message, entries[0].isInfo());
-		assertTrue(message, message.indexOf("parse") != -1);
+		assertTrue(message, message.contains("parse"));
 	}
 
 	public void testOrganizeImportsBug202266() throws Exception {
