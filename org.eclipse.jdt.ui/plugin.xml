@@ -7217,6 +7217,7 @@
         </enabledWhen>
       </codeMiningProvider>
    </extension>
+<!-- disabled due bug 547833
   <extension
         id="javaChainProposalCategory"
         name="%ChainProposalCategory"
@@ -7233,4 +7234,5 @@
            needsSortingAfterFiltering="false">
      </javaCompletionProposalComputer>
   </extension>
+-->
 </plugin>
