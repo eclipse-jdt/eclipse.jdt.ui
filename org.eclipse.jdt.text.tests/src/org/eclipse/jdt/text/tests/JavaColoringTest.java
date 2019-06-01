@@ -92,7 +92,7 @@ public class JavaColoringTest extends TestCase {
 
 	String print(TextPresentation presentation) {
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 
 		if (presentation != null) {
 

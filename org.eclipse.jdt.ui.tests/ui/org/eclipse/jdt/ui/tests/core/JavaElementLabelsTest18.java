@@ -94,7 +94,7 @@ public class JavaElementLabelsTest18 extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package org.test;\n");
 		buf.append("import java.lang.invoke.MethodHandle;\n");
 		buf.append("public class Test {\n");
@@ -218,7 +218,7 @@ public class JavaElementLabelsTest18 extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package org.test;\n");
 		buf.append("import java.util.function.IntConsumer;\n");
 		buf.append("public class C {\n");
@@ -247,7 +247,7 @@ public class JavaElementLabelsTest18 extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package org.test;\n");
 		buf.append("import java.util.function.Consumer;\n");
 		buf.append("public class C {\n");

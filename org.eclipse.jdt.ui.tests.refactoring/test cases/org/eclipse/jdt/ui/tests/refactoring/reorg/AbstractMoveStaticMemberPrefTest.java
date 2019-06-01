@@ -40,7 +40,7 @@ public abstract class AbstractMoveStaticMemberPrefTest extends RepeatingRefactor
 		IMember[] elements= new IMember[] {member};
 		MoveStaticMembersProcessor processor= (RefactoringAvailabilityTester.isMoveStaticMembersAvailable(elements) ? new MoveStaticMembersProcessor(elements, JavaPreferencesSettings.getCodeGenerationSettings(cunit.getJavaProject())) : null);
 		IPackageFragment destPack= fTestProject.getSourceFolder().createPackageFragment("destination", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package destination;\n");
 		buf.append("public class Dest {\n");
 		buf.append("}\n");
@@ -52,7 +52,7 @@ public abstract class AbstractMoveStaticMemberPrefTest extends RepeatingRefactor
 
 	private ICompilationUnit generateSources(int numberOfCus, int numberOfRefs) throws Exception {
 		IPackageFragment source= fTestProject.getSourceFolder().createPackageFragment("source", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package source;\n");
 		buf.append("public class A {\n");
 		buf.append("    public static final int VALUE= 10;\n");
@@ -67,7 +67,7 @@ public abstract class AbstractMoveStaticMemberPrefTest extends RepeatingRefactor
 	}
 
 	private static void createReferenceCu(IPackageFragment pack, int index, int numberOfRefs) throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package " + pack.getElementName() + ";\n");
 		buf.append("import source.A;\n");
 		buf.append("public class Ref" + index + " {\n");

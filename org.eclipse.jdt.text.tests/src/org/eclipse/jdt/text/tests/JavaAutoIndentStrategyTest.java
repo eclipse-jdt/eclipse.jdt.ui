@@ -229,7 +229,7 @@ public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener
 		fDocumentCommand.offset= 21;
 		fDocumentCommand.text= "\r\n";
 		performSmartIndentAfterNewLine();
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("main (new String [] {\r\n");
 		buf.append("\t\t\r\n");
 		buf.append("});");
@@ -240,7 +240,7 @@ public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener
 		fDocumentCommand.offset= 24;
 		fDocumentCommand.text= "\r\n";
 		performSmartIndentAfterNewLine();
-		StringBuffer buf1= new StringBuffer();
+		StringBuilder buf1= new StringBuilder();
 		buf1.append("main (new String [] {\"a\"\r\n");
 		buf1.append("\t\t\r\n");
 		buf1.append("});");
@@ -255,7 +255,7 @@ public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener
 		fDocumentCommand.offset= 25;
 		fDocumentCommand.text= "\r\n";
 		performSmartIndentAfterNewLine();
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("main (new String [] {\"a\",\r\n");
 		buf.append("\t\t\r\n");
 		buf.append("});");
@@ -266,7 +266,7 @@ public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener
 		fDocumentCommand.offset= 26;
 		fDocumentCommand.text= "\r\n";
 		performSmartIndentAfterNewLine();
-		StringBuffer buf1= new StringBuffer();
+		StringBuilder buf1= new StringBuilder();
 		buf1.append("main (new String [] {\"a\", \r\n");
 		buf1.append("\t\t\r\n");
 		buf1.append("});");
@@ -281,7 +281,7 @@ public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener
 		fDocumentCommand.offset= 29;
 		fDocumentCommand.text= "\r\n";
 		performSmartIndentAfterNewLine();
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("main (new String [] {\"a\",\"b\",\r\n");
 		buf.append("\t\t\r\n");
 		buf.append("});");
@@ -296,7 +296,7 @@ public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener
 		fDocumentCommand.offset= 15;
 		fDocumentCommand.text= "\r\n";
 		performSmartIndentAfterNewLine();
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("@NamedQueries({\r\n");
 		buf.append("\t\r\n");
 		buf.append("});");
@@ -308,7 +308,7 @@ public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener
 		fDocumentCommand.offset= 34;
 		fDocumentCommand.text= "\r\n";
 		performSmartIndentAfterNewLine();
-		StringBuffer buf1= new StringBuffer();
+		StringBuilder buf1= new StringBuilder();
 		buf1.append("@MesageDriven( activationConfig ={\r\n");
 		buf1.append("\t\t\r\n");
 		buf1.append("})");
@@ -323,7 +323,7 @@ public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener
 		fDocumentCommand.offset= 12;
 		fDocumentCommand.text= "\r\n";
 		performSmartIndentAfterNewLine();
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("if (false) {\r\n");
 		buf.append("\treturn false;\r\n");
 		buf.append("}");
@@ -334,7 +334,7 @@ public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener
 		fDocumentCommand.offset= 13;
 		fDocumentCommand.text= "\r\n";
 		performSmartIndentAfterNewLine();
-		StringBuffer buf1= new StringBuffer();
+		StringBuilder buf1= new StringBuilder();
 		buf1.append("if (false) { \r\n");
 		buf1.append("\treturn false;\r\n");
 		buf1.append("}");
@@ -344,7 +344,7 @@ public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener
 	public void testSmartIndentAfterNewLine6() {
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=200015
 		fDocument.setInitialLineDelimiter("\r\n");
-		StringBuffer inBuf= new StringBuffer();
+		StringBuilder inBuf= new StringBuilder();
 		inBuf.append("enum ReviewResult {\n");
 		inBuf.append("    Good{, Bad\n");
 		inBuf.append("}");
@@ -353,7 +353,7 @@ public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener
 		fDocumentCommand.offset= 29;
 		fDocumentCommand.text= "\r\n";
 		performSmartIndentAfterNewLine();
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("enum ReviewResult {\n");
 		buf.append("    Good{\r\n");
 		buf.append("    \t\n");
@@ -369,7 +369,7 @@ public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener
 		fDocumentCommand.offset= 21;
 		fDocumentCommand.text= "\r\n";
 		performSmartIndentAfterNewLine();
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("int[] a= new int[] { \r\n");
 		buf.append("\t\t\r\n");
 		buf.append("};");
@@ -383,7 +383,7 @@ public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener
 		fDocumentCommand.offset= 21;
 		fDocumentCommand.text= "\r\n";
 		performSmartIndentAfterNewLine();
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("String[] strs = {\"a\",\r\n");
 		buf.append("\t\t\"b\",\r\n");
 		buf.append("}");
@@ -397,7 +397,7 @@ public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener
 		fDocumentCommand.offset= 1;
 		fDocumentCommand.text= "\r\n";
 		performSmartIndentAfterNewLine();
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("{\r\n");
 		buf.append("\tint a;\r\n");
 		buf.append("}");
@@ -412,7 +412,7 @@ public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener
 		fDocumentCommand.offset= 1;
 		fDocumentCommand.text= "\r\n";
 		performSmartIndentAfterNewLine();
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("{\r\n");
 		buf.append("\tfoo();\r\n");
 		buf.append("}");

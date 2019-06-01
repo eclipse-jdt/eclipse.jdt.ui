@@ -242,7 +242,7 @@ public class JavaParameterListValidatorTest extends TestCase {
 	}
 
 	protected String print(TextPresentation presentation) {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		if (presentation != null) {
 			// default range
 			buf.append("Default style range: ");

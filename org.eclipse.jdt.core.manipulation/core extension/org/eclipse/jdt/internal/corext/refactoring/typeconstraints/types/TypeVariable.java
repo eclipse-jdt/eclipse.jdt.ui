@@ -98,7 +98,7 @@ public final class TypeVariable extends AbstractTypeVariable {
 		if (fBounds.length == 1 && fBounds[0].isJavaLangObject())
 			return fJavaTypeParameter.getElementName(); // don't print the trivial bound
 
-		StringBuffer result= new StringBuffer(fJavaTypeParameter.getElementName());
+		StringBuilder result= new StringBuilder(fJavaTypeParameter.getElementName());
 		if (fBounds.length > 0) {
 			result.append(" extends "); //$NON-NLS-1$
 			result.append(fBounds[0].getPlainPrettySignature());

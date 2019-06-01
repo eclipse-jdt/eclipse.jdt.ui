@@ -566,7 +566,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	 * @return the JNI style signature
 	 */
 	private String getJNISignature(Class<?>[] paramTypes) {
-		StringBuffer signature= new StringBuffer();
+		StringBuilder signature= new StringBuilder();
 		signature.append('(');
 		for (int i = 0; i < paramTypes.length; ++i)
 			signature.append(getJNISignature(paramTypes[i]));
@@ -584,7 +584,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	 */
 	private String getJNISignature(Class<?> clazz) {
 		String qualifiedName= getName(clazz);
-		StringBuffer signature= new StringBuffer();
+		StringBuilder signature= new StringBuilder();
 
 		int index= qualifiedName.indexOf('[') + 1;
 		while (index > 0) {

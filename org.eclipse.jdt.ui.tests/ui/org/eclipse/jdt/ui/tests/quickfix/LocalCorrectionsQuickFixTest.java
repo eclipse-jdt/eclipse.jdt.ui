@@ -1745,7 +1745,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	public void testUncaughtExceptionOnSuper6() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=349051
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.io.Closeable;\n");
 		buf.append("public class A implements Closeable {\n");
@@ -4747,7 +4747,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		JavaCore.setOptions(hashtable);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E  {\n");
 		buf.append("    public void foo() {\n");
@@ -6217,7 +6217,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		JavaCore.setOptions(hashtable);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class F {\n");
 		buf.append("    public abstract class E1Inner1 {\n");
@@ -6380,7 +6380,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		JavaCore.setOptions(hashtable);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    private int count;\n");
@@ -6404,7 +6404,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		JavaCore.setOptions(hashtable);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    private int count;\n");
@@ -6427,7 +6427,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		JavaCore.setOptions(hashtable);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(int count) {\n");
@@ -6452,7 +6452,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		JavaCore.setOptions(hashtable);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    private int count;\n");
@@ -6478,7 +6478,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		JavaCore.setOptions(hashtable);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(int count) {\n");
@@ -6505,7 +6505,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		JavaCore.setOptions(hashtable);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(int count) {\n");
@@ -10693,7 +10693,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 	public void testMissingHashCode2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("\n");
 		buf.append("public class E extends java.io.File{\n");
@@ -11069,7 +11069,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	// regression test for https://bugs.eclipse.org/434188 - [quick fix] shows sign of quick fix, but says no suggestions available.
 	public void testNoFixFor_ParsingErrorInsertToComplete() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.*;\n");
 		buf.append("class E {\n");

@@ -1323,7 +1323,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 				return null;
 			String source= document.get(sourceRange.getOffset(), sourceRange.getLength());
 
-			StringBuffer contents= new StringBuffer();
+			StringBuilder contents= new StringBuilder();
 			contents.append("class ____C{void ____m()"); //$NON-NLS-1$
 			final int methodOffset= contents.length();
 			contents.append(source);

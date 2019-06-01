@@ -81,7 +81,7 @@ public class TypeRulesTest extends CoreTests {
 
 	private VariableDeclarationFragment[] createVariables() throws JavaModelException {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Vector;\n");
 		buf.append("import java.util.Collection;\n");
@@ -171,14 +171,14 @@ public class TypeRulesTest extends CoreTests {
 	public void testIsAssignmentCompatible() throws Exception {
 		VariableDeclarationFragment[] targets= createVariables();
 
-		StringBuffer errors= new StringBuffer();
+		StringBuilder errors= new StringBuilder();
 		for (int k= 0; k < targets.length; k++) {
 			for (int n= 0; n < targets.length; n++) {
 				VariableDeclarationFragment f1= targets[k];
 				VariableDeclarationFragment f2= targets[n];
 				String line= f2.getName().getIdentifier() + "= " + f1.getName().getIdentifier();
 
-				StringBuffer buf= new StringBuffer();
+				StringBuilder buf= new StringBuilder();
 				buf.append("package test1;\n");
 				buf.append("public class F<T, U extends Number> extends E<T, U> {\n");
 				buf.append("    void foo() {\n");
@@ -212,14 +212,14 @@ public class TypeRulesTest extends CoreTests {
 	public void testCanAssign() throws Exception {
 		VariableDeclarationFragment[] targets= createVariables();
 
-		StringBuffer errors= new StringBuffer();
+		StringBuilder errors= new StringBuilder();
 		for (int k= 0; k < targets.length; k++) {
 			for (int n= 0; n < targets.length; n++) {
 				VariableDeclarationFragment f1= targets[k];
 				VariableDeclarationFragment f2= targets[n];
 				String line= f2.getName().getIdentifier() + "= " + f1.getName().getIdentifier();
 
-				StringBuffer buf= new StringBuffer();
+				StringBuilder buf= new StringBuilder();
 				buf.append("package test1;\n");
 				buf.append("public class F<T, U extends Number> extends E<T, U> {\n");
 				buf.append("    void foo() {\n");
@@ -252,7 +252,7 @@ public class TypeRulesTest extends CoreTests {
 	}
 
 	public void testIsCastCompatible() throws Exception {
-		StringBuffer errors= new StringBuffer();
+		StringBuilder errors= new StringBuilder();
 		VariableDeclarationFragment[] targets= createVariables();
 		for (int k= 0; k < targets.length; k++) {
 			for (int n= 0; n < targets.length; n++) {
@@ -262,7 +262,7 @@ public class TypeRulesTest extends CoreTests {
 				String castType= f2.resolveBinding().getType().getQualifiedName();
 				String line= castType + " x= (" + castType + ") " + f1.getName().getIdentifier();
 
-				StringBuffer buf= new StringBuffer();
+				StringBuilder buf= new StringBuilder();
 				buf.append("package test1;\n");
 				buf.append("public class F<T, U extends Number> extends E<T, U> {\n");
 				buf.append("    void foo() {\n");
@@ -295,7 +295,7 @@ public class TypeRulesTest extends CoreTests {
 	}
 
 	public void testCanCast() throws Exception {
-		StringBuffer errors= new StringBuffer();
+		StringBuilder errors= new StringBuilder();
 		VariableDeclarationFragment[] targets= createVariables();
 		for (int k= 0; k < targets.length; k++) {
 			for (int n= 0; n < targets.length; n++) {
@@ -305,7 +305,7 @@ public class TypeRulesTest extends CoreTests {
 				String castType= f2.resolveBinding().getType().getQualifiedName();
 				String line= castType + " x= (" + castType + ") " + f1.getName().getIdentifier();
 
-				StringBuffer buf= new StringBuffer();
+				StringBuilder buf= new StringBuilder();
 				buf.append("package test1;\n");
 				buf.append("public class F<T, U extends Number> extends E<T, U> {\n");
 				buf.append("    void foo() {\n");

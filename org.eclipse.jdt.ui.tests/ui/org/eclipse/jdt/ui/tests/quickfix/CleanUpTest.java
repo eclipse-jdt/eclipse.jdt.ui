@@ -1402,7 +1402,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 	public void testJava50Bug222257() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.ArrayList;\n");
 		buf.append("public class E1 {\n");
@@ -1976,7 +1976,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 	public void testCodeStyle06() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    public String s= \"\";\n");
@@ -1999,7 +1999,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 	public void testCodeStyle07() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    public static int i = 10;\n");
@@ -2020,7 +2020,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 	public void testCodeStyle08() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    public final static int i = 1;\n");
@@ -2047,7 +2047,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 	public void testCodeStyle09() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    public abstract class E1Inner1 {\n");
@@ -2081,7 +2081,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 	public void testCodeStyle10() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    private static final int N;\n");
@@ -3535,7 +3535,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 	public void testCodeStyle_StaticAccessThroughInstance_Bug307407() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    private final String localString = new MyClass().getMyString();\n");
@@ -3876,7 +3876,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 	public void testJava50ForLoop05() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    public void foo() {\n");
@@ -3893,7 +3893,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 	public void testJava50ForLoop06() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    public void foo() {\n");
@@ -3910,7 +3910,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 	public void testJava50ForLoop07() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    public void foo() {\n");
@@ -3927,7 +3927,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 	public void testJava50ForLoop08() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    public void foo() {\n");
@@ -3975,7 +3975,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 	public void testJava50ForLoop10() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    public void foo() {\n");
@@ -4062,7 +4062,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 	public void testJava50ForLoop13() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    public int[] array1, array2;\n");
@@ -4171,7 +4171,7 @@ public class CleanUpTest extends CleanUpTestCase {
 	
 	public void testJava50ForLoopBug154939() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Iterator;\n");
 		buf.append("import java.util.List;\n");
@@ -4842,7 +4842,7 @@ public class CleanUpTest extends CleanUpTestCase {
 	public void testJava50ForLoop374264() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=374264
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Iterator;\n");
 		buf.append("import java.util.List;\n");
@@ -6146,7 +6146,7 @@ public class CleanUpTest extends CleanUpTestCase {
 	public void testRemoveParenthesesBug134741_2() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(boolean a) {\n");
@@ -6165,7 +6165,7 @@ public class CleanUpTest extends CleanUpTestCase {
 	public void testRemoveParenthesesBug134741_3() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    public String foo2(String s) {\n");
@@ -6970,7 +6970,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 	public void testRemoveParenthesesBug405096_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    final Short cache[] = new Short[-(-128) + 1];\n");
@@ -6985,7 +6985,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 	public void testRemoveParenthesesBug405096_2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    int a= 10\n");
@@ -7001,7 +7001,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 	public void testRemoveParenthesesBug405096_3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    int a= 10\n");
@@ -7017,7 +7017,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 	public void testRemoveParenthesesBug405096_4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    int a= 10\n");
@@ -7439,7 +7439,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 	public void testRemoveQualifierBug330754() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class Test {\n");
 		buf.append("    String label = \"works\";\n");
@@ -7674,7 +7674,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 	public void testAddFinalBug134676_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E<T> { \n");
 		buf.append("    private String s;\n");
@@ -7726,7 +7726,7 @@ public class CleanUpTest extends CleanUpTestCase {
 	//Changed test due to https://bugs.eclipse.org/bugs/show_bug.cgi?id=220124
 	public void testAddFinalBug145028() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    private volatile int field= 0;\n");
@@ -7742,7 +7742,7 @@ public class CleanUpTest extends CleanUpTestCase {
 	//https://bugs.eclipse.org/bugs/show_bug.cgi?id=294768
 	public void testAddFinalBug294768() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    private transient int field= 0;\n");
@@ -7817,7 +7817,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 	public void testAddFinalBug157276_3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    private int field;\n");
@@ -7839,7 +7839,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 	public void testAddFinalBug157276_4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    private int field;\n");
@@ -7859,7 +7859,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 	public void testAddFinalBug157276_5() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    private int field= 0;\n");
@@ -7877,7 +7877,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 	public void testAddFinalBug157276_6() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    private int field;\n");
@@ -7895,7 +7895,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 	public void testAddFinalBug157276_7() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    private static int field;\n");
@@ -8195,7 +8195,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 	public void testAddFinalBug272532() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    private int field;\n");
@@ -8215,7 +8215,7 @@ public class CleanUpTest extends CleanUpTestCase {
 	
 	public void testAddFinalBug297566() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    private int x;\n");
@@ -8236,7 +8236,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 	public void testAddFinalBug297566_2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    private int x;\n");
@@ -8545,7 +8545,7 @@ public class CleanUpTest extends CleanUpTestCase {
 	
 	public void testSortMembersBug434941() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class A {\n");
 		buf.append("    public static final int CONSTANT = 5;\n");
@@ -8786,7 +8786,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 	public void testOrganizeImports02() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    Vect or v;\n");

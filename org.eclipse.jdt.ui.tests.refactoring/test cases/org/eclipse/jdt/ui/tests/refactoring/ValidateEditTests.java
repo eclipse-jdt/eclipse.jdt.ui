@@ -157,7 +157,7 @@ public class ValidateEditTests extends RefactoringTest {
 
 		IPackageFragment fragment= getRoot().createPackageFragment("org.test", true, null);
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package org.test;\n");
 		buf.append("public class MyClass {\n");
 		buf.append("}\n");
@@ -188,7 +188,7 @@ public class ValidateEditTests extends RefactoringTest {
 
 		IPackageFragment fragment= getRoot().createPackageFragment("org.test", true, null);
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package org.test;\n");
 		buf.append("public class MyClass {\n");
 		buf.append("}\n");

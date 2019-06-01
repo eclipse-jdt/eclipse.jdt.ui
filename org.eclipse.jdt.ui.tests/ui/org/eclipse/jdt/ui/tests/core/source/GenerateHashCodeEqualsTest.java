@@ -2091,7 +2091,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	}
 
 	public void testInsertAt() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("\n");
 		buf.append("public class A  {\n");

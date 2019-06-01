@@ -126,7 +126,7 @@ public class FatJarExportTests extends TestCase {
 
 		fMainRoot= JavaProjectHelper.addSourceContainer(fProject, "src"); //$NON-NLS-1$
 		IPackageFragment fragment= fMainRoot.createPackageFragment("org.eclipse.jdt.ui.test", true, null); //$NON-NLS-1$
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package org.eclipse.jdt.ui.test;\n"); //$NON-NLS-1$
 		buf.append("import mylib.Foo;\n"); //$NON-NLS-1$
 		buf.append("public class Main {\n"); //$NON-NLS-1$
@@ -145,7 +145,7 @@ public class FatJarExportTests extends TestCase {
 	}
 
 	private static String getFooContent() {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package mylib;\n"); //$NON-NLS-1$
 		buf.append("public class Foo {\n"); //$NON-NLS-1$
 		buf.append("    public Foo() {\n"); //$NON-NLS-1$
@@ -340,7 +340,7 @@ public class FatJarExportTests extends TestCase {
 	}
 
 	private static String getProblems(MultiStatus status) {
-		StringBuffer result= new StringBuffer();
+		StringBuilder result= new StringBuilder();
 
 		IStatus[] children= status.getChildren();
 		for (int i= 0; i < children.length; i++) {

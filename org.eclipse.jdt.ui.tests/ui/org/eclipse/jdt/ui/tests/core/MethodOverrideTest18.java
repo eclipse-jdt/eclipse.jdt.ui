@@ -69,7 +69,7 @@ public class MethodOverrideTest18 extends MethodOverrideTest {
 
 	public void testOverrideLambda1() throws Exception {
 		IPackageFragment pack1= fSrc.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public interface MyFunction<T, R> {\n");
 		buf.append("    R apply(T t);\n");

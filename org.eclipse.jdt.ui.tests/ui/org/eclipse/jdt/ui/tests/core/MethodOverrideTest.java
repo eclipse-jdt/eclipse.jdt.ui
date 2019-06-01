@@ -99,7 +99,7 @@ public class MethodOverrideTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class A<S> {\n");
 		buf.append("    public A() {}\n");
@@ -124,7 +124,7 @@ public class MethodOverrideTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class A<T> {\n");
 		buf.append("    public A() {}\n");
@@ -161,7 +161,7 @@ public class MethodOverrideTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.List;\n");
 		buf.append("import java.util.Map;\n");
@@ -184,7 +184,7 @@ public class MethodOverrideTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.List;\n");
 		buf.append("public class A {\n");
@@ -206,7 +206,7 @@ public class MethodOverrideTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.List;\n");
 		buf.append("public class A<T> {\n");
@@ -234,7 +234,7 @@ public class MethodOverrideTest extends CoreTests {
 
 		// ATTENTION: Method names in this test must be in alphabetic order!
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class A<S> {\n");
 		buf.append("    public A() {}\n");
@@ -273,7 +273,7 @@ public class MethodOverrideTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class A<S> {\n");
 		buf.append("    public A() {}\n");
@@ -381,7 +381,7 @@ public class MethodOverrideTest extends CoreTests {
 	}
 
 	private static String getDebugString(IMethodBinding overriding,  IMethodBinding overriddenMethod) {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append(BindingLabelProvider.getBindingLabel(overriding, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_FULLY_QUALIFIED | JavaElementLabels.T_TYPE_PARAMETERS));
 		buf.append(" - ");
 		buf.append(BindingLabelProvider.getBindingLabel(overriddenMethod, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_FULLY_QUALIFIED  | JavaElementLabels.T_TYPE_PARAMETERS));
@@ -392,7 +392,7 @@ public class MethodOverrideTest extends CoreTests {
 	}
 
 	private static String getCodeString(IMethodBinding overriding,  IMethodBinding overriddenMethod, CompilationUnit root) {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 
 		buf.append("// Overridden: ----------------------------------\n");
 		buf.append(getCode(overriddenMethod, root)).append('\n');
@@ -466,7 +466,7 @@ public class MethodOverrideTest extends CoreTests {
 			}
 		}
 		if (hasProblems) {
-			StringBuffer buf= new StringBuffer();
+			StringBuilder buf= new StringBuilder();
 			buf.append(cu.getElementName() + " has compilation problems: \n");
 			for (int i= 0; i < problems.length; i++) {
 				buf.append(problems[i].getMessage()).append('\n');

@@ -98,7 +98,7 @@ public class UnresolvedMethodsQuickFixTest18 extends QuickFixTest {
 
 	public void testStaticInterfaceMethodNotInherited() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack;\n");
 		buf.append("interface I {\n");
 		buf.append("    public static void bar(int i) {}\n");
@@ -217,7 +217,7 @@ public class UnresolvedMethodsQuickFixTest18 extends QuickFixTest {
 		CUCorrectionProposal proposal1= (CUCorrectionProposal) proposals.get(0);
 		CUCorrectionProposal proposal2= (CUCorrectionProposal) proposals.get(1);
 
-		StringBuffer buf1= new StringBuffer();
+		StringBuilder buf1= new StringBuilder();
 		buf1.append("package test1;\n");
 		buf1.append("public interface NestedInterfaceInInterface {\n");
 		buf1.append("    interface Interface {\n");
@@ -351,7 +351,7 @@ public class UnresolvedMethodsQuickFixTest18 extends QuickFixTest {
 		buf1.append("    }\n");
 		buf1.append("}\n");
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class NestedInterfaceInClass {\n");
 		buf.append("    public static final int total= 10;\n");

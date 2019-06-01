@@ -60,7 +60,7 @@ public class ProblemNode extends ASTAttribute {
 
 	@Override
 	public String getLabel() {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		int offset= fProblem.getSourceStart();
 		int length= fProblem.getSourceEnd() + 1 - offset;
 		
@@ -78,7 +78,7 @@ public class ProblemNode extends ASTAttribute {
 	
 	private String getErrorLabel() {
 		int id= fProblem.getID();
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 			
 		if ((id & IProblem.TypeRelated) != 0) {
 			buf.append("TypeRelated + "); //$NON-NLS-1$
@@ -130,7 +130,7 @@ public class ProblemNode extends ASTAttribute {
 	private String getCategoryCode() {
 		CategorizedProblem categorized= (CategorizedProblem) fProblem;
 		int categoryID= categorized.getCategoryID();
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		
 		switch (categoryID) {
 			case CategorizedProblem.CAT_UNSPECIFIED:

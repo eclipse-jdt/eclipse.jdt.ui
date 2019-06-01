@@ -80,7 +80,7 @@ public class AddUnimplementedMethodsTest18 extends TestCase {
 	}
 
 	public void testBug460521() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("interface I {\n");
 		buf.append("}\n");
 

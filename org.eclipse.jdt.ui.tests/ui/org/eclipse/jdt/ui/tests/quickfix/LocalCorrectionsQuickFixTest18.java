@@ -709,7 +709,7 @@ public class LocalCorrectionsQuickFixTest18 extends QuickFixTest {
 
 	public void testUncaughtExceptionInMethodReference4() throws Exception { // Generic lambda not allowed
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import java.io.IOException;\n");
 		buf.append("public class E4 {\n");

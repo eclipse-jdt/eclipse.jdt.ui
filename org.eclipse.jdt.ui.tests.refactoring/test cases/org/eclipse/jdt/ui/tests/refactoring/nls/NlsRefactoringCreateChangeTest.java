@@ -261,7 +261,7 @@ public class NlsRefactoringCreateChangeTest extends TestCase {
 	}
 
 	private void createDefaultAccessor(IPackageFragment pack1) throws JavaModelException {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Accessor {\n");
 		buf.append("    private static final String BUNDLE_NAME = \"test.Accessor\";//$NON-NLS-1$\n");

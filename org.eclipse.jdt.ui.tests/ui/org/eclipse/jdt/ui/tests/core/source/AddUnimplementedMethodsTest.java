@@ -358,7 +358,7 @@ public class AddUnimplementedMethodsTest extends TestCase {
 	}
 
 	public void testBug480682() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("public class Test480682 extends Base {\n");
 		buf.append("}\n");
 		buf.append("abstract class Base implements I {\n");
@@ -481,7 +481,7 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		int nImports= imports.length;
 		int nExpected= expected.length;
 		if (nExpected != nImports) {
-			StringBuffer buf= new StringBuffer();
+			StringBuilder buf= new StringBuilder();
 			buf.append(nExpected).append(" imports expected, is ").append(nImports).append("\n");
 			buf.append("expected:\n");
 			for (int i= 0; i < expected.length; i++) {

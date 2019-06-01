@@ -105,7 +105,7 @@ public class NLSSearchTestHelper {
 	}
 
 	private static String getContent(IFile entry) throws CoreException, IOException {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		InputStream contents= entry.getContents();
 		try {
 			char ch= (char)contents.read();

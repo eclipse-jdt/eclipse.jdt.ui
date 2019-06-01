@@ -574,7 +574,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("public class E {\n");
@@ -611,7 +611,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("public class E<X> {\n");
@@ -649,7 +649,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("public class E<X> {\n");
@@ -1134,7 +1134,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("p", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package organize.imports.pvtStaticMembers.bug409594;\n");
 		buf.append("\n");
 		buf.append("class SnippetY {    \n");
@@ -1613,7 +1613,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    void foo() {//<-insert\n}\n");
@@ -1628,7 +1628,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    public static final double PI= 3.0;\n");
@@ -1644,7 +1644,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    void foo() {//<-insert\n}\n");
@@ -1659,7 +1659,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    public static final double PI= 3.0;\n");
@@ -1675,7 +1675,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    private class E11 {\n");
@@ -1694,7 +1694,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    private class E11 {\n");
@@ -1713,7 +1713,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    private class E11 {\n");
@@ -1734,7 +1734,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    public static class E2 {}\n");
@@ -1757,7 +1757,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    public static class E2 {\n");
@@ -1782,7 +1782,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    void foo() {\n");

@@ -57,7 +57,7 @@ public class PartitionTokenScannerTest extends TestCase {
 			InputStream stream= getClass().getResourceAsStream(name);
 			BufferedReader reader= new BufferedReader(new InputStreamReader(stream));
 
-			StringBuffer buffer= new StringBuffer();
+			StringBuilder buffer= new StringBuilder();
 			String line= reader.readLine();
 			while (line != null) {
 				buffer.append(line);

@@ -99,7 +99,7 @@ public class JDTFlagsTest18 extends TestCase {
 
 	public void testIsStaticInSrcFile() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.io.IOException;\n");
 		buf.append("public interface Snippet {\n");
@@ -129,7 +129,7 @@ public class JDTFlagsTest18 extends TestCase {
 
 	public void testNestedEnumInEnum() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("enum Snippet {\n");
@@ -147,7 +147,7 @@ public class JDTFlagsTest18 extends TestCase {
 
 	public void testNestedEnumInInterface() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("interface Snippet {\n");
 		buf.append("    enum CoffeeSize {\n");
@@ -188,7 +188,7 @@ public class JDTFlagsTest18 extends TestCase {
 
 	public void testNestedEnumInClass() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class Snippet {    \n");
 		buf.append("    enum Color {\n");
@@ -236,7 +236,7 @@ public class JDTFlagsTest18 extends TestCase {
 
 	public void testNestedEnumIsFinal() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class Snippet {    \n");
 		buf.append("    enum Color {\n");
@@ -269,7 +269,7 @@ public class JDTFlagsTest18 extends TestCase {
 
 	public void testIsDefaultInInterface() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("interface Snippet {\n");
 		buf.append("     public default String defaultMethod(){\n");
@@ -314,7 +314,7 @@ public class JDTFlagsTest18 extends TestCase {
 
 	public void testIsDefaultInClass() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("class Snippet {\n");
 		buf.append("     public String notDefaultMethod(){\n");
@@ -362,7 +362,7 @@ public class JDTFlagsTest18 extends TestCase {
 
 	public void testImplicitAbstractInSrcFile() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.io.IOException;\n");
 		buf.append("public interface Snippet {\n");
@@ -392,7 +392,7 @@ public class JDTFlagsTest18 extends TestCase {
 
 	public void testExplicitAbstractInSrcFile() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.io.IOException;\n");
 		buf.append("public interface Snippet {\n");
@@ -453,7 +453,7 @@ public class JDTFlagsTest18 extends TestCase {
 
 	public void testIsStaticAnnotationType() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("\n");
 		buf.append("public @interface Snippet {\n");

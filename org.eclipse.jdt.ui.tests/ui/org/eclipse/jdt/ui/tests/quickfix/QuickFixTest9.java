@@ -75,12 +75,12 @@ public class QuickFixTest9 extends QuickFixTest {
 		IPackageFragmentRoot java9Src= JavaProjectHelper.addSourceContainer(fJProject2, "src");
 		IPackageFragment def= java9Src.createPackageFragment("", false, null);
 		IPackageFragment pkgFrag= java9Src.createPackageFragment("java.defaultProject", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("module java.defaultProject {\n");
 		buf.append("     exports java.defaultProject; \n");
 		buf.append("}\n");
 		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
-		StringBuffer buf2= new StringBuffer();
+		StringBuilder buf2= new StringBuilder();
 		buf2.append("package java.defaultProject; \n\n public class One { \n\n");
 		buf2.append("}\n");
 		pkgFrag.createCompilationUnit("One.java", buf2.toString(), false, null);
@@ -194,7 +194,7 @@ public class QuickFixTest9 extends QuickFixTest {
 	}
 	
 	public void testAddNewTypeProposals() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("module test {\n");
 		buf.append("  exports test.examples;");
 		buf.append("}\n");

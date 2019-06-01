@@ -61,7 +61,7 @@ public class TreeCopyAction extends Action {
 		}
 		@Override
 		public String toString() {
-			StringBuffer buf= new StringBuffer();
+			StringBuilder buf= new StringBuilder();
 			if (fSelected)
 				buf.append("* "); //$NON-NLS-1$
 			buf.append(trim(fTreeItem.getText())).append(" ["); //$NON-NLS-1$

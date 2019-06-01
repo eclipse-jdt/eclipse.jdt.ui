@@ -1066,7 +1066,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		BufferedReader reader= null;
 		try {
 			reader= new BufferedReader(new InputStreamReader(styleSheetURL.openStream()));
-			StringBuffer buffer= new StringBuffer(1500);
+			StringBuilder buffer= new StringBuilder(1500);
 			String line= reader.readLine();
 			while (line != null) {
 				buffer.append(line);
@@ -1090,7 +1090,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	}
 
 	public static String getImageAndLabel(IJavaElement element, boolean allowImage, String label) {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		int imageWidth= 16;
 		int imageHeight= 16;
 		int labelLeft= 20;
@@ -1334,7 +1334,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 
 			char charValue= ((Character) constantValue).charValue();
 			String hexString= Integer.toHexString(charValue);
-			StringBuffer hexResult= new StringBuffer("\\u"); //$NON-NLS-1$
+			StringBuilder hexResult= new StringBuilder("\\u"); //$NON-NLS-1$
 			for (int i= hexString.length(); i < 4; i++) {
 				hexResult.append('0');
 			}

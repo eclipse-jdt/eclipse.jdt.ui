@@ -951,7 +951,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 
 	public void testAddToClasspathIntJAR() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import mylib.Foo;\n");
 		buf.append("public class E {\n");
@@ -987,7 +987,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 
 	public void testAddToClasspathExportedExtJAR() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import mylib.Foo;\n");
 		buf.append("public class E {\n");
@@ -1021,7 +1021,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 
 	public void testAddToClasspathContainer() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import mylib.Foo;\n");
 		buf.append("public class E {\n");

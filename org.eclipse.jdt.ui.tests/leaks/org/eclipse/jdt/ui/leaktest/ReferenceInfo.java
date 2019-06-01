@@ -76,7 +76,7 @@ public class ReferenceInfo {
 
 	@Override
 	public String toString() {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append(getReference().getClass().getName()).append('\n');
 		BacklinkNode[] backlinkNodes= getBacklinkNodes();
 		for (int i= 0; i < backlinkNodes.length; i++) {

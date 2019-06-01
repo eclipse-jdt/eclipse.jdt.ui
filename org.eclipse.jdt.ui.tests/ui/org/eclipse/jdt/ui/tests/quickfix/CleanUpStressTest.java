@@ -5330,7 +5330,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 	}
 
 	private static String getNormalizedContent(IDocument document) {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		try {
 			int selectionOffset= 0;
 			int selectionLength= document.getLength();

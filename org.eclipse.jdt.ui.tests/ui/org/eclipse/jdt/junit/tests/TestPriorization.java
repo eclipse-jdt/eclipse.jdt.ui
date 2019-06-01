@@ -351,7 +351,7 @@ public class TestPriorization extends TestCase {
 	}
 
 	private static String enumerate(List<String> list) {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		for (Iterator<String> iter= list.iterator(); iter.hasNext();) {
 			String s= iter.next();
 			buf.append(s).append('\n');

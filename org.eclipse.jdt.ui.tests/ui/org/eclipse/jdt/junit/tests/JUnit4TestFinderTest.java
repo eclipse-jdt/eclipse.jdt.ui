@@ -186,7 +186,7 @@ public class JUnit4TestFinderTest extends TestCase {
 	public void testSuiteFinder() throws Exception {
 
 		IPackageFragment p= fRoot.createPackageFragment("p", true, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("import junit.framework.Test;\n");
 		buf.append("\n");
@@ -403,7 +403,7 @@ public class JUnit4TestFinderTest extends TestCase {
 	public void testTestAnnotation_bug204682() throws Exception {
 
 		IPackageFragment p= fRoot.createPackageFragment("p", true, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("\n");
 		buf.append("import org.junit.Test;\n");
@@ -425,7 +425,7 @@ public class JUnit4TestFinderTest extends TestCase {
 	public void testTestAnnotation2() throws Exception {
 
 		IPackageFragment p= fRoot.createPackageFragment("p", true, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("\n");
 		buf.append("import org.junit.Test;\n");

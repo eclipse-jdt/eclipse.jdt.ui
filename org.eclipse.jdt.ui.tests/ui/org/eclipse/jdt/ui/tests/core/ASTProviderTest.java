@@ -124,7 +124,7 @@ public class ASTProviderTest extends CoreTests {
 
 	public void testBug181257() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("}\n");

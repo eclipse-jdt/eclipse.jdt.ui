@@ -113,7 +113,7 @@ public class ExtractClassTests extends RefactoringTest {
 	}
 
 	protected String getCUName() {
-		StringBuffer sb= new StringBuffer();
+		StringBuilder sb= new StringBuilder();
 		String name= getName();
 		if (name.startsWith("test"))
 			name= name.substring(4);
@@ -122,7 +122,7 @@ public class ExtractClassTests extends RefactoringTest {
 	}
 
 	protected String getCUFileName() {
-		StringBuffer sb= new StringBuffer();
+		StringBuilder sb= new StringBuilder();
 		sb.append(getCUName());
 		sb.append(".java");
 		return sb.toString();

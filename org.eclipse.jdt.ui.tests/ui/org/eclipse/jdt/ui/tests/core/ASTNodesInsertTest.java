@@ -80,7 +80,7 @@ public class ASTNodesInsertTest extends CoreTests {
 
 	public void testInsert1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1.ae;\n");
 		buf.append("public class E {\n");
 		buf.append("    int[] fGlobal;\n");
@@ -128,7 +128,7 @@ public class ASTNodesInsertTest extends CoreTests {
 
 	public void testInsert2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1.ae;\n");
 		buf.append("public class E {\n");
 		buf.append("    class Inner {\n");
@@ -177,7 +177,7 @@ public class ASTNodesInsertTest extends CoreTests {
 
 	public void testInsert3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1.ae;\n");
 		buf.append("public class E {\n");
 		buf.append("    static final int CONST= 1;\n");
@@ -229,7 +229,7 @@ public class ASTNodesInsertTest extends CoreTests {
 
 	public void testInsert4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1.ae;\n");
 		buf.append("public class E {\n");
 		buf.append("    private int fInt;\n");

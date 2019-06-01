@@ -91,7 +91,7 @@ public class AdvancedQuickAssistTest18 extends QuickFixTest {
 	public void testConvertToIfReturn1() throws Exception {
 		// 'if' in lambda body - positive cases
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("@FunctionalInterface\n");
 		buf.append("interface A {\n");
@@ -372,7 +372,7 @@ public class AdvancedQuickAssistTest18 extends QuickFixTest {
 	public void testConvertToIfReturn2() throws Exception {
 		// 'if' in lambda body - negative cases
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("@FunctionalInterface\n");
 		buf.append("interface A {\n");

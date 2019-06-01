@@ -183,7 +183,7 @@ public class JavaActivationTest extends TestCase {
 	private ICompilationUnit createTestCU() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(project, "src");
 		IPackageFragment pack= sourceFolder.createPackageFragment("pack0", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack0;\n");
 		buf.append("public class List1 {\n}\n");
 		return pack.createCompilationUnit("List1.java", buf.toString(), false, null);

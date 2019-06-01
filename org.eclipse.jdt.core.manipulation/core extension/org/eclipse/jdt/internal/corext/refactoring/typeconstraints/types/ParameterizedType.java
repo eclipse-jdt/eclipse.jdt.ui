@@ -155,7 +155,7 @@ public final class ParameterizedType extends HierarchyType {
 
 	@Override
 	public String getName() {
-		StringBuffer result= new StringBuffer(getJavaElementType().getElementName());
+		StringBuilder result= new StringBuilder(getJavaElementType().getElementName());
 		result.append("<"); //$NON-NLS-1$
 		result.append(fTypeArguments[0].getName());
 		for (int i= 1; i < fTypeArguments.length; i++) {
@@ -168,7 +168,7 @@ public final class ParameterizedType extends HierarchyType {
 
 	@Override
 	protected String getPlainPrettySignature() {
-		StringBuffer result= new StringBuffer(getJavaElementType().getFullyQualifiedName('.'));
+		StringBuilder result= new StringBuilder(getJavaElementType().getFullyQualifiedName('.'));
 		result.append("<"); //$NON-NLS-1$
 		result.append(fTypeArguments[0].getPlainPrettySignature());
 		for (int i= 1; i < fTypeArguments.length; i++) {

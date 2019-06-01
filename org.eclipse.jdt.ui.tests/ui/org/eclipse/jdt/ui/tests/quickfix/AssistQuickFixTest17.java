@@ -226,7 +226,7 @@ public class AssistQuickFixTest17 extends QuickFixTest {
 
 	public void testConvertToMultiCatch4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    void foo() {\n");
@@ -251,7 +251,7 @@ public class AssistQuickFixTest17 extends QuickFixTest {
 
 	public void testConvertToMultiCatch5() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    void foo() {\n");
@@ -277,7 +277,7 @@ public class AssistQuickFixTest17 extends QuickFixTest {
 		JavaProjectHelper.set15CompilerOptions(fJProject1);
 		try {
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-			StringBuffer buf= new StringBuffer();
+			StringBuilder buf= new StringBuilder();
 			buf.append("package test1;\n");
 			buf.append("public class E {\n");
 			buf.append("    void foo() {\n");
@@ -481,7 +481,7 @@ public class AssistQuickFixTest17 extends QuickFixTest {
 
 	public void testUnrollMultiCatch5() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    void foo() {\n");
@@ -599,7 +599,7 @@ public class AssistQuickFixTest17 extends QuickFixTest {
 
 	public void testReplaceMultiCatchClauseWithThrows2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    void foo() {\n");
@@ -935,7 +935,7 @@ public class AssistQuickFixTest17 extends QuickFixTest {
 
 	public void testSplitDeclaration1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    void foo() throws Exception {\n");
@@ -962,7 +962,7 @@ public class AssistQuickFixTest17 extends QuickFixTest {
 	public void testUnwrapTryStatement() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.io.FileReader;\n");
 		buf.append("public class E {\n");

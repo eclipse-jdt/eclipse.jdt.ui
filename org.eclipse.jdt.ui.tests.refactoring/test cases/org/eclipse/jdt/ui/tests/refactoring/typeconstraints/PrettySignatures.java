@@ -51,13 +51,13 @@ public class PrettySignatures {
 	}
 
 	private static String getPlainCaptureType(ITypeBinding binding) {
-		StringBuffer result= new StringBuffer("capture-of ");
+		StringBuilder result= new StringBuilder("capture-of ");
 		result.append(PrettySignatures.getPlain(binding.getWildcard()));
 		return result.toString();
 	}
 
 	private static String getPlainSuperWildCardType(ITypeBinding binding) {
-		StringBuffer result= new StringBuffer("?");
+		StringBuilder result= new StringBuilder("?");
 		ITypeBinding bound= binding.getBound();
 		if (bound != null) {
 			result.append(" super ");
@@ -67,7 +67,7 @@ public class PrettySignatures {
 	}
 
 	private static String getPlainExtendsWildCardType(ITypeBinding binding) {
-		StringBuffer result= new StringBuffer("?");
+		StringBuilder result= new StringBuilder("?");
 		ITypeBinding bound= binding.getBound();
 		if (bound != null) {
 			result.append(" extends ");
@@ -77,7 +77,7 @@ public class PrettySignatures {
 	}
 
 	private static String getPlainParameterizedType(ITypeBinding binding) {
-		StringBuffer result= new StringBuffer(getQualifiedName(binding));
+		StringBuilder result= new StringBuilder(getQualifiedName(binding));
 		ITypeBinding[] typeArguments= binding.getTypeArguments();
 		result.append("<"); //$NON-NLS-1$
 		result.append(PrettySignatures.getPlain(typeArguments[0]));
@@ -90,7 +90,7 @@ public class PrettySignatures {
 	}
 
 	private static String getPlainGenericType(ITypeBinding binding) {
-		StringBuffer result= new StringBuffer(getQualifiedName(binding));
+		StringBuilder result= new StringBuilder(getQualifiedName(binding));
 		ITypeBinding[] typeParameters= binding.getTypeParameters();
 		result.append("<"); //$NON-NLS-1$
 		result.append(PrettySignatures.get(typeParameters[0]));
@@ -107,7 +107,7 @@ public class PrettySignatures {
 		if (bounds.length == 1 && bounds[0].getQualifiedName().equals("java.lang.Object"))
 			return binding.getName();
 
-		StringBuffer result= new StringBuffer(binding.getName());
+		StringBuilder result= new StringBuilder(binding.getName());
 		if (bounds.length > 0) {
 			result.append(" extends "); //$NON-NLS-1$
 			result.append(PrettySignatures.getPlain(bounds[0]));
@@ -128,7 +128,7 @@ public class PrettySignatures {
 	}
 
 	private static String getPlainArrayType(ITypeBinding binding) {
-		StringBuffer result= new StringBuffer(PrettySignatures.getPlain(binding.getElementType()));
+		StringBuilder result= new StringBuilder(PrettySignatures.getPlain(binding.getElementType()));
 		for (int i= 0; i < binding.getDimensions(); i++) {
 			result.append("[]");
 		}

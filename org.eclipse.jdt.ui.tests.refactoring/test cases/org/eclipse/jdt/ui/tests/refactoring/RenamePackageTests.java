@@ -323,7 +323,7 @@ public class RenamePackageTests extends RefactoringTest {
 		}
 
 		private String getDummyContents(String packName, String typeName) {
-			StringBuffer contents= new StringBuffer();
+			StringBuilder contents= new StringBuilder();
 			if (packName.length() != 0)
 				contents.append("package ").append(packName).append(";\n");
 			contents.append("public class ").append(typeName).append(" { }\n");
@@ -596,7 +596,7 @@ public class RenamePackageTests extends RefactoringTest {
 	public void testPackageRenameWithResource1() throws Exception {
 		IPackageFragment fragment= getRoot().createPackageFragment("org.test", true, null);
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package org.test;\n");
 		buf.append("public class MyClass {\n");
 		buf.append("	org.test.MyClass me;\n");
@@ -633,7 +633,7 @@ public class RenamePackageTests extends RefactoringTest {
 	public void testPackageRenameWithResource2() throws Exception {
 		IPackageFragment fragment= getRoot().createPackageFragment("org.test", true, null);
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package org.test;\n");
 		buf.append("public class MyClass {\n");
 		buf.append("}\n");
@@ -684,7 +684,7 @@ public class RenamePackageTests extends RefactoringTest {
 		helper2(new String[]{"my.pack", "my"}, new String[][]{{}, {}}, "my");
 
 		InputStreamReader reader= new InputStreamReader(textfile.getContents(true));
-		StringBuffer newContent= new StringBuffer();
+		StringBuilder newContent= new StringBuilder();
 		try {
 			int ch;
 			while((ch= reader.read()) != -1)
@@ -1152,7 +1152,7 @@ public class RenamePackageTests extends RefactoringTest {
 		helper2(new String[]{"r.p1", "r"}, new String[][]{{"A"}, {"A"}}, "q");
 
 		InputStreamReader reader= new InputStreamReader(textfile.getContents(true));
-		StringBuffer newContent= new StringBuffer();
+		StringBuilder newContent= new StringBuilder();
 		try {
 			int ch;
 			while((ch= reader.read()) != -1)

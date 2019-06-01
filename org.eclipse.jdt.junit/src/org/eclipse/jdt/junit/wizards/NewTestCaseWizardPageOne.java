@@ -905,7 +905,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 			content= JUnitStubUtility.genStub(type.getCompilationUnit(), getTypeName(), methodTemplate, settings, null, imports);
 		} else {
 			final String delimiter= getLineDelimiter();
-			StringBuffer buffer= new StringBuffer(32);
+			StringBuilder buffer= new StringBuilder(32);
 			buffer.append("public "); //$NON-NLS-1$
 			buffer.append(getTypeName());
 			buffer.append('(');
@@ -959,7 +959,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 			content= JUnitStubUtility.genStub(type.getCompilationUnit(), getTypeName(), methodTemplate, settings, annotation, imports);
 		} else {
 			final String delimiter= getLineDelimiter();
-			StringBuffer buffer= new StringBuffer();
+			StringBuilder buffer= new StringBuilder();
 			if (settings.createComments) {
 				String[] excSignature= { Signature.createTypeSignature("java.lang.Exception", true) }; //$NON-NLS-1$
 				String comment= CodeGeneration.getMethodComment(type.getCompilationUnit(), type.getElementName(), methodName, new String[0], excSignature, Signature.SIG_VOID, null, delimiter);

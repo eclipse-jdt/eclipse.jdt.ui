@@ -246,7 +246,7 @@ public class ChangeMethodSignatureArguments extends RefactoringArguments {
 
 	@Override
 	public String toString() {
-		StringBuffer buf= new StringBuffer("change signature to "); //$NON-NLS-1$
+		StringBuilder buf= new StringBuilder("change signature to "); //$NON-NLS-1$
 		buf.append("\n\tvisibility: ").append(Flags.toString(fNewVisibility)); //$NON-NLS-1$
 		buf.append("\n\treturn type sig: ").append(fNewReturnType); //$NON-NLS-1$
 		buf.append("\n\tnew name: ").append(fNewName); //$NON-NLS-1$

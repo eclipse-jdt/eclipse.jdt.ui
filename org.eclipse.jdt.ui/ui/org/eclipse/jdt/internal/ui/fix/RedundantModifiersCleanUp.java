@@ -82,7 +82,7 @@ public class RedundantModifiersCleanUp extends AbstractMultiFix {
 	@SuppressWarnings("nls")
 	@Override
 	public String getPreview() {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("\n");
 		buf.append("public interface IFoo {\n");
 		if (isEnabled(CleanUpConstants.REMOVE_REDUNDANT_MODIFIERS)) {
