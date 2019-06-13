@@ -29,11 +29,13 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
@@ -212,8 +214,14 @@ public final class TypeBindingAnalyzer {
         final List<ITypeBinding> bindings = new LinkedList<>();
         final IType expectedTypeSig = getExpectedType(proj, ctx);
 		if (expectedTypeSig == null) {
-			ASTParser parser= createParser(cu, false);
-			AST ast= parser.createAST(null).getAST();
+			AST ast;
+			CompilationUnit cuNode= SharedASTProviderCore.getAST(cu, SharedASTProviderCore.WAIT_NO, null);
+			if (cuNode != null) {
+				ast= cuNode.getAST();
+			} else {
+				ASTParser parser= createParser(cu, false);
+				ast= parser.createAST(null).getAST();
+			}
 			ITypeBinding binding= ast.resolveWellKnownType(TypeBindingAnalyzer.getExpectedFullyQualifiedTypeName(ctx));
 			int dim= TypeBindingAnalyzer.getArrayDimension(ctx.getExpectedTypesSignatures());
 			if (dim > 0) {
