@@ -614,7 +614,16 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 				return;
 			}
 			selectedModuleNames.add(moduleName);
-			collectModulesToRemove(moduleName, allModulesToRemove);
+			String problemModule= collectModulesToRemove(moduleName, allModulesToRemove);
+			if (problemModule != null) {
+				int lastArrow= problemModule.lastIndexOf("->"); //$NON-NLS-1$
+				String leafMod= lastArrow == -1 ? problemModule : problemModule.substring(lastArrow+2);
+				MessageDialog.openError(getShell(), NewWizardMessages.ModuleDependenciesPage_removeModule_dialog_title,
+						MessageFormat.format(NewWizardMessages.ModuleDependenciesPage_removeModule_error_with_hint,
+								leafMod, 
+								MessageFormat.format(NewWizardMessages.ModuleDependenciesPage_moduleIsRequired_error_hint, problemModule)));
+				return;
+			}
 		}
 		String seedModules= String.join(", ", selectedModuleNames); //$NON-NLS-1$
 		if (allModulesToRemove.size() == selectedModuleNames.size()) {
@@ -664,15 +673,20 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 		}
 	}
 
-	private void collectModulesToRemove(String mod, Set<String> modulesToRemove) {
+	private String collectModulesToRemove(String mod, Set<String> modulesToRemove) {
 		if (fModuleList.fNames.contains(mod) && modulesToRemove.add(mod)) {
 			List<String> requireds= fModuleRequiredByModules.get(mod);
 			if (requireds != null) {
 				for (String required : requireds) {
-					collectModulesToRemove(required, modulesToRemove);
+					if (fModuleList.getModuleKind(required) == ModuleKind.Focus)
+						return required + "->" + mod; //$NON-NLS-1$
+					String problemModule= collectModulesToRemove(required, modulesToRemove);
+					if (problemModule != null)
+						return problemModule + "->" + mod; //$NON-NLS-1$
 				}
 			}
 		}
+		return null;
 	}
 	
 	private boolean confirmRemoveModule(String message) {
@@ -741,7 +755,7 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 				List<String> dominators= fModuleRequiredByModules.get(name);
 				if (dominators != null) {
 					for (String dominator : dominators) {
-						if (names.contains(dominator)) {
+						if (names.contains(dominator) && fModuleList.getModuleKind(dominator) == ModuleKind.System) {
 							continue outer;
 						}
 					}
