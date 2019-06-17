@@ -53,7 +53,7 @@ public final class TypeBindingAnalyzer {
     private static final Predicate<IMethodBinding> RELEVANT_NON_STATIC_METHODS_ONLY_FILTER = new Predicate<IMethodBinding>() {
 		@Override
 		public boolean test(IMethodBinding m) {
-			return !Modifier.isStatic(m.getModifiers()) && !isVoid(m) & !m.isConstructor() && !hasPrimitiveReturnType(m);
+			return !Modifier.isStatic(m.getModifiers()) && !isVoid(m) && !m.isConstructor();
 		}
     };
 
@@ -67,7 +67,7 @@ public final class TypeBindingAnalyzer {
     private static final Predicate<IMethodBinding> STATIC_NON_VOID_NON_PRIMITIVE_METHODS_ONLY_FILTER = new Predicate<IMethodBinding>() {
 		@Override
 		public boolean test(IMethodBinding m) {
-			return Modifier.isStatic(m.getModifiers()) && !isVoid(m) && !m.isConstructor() && hasPrimitiveReturnType(m);
+			return Modifier.isStatic(m.getModifiers()) && !isVoid(m) && !m.isConstructor();
 		}
     };
 

@@ -107,6 +107,31 @@ public class ChainCompletionTest extends TestCase {
 		assertEquals("getBar().getBaz() - 2 elements", proposals.get(0).getDisplayString());
 	}
 
+	public void testPrimitiveCompletion() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n" + 
+				"public class Foo {\n" + 
+				"  public void foo () {\n" + 
+				"    String s = \"\";\n" + 
+				"    int length = $\n" + 
+				"  }\n" + 
+				"}");
+
+		int completionIndex= getCompletionIndex(buf);
+		ICompilationUnit cu= getCompilationUnit(pkg, buf, "Foo.java");
+
+		List<ICompletionProposal> proposals= computeCompletionProposals(cu, completionIndex);
+
+		assertTrue(!proposals.isEmpty());
+		List<String> expected= Arrays.asList(
+				"s.length() - 2 elements",
+				"s.hashCode() - 2 elements",
+				"s.indexOf(String) - 2 elements",
+				"s.compareTo(String) - 2 elements");
+
+		assertProposalsExist(expected, proposals);
+	}
+
 	public void testAccessMethodParameters() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test;\n" +
