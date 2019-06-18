@@ -164,6 +164,7 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 	private Collection<String> fAllDefaultSystemModules; // if current is unnamed module: transitive closure of default root modules (names)
 
 	public final Map<String,String> fPatchMap= new HashMap<>();
+	private boolean needReInit= false;
 
 	public ModuleDependenciesPage(IStatusChangeListener context, CheckedListDialogField<CPListElement> classPathList) {
 		fClassPathList= classPathList;
@@ -530,6 +531,7 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 		}
 		updateLimitModules(cpListElement.findAttributeElement(CPListElement.MODULE));
 		fModuleList.refresh();
+		this.needReInit= true;
 	}
 
 	public void addToSystemModules(List<IModuleDescription> modulesToAdd) throws JavaModelException {
@@ -655,8 +657,19 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 				}
 			}
 		}
+		this.needReInit= true;
 	}
 
+	/** Destructively reed the needReInit flag.
+	 * @return {@code true} if the classpath needs to be reinitialized due to change of extent of the system library
+	 */
+	public boolean needReInit() {
+		try {
+			return this.needReInit;
+		} finally {
+			this.needReInit= false;
+		}
+	}
 	private Set<String> computeForwardClosure(List<String> seeds) {
 		Set<String> closure= new HashSet<>();
 		collectForwardClosure(seeds, closure);
