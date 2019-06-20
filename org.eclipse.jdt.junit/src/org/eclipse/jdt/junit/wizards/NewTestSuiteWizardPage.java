@@ -527,9 +527,8 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 		String typeName= getTypeName();
 		JUnitStatus status= new JUnitStatus();
 		Object[] checkedClasses= fClassesInSuiteTable.getCheckedElements();
-		for (int i= 0; i < checkedClasses.length; i++) {
-			IType checkedClass= (IType)checkedClasses[i];
-			if (checkedClass.getElementName().equals(typeName)){
+		for (Object checkedClass : checkedClasses) {
+			if (((IType)checkedClass).getElementName().equals(typeName)){
 				status.setWarning(WizardMessages.NewTestSuiteCreationWizardPage_infinite_recursion);
 				return status;
 			}

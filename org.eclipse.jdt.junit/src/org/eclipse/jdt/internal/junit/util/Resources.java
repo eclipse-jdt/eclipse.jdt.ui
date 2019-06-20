@@ -60,8 +60,7 @@ public class Resources {
 	 */
 	public static IStatus checkInSync(IResource[] resources) {
 		IStatus result= null;
-		for (int i= 0; i < resources.length; i++) {
-			IResource resource= resources[i];
+		for (IResource resource : resources) {
 			if (!resource.isSynchronized(IResource.DEPTH_INFINITE)) {
 				result= addOutOfSync(result, resource);
 			}

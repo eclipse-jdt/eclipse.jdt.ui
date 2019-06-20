@@ -93,8 +93,7 @@ public final class JUnitAddLibraryProposal implements IJavaCompletionProposal {
 		IClasspathEntry[] oldEntries= project.getRawClasspath();
 		ArrayList<IClasspathEntry> newEntries= new ArrayList<>(oldEntries.length + 1);
 		boolean added= false;
-		for (int i= 0; i < oldEntries.length; i++) {
-			IClasspathEntry curr= oldEntries[i];
+		for (IClasspathEntry curr : oldEntries) {
 			if (curr.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
 				IPath path= curr.getPath();
 				if (path.equals(entry.getPath())) {

@@ -1045,9 +1045,10 @@ public class TestRunnerViewPart extends ViewPart {
 			if (affectedChildren == null)
 				return true;
 
-			for (int i= 0; i < affectedChildren.length; i++) {
-				if (!processDelta(affectedChildren[i]))
+			for (IJavaElementDelta affectedChild : affectedChildren) {
+				if (!processDelta(affectedChild)) {
 					return false;
+				}
 			}
 			return true;
 		}
