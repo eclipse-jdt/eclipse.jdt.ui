@@ -2143,8 +2143,8 @@ public class SemanticHighlightings {
 	public static boolean affectsEnablement(IPreferenceStore store, PropertyChangeEvent event) {
 		String relevantKey= null;
 		SemanticHighlighting[] highlightings= getSemanticHighlightings();
-		for (int i= 0; i < highlightings.length; i++) {
-			if (event.getProperty().equals(getEnabledPreferenceKey(highlightings[i]))) {
+		for (SemanticHighlighting highlighting : highlightings) {
+			if (event.getProperty().equals(getEnabledPreferenceKey(highlighting))) {
 				relevantKey= event.getProperty();
 				break;
 			}
@@ -2152,8 +2152,8 @@ public class SemanticHighlightings {
 		if (relevantKey == null)
 			return false;
 
-		for (int i= 0; i < highlightings.length; i++) {
-			String key= getEnabledPreferenceKey(highlightings[i]);
+		for (SemanticHighlighting highlighting : highlightings) {
+			String key= getEnabledPreferenceKey(highlighting);
 			if (key.equals(relevantKey))
 				continue;
 			if (store.getBoolean(key))
@@ -2175,8 +2175,8 @@ public class SemanticHighlightings {
 	public static boolean isEnabled(IPreferenceStore store) {
 		SemanticHighlighting[] highlightings= getSemanticHighlightings();
 		boolean enable= false;
-		for (int i= 0; i < highlightings.length; i++) {
-			String enabledKey= getEnabledPreferenceKey(highlightings[i]);
+		for (SemanticHighlighting highlighting : highlightings) {
+			String enabledKey= getEnabledPreferenceKey(highlighting);
 			if (store.getBoolean(enabledKey)) {
 				enable= true;
 				break;

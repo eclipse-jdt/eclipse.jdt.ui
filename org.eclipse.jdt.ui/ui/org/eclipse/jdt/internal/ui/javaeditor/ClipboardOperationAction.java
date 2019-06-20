@@ -135,8 +135,8 @@ public final class ClipboardOperationAction extends TextEditorAction {
 
 		private static void writeArray(DataOutputStream dataOut, String[] array) throws IOException {
 			dataOut.writeInt(array.length);
-			for (int i = 0; i < array.length; i++) {
-				dataOut.writeUTF(array[i]);
+			for (String a : array) {
+				dataOut.writeUTF(a);
 			}
 		}
 
@@ -548,21 +548,18 @@ public final class ClipboardOperationAction extends TextEditorAction {
 
 	private void addImports(final ICompilationUnit unit, ClipboardData data) throws CoreException {
 		final ImportRewrite rewrite= StubUtility.createImportRewrite(unit, true);
-		String[] imports= data.getTypeImports();
-		for (int i= 0; i < imports.length; i++) {
-			String type= imports[i];
+		for (String type : data.getTypeImports()) {
 			if (type.indexOf('.') != -1 || JavaModelUtil.isVersionLessThan(unit.getJavaProject().getOption(JavaCore.COMPILER_COMPLIANCE, true), JavaCore.VERSION_1_4)) {
 				rewrite.addImport(type);
 			}
 		}
-		String[] staticImports= data.getStaticImports();
-		for (int i= 0; i < staticImports.length; i++) {
-			String name= Signature.getSimpleName(staticImports[i]);
+		for (String staticImport : data.getStaticImports()) {
+			String name= Signature.getSimpleName(staticImport);
 			boolean isField= !name.endsWith("()"); //$NON-NLS-1$
 			if (!isField) {
 				name= name.substring(0, name.length() - 2);
 			}
-			String qualifier= Signature.getQualifier(staticImports[i]);
+			String qualifier= Signature.getQualifier(staticImport);
 			rewrite.addStaticImport(qualifier, name, isField);
 		}
 

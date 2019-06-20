@@ -387,8 +387,8 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 
 		ArrayList<OverlayKey> overlayKeys= new ArrayList<>();
 
-		for (int i= 0; i < fSyntaxColorListModel.length; i++) {
-			String colorKey= fSyntaxColorListModel[i][1];
+		for (String[] c : fSyntaxColorListModel) {
+			String colorKey= c[1];
 			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, colorKey));
 			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, colorKey + BOLD));
 			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, colorKey + ITALIC));

@@ -63,25 +63,22 @@ public class SearchResultUpdater implements IElementChangedListener, IQueryListe
 	}
 
 	private void handleRemoved(Set<IAdaptable> removedElements) {
-		Object[] elements= fResult.getElements();
-		for (int i= 0; i < elements.length; i++) {
-			if (isContainedInRemoved(removedElements, elements[i])) {
-				if (elements[i] instanceof IJavaElement) {
-					IJavaElement je= (IJavaElement)elements[i];
+		for (Object element : fResult.getElements()) {
+			if (isContainedInRemoved(removedElements, element)) {
+				if (element instanceof IJavaElement) {
+					IJavaElement je= (IJavaElement) element;
 					if (!je.exists()) {
 						//System.out.println("removing: "+je+" in "+fResult.getUserData());
-						Match[] matches= fResult.getMatches(elements[i]);
-						for (int j= 0; j < matches.length; j++) {
-							fResult.removeMatch(matches[j]);
+						for (Match match : fResult.getMatches(element)) {
+							fResult.removeMatch(match);
 						}
 					}
-				} else if (elements[i] instanceof IResource) {
-					IResource resource= (IResource)elements[i];
+				} else if (element instanceof IResource) {
+					IResource resource= (IResource) element;
 					if (!resource.exists()) {
 						//System.out.println("removing: "+resource+" in "+fResult.getUserData());
-						Match[] matches= fResult.getMatches(elements[i]);
-						for (int j= 0; j < matches.length; j++) {
-							fResult.removeMatch(matches[j]);
+						for (Match match : fResult.getMatches(element)) {
+							fResult.removeMatch(match);
 						}
 					}
 
@@ -120,16 +117,15 @@ public class SearchResultUpdater implements IElementChangedListener, IQueryListe
 			if ((flags & REMOVED_FLAGS) != 0) {
 				potentiallyRemovedSet.add(delta.getElement());
 			} else {
-				IJavaElementDelta[] childDeltas= delta.getAffectedChildren();
-				for (int i= 0; i < childDeltas.length; i++) {
-					collectRemoved(potentiallyRemovedSet, removedElements, childDeltas[i]);
+				for (IJavaElementDelta childDelta : delta.getAffectedChildren()) {
+					collectRemoved(potentiallyRemovedSet, removedElements, childDelta);
 				}
 			}
 		}
 		IResourceDelta[] resourceDeltas= delta.getResourceDeltas();
 		if (resourceDeltas != null) {
-			for (int i= 0; i < resourceDeltas.length; i++) {
-				collectRemovals(removedElements, resourceDeltas[i]);
+			for (IResourceDelta resourceDelta : resourceDeltas) {
+				collectRemovals(removedElements, resourceDelta);
 			}
 		}
 	}
@@ -151,9 +147,8 @@ public class SearchResultUpdater implements IElementChangedListener, IQueryListe
 		if (delta.getKind() == IResourceDelta.REMOVED)
 			removals.add(delta.getResource());
 		else {
-			IResourceDelta[] children= delta.getAffectedChildren();
-			for (int i= 0; i < children.length; i++) {
-				collectRemovals(removals, children[i]);
+			for (IResourceDelta child : delta.getAffectedChildren()) {
+				collectRemovals(removals, child);
 			}
 		}
 	}

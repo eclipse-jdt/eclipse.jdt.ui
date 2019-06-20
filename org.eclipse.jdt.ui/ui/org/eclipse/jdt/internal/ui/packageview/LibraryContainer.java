@@ -67,9 +67,7 @@ public class LibraryContainer extends PackageFragmentRootContainer {
 	public IPackageFragmentRoot[] getPackageFragmentRoots() {
 		List<IPackageFragmentRoot> list= new ArrayList<>();
 		try {
-			IPackageFragmentRoot[] roots= getJavaProject().getPackageFragmentRoots();
-			for (int i= 0; i < roots.length; i++) {
-				IPackageFragmentRoot root= roots[i];
+			for (IPackageFragmentRoot root : getJavaProject().getPackageFragmentRoots()) {
 				int classpathEntryKind= root.getRawClasspathEntry().getEntryKind();
 				if (classpathEntryKind == IClasspathEntry.CPE_LIBRARY || classpathEntryKind == IClasspathEntry.CPE_VARIABLE) {
 					list.add(root);

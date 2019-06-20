@@ -127,10 +127,10 @@ public class ClassFileMarkerAnnotationModel extends AbstractMarkerAnnotationMode
 	}
 
 	private void checkDeltas(IMarkerDelta[] markerDeltas) throws CoreException {
-		for (int i= 0; i < markerDeltas.length; i++) {
-			if (isAffected(markerDeltas[i])) {
-				IMarker marker= markerDeltas[i].getMarker();
-				switch (markerDeltas[i].getKind()) {
+		for (IMarkerDelta markerDelta : markerDeltas) {
+			if (isAffected(markerDelta)) {
+				IMarker marker= markerDelta.getMarker();
+				switch (markerDelta.getKind()) {
 					case IResourceDelta.ADDED :
 						addMarkerAnnotation(marker);
 						fChangesApplied= true;

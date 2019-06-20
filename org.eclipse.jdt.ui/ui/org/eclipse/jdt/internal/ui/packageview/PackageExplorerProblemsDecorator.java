@@ -38,10 +38,8 @@ public class PackageExplorerProblemsDecorator extends TreeHierarchyLayoutProblem
 			return super.computeAdornmentFlags(obj);
 
 		IWorkingSet workingSet= (IWorkingSet)obj;
-		IAdaptable[] elements= workingSet.getElements();
 		int result= 0;
-		for (int i= 0; i < elements.length; i++) {
-			IAdaptable element= elements[i];
+		for (IAdaptable element : workingSet.getElements()) {
 			int flags= super.computeAdornmentFlags(element);
 			if ((flags & JavaElementImageDescriptor.BUILDPATH_ERROR) != 0)
 				return JavaElementImageDescriptor.BUILDPATH_ERROR;

@@ -52,8 +52,9 @@ public final class JavaModelMerger extends AbstractResourceMappingMerger {
 	protected IProject[] getDependencies(final IProject[] projects) {
 		Assert.isNotNull(projects);
 		final Set<IProject> set= new HashSet<>();
-		for (int index= 0; index < projects.length; index++)
-			getDependentProjects(set, projects[index]);
+		for (IProject project : projects) {
+			getDependentProjects(set, project);
+		}
 		final IProject[] result= new IProject[set.size()];
 		set.toArray(result);
 		return result;
@@ -74,12 +75,11 @@ public final class JavaModelMerger extends AbstractResourceMappingMerger {
 		if (model != null) {
 			try {
 				final String name= project.getName();
-				final IJavaProject[] projects= model.getJavaProjects();
-				for (int index= 0; index < projects.length; index++) {
-					final String[] names= projects[index].getRequiredProjectNames();
-					for (int offset= 0; offset < names.length; offset++) {
-						if (name.equals(names[offset]))
-							set.add(projects[index].getProject());
+				for (IJavaProject p : model.getJavaProjects()) {
+					for (String n : p.getRequiredProjectNames()) {
+						if (name.equals(n)) {
+							set.add(p.getProject());
+						}
 					}
 				}
 			} catch (JavaModelException exception) {

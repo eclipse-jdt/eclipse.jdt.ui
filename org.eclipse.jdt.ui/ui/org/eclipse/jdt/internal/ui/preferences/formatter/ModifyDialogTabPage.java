@@ -271,8 +271,11 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 			fCombo.setItems(items);
 
 			int max= 0;
-			for (int i= 0; i < items.length; i++)
-			    if (items[i].length() > max) max= items[i].length();
+			for (String item : items) {
+				if (item.length() > max) {
+					max= item.length();
+				}
+			}
 
 			fCombo.setLayoutData(createGridData(1, GridData.HORIZONTAL_ALIGN_FILL, fCombo.computeSize(SWT.DEFAULT, SWT.DEFAULT).x));
 
@@ -709,10 +712,10 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 			int x = fMinimalWidth;
 			int y = fMinimalHight;
 			Control[] children = composite.getChildren();
-			for (int i = 0; i < children.length; i++) {
-				Point size = children[i].computeSize(SWT.DEFAULT, SWT.DEFAULT, force);
-				x = Math.max(x, size.x);
-				y = Math.max(y, size.y);
+			for (Control c : children) {
+				Point size= c.computeSize(SWT.DEFAULT, SWT.DEFAULT, force);
+				x= Math.max(x, size.x);
+				y= Math.max(y, size.y);
 			}
 
 			Rectangle area= fContainer.getClientArea();
@@ -741,9 +744,8 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 		@Override
 		public void layout(Composite composite, boolean force) {
 			Rectangle rect = composite.getClientArea();
-			Control[] children = composite.getChildren();
-			for (int i = 0; i < children.length; i++) {
-				children[i].setSize(rect.width, rect.height);
+			for (Control c : composite.getChildren()) {
+				c.setSize(rect.width, rect.height);
 			}
 		}
 	}

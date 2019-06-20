@@ -302,8 +302,8 @@ public class EditTemplateDialog extends StatusDialog {
 			fContextCombo= new Combo(composite, SWT.READ_ONLY);
 			SWTUtil.setDefaultVisibleItemCount(fContextCombo);
 
-			for (int i= 0; i < fContextTypes.length; i++) {
-				fContextCombo.add(fContextTypes[i][1]);
+			for (String[] fContextType : fContextTypes) {
+				fContextCombo.add(fContextType[1]);
 			}
 
 			fContextCombo.addModifyListener(listener);
@@ -383,9 +383,9 @@ public class EditTemplateDialog extends StatusDialog {
 	private String getContextId() {
 		if (fContextCombo != null && !fContextCombo.isDisposed()) {
 			String name= fContextCombo.getText();
-			for (int i= 0; i < fContextTypes.length; i++) {
-				if (name.equals(fContextTypes[i][1])) {
-					return fContextTypes[i][0];
+			for (String[] fContextType : fContextTypes) {
+				if (name.equals(fContextType[1])) {
+					return fContextType[0];
 				}
 			}
 		}

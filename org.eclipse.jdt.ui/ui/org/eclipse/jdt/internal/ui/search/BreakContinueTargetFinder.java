@@ -205,9 +205,10 @@ public class BreakContinueTargetFinder extends ASTVisitor implements IOccurrence
 	}
 
 	private static boolean isAnyInstanceOf(Class<?>[] continueTargets, ASTNode node) {
-		for (int i= 0; i < continueTargets.length; i++) {
-			if (continueTargets[i].isInstance(node))
+		for (Class<?> continueTarget : continueTargets) {
+			if (continueTarget.isInstance(node)) {
 				return true;
+			}
 		}
 		return false;
 	}

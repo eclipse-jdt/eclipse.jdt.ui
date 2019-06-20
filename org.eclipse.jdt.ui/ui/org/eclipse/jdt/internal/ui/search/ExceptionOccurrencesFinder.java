@@ -170,9 +170,9 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 			if (typeBinding != null) {
 				IMethodBinding methodBinding= Bindings.findMethodInHierarchy(typeBinding, "close", new ITypeBinding[0]); //$NON-NLS-1$
 				if (methodBinding != null) {
-					ITypeBinding[] exceptionTypes= methodBinding.getExceptionTypes();
-					for (int j= 0; j < exceptionTypes.length; j++) {
-						if (matches(exceptionTypes[j])) { // a close() throws the caught exception
+					for (ITypeBinding exceptionType : methodBinding.getExceptionTypes()) {
+						if (matches(exceptionType)) {
+							// a close() throws the caught exception
 							// mark name of resource
 							if (variable instanceof VariableDeclarationExpression) {
 								VariableDeclarationExpression varDeclExpr= (VariableDeclarationExpression) variable;
@@ -190,7 +190,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 								Block body= tryStatement.getBody();
 								int offset= body.getStartPosition() + body.getLength() - 1; // closing bracket of try block
 								fResult.add(new OccurrenceLocation(offset, 1, 0, Messages.format(SearchMessages.ExceptionOccurrencesFinder_occurrence_implicit_close_description,
-										BasicElementLabels.getJavaElementName(fException.getName()))));
+									BasicElementLabels.getJavaElementName(fException.getName()))));
 							}
 						}
 					}
@@ -398,9 +398,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 	private boolean matches(IMethodBinding binding) {
 		if (binding == null)
 			return false;
-		ITypeBinding[] exceptions= binding.getExceptionTypes();
-		for (int i = 0; i < exceptions.length; i++) {
-			ITypeBinding exception= exceptions[i];
+		for (ITypeBinding exception : binding.getExceptionTypes()) {
 			if(matches(exception))
 				return true;
 		}

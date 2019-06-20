@@ -227,8 +227,8 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 					if (children == null || children.length == 0)
 						return null;
 
-					for (int i= 0; i < children.length; i++) {
-						IJavaElementDelta d= findElement(unit, children[i]);
+					for (IJavaElementDelta child : children) {
+						IJavaElementDelta d= findElement(unit, child);
 						if (d != null)
 							return d;
 					}
@@ -275,8 +275,8 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 
 				protected IJavaElement[] filter(IJavaElement[] children) {
 					boolean initializers= false;
-					for (int i= 0; i < children.length; i++) {
-						if (matches(children[i])) {
+					for (IJavaElement child : children) {
+						if (matches(child)) {
 							initializers= true;
 							break;
 						}
@@ -286,10 +286,11 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 						return children;
 
 					Vector<IJavaElement> v= new Vector<>();
-					for (int i= 0; i < children.length; i++) {
-						if (matches(children[i]))
+					for (IJavaElement child : children) {
+						if (matches(child)) {
 							continue;
-						v.addElement(children[i]);
+						}
+						v.addElement(child);
 					}
 
 					IJavaElement[] result= new IJavaElement[v.size()];
@@ -452,8 +453,8 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 					if (changed != null) {
 						IResource resource= getUnderlyingResource();
 						if (resource != null) {
-							for (int i= 0; i < changed.length; i++) {
-								if (changed[i] != null && changed[i].equals(resource)) {
+							for (Object c : changed) {
+								if (c != null && c.equals(resource)) {
 									// change event to a full refresh
 									event= new LabelProviderChangedEvent((IBaseLabelProvider) event.getSource());
 									break;

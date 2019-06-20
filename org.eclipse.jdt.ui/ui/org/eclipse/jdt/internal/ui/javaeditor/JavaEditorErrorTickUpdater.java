@@ -63,8 +63,8 @@ public class JavaEditorErrorTickUpdater implements IProblemChangedListener {
 			IJavaElement jelement= input.getAdapter(IJavaElement.class);
 			if (jelement != null) {
 				IResource resource= jelement.getResource();
-				for (int i = 0; i < changedResources.length; i++) {
-					if (changedResources[i].equals(resource)) {
+				for (IResource changedResource : changedResources) {
+					if (changedResource.equals(resource)) {
 						updateEditorImage(jelement);
 					}
 				}

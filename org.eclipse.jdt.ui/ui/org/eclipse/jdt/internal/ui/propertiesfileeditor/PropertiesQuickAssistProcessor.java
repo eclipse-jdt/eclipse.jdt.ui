@@ -15,7 +15,6 @@
 package org.eclipse.jdt.internal.ui.propertiesfileeditor;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.swt.graphics.Image;
@@ -49,6 +48,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
 import org.eclipse.jdt.internal.corext.refactoring.nls.AccessorClassModifier;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSPropertyFileModifier;
@@ -61,7 +61,6 @@ import org.eclipse.jdt.ui.text.java.correction.ChangeCorrectionProposal;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.EditAnnotator;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 /**
  * The properties file quick assist processor.
@@ -172,8 +171,7 @@ public class PropertiesQuickAssistProcessor {
 		if (keys == null || keys.size() == 0)
 			return false;
 
-		for (Iterator<String> iterator= keys.iterator(); iterator.hasNext();) {
-			String key= iterator.next();
+		for (String key : keys) {
 			if (!isValidJavaIdentifier(key))
 				continue;
 			IField field= accessorClass.getField(key);
@@ -231,8 +229,7 @@ public class PropertiesQuickAssistProcessor {
 		if (resultingCollections == null)
 			return true;
 
-		for (Iterator<String> iterator= keys.iterator(); iterator.hasNext();) {
-			String key= iterator.next();
+		for (String key : keys) {
 			IField field= accessorClass.getField(key);
 			if (field.exists())
 				fields.add(key);
@@ -369,9 +366,9 @@ public class PropertiesQuickAssistProcessor {
 			final StringBuffer buf= new StringBuffer();
 
 			try {
-				for (int i= 0; i < fChanges.length; i++) {
-					if (fChanges[i] instanceof TextChange) {
-						TextChange change= (TextChange) fChanges[i];
+				for (Change fChange : fChanges) {
+					if (fChange instanceof TextChange) {
+						TextChange change= (TextChange) fChange;
 						String filename= getFileName(change);
 						if (filename != null) {
 							buf.append("<b>"); //$NON-NLS-1$
@@ -381,9 +378,7 @@ public class PropertiesQuickAssistProcessor {
 						}
 						change.setKeepPreviewEdits(true);
 						IDocument currentContent= change.getCurrentDocument(monitor);
-
 						TextEdit rootEdit= change.getEdit();
-
 						EditAnnotator ea= new EditAnnotator(buf, currentContent) {
 							@Override
 							protected boolean rangeRemoved(TextEdit edit) {

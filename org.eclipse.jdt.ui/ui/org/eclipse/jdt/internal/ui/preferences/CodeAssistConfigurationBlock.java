@@ -251,9 +251,8 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 			private void deepSetEnabled(final Control control, boolean enabled) {
 				control.setEnabled(enabled);
 				if (control instanceof Composite) {
-					Control[] children= ((Composite)control).getChildren();
-					for (int i= 0; i < children.length; i++) {
-						deepSetEnabled(children[i], enabled);
+					for (Control child : ((Composite)control).getChildren()) {
+						deepSetEnabled(child, enabled);
 					}
 				}
 			}

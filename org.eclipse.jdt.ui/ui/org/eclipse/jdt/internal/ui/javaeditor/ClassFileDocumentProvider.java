@@ -138,10 +138,10 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 				return true;
 			}
 
-			IJavaElementDelta[] subdeltas= delta.getAffectedChildren();
-			for (int i= 0; i < subdeltas.length; i++) {
-				if (check(input, subdeltas[i]))
+			for (IJavaElementDelta subdelta : delta.getAffectedChildren()) {
+				if (check(input, subdelta)) {
 					return true;
+				}
 			}
 
 			if ((delta.getFlags() & IJavaElementDelta.F_SOURCEDETACHED) != 0 ||

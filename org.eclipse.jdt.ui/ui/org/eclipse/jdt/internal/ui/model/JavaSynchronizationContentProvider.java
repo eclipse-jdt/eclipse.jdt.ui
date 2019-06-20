@@ -239,27 +239,23 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 	 */
 	private IJavaProject[] getChangedProjects(final IDiffChangeEvent event) {
 		final Set<IJavaProject> result= new HashSet<>();
-		final IDiff[] changes= event.getChanges();
-		for (int index= 0; index < changes.length; index++) {
-			final IResource resource= ResourceDiffTree.getResourceFor(changes[index]);
+		for (IDiff change : event.getChanges()) {
+			final IResource resource = ResourceDiffTree.getResourceFor(change);
 			if (resource != null) {
 				final IJavaProject project= asJavaProject(resource.getProject());
 				if (project != null)
 					result.add(project);
 			}
 		}
-		final IDiff[] additions= event.getAdditions();
-		for (int index= 0; index < additions.length; index++) {
-			final IResource resource= ResourceDiffTree.getResourceFor(additions[index]);
+		for (IDiff addition : event.getAdditions()) {
+			final IResource resource = ResourceDiffTree.getResourceFor(addition);
 			if (resource != null) {
 				final IJavaProject project= asJavaProject(resource.getProject());
 				if (project != null)
 					result.add(project);
 			}
 		}
-		final IPath[] removals = event.getRemovals();
-		for (int i = 0; i < removals.length; i++) {
-			IPath path = removals[i];
+		for (IPath path : event.getRemovals()) {
 			if (path.segmentCount() > 0) {
 				IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(path.segment(0));
 				// Only consider projects that still exist
@@ -300,12 +296,14 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 	 */
 	private Object[] getFilteredElements(final Object parent, final Object[] children) {
 		final List<Object> result= new ArrayList<>(children.length);
-		for (int index= 0; index < children.length; index++) {
-			if (children[index] instanceof IFolder) {
-				if (!(JavaCore.create((IFolder) children[index]) instanceof IPackageFragmentRoot))
-					result.add(children[index]);
-			} else
-				result.add(children[index]);
+		for (Object child : children) {
+			if (child instanceof IFolder) {
+				if (!(JavaCore.create((IFolder) child) instanceof IPackageFragmentRoot)) {
+					result.add(child);
+				}
+			} else {
+				result.add(child);
+			}
 		}
 		return result.toArray();
 	}
@@ -327,9 +325,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 	 */
 	private Set<IProject> getDeletedProjects(final IDiffChangeEvent event) {
 		final Set<IProject> result= new HashSet<>();
-		final IPath[] deletions= event.getRemovals();
-		for (int index= 0; index < deletions.length; index++) {
-			final IPath path= deletions[index];
+		for (IPath path : event.getRemovals()) {
 			if (path.segmentCount() > 0) {
 				IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(path.segment(0));
 				if (!project.isAccessible())
@@ -368,27 +364,25 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 	 */
 	private Object[] getJavaProjectChildren(final ISynchronizationContext context, final Object parent, final Object[] children) {
 		final LinkedList<Object> list= new LinkedList<>();
-		for (int index= 0; index < children.length; index++) {
-			if (children[index] instanceof IPackageFragment) {
-				final IPackageFragment fragment= (IPackageFragment) children[index];
+		for (Object child : children) {
+			if (child instanceof IPackageFragment) {
+				final IPackageFragment fragment= (IPackageFragment) child;
 				if (getChildren(fragment).length == 0)
 					continue;
 			}
 			// We need to check whether a folder has non-fragment children (bug 138767)
-			if (children[index] instanceof IFolder) {
-				IFolder folder = (IFolder) children[index];
+			if (child instanceof IFolder) {
+				IFolder folder= (IFolder) child;
 				if (getChildren(folder).length == 0)
 					continue;
 			}
-			list.add(children[index]);
+			list.add(child);
 		}
 
 		final IResource resource= JavaModelProvider.getResource(parent);
 		if (resource != null) {
 			final IResourceDiffTree tree= context.getDiffTree();
-			final IResource[] members= tree.members(resource);
-			for (int index= 0; index < members.length; index++) {
-				IResource child = members[index];
+			for (IResource child : tree.members(resource)) {
 				if (isVisible(context, child)) {
 					if (hasPhantomFolder(tree, child) && ! containsAsResource(list, child)) {
 						// Add any phantom resources that are visible
@@ -414,8 +408,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 	}
 
 	private boolean containsAsResource(List<Object> list, IResource child) {
-		for (Iterator<Object> iter= list.iterator(); iter.hasNext(); ) {
-			Object element= iter.next();
+		for (Object element : list) {
 			if (child.equals(element))
 				return true;
 			if (element instanceof IJavaElement) {
@@ -427,7 +420,6 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 					continue;
 				}
 			}
-			
 		}
 		return false;
 	}
@@ -481,17 +473,16 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 		IResource resource= packageFragment.getResource();
 		if (resource != null) {
 			final IResourceDiffTree tree= context.getDiffTree();
-			final IResource[] members= tree.members(resource);
-			for (int index= 0; index < members.length; index++) {
-				final int type= members[index].getType();
+			for (IResource member : tree.members(resource)) {
+				final int type= member.getType();
 				if (type == IResource.FILE) {
-					final IDiff diff= tree.getDiff(members[index]);
+					final IDiff diff= tree.getDiff(member);
 					if (diff != null && isVisible(diff)) {
-						if (isInScope(context.getScope(), parent, members[index])) {
-							final IJavaElement element= JavaCore.create(members[index]);
+						if (isInScope(context.getScope(), parent, member)) {
+							final IJavaElement element= JavaCore.create(member);
 							if (element == null) {
 								if (!packageFragment.isDefaultPackage()) {
-									set.add(members[index]); //
+									set.add(member); //
 								}
 							} else {
 								set.add(element);
@@ -517,39 +508,39 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 	 */
 	private Object[] getPackageFragmentRootChildren(final ISynchronizationContext context, final Object parent, final Object[] children) {
 		final Set<Object> set= new HashSet<>();
-		for (int index= 0; index < children.length; index++) {
-			if (children[index] instanceof IPackageFragment) {
-				IPackageFragment fragment = (IPackageFragment) children[index];
+		for (Object child : children) {
+			if (child instanceof IPackageFragment) {
+				IPackageFragment fragment = (IPackageFragment) child;
 				if (fragment.isOpen() && getChildren(fragment).length == 0)
 					// Don't add the default package unless it has children
 					continue;
 			}
-			set.add(children[index]);
+			set.add(child);
 		}
 		final IResource resource= JavaModelProvider.getResource(parent);
 		if (resource != null) {
 			final IResourceDiffTree tree= context.getDiffTree();
-			final IResource[] members= tree.members(resource);
-			for (int index= 0; index < members.length; index++) {
-				final int type= members[index].getType();
-				final boolean contained= isInScope(context.getScope(), parent, members[index]);
-				final boolean visible= isVisible(context, members[index]);
+			for (IResource member : tree.members(resource)) {
+				final int type= member.getType();
+				final boolean contained= isInScope(context.getScope(), parent, member);
+				final boolean visible= isVisible(context, member);
 				if (type == IResource.FILE && contained && visible) {
 					// If the file is not a compilation unit add it.
 					// (compilation units are always children of packages so they
 					// don't need to be added here)
-					final IJavaElement element= JavaCore.create((IFile) members[index]);
-					if (element == null)
-						set.add(members[index]);
-				} else if (type == IResource.FOLDER && contained && visible && tree.getDiff(members[index]) != null) {
+					final IJavaElement element= JavaCore.create((IFile) member);
+					if (element == null) {
+						set.add(member);
+					}
+				} else if (type == IResource.FOLDER && contained && visible && tree.getDiff(member) != null) {
 					// If the folder is out-of-sync, add it
-					final IJavaElement element= JavaCore.create(members[index]);
+					final IJavaElement element= JavaCore.create(member);
 					if (element != null)
 						set.add(element);
 				}
 				if (type == IResource.FOLDER) {
 					// If the folder contains java elements, add it
-					final IFolder folder= (IFolder) members[index];
+					final IFolder folder= (IFolder) member;
 					tree.accept(folder.getFullPath(), new IDiffVisitor() {
 
 						@Override
@@ -596,8 +587,8 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 					}
 				}
 				if (element instanceof IFolder) {
-					IFolder folder = (IFolder) element;
-					IJavaElement javaElement = JavaCore.create(folder);
+					IFolder folder= (IFolder) element;
+					IJavaElement javaElement= JavaCore.create(folder);
 					// If the folder is also a package, don't show it
 					// as a folder since it will be shown as a package
 					if (javaElement instanceof IPackageFragmentRoot) {
@@ -650,10 +641,9 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 	 * @return the visible projects
 	 */
 	private Set<IJavaProject> getVisibleProjects() {
-		final TreeItem[] children= ((TreeViewer) getViewer()).getTree().getItems();
 		final Set<IJavaProject> result= new HashSet<>();
-		for (int index= 0; index < children.length; index++) {
-			final Object data= children[index].getData();
+		for (TreeItem child : ((TreeViewer) getViewer()).getTree().getItems()) {
+			final Object data= child.getData();
 			if (data instanceof IJavaProject)
 				result.add((IJavaProject) data);
 		}
@@ -675,8 +665,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 		final List<IJavaProject> refreshes= new ArrayList<>(changed.length);
 		final List<IJavaProject> additions= new ArrayList<>(changed.length);
 		final List<IJavaProject> removals= new ArrayList<>(changed.length);
-		for (int index= 0; index < changed.length; index++) {
-			final IJavaProject project= changed[index];
+		for (IJavaProject project : changed) {
 			if (hasVisibleChanges(event.getTree(), project)) {
 				if (existing.contains(project))
 					refreshes.add(project);
@@ -735,14 +724,18 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 		final IResource[] roots= scope.getRoots();
 		final IPath path= resource.getFullPath();
 		if (element instanceof IPackageFragment) {
-			for (int index= 0; index < roots.length; index++)
-				if (path.equals(roots[index].getFullPath().removeLastSegments(1)))
+			for (IResource root : roots) {
+				if (path.equals(root.getFullPath().removeLastSegments(1))) {
 					return true;
+				}
+			}
 			return false;
 		}
-		for (int index= 0; index < roots.length; index++)
-			if (path.isPrefixOf(roots[index].getFullPath()))
+		for (IResource root : roots) {
+			if (path.isPrefixOf(root.getFullPath())) {
 				return true;
+			}
+		}
 		return false;
 	}
 

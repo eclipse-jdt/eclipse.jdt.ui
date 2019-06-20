@@ -30,11 +30,10 @@ public class JavaSearchTableContentProvider extends JavaSearchContentProvider {
 	public Object[] getElements(Object inputElement) {
 		if (inputElement instanceof AbstractTextSearchResult) {
 			Set<Object> filteredElements= new HashSet<>();
-			Object[] rawElements= ((AbstractTextSearchResult)inputElement).getElements();
 			int limit= getPage().getElementLimit().intValue();
-			for (int i= 0; i < rawElements.length; i++) {
-				if (getPage().getDisplayedMatchCount(rawElements[i]) > 0) {
-					filteredElements.add(rawElements[i]);
+			for (Object rawElement : ((AbstractTextSearchResult)inputElement).getElements()) {
+				if (getPage().getDisplayedMatchCount(rawElement) > 0) {
+					filteredElements.add(rawElement);
 					if (limit != -1 && limit < filteredElements.size()) {
 						break;
 					}
@@ -56,18 +55,18 @@ public class JavaSearchTableContentProvider extends JavaSearchContentProvider {
 		Set<Object> updated= new HashSet<>();
 		Set<Object> added= new HashSet<>();
 		Set<Object> removed= new HashSet<>();
-		for (int i= 0; i < updatedElements.length; i++) {
-			if (getPage().getDisplayedMatchCount(updatedElements[i]) > 0) {
-				if (viewer.testFindItem(updatedElements[i]) != null)
-					updated.add(updatedElements[i]);
-				else {
+		for (Object updatedElement : updatedElements) {
+			if (getPage().getDisplayedMatchCount(updatedElement) > 0) {
+				if (viewer.testFindItem(updatedElement) != null) {
+					updated.add(updatedElement);
+				} else {
 					if (addLimit > 0) {
-						added.add(updatedElements[i]);
+						added.add(updatedElement);
 						addLimit--;
 					}
 				}
 			} else {
-				removed.add(updatedElements[i]);
+				removed.add(updatedElement);
 			}
 		}
 

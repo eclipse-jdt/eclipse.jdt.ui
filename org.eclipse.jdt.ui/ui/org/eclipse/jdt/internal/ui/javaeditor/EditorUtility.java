@@ -652,13 +652,9 @@ public class EditorUtility {
 		Set<IEditorInput> inputs= new HashSet<>();
 		List<IEditorPart> result= new ArrayList<>(0);
 		IWorkbench workbench= PlatformUI.getWorkbench();
-		IWorkbenchWindow[] windows= workbench.getWorkbenchWindows();
-		for (int i= 0; i < windows.length; i++) {
-			IWorkbenchPage[] pages= windows[i].getPages();
-			for (int x= 0; x < pages.length; x++) {
-				IEditorPart[] editors= pages[x].getDirtyEditors();
-				for (int z= 0; z < editors.length; z++) {
-					IEditorPart ep= editors[z];
+		for (IWorkbenchWindow window : workbench.getWorkbenchWindows()) {
+			for (IWorkbenchPage page : window.getPages()) {
+				for (IEditorPart ep : page.getDirtyEditors()) {
 					IEditorInput input= ep.getEditorInput();
 					if (inputs.add(input)) {
 						if (!skipNonResourceEditors || isResourceEditorInput(input)) {
@@ -674,8 +670,8 @@ public class EditorUtility {
 	private static boolean isResourceEditorInput(IEditorInput input) {
 		if (input instanceof MultiEditorInput) {
 			IEditorInput[] inputs= ((MultiEditorInput) input).getInput();
-			for (int i= 0; i < inputs.length; i++) {
-				if (inputs[i].getAdapter(IResource.class) != null) {
+			for (IEditorInput i : inputs) {
+				if (i.getAdapter(IResource.class) != null) {
 					return true;
 				}
 			}
@@ -714,13 +710,9 @@ public class EditorUtility {
 		Set<IEditorInput> inputs= new HashSet<>();
 		List<IEditorPart> result= new ArrayList<>(0);
 		IWorkbench workbench= PlatformUI.getWorkbench();
-		IWorkbenchWindow[] windows= workbench.getWorkbenchWindows();
-		for (int i= 0; i < windows.length; i++) {
-			IWorkbenchPage[] pages= windows[i].getPages();
-			for (int x= 0; x < pages.length; x++) {
-				IEditorPart[] editors= pages[x].getDirtyEditors();
-				for (int z= 0; z < editors.length; z++) {
-					IEditorPart ep= editors[z];
+		for (IWorkbenchWindow window : workbench.getWorkbenchWindows()) {
+			for (IWorkbenchPage page : window.getPages()) {
+				for (IEditorPart ep : page.getDirtyEditors()) {
 					IEditorInput input= ep.getEditorInput();
 					if (!mustSaveDirtyEditor(ep, input, saveUnknownEditors))
 						continue;
@@ -849,8 +841,7 @@ public class EditorUtility {
 					//     forAll r1,r2 element differences: r1.rightStart()<r2.rightStart() -> r1.rightEnd()<r2.rightStart
 
 					ArrayList<IRegion> regions= new ArrayList<>();
-					for (int i= 0; i < differences.length; i++) {
-						RangeDifference curr= differences[i];
+					for (RangeDifference curr : differences) {
 						if (curr.kind() == RangeDifference.CHANGE && curr.rightLength() > 0) {
 							int startLine= curr.rightStart();
 							int endLine= curr.rightEnd() - 1;

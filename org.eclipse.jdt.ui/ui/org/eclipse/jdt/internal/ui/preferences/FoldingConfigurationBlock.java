@@ -15,7 +15,6 @@ package org.eclipse.jdt.internal.ui.preferences;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.swt.SWT;
@@ -136,8 +135,8 @@ class FoldingConfigurationBlock implements IPreferenceConfigurationBlock {
 		reg.reloadExtensions();
 		JavaFoldingStructureProviderDescriptor[] descs= reg.getFoldingProviderDescriptors();
 		Map<String, JavaFoldingStructureProviderDescriptor> map= new HashMap<>();
-		for (int i= 0; i < descs.length; i++) {
-			map.put(descs[i].getId(), descs[i]);
+		for (JavaFoldingStructureProviderDescriptor desc : descs) {
+			map.put(desc.getId(), desc);
 		}
 		return map;
 	}
@@ -354,8 +353,7 @@ class FoldingConfigurationBlock implements IPreferenceConfigurationBlock {
 
 	@Override
 	public void performOk() {
-		for (Iterator<IJavaFoldingPreferenceBlock> it= fProviderPreferences.values().iterator(); it.hasNext();) {
-			IJavaFoldingPreferenceBlock prefs= it.next();
+		for (IJavaFoldingPreferenceBlock prefs : fProviderPreferences.values()) {
 			prefs.performOk();
 		}
 	}
@@ -363,16 +361,14 @@ class FoldingConfigurationBlock implements IPreferenceConfigurationBlock {
 	@Override
 	public void performDefaults() {
 		restoreFromPreferences();
-		for (Iterator<IJavaFoldingPreferenceBlock> it= fProviderPreferences.values().iterator(); it.hasNext();) {
-			IJavaFoldingPreferenceBlock prefs= it.next();
+		for (IJavaFoldingPreferenceBlock prefs : fProviderPreferences.values()) {
 			prefs.performDefaults();
 		}
 	}
 
 	@Override
 	public void dispose() {
-		for (Iterator<IJavaFoldingPreferenceBlock> it= fProviderPreferences.values().iterator(); it.hasNext();) {
-			IJavaFoldingPreferenceBlock prefs= it.next();
+		for (IJavaFoldingPreferenceBlock prefs : fProviderPreferences.values()) {
 			prefs.dispose();
 		}
 	}

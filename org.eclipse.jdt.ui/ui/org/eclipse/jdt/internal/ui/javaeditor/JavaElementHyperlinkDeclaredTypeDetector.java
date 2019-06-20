@@ -48,8 +48,8 @@ public class JavaElementHyperlinkDeclaredTypeDetector extends JavaElementHyperli
 					if (Signature.getTypeSignatureKind(typeSignature) == Signature.INTERSECTION_TYPE_SIGNATURE) {
 						String[] bounds= Signature.getIntersectionTypeBounds(typeSignature);
 						qualify|= bounds.length >= 2;
-						for (int i= 0; i < bounds.length; i++) {
-							hyperlinksCollector.add(new JavaElementDeclaredTypeHyperlink(wordRegion, openAction, element, bounds[i], qualify));
+						for (String bound : bounds) {
+							hyperlinksCollector.add(new JavaElementDeclaredTypeHyperlink(wordRegion, openAction, element, bound, qualify));
 						}
 					} else {
 						hyperlinksCollector.add(new JavaElementDeclaredTypeHyperlink(wordRegion, openAction, element, qualify));

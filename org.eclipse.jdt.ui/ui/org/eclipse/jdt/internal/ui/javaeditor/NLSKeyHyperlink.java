@@ -179,8 +179,8 @@ public class NLSKeyHyperlink implements IHyperlink {
 						// test whether it's the key
 						IHyperlink[] hyperlinks= detector.detectHyperlinks(null, region, false);
 						if (hyperlinks != null) {
-							for (int i= 0; i < hyperlinks.length; i++) {
-								IRegion hyperlinkRegion= hyperlinks[i].getHyperlinkRegion();
+							for (IHyperlink hyperlink : hyperlinks) {
+								IRegion hyperlinkRegion= hyperlink.getHyperlinkRegion();
 								found= key.equals(document.get(hyperlinkRegion.getOffset(), hyperlinkRegion.getLength()));
 							}
 						} else if (document instanceof IDocumentExtension3) {

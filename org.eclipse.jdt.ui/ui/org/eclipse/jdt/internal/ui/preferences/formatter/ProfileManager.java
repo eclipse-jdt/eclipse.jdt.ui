@@ -86,8 +86,7 @@ public abstract class ProfileManager extends Observable {
 
 		public boolean hasEqualSettings(Map<String, String> otherMap, Collection<String> allKeys) {
 			Map<String, String> settings= getSettings();
-			for (Iterator<String> iter= allKeys.iterator(); iter.hasNext(); ){
-				String key= iter.next();
+			for (String key : allKeys) {
 				Object other= otherMap.get(key);
 				Object curr= settings.get(key);
 				if (other == null) {
@@ -413,9 +412,9 @@ public abstract class ProfileManager extends Observable {
 			if (map != null) {
 
 				List<String> allKeys= new ArrayList<>();
-				for (int i= 0; i < fKeySets.length; i++) {
-			        allKeys.addAll(fKeySets[i].getKeys());
-		        }
+				for (KeySet fKeySet : fKeySets) {
+					allKeys.addAll(fKeySet.getKeys());
+				}
 		        Collections.sort(allKeys);
 
 				Profile matching= null;
@@ -480,17 +479,16 @@ public abstract class ProfileManager extends Observable {
 	}
 
 	public static boolean hasProjectSpecificSettings(IScopeContext context, KeySet[] keySets) {
-		for (int i= 0; i < keySets.length; i++) {
-	        KeySet keySet= keySets[i];
-	        IEclipsePreferences preferences= context.getNode(keySet.getNodeName());
-	        for (final Iterator<String> keyIter= keySet.getKeys().iterator(); keyIter.hasNext();) {
-	            final String key= keyIter.next();
-	            Object val= preferences.get(key, null);
-	            if (val != null) {
-	            	return true;
-	            }
-            }
-        }
+		for (KeySet keySet : keySets) {
+			IEclipsePreferences preferences= context.getNode(keySet.getNodeName());
+			for (final Iterator<String> keyIter= keySet.getKeys().iterator(); keyIter.hasNext();) {
+				final String key= keyIter.next();
+				Object val= preferences.get(key, null);
+				if (val != null) {
+					return true;
+				}
+			}
+		}
 		return false;
 	}
 
@@ -509,19 +507,18 @@ public abstract class ProfileManager extends Observable {
 		int version= uiPrefs.getInt(fProfileVersionKey, fProfileVersioner.getFirstVersion());
 		if (version != fProfileVersioner.getCurrentVersion()) {
 			Map<String, String> allOptions= new HashMap<>();
-			for (int i= 0; i < fKeySets.length; i++) {
-	            addAll(context.getNode(fKeySets[i].getNodeName()), allOptions);
-            }
+			for (KeySet fKeySet : fKeySets) {
+				addAll(context.getNode(fKeySet.getNodeName()), allOptions);
+			}
 			CustomProfile profile= new CustomProfile("tmp", allOptions, version, fProfileVersioner.getProfileKind()); //$NON-NLS-1$
 			fProfileVersioner.update(profile);
 			return profile.getSettings();
 		}
 
 		boolean hasValues= false;
-		for (int i= 0; i < fKeySets.length; i++) {
-	        KeySet keySet= fKeySets[i];
-	        IEclipsePreferences preferences= context.getNode(keySet.getNodeName());
-	        for (final Iterator<String> keyIter = keySet.getKeys().iterator(); keyIter.hasNext(); ) {
+		for (KeySet keySet : fKeySets) {
+			IEclipsePreferences preferences= context.getNode(keySet.getNodeName());
+			for (final Iterator<String> keyIter = keySet.getKeys().iterator(); keyIter.hasNext(); ) {
 				final String key= keyIter.next();
 				String val= preferences.get(key, null);
 				if (val != null) {
@@ -531,7 +528,7 @@ public abstract class ProfileManager extends Observable {
 				}
 				profileOptions.put(key, val);
 			}
-        }
+		}
 
 		if (!hasValues) {
 			return null;
@@ -548,9 +545,7 @@ public abstract class ProfileManager extends Observable {
 	 */
 	private void addAll(IEclipsePreferences uiPrefs, Map<String, String> allOptions) {
 		try {
-			String[] keys= uiPrefs.keys();
-			for (int i= 0; i < keys.length; i++) {
-				String key= keys[i];
+			for (String key : uiPrefs.keys()) {
 				String val= uiPrefs.get(key, null);
 				if (val != null) {
 					allOptions.put(key, val);
@@ -589,9 +584,9 @@ public abstract class ProfileManager extends Observable {
 	private void writeToPreferenceStore(Profile profile, IScopeContext context) {
 		final Map<String, String> profileOptions= profile.getSettings();
 
-		for (int i= 0; i < fKeySets.length; i++) {
-	        updatePreferences(context.getNode(fKeySets[i].getNodeName()), fKeySets[i].getKeys(), profileOptions);
-        }
+		for (KeySet fKeySet : fKeySets) {
+			updatePreferences(context.getNode(fKeySet.getNodeName()), fKeySet.getKeys(), profileOptions);
+		}
 
 		final IEclipsePreferences uiPrefs= context.getNode(JavaUI.ID_PLUGIN);
 		if (uiPrefs.getInt(fProfileVersionKey, 0) != fProfileVersioner.getCurrentVersion()) {
@@ -655,9 +650,9 @@ public abstract class ProfileManager extends Observable {
 	}
 
 	public void clearAllSettings(IScopeContext context) {
-		for (int i= 0; i < fKeySets.length; i++) {
-	        updatePreferences(context.getNode(fKeySets[i].getNodeName()), fKeySets[i].getKeys(), Collections.<String, String>emptyMap());
-        }
+		for (KeySet fKeySet : fKeySets) {
+			updatePreferences(context.getNode(fKeySet.getNodeName()), fKeySet.getKeys(), Collections.<String, String>emptyMap());
+		}
 
 		final IEclipsePreferences uiPrefs= context.getNode(JavaUI.ID_PLUGIN);
 		uiPrefs.remove(fProfileKey);
@@ -789,9 +784,8 @@ public abstract class ProfileManager extends Observable {
 
 
 	protected void updateProfilesWithName(String oldName, Profile newProfile, boolean applySettings) {
-		IProject[] projects= ResourcesPlugin.getWorkspace().getRoot().getProjects();
-		for (int i= 0; i < projects.length; i++) {
-			IScopeContext projectScope= fPreferencesAccess.getProjectScope(projects[i]);
+		for (IProject project : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
+			IScopeContext projectScope= fPreferencesAccess.getProjectScope(project);
 			IEclipsePreferences node= projectScope.getNode(JavaUI.ID_PLUGIN);
 			String profileId= node.get(fProfileKey, null);
 			if (oldName.equals(profileId)) {

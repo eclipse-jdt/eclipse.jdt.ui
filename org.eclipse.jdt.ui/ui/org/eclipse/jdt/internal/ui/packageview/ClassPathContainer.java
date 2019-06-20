@@ -196,8 +196,7 @@ public class ClassPathContainer extends PackageFragmentRootContainer {
 				JavaPlugin.log(new IllegalArgumentException("Invalid classpath container implementation: getClasspathEntries() returns null. " + fContainer.getPath())); //$NON-NLS-1$
 			} else {
 				IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
-				for (int i= 0; i < classpathEntries.length; i++) {
-					IClasspathEntry entry= classpathEntries[i];
+				for (IClasspathEntry entry : classpathEntries) {
 					if (entry.getEntryKind() == IClasspathEntry.CPE_PROJECT) {
 						IResource resource= root.findMember(entry.getPath());
 						if (resource instanceof IProject)
@@ -234,10 +233,10 @@ public class ClassPathContainer extends PackageFragmentRootContainer {
 	}
 
 	static boolean contains(IJavaProject project, IClasspathEntry entry, IPackageFragmentRoot root) {
-		IPackageFragmentRoot[] roots= project.findPackageFragmentRoots(entry);
-		for (int i= 0; i < roots.length; i++) {
-			if (roots[i].equals(root))
+		for (IPackageFragmentRoot r : project.findPackageFragmentRoots(entry)) {
+			if (r.equals(root)) {
 				return true;
+			}
 		}
 		return false;
 	}

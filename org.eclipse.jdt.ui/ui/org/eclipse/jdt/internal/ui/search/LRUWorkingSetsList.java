@@ -61,8 +61,8 @@ public class LRUWorkingSetsList {
 		Iterator<IWorkingSet[]> iter= new ArrayList<>(fLRUList).iterator();
 		while (iter.hasNext()) {
 			IWorkingSet[] workingSets= iter.next();
-			for (int i= 0; i < workingSets.length; i++) {
-				if (PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(workingSets[i].getName()) == null) {
+			for (IWorkingSet workingSet : workingSets) {
+				if (PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(workingSet.getName()) == null) {
 					fLRUList.remove(workingSets);
 					break;
 				}

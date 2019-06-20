@@ -110,8 +110,7 @@ public class JavaSearchScopeFactory {
 			return EMPTY_SCOPE;
 
 		Set<IJavaElement> javaElements= new HashSet<>(workingSets.length * 10);
-		for (int i= 0; i < workingSets.length; i++) {
-			IWorkingSet workingSet= workingSets[i];
+		for (IWorkingSet workingSet : workingSets) {
 			if (workingSet.isEmpty() && workingSet.isAggregateWorkingSet()) {
 				return createWorkspaceScope(includeMask);
 			}
@@ -160,8 +159,8 @@ public class JavaSearchScopeFactory {
 	public IJavaSearchScope createJavaProjectSearchScope(String[] projectNames, int includeMask) {
 		ArrayList<IJavaElement> res= new ArrayList<>();
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
-		for (int i= 0; i < projectNames.length; i++) {
-			IJavaProject project= JavaCore.create(root.getProject(projectNames[i]));
+		for (String projectName : projectNames) {
+			IJavaProject project= JavaCore.create(root.getProject(projectName));
 			if (project.exists()) {
 				res.add(project);
 			}
@@ -287,10 +286,9 @@ public class JavaSearchScopeFactory {
 	}
 
 	public IProject[] getProjects(IJavaSearchScope scope) {
-		IPath[] paths= scope.enclosingProjectsAndJars();
 		HashSet<IResource> temp= new HashSet<>();
-		for (int i= 0; i < paths.length; i++) {
-			IResource resource= ResourcesPlugin.getWorkspace().getRoot().findMember(paths[i]);
+		for (IPath path : scope.enclosingProjectsAndJars()) {
+			IResource resource= ResourcesPlugin.getWorkspace().getRoot().findMember(path);
 			if (resource != null && resource.getType() == IResource.PROJECT)
 				temp.add(resource);
 		}
@@ -310,8 +308,7 @@ public class JavaSearchScopeFactory {
 			return new IJavaElement[0];
 
 		Set<IJavaElement> result= new HashSet<>(elements.length);
-		for (int i= 0; i < elements.length; i++) {
-			Object selectedElement= elements[i];
+		for (Object selectedElement : elements) {
 			if (selectedElement instanceof IJavaElement) {
 				addJavaElements(result, (IJavaElement) selectedElement);
 			} else if (selectedElement instanceof IResource) {
@@ -326,7 +323,6 @@ public class JavaSearchScopeFactory {
 				if (resource != null)
 					addJavaElements(result, resource);
 			}
-
 		}
 		return result.toArray(new IJavaElement[result.size()]);
 	}
@@ -353,8 +349,9 @@ public class JavaSearchScopeFactory {
 	}
 
 	private void addJavaElements(Set<IJavaElement> javaElements, IResource[] resources) {
-		for (int i= 0; i < resources.length; i++)
-			addJavaElements(javaElements, resources[i]);
+		for (IResource resource : resources) {
+			addJavaElements(javaElements, resource);
+		}
 	}
 
 	private void addJavaElements(Set<IJavaElement> javaElements, IResource resource) {
@@ -393,14 +390,13 @@ public class JavaSearchScopeFactory {
 			return;
 		}
 
-		IAdaptable[] elements= workingSet.getElements();
-		for (int i= 0; i < elements.length; i++) {
-			IJavaElement javaElement=elements[i].getAdapter(IJavaElement.class);
+		for (IAdaptable element : workingSet.getElements()) {
+			IJavaElement javaElement= element.getAdapter(IJavaElement.class);
 			if (javaElement != null) {
 				addJavaElements(javaElements, javaElement);
 				continue;
 			}
-			IResource resource= elements[i].getAdapter(IResource.class);
+			IResource resource= element.getAdapter(IResource.class);
 			if (resource != null) {
 				addJavaElements(javaElements, resource);
 			}
@@ -410,9 +406,9 @@ public class JavaSearchScopeFactory {
 	}
 
 	private void addJavaElements(Set<IJavaElement> javaElements, LogicalPackage selectedElement) {
-		IPackageFragment[] packages= selectedElement.getFragments();
-		for (int i= 0; i < packages.length; i++)
-			addJavaElements(javaElements, packages[i]);
+		for (IPackageFragment p : selectedElement.getFragments()) {
+			addJavaElements(javaElements, p);
+		}
 	}
 
 	public IJavaSearchScope createWorkspaceScope(boolean includeJRE) {

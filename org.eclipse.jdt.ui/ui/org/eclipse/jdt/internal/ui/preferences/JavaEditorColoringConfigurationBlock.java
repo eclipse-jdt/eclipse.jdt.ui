@@ -20,7 +20,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
@@ -634,8 +633,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		gd= new GridData(SWT.BEGINNING, SWT.FILL, false, true);
 		gd.heightHint= convertHeightInCharsToPixels(7);
 		int maxWidth= 0;
-		for (Iterator<HighlightingColorListItem> it= fListModel.iterator(); it.hasNext();) {
-			HighlightingColorListItem item= it.next();
+		for (HighlightingColorListItem item : fListModel) {
 			maxWidth= Math.max(maxWidth, convertWidthInCharsToPixels(item.getDisplayName().length()));
 		}
 		ScrollBar vBar= ((Scrollable) fTreeViewer.getControl()).getVerticalBar();

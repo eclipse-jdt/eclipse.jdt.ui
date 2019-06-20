@@ -360,8 +360,7 @@ public abstract class OptionsConfigurationBlock {
 			fDisabledProjectSettings= null;
 		} else {
 			fDisabledProjectSettings= new IdentityHashMap<>();
-			for (int i= 0; i < allKeys.length; i++) {
-				Key curr= allKeys[i];
+			for (Key curr : allKeys) {
 				fDisabledProjectSettings.put(curr, curr.getStoredValue(fLookupOrder, false, fManager));
 			}
 		}
@@ -403,8 +402,7 @@ public abstract class OptionsConfigurationBlock {
 	}
 
 	private void testIfOptionsComplete(Key[] allKeys) {
-		for (int i= 0; i < allKeys.length; i++) {
-			Key key= allKeys[i];
+		for (Key key : allKeys) {
 			if (!(key instanceof LocalKey)) {
 				if (key.getStoredValue(fLookupOrder, false, fManager) == null) {
 					JavaPlugin.logErrorMessage("preference option missing: " + key + " (" + this.getClass().getName() + ')'); //$NON-NLS-1$//$NON-NLS-2$
@@ -429,8 +427,7 @@ public abstract class OptionsConfigurationBlock {
 
 
 	public void selectOption(String key, String qualifier) {
-		for (int i= 0; i < fAllKeys.length; i++) {
-			Key curr= fAllKeys[i];
+		for (Key curr : fAllKeys) {
 			if (curr.getName().equals(key) && curr.getQualifier().equals(qualifier)) {
 				selectOption(curr);
 			}
@@ -468,8 +465,8 @@ public abstract class OptionsConfigurationBlock {
 	public static boolean hasProjectSpecificOptions(IProject project, Key[] allKeys, IWorkingCopyManager manager) {
 		if (project != null) {
 			IScopeContext projectContext= new ProjectScope(project);
-			for (int i= 0; i < allKeys.length; i++) {
-				if (allKeys[i].getStoredValue(projectContext, manager) != null) {
+			for (Key key : allKeys) {
+				if (key.getStoredValue(projectContext, manager) != null) {
 					return true;
 				}
 			}
@@ -746,13 +743,9 @@ public abstract class OptionsConfigurationBlock {
 			return null;
 		}
 		try {
-			IClasspathEntry[] classpathEntries= javaProject.getRawClasspath();
-			for (int i= 0; i < classpathEntries.length; i++) {
-				IClasspathEntry entry= classpathEntries[i];
+			for (IClasspathEntry entry : javaProject.getRawClasspath()) {
 				if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
-					IClasspathAttribute[] extraAttributes= entry.getExtraAttributes();
-					for (int j= 0; j < extraAttributes.length; j++) {
-						IClasspathAttribute attrib= extraAttributes[j];
+					for (IClasspathAttribute attrib : entry.getExtraAttributes()) {
 						if (IClasspathAttribute.IGNORE_OPTIONAL_PROBLEMS.equals(attrib.getName())) {
 							if ("true".equals(attrib.getValue())) { //$NON-NLS-1$
 								return entry;
@@ -993,8 +986,7 @@ public abstract class OptionsConfigurationBlock {
 	 * @since 3.5
 	 */
 	protected void revertValues(Key[] keys) {
-		for (int i= 0; i < keys.length; i++) {
-			Key curr= keys[i];
+		for (Key curr : keys) {
 			String origValue= curr.getStoredValue(fLookupOrder, false, null);
 			setValue(curr, origValue);
 		}
@@ -1023,8 +1015,7 @@ public abstract class OptionsConfigurationBlock {
 	private boolean getChanges(IScopeContext currContext, List<Key> changedSettings) {
 		boolean completeSettings= fProject != null && fDisabledProjectSettings == null; // complete when project settings are enabled
 		boolean needsBuild= false;
-		for (int i= 0; i < fAllKeys.length; i++) {
-			Key key= fAllKeys[i];
+		for (Key key : fAllKeys) {
 			String oldVal= key.getStoredValue(currContext, null);
 			String val= key.getStoredValue(currContext, fManager);
 			if (val == null) {
@@ -1048,8 +1039,7 @@ public abstract class OptionsConfigurationBlock {
 		boolean hasProjectSpecificOption= fDisabledProjectSettings == null;
 		if (enable != hasProjectSpecificOption && fProject != null) {
 			if (enable) {
-				for (int i= 0; i < fAllKeys.length; i++) {
-					Key curr= fAllKeys[i];
+				for (Key curr : fAllKeys) {
 					String val= fDisabledProjectSettings.get(curr);
 					curr.setStoredValue(fLookupOrder[0], val, fManager);
 				}
@@ -1058,8 +1048,7 @@ public abstract class OptionsConfigurationBlock {
 				validateSettings(null, null, null);
 			} else {
 				fDisabledProjectSettings= new IdentityHashMap<>();
-				for (int i= 0; i < fAllKeys.length; i++) {
-					Key curr= fAllKeys[i];
+				for (Key curr : fAllKeys) {
 					String oldSetting= curr.getStoredValue(fLookupOrder, false, fManager);
 					fDisabledProjectSettings.put(curr, oldSetting);
 					curr.setStoredValue(fLookupOrder[0], null, fManager); // clear project settings
@@ -1170,8 +1159,7 @@ public abstract class OptionsConfigurationBlock {
 	}
 
 	public void performDefaults() {
-		for (int i= 0; i < fAllKeys.length; i++) {
-			Key curr= fAllKeys[i];
+		for (Key curr : fAllKeys) {
 			String defValue= curr.getStoredValue(fLookupOrder, true, fManager);
 			setValue(curr, defValue);
 		}

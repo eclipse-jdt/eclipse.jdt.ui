@@ -158,8 +158,7 @@ public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements Trans
 			}
 			ITreeSelection treeSelection= (ITreeSelection)fSelection;
 			TreePath[] paths= treeSelection.getPaths();
-			for (int i= 0; i < paths.length; i++) {
-				TreePath path= paths[i];
+			for (TreePath path : paths) {
 				if (path.getSegmentCount() != 2)
 					return DND.DROP_COPY;
 				if (!(path.getSegment(0) instanceof IWorkingSet))
@@ -196,9 +195,10 @@ public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements Trans
 	}
 
 	private boolean isWorkingSetSelection() {
-		for (int i= 0; i < fElementsToAdds.length; i++) {
-			if (!(fElementsToAdds[i] instanceof IWorkingSet))
+		for (Object fElementsToAdd : fElementsToAdds) {
+			if (!(fElementsToAdd instanceof IWorkingSet)) {
 				return false;
+			}
 		}
 		return true;
 	}
@@ -268,8 +268,7 @@ public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements Trans
 
 	private Map<IWorkingSet, List<Object>> groupByWorkingSets(TreePath[] paths) {
 		Map<IWorkingSet, List<Object>> result= new HashMap<>();
-		for (int i= 0; i < paths.length; i++) {
-			TreePath path= paths[i];
+		for (TreePath path : paths) {
 			IWorkingSet ws= (IWorkingSet)path.getSegment(0);
 			List<Object> l= result.get(ws);
 			if (l == null) {

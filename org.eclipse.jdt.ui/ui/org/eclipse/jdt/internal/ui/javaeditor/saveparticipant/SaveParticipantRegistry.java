@@ -15,7 +15,6 @@ package org.eclipse.jdt.internal.ui.javaeditor.saveparticipant;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
@@ -136,11 +135,10 @@ public final class SaveParticipantRegistry {
 	public synchronized boolean hasSettingsInScope(IScopeContext context) {
 		ensureRegistered();
 
-    	for (Iterator<SaveParticipantDescriptor> iterator= fDescriptors.values().iterator(); iterator.hasNext();) {
-	        SaveParticipantDescriptor descriptor= iterator.next();
-	        if (descriptor.getPreferenceConfiguration().hasSettingsInScope(context))
-	        	return true;
-    	}
+		for (SaveParticipantDescriptor descriptor : fDescriptors.values()) {
+			if (descriptor.getPreferenceConfiguration().hasSettingsInScope(context))
+				return true;
+		}
 
     	return false;
     }
@@ -160,8 +158,7 @@ public final class SaveParticipantRegistry {
 		ensureRegistered();
 
 		ArrayList<IPostSaveListener> result= null;
-		for (Iterator<SaveParticipantDescriptor> iterator= fDescriptors.values().iterator(); iterator.hasNext();) {
-			SaveParticipantDescriptor descriptor= iterator.next();
+		for (SaveParticipantDescriptor descriptor : fDescriptors.values()) {
 			if (descriptor.getPreferenceConfiguration().isEnabled(context)) {
 				if (result == null) {
 					result= new ArrayList<>();
@@ -193,8 +190,7 @@ public final class SaveParticipantRegistry {
 		IPostSaveListener[] listeners= JavaPlugin.getDefault().getSaveParticipantRegistry().getEnabledPostSaveListeners(unit.getJavaProject().getProject());
 		try {
 			final boolean result[]= new boolean[] {false};
-			for (int i= 0; i < listeners.length; i++) {
-				final IPostSaveListener listener= listeners[i];
+			for (IPostSaveListener listener : listeners) {
 				SafeRunner.run(new ISafeRunnable() {
 
 					@Override

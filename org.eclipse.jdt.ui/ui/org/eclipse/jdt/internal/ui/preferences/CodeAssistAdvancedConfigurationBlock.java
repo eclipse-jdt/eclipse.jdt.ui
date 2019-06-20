@@ -188,10 +188,8 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 		final List<ModelElement> elements;
 
 		public PreferenceModel(CompletionProposalComputerRegistry registry) {
-			List<CompletionProposalCategory> categories= registry.getProposalCategories();
 			fElements= new ArrayList<>();
-			for (Iterator<CompletionProposalCategory> it= categories.iterator(); it.hasNext();) {
-				CompletionProposalCategory category= it.next();
+			for (CompletionProposalCategory category : registry.getProposalCategories()) {
 				if (category.hasComputers()) {
 					fElements.add(new ModelElement(category, this));
 				}
@@ -220,12 +218,11 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 
     	private void writeInclusionPreference(ModelElement changed, boolean isInDefaultCategory) {
     		StringBuilder buf= new StringBuilder();
-    		for (Iterator<ModelElement> it= fElements.iterator(); it.hasNext();) {
-    			ModelElement item= it.next();
-    			boolean included= changed == item ? isInDefaultCategory : item.isInDefaultCategory();
-    			if (!included)
-    				buf.append(item.getId() + SEPARATOR);
-    		}
+			for (ModelElement item : fElements) {
+				boolean included= changed == item ? isInDefaultCategory : item.isInDefaultCategory();
+				if (!included)
+					buf.append(item.getId() + SEPARATOR);
+			}
 
     		String newValue= buf.toString();
     		String oldValue= setValue(PREF_EXCLUDED_CATEGORIES, newValue);
@@ -249,21 +246,20 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 
 
     	private boolean readInclusionPreference(CompletionProposalCategory cat) {
-    		String[] ids= getTokens(getValue(PREF_EXCLUDED_CATEGORIES), SEPARATOR);
-    		for (int i= 0; i < ids.length; i++) {
-    			if (ids[i].equals(cat.getId()))
-    				return false;
-    		}
+    		for (String id : getTokens(getValue(PREF_EXCLUDED_CATEGORIES), SEPARATOR)) {
+				if (id.equals(cat.getId())) {
+					return false;
+				}
+			}
     		return true;
     	}
 
     	private int readOrderPreference(CompletionProposalCategory cat) {
-    		String[] sortOrderIds= getTokens(getValue(PREF_CATEGORY_ORDER), SEPARATOR);
-    		for (int i= 0; i < sortOrderIds.length; i++) {
-    			String[] idAndRank= getTokens(sortOrderIds[i], COLON);
-    			if (idAndRank[0].equals(cat.getId()))
-    				return Integer.parseInt(idAndRank[1]);
-    		}
+    		for (String sortOrderId : getTokens(getValue(PREF_CATEGORY_ORDER), SEPARATOR)) {
+				String[] idAndRank= getTokens(sortOrderId, COLON);
+				if (idAndRank[0].equals(cat.getId()))
+					return Integer.parseInt(idAndRank[1]);
+			}
 			return LIMIT - 1;
     	}
 
@@ -654,8 +650,7 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 		List<ModelElement> defaultChecked= new ArrayList<>(size);
 		List<ModelElement> separateChecked= new ArrayList<>(size);
 
-		for (Iterator<ModelElement> it= fModel.elements.iterator(); it.hasNext();) {
-			ModelElement element= it.next();
+		for (ModelElement element : fModel.elements) {
 			if (element.isInDefaultCategory())
 				defaultChecked.add(element);
 			if (element.isSeparateCommand())
@@ -671,8 +666,7 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 	 */
 	@Override
 	protected boolean processChanges(IWorkbenchPreferenceContainer container) {
-		for (Iterator<ModelElement> it= fModel.elements.iterator(); it.hasNext();) {
-			ModelElement item= it.next();
+		for (ModelElement item : fModel.elements) {
 			item.update();
 		}
 
@@ -749,8 +743,7 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 		final Scheme[] definedSchemes= bindingService.getDefinedSchemes();
 		if (definedSchemes != null) {
 			try {
-				for (int i = 0; i < definedSchemes.length; i++) {
-					final Scheme scheme= definedSchemes[i];
+				for (Scheme scheme : definedSchemes) {
 					final Scheme copy= fgLocalBindingManager.getScheme(scheme.getId());
 					copy.define(scheme.getName(), scheme.getDescription(), scheme.getParentId());
 				}

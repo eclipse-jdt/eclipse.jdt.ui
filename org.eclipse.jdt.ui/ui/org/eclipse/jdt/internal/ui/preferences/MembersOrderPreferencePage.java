@@ -15,7 +15,6 @@
 package org.eclipse.jdt.internal.ui.preferences;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -271,9 +270,7 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 
 	private void updateList(IPreferenceStore store, ListDialogField<String> list, String str) {
 		StringBuilder buf= new StringBuilder();
-		List<String> curr= list.getElements();
-		for (Iterator<String> iter= curr.iterator(); iter.hasNext();) {
-			String s= iter.next();
+		for (String s : list.getElements()) {
 			buf.append(s);
 			buf.append(',');
 		}

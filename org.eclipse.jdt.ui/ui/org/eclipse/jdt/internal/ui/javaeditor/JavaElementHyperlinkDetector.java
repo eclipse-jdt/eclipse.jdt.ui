@@ -124,8 +124,8 @@ public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 				return null;
 			
 			ArrayList<IHyperlink> links= new ArrayList<>(elements.length);
-			for (int i= 0; i < elements.length; i++) {
-				addHyperlinks(links, wordRegion, (SelectionDispatchAction)openAction, elements[i], elements.length > 1, (JavaEditor)textEditor);
+			for (IJavaElement element : elements) {
+				addHyperlinks(links, wordRegion, (SelectionDispatchAction)openAction, element, elements.length > 1, (JavaEditor)textEditor);
 			}
 			if (links.size() == 0)
 				return null;
@@ -189,8 +189,7 @@ public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 	 */
 	private IJavaElement[] selectOpenableElements(IJavaElement[] elements) {
 		List<IJavaElement> result= new ArrayList<>(elements.length);
-		for (int i= 0; i < elements.length; i++) {
-			IJavaElement element= elements[i];
+		for (IJavaElement element : elements) {
 			switch (element.getElementType()) {
 				case IJavaElement.PACKAGE_DECLARATION:
 				case IJavaElement.PACKAGE_FRAGMENT:

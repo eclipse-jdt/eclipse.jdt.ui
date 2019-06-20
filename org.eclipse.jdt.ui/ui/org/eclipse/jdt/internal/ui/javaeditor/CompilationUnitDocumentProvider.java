@@ -1247,12 +1247,14 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 		} catch (JavaModelException e) {
 			return null; // ignore - use default JRE
 		}
-		for (int i= 0; i < projects.length; i++) {
-			IPath projectPath= projects[i].getProject().getFullPath();
+		for (IJavaProject project : projects) {
+			IPath projectPath= project.getProject().getFullPath();
 			String projectSegment= projectPath.segments()[0];
-			for (int j= 0; j < pathSegments.length; j++)
-				if (projectSegment.equals(pathSegments[j]))
-					return projects[i];
+			for (String pathSegment : pathSegments) {
+				if (projectSegment.equals(pathSegment)) {
+					return project;
+				}
+			}
 		}
 		return null;
 	}
@@ -1459,8 +1461,9 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 					IMarker[] markers= r.findMarkers(IMarker.MARKER, true, IResource.DEPTH_ZERO);
 					if (markers != null && markers.length > 0) {
 						AbstractMarkerAnnotationModel model= (AbstractMarkerAnnotationModel) info.fModel;
-						for (int i= 0; i < markers.length; i++)
-							model.updateMarker(document, markers[i], null);
+						for (IMarker marker : markers) {
+							model.updateMarker(document, marker, null);
+						}
 					}
 				}
 			}
@@ -1636,8 +1639,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 
 		monitor.beginTask(JavaEditorMessages.CompilationUnitDocumentProvider_progressNotifyingSaveParticipants, listeners.length * 5);
 		try {
-			for (int i= 0; i < listeners.length; i++) {
-				final IPostSaveListener listener= listeners[i];
+			for (IPostSaveListener listener : listeners) {
 				final String participantName= listener.getName();
 				SafeRunner.run(new ISafeRunnable() {
 					@Override

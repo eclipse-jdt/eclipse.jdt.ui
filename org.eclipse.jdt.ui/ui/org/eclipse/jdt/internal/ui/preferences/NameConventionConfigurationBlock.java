@@ -183,8 +183,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		}
 
 		private IStatus validateIdentifiers(String[] values, boolean prefix) {
-			for (int i= 0; i < values.length; i++) {
-				String val= values[i];
+			for (String val : values) {
 				if (val.length() == 0) {
 					if (prefix) {
 						return new StatusInfo(IStatus.ERROR, PreferencesMessages.NameConventionConfigurationBlock_error_emptyprefix);

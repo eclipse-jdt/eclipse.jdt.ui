@@ -353,9 +353,8 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 				if (openAction != null && openAction.isEnabled() && OpenStrategy.getOpenMethod() == OpenStrategy.DOUBLE_CLICK)
 					return;
 				if (selection instanceof ITreeSelection) {
-					TreePath[] paths= ((ITreeSelection)selection).getPathsFor(element);
-					for (int i= 0; i < paths.length; i++) {
-						viewer.setExpandedState(paths[i], !viewer.getExpandedState(paths[i]));
+					for (TreePath path : ((ITreeSelection)selection).getPathsFor(element)) {
+						viewer.setExpandedState(path, !viewer.getExpandedState(path));
 					}
 				} else {
 					viewer.setExpandedState(element, !viewer.getExpandedState(element));

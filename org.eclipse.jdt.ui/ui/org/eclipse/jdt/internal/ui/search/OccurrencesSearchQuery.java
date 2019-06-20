@@ -78,9 +78,7 @@ public class OccurrencesSearchQuery implements ISearchQuery {
 				CompilationUnit astRoot= fFinder.getASTRoot();
 				ArrayList<OccurrenceMatch> resultingMatches= new ArrayList<>();
 
-				for (int i= 0; i < occurrences.length; i++) {
-					OccurrenceLocation loc= occurrences[i];
-
+				for (OccurrenceLocation loc : occurrences) {
 					JavaElementLine lineKey= getLineElement(astRoot, loc, lineMap);
 					if (lineKey != null) {
 						OccurrenceMatch match= new OccurrenceMatch(lineKey, loc.getOffset(), loc.getLength(), loc.getFlags());

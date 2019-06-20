@@ -1293,9 +1293,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 			return null;
 		
 		try {
-			IClasspathEntry[] entries= JavaCore.create(fProject).getRawClasspath();
-			for (int i= 0; i < entries.length; i++) {
-				IClasspathEntry entry= entries[i];
+			for (IClasspathEntry entry : JavaCore.create(fProject).getRawClasspath()) {
 				if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
 					String eeId= JavaRuntime.getExecutionEnvironmentId(entry.getPath());
 					if (eeId != null) {
@@ -1330,8 +1328,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	}
 
 	private String checkDefaults(Key[] keys, Map<String, String> options) {
-		for (int i= 0; i < keys.length; i++) {
-			Key key= keys[i];
+		for (Key key : keys) {
 			Object option= options.get(key.getName());
 			if (!checkValue(key, (String)option))
 				return USER_CONF;

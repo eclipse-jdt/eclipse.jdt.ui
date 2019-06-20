@@ -60,12 +60,10 @@ class OccurrencesSearchLabelProvider extends TextSearchLabelProvider implements 
 		StyledString res= new StyledString();
 		res.append(lineNumberString, StyledString.QUALIFIER_STYLER);
 		res.append(jel.getLineContents());
-		Match[] matches= getPage().getInput().getMatches(jel);
-		for (int i= 0; i < matches.length; i++) {
-			OccurrenceMatch curr= (OccurrenceMatch) matches[i];
+		for (Match match : getPage().getInput().getMatches(jel)) {
+			OccurrenceMatch curr= (OccurrenceMatch) match;
 			int offset= curr.getOriginalOffset() - jel.getLineStartOffset() + lineNumberString.length();
 			int length= curr.getOriginalLength();
-
 			if (offset >= 0 && (offset + length <= res.length())) {
 				if ((curr.getFlags() & IOccurrencesFinder.F_WRITE_OCCURRENCE) != 0) {
 					res.setStyle(offset, length, ColoringLabelProvider.HIGHLIGHT_WRITE_STYLE);

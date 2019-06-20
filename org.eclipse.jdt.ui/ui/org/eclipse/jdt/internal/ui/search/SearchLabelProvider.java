@@ -119,11 +119,11 @@ public abstract class SearchLabelProvider extends AppearanceAwareLabelProvider {
 		int res= 0;
 		AbstractTextSearchResult result= fPage.getInput();
 		if (result != null) {
-			Match[] matches= result.getMatches(element);
-			for (int i = 0; i < matches.length; i++) {
-				if ((matches[i]) instanceof JavaElementMatch) {
-					if (((JavaElementMatch)matches[i]).getAccuracy() == SearchMatch.A_INACCURATE)
+			for (Match match : result.getMatches(element)) {
+				if ((match) instanceof JavaElementMatch) {
+					if (((JavaElementMatch) match).getAccuracy() == SearchMatch.A_INACCURATE) {
 						res++;
+					}
 				}
 			}
 		}

@@ -133,10 +133,9 @@ public class JavaElementDeclaredTypeHyperlink implements IHyperlink {
 		} else if (kind == Signature.CLASS_TYPE_SIGNATURE) {
 			typeSignature= Signature.getTypeErasure(typeSignature);
 		} else if (kind == Signature.UNION_TYPE_SIGNATURE) {
-			String[] typeBounds= Signature.getUnionTypeBounds(typeSignature);
 			ArrayList<IType> types= new ArrayList<>();
-			for (int i= 0; i < typeBounds.length; i++) {
-				String typeErasure= Signature.getTypeErasure(typeBounds[i]);
+			for (String typeBound : Signature.getUnionTypeBounds(typeSignature)) {
+				String typeErasure= Signature.getTypeErasure(typeBound);
 				IType type= getType(typeErasure);
 				if (type != null) {
 					types.add(type);

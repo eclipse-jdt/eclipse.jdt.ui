@@ -90,8 +90,7 @@ public class WorkingSetAwareContentProvider extends PackageExplorerContentProvid
 	private Object[] getWorkingSetChildren(IWorkingSet set) {
 		IAdaptable[] elements= fWorkingSetModel.getChildren(set);
 		Set<IAdaptable> result= new HashSet<>(elements.length);
-		for (int i= 0; i < elements.length; i++) {
-			IAdaptable element= elements[i];
+		for (IAdaptable element : elements) {
 			if (element instanceof IProject) {
 				processResource((IProject) element, result); // also add closed projects
 			} else if (element instanceof IResource) {
@@ -165,11 +164,11 @@ public class WorkingSetAwareContentProvider extends PackageExplorerContentProvid
 		List<TreePath> result= new ArrayList<>();
 		Object input= getViewerInput();
 		Object element= modelParents.get(index);
-		Object[] parents= fWorkingSetModel.getAllParents(element);
-		for (int i= 0; i < parents.length; i++) {
+		for (Object parent : fWorkingSetModel.getAllParents(element)) {
 			List<Object> chain= new ArrayList<>();
-			if (!parents[i].equals(input))
-				chain.add(parents[i]);
+			if (!parent.equals(input)) {
+				chain.add(parent);
+			}
 			for (int m= index; m < modelParents.size(); m++) {
 				chain.add(modelParents.get(m));
 			}
@@ -232,8 +231,7 @@ public class WorkingSetAwareContentProvider extends PackageExplorerContentProvid
 		Object parent= super.getParent(element);
 		if (parent == null)
 			return false;
-		for (Iterator<Object> iter= potentialParents.iterator(); iter.hasNext();) {
-			Object potentialParent= iter.next();
+		for (Object potentialParent : potentialParents) {
 			while(parent != null) {
 				if (parent.equals(potentialParent))
 					return true;

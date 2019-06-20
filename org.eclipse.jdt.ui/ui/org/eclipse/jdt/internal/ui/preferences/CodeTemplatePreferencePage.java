@@ -142,10 +142,9 @@ public class CodeTemplatePreferencePage extends PropertyAndPreferencePage {
 		if (data instanceof Map) {
 			Object id= ((Map<?, ?>) data).get(DATA_SELECT_TEMPLATE);
 			if (id instanceof String) {
-				final TemplatePersistenceData[] templates= fCodeTemplateConfigurationBlock.fTemplateStore.getTemplateData();
 				TemplatePersistenceData template= null;
-				for (int index= 0; index < templates.length; index++) {
-					template= templates[index];
+				for (TemplatePersistenceData t : fCodeTemplateConfigurationBlock.fTemplateStore.getTemplateData()) {
+					template= t;
 					if (template.getId().equals(id)) {
 						fCodeTemplateConfigurationBlock.postSetSelection(template);
 						break;

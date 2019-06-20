@@ -827,9 +827,8 @@ public class PackageExplorerPart extends ViewPart
 
 	@Override
 	public void refresh(IStructuredSelection selection) {
-		Object[] selectedElements= selection.toArray();
-		for (int i= 0; i < selectedElements.length; i++) {
-			fViewer.refresh(selectedElements[i]);
+		for (Object selectedElement : selection.toArray()) {
+			fViewer.refresh(selectedElement);
 		}
 	}
 

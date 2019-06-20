@@ -431,8 +431,8 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 		boolean ignoreLowerCase= Boolean.valueOf(getValue(PREF_IGNORELOWERCASE)).booleanValue();
 
 		fOrderListField.removeAllElements();
-		for (int i= 0; i < importOrder.length; i++) {
-			fOrderListField.addElement(importOrder[i]);
+		for (ImportOrderEntry i : importOrder) {
+			fOrderListField.addElement(i);
 		}
 		fThresholdField.setText(String.valueOf(threshold));
 		fStaticThresholdField.setText(String.valueOf(staticThreshold));

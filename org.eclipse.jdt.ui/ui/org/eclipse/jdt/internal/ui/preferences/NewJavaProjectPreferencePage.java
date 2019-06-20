@@ -182,8 +182,7 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 
 	public static String encodeJRELibrary(String desc, IClasspathEntry[] cpentries) {
 		StringBuilder buf= new StringBuilder();
-		for (int i= 0; i < cpentries.length; i++) {
-			IClasspathEntry entry= cpentries[i];
+		for (IClasspathEntry entry : cpentries) {
 			buf.append(encode(desc));
 			buf.append(' ');
 			buf.append(entry.getEntryKind());

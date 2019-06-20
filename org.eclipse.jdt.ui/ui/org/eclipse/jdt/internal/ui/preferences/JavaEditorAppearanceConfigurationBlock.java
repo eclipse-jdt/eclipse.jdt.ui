@@ -465,8 +465,9 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 		super.initialize(); // also updates state of slaves, hence it is the second call
 		initializeDefaultColors();
 
-		for (int i= 0; i < fAppearanceColorListModel.length; i++)
-			fAppearanceColorList.add(fAppearanceColorListModel[i][0]);
+		for (String[] c : fAppearanceColorListModel) {
+			fAppearanceColorList.add(c[0]);
+		}
 
 		fAppearanceColorList.getDisplay().asyncExec(new Runnable() {
 			@Override

@@ -529,19 +529,18 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 
 	private int getMatchCount(ITreeContentProvider cp, Object[] elements) {
 		int count= 0;
-		for (int j = 0; j < elements.length; j++) {
-			count+= getDisplayedMatchCount(elements[j]);
-			Object[] children = cp.getChildren(elements[j]);
+		for (Object element : elements) {
+			count+= getDisplayedMatchCount(element);
+			Object[] children = cp.getChildren(element);
 			count+= getMatchCount(cp, children);
 		}
 		return count;
 	}
 
 	private int getMatchCount(TableViewer viewer) {
-		Object[] elements= getRootElements(viewer);
 		int count= 0;
-		for (int i = 0; i < elements.length; i++) {
-			count+= getDisplayedMatchCount(elements[i]);
+		for (Object element : getRootElements(viewer)) {
+			count+= getDisplayedMatchCount(element);
 		}
 		return count;
 	}

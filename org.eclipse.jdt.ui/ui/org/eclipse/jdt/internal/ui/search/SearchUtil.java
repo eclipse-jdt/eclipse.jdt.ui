@@ -114,8 +114,8 @@ public class SearchUtil {
 		String result= ""; //$NON-NLS-1$
 		if (workingSets != null && workingSets.length > 0) {
 			boolean firstFound= false;
-			for (int i= 0; i < workingSets.length; i++) {
-				String workingSetLabel= BasicElementLabels.getWorkingSetLabel(workingSets[i]);
+			for (IWorkingSet workingSet : workingSets) {
+				String workingSetLabel= BasicElementLabels.getWorkingSetLabel(workingSet);
 				if (firstFound)
 					result= Messages.format(SearchMessages.SearchUtil_workingSetConcatenation, new String[] {result, workingSetLabel});
 				else {
@@ -172,8 +172,8 @@ public class SearchUtil {
 			String[] lruWorkingSetNames= settingsStore.getArray(STORE_LRU_WORKING_SET_NAMES + i);
 			if (lruWorkingSetNames != null) {
 				Set<IWorkingSet> workingSets= new HashSet<>(2);
-				for (int j= 0; j < lruWorkingSetNames.length; j++) {
-					IWorkingSet workingSet= PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(lruWorkingSetNames[j]);
+				for (String lruWorkingSetName : lruWorkingSetNames) {
+					IWorkingSet workingSet= PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(lruWorkingSetName);
 					if (workingSet != null) {
 						workingSets.add(workingSet);
 					}

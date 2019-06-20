@@ -82,13 +82,12 @@ public final class JavaSynchronizationCompareAdapter extends AbstractSynchroniza
 
 	@Override
 	public ResourceMapping[] restore(final IMemento memento) {
-		IMemento[] children= memento.getChildren(RESOURCES);
 		final List<ResourceMapping> result= new ArrayList<>();
-		for (int index= 0; index < children.length; index++) {
-			final Integer typeInt= children[index].getInteger(RESOURCE_TYPE);
+		for (IMemento child : memento.getChildren(RESOURCES)) {
+			final Integer typeInt= child.getInteger(RESOURCE_TYPE);
 			if (typeInt == null)
 				continue;
-			final String pathString= children[index].getString(RESOURCE_PATH);
+			final String pathString= child.getString(RESOURCE_PATH);
 			if (pathString == null)
 				continue;
 			IResource resource= null;
@@ -114,9 +113,8 @@ public final class JavaSynchronizationCompareAdapter extends AbstractSynchroniza
 					result.add(mapping);
 			}
 		}
-		children= memento.getChildren(WORKING_SETS);
-		for (int index= 0; index < children.length; index++) {
-			final String name= children[index].getString(WORKING_SET_NAME);
+		for (IMemento child : memento.getChildren(WORKING_SETS)) {
+			final String name= child.getString(WORKING_SET_NAME);
 			if (name == null)
 				continue;
 			final IWorkingSet set= PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(name);
@@ -126,9 +124,8 @@ public final class JavaSynchronizationCompareAdapter extends AbstractSynchroniza
 					result.add(mapping);
 			}
 		}
-		children= memento.getChildren(MODEL_PROVIDERS);
-		for (int index= 0; index < children.length; index++) {
-			final String id= children[index].getString(MODEL_PROVIDER_ID);
+		for (IMemento child : memento.getChildren(MODEL_PROVIDERS)) {
+			final String id= child.getString(MODEL_PROVIDER_ID);
 			if (id == null)
 				continue;
 			final IModelProviderDescriptor descriptor= ModelProvider.getModelProviderDescriptor(id);
@@ -150,8 +147,8 @@ public final class JavaSynchronizationCompareAdapter extends AbstractSynchroniza
 
 	@Override
 	public void save(final ResourceMapping[] mappings, final IMemento memento) {
-		for (int index= 0; index < mappings.length; index++) {
-			final Object object= mappings[index].getModelObject();
+		for (ResourceMapping mapping : mappings) {
+			final Object object= mapping.getModelObject();
 			if (object instanceof IJavaElement) {
 				final IJavaElement element= (IJavaElement) object;
 				final IResource resource= element.getAdapter(IResource.class);

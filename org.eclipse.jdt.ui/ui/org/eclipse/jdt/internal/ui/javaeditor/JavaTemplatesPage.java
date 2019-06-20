@@ -173,9 +173,8 @@ public class JavaTemplatesPage extends AbstractTemplatesPage {
 	 */
 	@Override
 	protected boolean isValidTemplate(IDocument document, Template template, int offset, int length) {
-		String[] contextIds= getContextTypeIds(document, offset);
-		for (int i= 0; i < contextIds.length; i++) {
-			if (contextIds[i].equals(template.getContextTypeId())) {
+		for (String contextId : getContextTypeIds(document, offset)) {
+			if (contextId.equals(template.getContextTypeId())) {
 				DocumentTemplateContext context= getContext(document, template, offset, length);
 				return context.canEvaluate(template) || isTemplateAllowed(context, template);
 			}

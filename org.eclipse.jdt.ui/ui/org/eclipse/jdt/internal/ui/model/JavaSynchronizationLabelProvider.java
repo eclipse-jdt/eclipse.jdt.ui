@@ -91,10 +91,10 @@ public final class JavaSynchronizationLabelProvider extends AbstractSynchronizat
 		final ISynchronizationContext context= getContext();
 		final IResource resource= JavaModelProvider.getResource(element);
 		if (context != null && resource != null) {
-			final IDiff[] diff= JavaSynchronizationContentProvider.getDiffs(context, element);
-			for (int index= 0; index < diff.length; index++) {
-				if (context.getDiffTree().getResource(diff[index]).equals(resource))
-					return diff[index];
+			for (IDiff d : JavaSynchronizationContentProvider.getDiffs(context, element)) {
+				if (context.getDiffTree().getResource(d).equals(resource)) {
+					return d;
+				}
 			}
 		}
 		return super.getDiff(element);

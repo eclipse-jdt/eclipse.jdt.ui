@@ -171,10 +171,9 @@ public class OccurrencesSearchResult extends AbstractTextSearchResult implements
 	private Match[] collectMatches(Object[] elements) {
 		Match[] matches= new Match[getMatchCount()];
 		int writeIndex= 0;
-		for (int i= 0; i < elements.length; i++) {
-			Match[] perElement= getMatches(elements[i]);
-			for (int j= 0; j < perElement.length; j++) {
-				matches[writeIndex++]= perElement[j];
+		for (Object element : elements) {
+			for (Match perElement : getMatches(element)) {
+				matches[writeIndex++]= perElement;
 			}
 		}
 		return matches;

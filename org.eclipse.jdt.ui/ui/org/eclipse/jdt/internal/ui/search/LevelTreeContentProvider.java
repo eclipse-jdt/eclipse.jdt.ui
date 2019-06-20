@@ -131,10 +131,9 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 		super.initialize(result);
 		fChildrenMap= new HashMap<>();
 		if (result != null) {
-			Object[] elements= result.getElements();
-			for (int i= 0; i < elements.length; i++) {
-				if (getPage().getDisplayedMatchCount(elements[i]) > 0) {
-					insert(null, null, elements[i]);
+			for (Object element : result.getElements()) {
+				if (getPage().getDisplayedMatchCount(element) > 0) {
+					insert(null, null, element);
 				}
 			}
 		}
@@ -251,16 +250,16 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 		Set<Object> toRemove= new HashSet<>();
 		Set<Object> toUpdate= new HashSet<>();
 		Map<Object, Set<Object>> toAdd= new HashMap<>();
-		for (int i= 0; i < updatedElements.length; i++) {
-			if (getPage().getDisplayedMatchCount(updatedElements[i]) > 0)
-				insert(toAdd, toUpdate, updatedElements[i]);
-			else
-				remove(toRemove, toUpdate, updatedElements[i]);
+		for (Object updatedElement : updatedElements) {
+			if (getPage().getDisplayedMatchCount(updatedElement) > 0) {
+				insert(toAdd, toUpdate, updatedElement);
+			} else {
+				remove(toRemove, toUpdate, updatedElement);
+			}
 		}
 
 		viewer.remove(toRemove.toArray());
-		for (Iterator<Object> iter= toAdd.keySet().iterator(); iter.hasNext();) {
-			Object parent= iter.next();
+		for (Object parent : toAdd.keySet()) {
 			HashSet<Object> children= (HashSet<Object>) toAdd.get(parent);
 			viewer.add(parent, children.toArray());
 		}

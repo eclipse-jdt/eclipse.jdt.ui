@@ -161,18 +161,20 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	}
 
 	private boolean contains(IResource[] resources, Object target) {
-		for (int i= 0; i < resources.length; i++) {
-			if (resources[i].equals(target))
+		for (IResource resource : resources) {
+			if (resource.equals(target)) {
 				return true;
+			}
 		}
 
 		return false;
 	}
 
 	private boolean contains(IJavaElement[] elements, Object target) {
-		for (int i= 0; i < elements.length; i++) {
-			if (elements[i].equals(target))
+		for (IJavaElement element : elements) {
+			if (element.equals(target)) {
 				return true;
+			}
 		}
 
 		return false;

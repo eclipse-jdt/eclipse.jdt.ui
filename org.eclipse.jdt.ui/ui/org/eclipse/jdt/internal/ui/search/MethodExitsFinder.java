@@ -218,9 +218,9 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 			if (typeBinding != null) {
 				IMethodBinding methodBinding= Bindings.findMethodInHierarchy(typeBinding, "close", new ITypeBinding[0]); //$NON-NLS-1$
 				if (methodBinding != null) {
-					ITypeBinding[] exceptionTypes= methodBinding.getExceptionTypes();
-					for (int j= 0; j < exceptionTypes.length; j++) {
-						if (isExitPoint(exceptionTypes[j])) { // a close() throws an uncaught exception
+					for (ITypeBinding exceptionType : methodBinding.getExceptionTypes()) {
+						if (isExitPoint(exceptionType)) {
+							// a close() throws an uncaught exception
 							// mark name of resource
 							if (variable instanceof VariableDeclarationExpression) {
 								VariableDeclarationExpression varDeclExpr= (VariableDeclarationExpression) variable;
@@ -238,7 +238,7 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 								Block body= node.getBody();
 								int offset= body.getStartPosition() + body.getLength() - 1; // closing bracket of try block
 								fResult.add(new OccurrenceLocation(offset, 1, 0, Messages.format(SearchMessages.MethodExitsFinder_occurrence_exit_impclict_close_description,
-										BasicElementLabels.getJavaElementName(fMethodDeclaration.getName().toString()))));
+									BasicElementLabels.getJavaElementName(fMethodDeclaration.getName().toString()))));
 							}
 						}
 					}
@@ -333,10 +333,10 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 	private boolean isExitPoint(IMethodBinding binding) {
 		if (binding == null)
 			return false;
-		ITypeBinding[] exceptions= binding.getExceptionTypes();
-		for (int i= 0; i < exceptions.length; i++) {
-			if (!isCaught(exceptions[i]))
+		for (ITypeBinding exception : binding.getExceptionTypes()) {
+			if (!isCaught(exception)) {
 				return true;
+			}
 		}
 		return false;
 	}

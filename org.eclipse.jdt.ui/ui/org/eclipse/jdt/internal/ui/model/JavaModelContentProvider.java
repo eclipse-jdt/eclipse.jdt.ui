@@ -54,10 +54,10 @@ public final class JavaModelContentProvider extends StandardJavaElementContentPr
 		else if (element instanceof IJavaProject) {
 			final List<Object> elements= new ArrayList<>();
 			elements.add(((IJavaProject) element).getProject().getFolder(NAME_SETTINGS_FOLDER));
-			final Object[] children= super.getChildren(element);
-			for (int index= 0; index < children.length; index++) {
-				if (!elements.contains(children[index]))
-					elements.add(children[index]);
+			for (Object child : super.getChildren(element)) {
+				if (!elements.contains(child)) {
+					elements.add(child);
+				}
 			}
 			return elements.toArray();
 		} else if (element instanceof IFolder) {

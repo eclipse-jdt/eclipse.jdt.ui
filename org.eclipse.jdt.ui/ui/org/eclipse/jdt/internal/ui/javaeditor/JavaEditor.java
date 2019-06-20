@@ -3062,12 +3062,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 */
 	private void updateHoverBehavior() {
 		SourceViewerConfiguration configuration= getSourceViewerConfiguration();
-		String[] types= configuration.getConfiguredContentTypes(getSourceViewer());
 
-		for (int i= 0; i < types.length; i++) {
-
-			String t= types[i];
-
+		for (String t : configuration.getConfiguredContentTypes(getSourceViewer())) {
 			ISourceViewer sourceViewer= getSourceViewer();
 			if (sourceViewer instanceof ITextViewerExtension2) {
 				// Remove existing hovers

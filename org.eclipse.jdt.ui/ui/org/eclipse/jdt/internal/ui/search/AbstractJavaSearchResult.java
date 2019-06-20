@@ -82,9 +82,8 @@ public abstract class AbstractJavaSearchResult extends AbstractTextSearchResult 
 		if (element instanceof IParent) {
 			IParent parent= (IParent) element;
 			try {
-				IJavaElement[] children= parent.getChildren();
-				for (int i= 0; i < children.length; i++) {
-					collectMatches(matches, children[i]);
+				for (IJavaElement child : parent.getChildren()) {
+					collectMatches(matches, child);
 				}
 			} catch (JavaModelException e) {
 				// we will not be tracking these results

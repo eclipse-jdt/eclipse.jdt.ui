@@ -59,9 +59,9 @@ public class BasicCompilationUnitEditorActionContributor extends BasicJavaEditor
 
 		@Override
 		public void menuAboutToShow(IMenuManager manager) {
-	    	for (int i= 0; i < fSpecificAssistActions.length; i++) {
-	            fSpecificAssistActions[i].update();
-	        }
+			for (SpecificContentAssistAction fSpecificAssistAction : fSpecificAssistActions) {
+				fSpecificAssistAction.update();
+			}
 	    }
 
 		public void dispose() {
@@ -158,8 +158,7 @@ public class BasicCompilationUnitEditorActionContributor extends BasicJavaEditor
 		fQuickAssistAction.setAction(getAction(textEditor, ITextEditorActionConstants.QUICK_ASSIST));
 
 		if (fSpecificAssistActions != null) {
-			for (int i= 0; i < fSpecificAssistActions.length; i++) {
-				SpecificContentAssistAction assistAction= fSpecificAssistActions[i];
+			for (SpecificContentAssistAction assistAction : fSpecificAssistActions) {
 				assistAction.setActiveEditor(part);
 			}
 		}

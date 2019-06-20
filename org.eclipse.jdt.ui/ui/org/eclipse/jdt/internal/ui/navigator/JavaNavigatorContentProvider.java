@@ -146,8 +146,7 @@ public class JavaNavigatorContentProvider extends
 
 	private static IProject[] filterResourceProjects(IProject[] projects) {
 		List<IProject> filteredProjects= new ArrayList<>(projects.length);
-		for (int i= 0; i < projects.length; i++) {
-			IProject project= projects[i];
+		for (IProject project : projects) {
 			if (!project.isOpen() || isJavaProject(project))
 				filteredProjects.add(project);
 		}
@@ -321,8 +320,7 @@ public class JavaNavigatorContentProvider extends
 	 */
 	private void customize(Object[] javaElements, Set<Object> proposedChildren) {
 		List<?> elementList= Arrays.asList(javaElements);
-		for (Iterator<?> iter= proposedChildren.iterator(); iter.hasNext();) {
-			Object element= iter.next();
+		for (Object element : proposedChildren) {
 			IResource resource= null;
 			if (element instanceof IResource) {
 				resource= (IResource)element;
@@ -336,8 +334,7 @@ public class JavaNavigatorContentProvider extends
 				}
 			}
 		}
-		for (int i= 0; i < javaElements.length; i++) {
-			Object element= javaElements[i];
+		for (Object element : javaElements) {
 			if (element instanceof IJavaElement) {
 				IJavaElement cElement= (IJavaElement)element;
 				IResource resource= cElement.getResource();

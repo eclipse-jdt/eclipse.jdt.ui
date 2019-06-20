@@ -85,8 +85,7 @@ abstract class JavaMatchFilter extends MatchFilter {
 
 	private static String encodeFilters(MatchFilter[] enabledFilters) {
 		StringBuilder buf= new StringBuilder();
-		for (int i= 0; i < enabledFilters.length; i++) {
-			MatchFilter matchFilter= enabledFilters[i];
+		for (MatchFilter matchFilter : enabledFilters) {
 			buf.append(matchFilter.getID());
 			buf.append(';');
 		}
@@ -149,8 +148,7 @@ abstract class JavaMatchFilter extends MatchFilter {
 
 	public static JavaMatchFilter[] allFilters(JavaSearchQuery query) {
 		ArrayList<JavaMatchFilter> res= new ArrayList<>();
-		for (int i= 0; i < ALL_FILTERS.length; i++) {
-			JavaMatchFilter curr= ALL_FILTERS[i];
+		for (JavaMatchFilter curr : ALL_FILTERS) {
 			if (curr.isApplicable(query)) {
 				res.add(curr);
 			}
@@ -159,8 +157,7 @@ abstract class JavaMatchFilter extends MatchFilter {
 	}
 
 	private static JavaMatchFilter findMatchFilter(String id) {
-		for (int i= 0; i < ALL_FILTERS.length; i++) {
-			JavaMatchFilter matchFilter= ALL_FILTERS[i];
+		for (JavaMatchFilter matchFilter : ALL_FILTERS) {
 			if (matchFilter.getID().equals(id))
 				return matchFilter;
 		}

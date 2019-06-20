@@ -356,12 +356,10 @@ public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
 	}
 
 	private static JavaElementLine getMatchingLine(OccurrencesSearchResult result, int offset, int length) {
-		Object[] elements= result.getElements();
-		for (int i= 0; i < elements.length; i++) {
-			JavaElementLine line= (JavaElementLine) elements[i];
-			Match[] matches= result.getMatches(line);
-			for (int j= 0; j < matches.length; j++) {
-				OccurrenceMatch match= (OccurrenceMatch) matches[j];
+		for (Object element : result.getElements()) {
+			JavaElementLine line = (JavaElementLine) element;
+			for (Match matche : result.getMatches(line)) {
+				OccurrenceMatch match= (OccurrenceMatch) matche;
 				if (match.getOriginalOffset() <= offset && offset + length <= match.getOriginalOffset() + match.getOriginalLength()) {
 					return line;
 				}

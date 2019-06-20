@@ -88,8 +88,7 @@ class SaveParticipantConfigurationBlock implements IPreferenceAndPropertyConfigu
 		});
 
 		IPreferencePageContainer container= fPreferencePage.getContainer();
-		for (int i= 0; i < descriptors.length; i++) {
-			final SaveParticipantDescriptor descriptor= descriptors[i];
+		for (SaveParticipantDescriptor descriptor : descriptors) {
 			ISaveParticipantPreferenceConfiguration configuration= descriptor.createPreferenceConfiguration();
 			configuration.createControl(composite, container);
 			fConfigurations.add(configuration);

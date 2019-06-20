@@ -202,8 +202,7 @@ public class GoToNextPreviousMemberAction extends Action implements IUpdate {
 
 	private static Integer[] createOffsetArray(IType[] types) throws JavaModelException {
 		List<Integer> result= new ArrayList<>();
-		for (int i= 0; i < types.length; i++) {
-			IType iType= types[i];
+		for (IType iType : types) {
 			addOffset(result, iType.getNameRange().getOffset());
 			addOffset(result, iType.getSourceRange().getOffset() + iType.getSourceRange().getLength());
 			addMemberOffsetList(result, iType.getMethods());
@@ -214,8 +213,8 @@ public class GoToNextPreviousMemberAction extends Action implements IUpdate {
 	}
 
 	private static void addMemberOffsetList(List<Integer> result, IMember[] members) throws JavaModelException {
-		for (int i= 0; i < members.length; i++) {
-			addOffset(result, getOffset(members[i]));
+		for (IMember member : members) {
+			addOffset(result, getOffset(member));
 		}
 	}
 

@@ -321,9 +321,8 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 
 		IWorkspace workspace= ResourcesPlugin.getWorkspace();
 
-		String[] filters= getTokens(text, ","); //$NON-NLS-1$
-		for (int i= 0; i < filters.length; i++) {
-			String fileName= filters[i].replace('*', 'x');
+		for (String filter : getTokens(text, ",")) { //$NON-NLS-1$
+			String fileName= filter.replace('*', 'x');
 			int resourceType= IResource.FILE;
 			int lastCharacter= fileName.length() - 1;
 			if (lastCharacter >= 0 && fileName.charAt(lastCharacter) == '/') {

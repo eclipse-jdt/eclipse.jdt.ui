@@ -160,9 +160,9 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 				value= value.trim();
 				if (value.isEmpty())
 					return;
-				String[] strings= value.split(","); //$NON-NLS-1$
-				for (int i= 0; i < strings.length; i++)
-					addElement(new AnnotationWrapper(strings[i].trim()));
+				for (String string : value.split(",")) { //$NON-NLS-1$
+					addElement(new AnnotationWrapper(string.trim()));
+				}
 			}
 
 			public String getCommaSeparatedElements() {

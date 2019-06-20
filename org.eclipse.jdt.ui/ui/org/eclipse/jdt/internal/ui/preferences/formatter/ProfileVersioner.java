@@ -210,8 +210,8 @@ public class ProfileVersioner implements IProfileVersioner {
 		if (value == null)
 			return;
 
-		for (int i = 0; i < newKeys.length; i++) {
-			settings.put(newKeys[i], value);
+		for (String newKey : newKeys) {
+			settings.put(newKey, value);
 		}
 	}
 

@@ -518,9 +518,9 @@ public class PropertyKeyHyperlink implements IHyperlink {
 		ArrayList<String> fileNamePatternStrings= new ArrayList<>();
 
 		// XXX: Should be configurable via preference, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=81117
-		String[] javaExtensions= JavaCore.getJavaLikeExtensions();
-		for (int i= 0; i < javaExtensions.length; i++)
-			fileNamePatternStrings.add("*." + javaExtensions[i]); //$NON-NLS-1$
+		for (String javaExtension : JavaCore.getJavaLikeExtensions()) {
+			fileNamePatternStrings.add("*." + javaExtension); //$NON-NLS-1$
+		}
 		fileNamePatternStrings.add("*.xml"); //$NON-NLS-1$
 		fileNamePatternStrings.add("*.ini"); //$NON-NLS-1$
 
