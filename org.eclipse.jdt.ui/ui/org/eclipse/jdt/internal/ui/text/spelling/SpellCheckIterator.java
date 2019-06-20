@@ -210,10 +210,10 @@ public class SpellCheckIterator implements ISpellCheckIterator {
 
 		if (token != null) {
 
-			for (int index= 0; index < tags.length; index++) {
-
-				if (token.equals(tags[index]))
+			for (String tag : tags) {
+				if (token.equals(tag)) {
 					return true;
+				}
 			}
 		}
 		return false;
@@ -249,10 +249,10 @@ public class SpellCheckIterator implements ISpellCheckIterator {
 	 */
 	protected final boolean isUrlToken(final int begin) {
 
-		for (int index= 0; index < DefaultSpellChecker.URL_PREFIXES.length; index++) {
-
-			if (fContent.startsWith(DefaultSpellChecker.URL_PREFIXES[index], begin))
+		for (String prefix : DefaultSpellChecker.URL_PREFIXES) {
+			if (fContent.startsWith(prefix, begin)) {
 				return true;
+			}
 		}
 		return false;
 	}

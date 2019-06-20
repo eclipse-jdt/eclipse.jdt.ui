@@ -496,8 +496,8 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 		AST ast= rewrite.getAST();
 		String[] nameProposals= getVariableNameProposals(basename, excludedName);
 		SimpleName forDeclarationName= ast.newSimpleName(nameProposals.length > 0 ? nameProposals[0] : basename);
-		for (int i= 0; i < nameProposals.length; i++) {
-			addLinkedPositionProposal(forDeclarationName.getIdentifier(), nameProposals[i], null);
+		for (String nameProposal : nameProposals) {
+			addLinkedPositionProposal(forDeclarationName.getIdentifier(), nameProposal, null);
 		}
 
 		// mark declaration name as editable

@@ -1589,8 +1589,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		// prepare possible variable names
 		List<String> excludedNames= Arrays.asList(ASTResolving.getUsedVariableNames(body));
 		String[] varNames= suggestLocalVariableNames(cu, originalType.resolveBinding(), excludedNames);
-		for (int i= 0; i < varNames.length; i++) {
-			proposal.addLinkedPositionProposal(KEY_NAME, varNames[i], null);
+		for (String varName : varNames) {
+			proposal.addLinkedPositionProposal(KEY_NAME, varName, null);
 		}
 		CastExpression castExpression= ast.newCastExpression();
 		castExpression.setExpression((Expression)rewrite.createCopyTarget(expression.getLeftOperand()));
@@ -1922,8 +1922,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			AST ast= invocation.getAST();
 			ListRewrite typeArgsRewrite= Invocations.getInferredTypeArgumentsRewrite(rewrite, invocation);
 			
-			for (int i= 0; i < typeArguments.length; i++) {
-				Type typeArgumentNode= importRewrite.addImport(typeArguments[i], ast, importRewriteContext, TypeLocation.TYPE_ARGUMENT);
+			for (ITypeBinding typeArgument : typeArguments) {
+				Type typeArgumentNode= importRewrite.addImport(typeArgument, ast, importRewriteContext, TypeLocation.TYPE_ARGUMENT);
 				typeArgsRewrite.insertLast(typeArgumentNode, null);
 			}
 			
@@ -2117,8 +2117,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		proposal.addLinkedPositionProposal(KEY_NAME, oldIdentifier, null);
 		// iterate over linked nodes and replace variable references with negated reference
 		final HashSet<SimpleName> renamedNames= new HashSet<>();
-		for (int i= 0; i < linkedNodes.length; i++) {
-			SimpleName name= linkedNodes[i];
+		for (SimpleName name : linkedNodes) {
 			if (renamedNames.contains(name)) {
 				continue;
 			}
@@ -2137,8 +2136,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				int exEnd= exStart + expression.getLength();
 				// collect all names that are used in assignments
 				HashSet<SimpleName> overlapNames= new HashSet<>();
-				for (int j= 0; j < linkedNodes.length; j++) {
-					SimpleName name2= linkedNodes[j];
+				for (SimpleName name2 : linkedNodes) {
 					if (name2 == null) {
 						continue;
 					}
@@ -2774,9 +2772,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				thenStatement= currentIf.getThenStatement();
 			}
 			
-			SwitchCase[] switchCaseStatements= createSwitchCaseStatements(ast, rewrite, caseExpressions);
-			for (int i= 0; i < switchCaseStatements.length; i++) {
-				switchStatement.statements().add(switchCaseStatements[i]);
+			for (SwitchCase switchCaseStatement : createSwitchCaseStatements(ast, rewrite, caseExpressions)) {
+				switchStatement.statements().add(switchCaseStatement);
 			}
 			boolean isBreakRequired= true;
 			if (thenStatement instanceof Block) {

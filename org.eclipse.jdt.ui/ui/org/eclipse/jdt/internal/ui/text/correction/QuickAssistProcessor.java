@@ -354,11 +354,10 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 	static boolean noErrorsAtLocation(IProblemLocation[] locations) {
 		if (locations != null) {
-			for (int i= 0; i < locations.length; i++) {
-				IProblemLocation location= locations[i];
+			for (IProblemLocation location : locations) {
 				if (location.isError()) {
 					if (IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER.equals(location.getMarkerType())
-							&& JavaCore.getOptionForConfigurableSeverity(location.getProblemId()) != null) {
+						&& JavaCore.getOptionForConfigurableSeverity(location.getProblemId()) != null) {
 						// continue (only drop out for severe (non-optional) errors)
 					} else {
 						return false;
@@ -889,9 +888,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 	private static boolean hasConflict(int startPosition, IMethodBinding referredMethodBinding, int flags, CompilationUnit cu) {
 		ScopeAnalyzer analyzer= new ScopeAnalyzer(cu);
-		IBinding[] declarationsInScope= analyzer.getDeclarationsInScope(startPosition, flags);
-		for (int i= 0; i < declarationsInScope.length; i++) {
-			IBinding decl= declarationsInScope[i];
+		for (IBinding decl : analyzer.getDeclarationsInScope(startPosition, flags)) {
 			if (decl.getName().equals(referredMethodBinding.getName()) && !referredMethodBinding.getMethodDeclaration().isEqualTo(decl))
 				return true;
 		}
@@ -1921,8 +1918,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.SPLIT_VARIABLE_DECLARATION, image);
 		boolean commandConflict= false;
-		for (Iterator<ICommandAccess> iterator= resultingCollections.iterator(); iterator.hasNext();) {
-			Object completionProposal= iterator.next();
+		for (ICommandAccess completionProposal : resultingCollections) {
 			if (completionProposal instanceof ChangeCorrectionProposal) {
 				if (SPLIT_JOIN_VARIABLE_DECLARATION_ID.equals(((ChangeCorrectionProposal)completionProposal).getCommandId())) {
 					commandConflict= true;
@@ -2079,8 +2075,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			frag.setName(bufferNameDeclaration);
 
 			proposal.addLinkedPosition(rewrite.track(bufferNameDeclaration), true, groupID);
-			for (int i= 0; i < newBufferNames.length; i++) {
-				proposal.addLinkedPositionProposal(groupID, newBufferNames[i], null);
+			for (String newBufferName : newBufferNames) {
+				proposal.addLinkedPositionProposal(groupID, newBufferName, null);
 			}
 
 
@@ -2358,10 +2354,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 	private static boolean containsMatchingProblem(IProblemLocation[] locations, int problemId) {
 		if (locations != null) {
-			for (int i= 0; i < locations.length; i++) {
-				IProblemLocation location= locations[i];
+			for (IProblemLocation location : locations) {
 				if (IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER.equals(location.getMarkerType())
-						&& location.getProblemId() == problemId) {
+					&& location.getProblemId() == problemId) {
 					return true;
 				}
 			}
@@ -2398,10 +2393,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			}
 			// assign to existing fields
 			CompilationUnit root= context.getASTRoot();
-			IVariableBinding[] declaredFields= parentType.getDeclaredFields();
 			boolean isStaticContext= ASTResolving.isInStaticContext(node);
-			for (int i= 0; i < declaredFields.length; i++) {
-				IVariableBinding curr= declaredFields[i];
+			for (IVariableBinding curr : parentType.getDeclaredFields()) {
 				if (isStaticContext == Modifier.isStatic(curr.getModifiers()) && typeBinding.isAssignmentCompatible(curr.getType())) {
 					ASTNode fieldDeclFrag= root.findDeclaringNode(curr);
 					if (fieldDeclFrag instanceof VariableDeclarationFragment) {
@@ -2967,8 +2960,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	
 	private static boolean containsQuickFixableRenameLocal(IProblemLocation[] locations) {
 		if (locations != null) {
-			for (int i= 0; i < locations.length; i++) {
-				IProblemLocation location= locations[i];
+			for (IProblemLocation location : locations) {
 				if (IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER.equals(location.getMarkerType())) {
 					switch (location.getProblemId()) {
 						case IProblem.LocalVariableHidingLocalVariable:
@@ -3141,8 +3133,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			options.put(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS, CleanUpOptions.TRUE);
 			options.put(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NEVER, CleanUpOptions.TRUE);
 			ICleanUp cleanUp= new ControlStatementsCleanUp(options);
-			for (int i= 0; i < fixes.length; i++) {
-				IProposableFix fix= fixes[i];
+			for (IProposableFix fix : fixes) {
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 				FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, IProposalRelevance.REMOVE_BLOCK_FIX, image, context);
 				resultingCollections.add(proposal);
@@ -3457,8 +3448,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		ITypeBinding[] superTypes= Bindings.getAllSuperTypes(binding.getDeclaringClass());
 		if (resultingCollections == null) {
-			for (int i= 0; i < superTypes.length; i++) {
-				ITypeBinding curr= superTypes[i];
+			for (ITypeBinding curr : superTypes) {
 				if (curr.isFromSource() && Bindings.findOverriddenMethodInType(curr, binding) == null) {
 					return true;
 				}
@@ -3472,8 +3462,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			paramNames[i]= param.getName().getIdentifier();
 		}
 
-		for (int i= 0; i < superTypes.length; i++) {
-			ITypeBinding curr= superTypes[i];
+		for (ITypeBinding curr : superTypes) {
 			if (curr.isFromSource()) {
 				IMethodBinding method= Bindings.findOverriddenMethodInType(curr, binding);
 				if (method == null) {
@@ -3553,8 +3542,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			VariableDeclarationFragment iterFragment= ast.newVariableDeclarationFragment();
 			iterFragment.setName(initializerIterName);
 			proposal.addLinkedPosition(rewrite.track(initializerIterName), 0, iterNameKey);
-			for (int i= 0; i < iterNames.length; i++) {
-				proposal.addLinkedPositionProposal(iterNameKey, iterNames[i], null);
+			for (String name : iterNames) {
+				proposal.addLinkedPositionProposal(iterNameKey, name, null);
 			}
 			
 			Expression initializerExpression= (Expression) rewrite.createCopyTarget(initializer);
@@ -3635,8 +3624,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				SimpleName varNameNode= ast.newSimpleName(varName);
 				varFragment.setName(varNameNode);
 				proposal.addLinkedPosition(rewrite.track(varNameNode), 0, varNameKey);
-				for (int i= 0; i < varNames.length; i++) {
-					proposal.addLinkedPositionProposal(varNameKey, varNames[i], null);
+				for (String name : varNames) {
+					proposal.addLinkedPositionProposal(varNameKey, name, null);
 				}
 				
 				varFragment.setInitializer((Expression) rewrite.createCopyTarget(initializer));
@@ -3677,8 +3666,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			SimpleName initializerIndexName= ast.newSimpleName(indexName);
 			indexFragment.setName(initializerIndexName);
 			proposal.addLinkedPosition(rewrite.track(initializerIndexName), 0, indexNameKey);
-			for (int i= 0; i < indexNames.length; i++) {
-				proposal.addLinkedPositionProposal(indexNameKey, indexNames[i], null);
+			for (String name : indexNames) {
+				proposal.addLinkedPositionProposal(indexNameKey, name, null);
 			}
 			VariableDeclarationExpression indexVariable= ast.newVariableDeclarationExpression(indexFragment);
 			indexVariable.setType(indexType);

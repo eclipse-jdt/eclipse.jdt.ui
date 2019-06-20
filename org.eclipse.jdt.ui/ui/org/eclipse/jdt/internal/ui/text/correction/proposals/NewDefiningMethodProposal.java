@@ -84,8 +84,8 @@ public class NewDefiningMethodProposal extends AbstractMethodCorrectionProposal 
 			String groupId= "arg_name_" + i; //$NON-NLS-1$
 			addLinkedPosition(rewrite.track(newParam.getName()), false, groupId);
 
-			for (int k= 0; k < proposedNames.length; k++) {
-				addLinkedPositionProposal(groupId, proposedNames[k], null);
+			for (String proposedName : proposedNames) {
+				addLinkedPositionProposal(groupId, proposedName, null);
 			}
 		}
 	}

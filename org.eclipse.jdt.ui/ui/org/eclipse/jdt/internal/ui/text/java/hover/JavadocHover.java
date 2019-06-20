@@ -694,10 +694,10 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			return elements;
 		}
 
-		for (int i= 0; i < elements.length; i++) {
+		for (IJavaElement element : elements) {
 			try {
-				if (elements[i] instanceof IPackageFragment) {
-					IPackageFragment packageFragment= (IPackageFragment) elements[i];
+				if (element instanceof IPackageFragment) {
+					IPackageFragment packageFragment= (IPackageFragment) element;
 					if (JavadocContentAccess2.getHTMLContent(packageFragment) != null)
 						return new IJavaElement[] { packageFragment };
 				}
@@ -729,9 +729,9 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		elements= filterDuplicatePackages(elements);
 		
 		if (elements.length > 1) {
-			for (int i= 0; i < elements.length; i++) {
+			for (IJavaElement el : elements) {
 				HTMLPrinter.startBulletList(buffer);
-				IJavaElement curr= elements[i];
+				IJavaElement curr= el;
 				if (curr instanceof IMember || curr.getElementType() == IJavaElement.LOCAL_VARIABLE) {
 					String label= JavaElementLabels.getElementLabel(curr, getHeaderFlags(curr));
 					String link;
@@ -1194,9 +1194,9 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			return null;
 		
 		StringBuffer buf= new StringBuffer();
-		for (int i= 0; i < annotations.length; i++) {
+		for (IAnnotationBinding annotation : annotations) {
 			//TODO: skip annotations that don't have an @Documented annotation?
-			addAnnotation(buf, annotations[i], true);
+			addAnnotation(buf, annotation, true);
 			buf.append("<br>"); //$NON-NLS-1$
 		}
 		
@@ -1233,9 +1233,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	}
 
 	private static IBinding resolveSuperclassConstructor(ITypeBinding superClassDeclaration, IMethodBinding constructor) {
-		IMethodBinding[] methods= superClassDeclaration.getDeclaredMethods();
-		for (int i= 0; i < methods.length; i++) {
-			IMethodBinding method= methods[i];
+		for (IMethodBinding method : superClassDeclaration.getDeclaredMethods()) {
 			if (method.isConstructor() && constructor.isSubsignature(method))
 				return method;
 		}

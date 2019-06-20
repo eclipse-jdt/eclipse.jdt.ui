@@ -79,15 +79,13 @@ public class MissingReturnTypeInLambdaCorrectionProposal extends MissingReturnTy
 	@Override
 	protected Expression computeProposals(AST ast, ITypeBinding returnBinding, int returnOffset, CompilationUnit root, Expression result) {
 		ScopeAnalyzer analyzer= new ScopeAnalyzer(root);
-		IBinding[] bindings= analyzer.getDeclarationsInScope(returnOffset, ScopeAnalyzer.VARIABLES | ScopeAnalyzer.CHECK_VISIBILITY);
-
 		org.eclipse.jdt.core.dom.NodeFinder finder= new org.eclipse.jdt.core.dom.NodeFinder(root, returnOffset, 0);
 		ASTNode varDeclFrag= ASTResolving.findAncestor(finder.getCoveringNode(), ASTNode.VARIABLE_DECLARATION_FRAGMENT);
 		IVariableBinding varDeclFragBinding= null;
 		if (varDeclFrag != null)
 			varDeclFragBinding= ((VariableDeclarationFragment) varDeclFrag).resolveBinding();
-		for (int i= 0; i < bindings.length; i++) {
-			IVariableBinding curr= (IVariableBinding) bindings[i];
+		for (IBinding binding : analyzer.getDeclarationsInScope(returnOffset, ScopeAnalyzer.VARIABLES | ScopeAnalyzer.CHECK_VISIBILITY)) {
+			IVariableBinding curr= (IVariableBinding) binding;
 			ITypeBinding type= curr.getType();
 			// Bindings are compared to make sure that a lambda does not return a variable which is yet to be initialised.
 			if (type != null && type.isAssignmentCompatible(returnBinding) && testModifier(curr) && !Bindings.equals(curr, varDeclFragBinding)) {

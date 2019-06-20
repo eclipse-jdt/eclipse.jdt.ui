@@ -16,7 +16,6 @@ package org.eclipse.jdt.internal.ui.text.java;
 
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -178,8 +177,8 @@ final class CompletionProposalComputerDescriptor {
 		if (children.length == 0) {
 			fPartitions= PARTITION_SET; // add to all partition types if no partition is configured
 		} else {
-			for (int i= 0; i < children.length; i++) {
-				String type= children[i].getAttribute(TYPE);
+			for (IConfigurationElement child : children) {
+				String type= child.getAttribute(TYPE);
 				checkNotNull(type, TYPE);
 				partitions.add(type);
 			}
@@ -199,8 +198,7 @@ final class CompletionProposalComputerDescriptor {
 		if (categoryId == null)
 			categoryId= DEFAULT_CATEGORY_ID;
 		CompletionProposalCategory category= null;
-		for (Iterator<CompletionProposalCategory> it= categories.iterator(); it.hasNext();) {
-			CompletionProposalCategory cat= it.next();
+		for (CompletionProposalCategory cat : categories) {
 			if (cat.getId().equals(categoryId)) {
 				category= cat;
 				break;

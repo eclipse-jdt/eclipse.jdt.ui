@@ -94,15 +94,11 @@ public final class ContentAssistHistory {
 				rootElement.setAttribute(ATTRIBUTE_MAX_RHS, Integer.toString(history.fMaxRHS));
 				document.appendChild(rootElement);
 
-				for (Iterator<String> leftHandSides= history.fLHSCache.keySet().iterator(); leftHandSides.hasNext();) {
-					String lhs= leftHandSides.next();
+				for (String lhs : history.fLHSCache.keySet()) {
 					Element lhsElement= document.createElement(NODE_LHS);
 					lhsElement.setAttribute(ATTRIBUTE_NAME, lhs);
 					rootElement.appendChild(lhsElement);
-
-					MRUSet<String> rightHandSides= history.fLHSCache.get(lhs);
-					for (Iterator<String> rhsIterator= rightHandSides.iterator(); rhsIterator.hasNext();) {
-						String rhs= rhsIterator.next();
+					for (String rhs : history.fLHSCache.get(lhs)) {
 						Element rhsElement= document.createElement(NODE_RHS);
 						rhsElement.setAttribute(ATTRIBUTE_NAME, rhs);
 						lhsElement.appendChild(rhsElement);
@@ -380,10 +376,10 @@ public final class ContentAssistHistory {
 			ITypeHierarchy hierarchy= rhs.newSupertypeHierarchy(getProgressMonitor());
 			if (hierarchy.contains(lhs)) {
 				// TODO remember for every member of the LHS hierarchy or not? Yes for now.
-				IType[] allLHSides= hierarchy.getAllSupertypes(lhs);
 				String rhsQualifiedName= rhs.getFullyQualifiedName();
-				for (int i= 0; i < allLHSides.length; i++)
-					rememberInternal(allLHSides[i], rhsQualifiedName);
+				for (IType lhSide : hierarchy.getAllSupertypes(lhs)) {
+					rememberInternal(lhSide, rhsQualifiedName);
+				}
 				rememberInternal(lhs, rhsQualifiedName);
 			}
 		} catch (JavaModelException x) {
@@ -422,8 +418,7 @@ public final class ContentAssistHistory {
 	 */
 	public Map<String, RHSHistory> getEntireHistory() {
 		HashMap<String, RHSHistory> map= new HashMap<>((int) (fLHSCache.size() / 0.75));
-		for ( Iterator<Entry<String, MRUSet<String>>> it= fLHSCache.entrySet().iterator(); it.hasNext();) {
-			Entry<String, MRUSet<String>> entry= it.next();
+		for (Entry<String, MRUSet<String>> entry : fLHSCache.entrySet()) {
 			String lhs= entry.getKey();
 			map.put(lhs, getHistory(lhs));
 		}

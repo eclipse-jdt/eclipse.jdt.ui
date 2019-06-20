@@ -15,7 +15,6 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.swt.graphics.Image;
@@ -56,6 +55,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -66,7 +66,6 @@ import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposal;
 import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 /**
  *
@@ -101,8 +100,7 @@ public class SuppressWarningsSubProcessor {
 		if (warningToken == null) {
 			return;
 		}
-		for (Iterator<ICommandAccess> iter= proposals.iterator(); iter.hasNext();) {
-			Object element= iter.next();
+		for (ICommandAccess element : proposals) {
 			if (element instanceof SuppressWarningsProposal && warningToken.equals(((SuppressWarningsProposal) element).getWarningToken())) {
 				return; // only one at a time
 			}
@@ -335,9 +333,7 @@ public class SuppressWarningsSubProcessor {
 		StringLiteral literal= (StringLiteral) coveringNode;
 
 		String literalValue= literal.getLiteralValue();
-		String[] allWarningTokens= CorrectionEngine.getAllWarningTokens();
-		for (int i= 0; i < allWarningTokens.length; i++) {
-			String curr= allWarningTokens[i];
+		for (String curr : CorrectionEngine.getAllWarningTokens()) {
 			if (NameMatcher.isSimilarName(literalValue, curr)) {
 				StringLiteral newLiteral= ast.newStringLiteral();
 				newLiteral.setLiteralValue(curr);

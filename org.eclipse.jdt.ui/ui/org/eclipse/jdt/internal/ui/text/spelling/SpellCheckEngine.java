@@ -315,8 +315,7 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 		fChecker= new DefaultSpellChecker(store, locale);
 		resetUserDictionary();
 
-		for (Iterator<ISpellDictionary> iterator= fGlobalDictionaries.iterator(); iterator.hasNext();) {
-			ISpellDictionary dictionary= iterator.next();
+		for (ISpellDictionary dictionary : fGlobalDictionaries) {
 			fChecker.addDictionary(dictionary);
 		}
 

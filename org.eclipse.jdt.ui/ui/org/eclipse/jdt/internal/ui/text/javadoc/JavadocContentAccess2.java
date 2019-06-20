@@ -235,9 +235,7 @@ public class JavadocContentAccess2 {
 		 */
 		private Object visitInheritDocInterfaces(ArrayList<IType> visited, IType currentType, ITypeHierarchy typeHierarchy) throws JavaModelException {
 			ArrayList<IType> toVisitChildren= new ArrayList<>();
-			IType[] superInterfaces= typeHierarchy.getSuperInterfaces(currentType);
-			for (int i= 0; i < superInterfaces.length; i++) {
-				IType superInterface= superInterfaces[i];
+			for (IType superInterface : typeHierarchy.getSuperInterfaces(currentType)) {
 				if (visited.contains(superInterface))
 					continue;
 				visited.add(superInterface);
@@ -1162,10 +1160,9 @@ public class JavadocContentAccess2 {
 	private List<String> initExceptionNames() {
 		if (fMethod != null) {
 			try {
-				String[] exceptionTypes= fMethod.getExceptionTypes();
 				ArrayList<String> exceptionNames= new ArrayList<>();
-				for (int i= 0; i < exceptionTypes.length; i++) {
-					exceptionNames.add(Signature.getSimpleName(Signature.toString(exceptionTypes[i])));
+				for (String exceptionType : fMethod.getExceptionTypes()) {
+					exceptionNames.add(Signature.getSimpleName(Signature.toString(exceptionType)));
 				}
 				return exceptionNames;
 			} catch (JavaModelException e) {
@@ -1408,17 +1405,16 @@ public class JavadocContentAccess2 {
 	
 	private void handleContentElements(List<? extends ASTNode> nodes, boolean skipLeadingWhitespace) {
 		ASTNode previousNode= null;
-		for (Iterator<? extends ASTNode> iter= nodes.iterator(); iter.hasNext(); ) {
-			ASTNode child= iter.next();
+		for (ASTNode child : nodes) {
 			if (previousNode != null) {
 				int previousEnd= previousNode.getStartPosition() + previousNode.getLength();
 				int childStart= child.getStartPosition();
 				if (previousEnd > childStart) {
 					// should never happen, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=304826
 					Exception exception= new Exception("Illegal ASTNode positions: previousEnd=" + previousEnd //$NON-NLS-1$
-							+ ", childStart=" + childStart //$NON-NLS-1$
-							+ ", element=" + fElement.getHandleIdentifier() //$NON-NLS-1$
-							+ ", Javadoc:\n" + fSource); //$NON-NLS-1$
+						+ ", childStart=" + childStart //$NON-NLS-1$
+						+ ", element=" + fElement.getHandleIdentifier() //$NON-NLS-1$
+						+ ", Javadoc:\n" + fSource); //$NON-NLS-1$
 					JavaPlugin.log(exception);
 				} else if (previousEnd != childStart) {
 					// Need to preserve whitespace before a node that's not
@@ -2305,9 +2301,7 @@ public class JavadocContentAccess2 {
 		if (entry != null) {
 			int kind= entry.getEntryKind();
 			if (kind == IClasspathEntry.CPE_LIBRARY || kind == IClasspathEntry.CPE_VARIABLE) {
-				IClasspathAttribute[] extraAttributes= entry.getExtraAttributes();
-				for (int i= 0; i < extraAttributes.length; i++) {
-					IClasspathAttribute attrib= extraAttributes[i];
+				for (IClasspathAttribute attrib : entry.getExtraAttributes()) {
 					if (IClasspathAttribute.SOURCE_ATTACHMENT_ENCODING.equals(attrib.getName())) {
 						return attrib.getValue();
 					}

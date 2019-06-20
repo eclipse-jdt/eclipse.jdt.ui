@@ -72,8 +72,8 @@ public final class ClasspathFixProcessorDescriptor {
 		IConfigurationElement[] children= fConfigurationElement.getChildren(OVERRIDES);
 		if (children.length > 0) {
 			fOverriddenIds= new ArrayList<>(children.length);
-			for (int i= 0; i < children.length; i++) {
-				fOverriddenIds.add(children[i].getAttribute(ID));
+			for (IConfigurationElement child : children) {
+				fOverriddenIds.add(child.getAttribute(ID));
 			}
 		} else {
 			fOverriddenIds= Collections.emptyList();
@@ -149,8 +149,8 @@ public final class ClasspathFixProcessorDescriptor {
 			IConfigurationElement[] elements= Platform.getExtensionRegistry().getConfigurationElementsFor(JavaUI.ID_PLUGIN, ATT_EXTENSION);
 			ArrayList<ClasspathFixProcessorDescriptor> res= new ArrayList<>(elements.length);
 
-			for (int i= 0; i < elements.length; i++) {
-				ClasspathFixProcessorDescriptor desc= new ClasspathFixProcessorDescriptor(elements[i]);
+			for (IConfigurationElement element : elements) {
+				ClasspathFixProcessorDescriptor desc= new ClasspathFixProcessorDescriptor(element);
 				IStatus status= desc.checkSyntax();
 				if (status.isOK()) {
 					res.add(desc);
@@ -179,9 +179,7 @@ public final class ClasspathFixProcessorDescriptor {
 		final ArrayList<ClasspathFixProposal> proposals= new ArrayList<>();
 
 		final HashSet<String> overriddenIds= new HashSet<>();
-		ClasspathFixProcessorDescriptor[] correctionProcessors= getCorrectionProcessors();
-		for (int i= 0; i < correctionProcessors.length; i++) {
-			final ClasspathFixProcessorDescriptor curr= correctionProcessors[i];
+		for (ClasspathFixProcessorDescriptor curr : getCorrectionProcessors()) {
 			if (!overriddenIds.contains(curr.getID())) {
 				SafeRunner.run(new ISafeRunnable() {
 					@Override

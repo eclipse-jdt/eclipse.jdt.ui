@@ -141,9 +141,9 @@ public abstract class AbstractMethodCorrectionProposal extends LinkedCorrectionP
 
 		decl.setName(newNameNode);
 
-		IVariableBinding[] declaredFields= fSenderBinding.getDeclaredFields();
-		for (int i= 0; i < declaredFields.length; i++) { // avoid to take parameter names that are equal to field names
-			takenNames.add(declaredFields[i].getName());
+		for (IVariableBinding declaredField : fSenderBinding.getDeclaredFields()) {
+			// avoid to take parameter names that are equal to field names
+			takenNames.add(declaredField.getName());
 		}
 
 		String bodyStatement= ""; //$NON-NLS-1$

@@ -80,15 +80,14 @@ public abstract class AbstractTemplateCompletionProposalComputer implements IJav
 		 * give those templates slightly more relevance than the keyword to
 		 * sort them first.
 		 */
-		for (int k= 0; k < templateProposals.length; k++) {
-			TemplateProposal curr= templateProposals[k];
+		for (TemplateProposal curr : templateProposals) {
 			String name= curr.getTemplate().getName();
-			for (int i= 0; i < keyWordResults.length; i++) {
-				String keyword= keyWordResults[i].getDisplayString();
+			for (IJavaCompletionProposal keyWordResult : keyWordResults) {
+				String keyword= keyWordResult.getDisplayString();
 				if (name.startsWith(keyword)) {
 					String content= curr.getTemplate().getPattern();
 					if (content.startsWith(keyword)) {
-						curr.setRelevance(keyWordResults[i].getRelevance() + 1);
+						curr.setRelevance(keyWordResult.getRelevance() + 1);
 						break;
 					}
 				}

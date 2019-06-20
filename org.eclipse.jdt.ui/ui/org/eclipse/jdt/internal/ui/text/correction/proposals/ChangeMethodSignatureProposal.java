@@ -149,9 +149,9 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 		ArrayList<String> usedNames= new ArrayList<>();
 		boolean hasCreatedVariables= false;
 
-		IVariableBinding[] declaredFields= fSenderBinding.getDeclaringClass().getDeclaredFields();
-		for (int i= 0; i < declaredFields.length; i++) { // avoid to take parameter names that are equal to field names
-			usedNames.add(declaredFields[i].getName());
+		for (IVariableBinding declaredField : fSenderBinding.getDeclaringClass().getDeclaredFields()) {
+			// avoid to take parameter names that are equal to field names
+			usedNames.add(declaredField.getName());
 		}
 
 		ImportRewrite imports= getImportRewrite();
@@ -279,9 +279,8 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 		if (methodDecl.getBody() != null) {
 			// avoid take a name of a local variable inside
 			CompilationUnit root= (CompilationUnit) methodDecl.getRoot();
-			IBinding[] bindings= (new ScopeAnalyzer(root)).getDeclarationsAfter(methodDecl.getBody().getStartPosition(), ScopeAnalyzer.VARIABLES);
-			for (int i= 0; i < bindings.length; i++) {
-				usedNames.add(bindings[i].getName());
+			for (IBinding binding : (new ScopeAnalyzer(root)).getDeclarationsAfter(methodDecl.getBody().getStartPosition(), ScopeAnalyzer.VARIABLES)) {
+				usedNames.add(binding.getName());
 			}
 		}
 
@@ -315,26 +314,24 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 
 				Type type= desc.resultingParamType;
 				String[] suggestedNames= StubUtility.getArgumentNameSuggestions(getCompilationUnit().getJavaProject(), type, excludedNames);
-				for (int k= 0; k < suggestedNames.length; k++) {
-					addLinkedPositionProposal(nameKey, suggestedNames[k], null);
+				for (String sname : suggestedNames) {
+					addLinkedPositionProposal(nameKey, sname, null);
 				}
 				if (favourite == null) {
 					favourite= suggestedNames[0];
 				}
 				usedNames.add(favourite);
 
-				SimpleName[] names= desc.resultingParamName;
-				for (int j= 0; j < names.length; j++) {
-					names[j].setIdentifier(favourite);
-					addLinkedPosition(rewrite.track(names[j]), false, nameKey);
+				for (SimpleName name : desc.resultingParamName) {
+					name.setIdentifier(favourite);
+					addLinkedPosition(rewrite.track(name), false, nameKey);
 				}
 
 				addLinkedPosition(rewrite.track(desc.resultingParamType), true, typeKey);
 
 				// collect type suggestions
-				ITypeBinding[] bindings= ASTResolving.getRelaxingTypes(ast, desc.type);
-				for (int k= 0; k < bindings.length; k++) {
-					addLinkedPositionProposal(typeKey, bindings[k]);
+				for (ITypeBinding binding : ASTResolving.getRelaxingTypes(ast, desc.type)) {
+					addLinkedPositionProposal(typeKey, binding);
 				}
 
 				SimpleName tagArg= desc.resultingTagArg;

@@ -57,10 +57,8 @@ public class GetterSetterCompletionProposal extends JavaTypeCompletionProposal i
 			relevance--;
 		}
 
-		IField[] fields= type.getFields();
 		IMethod[] methods= type.getMethods();
-		for (int i= 0; i < fields.length; i++) {
-			IField curr= fields[i];
+		for (IField curr : type.getFields()) {
 			if (!JdtFlags.isEnum(curr)) {
 				String getterName= GetterSetterUtil.getGetterName(curr, null);
 				if (Strings.startsWithIgnoreCase(getterName, prefix) && !hasMethod(methods, getterName)) {
@@ -83,8 +81,8 @@ public class GetterSetterCompletionProposal extends JavaTypeCompletionProposal i
 	}
 
 	private static boolean hasMethod(IMethod[] methods, String name) {
-		for (int i= 0; i < methods.length; i++) {
-			if (methods[i].getElementName().equals(name)) {
+		for (IMethod method : methods) {
+			if (method.getElementName().equals(name)) {
 				return true;
 			}
 		}

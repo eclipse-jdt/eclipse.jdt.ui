@@ -15,7 +15,6 @@ package org.eclipse.jdt.internal.ui.text.template.contentassist;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -246,9 +245,7 @@ public class MultiVariableGuess {
 	private void updateSlaves(MultiVariable variable, IDocument document, Object oldChoice) {
 		Object choice= variable.getCurrentChoice();
 		if (!oldChoice.equals(choice)) {
-			Set<MultiVariable> slaves= fDependencies.get(variable);
-			for (Iterator<MultiVariable> it= slaves.iterator(); it.hasNext();) {
-				MultiVariable slave= it.next();
+			for (MultiVariable slave : fDependencies.get(variable)) {
 				VariablePosition pos= fPositions.get(slave);
 
 				Object slavesOldChoice= slave.getCurrentChoice();

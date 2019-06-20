@@ -230,15 +230,15 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 
 		@Override
 		protected Object[] getFilteredChildren(Object parent) {
-			Object[] result = getRawChildren(parent);
+			Object[] result= getRawChildren(parent);
 			int unfilteredChildren= result.length;
-			ViewerFilter[] filters = getFilters();
+			ViewerFilter[] filters= getFilters();
 			if (filters != null) {
-				for (int i= 0; i < filters.length; i++) {
+				for (ViewerFilter filter : filters) {
 					if (parent instanceof TreePath) {
-						result = filters[i].filter(this, (TreePath) parent, result);
+						result= filter.filter(this, (TreePath) parent, result);
 					} else {
-						result = filters[i].filter(this, parent, result);
+						result= filter.filter(this, parent, result);
 					}
 				}
 			}
@@ -666,8 +666,8 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 					TriggerSequence[] sequences= getInvokingCommandKeySequences();
 					if (sequences == null)
 						return;
-					for (int i= 0; i < sequences.length; i++) {
-						if (sequences[i].equals(keySequence)) {
+					for (TriggerSequence sequence : sequences) {
+						if (sequence.equals(keySequence)) {
 							e.doit= false;
 							toggleShowInheritedMembers();
 							return;

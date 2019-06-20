@@ -182,9 +182,9 @@ public class SimilarElementsRequestor extends CompletionRequestor {
 	 */
 	private void processKeywords() {
 		if (isKind(TypeKinds.PRIMITIVETYPES)) {
-			for (int i= 0; i < PRIM_TYPES.length; i++) {
-				if (NameMatcher.isSimilarName(fName, PRIM_TYPES[i])) {
-					addResult(new SimilarElement(TypeKinds.PRIMITIVETYPES, PRIM_TYPES[i], 50));
+			for (String t : PRIM_TYPES) {
+				if (NameMatcher.isSimilarName(fName, t)) {
+					addResult(new SimilarElement(TypeKinds.PRIMITIVETYPES, t, 50));
 				}
 			}
 		}
@@ -261,9 +261,7 @@ public class SimilarElementsRequestor extends CompletionRequestor {
 				@Override
 				public void accept(CompletionProposal proposal) {
 					if (elementName.equals(new String(proposal.getName()))) {
-						CompletionProposal[] requiredProposals= proposal.getRequiredProposals();
-						for (int i= 0; i < requiredProposals.length; i++) {
-							CompletionProposal curr= requiredProposals[i];
+						for (CompletionProposal curr : proposal.getRequiredProposals()) {
 							if (curr.getKind() == CompletionProposal.METHOD_IMPORT || curr.getKind() == CompletionProposal.FIELD_IMPORT) {
 								result.add(JavaModelUtil.concatenateName(Signature.toCharArray(curr.getDeclarationSignature()), curr.getName()));
 							}

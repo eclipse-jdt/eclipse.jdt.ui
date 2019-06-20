@@ -53,8 +53,9 @@ public class PropertiesFileSpellingEngine extends SpellingEngine {
 		boolean isIgnoringAmpersand= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.SPELLING_IGNORE_AMPERSAND_IN_PROPERTIES);
 		try {
 			List<ITypedRegion> partitionList= new ArrayList<>();
-			for (int i= 0; i < regions.length; i++)
-				partitionList.addAll(Arrays.asList(TextUtilities.computePartitioning(document, IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING, regions[i].getOffset(), regions[i].getLength(), false)));
+			for (IRegion region : regions) {
+				partitionList.addAll(Arrays.asList(TextUtilities.computePartitioning(document, IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING, region.getOffset(), region.getLength(), false)));
+			}
 			ITypedRegion[] partitions= partitionList.toArray(new ITypedRegion[partitionList.size()]);
 
 			for (int i= 0; i < partitions.length; i++) {

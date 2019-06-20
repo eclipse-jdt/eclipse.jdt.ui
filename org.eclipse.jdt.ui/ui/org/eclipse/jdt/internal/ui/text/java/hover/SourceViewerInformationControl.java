@@ -223,8 +223,9 @@ public class SourceViewerInformationControl
 			fStatusField.setText(statusFieldText);
 			Font font= fStatusField.getFont();
 			FontData[] fontDatas= font.getFontData();
-			for (int i= 0; i < fontDatas.length; i++)
-				fontDatas[i].setHeight(fontDatas[i].getHeight() * 9 / 10);
+			for (FontData fontData : fontDatas) {
+				fontData.setHeight(fontData.getHeight() * 9 / 10);
+			}
 			fStatusTextFont= new Font(fStatusField.getDisplay(), fontDatas);
 			fStatusField.setFont(fStatusTextFont);
 			GridData gd2= new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);

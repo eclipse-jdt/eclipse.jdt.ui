@@ -93,8 +93,7 @@ public class JavaTypeCompletionProposalComputer extends JavaCompletionProposalCo
 					// insert history types
 					List<String> history= JavaPlugin.getDefault().getContentAssistHistory().getHistory(expectedType.getFullyQualifiedName()).getTypes();
 					relevance-= history.size() + 1;
-					for (Iterator<String> it= history.iterator(); it.hasNext();) {
-						String type= it.next();
+					for (String type : history) {
 						if (proposed.contains(type))
 							continue;
 

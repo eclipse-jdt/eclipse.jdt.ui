@@ -500,8 +500,8 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 				// _x_.foo() -> guess qualifier type by looking for a type with method 'foo'
 				ITypeBinding[] bindings= ASTResolving.getQualifierGuess(fOriginalNode.getRoot(), parent.getName().getIdentifier(), parent.arguments(), targetContext);
 				if (bindings.length > 0) {
-					for (int i= 0; i < bindings.length; i++) {
-						addLinkedPositionProposal(KEY_TYPE, bindings[i]);
+					for (ITypeBinding binding : bindings) {
+						addLinkedPositionProposal(KEY_TYPE, binding);
 					}
 					return imports.addImport(bindings[0], ast, importRewriteContext, location);
 				}
@@ -519,9 +519,8 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 			}
 
 			if (isVariableAssigned()) {
-				ITypeBinding[] typeProposals= ASTResolving.getRelaxingTypes(ast, binding);
-				for (int i= 0; i < typeProposals.length; i++) {
-					addLinkedPositionProposal(KEY_TYPE, typeProposals[i]);
+				for (ITypeBinding typeProposal : ASTResolving.getRelaxingTypes(ast, binding)) {
+					addLinkedPositionProposal(KEY_TYPE, typeProposal);
 				}
 			}
 			return imports.addImport(binding, ast, importRewriteContext, location);

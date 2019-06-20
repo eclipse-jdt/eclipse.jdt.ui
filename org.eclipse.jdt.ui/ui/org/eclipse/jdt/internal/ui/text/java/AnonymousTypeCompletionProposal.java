@@ -217,9 +217,10 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 				if (dialog.open() == Window.OK) {
 					Object[] selection= dialog.getResult();
 					ArrayList<Object> result= new ArrayList<>(selection.length);
-					for (int i= 0; i < selection.length; i++) {
-						if (selection[i] instanceof IMethodBinding)
-							result.add(selection[i]);
+					for (Object s : selection) {
+						if (s instanceof IMethodBinding) {
+							result.add(s);
+						}
 					}
 					methodsToOverride= result.toArray(new IMethodBinding[result.size()]);
 					settings.createComments= dialog.getGenerateComment();
@@ -232,8 +233,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 			} else {
 				settings.createComments= false;
 				List<IMethodBinding> result= new ArrayList<>();
-				for (int i= 0; i < bindings.length; i++) {
-					IMethodBinding curr= bindings[i];
+				for (IMethodBinding curr : bindings) {
 					if (Modifier.isAbstract(curr.getModifiers()))
 						result.add(curr);
 				}
@@ -249,8 +249,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 			ITrackedNodePosition trackedDeclaration= rewrite.track(declaration);
 
 			ListRewrite rewriter= rewrite.getListRewrite(declaration, declaration.getBodyDeclarationsProperty());
-			for (int i= 0; i < methodsToOverride.length; i++) {
-				IMethodBinding curr= methodsToOverride[i];
+			for (IMethodBinding curr : methodsToOverride) {
 				MethodDeclaration stub= StubUtility2.createImplementationStub(workingCopy, rewrite, importRewrite, context, curr, dummyTypeBinding, settings, dummyTypeBinding.isInterface(), focusNode);
 				rewriter.insertFirst(stub, null);
 			}

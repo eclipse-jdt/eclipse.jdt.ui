@@ -64,8 +64,9 @@ public class CompositeReconcilingStrategy  implements IReconcilingStrategy, IRec
 		if (fStrategies == null)
 			return;
 
-		for (int i= 0; i < fStrategies.length; i++)
-			fStrategies[i].setDocument(document);
+		for (IReconcilingStrategy strategy : fStrategies) {
+			strategy.setDocument(document);
+		}
 	}
 
 	/*
@@ -76,8 +77,9 @@ public class CompositeReconcilingStrategy  implements IReconcilingStrategy, IRec
 		if (fStrategies == null)
 			return;
 
-		for (int i= 0; i < fStrategies.length; i++)
-			fStrategies[i].reconcile(dirtyRegion, subRegion);
+		for (IReconcilingStrategy strategy : fStrategies) {
+			strategy.reconcile(dirtyRegion, subRegion);
+		}
 	}
 
 	/*
@@ -88,8 +90,9 @@ public class CompositeReconcilingStrategy  implements IReconcilingStrategy, IRec
 		if (fStrategies == null)
 			return;
 
-		for (int i= 0; i < fStrategies.length; i++)
-			fStrategies[i].reconcile(partition);
+		for (IReconcilingStrategy strategy : fStrategies) {
+			strategy.reconcile(partition);
+		}
 	}
 
 	/*
@@ -100,9 +103,9 @@ public class CompositeReconcilingStrategy  implements IReconcilingStrategy, IRec
 		if (fStrategies == null)
 			return;
 
-		for (int i=0; i < fStrategies.length; i++) {
-			if (fStrategies[i] instanceof IReconcilingStrategyExtension) {
-				IReconcilingStrategyExtension extension= (IReconcilingStrategyExtension) fStrategies[i];
+		for (IReconcilingStrategy strategy : fStrategies) {
+			if (strategy instanceof IReconcilingStrategyExtension) {
+				IReconcilingStrategyExtension extension= (IReconcilingStrategyExtension) strategy;
 				extension.setProgressMonitor(monitor);
 			}
 		}
@@ -116,9 +119,9 @@ public class CompositeReconcilingStrategy  implements IReconcilingStrategy, IRec
 		if (fStrategies == null)
 			return;
 
-		for (int i=0; i < fStrategies.length; i++) {
-			if (fStrategies[i] instanceof IReconcilingStrategyExtension) {
-				IReconcilingStrategyExtension extension= (IReconcilingStrategyExtension) fStrategies[i];
+		for (IReconcilingStrategy strategy : fStrategies) {
+			if (strategy instanceof IReconcilingStrategyExtension) {
+				IReconcilingStrategyExtension extension= (IReconcilingStrategyExtension) strategy;
 				extension.initialReconcile();
 			}
 		}

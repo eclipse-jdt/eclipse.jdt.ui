@@ -16,7 +16,6 @@ package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.ui.IWorkbench;
@@ -52,9 +51,7 @@ public class CorrectionCommandInstaller {
 		}
 		fCorrectionHandlerActivations= new ArrayList<>();
 
-		Collection<String> definedCommandIds= commandService.getDefinedCommandIds();
-		for (Iterator<String> iter= definedCommandIds.iterator(); iter.hasNext();) {
-			String id= iter.next();
+		for (String id : (Collection<String>)commandService.getDefinedCommandIds()) {
 			if (id.startsWith(ICommandAccess.COMMAND_ID_PREFIX)) {
 				boolean isAssist= id.endsWith(ICommandAccess.ASSIST_SUFFIX);
 				CorrectionCommandHandler handler= new CorrectionCommandHandler(editor, id, isAssist);

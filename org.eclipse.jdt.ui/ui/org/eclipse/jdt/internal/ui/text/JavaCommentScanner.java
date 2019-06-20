@@ -93,10 +93,9 @@ public class JavaCommentScanner extends AbstractJavaScanner{
 		}
 
 		public synchronized void addTaskTags(String value) {
-			String[] tasks= split(value, ","); //$NON-NLS-1$
-			for (int i= 0; i < tasks.length; i++) {
-				if (tasks[i].length() > 0) {
-					addWord(tasks[i], fToken);
+			for (String task : split(value, ",")) { //$NON-NLS-1$
+				if (task.length() > 0) {
+					addWord(task, fToken);
 				}
 			}
 		}

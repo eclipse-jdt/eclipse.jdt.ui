@@ -53,14 +53,15 @@ public class JavaDocTagDictionary extends AbstractSpellDictionary implements IJa
 
 		unload();
 
-		for (int index= 0; index < JAVADOC_LINK_TAGS.length; index++)
-			hashWord(JAVADOC_LINK_TAGS[index]);
-
-		for (int index= 0; index < JAVADOC_ROOT_TAGS.length; index++)
-			hashWord(JAVADOC_ROOT_TAGS[index]);
-
-		for (int index= 0; index < JAVADOC_PARAM_TAGS.length; index++)
-			hashWord(JAVADOC_PARAM_TAGS[index]);
+		for (String t : JAVADOC_LINK_TAGS) {
+			hashWord(t);
+		}
+		for (String t : JAVADOC_ROOT_TAGS) {
+			hashWord(t);
+		}
+		for (String t : JAVADOC_PARAM_TAGS) {
+			hashWord(t);
+		}
 
 		return true;
 	}

@@ -225,9 +225,8 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 		}
 
 		protected void disposeDeferredCreatedContent() {
-			Control[] children= fParent.getChildren();
-			for (int i= 0; i < children.length; i++) {
-				children[i].dispose();
+			for (Control child : fParent.getChildren()) {
+				child.dispose();
 			}
 			ToolBarManager toolBarManager= getToolBarManager();
 			if (toolBarManager != null)
@@ -317,9 +316,8 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			control.setFont(font);
 
 			if (control instanceof Composite) {
-				Control[] children= ((Composite) control).getChildren();
-				for (int i= 0; i < children.length; i++) {
-					setColorAndFont(children[i], foreground, background, font);
+				for (Control child : ((Composite) control).getChildren()) {
+					setColorAndFont(child, foreground, background, font);
 				}
 			}
 		}
@@ -399,14 +397,13 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			composite.setLayout(layout);
 			
 			List<Link> list= new ArrayList<>();
-			for (int i= 0; i < proposals.length; i++) {
-				list.add(createCompletionProposalLink(composite, proposals[i], 1));// Original link for single fix, hence pass 1 for count
-
-				if (proposals[i] instanceof FixCorrectionProposal) {
-					FixCorrectionProposal proposal= (FixCorrectionProposal)proposals[i];
+			for (ICompletionProposal prop : proposals) {
+				list.add(createCompletionProposalLink(composite, prop, 1)); // Original link for single fix, hence pass 1 for count
+				if (prop instanceof FixCorrectionProposal) {
+					FixCorrectionProposal proposal= (FixCorrectionProposal) prop;
 					int count= proposal.computeNumberOfFixesForCleanUp(proposal.getCleanUp());
 					if (count > 1) {
-						list.add(createCompletionProposalLink(composite, proposals[i], count));
+						list.add(createCompletionProposalLink(composite, prop, count));
 					}
 				}
 			}

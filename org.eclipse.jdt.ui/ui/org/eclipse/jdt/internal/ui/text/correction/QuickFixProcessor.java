@@ -337,8 +337,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 
 		HashSet<Integer> handledProblems= new HashSet<>(locations.length);
 		ArrayList<ICommandAccess> resultingCollections= new ArrayList<>();
-		for (int i= 0; i < locations.length; i++) {
-			IProblemLocation curr= locations[i];
+		for (IProblemLocation curr : locations) {
 			Integer id= Integer.valueOf(curr.getProblemId());
 			if (handledProblems.add(id)) {
 				process(context, curr, resultingCollections);

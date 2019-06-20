@@ -73,9 +73,8 @@ public class CorrectMainTypeNameProposal extends ASTRewriteCorrectionProposal {
 
 		AbstractTypeDeclaration decl= findTypeDeclaration(astRoot.types(), fOldName);
 		if (decl != null) {
-			ASTNode[] sameNodes= LinkedNodeFinder.findByNode(astRoot, decl.getName());
-			for (int i= 0; i < sameNodes.length; i++) {
-				rewrite.replace(sameNodes[i], ast.newSimpleName(fNewName), null);
+			for (ASTNode sameNode : LinkedNodeFinder.findByNode(astRoot, decl.getName())) {
+				rewrite.replace(sameNode, ast.newSimpleName(fNewName), null);
 			}
 		}
 		return rewrite;

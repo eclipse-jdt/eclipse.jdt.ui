@@ -17,7 +17,6 @@ package org.eclipse.jdt.internal.ui.text.template.contentassist;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
@@ -84,8 +83,7 @@ public class TemplateEngine {
 	 */
 	public void reset() {
 		fProposals.clear();
-		for (Iterator<Entry<IDocument, Position>> it= fPositions.entrySet().iterator(); it.hasNext();) {
-			Entry<IDocument, Position> entry= it.next();
+		for (Entry<IDocument, Position> entry : fPositions.entrySet()) {
 			IDocument doc= entry.getKey();
 			Position position= entry.getValue();
 			doc.removePosition(position);

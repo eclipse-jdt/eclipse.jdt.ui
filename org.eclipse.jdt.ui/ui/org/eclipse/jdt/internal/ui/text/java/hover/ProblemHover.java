@@ -109,8 +109,7 @@ public class ProblemHover extends AbstractAnnotationHover {
 		}
 
 		private static boolean hasProblem(IProblem[] problems, IProblemLocation location) {
-			for (int i= 0; i < problems.length; i++) {
-				IProblem problem= problems[i];
+			for (IProblem problem : problems) {
 				if (problem.getID() == location.getProblemId() && problem.getSourceStart() == location.getOffset())
 					return true;
 			}

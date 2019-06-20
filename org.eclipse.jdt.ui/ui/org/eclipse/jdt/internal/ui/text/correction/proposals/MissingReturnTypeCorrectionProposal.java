@@ -145,9 +145,8 @@ public class MissingReturnTypeCorrectionProposal extends LinkedCorrectionProposa
 
 	protected Expression computeProposals(AST ast, ITypeBinding returnBinding, int returnOffset, CompilationUnit root, Expression result) {
 		ScopeAnalyzer analyzer= new ScopeAnalyzer(root);
-		IBinding[] bindings= analyzer.getDeclarationsInScope(returnOffset, ScopeAnalyzer.VARIABLES | ScopeAnalyzer.CHECK_VISIBILITY);
-		for (int i= 0; i < bindings.length; i++) {
-			IVariableBinding curr= (IVariableBinding) bindings[i];
+		for (IBinding binding : analyzer.getDeclarationsInScope(returnOffset, ScopeAnalyzer.VARIABLES | ScopeAnalyzer.CHECK_VISIBILITY)) {
+			IVariableBinding curr= (IVariableBinding) binding;
 			ITypeBinding type= curr.getType();
 			if (type != null && type.isAssignmentCompatible(returnBinding) && testModifier(curr)) {
 				if (result == null) {

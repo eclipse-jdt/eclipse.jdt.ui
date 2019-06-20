@@ -328,9 +328,8 @@ public class DefaultClasspathFixProcessor extends ClasspathFixProcessor {
 	protected boolean hasJREInClassPath(IJavaProject javaProject) {
 		if (javaProject != null) {
 			try {
-				IClasspathEntry[] oldClasspaths= javaProject.getRawClasspath();
-				for (int i= 0; i < oldClasspaths.length; i++) {
-					if (isJREContainer(oldClasspaths[i].getPath())) {
+				for (IClasspathEntry oldClasspath : javaProject.getRawClasspath()) {
+					if (isJREContainer(oldClasspath.getPath())) {
 						return true;
 					}
 				}

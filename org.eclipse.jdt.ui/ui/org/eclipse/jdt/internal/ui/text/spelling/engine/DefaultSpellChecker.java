@@ -115,10 +115,10 @@ public class DefaultSpellChecker implements ISpellChecker {
 	 */
 	protected static boolean isUrl(final String word) {
 
-		for (int index= 0; index < URL_PREFIXES.length; index++) {
-
-			if (word.startsWith(URL_PREFIXES[index]))
+		for (String urlprefix : URL_PREFIXES) {
+			if (word.startsWith(urlprefix)) {
 				return true;
+			}
 		}
 		return false;
 	}

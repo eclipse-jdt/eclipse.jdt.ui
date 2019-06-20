@@ -93,8 +93,8 @@ public class SmartBackspaceManager {
 			Assert.isLegal(lives >= 0);
 			Assert.isLegal(edits != null);
 			Assert.isLegal(edits.length > 0);
-			for (int i= 0; i < edits.length; i++) {
-				Assert.isLegal(edits[i] != null);
+			for (TextEdit edit : edits) {
+				Assert.isLegal(edit != null);
 			}
 
 			this.triggerOffset= triggerOffset;
@@ -119,8 +119,8 @@ public class SmartBackspaceManager {
 				if (spec != null) {
 					try {
 						beginChange();
-						for (int i= 0; i < spec.undoEdits.length; i++) {
-							spec.undoEdits[i].apply(getDocument(), TextEdit.UPDATE_REGIONS);
+						for (TextEdit undoEdit : spec.undoEdits) {
+							undoEdit.apply(getDocument(), TextEdit.UPDATE_REGIONS);
 						}
 						fViewer.setSelectedRange(spec.selection.getOffset(), spec.selection.getLength());
 						if (spec.child != null)

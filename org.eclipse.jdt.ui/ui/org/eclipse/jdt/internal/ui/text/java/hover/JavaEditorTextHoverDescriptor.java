@@ -196,8 +196,7 @@ public class JavaEditorTextHoverDescriptor {
 
 	private static JavaEditorTextHoverDescriptor[] createDescriptors(IConfigurationElement[] elements) {
 		List<JavaEditorTextHoverDescriptor> result= new ArrayList<>(elements.length);
-		for (int i= 0; i < elements.length; i++) {
-			IConfigurationElement element= elements[i];
+		for (IConfigurationElement element : elements) {
 			if (HOVER_TAG.equals(element.getName())) {
 				JavaEditorTextHoverDescriptor desc= new JavaEditorTextHoverDescriptor(element);
 				result.add(desc);
@@ -229,36 +228,34 @@ public class JavaEditorTextHoverDescriptor {
 				idToModifierMask.put(id, tokenizer.nextToken());
 		}
 
-		for (int i= 0; i < hovers.length; i++) {
-			String modifierString= idToModifier.get(hovers[i].getId());
+		for (JavaEditorTextHoverDescriptor hover : hovers) {
+			String modifierString= idToModifier.get(hover.getId());
 			boolean enabled= true;
 			if (modifierString == null)
 				modifierString= DISABLED_TAG;
-
 			if (modifierString.startsWith(DISABLED_TAG)) {
 				enabled= false;
 				modifierString= modifierString.substring(1);
 			}
-
 			if (modifierString.equals(NO_MODIFIER))
 				modifierString= ""; //$NON-NLS-1$
-
-			hovers[i].fModifierString= modifierString;
-			hovers[i].fIsEnabled= enabled;
-			hovers[i].fStateMask= computeStateMask(modifierString);
-			if (hovers[i].fStateMask == -1) {
+			hover.fModifierString= modifierString;
+			hover.fIsEnabled= enabled;
+			hover.fStateMask= computeStateMask(modifierString);
+			if (hover.fStateMask == -1) {
 				// Fallback: use stored modifier masks
 				try {
-					hovers[i].fStateMask= Integer.parseInt(idToModifierMask.get(hovers[i].getId()));
+					hover.fStateMask= Integer.parseInt(idToModifierMask.get(hover.getId()));
 				} catch (NumberFormatException ex) {
-					hovers[i].fStateMask= -1;
+					hover.fStateMask= -1;
 				}
 				// Fix modifier string
-				int stateMask= hovers[i].fStateMask;
-				if (stateMask == -1)
-					hovers[i].fModifierString= ""; //$NON-NLS-1$
-				else
-					hovers[i].fModifierString= EditorUtility.getModifierString(stateMask);
+				int stateMask= hover.fStateMask;
+				if (stateMask == -1) {
+					hover.fModifierString= ""; //$NON-NLS-1$
+				} else {
+					hover.fModifierString= EditorUtility.getModifierString(stateMask);
+				}
 			}
 		}
 	}

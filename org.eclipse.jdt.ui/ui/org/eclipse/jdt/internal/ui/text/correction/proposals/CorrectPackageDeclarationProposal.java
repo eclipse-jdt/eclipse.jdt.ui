@@ -64,8 +64,8 @@ public class CorrectPackageDeclarationProposal extends CUCorrectionProposal {
 		IPackageDeclaration[] decls= cu.getPackageDeclarations();
 
 		if (parentPack.isDefaultPackage() && decls.length > 0) {
-			for (int i= 0; i < decls.length; i++) {
-				ISourceRange range= decls[i].getSourceRange();
+			for (IPackageDeclaration decl : decls) {
+				ISourceRange range= decl.getSourceRange();
 				root.addChild(new DeleteEdit(range.getOffset(), range.getLength()));
 			}
 			return;

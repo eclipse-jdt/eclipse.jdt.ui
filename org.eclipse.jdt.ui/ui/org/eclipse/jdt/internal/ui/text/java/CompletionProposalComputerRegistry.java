@@ -275,13 +275,10 @@ public final class CompletionProposalComputerRegistry {
 		List<CompletionProposalComputerDescriptor> all= new ArrayList<>();
 
 		List<CompletionProposalCategory> categories= getCategories(elements);
-		for (Iterator<IConfigurationElement> iter= elements.iterator(); iter.hasNext();) {
-			IConfigurationElement element= iter.next();
+		for (IConfigurationElement element : elements) {
 			try {
 				CompletionProposalComputerDescriptor desc= new CompletionProposalComputerDescriptor(element, this, categories);
-				Set<String> partitions= desc.getPartitions();
-				for (Iterator<String> it= partitions.iterator(); it.hasNext();) {
-					String partition= it.next();
+				for (String partition : desc.getPartitions()) {
 					List<CompletionProposalComputerDescriptor> list= map.get(partition);
 					if (list == null) {
 						list= new ArrayList<>();
@@ -313,8 +310,7 @@ public final class CompletionProposalComputerRegistry {
 			Set<String> partitions= map.keySet();
 			fDescriptorsByPartition.keySet().retainAll(partitions);
 			fPublicDescriptorsByPartition.keySet().retainAll(partitions);
-			for (Iterator<String> it= partitions.iterator(); it.hasNext();) {
-				String partition= it.next();
+			for (String partition : partitions) {
 				List<CompletionProposalComputerDescriptor> old= fDescriptorsByPartition.get(partition);
 				List<CompletionProposalComputerDescriptor> current= map.get(partition);
 				if (old != null) {
@@ -485,15 +481,14 @@ public final class CompletionProposalComputerRegistry {
 	 */
 	private Set<String> getAffectedContributors(CompletionProposalCategory category, IContributor culprit) {
 	    Set<String> affectedPlugins= new HashSet<>();
-        for (Iterator<CompletionProposalComputerDescriptor> it= getProposalComputerDescriptors().iterator(); it.hasNext();) {
-	        CompletionProposalComputerDescriptor desc= it.next();
-	        CompletionProposalCategory cat= desc.getCategory();
-	        if (cat.equals(category)) {
-	        	IContributor contributor= desc.getContributor();
-	        	if (contributor != null && !culprit.equals(contributor))
-	        		affectedPlugins.add(contributor.getName());
-	        }
-        }
+		for (CompletionProposalComputerDescriptor desc : getProposalComputerDescriptors()) {
+			CompletionProposalCategory cat= desc.getCategory();
+			if (cat.equals(category)) {
+				IContributor contributor= desc.getContributor();
+				if (contributor != null && !culprit.equals(contributor))
+					affectedPlugins.add(contributor.getName());
+			}
+		}
 	    return affectedPlugins;
     }
 

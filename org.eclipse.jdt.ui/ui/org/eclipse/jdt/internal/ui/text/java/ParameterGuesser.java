@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -304,8 +303,7 @@ public class ParameterGuesser {
 		boolean hasVarWithParamName= false;
 		ICompletionProposal[] ret= new ICompletionProposal[typeMatches.size()];
 		int i= 0; int replacementLength= 0;
-		for (Iterator<Variable> it= typeMatches.iterator(); it.hasNext();) {
-			Variable v= it.next();
+		for (Variable v : typeMatches) {
 			if (i == 0) {
 				fAlreadyMatchedNames.add(v.name);
 				replacementLength= v.name.length();

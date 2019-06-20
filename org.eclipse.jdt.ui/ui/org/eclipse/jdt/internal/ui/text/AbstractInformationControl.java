@@ -154,9 +154,11 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 				Object[] children= contentProvider instanceof ITreePathContentProvider
 						? ((ITreePathContentProvider) contentProvider).getChildren(elementPath)
 						: ((ITreeContentProvider) contentProvider).getChildren(element);
-				for (int i= 0; i < children.length; i++)
-					if (selectTreePath(viewer, elementPath, children[i]))
+				for (Object child : children) {
+					if (selectTreePath(viewer, elementPath, child)) {
 						return true;
+					}
+				}
 			}
 			return false;
 		}
@@ -520,8 +522,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 		ILabelProvider labelProvider= (ILabelProvider)fTreeViewer.getLabelProvider();
 
 		// First search at same level
-		for (int i= 0; i < items.length; i++) {
-			final TreeItem item= items[i];
+		for (TreeItem item : items) {
 			IJavaElement element= (IJavaElement)item.getData();
 			if (element != null) {
 				String label= labelProvider.getText(element);
@@ -529,10 +530,8 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 					return item;
 			}
 		}
-
 		// Go one level down for each item
-		for (int i= 0; i < items.length; i++) {
-			final TreeItem item= items[i];
+		for (TreeItem item : items) {
 			TreeItem foundItem= findElement(selectItems(item.getItems(), toBeSkipped), null, false);
 			if (foundItem != null)
 				return foundItem;
@@ -554,9 +553,10 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 		if (toBeSkipped == null)
 			return false;
 		
-		for (int i= 0; i < toBeSkipped.length; i++) {
-			if (toBeSkipped[i] == item)
+		for (TreeItem curr : toBeSkipped) {
+			if (curr == item) {
 				return true;
+			}
 		}
 		return false;
 	}
@@ -566,8 +566,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 			return items;
 
 		int j= 0;
-		for (int i= 0; i < items.length; i++) {
-			TreeItem item= items[i];
+		for (TreeItem item : items) {
 			if (!canSkip(item, toBeSkipped))
 				items[j++]= item;
 		}

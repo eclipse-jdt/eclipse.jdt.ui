@@ -54,10 +54,9 @@ public class HtmlTagDictionary extends AbstractSpellDictionary {
 
 		unload();
 
-		for (int index= 0; index < IHtmlTagConstants.HTML_GENERAL_TAGS.length; index++) {
-
-			hashWord(IHtmlTagConstants.HTML_TAG_PREFIX + IHtmlTagConstants.HTML_GENERAL_TAGS[index] + IHtmlTagConstants.HTML_TAG_POSTFIX);
-			hashWord(IHtmlTagConstants.HTML_CLOSE_PREFIX + IHtmlTagConstants.HTML_GENERAL_TAGS[index] + IHtmlTagConstants.HTML_TAG_POSTFIX);
+		for (String tag : IHtmlTagConstants.HTML_GENERAL_TAGS) {
+			hashWord(IHtmlTagConstants.HTML_TAG_PREFIX + tag + IHtmlTagConstants.HTML_TAG_POSTFIX);
+			hashWord(IHtmlTagConstants.HTML_CLOSE_PREFIX + tag + IHtmlTagConstants.HTML_TAG_POSTFIX);
 		}
 		return true;
 	}

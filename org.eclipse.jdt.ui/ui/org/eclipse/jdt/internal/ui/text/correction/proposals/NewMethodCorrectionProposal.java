@@ -238,8 +238,8 @@ public class NewMethodCorrectionProposal extends AbstractMethodCorrectionProposa
 
 		addLinkedPosition(rewrite.track(newTypeNode), false, KEY_TYPE);
 		if (otherProposals != null) {
-			for (int i= 0; i < otherProposals.length; i++) {
-				addLinkedPositionProposal(KEY_TYPE, otherProposals[i]);
+			for (ITypeBinding otherProposal : otherProposals) {
+				addLinkedPositionProposal(KEY_TYPE, otherProposal);
 			}
 		}
 
@@ -279,9 +279,8 @@ public class NewMethodCorrectionProposal extends AbstractMethodCorrectionProposa
 			binding= ASTResolving.normalizeWildcardType(binding, true, ast);
 		}
 		if (binding != null) {
-			ITypeBinding[] typeProposals= ASTResolving.getRelaxingTypes(ast, binding);
-			for (int i= 0; i < typeProposals.length; i++) {
-				addLinkedPositionProposal(key, typeProposals[i]);
+			for (ITypeBinding typeProposal : ASTResolving.getRelaxingTypes(ast, binding)) {
+				addLinkedPositionProposal(key, typeProposal);
 			}
 			return getImportRewrite().addImport(binding, ast, context, TypeLocation.PARAMETER);
 		}
@@ -291,8 +290,8 @@ public class NewMethodCorrectionProposal extends AbstractMethodCorrectionProposa
 	private String evaluateParameterName(List<String> takenNames, Expression argNode, Type type, String key) {
 		IJavaProject project= getCompilationUnit().getJavaProject();
 		String[] names= StubUtility.getVariableNameSuggestions(NamingConventions.VK_PARAMETER, project, type, argNode, takenNames);
-		for (int i= 0; i < names.length; i++) {
-			addLinkedPositionProposal(key, names[i], null);
+		for (String name : names) {
+			addLinkedPositionProposal(key, name, null);
 		}
 		String favourite= names[0];
 		takenNames.add(favourite);

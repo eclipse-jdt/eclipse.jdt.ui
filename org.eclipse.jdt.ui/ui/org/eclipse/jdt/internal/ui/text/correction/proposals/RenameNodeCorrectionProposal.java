@@ -58,8 +58,7 @@ public class RenameNodeCorrectionProposal extends CUCorrectionProposal {
 
 			SimpleName[] names= LinkedNodeFinder.findByProblems(unit, (SimpleName) name);
 			if (names != null) {
-				for (int i= 0; i < names.length; i++) {
-					SimpleName curr= names[i];
+				for (SimpleName curr : names) {
 					root.addChild(new ReplaceEdit(curr.getStartPosition(), curr.getLength(), fNewName));
 				}
 				return;

@@ -46,22 +46,15 @@ public class JavaSpellingEngine extends SpellingEngine {
 		SpellEventListener listener= new SpellEventListener(collector, document);
 		boolean isIgnoringJavaStrings= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.SPELLING_IGNORE_JAVA_STRINGS);
 		try {
-			for (int i= 0; i < regions.length; i++) {
-				IRegion region= regions[i];
-				ITypedRegion[] partitions= TextUtilities.computePartitioning(document, IJavaPartitions.JAVA_PARTITIONING, region.getOffset(), region.getLength(), false);
-				for (int index= 0; index < partitions.length; index++) {
+			for (IRegion region : regions) {
+				for (ITypedRegion partition : TextUtilities.computePartitioning(document, IJavaPartitions.JAVA_PARTITIONING, region.getOffset(), region.getLength(), false)) {
 					if (monitor != null && monitor.isCanceled())
 						return;
-
 					if (listener.isProblemsThresholdReached())
 						return;
-
-					ITypedRegion partition= partitions[index];
 					final String type= partition.getType();
-
 					if (isIgnoringJavaStrings && type.equals(IJavaPartitions.JAVA_STRING))
 						continue;
-
 					if (!type.equals(IDocument.DEFAULT_CONTENT_TYPE) && !type.equals(IJavaPartitions.JAVA_CHARACTER))
 						checker.execute(listener, new SpellCheckIterator(document, partition, checker.getLocale()));
 				}

@@ -92,8 +92,8 @@ public class CastCorrectionProposal extends LinkedCorrectionProposal {
 
 					Type newTypeNode= importRewrite.addImport(first, ast, context, TypeLocation.CAST);
 					addLinkedPosition(rewrite.track(newTypeNode), true, "casttype"); //$NON-NLS-1$
-					for (int i= 0; i < bindings.length; i++) {
-						addLinkedPositionProposal("casttype", bindings[i]); //$NON-NLS-1$
+					for (ITypeBinding binding : bindings) {
+						addLinkedPositionProposal("casttype", binding); //$NON-NLS-1$
 					}
 					return newTypeNode;
 				}
@@ -109,8 +109,7 @@ public class CastCorrectionProposal extends LinkedCorrectionProposal {
 			return suggestedCasts[0];
 		}
 		ITypeBinding favourite= suggestedCasts[0];
-		for (int i = 0; i < suggestedCasts.length; i++) {
-			ITypeBinding curr= suggestedCasts[i];
+		for (ITypeBinding curr : suggestedCasts) {
 			if (nodeToCastBinding.isCastCompatible(curr)) {
 				return curr;
 			}

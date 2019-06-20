@@ -36,12 +36,12 @@ public class TextSpellingEngine extends SpellingEngine {
 	@Override
 	protected void check(IDocument document, IRegion[] regions, ISpellChecker checker, ISpellingProblemCollector collector, IProgressMonitor monitor) {
 		SpellEventListener listener= new SpellEventListener(collector, document);
-		for (int i= 0; i < regions.length; i++) {
+		for (IRegion region : regions) {
 			if (monitor != null && monitor.isCanceled())
 				return;
 			if (listener.isProblemsThresholdReached())
 				return;
-			checker.execute(listener, new SpellCheckIterator(document, regions[i], checker.getLocale()));
+			checker.execute(listener, new SpellCheckIterator(document, region, checker.getLocale()));
 		}
 	}
 }

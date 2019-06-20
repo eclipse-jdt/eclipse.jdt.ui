@@ -198,8 +198,8 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 		}
 
 		final CleanUpRefactoring refactoring= new CleanUpRefactoring(changeName);
-		for (int i= 0; i < targets.length; i++) {
-			refactoring.addCleanUpTarget(targets[i]);
+		for (MultiFixTarget target : targets) {
+			refactoring.addCleanUpTarget(target);
 		}
 
 		refactoring.addCleanUp(fCleanUp);

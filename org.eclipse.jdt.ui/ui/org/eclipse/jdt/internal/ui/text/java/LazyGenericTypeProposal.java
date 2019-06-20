@@ -558,9 +558,7 @@ public class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposal {
 	 *         signature to <code>superType</code>
 	 */
 	private String findMatchingSuperTypeSignature(IType subType, IType superType) throws JavaModelException {
-		String[] signatures= getSuperTypeSignatures(subType, superType);
-		for (int i= 0; i < signatures.length; i++) {
-			String signature= signatures[i];
+		for (String signature : getSuperTypeSignatures(subType, superType)) {
 			String qualified= SignatureUtil.qualifySignature(signature, subType);
 			String subFQN= SignatureUtil.stripSignatureToFQN(qualified);
 
@@ -827,8 +825,8 @@ public class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposal {
 
 	private boolean hasAmbiguousProposals(TypeArgumentProposal[] typeArgumentProposals) {
 		boolean hasAmbiguousProposals= false;
-		for (int i= 0; i < typeArgumentProposals.length; i++) {
-			if (typeArgumentProposals[i].isAmbiguous()) {
+		for (TypeArgumentProposal typeArgumentProposal : typeArgumentProposals) {
+			if (typeArgumentProposal.isAmbiguous()) {
 				hasAmbiguousProposals= true;
 				break;
 			}

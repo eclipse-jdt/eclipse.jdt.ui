@@ -16,7 +16,6 @@ package org.eclipse.jdt.internal.ui.text.spelling;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -86,16 +85,15 @@ public final class WordCompletionProposalComputer implements IJavaCompletionProp
 						final List<RankedWordProposal> proposals= new ArrayList<>(checker.getProposals(candidate, Character.isUpperCase(candidate.charAt(0))));
 						final List<ICompletionProposal> result= new ArrayList<>(proposals.size());
 
-						for (Iterator<RankedWordProposal> it= proposals.iterator(); it.hasNext();) {
-							RankedWordProposal word= it.next();
+						for (RankedWordProposal word : proposals) {
 							String text= word.getText();
 							if (text.startsWith(candidate))
 								word.setRank(word.getRank() + PREFIX_RANK_SHIFT);
 
 							result.add(new JavaCompletionProposal(text, start, candidate.length(), JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_RENAME), text, word.getRank()) {
 								/*
-								 * @see org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal#validate(org.eclipse.jface.text.IDocument, int, org.eclipse.jface.text.DocumentEvent)
-								 */
+								* @see org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal#validate(org.eclipse.jface.text.IDocument, int, org.eclipse.jface.text.DocumentEvent)
+								*/
 								@Override
 								public boolean validate(IDocument doc, int validate_offset, DocumentEvent event) {
 									return offset == validate_offset;

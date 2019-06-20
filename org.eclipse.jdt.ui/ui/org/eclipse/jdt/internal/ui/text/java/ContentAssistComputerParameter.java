@@ -15,7 +15,6 @@ package org.eclipse.jdt.internal.ui.text.java;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.core.commands.IParameterValues;
@@ -33,8 +32,7 @@ public final class ContentAssistComputerParameter implements IParameterValues {
 	public Map<String, String> getParameterValues() {
 		Collection<CompletionProposalCategory> descriptors= CompletionProposalComputerRegistry.getDefault().getProposalCategories();
 		Map<String, String> map= new HashMap<>(descriptors.size());
-		for (Iterator<CompletionProposalCategory> it= descriptors.iterator(); it.hasNext();) {
-			CompletionProposalCategory category= it.next();
+		for (CompletionProposalCategory category : descriptors) {
 			map.put(category.getDisplayName(), category.getId());
 		}
 		return map;

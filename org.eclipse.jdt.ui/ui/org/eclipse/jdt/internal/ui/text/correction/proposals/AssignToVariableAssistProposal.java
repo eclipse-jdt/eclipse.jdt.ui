@@ -174,8 +174,8 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		createImportRewrite((CompilationUnit) nodeToAssign.getRoot());
 
 		String[] varNames= suggestLocalVariableNames(fTypeBinding, expression);
-		for (int i= 0; i < varNames.length; i++) {
-			addLinkedPositionProposal(KEY_NAME, varNames[i], null);
+		for (String varName : varNames) {
+			addLinkedPositionProposal(KEY_NAME, varName, null);
 		}
 
 		VariableDeclarationFragment newDeclFrag= ast.newVariableDeclarationFragment();
@@ -325,9 +325,8 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		addLinkedPosition(rewrite.track(accessName), true, KEY_NAME + index);
 		IVariableBinding variableBinding= newDeclFrag.resolveBinding();
 		if (variableBinding != null) {
-			SimpleName[] linkedNodes= LinkedNodeFinder.findByBinding(nodeToAssign.getRoot(), variableBinding);
-			for (int i= 0; i < linkedNodes.length; i++) {
-				addLinkedPosition(rewrite.track(linkedNodes[i]), false, KEY_NAME + index);
+			for (SimpleName linkedNode : LinkedNodeFinder.findByBinding(nodeToAssign.getRoot(), variableBinding)) {
+				addLinkedPosition(rewrite.track(linkedNode), false, KEY_NAME + index);
 			}
 		}
 		setEndPosition(rewrite.track(selectionNode));
@@ -354,8 +353,8 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		List<BodyDeclaration> decls= ASTNodes.getBodyDeclarations(newTypeDecl);
 		AST ast= newTypeDecl.getAST();
 		String[] varNames= suggestFieldNames(typeBinding, expression, modifiers, nodeToAssign);
-		for (int i= 0; i < varNames.length; i++) {
-			addLinkedPositionProposal(KEY_NAME + index, varNames[i], null);
+		for (String varName : varNames) {
+			addLinkedPositionProposal(KEY_NAME + index, varName, null);
 		}
 		String varName= varNames[0];
 
@@ -377,9 +376,8 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 	}
 
 	private Type evaluateType(AST ast, ASTNode nodeToAssign, ITypeBinding typeBinding, String groupID, TypeLocation location) {
-		ITypeBinding[] proposals= ASTResolving.getRelaxingTypes(ast, typeBinding);
-		for (int i= 0; i < proposals.length; i++) {
-			addLinkedPositionProposal(groupID, proposals[i]);
+		for (ITypeBinding proposal : ASTResolving.getRelaxingTypes(ast, typeBinding)) {
+			addLinkedPositionProposal(groupID, proposal);
 		}
 		ImportRewrite importRewrite= getImportRewrite();
 		CompilationUnit cuNode= (CompilationUnit) nodeToAssign.getRoot();

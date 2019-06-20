@@ -91,10 +91,8 @@ public class LegacyJavadocCompletionProposalComputer implements IJavaCompletionP
 
 			ArrayList<IContextInformation> result= new ArrayList<>();
 
-			IJavadocCompletionProcessor[] processors= getContributedProcessors();
 			String error= null;
-			for (int i= 0; i < processors.length; i++) {
-				IJavadocCompletionProcessor curr= processors[i];
+			for (IJavadocCompletionProcessor curr : getContributedProcessors()) {
 				IContextInformation[] contextInfos= curr.computeContextInformation(cu, offset);
 				if (contextInfos != null) {
 					result.addAll(Arrays.asList(contextInfos));
@@ -127,9 +125,7 @@ public class LegacyJavadocCompletionProposalComputer implements IJavaCompletionP
 
 			ArrayList<ICompletionProposal> result= new ArrayList<>();
 
-			IJavadocCompletionProcessor[] processors= getContributedProcessors();
-			for (int i= 0; i < processors.length; i++) {
-				IJavadocCompletionProcessor curr= processors[i];
+			for (IJavadocCompletionProcessor curr : getContributedProcessors()) {
 				IJavaCompletionProposal[] proposals= curr.computeCompletionProposals(cu, offset, length, javaContext.getFlags());
 				if (proposals != null) {
 					result.addAll(Arrays.asList(proposals));

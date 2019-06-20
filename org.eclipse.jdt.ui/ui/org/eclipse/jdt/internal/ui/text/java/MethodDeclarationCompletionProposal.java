@@ -73,8 +73,7 @@ public class MethodDeclarationCompletionProposal extends JavaTypeCompletionPropo
 	}
 
 	private static boolean hasMethod(IMethod[] methods, String name) {
-		for (int i= 0; i < methods.length; i++) {
-			IMethod curr= methods[i];
+		for (IMethod curr : methods) {
 			if (curr.getElementName().equals(name) && curr.getParameterTypes().length == 0) {
 				return true;
 			}

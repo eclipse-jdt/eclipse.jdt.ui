@@ -163,9 +163,8 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 			SimpleName nameNode= (SimpleName) NodeFinder.perform(completeRoot, fName.getStartPosition(), fName.getLength());
 
 			rewrite= ASTRewrite.create(completeRoot.getAST());
-			SimpleName[] references= LinkedNodeFinder.findByBinding(completeRoot, nameNode.resolveBinding());
-			for (int i= 0; i < references.length; i++) {
-				removeVariableReferences(rewrite, references[i]);
+			for (SimpleName reference : LinkedNodeFinder.findByBinding(completeRoot, nameNode.resolveBinding())) {
+				removeVariableReferences(rewrite, reference);
 			}
 
 			IVariableBinding bindingDecl= ((IVariableBinding) nameNode.resolveBinding()).getVariableDeclaration();

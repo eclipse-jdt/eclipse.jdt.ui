@@ -237,8 +237,8 @@ public abstract class SurroundWith {
 		if (fIsNewContext) {
 			ImportRewrite importRewrite= StubUtility.createImportRewrite((CompilationUnit)selectedNodes[0].getRoot(), false);
 			ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(selectedNodes[0], importRewrite);
-			for (int i= 0; i < selectedNodes.length; i++) {
-				qualifyThisExpressions(selectedNodes[i], rewrite, importRewrite, importRewriteContext);
+			for (ASTNode selectedNode : selectedNodes) {
+				qualifyThisExpressions(selectedNode, rewrite, importRewrite, importRewriteContext);
 			}
 		}
 
@@ -287,9 +287,7 @@ public abstract class SurroundWith {
 		if (!fIsNewContext)
 			return result;
 
-		IVariableBinding[] reads= getReads(selectedNodes, maxVariableId);
-		for (int i= 0; i < reads.length; i++) {
-			IVariableBinding read= reads[i];
+		for (IVariableBinding read : getReads(selectedNodes, maxVariableId)) {
 			if (!read.isField()) {
 				ASTNode readDecl= getRootNode().findDeclaringNode(read);
 				if (readDecl instanceof VariableDeclaration) {
@@ -323,10 +321,7 @@ public abstract class SurroundWith {
 		List<VariableDeclarationFragment> result= new ArrayList<>();
 		if (!bodyAfterSelection.isEmpty()) {
 
-			IVariableBinding[] accesses= getAccesses(bodyAfterSelection.toArray(new ASTNode[bodyAfterSelection.size()]), maxVariableId);
-
-			for (int i= 0; i < accesses.length; i++) {
-				IVariableBinding curVar= accesses[i];
+			for (IVariableBinding curVar : getAccesses(bodyAfterSelection.toArray(new ASTNode[bodyAfterSelection.size()]), maxVariableId)) {
 				if (!curVar.isField()) {
 					ASTNode readDecl= ASTNodes.findDeclaration(curVar, getRootNode());
 					if (readDecl instanceof VariableDeclarationFragment) {
@@ -387,8 +382,7 @@ public abstract class SurroundWith {
 	 */
 	private final void moveToBlock(ASTNode[] toMove, List<ASTNode> statements, final List<VariableDeclarationFragment> accessedAfter, final List<VariableDeclaration> accessedInside, final ASTRewrite rewrite) {
 
-		for (int i= 0; i < toMove.length; i++) {
-			ASTNode node= toMove[i];
+		for (ASTNode node : toMove) {
 			if (node instanceof VariableDeclarationStatement) {
 				VariableDeclarationStatement statement= (VariableDeclarationStatement)node;
 				final ListRewrite blockRewrite= getListRewrite(statement, rewrite);

@@ -96,8 +96,8 @@ public class AddTypeParameterProposal extends LinkedCorrectionProposal {
 		if (fBounds != null && fBounds.length > 0) {
 			List<Type> typeBounds= newTypeParam.typeBounds();
 			ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(declNode, getImportRewrite());
-			for (int i= 0; i < fBounds.length; i++) {
-				Type newBound= getImportRewrite().addImport(fBounds[i], ast, importRewriteContext, TypeLocation.TYPE_BOUND);
+			for (ITypeBinding fBound : fBounds) {
+				Type newBound= getImportRewrite().addImport(fBound, ast, importRewriteContext, TypeLocation.TYPE_BOUND);
 				typeBounds.add(newBound);
 			}
 		}

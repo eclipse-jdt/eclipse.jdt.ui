@@ -510,13 +510,13 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 			public void mouseExit(MouseEvent e) {
 				if (fComposite == null)
 						return;
-				Control[] children= fComposite.getChildren();
 				Rectangle bounds= null;
-				for (int i= 0; i < children.length; i++) {
-					if (bounds == null)
-						bounds= children[i].getBounds();
-					else
-						bounds.add(children[i].getBounds());
+				for (Control child : fComposite.getChildren()) {
+					if (bounds == null) {
+						bounds= child.getBounds();
+					} else {
+						bounds.add(child.getBounds());
+					}
 					if (bounds.contains(e.x, e.y))
 						return;
 				}
@@ -801,8 +801,8 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 		StyleRange[] ranges= text.getStyleRanges(region.getOffset(), region.getLength());
 
 		List<StyleRange> undoRanges= new ArrayList<>(ranges.length);
-		for (int i= 0; i < ranges.length; i++) {
-			undoRanges.add((StyleRange)ranges[i].clone());
+		for (StyleRange range : ranges) {
+			undoRanges.add((StyleRange) range.clone());
 		}
 
 		int offset= region.getOffset();
@@ -867,8 +867,8 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 			return;
 
 		// set the ranges one by one
-		for (int i= 0; i < oldRanges.length; i++) {
-			text.setStyleRange(oldRanges[i]);
+		for (StyleRange oldRange : oldRanges) {
+			text.setStyleRange(oldRange);
 		}
 	}
 

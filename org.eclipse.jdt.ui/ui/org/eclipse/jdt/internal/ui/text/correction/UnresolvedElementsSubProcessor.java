@@ -543,9 +543,8 @@ public class UnresolvedElementsSubProcessor {
 
 							MethodInvocation newInv= ast.newMethodInvocation();
 							newInv.setName(ast.newSimpleName(curr.getName()));
-							ITypeBinding[] parameterTypes= curr.getParameterTypes();
-							for (int k= 0; k < parameterTypes.length; k++) {
-								ASTNode arg= ASTNodeFactory.newDefaultExpression(ast, parameterTypes[k]);
+							for (ITypeBinding parameterType : curr.getParameterTypes()) {
+								ASTNode arg= ASTNodeFactory.newDefaultExpression(ast, parameterType);
 								newInv.arguments().add(arg);
 								proposal.addLinkedPosition(rewrite.track(arg), false, null);
 							}
@@ -569,9 +568,8 @@ public class UnresolvedElementsSubProcessor {
 	}
 
 	private static boolean hasMethodWithName(ITypeBinding typeBinding, String name) {
-		IVariableBinding[] fields= typeBinding.getDeclaredFields();
-		for (int i= 0; i < fields.length; i++) {
-			if (fields[i].getName().equals(name)) {
+		for (IVariableBinding field : typeBinding.getDeclaredFields()) {
+			if (field.getName().equals(name)) {
 				return true;
 			}
 		}
@@ -583,9 +581,8 @@ public class UnresolvedElementsSubProcessor {
 	}
 
 	private static boolean hasFieldWithName(ITypeBinding typeBinding, String name) {
-		IMethodBinding[] methods= typeBinding.getDeclaredMethods();
-		for (int i= 0; i < methods.length; i++) {
-			if (methods[i].getName().equals(name)) {
+		for (IMethodBinding method : typeBinding.getDeclaredMethods()) {
+			if (method.getName().equals(name)) {
 				return true;
 			}
 		}
@@ -879,8 +876,7 @@ public class UnresolvedElementsSubProcessor {
 		}
 
 		// add all similar elements
-		for (int i= 0; i < elements.length; i++) {
-			SimilarElement elem= elements[i];
+		for (SimilarElement elem : elements) {
 			if ((elem.getKind() & TypeKinds.ALL_TYPES) != 0) {
 				String fullName= elem.getName();
 				if (!fullName.equals(resolvedTypeName)) {
@@ -1240,8 +1236,8 @@ public class UnresolvedElementsSubProcessor {
 		IBinding[] bindings= (new ScopeAnalyzer(astRoot)).getDeclarationsInScope(nameNode, ScopeAnalyzer.METHODS);
 
 		HashSet<String> suggestedRenames= new HashSet<>();
-		for (int i= 0; i < bindings.length; i++) {
-			IMethodBinding binding= (IMethodBinding) bindings[i];
+		for (IBinding b : bindings) {
+			IMethodBinding binding= (IMethodBinding) b;
 			String curr= binding.getName();
 			if (!curr.equals(methodName) && binding.getParameterTypes().length == nArguments && NameMatcher.isSimilarName(methodName, curr) && suggestedRenames.add(curr)) {
 				String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_changemethod_description, BasicElementLabels.getJavaElementName(curr));
@@ -1252,10 +1248,9 @@ public class UnresolvedElementsSubProcessor {
 
 		if (isOnlyParameterMismatch) {
 			ArrayList<IMethodBinding> parameterMismatchs= new ArrayList<>();
-			for (int i= 0; i < bindings.length; i++) {
-				IMethodBinding binding= (IMethodBinding) bindings[i];
+			for (IBinding binding : bindings) {
 				if (binding.getName().equals(methodName)) {
-					parameterMismatchs.add(binding);
+					parameterMismatchs.add((IMethodBinding) binding);
 				}
 			}
 			addParameterMissmatchProposals(context, problem, parameterMismatchs, invocationNode, arguments, proposals);
@@ -1295,10 +1290,7 @@ public class UnresolvedElementsSubProcessor {
 			AST ast= root.getAST();
 			
 			String name= node.getIdentifier();
-			String[] staticImports= SimilarElementsRequestor.getStaticImportFavorites(context.getCompilationUnit(), name, isMethod, favourites);
-			for (int i= 0; i < staticImports.length; i++) {
-				String curr= staticImports[i];
-				
+			for (String curr : SimilarElementsRequestor.getStaticImportFavorites(context.getCompilationUnit(), name, isMethod, favourites)) {
 				ImportRewrite importRewrite= StubUtility.createImportRewrite(root, true);
 				ASTRewrite astRewrite= ASTRewrite.create(ast);
 				
@@ -2017,10 +2009,8 @@ public class UnresolvedElementsSubProcessor {
 		if (targetBinding == null) {
 			return;
 		}
-		IMethodBinding[] methods= targetBinding.getDeclaredMethods();
 		ArrayList<IMethodBinding> similarElements= new ArrayList<>();
-		for (int i= 0; i < methods.length; i++) {
-			IMethodBinding curr= methods[i];
+		for (IMethodBinding curr : targetBinding.getDeclaredMethods()) {
 			if (curr.isConstructor() && recursiveConstructor != curr) {
 				similarElements.add(curr); // similar elements can contain a implicit default constructor
 			}
@@ -2046,9 +2036,7 @@ public class UnresolvedElementsSubProcessor {
 		int offset= problem.getOffset();
 		int len= problem.getLength();
 
-		IJavaElement[] elements= cu.codeSelect(offset, len);
-		for (int i= 0; i < elements.length; i++) {
-			IJavaElement curr= elements[i];
+		for (IJavaElement curr : cu.codeSelect(offset, len)) {
 			if (curr instanceof IType && !TypeFilter.isFiltered((IType) curr)) {
 				String qualifiedTypeName= ((IType) curr).getFullyQualifiedName('.');
 
@@ -2078,9 +2066,8 @@ public class UnresolvedElementsSubProcessor {
 		SimpleName nameNode= decl.getName();
 		String methodName= nameNode.getIdentifier();
 
-		IBinding[] bindings= (new ScopeAnalyzer(root)).getDeclarationsInScope(nameNode, ScopeAnalyzer.METHODS);
-		for (int i= 0; i < bindings.length; i++) {
-			String currName= bindings[i].getName();
+		for (IBinding binding : (new ScopeAnalyzer(root)).getDeclarationsInScope(nameNode, ScopeAnalyzer.METHODS)) {
+			String currName= binding.getName();
 			if (NameMatcher.isSimilarName(methodName, currName)) {
 				String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_arraychangetomethod_description, BasicElementLabels.getJavaElementName(currName));
 				proposals.add(new RenameNodeCorrectionProposal(label, context.getCompilationUnit(), nameNode.getStartPosition(), nameNode.getLength(), currName, IProposalRelevance.ARRAY_CHANGE_TO_METHOD));
@@ -2122,9 +2109,7 @@ public class UnresolvedElementsSubProcessor {
 
 		if (annotation instanceof NormalAnnotation) {
 			// similar names
-			IMethodBinding[] otherMembers= annotBinding.getDeclaredMethods();
-			for (int i= 0; i < otherMembers.length; i++) {
-				IMethodBinding binding= otherMembers[i];
+			for (IMethodBinding binding : annotBinding.getDeclaredMethods()) {
 				String curr= binding.getName();
 				int relevance= NameMatcher.isSimilarName(memberName, curr) ? IProposalRelevance.CHANGE_TO_ATTRIBUTE_SIMILAR_NAME : IProposalRelevance.CHANGE_TO_ATTRIBUTE;
 				String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_UnresolvedElementsSubProcessor_changetoattribute_description, BasicElementLabels.getJavaElementName(curr));

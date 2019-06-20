@@ -61,11 +61,11 @@ public class BestMatchHover extends AbstractJavaEditorTextHover {
 		fInstantiatedTextHovers= new ArrayList<>(2);
 
 		// populate list
-		JavaEditorTextHoverDescriptor[] hoverDescs= JavaPlugin.getDefault().getJavaEditorTextHoverDescriptors();
-		for (int i= 0; i < hoverDescs.length; i++) {
+		for (JavaEditorTextHoverDescriptor hoverDesc : JavaPlugin.getDefault().getJavaEditorTextHoverDescriptors()) {
 			// ensure that we don't add ourselves to the list
-			if (!PreferenceConstants.ID_BESTMATCH_HOVER.equals(hoverDescs[i].getId()))
-				fTextHoverSpecifications.add(hoverDescs[i]);
+			if (!PreferenceConstants.ID_BESTMATCH_HOVER.equals(hoverDesc.getId())) {
+				fTextHoverSpecifications.add(hoverDesc);
+			}
 		}
 	}
 
@@ -110,8 +110,7 @@ public class BestMatchHover extends AbstractJavaEditorTextHover {
 		if (fInstantiatedTextHovers == null)
 			return null;
 
-		for (Iterator<IJavaEditorTextHover> iterator= fInstantiatedTextHovers.iterator(); iterator.hasNext(); ) {
-			ITextHover hover= iterator.next();
+		for (ITextHover hover : fInstantiatedTextHovers) {
 			if (hover == null)
 				continue;
 
@@ -158,8 +157,7 @@ public class BestMatchHover extends AbstractJavaEditorTextHover {
 		if (fInstantiatedTextHovers == null)
 			return null;
 
-		for (Iterator<IJavaEditorTextHover> iterator= fInstantiatedTextHovers.iterator(); iterator.hasNext(); ) {
-			ITextHover hover= iterator.next();
+		for (ITextHover hover : fInstantiatedTextHovers) {
 			if (hover == null)
 				continue;
 

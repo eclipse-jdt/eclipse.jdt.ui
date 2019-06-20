@@ -23,7 +23,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -185,7 +184,6 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatu
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposal.ChangeDescription;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposal.InsertDescription;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposal.RemoveDescription;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ConstructorFromSuperclassProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposal;
@@ -197,6 +195,7 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.NewProviderMethodDe
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewVariableCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.RefactoringCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ReplaceCorrectionProposal;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 /**
   */
@@ -457,8 +456,7 @@ public class LocalCorrectionsSubProcessor {
 					if (!isApplicable) { // bug 349051
 						ITypeBinding[] exceptionTypes= overriddenMethod.getExceptionTypes();
 						ArrayList<ITypeBinding> unhandledExceptions= new ArrayList<>(uncaughtExceptions.length);
-						for (int i= 0; i < uncaughtExceptions.length; i++) {
-							ITypeBinding curr= uncaughtExceptions[i];
+						for (ITypeBinding curr : uncaughtExceptions) {
 							if (isSubtype(curr, exceptionTypes)) {
 								unhandledExceptions.add(curr);
 							}
@@ -471,8 +469,7 @@ public class LocalCorrectionsSubProcessor {
 			if (isApplicable) {
 				ITypeBinding[] methodExceptions= binding.getExceptionTypes();
 				ArrayList<ITypeBinding> unhandledExceptions= new ArrayList<>(uncaughtExceptions.length);
-				for (int i= 0; i < uncaughtExceptions.length; i++) {
-					ITypeBinding curr= uncaughtExceptions[i];
+				for (ITypeBinding curr : uncaughtExceptions) {
 					if (!isSubtype(curr, methodExceptions)) {
 						unhandledExceptions.add(curr);
 					}
@@ -516,8 +513,8 @@ public class LocalCorrectionsSubProcessor {
 
 	private static boolean isSubtype(ITypeBinding curr, ITypeBinding[] addedExceptions) {
 		while (curr != null) {
-			for (int i= 0; i < addedExceptions.length; i++) {
-				if (curr == addedExceptions[i]) {
+			for (ITypeBinding addedException : addedExceptions) {
+				if (curr == addedException) {
 					return true;
 				}
 			}
@@ -703,9 +700,7 @@ public class LocalCorrectionsSubProcessor {
 			return;
 		}
 		ICompilationUnit cu= context.getCompilationUnit();
-		IMethodBinding[] methods= binding.getSuperclass().getDeclaredMethods();
-		for (int i= 0; i < methods.length; i++) {
-			IMethodBinding curr= methods[i];
+		for (IMethodBinding curr : binding.getSuperclass().getDeclaredMethods()) {
 			if (curr.isConstructor() && !Modifier.isPrivate(curr.getModifiers())) {
 				proposals.add(new ConstructorFromSuperclassProposal(cu, typeDeclaration, curr, IProposalRelevance.ADD_CONSTRUCTOR_FROM_SUPER_CLASS));
 			}
@@ -1476,8 +1471,7 @@ public class LocalCorrectionsSubProcessor {
 	public static void addTypePrametersToRawTypeReference(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		IProposableFix fix= Java50Fix.createRawTypeReferenceFix(context.getASTRoot(), problem);
 		if (fix != null) {
-			for (Iterator<ICommandAccess> iter= proposals.iterator(); iter.hasNext();) {
-				Object element= iter.next();
+			for (ICommandAccess element : proposals) {
 				if (element instanceof FixCorrectionProposal) {
 					FixCorrectionProposal fixProp= (FixCorrectionProposal)element;
 					if (RAW_TYPE_REFERENCE_ID.equals(fixProp.getCommandId())) {
@@ -1495,8 +1489,7 @@ public class LocalCorrectionsSubProcessor {
 
 		//Infer Generic Type Arguments... proposal
 		boolean hasInferTypeArgumentsProposal= false;
-		for (Iterator<ICommandAccess> iterator= proposals.iterator(); iterator.hasNext();) {
-			Object completionProposal= iterator.next();
+		for (ICommandAccess completionProposal : proposals) {
 			if (completionProposal instanceof ChangeCorrectionProposal) {
 				if (IJavaEditorActionDefinitionIds.INFER_TYPE_ARGUMENTS_ACTION.equals(((ChangeCorrectionProposal)completionProposal).getCommandId())) {
 					hasInferTypeArgumentsProposal= true;
@@ -1695,15 +1688,13 @@ public class LocalCorrectionsSubProcessor {
 								int i= Invocations.getArguments(parent).indexOf(selectedNode);
 								if (parameterTypes.length >= i && parameterTypes[i].isParameterizedType()) {
 									ITypeBinding[] typeArguments= parameterTypes[i].getTypeArguments();
-									for (int j= 0; j < typeArguments.length; j++) {
-										ITypeBinding typeArgument= typeArguments[j];
+									for (ITypeBinding typeArgument : typeArguments) {
 										typeArgument= Bindings.normalizeForDeclarationUse(typeArgument, ast);
 										if (! TypeRules.isJavaLangObject(typeArgument)) {
 											// add all type arguments if at least one is found to be necessary:
 											List<Type> typeArgumentsList= method.typeArguments();
-											for (int k= 0; k < typeArguments.length; k++) {
-												typeArgument= typeArguments[k];
-												typeArgument= Bindings.normalizeForDeclarationUse(typeArgument, ast);
+											for (ITypeBinding t : typeArguments) {
+												typeArgument= Bindings.normalizeForDeclarationUse(t, ast);
 												typeArgumentsList.add(importRewrite.addImport(typeArgument, ast));
 											}
 											break;
@@ -1738,8 +1729,7 @@ public class LocalCorrectionsSubProcessor {
 	}
 
 	public static void getMissingEnumConstantCaseProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
-		for (Iterator<ICommandAccess> iterator= proposals.iterator(); iterator.hasNext();) {
-			ICommandAccess proposal= iterator.next();
+		for (ICommandAccess proposal : proposals) {
 			if (proposal instanceof ChangeCorrectionProposal) {
 				if (CorrectionMessages.LocalCorrectionsSubProcessor_add_missing_cases_description.equals(((ChangeCorrectionProposal) proposal).getName())) {
 					return;
@@ -1781,10 +1771,9 @@ public class LocalCorrectionsSubProcessor {
 
 	@SuppressWarnings("deprecation")
 	public static boolean evaluateMissingSwitchCases(ITypeBinding enumBindings, List<Statement> switchStatements, ArrayList<String> enumConstNames) {
-		IVariableBinding[] fields= enumBindings.getDeclaredFields();
-		for (int i= 0; i < fields.length; i++) {
-			if (fields[i].isEnumConstant()) {
-				enumConstNames.add(fields[i].getName());
+		for (IVariableBinding field : enumBindings.getDeclaredFields()) {
+			if (field.isEnumConstant()) {
+				enumConstNames.add(field.getName());
 			}
 		}
 
@@ -2066,9 +2055,8 @@ public class LocalCorrectionsSubProcessor {
 		final IType type= (IType) binding.getJavaElement();
 		
 		boolean hasInstanceFields= false;
-		IVariableBinding[] declaredFields= binding.getDeclaredFields();
-		for (int i= 0; i < declaredFields.length; i++) {
-			if (!Modifier.isStatic(declaredFields[i].getModifiers())) {
+		for (IVariableBinding declaredField : binding.getDeclaredFields()) {
+			if (!Modifier.isStatic(declaredField.getModifiers())) {
 				hasInstanceFields= true;
 				break;
 			}

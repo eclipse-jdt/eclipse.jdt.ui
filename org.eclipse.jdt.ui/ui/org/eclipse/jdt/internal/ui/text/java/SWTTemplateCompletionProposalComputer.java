@@ -61,9 +61,7 @@ public class SWTTemplateCompletionProposalComputer extends AbstractTemplateCompl
 			if (javaProject == null)
 				return;
 
-			IJavaElementDelta[] children= event.getDelta().getChangedChildren();
-			for (int i= 0; i < children.length; i++) {
-				IJavaElementDelta child= children[i];
+			for (IJavaElementDelta child : event.getDelta().getChangedChildren()) {
 				if (javaProject.equals(child.getElement())) {
 					if (isClasspathChange(child)) {
 						setCachedJavaProject(null);
@@ -83,10 +81,10 @@ public class SWTTemplateCompletionProposalComputer extends AbstractTemplateCompl
 				return true;
 
 			if ((flags & IJavaElementDelta.F_CHILDREN) != 0) {
-				IJavaElementDelta[] children= delta.getAffectedChildren();
-				for (int i= 0; i < children.length; i++) {
-					if (isClasspathChangeFlag(children[i].getFlags()))
+				for (IJavaElementDelta child : delta.getAffectedChildren()) {
+					if (isClasspathChangeFlag(child.getFlags())) {
 						return true;
+					}
 				}
 			}
 

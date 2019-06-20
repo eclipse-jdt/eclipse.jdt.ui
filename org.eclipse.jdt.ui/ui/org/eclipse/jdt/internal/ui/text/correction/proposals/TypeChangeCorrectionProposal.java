@@ -159,9 +159,8 @@ public class TypeChangeCorrectionProposal extends LinkedCorrectionProposal {
 		if (binding.isArray()) {
 			return containsNestedCapture(binding.getElementType(), true);
 		}
-		ITypeBinding[] typeArguments= binding.getTypeArguments();
-		for (int i= 0; i < typeArguments.length; i++) {
-			if (containsNestedCapture(typeArguments[i], true)) {
+		for (ITypeBinding typeArgument : binding.getTypeArguments()) {
+			if (containsNestedCapture(typeArgument, true)) {
 				return true;
 			}
 		}
@@ -318,8 +317,8 @@ public class TypeChangeCorrectionProposal extends LinkedCorrectionProposal {
 			final String KEY_TYPE= "type"; //$NON-NLS-1$
 			addLinkedPosition(rewrite.track(type), true, KEY_TYPE);
 			if (fTypeProposals != null) {
-				for (int i= 0; i < fTypeProposals.length; i++) {
-					addLinkedPositionProposal(KEY_TYPE, fTypeProposals[i]);
+				for (ITypeBinding fTypeProposal : fTypeProposals) {
+					addLinkedPositionProposal(KEY_TYPE, fTypeProposal);
 				}
 			}
 			if (fIsNewTypeVar) {
@@ -393,10 +392,8 @@ public class TypeChangeCorrectionProposal extends LinkedCorrectionProposal {
 
 		ITypeBinding binding= createdType.resolveBinding();
 		if (binding != null) {
-			ITypeBinding[] typeArguments= binding.getTypeArguments();
 			ListRewrite argumentsRewrite= rewrite.getListRewrite(createdType, ParameterizedType.TYPE_ARGUMENTS_PROPERTY);
-			for (int i= 0; i < typeArguments.length; i++) {
-				ITypeBinding typeArgument= typeArguments[i];
+			for (ITypeBinding typeArgument : binding.getTypeArguments()) {
 				Type argumentNode= importRewrite.addImport(typeArgument, ast, context, TypeLocation.TYPE_ARGUMENT);
 				argumentsRewrite.insertLast(argumentNode, null);
 			}

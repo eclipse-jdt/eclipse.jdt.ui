@@ -17,7 +17,6 @@ package org.eclipse.jdt.internal.ui.text.java;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
@@ -454,8 +453,9 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		VersionedWordMatcher j14Matcher= new VersionedWordMatcher(defaultToken, JavaCore.VERSION_1_4, version);
 
 		token= getToken(IJavaColorConstants.JAVA_KEYWORD);
-		for (int i=0; i<fgJava14Keywords.length; i++)
-			j14Matcher.addWord(fgJava14Keywords[i], token);
+		for (String fgJava14Keyword : fgJava14Keywords) {
+			j14Matcher.addWord(fgJava14Keyword, token);
+		}
 
 		combinedWordRule.addWordMatcher(j14Matcher);
 		fVersionDependentRules.add(j14Matcher);
@@ -463,8 +463,9 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		VersionedWordMatcher j15Matcher= new VersionedWordMatcher(defaultToken, JavaCore.VERSION_1_5, version);
 		
 		token= getToken(IJavaColorConstants.JAVA_KEYWORD);
-		for (int i=0; i<fgJava15Keywords.length; i++)
-			j15Matcher.addWord(fgJava15Keywords[i], token);
+		for (String fgJava15Keyword : fgJava15Keywords) {
+			j15Matcher.addWord(fgJava15Keyword, token);
+		}
 
 		combinedWordRule.addWordMatcher(j15Matcher);
 		fVersionDependentRules.add(j15Matcher);
@@ -486,12 +487,15 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		// Add word rule for keywords, types, and constants.
 		CombinedWordRule.WordMatcher wordRule= new CombinedWordRule.WordMatcher();
 		token= getToken(IJavaColorConstants.JAVA_KEYWORD);
-		for (int i=0; i<fgKeywords.length; i++)
-			wordRule.addWord(fgKeywords[i], token);
-		for (int i=0; i<fgTypes.length; i++)
-			wordRule.addWord(fgTypes[i], token);
-		for (int i=0; i<fgConstants.length; i++)
-			wordRule.addWord(fgConstants[i], token);
+		for (String fgKeyword : fgKeywords) {
+			wordRule.addWord(fgKeyword, token);
+		}
+		for (String fgType : fgTypes) {
+			wordRule.addWord(fgType, token);
+		}
+		for (String fgConstant : fgConstants) {
+			wordRule.addWord(fgConstant, token);
+		}
 
 		combinedWordRule.addWordMatcher(wordRule);
 
@@ -505,8 +509,9 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		// Add word rule for new keywords
 		WordMatcher j9ModuleInfoMatcher= new WordMatcher();
 		Token token= getToken(IJavaColorConstants.JAVA_KEYWORD);
-		for (int i= 0; i < fgJava9ModuleInfoKeywords.length; i++)
-			j9ModuleInfoMatcher.addWord(fgJava9ModuleInfoKeywords[i], token);
+		for (String fgJava9ModuleInfoKeyword : fgJava9ModuleInfoKeywords) {
+			j9ModuleInfoMatcher.addWord(fgJava9ModuleInfoKeyword, token);
+		}
 
 		CombinedWordRule combinedWordRule= new CombinedWordRule(new JavaWordDetector(), j9ModuleInfoMatcher, defaultToken);
 
@@ -556,8 +561,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 			if (value instanceof String) {
 				String s= (String) value;
 
-				for (Iterator<ISourceVersionDependent> it= fVersionDependentRules.iterator(); it.hasNext();) {
-					ISourceVersionDependent dependent= it.next();
+				for (ISourceVersionDependent dependent : fVersionDependentRules) {
 					dependent.setSourceVersion(s);
 				}
 			}

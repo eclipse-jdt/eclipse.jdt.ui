@@ -15,7 +15,6 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.swt.graphics.Image;
@@ -150,9 +149,7 @@ public class VarargsWarningsSubProcessor {
 		MethodDeclaration methodDeclaration= (MethodDeclaration) coveringNode;
 		MarkerAnnotation annotation= null;
 
-		List<? extends ASTNode> modifiers= methodDeclaration.modifiers();
-		for (Iterator<? extends ASTNode> iterator= modifiers.iterator(); iterator.hasNext();) {
-			ASTNode node= iterator.next();
+		for (ASTNode node : (List<? extends ASTNode>)methodDeclaration.modifiers()) {
 			if (node instanceof MarkerAnnotation) {
 				annotation= (MarkerAnnotation) node;
 				if ("SafeVarargs".equals(annotation.resolveAnnotationBinding().getName())) { //$NON-NLS-1$

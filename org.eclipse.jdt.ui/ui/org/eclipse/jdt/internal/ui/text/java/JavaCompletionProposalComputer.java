@@ -266,9 +266,9 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 		ICompletionProposal[] javaProposals= collector.getJavaCompletionProposals();
 		int contextInformationOffset= guessMethodContextInformationPosition(context);
 		if (contextInformationOffset != offset) {
-			for (int i= 0; i < javaProposals.length; i++) {
-				if (javaProposals[i] instanceof JavaMethodCompletionProposal) {
-					JavaMethodCompletionProposal jmcp= (JavaMethodCompletionProposal) javaProposals[i];
+			for (ICompletionProposal javaProposal : javaProposals) {
+				if (javaProposal instanceof JavaMethodCompletionProposal) {
+					JavaMethodCompletionProposal jmcp= (JavaMethodCompletionProposal) javaProposal;
 					jmcp.setContextInformationPosition(contextInformationOffset);
 				}
 			}

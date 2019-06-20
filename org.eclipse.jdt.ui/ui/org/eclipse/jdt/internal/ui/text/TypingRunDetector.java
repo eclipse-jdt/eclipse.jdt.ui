@@ -15,8 +15,6 @@ package org.eclipse.jdt.internal.ui.text;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import org.eclipse.swt.SWT;
@@ -461,9 +459,7 @@ public class TypingRunDetector {
 	 * @param run the new run
 	 */
 	private void fireRunBegun(TypingRun run) {
-		List<ITypingRunListener> listeners= new ArrayList<>(fListeners);
-		for (Iterator<ITypingRunListener> it= listeners.iterator(); it.hasNext();) {
-			ITypingRunListener listener= it.next();
+		for (ITypingRunListener listener : new ArrayList<>(fListeners)) {
 			listener.typingRunStarted(fRun);
 		}
 	}
@@ -475,9 +471,7 @@ public class TypingRunDetector {
 	 * @param reason the type of change that caused the run to be ended
 	 */
 	private void fireRunEnded(TypingRun run, ChangeType reason) {
-		List<ITypingRunListener> listeners= new ArrayList<>(fListeners);
-		for (Iterator<ITypingRunListener> it= listeners.iterator(); it.hasNext();) {
-			ITypingRunListener listener= it.next();
+		for (ITypingRunListener listener : new ArrayList<>(fListeners)) {
 			listener.typingRunEnded(fRun, reason);
 		}
 	}

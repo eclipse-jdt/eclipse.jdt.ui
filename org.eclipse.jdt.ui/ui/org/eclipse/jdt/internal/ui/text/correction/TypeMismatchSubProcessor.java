@@ -196,9 +196,8 @@ public class TypeMismatchSubProcessor {
 
 				String returnKey= "return"; //$NON-NLS-1$
 				proposal.addLinkedPosition(rewrite.track(newReturnType), true, returnKey);
-				ITypeBinding[] typeSuggestions= ASTResolving.getRelaxingTypes(ast, currBinding);
-				for (int i= 0; i < typeSuggestions.length; i++) {
-					proposal.addLinkedPositionProposal(returnKey, typeSuggestions[i]);
+				for (ITypeBinding typeSuggestion : ASTResolving.getRelaxingTypes(ast, currBinding)) {
+					proposal.addLinkedPositionProposal(returnKey, typeSuggestion);
 				}
 				proposals.add(proposal);
 			}
@@ -430,8 +429,8 @@ public class TypeMismatchSubProcessor {
 	}
 
 	private static boolean isDeclaredException(ITypeBinding curr, ITypeBinding[] declared) {
-		for (int i= 0; i < declared.length; i++) {
-			if (Bindings.isSuperType(declared[i], curr)) {
+		for (ITypeBinding d : declared) {
+			if (Bindings.isSuperType(d, curr)) {
 				return true;
 			}
 		}

@@ -189,8 +189,7 @@ public class HTMLTagCompletionProposalComputer implements IJavaCompletionProposa
 
 	private void addAllTags(String prefix) {
 		String htmlPrefix= "<" + prefix; //$NON-NLS-1$
-		for (int i= 0; i < fgHTMLProposals.length; i++) {
-			String curr= fgHTMLProposals[i];
+		for (String curr : fgHTMLProposals) {
 			if (prefixMatches(htmlPrefix, curr)) {
 				fResult.add(createCompletion(curr, prefix, new StyledString(curr), JavaPluginImages.get(JavaPluginImages.IMG_OBJS_HTMLTAG), 0));
 			}
@@ -198,8 +197,7 @@ public class HTMLTagCompletionProposalComputer implements IJavaCompletionProposa
 	}
 
 	private void addProposals(String prefix, String[] choices, String imageName) {
-		for (int i= 0; i < choices.length; i++) {
-			String curr= choices[i];
+		for (String curr : choices) {
 			if (prefixMatches(prefix, curr)) {
 				fResult.add(createCompletion(curr, prefix, new StyledString(curr), JavaPluginImages.get(imageName), 0));
 			}
