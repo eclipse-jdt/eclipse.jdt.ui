@@ -22,7 +22,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -174,8 +173,7 @@ public final class ReorgPolicyFactory {
 
 		public IJavaElement[] getActualJavaElementsToReorg() throws JavaModelException {
 			List<IJavaElement> result= new ArrayList<>();
-			for (int i= 0; i < fJavaElements.length; i++) {
-				IJavaElement element= fJavaElements[i];
+			for (IJavaElement element : fJavaElements) {
 				if (element == null)
 					continue;
 				if (element instanceof IType) {
@@ -195,13 +193,16 @@ public final class ReorgPolicyFactory {
 		public IResource[] getActualResourcesToReorg() {
 			Set<IJavaElement> javaElementSet= new HashSet<>(Arrays.asList(fJavaElements));
 			List<IResource> result= new ArrayList<>();
-			for (int i= 0; i < fResources.length; i++) {
-				if (fResources[i] == null)
+			for (IResource resource : fResources) {
+				if (resource == null) {
 					continue;
-				IJavaElement element= JavaCore.create(fResources[i]);
-				if (element == null || !element.exists() || !javaElementSet.contains(element))
-					if (!result.contains(fResources[i]))
-						result.add(fResources[i]);
+				}
+				IJavaElement element= JavaCore.create(resource);
+				if (element == null || !element.exists() || !javaElementSet.contains(element)) {
+					if (!result.contains(resource)) {
+						result.add(resource);
+					}
+				}
 			}
 			return result.toArray(new IResource[result.size()]);
 
@@ -278,20 +279,20 @@ public final class ReorgPolicyFactory {
 			NewNameProposer nameProposer= new NewNameProposer();
 			CompositeChange composite= new DynamicValidationStateChange(RefactoringCoreMessages.ReorgPolicy_copy);
 			composite.markAsSynthetic();
-			for (int i= 0; i < cus.length; i++) {
-				composite.add(createChange(cus[i], nameProposer, copyQueries));
+			for (ICompilationUnit cu : cus) {
+				composite.add(createChange(cu, nameProposer, copyQueries));
 				pm.worked(1);
 			}
 			if (pm.isCanceled())
 				throw new OperationCanceledException();
-			for (int i= 0; i < file.length; i++) {
-				composite.add(createChange(file[i], nameProposer, copyQueries));
+			for (IFile f : file) {
+				composite.add(createChange(f, nameProposer, copyQueries));
 				pm.worked(1);
 			}
 			if (pm.isCanceled())
 				throw new OperationCanceledException();
-			for (int i= 0; i < folders.length; i++) {
-				composite.add(createChange(folders[i], nameProposer, copyQueries));
+			for (IFolder folder : folders) {
+				composite.add(createChange(folder, nameProposer, copyQueries));
 				pm.worked(1);
 			}
 			pm.done();
@@ -363,13 +364,11 @@ public final class ReorgPolicyFactory {
 			fReorgExecutionLog= new ReorgExecutionLog();
 			CopyArguments jArgs= new CopyArguments(getDestination(), fReorgExecutionLog);
 			CopyArguments rArgs= new CopyArguments(getDestinationAsContainer(), fReorgExecutionLog);
-			ICompilationUnit[] cus= getCus();
-			for (int i= 0; i < cus.length; i++) {
-				fModifications.copy(cus[i], jArgs, rArgs);
+			for (ICompilationUnit cu : getCus()) {
+				fModifications.copy(cu, jArgs, rArgs);
 			}
-			IResource[] resources= ReorgUtils.union(getFiles(), getFolders());
-			for (int i= 0; i < resources.length; i++) {
-				fModifications.copy(resources[i], rArgs);
+			for (IResource resource : ReorgUtils.union(getFiles(), getFolders())) {
+				fModifications.copy(resource, rArgs);
 			}
 			return fModifications;
 		}
@@ -442,11 +441,11 @@ public final class ReorgPolicyFactory {
 			CompositeChange composite= new DynamicValidationStateChange(RefactoringCoreMessages.ReorgPolicy_copy_source_folder);
 			composite.markAsSynthetic();
 			IJavaProject destination= getDestinationJavaProject();
-			for (int i= 0; i < roots.length; i++) {
+			for (IPackageFragmentRoot root : roots) {
 				if (destination == null) {
-					composite.add(createChange(roots[i], (IContainer) getResourceDestination(), nameProposer, copyQueries));
+					composite.add(createChange(root, (IContainer) getResourceDestination(), nameProposer, copyQueries));
 				} else {
-					composite.add(createChange(roots[i], destination, nameProposer, copyQueries));
+					composite.add(createChange(root, destination, nameProposer, copyQueries));
 				}
 				pm.worked(1);
 			}
@@ -490,16 +489,14 @@ public final class ReorgPolicyFactory {
 			fReorgExecutionLog= new ReorgExecutionLog();
 			IJavaProject destination= getDestinationJavaProject();
 			if (destination == null) {
-				IPackageFragmentRoot[] roots= getRoots();
-				for (int i= 0; i < roots.length; i++) {
-					fModifications.copy(roots[i].getResource(), new CopyArguments(getResourceDestination(), fReorgExecutionLog));
+				for (IPackageFragmentRoot root : getRoots()) {
+					fModifications.copy(root.getResource(), new CopyArguments(getResourceDestination(), fReorgExecutionLog));
 				}
 			} else {
 				CopyArguments javaArgs= new CopyArguments(destination, fReorgExecutionLog);
 				CopyArguments resourceArgs= new CopyArguments(destination.getProject(), fReorgExecutionLog);
-				IPackageFragmentRoot[] roots= getRoots();
-				for (int i= 0; i < roots.length; i++) {
-					fModifications.copy(roots[i], javaArgs, resourceArgs);
+				for (IPackageFragmentRoot root : getRoots()) {
+					fModifications.copy(root, javaArgs, resourceArgs);
 				}
 			}
 			return fModifications;
@@ -578,11 +575,11 @@ public final class ReorgPolicyFactory {
 			CompositeChange composite= new DynamicValidationStateChange(RefactoringCoreMessages.ReorgPolicy_copy_package);
 			composite.markAsSynthetic();
 			IPackageFragmentRoot root= getDestinationAsPackageFragmentRoot();
-			for (int i= 0; i < fragments.length; i++) {
+			for (IPackageFragment fragment : fragments) {
 				if (root == null) {
-					composite.add(createChange(fragments[i], (IContainer) getResourceDestination(), nameProposer, newNameQueries));
+					composite.add(createChange(fragment, (IContainer) getResourceDestination(), nameProposer, newNameQueries));
 				} else {
-					composite.add(createChange(fragments[i], root, nameProposer, newNameQueries));
+					composite.add(createChange(fragment, root, nameProposer, newNameQueries));
 				}
 				pm.worked(1);
 			}
@@ -626,16 +623,14 @@ public final class ReorgPolicyFactory {
 			fReorgExecutionLog= new ReorgExecutionLog();
 			IPackageFragmentRoot destination= getDestinationAsPackageFragmentRoot();
 			if (destination == null) {
-				IPackageFragment[] packages= getPackages();
-				for (int i= 0; i < packages.length; i++) {
-					fModifications.copy(packages[i].getResource(), new CopyArguments(getResourceDestination(), fReorgExecutionLog));
+				for (IPackageFragment p : getPackages()) {
+					fModifications.copy(p.getResource(), new CopyArguments(getResourceDestination(), fReorgExecutionLog));
 				}
 			} else {
 				CopyArguments javaArgs= new CopyArguments(destination, fReorgExecutionLog);
 				CopyArguments resourceArgs= new CopyArguments(destination.getResource(), fReorgExecutionLog);
-				IPackageFragment[] packages= getPackages();
-				for (int i= 0; i < packages.length; i++) {
-					fModifications.copy(packages[i], javaArgs, resourceArgs);
+				for (IPackageFragment p : getPackages()) {
+					fModifications.copy(p, javaArgs, resourceArgs);
 				}
 			}
 			return fModifications;
@@ -685,9 +680,8 @@ public final class ReorgPolicyFactory {
 				CompilationUnit sourceCuNode= createSourceCuNode();
 				ICompilationUnit targetCu= getEnclosingCompilationUnit(getJavaElementDestination());
 				CompilationUnitRewrite targetRewriter= new CompilationUnitRewrite(targetCu);
-				IJavaElement[] javaElements= getJavaElements();
-				for (int i= 0; i < javaElements.length; i++) {
-					copyToDestination(javaElements[i], targetRewriter, sourceCuNode, targetRewriter.getRoot());
+				for (IJavaElement javaElement : getJavaElements()) {
+					copyToDestination(javaElement, targetRewriter, sourceCuNode, targetRewriter.getRoot());
 				}
 				return createCompilationUnitChange(targetRewriter);
 			} catch (JavaModelException e) {
@@ -782,9 +776,8 @@ public final class ReorgPolicyFactory {
 			fModifications= new CopyModifications();
 			fReorgExecutionLog= new ReorgExecutionLog();
 			CopyArguments args= new CopyArguments(getJavaElementDestination(), fReorgExecutionLog);
-			IJavaElement[] javaElements= getJavaElements();
-			for (int i= 0; i < javaElements.length; i++) {
-				fModifications.copy(javaElements[i], args, null);
+			for (IJavaElement javaElement : getJavaElements()) {
+				fModifications.copy(javaElement, args, null);
 			}
 			return fModifications;
 		}
@@ -1053,23 +1046,26 @@ public final class ReorgPolicyFactory {
 
 		private IProject getSingleProject() {
 			IProject result= null;
-			for (int index= 0; index < fFiles.length; index++) {
-				if (result == null)
-					result= fFiles[index].getProject();
-				else if (!result.equals(fFiles[index].getProject()))
+			for (IFile file : fFiles) {
+				if (result == null) {
+					result= file.getProject();
+				} else if (!result.equals(file.getProject())) {
 					return null;
+				}
 			}
-			for (int index= 0; index < fFolders.length; index++) {
-				if (result == null)
-					result= fFolders[index].getProject();
-				else if (!result.equals(fFolders[index].getProject()))
+			for (IFolder folder : fFolders) {
+				if (result == null) {
+					result= folder.getProject();
+				} else if (!result.equals(folder.getProject())) {
 					return null;
+				}
 			}
-			for (int index= 0; index < fCus.length; index++) {
-				if (result == null)
-					result= fCus[index].getJavaProject().getProject();
-				else if (!result.equals(fCus[index].getJavaProject().getProject()))
+			for (ICompilationUnit cu : fCus) {
+				if (result == null) {
+					result= cu.getJavaProject().getProject();
+				} else if (!result.equals(cu.getJavaProject().getProject())) {
 					return null;
+				}
 			}
 			return result;
 		}
@@ -1155,8 +1151,7 @@ public final class ReorgPolicyFactory {
 		}
 
 		private boolean isChildOfOrEqualToAnyFolder(IResource resource) {
-			for (int i= 0; i < fFolders.length; i++) {
-				IFolder folder= fFolders[i];
+			for (IFolder folder : fFolders) {
 				if (folder.equals(resource) || ParentChecker.isDescendantOf(resource, folder))
 					return true;
 			}
@@ -1355,13 +1350,12 @@ public final class ReorgPolicyFactory {
 				ICompilationUnit[] cus= getCus();
 				pm.beginTask("", cus.length); //$NON-NLS-1$
 				pm.subTask(RefactoringCoreMessages.MoveRefactoring_scanning_qualified_names);
-				for (int i= 0; i < cus.length; i++) {
-					ICompilationUnit cu= cus[i];
+				for (ICompilationUnit cu : cus) {
 					IType[] types= cu.getTypes();
 					IProgressMonitor typesMonitor= new SubProgressMonitor(pm, 1);
 					typesMonitor.beginTask("", types.length); //$NON-NLS-1$
-					for (int j= 0; j < types.length; j++) {
-						handleType(types[j], destination, new SubProgressMonitor(typesMonitor, 1));
+					for (IType type : types) {
+						handleType(type, destination, new SubProgressMonitor(typesMonitor, 1));
 						if (typesMonitor.isCanceled())
 							throw new OperationCanceledException();
 					}
@@ -1463,20 +1457,20 @@ public final class ReorgPolicyFactory {
 			IFolder[] folders= getFolders();
 			ICompilationUnit[] cus= getCus();
 			pm.beginTask("", files.length + folders.length + cus.length); //$NON-NLS-1$
-			for (int i= 0; i < files.length; i++) {
-				result.add(createChange(files[i]));
+			for (IFile file : files) {
+				result.add(createChange(file));
 				pm.worked(1);
 			}
 			if (pm.isCanceled())
 				throw new OperationCanceledException();
-			for (int i= 0; i < folders.length; i++) {
-				result.add(createChange(folders[i]));
+			for (IFolder folder : folders) {
+				result.add(createChange(folder));
 				pm.worked(1);
 			}
 			if (pm.isCanceled())
 				throw new OperationCanceledException();
-			for (int i= 0; i < cus.length; i++) {
-				result.add(createChange(cus[i]));
+			for (ICompilationUnit cu : cus) {
+				result.add(createChange(cu));
 				pm.worked(1);
 			}
 			pm.done();
@@ -1566,19 +1560,16 @@ public final class ReorgPolicyFactory {
 
 			boolean updateReferenes= getUpdateReferences();
 			if (unitDestination != null) {
-				ICompilationUnit[] units= getCus();
-				for (int i= 0; i < units.length; i++) {
-					fModifications.move(units[i], new MoveArguments(unitDestination, updateReferenes));
+				for (ICompilationUnit unit : getCus()) {
+					fModifications.move(unit, new MoveArguments(unitDestination, updateReferenes));
 				}
 			}
 			if (container != null) {
-				IFile[] files= getFiles();
-				for (int i= 0; i < files.length; i++) {
-					fModifications.move(files[i], new MoveArguments(container, updateReferenes));
+				for (IFile file : getFiles()) {
+					fModifications.move(file, new MoveArguments(container, updateReferenes));
 				}
-				IFolder[] folders= getFolders();
-				for (int i= 0; i < folders.length; i++) {
-					fModifications.move(folders[i], new MoveArguments(container, updateReferenes));
+				for (IFolder folder : getFolders()) {
+					fModifications.move(folder, new MoveArguments(container, updateReferenes));
 				}
 			}
 			return fModifications;
@@ -1741,9 +1732,10 @@ public final class ReorgPolicyFactory {
 		private static final String POLICY_MOVE_ROOTS= "org.eclipse.jdt.ui.moveRoots"; //$NON-NLS-1$
 
 		private static boolean isParentOfAny(IJavaProject javaProject, IPackageFragmentRoot[] roots) {
-			for (int i= 0; i < roots.length; i++) {
-				if (ReorgUtils.isParentInWorkspaceOrOnDisk(roots[i], javaProject))
+			for (IPackageFragmentRoot root : roots) {
+				if (ReorgUtils.isParentInWorkspaceOrOnDisk(root, javaProject)) {
 					return true;
+				}
 			}
 			return false;
 		}
@@ -1763,10 +1755,9 @@ public final class ReorgPolicyFactory {
 			if (!super.canEnable())
 				return false;
 			IPackageFragmentRoot[] roots= getPackageFragmentRoots();
-			for (int i= 0; i < roots.length; i++) {
-				IPackageFragmentRoot root= roots[i];
+			for (IPackageFragmentRoot root : roots) {
 				if (root.isReadOnly() && !root.isArchive() && !root.isExternal()) {
-					final ResourceAttributes attributes= roots[i].getResource().getResourceAttributes();
+					final ResourceAttributes attributes= root.getResource().getResourceAttributes();
 					if (attributes == null || attributes.isReadOnly())
 						return false;
 				}
@@ -1804,11 +1795,11 @@ public final class ReorgPolicyFactory {
 			CompositeChange composite= new DynamicValidationStateChange(RefactoringCoreMessages.ReorgPolicy_move_source_folder);
 			composite.markAsSynthetic();
 			IJavaProject destination= getDestinationJavaProject();
-			for (int i= 0; i < roots.length; i++) {
+			for (IPackageFragmentRoot root : roots) {
 				if (destination == null) {
-					composite.add(new MovePackageFragmentRootChange(roots[i], (IContainer) getResourceDestination(), null));
+					composite.add(new MovePackageFragmentRootChange(root, (IContainer) getResourceDestination(), null));
 				} else {
-					composite.add(createChange(roots[i], destination));
+					composite.add(createChange(root, destination));
 				}
 				pm.worked(1);
 			}
@@ -1862,14 +1853,12 @@ public final class ReorgPolicyFactory {
 			IJavaProject destination= getDestinationJavaProject();
 			boolean updateReferences= getUpdateReferences();
 			if (destination != null) {
-				IPackageFragmentRoot[] roots= getPackageFragmentRoots();
-				for (int i= 0; i < roots.length; i++) {
-					fModifications.move(roots[i], new MoveArguments(destination, updateReferences));
+				for (IPackageFragmentRoot root : getPackageFragmentRoots()) {
+					fModifications.move(root, new MoveArguments(destination, updateReferences));
 				}
 			} else {
-				IPackageFragmentRoot[] roots= getPackageFragmentRoots();
-				for (int i= 0; i < roots.length; i++) {
-					fModifications.move(roots[i], new MoveArguments(getResourceDestination(), updateReferences));
+				for (IPackageFragmentRoot root : getPackageFragmentRoots()) {
+					fModifications.move(root, new MoveArguments(getResourceDestination(), updateReferences));
 				}
 			}
 			return fModifications;
@@ -1983,8 +1972,7 @@ public final class ReorgPolicyFactory {
 		private static final String POLICY_MOVE_PACKAGES= "org.eclipse.jdt.ui.movePackages"; //$NON-NLS-1$
 
 		private static boolean isParentOfAny(IPackageFragmentRoot root, IPackageFragment[] fragments) {
-			for (int i= 0; i < fragments.length; i++) {
-				IPackageFragment fragment= fragments[i];
+			for (IPackageFragment fragment : fragments) {
 				if (ReorgUtils.isParentInWorkspaceOrOnDisk(fragment, root))
 					return true;
 			}
@@ -2034,11 +2022,11 @@ public final class ReorgPolicyFactory {
 			CompositeChange result= new DynamicValidationStateChange(RefactoringCoreMessages.ReorgPolicy_move_package);
 			result.markAsSynthetic();
 			IPackageFragmentRoot root= getDestinationAsPackageFragmentRoot();
-			for (int i= 0; i < fragments.length; i++) {
+			for (IPackageFragment fragment : fragments) {
 				if (root == null) {
-					result.add(createChange(fragments[i], (IContainer)getResourceDestination()));
+					result.add(createChange(fragment, (IContainer)getResourceDestination()));
 				} else {
-					result.add(createChange(fragments[i], root));
+					result.add(createChange(fragment, root));
 				}
 				pm.worked(1);
 				if (pm.isCanceled())
@@ -2093,13 +2081,12 @@ public final class ReorgPolicyFactory {
 
 			fModifications= new MoveModifications();
 			boolean updateReferences= getUpdateReferences();
-			IPackageFragment[] packages= getPackages();
 			IPackageFragmentRoot javaDestination= getDestinationAsPackageFragmentRoot();
-			for (int i= 0; i < packages.length; i++) {
+			for (IPackageFragment p : getPackages()) {
 				if (javaDestination == null) {
-					fModifications.move(packages[i].getResource(), new MoveArguments(getResourceDestination(), updateReferences));
+					fModifications.move(p.getResource(), new MoveArguments(getResourceDestination(), updateReferences));
 				} else {
-					fModifications.move(packages[i], new MoveArguments(javaDestination, updateReferences));
+					fModifications.move(p, new MoveArguments(javaDestination, updateReferences));
 				}
 			}
 			return fModifications;
@@ -2241,8 +2228,8 @@ public final class ReorgPolicyFactory {
 					targetRewriter= new CompilationUnitRewrite(destinationCu, destinationCuNode);
 				}
 				IJavaElement[] javaElements= getJavaElements();
-				for (int i= 0; i < javaElements.length; i++) {
-					copyToDestination(javaElements[i], targetRewriter, sourceRewriter.getRoot(), targetRewriter.getRoot());
+				for (IJavaElement javaElement : javaElements) {
+					copyToDestination(javaElement, targetRewriter, sourceRewriter.getRoot(), targetRewriter.getRoot());
 				}
 				ASTNodeDeleteUtil.markAsDeleted(javaElements, sourceRewriter, null);
 				Change targetCuChange= createCompilationUnitChange(targetRewriter);
@@ -2370,11 +2357,12 @@ public final class ReorgPolicyFactory {
 		@Override
 		protected RefactoringStatus verifyDestination(IJavaElement destination, int location) throws JavaModelException {
 			IJavaElement[] elements= getJavaElements();
-			for (int i= 0; i < elements.length; i++) {
+			for (IJavaElement element : elements) {
 				IJavaElement parent= destination.getParent();
 				while (parent != null) {
-					if (parent.equals(elements[i]))
+					if (parent.equals(element)) {
 						return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot);
+					}
 					parent= parent.getParent();
 				}
 			}
@@ -2404,11 +2392,10 @@ public final class ReorgPolicyFactory {
 
 				int destinationIndex= sortedChildren.indexOf(destination);
 
-				for (int i= 0; i < elements.length; i++) {
-					int elementIndex= sortedChildren.indexOf(elements[i]);
+				for (IJavaElement element : elements) {
+					int elementIndex= sortedChildren.indexOf(element);
 					if (location == IReorgDestination.LOCATION_AFTER && elementIndex == destinationIndex + 1)
 						return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot);
-
 					if (location == IReorgDestination.LOCATION_BEFORE && elementIndex == destinationIndex - 1)
 						return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot);
 				}
@@ -2445,18 +2432,20 @@ public final class ReorgPolicyFactory {
 		}
 
 		private boolean contains(IJavaElement[] elements, IJavaElement element) {
-			for (int i= 0; i < elements.length; i++) {
-				if (element.equals(elements[i]))
+			for (IJavaElement e : elements) {
+				if (element.equals(e)) {
 					return true;
+				}
 			}
 
 			return false;
 		}
 
 		private boolean allInSameParent(IJavaElement[] elements, IJavaElement parent) {
-			for (int i= 0; i < elements.length; i++) {
-				if (!elements[i].getParent().equals(parent))
+			for (IJavaElement element : elements) {
+				if (!element.getParent().equals(parent)) {
 					return false;
+				}
 			}
 
 			return true;
@@ -2913,8 +2902,7 @@ public final class ReorgPolicyFactory {
 		public boolean canEnable() throws JavaModelException {
 			if (!super.canEnable() || fPackageFragmentRoots.length == 0)
 				return false;
-			for (int i= 0; i < fPackageFragmentRoots.length; i++) {
-				IPackageFragmentRoot root= fPackageFragmentRoots[i];
+			for (IPackageFragmentRoot root : fPackageFragmentRoots) {
 				if (!(ReorgUtils.isSourceFolder(root) || root.isArchive() && !root.isExternal()))
 					return false;
 			}
@@ -2995,11 +2983,12 @@ public final class ReorgPolicyFactory {
 
 		private IProject getSingleProject() {
 			IProject result= null;
-			for (int index= 0; index < fPackageFragmentRoots.length; index++) {
-				if (result == null)
-					result= fPackageFragmentRoots[index].getJavaProject().getProject();
-				else if (!result.equals(fPackageFragmentRoots[index].getJavaProject().getProject()))
+			for (IPackageFragmentRoot root : fPackageFragmentRoots) {
+				if (result == null) {
+					result= root.getJavaProject().getProject();
+				} else if (!result.equals(root.getJavaProject().getProject())) {
 					return null;
+				}
 			}
 			return result;
 		}
@@ -3078,8 +3067,8 @@ public final class ReorgPolicyFactory {
 		}
 
 		private boolean isChildOfOrEqualToAnyFolder(IResource resource) {
-			for (int i= 0; i < fPackageFragmentRoots.length; i++) {
-				IResource fragmentRootResource= fPackageFragmentRoots[i].getResource();
+			for (IPackageFragmentRoot root : fPackageFragmentRoots) {
+				IResource fragmentRootResource= root.getResource();
 				if (fragmentRootResource.equals(resource) || ParentChecker.isDescendantOf(resource, fragmentRootResource))
 					return true;
 			}
@@ -3087,9 +3076,10 @@ public final class ReorgPolicyFactory {
 		}
 
 		protected boolean containsLinkedResources() {
-			for (int i= 0; i < fPackageFragmentRoots.length; i++) {
-				if (fPackageFragmentRoots[i].getResource().isLinked())
+			for (IPackageFragmentRoot root : fPackageFragmentRoots) {
+				if (root.getResource().isLinked()) {
 					return true;
+				}
 			}
 			return false;
 		}
@@ -3143,9 +3133,10 @@ public final class ReorgPolicyFactory {
 		public boolean canEnable() throws JavaModelException {
 			if (fPackageFragments.length == 0)
 				return false;
-			for (int i= 0; i < fPackageFragments.length; i++) {
-				if (JavaElementUtil.isDefaultPackage(fPackageFragments[i]) || fPackageFragments[i].isReadOnly())
+			for (IPackageFragment pack : fPackageFragments) {
+				if (JavaElementUtil.isDefaultPackage(pack) || pack.isReadOnly()) {
 					return false;
+				}
 			}
 			if (ReorgUtils.containsLinkedResources(fPackageFragments))
 				return false;
@@ -3232,11 +3223,12 @@ public final class ReorgPolicyFactory {
 
 		private IProject getSingleProject() {
 			IProject result= null;
-			for (int index= 0; index < fPackageFragments.length; index++) {
-				if (result == null)
-					result= fPackageFragments[index].getJavaProject().getProject();
-				else if (!result.equals(fPackageFragments[index].getJavaProject().getProject()))
+			for (IPackageFragment pack : fPackageFragments) {
+				if (result == null) {
+					result= pack.getJavaProject().getProject();
+				} else if (!result.equals(pack.getJavaProject().getProject())) {
 					return null;
+				}
 			}
 			return result;
 		}
@@ -3312,8 +3304,8 @@ public final class ReorgPolicyFactory {
 		}
 
 		private boolean isChildOfOrEqualToAnyFolder(IResource resource) {
-			for (int i= 0; i < fPackageFragments.length; i++) {
-				IFolder folder= (IFolder) fPackageFragments[i].getResource();
+			for (IPackageFragment pack : fPackageFragments) {
+				IFolder folder= (IFolder) pack.getResource();
 				if (folder.equals(resource) || ParentChecker.isDescendantOf(resource, folder))
 					return true;
 			}
@@ -3321,9 +3313,10 @@ public final class ReorgPolicyFactory {
 		}
 
 		protected boolean containsLinkedResources() {
-			for (int i= 0; i < fPackageFragments.length; i++) {
-				if (fPackageFragments[i].getResource().isLinked())
+			for (IPackageFragment pack : fPackageFragments) {
+				if (pack.getResource().isLinked()) {
 					return true;
+				}
 			}
 			return false;
 		}
@@ -3412,15 +3405,13 @@ public final class ReorgPolicyFactory {
 		@Override
 		public boolean canEnable() throws JavaModelException {
 			IResource[] resources= getResources();
-			for (int i= 0; i < resources.length; i++) {
-				IResource resource= resources[i];
+			for (IResource resource : resources) {
 				if (!resource.exists() || resource.isPhantom() || !resource.isAccessible())
 					return false;
 			}
 
 			IJavaElement[] javaElements= getJavaElements();
-			for (int i= 0; i < javaElements.length; i++) {
-				IJavaElement element= javaElements[i];
+			for (IJavaElement element : javaElements) {
 				if (!element.exists())
 					return false;
 			}
@@ -3436,11 +3427,10 @@ public final class ReorgPolicyFactory {
 		public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context, IReorgQueries reorgQueries) throws CoreException {
 			Assert.isNotNull(reorgQueries);
 			ResourceChangeChecker checker= context.getChecker(ResourceChangeChecker.class);
-			IFile[] allModifiedFiles= getAllModifiedFiles();
 			RefactoringModifications modifications= getModifications();
 			IResourceChangeDescriptionFactory deltaFactory= checker.getDeltaFactory();
-			for (int i= 0; i < allModifiedFiles.length; i++) {
-				deltaFactory.change(allModifiedFiles[i]);
+			for (IFile file : getAllModifiedFiles()) {
+				deltaFactory.change(file);
 			}
 			if (modifications != null) {
 				modifications.buildDelta(deltaFactory);
@@ -3681,9 +3671,9 @@ public final class ReorgPolicyFactory {
 			if (!super.canEnable() || fJavaElements.length == 0)
 				return false;
 
-			for (int i= 0; i < fJavaElements.length; i++) {
-				if (fJavaElements[i] instanceof IMember) {
-					IMember member= (IMember) fJavaElements[i];
+			for (IJavaElement javaElement : fJavaElements) {
+				if (javaElement instanceof IMember) {
+					IMember member= (IMember) javaElement;
 					// we can copy some binary members, but not all
 					if (member.isBinary() && member.getSourceRange() == null)
 						return false;
@@ -3701,13 +3691,10 @@ public final class ReorgPolicyFactory {
 		private void copyImportsToDestination(IImportContainer container, ASTRewrite rewrite, CompilationUnit sourceCuNode, CompilationUnit destinationCuNode) throws JavaModelException {
 			ListRewrite listRewrite= rewrite.getListRewrite(destinationCuNode, CompilationUnit.IMPORTS_PROPERTY);
 
-			IJavaElement[] importDeclarations= container.getChildren();
-			for (int i= 0; i < importDeclarations.length; i++) {
-				IImportDeclaration declaration= (IImportDeclaration) importDeclarations[i];
-
+			for (IJavaElement importDeclaration : container.getChildren()) {
+				IImportDeclaration declaration= (IImportDeclaration) importDeclaration;
 				ImportDeclaration sourceNode= ASTNodeSearchUtil.getImportDeclarationNode(declaration, sourceCuNode);
 				ImportDeclaration copiedNode= (ImportDeclaration) ASTNode.copySubtree(rewrite.getAST(), sourceNode);
-
 				if (getLocation() == IReorgDestination.LOCATION_BEFORE) {
 					listRewrite.insertFirst(copiedNode, null);
 				} else {
@@ -3955,11 +3942,12 @@ public final class ReorgPolicyFactory {
 
 		private IProject getSingleProject() {
 			IProject result= null;
-			for (int index= 0; index < fJavaElements.length; index++) {
-				if (result == null)
-					result= fJavaElements[index].getJavaProject().getProject();
-				else if (!result.equals(fJavaElements[index].getJavaProject().getProject()))
+			for (IJavaElement javaElement : fJavaElements) {
+				if (result == null) {
+					result= javaElement.getJavaProject().getProject();
+				} else if (!result.equals(javaElement.getJavaProject().getProject())) {
 					return null;
+				}
 			}
 			return result;
 		}
@@ -4137,9 +4125,10 @@ public final class ReorgPolicyFactory {
 	private static final String UNUSED_STRING= "unused"; //$NON-NLS-1$
 
 	private static boolean containsNull(Object[] objects) {
-		for (int i= 0; i < objects.length; i++) {
-			if (objects[i] == null)
+		for (Object object : objects) {
+			if (object == null) {
 				return true;
+			}
 		}
 		return false;
 	}
@@ -4296,9 +4285,9 @@ public final class ReorgPolicyFactory {
 	}
 
 	private static boolean hasAnonymousClassDeclarations(IJavaElement[] javaElements) throws JavaModelException {
-		for (int i= 0; i < javaElements.length; i++) {
-			if (javaElements[i] instanceof IType) {
-				IType type= (IType) javaElements[i];
+		for (IJavaElement javaElement : javaElements) {
+			if (javaElement instanceof IType) {
+				IType type= (IType) javaElement;
 				if (type.isAnonymous())
 					return true;
 			}
@@ -4307,27 +4296,31 @@ public final class ReorgPolicyFactory {
 	}
 
 	private static boolean hasElementsSmallerThanCuOrClassFile(IJavaElement[] javaElements) {
-		for (int i= 0; i < javaElements.length; i++) {
-			if (ReorgUtils.isInsideCompilationUnit(javaElements[i]))
+		for (IJavaElement javaElement : javaElements) {
+			if (ReorgUtils.isInsideCompilationUnit(javaElement)) {
 				return true;
-			if (ReorgUtils.isInsideClassFile(javaElements[i]))
+			}
+			if (ReorgUtils.isInsideClassFile(javaElement)) {
 				return true;
+			}
 		}
 		return false;
 	}
 
 	private static boolean hasOnlyImportDeclarations(IJavaElement[] javaElements) {
-		for (int i= 0; i < javaElements.length; i++) {
-			if (javaElements[i].getElementType() != IJavaElement.IMPORT_DECLARATION)
+		for (IJavaElement javaElement : javaElements) {
+			if (javaElement.getElementType() != IJavaElement.IMPORT_DECLARATION) {
 				return false;
+			}
 		}
 		return true;
 	}
 
 	private static boolean hasOnlyMembers(IJavaElement[] javaElements) {
-		for (int i= 0; i < javaElements.length; i++) {
-			if (!(javaElements[i] instanceof IMember))
+		for (IJavaElement javaElement : javaElements) {
+			if (!(javaElement instanceof IMember)) {
 				return false;
+			}
 		}
 		return true;
 	}
@@ -4408,9 +4401,7 @@ public final class ReorgPolicyFactory {
 	public static void storeCreateTargetExecutionLog(String project, Map<String, String> arguments, CreateTargetExecutionLog log) {
 		if (log != null) {
 			final StringBuilder buffer= new StringBuilder(64);
-			final Object[] selections= log.getSelectedElements();
-			for (int index= 0; index < selections.length; index++) {
-				final Object selection= selections[index];
+			for (Object selection : log.getSelectedElements()) {
 				if (selection != null) {
 					final Object created= log.getCreatedElement(selection);
 					if (created != null) {
@@ -4447,8 +4438,7 @@ public final class ReorgPolicyFactory {
 			set.addAll(Arrays.asList(log.getProcessedElements()));
 			set.addAll(Arrays.asList(log.getRenamedElements()));
 			final StringBuilder buffer= new StringBuilder(64);
-			for (final Iterator<Object> iterator= set.iterator(); iterator.hasNext();) {
-				final Object object= iterator.next();
+			for (Object object : set) {
 				if (storeLogElement(buffer, project, object)) {
 					buffer.append(DELIMITER_ELEMENT);
 					buffer.append(log.isProcessed(object));

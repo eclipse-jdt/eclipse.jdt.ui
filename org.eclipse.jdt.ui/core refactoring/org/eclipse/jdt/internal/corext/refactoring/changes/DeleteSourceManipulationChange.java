@@ -111,9 +111,9 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 		} else if (element instanceof IPackageFragment) {
 			ICompilationUnit[] units= ((IPackageFragment)element).getCompilationUnits();
 			pm.beginTask("", units.length + 1); //$NON-NLS-1$
-			for (int i = 0; i < units.length; i++) {
+			for (ICompilationUnit unit : units) {
 				// fix https://bugs.eclipse.org/bugs/show_bug.cgi?id=66835
-				saveCUnitIfNeeded(units[i], new SubProgressMonitor(pm, 1));
+				saveCUnitIfNeeded(unit, new SubProgressMonitor(pm, 1));
 			}
 			element.delete(false, new SubProgressMonitor(pm, 1));
 			return new NullChange(); // caveat: real undo implemented by UndoablePackageDeleteChange

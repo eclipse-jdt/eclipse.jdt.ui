@@ -319,11 +319,10 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 		try {
 			if (fIntermediaryType != null) {
 				IMethod[] toCheck= fIntermediaryType.getMethods();
-				for (int i= 0; i < toCheck.length; i++) {
-					IMethod method= toCheck[i];
+				for (IMethod method : toCheck) {
 					if (method.getElementName().equals(fIntermediaryMethodName))
 						return RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.IntroduceIndirectionRefactoring_duplicate_method_name_in_declaring_type_error,
-								BasicElementLabels.getJavaElementName(fIntermediaryMethodName)));
+							BasicElementLabels.getJavaElementName(fIntermediaryMethodName)));
 				}
 			}
 		} catch (JavaModelException e) {
@@ -647,14 +646,10 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 
 		int ticksPerCU= references.length == 0 ? 0 : 70 / references.length;
 
-		for (int i= 0; i < references.length; i++) {
-			SearchResultGroup group= references[i];
+		for (SearchResultGroup group : references) {
 			SearchMatch[] searchResults= group.getSearchResults();
 			CompilationUnitRewrite currentCURewrite= getCachedCURewrite(group.getCompilationUnit());
-
-			for (int j= 0; j < searchResults.length; j++) {
-
-				SearchMatch match= searchResults[j];
+			for (SearchMatch match : searchResults) {
 				if (match.isInsideDocComment())
 					continue;
 
@@ -693,10 +688,8 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 				if (monitor.isCanceled())
 					throw new OperationCanceledException();
 			}
-
 			if (!isRewriteKept(group.getCompilationUnit()))
 				createChangeAndDiscardRewrite(group.getCompilationUnit());
-
 			monitor.worked(ticksPerCU);
 		}
 
@@ -721,11 +714,10 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 		ITypeBinding[] highestAndSupers= getTypeAndAllSuperTypes(highest);
 
 		ITypeBinding foundBinding= null;
-		for (int i1= 0; i1 < currentAndSupers.length; i1++) {
-			for (int i2= 0; i2 < highestAndSupers.length; i2++) {
-				if (highestAndSupers[i2].isEqualTo(currentAndSupers[i1])
-						&& (Bindings.findMethodInHierarchy(highestAndSupers[i2], fTargetMethodBinding.getName(), fTargetMethodBinding.getParameterTypes()) != null)) {
-					foundBinding= highestAndSupers[i2];
+		for (ITypeBinding currentAndSuper : currentAndSupers) {
+			for (ITypeBinding highestAndSuper : highestAndSupers) {
+				if (highestAndSuper.isEqualTo(currentAndSuper) && (Bindings.findMethodInHierarchy(highestAndSuper, fTargetMethodBinding.getName(), fTargetMethodBinding.getParameterTypes()) != null)) {
+					foundBinding= highestAndSuper;
 					break;
 				}
 			}
@@ -823,9 +815,9 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 			Type t= imRewrite.getImportRewrite().addImport(fIntermediaryFirstParameterType, imRewrite.getAST(), context, TypeLocation.PARAMETER);
 			if (fIntermediaryFirstParameterType.isGenericType()) {
 				ParameterizedType parameterized= imRewrite.getAST().newParameterizedType(t);
-				ITypeBinding[] typeParameters= fIntermediaryFirstParameterType.getTypeParameters();
-				for (int i= 0; i < typeParameters.length; i++)
-					parameterized.typeArguments().add(imRewrite.getImportRewrite().addImport(typeParameters[i], imRewrite.getAST()));
+				for (ITypeBinding typeParameter : fIntermediaryFirstParameterType.getTypeParameters()) {
+					parameterized.typeArguments().add(imRewrite.getImportRewrite().addImport(typeParameter, imRewrite.getAST()));
+				}
 				t= parameterized;
 			}
 			parameter.setType(t);
@@ -888,14 +880,14 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 		if (enclosing != null)
 			addTypeParameters(imRewrite, list, enclosing, context);
 
-		ITypeBinding[] typeParameters= parent.getTypeParameters();
-		for (int i= 0; i < typeParameters.length; i++) {
+		for (ITypeBinding typeParameter : parent.getTypeParameters()) {
 			TypeParameter ntp= imRewrite.getAST().newTypeParameter();
-			ntp.setName(imRewrite.getAST().newSimpleName(typeParameters[i].getName()));
-			ITypeBinding[] bounds= typeParameters[i].getTypeBounds();
-			for (int j= 0; j < bounds.length; j++)
-				if (!"java.lang.Object".equals(bounds[j].getQualifiedName())) //$NON-NLS-1$
-					ntp.typeBounds().add(imRewrite.getImportRewrite().addImport(bounds[j], imRewrite.getAST(), context, TypeLocation.TYPE_BOUND));
+			ntp.setName(imRewrite.getAST().newSimpleName(typeParameter.getName()));
+			for (ITypeBinding bound : typeParameter.getTypeBounds()) {
+				if (!"java.lang.Object".equals(bound.getQualifiedName())) { //$NON-NLS-1$
+					ntp.typeBounds().add(imRewrite.getImportRewrite().addImport(bound, imRewrite.getAST(), context, TypeLocation.TYPE_BOUND));
+				}
+			}
 			list.add(ntp);
 		}
 	}
@@ -912,9 +904,9 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 	}
 
 	private void copyInvocationParameters(MethodInvocation invocation, AST ast) throws JavaModelException {
-		String[] names= fTargetMethod.getParameterNames();
-		for (int i= 0; i < names.length; i++)
-			invocation.arguments().add(ast.newSimpleName(names[i]));
+		for (String name : fTargetMethod.getParameterNames()) {
+			invocation.arguments().add(ast.newSimpleName(name));
+		}
 	}
 
 	private void copyArguments(MethodDeclaration intermediary, CompilationUnitRewrite rew, ImportRewriteContext context) throws JavaModelException {
@@ -937,25 +929,21 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 	}
 
 	private void copyTypeParameters(MethodDeclaration intermediary, CompilationUnitRewrite rew,  ImportRewriteContext context) {
-		ITypeBinding[] typeParameters= fTargetMethodBinding.getTypeParameters();
-		for (int i= 0; i < typeParameters.length; i++) {
-			ITypeBinding current= typeParameters[i];
-
+		for (ITypeBinding current : fTargetMethodBinding.getTypeParameters()) {
 			TypeParameter parameter= rew.getAST().newTypeParameter();
 			parameter.setName(rew.getAST().newSimpleName(current.getName()));
-			ITypeBinding[] bounds= current.getTypeBounds();
-			for (int j= 0; j < bounds.length; j++)
-				if (!"java.lang.Object".equals(bounds[j].getQualifiedName())) //$NON-NLS-1$
-					parameter.typeBounds().add(rew.getImportRewrite().addImport(bounds[j], rew.getAST(), context, TypeLocation.TYPE_BOUND));
-
+			for (ITypeBinding bound : current.getTypeBounds()) {
+				if (!"java.lang.Object".equals(bound.getQualifiedName())) { //$NON-NLS-1$
+					parameter.typeBounds().add(rew.getImportRewrite().addImport(bound, rew.getAST(), context, TypeLocation.TYPE_BOUND));
+				}
+			}
 			intermediary.typeParameters().add(parameter);
 		}
 	}
 
 	private void copyExceptions(MethodDeclaration intermediary, CompilationUnitRewrite imRewrite,  ImportRewriteContext context) {
-		ITypeBinding[] exceptionTypes= fTargetMethodBinding.getExceptionTypes();
-		for (int i= 0; i < exceptionTypes.length; i++) {
-			Type exceptionType= imRewrite.getImportRewrite().addImport(exceptionTypes[i], imRewrite.getAST(), context, TypeLocation.EXCEPTION);
+		for (ITypeBinding typebinding : fTargetMethodBinding.getExceptionTypes()) {
+			Type exceptionType= imRewrite.getImportRewrite().addImport(typebinding, imRewrite.getAST(), context, TypeLocation.EXCEPTION);
 			intermediary.thrownExceptionTypes().add(exceptionType);
 		}
 	}
@@ -1092,10 +1080,11 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 	 * Helper method for finding an IMethod inside a binding hierarchy
 	 */
 	private IMethodBinding findMethodBindingInHierarchy(ITypeBinding currentTypeBinding, IMethod methodDeclaration) {
-		IMethodBinding[] bindings= currentTypeBinding.getDeclaredMethods();
-		for (int i= 0; i < bindings.length; i++)
-			if (methodDeclaration.equals(bindings[i].getJavaElement()))
-				return bindings[i];
+		for (IMethodBinding binding : currentTypeBinding.getDeclaredMethods()) {
+			if (methodDeclaration.equals(binding.getJavaElement())) {
+				return binding;
+			}
+		}
 
 		ITypeBinding superClass= currentTypeBinding.getSuperclass();
 		if (superClass != null) {
@@ -1103,9 +1092,8 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 			if (b != null)
 				return b;
 		}
-		ITypeBinding[] interfaces= currentTypeBinding.getInterfaces();
-		for (int i= 0; i < interfaces.length; i++) {
-			IMethodBinding b= findMethodBindingInHierarchy(interfaces[i], methodDeclaration);
+		for (ITypeBinding intf : currentTypeBinding.getInterfaces()) {
+			IMethodBinding b= findMethodBindingInHierarchy(intf, methodDeclaration);
 			if (b != null)
 				return b;
 		}
@@ -1123,9 +1111,8 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 
 	private void collectSuperTypes(ITypeBinding curr, List<ITypeBinding> list) {
 		if (list.add(curr.getTypeDeclaration())) {
-			ITypeBinding[] interfaces= curr.getInterfaces();
-			for (int i= 0; i < interfaces.length; i++) {
-				collectSuperTypes(interfaces[i], list);
+			for (ITypeBinding intf : curr.getInterfaces()) {
+				collectSuperTypes(intf, list);
 			}
 			ITypeBinding superClass= curr.getSuperclass();
 			if (superClass != null) {

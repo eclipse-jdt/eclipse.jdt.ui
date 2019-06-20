@@ -33,8 +33,7 @@ public class Changes {
 	}
 
 	private static void getModifiedFiles(List<IFile> result, Change[] changes) {
-		for (int i= 0; i < changes.length; i++) {
-			Change change= changes[i];
+		for (Change change : changes) {
 			Object modifiedElement= change.getModifiedElement();
 			if (modifiedElement instanceof IAdaptable) {
 				IFile file= ((IAdaptable)modifiedElement).getAdapter(IFile.class);

@@ -174,9 +174,8 @@ public class NLSAccessorFieldRenameParticipant extends RenameParticipant {
 		if (!importsOSGIUtil(unit))
 			return false;
 
-		IInitializer[] initializers= type.getInitializers();
-		for (int i= 0; i < initializers.length; i++) {
-			if (Modifier.isStatic(initializers[0].getFlags()))
+		for (IInitializer initializer : type.getInitializers()) {
+			if (Modifier.isStatic(initializer.getFlags()))
 				return true;
 		}
 
@@ -184,19 +183,20 @@ public class NLSAccessorFieldRenameParticipant extends RenameParticipant {
 	}
 
 	private static IField getBundleNameField(IField[] fields) {
-		for (int i= 0; i < fields.length; i++) {
-			if ("BUNDLE_NAME".equals(fields[i].getElementName())) //$NON-NLS-1$
-				return fields[i];
+		for (IField field : fields) {
+			if ("BUNDLE_NAME".equals(field.getElementName())) { //$NON-NLS-1$
+				return field;
+			}
 		}
 
 		return null;
 	}
 
 	private static boolean importsOSGIUtil(ICompilationUnit unit) throws JavaModelException {
-		IImportDeclaration[] imports= unit.getImports();
-		for (int i= 0; i < imports.length; i++) {
-			if (imports[i].getElementName().startsWith("org.eclipse.osgi.util.")) //$NON-NLS-1$
+		for (IImportDeclaration importDecl : unit.getImports()) {
+			if (importDecl.getElementName().startsWith("org.eclipse.osgi.util.")) { //$NON-NLS-1$
 				return true;
+			}
 		}
 
 		return false;

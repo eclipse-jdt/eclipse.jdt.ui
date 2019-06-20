@@ -333,15 +333,11 @@ public class NLSHintHelper {
 	}
 
 	public static IPackageFragment getResourceBundlePackage(IJavaProject javaProject, String packageName, String resourceName) throws JavaModelException {
-		IPackageFragmentRoot[] allRoots= javaProject.getAllPackageFragmentRoots();
-		for (int i= 0; i < allRoots.length; i++) {
-			IPackageFragmentRoot root= allRoots[i];
+		for (IPackageFragmentRoot root : javaProject.getAllPackageFragmentRoots()) {
 			if (root.getKind() == IPackageFragmentRoot.K_SOURCE) {
 				IPackageFragment packageFragment= root.getPackageFragment(packageName);
 				if (packageFragment.exists()) {
-					Object[] resources= packageFragment.isDefaultPackage() ? root.getNonJavaResources() : packageFragment.getNonJavaResources();
-					for (int j= 0; j < resources.length; j++) {
-						Object object= resources[j];
+					for (Object object : packageFragment.isDefaultPackage() ? root.getNonJavaResources() : packageFragment.getNonJavaResources()) {
 						if (object instanceof IFile) {
 							IFile file= (IFile) object;
 							if (file.getName().equals(resourceName)) {
@@ -371,9 +367,7 @@ public class NLSHintHelper {
 	}
 
 	public static IStorage getResourceBundle(IJavaProject javaProject, String packageName, String resourceName) throws JavaModelException {
-		IPackageFragmentRoot[] allRoots= javaProject.getAllPackageFragmentRoots();
-		for (int i= 0; i < allRoots.length; i++) {
-			IPackageFragmentRoot root= allRoots[i];
+		for (IPackageFragmentRoot root : javaProject.getAllPackageFragmentRoots()) {
 			if (root.getKind() == IPackageFragmentRoot.K_SOURCE) {
 				IStorage storage= getResourceBundle(root, packageName, resourceName);
 				if (storage != null)
@@ -386,9 +380,7 @@ public class NLSHintHelper {
 	public static IStorage getResourceBundle(IPackageFragmentRoot root, String packageName, String resourceName) throws JavaModelException {
 		IPackageFragment packageFragment= root.getPackageFragment(packageName);
 		if (packageFragment.exists()) {
-			Object[] resources= packageFragment.isDefaultPackage() ? root.getNonJavaResources() : packageFragment.getNonJavaResources();
-			for (int j= 0; j < resources.length; j++) {
-				Object object= resources[j];
+			for (Object object : packageFragment.isDefaultPackage() ? root.getNonJavaResources() : packageFragment.getNonJavaResources()) {
 				if (JavaModelUtil.isOpenableStorage(object)) {
 					IStorage storage= (IStorage)object;
 					if (storage.getName().equals(resourceName)) {

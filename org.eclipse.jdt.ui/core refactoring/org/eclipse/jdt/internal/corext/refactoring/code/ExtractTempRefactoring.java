@@ -177,8 +177,8 @@ public class ExtractTempRefactoring extends Refactoring {
 
 	private static boolean allArraysEqual(ASTNode[][] arrays, int position) {
 		Object element= arrays[0][position];
-		for (int i= 0; i < arrays.length; i++) {
-			Object[] array= arrays[i];
+		for (ASTNode[] a : arrays) {
+			Object[] array= a;
 			if (!element.equals(array[position]))
 				return false;
 		}
@@ -326,9 +326,10 @@ public class ExtractTempRefactoring extends Refactoring {
 
 	private static IASTFragment[] retainOnlyReplacableMatches(IASTFragment[] allMatches) {
 		List<IASTFragment> result= new ArrayList<>(allMatches.length);
-		for (int i= 0; i < allMatches.length; i++) {
-			if (canReplace(allMatches[i]))
-				result.add(allMatches[i]);
+		for (IASTFragment match : allMatches) {
+			if (canReplace(match)) {
+				result.add(match);
+			}
 		}
 		return result.toArray(new IASTFragment[result.size()]);
 	}
@@ -429,8 +430,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		//TODO: should not have to prune duplicates here...
 		ASTRewrite rewrite= fCURewrite.getASTRewrite();
 		HashSet<IASTFragment> seen= new HashSet<>();
-		for (int i= 0; i < fragmentsToReplace.length; i++) {
-			IASTFragment fragment= fragmentsToReplace[i];
+		for (IASTFragment fragment : fragmentsToReplace) {
 			if (! seen.add(fragment))
 				continue;
 			SimpleName tempName= fCURewrite.getAST().newSimpleName(fTempName);
@@ -597,9 +597,8 @@ public class ExtractTempRefactoring extends Refactoring {
 
 	private RefactoringStatus checkMatchingFragments() throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
-		IASTFragment[] matchingFragments= getMatchingFragments();
-		for (int i= 0; i < matchingFragments.length; i++) {
-			ASTNode node= matchingFragments[i].getAssociatedNode();
+		for (IASTFragment matchingFragment : getMatchingFragments()) {
+			ASTNode node= matchingFragment.getAssociatedNode();
 			if (isLeftValue(node) && !isReferringToLocalVariableFromFor((Expression) node)) {
 				String msg= RefactoringCoreMessages.ExtractTempRefactoring_assigned_to;
 				result.addWarning(msg, JavaStatusContext.create(fCu, node));

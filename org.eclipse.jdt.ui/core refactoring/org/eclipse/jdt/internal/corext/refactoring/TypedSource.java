@@ -150,8 +150,8 @@ public class TypedSource {
 	private static TypedSource[] createTypedSourcesForImportContainer(SourceTuple tuple, IImportContainer container) throws JavaModelException, CoreException {
 		IJavaElement[] imports= container.getChildren();
 		List<TypedSource> result= new ArrayList<>(imports.length);
-		for (int i= 0; i < imports.length; i++) {
-			result.addAll(Arrays.asList(createTypedSources(imports[i], tuple)));
+		for (IJavaElement importedElement : imports) {
+			result.addAll(Arrays.asList(createTypedSources(importedElement, tuple)));
 		}
 		return result.toArray(new TypedSource[result.size()]);
 	}

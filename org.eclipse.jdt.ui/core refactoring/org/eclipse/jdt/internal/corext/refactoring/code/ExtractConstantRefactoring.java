@@ -598,9 +598,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 		ASTRewrite astRewrite= fCuRewrite.getASTRewrite();
 		AST ast= astRewrite.getAST();
 
-		IASTFragment[] fragmentsToReplace= getFragmentsToReplace();
-		for (int i= 0; i < fragmentsToReplace.length; i++) {
-			IASTFragment fragment= fragmentsToReplace[i];
+		for (IASTFragment fragment : getFragmentsToReplace()) {
 			ASTNode node= fragment.getAssociatedNode();
 			boolean inTypeDeclarationAnnotation= isInTypeDeclarationAnnotation(node);
 			if (inTypeDeclarationAnnotation && JdtFlags.VISIBILITY_STRING_PRIVATE == getVisibility())
@@ -778,9 +776,10 @@ public class ExtractConstantRefactoring extends Refactoring {
 	// !! - like one in ExtractTempRefactoring
 	private static IASTFragment[] retainOnlyReplacableMatches(IASTFragment[] allMatches) {
 		List<IASTFragment> result= new ArrayList<>(allMatches.length);
-		for (int i= 0; i < allMatches.length; i++) {
-			if (canReplace(allMatches[i]))
-				result.add(allMatches[i]);
+		for (IASTFragment match : allMatches) {
+			if (canReplace(match)) {
+				result.add(match);
+			}
 		}
 		return result.toArray(new IASTFragment[result.size()]);
 	}

@@ -182,8 +182,8 @@ public class ExtractMethodRefactoring extends Refactoring {
 		private Set<SimpleName> fIgnore= new HashSet<>();
 		public static Set<String> perform(ASTNode[] nodes) {
 			UsedNamesCollector collector= new UsedNamesCollector();
-			for (int i= 0; i < nodes.length; i++) {
-				nodes[i].accept(collector);
+			for (ASTNode node : nodes) {
+				node.accept(collector);
 			}
 			return collector.result;
 		}
@@ -415,11 +415,9 @@ public class ExtractMethodRefactoring extends Refactoring {
 	 */
 	public RefactoringStatus checkParameterNames() {
 		RefactoringStatus result= new RefactoringStatus();
-		for (Iterator<ParameterInfo> iter= fParameterInfos.iterator(); iter.hasNext();) {
-			ParameterInfo parameter= iter.next();
+		for (ParameterInfo parameter : fParameterInfos) {
 			result.merge(Checks.checkIdentifier(parameter.getNewName(), fCUnit));
-			for (Iterator<ParameterInfo> others= fParameterInfos.iterator(); others.hasNext();) {
-				ParameterInfo other= others.next();
+			for (ParameterInfo other : fParameterInfos) {
 				if (parameter != other && other.getNewName().equals(parameter.getNewName())) {
 					result.addError(Messages.format(
 						RefactoringCoreMessages.ExtractMethodRefactoring_error_sameParameter,
@@ -558,9 +556,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 	}
 
 	private void replaceBranches(final CompilationUnitChange result) {
-		ASTNode[] selectedNodes= fAnalyzer.getSelectedNodes();
-		for (int i= 0; i < selectedNodes.length; i++) {
-			ASTNode astNode= selectedNodes[i];
+		for (ASTNode astNode : fAnalyzer.getSelectedNodes()) {
 			astNode.accept(new ASTVisitor() {
 				private LinkedList<String> fOpenLoopLabels= new LinkedList<>();
 
@@ -775,8 +771,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 
 	private void initializeUsedNames() {
 		fUsedNames= UsedNamesCollector.perform(fAnalyzer.getSelectedNodes());
-		for (Iterator<ParameterInfo> iter= fParameterInfos.iterator(); iter.hasNext();) {
-			ParameterInfo parameter= iter.next();
+		for (ParameterInfo parameter : fParameterInfos) {
 			fUsedNames.remove(parameter.getOldName());
 		}
 	}
@@ -952,9 +947,8 @@ public class ExtractMethodRefactoring extends Refactoring {
 	private ASTNode[] createCallNodes(SnippetFinder.Match duplicate, int modifiers) {
 		List<ASTNode> result= new ArrayList<>(2);
 
-		IVariableBinding[] locals= fAnalyzer.getCallerLocals();
-		for (int i= 0; i < locals.length; i++) {
-			result.add(createDeclaration(locals[i], null));
+		for (IVariableBinding local : fAnalyzer.getCallerLocals()) {
+			result.add(createDeclaration(local, null));
 		}
 
 		MethodInvocation invocation= fAST.newMethodInvocation();
@@ -1123,15 +1117,15 @@ public class ExtractMethodRefactoring extends Refactoring {
 			modifiers|= Modifier.DEFAULT;
 		}
 
-		ITypeBinding[] typeVariables= computeLocalTypeVariables(modifiers);
 		List<TypeParameter> typeParameters= result.typeParameters();
-		for (int i= 0; i < typeVariables.length; i++) {
+		for (ITypeBinding typeVariable : computeLocalTypeVariables(modifiers)) {
 			TypeParameter parameter= fAST.newTypeParameter();
-			parameter.setName(fAST.newSimpleName(typeVariables[i].getName()));
-			ITypeBinding[] bounds= typeVariables[i].getTypeBounds();
-			for (int j= 0; j < bounds.length; j++)
-				if (!"java.lang.Object".equals(bounds[j].getQualifiedName())) //$NON-NLS-1$
-					parameter.typeBounds().add(fImportRewriter.addImport(bounds[j], fAST));
+			parameter.setName(fAST.newSimpleName(typeVariable.getName()));
+			for (ITypeBinding bound : typeVariable.getTypeBounds()) {
+				if (!"java.lang.Object".equals(bound.getQualifiedName())) { //$NON-NLS-1$
+					parameter.typeBounds().add(fImportRewriter.addImport(bound, fAST));
+				}
+			}
 			typeParameters.add(parameter);
 		}
 
@@ -1154,9 +1148,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		}
 
 		List<Type> exceptions= result.thrownExceptionTypes();
-		ITypeBinding[] exceptionTypes= fAnalyzer.getExceptions(fThrowRuntimeExceptions);
-		for (int i= 0; i < exceptionTypes.length; i++) {
-			ITypeBinding exceptionType= exceptionTypes[i];
+		for (ITypeBinding exceptionType : fAnalyzer.getExceptions(fThrowRuntimeExceptions)) {
 			exceptions.add(fImportRewriter.addImport(exceptionType, fAST, context, TypeLocation.EXCEPTION));
 		}
 		return result;
@@ -1168,9 +1160,8 @@ public class ExtractMethodRefactoring extends Refactoring {
 			ParameterInfo info= fParameterInfos.get(i);
 			processVariable(result, info.getOldBinding(), modifier);
 		}
-		IVariableBinding[] methodLocals= fAnalyzer.getMethodLocals();
-		for (int i= 0; i < methodLocals.length; i++) {
-			processVariable(result, methodLocals[i], modifier);
+		for (IVariableBinding methodLocal : fAnalyzer.getMethodLocals()) {
+			processVariable(result, methodLocal, modifier);
 		}
 		return result.toArray(new ITypeBinding[result.size()]);
 	}
@@ -1180,9 +1171,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			return;
 		ITypeBinding binding= variable.getType();
 		if (binding != null && binding.isParameterizedType()) {
-			ITypeBinding[] typeArgs= binding.getTypeArguments();
-			for (int args= 0; args < typeArgs.length; args++) {
-				ITypeBinding arg= typeArgs[args];
+			for (ITypeBinding arg : binding.getTypeArguments()) {
 				if (arg.isTypeVariable() && !result.contains(arg)) {
 					ASTNode decl= fRoot.findDeclaringNode(arg);
 					if (decl != null) {
@@ -1213,20 +1202,16 @@ public class ExtractMethodRefactoring extends Refactoring {
 
 		// Locals that are not passed as an arguments since the extracted method only
 		// writes to them
-		IVariableBinding[] methodLocals= fAnalyzer.getMethodLocals();
-		for (int i= 0; i < methodLocals.length; i++) {
-			if (methodLocals[i] != null) {
-				result.statements().add(createDeclaration(methodLocals[i], null));
+		for (IVariableBinding methodLocal : fAnalyzer.getMethodLocals()) {
+			if (methodLocal != null) {
+				result.statements().add(createDeclaration(methodLocal, null));
 			}
 		}
-
-		for (Iterator<ParameterInfo> iter= fParameterInfos.iterator(); iter.hasNext();) {
-			ParameterInfo parameter= iter.next();
+		for (ParameterInfo parameter : fParameterInfos) {
 			if (parameter.isRenamed()) {
-				for (int n= 0; n < selectedNodes.length; n++) {
-					SimpleName[] oldNames= LinkedNodeFinder.findByBinding(selectedNodes[n], parameter.getOldBinding());
-					for (int i= 0; i < oldNames.length; i++) {
-						fRewriter.replace(oldNames[i], fAST.newSimpleName(parameter.getNewName()), null);
+				for (ASTNode selectedNode : selectedNodes) {
+					for (SimpleName oldName : LinkedNodeFinder.findByBinding(selectedNode, parameter.getOldBinding())) {
+						fRewriter.replace(oldName, fAST.newSimpleName(parameter.getNewName()), null);
 					}
 				}
 			}
@@ -1287,8 +1272,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 	}
 
 	private String getName(IVariableBinding binding) {
-		for (Iterator<ParameterInfo> iter= fParameterInfos.iterator(); iter.hasNext();) {
-			ParameterInfo info= iter.next();
+		for (ParameterInfo info : fParameterInfos) {
 			if (Bindings.equals(binding, info.getOldBinding())) {
 				return info.getNewName();
 			}

@@ -113,9 +113,11 @@ public class TypeContextChecker {
 
 		public RefactoringStatus[] checkAndResolveMethodTypes() throws CoreException {
 			RefactoringStatus[] results= new MethodTypesSyntaxChecker(fMethod, fParameterInfos, fReturnTypeInfo).checkSyntax();
-			for (int i= 0; i < results.length; i++)
-				if (results[i] != null && results[i].hasFatalError())
+			for (RefactoringStatus result : results) {
+				if (result != null && result.hasFatalError()) {
 					return results;
+				}
+			}
 
 			int parameterCount= fParameterInfos.size();
 			String[] types= new String[parameterCount + 1];
@@ -197,11 +199,10 @@ public class TypeContextChecker {
 						continue;
 					}
 					results[i]= new RefactoringStatus();
-					IProblem[] problems= ASTNodes.getProblems(type, ASTNodes.NODE_ONLY, ASTNodes.PROBLEMS);
-					if (problems.length > 0) {
-						for (int p= 0; p < problems.length; p++)
-							if (isError(problems[p], type))
-								results[i].addError(problems[p].getMessage());
+					for (IProblem problem : ASTNodes.getProblems(type, ASTNodes.NODE_ONLY, ASTNodes.PROBLEMS)) {
+						if (isError(problem, type)) {
+							results[i].addError(problem.getMessage());
+						}
 					}
 					ITypeBinding binding= handleBug84585(type.resolveBinding());
 					if (firstPass && (binding == null || binding.isRecovered())) {
@@ -454,12 +455,9 @@ public class TypeContextChecker {
 		Type type= (Type)selected;
 		if (MethodTypesSyntaxChecker.isVoidArrayType(type))
 			return null;
-		IProblem[] problems= ASTNodes.getProblems(type, ASTNodes.NODE_ONLY, ASTNodes.PROBLEMS);
-		if (problems.length > 0) {
-			for (int i= 0; i < problems.length; i++)
-				problemsCollector.add(problems[i].getMessage());
+		for (IProblem problem : ASTNodes.getProblems(type, ASTNodes.NODE_ONLY, ASTNodes.PROBLEMS)) {
+			problemsCollector.add(problem.getMessage());
 		}
-
 		String typeNodeRange= cuBuff.substring(type.getStartPosition(), ASTNodes.getExclusiveEnd(type));
 		if (typeString.equals(typeNodeRange))
 			return type;
@@ -544,8 +542,7 @@ public class TypeContextChecker {
 
 	private static void fillWithTypeStubs(final StringBuilder bufBefore, final StringBuilder bufAfter, final int focalPosition, List<? extends BodyDeclaration> types) {
 		StringBuilder buf;
-		for (Iterator<? extends BodyDeclaration> iter= types.iterator(); iter.hasNext();) {
-			BodyDeclaration bodyDeclaration= iter.next();
+		for (BodyDeclaration bodyDeclaration : types) {
 			if (! (bodyDeclaration instanceof AbstractTypeDeclaration)) {
 				//account for local classes:
 				if (! (bodyDeclaration instanceof MethodDeclaration))

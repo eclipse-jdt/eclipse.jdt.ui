@@ -117,7 +117,6 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTy
 import org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeRefactoringProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ISourceConstraintVariable;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstraintVariable;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
@@ -596,9 +595,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 			boolean annotations= fAnnotations && !JavaModelUtil.isVersionLessThan(project.getOption(JavaCore.COMPILER_SOURCE, true), JavaCore.VERSION_1_6);
 			boolean inheritNullAnnotations= JavaCore.ENABLED.equals(project.getOption(JavaCore.COMPILER_INHERIT_NULL_ANNOTATIONS, true));
 			boolean javadoc= project.getOption(JavaCore.COMPILER_DOC_COMMENT_SUPPORT, true).equals(JavaCore.ENABLED);
-			IMember member= null;
-			for (int index= 0; index < fMembers.length; index++) {
-				member= fMembers[index];
+			for (IMember member : fMembers) {
 				if (member instanceof IMethod) {
 					MethodDeclaration declaration= ASTNodeSearchUtil.getMethodDeclarationNode((IMethod) member, sourceRewrite.getRoot());
 					if (inheritNullAnnotations) {
@@ -733,8 +730,9 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 			Type type= ast.newSimpleType(ast.newSimpleName(fSuperName));
 			if (parameters.length > 0) {
 				final ParameterizedType parameterized= ast.newParameterizedType(type);
-				for (int index= 0; index < parameters.length; index++)
-					parameterized.typeArguments().add(ast.newSimpleType(ast.newSimpleName(parameters[index].getElementName())));
+				for (ITypeParameter parameter : parameters) {
+					parameterized.typeArguments().add(ast.newSimpleType(ast.newSimpleName(parameter.getElementName())));
+				}
 				type= parameterized;
 			}
 			final ASTRewrite rewriter= rewrite.getASTRewrite();
@@ -765,10 +763,10 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	 */
 	public final IMember[] getExtractableMembers() throws JavaModelException {
 		final List<IJavaElement> list= new ArrayList<>();
-		IJavaElement[] children= fSubType.getChildren();
-		for (int index= 0; index < children.length; index++) {
-			if (children[index] instanceof IMember && isExtractableMember((IMember) children[index]))
-				list.add(children[index]);
+		for (IJavaElement child : fSubType.getChildren()) {
+			if (child instanceof IMember && isExtractableMember((IMember) child)) {
+				list.add(child);
+			}
 		}
 		final IMember[] members= new IMember[list.size()];
 		list.toArray(members);
@@ -785,9 +783,9 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	protected final IField[] getExtractedFields(final ICompilationUnit unit) {
 		Assert.isNotNull(unit);
 		final List<IJavaElement> list= new ArrayList<>();
-		for (int index= 0; index < fMembers.length; index++) {
-			if (fMembers[index] instanceof IField) {
-				final IJavaElement element= JavaModelUtil.findInCompilationUnit(unit, fMembers[index]);
+		for (IMember member : fMembers) {
+			if (member instanceof IField) {
+				final IJavaElement element= JavaModelUtil.findInCompilationUnit(unit, member);
 				if (element instanceof IField)
 					list.add(element);
 			}
@@ -807,9 +805,9 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	protected final IMethod[] getExtractedMethods(final ICompilationUnit unit) throws JavaModelException {
 		Assert.isNotNull(unit);
 		final List<IJavaElement> list= new ArrayList<>();
-		for (int index= 0; index < fMembers.length; index++) {
-			if (fMembers[index] instanceof IMethod) {
-				final IJavaElement element= JavaModelUtil.findInCompilationUnit(unit, fMembers[index]);
+		for (IMember member : fMembers) {
+			if (member instanceof IMethod) {
+				final IJavaElement element= JavaModelUtil.findInCompilationUnit(unit, member);
 				if (element instanceof IMethod && !JdtFlags.isDefaultMethod((IMethod) element))
 					list.add(element);
 			}
@@ -982,12 +980,8 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 					subMonitor.beginTask("", collection.size() * 10); //$NON-NLS-1$
 					subMonitor.setTaskName(RefactoringCoreMessages.ExtractInterfaceProcessor_creating);
 					TType estimate= null;
-					ISourceConstraintVariable variable= null;
-					ITypeConstraintVariable constraint= null;
-					for (final Iterator<ITypeConstraintVariable> iterator= collection.iterator(); iterator.hasNext();) {
-						variable= iterator.next();
-						if (variable instanceof ITypeConstraintVariable) {
-							constraint= (ITypeConstraintVariable) variable;
+					for (ITypeConstraintVariable constraint : collection) {
+						if (constraint != null) {
 							estimate= (TType) constraint.getData(SuperTypeConstraintsSolver.DATA_TYPE_ESTIMATE);
 							if (estimate != null) {
 								final CompilationUnitRange range= constraint.getRange();
@@ -1081,11 +1075,11 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 							if (subBinding != null) {
 								String name= null;
 								ITypeBinding superBinding= null;
-								final ITypeBinding[] superBindings= subBinding.getInterfaces();
-								for (int index= 0; index < superBindings.length; index++) {
-									name= superBindings[index].getName();
-									if (name.startsWith(fSuperName) && superBindings[index].getTypeArguments().length == subBinding.getTypeParameters().length)
-										superBinding= superBindings[index];
+								for (ITypeBinding binding : subBinding.getInterfaces()) {
+									name= binding.getName();
+									if (name.startsWith(fSuperName) && binding.getTypeArguments().length == subBinding.getTypeParameters().length) {
+										superBinding= binding;
+									}
 								}
 								if (superBinding != null) {
 									solveSuperTypeConstraints(unit, node, subType, subBinding, superBinding, new SubProgressMonitor(monitor, 80), status);

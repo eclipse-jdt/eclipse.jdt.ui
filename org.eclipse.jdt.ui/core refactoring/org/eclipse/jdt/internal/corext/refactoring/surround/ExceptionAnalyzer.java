@@ -217,9 +217,8 @@ public class ExceptionAnalyzer extends AbstractExceptionAnalyzer {
 	private boolean handleExceptions(IMethodBinding binding, ASTNode node) {
 		if (binding == null)
 			return true;
-		ITypeBinding[] exceptions= binding.getExceptionTypes();
-		for (int i= 0; i < exceptions.length; i++) {
-			addException(exceptions[i], node.getAST());
+		for (ITypeBinding exception : binding.getExceptionTypes()) {
+			addException(exception, node.getAST());
 		}
 		return true;
 	}

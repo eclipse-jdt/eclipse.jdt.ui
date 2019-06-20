@@ -65,8 +65,7 @@ public class NLSSourceModifier {
 		change.setEdit(multiTextEdit);
 
 		boolean createImportForAccessor= true;
-		for (int i= 0; i < subs.length; i++) {
-			NLSSubstitution substitution= subs[i];
+		for (NLSSubstitution substitution : subs) {
 			int newState= substitution.getState();
 			if (newState == NLSSubstitution.EXTERNALIZED && createImportForAccessor) {
 				accessorClassName= sourceModification.createImportForAccessor(multiTextEdit, accessorClassName, accessorPackage, cu);
@@ -213,10 +212,10 @@ public class NLSSourceModifier {
 	}
 
 	private boolean isDelemiter(char ch) {
-		String[] delem= TextUtilities.DELIMITERS;
-		for (int i= 0; i < delem.length; i++) {
-			if (delem[i].length() == 1 && ch == delem[i].charAt(0))
+		for (String delim : TextUtilities.DELIMITERS) {
+			if (delim.length() == 1 && ch == delim.charAt(0)) {
 				return true;
+			}
 		}
 		return false;
 	}
@@ -227,9 +226,7 @@ public class NLSSourceModifier {
 	}
 
 	private static NLSElement findElement(NLSLine line, int position) {
-		NLSElement[] elements= line.getElements();
-		for (int i= 0; i < elements.length; i++) {
-			NLSElement element= elements[i];
+		for (NLSElement element : line.getElements()) {
 			if (isPositionInElement(element, position))
 				return element;
 		}

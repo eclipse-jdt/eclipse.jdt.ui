@@ -104,9 +104,8 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 			if (result != null)
 				return result;
 		}
-		final ITypeBinding[] bindings= type.getInterfaces();
-		for (int index= 0; index < bindings.length; index++) {
-			final ITypeBinding result= findTypeInHierarchy(bindings[index], name);
+		for (ITypeBinding b : type.getInterfaces()) {
+			final ITypeBinding result= findTypeInHierarchy(b, name);
 			if (result != null)
 				return result;
 		}

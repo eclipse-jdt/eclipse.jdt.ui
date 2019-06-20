@@ -150,20 +150,17 @@ public class AccessorClassModifier {
 		MultiTextEdit multiTextEdit= new MultiTextEdit();
 		change.setEdit(multiTextEdit);
 
-		for (int i= 0; i < substitutions.length; i++) {
-			NLSSubstitution substitution= substitutions[i];
+		for (NLSSubstitution substitution : substitutions) {
 			if (NLSPropertyFileModifier.doRemove(substitution, newKeyToSubstMap, oldKeyToSubstMap)) {
 				sourceModification.removeKey(substitution, change);
 			}
 		}
-		for (int i= 0; i < substitutions.length; i++) {
-			NLSSubstitution substitution= substitutions[i];
+		for (NLSSubstitution substitution : substitutions) {
 			if (substitution.isKeyRename() && NLSPropertyFileModifier.doReplace(substitution, newKeyToSubstMap, oldKeyToSubstMap)) {
 				sourceModification.renameKey(substitution, change);
 			}
 		}
-		for (int i= 0; i < substitutions.length; i++) {
-			NLSSubstitution substitution= substitutions[i];
+		for (NLSSubstitution substitution : substitutions) {
 			if (NLSPropertyFileModifier.doInsert(substitution, newKeyToSubstMap, oldKeyToSubstMap)) {
 				sourceModification.addKey(substitution, change);
 			}

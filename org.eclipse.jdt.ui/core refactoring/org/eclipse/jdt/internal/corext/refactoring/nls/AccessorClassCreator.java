@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 
 import com.ibm.icu.text.Collator;
@@ -227,8 +226,7 @@ public class AccessorClassCreator {
 	private String createStaticFields() {
 		HashSet<String> added= new HashSet<>();
 		List<NLSSubstitution> subs= new ArrayList<>();
-		for (int i= 0; i < fNLSSubstitutions.length; i++) {
-			NLSSubstitution substitution= fNLSSubstitutions[i];
+		for (NLSSubstitution substitution : fNLSSubstitutions) {
 			int newState= substitution.getState();
 			if ((substitution.hasStateChanged() || substitution.isAccessorRename())&& newState == NLSSubstitution.EXTERNALIZED) {
 				if (added.add(substitution.getKey()))
@@ -243,8 +241,7 @@ public class AccessorClassCreator {
 			}
 		});
 		StringBuilder buf= new StringBuilder();
-		for (Iterator<NLSSubstitution> iter= subs.iterator(); iter.hasNext();) {
-			NLSSubstitution element= iter.next();
+		for (NLSSubstitution element : subs) {
 			appendStaticField(buf, element);
 		}
 		return buf.toString();

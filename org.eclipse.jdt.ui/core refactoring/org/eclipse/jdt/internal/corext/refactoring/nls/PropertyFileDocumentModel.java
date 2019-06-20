@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 
 import com.ibm.icu.text.Collator;
@@ -32,12 +31,12 @@ import org.eclipse.jface.text.TextUtilities;
 
 import org.eclipse.ltk.core.refactoring.TextChange;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
+import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.util.Messages;
-import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileEscapes;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 public class PropertyFileDocumentModel {
 
@@ -63,8 +62,7 @@ public class PropertyFileDocumentModel {
 	 * @return the pair with the key or <b>null</b> if no such pair.
 	 */
     public KeyValuePair getKeyValuePair(String key) {
-    	for (int i= 0; i < fKeyValuePairs.size(); i++) {
-            KeyValuePairModell keyValuePair = fKeyValuePairs.get(i);
+    	for (KeyValuePairModell keyValuePair : fKeyValuePairs) {
             if (keyValuePair.getKey().equals(key)) {
             	return keyValuePair;
             }
@@ -124,9 +122,8 @@ public class PropertyFileDocumentModel {
 			}
         });
 
-        for (int i = 0; i < sorted.size(); i++) {
-            KeyValuePair curr= sorted.get(i);
-			InsertEdit insertEdit= insert(curr);
+        for (KeyValuePair curr : sorted) {
+            InsertEdit insertEdit= insert(curr);
 
             String message= Messages.format(NLSMessages.NLSPropertyFileModifier_add_entry, BasicElementLabels.getJavaElementName(curr.getKey()));
 			TextChangeCompatibility.addTextEdit(change, message, insertEdit);
@@ -134,30 +131,28 @@ public class PropertyFileDocumentModel {
     }
 
     public DeleteEdit remove(String key) {
-    	for (Iterator<KeyValuePairModell> iter = fKeyValuePairs.iterator(); iter.hasNext();) {
-            KeyValuePairModell keyValuePair = iter.next();
-            if (keyValuePair.fKey.equals(key)) {
-            	return new DeleteEdit(keyValuePair.fOffset, keyValuePair.getLength());
-            }
-        }
+		for (KeyValuePairModell keyValuePair : fKeyValuePairs) {
+			if (keyValuePair.fKey.equals(key)) {
+				return new DeleteEdit(keyValuePair.fOffset, keyValuePair.getLength());
+			}
+		}
         return null;
     }
 
     public ReplaceEdit replace(KeyValuePair toReplace, KeyValuePair replaceWith) {
-        for (Iterator<KeyValuePairModell> iter = fKeyValuePairs.iterator(); iter.hasNext();) {
-            KeyValuePairModell keyValuePair = iter.next();
-            if (keyValuePair.fKey.equals(toReplace.getKey())) {
-                String newText= new KeyValuePairModell(replaceWith).getKeyValueText();
-                return new ReplaceEdit(keyValuePair.fOffset, keyValuePair.getLength(), newText);
-            }
-        }
+		for (KeyValuePairModell keyValuePair : fKeyValuePairs) {
+			if (keyValuePair.fKey.equals(toReplace.getKey())) {
+				String newText= new KeyValuePairModell(replaceWith).getKeyValueText();
+				return new ReplaceEdit(keyValuePair.fOffset, keyValuePair.getLength(), newText);
+			}
+		}
         return null;
     }
 
     private int findInsertPosition(KeyValuePairModell keyValuePair) {
     	ArrayList<String> keys= new ArrayList<>();
-        for (int i= 0; i < fKeyValuePairs.size(); i++) {
-            KeyValuePairModell element = fKeyValuePairs.get(i);
+        for (KeyValuePairModell keyValuePairmodel : fKeyValuePairs) {
+            KeyValuePairModell element= keyValuePairmodel;
             if (! (element instanceof LastKeyValuePair))
             	keys.add(element.getKey());
         }

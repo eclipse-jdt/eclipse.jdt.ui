@@ -341,8 +341,9 @@ public final class SuperTypeConstraintsModel {
 				else {
 					final ConstraintVariable2[] variables= second.getContributingVariables();
 					first.addAll(variables);
-					for (int index= 0; index < variables.length; index++)
-						variables[index].setTypeEquivalenceSet(first);
+					for (ConstraintVariable2 variable : variables) {
+						variable.setTypeEquivalenceSet(first);
+					}
 				}
 			}
 		}

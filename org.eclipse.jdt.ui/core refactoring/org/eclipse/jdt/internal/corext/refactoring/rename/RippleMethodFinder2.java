@@ -290,10 +290,8 @@ public class RippleMethodFinder2 {
 				IType alienType= iter.next();
 				IMethod alienMethod= fTypeToMethod.get(alienType);
 				ITypeHierarchy hierarchy= hierarchy(pm, owner, alienType);
-				IType[] allSubtypes= hierarchy.getAllSubtypes(alienType);
 
-				for (int i= 0; i < allSubtypes.length; i++) {
-					IType subtype= allSubtypes[i];
+				for (IType subtype : hierarchy.getAllSubtypes(alienType)) {
 					if (relatedSubTypes.contains(subtype)) {
 						if (JavaModelUtil.isVisibleInHierarchy(alienMethod, subtype.getPackageFragment())) {
 							marriedAlienTypeReps.add(fUnionFind.find(alienType));
@@ -490,9 +488,7 @@ public class RippleMethodFinder2 {
 	}
 
 	private void uniteWithSupertypes(IType anchor, IType type) throws JavaModelException {
-		IType[] supertypes= fHierarchy.getSupertypes(type);
-		for (int i= 0; i < supertypes.length; i++) {
-			IType supertype= supertypes[i];
+		for (IType supertype : fHierarchy.getSupertypes(type)) {
 			IType superRep= fUnionFind.find(supertype);
 			if (superRep == null) {
 				//Type doesn't declare method, but maybe supertypes?

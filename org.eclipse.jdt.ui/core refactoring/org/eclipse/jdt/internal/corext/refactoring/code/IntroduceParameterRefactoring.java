@@ -481,8 +481,7 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 
 	private List<String> guessTempNamesFromMethodInvocation(MethodInvocation selectedMethodInvocation, String[] excludedVariableNames) {
 		String methodName= selectedMethodInvocation.getName().getIdentifier();
-		for (int i= 0; i < KNOWN_METHOD_NAME_PREFIXES.length; i++) {
-			String prefix= KNOWN_METHOD_NAME_PREFIXES[i];
+		for (String prefix : KNOWN_METHOD_NAME_PREFIXES) {
 			if (! methodName.startsWith(prefix))
 				continue; //not this prefix
 			if (methodName.length() == prefix.length())

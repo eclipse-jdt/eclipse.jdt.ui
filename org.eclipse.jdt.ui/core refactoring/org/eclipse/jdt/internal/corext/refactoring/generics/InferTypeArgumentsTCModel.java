@@ -162,8 +162,7 @@ public class InferTypeArgumentsTCModel {
 	}
 
 	private void pruneUnusedCuScopedCvs() {
-		for (Iterator<ConstraintVariable2> iter= fCuScopedConstraintVariables.iterator(); iter.hasNext();) {
-			ConstraintVariable2 cv= iter.next();
+		for (ConstraintVariable2 cv : fCuScopedConstraintVariables) {
 			pruneCvIfUnused(cv);
 		}
 	}
@@ -182,8 +181,7 @@ public class InferTypeArgumentsTCModel {
 			return false;
 
 		Map<String, CollectionElementVariable2> elementVariables= getElementVariables(cv);
-		for (Iterator<CollectionElementVariable2> iter= elementVariables.values().iterator(); iter.hasNext();) {
-			CollectionElementVariable2 elementVariable= iter.next();
+		for (CollectionElementVariable2 elementVariable : elementVariables.values()) {
 			if (! pruneCvIfUnused(elementVariable))
 				return false;
 		}
@@ -278,8 +276,9 @@ public class InferTypeArgumentsTCModel {
 			} else {
 				ConstraintVariable2[] cvs= rightSet.getContributingVariables();
 				leftSet.addAll(cvs);
-				for (int i= 0; i < cvs.length; i++)
-					cvs[i].setTypeEquivalenceSet(leftSet);
+				for (ConstraintVariable2 cv : cvs) {
+					cv.setTypeEquivalenceSet(leftSet);
+				}
 			}
 		}
 	}
@@ -580,9 +579,8 @@ public class InferTypeArgumentsTCModel {
 			makeSupertypeElementVariables(expressionCv, superclass);
 		}
 
-		TType[] interfaces= type.getInterfaces();
-		for (int i= 0; i < interfaces.length; i++) {
-			makeSupertypeElementVariables(expressionCv, interfaces[i]);
+		for (TType intf : type.getInterfaces()) {
+			makeSupertypeElementVariables(expressionCv, intf);
 		}
 
 	}
@@ -646,9 +644,9 @@ public class InferTypeArgumentsTCModel {
 		if (superclass != null)
 			makeFixedSupertypeElementVariables(expressionCv, superclass);
 
-		TType[] interfaces= type.getInterfaces();
-		for (int i= 0; i < interfaces.length; i++)
-			makeFixedSupertypeElementVariables(expressionCv, interfaces[i]);
+		for (TType intf : type.getInterfaces()) {
+			makeFixedSupertypeElementVariables(expressionCv, intf);
+		}
 	}
 
 	private void makeFixedSupertypeElementVariables(ConstraintVariable2 expressionCv, TType supertype) {
@@ -820,8 +818,7 @@ public class InferTypeArgumentsTCModel {
 
 		Map<String, CollectionElementVariable2> leftElements= getElementVariables(cv);
 		Map<String, CollectionElementVariable2> rightElements= getElementVariables(initializerCv);
-		for (Iterator<Entry<String, CollectionElementVariable2>> leftIter= leftElements.entrySet().iterator(); leftIter.hasNext();) {
-			Entry<String, CollectionElementVariable2> leftEntry= leftIter.next();
+		for (Entry<String, CollectionElementVariable2> leftEntry : leftElements.entrySet()) {
 			String leftTypeVariableKey= leftEntry.getKey();
 			CollectionElementVariable2 rightElementVariable= rightElements.get(leftTypeVariableKey);
 			if (rightElementVariable != null) {

@@ -341,7 +341,7 @@ public class NLSRefactoring extends Refactoring {
 			result.addError(NLSMessages.NLSRefactoring_pattern_empty);
 		}
 
-		if (pattern.indexOf(KEY) == -1) {
+		if (!pattern.contains(KEY)) {
 			String msg= Messages.format(NLSMessages.NLSRefactoring_pattern_does_not_contain, KEY);
 			result.addWarning(msg);
 		}
@@ -356,9 +356,7 @@ public class NLSRefactoring extends Refactoring {
 
 	private RefactoringStatus checkKeys() {
 		RefactoringStatus result= new RefactoringStatus();
-		NLSSubstitution[] subs= fSubstitutions;
-		for (int i= 0; i < subs.length; i++) {
-			NLSSubstitution substitution= subs[i];
+		for (NLSSubstitution substitution : fSubstitutions) {
 			if ((substitution.getState() == NLSSubstitution.EXTERNALIZED) && substitution.hasStateChanged()) {
 				result.merge(checkKey(substitution.getKey()));
 			}
@@ -382,9 +380,9 @@ public class NLSRefactoring extends Refactoring {
 
 		final String[] UNWANTED_STRINGS= {" ", ":", "\"", "\\", "'", "?", "="}; //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
 		//feature in resource bundle - does not work properly if keys have ":"
-		for (int i= 0; i < UNWANTED_STRINGS.length; i++) {
-			if (key.indexOf(UNWANTED_STRINGS[i]) != -1) {
-				String[] args= {key, UNWANTED_STRINGS[i]};
+		for (String s : UNWANTED_STRINGS) {
+			if (key.contains(s)) {
+				String[] args= {key, s};
 				String msg= Messages.format(NLSMessages.NLSRefactoring_should_not_contain, args);
 				result.addError(msg);
 			}
@@ -412,17 +410,16 @@ public class NLSRefactoring extends Refactoring {
 
 	private boolean willModifySource() {
 		NLSSubstitution[] subs= fSubstitutions;
-		for (int i= 0; i < subs.length; i++) {
-			if (subs[i].hasSourceChange())
+		for (NLSSubstitution sub : subs) {
+			if (sub.hasSourceChange()) {
 				return true;
+			}
 		}
 		return false;
 	}
 
 	private boolean willModifyPropertyFile() {
-		NLSSubstitution[] subs= fSubstitutions;
-		for (int i= 0; i < subs.length; i++) {
-			NLSSubstitution substitution= subs[i];
+		for (NLSSubstitution substitution : fSubstitutions) {
 			if (substitution.hasPropertyFileChange()) {
 				return true;
 			}
@@ -434,9 +431,7 @@ public class NLSRefactoring extends Refactoring {
 		if (!isEclipseNLS())
 			return false;
 
-		NLSSubstitution[] subs= fSubstitutions;
-		for (int i= 0; i < subs.length; i++) {
-			NLSSubstitution substitution= subs[i];
+		for (NLSSubstitution substitution : fSubstitutions) {
 			if (substitution.hasAccessorClassChange()) {
 				return true;
 			}
@@ -467,8 +462,9 @@ public class NLSRefactoring extends Refactoring {
 	public void setPrefix(String prefix) {
 		fPrefix= prefix;
 		if (fSubstitutions != null) {
-			for (int i= 0; i < fSubstitutions.length; i++)
-				fSubstitutions[i].setPrefix(prefix);
+			for (NLSSubstitution fSubstitution : fSubstitutions) {
+				fSubstitution.setPrefix(prefix);
+			}
 		}
 	}
 

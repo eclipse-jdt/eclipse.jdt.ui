@@ -107,8 +107,7 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 			IMethod[] hierarchyMethods= hierarchyDeclaresMethodName(
 				new SubProgressMonitor(pm, 1), declaring.newTypeHierarchy(new SubProgressMonitor(pm, 1)), method, name);
 
-			for (int i= 0; i < hierarchyMethods.length; i++) {
-				IMethod hierarchyMethod= hierarchyMethods[i];
+			for (IMethod hierarchyMethod : hierarchyMethods) {
 				RefactoringStatusContext context= JavaStatusContext.create(hierarchyMethod);
 				if (Checks.compareParamTypes(method.getParameterTypes(), hierarchyMethod.getParameterTypes())) {
 					String message= Messages.format(
@@ -174,14 +173,10 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 	}
 
 	private void addReferenceUpdates(TextChangeManager manager, IProgressMonitor pm) {
-		SearchResultGroup[] grouped= getOccurrences();
-		for (int i= 0; i < grouped.length; i++) {
-			SearchResultGroup group= grouped[i];
-			SearchMatch[] results= group.getSearchResults();
+		for (SearchResultGroup group : getOccurrences()) {
 			ICompilationUnit cu= group.getCompilationUnit();
 			TextChange change= manager.get(cu);
-			for (int j= 0; j < results.length; j++){
-				SearchMatch match= results[j];
+			for (SearchMatch match : group.getSearchResults()) {
 				if (!(match instanceof MethodDeclarationMatch)) {
 					ReplaceEdit replaceEdit= createReplaceEdit(match, cu);
 					String editName= RefactoringCoreMessages.RenamePrivateMethodRefactoring_update;

@@ -114,9 +114,7 @@ public class CopyModifications extends RefactoringModifications {
 			IContainer resourceDestination= (IContainer) newPack.getResource();
 			createIncludingParents(resourceDestination);
 			CopyArguments arguments= new CopyArguments(resourceDestination, resourceArgs.getExecutionLog());
-			IResource[] resourcesToCopy= collectResourcesOfInterest(pack);
-			for (int i= 0; i < resourcesToCopy.length; i++) {
-				IResource toCopy= resourcesToCopy[i];
+			for (IResource toCopy : collectResourcesOfInterest(pack)) {
 				getResourceModifications().addCopyDelta(toCopy, arguments);
 			}
 		}

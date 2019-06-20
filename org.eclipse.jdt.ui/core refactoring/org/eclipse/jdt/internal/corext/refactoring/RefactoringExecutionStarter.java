@@ -226,14 +226,14 @@ public final class RefactoringExecutionStarter {
 
 	public static void startCleanupRefactoring(ICompilationUnit[] cus, ICleanUp[] cleanUps, boolean useOptionsFromProfile, Shell shell, boolean showWizard, String actionName) throws InvocationTargetException {
 		final CleanUpRefactoring refactoring= new CleanUpRefactoring(actionName);
-		for (int i= 0; i < cus.length; i++) {
-			refactoring.addCompilationUnit(cus[i]);
+		for (ICompilationUnit cu : cus) {
+			refactoring.addCompilationUnit(cu);
 		}
 
 		if (!showWizard) {
 			refactoring.setUseOptionsFromProfile(useOptionsFromProfile);
-			for (int i= 0; i < cleanUps.length; i++) {
-				refactoring.addCleanUp(cleanUps[i]);
+			for (ICleanUp cleanUp : cleanUps) {
+				refactoring.addCleanUp(cleanUp);
 			}
 
 			IRunnableContext context;

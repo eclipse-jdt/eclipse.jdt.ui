@@ -152,10 +152,10 @@ public final class JavaMoveProcessor extends MoveProcessor implements IQualified
 				@Override
 				public Change perform(IProgressMonitor pm2) throws CoreException {
 					Change change= super.perform(pm2);
-					Change[] changes= getChildren();
-					for (int index= 0; index < changes.length; index++) {
-						if (!(changes[index] instanceof TextEditBasedChange))
+					for (Change c : getChildren()) {
+						if (!(c instanceof TextEditBasedChange)) {
 							return null;
+						}
 					}
 					return change;
 				}
@@ -168,9 +168,8 @@ public final class JavaMoveProcessor extends MoveProcessor implements IQualified
 					log= queries.getCreateTargetExecutionLog();
 			}
 			if (log != null) {
-				final Object[] selected= log.getSelectedElements();
-				for (int index= 0; index < selected.length; index++) {
-					result.add(new LoggedCreateTargetChange(selected[index], fCreateTargetQueries));
+				for (Object element : log.getSelectedElements()) {
+					result.add(new LoggedCreateTargetChange(element, fCreateTargetQueries));
 				}
 			}
 			Change change= fMovePolicy.createChange(pm);

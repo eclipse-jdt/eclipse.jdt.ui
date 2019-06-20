@@ -158,10 +158,10 @@ public class SuperTypeConstraintsSolver {
 			} else {
 				ITypeSet estimate= variable.getTypeEstimate();
 				if (estimate == null) {
-					final ConstraintVariable2[] contributing= set.getContributingVariables();
 					estimate= SuperTypeSet.getUniverse();
-					for (int index= 0; index < contributing.length; index++)
-						estimate= estimate.restrictedTo(computeTypeEstimate(contributing[index]));
+					for (ConstraintVariable2 v : set.getContributingVariables()) {
+						estimate= estimate.restrictedTo(computeTypeEstimate(v));
+					}
 					set.setTypeEstimate(estimate);
 				}
 			}

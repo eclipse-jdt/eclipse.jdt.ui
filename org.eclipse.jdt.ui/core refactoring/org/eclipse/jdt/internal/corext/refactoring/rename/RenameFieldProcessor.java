@@ -552,15 +552,13 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		if (nestedTypes == null)
 			return null;
 		RefactoringStatus result= new RefactoringStatus();
-		for (int i= 0; i < nestedTypes.length; i++){
-			IField otherField= nestedTypes[i].getField(getNewElementName());
-			if (otherField.exists()){
-				String msg= Messages.format(
-					RefactoringCoreMessages.RenameFieldRefactoring_hiding,
-					new String[]{ BasicElementLabels.getJavaElementName(fField.getElementName()), BasicElementLabels.getJavaElementName(getNewElementName()), BasicElementLabels.getJavaElementName(nestedTypes[i].getFullyQualifiedName('.'))});
+		for (IType nestedType : nestedTypes) {
+			IField otherField= nestedType.getField(getNewElementName());
+			if (otherField.exists()) {
+				String msg= Messages.format(RefactoringCoreMessages.RenameFieldRefactoring_hiding, new String[]{BasicElementLabels.getJavaElementName(fField.getElementName()), BasicElementLabels.getJavaElementName(getNewElementName()), BasicElementLabels.getJavaElementName(nestedType.getFullyQualifiedName('.'))});
 				result.addWarning(msg, JavaStatusContext.create(otherField));
 			}
-			result.merge(checkNestedHierarchy(nestedTypes[i]));
+			result.merge(checkNestedHierarchy(nestedType));
 		}
 		return result;
 	}
@@ -788,13 +786,12 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	private void addReferenceUpdates(IProgressMonitor pm) {
 		pm.beginTask("", fReferences.length); //$NON-NLS-1$
 		String editName= RefactoringCoreMessages.RenameFieldRefactoring_Update_field_reference;
-		for (int i= 0; i < fReferences.length; i++){
-			ICompilationUnit cu= fReferences[i].getCompilationUnit();
+		for (SearchResultGroup reference : fReferences) {
+			ICompilationUnit cu= reference.getCompilationUnit();
 			if (cu == null)
 				continue;
-			SearchMatch[] results= fReferences[i].getSearchResults();
-			for (int j= 0; j < results.length; j++){
-				addTextEdit(fChangeManager.get(cu), editName, createTextChange(results[j]));
+			for (SearchMatch result : reference.getSearchResults()) {
+				addTextEdit(fChangeManager.get(cu), editName, createTextChange(result));
 			}
 			pm.worked(1);
 		}
@@ -820,13 +817,12 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		SearchResultGroup[] groupedResults= RefactoringSearchEngine.search(
 			pattern, scope, new MethodOccurenceCollector(accessor.getElementName()), pm, status);
 
-		for (int i= 0; i < groupedResults.length; i++) {
-			ICompilationUnit cu= groupedResults[i].getCompilationUnit();
+		for (SearchResultGroup groupedResult : groupedResults) {
+			ICompilationUnit cu= groupedResult.getCompilationUnit();
 			if (cu == null)
 				continue;
-			SearchMatch[] results= groupedResults[i].getSearchResults();
-			for (int j= 0; j < results.length; j++){
-				SearchMatch searchResult= results[j];
+			SearchMatch[] results= groupedResult.getSearchResults();
+			for (SearchMatch searchResult : results) {
 				TextEdit edit= new ReplaceEdit(searchResult.getOffset(), searchResult.getLength(), newAccessorName);
 				addTextEdit(fChangeManager.get(cu), editName, edit);
 			}
@@ -849,8 +845,9 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			List<ICompilationUnit> compilationUnitsToModify= new ArrayList<>();
 			if (fIsComposite) {
 				// limited change set, no accessors.
-				for (int i= 0; i < oldReferences.length; i++)
-					compilationUnitsToModify.add(oldReferences[i].getCompilationUnit());
+				for (SearchResultGroup oldReference : oldReferences) {
+					compilationUnitsToModify.add(oldReference.getCompilationUnit());
+				}
 				compilationUnitsToModify.add(fField.getCompilationUnit());
 			} else {
 				// include all cus, including accessors
@@ -866,8 +863,8 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		} finally{
 			pm.done();
 			if (newWorkingCopies != null){
-				for (int i= 0; i < newWorkingCopies.length; i++) {
-					newWorkingCopies[i].discardWorkingCopy();
+				for (ICompilationUnit newWorkingCopy : newWorkingCopies) {
+					newWorkingCopy.discardWorkingCopy();
 				}
 			}
 		}

@@ -80,9 +80,8 @@ public class RenameModifications extends RefactoringModifications {
 		IProject rProject= project.getProject();
 		if (rProject != null) {
 			getResourceModifications().addRename(rProject, args);
-			IProject[] referencingProjects= rProject.getReferencingProjects();
-			for (int i= 0; i < referencingProjects.length; i++) {
-				IFile classpath= getClasspathFile(referencingProjects[i]);
+			for (IProject referencingProject : rProject.getReferencingProjects()) {
+				IFile classpath= getClasspathFile(referencingProject);
 				if (classpath != null) {
 					getResourceModifications().addChanged(classpath);
 				}
@@ -102,8 +101,7 @@ public class RenameModifications extends RefactoringModifications {
 		IPackageFragment[] allSubPackages= null;
 		if (renameSubPackages) {
 			allSubPackages= getSubpackages(rootPackage);
-			for (int i= 0; i < allSubPackages.length; i++) {
-				IPackageFragment pack= allSubPackages[i];
+			for (IPackageFragment pack : allSubPackages) {
 				RenameArguments subArgs= new RenameArguments(
 					getNewPackageName(rootPackage, args.getNewName(), pack.getElementName()),
 					args.getUpdateReferences());
@@ -177,8 +175,7 @@ public class RenameModifications extends RefactoringModifications {
 
 	@Override
 	public void buildValidateEdits(ValidateEditChecker checker) {
-		for (Iterator<Object> iter= fRename.iterator(); iter.hasNext();) {
-			Object element= iter.next();
+		for (Object element : fRename) {
 			if (element instanceof ICompilationUnit) {
 				ICompilationUnit unit= (ICompilationUnit)element;
 				IResource resource= unit.getResource();
@@ -218,8 +215,7 @@ public class RenameModifications extends RefactoringModifications {
 			if (container == null)
 				return;
 			boolean removeContainer= ! container.contains(target);
-			for (int i= 0; i < allSubPackages.length; i++) {
-				IPackageFragment pack= allSubPackages[i];
+			for (IPackageFragment pack : allSubPackages) {
 				IFolder subTarget= addResourceModifications(rootPackage, args, pack, renameSubPackages);
 				if (container.contains(subTarget))
 					removeContainer= false;
@@ -237,10 +233,8 @@ public class RenameModifications extends RefactoringModifications {
 		IFolder target= computeTargetFolder(rootPackage, args, pack);
 		createIncludingParents(target);
 		MoveArguments arguments= new MoveArguments(target, args.getUpdateReferences());
-		IResource[] resourcesToMove= collectResourcesOfInterest(pack);
 		Set<IResource> allMembers= new HashSet<>(Arrays.asList(container.members()));
-		for (int i= 0; i < resourcesToMove.length; i++) {
-			IResource toMove= resourcesToMove[i];
+		for (IResource toMove : collectResourcesOfInterest(pack)) {
 			getResourceModifications().addMove(toMove, arguments);
 			allMembers.remove(toMove);
 		}
@@ -263,13 +257,12 @@ public class RenameModifications extends RefactoringModifications {
 
 	private IPackageFragment[] getSubpackages(IPackageFragment pack) throws CoreException {
 		IPackageFragmentRoot root= (IPackageFragmentRoot) pack.getParent();
-		IJavaElement[] allPackages= root.getChildren();
 		if (pack.isDefaultPackage())
 			return new IPackageFragment[0];
 		ArrayList<IPackageFragment> result= new ArrayList<>();
 		String prefix= pack.getElementName() + '.';
-		for (int i= 0; i < allPackages.length; i++) {
-			IPackageFragment currentPackage= (IPackageFragment) allPackages[i];
+		for (IJavaElement element : root.getChildren()) {
+			IPackageFragment currentPackage= (IPackageFragment) element;
 			if (currentPackage.getElementName().startsWith(prefix))
 				result.add(currentPackage);
 		}

@@ -90,9 +90,10 @@ public final class RefactoringAvailabilityTester {
 
 	public static IJavaElement[] getJavaElements(final Object[] elements) {
 		List<IJavaElement> result= new ArrayList<>();
-		for (int index= 0; index < elements.length; index++) {
-			if (elements[index] instanceof IJavaElement)
-				result.add((IJavaElement) elements[index]);
+		for (Object element : elements) {
+			if (element instanceof IJavaElement) {
+				result.add((IJavaElement) element);
+			}
 		}
 		return result.toArray(new IJavaElement[result.size()]);
 	}
@@ -100,20 +101,20 @@ public final class RefactoringAvailabilityTester {
 	public static IMember[] getPullUpMembers(final IType type) throws JavaModelException {
 		final List<IMember> list= new ArrayList<>(3);
 		if (type.exists()) {
-			IMember[] members= type.getFields();
-			for (int index= 0; index < members.length; index++) {
-				if (isPullUpAvailable(members[index]))
-					list.add(members[index]);
+			for (IMember member : type.getFields()) {
+				if (isPullUpAvailable(member)) {
+					list.add(member);
+				}
 			}
-			members= type.getMethods();
-			for (int index= 0; index < members.length; index++) {
-				if (isPullUpAvailable(members[index]))
-					list.add(members[index]);
+			for (IMember member : type.getMethods()) {
+				if (isPullUpAvailable(member)) {
+					list.add(member);
+				}
 			}
-			members= type.getTypes();
-			for (int index= 0; index < members.length; index++) {
-				if (isPullUpAvailable(members[index]))
-					list.add(members[index]);
+			for (IMember member : type.getTypes()) {
+				if (isPullUpAvailable(member)) {
+					list.add(member);
+				}
 			}
 		}
 		return list.toArray(new IMember[list.size()]);
@@ -122,15 +123,15 @@ public final class RefactoringAvailabilityTester {
 	public static IMember[] getPushDownMembers(final IType type) throws JavaModelException {
 		final List<IMember> list= new ArrayList<>(3);
 		if (type.exists()) {
-			IMember[] members= type.getFields();
-			for (int index= 0; index < members.length; index++) {
-				if (isPushDownAvailable(members[index]))
-					list.add(members[index]);
+			for (IMember member : type.getFields()) {
+				if (isPushDownAvailable(member)) {
+					list.add(member);
+				}
 			}
-			members= type.getMethods();
-			for (int index= 0; index < members.length; index++) {
-				if (isPushDownAvailable(members[index]))
-					list.add(members[index]);
+			for (IMember member : type.getMethods()) {
+				if (isPushDownAvailable(member)) {
+					list.add(member);
+				}
 			}
 		}
 		return list.toArray(new IMember[list.size()]);
@@ -138,9 +139,10 @@ public final class RefactoringAvailabilityTester {
 
 	public static IResource[] getResources(final Object[] elements) {
 		List<IResource> result= new ArrayList<>();
-		for (int index= 0; index < elements.length; index++) {
-			if (elements[index] instanceof IResource)
-				result.add((IResource) elements[index]);
+		for (Object element : elements) {
+			if (element instanceof IResource) {
+				result.add((IResource) element);
+			}
 		}
 		return result.toArray(new IResource[result.size()]);
 	}
@@ -271,13 +273,15 @@ public final class RefactoringAvailabilityTester {
 
 			if (objects.length != resources.length + elements.length)
 				return false;
-			for (int index= 0; index < resources.length; index++) {
-				if (!isDeleteAvailable(resources[index]))
+			for (IResource resource : resources) {
+				if (!isDeleteAvailable(resource)) {
 					return false;
+				}
 			}
-			for (int index= 0; index < elements.length; index++) {
-				if (!isDeleteAvailable(elements[index]))
+			for (IJavaElement element : elements) {
+				if (!isDeleteAvailable(element)) {
 					return false;
+				}
 			}
 			return true;
 		}
@@ -351,9 +355,10 @@ public final class RefactoringAvailabilityTester {
 			if (nodes.length == 1)
 				return nodes[0] instanceof Statement || Checks.isExtractableExpression(nodes[0]);
 			else {
-				for (int index= 0; index < nodes.length; index++) {
-					if (!(nodes[index] instanceof Statement))
+				for (ASTNode node : nodes) {
+					if (!(node instanceof Statement)) {
 						return false;
+					}
 				}
 				return true;
 			}
@@ -405,9 +410,10 @@ public final class RefactoringAvailabilityTester {
 			final IType type= getTopLevelType(members);
 			if (type != null && !type.isClass())
 				return false;
-			for (int index= 0; index < members.length; index++) {
-				if (!isExtractSupertypeAvailable(members[index]))
+			for (IMember member : members) {
+				if (!isExtractSupertypeAvailable(member)) {
 					return false;
+				}
 			}
 			return members.length == 1 || isCommonDeclaringType(members);
 		}
@@ -508,10 +514,10 @@ public final class RefactoringAvailabilityTester {
 			return false;
 		} else if (element instanceof IJavaProject) {
 			IJavaProject project= (IJavaProject) element;
-			IClasspathEntry[] classpathEntries= project.getRawClasspath();
-			for (int i= 0; i < classpathEntries.length; i++) {
-				if (classpathEntries[i].getEntryKind() == IClasspathEntry.CPE_SOURCE)
+			for (IClasspathEntry classpathEntry : project.getRawClasspath()) {
+				if (classpathEntry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
 					return true;
+				}
 			}
 			return false;
 		} else if (element instanceof IPackageFragmentRoot) {
@@ -531,9 +537,10 @@ public final class RefactoringAvailabilityTester {
 		if (elements.length == 0)
 			return false;
 
-		for (int i= 0; i < elements.length; i++) {
-			if (!(isInferTypeArgumentsAvailable(elements[i])))
+		for (IJavaElement element : elements) {
+			if (!(isInferTypeArgumentsAvailable(element))) {
 				return false;
+			}
 		}
 		return true;
 	}
@@ -729,8 +736,7 @@ public final class RefactoringAvailabilityTester {
 
 	public static boolean isMoveAvailable(final IResource[] resources, final IJavaElement[] elements) throws JavaModelException {
 		if (elements != null) {
-			for (int index= 0; index < elements.length; index++) {
-				IJavaElement element= elements[index];
+			for (IJavaElement element : elements) {
 				if (element == null || !element.exists())
 					return false;
 				if ((element instanceof IType) && ((IType) element).isLocal())
@@ -854,9 +860,10 @@ public final class RefactoringAvailabilityTester {
 			final IType type= getTopLevelType(members);
 			if (type != null && getPullUpMembers(type).length != 0)
 				return true;
-			for (int index= 0; index < members.length; index++) {
-				if (!isPullUpAvailable(members[index]))
+			for (IMember member : members) {
+				if (!isPullUpAvailable(member)) {
 					return false;
+				}
 			}
 			return isCommonDeclaringType(members);
 		}
@@ -924,9 +931,10 @@ public final class RefactoringAvailabilityTester {
 				return true;
 			if (type != null && JdtFlags.isEnum(type))
 				return false;
-			for (int index= 0; index < members.length; index++) {
-				if (!isPushDownAvailable(members[index]))
+			for (IMember member : members) {
+				if (!isPushDownAvailable(member)) {
 					return false;
+				}
 			}
 			return isCommonDeclaringType(members);
 		}

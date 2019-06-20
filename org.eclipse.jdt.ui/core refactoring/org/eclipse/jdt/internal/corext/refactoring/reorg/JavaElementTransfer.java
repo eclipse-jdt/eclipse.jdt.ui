@@ -81,8 +81,8 @@ public class JavaElementTransfer extends ByteArrayTransfer {
 			dataOut.writeInt(javaElements.length);
 
 			//write each element
-			for (int i= 0; i < javaElements.length; i++) {
-				writeJavaElement(dataOut, javaElements[i]);
+			for (IJavaElement javaElement : javaElements) {
+				writeJavaElement(dataOut, javaElement);
 			}
 
 			//cleanup

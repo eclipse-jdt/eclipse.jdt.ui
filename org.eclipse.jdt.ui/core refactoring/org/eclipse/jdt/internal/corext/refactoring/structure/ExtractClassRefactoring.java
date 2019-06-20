@@ -17,7 +17,6 @@ package org.eclipse.jdt.internal.corext.refactoring.structure;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -166,9 +165,7 @@ public class ExtractClassRefactoring extends Refactoring {
 
 		private void validateFieldNames(RefactoringStatus status, String parameterName, IType type) {
 			if (type.getField(parameterName).exists()) {
-				Field[] fields= fDescriptor.getFields();
-				for (int i= 0; i < fields.length; i++) {
-					Field field= fields[i];
+				for (Field field : fDescriptor.getFields()) {
 					if (parameterName.equals(field.getFieldName())){
 						if (!field.isCreateField())
 							status.addError(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_error_field_already_exists, BasicElementLabels.getJavaElementName(parameterName)));
@@ -179,10 +176,8 @@ public class ExtractClassRefactoring extends Refactoring {
 
 		public RefactoringStatus validateFields() {
 			RefactoringStatus status= new RefactoringStatus();
-			Field[] fields= fDescriptor.getFields();
 			Set<String> names= new HashSet<>();
-			for (int i= 0; i < fields.length; i++) {
-				Field field= fields[i];
+			for (Field field : fDescriptor.getFields()) {
 				if (field.isCreateField()) {
 					if (names.contains(field.getNewFieldName())) {
 						status.addError(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_error_duplicate_field_name, BasicElementLabels.getJavaElementName(field.getNewFieldName())));
@@ -346,8 +341,7 @@ public class ExtractClassRefactoring extends Refactoring {
 		result.merge(fVerification.validateAll());
 		try {
 			pm.beginTask(RefactoringCoreMessages.ExtractClassRefactoring_progress_final_conditions, 95);
-			for (Iterator<FieldInfo> iter= fVariables.values().iterator(); iter.hasNext();) {
-				FieldInfo fi= iter.next();
+			for (FieldInfo fi : fVariables.values()) {
 				boolean createField= isCreateField(fi);
 				if (createField) {
 					IField field= fi.ifield;
@@ -416,10 +410,8 @@ public class ExtractClassRefactoring extends Refactoring {
 		if (fDescriptor.isCreateTopLevel())
 			comment.addSetting(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_comment_package, BasicElementLabels.getJavaElementName(fDescriptor.getPackage())));
 
-		Field[] fields= fDescriptor.getFields();
 		ArrayList<String> strings= new ArrayList<>();
-		for (int i= 0; i < fields.length; i++) {
-			Field field= fields[i];
+		for (Field field : fDescriptor.getFields()) {
 			if (field.isCreateField()) {
 				strings.add(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_comment_field_renamed, new Object[] { BasicElementLabels.getJavaElementName(field.getFieldName()), BasicElementLabels.getJavaElementName(field.getNewFieldName()) }));
 			}
@@ -442,8 +434,7 @@ public class ExtractClassRefactoring extends Refactoring {
 			FieldDeclaration parent= (FieldDeclaration) fieldInfo.declaration.getParent();
 			List<IExtendedModifier> modifiers= parent.modifiers();
 			ListRewrite listRewrite= cuRewrite.getASTRewrite().getListRewrite(field, FieldDeclaration.MODIFIERS2_PROPERTY);
-			for (Iterator<IExtendedModifier> iterator= modifiers.iterator(); iterator.hasNext();) {
-				IExtendedModifier mod= iterator.next();
+			for (IExtendedModifier mod : modifiers) {
 				//Temporarily disabled until initialization of final fields is handled correctly
 //				if (mod.isModifier()) {
 //					Modifier modifier= (Modifier) mod;
@@ -456,8 +447,7 @@ public class ExtractClassRefactoring extends Refactoring {
 			}
 			if (fieldInfo.initializer != null && fieldInfo.hasFieldReference()) {
 				List<VariableDeclarationFragment> fragments= field.fragments();
-				for (Iterator<VariableDeclarationFragment> iterator= fragments.iterator(); iterator.hasNext();) {
-					VariableDeclarationFragment vdf= iterator.next();
+				for (VariableDeclarationFragment vdf : fragments) {
 					vdf.setInitializer((Expression) moveNode(cuRewrite, fieldInfo.initializer));
 				}
 			}
@@ -516,8 +506,7 @@ public class ExtractClassRefactoring extends Refactoring {
 		pof.setCreateGetter(fDescriptor.isCreateGetterSetter());
 		pof.setCreateSetter(fDescriptor.isCreateGetterSetter());
 		List<ParameterInfo> variables= new ArrayList<>();
-		for (Iterator<FieldInfo> iterator= fVariables.values().iterator(); iterator.hasNext();) {
-			FieldInfo info= iterator.next();
+		for (FieldInfo info : fVariables.values()) {
 			boolean createField= isCreateField(info);
 			info.pi.setCreateField(createField);
 			if (createField) {
@@ -531,9 +520,7 @@ public class ExtractClassRefactoring extends Refactoring {
 	}
 
 	private Field getField(String name) {
-		Field[] fields= fDescriptor.getFields();
-		for (int i= 0; i < fields.length; i++) {
-			Field field= fields[i];
+		for (Field field : fDescriptor.getFields()) {
 			if (field.getFieldName().equals(name))
 				return field;
 		}
@@ -549,8 +536,7 @@ public class ExtractClassRefactoring extends Refactoring {
 			if (pm.isCanceled())
 				throw new OperationCanceledException();
 			List<IField> validIFields= new ArrayList<>();
-			for (Iterator<FieldInfo> iterator= fVariables.values().iterator(); iterator.hasNext();) {
-				FieldInfo info= iterator.next();
+			for (FieldInfo info : fVariables.values()) {
 				if (isCreateField(info))
 					validIFields.add(info.ifield);
 			}
@@ -563,8 +549,7 @@ public class ExtractClassRefactoring extends Refactoring {
 			SubProgressMonitor spm= new SubProgressMonitor(pm, 90);
 			spm.beginTask(RefactoringCoreMessages.ExtractClassRefactoring_progress_updating_references, results.length * 10);
 			try {
-				for (int i= 0; i < results.length; i++) {
-					SearchResultGroup group= results[i];
+				for (SearchResultGroup group : results) {
 					ICompilationUnit unit= group.getCompilationUnit();
 
 					CompilationUnitRewrite cuRewrite;
@@ -599,9 +584,7 @@ public class ExtractClassRefactoring extends Refactoring {
 		RefactoringStatus status= new RefactoringStatus();
 		String parameterName= fDescriptor.getFieldName();
 
-		SearchMatch[] searchResults= group.getSearchResults();
-		for (int j= 0; j < searchResults.length; j++) {
-			SearchMatch searchMatch= searchResults[j];
+		for (SearchMatch searchMatch : group.getSearchResults()) {
 			ASTNode node= NodeFinder.perform(cuRewrite.getRoot(), searchMatch.getOffset(), searchMatch.getLength());
 			ASTNode parent= node.getParent();
 			boolean isDeclaration= parent instanceof VariableDeclaration && ((VariableDeclaration)parent).getInitializer() != node;
@@ -738,8 +721,7 @@ public class ExtractClassRefactoring extends Refactoring {
 		TextEditGroup removeFieldGroup= fBaseCURewrite.createGroupDescription(RefactoringCoreMessages.ExtractClassRefactoring_group_remove_field);
 		FieldDeclaration lastField= null;
 		initializeDeclaration(typeNode);
-		for (Iterator<FieldInfo> iter= fVariables.values().iterator(); iter.hasNext();) {
-			FieldInfo pi= iter.next();
+		for (FieldInfo pi : fVariables.values()) {
 			if (isCreateField(pi)) {
 				VariableDeclarationFragment vdf= pi.declaration;
 				FieldDeclaration parent= (FieldDeclaration) vdf.getParent();
@@ -793,12 +775,9 @@ public class ExtractClassRefactoring extends Refactoring {
 	}
 
 	private void initializeDeclaration(TypeDeclaration node) {
-		FieldDeclaration[] fields= node.getFields();
-		for (int i= 0; i < fields.length; i++) {
-			FieldDeclaration fieldDeclaration= fields[i];
-			List<VariableDeclarationFragment> fragments= fieldDeclaration.fragments();
-			for (Iterator<VariableDeclarationFragment> iterator= fragments.iterator(); iterator.hasNext();) {
-				VariableDeclarationFragment vdf= iterator.next();
+		for (FieldDeclaration fieldDeclaration : node.getFields()) {
+			for (Object element : fieldDeclaration.fragments()) {
+				VariableDeclarationFragment vdf=(VariableDeclarationFragment) element;
 				FieldInfo fieldInfo= getFieldInfo(vdf.getName().getIdentifier());
 				if (fieldInfo != null) {
 					Assert.isNotNull(vdf);
@@ -819,8 +798,7 @@ public class ExtractClassRefactoring extends Refactoring {
 		ClassInstanceCreation creation= ast.newClassInstanceCreation();
 		creation.setType(pof.createType(fDescriptor.isCreateTopLevel(), fBaseCURewrite, typeNode.getStartPosition()));
 		ListRewrite listRewrite= fBaseCURewrite.getASTRewrite().getListRewrite(creation, ClassInstanceCreation.ARGUMENTS_PROPERTY);
-		for (Iterator<FieldInfo> iter= fVariables.values().iterator(); iter.hasNext();) {
-			FieldInfo fi= iter.next();
+		for (FieldInfo fi : fVariables.values()) {
 			if (isCreateField(fi)) {
 				Expression expression= fi.initializer;
 				if (expression != null && !fi.hasFieldReference()) {

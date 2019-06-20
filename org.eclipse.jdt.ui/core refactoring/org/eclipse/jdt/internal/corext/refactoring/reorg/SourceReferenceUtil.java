@@ -65,8 +65,7 @@ public class SourceReferenceUtil {
 	public static ISourceReference[] removeAllWithParentsSelected(ISourceReference[] elems){
 		Set<ISourceReference> set= new HashSet<>(Arrays.asList(elems));
 		List<ISourceReference> result= new ArrayList<>(elems.length);
-		for (int i= 0; i < elems.length; i++) {
-			ISourceReference elem= elems[i];
+		for (ISourceReference elem : elems) {
 			if (! (elem instanceof IJavaElement))
 				result.add(elem);
 			else{

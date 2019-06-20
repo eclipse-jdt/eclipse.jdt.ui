@@ -56,8 +56,7 @@ public class StubCreator {
 	protected void appendEnumConstants(final IType type) throws JavaModelException {
 		final IField[] fields= type.getFields();
 		final List<IField> list= new ArrayList<>(fields.length);
-		for (int index= 0; index < fields.length; index++) {
-			final IField field= fields[index];
+		for (IField field : fields) {
 			if (Flags.isEnum(field.getFlags()))
 				list.add(field);
 		}
@@ -199,16 +198,15 @@ public class StubCreator {
 	protected void appendMembers(final IType type, final IProgressMonitor monitor) throws JavaModelException {
 		try {
 			monitor.beginTask(RefactoringCoreMessages.StubCreationOperation_creating_type_stubs, 1);
-			final IJavaElement[] children= type.getChildren();
-			for (int index= 0; index < children.length; index++) {
-				final IMember child= (IMember) children[index];
+			for (IJavaElement childJavaElement : type.getChildren()) {
+				final IMember child= (IMember) childJavaElement;
 				final int flags= child.getFlags();
 				final boolean isPrivate= Flags.isPrivate(flags);
 				final boolean isDefault= !Flags.isPublic(flags) && !Flags.isProtected(flags) && !isPrivate;
 				final boolean stub= fStubInvisible || (!isPrivate && !isDefault);
 				if (child instanceof IType) {
 					if (stub || "java.lang.invoke.MethodHandle".equals(type.getFullyQualifiedName()) //$NON-NLS-1$
-							|| "java.util.concurrent.ConcurrentHashMap$CollectionView".equals(((IType) child).getFullyQualifiedName())) //$NON-NLS-1$
+						|| "java.util.concurrent.ConcurrentHashMap$CollectionView".equals(((IType) child).getFullyQualifiedName())) //$NON-NLS-1$
 						appendTypeDeclaration((IType) child, new SubProgressMonitor(monitor, 1));
 				} else if (child instanceof IField) {
 					if (stub && !Flags.isEnum(flags) && !Flags.isSynthetic(flags))
@@ -254,12 +252,11 @@ public class StubCreator {
 					Map<Integer, List<IMethod>> superConstructorsByParamCount= new TreeMap<>();
 					boolean multi= false;
 					IMethod superConstructor= null;
-					for (int i= 0; i < superMethods.length; i++) {
-						IMethod superMethod= superMethods[i];
+					for (IMethod superMethod : superMethods) {
 						if (superMethod.isConstructor()
-								&& !Flags.isPrivate(superMethod.getFlags())
-								&& !(Flags.isPackageDefault(superMethod.getFlags()) && !declaringType.getPackageFragment().equals(superclass.getPackageFragment()))
-								) {
+							&& !Flags.isPrivate(superMethod.getFlags())
+							&& !(Flags.isPackageDefault(superMethod.getFlags()) && !declaringType.getPackageFragment().equals(superclass.getPackageFragment()))
+							) {
 							int paramCount= superMethod.getNumberOfParameters();
 							if (paramCount == 0) {
 								superConstructor= superMethod;

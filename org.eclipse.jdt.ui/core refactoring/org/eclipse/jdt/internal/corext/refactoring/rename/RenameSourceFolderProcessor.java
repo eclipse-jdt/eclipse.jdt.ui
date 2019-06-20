@@ -103,10 +103,10 @@ public final class RenameSourceFolderProcessor extends JavaRenameProcessor {
 
 	@Override
 	public Object getNewElement() throws CoreException {
-		IPackageFragmentRoot[] roots= fSourceFolder.getJavaProject().getPackageFragmentRoots();
-		for (int i= 0; i < roots.length; i++) {
-			if (roots[i].getElementName().equals(getNewElementName()))
-				return roots[i];
+		for (IPackageFragmentRoot root : fSourceFolder.getJavaProject().getPackageFragmentRoots()) {
+			if (root.getElementName().equals(getNewElementName())) {
+				return root;
+			}
 		}
 		return null;
 	}

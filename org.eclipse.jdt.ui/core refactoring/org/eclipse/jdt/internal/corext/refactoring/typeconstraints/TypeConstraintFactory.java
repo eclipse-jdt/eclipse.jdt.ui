@@ -113,8 +113,8 @@ public class TypeConstraintFactory implements ITypeConstraintFactory {
 	public CompositeOrTypeConstraint createCompositeOrTypeConstraint(ITypeConstraint[] constraints){
 		ConstraintVariable left= ((SimpleTypeConstraint)constraints[0]).getLeft();
 		String bounds= ""; //$NON-NLS-1$
-		for (int i= 0; i < constraints.length; i++){
-			ConstraintVariable right= ((SimpleTypeConstraint)constraints[i]).getRight();
+		for (ITypeConstraint constraint : constraints) {
+			ConstraintVariable right= ((SimpleTypeConstraint) constraint).getRight();
 			ITypeBinding binding= right.getBinding();
 			String typeName= binding.getQualifiedName();
 			bounds= bounds + typeName +","; //$NON-NLS-1$

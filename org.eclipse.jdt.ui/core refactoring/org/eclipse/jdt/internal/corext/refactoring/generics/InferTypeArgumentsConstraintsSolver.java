@@ -101,13 +101,12 @@ public class InferTypeArgumentsConstraintsSolver {
 
 		//loop over all TypeEquivalenceSets and unify the elements from the fElemStructureEnv with the existing TypeEquivalenceSets
 		HashSet<TypeEquivalenceSet> allTypeEquivalenceSets= new HashSet<>();
-		for (int i= 0; i < allConstraintVariables.length; i++) {
-			TypeEquivalenceSet typeEquivalenceSet= allConstraintVariables[i].getTypeEquivalenceSet();
+		for (ConstraintVariable2 allConstraintVariable : allConstraintVariables) {
+			TypeEquivalenceSet typeEquivalenceSet= allConstraintVariable.getTypeEquivalenceSet();
 			if (typeEquivalenceSet != null)
 				allTypeEquivalenceSets.add(typeEquivalenceSet);
 		}
-		for (Iterator<TypeEquivalenceSet> iter= allTypeEquivalenceSets.iterator(); iter.hasNext();) {
-			TypeEquivalenceSet typeEquivalenceSet= iter.next();
+		for (TypeEquivalenceSet typeEquivalenceSet : allTypeEquivalenceSets) {
 			ConstraintVariable2[] contributingVariables= typeEquivalenceSet.getContributingVariables();
 			for (int i= 0; i < contributingVariables.length; i++) {
 				for (int j= i + 1; j < contributingVariables.length; j++) {
@@ -117,9 +116,7 @@ public class InferTypeArgumentsConstraintsSolver {
 				}
 			}
 		}
-		ITypeConstraint2[] allTypeConstraints= fTCModel.getAllTypeConstraints();
-		for (int i= 0; i < allTypeConstraints.length; i++) {
-			ITypeConstraint2 typeConstraint= allTypeConstraints[i];
+		for (ITypeConstraint2 typeConstraint : fTCModel.getAllTypeConstraints()) {
 			fTCModel.createElementEqualsConstraints(typeConstraint.getLeft(), typeConstraint.getRight());
 		}
 
@@ -134,8 +131,7 @@ public class InferTypeArgumentsConstraintsSolver {
 	}
 
 	private void initializeTypeEstimates(ConstraintVariable2[] allConstraintVariables) {
-		for (int i= 0; i < allConstraintVariables.length; i++) {
-			ConstraintVariable2 cv= allConstraintVariables[i];
+		for (ConstraintVariable2 cv : allConstraintVariables) {
 			//TODO: not necessary for types that are not used in a TypeConstraint but only as type in CollectionElementVariable
 			//TODO: handle nested element variables; see ParametricStructureComputer.createAndInitVars()
 			TypeEquivalenceSet set= cv.getTypeEquivalenceSet();
@@ -146,10 +142,10 @@ public class InferTypeArgumentsConstraintsSolver {
 			} else {
 				TypeSet typeEstimate= (TypeSet) cv.getTypeEstimate();
 				if (typeEstimate == null) {
-					ConstraintVariable2[] cvs= set.getContributingVariables();
 					typeEstimate= fTypeSetEnvironment.getUniverseTypeSet();
-					for (int j= 0; j < cvs.length; j++) //TODO: optimize: just try to find an immutable CV; if not found, use Universe
-						typeEstimate= typeEstimate.intersectedWith(createInitialEstimate(cvs[j]));
+					for (ConstraintVariable2 c : set.getContributingVariables()) { //TODO: optimize: just try to find an immutable CV; if not found, use Universe
+						typeEstimate= typeEstimate.intersectedWith(createInitialEstimate(c));
+					}
 					set.setTypeEstimate(typeEstimate);
 				}
 			}
@@ -271,9 +267,7 @@ public class InferTypeArgumentsConstraintsSolver {
 
 	private void chooseTypes(ConstraintVariable2[] allConstraintVariables, SubProgressMonitor pm) {
 		pm.beginTask("", allConstraintVariables.length); //$NON-NLS-1$
-		for (int i= 0; i < allConstraintVariables.length; i++) {
-			ConstraintVariable2 cv= allConstraintVariables[i];
-
+		for (ConstraintVariable2 cv : allConstraintVariables) {
 			TypeEquivalenceSet set= cv.getTypeEquivalenceSet();
 			if (set == null)
 				continue; //TODO: should not happen iff all unused constraint variables got pruned
@@ -352,9 +346,7 @@ public class InferTypeArgumentsConstraintsSolver {
 		}
 
 		if (unresolvedTypes.size() != 0) {
-			TType[] interfaces= unresolvedTypes.toArray(new TType[unresolvedTypes.size()]);
-			for (int i= 0; i < interfaces.length; i++) {
-				TType interf= interfaces[i];
+			for (TType interf : unresolvedTypes) {
 				if (isTaggingInterface(interf)) {
 					fInterfaceTaggingCache.put(interf, Boolean.TRUE);
 				} else {
@@ -379,8 +371,7 @@ public class InferTypeArgumentsConstraintsSolver {
 	}
 
 	private void findCastsToRemove(CastVariable2[] castVariables) {
-		for (int i= 0; i < castVariables.length; i++) {
-			CastVariable2 castCv= castVariables[i];
+		for (CastVariable2 castCv : castVariables) {
 			ConstraintVariable2 expressionVariable= castCv.getExpressionVariable();
 			TType chosenType= InferTypeArgumentsConstraintsSolver.getChosenType(expressionVariable);
 			TType castType= castCv.getType();
@@ -388,8 +379,8 @@ public class InferTypeArgumentsConstraintsSolver {
 			if (chosenType != null && TTypes.canAssignTo(chosenType, castType)) {
 				if (chosenType.equals(expressionType))
 					continue; // The type has not changed. Don't remove the cast, since it could be
-							   // there to get access to default-visible members or to
-							   // unify types of conditional expressions.
+							// there to get access to default-visible members or to
+							// unify types of conditional expressions.
 				fUpdate.addCastToRemove(castCv);
 
 			} else if (expressionVariable instanceof ArrayTypeVariable2 && castType.isArrayType()) { // bug 97258
@@ -400,7 +391,7 @@ public class InferTypeArgumentsConstraintsSolver {
 				if (chosenArrayElementType != null && TTypes.canAssignTo(chosenArrayElementType, ((ArrayType) castType).getComponentType())) {
 					if (expressionType instanceof ArrayType && chosenArrayElementType.equals(((ArrayType) expressionType).getComponentType()))
 						continue; // The type has not changed. Don't remove the cast, since it could be
-								   // there to unify types of conditional expressions.
+								// there to unify types of conditional expressions.
 					fUpdate.addCastToRemove(castCv);
 				}
 			}

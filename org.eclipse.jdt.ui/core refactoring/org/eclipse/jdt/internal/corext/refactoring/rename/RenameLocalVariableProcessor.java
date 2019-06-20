@@ -438,8 +438,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 					try {
 						final IJavaElement[] elements= fCu.codeSelect(offset, length);
 						if (elements != null) {
-							for (int index= 0; index < elements.length; index++) {
-								final IJavaElement element= elements[index];
+							for (IJavaElement element : elements) {
 								if (element instanceof ILocalVariable)
 									fLocalVariable= (ILocalVariable) element;
 							}

@@ -382,11 +382,11 @@ public final class RenameCompilationUnitProcessor extends JavaRenameProcessor im
 
 	private IType getTypeWithTheSameName() {
 		try {
-			IType[] topLevelTypes= fCu.getTypes();
 			String name= getSimpleCUName();
-			for (int i = 0; i < topLevelTypes.length; i++) {
-				if (name.equals(topLevelTypes[i].getElementName()))
-					return topLevelTypes[i];
+			for (IType topLevelType : fCu.getTypes()) {
+				if (name.equals(topLevelType.getElementName())) {
+					return topLevelType;
+				}
 			}
 			return null;
 		} catch (CoreException e) {

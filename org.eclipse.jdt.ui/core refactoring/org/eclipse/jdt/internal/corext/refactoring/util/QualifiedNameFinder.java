@@ -168,9 +168,7 @@ public class QualifiedNameFinder {
 	}
 
 	private static void addReferencingProjects(IProject root, Set<IProject> res) {
-		IProject[] projects= root.getReferencingProjects();
-		for (int i= 0; i < projects.length; i++) {
-			IProject project= projects[i];
+		for (IProject project : root.getReferencingProjects()) {
 			if (res.add(project)) {
 				addReferencingProjects(project, res);
 			}

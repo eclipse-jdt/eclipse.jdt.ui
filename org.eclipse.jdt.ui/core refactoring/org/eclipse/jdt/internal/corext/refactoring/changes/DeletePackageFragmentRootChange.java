@@ -18,7 +18,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.Assert;
@@ -51,6 +50,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.Corext;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IPackageFragmentRootManipulationQuery;
@@ -60,7 +60,6 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 public class DeletePackageFragmentRootChange extends AbstractDeleteChange {
 
@@ -118,10 +117,8 @@ public class DeletePackageFragmentRootChange extends AbstractDeleteChange {
 		CompositeChange result= new CompositeChange(getName());
 
 		ResourceDescription rootDescription = ResourceDescription.fromResource(rootResource);
-		IJavaProject[] referencingProjects= JavaElementUtil.getReferencingProjects(root);
 		HashMap<IFile, String> classpathFilesContents= new HashMap<>();
-		for (int i= 0; i < referencingProjects.length; i++) {
-			IJavaProject javaProject= referencingProjects[i];
+		for (IJavaProject javaProject : JavaElementUtil.getReferencingProjects(root)) {
 			IFile classpathFile= javaProject.getProject().getFile(".classpath"); //$NON-NLS-1$
 			if (classpathFile.exists()) {
 				classpathFilesContents.put(classpathFile, getFileContents(classpathFile));
@@ -131,8 +128,7 @@ public class DeletePackageFragmentRootChange extends AbstractDeleteChange {
 		root.delete(resourceUpdateFlags, jCoreUpdateFlags, new SubProgressMonitor(pm, 1));
 
 		rootDescription.recordStateFromHistory(rootResource, new SubProgressMonitor(pm, 1));
-		for (Iterator<Entry<IFile, String>> iterator= classpathFilesContents.entrySet().iterator(); iterator.hasNext();) {
-			Entry<IFile, String> entry= iterator.next();
+		for (Entry<IFile, String> entry : classpathFilesContents.entrySet()) {
 			IFile file= entry.getKey();
 			String contents= entry.getValue();
 			//Restore time stamps? This should probably be some sort of UndoTextFileChange.

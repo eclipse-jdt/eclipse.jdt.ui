@@ -303,8 +303,8 @@ public class FullConstraintCreator extends ConstraintCreator{
 					result.addAll(Arrays.asList(fTypeConstraintFactory.createSubtypeConstraint(expressionVar, fConstraintVariableFactory.makeDeclaringTypeVariable(rootDefs[0]))));
 				}else{
 					Collection<ITypeConstraint> constraints= new ArrayList<>();
-					for (int i= 0; i < rootDefs.length; i++) {
-						ConstraintVariable rootDefTypeVar= fConstraintVariableFactory.makeDeclaringTypeVariable(rootDefs[i]);
+					for (IMethodBinding rootDef : rootDefs) {
+						ConstraintVariable rootDefTypeVar= fConstraintVariableFactory.makeDeclaringTypeVariable(rootDef);
 						ITypeConstraint[] tc= fTypeConstraintFactory.createSubtypeConstraint(expressionVar, rootDefTypeVar);
 						constraints.addAll(Arrays.asList(tc));
 					}
@@ -662,10 +662,8 @@ public class FullConstraintCreator extends ConstraintCreator{
 	 * return Set of ITypeBindings
 	 */
 	private static Set<ITypeBinding> getDeclaringSuperTypes(IVariableBinding fieldBinding) {
-		ITypeBinding[] allSuperTypes= Bindings.getAllSuperTypes(fieldBinding.getDeclaringClass());
 		Set<ITypeBinding> result= new HashSet<>();
-		for (int i= 0; i < allSuperTypes.length; i++) {
-			ITypeBinding type= allSuperTypes[i];
+		for (ITypeBinding type : Bindings.getAllSuperTypes(fieldBinding.getDeclaringClass())) {
 			if (findField(fieldBinding, type) != null)
 				result.add(type);
 		}

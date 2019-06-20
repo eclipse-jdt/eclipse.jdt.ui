@@ -281,9 +281,10 @@ import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 	}
 
 	private boolean isSnippetNode(ASTNode node) {
-		for (int i= 0; i < fSnippet.length; i++) {
-			if (node == fSnippet[i])
+		for (ASTNode a : fSnippet) {
+			if (node == a) {
 				return true;
+			}
 		}
 		return false;
 	}

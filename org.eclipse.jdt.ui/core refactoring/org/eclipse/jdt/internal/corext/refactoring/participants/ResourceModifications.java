@@ -15,7 +15,6 @@ package org.eclipse.jdt.internal.corext.refactoring.participants;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
@@ -257,18 +256,18 @@ public class ResourceModifications {
 		List<RefactoringParticipant> result= new ArrayList<>(5);
 		if (fDelete != null) {
 			DeleteArguments arguments= new DeleteArguments();
-			for (Iterator<IResource> iter= fDelete.iterator(); iter.hasNext();) {
+			for (IResource resource : fDelete) {
 				DeleteParticipant[] deletes= ParticipantManager.loadDeleteParticipants(status,
-					processor, iter.next(),
+					processor, resource,
 					arguments, natures, shared);
 				result.addAll(Arrays.asList(deletes));
 			}
 		}
 		if (fCreate != null) {
 			CreateArguments arguments= new CreateArguments();
-			for (Iterator<IResource> iter= fCreate.iterator(); iter.hasNext();) {
+			for (IResource resource : fCreate) {
 				CreateParticipant[] creates= ParticipantManager.loadCreateParticipants(status,
-					processor, iter.next(),
+					processor, resource,
 					arguments, natures, shared);
 				result.addAll(Arrays.asList(creates));
 			}
@@ -339,8 +338,7 @@ public class ResourceModifications {
 		if (fDeltaDescriptions == null)
 			return false;
 		IPath fullPath= resource.getFullPath();
-		for (Iterator<DeltaDescription> iter= fDeltaDescriptions.iterator(); iter.hasNext();) {
-			DeltaDescription delta= iter.next();
+		for (DeltaDescription delta : fDeltaDescriptions) {
 			if (fullPath.equals(delta.getDestinationPath()))
 				return true;
 		}
@@ -350,8 +348,8 @@ public class ResourceModifications {
 	public void buildDelta(IResourceChangeDescriptionFactory builder) {
 		if (fDeltaDescriptions == null)
 			return;
-		for (Iterator<DeltaDescription> iter= fDeltaDescriptions.iterator(); iter.hasNext();) {
-			iter.next().buildDelta(builder);
+		for (DeltaDescription delta : fDeltaDescriptions) {
+			delta.buildDelta(builder);
 		}
 	}
 

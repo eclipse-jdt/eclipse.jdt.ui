@@ -33,9 +33,11 @@ public class TypeEquivalenceSet {
 	}
 
 	public void add(ConstraintVariable2 variable) {
-		for (int i= 0; i < fVariables.length; i++)
-			if (fVariables[i] == variable)
+		for (ConstraintVariable2 constraintVariable : fVariables) {
+			if (constraintVariable == variable) {
 				return;
+			}
+		}
 
 		int length= fVariables.length;
 		ConstraintVariable2[] newElements= new ConstraintVariable2[length + 1];
@@ -59,8 +61,7 @@ public class TypeEquivalenceSet {
 			List<ConstraintVariable2> elements= Arrays.asList(fVariables);
 			ArrayList<ConstraintVariable2> result= new ArrayList<>(fVariables.length + variables.length);
 			result.addAll(elements);
-			for (int i= 0; i < variables.length; i++) {
-				ConstraintVariable2 right= variables[i];
+			for (ConstraintVariable2 right : variables) {
 				if (! result.contains(right))
 					result.add(right);
 			}

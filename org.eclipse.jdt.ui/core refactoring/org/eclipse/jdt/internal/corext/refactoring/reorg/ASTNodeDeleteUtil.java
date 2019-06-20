@@ -15,7 +15,6 @@ package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -93,16 +92,14 @@ public class ASTNodeDeleteUtil {
 
 	public static void markAsDeleted(IJavaElement[] javaElements, CompilationUnitRewrite rewrite, TextEditGroup group) throws JavaModelException {
 		final List<ASTNode> removed= new ArrayList<>();
-		for (int i= 0; i < javaElements.length; i++) {
-			markAsDeleted(removed, javaElements[i], rewrite, group);
+		for (IJavaElement javaElement : javaElements) {
+			markAsDeleted(removed, javaElement, rewrite, group);
 		}
 		propagateFieldDeclarationNodeDeletions(removed, rewrite, group);
 	}
 
 	private static void markAsDeleted(List<ASTNode> list, IJavaElement element, CompilationUnitRewrite rewrite, TextEditGroup group) throws JavaModelException {
-		ASTNode[] declarationNodes= getNodesToDelete(element, rewrite.getRoot());
-		for (int i= 0; i < declarationNodes.length; i++) {
-			ASTNode node= declarationNodes[i];
+		for (ASTNode node : getNodesToDelete(element, rewrite.getRoot())) {
 			if (node != null) {
 				list.add(node);
 				rewrite.getASTRewrite().remove(node, group);
@@ -113,8 +110,7 @@ public class ASTNodeDeleteUtil {
 
 	private static void propagateFieldDeclarationNodeDeletions(final List<ASTNode> removed, final CompilationUnitRewrite rewrite, final TextEditGroup group) {
 		Set<ASTNode> removedNodes= getRemovedNodes(removed, rewrite);
-		for (Iterator<ASTNode> iter= removedNodes.iterator(); iter.hasNext();) {
-			ASTNode node= iter.next();
+		for (ASTNode node : removedNodes) {
 			if (node instanceof VariableDeclarationFragment) {
 				if (node.getParent() instanceof FieldDeclaration) {
 					FieldDeclaration fd= (FieldDeclaration) node.getParent();
