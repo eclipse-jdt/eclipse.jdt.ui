@@ -1206,11 +1206,27 @@ public class LocalCorrectionsSubProcessor {
 			if (idx > 0) {
 				Object prevStatement= statements.get(idx - 1);
 				if (prevStatement instanceof IfStatement) {
-					IfStatement ifStatement= (IfStatement)prevStatement;
+					IfStatement ifStatement= (IfStatement) prevStatement;
 					if (ifStatement.getElseStatement() == null) {
 						// remove if (true), see https://bugs.eclipse.org/bugs/show_bug.cgi?id=261519
-						rewrite.replace(ifStatement, rewrite.createMoveTarget(ifStatement.getThenStatement()), null);
+						Statement thenStatement= ifStatement.getThenStatement();
 						label= CorrectionMessages.LocalCorrectionsSubProcessor_removeunreachablecode_including_condition_description;
+						if (thenStatement instanceof Block) {
+							// add all child nodes from Block node
+							List<Statement> thenStatements= ((Block) thenStatement).statements();
+							if (thenStatements.isEmpty()) {
+								return;
+							}
+							ASTNode[] thenStatementsArray= new ASTNode[thenStatements.size()];
+							for (int i= 0; i < thenStatementsArray.length; i++) {
+								thenStatementsArray[i]= thenStatements.get(i);
+							}
+							ASTNode newThenStatement= rewrite.createGroupNode(thenStatementsArray);
+
+							rewrite.replace(ifStatement, newThenStatement, null);
+						} else {
+							rewrite.replace(ifStatement, thenStatement, null);
+						}
 					}
 				}
 			}
