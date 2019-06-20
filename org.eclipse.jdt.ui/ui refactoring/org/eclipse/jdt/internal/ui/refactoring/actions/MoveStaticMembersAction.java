@@ -95,9 +95,10 @@ public class MoveStaticMembersAction extends SelectionDispatchAction{
 	public void run(IStructuredSelection selection) {
 		try {
 			IMember[] members= getSelectedMembers(selection);
-			for (int index= 0; index < members.length; index++) {
-				if (!ActionUtil.isEditable(getShell(), members[index]))
+			for (IMember member : members) {
+				if (!ActionUtil.isEditable(getShell(), member)) {
 					return;
+				}
 			}
 			if (RefactoringAvailabilityTester.isMoveStaticMembersAvailable(members))
 				RefactoringExecutionStarter.startMoveStaticMembersRefactoring(members, getShell());

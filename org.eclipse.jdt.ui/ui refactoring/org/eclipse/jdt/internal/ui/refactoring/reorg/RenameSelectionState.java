@@ -55,13 +55,11 @@ public class RenameSelectionState {
 		IWorkbenchPage page = dw.getActivePage();
 		if (page == null)
 			return;
-		IViewReference vrefs[]= page.getViewReferences();
-		for(int i= 0; i < vrefs.length; i++) {
-			consider(vrefs[i].getPart(false));
+		for (IViewReference vref : page.getViewReferences()) {
+			consider(vref.getPart(false));
 		}
-		IEditorReference refs[]= page.getEditorReferences();
-		for(int i= 0; i < refs.length; i++) {
-			consider(refs[i].getPart(false));
+		for (IEditorReference ref : page.getEditorReferences()) {
+			consider(ref.getPart(false));
 		}
 	}
 

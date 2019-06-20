@@ -276,10 +276,10 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 			if (fPkgFragment == null)
 				return new Object[0];
 			List<Object> result= new ArrayList<>(1);
-			Object[] nonjava= fPkgFragment.getNonJavaResources();
-			for (int i= 0; i < nonjava.length; i++) {
-				if (isPropertyFile(nonjava[i]))
-					result.add(nonjava[i]);
+			for (Object nonJava : fPkgFragment.getNonJavaResources()) {
+				if (isPropertyFile(nonJava)) {
+					result.add(nonJava);
+				}
 			}
 			return result.toArray();
 

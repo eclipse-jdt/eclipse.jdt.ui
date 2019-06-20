@@ -67,9 +67,8 @@ public class QualifiedNameComponent extends Composite {
 	@Override
 	public void setEnabled(boolean enabled) {
 		super.setEnabled(enabled);
-		Control[] children= getChildren();
-		for (int i= 0; i < children.length; i++) {
-			children[i].setEnabled(enabled);
+		for (Control child : getChildren()) {
+			child.setEnabled(enabled);
 		}
 	}
 

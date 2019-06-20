@@ -164,8 +164,8 @@ public class PromoteTempWizard extends RefactoringWizard {
 		private void updateButtonsEnablement() {
 			fDeclareFinalCheckbox.setEnabled(getPromoteTempRefactoring().canEnableSettingFinal());
 			fDeclareStaticCheckbox.setEnabled(getPromoteTempRefactoring().canEnableSettingStatic());
-			for (int i= 0; i < fInitializeInRadioButtons.length; i++) {
-				fInitializeInRadioButtons[i].setEnabled(canEnable(getDataAsInt(fInitializeInRadioButtons[i])));
+			for (Button initializeInRadioButton : fInitializeInRadioButtons) {
+				initializeInRadioButton.setEnabled(canEnable(getDataAsInt(initializeInRadioButton)));
 			}
 		}
 

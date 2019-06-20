@@ -15,9 +15,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.code;
 
-import java.util.Iterator;
-import java.util.List;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -47,6 +44,7 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring;
@@ -63,7 +61,6 @@ import org.eclipse.jdt.internal.ui.refactoring.InputPageUtil;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 
 public class ExtractMethodInputPage extends UserInputWizardPage {
@@ -123,8 +120,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 			label.setText(RefactoringMessages.ExtractMethodInputPage_destination_type);
 			final Combo combo= new Combo(result, SWT.READ_ONLY | SWT.DROP_DOWN);
 			SWTUtil.setDefaultVisibleItemCount(combo);
-			for (int i= 0; i < destinations.length; i++) {
-				ASTNode declaration= destinations[i];
+			for (ASTNode declaration : destinations) {
 				combo.add(getLabel(declaration));
 			}
 			combo.select(0);
@@ -262,24 +258,24 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 		if (fRefactoring.isDestinationInterface()) {
 			Integer visibility= Integer.valueOf(Modifier.PUBLIC);
 			fRefactoring.setVisibility(visibility.intValue());
-			for (int i= 0; i < radioButtons.length; i++) {
-				radioButtons[i].setEnabled(false);
-				if (radioButtons[i].getData().equals(visibility)) {
-					((Button) radioButtons[i]).setSelection(true);
+			for (Control radioButton : radioButtons) {
+				radioButton.setEnabled(false);
+				if (radioButton.getData().equals(visibility)) {
+					((Button) radioButton).setSelection(true);
 				} else {
-					((Button) radioButtons[i]).setSelection(false);
+					((Button) radioButton).setSelection(false);
 				}
 			}
 		} else {
 			final String accessModifier= fSettings.get(ACCESS_MODIFIER);
 			Integer visibility= accessModifier != null ? Integer.valueOf(accessModifier) : Integer.valueOf(fRefactoring.getVisibility());
 			fRefactoring.setVisibility(visibility.intValue());
-			for (int i= 0; i < radioButtons.length; i++) {
-				radioButtons[i].setEnabled(true);
-				if (radioButtons[i].getData().equals(visibility)) {
-					((Button) radioButtons[i]).setSelection(true);
+			for (Control radioButton : radioButtons) {
+				radioButton.setEnabled(true);
+				if (radioButton.getData().equals(visibility)) {
+					((Button) radioButton).setSelection(true);
 				} else {
-					((Button) radioButtons[i]).setSelection(false);
+					((Button) radioButton).setSelection(false);
 				}
 			}
 		}
@@ -447,9 +443,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 
 	private RefactoringStatus validateParameters() {
 		RefactoringStatus result= new RefactoringStatus();
-		List<ParameterInfo> parameters= fRefactoring.getParameterInfos();
-		for (Iterator<ParameterInfo> iter= parameters.iterator(); iter.hasNext();) {
-			ParameterInfo info= iter.next();
+		for (ParameterInfo info : fRefactoring.getParameterInfos()) {
 			if ("".equals(info.getNewName())) { //$NON-NLS-1$
 				result.addFatalError(RefactoringMessages.ExtractMethodInputPage_validation_emptyParameterName);
 				return result;

@@ -109,9 +109,8 @@ public abstract class AbstractJavaElementLabelDecorator implements ILightweightL
 	protected abstract void processDelta(IJavaElementDelta delta, List<IJavaElement> result);
 
 	protected boolean processChildrenDelta(IJavaElementDelta delta, List<IJavaElement> result) {
-		IJavaElementDelta[] children= delta.getAffectedChildren();
-		for (int i= 0; i < children.length; i++) {
-			processDelta(children[i], result);
+		for (IJavaElementDelta child : delta.getAffectedChildren()) {
+			processDelta(child, result);
 		}
 		return false;
 	}

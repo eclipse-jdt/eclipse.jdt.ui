@@ -17,7 +17,6 @@ package org.eclipse.jdt.internal.ui.refactoring.nls.search;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -96,8 +95,7 @@ public class NLSSearchResult extends AbstractTextSearchResult implements IEditor
 	@Override
 	public Match[] computeContainedMatches(AbstractTextSearchResult result, IFile file) {
 		Set<Match> matches= new HashSet<>();
-		for (Iterator<FileEntry> iter= fFileEntryGroups.iterator(); iter.hasNext();) {
-			FileEntry element= iter.next();
+		for (FileEntry element : fFileEntryGroups) {
 			if (element.getPropertiesFile().equals(file)) {
 				matches.addAll(Arrays.asList(getMatches(element)));
 			}
@@ -106,8 +104,7 @@ public class NLSSearchResult extends AbstractTextSearchResult implements IEditor
 			return matches.toArray(new Match[matches.size()]);
 
 		try {
-			for (Iterator<CompilationUnitEntry> iter= fCompilationUnitGroups.iterator(); iter.hasNext();) {
-				CompilationUnitEntry element= iter.next();
+			for (CompilationUnitEntry element : fCompilationUnitGroups) {
 				ICompilationUnit cu= element.getCompilationUnit();
 				if (cu.exists() && file.equals(cu.getCorrespondingResource())) {
 					matches.addAll(Arrays.asList(getMatches(element)));
@@ -133,9 +130,8 @@ public class NLSSearchResult extends AbstractTextSearchResult implements IEditor
 		if (element instanceof IParent) {
 			IParent parent= (IParent) element;
 			try {
-				IJavaElement[] children= parent.getChildren();
-				for (int i= 0; i < children.length; i++) {
-					collectMatches(matches, children[i]);
+				for (IJavaElement child : parent.getChildren()) {
+					collectMatches(matches, child);
 				}
 			} catch (JavaModelException e) {
 				// we will not be tracking these results

@@ -290,8 +290,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 
 	private static int getEditableCount(final MemberActionInfo[] infos) {
 		int result= 0;
-		for (int i= 0; i < infos.length; i++) {
-			final MemberActionInfo info= infos[i];
+		for (PullUpMemberPage.MemberActionInfo info : infos) {
 			if (info.isEditable())
 				result++;
 		}
@@ -303,8 +302,8 @@ public class PullUpMemberPage extends UserInputWizardPage {
 	}
 
 	private static void setActionForInfos(final MemberActionInfo[] infos, final int action) {
-		for (int i= 0; i < infos.length; i++) {
-			infos[i].setAction(action);
+		for (PullUpMemberPage.MemberActionInfo info : infos) {
+			info.setAction(action);
 		}
 	}
 
@@ -680,8 +679,8 @@ public class PullUpMemberPage extends UserInputWizardPage {
 		fSuperTypesCombo= new Combo(parent, SWT.READ_ONLY);
 		SWTUtil.setDefaultVisibleItemCount(fSuperTypesCombo);
 		if (fCandidateTypes.length > 0) {
-			for (int i= 0; i < fCandidateTypes.length; i++) {
-				final String comboLabel= fCandidateTypes[i].getFullyQualifiedName('.');
+			for (IType candidateType : fCandidateTypes) {
+				final String comboLabel= candidateType.getFullyQualifiedName('.');
 				fSuperTypesCombo.add(comboLabel);
 			}
 			fSuperTypesCombo.select(fCandidateTypes.length - 1);
@@ -755,8 +754,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 	private MemberActionInfo[] getActiveInfos() {
 		final MemberActionInfo[] infos= getTableInput();
 		final List<MemberActionInfo> result= new ArrayList<>(infos.length);
-		for (int i= 0; i < infos.length; i++) {
-			final MemberActionInfo info= infos[i];
+		for (PullUpMemberPage.MemberActionInfo info : infos) {
 			if (info.isActive())
 				result.add(info);
 		}
@@ -769,9 +767,10 @@ public class PullUpMemberPage extends UserInputWizardPage {
 			return -1;
 
 		final int code= infos[0].getAction();
-		for (int i= 0; i < infos.length; i++) {
-			if (code != infos[i].getAction())
+		for (PullUpMemberPage.MemberActionInfo info : infos) {
+			if (code != info.getAction()) {
 				return -1;
+			}
 		}
 		return code;
 	}
@@ -816,8 +815,8 @@ public class PullUpMemberPage extends UserInputWizardPage {
 	private IMember[] getMembers() {
 		final MemberActionInfo[] infos= getTableInput();
 		final List<IMember> result= new ArrayList<>(infos.length);
-		for (int index= 0; index < infos.length; index++) {
-			result.add(infos[index].getMember());
+		for (PullUpMemberPage.MemberActionInfo info : infos) {
+			result.add(info.getMember());
 		}
 		return result.toArray(new IMember[result.size()]);
 	}
@@ -836,9 +835,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 
 	private void getMembersForAction(int action, boolean onlyMethods, List<IMember> result) {
 		boolean isDestinationInterface= isDestinationInterface();
-		final MemberActionInfo[] infos= getTableInput();
-		for (int index= 0; index < infos.length; index++) {
-			MemberActionInfo info= infos[index];
+		for (PullUpMemberPage.MemberActionInfo info : getTableInput()) {
 			int infoAction= info.getAction();
 			boolean isMethodInfo= info.isMethodInfo();
 			if (!isMethodInfo && onlyMethods)
@@ -947,10 +944,11 @@ public class PullUpMemberPage extends UserInputWizardPage {
 
 	private void setActionForMembers(final IMember[] members, final int action) {
 		final MemberActionInfo[] infos= getTableInput();
-		for (int i= 0; i < members.length; i++) {
-			for (int j= 0; j < infos.length; j++) {
-				if (infos[j].getMember().equals(members[i]))
-					infos[j].setAction(action);
+		for (IMember member : members) {
+			for (PullUpMemberPage.MemberActionInfo info : infos) {
+				if (info.getMember().equals(member)) {
+					info.setAction(action);
+				}
 			}
 		}
 	}

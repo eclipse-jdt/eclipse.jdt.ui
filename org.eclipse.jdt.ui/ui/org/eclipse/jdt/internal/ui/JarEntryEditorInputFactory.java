@@ -106,10 +106,9 @@ public class JarEntryEditorInputFactory implements IElementFactory {
 		if (versionSepIndex > 0) {
 			// try stripping plug-in version number
 			String prefix= rootName.substring(0, versionSepIndex);
-			IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
-			for (int i= 0; i < roots.length; i++) {
-				if (roots[i].getElementName().startsWith(prefix)) {
-					return roots[i];
+			for (IPackageFragmentRoot root : project.getPackageFragmentRoots()) {
+				if (root.getElementName().startsWith(prefix)) {
+					return root;
 				}
 			}
 		}
@@ -120,8 +119,7 @@ public class JarEntryEditorInputFactory implements IElementFactory {
 		int depth= pathSegments.length;
 		segments: for (int i= 0; i < depth; i++) {
 			String name= pathSegments[i];
-			for (int j= 0; j < children.length; j++) {
-				Object child= children[j];
+			for (Object child : children) {
 				if (child instanceof IJarEntryResource) {
 					IJarEntryResource jarEntryResource= (IJarEntryResource) child;
 					if (name.equals(jarEntryResource.getName())) {

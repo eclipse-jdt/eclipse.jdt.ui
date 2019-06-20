@@ -81,8 +81,8 @@ public class TypedSourceTransfer extends ByteArrayTransfer {
 
 			dataOut.writeInt(sources.length);
 
-			for (int i = 0; i < sources.length; i++) {
-				writeJavaElement(dataOut, sources[i]);
+			for (TypedSource source : sources) {
+				writeJavaElement(dataOut, source);
 			}
 
 			dataOut.close();

@@ -273,8 +273,7 @@ public class ExtractClassWizard extends RefactoringWizard {
 			table.setLayoutData(gridData);
 			Field[] fields= fDescriptor.getFields();
 			tv.setInput(fields);
-			for (int i= 0; i < fields.length; i++) {
-				Field field= fields[i];
+			for (Field field : fields) {
 				tv.setChecked(field, field.isCreateField());
 			}
 

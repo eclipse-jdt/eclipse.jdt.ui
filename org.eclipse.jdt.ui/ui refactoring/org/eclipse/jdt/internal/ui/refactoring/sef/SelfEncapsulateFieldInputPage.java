@@ -394,8 +394,8 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		combo.add(RefactoringMessages.SelfEncapsulateFieldInputPage_first_method);
 		try {
 			IMethod[] methods= field.getDeclaringType().getMethods();
-			for (int i= 0; i < methods.length; i++) {
-				combo.add(JavaElementLabels.getElementLabel(methods[i], JavaElementLabels.M_PARAMETER_TYPES));
+			for (IMethod method : methods) {
+				combo.add(JavaElementLabels.getElementLabel(method, JavaElementLabels.M_PARAMETER_TYPES));
 			}
 			if (methods.length > 0)
 				select= methods.length;

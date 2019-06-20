@@ -101,9 +101,7 @@ public class CompilationUnitChangeNode extends TextEditChangeNode {
 		if (cunit != null) {
 			List<ChildNode> children= new ArrayList<>(5);
 			Map<IJavaElement, JavaLanguageNode> map= new HashMap<>(20);
-			TextEditBasedChangeGroup[] changes= getSortedChangeGroups(change);
-			for (int i= 0; i < changes.length; i++) {
-				TextEditBasedChangeGroup tec= changes[i];
+			for (TextEditBasedChangeGroup tec : getSortedChangeGroups(change)) {
 				try {
 					IJavaElement element= getModifiedJavaElement(tec, cunit);
 					if (element.equals(cunit)) {
@@ -142,9 +140,10 @@ public class CompilationUnitChangeNode extends TextEditChangeNode {
 	private TextEditBasedChangeGroup[] getSortedChangeGroups(TextEditBasedChange change) {
 		TextEditBasedChangeGroup[] edits= change.getChangeGroups();
 		List<TextEditBasedChangeGroup> result= new ArrayList<>(edits.length);
-		for (int i= 0; i < edits.length; i++) {
-			if (!edits[i].getTextEditGroup().isEmpty())
-				result.add(edits[i]);
+		for (TextEditBasedChangeGroup edit : edits) {
+			if (!edit.getTextEditGroup().isEmpty()) {
+				result.add(edit);
+			}
 		}
 		Comparator<TextEditBasedChangeGroup> comparator= new OffsetComparator();
 		Collections.sort(result, comparator);
@@ -199,15 +198,13 @@ public class CompilationUnitChangeNode extends TextEditChangeNode {
 			return false;
 		int sOffset= sourceRegion.getOffset();
 		int sEnd= sOffset + sLength - 1;
-		TextEdit[] edits= group.getTextEdits();
-		for (int i= 0; i < edits.length; i++) {
-			TextEdit edit= edits[i];
+		for (TextEdit edit : group.getTextEdits()) {
 			if (edit.isDeleted())
 				return false;
 			int rOffset= edit.getOffset();
 			int rLength= edit.getLength();
 			int rEnd= rOffset + rLength - 1;
-		    if (rLength == 0) {
+			if (rLength == 0) {
 				if (!(sOffset < rOffset && rOffset <= sEnd))
 					return false;
 			} else {

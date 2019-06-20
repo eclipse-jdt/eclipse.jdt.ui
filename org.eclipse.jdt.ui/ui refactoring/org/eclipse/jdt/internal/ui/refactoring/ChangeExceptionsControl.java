@@ -14,7 +14,6 @@
 package org.eclipse.jdt.internal.ui.refactoring;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
@@ -55,6 +54,7 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.refactoring.ExceptionInfo;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -63,7 +63,6 @@ import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.dialogs.FilteredTypesSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 /**
  * A special control to add and remove thrown exceptions.
@@ -79,8 +78,7 @@ public class ChangeExceptionsControl extends Composite {
 		}
 		private ExceptionInfo[] removeMarkedAsDeleted(List<ExceptionInfo> exceptionInfos){
 			List<ExceptionInfo> result= new ArrayList<>(exceptionInfos.size());
-			for (Iterator<ExceptionInfo> iter= exceptionInfos.iterator(); iter.hasNext();) {
-				ExceptionInfo info= iter.next();
+			for (ExceptionInfo info : exceptionInfos) {
 				if (! info.isDeleted())
 					result.add(info);
 			}
@@ -292,8 +290,7 @@ public class ChangeExceptionsControl extends Composite {
 	}
 
 	private ExceptionInfo findExceptionInfo(IType exception) {
-		for (Iterator<ExceptionInfo> iter= fExceptionInfos.iterator(); iter.hasNext(); ) {
-			ExceptionInfo info= iter.next();
+		for (ExceptionInfo info : fExceptionInfos) {
 			if (info.getElement().equals(exception))
 				return info;
 		}
@@ -309,12 +306,12 @@ public class ChangeExceptionsControl extends Composite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				int index= getTable().getSelectionIndices()[0];
-				ExceptionInfo[] selected= getSelectedItems();
-				for (int i= 0; i < selected.length; i++) {
-					if (selected[i].isAdded())
-						fExceptionInfos.remove(selected[i]);
-					else
-						selected[i].markAsDeleted();
+				for (ExceptionInfo s : getSelectedItems()) {
+					if (s.isAdded()) {
+						fExceptionInfos.remove(s);
+					} else {
+						s.markAsDeleted();
+					}
 				}
 				restoreSelection(index);
 			}

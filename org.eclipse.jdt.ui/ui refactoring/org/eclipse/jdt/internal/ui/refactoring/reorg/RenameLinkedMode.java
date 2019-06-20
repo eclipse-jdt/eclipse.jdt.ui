@@ -401,9 +401,7 @@ public class RenameLinkedMode {
 	private void restoreFullSelection() {
 		if (fOriginalSelection.y != 0) {
 			int originalOffset= fOriginalSelection.x;
-			LinkedPosition[] positions= fLinkedPositionGroup.getPositions();
-			for (int i= 0; i < positions.length; i++) {
-				LinkedPosition position= positions[i];
+			for (LinkedPosition position : fLinkedPositionGroup.getPositions()) {
 				if (! position.isDeleted() && position.includes(originalOffset)) {
 					fEditor.getViewer().setSelectedRange(position.offset, position.length);
 					return;
@@ -615,9 +613,7 @@ public class RenameLinkedMode {
 		Point selection= fEditor.getViewer().getSelectedRange();
 		int start= selection.x;
 		int end= start + selection.y;
-		LinkedPosition[] positions= fLinkedPositionGroup.getPositions();
-		for (int i= 0; i < positions.length; i++) {
-			LinkedPosition position= positions[i];
+		for (LinkedPosition position : fLinkedPositionGroup.getPositions()) {
 			if (position.includes(start) && position.includes(end))
 				return position;
 		}

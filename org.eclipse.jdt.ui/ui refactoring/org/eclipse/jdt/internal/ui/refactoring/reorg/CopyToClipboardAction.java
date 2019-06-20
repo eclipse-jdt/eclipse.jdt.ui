@@ -243,8 +243,8 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 		}
 
 		private static void addFileNames(Set<String> fileName, IResource[] resources) {
-			for (int i= 0; i < resources.length; i++) {
-				addFileName(fileName, resources[i]);
+			for (IResource resource : resources) {
+				addFileName(fileName, resource);
 			}
 		}
 
@@ -358,14 +358,20 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 		}
 
 		private boolean canCopyAllToClipboard() {
-			for (int i= 0; i < fResources.length; i++) {
-				if (! canCopyToClipboard(fResources[i])) return false;
+			for (IResource resource : fResources) {
+				if (!canCopyToClipboard(resource)) {
+					return false;
+				}
 			}
-			for (int i= 0; i < fJavaElements.length; i++) {
-				if (! canCopyToClipboard(fJavaElements[i])) return false;
+			for (IJavaElement javaElement : fJavaElements) {
+				if (!canCopyToClipboard(javaElement)) {
+					return false;
+				}
 			}
-			for (int i= 0; i < fJarEntryResources.length; i++) {
-				if (fJarEntryResources[i] == null) return false;
+			for (IJarEntryResource jarEntryResource : fJarEntryResources) {
+				if (jarEntryResource == null) {
+					return false;
+				}
 			}
 			return true;
 		}
@@ -388,21 +394,29 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 		}
 
 		private boolean hasProjects() {
-			for (int i= 0; i < fResources.length; i++) {
-				if (ReorgUtils.isProject(fResources[i])) return true;
+			for (IResource resource : fResources) {
+				if (ReorgUtils.isProject(resource)) {
+					return true;
+				}
 			}
-			for (int i= 0; i < fJavaElements.length; i++) {
-				if (ReorgUtils.isProject(fJavaElements[i])) return true;
+			for (IJavaElement javaElement : fJavaElements) {
+				if (ReorgUtils.isProject(javaElement)) {
+					return true;
+				}
 			}
 			return false;
 		}
 
 		private boolean hasNonProjects() {
-			for (int i= 0; i < fResources.length; i++) {
-				if (! ReorgUtils.isProject(fResources[i])) return true;
+			for (IResource resource : fResources) {
+				if (!ReorgUtils.isProject(resource)) {
+					return true;
+				}
 			}
-			for (int i= 0; i < fJavaElements.length; i++) {
-				if (! ReorgUtils.isProject(fJavaElements[i])) return true;
+			for (IJavaElement javaElement : fJavaElements) {
+				if (!ReorgUtils.isProject(javaElement)) {
+					return true;
+				}
 			}
 			return false;
 		}

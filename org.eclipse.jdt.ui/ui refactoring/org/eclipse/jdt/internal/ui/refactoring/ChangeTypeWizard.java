@@ -251,11 +251,13 @@ public class ChangeTypeWizard extends RefactoringWizard {
 		}
 
 		private TreeItem findItem(TreeItem[] items, ITypeBinding type){
-			for (int i=0; i < items.length; i++){
-				if (items[i].getData().equals(type)) return items[i];
+			for (TreeItem item : items) {
+				if (item.getData().equals(type)) {
+					return item;
+				}
 			}
-			for (int i=0; i < items.length; i++){
-				TreeItem item= findItem(items[i].getItems(), type);
+			for (TreeItem ti : items) {
+				TreeItem item= findItem(ti.getItems(), type);
 				if (item != null) return item;
 			}
 			return null;

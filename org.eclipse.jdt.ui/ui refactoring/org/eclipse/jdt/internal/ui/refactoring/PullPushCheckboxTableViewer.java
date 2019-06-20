@@ -55,8 +55,7 @@ class PullPushCheckboxTableViewer extends CheckboxTableViewer{
 	private void setCheckState(IMemberActionInfo[] infos) {
 		if (infos == null)
 			return;
-		for (int i= 0; i < infos.length; i++) {
-			IMemberActionInfo info= infos[i];
+		for (IMemberActionInfo info : infos) {
 			setChecked(info, PullPushCheckboxTableViewer.getCheckState(info));
 		}
 	}

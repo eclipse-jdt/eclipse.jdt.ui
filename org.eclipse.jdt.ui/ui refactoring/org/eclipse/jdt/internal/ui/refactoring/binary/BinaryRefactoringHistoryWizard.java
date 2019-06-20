@@ -143,13 +143,12 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 							final IProgressMonitor subMonitor= new SubProgressMonitor(monitor, 100, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL);
 							try {
 								subMonitor.beginTask(JarImportMessages.JarImportWizard_prepare_import, projects.length * 100);
-								for (int index= 0; index < projects.length; index++) {
-									final IPackageFragmentRoot[] roots= projects[index].getPackageFragmentRoots();
+								for (IJavaProject project : projects) {
+									final IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
 									final IProgressMonitor subsubMonitor= new SubProgressMonitor(subMonitor, 100, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL);
 									try {
 										subsubMonitor.beginTask(JarImportMessages.JarImportWizard_prepare_import, roots.length);
-										for (int offset= 0; offset < roots.length; offset++) {
-											final IPackageFragmentRoot current= roots[offset];
+										for (IPackageFragmentRoot current : roots) {
 											if (!current.equals(root) && current.getKind() == IPackageFragmentRoot.K_BINARY) {
 												final IClasspathEntry entry= current.getRawClasspathEntry();
 												if (entry.getEntryKind() == IClasspathEntry.CPE_LIBRARY) {
@@ -381,8 +380,8 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 			if (!canUseSourceAttachment()) {
 				final RefactoringDescriptorProxy[] proxies= getRefactoringHistory().getDescriptors();
 				monitor.beginTask(JarImportMessages.JarImportWizard_prepare_import, proxies.length * 100);
-				for (int index= 0; index < proxies.length; index++) {
-					final RefactoringDescriptor descriptor= proxies[index].requestDescriptor(new SubProgressMonitor(monitor, 100, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+				for (RefactoringDescriptorProxy proxy : proxies) {
+					final RefactoringDescriptor descriptor= proxy.requestDescriptor(new SubProgressMonitor(monitor, 100, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
 					if (descriptor != null) {
 						final int flags= descriptor.getFlags();
 						if ((flags & JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT) != 0)
@@ -417,8 +416,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 					final List<IPackageFragment> list= new ArrayList<>(elements.length);
 					try {
 						subMonitor.beginTask(JarImportMessages.JarImportWizard_prepare_import, elements.length);
-						for (int index= 0; index < elements.length; index++) {
-							final IJavaElement element= elements[index];
+						for (IJavaElement element : elements) {
 							if (!fProcessedFragments.contains(element) && !element.getElementName().equals(META_INF_FRAGMENT))
 								list.add((IPackageFragment) element);
 							subMonitor.worked(1);

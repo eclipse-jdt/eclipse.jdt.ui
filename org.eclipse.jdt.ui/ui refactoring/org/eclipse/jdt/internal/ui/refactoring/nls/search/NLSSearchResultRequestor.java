@@ -298,13 +298,13 @@ class NLSSearchResultRequestor extends SearchRequestor {
 					keyPositionResult.setOffset(tokenStart);
 					keyPositionResult.setLength(tokenEnd - tokenStart + 1);
 					IType parentClass= (IType)enclosingElement.getAncestor(IJavaElement.TYPE);
-					IField[] fields= parentClass.getFields();
 					String identifier= source.substring(tokenStart, tokenEnd + 1);
-					for (int i= 0; i < fields.length; i++) {
-						if (fields[i].getElementName().equals(identifier)) {
-							if (!Signature.getSignatureSimpleName(fields[i].getTypeSignature()).equals("String")) //$NON-NLS-1$
+					for (IField field : parentClass.getFields()) {
+						if (field.getElementName().equals(identifier)) {
+							if (!Signature.getSignatureSimpleName(field.getTypeSignature()).equals("String")) { //$NON-NLS-1$
 								return null;
-							Object obj= fields[i].getConstant();
+							}
+							Object obj= field.getConstant();
 							return obj instanceof String ? ((String)obj).substring(1, ((String)obj).length() - 1) : NO_KEY;
 						}
 					}

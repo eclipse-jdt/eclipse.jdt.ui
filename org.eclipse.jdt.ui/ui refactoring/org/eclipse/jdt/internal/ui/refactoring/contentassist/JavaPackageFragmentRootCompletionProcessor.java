@@ -139,9 +139,8 @@ public class JavaPackageFragmentRootCompletionProcessor implements IContentAssis
 		ArrayList<JavaCompletionProposal> proposals= new ArrayList<>();
 		String prefix= input.substring(0, documentOffset);
 		try {
-			IJavaElement[] packageFragments= fPackageFragmentRoot.getChildren();
-			for (int i= 0; i < packageFragments.length; i++) {
-				IPackageFragment pack= (IPackageFragment) packageFragments[i];
+			for (IJavaElement packageFragment : fPackageFragmentRoot.getChildren()) {
+				IPackageFragment pack= (IPackageFragment) packageFragment;
 				String packName= pack.getElementName();
 				if (packName.length() == 0 || ! packName.startsWith(prefix))
 					continue;
