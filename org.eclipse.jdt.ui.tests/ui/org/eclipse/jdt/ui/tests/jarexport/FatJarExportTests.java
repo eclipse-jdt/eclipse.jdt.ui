@@ -305,9 +305,7 @@ public class FatJarExportTests extends TestCase {
 	private static void buildProject() throws CoreException {
 		ResourcesPlugin.getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
 
-		IMarker[] markers= ResourcesPlugin.getWorkspace().getRoot().findMarkers(null, true, IResource.DEPTH_INFINITE);
-		for (int i= 0; i < markers.length; i++) {
-			IMarker marker= markers[i];
+		for (IMarker marker : ResourcesPlugin.getWorkspace().getRoot().findMarkers(null, true, IResource.DEPTH_INFINITE)) {
 			if (marker.getAttribute(IMarker.SEVERITY, IMarker.SEVERITY_INFO) == IMarker.SEVERITY_ERROR) {
 				assertTrue((String) marker.getAttribute(IMarker.MESSAGE), false);
 			}
@@ -342,9 +340,8 @@ public class FatJarExportTests extends TestCase {
 	private static String getProblems(MultiStatus status) {
 		StringBuilder result= new StringBuilder();
 
-		IStatus[] children= status.getChildren();
-		for (int i= 0; i < children.length; i++) {
-			result.append(children[i].getMessage()).append("\n"); //$NON-NLS-1$
+		for (IStatus child : status.getChildren()) {
+			result.append(child.getMessage()).append("\n"); //$NON-NLS-1$
 		}
 
 		return result.toString();
@@ -502,8 +499,8 @@ public class FatJarExportTests extends TestCase {
 		for (int i= 0; i < xmlFilesets.getLength(); i++) {
 			String dir= ((Element)xmlFilesets.item(i)).getAttribute("dir"); //$NON-NLS-1$
 			boolean found= false;
-			for (int j= 0; j < filesets.length; j++) {
-				if (dir.endsWith(filesets[j])) {
+			for (String fileset : filesets) {
+				if (dir.endsWith(fileset)) {
 					found= true;
 					break;
 				}
@@ -524,8 +521,8 @@ public class FatJarExportTests extends TestCase {
 			String absLibPath= ((Element)xmlCopies.item(i)).getAttribute("file"); //$NON-NLS-1$
 			String libName= new File(absLibPath).getName();
 			boolean found= false;
-			for (int j= 0; j < zipfilesets.length; j++) {
-				if (libName.equals(zipfilesets[j])) {
+			for (String zipfileset : zipfilesets) {
+				if (libName.equals(zipfileset)) {
 					found= true;
 					break;
 				}
@@ -577,8 +574,8 @@ public class FatJarExportTests extends TestCase {
 		for (int i= 0; i < xmlFilesets.getLength(); i++) {
 			String dir= ((Element)xmlFilesets.item(i)).getAttribute("dir"); //$NON-NLS-1$
 			boolean found= false;
-			for (int j= 0; j < filesets.length; j++) {
-				if (dir.endsWith(filesets[j])) {
+			for (String fileset : filesets) {
+				if (dir.endsWith(fileset)) {
 					found= true;
 					break;
 				}
@@ -593,8 +590,8 @@ public class FatJarExportTests extends TestCase {
 				libName= ((Element)xmlZipfilesets.item(i)).getAttribute("src"); //$NON-NLS-1$
 				found= libName.equals(FatJarRsrcUrlBuilder.JAR_RSRC_LOADER_ZIP); //$NON-NLS-1$
 			}
-			for (int j= 0; j < zipfilesets.length; j++) {
-				if (libName.equals(zipfilesets[j])) {
+			for (String zipfileset : zipfilesets) {
+				if (libName.equals(zipfileset)) {
 					found= true;
 					break;
 				}
@@ -637,8 +634,8 @@ public class FatJarExportTests extends TestCase {
 		for (int i= 0; i < xmlFilesets.getLength(); i++) {
 			String dir= ((Element)xmlFilesets.item(i)).getAttribute("dir"); //$NON-NLS-1$
 			boolean found= false;
-			for (int j= 0; j < filesets.length; j++) {
-				if (dir.endsWith(filesets[j])) {
+			for (String fileset : filesets) {
+				if (dir.endsWith(fileset)) {
 					found= true;
 					break;
 				}
@@ -651,8 +648,8 @@ public class FatJarExportTests extends TestCase {
 			assertEquals("META-INF/*.SF", excludes); //$NON-NLS-1$
 			String src= ((Element)xmlZipfilesets.item(i)).getAttribute("src"); //$NON-NLS-1$
 			boolean found= false;
-			for (int j= 0; j < zipfilesets.length; j++) {
-				if (src.endsWith(zipfilesets[j])) {
+			for (String zipfileset : zipfilesets) {
+				if (src.endsWith(zipfileset)) {
 					found= true;
 					break;
 				}

@@ -106,8 +106,7 @@ public class ClassPathDetectorTest extends TestCase {
 
 
 	private IClasspathEntry findEntry(IClasspathEntry entry, IClasspathEntry[] entries) {
-		for (int i= 0; i < entries.length; i++) {
-			IClasspathEntry curr= entries[i];
+		for (IClasspathEntry curr : entries) {
 			if (curr.getPath().equals(entry.getPath()) && curr.getEntryKind() == entry.getEntryKind()) {
 				if (curr.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
 					if (hasSamePaths(curr.getExclusionPatterns(), entry.getExclusionPatterns())) {
@@ -126,8 +125,7 @@ public class ClassPathDetectorTest extends TestCase {
 	private void assertSameClasspath(IClasspathEntry[] projectEntries, IClasspathEntry[] entries) throws Exception {
 		assertEquals("Number of classpath entries", projectEntries.length, entries.length);
 
-		for (int i= 0; i < projectEntries.length; i++) {
-			IClasspathEntry curr= projectEntries[i];
+		for (IClasspathEntry curr : projectEntries) {
 			assertTrue("entry not found: " + curr.getPath(), findEntry(curr, entries) != null);
 		}
 	}
@@ -158,9 +156,8 @@ public class ClassPathDetectorTest extends TestCase {
 
 		JavaProjectHelper.addLibraryWithImport(fJProject1, Path.fromOSString(mylibJar.getPath()), null, null);
 
-		IClasspathEntry[] jreEntries= PreferenceConstants.getDefaultJRELibrary();
-		for (int i= 0; i < jreEntries.length; i++) {
-			JavaProjectHelper.addToClasspath(fJProject1, jreEntries[i]);
+		for (IClasspathEntry jreEntry : PreferenceConstants.getDefaultJRELibrary()) {
+			JavaProjectHelper.addToClasspath(fJProject1, jreEntry);
 		}
 		fJProject1.getProject().build(IncrementalProjectBuilder.FULL_BUILD, null);
 
@@ -200,9 +197,8 @@ public class ClassPathDetectorTest extends TestCase {
 		buf.append("}\n");
 		pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		IClasspathEntry[] jreEntries= PreferenceConstants.getDefaultJRELibrary();
-		for (int i= 0; i < jreEntries.length; i++) {
-			JavaProjectHelper.addToClasspath(fJProject1, jreEntries[i]);
+		for (IClasspathEntry jreEntry : PreferenceConstants.getDefaultJRELibrary()) {
+			JavaProjectHelper.addToClasspath(fJProject1, jreEntry);
 		}
 		fJProject1.getProject().build(IncrementalProjectBuilder.FULL_BUILD, null);
 
@@ -243,9 +239,8 @@ public class ClassPathDetectorTest extends TestCase {
 		buf.append("}\n");
 		pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		IClasspathEntry[] jreEntries= PreferenceConstants.getDefaultJRELibrary();
-		for (int i= 0; i < jreEntries.length; i++) {
-			JavaProjectHelper.addToClasspath(fJProject1, jreEntries[i]);
+		for (IClasspathEntry jreEntry : PreferenceConstants.getDefaultJRELibrary()) {
+			JavaProjectHelper.addToClasspath(fJProject1, jreEntry);
 		}
 		fJProject1.getProject().build(IncrementalProjectBuilder.FULL_BUILD, null);
 
@@ -274,9 +269,8 @@ public class ClassPathDetectorTest extends TestCase {
 		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
 		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "", junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
 
-		IClasspathEntry[] jreEntries= PreferenceConstants.getDefaultJRELibrary();
-		for (int i= 0; i < jreEntries.length; i++) {
-			JavaProjectHelper.addToClasspath(fJProject1, jreEntries[i]);
+		for (IClasspathEntry jreEntry : PreferenceConstants.getDefaultJRELibrary()) {
+			JavaProjectHelper.addToClasspath(fJProject1, jreEntry);
 		}
 		fJProject1.getProject().build(IncrementalProjectBuilder.FULL_BUILD, null);
 
@@ -316,9 +310,8 @@ public class ClassPathDetectorTest extends TestCase {
 
 		IPackageFragmentRoot cfroot= JavaProjectHelper.addClassFolderWithImport(fJProject1, "cf", null, null, lib);
 
-		IClasspathEntry[] jreEntries= PreferenceConstants.getDefaultJRELibrary();
-		for (int i= 0; i < jreEntries.length; i++) {
-			JavaProjectHelper.addToClasspath(fJProject1, jreEntries[i]);
+		for (IClasspathEntry jreEntry : PreferenceConstants.getDefaultJRELibrary()) {
+			JavaProjectHelper.addToClasspath(fJProject1, jreEntry);
 		}
 		fJProject1.getProject().build(IncrementalProjectBuilder.FULL_BUILD, null);
 

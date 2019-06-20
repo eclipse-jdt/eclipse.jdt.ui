@@ -164,8 +164,8 @@ public class WorkingSetDropAdapterTest extends TestCase {
 
 	private static IWorkingSet[] createJavaWorkingSets(String[] names) {
 		IWorkingSetManager workingSetManager= PlatformUI.getWorkbench().getWorkingSetManager();
-		for (int i= 0; i < names.length; i++) {
-			IWorkingSet workingSet= workingSetManager.getWorkingSet(names[i]);
+		for (String name : names) {
+			IWorkingSet workingSet= workingSetManager.getWorkingSet(name);
 			if (workingSet != null)
 				workingSetManager.removeWorkingSet(workingSet);
 		}

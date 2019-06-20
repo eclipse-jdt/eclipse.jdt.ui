@@ -15,9 +15,7 @@
 package org.eclipse.jdt.ui.tests.performance.views;
 
 import java.io.File;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -125,8 +123,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 	}
 
 	private void addAllCUs(CleanUpRefactoring cleanUp, IJavaElement[] children) throws JavaModelException {
-		for (int i= 0; i < children.length; i++) {
-			IJavaElement element= children[i];
+		for (IJavaElement element : children) {
 			if (element instanceof ICompilationUnit) {
 				cleanUp.addCompilationUnit((ICompilationUnit)element);
 			} else if (element instanceof IPackageFragmentRoot) {
@@ -142,9 +139,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 	private static Map<String, String> getNullSettings() {
 		Map<String, String> result= new HashMap<>();
 
-		Collection<String> keys= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(CleanUpConstants.DEFAULT_CLEAN_UP_OPTIONS).getKeys();
-		for (Iterator<String> iterator= keys.iterator(); iterator.hasNext();) {
-			String key= iterator.next();
+		for (String key : JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(CleanUpConstants.DEFAULT_CLEAN_UP_OPTIONS).getKeys()) {
 			result.put(key, CleanUpOptions.FALSE);
 		}
 
@@ -231,9 +226,8 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 
 		storeSettings(node);
 
-		ICleanUp[] cleanUps= JavaPlugin.getDefault().getCleanUpRegistry().createCleanUps();
-		for (int i= 0; i < cleanUps.length; i++) {
-			cleanUpRefactoring.addCleanUp(cleanUps[i]);
+		for (ICleanUp cleanUp : JavaPlugin.getDefault().getCleanUpRegistry().createCleanUps()) {
+			cleanUpRefactoring.addCleanUp(cleanUp);
 		}
 
 		//See https://bugs.eclipse.org/bugs/show_bug.cgi?id=135219
@@ -489,8 +483,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 	}
 
 	private void clearOptions(ICleanUp[] cleanUps) {
-		for (int i= 0; i < cleanUps.length; i++) {
-			ICleanUp cleanUp= cleanUps[i];
+		for (ICleanUp cleanUp : cleanUps) {
 			if (cleanUp instanceof AbstractCleanUp) {
 				Accessor<AbstractCleanUp> accessor= new Accessor<>(cleanUp, AbstractCleanUp.class);
 				accessor.set("fOptions", null);

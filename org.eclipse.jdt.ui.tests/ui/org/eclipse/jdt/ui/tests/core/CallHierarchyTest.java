@@ -456,11 +456,8 @@ public class CallHierarchyTest extends TestCase {
     }
 
     private void assertRecursive(MethodWrapper[] callResults, boolean shouldBeRecursive) {
-        for (int i= 0; i < callResults.length; i++) {
-            assertEquals(
-                "Wrong recursive value: " + callResults[i].getName(),
-                shouldBeRecursive,
-                callResults[i].isRecursive());
-        }
+    	for (MethodWrapper callResult : callResults) {
+    		assertEquals("Wrong recursive value: " + callResult.getName(), shouldBeRecursive, callResult.isRecursive());
+    	}
     }
 }

@@ -119,8 +119,8 @@ public class AddUnimplementedMethodsTest18 extends TestCase {
 	}
 
 	private boolean nameContained(String methName, IJavaElement[] methods) {
-		for (int i= 0; i < methods.length; i++) {
-			if (methods[i].getElementName().equals(methName)) {
+		for (IJavaElement method : methods) {
+			if (method.getElementName().equals(methName)) {
 				return true;
 			}
 		}

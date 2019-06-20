@@ -65,9 +65,8 @@ public class HelloWorld extends TestCase {
 
 		IType type= classfile.getType();
 		System.out.println("methods of Vector");
-		IMethod[] methods= type.getMethods();
-		for (int i= 0; i < methods.length; i++) {
-			System.out.println(methods[i].getElementName());
+		for (IMethod method : type.getMethods()) {
+			System.out.println(method.getElementName());
 		}
 	}
 

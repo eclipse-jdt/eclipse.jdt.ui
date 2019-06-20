@@ -48,9 +48,8 @@ public class FileAdapterTest extends TestCase {
 		JavaSearchQuery query= SearchTestHelper.runTypeRefQuery("junit.framework.Test");
 		JavaSearchResult result= (JavaSearchResult) query.getSearchResult();
 		IFileMatchAdapter adapter= result.getFileMatchAdapter();
-		Object[] elements= result.getElements();
-		for (int i= 0; i < elements.length; i++) {
-			IJavaElement je= (IJavaElement) elements[i];
+		for (Object element : result.getElements()) {
+			IJavaElement je= (IJavaElement) element;
 			IResource underlying= je.getUnderlyingResource();
 			if (underlying != null && underlying.getName().endsWith(".java")) {
 				assertEquals(underlying, adapter.getFile(je));

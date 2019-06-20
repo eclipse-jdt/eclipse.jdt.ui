@@ -42,8 +42,8 @@ public class LeakTestCase extends TestCase {
 		@Override
 		public boolean visit(ReferencedObject object, Class<?> clazz, boolean firstVisit) {
 			boolean visitChildren= false;
-			for (int i= 0; i < fVisitors.length; i++) {
-				boolean res= fVisitors[i].visit(object, clazz, firstVisit);
+			for (ReferenceVisitor visitor : fVisitors) {
+				boolean res= visitor.visit(object, clazz, firstVisit);
 				visitChildren |= res;
 			}
 			return visitChildren;
@@ -71,8 +71,8 @@ public class LeakTestCase extends TestCase {
 		ReferenceVisitor visitor= new ReferenceVisitor() {
 			@Override
 			public boolean visit(ReferencedObject object, Class<?> clazz, boolean firstVisit) {
-				for (int i= 0; i < requestors.length; i++) {
-					requestors[i].visit(object, clazz, firstVisit);
+				for (InstancesOfTypeCollector requestor : requestors) {
+					requestor.visit(object, clazz, firstVisit);
 				}
 				return true;
 			}

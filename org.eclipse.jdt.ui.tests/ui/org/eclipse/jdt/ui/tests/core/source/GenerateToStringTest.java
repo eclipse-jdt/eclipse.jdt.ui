@@ -119,10 +119,8 @@ public class GenerateToStringTest extends SourceTestCase {
 		fSettings2.is60orHigher= is60orHigher;
 		IJavaProject jp= fRoot.getJavaProject();
 		if (is60orHigher || ! is50orHigher) {
-			IClasspathEntry[] cp= jp.getRawClasspath();
 			ArrayList<IClasspathEntry> newCP= new ArrayList<>();
-			for (int i= 0; i < cp.length; i++) {
-				IClasspathEntry cpe= cp[i];
+			for (IClasspathEntry cpe : jp.getRawClasspath()) {
 				if (cpe.getEntryKind() != IClasspathEntry.CPE_LIBRARY) {
 					newCP.add(cpe);
 				}
@@ -189,9 +187,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	private void compareSourceAssertCompilation(String expected, ICompilationUnit cu, CompilationUnit oldCUNode) throws Exception {
 		compareSource(expected, cu.getSource());
 		CompilationUnit newCUNode= getCUNode(cu);
-		IProblem[] problems= RefactoringAnalyzeUtil.getIntroducedCompileProblems(newCUNode, oldCUNode);
-		for (int i= 0; i < problems.length; i++) {
-			IProblem problem= problems[i];
+		for (IProblem problem : RefactoringAnalyzeUtil.getIntroducedCompileProblems(newCUNode, oldCUNode)) {
 			assertFalse(problem.toString(), problem.isError());
 		}
 	}

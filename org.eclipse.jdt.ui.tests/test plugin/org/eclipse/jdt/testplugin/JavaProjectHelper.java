@@ -492,10 +492,9 @@ public class JavaProjectHelper {
 			public void run(IProgressMonitor monitor) throws CoreException {
 				jproject.setRawClasspath(entries, null);
 
-				IResource[] resources= jproject.getProject().members();
-				for (int i= 0; i < resources.length; i++) {
-					if (!resources[i].getName().startsWith(".")) {
-						delete(resources[i]);
+				for (IResource resource : jproject.getProject().members()) {
+					if (!resource.getName().startsWith(".")) {
+						delete(resource);
 					}
 				}
 			}
@@ -981,8 +980,8 @@ public class JavaProjectHelper {
 
 	public static void addToClasspath(IJavaProject jproject, IClasspathEntry cpe) throws JavaModelException {
 		IClasspathEntry[] oldEntries= jproject.getRawClasspath();
-		for (int i= 0; i < oldEntries.length; i++) {
-			if (oldEntries[i].equals(cpe)) {
+		for (IClasspathEntry oldEntry : oldEntries) {
+			if (oldEntry.equals(cpe)) {
 				return;
 			}
 		}

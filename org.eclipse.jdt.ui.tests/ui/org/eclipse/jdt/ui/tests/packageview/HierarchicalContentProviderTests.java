@@ -74,11 +74,9 @@ public class HierarchicalContentProviderTests extends TestCase {
 
 		private static List<String> getExpected(IPackageFragmentRoot root) throws JavaModelException {
 			ArrayList<String> res= new ArrayList<>();
-			IJavaElement[] packages= root.getChildren();
-			for (int i= 0; i < packages.length; i++) {
-				IJavaElement[] files= ((IPackageFragment) packages[i]).getChildren();
-				for (int j= 0; j < files.length; j++) {
-					testAndAdd(files[j], res);
+			for (IJavaElement p : root.getChildren()) {
+				for (IJavaElement file : ((IPackageFragment) p).getChildren()) {
+					testAndAdd(file, res);
 				}
 			}
 			return res;
@@ -177,9 +175,7 @@ public class HierarchicalContentProviderTests extends TestCase {
 
 
 	private void collectChildren(PackageExplorerContentProvider provider, Object elem, List<String> result) {
-		Object[] children= provider.getChildren(elem);
-		for (int i= 0; i < children.length; i++) {
-			Object curr= children[i];
+		for (Object curr : provider.getChildren(elem)) {
 			testAndAdd(curr, result);
 			if (curr instanceof IPackageFragment) {
 				collectChildren(provider, curr, result);

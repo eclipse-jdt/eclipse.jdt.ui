@@ -68,9 +68,8 @@ public class TestRunListeners {
 		private void logElement(ITestElement elem, int indent) {
 			fLog.add(asString(elem, indent));
 			if (elem instanceof ITestElementContainer) {
-				ITestElement[] children= ((ITestElementContainer) elem).getChildren();
-				for (int i= 0; i < children.length; i++) {
-					logElement(children[i], indent + 1);
+				for (ITestElement child : ((ITestElementContainer) elem).getChildren()) {
+					logElement(child, indent + 1);
 				}
 			}
 		}

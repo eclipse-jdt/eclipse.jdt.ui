@@ -214,19 +214,17 @@ public class QuickFixTest extends TestCase {
 	}
 
 	public static MethodDeclaration findMethodDeclaration(TypeDeclaration typeDecl, String methodName) {
-		MethodDeclaration[] methods= typeDecl.getMethods();
-		for (int i= 0; i < methods.length; i++) {
-			if (methodName.equals(methods[i].getName().getIdentifier())) {
-				return methods[i];
+		for (MethodDeclaration method : typeDecl.getMethods()) {
+			if (methodName.equals(method.getName().getIdentifier())) {
+				return method;
 			}
 		}
 		return null;
 	}
 
 	public static VariableDeclarationFragment findFieldDeclaration(TypeDeclaration typeDecl, String fieldName) {
-		FieldDeclaration[] fields= typeDecl.getFields();
-		for (int i= 0; i < fields.length; i++) {
-			List<VariableDeclarationFragment> list= fields[i].fragments();
+		for (FieldDeclaration field : typeDecl.getFields()) {
+			List<VariableDeclarationFragment> list= field.fragments();
 			for (int k= 0; k < list.size(); k++) {
 				VariableDeclarationFragment fragment= list.get(k);
 				if (fieldName.equals(fragment.getName().getIdentifier())) {
@@ -299,9 +297,9 @@ public class QuickFixTest extends TestCase {
 		if (problems.length != nProblems) {
 			StringBuilder buf= new StringBuilder("Wrong number of problems, is: ");
 			buf.append(problems.length).append(", expected: ").append(nProblems).append('\n');
-			for (int i= 0; i < problems.length; i++) {
-				buf.append(problems[i]);
-				buf.append('[').append(problems[i].getSourceStart()).append(" ,").append(problems[i].getSourceEnd()).append(']');
+			for (IProblem problem : problems) {
+				buf.append(problem);
+				buf.append('[').append(problem.getSourceStart()).append(" ,").append(problem.getSourceEnd()).append(']');
 				buf.append('\n');
 			}
 			assertTrue(buf.toString(), false);
@@ -378,9 +376,7 @@ public class QuickFixTest extends TestCase {
 	public static void assertStatusOk(IStatus status) throws CoreException {
 		if (!status.isOK()) {
 			if (status.getException() == null) {  // find a status with an exception
-				IStatus[] children= status.getChildren();
-				for (int i= 0; i < children.length; i++) {
-					IStatus child= children[i];
+				for (IStatus child : status.getChildren()) {
 					if (child.getException() != null) {
 						throw new CoreException(child);
 					}
@@ -411,8 +407,8 @@ public class QuickFixTest extends TestCase {
 	}
 
 	private static boolean isFiltered(Object curr, Class<?>[] filteredTypes) {
-		for (int k = 0; k < filteredTypes.length; k++) {
-			if (filteredTypes[k].isInstance(curr)) {
+		for (Class<?> filteredType : filteredTypes) {
+			if (filteredType.isInstance(curr)) {
 				return true;
 			}
 		}
@@ -568,10 +564,9 @@ public class QuickFixTest extends TestCase {
 	}
 
 	protected static void assertNoErrors(IInvocationContext context) {
-		IProblem[] problems= context.getASTRoot().getProblems();
-		for (int i= 0; i < problems.length; i++) {
-			if (problems[i].isError()) {
-				assertTrue("source has error: " + problems[i].getMessage(), false);
+		for (IProblem problem : context.getASTRoot().getProblems()) {
+			if (problem.isError()) {
+				assertTrue("source has error: " + problem.getMessage(), false);
 			}
 		}
 	}

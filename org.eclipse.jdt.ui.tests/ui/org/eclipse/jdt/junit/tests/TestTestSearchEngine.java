@@ -213,8 +213,8 @@ public class TestTestSearchEngine extends TestCase {
 
 	private IType[] findTests(IJavaElement[] elements) throws InvocationTargetException, InterruptedException {
 		HashSet<IType> res= new HashSet<>();
-		for (int i= 0; i < elements.length; i++) {
-			IType[] types= findTests(elements[i]);
+		for (IJavaElement element : elements) {
+			IType[] types= findTests(element);
 			res.addAll(Arrays.asList(types));
 		}
 		return res.toArray(new IType[res.size()]);

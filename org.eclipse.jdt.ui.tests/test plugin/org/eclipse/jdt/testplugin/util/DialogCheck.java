@@ -109,19 +109,18 @@ public class DialogCheck {
 	 * @param composite The composite to look through
 	 */
 	private static void verifyCompositeText(Composite composite) {
-		Control children[] = composite.getChildren();
-		for (int i = 0; i < children.length; i++) {
+		for (Control child : composite.getChildren()) {
 			try {
 				//verify the text if the child is a button
-				verifyButtonText((Button) children[i]);
+				verifyButtonText((Button) child);
 			} catch (ClassCastException exNotButton) {
 				try {
 					//child is not a button, maybe a label
-					verifyLabelText((Label) children[i]);
+					verifyLabelText((Label) child);
 				} catch (ClassCastException exNotLabel) {
 					try {
 						//child is not a label, make a recursive call if it is a composite
-						verifyCompositeText((Composite) children[i]);
+						verifyCompositeText((Composite) child);
 					} catch (ClassCastException exNotComposite) {
 						//the child is not a button, label, or composite - ignore it.
 					}

@@ -454,8 +454,8 @@ public class AssistQuickFixTest10 extends QuickFixTest {
 	}
 
 	private static boolean isexpected(Object curr, Class<?>[] expectedTypes) {
-		for (int k= 0; k < expectedTypes.length; k++) {
-			if (expectedTypes[k].isInstance(curr)) {
+		for (Class<?> expectedType : expectedTypes) {
+			if (expectedType.isInstance(curr)) {
 				return true;
 			}
 		}

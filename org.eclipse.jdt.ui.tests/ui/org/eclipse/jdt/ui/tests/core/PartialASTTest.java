@@ -164,9 +164,7 @@ public class PartialASTTest extends CoreTests {
 				assertTrue(interfaces.get(j).resolveBinding() != null);
 			}
 
-			MethodDeclaration[] declarations= decl.getMethods();
-			for (int k= 0; k < declarations.length; k++) {
-				MethodDeclaration meth= declarations[k];
+			for (MethodDeclaration meth : decl.getMethods()) {
 				assertTrue(meth.resolveBinding() != null);
 				List<SingleVariableDeclaration> params= meth.parameters();
 				for (int n= 0; n < params.size(); n++) {

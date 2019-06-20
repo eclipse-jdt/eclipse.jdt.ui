@@ -134,8 +134,7 @@ public class HTMLTidyTest extends TestCase {
 	private boolean isIgnored(File file) {
 		String relativePath= file.getAbsolutePath().substring(fworkspacePathLength);
 		relativePath= relativePath.replace('\\', '/');
-		for (int i= 0; i < fIgnores.length; i++) {
-			StringMatcher matcher= fIgnores[i];
+		for (StringMatcher matcher : fIgnores) {
 			if (matcher.match(relativePath))
 				return true;
 		}
@@ -144,10 +143,8 @@ public class HTMLTidyTest extends TestCase {
 
 	private boolean checkFolder(File folder) throws Exception {
 
-		File[] files= folder.listFiles();
 		boolean success= true;
-		for (int i= 0; i < files.length; i++) {
-			File file= files[i];
+		for (File file : folder.listFiles()) {
 			if (isIgnored(file)) {
 //				System.out.println("Ignored: " + file.getAbsolutePath() + (file.isDirectory() ? "/*" : ""));
 				continue;

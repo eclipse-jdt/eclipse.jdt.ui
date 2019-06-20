@@ -260,15 +260,15 @@ public class CallHierarchyContentProviderTest extends TestCase {
     }
 
     private void assertCalleeMethodWrapperChildren(Object[] children) {
-        for (int i= 0; i < children.length; i++) {
-            assertTrue("Wrong class returned", children[i].getClass().getName().endsWith(".CalleeMethodWrapper"));
-        }
+    	for (Object child : children) {
+    		assertTrue("Wrong class returned", child.getClass().getName().endsWith(".CalleeMethodWrapper"));
+    	}
     }
 
     private void assertCallerMethodWrapperChildren(Object[] children) {
-        for (int i= 0; i < children.length; i++) {
-            assertTrue("Wrong class returned", children[i].getClass().getName().endsWith(".CallerMethodWrapper"));
-        }
+    	for (Object child : children) {
+    		assertTrue("Wrong class returned", child.getClass().getName().endsWith(".CallerMethodWrapper"));
+    	}
     }
 
     private TreeRoot wrapCalleeRoot(IMethod method) {

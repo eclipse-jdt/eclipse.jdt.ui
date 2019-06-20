@@ -484,12 +484,12 @@ public class AddUnimplementedMethodsTest extends TestCase {
 			StringBuilder buf= new StringBuilder();
 			buf.append(nExpected).append(" imports expected, is ").append(nImports).append("\n");
 			buf.append("expected:\n");
-			for (int i= 0; i < expected.length; i++) {
-				buf.append(expected[i]).append("\n");
+			for (String e : expected) {
+				buf.append(e).append("\n");
 			}
 			buf.append("actual:\n");
-			for (int i= 0; i < imports.length; i++) {
-				buf.append(imports[i]).append("\n");
+			for (IImportDeclaration i : imports) {
+				buf.append(i).append("\n");
 			}
 			assertTrue(buf.toString(), false);
 		}
@@ -500,8 +500,8 @@ public class AddUnimplementedMethodsTest extends TestCase {
 	}
 
 	private boolean nameContained(String methName, IJavaElement[] methods) {
-		for (int i= 0; i < methods.length; i++) {
-			if (methods[i].getElementName().equals(methName)) {
+		for (IJavaElement method : methods) {
+			if (method.getElementName().equals(methName)) {
 				return true;
 			}
 		}

@@ -90,9 +90,8 @@ public class ParticipantTest extends TestCase {
 		JavaSearchResult result= (JavaSearchResult) query.getSearchResult();
 		assertEquals(20, result.getMatchCount());
 
-		Object[] elements= result.getElements();
-		for (int i= 0; i < elements.length; i++) {
-			assertTrue(elements[i] instanceof Integer);
+		for (Object element : result.getElements()) {
+			assertTrue(element instanceof Integer);
 		}
 	}
 

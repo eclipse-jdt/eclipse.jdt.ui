@@ -146,9 +146,7 @@ public class PackagesViewDeltaTests extends TestCase {
 
 		//initialise the map
 		fMyPart.fViewer.setInput(fJProject);
-		Object[] children= fProvider.getChildren(fJProject);
-		for (int i= 0; i < children.length; i++) {
-			Object object= children[i];
+		for (Object object : fProvider.getChildren(fJProject)) {
 			fProvider.getChildren(object);
 		}
 
@@ -577,8 +575,7 @@ public class PackagesViewDeltaTests extends TestCase {
 	private boolean compareArrays(Object[] children, Object[] expectedChildren) {
 		if (children.length != expectedChildren.length)
 			return false;
-		for (int i= 0; i < children.length; i++) {
-			Object child= children[i];
+		for (Object child : children) {
 			if (child instanceof IJavaElement) {
 				IJavaElement el= (IJavaElement) child;
 				if (!contains(el, expectedChildren))
@@ -597,8 +594,7 @@ public class PackagesViewDeltaTests extends TestCase {
 	}
 
 	private boolean contains(IResource res, Object[] expectedChildren) {
-		for (int i= 0; i < expectedChildren.length; i++) {
-			Object object= expectedChildren[i];
+		for (Object object : expectedChildren) {
 			if (object instanceof IResource) {
 				IResource expres= (IResource) object;
 				if (expres.equals(res))
@@ -609,8 +605,7 @@ public class PackagesViewDeltaTests extends TestCase {
 	}
 
 	private boolean contains(IJavaElement fragment, Object[] expectedChildren) {
-		for (int i= 0; i < expectedChildren.length; i++) {
-			Object object= expectedChildren[i];
+		for (Object object : expectedChildren) {
 			if (object instanceof IJavaElement) {
 				IJavaElement expfrag= (IJavaElement) object;
 				if (expfrag.equals(fragment))
@@ -621,8 +616,7 @@ public class PackagesViewDeltaTests extends TestCase {
 	}
 
 	private boolean contains(LogicalPackage lp, Object[] expectedChildren) {
-		for (int i= 0; i < expectedChildren.length; i++) {
-			Object object= expectedChildren[i];
+		for (Object object : expectedChildren) {
 			if (object instanceof LogicalPackage) {
 				LogicalPackage explp= (LogicalPackage) object;
 				if (explp.equals(lp))

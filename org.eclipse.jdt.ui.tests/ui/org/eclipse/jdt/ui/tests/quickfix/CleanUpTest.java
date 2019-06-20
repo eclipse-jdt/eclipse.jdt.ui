@@ -1448,8 +1448,8 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		IProblem[] problems= roots[0].getProblems();
 		assertTrue(problems.length == 2);
-		for (int i= 0; i < problems.length; i++) {
-			ProblemLocation location= new ProblemLocation(problems[i]);
+		for (IProblem problem : problems) {
+			ProblemLocation location= new ProblemLocation(problem);
 			assertTrue(cleanUp.canFix(cu1, location));
 		}
 	}

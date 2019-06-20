@@ -214,9 +214,7 @@ public class ContentProviderTests4 extends TestCase{
 		fJProject3 = JavaProjectHelper.createJavaProject("TestProject3", "bin");//$NON-NLS-1$//$NON-NLS-2$
 		assertNotNull("project3 null", fJProject3);//$NON-NLS-1$
 
-		Object[] resource = fJProject3.getNonJavaResources();
-		for (int i = 0; i < resource.length; i++) {
-			Object object = resource[i];
+		for (Object object : fJProject3.getNonJavaResources()) {
 			if (object instanceof IFile) {
 				IFile file = (IFile) object;
 				if (".classpath".equals(file.getName()))//$NON-NLS-1$
@@ -324,8 +322,7 @@ public class ContentProviderTests4 extends TestCase{
 	private boolean compareArrays(Object[] children, Object[] expectedChildren) {
 		if(children.length!=expectedChildren.length)
 			return false;
-		for (int i= 0; i < children.length; i++) {
-			Object child= children[i];
+		for (Object child : children) {
 			if (child instanceof IJavaElement) {
 				IJavaElement el= (IJavaElement) child;
 				if(!contains(el, expectedChildren))
@@ -346,8 +343,7 @@ public class ContentProviderTests4 extends TestCase{
 	 * @return boolean
 	 */
 	private boolean contains(IResource res, Object[] expectedChildren) {
-		for (int i= 0; i < expectedChildren.length; i++) {
-			Object object= expectedChildren[i];
+		for (Object object : expectedChildren) {
 			if (object instanceof IResource) {
 				IResource expres= (IResource) object;
 				if(expres.equals(res))
@@ -364,8 +360,7 @@ public class ContentProviderTests4 extends TestCase{
 	 * @return boolean
 	 */
 	private boolean contains(IJavaElement fragment, Object[] expectedChildren) {
-		for (int i= 0; i < expectedChildren.length; i++) {
-			Object object= expectedChildren[i];
+		for (Object object : expectedChildren) {
 			if (object instanceof IJavaElement) {
 				IJavaElement expfrag= (IJavaElement) object;
 				if(expfrag.equals(fragment))

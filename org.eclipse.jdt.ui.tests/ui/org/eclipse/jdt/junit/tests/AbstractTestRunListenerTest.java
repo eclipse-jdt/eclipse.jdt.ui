@@ -131,29 +131,33 @@ public class AbstractTestRunListenerTest extends TestCase {
 		ILaunchesListener2 launchesListener= new ILaunchesListener2() {
 			@Override
 			public void launchesTerminated(ILaunch[] launches) {
-				for (int i= 0; i < launches.length; i++) {
-					if (isJUnitLaunch(launches[i]))
+				for (ILaunch launch : launches) {
+					if (isJUnitLaunch(launch)) {
 						fLaunchHasTerminated= true;
-					logLaunch("terminated", launches[i]);
+					}
+					logLaunch("terminated", launch);
 				}
 			}
 			@Override
 			public void launchesRemoved(ILaunch[] launches) {
-				for (int i= 0; i < launches.length; i++) {
-					if (isJUnitLaunch(launches[i]))
+				for (ILaunch launch : launches) {
+					if (isJUnitLaunch(launch)) {
 						fLaunchHasTerminated= true;
-					logLaunch("removed   ", launches[i]);
+					}
+					logLaunch("removed   ", launch);
 				}
 			}
 			@Override
 			public void launchesAdded(ILaunch[] launches) {
-				for (int i= 0; i < launches.length; i++)
-					logLaunch("added     ", launches[i]);
+				for (ILaunch launch : launches) {
+					logLaunch("added     ", launch);
+				}
 			}
 			@Override
 			public void launchesChanged(ILaunch[] launches) {
-				for (int i= 0; i < launches.length; i++)
-					logLaunch("changed   ", launches[i]);
+				for (ILaunch launch : launches) {
+					logLaunch("changed   ", launch);
+				}
 			}
 			private void logLaunch(String action, ILaunch launch) {
 				StringBuffer buf= new StringBuffer();
@@ -230,12 +234,12 @@ public class AbstractTestRunListenerTest extends TestCase {
 
 	public static void assertEqualLog(final String[] expectedSequence, String[] logMessages) {
 		StringBuilder actual= new StringBuilder();
-		for (int i= 0; i < logMessages.length; i++) {
-			actual.append(logMessages[i]).append('\n');
+		for (String logMessage : logMessages) {
+			actual.append(logMessage).append('\n');
 		}
 		StringBuilder expected= new StringBuilder();
-		for (int i= 0; i < expectedSequence.length; i++) {
-			expected.append(expectedSequence[i]).append('\n');
+		for (String sequence : expectedSequence) {
+			expected.append(sequence).append('\n');
 		}
 		assertEquals(expected.toString(), actual.toString());
 	}

@@ -99,9 +99,7 @@ public final class ReferenceTracker {
 	}
 
 	private void followStaticReferences(Class<?> classInstance) {
-		Field[] declaredFields= classInstance.getDeclaredFields();
-		for (int i= 0; i < declaredFields.length; i++) {
-			Field fld= declaredFields[i];
+		for (Field fld : classInstance.getDeclaredFields()) {
 			if (isStatic(fld.getModifiers()) && !fld.getType().isPrimitive()) {
 				followFieldReference(new RootReference(classInstance), null, fld);
 			}
@@ -148,9 +146,7 @@ public final class ReferenceTracker {
 				followStaticReferences((Class<?>) curr);
 			}
 			do {
-				Field[] declaredFields= currClass.getDeclaredFields();
-				for (int i= 0; i < declaredFields.length; i++) {
-					Field fld= declaredFields[i];
+				for (Field fld : currClass.getDeclaredFields()) {
 					if (!isStatic(fld.getModifiers()) && !fld.getType().isPrimitive()) {
 						followFieldReference(ref, curr, fld);
 					}

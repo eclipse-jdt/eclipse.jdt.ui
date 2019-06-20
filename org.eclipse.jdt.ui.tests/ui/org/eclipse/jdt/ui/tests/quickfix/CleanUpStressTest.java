@@ -72,8 +72,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 	}
 
 	private void addAllCUs(IJavaElement[] children, List<IJavaElement> result) throws JavaModelException {
-		for (int i= 0; i < children.length; i++) {
-			IJavaElement element= children[i];
+		for (IJavaElement element : children) {
 			if (element instanceof ICompilationUnit) {
 				result.add(element);
 			} else if (element instanceof IPackageFragmentRoot) {
@@ -5310,17 +5309,15 @@ public class CleanUpStressTest extends CleanUpTestCase {
 
 
 //		generateTable(units);
-
-		for (int i= 0; i < units.length; i++) {
-	        ICompilationUnit cu= units[i];
+		for (ICompilationUnit cu : units) {
 			String previewContent= getNormalizedContent(new Document(cu.getBuffer().getContents()));
-	       	String compilationUnitName= getCompilationUnitName(cu);
-
-	       	String expected= fExpectedChangesAllTests.get(compilationUnitName);
-
-	       	assertTrue("No expected value in table for " + compilationUnitName, expected != null);
-	       	assertEquals("Content not as expected for " + compilationUnitName, expected, previewContent);
-        }
+			String compilationUnitName= getCompilationUnitName(cu);
+			
+			String expected= fExpectedChangesAllTests.get(compilationUnitName);
+			
+			assertTrue("No expected value in table for " + compilationUnitName, expected != null);
+			assertEquals("Content not as expected for " + compilationUnitName, expected, previewContent);
+		}
 	}
 
 	private static String getCompilationUnitName(ICompilationUnit cu) {

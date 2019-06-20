@@ -901,12 +901,10 @@ public class ScopeAnalyzerTest extends CoreTests {
 			int offset= buf.toString().indexOf(str);
 
 			int flags= ScopeAnalyzer.METHODS;
-			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
-			for (int i= 0; i < res.length; i++) {
-				if ("getDefaultValue".equals(res[i].getName())) {
+			for (IBinding binding : new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags)) {
+				if ("getDefaultValue".equals(binding.getName())) {
 					return;
 				}
-
 			}
 			assertFalse("getDefaultValue not found", true);
 		}
@@ -925,8 +923,8 @@ public class ScopeAnalyzerTest extends CoreTests {
 		IProblem[] problems= astRoot.getProblems();
 		if (problems.length > 0) {
 			StringBuilder buf= new StringBuilder();
-			for (int i= 0; i < problems.length; i++) {
-				buf.append(problems[i].getMessage()).append('\n');
+			for (IProblem problem : problems) {
+				buf.append(problem.getMessage()).append('\n');
 			}
 			assertTrue(buf.toString(), false);
 		}

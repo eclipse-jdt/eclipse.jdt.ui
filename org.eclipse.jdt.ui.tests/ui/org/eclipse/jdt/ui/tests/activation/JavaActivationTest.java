@@ -199,10 +199,9 @@ public class JavaActivationTest extends TestCase {
 
 	public void checkNotLoaded(Set<String> inactiveBundles) {
 		Bundle bundle= Platform.getBundle("org.eclipse.jdt.ui.tests");
-		Bundle[] bundles= bundle.getBundleContext().getBundles();
-		for (int i= 0; i < bundles.length; i++) {
-			if (bundles[i].getState() == Bundle.ACTIVE && inactiveBundles.contains(bundles[i].getSymbolicName())) {
-				Assert.fail ("plugin should not be activated: "+bundles[i].getSymbolicName()) ;
+		for (Bundle b : bundle.getBundleContext().getBundles()) {
+			if (b.getState() == Bundle.ACTIVE && inactiveBundles.contains(b.getSymbolicName())) {
+				Assert.fail("plugin should not be activated: " + b.getSymbolicName());
 			}
 		}
 	}
