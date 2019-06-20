@@ -110,10 +110,8 @@ public class ExpressionsFix extends CompilationUnitRewriteOperationsFix {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			AST ast= cuRewrite.getRoot().getAST();
 
-			for (int i= 0; i < fExpressions.length; i++) {
+			for (Expression expression : fExpressions) {
 				// add parenthesis around expression
-				Expression expression= fExpressions[i];
-
 				ParenthesizedExpression parenthesizedExpression= ast.newParenthesizedExpression();
 				parenthesizedExpression.setExpression((Expression) rewrite.createCopyTarget(expression));
 				rewrite.replace(expression, parenthesizedExpression, group);
@@ -166,8 +164,7 @@ public class ExpressionsFix extends CompilationUnitRewriteOperationsFix {
 			return null;
 		// check sub-expressions in fully covered nodes
 		final ArrayList<ASTNode> changedNodes = new ArrayList<>();
-		for (int i= 0; i < coveredNodes.length; i++) {
-			ASTNode covered = coveredNodes[i];
+		for (ASTNode covered : coveredNodes) {
 			if (covered instanceof InfixExpression)
 				covered.accept(new MissingParenthesisVisitor(changedNodes));
 		}
@@ -182,8 +179,7 @@ public class ExpressionsFix extends CompilationUnitRewriteOperationsFix {
 	public static ExpressionsFix createRemoveUnnecessaryParenthesisFix(CompilationUnit compilationUnit, ASTNode[] nodes) {
 		// check sub-expressions in fully covered nodes
 		final ArrayList<ParenthesizedExpression> changedNodes= new ArrayList<>();
-		for (int i= 0; i < nodes.length; i++) {
-			ASTNode covered= nodes[i];
+		for (ASTNode covered : nodes) {
 			if (covered instanceof ParenthesizedExpression || covered instanceof InfixExpression)
 				covered.accept(new UnnecessaryParenthesisVisitor(changedNodes));
 		}

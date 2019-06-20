@@ -160,9 +160,8 @@ public class TemplateSet {
 				String message= validateTemplate(template);
 				if (message == null) {
 					if (!allowDuplicates) {
-						Template[] templates= getTemplates(name);
-						for (int k= 0; k < templates.length; k++) {
-							remove(templates[k]);
+						for (Template t : getTemplates(name)) {
+							remove(t);
 						}
 					}
 					add(template);

@@ -234,9 +234,8 @@ public class TypeInfoViewer {
 			fProviderExtension= extension;
 			List locations= new ArrayList();
 			List labels= new ArrayList();
-			IVMInstallType[] installs= JavaRuntime.getVMInstallTypes();
-			for (int i= 0; i < installs.length; i++) {
-				processVMInstallType(installs[i], locations, labels);
+			for (IVMInstallType install : JavaRuntime.getVMInstallTypes()) {
+				processVMInstallType(install, locations, labels);
 			}
 			fInstallLocations= (String[])locations.toArray(new String[locations.size()]);
 			fVMNames= (String[])labels.toArray(new String[labels.size()]);
@@ -247,16 +246,15 @@ public class TypeInfoViewer {
 		}
 		private void processVMInstallType(IVMInstallType installType, List locations, List labels) {
 			if (installType != null) {
-				IVMInstall[] installs= installType.getVMInstalls();
 				boolean isMac= Platform.OS_MACOSX.equals(Platform.getOS());
 				final String HOME_SUFFIX= "/Home"; //$NON-NLS-1$
-				for (int i= 0; i < installs.length; i++) {
-					String label= getFormattedLabel(installs[i].getName());
-					LibraryLocation[] libLocations= installs[i].getLibraryLocations();
+				for (IVMInstall install : installType.getVMInstalls()) {
+					String label= getFormattedLabel(install.getName());
+					LibraryLocation[] libLocations= install.getLibraryLocations();
 					if (libLocations != null) {
 						processLibraryLocation(libLocations, label);
 					} else {
-						String filePath= installs[i].getInstallLocation().getAbsolutePath();
+						String filePath= install.getInstallLocation().getAbsolutePath();
 						// on MacOS X install locations end in an additional "/Home" segment; remove it
 						if (isMac && filePath.endsWith(HOME_SUFFIX))
 							filePath= filePath.substring(0, filePath.length()- HOME_SUFFIX.length() + 1);
@@ -267,8 +265,7 @@ public class TypeInfoViewer {
 			}
 		}
 		private void processLibraryLocation(LibraryLocation[] libLocations, String label) {
-			for (int l= 0; l < libLocations.length; l++) {
-				LibraryLocation location= libLocations[l];
+			for (LibraryLocation location : libLocations) {
 				fLib2Name.put(location.getSystemLibraryPath().toString(), label);
 			}
 		}
@@ -704,8 +701,7 @@ public class TypeInfoViewer {
 		@Override
 		protected TypeNameMatch[] getSearchResult(Set filteredHistory, ProgressMonitor monitor) throws CoreException {
 			List result= new ArrayList(2048);
-			for (int i= 0; i < fLastResult.length; i++) {
-				TypeNameMatch type= fLastResult[i];
+			for (TypeNameMatch type : fLastResult) {
 				if (filteredHistory.contains(type))
 					continue;
 				if (fFilter.matchesCachedResult(type))
@@ -1023,8 +1019,7 @@ public class TypeInfoViewer {
 			return;
 		fFullyQualifySelection= value;
 		if (fLastSelection != null) {
-			for (int i= 0; i < fLastSelection.length; i++) {
-				TableItem item= fLastSelection[i];
+			for (TableItem item : fLastSelection) {
 				Object data= item.getData();
 				if (data instanceof TypeNameMatch) {
 					item.setText(getQualifiedText((TypeNameMatch)data));
@@ -1036,8 +1031,8 @@ public class TypeInfoViewer {
 	public TypeNameMatch[] getSelection() {
 		TableItem[] items= fTable.getSelection();
 		List result= new ArrayList(items.length);
-		for (int i= 0; i < items.length; i++) {
-			Object data= items[i].getData();
+		for (TableItem item : items) {
+			Object data= item.getData();
 			if (data instanceof TypeNameMatch) {
 				result.add(data);
 			}
@@ -1178,8 +1173,7 @@ public class TypeInfoViewer {
 	private boolean canEnable(TableItem[] selection) {
 		if (selection.length == 0)
 			return false;
-		for (int i= 0; i < selection.length; i++) {
-			TableItem item= selection[i];
+		for (TableItem item : selection) {
 			Object data= item.getData();
 			if (!(data instanceof TypeNameMatch))
 				return false;

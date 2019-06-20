@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
-import java.util.Iterator;
-
 import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -218,8 +216,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 
 	public static void initDefaults(IPreferenceStore store) {
 		CleanUpOptions settings= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(CleanUpConstants.DEFAULT_CLEAN_UP_OPTIONS);
-		for (Iterator<String> iterator= settings.getKeys().iterator(); iterator.hasNext();) {
-			String key= iterator.next();
+		for (String key : settings.getKeys()) {
 			store.setDefault(key, settings.getValue(key));
 		}
 

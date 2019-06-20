@@ -212,9 +212,7 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 		if (container != null) {
 			res.add(new ResourceTraversal(new IResource[] { container }, IResource.DEPTH_ONE, 0));
 			if (pack.exists()) { // folder may not exist any more, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=269167
-				Object[] nonJavaResources= pack.getNonJavaResources();
-				for (int i= 0; i < nonJavaResources.length; i++) {
-					Object resource= nonJavaResources[i];
+				for (Object resource : pack.getNonJavaResources()) {
 					if (resource instanceof IFolder) {
 						res.add(new ResourceTraversal(new IResource[] { (IResource)resource }, IResource.DEPTH_INFINITE, 0));
 					}
@@ -236,10 +234,9 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 				remoteMembers= context.fetchMembers(container, monitor);
 			}
 			if (remoteMembers != null) {
-				for (int i= 0; i < remoteMembers.length; i++) {
-					IResource member= remoteMembers[i];
+				for (IResource member : remoteMembers) {
 					if (member instanceof IFolder
-							&& JavaConventionsUtil.validatePackageName(member.getName(), pack).getSeverity() == IStatus.ERROR) {
+						&& JavaConventionsUtil.validatePackageName(member.getName(), pack).getSeverity() == IStatus.ERROR) {
 						res.add(new ResourceTraversal(new IResource[] { member }, IResource.DEPTH_INFINITE, 0));
 					}
 				}
@@ -303,8 +300,8 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 		@Override
 		public IProject[] getProjects() {
 			Set<IProject> result= new HashSet<>();
-			for (int i= 0; i < fFragments.length; i++) {
-				result.add(fFragments[i].getJavaProject().getProject());
+			for (IPackageFragment fragment : fFragments) {
+				result.add(fragment.getJavaProject().getProject());
 			}
 			return result.toArray(new IProject[result.size()]);
 		}
@@ -312,12 +309,12 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 		public ResourceTraversal[] getTraversals(ResourceMappingContext context, IProgressMonitor monitor) throws CoreException {
 			List<ResourceTraversal> result= new ArrayList<>();
 			if (context instanceof RemoteResourceMappingContext) {
-				for (int i= 0; i < fFragments.length; i++) {
-					result.addAll(Arrays.asList(getRemotePackageFragmentTraversals(fFragments[i], (RemoteResourceMappingContext)context, monitor)));
+				for (IPackageFragment fragment : fFragments) {
+					result.addAll(Arrays.asList(getRemotePackageFragmentTraversals(fragment, (RemoteResourceMappingContext)context, monitor)));
 				}
 			} else {
-				for (int i= 0; i < fFragments.length; i++) {
-					result.addAll(Arrays.asList(getPackageFragmentTraversals(fFragments[i])));
+				for (IPackageFragment fragment : fFragments) {
+					result.addAll(Arrays.asList(getPackageFragmentTraversals(fragment)));
 				}
 			}
 			return result.toArray(new ResourceTraversal[result.size()]);
@@ -401,11 +398,11 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 	public static ResourceMapping create(LogicalPackage logicalPackage) {
 		IPackageFragment[] fragments= logicalPackage.getFragments();
 		List<IPackageFragment> toProcess= new ArrayList<>(fragments.length);
-		for (int i= 0; i < fragments.length; i++) {
+		for (IPackageFragment fragment : fragments) {
 			// only add if not part of an archive
-			IPackageFragmentRoot root= (IPackageFragmentRoot)fragments[i].getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+			IPackageFragmentRoot root= (IPackageFragmentRoot) fragment.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 			if (!root.isArchive() && !root.isExternal()) {
-				toProcess.add(fragments[i]);
+				toProcess.add(fragment);
 			}
 		}
 		if (toProcess.size() == 0)

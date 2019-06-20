@@ -14,7 +14,6 @@
 package org.eclipse.jdt.internal.corext.buildpath;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -44,10 +43,9 @@ public class CPJavaProject {
 
     public CPJavaProject createWorkingCopy() {
     	List<CPListElement> newList= new ArrayList<>(fCPListElements.size());
-    	for (Iterator<CPListElement> iterator= fCPListElements.iterator(); iterator.hasNext();) {
-	        CPListElement element= iterator.next();
-	        newList.add(element.copy());
-        }
+		for (CPListElement element : fCPListElements) {
+			newList.add(element.copy());
+		}
 		return new CPJavaProject(fJavaProject, newList, fDefaultOutputLocation);
     }
 
@@ -58,11 +56,10 @@ public class CPJavaProject {
     public IClasspathEntry[] getClasspathEntries() {
     	IClasspathEntry[] result= new IClasspathEntry[fCPListElements.size()];
     	int i= 0;
-    	for (Iterator<CPListElement> iterator= fCPListElements.iterator(); iterator.hasNext();) {
-	        CPListElement element= iterator.next();
-	        result[i]= element.getClasspathEntry();
-	        i++;
-        }
+		for (CPListElement element : fCPListElements) {
+			result[i]= element.getClasspathEntry();
+			i++;
+		}
 	    return result;
     }
 

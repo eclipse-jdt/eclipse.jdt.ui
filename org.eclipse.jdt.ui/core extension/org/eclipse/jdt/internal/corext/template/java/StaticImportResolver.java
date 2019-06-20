@@ -13,9 +13,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.template.java;
 
-import java.util.Iterator;
-import java.util.List;
-
 import org.eclipse.jface.text.templates.TemplateContext;
 import org.eclipse.jface.text.templates.TemplateVariable;
 import org.eclipse.jface.text.templates.TemplateVariableResolver;
@@ -45,12 +42,8 @@ public class StaticImportResolver extends TemplateVariableResolver {
 
 		if (context instanceof JavaContext) {
 			JavaContext jc= (JavaContext) context;
-			List<String> params= variable.getVariableType().getParams();
-			if (params.size() > 0) {
-				for (Iterator<String> iterator= params.iterator(); iterator.hasNext();) {
-					String qualifiedMemberName= iterator.next();
-					jc.addStaticImport(qualifiedMemberName);
-				}
+			for (String qualifiedMemberName : variable.getVariableType().getParams()) {
+				jc.addStaticImport(qualifiedMemberName);
 			}
 		} else {
 			super.resolve(variable, context);

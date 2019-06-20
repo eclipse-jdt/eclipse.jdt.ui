@@ -16,7 +16,6 @@ package org.eclipse.jdt.internal.corext.fix;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
@@ -230,8 +229,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 			}
 
 			// perform the changes
-			for (int index= 0; index < fUndos.length; index++) {
-				UndoEdit edit= fUndos[index];
+			for (UndoEdit edit : fUndos) {
 				UndoEdit redo= edit.apply(document, TextEdit.CREATE_UNDO);
 				editCollector.addFirst(redo);
 			}
@@ -359,20 +357,20 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 
     			do {
     				RefactoringStatus preCondition= new RefactoringStatus();
-    				for (int i= 0; i < cleanUps.length; i++) {
-    					RefactoringStatus conditions= cleanUps[i].checkPreConditions(unit.getJavaProject(), new ICompilationUnit[] {unit}, new SubProgressMonitor(monitor, 5));
-    					preCondition.merge(conditions);
-    				}
+					for (ICleanUp cleanUp : cleanUps) {
+						RefactoringStatus conditions= cleanUp.checkPreConditions(unit.getJavaProject(), new ICompilationUnit[] {unit}, new SubProgressMonitor(monitor, 5));
+						preCondition.merge(conditions);
+					}
     				if (showStatus(preCondition) != Window.OK)
     					return;
 
     				Map<String, String> options= new HashMap<>();
-    				for (int i= 0; i < cleanUps.length; i++) {
-    					Map<String, String> map= cleanUps[i].getRequirements().getCompilerOptions();
-    					if (map != null) {
-    						options.putAll(map);
-    					}
-    				}
+					for (ICleanUp cleanUp : cleanUps) {
+						Map<String, String> map= cleanUp.getRequirements().getCompilerOptions();
+						if (map != null) {
+							options.putAll(map);
+						}
+					}
 
     				CompilationUnit ast= null;
     				if (requiresAST(cleanUps)) {
@@ -390,10 +388,10 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 					CleanUpChange change= CleanUpRefactoring.calculateChange(context, cleanUps, undoneCleanUps, slowCleanUps);
 
     				RefactoringStatus postCondition= new RefactoringStatus();
-    				for (int i= 0; i < cleanUps.length; i++) {
-    					RefactoringStatus conditions= cleanUps[i].checkPostConditions(new SubProgressMonitor(monitor, 1));
-    					postCondition.merge(conditions);
-    				}
+					for (ICleanUp cleanUp : cleanUps) {
+						RefactoringStatus conditions= cleanUp.checkPostConditions(new SubProgressMonitor(monitor, 1));
+						postCondition.merge(conditions);
+					}
     				if (showStatus(postCondition) != Window.OK)
     					return;
 
@@ -467,8 +465,8 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 	private static ICleanUp[] getCleanUps(Map<String, String> settings, Set<String> ids) {
 		ICleanUp[] result= JavaPlugin.getDefault().getCleanUpRegistry().createCleanUps(ids);
 
-		for (int i= 0; i < result.length; i++) {
-			result[i].setOptions(new MapCleanUpOptions(settings));
+		for (ICleanUp cleanUp : result) {
+			cleanUp.setOptions(new MapCleanUpOptions(settings));
 		}
 
 		return result;
@@ -543,8 +541,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 				performChangeOperation.run(new SubProgressMonitor(monitor, 5));
 
 				ArrayList<Region> result= new ArrayList<>();
-				for (int i= 0; i < positions.length; i++) {
-					Position position= positions[i];
+				for (Position position : positions) {
 					if (!position.isDeleted())
 						result.add(new Region(position.getOffset(), position.getLength()));
 				}
@@ -566,17 +563,18 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 	}
 
 	private boolean requiresAST(ICleanUp[] cleanUps) {
-		for (int i= 0; i < cleanUps.length; i++) {
-	        if (cleanUps[i].getRequirements().requiresAST())
-	        	return true;
-        }
+		for (ICleanUp cleanUp : cleanUps) {
+			if (cleanUp.getRequirements().requiresAST()) {
+				return true;
+			}
+		}
 
 	    return false;
     }
 
 	private boolean requiresChangedRegions(ICleanUp[] cleanUps) {
-		for (int i= 0; i < cleanUps.length; i++) {
-			CleanUpRequirements requirements= cleanUps[i].getRequirements();
+		for (ICleanUp cleanUp : cleanUps) {
+			CleanUpRequirements requirements= cleanUp.getRequirements();
 			if (requirements.requiresChangedRegions())
 				return true;
 		}
@@ -608,13 +606,12 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 
 		Map<String, String> projectOptions= project.getOptions(true);
 
-		for (Iterator<String> iterator= cleanUpOptions.keySet().iterator(); iterator.hasNext();) {
-	        String key= iterator.next();
-	        String projectOption= projectOptions.get(key);
+		for (String key : cleanUpOptions.keySet()) {
+			String projectOption= projectOptions.get(key);
 			String cleanUpOption= cleanUpOptions.get(key);
 			if (!strongerEquals(projectOption, cleanUpOption))
 				return false;
-        }
+		}
 
 	    return true;
     }
@@ -659,15 +656,13 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 	private void showSlowCleanUpsWarning(HashSet<ICleanUp> slowCleanUps) {
 
 		final StringBuilder cleanUpNames= new StringBuilder();
-		for (Iterator<ICleanUp> iterator= slowCleanUps.iterator(); iterator.hasNext();) {
-			ICleanUp cleanUp= iterator.next();
+		for (ICleanUp cleanUp : slowCleanUps) {
 			String[] descriptions= cleanUp.getStepDescriptions();
 			if (descriptions != null) {
-				for (int i= 0; i < descriptions.length; i++) {
+				for (String description : descriptions) {
 					if (cleanUpNames.length() > 0)
 						cleanUpNames.append('\n');
-
-					cleanUpNames.append(descriptions[i]);
+					cleanUpNames.append(description);
 				}
 			}
 		}

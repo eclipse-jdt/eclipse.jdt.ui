@@ -18,7 +18,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.preferences.DefaultScope;
@@ -67,12 +66,10 @@ public class CleanUpPreferenceUtil {
     		}
     	}
 
-    	List<Profile> builtInProfiles= getBuiltInProfiles();
-    	for (Iterator<Profile> iterator= builtInProfiles.iterator(); iterator.hasNext();) {
-    		Profile profile= iterator.next();
-            if (id.equals(profile.getID()))
-            	return profile.getSettings();
-        }
+    	for (Profile profile : getBuiltInProfiles()) {
+			if (id.equals(profile.getID()))
+				return profile.getSettings();
+		}
 
     	if (id.equals(CleanUpConstants.SAVE_PARTICIPANT_PROFILE))
     		return JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(CleanUpConstants.DEFAULT_SAVE_ACTION_OPTIONS).getMap();
@@ -89,11 +86,10 @@ public class CleanUpPreferenceUtil {
         if (list == null)
         	return null;
 
-        for (Iterator<Profile> iterator= list.iterator(); iterator.hasNext();) {
-        	Profile profile= iterator.next();
-        	if (id.equals(profile.getID()))
-        		return profile.getSettings();
-        }
+		for (Profile profile : list) {
+			if (id.equals(profile.getID()))
+				return profile.getSettings();
+		}
 
     	return null;
     }
@@ -105,13 +101,11 @@ public class CleanUpPreferenceUtil {
     	CleanUpProfileVersioner versioner= new CleanUpProfileVersioner();
 
     	CleanUpOptions defaultOptions= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(CleanUpConstants.DEFAULT_CLEAN_UP_OPTIONS);
-    	KeySet[] keySets= CleanUpProfileManager.KEY_SETS;
 
     	boolean hasValues= false;
-		for (int i= 0; i < keySets.length; i++) {
-	        KeySet keySet= keySets[i];
-	        IEclipsePreferences preferences= context.getNode(keySet.getNodeName());
-	        for (final Iterator<String> keyIter = keySet.getKeys().iterator(); keyIter.hasNext(); ) {
+		for (KeySet keySet : CleanUpProfileManager.KEY_SETS) {
+			IEclipsePreferences preferences= context.getNode(keySet.getNodeName());
+			for (final Iterator<String> keyIter = keySet.getKeys().iterator(); keyIter.hasNext(); ) {
 				final String key= keyIter.next();
 				String val= preferences.get(key, null);
 				if (val != null) {
@@ -121,7 +115,7 @@ public class CleanUpPreferenceUtil {
 				}
 				profileOptions.put(key, val);
 			}
-        }
+		}
 
 		if (!hasValues)
 			return null;
@@ -149,32 +143,27 @@ public class CleanUpPreferenceUtil {
 		}
 
 		Map<String, String> result= new HashMap<>();
-		Set<String> keys= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(CleanUpConstants.DEFAULT_SAVE_ACTION_OPTIONS).getKeys();
-		for (Iterator<String> iterator= keys.iterator(); iterator.hasNext();) {
-	        String key= iterator.next();
-	        result.put(key, node.get(SAVE_PARTICIPANT_KEY_PREFIX + key, CleanUpOptions.FALSE));
-        }
+		for (String key : JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(CleanUpConstants.DEFAULT_SAVE_ACTION_OPTIONS).getKeys()) {
+			result.put(key, node.get(SAVE_PARTICIPANT_KEY_PREFIX + key, CleanUpOptions.FALSE));
+		}
 
 		return result;
 	}
 
     public static void saveSaveParticipantOptions(IScopeContext context, Map<String, String> settings) {
     	IEclipsePreferences node= context.getNode(JavaUI.ID_PLUGIN);
-    	for (Iterator<String> iterator= settings.keySet().iterator(); iterator.hasNext();) {
-	        String key= iterator.next();
-	        node.put(SAVE_PARTICIPANT_KEY_PREFIX + key, settings.get(key));
-        }
+		for (String key : settings.keySet()) {
+			node.put(SAVE_PARTICIPANT_KEY_PREFIX + key, settings.get(key));
+		}
     }
 
 	public static boolean hasSettingsInScope(IScopeContext context) {
     	IEclipsePreferences node= context.getNode(JavaUI.ID_PLUGIN);
 
-    	Set<String> keys= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(CleanUpConstants.DEFAULT_SAVE_ACTION_OPTIONS).getKeys();
-		for (Iterator<String> iterator= keys.iterator(); iterator.hasNext();) {
-			String key= iterator.next();
+    	for (String key : JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(CleanUpConstants.DEFAULT_SAVE_ACTION_OPTIONS).getKeys()) {
 			if (node.get(SAVE_PARTICIPANT_KEY_PREFIX + key, null) != null)
 				return true;
-        }
+		}
 
     	return false;
     }

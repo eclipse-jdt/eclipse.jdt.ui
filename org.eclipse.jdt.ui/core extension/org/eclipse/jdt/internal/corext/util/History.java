@@ -247,10 +247,8 @@ public abstract class History<K, V> {
 
 	private void rebuildPositions() {
 		fPositions.clear();
-		Collection<V> values= fHistory.values();
 		int pos=0;
-		for (Iterator<V> iter= values.iterator(); iter.hasNext();) {
-			V element= iter.next();
+		for (V element : fHistory.values()) {
 			fPositions.put(getKey(element), Integer.valueOf(pos));
 			pos++;
 		}

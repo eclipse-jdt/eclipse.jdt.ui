@@ -115,9 +115,7 @@ public class TypeFilter implements IPropertyChangeListener {
 	 * @return <code>true</code> iff the given type is filtered out
 	 */
 	public boolean filter(String fullTypeName) {
-		StringMatcher[] matchers= getStringMatchers();
-		for (int i= 0; i < matchers.length; i++) {
-			StringMatcher curr= matchers[i];
+		for (StringMatcher curr : getStringMatchers()) {
 			if (curr.match(fullTypeName)) {
 				return true;
 			}

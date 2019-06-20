@@ -210,8 +210,7 @@ public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
 		String nonNullAnnotationName= getNonNullAnnotationName(compilationUnit.getJavaElement(), false);
 
 		Set<String> handledPositions= new HashSet<>();
-		for (int i= 0; i < locations.length; i++) {
-			IProblemLocation problem= locations[i];
+		for (IProblemLocation problem : locations) {
 			if (problem == null)
 				continue; // problem was filtered out by createCleanUp()
 
@@ -226,7 +225,7 @@ public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
 				continue;
 			}
 			Builder builder= new Builder(problem, compilationUnit, nullableAnnotationName, nonNullAnnotationName,
-											/*allowRemove*/false, isArgumentProblem, ChangeKind.LOCAL);
+					/*allowRemove*/false, isArgumentProblem, ChangeKind.LOCAL);
 			boolean addNonNull= false;
 			// cf. createNullAnnotationInSignatureFix() but changeKind is constantly LOCAL
 			switch (problem.getProblemId()) {
@@ -263,15 +262,14 @@ public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
 	}
 
 	private static void createRemoveRedundantNullAnnotationsOperations(CompilationUnit compilationUnit, IProblemLocation[] locations, List<CompilationUnitRewriteOperation> result) {
-		for (int i= 0; i < locations.length; i++) {
-			IProblemLocation problem= locations[i];
+		for (IProblemLocation problem : locations) {
 			if (problem == null)
 				continue; // problem was filtered out by createCleanUp()
 
 			int problemId= problem.getProblemId();
 			if (problemId == IProblem.RedundantNullAnnotation || problemId == IProblem.RedundantNullDefaultAnnotationPackage || problemId == IProblem.RedundantNullDefaultAnnotationType
-					|| problemId == IProblem.RedundantNullDefaultAnnotationMethod || problemId == IProblem.RedundantNullDefaultAnnotationLocal
-					|| problemId == IProblem.RedundantNullDefaultAnnotationField) {
+				|| problemId == IProblem.RedundantNullDefaultAnnotationMethod || problemId == IProblem.RedundantNullDefaultAnnotationLocal
+				|| problemId == IProblem.RedundantNullDefaultAnnotationField) {
 				RemoveRedundantAnnotationRewriteOperation operation= new RemoveRedundantAnnotationRewriteOperation(compilationUnit, problem);
 				result.add(operation);
 			}

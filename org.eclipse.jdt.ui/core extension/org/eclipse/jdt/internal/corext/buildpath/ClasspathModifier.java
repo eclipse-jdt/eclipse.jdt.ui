@@ -17,7 +17,6 @@ package org.eclipse.jdt.internal.corext.buildpath;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.filesystem.EFS;
@@ -53,12 +52,12 @@ import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.ArchiveFileFilter;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathSupport;
@@ -200,23 +199,22 @@ public class ClasspathModifier {
     	List<CPListElement> newEntries= new ArrayList<>();
     	List<CPListElement> duplicateEntries= new ArrayList<>();
     	List<CPListElement> existingEntries= cpProject.getCPListElements();
-    	for (int i= 0; i < absolutePaths.length; i++) {
-	        CPListElement newEntry= new CPListElement(javaProject, IClasspathEntry.CPE_LIBRARY, absolutePaths[i], null);
-	        if (existingEntries.contains(newEntry)) {
-	        	duplicateEntries.add(newEntry);
-	        } else {
-	        	newEntries.add(newEntry);
-	        }
-        }
+		for (IPath absolutePath : absolutePaths) {
+			CPListElement newEntry= new CPListElement(javaProject, IClasspathEntry.CPE_LIBRARY, absolutePath, null);
+			if (existingEntries.contains(newEntry)) {
+				duplicateEntries.add(newEntry);
+			} else {
+				newEntries.add(newEntry);
+			}
+		}
 
 		if (duplicateEntries.size() > 0) {
 			String message;
 			if (duplicateEntries.size() > 1) {
 				StringBuilder buf= new StringBuilder();
-				for (Iterator<CPListElement> iterator= duplicateEntries.iterator(); iterator.hasNext();) {
-	                CPListElement dup= iterator.next();
-	                buf.append('\n').append(BasicElementLabels.getResourceName(dup.getPath().lastSegment()));
-                }
+				for (CPListElement dup : duplicateEntries) {
+					buf.append('\n').append(BasicElementLabels.getResourceName(dup.getPath().lastSegment()));
+				}
 				message= Messages.format(NewWizardMessages.AddArchiveToBuildpathAction_DuplicateArchivesInfo_message, buf.toString());
 			} else {
 				message= Messages.format(NewWizardMessages.AddArchiveToBuildpathAction_DuplicateArchiveInfo_message, BasicElementLabels.getResourceName(duplicateEntries.get(0).getPath().lastSegment()));
@@ -230,10 +228,9 @@ public class ClasspathModifier {
 		cpProject= cpProject.createWorkingCopy();
 		existingEntries= cpProject.getCPListElements();
 
-		for (Iterator<CPListElement> iterator= newEntries.iterator(); iterator.hasNext();) {
-            CPListElement newEntry= iterator.next();
-            insertAtEndOfCategory(newEntry, existingEntries);
-        }
+		for (CPListElement newEntry : newEntries) {
+			insertAtEndOfCategory(newEntry, existingEntries);
+		}
 
 		IJavaModelStatus cpStatus= JavaConventions.validateClasspath(javaProject, cpProject.getClasspathEntries(), cpProject.getDefaultOutputLocation());
 		if (!cpStatus.isOK())
@@ -248,13 +245,13 @@ public class ClasspathModifier {
     	IJavaProject javaProject= cpProject.getJavaProject();
 
     	List<CPListElement> existingEntries= cpProject.getCPListElements();
-    	for (int i= 0; i < absolutePaths.length; i++) {
-	        CPListElement newEntry= new CPListElement(javaProject, IClasspathEntry.CPE_LIBRARY, absolutePaths[i], null);
-	        if (!existingEntries.contains(newEntry)) {
-	        	insertAtEndOfCategory(newEntry, existingEntries);
-	        	result.addEntry(newEntry);
-	        }
-        }
+		for (IPath absolutePath : absolutePaths) {
+			CPListElement newEntry= new CPListElement(javaProject, IClasspathEntry.CPE_LIBRARY, absolutePath, null);
+			if (!existingEntries.contains(newEntry)) {
+				insertAtEndOfCategory(newEntry, existingEntries);
+				result.addEntry(newEntry);
+			}
+		}
 
 		result.setNewEntries(existingEntries.toArray(new CPListElement[existingEntries.size()]));
 		result.setDefaultOutputLocation(cpProject.getDefaultOutputLocation());
@@ -270,21 +267,20 @@ public class ClasspathModifier {
     	List<CPListElement> existingEntries= cpProject.getCPListElements();
 		BuildpathDelta result= new BuildpathDelta(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_RemoveFromCP_tooltip);
 
-		for (int i= 0; i < toRemove.length; i++) {
-	        CPListElement element= toRemove[i];
-	        existingEntries.remove(element);
-	        result.removeEntry(element);
-	        IPath path= element.getPath();
+		for (CPListElement element : toRemove) {
+			existingEntries.remove(element);
+			result.removeEntry(element);
+			IPath path= element.getPath();
 			removeFilters(path, javaProject, existingEntries);
 			if (!path.equals(projectPath)) {
-	            IResource member= workspaceRoot.findMember(path);
-	            if (member != null)
-	            	result.addDeletedResource(member);
-            } else if (cpProject.getDefaultOutputLocation().equals(projectPath) && containsSourceFolders(cpProject)) {
-            	String outputFolderName= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_BINNAME);
-    			cpProject.setDefaultOutputLocation(cpProject.getDefaultOutputLocation().append(outputFolderName));
-            }
-        }
+				IResource member= workspaceRoot.findMember(path);
+				if (member != null)
+					result.addDeletedResource(member);
+			} else if (cpProject.getDefaultOutputLocation().equals(projectPath) && containsSourceFolders(cpProject)) {
+				String outputFolderName= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_BINNAME);
+				cpProject.setDefaultOutputLocation(cpProject.getDefaultOutputLocation().append(outputFolderName));
+			}
+		}
 
 		result.setDefaultOutputLocation(cpProject.getDefaultOutputLocation());
     	result.setNewEntries(existingEntries.toArray(new CPListElement[existingEntries.size()]));
@@ -293,21 +289,17 @@ public class ClasspathModifier {
     }
 
     private static boolean containsSourceFolders(CPJavaProject cpProject) {
-    	List<CPListElement> elements= cpProject.getCPListElements();
-    	for (Iterator<CPListElement> iterator= elements.iterator(); iterator.hasNext();) {
-	        CPListElement element= iterator.next();
-	        if (element.getEntryKind() == IClasspathEntry.CPE_SOURCE)
-	        	return true;
-        }
+    	for (CPListElement element : cpProject.getCPListElements()) {
+			if (element.getEntryKind() == IClasspathEntry.CPE_SOURCE)
+				return true;
+		}
 	    return false;
     }
 
 	private static void include(CPJavaProject cpProject, IPath path) {
-	    List<CPListElement> elements= cpProject.getCPListElements();
-	    for (Iterator<CPListElement> iterator= elements.iterator(); iterator.hasNext();) {
-	        CPListElement element= iterator.next();
-	        element.removeFromExclusions(path);
-	    }
+	 	for (CPListElement element : cpProject.getCPListElements()) {
+			element.removeFromExclusions(path);
+		}
     }
 
 	/**
@@ -320,11 +312,9 @@ public class ClasspathModifier {
 	 * @throws JavaModelException
 	 */
 	public static List<CPListElement> getExistingEntries(IJavaProject project) throws JavaModelException {
-		IClasspathEntry[] classpathEntries= project.getRawClasspath();
 		ArrayList<CPListElement> newClassPath= new ArrayList<>();
-		for (int i= 0; i < classpathEntries.length; i++) {
-			IClasspathEntry curr= classpathEntries[i];
-			newClassPath.add(CPListElement.createFromExisting(curr, project));
+		for (IClasspathEntry entry : project.getRawClasspath()) {
+			newClassPath.add(CPListElement.createFromExisting(entry, project));
 		}
 		return newClassPath;
 	}
@@ -420,9 +410,7 @@ public class ClasspathModifier {
 	 * @throws JavaModelException
 	 */
 	public static IClasspathEntry getClasspathEntryFor(IPath path, IJavaProject project, int entryKind) throws JavaModelException {
-		IClasspathEntry[] entries= project.getRawClasspath();
-		for (int i= 0; i < entries.length; i++) {
-			IClasspathEntry entry= entries[i];
+		for (IClasspathEntry entry : project.getRawClasspath()) {
 			if (entry.getPath().equals(path) && equalEntryKind(entry, entryKind))
 				return entry;
 		}
@@ -547,9 +535,10 @@ public class ClasspathModifier {
 		try {
 			IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
 			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_CheckOutputFolders, roots.length);
-			for (int i= 0; i < roots.length; i++) {
-				if (roots[i].getRawClasspathEntry().getOutputLocation() != null)
+			for (IPackageFragmentRoot root : roots) {
+				if (root.getRawClasspathEntry().getOutputLocation() != null) {
 					return true;
+				}
 				monitor.worked(1);
 			}
 		} finally {
@@ -768,28 +757,26 @@ public class ClasspathModifier {
 		}
 
 		List<CPListElement> result= new ArrayList<>();
-		for (Iterator<CPListElement> iter= existingEntries.iterator(); iter.hasNext();) {
-			CPListElement element= iter.next();
+		for (CPListElement element : existingEntries) {
 			boolean hasChange= false;
 			IPath[] exlusions= (IPath[])element.getAttribute(CPListElement.EXCLUSION);
 			if (exlusions != null) {
 				List<IPath> exlusionList= new ArrayList<>(exlusions.length);
-				for (int i= 0; i < exlusions.length; i++) {
-					if (!exlusions[i].equals(path)) {
-						exlusionList.add(exlusions[i]);
+				for (IPath exlusion : exlusions) {
+					if (!exlusion.equals(path)) {
+						exlusionList.add(exlusion);
 					} else {
 						hasChange= true;
 					}
 				}
 				element.setAttribute(CPListElement.EXCLUSION, exlusionList.toArray(new IPath[exlusionList.size()]));
 			}
-
-			IPath[] inclusion= (IPath[])element.getAttribute(CPListElement.INCLUSION);
-			if (inclusion != null) {
-				List<IPath> inclusionList= new ArrayList<>(inclusion.length);
-				for (int i= 0; i < inclusion.length; i++) {
-					if (!inclusion[i].equals(path)) {
-						inclusionList.add(inclusion[i]);
+			IPath[] inclusions= (IPath[])element.getAttribute(CPListElement.INCLUSION);
+			if (inclusions != null) {
+				List<IPath> inclusionList= new ArrayList<>(inclusions.length);
+				for (IPath inclusion : inclusions) {
+					if (!inclusion.equals(path)) {
+						inclusionList.add(inclusion);
 					} else {
 						hasChange= true;
 					}
@@ -1139,9 +1126,10 @@ public class ClasspathModifier {
 			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_ComparePaths, paths.length);
 			if (path.getFileExtension() == null)
 				path= new Path(completeName(path.toString()));
-			for (int i= 0; i < paths.length; i++) {
-				if (paths[i].equals(path))
+			for (IPath p : paths) {
+				if (p.equals(path)) {
 					return true;
+				}
 				monitor.worked(1);
 			}
 		} finally {
@@ -1188,10 +1176,11 @@ public class ClasspathModifier {
 				return paths;
 
 			ArrayList<IPath> newPaths= new ArrayList<>();
-			for (int i= 0; i < paths.length; i++) {
+			for (IPath p : paths) {
 				monitor.worked(1);
-				if (!paths[i].equals(path))
-					newPaths.add(paths[i]);
+				if (!p.equals(path)) {
+					newPaths.add(p);
+				}
 			}
 
 			return newPaths.toArray(new IPath[newPaths.size()]);
@@ -1221,9 +1210,8 @@ public class ClasspathModifier {
 	 */
 	private static List<Path> getFoldersOnCP(IPath path, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
 		List<Path> srcFolders= new ArrayList<>();
-		IClasspathEntry[] cpEntries= project.getRawClasspath();
-		for (int i= 0; i < cpEntries.length; i++) {
-			IPath cpPath= cpEntries[i].getPath();
+		for (IClasspathEntry cpEntry : project.getRawClasspath()) {
+			IPath cpPath= cpEntry.getPath();
 			if (path.isPrefixOf(cpPath) && path.segmentCount() + 1 == cpPath.segmentCount())
 				srcFolders.add(new Path(completeName(cpPath.lastSegment())));
 		}

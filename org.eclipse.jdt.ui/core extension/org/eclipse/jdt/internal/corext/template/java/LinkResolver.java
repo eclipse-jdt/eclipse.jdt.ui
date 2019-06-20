@@ -13,7 +13,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.template.java;
 
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jface.text.templates.TemplateContext;
@@ -54,8 +53,7 @@ public class LinkResolver extends TemplateVariableResolver {
 			if (params.size() > 0) {
 				fProposals= new String[params.size()];
 				int i= 0;
-				for (Iterator<String> iterator= params.iterator(); iterator.hasNext();) {
-					String param= iterator.next();
+				for (String param : params) {
 					fProposals[i]= param;
 					i++;
 				}
