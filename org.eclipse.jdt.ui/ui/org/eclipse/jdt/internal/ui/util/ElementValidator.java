@@ -193,8 +193,7 @@ public class ElementValidator {
 
 	private static IResource[] getResources(IAdaptable[] elements) {
 		Set<IResource> result= new HashSet<>();
-		for (int i= 0; i < elements.length; i++) {
-			IAdaptable element= elements[i];
+		for (IAdaptable element : elements) {
 			IResource resource= null;
 			if (element instanceof IJavaElement) {
 				IJavaElement je= (IJavaElement)element;

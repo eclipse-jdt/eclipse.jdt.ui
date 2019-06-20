@@ -102,14 +102,12 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 			return;
 		synchronized (fTypeHierarchyLifeCycleListener) {
 			boolean filterMethodOverrides= initializeMethodOverrideTester(filterMethod, typeToFindIn);
-			IMethod[] methods= typeToFindIn.getMethods();
-			for (int i= 0; i < methods.length; i++) {
-				IMethod curr= methods[i];
-				flags= curr.getFlags();
-				if (Flags.isPrivate(flags) || Flags.isStatic(flags) || curr.isConstructor())
+			for (IMethod m : typeToFindIn.getMethods()) {
+				flags= m.getFlags();
+				if (Flags.isPrivate(flags) || Flags.isStatic(flags) || m.isConstructor())
 					continue;
-				if (isCompatibleMethod(filterMethod, curr, filterMethodOverrides) && !children.contains(curr)) {
-					children.add(curr);
+				if (isCompatibleMethod(filterMethod, m, filterMethodOverrides) && !children.contains(m)) {
+					children.add(m);
 				}
 			}
 		}
@@ -121,13 +119,11 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 			return false;
 		synchronized (fTypeHierarchyLifeCycleListener) {
 			boolean filterMethodOverrides= initializeMethodOverrideTester(filterMethod, typeToFindIn);
-			IMethod[] methods= typeToFindIn.getMethods();
-			for (int i= 0; i < methods.length; i++) {
-				IMethod curr= methods[i];
-				flags= curr.getFlags();
-				if (Flags.isPrivate(flags) || Flags.isStatic(flags) || curr.isConstructor())
+			for (IMethod m : typeToFindIn.getMethods()) {
+				flags= m.getFlags();
+				if (Flags.isPrivate(flags) || Flags.isStatic(flags) || m.isConstructor())
 					continue;
-				if (isCompatibleMethod(filterMethod, curr, filterMethodOverrides)) {
+				if (isCompatibleMethod(filterMethod, m, filterMethodOverrides)) {
 					return true;
 				}
 			}
@@ -226,18 +222,17 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 		IJavaElement[] input= fTypeHierarchy.getInputElements();
 		if (input == null)
 			return false;
-		for (int i= 0; i < input.length; i++) {
-			int inputType= input[i].getElementType();
+		for (IJavaElement e : input) {
+			int inputType= e.getElementType();
 			if (inputType == IJavaElement.TYPE) {
 				return true;
 			}
-
 			IJavaElement parent= type.getAncestor(inputType);
 			if (inputType == IJavaElement.PACKAGE_FRAGMENT) {
-				if (parent == null || parent.getElementName().equals(input[i].getElementName())) {
+				if (parent == null || parent.getElementName().equals(e.getElementName())) {
 					return true;
 				}
-			} else if (input[i].equals(parent)) {
+			} else if (e.equals(parent)) {
 				return true;
 			}
 		}
@@ -286,8 +281,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	}
 
 	private void addFilteredMemberChildren(IType parent, List<IMember> children) throws JavaModelException {
-		for (int i= 0; i < fMemberFilter.length; i++) {
-			IMember member= fMemberFilter[i];
+		for (IMember member : fMemberFilter) {
 			if (parent.equals(member.getDeclaringType())) {
 				if (!children.contains(member)) {
 					children.add(member);
@@ -322,8 +316,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	}
 
 	private boolean hasMemberFilterChildren(IType type) throws JavaModelException {
-		for (int i= 0; i < fMemberFilter.length; i++) {
-			IMember member= fMemberFilter[i];
+		for (IMember member : fMemberFilter) {
 			if (type.equals(member.getDeclaringType())) {
 				return true;
 			} else if (member instanceof IMethod) {

@@ -15,8 +15,6 @@ package org.eclipse.jdt.internal.ui.workingsets;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 
 import org.eclipse.core.runtime.IAdaptable;
 
@@ -46,10 +44,8 @@ public class RemoveWorkingSetElementAction extends SelectionDispatchAction {
 		if (!(selection instanceof ITreeSelection))
 			return null;
 		ITreeSelection treeSelection= (ITreeSelection)selection;
-		List<?> elements= treeSelection.toList();
 		IWorkingSet result= null;
-		for (Iterator<?> iter= elements.iterator(); iter.hasNext();) {
-			Object element= iter.next();
+		for (Object element : treeSelection.toList()) {
 			TreePath[] paths= treeSelection.getPathsFor(element);
 			if (paths.length != 1)
 				return null;
@@ -75,9 +71,7 @@ public class RemoveWorkingSetElementAction extends SelectionDispatchAction {
 		if (ws == null)
 			return;
 		HashSet<IAdaptable> elements= new HashSet<>(Arrays.asList(ws.getElements()));
-		List<?> selectedElements= selection.toList();
-		for (Iterator<?> iter= selectedElements.iterator(); iter.hasNext();) {
-			Object object= iter.next();
+		for (Object object : selection.toList()) {
 			if (object instanceof IAdaptable) {
 				IAdaptable[] adaptedElements= ws.adaptElements(new IAdaptable[] {(IAdaptable)object});
 				if (adaptedElements.length == 1) {

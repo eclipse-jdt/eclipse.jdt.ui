@@ -378,9 +378,8 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	private boolean hasFolders(IContainer container) {
 
 		try {
-			IResource[] members= container.members();
-			for (int i= 0; i < members.length; i++) {
-				if (members[i] instanceof IContainer) {
+			for (IResource member : container.members()) {
+				if (member instanceof IContainer) {
 					return true;
 				}
 			}
@@ -511,9 +510,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			for (Iterator<Object> iter= selElements.iterator(); iter.hasNext();) {
 				CPListElement element= (CPListElement)iter.next();
 				if (element.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
-					List<CPListElement> list= ClasspathModifier.removeFilters(element.getPath(), fCurrJProject, fFoldersList.getElements());
-					for (Iterator<CPListElement> iterator= list.iterator(); iterator.hasNext();) {
-						CPListElement modified= iterator.next();
+					for (CPListElement modified : ClasspathModifier.removeFilters(element.getPath(), fCurrJProject, fFoldersList.getElements())) {
 						fFoldersList.refresh(modified);
 						fFoldersList.expandElement(modified, 3);
 					}
@@ -666,15 +663,13 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 
 	private void refresh(List<CPListElement> insertedElements, List<?> removedElements, List<CPListElement> modifiedElements, IPath outputLocation) {
 		fFoldersList.addElements(insertedElements);
-		for (Iterator<CPListElement> iter= insertedElements.iterator(); iter.hasNext();) {
-			CPListElement element= iter.next();
+		for (CPListElement element : insertedElements) {
 			fFoldersList.expandElement(element, 3);
 		}
 
 		fFoldersList.removeElements(removedElements);
 
-		for (Iterator<CPListElement> iter= modifiedElements.iterator(); iter.hasNext();) {
-			CPListElement element= iter.next();
+		for (CPListElement element : modifiedElements) {
 			fFoldersList.refresh(element);
 			fFoldersList.expandElement(element, 3);
 		}

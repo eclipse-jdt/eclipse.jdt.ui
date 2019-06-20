@@ -88,8 +88,7 @@ public class SelectionProviderMediator implements IPostSelectionProvider {
 		fPostSelectionChangedListeners= new ListenerList<>();
 		fViewerInFocus= viewerInFocus;
 
-		for (int i= 0; i < fViewers.length; i++) {
-			StructuredViewer viewer= fViewers[i];
+		for (StructuredViewer viewer : fViewers) {
 			viewer.addSelectionChangedListener(listener);
 			viewer.addPostSelectionChangedListener(new InternalPostSelectionListener());
 			Control control= viewer.getControl();
@@ -98,9 +97,9 @@ public class SelectionProviderMediator implements IPostSelectionProvider {
 	}
 
 	private void doFocusChanged(Widget control) {
-		for (int i= 0; i < fViewers.length; i++) {
-			if (fViewers[i].getControl() == control) {
-				propagateFocusChanged(fViewers[i]);
+		for (StructuredViewer viewer : fViewers) {
+			if (viewer.getControl() == control) {
+				propagateFocusChanged(viewer);
 				return;
 			}
 		}

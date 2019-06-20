@@ -298,10 +298,9 @@ public class MethodsViewer extends ProblemTableViewer {
 		String[] paramTypes= meth.getParameterTypes();
 		boolean isConstructor= meth.isConstructor();
 
-		for (int i= 0; i < elements.length; i++) {
-			Object curr= elements[i];
-			if (curr instanceof IMethod && JavaModelUtil.isSameMethodSignature(name, paramTypes, isConstructor, (IMethod) curr)) {
-				return (IMethod) curr;
+		for (Object element : elements) {
+			if (element instanceof IMethod && JavaModelUtil.isSameMethodSignature(name, paramTypes, isConstructor, (IMethod) element)) {
+				return (IMethod) element;
 			}
 		}
 		return null;

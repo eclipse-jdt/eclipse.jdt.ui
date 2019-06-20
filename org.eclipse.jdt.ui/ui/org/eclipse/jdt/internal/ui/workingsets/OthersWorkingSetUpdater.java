@@ -65,9 +65,7 @@ public class OthersWorkingSetUpdater implements IWorkingSetUpdater {
 			if (affectedChildren.length > 0) {
 				updateElements();
 			} else {
-				affectedChildren= delta.getAffectedChildren(IResourceDelta.CHANGED, IResource.PROJECT);
-				for (int i= 0; i < affectedChildren.length; i++) {
-					IResourceDelta projectDelta= affectedChildren[i];
+				for (IResourceDelta projectDelta : delta.getAffectedChildren(IResourceDelta.CHANGED, IResource.PROJECT)) {
 					if ((projectDelta.getFlags() & IResourceDelta.DESCRIPTION) != 0) {
 						updateElements();
 						// one is enough
@@ -122,9 +120,8 @@ public class OthersWorkingSetUpdater implements IWorkingSetUpdater {
 				// don't visit below projects
 				return;
 			}
-			IJavaElementDelta[] children= delta.getAffectedChildren();
-			for (int i= 0; i < children.length; i++) {
-				processJavaDelta(elements, children[i]);
+			for (IJavaElementDelta child : delta.getAffectedChildren()) {
+				processJavaDelta(elements, child);
 			}
 		}
 	}
@@ -176,15 +173,13 @@ public class OthersWorkingSetUpdater implements IWorkingSetUpdater {
 	public void updateElements() {
 		Assert.isTrue(fWorkingSet != null && fWorkingSetModel != null); // init and addWorkingSet have happend
 
-		IWorkingSet[] activeWorkingSets= fWorkingSetModel.getActiveWorkingSets();
-
 		List<IAdaptable> result= new ArrayList<>();
 		Set<IResource> projects= new HashSet<>();
-		for (int i= 0; i < activeWorkingSets.length; i++) {
-			if (activeWorkingSets[i] == fWorkingSet) continue;
-			IAdaptable[] elements= activeWorkingSets[i].getElements();
-			for (int j= 0; j < elements.length; j++) {
-				IAdaptable element= elements[j];
+		for (IWorkingSet activeWorkingSet : fWorkingSetModel.getActiveWorkingSets()) {
+			if (activeWorkingSet == fWorkingSet) {
+				continue;
+			}
+			for (IAdaptable element : activeWorkingSet.getElements()) {
 				IResource resource= element.getAdapter(IResource.class);
 				if (resource != null && resource.getType() == IResource.PROJECT) {
 					projects.add(resource);
@@ -193,15 +188,15 @@ public class OthersWorkingSetUpdater implements IWorkingSetUpdater {
 		}
 		IJavaModel model= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
 		try {
-			IJavaProject[] jProjects= model.getJavaProjects();
-			for (int i= 0; i < jProjects.length; i++) {
-				if (!projects.contains(jProjects[i].getProject()))
-					result.add(jProjects[i]);
+			for (IJavaProject jProject : model.getJavaProjects()) {
+				if (!projects.contains(jProject.getProject())) {
+					result.add(jProject);
+				}
 			}
-			Object[] rProjects= model.getNonJavaResources();
-			for (int i= 0; i < rProjects.length; i++) {
-				if (!projects.contains(rProjects[i]))
-					result.add((IProject) rProjects[i]);
+			for (Object rProject : model.getNonJavaResources()) {
+				if (!projects.contains(rProject)) {
+					result.add((IProject) rProject);
+				}
 			}
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);

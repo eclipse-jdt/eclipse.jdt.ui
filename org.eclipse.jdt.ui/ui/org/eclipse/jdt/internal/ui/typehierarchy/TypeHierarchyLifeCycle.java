@@ -189,8 +189,8 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 			freeHierarchy();
 			return;
 		}
-		for (int i= 0; i < elements.length; i++) {
-			if (elements[i] == null || !elements[i].exists()) {
+		for (IJavaElement element : elements) {
+			if (element == null || !element.exists()) {
 				freeHierarchy();
 				return;
 			}
@@ -305,17 +305,16 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 			}
 		} else {
 			IRegion region= JavaCore.newRegion();
-			for (int i= 0; i < elements.length; i++) {
-				if (elements[i].getElementType() == IJavaElement.JAVA_PROJECT) {
+			for (IJavaElement element : elements) {
+				if (element.getElementType() == IJavaElement.JAVA_PROJECT) {
 					// for projects only add the contained source folders
-					IPackageFragmentRoot[] roots= ((IJavaProject)elements[i]).getPackageFragmentRoots();
-					for (int j= 0; j < roots.length; j++) {
-						if (!roots[j].isExternal()) {
-							region.add(roots[j]);
+					for (IPackageFragmentRoot root : ((IJavaProject) element).getPackageFragmentRoots()) {
+						if (!root.isExternal()) {
+							region.add(root);
 						}
 					}
 				} else {
-					region.add(elements[i]);
+					region.add(element);
 				}
 			}
 			return JavaCore.newTypeHierarchy(region, null, pm);
@@ -401,9 +400,8 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 				if (delta.getKind() == IJavaElementDelta.CHANGED && isPossibleStructuralChange(delta.getFlags())) {
 					try {
 						if (cu.exists()) {
-							IType[] types= cu.getAllTypes();
-							for (int i= 0; i < types.length; i++) {
-								processTypeDelta(types[i], changedTypes);
+							for (IType type : cu.getAllTypes()) {
+								processTypeDelta(type, changedTypes);
 							}
 						}
 					} catch (JavaModelException e) {
@@ -436,9 +434,8 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 	}
 
 	private void processChildrenDelta(IJavaElementDelta delta, ArrayList<IType> changedTypes) {
-		IJavaElementDelta[] children= delta.getAffectedChildren();
-		for (int i= 0; i < children.length; i++) {
-			processDelta(children[i], changedTypes); // recursive
+		for (IJavaElementDelta child : delta.getAffectedChildren()) {
+			processDelta(child, changedTypes); // recursive
 		}
 	}
 

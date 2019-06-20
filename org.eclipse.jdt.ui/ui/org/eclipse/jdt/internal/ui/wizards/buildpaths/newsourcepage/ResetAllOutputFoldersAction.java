@@ -99,9 +99,8 @@ public class ResetAllOutputFoldersAction extends BuildpathModifierAction {
 			IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
 			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_ResetOutputFolder, roots.length + 10);
 			List<CPListElementAttribute> entries= new ArrayList<>();
-			for (int i= 0; i < roots.length; i++) {
+			for (IPackageFragmentRoot root : roots) {
 				monitor.worked(1);
-				IPackageFragmentRoot root= roots[i];
 				if (root.isArchive() || root.isExternal())
 					continue;
 				IClasspathEntry entry= root.getRawClasspathEntry();

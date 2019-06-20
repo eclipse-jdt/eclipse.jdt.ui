@@ -43,11 +43,9 @@ public class FilterUpdater implements IResourceChangeListener {
 		IResourceDelta delta= event.getDelta();
 		if (delta == null)
 			return;
-		IResourceDelta[] projDeltas = delta.getAffectedChildren(IResourceDelta.CHANGED);
-		for (int i= 0; i < projDeltas.length; i++) {
-			IResourceDelta pDelta= projDeltas[i];
-			if ((pDelta.getFlags() & IResourceDelta.DESCRIPTION) != 0) {
-				IProject project= (IProject) pDelta.getResource();
+		for (IResourceDelta deltachild : delta.getAffectedChildren(IResourceDelta.CHANGED)) {
+			if ((deltachild.getFlags() & IResourceDelta.DESCRIPTION) != 0) {
+				IProject project= (IProject) deltachild.getResource();
 				if (needsRefiltering(project)) {
 					final Control ctrl= fViewer.getControl();
 					if (ctrl != null && !ctrl.isDisposed()) {

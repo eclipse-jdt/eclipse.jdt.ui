@@ -64,10 +64,9 @@ public class SubTypeHierarchyViewer extends TypeHierarchyViewer {
 			if (hierarchy != null) {
 				IType[] types= hierarchy.getSubtypes(type);
 				if (isObject(type)) {
-					for (int i= 0; i < types.length; i++) {
-						IType curr= types[i];
-						if (!isAnonymousFromInterface(curr)) {
-							res.add(curr);
+					for (IType t : types) {
+						if (!isAnonymousFromInterface(t)) {
+							res.add(t);
 						}
 					}
 				} else {

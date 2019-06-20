@@ -125,8 +125,7 @@ public class ProblemTableViewer extends TableViewer implements ResourceToItemsMa
 		Object[] changed= event.getElements();
 		if (changed != null && !fResourceToItemsMapper.isEmpty()) {
 			ArrayList<Object> others= new ArrayList<>(changed.length);
-			for (int i= 0; i < changed.length; i++) {
-				Object curr= changed[i];
+			for (Object curr : changed) {
 				if (curr instanceof IResource) {
 					fResourceToItemsMapper.resourceChanged((IResource) curr);
 				} else {

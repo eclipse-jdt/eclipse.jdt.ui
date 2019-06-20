@@ -29,8 +29,8 @@ public class LayoutUtil {
 	 */
 	public static int getNumberOfColumns(DialogField[] editors) {
 		int nCulumns= 0;
-		for (int i= 0; i < editors.length; i++) {
-			nCulumns= Math.max(editors[i].getNumberOfControls(), nCulumns);
+		for (DialogField editor : editors) {
+			nCulumns= Math.max(editor.getNumberOfControls(), nCulumns);
 		}
 		return nCulumns;
 	}
@@ -76,8 +76,8 @@ public class LayoutUtil {
 	}
 
 	private static void modifyLabelSpans(Control[][] controls, int nCulumns) {
-		for (int i= 0; i < controls.length; i++) {
-			setHorizontalSpan(controls[i][0], nCulumns);
+		for (Control[] control : controls) {
+			setHorizontalSpan(control[0], nCulumns);
 		}
 	}
 

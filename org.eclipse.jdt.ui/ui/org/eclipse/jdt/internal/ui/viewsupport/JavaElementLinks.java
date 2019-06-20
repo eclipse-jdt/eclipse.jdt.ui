@@ -149,12 +149,10 @@ public class JavaElementLinks {
 		private String getPackageFragmentElementName(IJavaElement javaElement) {
 			IPackageFragmentRoot root= (IPackageFragmentRoot) javaElement.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 			String javaElementName= javaElement.getElementName();
-			String[] individualSegmentNames= javaElementName.split("\\."); //$NON-NLS-1$
 			String packageName= null;
 			StringBuilder strBuffer= new StringBuilder();
 
-			for (int i= 0; i < individualSegmentNames.length; i++) {
-				String lastSegmentName= individualSegmentNames[i];
+			for (String lastSegmentName : javaElementName.split("\\.")) { //$NON-NLS-1$
 				if (packageName != null) {
 					strBuffer.append('.');
 					packageName= packageName + '.' + lastSegmentName;
@@ -463,9 +461,8 @@ public class JavaElementLinks {
 									// easily, since the Javadoc references are erasures
 
 									//Shortcut: only check name and parameter count:
-									methods= type.getMethods();
-									for (int i= 0; i < methods.length; i++) {
-										method= methods[i];
+									for (IMethod method1 : type.getMethods()) {
+										method= method1;
 										if (method.getElementName().equals(refMemberName) && method.getNumberOfParameters() == paramSignatures.length)
 											return method;
 									}
@@ -481,9 +478,7 @@ public class JavaElementLinks {
 								if (field.exists()) {
 									return field;
 								} else {
-									IMethod[] methods= type.getMethods();
-									for (int i= 0; i < methods.length; i++) {
-										IMethod method= methods[i];
+									for (IMethod method : type.getMethods()) {
 										if (method.getElementName().equals(refMemberName))
 											return method;
 									}
@@ -587,26 +582,22 @@ public class JavaElementLinks {
 		while (baseElement != null) {
 			switch (baseElement.getElementType()) {
 				case IJavaElement.METHOD:
-					IMethod method= (IMethod)baseElement;
-					ITypeParameter[] typeParameters= method.getTypeParameters();
-					for (int i= 0; i < typeParameters.length; i++) {
-						ITypeParameter typeParameter= typeParameters[i];
+					for (ITypeParameter typeParameter : ((IMethod)baseElement).getTypeParameters()) {
 						if (typeParameter.getElementName().equals(typeVariableName)) {
 							return typeParameter;
 						}
 					}
 					break;
 
+
 				case IJavaElement.TYPE:
-					IType type= (IType)baseElement;
-					typeParameters= type.getTypeParameters();
-					for (int i= 0; i < typeParameters.length; i++) {
-						ITypeParameter typeParameter= typeParameters[i];
+					for (ITypeParameter typeParameter : ((IType)baseElement).getTypeParameters()) {
 						if (typeParameter.getElementName().equals(typeVariableName)) {
 							return typeParameter;
 						}
 					}
 					break;
+
 
 				case IJavaElement.JAVA_MODEL:
 				case IJavaElement.JAVA_PROJECT:

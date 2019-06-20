@@ -18,7 +18,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -238,8 +237,7 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 		fOrginalInclusionFilters= new Hashtable<>();
 		fOrginalExlusionFiltersCopy= new Hashtable<>();
 		fOrginalInclusionFiltersCopy= new Hashtable<>();
-		for (Iterator<CPListElement> iter= existingEntries.iterator(); iter.hasNext();) {
-			CPListElement element= iter.next();
+		for (CPListElement element : existingEntries) {
 			IPath[] exlusions= (IPath[])element.getAttribute(CPListElement.EXCLUSION);
 			if (exlusions != null) {
 				IPath[] save= new IPath[exlusions.length];
@@ -542,8 +540,7 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 	}
 
 	public void restore() {
-		for (Iterator<CPListElement> iter= fExistingEntries.iterator(); iter.hasNext();) {
-			CPListElement element= iter.next();
+		for (CPListElement element : fExistingEntries) {
 			if (fOrginalExlusionFilters.containsKey(element)) {
 				element.setAttribute(CPListElement.EXCLUSION, fOrginalExlusionFiltersCopy.get(element));
 			}
@@ -556,8 +553,7 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 
 	private void restoreCPElements() {
 		if (fNewElement.getPath() != null) {
-			for (Iterator<CPListElement> iter= fExistingEntries.iterator(); iter.hasNext();) {
-				CPListElement element= iter.next();
+			for (CPListElement element : fExistingEntries) {
 				if (fOrginalExlusionFilters.containsKey(element)) {
 					element.setAttribute(CPListElement.EXCLUSION, fOrginalExlusionFilters.get(element));
 				}
@@ -587,8 +583,7 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 			newPath= newPath.removeFirstSegments(projPath.segmentCount()).addTrailingSeparator();
 		}
 
-		for (Iterator<CPListElement> iter= fExistingEntries.iterator(); iter.hasNext();) {
-			CPListElement element= iter.next();
+		for (CPListElement element : fExistingEntries) {
 			IPath elementPath= element.getPath();
 			if (projPath.isPrefixOf(elementPath)) {
 				elementPath= elementPath.removeFirstSegments(projPath.segmentCount());

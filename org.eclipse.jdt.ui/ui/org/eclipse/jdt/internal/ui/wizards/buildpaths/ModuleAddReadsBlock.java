@@ -114,9 +114,9 @@ public class ModuleAddReadsBlock {
 	private Set<String> moduleNames() {
 		Set<String> moduleNames= new HashSet<>();
 		if (fSourceJavaElements != null) {
-			for (int i= 0; i < fSourceJavaElements.length; i++) {
-				if (fSourceJavaElements[i] instanceof IPackageFragmentRoot) {
-					IModuleDescription module= ((IPackageFragmentRoot) fSourceJavaElements[i]).getModuleDescription();
+			for (IJavaElement element : fSourceJavaElements) {
+				if (element instanceof IPackageFragmentRoot) {
+					IModuleDescription module= ((IPackageFragmentRoot) element).getModuleDescription();
 					if (module != null) {
 						moduleNames.add(module.getElementName());
 					}

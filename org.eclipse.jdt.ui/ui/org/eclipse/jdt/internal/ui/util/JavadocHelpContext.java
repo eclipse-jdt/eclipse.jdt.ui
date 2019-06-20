@@ -104,13 +104,12 @@ public class JavadocHelpContext implements IContext2 {
 		List<IHelpResource> helpResources= new ArrayList<>();
 
 		String javadocSummary= null;
-		for (int i= 0; i < elements.length; i++) {
-			if (elements[i] instanceof IJavaElement) {
-				IJavaElement element= (IJavaElement) elements[i];
+		for (Object e : elements) {
+			if (e instanceof IJavaElement) {
+				IJavaElement element= (IJavaElement) e;
 				// if element isn't on the build path skip it
 				if (!ActionUtil.isOnBuildPath(element))
 					continue;
-
 				// Create Javadoc summary
 				if (BUG_85721_FIXED) {
 					if (javadocSummary == null) {
@@ -125,7 +124,6 @@ public class JavadocHelpContext implements IContext2 {
 						javadocSummary= ""; // no Javadoc summary for multiple selection //$NON-NLS-1$
 					}
 				}
-
 				URL url= JavaUI.getJavadocLocation(element, true);
 				if (url == null || doesNotExist(url)) {
 					IPackageFragmentRoot root= JavaModelUtil.getPackageFragmentRoot(element);

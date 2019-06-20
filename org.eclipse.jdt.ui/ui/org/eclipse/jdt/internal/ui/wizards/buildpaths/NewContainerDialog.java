@@ -143,8 +143,8 @@ public class NewContainerDialog extends StatusDialog {
 	}
 
 	private boolean isFolderExisting(IFolder folder) {
-		for (int i= 0; i < fExistingFolders.length; i++) {
-			if (folder.getFullPath().equals(fExistingFolders[i])) {
+		for (IPath existingFolder : fExistingFolders) {
+			if (folder.getFullPath().equals(existingFolder)) {
 				return true;
 			}
 		}

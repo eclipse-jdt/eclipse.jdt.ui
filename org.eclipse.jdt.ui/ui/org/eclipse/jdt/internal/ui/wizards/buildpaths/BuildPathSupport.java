@@ -15,7 +15,6 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -101,13 +100,9 @@ public class BuildPathSupport {
 		IJavaProject currProject= elem.getJavaProject(); // can be null
 		try {
 			IJavaModel jmodel= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
-			IJavaProject[] jprojects= jmodel.getJavaProjects();
-			for (int i= 0; i < jprojects.length; i++) {
-				IJavaProject curr= jprojects[i];
+			for (IJavaProject curr : jmodel.getJavaProjects()) {
 				if (!curr.equals(currProject)) {
-					IClasspathEntry[] entries= curr.getRawClasspath();
-					for (int k= 0; k < entries.length; k++) {
-						IClasspathEntry entry= entries[k];
+					for (IClasspathEntry entry : curr.getRawClasspath()) {
 						if (entry.getEntryKind() == elem.getEntryKind()
 							&& entry.getPath().equals(elem.getPath())) {
 							IPath attachPath= entry.getSourceAttachmentPath();
@@ -137,17 +132,11 @@ public class BuildPathSupport {
 		try {
 			// try if the jar itself contains the source
 			IJavaModel jmodel= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
-			IJavaProject[] jprojects= jmodel.getJavaProjects();
-			for (int i= 0; i < jprojects.length; i++) {
-				IJavaProject curr= jprojects[i];
+			for (IJavaProject curr : jmodel.getJavaProjects()) {
 				if (!curr.equals(currProject)) {
-					IClasspathEntry[] entries= curr.getRawClasspath();
-					for (int k= 0; k < entries.length; k++) {
-						IClasspathEntry entry= entries[k];
+					for (IClasspathEntry entry : curr.getRawClasspath()) {
 						if (entry.getEntryKind() == elem.getEntryKind() && entry.getPath().equals(elem.getPath())) {
-							IClasspathAttribute[] attributes= entry.getExtraAttributes();
-							for (int n= 0; n < attributes.length; n++) {
-								IClasspathAttribute attrib= attributes[n];
+							for (IClasspathAttribute attrib : entry.getExtraAttributes()) {
 								if (IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME.equals(attrib.getName())) {
 									return attrib.getValue();
 								}
@@ -239,8 +228,7 @@ public class BuildPathSupport {
 		}
 		CPListElement currElem= CPListElement.createFromExisting(currEntry, jproject);
 		CPListElement newElem= CPListElement.createFromExisting(updatedEntry, jproject);
-		for (int i= 0; i < updatedAttributes.length; i++) {
-			String attrib= updatedAttributes[i];
+		for (String attrib : updatedAttributes) {
 			currElem.setAttribute(attrib, newElem.getAttribute(attrib));
 		}
 		return currElem.getClasspathEntry();
@@ -353,8 +341,7 @@ public class BuildPathSupport {
 	 * @since 3.5
 	 */
 	public static void setEEComplianceOptions(IJavaProject javaProject, List<CPListElement> modifiedClassPathEntries) {
-		for (Iterator<CPListElement> iter= modifiedClassPathEntries.iterator(); iter.hasNext();) {
-			CPListElement entry= iter.next();
+		for (CPListElement entry : modifiedClassPathEntries) {
 			if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
 				IPath path= entry.getPath();
 				if (! path.equals(entry.getOrginalPath())) {
@@ -386,8 +373,7 @@ public class BuildPathSupport {
 			Map<String, String> options= javaProject.getOptions(false);
 			Map<String, String> eeOptions= getEEOptions(ee);
 			if (eeOptions != null) {
-				for (int i= 0; i < PREFS_COMPLIANCE.length; i++) {
-					String option= PREFS_COMPLIANCE[i];
+				for (String option : PREFS_COMPLIANCE) {
 					String val= eeOptions.get(option);
 					if (val != null) {
 						options.put(option, val);

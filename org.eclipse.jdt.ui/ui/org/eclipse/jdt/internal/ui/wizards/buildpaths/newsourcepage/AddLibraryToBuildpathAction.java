@@ -129,8 +129,8 @@ public class AddLibraryToBuildpathAction extends BuildpathModifierAction {
 						pm.beginTask(NewWizardMessages.ClasspathModifier_Monitor_AddToBuildpath, 4);
 
 						List<CPListElement> addedEntries= new ArrayList<>();
-						for (int i= 0; i < selected.length; i++) {
-							addedEntries.add(CPListElement.create(selected[i], true, project));
+						for (IClasspathEntry entry : selected) {
+							addedEntries.add(CPListElement.create(entry, true, project));
 						}
 
 						pm.worked(1);

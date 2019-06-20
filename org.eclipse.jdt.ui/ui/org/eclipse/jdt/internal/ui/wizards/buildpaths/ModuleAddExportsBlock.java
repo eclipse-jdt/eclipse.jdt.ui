@@ -145,9 +145,9 @@ public class ModuleAddExportsBlock {
 	private Set<String> moduleNames() {
 		Set<String> moduleNames= new HashSet<>();
 		if (fSourceJavaElements != null) {
-			for (int i= 0; i < fSourceJavaElements.length; i++) {
-				if (fSourceJavaElements[i] instanceof IPackageFragmentRoot) {
-					IModuleDescription module= ((IPackageFragmentRoot) fSourceJavaElements[i]).getModuleDescription();
+			for (IJavaElement element : fSourceJavaElements) {
+				if (element instanceof IPackageFragmentRoot) {
+					IModuleDescription module= ((IPackageFragmentRoot) element).getModuleDescription();
 					if (module != null) {
 						moduleNames.add(module.getElementName());
 					}
@@ -323,9 +323,10 @@ public class ModuleAddExportsBlock {
 					assert fSourceJavaElements.length == 1;
 					IPackageFragmentRoot[] packageFragmentRoots= ((IJavaProject) fSourceJavaElements[0]).getPackageFragmentRoots();
 					int count= 0;
-					for (int i= 0; i < packageFragmentRoots.length; i++) {
-						if (packageFragmentRoots[i].getKind() == IPackageFragmentRoot.K_SOURCE) // only the project's own sources
-							packageFragmentRoots[count++]= packageFragmentRoots[i];
+					for (IPackageFragmentRoot packageFragmentRoot : packageFragmentRoots) {
+						if (packageFragmentRoot.getKind() == IPackageFragmentRoot.K_SOURCE) {
+							packageFragmentRoots[count++]= packageFragmentRoot;
+						}
 					}
 					if (count < packageFragmentRoots.length)
 						packageFragmentRoots= Arrays.copyOf(packageFragmentRoots, count);

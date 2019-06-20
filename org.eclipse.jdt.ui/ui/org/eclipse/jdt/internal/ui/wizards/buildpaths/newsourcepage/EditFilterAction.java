@@ -145,8 +145,7 @@ public class EditFilterAction extends BuildpathModifierAction {
 
 	private static CPListElement findElement(IJavaElement element, CPListElement[] elements) {
 		IPath path= element.getPath();
-		for (int i= 0; i < elements.length; i++) {
-			CPListElement cur= elements[i];
+		for (CPListElement cur : elements) {
 			if (cur.getEntryKind() == IClasspathEntry.CPE_SOURCE && cur.getPath().equals(path)) {
 				return cur;
 			}

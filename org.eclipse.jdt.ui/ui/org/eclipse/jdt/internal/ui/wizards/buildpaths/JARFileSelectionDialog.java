@@ -160,8 +160,8 @@ public class JARFileSelectionDialog extends FilteredElementTreeSelectionDialog {
 				} else {
 					File[] listFiles= file.listFiles();
 					if (listFiles != null) {
-						for (int i= 0; i < listFiles.length; i++) {
-							if (select(viewer, file, listFiles[i])) {
+						for (File f : listFiles) {
+							if (select(viewer, file, f)) {
 								return true;
 							}
 						}
@@ -205,8 +205,7 @@ public class JARFileSelectionDialog extends FilteredElementTreeSelectionDialog {
 			if (nSelected == 0 || (nSelected > 1 && !fMultiSelect)) {
 				return new StatusInfo(IStatus.ERROR, "");  //$NON-NLS-1$
 			}
-			for (int i= 0; i < selection.length; i++) {
-				Object curr= selection[i];
+			for (Object curr : selection) {
 				if (curr instanceof File) {
 					File file= (File) curr;
 					if (!fAcceptFolders && !file.isFile()) {

@@ -70,8 +70,7 @@ public class EditVariableEntryDialog extends StatusDialog {
 
 		fExistingEntries= new HashSet<>();
 		if (existingEntries != null) {
-			for (int i = 0; i < existingEntries.length; i++) {
-				IPath curr= existingEntries[i];
+			for (IPath curr : existingEntries) {
 				if (!curr.equals(initialEntry)) {
 					fExistingEntries.add(curr);
 				}

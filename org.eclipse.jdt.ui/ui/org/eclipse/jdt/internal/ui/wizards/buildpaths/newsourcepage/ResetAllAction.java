@@ -14,7 +14,6 @@
 package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -127,11 +126,10 @@ public class ResetAllAction extends BuildpathModifierAction {
 	        			fJavaProject.setOutputLocation(fOutputLocation, monitor);
 	        			delta.setDefaultOutputLocation(fOutputLocation);
 
-	        			for (Iterator<IResource> iterator= fProvider.getCreatedResources().iterator(); iterator.hasNext();) {
-	                        IResource resource= iterator.next();
-	                        resource.delete(false, null);
-	                        delta.addDeletedResource(resource);
-                        }
+						for (IResource resource : fProvider.getCreatedResources()) {
+							resource.delete(false, null);
+							delta.addDeletedResource(resource);
+						}
 
 	        			fProvider.resetCreatedResources();
 
@@ -178,12 +176,11 @@ public class ResetAllAction extends BuildpathModifierAction {
             return true;
 
         int i= 0;
-        for (Iterator<CPListElement> iterator= fEntries.iterator(); iterator.hasNext();) {
-	        CPListElement oldEntrie= iterator.next();
-	        if (!oldEntrie.getClasspathEntry().equals(currentEntries[i]))
-	        	return true;
-	        i++;
-        }
+		for (CPListElement oldEntry : fEntries) {
+			if (!oldEntry.getClasspathEntry().equals(currentEntries[i]))
+				return true;
+			i++;
+		}
         return false;
 	}
 }

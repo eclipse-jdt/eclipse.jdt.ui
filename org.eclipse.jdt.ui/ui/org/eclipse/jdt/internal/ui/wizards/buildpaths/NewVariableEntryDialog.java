@@ -16,7 +16,6 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -167,8 +166,7 @@ public class NewVariableEntryDialog extends StatusDialog {
 	private void initializeElements() {
 		String[] entries= JavaCore.getClasspathVariableNames();
 		ArrayList<CPVariableElement> elements= new ArrayList<>(entries.length);
-		for (int i= 0; i < entries.length; i++) {
-			String name= entries[i];
+		for (String name : entries) {
 			IPath entryPath= JavaCore.getClasspathVariable(name);
 			if (entryPath != null) {
 				elements.add(new CPVariableElement(name, entryPath));
@@ -286,8 +284,7 @@ public class NewVariableEntryDialog extends StatusDialog {
 		if (fWarning == null || fWarning.isDisposed())
 			return;
 
-		for (Iterator<CPVariableElement> iter= fVariablesList.getSelectedElements().iterator(); iter.hasNext();) {
-			CPVariableElement element= iter.next();
+		for (CPVariableElement element : fVariablesList.getSelectedElements()) {
 			String deprecationMessage= element.getDeprecationMessage();
 			if (deprecationMessage != null) {
 				fWarning.setText(deprecationMessage);

@@ -274,9 +274,9 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 			addLRUWorkingSetAction(mm, currId++, fWorkbenchPage.getAggregateWorkingSet());
 		}
 
-		for (int i= 0; i < workingSets.length; i++) {
-			if (!workingSets[i].isAggregateWorkingSet()) {
-				addLRUWorkingSetAction(mm, currId++, workingSets[i]);
+		for (IWorkingSet workingSet : workingSets) {
+			if (!workingSet.isAggregateWorkingSet()) {
+				addLRUWorkingSetAction(mm, currId++, workingSet);
 			}
 		}
 		fLRUMenuCount= currId;

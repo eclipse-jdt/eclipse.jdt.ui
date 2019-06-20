@@ -47,6 +47,7 @@ import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroupCore.PositionInformation;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
@@ -79,8 +80,7 @@ public class LinkedProposalModelPresenter {
 			if (positions.length > 0) {
 				LinkedProposalPositionGroup.Proposal[] linkedModeProposals= curr.getProposals();
 				if (linkedModeProposals.length <= 1) {
-					for (int i= 0; i < positions.length; i++) {
-						LinkedProposalPositionGroup.PositionInformation pos= positions[i];
+					for (PositionInformation pos : positions) {
 						if (pos.getOffset() != -1) {
 							group.addPosition(new LinkedPosition(document, pos.getOffset(), pos.getLength(), pos.getSequenceRank()));
 						}
@@ -91,8 +91,7 @@ public class LinkedProposalModelPresenter {
 						proposalImpls[i]= new LinkedPositionProposalImpl(linkedModeProposals[i], model);
 					}
 
-					for (int i= 0; i < positions.length; i++) {
-						LinkedProposalPositionGroup.PositionInformation pos= positions[i];
+					for (PositionInformation pos : positions) {
 						if (pos.getOffset() != -1) {
 							group.addPosition(new ProposalPosition(document, pos.getOffset(), pos.getLength(), pos.getSequenceRank(), proposalImpls));
 						}

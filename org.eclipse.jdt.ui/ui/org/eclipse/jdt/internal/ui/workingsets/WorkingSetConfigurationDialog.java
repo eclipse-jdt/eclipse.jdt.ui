@@ -462,9 +462,8 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 				if (fAddedWorkingSets.contains(workingSet)) {
 					fAddedWorkingSets.remove(workingSet);
 				} else {
-					IWorkingSet[] recentWorkingSets= manager.getRecentWorkingSets();
-					for (int i= 0; i < recentWorkingSets.length; i++) {
-						if (workingSet.equals(recentWorkingSets[i])) {
+					for (IWorkingSet recentWorkingSet : manager.getRecentWorkingSets()) {
+						if (workingSet.equals(recentWorkingSet)) {
 							fRemovedMRUWorkingSets.add(workingSet);
 							break;
 						}

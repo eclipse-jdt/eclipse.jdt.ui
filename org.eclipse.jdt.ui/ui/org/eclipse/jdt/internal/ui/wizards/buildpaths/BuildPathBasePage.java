@@ -160,8 +160,7 @@ public abstract class BuildPathBasePage {
 			if (value instanceof ModuleEncapsulationDetail[]) {
 				ModuleEncapsulationDetail[] existingDetails= (ModuleEncapsulationDetail[]) value;
 				int count= 0;
-				for (int j= 0; j < existingDetails.length; j++) {
-					ModuleEncapsulationDetail aDetail= existingDetails[j];
+				for (ModuleEncapsulationDetail aDetail : existingDetails) {
 					if (aDetail != detail)
 						existingDetails[count++]= aDetail;
 				}
@@ -222,15 +221,14 @@ public abstract class BuildPathBasePage {
 	}
 
 	public static void fixNestingConflicts(CPListElement[] newEntries, CPListElement[] existing, Set<CPListElement> modifiedSourceEntries) {
-		for (int i= 0; i < newEntries.length; i++) {
-			addExclusionPatterns(newEntries[i], existing, modifiedSourceEntries);
+		for (CPListElement newEntry : newEntries) {
+			addExclusionPatterns(newEntry, existing, modifiedSourceEntries);
 		}
 	}
 
 	private static void addExclusionPatterns(CPListElement newEntry, CPListElement[] existing, Set<CPListElement> modifiedEntries) {
 		IPath entryPath= newEntry.getPath();
-		for (int i= 0; i < existing.length; i++) {
-			CPListElement curr= existing[i];
+		for (CPListElement curr : existing) {
 			if (curr.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
 				IPath currPath= curr.getPath();
 				if (!currPath.equals(entryPath)) {

@@ -16,7 +16,6 @@ package org.eclipse.jdt.internal.ui.typehierarchy;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.help.IContextProvider;
@@ -388,8 +387,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	 * @param entry The new entry
 	 */
 	private void addHistoryEntry(IJavaElement[] entry) {
-		for (Iterator<IJavaElement[]> iter= fInputHistory.iterator(); iter.hasNext();) {
-			IJavaElement[] elem= iter.next();
+		for (IJavaElement[] elem : fInputHistory) {
 			if (Arrays.equals(elem, entry)) {
 				fInputHistory.remove(elem);
 				break;
@@ -401,9 +399,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 
 	private void updateHistoryEntries() {
 		for (int i= fInputHistory.size() - 1; i >= 0; i--) {
-			IJavaElement[] entries= fInputHistory.get(i);
-			for (int j= 0; j < entries.length; j++) {
-				IJavaElement elem= entries[j];
+			for (IJavaElement elem : fInputHistory.get(i)) {
 				if (elem != null && !elem.exists()) {
 					fInputHistory.remove(i);
 					break;
@@ -454,8 +450,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	 */
 	public void setHistoryEntries(List<IJavaElement[]> elems) {
 		fInputHistory.clear();
-		for (Iterator<IJavaElement[]> iterator= elems.iterator(); iterator.hasNext();) {
-			IJavaElement[] elements= iterator.next();
+		for (IJavaElement[] elements : elems) {
 			if (elements != null && elements.length != 0)
 				fInputHistory.add(elements);
 		}
@@ -619,8 +614,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			clearInput();
 		} else {
 			if (!inputElements.equals(prevInput)) {
-				for (int i= 0; i < fAllViewers.length; i++) {
-					fAllViewers[i].setInput(null);
+				for (TypeHierarchyViewer viewer : fAllViewers) {
+					viewer.setInput(null);
 				}
 			}
 			fInputElements= inputElements;
@@ -782,8 +777,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 
 		fEmptyTypesViewer= new Label(fViewerbook, SWT.TOP | SWT.LEFT | SWT.WRAP);
 
-		for (int i= 0; i < fAllViewers.length; i++) {
-			fAllViewers[i].setInput(fAllViewers[i]);
+		for (TypeHierarchyViewer viewer : fAllViewers) {
+			viewer.setInput(viewer);
 		}
 
 		// force the update
@@ -879,9 +874,9 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	}
 
 	private void initDragAndDrop() {
-		for (int i= 0; i < fAllViewers.length; i++) {
-			addDragAdapters(fAllViewers[i]);
-			addDropAdapters(fAllViewers[i]);
+		for (TypeHierarchyViewer viewer : fAllViewers) {
+			addDragAdapters(viewer);
+			addDropAdapters(viewer);
 		}
 		addDragAdapters(fMethodsViewer);
 		fMethodsViewer.addDropSupport(DND.DROP_NONE, new Transfer[0], new DropTargetAdapter());
@@ -983,8 +978,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		// set the filter menu items
 		IActionBars actionBars= getViewSite().getActionBars();
 		IMenuManager viewMenu= actionBars.getMenuManager();
-		for (int i= 0; i < fViewActions.length; i++) {
-			ToggleViewAction action= fViewActions[i];
+		for (ToggleViewAction action : fViewActions) {
 			viewMenu.add(action);
 			action.setEnabled(false);
 		}
@@ -996,8 +990,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 
 		IMenuManager layoutSubMenu= new MenuManager(TypeHierarchyMessages.TypeHierarchyViewPart_layout_submenu);
 		viewMenu.add(layoutSubMenu);
-		for (int i= 0; i < fToggleOrientationActions.length; i++) {
-			layoutSubMenu.add(fToggleOrientationActions[i]);
+		for (ToggleOrientationAction action : fToggleOrientationActions) {
+			layoutSubMenu.add(action);
 		}
 		viewMenu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 		viewMenu.add(fShowQualifiedTypeNamesAction);
@@ -1134,8 +1128,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	}
 
 	private void updateCheckedState() {
-		for (int i= 0; i < fToggleOrientationActions.length; i++) {
-			fToggleOrientationActions[i].setChecked(getViewLayout() == fToggleOrientationActions[i].getOrientation());
+		for (ToggleOrientationAction action : fToggleOrientationActions) {
+			action.setChecked(getViewLayout() == action.getOrientation());
 		}
 	}
 
@@ -1156,8 +1150,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 
 	private void fillMainToolBar(IToolBarManager tbmanager) {
 		tbmanager.removeAll();
-		for (int i= 0; i < fViewActions.length; i++) {
-			tbmanager.add(fViewActions[i]);
+		for (ToggleViewAction action : fViewActions) {
+			tbmanager.add(action);
 		}
 		tbmanager.add(fHistoryDropDownAction);
 		tbmanager.update(false);
@@ -1216,8 +1210,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	 */
 	private void setMemberFilter(IMember[] memberFilter) {
 		Assert.isNotNull(fAllViewers);
-		for (int i= 0; i < fAllViewers.length; i++) {
-			fAllViewers[i].setMemberFilter(memberFilter);
+		for (TypeHierarchyViewer viewer : fAllViewers) {
+			viewer.setMemberFilter(memberFilter);
 		}
 	}
 
@@ -1383,10 +1377,10 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	}
 
 	private boolean isChildVisible(Composite pb, Control child) {
-		Control[] children= pb.getChildren();
-		for (int i= 0; i < children.length; i++) {
-			if (children[i] == child && children[i].isVisible())
+		for (Control c : pb.getChildren()) {
+			if (c == child && c.isVisible()) {
 				return true;
+			}
 		}
 		return false;
 	}
@@ -1442,8 +1436,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	private void updateToolbarButtons() {
 		boolean isNull= fInputElements == null;
 		boolean isType= !isNull && fInputElements.length == 1 && fInputElements[0] instanceof IType;
-		for (int i= 0; i < fViewActions.length; i++) {
-			ToggleViewAction action= fViewActions[i];
+		for (ToggleViewAction action : fViewActions) {
 			if (action.getViewerIndex() == HIERARCHY_MODE_CLASSIC) {
 				action.setEnabled(!isNull);
 			} else {
@@ -1503,8 +1496,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			};
 
 		}
-		for (int i= 0; i < fViewActions.length; i++) {
-			ToggleViewAction action= fViewActions[i];
+		for (ToggleViewAction action : fViewActions) {
 			action.setChecked(fCurrentViewerIndex == action.getViewerIndex());
 		}
 	}
@@ -1554,8 +1546,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		if (on != fShowQualifiedTypeNames) {
 			fShowQualifiedTypeNames= on;
 			if (fAllViewers != null) {
-				for (int i= 0; i < fAllViewers.length; i++) {
-					fAllViewers[i].setQualifiedTypeName(on);
+				for (TypeHierarchyViewer viewer : fAllViewers) {
+					viewer.setQualifiedTypeName(on);
 				}
 			}
 		}
@@ -1944,8 +1936,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	 * @since 3.6
 	 */
 	public void setViewersInput() {
-		for (int i= 0; i < fAllViewers.length; i++) {
-			fAllViewers[i].setInput(fAllViewers[i]);
+		for (TypeHierarchyViewer viewer : fAllViewers) {
+			viewer.setInput(viewer);
 		}
 		setKeepShowingEmptyViewers(false);
 	}

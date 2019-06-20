@@ -90,14 +90,13 @@ public class ProblemMarkerManager implements IResourceChangeListener, IAnnotatio
 
 		private boolean isErrorDelta(IResourceDelta delta) {
 			if ((delta.getFlags() & IResourceDelta.MARKERS) != 0) {
-				IMarkerDelta[] markerDeltas= delta.getMarkerDeltas();
-				for (int i= 0; i < markerDeltas.length; i++) {
-					if (markerDeltas[i].isSubtypeOf(IMarker.PROBLEM)) {
-						int kind= markerDeltas[i].getKind();
+				for (IMarkerDelta markerDelta : delta.getMarkerDeltas()) {
+					if (markerDelta.isSubtypeOf(IMarker.PROBLEM)) {
+						int kind= markerDelta.getKind();
 						if (kind == IResourceDelta.ADDED || kind == IResourceDelta.REMOVED)
 							return true;
-						int severity= markerDeltas[i].getAttribute(IMarker.SEVERITY, -1);
-						int newSeverity= markerDeltas[i].getMarker().getAttribute(IMarker.SEVERITY, -1);
+						int severity= markerDelta.getAttribute(IMarker.SEVERITY, -1);
+						int newSeverity= markerDelta.getMarker().getAttribute(IMarker.SEVERITY, -1);
 						if (newSeverity != severity)
 							return true;
 					}

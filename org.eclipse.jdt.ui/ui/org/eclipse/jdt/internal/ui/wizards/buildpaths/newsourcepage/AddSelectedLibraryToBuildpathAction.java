@@ -130,8 +130,7 @@ public class AddSelectedLibraryToBuildpathAction extends BuildpathModifierAction
 		List<CPListElement> addedEntries= new ArrayList<>();
 		try {
 			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_AddToBuildpath, 4);
-			for (int i= 0; i < resources.length; i++) {
-				IResource res= resources[i];
+			for (IFile res : resources) {
 				CPListElement cpListElement= new CPListElement(project, IClasspathEntry.CPE_LIBRARY, res.getFullPath(), res);
 				if(fForTestOnly) {
 					cpListElement.setAttribute(IClasspathAttribute.TEST, "true"); //$NON-NLS-1$
@@ -153,8 +152,7 @@ public class AddSelectedLibraryToBuildpathAction extends BuildpathModifierAction
         	informListeners(delta);
 
 			List<IJavaElement> result= new ArrayList<>(addedEntries.size());
-			for (int i= 0; i < resources.length; i++) {
-				IResource res= resources[i];
+			for (IResource res : resources) {
 				IJavaElement elem= project.getPackageFragmentRoot(res);
 				if (elem != null) {
 					result.add(elem);

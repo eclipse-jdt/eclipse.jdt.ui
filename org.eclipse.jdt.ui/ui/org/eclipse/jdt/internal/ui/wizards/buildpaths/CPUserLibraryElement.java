@@ -92,9 +92,9 @@ public class CPUserLibraryElement {
 		fName= name;
 		fChildren= new ArrayList<>();
 		if (children != null) {
-			for (int i= 0; i < children.length; i++) {
-				children[i].setParentContainer(this);
-				fChildren.add(children[i]);
+			for (CPListElement child : children) {
+				child.setParentContainer(this);
+				fChildren.add(child);
 			}
 		}
 		fIsSystemLibrary= isSystemLibrary;
