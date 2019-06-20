@@ -110,8 +110,8 @@ public final class JarRefactoringDialog extends TrayDialog {
 			final RefactoringDescriptorProxy[] descriptors= fHistoryControl.getCheckedDescriptors();
 			Set<IProject> set= new HashSet<>();
 			IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
-			for (int index= 0; index < descriptors.length; index++) {
-				final String project= descriptors[index].getProject();
+			for (RefactoringDescriptorProxy descriptor : descriptors) {
+				final String project= descriptor.getProject();
 				if (project != null && !"".equals(project)) //$NON-NLS-1$
 					set.add(root.getProject(project));
 			}

@@ -183,8 +183,8 @@ public abstract class CleanUpSelectionDialog extends StatusDialog implements IMo
 	@Override
 	public void updateStatus(IStatus status) {
 		int count= 0;
-		for (int i= 0; i < fPages.length; i++) {
-			count+= fPages[i].getSelectedCleanUpCount();
+		for (CleanUpTabPage page : fPages) {
+			count+= page.getSelectedCleanUpCount();
 		}
 		if (count == 0) {
 			super.updateStatus(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, getEmptySelectionMessage()));
@@ -239,9 +239,9 @@ public abstract class CleanUpSelectionDialog extends StatusDialog implements IMo
 
 	private void updateCountLabel() {
 		int size= 0, count= 0;
-		for (int i= 0; i < fPages.length; i++) {
-			size+= fPages[i].getCleanUpCount();
-			count+= fPages[i].getSelectedCleanUpCount();
+		for (CleanUpTabPage page : fPages) {
+			size+= page.getCleanUpCount();
+			count+= page.getSelectedCleanUpCount();
 		}
 
 		fCountLabel.setText(getSelectionCountMessage(count, size));

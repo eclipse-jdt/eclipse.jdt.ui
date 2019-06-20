@@ -248,13 +248,9 @@ abstract class JavaHistoryActionImpl /* extends Action implements IActionDelegat
 	final JavaEditor getEditor(IFile file) {
 		FileEditorInput fei= new FileEditorInput(file);
 		IWorkbench workbench= PlatformUI.getWorkbench();
-		IWorkbenchWindow[] windows= workbench.getWorkbenchWindows();
-		for (int i= 0; i < windows.length; i++) {
-			IWorkbenchPage[] pages= windows[i].getPages();
-			for (int x= 0; x < pages.length; x++) {
-				IEditorPart[] editors= pages[x].getDirtyEditors();
-				for (int z= 0; z < editors.length; z++) {
-					IEditorPart ep= editors[z];
+		for (IWorkbenchWindow window : workbench.getWorkbenchWindows()) {
+			for (IWorkbenchPage page : window.getPages()) {
+				for (IEditorPart ep : page.getDirtyEditors()) {
 					if (ep instanceof JavaEditor) {
 						JavaEditor je= (JavaEditor) ep;
 						if (fei.equals(je.getEditorInput()))

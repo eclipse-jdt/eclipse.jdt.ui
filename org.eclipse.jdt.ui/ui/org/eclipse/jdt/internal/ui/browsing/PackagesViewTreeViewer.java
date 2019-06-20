@@ -43,9 +43,7 @@ public class PackagesViewTreeViewer extends ProblemTreeViewer implements IPackag
 	public void mapElement(Object element, Widget item) {
 		if (element instanceof LogicalPackage && item instanceof Item) {
 			LogicalPackage cp= (LogicalPackage) element;
-			IPackageFragment[] fragments= cp.getFragments();
-			for (int i= 0; i < fragments.length; i++) {
-				IPackageFragment fragment= fragments[i];
+			for (IPackageFragment fragment : cp.getFragments()) {
 				fResourceToItemsMapper.addToMap(fragment, (Item) item);
 			}
 		}
@@ -60,9 +58,7 @@ public class PackagesViewTreeViewer extends ProblemTreeViewer implements IPackag
 
 		if (element instanceof LogicalPackage && item instanceof Item) {
 			LogicalPackage cp= (LogicalPackage) element;
-			IPackageFragment[] fragments= cp.getFragments();
-			for (int i= 0; i < fragments.length; i++) {
-				IPackageFragment fragment= fragments[i];
+			for (IPackageFragment fragment : cp.getFragments()) {
 				fResourceToItemsMapper.removeFromMap((Object)fragment, (Item)item);
 			}
 		}

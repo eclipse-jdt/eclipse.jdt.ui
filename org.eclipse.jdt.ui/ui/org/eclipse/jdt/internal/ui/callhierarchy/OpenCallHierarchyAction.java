@@ -99,8 +99,7 @@ public class OpenCallHierarchyAction extends SelectionDispatchAction {
 			if (elements == null)
 				return;
 			List<IJavaElement> candidates= new ArrayList<>(elements.length);
-			for (int i= 0; i < elements.length; i++) {
-				IJavaElement element= elements[i];
+			for (IJavaElement element : elements) {
 				if (CallHierarchy.isPossibleInputElement(element)) {
 					candidates.add(element);
 				}

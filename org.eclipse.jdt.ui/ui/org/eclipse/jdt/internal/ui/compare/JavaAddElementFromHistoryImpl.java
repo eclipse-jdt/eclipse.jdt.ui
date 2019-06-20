@@ -172,24 +172,19 @@ class JavaAddElementFromHistoryImpl extends JavaHistoryActionImpl {
 			CompilationUnit root= parsePartialCompilationUnit(cu2);
 			ASTRewrite rewriter= ASTRewrite.create(root.getAST());
 
-			ITypedElement[] results= d.getSelection();
-			for (int i= 0; i < results.length; i++) {
-
-			    // create an AST node
-				ASTNode newNode= createASTNode(rewriter, results[i], TextUtilities.getDefaultLineDelimiter(document), cu.getJavaProject());
+			for (ITypedElement result : d.getSelection()) {
+				// create an AST node
+				ASTNode newNode= createASTNode(rewriter, result, TextUtilities.getDefaultLineDelimiter(document), cu.getJavaProject());
 				if (newNode == null) {
 					MessageDialog.openError(shell, errorTitle, errorMessage);
 					return;
 				}
-
 				// now determine where to put the new node
 				if (newNode instanceof PackageDeclaration) {
-				    rewriter.set(root, CompilationUnit.PACKAGE_PROPERTY, newNode, null);
-
+					rewriter.set(root, CompilationUnit.PACKAGE_PROPERTY, newNode, null);
 				} else if (newNode instanceof ImportDeclaration) {
 					ListRewrite lw= rewriter.getListRewrite(root, CompilationUnit.IMPORTS_PROPERTY);
 					lw.insertFirst(newNode, null);
-
 				} else {	// class, interface, enum, annotation, method, field
 
 					if (parent instanceof ICompilationUnit) {	// top level

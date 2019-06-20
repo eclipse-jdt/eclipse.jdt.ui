@@ -377,15 +377,12 @@ public class JavaStructureCreator extends StructureCreator {
 
 		HashMap<String, RewriteInfo> map= new HashMap<>(10);
 
-		Object[] children= root.getChildren();
-		for (int i= 0; i < children.length; i++) {
-			DiffNode diff= (DiffNode) children[i];
+		for (IDiffElement child : root.getChildren()) {
+			DiffNode diff= (DiffNode) child;
 			JavaNode jn= (JavaNode) diff.getId();
-
 			if (jn == null)
 				continue;
 			int type= jn.getTypeCode();
-
 			// we can only combine methods or constructors
 			if (type == JavaNode.METHOD || type == JavaNode.CONSTRUCTOR) {
 
@@ -427,7 +424,6 @@ public class JavaStructureCreator extends StructureCreator {
 					break;
 				}
 			}
-
 			// recurse
 			rewriteTree(differencer, diff);
 		}

@@ -67,9 +67,10 @@ public abstract class AbstractMultiFix extends AbstractCleanUp implements IMulti
 	 */
 	protected static int getNumberOfProblems(IProblem[] problems, int problemId) {
 		int result= 0;
-		for (int i= 0; i < problems.length; i++) {
-			if (problems[i].getID() == problemId)
+		for (IProblem problem : problems) {
+			if (problem.getID() == problemId) {
 				result++;
+			}
 		}
 		return result;
 	}
@@ -100,8 +101,7 @@ public abstract class AbstractMultiFix extends AbstractCleanUp implements IMulti
 	protected static IProblemLocation[] filter(IProblemLocation[] problems, int[] problemIds) {
 		ArrayList<IProblemLocation> result= new ArrayList<>();
 
-		for (int i= 0; i < problems.length; i++) {
-			IProblemLocation problem= problems[i];
+		for (IProblemLocation problem : problems) {
 			if (contains(problemIds, problem.getProblemId()) && !contains(result, problem)) {
 				result.add(problem);
 			}

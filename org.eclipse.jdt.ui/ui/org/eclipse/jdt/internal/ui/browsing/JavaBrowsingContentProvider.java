@@ -120,27 +120,30 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 			sourceRefs= fragment.getCompilationUnits();
 		}
 		else {
-			IOrdinaryClassFile[] classFiles= fragment.getOrdinaryClassFiles();
 			List<IOrdinaryClassFile> topLevelClassFile= new ArrayList<>();
-			for (int i= 0; i < classFiles.length; i++) {
-				IType type= classFiles[i].getType();
-				if (type != null && type.getDeclaringType() == null && !type.isAnonymous() && !type.isLocal())
-					topLevelClassFile.add(classFiles[i]);
+			for (IOrdinaryClassFile classFile : fragment.getOrdinaryClassFiles()) {
+				IType type= classFile.getType();
+				if (type != null && type.getDeclaringType() == null && !type.isAnonymous() && !type.isLocal()) {
+					topLevelClassFile.add(classFile);
+				}
 			}
 			sourceRefs= topLevelClassFile.toArray(new ISourceReference[topLevelClassFile.size()]);
 		}
 
 		Object[] result= new Object[0];
-		for (int i= 0; i < sourceRefs.length; i++)
-			result= concatenate(result, removeImportAndPackageDeclarations(getChildren(sourceRefs[i])));
+		for (ISourceReference sourceRef : sourceRefs) {
+			result= concatenate(result, removeImportAndPackageDeclarations(getChildren(sourceRef)));
+		}
 		return concatenate(result, fragment.getNonJavaResources());
 	}
 
 	private Object[] removeImportAndPackageDeclarations(Object[] members) {
 		ArrayList<Object> tempResult= new ArrayList<>(members.length);
-		for (int i= 0; i < members.length; i++)
-			if (!(members[i] instanceof IImportContainer) && !(members[i] instanceof IPackageDeclaration))
-				tempResult.add(members[i]);
+		for (Object member : members) {
+			if (!(member instanceof IImportContainer) && !(member instanceof IPackageDeclaration)) {
+				tempResult.add(member);
+			}
+		}
 		return tempResult.toArray();
 	}
 
@@ -157,9 +160,11 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 		// Add import declarations
 		IJavaElement[] members= parent.getChildren();
 		ArrayList<IJavaElement> tempResult= new ArrayList<>(members.length);
-		for (int i= 0; i < members.length; i++)
-			if ((members[i] instanceof IImportContainer))
-				tempResult.add(members[i]);
+		for (IJavaElement member : members) {
+			if (member instanceof IImportContainer) {
+				tempResult.add(member);
+			}
+		}
 		tempResult.addAll(Arrays.asList(type.getChildren()));
 		return tempResult.toArray();
 	}
@@ -173,8 +178,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 		List<IJavaElement> list= new ArrayList<>(roots.length);
 		// filter out package fragments that correspond to projects and
 		// replace them with the package fragments directly
-		for (int i= 0; i < roots.length; i++) {
-			IPackageFragmentRoot root= roots[i];
+		for (IPackageFragmentRoot root : roots) {
 			if (!root.isExternal()) {
 				IJavaElement[] children= root.getChildren();
 				list.addAll(Arrays.asList(children));
@@ -355,8 +359,8 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 				return;
 			}
 		}
-		for (int i= 0; i < affectedChildren.length; i++) {
-			processDelta(affectedChildren[i]);
+		for (IJavaElementDelta child : affectedChildren) {
+			processDelta(child);
 		}
 	}
 

@@ -113,9 +113,10 @@ public class GenerateHashCodeEqualsDialog extends SourceActionDialog {
 		@Override
 		public IStatus validate(Object[] selection) {
 			int count= 0;
-			for (int index= 0; index < selection.length; index++) {
-				if (selection[index] instanceof IVariableBinding)
+			for (Object s : selection) {
+				if (s instanceof IVariableBinding) {
 					count++;
+				}
 			}
 			if (count == 0)
 				return new StatusInfo(IStatus.ERROR, JavaUIMessages.GenerateHashCodeEqualsDialog_select_at_least_one_field);

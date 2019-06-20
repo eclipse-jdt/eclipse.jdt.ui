@@ -49,8 +49,8 @@ class SearchScopeProjectAction extends SearchScopeAction {
 		}
 
 		HashSet<IJavaProject> projects= new HashSet<>();
-		for (int i= 0; i < members.length; i++) {
-			projects.add(members[i].getJavaProject());
+		for (IMember member : members) {
+			projects.add(member.getJavaProject());
 		}
 		return SearchEngine.createJavaSearchScope(
 				projects.toArray(new IJavaProject[projects.size()]),
@@ -67,8 +67,8 @@ class SearchScopeProjectAction extends SearchScopeAction {
 		IMember[] members= fGroup.getView().getInputElements();
 		if (members != null) {
 			HashSet<String> projectNames= new HashSet<>();
-			for (int i= 0; i < members.length; i++) {
-				projectNames.add(members[i].getJavaProject().getElementName());
+			for (IMember member : members) {
+				projectNames.add(member.getJavaProject().getElementName());
 			}
 			JavaSearchScopeFactory factory= JavaSearchScopeFactory.getInstance();
 			return factory.getProjectScopeDescription(

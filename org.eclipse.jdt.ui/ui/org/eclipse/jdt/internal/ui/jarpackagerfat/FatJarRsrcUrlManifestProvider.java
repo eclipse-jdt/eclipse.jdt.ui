@@ -18,7 +18,6 @@ package org.eclipse.jdt.internal.ui.jarpackagerfat;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
@@ -41,9 +40,7 @@ public class FatJarRsrcUrlManifestProvider extends FatJarManifestProvider {
 
 	private void setManifestRsrcClasspath(Manifest ownManifest, JarPackageData jarPackage) {
 		ArrayList<String> jarNames= new ArrayList<>();
-		Object[] elements= jarPackage.getElements();
-		for (int i= 0; i < elements.length; i++) {
-			Object element= elements[i];
+		for (Object element : jarPackage.getElements()) {
 			if (element instanceof IPackageFragmentRoot && ((IPackageFragmentRoot) element).isArchive()) {
 				String jarName= ((IPackageFragmentRoot) element).getPath().toFile().getName();
 				while (jarNames.contains(jarName)) {
@@ -59,8 +56,7 @@ public class FatJarRsrcUrlManifestProvider extends FatJarManifestProvider {
 	public String getManifestRsrcClasspath(ArrayList<String> jarNames) {
 		StringBuilder result= new StringBuilder();
 		result.append(JIJConstants.CURRENT_DIR); 
-		for (Iterator<String> iterator= jarNames.iterator(); iterator.hasNext();) {
-			String jarName= iterator.next();
+		for (String jarName : jarNames) {
 			try {
 				jarName= URLEncoder.encode(jarName, "UTF-8"); //$NON-NLS-1$
 			} catch (UnsupportedEncodingException e) {

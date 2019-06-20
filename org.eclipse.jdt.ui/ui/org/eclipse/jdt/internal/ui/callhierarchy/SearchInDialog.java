@@ -154,8 +154,8 @@ class SearchInDialog extends TrayDialog {
 				updateOKStatus();
 			}
 		};
-		for (int i= 0; i < fIncludeMasks.length; i++) {
-			fIncludeMasks[i].addSelectionListener(listener);
+		for (Button b : fIncludeMasks) {
+			b.addSelectionListener(listener);
 		}
 
 		return result;
@@ -178,8 +178,7 @@ class SearchInDialog extends TrayDialog {
 		if (fIncludeMasks == null || fIncludeMasks[0].isDisposed())
 			return fIncludeMask;
 		int mask= 0;
-		for (int i= 0; i < fIncludeMasks.length; i++) {
-			Button button= fIncludeMasks[i];
+		for (Button button : fIncludeMasks) {
 			if (button.getSelection()) {
 				mask|= getIntData(button);
 			}

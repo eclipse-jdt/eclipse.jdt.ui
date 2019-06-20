@@ -91,9 +91,8 @@ public class OccurrencesSearchMenuAction implements IWorkbenchWindowPulldownDele
 			@Override
 			public void menuShown(MenuEvent e) {
 				Menu m= (Menu) e.widget;
-				MenuItem[] items= m.getItems();
-				for (int i= 0; i < items.length; i++) {
-					items[i].dispose();
+				for (MenuItem item : m.getItems()) {
+					item.dispose();
 				}
 				fillMenu(m);
 			}
@@ -120,9 +119,9 @@ public class OccurrencesSearchMenuAction implements IWorkbenchWindowPulldownDele
 
 	private void disposeSubmenuActions() {
 		if (fPartService != null && fRetargetActions != null) {
-			for (int i= 0; i < fRetargetActions.length; i++) {
-				fPartService.removePartListener(fRetargetActions[i]);
-				fRetargetActions[i].dispose();
+			for (RetargetAction action : fRetargetActions) {
+				fPartService.removePartListener(action);
+				action.dispose();
 			}
 		}
 		fRetargetActions= null;
@@ -171,8 +170,7 @@ public class OccurrencesSearchMenuAction implements IWorkbenchWindowPulldownDele
 		}
 
 		final ArrayList<IAction> activeActions= new ArrayList<>(fRetargetActions.length);
-		for (int i= 0; i < fRetargetActions.length; i++) {
-			RetargetAction action= fRetargetActions[i];
+		for (RetargetAction action : fRetargetActions) {
 			IAction actionHandler= action.getActionHandler();
 			if (actionHandler instanceof SelectionDispatchAction) {
 				((SelectionDispatchAction) actionHandler).update(selection);
@@ -202,8 +200,7 @@ public class OccurrencesSearchMenuAction implements IWorkbenchWindowPulldownDele
 		if (javaSelection == null)
 			return;
 
-		for (int i= 0; i < fRetargetActions.length; i++) {
-			RetargetAction action= fRetargetActions[i];
+		for (RetargetAction action : fRetargetActions) {
 			IAction actionHandler= action.getActionHandler();
 			if (actionHandler instanceof SelectionDispatchAction) {
 				((SelectionDispatchAction) actionHandler).update(javaSelection);
@@ -247,8 +244,8 @@ public class OccurrencesSearchMenuAction implements IWorkbenchWindowPulldownDele
 	public void fillMenu(Menu menu) {
 		if (fRetargetActions != null) {
 			updateActions();
-			for (int i= 0; i < fRetargetActions.length; i++) {
-				ActionContributionItem item= new ActionContributionItem(fRetargetActions[i]);
+			for (RetargetAction fRetargetAction : fRetargetActions) {
+				ActionContributionItem item= new ActionContributionItem(fRetargetAction);
 				item.fill(menu, -1);
 			}
 		} else {

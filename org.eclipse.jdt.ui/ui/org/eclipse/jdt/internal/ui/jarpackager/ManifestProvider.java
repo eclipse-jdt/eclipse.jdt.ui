@@ -95,21 +95,21 @@ public class ManifestProvider implements IManifestProvider {
 			manifest.getMainAttributes().put(Attributes.Name.SEALED, SEALED_VALUE);
 			IPackageFragment[] packages= jarPackage.getPackagesToUnseal();
 			if (packages != null) {
-				for (int i= 0; i < packages.length; i++) {
+				for (IPackageFragment p : packages) {
 					Attributes attributes= new Attributes();
 					attributes.put(Attributes.Name.SEALED, UNSEALED_VALUE);
-					manifest.getEntries().put(getInManifestFormat(packages[i]), attributes);
+					manifest.getEntries().put(getInManifestFormat(p), attributes);
 				}
 			}
 		}
 		else {
 			IPackageFragment[] packages= jarPackage.getPackagesToSeal();
 			if (packages != null)
-				for (int i= 0; i < packages.length; i++) {
+				for (IPackageFragment p : packages) {
 					Attributes attributes= new Attributes();
 					attributes.put(Attributes.Name.SEALED, SEALED_VALUE);
-					manifest.getEntries().put(getInManifestFormat(packages[i]), attributes);
-				}
+					manifest.getEntries().put(getInManifestFormat(p), attributes);
+			}
 		}
 	}
 

@@ -50,10 +50,10 @@ public class NoPackageContainingFoldersFilter extends ViewerFilter {
 		IJavaElement element= JavaCore.create(folder);
 		if (element instanceof IPackageFragment)
 			return true;
-		IResource[] resources= folder.members();
-		for (int i= 0; i < resources.length; i++) {
-			if (resources[i] instanceof IFolder && containsPackage((IFolder)resources[i]))
+		for (IResource resource : folder.members()) {
+			if (resource instanceof IFolder && containsPackage((IFolder) resource)) {
 				return true;
+			}
 		}
 		return false;
 	}

@@ -128,8 +128,7 @@ public final class JarPackagerUtil {
 		if (elements == null)
 			return null;
 		List<IResource> selectedResources= new ArrayList<>(elements.length);
-		for (int i= 0; i < elements.length; i++) {
-			Object element= elements[i];
+		for (Object element : elements) {
 			if (element instanceof IJavaElement) {
 				selectedResources.add(((IJavaElement)element).getResource());
 			}

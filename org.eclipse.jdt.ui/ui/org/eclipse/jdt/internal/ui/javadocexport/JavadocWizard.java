@@ -183,8 +183,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 				String newExternalForm= newURL.toExternalForm();
 				List<IJavaProject> projs= new ArrayList<>();
 				//get javadoc locations for all projects
-				for (int i= 0; i < checkedProjects.length; i++) {
-					IJavaProject curr= checkedProjects[i];
+				for (IJavaProject curr : checkedProjects) {
 					URL currURL= JavaUI.getProjectJavadocLocation(curr);
 					if (currURL == null || !newExternalForm.equals(currURL.toExternalForm())) {
 						//if not all projects have the same javadoc location ask if you want to change
@@ -208,15 +207,15 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 				if (javadocXMLElement != null) {
 
 					if (!fTreeWizardPage.getCustom()) {
-						for (int i= 0; i < fContributedJavadocWizardPages.length; i++) {
-							fContributedJavadocWizardPages[i].updateAntScript(javadocXMLElement);
+						for (ContributedJavadocWizardPage contributedJavadocWizardPage : fContributedJavadocWizardPages) {
+							contributedJavadocWizardPage.updateAntScript(javadocXMLElement);
 						}
 					}
 					File file= fStore.writeXML(javadocXMLElement);
 					IFile[] files= fRoot.findFilesForLocationURI(file.toURI());
 					if (files != null) {
-						for (int i= 0; i < files.length; i++) {
-							files[i].refreshLocal(IResource.DEPTH_ONE, null);
+						for (IFile f : files) {
+							f.refreshLocal(IResource.DEPTH_ONE, null);
 						}
 					}
 				}
@@ -293,8 +292,8 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 			}
 
 			if (!fTreeWizardPage.getCustom()) {
-				for (int i= 0; i < fContributedJavadocWizardPages.length; i++) {
-					fContributedJavadocWizardPages[i].updateArguments(vmArgs, progArgs);
+				for (ContributedJavadocWizardPage fContributedJavadocWizardPage : fContributedJavadocWizardPages) {
+					fContributedJavadocWizardPage.updateArguments(vmArgs, progArgs);
 				}
 			}
 
@@ -318,8 +317,8 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 			if (process != null) {
 				// construct a formatted command line for the process properties
 				StringBuilder buf= new StringBuilder();
-				for (int i= 0; i < args.length; i++) {
-					buf.append(args[i]);
+				for (String arg : args) {
+					buf.append(arg);
 					buf.append(' ');
 				}
 
@@ -410,8 +409,8 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 		super.addPage(fTreeWizardPage);
 		super.addPage(fStandardDocletWizardPage);
 
-		for (int i= 0; i < fContributedJavadocWizardPages.length; i++) {
-			super.addPage(fContributedJavadocWizardPages[i]);
+		for (ContributedJavadocWizardPage fContributedJavadocWizardPage : fContributedJavadocWizardPages) {
+			super.addPage(fContributedJavadocWizardPage);
 		}
 		super.addPage(fLastWizardPage);
 
@@ -441,8 +440,8 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 	private void refresh(IPath path) {
 		IContainer[] containers= fRoot.findContainersForLocationURI(path.toFile().toURI());
 		try {
-			for (int i= 0; i < containers.length; i++) {
-				containers[i].refreshLocal(IResource.DEPTH_INFINITE, null);
+			for (IContainer container : containers) {
+				container.refreshLocal(IResource.DEPTH_INFINITE, null);
 			}
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
@@ -480,8 +479,8 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 		}
 
 		private boolean containsJavadocLaunch(ILaunch[] launches) {
-			for (int i= 0; i < launches.length; i++) {
-				if (launches[i] == fLaunch) {
+			for (ILaunch launch : launches) {
+				if (launch == fLaunch) {
 					return true;
 				}
 			}

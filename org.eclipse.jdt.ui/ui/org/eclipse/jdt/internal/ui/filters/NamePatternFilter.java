@@ -81,10 +81,10 @@ public class NamePatternFilter extends ViewerFilter {
 			}
 		}
 		if (matchName != null && matchName.length() > 0) {
-			StringMatcher[] testMatchers= getMatchers();
-			for (int i = 0; i < testMatchers.length; i++) {
-				if (testMatchers[i].match(matchName))
+			for (StringMatcher testMatcher : getMatchers()) {
+				if (testMatcher.match(matchName)) {
 					return false;
+				}
 			}
 			return true;
 		}

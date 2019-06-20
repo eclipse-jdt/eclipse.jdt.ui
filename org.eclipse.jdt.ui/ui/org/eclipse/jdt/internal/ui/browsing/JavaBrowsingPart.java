@@ -260,16 +260,15 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, IView
 		Object elements[]= ((IStructuredSelection) fViewer.getSelection()).toArray();
 		if (elements.length > 0) {
 			IMemento selectionMem= memento.createChild(TAG_SELECTED_ELEMENTS);
-			for (int i= 0; i < elements.length; i++) {
+			for (Object element : elements) {
 				IMemento elementMem= selectionMem.createChild(TAG_SELECTED_ELEMENT);
-				Object o= elements[i];
-				if (o instanceof IJavaElement)
-					elementMem.putString(TAG_SELECTED_ELEMENT_PATH, ((IJavaElement) elements[i]).getHandleIdentifier());
-				else if (o instanceof LogicalPackage) {
-					IPackageFragment[] packages=((LogicalPackage)o).getFragments();
-					for (int j= 0; j < packages.length; j++) {
+				Object o= element;
+				if (o instanceof IJavaElement) {
+					elementMem.putString(TAG_SELECTED_ELEMENT_PATH, ((IJavaElement) element).getHandleIdentifier());
+				} else if (o instanceof LogicalPackage) {
+					for (IPackageFragment p : ((LogicalPackage)o).getFragments()) {
 						IMemento packageMem= elementMem.createChild(TAG_LOGICAL_PACKAGE);
-						packageMem.putString(TAG_SELECTED_ELEMENT_PATH, packages[j].getHandleIdentifier());
+						packageMem.putString(TAG_SELECTED_ELEMENT_PATH, p.getHandleIdentifier());
 					}
 				}
 			}
@@ -297,15 +296,13 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, IView
 		childMem= memento.getChild(TAG_SELECTED_ELEMENTS);
 		if (childMem != null) {
 			ArrayList<Object> list= new ArrayList<>();
-			IMemento[] elementMem= childMem.getChildren(TAG_SELECTED_ELEMENT);
-			for (int i= 0; i < elementMem.length; i++) {
-				String javaElementHandle= elementMem[i].getString(TAG_SELECTED_ELEMENT_PATH);
+			for (IMemento m : childMem.getChildren(TAG_SELECTED_ELEMENT)) {
+				String javaElementHandle= m.getString(TAG_SELECTED_ELEMENT_PATH);
 				if (javaElementHandle == null) {
 					// logical package
-					IMemento[] packagesMem= elementMem[i].getChildren(TAG_LOGICAL_PACKAGE);
 					LogicalPackage lp= null;
-					for (int j= 0; j < packagesMem.length; j++) {
-						javaElementHandle= packagesMem[j].getString(TAG_SELECTED_ELEMENT_PATH);
+					for (IMemento p : m.getChildren(TAG_LOGICAL_PACKAGE)) {
+						javaElementHandle= p.getString(TAG_SELECTED_ELEMENT_PATH);
 						Object pack= JavaCore.create(javaElementHandle);
 						if (pack instanceof IPackageFragment && ((IPackageFragment)pack).exists()) {
 							if (lp == null)

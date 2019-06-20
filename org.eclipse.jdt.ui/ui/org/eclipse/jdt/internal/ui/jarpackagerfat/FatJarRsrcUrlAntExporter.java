@@ -136,11 +136,10 @@ public class FatJarRsrcUrlAntExporter extends FatJarAntExporter {
 		attribute.setAttribute("name", JIJConstants.REDIRECTED_CLASS_PATH_MANIFEST_NAME); //$NON-NLS-1$ 
 		StringBuilder rsrcClassPath= new StringBuilder();
 		rsrcClassPath.append(JIJConstants.CURRENT_DIR); 
-		for (int i= 0; i < sourceInfos.length; i++) {
-			SourceInfo sourceInfo= sourceInfos[i];
+		for (SourceInfo sourceInfo : sourceInfos) {
 			if (sourceInfo.isJar) {
 				rsrcClassPath.append(" ") //$NON-NLS-1$
-						.append(new File(sourceInfo.absPath).getName());
+					.append(new File(sourceInfo.absPath).getName());
 			}
 		}
 		attribute.setAttribute("value", rsrcClassPath.toString()); //$NON-NLS-1$  
@@ -150,8 +149,7 @@ public class FatJarRsrcUrlAntExporter extends FatJarAntExporter {
 		zipfileset.setAttribute("src", FatJarRsrcUrlBuilder.JAR_RSRC_LOADER_ZIP); //$NON-NLS-1$ 
 		jar.appendChild(zipfileset);
 		
-		for (int i= 0; i < sourceInfos.length; i++) {
-			SourceInfo sourceInfo= sourceInfos[i];
+		for (SourceInfo sourceInfo : sourceInfos) {
 			if (sourceInfo.isJar) {
 				File jarFile= new File(sourceInfo.absPath);
 				Element fileset= document.createElement("zipfileset"); //$NON-NLS-1$

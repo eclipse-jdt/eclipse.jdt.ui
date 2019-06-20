@@ -146,9 +146,7 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 		if (fMenu == null || fMenu.isDisposed()) {
 			return;
 		}
-		MenuItem[] items = fMenu.getItems();
-		for (int i=0; i < items.length; i++) {
-			MenuItem menuItem= items[i];
+		for (MenuItem menuItem : fMenu.getItems()) {
 			if (!menuItem.isDisposed()) {
 				menuItem.dispose();
 			}
@@ -289,8 +287,8 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 				templateGroup.fill(menu, -1);
 			}
 
-			for (int i= 0; i < actions.length; i++) {
-				ActionContributionItem item= new ActionContributionItem(actions[i]);
+			for (IAction action : actions) {
+				ActionContributionItem item= new ActionContributionItem(action);
 				item.fill(menu, -1);
 			}
 		}
@@ -308,9 +306,8 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 			@Override
 			public void menuShown(MenuEvent e) {
 				Menu m = (Menu)e.widget;
-				MenuItem[] items = m.getItems();
-				for (int i=0; i < items.length; i++) {
-					items[i].dispose();
+				for (MenuItem item : m.getItems()) {
+					item.dispose();
 				}
 				fillMenu(m);
 			}

@@ -120,12 +120,12 @@ class JavaStructureDiffViewer extends StructureDiffViewer implements IElementCha
 		if (o != null) {
 			Object[] children= getSortedChildren(o);
 			if (children != null && children.length > 0) {
-				for (int i= 0; i < children.length; i++) {
-					o= children[i];
+				for (Object child : children) {
+					o= child;
 					Object[] sortedChildren= getSortedChildren(o);
 					if (sortedChildren != null && sortedChildren.length > 0) {
-						for (int j= 0; j < sortedChildren.length; j++) {
-							o= sortedChildren[j];
+						for (Object sortedChild : sortedChildren) {
+							o= sortedChild;
 							if (o instanceof DiffNode) {
 								DiffNode dn= (DiffNode) o;
 								ITypedElement e= dn.getId();
@@ -264,8 +264,7 @@ class JavaStructureDiffViewer extends StructureDiffViewer implements IElementCha
 	@Override
 	public void elementChanged(ElementChangedEvent event) {
 		ITypedElement[] elements= findAffectedElement(event);
-		for (int i= 0; i < elements.length; i++) {
-			ITypedElement e= elements[i];
+		for (ITypedElement e : elements) {
 			if (e == null || !(e instanceof IContentChangeNotifier))
 				continue;
 			contentChanged((IContentChangeNotifier)e);
@@ -388,8 +387,8 @@ class JavaStructureDiffViewer extends StructureDiffViewer implements IElementCha
 		if (children == null || children.length == 0)
 			return null;
 
-		for (int i= 0; i < children.length; i++) {
-			IJavaElementDelta d= findJavaElementDelta(unit, children[i]);
+		for (IJavaElementDelta child : children) {
+			IJavaElementDelta d= findJavaElementDelta(unit, child);
 			if (d != null)
 				return d;
 		}

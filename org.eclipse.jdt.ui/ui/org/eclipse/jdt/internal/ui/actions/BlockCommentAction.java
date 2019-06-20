@@ -13,7 +13,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.actions;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -238,8 +237,7 @@ public abstract class BlockCommentAction extends TextEditorAction {
 	 * @throws BadLocationException if an <code>Edit</code> threw such an exception.
 	 */
 	protected void executeEdits(List<Edit> edits) throws BadLocationException {
-		for (Iterator<Edit> it= edits.iterator(); it.hasNext();) {
-			Edit edit= it.next();
+		for (Edit edit : edits) {
 			edit.perform();
 		}
 	}

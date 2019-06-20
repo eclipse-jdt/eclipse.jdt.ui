@@ -74,9 +74,9 @@ class RemoveFromViewAction extends Action{
 	 */
 	@Override
 	public void run() {
-		TreeItem[] items= fCallHierarchyViewer.getTree().getSelection();
-		for (int i= 0; i < items.length; i++)
-			items[i].dispose();
+		for (TreeItem item : fCallHierarchyViewer.getTree().getSelection()) {
+			item.dispose();
+		}
 	}
 
 	/**
@@ -105,10 +105,10 @@ class RemoveFromViewAction extends Action{
 				return false;
 		}
 
-		TreeItem[] items= fCallHierarchyViewer.getTree().getSelection();
-		for (int k= 0; k < items.length; k++) {
-			if (!checkForChildren(items[k]))
+		for (TreeItem item : fCallHierarchyViewer.getTree().getSelection()) {
+			if (!checkForChildren(item)) {
 				return false;
+			}
 		}
 		return true;
 	}
@@ -127,9 +127,10 @@ class RemoveFromViewAction extends Action{
 			if (!(data instanceof MethodWrapper) && data != null)
 				return false; // Do not add action if children are still being fetched for that node or if it's only JFace's dummy node.
 		}
-		for (int i= 0; i < children.length; i++) {
-			if (!checkForChildren(children[i]))
+		for (TreeItem child : children) {
+			if (!checkForChildren(child)) {
 				return false;
+			}
 		}
 		return true;
 	}

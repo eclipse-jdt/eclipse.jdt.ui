@@ -310,11 +310,12 @@ public class GenerateToStringDialog extends SourceActionDialog {
 			}
 
 			int countFields= 0, countMethods= 0;
-			for (int index= 0; index < selection.length; index++) {
-				if (selection[index] instanceof IVariableBinding)
+			for (Object s : selection) {
+				if (s instanceof IVariableBinding) {
 					countFields++;
-				else if (selection[index] instanceof IMethodBinding)
+				} else if (s instanceof IMethodBinding) {
 					countMethods++;
+				}
 			}
 
 			return new StatusInfo(IStatus.INFO, Messages.format(JavaUIMessages.GenerateToStringDialog_selectioninfo_more, new String[] { String.valueOf(countFields), String.valueOf(fNumFields),
@@ -517,11 +518,12 @@ public class GenerateToStringDialog extends SourceActionDialog {
 				List<Proposal> secondaryProposals= new ArrayList<>();
 				String[] proposalStrings= parser.getVariables();
 				String contentToCursor= contents.substring(0, position);
-				for (int i= 0; i < proposalStrings.length; i++) {
-					if (stringOverlap(contentToCursor, proposalStrings[i]) > 0)
-						primaryProposals.add(new Proposal(proposalStrings[i]));
-					else
-						secondaryProposals.add(new Proposal(proposalStrings[i]));
+				for (String proposalString : proposalStrings) {
+					if (stringOverlap(contentToCursor, proposalString) > 0) {
+						primaryProposals.add(new Proposal(proposalString));
+					} else {
+						secondaryProposals.add(new Proposal(proposalString));
+					}
 				}
 
 				this.latestContents= contents;
@@ -764,11 +766,10 @@ public class GenerateToStringDialog extends SourceActionDialog {
 			}
 
 			try {
-				IMethod[] methods= type.getMethods();
 				boolean foundConstructor= false;
-				for (int i= 0; i < methods.length; i++) {
-					if (methods[i].isConstructor() && Flags.isPublic(methods[i].getFlags())) {
-						String[] parameterTypes= methods[i].getParameterTypes();
+				for (IMethod method : type.getMethods()) {
+					if (method.isConstructor() && Flags.isPublic(method.getFlags())) {
+						String[] parameterTypes= method.getParameterTypes();
 						if (parameterTypes.length == 1 && "java.lang.Object".equals(JavaModelUtil.getResolvedTypeName(parameterTypes[0], type))) { //$NON-NLS-1$
 							foundConstructor= true;
 							break;
@@ -859,8 +860,8 @@ public class GenerateToStringDialog extends SourceActionDialog {
 						return false;
 					}
 					int countObjects= 0, countStrings= 0;
-					for (int i= 0; i < parameterTypes.length; i++) {
-						String resolvedParameterTypeName= JavaModelUtil.getResolvedTypeName(parameterTypes[i], type);
+					for (String parameterType : parameterTypes) {
+						String resolvedParameterTypeName= JavaModelUtil.getResolvedTypeName(parameterType, type);
 						if ("java.lang.Object".equals(resolvedParameterTypeName))//$NON-NLS-1$
 							countObjects++;
 						if ("java.lang.String".equals(resolvedParameterTypeName))//$NON-NLS-1$
@@ -890,12 +891,10 @@ public class GenerateToStringDialog extends SourceActionDialog {
 
 		private List<String> getMethodSuggestions(IType type, MethodChecker checker) throws JavaModelException {
 			ArrayList<String> result= new ArrayList<>();
-			IType[] classes= type.newSupertypeHierarchy(null).getAllClasses();
-			for (int i= 0; i < classes.length; i++) {
-				IMethod[] methods= classes[i].getMethods();
-				for (int j= 0; j < methods.length; j++) {
-					if (checker.isMethodOK(methods[j])) {
-						String name= methods[j].getElementName();
+			for (IType classe : type.newSupertypeHierarchy(null).getAllClasses()) {
+				for (IMethod method : classe.getMethods()) {
+					if (checker.isMethodOK(method)) {
+						String name= method.getElementName();
 						if (!result.contains(name))
 							result.add(name);
 					}
@@ -1233,9 +1232,9 @@ public class GenerateToStringDialog extends SourceActionDialog {
 	public Object[] getResult() {
 		Object[] oldResult= super.getResult();
 		List<Object> newResult= new ArrayList<>();
-		for (int i= 0; i < oldResult.length; i++) {
-			if (!(oldResult[i] instanceof String)) {
-				newResult.add(oldResult[i]);
+		for (Object r : oldResult) {
+			if (!(r instanceof String)) {
+				newResult.add(r);
 			}
 		}
 		return newResult.toArray();
@@ -1281,9 +1280,10 @@ public class GenerateToStringDialog extends SourceActionDialog {
 				if (parentElement != null) {
 					Object[] siblings= ((ITreeContentProvider)(getTreeViewer().getContentProvider())).getChildren(parentElement);
 					int count= 0;
-					for (int i= 0; i < siblings.length; i++) {
-						if (getTreeViewer().getChecked(siblings[i]))
+					for (Object sibling : siblings) {
+						if (getTreeViewer().getChecked(sibling)) {
 							count++;
+						}
 					}
 					if (count == 0)
 						getTreeViewer().setGrayChecked(parentElement, false);

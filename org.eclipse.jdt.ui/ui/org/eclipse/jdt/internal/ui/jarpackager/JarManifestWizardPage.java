@@ -480,9 +480,10 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 				// null
 			}
 		}
-		for (int i= 0; i < fMainTypes.length; i++) {
-			if (fMainTypes[i].getFullyQualifiedName().equals(name))
-			 return fMainTypes[i];
+		for (IType mainType : fMainTypes) {
+			if (mainType.getFullyQualifiedName().equals(name)) {
+				return mainType;
+			}
 		}
 		return null;
 	}
@@ -933,8 +934,8 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 			@Override
 			public IStatus validate(Object[] selection) {
 				StatusInfo res= new StatusInfo();
-				for (int i= 0; i < selection.length; i++) {
-					if (!(selection[i] instanceof IPackageFragment)) {
+				for (Object s : selection) {
+					if (!(s instanceof IPackageFragment)) {
 						res.setError(JarPackagerMessages.JarManifestWizardPage_error_mustContainPackages);
 						return res;
 					}

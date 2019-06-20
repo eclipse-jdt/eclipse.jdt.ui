@@ -111,9 +111,8 @@ class CopyCallHierarchyAction extends Action {
 		buf.append('\n');
 
 		if (item.getExpanded()) {
-			TreeItem[] items= item.getItems();
-			for (int i= 0; i < items.length; i++) {
-				addCalls(items[i], indent + 1, buf);
+			for (TreeItem i : item.getItems()) {
+				addCalls(i, indent + 1, buf);
 			}
 		}
 	}

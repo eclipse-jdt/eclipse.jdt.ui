@@ -104,19 +104,17 @@ public class UnpackJarAntExporter extends FatJarAntExporter {
 			attribute.setAttribute("name", "Class-Path"); //$NON-NLS-1$ //$NON-NLS-2$s
 			StringBuilder classPath= new StringBuilder();
 			classPath.append("."); //$NON-NLS-1$
-			for (int i= 0; i < sourceInfos.length; i++) {
-				SourceInfo sourceInfo= sourceInfos[i];
+			for (SourceInfo sourceInfo : sourceInfos) {
 				if (sourceInfo.isJar) {
 					classPath.append(" ").append(subfolder).append("/") //$NON-NLS-1$ //$NON-NLS-2$
-							.append(new File(sourceInfo.absPath).getName());
+						.append(new File(sourceInfo.absPath).getName());
 				}
 			}
 			attribute.setAttribute("value", classPath.toString()); //$NON-NLS-1$
 			manifest.appendChild(attribute);
 
 			// add folders
-			for (int i= 0; i < sourceInfos.length; i++) {
-				SourceInfo sourceInfo= sourceInfos[i];
+			for (SourceInfo sourceInfo : sourceInfos) {
 				if (!sourceInfo.isJar) {
 					Element fileset= document.createElement("fileset"); //$NON-NLS-1$
 					fileset.setAttribute("dir", substituteBaseDirs(sourceInfo.absPath)); //$NON-NLS-1$
@@ -134,8 +132,7 @@ public class UnpackJarAntExporter extends FatJarAntExporter {
 			target.appendChild(mkdir);
 
 			// add libraries
-			for (int i= 0; i < sourceInfos.length; i++) {
-				SourceInfo sourceInfo= sourceInfos[i];
+			for (SourceInfo sourceInfo : sourceInfos) {
 				if (sourceInfo.isJar) {
 					Element copy= document.createElement("copy"); //$NON-NLS-1$
 					copy.setAttribute("file", substituteBaseDirs(sourceInfo.absPath)); //$NON-NLS-1$
@@ -143,10 +140,8 @@ public class UnpackJarAntExporter extends FatJarAntExporter {
 					target.appendChild(copy);
 				}
 			}
-
 			// add folders
-			for (int i= 0; i < sourceInfos.length; i++) {
-				SourceInfo sourceInfo= sourceInfos[i];
+			for (SourceInfo sourceInfo : sourceInfos) {
 				if (!sourceInfo.isJar) {
 				}
 			}

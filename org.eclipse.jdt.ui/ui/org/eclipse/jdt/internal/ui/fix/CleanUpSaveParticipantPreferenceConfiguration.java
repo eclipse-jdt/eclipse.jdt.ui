@@ -15,9 +15,7 @@ package org.eclipse.jdt.internal.ui.fix;
 
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -280,9 +278,7 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 
 		IEclipsePreferences node= fContext.getNode(JavaUI.ID_PLUGIN);
 
-		Set<String> keys= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(CleanUpConstants.DEFAULT_SAVE_ACTION_OPTIONS).getKeys();
-		for (Iterator<String> iterator= keys.iterator(); iterator.hasNext();) {
-			String key= iterator.next();
+		for (String key : JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(CleanUpConstants.DEFAULT_SAVE_ACTION_OPTIONS).getKeys()) {
 			node.remove(CleanUpPreferenceUtil.SAVE_PARTICIPANT_KEY_PREFIX + key);
 		}
 	}
@@ -344,19 +340,18 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 	private String getSelectedCleanUpsText(CleanUpOptions options) {
 		StringBuilder buf= new StringBuilder();
 
-		final ICleanUp[] cleanUps= JavaPlugin.getDefault().getCleanUpRegistry().createCleanUps();
-		for (int i= 0; i < cleanUps.length; i++) {
-			cleanUps[i].setOptions(options);
-			String[] descriptions= cleanUps[i].getStepDescriptions();
+		for (ICleanUp cleanUp : JavaPlugin.getDefault().getCleanUpRegistry().createCleanUps()) {
+			cleanUp.setOptions(options);
+			String[] descriptions= cleanUp.getStepDescriptions();
 			if (descriptions != null) {
-				for (int j= 0; j < descriptions.length; j++) {
+				for (String description : descriptions) {
 					if (buf.length() > 0) {
 						buf.append('\n');
 					}
-					buf.append(descriptions[j]);
+					buf.append(description);
 				}
-	        }
-        }
+			}
+		}
 		String string= buf.toString();
 		return string;
 	}

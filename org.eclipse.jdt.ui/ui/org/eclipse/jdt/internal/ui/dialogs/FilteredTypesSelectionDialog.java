@@ -805,9 +805,8 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			fProviderExtension= extension;
 			List<IPath> locations= new ArrayList<>();
 			List<String> labels= new ArrayList<>();
-			IVMInstallType[] installs= JavaRuntime.getVMInstallTypes();
-			for (int i= 0; i < installs.length; i++) {
-				processVMInstallType(installs[i], locations, labels);
+			for (IVMInstallType install : JavaRuntime.getVMInstallTypes()) {
+				processVMInstallType(install, locations, labels);
 			}
 			fInstallLocations= CollectionsUtil.toArray(locations, IPath.class);
 			fVMNames= labels.toArray(new String[labels.size()]);
@@ -816,15 +815,14 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 		private void processVMInstallType(IVMInstallType installType, List<IPath> locations, List<String> labels) {
 			if (installType != null) {
-				IVMInstall[] installs= installType.getVMInstalls();
 				boolean isMac= Platform.OS_MACOSX.equals(Platform.getOS());
-				for (int i= 0; i < installs.length; i++) {
-					String label= getFormattedLabel(installs[i].getName());
-					LibraryLocation[] libLocations= installs[i].getLibraryLocations();
+				for (IVMInstall install : installType.getVMInstalls()) {
+					String label= getFormattedLabel(install.getName());
+					LibraryLocation[] libLocations = install.getLibraryLocations();
 					if (libLocations != null) {
 						processLibraryLocation(libLocations, label);
 					} else {
-						IPath filePath= Path.fromOSString(installs[i].getInstallLocation().getAbsolutePath());
+						IPath filePath= Path.fromOSString(install.getInstallLocation().getAbsolutePath());
 						// On MacOS X, install locations end in an additional "/Home" segment; remove it.
 						if (isMac && "Home".equals(filePath.lastSegment())) //$NON-NLS-1$
 							filePath= filePath.removeLastSegments(1);
@@ -836,8 +834,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		}
 
 		private void processLibraryLocation(LibraryLocation[] libLocations, String label) {
-			for (int l= 0; l < libLocations.length; l++) {
-				LibraryLocation location= libLocations[l];
+			for (LibraryLocation location : libLocations) {
 				fLib2Name.put(location.getSystemLibraryPath(), label);
 			}
 		}
@@ -1115,9 +1112,8 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		public TypeItemsComparator() {
 			List<String> locations= new ArrayList<>();
 			List<String> labels= new ArrayList<>();
-			IVMInstallType[] installs= JavaRuntime.getVMInstallTypes();
-			for (int i= 0; i < installs.length; i++) {
-				processVMInstallType(installs[i], locations, labels);
+			for (IVMInstallType install : JavaRuntime.getVMInstallTypes()) {
+				processVMInstallType(install, locations, labels);
 			}
 			fInstallLocations= locations.toArray(new String[locations.size()]);
 			fVMNames= labels.toArray(new String[labels.size()]);
@@ -1125,16 +1121,15 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 		private void processVMInstallType(IVMInstallType installType, List<String> locations, List<String> labels) {
 			if (installType != null) {
-				IVMInstall[] installs= installType.getVMInstalls();
 				boolean isMac= Platform.OS_MACOSX.equals(Platform.getOS());
 				final String HOME_SUFFIX= "/Home"; //$NON-NLS-1$
-				for (int i= 0; i < installs.length; i++) {
-					String label= getFormattedLabel(installs[i].getName());
-					LibraryLocation[] libLocations= installs[i].getLibraryLocations();
+				for (IVMInstall install : installType.getVMInstalls()) {
+					String label = getFormattedLabel(install.getName());
+					LibraryLocation[] libLocations= install.getLibraryLocations();
 					if (libLocations != null) {
 						processLibraryLocation(libLocations, label);
 					} else {
-						String filePath= installs[i].getInstallLocation().getAbsolutePath();
+						String filePath= install.getInstallLocation().getAbsolutePath();
 						// on MacOS X install locations end in an additional
 						// "/Home" segment; remove it
 						if (isMac && filePath.endsWith(HOME_SUFFIX))
@@ -1147,8 +1142,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		}
 
 		private void processLibraryLocation(LibraryLocation[] libLocations, String label) {
-			for (int l= 0; l < libLocations.length; l++) {
-				LibraryLocation location= libLocations[l];
+			for (LibraryLocation location : libLocations) {
 				fLib2Name.put(location.getSystemLibraryPath().toString(), label);
 			}
 		}
@@ -1293,9 +1287,8 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		 */
 		private synchronized void persistHistory() {
 			if (getReturnCode() == OK) {
-				Object[] items= getHistoryItems();
-				for (int i= 0; i < items.length; i++) {
-					OpenTypeHistory.getInstance().accessed((TypeNameMatch) items[i]);
+				for (Object item : getHistoryItems()) {
+					OpenTypeHistory.getInstance().accessed((TypeNameMatch) item);
 				}
 			}
 		}

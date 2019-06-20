@@ -167,8 +167,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		fLabels.add(ActionMessages.SourceActionDialog_first);
 		fLabels.add(ActionMessages.SourceActionDialog_last);
 
-		for (int i = 0; i < members.length; i++) {
-			IJavaElement curr= members[i];
+		for (IJavaElement curr : members) {
 			String methodLabel= JavaElementLabels.getElementLabel(curr, JavaElementLabels.M_PARAMETER_TYPES);
 			fLabels.add(Messages.format(ActionMessages.SourceActionDialog_after, methodLabel));
 			fInsertPositions.add(findSibling(curr, members));
@@ -526,9 +525,9 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		if (items.length > 0) {
 			Object revealedElement= items[0];
 
-			for (int i= 0; i < items.length; i++) {
-				if (items[i].getChecked()) {
-					revealedElement= items[i].getData();
+			for (TreeItem item : items) {
+				if (item.getChecked()) {
+					revealedElement= item.getData();
 					break;
 				}
 			}

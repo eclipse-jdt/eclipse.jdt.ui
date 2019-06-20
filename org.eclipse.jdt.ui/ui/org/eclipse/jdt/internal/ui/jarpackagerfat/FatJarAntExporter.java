@@ -196,11 +196,11 @@ public abstract class FatJarAntExporter {
 
 		ArrayList<IPath> userEntries= new ArrayList<>(entries.length);
 		boolean isModularConfig= JavaRuntime.isModularConfiguration(configuration);
-		for (int i= 0; i < entries.length; i++) {
-			int classPathProperty= entries[i].getClasspathProperty();
+		for (IRuntimeClasspathEntry cpentry : entries) {
+			int classPathProperty= cpentry.getClasspathProperty();
 			if ((!isModularConfig && classPathProperty == IRuntimeClasspathEntry.USER_CLASSES)
-					|| (isModularConfig && (classPathProperty == IRuntimeClasspathEntry.CLASS_PATH || classPathProperty == IRuntimeClasspathEntry.MODULE_PATH))) {
-				String location= entries[i].getLocation();
+				|| (isModularConfig && (classPathProperty == IRuntimeClasspathEntry.CLASS_PATH || classPathProperty == IRuntimeClasspathEntry.MODULE_PATH))) {
+				String location= cpentry.getLocation();
 				if (location != null) {
 					IPath entry= Path.fromOSString(location);
 					if (!userEntries.contains(entry)) {

@@ -266,8 +266,9 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 					addToStatus(ex);
 					continue;
 				}
-				for (int i= 0; i < outputContainers.length; i++)
-					count += getTotalChildCount(outputContainers[i]);
+				for (IContainer outputContainer : outputContainers) {
+					count += getTotalChildCount(outputContainer);
+				}
 
 			}
 		}
@@ -277,11 +278,11 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 
 	private int getClassFileCount(IJavaElement[] children) throws JavaModelException {
 		int result= 0;
-		for (int i= 0; i < children.length; i++) {
-			if (children[i] instanceof IClassFile) {
+		for (IJavaElement child : children) {
+			if (child instanceof IClassFile) {
 				result++;
-			} else if (children[i] instanceof IPackageFragment) {
-				IPackageFragment fragment= (IPackageFragment) children[i];
+			} else if (child instanceof IPackageFragment) {
+				IPackageFragment fragment= (IPackageFragment) child;
 				result+= getClassFileCount(fragment.getChildren());
 			}
 		}
@@ -296,11 +297,12 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 			return 0;
 		}
 		int count= 0;
-		for (int i= 0; i < members.length; i++) {
-			if (members[i].getType() == IResource.FILE)
+		for (IResource member : members) {
+			if (member.getType() == IResource.FILE) {
 				count++;
-			else
-				count += getTotalChildCount((IContainer)members[i]);
+			} else {
+				count += getTotalChildCount((IContainer) member);
+			}
 		}
 		return count;
 	}
@@ -423,16 +425,15 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 			return;
 		}
 
-		Object[] children= fJavaElementContentProvider.getChildren(je);
-		for (int i= 0; i < children.length; i++)
-			exportElement(children[i], progressMonitor);
+		for (Object child : fJavaElementContentProvider.getChildren(je)) {
+			exportElement(child, progressMonitor);
+		}
 	}
 
 	private void exportExternalClassFolder(IPackageFragmentRoot classFolder, IProgressMonitor progressMonitor) throws InterruptedException {
 		try {
-			IJavaElement[] children= classFolder.getChildren();
-			for (int i= 0; i < children.length; i++) {
-				exportExternalClassFolderElement(children[i], classFolder.getPath(), progressMonitor);
+			for (IJavaElement child : classFolder.getChildren()) {
+				exportExternalClassFolderElement(child, classFolder.getPath(), progressMonitor);
 			}
 		} catch (JavaModelException e) {
 			addToStatus(e);
@@ -455,9 +456,8 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 				ModalContext.checkCanceled(progressMonitor);
 			}
 		} else if (javaElement instanceof IPackageFragment) {
-			IJavaElement[] children= ((IPackageFragment) javaElement).getChildren();
-			for (int i= 0; i < children.length; i++) {
-				exportExternalClassFolderElement(children[i], classFolderPath, progressMonitor);
+			for (IJavaElement child : ((IPackageFragment) javaElement).getChildren()) {
+				exportExternalClassFolderElement(child, classFolderPath, progressMonitor);
 			}
 		}
 	}
@@ -473,8 +473,9 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 				addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_errorDuringExport, BasicElementLabels.getPathLabel(container.getFullPath(), false)), e);
 				return;
 			}
-			for (int i= 0; i < children.length; i++)
-				exportResource(progressMonitor, children[i], leadingSegmentsToRemove);
+			for (IResource child : children) {
+				exportResource(progressMonitor, child, leadingSegmentsToRemove);
+			}
 		} else if (resource instanceof IFile) {
 			try {
 				IPath destinationPath= resource.getFullPath().removeFirstSegments(leadingSegmentsToRemove);
@@ -505,8 +506,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 		if (children != null) {
 			IJavaProject javaProject= JavaCore.create(container.getProject());
 			boolean isOnCP= javaProject.isOnClasspath(container);
-			for (int i= 0; i < children.length; i++) {
-				IResource child= children[i];
+			for (IResource child : children) {
 				if (isOnCP || !javaProject.isOnClasspath(child) || isInternalJar(child))
 					exportElement(child, progressMonitor);
 			}
@@ -657,8 +657,9 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 				addToStatus(ex);
 				continue;
 			}
-			for (int i= 0; i < outputContainers.length; i++)
-				exportResource(progressMonitor, outputContainers[i], outputContainers[i].getFullPath().segmentCount());
+			for (IContainer outputContainer : outputContainers) {
+				exportResource(progressMonitor, outputContainer, outputContainer.getFullPath().segmentCount());
+			}
 
 		}
 	}
@@ -666,10 +667,9 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 	private IContainer[] getOutputContainers(IJavaProject javaProject) throws CoreException {
 		Set<IPath> outputPaths= new HashSet<>();
 		boolean includeDefaultOutputPath= false;
-		IPackageFragmentRoot[] roots= javaProject.getPackageFragmentRoots();
-		for (int i= 0; i < roots.length; i++) {
-			if (roots[i] != null) {
-				IClasspathEntry cpEntry= roots[i].getRawClasspathEntry();
+		for (IPackageFragmentRoot root : javaProject.getPackageFragmentRoots()) {
+			if (root != null) {
+				IClasspathEntry cpEntry = root.getRawClasspathEntry();
 				if (cpEntry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
 					IPath location= cpEntry.getOutputLocation();
 					if (location != null)
@@ -798,9 +798,11 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 	private Iterator<IResource> getClassesIn(IContainer classContainer) throws CoreException {
 		IResource[] resources= classContainer.members();
 		List<IResource> files= new ArrayList<>(resources.length);
-		for (int i= 0; i < resources.length; i++)
-			if (resources[i].getType() == IResource.FILE && isClassFile(resources[i]))
-				files.add(resources[i]);
+		for (IResource resource : resources) {
+			if (resource.getType() == IResource.FILE && isClassFile(resource)) {
+				files.add(resource);
+			}
+		}
 		return files.iterator();
 	}
 
@@ -846,9 +848,9 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 		IClassFileReader cfReader= null;
 		IResource[] members= container.members();
 		Map<String, ArrayList<IResource>> map= new HashMap<>(members.length);
-		for (int i= 0;  i < members.length; i++) {
-			if (isClassFile(members[i])) {
-				IFile classFile= (IFile)members[i];
+		for (IResource member : members) {
+			if (isClassFile(member)) {
+				IFile classFile = (IFile) member;
 				URI location= classFile.getLocationURI();
 				if (location != null) {
 					InputStream contents= null;
@@ -869,10 +871,10 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 						ISourceAttribute sourceAttribute= cfReader.getSourceFileAttribute();
 						if (sourceAttribute == null) {
 							/*
-							 * Can't fully build the map because one or more
-							 * class file does not contain the name of its
-							 * source file.
-							 */
+							* Can't fully build the map because one or more
+							* class file does not contain the name of its
+							* source file.
+							*/
 							addWarning(Messages.format(
 								JarPackagerMessages.JarFileExportOperation_classFileWithoutSourceFileAttribute,
 								BasicElementLabels.getURLPart(Resources.getLocationString(classFile))), null);
@@ -1156,10 +1158,9 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 
 	private void buildProjects(IProgressMonitor progressMonitor) {
 		Set<IProject> builtProjects= new HashSet<>(10);
-		Object[] elements= fJarPackage.getElements();
-		for (int i= 0; i < elements.length; i++) {
+		for (Object e : fJarPackage.getElements()) {
 			IProject project= null;
-			Object element= elements[i];
+			Object element= e;
 			if (element instanceof IResource)
 				project= ((IResource)element).getProject();
 			else if (element instanceof IJavaElement)
@@ -1187,10 +1188,10 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 	 * @throws CoreException import org.eclipse.core.runtime.CoreException if there's a marker problem
 	 */
 	private boolean hasCompileErrors(IResource resource) throws CoreException {
-		IMarker[] problemMarkers= resource.findMarkers(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, true, IResource.DEPTH_INFINITE);
-		for (int i= 0; i < problemMarkers.length; i++) {
-			if (problemMarkers[i].getAttribute(IMarker.SEVERITY, -1) == IMarker.SEVERITY_ERROR)
+		for (IMarker problemMarker : resource.findMarkers(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, true, IResource.DEPTH_INFINITE)) {
+			if (problemMarker.getAttribute(IMarker.SEVERITY, -1) == IMarker.SEVERITY_ERROR) {
 				return true;
+			}
 		}
 		return false;
 	}
@@ -1204,10 +1205,10 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 	 * @throws CoreException import org.eclipse.core.runtime.CoreException if there's a marker problem
 	 */
 	private boolean hasCompileWarnings(IResource resource) throws CoreException {
-		IMarker[] problemMarkers= resource.findMarkers(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, true, IResource.DEPTH_INFINITE);
-		for (int i= 0; i < problemMarkers.length; i++) {
-			if (problemMarkers[i].getAttribute(IMarker.SEVERITY, -1) == IMarker.SEVERITY_WARNING)
+		for (IMarker problemMarker : resource.findMarkers(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, true, IResource.DEPTH_INFINITE)) {
+			if (problemMarker.getAttribute(IMarker.SEVERITY, -1) == IMarker.SEVERITY_WARNING) {
 				return true;
+			}
 		}
 		return false;
 	}

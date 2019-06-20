@@ -64,8 +64,7 @@ abstract class LogicalPackagesProvider implements IPropertyChangeListener, IElem
 	 * @param packageFragments the package fragments to add
 	 */
 	protected void addFragmentsToMap(IPackageFragment[] packageFragments) {
-		for (int i= 0; i < packageFragments.length; i++) {
-			IPackageFragment fragment= packageFragments[i];
+		for (IPackageFragment fragment : packageFragments) {
 			String key= getKey(fragment);
 			fMapToPackageFragments.put(key, fragment);
 		}
@@ -105,9 +104,7 @@ abstract class LogicalPackagesProvider implements IPropertyChangeListener, IElem
 
 		List<IAdaptable> newChildren= new ArrayList<>();
 
-		for (int i= 0; i < packageFragments.length; i++) {
-			IPackageFragment fragment=  packageFragments[i];
-
+		for (IPackageFragment fragment : packageFragments) {
 			if (fragment == null)
 				continue;
 

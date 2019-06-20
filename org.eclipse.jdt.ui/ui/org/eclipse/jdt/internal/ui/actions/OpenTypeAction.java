@@ -106,8 +106,8 @@ public class OpenTypeAction extends Action implements IWorkbenchWindowActionDele
 
 		MultiStatus multiStatus= new MultiStatus(JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, JavaUIMessages.OpenTypeAction_multiStatusMessage, null);
 
-		for (int i= 0; i < types.length; i++) {
-			IType type= (IType)types[i];
+		for (Object t : types) {
+			IType type= (IType) t;
 			try {
 				JavaUI.openInEditor(type, true, true);
 			} catch (CoreException x) {

@@ -81,9 +81,7 @@ class PackageViewerWrapper extends StructuredViewer {
 	private void transferFilters(StructuredViewer oldViewer) {
 		//set filters
 		if (oldViewer != null) {
-			ViewerFilter[] filters= oldViewer.getFilters();
-			for (int i= 0; i < filters.length; i++) {
-				ViewerFilter filter= filters[i];
+			for (ViewerFilter filter : oldViewer.getFilters()) {
 				fViewer.addFilter(filter);
 			}
 		}
@@ -91,25 +89,18 @@ class PackageViewerWrapper extends StructuredViewer {
 
 	private void transferListeners() {
 
-		Object[] listeners= fPostSelectionChangedListenerList.getListeners();
-		for (int i= 0; i < listeners.length; i++) {
-			Object object= listeners[i];
+		for (Object object : fPostSelectionChangedListenerList.getListeners()) {
 			ISelectionChangedListener listener= (ISelectionChangedListener)object;
 			fViewer.addPostSelectionChangedListener(listener);
 		}
 
-		listeners= fSelectionChangedListenerList.getListeners();
-		for (int i= 0; i < listeners.length; i++) {
-			Object object= listeners[i];
+		for (Object object : fSelectionChangedListenerList.getListeners()) {
 			ISelectionChangedListener listener= (ISelectionChangedListener)object;
 			fViewer.addSelectionChangedListener(listener);
 		}
 
 		// Add all other listeners
-		listeners= fListenerList.getListeners();
-		for (int i= 0; i < listeners.length; i++) {
-			Object object= listeners[i];
-
+		for (Object object : fListenerList.getListeners()) {
 			if (object instanceof IOpenListener) {
 				IOpenListener listener= (IOpenListener) object;
 				addOpenListener(listener);

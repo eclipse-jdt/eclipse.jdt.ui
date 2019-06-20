@@ -37,9 +37,7 @@ class PackagesViewTableViewer extends ProblemTableViewer implements IPackagesVie
 	public void mapElement(Object element, Widget item) {
 		if (element instanceof LogicalPackage && item instanceof Item) {
 			LogicalPackage cp= (LogicalPackage) element;
-			IPackageFragment[] fragments= cp.getFragments();
-			for (int i= 0; i < fragments.length; i++) {
-				IPackageFragment fragment= fragments[i];
+			for (IPackageFragment fragment : cp.getFragments()) {
 				fResourceToItemsMapper.addToMap(fragment, (Item)item);
 			}
 		}
@@ -50,9 +48,7 @@ class PackagesViewTableViewer extends ProblemTableViewer implements IPackagesVie
 	public void unmapElement(Object element, Widget item) {
 		if (element instanceof LogicalPackage && item instanceof Item) {
 			LogicalPackage cp= (LogicalPackage) element;
-			IPackageFragment[] fragments= cp.getFragments();
-			for (int i= 0; i < fragments.length; i++) {
-				IPackageFragment fragment= fragments[i];
+			for (IPackageFragment fragment : cp.getFragments()) {
 				fResourceToItemsMapper.removeFromMap(fragment, (Item)item);
 			}
 		}
@@ -70,8 +66,7 @@ class PackagesViewTableViewer extends ProblemTableViewer implements IPackagesVie
 		List<Object> list= new ArrayList<>();
 		if (result != null) {
 			Object[] toBeFiltered= new Object[1];
-			for (int i= 0; i < result.length; i++) {
-				Object object= result[i];
+			for (Object object : result) {
 				if(object instanceof LogicalPackage) {
 					if(selectLogicalPackage((LogicalPackage)object))
 						list.add(object);

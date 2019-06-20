@@ -770,15 +770,16 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	protected Object[] filter(ViewerFilter[] filters, Object[] elements) {
 		if (filters != null) {
 			ArrayList<Object> filtered = new ArrayList<>(elements.length);
-			for (int i = 0; i < elements.length; i++) {
+			for (Object element : elements) {
 				boolean add = true;
-				for (int j = 0; j < filters.length; j++) {
-					add = filters[j].select(null, null, elements[i]);
+				for (ViewerFilter filter : filters) {
+					add = filter.select(null, null, element);
 					if (!add)
 						break;
 				}
-				if (add)
-					filtered.add(elements[i]);
+				if (add) {
+					filtered.add(element);
+				}
 			}
 			return filtered.toArray();
 		}

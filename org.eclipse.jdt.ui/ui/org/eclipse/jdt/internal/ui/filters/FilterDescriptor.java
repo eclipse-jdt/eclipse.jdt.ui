@@ -96,12 +96,14 @@ public class FilterDescriptor implements Comparable<FilterDescriptor>, IPluginCo
 	public static FilterDescriptor[] getFilterDescriptors(String targetId) {
 		FilterDescriptor[] filterDescs= FilterDescriptor.getFilterDescriptors();
 		List<FilterDescriptor> result= new ArrayList<>(filterDescs.length);
-		for (int i= 0; i < filterDescs.length; i++) {
-			String tid= filterDescs[i].getTargetId();
-			if (WorkbenchActivityHelper.filterItem(filterDescs[i]))
+		for (FilterDescriptor filterDesc : filterDescs) {
+			String tid= filterDesc.getTargetId();
+			if (WorkbenchActivityHelper.filterItem(filterDesc)) {
 				continue;
-			if (tid == null || tid.equals(targetId))
-				result.add(filterDescs[i]);
+			}
+			if (tid == null || tid.equals(targetId)) {
+				result.add(filterDesc);
+			}
 		}
 		return result.toArray(new FilterDescriptor[result.size()]);
 	}
@@ -262,8 +264,7 @@ public class FilterDescriptor implements Comparable<FilterDescriptor>, IPluginCo
 	private static FilterDescriptor[] createFilterDescriptors(IConfigurationElement[] elements) {
 		List<FilterDescriptor> result= new ArrayList<>(5);
 		Set<String> descIds= new HashSet<>(5);
-		for (int i= 0; i < elements.length; i++) {
-			final IConfigurationElement element= elements[i];
+		for (IConfigurationElement element : elements) {
 			if (FILTER_TAG.equals(element.getName())) {
 
 				final FilterDescriptor[] desc= new FilterDescriptor[1];

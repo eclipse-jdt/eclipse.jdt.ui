@@ -14,7 +14,6 @@
 package org.eclipse.jdt.internal.ui.dialogs;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import com.ibm.icu.text.BreakIterator;
@@ -365,11 +364,9 @@ public class TextFieldNavigationHandler {
 						int accelerator = SWTKeySupport.convertEventToUnmodifiedAccelerator(e);
 						KeySequence keySequence = KeySequence.getInstance(SWTKeySupport.convertAcceleratorToKeyStroke(accelerator));
 						getSubmissions();
-						for (Iterator<Submission> iter= getSubmissions().iterator(); iter.hasNext();) {
-							Submission submission= iter.next();
-							TriggerSequence[] triggerSequences= submission.getTriggerSequences();
-							for (int i= 0; i < triggerSequences.length; i++) {
-								if (triggerSequences[i].equals(keySequence)) { // XXX does not work for multi-stroke bindings
+						for (Submission submission : getSubmissions()) {
+							for (TriggerSequence triggerSequence : submission.getTriggerSequences()) {
+								if (triggerSequence.equals(keySequence)) { // XXX does not work for multi-stroke bindings
 									e.doit= false;
 									submission.execute();
 									return;
@@ -395,8 +392,7 @@ public class TextFieldNavigationHandler {
 						final Scheme[] definedSchemes= bindingService.getDefinedSchemes();
 						if (definedSchemes != null) {
 							try {
-								for (int i = 0; i < definedSchemes.length; i++) {
-									Scheme scheme= definedSchemes[i];
+								for (Scheme scheme : definedSchemes) {
 									Scheme localSchemeCopy= localBindingManager.getScheme(scheme.getId());
 									localSchemeCopy.define(scheme.getName(), scheme.getDescription(), scheme.getParentId());
 								}

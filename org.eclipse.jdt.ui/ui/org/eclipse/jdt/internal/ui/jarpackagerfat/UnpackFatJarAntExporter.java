@@ -101,8 +101,7 @@ public class UnpackFatJarAntExporter extends FatJarAntExporter {
 			attribute.setAttribute("value", "."); //$NON-NLS-1$ //$NON-NLS-2$
 			manifest.appendChild(attribute);
 
-			for (int i= 0; i < sourceInfos.length; i++) {
-				SourceInfo sourceInfo= sourceInfos[i];
+			for (SourceInfo sourceInfo : sourceInfos) {
 				if (sourceInfo.isJar) {
 					Element zipfileset= document.createElement("zipfileset"); //$NON-NLS-1$
 					zipfileset.setAttribute("src", substituteBaseDirs(sourceInfo.absPath)); //$NON-NLS-1$

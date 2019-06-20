@@ -150,9 +150,10 @@ public class OverrideMethodDialog extends SourceActionDialog {
 		public Object[] getChildren(Object parentElement) {
 			if (parentElement instanceof ITypeBinding) {
 				ArrayList<IMethodBinding> result= new ArrayList<>(fMethods.length);
-				for (int index= 0; index < fMethods.length; index++) {
-					if (fMethods[index].getDeclaringClass().isEqualTo((IBinding) parentElement))
-						result.add(fMethods[index]);
+				for (IMethodBinding fMethod : fMethods) {
+					if (fMethod.getDeclaringClass().isEqualTo((IBinding) parentElement)) {
+						result.add(fMethod);
+					}
 				}
 				return result.toArray();
 			}
@@ -266,9 +267,10 @@ public class OverrideMethodDialog extends SourceActionDialog {
 		@Override
 		public IStatus validate(Object[] selection) {
 			int count= 0;
-			for (int index= 0; index < selection.length; index++) {
-				if (selection[index] instanceof IMethodBinding)
+			for (Object s : selection) {
+				if (s instanceof IMethodBinding) {
 					count++;
+				}
 			}
 			if (count == 0)
 				return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
@@ -290,9 +292,8 @@ public class OverrideMethodDialog extends SourceActionDialog {
 			if (result != null)
 				return result;
 		}
-		final ITypeBinding[] types= binding.getInterfaces();
-		for (int index= 0; index < types.length; index++) {
-			final ITypeBinding result= getSuperType(types[index], name);
+		for (ITypeBinding t : binding.getInterfaces()) {
+			final ITypeBinding result= getSuperType(t, name);
 			if (result != null)
 				return result;
 		}
@@ -312,26 +313,23 @@ public class OverrideMethodDialog extends SourceActionDialog {
 			final IPackageBinding pack= binding.getPackage();
 			final IMethodBinding[] methods= StubUtility2Core.getOverridableMethods(fUnit.getAST(), binding, false);
 			List<IMethodBinding> list= new ArrayList<>(methods.length);
-			for (int index= 0; index < methods.length; index++) {
-				final IMethodBinding cur= methods[index];
+			for (IMethodBinding cur : methods) {
 				if (Bindings.isVisibleInHierarchy(cur, pack))
 					list.add(cur);
 			}
 			overridable= list.toArray(new IMethodBinding[list.size()]);
 		} else
 			overridable= new IMethodBinding[] {};
-		for (int i= 0; i < overridable.length; i++) {
-			if (Modifier.isAbstract(overridable[i].getModifiers())) {
-				toImplement.add(overridable[i]);
+		for (IMethodBinding b : overridable) {
+			if (Modifier.isAbstract(b.getModifiers())) {
+				toImplement.add(b);
 			}
 		}
 
 		if (binding != null) {
 			ITypeBinding cloneable= getSuperType(binding, "java.lang.Cloneable"); //$NON-NLS-1$
 			if (cloneable != null) {
-				IMethodBinding[] methods= fUnit.getAST().resolveWellKnownType("java.lang.Object").getDeclaredMethods(); //$NON-NLS-1$
-				for (int index= 0; index < methods.length; index++) {
-					IMethodBinding method= methods[index];
+				for (IMethodBinding method : fUnit.getAST().resolveWellKnownType("java.lang.Object").getDeclaredMethods()) { //$NON-NLS-1$
 					if (method.getName().equals("clone") && method.getParameterTypes().length == 0) //$NON-NLS-1$
 						toImplement.add(method);
 				}
@@ -342,13 +340,13 @@ public class OverrideMethodDialog extends SourceActionDialog {
 		setInitialSelections((Object[]) toImplementArray);
 
 		HashSet<ITypeBinding> expanded= new HashSet<>(toImplementArray.length);
-		for (int i= 0; i < toImplementArray.length; i++) {
-			expanded.add(toImplementArray[i].getDeclaringClass());
+		for (IMethodBinding b : toImplementArray) {
+			expanded.add(b.getDeclaringClass());
 		}
 
 		HashSet<ITypeBinding> types= new HashSet<>(overridable.length);
-		for (int i= 0; i < overridable.length; i++) {
-			types.add(overridable[i].getDeclaringClass());
+		for (IMethodBinding b : overridable) {
+			types.add(b.getDeclaringClass());
 		}
 
 		ITypeBinding[] typesArrays= types.toArray(new ITypeBinding[types.size()]);

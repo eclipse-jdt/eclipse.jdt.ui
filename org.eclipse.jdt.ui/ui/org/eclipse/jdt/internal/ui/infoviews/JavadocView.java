@@ -999,9 +999,9 @@ public class JavadocView extends AbstractInfoView {
 
 		String base= null;
 		if (nResults > 1) {
-			for (int i= 0; i < result.length; i++) {
+			for (IJavaElement r : result) {
 				HTMLPrinter.startBulletList(buffer);
-				IJavaElement curr= result[i];
+				IJavaElement curr= r;
 				if (curr instanceof IMember || curr instanceof IPackageFragment || curr instanceof IPackageDeclaration || curr.getElementType() == IJavaElement.LOCAL_VARIABLE) {
 					HTMLPrinter.addBullet(buffer, getInfoText(curr, null, null, false));
 					HTMLPrinter.endBulletList(buffer);

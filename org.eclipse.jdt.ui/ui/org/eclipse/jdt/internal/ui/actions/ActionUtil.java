@@ -112,11 +112,9 @@ public class ActionUtil {
 	}
 
 	public static boolean areProcessable(Shell shell, IJavaElement[] elements) {
-		for (int i= 0; i < elements.length; i++) {
-			if (! isOnBuildPath(elements[i])) {
-				MessageDialog.openInformation(shell,
-						ActionMessages.ActionUtil_notOnBuildPath_title,
-						Messages.format(ActionMessages.ActionUtil_notOnBuildPath_resource_message, new Object[] {BasicElementLabels.getPathLabel(elements[i].getPath(), false)}));
+		for (IJavaElement element : elements) {
+			if (!isOnBuildPath(element)) {
+				MessageDialog.openInformation(shell, ActionMessages.ActionUtil_notOnBuildPath_title, Messages.format(ActionMessages.ActionUtil_notOnBuildPath_resource_message, new Object[]{BasicElementLabels.getPathLabel(element.getPath(), false)}));
 				return false;
 			}
 		}

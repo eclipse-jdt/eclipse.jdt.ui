@@ -156,8 +156,7 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 	private void run(SearchPatternData[] data, String scope) {
 		List<IType> wrappers= new ArrayList<>();
 		List<IFile> properties= new ArrayList<>();
-		for (int i= 0; i < data.length; i++) {
-			SearchPatternData current= data[i];
+		for (SearchPatternData current : data) {
 			if (current.getWrapperClass() != null || current.getPropertyFile() != null) {
 				wrappers.add(current.getWrapperClass());
 				properties.add(current.getPropertyFile());
@@ -196,10 +195,10 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 
 	private boolean canEnable(IStructuredSelection selection) {
 		Object[] selected= selection.toArray();
-		for (int i= 0; i < selected.length; i++) {
+		for (Object s : selected) {
 			try {
-				if (selected[i] instanceof IJavaElement) {
-					IJavaElement elem= (IJavaElement) selected[i];
+				if (s instanceof IJavaElement) {
+					IJavaElement elem= (IJavaElement) s;
 					if (elem.exists()) {
 						switch (elem.getElementType()) {
 							case IJavaElement.TYPE:
@@ -219,17 +218,17 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 								return true;
 						}
 					}
-				} else if (selected[i] instanceof LogicalPackage) {
+				} else if (s instanceof LogicalPackage) {
 					return true;
-				} else if (selected[i] instanceof IFile) {
-					IFile file= (IFile)selected[i];
+				} else if (s instanceof IFile) {
+					IFile file= (IFile) s;
 					if ("properties".equalsIgnoreCase(file.getFileExtension())) //$NON-NLS-1$
 						return true;
-				} else if (selected[i] instanceof IWorkingSet) {
-					IWorkingSet workingSet= (IWorkingSet) selected[i];
+				} else if (s instanceof IWorkingSet) {
+					IWorkingSet workingSet= (IWorkingSet) s;
 					return IWorkingSetIDs.JAVA.equals(workingSet.getId());
 				}
-			} catch (JavaModelException e) {
+			}catch (JavaModelException e) {
 				if (!e.isDoesNotExist()) {
 					JavaPlugin.log(e);
 				}
@@ -240,9 +239,7 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 
 	private void collectNLSFilesFromResources(Object[] objects, HashMap<IType, SearchPatternData> result) {
 		try {
-			for (int i= 0; i < objects.length; i++) {
-				Object object= objects[i];
-
+			for (Object object : objects) {
 				IResource resource= null;
 				if (object instanceof IWorkingSet) {
 					IWorkingSet workingSet= (IWorkingSet) object;
@@ -276,9 +273,9 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 
 	private void collectNLSFilesFromJavaElements(Object[] objects, HashMap<IType, SearchPatternData> result) {
 		try {
-			for (int i= 0; i < objects.length; i++) {
-				if (objects[i] instanceof IJavaElement) {
-					IJavaElement elem= (IJavaElement) objects[i];
+			for (Object object : objects) {
+				if (object instanceof IJavaElement) {
+					IJavaElement elem= (IJavaElement) object;
 					if (elem.exists()) {
 						switch (elem.getElementType()) {
 							case IJavaElement.TYPE:
@@ -317,8 +314,7 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 							{
 								IJavaProject javaProject= (IJavaProject)elem;
 								IPackageFragmentRoot[] allPackageFragmentRoots= javaProject.getAllPackageFragmentRoots();
-								for (int j= 0; j < allPackageFragmentRoots.length; j++) {
-									IPackageFragmentRoot root= allPackageFragmentRoots[j];
+								for (IPackageFragmentRoot root : allPackageFragmentRoots) {
 									if (root.getKind() == IPackageFragmentRoot.K_SOURCE) {
 										if (javaProject.equals(root.getJavaProject())) {
 											collectNLSFilesFromJavaElements(new Object[] {root}, result);
@@ -329,11 +325,11 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 							}
 						}
 					}
-				} else if (objects[i] instanceof LogicalPackage) {
-					LogicalPackage logicalPackage= (LogicalPackage)objects[i];
+				} else if (object instanceof LogicalPackage) {
+					LogicalPackage logicalPackage= (LogicalPackage) object;
 					collectNLSFilesFromJavaElements(new Object[] {logicalPackage.getJavaProject()}, result);
-				} else if (objects[i] instanceof IWorkingSet) {
-					IWorkingSet workingSet= (IWorkingSet) objects[i];
+				} else if (object instanceof IWorkingSet) {
+					IWorkingSet workingSet= (IWorkingSet) object;
 					collectNLSFilesFromJavaElements(workingSet.getElements(), result);
 				}
 			}
@@ -383,14 +379,13 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 
 		if (importsOSGIUtil(unit)) { //new school
 			IInitializer[] initializers= type.getInitializers();
-			for (int i= 0; i < initializers.length; i++) {
-				if (Modifier.isStatic(initializers[0].getFlags()))
+			for (IInitializer initializer : initializers) {
+				if (Modifier.isStatic(initializer.getFlags()))
 					return true;
 			}
 		} else { //old school
 			IMethod[] methods= type.getMethods();
-			for (int i= 0; i < methods.length; i++) {
-				IMethod method= methods[i];
+			for (IMethod method : methods) {
 				if (isValueAccessor(method))
 					return true;
 			}
@@ -400,10 +395,10 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 	}
 
 	private static boolean importsOSGIUtil(ICompilationUnit unit) throws JavaModelException {
-		IImportDeclaration[] imports= unit.getImports();
-		for (int i= 0; i < imports.length; i++) {
-			if (imports[i].getElementName().startsWith("org.eclipse.osgi.util.")) //$NON-NLS-1$
+		for (IImportDeclaration i : unit.getImports()) {
+			if (i.getElementName().startsWith("org.eclipse.osgi.util.")) { //$NON-NLS-1$
 				return true;
+			}
 		}
 
 		return false;
@@ -429,9 +424,10 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 	}
 
 	private static IField getBundleNameField(IField[] fields) {
-		for (int i= 0; i < fields.length; i++) {
-			if ("BUNDLE_NAME".equals(fields[i].getElementName())) //$NON-NLS-1$
-				return fields[i];
+		for (IField field : fields) {
+			if ("BUNDLE_NAME".equals(field.getElementName())) { //$NON-NLS-1$
+				return field;
+			}
 		}
 
 		return null;
@@ -448,9 +444,7 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 
 		IPath propertyFullPath= file.getFullPath();
 		// Try to find a corresponding CU
-		String[] javaExtensions= JavaCore.getJavaLikeExtensions();
-		for (int i= 0; i < javaExtensions.length; i++) {
-			String extension= javaExtensions[i];
+		for (String extension : JavaCore.getJavaLikeExtensions()) {
 			IPath cuPath= propertyFullPath.removeFileExtension().addFileExtension(extension);
 			IFile cuFile= (IFile)JavaPlugin.getWorkspace().getRoot().findMember(cuPath);
 

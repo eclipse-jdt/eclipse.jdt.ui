@@ -63,9 +63,10 @@ public class EmptyPackageFilter extends ViewerFilter {
 
 		ViewerFilter[] filters= ((StructuredViewer)viewer).getFilters();
 		resourceLoop: for (int i= 0; i < length; i++) {
-			for (int j= 0; j < filters.length; j++) {
-				if (!filters[j].select(viewer, pkg, resources[i]))
+			for (ViewerFilter filter : filters) {
+				if (!filter.select(viewer, pkg, resources[i])) {
 					continue resourceLoop;
+				}
 			}
 			return true;
 

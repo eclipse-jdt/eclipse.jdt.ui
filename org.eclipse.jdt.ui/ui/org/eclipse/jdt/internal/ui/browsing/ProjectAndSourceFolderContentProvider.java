@@ -85,8 +85,7 @@ class ProjectAndSourceFolderContentProvider extends JavaBrowsingContentProvider 
 		List<IPackageFragmentRoot> list= new ArrayList<>(roots.length);
 		// filter out package fragments that correspond to projects and
 		// replace them with the package fragments directly
-		for (int i= 0; i < roots.length; i++) {
-			IPackageFragmentRoot root= roots[i];
+		for (IPackageFragmentRoot root : roots) {
 			if (!isProjectPackageFragmentRoot(root))
 				list.add(root);
 		}

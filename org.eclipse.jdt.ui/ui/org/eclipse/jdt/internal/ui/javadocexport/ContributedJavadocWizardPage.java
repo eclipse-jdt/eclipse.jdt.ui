@@ -161,18 +161,15 @@ public class ContributedJavadocWizardPage extends NewElementWizardPage implement
 	public static ContributedJavadocWizardPage[] getContributedPages(JavadocOptionsManager store) {
 		ArrayList<ContributedJavadocWizardPage> pages= new ArrayList<>();
 
-		IConfigurationElement[] elements= Platform.getExtensionRegistry().getConfigurationElementsFor(JavaUI.ID_PLUGIN, ATT_EXTENSION);
-		for (int i = 0; i < elements.length; i++) {
-			IConfigurationElement curr= elements[i];
+		for (IConfigurationElement curr : Platform.getExtensionRegistry().getConfigurationElementsFor(JavaUI.ID_PLUGIN, ATT_EXTENSION)) {
 			String id= curr.getAttribute(ATT_ID);
 			String description= curr.getAttribute(ATT_DESCRIPTION);
 			String pageClassName= curr.getAttribute(ATT_PAGE_CLASS);
-
 			if (id == null || description == null || pageClassName == null) {
 				JavaPlugin.logErrorMessage("Invalid extension " + curr.toString()); //$NON-NLS-1$
 				continue;
 			}
-			pages.add(new ContributedJavadocWizardPage(elements[i], store));
+			pages.add(new ContributedJavadocWizardPage(curr, store));
 		}
 		return pages.toArray(new ContributedJavadocWizardPage[pages.size()]);
 	}

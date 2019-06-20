@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.jar.Attributes;
@@ -62,9 +61,7 @@ public class FatJarManifestProvider implements IManifestProvider {
 			List<ZipFile> openZips= new ArrayList<>();
 			try {
 				List<Manifest> otherManifests= new ArrayList<>();
-				Object[] elements= jarPackage.getElements();
-				for (int i= 0; i < elements.length; i++) {
-					Object element= elements[i];
+				for (Object element : jarPackage.getElements()) {
 					if (element instanceof IPackageFragmentRoot && ((IPackageFragmentRoot) element).isArchive()) {
 						ZipFile zip= JarPackagerUtil.getArchiveFile(((IPackageFragmentRoot) element).getPath());
 						openZips.add(zip);
@@ -93,8 +90,7 @@ public class FatJarManifestProvider implements IManifestProvider {
 				}
 				result= merge(ownManifest, otherManifests);
 			} finally {
-				for (Iterator<ZipFile> iter= openZips.iterator(); iter.hasNext(); ) {
-					ZipFile file= iter.next();
+				for (ZipFile file : openZips) {
 					try {
 						file.close();
 					} catch (IOException e) {
@@ -118,11 +114,9 @@ public class FatJarManifestProvider implements IManifestProvider {
 	private Manifest merge(Manifest ownManifest, List<Manifest> otherManifests) {
 		Manifest mergedManifest= new Manifest(ownManifest);
 		Map<String, Attributes> mergedEntries= mergedManifest.getEntries();
-		for (Iterator<Manifest> iter= otherManifests.iterator(); iter.hasNext();) {
-			Manifest otherManifest= iter.next();
+		for (Manifest otherManifest : otherManifests) {
 			Map<String, Attributes> otherEntries= otherManifest.getEntries();
-			for (Iterator<String> iterator= otherEntries.keySet().iterator(); iterator.hasNext();) {
-				String attributeName= iterator.next();
+			for (String attributeName : otherEntries.keySet()) {
 				if (mergedEntries.containsKey(attributeName)) {
 					// TODO: WARNING
 				} else {
@@ -178,20 +172,20 @@ public class FatJarManifestProvider implements IManifestProvider {
 			manifest.getMainAttributes().put(Attributes.Name.SEALED, SEALED_VALUE);
 			IPackageFragment[] packages= jarPackage.getPackagesToUnseal();
 			if (packages != null) {
-				for (int i= 0; i < packages.length; i++) {
+				for (IPackageFragment p : packages) {
 					Attributes attributes= new Attributes();
 					attributes.put(Attributes.Name.SEALED, UNSEALED_VALUE);
-					manifest.getEntries().put(getInManifestFormat(packages[i]), attributes);
+					manifest.getEntries().put(getInManifestFormat(p), attributes);
 				}
 			}
 		} else {
 			IPackageFragment[] packages= jarPackage.getPackagesToSeal();
 			if (packages != null)
-				for (int i= 0; i < packages.length; i++) {
+				for (IPackageFragment p : packages) {
 					Attributes attributes= new Attributes();
 					attributes.put(Attributes.Name.SEALED, SEALED_VALUE);
-					manifest.getEntries().put(getInManifestFormat(packages[i]), attributes);
-				}
+					manifest.getEntries().put(getInManifestFormat(p), attributes);
+			}
 		}
 	}
 

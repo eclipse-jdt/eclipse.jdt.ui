@@ -427,8 +427,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	 * @param sourceElements an array with the source elements
 	 */
 	private void setTreeChecked(IJavaElement[] sourceElements) {
-		for (int i= 0; i < sourceElements.length; i++) {
-			IJavaElement curr= sourceElements[i];
+		for (IJavaElement curr : sourceElements) {
 			if (curr instanceof ICompilationUnit) {
 				fInputGroup.initialCheckListItem(curr);
 			} else if (curr instanceof IPackageFragment) {
@@ -446,13 +445,9 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	private IPath[] getSourcePath(IJavaProject[] projects) {
 		HashSet<IPath> res= new HashSet<>();
 		//loops through all projects and gets a list if of their source paths
-		for (int k= 0; k < projects.length; k++) {
-			IJavaProject iJavaProject= projects[k];
-
+		for (IJavaProject javaProject : projects) {
 			try {
-				IPackageFragmentRoot[] roots= iJavaProject.getPackageFragmentRoots();
-				for (int i= 0; i < roots.length; i++) {
-					IPackageFragmentRoot curr= roots[i];
+				for (IPackageFragmentRoot curr : javaProject.getPackageFragmentRoots()) {
 					if (curr.getKind() == IPackageFragmentRoot.K_SOURCE) {
 						IResource resource= curr.getResource();
 						if (resource != null) {
@@ -476,11 +471,9 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		HashSet<IPath> res= new HashSet<>();
 
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
-		for (int j= 0; j < javaProjects.length; j++) {
-			IJavaProject curr= javaProjects[j];
+		for (IJavaProject curr : javaProjects) {
 			try {
 				IPath outputLocation= null;
-
 				// Not really clear yet what to do here for EFS. See bug
 				// https://bugs.eclipse.org/bugs/show_bug.cgi?id=113233.
 
@@ -491,10 +484,8 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 				IResource outputPathFolder= root.findMember(curr.getOutputLocation());
 				if (outputPathFolder != null)
 					outputLocation= outputPathFolder.getLocation();
-
-				String[] classPath= JavaRuntime.computeDefaultRuntimeClassPath(curr);
-				for (int i= 0; i < classPath.length; i++) {
-					IPath path= Path.fromOSString(classPath[i]);
+				for (String p : JavaRuntime.computeDefaultRuntimeClassPath(curr)) {
+					IPath path= Path.fromOSString(p);
 					if (!path.equals(outputLocation)) {
 						res.add(path);
 					}
@@ -519,21 +510,15 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 			Set<Object> allChecked= fInputGroup.getAllCheckedTreeItems();
 
 			Set<String> incompletePackages= new HashSet<>();
-			for (int h= 0; h < projects.length; h++) {
-				IJavaProject iJavaProject= projects[h];
-
-				IPackageFragmentRoot[] roots= iJavaProject.getPackageFragmentRoots();
-				for (int i= 0; i < roots.length; i++) {
-					IPackageFragmentRoot root= roots[i];
+			for (IJavaProject iJavaProject : projects) {
+				for (IPackageFragmentRoot root : iJavaProject.getPackageFragmentRoots()) {
 					if (root.getKind() == IPackageFragmentRoot.K_SOURCE) {
 						IPath rootLocation= root.getResource().getLocation();
-						IJavaElement[] packs= root.getChildren();
-						for (int k= 0; k < packs.length; k++) {
-							IJavaElement curr= packs[k];
+						for (IJavaElement curr : root.getChildren()) {
 							if (curr.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
 								// default packages are always incomplete
 								if (curr.getElementName().length() == 0 || !allChecked.contains(curr)
-										|| fInputGroup.isTreeItemGreyChecked(curr) || !isAccessibleLocation(curr.getResource().getLocation(), rootLocation)) {
+									|| fInputGroup.isTreeItemGreyChecked(curr) || !isAccessibleLocation(curr.getResource().getLocation(), rootLocation)) {
 									incompletePackages.add(curr.getElementName());
 								}
 							}
@@ -599,9 +584,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 
 		ArrayList<String> commands= new ArrayList<>();
 		commands.add(fJavadocCommandText.getText()); // must be first
-		String[] items= fJavadocCommandText.getItems();
-		for (int i= 0; i < items.length; i++) {
-			String curr= items[i];
+		for (String curr : fJavadocCommandText.getItems()) {
 			if (!commands.contains(curr)) {
 				commands.add(curr);
 			}
@@ -611,10 +594,9 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 
 	public IJavaProject[] getCheckedProjects() {
 		ArrayList<Object> res= new ArrayList<>();
-		TreeItem[] treeItems= fInputGroup.getTree().getItems();
-		for (int i= 0; i < treeItems.length; i++) {
-			if (treeItems[i].getChecked()) {
-				Object curr= treeItems[i].getData();
+		for (TreeItem treeItem : fInputGroup.getTree().getItems()) {
+			if (treeItem.getChecked()) {
+				Object curr= treeItem.getData();
 				if (curr instanceof IJavaProject) {
 					res.add(curr);
 				}

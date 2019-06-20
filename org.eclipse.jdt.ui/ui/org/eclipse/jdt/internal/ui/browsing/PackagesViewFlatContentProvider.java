@@ -101,8 +101,7 @@ public class PackagesViewFlatContentProvider extends LogicalPackagesProvider imp
 	 */
 	private IPackageFragment[] getPackageFragments(IPackageFragment[] iPackageFragments) {
 		List<IPackageFragment> list= new ArrayList<>();
-		for (int i= 0; i < iPackageFragments.length; i++) {
-			IPackageFragment fragment= iPackageFragments[i];
+		for (IPackageFragment fragment : iPackageFragments) {
 			IJavaElement el= fragment.getParent();
 			if (el instanceof IPackageFragmentRoot) {
 				IPackageFragmentRoot root= (IPackageFragmentRoot) el;
@@ -209,9 +208,7 @@ public class PackagesViewFlatContentProvider extends LogicalPackagesProvider imp
 
 
 	private void processAffectedChildren(IJavaElementDelta delta) throws JavaModelException {
-		IJavaElementDelta[] children= delta.getAffectedChildren();
-		for (int i= 0; i < children.length; i++) {
-			IJavaElementDelta elementDelta= children[i];
+		for (IJavaElementDelta elementDelta : delta.getAffectedChildren()) {
 			processDelta(elementDelta);
 		}
 	}

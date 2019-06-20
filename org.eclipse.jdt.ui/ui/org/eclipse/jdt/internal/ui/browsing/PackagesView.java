@@ -111,8 +111,7 @@ public class PackagesView extends JavaBrowsingPart{
 			buf.append(JavaElementLabels.CONCAT_STRING);
 			String message= ""; //$NON-NLS-1$
 			boolean firstTime= true;
-			for (int i= 0; i < fragments.length; i++) {
-				IPackageFragment fragment= fragments[i];
+			for (IPackageFragment fragment : fragments) {
 				IJavaElement element= fragment.getParent();
 				if (element instanceof IPackageFragmentRoot) {
 					IPackageFragmentRoot root= (IPackageFragmentRoot) element;
@@ -607,11 +606,9 @@ public class PackagesView extends JavaBrowsingPart{
 				if(element instanceof LogicalPackage){
 					LogicalPackage el= (LogicalPackage) element;
 					ILabelDecorator decorator= getLabelDecorator();
-					IPackageFragment[] fragments= el.getFragments();
-
+					
 					Image image= super.getImage(el);
-					for (int i= 0; i < fragments.length; i++) {
-						IPackageFragment fragment= fragments[i];
+					for (IPackageFragment fragment : el.getFragments()) {
 						Image decoratedImage= decorator.decorateImage(image, fragment);
 						if(decoratedImage != null)
 							image= decoratedImage;

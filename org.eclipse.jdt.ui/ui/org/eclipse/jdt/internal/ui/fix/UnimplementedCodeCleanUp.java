@@ -126,8 +126,8 @@ public class UnimplementedCodeCleanUp extends AbstractMultiFix {
 		IProblemLocation[] locations= filter(convertProblems(compilationUnit.getProblems()), new int[] { IProblem.AbstractMethodMustBeImplemented, IProblem.EnumConstantMustImplementAbstractMethod });
 
 		HashSet<ASTNode> types= new HashSet<>();
-		for (int i= 0; i < locations.length; i++) {
-			ASTNode type= UnimplementedCodeFix.getSelectedTypeNode(compilationUnit, locations[i]);
+		for (IProblemLocation location : locations) {
+			ASTNode type= UnimplementedCodeFix.getSelectedTypeNode(compilationUnit, location);
 			if (type != null) {
 				types.add(type);
 			}

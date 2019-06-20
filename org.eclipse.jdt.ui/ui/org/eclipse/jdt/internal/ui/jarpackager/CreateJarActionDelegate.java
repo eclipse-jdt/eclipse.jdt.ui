@@ -83,8 +83,8 @@ public class CreateJarActionDelegate extends JarPackageActionDelegate {
 
 	private JarPackageData[] readJarPackages(IFile[] descriptions, MultiStatus readStatus) {
 		List<JarPackageData> jarPackagesList= new ArrayList<>(descriptions.length);
-		for (int i= 0; i < descriptions.length; i++) {
-			JarPackageData jarPackage= readJarPackage(descriptions[i], readStatus);
+		for (IFile description : descriptions) {
+			JarPackageData jarPackage= readJarPackage(description, readStatus);
 			if (jarPackage != null)
 				jarPackagesList.add(jarPackage);
 		}

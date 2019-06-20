@@ -66,18 +66,14 @@ public class JavadocConsoleLineTracker implements IConsoleLineTracker {
 		@Override
 		public void linkActivated() {
 			try {
-				IFile[] files= ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(URIUtil.toURI(fExternalPath.makeAbsolute()));
-				if (files.length > 0) {
-					for (int i = 0; i < files.length; i++) {
-						IFile curr= files[0];
-						IJavaElement element= JavaCore.create(curr);
-						if (element != null && element.exists()) {
-							IEditorPart part= JavaUI.openInEditor(element, true, false);
-							if (part instanceof ITextEditor) {
-								revealLine((ITextEditor) part, fLineNumber);
-							}
-							return;
+				for (IFile curr : ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(URIUtil.toURI(fExternalPath.makeAbsolute()))) {
+					IJavaElement element= JavaCore.create(curr);
+					if (element != null && element.exists()) {
+						IEditorPart part= JavaUI.openInEditor(element, true, false);
+						if (part instanceof ITextEditor) {
+							revealLine((ITextEditor) part, fLineNumber);
 						}
+						return;
 					}
 				}
 			} catch (BadLocationException e) {

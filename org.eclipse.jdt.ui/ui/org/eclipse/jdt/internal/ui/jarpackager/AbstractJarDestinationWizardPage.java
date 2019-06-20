@@ -190,8 +190,9 @@ public abstract class AbstractJarDestinationWizardPage extends WizardExportResou
 				return; // ie.- no settings stored
 			if (!fDestinationNamesCombo.getText().equals(directoryNames[0]))
 				fDestinationNamesCombo.add(fDestinationNamesCombo.getText());
-			for (int i= 0; i < directoryNames.length; i++)
-				fDestinationNamesCombo.add(directoryNames[i]);
+			for (String directoryName : directoryNames) {
+				fDestinationNamesCombo.add(directoryName);
+			}
 		}
 	}
 

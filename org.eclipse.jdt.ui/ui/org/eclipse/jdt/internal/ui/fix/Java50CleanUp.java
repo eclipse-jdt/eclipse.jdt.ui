@@ -180,9 +180,8 @@ public class Java50CleanUp extends AbstractMultiFix {
 		boolean addMissingDeprecated= addAnnotations && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED);
 		boolean useTypeArgs= isEnabled(CleanUpConstants.VARIABLE_DECLARATION_USE_TYPE_ARGUMENTS_FOR_RAW_TYPE_REFERENCES);
 		
-		IProblem[] problems= compilationUnit.getProblems();
-		for (int i= 0; i < problems.length; i++) {
-			int id= problems[i].getID();
+		for (IProblem problem : compilationUnit.getProblems()) {
+			int id= problem.getID();
 			if (addMissingOverride && Java50Fix.isMissingOverrideAnnotationProblem(id))
 				if (! Java50Fix.isMissingOverrideAnnotationInterfaceProblem(id) || addMissingOverrideInterfaceMethods)
 					result++;

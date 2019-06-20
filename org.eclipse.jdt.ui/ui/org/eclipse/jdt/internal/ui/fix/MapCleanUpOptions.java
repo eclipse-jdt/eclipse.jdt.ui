@@ -14,9 +14,7 @@
 package org.eclipse.jdt.internal.ui.fix;
 
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
@@ -57,9 +55,7 @@ public class MapCleanUpOptions extends CleanUpOptions {
 		if (options instanceof MapCleanUpOptions) {
 			fOptions.putAll(((MapCleanUpOptions)options).getMap());
 		} else {
-			Set<String> keys= options.getKeys();
-			for (Iterator<String> iterator= keys.iterator(); iterator.hasNext();) {
-				String key= iterator.next();
+			for (String key : options.getKeys()) {
 				fOptions.put(key, options.getValue(key));
 			}
 		}

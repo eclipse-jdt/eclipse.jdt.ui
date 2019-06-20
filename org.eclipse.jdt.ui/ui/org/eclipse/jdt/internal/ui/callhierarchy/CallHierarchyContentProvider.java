@@ -249,12 +249,10 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
 			return false;
 		}
 		
-		for (int i= 0; i < defaultMemberPatterns.length; i++) {
-			String defaultMemberPattern= defaultMemberPatterns[i];
+		for (String defaultMemberPattern : defaultMemberPatterns) {
 			int pos= defaultMemberPattern.lastIndexOf('.');
 			String defaultTypeName= defaultMemberPattern.substring(0, pos);
 			String defaultMethodName= defaultMemberPattern.substring(pos + 1);
-			
 			if ("*".equals(defaultMethodName)) { //$NON-NLS-1$
 				if (declaringTypeName.equals(defaultTypeName)) {
 					return true;
@@ -270,8 +268,7 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
 			if (superClassName != null && JavaModelUtil.isMatchingName(superClassName, defaultTypeName)) {
 				return true;
 			}
-			for (int j= 0; j < superInterfaceNames.length; j++) {
-				String superInterfaceName= superInterfaceNames[j];
+			for (String superInterfaceName : superInterfaceNames) {
 				if (JavaModelUtil.isMatchingName(superInterfaceName, defaultTypeName)) {
 					return true;
 				}
@@ -455,10 +452,9 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
      */
     void cancelJobs(MethodWrapper[] wrappers) {
         if (fManager != null && wrappers != null) {
-        	for (int i= 0; i < wrappers.length; i++) {
-				MethodWrapper wrapper= wrappers[i];
-				fManager.cancel(wrapper);
-			}
+        	for (MethodWrapper wrapper : wrappers) {
+        		fManager.cancel(wrapper);
+        	}
             if (fPart != null) {
                 fPart.setCancelEnabled(false);
             }

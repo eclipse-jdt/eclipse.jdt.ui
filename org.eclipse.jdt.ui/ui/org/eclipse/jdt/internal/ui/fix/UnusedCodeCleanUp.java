@@ -189,10 +189,10 @@ public class UnusedCodeCleanUp extends AbstractMultiFix {
 		int result= 0;
 		IProblem[] problems= compilationUnit.getProblems();
 		if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS) && !isEnabled(CleanUpConstants.ORGANIZE_IMPORTS)) {
-			for (int i=0;i<problems.length;i++) {
-				int id= problems[i].getID();
+			for (IProblem problem : problems) {
+				int id= problem.getID();
 				if (id == IProblem.UnusedImport || id == IProblem.DuplicateImport || id == IProblem.ConflictingImport ||
-					    id == IProblem.CannotImportPackage || id == IProblem.ImportNotFound)
+					id == IProblem.CannotImportPackage || id == IProblem.ImportNotFound)
 					result++;
 			}
 		}

@@ -54,8 +54,8 @@ public class CompositeActionGroup extends ActionGroup {
 		super.dispose();
 		if (fGroups == null)
 			return;
-		for (int i= 0; i < fGroups.length; i++) {
-			fGroups[i].dispose();
+		for (ActionGroup group : fGroups) {
+			group.dispose();
 		}
 	}
 
@@ -64,8 +64,8 @@ public class CompositeActionGroup extends ActionGroup {
 		super.fillActionBars(actionBars);
 		if (fGroups == null)
 			return;
-		for (int i= 0; i < fGroups.length; i++) {
-			fGroups[i].fillActionBars(actionBars);
+		for (ActionGroup group : fGroups) {
+			group.fillActionBars(actionBars);
 		}
 	}
 
@@ -74,8 +74,8 @@ public class CompositeActionGroup extends ActionGroup {
 		super.fillContextMenu(menu);
 		if (fGroups == null)
 			return;
-		for (int i= 0; i < fGroups.length; i++) {
-			fGroups[i].fillContextMenu(menu);
+		for (ActionGroup group : fGroups) {
+			group.fillContextMenu(menu);
 		}
 	}
 
@@ -84,8 +84,8 @@ public class CompositeActionGroup extends ActionGroup {
 		super.setContext(context);
 		if (fGroups == null)
 			return;
-		for (int i= 0; i < fGroups.length; i++) {
-			fGroups[i].setContext(context);
+		for (ActionGroup group : fGroups) {
+			group.setContext(context);
 		}
 	}
 
@@ -94,8 +94,8 @@ public class CompositeActionGroup extends ActionGroup {
 		super.updateActionBars();
 		if (fGroups == null)
 			return;
-		for (int i= 0; i < fGroups.length; i++) {
-			fGroups[i].updateActionBars();
+		for (ActionGroup group : fGroups) {
+			group.updateActionBars();
 		}
 	}
 }

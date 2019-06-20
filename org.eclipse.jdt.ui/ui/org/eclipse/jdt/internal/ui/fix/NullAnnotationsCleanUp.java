@@ -65,9 +65,10 @@ public class NullAnnotationsCleanUp extends AbstractMultiFix {
 		IProblemLocation[] locations= null;
 		ArrayList<IProblemLocation> filteredLocations= new ArrayList<>();
 		if (problems != null) {
-			for (int i= 0; i < problems.length; i++) {
-				if (problems[i].getProblemId() == this.handledProblemID)
-					filteredLocations.add(problems[i]);
+			for (IProblemLocation problem : problems) {
+				if (problem.getProblemId() == this.handledProblemID) {
+					filteredLocations.add(problem);
+				}
 			}
 			locations= filteredLocations.toArray(new IProblemLocation[filteredLocations.size()]);
 		}
@@ -142,9 +143,8 @@ public class NullAnnotationsCleanUp extends AbstractMultiFix {
 	@Override
 	public int computeNumberOfFixes(CompilationUnit compilationUnit) {
 		int result= 0;
-		IProblem[] problems= compilationUnit.getProblems();
-		for (int i= 0; i < problems.length; i++) {
-			int id= problems[i].getID();
+		for (IProblem problem : compilationUnit.getProblems()) {
+			int id= problem.getID();
 			if (id == this.handledProblemID) {
 				// FIXME search specifically: return param (which??)
 //				if (!QuickFixes.hasExplicitNullnessAnnotation(compilationUnit, problems[i].getSourceStart()))

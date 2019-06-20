@@ -236,9 +236,9 @@ public class FatJarPackageWizard extends Wizard implements IExportWizard {
 	}
 
 	private boolean hasArchive(Object[] elements) {
-		for (int i= 0; i < elements.length; i++) {
-			if (elements[i] instanceof IPackageFragmentRoot) {
-				IPackageFragmentRoot root= (IPackageFragmentRoot) elements[i];
+		for (Object element : elements) {
+			if (element instanceof IPackageFragmentRoot) {
+				IPackageFragmentRoot root= (IPackageFragmentRoot) element;
 				if (root.isArchive())
 					return true;
 			}

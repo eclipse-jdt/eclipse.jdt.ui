@@ -218,9 +218,7 @@ public class JarPackageWriter extends Object implements IJarDescriptionWriter {
 		selectedElements.setAttribute("exportClassFiles", "" + jarPackage.areClassFilesExported()); //$NON-NLS-2$ //$NON-NLS-1$
 		selectedElements.setAttribute("exportOutputFolder", "" + jarPackage.areOutputFoldersExported()); //$NON-NLS-2$ //$NON-NLS-1$
 		selectedElements.setAttribute("exportJavaFiles", "" + jarPackage.areJavaFilesExported()); //$NON-NLS-2$ //$NON-NLS-1$
-		Object[] elements= jarPackage.getElements();
-		for (int i= 0; i < elements.length; i++) {
-			Object element= elements[i];
+		for (Object element : jarPackage.getElements()) {
 			if (element instanceof IResource)
 				add((IResource)element, selectedElements, document);
 			else if (element instanceof IJavaElement)
@@ -232,9 +230,7 @@ public class JarPackageWriter extends Object implements IJarDescriptionWriter {
 	private void xmlWriteSelectedProjects(JarPackageData jarPackage, Document document, Element xmlJarDesc) throws DOMException {
 		Element selectedElements= document.createElement("selectedProjects"); //$NON-NLS-1$
 		xmlJarDesc.appendChild(selectedElements);
-		Object[] elements= jarPackage.getRefactoringProjects();
-		for (int index= 0; index < elements.length; index++) {
-			Object element= elements[index];
+		for (Object element : jarPackage.getRefactoringProjects()) {
 			if (element instanceof IResource)
 				add((IResource)element, selectedElements, document);
 		}
@@ -280,10 +276,10 @@ public class JarPackageWriter extends Object implements IJarDescriptionWriter {
 	}
 
 	private void add(IPackageFragment[] packages, Element parent, Document document) {
-		for (int i= 0; i < packages.length; i++) {
+		for (IPackageFragment p : packages) {
 			Element pkg= document.createElement("package"); //$NON-NLS-1$
 			parent.appendChild(pkg);
-			pkg.setAttribute("handleIdentifier", packages[i].getHandleIdentifier()); //$NON-NLS-1$
+			pkg.setAttribute("handleIdentifier", p.getHandleIdentifier()); //$NON-NLS-1$
 		}
 	}
 

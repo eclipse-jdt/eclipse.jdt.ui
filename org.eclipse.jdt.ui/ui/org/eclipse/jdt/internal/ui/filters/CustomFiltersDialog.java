@@ -250,8 +250,9 @@ public class CustomFiltersDialog extends SelectionDialog {
 			public void widgetSelected(SelectionEvent e) {
 				fCheckBoxList.setAllChecked(true);
 				fFilterDescriptorChangeHistory.clear();
-				for (int i= 0; i < fBuiltInFilters.length; i++)
-					fFilterDescriptorChangeHistory.push(fBuiltInFilters[i]);
+				for (FilterDescriptor builtInFilter : fBuiltInFilters) {
+					fFilterDescriptorChangeHistory.push(builtInFilter);
+				}
 			}
 		};
 		selectButton.addSelectionListener(listener);
@@ -265,8 +266,9 @@ public class CustomFiltersDialog extends SelectionDialog {
 			public void widgetSelected(SelectionEvent e) {
 				fCheckBoxList.setAllChecked(false);
 				fFilterDescriptorChangeHistory.clear();
-				for (int i= 0; i < fBuiltInFilters.length; i++)
-					fFilterDescriptorChangeHistory.push(fBuiltInFilters[i]);
+				for (FilterDescriptor builtInFilter : fBuiltInFilters) {
+					fFilterDescriptorChangeHistory.push(builtInFilter);
+				}
 			}
 		};
 		deselectButton.addSelectionListener(listener);
@@ -336,8 +338,9 @@ public class CustomFiltersDialog extends SelectionDialog {
 	public String[] getEnabledFilterIds() {
 		Object[] result= getResult();
 		Set<String> enabledIds= new HashSet<>(result.length);
-		for (int i= 0; i < result.length; i++)
-			enabledIds.add(((FilterDescriptor)result[i]).getId());
+		for (Object r : result) {
+			enabledIds.add(((FilterDescriptor) r).getId());
+		}
 		return enabledIds.toArray(new String[enabledIds.size()]);
 	}
 
@@ -360,10 +363,11 @@ public class CustomFiltersDialog extends SelectionDialog {
 		FilterDescriptor[] filterDescs= fBuiltInFilters;
 		List<FilterDescriptor> result= new ArrayList<>(filterDescs.length);
 		List<String> enabledFilterIds= Arrays.asList(fEnabledFilterIds);
-		for (int i= 0; i < filterDescs.length; i++) {
-			String id= filterDescs[i].getId();
-			if (enabledFilterIds.contains(id))
-				result.add(filterDescs[i]);
+		for (FilterDescriptor filterDesc : filterDescs) {
+			String id= filterDesc.getId();
+			if (enabledFilterIds.contains(id)) {
+				result.add(filterDesc);
+			}
 		}
 		return result.toArray(new FilterDescriptor[result.size()]);
 	}

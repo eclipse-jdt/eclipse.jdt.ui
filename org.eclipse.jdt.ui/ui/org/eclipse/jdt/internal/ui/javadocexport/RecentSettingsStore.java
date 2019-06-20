@@ -71,9 +71,7 @@ public class RecentSettingsStore {
 
 		IDialogSettings projectsSection= settings.getSection(SECTION_PROJECTS);
 		if (projectsSection != null) {
-			IDialogSettings[] sections= projectsSection.getSections();
-			for (int i= 0; i < sections.length; i++) {
-				IDialogSettings curr= sections[i];
+			for (IDialogSettings curr : projectsSection.getSections()) {
 				String projectName= curr.getName();
 				IProject project= root.getProject(projectName);
 				//make sure project has not been removed
@@ -103,9 +101,7 @@ public class RecentSettingsStore {
 		}
 		//finds projects in the workspace that have been added since the
 		//last time the wizard was run
-		IProject[] projects= root.getProjects();
-		for (int i= 0; i < projects.length; i++) {
-			IProject project= projects[i];
+		for (IProject project : root.getProjects()) {
 			if (project.isAccessible()) {
 				IJavaProject curr= JavaCore.create(project);
 				if (!fPerProjectSettings.containsKey(curr)) {

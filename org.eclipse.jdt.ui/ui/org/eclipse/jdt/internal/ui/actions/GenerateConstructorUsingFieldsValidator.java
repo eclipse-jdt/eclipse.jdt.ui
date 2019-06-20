@@ -52,31 +52,33 @@ public class GenerateConstructorUsingFieldsValidator implements ISelectionStatus
 
 	private int countSelectedFields(Object[] selection) {
 		int count= 0;
-		for (int index= 0; index < selection.length; index++) {
-			if (selection[index] instanceof IVariableBinding)
+		for (Object s : selection) {
+			if (s instanceof IVariableBinding) {
 				count++;
+			}
 		}
 		return count;
 	}
 
 	private void createSignature(final IMethodBinding constructor, StringBuilder buffer, Object[] selection) {
-		ITypeBinding types[]= constructor.getParameterTypes();
-		for (int index= 0; index < types.length; index++)
-			buffer.append(types[index].getName());
+		for (ITypeBinding type : constructor.getParameterTypes()) {
+			buffer.append(type.getName());
+		}
 		if (selection != null) {
-			for (int index= 0; index < selection.length; index++)
-				if (selection[index] instanceof IVariableBinding)
-					buffer.append(((IVariableBinding) selection[index]).getType().getErasure().getName());
+			for (Object s : selection) {
+				if (s instanceof IVariableBinding) {
+					buffer.append(((IVariableBinding) s).getType().getErasure().getName());
+				}
+			}
 		}
 	}
 
 	private List<String> getExistingConstructorSignatures() {
 		List<String> existing= new ArrayList<>();
-		IMethodBinding[] methods= fType.getDeclaredMethods();
-		for (int index= 0; index < methods.length; index++) {
-			if (methods[index].isConstructor()) {
+		for (IMethodBinding method : fType.getDeclaredMethods()) {
+			if (method.isConstructor()) {
 				StringBuilder buffer= new StringBuilder();
-				createSignature(methods[index], buffer, null);
+				createSignature(method, buffer, null);
 				existing.add(buffer.toString());
 			}
 		}

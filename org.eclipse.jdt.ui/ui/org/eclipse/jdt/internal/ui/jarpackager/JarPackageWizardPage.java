@@ -483,10 +483,9 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 		try {
 			service.connect();
 			final Set<IProject> set= new HashSet<>();
-			final Object[] elements= fJarPackage.getElements();
-			for (int index= 0; index < elements.length; index++) {
-				if (elements[index] instanceof IAdaptable) {
-					final IAdaptable adaptable= (IAdaptable) elements[index];
+			for (Object element : fJarPackage.getElements()) {
+				if (element instanceof IAdaptable) {
+					final IAdaptable adaptable= (IAdaptable) element;
 					final IResource resource= adaptable.getAdapter(IResource.class);
 					if (resource != null)
 						set.add(resource.getProject());

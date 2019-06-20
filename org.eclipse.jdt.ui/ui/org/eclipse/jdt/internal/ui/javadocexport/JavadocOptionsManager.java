@@ -215,8 +215,8 @@ public class JavadocOptionsManager {
 	 */
 	private IJavaProject getSingleProjectFromInitialSelection() {
 		IJavaProject res= null;
-		for (int i= 0; i < fInitialElements.length; i++) {
-			IJavaProject curr= fInitialElements[i].getJavaProject();
+		for (IJavaElement initialElement : fInitialElements) {
+			IJavaProject curr= initialElement.getJavaProject();
 			if (res == null) {
 				res= curr;
 			} else if (!res.equals(curr)) {
@@ -420,11 +420,9 @@ public class JavadocOptionsManager {
 		String extraOptions= element.getAttribute(EXTRAOPTIONS);
 		if (extraOptions.length() > 0) {
 			ExecutionArguments tokens= new ExecutionArguments("", extraOptions); //$NON-NLS-1$
-			String[] args= tokens.getProgramArgumentsArray();
-
+			
 			boolean vmarg= false;
-			for (int i= 0; i < args.length; i++) {
-				String curr= args[i];
+			for (String curr : tokens.getProgramArgumentsArray()) {
 				if (curr.length() > 0 && curr.charAt(0) == '-') {
 					// an command
 					vmarg=(curr.length() > 1 && curr.charAt(1) == 'J');
@@ -487,14 +485,12 @@ public class JavadocOptionsManager {
 
 		ArrayList<IContainer> res= new ArrayList<>();
 
-		String[] strings= sourcePaths.split(File.pathSeparator);
-		for (int i= 0; i < strings.length; i++) {
-			IPath path= makeAbsolutePathFromRelative(new Path(strings[i].trim()));
+		for (String string : sourcePaths.split(File.pathSeparator)) {
+			IPath path= makeAbsolutePathFromRelative(new Path(string.trim()));
 			if (path != null) {
 				IContainer[] containers= root.findContainersForLocationURI(URIUtil.toURI(path.makeAbsolute()));
 				res.addAll(Arrays.asList(containers));
 			}
-
 		}
 		return res.toArray(new IContainer[res.size()]);
 	}
@@ -510,8 +506,7 @@ public class JavadocOptionsManager {
 			StringTokenizer tokenizer= new StringTokenizer(packagenames, ","); //$NON-NLS-1$
 			while (tokenizer.hasMoreTokens()) {
 				IPath relPackagePath= new Path(tokenizer.nextToken().trim().replace('.', '/'));
-				for (int i= 0; i < containers.length; i++) {
-					IContainer curr= containers[i];
+				for (IContainer curr : containers) {
 					IResource resource= curr.findMember(relPackagePath);
 					if (resource != null) {
 						IJavaElement javaElem= JavaCore.create(resource);
@@ -535,9 +530,8 @@ public class JavadocOptionsManager {
 					IPath path= makeAbsolutePathFromRelative(new Path(name));
 					//if unable to create an absolute path to the resource skip it
 					if (path != null) {
-						IFile[] files= root.findFilesForLocationURI(URIUtil.toURI(path.makeAbsolute()));
-						for (int i= 0; i < files.length; i++) {
-							IJavaElement el= JavaCore.createCompilationUnitFrom(files[i]);
+						for (IFile file : root.findFilesForLocationURI(URIUtil.toURI(path.makeAbsolute()))) {
+							IJavaElement el= JavaCore.createCompilationUnitFrom(file);
 							if (el != null) {
 								res.add(el);
 							}
@@ -763,9 +757,9 @@ public class JavadocOptionsManager {
 				toolArgs.add(fStylesheet);
 			}
 
-			for (int i= 0; i < fHRefs.length; i++) {
+			for (String fHRef : fHRefs) {
 				toolArgs.add("-link"); //$NON-NLS-1$
-				toolArgs.add(fHRefs[i]);
+				toolArgs.add(fHRef);
 			}
 
 		} //end standard options
@@ -792,8 +786,7 @@ public class JavadocOptionsManager {
 			toolArgs.add(fOverview);
 		}
 
-		for (int i= 0; i < fSelectedElements.length; i++) {
-			IJavaElement curr= fSelectedElements[i];
+		for (IJavaElement curr : fSelectedElements) {
 			if (curr instanceof IPackageFragment) {
 				toolArgs.add(curr.getElementName());
 			} else if (curr instanceof ICompilationUnit) {
@@ -1115,10 +1108,9 @@ public class JavadocOptionsManager {
 			return false;
 		}
 
-		IJavaElement[] elements= root.getChildren();
-		for (int i= 0; i < elements.length; i++) {
-			if (elements[i] instanceof IPackageFragment) {
-				IPackageFragment fragment= (IPackageFragment) elements[i];
+		for (IJavaElement element : root.getChildren()) {
+			if (element instanceof IPackageFragment) {
+				IPackageFragment fragment= (IPackageFragment) element;
 				if (containsCompilationUnits(fragment)) {
 					return true;
 				}
@@ -1168,12 +1160,9 @@ public class JavadocOptionsManager {
 			}
 		}
 
-		IVMInstallType[] jreTypes= JavaRuntime.getVMInstallTypes();
-		for (int i= 0; i < jreTypes.length; i++) {
-			IVMInstallType jreType= jreTypes[i];
-			IVMInstall[] installs= jreType.getVMInstalls();
-			for (int k= 0; k < installs.length; k++) {
-				File res= getCommand(installs[k]);
+		for (IVMInstallType jreType : JavaRuntime.getVMInstallTypes()) {
+			for (IVMInstall i : jreType.getVMInstalls()) {
+				File res= getCommand(i);
 				if (res != null) {
 					return res;
 				}

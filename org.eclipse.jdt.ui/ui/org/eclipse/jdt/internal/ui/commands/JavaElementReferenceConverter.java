@@ -176,10 +176,9 @@ public class JavaElementReferenceConverter extends AbstractParameterValueConvert
 				buffer= composeTypeReference(method.getDeclaringType());
 				buffer.append(TYPE_END_CHAR);
 				buffer.append(method.getElementName());
-				String[] parameterTypes= method.getParameterTypes();
 				buffer.append(PARAM_START_CHAR);
-				for (int i= 0; i < parameterTypes.length; i++) {
-					buffer.append(parameterTypes[i]);
+				for (String parameterType : method.getParameterTypes()) {
+					buffer.append(parameterType);
 				}
 				buffer.append(PARAM_END_CHAR);
 			} else

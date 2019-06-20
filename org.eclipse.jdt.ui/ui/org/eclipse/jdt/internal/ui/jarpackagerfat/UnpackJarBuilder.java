@@ -24,7 +24,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 import java.util.zip.ZipFile;
 
@@ -96,9 +95,7 @@ public class UnpackJarBuilder extends FatJarBuilder {
 	@Override
 	public String getManifestClasspath() {
 		ArrayList<String> renamedJarNames= new ArrayList<>();
-		Object[] elements= fJarPackage.getElements();
-		for (int i= 0; i < elements.length; i++) {
-			Object element= elements[i];
+		for (Object element : fJarPackage.getElements()) {
 			if (element instanceof IPackageFragmentRoot && ((IPackageFragmentRoot)element).isArchive()) {
 				String jarName= ((IPackageFragmentRoot)element).getPath().toFile().getName();
 				while (renamedJarNames.contains(jarName)) {
@@ -109,8 +106,7 @@ public class UnpackJarBuilder extends FatJarBuilder {
 		}
 		StringBuilder result= new StringBuilder();
 		result.append("."); //$NON-NLS-1$
-		for (Iterator<String> iterator= renamedJarNames.iterator(); iterator.hasNext();) {
-			String jarName= iterator.next();
+		for (String jarName : renamedJarNames) {
 			result.append(" ").append(fSubfolder).append("/").append(jarName); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return result.toString();
@@ -145,12 +141,13 @@ public class UnpackJarBuilder extends FatJarBuilder {
 			if (!allowOverwrite)
 				if (parent == null || !JarPackagerUtil.askForOverwriteFolderPermission(parent, fSubfolderPath, true))
 					throw JarPackagerUtil.createCoreException("Folder '" + folder.getAbsolutePath() + "' exists and should not be overwritten", null); //$NON-NLS-1$ //$NON-NLS-2$
-			File[] jarFiles= folder.listFiles();
-			for (int i= 0; i < jarFiles.length; i++) {
-				if (!jarFiles[i].isFile())
-					throw JarPackagerUtil.createCoreException("Subfolder '" + jarFiles[i].getAbsolutePath() + "' exists", null); //$NON-NLS-1$ //$NON-NLS-2$
-				if (!jarFiles[i].delete())
-					throw JarPackagerUtil.createCoreException("Could not delete file '" + jarFiles[i].getAbsolutePath() + "'", null); //$NON-NLS-1$ //$NON-NLS-2$
+			for (File jarFile : folder.listFiles()) {
+				if (!jarFile.isFile()) {
+					throw JarPackagerUtil.createCoreException("Subfolder '" + jarFile.getAbsolutePath() + "' exists", null); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+				if (!jarFile.delete()) {
+					throw JarPackagerUtil.createCoreException("Could not delete file '" + jarFile.getAbsolutePath() + "'", null); //$NON-NLS-1$ //$NON-NLS-2$
+				}
 			}
 		}
 	}

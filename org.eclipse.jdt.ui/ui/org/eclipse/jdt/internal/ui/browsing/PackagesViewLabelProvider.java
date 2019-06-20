@@ -83,9 +83,7 @@ class PackagesViewLabelProvider extends AppearanceAwareLabelProvider {
 	 * Decoration is only concerned with error ticks
 	 */
 	private Image getLogicalPackageImage(LogicalPackage cp) {
-		IPackageFragment[] fragments= cp.getFragments();
-		for (int i= 0; i < fragments.length; i++) {
-			IPackageFragment fragment= fragments[i];
+		for (IPackageFragment fragment : cp.getFragments()) {
 			if(!isEmpty(fragment)) {
 				return decorateCompoundElement(JavaPluginImages.DESC_OBJS_LOGICAL_PACKAGE, cp);
 			}

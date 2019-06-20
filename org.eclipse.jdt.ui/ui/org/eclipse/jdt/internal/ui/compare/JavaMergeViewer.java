@@ -16,7 +16,6 @@ package org.eclipse.jdt.internal.ui.compare;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -167,8 +166,7 @@ public class JavaMergeViewer extends TextMergeViewer {
 
 	private void handlePropertyChange(PropertyChangeEvent event) {
 		if (fSourceViewerConfiguration != null) {
-			for (Iterator<Entry<SourceViewer, JavaSourceViewerConfiguration>> iterator= fSourceViewerConfiguration.entrySet().iterator(); iterator.hasNext();) {
-				Entry<SourceViewer, JavaSourceViewerConfiguration> entry= iterator.next();
+			for (Entry<SourceViewer, JavaSourceViewerConfiguration> entry : fSourceViewerConfiguration.entrySet()) {
 				JavaSourceViewerConfiguration configuration= entry.getValue();
 				if (configuration.affectsTextPresentation(event)) {
 					configuration.handlePropertyChangeEvent(event);
@@ -347,14 +345,13 @@ public class JavaMergeViewer extends TextMergeViewer {
 					children= javaContainer.getChildren();
 					if (children.length > 0) {
 						JavaNode packageDecl= null;
-						for (int i= 0; i < children.length; i++) {
-							JavaNode child= (JavaNode) children[i];
+						for (JavaNode child : (JavaNode[])children) {
 							switch (child.getTypeCode()) {
-							case JavaNode.PACKAGE:
-								packageDecl= child;
-								break;
-							case JavaNode.CLASS:
-								return child.getRange().getOffset();
+								case JavaNode.PACKAGE:
+									packageDecl= child;
+									break;
+								case JavaNode.CLASS:
+									return child.getRange().getOffset();
 							}
 						}
 						if (packageDecl != null) {
@@ -538,8 +535,7 @@ public class JavaMergeViewer extends TextMergeViewer {
 		if (adapter == ITextEditorExtension3.class) {
 			IEditorInput activeInput= super.getAdapter(IEditorInput.class);
 			if (activeInput != null) {
-				for (Iterator<CompilationUnitEditorAdapter> iterator= fEditor.values().iterator(); iterator.hasNext();) {
-					CompilationUnitEditorAdapter editor= iterator.next();
+				for (CompilationUnitEditorAdapter editor : fEditor.values()) {
 					if (activeInput.equals(editor.getEditorInput()))
 						return (T) editor;
 				}

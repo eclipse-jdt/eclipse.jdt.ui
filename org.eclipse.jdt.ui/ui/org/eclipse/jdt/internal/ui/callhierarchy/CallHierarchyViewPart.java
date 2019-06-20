@@ -346,8 +346,8 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     }
 
 	private void updateCheckedState() {
-		for (int i= 0; i < fToggleOrientationActions.length; i++) {
-			fToggleOrientationActions[i].setChecked(fOrientation == fToggleOrientationActions[i].getOrientation());
+		for (ToggleOrientationAction toaction : fToggleOrientationActions) {
+			toaction.setChecked(fOrientation == toaction.getOrientation());
 		}
 	}
 
@@ -357,9 +357,9 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
      */
     void setCallMode(int mode) {
         if (fCurrentCallMode != mode) {
-            for (int i = 0; i < fToggleCallModeActions.length; i++) {
-                fToggleCallModeActions[i].setChecked(mode == fToggleCallModeActions[i].getMode());
-            }
+			for (ToggleCallModeAction tcmaction : fToggleCallModeActions) {
+				tcmaction.setChecked(mode == tcmaction.getMode());
+			}
 
             fCurrentCallMode = mode;
             fDialogSettings.put(DIALOGSTORE_CALL_MODE, mode);
@@ -385,9 +385,9 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
      */
     void setFieldMode(int mode) {
         if (fCurrentFieldMode != mode) {
-            for (int i = 0; i < fToggleFieldModeActions.length; i++) {
-                fToggleFieldModeActions[i].setChecked(mode == fToggleFieldModeActions[i].getMode());
-            }
+			for (SelectFieldModeAction toggleFieldModeAction : fToggleFieldModeActions) {
+				toggleFieldModeAction.setChecked(mode == toggleFieldModeAction.getMode());
+			}
 
             fCurrentFieldMode = mode;
             fDialogSettings.put(DIALOGSTORE_FIELD_MODE, mode);
@@ -708,24 +708,24 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         IMenuManager viewMenu = actionBars.getMenuManager();
         viewMenu.add(new Separator());
 
-        for (int i = 0; i < fToggleCallModeActions.length; i++) {
-            viewMenu.add(fToggleCallModeActions[i]);
-        }
+		for (ToggleCallModeAction fToggleCallModeAction : fToggleCallModeActions) {
+			viewMenu.add(fToggleCallModeAction);
+		}
 
         viewMenu.add(new Separator());
 
         MenuManager layoutSubMenu= new MenuManager(CallHierarchyMessages.CallHierarchyViewPart_layout_menu);
-        for (int i = 0; i < fToggleOrientationActions.length; i++) {
-        	layoutSubMenu.add(fToggleOrientationActions[i]);
-        }
+		for (ToggleOrientationAction fToggleOrientationAction : fToggleOrientationActions) {
+			layoutSubMenu.add(fToggleOrientationAction);
+		}
         viewMenu.add(layoutSubMenu);
 
 		viewMenu.add(new Separator(IContextMenuConstants.GROUP_SEARCH));
 
         MenuManager fieldSubMenu= new MenuManager(CallHierarchyMessages.CallHierarchyViewPart_field_menu);
-        for (int i = 0; i < fToggleFieldModeActions.length; i++) {
-        	fieldSubMenu.add(fToggleFieldModeActions[i]);
-        }
+		for (SelectFieldModeAction fToggleFieldModeAction : fToggleFieldModeActions) {
+			fieldSubMenu.add(fToggleFieldModeAction);
+		}
         viewMenu.add(fieldSubMenu);
         viewMenu.add(fShowSearchInDialogAction);
     }
@@ -939,8 +939,8 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     	}
         if (fCallerRoots == null) {
             fCallerRoots = CallHierarchy.getDefault().getCallerRoots(fInputElements);
-        	for (int i= 0; i < fCallerRoots.length; i++) {
-        		fCallerRoots[i].setFieldSearchMode(fCurrentFieldMode);
+			for (MethodWrapper fCallerRoot : fCallerRoots) {
+				fCallerRoot.setFieldSearchMode(fCurrentFieldMode);
 			}
         }
 
@@ -1046,9 +1046,9 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
         toolBar.add(fRefreshViewAction);
         toolBar.add(fCancelSearchAction);
-        for (int i = 0; i < fToggleCallModeActions.length; i++) {
-            toolBar.add(fToggleCallModeActions[i]);
-        }
+		for (ToggleCallModeAction fToggleCallModeAction : fToggleCallModeActions) {
+			toolBar.add(fToggleCallModeAction);
+		}
         toolBar.add(fHistoryDropDownAction);
         toolBar.add(fPinViewAction);
     }
@@ -1120,9 +1120,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
     private void updateHistoryEntries() {
         for (int i = getMethodHistory().size() - 1; i >= 0; i--) {
-            IMember[] members = getMethodHistory().get(i);
-            for (int j= 0; j < members.length; j++) {
-				IMember member= members[j];
+         	for (IMember member : getMethodHistory().get(i)) {
 				if (! member.exists()) {
 					getMethodHistory().remove(i);
 					break;
@@ -1377,9 +1375,8 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 		
 		List<IMember> inputElements= Arrays.asList(fInputElements);
 		List<IMember> treeElements= new ArrayList<>();
-		TreeItem[] treeItems= fCallHierarchyViewer.getTree().getItems();
-		for (int i= 0; i < treeItems.length; i++) {
-			Object data= treeItems[i].getData();
+		for (TreeItem treeItem : fCallHierarchyViewer.getTree().getItems()) {
+			Object data= treeItem.getData();
 			if (data instanceof MethodWrapper)
 				treeElements.add(((MethodWrapper) data).getMember());
 		}
@@ -1388,8 +1385,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 		newInput.addAll(inputElements);
 		List<IMember> addedElements= new ArrayList<>();
 		
-		for (int i= 0; i < newElements.length; i++) {
-			IMember newElement= newElements[i];
+		for (IMember newElement : newElements) {
 			if (! inputElements.contains(newElement))
 				newInput.add(newElement);
 			if (! treeElements.contains(newElement))
@@ -1420,8 +1416,8 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 		CallHierarchyViewer hierarchyViewer= getViewer();		
 		TreeRoot treeRoot= hierarchyViewer.getTreeRoot(roots, true);
 		hierarchyViewer.add(treeRoot, (Object[]) roots);
-		for (int i= 0; i < roots.length; i++) {
-			hierarchyViewer.setExpandedState(roots[i], true);
+		for (MethodWrapper root : roots) {
+			hierarchyViewer.setExpandedState(root, true);
 		}
 		hierarchyViewer.setSelection(new StructuredSelection(roots), true);
 	}

@@ -169,17 +169,15 @@ public class JavadocWriter {
 			xmlJavadocDesc.setAttribute(store.EXTRAOPTIONS, str);
 		}
 
-		String[] hrefs= store.getHRefs();
-		for (int i= 0; i < hrefs.length; i++) {
+		for (String href : store.getHRefs()) {
 			Element links= document.createElement("link"); //$NON-NLS-1$
 			xmlJavadocDesc.appendChild(links);
-			links.setAttribute(store.HREF, hrefs[i]);
+			links.setAttribute(store.HREF, href);
 		}
 	}
 
 	private void sortSourceElement(IJavaElement[] iJavaElements, List<String> sourcefiles, List<String> packages) {
-		for (int i= 0; i < iJavaElements.length; i++) {
-			IJavaElement element= iJavaElements[i];
+		for (IJavaElement element : iJavaElements) {
 			IPath p= element.getResource().getLocation();
 			if (p == null)
 				continue;
@@ -196,11 +194,11 @@ public class JavadocWriter {
 	private String getPathString(IPath[] paths) {
 		StringBuilder buf= new StringBuilder();
 
-		for (int i= 0; i < paths.length; i++) {
+		for (IPath path : paths) {
 			if (buf.length() != 0) {
 				buf.append(File.pathSeparatorChar);
 			}
-			buf.append(getPathString(paths[i]));
+			buf.append(getPathString(path));
 		}
 
 		if (buf.length() == 0) {
@@ -226,8 +224,8 @@ public class JavadocWriter {
 		if (fBasePath.segmentCount() == matchingSegments) {
 			return getRelativePath(fullPath, matchingSegments);
 		}
-		for (int i= 0; i < fJavaProjects.length; i++) {
-			IProject proj= fJavaProjects[i].getProject();
+		for (IJavaProject javaProject : fJavaProjects) {
+			IProject proj= javaProject.getProject();
 			IPath projLoc= proj.getLocation();
 			if (projLoc != null && projLoc.segmentCount() <= matchingSegments && projLoc.isPrefixOf(fullPath)) {
 				return getRelativePath(fullPath, matchingSegments);

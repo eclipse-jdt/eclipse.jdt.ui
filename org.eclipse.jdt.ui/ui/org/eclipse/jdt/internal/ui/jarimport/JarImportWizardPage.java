@@ -188,12 +188,12 @@ public final class JarImportWizardPage extends WizardPage {
 			@Override
 			protected Object[] getJavaProjects(final IJavaModel model) throws JavaModelException {
 				final Set<IJavaProject> set= new HashSet<>();
-				final IJavaProject[] projects= model.getJavaProjects();
-				for (int index= 0; index < projects.length; index++) {
-					if (JarImportWizard.isValidJavaProject(projects[index])) {
-						final Object[] roots= getPackageFragmentRoots(projects[index]);
-						if (roots.length > 0)
-							set.add(projects[index]);
+				for (IJavaProject project : model.getJavaProjects()) {
+					if (JarImportWizard.isValidJavaProject(project)) {
+						final Object[] roots= getPackageFragmentRoots(project);
+						if (roots.length > 0) {
+							set.add(project);
+						}
 					}
 				}
 				return set.toArray();
@@ -202,12 +202,10 @@ public final class JarImportWizardPage extends WizardPage {
 			@Override
 			protected Object[] getPackageFragmentRoots(final IJavaProject project) throws JavaModelException {
 				final Set<IPackageFragmentRoot> set= new HashSet<>();
-				final IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
-				for (int offset= 0; offset < roots.length; offset++) {
-					IPackageFragmentRoot root= roots[offset];
+				for (IPackageFragmentRoot root : project.getPackageFragmentRoots()) {
 					IClasspathEntry entry= root.getRawClasspathEntry();
 					if (JarImportWizard.isValidClassPathEntry(entry)
-							&& root.getResolvedClasspathEntry().getReferencingEntry() == null)
+						&& root.getResolvedClasspathEntry().getReferencingEntry() == null)
 						set.add(root);
 				}
 				return set.toArray();

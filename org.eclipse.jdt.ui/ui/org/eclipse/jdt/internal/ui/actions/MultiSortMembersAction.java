@@ -99,9 +99,10 @@ public class MultiSortMembersAction extends CleanUpAction {
 	}
 
 	private boolean hasMembersToSort(ICompilationUnit[] units) throws JavaModelException {
-		for (int i= 0; i < units.length; i++) {
-			if (hasMembersToSort(units[i].getTypes()))
+		for (ICompilationUnit unit : units) {
+			if (hasMembersToSort(unit.getTypes())) {
 				return true;
+			}
 		}
 
 		return false;

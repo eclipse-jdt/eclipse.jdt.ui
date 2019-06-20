@@ -121,8 +121,7 @@ public class LogicalPackage extends PlatformObject {
 			return false;
 
 		//this works because a LogicalPackage cannot contain the same IPackageFragment twice
-		for (int i= 0; i < fragments.length; i++) {
-			IPackageFragment fragment= fragments[i];
+		for (IPackageFragment fragment : fragments) {
 			if(!fPackages.contains(fragment))
 				return false;
 		}

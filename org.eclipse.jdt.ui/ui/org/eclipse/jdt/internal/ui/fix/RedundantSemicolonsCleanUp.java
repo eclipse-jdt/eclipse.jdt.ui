@@ -213,11 +213,10 @@ public class RedundantSemicolonsCleanUp extends AbstractMultiFix implements ICle
 			return null;
 
 		CompilationUnitChange result= new CompilationUnitChange(fName, fCompilationUnit);
-		for (int i= 0; i < fEditGroups.length; i++) {
-			TextEdit[] edits= fEditGroups[i].getTextEdits();
-			String groupName= fEditGroups[i].getName();
-			for (int j= 0; j < edits.length; j++) {
-				TextChangeCompatibility.addTextEdit(result, groupName, edits[j]);
+		for (TextEditGroup editGroup : fEditGroups) {
+			String groupName= editGroup.getName();
+			for (TextEdit edit : editGroup.getTextEdits()) {
+				TextChangeCompatibility.addTextEdit(result, groupName, edit);
 			}
 		}
 		return result;

@@ -263,8 +263,7 @@ public class CallHierarchyUI {
 	 */
 	private CallHierarchyViewPart findLRUCallHierarchyViewPart(IWorkbenchPage page) {
 		boolean viewFoundInPage= false;
-		for (Iterator<CallHierarchyViewPart> iter= fLRUCallHierarchyViews.iterator(); iter.hasNext();) {
-			CallHierarchyViewPart view= iter.next();
+		for (CallHierarchyViewPart view : fLRUCallHierarchyViews) {
 			if (page.equals(view.getSite().getPage())) {
 				if (!view.isPinned()) {
 					return view;
@@ -274,9 +273,7 @@ public class CallHierarchyUI {
 		}
 		if (!viewFoundInPage) {
 			// find unresolved views
-			IViewReference[] viewReferences= page.getViewReferences();
-			for (int i= 0; i < viewReferences.length; i++) {
-				IViewReference curr= viewReferences[i];
+			for (IViewReference curr : page.getViewReferences()) {
 				if (CallHierarchyViewPart.ID_CALL_HIERARCHY.equals(curr.getId()) && page.equals(curr.getPage())) {
 					CallHierarchyViewPart view= (CallHierarchyViewPart)curr.getView(true);
 					if (view != null && !view.isPinned()) {
@@ -350,8 +347,7 @@ public class CallHierarchyUI {
 	 * @since 3.7
 	 */
 	void clearHistory() {
-		for (Iterator<CallHierarchyViewPart> iter= fLRUCallHierarchyViews.iterator(); iter.hasNext();) {
-			CallHierarchyViewPart part= iter.next();
+		for (CallHierarchyViewPart part : fLRUCallHierarchyViews) {
 			part.setHistoryEntries(new IMember[0][]);
 			part.setInputElements(null);
 		}

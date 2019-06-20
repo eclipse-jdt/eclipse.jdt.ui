@@ -130,8 +130,7 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 	}
 
 	private boolean canEnable(Object[] objects) {
-		for (int i= 0; i < objects.length; i++) {
-			Object element= objects[i];
+		for (Object element : objects) {
 			if (isValidElement(element))
 				return true;
 		}
