@@ -186,8 +186,7 @@ public class RenameTypeTests extends RefactoringTest {
 		IJavaElement[] similarElements= rtp.getSimilarElements();
 		if (similarElements == null)
 			return;
-		for (int i= 0; i < similarElements.length; i++) {
-			IJavaElement element= similarElements[i];
+		for (IJavaElement element : similarElements) {
 			if (! (element instanceof ILocalVariable)) {
 				IJavaElement newElement= mapper.getRefactoredJavaElement(element);
 				assertTrue(newElement.exists());
@@ -1647,8 +1646,8 @@ public class RenameTypeTests extends RefactoringTest {
 		IPackageFragment newPackage= (IPackageFragment)rtp.getRefactoredJavaElement(oldPackage);
 		assertEquals(oldPackage, newPackage);
 
-		for (int i= 0; i < someClassMembers.length; i++) {
-			IMember member= (IMember) someClassMembers[i];
+		for (IJavaElement someClassMember : someClassMembers) {
+			IMember member= (IMember) someClassMember;
 			IJavaElement refactoredMember= rtp.getRefactoredJavaElement(member);
 			if (member instanceof IMethod && member.getElementName().equals(type.getElementName()))
 				continue; // constructor

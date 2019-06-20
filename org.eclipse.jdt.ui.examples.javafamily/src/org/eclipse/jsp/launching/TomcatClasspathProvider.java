@@ -45,7 +45,6 @@ public class TomcatClasspathProvider extends StandardClasspathProvider {
 		if (useDefault) {
 			IRuntimeClasspathEntry[] defaults = super.computeUnresolvedClasspath(configuration);
 			IVMInstall vm = JavaRuntime.computeVMInstall(configuration);
-			LibraryLocation[] libs = JavaRuntime.getLibraryLocations(vm);
 			List rtes = new ArrayList();
 			rtes.addAll(Arrays.asList(defaults));
 			// add bootstrap.jar
@@ -56,8 +55,7 @@ public class TomcatClasspathProvider extends StandardClasspathProvider {
 			rtes.add(r);
 			// add class libraries to bootpath			
 			boolean tools = false; // keeps track of whether a tools.jar was found	
-			for (int i = 0; i < libs.length; i++) {
-				LibraryLocation lib = libs[i];
+			for (LibraryLocation lib : JavaRuntime.getLibraryLocations(vm)) {
 				if (lib.getSystemLibraryPath().toString().endsWith("tools.jar")) { //$NON-NLS-1$
 					tools = true;
 				}

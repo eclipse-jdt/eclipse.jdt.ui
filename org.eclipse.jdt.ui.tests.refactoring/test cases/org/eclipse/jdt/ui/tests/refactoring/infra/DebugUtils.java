@@ -34,8 +34,8 @@ public final class DebugUtils {
 
 	public static void dumpCharCharArray(String msg, char[][] o){
 		dump("DUMPING char[][]:" + msg); //$NON-NLS-1$
-		for (int i= 0; i < o.length; i++){
-			dump(new String(o[i]));
+		for (char[] o1 : o) {
+			dump(new String(o1));
 		}
 	}
 
@@ -45,8 +45,9 @@ public final class DebugUtils {
 			System.out.println("null"); //$NON-NLS-1$
 			return;
 		}
-		for (int i= 0; i < refs.length; i++)
-			System.out.println(refs[i].toString());
+		for (Object ref : refs) {
+			System.out.println(ref.toString());
+		}
 	}
 
 	public static void dumpCollectionCollection(Collection<?> c) {
@@ -130,8 +131,8 @@ public final class DebugUtils {
 		if (imports == null)
 			return;
 		DebugUtils.dump("Compilation Unit: " + cu.getElementName());	 //$NON-NLS-1$
-		for (int k= 0; k < imports.length; k ++){
-			DebugUtils.dump("import " + imports[k].getElementName() + " on demand: " + imports[k].isOnDemand()); //$NON-NLS-2$ //$NON-NLS-1$
+		for (IImportDeclaration i : imports) {
+			DebugUtils.dump("import " + i.getElementName() + " on demand: " + i.isOnDemand()); //$NON-NLS-2$ //$NON-NLS-1$
 		}
 	}
 
@@ -140,8 +141,8 @@ public final class DebugUtils {
 		if (cus == null)
 			return;
 		//DebugUtils.dump("Package " + pack.getElementName());
-		for (int j= 0; j < cus.length; j++){
-			dumpImports(cus[j]);
+		for (ICompilationUnit cu : cus) {
+			dumpImports(cu);
 		}
 	}
 
@@ -150,8 +151,8 @@ public final class DebugUtils {
 		if (packages == null)
 			return;
 		//DebugUtils.dump("Project " + project.getElementName());
-		for (int i= 0; i < packages.length; i++){
-			dumpImports(packages[i]);
+		for (IPackageFragment p : packages) {
+			dumpImports(p);
 		}
 	}
 }

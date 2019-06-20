@@ -167,9 +167,9 @@ public class NlsRefactoringCheckFinalConditionsTest extends TestCase {
 		NLSRefactoring refac= NLSRefactoring.create(cu);
 		NLSSubstitution[] subs= refac.getSubstitutions();
 		refac.setPrefix("");
-		for (int i= 0; i < subs.length; i++) {
-			subs[i].setState(NLSSubstitution.EXTERNALIZED);
-			subs[i].generateKey(subs, new Properties());
+		for (NLSSubstitution sub : subs) {
+			sub.setState(NLSSubstitution.EXTERNALIZED);
+			sub.generateKey(subs, new Properties());
 		}
 		fillInValues(refac);
 		return refac;

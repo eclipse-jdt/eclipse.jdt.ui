@@ -1856,8 +1856,8 @@ public class MoveTest extends RefactoringTest {
 		} else {
 			assertTrue(destination.exists());
 		}
-		for (int i= 0; i < resources.length; i++) {
-			assertTrue(resources[i].exists());
+		for (IResource resource : resources) {
+			assertTrue(resource.exists());
 		}
 
 		IMovePolicy policy= ReorgPolicyFactory.createMovePolicy(resources, javaElements);

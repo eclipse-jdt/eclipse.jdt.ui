@@ -66,10 +66,8 @@ public class ExtractInterfaceHeapAcceptanceTests extends RefactoringHeapTestCase
 		ExtractInterfaceProcessor processor= new ExtractInterfaceProcessor(control, JavaPreferencesSettings.getCodeGenerationSettings(fProject.getProject()));
 		fRefactoring= new ProcessorBasedRefactoring(processor);
 
-		IMethod[] methods= control.getMethods();
 		List<IMethod> extractedMembers= new ArrayList<>();
-		for (int i= 0; i < methods.length; i++) {
-			IMethod method= methods[i];
+		for (IMethod method : control.getMethods()) {
 			int flags= method.getFlags();
 			if (Flags.isPublic(flags) && !Flags.isStatic(flags) && !method.isConstructor()) {
 				extractedMembers.add(method);

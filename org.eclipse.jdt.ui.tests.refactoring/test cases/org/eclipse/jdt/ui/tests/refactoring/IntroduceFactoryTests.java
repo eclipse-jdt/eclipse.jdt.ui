@@ -475,37 +475,26 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	}
 
 	private void addProjectDependencies(String[] dependencies, Map<String, IJavaProject> projName2Project) throws JavaModelException {
-		for(int i= 0; i < dependencies.length; i++) {
+		for (String dependency : dependencies) {
 			// dependent:provider
-			String dependency= dependencies[i];
 			int colonIdx= dependency.indexOf(':');
 			String depName= dependency.substring(0, colonIdx);
 			String provName= dependency.substring(colonIdx+1);
-
 			IJavaProject depProj= projName2Project.get(depName);
 			IJavaProject provProj= projName2Project.get(provName);
-
 			JavaProjectHelper.addRequiredProject(depProj, provProj);
 		}
 	}
 
 	private void createProjectPackageStructure(Map<String, Set<String>> projName2PkgNames, Map<String, IJavaProject> projName2Project, Map<IJavaProject, IPackageFragmentRoot> proj2PkgRoot) throws CoreException, JavaModelException {
-		for(Iterator<String> iter= projName2PkgNames.keySet().iterator(); iter.hasNext(); ) {
-			String projName= iter.next();
-			Set<String> projPkgNames= projName2PkgNames.get(projName);
-
+		for (String projName : projName2PkgNames.keySet()) {
 			IJavaProject project= JavaProjectHelper.createJavaProject(projName, "bin");
 			IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(project, CONTAINER);
-
 			JavaProjectHelper.addRTJar(project);
-
 			Set<IPackageFragment> pkgs= new HashSet<>();
-
 			projName2Project.put(projName, project);
 			proj2PkgRoot.put(project, root);
-			for(Iterator<String> pkgIter= projPkgNames.iterator(); pkgIter.hasNext(); ) {
-				String pkgName= pkgIter.next();
-
+			for (String pkgName : projName2PkgNames.get(projName)) {
 				pkgs.add(root.createPackageFragment(pkgName, true, null));
 			}
 		}
@@ -514,8 +503,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	private Map<String, Set<String>> collectProjectPackages(String[] inputFileBaseNames) {
 		Map<String, Set<String>> proj2Pkgs= new HashMap<>();
 
-		for(int i= 0; i < inputFileBaseNames.length; i++) {
-			String filePath= inputFileBaseNames[i];
+		for (String filePath : inputFileBaseNames) {
 			int projEnd= filePath.indexOf('/');
 			String projName= filePath.substring(0, projEnd);
 			String pkgName= filePath.substring(projEnd+1, filePath.lastIndexOf('/'));

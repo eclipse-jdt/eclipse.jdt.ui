@@ -237,8 +237,7 @@ public class ExtractClassTests extends RefactoringTest {
 		RefactoringStatusEntry[] entries= status.getEntries();
 		//Warning for no IFields moved
 		assertEquals(1, entries.length);
-		for (int i= 0; i < entries.length; i++) {
-			RefactoringStatusEntry refactoringStatusEntry= entries[i];
+		for (RefactoringStatusEntry refactoringStatusEntry : entries) {
 			assertEquals("Status was:" + refactoringStatusEntry, true, refactoringStatusEntry.isFatalError());
 		}
 	}
@@ -256,8 +255,7 @@ public class ExtractClassTests extends RefactoringTest {
 		RefactoringStatusEntry[] entries= status.getEntries();
 		//Error for usage in Switch case
 		assertEquals(1, entries.length);
-		for (int i= 0; i < entries.length; i++) {
-			RefactoringStatusEntry refactoringStatusEntry= entries[i];
+		for (RefactoringStatusEntry refactoringStatusEntry : entries) {
 			assertEquals(true, refactoringStatusEntry.isError());
 		}
 	}
@@ -270,8 +268,7 @@ public class ExtractClassTests extends RefactoringTest {
 		//Warning for transient
 		//Warning for volatile
 		assertEquals(2, entries.length);
-		for (int i= 0; i < entries.length; i++) {
-			RefactoringStatusEntry refactoringStatusEntry= entries[i];
+		for (RefactoringStatusEntry refactoringStatusEntry : entries) {
 			assertEquals(true, refactoringStatusEntry.isWarning());
 		}
 	}
@@ -279,8 +276,7 @@ public class ExtractClassTests extends RefactoringTest {
 	public void testUFOGetter() throws Exception {
 		fDescriptor.setType(setupType());
 		Field[] fields= ExtractClassDescriptor.getFields(fDescriptor.getType());
-		for (int i= 0; i < fields.length; i++) {
-			Field field= fields[i];
+		for (Field field : fields) {
 			if ("homePlanet".equals(field.getFieldName()))
 				field.setCreateField(false);
 		}
@@ -355,8 +351,7 @@ public class ExtractClassTests extends RefactoringTest {
 		//Error for privateInner reference
 		//Error for OtherPackageProteced reference
 		assertEquals(2, entries.length);
-		for (int i= 0; i < entries.length; i++) {
-			RefactoringStatusEntry refactoringStatusEntry= entries[i];
+		for (RefactoringStatusEntry refactoringStatusEntry : entries) {
 			assertEquals(true, refactoringStatusEntry.isError());
 		}
 	}
@@ -406,8 +401,7 @@ public class ExtractClassTests extends RefactoringTest {
 		RefactoringStatusEntry[] entries= status.getEntries();
 		//3*Warning for semantic change
 		assertEquals(3, entries.length);
-		for (int i= 0; i < entries.length; i++) {
-			RefactoringStatusEntry refactoringStatusEntry= entries[i];
+		for (RefactoringStatusEntry refactoringStatusEntry : entries) {
 			assertEquals(true, refactoringStatusEntry.isWarning());
 		}
 	}

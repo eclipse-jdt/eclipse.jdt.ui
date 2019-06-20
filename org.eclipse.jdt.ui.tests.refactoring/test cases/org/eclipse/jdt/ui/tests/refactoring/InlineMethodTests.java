@@ -106,10 +106,10 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	}
 
 	private IMethod getMethodToInline(IType type) throws CoreException {
-		IMethod[] methods= type.getMethods();
-		for (int i= 0; i < methods.length; i++) {
-			if ("toInline".equals(methods[i].getElementName()))
-				return methods[i];
+		for (IMethod method : type.getMethods()) {
+			if ("toInline".equals(method.getElementName())) {
+				return method;
+			}
 		}
 		return null;
 	}
@@ -128,10 +128,10 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	}
 
 	private IMethod getFirstConstructor(IType type) throws CoreException {
-		IMethod[] methods= type.getMethods();
-		for (int i= 0; i < methods.length; i++) {
-			if (methods[i].isConstructor())
-				return methods[i];
+		for (IMethod method : type.getMethods()) {
+			if (method.isConstructor()) {
+				return method;
+			}
 		}
 		return null;
 	}

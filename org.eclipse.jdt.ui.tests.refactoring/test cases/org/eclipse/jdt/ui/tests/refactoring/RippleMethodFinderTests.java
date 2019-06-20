@@ -88,9 +88,7 @@ public class RippleMethodFinderTests extends AbstractCUTestCase {
 			start++;
 		}
 
-		IMethod[] result= RippleMethodFinder2.getRelatedMethods(target, new NullProgressMonitor(), null);
-		for (int i= 0; i < result.length; i++) {
-			IMethod method= result[i];
+		for (IMethod method : RippleMethodFinder2.getRelatedMethods(target, new NullProgressMonitor(), null)) {
 			assertTrue("method not found: " + method, rippleMethods.remove(method));
 		}
 		assertEquals("found wrong ripple methods: " + rippleMethods, 0, rippleMethods.size());

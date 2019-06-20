@@ -122,8 +122,8 @@ public class TypeConstraintTests extends RefactoringTest {
 
 		List<String> externals= allToStrings(constraints);
 		assertEquals("length", constraintStrings.length, constraints.length);
-		for (int i= 0; i < constraintStrings.length; i++) {
-			assertTrue("missing constraint:" + constraintStrings[i], externals.remove(constraintStrings[i]));
+		for (String constraintString : constraintStrings) {
+			assertTrue("missing constraint:" + constraintString, externals.remove(constraintString));
 		}
 	}
 

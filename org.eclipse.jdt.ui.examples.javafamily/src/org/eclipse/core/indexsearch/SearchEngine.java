@@ -143,9 +143,7 @@ public class SearchEngine {
 		execute(search, pathCollector, pm);
 		
 		/* TODO_SEARCH */
-		IFile[] files= getFiles(pathCollector, ResourcesPlugin.getWorkspace());
-		for (int i= 0; i < files.length; i++) {
-			IFile file= files[i];
+		for (IFile file : getFiles(pathCollector, ResourcesPlugin.getWorkspace())) {
 			search.locateMatches(file, resultCollector);
 		}
 	}

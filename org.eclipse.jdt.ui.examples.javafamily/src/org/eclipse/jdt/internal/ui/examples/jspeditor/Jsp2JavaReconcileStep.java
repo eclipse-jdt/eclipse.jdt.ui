@@ -108,15 +108,13 @@ public class Jsp2JavaReconcileStep extends AbstractReconcileStep {
 		// the "only" thing we need to do is to adapt the positions
 		int[] smap= fJspTranslator.getLineMapping();
 
-		for (int i= 0; i < inputResults.length; i++) {				
-		
+		for (IReconcileResult inputResult : inputResults) {
 			if (isCanceled())
 				return null;
-
-			if (!(inputResults[i] instanceof AnnotationAdapter))
+			if (!(inputResult instanceof AnnotationAdapter)) {
 				continue;
-				
-			AnnotationAdapter result= (AnnotationAdapter)inputResults[i];
+			}
+			AnnotationAdapter result= (AnnotationAdapter) inputResult;
 			Position pos= result.getPosition();
 			int javaLine;
 			try {

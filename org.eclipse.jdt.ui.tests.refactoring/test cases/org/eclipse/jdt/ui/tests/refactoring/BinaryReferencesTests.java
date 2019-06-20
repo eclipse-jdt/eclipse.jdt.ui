@@ -109,10 +109,9 @@ public class BinaryReferencesTests extends TestCase {
 	private static IMethod findMethod(IType type, String methodName) throws JavaModelException {
 		IMethod method= type.getMethod(methodName, new String[0]);
 		if (! method.exists()) {
-			IMethod[] methods= type.getMethods();
-			for (int i= 0; i < methods.length; i++) {
-				if (methods[i].getElementName().equals(methodName)) {
-					method= methods[i];
+			for (IMethod m : type.getMethods()) {
+				if (m.getElementName().equals(methodName)) {
+					method= m;
 					break;
 				}
 			}

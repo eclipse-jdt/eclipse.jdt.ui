@@ -124,8 +124,8 @@ public class TestModelProvider extends ModelProvider {
 		IResourceDelta[] affectedChildren= delta.getAffectedChildren();
 		Arrays.sort(affectedChildren, COMPARATOR);
 
-		for (int i= 0; i < affectedChildren.length; i++) {
-			appendDelta(affectedChildren[i], indent + 1, buf);
+		for (IResourceDelta resourcedelta : affectedChildren) {
+			appendDelta(resourcedelta, indent + 1, buf);
 		}
 		return buf;
 	}
@@ -196,9 +196,7 @@ public class TestModelProvider extends ModelProvider {
 
 	private static IResourceDelta[] getExpectedChildren(IResourceDelta delta) {
 		List<IResourceDelta> result= new ArrayList<>();
-		IResourceDelta[] children= delta.getAffectedChildren();
-		for (int i= 0; i < children.length; i++) {
-			IResourceDelta child= children[i];
+		for (IResourceDelta child : delta.getAffectedChildren()) {
 			IResource resource= child.getResource();
 			if (resource != null && isIgnorable(resource))
 				continue;
@@ -224,25 +222,21 @@ public class TestModelProvider extends ModelProvider {
 	private static IResourceDelta[] getActualChildren(IResourceDelta delta, IResourceDelta[] expectedChildren) {
 		List<IResourceDelta> result= new ArrayList<>();
 		if (!IS_COPY_TEST) {
-			IResourceDelta[] children= delta.getAffectedChildren();
-			for (int i= 0; i < children.length; i++) {
-				IResourceDelta child= children[i];
-				IResource resource= child.getResource();
+			for (IResourceDelta resourcedelta : delta.getAffectedChildren()) {
+				IResource resource= resourcedelta.getResource();
 				if (resource != null && isIgnorable(resource))
 					continue;
-				result.add(child);
+				result.add(resourcedelta);
 			}
 		} else {
-			IResourceDelta[] candidates= delta.getAffectedChildren();
-			for (int i= 0; i < candidates.length; i++) {
-				IResourceDelta candidate= candidates[i];
-				IResource resource= candidate.getResource();
+			for (IResourceDelta resourcedelta : delta.getAffectedChildren()) {
+				IResource resource= resourcedelta.getResource();
 				if (resource != null && isIgnorable(resource))
 					continue;
-				if (contains(expectedChildren, candidate)) {
-					result.add(candidate);
+				if (contains(expectedChildren, resourcedelta)) {
+					result.add(resourcedelta);
 				} else {
-					assertCopySource(candidate);
+					assertCopySource(resourcedelta);
 				}
 			}
 		}
@@ -251,9 +245,10 @@ public class TestModelProvider extends ModelProvider {
 
 	private static boolean contains(IResourceDelta[] expectedChildren, IResourceDelta actualDelta) {
 		IResource actualResource= actualDelta.getResource();
-		for (int i= 0; i < expectedChildren.length; i++) {
-			if (isSameResourceInCopy(expectedChildren[i].getResource(), actualResource))
+		for (IResourceDelta resourcedelta : expectedChildren) {
+			if (isSameResourceInCopy(resourcedelta.getResource(), actualResource)) {
 				return true;
+			}
 		}
 		return false;
 	}

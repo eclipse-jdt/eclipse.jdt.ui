@@ -247,12 +247,11 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 	private void checkNames(IResource[] resourcesCopied, IJavaElement[] javaElementsCopied, String clipboardText){
 		List<String> stringLines= Arrays.asList(Strings.convertIntoLines(clipboardText));
 		assertEquals("different number of names", resourcesCopied.length + javaElementsCopied.length, stringLines.size());
-		for (int i= 0; i < resourcesCopied.length; i++) {
-			String name= getName(resourcesCopied[i]);
+		for (IResource resource : resourcesCopied) {
+			String name= getName(resource);
 			assertTrue("name not in set:" + name, stringLines.contains(name));
 		}
-		for (int i= 0; i < javaElementsCopied.length; i++) {
-			IJavaElement element= javaElementsCopied[i];
+		for (IJavaElement element : javaElementsCopied) {
 			if (! ReorgUtils.isInsideCompilationUnit(element)){
 				String name= getName(element);
 				assertTrue("name not in set:" + name, stringLines.contains(name));
@@ -272,8 +271,7 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 
 	private static int countResources(IJavaElement[] javaElementsCopied) {
 		int count= 0;
-		for (int i= 0; i < javaElementsCopied.length; i++) {
-			IJavaElement element= javaElementsCopied[i];
+		for (IJavaElement element : javaElementsCopied) {
 			switch (element.getElementType()) {
 				case IJavaElement.JAVA_PROJECT :
 				case IJavaElement.PACKAGE_FRAGMENT_ROOT :
