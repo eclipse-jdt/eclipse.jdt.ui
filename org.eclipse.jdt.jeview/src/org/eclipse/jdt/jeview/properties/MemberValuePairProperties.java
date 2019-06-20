@@ -89,8 +89,7 @@ public class MemberValuePairProperties implements IPropertySource {
 	static String getValueKindName(int valueKind) {
 		String name= "UNKNOWN";
 		Field[] fields= IMemberValuePair.class.getFields();
-		for (int i= 0; i < fields.length; i++) {
-			Field f= fields[i];
+		for (Field f : fields) {
 			try {
 				if (f.getType() == int.class && f.getInt(f) == valueKind) {
 					name= "IMemberValuePair." + f.getName();

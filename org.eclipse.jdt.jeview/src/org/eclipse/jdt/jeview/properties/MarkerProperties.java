@@ -109,8 +109,7 @@ public class MarkerProperties implements IPropertySource {
 	@Override
 	public Object getPropertyValue(Object id) {
 		AttributeDescriptor[] propertyDescriptors= getPropertyDescriptors();
-		for (int i= 0; i < propertyDescriptors.length; i++) {
-			AttributeDescriptor descriptor= propertyDescriptors[i];
+		for (AttributeDescriptor descriptor : propertyDescriptors) {
 			if (descriptor.getId().equals(id))
 				return descriptor.getValue();
 		}
@@ -203,8 +202,7 @@ public class MarkerProperties implements IPropertySource {
 		
 		private static String getConstantName(int id) {
 			Field[] fields= IProblem.class.getFields();
-			for (int i= 0; i < fields.length; i++) {
-				Field f= fields[i];
+			for (Field f : fields) {
 				try {
 					if (f.getType() == int.class && f.getInt(f) == id) {
 						return "IProblem." + f.getName();
