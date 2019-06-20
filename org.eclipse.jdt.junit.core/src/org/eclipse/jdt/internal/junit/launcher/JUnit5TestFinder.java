@@ -77,8 +77,8 @@ public class JUnit5TestFinder implements ITestFinder {
 				return true;
 			}
 			ITypeBinding[] interfaces= type.getInterfaces();
-			for (int i= 0; i < interfaces.length; i++) {
-				if (annotatesAtLeastOneInnerClass(interfaces[i])) {
+			for (ITypeBinding intf : interfaces) {
+				if (annotatesAtLeastOneInnerClass(intf)) {
 					return true;
 				}
 			}
@@ -87,8 +87,8 @@ public class JUnit5TestFinder implements ITestFinder {
 
 		private boolean annotatesDeclaredTypes(ITypeBinding type) {
 			ITypeBinding[] declaredTypes= type.getDeclaredTypes();
-			for (int i= 0; i < declaredTypes.length; i++) {
-				if (isNestedClass(declaredTypes[i])) {
+			for (ITypeBinding declaredType : declaredTypes) {
+				if (isNestedClass(declaredType)) {
 					return true;
 				}
 			}
@@ -128,8 +128,8 @@ public class JUnit5TestFinder implements ITestFinder {
 				return true;
 			}
 			ITypeBinding[] interfaces= type.getInterfaces();
-			for (int i= 0; i < interfaces.length; i++) {
-				if (annotatesAtLeastOneMethod(interfaces[i])) {
+			for (ITypeBinding intf : interfaces) {
+				if (annotatesAtLeastOneMethod(intf)) {
 					return true;
 				}
 			}
@@ -138,8 +138,7 @@ public class JUnit5TestFinder implements ITestFinder {
 
 		private boolean annotatesDeclaredMethods(ITypeBinding type) {
 			IMethodBinding[] declaredMethods= type.getDeclaredMethods();
-			for (int i= 0; i < declaredMethods.length; i++) {
-				IMethodBinding curr= declaredMethods[i];
+			for (IMethodBinding curr : declaredMethods) {
 				if (annotates(curr.getAnnotations())) {
 					return true;
 				}
@@ -241,8 +240,8 @@ public class JUnit5TestFinder implements ITestFinder {
 	private void addTypeAndSubtypes(IType type, Set<IType> result, ITypeHierarchy hierarchy) {
 		if (result.add(type)) {
 			IType[] subclasses= hierarchy.getSubclasses(type);
-			for (int i= 0; i < subclasses.length; i++) {
-				addTypeAndSubtypes(subclasses[i], result, hierarchy);
+			for (IType subclasse : subclasses) {
+				addTypeAndSubtypes(subclasse, result, hierarchy);
 			}
 		}
 	}

@@ -75,8 +75,8 @@ public class JUnit4TestFinder implements ITestFinder {
 		}
 
 		private boolean annotates(IAnnotationBinding[] annotations) {
-			for (int i= 0; i < annotations.length; i++) {
-				ITypeBinding annotationType= annotations[i].getAnnotationType();
+			for (IAnnotationBinding annotation : annotations) {
+				ITypeBinding annotationType= annotation.getAnnotationType();
 				if (annotationType != null && (annotationType.getQualifiedName().equals(fName))) {
 					return true;
 				}
@@ -97,8 +97,7 @@ public class JUnit4TestFinder implements ITestFinder {
 		public boolean annotatesAtLeastOneMethod(ITypeBinding type) {
 			while (type != null) {
 				IMethodBinding[] declaredMethods= type.getDeclaredMethods();
-				for (int i= 0; i < declaredMethods.length; i++) {
-					IMethodBinding curr= declaredMethods[i];
+				for (IMethodBinding curr : declaredMethods) {
 					if (annotates(curr.getAnnotations())) {
 						return true;
 					}
@@ -191,8 +190,8 @@ public class JUnit4TestFinder implements ITestFinder {
 		private void addTypeAndSubtypes(IType type) {
 			if (fResult.add(type)) {
 				IType[] subclasses= fHierarchy.getSubclasses(type);
-				for (int i= 0; i < subclasses.length; i++) {
-					addTypeAndSubtypes(subclasses[i]);
+				for (IType subclasse : subclasses) {
+					addTypeAndSubtypes(subclasse);
 				}
 			}
 		}

@@ -54,9 +54,8 @@ public class JUnit3TestFinder implements ITestFinder {
 				}
 			} else if (element instanceof ICompilationUnit) {
 				IType[] types= ((ICompilationUnit) element).getAllTypes();
-				for (int i= 0; i < types.length; i++) {
-					IType type= types[i];
-					if (isTest(types[i])) {
+				for (IType type : types) {
+					if (isTest(type)) {
 						result.add(type);
 					}
 				}

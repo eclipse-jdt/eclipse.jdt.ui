@@ -95,8 +95,7 @@ public class BuildPathSupport {
 				Bundle[] bundles= Platform.getBundles(aBundleId, aVersionRange.toString());
 				Bundle bestMatch = null;
 				if (bundles != null) {
-					for (int i= 0; i < bundles.length; i++) {
-						Bundle bundle= bundles[i];
+					for (Bundle bundle : bundles) {
 						if (bestMatch == null || bundle.getState() > bestMatch.getState()) {
 							bestMatch= bundle;
 						}
@@ -136,8 +135,7 @@ public class BuildPathSupport {
 				Bundle[] bundles= Platform.getBundles(aBundleId, aVersionRange.toString());
 				Bundle bestMatch= null;
 				if (bundles != null) {
-					for (int i= 0; i < bundles.length; i++) {
-						Bundle bundle= bundles[i];
+					for (Bundle bundle : bundles) {
 						if (bestMatch == null || bundle.getState() > bestMatch.getState()) {
 							bestMatch= bundle;
 						}

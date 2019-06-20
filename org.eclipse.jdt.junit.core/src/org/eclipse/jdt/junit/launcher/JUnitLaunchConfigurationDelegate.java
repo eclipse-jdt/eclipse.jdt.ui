@@ -605,9 +605,9 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 			File file= File.createTempFile("testNames", ".txt"); //$NON-NLS-1$ //$NON-NLS-2$
 			file.deleteOnExit();
 			try (BufferedWriter bw= new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8));) {
-				for (int i= 0; i < testElements.length; i++) {
-					if (testElements[i] instanceof IType) {
-						IType type= (IType) testElements[i];
+				for (IJavaElement testElement : testElements) {
+					if (testElement instanceof IType) {
+						IType type= (IType) testElement;
 						String testName= type.getFullyQualifiedName();
 						bw.write(testName);
 						bw.newLine();
@@ -677,11 +677,11 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 			JUnitRuntimeClasspathEntry[] entries= kind.getClasspathEntries();
 			List<String> junitEntries= new ArrayList<>();
 
-			for (int i= 0; i < entries.length; i++) {
+			for (JUnitRuntimeClasspathEntry entrie : entries) {
 				try {
-					addEntry(junitEntries, entries[i]);
+					addEntry(junitEntries, entrie);
 				} catch (IOException | URISyntaxException e) {
-					Assert.isTrue(false, entries[i].getPluginId() + " is available (required JAR)"); //$NON-NLS-1$
+					Assert.isTrue(false, entrie.getPluginId() + " is available (required JAR)"); //$NON-NLS-1$
 				}
 			}
 			return junitEntries;

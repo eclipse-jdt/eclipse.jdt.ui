@@ -866,8 +866,8 @@ public class TestRunSession implements ITestRunSession {
 		if (testElement instanceof TestSuiteElement) {
 			TestSuiteElement testSuiteElement= (TestSuiteElement) testElement;
 			ITestElement[] children= testSuiteElement.getChildren();
-			for (int i= 0; i < children.length; i++) {
-				addFailures(failures, children[i]);
+			for (ITestElement child : children) {
+				addFailures(failures, child);
 			}
 		}
 	}

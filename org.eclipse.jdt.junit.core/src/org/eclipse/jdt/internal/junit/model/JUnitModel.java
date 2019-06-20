@@ -65,6 +65,7 @@ import org.eclipse.jdt.internal.junit.JUnitPreferencesConstants;
 import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants;
 import org.eclipse.jdt.internal.junit.model.TestElement.Status;
+import org.eclipse.jdt.junit.ITestRunListener;
 
 /**
  * Central registry for JUnit test runs.
@@ -167,31 +168,31 @@ public final class JUnitModel {
 				@Override
 				public void sessionStarted() {
 					org.eclipse.jdt.junit.ITestRunListener[] testRunListeners= JUnitCorePlugin.getDefault().getTestRunListeners();
-					for (int i= 0; i < testRunListeners.length; i++) {
-						testRunListeners[i].testRunStarted(fActiveTestRunSession.getTotalCount());
+					for (ITestRunListener testRunListener : testRunListeners) {
+						testRunListener.testRunStarted(fActiveTestRunSession.getTotalCount());
 					}
 				}
 				@Override
 				public void sessionTerminated() {
 					org.eclipse.jdt.junit.ITestRunListener[] testRunListeners= JUnitCorePlugin.getDefault().getTestRunListeners();
-					for (int i= 0; i < testRunListeners.length; i++) {
-						testRunListeners[i].testRunTerminated();
+					for (ITestRunListener testRunListener : testRunListeners) {
+						testRunListener.testRunTerminated();
 					}
 					sessionRemoved(fActiveTestRunSession);
 				}
 				@Override
 				public void sessionStopped(long elapsedTime) {
 					org.eclipse.jdt.junit.ITestRunListener[] testRunListeners= JUnitCorePlugin.getDefault().getTestRunListeners();
-					for (int i= 0; i < testRunListeners.length; i++) {
-						testRunListeners[i].testRunStopped(elapsedTime);
+					for (ITestRunListener testRunListener : testRunListeners) {
+						testRunListener.testRunStopped(elapsedTime);
 					}
 					sessionRemoved(fActiveTestRunSession);
 				}
 				@Override
 				public void sessionEnded(long elapsedTime) {
 					org.eclipse.jdt.junit.ITestRunListener[] testRunListeners= JUnitCorePlugin.getDefault().getTestRunListeners();
-					for (int i= 0; i < testRunListeners.length; i++) {
-						testRunListeners[i].testRunEnded(elapsedTime);
+					for (ITestRunListener testRunListener : testRunListeners) {
+						testRunListener.testRunEnded(elapsedTime);
 					}
 					sessionRemoved(fActiveTestRunSession);
 				}
@@ -202,32 +203,32 @@ public final class JUnitModel {
 				@Override
 				public void testStarted(TestCaseElement testCaseElement) {
 					org.eclipse.jdt.junit.ITestRunListener[] testRunListeners= JUnitCorePlugin.getDefault().getTestRunListeners();
-					for (int i= 0; i < testRunListeners.length; i++) {
-						testRunListeners[i].testStarted(testCaseElement.getId(), testCaseElement.getTestName());
+					for (ITestRunListener testRunListener : testRunListeners) {
+						testRunListener.testStarted(testCaseElement.getId(), testCaseElement.getTestName());
 					}
 				}
 
 				@Override
 				public void testFailed(TestElement testElement, Status status, String trace, String expected, String actual) {
 					org.eclipse.jdt.junit.ITestRunListener[] testRunListeners= JUnitCorePlugin.getDefault().getTestRunListeners();
-					for (int i= 0; i < testRunListeners.length; i++) {
-						testRunListeners[i].testFailed(status.getOldCode(), testElement.getId(), testElement.getTestName(), trace);
+					for (ITestRunListener testRunListener : testRunListeners) {
+						testRunListener.testFailed(status.getOldCode(), testElement.getId(), testElement.getTestName(), trace);
 					}
 				}
 
 				@Override
 				public void testEnded(TestCaseElement testCaseElement) {
 					org.eclipse.jdt.junit.ITestRunListener[] testRunListeners= JUnitCorePlugin.getDefault().getTestRunListeners();
-					for (int i= 0; i < testRunListeners.length; i++) {
-						testRunListeners[i].testEnded(testCaseElement.getId(), testCaseElement.getTestName());
+					for (ITestRunListener testRunListener : testRunListeners) {
+						testRunListener.testEnded(testCaseElement.getId(), testCaseElement.getTestName());
 					}
 				}
 
 				@Override
 				public void testReran(TestCaseElement testCaseElement, Status status, String trace, String expectedResult, String actualResult) {
 					org.eclipse.jdt.junit.ITestRunListener[] testRunListeners= JUnitCorePlugin.getDefault().getTestRunListeners();
-					for (int i= 0; i < testRunListeners.length; i++) {
-						testRunListeners[i].testReran(testCaseElement.getId(), testCaseElement.getClassName(), testCaseElement.getTestMethodName(), status.getOldCode(), trace);
+					for (ITestRunListener testRunListener : testRunListeners) {
+						testRunListener.testReran(testCaseElement.getId(), testCaseElement.getClassName(), testCaseElement.getTestMethodName(), status.getOldCode(), trace);
 					}
 				}
 
@@ -304,8 +305,8 @@ public final class JUnitModel {
 		File historyDirectory= JUnitCorePlugin.getHistoryDirectory();
 		File[] swapFiles= historyDirectory.listFiles();
 		if (swapFiles != null) {
-			for (int i= 0; i < swapFiles.length; i++) {
-				swapFiles[i].delete();
+			for (File swapFile : swapFiles) {
+				swapFile.delete();
 			}
 		}
 

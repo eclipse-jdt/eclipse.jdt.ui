@@ -109,9 +109,10 @@ public class TestKind implements ITestKind {
 	boolean precedes(ITestKind otherKind) {
 		final String precededKindId = getPrecededKindId();
 		String[] ids = precededKindId.split(","); //$NON-NLS-1$
-		for (int i = 0; i < ids.length; i++) {
-			if (ids[i].equals(otherKind.getId()))
+		for (String id : ids) {
+			if (id.equals(otherKind.getId())) {
 				return true;
+			}
 		}
 		return false;
 	}

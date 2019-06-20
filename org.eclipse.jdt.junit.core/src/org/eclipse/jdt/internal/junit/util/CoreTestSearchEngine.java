@@ -163,8 +163,8 @@ public class CoreTestSearchEngine {
 	public static boolean isTestImplementor(IType type) throws JavaModelException {
 		ITypeHierarchy typeHier= type.newSupertypeHierarchy(null);
 		IType[] superInterfaces= typeHier.getAllInterfaces();
-		for (int i= 0; i < superInterfaces.length; i++) {
-			if (JUnitCorePlugin.TEST_INTERFACE_NAME.equals(superInterfaces[i].getFullyQualifiedName('.'))) {
+		for (IType superInterface : superInterfaces) {
+			if (JUnitCorePlugin.TEST_INTERFACE_NAME.equals(superInterface.getFullyQualifiedName('.'))) {
 				return true;
 			}
 		}
@@ -177,8 +177,7 @@ public class CoreTestSearchEngine {
 			return true;
 		}
 		ITypeBinding[] interfaces= type.getInterfaces();
-		for (int i= 0; i < interfaces.length; i++) {
-			ITypeBinding curr= interfaces[i];
+		for (ITypeBinding curr : interfaces) {
 			if (JUnitCorePlugin.TEST_INTERFACE_NAME.equals(curr.getQualifiedName()) || isTestImplementor(curr)) {
 				return true;
 			}
@@ -205,9 +204,9 @@ public class CoreTestSearchEngine {
 		if (element.getElementType() == IJavaElement.JAVA_PROJECT) {
 			// for projects only add the contained source folders
 			IPackageFragmentRoot[] roots= ((IJavaProject) element).getPackageFragmentRoots();
-			for (int i= 0; i < roots.length; i++) {
-				if (!roots[i].isArchive()) {
-					result.add(roots[i]);
+			for (IPackageFragmentRoot root : roots) {
+				if (!root.isArchive()) {
+					result.add(root);
 				}
 			}
 		} else {
@@ -219,11 +218,10 @@ public class CoreTestSearchEngine {
 	public static void findTestImplementorClasses(ITypeHierarchy typeHierarchy, IType testInterface, IRegion region, Set<IType> result)
 			throws JavaModelException {
 		IType[] subtypes= typeHierarchy.getAllSubtypes(testInterface);
-		for (int i= 0; i < subtypes.length; i++) {
-			IType type= subtypes[i];
+		for (IType type : subtypes) {
 			int cachedFlags= typeHierarchy.getCachedFlags(type);
 			if (!Flags.isInterface(cachedFlags) && !Flags.isAbstract(cachedFlags) // do the cheaper tests first
-					&& region.contains(type) && CoreTestSearchEngine.isAccessibleClass(type)) {
+				&& region.contains(type) && CoreTestSearchEngine.isAccessibleClass(type)) {
 				result.add(type);
 			}
 		}

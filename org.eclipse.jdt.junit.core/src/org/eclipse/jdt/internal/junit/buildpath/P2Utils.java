@@ -96,8 +96,7 @@ class P2Utils {
 		}
 		
 		if (bundles != null) {
-			for (int j= 0; j < bundles.length; j++) {
-				BundleInfo bundleInfo= bundles[j];
+			for (BundleInfo bundleInfo : bundles) {
 				if (symbolicName.equals(bundleInfo.getSymbolicName())) {
 					Version version= new Version(bundleInfo.getVersion());
 					if (versionRange.isIncluded(version)) {

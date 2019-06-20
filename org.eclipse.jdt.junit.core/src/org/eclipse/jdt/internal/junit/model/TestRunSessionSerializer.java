@@ -97,8 +97,8 @@ public class TestRunSessionSerializer implements XMLReader {
 
 		TestRoot testRoot= fTestRunSession.getTestRoot();
 		ITestElement[] topSuites= testRoot.getChildren();
-		for (int i= 0; i < topSuites.length; i++) {
-			handleTestElement(topSuites[i]);
+		for (ITestElement topSuite : topSuites) {
+			handleTestElement(topSuite);
 		}
 
 		endElement(IXMLTags.NODE_TESTRUN);
@@ -130,8 +130,8 @@ public class TestRunSessionSerializer implements XMLReader {
 			addFailure(testSuiteElement);
 
 			ITestElement[] children= testSuiteElement.getChildren();
-			for (int i= 0; i < children.length; i++) {
-				handleTestElement(children[i]);
+			for (ITestElement child : children) {
+				handleTestElement(child);
 			}
 			endElement(IXMLTags.NODE_TESTSUITE);
 
