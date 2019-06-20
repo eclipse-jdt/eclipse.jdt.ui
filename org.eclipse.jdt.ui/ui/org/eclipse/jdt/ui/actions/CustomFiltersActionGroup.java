@@ -264,9 +264,8 @@ public class CustomFiltersActionGroup extends ActionGroup {
 		fPreviousPatterns= new String[0];
 
 		fFilterItems= new HashMap<>();
-		FilterDescriptor[] filterDescriptors= FilterDescriptor.getFilterDescriptors(fTargetId);
-		for (int i= 0; i < filterDescriptors.length; i++) {
-			FilterItem item= new FilterItem(filterDescriptors[i]);
+		for (FilterDescriptor filterDescriptor : FilterDescriptor.getFilterDescriptors(fTargetId)) {
+			FilterItem item= new FilterItem(filterDescriptor);
 			Object existing= fFilterItems.put(item.id, item);
 			if (existing != null) {
 				JavaPlugin.logErrorMessage("WARNING: Duplicate id for extension-point \"org.eclipse.jdt.ui.javaElementFilters\" in " + ownerId); //$NON-NLS-1$
@@ -302,8 +301,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 	 */
 	public String[] internalGetEnabledFilterIds() {
 		ArrayList<String> enabledFilterIds= new ArrayList<>();
-		for (Iterator<FilterItem> iterator= fFilterItems.values().iterator(); iterator.hasNext();) {
-			FilterItem item= iterator.next();
+		for (FilterItem item : fFilterItems.values()) {
 			if (item.enabled) {
 				enabledFilterIds.add(item.id);
 			}
@@ -323,12 +321,11 @@ public class CustomFiltersActionGroup extends ActionGroup {
 	 */
 	public String[] removeFiltersFor(Object parent, Object element, IContentProvider contentProvider) {
 		ArrayList<String> newFilters= new ArrayList<>();
-		for (Iterator<FilterItem> iterator= fFilterItems.values().iterator(); iterator.hasNext();) {
-			FilterItem item= iterator.next();
+		for (FilterItem item : fFilterItems.values()) {
 			if (item.enabled) {
 				ViewerFilter filter= item.getFilterInstance();
-	            if (filter != null && isSelected(parent, element, contentProvider, filter))
-	                newFilters.add(item.id);
+				if (filter != null && isSelected(parent, element, contentProvider, filter))
+					newFilters.add(item.id);
 			}
 		}
 		if (fUserDefinedPatternsEnabled && isSelected(parent, element, contentProvider, fPatternFilter))
@@ -386,18 +383,18 @@ public class CustomFiltersActionGroup extends ActionGroup {
 	private void setEnabledFilterIds(String[] enabledIds) {
 		// set all to false
 		fUserDefinedPatternsEnabled= false;
-		for (Iterator<FilterItem> iterator= fFilterItems.values().iterator(); iterator.hasNext();) {
-			FilterItem item= iterator.next();
+		for (FilterItem item : fFilterItems.values()) {
 			item.enabled= false;
 		}
 		// set enabled to true
-		for (int i= 0; i < enabledIds.length; i++) {
-			FilterItem item= fFilterItems.get(enabledIds[i]);
+		for (String enabledId : enabledIds) {
+			FilterItem item= fFilterItems.get(enabledId);
 			if (item != null) {
 				item.enabled= true;
 			}
-			if (fPatternFilter.getClass().getName().equals(enabledIds[i]))
+			if (fPatternFilter.getClass().getName().equals(enabledId)) {
 				fUserDefinedPatternsEnabled= true;
+			}
 		}
 	}
 
@@ -467,8 +464,9 @@ public class CustomFiltersActionGroup extends ActionGroup {
 		if (fFilterIdsUsedInLastViewMenu == null)
 			return;
 
-		for (int i= 0; i < fFilterIdsUsedInLastViewMenu.length; i++)
-			mm.remove(fFilterIdsUsedInLastViewMenu[i]);
+		for (String fFilterId : fFilterIdsUsedInLastViewMenu) {
+			mm.remove(fFilterId);
+		}
 	}
 
 	private void addLRUFilterActions(IMenuManager mm) {
@@ -513,8 +511,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 		boolean hasChange= false;
 		boolean patternChange= false;
 
-		for (Iterator<FilterItem> iterator= fFilterItems.values().iterator(); iterator.hasNext();) {
-			FilterItem item= iterator.next();
+		for (FilterItem item : fFilterItems.values()) {
 			if (item.descriptor.isCustomFilter()) {
 				if (item.enabled != item.previouslyEnabled) {
 					ViewerFilter filter= item.getFilterInstance(); // only create when changed
@@ -562,8 +559,8 @@ public class CustomFiltersActionGroup extends ActionGroup {
 	private boolean hasChanges(HashSet<String> patterns, String[] oldPatterns) {
 		@SuppressWarnings("unchecked")
 		HashSet<String> copy= (HashSet<String>) patterns.clone();
-		for (int i= 0; i < oldPatterns.length; i++) {
-			boolean found= copy.remove(oldPatterns[i]);
+		for (String oldPattern : oldPatterns) {
+			boolean found= copy.remove(oldPattern);
 			if (!found)
 				return true;
 		}
@@ -583,8 +580,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 		fUserDefinedPatternsEnabled= store.getBoolean(getPreferenceKey(TAG_USER_DEFINED_PATTERNS_ENABLED));
 		setUserDefinedPatterns(CustomFiltersDialog.convertFromString(store.getString(getPreferenceKey(TAG_USER_DEFINED_PATTERNS)), SEPARATOR));
 
-		for (Iterator<FilterItem> iterator= fFilterItems.values().iterator(); iterator.hasNext();) {
-			FilterItem item= iterator.next();
+		for (FilterItem item : fFilterItems.values()) {
 			String id= item.id;
 			// set default to value from plugin contributions (fixes https://bugs.eclipse.org/bugs/show_bug.cgi?id=73991 ):
 			store.setDefault(id, item.descriptor.isEnabled());
@@ -611,8 +607,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 		store.setValue(getPreferenceKey(TAG_USER_DEFINED_PATTERNS_ENABLED), fUserDefinedPatternsEnabled);
 		store.setValue(getPreferenceKey(TAG_USER_DEFINED_PATTERNS), CustomFiltersDialog.convertToString(fUserDefinedPatterns ,SEPARATOR));
 
-		for (Iterator<FilterItem> iterator= fFilterItems.values().iterator(); iterator.hasNext();) {
-			FilterItem item= iterator.next();
+		for (FilterItem item : fFilterItems.values()) {
 			store.setValue(item.id, item.enabled);
 		}
 
@@ -647,9 +642,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 	private void saveXmlDefinedFilters(IMemento memento) {
 		IMemento xmlDefinedFilters= memento.createChild(TAG_XML_DEFINED_FILTERS);
 
-		for (Iterator<FilterItem> iterator= fFilterItems.values().iterator(); iterator.hasNext();) {
-			FilterItem item= iterator.next();
-
+		for (FilterItem item : fFilterItems.values()) {
 			IMemento child= xmlDefinedFilters.createChild(TAG_CHILD);
 			child.putString(TAG_FILTER_ID, item.id);
 			child.putString(TAG_IS_ENABLED, String.valueOf(item.enabled));
@@ -677,9 +670,9 @@ public class CustomFiltersActionGroup extends ActionGroup {
 	private void saveUserDefinedPatterns(IMemento memento) {
 		if(fUserDefinedPatterns != null && fUserDefinedPatterns.length > 0) {
 			IMemento userDefinedPatterns= memento.createChild(TAG_USER_DEFINED_PATTERNS);
-			for (int i= 0; i < fUserDefinedPatterns.length; i++) {
+			for (String fUserDefinedPattern : fUserDefinedPatterns) {
 				IMemento child= userDefinedPatterns.createChild(TAG_CHILD);
-				child.putString(TAG_PATTERN, fUserDefinedPatterns[i]);
+				child.putString(TAG_PATTERN, fUserDefinedPattern);
 			}
 		}
 	}
@@ -726,10 +719,9 @@ public class CustomFiltersActionGroup extends ActionGroup {
 	private void restoreXmlDefinedFilters(IMemento memento) {
 		IMemento xmlDefinedFilters= memento.getChild(TAG_XML_DEFINED_FILTERS);
 		if(xmlDefinedFilters != null) {
-			IMemento[] children= xmlDefinedFilters.getChildren(TAG_CHILD);
-			for (int i= 0; i < children.length; i++) {
-				String id= children[i].getString(TAG_FILTER_ID);
-				Boolean isEnabled= Boolean.valueOf(children[i].getString(TAG_IS_ENABLED));
+			for (IMemento child : xmlDefinedFilters.getChildren(TAG_CHILD)) {
+				String id= child.getString(TAG_FILTER_ID);
+				Boolean isEnabled= Boolean.valueOf(child.getString(TAG_IS_ENABLED));
 				FilterItem item= fFilterItems.get(id);
 				if (item != null) {
 					item.enabled= isEnabled.booleanValue();
@@ -742,9 +734,8 @@ public class CustomFiltersActionGroup extends ActionGroup {
 		IMemento lruFilters= memento.getChild(TAG_LRU_FILTERS);
 		fLRUFilterIdsStack.clear();
 		if(lruFilters != null) {
-			IMemento[] children= lruFilters.getChildren(TAG_CHILD);
-			for (int i= 0; i < children.length; i++) {
-				String id= children[i].getString(TAG_FILTER_ID);
+			for (IMemento child : lruFilters.getChildren(TAG_CHILD)) {
+				String id= child.getString(TAG_FILTER_ID);
 				if (fFilterItems.containsKey(id) && !fLRUFilterIdsStack.contains(id))
 					fLRUFilterIdsStack.push(id);
 			}

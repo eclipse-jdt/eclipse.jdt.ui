@@ -669,10 +669,10 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 		JavaEditorTextHoverDescriptor[] hoverDescs= JavaPlugin.getDefault().getJavaEditorTextHoverDescriptors();
 		int stateMasks[]= new int[hoverDescs.length];
 		int stateMasksLength= 0;
-		for (int i= 0; i < hoverDescs.length; i++) {
-			if (hoverDescs[i].isEnabled()) {
+		for (JavaEditorTextHoverDescriptor hoverDesc : hoverDescs) {
+			if (hoverDesc.isEnabled()) {
 				int j= 0;
-				int stateMask= hoverDescs[i].getStateMask();
+				int stateMask= hoverDesc.getStateMask();
 				while (j < stateMasksLength) {
 					if (stateMasks[j] == stateMask)
 						break;
@@ -827,9 +827,9 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 
 		// Register information provider
 		IInformationProvider provider= new JavaInformationProvider(getEditor());
-		String[] contentTypes= getConfiguredContentTypes(sourceViewer);
-		for (int i= 0; i < contentTypes.length; i++)
-			presenter.setInformationProvider(provider, contentTypes[i]);
+		for (String contentType : getConfiguredContentTypes(sourceViewer)) {
+			presenter.setInformationProvider(provider, contentType);
+		}
 
 		// sizes: see org.eclipse.jface.text.TextViewer.TEXT_HOVER_*_CHARS
 		presenter.setSizeConstraints(100, 12, false, true);

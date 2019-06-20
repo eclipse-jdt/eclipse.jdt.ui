@@ -95,13 +95,10 @@ public class RefreshAction extends SelectionDispatchAction {
 		}
 
 		private void addWorkingSetResources(List<IResource> selectedResources) {
-			Object[] elements= getStructuredSelection().toArray();
-			for (int i= 0; i < elements.length; i++) {
-				Object curr= elements[i];
+			for (Object curr : getStructuredSelection().toArray()) {
 				if (curr instanceof IWorkingSet) {
-					IAdaptable[] members= ((IWorkingSet) curr).getElements();
-					for (int k= 0; k < members.length; k++) {
-						IResource adapted= members[k].getAdapter(IResource.class);
+					for (IAdaptable member : ((IWorkingSet) curr).getElements()) {
+						IResource adapted= member.getAdapter(IResource.class);
 						if (adapted != null) {
 							selectedResources.add(adapted);
 						}
@@ -195,24 +192,21 @@ public class RefreshAction extends SelectionDispatchAction {
 	}
 
 	private void refreshJavaElements(IStructuredSelection selection, IProgressMonitor monitor) throws JavaModelException {
-		Object[] selectedElements= selection.toArray();
 		ArrayList<IJavaElement> javaElements= new ArrayList<>();
-		for (int i= 0; i < selectedElements.length; i++) {
-			Object curr= selectedElements[i];
+		for (Object curr : selection.toArray()) {
 			if (curr instanceof IPackageFragmentRoot) {
 				javaElements.add((IPackageFragmentRoot) curr);
 			} else if (curr instanceof PackageFragmentRootContainer) {
 				javaElements.addAll(Arrays.asList(((PackageFragmentRootContainer) curr).getPackageFragmentRoots()));
 			} else if (curr instanceof IWorkingSet) {
-				IAdaptable[] members= ((IWorkingSet) curr).getElements();
-				for (int k= 0; k < members.length; k++) {
-					IJavaElement adapted= members[k].getAdapter(IJavaElement.class);
+				for (IAdaptable member : ((IWorkingSet) curr).getElements()) {
+					IJavaElement adapted= member.getAdapter(IJavaElement.class);
 					if (adapted instanceof IPackageFragmentRoot) {
 						javaElements.add(adapted);
 					}
 				}
 			}
- 		}
+		}
 		if (!javaElements.isEmpty()) {
 			IJavaModel model= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
 			model.refreshExternalArchives(javaElements.toArray(new IJavaElement[javaElements.size()]), monitor);

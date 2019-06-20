@@ -124,8 +124,8 @@ public abstract class FindAction extends SelectionDispatchAction {
 		if (element == null || fValidTypes == null || fValidTypes.length == 0 || !ActionUtil.isOnBuildPath(element))
 			return false;
 
-		for (int i= 0; i < fValidTypes.length; i++) {
-			if (fValidTypes[i].isInstance(element)) {
+		for (Class<?> fValidType : fValidTypes) {
+			if (fValidType.isInstance(element)) {
 				if (element.getElementType() == IJavaElement.PACKAGE_FRAGMENT)
 					return hasChildren((IPackageFragment)element);
 				else
@@ -228,8 +228,7 @@ public abstract class FindAction extends SelectionDispatchAction {
 	@Override
 	public void run(IStructuredSelection selection) {
 		IJavaElement[] elements= getJavaElements(selection, false);
-		for (int i= 0; i < elements.length; i++) {
-			IJavaElement element= elements[i];
+		for (IJavaElement element : elements) {
 			if (element == null || !element.exists()) {
 				showOperationUnavailableDialog();
 				return;

@@ -146,8 +146,8 @@ public class CCPActionGroup extends ActionGroup {
 		}
 
 		if (specialSelectionProvider != null) {
-			for (int i= 0; i < fActions.length; i++) {
-				fActions[i].setSpecialSelectionProvider(specialSelectionProvider);
+			for (SelectionDispatchAction action : fActions) {
+				action.setSpecialSelectionProvider(specialSelectionProvider);
 			}
 		}
 
@@ -157,18 +157,17 @@ public class CCPActionGroup extends ActionGroup {
 	private void registerActionsAsSelectionChangeListeners() {
 		ISelectionProvider provider= fSelectionProvider;
 		ISelection selection= provider.getSelection();
-		for (int i= 0; i < fActions.length; i++) {
-			SelectionDispatchAction action= fActions[i];
-			action.update(selection);
-			provider.addSelectionChangedListener(action);
-		}
+		 for (SelectionDispatchAction action : fActions) {
+			 action.update(selection);
+			 provider.addSelectionChangedListener(action);
+		 }
 	}
 
 	private void deregisterActionsAsSelectionChangeListeners() {
 		ISelectionProvider provider= fSelectionProvider;
-		for (int i= 0; i < fActions.length; i++) {
-			provider.removeSelectionChangedListener(fActions[i]);
-		}
+		 for (SelectionDispatchAction fAction : fActions) {
+			 provider.removeSelectionChangedListener(fAction);
+		 }
 	}
 
 
@@ -198,12 +197,11 @@ public class CCPActionGroup extends ActionGroup {
 	@Override
 	public void fillContextMenu(IMenuManager menu) {
 		super.fillContextMenu(menu);
-		for (int i= 0; i < fActions.length; i++) {
-			SelectionDispatchAction action= fActions[i];
-			if (action == fCutAction && !fCutAction.isEnabled())
-				continue;
-			menu.appendToGroup(ICommonMenuConstants.GROUP_EDIT, action);
-		}
+		 for (SelectionDispatchAction action : fActions) {
+			 if (action == fCutAction && !fCutAction.isEnabled())
+				 continue;
+			 menu.appendToGroup(ICommonMenuConstants.GROUP_EDIT, action);
+		 }
 	}
 
 	/*

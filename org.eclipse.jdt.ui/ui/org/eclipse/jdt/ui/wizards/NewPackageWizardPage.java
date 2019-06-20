@@ -407,9 +407,7 @@ public class NewPackageWizardPage extends NewTypeWizardPage {
 		if (packageInfoJava.exists()) {
 			return true;
 		}
-		Object[] nonJavaResources= pack.getNonJavaResources();
-		for (int i= 0; i < nonJavaResources.length; i++) {
-			Object resource= nonJavaResources[i];
+		for (Object resource : pack.getNonJavaResources()) {
 			if (resource instanceof IFile) {
 				IFile file= (IFile) resource;
 				String fileName= file.getName();

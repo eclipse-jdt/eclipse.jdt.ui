@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
@@ -547,12 +546,8 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 
 		private IVMInstall[] getWorkspaceJREs() {
 			List<VMStandin> standins = new ArrayList<>();
-			IVMInstallType[] types = JavaRuntime.getVMInstallTypes();
-			for (int i = 0; i < types.length; i++) {
-				IVMInstallType type = types[i];
-				IVMInstall[] installs = type.getVMInstalls();
-				for (int j = 0; j < installs.length; j++) {
-					IVMInstall install = installs[j];
+			for (IVMInstallType type : JavaRuntime.getVMInstallTypes()) {
+				for (IVMInstall install : type.getVMInstalls()) {
 					standins.add(new VMStandin(install));
 				}
 			}
@@ -573,10 +568,11 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 
 			IExecutionEnvironment[] environments= JavaRuntime.getExecutionEnvironmentsManager().getExecutionEnvironments();
 			if (defaultVM != null) {
-				for (int i= 0; i < environments.length; i++) {
-					IVMInstall eeDefaultVM= environments[i].getDefaultVM();
-					if (eeDefaultVM != null && defaultVM.getId().equals(eeDefaultVM.getId()))
-						return environments[i].getId();
+				for (IExecutionEnvironment environment : environments) {
+					IVMInstall eeDefaultVM= environment.getDefaultVM();
+					if (eeDefaultVM != null && defaultVM.getId().equals(eeDefaultVM.getId())) {
+						return environment.getId();
+					}
 				}
 			}
 
@@ -584,10 +580,11 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			if (defaultVM instanceof IVMInstall2)
 				defaultCC= JavaModelUtil.getCompilerCompliance((IVMInstall2)defaultVM, defaultCC);
 
-			for (int i= 0; i < environments.length; i++) {
-				String eeCompliance= JavaModelUtil.getExecutionEnvironmentCompliance(environments[i]);
-				if (defaultCC.endsWith(eeCompliance))
-					return environments[i].getId();
+			for (IExecutionEnvironment environment : environments) {
+				String eeCompliance= JavaModelUtil.getExecutionEnvironmentCompliance(environment);
+				if (defaultCC.endsWith(eeCompliance)) {
+					return environment.getId();
+				}
 			}
 
 			return "JavaSE-1.7"; //$NON-NLS-1$
@@ -1395,9 +1392,10 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 	private IWorkingSet[] getSelectedWorkingSet(IStructuredSelection selection, IWorkbenchPart activePart) {
 		IWorkingSet[] selected= getSelectedWorkingSet(selection);
 		if (selected != null && selected.length > 0) {
-			for (int i= 0; i < selected.length; i++) {
-				if (!isValidWorkingSet(selected[i]))
+			for (IWorkingSet s : selected) {
+				if (!isValidWorkingSet(s)) {
 					return EMPTY_WORKING_SET_ARRAY;
+				}
 			}
 			return selected;
 		}
@@ -1461,8 +1459,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		}
 
 		ArrayList<IWorkingSet> result= new ArrayList<>();
-		for (Iterator<?> iterator= elements.iterator(); iterator.hasNext();) {
-			Object element= iterator.next();
+		for (Object element : elements) {
 			if (element instanceof IWorkingSet && isValidWorkingSet((IWorkingSet) element)) {
 				result.add((IWorkingSet) element);
 			}

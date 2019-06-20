@@ -145,8 +145,7 @@ public class ProjectActionGroup extends ActionGroup {
 
 	private int evaluateSelection(Object[] array, List<IProject> allOpenProjects) {
 		int status= 0;
-		for (int i= 0; i < array.length; i++) {
-			Object curr= array[i];
+		for (Object curr : array) {
 			if (curr instanceof IJavaProject) {
 				curr= ((IJavaProject) curr).getProject();
 			}
@@ -170,10 +169,10 @@ public class ProjectActionGroup extends ActionGroup {
 	}
 
 	private boolean hasClosedProjectsInWorkspace() {
-		IProject[] projects= ResourcesPlugin.getWorkspace().getRoot().getProjects();
-		for (int i = 0; i < projects.length; i++) {
-			if (!projects[i].isOpen())
+		for (IProject project : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
+			if (!project.isOpen()) {
 				return true;
+			}
 		}
 		return false;
 	}

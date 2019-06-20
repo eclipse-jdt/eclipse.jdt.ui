@@ -307,14 +307,13 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 				List<IClasspathEntry> cpEntries= new ArrayList<>();
 				IWorkspaceRoot root= project.getWorkspace().getRoot();
 
-				IClasspathEntry[] sourceClasspathEntries= fFirstPage.getSourceClasspathEntries();
-				for (int i= 0; i < sourceClasspathEntries.length; i++) {
-					IPath path= sourceClasspathEntries[i].getPath();
+				for (IClasspathEntry sourceClasspathEntry : fFirstPage.getSourceClasspathEntries()) {
+					IPath path= sourceClasspathEntry.getPath();
 					if (path.segmentCount() > 1) {
 						IFolder folder= root.getFolder(path);
 						CoreUtility.createFolder(folder, true, true, new SubProgressMonitor(monitor, 1));
 					}
-					cpEntries.add(sourceClasspathEntries[i]);
+					cpEntries.add(sourceClasspathEntry);
 				}
 
 				cpEntries.addAll(0, Arrays.asList(fFirstPage.getDefaultClasspathEntries()));
@@ -351,9 +350,7 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 		fOrginalFolders= new HashSet<>();
 
 		try {
-			IFileStore[] children= EFS.getStore(projectLocation).childStores(EFS.NONE, null);
-			for (int i= 0; i < children.length; i++) {
-				IFileStore child= children[i];
+			for (IFileStore child : EFS.getStore(projectLocation).childStores(EFS.NONE, null)) {
 				IFileInfo info= child.fetchInfo();
 				if (info.isDirectory() && info.exists()) {
 					fOrginalFolders.add(child);
@@ -383,9 +380,7 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 		}
 
 		try {
-			IFileStore[] children= EFS.getStore(projectLocation).childStores(EFS.NONE, null);
-			for (int i= 0; i < children.length; i++) {
-				IFileStore child= children[i];
+			for (IFileStore child : EFS.getStore(projectLocation).childStores(EFS.NONE, null)) {
 				IFileInfo info= child.fetchInfo();
 				if (info.isDirectory() && info.exists() && !foldersToKeep.contains(child)) {
 					child.delete(EFS.NONE, null);

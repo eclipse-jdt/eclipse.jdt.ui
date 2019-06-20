@@ -191,9 +191,8 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 		}
 
 		if (delta.getResourceDeltas() != null) {
-			IResourceDelta[] rd= delta.getResourceDeltas();
-			for (int i= 0; i < rd.length; i++) {
-				processResourceDelta(rd[i], element);
+			for (IResourceDelta r : delta.getResourceDeltas()) {
+				processResourceDelta(r, element);
 			}
 		}
 
@@ -218,8 +217,8 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 				postRefresh(element);
 			return;
 		}
-		for (int i= 0; i < affectedChildren.length; i++) {
-			processDelta(affectedChildren[i]);
+		for (IJavaElementDelta affectedChild : affectedChildren) {
+			processDelta(affectedChild);
 		}
 	}
 
@@ -279,8 +278,9 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 			return;
 		}
 
-		for (int i= 0; i < affectedChildren.length; i++)
-			processResourceDelta(affectedChildren[i], resource);
+		for (IResourceDelta affectedChild : affectedChildren) {
+			processResourceDelta(affectedChild, resource);
+		}
 	}
 
 	private void postRefresh(final Object root) {

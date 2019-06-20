@@ -277,8 +277,8 @@ abstract class GenerateMethodAbstractAction extends SelectionDispatchAction {
 				status.merge(checkEnclosingClass(fTypeBinding.getDeclaringClass()));
 			}
 
-			for (int i= 0; i < selected.length; i++) {
-				status.merge(checkMember(selected[i]));
+			for (Object s : selected) {
+				status.merge(checkMember(s));
 			}
 	
 			if (status.hasEntries()) {

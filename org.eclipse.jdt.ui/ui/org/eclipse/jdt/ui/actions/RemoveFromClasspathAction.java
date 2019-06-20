@@ -95,9 +95,9 @@ public class RemoveFromClasspathAction extends SelectionDispatchAction {
 					try{
 						IPackageFragmentRoot[] roots= getRootsToRemove(selection);
 						pm.beginTask(ActionMessages.RemoveFromClasspathAction_Removing, roots.length);
-						for (int i= 0; i < roots.length; i++) {
+						for (IPackageFragmentRoot root : roots) {
 							int jCoreFlags= IPackageFragmentRoot.NO_RESOURCE_MODIFICATION | IPackageFragmentRoot.ORIGINATING_PROJECT_CLASSPATH;
-							roots[i].delete(IResource.NONE, jCoreFlags, new SubProgressMonitor(pm, 1));
+							root.delete(IResource.NONE, jCoreFlags, new SubProgressMonitor(pm, 1));
 						}
 					} finally {
 						pm.done();

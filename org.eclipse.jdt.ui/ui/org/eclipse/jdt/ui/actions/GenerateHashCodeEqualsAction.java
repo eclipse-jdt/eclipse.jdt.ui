@@ -146,21 +146,21 @@ public final class GenerateHashCodeEqualsAction extends GenerateMethodAbstractAc
 		}
 		
 		while (true) {
-			IMethodBinding[] declaredMethods= someType.getDeclaredMethods();
-	
-			for (int i= 0; i < declaredMethods.length; i++) {
-				if (declaredMethods[i].getName().equals(METHODNAME_EQUALS)) {
-					ITypeBinding[] b= declaredMethods[i].getParameterTypes();
+			for (IMethodBinding declaredMethod : someType.getDeclaredMethods()) {
+				if (declaredMethod.getName().equals(METHODNAME_EQUALS)) {
+					ITypeBinding[] b= declaredMethod.getParameterTypes();
 					if ((b.length == 1) && (b[0].getQualifiedName().equals("java.lang.Object"))) { //$NON-NLS-1$
 						info.foundEquals= true;
-						if (Modifier.isFinal(declaredMethods[i].getModifiers()))
+						if (Modifier.isFinal(declaredMethod.getModifiers())) {
 							info.foundFinalEquals= true;
+						}
 					}
 				}
-				if (declaredMethods[i].getName().equals(METHODNAME_HASH_CODE) && declaredMethods[i].getParameterTypes().length == 0) {
+				if (declaredMethod.getName().equals(METHODNAME_HASH_CODE) && declaredMethod.getParameterTypes().length == 0) {
 					info.foundHashCode= true;
-					if (Modifier.isFinal(declaredMethods[i].getModifiers()))
+					if (Modifier.isFinal(declaredMethod.getModifiers())) {
 						info.foundFinalHashCode= true;
+					}
 				}
 				if (info.foundEquals && info.foundHashCode)
 					break;
@@ -233,15 +233,14 @@ public final class GenerateHashCodeEqualsAction extends GenerateMethodAbstractAc
 
 	@Override
 	boolean generateCandidates() {
-		IVariableBinding[] fCandidateFields= fTypeBinding.getDeclaredFields();
-
 		allFields= new ArrayList<>();
 		selectedFields= new ArrayList<>();
-		for (int i= 0; i < fCandidateFields.length; i++) {
-			if (!Modifier.isStatic(fCandidateFields[i].getModifiers())) {
-				allFields.add(fCandidateFields[i]);
-				if (!Modifier.isTransient(fCandidateFields[i].getModifiers()))
-					selectedFields.add(fCandidateFields[i]);
+		for (IVariableBinding candidateField : fTypeBinding.getDeclaredFields()) {
+			if (!Modifier.isStatic(candidateField.getModifiers())) {
+				allFields.add(candidateField);
+				if (!Modifier.isTransient(candidateField.getModifiers())) {
+					selectedFields.add(candidateField);
+				}
 			}
 		}
 		

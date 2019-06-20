@@ -161,8 +161,7 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 		
 		// strategy: allow non-IJavaElements (e.g. an IResource), but stop for invalid IJavaElements
 		boolean hasValidElement= false;
-		for (int j= 0; j < elements.length; j++) {
-			Object input= elements[j];
+		for (Object input : elements) {
 			if (input instanceof LogicalPackage) {
 				hasValidElement= true;
 				continue;
@@ -195,8 +194,8 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 			if (elements == null)
 				return;
 			List<IJavaElement> candidates= new ArrayList<>(elements.length);
-			for (int i= 0; i < elements.length; i++) {
-				IJavaElement[] resolvedElements= OpenTypeHierarchyUtil.getCandidates(elements[i]);
+			for (IJavaElement element : elements) {
+				IJavaElement[] resolvedElements= OpenTypeHierarchyUtil.getCandidates(element);
 				if (resolvedElements != null)
 					candidates.addAll(Arrays.asList(resolvedElements));
 			}
@@ -211,10 +210,7 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 	@Override
 	public void run(IStructuredSelection selection) {
 		List<IJavaElement> validElements= new ArrayList<>();
-		Object[] selectedElements= selection.toArray();
-
-		for (int i= 0; i < selectedElements.length; i++) {
-			Object input= selectedElements[i];
+		for (Object input : selection.toArray()) {
 			if (input instanceof LogicalPackage) {
 				IPackageFragment[] fragments= ((LogicalPackage)input).getFragments();
 				if (fragments.length == 0)
@@ -230,8 +226,8 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 					continue;
 				}
 				String name= fragment.getElementName();
-				for (int j= 0; j < roots.length; j++) {
-					IPackageFragment pack= roots[j].getPackageFragment(name);
+				for (IPackageFragmentRoot root : roots) {
+					IPackageFragment pack= root.getPackageFragment(name);
 					if (pack.exists())
 						validElements.add(pack);
 				}

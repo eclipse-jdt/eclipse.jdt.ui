@@ -42,6 +42,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.ITypeRoot;
+import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
@@ -373,11 +374,9 @@ public final class JavaUI {
 			consideredRoots= Arrays.asList(roots);
 		} else {
 			consideredRoots= new ArrayList<>(roots.length);
-			for (int i= 0; i < roots.length; i++) {
-				IPackageFragmentRoot root= roots[i];
+			for (IPackageFragmentRoot root : roots) {
 				if (root.getKind() != IPackageFragmentRoot.K_BINARY)
 					consideredRoots.add(root);
-
 			}
 		}
 
@@ -854,8 +853,7 @@ public final class JavaUI {
 	public static org.eclipse.jdt.core.IWorkingCopy[] getSharedWorkingCopiesOnClasspath() {
 		org.eclipse.jdt.core.IWorkingCopy[] wcs= getSharedWorkingCopies();
 		List<org.eclipse.jdt.core.IWorkingCopy> result= new ArrayList<>(wcs.length);
-		for (int i = 0; i < wcs.length; i++) {
-			org.eclipse.jdt.core.IWorkingCopy wc= wcs[i];
+		for (IWorkingCopy wc : wcs) {
 			if (wc instanceof IJavaElement) {
 				IJavaElement je= (IJavaElement)wc;
 				if (je.getJavaProject().isOnClasspath(je)) {

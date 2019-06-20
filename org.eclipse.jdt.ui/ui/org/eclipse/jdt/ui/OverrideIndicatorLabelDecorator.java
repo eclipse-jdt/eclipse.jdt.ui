@@ -225,9 +225,8 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 				}
 			}
 		}
-		IType[] interfaces= hierarchy.getSuperInterfaces(type);
-		for (int i= 0; i < interfaces.length; i++) {
-			IMethod res= JavaModelUtil.findMethodInHierarchy(hierarchy, interfaces[i], name, paramTypes, false);
+		for (IType intf : hierarchy.getSuperInterfaces(type)) {
+			IMethod res= JavaModelUtil.findMethodInHierarchy(hierarchy, intf, name, paramTypes, false);
 			if (res != null) {
 				if (JdtFlags.isAbstract(res)) {
 					return JavaElementImageDescriptor.IMPLEMENTS;

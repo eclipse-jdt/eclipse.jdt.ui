@@ -359,14 +359,12 @@ public class GenerateActionGroup extends ActionGroup {
 				fCleanUp
 		};
 
-		for (int i= 0; i < actions.length; i++) {
-			SelectionDispatchAction action= actions[i];
+		for (SelectionDispatchAction action : actions) {
 			registerSelectionListener(fSelectionProvider, action);
 			if (selectionProvider != null) {
 				action.setSpecialSelectionProvider(fSelectionProvider);
 			}
 		}
-
 		// FIXME, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=213335
 		//installQuickAccessAction();
 	}

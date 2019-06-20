@@ -248,9 +248,10 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		if (fields == null || fields.length == 0)
 			return false;
 		int count= 0;
-		for (int index= 0; index < fields.length; index++) {
-			if (!JdtFlags.isEnum(fields[index]))
+		for (IField field : fields) {
+			if (!JdtFlags.isEnum(field)) {
 				count++;
+			}
 		}
 		if (count == 0)
 			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.AddGetterSetterAction_not_applicable);
@@ -357,12 +358,12 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 
 			int selectedCount= 0;
 			int possibleDuplicateCount= 0;
-			for (int i= 0; i < selection.length; i++) {
+			for (Object element : selection) {
 				try {
-					if (selection[i] instanceof GetterSetterEntry) {
-						Object key= selection[i];
-						IField getsetField= ((GetterSetterEntry) selection[i]).field;
-						if (((GetterSetterEntry) selection[i]).isGetter) {
+					if (element instanceof GetterSetterEntry) {
+						Object key= element;
+						IField getsetField= ((GetterSetterEntry) element).field;
+						if (((GetterSetterEntry) element).isGetter) {
 							if (!map.add(GetterSetterUtil.getGetterName(getsetField, null)))
 								possibleDuplicateCount++;
 						} else {
@@ -416,12 +417,9 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	// returns a list of fields with setter entries checked
 	private static IField[] getSetterFields(Object[] result, Set<IField> set) {
 		List<IField> list= new ArrayList<>(0);
-		Object each= null;
-		GetterSetterEntry entry= null;
-		for (int i= 0; i < result.length; i++) {
-			each= result[i];
+		for (Object each : result) {
 			if ((each instanceof GetterSetterEntry)) {
-				entry= (GetterSetterEntry) each;
+				GetterSetterEntry entry= (GetterSetterEntry) each;
 				if (!entry.isGetter) {
 					list.add(entry.field);
 				}
@@ -434,12 +432,9 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	// returns a list of fields with getter entries checked
 	private static IField[] getGetterFields(Object[] result, Set<IField> set) {
 		List<IField> list= new ArrayList<>(0);
-		Object each= null;
-		GetterSetterEntry entry= null;
-		for (int i= 0; i < result.length; i++) {
-			each= result[i];
+		for (Object each : result) {
 			if ((each instanceof GetterSetterEntry)) {
-				entry= (GetterSetterEntry) each;
+				GetterSetterEntry entry= (GetterSetterEntry) each;
 				if (entry.isGetter) {
 					list.add(entry.field);
 				}
@@ -452,13 +447,10 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	// returns a list of fields with only getter entries checked
 	private static IField[] getGetterOnlyFields(Object[] result, Set<IField> set) {
 		List<IField> list= new ArrayList<>(0);
-		Object each= null;
-		GetterSetterEntry entry= null;
 		boolean getterSet= false;
-		for (int i= 0; i < result.length; i++) {
-			each= result[i];
+		for (Object each : result) {
 			if ((each instanceof GetterSetterEntry)) {
-				entry= (GetterSetterEntry) each;
+				GetterSetterEntry entry= (GetterSetterEntry) each;
 				if (entry.isGetter) {
 					list.add(entry.field);
 					getterSet= true;
@@ -477,13 +469,10 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	// returns a list of fields with only setter entries checked
 	private static IField[] getSetterOnlyFields(Object[] result, Set<IField> set) {
 		List<IField> list= new ArrayList<>(0);
-		Object each= null;
-		GetterSetterEntry entry= null;
 		boolean getterSet= false;
-		for (int i= 0; i < result.length; i++) {
-			each= result[i];
+		for (Object each : result) {
 			if ((each instanceof GetterSetterEntry)) {
-				entry= (GetterSetterEntry) each;
+				GetterSetterEntry entry= (GetterSetterEntry) each;
 				if (entry.isGetter) {
 					getterSet= true;
 				}
@@ -501,13 +490,10 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	// returns a list of fields with both entries checked
 	private static IField[] getGetterSetterFields(Object[] result, Set<IField> set) {
 		List<IField> list= new ArrayList<>(0);
-		Object each= null;
-		GetterSetterEntry entry= null;
 		boolean getterSet= false;
-		for (int i= 0; i < result.length; i++) {
-			each= result[i];
+		for (Object each : result) {
 			if ((each instanceof GetterSetterEntry)) {
-				entry= (GetterSetterEntry) each;
+				GetterSetterEntry entry= (GetterSetterEntry) each;
 				if (entry.isGetter) {
 					getterSet= true;
 				}
@@ -768,10 +754,8 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	 *             accessing its corresponding resource
 	 */
 	private Map<IField, GetterSetterEntry[]> createGetterSetterMapping(IType type) throws JavaModelException {
-		IField[] fields= type.getFields();
 		Map<IField, GetterSetterEntry[]> result= new LinkedHashMap<>();
-		for (int i= 0; i < fields.length; i++) {
-			IField field= fields[i];
+		for (IField field : type.getFields()) {
 			int flags= field.getFlags();
 			if (!Flags.isEnum(flags)) {
 				List<GetterSetterEntry> l= new ArrayList<>(2);
@@ -871,9 +855,8 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 				GetterSetterEntry getterSetterEntry= (GetterSetterEntry) element;
 				return getterSetterEntry.isGetter || !getterSetterEntry.isFinal;
 			} else if (element instanceof IField) {
-				Object[] children= fContentProvider.getChildren(element);
-				for (int i= 0; i < children.length; i++) {
-					GetterSetterEntry curr= (GetterSetterEntry) children[i];
+				for (Object child : fContentProvider.getChildren(element)) {
+					GetterSetterEntry curr= (GetterSetterEntry) child;
 					if (curr.isGetter || !curr.isFinal) {
 						return true;
 					}
@@ -962,10 +945,9 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 						newChecked.addAll(fPreviousSelectedFinals);
 					}
 					fPreviousSelectedFinals.clear();
-					Object[] checkedElements= treeViewer.getCheckedElements();
-					for (int i= 0; i < checkedElements.length; i++) {
-						if (checkedElements[i] instanceof GetterSetterEntry) {
-							GetterSetterEntry entry= (GetterSetterEntry) checkedElements[i];
+					for (Object checkedElement : treeViewer.getCheckedElements()) {
+						if (checkedElement instanceof GetterSetterEntry) {
+							GetterSetterEntry entry= (GetterSetterEntry) checkedElement;
 							if (allowSettersForFinals || entry.isGetter || !entry.isFinal) {
 								newChecked.add(entry);
 							} else {
@@ -1079,13 +1061,9 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		}
 
 		private Object[] getGetterSetterElements(boolean isGetter) {
-			Object[] allFields= fContentProvider.getElements(null);
 			Set<GetterSetterEntry> result= new HashSet<>();
-			for (int i= 0; i < allFields.length; i++) {
-				IField field= (IField) allFields[i];
-				GetterSetterEntry[] entries= getEntries(field);
-				for (int j= 0; j < entries.length; j++) {
-					AddGetterSetterAction.GetterSetterEntry entry= entries[j];
+			for (Object allField : fContentProvider.getElements(null)) {
+				for (GetterSetterEntry entry : getEntries((IField) allField)) {
 					if (entry.isGetter == isGetter)
 						result.add(entry);
 				}

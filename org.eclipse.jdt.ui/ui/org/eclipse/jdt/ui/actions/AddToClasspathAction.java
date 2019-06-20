@@ -122,10 +122,10 @@ public class AddToClasspathAction extends SelectionDispatchAction {
 				@Override
 				public void run(IProgressMonitor monitor) throws CoreException {
 					monitor.beginTask(ActionMessages.AddToClasspathAction_progressMessage, files.length);
-					for (int i= 0; i < files.length; i++) {
-						monitor.subTask(BasicElementLabels.getPathLabel(files[i].getFullPath(), false));
-						IJavaProject project= JavaCore.create(files[i].getProject());
-						addToClassPath(project, files[i].getFullPath(), new SubProgressMonitor(monitor, 1));
+					for (IFile file : files) {
+						monitor.subTask(BasicElementLabels.getPathLabel(file.getFullPath(), false));
+						IJavaProject project= JavaCore.create(file.getProject());
+						addToClassPath(project, file.getFullPath(), new SubProgressMonitor(monitor, 1));
 					}
 				}
 

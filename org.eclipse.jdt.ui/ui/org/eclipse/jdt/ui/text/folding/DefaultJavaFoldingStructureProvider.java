@@ -415,10 +415,10 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 			}
 
 			if (caretLine > 0) {
-				IProblem[] problems= ast.getProblems();
-				for (int i= 0; i < problems.length; i++) {
-					if (problems[i].isError() && caretLine == problems[i].getSourceLineNumber())
+				for (IProblem problem : ast.getProblems()) {
+					if (problem.isError() && caretLine == problem.getSourceLineNumber()) {
 						return true;
+					}
 				}
 			}
 
@@ -438,10 +438,8 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 			if (target.equals(element))
 				return delta;
 
-			IJavaElementDelta[] children= delta.getAffectedChildren();
-
-			for (int i= 0; i < children.length; i++) {
-				IJavaElementDelta d= findElement(target, children[i]);
+			for (IJavaElementDelta child : delta.getAffectedChildren()) {
+				IJavaElementDelta d= findElement(target, child);
 				if (d != null)
 					return d;
 			}
@@ -986,9 +984,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	}
 
 	private void computeFoldingStructure(IJavaElement[] elements, FoldingStructureComputationContext ctx) throws JavaModelException {
-		for (int i= 0; i < elements.length; i++) {
-			IJavaElement element= elements[i];
-
+		for (IJavaElement element : elements) {
 			computeFoldingStructure(element, ctx);
 
 			if (element instanceof IParent) {
@@ -1417,8 +1413,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 				return o1.position.getOffset() - o2.position.getOffset();
 			}
 		};
-		for (Iterator<List<Tuple>> it= map.values().iterator(); it.hasNext();) {
-			List<Tuple> list= it.next();
+		for (List<Tuple> list : map.values()) {
 			Collections.sort(list, comparator);
 		}
 		return map;

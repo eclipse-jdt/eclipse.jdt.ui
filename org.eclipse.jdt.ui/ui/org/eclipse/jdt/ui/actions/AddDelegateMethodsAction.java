@@ -133,9 +133,9 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			if (selection != null && selection.length > 0) {
 
 				HashSet<String> signatures= new HashSet<>(selection.length);
-				for (int index= 0; index < selection.length; index++) {
-					if (selection[index] instanceof DelegateEntry) {
-						DelegateEntry delegateEntry= (DelegateEntry) selection[index];
+				for (Object element : selection) {
+					if (element instanceof DelegateEntry) {
+						DelegateEntry delegateEntry = (DelegateEntry) element;
 						if (!signatures.add(getSignature(delegateEntry.delegateMethod)))
 							duplicateCount++;
 						selectedCount++;
@@ -152,9 +152,8 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 
 		private String getSignature(IMethodBinding binding) {
 			StringBuilder buf= new StringBuilder(binding.getName()).append('(');
-			ITypeBinding[] parameterTypes= binding.getParameterTypes();
-			for (int i= 0; i < parameterTypes.length; i++) {
-				buf.append(parameterTypes[i].getTypeDeclaration().getName());
+			for (ITypeBinding parameterType : binding.getParameterTypes()) {
+				buf.append(parameterType.getTypeDeclaration().getName());
 			}
 			buf.append(')');
 			return buf.toString();
@@ -174,8 +173,8 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 				fDelegateEntries= StubUtility2Core.getDelegatableMethods(binding);
 
 				List<IVariableBinding> expanded= new ArrayList<>();
-				for (int index= 0; index < fields.length; index++) {
-					VariableDeclarationFragment fragment= ASTNodeSearchUtil.getFieldDeclarationFragmentNode(fields[index], astRoot);
+				for (IField field : fields) {
+					VariableDeclarationFragment fragment= ASTNodeSearchUtil.getFieldDeclarationFragmentNode(field, astRoot);
 					if (fragment != null) {
 						IVariableBinding variableBinding= fragment.resolveBinding();
 						if (variableBinding != null)
@@ -194,9 +193,9 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		public Object[] getChildren(Object element) {
 			if (element instanceof IVariableBinding) {
 				List<DelegateEntry> result= new ArrayList<>();
-				for (int i= 0; i < fDelegateEntries.length; i++) {
-					if (element == fDelegateEntries[i].field) {
-						result.add(fDelegateEntries[i]);
+				for (DelegateEntry delegateEntry : fDelegateEntries) {
+					if (element == delegateEntry.field) {
+						result.add(delegateEntry);
 					}
 				}
 				return result.toArray();
@@ -211,8 +210,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		@Override
 		public Object[] getElements(Object inputElement) {
 			HashSet<IVariableBinding> result= new HashSet<>();
-			for (int i= 0; i < fDelegateEntries.length; i++) {
-				DelegateEntry curr= fDelegateEntries[i];
+			for (DelegateEntry curr : fDelegateEntries) {
 				result.add(curr.field);
 			}
 			return result.toArray();
@@ -391,9 +389,10 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		if (fields == null || fields.length == 0)
 			return false;
 		int count= 0;
-		for (int index= 0; index < fields.length; index++) {
-			if (!JdtFlags.isEnum(fields[index]) && !hasPrimitiveType(fields[index]) || isArray(fields[index]))
+		for (IField field : fields) {
+			if (!JdtFlags.isEnum(field) && !hasPrimitiveType(field) || isArray(field)) {
 				count++;
+			}
 		}
 		if (count == 0)
 			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.AddDelegateMethodsAction_not_applicable);
@@ -564,15 +563,16 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			dialog.setSize(60, 18);
 			int result= dialog.open();
 			if (result == Window.OK) {
-				Object[] object= dialog.getResult();
-				if (object == null) {
+				Object[] objectarray= dialog.getResult();
+				if (objectarray == null) {
 					notifyResult(false);
 					return;
 				}
-				List<DelegateEntry> tuples= new ArrayList<>(object.length);
-				for (int index= 0; index < object.length; index++) {
-					if (object[index] instanceof DelegateEntry)
-						tuples.add((DelegateEntry) object[index]);
+				List<DelegateEntry> tuples= new ArrayList<>(objectarray.length);
+				for (Object object : objectarray) {
+					if (object instanceof DelegateEntry) {
+						tuples.add((DelegateEntry) object);
+					}
 				}
 				IEditorPart part= JavaUI.openInEditor(type);
 				IRewriteTarget target= part.getAdapter(IRewriteTarget.class);

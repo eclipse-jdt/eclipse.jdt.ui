@@ -260,9 +260,7 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 
 	private boolean isIgnoringOptionalProblems(IClasspathEntry entry) {
 		if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
-			IClasspathAttribute[] extraAttributes= entry.getExtraAttributes();
-			for (int i= 0; i < extraAttributes.length; i++) {
-				IClasspathAttribute attrib= extraAttributes[i];
+			for (IClasspathAttribute attrib : entry.getExtraAttributes()) {
 				if (IClasspathAttribute.IGNORE_OPTIONAL_PROBLEMS.equals(attrib.getName())) {
 					return "true".equals(attrib.getValue()); //$NON-NLS-1$
 				}

@@ -321,8 +321,7 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 		List<Object> list= new ArrayList<>(roots.length);
 		// filter out package fragments that correspond to projects and
 		// replace them with the package fragments directly
-		for (int i= 0; i < roots.length; i++) {
-			IPackageFragmentRoot root= roots[i];
+		for (IPackageFragmentRoot root : roots) {
 			if (isProjectPackageFragmentRoot(root)) {
 				Object[] fragments= getPackageFragmentRootContent(root);
 				list.addAll(Arrays.asList(fragments));
@@ -368,9 +367,10 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 		if (fragment.isDefaultPackage() && JavaModelUtil.is9OrHigher(fragment.getJavaProject())) {
 			int count= 0;
 			ITypeRoot[] newUnits= new ITypeRoot[units.length];
-			for (int i= 0; i < units.length; i++) {
-				if (!JavaModelUtil.isModuleInfo(units[i]))
-					newUnits[count++]= units[i];
+			for (ITypeRoot unit : units) {
+				if (!JavaModelUtil.isModuleInfo(unit)) {
+					newUnits[count++]= unit;
+				}
 			}
 			if (count < units.length)
 				return Arrays.copyOf(newUnits, count);
@@ -394,8 +394,7 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 		boolean isFolderOnClasspath = javaProject.isOnClasspath(folder);
 		List<IResource> nonJavaResources= new ArrayList<>();
 		// Can be on classpath but as a member of non-java resource folder
-		for (int i= 0; i < members.length; i++) {
-			IResource member= members[i];
+		for (IResource member : members) {
 			// A resource can also be a java element
 			// in the case of exclusion and inclusion filters.
 			// We therefore exclude Java elements from the list
@@ -409,8 +408,8 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 			} else {
 				IJavaElement element= JavaCore.create(member, javaProject);
 				if (element instanceof IPackageFragmentRoot
-						&& javaProject.equals(element.getJavaProject())
-						&& ((IPackageFragmentRoot)element).getKind() != IPackageFragmentRoot.K_SOURCE) {
+					&& javaProject.equals(element.getJavaProject())
+					&& ((IPackageFragmentRoot)element).getKind() != IPackageFragmentRoot.K_SOURCE) {
 					// don't skip libs and class folders on the classpath of their project
 					nonJavaResources.add(member);
 				}

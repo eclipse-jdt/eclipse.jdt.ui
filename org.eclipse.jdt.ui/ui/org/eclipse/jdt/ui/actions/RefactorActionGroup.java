@@ -646,8 +646,7 @@ public class RefactorActionGroup extends ActionGroup {
 		ITextSelection textSelection= (ITextSelection)fEditor.getSelectionProvider().getSelection();
 		JavaTextSelection javaSelection= new JavaTextSelection(getEditorInput(), getDocument(), textSelection.getOffset(), textSelection.getLength());
 
-		for (Iterator<SelectionDispatchAction> iter= fActions.iterator(); iter.hasNext(); ) {
-			SelectionDispatchAction action= iter.next();
+		for (SelectionDispatchAction action : fActions) {
 			action.update(javaSelection);
 		}
 		refactorSubmenu.removeAll();
@@ -657,8 +656,7 @@ public class RefactorActionGroup extends ActionGroup {
 
 	private void refactorMenuHidden() {
 		ITextSelection textSelection= (ITextSelection)fEditor.getSelectionProvider().getSelection();
-		for (Iterator<SelectionDispatchAction> iter= fActions.iterator(); iter.hasNext(); ) {
-			SelectionDispatchAction action= iter.next();
+		for (SelectionDispatchAction action : fActions) {
 			action.update(textSelection);
 		}
 	}

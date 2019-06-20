@@ -296,9 +296,7 @@ public class JarWriter2 {
 
 	private void registerInWorkspaceIfNeeded() {
 		IPath jarPath= fJarPackage.getAbsoluteJarLocation();
-		IProject[] projects= ResourcesPlugin.getWorkspace().getRoot().getProjects();
-		for (int i= 0; i < projects.length; i++) {
-			IProject project= projects[i];
+		for (IProject project : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
 			// The Jar is always put into the local file system. So it can only be
 			// part of a project if the project is local as well. So using getLocation
 			// is currently save here.

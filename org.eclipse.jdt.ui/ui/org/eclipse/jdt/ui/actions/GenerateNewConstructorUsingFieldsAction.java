@@ -145,8 +145,8 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 
 	private boolean canRunOn(IField[] fields) throws JavaModelException {
 		if (fields != null && fields.length > 0) {
-			for (int index= 0; index < fields.length; index++) {
-				if (JdtFlags.isEnum(fields[index])) {
+			for (IField field : fields) {
+				if (JdtFlags.isEnum(field)) {
 					MessageDialog.openInformation(getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_enum_not_applicable);
 					return false;
 				}
@@ -324,9 +324,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 		HashMap<IJavaElement, IVariableBinding> fieldsToBindings= new HashMap<>();
 		ArrayList<IVariableBinding> selected= new ArrayList<>();
 
-		IVariableBinding[] candidates= typeBinding.getDeclaredFields();
-		for (int i= 0; i < candidates.length; i++) {
-			IVariableBinding curr= candidates[i];
+		for (IVariableBinding curr : typeBinding.getDeclaredFields()) {
 			if (curr.isSynthetic()) {
 				continue;
 			}
@@ -352,9 +350,8 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 		}
 
 		ArrayList<IVariableBinding> fields= new ArrayList<>();
-		IField[] allFields= type.getFields();
-		for (int i= 0; i < allFields.length; i++) {
-			IVariableBinding fieldBinding= fieldsToBindings.remove(allFields[i]);
+		for (IField field : type.getFields()) {
+			IVariableBinding fieldBinding= fieldsToBindings.remove(field);
 			if (fieldBinding != null) {
 				fields.add(fieldBinding);
 			}
@@ -398,9 +395,10 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 				return;
 			}
 			ArrayList<IVariableBinding> result= new ArrayList<>(elements.length);
-			for (int index= 0; index < elements.length; index++) {
-				if (elements[index] instanceof IVariableBinding)
-					result.add((IVariableBinding) elements[index]);
+			for (Object element : elements) {
+				if (element instanceof IVariableBinding) {
+					result.add((IVariableBinding) element);
+				}
 			}
 			IVariableBinding[] variables= result.toArray(new IVariableBinding[result.size()]);
 

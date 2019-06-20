@@ -730,8 +730,7 @@ public class CompletionProposalLabelProvider {
 		if (!deprecated) {
 			CompletionProposal[] requiredProposals= proposal.getRequiredProposals();
 			if (requiredProposals != null) {
-				for (int i= 0; i < requiredProposals.length; i++) {
-					CompletionProposal requiredProposal= requiredProposals[i];
+				for (CompletionProposal requiredProposal : requiredProposals) {
 					if (requiredProposal.getKind() == CompletionProposal.TYPE_REF) {
 						deprecated |= Flags.isDeprecated(requiredProposal.getFlags());
 					}

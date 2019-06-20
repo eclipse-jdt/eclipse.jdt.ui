@@ -163,10 +163,9 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 						IJavaProject jproject= elem.getJavaProject();
 						if (jproject != null) {
 							if (jproject.exists()) {
-								IPackageFragmentRoot[] roots= jproject.getPackageFragmentRoots();
-								for (int i= 0; i < roots.length; i++) {
-									if (roots[i].getKind() == IPackageFragmentRoot.K_SOURCE && roots[i].getResolvedClasspathEntry().isTest()) {
-										testInitRoot= roots[i];
+								for (IPackageFragmentRoot root : jproject.getPackageFragmentRoots()) {
+									if (root.getKind() == IPackageFragmentRoot.K_SOURCE && root.getResolvedClasspathEntry().isTest()) {
+										testInitRoot= root;
 										break;
 									}
 								}
@@ -182,10 +181,9 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 					if (jproject != null) {
 							initRoot= null;
 							if (jproject.exists()) {
-								IPackageFragmentRoot[] roots= jproject.getPackageFragmentRoots();
-								for (int i= 0; i < roots.length; i++) {
-									if (roots[i].getKind() == IPackageFragmentRoot.K_SOURCE) {
-										initRoot= roots[i];
+								for (IPackageFragmentRoot root : jproject.getPackageFragmentRoots()) {
+									if (root.getKind() == IPackageFragmentRoot.K_SOURCE) {
+										initRoot= root;
 										break;
 									}
 								}
@@ -250,9 +248,9 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 			try {
 				IJavaProject[] projects= JavaCore.create(getWorkspaceRoot()).getJavaProjects();
 				if (projects.length == 1) {
-					IClasspathEntry[] rawClasspath= projects[0].getRawClasspath();
-					for (int i= 0; i < rawClasspath.length; i++) {
-						if (rawClasspath[i].getEntryKind() == IClasspathEntry.CPE_SOURCE) {// add only if the project contains a source folder
+					for (IClasspathEntry p : projects[0].getRawClasspath()) {
+						if (p.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+							// add only if the project contains a source folder
 							jelem= projects[0];
 							break;
 						}

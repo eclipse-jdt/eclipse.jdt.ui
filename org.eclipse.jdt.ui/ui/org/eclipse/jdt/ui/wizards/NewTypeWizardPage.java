@@ -1486,8 +1486,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	public List<String> getSuperInterfaces() {
 		List<InterfaceWrapper> interfaces= fSuperInterfacesDialogField.getElements();
 		ArrayList<String> result= new ArrayList<>(interfaces.size());
-		for (Iterator<InterfaceWrapper> iter= interfaces.iterator(); iter.hasNext();) {
-			InterfaceWrapper wrapper= iter.next();
+		for (InterfaceWrapper wrapper : interfaces) {
 			result.add(wrapper.interfaceName);
 		}
 		return result;
@@ -2253,9 +2252,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 
 
 				// add imports that will be removed again. Having the imports solves 14661
-				IType[] topLevelTypes= parentCU.getTypes();
-				for (int i= 0; i < topLevelTypes.length; i++) {
-					imports.addImport(topLevelTypes[i].getFullyQualifiedName('.'));
+				for (IType topLevelType : parentCU.getTypes()) {
+					imports.addImport(topLevelType.getFullyQualifiedName('.'));
 				}
 
 				lineDelimiter= StubUtility.getLineDelimiterUsed(enclosingType);
@@ -2383,9 +2381,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		ImportsManager imports= new ImportsManager(root);
 
 		int importsEnd= ASTNodes.getExclusiveEnd(importsDecls.get(importsDecls.size() - 1));
-		IProblem[] problems= root.getProblems();
-		for (int i= 0; i < problems.length; i++) {
-			IProblem curr= problems[i];
+		for (IProblem curr : root.getProblems()) {
 			if (curr.getSourceEnd() < importsEnd) {
 				int id= curr.getID();
 				if (id == IProblem.UnusedImport || id == IProblem.NotVisibleType) { // not visible problems hide unused -> remove both
@@ -2748,8 +2744,9 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		JavaModelUtil.reconcile(cu);
 		IMethod[] typeMethods= type.getMethods();
 		Set<String> handleIds= new HashSet<>(typeMethods.length);
-		for (int index= 0; index < typeMethods.length; index++)
-			handleIds.add(typeMethods[index].getHandleIdentifier());
+		for (IMethod typeMethod : typeMethods) {
+			handleIds.add(typeMethod.getHandleIdentifier());
+		}
 		ArrayList<IMethod> newMethods= new ArrayList<>();
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(type.getJavaProject());
 		settings.createComments= isAddComments();
@@ -2774,18 +2771,20 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			}
 		}
 		JavaModelUtil.reconcile(cu);
-		typeMethods= type.getMethods();
-		for (int index= 0; index < typeMethods.length; index++)
-			if (!handleIds.contains(typeMethods[index].getHandleIdentifier()))
-				newMethods.add(typeMethods[index]);
+		for (IMethod typeMethod : type.getMethods()) {
+			if (!handleIds.contains(typeMethod.getHandleIdentifier())) {
+				newMethods.add(typeMethod);
+			}
+		}
 		IMethod[] methods= new IMethod[newMethods.size()];
 		newMethods.toArray(methods);
 		return methods;
 	}
 
 	private void createImports(ImportsManager imports, String[] createdImports) {
-		for (int index= 0; index < createdImports.length; index++)
-			imports.addImport(createdImports[index]);
+		for (String createdImport : createdImports) {
+			imports.addImport(createdImport);
+		}
 	}
 
 

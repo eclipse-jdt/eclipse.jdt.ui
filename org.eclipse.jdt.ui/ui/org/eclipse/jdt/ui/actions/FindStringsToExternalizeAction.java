@@ -183,8 +183,8 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 
 		try{
 			List<NonNLSElement> l= new ArrayList<>();
-			for (Iterator<?> iter= elements.iterator(); iter.hasNext();) {
-				IJavaElement element= (IJavaElement) iter.next();
+			for (Object e : (List<?>)elements) {
+				IJavaElement element=(IJavaElement) e;
 				if (element.getElementType() == IJavaElement.PACKAGE_FRAGMENT)
 					l.addAll(analyze((IPackageFragment) element, new SubProgressMonitor(pm, 1)));
 				else if (element.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT)
@@ -207,9 +207,10 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 
 	private boolean noStrings() {
 		if (fElements != null) {
-			for (int i= 0; i < fElements.length; i++) {
-				if (fElements[i].count != 0)
+			for (NonNLSElement fElement : fElements) {
+				if (fElement.count != 0) {
 					return false;
+				}
 			}
 		}
 		return true;
@@ -229,9 +230,9 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 			pm.setTaskName(pack.getElementName());
 
 			List<NonNLSElement> l= new ArrayList<>(cus.length);
-			for (int i= 0; i < cus.length; i++){
-				pm.subTask(BasicElementLabels.getFileName(cus[i]));
-				NonNLSElement element= analyze(cus[i]);
+			for (ICompilationUnit cu : cus) {
+				pm.subTask(BasicElementLabels.getFileName(cu));
+				NonNLSElement element= analyze(cu);
 				if (element != null)
 					l.add(element);
 				pm.worked(1);
@@ -253,8 +254,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 			pm.beginTask("", children.length); //$NON-NLS-1$
 			pm.setTaskName(JavaElementLabels.getElementLabel(sourceFolder, JavaElementLabels.ALL_DEFAULT));
 			List<NonNLSElement> result= new ArrayList<>();
-			for (int i= 0; i < children.length; i++) {
-				IJavaElement iJavaElement= children[i];
+			for (IJavaElement iJavaElement : children) {
 				if (iJavaElement.getElementType() == IJavaElement.PACKAGE_FRAGMENT){
 					IPackageFragment pack= (IPackageFragment)iJavaElement;
 					if (! pack.isReadOnly())
@@ -278,11 +278,12 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 			IPackageFragment[] packs= project.getPackageFragments();
 			pm.beginTask("", packs.length); //$NON-NLS-1$
 			List<NonNLSElement> result= new ArrayList<>();
-			for (int i= 0; i < packs.length; i++) {
-				if (! packs[i].isReadOnly())
-					result.addAll(analyze(packs[i], new SubProgressMonitor(pm, 1)));
-				else
+			for (IPackageFragment pack : packs) {
+				if (!pack.isReadOnly()) {
+					result.addAll(analyze(pack, new SubProgressMonitor(pm, 1)));
+				} else {
 					pm.worked(1);
+				}
 			}
 			return result;
 		} finally{
@@ -293,8 +294,9 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 	private int countStrings() {
 		int found= 0;
 		if (fElements != null) {
-			for (int i= 0; i < fElements.length; i++)
-				found+= fElements[i].count;
+			for (NonNLSElement fElement : fElements) {
+				found+= fElement.count;
+			}
 		}
 		return found;
 	}
@@ -309,10 +311,9 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 
 	private int countNonExternalizedStrings(ICompilationUnit cu) throws CoreException {
 		try{
-			NLSLine[] lines= NLSScanner.scan(cu);
 			int result= 0;
-			for (int i= 0; i < lines.length; i++) {
-				result += countNonExternalizedStrings(lines[i]);
+			for (NLSLine line : NLSScanner.scan(cu)) {
+				result += countNonExternalizedStrings(line);
 			}
 			return result;
 		} catch (InvalidInputException e) {
@@ -327,10 +328,10 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 
 	private int countNonExternalizedStrings(NLSLine line){
 		int result= 0;
-		NLSElement[] elements= line.getElements();
-		for (int i= 0; i < elements.length; i++){
-			if (! elements[i].hasTag())
+		for (NLSElement element : line.getElements()) {
+			if (!element.hasTag()) {
 				result++;
+			}
 		}
 		return result;
 	}
