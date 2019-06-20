@@ -487,8 +487,8 @@ public class StubUtility {
 		int nLines= doc.getNumberOfLines();
 		MultiTextEdit edit= new MultiTextEdit();
 		HashSet<Integer> removedLines= new HashSet<>();
-		for (int i= 0; i < variables.length; i++) {
-			TemplateVariable position= findVariable(buffer, variables[i]); // look if Javadoc tags have to be added
+		for (String variable : variables) {
+			TemplateVariable position= findVariable(buffer, variable); // look if Javadoc tags have to be added
 			if (position == null || position.getLength() > 0) {
 				continue;
 			}
@@ -811,9 +811,7 @@ public class StubUtility {
 
 
 	private static TemplateVariable findVariable(TemplateBuffer buffer, String variable) {
-		TemplateVariable[] positions= buffer.getVariables();
-		for (int i= 0; i < positions.length; i++) {
-			TemplateVariable curr= positions[i];
+		for (TemplateVariable curr : buffer.getVariables()) {
 			if (variable.equals(curr.getType())) {
 				return curr;
 			}
@@ -830,17 +828,17 @@ public class StubUtility {
 		String lineStart= textBuffer.get(region.getOffset(), offset - region.getOffset());
 
 		StringBuilder buf= new StringBuilder();
-		for (int i= 0; i < typeParameterNames.length; i++) {
+		for (String typeParameterName : typeParameterNames) {
 			if (buf.length() > 0) {
 				buf.append(lineDelimiter).append(lineStart);
 			}
-			buf.append("@param <").append(typeParameterNames[i]).append('>'); //$NON-NLS-1$
+			buf.append("@param <").append(typeParameterName).append('>'); //$NON-NLS-1$
 		}
-		for (int i= 0; i < paramNames.length; i++) {
+		for (String paramName : paramNames) {
 			if (buf.length() > 0) {
 				buf.append(lineDelimiter).append(lineStart);
 			}
-			buf.append("@param ").append(paramNames[i]); //$NON-NLS-1$
+			buf.append("@param ").append(paramName); //$NON-NLS-1$
 		}
 		if (returnType != null && !returnType.equals("void")) { //$NON-NLS-1$
 			if (buf.length() > 0) {
@@ -849,11 +847,11 @@ public class StubUtility {
 			buf.append("@return"); //$NON-NLS-1$
 		}
 		if (exceptionNames != null) {
-			for (int i= 0; i < exceptionNames.length; i++) {
+			for (String exceptionName : exceptionNames) {
 				if (buf.length() > 0) {
 					buf.append(lineDelimiter).append(lineStart);
 				}
-				buf.append("@throws ").append(exceptionNames[i]); //$NON-NLS-1$
+				buf.append("@throws ").append(exceptionName); //$NON-NLS-1$
 			}
 		}
 		if (isDeprecated) {
@@ -1190,8 +1188,7 @@ public class StubUtility {
 			}
 		}
 		if (name != null) {
-			for (int i= 0; i < KNOWN_METHOD_NAME_PREFIXES.length; i++) {
-				String curr= KNOWN_METHOD_NAME_PREFIXES[i];
+			for (String curr : KNOWN_METHOD_NAME_PREFIXES) {
 				if (name.startsWith(curr)) {
 					if (name.equals(curr)) {
 						return null; // don't suggest 'get' as variable name
@@ -1359,8 +1356,7 @@ public class StubUtility {
 						String[] namesArray= EMPTY;
 						ArrayList<String> newNames= new ArrayList<>(paramNames.length);
 						// Ensure that the code generation preferences are respected
-						for (int i= 0; i < paramNames.length; i++) {
-							String curr= paramNames[i];
+						for (String curr : paramNames) {
 							String baseName= NamingConventions.getBaseName(NamingConventions.VK_PARAMETER, curr, method.getJavaProject());
 							if (!curr.equals(baseName)) {
 								// make the existing name the favorite

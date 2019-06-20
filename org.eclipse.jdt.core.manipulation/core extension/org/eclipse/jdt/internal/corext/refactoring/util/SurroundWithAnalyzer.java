@@ -141,9 +141,7 @@ public class SurroundWithAnalyzer extends CodeAnalyzer {
 	}
 
 	private boolean validSelectedNodes() {
-		ASTNode[] nodes= getSelectedNodes();
-		for (int i= 0; i < nodes.length; i++) {
-			ASTNode node= nodes[i];
+		for (ASTNode node : getSelectedNodes()) {
 			boolean isValidNode= node instanceof Statement;
 			if (fSurroundWithTryCatch) { // allow method reference and lambda's expression body also
 				isValidNode= isValidNode || node instanceof MethodReference || node.getLocationInParent() == LambdaExpression.BODY_PROPERTY;

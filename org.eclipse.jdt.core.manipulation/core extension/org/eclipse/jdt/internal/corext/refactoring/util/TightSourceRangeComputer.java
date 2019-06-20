@@ -57,13 +57,11 @@ public class TightSourceRangeComputer extends TargetSourceRangeComputer {
 	        		addTightSourceNode(child);
 	        	}
 	        } else if (descriptor.isChildListProperty()) {
-	        	List<? extends ASTNode> children= ASTNodes.getChildListProperty(reference, (ChildListPropertyDescriptor) descriptor);
-	        	for (Iterator<? extends ASTNode> iterator2= children.iterator(); iterator2.hasNext();) {
-	                ASTNode child= iterator2.next();
-	                if (isExtending(child, reference)) {
-		        		addTightSourceNode(child);
-		        	}
-                }
+	        	for (ASTNode child : ASTNodes.getChildListProperty(reference, (ChildListPropertyDescriptor) descriptor)) {
+					if (isExtending(child, reference)) {
+						addTightSourceNode(child);
+					}
+				}
 	        }
         }
     }

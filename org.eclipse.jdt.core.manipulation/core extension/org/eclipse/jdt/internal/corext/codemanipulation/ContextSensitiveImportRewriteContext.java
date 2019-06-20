@@ -94,26 +94,24 @@ public class ContextSensitiveImportRewriteContext extends ImportRewriteContext {
 
 	@Override
 	public int findInContext(String qualifier, String name, int kind) {
-		IBinding[] declarationsInScope= getDeclarationsInScope();
-		for (int i= 0; i < declarationsInScope.length; i++) {
-			if (declarationsInScope[i] instanceof ITypeBinding) {
-				ITypeBinding typeBinding= (ITypeBinding)declarationsInScope[i];
+		for (IBinding declaration : getDeclarationsInScope()) {
+			if (declaration instanceof ITypeBinding) {
+				ITypeBinding typeBinding= (ITypeBinding) declaration;
 				if (isSameType(typeBinding, qualifier, name)) {
 					return RES_NAME_FOUND;
 				} else if (isConflicting(typeBinding, name)) {
 					return RES_NAME_CONFLICT;
 				}
-			} else if (declarationsInScope[i] != null) {
-				if (isConflicting(declarationsInScope[i], name)) {
+			} else if (declaration != null) {
+				if (isConflicting(declaration, name)) {
 					return RES_NAME_CONFLICT;
 				}
 			}
 		}
 
 
-		Name[] names= getImportedNames();
-		for (int i= 0; i < names.length; i++) {
-			IBinding binding= names[i].resolveBinding();
+		for (Name n : getImportedNames()) {
+			IBinding binding= n.resolveBinding();
 			if (binding instanceof ITypeBinding && !binding.isRecovered()) {
 				ITypeBinding typeBinding= (ITypeBinding)binding;
 				if (isConflictingType(typeBinding, qualifier, name)) {
@@ -141,10 +139,8 @@ public class ContextSensitiveImportRewriteContext extends ImportRewriteContext {
 			}
 		}
 
-		String[] addedImports= fImportRewrite.getAddedImports();
 		String qualifiedName= JavaModelUtil.concatenateName(qualifier, name);
-		for (int i= 0; i < addedImports.length; i++) {
-			String addedImport= addedImports[i];
+		for (String addedImport : fImportRewrite.getAddedImports()) {
 			if (qualifiedName.equals(addedImport)) {
 				return RES_NAME_FOUND;
 			} else {
@@ -159,12 +155,8 @@ public class ContextSensitiveImportRewriteContext extends ImportRewriteContext {
 			if (typeRoot != null) {
 				IPackageFragment packageFragment= (IPackageFragment) typeRoot.getParent();
 				try {
-					ICompilationUnit[] compilationUnits= packageFragment.getCompilationUnits();
-					for (int i= 0; i < compilationUnits.length; i++) {
-						ICompilationUnit cu= compilationUnits[i];
-						IType[] allTypes= cu.getAllTypes();
-						for (int j= 0; j < allTypes.length; j++) {
-							IType type= allTypes[j];
+					for (ICompilationUnit cu : packageFragment.getCompilationUnits()) {
+						for (IType type : cu.getAllTypes()) {
 							String packageTypeName= type.getFullyQualifiedName();
 							if (isConflicting(name, packageTypeName))
 								return RES_NAME_CONFLICT;
@@ -193,9 +185,7 @@ public class ContextSensitiveImportRewriteContext extends ImportRewriteContext {
 	}
 
 	private ITypeBinding containingDeclaration(ITypeBinding binding, String qualifier, String name) {
-		ITypeBinding[] declaredTypes= binding.getDeclaredTypes();
-		for (int i= 0; i < declaredTypes.length; i++) {
-			ITypeBinding childBinding= declaredTypes[i];
+		for (ITypeBinding childBinding : binding.getDeclaredTypes()) {
 			if (isSameType(childBinding, qualifier, name)) {
 				return childBinding;
 			} else {

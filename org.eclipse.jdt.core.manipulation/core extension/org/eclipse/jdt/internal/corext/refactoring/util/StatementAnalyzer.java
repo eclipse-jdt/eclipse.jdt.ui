@@ -163,8 +163,7 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 		ASTNode[] selectedNodes= getSelectedNodes();
 		if (doAfterValidation(node, selectedNodes)) {
 			List<SwitchCase> cases= getSwitchCases(node);
-			for (int i= 0; i < selectedNodes.length; i++) {
-				ASTNode topNode= selectedNodes[i];
+			for (ASTNode topNode : selectedNodes) {
 				if (cases.contains(topNode)) {
 					invalidSelection(JavaManipulationMessages.StatementAnalyzer_switch_statement);
 					break;
@@ -179,8 +178,7 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 		ASTNode[] selectedNodes= getSelectedNodes();
 		if (doAfterValidation(node, selectedNodes)) {
 			List<SwitchCase> cases= getSwitchCases(node);
-			for (int i= 0; i < selectedNodes.length; i++) {
-				ASTNode topNode= selectedNodes[i];
+			for (ASTNode topNode : selectedNodes) {
 				if (cases.contains(topNode)) {
 					invalidSelection(JavaManipulationMessages.StatementAnalyzer_switch_expression);
 					break;
@@ -264,17 +262,19 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 	}
 
 	protected static boolean contains(ASTNode[] nodes, ASTNode node) {
-		for (int i = 0; i < nodes.length; i++) {
-			if (nodes[i] == node)
+		for (ASTNode n : nodes) {
+			if (n == node) {
 				return true;
+			}
 		}
 		return false;
 	}
 
 	protected static boolean contains(ASTNode[] nodes, List<Expression> list) {
-		for (int i = 0; i < nodes.length; i++) {
-			if (list.contains(nodes[i]))
+		for (ASTNode node : nodes) {
+			if (list.contains(node)) {
 				return true;
+			}
 		}
 		return false;
 	}

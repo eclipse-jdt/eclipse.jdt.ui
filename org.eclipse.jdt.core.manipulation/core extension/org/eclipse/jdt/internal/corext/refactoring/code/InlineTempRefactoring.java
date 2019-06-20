@@ -339,13 +339,10 @@ public class InlineTempRefactoring extends Refactoring {
 	}
 
 	private void inlineTemp(CompilationUnitRewrite cuRewrite) throws JavaModelException {
-		SimpleName[] references= getReferences();
-
 		TextEditGroup groupDesc= cuRewrite.createGroupDescription(RefactoringCoreMessages.InlineTempRefactoring_inline_edit_name);
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
 
-		for (int i= 0; i < references.length; i++){
-			SimpleName curr= references[i];
+		for (SimpleName curr : getReferences()) {
 			ASTNode initializerCopy= getInitializerSource(cuRewrite, curr);
 			rewrite.replace(curr, initializerCopy, groupDesc);
 		}
@@ -430,8 +427,8 @@ public class InlineTempRefactoring extends Refactoring {
 		ASTRewrite rewrite= ASTRewrite.create(invocation.getAST());
 		ListRewrite typeArgsRewrite= Invocations.getInferredTypeArgumentsRewrite(rewrite, invocation);
 		
-		for (int i= 0; i < typeArguments.length; i++) {
-			Type typeArgumentNode= cuRewrite.getImportRewrite().addImport(typeArguments[i], cuRewrite.getAST());
+		for (ITypeBinding typeArgument : typeArguments) {
+			Type typeArgumentNode = cuRewrite.getImportRewrite().addImport(typeArgument, cuRewrite.getAST());
 			typeArgsRewrite.insertLast(typeArgumentNode, null);
 		}
 		

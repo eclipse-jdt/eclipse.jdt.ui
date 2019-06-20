@@ -56,9 +56,9 @@ public class CompilationUnitChange extends org.eclipse.jdt.core.refactoring.Comp
 		setKeepPreviewEdits(change.getKeepPreviewEdits());
 		setSaveMode(change.getSaveMode());
 		setTextType(change.getTextType());
-		TextEditBasedChangeGroup[] groups= change.getChangeGroups();
-		for (int i= 0; i < groups.length; i++)
-			addChangeGroup(groups[i]);
+		for (TextEditBasedChangeGroup group : change.getChangeGroups()) {
+			addChangeGroup(group);
+		}
 	}
 }
 

@@ -181,9 +181,9 @@ public final class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 
 				Arrays.sort(fDelegatesToCreate, new DelegateEntryComparator());
 
-				for (int i= 0; i < fDelegatesToCreate.length; i++) {
-					IMethodBinding delegateMethod= fDelegatesToCreate[i].delegateMethod;
-					IVariableBinding field= fDelegatesToCreate[i].field;
+				for (DelegateEntry delegateEntry : fDelegatesToCreate) {
+					IMethodBinding delegateMethod= delegateEntry.delegateMethod;
+					IVariableBinding field= delegateEntry.field;
 					MethodDeclaration newMethod= StubUtility2Core.createDelegationStub(cu, astRewrite, importRewrite, context, delegateMethod, field, fSettings);
 					if (newMethod != null) {
 						fCreated.add(delegateMethod);
