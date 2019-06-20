@@ -53,9 +53,8 @@ public class PerfTestSuite extends TestSuite {
 		Class<?> superClass= theClass;
 		Vector<String> names= new Vector<>();
 		while (Test.class.isAssignableFrom(superClass)) {
-			Method[] methods= superClass.getDeclaredMethods();
-			for (int i= 0; i < methods.length; i++) {
-				addPerformanceTestMethod(methods[i], names, theClass);
+			for (Method method : superClass.getDeclaredMethods()) {
+				addPerformanceTestMethod(method, names, theClass);
 			}
 			superClass= superClass.getSuperclass();
 		}

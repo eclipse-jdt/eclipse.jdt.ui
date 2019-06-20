@@ -168,13 +168,11 @@ public class EditorTestHelper {
 	}
 
 	public static void closeAllEditors() {
-		IWorkbenchWindow[] windows= PlatformUI.getWorkbench().getWorkbenchWindows();
-		for (int i= 0; i < windows.length; i++) {
-			IWorkbenchPage[] pages= windows[i].getPages();
-			for (int j= 0; j < pages.length; j++) {
-				IEditorReference[] editorReferences= pages[j].getEditorReferences();
-				for (int k= 0; k < editorReferences.length; k++)
-					closeEditor(editorReferences[k].getEditor(false));
+		for (IWorkbenchWindow window : PlatformUI.getWorkbench().getWorkbenchWindows()) {
+			for (IWorkbenchPage page : window.getPages()) {
+				for (IEditorReference editorReference : page.getEditorReferences()) {
+					closeEditor(editorReference.getEditor(false));
+				}
 			}
 		}
 	}
@@ -321,9 +319,7 @@ public class EditorTestHelper {
 
 	public static boolean allJobsQuiet() {
 		IJobManager jobManager= Job.getJobManager();
-		Job[] jobs= jobManager.find(null);
-		for (int i= 0; i < jobs.length; i++) {
-			Job job= jobs[i];
+		for (Job job : jobManager.find(null)) {
 			int state= job.getState();
 			if (state == Job.RUNNING || state == Job.WAITING) {
 				Logger.getGlobal().finest(job.toString());
@@ -478,9 +474,9 @@ public class EditorTestHelper {
 			return;
 		}
 		if (resource instanceof IContainer) {
-			IResource[] resources= ((IContainer) resource).members();
-			for (int i= 0; i < resources.length; i++)
-				findFiles(resources[i], files);
+			for (IResource res : ((IContainer) resource).members()) {
+				findFiles(res, files);
+			}
 		}
 	}
 
@@ -509,13 +505,12 @@ public class EditorTestHelper {
 	}
 
 	private static void addJavaFiles(File dir, List<File> collection) throws IOException {
-		File[] files= dir.listFiles();
 		List<File> subDirs= new ArrayList<>(2);
-		for (int i= 0; i < files.length; i++) {
-			if (files[i].isFile()) {
-				collection.add(files[i]);
-			} else if (files[i].isDirectory()) {
-				subDirs.add(files[i]);
+		for (File file : dir.listFiles()) {
+			if (file.isFile()) {
+				collection.add(file);
+			} else if (file.isDirectory()) {
+				subDirs.add(file);
 			}
 		}
 		Iterator<File> iter= subDirs.iterator();

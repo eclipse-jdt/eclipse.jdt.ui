@@ -15,7 +15,6 @@ package org.eclipse.jdt.text.tests.contentassist;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -249,8 +248,7 @@ public class ContentAssistHistoryTest extends TestCase {
 
 	private static void assertEqualMap(String message, Map<String, List<String>> expected, Map<String, RHSHistory> actual) {
 		assertEquals(message, expected.size(), actual.size());
-		for (Iterator<String> it= expected.keySet().iterator(); it.hasNext();) {
-			String type= it.next();
+		for (String type : expected.keySet()) {
 			assertEquals(message, expected.get(type), actual.get(type).getTypes());
 		}
 	}

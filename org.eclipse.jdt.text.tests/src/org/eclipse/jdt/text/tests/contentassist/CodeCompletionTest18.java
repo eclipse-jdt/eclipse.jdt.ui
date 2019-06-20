@@ -121,13 +121,11 @@ public class CodeCompletionTest18 extends AbstractCompletionTest {
 	}
 
 	public static void closeAllEditors() {
-		IWorkbenchWindow[] windows= PlatformUI.getWorkbench().getWorkbenchWindows();
-		for (int i= 0; i < windows.length; i++) {
-			IWorkbenchPage[] pages= windows[i].getPages();
-			for (int j= 0; j < pages.length; j++) {
-				IEditorReference[] editorReferences= pages[j].getEditorReferences();
-				for (int k= 0; k < editorReferences.length; k++)
-					closeEditor(editorReferences[k].getEditor(false));
+		for (IWorkbenchWindow window : PlatformUI.getWorkbench().getWorkbenchWindows()) {
+			for (IWorkbenchPage page : window.getPages()) {
+				for (IEditorReference editorReference : page.getEditorReferences()) {
+					closeEditor(editorReference.getEditor(false));
+				}
 			}
 		}
 	}
@@ -172,11 +170,9 @@ public class CodeCompletionTest18 extends AbstractCompletionTest {
 
 		codeComplete(cu, offset, collector);
 
-		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
 		ICompletionProposal proposal= null;
 
-		for (int i= 0; i < proposals.length; i++) {
-			IJavaCompletionProposal curr= proposals[i];
+		for (IJavaCompletionProposal curr : collector.getJavaCompletionProposals()) {
 			if (curr.getDisplayString().startsWith("thenComparingLong")) {
 				assertNull("more than one proposal for thenComparingLong()", proposal);
 				proposal= curr;

@@ -17,14 +17,11 @@ import java.util.Iterator;
 
 import org.eclipse.jface.text.templates.ContextTypeRegistry;
 import org.eclipse.jface.text.templates.Template;
-import org.eclipse.jface.text.templates.TemplateBuffer;
 import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.TemplateException;
 import org.eclipse.jface.text.templates.TemplateTranslator;
 import org.eclipse.jface.text.templates.TemplateVariable;
 import org.eclipse.jface.text.templates.TemplateVariableResolver;
-import org.eclipse.jface.text.templates.persistence.TemplateStore;
-
 import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
 import org.eclipse.jdt.internal.corext.template.java.JavaDocContextType;
 import org.eclipse.jdt.internal.corext.template.java.SWTContextType;
@@ -51,16 +48,9 @@ public class TemplateContributionTest extends TestCase {
 		ContextTypeRegistry registry= JavaPlugin.getDefault().getTemplateContextRegistry();
 		TemplateContextType context= registry.getContextType(resolverContextTypeId);
 
-		TemplateStore templateStore= JavaPlugin.getDefault().getTemplateStore();
-		Template[] templates= templateStore.getTemplates(contextTypeId);
-
-		for (int i= 0; i < templates.length; i++) {
-			Template template= templates[i];
+		for (Template template : JavaPlugin.getDefault().getTemplateStore().getTemplates(contextTypeId)) {
 			TemplateTranslator translator= new TemplateTranslator();
-			TemplateBuffer buffer= translator.translate(template);
-			TemplateVariable[] variables= buffer.getVariables();
-			for (int j= 0; j < variables.length; j++) {
-				TemplateVariable variable= variables[j];
+			for (TemplateVariable variable : translator.translate(template).getVariables()) {
 				if (!variable.getType().equals(variable.getName())) {
 					assertTrue("No resolver found for variable '" + variable.getType() + "' in template '" + template.getName() + "'\n\n" + template.getPattern(), canHandle(context, variable));
 				}
