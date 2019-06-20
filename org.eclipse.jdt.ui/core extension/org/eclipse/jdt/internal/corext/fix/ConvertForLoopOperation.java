@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
@@ -56,8 +57,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -72,6 +73,9 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 public class ConvertForLoopOperation extends ConvertLoopOperation {
 
 	private static final String LENGTH_QUERY= "length"; //$NON-NLS-1$
+	private static final String SIZE_QUERY= "size"; //$NON-NLS-1$
+	private static final String GET_QUERY= "get"; //$NON-NLS-1$
+	private static final String ISEMPTY_QUERY= "isEmpty"; //$NON-NLS-1$
 	private static final String LITERAL_0= "0"; //$NON-NLS-1$
 	private static final String LITERAL_1= "1"; //$NON-NLS-1$
 	private static final class InvalidBodyError extends Error {
@@ -84,6 +88,10 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 	private Expression fArrayAccess;
 	private VariableDeclarationFragment fElementDeclaration;
 	private boolean fMakeFinal;
+	private boolean fIsCollection;
+	private IMethodBinding fSizeMethodBinding;
+	private IMethodBinding fGetMethodBinding;
+	private MethodInvocation fSizeMethodAccess;
 
 	public ConvertForLoopOperation(ForStatement forStatement) {
 		this(forStatement, new String[0], false);
@@ -277,6 +285,7 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 	 * Must be one of:
 	 * <ul>
 	 * <li>[result].length</li>
+	 * <li>[result].size()</li>
 	 * </ul>
 	 */
 	private boolean validateLengthQuery(Expression lengthQuery) {
@@ -322,11 +331,48 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 			fArrayBinding= arrayBinding;
 			fArrayAccess= arrayAccess;
 			return true;
+		} else if (lengthQuery instanceof MethodInvocation) {
+			MethodInvocation methodCall= (MethodInvocation)lengthQuery;
+			SimpleName name= methodCall.getName();
+			if (!SIZE_QUERY.equals(name.getIdentifier())
+					|| !methodCall.arguments().isEmpty()) {
+				return false;
+			}
+			IMethodBinding methodBinding= methodCall.resolveMethodBinding();
+			if (methodBinding == null) {
+				return false;
+			}
+			ITypeBinding classBinding= methodBinding.getDeclaringClass();
+
+			if (isCollection(classBinding)) {
+				fIsCollection= true;
+				fSizeMethodBinding= methodBinding;
+				fSizeMethodAccess= methodCall;
+				return true;
+			}
 		}
 
 		return false;
 	}
 
+	private boolean isCollection(ITypeBinding classBinding) {
+		ITypeBinding[] interfaces= classBinding.getInterfaces();
+		for (ITypeBinding binding : interfaces) {
+			if (binding.getErasure().getQualifiedName().startsWith("java.util.Collection")) { //$NON-NLS-1$
+				return true;
+			}
+		}
+		ITypeBinding superClass= classBinding.getSuperclass();
+		if (superClass != null && isCollection(superClass)) {
+			return true;
+		}
+		for (ITypeBinding binding : interfaces) {
+			if (isCollection(binding)) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	/*
 	 * Must be one of:
@@ -409,10 +455,11 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 	 * returns false iff
 	 * <ul>
 	 * <li><code>indexBinding</code> is used for anything else then accessing
-	 * an element of <code>arrayBinding</code></li>
+	 * an element of <code>arrayBinding</code></li> or as a parameter to <code>getBinding</code>
 	 * <li><code>arrayBinding</code> is assigned</li>
 	 * <li>an element of <code>arrayBinding</code> is assigned</li>
 	 * <li><code>lengthBinding</code> is referenced</li>
+	 * <li>a method call is made to anything but get(<code>indexBinding</code>) or size() or isEmpty()
 	 * </ul>
 	 * within <code>body</code>
 	 */
@@ -432,59 +479,71 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 							throw new InvalidBodyError();
 
 						if (nameBinding.equals(fIndexBinding)) {
-							if (node.getLocationInParent() != ArrayAccess.INDEX_PROPERTY)
-								throw new InvalidBodyError();
+							if (node.getLocationInParent() == ArrayAccess.INDEX_PROPERTY) {
+								ArrayAccess arrayAccess= (ArrayAccess)node.getParent();
+								Expression array= arrayAccess.getArray();
+								if (array instanceof QualifiedName) {
+									if (!(fArrayAccess instanceof QualifiedName))
+										throw new InvalidBodyError();
 
-							ArrayAccess arrayAccess= (ArrayAccess)node.getParent();
-							Expression array= arrayAccess.getArray();
-							if (array instanceof QualifiedName) {
-								if (!(fArrayAccess instanceof QualifiedName))
-									throw new InvalidBodyError();
+									IBinding varBinding1= ((QualifiedName) array).getQualifier().resolveBinding();
+									if (varBinding1 == null)
+										throw new InvalidBodyError();
 
-								IBinding varBinding1= ((QualifiedName) array).getQualifier().resolveBinding();
-								if (varBinding1 == null)
-									throw new InvalidBodyError();
+									IBinding varBinding2= ((QualifiedName) fArrayAccess).getQualifier().resolveBinding();
+									if (!varBinding1.equals(varBinding2))
+										throw new InvalidBodyError();
+								} else if (array instanceof FieldAccess) {
+									Expression arrayExpression= ((FieldAccess) array).getExpression();
+									if (arrayExpression instanceof ThisExpression) {
+										if (fArrayAccess instanceof FieldAccess) {
+											Expression arrayAccessExpression= ((FieldAccess) fArrayAccess).getExpression();
+											if (!(arrayAccessExpression instanceof ThisExpression))
+												throw new InvalidBodyError();
+										} else if (fArrayAccess instanceof QualifiedName) {
+											throw new InvalidBodyError();
+										}
+									} else {
+										if (!(fArrayAccess instanceof FieldAccess))
+											throw new InvalidBodyError();
 
-								IBinding varBinding2= ((QualifiedName) fArrayAccess).getQualifier().resolveBinding();
-								if (!varBinding1.equals(varBinding2))
-									throw new InvalidBodyError();
-							} else if (array instanceof FieldAccess) {
-								Expression arrayExpression= ((FieldAccess) array).getExpression();
-								if (arrayExpression instanceof ThisExpression) {
+										Expression arrayAccessExpression= ((FieldAccess) fArrayAccess).getExpression();
+										if (!arrayExpression.subtreeMatch(new JdtASTMatcher(), arrayAccessExpression)) {
+											throw new InvalidBodyError();
+										}
+									}
+								} else {
+									if (fArrayAccess instanceof QualifiedName) {
+										throw new InvalidBodyError();
+									}
 									if (fArrayAccess instanceof FieldAccess) {
 										Expression arrayAccessExpression= ((FieldAccess) fArrayAccess).getExpression();
 										if (!(arrayAccessExpression instanceof ThisExpression))
 											throw new InvalidBodyError();
-									} else if (fArrayAccess instanceof QualifiedName) {
-										throw new InvalidBodyError();
-									}
-								} else {
-									if (!(fArrayAccess instanceof FieldAccess))
-										throw new InvalidBodyError();
-
-									Expression arrayAccessExpression= ((FieldAccess) fArrayAccess).getExpression();
-									if (!arrayExpression.subtreeMatch(new JdtASTMatcher(), arrayAccessExpression)) {
-										throw new InvalidBodyError();
 									}
 								}
-							} else {
-								if (fArrayAccess instanceof QualifiedName) {
+
+								IBinding binding= getBinding(array);
+								if (binding == null)
 									throw new InvalidBodyError();
-								}
-								if (fArrayAccess instanceof FieldAccess) {
-									Expression arrayAccessExpression= ((FieldAccess) fArrayAccess).getExpression();
-									if (!(arrayAccessExpression instanceof ThisExpression))
-										throw new InvalidBodyError();
-								}
+
+								if (!fArrayBinding.equals(binding))
+									throw new InvalidBodyError();
+
+							} else if (node.getLocationInParent() == MethodInvocation.ARGUMENTS_PROPERTY) {
+								MethodInvocation method= (MethodInvocation)node.getParent();
+								IMethodBinding methodBinding= method.resolveMethodBinding();
+								if (methodBinding == null)
+									throw new InvalidBodyError();
+								ITypeBinding[] parms= methodBinding.getParameterTypes();
+								if (!fIsCollection || !GET_QUERY.equals(method.getName().getFullyQualifiedName()) ||
+										parms.length != 1 || !parms[0].getName().equals("int") || //$NON-NLS-1$
+										!fSizeMethodBinding.getDeclaringClass().equals(methodBinding.getDeclaringClass()))
+									throw new InvalidBodyError();
+								fGetMethodBinding= methodBinding;
+							} else {
+								throw new InvalidBodyError();
 							}
-
-							IBinding binding= getBinding(array);
-							if (binding == null)
-								throw new InvalidBodyError();
-
-							if (!fArrayBinding.equals(binding))
-								throw new InvalidBodyError();
-
 						} else if (nameBinding.equals(fArrayBinding)) {
 							if (isAssigned(node))
 								throw new InvalidBodyError();
@@ -493,6 +552,20 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 						} else if (fElementDeclaration != null && nameBinding.equals(fElementDeclaration.getName().resolveBinding())) {
 							if (isAssigned(node))
 								fElementDeclaration= null;
+						}
+					} else if (fIsCollection && node instanceof MethodInvocation) {
+						MethodInvocation method= (MethodInvocation)node;
+						IMethodBinding binding= method.resolveMethodBinding();
+						if (binding == null) {
+							throw new InvalidBodyError();
+						}
+						if (fSizeMethodBinding.getDeclaringClass().equals(binding.getDeclaringClass())) {
+							String methodName= method.getName().getFullyQualifiedName();
+							if (!SIZE_QUERY.equals(methodName) &&
+									!GET_QUERY.equals(methodName) &&
+									!ISEMPTY_QUERY.equals(methodName)) {
+								throw new InvalidBodyError();
+							}
 						}
 					}
 
@@ -534,6 +607,28 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 					return super.visit(node);
 				}
 
+				@Override
+				public boolean visit(MethodInvocation node) {
+					if (fElementDeclaration != null || !fIsCollection)
+						return super.visit(node);
+
+					IMethodBinding nodeBinding= node.resolveMethodBinding();
+					if (nodeBinding == null) {
+						return super.visit(node);
+					}
+					ITypeBinding[] args= nodeBinding.getParameterTypes();
+					if (GET_QUERY.equals(nodeBinding.getName()) && args.length == 1 &&
+							args[0].getName().equals("int") && //$NON-NLS-1$
+							nodeBinding.getDeclaringClass().equals(fSizeMethodBinding.getDeclaringClass())) {
+						IBinding index= getBinding((Expression)node.arguments().get(0));
+						if (fIndexBinding.equals(index)) {
+							if (node.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
+								fElementDeclaration= (VariableDeclarationFragment)node.getParent();
+							}
+						}
+					}
+					return super.visit(node);
+				}
 			});
 		} catch (InvalidBodyError e) {
 			return false;
@@ -590,7 +685,13 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 		ForStatement forStatement= getForStatement();
 
 		IJavaProject javaProject= ((CompilationUnit)forStatement.getRoot()).getJavaElement().getJavaProject();
-		String[] proposals= getVariableNameProposals(fArrayAccess.resolveTypeBinding(), javaProject);
+		String[] proposals= null;
+
+		if (this.fIsCollection) {
+			proposals= getVariableNameProposalsCollection(fSizeMethodAccess, javaProject);
+		} else {
+			proposals= getVariableNameProposals(fArrayAccess.resolveTypeBinding(), javaProject);
+		}
 
 		String parameterName;
 		if (fElementDeclaration != null) {
@@ -609,12 +710,25 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 		AST ast= forStatement.getAST();
 		EnhancedForStatement result= ast.newEnhancedForStatement();
 
-		SingleVariableDeclaration parameterDeclaration= createParameterDeclaration(parameterName, fElementDeclaration, fArrayAccess, forStatement, importRewrite, rewrite, group, pg, fMakeFinal);
+		SingleVariableDeclaration parameterDeclaration= null;
+		Expression parameterExpression= null;
+
+		if (this.fIsCollection) {
+			parameterExpression= fSizeMethodAccess.getExpression();
+			parameterDeclaration= createParameterDeclarationCollection(parameterName, fElementDeclaration, fSizeMethodAccess, forStatement, importRewrite, rewrite, group, pg, fMakeFinal);
+		} else {
+			parameterExpression= fArrayAccess;
+			parameterDeclaration= createParameterDeclaration(parameterName, fElementDeclaration, fArrayAccess, forStatement, importRewrite, rewrite, group, pg, fMakeFinal);
+		}
 		result.setParameter(parameterDeclaration);
 
-		result.setExpression((Expression)rewrite.createCopyTarget(fArrayAccess));
+		result.setExpression((Expression)rewrite.createCopyTarget(parameterExpression));
 
-		convertBody(forStatement.getBody(), fIndexBinding, fArrayBinding, parameterName, rewrite, group, pg);
+		if (this.fIsCollection) {
+			convertBodyCollection(forStatement.getBody(), fIndexBinding, fGetMethodBinding, parameterName, rewrite, group, pg);
+		} else {
+			convertBody(forStatement.getBody(), fIndexBinding, fArrayBinding, parameterName, rewrite, group, pg);
+		}
 		result.setBody(getBody(cuRewrite, group, positionGroups));
 
 		positionGroups.setEndPosition(rewrite.track(result));
@@ -713,5 +827,105 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 		System.arraycopy(typeSuggestions, 0, result, elementSuggestions.length, typeSuggestions.length);
 		return result;
 	}
+
+	private String[] getVariableNameProposalsCollection(MethodInvocation sizeMethodAccess, IJavaProject project) {
+		String[] variableNames= getUsedVariableNames();
+		String baseName= FOR_LOOP_ELEMENT_IDENTIFIER;
+		Expression exp= sizeMethodAccess.getExpression();
+		String name= exp instanceof SimpleName ? ((SimpleName)exp).getFullyQualifiedName() : ""; //$NON-NLS-1$
+		if (name.length() > 2 && name.charAt(name.length() - 1) == 's') {
+			baseName= name.substring(0, name.length() - 1);
+		}
+		String[] elementSuggestions= StubUtility.getLocalNameSuggestions(project, baseName, 0, variableNames);
+
+		ITypeBinding[] typeArgs= fSizeMethodBinding.getDeclaringClass().getTypeArguments();
+		String type= "Object"; //$NON-NLS-1$
+		if (typeArgs != null && typeArgs.length > 0) {
+			type= typeArgs[0].getName();
+		}
+		String[] typeSuggestions= StubUtility.getLocalNameSuggestions(project, type, 0, variableNames);
+
+		String[] result= new String[elementSuggestions.length + typeSuggestions.length];
+		System.arraycopy(elementSuggestions, 0, result, 0, elementSuggestions.length);
+		System.arraycopy(typeSuggestions, 0, result, elementSuggestions.length, typeSuggestions.length);
+		return result;
+	}
+
+	private void convertBodyCollection(Statement body, final IBinding indexBinding, final IBinding getBinding, final String parameterName, final ASTRewrite rewrite, final TextEditGroup editGroup, final LinkedProposalPositionGroup pg) {
+		final AST ast= body.getAST();
+
+		body.accept(new GenericVisitor() {
+			@Override
+			public boolean visit(MethodInvocation node) {
+				IBinding binding= node.resolveMethodBinding();
+				if (binding != null && getBinding.equals(binding)) {
+					List<Expression> args = node.arguments();
+					if (args.size() == 1 && args.get(0) instanceof SimpleName
+							&& indexBinding.equals(((SimpleName)args.get(0)).resolveBinding())) {
+						replaceAccess(node);
+					}
+				}
+
+				return super.visit(node);
+			}
+
+			private void replaceAccess(ASTNode node) {
+				if (fElementDeclaration != null && node.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
+					VariableDeclarationFragment fragment= (VariableDeclarationFragment)node.getParent();
+					IBinding targetBinding= fragment.getName().resolveBinding();
+					if (targetBinding != null) {
+						VariableDeclarationStatement statement= (VariableDeclarationStatement)fragment.getParent();
+
+						if (statement.fragments().size() == 1) {
+							rewrite.remove(statement, editGroup);
+						} else {
+							ListRewrite listRewrite= rewrite.getListRewrite(statement, VariableDeclarationStatement.FRAGMENTS_PROPERTY);
+							listRewrite.remove(fragment, editGroup);
+						}
+
+					} else {
+						SimpleName name= ast.newSimpleName(parameterName);
+						rewrite.replace(node, name, editGroup);
+						pg.addPosition(rewrite.track(name), true);
+					}
+				} else {
+					SimpleName name= ast.newSimpleName(parameterName);
+					rewrite.replace(node, name, editGroup);
+					pg.addPosition(rewrite.track(name), true);
+				}
+			}
+		});
+	}
+
+	private SingleVariableDeclaration createParameterDeclarationCollection(String parameterName, VariableDeclarationFragment fragement, Expression sizeAccess, ForStatement statement, ImportRewrite importRewrite, ASTRewrite rewrite, TextEditGroup group, LinkedProposalPositionGroup pg, boolean makeFinal) {
+		CompilationUnit compilationUnit= (CompilationUnit)sizeAccess.getRoot();
+		AST ast= compilationUnit.getAST();
+
+		SingleVariableDeclaration result= ast.newSingleVariableDeclaration();
+
+		SimpleName name= ast.newSimpleName(parameterName);
+		pg.addPosition(rewrite.track(name), true);
+		result.setName(name);
+
+		IMethodBinding sizeTypeBinding= ((MethodInvocation)sizeAccess).resolveMethodBinding();
+		ITypeBinding[] sizeTypeArguments= sizeTypeBinding.getDeclaringClass().getTypeArguments();
+		Type type= importType(sizeTypeArguments != null && sizeTypeArguments.length > 0
+				? sizeTypeArguments[0]
+						: fSizeMethodAccess.getAST().resolveWellKnownType("java.lang.Object"), //$NON-NLS-1$
+			statement, importRewrite, compilationUnit,
+			TypeLocation.LOCAL_VARIABLE);
+		result.setType(type);
+
+		if (fragement != null) {
+			VariableDeclarationStatement declaration= (VariableDeclarationStatement)fragement.getParent();
+			ModifierRewrite.create(rewrite, result).copyAllModifiers(declaration, group);
+		}
+		if (makeFinal && (fragement == null || ASTNodes.findModifierNode(Modifier.FINAL, ASTNodes.getModifiers(fragement)) == null)) {
+			ModifierRewrite.create(rewrite, result).setModifiers(Modifier.FINAL, 0, group);
+		}
+
+		return result;
+	}
+
 
 }
