@@ -7,5 +7,5 @@ heapdump.*
 core.*
 Snap.*
 # maven
-/*/target/
+target/
 .DS_Store
