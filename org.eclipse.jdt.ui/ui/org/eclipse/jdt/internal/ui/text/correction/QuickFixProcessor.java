@@ -8,6 +8,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * 
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Benjamin Muskalla <b.muskalla@gmx.net> - [quick fix] Quick fix for missing synchronized modifier - https://bugs.eclipse.org/bugs/show_bug.cgi?id=245250
@@ -302,8 +306,8 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.ServiceImplDefaultConstructorNotPublic:
 			case IProblem.PreviewFeatureDisabled:
 			case IProblem.PreviewFeatureNotSupported:
-			case IProblem.SwitchExpressionMissingEnumConstantCase:
-			case IProblem.SwitchExpressionMissingDefaultCase:
+			case IProblem.SwitchExpressionsYieldMissingEnumConstantCase:
+			case IProblem.SwitchExpressionsYieldMissingDefaultCase:
 				return true;
 			default:
 				return SuppressWarningsSubProcessor.hasSuppressWarningsProposal(cu.getJavaProject(), problemId)
@@ -728,11 +732,11 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				break;
 			case IProblem.MissingEnumConstantCase:
 			case IProblem.MissingEnumDefaultCase:
-			case IProblem.SwitchExpressionMissingEnumConstantCase:
+			case IProblem.SwitchExpressionsYieldMissingEnumConstantCase:
 				LocalCorrectionsSubProcessor.getMissingEnumConstantCaseProposals(context, problem, proposals);
 				break;
 			case IProblem.MissingDefaultCase:
-			case IProblem.SwitchExpressionMissingDefaultCase:
+			case IProblem.SwitchExpressionsYieldMissingDefaultCase:
 				LocalCorrectionsSubProcessor.addMissingDefaultCaseProposal(context, problem, proposals);
 				break;
 			case IProblem.MissingEnumConstantCaseDespiteDefault:
