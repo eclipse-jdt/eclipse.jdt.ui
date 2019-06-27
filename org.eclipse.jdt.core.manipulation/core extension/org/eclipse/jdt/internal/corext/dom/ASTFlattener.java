@@ -8,6 +8,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * 
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -46,8 +50,13 @@ public class ASTFlattener extends GenericVisitor {
 	 */
 	@Deprecated
 	private static final int JLS9= AST.JLS9;
-	
+	/**
+	 * @deprecated to avoid deprecation warnings
+	 */
+	@Deprecated
 	private static final int JLS12= AST.JLS12;
+
+	private static final int JLS13= AST.JLS13;
 
 	/**
 	 * The string buffer into which the serialized representation of the AST is
@@ -371,20 +380,10 @@ public class ASTFlattener extends GenericVisitor {
 	 */
 	@Override
 	public boolean visit(BreakStatement node) {
-		int apiLevel= node.getAST().apiLevel();
-		if (apiLevel >= JLS12 && node.isImplicit() && node.getExpression() == null) {
-			return false;
-		}
-		if (apiLevel < JLS12 || (apiLevel >= JLS12 && !node.isImplicit())) {
-			this.fBuffer.append("break");//$NON-NLS-1$
-		}
+		this.fBuffer.append("break");//$NON-NLS-1$
 		if (node.getLabel() != null) {
 			this.fBuffer.append(" ");//$NON-NLS-1$
 			node.getLabel().accept(this);
-		}
-		if (apiLevel >= JLS12 && node.getExpression() != null) {
-			this.fBuffer.append(" ");//$NON-NLS-1$
-			node.getExpression().accept(this);
 		}
 		this.fBuffer.append(";");//$NON-NLS-1$
 		return false;
@@ -1542,7 +1541,7 @@ public class ASTFlattener extends GenericVisitor {
 
 	@Override
 	public boolean visit(SwitchCase node) {
-		if (node.getAST().apiLevel() >= JLS12) {
+		if (node.getAST().apiLevel() == JLS13) {
 			if (node.isDefault()) {
 				this.fBuffer.append("default");//$NON-NLS-1$
 				this.fBuffer.append(node.isSwitchLabeledRule() ? " ->" : ":");//$NON-NLS-1$ //$NON-NLS-2$
@@ -1564,6 +1563,20 @@ public class ASTFlattener extends GenericVisitor {
 				this.fBuffer.append(":\n");//$NON-NLS-1$
 			}
 		}
+		return false;
+	}
+
+	@Override
+	public boolean visit(YieldStatement node) {
+		if (node.getAST().apiLevel() == JLS13 && node.isImplicit() && node.getExpression() == null) {
+			return false;
+		}
+		this.fBuffer.append("yield"); //$NON-NLS-1$
+		if (node.getExpression() != null) {
+			this.fBuffer.append(" ");//$NON-NLS-1$
+			node.getExpression().accept(this);
+		}
+		this.fBuffer.append(";");//$NON-NLS-1$
 		return false;
 	}
 
