@@ -36,6 +36,9 @@
   <profiles>
     <profile>
       <id>build-individual-bundles</id>
+      <properties>
+      	<eclipse-p2-repo.url>http://download.eclipse.org/eclipse/updates/4.13-Y-builds</eclipse-p2-repo.url>
+ 	  </properties>
       <repositories>
         <repository>
           <releases>
