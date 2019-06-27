@@ -7,6 +7,10 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
+ * 
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -477,6 +481,16 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
 	@Override
 	public void endVisit(SwitchExpression node) {
 		endVisit((Expression)node);
+	}
+
+	@Override
+	public boolean visit(YieldStatement node) {
+		return visit((Statement)node);
+	}
+
+	@Override
+	public void endVisit(YieldStatement node) {
+		endVisit((Statement)node);
 	}
 
 	//---- Begin MethodReference Hierarchy ----------------------------------
