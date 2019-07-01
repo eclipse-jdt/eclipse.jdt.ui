@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2018 IBM Corporation and others.
+ * Copyright (c) 2008, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -127,7 +127,7 @@ public class HTMLTidyTest extends TestCase {
 					matchers.add(new StringMatcher(line, true, false));
 				}
 			}
-		};
+		}
 		return matchers.toArray(new StringMatcher[matchers.size()]);
 	}
 
