@@ -1421,7 +1421,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 			roots= CallHierarchy.getDefault().getCalleeRoots(newElements);
 		CallHierarchyViewer hierarchyViewer= getViewer();		
 		TreeRoot treeRoot= hierarchyViewer.getTreeRoot(roots, true);
-		hierarchyViewer.add(treeRoot, roots);
+		hierarchyViewer.add(treeRoot, (Object[]) roots);
 		for (int i= 0; i < roots.length; i++) {
 			hierarchyViewer.setExpandedState(roots[i], true);
 		}

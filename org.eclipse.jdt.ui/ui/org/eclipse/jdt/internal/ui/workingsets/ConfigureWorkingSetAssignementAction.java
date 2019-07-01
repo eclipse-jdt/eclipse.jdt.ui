@@ -481,7 +481,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 
 			result.setInput(fModel);
 			result.setCheckedElements(fModel.getChecked());
-			result.setGrayedElements(fModel.getGrayed());
+			result.setGrayedElements((Object[]) fModel.getGrayed());
 
 			return result;
 		}
@@ -502,7 +502,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 			fTableViewer.refresh();
 
 			fTableViewer.setCheckedElements(fModel.getChecked());
-			fTableViewer.setGrayedElements(fModel.getGrayed());
+			fTableViewer.setGrayedElements((Object[]) fModel.getGrayed());
 
 			fTableViewer.setSelection(new StructuredSelection(element));
 		}
@@ -524,7 +524,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 					fTableViewer.refresh();
 
 					fTableViewer.setCheckedElements(fModel.getChecked());
-					fTableViewer.setGrayedElements(fModel.getGrayed());
+					fTableViewer.setGrayedElements((Object[]) fModel.getGrayed());
 				}
 			});
 
@@ -575,7 +575,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 			fTableViewer.setInput(fModel);
 			fTableViewer.refresh();
 			fTableViewer.setCheckedElements(fModel.getChecked());
-			fTableViewer.setGrayedElements(fModel.getGrayed());
+			fTableViewer.setGrayedElements((Object[]) fModel.getGrayed());
 		}
 
 		@Override

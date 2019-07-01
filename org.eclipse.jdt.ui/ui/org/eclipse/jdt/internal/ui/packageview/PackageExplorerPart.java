@@ -260,7 +260,7 @@ public class PackageExplorerPart extends ViewPart
 			fPendingRefreshes= Collections.synchronizedList(new ArrayList<>());
 		}
 		@Override
-		public void add(Object parentElement, Object[] childElements) {
+		public void add(Object parentElement, Object... childElements) {
 			if (fPendingRefreshes.contains(parentElement)) {
 				return;
 			}
