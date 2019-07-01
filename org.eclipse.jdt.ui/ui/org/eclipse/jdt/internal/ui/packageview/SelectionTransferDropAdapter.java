@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -25,13 +25,12 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.util.TransferDropTargetListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
-
-import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
@@ -74,7 +73,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 
 	@Override
 	public Transfer getTransfer() {
-		return LocalSelectionTransfer.getInstance();
+		return LocalSelectionTransfer.getTransfer();
 	}
 
 	@Override
@@ -182,7 +181,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	protected void initializeSelection(){
 		if (fElements != null)
 			return;
-		ISelection s= LocalSelectionTransfer.getInstance().getSelection();
+		ISelection s= LocalSelectionTransfer.getTransfer().getSelection();
 		if (!(s instanceof IStructuredSelection)) {
 			fSelection= StructuredSelection.EMPTY;
 			fElements= Collections.EMPTY_LIST;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.util.TransferDropTargetListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -38,7 +39,6 @@ import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.TreePath;
 
 import org.eclipse.ui.IWorkingSet;
-import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 
 import org.eclipse.jdt.core.IJavaElement;
 
@@ -74,7 +74,7 @@ public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements Trans
 
 	@Override
 	public Transfer getTransfer() {
-		return LocalSelectionTransfer.getInstance();
+		return LocalSelectionTransfer.getTransfer();
 	}
 
 	@Override
@@ -82,7 +82,7 @@ public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements Trans
 		Object target= event.item != null ? event.item.getData() : null;
 		if (target == null)
 			return false;
-		ISelection selection= LocalSelectionTransfer.getInstance().getSelection();
+		ISelection selection= LocalSelectionTransfer.getTransfer().getSelection();
 		if (!isValidSelection(selection)) {
 			return false;
 		}
@@ -119,7 +119,7 @@ public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements Trans
 		setExpandEnabled(true);
 		if (!isValidTarget(target))
 			return DND.DROP_NONE;
-		ISelection s= LocalSelectionTransfer.getInstance().getSelection();
+		ISelection s= LocalSelectionTransfer.getTransfer().getSelection();
 		if (!isValidSelection(s)) {
 			return DND.DROP_NONE;
 		}

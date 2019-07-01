@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -20,11 +20,11 @@ import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.util.DelegatingDropAdapter;
+import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.util.TransferDropTargetListener;
 import org.eclipse.jface.viewers.StructuredViewer;
 
 import org.eclipse.ui.part.PluginTransfer;
-import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 
 import org.eclipse.jdt.internal.ui.packageview.FileTransferDropAdapter;
 import org.eclipse.jdt.internal.ui.packageview.PluginTransferDropAdapter;
@@ -61,7 +61,7 @@ public class JdtViewerDropSupport {
 		int ops= DND.DROP_COPY | DND.DROP_MOVE | DND.DROP_LINK | DND.DROP_DEFAULT;
 
 		Transfer[] transfers= new Transfer[] {
-			LocalSelectionTransfer.getInstance(),
+			LocalSelectionTransfer.getTransfer(),
 			FileTransfer.getInstance(),
 			PluginTransfer.getInstance()};
 
