@@ -1402,7 +1402,7 @@ public class ASTNodes {
 	 * @see StringLiteral#getEscapedValue()
 	 */
 	public static String getEscapedStringLiteral(String stringValue) {
-		StringLiteral stringLiteral= AST.newAST(IASTSharedValues.SHARED_AST_LEVEL).newStringLiteral();
+		StringLiteral stringLiteral= AST.newAST(IASTSharedValues.SHARED_AST_LEVEL, false).newStringLiteral();
 		stringLiteral.setLiteralValue(stringValue);
 		return stringLiteral.getEscapedValue();
 	}
@@ -1415,7 +1415,7 @@ public class ASTNodes {
 	 * @see CharacterLiteral#getEscapedValue()
 	 */
 	public static String getEscapedCharacterLiteral(char ch) {
-		CharacterLiteral characterLiteral= AST.newAST(IASTSharedValues.SHARED_AST_LEVEL).newCharacterLiteral();
+		CharacterLiteral characterLiteral= AST.newAST(IASTSharedValues.SHARED_AST_LEVEL, false).newCharacterLiteral();
 		characterLiteral.setCharValue(ch);
 		return characterLiteral.getEscapedValue();
 	}
