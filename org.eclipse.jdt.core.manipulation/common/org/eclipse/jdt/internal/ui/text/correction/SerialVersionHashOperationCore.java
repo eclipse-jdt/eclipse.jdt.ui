@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc. - copied to jdt.core.manipulation core class
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
@@ -17,20 +18,17 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Comparator;
-
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
@@ -42,11 +40,6 @@ import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
 import org.eclipse.core.filebuffers.LocationKind;
-
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
-
-import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -69,20 +62,16 @@ import org.eclipse.jdt.core.util.IInnerClassesAttribute;
 import org.eclipse.jdt.core.util.IInnerClassesAttributeEntry;
 import org.eclipse.jdt.core.util.IMethodInfo;
 
-import org.eclipse.jdt.internal.corext.fix.AbstractSerialVersionOperation;
-import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
-import org.eclipse.jdt.internal.corext.util.Messages;
-
-import org.eclipse.jdt.ui.JavaUI;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
+import org.eclipse.jdt.internal.corext.fix.AbstractSerialVersionOperationCore;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 
 /**
  * Proposal for a hashed serial version id.
  *
  * @since 3.1
  */
-public final class SerialVersionHashOperation extends AbstractSerialVersionOperation {
+public final class SerialVersionHashOperationCore extends AbstractSerialVersionOperationCore {
 
 	private static final String STATIC_CLASS_INITIALIZER= "<clinit>"; //$NON-NLS-1$
 
@@ -200,7 +189,7 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 				return Long.valueOf(hash);
 			}
 		} catch (NoSuchAlgorithmException e) {
-			JavaPlugin.log(e);
+			JavaManipulationPlugin.log(e);
 		}
 		return null;
 	}
@@ -274,7 +263,7 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 				name= name.substring(packStart + 1);
 			}
 		} else {
-			throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, CorrectionMessages.SerialVersionHashOperation_error_classnotfound));
+			throw new CoreException(new Status(IStatus.ERROR, JavaManipulationPlugin.getPluginId(), CorrectionMessages.SerialVersionHashOperation_error_classnotfound));
 		}
 
 		name += ".class"; //$NON-NLS-1$
@@ -286,7 +275,7 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 				return (IFile) resource;
 			}
 		}
-		throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, CorrectionMessages.SerialVersionHashOperation_error_classnotfound));
+		throw new CoreException(new Status(IStatus.ERROR, JavaManipulationPlugin.getPluginId(), CorrectionMessages.SerialVersionHashOperation_error_classnotfound));
 	}
 
 	/**
@@ -295,21 +284,8 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 	 * @param message
 	 *            The message to display
 	 */
-	private static void displayErrorMessage(final String message) {
-		final Display display= PlatformUI.getWorkbench().getDisplay();
-		if (display != null && !display.isDisposed()) {
-			display.asyncExec(new Runnable() {
-
-				@Override
-				public final void run() {
-					if (!display.isDisposed()) {
-						final Shell shell= display.getActiveShell();
-						if (shell != null && !shell.isDisposed())
-							MessageDialog.openError(shell, CorrectionMessages.SerialVersionHashOperation_dialog_error_caption, Messages.format(CorrectionMessages.SerialVersionHashOperation_dialog_error_message, message));
-					}
-				}
-			});
-		}
+	private void displayErrorMessage(final String message) {
+		fDisplay.displayErrorMessage(message);
 	}
 
 	/**
@@ -318,7 +294,7 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 	 * @param throwable
 	 *            the throwable object to display
 	 */
-	private static void displayErrorMessage(final Throwable throwable) {
+	private void displayErrorMessage(final Throwable throwable) {
 		displayErrorMessage(throwable.getLocalizedMessage());
 	}
 
@@ -331,47 +307,29 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 	 *            The message to display
 	 * @return returns the result of the dialog
 	 */
-	private static boolean displayYesNoMessage(final String title, final String message) {
-		final boolean[] result= { true};
-		final Display display= PlatformUI.getWorkbench().getDisplay();
-		if (display != null && !display.isDisposed()) {
-			display.syncExec(new Runnable() {
-
-				@Override
-				public final void run() {
-					if (!display.isDisposed()) {
-						final Shell shell= display.getActiveShell();
-						if (shell != null && !shell.isDisposed())
-							result[0]= MessageDialog.openQuestion(shell, title, message);
-					}
-				}
-			});
-		}
-		return result[0];
+	private boolean displayYesNoMessage(final String title, final String message) {
+		return fDisplay.displayYesNoMessage(title, message);
 	}
 
 	private final ICompilationUnit fCompilationUnit;
+	private final SerialVersionHashOperationDisplayCore fDisplay;
 
-	public SerialVersionHashOperation(ICompilationUnit unit, ASTNode[] nodes) {
+	public SerialVersionHashOperationCore(ICompilationUnit unit, ASTNode[] nodes) {
+		this(unit, nodes, new SerialVersionHashOperationDisplayCore());
+	}
+
+	public SerialVersionHashOperationCore(ICompilationUnit unit, ASTNode[] nodes, SerialVersionHashOperationDisplayCore display) {
 		super(unit, nodes);
 		fCompilationUnit= unit;
+		fDisplay= display;
 	}
 
 	@Override
 	protected boolean addInitializer(final VariableDeclarationFragment fragment, final ASTNode declarationNode) {
 		Assert.isNotNull(fragment);
 		try {
-			PlatformUI.getWorkbench().getProgressService().busyCursorWhile(new IRunnableWithProgress() {
-
-				@Override
-				public final void run(final IProgressMonitor monitor) throws InterruptedException {
-					Assert.isNotNull(monitor);
-					String id= computeId(declarationNode, monitor);
-					fragment.setInitializer(fragment.getAST().newNumberLiteral(id));
-				}
-			});
-		} catch (InvocationTargetException exception) {
-			JavaPlugin.log(exception);
+			String id= computeId(declarationNode, new NullProgressMonitor());
+			fragment.setInitializer(fragment.getAST().newNumberLiteral(id));
 		} catch (InterruptedException exception) {
 			// Do nothing
 		}
@@ -379,7 +337,7 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 	}
 
 	@Override
-	protected void addLinkedPositions(ASTRewrite rewrite, VariableDeclarationFragment fragment, LinkedProposalModel positionGroups) {
+	protected void addLinkedPositions(ASTRewrite rewrite, VariableDeclarationFragment fragment, LinkedProposalModelCore positionGroups) {
 		//Do nothing
 	}
 
