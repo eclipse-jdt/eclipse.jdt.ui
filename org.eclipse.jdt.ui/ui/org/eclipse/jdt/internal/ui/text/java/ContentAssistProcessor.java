@@ -32,6 +32,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 
@@ -110,8 +111,9 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 		 */
 		@Override
 		public void assistSessionStarted(ContentAssistEvent event) {
-			if (event.processor != ContentAssistProcessor.this)
+			if (event.processor != ContentAssistProcessor.this) {
 				return;
+			}
 
 			fIterationGesture= getIterationGesture();
 			KeySequence binding= getIterationBinding();
@@ -145,7 +147,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 
 		/**
 		 * Returns the categories that need to be notified when a session starts and ends.
-		 * 
+		 *
 		 * @return the current categories
 		 * @since 3.8.1
 		 */
@@ -155,14 +157,16 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 			// Currently enabled categories for this session
 			if (fCategoryIteration != null) {
 				Iterator<List<CompletionProposalCategory>> it= fCategoryIteration.iterator();
-				while (it.hasNext())
+				while (it.hasNext()) {
 					currentCategories.addAll(it.next());
+				}
 			}
 
 			// Backwards compatibility: notify all categories which have no enablement expression
 			for (CompletionProposalCategory cat : fCategories) {
-				if (cat.getEnablementExpression() == null)
+				if (cat.getEnablementExpression() == null) {
 					currentCategories.add(cat);
+				}
 			}
 
 			return currentCategories;
@@ -173,8 +177,9 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 		 */
 		@Override
 		public void assistSessionEnded(ContentAssistEvent event) {
-			if (event.processor != ContentAssistProcessor.this)
+			if (event.processor != ContentAssistProcessor.this) {
 				return;
+			}
 
 			for (CompletionProposalCategory cat : getCategoriesToNotify()) {
 				cat.sessionEnded();
@@ -222,14 +227,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	 */
 	private static final String PREF_WARN_ABOUT_EMPTY_ASSIST_CATEGORY= "EmptyDefaultAssistCategory"; //$NON-NLS-1$
 
-	private static final Comparator<CompletionProposalCategory> ORDER_COMPARATOR= new Comparator<CompletionProposalCategory>() {
-
-		@Override
-		public int compare(CompletionProposalCategory d1, CompletionProposalCategory d2) {
-			return d1.getSortOrder() - d2.getSortOrder();
-		}
-
-	};
+	private static final Comparator<CompletionProposalCategory> ORDER_COMPARATOR= (d1, d2) -> d1.getSortOrder() - d2.getSortOrder();
 
 	private final List<CompletionProposalCategory> fCategories;
 	private final String fPartition;
@@ -256,7 +254,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	 * Flag indicating whether any completion engine associated with this processor requests
 	 * resorting of its proposals after filtering is triggered. Filtering is, e.g., triggered when a
 	 * user continues typing with an open completion window.
-	 * 
+	 *
 	 * @since 3.8
 	 */
 	private boolean fNeedsSortingAfterFiltering;
@@ -292,10 +290,11 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 		long collect= JavaPlugin.DEBUG_RESULT_COLLECTOR ? System.currentTimeMillis() : 0;
 
 		monitor.subTask(JavaTextMessages.ContentAssistProcessor_sorting_proposals);
-		if (fNeedsSortingAfterFiltering)
+		if (fNeedsSortingAfterFiltering) {
 			setContentAssistSorter();
-		else
+		} else {
 			proposals= sortProposals(proposals, monitor, context);
+		}
 		fNumberOfComputedResults= proposals.size();
 		long filter= JavaPlugin.DEBUG_RESULT_COLLECTOR ? System.currentTimeMillis() : 0;
 
@@ -334,11 +333,13 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 			List<ICompletionProposal> computed= cat.computeCompletionProposals(context, fPartition, new SubProgressMonitor(monitor, 1));
 			proposals.addAll(computed);
 			needsSortingAfterFiltering= needsSortingAfterFiltering || (cat.isSortingAfterFilteringNeeded() && !computed.isEmpty());
-			if (fErrorMessage == null)
+			if (fErrorMessage == null) {
 				fErrorMessage= cat.getErrorMessage();
+			}
 		}
-		if (fNeedsSortingAfterFiltering && !needsSortingAfterFiltering)
+		if (fNeedsSortingAfterFiltering && !needsSortingAfterFiltering) {
 			fAssistant.setSorter(null);
+		}
 		fNeedsSortingAfterFiltering= needsSortingAfterFiltering;
 		return proposals;
 	}
@@ -388,8 +389,9 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 		for (CompletionProposalCategory cat : providers) {
 			List<IContextInformation> computed= cat.computeContextInformation(context, fPartition, new SubProgressMonitor(monitor, 1));
 			proposals.addAll(computed);
-			if (fErrorMessage == null)
+			if (fErrorMessage == null) {
 				fErrorMessage= cat.getErrorMessage();
+			}
 		}
 
 		return proposals;
@@ -442,10 +444,12 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	 */
 	@Override
 	public String getErrorMessage() {
-		if (fErrorMessage != null)
+		if (fErrorMessage != null) {
 			return fErrorMessage;
-		if (fNumberOfComputedResults > 0)
+		}
+		if (fNumberOfComputedResults > 0) {
 			return null;
+		}
 		return JavaUIMessages.JavaEditor_codeassist_noCompletions;
 	}
 
@@ -483,11 +487,17 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	}
 
 	private List<CompletionProposalCategory> getCategories() {
-		if (fCategoryIteration == null)
+		if (fCategoryIteration == null) {
 			return fCategories;
+		}
 
 		int iteration= fRepetition % fCategoryIteration.size();
-		fAssistant.setStatusMessage(createIterationMessage());
+		String iterationMessage = createIterationMessage();
+		if (Display.getCurrent() != null) {
+			fAssistant.setStatusMessage(iterationMessage);
+		} else {
+			Display.getDefault().asyncExec(() -> fAssistant.setStatusMessage(iterationMessage));
+		}
 		fAssistant.setEmptyMessage(createEmptyMessage());
 		fRepetition++;
 
@@ -515,9 +525,10 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 		List<CompletionProposalCategory> included= getDefaultCategoriesUnchecked();
 
 		if (fComputerRegistry.hasUninstalledComputers(fPartition, included)) {
-			if (informUserAboutEmptyDefaultCategory())
+			if (informUserAboutEmptyDefaultCategory()) {
 				// preferences were restored - recompute the default categories
 				included= getDefaultCategoriesUnchecked();
+			}
 			fComputerRegistry.resetUnistalledComputers();
 		}
 
@@ -527,15 +538,16 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	private List<CompletionProposalCategory> getDefaultCategoriesUnchecked() {
 		List<CompletionProposalCategory> included= new ArrayList<>();
 		for (CompletionProposalCategory category : fCategories) {
-			if (checkDefaultEnablement(category)) 
+			if (checkDefaultEnablement(category)) {
 				included.add(category);
+			}
 		}
 		return included;
 	}
 
 	/**
 	 * Determine whether the category is enabled by default.
-	 * 
+	 *
 	 * @param category the category to check
 	 * @return <code>true</code> if this category is enabled by default, <code>false</code>
 	 *         otherwise
@@ -620,8 +632,9 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	        		store.setToDefault(PreferenceConstants.CODEASSIST_CATEGORY_ORDER);
 	        		store.setToDefault(PreferenceConstants.CODEASSIST_EXCLUDED_CATEGORIES);
 	        	}
-	        	if (settingsId == returnValue)
+				if (settingsId == returnValue) {
 					PreferencesUtil.createPreferenceDialogOn(shell, "org.eclipse.jdt.ui.preferences.CodeAssistPreferenceAdvanced", null, null).open(); //$NON-NLS-1$
+				}
 	        	fComputerRegistry.reload();
 	        	return true;
 	        }
@@ -632,16 +645,17 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	private List<CompletionProposalCategory> getSeparateCategories() {
 		ArrayList<CompletionProposalCategory> sorted= new ArrayList<>();
 		for (CompletionProposalCategory category : fCategories) {
-			if (checkSeparateEnablement(category))
+			if (checkSeparateEnablement(category)) {
 				sorted.add(category);
+			}
 		}
 		Collections.sort(sorted, ORDER_COMPARATOR);
 		return sorted;
 	}
-	
+
 	/**
 	 * Determine whether the category is enabled for separate use.
-	 * 
+	 *
 	 * @param category the category to check
 	 * @return <code>true</code> if this category is enabled for separate use, <code>false</code>
 	 *         otherwise
@@ -661,8 +675,9 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 
 	private String getCategoryLabel(int repetition) {
 		int iteration= repetition % fCategoryIteration.size();
-		if (iteration == 0)
+		if (iteration == 0) {
 			return JavaTextMessages.ContentAssistProcessor_defaultProposalCategory;
+		}
 		return toString(fCategoryIteration.get(iteration).get(0));
 	}
 
@@ -680,14 +695,15 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	private KeySequence getIterationBinding() {
 	    final IBindingService bindingSvc= PlatformUI.getWorkbench().getAdapter(IBindingService.class);
 		TriggerSequence binding= bindingSvc.getBestActiveBindingFor(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);
-		if (binding instanceof KeySequence)
+		if (binding instanceof KeySequence) {
 			return (KeySequence) binding;
+		}
 		return null;
     }
 
 	/**
 	 * Sets the current proposal sorter into the content assistant.
-	 * 
+	 *
 	 * @since 3.8
 	 * @see ProposalSorterRegistry#getCurrentSorter() the sorter used if <code>true</code>
 	 */
