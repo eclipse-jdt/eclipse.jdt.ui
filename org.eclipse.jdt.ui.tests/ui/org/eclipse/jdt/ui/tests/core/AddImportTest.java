@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -525,7 +525,7 @@ public class AddImportTest extends CoreTests {
 
 		String[] order= new String[] { "java.util", "java.io", "java.net" };
 		int threshold= 99;
-		AST ast= AST.newAST(IASTSharedValues.SHARED_AST_LEVEL);
+		AST ast= AST.newAST(IASTSharedValues.SHARED_AST_LEVEL, false);
 		ImportRewrite importsRewrite= newImportsRewrite(cu2, order, threshold, true);
 		{
 			IJavaElement[] elements= cu1.codeSelect(content.indexOf("IOException"), "IOException".length());
@@ -711,7 +711,7 @@ public class AddImportTest extends CoreTests {
 
 		String[] order= new String[] { "java.util", "java.io", "java.net" };
 		int threshold= 99;
-		AST ast= AST.newAST(IASTSharedValues.SHARED_AST_LEVEL);
+		AST ast= AST.newAST(IASTSharedValues.SHARED_AST_LEVEL, false);
 		ImportRewrite importsRewrite= newImportsRewrite(cu2, order, threshold, true);
 		{
 			IJavaElement[] elements= cu1.codeSelect(content.indexOf("Map"), "Map".length());
