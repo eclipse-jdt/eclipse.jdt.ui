@@ -8,6 +8,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * 
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Sebastian Davids <sdavids@gmx.de> - Bug 37432 getInvertEqualsProposal
@@ -4263,8 +4267,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 	private boolean getSplitSwitchLabelProposal(IInvocationContext context, ASTNode coveringNode, Collection<ICommandAccess> proposals) {
 		AST ast= coveringNode.getAST();
-		// Only continue if >= JLS12 and selected node, or its parent is a SwitchCase
-		if (ast.apiLevel() < AST.JLS12 ||
+		// Only continue if AST level is JLS13 and selected node, or its parent is a SwitchCase
+		if (ast.apiLevel() != AST.JLS13 ||
 				!(coveringNode instanceof SwitchCase || coveringNode.getParent() instanceof SwitchCase)) {
 			return false;
 		}

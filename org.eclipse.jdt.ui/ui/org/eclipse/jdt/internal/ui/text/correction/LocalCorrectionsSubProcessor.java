@@ -8,6 +8,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Renaud Waldura &lt;renaud+eclipse@waldura.com&gt; - Access to static proposal
@@ -1775,7 +1779,7 @@ public class LocalCorrectionsSubProcessor {
 			Statement curr= statements.get(i);
 			if (curr instanceof SwitchCase) {
 				SwitchCase switchCase= (SwitchCase) curr;
-				if (switchCase.getAST().apiLevel() >= AST.JLS12) {
+				if (switchCase.getAST().apiLevel() == AST.JLS13) {
 					List<Expression> expressions= switchCase.expressions();
 					if (expressions.size() == 0) {
 						hasDefault= true;
@@ -1818,7 +1822,7 @@ public class LocalCorrectionsSubProcessor {
 			Statement curr= statements.get(i);
 			if (curr instanceof SwitchCase) {
 				SwitchCase switchCase= (SwitchCase) curr;
-				if (switchCase.getAST().apiLevel() >= AST.JLS12) {
+				if (switchCase.getAST().apiLevel() == AST.JLS13) {
 					if (switchCase.expressions().size() == 0) {
 						defaultIndex= i;
 						break;
@@ -1850,7 +1854,7 @@ public class LocalCorrectionsSubProcessor {
 				SwitchCase newSwitchCase= ast.newSwitchCase();
 				String enumConstName= enumConstNames.get(i);
 				Name newName= ast.newName(enumConstName);
-				if (ast.apiLevel() >= AST.JLS12) {
+				if (ast.apiLevel() == AST.JLS13) {
 					newSwitchCase.expressions().add(newName);
 				} else {
 					newSwitchCase.setExpression(newName);
@@ -1858,7 +1862,7 @@ public class LocalCorrectionsSubProcessor {
 				listRewrite.insertAt(newSwitchCase, defaultIndex, null);
 				defaultIndex++;
 				if (!hasDefault) {
-					if (ast.apiLevel() >= AST.JLS12) {
+					if (ast.apiLevel() == AST.JLS13) {
 						if (statements.size() > 0) {
 							Statement firstStatement= statements.get(0);
 							SwitchCase switchCase= (SwitchCase) firstStatement;
@@ -1886,7 +1890,7 @@ public class LocalCorrectionsSubProcessor {
 				listRewrite.insertAt(newSwitchCase, defaultIndex, null);
 				defaultIndex++;
 
-				if (ast.apiLevel() >= AST.JLS12) {
+				if (ast.apiLevel() == AST.JLS13) {
 					if (statements.size() > 0) {
 						Statement firstStatement= statements.get(0);
 						SwitchCase switchCase= (SwitchCase) firstStatement;
@@ -1982,7 +1986,7 @@ public class LocalCorrectionsSubProcessor {
 		SwitchCase newSwitchCase= ast.newSwitchCase();
 		listRewrite.insertLast(newSwitchCase, null);
 
-		if (ast.apiLevel() >= AST.JLS12) {
+		if (ast.apiLevel() == AST.JLS13) {
 			if (statements.size() > 0) {
 				Statement firstStatement= statements.get(0);
 				SwitchCase switchCase= (SwitchCase) firstStatement;

@@ -8,6 +8,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *   Konstantin Scheglov (scheglov_ke@nlmk.ru) - initial API and implementation
  *          (reports 71244 & 74746: New Quick Assist's [quick assist])
@@ -2454,7 +2458,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			Statement statement= iter.next();
 			if (statement instanceof SwitchCase) {
 				SwitchCase switchCase= (SwitchCase) statement;
-				if (ast.apiLevel() >= AST.JLS12 && switchCase.expressions().size() > 1) {
+				if (ast.apiLevel() == AST.JLS13 && switchCase.expressions().size() > 1) {
 					return false;
 				}
 				// special case: pass through
@@ -2556,7 +2560,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 	private static Expression createSwitchCaseCondition(AST ast, ASTRewrite rewrite, ImportRewrite importRewrite, ImportRewriteContext importRewriteContext, Name switchExpression,
 			SwitchCase switchCase, boolean isStringsInSwitch, boolean preserveNPE) {
 		Expression expression= null;
-		if (ast.apiLevel() >= AST.JLS12) {
+		if (ast.apiLevel() == AST.JLS13) {
 			if (switchCase.expressions().size() == 1) {
 				expression= (Expression) switchCase.expressions().get(0);
 			}
@@ -2903,7 +2907,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				ASTNode astNode= caseExpressions.get(i);
 				switchCaseStatements[i]= ast.newSwitchCase();
 				Expression copyTarget= (Expression) rewrite.createCopyTarget(astNode);
-				if (ast.apiLevel() >= AST.JLS12) {
+				if (ast.apiLevel() == AST.JLS13) {
 					switchCaseStatements[i].expressions().add(copyTarget);
 				} else {
 					switchCaseStatements[i].setExpression(copyTarget);
