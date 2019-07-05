@@ -100,7 +100,7 @@ public final class ChainCompletionTemplateBuilder {
 		for (final ITypeBinding parameter : method.getParameterTypes()) {
 			String tmp= String.valueOf(parameter.getName());
 			String parameterName= tmp.substring(0, 1).toLowerCase() + tmp.substring(1);
-			int index= parameterName.indexOf("<"); //$NON-NLS-1$
+			int index= parameterName.indexOf('<');
 			if (index != -1) {
 				parameterName= parameterName.substring(0, index);
 			}

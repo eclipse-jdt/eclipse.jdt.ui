@@ -436,7 +436,7 @@ public class FilteredPreferenceTree {
 		fRefreshJob.cancel();
 		fRefreshJob.schedule(getRefreshJobDelay());
 		filterText= filterText.trim();
-		int index= filterText.indexOf("~"); //$NON-NLS-1$
+		int index= filterText.indexOf('~');
 		StringMatcher labelMatcher= null;
 		StringMatcher valueMatcher= null;
 		if (index == -1) {
