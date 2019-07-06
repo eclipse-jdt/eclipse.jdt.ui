@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
 
@@ -67,6 +68,19 @@ public class CalleeJavaMethodParameterVisitor extends HierarchicalASTVisitor {
 			}
 		}
 		return super.visit(classInstanceCreation);
+	}
+
+	@Override
+	public boolean visit(SuperConstructorInvocation superConstructorInvocation) {
+		List<?> arguments= superConstructorInvocation.arguments();
+		if (!arguments.isEmpty()) {
+			IMethodBinding constructorBinding= superConstructorInvocation.resolveConstructorBinding();
+			if (constructorBinding != null) {
+				IMethod method = resolveMethodBinding(constructorBinding);
+				collectParameterNamesCodeMinings(method, arguments, constructorBinding.isVarargs());
+			}
+		}
+		return super.visit(superConstructorInvocation);
 	}
 
 	@Override
