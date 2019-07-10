@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
+import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -81,6 +82,19 @@ public class CalleeJavaMethodParameterVisitor extends HierarchicalASTVisitor {
 			}
 		}
 		return super.visit(superConstructorInvocation);
+	}
+
+	@Override
+	public boolean visit(EnumConstantDeclaration enumConstantDeclaration) {
+		List<?> arguments= enumConstantDeclaration.arguments();
+		if (!arguments.isEmpty()) {
+			IMethodBinding constructorBinding= enumConstantDeclaration.resolveConstructorBinding();
+			if (constructorBinding != null) {
+				IMethod method = resolveMethodBinding(constructorBinding);
+				collectParameterNamesCodeMinings(method, arguments, constructorBinding.isVarargs());
+			}
+		}
+		return super.visit(enumConstantDeclaration);
 	}
 
 	@Override
