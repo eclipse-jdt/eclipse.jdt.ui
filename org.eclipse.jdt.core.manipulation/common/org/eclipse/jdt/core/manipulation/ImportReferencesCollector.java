@@ -7,6 +7,11 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
+ * 
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -23,7 +28,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnnotatableType;
-import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ContinueStatement;
@@ -62,6 +66,7 @@ import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeMethodReference;
 import org.eclipse.jdt.core.dom.UsesDirective;
+import org.eclipse.jdt.core.dom.YieldStatement;
 
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
@@ -304,17 +309,13 @@ public class ImportReferencesCollector extends GenericVisitor {
 	}
 	
 	@Override
-	public boolean visit(BreakStatement node) {
-		int apiLevel= node.getAST().apiLevel();
-		if (apiLevel >= AST.JLS12) {
+	public boolean visit(YieldStatement node) {
+		if (node.getAST().apiLevel() == AST.JLS13) {
 			evalQualifyingExpression(node.getExpression(), null);			
 		}
 		return false;
 	}
 	
-	/*
-	 * @see ASTVisitor#visit(ThisExpression)
-	 */
 	@Override
 	public boolean visit(ThisExpression node) {
 		typeRefFound(node.getQualifier());
