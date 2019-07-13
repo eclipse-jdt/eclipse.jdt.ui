@@ -9118,7 +9118,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test;\n");
-		buf.append("public interface IFoo {\n");
+		buf.append("public abstract interface IFoo {\n");
 		buf.append("  public static final int MAGIC_NUMBER = 646;\n");
 		buf.append("  public abstract int foo ();\n");
 		buf.append("  abstract void func ();\n");
@@ -9141,7 +9141,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("public final class Sealed {\n");
 		buf.append("  public final void foo () {};\n");
 		buf.append("  \n");
-		buf.append("  static interface INested {\n");
+		buf.append("  abstract static interface INested {\n");
 		buf.append("  }\n");
 		buf.append("}\n");
 		ICompilationUnit cu2= pack1.createCompilationUnit("Sealed.java", buf.toString(), false, null);
