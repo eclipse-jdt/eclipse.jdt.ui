@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,6 +14,7 @@
  *     Samrat Dhillon <samrat.dhillon@gmail.com> - [introduce factory] Introduce Factory on an abstract class adds a statement to create an instance of that class - https://bugs.eclipse.org/bugs/show_bug.cgi?id=395016
  *     Yves Joan <yves.joan@oracle.com> - [reorg] Copy action should NOT add 'copy of' prefix - https://bugs.eclipse.org/bugs/show_bug.cgi?id=151668
  *     Red Hat Inc. - copied to jdt.core.manipulation
+ *     Pierre-Yves B. <pyvesdev@gmail.com> - [inline] Allow inlining of local variable initialized to null. - https://bugs.eclipse.org/93850
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring;
 
@@ -876,8 +877,6 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String InlineTempRefactoring_select_temp;
 
 	public static String InlineTemRefactoring_error_message_fieldsCannotBeInlined;
-
-	public static String InlineTemRefactoring_error_message_nulLiteralsCannotBeInlined;
 
 	public static String IntroduceFactory_addFactoryMethod;
 
