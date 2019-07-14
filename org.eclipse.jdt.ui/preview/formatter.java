@@ -555,6 +555,8 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import java.net.Socket;
 public class Another {}
 public class Example {
+	public class Nested {
+	}
 	public static class Pair {
 		public String first;
 		public String second;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -683,16 +683,14 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 					List<NumberPreference> preferences= findPreferences(NumberPreference.class);
 					for (NumberPreference pref : preferences) {
 						int value= pref.getControl().getSelection();
-						Integer count= counts.get(value);
-						count= count == null ? 1 : count + 1;
-						counts.put(value, count);
+						int count= counts.merge(value, 1, Integer::sum);
 						if (count > modeCount) {
 							modeValue= value;
 							modeCount= count;
 						}
 					}
 					fControl.setSelection(modeValue);
-					fLabel.setText(modeCount == preferences.size() ? "" : Messages.format(FormatterMessages.ModifyDialog_modifyAll_summary, new Object[] { modeCount, preferences.size() })); //$NON-NLS-1$
+					fLabel.setText(Messages.format(FormatterMessages.ModifyDialog_modifyAll_summary, new Object[] { modeCount, preferences.size() }));
 					fLabel.requestLayout();
 				}
 			};

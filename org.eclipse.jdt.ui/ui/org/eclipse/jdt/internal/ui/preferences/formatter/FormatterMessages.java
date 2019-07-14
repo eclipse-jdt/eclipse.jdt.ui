@@ -47,6 +47,7 @@ final class FormatterMessages extends NLS {
 	public static String FormatterModifyDialog_blankLines_tree_blank_lines;
 	public static String FormatterModifyDialog_blankLines_tree_class_declarations;
 	public static String FormatterModifyDialog_blankLines_tree_compilation_unit;
+	public static String FormatterModifyDialog_blankLines_val_remove_extra_lines;
 	public static String FormatterModifyDialog_braces_pref_annotation_type_declaration;
 	public static String FormatterModifyDialog_braces_pref_anonymous_class_declaration;
 	public static String FormatterModifyDialog_braces_pref_array_initializer;
@@ -93,6 +94,8 @@ final class FormatterMessages extends NLS {
 	public static String FormatterModifyDialog_comments_tree_block_comments;
 	public static String FormatterModifyDialog_comments_tree_comments;
 	public static String FormatterModifyDialog_comments_tree_javadocs;
+	public static String FormatterModifyDialog_indentation_info_blank_lines_before_field;
+	public static String FormatterModifyDialog_indentation_info_blank_lines_before_field_delete;
 	public static String FormatterModifyDialog_indentation_info_blank_lines_to_preserve;
 	public static String FormatterModifyDialog_indentation_pref_align_assignment_statements_on_columns;
 	public static String FormatterModifyDialog_indentation_pref_align_fields_in_columns;
