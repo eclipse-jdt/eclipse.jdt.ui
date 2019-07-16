@@ -145,6 +145,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	private static final String VERSION_11= JavaCore.VERSION_11;
 	private static final String VERSION_12 = JavaCore.VERSION_12;
 	private static final String VERSION_13 = JavaCore.VERSION_13;
+	private static final String VERSION_LATEST = JavaCore.latestSupportedJavaVersion();
 	private static final String VERSION_JSR14= "jsr14"; //$NON-NLS-1$
 
 	private static final String ERROR= JavaCore.ERROR;
@@ -427,7 +428,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				PreferencesMessages.ComplianceConfigurationBlock_ignore
 		};
 
-		label= PreferencesMessages.ComplianceConfigurationBlock_enable_preview_label;
+		label= Messages.format(PreferencesMessages.ComplianceConfigurationBlock_enable_preview_label, new String[] { getVersionLabel(VERSION_LATEST) });
 		fEnablePreviewCheck= addCheckBox(group, label, PREF_ENABLE_PREVIEW, new String[] { ENABLED, DISABLED }, indent);
 		label= PreferencesMessages.ComplianceConfigurationBlock_enable_preview_severity_label;
 		fReportPreviewCombo= addComboBox(group, label, PREF_PB_REPORT_PREVIEW, warningInfoIgnore, warningInfoIgnoreLabels, indent * 2);
@@ -1013,15 +1014,15 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		if (checkValue(INTR_DEFAULT_COMPLIANCE, USER_CONF)) {
 			String compatibility= getValue(PREF_SOURCE_COMPATIBILITY);
 
-			boolean isLessThan11= JavaModelUtil.isVersionLessThan(compatibility, VERSION_11);
-			updateRememberedComplianceOption(PREF_ENABLE_PREVIEW, IDX_ENABLE_PREVIEW, !isLessThan11, null);
+			boolean isLessThanLatest= JavaModelUtil.isVersionLessThan(compatibility, VERSION_LATEST);
+			updateRememberedComplianceOption(PREF_ENABLE_PREVIEW, IDX_ENABLE_PREVIEW, !isLessThanLatest, null);
 			updateRememberedComplianceOption(PREF_PB_REPORT_PREVIEW, IDX_REPORT_PREVIEW, fEnablePreviewCheck.isEnabled() && fEnablePreviewCheck.getSelection(), WARNING);
 		}
 	}
 
 	private void updatePreviewControls() {
 		String compliance= getValue(PREF_COMPLIANCE);
-		if (JavaCore.compareJavaVersions(compliance, JavaCore.VERSION_10) <= 0) {
+		if (JavaCore.compareJavaVersions(compliance, VERSION_LATEST) < 0) {
 			fEnablePreviewCheck.setSelection(false);
 			fReportPreviewCombo.select(0);
 		}
