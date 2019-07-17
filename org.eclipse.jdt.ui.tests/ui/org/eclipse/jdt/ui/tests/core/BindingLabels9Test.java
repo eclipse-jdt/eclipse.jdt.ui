@@ -59,7 +59,7 @@ public class BindingLabels9Test extends AbstractBindingLabelsTest {
 
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("/** @category test */\n");
 		buf.append("module mymod {}\n");
 		String content= buf.toString();
@@ -75,7 +75,7 @@ public class BindingLabels9Test extends AbstractBindingLabelsTest {
 
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("@Deprecated\n");
 		buf.append("module mymod {}\n");
 		String content= buf.toString();

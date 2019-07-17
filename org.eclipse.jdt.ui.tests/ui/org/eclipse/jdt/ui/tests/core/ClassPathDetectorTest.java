@@ -191,7 +191,7 @@ public class ClassPathDetectorTest extends TestCase {
 
 		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(fJProject1, "src2");
 		IPackageFragment pack1= root.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
@@ -234,7 +234,7 @@ public class ClassPathDetectorTest extends TestCase {
 
 		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(fJProject1, "src1/src2");
 		IPackageFragment pack1= root.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
@@ -302,7 +302,7 @@ public class ClassPathDetectorTest extends TestCase {
 
 		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(fJProject1, "src1");
 		IPackageFragment pack1= root.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");

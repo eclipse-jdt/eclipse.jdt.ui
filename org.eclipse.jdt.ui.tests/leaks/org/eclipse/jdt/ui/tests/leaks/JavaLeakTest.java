@@ -280,7 +280,7 @@ public class JavaLeakTest extends LeakTestCase {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject, "src");
 
 		IPackageFragment pack2= sourceFolder.createPackageFragment("pack0", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack0;\n");
 		buf.append("public class " + typeName + " {\n}\n");
 		return pack2.createCompilationUnit(typeName + ".java", buf.toString(), false, null);

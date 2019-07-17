@@ -171,7 +171,7 @@ public class DeleteTest extends RefactoringTest {
 	}
 
 	private String getPackageName(int i) {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		for (int j= 0; j <= i; j++) {
 			if (j>0)
 				buf.append(".");

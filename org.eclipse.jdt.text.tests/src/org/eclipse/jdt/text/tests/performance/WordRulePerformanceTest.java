@@ -64,7 +64,7 @@ public class WordRulePerformanceTest extends TextPerformanceTestCase2 {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		StringBuffer sb= new StringBuffer();
+		StringBuilder sb= new StringBuilder();
 		for (int i= 0; i < WORDS_IN_DOCUMENT; i++)
 			sb.append(WORD_IN_DOCUMENT).append("\n");
 

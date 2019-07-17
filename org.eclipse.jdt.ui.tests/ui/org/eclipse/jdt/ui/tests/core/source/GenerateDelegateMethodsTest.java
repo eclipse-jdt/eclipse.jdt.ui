@@ -72,7 +72,7 @@ public class GenerateDelegateMethodsTest extends SourceTestCase {
 	protected void setUp() throws CoreException {
 		super.setUp();
 
-		StringBuffer comment= new StringBuffer();
+		StringBuilder comment= new StringBuilder();
 		comment.append("/* (non-Javadoc)\n");
 		comment.append(" * ${see_to_target}\n");
 		comment.append(" */");

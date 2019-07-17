@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 itemis AG (http://www.itemis.eu) and others.
+ * Copyright (c) 2018, 2019 itemis AG (http://www.itemis.eu) and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     Karsten Thoms (itemis) - initial API and implementation
+ *     Fabrice TIERCELIN - Remove redundant abstract modifier on interface
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.fix;
 
@@ -82,14 +83,15 @@ public class RedundantModifiersCleanUp extends AbstractMultiFix {
 	@SuppressWarnings("nls")
 	@Override
 	public String getPreview() {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("\n");
-		buf.append("public interface IFoo {\n");
 		if (isEnabled(CleanUpConstants.REMOVE_REDUNDANT_MODIFIERS)) {
+			buf.append("public interface IFoo {\n");
 			buf.append("  int MAGIC_NUMBER = 646;\n");
 			buf.append("  int foo ();\n");
 			buf.append("  int bar (int bazz);\n");
 		} else {
+			buf.append("public abstract interface IFoo {\n");
 			buf.append("  public static final int MAGIC_NUMBER = 646;\n");
 			buf.append("  public abstract int foo ();\n");
 			buf.append("  public int bar (int bazz);\n");
@@ -106,7 +108,7 @@ public class RedundantModifiersCleanUp extends AbstractMultiFix {
 		} else {
 			buf.append("  public final void foo () {};\n");
 			buf.append("  \n");
-			buf.append("  static interface INested {\n");
+			buf.append("  abstract static interface INested {\n");
 			buf.append("  }\n");
 		}
 		buf.append("}\n");
@@ -151,9 +153,14 @@ public class RedundantModifiersCleanUp extends AbstractMultiFix {
 
 			@Override
 			public boolean visit(TypeDeclaration node) {
-				TypeDeclaration typeDecl= ASTNodes.getParent(node, TypeDeclaration.class);
-				if (typeDecl != null && node.isInterface() && Modifier.isStatic(node.getModifiers())) {
-					rewriteOperations.add(new RemoveModifiersOperation(node, Modifier.STATIC));
+				if (node.isInterface()) {
+					if (Modifier.isAbstract(node.getModifiers())) {
+						rewriteOperations.add(new RemoveModifiersOperation(node, Modifier.ABSTRACT));
+					}
+					TypeDeclaration typeDecl= ASTNodes.getParent(node, TypeDeclaration.class);
+					if (typeDecl != null && Modifier.isStatic(node.getModifiers())) {
+						rewriteOperations.add(new RemoveModifiersOperation(node, Modifier.STATIC));
+					}
 				}
 				return true;
 			}

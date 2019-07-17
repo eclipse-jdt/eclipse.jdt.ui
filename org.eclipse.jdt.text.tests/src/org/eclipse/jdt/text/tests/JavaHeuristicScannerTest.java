@@ -1110,7 +1110,7 @@ public class JavaHeuristicScannerTest extends TestCase {
 	}
 	
 	public void testDefaultMethod1() {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("interface I {\n");
 		buf.append("			default void foo (int a) {\n");
 		buf.append("		switch(a) {\n");
@@ -1133,7 +1133,7 @@ public class JavaHeuristicScannerTest extends TestCase {
 	}
 
 	public void testDefaultMethod2() {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("interface I {\n");
 		buf.append("    default String name() {\n");
 		buf.append("        return \"unnamed\";\n");

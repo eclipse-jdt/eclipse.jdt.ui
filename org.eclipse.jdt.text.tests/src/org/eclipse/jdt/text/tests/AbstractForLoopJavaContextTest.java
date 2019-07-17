@@ -138,7 +138,7 @@ public abstract class AbstractForLoopJavaContextTest extends TestCase {
 	protected abstract String getInnerClasses();
 
 	protected String evaluateTemplateInMethodWithField(String signature, String fieldDeclaration) throws BadLocationException, TemplateException, CoreException {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append(fieldDeclaration);
 		buf.append(";\n");
 		buf.append(signature);

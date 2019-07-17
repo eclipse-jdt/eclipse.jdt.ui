@@ -208,7 +208,7 @@ public class AdvancedQuickAssistTest17 extends QuickFixTest {
 
 	public void testConvertIfToSwitch2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(String s) {\n");

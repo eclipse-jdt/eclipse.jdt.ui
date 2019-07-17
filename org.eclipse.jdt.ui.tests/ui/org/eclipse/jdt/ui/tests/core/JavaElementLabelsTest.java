@@ -78,7 +78,7 @@ public class JavaElementLabelsTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package org.test;\n");
 		buf.append("public class Outer {\n");
 		buf.append("}\n");
@@ -107,7 +107,7 @@ public class JavaElementLabelsTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package org.test;\n");
 		buf.append("import java.util.Vector;\n");
 		buf.append("public class Outer {\n");
@@ -143,7 +143,7 @@ public class JavaElementLabelsTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package org.test;\n");
 		buf.append("import java.util.Vector;\n");
 		buf.append("public class Outer {\n");
@@ -177,7 +177,7 @@ public class JavaElementLabelsTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package org.test;\n");
 		buf.append("import java.util.*;\n");
 		buf.append("import java.io.Serializable;\n");
@@ -231,7 +231,7 @@ public class JavaElementLabelsTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package org.test;\n");
 		buf.append("import java.util.*;\n");
 		buf.append("public class X {\n");
@@ -269,7 +269,7 @@ public class JavaElementLabelsTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package org.test;\n");
 		buf.append("import java.util.Vector;\n");
 		buf.append("public class Outer {\n");
@@ -303,7 +303,7 @@ public class JavaElementLabelsTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package org.test;\n");
 		buf.append("import java.util.Vector;\n");
 		buf.append("public class Outer {\n");
@@ -341,7 +341,7 @@ public class JavaElementLabelsTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package org.test;\n");
 		buf.append("import java.util.Vector;\n");
 		buf.append("public class Outer {\n");
@@ -373,7 +373,7 @@ public class JavaElementLabelsTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package org.test;\n");
 		buf.append("import java.util.Vector;\n");
 		buf.append("public class Outer {\n");
@@ -407,7 +407,7 @@ public class JavaElementLabelsTest extends CoreTests {
 			IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 			IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-			StringBuffer buf= new StringBuffer();
+			StringBuilder buf= new StringBuilder();
 			buf.append("package org.test;\n");
 			buf.append("public class Wildcards<T> {\n");
 			buf.append("	Wildcards<? extends Number> upper;\n");
@@ -516,7 +516,7 @@ public class JavaElementLabelsTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package org.test;\n");
 		buf.append("public class Varargs {\n");
 		buf.append("    public void foo(int i, String... varargs) {\n");
@@ -547,7 +547,7 @@ public class JavaElementLabelsTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package org.test;\n");
 		buf.append("import java.util.Arrays;\n");
 		buf.append("public class Varargs {\n");
@@ -595,7 +595,7 @@ public class JavaElementLabelsTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package org.test;\n");
 		buf.append("import java.util.Arrays;\n");
 		buf.append("public class Varargs {\n");
@@ -631,7 +631,7 @@ public class JavaElementLabelsTest extends CoreTests {
 	public void testMethodLabelAnnotatedParameters() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package org.test;\n");
 		buf.append("\n");
 		buf.append("import java.lang.annotation.Retention;\n");

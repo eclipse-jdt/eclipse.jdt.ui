@@ -161,7 +161,7 @@ public class NLSSourceModifierTest extends TestCase {
 
       CreateTextFileChange accessorChange= (CreateTextFileChange)AccessorClassCreator.create(cu, "Accessor", pack.getPath().append("Accessor.java"), pack, pack.getPath().append("test.properties"), true, nlsSubstitutions, defaultSubst, null);
       String accessor= accessorChange.getPreview();
-      StringBuffer buf= new StringBuffer();
+      StringBuilder buf= new StringBuilder();
       buf.append("package test;\n");
       buf.append("\n");
       buf.append("import org.eclipse.osgi.util.NLS;\n");
@@ -237,7 +237,7 @@ public class NLSSourceModifierTest extends TestCase {
 
         CreateTextFileChange accessorChange= (CreateTextFileChange)AccessorClassCreator.create(cu, "Accessor", pack.getPath().append("Accessor.java"), pack, pack.getPath().append("test.properties"), true, nlsSubstitutions, NLSRefactoring.DEFAULT_SUBST_PATTERN, null);
         String accessor= accessorChange.getPreview();
-        StringBuffer buf= new StringBuffer();
+        StringBuilder buf= new StringBuilder();
         buf.append("package test;\n");
         buf.append("\n");
         buf.append("import org.eclipse.osgi.util.NLS;\n");
@@ -321,7 +321,7 @@ public class NLSSourceModifierTest extends TestCase {
         CreateTextFileChange accessorChange= (CreateTextFileChange)AccessorClassCreator.create(cu, "Accessor", pack.getPath().append("Accessor.java"), pack, pack.getPath().append("test.properties"), true, nlsSubstitutions, NLSRefactoring.DEFAULT_SUBST_PATTERN, null);
 
         String accessor= accessorChange.getPreview();
-        StringBuffer buf= new StringBuffer();
+        StringBuilder buf= new StringBuilder();
         buf.append("package test;\n");
         buf.append("\n");
         buf.append("import org.eclipse.osgi.util.NLS;\n");
@@ -397,7 +397,7 @@ public class NLSSourceModifierTest extends TestCase {
 
         CreateTextFileChange accessorChange= (CreateTextFileChange)AccessorClassCreator.create(cu, "Accessor", pack.getPath().append("Accessor.java"), pack, pack.getPath().append("test.properties"), true, nlsSubstitutions, NLSRefactoring.DEFAULT_SUBST_PATTERN, null);
         String accessor= accessorChange.getPreview();
-        StringBuffer buf= new StringBuffer();
+        StringBuilder buf= new StringBuilder();
         buf.append("package test;\n");
         buf.append("\n");
         buf.append("import org.eclipse.osgi.util.NLS;\n");
@@ -876,7 +876,7 @@ public class NLSSourceModifierTest extends TestCase {
 
         CreateTextFileChange accessorChange= (CreateTextFileChange)AccessorClassCreator.create(cu, "Accessor", pack.getPath().append("Accessor.java"), pack, pack.getPath().append("test.properties"), true, nlsSubstitutions, NLSRefactoring.DEFAULT_SUBST_PATTERN, null);
         String accessor= accessorChange.getPreview();
-        StringBuffer buf= new StringBuffer();
+        StringBuilder buf= new StringBuilder();
         buf.append("package test;\n");
         buf.append("\n");
         buf.append("import org.eclipse.osgi.util.NLS;\n");
@@ -1376,7 +1376,7 @@ public class NLSSourceModifierTest extends TestCase {
 
         CreateTextFileChange accessorChange= (CreateTextFileChange)AccessorClassCreator.create(cu, "Accessor", pack.getPath().append("Accessor.java"), pack, pack.getPath().append("test.properties"), false, nlsSubstitutions, subpattern, null);
         String accessor= accessorChange.getPreview();
-        StringBuffer buf= new StringBuffer();
+        StringBuilder buf= new StringBuilder();
         buf.append("package test;\n");
         buf.append("\n");
         buf.append("import java.util.MissingResourceException;\n");

@@ -55,7 +55,7 @@ public abstract class AbstractJspParser {
 	}
 	
 	private void parseDirective() throws IOException {
-		StringBuffer sb= new StringBuffer();
+		StringBuilder sb= new StringBuilder();
 		int pos= fPos;
 		while (true) {
 			int c = getc();
@@ -72,7 +72,7 @@ public abstract class AbstractJspParser {
 	}
 	
 	private void parseTag(boolean endTag) throws IOException {
-		StringBuffer sb= new StringBuffer();
+		StringBuilder sb= new StringBuilder();
 		int pos= fPos;
 		while (true) {
 			int c= getc();
@@ -113,7 +113,7 @@ public abstract class AbstractJspParser {
 	}
 
 	private void parseJava(char type) throws IOException {
-		StringBuffer sb= new StringBuffer();
+		StringBuilder sb= new StringBuilder();
 		int line= fLines;
 		while (true) {
 			int c = getc();
@@ -135,7 +135,7 @@ public abstract class AbstractJspParser {
 	private void parseAttributes(int pos, String s) {
 		
 		boolean hasValue= false;
-		StringBuffer name= new StringBuffer();
+		StringBuilder name= new StringBuilder();
 		StringBuffer value= new StringBuffer();
 		String startTag= ""; //$NON-NLS-1$
 		int i= 0;
@@ -241,7 +241,7 @@ public abstract class AbstractJspParser {
 	
 	void parse(Reader reader) throws IOException {
 		int c;
-		StringBuffer buffer= new StringBuffer();
+		StringBuilder buffer= new StringBuilder();
 		fPos= 0;
 		fLines= 1;
 		int line= fLines;

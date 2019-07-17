@@ -41,6 +41,16 @@ public abstract class AbstractCleanUp implements ICleanUp {
 		setOptions(new MapCleanUpOptions(settings));
 	}
 
+	/**
+	 * Sets the options that will be used.
+	 *
+	 * @param settings Map of setting keys to values
+	 * @since 3.19
+	 */
+	public void setOptions(Map<String, String> settings) {
+		setOptions(new MapCleanUpOptions(settings));
+	}
+
 	/*
 	 * @see org.eclipse.jdt.ui.cleanup.ICleanUp#setOptions(org.eclipse.jdt.ui.cleanup.CleanUpOptions)
 	 * @since 3.5

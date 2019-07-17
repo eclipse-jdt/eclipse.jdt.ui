@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -54,6 +54,7 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.util.DelegatingDragAdapter;
 import org.eclipse.jface.util.DelegatingDropAdapter;
+import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.util.OpenStrategy;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -89,7 +90,6 @@ import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.IWorkbenchSiteProgressService;
-import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 
 import org.eclipse.ui.texteditor.ITextEditor;
 
@@ -421,12 +421,12 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
         //dnd on empty hierarchy
         DropTarget dropTarget = new DropTarget(fPagebook, DND.DROP_MOVE | DND.DROP_COPY | DND.DROP_LINK | DND.DROP_DEFAULT);
-        dropTarget.setTransfer(new Transfer[] { LocalSelectionTransfer.getInstance() });
+        dropTarget.setTransfer(LocalSelectionTransfer.getTransfer());
         dropTarget.addDropListener(new CallHierarchyTransferDropAdapter(this, fCallHierarchyViewer));
     }
 
 	private void addDropAdapters(StructuredViewer viewer) {
-		Transfer[] transfers= new Transfer[] { LocalSelectionTransfer.getInstance(), PluginTransfer.getInstance() };
+		Transfer[] transfers= new Transfer[] { LocalSelectionTransfer.getTransfer(), PluginTransfer.getInstance() };
 		int ops= DND.DROP_MOVE | DND.DROP_COPY | DND.DROP_LINK | DND.DROP_DEFAULT;
 
 		DelegatingDropAdapter delegatingDropAdapter= new DelegatingDropAdapter();
@@ -439,7 +439,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 	private void addDragAdapters(StructuredViewer viewer) {
 		int ops= DND.DROP_COPY | DND.DROP_LINK;
 
-		Transfer[] transfers= new Transfer[] { LocalSelectionTransfer.getInstance(), ResourceTransfer.getInstance(), FileTransfer.getInstance()};
+		Transfer[] transfers= new Transfer[] { LocalSelectionTransfer.getTransfer(), ResourceTransfer.getInstance(), FileTransfer.getInstance()};
 
 		DelegatingDragAdapter dragAdapter= new DelegatingDragAdapter() {
 			@Override
@@ -1421,7 +1421,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 			roots= CallHierarchy.getDefault().getCalleeRoots(newElements);
 		CallHierarchyViewer hierarchyViewer= getViewer();		
 		TreeRoot treeRoot= hierarchyViewer.getTreeRoot(roots, true);
-		hierarchyViewer.add(treeRoot, roots);
+		hierarchyViewer.add(treeRoot, (Object[]) roots);
 		for (int i= 0; i < roots.length; i++) {
 			hierarchyViewer.setExpandedState(roots[i], true);
 		}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc. - copied to jdt.core.manipulation core class
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
@@ -35,7 +36,7 @@ import org.eclipse.jdt.core.manipulation.CodeGeneration;
 
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
 /**
@@ -43,7 +44,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewr
  *
  * @since 3.1
  */
-public abstract class AbstractSerialVersionOperation extends CompilationUnitRewriteOperation {
+public abstract class AbstractSerialVersionOperationCore extends CompilationUnitRewriteOperation {
 
 	/** The long literal suffix */
 	protected static final String LONG_SUFFIX= "L"; //$NON-NLS-1$
@@ -61,7 +62,7 @@ public abstract class AbstractSerialVersionOperation extends CompilationUnitRewr
 	private final ASTNode[] fNodes;
 	private final ICompilationUnit fUnit;
 
-	protected AbstractSerialVersionOperation(final ICompilationUnit unit, final ASTNode[] node) {
+	protected AbstractSerialVersionOperationCore(final ICompilationUnit unit, final ASTNode[] node) {
 		fUnit= unit;
 		fNodes= node;
 	}
@@ -80,12 +81,12 @@ public abstract class AbstractSerialVersionOperation extends CompilationUnitRewr
 	 *
 	 * @param rewrite the ast rewrite to operate on
 	 * @param fragment the fragment to add linked positions to
-	 * @param positionGroups the list of {@link LinkedProposalPositionGroup}s
+	 * @param positionGroups the list of {@link LinkedProposalPositionGroupCore}s
 	 */
-	protected abstract void addLinkedPositions(final ASTRewrite rewrite, final VariableDeclarationFragment fragment, final LinkedProposalModel positionGroups);
+	protected abstract void addLinkedPositions(final ASTRewrite rewrite, final VariableDeclarationFragment fragment, final LinkedProposalModelCore positionGroups);
 
 	@Override
-	public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel positionGroups) throws CoreException {
+	public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModelCore positionGroups) throws CoreException {
 		final ASTRewrite rewrite= cuRewrite.getASTRewrite();
 		VariableDeclarationFragment fragment= null;
 		for (int i= 0; i < fNodes.length; i++) {

@@ -95,7 +95,7 @@ public class JspTranslator extends AbstractJspParser implements ITranslator {
 	@Override
 	protected void text(String t, int line) {
 		int i= 0;
-		StringBuffer out= new StringBuffer();
+		StringBuilder out= new StringBuilder();
 		while (i < t.length()) {
 			char c= t.charAt(i++);
 			if (c == '\n') {
@@ -126,7 +126,7 @@ public class JspTranslator extends AbstractJspParser implements ITranslator {
 	@Override
 	public String translate(Reader reader, String name) throws IOException  {
 
-		StringBuffer buffer= new StringBuffer();
+		StringBuilder buffer= new StringBuilder();
 		
 		resetTranslator();
 		parse(reader);

@@ -229,11 +229,11 @@ public class AbstractTestRunListenerTest extends TestCase {
 	}
 
 	public static void assertEqualLog(final String[] expectedSequence, String[] logMessages) {
-		StringBuffer actual= new StringBuffer();
+		StringBuilder actual= new StringBuilder();
 		for (int i= 0; i < logMessages.length; i++) {
 			actual.append(logMessages[i]).append('\n');
 		}
-		StringBuffer expected= new StringBuffer();
+		StringBuilder expected= new StringBuilder();
 		for (int i= 0; i < expectedSequence.length; i++) {
 			expected.append(expectedSequence[i]).append('\n');
 		}

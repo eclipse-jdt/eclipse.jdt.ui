@@ -1226,7 +1226,7 @@ public class RenameTypeTests extends RefactoringTest {
 		ICompilationUnit newcu= getPackageP().getCompilationUnit(newName + ".java");
 		assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName(newName)), newcu.getSource());
 		InputStreamReader reader= new InputStreamReader(file.getContents(true));
-		StringBuffer newContent= new StringBuffer();
+		StringBuilder newContent= new StringBuilder();
 		try {
 			int ch;
 			while((ch= reader.read()) != -1)
@@ -1334,7 +1334,7 @@ public class RenameTypeTests extends RefactoringTest {
 		helper3("SomeClass", "SomeDifferentClass", true, true, true, "test.html");
 
 		InputStreamReader reader= new InputStreamReader(file.getContents(true));
-		StringBuffer newContent= new StringBuffer();
+		StringBuilder newContent= new StringBuilder();
 		try {
 			int ch;
 			while((ch= reader.read()) != -1)

@@ -221,7 +221,7 @@ public class ModifierCorrectionsQuickFixTest17 extends QuickFixTest {
 
 	public void testAddSafeVarargs5() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("import java.util.List;\n");
 		buf.append("public class E {\n");
@@ -423,7 +423,7 @@ public class ModifierCorrectionsQuickFixTest17 extends QuickFixTest {
 		JavaProjectHelper.set15CompilerOptions(fJProject1);
 		try {
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
-			StringBuffer buf= new StringBuffer();
+			StringBuilder buf= new StringBuilder();
 			buf.append("package p;\n");
 			buf.append("import java.util.List;\n");
 			buf.append("public class E {\n");

@@ -3925,7 +3925,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
     public void testInvertEquals10() throws Exception {
         IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-        StringBuffer buf= new StringBuffer();
+        StringBuilder buf= new StringBuilder();
         buf.append("package test1;\n");
         buf.append("public class E {\n");
         buf.append("    public void foo() {\n");
@@ -3944,7 +3944,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
     public void testInvertEquals11() throws Exception {
         IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-        StringBuffer buf= new StringBuffer();
+        StringBuilder buf= new StringBuilder();
         buf.append("package test1;\n");
         buf.append("public class E {\n");
         buf.append("    boolean equals(Object o, boolean a) {\n");
@@ -3972,7 +3972,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
     public void testInvertEquals12() throws Exception {
         IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-        StringBuffer buf= new StringBuffer();
+        StringBuilder buf= new StringBuilder();
         buf.append("package test1;\n");
         buf.append("public class E {\n");
         buf.append("    boolean equals(boolean b) {\n");
@@ -4000,7 +4000,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
     public void testInvertEquals13() throws Exception {
         IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-        StringBuffer buf= new StringBuffer();
+        StringBuilder buf= new StringBuilder();
         buf.append("package test1;\n");
         buf.append("public class E {\n");
         buf.append("    boolean equals(boolean b) {\n");
@@ -4028,7 +4028,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
     public void testInvertEquals14() throws Exception {
         IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-        StringBuffer buf= new StringBuffer();
+        StringBuilder buf= new StringBuilder();
         buf.append("package test1;\n");
         buf.append("class Super {\n");
         buf.append("    protected boolean sBool= false;\n");
@@ -4059,7 +4059,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
     public void testInvertEquals15() throws Exception {
         IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-        StringBuffer buf= new StringBuffer();
+        StringBuilder buf= new StringBuilder();
         buf.append("package test1;\n");
         buf.append("public class E {\n");
         buf.append("    boolean equals(int i) {\n");
@@ -4087,7 +4087,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
     public void testInvertEquals16() throws Exception {
         IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-        StringBuffer buf= new StringBuffer();
+        StringBuilder buf= new StringBuilder();
         buf.append("package test1;\n");
         buf.append("public class E {\n");
         buf.append("    boolean equals(int i) {\n");
@@ -4116,7 +4116,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
     public void testInvertEquals17() throws Exception {
         IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-        StringBuffer buf= new StringBuffer();
+        StringBuilder buf= new StringBuilder();
         buf.append("package test1;\n");
         buf.append("public class E {\n");
         buf.append("    public void foo() {\n");
@@ -4135,7 +4135,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
     public void testInvertEquals18() throws Exception {
         IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-        StringBuffer buf= new StringBuffer();
+        StringBuilder buf= new StringBuilder();
         buf.append("package test1;\n");
         buf.append("public class E {\n");
         buf.append("    public boolean equals(Object o) {\n");
@@ -5976,7 +5976,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 	public void testMakeFinal06() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
@@ -6000,7 +6000,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 	public void testMakeFinal07() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    private int i= 0;\n");
@@ -6024,7 +6024,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 	public void testMakeFinal08() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    private int i= 0;\n");
@@ -6050,7 +6050,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 	public void testMakeFinal09() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    private int i= 0;\n");
@@ -6076,7 +6076,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 	public void testMakeFinal10() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    private int i= 0;\n");
@@ -6102,7 +6102,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 	public void testMakeFinal11() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
@@ -6314,7 +6314,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 	public void testMakeFinal16() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
@@ -6371,7 +6371,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 	public void testMakeFinal18() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    private int i= 0;\n");
@@ -6391,7 +6391,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 	public void testMakeFinal19() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    private void foo() {\n");
@@ -9701,7 +9701,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 
-		StringBuffer buf2= new StringBuffer();
+		StringBuilder buf2= new StringBuilder();
 		buf2.append("package test1;\n");
 		buf2.append("import java.util.ArrayList;\n");
 		buf2.append("import java.util.Date;\n");
@@ -9799,7 +9799,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 
-		StringBuffer buf2= new StringBuffer();
+		StringBuilder buf2= new StringBuilder();
 		buf2.append("package test1;\n");
 		buf2.append("import java.util.ArrayList;\n");
 		buf2.append("import java.util.Date;\n");
@@ -9876,7 +9876,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 
-		StringBuffer buf2= new StringBuffer();
+		StringBuilder buf2= new StringBuilder();
 		buf2.append("package test1;\n");
 		buf2.append("import java.util.Date;\n");
 		buf2.append("public class B {\n");
@@ -10066,7 +10066,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
-		StringBuffer expectation= new StringBuffer();
+		StringBuilder expectation= new StringBuilder();
 		expectation.append("package test1;\n");
 		expectation.append("\n");
 		expectation.append("import static test1.T.str;\n");
@@ -10186,7 +10186,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
-		StringBuffer expectation= new StringBuffer();
+		StringBuilder expectation= new StringBuilder();
 		expectation.append("package test1;\n");
 		expectation.append("\n");
 		expectation.append("import static test1.T.FOO;\n");
@@ -10211,7 +10211,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 	public void testConvertToStaticImportDoesNotAddImportWhenInScope() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class T {\n");
 		buf.append("	static String str;\n");
@@ -10227,7 +10227,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
-		StringBuffer expectation= new StringBuffer();
+		StringBuilder expectation= new StringBuilder();
 		expectation.append("package test1;\n");
 		expectation.append("public class T {\n");
 		expectation.append("	static String str;\n");
@@ -10704,7 +10704,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 	public void testCreateJUnitTestCase() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("}\n");

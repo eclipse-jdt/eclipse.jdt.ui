@@ -34,7 +34,7 @@ public abstract class AbstractCUTestCase extends TestCase {
 	protected String getFileContents(InputStream in) throws IOException {
 		BufferedReader br= new BufferedReader(new InputStreamReader(in));
 
-		StringBuffer sb= new StringBuffer();
+		StringBuilder sb= new StringBuilder();
 		try {
 			int read= 0;
 			while ((read= br.read()) != -1)

@@ -50,7 +50,7 @@ public abstract class AbstractMoveCompilationUnitPrefTest extends RepeatingRefac
 
 	private ICompilationUnit generateSources(int numberOfCus, int numberOfRefs) throws Exception {
 		IPackageFragment source= fTestProject.getSourceFolder().createPackageFragment("source", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package source;\n");
 		buf.append("public class A {\n");
 		buf.append("}\n");
@@ -64,7 +64,7 @@ public abstract class AbstractMoveCompilationUnitPrefTest extends RepeatingRefac
 	}
 
 	private static void createReferenceCu(IPackageFragment pack, int index, int numberOfRefs) throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package " + pack.getElementName() + ";\n");
 		buf.append("public class Ref" + index + " {\n");
 		for (int i= 0; i < numberOfRefs - 1; i++) {

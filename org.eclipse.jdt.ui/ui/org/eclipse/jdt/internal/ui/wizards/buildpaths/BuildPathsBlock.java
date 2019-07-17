@@ -395,6 +395,9 @@ public class BuildPathsBlock {
 	}
 
 	protected void doUpdateUI() {
+		if (fModulesPage.needReInit()) {
+			init(fCurrJProject, null, null); // extent of system modules was changed, re-init fClassPathList
+		}
 		fBuildPathDialogField.refresh();
 		fClassPathList.refresh();
 		boolean is9OrHigherAfter= JavaModelUtil.is9OrHigher(fCurrJProject);
@@ -632,7 +635,7 @@ public class BuildPathsBlock {
 					entryMissing= currElement;
 				}
 			}
-			if (entryDeprecated == null & currElement.isDeprecated()) {
+			if (entryDeprecated == null && currElement.isDeprecated()) {
 				entryDeprecated= currElement;
 			}
 		}

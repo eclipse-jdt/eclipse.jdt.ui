@@ -91,6 +91,7 @@ public class JavaNavigatorActionProvider extends CommonActionProvider {
 
 				fOpenViewGroup= new OpenViewActionGroup(viewPart, site.getStructuredViewer());
 				fOpenViewGroup.containsOpenPropertiesAction(false);
+				fOpenViewGroup.containsShowInMenu(false);
 				fCCPGroup= new CCPActionGroup(viewPart);
 				fGenerateGroup= new GenerateActionGroup(viewPart);
 				fSearchGroup= new JavaSearchActionGroup(viewPart);

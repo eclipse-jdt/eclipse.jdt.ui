@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,11 +10,11 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc. - modified to use PotentialProgrammingProblemsCleanUpCore
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.fix;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
@@ -25,25 +25,33 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 
-import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-import org.eclipse.jdt.internal.corext.fix.PotentialProgrammingProblemsFix;
-
+import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
+import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
+import org.eclipse.jdt.internal.ui.text.correction.ProblemLocationCore;
+
 public class PotentialProgrammingProblemsCleanUp extends AbstractMultiFix {
 
+	private PotentialProgrammingProblemsCleanUpCore coreCleanUp= new PotentialProgrammingProblemsCleanUpCore();
+
 	public PotentialProgrammingProblemsCleanUp(Map<String, String> options) {
-		super(options);
+		super();
+		setOptions(options);
 	}
 
 	public PotentialProgrammingProblemsCleanUp() {
 		super();
+	}
+
+	@Override
+	public void setOptions(CleanUpOptions options) {
+		coreCleanUp.setOptions(options);
 	}
 
 	/**A
@@ -51,109 +59,52 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractMultiFix {
 	 */
 	@Override
 	public CleanUpRequirements getRequirements() {
-		boolean requireAST= requireAST();
-		Map<String, String> requiredOptions= requireAST ? getRequiredOptions() : null;
-		return new CleanUpRequirements(requireAST, false, false, requiredOptions);
-	}
-
-	private boolean requireAST() {
-		boolean addSUID= isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
-		if (!addSUID)
-			return false;
-
-		return isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED) ||
-		       isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT);
+		return new CleanUpRequirements(coreCleanUp.getRequirementsCore());
 	}
 
 	@Override
 	protected ICleanUpFix createFix(CompilationUnit compilationUnit) throws CoreException {
-
-		boolean addSUID= isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
-		if (!addSUID)
-			return null;
-
-		return PotentialProgrammingProblemsFix.createCleanUp(compilationUnit,
-				isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED) ||
-				isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT));
+		ICleanUpFixCore fixCore= coreCleanUp.createFix(compilationUnit);
+		return fixCore == null ? null : new CleanUpFixWrapper(fixCore);
 	}
 
 	@Override
 	protected ICleanUpFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
-		if (compilationUnit == null)
-			return null;
-
-		return PotentialProgrammingProblemsFix.createCleanUp(compilationUnit, problems,
-				(isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED)) ||
-				(isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT)));
-	}
-
-	private Map<String, String> getRequiredOptions() {
-		Map<String, String> result= new Hashtable<>();
-		if ((isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED)) ||
-				(isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT)))
-			result.put(JavaCore.COMPILER_PB_MISSING_SERIAL_VERSION, JavaCore.WARNING);
-		return result;
+		List<IProblemLocationCore> coreProblemList= new ArrayList<>();
+		for (IProblemLocation location : problems) {
+			coreProblemList.add((ProblemLocationCore)location);
+		}
+		ICleanUpFixCore fixCore= coreCleanUp.createFix(compilationUnit, coreProblemList.toArray(new IProblemLocationCore[0]));
+		return fixCore == null ? null : new CleanUpFixWrapper(fixCore);
 	}
 
 	@Override
 	public String[] getStepDescriptions() {
-		List<String> result= new ArrayList<>();
-
-		if ((isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED)))
-			result.add(MultiFixMessages.SerialVersionCleanUp_Generated_description);
-		if ((isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT)))
-			result.add(MultiFixMessages.CodeStyleCleanUp_addDefaultSerialVersionId_description);
-
-		return result.toArray(new String[result.size()]);
+		return coreCleanUp.getStepDescriptions();
 	}
 
 	@Override
 	public String getPreview() {
-		StringBuilder buf= new StringBuilder();
-
-		buf.append("class E implements java.io.Serializable {\n"); //$NON-NLS-1$
-		if ((isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED))) {
-			buf.append("    private static final long serialVersionUID = -391484377137870342L;\n"); //$NON-NLS-1$
-		} else if ((isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT))) {
-			buf.append("    private static final long serialVersionUID = 1L;\n"); //$NON-NLS-1$
-		}
-		buf.append("}\n"); //$NON-NLS-1$
-
-		return buf.toString();
+		return coreCleanUp.getPreview();
 	}
 
 	@Override
 	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocation problem) {
-		if (problem.getProblemId() == IProblem.MissingSerialVersion)
-			return (isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED))
-				|| (isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT));
-
-		return false;
+		return coreCleanUp.canFix(compilationUnit, (ProblemLocationCore)problem);
 	}
 
 	@Override
 	public RefactoringStatus checkPreConditions(IJavaProject project, ICompilationUnit[] compilationUnits, IProgressMonitor monitor) throws CoreException {
-		RefactoringStatus superStatus= super.checkPreConditions(project, compilationUnits, monitor);
-		if (superStatus.hasFatalError())
-			return superStatus;
-
-		return PotentialProgrammingProblemsFix.checkPreConditions(project, compilationUnits, monitor,
-				isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED),
-				isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT),
-				false);
+		return coreCleanUp.checkPreConditions(project, compilationUnits, monitor);
 	}
 
 	@Override
 	public RefactoringStatus checkPostConditions(IProgressMonitor monitor) throws CoreException {
-		return PotentialProgrammingProblemsFix.checkPostConditions(monitor);
+		return coreCleanUp.checkPostConditions(monitor);
 	}
 
 	@Override
 	public int computeNumberOfFixes(CompilationUnit compilationUnit) {
-		if ((isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED)) ||
-				(isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT)))
-			return getNumberOfProblems(compilationUnit.getProblems(), IProblem.MissingSerialVersion);
-
-		return 0;
+		return coreCleanUp.computeNumberOfFixes(compilationUnit);
 	}
 }

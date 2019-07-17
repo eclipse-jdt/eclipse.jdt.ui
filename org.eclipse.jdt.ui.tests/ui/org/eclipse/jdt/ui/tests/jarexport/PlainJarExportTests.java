@@ -83,7 +83,7 @@ public class PlainJarExportTests extends TestCase {
 
 		fMainRoot= JavaProjectHelper.addSourceContainer(fProject, "src");
 		IPackageFragment fragment= fMainRoot.createPackageFragment("org.eclipse.jdt.ui.test", true, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package org.eclipse.jdt.ui.test;\n");
 		buf.append("public class Main {\n");
 		buf.append("    public class MainInner {\n");

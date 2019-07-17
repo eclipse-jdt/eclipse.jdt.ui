@@ -169,7 +169,7 @@ public class ScopeAnalyzer {
 		if (binding != null) {
 			switch (binding.getKind()) {
 				case IBinding.METHOD:
-					StringBuffer buf= new StringBuffer();
+					StringBuilder buf= new StringBuilder();
 					buf.append('M');
 					buf.append(binding.getName()).append('(');
 					ITypeBinding[] parameters= ((IMethodBinding) binding).getParameterTypes();
@@ -182,6 +182,7 @@ public class ScopeAnalyzer {
 					}
 					buf.append(')');
 					return buf.toString();
+
 				case IBinding.VARIABLE:
 					if (hasFlag(NO_FIELDS, flags) && ((IVariableBinding) binding).isField()) {
 						return 'F' + binding.getName();

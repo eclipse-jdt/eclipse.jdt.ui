@@ -162,7 +162,7 @@ public class Bindings {
 			Assert.isTrue(variableBinding.getName().equals("length"));//$NON-NLS-1$
 			return ARRAY_LENGTH_FIELD_BINDING_STRING;
 		}
-		StringBuffer result= new StringBuffer();
+		StringBuilder result= new StringBuilder();
 		result.append(variableBinding.getDeclaringClass().getName());
 		result.append(':');
 		result.append(variableBinding.getName());
@@ -170,7 +170,7 @@ public class Bindings {
 	}
 
 	private static String asString(IMethodBinding method) {
-		StringBuffer result= new StringBuffer();
+		StringBuilder result= new StringBuilder();
 		result.append(method.getDeclaringClass().getName());
 		result.append(':');
 		result.append(method.getName());
@@ -191,7 +191,7 @@ public class Bindings {
 		List<String> result= new ArrayList<>(5);
 		createName(type, false, result);
 
-		StringBuffer buffer= new StringBuffer();
+		StringBuilder buffer= new StringBuilder();
 		for (int i= 0; i < result.size(); i++) {
 			if (i > 0) {
 				buffer.append('.');
@@ -865,7 +865,7 @@ public class Bindings {
 			index= first.indexOf('<');
 			if (index > 0){
 				int lastIndex= first.lastIndexOf('>');
-				StringBuffer buf= new StringBuffer();
+				StringBuilder buf= new StringBuilder();
 				buf.append(first.substring(0, index));
 				if (lastIndex < first.length() - 1)
 					buf.append(first.substring(lastIndex + 1, first.length()));
@@ -1256,7 +1256,7 @@ public class Bindings {
 		if (binding.isArray()) {
 			String elementTypeQualifiedName = getRawQualifiedName(binding.getElementType());
 			if (elementTypeQualifiedName.length() != 0) {
-				StringBuffer stringBuffer= new StringBuffer(elementTypeQualifiedName);
+				StringBuilder stringBuffer= new StringBuilder(elementTypeQualifiedName);
 				stringBuffer.append('[').append(']');
 				return stringBuffer.toString();
 			} else {
@@ -1266,7 +1266,7 @@ public class Bindings {
 		if (binding.isMember()) {
 			String outerName= getRawQualifiedName(binding.getDeclaringClass());
 			if (outerName.length() > 0) {
-				StringBuffer buffer= new StringBuffer();
+				StringBuilder buffer= new StringBuilder();
 				buffer.append(outerName);
 				buffer.append('.');
 				buffer.append(getRawName(binding));
@@ -1277,7 +1277,7 @@ public class Bindings {
 
 		} else if (binding.isTopLevel()) {
 			IPackageBinding packageBinding= binding.getPackage();
-			StringBuffer buffer= new StringBuffer();
+			StringBuilder buffer= new StringBuilder();
 			if (packageBinding != null && packageBinding.getName().length() > 0) {
 				buffer.append(packageBinding.getName()).append('.');
 			}

@@ -651,7 +651,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 							return new ITypeInfoFilterExtension() {
 								@Override
 								public boolean select(ITypeInfoRequestor requestor) {
-									StringBuffer buf= new StringBuffer();
+									StringBuilder buf= new StringBuilder();
 									buf.append(requestor.getPackageName()).append('/');
 									String enclosingName= requestor.getEnclosingName();
 									if (enclosingName.length() > 0)

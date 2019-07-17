@@ -29,11 +29,13 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
@@ -51,7 +53,7 @@ public final class TypeBindingAnalyzer {
     private static final Predicate<IMethodBinding> RELEVANT_NON_STATIC_METHODS_ONLY_FILTER = new Predicate<IMethodBinding>() {
 		@Override
 		public boolean test(IMethodBinding m) {
-			return !Modifier.isStatic(m.getModifiers()) && !isVoid(m) & !m.isConstructor() && !hasPrimitiveReturnType(m);
+			return !Modifier.isStatic(m.getModifiers()) && !isVoid(m) && !m.isConstructor();
 		}
     };
 
@@ -65,7 +67,7 @@ public final class TypeBindingAnalyzer {
     private static final Predicate<IMethodBinding> STATIC_NON_VOID_NON_PRIMITIVE_METHODS_ONLY_FILTER = new Predicate<IMethodBinding>() {
 		@Override
 		public boolean test(IMethodBinding m) {
-			return Modifier.isStatic(m.getModifiers()) && !isVoid(m) && !m.isConstructor() && hasPrimitiveReturnType(m);
+			return Modifier.isStatic(m.getModifiers()) && !isVoid(m) && !m.isConstructor();
 		}
     };
 
@@ -212,8 +214,14 @@ public final class TypeBindingAnalyzer {
         final List<ITypeBinding> bindings = new LinkedList<>();
         final IType expectedTypeSig = getExpectedType(proj, ctx);
 		if (expectedTypeSig == null) {
-			ASTParser parser= createParser(cu, false);
-			AST ast= parser.createAST(null).getAST();
+			AST ast;
+			CompilationUnit cuNode= SharedASTProviderCore.getAST(cu, SharedASTProviderCore.WAIT_NO, null);
+			if (cuNode != null) {
+				ast= cuNode.getAST();
+			} else {
+				ASTParser parser= createParser(cu, false);
+				ast= parser.createAST(null).getAST();
+			}
 			ITypeBinding binding= ast.resolveWellKnownType(TypeBindingAnalyzer.getExpectedFullyQualifiedTypeName(ctx));
 			int dim= TypeBindingAnalyzer.getArrayDimension(ctx.getExpectedTypesSignatures());
 			if (dim > 0) {

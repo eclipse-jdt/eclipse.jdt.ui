@@ -221,7 +221,7 @@ public final class JavaModelUtil {
 	 * @return the concatenated name
 	 */
 	public static String concatenateName(String name1, String name2) {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		if (name1 != null && name1.length() > 0) {
 			buf.append(name1);
 		}
@@ -242,7 +242,7 @@ public final class JavaModelUtil {
 	 * @return the concatenated string
 	 */
 	public static String concatenateName(char[] name1, char[] name2) {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		if (name1 != null && name1.length > 0) {
 			buf.append(name1);
 		}

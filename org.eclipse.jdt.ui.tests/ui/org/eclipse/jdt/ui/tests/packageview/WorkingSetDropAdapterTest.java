@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -28,6 +28,7 @@ import org.eclipse.core.resources.IFolder;
 
 import org.eclipse.text.tests.Accessor;
 
+import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeSelection;
@@ -36,7 +37,6 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -229,14 +229,14 @@ public class WorkingSetDropAdapterTest extends TestCase {
 	}
 	private void performDnD(int validateResult, ITreeSelection selection, Object target, int location) throws Exception {
 		try {
-			LocalSelectionTransfer.getInstance().setSelection(selection);
+			LocalSelectionTransfer.getTransfer().setSelection(selection);
 			fAdapter.internalTestSetLocation(location);
 			int result= fAdapter.internalTestValidateTarget(target, DND.DROP_DEFAULT);
 			assertEquals(validateResult, result);
 			if (validateResult != DND.DROP_NONE)
 				fAdapter.internalTestDrop(target, result);
 		} finally {
-			LocalSelectionTransfer.getInstance().setSelection(null);
+			LocalSelectionTransfer.getTransfer().setSelection(null);
 		}
 	}
 }

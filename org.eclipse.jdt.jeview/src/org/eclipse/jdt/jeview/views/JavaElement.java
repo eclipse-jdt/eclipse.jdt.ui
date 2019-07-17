@@ -121,7 +121,7 @@ public class JavaElement extends JEAttribute {
 	
 	@Override
 	public String getLabel() {
-		StringBuffer sb= new StringBuffer();
+		StringBuilder sb= new StringBuilder();
 		if (fName != null)
 			sb.append(fName).append(": ");
 		

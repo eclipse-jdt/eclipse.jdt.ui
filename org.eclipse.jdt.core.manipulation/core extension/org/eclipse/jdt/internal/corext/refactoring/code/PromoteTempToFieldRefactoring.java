@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Microsoft Corporation - copied to jdt.core.manipulation
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
@@ -26,6 +27,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.text.edits.TextEdit;
+
+import org.eclipse.jface.text.Document;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
@@ -80,6 +83,11 @@ import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.ConvertLocalVariableDescriptor;
 
+import org.eclipse.jdt.internal.core.manipulation.BindingLabelProviderCore;
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
+import org.eclipse.jdt.internal.core.manipulation.StubUtility;
+import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
@@ -87,8 +95,8 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.DimensionRewrite;
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
-import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
-import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroupCore;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
@@ -102,13 +110,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
-
-import org.eclipse.jdt.ui.JavaElementLabels;
-
-import org.eclipse.jdt.internal.core.manipulation.StubUtility;
-import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
-import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 public class PromoteTempToFieldRefactoring extends Refactoring {
 
@@ -142,7 +143,9 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 	private boolean fTempTypeUsesClassTypeVariables;
 	//------ scripting --------//
 	private boolean fSelfInitializing= false;
-	private LinkedProposalModel fLinkedProposalModel;
+	private LinkedProposalModelCore fLinkedProposalModel;
+
+	private Map<String, String> fFormatterOptions;
 
 	/**
 	 * Creates a new promote temp to field refactoring.
@@ -376,9 +379,9 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     	String[] suggestedNames= guessFieldNames();
 		if (suggestedNames.length > 0) {
 			if (fLinkedProposalModel != null) {
-				LinkedProposalPositionGroup nameGroup= fLinkedProposalModel.getPositionGroup(LINKED_NAME, true);
+				LinkedProposalPositionGroupCore nameGroup= fLinkedProposalModel.getPositionGroup(LINKED_NAME, true);
 				for (int i= 0; i < suggestedNames.length; i++) {
-					nameGroup.addProposal(suggestedNames[i], null, suggestedNames.length - i);
+					nameGroup.addProposal(suggestedNames[i], suggestedNames.length - i);
 				}
 			}
 			return suggestedNames[0];
@@ -493,7 +496,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 				method.accept(nameCollector);
 				List<String> names= nameCollector.getNames();
 				if (names.contains(fFieldName)) {
-					String[] keys= { BasicElementLabels.getJavaElementName(fFieldName), BindingLabelProvider.getBindingLabel(method.resolveBinding(), JavaElementLabels.ALL_FULLY_QUALIFIED)};
+					String[] keys= { BasicElementLabels.getJavaElementName(fFieldName), BindingLabelProviderCore.getBindingLabel(method.resolveBinding(), JavaElementLabelsCore.ALL_FULLY_QUALIFIED)};
 					String msg= Messages.format(RefactoringCoreMessages.PromoteTempToFieldRefactoring_Name_conflict, keys);
 					return RefactoringStatus.createFatalErrorStatus(msg);
 				}
@@ -553,7 +556,13 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 
 			CompilationUnitChange result= new CompilationUnitChange(RefactoringCoreMessages.PromoteTempToFieldRefactoring_name, fCu);
 			result.setDescriptor(new RefactoringChangeDescriptor(getRefactoringDescriptor()));
-			TextEdit resultingEdits= rewrite.rewriteAST();
+			TextEdit resultingEdits;
+			if (fFormatterOptions == null) {
+				resultingEdits= rewrite.rewriteAST();
+			} else {
+				resultingEdits= rewrite.rewriteAST(new Document(fCu.getSource()), fFormatterOptions);
+			}
+
 			TextChangeCompatibility.addTextEdit(result, RefactoringCoreMessages.PromoteTempToFieldRefactoring_editName, resultingEdits);
 			return result;
 
@@ -688,9 +697,9 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 			project= javaProject.getElementName();
 		final IVariableBinding binding= fTempDeclarationNode.resolveBinding();
 		final String description= Messages.format(RefactoringCoreMessages.PromoteTempToFieldRefactoring_descriptor_description_short, BasicElementLabels.getJavaElementName(binding.getName()));
-		final String header= Messages.format(RefactoringCoreMessages.PromoteTempToFieldRefactoring_descriptor_description, new String[] { BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(binding.getDeclaringMethod(), JavaElementLabels.ALL_FULLY_QUALIFIED)});
+		final String header= Messages.format(RefactoringCoreMessages.PromoteTempToFieldRefactoring_descriptor_description, new String[] { BindingLabelProviderCore.getBindingLabel(binding, JavaElementLabelsCore.ALL_FULLY_QUALIFIED), BindingLabelProviderCore.getBindingLabel(binding.getDeclaringMethod(), JavaElementLabelsCore.ALL_FULLY_QUALIFIED)});
 		final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
-		comment.addSetting(Messages.format(RefactoringCoreMessages.PromoteTempToFieldRefactoring_original_pattern, BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED)));
+		comment.addSetting(Messages.format(RefactoringCoreMessages.PromoteTempToFieldRefactoring_original_pattern, BindingLabelProviderCore.getBindingLabel(binding, JavaElementLabelsCore.ALL_FULLY_QUALIFIED)));
 		comment.addSetting(Messages.format(RefactoringCoreMessages.PromoteTempToFieldRefactoring_field_pattern, BasicElementLabels.getJavaElementName(fFieldName)));
 		switch (fInitializeIn) {
 			case INITIALIZE_IN_CONSTRUCTOR:
@@ -996,7 +1005,19 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 	}
 
 
-	public void setLinkedProposalModel(LinkedProposalModel model) {
+	public void setLinkedProposalModel(LinkedProposalModelCore model) {
 		fLinkedProposalModel= model;
+	}
+
+	public Map<String, String> getFormatterOptions() {
+		return fFormatterOptions;
+	}
+
+	/**
+	 * Set the formatter options to format the refactored code.
+	 * @param formatterOptions the formatter options to format the refactored code
+	 */
+	public void setFormatterOptions(Map<String, String> formatterOptions) {
+		fFormatterOptions= formatterOptions;
 	}
 }

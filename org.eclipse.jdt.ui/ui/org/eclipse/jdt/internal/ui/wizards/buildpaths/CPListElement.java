@@ -42,6 +42,7 @@ import org.eclipse.jdt.core.IModuleDescription;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.provisional.JavaModelAccess;
 
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -207,13 +208,22 @@ public class CPListElement {
 		boolean modulesAdded= false;
 		if (containerEntry != null) {
 			IPackageFragmentRoot[] fragmentRoots= fProject.findPackageFragmentRoots(containerEntry);
-			if (fragmentRoots != null && fragmentRoots.length > 1) {
-				for (IPackageFragmentRoot fragmentRoot : fragmentRoots) {
-					IModuleDescription currModule= fragmentRoot.getModuleDescription();
-					if (currModule != null) {
-						CPListElement curr= create(this, pseudoEntry, currModule, true, fProject);
-						fChildren.add(curr);
-						modulesAdded= true;
+			if (fragmentRoots != null) {
+				// detect if system library:
+				boolean addChildren= false;
+				if (fragmentRoots.length > 0) {
+					IModuleDescription module= fragmentRoots[0].getModuleDescription();
+					if (module != null && JavaModelAccess.isSystemModule(module))
+						addChildren= true;
+				}
+				if (addChildren) {
+					for (IPackageFragmentRoot fragmentRoot : fragmentRoots) {
+						IModuleDescription currModule= fragmentRoot.getModuleDescription();
+						if (currModule != null) {
+							CPListElement curr= create(this, pseudoEntry, currModule, true, fProject);
+							fChildren.add(curr);
+							modulesAdded= true;
+						}
 					}
 				}
 			}

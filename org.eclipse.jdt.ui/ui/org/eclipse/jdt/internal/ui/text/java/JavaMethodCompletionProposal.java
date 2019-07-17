@@ -264,7 +264,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 		char[] name= fProposal.getName();
 		char[] parameterList= Signature.toCharArray(fProposal.getSignature(), null, null, false, false);
 		int parameterCount= Signature.getParameterCount(fProposal.getSignature()) % 10; // we don't care about insane methods with >9 parameters
-		StringBuffer buf= new StringBuffer(name.length + 2 + parameterList.length);
+		StringBuilder buf= new StringBuilder(name.length + 2 + parameterList.length);
 
 		buf.append(name);
 		buf.append('\0'); // separator

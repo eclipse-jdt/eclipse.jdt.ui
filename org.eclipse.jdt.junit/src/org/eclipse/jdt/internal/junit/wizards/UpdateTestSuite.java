@@ -230,7 +230,7 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 
 			ISourceRange range= testClassesAnnotation.getSourceRange();
 			IDocument fullSource= new Document(testSuite.getBuffer().getContents());
-			StringBuffer source= new StringBuffer();
+			StringBuilder source= new StringBuilder();
 			monitor.worked(1);
 			source.append(getUpdatableAnnotations(selectedTestCases));
 			fullSource.replace(range.getOffset(), range.getLength(), source.toString());
@@ -257,7 +257,7 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 			ISourceRange range= suiteMethod.getSourceRange();
 			IDocument fullSource= new Document(testSuite.getBuffer().getContents());
 			String originalContent= fullSource.get(range.getOffset(), range.getLength());
-			StringBuffer source= new StringBuffer(originalContent);
+			StringBuilder source= new StringBuilder(originalContent);
 			TestSuiteClassListRange classRange= getTestSuiteClassListRange(source.toString());
 			if (classRange != null) {
 				monitor.worked(1);
@@ -301,7 +301,7 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 	 * Returns the new code to be included in a new suite() or which replaces old code in an existing suite().
 	 */
 	public static String getUpdatableString(Object[] selectedClasses) {
-		StringBuffer suite= new StringBuffer();
+		StringBuilder suite= new StringBuilder();
 		suite.append(NewTestSuiteWizardPage.START_MARKER+"\n"); //$NON-NLS-1$
 		for (Object selectedClasse : selectedClasses) {
 			if (selectedClasse instanceof IType) {
@@ -322,7 +322,7 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 	 * Returns the new test suite annotations which replace old annotations in the existing suite
 	 */
 	public static String getUpdatableAnnotations(Object[] selectedClasses) {
-		StringBuffer buffer = new StringBuffer("@SuiteClasses({"); //$NON-NLS-1$
+		StringBuilder buffer = new StringBuilder("@SuiteClasses({"); //$NON-NLS-1$
 		for (int i= 0; i < selectedClasses.length; i++) {
 			if (selectedClasses[i] instanceof IType) {
 				IType testType= (IType) selectedClasses[i];

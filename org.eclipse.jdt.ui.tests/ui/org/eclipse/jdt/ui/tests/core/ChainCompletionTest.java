@@ -107,6 +107,31 @@ public class ChainCompletionTest extends TestCase {
 		assertEquals("getBar().getBaz() - 2 elements", proposals.get(0).getDisplayString());
 	}
 
+	public void testPrimitiveCompletion() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n" + 
+				"public class Foo {\n" + 
+				"  public void foo () {\n" + 
+				"    String s = \"\";\n" + 
+				"    int length = $\n" + 
+				"  }\n" + 
+				"}");
+
+		int completionIndex= getCompletionIndex(buf);
+		ICompilationUnit cu= getCompilationUnit(pkg, buf, "Foo.java");
+
+		List<ICompletionProposal> proposals= computeCompletionProposals(cu, completionIndex);
+
+		assertTrue(!proposals.isEmpty());
+		List<String> expected= Arrays.asList(
+				"s.length() - 2 elements",
+				"s.hashCode() - 2 elements",
+				"s.indexOf(String) - 2 elements",
+				"s.compareTo(String) - 2 elements");
+
+		assertProposalsExist(expected, proposals);
+	}
+
 	public void testAccessMethodParameters() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test;\n" +
@@ -405,6 +430,95 @@ public class ChainCompletionTest extends TestCase {
 		List<ICompletionProposal> proposals= computeCompletionProposals(cu, completionIndex);
 
 		List<String> expected= Arrays.asList("useMe.findMe - 2 elements");
+		assertProposalsExist(expected, proposals);
+	}
+
+	public void testCompletionOnSuperTypeMemberInMethod2() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n" +
+				"\n" +
+				"public class CompletionOnSupertypeMemberInMethod {\n" +
+				"\n" +
+				"  public static class Subtype extends CompletionOnSupertypeMemberInMethod {\n" +
+				"  }\n" +
+				"\n" +
+				"  public Boolean findMe() {\n" + 
+				"    return Boolean.TRUE;\n" + 
+				"  }\n" +
+				"\n" +
+				"  public static void test_onAttribute() {\n" +
+				"    final Subtype useMe = new Subtype();\n" +
+				"    final Boolean c = $\n" +
+				"  }\n" +
+				"}");
+
+		int completionIndex= getCompletionIndex(buf);
+		ICompilationUnit cu= getCompilationUnit(pkg, buf, "CompletionOnSupertypeMemberInMethod.java");
+
+		List<ICompletionProposal> proposals= computeCompletionProposals(cu, completionIndex);
+
+		List<String> expected= Arrays.asList("useMe.findMe() - 2 elements");
+		assertProposalsExist(expected, proposals);
+	}
+
+	public void testCompletionOnThisAndLocal() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		buf.append("import java.util.Collection;\n" + 
+				"import java.util.HashMap;\n" + 
+				"import java.util.Map;\n" + 
+				"\n" + 
+				"package test;\n" + 
+				"\n" + 
+				"public class TestCompletionOnThisAndLocal {\n" + 
+				"  public void method() {\n" + 
+				"    final Map map = new HashMap();\n" + 
+				"    final Collection c = $ \n" + 
+				"  }\n" + 
+				"}");
+
+		int completionIndex= getCompletionIndex(buf);
+		ICompilationUnit cu= getCompilationUnit(pkg, buf, "TestCompletionOnThisAndLocal.java");
+
+		List<ICompletionProposal> proposals= computeCompletionProposals(cu, completionIndex);
+
+		List<String> expected= Arrays.asList(
+				"map.entrySet() - 2 elements",
+				"map.keySet() - 2 elements",
+				"map.values() - 2 elements"
+				);
+		assertProposalsExist(expected, proposals);
+	}
+
+	public void testCompletionOnType() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n" + 
+				"\n" + 
+				"public class TestCompletionOnType {\n" + 
+				"  public class S {\n" + 
+				"\n" + 
+				"    private static S INSTANCE = new S();\n" + 
+				"    private S () {}\n" + 
+				"\n" + 
+				"    public Integer findMe() {\n" + 
+				"      return 0;\n" + 
+				"    }\n" + 
+				"\n" + 
+				"    public static S getInstance() {\n" + 
+				"      return INSTANCE;\n" + 
+				"    }\n" + 
+				"  }\n" + 
+				"\n" + 
+				"  public void __test() {\n" + 
+				"    Integer i = S.$\n" + 
+				"  } \n" + 
+				"}");
+
+		int completionIndex= getCompletionIndex(buf);
+		ICompilationUnit cu= getCompilationUnit(pkg, buf, "TestCompletionOnType.java");
+
+		List<ICompletionProposal> proposals= computeCompletionProposals(cu, completionIndex);
+
+		List<String> expected= Arrays.asList("getInstance().findMe() - 2 elements");
 		assertProposalsExist(expected, proposals);
 	}
 

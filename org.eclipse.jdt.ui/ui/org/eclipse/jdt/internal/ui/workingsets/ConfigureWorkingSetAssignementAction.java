@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -53,8 +53,8 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.viewers.ViewerFilter;
-import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 
@@ -271,7 +271,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 		private static final String SETTINGS_SHOW_VISIBLE_ONLY= "ShowVisibleOnly"; //$NON-NLS-1$
 
 
-		private final class GrayedCheckModelElementSorter extends ViewerSorter {
+		private final class GrayedCheckModelElementSorter extends ViewerComparator {
 			@Override
 			public int compare(Viewer viewer, Object e1, Object e2) {
 				GrayedCheckedModelElement w1= (GrayedCheckedModelElement)e1;
@@ -476,12 +476,12 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 
 			result.addFilter(new Filter());
 			result.setLabelProvider(new GrayedCheckedModelLabelProvider());
-			result.setSorter(new GrayedCheckModelElementSorter());
+			result.setComparator(new GrayedCheckModelElementSorter());
 			result.setContentProvider(new GrayedCheckedModelContentProvider());
 
 			result.setInput(fModel);
 			result.setCheckedElements(fModel.getChecked());
-			result.setGrayedElements(fModel.getGrayed());
+			result.setGrayedElements((Object[]) fModel.getGrayed());
 
 			return result;
 		}
@@ -502,7 +502,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 			fTableViewer.refresh();
 
 			fTableViewer.setCheckedElements(fModel.getChecked());
-			fTableViewer.setGrayedElements(fModel.getGrayed());
+			fTableViewer.setGrayedElements((Object[]) fModel.getGrayed());
 
 			fTableViewer.setSelection(new StructuredSelection(element));
 		}
@@ -524,7 +524,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 					fTableViewer.refresh();
 
 					fTableViewer.setCheckedElements(fModel.getChecked());
-					fTableViewer.setGrayedElements(fModel.getGrayed());
+					fTableViewer.setGrayedElements((Object[]) fModel.getGrayed());
 				}
 			});
 
@@ -575,7 +575,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 			fTableViewer.setInput(fModel);
 			fTableViewer.refresh();
 			fTableViewer.setCheckedElements(fModel.getChecked());
-			fTableViewer.setGrayedElements(fModel.getGrayed());
+			fTableViewer.setGrayedElements((Object[]) fModel.getGrayed());
 		}
 
 		@Override

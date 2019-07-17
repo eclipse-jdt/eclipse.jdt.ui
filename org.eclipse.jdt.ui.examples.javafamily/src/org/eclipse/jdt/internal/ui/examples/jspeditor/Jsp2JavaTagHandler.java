@@ -151,7 +151,7 @@ public class Jsp2JavaTagHandler implements ITagHandler {
 		}
 		if (fInJavaSection)  {
 			int i= 0;
-			StringBuffer out= new StringBuffer();
+			StringBuilder out= new StringBuilder();
 			while (i < fSource.length()) {
 				char c= fSource.charAt(i++);
 				if (c == '\n') {
@@ -167,7 +167,7 @@ public class Jsp2JavaTagHandler implements ITagHandler {
 		}
 		if (fInDeclaration)  {
 			int i= 0;
-			StringBuffer out= new StringBuffer();
+			StringBuilder out= new StringBuilder();
 			while (i < fSource.length()) {
 				char c= fSource.charAt(i++);
 				if (c == '\n') {

@@ -1095,7 +1095,7 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 	
 	public void testBug510758_1() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Iterator;\n");
 		buf.append("import java.util.List;\n");

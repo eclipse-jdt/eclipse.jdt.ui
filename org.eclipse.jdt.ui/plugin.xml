@@ -40,7 +40,7 @@
 	<decorator
 		label="%OverrideIndicatorLabelDecorator.label"
 		lightweight="true"
-		location="BOTTOM_RIGHT"		
+		location="BOTTOM_RIGHT"
 		state="true"
 		class="org.eclipse.jdt.ui.OverrideIndicatorLabelDecorator"
 		id="org.eclipse.jdt.ui.override.decorator">
@@ -52,7 +52,7 @@
 				name="org.eclipse.jdt.core.IMethod">
 			</objectClass>
 		</enablement>
-	</decorator>	
+	</decorator>
 	<decorator
 		label="%InterfaceIndicatorLabelDecorator.label"
 		lightweight="true"
@@ -88,7 +88,7 @@
 	<decorator
 		label="%WithoutTestCodeDecorator.label"
 		lightweight="true"
-		location="BOTTOM_RIGHT"		
+		location="BOTTOM_RIGHT"
 		state="true"
 		class="org.eclipse.jdt.internal.ui.WithoutTestCodeDecorator"
 		id="org.eclipse.jdt.internal.ui.without.test.code.decorator">
@@ -102,78 +102,78 @@
                <objectClass name="org.eclipse.jdt.internal.ui.packageview.ClassPathContainer$RequiredProjectWrapper"/>
             </or>
          </enablement>
-	</decorator>	
+	</decorator>
 </extension>
 
    <extension point="org.eclipse.core.runtime.adapters">
-		<factory 
-            class="org.eclipse.jdt.internal.ui.JavaElementAdapterFactory" 
+		<factory
+            class="org.eclipse.jdt.internal.ui.JavaElementAdapterFactory"
             adaptableType="org.eclipse.jdt.core.IJavaElement">
-            
+
             <adapter type="org.eclipse.core.resources.IResource"/>
-            
+
             <adapter type="org.eclipse.ui.IPersistableElement"/>
             <adapter type="org.eclipse.ui.IContributorResourceAdapter"/>
             <adapter type="org.eclipse.ui.ide.IContributorResourceAdapter2"/>
             <adapter type="org.eclipse.ui.IContainmentAdapter"/>
-            
+
             <adapter type="org.eclipse.search.ui.ISearchPageScoreComputer"/>
-            
+
             <adapter type="org.eclipse.ui.model.IWorkbenchAdapter"/>
             <adapter type="org.eclipse.ui.views.properties.IPropertySource"/>
             <adapter type="org.eclipse.ui.views.tasklist.ITaskListResourceAdapter"/>
-            
+
             <adapter type="org.eclipse.jdt.internal.ui.IResourceLocator"/>
             <adapter type="org.eclipse.team.ui.history.IHistoryPageSource"/>
 		</factory>
-		
-		<factory 
-            class="org.eclipse.jdt.internal.ui.JavaProjectAdapterFactory" 
+
+		<factory
+            class="org.eclipse.jdt.internal.ui.JavaProjectAdapterFactory"
             adaptableType="org.eclipse.jdt.core.IJavaProject">
             <adapter type="org.eclipse.core.resources.IProject"/>
 		</factory>
-		
-		<factory 
-            class="org.eclipse.jdt.internal.ui.ResourceAdapterFactory" 
+
+		<factory
+            class="org.eclipse.jdt.internal.ui.ResourceAdapterFactory"
             adaptableType="org.eclipse.core.resources.IResource">
             <adapter type="org.eclipse.jdt.core.IJavaElement"/>
 		</factory>
-		
-		<factory 
-            class="org.eclipse.jdt.internal.ui.MarkerAdapterFactory" 
+
+		<factory
+            class="org.eclipse.jdt.internal.ui.MarkerAdapterFactory"
             adaptableType="org.eclipse.core.resources.IMarker">
             <adapter type="org.eclipse.search.ui.ISearchPageScoreComputer"/>
 		</factory>
-		
-		<factory 
-            class="org.eclipse.jdt.internal.ui.EditorInputAdapterFactory" 
+
+		<factory
+            class="org.eclipse.jdt.internal.ui.EditorInputAdapterFactory"
             adaptableType="org.eclipse.ui.IEditorInput">
             <adapter type="org.eclipse.search.ui.ISearchPageScoreComputer"/>
             <adapter type="org.eclipse.jdt.core.IJavaElement"/>
 		</factory>
-		
-		<factory 
-            class="org.eclipse.jdt.internal.ui.LogicalPackageAdapterFactory" 
+
+		<factory
+            class="org.eclipse.jdt.internal.ui.LogicalPackageAdapterFactory"
             adaptableType="org.eclipse.jdt.internal.ui.browsing.LogicalPackage">
             <adapter type="org.eclipse.search.ui.ISearchPageScoreComputer"/>
             <adapter type="org.eclipse.core.resources.mapping.ResourceMapping"/>
 		</factory>
-		
-		<factory 
-            class="org.eclipse.jdt.internal.ui.refactoring.RefactoringAdapterFactory" 
+
+		<factory
+            class="org.eclipse.jdt.internal.ui.refactoring.RefactoringAdapterFactory"
             adaptableType="org.eclipse.jdt.core.refactoring.CompilationUnitChange">
-            
+
             <adapter type="org.eclipse.ltk.ui.refactoring.TextEditChangeNode"/>
 		</factory>
-		
+
         <factory
             class="org.eclipse.jdt.internal.ui.refactoring.RefactoringAdapterFactory"
             adaptableType="org.eclipse.ltk.core.refactoring.MultiStateTextFileChange">
-            
+
             <adapter type="org.eclipse.ltk.ui.refactoring.TextEditChangeNode"/>
         </factory>
 
-   </extension>     	
+   </extension>
 
 
    <extension
@@ -247,7 +247,7 @@
             id="org.eclipse.jdt.ui.text.correction.AdvancedQuickAssistProcessor">
       </quickAssistProcessor>
    </extension>
-   <!-- While adding a new classpathFixProcessor, also update plugin.xml in its clients. See Bug 537470  -->  
+   <!-- While adding a new classpathFixProcessor, also update plugin.xml in its clients. See Bug 537470  -->
    <extension
          point="org.eclipse.jdt.ui.classpathFixProcessors">
       <classpathFixProcessor
@@ -262,7 +262,7 @@
       </classpathFixProcessor>
    </extension>
 
-	<!-- content assist processors - do not change their order -->  
+	<!-- content assist processors - do not change their order -->
 	<!-- java and javadoc category -->
 	<extension
 		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
@@ -312,12 +312,12 @@
 		<proposalCategory
 			icon="$nl$/icons/full/elcl16/swtassist_co.png"/>
 	</extension>
-	 
-	<!-- java completions -->   
+
+	<!-- java completions -->
 	<extension
 		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
 		id="JavaTypeCompletionProposalComputer">
-		<javaCompletionProposalComputer 
+		<javaCompletionProposalComputer
 			class="org.eclipse.jdt.internal.ui.text.java.JavaTypeCompletionProposalComputer"
 			categoryId="org.eclipse.jdt.ui.javaTypeProposalCategory">
 			<partition type="__dftl_partition_content_type"/>
@@ -327,7 +327,7 @@
 	<extension
 		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
 		id="JavaNoTypeCompletionProposalComputer">
-		<javaCompletionProposalComputer 
+		<javaCompletionProposalComputer
 			class="org.eclipse.jdt.internal.ui.text.java.JavaNoTypeCompletionProposalComputer"
 			categoryId="org.eclipse.jdt.ui.javaNoTypeProposalCategory"
 			needsSortingAfterFiltering="true">
@@ -338,7 +338,7 @@
 	<extension
 		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
 		id="JavaAllCompletionProposalComputer">
-		<javaCompletionProposalComputer 
+		<javaCompletionProposalComputer
 			class="org.eclipse.jdt.internal.ui.text.java.JavaAllCompletionProposalComputer"
 			categoryId="org.eclipse.jdt.ui.javaAllProposalCategory"
 			needsSortingAfterFiltering="true">
@@ -346,11 +346,11 @@
 			<partition type="__java_string"/>
 		</javaCompletionProposalComputer>
 	</extension>
-	<!-- javadoc completions -->   
+	<!-- javadoc completions -->
 	<extension
 		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
 		id="LegacyJavadocCompletionProposalComputer_no">
-		<javaCompletionProposalComputer 
+		<javaCompletionProposalComputer
 			class="org.eclipse.jdt.internal.ui.text.javadoc.LegacyJavadocCompletionProposalComputer"
 			categoryId="org.eclipse.jdt.ui.javaNoTypeProposalCategory">
 			<partition type="__java_javadoc"/>
@@ -359,7 +359,7 @@
 	<extension
 		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
 		id="JavadocCompletionProposalComputer_no">
-		<javaCompletionProposalComputer 
+		<javaCompletionProposalComputer
 			class="org.eclipse.jdt.internal.ui.text.javadoc.JavadocCompletionProposalComputer"
 			categoryId="org.eclipse.jdt.ui.javaNoTypeProposalCategory">
 			<partition type="__java_javadoc"/>
@@ -368,7 +368,7 @@
 	<extension
 		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
 		id="JavadocHTMLCompletionProposalComputer_no">
-		<javaCompletionProposalComputer 
+		<javaCompletionProposalComputer
 			class="org.eclipse.jdt.internal.ui.text.javadoc.HTMLTagCompletionProposalComputer"
 			categoryId="org.eclipse.jdt.ui.javaNoTypeProposalCategory">
 			<partition type="__java_javadoc"/>
@@ -377,7 +377,7 @@
 	<extension
 		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
 		id="LegacyJavadocCompletionProposalComputer_all">
-		<javaCompletionProposalComputer 
+		<javaCompletionProposalComputer
 			class="org.eclipse.jdt.internal.ui.text.javadoc.LegacyJavadocCompletionProposalComputer"
 			categoryId="org.eclipse.jdt.ui.javaAllProposalCategory">
 			<partition type="__java_javadoc"/>
@@ -386,7 +386,7 @@
 	<extension
 		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
 		id="JavadocCompletionProposalComputer_all">
-		<javaCompletionProposalComputer 
+		<javaCompletionProposalComputer
 			class="org.eclipse.jdt.internal.ui.text.javadoc.JavadocCompletionProposalComputer"
 			categoryId="org.eclipse.jdt.ui.javaAllProposalCategory">
 			<partition type="__java_javadoc"/>
@@ -395,7 +395,7 @@
 	<extension
 		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
 		id="JavadocHTMLCompletionProposalComputer_all">
-		<javaCompletionProposalComputer 
+		<javaCompletionProposalComputer
 			class="org.eclipse.jdt.internal.ui.text.javadoc.HTMLTagCompletionProposalComputer"
 			categoryId="org.eclipse.jdt.ui.javaAllProposalCategory">
 			<partition type="__java_javadoc"/>
@@ -424,7 +424,7 @@
 			<partition type="__dftl_partition_content_type"/>
       </javaCompletionProposalComputer>
     </extension>
-	<!-- hippie word completions -->   
+	<!-- hippie word completions -->
 	<extension
 		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
 		id="HippieCompletionProposalComputer">
@@ -437,7 +437,7 @@
 			<partition type="__java_javadoc"/>
 		</javaCompletionProposalComputer>
 	</extension>
-	
+
 	<!-- the parameterized content assist action and keybindings for our contributed computers -->
 	<extension
 		point="org.eclipse.ui.commands">
@@ -454,7 +454,7 @@
 				values="org.eclipse.jdt.internal.ui.text.java.ContentAssistComputerParameter"/>
 		</command>
 	</extension>
-	
+
 	<extension
 		point="org.eclipse.jdt.ui.javaCompletionProposalSorters">
 		<proposalSorter
@@ -466,7 +466,7 @@
 			name="%AlphabeticSorter.name"
 			class="org.eclipse.jdt.internal.ui.text.java.AlphabeticSorter"/>
 	</extension>
-	
+
 	<!-- commands to surface java elements given handle id encoded parameter -->
 	<extension
 		point="org.eclipse.ui.commands">
@@ -511,7 +511,7 @@
 				typeId="org.eclipse.jdt.ui.commands.javaElementReference"/>
 		</command>
 	</extension>
-	
+
    <!-- Note: Do not change the sequence of those hover contributions -->
    <extension
          point="org.eclipse.jdt.ui.javaEditorTextHovers">
@@ -562,7 +562,7 @@
          <description>
             %java.perspective.description
          </description>
-      </perspective> 
+      </perspective>
       <perspective
             name="%typeHierarchyName"
             icon="$nl$/icons/full/eview16/hierch_persp.png"
@@ -580,9 +580,9 @@
          <description>
             %browsing.perspective.description
          </description>
-      </perspective>     
+      </perspective>
    </extension>
-   
+
    <extension
          point="org.eclipse.ui.perspectiveExtensions">
       <perspectiveExtension targetID="org.eclipse.ui.resourcePerspective">
@@ -603,14 +603,14 @@
          <showInPart id="org.eclipse.ui.views.ResourceNavigator"/>
          <showInPart id="org.eclipse.ui.navigator.ProjectExplorer"/>
       </perspectiveExtension>
-      
+
       <perspectiveExtension targetID="org.eclipse.jdt.ui.JavaBrowsingPerspective">
          <showInPart id="org.eclipse.jdt.ui.PackageExplorer"/>
          <showInPart id="org.eclipse.team.ui.GenericHistoryView"/>
          <showInPart id="org.eclipse.ui.views.ResourceNavigator"/>
          <showInPart id="org.eclipse.ui.navigator.ProjectExplorer"/>
       </perspectiveExtension>
-      
+
       <perspectiveExtension targetID="org.eclipse.jdt.ui.JavaHierarchyPerspective">
          <showInPart id="org.eclipse.jdt.ui.PackageExplorer"/>
          <showInPart id="org.eclipse.team.ui.GenericHistoryView"/>
@@ -618,7 +618,7 @@
          <showInPart id="org.eclipse.ui.navigator.ProjectExplorer"/>
       </perspectiveExtension>
    </extension>
-   
+
    <extension
          point="org.eclipse.ui.ide.projectNatureImages">
       <image
@@ -753,8 +753,8 @@
             %NewJavaWorkingSetWizard.description
          </description>
          <keywordReference id="org.eclipse.jdt.ui.wizards.java"/>
-      </wizard>      
-      
+      </wizard>
+
    </extension>
    <extension
          point="org.eclipse.ui.propertyPages">
@@ -767,18 +767,18 @@
          <enabledWhen>
 		     <adapt type="org.eclipse.core.resources.IProject">
 		          <test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature"/>
-		     </adapt>         
+		     </adapt>
          </enabledWhen>
       </page>
 -->
       <page
-            name="%buildPathPageName"        
+            name="%buildPathPageName"
             class="org.eclipse.jdt.internal.ui.preferences.BuildPathsPropertyPage"
             id="org.eclipse.jdt.ui.propertyPages.BuildPathsPropertyPage">
          <enabledWhen>
 		     <adapt type="org.eclipse.core.resources.IProject">
 		          <test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature"/>
-		     </adapt>         
+		     </adapt>
          </enabledWhen>
          <keywordReference id="org.eclipse.jdt.ui.buildpath"/>
       </page>
@@ -789,7 +789,7 @@
          <enabledWhen>
 		     <adapt type="org.eclipse.core.resources.IProject">
 		          <test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature"/>
-		     </adapt>         
+		     </adapt>
          </enabledWhen>
          <keywordReference id="org.eclipse.jdt.ui.codestyle"/>
       </page>
@@ -801,7 +801,7 @@
          <enabledWhen>
 		     <adapt type="org.eclipse.core.resources.IProject">
 		          <test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature"/>
-		     </adapt>         
+		     </adapt>
          </enabledWhen>
          <keywordReference id="org.eclipse.jdt.ui.organizeimports"/>
       </page>
@@ -813,7 +813,7 @@
          <enabledWhen>
 		     <adapt type="org.eclipse.core.resources.IProject">
 		          <test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature"/>
-		     </adapt>         
+		     </adapt>
          </enabledWhen>
          <keywordReference id="org.eclipse.jdt.ui.formatter"/>
       </page>
@@ -825,7 +825,7 @@
          <enabledWhen>
 		     <adapt type="org.eclipse.core.resources.IProject">
 		          <test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature"/>
-		     </adapt>         
+		     </adapt>
          </enabledWhen>
          <keywordReference id="org.eclipse.jdt.ui.cleanup"/>
       </page>
@@ -837,7 +837,7 @@
          <enabledWhen>
 		     <adapt type="org.eclipse.core.resources.IProject">
 		          <test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature"/>
-		     </adapt>         
+		     </adapt>
          </enabledWhen>
          <keywordReference id="org.eclipse.jdt.ui.codetemplates"/>
       </page>
@@ -848,7 +848,7 @@
          <enabledWhen>
 		     <adapt type="org.eclipse.core.resources.IProject">
 		          <test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature"/>
-		     </adapt>         
+		     </adapt>
          </enabledWhen>
           <keywordReference id="org.eclipse.jdt.ui.compliance"/>
       </page>
@@ -860,7 +860,7 @@
          <enabledWhen>
 		     <adapt type="org.eclipse.core.resources.IProject">
 		          <test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature"/>
-		     </adapt>         
+		     </adapt>
          </enabledWhen>
          <keywordReference id="org.eclipse.jdt.ui.severities"/>
       </page>
@@ -872,7 +872,7 @@
          <enabledWhen>
 		     <adapt type="org.eclipse.core.resources.IProject">
 		          <test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature"/>
-		     </adapt>         
+		     </adapt>
          </enabledWhen>
          <keywordReference id="org.eclipse.jdt.ui.javadocproblems"/>
       </page>
@@ -884,7 +884,7 @@
          <enabledWhen>
 		     <adapt type="org.eclipse.core.resources.IProject">
 		          <test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature"/>
-		     </adapt>         
+		     </adapt>
          </enabledWhen>
          <keywordReference id="org.eclipse.jdt.ui.building"/>
       </page>
@@ -896,7 +896,7 @@
          <enabledWhen>
 		     <adapt type="org.eclipse.core.resources.IProject">
 		          <test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature"/>
-		     </adapt>         
+		     </adapt>
          </enabledWhen>
          <keywordReference id="org.eclipse.jdt.ui.todo"/>-->
       </page>
@@ -951,7 +951,7 @@
             </and>
          </enabledWhen>
       </page>
-      
+
       <page
             name="%editorPageName"
             class="org.eclipse.jdt.internal.ui.preferences.JavaEditorPropertyPage"
@@ -959,7 +959,7 @@
          <enabledWhen>
 		     <adapt type="org.eclipse.core.resources.IProject">
 		          <test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature"/>
-		     </adapt>         
+		     </adapt>
          </enabledWhen>
       </page>
       <page
@@ -970,11 +970,11 @@
          <enabledWhen>
 		     <adapt type="org.eclipse.core.resources.IProject">
 		          <test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature"/>
-		     </adapt>         
+		     </adapt>
          </enabledWhen>
          <keywordReference id="org.eclipse.jdt.ui.saveparticipant"/>
       </page>
-      
+
       <page
             name="%classpathContainerPageName"
             class="org.eclipse.jdt.internal.ui.preferences.ClasspathContainerPreferencePage"
@@ -1014,7 +1014,7 @@
             id="org.eclipse.jdt.ui.CompilationUnitEditor">
             <contentTypeBinding
                contentTypeId="org.eclipse.jdt.core.javaSource"
-            /> 
+            />
       </editor>
       <editor
             name="%ClassFileViewerName"
@@ -1026,7 +1026,7 @@
             id="org.eclipse.jdt.ui.ClassFileEditor">
             <contentTypeBinding
                contentTypeId="org.eclipse.jdt.core.javaClass"
-            /> 
+            />
       </editor>
       <editor
             name="%ClassFileViewerName"
@@ -1047,7 +1047,7 @@
             id="org.eclipse.jdt.ui.PropertiesFileEditor">
             <contentTypeBinding
                contentTypeId="org.eclipse.jdt.core.javaProperties"
-            /> 
+            />
       </editor>
       <editor
             default="true"
@@ -1088,14 +1088,14 @@
             symbolicFontName="org.eclipse.jdt.ui.editors.textfont">
       </editor>
    </extension>
-   
+
       <extension
          point="org.eclipse.core.filebuffers.annotationModelCreation">
       <factory
             contentTypeId="org.eclipse.jdt.core.javaSource"
             class="org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider"/>
    </extension>
-   
+
    <extension
          point="org.eclipse.ui.themes">
         <themeElementCategory label="%javaPresentation.label" id="org.eclipse.jdt.ui.presentation"/>
@@ -1196,8 +1196,8 @@
          </description>
       </colorDefinition>
    </extension>
-   
-   
+
+
    <extension
          point="org.eclipse.ui.editors.annotationTypes">
       <type
@@ -1287,8 +1287,8 @@
             presentationLayer="4"
             textStylePreferenceKey="writeOccurrenceTextStyle"
             textStylePreferenceValue="NONE">
-	  </specification>	  
-	  
+	  </specification>
+
 	  <specification
             annotationType="org.eclipse.jdt.ui.overrideIndicator"
             label="%OverrideIndicator.label"
@@ -1342,7 +1342,7 @@
             verticalRulerPreferenceValue="false"
             includeOnPreferencePage="false"
             overviewRulerPreferenceKey="jdt.linked.focus.overviewruler">
-      </specification>      
+      </specification>
       <specification
             annotationType="org.eclipse.jdt.ui.link.slave"
             colorPreferenceValue="180,215,255"
@@ -1367,7 +1367,7 @@
             verticalRulerPreferenceValue="false"
             includeOnPreferencePage="false"
             overviewRulerPreferenceKey="jdt.linked.slave.overviewruler">
-      </specification>      
+      </specification>
       <specification
             annotationType="org.eclipse.jdt.ui.link.target"
             colorPreferenceValue="70,100,165"
@@ -1464,7 +1464,7 @@
             class="org.eclipse.jdt.internal.ui.javaeditor.JavaDocumentSetupParticipant">
       </participant>
    </extension>
-   
+
    <extension
          id="PropertiesFileDocumentSetupParticipant"
          name="%propertiesFileDocumentSetupParticipant"
@@ -1591,7 +1591,7 @@
             class="org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage"
             id="org.eclipse.jdt.ui.preferences.BuildPathPreferencePage">
             <keywordReference id="org.eclipse.jdt.ui.buildpathoptions"/>
-      </page>      
+      </page>
       <page
             name="%classPathVarPrefName"
             category="org.eclipse.jdt.ui.preferences.BuildPathPreferencePage"
@@ -1605,7 +1605,7 @@
             class="org.eclipse.jdt.internal.ui.preferences.UserLibraryPreferencePage"
             id="org.eclipse.jdt.ui.preferences.UserLibraryPreferencePage">
             <keywordReference id="org.eclipse.jdt.ui.userlibs"/>
-      </page>      
+      </page>
       <page
             name="%editorPrefName"
             category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage"
@@ -1620,7 +1620,7 @@
             id="org.eclipse.jdt.ui.preferences.PropertiesFileEditorPreferencePage">
             <keywordReference id="org.eclipse.jdt.ui.propertieseditor"/>
       </page>
-      
+
       <page
             name="%compliancePrefName"
             category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage"
@@ -1769,7 +1769,7 @@
             id="org.eclipse.jdt.ui.buildpathoptions"/>
       <keyword
             label="%preferenceKeywords.buildpath"
-            id="org.eclipse.jdt.ui.buildpath"/>      
+            id="org.eclipse.jdt.ui.buildpath"/>
       <keyword
             label="%preferenceKeywords.cpvars"
             id="org.eclipse.jdt.ui.cpvars"/>
@@ -1784,40 +1784,40 @@
             id="org.eclipse.jdt.ui.codetemplates"/>
       <keyword
             label="%preferenceKeywords.formatter"
-            id="org.eclipse.jdt.ui.formatter"/>  
+            id="org.eclipse.jdt.ui.formatter"/>
       <keyword
             label="%preferenceKeywords.cleanup"
-            id="org.eclipse.jdt.ui.cleanup"/>     
+            id="org.eclipse.jdt.ui.cleanup"/>
       <keyword
             label="%preferenceKeywords.organizeimports"
             id="org.eclipse.jdt.ui.organizeimports"/>
       <keyword
             label="%preferenceKeywords.compliance"
-            id="org.eclipse.jdt.ui.compliance"/>      
+            id="org.eclipse.jdt.ui.compliance"/>
       <keyword
             label="%preferenceKeywords.building"
             id="org.eclipse.jdt.ui.building"/>
       <keyword
             label="%preferenceKeywords.severities"
-            id="org.eclipse.jdt.ui.severities"/>      
+            id="org.eclipse.jdt.ui.severities"/>
       <keyword
             label="%preferenceKeywords.javadocproblems"
-            id="org.eclipse.jdt.ui.javadocproblems"/>   
+            id="org.eclipse.jdt.ui.javadocproblems"/>
       <keyword
             label="%preferenceKeywords.todo"
-            id="org.eclipse.jdt.ui.todo"/>            
+            id="org.eclipse.jdt.ui.todo"/>
       <keyword
             label="%preferenceKeywords.javaeditor"
-            id="org.eclipse.jdt.ui.javaeditor"/>      
+            id="org.eclipse.jdt.ui.javaeditor"/>
       <keyword
             label="%preferenceKeywords.contentassist"
-            id="org.eclipse.jdt.ui.contentassist"/>   
+            id="org.eclipse.jdt.ui.contentassist"/>
       <keyword
             label="%preferenceKeywords.hover"
             id="org.eclipse.jdt.ui.hover"/>
       <keyword
             label="%preferenceKeywords.syntaxcoloring"
-            id="org.eclipse.jdt.ui.syntaxcoloring"/>   
+            id="org.eclipse.jdt.ui.syntaxcoloring"/>
       <keyword
             label="%preferenceKeywords.templates"
             id="org.eclipse.jdt.ui.templates"/>
@@ -1910,7 +1910,7 @@
          </hiddenToolBarItem>
       </perspectiveExtension>
    </extension>
-   
+
 <!-- =========================================================================== -->
 <!-- Java Search Page                                                            -->
 <!-- =========================================================================== -->
@@ -1927,7 +1927,7 @@
             id="org.eclipse.jdt.ui.JavaSearchPage">
       </page>
    </extension>
-   
+
    <extension
     	id="JavaSearchResultPage"
         point="org.eclipse.search.searchResultViewPages">
@@ -1967,10 +1967,10 @@
 			helpContextId="org.eclipse.jdt.ui.refactoring.references_in_binary"
 			class="org.eclipse.jdt.internal.ui.search.JavaSearchResultPage">
 		</viewPage>
-   </extension>   
-   
-   
-  
+   </extension>
+
+
+
 <!-- =========================================================================== -->
 <!-- Java Compare                                                                -->
 <!-- =========================================================================== -->
@@ -1995,7 +1995,7 @@
          </description>
       </fontDefinition>
    </extension>
-   
+
    <extension
          point="org.eclipse.ui.popupMenus">
       <objectContribution
@@ -2171,7 +2171,7 @@
             pattern="*.class">
       </filter>
    </extension>
-   
+
 <!-- =========================================================================== -->
 <!-- Export wizard category                                                      -->
 <!-- =========================================================================== -->
@@ -2182,7 +2182,7 @@
 	     id="org.eclipse.jdt.ui.Java">
 	  </category>
    </extension>
-   
+
 <!-- =========================================================================== -->
 <!-- JAR Packager                                                                -->
 <!-- =========================================================================== -->
@@ -2280,7 +2280,7 @@
             id="org.eclipse.jdt.ui.javadocexport.JavadocConsoleLineTracker">
       </consoleLineTracker>
    </extension>
-   
+
 <!-- =========================================================================== -->
 <!-- Java Browsing 																 -->
 <!-- =========================================================================== -->
@@ -2408,7 +2408,7 @@
          </part>
       </actionSetPartAssociation>
    </extension>
-   
+
 <!-- with an A_                                                                -->
 <!-- the open action set is contributed before the CodeActionSet we prefix it  -->
 <!-- Action sets are contributed after they have been sorted. To enfore that   -->
@@ -2573,7 +2573,7 @@
             <separator name="typeGroup3"/>
             <separator name="scriptGroup"/>
          </menu>
-         
+
 <!-- reorg group  -->
          <action
                definitionId="org.eclipse.jdt.ui.edit.text.java.move.element"
@@ -2589,8 +2589,8 @@
                menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup"
                id="org.eclipse.jdt.ui.actions.Rename">
          </action>
-         
-<!-- coding group  -->         
+
+<!-- coding group  -->
          <action
                definitionId="org.eclipse.jdt.ui.edit.text.java.inline"
                label="%Refactoring.inlineAction.label"
@@ -2626,7 +2626,7 @@
                menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup"
                id="org.eclipse.jdt.ui.actions.ModifyParameters">
          </action>
-         
+
 <!-- reorg group 2 -->
          <action
                definitionId="org.eclipse.jdt.ui.edit.text.java.move.inner.to.top.level"
@@ -2648,10 +2648,10 @@
                retarget="true"
                menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup2"
                id="org.eclipse.jdt.ui.actions.ConvertLocalToField">
-         </action>    
-         
-         
-         
+         </action>
+
+
+
 <!-- type group  -->
          <action
                definitionId="org.eclipse.jdt.ui.edit.text.java.push.down"
@@ -2688,9 +2688,9 @@
                menubarPath="org.eclipse.jdt.ui.refactoring.menu/typeGroup"
                id="org.eclipse.jdt.ui.actions.ExtractInterface">
          </action>
-         
+
 <!-- coding group 2  -->
-<!--         
+<!--
          <action
                definitionId="org.eclipse.jdt.ui.edit.text.java.replace.invocations"
                label="%Refactoring.replaceInvocationsAction.label"
@@ -2727,7 +2727,7 @@
                menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup2"
                id="org.eclipse.jdt.ui.actions.IntroduceIndirection">
          </action>
-         
+
 <!-- type group 2 -->
          <action
                definitionId="org.eclipse.jdt.ui.edit.text.java.introduce.parameter.object"
@@ -2742,7 +2742,7 @@
                retarget="true"
                menubarPath="org.eclipse.jdt.ui.refactoring.menu/typeGroup2"
                id="org.eclipse.jdt.ui.actions.ExtractClass">
-         </action>  
+         </action>
 
 <!-- type group 3 -->
          <action
@@ -2766,7 +2766,7 @@
               definitionId="org.eclipse.ltk.ui.refactor.show.refactoring.history"
               id="org.eclipse.ltk.ui.actions.ShowRefactoringHistory"
               label="%Refactoring.showHistory.label"
-              menubarPath="org.eclipse.jdt.ui.refactoring.menu/scriptGroup"/>         
+              menubarPath="org.eclipse.jdt.ui.refactoring.menu/scriptGroup"/>
         <action
                class="org.eclipse.jdt.internal.ui.refactoring.actions.ApplyRefactoringScriptAction"
                definitionId="org.eclipse.ltk.ui.refactor.apply.refactoring.script"
@@ -2785,7 +2785,7 @@
               id="org.eclipse.jdt.ui.actions.MigrateJarFile"
               label="%Refactoring.migrateJar.label"
               menubarPath="org.eclipse.jdt.ui.refactoring.menu/scriptGroup"/>
-         
+
 <!-- =========================================================================== -->
 <!-- Source Menu                                                                 -->
 <!-- =========================================================================== -->
@@ -3113,7 +3113,7 @@
                label="%BreakContinueTargetOccurrences.label"
                retarget="true"
                id="org.eclipse.jdt.ui.actions.BreakContinueTargetOccurrences">
-         </action>         
+         </action>
          <action
                definitionId="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.working.set"
                label="%InWorkingSet.label"
@@ -3792,7 +3792,7 @@
             description="%ActionDefinition.corrections.addBlock.description"
             categoryId="org.eclipse.jdt.ui.category.source"
             id="org.eclipse.jdt.ui.correction.addBlock.assist">
-      </command> 
+      </command>
       <command
             name="%ActionDefinition.corrections.addThrowsDecl.name"
             description="%ActionDefinition.corrections.addThrowsDecl.description"
@@ -3888,7 +3888,7 @@
             description="%ActionDefinition.corrections.encapsulateField.description"
             categoryId="org.eclipse.jdt.ui.category.source"
             id="org.eclipse.jdt.ui.correction.encapsulateField.assist">
-      </command>  
+      </command>
       <command
             name="%ActionDefinition.surroundWith.quickMenu.name"
             description="%ActionDefinition.surroundWith.quickMenu.description"
@@ -3911,7 +3911,7 @@
             description="%PerspectiveCommand.javaTypeHierarchy.description"
             categoryId="org.eclipse.ui.category.perspectives"
             id="org.eclipse.jdt.ui.JavaHierarchyPerspective" />
-            
+
 <!-- refactoring -->
       <command
             name="%ActionDefinition.refactorQuickMenu.name"
@@ -4020,7 +4020,7 @@
             description="%ActionDefinition.extractClass.description"
             categoryId="org.eclipse.jdt.ui.category.refactoring"
             id="org.eclipse.jdt.ui.edit.text.java.extract.class">
-      </command>      
+      </command>
       <command
             name="%ActionDefinition.replaceInvocations.name"
             description="%ActionDefinition.replaceInvocations.description"
@@ -4080,7 +4080,7 @@
             description="%ActionDefinition.openRefactoringHistory.description"
             id="org.eclipse.ltk.ui.refactor.show.refactoring.history"
             name="%ActionDefinition.openRefactoringHistory.name">
-       </command>      
+       </command>
       <command
             categoryId="org.eclipse.jdt.ui.category.refactoring"
             description="%ActionDefinition.migrate.description"
@@ -4117,7 +4117,7 @@
             description="%ActionDefinition.gotoBreadcrumb.description"
             categoryId="org.eclipse.ui.category.navigate"
             id="org.eclipse.jdt.ui.edit.text.java.gotoBreadcrumb">
-      </command>      
+      </command>
       <command
             name="%ActionDefinition.open.hierarchy.name"
             description="%ActionDefinition.open.hierarchy.description"
@@ -4178,7 +4178,7 @@
             categoryId="org.eclipse.ui.category.navigate"
             id="org.eclipse.jdt.ui.edit.text.java.open.call.hierarchy">
       </command>
-      
+
       <command
             name="%ActionDefinition.gotoPackage.name"
             description="%ActionDefinition.gotoPackage.description"
@@ -4191,7 +4191,7 @@
             categoryId="org.eclipse.ui.category.navigate"
             id="org.eclipse.jdt.ui.navigate.gototype">
       </command>
-      
+
 <!-- project -->
       <command
             name="%ActionDefinition.generateJavadoc.name"
@@ -4206,7 +4206,7 @@
             categoryId="org.eclipse.ui.category.project"
             id="org.eclipse.jdt.ui.index.rebuild">
       </command>
-     
+
 <!-- search -->
       <command
             name="%ActionDefinition.referencesInWorkspace.name"
@@ -4345,7 +4345,7 @@
             description="%ActionDefinition.breakContinueTargetOccurrences.description"
             categoryId="org.eclipse.search.ui.category.search"
             id="org.eclipse.jdt.ui.edit.text.java.search.return.continue.targets">
-      </command>          
+      </command>
       <command
             name="%ActionDefinition.exceptionOccurrences.name"
             description="%ActionDefinition.exceptionOccurrences.description"
@@ -4366,12 +4366,12 @@
 	        id="org.eclipse.jdt.ui.edit.text.java.annotate.classFile">
 	  </command>
    </extension>
-   
+
    <extension
          point="org.eclipse.ui.bindings">
       <!--  win32:  M1=CTRL,    M2=SHIFT, M3=ALT, M4=-
             carbon: M1=COMMAND, M2=SHIFT, M3=ALT, M4=CTRL -->
-      
+
 <!-- edit -->
       <key
             sequence="M2+M3+ARROW_UP"
@@ -4390,7 +4390,7 @@
             contextId="org.eclipse.jdt.ui.javaEditorScope"
             commandId="org.eclipse.jdt.ui.edit.text.java.select.enclosing"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-            
+
       <key
             sequence="M2+M3+ARROW_RIGHT"
             contextId="org.eclipse.jdt.ui.javaEditorScope"
@@ -4458,7 +4458,7 @@
             sequence="COMMAND+ALT+S"
             commandId="org.eclipse.jdt.ui.edit.text.java.source.quickMenu"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-            
+
       <key
             sequence="M1+M2+C"
             contextId="org.eclipse.jdt.ui.javaEditorScope"
@@ -4517,7 +4517,7 @@
             sequence="COMMAND+ALT+J"
             commandId="org.eclipse.jdt.ui.edit.text.java.add.javadoc.comment"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-      
+
       <key
             sequence="M1+M2+/"
             contextId="org.eclipse.jdt.ui.javaEditorScope"
@@ -4572,7 +4572,7 @@
             contextId="org.eclipse.jdt.ui.javaEditorScope"
             commandId="org.eclipse.jdt.ui.edit.text.java.toggleMarkOccurrences"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-            
+
       <key
             sequence="M2+M3+U"
             contextId="org.eclipse.jdt.ui.javaEditorScope"
@@ -4590,7 +4590,7 @@
             contextId="org.eclipse.jdt.ui.javaEditorScope"
             commandId="org.eclipse.jdt.ui.edit.text.remove.occurrence.annotations"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-            
+
        <key
             sequence="M1+2 R"
             contextId="org.eclipse.jdt.ui.javaEditorScope"
@@ -4605,16 +4605,16 @@
             sequence="M1+2 L"
             contextId="org.eclipse.jdt.ui.javaEditorScope"
             commandId="org.eclipse.jdt.ui.correction.assignToLocal.assist"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>            
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
        <key
             sequence="M1+2 F"
             contextId="org.eclipse.jdt.ui.javaEditorScope"
             commandId="org.eclipse.jdt.ui.correction.assignToField.assist"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>              
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
        <key
             sequence="M2+M3+Z"
             commandId="org.eclipse.jdt.ui.edit.text.java.surround.with.quickMenu"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>        
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
        <key
             platform="carbon"
             sequence="M2+M3+Z"
@@ -4655,7 +4655,7 @@
             sequence="COMMAND+ALT+R"
             commandId="org.eclipse.jdt.ui.edit.text.java.rename.element"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-            
+
       <key
             sequence="M2+M3+V"
             commandId="org.eclipse.jdt.ui.edit.text.java.move.element"
@@ -4670,7 +4670,7 @@
             sequence="COMMAND+ALT+V"
             commandId="org.eclipse.jdt.ui.edit.text.java.move.element"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-            
+
       <key
             sequence="M2+M3+C"
             commandId="org.eclipse.jdt.ui.edit.text.java.modify.method.parameters"
@@ -4685,7 +4685,7 @@
             sequence="COMMAND+ALT+C"
             commandId="org.eclipse.jdt.ui.edit.text.java.modify.method.parameters"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-            
+
       <key
             sequence="M2+M3+I"
             commandId="org.eclipse.jdt.ui.edit.text.java.inline"
@@ -4700,7 +4700,7 @@
             sequence="COMMAND+ALT+I"
             commandId="org.eclipse.jdt.ui.edit.text.java.inline"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-            
+
       <key
             sequence="M2+M3+M"
             commandId="org.eclipse.jdt.ui.edit.text.java.extract.method"
@@ -4715,7 +4715,7 @@
             sequence="COMMAND+ALT+M"
             commandId="org.eclipse.jdt.ui.edit.text.java.extract.method"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-            
+
       <key
             sequence="M2+M3+L"
             commandId="org.eclipse.jdt.ui.edit.text.java.extract.local.variable"
@@ -4730,7 +4730,7 @@
             sequence="COMMAND+ALT+L"
             commandId="org.eclipse.jdt.ui.edit.text.java.extract.local.variable"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-            
+
 <!-- navigate -->
       <key
             sequence="M1+M2+ARROW_DOWN"
@@ -4845,7 +4845,7 @@
             commandId="org.eclipse.jdt.ui.edit.text.java.open.call.hierarchy"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
 	  <!-- COMMAND+ALT+H is "Hide Others" on carbon, so don't overwrite it -->
-      
+
 <!-- project -->
 
 <!-- search -->
@@ -4979,8 +4979,8 @@
        sequence="M1+1">
 	</key>
 	</extension>
-   
-   
+
+
    <extension
          point="org.eclipse.ui.ide.markerResolution">
       <markerResolutionGenerator
@@ -4995,7 +4995,7 @@
             class="org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildpathProblemMarkerResolutionGenerator">
       </markerResolutionGenerator>
    </extension>
-   
+
    <extension point="org.eclipse.ui.ide.markerSupport">
       <markerTypeCategory name="%markerCategory.problem">
          <markerTypeReference id="org.eclipse.jdt.core.problem"/>
@@ -5004,7 +5004,7 @@
          <markerTypeReference id="org.eclipse.jdt.core.buildpath_problem"/>
          <markerTypeReference id="org.eclipse.jdt.launching.jreContainerMarker"/>
       </markerTypeCategory>
-      
+
     <markerGrouping id="org.eclipse.jdt.ui.java_marker_category" label="%MarkerCategory.name"/>
     <markerGroupingEntry id="org.eclipse.jdt.ui.category.buildpath"
         markerGrouping="org.eclipse.jdt.ui.java_marker_category"
@@ -5021,11 +5021,11 @@
     <markerGroupingEntry id="org.eclipse.jdt.ui.category.potential"
         markerGrouping="org.eclipse.jdt.ui.java_marker_category"
         label="%MarkerCategory.potential"
-        priority="70"/>        
+        priority="70"/>
     <markerGroupingEntry id="org.eclipse.jdt.ui.category.namingconflicts"
         markerGrouping="org.eclipse.jdt.ui.java_marker_category"
         label="%MarkerCategory.namingconflicts"
-        priority="65"/>        
+        priority="65"/>
     <markerGroupingEntry id="org.eclipse.jdt.ui.category.codestyle"
         markerGrouping="org.eclipse.jdt.ui.java_marker_category"
         label="%MarkerCategory.codestyle"
@@ -5033,7 +5033,7 @@
     <markerGroupingEntry id="org.eclipse.jdt.ui.category.restrictedAPI"
         markerGrouping="org.eclipse.jdt.ui.java_marker_category"
         label="%MarkerCategory.restrictedAPI"
-        priority="50"/>        
+        priority="50"/>
     <markerGroupingEntry id="org.eclipse.jdt.ui.category.deprecation"
         markerGrouping="org.eclipse.jdt.ui.java_marker_category"
         label="%MarkerCategory.deprecation"
@@ -5045,7 +5045,7 @@
     <markerGroupingEntry id="org.eclipse.jdt.ui.category.unnecessary"
         markerGrouping="org.eclipse.jdt.ui.java_marker_category"
         label="%MarkerCategory.unnecessary"
-        priority="20"/>          
+        priority="20"/>
     <markerGroupingEntry id="org.eclipse.jdt.ui.category.nls"
         markerGrouping="org.eclipse.jdt.ui.java_marker_category"
         label="%MarkerCategory.nls"
@@ -5070,7 +5070,7 @@
      <markerAttributeGrouping markerType="org.eclipse.jdt.core.buildpath_problem"
         defaultGroupingEntry="org.eclipse.jdt.ui.category.buildpath"/>
    </extension>
-   
+
 <!-- =========================================================================== -->
 <!-- Filter Support                                                              -->
 <!-- =========================================================================== -->
@@ -5131,7 +5131,7 @@
             description="%HideReferencedLibraries.description"
             class="org.eclipse.jdt.internal.ui.filters.LibraryFilter"
             id="org.eclipse.jdt.ui.PackageExplorer.LibraryFilter">
-      </filter>      
+      </filter>
       <filter
             targetId="org.eclipse.jdt.ui.PackageExplorer"
             name="%HideContainedLibraries.label"
@@ -5506,7 +5506,7 @@
             id="org.eclipse.jdt.callhierarchy.view">
       </view>
    </extension>
-   
+
 <!-- =========================================================================== -->
 <!-- Templates                                                                   -->
 <!-- =========================================================================== -->
@@ -5562,7 +5562,7 @@
             class="org.eclipse.jdt.internal.corext.template.java.SWTContextType"
             id="swt-members"
             registryId="org.eclipse.jdt.ui.CompilationUnitEditor">
-      </contextType>      
+      </contextType>
       <include
       		file="templates/default-templates.xml"
       		translations="$nl$/templates/default-templates.properties">
@@ -5653,7 +5653,7 @@
             id="org.eclipse.ui.texteditor.TemplatesView">
       </view>
    </extension>
-   
+
 <!-- =========================================================================== -->
 <!-- Refactoring                                                                 -->
 <!-- =========================================================================== -->
@@ -5679,7 +5679,7 @@
          </enablement>
       </statusContextViewer>
    </extension>
-   
+
    <extension point="org.eclipse.ltk.ui.refactoring.changePreviewViewers">
       <changePreviewViewer
             class="org.eclipse.jdt.internal.ui.refactoring.CreateTextFileChangePreviewViewer"
@@ -5808,7 +5808,7 @@
             class="org.eclipse.jdt.internal.corext.refactoring.scripting.CopyRefactoringContribution"
             id="org.eclipse.jdt.ui.copy"/>
    </extension>
-   
+
    <extension
          point="org.eclipse.ltk.core.refactoring.renameParticipants">
       <renameParticipant
@@ -5827,7 +5827,7 @@
             </enablement>
       </renameParticipant>
    </extension>
-   
+
 
 <!-- End Refactoring -->
 
@@ -5853,7 +5853,7 @@
    </extension>
 
 <!-- classpath container -->
-   
+
    <extension
          point="org.eclipse.jdt.ui.classpathContainerPage">
       <classpathContainerPage
@@ -5862,7 +5862,7 @@
             id="org.eclipse.jdt.USER_LIBRARY">
       </classpathContainerPage>
    </extension>
-   
+
 	<extension
 		point= "org.eclipse.jdt.ui.foldingStructureProviders">
 		<provider
@@ -5882,7 +5882,7 @@
               id="org.eclipse.jdt.internal.ui.text.spelling.DefaultSpellingEngine">
         </engine>
     </extension>
-        
+
     <extension point="org.eclipse.core.runtime.preferences">
         <initializer class="org.eclipse.jdt.internal.ui.JavaUIPreferenceInitializer"/>
     </extension>
@@ -5918,7 +5918,7 @@
          <adapter type="org.eclipse.core.resources.mapping.ResourceMapping"/>
       </factory>
    </extension>
-   
+
    <extension
          id="jdtContentProvider"
          point="org.eclipse.team.ui.teamContentProviders">
@@ -5927,7 +5927,7 @@
             icon="$nl$/icons/full/obj16/java_model_obj.png"
             modelProviderId="org.eclipse.jdt.ui.modelProvider"/>
    </extension>
-   
+
    <extension
          point="org.eclipse.ui.navigator.viewer">
       <viewerContentBinding viewerId="org.eclipse.team.cvs.ui.workspaceSynchronization">
@@ -5938,9 +5938,9 @@
          </includes>
       </viewerContentBinding>
    </extension>
-   
+
     <!-- CommonNavigator -->
-   
+
    <extension
          point="org.eclipse.ui.navigator.navigatorContent">
       <navigatorContent
@@ -5991,18 +5991,18 @@
          </actionProvider>
       </navigatorContent>
    </extension>
-	
+
 	<extension
 			point="org.eclipse.ui.navigator.viewer">
 		<viewerContentBinding viewerId="org.eclipse.ui.navigator.ProjectExplorer">
 			<includes>
 				<contentExtension pattern="org.eclipse.jdt.java.ui.javaContent" />
-				<contentExtension pattern="org.eclipse.jdt.java.ui.filters.*" />	
-				<contentExtension pattern="org.eclipse.jdt.java.ui.javaLinkHelper" />	
+				<contentExtension pattern="org.eclipse.jdt.java.ui.filters.*" />
+				<contentExtension pattern="org.eclipse.jdt.java.ui.javaLinkHelper" />
 			</includes>
 		</viewerContentBinding>
 	</extension>
-	
+
 	<extension
 			point="org.eclipse.ui.navigator.navigatorContent">
 		<navigatorContent
@@ -6031,43 +6031,62 @@
 					<instanceof value="org.eclipse.jdt.core.IJarEntryResource" />
 					<instanceof value="org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer" />
 				</or>
-			</possibleChildren> 
+			</possibleChildren>
 			<actionProvider
 					class="org.eclipse.jdt.internal.ui.navigator.JavaNavigatorViewActionProvider"
-					id="org.eclipse.jdt.ui.navigator.actions.ViewActions"> 
+					id="org.eclipse.jdt.ui.navigator.actions.ViewActions">
 				<enablement>
-					<or>  
-						<instanceof value="org.eclipse.core.resources.IWorkspaceRoot" /> 
-						<adapt type="java.util.Collection"> 
+					<or>
+						<instanceof value="org.eclipse.core.resources.IWorkspaceRoot" />
+						<adapt type="java.util.Collection">
 							<count value="0" />
-						</adapt>		
+						</adapt>
 					</or>
 				</enablement>
-			</actionProvider>				
+			</actionProvider>
 			<actionProvider
 					class="org.eclipse.jdt.internal.ui.navigator.JavaNavigatorActionProvider"
 					id="org.eclipse.jdt.ui.navigator.actions.StandardActions"
-					overrides="org.eclipse.ui.navigator.resources.actions.EditActions"> 
+					overrides="org.eclipse.ui.navigator.resources.actions.EditActions">
 				<enablement>
-					<or>   
+					<or>
 						<and>
 							<instanceof value="org.eclipse.core.resources.IResource" />
 							<test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature" />
 						</and>
 						<instanceof value="org.eclipse.jdt.core.IJavaElement" />
-						<instanceof value="org.eclipse.jdt.core.IJarEntryResource" /> 
-						<instanceof	value="org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer" /> 
-						<adapt type="java.util.Collection"> 
+						<instanceof value="org.eclipse.jdt.core.IJarEntryResource" />
+						<instanceof	value="org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer" />
+						<adapt type="java.util.Collection">
 							<count value="0" />
 						</adapt>
 					</or>
 				</enablement>
-			</actionProvider> 
-			
+			</actionProvider>
+			<actionProvider
+					class="org.eclipse.ui.internal.navigator.resources.actions.ShowInActionProvider"
+					id="org.eclipse.jdt.ui.navigator.actions.ShowInAction"
+					overrides="org.eclipse.ui.navigator.resources.ShowInActionProvider">
+				<enablement>
+					<or>
+						<and>
+							<instanceof value="org.eclipse.core.resources.IResource" />
+							<test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature" />
+						</and>
+						<instanceof value="org.eclipse.jdt.core.IJavaElement" />
+						<instanceof value="org.eclipse.jdt.core.IJarEntryResource" />
+						<instanceof	value="org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer" />
+						<adapt type="java.util.Collection">
+							<count value="0" />
+						</adapt>
+					</or>
+				</enablement>
+			</actionProvider>
+
 			<actionProvider
 					class="org.eclipse.jdt.internal.ui.navigator.JavaNavigatorRefactorActionProvider"
 					id="org.eclipse.jdt.ui.navigator.actions.RefactorActions"
-					overrides="org.eclipse.ui.navigator.resources.actions.RefactorActions"> 
+					overrides="org.eclipse.ui.navigator.resources.actions.RefactorActions">
 				<enablement>
 					<or>
 						<and>
@@ -6075,23 +6094,23 @@
           					<test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature" />
 						</and>
 						<instanceof value="org.eclipse.jdt.core.IJavaElement" />
-						<instanceof value="org.eclipse.jdt.core.IJarEntryResource" /> 
-						<instanceof value="org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer" /> 
-						<adapt type="java.util.Collection"> 
+						<instanceof value="org.eclipse.jdt.core.IJarEntryResource" />
+						<instanceof value="org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer" />
+						<adapt type="java.util.Collection">
 							<count value="0" />
-						</adapt>				
+						</adapt>
 					</or>
 				</enablement>
 			</actionProvider>
 		   <actionProvider
 		         class="org.eclipse.jdt.internal.ui.navigator.PackageExplorerOpenActionProvider"
 		         id="org.eclipse.jdt.ui.navigator.actions.OpenActions"
-		         overrides="org.eclipse.ui.navigator.resources.OpenActions"> 
-		   </actionProvider> 
+		         overrides="org.eclipse.ui.navigator.resources.OpenActions">
+		   </actionProvider>
 			<actionProvider
 					class="org.eclipse.ui.navigator.resources.GoIntoActionProvider"
 					id="org.eclipse.jdt.ui.navigator.resources.GoIntoActions"
-					overrides="org.eclipse.ui.navigator.resources.GoIntoActions"> 
+					overrides="org.eclipse.ui.navigator.resources.GoIntoActions">
 				<enablement>
 					<or>
 						<adapt
@@ -6100,8 +6119,8 @@
 								property="org.eclipse.core.resources.open">
 							</test>
 						</adapt>
-						<adapt type="org.eclipse.core.resources.IFolder" /> 	
-						<adapt type="org.eclipse.ui.IWorkingSet" /> 	
+						<adapt type="org.eclipse.core.resources.IFolder" />
+						<adapt type="org.eclipse.ui.IWorkingSet" />
 						<instanceof value="org.eclipse.jdt.core.IJavaProject" />
 						<instanceof value="org.eclipse.jdt.core.IPackageFragmentRoot" />
 						<instanceof value="org.eclipse.jdt.core.IPackageFragment" />
@@ -6115,7 +6134,7 @@
 			<commonSorter
 					class="org.eclipse.jdt.ui.JavaElementSorter"
 					id="org.eclipse.jdt.ui.javaElementSorter"/>
-		   
+
 		   <commonWizard
 		        menuGroupId="org.eclipse.jdt.ui.java"
 		        type="new"
@@ -6161,7 +6180,7 @@
 		           </adapt>
 		        </or>
 		     </enablement>
-		  </commonWizard>		  
+		  </commonWizard>
 		  <commonWizard
 		        menuGroupId="org.eclipse.jdt.ui.java"
 		        type="new"
@@ -6192,14 +6211,14 @@
 						</adapt>
 					</or>
 				 </enablement>
-		    </commonWizard>	 
+		    </commonWizard>
 		    <commonWizard
 		          menuGroupId="org.eclipse.jdt.ui.java"
 		          type="new"
 		          wizardId="org.eclipse.jdt.ui.wizards.NewSourceFolderCreationWizard">
 				<enablement>
-					<or> 
-						<instanceof value="org.eclipse.jdt.core.IPackageFragmentRoot"/> 
+					<or>
+						<instanceof value="org.eclipse.jdt.core.IPackageFragmentRoot"/>
 						<adapt type="org.eclipse.core.resources.IProject">
 							<test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature"/>
 						</adapt>
@@ -6215,7 +6234,7 @@
        					<instanceof value="org.eclipse.jdt.core.IJavaElement"/>
     				</or>
  				</possibleDropTargets>
- 			</dropAssistant>		   
+ 			</dropAssistant>
 		</navigatorContent>
   		<commonFilter
 		        activeByDefault="false"
@@ -6236,22 +6255,22 @@
 	            id="org.eclipse.jdt.java.ui.filters.HideEmptyLibraryContainers"
 	            name="%HideEmptyLibraryContainers.label">
 	    </commonFilter>
-  		<commonFilter 
+  		<commonFilter
 		        class="org.eclipse.jdt.internal.ui.filters.AnnotationFilter"
 		        name="%HideAnnotation.label"
 		        description="%HideAnnotation.description"
 		        id="org.eclipse.jdt.java.ui.filters.HideAnnotations"/>
-  		<commonFilter 
+  		<commonFilter
 		        class="org.eclipse.jdt.internal.ui.filters.EnumFilter"
 		        name="%HideEnum.label"
 		        description="%HideEnum.description"
 		        id="org.eclipse.jdt.java.ui.filters.HideEnums"/>
-  		<commonFilter 
+  		<commonFilter
 		        class="org.eclipse.jdt.internal.ui.filters.InterfaceFilter"
 		        name="%HideInterface.label"
 		        description="%HideInterface.description"
-		        id="org.eclipse.jdt.java.ui.filters.HideInterface"/>		        		        
-  		<commonFilter 
+		        id="org.eclipse.jdt.java.ui.filters.HideInterface"/>
+  		<commonFilter
 		        class="org.eclipse.jdt.internal.ui.filters.FieldsFilter"
 		        name="%HideFields.label"
 		        description="%HideFields.description"
@@ -6261,55 +6280,55 @@
 		        class="org.eclipse.jdt.internal.ui.filters.ImportDeclarationFilter"
 		        name="%HideImportDeclaration.label"
 		        description="%HideImportDeclaration.description"
-		        id="org.eclipse.jdt.java.ui.filters.HideImportDeclaration"/> 
+		        id="org.eclipse.jdt.java.ui.filters.HideImportDeclaration"/>
   		<commonFilter
 		        activeByDefault="true"
 		        class="org.eclipse.jdt.internal.ui.filters.InnerClassFilesFilter"
 		        name="%HideInnerClassFiles.label"
 		        description="%HideInnerClassFiles.description"
 		        id="org.eclipse.jdt.java.ui.filters.HideInnerClassFiles"/>
-  		<commonFilter 
+  		<commonFilter
 		        class="org.eclipse.jdt.internal.ui.filters.JavaFileFilter"
 		        name="%HideJavaFiles.label"
 		        description="%HideJavaFiles.description"
-		        id="org.eclipse.jdt.java.ui.filters.HideJavaFiles"/> 		 
-  		<commonFilter 
+		        id="org.eclipse.jdt.java.ui.filters.HideJavaFiles"/>
+  		<commonFilter
 		        class="org.eclipse.jdt.internal.ui.filters.LocalTypesFilter"
 		        name="%HideLocalTypes.label"
 		        description="%HideLocalTypes.description"
 		        id="org.eclipse.jdt.java.ui.filters.HideLocalTypes"/>
-  		<commonFilter 
+  		<commonFilter
 		        class="org.eclipse.jdt.internal.ui.filters.NonJavaElementFilter"
 		        name="%HideNonJavaElements.label"
 		        description="%HideNonJavaElements.description"
-		        id="org.eclipse.jdt.java.ui.filters.HideNonJavaElements"/>   		
-  		<commonFilter 
+		        id="org.eclipse.jdt.java.ui.filters.HideNonJavaElements"/>
+  		<commonFilter
 		        class="org.eclipse.jdt.internal.ui.filters.NonJavaProjectsFilter"
 		        name="%HideNonJavaProjects.label"
 		        description="%HideNonJavaProjects.description"
-		        id="org.eclipse.jdt.java.ui.filters.HideNonJavaProjects"/>   
-  		<commonFilter 
+		        id="org.eclipse.jdt.java.ui.filters.HideNonJavaProjects"/>
+  		<commonFilter
 		        class="org.eclipse.jdt.internal.ui.filters.NonPublicFilter"
 		        name="%HideNonPublic.label"
 		        description="%HideNonPublic.description"
-		        id="org.eclipse.jdt.java.ui.filters.HideNonPublic"/>   
-  		<commonFilter 
+		        id="org.eclipse.jdt.java.ui.filters.HideNonPublic"/>
+  		<commonFilter
 		        class="org.eclipse.jdt.internal.ui.filters.NonSharedProjectFilter"
 		        name="%HideNonSharedProjects.label"
 		        description="%HideNonSharedProjects.description"
-		        id="org.eclipse.jdt.java.ui.filters.HideNonSharedProjects"/>   
+		        id="org.eclipse.jdt.java.ui.filters.HideNonSharedProjects"/>
   		<commonFilter
 		        activeByDefault="true"
 		        class="org.eclipse.jdt.internal.ui.filters.PackageDeclarationFilter"
 		        name="%HidePackageDeclaration.label"
 		        description="%HidePackageDeclaration.description"
-		        id="org.eclipse.jdt.java.ui.filters.HidePackageDeclaration"/>   
-  		<commonFilter 
+		        id="org.eclipse.jdt.java.ui.filters.HidePackageDeclaration"/>
+  		<commonFilter
 		        class="org.eclipse.jdt.internal.ui.filters.LibraryFilter"
 		        name="%HideReferencedLibraries.label"
 		        description="%HideReferencedLibraries.description"
-		        id="org.eclipse.jdt.java.ui.filters.HideReferencedLibraries"/>   
-  		<commonFilter 
+		        id="org.eclipse.jdt.java.ui.filters.HideReferencedLibraries"/>
+  		<commonFilter
 		        class="org.eclipse.jdt.internal.ui.filters.StaticsFilter"
 		        name="%HideStatics.label"
 		        description="%HideStatics.description"
@@ -6337,9 +6356,9 @@
        point="org.eclipse.ui.navigator.linkHelper">
 		<linkHelper
 	          class="org.eclipse.jdt.internal.ui.navigator.JavaFileLinkHelper"
-	          id="org.eclipse.jdt.java.ui.javaLinkHelper">          
+	          id="org.eclipse.jdt.java.ui.javaLinkHelper">
 	         <editorInputEnablement>
-		         <or> 
+		         <or>
 		         	<instanceof value="org.eclipse.ui.IFileEditorInput" />
 		         	<instanceof value="org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput" />
 		         	<instanceof value="org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput" />
@@ -6352,11 +6371,11 @@
 					</adapt>
 					<instanceof value="org.eclipse.core.resources.IResource" />
 					<instanceof value="org.eclipse.jdt.core.IJavaElement" />
-					<instanceof value="org.eclipse.jdt.core.IJarEntryResource" /> 
+					<instanceof value="org.eclipse.jdt.core.IJarEntryResource" />
 					<instanceof value="org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer" />
 				</or>
 	         </selectionEnablement>
-      </linkHelper>          
+      </linkHelper>
    </extension>
    <extension
       point="org.eclipse.ui.themes">
@@ -6841,7 +6860,7 @@
 
    <extension
          point="org.eclipse.jdt.ui.cleanUps">
-         
+
       <cleanUpConfigurationUI
             class="org.eclipse.jdt.internal.ui.preferences.cleanup.CodeStyleTabPage"
             name="%CleanUpTabPage.CodeStyle.name"
@@ -6867,7 +6886,7 @@
             name="%CleanUpTabPage.CodeOrganizing.name"
             cleanUpKind="cleanUp">
       </cleanUpConfigurationUI>
-      
+
       <cleanUpConfigurationUI
             class="org.eclipse.jdt.internal.ui.preferences.cleanup.CodeStyleTabPage"
             name="%CleanUpTabPage.CodeStyle.name"
@@ -6897,12 +6916,12 @@
       <cleanUpOptionsInitializer
             class="org.eclipse.jdt.internal.ui.preferences.cleanup.DefaultCleanUpOptionsInitializer"
             cleanUpKind="cleanUp">
-      </cleanUpOptionsInitializer>      
+      </cleanUpOptionsInitializer>
       <cleanUpOptionsInitializer
             class="org.eclipse.jdt.internal.ui.preferences.cleanup.SaveActionCleanUpOptionsInitializer"
             cleanUpKind="saveAction">
       </cleanUpOptionsInitializer>
-      
+
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUp"
             id="org.eclipse.jdt.ui.cleanup.code_style">
@@ -7129,15 +7148,15 @@
             id="org.eclipse.jdt.ui.create.module.info">
        	 <visibility>
         	<and>
-            <objectState 
-	            name="projectNature" 
+            <objectState
+	            name="projectNature"
 	            value="org.eclipse.jdt.core.javanature"/>
 	        <objectState
 	        	name="open"
 	        	value="true"/>
             <not>
-            <objectState 
-	            name="projectNature" 
+            <objectState
+	            name="projectNature"
 	            value="org.eclipse.pde.PluginNature"/>
             </not>
             </and>
@@ -7195,7 +7214,7 @@
       <codeMiningProvider
          class="org.eclipse.jdt.internal.ui.javaeditor.codemining.JavaMethodParameterCodeMiningProvider"
          id="codemining.java.parameters"
-         label="%JavaElementCodeMiningProvider.parameterNames.label">         
+         label="%JavaElementCodeMiningProvider.parameterNames.label">
 	     <enabledWhen>
           <and>
             <with variable="editor">

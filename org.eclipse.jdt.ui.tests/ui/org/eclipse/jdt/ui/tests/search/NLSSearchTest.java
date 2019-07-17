@@ -71,7 +71,7 @@ public class NLSSearchTest extends TestCase {
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("org.eclipse.osgi.util", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package org.eclipse.osgi.util;\n");
 		buf.append("public class NLS {\n");
 		buf.append("public static void initializeMessages(String s, Class c) {}\n}\n");
@@ -102,7 +102,7 @@ public class NLSSearchTest extends TestCase {
 
 	public void test01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import org.eclipse.osgi.util.NLS;\n");
 		buf.append("public class Accessor extends NLS {\n");

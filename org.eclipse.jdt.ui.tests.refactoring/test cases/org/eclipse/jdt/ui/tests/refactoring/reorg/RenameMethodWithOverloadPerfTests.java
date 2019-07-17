@@ -78,7 +78,7 @@ public class RenameMethodWithOverloadPerfTests extends RepeatingRefactoringPerfo
 
 	private ICompilationUnit generateSources(int numberOfCus, int numberOfRefs) throws Exception {
 		IPackageFragment definition= getTestProject().getSourceFolder().createPackageFragment("def", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package def;\n");
 		buf.append("public class A {\n");
 		buf.append("    public void set(Object s) {\n");
@@ -96,7 +96,7 @@ public class RenameMethodWithOverloadPerfTests extends RepeatingRefactoringPerfo
 	}
 
 	private void createReferenceCu(IPackageFragment pack, int index, int numberOfRefs) throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package " + pack.getElementName() + ";\n");
 		buf.append("import def.A;\n");
 		buf.append("public class Ref" + index + " {\n");

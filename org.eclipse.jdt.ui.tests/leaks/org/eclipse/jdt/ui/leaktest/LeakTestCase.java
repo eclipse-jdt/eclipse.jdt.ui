@@ -159,7 +159,7 @@ public class LeakTestCase extends TestCase {
 
 	  		numTries--;
 			if (numTries == 0) {
-	  			StringBuffer buf= new StringBuffer();
+	  			StringBuilder buf= new StringBuilder();
 		  		for (int k= 0; k < requestors.length; k++) {
 					int actual= requestors[k].getNumberOfResults();
 					if (expected[k] != actual) {

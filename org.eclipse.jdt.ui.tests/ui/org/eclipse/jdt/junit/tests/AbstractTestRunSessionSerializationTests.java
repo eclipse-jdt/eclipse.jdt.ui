@@ -226,7 +226,7 @@ public class AbstractTestRunSessionSerializationTests extends TestCase {
 
 	public static String getContents(InputStream in) throws IOException {
 		InputStreamReader reader= new InputStreamReader(in);
-		StringBuffer sb= new StringBuffer(8192);
+		StringBuilder sb= new StringBuilder(8192);
 		char[] cbuf= new char[8192];
 		try {
 			int read= 0;

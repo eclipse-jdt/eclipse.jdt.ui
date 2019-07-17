@@ -269,7 +269,7 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 				String home = TomcatLaunchDelegate.getCatalinaHome();
 				IPath endorsed = new Path(home).append("common").append("endorsed");  //$NON-NLS-1$//$NON-NLS-2$
 				IPath temp = new Path(home).append("temp"); //$NON-NLS-1$
-				StringBuffer args = new StringBuffer();
+				StringBuilder args = new StringBuilder();
 				args.append("-Djava.endorsed.dirs=\""); //$NON-NLS-1$
 				args.append(endorsed.toOSString());
 				args.append("\" "); //$NON-NLS-1$

@@ -55,7 +55,7 @@ public class AbstractRefactoringTestSetup extends TestSetup {
 		TestOptions.initializeCodeGenerationOptions();
 		JavaPlugin.getDefault().getCodeTemplateStore().load();
 
-		StringBuffer comment= new StringBuffer();
+		StringBuilder comment= new StringBuilder();
 		comment.append("/**\n");
 		comment.append(" * ${tags}\n");
 		comment.append(" */");

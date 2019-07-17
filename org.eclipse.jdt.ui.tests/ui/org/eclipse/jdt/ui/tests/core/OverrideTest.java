@@ -78,7 +78,7 @@ public class OverrideTest extends TestCase {
 	}
 
 	public void test14Overloaded() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package override.test;\n");
 		buf.append("public class Top {\n");
 		buf.append("    void m(Integer i) {}\n");
@@ -108,7 +108,7 @@ public class OverrideTest extends TestCase {
 	}
 
 	public void test14Overloaded2() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package override.test;\n");
 		buf.append("public interface ITop {\n");
 		buf.append("    void m(Integer i);\n");
@@ -152,7 +152,7 @@ public class OverrideTest extends TestCase {
 	}
 
 	public void test15Bug100233() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package override.test;\n");
 		buf.append("abstract class A<T> {\n");
 		buf.append("  void g1 (T t) {\n");
@@ -194,7 +194,7 @@ public class OverrideTest extends TestCase {
 	}
 
 	public void test15Bug97027() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package override.test;\n");
 		buf.append("class AA<T> {\n");
 		buf.append("    public AA<Object> test() { return null; }\n");
@@ -218,7 +218,7 @@ public class OverrideTest extends TestCase {
 	}
 
 	public void test15JLS3_842() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package override.test;\n");
 		buf.append("import java.util.Collection;\n");
 		buf.append("import java.util.List;\n");
@@ -246,7 +246,7 @@ public class OverrideTest extends TestCase {
 	}
 
 	public void test15JLS3_848_1() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package override.test;\n");
 		buf.append("class C implements Cloneable {\n");
 		buf.append("    C copy() { return (C)clone(); }\n");
@@ -272,7 +272,7 @@ public class OverrideTest extends TestCase {
 	}
 
 	public void test15JLS3_848_2() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package override.test;\n");
 		buf.append("import java.util.ArrayList;\n");
 		buf.append("import java.util.Collection;\n");
@@ -301,7 +301,7 @@ public class OverrideTest extends TestCase {
 	}
 
 	public void test15JLS3_848_3() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package override.test;\n");
 		buf.append("class C<T> {\n");
 		buf.append("    T id(T x) { return x; }\n");
@@ -329,7 +329,7 @@ public class OverrideTest extends TestCase {
 	}
 
 	public void test15JLS3_848_4() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package override.test;\n");
 		buf.append("class C<T> {\n");
 		buf.append("    public T id (T x) { return x; }\n");
@@ -363,7 +363,7 @@ public class OverrideTest extends TestCase {
 	}
 
 	public void test15ClassTypeVars1() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package override.test;\n");
 		buf.append("class A<E extends Number, F> {\n");
 		buf.append("    void take(E e, F f) {}\n");
@@ -391,7 +391,7 @@ public class OverrideTest extends TestCase {
 	}
 
 	public void test15ClassTypeVars2() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package override.test;\n");
 		buf.append("class A<T extends Number> {\n");
 		buf.append("    void m(T t) {}\n");
@@ -450,7 +450,7 @@ public class OverrideTest extends TestCase {
 	}
 
 	public void test15MethodTypeVars1() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package override.test;\n");
 		buf.append("class A {\n");
 		buf.append("    <E extends Number, F> void take(E e, F f) {}\n");
@@ -481,7 +481,7 @@ public class OverrideTest extends TestCase {
 	}
 
 	public void test15MethodTypeVars2() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package override.test;\n");
 		buf.append("class A {\n");
 		buf.append("    <E extends Number, F> void take(E e, F f) {}\n");
@@ -514,7 +514,7 @@ public class OverrideTest extends TestCase {
 	}
 
 	public void test15MethodTypeVars3() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package override.test;\n");
 		buf.append("class A {\n");
 		buf.append("    void take(Object t) {}\n");
@@ -541,7 +541,7 @@ public class OverrideTest extends TestCase {
 	}
 
 	public void test15MethodTypeVars4() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package override.test;\n");
 		buf.append("public class A {\n");
 		buf.append("    <T, U extends T> void m(T t, U u) { }\n");
@@ -566,7 +566,7 @@ public class OverrideTest extends TestCase {
 	}
 
 	public void test15MethodTypeVars5() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package override.test;\n");
 		buf.append("import java.util.List;\n");
 		buf.append("class A {\n");
@@ -589,7 +589,7 @@ public class OverrideTest extends TestCase {
 	}
 
 	public void test15MethodTypeVars6() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package override.test;\n");
 		buf.append("import java.util.List;\n");
 		buf.append("class A {\n");
@@ -615,7 +615,7 @@ public class OverrideTest extends TestCase {
 	}
 
 	public void test15Bug99608() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package override.test;\n");
 		buf.append("class Top<E> {\n");
 		buf.append("    void add(E[] e) {}\n");
@@ -646,7 +646,7 @@ public class OverrideTest extends TestCase {
 	}
 
 	public void test15Bug90114() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package override.test;\n");
 		buf.append("class SuperX {\n");
 		buf.append("    static void notOverridden() {\n");
@@ -671,7 +671,7 @@ public class OverrideTest extends TestCase {
 	}
 
 	public void test15Bug89516primitive() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package override.test;\n");
 		buf.append("import java.util.ArrayList;\n");
 		buf.append("public class Test extends ArrayList<String> {\n");
@@ -693,7 +693,7 @@ public class OverrideTest extends TestCase {
 	}
 
 	public void test15Bug105669() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package override.test;\n");
 		buf.append("import java.util.*;\n");
 		buf.append("class I extends Vector<Number> {\n");
@@ -719,7 +719,7 @@ public class OverrideTest extends TestCase {
 	}
 
 	public void test15Bug107105() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package override.test;\n");
 		buf.append("import java.io.Serializable;\n");
 		buf.append("\n");

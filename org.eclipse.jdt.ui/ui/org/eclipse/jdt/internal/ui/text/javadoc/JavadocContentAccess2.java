@@ -813,7 +813,7 @@ public class JavadocContentAccess2 {
 	 * @return the reader content as string
 	 */
 	private static String getString(Reader reader) {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		char[] buffer= new char[1024];
 		int count;
 		try {
@@ -2265,7 +2265,7 @@ public class JavadocContentAccess2 {
 
 	private static String getContentsFromInputStream(InputStream in, String encoding) throws CoreException {
 		final int defaultFileSize= 15 * 1024;
-		StringBuffer buffer= new StringBuffer(defaultFileSize);
+		StringBuilder buffer= new StringBuilder(defaultFileSize);
 		Reader reader= null;
 
 		try {

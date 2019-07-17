@@ -81,7 +81,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 	}
 
 	private void checkDefaultConstructorWithCommentWithSuper(String con) throws IOException {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("/** Constructor Comment\n");
 		buf.append("     * \n");
 		buf.append("     */\n");
@@ -129,7 +129,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		options.put(DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT, "999");
 		JavaCore.setOptions(options);
 
-		StringBuffer comment= new StringBuffer();
+		StringBuilder comment= new StringBuilder();
 		comment.append("/** Constructor Comment\n");
 		comment.append(" * ${tags}\n");
 		comment.append(" */");
@@ -193,7 +193,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 
 		checkDefaultConstructorWithCommentWithSuper(createdMethods[0].getSource());
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("public class Test1 extends A {\n");
 		buf.append("\n");
 		buf.append("    /** Constructor Comment\n");
@@ -245,7 +245,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 
 		checkDefaultConstructorWithCommentWithSuper(createdMethods[0].getSource());
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("public class Test1 extends A {\n");
 		buf.append("\n");
 		buf.append("    /** Constructor Comment\n");
@@ -388,7 +388,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		IMethod[] createdMethods= testClass.getMethods();
 		checkMethods(new String[] { "Test1", "Test1", "Test1", "Test1", "Test1"}, createdMethods); //$NON-NLS-1$ //$NON-NLS-2$
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("public class Test1 extends C {\n");
 		buf.append("\n");
 		buf.append("    /** Constructor Comment\n");
@@ -502,7 +502,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		IMethod[] createdMethods= testClass.getMethods();
 		checkMethods(new String[] { "Test1", "Test1", "Test1", "Test1"}, createdMethods); //$NON-NLS-1$ //$NON-NLS-2$
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("public class Test1 extends B {\n");
 		buf.append("\n");
 		buf.append("    /** Constructor Comment\n");
@@ -594,7 +594,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		IMethod[] createdMethods= testClass.getMethods();
 		checkMethods(new String[] { "Test1", "Test1", "Test1", "Test1", "Test1"}, createdMethods); //$NON-NLS-1$ //$NON-NLS-2$
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("public class Test1 extends A {\n" +
 				"\n" +
 				"    public Test1(int a, boolean boo, String fooString) {super();}\n" +
@@ -668,7 +668,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		IMethod[] existingMethods= testClass.getMethods();
 		checkMethods(new String[] { "Test1"}, existingMethods); //$NON-NLS-1$ //$NON-NLS-2$
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("public class Test1 extends A {\n");
 		buf.append("\n");
 		buf.append("    public Test1(){}\n");
@@ -704,7 +704,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		IMethod[] existingMethods= testClass.getMethods();
 		checkMethods(new String[] { "Test1"}, existingMethods); //$NON-NLS-1$ //$NON-NLS-2$
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("public class Test1 implements A {\n");
 		buf.append("\n");
 		buf.append("    public Test1(){}\n");
@@ -741,7 +741,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		IMethod[] createdMethods= testClass.getMethods();
 		checkMethods(new String[] { "Test1"}, createdMethods); //$NON-NLS-1$ //$NON-NLS-2$
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("public class Test1 extends A {\n");
 		buf.append("\n");
 		buf.append("    public Test1() {\n");
@@ -783,7 +783,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		IMethod[] existingMethods= testClass.getMethods();
 		checkMethods(new String[] { "Test1", "Test1", "Test1"}, existingMethods); //$NON-NLS-1$ //$NON-NLS-2$
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("public class Test1 extends A {\n");
 		buf.append("\n");
 		buf.append("    public Test1() {\n");
@@ -826,7 +826,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 
 		checkDefaultConstructorWithCommentWithSuper(createdMethods[0].getSource());
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("public class Test1 extends A {\n");
 		buf.append("\n");
 		buf.append("    /** Constructor Comment\n");
@@ -869,7 +869,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 
 		checkMethods(new String[] { "Test1", "Test1"}, createdMethods); //$NON-NLS-1$ //$NON-NLS-2$
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("public class Test1 extends A {\n");
 		buf.append("\n");
 		buf.append("    public Test1(int a, boolean boo, String fooString) {super();}\n");
@@ -918,7 +918,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 
 		checkMethods(new String[] { "Test1"}, createdMethods); //$NON-NLS-1$ //$NON-NLS-2$
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package ibm.util.bogus;\n");
 		buf.append("\n");
 		buf.append("import java.util.Vector;\n");
@@ -970,7 +970,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 
 		checkDefaultConstructorWithCommentWithSuper(createdMethods[0].getSource());
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("public class Test1 extends A {\n" + "\n" + "    /** Constructor Comment\n" + "     * \n" + "     */\n" + "    public Test1() {\n" + "        super();\n" + "        // TODO\n" + "    }\n" + "\n" + "    /** Constructor Comment\n" + "     * @param a\n" + "     */\n" + "    public Test1(int a) {\n" + "        super(a);\n" + "        // TODO\n" + "    }\n" + "\n" + "    /** Constructor Comment\n" + "     * @param a\n" + "     * @param boo\n" + "     */\n" + "    public Test1(int a, boolean boo) {\n" + "        super(a, boo);\n" + "        // TODO\n" + "    }\n" + "}");
 
 		compareSource(buf.toString(), testClass.getSource());
@@ -1006,7 +1006,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 
 		checkDefaultConstructorWithCommentWithSuper(createdMethods[0].getSource());
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("public class Test1 extends A {\n");
 		buf.append("\n");
 		buf.append("    /** Constructor Comment\n");
@@ -1065,7 +1065,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 
 		checkDefaultConstructorWithCommentWithSuper(createdMethods[3].getSource());
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("public class Test1 extends A {\n");
 		buf.append("\n");
 		buf.append("    public Test1(int a, boolean boo, String fooString, StringBuffer buf) {\n");

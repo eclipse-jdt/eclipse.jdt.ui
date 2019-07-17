@@ -279,7 +279,7 @@ public class TypeInfoViewer {
 			return ((TypeNameMatch)element).getSimpleTypeName();
 		}
 		public String getQualifiedText(TypeNameMatch type) {
-			StringBuffer result= new StringBuffer();
+			StringBuilder result= new StringBuilder();
 			result.append(type.getSimpleTypeName());
 			String containerName= type.getTypeContainerName();
 			result.append(JavaElementLabels.CONCAT_STRING);
@@ -291,7 +291,7 @@ public class TypeInfoViewer {
 			return result.toString();
 		}
 		public String getFullyQualifiedText(TypeNameMatch type) {
-			StringBuffer result= new StringBuffer();
+			StringBuilder result= new StringBuilder();
 			result.append(type.getSimpleTypeName());
 			String containerName= type.getTypeContainerName();
 			if (containerName.length() > 0) {
@@ -303,7 +303,7 @@ public class TypeInfoViewer {
 			return result.toString();
 		}
 		public String getText(TypeNameMatch last, TypeNameMatch current, TypeNameMatch next) {
-			StringBuffer result= new StringBuffer();
+			StringBuilder result= new StringBuilder();
 			int qualifications= 0;
 			String currentTN= current.getSimpleTypeName();
 			result.append(currentTN);
@@ -349,7 +349,7 @@ public class TypeInfoViewer {
 			return result.toString();
 		}
 		public String getQualificationText(TypeNameMatch type) {
-			StringBuffer result= new StringBuffer();
+			StringBuilder result= new StringBuilder();
 			String containerName= type.getTypeContainerName();
 			if (containerName.length() > 0) {
 				result.append(containerName);
@@ -766,7 +766,7 @@ public class TypeInfoViewer {
 			for (int i= 0; i < chars; i++) {
 				dashes.append(SEPARATOR);
 			}
-			StringBuffer result= new StringBuffer();
+			StringBuilder result= new StringBuilder();
 			result.append(dashes);
 			result.append(fMessage);
 			result.append(dashes);

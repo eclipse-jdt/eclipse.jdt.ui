@@ -21,18 +21,22 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.manipulation.CleanUpContextCore;
+import org.eclipse.jdt.core.manipulation.CleanUpOptionsCore;
+import org.eclipse.jdt.core.manipulation.CleanUpRequirementsCore;
+import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 
 
 /**
  * A clean up solves problems in a compilation unit.
  * <p>
- * The clean up is asked for its requirements through a call to {@link #getRequirements()}. The
+ * The clean up is asked for its requirements through a call to {@link #getRequirementsCore()}. The
  * clean up can request an AST and define how to build this AST. It can base its requirements on the
- * options passed through {@link #setOptions(CleanUpOptions)}.
+ * options passed through {@link #setOptions(CleanUpOptionsCore)}.
  * </p>
  * <p>
  * A context containing the information requested by the requirements are passed to
- * {@link #createFix(CleanUpContext)}. A fix capable of fixing the problems is returned by this
+ * {@link #createFixCore(CleanUpContextCore)}. A fix capable of fixing the problems is returned by this
  * function if {@link #checkPreConditions(IJavaProject, ICompilationUnit[], IProgressMonitor)} has
  * returned a non fatal error status.
  * </p>
@@ -49,7 +53,7 @@ public interface ICleanUpCore {
 	 * 
 	 * @param options the options to use
 	 */
-	void setOptions(CleanUpOptions options);
+	void setOptions(CleanUpOptionsCore options);
 
 	/**
 	 * Human readable description for each step this clean up will execute.
@@ -67,9 +71,9 @@ public interface ICleanUpCore {
 	 * <strong>Note:</strong> This method must only be called after the options have been set.
 	 * </p>
 	 * 
-	 * @return the requirements used for {@link #createFix(CleanUpContext)} to work
+	 * @return the requirements used for {@link #createFixCore(CleanUpContextCore)} to work
 	 */
-	CleanUpRequirements getRequirements();
+	CleanUpRequirementsCore getRequirementsCore();
 
 	/**
 	 * After call to checkPreConditions clients will start creating fixes for
@@ -88,11 +92,11 @@ public interface ICleanUpCore {
 	 * Create an <code>ICleanUpFixCore</code> which fixes all problems in <code>context</code> or
 	 * <code>null</code> if nothing to fix.
 	 * 
-	 * @param context a context containing all information requested by {@link #getRequirements()}
+	 * @param context a context containing all information requested by {@link #getRequirementsCore()}
 	 * @return the fix for the problems or <code>null</code> if nothing to fix
 	 * @throws CoreException if an unexpected error occurred
 	 */
-	ICleanUpFixCore createFix(CleanUpContext context) throws CoreException;
+	ICleanUpFixCore createFixCore(CleanUpContextCore context) throws CoreException;
 
 	/**
 	 * Called when done cleaning up.

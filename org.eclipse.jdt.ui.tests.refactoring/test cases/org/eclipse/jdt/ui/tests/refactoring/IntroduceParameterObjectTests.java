@@ -92,14 +92,14 @@ public class IntroduceParameterObjectTests extends RefactoringTest {
 	}
 
 	private String getCUFileName(boolean caller) {
-		StringBuffer sb= new StringBuffer();
+		StringBuilder sb= new StringBuilder();
 		sb.append(getCUName(caller));
 		sb.append(".java");
 		return sb.toString();
 	}
 
 	private String getCUName(boolean caller) {
-		StringBuffer sb= new StringBuffer();
+		StringBuilder sb= new StringBuilder();
 		sb.append(Character.toUpperCase(getName().charAt(0)) + getName().substring(1));
 		if (caller)
 			sb.append("Caller");

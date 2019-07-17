@@ -1604,7 +1604,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 				new IClasspathAttribute[] { JavaCore.newClasspathAttribute(IClasspathAttribute.TEST, "true") });
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pp", false, null);
-		StringBuffer buf1= new StringBuffer();
+		StringBuilder buf1= new StringBuilder();
 		buf1.append("package pp;\n");
 		buf1.append("public class C1 {\n");
 		buf1.append("    Tests at=new Tests();\n");
@@ -1612,7 +1612,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu1= pack1.createCompilationUnit("C1.java", buf1.toString(), false, null);
 
 		IPackageFragment pack2= testSourceFolder.createPackageFragment("pt", false, null);
-		StringBuffer buf2= new StringBuffer();
+		StringBuilder buf2= new StringBuilder();
 		buf2.append("package pt;\n");
 		buf2.append("public class Tests {\n");
 		buf2.append("}\n");

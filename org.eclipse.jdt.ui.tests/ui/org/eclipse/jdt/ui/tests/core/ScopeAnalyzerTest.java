@@ -76,7 +76,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 
 	public void testVariableDeclarations1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1.ae;\n");
 		buf.append("public class E {\n");
 		buf.append("    int[] fGlobal;\n");
@@ -133,7 +133,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 
 	public void testVariableDeclarations2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1.ae;\n");
 		buf.append("import java.io.IOException;\n");
 		buf.append("public class E {\n");
@@ -215,7 +215,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 	public void testVariableDeclarations3() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1.ae;\n");
 		buf.append("public class E {\n");
 		buf.append("    private int fVar1, fVar2;\n");
@@ -359,7 +359,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 
 	public void testVariableDeclarations6() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1.ae;\n");
 		buf.append("public class E {\n");
 		buf.append("    int[] fGlobal;\n");
@@ -442,7 +442,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 	public void testVariableDeclarations7() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1.ae;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void goo() {\n");
@@ -470,7 +470,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 
 	public void testSwitchOnEnum() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1.ae;\n");
 		buf.append("public enum E {\n");
 		buf.append("    A, B, C;\n");
@@ -511,7 +511,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 	public void testDeclarationsAfter() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1.ae;\n");
 		buf.append("public class E {\n");
 		buf.append("    public int goo(final int param0) {\n");
@@ -578,7 +578,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 	public void testTypeDeclarations1() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1.ae;\n");
 		buf.append("public class E {\n");
 		buf.append("    public static class A {\n");
@@ -654,7 +654,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 	public void testTypeDeclarations2() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1.ae;\n");
 		buf.append("public class E {\n");
 		buf.append("    public static class E1 extends G {\n");
@@ -725,7 +725,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 
 	public void testClassInstanceCreation() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1.ae;\n");
 		buf.append("public class E {\n");
 		buf.append("    public Object foo(G g) {\n");
@@ -762,7 +762,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 	public void testMethodDeclarations1() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1.ae;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
@@ -796,7 +796,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 	public void testMethodDeclarations2() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1.ae;\n");
 		buf.append("public class E {\n");
 		buf.append("    int fVar1, fVar2;\n");
@@ -880,7 +880,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 	public void testEnumConstantDeclaration1() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("\n");
 		buf.append("public enum TestEnum {\n");
@@ -924,7 +924,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 	private void assertNoProblems(CompilationUnit astRoot) {
 		IProblem[] problems= astRoot.getProblems();
 		if (problems.length > 0) {
-			StringBuffer buf= new StringBuffer();
+			StringBuilder buf= new StringBuilder();
 			for (int i= 0; i < problems.length; i++) {
 				buf.append(problems[i].getMessage()).append('\n');
 			}

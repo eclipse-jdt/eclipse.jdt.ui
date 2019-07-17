@@ -944,7 +944,7 @@ public class CleanUpTest18 extends CleanUpTestCase {
 
 	public void testConvertToLambdaWithSynchronizedOrStrictfp() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class C1 {\n");
 		buf.append("    Runnable run1 = new Runnable() {\n");

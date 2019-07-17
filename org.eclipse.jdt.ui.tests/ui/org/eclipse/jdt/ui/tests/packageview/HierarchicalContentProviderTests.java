@@ -155,7 +155,7 @@ public class HierarchicalContentProviderTests extends TestCase {
 
 	private String getString(List<String> list) {
 		Collections.sort(list, Collator.getInstance());
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		for (int i= 0; i < list.size(); i++) {
 			buf.append(list.get(i)).append('\n');
 		}

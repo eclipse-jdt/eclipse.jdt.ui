@@ -64,7 +64,7 @@ public abstract class WildcardType extends TType {
 	// protected abstract boolean checkTypeArgumentBound(TType rhs);
 
 	protected String internalGetName(String keyword) {
-		StringBuffer result= new StringBuffer("?"); //$NON-NLS-1$
+		StringBuilder result= new StringBuilder("?"); //$NON-NLS-1$
 		TType bound= getBound();
 		if (bound != null) {
 			result.append(" "); //$NON-NLS-1$
@@ -76,7 +76,7 @@ public abstract class WildcardType extends TType {
 	}
 
 	protected String internalGetPrettySignature(String keyword) {
-		StringBuffer result= new StringBuffer("?"); //$NON-NLS-1$
+		StringBuilder result= new StringBuilder("?"); //$NON-NLS-1$
 		TType bound= getBound();
 		if (bound != null) {
 			result.append(" "); //$NON-NLS-1$

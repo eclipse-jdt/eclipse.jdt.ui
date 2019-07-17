@@ -403,7 +403,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 				return result;
 
 			createChanges(new SubProgressMonitor(pm, 1), result);
-			if (fUpdateReferences & mustAnalyzeShadowing)
+			if (fUpdateReferences && mustAnalyzeShadowing)
 				result.merge(analyzeRenameChanges(new SubProgressMonitor(pm, 1)));
 			else
 				pm.worked(1);

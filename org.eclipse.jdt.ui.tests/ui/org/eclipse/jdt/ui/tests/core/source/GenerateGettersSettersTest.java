@@ -842,7 +842,7 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 	}
 
 	public void testInsertSetterAtLocation() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("/**\n");
 		buf.append("	 * @return Returns the x.\n");
 		buf.append("	 */\n");
@@ -855,7 +855,7 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 	}
 
 	public void testInsertGetterAtLocation() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("/**\n");
 		buf.append("	 * @param x The x to set.\n");
 		buf.append("	 */\n");
@@ -868,7 +868,7 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 	}
 
 	public void testInsertGetterAtLocation2() throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("/**\n");
 		buf.append("	 * @param x The x to set.\n");
 		buf.append("	 */\n");
@@ -881,7 +881,7 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 	}
 
 	private void assertInsertAt(String expectedMethod, boolean isGetter) throws CoreException {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("\n");
 		buf.append("public class A  {\n");
@@ -938,7 +938,7 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 	}
 
 	private void assertInsertAt2(String expectedMethod, boolean isGetter) throws CoreException {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("\n");
 		buf.append("public class A  {\n");

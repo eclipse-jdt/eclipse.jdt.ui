@@ -63,7 +63,7 @@ public class CopyFailureListAction extends Action {
 	}
 
 	public String getAllFailureTraces() {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		TestElement[] failures= fRunner.getAllFailures();
 
 		String lineDelim= System.getProperty("line.separator", "\n");  //$NON-NLS-1$//$NON-NLS-2$

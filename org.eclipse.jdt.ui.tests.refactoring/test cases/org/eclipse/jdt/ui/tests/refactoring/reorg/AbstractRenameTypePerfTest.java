@@ -39,7 +39,7 @@ public abstract class AbstractRenameTypePerfTest extends RepeatingRefactoringPer
 
 	private ICompilationUnit generateSources(int numberOfCus, int numberOfRefs) throws Exception {
 		IPackageFragment definition= fTestProject.getSourceFolder().createPackageFragment("def", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package def;\n");
 		buf.append("public class A {\n");
 		buf.append("}\n");
@@ -53,7 +53,7 @@ public abstract class AbstractRenameTypePerfTest extends RepeatingRefactoringPer
 	}
 
 	private void createReferenceCu(IPackageFragment pack, int index, int numberOfRefs) throws Exception {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package " + pack.getElementName() + ";\n");
 		buf.append("import def.A;\n");
 		buf.append("public class Ref" + index + " {\n");

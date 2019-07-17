@@ -113,7 +113,7 @@ public class JUnitStubUtility {
 	 */
 	public static String genStub(ICompilationUnit compilationUnit, String destTypeName, IMethod method, GenStubSettings settings, String extraAnnotations, ImportsManager imports) throws CoreException {
 		IType declaringtype= method.getDeclaringType();
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		String[] paramTypes= method.getParameterTypes();
 		String[] paramNames= method.getParameterNames();
 		String[] excTypes= method.getExceptionTypes();
@@ -295,7 +295,7 @@ public class JUnitStubUtility {
 				String[] fullNames= null;
 				for (int i= 0; i < parameterTypeSignatures.length; i++) {
 					String paramTypeSign= parameterTypeSignatures[i];
-					StringBuffer buf= new StringBuffer();
+					StringBuilder buf= new StringBuilder();
 
 					String typeSign= Signature.getTypeErasure(paramTypeSign);
 					String fullName;

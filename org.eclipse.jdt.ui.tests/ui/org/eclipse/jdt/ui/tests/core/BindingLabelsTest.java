@@ -63,7 +63,7 @@ public class BindingLabelsTest extends AbstractBindingLabelsTest {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package org.test;\n");
 		buf.append("public class Outer {\n");
 		buf.append("}\n");
@@ -94,7 +94,7 @@ public class BindingLabelsTest extends AbstractBindingLabelsTest {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package org.test;\n");
 		buf.append("import java.util.Vector;\n");
 		buf.append("public class Outer {\n");
@@ -132,7 +132,7 @@ public class BindingLabelsTest extends AbstractBindingLabelsTest {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package org.test;\n");
 		buf.append("import java.util.Vector;\n");
 		buf.append("public class Outer {\n");
@@ -168,7 +168,7 @@ public class BindingLabelsTest extends AbstractBindingLabelsTest {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package org.test;\n");
 		buf.append("import java.util.*;\n");
 		buf.append("import java.io.Serializable;\n");
@@ -229,7 +229,7 @@ public class BindingLabelsTest extends AbstractBindingLabelsTest {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package org.test;\n");
 		buf.append("import java.util.*;\n");
 		buf.append("public class X {\n");
@@ -267,7 +267,7 @@ public class BindingLabelsTest extends AbstractBindingLabelsTest {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package org.test;\n");
 		buf.append("import java.util.Vector;\n");
 		buf.append("public class Outer {\n");
@@ -303,7 +303,7 @@ public class BindingLabelsTest extends AbstractBindingLabelsTest {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package org.test;\n");
 		buf.append("import java.util.Vector;\n");
 		buf.append("import java.io.Serializable;\n");
@@ -349,7 +349,7 @@ public class BindingLabelsTest extends AbstractBindingLabelsTest {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package org.test;\n");
 		buf.append("import java.util.Vector;\n");
 		buf.append("public class Outer {\n");
@@ -383,7 +383,7 @@ public class BindingLabelsTest extends AbstractBindingLabelsTest {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package org.test;\n");
 		buf.append("import java.util.Vector;\n");
 		buf.append("public class Outer {\n");
@@ -419,7 +419,7 @@ public class BindingLabelsTest extends AbstractBindingLabelsTest {
 			IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 			IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-			StringBuffer buf= new StringBuffer();
+			StringBuilder buf= new StringBuilder();
 			buf.append("package org.test;\n");
 			buf.append("public class Wildcards<T> {\n");
 			buf.append("	Wildcards<? extends Number> upper;\n");
@@ -456,7 +456,7 @@ public class BindingLabelsTest extends AbstractBindingLabelsTest {
 		packOrg.createCompilationUnit("T1.java", "package org;\npublic class T1 {}\n", false, null);
 		packOrgTestLongname.createCompilationUnit("T2.java", "package org.test.longname;\npublic class T2 {}\n", false, null);
 		
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("import org.T1;\n");
 		buf.append("import org.test.longname.T2;\n");
 		buf.append("public class Main {\n");
@@ -554,7 +554,7 @@ public class BindingLabelsTest extends AbstractBindingLabelsTest {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package org.test;\n");
 		buf.append("public class Varargs {\n");
 		buf.append("    public void foo(int i, String... varargs) {\n");
@@ -585,7 +585,7 @@ public class BindingLabelsTest extends AbstractBindingLabelsTest {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package org.test;\n");
 		buf.append("import java.util.Arrays;\n");
 		buf.append("public class Varargs {\n");
@@ -633,7 +633,7 @@ public class BindingLabelsTest extends AbstractBindingLabelsTest {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package org.test;\n");
 		buf.append("import java.util.Arrays;\n");
 		buf.append("public class Varargs {\n");
@@ -669,7 +669,7 @@ public class BindingLabelsTest extends AbstractBindingLabelsTest {
 	public void testMethodLabelAnnotatedParameters() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package org.test;\n");
 		buf.append("\n");
 		buf.append("import java.lang.annotation.Retention;\n");
@@ -709,7 +709,7 @@ public class BindingLabelsTest extends AbstractBindingLabelsTest {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package org.test;\n");
 		buf.append("public class LambdaTests {\n");
 		buf.append("    {\n");
@@ -745,7 +745,7 @@ public class BindingLabelsTest extends AbstractBindingLabelsTest {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package org.test;\n");
 		buf.append("public class LambdaTests {\n");
 		buf.append("    static {\n");
@@ -776,7 +776,7 @@ public class BindingLabelsTest extends AbstractBindingLabelsTest {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package org.test;\n");
 		buf.append("public interface TypeTest {\n");
 		buf.append("    public <V extends Comparable<? super V>> boolean compare(V t);\n");
@@ -800,7 +800,7 @@ public class BindingLabelsTest extends AbstractBindingLabelsTest {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package org.test;\n");
 		buf.append("class Two<B extends Number, A extends B> { }\n");
 		buf.append("public class Three<E extends Number> {\n");

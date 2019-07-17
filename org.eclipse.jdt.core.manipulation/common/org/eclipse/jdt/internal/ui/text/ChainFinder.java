@@ -114,6 +114,9 @@ public class ChainFinder {
 		if (edge.getElementBinding().getKind() == IBinding.TYPE) {
 			return false;
 		}
+		if (edge.getReturnType().isPrimitive() || expectedType.isPrimitive()) {
+			return expectedType.getName().equals(edge.getReturnType().getName());
+		}
 		Boolean isAssignable= assignableCache.get(Collections.singletonMap(edge, expectedType));
 		if (isAssignable == null) {
 			isAssignable= TypeBindingAnalyzer.isAssignable(edge, expectedType, expectedDimension);

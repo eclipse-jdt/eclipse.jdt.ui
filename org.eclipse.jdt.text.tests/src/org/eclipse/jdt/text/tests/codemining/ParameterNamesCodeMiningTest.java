@@ -306,7 +306,55 @@ public class ParameterNamesCodeMiningTest extends TestCase {
 				"    }\n" + 
 				"}\n" + 
 				"";
-		ICompilationUnit compilationUnit= fPackage.createCompilationUnit("Foo.java", contents, true, new NullProgressMonitor());
+		ICompilationUnit compilationUnit= fPackage.createCompilationUnit("Test.java", contents, true, new NullProgressMonitor());
+		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(compilationUnit);
+		fParameterNameCodeMiningProvider.setContext(editor);
+		JavaSourceViewer viewer= (JavaSourceViewer)editor.getViewer();
+		waitReconciled(viewer);
+
+		assertEquals(2, fParameterNameCodeMiningProvider.provideCodeMinings(viewer, new NullProgressMonitor()).get().size());
+	}
+
+	public void testBug549023() throws Exception {
+		String contents= "class Base {\n" + 
+				"    public final Object object;\n" + 
+				"    public final String string;\n" + 
+				"\n" + 
+				"    Base(Object object, String string) {\n" + 
+				"        this.object = object;\n" + 
+				"        this.string = string;\n" + 
+				"    }\n" + 
+				"}\n" + 
+				"\n" + 
+				"public class Test extends Base {\n" + 
+				"    Test() {\n" + 
+				"        super(null, \"\");\n" + 
+				"    }\n" + 
+				"}\n" + 
+				"";
+		ICompilationUnit compilationUnit= fPackage.createCompilationUnit("Test.java", contents, true, new NullProgressMonitor());
+		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(compilationUnit);
+		fParameterNameCodeMiningProvider.setContext(editor);
+		JavaSourceViewer viewer= (JavaSourceViewer)editor.getViewer();
+		waitReconciled(viewer);
+
+		assertEquals(2, fParameterNameCodeMiningProvider.provideCodeMinings(viewer, new NullProgressMonitor()).get().size());
+	}
+
+	public void testBug549126() throws Exception {
+		String contents= "public enum TestEnum {\n" + 
+				"    A(\"bla\", null);\n" + 
+				"\n" + 
+				"    public final String string;\n" + 
+				"    public final Object object;\n" + 
+				"\n" + 
+				"    TestEnum(String string, Object object) {\n" + 
+				"        this.string = string;\n" + 
+				"        this.object = object;\n" + 
+				"    }\n" + 
+				"}\n" + 
+				"";
+		ICompilationUnit compilationUnit= fPackage.createCompilationUnit("TestEnum.java", contents, true, new NullProgressMonitor());
 		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(compilationUnit);
 		fParameterNameCodeMiningProvider.setContext(editor);
 		JavaSourceViewer viewer= (JavaSourceViewer)editor.getViewer();

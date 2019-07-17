@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc. - code modified from SerialVersionDefaultOperation
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
@@ -27,7 +28,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
  *
  * @since 3.1
  */
-public final class SerialVersionDefaultOperation extends AbstractSerialVersionOperation {
+public final class SerialVersionDefaultOperationCore extends AbstractSerialVersionOperationCore {
 
 	/** The initializer linked position group id */
 	private static final String GROUP_INITIALIZER= "initializer"; //$NON-NLS-1$
@@ -40,7 +41,7 @@ public final class SerialVersionDefaultOperation extends AbstractSerialVersionOp
 	 * @param nodes
 	 *            the originally selected nodes
 	 */
-	public SerialVersionDefaultOperation(ICompilationUnit unit, ASTNode[] nodes) {
+	public SerialVersionDefaultOperationCore(ICompilationUnit unit, ASTNode[] nodes) {
 		super(unit, nodes);
 	}
 
@@ -56,14 +57,14 @@ public final class SerialVersionDefaultOperation extends AbstractSerialVersionOp
 	}
 
 	@Override
-	protected void addLinkedPositions(final ASTRewrite rewrite, final VariableDeclarationFragment fragment, final LinkedProposalModel positionGroups) {
+	protected void addLinkedPositions(final ASTRewrite rewrite, final VariableDeclarationFragment fragment, final LinkedProposalModelCore positionGroups) {
 
 		Assert.isNotNull(rewrite);
 		Assert.isNotNull(fragment);
 
 		final Expression initializer= fragment.getInitializer();
 		if (initializer != null) {
-			LinkedProposalPositionGroup group= new LinkedProposalPositionGroup(GROUP_INITIALIZER);
+			LinkedProposalPositionGroupCore group= positionGroups.createPositionGroup(GROUP_INITIALIZER);
 			group.addPosition(rewrite.track(initializer), true);
 			positionGroups.addPositionGroup(group);
 		}

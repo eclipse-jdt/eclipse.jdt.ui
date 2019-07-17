@@ -297,7 +297,7 @@ public class QuickFixTest extends TestCase {
 
 	protected static void assertNumberOfProblems(int nProblems, IProblem[] problems) {
 		if (problems.length != nProblems) {
-			StringBuffer buf= new StringBuffer("Wrong number of problems, is: ");
+			StringBuilder buf= new StringBuilder("Wrong number of problems, is: ");
 			buf.append(problems.length).append(", expected: ").append(nProblems).append('\n');
 			for (int i= 0; i < problems.length; i++) {
 				buf.append(problems[i]);
@@ -509,7 +509,7 @@ public class QuickFixTest extends TestCase {
 		} else {
 			JavaProjectHelper.delete(parent);
 		}
-		StringBuffer res= new StringBuffer();
+		StringBuilder res= new StringBuilder();
 		IDocument doc= new Document(preview);
 		int nLines= doc.getNumberOfLines();
 		for (int i= 0; i < nLines; i++) {

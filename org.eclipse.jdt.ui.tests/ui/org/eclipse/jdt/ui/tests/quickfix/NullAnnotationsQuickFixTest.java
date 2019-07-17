@@ -779,7 +779,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	// don't propose to change argument if mismatch is in an assignment to the argument
 	public void testChangeParameter2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class E {\n");
@@ -1072,7 +1072,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		fJProject1.setOption(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.DISABLED);
 		try {
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-			StringBuffer buf= new StringBuffer();
+			StringBuilder buf= new StringBuilder();
 			buf.append("package test1;\n");
 			buf.append("public class E {\n");
 			buf.append("    void foo(Object o) {\n");
@@ -1094,7 +1094,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	// don't propose a parameter change if there was no parameter annotation being the cause for the warning
 	public void testChangeParameter6() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    void foo(Object o) {\n");

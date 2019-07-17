@@ -42,7 +42,7 @@ public class InstancesOfTypeCollector extends ReferenceVisitor {
 
 	public String getResultString() {
 		int i= 0;
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		for (Iterator<ReferenceInfo> iterator= fResults.iterator(); iterator.hasNext();) {
 			ReferenceInfo element= iterator.next();
 			buf.append("Element ").append(i++).append('\n');

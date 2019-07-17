@@ -122,7 +122,7 @@ public class AbstractSemanticHighlightingTest extends TestCase {
 	}
 
 	String toString(Position[] positions) throws BadLocationException {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		IDocument document= fSourceViewer.getDocument();
 		buf.append("Position[] expected= new Position[] {\n");
 		for (int i= 0, n= positions.length; i < n; i++) {

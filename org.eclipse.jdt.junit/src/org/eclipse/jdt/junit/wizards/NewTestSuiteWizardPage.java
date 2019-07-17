@@ -362,7 +362,7 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 	 */
 	private String getSuiteMethodString(IType type) {
 		String typeName= type.getElementName();
-		StringBuffer suite= new StringBuffer("public static Test suite () {TestSuite suite= new TestSuite(" + typeName + ".class.getName());\n"); //$NON-NLS-1$ //$NON-NLS-2$ 
+		StringBuilder suite= new StringBuilder("public static Test suite () {TestSuite suite= new TestSuite(" + typeName + ".class.getName());\n"); //$NON-NLS-1$ //$NON-NLS-2$ 
 		suite.append(getUpdatableString());
 		suite.append("\nreturn suite;}"); //$NON-NLS-1$
 		return suite.toString();
@@ -667,7 +667,7 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 
 	private String appendAnnotations(String typeContent, String lineDelimiter) {
 		Object[] checkedElements= fClassesInSuiteTable.getCheckedElements();
-		StringBuffer buffer = new StringBuffer("@RunWith(Suite.class)"); //$NON-NLS-1$
+		StringBuilder buffer = new StringBuilder("@RunWith(Suite.class)"); //$NON-NLS-1$
 		buffer.append(lineDelimiter);
 		buffer.append("@SuiteClasses({"); //$NON-NLS-1$
 		for (int i= 0; i < checkedElements.length; i++) {

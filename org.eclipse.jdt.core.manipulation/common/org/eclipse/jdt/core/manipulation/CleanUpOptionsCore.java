@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2018 IBM Corporation and others.
+ * Copyright (c) 2008, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -12,7 +12,7 @@
  *     IBM Corporation - initial API and implementation
  *     Red Hat Inc. - refactored to jdt.core.manipulation
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext.fix;
+package org.eclipse.jdt.core.manipulation;
 
 import java.util.Collections;
 import java.util.Hashtable;
@@ -26,11 +26,11 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
 /**
  * Allows to set and retrieve clean up settings for given options keys.
- * 
- * @since 3.5
- * @noextend This class is not intended to be subclassed by clients.
+ *
+ * @since 1.12
+ * This class is not intended to be subclassed by clients.
  */
-public class CleanUpOptions {
+public class CleanUpOptionsCore {
 
 	private final Map<String, String> fOptions;
 
@@ -46,24 +46,24 @@ public class CleanUpOptions {
 
 	/**
 	 * Creates a new CleanUpOptions instance with the given options.
-	 * 
+	 *
 	 * @param options map that maps clean ups keys (<code>String</code>) to a non-<code>null</code>
 	 *            string value
 	 */
-	public CleanUpOptions(Map<String, String> options) {
+	public CleanUpOptionsCore(Map<String, String> options) {
 		fOptions= options;
 	}
 
 	/**
 	 * Creates a new instance.
 	 */
-	public CleanUpOptions() {
+	public CleanUpOptionsCore() {
 		fOptions= new Hashtable<>();
 	}
 
 	/**
 	 * Tells whether the option with the given <code>key</code> is enabled.
-	 * 
+	 *
 	 * @param key the name of the option
 	 * @return <code>true</code> if enabled, <code>false</code> if not enabled or unknown key
 	 * @throws IllegalArgumentException if the key is <code>null</code>
@@ -72,12 +72,12 @@ public class CleanUpOptions {
 	public boolean isEnabled(String key) {
 		Assert.isLegal(key != null);
 		Object value= fOptions.get(key);
-		return CleanUpOptions.TRUE == value || CleanUpOptions.TRUE.equals(value);
+		return CleanUpOptionsCore.TRUE == value || CleanUpOptionsCore.TRUE.equals(value);
 	}
 
 	/**
 	 * Returns the value for the given key.
-	 * 
+	 *
 	 * @param key the key of the value
 	 * @return the value associated with the key
 	 * @throws IllegalArgumentException if the key is null or unknown
@@ -91,12 +91,12 @@ public class CleanUpOptions {
 
 	/**
 	 * Sets the option for the given key to the given value.
-	 * 
+	 *
 	 * @param key the name of the option to set
 	 * @param value the value of the option
 	 * @throws IllegalArgumentException if the key is <code>null</code>
-	 * @see CleanUpOptions#TRUE
-	 * @see CleanUpOptions#FALSE
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
 	 */
 	public void setOption(String key, String value) {
 		Assert.isLegal(key != null);
@@ -106,7 +106,7 @@ public class CleanUpOptions {
 
 	/**
 	 * Returns an unmodifiable set of all known keys.
-	 * 
+	 *
 	 * @return an unmodifiable set of all keys
 	 */
 	public Set<String> getKeys() {

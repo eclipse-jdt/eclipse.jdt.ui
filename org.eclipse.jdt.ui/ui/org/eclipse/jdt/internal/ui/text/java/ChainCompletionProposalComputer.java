@@ -35,9 +35,11 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.manipulation.JavaManipulation;
+import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ASTCreator;
 
@@ -104,7 +106,13 @@ public class ChainCompletionProposalComputer implements IJavaCompletionProposalC
 	}
 
 	private boolean shouldPerformCompletionOnExpectedType() {
-		AST ast= ASTCreator.createAST(ctx.getCompilationUnit(), null).getAST();
+		AST ast;
+		CompilationUnit cuNode= SharedASTProviderCore.getAST(ctx.getCompilationUnit(), SharedASTProviderCore.WAIT_NO, null);
+		if (cuNode != null) {
+			ast= cuNode.getAST();
+		} else {
+			ast= ASTCreator.createAST(ctx.getCompilationUnit(), null).getAST();
+		}
 		ITypeBinding binding= ast.resolveWellKnownType(TypeBindingAnalyzer.getExpectedFullyQualifiedTypeName(ctx.getCoreContext()));
 		return binding != null || TypeBindingAnalyzer.getExpectedType(ctx.getProject(), ctx.getCoreContext()) != null;
 	}

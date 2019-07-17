@@ -71,7 +71,7 @@ public class JERoot extends JEAttribute {
 	
 	@Override
 	public String getLabel() {
-		StringBuffer buf = new StringBuffer("root: ");
+		StringBuilder buf = new StringBuilder("root: ");
 		boolean first= true;
 		for (JEAttribute att : fJEAttributes) {
 			if (! first)

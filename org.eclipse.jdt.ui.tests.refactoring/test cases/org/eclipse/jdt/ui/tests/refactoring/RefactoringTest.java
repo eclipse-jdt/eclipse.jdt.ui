@@ -492,7 +492,7 @@ public abstract class RefactoringTest extends TestCase {
 	public static String getContents(InputStream in) throws IOException {
 		BufferedReader br= new BufferedReader(new InputStreamReader(in));
 
-		StringBuffer sb= new StringBuffer(300);
+		StringBuilder sb= new StringBuilder(300);
 		try {
 			int read= 0;
 			while ((read= br.read()) != -1)

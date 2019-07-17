@@ -135,7 +135,7 @@ public class NewTypeWizardTest extends TestCase {
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("/**\n");
 		buf.append(" * File\n");
 		buf.append(" */\n");
@@ -174,7 +174,7 @@ public class NewTypeWizardTest extends TestCase {
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("/**\n");
 		buf.append(" * File\n");
 		buf.append(" */\n");
@@ -400,7 +400,7 @@ public class NewTypeWizardTest extends TestCase {
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("/**\n");
 		buf.append(" * File\n");
 		buf.append(" */\n");
@@ -579,7 +579,7 @@ public class NewTypeWizardTest extends TestCase {
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("/**\n");
 		buf.append(" * File\n");
 		buf.append(" */\n");
@@ -616,7 +616,7 @@ public class NewTypeWizardTest extends TestCase {
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("/**\n");
 		buf.append(" * File\n");
 		buf.append(" */\n");
@@ -651,7 +651,7 @@ public class NewTypeWizardTest extends TestCase {
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("/**\n");
 		buf.append(" * File\n");
 		buf.append(" */\n");
@@ -692,7 +692,7 @@ public class NewTypeWizardTest extends TestCase {
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("/**\n");
 		buf.append(" * File\n");
 		buf.append(" */\n");

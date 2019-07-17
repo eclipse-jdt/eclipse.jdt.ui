@@ -1335,7 +1335,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 	public void testInitializerPrecondition01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(Object[] x) {\n");
@@ -1349,7 +1349,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 	public void testInitializerPrecondition02() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(Object[] x) {\n");
@@ -1363,7 +1363,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 	public void testInitializerPrecondition03() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(Object[] x) {\n");
@@ -1378,7 +1378,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 	public void testInitializerPrecondition04() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(Object[] x) {\n");
@@ -1393,7 +1393,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 	public void testInitializerPrecondition05() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(Object[] x) {\n");
@@ -1407,7 +1407,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 	public void testInitializerPrecondition06() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    void foo(Object[] x) {\n");
@@ -1425,7 +1425,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 	public void testExpressionPrecondition01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(Object[] x) {\n");
@@ -1439,7 +1439,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 	public void testExpressionPrecondition02() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(Object[] x) {\n");
@@ -1453,7 +1453,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 	public void testExpressionPrecondition03() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(Object[] x) {\n");
@@ -1467,7 +1467,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 	public void testExpressionPrecondition04() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    private static class MyClass {\n");
@@ -1484,7 +1484,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 	public void testExpressionPrecondition05() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    Object[] x;\n");
@@ -1499,7 +1499,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 	public void testExpressionPrecondition06() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    Object[] x;\n");
@@ -1514,7 +1514,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 	public void testExpressionPrecondition07() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(Object[] x) {\n");
@@ -1528,7 +1528,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 	public void testExpressionPrecondition08() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(Object[] x) {\n");
@@ -1542,7 +1542,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 	public void testUpdatePrecondition01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(Object[] x) {\n");
@@ -1556,7 +1556,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 	public void testUpdatePrecondition02() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(Object[] x) {\n");
@@ -1570,7 +1570,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 	public void testUpdatePrecondition03() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(Object[] x) {\n");
@@ -1584,7 +1584,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 	public void testUpdatePrecondition04() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(Object[] x) {\n");
@@ -1598,7 +1598,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 	public void testUpdatePrecondition06() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(Object[] x) {\n");
@@ -1614,7 +1614,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	public void testUpdatePrecondition07() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=349782
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(Object[] x) {\n");
@@ -1628,7 +1628,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 	public void testBodyPrecondition01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(Object[] x) {\n");
@@ -1644,7 +1644,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 	public void testBodyPrecondition02() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    Object[] x;\n");
@@ -1661,7 +1661,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 	public void testBodyPrecondition03() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    Object[] x;\n");
@@ -1678,7 +1678,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 	public void testBodyPrecondition04() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    Object[] x;\n");
@@ -1696,7 +1696,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 	public void testBodyPrecondition05() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    Object[] x;\n");
@@ -1714,7 +1714,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 	public void testBodyPrecondition06() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    Object[] x;\n");
@@ -1731,7 +1731,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 	public void testBodyPrecondition07() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(Object[] x) {\n");
@@ -1747,7 +1747,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 	public void testBodyPrecondition08() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    Object[] x;\n");
@@ -1764,7 +1764,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 	public void testBodyPrecondition09() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(Object[] x) {\n");
@@ -1780,7 +1780,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 	public void testBodyPreconditio10() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(int[] x) {\n");
@@ -1796,7 +1796,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 	public void testBodyPrecondition11() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(int[] x) {\n");
@@ -1812,7 +1812,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 	public void testBodyPrecondition12() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(Object[] x) {\n");
@@ -1828,7 +1828,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 	public void testBodyPrecondition13() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("import java.util.Iterator;\n");
 		buf.append("import java.util.List;\n");
@@ -1848,7 +1848,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	public void testBodyPrecondition344674_1() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    Object[] x;\n");
@@ -1866,7 +1866,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	public void testBodyPrecondition344674_2() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    Object[] x;\n");
@@ -1884,7 +1884,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	public void testBodyPrecondition344674_3() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    Object[] x;\n");
@@ -1902,7 +1902,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	public void testBodyPrecondition344674_4() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E implements Comparable<Object> {\n");
 		buf.append("    private int[] tokens;\n");
@@ -1927,7 +1927,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	public void testBodyPrecondition344674_5() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E implements Comparable<Object> {\n");
 		buf.append("    private int[] tokens;\n");
@@ -1952,7 +1952,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	public void testBodyPrecondition344674_6() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E implements Comparable<Object> {\n");
 		buf.append("    private int[] tokens;\n");
@@ -1977,7 +1977,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	public void testBodyPrecondition344674_7() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E implements Comparable<Object> {\n");
 		buf.append("    private int[] tokens;\n");
@@ -2002,7 +2002,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	public void testBodyPrecondition344674_8() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E implements Comparable<E> {\n");
 		buf.append("    private int[] tokens;\n");
@@ -2027,7 +2027,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	public void testBodyPrecondition344674_9() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
 		buf.append("    String[] tokens;\n");
@@ -2124,7 +2124,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 	public void testBug214340_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    int[] array = new int[3];\n");
@@ -2144,7 +2144,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 	public void testBug214340_2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    int[] array = new int[3];\n");
@@ -2204,7 +2204,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 	public void testBug231575_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    private Object[] array;\n");

@@ -1063,7 +1063,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 	public void testAddParenthesesForExpression7() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=338675
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(int a, int b, int c) {\n");
@@ -1084,7 +1084,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 	public void testAddParenthesesForExpression8() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=338675
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(int a, int b, int c) {\n");
@@ -3644,7 +3644,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
 	public void testPushNegationDownBug335778_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(boolean b) {\n");
@@ -3666,7 +3666,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
 	public void testPushNegationDownBug335778_2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(Object a) {\n");
@@ -3755,7 +3755,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
 	public void testPullNegationUpBug335778_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(boolean b) {\n");
@@ -3778,7 +3778,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
 	public void testPullNegationUpBug335778_2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(Object a) {\n");
@@ -4333,7 +4333,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
 	public void testConvertSwitchToIfBug352422_2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(int a) {\n");
@@ -4420,7 +4420,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
 	public void testConvertIfToSwitch2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(String s) {\n");
@@ -4742,7 +4742,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
 	public void testConvertIfToSwitch8() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    private int a= 10;\n");
@@ -4865,7 +4865,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 	public void testConvertIfToSwitchBug392847() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=392847
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(String[] args) {\n");
@@ -4891,7 +4891,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
 	public void testConvertIfToSwitchBug393147() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
@@ -4914,7 +4914,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
 	public void testConvertIfToSwitchBug393147_2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
@@ -5594,7 +5594,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
 	public void testPickOutStringProposals3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
@@ -5613,7 +5613,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
 	public void testPickOutStringProposals4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
@@ -5695,7 +5695,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 	
 	public void testCombineStringsProposals3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
@@ -5745,7 +5745,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 	
 	public void testCombineStringsProposals5() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
@@ -5766,7 +5766,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 	public void testConvertToIfReturn1() throws Exception {
 		// positive cases
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo1() {\n");
@@ -5896,7 +5896,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 	public void testConvertToIfReturn2() throws Exception {
 		// negative cases
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo1() {\n");
@@ -5946,7 +5946,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 	public void testConvertToIfReturn3() throws Exception {
 		// 'if' should be in a 'method' returning 'void'
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    static {\n");
@@ -5982,7 +5982,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 	public void testConvertToIfReturn4() throws Exception {
 		// 'if' should not be in a loop
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo1() {\n");

@@ -347,7 +347,7 @@ public class RemoteTestRunnerClient {
 	}
 
 	private String readMessage(PushbackReader in) throws IOException {
-		StringBuffer buf= new StringBuffer(128);
+		StringBuilder buf= new StringBuilder(128);
 		int ch;
 		while ((ch= in.read()) != -1) {
 			if (ch == '\n') {

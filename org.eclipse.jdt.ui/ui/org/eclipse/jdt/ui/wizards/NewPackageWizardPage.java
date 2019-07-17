@@ -426,6 +426,7 @@ public class NewPackageWizardPage extends NewTypeWizardPage {
 	 *
 	 * @return the content of the package input field
 	 */
+	@Override
 	public String getPackageText() {
 		return fPackageDialogField.getText();
 	}
@@ -459,6 +460,7 @@ public class NewPackageWizardPage extends NewTypeWizardPage {
 	 * @return A resource or null if the page contains illegal values.
 	 * @since 3.0
 	 */
+	@Override
 	public IResource getModifiedResource() {
 		IPackageFragmentRoot root= getPackageFragmentRoot();
 		if (root != null) {
@@ -485,6 +487,7 @@ public class NewPackageWizardPage extends NewTypeWizardPage {
 	 *
 	 * @return the runnable that creates the new package
 	 */
+	@Override
 	public IRunnableWithProgress getRunnable() {
 		return new IRunnableWithProgress() {
 			@Override

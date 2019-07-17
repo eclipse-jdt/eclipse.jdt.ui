@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Microsoft Corporation - copied to jdt.core.manipulation
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.dom;
 
@@ -38,13 +39,12 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
-import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroupCore;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroupCore.PositionInformation;
-import org.eclipse.jdt.internal.corext.util.JDTUIHelperClasses;
 
 /**
  * Rewrite helper for modifier lists.
- * 
+ *
  * @see JDTUIHelperClasses
  */
 public class ModifierRewrite {
@@ -229,15 +229,15 @@ public class ModifierRewrite {
 			}
 			trackedNodes.add(fModifierRewrite.getASTRewrite().track(curr));
 		}
-		
+
 		if (trackedNodes.isEmpty()) {
 			if (trackedFallback == null) {
 				// out of tricks...
 				trackedFallback= fModifierRewrite.getASTRewrite().track(fModifierRewrite.getParent());
 			}
-			return new LinkedProposalPositionGroup.StartPositionInformation(trackedFallback);
+			return new LinkedProposalPositionGroupCore.StartPositionInformation(trackedFallback);
 		} else {
-			return new LinkedProposalPositionGroup.TrackedNodesPosition(trackedNodes);
+			return new LinkedProposalPositionGroupCore.TrackedNodesPosition(trackedNodes);
 		}
 	}
 }
