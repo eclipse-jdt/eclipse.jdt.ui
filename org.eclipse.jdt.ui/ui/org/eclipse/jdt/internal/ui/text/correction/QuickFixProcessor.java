@@ -308,6 +308,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.PreviewFeatureNotSupported:
 			case IProblem.SwitchExpressionsYieldMissingEnumConstantCase:
 			case IProblem.SwitchExpressionsYieldMissingDefaultCase:
+			case IProblem.PreviewFeaturesNotAllowed:
 				return true;
 			default:
 				return SuppressWarningsSubProcessor.hasSuppressWarningsProposal(cu.getJavaProject(), problemId)
@@ -857,6 +858,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				PreviewFeaturesSubProcessor.getOpenCompliancePageToEnablePreviewFeaturesProposal(context, proposals);
 				break;
 			case IProblem.PreviewFeatureNotSupported:
+			case IProblem.PreviewFeaturesNotAllowed:
 				PreviewFeaturesSubProcessor.getNeedHigherComplianceProposals(context, problem, proposals);
 				break;
 			default:

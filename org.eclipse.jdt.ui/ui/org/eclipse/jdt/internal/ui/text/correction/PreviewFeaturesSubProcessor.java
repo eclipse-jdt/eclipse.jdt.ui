@@ -7,7 +7,11 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -225,10 +229,10 @@ public class PreviewFeaturesSubProcessor {
 	public static void getNeedHigherComplianceProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		String[] args= problem.getProblemArguments();
 		if (args != null && args.length > 0) {
+			String supportedVersion= JavaCore.VERSION_13;
 			String arg= args[1];
-			if (arg == "12") { //$NON-NLS-1$
-				String version= JavaCore.VERSION_12;
-				ReorgCorrectionsSubProcessor.getNeedHigherComplianceProposals(context, problem, proposals, version);
+			if (arg.equals(supportedVersion)) {
+				ReorgCorrectionsSubProcessor.getNeedHigherComplianceProposals(context, problem, proposals, true, supportedVersion);
 			}
 		}
 	}
