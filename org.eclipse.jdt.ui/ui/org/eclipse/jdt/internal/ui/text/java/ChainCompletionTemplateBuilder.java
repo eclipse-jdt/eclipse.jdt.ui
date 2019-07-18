@@ -25,10 +25,8 @@ import org.eclipse.jface.text.templates.DocumentTemplateContext;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateContextType;
 
-import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.IMethod;
 
-import org.eclipse.jdt.internal.core.manipulation.BindingLabelProviderCore;
 import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
 import org.eclipse.jdt.internal.corext.template.java.JavaContext;
 import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
@@ -61,19 +59,22 @@ public final class ChainCompletionTemplateBuilder {
 
 	private static String createChainCode(final Chain chain, final boolean createAsTitle, final int expectedDimension) {
 		final Map<String, Integer> varNames= new HashMap<>();
-		final StringBuilder sb= new StringBuilder(64);
+		StringBuilder sb= new StringBuilder(64);
 		for (final ChainElement edge : chain.getElements()) {
 			switch (edge.getElementType()) {
 				case FIELD:
+				case TYPE:
 				case LOCAL_VARIABLE:
 					appendVariableString(edge, sb);
 					break;
 				case METHOD:
-					final IMethodBinding method= edge.getElementBinding();
+					final IMethod method= (IMethod) edge.getElement();
 					if (createAsTitle) {
-						sb.append(BindingLabelProviderCore.getBindingLabel(method, JavaElementLabelsCore.ALL_DEFAULT));
+						StringBuffer tmp= new StringBuffer(sb.toString());
+						JavaElementLabelsCore.getMethodLabel(method, JavaElementLabelsCore.ALL_DEFAULT, tmp);
+						sb= new StringBuilder(tmp.toString());
 					} else {
-						sb.append(method.getName());
+						sb.append(method.getElementName());
 						appendParameters(sb, method, varNames);
 					}
 					break;
@@ -91,15 +92,14 @@ public final class ChainCompletionTemplateBuilder {
 		if (edge.requiresThisForQualification() && sb.length() == 0) {
 			sb.append("this."); //$NON-NLS-1$
 		}
-		sb.append((edge.getElementBinding()).getName());
+		sb.append((edge.getElement()).getElementName());
 	}
 
-	private static void appendParameters(final StringBuilder sb, final IMethodBinding method,
+	private static void appendParameters(final StringBuilder sb, final IMethod method,
 			final Map<String, Integer> varNames) {
 		sb.append("("); //$NON-NLS-1$
-		for (final ITypeBinding parameter : method.getParameterTypes()) {
-			String tmp= String.valueOf(parameter.getName());
-			String parameterName= tmp.substring(0, 1).toLowerCase() + tmp.substring(1);
+		for (final String parameter : method.getParameterTypes()) {
+			String parameterName= parameter.substring(0, 1).toLowerCase() + parameter.substring(1);
 			int index= parameterName.indexOf('<');
 			if (index != -1) {
 				parameterName= parameterName.substring(0, index);
