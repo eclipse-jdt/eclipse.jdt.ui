@@ -50,11 +50,6 @@ public class ASTFlattener extends GenericVisitor {
 	 */
 	@Deprecated
 	private static final int JLS9= AST.JLS9;
-	/**
-	 * @deprecated to avoid deprecation warnings
-	 */
-	@Deprecated
-	private static final int JLS12= AST.JLS12;
 
 	private static final int JLS13= AST.JLS13;
 
