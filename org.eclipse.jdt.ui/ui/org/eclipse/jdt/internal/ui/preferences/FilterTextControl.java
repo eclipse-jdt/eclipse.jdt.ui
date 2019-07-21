@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 IBM Corporation and others.
+ * Copyright (c) 2010, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,8 +10,11 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Alexander Fedorov <alexander.fedorov@arsysop.ru> - Bug 549442
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
+
+import java.util.Optional;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.accessibility.ACC;
@@ -37,9 +40,9 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.resource.ResourceLocator;
 
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 /**
  * A simple filter text widget.
@@ -51,13 +54,13 @@ public class FilterTextControl {
 	/**
 	 * Image descriptor for enabled clear button.
 	 */
-	private static ImageDescriptor fgClearIconDescriptor= AbstractUIPlugin
-			.imageDescriptorFromPlugin(PlatformUI.PLUGIN_ID, "$nl$/icons/full/etool16/clear_co.png"); //$NON-NLS-1$
+	private static Optional<ImageDescriptor> fgClearIconDescriptor= ResourceLocator
+			.imageDescriptorFromBundle(PlatformUI.PLUGIN_ID, "$nl$/icons/full/etool16/clear_co.png"); //$NON-NLS-1$
 
 	/**
 	 * Image descriptor for disabled clear button.
 	 */
-	private static ImageDescriptor fgDisabledClearIconDescriptor= AbstractUIPlugin.imageDescriptorFromPlugin(
+	private static Optional<ImageDescriptor> fgDisabledClearIconDescriptor= ResourceLocator.imageDescriptorFromBundle(
 			PlatformUI.PLUGIN_ID, "$nl$/icons/full/dtool16/clear_co.png"); //$NON-NLS-1$
 
 
@@ -157,9 +160,9 @@ public class FilterTextControl {
 	private void createClearButton(Composite parent) {
 		// only create the button if the text widget doesn't support one natively
 		if ((fTextControl.getStyle() & SWT.ICON_CANCEL) == 0) {
-			final Image inactiveImage= fgDisabledClearIconDescriptor.createImage();
-			final Image activeImage= fgClearIconDescriptor.createImage();
-			final Image pressedImage= new Image(parent.getDisplay(), activeImage, SWT.IMAGE_GRAY);
+			final Image inactiveImage= fgDisabledClearIconDescriptor.isPresent() ? fgDisabledClearIconDescriptor.get().createImage() : null;
+			final Image activeImage= fgClearIconDescriptor.isPresent()? fgClearIconDescriptor.get().createImage(): null;
+			final Image pressedImage= activeImage != null ? new Image(parent.getDisplay(), activeImage, SWT.IMAGE_GRAY) : null;
 
 			final Label clearButton= new Label(parent, SWT.NONE);
 			clearButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
@@ -224,9 +227,15 @@ public class FilterTextControl {
 			clearButton.addDisposeListener(new DisposeListener() {
 				@Override
 				public void widgetDisposed(DisposeEvent e) {
-					inactiveImage.dispose();
-					activeImage.dispose();
-					pressedImage.dispose();
+					if (inactiveImage != null) {
+						inactiveImage.dispose();
+					}
+					if (activeImage != null) {
+						activeImage.dispose();
+					}
+					if (pressedImage != null) {
+						pressedImage.dispose();
+					}
 				}
 			});
 			clearButton.getAccessible().addAccessibleListener(
