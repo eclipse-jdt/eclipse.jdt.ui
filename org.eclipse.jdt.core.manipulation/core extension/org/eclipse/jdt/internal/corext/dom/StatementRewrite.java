@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc. - moved to jdt.core.manipulation
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.dom;
 
@@ -23,14 +24,12 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
-import org.eclipse.jdt.internal.corext.util.JDTUIHelperClasses;
-
 
 /**
  * Rewrite helper for {@link Statement}s. Ensures that
  * the replacement nodes are enclosed in a Block if necessary.
  * 
- * @see JDTUIHelperClasses
+ * see JDTUIHelperClasses
  */
 public class StatementRewrite extends ReplaceRewrite {
 

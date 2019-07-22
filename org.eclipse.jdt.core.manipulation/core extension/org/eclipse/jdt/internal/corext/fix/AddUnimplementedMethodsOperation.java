@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -12,6 +12,7 @@
  *     IBM Corporation - initial API and implementation
  *     Mateusz Wenus <mateusz.wenus@gmail.com> - [override method] generate in declaration order [code generation] - https://bugs.eclipse.org/bugs/show_bug.cgi?id=140971
  *     Stephan Herrmann - Contribution for Bug 463360 - [override method][null] generating method override should not create redundant null annotations
+ *     Red Hat Inc. - moved to jdt.core.manipulation
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.corext.fix;
@@ -36,20 +37,18 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import org.eclipse.jdt.internal.core.manipulation.BindingLabelProviderCore;
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2Core;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.MethodsSourcePositionComparator;
 
-import org.eclipse.jdt.ui.JavaElementLabels;
-
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
-import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 public class AddUnimplementedMethodsOperation extends CompilationUnitRewriteOperation {
 
@@ -67,7 +66,7 @@ public class AddUnimplementedMethodsOperation extends CompilationUnitRewriteOper
 	}
 
 	@Override
-	public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
+	public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModelCore model) throws CoreException {
 		IMethodBinding[] unimplementedMethods= getUnimplementedMethods(fTypeNode);
 		if (unimplementedMethods.length == 0)
 			return;
@@ -105,7 +104,7 @@ public class AddUnimplementedMethodsOperation extends CompilationUnitRewriteOper
 
 		for (int i= 0; i < unimplementedMethods.length; i++) {
 			IMethodBinding curr= unimplementedMethods[i];
-			MethodDeclaration newMethodDecl= StubUtility2.createImplementationStub(unit, rewrite, imports, context, curr, curr.getDeclaringClass(), settings, false, fTypeNode);
+			MethodDeclaration newMethodDecl= StubUtility2Core.createImplementationStubCore(unit, rewrite, imports, context, curr, curr.getDeclaringClass(), settings, false, fTypeNode, false);
 			listRewrite.insertLast(newMethodDecl, createTextEditGroup(CorrectionMessages.AddUnimplementedMethodsOperation_AddMissingMethod_group, cuRewrite));
 		}
 	}
@@ -126,7 +125,7 @@ public class AddUnimplementedMethodsOperation extends CompilationUnitRewriteOper
 		buf.append("</b><ul>"); //$NON-NLS-1$
 		for (int i= 0; i < methodsToOverride.length; i++) {
 			buf.append("<li>"); //$NON-NLS-1$
-			buf.append(BindingLabelProvider.getBindingLabel(methodsToOverride[i], JavaElementLabels.ALL_FULLY_QUALIFIED));
+			buf.append(BindingLabelProviderCore.getBindingLabel(methodsToOverride[i], JavaElementLabelsCore.ALL_FULLY_QUALIFIED));
 			buf.append("</li>"); //$NON-NLS-1$
 		}
 		buf.append("</ul>"); //$NON-NLS-1$

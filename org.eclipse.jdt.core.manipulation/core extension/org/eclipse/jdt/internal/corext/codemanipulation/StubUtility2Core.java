@@ -403,14 +403,19 @@ public final class StubUtility2Core {
 					final String ESCAPE_DOLLAR= "\\\\\\$"; //$NON-NLS-1$
 					final String DOLLAR= "\\$"; //$NON-NLS-1$
 
-					bodyStatement = bodyStatement.replaceAll(DOLLAR, ESCAPE_DOLLAR);
+					bodyStatement= bodyStatement.replaceAll(DOLLAR, ESCAPE_DOLLAR);
 				}
-				placeHolder.append(bodyStatement);
+				String bodyContent= CodeGeneration.getMethodBodyContent(unit, type, binding.getName(), false, bodyStatement, delimiter);
+				if (bodyContent != null) {
+					placeHolder.append(bodyContent);
+				}
 				if (snippetStringSupport) {
 					placeHolder.append("}"); //$NON-NLS-1$
 				}
-				ReturnStatement todoNode= (ReturnStatement) rewrite.createStringPlaceholder(placeHolder.toString(), ASTNode.RETURN_STATEMENT);
-				body.statements().add(todoNode);
+				if (bodyContent != null || snippetStringSupport) {
+					ReturnStatement todoNode= (ReturnStatement) rewrite.createStringPlaceholder(placeHolder.toString(), ASTNode.RETURN_STATEMENT);
+					body.statements().add(todoNode);
+				}
 			}
 		}
 		
