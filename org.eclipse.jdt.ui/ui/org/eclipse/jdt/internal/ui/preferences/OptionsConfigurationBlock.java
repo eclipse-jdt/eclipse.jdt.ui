@@ -52,6 +52,8 @@ import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.resources.ResourcesPlugin;
 
@@ -298,6 +300,12 @@ public abstract class OptionsConfigurationBlock {
 	private static final String REBUILD_COUNT_KEY= "preferences_build_requested"; //$NON-NLS-1$
 
 	private static final String SETTINGS_EXPANDED= "expanded"; //$NON-NLS-1$
+
+	/**
+	 * Bug 549457: In case auto-building on a JDT core settings change (e.g. compiler compliance) is not desired,
+	 * specify VM property: {@code -Dorg.eclipse.jdt.core.disableAutoBuildOnSettingsChange=true}
+	 */
+	private static final boolean DISABLE_AUTO_BUILDING_ON_SETTINGS_CHANGE= Boolean.getBoolean("org.eclipse.jdt.core.disableAutoBuildOnSettingsChange"); //$NON-NLS-1$
 
 	protected final ArrayList<Button> fCheckBoxes;
 	protected final ArrayList<Combo> fComboBoxes;
@@ -1089,19 +1097,31 @@ public abstract class OptionsConfigurationBlock {
 				fRebuildCount= count;
 			}
 		}
-
 		boolean doBuild= false;
 		if (needsBuild) {
+			boolean hasJdtCoreSettings= hasJdtCoreSettings(changedOptions);
+			boolean isAutoBuildOn= isAutoBuilding();
+			boolean willAutoBuild= isAutoBuildOn && hasJdtCoreSettings && !DISABLE_AUTO_BUILDING_ON_SETTINGS_CHANGE;
 			String[] strings= getFullBuildDialogStrings(fProject == null);
 			if (strings != null) {
 				if (ResourcesPlugin.getWorkspace().getRoot().getProjects().length == 0) {
 					doBuild= true; // don't bother the user
 				} else {
-					MessageDialog dialog= new MessageDialog(getShell(), strings[0], null, strings[1], MessageDialog.QUESTION, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL }, 2);
-					int res= dialog.open();
-					if (res == 0) {
-						doBuild= true;
-					} else if (res != 1) {
+					String[] dialogButtonLabels= new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL };
+					if (willAutoBuild) {
+						// Bug 549457: auto-build will build on the preference change, so we don't have a "no, don't build" dialog option
+						dialogButtonLabels= new String[] { IDialogConstants.YES_LABEL, IDialogConstants.CANCEL_LABEL };
+					}
+					int yesResult= 0;
+					int cancelResult= dialogButtonLabels.length - 1;
+					MessageDialog dialog= new MessageDialog(getShell(), strings[0], null, strings[1], MessageDialog.QUESTION, dialogButtonLabels, 1);
+					int dialogDesult= dialog.open();
+					if (dialogDesult == yesResult) {
+						// Bug 549457: changes to JDT core settings will result in a full build during auto-building
+						if (!willAutoBuild) {
+							doBuild= true;
+						}
+					} else if (dialogDesult == cancelResult) {
 						return false; // cancel pressed
 					}
 				}
@@ -1131,6 +1151,22 @@ public abstract class OptionsConfigurationBlock {
 
 	protected abstract String[] getFullBuildDialogStrings(boolean workspaceSettings);
 
+	private boolean isAutoBuilding() {
+		IWorkspace workspace= ResourcesPlugin.getWorkspace();
+		IWorkspaceDescription workspaceDescription= workspace.getDescription();
+		boolean isAutoBuildOn= workspaceDescription.isAutoBuilding();
+		return isAutoBuildOn;
+	}
+
+	private boolean hasJdtCoreSettings(List<Key> options) {
+		for (Key option : options) {
+			String qualifier = option.getQualifier();
+			if (JavaCore.PLUGIN_ID.equals(qualifier)) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	public void performDefaults() {
 		for (int i= 0; i < fAllKeys.length; i++) {
