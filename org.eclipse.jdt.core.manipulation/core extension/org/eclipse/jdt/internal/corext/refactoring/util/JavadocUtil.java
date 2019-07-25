@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Microsoft Corporation - copied to jdt.core.manipulation
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.corext.refactoring.util;
@@ -33,8 +34,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 
-import org.eclipse.jdt.internal.ui.text.correction.JavadocTagsSubProcessor;
-
+import org.eclipse.jdt.internal.ui.text.correction.JavadocTagsSubProcessorCore;
 
 public class JavadocUtil {
 
@@ -100,7 +100,6 @@ public class JavadocUtil {
 			leadingNames.add(curr.getName().getIdentifier());
 		}
 		TagElement parameterTag= createParamTag(parameterName, astRewrite.getAST(), javaProject);
-		JavadocTagsSubProcessor.insertTag(tagsRewrite, parameterTag, leadingNames, groupDescription);
+		JavadocTagsSubProcessorCore.insertTag(tagsRewrite, parameterTag, leadingNames, groupDescription);
 	}
-
 }

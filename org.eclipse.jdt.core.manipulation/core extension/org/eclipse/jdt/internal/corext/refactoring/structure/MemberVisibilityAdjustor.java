@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Microsoft Corporation - copied to jdt.core.manipulation
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
@@ -54,6 +55,7 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.dom.VariableDeclarationRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -65,8 +67,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.LRUMap;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
-
-import org.eclipse.jdt.ui.JavaElementLabels;
 
 /**
  * Helper class to adjust the visibilities of members with respect to a reference element.
@@ -273,7 +273,7 @@ public final class MemberVisibilityAdjustor {
 	 */
 	public static String getLabel(final IJavaElement element) {
 		Assert.isNotNull(element);
-		return JavaElementLabels.getElementLabel(element, JavaElementLabels.ALL_FULLY_QUALIFIED | JavaElementLabels.ALL_DEFAULT);
+		return JavaElementLabelsCore.getElementLabel(element, JavaElementLabelsCore.ALL_FULLY_QUALIFIED | JavaElementLabelsCore.ALL_DEFAULT);
 	}
 
 	/**
@@ -635,7 +635,7 @@ public final class MemberVisibilityAdjustor {
 				|| declaring.equals(fReferenced)))
 			adjust= false;
 		if (adjust && hasLowerVisibility(member.getFlags(), keywordToVisibility(threshold)) && needsVisibilityAdjustment(member, threshold))
-			fAdjustments.put(member, new OutgoingMemberVisibilityAdjustment(member, threshold, RefactoringStatus.createStatus(fVisibilitySeverity, Messages.format(template, new String[] { JavaElementLabels.getTextLabel(member, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.ALL_FULLY_QUALIFIED), getLabel(threshold)}), JavaStatusContext.create(member), null, RefactoringStatusEntry.NO_CODE, null)));
+			fAdjustments.put(member, new OutgoingMemberVisibilityAdjustment(member, threshold, RefactoringStatus.createStatus(fVisibilitySeverity, Messages.format(template, new String[] { JavaElementLabelsCore.getTextLabel(member, JavaElementLabelsCore.M_PARAMETER_TYPES | JavaElementLabelsCore.ALL_FULLY_QUALIFIED), getLabel(threshold)}), JavaStatusContext.create(member), null, RefactoringStatusEntry.NO_CODE, null)));
 	}
 
 	/**
