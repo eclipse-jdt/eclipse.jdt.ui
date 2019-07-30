@@ -1101,7 +1101,8 @@ public abstract class OptionsConfigurationBlock {
 		if (needsBuild) {
 			boolean hasJdtCoreSettings= hasJdtCoreSettings(changedOptions);
 			boolean isAutoBuildOn= isAutoBuilding();
-			boolean willAutoBuild= isAutoBuildOn && hasJdtCoreSettings && !DISABLE_AUTO_BUILDING_ON_SETTINGS_CHANGE;
+			// Bug 549457: auto-build will build on the preference change for a project (not for workspace)
+			boolean willAutoBuild= isAutoBuildOn && hasJdtCoreSettings && fProject != null && !DISABLE_AUTO_BUILDING_ON_SETTINGS_CHANGE;
 			String[] strings= getFullBuildDialogStrings(fProject == null);
 			if (strings != null) {
 				if (ResourcesPlugin.getWorkspace().getRoot().getProjects().length == 0) {
