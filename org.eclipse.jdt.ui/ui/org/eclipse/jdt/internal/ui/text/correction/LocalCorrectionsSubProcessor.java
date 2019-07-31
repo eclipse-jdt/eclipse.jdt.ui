@@ -1791,7 +1791,8 @@ public class LocalCorrectionsSubProcessor {
 			Statement curr= statements.get(i);
 			if (curr instanceof SwitchCase) {
 				SwitchCase switchCase= (SwitchCase) curr;
-				if (switchCase.getAST().apiLevel() >= AST.JLS12) {
+				AST ast= switchCase.getAST();
+				if (ast.apiLevel() >= AST.JLS12 && ast.isPreviewEnabled()) {
 					List<Expression> expressions= switchCase.expressions();
 					if (expressions.size() == 0) {
 						hasDefault= true;
@@ -1834,7 +1835,8 @@ public class LocalCorrectionsSubProcessor {
 			Statement curr= statements.get(i);
 			if (curr instanceof SwitchCase) {
 				SwitchCase switchCase= (SwitchCase) curr;
-				if (switchCase.getAST().apiLevel() >= AST.JLS12) {
+				AST ast= switchCase.getAST();
+				if (ast.apiLevel() >= AST.JLS12 && ast.isPreviewEnabled()) {
 					if (switchCase.expressions().size() == 0) {
 						defaultIndex= i;
 						break;
@@ -1866,7 +1868,7 @@ public class LocalCorrectionsSubProcessor {
 				SwitchCase newSwitchCase= ast.newSwitchCase();
 				String enumConstName= enumConstNames.get(i);
 				Name newName= ast.newName(enumConstName);
-				if (ast.apiLevel() >= AST.JLS12) {
+				if (ast.apiLevel() >= AST.JLS12 && ast.isPreviewEnabled()) {
 					newSwitchCase.expressions().add(newName);
 				} else {
 					newSwitchCase.setExpression(newName);
@@ -1874,7 +1876,7 @@ public class LocalCorrectionsSubProcessor {
 				listRewrite.insertAt(newSwitchCase, defaultIndex, null);
 				defaultIndex++;
 				if (!hasDefault) {
-					if (ast.apiLevel() >= AST.JLS12) {
+					if (ast.apiLevel() >= AST.JLS12 && ast.isPreviewEnabled()) {
 						if (statements.size() > 0) {
 							Statement firstStatement= statements.get(0);
 							SwitchCase switchCase= (SwitchCase) firstStatement;
@@ -1902,7 +1904,7 @@ public class LocalCorrectionsSubProcessor {
 				listRewrite.insertAt(newSwitchCase, defaultIndex, null);
 				defaultIndex++;
 
-				if (ast.apiLevel() >= AST.JLS12) {
+				if (ast.apiLevel() >= AST.JLS12 && ast.isPreviewEnabled()) {
 					if (statements.size() > 0) {
 						Statement firstStatement= statements.get(0);
 						SwitchCase switchCase= (SwitchCase) firstStatement;
@@ -1998,7 +2000,7 @@ public class LocalCorrectionsSubProcessor {
 		SwitchCase newSwitchCase= ast.newSwitchCase();
 		listRewrite.insertLast(newSwitchCase, null);
 
-		if (ast.apiLevel() >= AST.JLS12) {
+		if (ast.apiLevel() >= AST.JLS12 && ast.isPreviewEnabled()) {
 			if (statements.size() > 0) {
 				Statement firstStatement= statements.get(0);
 				SwitchCase switchCase= (SwitchCase) firstStatement;

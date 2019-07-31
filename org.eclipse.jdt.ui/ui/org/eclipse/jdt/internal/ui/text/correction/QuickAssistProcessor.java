@@ -4263,9 +4263,11 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 	private boolean getSplitSwitchLabelProposal(IInvocationContext context, ASTNode coveringNode, Collection<ICommandAccess> proposals) {
 		AST ast= coveringNode.getAST();
-		// Only continue if >= JLS12 and selected node, or its parent is a SwitchCase
-		if (ast.apiLevel() < AST.JLS12 ||
-				!(coveringNode instanceof SwitchCase || coveringNode.getParent() instanceof SwitchCase)) {
+		// Only continue if level is JLS12 with preview enabled and selected node, or its parent is a SwitchCase
+		if (!(ast.apiLevel() >= AST.JLS12 && ast.isPreviewEnabled())) {
+			return false;
+		}
+		if (!(coveringNode instanceof SwitchCase || coveringNode.getParent() instanceof SwitchCase)) {
 			return false;
 		}
 

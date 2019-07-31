@@ -2454,7 +2454,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			Statement statement= iter.next();
 			if (statement instanceof SwitchCase) {
 				SwitchCase switchCase= (SwitchCase) statement;
-				if (ast.apiLevel() >= AST.JLS12 && switchCase.expressions().size() > 1) {
+				if (ast.apiLevel() >= AST.JLS12 && ast.isPreviewEnabled() && switchCase.expressions().size() > 1) {
 					return false;
 				}
 				// special case: pass through
@@ -2556,7 +2556,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 	private static Expression createSwitchCaseCondition(AST ast, ASTRewrite rewrite, ImportRewrite importRewrite, ImportRewriteContext importRewriteContext, Name switchExpression,
 			SwitchCase switchCase, boolean isStringsInSwitch, boolean preserveNPE) {
 		Expression expression= null;
-		if (ast.apiLevel() >= AST.JLS12) {
+		if (ast.apiLevel() >= AST.JLS12 && ast.isPreviewEnabled()) {
 			if (switchCase.expressions().size() == 1) {
 				expression= (Expression) switchCase.expressions().get(0);
 			}
@@ -2895,7 +2895,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		SwitchCase[] switchCaseStatements= new SwitchCase[len];
 		if (caseExpressions.size() == 0) {
 			switchCaseStatements[0]= ast.newSwitchCase();
-			if (ast.apiLevel() < AST.JLS12) {
+			if (!ast.isPreviewEnabled()) {
 				switchCaseStatements[0].setExpression(null);
 			}
 		} else {
@@ -2903,7 +2903,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				ASTNode astNode= caseExpressions.get(i);
 				switchCaseStatements[i]= ast.newSwitchCase();
 				Expression copyTarget= (Expression) rewrite.createCopyTarget(astNode);
-				if (ast.apiLevel() >= AST.JLS12) {
+				if (ast.apiLevel() >= AST.JLS12 && ast.isPreviewEnabled()) {
 					switchCaseStatements[i].expressions().add(copyTarget);
 				} else {
 					switchCaseStatements[i].setExpression(copyTarget);

@@ -387,7 +387,8 @@ public class Checks {
 	public static boolean isEnumCase(ASTNode node) {
 		if (node instanceof SwitchCase) {
 			final SwitchCase caze= (SwitchCase) node;
-			if (node.getAST().apiLevel() >= AST.JLS12) {
+			AST ast= node.getAST();
+			if (ast.apiLevel() >= AST.JLS12 && ast.isPreviewEnabled()) {
 				List<Expression> expressions= caze.expressions();
 				boolean isEnumConst= true;
 				for (Expression expression : expressions) {

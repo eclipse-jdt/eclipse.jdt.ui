@@ -305,8 +305,8 @@ public class ImportReferencesCollector extends GenericVisitor {
 	
 	@Override
 	public boolean visit(BreakStatement node) {
-		int apiLevel= node.getAST().apiLevel();
-		if (apiLevel >= AST.JLS12) {
+		AST ast= node.getAST();
+		if (ast.apiLevel() >= AST.JLS12 && ast.isPreviewEnabled()) {
 			evalQualifyingExpression(node.getExpression(), null);			
 		}
 		return false;

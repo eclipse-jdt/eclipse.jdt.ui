@@ -724,7 +724,8 @@ public class ScopeAnalyzer {
 		public boolean visit(SwitchCase node) {
 			// switch on enum allows to use enum constants without qualification
 			if (hasFlag(VARIABLES, fFlags) && !node.isDefault()) {
-				if (node.getAST().apiLevel() >= AST.JLS12) {
+				AST ast= node.getAST();
+				if (ast.apiLevel() >= AST.JLS12 && ast.isPreviewEnabled()) {
 					List<Expression> expressions= node.expressions();
 					for (Expression expression : expressions) {
 						visitExpression(node, expression);

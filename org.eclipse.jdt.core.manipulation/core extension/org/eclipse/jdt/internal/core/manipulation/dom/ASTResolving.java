@@ -296,7 +296,8 @@ public class ASTResolving {
 			break;
 		case ASTNode.SWITCH_CASE:
 			SwitchCase switchCase= (SwitchCase) parent;
-			if (node.equals(switchCase.getExpression()) || (switchCase.getAST().apiLevel() >= AST.JLS12 && switchCase.expressions().contains(node))) {
+				AST ast= switchCase.getAST();
+				if (node.equals(switchCase.getExpression()) || (ast.apiLevel() >= AST.JLS12 && ast.isPreviewEnabled() && switchCase.expressions().contains(node))) {
 				ASTNode caseParent= switchCase.getParent();
 				if (caseParent instanceof SwitchStatement) {
 					return ((SwitchStatement) caseParent).getExpression().resolveTypeBinding();
