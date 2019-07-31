@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -55,17 +55,13 @@ import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
 
-import org.eclipse.ui.IEditorInput;
-
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
-import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.editors.text.TextSourceViewerConfiguration;
 
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
@@ -77,8 +73,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
-import org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitDocumentProvider;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.text.AbstractJavaScanner;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.HTMLAnnotationHover;
@@ -97,6 +92,7 @@ import org.eclipse.jdt.internal.ui.text.java.JavaCodeScanner;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProcessor;
 import org.eclipse.jdt.internal.ui.text.java.JavaDoubleClickSelector;
 import org.eclipse.jdt.internal.ui.text.java.JavaFormattingStrategy;
+import org.eclipse.jdt.internal.ui.text.java.JavaMultiLineStringAutoIndentStrategy;
 import org.eclipse.jdt.internal.ui.text.java.JavaStringAutoIndentStrategy;
 import org.eclipse.jdt.internal.ui.text.java.JavadocDoubleClickStrategy;
 import org.eclipse.jdt.internal.ui.text.java.PartitionDoubleClickSelector;
@@ -424,6 +420,9 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 		reconciler.setDamager(dr, IJavaPartitions.JAVA_CHARACTER);
 		reconciler.setRepairer(dr, IJavaPartitions.JAVA_CHARACTER);
 
+		dr= new DefaultDamagerRepairer(getStringScanner());
+		reconciler.setDamager(dr, IJavaPartitions.JAVA_MULTI_LINE_STRING);
+		reconciler.setRepairer(dr, IJavaPartitions.JAVA_MULTI_LINE_STRING);
 
 		return reconciler;
 	}
@@ -455,6 +454,9 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 
 			ContentAssistProcessor javadocProcessor= new JavadocCompletionProcessor(getEditor(), assistant);
 			assistant.setContentAssistProcessor(javadocProcessor, IJavaPartitions.JAVA_DOC);
+
+			ContentAssistProcessor multiLineStringProcessor= new JavaCompletionProcessor(getEditor(), assistant, IJavaPartitions.JAVA_MULTI_LINE_STRING);
+			assistant.setContentAssistProcessor(multiLineStringProcessor, IJavaPartitions.JAVA_MULTI_LINE_STRING);
 
 			ContentAssistPreference.configure(assistant, fPreferenceStore);
 
@@ -514,11 +516,13 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 		if (IJavaPartitions.JAVA_DOC.equals(contentType) || IJavaPartitions.JAVA_MULTI_LINE_COMMENT.equals(contentType))
 			return new IAutoEditStrategy[] { new JavaDocAutoIndentStrategy(partitioning) };
 		else if (IJavaPartitions.JAVA_STRING.equals(contentType))
-			return new IAutoEditStrategy[] { new SmartSemicolonAutoEditStrategy(partitioning), new JavaStringAutoIndentStrategy(partitioning, getProject()) };
+			return new IAutoEditStrategy[] { new SmartSemicolonAutoEditStrategy(partitioning), new JavaStringAutoIndentStrategy(partitioning, EditorUtility.getJavaProject(fTextEditor)) };
 		else if (IJavaPartitions.JAVA_CHARACTER.equals(contentType) || IDocument.DEFAULT_CONTENT_TYPE.equals(contentType))
-			return new IAutoEditStrategy[] { new SmartSemicolonAutoEditStrategy(partitioning), new JavaAutoIndentStrategy(partitioning, getProject(), sourceViewer) };
+			return new IAutoEditStrategy[] { new SmartSemicolonAutoEditStrategy(partitioning), new JavaAutoIndentStrategy(partitioning, EditorUtility.getJavaProject(fTextEditor), sourceViewer) };
+		else if (IJavaPartitions.JAVA_MULTI_LINE_STRING.equals(contentType))
+			return new IAutoEditStrategy[] { new JavaMultiLineStringAutoIndentStrategy(partitioning, EditorUtility.getJavaProject(fTextEditor)) };
 		else
-			return new IAutoEditStrategy[] { new JavaAutoIndentStrategy(partitioning, getProject(), sourceViewer) };
+			return new IAutoEditStrategy[] { new JavaAutoIndentStrategy(partitioning, EditorUtility.getJavaProject(fTextEditor), sourceViewer) };
 	}
 
 	/*
@@ -534,6 +538,8 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 			return new PartitionDoubleClickSelector(getConfiguredDocumentPartitioning(sourceViewer), 0, 0);
 		else if (IJavaPartitions.JAVA_STRING.equals(contentType) || IJavaPartitions.JAVA_CHARACTER.equals(contentType))
 			return new PartitionDoubleClickSelector(getConfiguredDocumentPartitioning(sourceViewer), 1, 1);
+		else if (IJavaPartitions.JAVA_MULTI_LINE_STRING.equals(contentType))
+			return new PartitionDoubleClickSelector(getConfiguredDocumentPartitioning(sourceViewer), 3, 3, 3);
 		if (fJavaDoubleClickSelector == null) {
 			fJavaDoubleClickSelector= new JavaDoubleClickSelector();
 			fJavaDoubleClickSelector.setSourceVersion(fPreferenceStore.getString(JavaCore.COMPILER_SOURCE));
@@ -555,7 +561,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	 */
 	@Override
 	public String[] getIndentPrefixes(ISourceViewer sourceViewer, String contentType) {
- 		IJavaProject project= getProject();
+ 		IJavaProject project= EditorUtility.getJavaProject(fTextEditor);
 		final int tabWidth= CodeFormatterUtil.getTabWidth(project);
 		final int indentWidth= CodeFormatterUtil.getIndentWidth(project);
 		boolean allowTabs= tabWidth <= indentWidth;
@@ -619,34 +625,12 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 		return new String(spaceChars);
 	}
 
-	private IJavaProject getProject() {
-		ITextEditor editor= getEditor();
-		if (editor == null)
-			return null;
-
-		IJavaElement element= null;
-		IEditorInput input= editor.getEditorInput();
-		IDocumentProvider provider= editor.getDocumentProvider();
-		if (provider instanceof ICompilationUnitDocumentProvider) {
-			ICompilationUnitDocumentProvider cudp= (ICompilationUnitDocumentProvider) provider;
-			element= cudp.getWorkingCopy(input);
-		} else if (input instanceof IClassFileEditorInput) {
-			IClassFileEditorInput cfei= (IClassFileEditorInput) input;
-			element= cfei.getClassFile();
-		}
-
-		if (element == null)
-			return null;
-
-		return element.getJavaProject();
-	}
-
 	/*
 	 * @see SourceViewerConfiguration#getTabWidth(ISourceViewer)
 	 */
 	@Override
 	public int getTabWidth(ISourceViewer sourceViewer) {
-		return CodeFormatterUtil.getTabWidth(getProject());
+		return CodeFormatterUtil.getTabWidth(EditorUtility.getJavaProject(fTextEditor));
 	}
 
 	/*
@@ -742,7 +726,8 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 			IJavaPartitions.JAVA_MULTI_LINE_COMMENT,
 			IJavaPartitions.JAVA_SINGLE_LINE_COMMENT,
 			IJavaPartitions.JAVA_STRING,
-			IJavaPartitions.JAVA_CHARACTER
+			IJavaPartitions.JAVA_CHARACTER,
+			IJavaPartitions.JAVA_MULTI_LINE_STRING
 		};
 	}
 
@@ -875,6 +860,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_SINGLE_LINE_COMMENT);
 		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_STRING);
 		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_CHARACTER);
+		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_MULTI_LINE_STRING);
 		presenter.setSizeConstraints(50, 20, true, false);
 		return presenter;
 	}
@@ -919,6 +905,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_SINGLE_LINE_COMMENT);
 		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_STRING);
 		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_CHARACTER);
+		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_MULTI_LINE_STRING);
 		presenter.setSizeConstraints(50, 20, true, false);
 		return presenter;
 	}

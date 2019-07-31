@@ -160,4 +160,12 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="ui/org/eclipse/jdt/ui/text/IJavaPartitions.java" type="org.eclipse.jdt.ui.text.IJavaPartitions">
+        <filter id="403767336">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.ui.text.IJavaPartitions"/>
+                <message_argument value="JAVA_MULTI_LINE_STRING"/>
+            </message_arguments>
+        </filter>
+    </resource>
 </component>

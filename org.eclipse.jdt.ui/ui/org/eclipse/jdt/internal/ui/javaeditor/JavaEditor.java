@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -7,7 +7,11 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- *
+ * 
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Tom Eicher <eclipse@tom.eicher.name> - [formatting] 'Format Element' in JavaDoc does also format method body - https://bugs.eclipse.org/bugs/show_bug.cgi?id=238746
@@ -204,6 +208,7 @@ import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
 import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
 import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
+import org.eclipse.jdt.ui.text.IJavaPartitionerManager;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
@@ -233,6 +238,7 @@ import org.eclipse.jdt.internal.ui.search.MethodExitsFinder;
 import org.eclipse.jdt.internal.ui.text.DocumentCharacterIterator;
 import org.eclipse.jdt.internal.ui.text.JavaChangeHover;
 import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
+import org.eclipse.jdt.internal.ui.text.JavaPartitionerManager;
 import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
 import org.eclipse.jdt.internal.ui.text.JavaWordIterator;
 import org.eclipse.jdt.internal.ui.text.PreferencesAdapter;
@@ -2599,6 +2605,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		SourceViewerConfiguration sourceViewerConfiguration= getSourceViewerConfiguration();
 		if (sourceViewerConfiguration == null || sourceViewerConfiguration instanceof JavaSourceViewerConfiguration) {
 			JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
+			setEditorInfoInPartitionerManager(this);
 			setSourceViewerConfiguration(new JavaSourceViewerConfiguration(textTools.getColorManager(), store, this, IJavaPartitions.JAVA_PARTITIONING));
 		}
 
@@ -2676,6 +2683,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			fBreadcrumb.dispose();
 			fBreadcrumb= null;
 		}
+
+		clearEditorInfoInPartitionerManager(this);
 
 		uninstallJavaCodeMining();
 
@@ -4361,6 +4370,24 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 */
 	private boolean isJavaCodeMiningPreference(String property) {
 		return PreferenceConstants.EDITOR_CODEMINING_ENABLED.equals(property) || property.startsWith(PreferenceConstants.EDITOR_JAVA_CODEMINING_PREFIX);
+	}
+
+	private void clearEditorInfoInPartitionerManager(JavaEditor editor) {
+		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
+		IJavaPartitionerManager pManager= textTools.getJavaPartitionerManager();
+		if (pManager instanceof JavaPartitionerManager) {
+			JavaPartitionerManager jpManager= (JavaPartitionerManager) pManager;
+			jpManager.clearEditorInfo(editor);
+		}
+	}
+
+	private void setEditorInfoInPartitionerManager(JavaEditor editor) {
+		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
+		IJavaPartitionerManager pManager= textTools.getJavaPartitionerManager();
+		if (pManager instanceof JavaPartitionerManager) {
+			JavaPartitionerManager jpManager= (JavaPartitionerManager) pManager;
+			jpManager.setEditorInfo(editor);
+		}
 	}
 
 }

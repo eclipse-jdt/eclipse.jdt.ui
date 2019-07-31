@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -7,7 +7,11 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- *
+ * 
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -602,6 +606,41 @@ public class EditorUtility {
 			jProject= ((IClassFileEditorInput)input).getClassFile().getJavaProject();
 		}
 		return jProject;
+	}
+
+	/**
+	 * Returns the Java project for a given text editor or <code>null</code> if no corresponding
+	 * Java project exists.
+	 * 
+	 * @param editor the text editor
+	 *
+	 * @return the corresponding Java project
+	 *
+	 * @since 3.19
+	 */
+	public static IJavaProject getJavaProject(ITextEditor editor) {
+		if (editor == null)
+			return null;
+
+		IJavaElement element= null;
+		IEditorInput input= editor.getEditorInput();
+		IDocumentProvider provider= editor.getDocumentProvider();
+		if (provider instanceof ICompilationUnitDocumentProvider) {
+			ICompilationUnitDocumentProvider cudp= (ICompilationUnitDocumentProvider) provider;
+			element= cudp.getWorkingCopy(input);
+		} else if (input instanceof IClassFileEditorInput) {
+			IClassFileEditorInput cfei= (IClassFileEditorInput) input;
+			element= cfei.getClassFile();
+		}
+
+		if (element == null) {
+			if (input != null) {
+				return EditorUtility.getJavaProject(input);
+			}
+			return null;
+		}
+
+		return element.getJavaProject();
 	}
 
 	/**

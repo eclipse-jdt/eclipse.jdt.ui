@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -8,6 +8,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -22,13 +26,12 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension3;
 import org.eclipse.jface.text.IDocumentPartitioner;
-import org.eclipse.jface.text.rules.FastPartitioner;
 import org.eclipse.jface.text.rules.IPartitionTokenScanner;
 import org.eclipse.jface.text.rules.RuleBasedScanner;
 
-import org.eclipse.jdt.internal.ui.text.FastJavaPartitionScanner;
 import org.eclipse.jdt.internal.ui.text.JavaColorManager;
 import org.eclipse.jdt.internal.ui.text.JavaCommentScanner;
+import org.eclipse.jdt.internal.ui.text.JavaPartitionerManager;
 import org.eclipse.jdt.internal.ui.text.SingleTokenJavaScanner;
 import org.eclipse.jdt.internal.ui.text.java.JavaCodeScanner;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocScanner;
@@ -46,18 +49,6 @@ import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocScanner;
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class JavaTextTools {
-
-	/**
-	 * Array with legal content types.
-	 * @since 3.0
-	 */
-	private final static String[] LEGAL_CONTENT_TYPES= new String[] {
-		IJavaPartitions.JAVA_DOC,
-		IJavaPartitions.JAVA_MULTI_LINE_COMMENT,
-		IJavaPartitions.JAVA_SINGLE_LINE_COMMENT,
-		IJavaPartitions.JAVA_STRING,
-		IJavaPartitions.JAVA_CHARACTER
-	};
 
 	/**
 	 * This tools' preference listener.
@@ -95,6 +86,7 @@ public class JavaTextTools {
 	/** The preference change listener */
 	private PreferenceListener fPreferenceListener= new PreferenceListener();
 
+	private JavaPartitionerManager fJavaPartitionerManager;
 
 	/**
 	 * Creates a new Java text tools collection.
@@ -173,6 +165,7 @@ public class JavaTextTools {
 		fSinglelineCommentScanner= new JavaCommentScanner(fColorManager, store, coreStore, IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT);
 		fStringScanner= new SingleTokenJavaScanner(fColorManager, store, IJavaColorConstants.JAVA_STRING);
 		fJavaDocScanner= new JavaDocScanner(fColorManager, store, coreStore);
+		fJavaPartitionerManager= new JavaPartitionerManager();
 	}
 
 	/**
@@ -202,6 +195,11 @@ public class JavaTextTools {
 
 			fPreferenceListener= null;
 		}
+
+		if (fJavaPartitionerManager != null) {
+			fJavaPartitionerManager.dispose();
+			fJavaPartitionerManager= null;
+		}
 	}
 
 	/**
@@ -217,6 +215,17 @@ public class JavaTextTools {
 	 */
 	public IColorManager getColorManager() {
 		return fColorManager;
+	}
+
+	/**
+	 * Returns a java partitioner manager which is to be 
+	 * used for Java text viewers
+	 *
+	 * @return a java partitioner manager
+	 * @since 3.19
+	 */
+	public IJavaPartitionerManager getJavaPartitionerManager() {
+		return fJavaPartitionerManager;
 	}
 
 	/**
@@ -288,7 +297,7 @@ public class JavaTextTools {
 	 * @return a Java partition scanner
 	 */
 	public IPartitionTokenScanner getPartitionScanner() {
-		return new FastJavaPartitionScanner();
+		return fJavaPartitionerManager.getPartitionScanner();
 	}
 
 	/**
@@ -299,7 +308,7 @@ public class JavaTextTools {
 	 * @return a newly created Java document partitioner
 	 */
 	public IDocumentPartitioner createDocumentPartitioner() {
-		return new FastPartitioner(getPartitionScanner(), LEGAL_CONTENT_TYPES);
+		return fJavaPartitionerManager.createDocumentPartitioner();
 	}
 
 	/**
@@ -355,6 +364,9 @@ public class JavaTextTools {
 			fStringScanner.adaptToPreferenceChange(event);
 		if (fJavaDocScanner.affectsBehavior(event))
 			fJavaDocScanner.adaptToPreferenceChange(event);
+		if (fJavaPartitionerManager.affectsBehavior(event)) {
+			fJavaPartitionerManager.adaptToPreferenceChange(event);
+		}
 	}
 
 	/**

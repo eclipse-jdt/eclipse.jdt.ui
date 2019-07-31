@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -8,11 +8,18 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text;
 
+
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.rules.ICharacterScanner;
@@ -20,8 +27,18 @@ import org.eclipse.jface.text.rules.IPartitionTokenScanner;
 import org.eclipse.jface.text.rules.IToken;
 import org.eclipse.jface.text.rules.Token;
 
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchPage;
+
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.text.correction.PreviewFeaturesSubProcessor;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 
 /**
  * This scanner recognizes the JavaDoc comments, Java multi line comments, Java single line comments,
@@ -36,6 +53,7 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaPa
 	private static final int JAVADOC= 3;
 	private static final int CHARACTER= 4;
 	private static final int STRING= 5;
+	private static final int MULTI_LINE_STRING= 6;
 
 	// beginning of prefixes and postfixes
 	private static final int NONE= 0;
@@ -45,6 +63,7 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaPa
 	private static final int SLASH_STAR_STAR= 4; // prefix for MULTI_LINE_COMMENT or JAVADOC
 	private static final int STAR= 5; // postfix for MULTI_LINE_COMMENT or JAVADOC
 	private static final int CARRIAGE_RETURN=6; // postfix for STRING, CHARACTER and SINGLE_LINE_COMMENT
+	private static final int TRIPLE_QUOTE= 9; // prefix for TextBlock.
 
 	/** The scanner. */
 	private final BufferedDocumentScanner fScanner= new BufferedDocumentScanner(1000);	// faster implementation
@@ -66,13 +85,16 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaPa
 	private int fJavaOffset;
 	private int fJavaLength;
 
+	private IJavaProject fJavaProject;
+
 	private final IToken[] fTokens= new IToken[] {
 		new Token(null),
 		new Token(JAVA_SINGLE_LINE_COMMENT),
 		new Token(JAVA_MULTI_LINE_COMMENT),
 		new Token(JAVA_DOC),
 		new Token(JAVA_CHARACTER),
-		new Token(JAVA_STRING)
+		new Token(JAVA_STRING),
+		new Token(JAVA_MULTI_LINE_STRING)
 	};
 
 	public FastJavaPartitionScanner(boolean emulate) {
@@ -81,6 +103,11 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaPa
 
 	public FastJavaPartitionScanner() {
 	    this(false);
+	}
+
+	public FastJavaPartitionScanner(IJavaProject javaProject) {
+		this(false);
+		fJavaProject= javaProject;
 	}
 
 	/*
@@ -121,7 +148,7 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaPa
 
 	 		case '\r':
 	 			// emulate JavaPartitionScanner
-	 			if (!fEmulate && fLast != CARRIAGE_RETURN) {
+	 			if (!fEmulate && fLast != TRIPLE_QUOTE && fLast != CARRIAGE_RETURN) {
 						fLast= CARRIAGE_RETURN;
 						fTokenLength++;
 	 					continue;
@@ -232,6 +259,9 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaPa
 	 		case JAVA:
 				switch (ch) {
 				case '/':
+					if (fLast == TRIPLE_QUOTE) {
+						break;
+					}
 					if (fLast == SLASH) {
 						if (fTokenLength - getLastLength(fLast) > 0) {
 							return preFix(JAVA, SINGLE_LINE_COMMENT, NONE, 2);
@@ -249,6 +279,9 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaPa
 					}
 
 				case '*':
+					if (fLast == TRIPLE_QUOTE) {
+						break;
+					}
 					if (fLast == SLASH) {
 						if (fTokenLength - getLastLength(fLast) > 0)
 							return preFix(JAVA, MULTI_LINE_COMMENT, SLASH_STAR, 2);
@@ -276,14 +309,27 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaPa
 					}
 
 				case '"':
-					fLast= NONE; // ignore fLast
-					if (fTokenLength > 0)
-						return preFix(JAVA, STRING, NONE, 1);
+					boolean isTextBlockBeginning= scanForTextBlockBeginning();
+					if (isTextBlockBeginning) {
+						if (fTokenLength - getLastLength(fLast) > 0)
+							return preFix(JAVA, MULTI_LINE_STRING, TRIPLE_QUOTE, 3);
+						else {
+							preFix(JAVA, MULTI_LINE_STRING, TRIPLE_QUOTE, 3);
+							fTokenOffset+= fTokenLength;
+							fTokenLength= fPrefixLength;
+							break;
+						}
+					}		
 					else {
-						preFix(JAVA, STRING, NONE, 1);
-						fTokenOffset += fTokenLength;
-						fTokenLength= fPrefixLength;
-						break;
+						fLast= NONE; // ignore fLast	
+						if (fTokenLength > 0)
+							return preFix(JAVA, STRING, NONE, 1);
+						else {
+							preFix(JAVA, STRING, NONE, 1);
+							fTokenOffset += fTokenLength;
+							fTokenLength= fPrefixLength;
+							break;
+						}
 					}
 
 				default:
@@ -393,9 +439,113 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaPa
 	 				break;
 	 			}
 	 			break;
+
+	 		case MULTI_LINE_STRING: 
+				switch (ch) {
+				case '\"':
+					if (scanForTextBlockClose()) {
+						fTokenLength= fTokenLength + 2;
+						return postFix(MULTI_LINE_STRING);
+					} else {
+						consume();
+						break;
+					}
+				default:
+					consume();
+					break;
+				}
+	 			break;
 	 		}
 		}
  	}
+
+	private boolean scanForTextBlockBeginning() {
+		if (!isEnablePreviewsAllowed()) {
+			return false;
+		}
+		int count= 0;
+		boolean isTextBlockBeginning= false;
+		try {
+			// Don't change the position and current character unless we are certain
+			// to be dealing with a text block. For producing all errors like before
+			// in case of a valid """ but missing \r or \n, just return false and not
+			// throw any error.
+			count++;
+			int ch= fScanner.read();
+			if (ch == '\"') {
+				count++;
+				ch= fScanner.read();
+				if (ch == '\"') {
+					count++;
+					ch= fScanner.read();
+					while (Character.isWhitespace(ch)) {
+						switch (ch) {
+							case 10: /* \ u000a: LINE FEED               */
+							case 13: /* \ u000d: CARRIAGE RETURN         */
+								isTextBlockBeginning= true;
+								break;
+							case ICharacterScanner.EOF:
+								count--;
+								break;
+							default:
+								count++;
+								ch= fScanner.read();
+								break;
+						}
+						if (isTextBlockBeginning) {
+							break;
+						}
+					}
+				} else if (ch == ICharacterScanner.EOF) {
+					count--;
+				}
+			} else if (ch == ICharacterScanner.EOF) {
+				count--;
+			}
+		} catch (IndexOutOfBoundsException e) {
+			//let it return false;
+		} finally {
+			int ignore= 0;
+			if (isTextBlockBeginning) {
+				ignore= 2;
+			}
+			for (int i= count - ignore; i > 0; i--) {
+				fScanner.unread();
+			}
+		}
+		return isTextBlockBeginning;
+	}
+
+	private boolean scanForTextBlockClose() {
+		int count= 0;
+		boolean isTextBlockEnd= false;
+		try {
+			count++;
+			int ch= fScanner.read();
+			if (ch == '\"') {
+				count++;
+				ch= fScanner.read();
+				if (ch == '\"') {
+					isTextBlockEnd= true;
+				} else if (ch == ICharacterScanner.EOF) {
+					count--;
+				}
+
+			} else if (ch == ICharacterScanner.EOF) {
+				count--;
+			}
+		} catch (IndexOutOfBoundsException e) {
+			//let it return false;
+		} finally {
+			if (!isTextBlockEnd) {
+				for (int i= count; i > 0; i--) {
+					fScanner.unread();
+				}
+			}
+
+		}
+		return isTextBlockEnd;
+	}
 
 	private static final int getLastLength(int last) {
 		switch (last) {
@@ -416,12 +566,16 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaPa
 
 		case SLASH_STAR_STAR:
 			return 3;
+		case TRIPLE_QUOTE:
+			return 3;
 		}
 	}
 
 	private final void consume() {
 		fTokenLength++;
-		fLast= NONE;
+		if (fLast != TRIPLE_QUOTE) {
+			fLast= NONE;
+		}
 	}
 
 	private final IToken postFix(int state) {
@@ -473,6 +627,9 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaPa
 
 		else if (contentType.equals(JAVA_CHARACTER))
 			return CHARACTER;
+
+		else if (contentType.equals(JAVA_MULTI_LINE_STRING))
+			return MULTI_LINE_STRING;
 
 		else
 			return JAVA;
@@ -540,4 +697,36 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaPa
 		return fTokenOffset;
 	}
 
+	private void setJavaProject() {
+		if (fJavaProject == null) {
+			IWorkbenchPage page= JavaPlugin.getActivePage();
+			if (page != null) {
+				IEditorPart part= page.getActiveEditor();
+				if (part != null) {
+					IEditorInput editorInput= part.getEditorInput();
+					if (editorInput != null) {
+						fJavaProject= EditorUtility.getJavaProject(editorInput);
+					}
+				}
+				if (fJavaProject == null) {
+					ISelection selection= page.getSelection();
+					if (selection instanceof IStructuredSelection && !selection.isEmpty()) {
+						Object obj= ((IStructuredSelection) selection).getFirstElement();
+						if (obj instanceof IJavaElement) {
+							fJavaProject= ((IJavaElement) obj).getJavaProject();
+						}
+					}
+				}
+			}
+		}
+	}
+
+	public boolean isEnablePreviewsAllowed() {
+		boolean isAllowed= false;
+		setJavaProject();
+		if (fJavaProject != null) {
+			isAllowed= PreviewFeaturesSubProcessor.isPreviewFeatureEnabled(fJavaProject);
+		}
+		return isAllowed;
+	}
 }
