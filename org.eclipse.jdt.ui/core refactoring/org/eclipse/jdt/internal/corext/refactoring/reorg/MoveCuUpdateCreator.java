@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Microsoft Corporation - Move CU should not remove import for the inner class - https://bugs.eclipse.org/bugs/show_bug.cgi?id=549674
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
@@ -236,7 +237,7 @@ public class MoveCuUpdateCreator {
 		if (fDestination.exists()) {
 			ICompilationUnit[] cus= fDestination.getCompilationUnits();
 			for (int i= 0; i < cus.length; i++) {
-				types.addAll(Arrays.asList(cus[i].getAllTypes()));
+				types.addAll(Arrays.asList(cus[i].getTypes()));
 			}
 		}
 		return types.toArray(new IType[types.size()]);
