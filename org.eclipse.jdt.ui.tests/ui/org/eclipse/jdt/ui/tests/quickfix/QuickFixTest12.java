@@ -13,19 +13,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
-import java.util.ArrayList;
-
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.ui.tests.core.Java12ProjectTestSetup;
-import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
-import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -420,17 +413,17 @@ public class QuickFixTest12 extends QuickFixTest {
 		*/}
 
 	public void testAddDefaultCaseSwitchExpression1() throws Exception {
-		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		/*fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(Java12ProjectTestSetup.getDefaultClasspath(), null);
 		JavaProjectHelper.set12CompilerOptions(fJProject1, true);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
-
+		
 		StringBuffer buf= new StringBuffer();
 		buf.append("module test {\n");
 		buf.append("}\n");
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
 		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
-
+		
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
 		buf= new StringBuffer();
 		buf.append("package test;\n");
@@ -447,15 +440,15 @@ public class QuickFixTest12 extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
-
+		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
-
+		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
-
+		
 		buf= new StringBuffer();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
@@ -472,22 +465,23 @@ public class QuickFixTest12 extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected= buf.toString();
-
-		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });*/
 	}
 
 	public void testAddDefaultCaseSwitchExpression2() throws Exception {
+		/*
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(Java12ProjectTestSetup.getDefaultClasspath(), null);
 		JavaProjectHelper.set12CompilerOptions(fJProject1, true);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
-
+		
 		StringBuffer buf= new StringBuffer();
 		buf.append("module test {\n");
 		buf.append("}\n");
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
 		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
-
+		
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
 		buf= new StringBuffer();
 		buf.append("package test;\n");
@@ -506,15 +500,15 @@ public class QuickFixTest12 extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
-
+		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
-
+		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
-
+		
 		buf= new StringBuffer();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
@@ -535,9 +529,9 @@ public class QuickFixTest12 extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected= buf.toString();
-
+		
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
-	}
+		*/}
 
 	public void testAddMissingCaseSwitchExpression() throws Exception {
 		/*
