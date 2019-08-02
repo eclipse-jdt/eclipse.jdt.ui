@@ -62,7 +62,7 @@ Contact the project developers via the project's "dev" list.
 License
 -------
 
-[Eclipse Public License (EPL) v1.0][2]
+[Eclipse Public License (EPL) v2.0][2]
 
 [1]: https://wiki.eclipse.org/JDT_UI/How_to_Contribute
 [2]: http://wiki.eclipse.org/EPL
