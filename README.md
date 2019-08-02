@@ -57,7 +57,7 @@ Contact:
 
 Contact the project developers via the project's "dev" list.
 
-- <https://dev.eclipse.org/mailman/listinfo/jdt-ui-dev>
+- <https://dev.eclipse.org/mailman/listinfo/jdt-dev>
 
 License
 -------
