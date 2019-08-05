@@ -8,6 +8,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -100,6 +104,8 @@ public final class CreateStubsAction implements IObjectActionDelegate {
 			//9:
 			"java.lang.module",
 			"java.nio.file.spi",
+			//13:
+			"java.lang.constant"
 	};
 
 	private static final String SETTINGS_ID_STUBS_PROJECT= "stubsProject";

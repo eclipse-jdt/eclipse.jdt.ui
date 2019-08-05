@@ -8,6 +8,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Jens Reimann - add method to convert a collection of previews
@@ -86,7 +90,7 @@ public class QuickFixTest extends TestCase {
 		TestSuite suite= new TestSuite(QuickFixTest.class.getName());
 		suite.addTest(QuickFixTest9.suite());
 		suite.addTest(QuickFixTest18.suite());
-		suite.addTest(QuickFixTest12.suite());
+		suite.addTest(QuickFixTest13.suite());
 		suite.addTest(SerialVersionQuickFixTest.suite());
 		suite.addTest(UtilitiesTest.suite());
 		suite.addTest(UnresolvedTypesQuickFixTest.suite());

@@ -8,39 +8,57 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
+import java.util.ArrayList;
+
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
-import org.eclipse.jdt.ui.tests.core.Java12ProjectTestSetup;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+
+import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.ui.tests.core.Java10ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.Java13ProjectTestSetup;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
+import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
+
+import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-public class QuickFixTest12 extends QuickFixTest {
+public class QuickFixTest13 extends QuickFixTest {
 
-	private static final Class<QuickFixTest12> THIS= QuickFixTest12.class;
+	private static final Class<QuickFixTest13> THIS= QuickFixTest13.class;
 
 	private IJavaProject fJProject1;
 
 	private IPackageFragmentRoot fSourceFolder;
 
-	public QuickFixTest12(String name) {
+	public QuickFixTest13(String name) {
 		super(name);
 	}
 
 	public static Test suite() {
-		return new Java12ProjectTestSetup(new TestSuite(THIS), true);
+		return new Java13ProjectTestSetup(new TestSuite(THIS), true);
 	}
 
 	public static Test setUpTest(Test test) {
-		Test testToReturn= new Java12ProjectTestSetup(test, true);
+		Test testToReturn= new Java13ProjectTestSetup(test, true);
 		return testToReturn;
 	}
 
@@ -59,11 +77,9 @@ public class QuickFixTest12 extends QuickFixTest {
 	}
 
 	public void testEnablePreviewsAndOpenCompilerPropertiesProposals() throws Exception {
-		/*
-		
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		fJProject1.setRawClasspath(Java12ProjectTestSetup.getDefaultClasspath(), null);
-		JavaProjectHelper.set12CompilerOptions(fJProject1, false);
+		fJProject1.setRawClasspath(Java13ProjectTestSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set13CompilerOptions(fJProject1, false);
 		
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		
@@ -81,10 +97,10 @@ public class QuickFixTest12 extends QuickFixTest {
 		buf.append("  String foo(Day day) {\n");
 		buf.append("	int x = 0;\n");
 		buf.append("	var today = switch(day){\n");
-		buf.append("		case SATURDAY, SUNDAY: break \"Weekend day\";\n");
+		buf.append("		case SATURDAY, SUNDAY: yield \"Weekend day\";\n");
 		buf.append("		case MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY: {\n");
 		buf.append("   	 		var kind = \"Working day\";\n");
-		buf.append("    		break kind;\n");
+		buf.append("    		yield kind;\n");
 		buf.append("		}\n");
 		buf.append("		default: {\n");
 		buf.append("    		var kind = day.name();\n");
@@ -112,21 +128,19 @@ public class QuickFixTest12 extends QuickFixTest {
 		pack.createCompilationUnit("Day.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 3, null);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 12, null);
 		
 		assertNumberOfProposals(proposals, 2);
 		String label1= CorrectionMessages.PreviewFeaturesSubProcessor_enable_preview_features;
 		assertProposalExists(proposals, label1);
 		String label2= CorrectionMessages.PreviewFeaturesSubProcessor_open_compliance_properties_page_enable_preview_features;
 		assertProposalExists(proposals, label2);
-		*/}
-
-	public void testNoEnablePreviewProposal() throws Exception {
-		/*
-		
+	}
+	
+	public void testGetNeedHigherComplianceProposalsAndEnablePreviewsProposal() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		fJProject1.setRawClasspath(Java12ProjectTestSetup.getDefaultClasspath(), null);
-		JavaProjectHelper.set12CompilerOptions(fJProject1, true);
+		fJProject1.setRawClasspath(Java10ProjectTestSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set12CompilerOptions(fJProject1, false);
 		
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		
@@ -144,10 +158,71 @@ public class QuickFixTest12 extends QuickFixTest {
 		buf.append("  String foo(Day day) {\n");
 		buf.append("	int x = 0;\n");
 		buf.append("	var today = switch(day){\n");
-		buf.append("		case SATURDAY, SUNDAY: break \"Weekend day\";\n");
+		buf.append("		case SATURDAY, SUNDAY: yield \"Weekend day\";\n");
 		buf.append("		case MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY: {\n");
 		buf.append("   	 		var kind = \"Working day\";\n");
-		buf.append("    		break kind;\n");
+		buf.append("    		yield kind;\n");
+		buf.append("		}\n");
+		buf.append("		default: {\n");
+		buf.append("    		var kind = day.name();\n");
+		buf.append("   	 		System.out.println(kind + x);\n");
+		buf.append("   	 		throw new IllegalArgumentException(\"Invalid day: \" + kind);\n");
+		buf.append("		}\n");
+		buf.append("  	};\n");
+		buf.append("  	return today;\n");
+		buf.append("  }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public enum Day {\n");
+		buf.append("	SUNDAY,\n");
+		buf.append("	MONDAY,\n");
+		buf.append("	TUESDAY,\n");
+		buf.append("	WEDNESDAY,\n");
+		buf.append("	THURSDAY,\n");
+		buf.append("	FRIDAY,\n");
+		buf.append("	SATURDAY\n");
+		buf.append("}\n");
+		pack.createCompilationUnit("Day.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 11, null);
+		
+		assertNumberOfProposals(proposals, 1);
+		String label1= Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_change_project_compliance_description, "13");
+		String label2= CorrectionMessages.PreviewFeaturesSubProcessor_enable_preview_features;
+		String label= Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_combine_two_quickfixes, new String[] {label1, label2});
+		assertProposalExists(proposals, label);
+	}
+
+	public void testNoEnablePreviewProposal() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(Java13ProjectTestSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set13CompilerOptions(fJProject1, true);
+		
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		
+		
+		StringBuffer buf= new StringBuffer();
+		buf.append("module test {\n");
+		buf.append("}\n");
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class Cls {\n");
+		buf.append("  String foo(Day day) {\n");
+		buf.append("	int x = 0;\n");
+		buf.append("	var today = switch(day){\n");
+		buf.append("		case SATURDAY, SUNDAY: yield \"Weekend day\";\n");
+		buf.append("		case MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY: {\n");
+		buf.append("   	 		var kind = \"Working day\";\n");
+		buf.append("    		yield kind;\n");
 		buf.append("		}\n");
 		buf.append("		default: {\n");
 		buf.append("    		var kind = day.name();\n");
@@ -178,13 +253,12 @@ public class QuickFixTest12 extends QuickFixTest {
 		ArrayList<ICompletionProposal> proposals= collectAllCorrections(cu, astRoot, 0);
 		
 		assertNumberOfProposals(proposals, 0);
-		*/}
+	}
 
 	public void testAddDefaultCaseSwitchStatement1() throws Exception {
-		/*
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		fJProject1.setRawClasspath(Java12ProjectTestSetup.getDefaultClasspath(), null);
-		JavaProjectHelper.set12CompilerOptions(fJProject1, true);
+		fJProject1.setRawClasspath(Java13ProjectTestSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set13CompilerOptions(fJProject1, true);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		
 		StringBuffer buf= new StringBuffer();
@@ -236,13 +310,12 @@ public class QuickFixTest12 extends QuickFixTest {
 		String expected= buf.toString();
 		
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
-		*/}
+	}
 
 	public void testAddDefaultCaseSwitchStatement2() throws Exception {
-		/*
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		fJProject1.setRawClasspath(Java12ProjectTestSetup.getDefaultClasspath(), null);
-		JavaProjectHelper.set12CompilerOptions(fJProject1, true);
+		fJProject1.setRawClasspath(Java13ProjectTestSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set13CompilerOptions(fJProject1, true);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		
 		StringBuffer buf= new StringBuffer();
@@ -295,13 +368,12 @@ public class QuickFixTest12 extends QuickFixTest {
 		String expected= buf.toString();
 		
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
-		*/}
+	}
 
 	public void testAddDefaultCaseSwitchStatement3() throws Exception {
-		/*
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		fJProject1.setRawClasspath(Java12ProjectTestSetup.getDefaultClasspath(), null);
-		JavaProjectHelper.set12CompilerOptions(fJProject1, true);
+		fJProject1.setRawClasspath(Java13ProjectTestSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set13CompilerOptions(fJProject1, true);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		
 		StringBuffer buf= new StringBuffer();
@@ -350,13 +422,12 @@ public class QuickFixTest12 extends QuickFixTest {
 		String expected= buf.toString();
 		
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
-		*/}
+	}
 
 	public void testAddMissingCaseSwitchStatement1() throws Exception {
-		/*
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		fJProject1.setRawClasspath(Java12ProjectTestSetup.getDefaultClasspath(), null);
-		JavaProjectHelper.set12CompilerOptions(fJProject1, true);
+		fJProject1.setRawClasspath(Java13ProjectTestSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set13CompilerOptions(fJProject1, true);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		
 		StringBuffer buf= new StringBuffer();
@@ -410,12 +481,12 @@ public class QuickFixTest12 extends QuickFixTest {
 		String expected= buf.toString();
 		
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
-		*/}
+	}
 
 	public void testAddDefaultCaseSwitchExpression1() throws Exception {
-		/*fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		fJProject1.setRawClasspath(Java12ProjectTestSetup.getDefaultClasspath(), null);
-		JavaProjectHelper.set12CompilerOptions(fJProject1, true);
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(Java13ProjectTestSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set13CompilerOptions(fJProject1, true);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		
 		StringBuffer buf= new StringBuffer();
@@ -434,7 +505,7 @@ public class QuickFixTest12 extends QuickFixTest {
 		buf.append("        case 70 -> 7;\n");
 		buf.append("        case 80 -> 8;\n");
 		buf.append("        case 90, 900 -> {\n");
-		buf.append("            break 9;\n");
+		buf.append("            yield 9;\n");
 		buf.append("        }\n");
 		buf.append("        };\n");
 		buf.append("    }\n");
@@ -458,7 +529,7 @@ public class QuickFixTest12 extends QuickFixTest {
 		buf.append("        case 70 -> 7;\n");
 		buf.append("        case 80 -> 8;\n");
 		buf.append("        case 90, 900 -> {\n");
-		buf.append("            break 9;\n");
+		buf.append("            yield 9;\n");
 		buf.append("        }\n");
 		buf.append("			default -> throw new IllegalArgumentException(\"Unexpected value: \" + input);\n");
 		buf.append("        };\n");
@@ -466,14 +537,13 @@ public class QuickFixTest12 extends QuickFixTest {
 		buf.append("}\n");
 		String expected= buf.toString();
 		
-		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });*/
+		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}
 
 	public void testAddDefaultCaseSwitchExpression2() throws Exception {
-		/*
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		fJProject1.setRawClasspath(Java12ProjectTestSetup.getDefaultClasspath(), null);
-		JavaProjectHelper.set12CompilerOptions(fJProject1, true);
+		fJProject1.setRawClasspath(Java13ProjectTestSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set13CompilerOptions(fJProject1, true);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		
 		StringBuffer buf= new StringBuffer();
@@ -489,13 +559,13 @@ public class QuickFixTest12 extends QuickFixTest {
 		buf.append("    public static void bar4(int input) {\n");
 		buf.append("        int num = switch (input) {\n");
 		buf.append("        case 60, 600:\n");
-		buf.append("            break 6;\n");
+		buf.append("            yield 6;\n");
 		buf.append("        case 70:\n");
-		buf.append("            break 7;\n");
+		buf.append("            yield 7;\n");
 		buf.append("        case 80:\n");
-		buf.append("            break 8;\n");
+		buf.append("            yield 8;\n");
 		buf.append("        case 90, 900:\n");
-		buf.append("            break 9;\n");
+		buf.append("            yield 9;\n");
 		buf.append("        };\n");
 		buf.append("    }\n");
 		buf.append("}\n");
@@ -515,13 +585,13 @@ public class QuickFixTest12 extends QuickFixTest {
 		buf.append("    public static void bar4(int input) {\n");
 		buf.append("        int num = switch (input) {\n");
 		buf.append("        case 60, 600:\n");
-		buf.append("            break 6;\n");
+		buf.append("            yield 6;\n");
 		buf.append("        case 70:\n");
-		buf.append("            break 7;\n");
+		buf.append("            yield 7;\n");
 		buf.append("        case 80:\n");
-		buf.append("            break 8;\n");
+		buf.append("            yield 8;\n");
 		buf.append("        case 90, 900:\n");
-		buf.append("            break 9;\n");
+		buf.append("            yield 9;\n");
 		buf.append("			default :\n");
 		buf.append("				throw new IllegalArgumentException(\n");
 		buf.append("						\"Unexpected value: \" + input);\n");
@@ -531,13 +601,12 @@ public class QuickFixTest12 extends QuickFixTest {
 		String expected= buf.toString();
 		
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
-		*/}
+	}
 
 	public void testAddMissingCaseSwitchExpression() throws Exception {
-		/*
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		fJProject1.setRawClasspath(Java12ProjectTestSetup.getDefaultClasspath(), null);
-		JavaProjectHelper.set12CompilerOptions(fJProject1, true);
+		fJProject1.setRawClasspath(Java13ProjectTestSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set13CompilerOptions(fJProject1, true);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		
 		StringBuffer buf= new StringBuffer();
@@ -553,11 +622,11 @@ public class QuickFixTest12 extends QuickFixTest {
 		buf.append("    public void bar1(Day day) {\n");
 		buf.append("        int len = switch (day) {\n");
 		buf.append("        case MONDAY, FRIDAY:\n");
-		buf.append("            break 6;\n");
+		buf.append("            yield 6;\n");
 		buf.append("        case TUESDAY:\n");
-		buf.append("            break 7;\n");
+		buf.append("            yield 7;\n");
 		buf.append("        case THURSDAY, SATURDAY:\n");
-		buf.append("            break 8;\n");
+		buf.append("            yield 8;\n");
 		buf.append("        };\n");
 		buf.append("    }\n");
 		buf.append("}\n");
@@ -580,11 +649,11 @@ public class QuickFixTest12 extends QuickFixTest {
 		buf.append("    public void bar1(Day day) {\n");
 		buf.append("        int len = switch (day) {\n");
 		buf.append("        case MONDAY, FRIDAY:\n");
-		buf.append("            break 6;\n");
+		buf.append("            yield 6;\n");
 		buf.append("        case TUESDAY:\n");
-		buf.append("            break 7;\n");
+		buf.append("            yield 7;\n");
 		buf.append("        case THURSDAY, SATURDAY:\n");
-		buf.append("            break 8;\n");
+		buf.append("            yield 8;\n");
 		buf.append("			case SUNDAY :\n");
 		buf.append("				throw new UnsupportedOperationException(\n");
 		buf.append("						\"Unimplemented case: \" + day);\n");
@@ -603,6 +672,6 @@ public class QuickFixTest12 extends QuickFixTest {
 		String expected= buf.toString();
 		
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
-		*/}
+	}
 
 }
