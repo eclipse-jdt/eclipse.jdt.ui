@@ -634,7 +634,7 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
 	public void endVisit(StringLiteral node) {
 		endVisit((Expression)node);
 	}
-
+	
 	@Override
 	public boolean visit(SuperFieldAccess node) {
 		return visit((Expression)node);
@@ -649,12 +649,22 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
 	public boolean visit(SuperMethodInvocation node) {
 		return visit((Expression)node);
 	}
+	
+	@Override
+	public boolean visit(TextBlock node) {
+		return visit((Expression)node);
+	}
 
 	@Override
 	public void endVisit(SuperMethodInvocation node) {
 		endVisit((Expression)node);
 	}
 
+	@Override
+	public void endVisit(TextBlock node) {
+		endVisit((Expression)node);
+	}
+	
 	@Override
 	public boolean visit(ThisExpression node) {
 		return visit((Expression)node);
