@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -110,6 +110,7 @@ class TestFormatterOptions {
 	public int blank_lines_before_first_class_body_declaration;
 	public int blank_lines_before_imports;
 	public int blank_lines_before_member_type;
+	public int blank_lines_before_abstract_method;
 	public int blank_lines_before_method;
 	public int blank_lines_before_new_chunk;
 	public int blank_lines_before_package;
@@ -305,6 +306,7 @@ class TestFormatterOptions {
 		options.put(DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_FIRST_CLASS_BODY_DECLARATION, Integer.toString(this.blank_lines_before_first_class_body_declaration));
 		options.put(DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_IMPORTS, Integer.toString(this.blank_lines_before_imports));
 		options.put(DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_MEMBER_TYPE, Integer.toString(this.blank_lines_before_member_type));
+		options.put(DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_ABSTRACT_METHOD, Integer.toString(this.blank_lines_before_abstract_method));
 		options.put(DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_METHOD, Integer.toString(this.blank_lines_before_method));
 		options.put(DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_NEW_CHUNK, Integer.toString(this.blank_lines_before_new_chunk));
 		options.put(DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_PACKAGE, Integer.toString(this.blank_lines_before_package));
@@ -487,6 +489,7 @@ class TestFormatterOptions {
 		this.blank_lines_before_first_class_body_declaration = 0;
 		this.blank_lines_before_imports = 0;
 		this.blank_lines_before_member_type = 0;
+		this.blank_lines_before_abstract_method = 0;
 		this.blank_lines_before_method = 0;
 		this.blank_lines_before_new_chunk = 0;
 		this.blank_lines_before_package = 0;
