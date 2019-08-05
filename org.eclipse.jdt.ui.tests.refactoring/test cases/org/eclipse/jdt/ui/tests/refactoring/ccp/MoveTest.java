@@ -938,7 +938,7 @@ public class MoveTest extends RefactoringTest {
 		buf.append("package q;\n");
 		buf.append("public class Class1 {\n");
 		buf.append("}\n");
-		ICompilationUnit reference1= getPackageQ().createCompilationUnit("Class1.java", buf.toString(), false, new NullProgressMonitor());
+		getPackageQ().createCompilationUnit("Class1.java", buf.toString(), false, new NullProgressMonitor());
 
 		buf= new StringBuffer();
 		buf.append("package q;\n");
@@ -946,7 +946,7 @@ public class MoveTest extends RefactoringTest {
 		buf.append("    public interface InnerClass3 {\n");
 		buf.append("    }\n");
 		buf.append("{\n");
-		ICompilationUnit reference2= getPackageQ().createCompilationUnit("Class3.java", buf.toString(), false, new NullProgressMonitor());
+		getPackageQ().createCompilationUnit("Class3.java", buf.toString(), false, new NullProgressMonitor());
 
 		String[] handles= ParticipantTesting.createHandles(new Object[] { toMove, toMove.getTypes()[0], toMove.getResource() });
 		JavaMoveProcessor processor= verifyEnabled(new IResource[] {}, new IJavaElement[] { toMove }, createReorgQueries());
