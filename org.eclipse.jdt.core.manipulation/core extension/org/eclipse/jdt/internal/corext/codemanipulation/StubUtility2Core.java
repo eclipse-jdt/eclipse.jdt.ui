@@ -230,7 +230,7 @@ public final class StubUtility2Core {
 		AST ast= rewrite.getAST();
 
 		MethodDeclaration decl= ast.newMethodDeclaration();
-		decl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, delegate.getModifiers() & ~Modifier.SYNCHRONIZED & ~Modifier.ABSTRACT & ~Modifier.NATIVE));
+		decl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, delegate.getModifiers() & ~Modifier.DEFAULT & ~Modifier.SYNCHRONIZED & ~Modifier.ABSTRACT & ~Modifier.NATIVE));
 
 		decl.setName(ast.newSimpleName(delegate.getName()));
 		decl.setConstructor(false);
