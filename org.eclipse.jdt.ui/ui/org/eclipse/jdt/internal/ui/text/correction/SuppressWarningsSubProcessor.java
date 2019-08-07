@@ -23,6 +23,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.CorrectionEngine;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -64,7 +65,6 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposal;
 import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
@@ -382,7 +382,7 @@ public class SuppressWarningsSubProcessor {
 			return;
 		}
 		String label= Messages.format(CorrectionMessages.SuppressWarningsSubProcessor_remove_annotation_label, literal.getLiteralValue());
-		Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
+		Image image= PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.REMOVE_ANNOTATION, image);
 		proposals.add(proposal);
 	}

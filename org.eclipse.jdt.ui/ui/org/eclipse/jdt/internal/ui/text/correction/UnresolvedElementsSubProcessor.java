@@ -42,6 +42,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
@@ -356,7 +357,7 @@ public class UnresolvedElementsSubProcessor {
 					rewrite.remove(statement, null);
 				}
 				String label= CorrectionMessages.UnresolvedElementsSubProcessor_removestatement_description;
-				Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
+				Image image= PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
 				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, IProposalRelevance.REMOVE_ASSIGNMENT, image);
 				proposals.add(proposal);
 			}

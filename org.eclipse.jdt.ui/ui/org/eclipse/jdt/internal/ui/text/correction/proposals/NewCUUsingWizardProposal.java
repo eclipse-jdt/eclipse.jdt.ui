@@ -33,6 +33,8 @@ import org.eclipse.jface.wizard.WizardDialog;
 
 import org.eclipse.jface.text.IDocument;
 
+import org.eclipse.ui.PlatformUI;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -248,7 +250,7 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
 	public void apply(IDocument document) {
 		StructuredSelection selection= new StructuredSelection(fCompilationUnit);
 		NewElementWizard wizard= createWizard(selection);
-		wizard.init(JavaPlugin.getDefault().getWorkbench(), selection);
+		wizard.init(PlatformUI.getWorkbench(), selection);
 
 		IType createdType= null;
 

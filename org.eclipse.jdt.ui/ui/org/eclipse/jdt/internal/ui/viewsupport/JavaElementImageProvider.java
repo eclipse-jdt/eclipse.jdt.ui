@@ -27,6 +27,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
 
 import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.model.IWorkbenchAdapter;
 
@@ -80,7 +81,7 @@ public class JavaElementImageProvider {
 	private static ImageDescriptor DESC_OBJ_PROJECT_CLOSED;
 	private static ImageDescriptor DESC_OBJ_PROJECT;
 	{
-		ISharedImages images= JavaPlugin.getDefault().getWorkbench().getSharedImages();
+		ISharedImages images= PlatformUI.getWorkbench().getSharedImages();
 		DESC_OBJ_PROJECT_CLOSED= images.getImageDescriptor(IDE.SharedImages.IMG_OBJ_PROJECT_CLOSED);
 		DESC_OBJ_PROJECT= 		 images.getImageDescriptor(IDE.SharedImages.IMG_OBJ_PROJECT);
 	}

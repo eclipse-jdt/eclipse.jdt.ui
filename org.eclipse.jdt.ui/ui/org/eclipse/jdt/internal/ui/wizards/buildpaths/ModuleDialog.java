@@ -486,7 +486,7 @@ public class ModuleDialog extends StatusDialog {
 	}
 
 	private void createHorizontalButtons(Composite parent) {
-		org.eclipse.ui.ISharedImages sharedImages= JavaPlugin.getDefault().getWorkbench().getSharedImages();
+		org.eclipse.ui.ISharedImages sharedImages= PlatformUI.getWorkbench().getSharedImages();
 
 		Composite box= new Composite(parent, SWT.NONE);
 		box.setLayout(new GridLayout(1, true));

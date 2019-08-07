@@ -293,7 +293,7 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	}
 
 	public static IWorkbenchWindow getActiveWorkbenchWindow() {
-		return getDefault().getWorkbench().getActiveWorkbenchWindow();
+		return PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 	}
 
 	public static Shell getActiveWorkbenchShell() {
@@ -558,7 +558,7 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	}
 
 	private IWorkbenchPage internalGetActivePage() {
-		IWorkbenchWindow window= getWorkbench().getActiveWorkbenchWindow();
+		IWorkbenchWindow window= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 		if (window == null)
 			return null;
 		return window.getActivePage();

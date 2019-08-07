@@ -28,7 +28,6 @@ import org.eclipse.ui.WorkbenchException;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
@@ -54,7 +53,7 @@ public class OpenJavaPerspectiveAction extends Action {
 
 	@Override
 	public void run() {
-		IWorkbench workbench= JavaPlugin.getDefault().getWorkbench();
+		IWorkbench workbench= PlatformUI.getWorkbench();
 		IWorkbenchWindow window= workbench.getActiveWorkbenchWindow();
 		IWorkbenchPage page= window.getActivePage();
 		IAdaptable input;

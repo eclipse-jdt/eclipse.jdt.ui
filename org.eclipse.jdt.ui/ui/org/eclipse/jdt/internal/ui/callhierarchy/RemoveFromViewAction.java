@@ -25,7 +25,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
 /**
@@ -60,7 +59,7 @@ class RemoveFromViewAction extends Action{
 		setToolTipText(CallHierarchyMessages.RemoveFromViewAction_removeFromView_tooltip);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_REMOVE_FROM_VIEW_ACTION);
 
-		ISharedImages workbenchImages= JavaPlugin.getDefault().getWorkbench().getSharedImages();
+		ISharedImages workbenchImages= PlatformUI.getWorkbench().getSharedImages();
 		setDisabledImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_ELCL_REMOVE_DISABLED));
 		setImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_ELCL_REMOVE));
 		setHoverImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_ELCL_REMOVE));

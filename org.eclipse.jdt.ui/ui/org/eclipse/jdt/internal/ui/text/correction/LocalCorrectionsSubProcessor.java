@@ -47,6 +47,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -567,7 +568,7 @@ public class LocalCorrectionsSubProcessor {
 	public static void getUnnecessaryNLSTagProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws CoreException {
 		IProposableFix fix= StringFix.createFix(context.getASTRoot(), problem, true, false);
 		if (fix != null) {
-			Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
+			Image image= PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
 			Map<String, String> options= new Hashtable<>();
 			options.put(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS, CleanUpOptions.TRUE);
 			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new StringCleanUp(options), IProposalRelevance.UNNECESSARY_NLS_TAG, image, context);
@@ -752,7 +753,7 @@ public class LocalCorrectionsSubProcessor {
 		rewrite.remove(node, null);
 
 		String label= CorrectionMessages.LocalCorrectionsSubProcessor_remove_redundant_superinterface;
-		Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
+		Image image= PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
 
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.REMOVE_REDUNDANT_SUPER_INTERFACE, image);
 		proposals.add(proposal);
@@ -761,7 +762,7 @@ public class LocalCorrectionsSubProcessor {
 
 	private static void addProposal(IInvocationContext context, Collection<ICommandAccess> proposals, final UnusedCodeFix fix) {
 		if (fix != null) {
-			Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
+			Image image= PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
 			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, fix.getCleanUp(), IProposalRelevance.UNUSED_MEMBER, image, context);
 			proposals.add(proposal);
 		}
@@ -1256,7 +1257,7 @@ public class LocalCorrectionsSubProcessor {
 	}
 
 	private static void addRemoveIncludingConditionProposal(IInvocationContext context, ASTNode toRemove, ASTNode replacement, Collection<ICommandAccess> proposals) {
-		Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
+		Image image= PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
 		String label= CorrectionMessages.LocalCorrectionsSubProcessor_removeunreachablecode_including_condition_description;
 		AST ast= toRemove.getAST();
 		ASTRewrite rewrite= ASTRewrite.create(ast);
@@ -1310,7 +1311,7 @@ public class LocalCorrectionsSubProcessor {
 	}
 
 	private static void addRemoveProposal(IInvocationContext context, ASTRewrite rewrite, String label, Collection<ICommandAccess> proposals) {
-		Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
+		Image image= PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 10, image);
 		proposals.add(proposal);
 	}
@@ -1380,7 +1381,7 @@ public class LocalCorrectionsSubProcessor {
 				rewrite.remove(parent, null);
 				
 				String label= CorrectionMessages.LocalCorrectionsSubProcessor_remove_allocated_description;
-				Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
+				Image image= PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
 				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.REMOVE_UNUSED_ALLOCATED_OBJECT, image);
 				proposals.add(proposal);
 			}
@@ -1600,7 +1601,7 @@ public class LocalCorrectionsSubProcessor {
 	public static void addRemoveRedundantTypeArgumentsProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		IProposableFix fix= TypeParametersFix.createRemoveRedundantTypeArgumentsFix(context.getASTRoot(), problem);
 		if (fix != null) {
-			Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
+			Image image= PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
 			Map<String, String> options= new HashMap<>();
 			options.put(CleanUpConstants.REMOVE_REDUNDANT_TYPE_ARGUMENTS, CleanUpOptions.TRUE);
 			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new TypeParametersCleanUp(options), IProposalRelevance.REMOVE_REDUNDANT_TYPE_ARGUMENTS, image, context);
