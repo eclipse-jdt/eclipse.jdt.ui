@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Microsoft Corporation - copied to jdt.core.manipulation
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
@@ -35,5 +36,9 @@ public final class CreateCompilationUnitChange extends CreateTextFileChange {
 		String cuName= BasicElementLabels.getFileName(fUnit);
 		String cuContainerName= BasicElementLabels.getPathLabel(fUnit.getParent().getPath(), false);
 		return Messages.format(RefactoringCoreMessages.CompilationUnitChange_label, new String[] { cuName, cuContainerName });
+	}
+
+	public ICompilationUnit getCu() {
+		return fUnit;
 	}
 }

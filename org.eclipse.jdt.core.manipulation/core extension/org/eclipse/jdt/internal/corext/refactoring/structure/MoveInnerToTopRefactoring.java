@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,6 +11,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Samrat Dhillon samrat.dhillon@gmail.com - [move member type] Moving a member interface to its own file adds the host's type parameters to it - https://bugs.eclipse.org/bugs/show_bug.cgi?id=385237
+ *     Microsoft Corporation - copied to jdt.core.manipulation
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
@@ -105,11 +106,18 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
+import org.eclipse.jdt.internal.core.manipulation.BindingLabelProviderCore;
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
+import org.eclipse.jdt.internal.core.manipulation.StubUtility;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
+import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
@@ -132,17 +140,8 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
-import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 
-import org.eclipse.jdt.ui.JavaElementLabels;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-
-import org.eclipse.jdt.internal.core.manipulation.StubUtility;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
-import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 
 public final class MoveInnerToTopRefactoring extends Refactoring {
@@ -735,7 +734,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 
 			String newCUName= JavaModelUtil.getRenamedCUName(fType.getCompilationUnit(), fType.getElementName());
 			if (fType.getPackageFragment().getCompilationUnit(newCUName).exists()) {
-				String message= Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_compilation_Unit_exists, new String[] { BasicElementLabels.getResourceName(newCUName), JavaElementLabels.getElementLabel(fType.getPackageFragment(), JavaElementLabels.ALL_DEFAULT)});
+				String message= Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_compilation_Unit_exists, new String[] { BasicElementLabels.getResourceName(newCUName), JavaElementLabelsCore.getElementLabel(fType.getPackageFragment(), JavaElementLabelsCore.ALL_DEFAULT)});
 				result.addFatalError(message);
 			}
 			result.merge(checkEnclosingInstanceName(fEnclosingInstanceFieldName));
@@ -760,7 +759,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 		if (type == null || !type.exists() || fType.equals(type)) {
 			return null;
 		}
-		String message= Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_type_exists, new String[] { BasicElementLabels.getJavaElementName(fType.getElementName()), JavaElementLabels.getElementLabel(fType.getPackageFragment(), JavaElementLabels.ALL_DEFAULT)});
+		String message= Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_type_exists, new String[] { BasicElementLabels.getJavaElementName(fType.getElementName()), JavaElementLabelsCore.getElementLabel(fType.getPackageFragment(), JavaElementLabelsCore.ALL_DEFAULT)});
 		return RefactoringStatus.createErrorStatus(message);
 	}
 
@@ -782,9 +781,9 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 		if (javaProject != null)
 			project= javaProject.getElementName();
 		final String description= Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_descriptor_description_short, BasicElementLabels.getJavaElementName(fType.getElementName()));
-		final String header= Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fType, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fType.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED)});
+		final String header= Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_descriptor_description, new String[] { JavaElementLabelsCore.getElementLabel(fType, JavaElementLabelsCore.ALL_FULLY_QUALIFIED), JavaElementLabelsCore.getElementLabel(fType.getParent(), JavaElementLabelsCore.ALL_FULLY_QUALIFIED)});
 		final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
-		comment.addSetting(Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_original_pattern, JavaElementLabels.getElementLabel(fType, JavaElementLabels.ALL_FULLY_QUALIFIED)));
+		comment.addSetting(Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_original_pattern, JavaElementLabelsCore.getElementLabel(fType, JavaElementLabelsCore.ALL_FULLY_QUALIFIED)));
 		final boolean enclosing= fEnclosingInstanceFieldName != null && !"".equals(fEnclosingInstanceFieldName); //$NON-NLS-1$
 		if (enclosing)
 			comment.addSetting(Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_field_pattern, BasicElementLabels.getJavaElementName(fEnclosingInstanceFieldName)));
@@ -935,7 +934,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 				if (!visibilityWasAdjusted) {
 					if (Modifier.isPrivate(declaration.getModifiers()) || Modifier.isProtected(declaration.getModifiers())) {
 						newFlags= JdtFlags.clearFlag(Modifier.PROTECTED | Modifier.PRIVATE, newFlags);
-						final RefactoringStatusEntry entry= new RefactoringStatusEntry(RefactoringStatus.WARNING, Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_change_visibility_type_warning, new String[] { BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED)}), JavaStatusContext.create(fSourceRewrite.getCu()));
+						final RefactoringStatusEntry entry= new RefactoringStatusEntry(RefactoringStatus.WARNING, Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_change_visibility_type_warning, new String[] { BindingLabelProviderCore.getBindingLabel(binding, JavaElementLabelsCore.ALL_FULLY_QUALIFIED)}), JavaStatusContext.create(fSourceRewrite.getCu()));
 						if (!containsStatusEntry(status, entry))
 							status.addEntry(entry);
 					}
@@ -1595,7 +1594,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 				try {
 					initialize();
 				} catch (JavaModelException exception) {
-					JavaPlugin.log(exception);
+					JavaManipulationPlugin.log(exception);
 				}
 			}
 		} else
