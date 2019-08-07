@@ -366,25 +366,22 @@ public class ASTFlattener extends GenericVisitor {
 		return false;
 	}
 
-	/*
-	 * @see ASTVisitor#visit(BreakStatement)
-	 */
 	@Override
 	public boolean visit(BreakStatement node) {
 		int apiLevel= node.getAST().apiLevel();
-		if (apiLevel >= JLS12 && node.isImplicit() && node.getExpression() == null) {
+		if (apiLevel == JLS12 && node.getAST().isPreviewEnabled() && node.isImplicit()  && node.getExpression() == null) {
 			return false;
 		}
-		if (apiLevel < JLS12 || (apiLevel >= JLS12 && !node.isImplicit())) {
-			this.fBuffer.append("break");//$NON-NLS-1$
-		}
+		this.fBuffer.append("break");//$NON-NLS-1$
 		if (node.getLabel() != null) {
 			this.fBuffer.append(" ");//$NON-NLS-1$
 			node.getLabel().accept(this);
 		}
-		if (apiLevel >= JLS12 && node.getExpression() != null) {
-			this.fBuffer.append(" ");//$NON-NLS-1$
-			node.getExpression().accept(this);
+		if (apiLevel == JLS12 && node.getAST().isPreviewEnabled()) {
+			if (node.getExpression() != null) {
+				this.fBuffer.append(" ");//$NON-NLS-1$
+				node.getExpression().accept(this);
+			}
 		}
 		this.fBuffer.append(";");//$NON-NLS-1$
 		return false;
