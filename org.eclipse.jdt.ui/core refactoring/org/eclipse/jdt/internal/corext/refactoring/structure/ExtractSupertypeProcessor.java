@@ -16,6 +16,7 @@ package org.eclipse.jdt.internal.corext.refactoring.structure;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -513,9 +514,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 				if (superBinding != null)
 					fTypeBindings.add(superBinding);
 				final ITypeBinding[] bindings= binding.getInterfaces();
-				for (int i= 0; i < bindings.length; i++) {
-	                fTypeBindings.add(bindings[i]);
-                }
+				Collections.addAll(fTypeBindings, bindings);
 			}
 			final String imports= createTypeImports(extractedWorkingCopy, monitor);
 			if (imports != null && !"".equals(imports)) { //$NON-NLS-1$

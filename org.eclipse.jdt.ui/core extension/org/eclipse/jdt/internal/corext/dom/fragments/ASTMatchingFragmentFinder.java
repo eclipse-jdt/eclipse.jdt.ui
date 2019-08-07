@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.dom.fragments;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -51,9 +52,7 @@ class ASTMatchingFragmentFinder extends GenericVisitor {
 	@Override
 	protected boolean visitNode(ASTNode node) {
 		IASTFragment[] localMatches= fFragmentToMatch.getMatchingFragmentsWithNode(node);
-		for(int i= 0; i < localMatches.length; i++) {
-			fMatches.add(localMatches[i]);
-		}
+		Collections.addAll(fMatches, localMatches);
 		return true;
 	}
 

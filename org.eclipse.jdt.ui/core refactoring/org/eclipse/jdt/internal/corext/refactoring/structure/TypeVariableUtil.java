@@ -15,6 +15,7 @@ package org.eclipse.jdt.internal.corext.refactoring.structure;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -134,8 +135,7 @@ public final class TypeVariableUtil {
 				extractTypeVariables(types[index], set);
 			extractTypeVariables(method.getReturnType(), set);
 			final String[] arguments= parametersToVariables(((IMethod) member).getTypeParameters());
-			for (int index= 0; index < arguments.length; index++)
-				set.add(arguments[index]);
+			Collections.addAll(set, arguments);
 			result= new String[set.size()];
 			set.toArray(result);
 		} else if (member instanceof IType)

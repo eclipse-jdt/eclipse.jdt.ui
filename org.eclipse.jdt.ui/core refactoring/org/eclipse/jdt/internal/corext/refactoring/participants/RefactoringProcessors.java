@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.participants;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -26,9 +27,7 @@ public class RefactoringProcessors {
 		Set<String> result= new HashSet<>();
 		for (int i= 0; i < projects.length; i++) {
 			String[] pns= projects[i].getDescription().getNatureIds();
-			for (int p = 0; p < pns.length; p++) {
-				result.add(pns[p]);
-			}
+			Collections.addAll(result, pns);
 		}
 		return result.toArray(new String[result.size()]);
 	}

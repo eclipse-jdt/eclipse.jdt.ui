@@ -15,6 +15,7 @@ package org.eclipse.jdt.internal.corext.refactoring.generics;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -394,9 +395,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 			Type movingType= (Type) rewrite.getASTRewrite().createMoveTarget(originalType);
 			ParameterizedType newType= rewrite.getAST().newParameterizedType(movingType);
 
-			for (int i= 0; i < typeArguments.length; i++) {
-				newType.typeArguments().add(typeArguments[i]);
-			}
+			Collections.addAll(newType.typeArguments(), typeArguments);
 
 			rewrite.getASTRewrite().replace(originalType, newType, rewrite.createGroupDescription(RefactoringCoreMessages.InferTypeArgumentsRefactoring_addTypeArguments));
 			return newType;
@@ -442,8 +441,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 				Type[] nestedTypeArguments= getTypeArguments(typeArgument, nestedTypeArgumentCvs, rewrite, tCModel, leaveUnconstraindRaw); //recursion
 				if (nestedTypeArguments != null) {
 					ParameterizedType parameterizedType= rewrite.getAST().newParameterizedType(typeArgument);
-					for (int j= 0; j < nestedTypeArguments.length; j++)
-						parameterizedType.typeArguments().add(nestedTypeArguments[j]);
+					Collections.addAll(parameterizedType.typeArguments(), nestedTypeArguments);
 					typeArgument= parameterizedType;
 				}
 
