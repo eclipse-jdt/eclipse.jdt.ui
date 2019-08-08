@@ -122,7 +122,7 @@ public class QuickFixTest12 extends QuickFixTest {
 		pack.createCompilationUnit("Day.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 3, null);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 7, null);
 
 		assertNumberOfProposals(proposals, 2);
 		String label1= CorrectionMessages.PreviewFeaturesSubProcessor_enable_preview_features;
