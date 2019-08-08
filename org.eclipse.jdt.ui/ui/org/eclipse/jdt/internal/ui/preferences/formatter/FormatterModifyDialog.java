@@ -1263,11 +1263,20 @@ public class FormatterModifyDialog extends ModifyDialog {
 						.pref(FormatterMessages.FormatterModifyDialog_blankLines_pref_between_type_declarations, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BETWEEN_TYPE_DECLARATIONS))
 				.node(fTree.builder(FormatterMessages.FormatterModifyDialog_blankLines_tree_class_declarations, null, modAll)
 						.pref(FormatterMessages.FormatterModifyDialog_blankLines_pref_before_first_decl, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_FIRST_CLASS_BODY_DECLARATION)
+						.pref(FormatterMessages.FormatterModifyDialog_blankLines_pref_after_last_decl, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_AFTER_LAST_CLASS_BODY_DECLARATION)
 						.pref(FormatterMessages.FormatterModifyDialog_blankLines_pref_before_decls_of_same_kind, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_NEW_CHUNK)
 						.pref(FormatterMessages.FormatterModifyDialog_blankLines_pref_before_member_class_decls, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_MEMBER_TYPE)
 						.pref(FormatterMessages.FormatterModifyDialog_blankLines_pref_before_field_decls, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_FIELD)
-						.pref(FormatterMessages.FormatterModifyDialog_blankLines_pref_before_method_decls, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_METHOD)
-						.pref(FormatterMessages.FormatterModifyDialog_blankLines_pref_at_beginning_of_method_body, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_AT_BEGINNING_OF_METHOD_BODY))
+						.pref(FormatterMessages.FormatterModifyDialog_blankLines_pref_before_abstract_method_decls, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_ABSTRACT_METHOD)
+						.pref(FormatterMessages.FormatterModifyDialog_blankLines_pref_before_method_decls, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_METHOD))
+				.node(fTree.builder(FormatterMessages.FormatterModifyDialog_blankLines_tree_method_declarations, null, modAll)
+						.pref(FormatterMessages.FormatterModifyDialog_blankLines_pref_at_beginning_of_method_body, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_AT_BEGINNING_OF_METHOD_BODY)
+						.pref(FormatterMessages.FormatterModifyDialog_blankLines_pref_at_end_of_method_body, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_AT_END_OF_METHOD_BODY)
+						.pref(FormatterMessages.FormatterModifyDialog_blankLines_pref_at_beginning_of_code_block, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_AT_BEGINNING_OF_CODE_BLOCK)
+						.pref(FormatterMessages.FormatterModifyDialog_blankLines_pref_at_end_of_code_block, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_AT_END_OF_CODE_BLOCK)
+						.pref(FormatterMessages.FormatterModifyDialog_blankLines_pref_before_code_block, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_CODE_BLOCK)
+						.pref(FormatterMessages.FormatterModifyDialog_blankLines_pref_after_code_block, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_AFTER_CODE_BLOCK)
+						.pref(FormatterMessages.FormatterModifyDialog_blankLines_pref_between_statement_groups_in_switch, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BETWEEN_STATEMENT_GROUPS_IN_SWITCH))
 				.build(null, new PreferenceBuilder() {
 					NumberPreference fPreserveLinesPref;
 

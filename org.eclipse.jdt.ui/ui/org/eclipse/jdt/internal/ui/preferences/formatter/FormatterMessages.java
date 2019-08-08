@@ -31,9 +31,16 @@ final class FormatterMessages extends NLS {
 		// Do not instantiate
 	}
 
+	public static String FormatterModifyDialog_blankLines_pref_after_code_block;
 	public static String FormatterModifyDialog_blankLines_pref_after_import;
+	public static String FormatterModifyDialog_blankLines_pref_after_last_decl;
 	public static String FormatterModifyDialog_blankLines_pref_after_package;
+	public static String FormatterModifyDialog_blankLines_pref_at_beginning_of_code_block;
 	public static String FormatterModifyDialog_blankLines_pref_at_beginning_of_method_body;
+	public static String FormatterModifyDialog_blankLines_pref_at_end_of_code_block;
+	public static String FormatterModifyDialog_blankLines_pref_at_end_of_method_body;
+	public static String FormatterModifyDialog_blankLines_pref_before_abstract_method_decls;
+	public static String FormatterModifyDialog_blankLines_pref_before_code_block;
 	public static String FormatterModifyDialog_blankLines_pref_before_decls_of_same_kind;
 	public static String FormatterModifyDialog_blankLines_pref_before_field_decls;
 	public static String FormatterModifyDialog_blankLines_pref_before_first_decl;
@@ -42,11 +49,13 @@ final class FormatterMessages extends NLS {
 	public static String FormatterModifyDialog_blankLines_pref_before_method_decls;
 	public static String FormatterModifyDialog_blankLines_pref_before_package;
 	public static String FormatterModifyDialog_blankLines_pref_between_import_groups;
+	public static String FormatterModifyDialog_blankLines_pref_between_statement_groups_in_switch;
 	public static String FormatterModifyDialog_blankLines_pref_between_type_declarations;
 	public static String FormatterModifyDialog_blankLines_pref_empty_lines_to_preserve;
 	public static String FormatterModifyDialog_blankLines_tree_blank_lines;
 	public static String FormatterModifyDialog_blankLines_tree_class_declarations;
 	public static String FormatterModifyDialog_blankLines_tree_compilation_unit;
+	public static String FormatterModifyDialog_blankLines_tree_method_declarations;
 	public static String FormatterModifyDialog_blankLines_val_remove_extra_lines;
 	public static String FormatterModifyDialog_braces_pref_annotation_type_declaration;
 	public static String FormatterModifyDialog_braces_pref_anonymous_class_declaration;
