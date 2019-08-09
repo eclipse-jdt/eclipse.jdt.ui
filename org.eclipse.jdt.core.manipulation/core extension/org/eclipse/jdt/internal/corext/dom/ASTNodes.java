@@ -55,6 +55,7 @@ import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
+import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
@@ -76,10 +77,10 @@ import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
+import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
-import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MemberValuePair;
@@ -104,6 +105,7 @@ import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
+import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.UnionType;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
@@ -236,7 +238,7 @@ public class ASTNodes {
 	 * To improve type-safety, callers can add the expected element type as explicit type argument, e.g.:
 	 * <p>
 	 * {@code ASTNodes.<BodyDeclaration>getChildListProperty(typeDecl, bodyDeclarationsProperty)}
-	 * 
+	 *
 	 * @param node the node
 	 * @param propertyDescriptor the child list property to get
 	 * @return the child list
@@ -320,7 +322,7 @@ public class ASTNodes {
 
 	/**
 	 * Returns the type node for the given declaration.
-	 * 
+	 *
 	 * @param declaration the declaration
 	 * @return the type node or <code>null</code> if the given declaration represents a type
 	 *         inferred parameter in lambda expression
@@ -422,7 +424,7 @@ public class ASTNodes {
 	/**
 	 * Returns the structural property descriptor for the "bodyDeclarations" property
 	 * of this node (element type: {@link BodyDeclaration}).
-	 * 
+	 *
 	 * @param node the node, either an {@link AbstractTypeDeclaration} or an {@link AnonymousClassDeclaration}
 	 * @return the property descriptor
 	 */
@@ -442,7 +444,7 @@ public class ASTNodes {
 	 * Skips qualifiers, type arguments, and type annotations.
 	 * <p>
 	 * Does <b>not</b> work for WildcardTypes, etc.!
-	 * 
+	 *
 	 * @param type a type that has a simple name
 	 * @return the simple name, followed by array dimensions
 	 * @see #getSimpleNameIdentifier(Name)
@@ -490,7 +492,7 @@ public class ASTNodes {
 	/**
 	 * Returns the (potentially qualified) name of a type, followed by array dimensions.
 	 * Skips type arguments and type annotations.
-	 * 
+	 *
 	 * @param type a type that has a name
 	 * @return the name, followed by array dimensions
 	 * @since 3.10
@@ -532,7 +534,7 @@ public class ASTNodes {
 		type.accept(visitor);
 		return buffer.toString();
 	}
-	
+
 	public static InfixExpression.Operator convertToInfixOperator(Assignment.Operator operator) {
 		if (operator.equals(Assignment.Operator.PLUS_ASSIGN))
 			return InfixExpression.Operator.PLUS;
@@ -591,7 +593,7 @@ public class ASTNodes {
 	/**
 	 * Returns the type to which an inlined variable initializer should be cast, or
 	 * <code>null</code> if no cast is necessary.
-	 * 
+	 *
 	 * @param initializer the initializer expression of the variable to inline
 	 * @param reference the reference to the variable (which is to be inlined)
 	 * @return a type binding to which the initializer should be cast, or <code>null</code> iff no cast is necessary
@@ -602,22 +604,22 @@ public class ASTNodes {
 		ITypeBinding referenceType= reference.resolveTypeBinding();
 		if (initializerType == null || referenceType == null)
 			return null;
-		
+
 		if (initializerType.isPrimitive() && referenceType.isPrimitive() && ! referenceType.isEqualTo(initializerType)) {
 			return referenceType;
-			
+
 		} else if (initializerType.isPrimitive() && ! referenceType.isPrimitive()) { // initializer is autoboxed
 			ITypeBinding unboxedReferenceType= Bindings.getUnboxedTypeBinding(referenceType, reference.getAST());
 			if (!unboxedReferenceType.isEqualTo(initializerType))
 				return unboxedReferenceType;
 			else if (needsExplicitBoxing(reference))
 				return referenceType;
-			
+
 		} else if (! initializerType.isPrimitive() && referenceType.isPrimitive()) { // initializer is autounboxed
 			ITypeBinding unboxedInitializerType= Bindings.getUnboxedTypeBinding(initializerType, reference.getAST());
 			if (!unboxedInitializerType.isEqualTo(referenceType))
 				return referenceType;
-			
+
 		} else if (initializerType.isRawType() && referenceType.isParameterizedType()) {
 			return referenceType; // don't lose the unchecked conversion
 
@@ -635,7 +637,7 @@ public class ASTNodes {
 			if (!Bindings.containsTypeVariables(referenceType))
 				return referenceType;
 		}
-		
+
 		return null;
 	}
 
@@ -643,13 +645,13 @@ public class ASTNodes {
 	 * Checks whether overloaded methods can result in an ambiguous method call or a semantic change when the
 	 * <code>expression</code> argument is replaced with a poly expression form of the functional
 	 * interface instance.
-	 * 
+	 *
 	 * @param expression the method argument, which is a functional interface instance
 	 * @param expressionIsExplicitlyTyped <code>true</code> iff the intended replacement for <code>expression</code>
 	 *         is an explicitly typed lambda expression (JLS8 15.27.1)
 	 * @return <code>true</code> if overloaded methods can result in an ambiguous method call or a semantic change,
 	 *         <code>false</code> otherwise
-	 * 
+	 *
 	 * @since 3.10
 	 */
 	public static boolean isTargetAmbiguous(Expression expression, boolean expressionIsExplicitlyTyped) {
@@ -661,7 +663,7 @@ public class ASTNodes {
 			expression= (Expression) expression.getParent();
 			locationInParent= expression.getLocationInParent();
 		}
-		
+
 		ASTNode parent= expression.getParent();
 		IMethodBinding methodBinding;
 		int argumentIndex;
@@ -717,7 +719,7 @@ public class ASTNodes {
 
 	/**
 	 * Returns the binding of the type which declares the method being invoked.
-	 * 
+	 *
 	 * @param invocationNode the method invocation node
 	 * @param methodBinding binding of the method being invoked
 	 * @param invocationQualifier the qualifier used for method invocation, or <code>null</code> if
@@ -801,7 +803,7 @@ public class ASTNodes {
 				if (fOriginalMethod.getName().equals(candidate.getName()) && !fOriginalMethod.overrides(candidate)) {
 					ITypeBinding[] originalParameterTypes= fOriginalMethod.getParameterTypes();
 					ITypeBinding[] candidateParameterTypes= candidate.getParameterTypes();
-					
+
 					boolean couldBeAmbiguous;
 					if (originalParameterTypes.length == candidateParameterTypes.length) {
 						couldBeAmbiguous= true;
@@ -847,12 +849,12 @@ public class ASTNodes {
 	/**
 	 * Derives the target type defined at the location of the given expression if the target context
 	 * supports poly expressions.
-	 * 
+	 *
 	 * @param expression the expression at whose location the target type is required
 	 * @return the type binding of the target type defined at the location of the given expression
 	 *         if the target context supports poly expressions, or <code>null</code> if the target
 	 *         type could not be derived
-	 * 
+	 *
 	 * @since 3.10
 	 */
 	public static ITypeBinding getTargetType(Expression expression) {
@@ -870,6 +872,24 @@ public class ASTNodes {
 
 		} else if (locationInParent == ArrayInitializer.EXPRESSIONS_PROPERTY) {
 			return getTargetTypeForArrayInitializer((ArrayInitializer) parent);
+
+		} else if (locationInParent == ArrayAccess.INDEX_PROPERTY) {
+			return parent.getAST().resolveWellKnownType(int.class.getSimpleName());
+
+		} else if (locationInParent == ConditionalExpression.EXPRESSION_PROPERTY
+				|| locationInParent == IfStatement.EXPRESSION_PROPERTY
+				|| locationInParent == WhileStatement.EXPRESSION_PROPERTY
+				|| locationInParent == DoStatement.EXPRESSION_PROPERTY) {
+			return parent.getAST().resolveWellKnownType(boolean.class.getSimpleName());
+
+		} else if (locationInParent == SwitchStatement.EXPRESSION_PROPERTY) {
+			final ITypeBinding discriminentType= expression.resolveTypeBinding();
+			if (discriminentType.isPrimitive() || discriminentType.isEnum()
+					|| discriminentType.getQualifiedName().equals(String.class.getCanonicalName())) {
+				return discriminentType;
+			} else {
+				return Bindings.getUnboxedTypeBinding(discriminentType, parent.getAST());
+			}
 
 		} else if (locationInParent == MethodInvocation.ARGUMENTS_PROPERTY) {
 			MethodInvocation methodInvocation= (MethodInvocation) parent;
@@ -969,7 +989,7 @@ public class ASTNodes {
 
 	/**
 	 * Returns whether an expression at the given location needs explicit boxing.
-	 * 
+	 *
 	 * @param expression the expression
 	 * @return <code>true</code> iff an expression at the given location needs explicit boxing
 	 * @since 3.6
@@ -978,18 +998,18 @@ public class ASTNodes {
 		StructuralPropertyDescriptor locationInParent= expression.getLocationInParent();
 		if (locationInParent == ParenthesizedExpression.EXPRESSION_PROPERTY)
 			return needsExplicitBoxing((ParenthesizedExpression) expression.getParent());
-		
+
 		if (locationInParent == ClassInstanceCreation.EXPRESSION_PROPERTY
 				|| locationInParent == FieldAccess.EXPRESSION_PROPERTY
 				|| locationInParent == MethodInvocation.EXPRESSION_PROPERTY)
 			return true;
-		
+
 		return false;
 	}
 
 	/**
 	 * Checks whether the given expression is a lambda expression with explicitly typed parameters.
-	 * 
+	 *
 	 * @param expression the expression to check
 	 * @return <code>true</code> if the expression is a lambda expression with explicitly typed
 	 *         parameters or no parameters, <code>false</code> otherwise
@@ -1060,7 +1080,7 @@ public class ASTNodes {
 	/**
 	 * For {@link Name} or {@link Type} nodes, returns the topmost {@link Type} node
 	 * that shares the same type binding as the given node.
-	 * 
+	 *
 	 * @param node an ASTNode
 	 * @return the normalized {@link Type} node or the original node
 	 */
@@ -1086,7 +1106,7 @@ public class ASTNodes {
 	/**
 	 * Returns <code>true</code> iff <code>parent</code> is a true ancestor of <code>node</code>
 	 * (i.e. returns <code>false</code> if <code>parent == node</code>).
-	 * 
+	 *
 	 * @param node node to test
 	 * @param parent assumed parent
 	 * @return <code>true</code> iff <code>parent</code> is a true ancestor of <code>node</code>
@@ -1281,7 +1301,7 @@ public class ASTNodes {
 	 * Returns the topmost ancestor of <code>name</code> that is still a {@link Name}.
 	 * <p>
 	 * <b>Note:</b> The returned node may resolve to a different binding than the given <code>name</code>!
-	 * 
+	 *
 	 * @param name a name node
 	 * @return the topmost name
 	 * @see #getNormalizedNode(ASTNode)
@@ -1298,7 +1318,7 @@ public class ASTNodes {
 	 * Returns the topmost ancestor of <code>node</code> that is a {@link Type} (but not a {@link UnionType}).
 	 * <p>
 	 * <b>Note:</b> The returned node often resolves to a different binding than the given <code>node</code>!
-	 * 
+	 *
 	 * @param node the starting node, can be <code>null</code>
 	 * @return the topmost type or <code>null</code> if the node is not a descendant of a type node
 	 * @see #getNormalizedNode(ASTNode)
@@ -1312,10 +1332,10 @@ public class ASTNodes {
 			result= node;
 			node= node.getParent();
 		}
-		
+
 		if (result instanceof Type)
 			return (Type) result;
-		
+
 		return null;
 	}
 
@@ -1361,6 +1381,51 @@ public class ASTNodes {
 		}
 	}
 
+    /**
+     * Returns whether the provided method invocation invokes a method with the
+     * provided method signature. The method signature is compared against the
+     * erasure of the invoked method.
+     *
+     * @param node                         the method invocation to compare
+     * @param typeQualifiedName            the qualified name of the type declaring
+     *                                     the method
+     * @param methodName                   the method name
+     * @param parameterTypesQualifiedNames the qualified names of the parameter
+     *                                     types
+     * @return true if the provided method invocation matches the provided method
+     *         signature, false otherwise
+     */
+	public static boolean usesGivenSignature(MethodInvocation node, String typeQualifiedName, String methodName,
+            String... parameterTypesQualifiedNames) {
+		if (node == null
+				|| node.resolveMethodBinding() == null
+				|| !node.resolveMethodBinding().getDeclaringClass().getQualifiedName().equals(typeQualifiedName)
+				|| !node.getName().getIdentifier().equals(methodName)) {
+			return false;
+		}
+
+		if (node.arguments() == null && parameterTypesQualifiedNames == null) {
+			return true;
+		}
+
+		if (node.arguments() == null || parameterTypesQualifiedNames == null) {
+			return true;
+		}
+
+		if (node.arguments().size() == parameterTypesQualifiedNames.length) {
+			return true;
+		}
+
+		for (int i= 0; i < parameterTypesQualifiedNames.length; i++) {
+			if (((Type) node.typeArguments().get(i)).resolveBinding() == null
+					|| ((Type) node.typeArguments().get(i)).resolveBinding().getQualifiedName() != parameterTypesQualifiedNames[i]) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	public static Modifier findModifierNode(int flag, List<IExtendedModifier> modifiers) {
 		for (int i= 0; i < modifiers.size(); i++) {
 			Object curr= modifiers.get(i);
@@ -1396,7 +1461,7 @@ public class ASTNodes {
 
 	/**
 	 * Escapes a string value to a literal that can be used in Java source.
-	 * 
+	 *
 	 * @param stringValue the string value
 	 * @return the escaped string
 	 * @see StringLiteral#getEscapedValue()
@@ -1409,7 +1474,7 @@ public class ASTNodes {
 
 	/**
 	 * Escapes a character value to a literal that can be used in Java source.
-	 * 
+	 *
 	 * @param ch the character value
 	 * @return the escaped string
 	 * @see CharacterLiteral#getEscapedValue()
@@ -1424,7 +1489,7 @@ public class ASTNodes {
 	 * If the given <code>node</code> has already been rewritten, undo that rewrite and return the
 	 * replacement version of the node. Otherwise, return the result of
 	 * {@link ASTRewrite#createCopyTarget(ASTNode)}.
-	 * 
+	 *
 	 * @param rewrite ASTRewrite for the given node
 	 * @param node the node to get the replacement or to create a copy placeholder for
 	 * @param group the edit group which collects the corresponding text edits, or <code>null</code>
@@ -1444,7 +1509,7 @@ public class ASTNodes {
 
 	/**
 	 * Type-safe variant of {@link ASTRewrite#createMoveTarget(ASTNode)}.
-	 * 
+	 *
 	 * @param rewrite ASTRewrite for the given node
 	 * @param node the node to create a move placeholder for
 	 * @return the new placeholder node
@@ -1458,7 +1523,7 @@ public class ASTNodes {
 
 	/**
 	 * Type-safe variant of {@link ASTNode#copySubtree(AST, ASTNode)}.
-	 * 
+	 *
 	 * @param target the AST that is to own the nodes in the result
 	 * @param node the node to copy, or <code>null</code> if none
 	 * @return the copied node, or <code>null</code> if <code>node</code>
@@ -1490,7 +1555,7 @@ public class ASTNodes {
 
 	/**
 	 * Checks whether the given <code>exprStatement</code> has a semicolon at the end.
-	 * 
+	 *
 	 * @param exprStatement the {@link ExpressionStatement} to check the semicolon
 	 * @param cu the compilation unit
 	 * @return <code>true</code> if the given <code>exprStatement</code> has a semicolon at the end,
