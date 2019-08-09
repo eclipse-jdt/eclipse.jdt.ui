@@ -42,6 +42,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;
 import org.eclipse.ui.dialogs.IOverwriteQuery;
 import org.eclipse.ui.ide.IDE;
@@ -120,7 +121,7 @@ public class ExampleProjectCreationWizard extends Wizard implements INewWizard, 
 		if (resource.getType() != IResource.FILE) {
 			return;
 		}
-		IWorkbenchWindow window= ExampleProjectsPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow();
+		IWorkbenchWindow window= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 		if (window == null) {
 			return;
 		}

@@ -1190,7 +1190,7 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 		fDeleteAction.setText("&Delete"); //$NON-NLS-1$
 		fDeleteAction.setToolTipText("Delete Binding from Tray"); //$NON-NLS-1$
 		fDeleteAction.setEnabled(false);
-		fDeleteAction.setImageDescriptor(ASTViewPlugin.getDefault().getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_DELETE));
+		fDeleteAction.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_DELETE));
 		fDeleteAction.setId(ActionFactory.DELETE.getId());
 		fDeleteAction.setActionDefinitionId(IWorkbenchCommandConstants.EDIT_DELETE);
 		
