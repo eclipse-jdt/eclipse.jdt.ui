@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 IBM Corporation and others.
+ * Copyright (c) 2005, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc. - refactored to jdt.core.manipulation
  *******************************************************************************/
 /**
  *
@@ -33,18 +34,17 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public abstract class ConvertLoopOperation extends CompilationUnitRewriteOperation {
 
 	protected static final String FOR_LOOP_ELEMENT_IDENTIFIER= "element"; //$NON-NLS-1$
 
-	protected static final IStatus ERROR_STATUS= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), ""); //$NON-NLS-1$
+	protected static final IStatus ERROR_STATUS= new Status(IStatus.ERROR, JavaManipulationPlugin.getPluginId(), ""); //$NON-NLS-1$
 
 	private final ForStatement fStatement;
 	private ConvertLoopOperation fOperation;
@@ -63,13 +63,13 @@ public abstract class ConvertLoopOperation extends CompilationUnitRewriteOperati
 
 	public abstract IStatus satisfiesPreconditions();
 
-	protected abstract Statement convert(CompilationUnitRewrite cuRewrite, TextEditGroup group, LinkedProposalModel positionGroups) throws CoreException;
+	protected abstract Statement convert(CompilationUnitRewrite cuRewrite, TextEditGroup group, LinkedProposalModelCore positionGroups) throws CoreException;
 
 	protected ForStatement getForStatement() {
 		return fStatement;
 	}
 
-	protected Statement getBody(CompilationUnitRewrite cuRewrite, TextEditGroup group, LinkedProposalModel positionGroups) throws CoreException {
+	protected Statement getBody(CompilationUnitRewrite cuRewrite, TextEditGroup group, LinkedProposalModelCore positionGroups) throws CoreException {
 		if (fOperation != null) {
 			return fOperation.convert(cuRewrite, group, positionGroups);
 		} else {

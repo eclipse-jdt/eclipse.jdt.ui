@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2018 IBM Corporation and others.
+ * Copyright (c) 2005, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc. - refactored to jdt.core.manipulation
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
@@ -214,7 +215,7 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 	}
 
 	@Override
-	public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel positionGroups) throws CoreException {
+	public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModelCore positionGroups) throws CoreException {
 		final TextEditGroup group= createTextEditGroup(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description, cuRewrite);
 
 		final ASTRewrite astRewrite= cuRewrite.getASTRewrite();
@@ -233,7 +234,7 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 	}
 
 	@Override
-	protected Statement convert(CompilationUnitRewrite cuRewrite, final TextEditGroup group, final LinkedProposalModel positionGroups) throws CoreException {
+	protected Statement convert(CompilationUnitRewrite cuRewrite, final TextEditGroup group, final LinkedProposalModelCore positionGroups) throws CoreException {
 		final AST ast= cuRewrite.getAST();
 		final ASTRewrite astRewrite= cuRewrite.getASTRewrite();
 		final ImportRewrite importRewrite= cuRewrite.getImportRewrite();
@@ -248,11 +249,11 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 		} else {
 			name= names[0];
 		}
-		final LinkedProposalPositionGroup pg= positionGroups.getPositionGroup(name, true);
+		final LinkedProposalPositionGroupCore pg= positionGroups.getPositionGroup(name, true);
 		if (fElementVariable != null)
-			pg.addProposal(name, null, 10);
+			pg.addProposal(name, 10);
 		for (int i= 0; i < names.length; i++) {
-			pg.addProposal(names[i], null, 10);
+			pg.addProposal(names[i], 10);
 		}
 
 		final Statement body= getForStatement().getBody();

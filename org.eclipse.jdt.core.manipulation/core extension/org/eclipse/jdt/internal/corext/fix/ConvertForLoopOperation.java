@@ -660,7 +660,7 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 	}
 
 	@Override
-	public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel positionGroups) throws CoreException {
+	public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModelCore positionGroups) throws CoreException {
 		TextEditGroup group= createTextEditGroup(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description, cuRewrite);
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
 
@@ -678,7 +678,7 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 	}
 
 	@Override
-	protected Statement convert(CompilationUnitRewrite cuRewrite, TextEditGroup group, LinkedProposalModel positionGroups) throws CoreException {
+	protected Statement convert(CompilationUnitRewrite cuRewrite, TextEditGroup group, LinkedProposalModelCore positionGroups) throws CoreException {
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
 		ImportRewrite importRewrite= cuRewrite.getImportRewrite();
 
@@ -700,11 +700,11 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 			parameterName= proposals[0];
 		}
 
-		LinkedProposalPositionGroup pg= positionGroups.getPositionGroup(parameterName, true);
+		LinkedProposalPositionGroupCore pg= positionGroups.getPositionGroup(parameterName, true);
 		if (fElementDeclaration != null)
-			pg.addProposal(parameterName, null, 10);
+			pg.addProposal(parameterName, 10);
 		for (int i= 0; i < proposals.length; i++) {
-			pg.addProposal(proposals[i], null, 10);
+			pg.addProposal(proposals[i], 10);
 		}
 
 		AST ast= forStatement.getAST();
@@ -736,7 +736,7 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 		return result;
 	}
 
-	private void convertBody(Statement body, final IBinding indexBinding, final IBinding arrayBinding, final String parameterName, final ASTRewrite rewrite, final TextEditGroup editGroup, final LinkedProposalPositionGroup pg) {
+	private void convertBody(Statement body, final IBinding indexBinding, final IBinding arrayBinding, final String parameterName, final ASTRewrite rewrite, final TextEditGroup editGroup, final LinkedProposalPositionGroupCore pg) {
 		final AST ast= body.getAST();
 
 		body.accept(new GenericVisitor() {
@@ -781,7 +781,7 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 		});
 	}
 
-	private SingleVariableDeclaration createParameterDeclaration(String parameterName, VariableDeclarationFragment fragement, Expression arrayAccess, ForStatement statement, ImportRewrite importRewrite, ASTRewrite rewrite, TextEditGroup group, LinkedProposalPositionGroup pg, boolean makeFinal) {
+	private SingleVariableDeclaration createParameterDeclaration(String parameterName, VariableDeclarationFragment fragement, Expression arrayAccess, ForStatement statement, ImportRewrite importRewrite, ASTRewrite rewrite, TextEditGroup group, LinkedProposalPositionGroupCore pg, boolean makeFinal) {
 		CompilationUnit compilationUnit= (CompilationUnit)arrayAccess.getRoot();
 		AST ast= compilationUnit.getAST();
 
@@ -851,7 +851,7 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 		return result;
 	}
 
-	private void convertBodyCollection(Statement body, final IBinding indexBinding, final IBinding getBinding, final String parameterName, final ASTRewrite rewrite, final TextEditGroup editGroup, final LinkedProposalPositionGroup pg) {
+	private void convertBodyCollection(Statement body, final IBinding indexBinding, final IBinding getBinding, final String parameterName, final ASTRewrite rewrite, final TextEditGroup editGroup, final LinkedProposalPositionGroupCore pg) {
 		final AST ast= body.getAST();
 
 		body.accept(new GenericVisitor() {
@@ -897,7 +897,7 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 		});
 	}
 
-	private SingleVariableDeclaration createParameterDeclarationCollection(String parameterName, VariableDeclarationFragment fragement, Expression sizeAccess, ForStatement statement, ImportRewrite importRewrite, ASTRewrite rewrite, TextEditGroup group, LinkedProposalPositionGroup pg, boolean makeFinal) {
+	private SingleVariableDeclaration createParameterDeclarationCollection(String parameterName, VariableDeclarationFragment fragement, Expression sizeAccess, ForStatement statement, ImportRewrite importRewrite, ASTRewrite rewrite, TextEditGroup group, LinkedProposalPositionGroupCore pg, boolean makeFinal) {
 		CompilationUnit compilationUnit= (CompilationUnit)sizeAccess.getRoot();
 		AST ast= compilationUnit.getAST();
 
