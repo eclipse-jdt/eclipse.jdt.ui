@@ -303,9 +303,9 @@ public abstract class OptionsConfigurationBlock {
 
 	/**
 	 * Bug 549457: In case auto-building on a JDT core settings change (e.g. compiler compliance) is not desired,
-	 * specify VM property: {@code -Dorg.eclipse.jdt.core.disableAutoBuildOnSettingsChange=true}
+	 * specify VM property: {@code -Dorg.eclipse.disableAutoBuildOnSettingsChange=true}
 	 */
-	private static final boolean DISABLE_AUTO_BUILDING_ON_SETTINGS_CHANGE= Boolean.getBoolean("org.eclipse.jdt.core.disableAutoBuildOnSettingsChange"); //$NON-NLS-1$
+	private static final boolean DISABLE_AUTO_BUILDING_ON_SETTINGS_CHANGE= Boolean.getBoolean("org.eclipse.disableAutoBuildOnSettingsChange"); //$NON-NLS-1$
 
 	protected final ArrayList<Button> fCheckBoxes;
 	protected final ArrayList<Combo> fComboBoxes;
