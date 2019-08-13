@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2015 IBM Corporation and others.
+ * Copyright (c) 2014, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,6 +11,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Lukas Hanke <hanke@yatta.de> - [templates][content assist] Content assist for 'for' loop should suggest member variables - https://bugs.eclipse.org/117215
+ *     Microsoft Corporation - [templates][content assist] - Extract the UI related code - https://bugs.eclipse.org/549989
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
@@ -34,7 +35,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
-import org.eclipse.jdt.internal.corext.template.java.JavaContext;
+import org.eclipse.jdt.internal.corext.template.java.TemplateUtils;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -126,7 +127,7 @@ public abstract class AbstractForLoopJavaContextTest extends TestCase {
 		fCU.getBuffer().setContents(prefix + signature + CU_POSTFIX);
 		int offset= prefix.length() + signature.length() + 3;
 		fCU.reconcile(ICompilationUnit.NO_AST, false, null, null);
-		return JavaContext.evaluateTemplate(getForLoop(), fCU, offset);
+		return TemplateUtils.evaluateTemplate(getForLoop(), fCU, offset);
 	}
 
 	/**

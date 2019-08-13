@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,6 +13,7 @@
  *     Lars Vogel  <lars.vogel@gmail.com> - [templates][content assist] Ctrl+Space without any starting letter shows to no templates - https://bugs.eclipse.org/406463
  *     Lukas Hanke <hanke@yatta.de> - [templates][content assist] Content assist for 'for' loop should suggest member variables - https://bugs.eclipse.org/117215
  *     Nicolaj Hoess <nicohoess@gmail.com> - Make some internal methods accessible to help Postfix Code Completion plug-in - https://bugs.eclipse.org/433500
+ *     Microsoft Corporation - [templates][content assist] - Extract the UI related code - https://bugs.eclipse.org/549989
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.template.java;
 
@@ -30,9 +31,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -40,7 +39,6 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.DefaultPositionUpdater;
-import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.jface.text.IRegion;
@@ -85,7 +83,6 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRe
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitCompletion.Variable;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
-import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -739,36 +736,6 @@ public class JavaContext extends CompilationUnitContext {
 			return true;
 		}
 		return curr.getPackageName().equals(cu.getParent().getElementName());
-	}
-
-	/**
-	 * Evaluates a 'java' template in the context of a compilation unit
-	 *
-	 * @param template the template to be evaluated
-	 * @param compilationUnit the compilation unit in which to evaluate the template
-	 * @param position the position inside the compilation unit for which to evaluate the template
-	 * @return the evaluated template
-	 * @throws CoreException in case the template is of an unknown context type
-	 * @throws BadLocationException in case the position is invalid in the compilation unit
-	 * @throws TemplateException in case the evaluation fails
-	 */
-	public static String evaluateTemplate(Template template, ICompilationUnit compilationUnit, int position) throws CoreException, BadLocationException, TemplateException {
-
-		TemplateContextType contextType= JavaPlugin.getDefault().getTemplateContextRegistry().getContextType(template.getContextTypeId());
-		if (!(contextType instanceof CompilationUnitContextType))
-			throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, JavaTemplateMessages.JavaContext_error_message, null));
-
-		IDocument document= new Document();
-		if (compilationUnit != null && compilationUnit.exists())
-			document.set(compilationUnit.getSource());
-
-		CompilationUnitContext context= ((CompilationUnitContextType) contextType).createContext(document, position, 0, compilationUnit);
-		context.setForceEvaluation(true);
-
-		TemplateBuffer buffer= context.evaluate(template);
-		if (buffer == null)
-			return null;
-		return buffer.getString();
 	}
 
 	public TemplateVariable getTemplateVariable(String name) {
