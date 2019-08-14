@@ -394,8 +394,8 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 
 			Type movingType= (Type) rewrite.getASTRewrite().createMoveTarget(originalType);
 			ParameterizedType newType= rewrite.getAST().newParameterizedType(movingType);
-
-			Collections.addAll(newType.typeArguments(), typeArguments);
+			List<Type> newTypeArguments= newType.typeArguments();
+			Collections.addAll(newTypeArguments, typeArguments);
 
 			rewrite.getASTRewrite().replace(originalType, newType, rewrite.createGroupDescription(RefactoringCoreMessages.InferTypeArgumentsRefactoring_addTypeArguments));
 			return newType;
@@ -441,7 +441,8 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 				Type[] nestedTypeArguments= getTypeArguments(typeArgument, nestedTypeArgumentCvs, rewrite, tCModel, leaveUnconstraindRaw); //recursion
 				if (nestedTypeArguments != null) {
 					ParameterizedType parameterizedType= rewrite.getAST().newParameterizedType(typeArgument);
-					Collections.addAll(parameterizedType.typeArguments(), nestedTypeArguments);
+					List<Type> newtypeArguments= parameterizedType.typeArguments();
+					Collections.addAll(newtypeArguments, nestedTypeArguments);
 					typeArgument= parameterizedType;
 				}
 
