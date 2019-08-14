@@ -148,7 +148,7 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaPa
 
 	 		case '\r':
 	 			// emulate JavaPartitionScanner
-	 			if (!fEmulate && fLast != TRIPLE_QUOTE && fLast != CARRIAGE_RETURN) {
+	 			if (!fEmulate && fLast != CARRIAGE_RETURN) {
 						fLast= CARRIAGE_RETURN;
 						fTokenLength++;
 	 					continue;
@@ -259,9 +259,6 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaPa
 	 		case JAVA:
 				switch (ch) {
 				case '/':
-					if (fLast == TRIPLE_QUOTE) {
-						break;
-					}
 					if (fLast == SLASH) {
 						if (fTokenLength - getLastLength(fLast) > 0) {
 							return preFix(JAVA, SINGLE_LINE_COMMENT, NONE, 2);
@@ -279,9 +276,6 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaPa
 					}
 
 				case '*':
-					if (fLast == TRIPLE_QUOTE) {
-						break;
-					}
 					if (fLast == SLASH) {
 						if (fTokenLength - getLastLength(fLast) > 0)
 							return preFix(JAVA, MULTI_LINE_COMMENT, SLASH_STAR, 2);
@@ -440,10 +434,17 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaPa
 	 			}
 	 			break;
 
-	 		case MULTI_LINE_STRING: 
+	 		case MULTI_LINE_STRING:
 				switch (ch) {
+				case '\\':
+						fLast= (fLast == BACKSLASH) ? NONE : BACKSLASH;
+						fTokenLength++;
+						break;
 				case '\"':
-					if (scanForTextBlockClose()) {
+					if (fLast == BACKSLASH) {
+	 					consume();
+	 					break;
+		 			} else if (scanForTextBlockClose()) {
 						fTokenLength= fTokenLength + 2;
 						return postFix(MULTI_LINE_STRING);
 					} else {
@@ -573,9 +574,7 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaPa
 
 	private final void consume() {
 		fTokenLength++;
-		if (fLast != TRIPLE_QUOTE) {
-			fLast= NONE;
-		}
+		fLast= NONE;
 	}
 
 	private final IToken postFix(int state) {
