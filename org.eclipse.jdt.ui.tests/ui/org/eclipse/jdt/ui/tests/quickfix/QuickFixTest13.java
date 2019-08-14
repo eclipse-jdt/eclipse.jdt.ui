@@ -128,7 +128,7 @@ public class QuickFixTest13 extends QuickFixTest {
 		pack.createCompilationUnit("Day.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 12, null);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 11, null);
 		
 		assertNumberOfProposals(proposals, 2);
 		String label1= CorrectionMessages.PreviewFeaturesSubProcessor_enable_preview_features;
@@ -189,7 +189,7 @@ public class QuickFixTest13 extends QuickFixTest {
 		pack.createCompilationUnit("Day.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 11, null);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 10, null);
 		
 		assertNumberOfProposals(proposals, 1);
 		String label1= Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_change_project_compliance_description, "13");
