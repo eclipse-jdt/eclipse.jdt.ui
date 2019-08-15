@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Microsoft Corporation - moved template related code to jdt.core.manipulation - https://bugs.eclipse.org/549989
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.template.java;
 
@@ -81,7 +82,7 @@ public class JavaDocContext extends CompilationUnitContext {
 		if (!template.getContextTypeId().equals(getContextType().getId()))
 			return false;
 
-		if (fForceEvaluation)
+		if (this.isForceEvaluation())
 			return true;
 
 		String key= getKey().toLowerCase();
@@ -100,7 +101,7 @@ public class JavaDocContext extends CompilationUnitContext {
 	 */
 	@Override
 	public int getStart() {
-		if (fIsManaged && getCompletionLength() > 0)
+		if (this.isManaged() && getCompletionLength() > 0)
 			return super.getStart();
 
 		try {
@@ -156,7 +157,7 @@ public class JavaDocContext extends CompilationUnitContext {
 	@Override
 	public int getEnd() {
 
-		if (fIsManaged || getCompletionLength() == 0)
+		if (this.isManaged() || getCompletionLength() == 0)
 			return super.getEnd();
 
 		try {

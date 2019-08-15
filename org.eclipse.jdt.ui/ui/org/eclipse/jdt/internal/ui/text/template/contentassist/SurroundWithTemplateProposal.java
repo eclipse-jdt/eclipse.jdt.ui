@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -261,7 +261,7 @@ public class SurroundWithTemplateProposal extends TemplateProposal {
 
 		//Create the new context
 		CompilationUnitContextType contextType= (CompilationUnitContextType) JavaPlugin.getDefault().getTemplateContextRegistry().getContextType(fTemplate.getContextTypeId());
-		CompilationUnitContext context= contextType.createContext(document, offset, newSelection.length(), fCompilationUnit);
+		CompilationUnitContext context= (CompilationUnitContext) contextType.createContext(document, offset, newSelection.length(), fCompilationUnit);
 		context.setVariable("selection", newSelection); //$NON-NLS-1$
 		context.setForceEvaluation(true);
 		return context;

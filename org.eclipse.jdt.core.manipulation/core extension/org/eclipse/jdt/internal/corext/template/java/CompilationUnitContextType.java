@@ -11,11 +11,13 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Lars Vogel <Lars.Vogel@vogella.com> - Bug 487901, 488432
+ *     Microsoft Corporation - moved template related code to jdt.core.manipulation - https://bugs.eclipse.org/549989
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.template.java;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.templates.DocumentTemplateContext;
 import org.eclipse.jface.text.templates.GlobalTemplateVariables;
 import org.eclipse.jface.text.templates.TemplateContext;
 import org.eclipse.jface.text.templates.TemplateContextType;
@@ -31,7 +33,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
-import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
 
 
 /**
@@ -45,7 +47,7 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
 	 	}
 	 	@Override
 		protected String resolve(TemplateContext context) {
-			IJavaElement element= ((CompilationUnitContext) context).findEnclosingElement(IJavaElement.METHOD);
+			IJavaElement element= ((ICompilationUnitContext) context).findEnclosingElement(IJavaElement.METHOD);
 			if (element == null)
 				return null;
 
@@ -63,7 +65,7 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
 		}
 		@Override
 		protected String resolve(TemplateContext context) {
-			ICompilationUnit unit= ((CompilationUnitContext) context).getCompilationUnit();
+			ICompilationUnit unit= ((ICompilationUnitContext) context).getCompilationUnit();
 
 			return (unit == null) ? null : unit.getElementName();
 		}
@@ -84,7 +86,7 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
 		}
 		@Override
 		protected String resolve(TemplateContext context) {
-			ICompilationUnit unit= ((CompilationUnitContext) context).getCompilationUnit();
+			ICompilationUnit unit= ((ICompilationUnitContext) context).getCompilationUnit();
 			if (unit == null)
 				return null;
 			return JavaCore.removeJavaLikeExtension(unit.getElementName());
@@ -108,9 +110,9 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
 		}
 		@Override
 		protected String resolve(TemplateContext context) {
-			IJavaElement element= ((CompilationUnitContext) context).findEnclosingElement(fElementType);
+			IJavaElement element= ((ICompilationUnitContext) context).findEnclosingElement(fElementType);
 			if (element instanceof IType)
-				return JavaElementLabels.getElementLabel(element, JavaElementLabels.T_CONTAINER_QUALIFIED);
+				return JavaElementLabelsCore.getElementLabel(element, JavaElementLabelsCore.T_CONTAINER_QUALIFIED);
 			return (element == null) ? null : element.getElementName();
 		}
 
@@ -153,7 +155,7 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
 		}
 		@Override
 		protected String resolve(TemplateContext context) {
-			IJavaElement element= ((CompilationUnitContext) context).findEnclosingElement(IJavaElement.METHOD);
+			IJavaElement element= ((ICompilationUnitContext) context).findEnclosingElement(IJavaElement.METHOD);
 			if (element == null)
 				return null;
 
@@ -187,8 +189,8 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
 	public CompilationUnitContextType() {
 	}
 
-	public abstract CompilationUnitContext createContext(IDocument document, int completionPosition, int length, ICompilationUnit compilationUnit);
-	public abstract CompilationUnitContext createContext(IDocument document, Position completionPosition, ICompilationUnit compilationUnit);
+	public abstract DocumentTemplateContext createContext(IDocument document, int completionPosition, int length, ICompilationUnit compilationUnit);
+	public abstract DocumentTemplateContext createContext(IDocument document, Position completionPosition, ICompilationUnit compilationUnit);
 
 	@Override
 	protected void validateVariables(TemplateVariable[] variables) throws TemplateException {

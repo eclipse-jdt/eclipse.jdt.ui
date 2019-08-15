@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -182,7 +182,7 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 
 	private void collectSurroundTemplates(IDocument document, ICompilationUnit cu, int offset, int length, Collection<IJavaCompletionProposal> result, String contextId) throws BadLocationException, CoreException {
 		CompilationUnitContextType contextType= (CompilationUnitContextType) JavaPlugin.getDefault().getTemplateContextRegistry().getContextType(contextId);
-		CompilationUnitContext context= contextType.createContext(document, offset, length, cu);
+		CompilationUnitContext context= (CompilationUnitContext) contextType.createContext(document, offset, length, cu);
 		context.setVariable("selection", document.get(offset, length)); //$NON-NLS-1$
 		context.setForceEvaluation(true);
 

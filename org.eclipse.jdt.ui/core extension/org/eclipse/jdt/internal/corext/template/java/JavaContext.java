@@ -13,7 +13,7 @@
  *     Lars Vogel  <lars.vogel@gmail.com> - [templates][content assist] Ctrl+Space without any starting letter shows to no templates - https://bugs.eclipse.org/406463
  *     Lukas Hanke <hanke@yatta.de> - [templates][content assist] Content assist for 'for' loop should suggest member variables - https://bugs.eclipse.org/117215
  *     Nicolaj Hoess <nicohoess@gmail.com> - Make some internal methods accessible to help Postfix Code Completion plug-in - https://bugs.eclipse.org/433500
- *     Microsoft Corporation - [templates][content assist] - Extract the UI related code - https://bugs.eclipse.org/549989
+ *     Microsoft Corporation - moved template related code to jdt.core.manipulation - https://bugs.eclipse.org/549989
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.template.java;
 
@@ -216,7 +216,7 @@ public class JavaContext extends CompilationUnitContext {
 		if (!hasCompatibleContextType(template))
 			return false;
 
-		if (fForceEvaluation)
+		if (this.isForceEvaluation())
 			return true;
 
 		String key= getKey().toLowerCase();
@@ -262,7 +262,7 @@ public class JavaContext extends CompilationUnitContext {
 	@Override
 	public int getStart() {
 
-		if (fIsManaged && getCompletionLength() > 0)
+		if (this.isManaged() && getCompletionLength() > 0)
 			return super.getStart();
 
 		try {
@@ -293,7 +293,7 @@ public class JavaContext extends CompilationUnitContext {
 	@Override
 	public int getEnd() {
 
-		if (fIsManaged || getCompletionLength() == 0)
+		if (this.isManaged() || getCompletionLength() == 0)
 			return super.getEnd();
 
 		try {

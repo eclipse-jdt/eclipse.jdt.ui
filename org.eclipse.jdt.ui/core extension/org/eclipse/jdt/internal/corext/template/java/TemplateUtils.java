@@ -58,7 +58,7 @@ public class TemplateUtils {
 		if (compilationUnit != null && compilationUnit.exists())
 			document.set(compilationUnit.getSource());
 
-		CompilationUnitContext context= ((CompilationUnitContextType) contextType).createContext(document, position, 0, compilationUnit);
+		CompilationUnitContext context= (CompilationUnitContext) ((CompilationUnitContextType) contextType).createContext(document, position, 0, compilationUnit);
 		context.setForceEvaluation(true);
 
 		TemplateBuffer buffer= context.evaluate(template);

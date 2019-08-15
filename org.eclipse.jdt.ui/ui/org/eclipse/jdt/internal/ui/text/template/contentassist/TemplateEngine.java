@@ -55,7 +55,7 @@ public class TemplateEngine {
 	private static final Pattern $_LINE_SELECTION_PATTERN= Pattern.compile("\\$\\{(.*:)?" + GlobalTemplateVariables.LineSelection.NAME + "(\\(.*\\))?\\}"); //$NON-NLS-1$ //$NON-NLS-2$
 
 	private static final Pattern $_WORD_SELECTION_PATTERN= Pattern.compile("\\$\\{(.*:)?" + GlobalTemplateVariables.WordSelection.NAME + "(\\(.*\\))?\\}"); //$NON-NLS-1$ //$NON-NLS-2$
-	
+
 	private static String Switch_Name = "switch"; //$NON-NLS-1$
 	private static String Switch_Default = "switch case statement"; //$NON-NLS-1$
 
@@ -128,7 +128,7 @@ public class TemplateEngine {
 			} catch (BadLocationException e) {}
 		}
 
-		CompilationUnitContext context= ((CompilationUnitContextType) fContextType).createContext(document, position, compilationUnit);
+		CompilationUnitContext context= (CompilationUnitContext) ((CompilationUnitContextType) fContextType).createContext(document, position, compilationUnit);
 		context.setVariable("selection", selectedText); //$NON-NLS-1$
 		int start= context.getStart();
 		int end= context.getEnd();
