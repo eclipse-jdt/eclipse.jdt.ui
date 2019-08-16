@@ -654,7 +654,12 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 		} else {
 			ForStatement forStatement= getForStatement();
 			IJavaProject javaProject= ((CompilationUnit)forStatement.getRoot()).getJavaElement().getJavaProject();
-			String[] proposals= getVariableNameProposals(fArrayAccess.resolveTypeBinding(), javaProject);
+			String[] proposals= null;
+			if (this.fIsCollection) {
+				proposals= getVariableNameProposalsCollection(fSizeMethodAccess, javaProject);
+			} else {
+				proposals= getVariableNameProposals(fArrayAccess.resolveTypeBinding(), javaProject);
+			}
 			return proposals[0];
 		}
 	}
