@@ -88,6 +88,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(PUSH_DOWN_NEGATION, CleanUpOptions.FALSE);
 		options.setOption(REMOVE_REDUNDANT_MODIFIERS, CleanUpOptions.FALSE);
 		options.setOption(REMOVE_REDUNDANT_SEMICOLONS, CleanUpOptions.FALSE);
+		options.setOption(REMOVE_UNNECESSARY_ARRAY_CREATION, CleanUpOptions.FALSE);
 
 		//Missing Code
 		options.setOption(ADD_MISSING_ANNOTATIONS, CleanUpOptions.TRUE);
@@ -180,6 +181,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(PUSH_DOWN_NEGATION, CleanUpOptions.FALSE);
 		options.setOption(REMOVE_REDUNDANT_MODIFIERS, CleanUpOptions.FALSE);
 		options.setOption(REMOVE_REDUNDANT_SEMICOLONS, CleanUpOptions.FALSE);
+		options.setOption(REMOVE_UNNECESSARY_ARRAY_CREATION, CleanUpOptions.FALSE);
 
 		//Missing Code
 		options.setOption(ADD_MISSING_ANNOTATIONS, CleanUpOptions.TRUE);

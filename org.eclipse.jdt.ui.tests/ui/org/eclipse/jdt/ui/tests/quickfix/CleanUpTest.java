@@ -10748,4 +10748,66 @@ public class CleanUpTest extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 
+	public void testUnnecessaryArrayBug550129() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test;\n");
+		buf.append("public class X {\n");
+		buf.append("  public int foo(String x, String ...y) { return y.length + 1; }\n");
+		buf.append("  public int bar() {\n");
+		buf.append("      return foo(\"a\", new String[] {\"b\", \"c\", \"d\"});\n");
+		buf.append("  };\n");
+		buf.append("  public int bar2() {\n");
+		buf.append("      return foo(\"a\", \"b\", new String[] {\"c\", \"d\"});\n");
+		buf.append("  };\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("X.java", buf.toString(), false, null);
+
+		buf= new StringBuilder();
+		buf.append("package test;\n");
+		buf.append("public class X {\n");
+		buf.append("  public int foo(String x, String ...y) { return y.length + 1; }\n");
+		buf.append("  public int bar() {\n");
+		buf.append("      return foo(\"a\", \"b\", \"c\", \"d\");\n");
+		buf.append("  };\n");
+		buf.append("  public int bar2() {\n");
+		buf.append("      return foo(\"a\", \"b\", new String[] {\"c\", \"d\"});\n");
+		buf.append("  };\n");
+		buf.append("}\n");
+		String expected1 = buf.toString();
+
+		buf= new StringBuilder();
+		buf.append("package test;\n");
+		buf.append("import java.util.Arrays;\n");
+		buf.append("public final class X2 {\n");
+		buf.append("  public static class Y {\n");
+		buf.append("      public int foo(String x, String ...y) { return y.length + 1; }\n");
+		buf.append("  }\n");
+		buf.append("  public static class Z extends Y {\n");
+		buf.append("      public int foo2() {\n");
+		buf.append("          List<String> list= Arrays.asList(new String[] {\"one\", \"two\", \"three\"});\n");
+		buf.append("          return super.foo(\"x\", new String[] {\"y\", \"z\"});\n");
+		buf.append("      }\n");
+		buf.append("}\n");
+		ICompilationUnit cu2= pack1.createCompilationUnit("X2.java", buf.toString(), false, null);
+
+		buf= new StringBuilder();
+		buf.append("package test;\n");
+		buf.append("import java.util.Arrays;\n");
+		buf.append("public final class X2 {\n");
+		buf.append("  public static class Y {\n");
+		buf.append("      public int foo(String x, String ...y) { return y.length + 1; }\n");
+		buf.append("  }\n");
+		buf.append("  public static class Z extends Y {\n");
+		buf.append("      public int foo2() {\n");
+		buf.append("          List<String> list= Arrays.asList(\"one\", \"two\", \"three\");\n");
+		buf.append("          return super.foo(\"x\", \"y\", \"z\");\n");
+		buf.append("      }\n");
+		buf.append("}\n");
+		String expected2 = buf.toString();
+
+		enable(CleanUpConstants.REMOVE_UNNECESSARY_ARRAY_CREATION);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1, cu2 }, new String[] { expected1, expected2 });
+	}
+
 }

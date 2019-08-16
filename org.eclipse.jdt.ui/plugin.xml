@@ -7017,9 +7017,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.unnecessary_modifiers">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.UnnecessaryArrayCreationCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.unnecessary_array_creation"
+            runAfter="org.eclipse.jdt.ui.cleanup.unnecessary_semicolons">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.StringCleanUp"
             id="org.eclipse.jdt.ui.cleanup.strings"
-            runAfter="org.eclipse.jdt.ui.cleanup.unnecessary_semicolons">
+            runAfter="org.eclipse.jdt.ui.cleanup.unnecessary_array_creation">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUp"

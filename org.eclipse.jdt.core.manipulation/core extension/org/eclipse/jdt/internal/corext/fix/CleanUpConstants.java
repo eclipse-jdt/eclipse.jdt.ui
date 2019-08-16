@@ -911,6 +911,17 @@ public class CleanUpConstants {
 	 */
 	public static final String REMOVE_REDUNDANT_SEMICOLONS= "cleanup.remove_redundant_semicolons"; //$NON-NLS-1$
 
+	/**
+	 * Removes unnecessary array creation for varargs.<br>
+	 * <br>
+	 * Possible values: {TRUE, FALSE}<br>
+	 * <br>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 3.19
+	 */
+	public static final String REMOVE_UNNECESSARY_ARRAY_CREATION= "cleanup.remove_unnecessary_array_creation"; //$NON-NLS-1$
 
 	/**
 	 * Controls whether missing annotations should be added to the code. For detailed settings use:<br>
