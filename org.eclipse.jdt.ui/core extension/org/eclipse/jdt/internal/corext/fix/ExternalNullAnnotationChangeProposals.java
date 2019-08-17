@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2017 GK Software AG and others.
+ * Copyright (c) 2015, 2019 GK Software AG and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -19,8 +19,10 @@ import static org.eclipse.jdt.core.util.ExternalAnnotationUtil.NULLABLE;
 import static org.eclipse.jdt.core.util.ExternalAnnotationUtil.annotateMember;
 import static org.eclipse.jdt.core.util.ExternalAnnotationUtil.annotateMethodParameterType;
 import static org.eclipse.jdt.core.util.ExternalAnnotationUtil.annotateMethodReturnType;
+import static org.eclipse.jdt.core.util.ExternalAnnotationUtil.annotateMethodTypeParameter;
 import static org.eclipse.jdt.core.util.ExternalAnnotationUtil.extractGenericSignature;
 import static org.eclipse.jdt.core.util.ExternalAnnotationUtil.extractGenericTypeSignature;
+import static org.eclipse.jdt.core.util.ExternalAnnotationUtil.extractGenericTypeParametersSignature;
 import static org.eclipse.jdt.core.util.ExternalAnnotationUtil.getAnnotationFile;
 import static org.eclipse.jdt.internal.ui.text.spelling.WordCorrectionProposal.getHtmlRepresentation;
 
@@ -70,6 +72,7 @@ import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -205,7 +208,10 @@ public class ExternalNullAnnotationChangeProposals {
 		public String getAdditionalProposalInfo() {
 			StringBuilder buffer= new StringBuilder();
 			buffer.append("<dl>"); //$NON-NLS-1$
-			buffer.append("<dt>").append(getHtmlRepresentation(fSelector)).append("</dt>"); //$NON-NLS-1$ //$NON-NLS-2$
+			if (fSelector != null)
+				buffer.append("<dt>").append(getHtmlRepresentation(fSelector)).append("</dt>"); //$NON-NLS-1$ //$NON-NLS-2$
+			else
+				buffer.append("<dt>class ").append(getHtmlRepresentation(fAffectedTypeName)).append("</dt>"); //$NON-NLS-1$ //$NON-NLS-2$
 			buffer.append("<dd>").append(getHtmlRepresentation(fSignature)).append("</dd>"); //$NON-NLS-1$ //$NON-NLS-2$
 			buffer.append("<dd>").append(getFullAnnotatedSignatureHTML()).append("</dd>"); //$NON-NLS-1$ //$NON-NLS-2$
 			buffer.append("</dl>"); //$NON-NLS-1$
@@ -295,6 +301,25 @@ public class ExternalNullAnnotationChangeProposals {
 		}
 	}
 
+	static class TypeParameterAnnotationRewriteProposal extends SignatureAnnotationChangeProposal {
+
+		int fParamIdx;
+
+		TypeParameterAnnotationRewriteProposal(int paramIdx) {
+			fParamIdx= paramIdx;
+		}
+
+		@Override
+		protected void dryRun() {
+			fDryRun= ExternalAnnotationUtil.annotateTypeParameter(fCurrentAnnotated, fAnnotatedSignature, fParamIdx, fMergeStrategy);
+		}
+
+		@Override
+		protected void doAnnotateMember(IProgressMonitor monitor) throws CoreException, IOException {
+			annotateMethodTypeParameter(fAffectedTypeName, fAnnotationFile, fSelector, fSignature, fAnnotatedSignature, fParamIdx, fMergeStrategy, monitor);
+		}
+	}
+
 	static class MissingBindingException extends RuntimeException {
 		private static final long serialVersionUID= 1L;
 		ASTNode fNode;
@@ -343,6 +368,12 @@ public class ExternalNullAnnotationChangeProposals {
 	static IVariableBinding resolveBinding(VariableDeclaration variable) {
 		IVariableBinding binding= variable.resolveBinding();
 		if (binding == null || binding.isRecovered()) throw new MissingBindingException(variable);
+		return binding;
+	}
+
+	static ITypeBinding resolveBinding(TypeDeclaration type) {
+		ITypeBinding binding= type.resolveBinding();
+		if (binding == null || binding.isRecovered()) throw new MissingBindingException(type);
 		return binding;
 	}
 
@@ -454,16 +485,11 @@ public class ExternalNullAnnotationChangeProposals {
 					if (typeBinding.isPrimitive())
 						return;
 				}
-				outer.accept(rendererNonNull);
-				outer.accept(rendererNullable);
-				outer.accept(rendererRemove);
-			} else { // type parameter
-				List<?> siblingList= (List<?>) outer.getParent().getStructuralProperty(outer.getLocationInParent());
-				rendererNonNull.visitTypeParameters(siblingList);
-				rendererNullable.visitTypeParameters(siblingList);
-				rendererRemove.visitTypeParameters(siblingList);
 			}
-		
+			outer.accept(rendererNonNull);
+			outer.accept(rendererNullable);
+			outer.accept(rendererRemove);
+
 			StructuralPropertyDescriptor locationInParent= outer.getLocationInParent();
 			ProposalCreator creator= null;
 			if (locationInParent == MethodDeclaration.RETURN_TYPE2_PROPERTY) {
@@ -483,6 +509,12 @@ public class ExternalNullAnnotationChangeProposals {
 					VariableDeclarationFragment fragment= (VariableDeclarationFragment) field.fragments().get(0);
 					creator= new FieldProposalCreator(cu, resolveBinding(fragment));
 				}
+			} else if (locationInParent == MethodDeclaration.TYPE_PARAMETERS_PROPERTY) {
+				MethodDeclaration method= ASTNodes.getParent(coveringNode, MethodDeclaration.class);
+				creator= new TypeParameterProposalCreator(cu, resolveBinding(method), method.typeParameters().indexOf(outer));
+			} else if (locationInParent == TypeDeclaration.TYPE_PARAMETERS_PROPERTY) {
+				TypeDeclaration type= ASTNodes.getParent(coveringNode, TypeDeclaration.class);
+				creator= new TypeParameterProposalCreator(cu, resolveBinding(type), type.typeParameters().indexOf(outer));
 			}
 			if (creator != null) {
 				createProposalsForType(cu, inner, extraDims, outerExtraDims, annotateVarargs, offset,
@@ -494,8 +526,8 @@ public class ExternalNullAnnotationChangeProposals {
 		}
 	}
 
-	static boolean hasAnnotationPathInWorkspace(IJavaProject javaProject, ICompilationUnit cu) {
-		IPackageFragmentRoot root= (IPackageFragmentRoot) cu.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+	public static boolean hasAnnotationPathInWorkspace(IJavaProject javaProject, IJavaElement element) {
+		IPackageFragmentRoot root= (IPackageFragmentRoot) element.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 		if (root != null) {
 			try {
 				IClasspathEntry resolvedClasspathEntry= root.getResolvedClasspathEntry();
@@ -582,6 +614,29 @@ public class ExternalNullAnnotationChangeProposals {
 		@Override
 		SignatureAnnotationChangeProposal doCreate(String annotatedSignature, String label) {
 			return new FieldAnnotationRewriteProposal();
+		}
+	}
+
+	private static class TypeParameterProposalCreator extends ProposalCreator {
+		int fParamIdx;
+
+		TypeParameterProposalCreator(ICompilationUnit cu, IMethodBinding methodBinding, int paramIdx) {
+			super(cu, methodBinding.getDeclaringClass(),
+					methodBinding.isConstructor() ? CONSTRUCTOR_SELECTOR : methodBinding.getName(),
+					extractGenericSignature(methodBinding));
+			fParamIdx= paramIdx;
+		}
+
+		TypeParameterProposalCreator(ICompilationUnit cu, ITypeBinding typeBinding, int paramIdx) {
+			super(cu, typeBinding,
+					null,
+					extractGenericTypeParametersSignature(typeBinding));
+			fParamIdx= paramIdx;
+		}
+
+		@Override
+		SignatureAnnotationChangeProposal doCreate(String annotatedSignature, String label) {
+			return new TypeParameterAnnotationRewriteProposal(fParamIdx);
 		}
 	}
 
@@ -772,12 +827,11 @@ public class ExternalNullAnnotationChangeProposals {
 					break;
 				}
 			}
+			boolean boundAdded= false;
+			fBuffer.append(':');
 			if (classBound != null) {
-				fBuffer.append(':');
 				classBound.accept(this);
-			} else {
-				ITypeBinding typeBinding= resolveBinding(parameter);
-				fBuffer.append(":L").append(binaryName(typeBinding.getSuperclass())).append(';'); //$NON-NLS-1$
+				boundAdded= true;
 			}
 			for (Object bound : parameter.typeBounds()) {
 				if (bound == classBound)
@@ -785,6 +839,10 @@ public class ExternalNullAnnotationChangeProposals {
 				Type typeBound= (Type) bound;
 				fBuffer.append(':');
 				typeBound.accept(this);
+				boundAdded= true;
+			}
+			if (!boundAdded) {
+				fBuffer.append("Ljava/lang/Object;"); //$NON-NLS-1$
 			}
 			return false;
 		}

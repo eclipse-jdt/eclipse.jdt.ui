@@ -892,13 +892,11 @@ public class AnnotateAssistTest18 extends AbstractAnnotateAssistTests {
 
 	/**
 	 * Assert two proposals ("@NonNull" and "@Nullable") on a method's type parameter
-	 * The parameterized type and the wildcard already has a @NonNull annotation.
-	 * Annotation entry already exists, with @NonNull on the wildcard itself.
 	 * Apply the second proposal and check the effect.
+	 * Then repeat for another type parameter (to check merging of changes)
 	 * @throws Exception multiple causes
 	 */
-	// FIXME(stephan): enable once implemented
-	public void _testAnnotateParameter_TypeParameter() throws Exception {
+	public void testAnnotateMethod_TypeParameter1() throws Exception {
 		
 		String X_PATH= "pack/age/X";
 		String[] pathAndContents= new String[] {
@@ -922,19 +920,19 @@ public class AnnotateAssistTest18 extends AbstractAnnotateAssistTests {
 			assertCorrectLabels(list);
 			assertNumberOfProposals(list, 2);
 			
-			ICompletionProposal proposal= findProposalByName("Annotate as '@NonNull T'", list);
+			ICompletionProposal proposal= findProposalByName("Annotate as '@NonNull T extends List<X>'", list);
 			String expectedInfo=
 					"<dl><dt>test</dt>" +
-					"<dd>&lt;X:Ljava/lang/Object;T:Ljava/util/List&lt;TX;&gt;&gt;(TT;)TX;</dd>" +
-					"<dd>&lt;X:Ljava/lang/Object;1T:Ljava/util/List&lt;TX;&gt;&gt;(TT;)TX;</dd>" + // <= 1
+					"<dd>&lt;X:Ljava/lang/Object;T::Ljava/util/List&lt;TX;&gt;;&gt;(TT;)TX;</dd>" +
+					"<dd>&lt;X:Ljava/lang/Object;<b>1</b>T::Ljava/util/List&lt;TX;&gt;;&gt;(TT;)TX;</dd>" + // <= 1
 					"</dl>";
 			assertEquals("expect detail", expectedInfo, proposal.getAdditionalProposalInfo());
 
-			proposal= findProposalByName("Annotate as '@Nullable Number'", list);
+			proposal= findProposalByName("Annotate as '@Nullable T extends List<X>'", list);
 			expectedInfo=
 					"<dl><dt>test</dt>" +
-					"<dd>&lt;X:Ljava/lang/Object;T:Ljava/util/List&lt;TX;&gt;&gt;(TT;)TX;</dd>" +
-					"<dd>&lt;X:Ljava/lang/Object;0T:Ljava/util/List&lt;TX;&gt;&gt;(TT;)TX;</dd>" + // <= 0
+					"<dd>&lt;X:Ljava/lang/Object;T::Ljava/util/List&lt;TX;&gt;;&gt;(TT;)TX;</dd>" +
+					"<dd>&lt;X:Ljava/lang/Object;<b>0</b>T::Ljava/util/List&lt;TX;&gt;;&gt;(TT;)TX;</dd>" + // <= 0
 					"</dl>";
 			assertEquals("expect detail", expectedInfo, proposal.getAdditionalProposalInfo());
 
@@ -947,8 +945,143 @@ public class AnnotateAssistTest18 extends AbstractAnnotateAssistTests {
 			String expectedContent=
 					"class pack/age/X\n" +
 					"test\n" +
-					" <X:Ljava/lang/Object;T:Ljava/util/List<;TX;>>(TT;)TX;\n" +
-					" <X:Ljava/lang/Object;0T:Ljava/util/List<;TX;>>(TT;)TX;\n";
+					" <X:Ljava/lang/Object;T::Ljava/util/List<TX;>;>(TT;)TX;\n" +
+					" <X:Ljava/lang/Object;0T::Ljava/util/List<TX;>;>(TT;)TX;\n";
+			checkContentOfFile("annotation file content", annotationFile, expectedContent);
+
+			// add second annotation:
+			offset= pathAndContents[1].indexOf("X,");
+
+			list= collectAnnotateProposals(javaEditor, offset);
+
+			assertCorrectLabels(list);
+			assertNumberOfProposals(list, 2);
+
+			proposal= findProposalByName("Annotate as '@NonNull X'", list);
+			expectedInfo=
+					"<dl><dt>test</dt>" +
+					"<dd>&lt;X:Ljava/lang/Object;T::Ljava/util/List&lt;TX;&gt;;&gt;(TT;)TX;</dd>" +
+					"<dd>&lt;<b>1</b>X:Ljava/lang/Object;0T::Ljava/util/List&lt;TX;&gt;;&gt;(TT;)TX;</dd>" + // <= 1
+					"</dl>";
+			assertEquals("expect detail", expectedInfo, proposal.getAdditionalProposalInfo());
+
+			proposal= findProposalByName("Annotate as '@Nullable X'", list);
+			expectedInfo=
+					"<dl><dt>test</dt>" +
+					"<dd>&lt;X:Ljava/lang/Object;T::Ljava/util/List&lt;TX;&gt;;&gt;(TT;)TX;</dd>" +
+					"<dd>&lt;<b>0</b>X:Ljava/lang/Object;0T::Ljava/util/List&lt;TX;&gt;;&gt;(TT;)TX;</dd>" + // <= 0
+					"</dl>";
+			assertEquals("expect detail", expectedInfo, proposal.getAdditionalProposalInfo());
+
+			document= javaEditor.getDocumentProvider().getDocument(javaEditor.getEditorInput());
+			proposal.apply(document);
+
+			annotationFile= fJProject1.getProject().getFile(new Path(ANNOTATION_PATH).append(X_PATH+".eea"));
+			assertTrue("Annotation file should have been created", annotationFile.exists());
+
+			expectedContent=
+					"class pack/age/X\n" +
+					"test\n" +
+					" <X:Ljava/lang/Object;T::Ljava/util/List<TX;>;>(TT;)TX;\n" +
+					" <0X:Ljava/lang/Object;0T::Ljava/util/List<TX;>;>(TT;)TX;\n";
+			checkContentOfFile("annotation file content", annotationFile, expectedContent);
+		} finally {
+			JavaPlugin.getActivePage().closeAllEditors(false);
+		}
+	}
+
+	/**
+	 * Assert two proposals ("@NonNull" and "@Nullable") on a type's type parameter
+	 * Apply the second proposal and check the effect.
+	 * Then repeat for another type parameter (to check merging of changes)
+	 * @throws Exception multiple causes
+	 */
+	public void testAnnotateMethod_TypeParameter2() throws Exception {
+		
+		String X_PATH= "pack/age/X";
+		String[] pathAndContents= new String[] {
+					X_PATH+".java",
+					"package pack.age;\n" +
+					"import java.util.List;\n" +
+					"public interface X <X, T extends List<X>> {\n" +
+					"    public X test(T list);\n" +
+					"}\n"
+				};
+		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_8, null);
+
+		IType type= fJProject1.findType(X_PATH.replace('/', '.'));
+		JavaEditor javaEditor= (JavaEditor) JavaUI.openInEditor(type);
+
+		try {
+			int offset= pathAndContents[1].indexOf("T extends");
+
+			List<ICompletionProposal> list= collectAnnotateProposals(javaEditor, offset);
+			
+			assertCorrectLabels(list);
+			assertNumberOfProposals(list, 2);
+			
+			ICompletionProposal proposal= findProposalByName("Annotate as '@NonNull T extends List<X>'", list);
+			String expectedInfo=
+					"<dl><dt>class pack/age/X</dt>" +
+					"<dd>&lt;X:Ljava/lang/Object;T::Ljava/util/List&lt;TX;&gt;;&gt;</dd>" +
+					"<dd>&lt;X:Ljava/lang/Object;<b>1</b>T::Ljava/util/List&lt;TX;&gt;;&gt;</dd>" + // <= 1
+					"</dl>";
+			assertEquals("expect detail", expectedInfo, proposal.getAdditionalProposalInfo());
+
+			proposal= findProposalByName("Annotate as '@Nullable T extends List<X>'", list);
+			expectedInfo=
+					"<dl><dt>class pack/age/X</dt>" +
+					"<dd>&lt;X:Ljava/lang/Object;T::Ljava/util/List&lt;TX;&gt;;&gt;</dd>" +
+					"<dd>&lt;X:Ljava/lang/Object;<b>0</b>T::Ljava/util/List&lt;TX;&gt;;&gt;</dd>" + // <= 0
+					"</dl>";
+			assertEquals("expect detail", expectedInfo, proposal.getAdditionalProposalInfo());
+
+			IDocument document= javaEditor.getDocumentProvider().getDocument(javaEditor.getEditorInput());
+			proposal.apply(document);
+			
+			IFile annotationFile= fJProject1.getProject().getFile(new Path(ANNOTATION_PATH).append(X_PATH+".eea"));
+			assertTrue("Annotation file should have been created", annotationFile.exists());
+
+			String expectedContent=
+					"class pack/age/X\n" +
+					" <X:Ljava/lang/Object;T::Ljava/util/List<TX;>;>\n" +
+					" <X:Ljava/lang/Object;0T::Ljava/util/List<TX;>;>\n";
+			checkContentOfFile("annotation file content", annotationFile, expectedContent);
+
+			// add second annotation:
+			offset= pathAndContents[1].indexOf("X,");
+
+			list= collectAnnotateProposals(javaEditor, offset);
+
+			assertCorrectLabels(list);
+			assertNumberOfProposals(list, 2);
+
+			proposal= findProposalByName("Annotate as '@NonNull X'", list);
+			expectedInfo=
+					"<dl><dt>class pack/age/X</dt>" +
+					"<dd>&lt;X:Ljava/lang/Object;T::Ljava/util/List&lt;TX;&gt;;&gt;</dd>" +
+					"<dd>&lt;<b>1</b>X:Ljava/lang/Object;0T::Ljava/util/List&lt;TX;&gt;;&gt;</dd>" + // <= 1
+					"</dl>";
+			assertEquals("expect detail", expectedInfo, proposal.getAdditionalProposalInfo());
+
+			proposal= findProposalByName("Annotate as '@Nullable X'", list);
+			expectedInfo=
+					"<dl><dt>class pack/age/X</dt>" +
+					"<dd>&lt;X:Ljava/lang/Object;T::Ljava/util/List&lt;TX;&gt;;&gt;</dd>" +
+					"<dd>&lt;<b>0</b>X:Ljava/lang/Object;0T::Ljava/util/List&lt;TX;&gt;;&gt;</dd>" + // <= 0
+					"</dl>";
+			assertEquals("expect detail", expectedInfo, proposal.getAdditionalProposalInfo());
+
+			document= javaEditor.getDocumentProvider().getDocument(javaEditor.getEditorInput());
+			proposal.apply(document);
+
+			annotationFile= fJProject1.getProject().getFile(new Path(ANNOTATION_PATH).append(X_PATH+".eea"));
+			assertTrue("Annotation file should have been created", annotationFile.exists());
+
+			expectedContent=
+					"class pack/age/X\n" +
+					" <X:Ljava/lang/Object;T::Ljava/util/List<TX;>;>\n" +
+					" <0X:Ljava/lang/Object;0T::Ljava/util/List<TX;>;>\n";
 			checkContentOfFile("annotation file content", annotationFile, expectedContent);
 		} finally {
 			JavaPlugin.getActivePage().closeAllEditors(false);

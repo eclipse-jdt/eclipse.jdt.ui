@@ -92,6 +92,7 @@ import org.eclipse.jdt.core.util.ClassFileBytesDisassembler;
 import org.eclipse.jdt.core.util.ClassFormatException;
 
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
+import org.eclipse.jdt.internal.corext.fix.ExternalNullAnnotationChangeProposals;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -884,7 +885,8 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 
 			IJavaProject javaProject= file.getJavaProject();
 			boolean useExternalAnnotations= javaProject != null
-					&& javaProject.getOption(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, true).equals(JavaCore.ENABLED);
+					&& javaProject.getOption(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, true).equals(JavaCore.ENABLED)
+					&& ExternalNullAnnotationChangeProposals.hasAnnotationPathInWorkspace(javaProject, file);
 			annotateAction.setEnabled(useExternalAnnotations);
 
 		}
