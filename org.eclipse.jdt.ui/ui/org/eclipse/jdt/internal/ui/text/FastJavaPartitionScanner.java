@@ -395,6 +395,9 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaPa
 	 			case '\\':
 					fLast= (fLast == BACKSLASH) ? NONE : BACKSLASH;
 					fTokenLength++;
+					if (scanForUnicodeSlash()) {
+						fTokenLength= fTokenLength + 5;
+					}
 					break;
 
 				case '\"':
@@ -417,6 +420,9 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaPa
 				case '\\':
 					fLast= (fLast == BACKSLASH) ? NONE : BACKSLASH;
 					fTokenLength++;
+					if (scanForUnicodeSlash()) {
+						fTokenLength= fTokenLength + 5;
+					}
 					break;
 
 	 			case '\'':
@@ -439,6 +445,9 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaPa
 				case '\\':
 						fLast= (fLast == BACKSLASH) ? NONE : BACKSLASH;
 						fTokenLength++;
+						if (scanForUnicodeSlash()) {
+							fTokenLength= fTokenLength + 5;
+						}
 						break;
 				case '\"':
 					if (fLast == BACKSLASH) {
@@ -459,6 +468,46 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaPa
 	 		}
 		}
  	}
+
+	private boolean scanForUnicodeSlash() {
+		int count= 0;
+		boolean isUnicodeSlash= false;
+		try {
+			int ch= fScanner.read();
+			count++;
+			if (ch == 'u') {
+				ch= fScanner.read();
+				count++;
+				if (ch == '0') {
+					ch= fScanner.read();
+					count++;
+					if (ch == '0') {
+						ch= fScanner.read();
+						count++;
+						if (ch == '5') {
+							ch= fScanner.read();
+							count++;
+							if (ch == 'C') {
+								isUnicodeSlash= true;
+							}
+						}
+					}
+				}
+			}
+			if (ch == ICharacterScanner.EOF) {
+				count--;
+			}
+		} catch (IndexOutOfBoundsException e) {
+			//let it return false;
+		} finally {
+			if (!isUnicodeSlash) {
+				for (int i= count; i > 0; i--) {
+					fScanner.unread();
+				}
+			}
+		}
+		return isUnicodeSlash;
+	}
 
 	private boolean scanForTextBlockBeginning() {
 		if (!isEnablePreviewsAllowed()) {
