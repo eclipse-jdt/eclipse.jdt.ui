@@ -15,6 +15,8 @@ package org.eclipse.jdt.internal.ui.text.java;
 
 import java.util.StringTokenizer;
 
+import org.eclipse.jface.preference.IPreferenceStore;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.IDocument;
@@ -23,6 +25,8 @@ import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.TextUtilities;
 
 import org.eclipse.jdt.core.IJavaProject;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.text.correction.PreviewFeaturesSubProcessor;
 
@@ -58,7 +62,10 @@ public class JavaMultiLineStringAutoIndentStrategy extends JavaStringAutoIndentS
 				} else {
 					indentation= getLineIndentation(document, offset);
 					indentation+= getExtraIndentAfterNewLine();
-					command.text= command.text + indentation + "\"\"\";"; //$NON-NLS-1$
+					command.text= command.text + indentation;
+					if (isCloseStringsPreferenceSet()) {
+						command.text= command.text + "\"\"\";"; //$NON-NLS-1$
+					}
 				}
 			} else {
 				command.text= command.text + indentation;
@@ -136,5 +143,16 @@ public class JavaMultiLineStringAutoIndentStrategy extends JavaStringAutoIndentS
 			}
 		} catch (BadLocationException e) {
 		}
+	}
+
+	private boolean isCloseStringsPreferenceSet() {
+		boolean isSet= false;
+		if (fProject != null) {
+			IPreferenceStore store= PreferenceConstants.getPreferenceStore();
+			if (store != null) {
+				isSet= store.getBoolean(PreferenceConstants.EDITOR_CLOSE_STRINGS);
+			}
+		}
+		return isSet;
 	}
 }
