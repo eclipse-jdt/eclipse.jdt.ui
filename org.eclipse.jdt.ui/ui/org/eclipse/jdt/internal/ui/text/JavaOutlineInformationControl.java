@@ -225,7 +225,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 
 		private OutlineTreeViewer(Tree tree) {
 			super(tree);
-
+			setUseHashlookup(true);
 		}
 
 		@Override
