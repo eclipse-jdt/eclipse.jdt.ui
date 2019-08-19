@@ -4500,6 +4500,72 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	public void testConvertLambdaToMethodReference5() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf1= new StringBuilder();
+		buf1.append("package test1;\n");
+		buf1.append("public interface I {\n");
+		buf1.append("    public default void i1() {\n");
+		buf1.append("    }\n");
+		buf1.append("    void i2();\n");
+		buf1.append("    \n");
+		buf1.append("    class E5 implements I {\n");
+		buf1.append("        Thread o1 = new Thread(() ->/*[1]*/ i1());\n");
+		buf1.append("        Thread o2 = new Thread(() ->/*[2]*/ i2());\n");
+		buf1.append("        public void i2() {\n");
+		buf1.append("        }\n");
+		buf1.append("    }\n");
+		buf1.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("I.java", buf1.toString(), false, null);
+
+
+		int offset= buf1.toString().indexOf("->/*[1]*/");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public interface I {\n");
+		buf.append("    public default void i1() {\n");
+		buf.append("    }\n");
+		buf.append("    void i2();\n");
+		buf.append("    \n");
+		buf.append("    class E5 implements I {\n");
+		buf.append("        Thread o1 = new Thread(this::i1);\n");
+		buf.append("        Thread o2 = new Thread(() ->/*[2]*/ i2());\n");
+		buf.append("        public void i2() {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+
+		offset= buf1.toString().indexOf("->/*[2]*/");
+		context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public interface I {\n");
+		buf.append("    public default void i1() {\n");
+		buf.append("    }\n");
+		buf.append("    void i2();\n");
+		buf.append("    \n");
+		buf.append("    class E5 implements I {\n");
+		buf.append("        Thread o1 = new Thread(() ->/*[1]*/ i1());\n");
+		buf.append("        Thread o2 = new Thread(this::i2);\n");
+		buf.append("        public void i2() {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected1= buf.toString();
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
 	public void testFixParenthesesInLambdaExpressionAdd() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf1= new StringBuilder();

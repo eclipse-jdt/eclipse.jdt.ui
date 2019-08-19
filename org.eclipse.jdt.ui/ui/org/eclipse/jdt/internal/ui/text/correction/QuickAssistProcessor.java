@@ -1265,7 +1265,40 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				if (invocationQualifier != null) {
 					exprMethodReference.setExpression((Expression) rewrite.createCopyTarget(invocationQualifier));
 				} else {
-					exprMethodReference.setExpression(ast.newThisExpression());
+					// check if method is in class scope or in super/nested class scope
+					TypeDeclaration lambdaParentType= (TypeDeclaration) ASTResolving.findParentType(lambda);
+					ITypeBinding lambdaMethodInvokingClass= lambdaParentType.resolveBinding();
+					ITypeBinding lambdaMethodDeclaringClass= methodBinding.getDeclaringClass();
+
+					ThisExpression newThisExpression= ast.newThisExpression();
+
+					ITypeBinding nestedRootClass= getNestedRootClass(lambdaMethodInvokingClass);
+					boolean isSuperClass= isSuperClass(lambdaMethodDeclaringClass, lambdaMethodInvokingClass);
+					boolean isNestedClass= isNestedClass(lambdaMethodDeclaringClass, lambdaMethodInvokingClass);
+
+					if (lambdaMethodDeclaringClass == lambdaMethodInvokingClass) {
+						// use this::
+					} else if (Modifier.isDefault(methodBinding.getModifiers())) {
+						boolean nestedInterfaceClass= isNestedInterfaceClass(ast, lambdaMethodDeclaringClass, lambdaMethodInvokingClass);
+						if (isNestedClass) {
+							// use this::
+						} else if (nestedInterfaceClass && !isNestedClass && !isSuperClass) {
+							// use this::
+						} else if (!nestedInterfaceClass || (nestedRootClass != lambdaMethodInvokingClass)) {
+							newThisExpression.setQualifier(ast.newName(nestedRootClass.getName()));
+						}
+					} else if (lambdaMethodDeclaringClass.isInterface()) {
+						if (isSuperClass) {
+							// use this::
+						} else {
+							newThisExpression.setQualifier(ast.newName(nestedRootClass.getName()));
+						}
+					} else if (isSuperClass) {
+						// use this::
+					} else {
+						newThisExpression.setQualifier(ast.newName(nestedRootClass.getName()));
+					}
+					exprMethodReference.setExpression(newThisExpression);
 				}
 				exprMethodReference.typeArguments().addAll(getCopiedTypeArguments(rewrite, methodInvocation.typeArguments()));
 			}
@@ -1282,6 +1315,61 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		}
 		resultingCollections.add(proposal);
 		return true;
+	}
+
+	/*
+	 * return TRUE if method declaration class is super class of lambda declaration class
+	 */
+	private static boolean isSuperClass(ITypeBinding methodDeclarationType, ITypeBinding lambdaDeclarationType) {
+		ITypeBinding parent= lambdaDeclarationType.getSuperclass();
+		while (parent != null) {
+			if (parent == methodDeclarationType) {
+				return true;
+			}
+			parent= parent.getSuperclass();
+		}
+		return false;
+	}
+
+	/*
+	 * return TRUE if method declaration interface is super class of lambda declaration class
+	 */
+	private static boolean isNestedInterfaceClass(AST ast, ITypeBinding lambdaMethodDeclaringClass, ITypeBinding lambdaMethodInvokingClass) {
+		ITypeBinding[] methodNarrowingTypes= ASTResolving.getRelaxingTypes(ast, lambdaMethodDeclaringClass);
+		ITypeBinding[] lambdaNarrowingTypes= ASTResolving.getRelaxingTypes(ast, lambdaMethodInvokingClass);
+
+		if (methodNarrowingTypes.length != 1) {
+			return false;
+		}
+		ITypeBinding methodNarrowingType= methodNarrowingTypes[0];
+		for (ITypeBinding lambdaNarrowingType : lambdaNarrowingTypes) {
+			if(methodNarrowingType == lambdaNarrowingType) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/*
+	 * return TRUE if lambda declaration class is nested class of method declaration class
+	 */
+	private static boolean isNestedClass(ITypeBinding methodDeclarationType, ITypeBinding lambdaDeclarationType) {
+		ITypeBinding parent= lambdaDeclarationType;
+		while (parent.isNested()) {
+			parent= parent.getDeclaringClass();
+			if (parent == methodDeclarationType) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private static ITypeBinding getNestedRootClass(ITypeBinding lambdaDeclarationType) {
+		ITypeBinding parent= lambdaDeclarationType;
+		while (parent.isNested()) {
+			parent= parent.getDeclaringClass();
+		}
+		return parent;
 	}
 
 	private static boolean representsDefiningNode(ASTNode innerNode, ASTNode definingNode) {
