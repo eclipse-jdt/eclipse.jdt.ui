@@ -64,13 +64,13 @@ public class JavaMultiLineStringAutoIndentStrategy extends JavaStringAutoIndentS
 		boolean isLineDelimiter= isLineDelimiter(document, command.text);
 		if (isEditorWrapStrings() && isLineDelimiter && isTextBlock) {
 			if (isTextBlock) {
-				indentation= getIndentation(document, command);
+				indentation= getIndentation(document, command.offset);
 				if (hasTextBlockEnded) {
 					command.text= command.text + indentation;
 				} else {
 					command.text= command.text + indentation;
 					if (isCloseStringsPreferenceSet()) {
-						command.text= command.text + System.lineSeparator() + indentation + "\"\"\";"; //$NON-NLS-1$
+						command.text= command.text + System.lineSeparator() + getIndentation(document, offset) + TEXT_BLOCK_STR + ";"; //$NON-NLS-1$
 					}
 				}
 			} else {
@@ -81,12 +81,12 @@ public class JavaMultiLineStringAutoIndentStrategy extends JavaStringAutoIndentS
 		}
 	}
 
-	private String getIndentation(IDocument document, DocumentCommand command) throws BadLocationException {
-		IRegion line= document.getLineInformationOfOffset(command.offset);
+	private String getIndentation(IDocument document, int offset) throws BadLocationException {
+		IRegion line= document.getLineInformationOfOffset(offset);
 		String fullStr= document.get(line.getOffset(), line.getLength());
 		String fullStrNoTrim= document.get(line.getOffset(), line.getLength()).trim();
 		int length= IndentManipulation.measureIndentInSpaces(fullStr, CodeFormatterUtil.getTabWidth(fProject));
-		String indentation= getLineIndentation(document, command.offset);
+		String indentation= getLineIndentation(document, offset);
 		if (fullStrNoTrim.endsWith(TEXT_BLOCK_STR)) {
 			length= length + fullStrNoTrim.lastIndexOf(TEXT_BLOCK_STR);
 			String str= EMPTY_STR;
