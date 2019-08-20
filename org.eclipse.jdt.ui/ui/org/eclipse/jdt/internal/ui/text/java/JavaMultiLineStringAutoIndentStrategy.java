@@ -25,12 +25,20 @@ import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.TextUtilities;
 
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.formatter.IndentManipulation;
+
+import org.eclipse.jdt.internal.core.manipulation.util.Strings;
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.text.correction.PreviewFeaturesSubProcessor;
 
 public class JavaMultiLineStringAutoIndentStrategy extends JavaStringAutoIndentStrategy {
+	
+	private static String TEXT_BLOCK_STR= "\"\"\""; //$NON-NLS-1$
+	private static String SPACE_STR= " "; //$NON-NLS-1$
+	private static String EMPTY_STR= ""; //$NON-NLS-1$
 
 	public JavaMultiLineStringAutoIndentStrategy(String partitioning, IJavaProject project) {
 		super(partitioning, project);
@@ -51,20 +59,18 @@ public class JavaMultiLineStringAutoIndentStrategy extends JavaStringAutoIndentS
 		IRegion line= document.getLineInformationOfOffset(offset);
 		String fullStr= document.get(line.getOffset(), line.getLength()).trim();
 		String fullTextBlockText= document.get(offset, length).trim();
-		boolean hasTextBlockEnded= PreviewFeaturesSubProcessor.isPreviewFeatureEnabled(fProject) && fullTextBlockText.endsWith("\"\"\""); //$NON-NLS-1$
-		boolean isTextBlock= PreviewFeaturesSubProcessor.isPreviewFeatureEnabled(fProject) && fullStr.endsWith("\"\""); //$NON-NLS-1$
+		boolean hasTextBlockEnded= PreviewFeaturesSubProcessor.isPreviewFeatureEnabled(fProject) && fullTextBlockText.endsWith(TEXT_BLOCK_STR);
+		boolean isTextBlock= PreviewFeaturesSubProcessor.isPreviewFeatureEnabled(fProject) && fullStr.endsWith(TEXT_BLOCK_STR);
 		boolean isLineDelimiter= isLineDelimiter(document, command.text);
 		if (isEditorWrapStrings() && isLineDelimiter && isTextBlock) {
 			if (isTextBlock) {
+				indentation= getIndentation(document, command);
 				if (hasTextBlockEnded) {
-					indentation= getLineIndentation(document, command.offset);
 					command.text= command.text + indentation;
 				} else {
-					indentation= getLineIndentation(document, offset);
-					indentation+= getExtraIndentAfterNewLine();
 					command.text= command.text + indentation;
 					if (isCloseStringsPreferenceSet()) {
-						command.text= command.text + "\"\"\";"; //$NON-NLS-1$
+						command.text= command.text + System.lineSeparator() + indentation + "\"\"\";"; //$NON-NLS-1$
 					}
 				}
 			} else {
@@ -73,6 +79,31 @@ public class JavaMultiLineStringAutoIndentStrategy extends JavaStringAutoIndentS
 		} else if (command.text.length() > 1 && !isLineDelimiter && isEditorEscapeStrings()) {
 			command.text= getModifiedText(command.text, indentation, delimiter, isEditorEscapeStringsNonAscii());
 		}
+	}
+
+	private String getIndentation(IDocument document, DocumentCommand command) throws BadLocationException {
+		IRegion line= document.getLineInformationOfOffset(command.offset);
+		String fullStr= document.get(line.getOffset(), line.getLength());
+		String fullStrNoTrim= document.get(line.getOffset(), line.getLength()).trim();
+		int length= IndentManipulation.measureIndentInSpaces(fullStr, CodeFormatterUtil.getTabWidth(fProject));
+		String indentation= getLineIndentation(document, command.offset);
+		if (fullStrNoTrim.endsWith(TEXT_BLOCK_STR)) {
+			length= length + fullStrNoTrim.lastIndexOf(TEXT_BLOCK_STR);
+			String str= EMPTY_STR;
+			for (int i= 0; i < length; i++) {
+				str+= SPACE_STR;
+			}
+			int units= Strings.computeIndentUnits(str, fProject);
+			String newStr= CodeFormatterUtil.createIndentString(units, fProject);
+			int newLength= IndentManipulation.measureIndentInSpaces(newStr, CodeFormatterUtil.getTabWidth(fProject));
+			if (newLength < length) {
+				for (int i= newLength; i < length; i++) {
+					newStr+= SPACE_STR;
+				}
+			}
+			indentation= newStr;
+		}
+		return indentation;
 	}
 
 	/**
