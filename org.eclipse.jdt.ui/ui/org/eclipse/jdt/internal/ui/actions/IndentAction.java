@@ -126,9 +126,9 @@ public class IndentAction extends TextEditorAction {
 	 */
 	private final boolean fIsTabAction;
 
-	private static String TEXT_BLOCK_STR= "\"\"\""; //$NON-NLS-1$
-	private static String SPACE_STR= " "; //$NON-NLS-1$
-	private static String EMPTY_STR= ""; //$NON-NLS-1$
+	public static String TEXT_BLOCK_STR= "\"\"\""; //$NON-NLS-1$
+	public static String SPACE_STR= " "; //$NON-NLS-1$
+	public static String EMPTY_STR= ""; //$NON-NLS-1$
 
 	/**
 	 * Creates a new instance.
@@ -443,7 +443,7 @@ public class IndentAction extends TextEditorAction {
 		return end;
 	}
 
-	private static int measureLengthInSpaces(CharSequence line, int tabWidth) {
+	public static int measureLengthInSpaces(CharSequence line, int tabWidth) {
 		if (tabWidth < 0 || line == null) {
 			throw new IllegalArgumentException();
 		}
