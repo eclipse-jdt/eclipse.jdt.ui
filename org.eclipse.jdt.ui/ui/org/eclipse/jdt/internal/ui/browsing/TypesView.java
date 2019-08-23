@@ -40,7 +40,6 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.SelectAllAction;
 import org.eclipse.jdt.internal.ui.filters.NonJavaElementFilter;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
@@ -71,7 +70,7 @@ public class TypesView extends JavaBrowsingPart {
 			return (T) new IShowInTargetList() {
 				@Override
 				public String[] getShowInTargetIds() {
-					return new String[] { JavaUI.ID_PACKAGES, JavaPlugin.ID_RES_NAV };
+					return new String[] { JavaUI.ID_PACKAGES};
 				}
 
 			};

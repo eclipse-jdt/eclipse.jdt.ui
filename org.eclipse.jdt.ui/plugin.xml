@@ -600,21 +600,18 @@
       <perspectiveExtension targetID="org.eclipse.jdt.ui.JavaPerspective">
          <showInPart id="org.eclipse.jdt.ui.PackageExplorer"/>
          <showInPart id="org.eclipse.team.ui.GenericHistoryView"/>
-         <showInPart id="org.eclipse.ui.views.ResourceNavigator"/>
          <showInPart id="org.eclipse.ui.navigator.ProjectExplorer"/>
       </perspectiveExtension>
 
       <perspectiveExtension targetID="org.eclipse.jdt.ui.JavaBrowsingPerspective">
          <showInPart id="org.eclipse.jdt.ui.PackageExplorer"/>
          <showInPart id="org.eclipse.team.ui.GenericHistoryView"/>
-         <showInPart id="org.eclipse.ui.views.ResourceNavigator"/>
          <showInPart id="org.eclipse.ui.navigator.ProjectExplorer"/>
       </perspectiveExtension>
 
       <perspectiveExtension targetID="org.eclipse.jdt.ui.JavaHierarchyPerspective">
          <showInPart id="org.eclipse.jdt.ui.PackageExplorer"/>
          <showInPart id="org.eclipse.team.ui.GenericHistoryView"/>
-         <showInPart id="org.eclipse.ui.views.ResourceNavigator"/>
          <showInPart id="org.eclipse.ui.navigator.ProjectExplorer"/>
       </perspectiveExtension>
    </extension>

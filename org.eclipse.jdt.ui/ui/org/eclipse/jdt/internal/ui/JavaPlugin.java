@@ -139,6 +139,7 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	 * The view id for the workbench's Resource Navigator standard component.
 	 * @since 3.6
 	 */
+	@Deprecated
 	public static final String ID_RES_NAV= IPageLayout.ID_RES_NAV;
 
 	/**

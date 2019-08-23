@@ -91,7 +91,6 @@ import org.eclipse.ui.internal.views.helpers.EmptyWorkspaceHelper;
 import org.eclipse.ui.part.ISetSelectionTarget;
 import org.eclipse.ui.part.IShowInSource;
 import org.eclipse.ui.part.IShowInTarget;
-import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.views.framelist.Frame;
@@ -702,15 +701,6 @@ public class PackageExplorerPart extends ViewPart
 			return (T) fViewer;
 		if (key == IShowInSource.class) {
 			return (T) getShowInSource();
-		}
-		if (key == IShowInTargetList.class) {
-			return (T) new IShowInTargetList() {
-				@Override
-				public String[] getShowInTargetIds() {
-					return new String[] { JavaPlugin.ID_RES_NAV };
-				}
-
-			};
 		}
 		if (key == IContextProvider.class) {
 			return (T) JavaUIHelp.getHelpContextProvider(this, IJavaHelpContextIds.PACKAGES_VIEW);

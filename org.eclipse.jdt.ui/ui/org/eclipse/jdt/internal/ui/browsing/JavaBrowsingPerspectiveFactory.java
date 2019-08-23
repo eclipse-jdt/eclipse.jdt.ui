@@ -32,7 +32,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
 public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
@@ -82,7 +81,6 @@ public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
 		// views - standard workbench
 		layout.addShowViewShortcut(IPageLayout.ID_OUTLINE);
 		layout.addShowViewShortcut(IPageLayout.ID_PROBLEM_VIEW);
-		layout.addShowViewShortcut(JavaPlugin.ID_RES_NAV);
 		layout.addShowViewShortcut(IPageLayout.ID_TASK_LIST);
 		layout.addShowViewShortcut(IProgressConstants.PROGRESS_VIEW_ID);
 		layout.addShowViewShortcut(IPageLayout.ID_PROJECT_EXPLORER);
@@ -116,7 +114,6 @@ public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
 		placeHolderLeft.addPlaceholder(JavaUI.ID_TYPE_HIERARCHY);
 		placeHolderLeft.addPlaceholder(IPageLayout.ID_OUTLINE);
 		placeHolderLeft.addPlaceholder(JavaUI.ID_PACKAGES);
-		placeHolderLeft.addPlaceholder(JavaPlugin.ID_RES_NAV);
 		placeHolderLeft.addPlaceholder(IPageLayout.ID_PROJECT_EXPLORER);
 
 		if (shouldShowProjectsView()) {
@@ -163,7 +160,6 @@ public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
 		placeHolderLeft.addPlaceholder(JavaUI.ID_TYPE_HIERARCHY);
 		placeHolderLeft.addPlaceholder(IPageLayout.ID_OUTLINE);
 		placeHolderLeft.addPlaceholder(JavaUI.ID_PACKAGES);
-		placeHolderLeft.addPlaceholder(JavaPlugin.ID_RES_NAV);
 		placeHolderLeft.addPlaceholder(IPageLayout.ID_PROJECT_EXPLORER);
 
 

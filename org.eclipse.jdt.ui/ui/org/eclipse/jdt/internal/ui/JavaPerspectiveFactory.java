@@ -46,7 +46,6 @@ public class JavaPerspectiveFactory implements IPerspectiveFactory {
 		IFolderLayout folder= layout.createFolder("left", IPageLayout.LEFT, (float)0.25, editorArea); //$NON-NLS-1$
 		folder.addView(JavaUI.ID_PACKAGES);
 		folder.addPlaceholder(JavaUI.ID_TYPE_HIERARCHY);
-		folder.addPlaceholder(JavaPlugin.ID_RES_NAV);
 		folder.addPlaceholder(IPageLayout.ID_PROJECT_EXPLORER);
 
 		IFolderLayout outputfolder= layout.createFolder("bottom", IPageLayout.BOTTOM, (float)0.75, editorArea); //$NON-NLS-1$

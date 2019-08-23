@@ -2198,7 +2198,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			return (T) new IShowInTargetList() {
 				@Override
 				public String[] getShowInTargetIds() {
-					return new String[] { JavaUI.ID_PACKAGES, IPageLayout.ID_OUTLINE, JavaPlugin.ID_RES_NAV };
+					return new String[] { JavaUI.ID_PACKAGES, IPageLayout.ID_OUTLINE };
 				}
 
 			};

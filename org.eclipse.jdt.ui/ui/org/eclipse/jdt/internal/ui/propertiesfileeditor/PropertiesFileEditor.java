@@ -222,7 +222,7 @@ public class PropertiesFileEditor extends TextEditor {
 			return (T) new IShowInTargetList() {
 				@Override
 				public String[] getShowInTargetIds() {
-					return new String[] { JavaUI.ID_PACKAGES, JavaPlugin.ID_RES_NAV };
+					return new String[] { JavaUI.ID_PACKAGES };
 				}
 
 			};

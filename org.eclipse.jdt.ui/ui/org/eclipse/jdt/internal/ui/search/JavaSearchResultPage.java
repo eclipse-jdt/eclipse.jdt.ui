@@ -156,7 +156,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 
 	private int fCurrentGrouping;
 
-	private static final String[] SHOW_IN_TARGETS= new String[] { JavaUI.ID_PACKAGES , JavaPlugin.ID_RES_NAV };
+	private static final String[] SHOW_IN_TARGETS= new String[] { JavaUI.ID_PACKAGES  };
 	public static final IShowInTargetList SHOW_IN_TARGET_LIST= new IShowInTargetList() {
 		@Override
 		public String[] getShowInTargetIds() {
