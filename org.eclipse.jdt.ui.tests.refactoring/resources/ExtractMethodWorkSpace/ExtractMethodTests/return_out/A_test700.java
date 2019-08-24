@@ -6,6 +6,5 @@ public class A_test700 {
 	}
 
 	protected void extracted() {
-		/*[*/return;/*]*/
 	}
 }

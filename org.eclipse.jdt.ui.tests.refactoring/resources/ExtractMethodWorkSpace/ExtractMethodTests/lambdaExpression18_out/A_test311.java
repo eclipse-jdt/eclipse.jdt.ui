@@ -11,6 +11,5 @@ class X1 {
 	};
 
 	private void extracted() {
-		/*[*/ return; /*]*/
 	}
 }

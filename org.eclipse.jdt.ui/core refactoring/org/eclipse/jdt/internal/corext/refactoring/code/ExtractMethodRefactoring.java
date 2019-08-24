@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1016,13 +1016,6 @@ public class ExtractMethodRefactoring extends Refactoring {
 			call= fAST.newExpressionStatement((Expression)call);
 		}
 		result.add(call);
-
-		// We have a void return statement. The code looks like
-		// extracted();
-		// return;
-		if (returnKind == ExtractMethodAnalyzer.RETURN_STATEMENT_VOID && !fAnalyzer.isLastStatementSelected()) {
-			result.add(fAST.newReturnStatement());
-		}
 		return result.toArray(new ASTNode[result.size()]);
 	}
 
@@ -1262,16 +1255,25 @@ public class ExtractMethodRefactoring extends Refactoring {
 			}
 			fRewriter.replace(selectedNodes[0].getParent() instanceof ParenthesizedExpression ? selectedNodes[0].getParent() : selectedNodes[0], replacementNode, substitute);
 		} else {
+			boolean isReturnVoid= selectedNodes[selectedNodes.length - 1] instanceof ReturnStatement &&
+					fAnalyzer.getReturnTypeBinding().equals(fAST.resolveWellKnownType("void")); //$NON-NLS-1$
 			if (selectedNodes.length == 1) {
-				statements.insertLast(fRewriter.createMoveTarget(selectedNodes[0]), substitute);
+				if (!isReturnVoid) {
+					statements.insertLast(fRewriter.createMoveTarget(selectedNodes[0]), substitute);
+				}
 				fRewriter.replace(selectedNodes[0], replacementNode, substitute);
-			} else {
+			} else if (selectedNodes.length > 1) {
+				if (isReturnVoid) {
+					fRewriter.remove(selectedNodes[selectedNodes.length - 1], substitute);
+				}
 				ListRewrite source= fRewriter.getListRewrite(
-					selectedNodes[0].getParent(),
-					(ChildListPropertyDescriptor)selectedNodes[0].getLocationInParent());
+						selectedNodes[0].getParent(),
+						(ChildListPropertyDescriptor) selectedNodes[0].getLocationInParent());
+				// if last statement is a void return statement then we skip it
+				int index= isReturnVoid ? selectedNodes.length - 2 : selectedNodes.length - 1;
 				ASTNode toMove= source.createMoveTarget(
-					selectedNodes[0], selectedNodes[selectedNodes.length - 1],
-					replacementNode, substitute);
+						selectedNodes[0], selectedNodes[index],
+						replacementNode, substitute);
 				statements.insertLast(toMove, substitute);
 			}
 			IVariableBinding returnValue= fAnalyzer.getReturnValue();
