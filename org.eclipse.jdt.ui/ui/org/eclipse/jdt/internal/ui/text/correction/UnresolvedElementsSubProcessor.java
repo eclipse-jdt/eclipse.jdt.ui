@@ -73,6 +73,7 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
+import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionMethodReference;
 import org.eclipse.jdt.core.dom.FieldAccess;
@@ -2003,6 +2004,16 @@ public class UnresolvedElementsSubProcessor {
 				recursiveConstructor= ASTResolving.findParentMethodDeclaration(selectedNode).resolveBinding();
 			}
 		}
+
+		if (selectedNode.getParent() instanceof EnumConstantDeclaration) {
+			EnumConstantDeclaration enumNode= (EnumConstantDeclaration) selectedNode.getParent();
+			ITypeBinding typeBinding= Bindings.getBindingOfParentType(selectedNode);
+			if (typeBinding != null && !typeBinding.isAnonymous()) {
+				targetBinding= typeBinding;
+				arguments= enumNode.arguments();
+			}
+		}
+
 		if (targetBinding == null) {
 			return;
 		}
