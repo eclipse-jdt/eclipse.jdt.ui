@@ -1188,25 +1188,40 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 										}
 										String sourcePackage= oldTypeBinding.getPackage() == null ? "" : oldTypeBinding.getPackage().getName(); //$NON-NLS-1$
 										String targetPackage= targetRewriter.getRoot().getPackage() == null ? "" : targetRewriter.getRoot().getPackage().getName().toString(); //$NON-NLS-1$
+										String targetTypeBinding= targetPackage + "." + oldTypeBinding.getName(); //$NON-NLS-1$
 
-										if (sourcePackage.isEmpty() ^ targetPackage.isEmpty()) {
-											// not one package can be default package, either none or both
-											status.merge(RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.PullUpRefactoring_moving_fromto_default_package,
-													new String[] { JavaElementLabels.getTextLabel(member, JavaElementLabels.ALL_FULLY_QUALIFIED) }), JavaStatusContext.create(member)));
-										}
-
-										if (!sourcePackage.isEmpty()) {
-											Name newName= rewrite.getAST().newName(sourcePackage);
-											SimpleName newSimpleName= rewrite.getAST().newSimpleName(oldTypeBinding.getName());
-											SimpleType newSimpleType= null;
-											if (targetPackage.equals(sourcePackage)) {
-												// if source type is in same package as target then we don't need the fully qualified name
-												newSimpleType= rewrite.getAST().newSimpleType(newSimpleName);
-											} else {
-												QualifiedName newQualifiedTypeName= rewrite.getAST().newQualifiedName(newName, newSimpleName);
-												newSimpleType= rewrite.getAST().newSimpleType(newQualifiedTypeName);
+										// Find the same type-name field but fully qualified. 
+										// In that case it won't shadow the pulled up field
+										boolean qualifiedTypeNameInTarget= true;
+										String sourceSignature= ((IField) member).getTypeSignature();
+										for (IField targetField : fDestinationType.getFields()) {
+											if (sourceSignature.equals(targetField.getTypeSignature())) {
+												qualifiedTypeNameInTarget= false;
+												break;
 											}
-											newField.setType(newSimpleType);
+										}
+										//check if same type name is accessible in new package (targetPackage + <type>)
+										IType findTargetType= target.getJavaProject().findType(targetTypeBinding);
+										if (!qualifiedTypeNameInTarget && findTargetType != null) {
+											if (sourcePackage.isEmpty() ^ targetPackage.isEmpty()) {
+												// not one package can be default package, either none or both
+												status.merge(RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.PullUpRefactoring_moving_fromto_default_package,
+														new String[] { JavaElementLabels.getTextLabel(member, JavaElementLabels.ALL_FULLY_QUALIFIED) }), JavaStatusContext.create(member)));
+											}
+
+											if (!sourcePackage.isEmpty()) {
+												Name newName= rewrite.getAST().newName(sourcePackage);
+												SimpleName newSimpleName= rewrite.getAST().newSimpleName(oldTypeBinding.getName());
+												SimpleType newSimpleType= null;
+												if (targetPackage.equals(sourcePackage)) {
+													// if source type is in same package as target then we don't need the fully qualified name
+													newSimpleType= rewrite.getAST().newSimpleType(newSimpleName);
+												} else {
+													QualifiedName newQualifiedTypeName= rewrite.getAST().newQualifiedName(newName, newSimpleName);
+													newSimpleType= rewrite.getAST().newSimpleType(newQualifiedTypeName);
+												}
+												newField.setType(newSimpleType);
+											}
 										}
 									}
 								}
