@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -19,6 +19,7 @@
  *       (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=124978)
  *     - [convert anonymous] Convert Anonymous to nested generates wrong code
  *       (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=159917)
+ *     Microsoft Corporation - copied to jdt.core.manipulation
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
@@ -97,8 +98,8 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
-import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
-import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroupCore;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
@@ -111,13 +112,12 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.internal.ui.text.correction.ModifierCorrectionSubProcessorCore;
 
-import org.eclipse.jdt.internal.ui.text.correction.ModifierCorrectionSubProcessor;
-
+import org.eclipse.jdt.internal.core.manipulation.BindingLabelProviderCore;
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
-import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 
@@ -145,7 +145,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 			}
 			return true;
 		}
-		
+
 		@Override
 		public final boolean visit(TypeParameter parameter) {
 			ITypeBinding binding= parameter.resolveBinding();
@@ -155,7 +155,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 			}
 			return false;
 		}
-		
+
 		public final ITypeBinding[] getResult() {
 			final ITypeBinding[] result= new ITypeBinding[fFound.size()];
 			fFound.toArray(result);
@@ -177,11 +177,11 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     private Set<String> fClassNamesUsed;
 	private boolean fSelfInitializing= false;
 
-	private LinkedProposalModel fLinkedProposalModel;
+	private LinkedProposalModelCore fLinkedProposalModelCore;
 
 	/**
 	 * Creates a new convert anonymous to nested refactoring.
-	 * 
+	 *
 	 * @param unit the compilation unit, or <code>null</code> if invoked by scripting
 	 * @param selectionStart start
 	 * @param selectionLength length
@@ -218,8 +218,8 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
    		status.merge(initializeStatus);
     }
 
-	public void setLinkedProposalModel(LinkedProposalModel linkedProposalModel) {
-		fLinkedProposalModel= linkedProposalModel;
+	public void setLinkedProposalModel(LinkedProposalModelCore linkedProposalModel) {
+		fLinkedProposalModelCore= linkedProposalModel;
 	}
 
     public int[] getAvailableVisibilities() {
@@ -547,14 +547,14 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 
 	private RefactoringChangeDescriptor createRefactoringDescriptor() {
 		final ITypeBinding binding= fAnonymousInnerClassNode.resolveBinding();
-		final String[] labels= new String[] { BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(binding.getDeclaringMethod(), JavaElementLabels.ALL_FULLY_QUALIFIED)};
+		final String[] labels= new String[] { BindingLabelProviderCore.getBindingLabel(binding, JavaElementLabelsCore.ALL_FULLY_QUALIFIED), BindingLabelProviderCore.getBindingLabel(binding.getDeclaringMethod(), JavaElementLabelsCore.ALL_FULLY_QUALIFIED)};
 		final Map<String, String> arguments= new HashMap<>();
 		final String projectName= fCu.getJavaProject().getElementName();
 		final int flags= RefactoringDescriptor.STRUCTURAL_CHANGE | JavaRefactoringDescriptor.JAR_REFACTORING | JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
 		final String description= RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_descriptor_description_short;
 		final String header= Messages.format(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_descriptor_description, labels);
 		final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(projectName, this, header);
-		comment.addSetting(Messages.format(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_original_pattern, BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED)));
+		comment.addSetting(Messages.format(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_original_pattern, BindingLabelProviderCore.getBindingLabel(binding, JavaElementLabelsCore.ALL_FULLY_QUALIFIED)));
 		comment.addSetting(Messages.format(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_class_name_pattern, BasicElementLabels.getJavaElementName(fClassName)));
 		String visibility= JdtFlags.getVisibilityString(fVisibility);
 		if (visibility.length() == 0)
@@ -696,10 +696,10 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 			fieldNames.add(fieldNameProposals[0]);
 
 
-			if (fLinkedProposalModel != null) {
-				LinkedProposalPositionGroup positionGroup= fLinkedProposalModel.getPositionGroup(KEY_FIELD_NAME_EXT + i, true);
+			if (fLinkedProposalModelCore != null) {
+				LinkedProposalPositionGroupCore positionGroup= fLinkedProposalModelCore.getPositionGroup(KEY_FIELD_NAME_EXT + i, true);
 				for (int k= 0; k < fieldNameProposals.length; k++) {
-					positionGroup.addProposal(fieldNameProposals[k], null, fieldNameProposals.length - k);
+					positionGroup.addProposal(fieldNameProposals[k], fieldNameProposals.length - k);
 				}
 			}
 		}
@@ -727,9 +727,9 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 				newDeclaration.setJavadoc(javadoc);
 			}
 		}
-		if (fLinkedProposalModel != null) {
+		if (fLinkedProposalModelCore != null) {
 			addLinkedPosition(KEY_TYPE_NAME, newDeclaration.getName(), rewrite.getASTRewrite(), false);
-			ModifierCorrectionSubProcessor.installLinkedVisibilityProposals(fLinkedProposalModel, rewrite.getASTRewrite(), newDeclaration.modifiers(), false);
+			ModifierCorrectionSubProcessorCore.installLinkedVisibilityProposals(fLinkedProposalModelCore, rewrite.getASTRewrite(), newDeclaration.modifiers(), false);
 		}
 
 		return newDeclaration;
@@ -816,8 +816,8 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 	}
 
     private void addLinkedPosition(String key, ASTNode nodeToTrack, ASTRewrite rewrite, boolean isFirst) {
-    	if (fLinkedProposalModel != null) {
-    		fLinkedProposalModel.getPositionGroup(key, true).addPosition(rewrite.track(nodeToTrack), isFirst);
+    	if (fLinkedProposalModelCore != null) {
+    		fLinkedProposalModelCore.getPositionGroup(key, true).addPosition(rewrite.track(nodeToTrack), isFirst);
     	}
     }
 
@@ -903,12 +903,12 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     	    		SimpleName newSIArgument= ast.newSimpleName(paramName);
 					superConstructorInvocation.arguments().add(newSIArgument);
 
-					if (fLinkedProposalModel != null) {
-						LinkedProposalPositionGroup positionGroup= fLinkedProposalModel.getPositionGroup(KEY_PARAM_NAME_CONST+ String.valueOf(i), true);
+					if (fLinkedProposalModelCore != null) {
+						LinkedProposalPositionGroupCore positionGroup= fLinkedProposalModelCore.getPositionGroup(KEY_PARAM_NAME_CONST+ String.valueOf(i), true);
 						positionGroup.addPosition(astRewrite.track(param.getName()), false);
 						positionGroup.addPosition(astRewrite.track(newSIArgument), false);
 	        	        for (int k= 0; k < nameProposals.length; k++) {
-	        	        	positionGroup.addProposal(nameProposals[k], null, nameProposals.length - k);
+	        	        	positionGroup.addProposal(nameProposals[k], nameProposals.length - k);
 						}
 					}
     	        }
@@ -931,15 +931,15 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     		SimpleName paramNameNode= ast.newSimpleName(paramName);
 			newStatements.add(newFieldAssignment(ast, fieldNameNode, paramNameNode, useThisAccess || newParameterNames.contains(fieldName)));
 
-			if (fLinkedProposalModel != null) {
-				LinkedProposalPositionGroup positionGroup= fLinkedProposalModel.getPositionGroup(KEY_PARAM_NAME_EXT+ String.valueOf(i), true);
+			if (fLinkedProposalModelCore != null) {
+				LinkedProposalPositionGroupCore positionGroup= fLinkedProposalModelCore.getPositionGroup(KEY_PARAM_NAME_EXT+ String.valueOf(i), true);
 				positionGroup.addPosition(astRewrite.track(param.getName()), false);
 				positionGroup.addPosition(astRewrite.track(paramNameNode), false);
     	        for (int k= 0; k < paramNameProposals.length; k++) {
-    	        	positionGroup.addProposal(paramNameProposals[k], null, paramNameProposals.length - k);
+    	        	positionGroup.addProposal(paramNameProposals[k], paramNameProposals.length - k);
 				}
 
-    	        fLinkedProposalModel.getPositionGroup(KEY_FIELD_NAME_EXT + i, true).addPosition(astRewrite.track(fieldNameNode), false);
+    	        fLinkedProposalModelCore.getPositionGroup(KEY_FIELD_NAME_EXT + i, true).addPosition(astRewrite.track(fieldNameNode), false);
 			}
 		}
 

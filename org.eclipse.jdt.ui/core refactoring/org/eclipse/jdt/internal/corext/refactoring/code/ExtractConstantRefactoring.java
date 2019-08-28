@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -110,7 +110,7 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-import org.eclipse.jdt.internal.ui.text.correction.ModifierCorrectionSubProcessor;
+import org.eclipse.jdt.internal.ui.text.correction.ModifierCorrectionSubProcessorCore;
 
 public class ExtractConstantRefactoring extends Refactoring {
 
@@ -302,7 +302,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 			if (isInTypeDeclarationAnnotation(getSelectedExpression().getAssociatedNode())) {
 				fVisibility= JdtFlags.VISIBILITY_STRING_PACKAGE;
 			}
-			
+
 			ITypeBinding targetType= getContainingTypeBinding();
 			if (targetType.isInterface()) {
 				fTargetIsInterface= true;
@@ -557,7 +557,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 				}
 			}
 			boolean isInterface= parent.resolveBinding() != null && parent.resolveBinding().isInterface();
-			ModifierCorrectionSubProcessor.installLinkedVisibilityProposals(fLinkedProposalModel, rewrite, fieldDeclaration.modifiers(), isInterface);
+			ModifierCorrectionSubProcessorCore.installLinkedVisibilityProposals(fLinkedProposalModel, rewrite, fieldDeclaration.modifiers(), isInterface);
 		}
 	}
 
@@ -762,7 +762,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 			EnumDeclaration enumDeclaration= (EnumDeclaration) containingType;
 			scope.addAll(enumDeclaration.enumConstants());
 		}
-		
+
 		for (Iterator<IExtendedModifier> iter= containingType.modifiers().iterator(); iter.hasNext();) {
 			IExtendedModifier modifier= iter.next();
 			if (modifier instanceof Annotation) {

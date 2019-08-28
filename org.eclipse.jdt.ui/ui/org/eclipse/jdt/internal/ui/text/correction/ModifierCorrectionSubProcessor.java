@@ -13,6 +13,7 @@
  *     Benjamin Muskalla <bmuskalla@innoopract.com> - [quick fix] 'Remove invalid modifiers' does not appear for enums and annotations - https://bugs.eclipse.org/bugs/show_bug.cgi?id=110589
  *     Benjamin Muskalla <b.muskalla@gmx.net> - [quick fix] Quick fix for missing synchronized modifier - https://bugs.eclipse.org/bugs/show_bug.cgi?id=245250
  *     Rabea Gransberger <rgransberger@gmx.de> - [quick fix] Fix several visibility issues - https://bugs.eclipse.org/394692
+ *     Microsoft Corporation - split into ModifierCorrectionSubProcessorCore in core manipulation
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
@@ -25,17 +26,6 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-
-import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.ReplaceEdit;
-import org.eclipse.text.edits.TextEdit;
-
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.link.LinkedModeModel;
-import org.eclipse.jface.text.link.LinkedPosition;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
@@ -49,7 +39,6 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -57,7 +46,6 @@ import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
-import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.NameQualifiedType;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
@@ -70,7 +58,6 @@ import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.core.formatter.IndentManipulation;
 
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
@@ -83,8 +70,6 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.fix.Java50Fix;
-import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
-import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup;
 import org.eclipse.jdt.internal.corext.fix.UnimplementedCodeFix;
 import org.eclipse.jdt.internal.corext.fix.UnimplementedCodeFixCore;
 import org.eclipse.jdt.internal.corext.fix.UnimplementedCodeFixCore.MakeTypeAbstractOperation;
@@ -92,7 +77,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
@@ -914,97 +898,4 @@ public class ModifierCorrectionSubProcessor {
 			proposals.add(new ModifierChangeCorrectionProposal(label, cu, binding, selectedNode, modifier, 0, IProposalRelevance.ADD_METHOD_MODIFIER, image));
 		}
 	}
-
-	public static final String KEY_MODIFIER= "modifier"; //$NON-NLS-1$
-
-	private static class ModifierLinkedModeProposal extends LinkedProposalPositionGroup.Proposal {
-
-		private final int fModifier;
-
-		public ModifierLinkedModeProposal(int modifier, int relevance) {
-			super(null, null, relevance);
-			fModifier= modifier;
-		}
-
-		@Override
-		public String getAdditionalProposalInfo() {
-			return getDisplayString();
-		}
-
-		@Override
-		public String getDisplayString() {
-			if (fModifier == 0) {
-				return CorrectionMessages.ModifierCorrectionSubProcessor_default_visibility_label;
-			} else {
-				return ModifierKeyword.fromFlagValue(fModifier).toString();
-			}
-		}
-
-		@Override
-		public TextEdit computeEdits(int offset, LinkedPosition currentPosition, char trigger, int stateMask, LinkedModeModel model) throws CoreException {
-			try {
-				IDocument document= currentPosition.getDocument();
-				MultiTextEdit edit= new MultiTextEdit();
-				int documentLen= document.getLength();
-				if (fModifier == 0) {
-					int end= currentPosition.offset + currentPosition.length; // current end position
-					int k= end;
-					while (k < documentLen && IndentManipulation.isIndentChar(document.getChar(k))) {
-						k++;
-					}
-					// first remove space then replace range (remove space can destroy empty position)
-					edit.addChild(new ReplaceEdit(end, k - end, new String())); // remove extra spaces
-					edit.addChild(new ReplaceEdit(currentPosition.offset, currentPosition.length, new String()));
-				} else {
-					// first then replace range the insert space (insert space can destroy empty position)
-					edit.addChild(new ReplaceEdit(currentPosition.offset, currentPosition.length, ModifierKeyword.fromFlagValue(fModifier).toString()));
-					int end= currentPosition.offset + currentPosition.length; // current end position
-					if (end < documentLen && !Character.isWhitespace(document.getChar(end))) {
-						edit.addChild(new ReplaceEdit(end, 0, String.valueOf(' '))); // insert extra space
-					}
-				}
-				return edit;
-			} catch (BadLocationException e) {
-				throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, e.getMessage(), e));
-			}
-		}
-	}
-
-	public static void installLinkedVisibilityProposals(LinkedProposalModel linkedProposalModel, ASTRewrite rewrite, List<IExtendedModifier> modifiers, boolean inInterface, String groupId) {
-		ASTNode modifier= findVisibilityModifier(modifiers);
-		if (modifier != null) {
-			int selected= ((Modifier) modifier).getKeyword().toFlagValue();
-
-			LinkedProposalPositionGroup positionGroup= linkedProposalModel.getPositionGroup(groupId, true);
-			positionGroup.addPosition(rewrite.track(modifier), false);
-			positionGroup.addProposal(new ModifierLinkedModeProposal(selected, 10));
-
-			// add all others
-			int[] flagValues= inInterface ? new int[] { Modifier.PUBLIC, 0 } : new int[] { Modifier.PUBLIC, 0, Modifier.PROTECTED, Modifier.PRIVATE };
-			for (int i= 0; i < flagValues.length; i++) {
-				if (flagValues[i] != selected) {
-					positionGroup.addProposal(new ModifierLinkedModeProposal(flagValues[i], 9 - i));
-				}
-			}
-		}
-	}
-
-	public static void installLinkedVisibilityProposals(LinkedProposalModel linkedProposalModel, ASTRewrite rewrite, List<IExtendedModifier> modifiers, boolean inInterface) {
-		ModifierCorrectionSubProcessor.installLinkedVisibilityProposals(linkedProposalModel, rewrite, modifiers, inInterface, KEY_MODIFIER);
-	}
-
-	private static Modifier findVisibilityModifier(List<IExtendedModifier> modifiers) {
-		for (int i= 0; i < modifiers.size(); i++) {
-			IExtendedModifier curr= modifiers.get(i);
-			if (curr instanceof Modifier) {
-				Modifier modifier= (Modifier) curr;
-				ModifierKeyword keyword= modifier.getKeyword();
-				if (keyword == ModifierKeyword.PUBLIC_KEYWORD || keyword == ModifierKeyword.PROTECTED_KEYWORD || keyword == ModifierKeyword.PRIVATE_KEYWORD) {
-					return modifier;
-				}
-			}
-		}
-		return null;
-	}
-
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -75,7 +75,7 @@ import org.eclipse.jdt.internal.corext.dom.BodyDeclarationRewrite;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 
 import org.eclipse.jdt.internal.ui.text.correction.JavadocTagsSubProcessor;
-import org.eclipse.jdt.internal.ui.text.correction.ModifierCorrectionSubProcessor;
+import org.eclipse.jdt.internal.ui.text.correction.ModifierCorrectionSubProcessorCore;
 
 public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 
@@ -186,7 +186,7 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 				ListRewrite tagsRewriter= rewrite.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY);
 				JavadocTagsSubProcessor.insertTag(tagsRewriter, newTagElement, leadingNames);
 			}
-			
+
 			addLinkedPosition(rewrite.track(newDecl.getType()), false, KEY_TYPE);
 			addLinkedPosition(rewrite.track(newDecl.getName()), false, KEY_NAME);
 
@@ -227,8 +227,8 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 		}
 		return false;
 	}
-	
-	
+
+
 	private ASTRewrite doAddLocal(CompilationUnit cu) {
 		AST ast= cu.getAST();
 
@@ -300,17 +300,17 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 			setEndPosition(rewrite.track(expression));
 
 			return rewrite;
-			
+
 		} else if ((dominant != dominantStatement) && isEnhancedForStatementVariable(dominantStatement, node)) {
 			//	for (x: collectionOfT) -> for (T x: collectionOfT)
-			
+
 			EnhancedForStatement enhancedForStatement= (EnhancedForStatement) dominantStatement;
 			SingleVariableDeclaration parameter= enhancedForStatement.getParameter();
 			Expression expression= enhancedForStatement.getExpression();
-			
+
 			SimpleName newName= (SimpleName) rewrite.createMoveTarget(node);
 			rewrite.set(parameter, SingleVariableDeclaration.NAME_PROPERTY, newName, null);
-			
+
 			ITypeBinding elementBinding= null;
 			ITypeBinding typeBinding= expression.resolveTypeBinding();
 			if (typeBinding != null) {
@@ -335,15 +335,15 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 			}
 
 			rewrite.set(parameter, SingleVariableDeclaration.TYPE_PROPERTY, type, null);
-			
+
 			addLinkedPosition(rewrite.track(type), false, KEY_TYPE);
 			addLinkedPosition(rewrite.track(newName), true, KEY_NAME);
-			
+
 			setEndPosition(rewrite.track(expression));
-			
+
 			return rewrite;
 		}
-		
+
 		//	foo(x) -> int x; foo(x)
 
 		VariableDeclarationFragment newDeclFrag= ast.newVariableDeclarationFragment();
@@ -464,7 +464,7 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 			ListRewrite listRewriter= rewrite.getListRewrite(newTypeDecl, property);
 			listRewriter.insertAt(newDecl, insertIndex, null);
 
-			ModifierCorrectionSubProcessor.installLinkedVisibilityProposals(getLinkedProposalModel(), rewrite, newDecl.modifiers(), fSenderBinding.isInterface());
+			ModifierCorrectionSubProcessorCore.installLinkedVisibilityProposals(getLinkedProposalModel(), rewrite, newDecl.modifiers(), fSenderBinding.isInterface());
 
 			addLinkedPosition(rewrite.track(newDecl.getType()), false, KEY_TYPE);
 			if (!isInDifferentCU) {

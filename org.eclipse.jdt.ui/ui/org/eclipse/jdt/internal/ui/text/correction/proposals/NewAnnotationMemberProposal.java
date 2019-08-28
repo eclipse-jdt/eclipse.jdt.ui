@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -40,7 +40,7 @@ import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 
-import org.eclipse.jdt.internal.ui.text.correction.ModifierCorrectionSubProcessor;
+import org.eclipse.jdt.internal.ui.text.correction.ModifierCorrectionSubProcessorCore;
 
 public class NewAnnotationMemberProposal extends LinkedCorrectionProposal {
 
@@ -71,7 +71,7 @@ public class NewAnnotationMemberProposal extends LinkedCorrectionProposal {
 
 		if (newTypeDecl instanceof AnnotationTypeDeclaration) {
 			AnnotationTypeDeclaration newAnnotationTypeDecl= (AnnotationTypeDeclaration) newTypeDecl;
-			
+
 			ASTRewrite rewrite= ASTRewrite.create(astRoot.getAST());
 
 			AnnotationTypeMemberDeclaration newStub= getStub(rewrite, newAnnotationTypeDecl);
@@ -96,7 +96,7 @@ public class NewAnnotationMemberProposal extends LinkedCorrectionProposal {
 
 		decl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, evaluateModifiers(targetTypeDecl)));
 
-		ModifierCorrectionSubProcessor.installLinkedVisibilityProposals(getLinkedProposalModel(), rewrite, decl.modifiers(), true);
+		ModifierCorrectionSubProcessorCore.installLinkedVisibilityProposals(getLinkedProposalModel(), rewrite, decl.modifiers(), true);
 
 		decl.setName(newNameNode);
 
