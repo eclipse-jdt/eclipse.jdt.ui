@@ -480,6 +480,8 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 
 						if (nameBinding.equals(fIndexBinding)) {
 							if (node.getLocationInParent() == ArrayAccess.INDEX_PROPERTY) {
+								if (fIsCollection)
+									throw new InvalidBodyError();
 								ArrayAccess arrayAccess= (ArrayAccess)node.getParent();
 								Expression array= arrayAccess.getArray();
 								if (array instanceof QualifiedName) {
@@ -596,7 +598,7 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 						return super.visit(node);
 
 					IBinding binding= getBinding(node.getArray());
-					if (fArrayBinding.equals(binding)) {
+					if (!fIsCollection && fArrayBinding.equals(binding)) {
 						IBinding index= getBinding(node.getIndex());
 						if (fIndexBinding.equals(index)) {
 							if (node.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
