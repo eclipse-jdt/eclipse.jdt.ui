@@ -24,6 +24,7 @@ import org.eclipse.text.edits.TextEditGroup;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.Assignment;
@@ -540,7 +541,9 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 								ITypeBinding[] parms= methodBinding.getParameterTypes();
 								if (!fIsCollection || !GET_QUERY.equals(method.getName().getFullyQualifiedName()) ||
 										parms.length != 1 || !parms[0].getName().equals("int") || //$NON-NLS-1$
-										!fSizeMethodBinding.getDeclaringClass().equals(methodBinding.getDeclaringClass()))
+										!fSizeMethodBinding.getDeclaringClass().equals(methodBinding.getDeclaringClass()) ||
+										fSizeMethodAccess.getExpression() == null ||
+										!fSizeMethodAccess.getExpression().subtreeMatch(new ASTMatcher(), method.getExpression()))
 									throw new InvalidBodyError();
 								fGetMethodBinding= methodBinding;
 							} else {

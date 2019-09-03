@@ -1080,6 +1080,30 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 	}
 
+	public void testMultipleCollectionsNotAccepted() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo(Map<String, String> map) {\n");
+        buf.append("        List<File> a = new ArrayList<>();\n");
+        buf.append("        List<File> b = new ArrayList<>();\n");
+        buf.append("        for (int i = 0; i < a.size(); i++) {\n");
+        buf.append("            System.out.print(a.get(i) + \" \" + b.get(i));\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(buf, cu);
+
+		assertNull(fConvertLoopProposal);
+
+		assertCorrectLabels(proposals);
+	}
+
 	public void testArrayAccessWithCollections() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
