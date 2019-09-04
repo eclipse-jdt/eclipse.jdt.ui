@@ -868,7 +868,7 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 			@Override
 			public boolean visit(MethodInvocation node) {
 				IBinding binding= node.resolveMethodBinding();
-				if (binding != null && getBinding.equals(binding)) {
+				if (binding != null && binding.equals(getBinding)) {
 					List<Expression> args = node.arguments();
 					if (args.size() == 1 && args.get(0) instanceof SimpleName
 							&& indexBinding.equals(((SimpleName)args.get(0)).resolveBinding())) {

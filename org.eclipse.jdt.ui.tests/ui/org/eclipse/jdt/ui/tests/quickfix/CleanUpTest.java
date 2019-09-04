@@ -4267,6 +4267,43 @@ public class CleanUpTest extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 
+	public void testBug550726() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("import java.io.File;\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class A {\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        List<File> a = new ArrayList<>();\n");
+		buf.append("        for (int i = 0; i < a.size(); i++) {\n");
+		buf.append("            System.out.print(a);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("import java.io.File;\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class A {\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        List<File> a = new ArrayList<>();\n");
+		buf.append("        for (File element : a) {\n");
+		buf.append("            System.out.print(a);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+	}
+
 	public void testJava50ForLoopBug154939() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
