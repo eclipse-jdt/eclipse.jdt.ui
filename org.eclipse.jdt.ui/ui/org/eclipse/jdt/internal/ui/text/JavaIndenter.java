@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -383,8 +383,8 @@ public final class JavaIndenter {
 	private int fPreviousPos;
 	/** The most recent token. */
 	private int fToken;
-	/** The line of <code>fPosition</code>. */
-	private int fLine;
+	/** The scan position of most resent token. */
+	private int fTokenPos;
 	/**
 	 * The scanner we will use to scan the document. It has to be installed
 	 * on the same document as the one we get.
@@ -880,7 +880,7 @@ public final class JavaIndenter {
 						break;
 
 					case Symbols.TokenPLUS:
-						if ((offsetLine - fLine) > 1) {
+						if ((offsetLine - lineOfToken()) > 1) {
 							return false;
 						}
 						break;
@@ -899,7 +899,7 @@ public final class JavaIndenter {
 						}
 					case Symbols.TokenLBRACKET:
 					case Symbols.TokenEOF:
-						if ((offsetLine - fLine) == 1)
+						if ((offsetLine - lineOfToken()) == 1)
 							return true;
 						else
 							return false;
@@ -972,7 +972,7 @@ public final class JavaIndenter {
 			if (skipScope(Symbols.TokenLBRACE, Symbols.TokenRBRACE)) {
 				try {
 					// align with the opening brace that is on a line by its own
-					int lineOffset= fDocument.getLineOffset(fLine);
+					int lineOffset= fDocument.getLineInformationOfOffset(fTokenPos).getOffset();
 					if (lineOffset <= fPosition && fDocument.get(lineOffset, fPosition - lineOffset).trim().length() == 0)
 						return fPosition;
 				} catch (BadLocationException e) {
@@ -1096,8 +1096,8 @@ public final class JavaIndenter {
 					fIndent= fPrefs.prefContinuationIndent;
 					return fPosition;
 				}
-				int line= fLine;
 				int rParen= fPosition;
+				int tokenPos = fTokenPos;
 				if (skipScope(Symbols.TokenLPAREN, Symbols.TokenRPAREN)) {
 					int scope= fPosition;
 					nextToken();
@@ -1124,7 +1124,7 @@ public final class JavaIndenter {
 				}
 				// restore
 				fPosition= offset;
-				fLine= line;
+				fTokenPos = tokenPos;
 
 				return skipToPreviousListItemOrListStart();
 			case Symbols.TokenRETURN:
@@ -1520,13 +1520,13 @@ public final class JavaIndenter {
 	 * that has its own indentation, or the list introduction start.
 	 */
 	private int skipToPreviousListItemOrListStart() {
-		int startLine= fLine;
+		int startLine= lineOfToken();
 		int startPosition= fPosition;
 		while (true) {
 			nextToken();
 
 			// if any line item comes with its own indentation, adapt to it
-			if (fLine < startLine) {
+			if (lineOfToken() < startLine) {
 				try {
 					int lineOffset= fDocument.getLineOffset(startLine);
 					int bound= Math.min(fDocument.getLength(), startPosition + 1);
@@ -1544,7 +1544,7 @@ public final class JavaIndenter {
 				case Symbols.TokenRBRACE:
 				case Symbols.TokenGREATERTHAN:
 					skipScope();
-					startLine= fLine;
+					startLine= lineOfToken();
 					startPosition= fPosition;
 					break;
 
@@ -1976,8 +1976,8 @@ public final class JavaIndenter {
 
 	/**
 	 * Reads the next token in backward direction from the heuristic scanner
-	 * and sets the fields <code>fToken, fPreviousPosition</code> and <code>fPosition</code>
-	 * accordingly.
+	 * and sets the fields <code>fToken, fTokenPos, fPreviousPosition</code>
+	 * and <code>fPosition</code> accordingly.
 	 */
 	private void nextToken() {
 		nextToken(fPosition);
@@ -1985,7 +1985,7 @@ public final class JavaIndenter {
 
 	/**
 	 * Reads the next token in backward direction of <code>start</code> from
-	 * the heuristic scanner and sets the fields <code>fToken, fPreviousPosition</code>
+	 * the heuristic scanner and sets the fields <code>fToken, fTokenPos, fPreviousPosition</code>
 	 * and <code>fPosition</code> accordingly.
 	 *
 	 * @param start the start offset from which to scan backwards
@@ -1994,10 +1994,19 @@ public final class JavaIndenter {
 		fToken= fScanner.previousToken(start - 1, JavaHeuristicScanner.UNBOUND);
 		fPreviousPos= start;
 		fPosition= fScanner.getPosition() + 1;
+		fTokenPos = fPosition;
+	}
+
+	/**
+	 * Get line in document for most recent token.
+	 *
+	 * @return document line for <code>fTokenPos</code> or <code>-1</code> if invalid
+	 */
+	private int lineOfToken() {
 		try {
-			fLine= fDocument.getLineOfOffset(fPosition);
+			return fDocument.getLineOfOffset(fTokenPos);
 		} catch (BadLocationException e) {
-			fLine= -1;
+			return -1;
 		}
 	}
 
