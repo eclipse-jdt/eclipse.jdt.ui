@@ -26,6 +26,7 @@ import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateContextType;
 
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
 import org.eclipse.jdt.internal.corext.template.java.JavaContext;
@@ -98,8 +99,9 @@ public final class ChainCompletionTemplateBuilder {
 	private static void appendParameters(final StringBuilder sb, final IMethod method,
 			final Map<String, Integer> varNames) {
 		sb.append("("); //$NON-NLS-1$
-		for (final String parameter : method.getParameterTypes()) {
-			String parameterName= parameter.substring(0, 1).toLowerCase() + parameter.substring(1);
+		for (final String typeSig : method.getParameterTypes()) {
+			String parameterName= Signature.getSignatureSimpleName(Signature.getElementType(typeSig));
+			parameterName= parameterName.substring(0, 1).toLowerCase() + parameterName.substring(1);
 			int index= parameterName.indexOf('<');
 			if (index != -1) {
 				parameterName= parameterName.substring(0, index);

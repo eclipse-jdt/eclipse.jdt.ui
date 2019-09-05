@@ -156,8 +156,8 @@ public class ChainCompletionProposalComputer implements IJavaCompletionProposalC
 
 		final List<ChainType> expectedTypes= ChainElementAnalyzer.resolveBindingsForExpectedTypes(ctx.getProject(), ctx.getCoreContext());
 		final ChainFinder finder= new ChainFinder(expectedTypes, Arrays.asList(excludedTypes), invocationType);
+		final ExecutorService executor= Executors.newSingleThreadExecutor();
 		try {
-			ExecutorService executor= Executors.newSingleThreadExecutor();
 			Future<?> future= executor.submit(() -> {
 				if (findEntrypoints()) {
 					finder.startChainSearch(entrypoints, maxChains, minDepth, maxDepth);
@@ -166,6 +166,7 @@ public class ChainCompletionProposalComputer implements IJavaCompletionProposalC
 			long timeout= Long.parseLong(JavaManipulation.getPreference(PreferenceConstants.PREF_CHAIN_TIMEOUT, ctx.getProject()));
 			future.get(timeout, TimeUnit.SECONDS);
 		} catch (final Exception e) {
+			executor.shutdownNow();
 			setError("Timeout during call chain computation."); //$NON-NLS-1$
 		}
 		return buildCompletionProposals(finder.getChains());
