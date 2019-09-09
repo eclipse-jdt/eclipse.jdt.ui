@@ -51,6 +51,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -103,7 +104,7 @@ public class JUnitPlugin extends AbstractUIPlugin {
 	public static IWorkbenchWindow getActiveWorkbenchWindow() {
 		if (fgPlugin == null)
 			return null;
-		IWorkbench workBench= fgPlugin.getWorkbench();
+		IWorkbench workBench= PlatformUI.getWorkbench();
 		if (workBench == null)
 			return null;
 		return workBench.getActiveWorkbenchWindow();

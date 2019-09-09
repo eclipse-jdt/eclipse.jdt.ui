@@ -1493,6 +1493,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String PullUpRefactoring_moving_static_method_to_interface;
 
+	public static String PullUpRefactoring_moving_fromto_default_package;
+
 	public static String PullUPRefactoring_no_all_binary;
 
 	public static String PullUpRefactoring_no_java_lang_Object;

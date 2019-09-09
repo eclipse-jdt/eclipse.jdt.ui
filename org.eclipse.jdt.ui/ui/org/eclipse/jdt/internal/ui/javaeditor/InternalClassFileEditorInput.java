@@ -177,6 +177,7 @@ public class InternalClassFileEditorInput implements IClassFileEditorInput, IPer
 		FileOutputStream writer= null;
 		try {
 			File file= File.createTempFile(classFile.getElementName(), ".class"); //$NON-NLS-1$
+			file.deleteOnExit();
 			byte[] bytes= classFile.getBytes();
 			writer= new FileOutputStream(file);
 			writer.write(bytes);

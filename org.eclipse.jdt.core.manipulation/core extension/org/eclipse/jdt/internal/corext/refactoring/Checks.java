@@ -52,7 +52,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
@@ -391,7 +390,7 @@ public class Checks {
 	public static boolean isEnumCase(ASTNode node) {
 		if (node instanceof SwitchCase) {
 			final SwitchCase caze= (SwitchCase) node;
-			if (node.getAST().apiLevel() == AST.JLS13) {
+			if (node.getAST().isPreviewEnabled()) {
 				List<Expression> expressions= caze.expressions();
 				boolean isEnumConst= true;
 				for (Expression expression : expressions) {

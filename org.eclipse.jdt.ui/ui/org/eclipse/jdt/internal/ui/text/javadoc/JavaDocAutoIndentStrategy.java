@@ -37,6 +37,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IModuleDescription;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -216,6 +217,9 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 		case IJavaElement.METHOD:
 			return createMethodTags(document, command, indentation, lineDelimiter, (IMethod) element);
 
+		case IJavaElement.JAVA_MODULE:
+			return createModuleTags(document, command, indentation, lineDelimiter, (IModuleDescription) element);
+
 		default:
 			return null;
 		}
@@ -266,6 +270,19 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 		}
 		return null;
 	}
+
+	private String createModuleTags(IDocument document, DocumentCommand command, String indentation, String lineDelimiter, IModuleDescription module)
+			throws CoreException, BadLocationException
+		{
+			String comment= CodeGeneration.getModuleComment(module.getCompilationUnit(), module, lineDelimiter);
+			if (comment != null) {
+				boolean javadocComment= comment.startsWith("/**"); //$NON-NLS-1$
+				if (!isFirstComment(document, command, module, javadocComment))
+					return null;
+				return prepareTemplateComment(comment.trim(), indentation, module.getJavaProject(), lineDelimiter);
+			}
+			return null;
+		}
 
 	private String createMethodTags(IDocument document, DocumentCommand command, String indentation, String lineDelimiter, IMethod method)
 		throws CoreException, BadLocationException

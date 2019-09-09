@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -111,6 +111,43 @@ public class PullUpTests extends RefactoringTest {
 		String expected= getFileContents(getOutputTestFileName("A"));
 		String actual= cu.getSource();
 		assertEqualLines(expected, actual);
+	}
+
+	private void fieldMethodHelper2(String[] fieldNames, String[] methodNames, String[][] signatures, boolean deleteAllInSourceType, boolean deleteAllMatchingMethods) throws Exception {
+		ICompilationUnit cuQ= createCUfromTestFile(getPackageQ(), "Asuper", "q/");
+		ICompilationUnit cuP= createCUfromTestFile(getPackageP(), "A", "p/");
+		createCUfromTestFile(getPackageP(), "C", "p/");
+		createCUfromTestFile(getPackageQ(), "C", "q/");
+
+		IType type= getType(cuP, "A");
+		IField[] fields= getFields(type, fieldNames);
+		IMethod[] methods= getMethods(type, methodNames, signatures);
+
+		PullUpRefactoringProcessor processor= createRefactoringProcessor(merge(methods, fields));
+
+		Refactoring ref= processor.getRefactoring();
+		RefactoringStatus checkInitialConditions= ref.checkInitialConditions(new NullProgressMonitor());
+		assertTrue("activation", checkInitialConditions.isOK());
+		setSuperclassAsTargetClass(processor);
+
+		if (deleteAllInSourceType) {
+			processor.setDeletedMethods(methods);
+		}
+		if (deleteAllMatchingMethods) {
+			processor.setDeletedMethods(getMethods(processor.getMatchingElements(new NullProgressMonitor(), false)));
+		}
+
+		RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
+		assertTrue("precondition was supposed to pass", !checkInputResult.hasError());
+		performChange(ref, false);
+
+		String expected= getFileContents(getOutputTestFileName("A", "p/"));
+		String actual= cuP.getSource();
+		assertEqualLines(expected, actual);
+
+		String expectedSuper= getFileContents(getOutputTestFileName("Asuper", "q/"));
+		String actualSuper= cuQ.getSource();
+		assertEqualLines(expectedSuper, actualSuper);
 	}
 
 	private IType[] getPossibleTargetClasses(PullUpRefactoringProcessor processor) throws JavaModelException {
@@ -1398,6 +1435,23 @@ public class PullUpTests extends RefactoringTest {
 	public void testFieldMethod0() throws Exception{
 //		printTestDisabledMessage("bug 23324 ");
 		fieldMethodHelper1(new String[]{"f"}, new String[]{"m"}, new String[][]{new String[0]}, true, false);
+	}
+
+	//---------------------------------------------------------
+	public void testFieldMethod1() throws Exception {
+		fieldMethodHelper2(new String[] { "c" }, new String[] {}, new String[][] { new String[0] }, true, false);
+	}
+
+	public void testFieldMethod2() throws Exception {
+		fieldMethodHelper2(new String[] { "c" }, new String[] {}, new String[][] { new String[0] }, true, false);
+	}
+
+	public void testFieldMethod3() throws Exception {
+		fieldMethodHelper2(new String[] { "c" }, new String[] {}, new String[][] { new String[0] }, true, false);
+	}
+
+	public void testFieldMethod4() throws Exception {
+		fieldMethodHelper2(new String[] { "c" }, new String[] {}, new String[][] { new String[0] }, true, false);
 	}
 
 	//----

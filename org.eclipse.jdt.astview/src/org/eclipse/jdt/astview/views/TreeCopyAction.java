@@ -18,8 +18,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.jdt.astview.ASTViewPlugin;
-
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
@@ -30,6 +28,7 @@ import org.eclipse.jface.action.Action;
 
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbenchCommandConstants;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionFactory;
 
 
@@ -88,7 +87,7 @@ public class TreeCopyAction extends Action {
 		setText("&Copy"); //$NON-NLS-1$
 		setToolTipText("Copy to Clipboard"); //$NON-NLS-1$
 		setEnabled(false);
-		setImageDescriptor(ASTViewPlugin.getDefault().getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_COPY));
+		setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_COPY));
 		setId(ActionFactory.COPY.getId());
 		setActionDefinitionId(IWorkbenchCommandConstants.EDIT_COPY);
 	}

@@ -25,6 +25,7 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 
 import org.eclipse.ui.IWorkbenchWizard;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ICreateTargetQueries;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ICreateTargetQuery;
@@ -81,7 +82,7 @@ public class CreateTargetQueries implements ICreateTargetQueries {
 	}
 
 	private IWizardPage[] openNewElementWizard(IWorkbenchWizard wizard, Shell shell, Object selection) {
-		wizard.init(JavaPlugin.getDefault().getWorkbench(), new StructuredSelection(selection));
+		wizard.init(PlatformUI.getWorkbench(), new StructuredSelection(selection));
 
 		WizardDialog dialog= new WizardDialog(shell, wizard);
 		PixelConverter converter= new PixelConverter(JFaceResources.getDialogFont());

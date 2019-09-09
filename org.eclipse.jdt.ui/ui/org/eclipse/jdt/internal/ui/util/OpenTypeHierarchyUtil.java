@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.WorkbenchException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -93,7 +94,7 @@ public class OpenTypeHierarchyUtil {
 	}
 
 	private static TypeHierarchyViewPart openInPerspective(IWorkbenchWindow window, IJavaElement[] input) throws WorkbenchException, JavaModelException {
-		IWorkbench workbench= JavaPlugin.getDefault().getWorkbench();
+		IWorkbench workbench= PlatformUI.getWorkbench();
 		IJavaElement perspectiveInput= input.length == 1 ? input[0] : null;
 
 		if (perspectiveInput != null && input[0] instanceof IMember) {

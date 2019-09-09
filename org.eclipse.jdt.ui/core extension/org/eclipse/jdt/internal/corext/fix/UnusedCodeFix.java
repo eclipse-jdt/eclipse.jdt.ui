@@ -26,13 +26,16 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
@@ -42,6 +45,7 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -154,7 +158,7 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 
 	/**
 	 * Removes the unused type parameter.
-	 * 
+	 *
 	 */
 	private static class RemoveUnusedTypeParameterOperation extends CompilationUnitRewriteOperation {
 		private final SimpleName fUnusedName;
@@ -309,11 +313,51 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 				} else {
 					fragments= ((VariableDeclarationStatement) varDecl).fragments();
 				}
-				Expression initializer = frag.getInitializer();
+				Expression initializer= frag.getInitializer();
 				ArrayList<Expression> sideEffects= new ArrayList<>();
 				if (initializer != null) {
 					initializer.accept(new SideEffectFinder(sideEffects));
 				}
+
+				/*
+				 * Special case for when the variable initializer is a conditional expression.
+				 * Certain actions must be taken depending on where in the conditional the side effect expressions are located.
+				 */
+				if (initializer instanceof ConditionalExpression && varDecl instanceof VariableDeclarationStatement) {
+					AST ast= rewrite.getAST();
+					ConditionalExpression ce= (ConditionalExpression) initializer;
+
+					// check if side effects and both expressions are to be removed then we remove whole statement
+					if (fForceRemove || (!checkSideEffects(sideEffects) &&
+							!checkCondtionalExpression(ce.getThenExpression()) &&
+							!checkCondtionalExpression(ce.getElseExpression()))) {
+						rewrite.remove(varDecl, group);
+						return;
+					}
+
+					IfStatement ifStatement= ast.newIfStatement();
+					ifStatement.setExpression((Expression) rewrite.createCopyTarget(getExpressionWithoutParenthezis(ce.getExpression())));
+
+					Block thenBlock= ast.newBlock();
+					// check if 'then' block contains code to keep
+					if (checkCondtionalExpression(ce.getThenExpression())) {
+						ASTNode thenExpression= rewrite.createCopyTarget(getExpressionWithoutParenthezis(ce.getThenExpression()));
+						thenBlock.statements().add(ast.newExpressionStatement((Expression) thenExpression));
+					}
+					ifStatement.setThenStatement(thenBlock);
+
+					// check if 'else' block contains code to keep
+					if (checkCondtionalExpression(ce.getElseExpression())) {
+						Block elseBlock= ast.newBlock();
+						ASTNode elseExpression= rewrite.createCopyTarget(getExpressionWithoutParenthezis(ce.getElseExpression()));
+						elseBlock.statements().add(ast.newExpressionStatement((Expression) elseExpression));
+						ifStatement.setElseStatement(elseBlock);
+					}
+
+					rewrite.replace(varDecl, ifStatement, group);
+					return;
+				}
+
 				boolean sideEffectInitializer= sideEffects.size() > 0;
 				if (fragments.size() == fUnusedNames.length) {
 					if (fForceRemove) {
@@ -370,10 +414,47 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 			}
 		}
 
+		private static Expression getExpressionWithoutParenthezis(Expression expression) {
+			Expression currExpression= expression;
+			while (currExpression instanceof ParenthesizedExpression) {
+				currExpression= ((ParenthesizedExpression) currExpression).getExpression();
+			}
+			return currExpression;
+		}
+
+		/*
+		 * Return TRUE if the expression node type is a method, pre/posfix or assignment 
+		 */
+		private static boolean checkCondtionalExpression(Expression expression) {
+			int nodeType= getExpressionWithoutParenthezis(expression).getNodeType();
+			if (nodeType == ASTNode.METHOD_INVOCATION ||
+					nodeType == ASTNode.POSTFIX_EXPRESSION ||
+					nodeType == ASTNode.PREFIX_EXPRESSION ||
+					nodeType == ASTNode.ASSIGNMENT) {
+				return true;
+			}
+			return false;
+		}
+
+		/*
+		 * Return TRUE if any of the sideEffects expression node type is a method, pre/posfix or assignment 
+		 */
+		private static boolean checkSideEffects(List<Expression> sideEffects) {
+			if (sideEffects.isEmpty()) {
+				return false;
+			}
+			for (Expression expression : sideEffects) {
+				if (checkCondtionalExpression(expression)) {
+					return true;
+				}
+			}
+			return false;
+		}
+
 		private void splitUpDeclarations(ASTRewrite rewrite, TextEditGroup group, VariableDeclarationFragment frag, VariableDeclarationStatement originalStatement, List<Expression> sideEffects) {
 			if (sideEffects.size() > 0) {
 				ListRewrite statementRewrite= rewrite.getListRewrite(originalStatement.getParent(), (ChildListPropertyDescriptor) originalStatement.getLocationInParent());
-				
+
 				Statement previousStatement= originalStatement;
 				for (int i= 0; i < sideEffects.size(); i++) {
 					Expression sideEffect= sideEffects.get(i);
@@ -476,7 +557,7 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 					expression= childExpression;
 				}
 			}
-			
+
 			replaceCast(cast, expression, rewrite, group);
 		}
 	}
@@ -498,11 +579,11 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 			while (fUnnecessaryCasts.size() > 0) {
 				CastExpression castExpression= fUnnecessaryCasts.iterator().next();
 				fUnnecessaryCasts.remove(castExpression);
-				
+
 				/*
 				 * ASTRewrite doesn't allow replacing (deleting) of moved nodes. To solve problems
 				 * with nested casts, we need to replace all casts at once.
-				 * 
+				 *
 				 * The loop proceeds downwards to find the innermost expression that stays in the result (downChild)
 				 * and it also skips necessary parentheses.
 				 */
@@ -527,10 +608,10 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 						break;
 					}
 				}
-				
+
 				// downChild is the innermost CastExpression's expression, stripped of a necessary surrounding ParenthesizedExpression
 				// Move either downChild (if it doesn't need parentheses), or a parenthesized version if necessary
-				
+
 				replaceCast(castExpression, downChild, rewrite, group);
 			}
 		}
@@ -838,7 +919,7 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 	private static void replaceCast(CastExpression castExpression, Expression replacement, ASTRewrite rewrite, TextEditGroup group) {
 		boolean castEnclosedInNecessaryParentheses= castExpression.getParent() instanceof ParenthesizedExpression
 				&& NecessaryParenthesesChecker.needsParentheses(castExpression, castExpression.getParent().getParent(), castExpression.getParent().getLocationInParent());
-		
+
 		ASTNode toReplace= castEnclosedInNecessaryParentheses ? castExpression.getParent() : castExpression;
 		ASTNode move;
 		if (NecessaryParenthesesChecker.needsParentheses(replacement, toReplace.getParent(), toReplace.getLocationInParent())) {

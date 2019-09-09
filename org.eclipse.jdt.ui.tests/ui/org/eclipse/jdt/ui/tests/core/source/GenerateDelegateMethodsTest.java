@@ -761,6 +761,61 @@ public class GenerateDelegateMethodsTest extends SourceTestCase {
 				"", a.getSource());
 	}
 
+	/**
+	 * Test generation from interface both with and without default methods
+	 *
+	 * @throws Exception CoreException, JavaModelException or IOException
+	 *
+	 */
+	public void test12() throws Exception {
+
+		/*ICompilationUnit i= */fPackageP.createCompilationUnit("I.java", "package p;\r\n" +
+				"\r\n" +
+				"public interface I {\r\n" +
+				"	public void foo();\r\n" +
+				"	public default void bar(String s) {\r\n" +
+				"		if(s == null) {\r\n" +
+				"			return;\r\n" +
+				"		};\r\n" +
+				"	}\r\n" +
+				"}", true, null);
+
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
+				"\r\n" +
+				"public class A {\r\n" +
+				"	I i;\r\n" +
+				"}", true, null);
+
+		IType anonType= (IType) a.getElementAt(32);
+		IField theField= anonType.getField("i");
+
+		IType iType= fPackageP.getJavaProject().findType("p.I");
+		IMethod fooMethod= iType.getMethod("foo", new String[0]);
+		IMethod barMethod= iType.getMethod("bar", new String[] { "QString;" });
+
+		runOperation(anonType, new IField[] { theField, theField }, new IMethod[] { fooMethod, barMethod });
+
+		compareSource("package p;\n" +
+				"\n" +
+				"public class A {\n" +
+				"	I i;\n" +
+				"\n" +
+				"	/* (non-Javadoc)\n" +
+				"	 * @see p.I#foo()\n" +
+				"	 */\n" +
+				"	public void foo() {\n" +
+				"		i.foo();\n" +
+				"	}\n" +
+				"\n" +
+				"	/* (non-Javadoc)\n" +
+				"	 * @see p.I#bar(java.lang.String)\n" +
+				"	 */\n" +
+				"	public void bar(String s) {\n" +
+				"		i.bar(s);\n" +
+				"	}\n" +
+				"}", a.getSource());
+	}
+
 	public void testInsertAt() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package p;\n");

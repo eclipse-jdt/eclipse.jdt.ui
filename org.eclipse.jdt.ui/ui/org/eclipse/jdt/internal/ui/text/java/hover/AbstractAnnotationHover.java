@@ -261,7 +261,9 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			int trimWidth= getShell().computeTrim(0, 0, 0, 0).width;
 			Point constrainedSize= getShell().computeSize(constrains.x - trimWidth, SWT.DEFAULT, true);
 
-			int width= Math.min(preferedSize.x, constrainedSize.x);
+			// get minimum needed width within constrained size including the trim and add a little extra
+			// to ensure we don't get unnecessary wrapping of the text (4 is minimum for Windows)
+			int width= Math.min(preferedSize.x + trimWidth + 4, constrainedSize.x);
 			int height= Math.max(preferedSize.y, constrainedSize.y);
 
 			return new Point(width, height);
@@ -344,9 +346,10 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 				}
 			});
 
-			StyledText text= new StyledText(composite, SWT.MULTI | SWT.WRAP | SWT.READ_ONLY);
+			StyledText text= new StyledText(composite, SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI | SWT.WRAP | SWT.READ_ONLY);
 			GridData data= new GridData(SWT.FILL, SWT.FILL, true, true);
 			text.setLayoutData(data);
+			text.setAlwaysShowScrollBars(false);
 			String annotationText= annotation.getText();
 			if (annotationText != null)
 				text.setText(annotationText);

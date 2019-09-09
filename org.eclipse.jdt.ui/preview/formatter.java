@@ -547,44 +547,58 @@ Map<X<?>, Y<? extends K, ? super V>> t;
 class BLANK_LINES {
 //--PREVIEW--START--section-blank-lines
 package foo.bar.baz;
+
+/* example comment */
+
 import java.util.List;
-import java.util.Vector;
+import java.util.Arrays;
 
 import org.eclipse.jdt.core.dom.ASTParser;
 
-import java.net.Socket;
-public class Another {}
 public class Example {
-	public static class Pair {
-		public String first;
-		public String second;
-// Between here...
-
-
-
-
-
-
-
-
-
-
-// ...and here are 10 blank lines
-	};
-	private LinkedList fList;
-	public int counter;
-	public Example(LinkedList list) {
-		fList= list;
-		counter= 0;
+	public interface ExampleProvider {
+		Example getExample();
+		List<Example> getManyExamples();
 	}
-	public void push(Pair p) {
-		fList.add(p);
-		++counter;
+	public class Pair {
+		String left;
+		String right;
 	}
-	public Object pop() {
-		--counter;
-		return (Pair)fList.getLast();
+	public Example() {
+		initialize(1);
 	}
+	protected void initialize(int value) {
+		Pair pair = new Pair();
+		for (int i = 0; i < value; i++) {
+			int square = i * i;
+			// Between here...
+
+
+
+
+
+
+
+
+
+
+			// ...and here are 10 blank lines
+			pair.left = pair.left + square;
+		}
+		switch (value) {
+		case 1:
+			pair.right = "";
+			break;
+		default:
+			pair.left = "";
+		}
+	}
+}
+class Another {
+
+
+
+
 }
 //--PREVIEW--END--section-blank-lines
 }

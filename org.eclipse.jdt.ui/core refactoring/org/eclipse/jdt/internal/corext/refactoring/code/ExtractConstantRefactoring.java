@@ -16,6 +16,7 @@ package org.eclipse.jdt.internal.corext.refactoring.code;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -789,8 +790,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 				ASTNode scope= replacementScope.next();
 				IASTFragment[] allMatches= ASTFragmentFactory.createFragmentForFullSubtree(scope).getSubFragmentsMatching(getSelectedExpression());
 				IASTFragment[] replaceableMatches = retainOnlyReplacableMatches(allMatches);
-				for(int i = 0; i < replaceableMatches.length; i++)
-					toReplace.add(replaceableMatches[i]);
+				Collections.addAll(toReplace, replaceableMatches);
 			}
 		} else if (canReplace(getSelectedExpression()))
 			toReplace.add(getSelectedExpression());

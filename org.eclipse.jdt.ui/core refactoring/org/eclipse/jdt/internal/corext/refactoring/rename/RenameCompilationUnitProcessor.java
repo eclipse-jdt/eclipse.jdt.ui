@@ -366,7 +366,7 @@ public final class RenameCompilationUnitProcessor extends JavaRenameProcessor im
 	}
 
 	private void computeRenameTypeRefactoring() throws CoreException{
-		if (getSimpleCUName().indexOf(".") != -1) { //$NON-NLS-1$
+		if (getSimpleCUName().indexOf('.') != -1) {
 			fRenameTypeProcessor= null;
 			fWillRenameType= false;
 			return;

@@ -13,8 +13,8 @@ package org.eclipse.jdt.internal.ui.text.java;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMethod;
 
 import org.eclipse.jdt.internal.ui.text.Chain;
 import org.eclipse.jdt.internal.ui.text.ChainElement;
@@ -55,8 +55,8 @@ public class ChainCompletionProposal implements IJavaCompletionProposal, IComple
 	public List<String> getChainElementNames() {
 		final List<String> b= new LinkedList<>();
 		for (final ChainElement edge : chain.getElements()) {
-			final IBinding bind= edge.getElementBinding();
-			final char[] name= bind instanceof IMethodBinding ? ((IMethodBinding) bind).getName().toCharArray() : bind.getName().toCharArray();
+			final IJavaElement elem= edge.getElement();
+			final char[] name= elem instanceof IMethod ? ((IMethod) elem).getElementName().toCharArray() : elem.getElementName().toCharArray();
 			b.add(String.valueOf(name));
 		}
 		return b;

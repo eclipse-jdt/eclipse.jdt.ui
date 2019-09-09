@@ -45,8 +45,9 @@ public class ProfileVersioner implements IProfileVersioner {
 	private static final int VERSION_14= 14; // https://bugs.eclipse.org/128653, https://bugs.eclipse.org/531826
 	private static final int VERSION_15= 15; // https://bugs.eclipse.org/205973
 	private static final int VERSION_16= 16; // https://bugs.eclipse.org/543080, https://bugs.eclipse.org/543475
+	private static final int VERSION_17= 17; // https://bugs.eclipse.org/214283
 
-	private static final int CURRENT_VERSION= VERSION_16;
+	private static final int CURRENT_VERSION= VERSION_17;
 
 	@Override
 	public int getFirstVersion() {
@@ -116,6 +117,9 @@ public class ProfileVersioner implements IProfileVersioner {
 			//$FALL-THROUGH$
 		case VERSION_15:
 			version15to16(oldSettings);
+			//$FALL-THROUGH$
+		case VERSION_16:
+			version16to17(oldSettings);
 			//$FALL-THROUGH$
 		default:
 		    for (final Iterator<String> iter= oldSettings.keySet().iterator(); iter.hasNext(); ) {
@@ -693,6 +697,11 @@ public class ProfileVersioner implements IProfileVersioner {
 				DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_BITWISE_OPERATOR,
 				DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_LOGICAL_OPERATOR,
 		});
+	}
+
+	private static void version16to17(Map<String, String> oldSettings) {
+		checkAndReplace(oldSettings, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_METHOD,
+				DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_ABSTRACT_METHOD);
 	}
 
 	/* old format constant values */

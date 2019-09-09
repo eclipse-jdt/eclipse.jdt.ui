@@ -59,7 +59,6 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 
@@ -91,7 +90,7 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 	}
 
 	private static ISharedImages getWorkbenchSharedImages() {
-		return JavaPlugin.getDefault().getWorkbench().getSharedImages();
+		return PlatformUI.getWorkbench().getSharedImages();
 	}
 
 	@Override

@@ -11,6 +11,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     John Kaplan, johnkaplantech@gmail.com - 108071 [code templates] template for body of newly created class
+ *     Microsoft Corporation - [templates][content assist] - Extract the UI related code - https://bugs.eclipse.org/549989
  *******************************************************************************/
 package org.eclipse.jdt.ui.wizards;
 
@@ -128,7 +129,7 @@ import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 import org.eclipse.jdt.internal.corext.refactoring.StubTypeContext;
 import org.eclipse.jdt.internal.corext.refactoring.TypeContextChecker;
-import org.eclipse.jdt.internal.corext.template.java.JavaContext;
+import org.eclipse.jdt.internal.corext.template.java.TemplateUtils;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -231,7 +232,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		 * @param insertPosition the offset where the import will be used
 		 * @return Returns the simple type name that can be used in the code or the
 		 * fully qualified type name if an import conflict prevented the import.
-		 * 
+		 *
 		 * @since 3.8
 		 */
 		public String addImport(String qualifiedTypeName, int insertPosition) {
@@ -263,14 +264,14 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		 *
 		 * @return Returns the simple type name that can be used in the code or the
 		 * fully qualified type name if an import conflict prevented the import.
-		 * 
+		 *
 		 * @since 3.8
 		 */
 		public String addImport(ITypeBinding typeBinding, int insertPosition) {
 			ImportRewriteContext context= new ContextSensitiveImportRewriteContext(fAstRoot, insertPosition, fImportsRewrite);
 			return fImportsRewrite.addImport(typeBinding, context);
 		}
-		
+
 		/**
 		 * Adds a new import declaration for a static type that is sorted in the existing imports.
 		 * If an import already exists or the import would conflict with an import
@@ -686,12 +687,12 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * folder does not contain any package and if the project name is a valid package name. If the
 	 * source folder contains exactly one package then the name of that package is used as the
 	 * package fragment's name. <code>null</code> is returned if none of the above is applicable.
-	 * 
+	 *
 	 * @param javaProject the containing Java project of the selection used to initialize this page
-	 * 
+	 *
 	 * @return the package fragment to be pre-filled in this page or <code>null</code> if no
 	 *         suitable package can be suggested for the given project
-	 * 
+	 *
 	 * @since 3.9
 	 */
 	private IPackageFragment getPackage(IJavaProject javaProject) {
@@ -886,7 +887,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		Text text= fTypeNameDialogField.getTextControl(null);
 		LayoutUtil.setWidthHint(text, getMaxFieldWidth());
 		TextFieldNavigationHandler.install(text);
-		
+
 		text.addVerifyListener(new VerifyListener() {
 			@Override
 			public void verifyText(VerifyEvent e) {
@@ -895,11 +896,11 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 					int lastDot= typeNameWithoutParameters.lastIndexOf('.');
 					if (lastDot == -1 || lastDot == typeNameWithoutParameters.length() - 1)
 						return;
-					
+
 					String pack= typeNameWithoutParameters.substring(0, lastDot);
 					if (validatePackageName(pack, null).getSeverity() == IStatus.ERROR)
 						return;
-					
+
 					fPackageDialogField.setText(pack);
 					e.text= e.text.substring(lastDot + 1);
 				}
@@ -981,7 +982,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				BidiUtils.applyBidiProcessing(text, StructuredTextTypeHandlerFactory.JAVA);
 				return control;
 			}
-			
+
 		    @Override
 			protected void doSetFocus() {
 		        if (text != null) {
@@ -1065,7 +1066,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		fAddCommentButton.doFillIntoGrid(composite, nColumns - 1);
 	}
 	/**
-	  * Creates the comment and link in the single line for the preference page links. Expects a 
+	  * Creates the comment and link in the single line for the preference page links. Expects a
 	  * <code>GridLayout</code> with at least 2 columns.
 	 *
 	 * @param composite the parent composite
@@ -2415,7 +2416,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	/**
 	 * Uses the New Java file template from the code template page to generate a
 	 * compilation unit with the given type content.
-	 * 
+	 *
 	 * @param cu The new created compilation unit
 	 * @param typeContent The content of the type, including signature and type
 	 * body.
@@ -2716,7 +2717,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		try {
 			Template template= JavaPlugin.getDefault().getTemplateStore().findTemplate(name);
 			if (template != null) {
-				return JavaContext.evaluateTemplate(template, parentCU, pos);
+				return TemplateUtils.evaluateTemplate(template, parentCU, pos);
 			}
 		} catch (CoreException e) {
 			JavaPlugin.log(e);

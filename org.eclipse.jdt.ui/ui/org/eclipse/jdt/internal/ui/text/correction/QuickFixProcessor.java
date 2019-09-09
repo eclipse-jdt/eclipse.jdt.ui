@@ -309,6 +309,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.SwitchExpressionsYieldMissingEnumConstantCase:
 			case IProblem.SwitchExpressionsYieldMissingDefaultCase:
 			case IProblem.PreviewFeaturesNotAllowed:
+			case IProblem.UninitializedBlankFinalField:
 				return true;
 			default:
 				return SuppressWarningsSubProcessor.hasSuppressWarningsProposal(cu.getJavaProject(), problemId)
@@ -390,6 +391,9 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.UndefinedName:
 			case IProblem.UnresolvedVariable:
 				UnresolvedElementsSubProcessor.getVariableProposals(context, problem, null, proposals);
+				break;
+			case IProblem.UninitializedBlankFinalField:
+				UnInitializedFinalFieldSubProcessor.getProposals(context, problem, proposals);
 				break;
 			case IProblem.AmbiguousType:
 			case IProblem.JavadocAmbiguousType:

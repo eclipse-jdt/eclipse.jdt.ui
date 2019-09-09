@@ -85,7 +85,7 @@ public class CPListLabelProvider extends LabelProvider implements IStyledLabelPr
 
 		fSharedImages= JavaUI.getSharedImages();
 
-		IWorkbench workbench= JavaPlugin.getDefault().getWorkbench();
+		IWorkbench workbench= PlatformUI.getWorkbench();
 
 		fProjectImage= workbench.getSharedImages().getImageDescriptor(IDE.SharedImages.IMG_OBJ_PROJECT);
 		fAttributeDescriptors= JavaPlugin.getDefault().getClasspathAttributeConfigurationDescriptors();

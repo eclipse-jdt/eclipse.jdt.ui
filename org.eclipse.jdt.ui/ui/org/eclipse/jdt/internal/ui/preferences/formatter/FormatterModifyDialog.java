@@ -444,6 +444,148 @@ public class FormatterModifyDialog extends ModifyDialog {
 		}
 	}
 
+	private static class BlankLinesPreference extends Preference<Spinner> {
+
+		static final int MIN_LINES= 0;
+
+		static final int MAX_LINES= 99;
+
+		private final ToolItem fRemoveLinesItem;
+
+		public static BlankLinesPreference create(Composite parentComposite, String label, String key, NumberPreference preserveLinesPref, Images images) {
+			Spinner spinner= NumberPreference.createSpinner(parentComposite, MIN_LINES, MAX_LINES);
+
+			ToolBar toolBar= new ToolBar(parentComposite, SWT.FLAT);
+			ToolItem item= new ToolItem(toolBar, SWT.CHECK);
+			item.setToolTipText(FormatterMessages.FormatterModifyDialog_blankLines_val_remove_extra_lines);
+			item.setImage(images.get(JavaPluginImages.DESC_ELCL_REMOVE_EXTRA_LINES));
+			item.setDisabledImage(images.get(JavaPluginImages.DESC_DLCL_REMOVE_EXTRA_LINES));
+
+			return new BlankLinesPreference(spinner, toolBar, label, key, preserveLinesPref);
+		}
+
+		private BlankLinesPreference(Spinner spinner, ToolBar toolBar, String label, String key, NumberPreference preserveLinesPref) {
+			super(spinner, label, key, FilteredPreferenceTree.SPINNER_VALUE_MATCHER);
+			fRemoveLinesItem= toolBar.getItem(0);
+
+			PreferenceTreeNode<?> toolBarNode= new PreferenceTreeNode<>(label, toolBar, true);
+			addChild(toolBarNode);
+			Predicate<String> valueChecker= v -> spinner.getSelection() < Integer.parseInt(preserveLinesPref.getValue());
+			this.addDependant(toolBarNode, valueChecker);
+			preserveLinesPref.addDependant(toolBarNode, valueChecker);
+
+			Label labelControl= createLabel(GRID_COLUMNS - 3, spinner.getParent(), label, 0);
+			labelControl.moveAbove(spinner);
+			fHighlight= PreferenceHighlight.addHighlight(labelControl, spinner, false);
+			addChild(new PreferenceTreeNode<>(label, labelControl, true));
+
+			SelectionAdapter listener= new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					fControl.setFocus();
+					updateValue();
+				}
+			};
+			spinner.addSelectionListener(listener);
+			fRemoveLinesItem.addSelectionListener(listener);
+		}
+
+		@Override
+		protected void updateWidget() {
+			int number;
+			try {
+				String s= getPreferences().get(getKey());
+				number= Integer.parseInt(s);
+			} catch (NumberFormatException x) {
+				final String message= Messages.format(FormatterMessages.ModifyDialogTabPage_NumberPreference_error_invalid_key, getKey());
+				JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, message, null));
+				number= 0;
+			}
+			fRemoveLinesItem.setSelection(number < 0);
+			if (number < 0)
+				number= ~number;
+			number= Math.max(fControl.getMinimum(), Math.min(fControl.getMaximum(), number));
+			fControl.setSelection(number);
+		}
+
+		@Override
+		protected String getValue() {
+			int number= fControl.getSelection();
+			return Integer.toString(fRemoveLinesItem.getSelection() ? ~number : number);
+		}
+
+		public static ModifyAll<Spinner> addModifyAll(Section section, final Images images) {
+			return new ModifyAll<Spinner>(section, images) {
+
+				private Label fLabel;
+				private ToolItem fRemoveLinesItem;
+
+				@Override
+				protected Spinner createControl(Composite parent) {
+					GridLayout layout= new GridLayout(3, false);
+					layout.marginWidth= layout.marginHeight= 0;
+					parent.setLayout(layout);
+
+					fLabel= createLabel(1, parent, "", 0); //$NON-NLS-1$
+
+					Spinner spinner= NumberPreference.createSpinner(parent, MIN_LINES, MAX_LINES);
+					spinner.addSelectionListener(new SelectionAdapter() {
+						@Override
+						public void widgetSelected(SelectionEvent e) {
+							int value= fControl.getSelection();
+							for (BlankLinesPreference pref : findPreferences(BlankLinesPreference.class)) {
+								pref.getControl().setSelection(value);
+								pref.updateValue();
+							}
+							prepareControl();
+						}
+					});
+
+					ToolBar toolBar= new ToolBar(parent, SWT.FLAT);
+					fRemoveLinesItem= new ToolItem(toolBar, SWT.CHECK);
+					fRemoveLinesItem.setImage(images.get(JavaPluginImages.DESC_ELCL_REMOVE_EXTRA_LINES));
+					fRemoveLinesItem.setDisabledImage(images.get(JavaPluginImages.DESC_DLCL_REMOVE_EXTRA_LINES));
+					fRemoveLinesItem.addSelectionListener(new SelectionAdapter() {
+						@Override
+						public void widgetSelected(SelectionEvent e) {
+							boolean value= fRemoveLinesItem.getSelection();
+							for (BlankLinesPreference pref : findPreferences(BlankLinesPreference.class)) {
+								pref.fRemoveLinesItem.setSelection(value);
+								pref.updateValue();
+							}
+							prepareControl();
+						}
+					});
+					return spinner;
+				}
+
+				@Override
+				protected void prepareControl() {
+					int modeValue= 0;
+					int modeCount= -1;
+					HashMap<Integer, Integer> counts= new HashMap<>();
+					int removeLinesCount= 0;
+					List<BlankLinesPreference> preferences= findPreferences(BlankLinesPreference.class);
+					for (BlankLinesPreference pref : preferences) {
+						int value= pref.getControl().getSelection();
+						int count= counts.merge(value, 1, Integer::sum);
+						if (count > modeCount) {
+							modeValue= value;
+							modeCount= count;
+						}
+
+						if (pref.fRemoveLinesItem.getSelection())
+							removeLinesCount++;
+					}
+					fControl.setSelection(modeValue);
+					fLabel.setText(Messages.format(FormatterMessages.ModifyDialog_modifyAll_summary, new Object[] { modeCount, preferences.size() }));
+					fLabel.requestLayout();
+					fRemoveLinesItem.setToolTipText(FormatterMessages.FormatterModifyDialog_blankLines_val_remove_extra_lines + Messages.format(FormatterMessages.ModifyDialog_modifyAll_summary, new Object[] { removeLinesCount, preferences.size() }));
+				}
+			};
+		}
+	}
+
 	private static final String DIALOG_PREFERENCE_KEY= "formatter_page"; //$NON-NLS-1$
 
 	private static final String SHOW_INVISIBLE_PREFERENCE_KEY= JavaUI.ID_PLUGIN + '.' + DIALOG_PREFERENCE_KEY + ".show_invisible_characters"; //$NON-NLS-1$
@@ -790,14 +932,21 @@ public class FormatterModifyDialog extends ModifyDialog {
 		alignAssignmentsPref.addDependant(groupingPref, anyAlignChecker);
 
 		groupingPref.setValueValidator(value -> {
-			int blankLinesToPreserve= Integer.parseInt(fWorkingValues.get(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE));
+			String warningMessage= null;
 			int groupingLines= value != null ? Integer.parseInt(value) : Integer.MAX_VALUE;
-			if (value != null && groupingLines > blankLinesToPreserve && groupingLines != Integer.MAX_VALUE) {
-				updateStatus(new Status(IStatus.INFO, JavaPlugin.getPluginId(), 0,
-						Messages.format(FormatterMessages.FormatterModifyDialog_indentation_info_blank_lines_to_preserve, Integer.valueOf(blankLinesToPreserve)), null));
-			} else {
-				updateStatus(null);
+			if (value != null && groupingLines != Integer.MAX_VALUE) {
+				int blankLinesToPreserve= Integer.parseInt(fWorkingValues.get(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE));
+				boolean alignFields= Boolean.parseBoolean(fWorkingValues.get(DefaultCodeFormatterConstants.FORMATTER_ALIGN_TYPE_MEMBERS_ON_COLUMNS));
+				int blankLinesBeforeField= Integer.parseInt(fWorkingValues.get(DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_FIELD));
+				if (groupingLines > blankLinesToPreserve) {
+					warningMessage= Messages.format(FormatterMessages.FormatterModifyDialog_indentation_info_blank_lines_to_preserve, blankLinesToPreserve);
+				} else if (alignFields && groupingLines <= blankLinesBeforeField) {
+					warningMessage= Messages.format(FormatterMessages.FormatterModifyDialog_indentation_info_blank_lines_before_field, blankLinesBeforeField);
+				} else if (alignFields && blankLinesBeforeField < 0 && groupingLines > ~blankLinesBeforeField) {
+					warningMessage= Messages.format(FormatterMessages.FormatterModifyDialog_indentation_info_blank_lines_before_field_delete, ~blankLinesBeforeField);
+				}
 			}
+			updateStatus(warningMessage == null ? null : new Status(IStatus.INFO, JavaPlugin.getPluginId(), 0, warningMessage, null));
 			return true;
 		});
 	}
@@ -1102,9 +1251,7 @@ public class FormatterModifyDialog extends ModifyDialog {
 	}
 
 	private void createBlankLinesTree() {
-		final int MIN_NUMBER_LINES= 0;
-		final int MAX_NUMBER_LINES= 99;
-		Consumer<Section> modAll= s -> NumberPreference.addModifyAll(MIN_NUMBER_LINES, MAX_NUMBER_LINES, s, fImages);
+		Consumer<Section> modAll= s -> BlankLinesPreference.addModifyAll(s, fImages);
 		fTree.builder(FormatterMessages.FormatterModifyDialog_blankLines_tree_blank_lines, "section-blank-lines") //$NON-NLS-1$
 				.pref(FormatterMessages.FormatterModifyDialog_blankLines_pref_empty_lines_to_preserve, DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE)
 				.node(fTree.builder(FormatterMessages.FormatterModifyDialog_blankLines_tree_compilation_unit, null, modAll)
@@ -1116,12 +1263,34 @@ public class FormatterModifyDialog extends ModifyDialog {
 						.pref(FormatterMessages.FormatterModifyDialog_blankLines_pref_between_type_declarations, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BETWEEN_TYPE_DECLARATIONS))
 				.node(fTree.builder(FormatterMessages.FormatterModifyDialog_blankLines_tree_class_declarations, null, modAll)
 						.pref(FormatterMessages.FormatterModifyDialog_blankLines_pref_before_first_decl, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_FIRST_CLASS_BODY_DECLARATION)
+						.pref(FormatterMessages.FormatterModifyDialog_blankLines_pref_after_last_decl, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_AFTER_LAST_CLASS_BODY_DECLARATION)
 						.pref(FormatterMessages.FormatterModifyDialog_blankLines_pref_before_decls_of_same_kind, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_NEW_CHUNK)
 						.pref(FormatterMessages.FormatterModifyDialog_blankLines_pref_before_member_class_decls, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_MEMBER_TYPE)
 						.pref(FormatterMessages.FormatterModifyDialog_blankLines_pref_before_field_decls, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_FIELD)
-						.pref(FormatterMessages.FormatterModifyDialog_blankLines_pref_before_method_decls, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_METHOD)
-						.pref(FormatterMessages.FormatterModifyDialog_blankLines_pref_at_beginning_of_method_body, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_AT_BEGINNING_OF_METHOD_BODY))
-				.build(null, (parent, label, key) -> fTree.addNumberPref(parent, label, key, MIN_NUMBER_LINES, MAX_NUMBER_LINES));
+						.pref(FormatterMessages.FormatterModifyDialog_blankLines_pref_before_abstract_method_decls, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_ABSTRACT_METHOD)
+						.pref(FormatterMessages.FormatterModifyDialog_blankLines_pref_before_method_decls, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_METHOD))
+				.node(fTree.builder(FormatterMessages.FormatterModifyDialog_blankLines_tree_method_declarations, null, modAll)
+						.pref(FormatterMessages.FormatterModifyDialog_blankLines_pref_at_beginning_of_method_body, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_AT_BEGINNING_OF_METHOD_BODY)
+						.pref(FormatterMessages.FormatterModifyDialog_blankLines_pref_at_end_of_method_body, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_AT_END_OF_METHOD_BODY)
+						.pref(FormatterMessages.FormatterModifyDialog_blankLines_pref_at_beginning_of_code_block, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_AT_BEGINNING_OF_CODE_BLOCK)
+						.pref(FormatterMessages.FormatterModifyDialog_blankLines_pref_at_end_of_code_block, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_AT_END_OF_CODE_BLOCK)
+						.pref(FormatterMessages.FormatterModifyDialog_blankLines_pref_before_code_block, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_CODE_BLOCK)
+						.pref(FormatterMessages.FormatterModifyDialog_blankLines_pref_after_code_block, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_AFTER_CODE_BLOCK)
+						.pref(FormatterMessages.FormatterModifyDialog_blankLines_pref_between_statement_groups_in_switch, DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BETWEEN_STATEMENT_GROUPS_IN_SWITCH))
+				.build(null, new PreferenceBuilder() {
+					NumberPreference fPreserveLinesPref;
+
+					@Override
+					public Preference<?> buildPreference(Section parent, String label, String key) {
+						if (key.equals(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE)) {
+							fPreserveLinesPref= fTree.addNumberPref(parent, label, key, BlankLinesPreference.MIN_LINES, BlankLinesPreference.MAX_LINES);
+							return fPreserveLinesPref;
+						}
+						BlankLinesPreference pref= BlankLinesPreference.create(parent.fInnerComposite, label, key, fPreserveLinesPref, fImages);
+						fTree.addChild(parent, pref);
+						return pref;
+					}
+				});
 	}
 
 	private void createNewLinesTree() {

@@ -162,7 +162,7 @@ class PackagesViewLabelProvider extends AppearanceAwareLabelProvider {
 	private String calculateName(IPackageFragment fragment) {
 
 		String name= fragment.getElementName();
-		if (name.indexOf(".") != -1) //$NON-NLS-1$
+		if (name.indexOf('.') != -1)
 			name= name.substring(name.lastIndexOf(".") + 1); //$NON-NLS-1$
 		return name;
 

@@ -310,12 +310,15 @@ public class ImportReferencesCollector extends GenericVisitor {
 	
 	@Override
 	public boolean visit(YieldStatement node) {
-		if (node.getAST().apiLevel() == AST.JLS13) {
+		if (node.getAST().isPreviewEnabled()) {
 			evalQualifyingExpression(node.getExpression(), null);			
 		}
 		return false;
 	}
 	
+	/*
+	 * @see ASTVisitor#visit(ThisExpression)
+	 */
 	@Override
 	public boolean visit(ThisExpression node) {
 		typeRefFound(node.getQualifier());

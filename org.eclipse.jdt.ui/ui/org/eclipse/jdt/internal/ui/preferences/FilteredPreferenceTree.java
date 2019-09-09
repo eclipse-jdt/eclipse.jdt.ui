@@ -287,13 +287,11 @@ public class FilteredPreferenceTree {
 	 */
 	private Label fDescription;
 
-	/**
-	 * The filter text control.
-	 */
-	private FilterTextControl fFilterTextControl;
 
 	private ToolItem fExpandAllItem;
 	private ToolItem fCollapseAllItem;
+
+	private Text fFilterBox;
 
 
 	public FilteredPreferenceTree(Composite parentComposite, String label, String hint) {
@@ -339,18 +337,16 @@ public class FilteredPreferenceTree {
 		composite.setLayout(layout);
 		composite.setFont(fParentComposite.getFont());
 
-		//TODO: Directly use the hint flags once Bug 293230 is fixed
-		fFilterTextControl= new FilterTextControl(composite);
+		fFilterBox = new Text(composite, SWT.SINGLE | SWT.BORDER | SWT.SEARCH | SWT.ICON_CANCEL);
 
-		Text filterBox= fFilterTextControl.getFilterControl();
-		filterBox.setMessage(hint);
+		fFilterBox.setMessage(hint);
 
-		filterBox.addModifyListener(new ModifyListener() {
+		fFilterBox.addModifyListener(new ModifyListener() {
 			private String fPrevFilterText;
 
 			@Override
 			public void modifyText(ModifyEvent e) {
-				String input= filterBox.getText();
+				String input= fFilterBox.getText();
 				fExpandAllItem.setEnabled(input.isEmpty());
 				fCollapseAllItem.setEnabled(input.isEmpty());
 				if (!input.equalsIgnoreCase(fPrevFilterText)) {
@@ -436,7 +432,7 @@ public class FilteredPreferenceTree {
 		fRefreshJob.cancel();
 		fRefreshJob.schedule(getRefreshJobDelay());
 		filterText= filterText.trim();
-		int index= filterText.indexOf("~"); //$NON-NLS-1$
+		int index= filterText.indexOf('~');
 		StringMatcher labelMatcher= null;
 		StringMatcher valueMatcher= null;
 		if (index == -1) {
@@ -557,7 +553,7 @@ public class FilteredPreferenceTree {
 		if (fDescription != null) {
 			fDescription.setEnabled(enabled);
 		}
-		fFilterTextControl.setEnabled(enabled);
+		fFilterBox.setEnabled(enabled);
 		fCollapseAllItem.setEnabled(enabled);
 		fExpandAllItem.setEnabled(enabled);
 		fRoot.getChildren().forEach(node -> node.setEnabled(enabled));

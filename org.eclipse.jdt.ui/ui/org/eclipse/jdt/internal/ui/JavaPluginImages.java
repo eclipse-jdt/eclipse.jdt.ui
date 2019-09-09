@@ -504,6 +504,9 @@ public class JavaPluginImages {
 
 	public static final ImageDescriptor DESC_ELCL_MODIFYALL= createUnManaged(T_ELCL, "modifyall.png"); //$NON-NLS-1$
 
+	public static final ImageDescriptor DESC_ELCL_REMOVE_EXTRA_LINES= createUnManaged(T_ELCL, "remove_extra_lines.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_DLCL_REMOVE_EXTRA_LINES= createUnManaged(T_DLCL, "remove_extra_lines.png"); //$NON-NLS-1$
+
 	// Image descriptors used for formatter line wrapping preferences
 	public static final ImageDescriptor DESC_ELCL_INDENT_COLUMN= createUnManaged(T_ELCL, "indent_column.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_DLCL_INDENT_COLUMN= createUnManaged(T_DLCL, "indent_column.png"); //$NON-NLS-1$

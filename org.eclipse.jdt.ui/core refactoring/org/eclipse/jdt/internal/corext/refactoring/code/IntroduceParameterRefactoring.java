@@ -508,7 +508,7 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 			typeName= expressionBinding.getName();
 		if (typeName.length() == 0)
 			return Collections.emptyList();
-		int typeParamStart= typeName.indexOf("<"); //$NON-NLS-1$
+		int typeParamStart= typeName.indexOf('<');
 		if (typeParamStart != -1)
 			typeName= typeName.substring(0, typeParamStart);
 		String[] proposals= StubUtility.getLocalNameSuggestions(fSourceCU.getJavaProject(), typeName, expressionBinding.getDimensions(), excluded);

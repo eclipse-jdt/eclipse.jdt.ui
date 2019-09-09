@@ -57,6 +57,7 @@ public class CodeTemplateContextType extends TemplateContextType {
 	public static final String DELEGATECOMMENT_CONTEXTTYPE= "delegatecomment_context"; //$NON-NLS-1$
 	public static final String GETTERCOMMENT_CONTEXTTYPE= "gettercomment_context"; //$NON-NLS-1$
 	public static final String SETTERCOMMENT_CONTEXTTYPE= "settercomment_context"; //$NON-NLS-1$
+	public static final String MODULECOMMENT_CONTEXTTYPE= "modulecomment_context"; //$NON-NLS-1$
 
 	/* templates */
 
@@ -82,11 +83,13 @@ public class CodeTemplateContextType extends TemplateContextType {
 	public static final String DELEGATECOMMENT_ID= CODETEMPLATES_PREFIX + "delegate" + COMMENT_SUFFIX; //$NON-NLS-1$
 	public static final String GETTERCOMMENT_ID= CODETEMPLATES_PREFIX + "getter" + COMMENT_SUFFIX; //$NON-NLS-1$
 	public static final String SETTERCOMMENT_ID= CODETEMPLATES_PREFIX + "setter" + COMMENT_SUFFIX; //$NON-NLS-1$
+	public static final String MODULECOMMENT_ID= CODETEMPLATES_PREFIX + "module" + COMMENT_SUFFIX; //$NON-NLS-1$
 
 	/* resolver types */
 	public static final String EXCEPTION_TYPE= "exception_type"; //$NON-NLS-1$
 	public static final String EXCEPTION_VAR= "exception_var"; //$NON-NLS-1$
 	public static final String ENCLOSING_METHOD= "enclosing_method"; //$NON-NLS-1$
+	public static final String ENCLOSING_MODULE= "enclosing_module"; //$NON-NLS-1$
 	public static final String ENCLOSING_TYPE= "enclosing_type"; //$NON-NLS-1$
 	public static final String BODY_STATEMENT= "body_statement"; //$NON-NLS-1$
 	public static final String FIELD= "field"; //$NON-NLS-1$
@@ -234,6 +237,11 @@ public class CodeTemplateContextType extends TemplateContextType {
 			addResolver(new TagsVariableResolver());
 			addCompilationUnitVariables();
 			fIsComment= true;
+		} else if (MODULECOMMENT_CONTEXTTYPE.equals(contextName)) {
+			addResolver(new CodeTemplateVariableResolver(ENCLOSING_MODULE, JavaManipulationMessages.CodeTemplateContextType_variable_description_enclosingmodule));
+			addResolver(new TagsVariableResolver());
+			addCompilationUnitVariables();
+			fIsComment= true;
 		} else if (OVERRIDECOMMENT_CONTEXTTYPE.equals(contextName)) {
 			addResolver(new CodeTemplateVariableResolver(ENCLOSING_TYPE,  JavaManipulationMessages.CodeTemplateContextType_variable_description_enclosingtype));
 			addResolver(new CodeTemplateVariableResolver(ENCLOSING_METHOD,  JavaManipulationMessages.CodeTemplateContextType_variable_description_enclosingmethod));
@@ -325,6 +333,7 @@ public class CodeTemplateContextType extends TemplateContextType {
 		registry.addContextType(new CodeTemplateContextType(CodeTemplateContextType.TYPECOMMENT_CONTEXTTYPE));
 		registry.addContextType(new CodeTemplateContextType(CodeTemplateContextType.FIELDCOMMENT_CONTEXTTYPE));
 		registry.addContextType(new CodeTemplateContextType(CodeTemplateContextType.METHODCOMMENT_CONTEXTTYPE));
+		registry.addContextType(new CodeTemplateContextType(CodeTemplateContextType.MODULECOMMENT_CONTEXTTYPE));
 		registry.addContextType(new CodeTemplateContextType(CodeTemplateContextType.CONSTRUCTORCOMMENT_CONTEXTTYPE));
 		registry.addContextType(new CodeTemplateContextType(CodeTemplateContextType.OVERRIDECOMMENT_CONTEXTTYPE));
 		registry.addContextType(new CodeTemplateContextType(CodeTemplateContextType.DELEGATECOMMENT_CONTEXTTYPE));

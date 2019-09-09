@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2016 IBM Corporation and others.
+ * Copyright (c) 2007, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc. - modified to use UnimplementedCodeFixCore
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
@@ -24,7 +25,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
 
@@ -34,19 +34,16 @@ import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.NullChange;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
-import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
-import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
-import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaUI;
@@ -54,31 +51,8 @@ import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 public class UnimplementedCodeFix extends CompilationUnitRewriteOperationsFix {
-
-	public static final class MakeTypeAbstractOperation extends CompilationUnitRewriteOperation {
-
-		private final TypeDeclaration fTypeDeclaration;
-
-		public MakeTypeAbstractOperation(TypeDeclaration typeDeclaration) {
-			fTypeDeclaration= typeDeclaration;
-		}
-
-		@Override
-		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel linkedProposalPositions) throws CoreException {
-			AST ast= cuRewrite.getAST();
-			ASTRewrite rewrite= cuRewrite.getASTRewrite();
-			Modifier newModifier= ast.newModifier(Modifier.ModifierKeyword.ABSTRACT_KEYWORD);
-			TextEditGroup textEditGroup= createTextEditGroup(CorrectionMessages.UnimplementedCodeFix_TextEditGroup_label, cuRewrite);
-			rewrite.getListRewrite(fTypeDeclaration, TypeDeclaration.MODIFIERS2_PROPERTY).insertLast(newModifier, textEditGroup);
-
-			LinkedProposalPositionGroup group= new LinkedProposalPositionGroup("modifier"); //$NON-NLS-1$
-			group.addPosition(rewrite.track(newModifier), !linkedProposalPositions.hasLinkedPositions());
-			linkedProposalPositions.addPositionGroup(group);
-		}
-	}
 
 	public static ICleanUpFix createCleanUp(CompilationUnit root, boolean addMissingMethod, boolean makeTypeAbstract, IProblemLocation[] problems) {
 		Assert.isLegal(!addMissingMethod || !makeTypeAbstract);
@@ -88,10 +62,9 @@ public class UnimplementedCodeFix extends CompilationUnitRewriteOperationsFix {
 		if (problems.length == 0)
 			return null;
 
-		ArrayList<CompilationUnitRewriteOperation> operations= new ArrayList<>();
+		ArrayList<CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation> operations= new ArrayList<>();
 
-		for (int i= 0; i < problems.length; i++) {
-			IProblemLocation problem= problems[i];
+		for (IProblemLocation problem : problems) {
 			if (addMissingMethod) {
 				ASTNode typeNode= getSelectedTypeNode(root, problem);
 				if (typeNode != null && !isTypeBindingNull(typeNode)) {
@@ -100,7 +73,7 @@ public class UnimplementedCodeFix extends CompilationUnitRewriteOperationsFix {
 			} else {
 				ASTNode typeNode= getSelectedTypeNode(root, problem);
 				if (typeNode instanceof TypeDeclaration) {
-					operations.add(new MakeTypeAbstractOperation((TypeDeclaration) typeNode));
+					operations.add(new UnimplementedCodeFixCore.MakeTypeAbstractOperation((TypeDeclaration) typeNode));
 				}
 			}
 		}
@@ -114,7 +87,7 @@ public class UnimplementedCodeFix extends CompilationUnitRewriteOperationsFix {
 		} else {
 			label= CorrectionMessages.UnimplementedCodeFix_MakeAbstractFix_label;
 		}
-		return new UnimplementedCodeFix(label, root, operations.toArray(new CompilationUnitRewriteOperation[operations.size()]));
+		return new UnimplementedCodeFix(label, root, operations.toArray(new CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation[operations.size()]));
 	}
 
 	public static IProposableFix createAddUnimplementedMethodsFix(final CompilationUnit root, IProblemLocation problem) {
@@ -127,7 +100,8 @@ public class UnimplementedCodeFix extends CompilationUnitRewriteOperationsFix {
 
 		AddUnimplementedMethodsOperation operation= new AddUnimplementedMethodsOperation(typeNode);
 		if (operation.getMethodsToImplement().length > 0) {
-			return new UnimplementedCodeFix(CorrectionMessages.UnimplementedMethodsCorrectionProposal_description, root, new CompilationUnitRewriteOperation[] { operation });
+			return new UnimplementedCodeFix(CorrectionMessages.UnimplementedMethodsCorrectionProposal_description, root,
+					new CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation[] { operation });
 		} else {
 			return new IProposableFix() {
 				@Override
@@ -171,10 +145,10 @@ public class UnimplementedCodeFix extends CompilationUnitRewriteOperationsFix {
 			return null;
 
 		TypeDeclaration typeDeclaration= (TypeDeclaration) typeNode;
-		MakeTypeAbstractOperation operation= new MakeTypeAbstractOperation(typeDeclaration);
+		UnimplementedCodeFixCore.MakeTypeAbstractOperation operation= new UnimplementedCodeFixCore.MakeTypeAbstractOperation(typeDeclaration);
 
 		String label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_addabstract_description, BasicElementLabels.getJavaElementName(typeDeclaration.getName().getIdentifier()));
-		return new UnimplementedCodeFix(label, root, new CompilationUnitRewriteOperation[] { operation });
+		return new UnimplementedCodeFix(label, root, new CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation[] { operation });
 	}
 
 	public static ASTNode getSelectedTypeNode(CompilationUnit root, IProblemLocation problem) {
@@ -223,7 +197,7 @@ public class UnimplementedCodeFix extends CompilationUnitRewriteOperationsFix {
 		}
 	}
 
-	public UnimplementedCodeFix(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperation[] fixRewriteOperations) {
+	public UnimplementedCodeFix(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation[] fixRewriteOperations) {
 		super(name, compilationUnit, fixRewriteOperations);
 	}
 }

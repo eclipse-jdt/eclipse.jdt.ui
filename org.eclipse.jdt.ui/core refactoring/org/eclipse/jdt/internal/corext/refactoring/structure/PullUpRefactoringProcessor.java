@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2018 IBM Corporation and others.
+ * Copyright (c) 2006, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -86,8 +86,10 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NodeFinder;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.ThisExpression;
@@ -1176,6 +1178,52 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 									final FieldDeclaration newField= createNewFieldDeclarationNode(rewriter, root, (IField) member, oldField, mapping, new SubProgressMonitor(subsub, 1), status, flags);
 									rewriter.getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newField, org.eclipse.jdt.internal.corext.dom.BodyDeclarationRewrite.getInsertionIndex(newField, declaration.bodyDeclarations()), rewrite.createCategorizedGroupDescription(RefactoringCoreMessages.HierarchyRefactoring_add_member, SET_PULL_UP));
 									ImportRewriteUtil.addImports(rewrite, context, oldField.getParent(), new HashMap<Name, String>(), new HashMap<Name, String>(), false);
+
+									if (oldField.getParent() instanceof FieldDeclaration) {
+										// set fully qualified type name for pulled up types
+										FieldDeclaration vds= (FieldDeclaration) oldField.getParent();
+										ITypeBinding oldTypeBinding= vds.getType().resolveBinding();
+										if (oldTypeBinding == null || oldTypeBinding.isPrimitive()) {
+											continue; // no qualified types for primitives
+										}
+										String sourcePackage= oldTypeBinding.getPackage() == null ? "" : oldTypeBinding.getPackage().getName(); //$NON-NLS-1$
+										String targetPackage= targetRewriter.getRoot().getPackage() == null ? "" : targetRewriter.getRoot().getPackage().getName().toString(); //$NON-NLS-1$
+										String targetTypeBinding= targetPackage + "." + oldTypeBinding.getName(); //$NON-NLS-1$
+
+										// Find the same type-name field but fully qualified. 
+										// In that case it won't shadow the pulled up field
+										boolean qualifiedTypeNameInTarget= true;
+										String sourceSignature= ((IField) member).getTypeSignature();
+										for (IField targetField : fDestinationType.getFields()) {
+											if (sourceSignature.equals(targetField.getTypeSignature())) {
+												qualifiedTypeNameInTarget= false;
+												break;
+											}
+										}
+										//check if same type name is accessible in new package (targetPackage + <type>)
+										IType findTargetType= target.getJavaProject().findType(targetTypeBinding);
+										if (!qualifiedTypeNameInTarget && findTargetType != null) {
+											if (sourcePackage.isEmpty() ^ targetPackage.isEmpty()) {
+												// not one package can be default package, either none or both
+												status.merge(RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.PullUpRefactoring_moving_fromto_default_package,
+														new String[] { JavaElementLabels.getTextLabel(member, JavaElementLabels.ALL_FULLY_QUALIFIED) }), JavaStatusContext.create(member)));
+											}
+
+											if (!sourcePackage.isEmpty()) {
+												Name newName= rewrite.getAST().newName(sourcePackage);
+												SimpleName newSimpleName= rewrite.getAST().newSimpleName(oldTypeBinding.getName());
+												SimpleType newSimpleType= null;
+												if (targetPackage.equals(sourcePackage)) {
+													// if source type is in same package as target then we don't need the fully qualified name
+													newSimpleType= rewrite.getAST().newSimpleType(newSimpleName);
+												} else {
+													QualifiedName newQualifiedTypeName= rewrite.getAST().newQualifiedName(newName, newSimpleName);
+													newSimpleType= rewrite.getAST().newSimpleType(newQualifiedTypeName);
+												}
+												newField.setType(newSimpleType);
+											}
+										}
+									}
 								}
 							} else if (member instanceof IMethod) {
 								final MethodDeclaration oldMethod= ASTNodeSearchUtil.getMethodDeclarationNode((IMethod) member, root);

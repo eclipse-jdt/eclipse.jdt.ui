@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IModuleDescription;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 
@@ -303,6 +304,36 @@ public class CodeGeneration {
 
 	public static String getMethodComment(ICompilationUnit cu, String declaringTypeName, MethodDeclaration decl, boolean isDeprecated, String overriddenMethodName, String overriddenMethodDeclaringTypeName, String[] overriddenMethodParameterTypeNames, String lineDelimiter) throws CoreException {
 		return StubUtility.getMethodComment(cu, declaringTypeName, decl, isDeprecated, overriddenMethodName, overriddenMethodDeclaringTypeName, overriddenMethodParameterTypeNames, false, lineDelimiter);
+	}
+
+	/**
+	 * Returns the comment for a module based on code templates
+	 *
+	 * @param cu The compilation unit for the module
+	 * @param moduleName The name of the module
+	 * @param providesNames Names of provided services
+	 * @param usesNames Names of used modules
+	 * @param lineDelimiter The line delimiter to use
+	 * @return Module comment
+	 * @throws CoreException Thrown when the evaluation of the code template fails
+	 * @since 1.12
+	 */
+	public static String getModuleComment(ICompilationUnit cu, String moduleName, String[] providesNames, String[] usesNames, String lineDelimiter) throws CoreException {
+		return StubUtility.getModuleComment(cu, moduleName, providesNames, usesNames, lineDelimiter);
+	}
+
+	/**
+	 * Returns the comment for a module based on code templates
+	 *
+	 * @param cu The compilation unit for the module
+	 * @param desc The module description
+	 * @param lineDelimiter The line delimiter to use
+	 * @return Module comment
+	 * @throws CoreException Thrown when the evaluation of the code template fails
+	 * @since 1.12
+	 */
+	public static String getModuleComment(ICompilationUnit cu, IModuleDescription desc, String lineDelimiter) throws CoreException {
+		return StubUtility.getModuleComment(cu, desc.getElementName(), desc.getProvidedServiceNames(), desc.getUsedServiceNames(), lineDelimiter);
 	}
 
 	/**

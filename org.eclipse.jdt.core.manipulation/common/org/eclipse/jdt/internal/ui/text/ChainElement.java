@@ -14,13 +14,12 @@ import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 
@@ -33,12 +32,12 @@ import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 public class ChainElement {
 
 	public enum ElementType {
-		METHOD, FIELD, LOCAL_VARIABLE
+		METHOD, FIELD, LOCAL_VARIABLE, TYPE
 	}
 
-	private final IBinding element;
+	private final IJavaElement element;
 
-	private ITypeBinding returnType;
+	private ChainType returnType;
 
 	private int dimension;
 
@@ -46,50 +45,74 @@ public class ChainElement {
 
 	private final boolean requireThis;
 
-	public ChainElement(final IBinding binding, final boolean requireThis) {
-		if (binding == null) {
+	public ChainElement(final IJavaElement element, final boolean requireThis) {
+		if (element == null) {
 			throw new IllegalArgumentException("???"); //$NON-NLS-1$
 		}
-		element= binding;
+		this.element= element;
 		this.requireThis= requireThis;
 		initializeReturnType();
 	}
 
 	private void initializeReturnType() {
-		switch (element.getKind()) {
-			case IBinding.VARIABLE:
-				IVariableBinding tmp= ((IVariableBinding) element);
-				returnType= tmp.getType();
-				if (tmp.isField()) {
-					elementType= ElementType.FIELD;
-				} else {
-					elementType= ElementType.LOCAL_VARIABLE;
-				}
-				break;
-			case IBinding.METHOD:
-				returnType= ((IMethodBinding) element).getReturnType();
-				elementType= ElementType.METHOD;
-				break;
-			case IBinding.TYPE:
-				returnType= ((ITypeBinding) element);
+		String signature= null;
+		IJavaProject proj= element.getJavaProject();
+		IType declType;
+		switch (element.getElementType()) {
+			case IJavaElement.FIELD:
 				elementType= ElementType.FIELD;
+				try {
+					signature= ((IField)element).getTypeSignature();
+				} catch (JavaModelException e) {
+					// ignore
+				}
+				declType= ((IField)element).getDeclaringType();
+				setReturnType(proj, signature, declType);
+				break;
+			case IJavaElement.LOCAL_VARIABLE:
+				elementType= ElementType.LOCAL_VARIABLE;
+				signature= ((ILocalVariable)element).getTypeSignature();
+				declType= ((ILocalVariable)element).getDeclaringMember().getDeclaringType();
+				setReturnType(proj, signature, declType);
+				break;
+			case IJavaElement.METHOD:
+				elementType= ElementType.METHOD;
+				try {
+					signature= ((IMethod)element).getReturnType();
+				} catch (JavaModelException e) {
+					// ignore
+				}
+				declType= ((IMethod)element).getDeclaringType();
+				setReturnType(proj, signature, declType);
+				break;
+			case IJavaElement.TYPE:
+				elementType= ElementType.TYPE;
+				returnType= new ChainType((IType) element);
 				break;
 			default:
 				JavaManipulationPlugin.logErrorMessage(NLS.bind("Cannot handle {0} as return type.", element));
 		}
-		dimension= returnType.getDimensions();
+		dimension= signature == null ? 0 : Signature.getArrayCount(signature);
 	}
 
-	@SuppressWarnings("unchecked")
-	public <T extends IBinding> T getElementBinding() {
-		return (T) element;
+	private void setReturnType(IJavaProject proj, String signature, IType declType) {
+		if (ChainElementAnalyzer.isPrimitive(signature)) {
+			returnType= new ChainType(signature);
+		} else {
+			IType res= ChainElementAnalyzer.getTypeFromSignature(proj, signature, declType);
+			returnType= (res != null) ? new ChainType(res) : new ChainType(signature);
+		}
+	}
+
+	public IJavaElement getElement() {
+		return element;
 	}
 
 	public ElementType getElementType() {
 		return elementType;
 	}
 
-	public ITypeBinding getReturnType() {
+	public ChainType getReturnType() {
 		return returnType;
 	}
 
@@ -118,15 +141,12 @@ public class ChainElement {
 	@Override
 	public String toString() {
 		if (elementType == ElementType.METHOD) {
-			final IMethodBinding m= (IMethodBinding) element;
-			IJavaElement e= m.getJavaElement();
-			StringBuilder ret= new StringBuilder(m.getName());
-			if (e instanceof IMethod) {
-				try {
-					return ret.append(((IMethod) e).getSignature()).toString();
-				} catch (JavaModelException e1) {
-					return ret.toString();
-				}
+			final IMethod m= (IMethod) element;
+			StringBuilder ret= new StringBuilder(m.getElementName());
+			try {
+				return ret.append(m.getSignature()).toString();
+			} catch (JavaModelException e1) {
+				return ret.toString();
 			}
 		}
 		return element.toString();

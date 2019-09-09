@@ -617,6 +617,7 @@ public final class PreferencesMessages extends NLS {
 	public static String CodeTemplateBlock_settercomment_label;
 	public static String CodeTemplateBlock_getterstub_label;
 	public static String CodeTemplateBlock_setterstub_label;
+	public static String CodeTemplateBlock_modulecomment_label;
 	public static String CodeTemplateBlock_templates_edit_button;
 	public static String CodeTemplateBlock_templates_import_button;
 	public static String CodeTemplateBlock_templates_export_button;

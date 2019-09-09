@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 IBM Corporation and others.
+ * Copyright (c) 2011, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Microsoft Corporation - copied the fields needed by jdt.core.manipulation
  *******************************************************************************/
 package org.eclipse.jdt.core.refactoring.participants;
 
@@ -36,7 +37,7 @@ public interface IRefactoringProcessorIds {
 	 * <code>IMethod</code> whose signature is changed.
 	 */
 	public static String CHANGE_METHOD_SIGNATURE_PROCESSOR= "org.eclipse.jdt.ui.changeMethodSignatureRefactoring"; //$NON-NLS-1$
-	
+
 	/**
 	 * Processor ID of the Introduce Parameter Object processor
 	 * (value <code>"org.eclipse.jdt.ui.introduceParameterObjectRefactoring"</code>).
@@ -45,4 +46,16 @@ public interface IRefactoringProcessorIds {
 	 * <code>IMethod</code> whose signature is changed.
 	 */
 	public static String INTRODUCE_PARAMETER_OBJECT_PROCESSOR= "org.eclipse.jdt.ui.introduceParameterObjectRefactoring"; //$NON-NLS-1$
+
+	/**
+	 * Processor ID of the move static member processor
+	 * (value <code>"org.eclipse.jdt.ui.MoveStaticMemberProcessor"</code>).
+	 *
+	 * The move static members processor loads participants registered for the
+	 * static Java element that gets moved. No support is available to participate
+	 * in non static member moves.
+	 *
+	 * @since 1.12
+	 */
+	public static String MOVE_STATIC_MEMBERS_PROCESSOR= "org.eclipse.jdt.ui.MoveStaticMemberProcessor"; //$NON-NLS-1$
 }

@@ -862,6 +862,30 @@ public class CleanUpConstants {
 	 */
 	public static final String REMOVE_REDUNDANT_MODIFIERS= "cleanup.remove_redundant_modifiers"; //$NON-NLS-1$
 
+	/**
+	 * Uses Autoboxing.<br>
+	 * <br>
+	 * Possible values: {TRUE, FALSE}<br>
+	 * <br>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.13
+	 */
+	public static final String USE_AUTOBOXING= "cleanup.use_autoboxing"; //$NON-NLS-1$
+
+	/**
+	 * Uses unboxing.<br>
+	 * <br>
+	 * Possible values: {TRUE, FALSE}<br>
+	 * <br>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.13
+	 */
+	public static final String USE_UNBOXING= "cleanup.use_unboxing"; //$NON-NLS-1$
+
 
 	/**
 	 * Removes redundant semicolons.<br>
