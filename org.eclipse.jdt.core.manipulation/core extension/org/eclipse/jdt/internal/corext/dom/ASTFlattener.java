@@ -1436,6 +1436,15 @@ public class ASTFlattener extends GenericVisitor {
 	}
 
 	/*
+	 * @see ASTVisitor#visit(StringLiteral)
+	 */
+	@Override
+	public boolean visit(TextBlock node) {
+		this.fBuffer.append(node.getEscapedValue());
+		return false;
+	}
+
+	/*
 	 * @see ASTVisitor#visit(SuperConstructorInvocation)
 	 */
 	@Override
@@ -1563,7 +1572,7 @@ public class ASTFlattener extends GenericVisitor {
 
 	@Override
 	public boolean visit(YieldStatement node) {
-		if (node.getAST().apiLevel() == JLS13 && node.isImplicit() && node.getExpression() == null) {
+		if (node.getAST().isPreviewEnabled() && node.isImplicit() && node.getExpression() == null) {
 			return false;
 		}
 		this.fBuffer.append("yield"); //$NON-NLS-1$

@@ -8,6 +8,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Dmitry Stalnov (dstalnov@fusionone.com) - contributed fix for
@@ -396,7 +400,7 @@ public class ASTNodes {
 	public static boolean isLiteral(Expression expression) {
 		int type= expression.getNodeType();
 		return type == ASTNode.BOOLEAN_LITERAL || type == ASTNode.CHARACTER_LITERAL || type == ASTNode.NULL_LITERAL ||
-			type == ASTNode.NUMBER_LITERAL || type == ASTNode.STRING_LITERAL || type == ASTNode.TYPE_LITERAL;
+			type == ASTNode.NUMBER_LITERAL || type == ASTNode.STRING_LITERAL || type == ASTNode.TYPE_LITERAL || type == ASTNode.TEXT_BLOCK;
 	}
 
 	public static boolean isLabel(SimpleName name) {
