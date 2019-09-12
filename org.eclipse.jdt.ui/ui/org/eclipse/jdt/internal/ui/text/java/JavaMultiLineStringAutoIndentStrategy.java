@@ -69,7 +69,7 @@ public class JavaMultiLineStringAutoIndentStrategy extends JavaStringAutoIndentS
 					if (isCloseStringsPreferenceSet()) {
 						command.caretOffset= command.offset + command.text.length();
 						command.shiftsCaret= false;
-						command.text= command.text + System.lineSeparator() + getIndentation(document, offset) + IndentAction.TEXT_BLOCK_STR + ";"; //$NON-NLS-1$
+						command.text= command.text + System.lineSeparator() + getIndentation(document, offset) + IndentAction.TEXT_BLOCK_STR;
 					}
 				}
 			} else {
