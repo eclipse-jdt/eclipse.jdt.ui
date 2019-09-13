@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -7,6 +7,10 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -43,6 +47,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
+import org.eclipse.jdt.core.dom.YieldStatement;
 import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -50,6 +55,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingManager.Highli
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingManager.Highlighting;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings.DeprecatedMemberHighlighting;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings.VarKeywordHighlighting;
+import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings.YieldKeywordHighlighting;
 import org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener;
 
 
@@ -133,6 +139,25 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 					for (int i= 0; i < fJobSemanticHighlightings.length; i++) {
 						SemanticHighlighting semanticHighlighting= fJobSemanticHighlightings[i];
 						if (semanticHighlighting instanceof VarKeywordHighlighting) {
+							addPosition(offset, length, fJobHighlightings[i]);
+							return false;
+						}
+					}
+				}
+			}
+			return true;
+		}
+
+		@Override
+		public boolean visit(YieldStatement node) {
+			AST ast= node.getAST();
+			if (ast.apiLevel() == AST.JLS13 && ast.isPreviewEnabled()) {
+				int offset= node.getStartPosition();
+				int length= 5; // length of 'yield'
+				if (offset > -1 && length > 0) {
+					for (int i= 0; i < fJobSemanticHighlightings.length; i++) {
+						SemanticHighlighting semanticHighlighting= fJobSemanticHighlightings[i];
+						if (semanticHighlighting instanceof YieldKeywordHighlighting) {
 							addPosition(offset, length, fJobHighlightings[i]);
 							return false;
 						}
