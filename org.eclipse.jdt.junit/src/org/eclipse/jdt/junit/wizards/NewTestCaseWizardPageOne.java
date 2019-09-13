@@ -1243,28 +1243,39 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 			try {
 				IJavaProject project= root.getJavaProject();
 				if (project.exists()) {
-					if (fJUnitVersion == JUnitVersion.VERSION_5) {
-						if (!JUnitStubUtility.is18OrHigher(project)) {
-							status.setError(WizardMessages.NewTestCaseWizardPageOne_error_java8required);
-							return status;
+					boolean noMatch= false;
+					if (fJUnitVersion != null) {
+						switch (fJUnitVersion) {
+							case VERSION_5:
+								if (!JUnitStubUtility.is18OrHigher(project)) {
+									status.setError(WizardMessages.NewTestCaseWizardPageOne_error_java8required);
+									return status;
+								}
+								if (project.findType(JUnitCorePlugin.JUNIT5_TESTABLE_ANNOTATION_NAME) == null) {
+									status.setWarning(WizardMessages.NewTestCaseWizardPageOne__error_junit5NotOnbuildpath);
+									return status;
+								}
+								break;
+							case VERSION_4:
+								if (!JUnitStubUtility.is50OrHigher(project)) {
+									status.setError(WizardMessages.NewTestCaseWizardPageOne_error_java5required);
+									return status;
+								}
+								if (project.findType(JUnitCorePlugin.JUNIT4_ANNOTATION_NAME) == null) {
+									status.setWarning(WizardMessages.NewTestCaseWizardPageOne__error_junit4NotOnbuildpath);
+									return status;
+								}
+								break;
+								//$CASES-OMITTED$
+							default:
+								noMatch= true;
+								break;
 						}
-						if (project.findType(JUnitCorePlugin.JUNIT5_TESTABLE_ANNOTATION_NAME) == null) {
-							status.setWarning(WizardMessages.NewTestCaseWizardPageOne__error_junit5NotOnbuildpath);
-							return status;
-						}
-					} else if (fJUnitVersion == JUnitVersion.VERSION_4) {
-						if (!JUnitStubUtility.is50OrHigher(project)) {
-							status.setError(WizardMessages.NewTestCaseWizardPageOne_error_java5required);
-							return status;
-						}
-						if (project.findType(JUnitCorePlugin.JUNIT4_ANNOTATION_NAME) == null) {
-							status.setWarning(WizardMessages.NewTestCaseWizardPageOne__error_junit4NotOnbuildpath);
-							return status;
-						}
-					} else {
-						if (project.findType(JUnitCorePlugin.TEST_SUPERCLASS_NAME) == null) {
-							status.setWarning(WizardMessages.NewTestCaseWizardPageOne_error_junitNotOnbuildpath);
-							return status;
+						if (noMatch) {
+							if (project.findType(JUnitCorePlugin.TEST_SUPERCLASS_NAME) == null) {
+								status.setWarning(WizardMessages.NewTestCaseWizardPageOne_error_junitNotOnbuildpath);
+								return status;
+							}
 						}
 					}
 				}

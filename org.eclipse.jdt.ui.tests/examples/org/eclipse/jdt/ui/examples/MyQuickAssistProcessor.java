@@ -184,12 +184,17 @@ public class MyQuickAssistProcessor implements IQuickAssistProcessor {
 				buf.append("buf.append(\"");
 				for (int k= 0; k < lineContent.length(); k++) {
 					char ch= lineContent.charAt(k);
-					if (ch == '\t') {
+					switch (ch) {
+					case '\t':
 						buf.append("    "); // 4 spaces
-					} else if (ch == '"' || ch == '\\') {
+						break;
+					case '"':
+					case '\\':
 						buf.append('\\').append(ch);
-					} else {
+						break;
+					default:
 						buf.append(ch);
+						break;
 					}
 				}
 				buf.append("\\n\");");

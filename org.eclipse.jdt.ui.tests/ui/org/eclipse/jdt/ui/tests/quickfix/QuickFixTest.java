@@ -625,19 +625,26 @@ public class QuickFixTest extends TestCase {
 		int last= curr.length() - 1;
 		for (int k= 0; k <= last ; k++) {
 			char ch= curr.charAt(k);
-			if (ch == '\n') {
+			switch (ch) {
+			case '\n':
 				buf.append("\\n\");\n");
 				if (k < last) {
 					buf.append("buf.append(\"");
 				}
-			} else if (ch == '\r') {
-				// ignore
-			} else if (ch == '\t') {
+				break;
+			// ignore
+			case '\r':
+				break;
+			case '\t':
 				buf.append("    "); // 4 spaces
-			} else if (ch == '"' || ch == '\\') {
+				break;
+			case '"':
+			case '\\':
 				buf.append('\\').append(ch);
-			} else {
+				break;
+			default:
 				buf.append(ch);
+				break;
 			}
 		}
 		if (buf.length() > 0 && buf.charAt(buf.length() - 1) != '\n') {

@@ -3,7 +3,7 @@ Automatic-Module-Name: org.eclipse.jdt.ui.examples.javafamily
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.jdt.ui.examples.javafamily; singleton:=true
-Bundle-Version: 3.2.100.qualifier
+Bundle-Version: 3.2.200.qualifier
 Bundle-ClassPath: javafamily.jar
 Bundle-Activator: org.eclipse.jsp.JspUIPlugin
 Bundle-Vendor: %providerName

@@ -211,12 +211,16 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 	@Override
 	public void run(IStructuredSelection selection) {
 		ICompilationUnit[] cus= fCleanUpDelegate.getCompilationUnits(selection);
-		if (cus.length == 0) {
+		switch (cus.length) {
+		case 0:
 			MessageDialog.openInformation(getShell(), ActionMessages.OrganizeImportsAction_EmptySelection_title, ActionMessages.OrganizeImportsAction_EmptySelection_description);
-		} else if (cus.length == 1) {
+			break;
+		case 1:
 			run(cus[0]);
-		} else {
+			break;
+		default:
 			fCleanUpDelegate.run(selection);
+			break;
 		}
 	}
 

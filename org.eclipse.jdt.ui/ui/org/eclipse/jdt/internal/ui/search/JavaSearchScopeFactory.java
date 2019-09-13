@@ -205,15 +205,25 @@ public class JavaSearchScopeFactory {
 		}
 		boolean includeJRE= (includeMask & JRE) != 0;
 		String scopeDescription;
-		if (projectNames.length == 1) {
-			String label= includeJRE ? SearchMessages.EnclosingProjectScope : SearchMessages.EnclosingProjectScopeNoJRE;
-			scopeDescription= Messages.format(label, org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels.getJavaElementName(projectNames[0]));
-		} else if (projectNames.length == 2) {
-			String label= includeJRE ? SearchMessages.EnclosingProjectsScope2 : SearchMessages.EnclosingProjectsScope2NoJRE;
-			scopeDescription= Messages.format(label, new String[] { org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels.getJavaElementName(projectNames[0]), org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels.getJavaElementName(projectNames[1])});
-		} else {
-			String label= includeJRE ? SearchMessages.EnclosingProjectsScope : SearchMessages.EnclosingProjectsScopeNoJRE;
-			scopeDescription= Messages.format(label, new String[] { org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels.getJavaElementName(projectNames[0]), org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels.getJavaElementName(projectNames[1])});
+		switch (projectNames.length) {
+		case 1:
+			{
+				String label= includeJRE ? SearchMessages.EnclosingProjectScope : SearchMessages.EnclosingProjectScopeNoJRE;
+				scopeDescription= Messages.format(label, org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels.getJavaElementName(projectNames[0]));
+				break;
+			}
+		case 2:
+			{
+				String label= includeJRE ? SearchMessages.EnclosingProjectsScope2 : SearchMessages.EnclosingProjectsScope2NoJRE;
+				scopeDescription= Messages.format(label, new String[] { org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels.getJavaElementName(projectNames[0]), org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels.getJavaElementName(projectNames[1])});
+				break;
+			}
+		default:
+			{
+				String label= includeJRE ? SearchMessages.EnclosingProjectsScope : SearchMessages.EnclosingProjectsScopeNoJRE;
+				scopeDescription= Messages.format(label, new String[] { org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels.getJavaElementName(projectNames[0]), org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels.getJavaElementName(projectNames[1])});
+				break;
+			}
 		}
 		return scopeDescription;
 	}
@@ -251,15 +261,25 @@ public class JavaSearchScopeFactory {
 			return SearchMessages.JavaSearchScopeFactory_undefined_selection;
 		}
 		String scopeDescription;
-		if (javaElements.length == 1) {
-			String label= includeJRE ? SearchMessages.SingleSelectionScope : SearchMessages.SingleSelectionScopeNoJRE;
-			scopeDescription= Messages.format(label, JavaElementLabels.getElementLabel(javaElements[0], JavaElementLabels.ALL_DEFAULT));
-		} else if (javaElements.length == 2) {
-			String label= includeJRE ? SearchMessages.DoubleSelectionScope : SearchMessages.DoubleSelectionScopeNoJRE;
-			scopeDescription= Messages.format(label, new String[] { JavaElementLabels.getElementLabel(javaElements[0], JavaElementLabels.ALL_DEFAULT), JavaElementLabels.getElementLabel(javaElements[1], JavaElementLabels.ALL_DEFAULT)});
-		}  else {
-			String label= includeJRE ? SearchMessages.SelectionScope : SearchMessages.SelectionScopeNoJRE;
-			scopeDescription= Messages.format(label, new String[] { JavaElementLabels.getElementLabel(javaElements[0], JavaElementLabels.ALL_DEFAULT), JavaElementLabels.getElementLabel(javaElements[1], JavaElementLabels.ALL_DEFAULT)});
+		switch (javaElements.length) {
+		case 1:
+			{
+				String label= includeJRE ? SearchMessages.SingleSelectionScope : SearchMessages.SingleSelectionScopeNoJRE;
+				scopeDescription= Messages.format(label, JavaElementLabels.getElementLabel(javaElements[0], JavaElementLabels.ALL_DEFAULT));
+				break;
+			}
+		case 2:
+			{
+				String label= includeJRE ? SearchMessages.DoubleSelectionScope : SearchMessages.DoubleSelectionScopeNoJRE;
+				scopeDescription= Messages.format(label, new String[] { JavaElementLabels.getElementLabel(javaElements[0], JavaElementLabels.ALL_DEFAULT), JavaElementLabels.getElementLabel(javaElements[1], JavaElementLabels.ALL_DEFAULT)});
+				break;
+			}
+		default:
+			{
+				String label= includeJRE ? SearchMessages.SelectionScope : SearchMessages.SelectionScopeNoJRE;
+				scopeDescription= Messages.format(label, new String[] { JavaElementLabels.getElementLabel(javaElements[0], JavaElementLabels.ALL_DEFAULT), JavaElementLabels.getElementLabel(javaElements[1], JavaElementLabels.ALL_DEFAULT)});
+				break;
+			}
 		}
 		return scopeDescription;
 	}

@@ -614,25 +614,35 @@ public final class JavaUI {
 	public static SelectionDialog createTypeDialog(Shell parent, IRunnableContext context, IJavaSearchScope scope, int style,
 			boolean multipleSelection, String filter, TypeSelectionExtension extension) throws JavaModelException {
 		int elementKinds= 0;
-		if (style == IJavaElementSearchConstants.CONSIDER_ALL_TYPES) {
+		switch (style) {
+		case IJavaElementSearchConstants.CONSIDER_ALL_TYPES:
 			elementKinds= IJavaSearchConstants.TYPE;
-		} else if (style == IJavaElementSearchConstants.CONSIDER_INTERFACES) {
+			break;
+		case IJavaElementSearchConstants.CONSIDER_INTERFACES:
 			elementKinds= IJavaSearchConstants.INTERFACE;
-		} else if (style == IJavaElementSearchConstants.CONSIDER_CLASSES) {
+			break;
+		case IJavaElementSearchConstants.CONSIDER_CLASSES:
 			elementKinds= IJavaSearchConstants.CLASS;
-		} else if (style == IJavaElementSearchConstants.CONSIDER_ANNOTATION_TYPES) {
+			break;
+		case IJavaElementSearchConstants.CONSIDER_ANNOTATION_TYPES:
 			elementKinds= IJavaSearchConstants.ANNOTATION_TYPE;
-		} else if (style == IJavaElementSearchConstants.CONSIDER_ENUMS) {
+			break;
+		case IJavaElementSearchConstants.CONSIDER_ENUMS:
 			elementKinds= IJavaSearchConstants.ENUM;
-		} else if (style == IJavaElementSearchConstants.CONSIDER_CLASSES_AND_INTERFACES) {
+			break;
+		case IJavaElementSearchConstants.CONSIDER_CLASSES_AND_INTERFACES:
 			elementKinds= IJavaSearchConstants.CLASS_AND_INTERFACE;
-		} else if (style == IJavaElementSearchConstants.CONSIDER_CLASSES_AND_ENUMS) {
+			break;
+		case IJavaElementSearchConstants.CONSIDER_CLASSES_AND_ENUMS:
 			elementKinds= IJavaSearchConstants.CLASS_AND_ENUM;
-		} else if (style == DEPRECATED_CONSIDER_TYPES) {
+			break;
+		case DEPRECATED_CONSIDER_TYPES:
 			elementKinds= IJavaSearchConstants.CLASS_AND_INTERFACE;
-		} else if (style == IJavaElementSearchConstants.CONSIDER_INTERFACES_AND_ANNOTATIONS) {
+			break;
+		case IJavaElementSearchConstants.CONSIDER_INTERFACES_AND_ANNOTATIONS:
 			elementKinds= IJavaSearchConstants.INTERFACE_AND_ANNOTATION;
-		} else {
+			break;
+		default:
 			throw new IllegalArgumentException("Invalid style constant."); //$NON-NLS-1$
 		}
 		FilteredTypesSelectionDialog dialog= new FilteredTypesSelectionDialog(parent, multipleSelection,

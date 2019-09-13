@@ -1063,24 +1063,36 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 	}
 
 	protected void doCustomButtonPressed(TreeListDialogField<CPUserLibraryElement> field, int index) {
-		if (index == IDX_NEW) {
+		switch (index) {
+		case IDX_NEW:
 			editUserLibraryElement(null);
-		} else if (index == IDX_ADD) {
+			break;
+		case IDX_ADD:
 			doAdd(field.getSelectedElements());
-		} else if (index == IDX_ADD_EXTERNAL) {
+			break;
+		case IDX_ADD_EXTERNAL:
 			doAddExternal(field.getSelectedElements());
-		} else if (index == IDX_REMOVE) {
+			break;
+		case IDX_REMOVE:
 			doRemove(field.getSelectedElements());
-		} else if (index == IDX_EDIT) {
+			break;
+		case IDX_EDIT:
 			doEdit(field.getSelectedElements());
-		} else if (index == IDX_SAVE) {
+			break;
+		case IDX_SAVE:
 			doSave();
-		} else if (index == IDX_LOAD) {
+			break;
+		case IDX_LOAD:
 			doLoad();
-		} else if (index == IDX_UP) {
+			break;
+		case IDX_UP:
 			doMoveUp(field.getSelectedElements());
-		} else if (index == IDX_DOWN) {
+			break;
+		case IDX_DOWN:
 			doMoveDown(field.getSelectedElements());
+			break;
+		default:
+			break;
 		}
 	}
 

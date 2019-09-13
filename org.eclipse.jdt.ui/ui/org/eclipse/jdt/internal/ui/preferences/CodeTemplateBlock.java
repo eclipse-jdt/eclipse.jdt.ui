@@ -455,14 +455,21 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 	}
 
 	protected void doButtonPressed(int buttonIndex, List<Object> selected) {
-		if (buttonIndex == IDX_EDIT) {
+		switch (buttonIndex) {
+		case IDX_EDIT:
 			edit((TemplatePersistenceData) selected.get(0));
-		} else if (buttonIndex == IDX_EXPORT) {
+			break;
+		case IDX_EXPORT:
 			export(selected);
-		} else if (buttonIndex == IDX_EXPORTALL) {
+			break;
+		case IDX_EXPORTALL:
 			exportAll();
-		} else if (buttonIndex == IDX_IMPORT) {
+			break;
+		case IDX_IMPORT:
 			import_();
+			break;
+		default:
+			break;
 		}
 	}
 

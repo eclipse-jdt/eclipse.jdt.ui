@@ -141,12 +141,16 @@ public class EditAnnotator extends TextEditVisitor {
 				}
 				for (int k= 0; k < content.length(); k++) {
 					char ch= content.charAt(k);
-					if (ch == '<') {
+					switch (ch) {
+					case '<':
 						fBuf.append("&lt;"); //$NON-NLS-1$
-					} else if (ch == '>') {
+						break;
+					case '>':
 						fBuf.append("&gt;"); //$NON-NLS-1$
-					} else {
+						break;
+					default:
 						fBuf.append(ch);
+						break;
 					}
 				}
 				if (to == end && to != endOffset) { // new line when at the end of the line, and not end of range

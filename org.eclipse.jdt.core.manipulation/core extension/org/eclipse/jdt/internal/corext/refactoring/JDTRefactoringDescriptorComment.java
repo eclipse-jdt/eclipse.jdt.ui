@@ -256,12 +256,19 @@ public final class JDTRefactoringDescriptorComment {
 			final ISimilarDeclarationUpdating updating= (ISimilarDeclarationUpdating) object;
 			if (updating.canEnableSimilarDeclarationUpdating() && updating.getUpdateSimilarDeclarations()) {
 				final int strategy= updating.getMatchStrategy();
-				if (strategy == RenamingNameSuggestor.STRATEGY_EXACT)
+				switch (strategy) {
+				case RenamingNameSuggestor.STRATEGY_EXACT:
 					fSettings.add(RefactoringCoreMessages.JavaRefactoringDescriptor_rename_similar);
-				else if (strategy == RenamingNameSuggestor.STRATEGY_EMBEDDED)
+					break;
+				case RenamingNameSuggestor.STRATEGY_EMBEDDED:
 					fSettings.add(RefactoringCoreMessages.JavaRefactoringDescriptor_rename_similar_embedded);
-				else if (strategy == RenamingNameSuggestor.STRATEGY_SUFFIX)
+					break;
+				case RenamingNameSuggestor.STRATEGY_SUFFIX:
 					fSettings.add(RefactoringCoreMessages.JavaRefactoringDescriptor_rename_similar_suffix);
+					break;
+				default:
+					break;
+				}
 			}
 		}
 		if (object instanceof IQualifiedNameUpdating) {

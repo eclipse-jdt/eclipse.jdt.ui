@@ -602,19 +602,25 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 		StringBuffer sb= new StringBuffer(s.length()+10);
 		for (int i= 0; i < s.length(); i++) {
 			char c= s.charAt(i);
-			if (c == ',') {
+			switch (c) {
+			case ',':
 				sb.append("\\,"); //$NON-NLS-1$
-			} else if (c == '\\') {
+				break;
+			case '\\':
 				sb.append("\\\\"); //$NON-NLS-1$
-			} else if (c == '\r') {
+				break;
+			case '\r':
 				if (i + 1 < s.length() && s.charAt(i + 1) == '\n') {
 					i++;
 				}
 				sb.append(' ');
-			} else if (c == '\n') {
+				break;
+			case '\n':
 				sb.append(' ');
-			} else {
+				break;
+			default:
 				sb.append(c);
+				break;
 			}
 		}
 		return sb.toString();

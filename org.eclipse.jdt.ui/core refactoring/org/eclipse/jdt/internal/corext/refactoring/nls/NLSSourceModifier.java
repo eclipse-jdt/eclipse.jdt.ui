@@ -73,13 +73,15 @@ public class NLSSourceModifier {
 				createImportForAccessor= false;
 			}
 			if (substitution.hasStateChanged()) {
-				if (newState == NLSSubstitution.EXTERNALIZED) {
+				switch (newState) {
+				case NLSSubstitution.EXTERNALIZED:
 					if (substitution.getInitialState() == NLSSubstitution.INTERNALIZED) {
 						sourceModification.addNLS(substitution, change, accessorClassName);
 					} else if (substitution.getInitialState() == NLSSubstitution.IGNORED) {
 						sourceModification.addAccessor(substitution, change, accessorClassName);
 					}
-				} else if (newState == NLSSubstitution.INTERNALIZED) {
+					break;
+				case NLSSubstitution.INTERNALIZED:
 					if (substitution.getInitialState() == NLSSubstitution.IGNORED) {
 						sourceModification.deleteTag(substitution, change);
 						if (substitution.isValueRename()) {
@@ -90,7 +92,8 @@ public class NLSSourceModifier {
 						if (!isEclipseNLS)
 							sourceModification.deleteTag(substitution, change);
 					}
-				} else if (newState == NLSSubstitution.IGNORED) {
+					break;
+				case NLSSubstitution.IGNORED:
 					if (substitution.getInitialState() == NLSSubstitution.INTERNALIZED) {
 						sourceModification.addNLS(substitution, change, null);
 						if (substitution.isValueRename()) {
@@ -101,7 +104,10 @@ public class NLSSourceModifier {
 							sourceModification.deleteAccessor(substitution, change, cu);
 						}
 					}
-					}
+					break;
+				default:
+					break;
+				}
 			} else {
 				if (newState == NLSSubstitution.EXTERNALIZED) {
 					if (substitution.isKeyRename()) {

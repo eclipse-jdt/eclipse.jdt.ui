@@ -444,17 +444,23 @@ public class IndentAction extends TextEditorAction {
 	 * @since 3.4
 	 */
 	private static void removeIndentations(int count, int tabSize, StringBuffer buffer) {
+		OUTER:
 		while (count > 0 && buffer.length() > 0) {
 			char c= buffer.charAt(0);
-			if (c == '\t')
-				if (count > tabSize)
+			switch (c) {
+			case '\t':
+				if (count > tabSize) {
 					count-= tabSize;
-				else
-					break;
-			else if (c == ' ')
+				} else {
+					break OUTER;
+				}
+				break;
+			case ' ':
 				count--;
-			else break;
-
+				break;
+			default:
+				break OUTER;
+			}
 			buffer.deleteCharAt(0);
 		}
 	}

@@ -35,26 +35,31 @@ public class ToggleViewAction extends Action {
 	public ToggleViewAction(ITypeHierarchyViewPart v, int viewerIndex) {
 		super("", AS_RADIO_BUTTON); //$NON-NLS-1$
 		String contextHelpId= null;
-		if (viewerIndex == ITypeHierarchyViewPart.HIERARCHY_MODE_SUPERTYPES) {
+		switch (viewerIndex) {
+		case ITypeHierarchyViewPart.HIERARCHY_MODE_SUPERTYPES:
 			setText(TypeHierarchyMessages.ToggleViewAction_supertypes_label);
 			contextHelpId= IJavaHelpContextIds.SHOW_SUPERTYPES;
 			setDescription(TypeHierarchyMessages.ToggleViewAction_supertypes_description);
 			setToolTipText(TypeHierarchyMessages.ToggleViewAction_supertypes_tooltip);
 			JavaPluginImages.setLocalImageDescriptors(this, "super_co.png"); //$NON-NLS-1$
-		} else if (viewerIndex == ITypeHierarchyViewPart.HIERARCHY_MODE_SUBTYPES) {
+			break;
+		case ITypeHierarchyViewPart.HIERARCHY_MODE_SUBTYPES:
 			setText(TypeHierarchyMessages.ToggleViewAction_subtypes_label);
 			contextHelpId= IJavaHelpContextIds.SHOW_SUBTYPES;
 			setDescription(TypeHierarchyMessages.ToggleViewAction_subtypes_description);
 			setToolTipText(TypeHierarchyMessages.ToggleViewAction_subtypes_tooltip);
 			JavaPluginImages.setLocalImageDescriptors(this, "sub_co.png"); //$NON-NLS-1$
-		} else if (viewerIndex == ITypeHierarchyViewPart.HIERARCHY_MODE_CLASSIC) {
+			break;
+		case ITypeHierarchyViewPart.HIERARCHY_MODE_CLASSIC:
 			setText(TypeHierarchyMessages.ToggleViewAction_vajhierarchy_label);
 			contextHelpId= IJavaHelpContextIds.SHOW_HIERARCHY;
 			setDescription(TypeHierarchyMessages.ToggleViewAction_vajhierarchy_description);
 			setToolTipText(TypeHierarchyMessages.ToggleViewAction_vajhierarchy_tooltip);
 			JavaPluginImages.setLocalImageDescriptors(this, "hierarchy_co.png"); //$NON-NLS-1$
-		} else {
+			break;
+		default:
 			Assert.isTrue(false);
+			break;
 		}
 
 		fViewPart= v;

@@ -105,12 +105,16 @@ public abstract class CleanUpAction extends SelectionDispatchAction {
 	@Override
 	public void run(IStructuredSelection selection) {
 		ICompilationUnit[] cus= getCompilationUnits(selection);
-		if (cus.length == 0) {
+		switch (cus.length) {
+		case 0:
 			MessageDialog.openInformation(getShell(), getActionName(), ActionMessages.CleanUpAction_EmptySelection_description);
-		} else if (cus.length == 1) {
+			break;
+		case 1:
 			run(cus[0]);
-		} else {
+			break;
+		default:
 			runOnMultiple(cus);
+			break;
 		}
 	}
 

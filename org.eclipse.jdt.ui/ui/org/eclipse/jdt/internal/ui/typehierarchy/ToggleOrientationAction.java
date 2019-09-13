@@ -34,28 +34,34 @@ public class ToggleOrientationAction extends Action {
 
 	public ToggleOrientationAction(ITypeHierarchyViewPart v, int orientation) {
 		super("", AS_RADIO_BUTTON); //$NON-NLS-1$
-		if (orientation == ITypeHierarchyViewPart.VIEW_LAYOUT_HORIZONTAL) {
+		switch (orientation) {
+		case ITypeHierarchyViewPart.VIEW_LAYOUT_HORIZONTAL:
 			setText(TypeHierarchyMessages.ToggleOrientationAction_horizontal_label);
 			setDescription(TypeHierarchyMessages.ToggleOrientationAction_horizontal_description);
 			setToolTipText(TypeHierarchyMessages.ToggleOrientationAction_horizontal_tooltip);
 			JavaPluginImages.setLocalImageDescriptors(this, "th_horizontal.png"); //$NON-NLS-1$
-		} else if (orientation == ITypeHierarchyViewPart.VIEW_LAYOUT_VERTICAL) {
+			break;
+		case ITypeHierarchyViewPart.VIEW_LAYOUT_VERTICAL:
 			setText(TypeHierarchyMessages.ToggleOrientationAction_vertical_label);
 			setDescription(TypeHierarchyMessages.ToggleOrientationAction_vertical_description);
 			setToolTipText(TypeHierarchyMessages.ToggleOrientationAction_vertical_tooltip);
 			JavaPluginImages.setLocalImageDescriptors(this, "th_vertical.png"); //$NON-NLS-1$
-		} else if (orientation == ITypeHierarchyViewPart.VIEW_LAYOUT_AUTOMATIC) {
+			break;
+		case ITypeHierarchyViewPart.VIEW_LAYOUT_AUTOMATIC:
 			setText(TypeHierarchyMessages.ToggleOrientationAction_automatic_label);
 			setDescription(TypeHierarchyMessages.ToggleOrientationAction_automatic_description);
 			setToolTipText(TypeHierarchyMessages.ToggleOrientationAction_automatic_tooltip);
 			JavaPluginImages.setLocalImageDescriptors(this, "th_automatic.png"); //$NON-NLS-1$
-		} else if (orientation == ITypeHierarchyViewPart.VIEW_LAYOUT_SINGLE) {
+			break;
+		case ITypeHierarchyViewPart.VIEW_LAYOUT_SINGLE:
 			setText(TypeHierarchyMessages.ToggleOrientationAction_single_label);
 			setDescription(TypeHierarchyMessages.ToggleOrientationAction_single_description);
 			setToolTipText(TypeHierarchyMessages.ToggleOrientationAction_single_tooltip);
 			JavaPluginImages.setLocalImageDescriptors(this, "th_single.png"); //$NON-NLS-1$
-		} else {
+			break;
+		default:
 			Assert.isTrue(false);
+			break;
 		}
 		fView= v;
 		fActionOrientation= orientation;

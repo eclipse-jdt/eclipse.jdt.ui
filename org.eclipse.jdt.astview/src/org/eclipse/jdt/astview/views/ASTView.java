@@ -748,12 +748,18 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 
 	private void updateContentDescription(IJavaElement element, CompilationUnit root, long time) {
 		String version= "AST Level " + root.getAST().apiLevel();
-		if (getCurrentInputKind() == ASTInputKindAction.USE_RECONCILE) {
+		switch (getCurrentInputKind()) {
+		case ASTInputKindAction.USE_RECONCILE:
 			version+= ", from reconciler"; //$NON-NLS-1$
-		} else if (getCurrentInputKind() == ASTInputKindAction.USE_CACHE) {
+			break;
+		case ASTInputKindAction.USE_CACHE:
 			version+= ", from ASTProvider"; //$NON-NLS-1$
-		} else if (getCurrentInputKind() == ASTInputKindAction.USE_FOCAL) {
+			break;
+		case ASTInputKindAction.USE_FOCAL:
 			version+= ", using focal position"; //$NON-NLS-1$
+			break;
+		default:
+			break;
 		}
 		TreeInfoCollector collector= new TreeInfoCollector(root);
 

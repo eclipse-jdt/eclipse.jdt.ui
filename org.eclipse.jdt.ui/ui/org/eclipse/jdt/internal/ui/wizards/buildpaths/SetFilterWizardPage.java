@@ -201,14 +201,21 @@ public class SetFilterWizardPage extends NewElementWizardPage {
 	}
 
 	protected void doCustomButtonPressed(ListDialogField<String> field, int index) {
-		if (index == IDX_ADD) {
+		switch (index) {
+		case IDX_ADD:
 			addEntry(field);
-		} else if (index == IDX_EDIT) {
+			break;
+		case IDX_EDIT:
 			editEntry(field);
-		} else if (index == IDX_ADD_MULTIPLE) {
+			break;
+		case IDX_ADD_MULTIPLE:
 			addMultipleEntries(field);
-		} else if (index == IDX_REMOVE) {
+			break;
+		case IDX_REMOVE:
 			field.removeElements(field.getSelectedElements());
+			break;
+		default:
+			break;
 		}
 		updateStatus();
 	}

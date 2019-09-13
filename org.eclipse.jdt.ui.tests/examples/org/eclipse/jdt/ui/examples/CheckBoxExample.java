@@ -90,16 +90,20 @@ public class CheckBoxExample {
 		public void customButtonPressed(ListDialogField<String> field, int index) {
 			if (field instanceof CheckedListDialogField) {
 				CheckedListDialogField<String> list= (CheckedListDialogField<String>)field;
-				if (index == 0) {
+				switch (index) {
+				case 0:
 					list.addElement("element-" + (fgRandom.nextInt() % 1000));
-				} else if (index == 2) {
+					break;
+				case 2:
 					System.out.println("---- printing all");
 					List<String> checked= list.getCheckedElements();
 					for (int i= 0; i < checked.size(); i++) {
 						System.out.println(checked.get(i).toString());
 					}
-				} else {
+					break;
+				default:
 					list.setChecked(list.getElement(0), true);
+					break;
 				}
 			}
 		}

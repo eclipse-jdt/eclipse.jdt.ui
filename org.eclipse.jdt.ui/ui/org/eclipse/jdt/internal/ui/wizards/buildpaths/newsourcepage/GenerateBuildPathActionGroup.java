@@ -246,12 +246,19 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 			if (action instanceof IUpdate)
 				((IUpdate) action).update();
 
-            if (i == 2)
-                source.add(new Separator(GROUP_BUILDPATH));
-            else if (i == 9)
-                source.add(new Separator(GROUP_FILTER));
-            else if (i == 11)
-                source.add(new Separator(GROUP_CUSTOMIZE));
+			switch (i) {
+			case 2:
+				source.add(new Separator(GROUP_BUILDPATH));
+				break;
+			case 9:
+				source.add(new Separator(GROUP_FILTER));
+				break;
+			case 11:
+				source.add(new Separator(GROUP_CUSTOMIZE));
+				break;
+			default:
+				break;
+			}
             added+= addAction(source, action);
             i++;
 		}

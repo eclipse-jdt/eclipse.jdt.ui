@@ -128,13 +128,18 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 			};
 			MessageDialog dialog= new MessageDialog(getShell(), title, null, message, MessageDialog.QUESTION, buttonLabels, 0);
 			int res= dialog.open();
-			if (res == 0) { //save
+			switch (res) {
+			case 0:
+				//save
 				fBlockOnApply= true;
 				return performOk() && super.okToLeave();
-			} else if (res == 1) { // discard
+			case 1:
+				// discard
 				fBuildPathsBlock.init(JavaCore.create(getProject()), null, null);
-			} else {
-				// keep unsaved
+				break;
+			// keep unsaved
+			default:
+				break;
 			}
 		}
 		return super.okToLeave();

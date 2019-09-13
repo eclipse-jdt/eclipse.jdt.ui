@@ -162,7 +162,8 @@ public class PropertiesFileEscapes {
 					return outBuffer.toString(); // silently ignore the \
 				}
 				aChar= s.charAt(x++);
-				if (aChar == 'u') {
+				switch (aChar) {
+				case 'u':
 					// Read the xxxx
 					int value= 0;
 					if (x > len - 4) {
@@ -183,16 +184,22 @@ public class PropertiesFileEscapes {
 						buf.append(aChar);
 					}
 					outBuffer.append(digit == -1 ? buf.toString() : String.valueOf((char)value));
-				} else if (aChar == 't') {
+					break;
+				case 't':
 					outBuffer.append('\t');
-				} else if (aChar == 'n') {
+					break;
+				case 'n':
 					outBuffer.append('\n');
-				} else if (aChar == 'f') {
+					break;
+				case 'f':
 					outBuffer.append('\f');
-				} else if (aChar == 'r') {
+					break;
+				case 'r':
 					outBuffer.append('\r');
-				} else {
+					break;
+				default:
 					outBuffer.append(aChar); // silently ignore the \
+					break;
 				}
 			} else
 				outBuffer.append(aChar);

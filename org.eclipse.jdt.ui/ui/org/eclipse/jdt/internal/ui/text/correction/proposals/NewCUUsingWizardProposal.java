@@ -504,12 +504,16 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
 	private void nameToHTML(String name, StringBuilder buf) {
 		for (int i= 0; i < name.length(); i++) {
 			char ch= name.charAt(i);
-			if (ch == '>') {
+			switch (ch) {
+			case '>':
 				buf.append("&gt;"); //$NON-NLS-1$
-			} else if (ch == '<') {
+				break;
+			case '<':
 				buf.append("&lt;"); //$NON-NLS-1$
-			} else {
+				break;
+			default:
 				buf.append(ch);
+				break;
 			}
 		}
 	}

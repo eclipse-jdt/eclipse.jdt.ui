@@ -350,10 +350,11 @@ public class RemoteTestRunnerClient {
 		StringBuilder buf= new StringBuilder(128);
 		int ch;
 		while ((ch= in.read()) != -1) {
-			if (ch == '\n') {
+			switch (ch) {
+			case '\n':
 				fLastLineDelimiter= "\n"; //$NON-NLS-1$
 				return buf.toString();
-			} else if (ch == '\r') {
+			case '\r':
 				ch= in.read();
 				if (ch == '\n') {
 					fLastLineDelimiter= "\r\n"; //$NON-NLS-1$
@@ -362,8 +363,9 @@ public class RemoteTestRunnerClient {
 					fLastLineDelimiter= "\r"; //$NON-NLS-1$
 				}
 				return buf.toString();
-			} else {
+			default:
 				buf.append((char) ch);
+				break;
 			}
 		}
 		fLastLineDelimiter= null;

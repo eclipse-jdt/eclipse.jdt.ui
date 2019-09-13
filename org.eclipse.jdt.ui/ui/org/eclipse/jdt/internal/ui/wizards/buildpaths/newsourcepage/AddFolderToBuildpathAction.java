@@ -150,11 +150,14 @@ public class AddFolderToBuildpathAction extends BuildpathModifierAction {
 						String message= Messages.format(NewWizardMessages.BuildPathsBlock_RemoveBinariesDialog_description, BasicElementLabels.getPathLabel(projPath, false));
 						MessageDialog dialog= new MessageDialog(shell, title, null, message, MessageDialog.QUESTION, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL }, 0);
 						int answer= dialog.open();
-						if (answer == 0) {
+						switch (answer) {
+						case 0:
 							removeOldClassFiles= true;
-						} else if (answer == 1) {
+							break;
+						case 1:
 							removeOldClassFiles= false;
-						} else {
+							break;
+						default:
 							return;
 						}
 					} else {

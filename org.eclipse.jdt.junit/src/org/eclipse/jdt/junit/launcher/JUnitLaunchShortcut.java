@@ -465,11 +465,12 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 		// IType, prompt the
 		// user to choose one.
 		int candidateCount= candidateConfigs.size();
-		if (candidateCount == 0) {
+		switch (candidateCount) {
+		case 0:
 			return null;
-		} else if (candidateCount == 1) {
+		case 1:
 			return candidateConfigs.get(0);
-		} else {
+		default:
 			// Prompt the user to choose a config. A null result means the user
 			// cancelled the dialog, in which case this method returns null,
 			// since cancelling the dialog should also cancel launching
@@ -478,6 +479,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 			if (config != null) {
 				return config;
 			}
+			break;
 		}
 		return null;
 	}

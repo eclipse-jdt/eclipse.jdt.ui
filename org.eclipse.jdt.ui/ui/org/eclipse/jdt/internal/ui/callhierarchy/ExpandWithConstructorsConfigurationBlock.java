@@ -554,33 +554,41 @@ public class ExpandWithConstructorsConfigurationBlock extends OptionsConfigurati
 	 * @param index the index of the button
 	 */
 	private void doButtonPressed(int index) {
-		if (index == IDX_NEW_TYPE || index == IDX_NEW_MEMBER) { // add new
-			List<String> existing= fList.getElements();
-			CallHierarchyTypesOrMembersDialog dialog= new CallHierarchyTypesOrMembersDialog(getShell(), existing, index == IDX_NEW_MEMBER);
-			if (dialog.open() == Window.OK) {
-				fList.addElement(dialog.getResult());
+		switch (index) {
+		case IDX_NEW_TYPE:
+		case IDX_NEW_MEMBER:
+			{
+				// add new
+				List<String> existing= fList.getElements();
+				CallHierarchyTypesOrMembersDialog dialog= new CallHierarchyTypesOrMembersDialog(getShell(), existing, index == IDX_NEW_MEMBER);
+				if (dialog.open() == Window.OK) {
+					fList.addElement(dialog.getResult());
+				}	break;
 			}
-		} else if (index == IDX_EDIT) { // edit
-			List<String> selected= fList.getSelectedElements();
-			if (selected.isEmpty())
-				return;
-
-			String editedEntry= selected.get(0);
-
-			List<String> existing= fList.getElements();
-			existing.remove(editedEntry);
-			boolean isType= editedEntry.endsWith(WILDCARD);
-			CallHierarchyTypesOrMembersDialog dialog= new CallHierarchyTypesOrMembersDialog(getShell(), existing, !isType);
-			if (isType)
-				dialog.setInitialSelection(editedEntry.substring(0, editedEntry.length() - 2));
-			else
-				dialog.setInitialSelection(editedEntry);
-
-			if (dialog.open() == Window.OK) {
-				fList.replaceElement(editedEntry, dialog.getResult());
+		case IDX_EDIT:
+			{
+				// edit
+				List<String> selected= fList.getSelectedElements();
+				if (selected.isEmpty())
+					return;
+				String editedEntry= selected.get(0);
+				List<String> existing= fList.getElements();
+				existing.remove(editedEntry);
+				boolean isType= editedEntry.endsWith(WILDCARD);
+				CallHierarchyTypesOrMembersDialog dialog= new CallHierarchyTypesOrMembersDialog(getShell(), existing, !isType);
+				if (isType)
+					dialog.setInitialSelection(editedEntry.substring(0, editedEntry.length() - 2));
+				else
+					dialog.setInitialSelection(editedEntry);
+				if (dialog.open() == Window.OK) {
+					fList.replaceElement(editedEntry, dialog.getResult());
+				}	break;
 			}
-		} else if (index == IDX_RESTORE_DEFAULTS){
+		case IDX_RESTORE_DEFAULTS:
 			performDefaults();
+			break;
+		default:
+			break;
 		}
 	}
 

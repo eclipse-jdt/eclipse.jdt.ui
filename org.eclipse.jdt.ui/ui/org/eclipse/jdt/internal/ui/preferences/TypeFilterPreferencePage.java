@@ -253,38 +253,43 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
 	}
 
 	private void doButtonPressed(int index) {
-		if (index == IDX_ADD) { // add new
-			List<String> existing= fFilterListField.getElements();
-			TypeFilterInputDialog dialog= new TypeFilterInputDialog(getShell(), existing);
-			if (dialog.open() == Window.OK) {
-				String res= (String) dialog.getResult();
-				fFilterListField.addElement(res);
-				fFilterListField.setChecked(res, true);
-			}
-		} else if (index == IDX_ADD_PACKAGE) { // add packages
-			String[] res= choosePackage();
-			if (res != null) {
-				fFilterListField.addElements(Arrays.asList(res));
-				for (String re : res) {
-					fFilterListField.setChecked(re, true);
+		switch (index) {
+			case IDX_ADD:
+				// add new
+				TypeFilterInputDialog dialog= new TypeFilterInputDialog(getShell(), fFilterListField.getElements());
+				if (dialog.open() == Window.OK) {
+					String res= (String) dialog.getResult();
+					fFilterListField.addElement(res);
+					fFilterListField.setChecked(res, true);
 				}
-			}
-
-		} else if (index == IDX_EDIT) { // edit
-			List<String> selected= fFilterListField.getSelectedElements();
-			if (selected.isEmpty()) {
-				return;
-			}
-			String editedEntry= selected.get(0);
-
-			List<String> existing= fFilterListField.getElements();
-			existing.remove(editedEntry);
-
-			TypeFilterInputDialog dialog= new TypeFilterInputDialog(getShell(), existing);
-			dialog.setInitialString(editedEntry);
-			if (dialog.open() == Window.OK) {
-				fFilterListField.replaceElement(editedEntry, (String) dialog.getResult());
-			}
+				break;
+			case IDX_ADD_PACKAGE:
+				// add packages
+				String[] res= choosePackage();
+				if (res != null) {
+					fFilterListField.addElements(Arrays.asList(res));
+					for (String re : res) {
+						fFilterListField.setChecked(re, true);
+					}
+				}
+				break;
+			case IDX_EDIT:
+				// edit
+				List<String> selected= fFilterListField.getSelectedElements();
+				if (selected.isEmpty()) {
+					return;
+				}
+				String editedEntry= selected.get(0);
+				List<String> existing= fFilterListField.getElements();
+				existing.remove(editedEntry);
+				dialog= new TypeFilterInputDialog(getShell(), existing);
+				dialog.setInitialString(editedEntry);
+				if (dialog.open() == Window.OK) {
+					fFilterListField.replaceElement(editedEntry, (String) dialog.getResult());
+				}
+				break;
+			default:
+				break;
 		}
 	}
 

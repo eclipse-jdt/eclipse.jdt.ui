@@ -250,22 +250,23 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		@Override
 		public String getColumnText(Object element, int columnIndex) {
 			NameConventionEntry entry= (NameConventionEntry) element;
-			if (columnIndex == 0) {
+			switch (columnIndex) {
+			case 0:
 				switch (entry.kind) {
-					case FIELD:
-						return PreferencesMessages.NameConventionConfigurationBlock_field_label;
-					case STATIC:
-						return PreferencesMessages.NameConventionConfigurationBlock_static_label;
-					case STATIC_FINAL:
-						return PreferencesMessages.NameConventionConfigurationBlock_static_final_label;
-					case ARGUMENT:
-						return PreferencesMessages.NameConventionConfigurationBlock_arg_label;
-					default:
-						return PreferencesMessages.NameConventionConfigurationBlock_local_label;
+				case FIELD:
+					return PreferencesMessages.NameConventionConfigurationBlock_field_label;
+				case STATIC:
+					return PreferencesMessages.NameConventionConfigurationBlock_static_label;
+				case STATIC_FINAL:
+					return PreferencesMessages.NameConventionConfigurationBlock_static_final_label;
+				case ARGUMENT:
+					return PreferencesMessages.NameConventionConfigurationBlock_arg_label;
+				default:
+					return PreferencesMessages.NameConventionConfigurationBlock_local_label;
 				}
-			} else if (columnIndex == 1) {
+			case 1:
 				return entry.prefix;
-			} else {
+			default:
 				return entry.suffix;
 			}
 		}

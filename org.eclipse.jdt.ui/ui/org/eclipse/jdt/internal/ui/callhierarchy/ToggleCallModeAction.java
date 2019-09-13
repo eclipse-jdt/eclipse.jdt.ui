@@ -33,19 +33,23 @@ class ToggleCallModeAction extends Action {
 
     public ToggleCallModeAction(CallHierarchyViewPart v, int mode) {
         super("", AS_RADIO_BUTTON); //$NON-NLS-1$
-        if (mode == CallHierarchyViewPart.CALL_MODE_CALLERS) {
-            setText(CallHierarchyMessages.ToggleCallModeAction_callers_label);
-            setDescription(CallHierarchyMessages.ToggleCallModeAction_callers_description);
-            setToolTipText(CallHierarchyMessages.ToggleCallModeAction_callers_tooltip);
-            JavaPluginImages.setLocalImageDescriptors(this, "ch_callers.png"); //$NON-NLS-1$
-        } else if (mode == CallHierarchyViewPart.CALL_MODE_CALLEES) {
-            setText(CallHierarchyMessages.ToggleCallModeAction_callees_label);
-            setDescription(CallHierarchyMessages.ToggleCallModeAction_callees_description);
-            setToolTipText(CallHierarchyMessages.ToggleCallModeAction_callees_tooltip);
-            JavaPluginImages.setLocalImageDescriptors(this, "ch_callees.png"); //$NON-NLS-1$
-        } else {
-            Assert.isTrue(false);
-        }
+		switch (mode) {
+		case CallHierarchyViewPart.CALL_MODE_CALLERS:
+			setText(CallHierarchyMessages.ToggleCallModeAction_callers_label);
+			setDescription(CallHierarchyMessages.ToggleCallModeAction_callers_description);
+			setToolTipText(CallHierarchyMessages.ToggleCallModeAction_callers_tooltip);
+			JavaPluginImages.setLocalImageDescriptors(this, "ch_callers.png"); //$NON-NLS-1$
+			break;
+		case CallHierarchyViewPart.CALL_MODE_CALLEES:
+			setText(CallHierarchyMessages.ToggleCallModeAction_callees_label);
+			setDescription(CallHierarchyMessages.ToggleCallModeAction_callees_description);
+			setToolTipText(CallHierarchyMessages.ToggleCallModeAction_callees_tooltip);
+			JavaPluginImages.setLocalImageDescriptors(this, "ch_callees.png"); //$NON-NLS-1$
+			break;
+		default:
+			Assert.isTrue(false);
+			break;
+		}
         fView= v;
         fMode= mode;
         PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_TOGGLE_CALL_MODE_ACTION);

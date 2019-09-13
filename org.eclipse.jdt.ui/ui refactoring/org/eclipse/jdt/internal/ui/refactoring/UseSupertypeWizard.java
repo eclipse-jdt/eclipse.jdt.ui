@@ -342,15 +342,22 @@ public class UseSupertypeWizard extends RefactoringWizard{
 				if  (! fFileCount.containsKey(element))
 					return superText;
 				int count= fFileCount.get(element).intValue();
-				if (count == 0){
+				switch (count) {
+				case 0:
+				{
 					String[] keys= {superText};
 					return Messages.format(RefactoringMessages.UseSupertypeInputPage_no_possible_updates, keys);
-				} else if (count == 1){
+				}
+				case 1:
+				{
 					String [] keys= {superText};
 					return Messages.format(RefactoringMessages.UseSupertypeInputPage_updates_possible_in_file, keys);
-				}	else {
+				}
+				default:
+				{
 					String[] keys= {superText, String.valueOf(count)};
 					return Messages.format(RefactoringMessages.UseSupertypeInputPage_updates_possible_in_files, keys);
+				}
 				}
 			}
 		}

@@ -271,20 +271,17 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 			return 0;
 
 		int insertPos;
-		if (character == BRACECHAR) {
-
+		switch (character) {
+		case BRACECHAR:
 			insertPos= computeArrayInitializationPos(document, line, offset, partitioning);
-
 			if (insertPos == -1) {
 				insertPos= computeAfterTryDoElse(document, line, offset);
 			}
-
 			if (insertPos == -1) {
 				insertPos= computeAfterParenthesis(document, line, offset, partitioning);
 			}
-
-		} else if (character == SEMICHAR) {
-
+			break;
+		case SEMICHAR:
 			if (isForStatement(text, offset)) {
 				insertPos= -1; // don't do anything in for statements, as semis are vital part of these
 			} else {
@@ -302,8 +299,8 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 					}
 				}
 			}
-
-		} else {
+			break;
+		default:
 			Assert.isTrue(false);
 			return -1;
 		}

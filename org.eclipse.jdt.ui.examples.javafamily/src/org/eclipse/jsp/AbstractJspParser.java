@@ -256,7 +256,8 @@ public abstract class AbstractJspParser {
 				return;
 			case '<':
 				c= getc();
-				if (c == '%') {
+				switch (c) {
+				case '%':
 					// flush buffer
 					if (buffer.length() > 0) {
 						text(buffer.toString(), line);
@@ -286,13 +287,17 @@ public abstract class AbstractJspParser {
 						parseComment();
 						break;
 					}
-				} else if (c == '/') {
+					break;
+				case '/':
 					parseTag(true);
-				} else {
+					break;
+				default:
 					ungetc(c);
 					parseTag(false);
+					break;
 				}
 				break;
+
 			default:
 				buffer.append((char)c);
 				break;

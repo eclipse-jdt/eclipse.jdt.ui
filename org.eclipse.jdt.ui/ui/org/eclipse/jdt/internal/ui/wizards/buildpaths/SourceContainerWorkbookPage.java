@@ -340,7 +340,8 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 
 	protected void sourcePageCustomButtonPressed(DialogField field, int index) {
 		if (field == fFoldersList) {
-			if (index == IDX_ADD) {
+			switch (index) {
+			case IDX_ADD:
 				IProject project= fCurrJProject.getProject();
 				if (project.isAccessible() && hasFolders(project)) {
 					List<CPListElement> existingElements= fFoldersList.getElements();
@@ -355,15 +356,21 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 					OpenBuildPathWizardAction action= new OpenBuildPathWizardAction(wizard);
 					action.run();
 				}
-			} else if (index == IDX_ADD_LINK) {
+				break;
+			case IDX_ADD_LINK:
 				CPListElement newElement= new CPListElement(fCurrJProject, IClasspathEntry.CPE_SOURCE);
 				AddSourceFolderWizard wizard= newLinkedSourceFolderWizard(newElement, fFoldersList.getElements(), fOutputLocationField.getText(), true);
 				OpenBuildPathWizardAction action= new OpenBuildPathWizardAction(wizard);
 				action.run();
-			} else if (index == IDX_EDIT) {
+				break;
+			case IDX_EDIT:
 				editEntry();
-			} else if (index == IDX_REMOVE) {
+				break;
+			case IDX_REMOVE:
 				removeEntry();
+				break;
+			default:
+				break;
 			}
 		}
 	}

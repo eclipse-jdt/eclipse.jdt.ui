@@ -503,14 +503,21 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 	@Override
 	public void decorate(Object element, IDecoration decoration) {
 		int adornmentFlags= computeAdornmentFlags(element);
-		if (adornmentFlags == ERRORTICK_ERROR) {
+		switch (adornmentFlags) {
+		case ERRORTICK_ERROR:
 			decoration.addOverlay(JavaPluginImages.DESC_OVR_ERROR);
-		} else if (adornmentFlags == ERRORTICK_BUILDPATH_ERROR) {
+			break;
+		case ERRORTICK_BUILDPATH_ERROR:
 			decoration.addOverlay(JavaPluginImages.DESC_OVR_BUILDPATH_ERROR);
-		} else if (adornmentFlags == ERRORTICK_WARNING) {
+			break;
+		case ERRORTICK_WARNING:
 			decoration.addOverlay(JavaPluginImages.DESC_OVR_WARNING);
-		} else if (adornmentFlags == ERRORTICK_INFO) {
+			break;
+		case ERRORTICK_INFO:
 			decoration.addOverlay(JavaPluginImages.DESC_OVR_INFO);
+			break;
+		default:
+			break;
 		}
 	}
 

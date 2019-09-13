@@ -223,10 +223,12 @@ public class CustomBuilderGenerator extends AbstractToStringGenerator {
 					String[] parameterTypes= methods[j].getParameterTypes();
 					AppendMethodInformation appendMethodInformation= new AppendMethodInformation();
 					String specyficType;
-					if (parameterTypes.length == 1) {
+					switch (parameterTypes.length) {
+					case 1:
 						specyficType= JavaModelUtil.getResolvedTypeName(parameterTypes[0], types[i]);
 						appendMethodInformation.methodType= 1;
-					} else if (parameterTypes.length == 2) {
+						break;
+					case 2:
 						String resolvedParameterTypeName1= JavaModelUtil.getResolvedTypeName(parameterTypes[0], types[i]);
 						String resolvedParameterTypeName2= JavaModelUtil.getResolvedTypeName(parameterTypes[1], types[i]);
 						if (resolvedParameterTypeName1.equals("java.lang.String")) {//$NON-NLS-1$
@@ -237,8 +239,10 @@ public class CustomBuilderGenerator extends AbstractToStringGenerator {
 							appendMethodInformation.methodType= 2;
 						} else
 							continue;
-					} else
+						break;
+					default:
 						continue;
+					}
 
 					String returnTypeName= JavaModelUtil.getResolvedTypeName(methods[j].getReturnType(), types[i]);
 					IType returnType= javaProject.findType(returnTypeName);

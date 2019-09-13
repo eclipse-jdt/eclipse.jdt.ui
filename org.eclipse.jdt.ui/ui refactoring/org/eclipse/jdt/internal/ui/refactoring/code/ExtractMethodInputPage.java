@@ -223,14 +223,18 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 
 		int duplicates= fRefactoring.getNumberOfDuplicates();
 		checkBox= new Button(result, SWT.CHECK);
-		if (duplicates == 0) {
+		switch (duplicates) {
+		case 0:
 			checkBox.setText(RefactoringMessages.ExtractMethodInputPage_duplicates_none);
-		} else  if (duplicates == 1) {
+			break;
+		case 1:
 			checkBox.setText(RefactoringMessages.ExtractMethodInputPage_duplicates_single);
-		} else {
+			break;
+		default:
 			checkBox.setText(Messages.format(
 				RefactoringMessages.ExtractMethodInputPage_duplicates_multi,
 				Integer.valueOf(duplicates)));
+			break;
 		}
 		checkBox.setSelection(fRefactoring.getReplaceDuplicates());
 		checkBox.setEnabled(duplicates > 0);

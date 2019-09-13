@@ -96,12 +96,18 @@ public class SortingLabelProvider extends SearchLabelProvider {
 	public void setOrder(int orderFlag) {
 		fCurrentOrder= orderFlag;
 		long flags= 0;
-		if (orderFlag == SHOW_ELEMENT_CONTAINER)
+		switch (orderFlag) {
+		case SHOW_ELEMENT_CONTAINER:
 			flags= DEFAULT_SEARCH_TEXTFLAGS;
-		else if (orderFlag == SHOW_CONTAINER_ELEMENT)
+			break;
+		case SHOW_CONTAINER_ELEMENT:
 			flags= FLAGS_QUALIFIED;
-		else if (orderFlag == SHOW_PATH) {
+			break;
+		case SHOW_PATH:
 			flags= FLAGS_QUALIFIED | JavaElementLabels.PREPEND_ROOT_PATH;
+			break;
+		default:
+			break;
 		}
 		setTextFlags(flags);
 	}
