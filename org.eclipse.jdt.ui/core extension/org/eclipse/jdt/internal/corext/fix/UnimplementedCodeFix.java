@@ -78,7 +78,7 @@ public class UnimplementedCodeFix extends CompilationUnitRewriteOperationsFix {
 			}
 		}
 
-		if (operations.size() == 0)
+		if (operations.isEmpty())
 			return null;
 
 		String label;

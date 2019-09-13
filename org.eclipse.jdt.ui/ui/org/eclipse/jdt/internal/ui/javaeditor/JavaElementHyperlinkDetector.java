@@ -127,7 +127,7 @@ public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 			for (IJavaElement element : elements) {
 				addHyperlinks(links, wordRegion, (SelectionDispatchAction)openAction, element, elements.length > 1, (JavaEditor)textEditor);
 			}
-			if (links.size() == 0)
+			if (links.isEmpty())
 				return null;
 
 			return CollectionsUtil.toArray(links, IHyperlink.class);

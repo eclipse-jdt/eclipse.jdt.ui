@@ -371,7 +371,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 		public void removeOverlaid(IJavaAnnotation annotation) {
 			if (fOverlaids != null) {
 				fOverlaids.remove(annotation);
-				if (fOverlaids.size() == 0)
+				if (fOverlaids.isEmpty())
 					fOverlaids= null;
 			}
 		}

@@ -616,7 +616,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		if (pm == null)
 			pm= new NullProgressMonitor();
 
-		if (fProjects.size() == 0 || fCleanUps.size() == 0) {
+		if (fProjects.isEmpty() || fCleanUps.isEmpty()) {
 			pm.beginTask("", 1); //$NON-NLS-1$
 			pm.worked(1);
 			pm.done();

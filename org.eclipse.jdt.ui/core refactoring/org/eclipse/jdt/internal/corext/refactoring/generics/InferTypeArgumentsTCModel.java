@@ -168,7 +168,7 @@ public class InferTypeArgumentsTCModel {
 	}
 
 	private boolean pruneCvIfUnused(ConstraintVariable2 cv) {
-		if (getUsedIn(cv).size() != 0)
+		if (!getUsedIn(cv).isEmpty())
 			return false;
 
 		if (cv.getTypeEquivalenceSet() != null) {

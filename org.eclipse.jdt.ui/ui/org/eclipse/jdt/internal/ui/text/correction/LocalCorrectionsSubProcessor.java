@@ -396,7 +396,7 @@ public class LocalCorrectionsSubProcessor {
 						rewrite.replace(type, newUnionType, null);
 					}
 					proposals.add(proposal);
-				} else if (catchClauses != null && catchClauses.size() == 0) {
+				} else if (catchClauses != null && catchClauses.isEmpty()) {
 					List<ITypeBinding> filteredExceptions= SurroundWithTryCatchRefactoring.filterSubtypeExceptions(uncaughtExceptions);
 					if (filteredExceptions.size() > 1) {
 						String label= CorrectionMessages.LocalCorrectionsSubProcessor_addadditionalmulticatch_description;

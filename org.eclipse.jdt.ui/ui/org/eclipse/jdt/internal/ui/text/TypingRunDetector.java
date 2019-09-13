@@ -309,7 +309,7 @@ public class TypingRunDetector {
 	 */
 	public void removeTypingRunListener(ITypingRunListener listener) {
 		fListeners.remove(listener);
-		if (fListeners.size() == 0)
+		if (fListeners.isEmpty())
 			disconnect();
 	}
 

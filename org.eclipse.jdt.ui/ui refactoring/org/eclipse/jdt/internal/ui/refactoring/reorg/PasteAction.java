@@ -586,7 +586,7 @@ public class PasteAction extends SelectionDispatchAction{
 				javaProject= destination.getJavaProject();
 			} else if (selectedWorkingSets.length == 1) {
 				// OK
-			} else if (selectedElements.size() != 0) {
+			} else if (!selectedElements.isEmpty()) {
 				return false; // e.g. ClassPathContainer
 			}
 

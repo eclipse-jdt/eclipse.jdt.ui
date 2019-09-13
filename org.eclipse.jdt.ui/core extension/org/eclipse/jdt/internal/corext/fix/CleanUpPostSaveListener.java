@@ -601,7 +601,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 	}
 
 	private boolean compatibleOptions(IJavaProject project, Map<String, String> cleanUpOptions) {
-		if (cleanUpOptions.size() == 0)
+		if (cleanUpOptions.isEmpty())
 			return true;
 
 		Map<String, String> projectOptions= project.getOptions(true);

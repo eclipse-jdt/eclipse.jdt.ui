@@ -391,7 +391,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		if (elements.size() > 1)
 			return true;
 
-		if (elements.size() == 0)
+		if (elements.isEmpty())
 			return false;
 
 		CPListElement single= elements.get(0);
@@ -521,7 +521,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	}
 
 	private boolean canRemove(List<Object> selElements) {
-		if (selElements.size() == 0) {
+		if (selElements.isEmpty()) {
 			return false;
 		}
 		for (int i= 0; i < selElements.size(); i++) {

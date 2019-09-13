@@ -794,7 +794,7 @@ public class ASTFlattener extends GenericVisitor {
 		this.fBuffer.append(' ');
 		node.getRightOperand().accept(this);
 		final List<Expression>extendedOperands = node.extendedOperands();
-		if (extendedOperands.size() != 0) {
+		if (!extendedOperands.isEmpty()) {
 			this.fBuffer.append(' ');
 			for (Iterator<Expression> it = extendedOperands.iterator(); it.hasNext(); ) {
 				this.fBuffer.append(node.getOperator().toString()).append(' ');

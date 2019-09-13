@@ -806,7 +806,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 			Object key= keyIterator.next();
 			//Replace the items in the checked state store with those from the supplied items
 			List<Object> selections= items.get(key);
-			if (selections.size() == 0)
+			if (selections.isEmpty())
 				//If it is empty remove it from the list
 				fCheckedStateStore.remove(key);
 			else {

@@ -107,7 +107,7 @@ public class FileTransferDragAdapter extends DragSourceAdapter implements Transf
 	@Override
 	public void dragSetData(DragSourceEvent event){
 		List<IResource> elements= getResources();
-		if (elements == null || elements.size() == 0) {
+		if (elements == null || elements.isEmpty()) {
 			event.data= null;
 			return;
 		}
@@ -134,7 +134,7 @@ public class FileTransferDragAdapter extends DragSourceAdapter implements Transf
 
 	/* package */ void handleDropMove() {
 		final List<IResource> elements= getResources();
-		if (elements == null || elements.size() == 0)
+		if (elements == null || elements.isEmpty())
 			return;
 
 		WorkspaceModifyOperation op= new WorkspaceModifyOperation() {

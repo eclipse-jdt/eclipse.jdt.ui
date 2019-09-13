@@ -187,7 +187,7 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 			}
 		}
 
-		if (result.size() == 0) {
+		if (result.isEmpty()) {
 			return anonymousResult;
 		}
 		return result;

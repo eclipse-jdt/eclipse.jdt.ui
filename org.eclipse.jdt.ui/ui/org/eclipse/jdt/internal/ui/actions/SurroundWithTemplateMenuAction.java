@@ -396,7 +396,7 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 				j++;
 			}
 		}
-		if (result.size() == 0)
+		if (result.isEmpty())
 			return null;
 
 		return result.toArray(new IAction[result.size()]);

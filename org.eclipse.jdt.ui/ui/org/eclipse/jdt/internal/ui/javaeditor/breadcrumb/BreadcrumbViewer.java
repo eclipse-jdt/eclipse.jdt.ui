@@ -185,7 +185,7 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 		if (fSelectedItem != null) {
 			fSelectedItem.setFocus(true);
 		} else {
-			if (fBreadcrumbItems.size() == 0)
+			if (fBreadcrumbItems.isEmpty())
 				return;
 
 			BreadcrumbItem item= fBreadcrumbItems.get(fBreadcrumbItems.size() - 1);

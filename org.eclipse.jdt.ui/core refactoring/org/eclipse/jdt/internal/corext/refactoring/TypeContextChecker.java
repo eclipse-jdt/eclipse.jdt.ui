@@ -319,7 +319,7 @@ public class TypeContextChecker {
 			}
 
 			List<TypeNameMatch> typeRefsFound= findTypeInfos(elementTypeName, declaringType, pm);
-			if (typeRefsFound.size() == 0){
+			if (typeRefsFound.isEmpty()){
 				String msg= Messages.format(RefactoringCoreMessages.TypeContextChecker_not_unique, BasicElementLabels.getJavaElementName(elementTypeName));
 				status.addError(msg);
 				return elementTypeName;
@@ -406,7 +406,7 @@ public class TypeContextChecker {
 				String msg= Messages.format(RefactoringCoreMessages.TypeContextChecker_invalid_return_type, BasicElementLabels.getJavaElementName(newTypeName));
 				return RefactoringStatus.createFatalErrorStatus(msg);
 			}
-			if (problemsCollector.size() == 0)
+			if (problemsCollector.isEmpty())
 				return null;
 
 			RefactoringStatus result= new RefactoringStatus();
@@ -507,7 +507,7 @@ public class TypeContextChecker {
 			String msg= Messages.format(RefactoringCoreMessages.TypeContextChecker_invalid_type_name, BasicElementLabels.getJavaElementName(newTypeName));
 			return RefactoringStatus.createFatalErrorStatus(msg);
 		}
-		if (problemsCollector.size() == 0)
+		if (problemsCollector.isEmpty())
 			return null;
 
 		RefactoringStatus result= new RefactoringStatus();

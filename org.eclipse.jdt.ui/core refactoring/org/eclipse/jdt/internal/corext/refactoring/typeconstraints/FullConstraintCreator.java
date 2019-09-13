@@ -680,7 +680,7 @@ public class FullConstraintCreator extends ConstraintCreator{
 				result.add(findMethod(methodBinding, type));
 		}
 
-		if (result.size() == 0){
+		if (result.isEmpty()){
 			result.add(methodBinding);
 		}
 		return result.toArray(new IMethodBinding[result.size()]);

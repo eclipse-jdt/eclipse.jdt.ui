@@ -883,7 +883,7 @@ class ModuleDependenciesAdapter implements IDialogFieldListener, ITreeListAdapte
 		int numDetails= countConfiguredDetails();
 		switch (index) {
 			case IDX_REMOVE:
-				if (selectedElements.size() == 0) {
+				if (selectedElements.isEmpty()) {
 					// no detail selected, remove the module(s) (with question):
 					fModuleDependenciesPage.removeModules();
 				} else {

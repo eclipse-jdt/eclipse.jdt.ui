@@ -134,7 +134,7 @@ public class TestMethodSelectionDialog extends ElementListSelectionDialog {
 			ErrorDialog.openError(getParentShell(), JUnitMessages.TestMethodSelectionDialog_error_notfound_title, JUnitMessages.TestMethodSelectionDialog_error_notfound_message, e.getStatus());
 			return null;
 		}
-		if (result.size() == 0) {
+		if (result.isEmpty()) {
 			String msg= Messages.format(JUnitMessages.TestMethodSelectionDialog_test_not_found, BasicElementLabels.getJavaElementName(JUnitCorePlugin.TEST_INTERFACE_NAME));
 			MessageDialog.openError(getParentShell(), JUnitMessages.TestMethodSelectionDialog_select_dialog_title, msg);
 			return null;

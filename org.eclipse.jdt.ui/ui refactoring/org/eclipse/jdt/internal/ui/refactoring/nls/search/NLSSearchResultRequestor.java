@@ -435,7 +435,7 @@ class NLSSearchResultRequestor extends SearchRequestor {
 	}
 
 	private void reportDuplicateKeys(Set<Object> duplicateKeys) {
-		if (duplicateKeys.size() == 0)
+		if (duplicateKeys.isEmpty())
 			return;
 
 		FileEntry groupElement= new FileEntry(fPropertiesFile, NLSSearchMessages.NLSSearchResultCollector_duplicateKeys);

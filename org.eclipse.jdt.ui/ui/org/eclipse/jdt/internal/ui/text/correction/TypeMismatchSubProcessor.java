@@ -425,7 +425,7 @@ public class TypeMismatchSubProcessor {
 					undeclaredExceptions.add(methodExceptions[i]);
 				}
 			}
-			if (undeclaredExceptions.size() == 0) {
+			if (undeclaredExceptions.isEmpty()) {
 				return;
 			}
 			String label= Messages.format(CorrectionMessages.TypeMismatchSubProcessor_removeexceptions_description, BasicElementLabels.getJavaElementName(methodDeclBinding.getName()));

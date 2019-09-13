@@ -260,7 +260,7 @@ public abstract class BuildPathBasePage {
 	}
 
 	protected boolean containsOnlyTopLevelEntries(List<?> selElements) {
-		if (selElements.size() == 0) {
+		if (selElements.isEmpty()) {
 			return true;
 		}
 		for (int i= 0; i < selElements.size(); i++) {

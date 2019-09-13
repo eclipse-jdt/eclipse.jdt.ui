@@ -473,7 +473,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 										throw new InvocationTargetException(e);
 									}
 								}
-								if (result.size() == 0) {
+								if (result.isEmpty()) {
 									//maybe not an eclipse style NLS string
 									String searchString;
 									if (useDoubleQuotedKey) {

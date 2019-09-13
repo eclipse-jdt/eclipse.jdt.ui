@@ -184,7 +184,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 			} else {
 				fResult= null;
 			}
-			fHistoryList.enableButton(0, selected.size() != 0);
+			fHistoryList.enableButton(0, !selected.isEmpty());
 		}
 
 		public E getResult() {

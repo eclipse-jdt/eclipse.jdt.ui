@@ -423,7 +423,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 				List<Object> selectedElements= fProjectsList.getSelectedElements();
 				List<CPListElement> elements= fProjectsList.getElements();
 				// if nothing selected, do nothing
-				if(selectedElements.size()==0)
+				if(selectedElements.isEmpty())
 					return;
 				boolean isClassRootExpanded= getRootExpansionState(fProjectsList, true);
 				boolean isModuleRootExpanded= getRootExpansionState(fProjectsList, false);
@@ -503,7 +503,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 	}
 
 	private boolean canRemove(List<?> selElements) {
-		if (selElements.size() == 0) {
+		if (selElements.isEmpty()) {
 			return false;
 		}
 

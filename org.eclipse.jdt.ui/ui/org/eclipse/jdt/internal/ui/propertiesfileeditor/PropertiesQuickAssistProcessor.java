@@ -91,7 +91,7 @@ public class PropertiesQuickAssistProcessor {
 		getRemovePropertiesProposals(invocationContext, resultingCollections);
 		getRenameKeysProposals(invocationContext, resultingCollections);
 
-		if (resultingCollections.size() == 0)
+		if (resultingCollections.isEmpty())
 			return null;
 		return resultingCollections.toArray(new ICompletionProposal[resultingCollections.size()]);
 	}
@@ -168,7 +168,7 @@ public class PropertiesQuickAssistProcessor {
 			return false;
 
 		List<String> keys= getKeysFromSelection(document, selectionOffset, selectionLength);
-		if (keys == null || keys.size() == 0)
+		if (keys == null || keys.isEmpty())
 			return false;
 
 		for (String key : keys) {
@@ -182,7 +182,7 @@ public class PropertiesQuickAssistProcessor {
 			fields.add(key);
 		}
 
-		if (fields.size() == 0)
+		if (fields.isEmpty())
 			return false;
 
 		ICompilationUnit cu= accessorClass.getCompilationUnit();
@@ -224,7 +224,7 @@ public class PropertiesQuickAssistProcessor {
 			return false;
 
 		List<String> keys= getKeysFromSelection(document, selectionOffset, selectionLength);
-		if (keys == null || keys.size() == 0)
+		if (keys == null || keys.isEmpty())
 			return false;
 		if (resultingCollections == null)
 			return true;

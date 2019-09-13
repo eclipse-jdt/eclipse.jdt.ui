@@ -186,7 +186,7 @@ public class ImportRemover {
 		List<SimpleName> removedRefs= new ArrayList<>();
 		List<SimpleName> unremovedRefs= new ArrayList<>();
 		divideTypeRefs(importNames, staticNames, removedRefs, unremovedRefs);
-		if (removedRefs.size() == 0)
+		if (removedRefs.isEmpty())
 			return new IBinding[0];
 
 		HashMap<String, IBinding> potentialRemoves= getPotentialRemoves(removedRefs);
@@ -235,7 +235,7 @@ public class ImportRemover {
 	}
 
 	public boolean hasRemovedNodes() {
-		return fHasRemovedNodes || fInlinedStaticImports.size() != 0;
+		return fHasRemovedNodes || !fInlinedStaticImports.isEmpty();
 	}
 
 	public void registerAddedImport(String typeName) {

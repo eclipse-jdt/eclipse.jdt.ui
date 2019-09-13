@@ -612,7 +612,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		if (fReturnTypeInfo.isTypeNameChanged() && fReturnTypeInfo.getNewTypeBinding() != null) {
 			HashSet<ITypeBinding> typeVariablesCollector= new HashSet<>();
 			collectTypeVariables(fReturnTypeInfo.getNewTypeBinding(), typeVariablesCollector);
-			if (typeVariablesCollector.size() != 0) {
+			if (!typeVariablesCollector.isEmpty()) {
 				ITypeBinding first= typeVariablesCollector.iterator().next();
 				String msg= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_return_type_contains_type_variable, new String[] {BasicElementLabels.getJavaElementName(fReturnTypeInfo.getNewTypeName()), BasicElementLabels.getJavaElementName(first.getName())});
 				result.addError(msg);
@@ -623,7 +623,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			if (info.isTypeNameChanged() && info.getNewTypeBinding() != null) {
 				HashSet<ITypeBinding> typeVariablesCollector= new HashSet<>();
 				collectTypeVariables(info.getNewTypeBinding(), typeVariablesCollector);
-				if (typeVariablesCollector.size() != 0) {
+				if (!typeVariablesCollector.isEmpty()) {
 					ITypeBinding first= typeVariablesCollector.iterator().next();
 					String msg= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_parameter_type_contains_type_variable, new String[] {BasicElementLabels.getJavaElementName(info.getNewTypeName()), BasicElementLabels.getJavaElementName(info.getNewName()), BasicElementLabels.getJavaElementName(first.getName())});
 					result.addError(msg);
@@ -2556,13 +2556,13 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			});
 			int goalOrdinal= tagOrder.indexOf(tagName);
 			if (goalOrdinal == -1) // unknown tag -> to end
-				return (tags.size() == 0) ? null : (TagElement) tags.get(tags.size());
+				return (tags.isEmpty()) ? null : (TagElement) tags.get(tags.size());
 			for (int i= 0; i < tags.size(); i++) {
 				int tagOrdinal= tagOrder.indexOf(tags.get(i).getTagName());
 				if (tagOrdinal >= goalOrdinal)
 					return (i == 0) ? null : (TagElement) tags.get(i - 1);
 			}
-			return (tags.size() == 0) ? null : (TagElement) tags.get(tags.size() - 1);
+			return (tags.isEmpty()) ? null : (TagElement) tags.get(tags.size() - 1);
 		}
 
 

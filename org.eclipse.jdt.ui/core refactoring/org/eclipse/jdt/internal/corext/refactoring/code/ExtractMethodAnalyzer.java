@@ -230,7 +230,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 			}
 			destination= ASTResolving.findParentType(destination.getParent());
 		}
-		if (validDestinations.size() == 0) {
+		if (validDestinations.isEmpty()) {
 			result.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_no_valid_destination_type);
 			return result;
 		}

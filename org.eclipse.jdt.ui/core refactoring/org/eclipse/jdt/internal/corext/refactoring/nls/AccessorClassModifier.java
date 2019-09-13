@@ -287,7 +287,7 @@ public class AccessorClassModifier {
 		String key= sub.getKey();
 		FieldDeclaration fieldDeclaration= getNewFinalStringFieldDeclaration(key);
 
-		if (fFields.size() == 0) {
+		if (fFields.isEmpty()) {
 			fListRewrite.insertLast(fieldDeclaration, editGroup);
 			fFields.add(fieldDeclaration);
 		} else {

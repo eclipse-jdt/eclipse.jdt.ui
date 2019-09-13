@@ -591,7 +591,7 @@ public class JavadocContentAccess2 {
 			}
 		}.visitInheritDoc(type, hierarchy);
 
-		boolean hasSuperInterfaceMethods= superInterfaceMethods.size() != 0;
+		boolean hasSuperInterfaceMethods= !superInterfaceMethods.isEmpty();
 		if (!hasSuperInterfaceMethods && superClassMethod[0] == null)
 			return null;
 
@@ -1803,7 +1803,7 @@ public class JavadocContentAccess2 {
 	}
 
 	private void handleExceptionTags(List<TagElement> tags, List<String> exceptionNames, CharSequence[] exceptionDescriptions) {
-		if (tags.size() == 0 && containsOnlyNull(exceptionNames))
+		if (tags.isEmpty() && containsOnlyNull(exceptionNames))
 			return;
 
 		handleBlockTagTitle(JavaDocMessages.JavaDoc2HTMLTextReader_throws_section);
@@ -1842,7 +1842,7 @@ public class JavadocContentAccess2 {
 	}
 
 	private void handleParameterTags(List<TagElement> tags, List<String> parameterNames, CharSequence[] parameterDescriptions, boolean isTypeParameters) {
-		if (tags.size() == 0 && containsOnlyNull(parameterNames))
+		if (tags.isEmpty() && containsOnlyNull(parameterNames))
 			return;
 
 		String tagTitle= isTypeParameters ? JavaDocMessages.JavaDoc2HTMLTextReader_type_parameters_section : JavaDocMessages.JavaDoc2HTMLTextReader_parameters_section;

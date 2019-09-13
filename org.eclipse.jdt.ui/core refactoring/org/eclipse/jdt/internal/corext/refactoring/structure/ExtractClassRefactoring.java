@@ -185,7 +185,7 @@ public class ExtractClassRefactoring extends Refactoring {
 					status.merge(Checks.checkFieldName(field.getNewFieldName(), fDescriptor.getType()));
 				}
 			}
-			if (names.size() == 0) {
+			if (names.isEmpty()) {
 				status.addError(RefactoringCoreMessages.ExtractClassRefactoring_error_msg_one_field);
 			}
 			validateFieldNames(status, fDescriptor.getFieldName(), fDescriptor.getType());
@@ -539,7 +539,7 @@ public class ExtractClassRefactoring extends Refactoring {
 				if (isCreateField(info))
 					validIFields.add(info.ifield);
 			}
-			if (validIFields.size() == 0) {
+			if (validIFields.isEmpty()) {
 				status.addWarning(RefactoringCoreMessages.ExtractClassRefactoring_warning_no_fields_moved, JavaStatusContext.create(type));
 				return status;
 			}

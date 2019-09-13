@@ -238,7 +238,7 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 				validElements.add(element);
 			}
 		}
-		if (validElements.size() == 0) {
+		if (validElements.isEmpty()) {
 			IStatus status= createStatus(ActionMessages.OpenTypeHierarchyAction_messages_no_java_elements);
 			ErrorDialog.openError(getShell(), getDialogTitle(), ActionMessages.OpenTypeHierarchyAction_messages_title, status);
 			return;

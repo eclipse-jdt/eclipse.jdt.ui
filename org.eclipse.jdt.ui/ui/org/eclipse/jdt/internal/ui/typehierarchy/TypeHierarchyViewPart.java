@@ -1335,7 +1335,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				if (types.size() == 1) {
 					fSelectedType= (IType) types.get(0);
 					updateMethodViewer(fSelectedType);
-				} else if (types.size() == 0) {
+				} else if (types.isEmpty()) {
 					// method selected, no change
 				}
 				if (nSelected == 1 && fSelectInEditor) {
@@ -1697,7 +1697,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			inputList.add(input);
 			elementId= memento.getString(TAG_INPUT + ++i);
 		}
-		if (inputList == null || inputList.size() == 0) {
+		if (inputList == null || inputList.isEmpty()) {
 			doRestoreState(memento, input);
 		} else {
 			final IJavaElement[] hierarchyInput= inputList.toArray(new IJavaElement[inputList.size()]);

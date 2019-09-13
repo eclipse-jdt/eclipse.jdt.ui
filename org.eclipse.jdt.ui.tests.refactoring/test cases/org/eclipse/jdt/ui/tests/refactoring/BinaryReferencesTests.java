@@ -98,7 +98,7 @@ public class BinaryReferencesTests extends TestCase {
 		}
 		List<String> expected= new ArrayList<>(Arrays.asList(expectedHandleIdentifiers));
 		expected.removeAll(actual);
-		if (expected.size() != 0)
+		if (!expected.isEmpty())
 			assertEquals("not all expected matches", expected.toString(), actual.toString());
 	}
 

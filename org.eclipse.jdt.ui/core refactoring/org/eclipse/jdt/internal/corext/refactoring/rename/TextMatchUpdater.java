@@ -158,11 +158,11 @@ class TextMatchUpdater {
 	private void addCuTextMatches(ICompilationUnit cu) throws JavaModelException{
 		fScanner.scan(cu);
 		Set<TextMatch> matches= fScanner.getMatches(); //Set of TextMatch
-		if (matches.size() == 0)
+		if (matches.isEmpty())
 			return;
 
 		removeReferences(cu, matches);
-		if (matches.size() != 0)
+		if (!matches.isEmpty())
 			addTextUpdates(cu, matches);
 	}
 

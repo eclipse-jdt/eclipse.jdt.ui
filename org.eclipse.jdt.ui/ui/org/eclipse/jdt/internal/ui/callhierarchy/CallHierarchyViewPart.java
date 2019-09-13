@@ -1391,7 +1391,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 			if (! treeElements.contains(newElement))
 				addedElements.add(newElement);
 		}
-		if (treeElements.size() == 0)
+		if (treeElements.isEmpty())
 			updateInputHistoryAndDescription(fInputElements, newElements);
 		else if (newInput.size() > fInputElements.length)
 			updateInputHistoryAndDescription(fInputElements, newInput.toArray(new IMember[newInput.size()]));

@@ -136,7 +136,7 @@ public class CategoryFilterActionGroup extends ActionGroup {
 			for (String selected : selectedCategories) {
 				fCategoryList.setChecked(selected, false);
 			}
-			if (categories.size() == 0) {
+			if (categories.isEmpty()) {
 				fCategoryList.setEnabled(false);
 			}
 		}
@@ -312,7 +312,7 @@ public class CategoryFilterActionGroup extends ActionGroup {
 
 	private void storeSettings() {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		if (fFilteredCategories.size() == 0) {
+		if (fFilteredCategories.isEmpty()) {
 			store.setValue(getPreferenceKey(), ""); //$NON-NLS-1$
 		} else {
 			StringBuilder buf= new StringBuilder();

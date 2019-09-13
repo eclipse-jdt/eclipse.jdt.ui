@@ -87,7 +87,7 @@ public class CreateMultipleSourceFoldersDialog extends TrayDialog {
 					result.add(key);
 				}
 			}
-			if (result.size() == 0)
+			if (result.isEmpty())
 				return super.getChildren(element);
 
 			Object[] children= super.getChildren(element);

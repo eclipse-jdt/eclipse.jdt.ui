@@ -1775,7 +1775,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			return false;
 		if (fPreloadedElementToName == null)
 			return false;
-		if (fPreloadedElementToName.size() == 0)
+		if (fPreloadedElementToName.isEmpty())
 			return false;
 		return true;
 	}

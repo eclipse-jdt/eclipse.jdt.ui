@@ -288,7 +288,7 @@ public final class HintTextGroup implements ISelectionChangedListener {
     }
 
 	private String noAction(List<?> selectedElements) {
-		if (selectedElements.size() == 0)
+		if (selectedElements.isEmpty())
 			return NewWizardMessages.PackageExplorerActionGroup_NoAction_NullSelection;
 
 		if (selectedElements.size() == 1)

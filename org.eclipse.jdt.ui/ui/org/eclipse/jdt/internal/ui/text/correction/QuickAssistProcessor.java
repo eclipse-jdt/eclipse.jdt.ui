@@ -2404,7 +2404,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			}
 		}
 
-		if (formatArguments.size() == 0)
+		if (formatArguments.isEmpty())
 			return null;
 
 		String label= CorrectionMessages.QuickAssistProcessor_convert_to_message_format;
@@ -4414,7 +4414,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		ArrayList<String> missingEnumCases= new ArrayList<>();
 		boolean hasDefault= LocalCorrectionsSubProcessor.evaluateMissingSwitchCases(expressionBinding, switchStatement.statements(), missingEnumCases);
-		if (missingEnumCases.size() == 0 && hasDefault)
+		if (missingEnumCases.isEmpty() && hasDefault)
 			return false;
 
 		if (proposals == null)

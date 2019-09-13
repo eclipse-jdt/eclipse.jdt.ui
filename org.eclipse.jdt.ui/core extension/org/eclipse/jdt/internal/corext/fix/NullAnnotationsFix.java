@@ -187,7 +187,7 @@ public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
 			createRemoveRedundantNullAnnotationsOperations(compilationUnit, locations, operations);
 			message= FixMessages.NullAnnotationsFix_add_annotation_change_name;
 		}
-		if (operations.size() == 0)
+		if (operations.isEmpty())
 			return null;
 		CompilationUnitRewriteOperation[] operationsArray= operations.toArray(new CompilationUnitRewriteOperation[operations.size()]);
 		return new NullAnnotationsFix(message, compilationUnit, operationsArray);

@@ -292,7 +292,7 @@ public class IndentAction extends TextEditorAction {
 			}
 		}
 
-		if (edits.size() == 0)
+		if (edits.isEmpty())
 			return null;
 
 		if (edits.size() == 1)

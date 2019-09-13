@@ -378,7 +378,7 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
 	public void setSelection(List<?> selection, boolean expand) {
 		// page switch
 
-        if (selection.size() == 0)
+        if (selection.isEmpty())
             return;
 
 		List<CPListElement> cpEntries= new ArrayList<>();
@@ -451,7 +451,7 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
 				}
 			}
 
-			if (packageFragmentRootsAsList.size() == 0) {
+			if (packageFragmentRootsAsList.isEmpty()) {
 				setSelection= false;
 				setEnabled= false;
 			} else {

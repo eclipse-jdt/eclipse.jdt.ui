@@ -373,7 +373,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				}
 
 				for (Entry<String, UnresolvedTypeData> entry : fUnresolvedTypes.entrySet()) {
-					if (entry.getValue().foundInfos.size() == 0) { // No result found in search
+					if (entry.getValue().foundInfos.isEmpty()) { // No result found in search
 						Set<String> matchingUnresolvableImports= fUnresolvableImportMatcher.matchTypeImports(entry.getKey());
 						if (!matchingUnresolvableImports.isEmpty()) {
 							// If there are matching unresolvable import(s), rely on them to provide the type.

@@ -1317,7 +1317,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 	}
 
 	private boolean canRemove(List<Object> list) {
-		if (list.size() == 0) {
+		if (list.isEmpty()) {
 			return false;
 		}
 		for (int i= 0; i < list.size(); i++) {

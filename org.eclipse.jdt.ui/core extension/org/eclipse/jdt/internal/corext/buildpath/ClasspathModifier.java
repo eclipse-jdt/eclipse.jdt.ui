@@ -222,7 +222,7 @@ public class ClasspathModifier {
 			result= new StatusInfo(IStatus.INFO, message);
 		}
 
-		if (newEntries.size() == 0)
+		if (newEntries.isEmpty())
 			return result;
 
 		cpProject= cpProject.createWorkingCopy();
