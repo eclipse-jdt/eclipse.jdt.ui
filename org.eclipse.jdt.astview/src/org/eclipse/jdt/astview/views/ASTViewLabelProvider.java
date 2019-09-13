@@ -14,7 +14,6 @@
 
 package org.eclipse.jdt.astview.views;
 
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
@@ -77,8 +76,8 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 		
 		fBold= PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getFontRegistry().getBold(JFaceResources.DEFAULT_FONT);
 		FontData[] fontData= fBold.getFontData();
-		for (int i= 0; i < fontData.length; i++) {
-			fontData[i].setStyle(fontData[i].getStyle() | SWT.ITALIC);
+		for (FontData fd : fontData) {
+			fd.setStyle(fd.getStyle() | SWT.ITALIC);
 		}
 		fAllocatedBoldItalic= new Font(display, fontData);
 	}
@@ -216,8 +215,7 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 			if (object instanceof ASTNode) {
 				return isInsideNode((ASTNode) object);
 			} else if (object instanceof List) {
-				for (Iterator<?> iter= ((List<?>) object).iterator(); iter.hasNext(); ) {
-					Object child= iter.next();
+				for (Object child : (List<?>) object) {
 					if (isInside(child)) {
 						return true;
 					}

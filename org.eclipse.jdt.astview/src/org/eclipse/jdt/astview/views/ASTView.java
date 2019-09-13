@@ -741,8 +741,8 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 		fStatementsRecoveryAction.setEnabled(enabled);
 		fBindingsRecoveryAction.setEnabled(enabled);
 		fIgnoreMethodBodiesAction.setEnabled(enabled);
-		for (int i= 0; i < fASTVersionToggleActions.length; i++) {
-			fASTVersionToggleActions[i].setEnabled(enabled);
+		for (ASTView.ASTLevelToggle action : fASTVersionToggleActions) {
+			action.setEnabled(enabled);
 		}
 	}
 
@@ -935,8 +935,8 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 	}
 
 	private void fillLocalPullDown(IMenuManager manager) {
-		for (int i= 0; i < fASTVersionToggleActions.length; i++) {
-			manager.add(fASTVersionToggleActions[i]);
+		for (ASTView.ASTLevelToggle action : fASTVersionToggleActions) {
+			manager.add(action);
 		}
 		manager.add(new Separator());
 		manager.add(fCreateBindingsAction);
@@ -944,8 +944,8 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 		manager.add(fBindingsRecoveryAction);
 		manager.add(fIgnoreMethodBodiesAction);
 		manager.add(new Separator());
-		for (int i= 0; i < fASTInputKindActions.length; i++) {
-			manager.add(fASTInputKindActions[i]);
+		for (ASTView.ASTInputKindAction action : fASTInputKindActions) {
+			manager.add(action);
 		}
 		manager.add(new Separator());
 		manager.add(fFindDeclaringNodeAction);
@@ -1236,9 +1236,8 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 			}
 		}
 		// update action state
-		for (int i= 0; i < fASTVersionToggleActions.length; i++) {
-			ASTLevelToggle curr= fASTVersionToggleActions[i];
-			curr.setChecked(curr.getLevel() == fCurrentASTLevel);
+		for (ASTView.ASTLevelToggle action : fASTVersionToggleActions) {
+			action.setChecked(action.getLevel() == fCurrentASTLevel);
 		}
 	}
 	
@@ -1246,9 +1245,8 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 		if (inputKind != fCurrentInputKind) {
 			fCurrentInputKind= inputKind;
 			fDialogSettings.put(SETTINGS_INPUT_KIND, inputKind);
-			for (int i= 0; i < fASTInputKindActions.length; i++) {
-				ASTInputKindAction curr= fASTInputKindActions[i];
-				curr.setChecked(curr.getInputKind() == inputKind);
+			for (ASTView.ASTInputKindAction action : fASTInputKindActions) {
+				action.setChecked(action.getInputKind() == inputKind);
 			}
 			refreshASTSettingsActions();
 			performRefresh();
@@ -1364,10 +1362,9 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 		if (selection.isEmpty()) {
 			fViewer.collapseAll();
 		} else {
-			Object[] selected= selection.toArray();
 			fViewer.getTree().setRedraw(false);
-			for (int i= 0; i < selected.length; i++) {
-				fViewer.collapseToLevel(selected[i], AbstractTreeViewer.ALL_LEVELS);
+			for (Object s : selection.toArray()) {
+				fViewer.collapseToLevel(s, AbstractTreeViewer.ALL_LEVELS);
 			}
 			fViewer.getTree().setRedraw(true);
 		}
@@ -1378,10 +1375,9 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 		if (selection.isEmpty()) {
 			fViewer.expandToLevel(3);
 		} else {
-			Object[] selected= selection.toArray();
 			fViewer.getTree().setRedraw(false);
-			for (int i= 0; i < selected.length; i++) {
-				fViewer.expandToLevel(selected[i], 3);
+			for (Object s : selection.toArray()) {
+				fViewer.expandToLevel(s, 3);
 			}
 			fViewer.getTree().setRedraw(true);
 		}

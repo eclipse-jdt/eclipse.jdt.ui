@@ -113,9 +113,7 @@ public class ProblemNode extends ASTAttribute {
 	
 	private String getConstantName() {
 		int id= fProblem.getID();
-		Field[] fields= IProblem.class.getFields();
-		for (int i= 0; i < fields.length; i++) {
-			Field f= fields[i];
+		for (Field f : IProblem.class.getFields()) {
 			try {
 				if (f.getType() == int.class && f.getInt(f) == id) {
 					return "IProblem." + f.getName();

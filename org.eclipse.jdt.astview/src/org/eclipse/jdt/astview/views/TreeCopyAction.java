@@ -15,7 +15,6 @@ package org.eclipse.jdt.astview.views;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.swt.dnd.Clipboard;
@@ -95,9 +94,9 @@ public class TreeCopyAction extends Action {
 	@Override
 	public void run() {
 		Tree tree= null;
-		for (int i= 0; i < fTrees.length; i++) {
-			if (fTrees[i].isFocusControl()) {
-				tree= fTrees[i];
+		for (Tree t : fTrees) {
+			if (t.isFocusControl()) {
+				tree= t;
 				break;
 			}
 		}
@@ -127,8 +126,7 @@ public class TreeCopyAction extends Action {
 		List<TreeObject> roots= new ArrayList<>();
 		int indent= Integer.MIN_VALUE;
 		
-		for (int i= 0; i < selection.length; i++) {
-			TreeItem item= selection[i];
+		for (TreeItem item : selection) {
 			TreeObject treeObj= elementToTreeObj.get(item);
 			if (treeObj == null) {
 				treeObj= new TreeObject(item, true);
@@ -168,8 +166,7 @@ public class TreeCopyAction extends Action {
 	}
 
 	private void appendSelectionObjects(StringBuffer buffer, int indent, List<TreeObject> selObjs) {
-		for (Iterator<TreeObject> iter= selObjs.iterator(); iter.hasNext();) {
-			TreeObject selObj= iter.next();
+		for (TreeObject selObj : selObjs) {
 			if (selObj.isSelected()) {
 				buffer.append('\n');
 				for (int d= 0; d < indent; d++)
