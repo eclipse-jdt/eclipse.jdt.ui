@@ -268,9 +268,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     public void setHistoryEntries(IMember[][] entries) {
         getMethodHistory().clear();
 
-        for (int i = 0; i < entries.length; i++) {
-            getMethodHistory().add(entries[i]);
-        }
+		getMethodHistory().addAll(Arrays.asList(entries));
 
         updateHistoryEntries();
     }

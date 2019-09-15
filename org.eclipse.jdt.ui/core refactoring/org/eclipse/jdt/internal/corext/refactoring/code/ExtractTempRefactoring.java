@@ -221,9 +221,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		Assert.isTrue(prefixLength <= array.length);
 		Assert.isTrue(prefixLength >= 0);
 		ASTNode[] prefix= new ASTNode[prefixLength];
-		for (int i= 0; i < prefix.length; i++) {
-			prefix[i]= array[i];
-		}
+		System.arraycopy(array, 0, prefix, 0, prefix.length);
 		return prefix;
 	}
 

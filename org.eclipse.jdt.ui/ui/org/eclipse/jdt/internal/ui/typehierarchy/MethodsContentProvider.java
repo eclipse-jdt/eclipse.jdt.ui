@@ -14,6 +14,7 @@
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
@@ -77,9 +78,7 @@ public class MethodsContentProvider implements IStructuredContentProvider, IWork
 
 	private void addAll(Object[] arr, List<Object> res) {
 		if (arr != null) {
-			for (int j= 0; j < arr.length; j++) {
-				res.add(arr[j]);
-			}
+			res.addAll(Arrays.asList(arr));
 		}
 	}
 

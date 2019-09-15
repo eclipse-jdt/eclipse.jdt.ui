@@ -151,9 +151,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		setTitle(WorkingSetMessages.WorkingSetConfigurationDialog_title);
 		setMessage(WorkingSetMessages.WorkingSetConfigurationDialog_message);
 		fAllWorkingSets= new ArrayList<>(allWorkingSets.length);
-		for (int i= 0; i < allWorkingSets.length; i++) {
-			fAllWorkingSets.add(allWorkingSets[i]);
-		}
+		fAllWorkingSets.addAll(Arrays.asList(allWorkingSets));
 		fIsSortingEnabled= isSortingEnabled;
 	}
 

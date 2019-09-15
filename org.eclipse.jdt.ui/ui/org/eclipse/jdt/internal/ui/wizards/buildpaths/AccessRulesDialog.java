@@ -14,6 +14,7 @@
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -132,9 +133,7 @@ public class AccessRulesDialog extends StatusDialog {
 
 		IAccessRule[] rules= (IAccessRule[]) entryToEdit.getAttribute(CPListElement.ACCESSRULES);
 		ArrayList<IAccessRule> elements= new ArrayList<>(rules.length);
-		for (int i= 0; i < rules.length; i++) {
-			elements.add(rules[i]);
-		}
+		elements.addAll(Arrays.asList(rules));
 		patternList.setElements(elements);
 		patternList.selectFirstElement();
 		return patternList;

@@ -190,9 +190,7 @@ public final class ClasspathFixProcessorDescriptor {
 						if (processor != null) {
 							ClasspathFixProposal[] fixProposals= processor.getFixImportProposals(project, missingType);
 							if (fixProposals != null) {
-								for (int k= 0; k < fixProposals.length; k++) {
-									proposals.add(fixProposals[k]);
-								}
+								proposals.addAll(Arrays.asList(fixProposals));
 								overriddenIds.addAll(curr.getOverridenIds());
 							}
 						}

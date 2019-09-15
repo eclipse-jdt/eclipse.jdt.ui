@@ -128,9 +128,7 @@ public class NLSSearchResult extends AbstractTextSearchResult implements IEditor
 		//TODO: copied from JavaSearchResult:
 		Match[] m= getMatches(element);
 		if (m.length != 0) {
-			for (int i= 0; i < m.length; i++) {
-				matches.add(m[i]);
-			}
+			matches.addAll(Arrays.asList(m));
 		}
 		if (element instanceof IParent) {
 			IParent parent= (IParent) element;

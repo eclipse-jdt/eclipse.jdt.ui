@@ -219,9 +219,7 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 				IPackageFragment[] fragments= ((LogicalPackage)input).getFragments();
 				if (fragments.length == 0)
 					continue;
-				for (int j= 0; j < fragments.length; j++) {
-					validElements.add(fragments[j]);
-				}
+				validElements.addAll(Arrays.asList(fragments));
 			} else if (input instanceof IPackageFragment) {
 				IPackageFragment fragment= (IPackageFragment)input;
 				IPackageFragmentRoot[] roots;

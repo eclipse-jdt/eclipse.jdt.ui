@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.jarimport;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 
 import org.eclipse.swt.SWT;
@@ -130,8 +131,7 @@ public class RefactoringLocationControl extends Composite {
 		if (settings != null) {
 			final LinkedList<String> locations= new LinkedList<>();
 			final String[] items= fCombo.getItems();
-			for (int index= 0; index < items.length; index++)
-				locations.add(items[index]);
+			locations.addAll(Arrays.asList(items));
 			final String text= fCombo.getText().trim();
 			if (!"".equals(text)) { //$NON-NLS-1$
 				locations.remove(text);

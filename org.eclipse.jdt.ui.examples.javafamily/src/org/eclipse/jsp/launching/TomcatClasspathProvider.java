@@ -14,6 +14,7 @@
 package org.eclipse.jsp.launching;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -46,9 +47,7 @@ public class TomcatClasspathProvider extends StandardClasspathProvider {
 			IVMInstall vm = JavaRuntime.computeVMInstall(configuration);
 			LibraryLocation[] libs = JavaRuntime.getLibraryLocations(vm);
 			List rtes = new ArrayList();
-			for (int i = 0; i < defaults.length; i++) {
-				rtes.add(defaults[i]);
-			}
+			rtes.addAll(Arrays.asList(defaults));
 			// add bootstrap.jar
 			String catalinaHome = TomcatLaunchDelegate.getCatalinaHome();
 			IPath path = new Path(catalinaHome).append("bin").append("bootstrap.jar"); //$NON-NLS-1$ //$NON-NLS-2$

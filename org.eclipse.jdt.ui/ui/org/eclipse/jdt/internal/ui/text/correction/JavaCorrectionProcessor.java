@@ -386,9 +386,7 @@ public class JavaCorrectionProcessor implements org.eclipse.jface.text.quickassi
 			if (curr != null) {
 				IJavaCompletionProposal[] res= curr.getCorrections(fContext, fLocations);
 				if (res != null) {
-					for (int k= 0; k < res.length; k++) {
-						fProposals.add(res[k]);
-					}
+					fProposals.addAll(Arrays.asList(res));
 				}
 			}
 		}
@@ -411,9 +409,7 @@ public class JavaCorrectionProcessor implements org.eclipse.jface.text.quickassi
 			if (curr != null) {
 				IJavaCompletionProposal[] res= curr.getAssists(fContext, fLocations);
 				if (res != null) {
-					for (int k= 0; k < res.length; k++) {
-						fProposals.add(res[k]);
-					}
+					fProposals.addAll(Arrays.asList(res));
 				}
 			}
 		}

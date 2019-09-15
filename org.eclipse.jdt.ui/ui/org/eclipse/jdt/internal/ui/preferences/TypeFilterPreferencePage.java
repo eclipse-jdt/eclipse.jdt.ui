@@ -234,13 +234,9 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
 		ArrayList<String> res= new ArrayList<>();
 
 		String[] enabledEntries= unpackOrderList(enabled);
-		for (int i= 0; i < enabledEntries.length; i++) {
-			res.add(enabledEntries[i]);
-		}
+		res.addAll(Arrays.asList(enabledEntries));
 		String[] disabledEntries= unpackOrderList(disabled);
-		for (int i= 0; i < disabledEntries.length; i++) {
-			res.add(disabledEntries[i]);
-		}
+		res.addAll(Arrays.asList(disabledEntries));
 
 		fFilterListField.setElements(res);
 		fFilterListField.setCheckedElements(Arrays.asList(enabledEntries));

@@ -411,9 +411,7 @@ public class Strings {
 	public static String[] removeTrailingEmptyLines(String[] sourceLines) {
 		int lastNonEmpty= findLastNonEmptyLineIndex(sourceLines);
 		String[] result= new String[lastNonEmpty + 1];
-		for (int i= 0; i < result.length; i++) {
-			result[i]= sourceLines[i];
-		}
+		System.arraycopy(sourceLines, 0, result, 0, result.length);
 		return result;
 	}
 

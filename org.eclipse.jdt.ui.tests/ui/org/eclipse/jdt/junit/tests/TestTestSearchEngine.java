@@ -215,9 +215,7 @@ public class TestTestSearchEngine extends TestCase {
 		HashSet<IType> res= new HashSet<>();
 		for (int i= 0; i < elements.length; i++) {
 			IType[] types= findTests(elements[i]);
-			for (int k= 0; k < types.length; k++) {
-				res.add(types[k]);
-			}
+			res.addAll(Arrays.asList(types));
 		}
 		return res.toArray(new IType[res.size()]);
 	}

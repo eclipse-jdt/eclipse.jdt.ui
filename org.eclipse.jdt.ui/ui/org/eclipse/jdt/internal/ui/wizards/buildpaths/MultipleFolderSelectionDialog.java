@@ -14,6 +14,7 @@
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -84,9 +85,7 @@ public class MultipleFolderSelectionDialog extends SelectionStatusDialog impleme
 
 	public void setExisting(Object[] existing) {
 		fExisting= new HashSet<>();
-		for (int i= 0; i < existing.length; i++) {
-			fExisting.add(existing[i]);
-		}
+		fExisting.addAll(Arrays.asList(existing));
 	}
 
 	/**

@@ -16,6 +16,7 @@ package org.eclipse.jdt.internal.corext.fix;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -164,9 +165,7 @@ public class PotentialProgrammingProblemsFixCore extends CompilationUnitRewriteO
 					//depending on how many subtypes exit in the project.
 
 					HashSet<ICompilationUnit> cus= new HashSet<>();
-					for (int i= 0; i < compilationUnits.length; i++) {
-						cus.add(compilationUnits[i]);
-					}
+					cus.addAll(Arrays.asList(compilationUnits));
 
 					monitor.subTask(Messages.format(FixMessages.Java50Fix_SerialVersion_CalculateHierarchy_description, SERIALIZABLE_NAME));
 					ITypeHierarchy hierarchy1= serializable.newTypeHierarchy(project, new SubProgressMonitor(monitor, compilationUnits.length));

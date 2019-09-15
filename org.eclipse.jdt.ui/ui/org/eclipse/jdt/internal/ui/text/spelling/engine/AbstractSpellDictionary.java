@@ -430,8 +430,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 		characters= word.toCharArray();
 		final char[] deleted= new char[characters.length - 1];
 
-		for (int index= 0; index < deleted.length; index++)
-			deleted[index]= characters[index];
+		System.arraycopy(characters, 0, deleted, 0, deleted.length);
 
 		next= characters[characters.length - 1];
 		offset= deleted.length;

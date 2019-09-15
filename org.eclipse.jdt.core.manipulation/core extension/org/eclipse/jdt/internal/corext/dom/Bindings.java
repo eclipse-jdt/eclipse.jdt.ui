@@ -19,6 +19,7 @@
 package org.eclipse.jdt.internal.corext.dom;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -252,9 +253,7 @@ public class Bindings {
 				createName(declaringType, includePackage, list);
 			} else if (includePackage && !baseType.getPackage().isUnnamed()) {
 				String[] components= baseType.getPackage().getNameComponents();
-				for (int i= 0; i < components.length; i++) {
-					list.add(components[i]);
-				}
+				list.addAll(Arrays.asList(components));
 			}
 		}
 		if (!baseType.isAnonymous()) {

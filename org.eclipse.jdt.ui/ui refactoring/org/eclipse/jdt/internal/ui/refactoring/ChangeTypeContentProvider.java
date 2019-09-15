@@ -65,9 +65,7 @@ class ChangeTypeContentProvider implements ITreeContentProvider {
 			result.add(type.getSuperclass());
 		}
 		ITypeBinding[] interfaces= type.getInterfaces();
-		for (int i=0; i < interfaces.length; i++){
-			result.add(interfaces[i]);
-		}
+		result.addAll(Arrays.asList(interfaces));
 		if (fGeneralizeType.getOriginalType().isInterface() && type != fGeneralizeType.getObject()){
 			result.add(fGeneralizeType.getObject());
 		}

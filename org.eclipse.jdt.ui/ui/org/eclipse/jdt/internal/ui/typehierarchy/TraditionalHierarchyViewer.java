@@ -94,13 +94,9 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 				IType input= hierarchy.getType();
 				if (input == null) {
 					IType[] classes= hierarchy.getRootClasses();
-					for (int i= 0; i < classes.length; i++) {
-						res.add(classes[i]);
-					}
+					res.addAll(Arrays.asList(classes));
 					IType[] interfaces= hierarchy.getRootInterfaces();
-					for (int i= 0; i < interfaces.length; i++) {
-						res.add(interfaces[i]);
-					}
+					res.addAll(Arrays.asList(interfaces));
 				} else {
 					if (Flags.isInterface(hierarchy.getCachedFlags(input))) {
 						res.add(input);
@@ -139,9 +135,7 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 					boolean isHierarchyOnType= (hierarchy.getType() != null);
 					boolean isClass= !Flags.isInterface(hierarchy.getCachedFlags(type));
 					if (isClass || isHierarchyOnType) {
-						for (int i= 0; i < types.length; i++) {
-							res.add(types[i]);
-						}
+						res.addAll(Arrays.asList(types));
 					} else {
 						for (int i= 0; i < types.length; i++) {
 							IType curr= types[i];

@@ -87,8 +87,7 @@ public class NLSHint {
 				int rawLinesLength= rawLines.length;
 				int eclipseLinesLength= eclipseNLSLines.size();
 				lines= new NLSLine[rawLinesLength + eclipseLinesLength];
-				for (int i= 0; i < rawLinesLength; i++)
-					lines[i]= rawLines[i];
+				System.arraycopy(rawLines, 0, lines, 0, rawLinesLength);
 				for (int i= 0; i < eclipseLinesLength; i++)
 					lines[i+rawLinesLength]= eclipseNLSLines.get(i);
 			}

@@ -14,6 +14,7 @@
 package org.eclipse.jdt.internal.ui.packageview;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -249,9 +250,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		getHierarchicalPackageRootChildren(root, result);
 		if (!isProjectPackageFragmentRoot(root)) {
 			Object[] nonJavaResources= root.getNonJavaResources();
-			for (int i= 0; i < nonJavaResources.length; i++) {
-				result.add(nonJavaResources[i]);
-			}
+			result.addAll(Arrays.asList(nonJavaResources));
 		}
 		return result.toArray();
 	}
@@ -269,9 +268,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		Object[] nonPackages= super.getPackageContent(fragment);
 		if (result.isEmpty())
 			return nonPackages;
-		for (int i= 0; i < nonPackages.length; i++) {
-			result.add(nonPackages[i]);
-		}
+		result.addAll(Arrays.asList(nonPackages));
 		return result.toArray();
 	}
 
@@ -288,9 +285,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		Object[] others= super.getFolderContent(folder);
 		if (result.isEmpty())
 			return others;
-		for (int i= 0; i < others.length; i++) {
-			result.add(others[i]);
-		}
+		result.addAll(Arrays.asList(others));
 		return result.toArray();
 	}
 
@@ -344,9 +339,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 					// filter out package fragments that correspond to projects and
 					// replace them with the package fragments directly
 					Object[] fragments= getPackageFragmentRootContent(root);
-					for (int j= 0; j < fragments.length; j++) {
-						result.add(fragments[j]);
-					}
+					result.addAll(Arrays.asList(fragments));
 				} else {
 					result.add(root);
 				}
@@ -366,9 +359,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 			}
 		}
 		Object[] resources= project.getNonJavaResources();
-		for (int i= 0; i < resources.length; i++) {
-			result.add(resources[i]);
-		}
+		result.addAll(Arrays.asList(resources));
 		return result.toArray();
 	}
 

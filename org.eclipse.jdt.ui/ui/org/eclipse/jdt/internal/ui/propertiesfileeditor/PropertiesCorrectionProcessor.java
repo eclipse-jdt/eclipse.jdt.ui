@@ -81,15 +81,11 @@ public class PropertiesCorrectionProcessor implements org.eclipse.jface.text.qui
 				List<ICompletionProposal> proposals= new ArrayList<>();
 				ICompletionProposal[] spellingProposals= fSpellingCorrectionProcessor.computeQuickAssistProposals(quickAssistContext);
 				if (spellingProposals.length > 1) {
-					for (int i= 0; i < spellingProposals.length; i++) {
-						proposals.add(spellingProposals[i]);
-					}
+					proposals.addAll(Arrays.asList(spellingProposals));
 				}
 				ICompletionProposal[] assists= PropertiesQuickAssistProcessor.collectAssists(createAssistContext(context));
 				if (assists != null) {
-					for (int i= 0; i < assists.length; i++) {
-						proposals.add(assists[i]);
-					}
+					proposals.addAll(Arrays.asList(assists));
 				}
 				res= proposals.toArray(new ICompletionProposal[proposals.size()]);
 			} catch (BadLocationException e) {

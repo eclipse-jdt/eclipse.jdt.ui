@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.lang.reflect.Modifier;
 import java.util.AbstractList;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -1071,9 +1072,7 @@ public class StubUtility {
 		}
 		if (expectedType != null) {
 			String[] names= getVariableNameSuggestions(variableKind, project, expectedType, excluded, false);
-			for (int i= 0; i < names.length; i++) {
-				res.add(names[i]);
-			}
+			res.addAll(Arrays.asList(names));
 		}
 		if (res.isEmpty()) {
 			return getDefaultVariableNameSuggestions(variableKind, excluded);
@@ -1149,9 +1148,7 @@ public class StubUtility {
 
 
 	private static void add(String[] names, Set<String> result) {
-		for (int i= 0; i < names.length; i++) {
-			result.add(names[i]);
-		}
+		result.addAll(Arrays.asList(names));
 	}
 
 	private static String getBaseNameFromExpression(IJavaProject project, Expression assignedExpression, int variableKind) {
@@ -1318,9 +1315,7 @@ public class StubUtility {
 				// make the existing name to favorite
 				LinkedHashSet<String> updatedNames= new LinkedHashSet<>();
 				updatedNames.add(curr);
-				for (int k= 0; k < proposedNames.length; k++) {
-					updatedNames.add(proposedNames[k]);
-				}
+				updatedNames.addAll(Arrays.asList(proposedNames));
 				proposedNames= updatedNames.toArray(new String[updatedNames.size()]);
 			}
 			newNames[i]= proposedNames;

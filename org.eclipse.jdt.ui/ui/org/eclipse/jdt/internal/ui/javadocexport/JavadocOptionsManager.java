@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -491,9 +492,7 @@ public class JavadocOptionsManager {
 			IPath path= makeAbsolutePathFromRelative(new Path(strings[i].trim()));
 			if (path != null) {
 				IContainer[] containers= root.findContainersForLocationURI(URIUtil.toURI(path.makeAbsolute()));
-				for (int k= 0; k < containers.length; k++) {
-					res.add(containers[k]);
-				}
+				res.addAll(Arrays.asList(containers));
 			}
 
 		}
@@ -774,9 +773,7 @@ public class JavadocOptionsManager {
 		if (fAdditionalParams.length() + fVMParams.length() != 0) {
 			ExecutionArguments tokens= new ExecutionArguments(fVMParams, fAdditionalParams);
 			String[] vmArgsArray= tokens.getVMArgumentsArray();
-			for (int i= 0; i < vmArgsArray.length; i++) {
-				vmArgs.add(vmArgsArray[i]);
-			}
+			vmArgs.addAll(Arrays.asList(vmArgsArray));
 			String[] argsArray= tokens.getProgramArgumentsArray();
 			for (int i= 0; i < argsArray.length; i++) {
 				String arg= argsArray[i];

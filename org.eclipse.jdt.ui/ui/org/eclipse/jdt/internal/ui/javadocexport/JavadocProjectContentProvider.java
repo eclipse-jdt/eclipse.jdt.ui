@@ -14,6 +14,7 @@
 package org.eclipse.jdt.internal.ui.javadocexport;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -110,9 +111,7 @@ public class JavadocProjectContentProvider implements ITreeContentProvider {
 			if (root.getKind() == IPackageFragmentRoot.K_SOURCE) {
 				if (root.getPath().equals(root.getJavaProject().getPath())) {
 					Object[] packageFragments= getPackageFragments(root);
-					for (int k= 0; k < packageFragments.length; k++) {
-						result.add(packageFragments[k]);
-					}
+					result.addAll(Arrays.asList(packageFragments));
 				} else {
 					result.add(root);
 				}

@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ibm.icu.text.BreakIterator;
+import java.util.Arrays;
 
 import org.eclipse.help.HelpSystem;
 import org.eclipse.help.IContext;
@@ -149,9 +150,7 @@ public class JavadocHelpContext implements IContext2 {
 		if (context != null) {
 			IHelpResource[] resources= context.getRelatedTopics();
 			if (resources != null) {
-				for (int j= 0; j < resources.length; j++) {
-					helpResources.add(resources[j]);
-				}
+				helpResources.addAll(Arrays.asList(resources));
 			}
 		}
 

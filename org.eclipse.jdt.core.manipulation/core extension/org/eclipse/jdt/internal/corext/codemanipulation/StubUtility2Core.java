@@ -686,8 +686,7 @@ public final class StubUtility2Core {
 		final List<DelegateEntry> tuples= new ArrayList<>();
 		final List<IMethodBinding> declared= new ArrayList<>();
 		IMethodBinding[] typeMethods= binding.getDeclaredMethods();
-		for (int index= 0; index < typeMethods.length; index++)
-			declared.add(typeMethods[index]);
+		declared.addAll(Arrays.asList(typeMethods));
 		IVariableBinding[] typeFields= binding.getDeclaredFields();
 		for (int index= 0; index < typeFields.length; index++) {
 			IVariableBinding fieldBinding= typeFields[index];

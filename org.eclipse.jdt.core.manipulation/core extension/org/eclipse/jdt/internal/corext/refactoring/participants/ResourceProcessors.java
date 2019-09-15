@@ -14,6 +14,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.participants;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -45,9 +46,7 @@ public class ResourceProcessors {
 		if (visitedProjects.contains(focus))
 			return;
 		String[] pns= focus.getDescription().getNatureIds();
-		for (int p = 0; p < pns.length; p++) {
-			result.add(pns[p]);
-		}
+		result.addAll(Arrays.asList(pns));
 		visitedProjects.add(focus);
 		IProject[] referencing= focus.getReferencingProjects();
 		for (int i= 0; i < referencing.length; i++) {

@@ -271,9 +271,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		String hrefs[]= fStore.getHRefs();
 		if (hrefs.length > 0) {
 			HashSet<String> set= new HashSet<>();
-			for (int i= 0; i < hrefs.length; i++) {
-				set.add(hrefs[i]);
-			}
+			set.addAll(Arrays.asList(hrefs));
 			for (int i = 0; i < referencesClasses.length; i++) {
 				JavadocLinkRef curr= referencesClasses[i];
 				URL url= curr.getURL();

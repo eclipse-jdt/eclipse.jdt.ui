@@ -20,6 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -203,9 +204,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 						if (history != null) {
 							final RefactoringDescriptorProxy[] descriptors= history.getDescriptors();
 							if (descriptors.length > 0) {
-								for (int index= 0; index < descriptors.length; index++) {
-									elements.add(descriptors[index]);
-								}
+								elements.addAll(Arrays.asList(descriptors));
 							}
 						}
 					} catch (CoreException exception) {

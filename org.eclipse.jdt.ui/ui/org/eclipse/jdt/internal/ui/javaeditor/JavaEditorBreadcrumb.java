@@ -14,6 +14,7 @@
 package org.eclipse.jdt.internal.ui.javaeditor;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
@@ -410,9 +411,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 				}
 
 				Object[] nonJavaResources= pack.getNonJavaResources();
-				for (int i= 0; i < nonJavaResources.length; i++) {
-					result.add(nonJavaResources[i]);
-				}
+				result.addAll(Arrays.asList(nonJavaResources));
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);
 			}
@@ -668,9 +667,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 							// filter out package fragments that correspond to projects and
 							// replace them with the package fragments directly
 							Object[] fragments= getPackageFragmentRootContent(root);
-							for (int j= 0; j < fragments.length; j++) {
-								result.add(fragments[j]);
-							}
+							result.addAll(Arrays.asList(fragments));
 						} else {
 							result.add(root);
 						}
@@ -690,9 +687,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 					}
 				}
 				Object[] resources= project.getNonJavaResources();
-				for (int i= 0; i < resources.length; i++) {
-					result.add(resources[i]);
-				}
+				result.addAll(Arrays.asList(resources));
 				return result.toArray();
 			}
 

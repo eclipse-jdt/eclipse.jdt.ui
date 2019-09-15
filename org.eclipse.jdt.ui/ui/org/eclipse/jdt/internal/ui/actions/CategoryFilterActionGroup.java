@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.ibm.icu.text.Collator;
+import java.util.Arrays;
 
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.graphics.Image;
@@ -297,9 +298,7 @@ public class CategoryFilterActionGroup extends ActionGroup {
 		String string= store.getString(getPreferenceKey());
 		if (string != null && string.length() > 0) {
 			String[] categories= string.split(";"); //$NON-NLS-1$
-			for (int i= 0; i < categories.length; i++) {
-				fFilteredCategories.add(categories[i]);
-			}
+			fFilteredCategories.addAll(Arrays.asList(categories));
 		}
 		string= store.getString(getPreferenceKey()+".LRU"); //$NON-NLS-1$
 		if (string != null && string.length() > 0) {
@@ -491,9 +490,7 @@ public class CategoryFilterActionGroup extends ActionGroup {
 			collectCategories(input[i], new IResultCollector() {
 				@Override
 				public boolean accept(String[] cats) {
-					for (int j= 0; j < cats.length; j++) {
-						categories.add(cats[j]);
-					}
+					categories.addAll(Arrays.asList(cats));
 					return false;
 				}
 			});

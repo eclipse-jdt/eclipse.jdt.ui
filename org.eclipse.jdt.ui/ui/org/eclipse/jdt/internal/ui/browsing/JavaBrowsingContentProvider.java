@@ -177,8 +177,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 			IPackageFragmentRoot root= roots[i];
 			if (!root.isExternal()) {
 				IJavaElement[] children= root.getChildren();
-				for (int k= 0; k < children.length; k++)
-					list.add(children[k]);
+				list.addAll(Arrays.asList(children));
 			}
 			else if (hasChildren(root)) {
 				list.add(root);

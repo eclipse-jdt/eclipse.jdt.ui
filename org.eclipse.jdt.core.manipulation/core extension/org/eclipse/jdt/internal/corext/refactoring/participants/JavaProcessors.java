@@ -14,6 +14,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.participants;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -45,9 +46,7 @@ public class JavaProcessors {
 		Set<String> result= new HashSet<>();
 		for (int i= 0; i < elements.length; i++) {
 			String[] natures= computeAffectedNatures(elements[i]);
-			for (int j= 0; j < natures.length; j++) {
-				result.add(natures[j]);
-			}
+			result.addAll(Arrays.asList(natures));
 		}
 		return result.toArray(new String[result.size()]);
 	}

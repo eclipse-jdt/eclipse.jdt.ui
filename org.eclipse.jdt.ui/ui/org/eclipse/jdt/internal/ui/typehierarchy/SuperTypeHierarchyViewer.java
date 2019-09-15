@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
@@ -73,9 +74,7 @@ public class SuperTypeHierarchyViewer extends TypeHierarchyViewer {
 			ITypeHierarchy hierarchy= getHierarchy();
 			if (hierarchy != null) {
 				IType[] types= hierarchy.getSupertypes(type);
-				for (int i= 0; i < types.length; i++) {
-					res.add(types[i]);
-				}
+				res.addAll(Arrays.asList(types));
 			}
 		}
 

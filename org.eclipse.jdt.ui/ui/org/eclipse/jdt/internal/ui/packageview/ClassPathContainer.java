@@ -14,6 +14,7 @@
 package org.eclipse.jdt.internal.ui.packageview;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.runtime.IAdaptable;
@@ -187,9 +188,7 @@ public class ClassPathContainer extends PackageFragmentRootContainer {
 	public IAdaptable[] getChildren() {
 		List<IAdaptable> list= new ArrayList<>();
 		IPackageFragmentRoot[] roots= getPackageFragmentRoots();
-		for (int i= 0; i < roots.length; i++) {
-			list.add(roots[i]);
-		}
+		list.addAll(Arrays.asList(roots));
 		if (fContainer != null) {
 			IClasspathEntry[] classpathEntries= fContainer.getClasspathEntries();
 			if (classpathEntries == null) {

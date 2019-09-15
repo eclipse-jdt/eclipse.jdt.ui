@@ -809,9 +809,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 			if (elements == null) {
 				status.add(new Status(IStatus.WARNING, JavaUI.ID_PLUGIN, Messages.format(FatJarPackagerMessages.FatJarPackageWizardPage_error_missingClassFile, BasicElementLabels.getPathLabel(entry, false))));
 			} else {
-				for (int j= 0; j < elements.length; j++) {
-					result.add(elements[j]);
-				}
+				result.addAll(Arrays.asList(elements));
 			}
 		}
 

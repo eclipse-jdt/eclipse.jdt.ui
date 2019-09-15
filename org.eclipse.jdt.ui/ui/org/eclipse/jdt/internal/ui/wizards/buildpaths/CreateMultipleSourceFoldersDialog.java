@@ -14,6 +14,7 @@
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -90,9 +91,7 @@ public class CreateMultipleSourceFoldersDialog extends TrayDialog {
 				return super.getChildren(element);
 
 			Object[] children= super.getChildren(element);
-			for (int i= 0; i < children.length; i++) {
-				result.add(children[i]);
-			}
+			result.addAll(Arrays.asList(children));
 			return result.toArray();
 		}
 	}

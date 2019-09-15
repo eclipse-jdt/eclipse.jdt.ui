@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.swt.widgets.Composite;
@@ -70,9 +71,7 @@ public class SubTypeHierarchyViewer extends TypeHierarchyViewer {
 						}
 					}
 				} else {
-					for (int i= 0; i < types.length; i++) {
-						res.add(types[i]);
-					}
+					res.addAll(Arrays.asList(types));
 				}
 			}
 

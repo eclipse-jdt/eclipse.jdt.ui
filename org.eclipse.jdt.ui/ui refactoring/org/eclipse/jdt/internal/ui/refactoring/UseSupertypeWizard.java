@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -98,9 +99,7 @@ public class UseSupertypeWizard extends RefactoringWizard{
 					result.add(superclass);
 				}
 				IType[] superInterface= fHierarchy.getSuperInterfaces(type);
-				for (int i=0; i < superInterface.length; i++){
-					result.add(superInterface[i]);
-				}
+				result.addAll(Arrays.asList(superInterface));
 				try {
 					if (type.isInterface()) {
 						IType found= type.getJavaProject().findType("java.lang.Object"); //$NON-NLS-1$

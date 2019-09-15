@@ -632,9 +632,7 @@ public class TypeInfoViewer {
 				return;
 				
 			Set filteredMatches= new HashSet(matchingTypes.length * 2);
-			for (int i= 0; i < matchingTypes.length; i++) {
-				filteredMatches.add(matchingTypes[i]);
-			}
+			filteredMatches.addAll(Arrays.asList(matchingTypes));
 			
 			TypeNameMatch[] result= getSearchResult(filteredMatches, monitor);
 			if (monitor.isCanceled())

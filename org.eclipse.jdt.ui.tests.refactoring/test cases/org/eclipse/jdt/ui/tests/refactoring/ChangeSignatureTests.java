@@ -319,9 +319,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 				newInfos[i]= infos.get(permutation[i]);
 			}
 			infos.clear();
-			for (int i= 0; i < newInfos.length; i++) {
-				infos.add(newInfos[i]);
-			}
+			infos.addAll(Arrays.asList(newInfos));
 			return;
 		} else {
 			List<String> oldNameList= Arrays.asList(oldNames);

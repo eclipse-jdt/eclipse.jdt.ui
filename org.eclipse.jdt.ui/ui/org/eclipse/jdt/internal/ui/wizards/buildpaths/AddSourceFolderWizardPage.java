@@ -243,18 +243,14 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 			IPath[] exlusions= (IPath[])element.getAttribute(CPListElement.EXCLUSION);
 			if (exlusions != null) {
 				IPath[] save= new IPath[exlusions.length];
-				for (int i= 0; i < save.length; i++) {
-					save[i]= exlusions[i];
-				}
+				System.arraycopy(exlusions, 0, save, 0, save.length);
 				fOrginalExlusionFiltersCopy.put(element, save);
 				fOrginalExlusionFilters.put(element, exlusions);
 			}
 			IPath[] inclusions= (IPath[])element.getAttribute(CPListElement.INCLUSION);
 			if (inclusions != null) {
 				IPath[] save= new IPath[inclusions.length];
-				for (int i= 0; i < save.length; i++) {
-					save[i]= inclusions[i];
-				}
+				System.arraycopy(inclusions, 0, save, 0, save.length);
 				fOrginalInclusionFiltersCopy.put(element, save);
 				fOrginalInclusionFilters.put(element, inclusions);
 			}

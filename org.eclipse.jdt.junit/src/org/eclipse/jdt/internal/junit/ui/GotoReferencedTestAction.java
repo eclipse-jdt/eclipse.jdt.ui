@@ -14,6 +14,7 @@
 package org.eclipse.jdt.internal.junit.ui;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.swt.widgets.Shell;
@@ -129,9 +130,7 @@ public class GotoReferencedTestAction implements IWorkbenchWindowActionDelegate 
 					types= unit.getTypes();
 				} catch (JavaModelException ex) {
 				}
-				for (IType type : types) {
-					result.add(type);
-				}
+				result.addAll(Arrays.asList(types));
 			}
 			else if (e instanceof IMethod || e instanceof IType || e instanceof IField) {
 				result.add((IMember) e);

@@ -15,6 +15,7 @@
 package org.eclipse.jdt.internal.ui.propertiesfileeditor;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -224,8 +225,7 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 		int length= IPropertiesFilePartitions.PARTITIONS.length;
 		String[] contentTypes= new String[length + 1];
 		contentTypes[0]= IDocument.DEFAULT_CONTENT_TYPE;
-		for (int i= 0; i < length; i++)
-			contentTypes[i+1]= IPropertiesFilePartitions.PARTITIONS[i];
+		System.arraycopy(IPropertiesFilePartitions.PARTITIONS, 0, contentTypes, 1, length);
 
 		return contentTypes;
 	}
@@ -360,9 +360,7 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 				return autoEditStrategies;
 			}
 			List<IAutoEditStrategy> stratergies= new ArrayList<>();
-			for (int i= 0; i < autoEditStrategies.length; i++) {
-				stratergies.add(autoEditStrategies[i]);
-			}
+			stratergies.addAll(Arrays.asList(autoEditStrategies));
 			stratergies.add(new PropertiesFileAutoEditStrategy(((IFileEditorInput)fTextEditor.getEditorInput()).getFile(), sourceViewer));
 			return stratergies.toArray(new IAutoEditStrategy[stratergies.size()]);
 		} catch (CoreException e) {

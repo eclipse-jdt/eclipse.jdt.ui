@@ -14,6 +14,7 @@
 package org.eclipse.jdt.internal.ui.model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -475,8 +476,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 	 */
 	private Object[] getPackageFragmentChildren(final ISynchronizationContext context, final Object parent, final Object[] children) {
 		final Set<Object> set= new HashSet<>();
-		for (int index= 0; index < children.length; index++)
-			set.add(children[index]);
+		set.addAll(Arrays.asList(children));
 		IPackageFragment packageFragment= (IPackageFragment) parent;
 		IResource resource= packageFragment.getResource();
 		if (resource != null) {

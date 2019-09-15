@@ -537,9 +537,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 		}
 
 		if (areUserDefinedPatternsEnabled()) {
-			for (int i= 0; i < fUserDefinedPatterns.length; i++) {
-				patterns.add(fUserDefinedPatterns[i]);
-			}
+			patterns.addAll(Arrays.asList(fUserDefinedPatterns));
 		}
 		if (!patternChange) { // no pattern change so far, test if the user patterns made a difference
 			patternChange= hasChanges(patterns, fPreviousPatterns);

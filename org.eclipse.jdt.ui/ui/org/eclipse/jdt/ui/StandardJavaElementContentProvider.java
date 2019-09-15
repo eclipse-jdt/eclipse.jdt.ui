@@ -325,17 +325,13 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 			IPackageFragmentRoot root= roots[i];
 			if (isProjectPackageFragmentRoot(root)) {
 				Object[] fragments= getPackageFragmentRootContent(root);
-				for (int j= 0; j < fragments.length; j++) {
-					list.add(fragments[j]);
-				}
+				list.addAll(Arrays.asList(fragments));
 			} else {
 				list.add(root);
 			}
 		}
 		Object[] resources= project.getNonJavaResources();
-		for (int i= 0; i < resources.length; i++) {
-			list.add(resources[i]);
-		}
+		list.addAll(Arrays.asList(resources));
 		return list.toArray();
 	}
 

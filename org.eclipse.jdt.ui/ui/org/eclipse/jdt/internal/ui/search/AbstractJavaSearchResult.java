@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.search;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -69,18 +70,14 @@ public abstract class AbstractJavaSearchResult extends AbstractTextSearchResult 
 	private void collectMatches(Set<Match> matches, IFile element) {
 		Match[] m= getMatches(element);
 		if (m.length != 0) {
-			for (int i= 0; i < m.length; i++) {
-				matches.add(m[i]);
-			}
+			matches.addAll(Arrays.asList(m));
 		}
 	}
 
 	private void collectMatches(Set<Match> matches, IJavaElement element) {
 		Match[] m= getMatches(element);
 		if (m.length != 0) {
-			for (int i= 0; i < m.length; i++) {
-				matches.add(m[i]);
-			}
+			matches.addAll(Arrays.asList(m));
 		}
 		if (element instanceof IParent) {
 			IParent parent= (IParent) element;

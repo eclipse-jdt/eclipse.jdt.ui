@@ -15,6 +15,7 @@ package org.eclipse.jdt.internal.ui.text.javadoc;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -96,9 +97,7 @@ public class LegacyJavadocCompletionProposalComputer implements IJavaCompletionP
 				IJavadocCompletionProcessor curr= processors[i];
 				IContextInformation[] contextInfos= curr.computeContextInformation(cu, offset);
 				if (contextInfos != null) {
-					for (int k= 0; k < contextInfos.length; k++) {
-						result.add(contextInfos[k]);
-					}
+					result.addAll(Arrays.asList(contextInfos));
 				} else if (error == null) {
 					error= curr.getErrorMessage();
 				}
@@ -133,9 +132,7 @@ public class LegacyJavadocCompletionProposalComputer implements IJavaCompletionP
 				IJavadocCompletionProcessor curr= processors[i];
 				IJavaCompletionProposal[] proposals= curr.computeCompletionProposals(cu, offset, length, javaContext.getFlags());
 				if (proposals != null) {
-					for (int k= 0; k < proposals.length; k++) {
-						result.add(proposals[k]);
-					}
+					result.addAll(Arrays.asList(proposals));
 				}
 			}
 			return result;
