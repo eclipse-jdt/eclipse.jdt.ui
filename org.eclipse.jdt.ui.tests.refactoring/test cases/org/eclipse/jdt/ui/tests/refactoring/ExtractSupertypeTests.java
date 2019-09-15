@@ -32,6 +32,7 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
@@ -146,6 +147,10 @@ public final class ExtractSupertypeTests extends RefactoringTest {
 	}
 
 	public void testBug151683() throws Exception {
-		helper1(new String[] { "m"}, new String[][] { new String[0]}, true, false, false);
+		helper1(new String[] { "m" }, new String[][] { new String[0] }, true, false, false);
+	}
+
+	public void testBug240353() throws Exception {
+		helper1(new String[] { "foo" }, new String[][] { new String[] { Signature.createTypeSignature("T", false) } }, true, false, false);
 	}
 }
