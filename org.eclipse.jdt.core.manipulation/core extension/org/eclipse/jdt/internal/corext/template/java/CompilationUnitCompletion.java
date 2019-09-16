@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,6 +11,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Lukas Hanke <hanke@yatta.de> - [templates][content assist] Content assist for 'for' loop should suggest member variables - https://bugs.eclipse.org/117215
+ *     Microsoft Corporation - moved template related code to jdt.core.manipulation - https://bugs.eclipse.org/549989
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.template.java;
 
@@ -37,7 +38,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.IProblem;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 
 /**
  * A completion requester to collect informations on local variables.
@@ -142,7 +143,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 			String implementorName= SignatureUtil.stripSignatureToFQN(signature);
 			if (implementorName.length() == 0)
 				return false;
-			
+
 			int implementorDims= Signature.getArrayCount(signature);
 			int superDimsIndex= supertype.indexOf("[]"); //$NON-NLS-1$
 			int superDims;
@@ -415,7 +416,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 			IJavaProject project= fUnit.getJavaProject();
 			IType type= project.findType(superType);
 			if (type == null)
-				throw new JavaModelException(new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, "No such type", null))); //$NON-NLS-1$
+				throw new JavaModelException(new CoreException(new Status(IStatus.ERROR, JavaManipulationPlugin.getPluginId(), IStatus.OK, "No such type", null))); //$NON-NLS-1$
 			return computeBinding(type, index);
 		}
 
@@ -584,7 +585,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 				}
 			}
 
-			throw new JavaModelException(new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, "Illegal hierarchy", null))); //$NON-NLS-1$
+			throw new JavaModelException(new CoreException(new Status(IStatus.ERROR, JavaManipulationPlugin.getPluginId(), IStatus.OK, "Illegal hierarchy", null))); //$NON-NLS-1$
 		}
 
 		/**
@@ -846,7 +847,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 
 	/**
 	 * Returns all arrays, visible in the current context's scope, in the order that they appear.
-	 * 
+	 *
 	 * @return all visible arrays
 	 */
 	public Variable[] findArraysInCurrentScope() {
@@ -859,7 +860,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 			if (localVariable.isArray())
 				arrays.add(localVariable);
 		}
-		
+
 		// fields
 		for (ListIterator<Variable> iterator= fFields.listIterator(fFields.size()); iterator.hasPrevious();) {
 			Variable field= iterator.previous();
@@ -915,7 +916,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 	 * Returns all variables, visible in the current context's scope, implementing
 	 * <code>java.lang.Iterable</code> <em>and</em> all arrays, in the order that they appear. That
 	 * is, the returned variables can be used within the <code>foreach</code> language construct.
-	 * 
+	 *
 	 * @return all visible <code>Iterable</code>s and arrays
 	 */
 	public Variable[] findIterablesInCurrentScope() {
@@ -928,7 +929,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 			if (localVariable.isArray() || localVariable.isIterable())
 				iterables.add(localVariable);
 		}
-		
+
 		// fields
 		for (ListIterator<Variable> iterator= fFields.listIterator(fFields.size()); iterator.hasPrevious();) {
 			Variable field= iterator.previous();
