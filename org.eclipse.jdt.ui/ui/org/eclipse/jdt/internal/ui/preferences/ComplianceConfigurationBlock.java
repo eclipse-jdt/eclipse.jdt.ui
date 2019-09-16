@@ -784,12 +784,12 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 			}
 
 			//TODO: Comment once Java SE 13 has been shipped:
-			String selectedCompliance= getValue(PREF_COMPLIANCE);
+			/*String selectedCompliance= getValue(PREF_COMPLIANCE);
 			if (VERSION_13.equals(selectedCompliance)) {
 				fJRE50InfoText.setText(
 						"This is an implementation of an early-draft specification developed under the Java Community Process (JCP) and is made available for testing and evaluation purposes only. The code is not compatible with any specification of the JCP."); //$NON-NLS-1$
 				isVisible= true;
-			}
+			}*/
 			
 			fJRE50InfoText.setVisible(isVisible);
 			fJRE50InfoImage.setImage(isVisible ? image : null);
