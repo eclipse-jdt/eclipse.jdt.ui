@@ -47,8 +47,6 @@ public class ASTFlattener extends GenericVisitor {
 	@Deprecated
 	private static final int JLS9= AST.JLS9;
 
-	private static final int JLS13= AST.JLS13;
-
 	/**
 	 * The string buffer into which the serialized representation of the AST is
 	 * written.
