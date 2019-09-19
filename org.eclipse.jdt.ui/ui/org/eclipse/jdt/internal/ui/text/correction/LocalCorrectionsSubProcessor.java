@@ -209,6 +209,7 @@ public class LocalCorrectionsSubProcessor {
 	private static final String ADD_STATIC_ACCESS_ID= "org.eclipse.jdt.ui.correction.changeToStatic"; //$NON-NLS-1$
 	private static final String REMOVE_UNNECESSARY_NLS_TAG_ID= "org.eclipse.jdt.ui.correction.removeNlsTag"; //$NON-NLS-1$
 
+	@SuppressWarnings("deprecation")
 	public static void addUncaughtExceptionProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 
@@ -1778,6 +1779,7 @@ public class LocalCorrectionsSubProcessor {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	public static boolean evaluateMissingSwitchCases(ITypeBinding enumBindings, List<Statement> switchStatements, ArrayList<String> enumConstNames) {
 		IVariableBinding[] fields= enumBindings.getDeclaredFields();
 		for (int i= 0; i < fields.length; i++) {
@@ -1816,6 +1818,7 @@ public class LocalCorrectionsSubProcessor {
 		return hasDefault;
 	}
 
+	@SuppressWarnings("deprecation")
 	public static void createMissingCaseProposals(IInvocationContext context, ASTNode parent, ArrayList<String> enumConstNames, Collection<ICommandAccess> proposals) {
 		List<Statement> statements;
 		Expression expression;
@@ -1971,6 +1974,7 @@ public class LocalCorrectionsSubProcessor {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	private static void createMissingDefaultProposal(IInvocationContext context, ASTNode parent, Image image, Collection<ICommandAccess> proposals) {
 		List<Statement> statements;
 		Expression expression;

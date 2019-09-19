@@ -20,7 +20,7 @@ import org.eclipse.jface.text.rules.IPartitionTokenScanner;
  * This IDocumentPartitioner Manager manages the creation of the IDocumentPartitioner 
  * and the corresponding IPartitionTokenScanner.
  * 
- * @since 3.19
+ * @since 3.20
  */
 public interface IJavaPartitionerManager {
 

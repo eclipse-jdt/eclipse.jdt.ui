@@ -8,6 +8,38 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="core refactoring/org/eclipse/jdt/internal/corext/refactoring/code/flow/FlowAnalyzer.java" type="org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowAnalyzer">
+        <filter comment="For Java 13 Enable Preview feature" id="640712815">
+            <message_arguments>
+                <message_argument value="SwitchExpression"/>
+                <message_argument value="FlowAnalyzer"/>
+                <message_argument value="getExpression()"/>
+            </message_arguments>
+        </filter>
+        <filter comment="For Java 13 Enable Preview feature" id="640712815">
+            <message_arguments>
+                <message_argument value="SwitchExpression"/>
+                <message_argument value="FlowAnalyzer"/>
+                <message_argument value="statements()"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="core refactoring/org/eclipse/jdt/internal/corext/refactoring/code/flow/InputFlowAnalyzer.java" type="org.eclipse.jdt.internal.corext.refactoring.code.flow.InputFlowAnalyzer">
+        <filter comment="For Java 13 Enable Preview feature" id="640712815">
+            <message_arguments>
+                <message_argument value="SwitchExpression"/>
+                <message_argument value="InputFlowAnalyzer"/>
+                <message_argument value="getExpression()"/>
+            </message_arguments>
+        </filter>
+        <filter comment="For Java 13 Enable Preview feature" id="640712815">
+            <message_arguments>
+                <message_argument value="SwitchExpression"/>
+                <message_argument value="InputFlowAnalyzer"/>
+                <message_argument value="statements()"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="core refactoring/org/eclipse/jdt/internal/corext/refactoring/scripting/JavaUIRefactoringContribution.java" type="org.eclipse.jdt.internal.corext.refactoring.scripting.JavaUIRefactoringContribution">
         <filter id="571473929">
             <message_arguments>
@@ -37,14 +69,6 @@
             <message_arguments>
                 <message_argument value="org.eclipse.jdt.internal.ui.refactoring.nls.ExternalizeWizardPage.createTableViewer(Composite)"/>
                 <message_argument value="TableViewer"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="ui/org/eclipse/jdt/internal/ui/CompatibilityTemplateStore.java" type="org.eclipse.jdt.internal.ui.CompatibilityTemplateStore">
-        <filter id="571473929">
-            <message_arguments>
-                <message_argument value="ContributionTemplateStore"/>
-                <message_argument value="CompatibilityTemplateStore"/>
             </message_arguments>
         </filter>
     </resource>
@@ -128,6 +152,112 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="ui/org/eclipse/jdt/internal/ui/text/correction/AdvancedQuickAssistProcessor.java" type="org.eclipse.jdt.internal.ui.text.correction.AdvancedQuickAssistProcessor">
+        <filter comment="For Java 13 Enable Preview feature" id="640712815">
+            <message_arguments>
+                <message_argument value="SwitchCase"/>
+                <message_argument value="AdvancedQuickAssistProcessor"/>
+                <message_argument value="expressions()"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="ui/org/eclipse/jdt/internal/ui/text/correction/LocalCorrectionsSubProcessor.java" type="org.eclipse.jdt.internal.ui.text.correction.LocalCorrectionsSubProcessor">
+        <filter comment="For Java 13 Enable Preview feature" id="623939596">
+            <message_arguments>
+                <message_argument value="SwitchExpression"/>
+                <message_argument value="LocalCorrectionsSubProcessor"/>
+                <message_argument value="EXPRESSION_PROPERTY"/>
+            </message_arguments>
+        </filter>
+        <filter comment="For Java 13 Enable Preview feature" id="623939596">
+            <message_arguments>
+                <message_argument value="SwitchExpression"/>
+                <message_argument value="LocalCorrectionsSubProcessor"/>
+                <message_argument value="STATEMENTS_PROPERTY"/>
+            </message_arguments>
+        </filter>
+        <filter comment="For Java 13 Enable Preview feature" id="640712815">
+            <message_arguments>
+                <message_argument value="SwitchCase"/>
+                <message_argument value="LocalCorrectionsSubProcessor"/>
+                <message_argument value="expressions()"/>
+            </message_arguments>
+        </filter>
+        <filter comment="For Java 13 Enable Preview feature" id="640712815">
+            <message_arguments>
+                <message_argument value="SwitchCase"/>
+                <message_argument value="LocalCorrectionsSubProcessor"/>
+                <message_argument value="isSwitchLabeledRule()"/>
+            </message_arguments>
+        </filter>
+        <filter comment="For Java 13 Enable Preview feature" id="640712815">
+            <message_arguments>
+                <message_argument value="SwitchCase"/>
+                <message_argument value="LocalCorrectionsSubProcessor"/>
+                <message_argument value="setSwitchLabeledRule(boolean)"/>
+            </message_arguments>
+        </filter>
+        <filter comment="For Java 13 Enable Preview feature" id="640712815">
+            <message_arguments>
+                <message_argument value="SwitchExpression"/>
+                <message_argument value="LocalCorrectionsSubProcessor"/>
+                <message_argument value="getExpression()"/>
+            </message_arguments>
+        </filter>
+        <filter comment="For Java 13 Enable Preview feature" id="640712815">
+            <message_arguments>
+                <message_argument value="SwitchExpression"/>
+                <message_argument value="LocalCorrectionsSubProcessor"/>
+                <message_argument value="statements()"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="ui/org/eclipse/jdt/internal/ui/text/correction/QuickAssistProcessor.java" type="org.eclipse.jdt.internal.ui.text.correction.QuickAssistProcessor">
+        <filter comment="For Java 13 Enable Preview feature" id="623939596">
+            <message_arguments>
+                <message_argument value="SwitchExpression"/>
+                <message_argument value="QuickAssistProcessor"/>
+                <message_argument value="STATEMENTS_PROPERTY"/>
+            </message_arguments>
+        </filter>
+        <filter comment="For Java 13 Enable Preview feature" id="640712815">
+            <message_arguments>
+                <message_argument value="SwitchCase"/>
+                <message_argument value="QuickAssistProcessor"/>
+                <message_argument value="expressions()"/>
+            </message_arguments>
+        </filter>
+        <filter comment="For Java 13 Enable Preview feature" id="640712815">
+            <message_arguments>
+                <message_argument value="SwitchCase"/>
+                <message_argument value="QuickAssistProcessor"/>
+                <message_argument value="isSwitchLabeledRule()"/>
+            </message_arguments>
+        </filter>
+        <filter comment="For Java 13 Enable Preview feature" id="640712815">
+            <message_arguments>
+                <message_argument value="SwitchCase"/>
+                <message_argument value="QuickAssistProcessor"/>
+                <message_argument value="setSwitchLabeledRule(boolean)"/>
+            </message_arguments>
+        </filter>
+        <filter comment="For Java 13 Enable Preview feature" id="640712815">
+            <message_arguments>
+                <message_argument value="SwitchExpression"/>
+                <message_argument value="QuickAssistProcessor"/>
+                <message_argument value="statements()"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="ui/org/eclipse/jdt/internal/ui/text/correction/UnresolvedElementsSubProcessor.java" type="org.eclipse.jdt.internal.ui.text.correction.UnresolvedElementsSubProcessor">
+        <filter comment="For Java 13 Enable Preview feature" id="640712815">
+            <message_arguments>
+                <message_argument value="SwitchExpression"/>
+                <message_argument value="UnresolvedElementsSubProcessor"/>
+                <message_argument value="getExpression()"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="ui/org/eclipse/jdt/internal/ui/util/ViewerPane.java" type="org.eclipse.jdt.internal.ui.util.ViewerPane">
         <filter id="571473929">
             <message_arguments>
@@ -149,6 +279,14 @@
             <message_arguments>
                 <message_argument value="TreeViewer"/>
                 <message_argument value="ProblemTreeViewer"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="ui/org/eclipse/jdt/ui/StandardJavaElementContentProvider.java" type="org.eclipse.jdt.ui.StandardJavaElementContentProvider">
+        <filter comment="For Java 13 Enable Preview feature" id="576725006">
+            <message_arguments>
+                <message_argument value="IWorkingCopyProvider"/>
+                <message_argument value="StandardJavaElementContentProvider"/>
             </message_arguments>
         </filter>
     </resource>

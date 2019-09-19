@@ -52,7 +52,7 @@ public interface IJavaPartitions {
 	
 	/**
 	 * The identifier multi-line (JEP 355: Text Block) String partition content type.
-	 * @since 3.19
+	 * @since 3.20
 	 */
 	String JAVA_MULTI_LINE_STRING= "__java_multiline_string"; //$NON-NLS-1$
 }

@@ -218,7 +218,7 @@ public class JavaTextTools {
 	 * used for Java text viewers
 	 *
 	 * @return a java partitioner manager
-	 * @since 3.19
+	 * @since 3.20
 	 */
 	public IJavaPartitionerManager getJavaPartitionerManager() {
 		return fJavaPartitionerManager;
