@@ -102,6 +102,7 @@ public class JavaProjectHelper {
 	public static final IPath RT_STUBS_9= new Path("testresources/rtstubs9.jar");
 	public static final IPath RT_STUBS_10= new Path("testresources/rtstubs10.jar");
 	public static final IPath RT_STUBS_12= new Path("testresources/rtstubs12.jar");
+	public static final IPath RT_STUBS13= new Path("testresources/rtstubs13.jar");
 	public static final IPath JUNIT_SRC_381= new Path("testresources/junit381-noUI-src.zip");
 	public static final String JUNIT_SRC_ENCODING= "ISO-8859-1";
 
@@ -227,7 +228,7 @@ public class JavaProjectHelper {
 	}
 	
 	/**
-	 * Sets the compiler options to 10 for the given project.
+	 * Sets the compiler options to 12 for the given project.
 	 * 
 	 * @param project the java project
 	 * @param enable_preview_feature sets enable-preview compliance project option based on the value specified.
@@ -236,6 +237,23 @@ public class JavaProjectHelper {
 	public static void set12CompilerOptions(IJavaProject project, boolean enable_preview_feature) {
 		Map<String, String> options= project.getOptions(false);
 		set12CompilerOptions(options);
+		if (enable_preview_feature) {
+			options.put(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES, JavaCore.ENABLED);
+			options.put(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
+		}		
+		project.setOptions(options);
+	}
+	
+	/**
+	 * Sets the compiler options to 13 for the given project.
+	 * 
+	 * @param project the java project
+	 * @param enable_preview_feature sets enable-preview compliance project option based on the value specified.
+	 * @since 3.19
+	 */
+	public static void set13CompilerOptions(IJavaProject project, boolean enable_preview_feature) {
+		Map<String, String> options= project.getOptions(false);
+		set13_CompilerOptions(options);
 		if (enable_preview_feature) {
 			options.put(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES, JavaCore.ENABLED);
 			options.put(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
@@ -321,6 +339,15 @@ public class JavaProjectHelper {
 	 */
 	public static void set12CompilerOptions(Map<String, String> options) {
 		JavaCore.setComplianceOptions(JavaCore.VERSION_12, options);
+	}
+	
+	/**
+	 * Sets the compiler options to 13.
+	 * 
+	 * @param options the compiler options to configure
+	 */
+	public static void set13_CompilerOptions(Map<String, String> options) {
+		JavaCore.setComplianceOptions(JavaCore.VERSION_13, options);
 	}
 
 	/**
@@ -833,6 +860,12 @@ public class JavaProjectHelper {
 	public static IPackageFragmentRoot addRTJar12(IJavaProject jproject, boolean enable_preview_feature) throws CoreException {
 		IPath[] rtJarPath= findRtJar(RT_STUBS_12);
 		set12CompilerOptions(jproject, enable_preview_feature);
+		return addLibrary(jproject, rtJarPath[0], rtJarPath[1], rtJarPath[2]);
+	}
+	
+	public static IPackageFragmentRoot addRTJar_13(IJavaProject jproject, boolean enable_preview_feature) throws CoreException {
+		IPath[] rtJarPath= findRtJar(RT_STUBS13);
+		set13CompilerOptions(jproject, enable_preview_feature);
 		return addLibrary(jproject, rtJarPath[0], rtJarPath[1], rtJarPath[2]);
 	}
 	

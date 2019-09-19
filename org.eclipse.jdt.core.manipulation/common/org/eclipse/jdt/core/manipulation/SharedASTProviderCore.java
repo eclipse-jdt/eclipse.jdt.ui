@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- *
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -33,7 +33,7 @@ import org.eclipse.jdt.core.manipulation.CoreASTProvider;
  * <p>Clients can make the following assumptions about the AST:</p>
  * <ul>
  *    <li>the AST has a {@link ITypeRoot} as source: {@link CompilationUnit#getTypeRoot()} is not null.</li>
- *    <li>the {@link AST#apiLevel() AST API level} is {@link AST#JLS12 API level 12} or higher</li>
+ *    <li>the {@link AST#apiLevel() AST API level} is {@link AST#JLS13 API level 13} or higher</li>
  *    <li>the AST has bindings resolved ({@link AST#hasResolvedBindings()})</li>
  *    <li>{@link AST#hasStatementsRecovery() statement} and {@link AST#hasBindingsRecovery() bindings}
  *           recovery are enabled

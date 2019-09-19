@@ -257,7 +257,7 @@ public class JUnit5TestFinder implements ITestFinder {
 			if (CoreTestSearchEngine.hasSuiteMethod(type)) { // since JUnit 4.3.1
 				return true;
 			}
-			ASTParser parser= ASTParser.newParser(AST.JLS12);
+			ASTParser parser= ASTParser.newParser(AST.JLS13);
 			if (type.getCompilationUnit() != null) {
 				parser.setSource(type.getCompilationUnit());
 			} else if (!isAvailable(type.getSourceRange())) { // class file with no source

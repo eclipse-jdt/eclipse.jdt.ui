@@ -140,6 +140,8 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	private static final String VERSION_10= JavaCore.VERSION_10;
 	private static final String VERSION_11= JavaCore.VERSION_11;
 	private static final String VERSION_12 = JavaCore.VERSION_12;
+	private static final String VERSION_13 = JavaCore.VERSION_13;
+	private static final String VERSION_LATEST = JavaCore.latestSupportedJavaVersion();
 	private static final String VERSION_JSR14= "jsr14"; //$NON-NLS-1$
 
 	private static final String ERROR= JavaCore.ERROR;
@@ -296,7 +298,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	private Composite createComplianceTabContent(Composite folder) {
 
 		final String[] complianceVersions= new String[] { VERSION_1_3, VERSION_1_4,
-				VERSION_1_5, VERSION_1_6, VERSION_1_7, VERSION_1_8, VERSION_9, VERSION_10, VERSION_11, VERSION_12 };
+				VERSION_1_5, VERSION_1_6, VERSION_1_7, VERSION_1_8, VERSION_9, VERSION_10, VERSION_11, VERSION_12, VERSION_13 };
 		final String[] complianceLabels= new String[] {
 			PreferencesMessages.ComplianceConfigurationBlock_version13,
 			PreferencesMessages.ComplianceConfigurationBlock_version14,
@@ -308,10 +310,11 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 			PreferencesMessages.ComplianceConfigurationBlock_version10,
 			PreferencesMessages.ComplianceConfigurationBlock_version_11,
 			PreferencesMessages.ComplianceConfigurationBlock_version_12,
+			PreferencesMessages.ComplianceConfigurationBlock_version_13,
 		};
 		
 		String[] targetVersions= new String[] { VERSION_CLDC_1_1, VERSION_1_1, VERSION_1_2, VERSION_1_3, VERSION_1_4,
-				VERSION_1_5, VERSION_1_6, VERSION_1_7, VERSION_1_8, VERSION_9, VERSION_10, VERSION_11, VERSION_12 };
+				VERSION_1_5, VERSION_1_6, VERSION_1_7, VERSION_1_8, VERSION_9, VERSION_10, VERSION_11, VERSION_12, VERSION_13 };
 		String[] targetLabels= new String[] {
 				PreferencesMessages.ComplianceConfigurationBlock_versionCLDC11,
 				PreferencesMessages.ComplianceConfigurationBlock_version11,
@@ -326,6 +329,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				PreferencesMessages.ComplianceConfigurationBlock_version10,
 				PreferencesMessages.ComplianceConfigurationBlock_version_11,
 				PreferencesMessages.ComplianceConfigurationBlock_version_12,
+				PreferencesMessages.ComplianceConfigurationBlock_version_13,
 		};
 		if (ComplianceConfigurationBlock.VERSION_JSR14.equals(getValue(PREF_CODEGEN_TARGET_PLATFORM))) {
 			targetVersions= append(targetVersions, ComplianceConfigurationBlock.VERSION_JSR14);
@@ -333,7 +337,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		}
 		
 		String[] sourceVersions= new String[] { VERSION_1_3, VERSION_1_4,
-				VERSION_1_5, VERSION_1_6, VERSION_1_7, VERSION_1_8, VERSION_9, VERSION_10, VERSION_11, VERSION_12 };
+				VERSION_1_5, VERSION_1_6, VERSION_1_7, VERSION_1_8, VERSION_9, VERSION_10, VERSION_11, VERSION_12, VERSION_13 };
 		String[] sourceLabels= new String[] {
 				PreferencesMessages.ComplianceConfigurationBlock_version13,
 				PreferencesMessages.ComplianceConfigurationBlock_version14,
@@ -345,6 +349,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				PreferencesMessages.ComplianceConfigurationBlock_version10,
 				PreferencesMessages.ComplianceConfigurationBlock_version_11,
 				PreferencesMessages.ComplianceConfigurationBlock_version_12,
+				PreferencesMessages.ComplianceConfigurationBlock_version_13,
 		};
 		
 		final ScrolledPageContent sc1 = new ScrolledPageContent(folder);
@@ -419,7 +424,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				PreferencesMessages.ComplianceConfigurationBlock_ignore
 		};
 
-		label= PreferencesMessages.ComplianceConfigurationBlock_enable_preview_label;
+		label= Messages.format(PreferencesMessages.ComplianceConfigurationBlock_enable_preview_label, new String[] { getVersionLabel(VERSION_LATEST) });
 		fEnablePreviewCheck= addCheckBox(group, label, PREF_ENABLE_PREVIEW, new String[] { ENABLED, DISABLED }, indent);
 		label= PreferencesMessages.ComplianceConfigurationBlock_enable_preview_severity_label;
 		fReportPreviewCombo= addComboBox(group, label, PREF_PB_REPORT_PREVIEW, warningInfoIgnore, warningInfoIgnoreLabels, indent * 2);
@@ -778,13 +783,13 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				}
 			}
 
-			//TODO: Remove once Java SE 11 has been shipped:
-			//String selectedCompliance= getValue(PREF_COMPLIANCE);
-			//if (VERSION_12.equals(selectedCompliance)) {
-				//fJRE50InfoText.setText(
-					//	"This is an implementation of an early-draft specification developed under the Java Community Process (JCP) and is made available for testing and evaluation purposes only. The code is not compatible with any specification of the JCP."); //$NON-NLS-1$
-				//isVisible= true;
-			//}
+			//TODO: Comment once Java SE 13 has been shipped:
+			/*String selectedCompliance= getValue(PREF_COMPLIANCE);
+			if (VERSION_13.equals(selectedCompliance)) {
+				fJRE50InfoText.setText(
+						"This is an implementation of an early-draft specification developed under the Java Community Process (JCP) and is made available for testing and evaluation purposes only. The code is not compatible with any specification of the JCP."); //$NON-NLS-1$
+				isVisible= true;
+			}*/
 			
 			fJRE50InfoText.setVisible(isVisible);
 			fJRE50InfoImage.setImage(isVisible ? image : null);
@@ -1005,15 +1010,15 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		if (checkValue(INTR_DEFAULT_COMPLIANCE, USER_CONF)) {
 			String compatibility= getValue(PREF_SOURCE_COMPATIBILITY);
 
-			boolean isLessThan11= JavaModelUtil.isVersionLessThan(compatibility, VERSION_11);
-			updateRememberedComplianceOption(PREF_ENABLE_PREVIEW, IDX_ENABLE_PREVIEW, !isLessThan11, null);
+			boolean isLessThanLatest= JavaModelUtil.isVersionLessThan(compatibility, VERSION_LATEST);
+			updateRememberedComplianceOption(PREF_ENABLE_PREVIEW, IDX_ENABLE_PREVIEW, !isLessThanLatest, null);
 			updateRememberedComplianceOption(PREF_PB_REPORT_PREVIEW, IDX_REPORT_PREVIEW, fEnablePreviewCheck.isEnabled() && fEnablePreviewCheck.getSelection(), WARNING);
 		}
 	}
 
 	private void updatePreviewControls() {
 		String compliance= getValue(PREF_COMPLIANCE);
-		if (JavaCore.compareJavaVersions(compliance, JavaCore.VERSION_10) <= 0) {
+		if (JavaCore.compareJavaVersions(compliance, VERSION_LATEST) < 0) {
 			fEnablePreviewCheck.setSelection(false);
 			fReportPreviewCombo.select(0);
 		}

@@ -121,7 +121,6 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTRequestor;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
@@ -129,15 +128,21 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SwitchExpression;
-import org.eclipse.jdt.core.dom.SwitchStatement;
+import org.eclipse.jdt.core.dom.YieldStatement;
 import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 import org.eclipse.jdt.ui.JavaUI;
 
 
 public class ASTView extends ViewPart implements IShowInSource, IShowInTargetList {
 	
-	static final int JLS_LATEST= AST.JLS12;
+	static final int JLS_LATEST= AST.JLS13;
 
+	private static final int JLS13= AST.JLS13;
+
+	/**
+	 * @deprecated to get rid of deprecation warnings in code
+	 */
+	@Deprecated
 	private static final int JLS12= AST.JLS12;
 	
 	/**
@@ -398,28 +403,25 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 		}
 	}
 
-	private static final class BreakStatementChecker extends ASTVisitor {
+	private static final class StatementChecker extends ASTVisitor {
 
 		@Override
-		public boolean visit(BreakStatement node) {
+		public boolean visit(YieldStatement node) {
 			try {
-				if (node != null && node.isImplicit() && isInSwitchExpressionOrStatement(node)) {
+				if (node != null && node.isImplicit() && isInSwitchExpression(node)) {
 					ASTNode parent= node.getParent();
 					List<Statement> statements= null;
 					if (parent instanceof Block) {
 						statements= ((Block) parent).statements();
 					} else if (parent instanceof SwitchExpression) {
 						statements= ((SwitchExpression) parent).statements();
-					} else if (parent instanceof SwitchStatement) {
-						statements= ((SwitchStatement) parent).statements();
 					}
 					if (statements == null) {
 						return true;
 					}
 					Expression exp= node.getExpression();
 					if (exp == null) {
-						statements.remove(node);
-						return false;
+						return true;
 					} else {
 						int index= statements.indexOf(node);
 						statements.remove(node);
@@ -437,11 +439,11 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 			return true;
 		}
 
-		private boolean isInSwitchExpressionOrStatement(BreakStatement node) {
+		private boolean isInSwitchExpression(YieldStatement node) {
 			boolean result= false;
 			ASTNode parent= node;
 			while (parent != null) {
-				if (parent instanceof SwitchStatement || parent instanceof SwitchExpression) {
+				if (parent instanceof SwitchExpression) {
 					result= true;
 					break;
 				}
@@ -537,6 +539,7 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 				case JLS10:
 				case JLS11:
 				case JLS12:
+				case JLS13:	
 					fCurrentASTLevel= level;
 			}
 		} catch (NumberFormatException e) {
@@ -718,7 +721,7 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 			endTime= System.currentTimeMillis();
 		}
 		if (root != null) {
-			root.accept(new BreakStatementChecker());	
+			root.accept(new StatementChecker());	
 			updateContentDescription(input, root, endTime - startTime);			
 		}
 		return root;
@@ -1168,6 +1171,7 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 				new ASTLevelToggle("AST Level 1&0 (10)", JLS10), //$NON-NLS-1$
 				new ASTLevelToggle("AST Level 1&1 (11)", JLS11), //$NON-NLS-1$
 				new ASTLevelToggle("AST Level 1&2 (12)", JLS12), //$NON-NLS-1$
+				new ASTLevelToggle("AST Level 1&3 (13)", JLS13), //$NON-NLS-1$
 		};
 		
 		fAddToTrayAction= new Action() {

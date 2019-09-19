@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- *
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -479,6 +479,16 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
 		endVisit((Expression)node);
 	}
 
+	@Override
+	public boolean visit(YieldStatement node) {
+		return visit((Statement)node);
+	}
+
+	@Override
+	public void endVisit(YieldStatement node) {
+		endVisit((Statement)node);
+	}
+
 	//---- Begin MethodReference Hierarchy ----------------------------------
 	public boolean visit(MethodReference node) {
 		return visit((Expression)node);
@@ -620,7 +630,7 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
 	public void endVisit(StringLiteral node) {
 		endVisit((Expression)node);
 	}
-
+	
 	@Override
 	public boolean visit(SuperFieldAccess node) {
 		return visit((Expression)node);
@@ -635,12 +645,22 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
 	public boolean visit(SuperMethodInvocation node) {
 		return visit((Expression)node);
 	}
+	
+	@Override
+	public boolean visit(TextBlock node) {
+		return visit((Expression)node);
+	}
 
 	@Override
 	public void endVisit(SuperMethodInvocation node) {
 		endVisit((Expression)node);
 	}
 
+	@Override
+	public void endVisit(TextBlock node) {
+		endVisit((Expression)node);
+	}
+	
 	@Override
 	public boolean visit(ThisExpression node) {
 		return visit((Expression)node);

@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -41,6 +41,7 @@ import org.eclipse.ui.progress.IProgressService;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -62,6 +63,7 @@ import org.eclipse.jdt.internal.ui.util.CoreUtility;
 
 public class PreviewFeaturesSubProcessor {
 	private static final String CONFIGURE_COMPILER_PROBLEM_SEVERITY_DIALOG_ID= "configure_compiler_settings_dialog_id"; //$NON-NLS-1$
+	private static final String ENABLED= "enabled"; //$NON-NLS-1$
 	
 	private static class EnablePreviewFeatureProposal extends ChangeCorrectionProposal implements IWorkspaceRunnable {
 		
@@ -127,14 +129,8 @@ public class PreviewFeaturesSubProcessor {
 
 	public static void getOpenCompliancePageToEnablePreviewFeaturesProposal(IInvocationContext context, Collection<ICommandAccess> proposals) {
 
-		IProject project= null;
 		IJavaProject javaProject= context.getCompilationUnit().getJavaProject();
-		if (javaProject != null) {
-			project= javaProject.getProject();
-		}
-		
-		Key[] keys= ComplianceConfigurationBlock.getKeys(javaProject != null);
-		boolean hasProjectSpecificOptions= OptionsConfigurationBlock.hasProjectSpecificOptions(project, keys, null);
+		boolean hasProjectSpecificOptions= hasProjectSpecificOptions(javaProject);
 		
 		String label= CorrectionMessages.PreviewFeaturesSubProcessor_open_compliance_page_enable_preview_features;
 		if (hasProjectSpecificOptions) {
@@ -210,9 +206,7 @@ public class PreviewFeaturesSubProcessor {
 	public static void getEnablePreviewFeaturesProposal(IInvocationContext context, Collection<ICommandAccess> proposals) {
 		IJavaProject javaProject= context.getCompilationUnit().getJavaProject();
 		if (javaProject != null) {
-			IProject project= javaProject.getProject();
-			Key[] keys= ComplianceConfigurationBlock.getKeys(true);
-			boolean changeOnWorkspace = !OptionsConfigurationBlock.hasProjectSpecificOptions(project, keys, null);
+			boolean changeOnWorkspace= !hasProjectSpecificOptions(javaProject);
 			String label= CorrectionMessages.PreviewFeaturesSubProcessor_enable_preview_features;
 			if (changeOnWorkspace) {
 				label= CorrectionMessages.PreviewFeaturesSubProcessor_enable_preview_features_workspace;
@@ -225,11 +219,42 @@ public class PreviewFeaturesSubProcessor {
 	public static void getNeedHigherComplianceProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		String[] args= problem.getProblemArguments();
 		if (args != null && args.length > 0) {
+			String supportedVersion= JavaCore.VERSION_13;
 			String arg= args[1];
-			if (arg == "12") { //$NON-NLS-1$
-				String version= JavaCore.VERSION_12;
-				ReorgCorrectionsSubProcessor.getNeedHigherComplianceProposals(context, problem, proposals, version);
+			if (arg.equals(supportedVersion)) {
+				ReorgCorrectionsSubProcessor.getNeedHigherComplianceProposals(context, problem, proposals, true, supportedVersion);
 			}
 		}
+	}
+
+	public static boolean hasProjectSpecificOptions(IJavaProject javaProject) {
+		boolean hasProjectSpecificOptions= false;
+		if (javaProject != null) {
+			IProject project= javaProject.getProject();
+			Key[] keys= ComplianceConfigurationBlock.getKeys(true);
+			hasProjectSpecificOptions= OptionsConfigurationBlock.hasProjectSpecificOptions(project, keys, null);
+		}
+		return hasProjectSpecificOptions;
+	}
+
+	public static boolean isPreviewFeatureEnabled(IJavaProject javaProject) {
+		boolean isPreviewFeatureEnabled= false;
+		if (javaProject != null && JavaModelUtil.is13OrHigher(javaProject)) {
+			IProject project= javaProject.getProject();
+			Key[] keys= ComplianceConfigurationBlock.getKeys(true);
+			boolean hasProjectSpecificOptions= OptionsConfigurationBlock.hasProjectSpecificOptions(project, keys, null);
+			if (hasProjectSpecificOptions) {
+				String option= javaProject.getOption(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES, true);
+				if (option != null && option.equals(ENABLED)) {
+					isPreviewFeatureEnabled= true;
+				}
+			} else {
+				String option= JavaCore.getOption(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES);
+				if (option != null && option.equals(ENABLED)) {
+					isPreviewFeatureEnabled= true;
+				}
+			}
+		}
+		return isPreviewFeatureEnabled;
 	}
 }

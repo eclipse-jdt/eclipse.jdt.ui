@@ -1,4 +1,5 @@
 # To force a version qualifier update, add the bug here
+Bug 549784: Comparator errors in Y20190801-0900
 Bug 545576: [12] Push Java 12 work to master
 Bug 509973 - Comparator errors in I20170105-0320
 Bug 539509 - Comparator errors in jdt.ui bundles in I20180926-0830

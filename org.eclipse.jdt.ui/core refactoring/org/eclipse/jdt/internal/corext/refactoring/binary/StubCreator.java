@@ -14,8 +14,10 @@
 package org.eclipse.jdt.internal.corext.refactoring.binary;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import org.eclipse.core.runtime.Assert;
@@ -111,10 +113,18 @@ public class StubCreator {
 	}
 
 	protected void appendFlags(final IMember member) throws JavaModelException {
-		if (member instanceof IAnnotatable)
-			for (IAnnotation annotation : ((IAnnotatable) member).getAnnotations()) {
-				appendAnnotation(annotation);
+		if (member instanceof IAnnotatable) {
+			IAnnotation[] annotations= ((IAnnotatable) member).getAnnotations();
+			Set<IAnnotation> annotationSet= new HashSet<>();
+			for (IAnnotation annotation : annotations) {
+				if (!annotationSet.contains(annotation)) {
+					appendAnnotation(annotation);
+					annotationSet.add(annotation);
+				}
 			}
+			annotationSet.clear();
+			annotationSet= null;
+		}
 		
 		int flags= member.getFlags();
 		final int kind= member.getElementType();

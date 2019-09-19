@@ -838,6 +838,10 @@ public class GenericVisitor extends ASTVisitor {
 		return visitNode(node);
 	}
 	@Override
+	public boolean visit(TextBlock node) {
+		return visitNode(node);
+	}
+	@Override
 	public boolean visit(UnionType node) {
 		return visitNode(node);
 	}
@@ -863,6 +867,10 @@ public class GenericVisitor extends ASTVisitor {
 	}
 	@Override
 	public boolean visit(WildcardType node) {
+		return visitNode(node);
+	}
+	@Override
+	public boolean visit(YieldStatement node) {
 		return visitNode(node);
 	}
 }

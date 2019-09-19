@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 IBM Corporation and others.
+ * Copyright (c) 2018, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- *
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Red Hat Inc. - copied and modified from SemanticHighlightings
@@ -164,6 +164,11 @@ public class SemanticHighlightingsCore {
 	 * A named preference part that controls the highlighting of 'var' keywords.
 	 */
 	public static final String VAR_KEYWORD= "varKeyword"; //$NON-NLS-1$
+
+	/**
+	 * A named preference part that controls the highlighting of 'yield' keywords.
+	 */
+	public static final String YIELD_KEYWORD= "yieldKeyword"; //$NON-NLS-1$
 
 	/**
 	 * Do not instantiate

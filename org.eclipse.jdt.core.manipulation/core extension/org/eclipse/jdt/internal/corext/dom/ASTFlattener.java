@@ -46,8 +46,6 @@ public class ASTFlattener extends GenericVisitor {
 	 */
 	@Deprecated
 	private static final int JLS9= AST.JLS9;
-	
-	private static final int JLS12= AST.JLS12;
 
 	/**
 	 * The string buffer into which the serialized representation of the AST is
@@ -366,22 +364,15 @@ public class ASTFlattener extends GenericVisitor {
 		return false;
 	}
 
+	/*
+	 * @see ASTVisitor#visit(BreakStatement)
+	 */
 	@Override
 	public boolean visit(BreakStatement node) {
-		int apiLevel= node.getAST().apiLevel();
-		if (apiLevel == JLS12 && node.getAST().isPreviewEnabled() && node.isImplicit()  && node.getExpression() == null) {
-			return false;
-		}
 		this.fBuffer.append("break");//$NON-NLS-1$
 		if (node.getLabel() != null) {
 			this.fBuffer.append(" ");//$NON-NLS-1$
 			node.getLabel().accept(this);
-		}
-		if (apiLevel == JLS12 && node.getAST().isPreviewEnabled()) {
-			if (node.getExpression() != null) {
-				this.fBuffer.append(" ");//$NON-NLS-1$
-				node.getExpression().accept(this);
-			}
 		}
 		this.fBuffer.append(";");//$NON-NLS-1$
 		return false;
@@ -1439,6 +1430,15 @@ public class ASTFlattener extends GenericVisitor {
 	}
 
 	/*
+	 * @see ASTVisitor#visit(StringLiteral)
+	 */
+	@Override
+	public boolean visit(TextBlock node) {
+		this.fBuffer.append(node.getEscapedValue());
+		return false;
+	}
+
+	/*
 	 * @see ASTVisitor#visit(SuperConstructorInvocation)
 	 */
 	@Override
@@ -1539,7 +1539,7 @@ public class ASTFlattener extends GenericVisitor {
 
 	@Override
 	public boolean visit(SwitchCase node) {
-		if (node.getAST().apiLevel() >= JLS12) {
+		if (node.getAST().isPreviewEnabled()) {
 			if (node.isDefault()) {
 				this.fBuffer.append("default");//$NON-NLS-1$
 				this.fBuffer.append(node.isSwitchLabeledRule() ? " ->" : ":");//$NON-NLS-1$ //$NON-NLS-2$
@@ -1561,6 +1561,20 @@ public class ASTFlattener extends GenericVisitor {
 				this.fBuffer.append(":\n");//$NON-NLS-1$
 			}
 		}
+		return false;
+	}
+
+	@Override
+	public boolean visit(YieldStatement node) {
+		if (node.getAST().isPreviewEnabled() && node.isImplicit() && node.getExpression() == null) {
+			return false;
+		}
+		this.fBuffer.append("yield"); //$NON-NLS-1$
+		if (node.getExpression() != null) {
+			this.fBuffer.append(" ");//$NON-NLS-1$
+			node.getExpression().accept(this);
+		}
+		this.fBuffer.append(";");//$NON-NLS-1$
 		return false;
 	}
 

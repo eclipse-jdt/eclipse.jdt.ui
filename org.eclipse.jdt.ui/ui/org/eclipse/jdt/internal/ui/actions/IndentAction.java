@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -54,6 +54,10 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+import org.eclipse.jdt.core.formatter.IndentManipulation;
+
+import org.eclipse.jdt.internal.core.manipulation.util.Strings;
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 
@@ -117,6 +121,10 @@ public class IndentAction extends TextEditorAction {
 	 * differently to accommodate normal TAB operation.
 	 */
 	private final boolean fIsTabAction;
+
+	public static String TEXT_BLOCK_STR= "\"\"\""; //$NON-NLS-1$
+	public static String SPACE_STR= " "; //$NON-NLS-1$
+	public static String EMPTY_STR= ""; //$NON-NLS-1$
 
 	/**
 	 * Creates a new instance.
@@ -345,6 +353,43 @@ public class IndentAction extends TextEditorAction {
 					removeIndentations(slashes, getTabSize(project), computed);
 					indent= document.get(offset, wsStart - offset) + computed;
 				}
+			} else if (IJavaPartitions.JAVA_MULTI_LINE_STRING.equals(type)) {
+				String fullStrNoTrim= document.get(currentLine.getOffset(), currentLine.getLength());
+				String fullStr= document.get(currentLine.getOffset(), currentLine.getLength()).trim();
+				int length= IndentManipulation.measureIndentInSpaces(fullStrNoTrim, CodeFormatterUtil.getTabWidth(project));
+				int partitionOffset= partition.getOffset();
+				IRegion PartitionStartline= document.getLineInformationOfOffset(partitionOffset);
+				String PartitionStartStrNoTrim= document.get(PartitionStartline.getOffset(), PartitionStartline.getLength());
+				int startIndex= PartitionStartStrNoTrim.lastIndexOf(TEXT_BLOCK_STR);
+				if (!fullStrNoTrim.equals(PartitionStartStrNoTrim) && startIndex != -1) {
+					int partitionStartLength= measureLengthInSpaces(PartitionStartStrNoTrim.substring(0, startIndex), CodeFormatterUtil.getTabWidth(project));
+					boolean calculateIndent= false;
+					String str= EMPTY_STR;
+					int strLength= 0;
+					if (partitionStartLength > length) {
+						calculateIndent= true;
+						strLength= length;
+					} else if (fullStr.startsWith(TEXT_BLOCK_STR) && partitionStartLength != length) {
+						calculateIndent= true;
+						strLength= partitionStartLength;
+					} else {
+						indent= getLineIndentation(document, currentLine.getOffset());
+					}
+					if (calculateIndent) {
+						for (int i= 0; i < strLength; i++) {
+							str+= SPACE_STR;
+						}
+						int units= Strings.computeIndentUnits(str, project);
+						String newStr= CodeFormatterUtil.createIndentString(units, project);
+						int newLength= IndentManipulation.measureIndentInSpaces(newStr, CodeFormatterUtil.getTabWidth(project));
+						if (newLength < partitionStartLength) {
+							for (int i= newLength; i < partitionStartLength; i++) {
+								newStr+= SPACE_STR;
+							}
+						}
+						indent= newStr;
+					}
+				}
 			}
 		}
 
@@ -369,6 +414,56 @@ public class IndentAction extends TextEditorAction {
 		}
 
 		return new ReplaceData(offset, end, indent);
+	}
+
+	private static String getLineIndentation(IDocument document, int offset) throws BadLocationException {
+		// find start of line
+		int adjustedOffset= (offset == document.getLength() ? offset - 1 : offset);
+		IRegion line= document.getLineInformationOfOffset(adjustedOffset);
+		int start= line.getOffset();
+
+		// find white spaces
+		int end= findEndOfWhiteSpace(document, start, offset + line.getLength());
+
+		return document.get(start, end - start);
+	}
+
+	private static int findEndOfWhiteSpace(IDocument document, int offset, int end) throws BadLocationException {
+		while (offset < end) {
+			char c= document.getChar(offset);
+			if (c != ' ' && c != '\t') {
+				return offset;
+			}
+			offset++;
+		}
+		return end;
+	}
+
+	public static int measureLengthInSpaces(CharSequence line, int tabWidth) {
+		if (tabWidth < 0 || line == null) {
+			throw new IllegalArgumentException();
+		}
+
+		int length= 0;
+		int max= line.length();
+		for (int i= 0; i < max; i++) {
+			char ch= line.charAt(i);
+			if (ch == '\t') {
+				length= calculateSpaceEquivalents(tabWidth, length);
+			} else {
+				length++;
+			}
+		}
+		return length;
+	}
+
+	private static int calculateSpaceEquivalents(int tabWidth, int spaceEquivalents) {
+		if (tabWidth == 0) {
+			return spaceEquivalents;
+		}
+		int remainder= spaceEquivalents % tabWidth;
+		spaceEquivalents+= tabWidth - remainder;
+		return spaceEquivalents;
 	}
 
 	/**

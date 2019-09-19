@@ -396,7 +396,7 @@ public class ASTNodes {
 	public static boolean isLiteral(Expression expression) {
 		int type= expression.getNodeType();
 		return type == ASTNode.BOOLEAN_LITERAL || type == ASTNode.CHARACTER_LITERAL || type == ASTNode.NULL_LITERAL ||
-			type == ASTNode.NUMBER_LITERAL || type == ASTNode.STRING_LITERAL || type == ASTNode.TYPE_LITERAL;
+			type == ASTNode.NUMBER_LITERAL || type == ASTNode.STRING_LITERAL || type == ASTNode.TYPE_LITERAL || type == ASTNode.TEXT_BLOCK;
 	}
 
 	public static boolean isLabel(SimpleName name) {

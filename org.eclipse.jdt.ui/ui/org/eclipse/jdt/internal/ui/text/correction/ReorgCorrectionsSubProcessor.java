@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- *
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Matt Chapman, mpchapman@gmail.com - 89977 Make JDT .java agnostic
@@ -379,17 +379,23 @@ public class ReorgCorrectionsSubProcessor {
 		private final IJavaProject fProject;
 		private final boolean fChangeOnWorkspace;
 		private final String fRequiredVersion;
+		private final boolean fEnablePreviews;
 
 		private Job fUpdateJob;
 		private boolean fRequiredJREFound;
 
 		public ChangeToRequiredCompilerCompliance(String name, IJavaProject project, boolean changeOnWorkspace, String requiredVersion, int relevance) {
+			this(name, project, changeOnWorkspace, requiredVersion, false, relevance);
+		}
+
+		public ChangeToRequiredCompilerCompliance(String name, IJavaProject project, boolean changeOnWorkspace, String requiredVersion, boolean enablePreviews, int relevance) {
 			super(name, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
 			fProject= project;
 			fChangeOnWorkspace= changeOnWorkspace;
 			fRequiredVersion= requiredVersion;
 			fUpdateJob= null;
 			fRequiredJREFound= false;
+			fEnablePreviews= enablePreviews;
 		}
 
 		private boolean isRequiredOrGreaterVMInstall(IVMInstall install) {
@@ -482,6 +488,13 @@ public class ReorgCorrectionsSubProcessor {
 			} catch (CoreException e) {
 				// ignore
 			}
+			if (fEnablePreviews) {
+				if (fChangeOnWorkspace) {
+					message.append(CorrectionMessages.PreviewFeaturesSubProcessor_enable_preview_features_workspace_info);
+				} else {
+					message.append(CorrectionMessages.PreviewFeaturesSubProcessor_enable_preview_features_info);
+				}
+			}
 			return message.toString();
 		}
 
@@ -500,6 +513,9 @@ public class ReorgCorrectionsSubProcessor {
 			if (fChangeOnWorkspace) {
 				Hashtable<String, String> map= JavaCore.getOptions();
 				JavaModelUtil.setComplianceOptions(map, fRequiredVersion);
+				if (fEnablePreviews) {
+					map.put(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES, JavaCore.ENABLED);
+				}
 				JavaCore.setOptions(map);
 			} else {
 				Map<String, String> map= fProject.getOptions(false);
@@ -508,6 +524,9 @@ public class ReorgCorrectionsSubProcessor {
 				if (map.size() > optionsCount) {
 					// options have been added -> ensure that all compliance options from preference page set
 					JavaModelUtil.setDefaultClassfileOptions(map, fRequiredVersion);
+				}
+				if (fEnablePreviews) {
+					map.put(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES, JavaCore.ENABLED);
 				}
 				fProject.setOptions(map);
 			}
@@ -540,14 +559,36 @@ public class ReorgCorrectionsSubProcessor {
 	 * @param requiredVersion the minimal required Java compiler version
 	 */
 	public static void getNeedHigherComplianceProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals, String requiredVersion) {
-		IJavaProject project= context.getCompilationUnit().getJavaProject();
+		getNeedHigherComplianceProposals(context, problem, proposals, false, requiredVersion);
+	}
 
+	/**
+	 * Adds a proposal to increase the compiler compliance level as well as set --enable-previews
+	 * option.
+	 * 
+	 * @param context the context
+	 * @param problem the current problem
+	 * @param proposals the resulting proposals
+	 * @param enablePreviews --enable-previews option will be enabled if set to true
+	 * @param requiredVersion the minimal required Java compiler version
+	 */
+	static void getNeedHigherComplianceProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals, boolean enablePreviews, String requiredVersion) {
+		IJavaProject project= context.getCompilationUnit().getJavaProject();
 		String label1= Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_change_project_compliance_description, requiredVersion);
-		proposals.add(new ChangeToRequiredCompilerCompliance(label1, project, false, requiredVersion, IProposalRelevance.CHANGE_PROJECT_COMPLIANCE));
+		if (enablePreviews) {
+			label1= Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_combine_two_quickfixes, new String[] {label1, CorrectionMessages.PreviewFeaturesSubProcessor_enable_preview_features});
+			proposals.add(new ChangeToRequiredCompilerCompliance(label1, project, false, requiredVersion, enablePreviews, IProposalRelevance.CHANGE_PROJECT_COMPLIANCE));
+		} else {
+			proposals.add(new ChangeToRequiredCompilerCompliance(label1, project, false, requiredVersion, IProposalRelevance.CHANGE_PROJECT_COMPLIANCE));
+		}
+		
 
 		if (project.getOption(JavaCore.COMPILER_COMPLIANCE, false) == null) {
 			String label2= Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_change_workspace_compliance_description, requiredVersion);
-			proposals.add(new ChangeToRequiredCompilerCompliance(label2, project, true, requiredVersion, IProposalRelevance.CHANGE_WORKSPACE_COMPLIANCE));
+			if (enablePreviews) {
+				label2= Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_combine_two_quickfixes, new String[] {label2, CorrectionMessages.PreviewFeaturesSubProcessor_enable_preview_features_workspace});
+			}
+			proposals.add(new ChangeToRequiredCompilerCompliance(label2, project, true, requiredVersion, enablePreviews, IProposalRelevance.CHANGE_WORKSPACE_COMPLIANCE));
 		}
 	}
 

@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- *
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -23,7 +23,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnnotatableType;
-import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ContinueStatement;
@@ -62,6 +61,7 @@ import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeMethodReference;
 import org.eclipse.jdt.core.dom.UsesDirective;
+import org.eclipse.jdt.core.dom.YieldStatement;
 
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
@@ -304,9 +304,8 @@ public class ImportReferencesCollector extends GenericVisitor {
 	}
 	
 	@Override
-	public boolean visit(BreakStatement node) {
-		AST ast= node.getAST();
-		if (ast.apiLevel() >= AST.JLS12 && ast.isPreviewEnabled()) {
+	public boolean visit(YieldStatement node) {
+		if (node.getAST().isPreviewEnabled()) {
 			evalQualifyingExpression(node.getExpression(), null);			
 		}
 		return false;

@@ -66,6 +66,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.text.FastJavaPartitionScanner;
+import org.eclipse.jdt.internal.ui.text.FastJavaPartitioner;
 import org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner;
 import org.eclipse.jdt.internal.ui.text.JavaIndenter;
 import org.eclipse.jdt.internal.ui.text.Symbols;
@@ -628,16 +629,17 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 	 *
 	 * @param document the document
 	 */
-	private static void installJavaStuff(Document document) {
+	private void installJavaStuff(Document document) {
 		String[] types= new String[] {
 									  IJavaPartitions.JAVA_DOC,
 									  IJavaPartitions.JAVA_MULTI_LINE_COMMENT,
 									  IJavaPartitions.JAVA_SINGLE_LINE_COMMENT,
 									  IJavaPartitions.JAVA_STRING,
 									  IJavaPartitions.JAVA_CHARACTER,
+									  IJavaPartitions.JAVA_MULTI_LINE_STRING,
 									  IDocument.DEFAULT_CONTENT_TYPE
 		};
-		FastPartitioner partitioner= new FastPartitioner(new FastJavaPartitionScanner(), types);
+		FastPartitioner partitioner= new FastJavaPartitioner(new FastJavaPartitionScanner(fProject), types);
 		partitioner.connect(document);
 		document.setDocumentPartitioner(IJavaPartitions.JAVA_PARTITIONING, partitioner);
 	}

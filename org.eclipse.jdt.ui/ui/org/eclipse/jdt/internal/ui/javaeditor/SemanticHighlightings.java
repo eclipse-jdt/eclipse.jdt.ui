@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -206,6 +206,11 @@ public class SemanticHighlightings {
 	 * A named preference part that controls the highlighting of 'var' keywords.
 	 */
 	public static final String VAR_KEYWORD= SemanticHighlightingsCore.VAR_KEYWORD;
+
+	/**
+	 * A named preference part that controls the highlighting of 'yield' keywords.
+	 */
+	public static final String YIELD_KEYWORD= SemanticHighlightingsCore.YIELD_KEYWORD;
 
 	/**
 	 * Semantic highlightings
@@ -1968,6 +1973,47 @@ public class SemanticHighlightings {
 	}
 
 	/**
+	 * Semantic highlighting for 'yield' keyword.
+	 */
+	static final class YieldKeywordHighlighting extends SemanticHighlighting {
+
+		@Override
+		public String getPreferenceKey() {
+			return YIELD_KEYWORD;
+		}
+
+		@Override
+		public RGB getDefaultDefaultTextColor() {
+			return new RGB(127, 0, 85);
+		}
+
+		@Override
+		public boolean isBoldByDefault() {
+			return true;
+		}
+
+		@Override
+		public boolean isItalicByDefault() {
+			return false;
+		}
+
+		@Override
+		public boolean isEnabledByDefault() {
+			return true;
+		}
+
+		@Override
+		public String getDisplayName() {
+			return PreferencesMessages.JavaEditorPreferencePage_yieldKeyword;
+		}
+
+		@Override
+		public boolean consumes(SemanticToken token) {
+			return false;
+		}
+	}
+
+	/**
 	 * A named preference that controls the given semantic highlighting's color.
 	 *
 	 * @param semanticHighlighting the semantic highlighting
@@ -2059,6 +2105,7 @@ public class SemanticHighlightings {
 				new InterfaceHighlighting(),
 				new NumberHighlighting(),
 				new VarKeywordHighlighting(),
+				new YieldKeywordHighlighting(),
 			};
 		return fgSemanticHighlightings;
 	}

@@ -100,6 +100,8 @@ public final class CreateStubsAction implements IObjectActionDelegate {
 			//9:
 			"java.lang.module",
 			"java.nio.file.spi",
+			//13:
+			"java.lang.constant"
 	};
 
 	private static final String SETTINGS_ID_STUBS_PROJECT= "stubsProject";

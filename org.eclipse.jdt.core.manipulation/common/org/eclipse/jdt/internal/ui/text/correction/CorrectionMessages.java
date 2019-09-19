@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Benjamin Muskalla <b.muskalla@gmx.net> - [quick fix] Quick fix for missing synchronized modifier - https://bugs.eclipse.org/bugs/show_bug.cgi?id=245250
@@ -395,6 +395,7 @@ public final class CorrectionMessages extends NLS {
 	public static String ReorgCorrectionsSubProcessor_50_compliance_changeProjectJREToDefault_description;
 	public static String ReorgCorrectionsSubProcessor_50_compliance_changeWorkspaceJRE_description;
 	public static String ReorgCorrectionsSubProcessor_50_compliance_changeProjectJRE_description;
+	public static String ReorgCorrectionsSubProcessor_combine_two_quickfixes;
 	public static String ModifierCorrectionSubProcessor_default_visibility_label;
 	public static String UnresolvedElementsSubProcessor_change_to_static_import_description;
 	public static String ReorgCorrectionsSubProcessor_configure_buildpath_label;

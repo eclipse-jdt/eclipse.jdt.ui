@@ -36,6 +36,10 @@
   <profiles>
     <profile>
       <id>build-individual-bundles</id>
+      <properties>
+      	<eclipse-p2-repo.url>http://download.eclipse.org/eclipse/updates/4.13-Y-builds</eclipse-p2-repo.url>
+      	<skipAPIAnalysis>true</skipAPIAnalysis>
+ 	  </properties>
       <repositories>
         <repository>
           <releases>
@@ -48,6 +52,26 @@
           <url>https://repo.eclipse.org/content/repositories/eclipse/</url>
         </repository>
       </repositories>
+      <build>
+      <plugins>
+      <plugin>
+       <groupId>org.eclipse.tycho.extras</groupId>
+       <artifactId>tycho-p2-extras-plugin</artifactId>
+       <version>${tycho.version}</version>
+       <executions>
+         <execution> <!-- Checks versions are properly bumped from one stream to the other -->
+           <id>compare-attached-artifacts-with-release</id>
+           <goals>
+             <goal>compare-version-with-baselines</goal>
+           </goals>
+           <configuration>
+             <skip>true</skip>
+           </configuration>
+         </execution>
+       </executions>
+     </plugin>
+    </plugins>
+    </build>
     </profile>
   </profiles>
 
