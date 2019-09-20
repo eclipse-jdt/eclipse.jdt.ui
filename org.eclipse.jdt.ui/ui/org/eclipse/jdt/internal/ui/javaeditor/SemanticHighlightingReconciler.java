@@ -147,7 +147,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 		@Override
 		public boolean visit(YieldStatement node) {
 			AST ast= node.getAST();
-			if (ast.apiLevel() == AST.JLS13 && ast.isPreviewEnabled()) {
+			if (ast.isPreviewEnabled() && !node.isImplicit()) {
 				int offset= node.getStartPosition();
 				int length= 5; // length of 'yield'
 				if (offset > -1 && length > 0) {
