@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -885,6 +885,18 @@ public class CleanUpConstants {
 	 * @since 4.13
 	 */
 	public static final String USE_UNBOXING= "cleanup.use_unboxing"; //$NON-NLS-1$
+
+	/**
+	 * Push down negation.<br>
+	 * <br>
+	 * Possible values: {TRUE, FALSE}<br>
+	 * <br>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.13
+	 */
+	public static final String PUSH_DOWN_NEGATION= "cleanup.push_down_negation"; //$NON-NLS-1$
 
 
 	/**

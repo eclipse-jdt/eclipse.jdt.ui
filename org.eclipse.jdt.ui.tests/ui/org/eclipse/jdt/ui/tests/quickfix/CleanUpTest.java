@@ -4300,7 +4300,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-		
+
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 
@@ -5526,6 +5526,456 @@ public class CleanUpTest extends CleanUpTestCase {
 		} finally {
 			JavaProjectHelper.set15CompilerOptions(fJProject1);
 		}
+	}
+
+	public void testPushDownNegationReplaceDoubleNegation() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public void replaceDoubleNegation(boolean b) {\n" //
+				+ "        boolean b1 = !!b;\n" //
+				+ "        boolean b2 = !Boolean.TRUE;\n" //
+				+ "        boolean b3 = !Boolean.FALSE;\n" //
+				+ "        boolean b4 = !true;\n" //
+				+ "        boolean b5 = !false;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.PUSH_DOWN_NEGATION);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public void replaceDoubleNegation(boolean b) {\n" //
+				+ "        boolean b1 = b;\n" //
+				+ "        boolean b2 = false;\n" //
+				+ "        boolean b3 = true;\n" //
+				+ "        boolean b4 = false;\n" //
+				+ "        boolean b5 = true;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+	}
+
+	public void testPushDownNegationReplaceDoubleNegationWithParentheses() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean replaceDoubleNegationWithParentheses(boolean b) {\n" //
+				+ "        return !(!(b /* another refactoring removes the parentheses */));\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.PUSH_DOWN_NEGATION);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean replaceDoubleNegationWithParentheses(boolean b) {\n" //
+				+ "        return (b /* another refactoring removes the parentheses */);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+	}
+
+	public void testPushDownNegationReplaceNegationWithInfixAndOperator() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean replaceNegationWithInfixAndOperator(boolean b1, boolean b2, boolean b3) {\n" //
+				+ "        return !(b1 && b2 && b3); // another refactoring removes the parentheses\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.PUSH_DOWN_NEGATION);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean replaceNegationWithInfixAndOperator(boolean b1, boolean b2, boolean b3) {\n" //
+				+ "        return (!b1 || !b2 || !b3); // another refactoring removes the parentheses\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+	}
+
+	public void testPushDownNegationReplaceNegationWithInfixOrOperator() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean replaceNegationWithInfixOrOperator(boolean b1, boolean b2, boolean b3) {\n" //
+				+ "        return !(b1 || b2 || b3); // another refactoring removes the parentheses\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.PUSH_DOWN_NEGATION);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean replaceNegationWithInfixOrOperator(boolean b1, boolean b2, boolean b3) {\n" //
+				+ "        return (!b1 && !b2 && !b3); // another refactoring removes the parentheses\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+	}
+
+	public void testPushDownNegationReplaceNegationWithEqualOperator() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean replaceNegationWithEqualOperator(boolean b1, boolean b2) {\n" //
+				+ "        return !(b1 == b2); // another refactoring removes the parentheses\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.PUSH_DOWN_NEGATION);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean replaceNegationWithEqualOperator(boolean b1, boolean b2) {\n" //
+				+ "        return (b1 != b2); // another refactoring removes the parentheses\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+	}
+
+	public void testPushDownNegationReplaceNegationWithNotEqualOperator() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean replaceNegationWithNotEqualOperator(boolean b1, boolean b2) {\n" //
+				+ "        return !(b1 != b2); // another refactoring removes the parentheses\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.PUSH_DOWN_NEGATION);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean replaceNegationWithNotEqualOperator(boolean b1, boolean b2) {\n" //
+				+ "        return (b1 == b2); // another refactoring removes the parentheses\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+	}
+
+	public void testPushDownNegationReplaceNegationRevertInnerExpressions() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean replaceNegationRevertInnerExpressions(boolean b1, boolean b2) {\n" //
+				+ "        return !(!b1 && !b2 /* another refactoring removes the parentheses */);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.PUSH_DOWN_NEGATION);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean replaceNegationRevertInnerExpressions(boolean b1, boolean b2) {\n" //
+				+ "        return (b1 || b2 /* another refactoring removes the parentheses */);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+	}
+
+	public void testPushDownNegationReplaceNegationLeaveParentheses() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean replaceNegationLeaveParentheses(boolean b1, boolean b2) {\n" //
+				+ "        return !(!(b1 && b2 /* another refactoring removes the parentheses */));\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.PUSH_DOWN_NEGATION);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean replaceNegationLeaveParentheses(boolean b1, boolean b2) {\n" //
+				+ "        return (b1 && b2 /* another refactoring removes the parentheses */);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+	}
+
+	public void testPushDownNegationReplaceNegationRemoveParentheses() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean replaceNegationRemoveParentheses(boolean b1, boolean b2) {\n" //
+				+ "        return !((!b1) && (!b2));\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.PUSH_DOWN_NEGATION);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean replaceNegationRemoveParentheses(boolean b1, boolean b2) {\n" //
+				+ "        return (b1 || b2);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+	}
+
+	public void testPushDownNegationReplaceNegateNonBooleanExprs() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean replaceNegateNonBooleanExprs(Object o) {\n" //
+				+ "        return !(o != null /* another refactoring removes the parentheses */);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.PUSH_DOWN_NEGATION);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean replaceNegateNonBooleanExprs(Object o) {\n" //
+				+ "        return (o == null /* another refactoring removes the parentheses */);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+	}
+
+	public void testPushDownNegationReplaceNegateNonBooleanPrimitiveExprs() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean replaceNegateNonBooleanPrimitiveExprs(Boolean b) {\n" //
+				+ "        return !(b != null /* another refactoring removes the parentheses */);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.PUSH_DOWN_NEGATION);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean replaceNegateNonBooleanPrimitiveExprs(Boolean b) {\n" //
+				+ "        return (b == null /* another refactoring removes the parentheses */);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+	}
+
+	public void testPushDownNegationReplaceNegationAndLessOperator() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean replaceNegationAndLessOperator(int i1, int i2) {\n" //
+				+ "        return !(i1 < i2 /* another refactoring removes the parentheses */);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.PUSH_DOWN_NEGATION);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean replaceNegationAndLessOperator(int i1, int i2) {\n" //
+				+ "        return (i1 >= i2 /* another refactoring removes the parentheses */);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+	}
+
+	public void testPushDownNegationReplaceNegationAndLessEqualOperator() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean replaceNegationAndLessEqualOperator(int i1, int i2) {\n" //
+				+ "        return !(i1 <= i2 /* another refactoring removes the parentheses */);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.PUSH_DOWN_NEGATION);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean replaceNegationAndLessEqualOperator(int i1, int i2) {\n" //
+				+ "        return (i1 > i2 /* another refactoring removes the parentheses */);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+	}
+
+	public void testPushDownNegationReplaceNegationAndGreaterOperator() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean replaceNegationAndGreaterOperator(int i1, int i2) {\n" //
+				+ "        return !(i1 > i2 /* another refactoring removes the parentheses */);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.PUSH_DOWN_NEGATION);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean replaceNegationAndGreaterOperator(int i1, int i2) {\n" //
+				+ "        return (i1 <= i2 /* another refactoring removes the parentheses */);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+	}
+
+	public void testPushDownNegationReplaceNegationAndGreaterEqualOperator() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean replaceNegationAndGreaterEqualOperator(int i1, int i2) {\n" //
+				+ "        return !(i1 >= i2 /* another refactoring removes the parentheses */);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.PUSH_DOWN_NEGATION);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean replaceNegationAndGreaterEqualOperator(int i1, int i2) {\n" //
+				+ "        return (i1 < i2 /* another refactoring removes the parentheses */);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+	}
+
+	public void testPushDownNegationReplaceNegationAndEqualOperator() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean replaceNegationAndEqualOperator(int i1, int i2) {\n" //
+				+ "        return !(i1 == i2 /* another refactoring removes the parentheses */);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.PUSH_DOWN_NEGATION);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean replaceNegationAndEqualOperator(int i1, int i2) {\n" //
+				+ "        return (i1 != i2 /* another refactoring removes the parentheses */);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+	}
+
+	public void testPushDownNegationReplaceNegationAndNotEqualOperator() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean replaceNegationAndNotEqualOperator(int i1, int i2) {\n" //
+				+ "        return !(i1 != i2 /* another refactoring removes the parentheses */);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.PUSH_DOWN_NEGATION);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean replaceNegationAndNotEqualOperator(int i1, int i2) {\n" //
+				+ "        return (i1 == i2 /* another refactoring removes the parentheses */);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
 	}
 
 	public void testSerialVersionBug139381() throws Exception {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -67,7 +67,7 @@ public class CleanUpMessages extends NLS {
 	public static String CodeStyleTabPage_RadioName_NeverUseBlocks;
 	public static String CodeStyleTabPage_RadioName_NeverUseParantheses;
 	public static String CodeStyleTabPage_RadioName_UseBlocksSpecial;
-	
+
 	public static String CodeStyleTabPage_GroupName_FunctionalInterfaces;
 	public static String CodeStyleTabPage_CheckboxName_ConvertFunctionalInterfaces;
 	public static String CodeStyleTabPage_RadioName_UseLambdaWherePossible;
@@ -109,6 +109,7 @@ public class CleanUpMessages extends NLS {
 	public static String UnnecessaryCodeTabPage_CheckboxName_RedundantTypeArguments;
 	public static String UnnecessaryCodeTabPage_CheckboxName_Autoboxing;
 	public static String UnnecessaryCodeTabPage_CheckboxName_Unboxing;
+	public static String UnnecessaryCodeTabPage_CheckboxName_PushDownNegation;
 	public static String UnnecessaryCodeTabPage_CheckboxName_RedundantModifiers;
 	public static String UnnecessaryCodeTabPage_CheckboxName_RedundantModifiers_description;
 	public static String UnnecessaryCodeTabPage_CheckboxName_RedundantSemicolons;

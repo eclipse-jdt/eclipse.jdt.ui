@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -114,6 +114,7 @@ public class MultiFixMessages extends NLS {
 	public static String RedundantModifiersCleanup_description;
 	public static String AutoboxingCleanup_description;
 	public static String UnboxingCleanup_description;
+	public static String PushDownNegationCleanup_description;
 	public static String RedundantSemicolonsCleanup_description;
 
 	static {

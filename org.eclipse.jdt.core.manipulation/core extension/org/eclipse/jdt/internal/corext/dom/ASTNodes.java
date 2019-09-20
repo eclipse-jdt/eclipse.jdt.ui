@@ -22,6 +22,8 @@
 package org.eclipse.jdt.internal.corext.dom;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -58,7 +60,9 @@ import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.BooleanLiteral;
 import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CharacterLiteral;
@@ -94,6 +98,7 @@ import org.eclipse.jdt.core.dom.NameQualifiedType;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
+import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.QualifiedType;
@@ -101,6 +106,7 @@ import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
@@ -533,6 +539,200 @@ public class ASTNodes {
 		};
 		type.accept(visitor);
 		return buffer.toString();
+	}
+
+	/**
+	 * Returns the {@link Boolean} object value represented by the provided expression.
+	 *
+	 * @param expression the expression to analyze
+	 * @return the {@link Boolean} object value if the provided expression represents one, null
+	 *         otherwise
+	 */
+	public static Boolean getBooleanLiteral(Expression expression) {
+		final BooleanLiteral bl= as(expression, BooleanLiteral.class);
+		if (bl != null) {
+			return Boolean.valueOf(bl.booleanValue());
+		}
+		final QualifiedName qn= as(expression, QualifiedName.class);
+		if (hasType(qn, Boolean.class.getCanonicalName())) {
+			return getBooleanObject(qn);
+		}
+		return null;
+	}
+
+	/**
+	 * Casts the provided expression to an object of the provided type if type matches.
+	 *
+	 * @param <T> the required expression type
+	 * @param expression the expression to cast
+	 * @param exprClass the class representing the required expression type
+	 * @return the provided expression as an object of the provided type if type matches, null
+	 *         otherwise
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T extends Expression> T as(Expression expression, Class<T> exprClass) {
+		if (expression != null) {
+			if (exprClass.isAssignableFrom(expression.getClass())) {
+				return (T) expression;
+			} else if (expression instanceof ParenthesizedExpression) {
+				return as(((ParenthesizedExpression) expression).getExpression(), exprClass);
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Returns the provided statement as a non null list of statements:
+	 * <ul>
+	 * <li>if the statement is null, then an empty list is returned</li>
+	 * <li>if the statement is a {@link Block}, then its children are returned</li>
+	 * <li>otherwise, the current node is returned wrapped in a list</li>
+	 * </ul>
+	 *
+	 * @param statement the statement to analyze
+	 * @return the provided statement as a non null list of statements
+	 */
+	public static List<Statement> asList(Statement statement) {
+		if (statement == null) {
+			return Collections.emptyList();
+		}
+
+		if (statement instanceof Block) {
+			return ((Block) statement).statements();
+		}
+
+		return Arrays.asList(statement);
+	}
+
+	/**
+	 * Returns all the operands from the provided infix expressions.
+	 *
+	 * @param node the infix expression
+	 * @return a List of expressions
+	 */
+	public static List<Expression> allOperands(InfixExpression node) {
+		final List<Expression> extOps= node.extendedOperands();
+		final List<Expression> results= new ArrayList<>(2 + extOps.size());
+		results.add(node.getLeftOperand());
+		results.add(node.getRightOperand());
+		results.addAll(extOps);
+
+		return results;
+	}
+
+	/**
+	 * Returns the {@link Boolean} object constant value represented by the provided qualified name.
+	 *
+	 * @param qualifiedName the qualified name that must represent a Boolean object constant
+	 * @return the {@link Boolean} object constant value represented by the provided qualified name,
+	 *         or null if the qualified name does not represent a {@link Boolean} object constant
+	 *         value.
+	 */
+	public static Boolean getBooleanObject(final QualifiedName qualifiedName) {
+		final String fqn= qualifiedName.getFullyQualifiedName();
+		if ("Boolean.TRUE".equals(fqn)) { //$NON-NLS-1$
+			return Boolean.TRUE;
+		} else if ("Boolean.FALSE".equals(fqn)) { //$NON-NLS-1$
+			return Boolean.FALSE;
+		}
+		return null;
+	}
+
+	/**
+	 * Returns whether the provided operator is the same as the one of provided node.
+	 *
+	 * @param node the node for which to test the operator
+	 * @param anOperator the first operator to test
+	 * @param operators the other operators to test
+	 * @return true if the provided node has the provided operator, false otherwise.
+	 */
+	public static boolean hasOperator(InfixExpression node, InfixExpression.Operator anOperator, InfixExpression.Operator... operators) {
+		return node != null && isOperatorInList(node.getOperator(), anOperator, operators);
+	}
+
+	/**
+	 * Returns whether the provided operator is the same as the one of provided node.
+	 *
+	 * @param node the node for which to test the operator
+	 * @param anOperator the first operator to test
+	 * @param operators the other operators to test
+	 * @return true if the provided node has the provided operator, false otherwise.
+	 */
+	public static boolean hasOperator(PrefixExpression node, PrefixExpression.Operator anOperator, PrefixExpression.Operator... operators) {
+		return node != null && isOperatorInList(node.getOperator(), anOperator, operators);
+	}
+
+	private static boolean isOperatorInList(Object realOperator, Object anOperator, Object[] operators) {
+		return realOperator != null && (realOperator.equals(anOperator) || Arrays.asList(operators).contains(realOperator));
+	}
+
+	/**
+	 * Returns whether the provided expression evaluates to exactly one of the provided type.
+	 *
+	 * @param expression the expression to analyze
+	 * @param oneOfQualifiedTypeNames the type binding qualified name must be equal to one of these
+	 *            qualified type names
+	 * @return true if the provided expression evaluates to exactly one of the provided type, false
+	 *         otherwise
+	 */
+	public static boolean hasType(Expression expression, String... oneOfQualifiedTypeNames) {
+		return expression != null && hasType(expression.resolveTypeBinding(), oneOfQualifiedTypeNames);
+	}
+
+	/**
+	 * Returns whether the provided type binding is exactly one of the provided type.
+	 *
+	 * @param typeBinding the type binding to analyze
+	 * @param oneOfQualifiedTypeNames the type binding qualified name must be equal to one of these
+	 *            qualified type names
+	 * @return {@code true} if the provided type binding is exactly one of the provided type,
+	 *         {@code false} otherwise
+	 */
+	public static boolean hasType(final ITypeBinding typeBinding, String... oneOfQualifiedTypeNames) {
+		if (typeBinding != null) {
+			final String qualifiedName= typeBinding.getErasure().getQualifiedName();
+			for (String qualifiedTypeName : oneOfQualifiedTypeNames) {
+				if (qualifiedTypeName.equals(qualifiedName)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Returns the opposite infix operator. For boolean operators, the operands should be negated
+	 * too.
+	 *
+	 * @param operator the infix operator
+	 * @return the opposite infix operator
+	 */
+	public static InfixExpression.Operator oppositeInfixOperator(InfixExpression.Operator operator) {
+		if (InfixExpression.Operator.LESS.equals(operator))
+			return InfixExpression.Operator.GREATER_EQUALS;
+
+		if (InfixExpression.Operator.LESS_EQUALS.equals(operator))
+			return InfixExpression.Operator.GREATER;
+
+		if (InfixExpression.Operator.GREATER.equals(operator))
+			return InfixExpression.Operator.LESS_EQUALS;
+
+		if (InfixExpression.Operator.GREATER_EQUALS.equals(operator))
+			return InfixExpression.Operator.LESS;
+
+		if (InfixExpression.Operator.EQUALS.equals(operator))
+			return InfixExpression.Operator.NOT_EQUALS;
+
+		if (InfixExpression.Operator.NOT_EQUALS.equals(operator))
+			return InfixExpression.Operator.EQUALS;
+
+		if (InfixExpression.Operator.CONDITIONAL_AND.equals(operator))
+			return InfixExpression.Operator.CONDITIONAL_OR;
+
+		if (InfixExpression.Operator.CONDITIONAL_OR.equals(operator))
+			return InfixExpression.Operator.CONDITIONAL_AND;
+
+		return null;
 	}
 
 	public static InfixExpression.Operator convertToInfixOperator(Assignment.Operator operator) {

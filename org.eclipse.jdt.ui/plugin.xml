@@ -7018,6 +7018,11 @@
             id="org.eclipse.jdt.ui.cleanup.unboxing"
             runAfter="org.eclipse.jdt.ui.cleanup.autoboxing">
       </cleanUp>
+      <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.PushDownNegationCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.push_down_negation"
+            runAfter="org.eclipse.jdt.ui.cleanup.unboxing">
+      </cleanUp>
    </extension>
 
   <extension
