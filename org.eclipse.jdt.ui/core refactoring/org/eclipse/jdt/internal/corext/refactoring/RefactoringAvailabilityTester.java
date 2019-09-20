@@ -48,18 +48,12 @@ import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.SourceRange;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.Statement;
-import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
-import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
@@ -566,7 +560,7 @@ public final class RefactoringAvailabilityTester {
 	}
 
 	public static boolean isInlineConstantAvailable(final IField field) throws JavaModelException {
-		return Checks.isAvailable(field) && JdtFlags.isStatic(field) && JdtFlags.isFinal(field) && !JdtFlags.isEnum(field);
+		return RefactoringAvailabilityTesterCore.isInlineConstantAvailable(field);
 	}
 
 	public static boolean isInlineConstantAvailable(final IStructuredSelection selection) throws JavaModelException {
@@ -584,17 +578,7 @@ public final class RefactoringAvailabilityTester {
 	}
 
 	public static boolean isInlineMethodAvailable(IMethod method) throws JavaModelException {
-		if (method == null)
-			return false;
-		if (!method.exists())
-			return false;
-		if (!method.isStructureKnown())
-			return false;
-		if (!method.isBinary())
-			return true;
-		if (method.isConstructor())
-			return false;
-		return SourceRange.isAvailable(method.getNameRange());
+		return RefactoringAvailabilityTesterCore.isInlineMethodAvailable(method);
 	}
 
 	public static boolean isInlineMethodAvailable(final IStructuredSelection selection) throws JavaModelException {
@@ -638,46 +622,11 @@ public final class RefactoringAvailabilityTester {
 	}
 
 	public static ASTNode getInlineableMethodNode(ITypeRoot typeRoot, CompilationUnit root, int offset, int length) {
-		ASTNode node= null;
-		try {
-			node= getInlineableMethodNode(NodeFinder.perform(root, offset, length, typeRoot), typeRoot);
-		} catch(JavaModelException e) {
-			// Do nothing
-		}
-		if (node != null)
-			return node;
-		return getInlineableMethodNode(NodeFinder.perform(root, offset, length), typeRoot);
-	}
-
-	private static ASTNode getInlineableMethodNode(ASTNode node, IJavaElement unit) {
-		if (node == null)
-			return null;
-		switch (node.getNodeType()) {
-			case ASTNode.SIMPLE_NAME:
-				StructuralPropertyDescriptor locationInParent= node.getLocationInParent();
-				if (locationInParent == MethodDeclaration.NAME_PROPERTY) {
-					return node.getParent();
-				} else if (locationInParent == MethodInvocation.NAME_PROPERTY
-						|| locationInParent == SuperMethodInvocation.NAME_PROPERTY) {
-					return unit instanceof ICompilationUnit ? node.getParent() : null; // don't start on invocations in binary
-				}
-				return null;
-			case ASTNode.EXPRESSION_STATEMENT:
-				node= ((ExpressionStatement)node).getExpression();
-		}
-		switch (node.getNodeType()) {
-			case ASTNode.METHOD_DECLARATION:
-				return node;
-			case ASTNode.METHOD_INVOCATION:
-			case ASTNode.SUPER_METHOD_INVOCATION:
-			case ASTNode.CONSTRUCTOR_INVOCATION:
-				return unit instanceof ICompilationUnit ? node : null; // don't start on invocations in binary
-		}
-		return null;
+		return RefactoringAvailabilityTesterCore.getInlineableMethodNode(typeRoot, root, offset, length);
 	}
 
 	public static boolean isInlineTempAvailable(final ILocalVariable variable) throws JavaModelException {
-		return Checks.isAvailable(variable);
+		return RefactoringAvailabilityTesterCore.isInlineTempAvailable(variable);
 	}
 
 	public static boolean isInlineTempAvailable(final JavaTextSelection selection) throws JavaModelException {
