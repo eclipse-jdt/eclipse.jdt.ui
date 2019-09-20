@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
@@ -200,7 +201,7 @@ public class OpenProjectAction extends SelectionDispatchAction implements IResou
 				for (int i = 0; i < projects.length; i++) {
 					IProject project= (IProject)projects[i];
 					try {
-						project.open(new SubProgressMonitor(monitor, 1));
+						project.open(IResource.BACKGROUND_REFRESH, new SubProgressMonitor(monitor, 1));
 					} catch (CoreException e) {
 						if (errorStatus == null)
 							errorStatus = new MultiStatus(JavaPlugin.getPluginId(), IStatus.ERROR, ActionMessages.OpenProjectAction_error_message, null);
