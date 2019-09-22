@@ -14,8 +14,6 @@
 package org.eclipse.jdt.internal.ui.exampleprojects;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -69,9 +67,7 @@ public class ExampleProjectCreationWizardPage extends WizardPage {
 		return res;
 	}
 
-	/*
-	 * @see IDialogPage#createControl(Composite)
-	 */
+	@Override
 	public void createControl(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
 		GridLayout gd= new GridLayout();
@@ -85,11 +81,9 @@ public class ExampleProjectCreationWizardPage extends WizardPage {
 		fTextControl= new Text(composite, SWT.SINGLE | SWT.BORDER);
 		fTextControl.setText(fProjectName);
 		fTextControl.setSelection(fProjectName.length());
-		fTextControl.addModifyListener(new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				if (!fTextControl.isDisposed()) {
-					validateText(fTextControl.getText());
-				}
+		fTextControl.addModifyListener(e -> {
+			if (!fTextControl.isDisposed()) {
+				validateText(fTextControl.getText());
 			}
 		});
 		fTextControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -119,6 +113,7 @@ public class ExampleProjectCreationWizardPage extends WizardPage {
 	/*
 	 * @see WizardPage#becomesVisible
 	 */
+	@Override
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
 		fPageVisible= visible;
@@ -167,6 +162,7 @@ public class ExampleProjectCreationWizardPage extends WizardPage {
 	/**
 	 * @return Returns the name entered by the user
 	 */
+	@Override
 	public String getName() {
 		return fProjectName;
 	}
