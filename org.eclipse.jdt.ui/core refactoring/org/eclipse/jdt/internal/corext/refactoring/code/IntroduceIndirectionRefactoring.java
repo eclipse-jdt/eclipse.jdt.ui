@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -593,26 +593,24 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 			return result; // binary
 
 		ModifierKeyword neededVisibility= getNeededVisibility(fTargetMethod, fIntermediaryType);
-		if (neededVisibility != null) {
 
-			result.merge(adjustVisibility(fTargetMethod, neededVisibility,  monitor));
-			if (result.hasError())
-				return result; // binary
+		result.merge(adjustVisibility(fTargetMethod, neededVisibility, monitor));
+		if (result.hasError())
+			return result; // binary
 
-			// Need to adjust the overridden methods of the target method.
-			ITypeHierarchy hierarchy= fTargetMethod.getDeclaringType().newTypeHierarchy(null);
-			MethodOverrideTester tester= new MethodOverrideTester(fTargetMethod.getDeclaringType(), hierarchy);
-			IType[] subtypes= hierarchy.getAllSubtypes(fTargetMethod.getDeclaringType());
-			for (int i= 0; i < subtypes.length; i++) {
-				IMethod method= tester.findOverridingMethodInType(subtypes[i], fTargetMethod);
-				if (method != null && method.exists()) {
-					result.merge(adjustVisibility(method, neededVisibility, monitor));
-					if (monitor.isCanceled())
-						throw new OperationCanceledException();
+		// Need to adjust the overridden methods of the target method.
+		ITypeHierarchy hierarchy= fTargetMethod.getDeclaringType().newTypeHierarchy(null);
+		MethodOverrideTester tester= new MethodOverrideTester(fTargetMethod.getDeclaringType(), hierarchy);
+		IType[] subtypes= hierarchy.getAllSubtypes(fTargetMethod.getDeclaringType());
+		for (int i= 0; i < subtypes.length; i++) {
+			IMethod method= tester.findOverridingMethodInType(subtypes[i], fTargetMethod);
+			if (method != null && method.exists()) {
+				result.merge(adjustVisibility(method, neededVisibility, monitor));
+				if (monitor.isCanceled())
+					throw new OperationCanceledException();
 
-					if (result.hasError())
-						return result; // binary
-				}
+				if (result.hasError())
+					return result; // binary
 			}
 		}
 

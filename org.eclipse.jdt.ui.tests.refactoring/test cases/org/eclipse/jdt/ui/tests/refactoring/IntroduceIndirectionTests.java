@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -347,4 +347,35 @@ public class IntroduceIndirectionTests extends RefactoringTest {
 		// test for bug 127665
 		helperPass(new String[] { "p.Test" }, "foo2", "p.Test0", 5, 21, 5, 24);
 	}
+
+	public void test39() throws Exception {
+		// test bug 127984
+		helperWarn(new String[] { "p.Foo", "p.Bar" }, "foo", "p.Bar", 5, 17, 5, 20);
+	}
+
+	public void test40() throws Exception {
+		// test bug 127984
+		helperPass(new String[] { "p.Foo", "p.Bar" }, "foo", "p.Bar", 5, 20, 5, 23);
+	}
+
+	public void test41() throws Exception {
+		// test bug 127984
+		helperPass(new String[] { "p.Foo" }, "foo", "p.Foo.Bar", 5, 18, 5, 20);
+	}
+
+	public void test42() throws Exception {
+		// test bug 127984
+		helperPass(new String[] { "p.Foo" }, "foo", "p.Foo", 9, 27, 9, 29);
+	}
+
+	public void test43() throws Exception {
+		// test bug 127984
+		helperWarn(new String[] { "p.Foo", "q.Bar" }, "foo", "q.Bar", 5, 20, 5, 23);
+	}
+
+	public void test44() throws Exception {
+		// test bug 127984
+		helperWarn(new String[] { "p.Foo", "p.Bar" }, "foo", "p.Bar", 5, 18, 5, 21);
+	}
+
 }

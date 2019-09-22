@@ -1267,18 +1267,20 @@ public final class MemberVisibilityAdjustor {
 	private ModifierKeyword thresholdTypeToMethod(final IType referencing, final IMethod referenced, final IProgressMonitor monitor) throws JavaModelException {
 		final ICompilationUnit referencedUnit= referenced.getCompilationUnit();
 		ModifierKeyword keyword= ModifierKeyword.PUBLIC_KEYWORD;
-		if (referenced.getDeclaringType().equals(referencing))
-			keyword= ModifierKeyword.PRIVATE_KEYWORD;
-		else {
-			final ITypeHierarchy hierarchy= getTypeHierarchy(referencing, new SubProgressMonitor(monitor, 1));
-			final IType[] types= hierarchy.getSupertypes(referencing);
-			IType superType= null;
-			for (int index= 0; index < types.length; index++) {
-				superType= types[index];
-				if (superType.equals(referenced.getDeclaringType())) {
-					keyword= ModifierKeyword.PROTECTED_KEYWORD;
-					return keyword;
-				}
+		IType tmp= referenced.getDeclaringType();
+		while (tmp != null) {
+			if (tmp.equals(referencing)) {
+				return ModifierKeyword.PRIVATE_KEYWORD;
+			}
+			tmp= tmp.getDeclaringType();
+		}
+		final ITypeHierarchy hierarchy= getTypeHierarchy(referencing, new SubProgressMonitor(monitor, 1));
+		final IType[] types= hierarchy.getSupertypes(referencing);
+		IType superType= null;
+		for (int index= 0; index < types.length; index++) {
+			superType= types[index];
+			if (superType.equals(referenced.getDeclaringType())) {
+				return ModifierKeyword.PROTECTED_KEYWORD;
 			}
 		}
 		final ICompilationUnit typeUnit= referencing.getCompilationUnit();
