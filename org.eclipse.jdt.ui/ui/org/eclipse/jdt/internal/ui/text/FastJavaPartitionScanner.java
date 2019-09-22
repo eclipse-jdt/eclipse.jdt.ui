@@ -743,7 +743,12 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaPa
 
 	private void setJavaProject() {
 		if (fJavaProject == null) {
-			IWorkbenchPage page= JavaPlugin.getActivePage();
+			IWorkbenchPage page= null;
+			try {
+				page= JavaPlugin.getActivePage();
+			} catch (IllegalStateException e) {
+				//do nothing
+			}
 			if (page != null) {
 				IEditorPart part= page.getActiveEditor();
 				if (part != null) {
