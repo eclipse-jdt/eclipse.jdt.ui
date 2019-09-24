@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -101,9 +102,15 @@ public class PushDownNegationCleanUp extends AbstractMultiFix {
 		final List<CompilationUnitRewriteOperation> rewriteOperations= new ArrayList<>();
 
 		unit.accept(new ASTVisitor() {
+			PrefixExpression secondNotOperator= null;
 			@Override
 			public boolean visit(PrefixExpression node) {
 				if (!ASTNodes.hasOperator(node, PrefixExpression.Operator.NOT)) {
+					return true;
+				}
+
+				if (node.subtreeMatch(new ASTMatcher(), secondNotOperator)) {
+					// already processed as part of RemoveDoubleNegationOperation
 					return true;
 				}
 
@@ -118,7 +125,8 @@ public class PushDownNegationCleanUp extends AbstractMultiFix {
 
 					if (ASTNodes.hasOperator(pe, PrefixExpression.Operator.NOT)) {
 						rewriteOperations.add(new RemoveDoubleNegationOperation(node, pe.getOperand()));
-						return false;
+						secondNotOperator= pe;
+						return true;
 					}
 				} else if (operand instanceof InfixExpression) {
 					final InfixExpression ie= (InfixExpression) operand;
@@ -145,6 +153,20 @@ public class PushDownNegationCleanUp extends AbstractMultiFix {
 			return null;
 		}
 
+		RemoveDoubleNegationOperation lastDoubleNegation= null;
+		for (int i= 0; i < rewriteOperations.size(); ++i) {
+			CompilationUnitRewriteOperation op= rewriteOperations.get(i);
+			if (op instanceof ReplacementOperation) {
+				ReplacementOperation chainedOp= (ReplacementOperation) op;
+				if (lastDoubleNegation != null && chainedOp.getNode().subtreeMatch(new ASTMatcher(), lastDoubleNegation.getReplacementExpression())) {
+					lastDoubleNegation.setNextOperation(chainedOp);
+				}
+				if (op instanceof RemoveDoubleNegationOperation) {
+					lastDoubleNegation= (RemoveDoubleNegationOperation) op;
+				}
+			}
+		}
+
 		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.PushDownNegationCleanup_description, unit,
 				rewriteOperations.toArray(new CompilationUnitRewriteOperation[rewriteOperations.size()]));
 	}
@@ -159,13 +181,25 @@ public class PushDownNegationCleanUp extends AbstractMultiFix {
 		return null;
 	}
 
-	private static class RemoveDoubleNegationOperation extends CompilationUnitRewriteOperation {
-		private final ASTNode node;
+	private abstract static class ReplacementOperation extends CompilationUnitRewriteOperation {
+		private ASTNode node;
 
-		private final Expression replacement;
+		public void setNode(ASTNode node) {
+			this.node= node;
+		}
+
+		public ASTNode getNode() {
+			return this.node;
+		}
+	}
+
+	private static class RemoveDoubleNegationOperation extends ReplacementOperation {
+		private Expression replacement;
+
+		private ReplacementOperation nextOperation;
 
 		public RemoveDoubleNegationOperation(ASTNode node, Expression replacement) {
-			this.node= node;
+			this.setNode(node);
 			this.replacement= replacement;
 		}
 
@@ -174,17 +208,28 @@ public class PushDownNegationCleanUp extends AbstractMultiFix {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			Expression copyOfReplacement= (Expression) rewrite.createCopyTarget(this.replacement);
 
-			rewrite.replace(this.node, copyOfReplacement, null);
+			// if next operation has been replaced above by a copy, update the target node to change
+			if (nextOperation != null) {
+				nextOperation.setNode(copyOfReplacement);
+			}
+
+			rewrite.replace(this.getNode(), copyOfReplacement, null);
+		}
+
+		public void setNextOperation(ReplacementOperation nextOperation) {
+			this.nextOperation= nextOperation;
+		}
+
+		public Expression getReplacementExpression() {
+			return this.replacement;
 		}
 	}
 
-	private static class ReverseBooleanConstantOperation extends CompilationUnitRewriteOperation {
-		private final ASTNode node;
-
-		private final boolean replacement;
+	private static class ReverseBooleanConstantOperation extends ReplacementOperation {
+		private boolean replacement;
 
 		public ReverseBooleanConstantOperation(ASTNode node, boolean replacement) {
-			this.node= node;
+			this.setNode(node);
 			this.replacement= replacement;
 		}
 
@@ -194,19 +239,17 @@ public class PushDownNegationCleanUp extends AbstractMultiFix {
 			AST ast= cuRewrite.getRoot().getAST();
 			Expression copyOfReplacement= ast.newBooleanLiteral(this.replacement);
 
-			rewrite.replace(this.node, copyOfReplacement, null);
+			rewrite.replace(this.getNode(), copyOfReplacement, null);
 		}
 	}
 
-	private static class PushDownNegationInInfixExpressionOperation extends CompilationUnitRewriteOperation {
-		private final ASTNode node;
-
-		private final InfixExpression infixExpression;
+	private static class PushDownNegationInInfixExpressionOperation extends ReplacementOperation {
+		private InfixExpression infixExpression;
 
 		private final Operator reverseOp;
 
 		public PushDownNegationInInfixExpressionOperation(ASTNode node, InfixExpression infixExpression, Operator reverseOp) {
-			this.node= node;
+			this.setNode(node);
 			this.infixExpression= infixExpression;
 			this.reverseOp= reverseOp;
 		}
@@ -217,7 +260,7 @@ public class PushDownNegationCleanUp extends AbstractMultiFix {
 			AST ast= cuRewrite.getRoot().getAST();
 			ParenthesizedExpression parenthesizedExpression= doRewriteAST(rewrite, ast, infixExpression, reverseOp);
 
-			rewrite.replace(this.node, parenthesizedExpression, null);
+			rewrite.replace(this.getNode(), parenthesizedExpression, null);
 		}
 
 		private ParenthesizedExpression doRewriteAST(ASTRewrite rewrite, AST ast, InfixExpression pInfixExpression, Operator pReverseOp) {

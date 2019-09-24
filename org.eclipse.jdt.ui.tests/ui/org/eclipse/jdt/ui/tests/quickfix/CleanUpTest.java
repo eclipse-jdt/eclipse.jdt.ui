@@ -4248,6 +4248,11 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        boolean b3 = !Boolean.FALSE;\n" //
 				+ "        boolean b4 = !true;\n" //
 				+ "        boolean b5 = !false;\n" //
+				+ "        boolean b6 = !!!!b;\n" //
+				+ "        boolean b7 = !!!!!Boolean.TRUE;\n" //
+				+ "        boolean b8 = !!!!!!!Boolean.FALSE;\n" //
+				+ "        boolean b9 = !!!!!!!!!true;\n" //
+				+ "        boolean b10 = !!!false;\n" //
 				+ "    }\n" //
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
@@ -4264,6 +4269,11 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        boolean b3 = true;\n" //
 				+ "        boolean b4 = false;\n" //
 				+ "        boolean b5 = true;\n" //
+				+ "        boolean b6 = b;\n" //
+				+ "        boolean b7 = false;\n" //
+				+ "        boolean b8 = true;\n" //
+				+ "        boolean b9 = false;\n" //
+				+ "        boolean b10 = true;\n" //
 				+ "    }\n" //
 				+ "}\n";
 
@@ -4277,7 +4287,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "public class E1 {\n" //
 				+ "    public boolean replaceDoubleNegationWithParentheses(boolean b) {\n" //
-				+ "        return !(!(b /* another refactoring removes the parentheses */));\n" //
+				+ "        return !!!(!(b /* another refactoring removes the parentheses */));\n" //
 				+ "    }\n" //
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
