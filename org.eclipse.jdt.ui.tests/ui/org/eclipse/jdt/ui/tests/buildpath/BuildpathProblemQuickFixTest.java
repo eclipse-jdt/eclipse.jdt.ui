@@ -171,7 +171,8 @@ public class BuildpathProblemQuickFixTest extends TestCase {
 		fJavaProject1.getProject().getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
 
 		IMarker[] markers= fJavaProject1.getResource().findMarkers("org.eclipse.jdt.core.buildpath_problem", true, IResource.DEPTH_INFINITE);
-		assertEquals("A cycle was detected in the build path of project '2_CyclicA'. The cycle consists of projects {2_CyclicA, 2_CyclicB}", (String) markers[0].getAttribute(IMarker.MESSAGE));
+		assertEquals("One or more cycles were detected in the build path of project '2_CyclicA'. The paths towards the cycle and cycle are:\n" + 
+				"->{2_CyclicA, 2_CyclicB}", (String) markers[0].getAttribute(IMarker.MESSAGE));
 		assertEquals(1, markers.length);
 		IMarkerResolution[] resolutions= sortResolutions(IDE.getMarkerHelpRegistry().getResolutions(markers[0]));
 		assertEquals(2, resolutions.length);
