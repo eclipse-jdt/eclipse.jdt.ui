@@ -10637,8 +10637,19 @@ public class CleanUpTest extends CleanUpTestCase {
 		// Bug#538459 'public' modified must not be removed from static method in nested enum
 		String expected4 = buf.toString().replace("static enum", "enum");
 
+		// Bug#551038: final keyword must not be removed from method with varargs
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public final class SafeVarargsExample {\n");
+		buf.append("  @SafeVarargs\n");
+		buf.append("  public final void errorRemoveRedundantModifiers(final String... input) {\n");
+		buf.append("  }\n");
+		buf.append("}\n");
+		String expected5 = buf.toString();
+		ICompilationUnit cu5= pack1.createCompilationUnit("SafeVarargsExample.java", buf.toString(), false, null);
+
 		enable(CleanUpConstants.REMOVE_REDUNDANT_MODIFIERS);
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1, cu2, cu3, cu4 }, new String[] { expected1, expected2, expected3, expected4 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1, cu2, cu3, cu4, cu5 }, new String[] { expected1, expected2, expected3, expected4, expected5 });
 
 	}
 

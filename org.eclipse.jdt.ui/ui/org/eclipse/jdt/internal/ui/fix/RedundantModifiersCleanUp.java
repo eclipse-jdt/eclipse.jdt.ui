@@ -145,7 +145,7 @@ public class RedundantModifiersCleanUp extends AbstractMultiFix {
 					if (!AnonymousClassDeclaration.class.isInstance(node.getParent()) && !EnumDeclaration.class.isInstance(node.getParent())) {
 						rewriteOperations.add(new RemoveModifiersOperation(node, Modifier.PUBLIC));
 					}
-				} else if (typeDecl != null && Modifier.isFinal(typeDecl.getModifiers()) && Modifier.isFinal(node.getModifiers())) {
+				} else if (typeDecl != null && Modifier.isFinal(typeDecl.getModifiers()) && Modifier.isFinal(node.getModifiers()) && !node.isVarargs()) {
 					rewriteOperations.add(new RemoveModifiersOperation(node, Modifier.FINAL));
 				}
 				return true;
