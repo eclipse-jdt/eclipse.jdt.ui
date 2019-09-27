@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2011 IBM Corporation and others.
+ * Copyright (c) 2006, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,6 +11,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Sebastian Davids: sdavids@gmx.de - see bug 25376
+ *     Microsoft Corporation - moved template related code to jdt.core.manipulation - https://bugs.eclipse.org/549989
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.template.java;
 
@@ -31,7 +32,7 @@ public class VarResolver extends AbstractVariableResolver {
 	}
 
 	@Override
-	protected Variable[] getVisibleVariables(String type, JavaContext context) {
+	protected Variable[] getVisibleVariables(String type, IJavaContext context) {
 		Variable[] localVariables= context.getLocalVariables(type);
 		Variable[] fields= context.getFields(type);
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2011 IBM Corporation and others.
+ * Copyright (c) 2007, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -44,7 +44,7 @@ public class SWTContextType extends AbstractJavaContextType {
 
 
 	@Override
-	protected void initializeContext(JavaContext context) {
+	protected void initializeContext(IJavaContext context) {
 		if (!getId().equals(SWTContextType.ID_ALL)) { // a specific context must also allow the templates that work everywhere
 			context.addCompatibleContextType(SWTContextType.ID_ALL);
 		}

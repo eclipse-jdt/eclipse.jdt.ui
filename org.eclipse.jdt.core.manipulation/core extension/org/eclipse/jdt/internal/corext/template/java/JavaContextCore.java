@@ -161,6 +161,7 @@ public class JavaContextCore extends CompilationUnitContextCore implements IJava
 	 *
 	 * @param contextTypeId the context type to accept
 	 */
+	@Override
 	public void addCompatibleContextType(String contextTypeId) {
 		if (fCompatibleContextTypeIds == null)
 			fCompatibleContextTypeIds= new HashSet<>();

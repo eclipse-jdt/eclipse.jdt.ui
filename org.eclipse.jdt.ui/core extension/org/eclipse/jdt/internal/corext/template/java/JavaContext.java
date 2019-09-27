@@ -90,6 +90,7 @@ public class JavaContext extends CompilationUnitContext implements IJavaContext 
 	 *
 	 * @param contextTypeId the context type to accept
 	 */
+	@Override
 	public void addCompatibleContextType(String contextTypeId) {
 		this.fJavaContextCore.addCompatibleContextType(contextTypeId);
 	}

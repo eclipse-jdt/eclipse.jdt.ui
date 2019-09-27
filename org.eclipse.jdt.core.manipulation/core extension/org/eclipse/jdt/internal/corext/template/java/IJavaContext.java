@@ -25,6 +25,13 @@ import org.eclipse.jdt.internal.ui.text.template.contentassist.MultiVariable;
 public interface IJavaContext {
 
 	/**
+	 * Adds a context type that is also compatible. That means the context can also process templates of that context type.
+	 *
+	 * @param contextTypeId the context type to accept
+	 */
+	public void addCompatibleContextType(String contextTypeId);
+
+	/**
 	 * Returns the compilation unit if one is associated with this context,
 	 * <code>null</code> otherwise.
 	 *

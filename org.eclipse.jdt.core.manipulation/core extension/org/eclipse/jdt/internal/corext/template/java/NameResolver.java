@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2011 IBM Corporation and others.
+ * Copyright (c) 2006, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,6 +11,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Sebastian Davids: sdavids@gmx.de - see bug 25376
+ *     Microsoft Corporation - moved template related code to jdt.core.manipulation - https://bugs.eclipse.org/549989
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.template.java;
 
@@ -56,7 +57,7 @@ public class NameResolver extends TemplateVariableResolver {
 			param= fDefaultType;
 		else
 			param= params.get(0);
-		JavaContext jc= (JavaContext) context;
+		IJavaContext jc= (IJavaContext) context;
 		TemplateVariable ref= jc.getTemplateVariable(param);
 		MultiVariable mv= (MultiVariable) variable;
 		if (ref instanceof MultiVariable) {

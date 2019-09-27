@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2011 IBM Corporation and others.
+ * Copyright (c) 2007, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Microsoft Corporation - moved template related code to jdt.core.manipulation - https://bugs.eclipse.org/549989
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.template.java;
 
@@ -54,13 +55,13 @@ public abstract class AbstractVariableResolver extends TemplateVariableResolver 
 	 * @param context context within to search for variables
 	 * @return the visible variables of <code>type</code> in <code>context</code>, empty array if no visible variables
 	 */
-	protected abstract Variable[] getVisibleVariables(String type, JavaContext context);
+	protected abstract Variable[] getVisibleVariables(String type, IJavaContext context);
 
 	@Override
 	public void resolve(TemplateVariable variable, TemplateContext context) {
 
 		if (variable instanceof JavaVariable) {
-			JavaContext jc= (JavaContext) context;
+			IJavaContext jc= (IJavaContext) context;
 			JavaVariable jv= (JavaVariable) variable;
 
 			List<String> params= variable.getVariableType().getParams();
@@ -106,7 +107,7 @@ public abstract class AbstractVariableResolver extends TemplateVariableResolver 
 			names[i]= fVariables[i].getName();
 
 	    if (names.length > 0)
-	    	((JavaContext)context).markAsUsed(names[0]);
+	    	((IJavaContext)context).markAsUsed(names[0]);
 
 		return names;
 	}
