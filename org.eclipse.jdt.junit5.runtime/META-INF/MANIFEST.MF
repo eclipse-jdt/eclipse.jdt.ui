@@ -4,7 +4,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-Vendor: %providerName
 Bundle-SymbolicName: org.eclipse.jdt.junit5.runtime;singleton:=true
-Bundle-Version: 1.0.600.qualifier
+Bundle-Version: 1.0.700.qualifier
 Bundle-Localization: plugin
 Export-Package: org.eclipse.jdt.internal.junit5.runner;x-internal:=true
 Require-Bundle: org.eclipse.jdt.junit.runtime;bundle-version="[3.4.600,4.0.0)",
