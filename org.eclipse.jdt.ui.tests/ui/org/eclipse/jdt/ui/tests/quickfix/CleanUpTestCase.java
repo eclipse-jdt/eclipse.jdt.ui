@@ -85,6 +85,7 @@ public class CleanUpTestCase extends QuickFixTest {
 
 		suite.addTest(CleanUpStressTest.suite());
 		suite.addTest(CleanUpTest.suite());
+		suite.addTest(CleanUpTest17.suite());
 		suite.addTest(CleanUpTest18.suite());
 		suite.addTest(CleanUpAnnotationTest.suite());
 		suite.addTest(SaveParticipantTest.suite());
