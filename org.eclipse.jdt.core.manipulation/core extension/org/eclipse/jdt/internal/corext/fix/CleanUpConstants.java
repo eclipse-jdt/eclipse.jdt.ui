@@ -568,7 +568,20 @@ public class CleanUpConstants {
 	public static final String EXPRESSIONS_USE_PARENTHESES_NEVER= "cleanup.never_use_parentheses_in_expressions"; //$NON-NLS-1$
 
 	/**
-	 * Controls the usage of 'final' modifier for variable declarations. For detailed settings use:<br>
+	 * Use lazy logical operator.<br>
+	 * <br>
+	 * Possible values: {TRUE, FALSE}<br>
+	 * <br>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.15
+	 */
+	public static final String USE_LAZY_LOGICAL_OPERATOR= "cleanup.lazy_logical_operator"; //$NON-NLS-1$
+
+	/**
+	 * Controls the usage of 'final' modifier for variable declarations. For detailed settings
+	 * use:<br>
 	 * {@link #VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES}<br>
 	 * {@link #VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS}<br>
 	 * {@link #VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS} <br>

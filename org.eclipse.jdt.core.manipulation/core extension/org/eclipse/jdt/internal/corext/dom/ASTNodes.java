@@ -102,6 +102,7 @@ import org.eclipse.jdt.core.dom.NameQualifiedType;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
+import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
@@ -116,6 +117,7 @@ import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.SwitchStatement;
+import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.UnionType;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
@@ -159,6 +161,161 @@ public class ASTNodes {
 
 	private static final int CLEAR_VISIBILITY= ~(Modifier.PUBLIC | Modifier.PROTECTED | Modifier.PRIVATE);
 
+	/** Enum representing the possible side effect of an expression. */
+	public enum ExprActivity {
+		/** Does nothing. */
+		PASSIVE_WITHOUT_FALLING_THROUGH(0),
+
+		/** Does nothing but may fall through. */
+		PASSIVE(1),
+
+		/** May modify something. */
+		CAN_BE_ACTIVE(2),
+
+		/** Modify something. */
+		ACTIVE(3);
+
+		private final int asInteger;
+
+		ExprActivity(int asInteger) {
+			this.asInteger= asInteger;
+		}
+	}
+
+	private static final class ExprActivityVisitor extends InterruptibleVisitor {
+		private ExprActivity activityLevel= ExprActivity.PASSIVE_WITHOUT_FALLING_THROUGH;
+
+		public ExprActivity getActivityLevel() {
+			return activityLevel;
+		}
+
+		@Override
+		public boolean visit(CastExpression node) {
+			setActivityLevel(ExprActivity.PASSIVE);
+			return true;
+		}
+
+		@Override
+		public boolean visit(ArrayAccess node) {
+			setActivityLevel(ExprActivity.PASSIVE);
+			return true;
+		}
+
+		@Override
+		public boolean visit(FieldAccess node) {
+			setActivityLevel(ExprActivity.PASSIVE);
+			return true;
+		}
+
+		@Override
+		public boolean visit(QualifiedName node) {
+			if (node.getQualifier() == null
+					|| node.getQualifier().resolveBinding() == null
+					|| node.getQualifier().resolveBinding().getKind() != IBinding.PACKAGE
+							&& node.getQualifier().resolveBinding().getKind() != IBinding.TYPE) {
+				setActivityLevel(ExprActivity.PASSIVE);
+			}
+
+			return true;
+		}
+
+		@Override
+		public boolean visit(Assignment node) {
+			setActivityLevel(ExprActivity.ACTIVE);
+			return interruptVisit();
+		}
+
+		@Override
+		public boolean visit(PrefixExpression node) {
+			if (hasOperator(node, PrefixExpression.Operator.INCREMENT, PrefixExpression.Operator.DECREMENT)) {
+				setActivityLevel(ExprActivity.ACTIVE);
+				return interruptVisit();
+			} else if (hasType(node.getOperand(), Object.class.getCanonicalName())) {
+				setActivityLevel(ExprActivity.PASSIVE);
+			}
+
+			return true;
+		}
+
+		@Override
+		public boolean visit(PostfixExpression node) {
+			setActivityLevel(ExprActivity.ACTIVE);
+			return interruptVisit();
+		}
+
+		@Override
+		public boolean visit(InfixExpression node) {
+			if (hasOperator(node, InfixExpression.Operator.DIVIDE)) {
+				setActivityLevel(ExprActivity.PASSIVE);
+			} else {
+				for (Expression operand : allOperands(node)) {
+					if (hasType(operand, Object.class.getCanonicalName())) {
+						setActivityLevel(ExprActivity.PASSIVE);
+						break;
+					}
+				}
+			}
+
+			if (hasOperator(node, InfixExpression.Operator.PLUS) && hasType(node, String.class.getCanonicalName())
+					&& (mayCallActiveToString(node.getLeftOperand())
+							|| mayCallActiveToString(node.getRightOperand())
+							|| mayCallActiveToString(node.extendedOperands()))) {
+				setActivityLevel(ExprActivity.CAN_BE_ACTIVE);
+			}
+
+			return true;
+		}
+
+		private boolean mayCallActiveToString(List<Expression> extendedOperands) {
+			if (extendedOperands != null) {
+				for (Expression expression : extendedOperands) {
+					if (mayCallActiveToString(expression)) {
+						return true;
+					}
+				}
+			}
+
+			return false;
+		}
+
+		private boolean mayCallActiveToString(Expression expression) {
+			return !hasType(expression, String.class.getCanonicalName(), boolean.class.getSimpleName(), short.class.getSimpleName(), int.class.getSimpleName(), long.class.getSimpleName(),
+					float.class.getSimpleName(), double.class.getSimpleName(),
+					Short.class.getCanonicalName(), Boolean.class.getCanonicalName(), Integer.class.getCanonicalName(), Long.class.getCanonicalName(), Float.class.getCanonicalName(),
+					Double.class.getCanonicalName()) && !(expression instanceof PrefixExpression) && !(expression instanceof InfixExpression)
+					&& !(expression instanceof PostfixExpression);
+		}
+
+		@Override
+		public boolean visit(SuperMethodInvocation node) {
+			setActivityLevel(ExprActivity.CAN_BE_ACTIVE);
+			return true;
+		}
+
+		@Override
+		public boolean visit(MethodInvocation node) {
+			setActivityLevel(ExprActivity.CAN_BE_ACTIVE);
+			return true;
+		}
+
+		@Override
+		public boolean visit(ClassInstanceCreation node) {
+			setActivityLevel(ExprActivity.CAN_BE_ACTIVE);
+			return true;
+		}
+
+		@Override
+		public boolean visit(ThrowStatement node) {
+			setActivityLevel(ExprActivity.CAN_BE_ACTIVE);
+			return true;
+		}
+
+		private void setActivityLevel(final ExprActivity newActivityLevel) {
+			if (activityLevel.asInteger < newActivityLevel.asInteger) {
+				activityLevel= newActivityLevel;
+			}
+		}
+	}
 
 	private ASTNodes() {
 		// no instance;
@@ -416,6 +573,19 @@ public class ASTNodes {
 		return parentType == ASTNode.LABELED_STATEMENT ||
 				(parentType == ASTNode.BREAK_STATEMENT && name.getLocationInParent() == BreakStatement.LABEL_PROPERTY) ||
 				parentType != ASTNode.CONTINUE_STATEMENT;
+	}
+
+	/**
+	 * Return true if the node changes nothing and throws no exceptions.
+	 *
+	 * @param node The node to visit.
+	 *
+	 * @return True if the node changes nothing and throws no exceptions.
+	 */
+	public static boolean isPassiveWithoutFallingThrough(final ASTNode node) {
+		final ExprActivityVisitor visitor= new ExprActivityVisitor();
+		visitor.visitNode(node);
+		return ExprActivity.PASSIVE_WITHOUT_FALLING_THROUGH.equals(visitor.getActivityLevel());
 	}
 
 	public static boolean isStatic(BodyDeclaration declaration) {

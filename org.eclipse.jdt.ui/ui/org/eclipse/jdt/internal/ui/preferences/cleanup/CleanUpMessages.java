@@ -72,6 +72,8 @@ public class CleanUpMessages extends NLS {
 	public static String CodeStyleTabPage_RadioName_AlwaysUseParantheses;
 	public static String CodeStyleTabPage_RadioName_NeverUseBlocks;
 	public static String CodeStyleTabPage_RadioName_NeverUseParantheses;
+
+	public static String CodeStyleTabPage_CheckboxName_UseLazyLogicalOperator;
 	public static String CodeStyleTabPage_RadioName_UseBlocksSpecial;
 
 	public static String CodeStyleTabPage_GroupName_FunctionalInterfaces;

@@ -4411,6 +4411,191 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testUseLazyLogicalOperator() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.List;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    private static int staticField = 0;\n" //
+				+ "\n" //
+				+ "    public void replaceOperatorWithPrimitiveTypes(boolean b1, boolean b2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = b1 & b2;\n" //
+				+ "        boolean newBoolean2 = b1 | b2;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceOperatorWithExtendedOperands(boolean b1, boolean b2, boolean b3) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = b1 & b2 & b3;\n" //
+				+ "        boolean newBoolean2 = b1 | b2 | b3;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceOperatorWithWrappers(Boolean b1, Boolean b2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = b1 & b2;\n" //
+				+ "        boolean newBoolean2 = b1 | b2;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceOperatorWithIntegers(int i1, int i2) {\n" //
+				+ "        int newInteger1 = i1 & i2;\n" //
+				+ "        int newInteger2 = i1 | i2;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceOperatorWithExpressions(int i1, int i2, int i3, int i4) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = (i1 == i2) & (i3 != i4);\n" //
+				+ "        boolean newBoolean2 = (i1 == i2) | (i3 != i4);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceOperatorWithMethods(List<String> myList) {\n" //
+				+ "        boolean newBoolean1 = myList.remove(\"lorem\") & myList.remove(\"ipsum\");\n" //
+				+ "        boolean newBoolean2 = myList.remove(\"lorem\") | myList.remove(\"ipsum\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceOperatorWithArrayAccess() {\n" //
+				+ "        boolean[] booleans = new boolean[] {true, true};\n" //
+				+ "        boolean newBoolean1 = booleans[0] & booleans[1] & booleans[2];\n" //
+				+ "        boolean newBoolean2 = booleans[0] | booleans[1] | booleans[2];\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceOperatorWithDivision(int i1, int i2) {\n" //
+				+ "        boolean newBoolean1 = (i1 == 123) & ((10 / i1) == i2);\n" //
+				+ "        boolean newBoolean2 = (i1 == 123) | ((10 / i1) == i2);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceOperatorWithMethodOnLeftOperand(List<String> myList, boolean b1, boolean b2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = myList.remove(\"lorem\") & b1 & b2;\n" //
+				+ "        boolean newBoolean2 = myList.remove(\"lorem\") | b1 | b2;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceOperatorWithIncrements(int i1, int i2, int i3, int i4) {\n" //
+				+ "        boolean newBoolean1 = (i1 == i2) & (i3 != i4++);\n" //
+				+ "        boolean newBoolean2 = (i1 == i2) & (i3 != ++i4);\n" //
+				+ "        boolean newBoolean3 = (i1 == i2) & (i3 != i4--);\n" //
+				+ "        boolean newBoolean4 = (i1 == i2) & (i3 != --i4);\n" //
+				+ "\n" //
+				+ "        boolean newBoolean5 = (i1 == i2) | (i3 != i4++);\n" //
+				+ "        boolean newBoolean6 = (i1 == i2) | (i3 != ++i4);\n" //
+				+ "        boolean newBoolean7 = (i1 == i2) | (i3 != i4--);\n" //
+				+ "        boolean newBoolean8 = (i1 == i2) | (i3 != --i4);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceOperatorWithAssignments(int i1, int i2, boolean b1, boolean b2) {\n" //
+				+ "        boolean newBoolean1 = (i1 == i2) & (b1 = b2);\n" //
+				+ "        boolean newBoolean2 = (i1 == i2) | (b1 = b2);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private class SideEffect {\n" //
+				+ "        private SideEffect() {\n" //
+				+ "            staticField++;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceOperatorWithInstanciations(Boolean b1) {\n" //
+				+ "        boolean newBoolean1 = b1 & new SideEffect() instanceof SideEffect;\n" //
+				+ "        boolean newBoolean2 = b1 | new SideEffect() instanceof SideEffect;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.USE_LAZY_LOGICAL_OPERATOR);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.List;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    private static int staticField = 0;\n" //
+				+ "\n" //
+				+ "    public void replaceOperatorWithPrimitiveTypes(boolean b1, boolean b2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = b1 && b2;\n" //
+				+ "        boolean newBoolean2 = b1 || b2;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceOperatorWithExtendedOperands(boolean b1, boolean b2, boolean b3) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = b1 && b2 && b3;\n" //
+				+ "        boolean newBoolean2 = b1 || b2 || b3;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceOperatorWithWrappers(Boolean b1, Boolean b2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = b1 && b2;\n" //
+				+ "        boolean newBoolean2 = b1 || b2;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceOperatorWithIntegers(int i1, int i2) {\n" //
+				+ "        int newInteger1 = i1 & i2;\n" //
+				+ "        int newInteger2 = i1 | i2;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceOperatorWithExpressions(int i1, int i2, int i3, int i4) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = (i1 == i2) && (i3 != i4);\n" //
+				+ "        boolean newBoolean2 = (i1 == i2) || (i3 != i4);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceOperatorWithMethods(List<String> myList) {\n" //
+				+ "        boolean newBoolean1 = myList.remove(\"lorem\") & myList.remove(\"ipsum\");\n" //
+				+ "        boolean newBoolean2 = myList.remove(\"lorem\") | myList.remove(\"ipsum\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceOperatorWithArrayAccess() {\n" //
+				+ "        boolean[] booleans = new boolean[] {true, true};\n" //
+				+ "        boolean newBoolean1 = booleans[0] & booleans[1] & booleans[2];\n" //
+				+ "        boolean newBoolean2 = booleans[0] | booleans[1] | booleans[2];\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceOperatorWithDivision(int i1, int i2) {\n" //
+				+ "        boolean newBoolean1 = (i1 == 123) & ((10 / i1) == i2);\n" //
+				+ "        boolean newBoolean2 = (i1 == 123) | ((10 / i1) == i2);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceOperatorWithMethodOnLeftOperand(List<String> myList, boolean b1, boolean b2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = myList.remove(\"lorem\") && b1 && b2;\n" //
+				+ "        boolean newBoolean2 = myList.remove(\"lorem\") || b1 || b2;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceOperatorWithIncrements(int i1, int i2, int i3, int i4) {\n" //
+				+ "        boolean newBoolean1 = (i1 == i2) & (i3 != i4++);\n" //
+				+ "        boolean newBoolean2 = (i1 == i2) & (i3 != ++i4);\n" //
+				+ "        boolean newBoolean3 = (i1 == i2) & (i3 != i4--);\n" //
+				+ "        boolean newBoolean4 = (i1 == i2) & (i3 != --i4);\n" //
+				+ "\n" //
+				+ "        boolean newBoolean5 = (i1 == i2) | (i3 != i4++);\n" //
+				+ "        boolean newBoolean6 = (i1 == i2) | (i3 != ++i4);\n" //
+				+ "        boolean newBoolean7 = (i1 == i2) | (i3 != i4--);\n" //
+				+ "        boolean newBoolean8 = (i1 == i2) | (i3 != --i4);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceOperatorWithAssignments(int i1, int i2, boolean b1, boolean b2) {\n" //
+				+ "        boolean newBoolean1 = (i1 == i2) & (b1 = b2);\n" //
+				+ "        boolean newBoolean2 = (i1 == i2) | (b1 = b2);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private class SideEffect {\n" //
+				+ "        private SideEffect() {\n" //
+				+ "            staticField++;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotReplaceOperatorWithInstanciations(Boolean b1) {\n" //
+				+ "        boolean newBoolean1 = b1 & new SideEffect() instanceof SideEffect;\n" //
+				+ "        boolean newBoolean2 = b1 | new SideEffect() instanceof SideEffect;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+	}
+
+	@Test
 	public void testPushDownNegationReplaceDoubleNegation() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //

@@ -7064,9 +7064,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.expressions">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.LazyLogicalCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.lazy_logical"
+            runAfter="org.eclipse.jdt.ui.cleanup.lambda_and_method_ref">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.NumberSuffixCleanUp"
             id="org.eclipse.jdt.ui.cleanup.number_suffix"
-            runAfter="org.eclipse.jdt.ui.cleanup.lambda_and_method_ref">
+            runAfter="org.eclipse.jdt.ui.cleanup.lazy_logical">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp"
