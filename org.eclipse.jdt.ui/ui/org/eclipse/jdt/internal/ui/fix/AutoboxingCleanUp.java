@@ -83,15 +83,13 @@ public class AutoboxingCleanUp extends AbstractMultiFix {
 	public String getPreview() {
 		StringBuilder bld= new StringBuilder();
 		bld.append("\n");
-		bld.append("public class Foo {\n");
-		bld.append("    public static void bar() {\n");
 		if (isEnabled(CleanUpConstants.USE_AUTOBOXING)) {
-			bld.append("        Character c = '*';\n");
+			bld.append("Integer i = 0;\n");
+			bld.append("Character c = '*';\n");
 		} else {
-			bld.append("        Character c = Character.valueOf('*');\n");
+			bld.append("Integer i = Integer.valueOf(0);\n");
+			bld.append("Character c = Character.valueOf('*');\n");
 		}
-		bld.append("    }\n");
-		bld.append("}\n");
 
 		return bld.toString();
 	}
