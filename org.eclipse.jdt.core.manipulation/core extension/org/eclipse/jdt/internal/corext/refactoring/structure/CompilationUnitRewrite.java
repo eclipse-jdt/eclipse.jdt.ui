@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,12 +11,14 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Red Hat Inc, - copied to jdt.core.manipulation
+ *     Microsoft Corporation - Add fFormattingOptions field - https://bugs.eclipse.org/551601
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -56,7 +58,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
  * Statements recovery is enabled by default, but can be disabled with <code>setStatementsRecovery(false)</code>.
  * Bindings recovery is disabled by default, but can be enabled with <code>setBindingRecovery(true)</code>.
  * </p>
- * 
+ *
  * see JDTUIHelperClasses
  */
 public class CompilationUnitRewrite {
@@ -73,24 +75,30 @@ public class CompilationUnitRewrite {
 	private boolean fBindingsRecovery= false;
 	private final WorkingCopyOwner fOwner;
 	private IDocument fRememberContent= null;
+	private Map<String, String> fFormattingOptions;
 
 
 	public CompilationUnitRewrite(ICompilationUnit cu) {
-		this(null, cu, null);
+		this(null, cu, null, null);
 	}
 
 	public CompilationUnitRewrite(WorkingCopyOwner owner, ICompilationUnit cu) {
-		this(owner, cu, null);
+		this(owner, cu, null, null);
 	}
 
 	public CompilationUnitRewrite(ICompilationUnit cu, CompilationUnit root) {
-		this(null, cu, root);
+		this(null, cu, root, null);
 	}
 
 	public CompilationUnitRewrite(WorkingCopyOwner owner, ICompilationUnit cu, CompilationUnit root) {
+		this(owner, cu, root, null);
+	}
+
+	public CompilationUnitRewrite(WorkingCopyOwner owner, ICompilationUnit cu, CompilationUnit root, Map<String, String> options) {
 		fOwner= owner;
 		fCu= cu;
 		fRoot= root;
+		fFormattingOptions = options;
 	}
 
 	public void rememberContent() {
@@ -183,7 +191,7 @@ public class CompilationUnitRewrite {
 	/**
 	 * Creates a compilation unit change based on the events recorded by this compilation unit
 	 * rewrite.
-	 * 
+	 *
 	 * @param generateGroups <code>true</code> to generate text edit groups, <code>false</code> otherwise
 	 * @return a {@link CompilationUnitChange}, or <code>null</code> for an empty change
 	 * @throws CoreException when text buffer acquisition or import rewrite text edit creation fails
@@ -199,7 +207,7 @@ public class CompilationUnitRewrite {
 	 * rewrite.
 	 * <p>
 	 * DO NOT REMOVE, used in a product.</p>
-	 * 
+	 *
 	 * @return a {@link org.eclipse.jdt.core.refactoring.CompilationUnitChange}, or <code>null</code> for an empty change
 	 * @throws CoreException when text buffer acquisition or import rewrite text edit creation fails
 	 * @throws IllegalArgumentException when the AST rewrite encounters problems
@@ -216,7 +224,7 @@ public class CompilationUnitRewrite {
 	/**
 	 * Creates a compilation unit change based on the events recorded by this compilation unit
 	 * rewrite.
-	 * 
+	 *
 	 * @param generateGroups <code>true</code> to generate text edit groups, <code>false</code>
 	 *            otherwise
 	 * @param monitor the progress monitor or <code>null</code>
@@ -276,9 +284,13 @@ public class CompilationUnitRewrite {
 				clearGroupDescriptionEdits();
 				TextEdit rewriteEdit;
 				if (fRememberContent != null) {
-					rewriteEdit= fRewrite.rewriteAST(fRememberContent, fCu.getJavaProject().getOptions(true));
+					rewriteEdit= fRewrite.rewriteAST(fRememberContent, fFormattingOptions == null ? fCu.getJavaProject().getOptions(true) : fFormattingOptions);
 				} else {
-					rewriteEdit= fRewrite.rewriteAST();
+					if (fFormattingOptions == null) {
+						rewriteEdit= fRewrite.rewriteAST();
+					} else {
+						rewriteEdit= fRewrite.rewriteAST(new Document(fCu.getSource()), fFormattingOptions);
+					}
 				}
 				if (!isEmptyEdit(rewriteEdit)) {
 					multiEdit.addChild(rewriteEdit);
@@ -386,5 +398,13 @@ public class CompilationUnitRewrite {
 			TextEditGroup group= iter.next();
 			group.clearTextEdits();
 		}
+	}
+
+	public Map<String, String> getFormattingOptions() {
+		return fFormattingOptions;
+	}
+
+	public void setFormattingOptions(Map<String, String> formattingOptions) {
+		fFormattingOptions = formattingOptions;
 	}
 }
