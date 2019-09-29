@@ -1781,6 +1781,27 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	public void testDoNotUseAutoboxingOnString() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public static void doNotUseAutoboxingOnString() {\n" //
+				+ "        Integer i = Integer.valueOf(\"1\");\n" //
+				+ "        Long l = Long.valueOf(\"1\");\n" //
+				+ "        Short s = Short.valueOf(\"1\");\n" //
+				+ "        Float f = Float.valueOf(\"1\");\n" //
+				+ "        Double d = Double.valueOf(\"1\");\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.USE_AUTOBOXING);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
 	public void testUseUnboxingOnPrimitiveDeclaration() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //

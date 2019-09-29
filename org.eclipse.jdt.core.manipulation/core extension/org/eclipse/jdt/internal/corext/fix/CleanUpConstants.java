@@ -900,6 +900,19 @@ public class CleanUpConstants {
 
 
 	/**
+	 * Use directly map method.<br>
+	 * <br>
+	 * Possible values: {TRUE, FALSE}<br>
+	 * <br>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.14
+	 */
+	public static final String USE_DIRECTLY_MAP_METHOD= "cleanup.use_directly_map_method"; //$NON-NLS-1$
+
+
+	/**
 	 * Removes redundant semicolons.<br>
 	 * <br>
 	 * Possible values: {TRUE, FALSE}<br>

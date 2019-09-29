@@ -4705,6 +4705,144 @@ public class CleanUpTest extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
 	}
 
+	public void testMapMethodRatherThanKeySetMethod() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Map;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public int replaceUnnecesaryCallsToMapKeySet(Map<String, String> map) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int x = map.keySet().size();\n" //
+				+ "\n" //
+				+ "        if (map.keySet().contains(\"hello\")) {\n" //
+				+ "            map.keySet().remove(\"hello\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (map.keySet().remove(\"world\")) {\n" //
+				+ "            // Cannot replace, because `map.removeKey(\"world\") != null` is not strictly equivalent\n" //
+				+ "            System.out.println(map);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        map.keySet().clear();\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        if (map.keySet().isEmpty()) {\n" //
+				+ "            x++;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return x;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.USE_DIRECTLY_MAP_METHOD);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Map;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public int replaceUnnecesaryCallsToMapKeySet(Map<String, String> map) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int x = map.size();\n" //
+				+ "\n" //
+				+ "        if (map.containsKey(\"hello\")) {\n" //
+				+ "            map.remove(\"hello\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (map.keySet().remove(\"world\")) {\n" //
+				+ "            // Cannot replace, because `map.removeKey(\"world\") != null` is not strictly equivalent\n" //
+				+ "            System.out.println(map);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        map.clear();\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        if (map.isEmpty()) {\n" //
+				+ "            x++;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return x;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+	}
+
+	public void testMapMethodRatherThanValuesMethod() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Map;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public int replaceUnnecesaryCallsToMapValues(Map<String, String> map) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int x = map.values().size();\n" //
+				+ "\n" //
+				+ "        if (map.values().contains(\"hello\")) {\n" //
+				+ "            map.values().remove(\"hello\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (map.values().remove(\"world\")) {\n" //
+				+ "            System.out.println(map);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        map.values().clear();\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        if (map.values().contains(\"foo\")) {\n" //
+				+ "            x++;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return x;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.USE_DIRECTLY_MAP_METHOD);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Map;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public int replaceUnnecesaryCallsToMapValues(Map<String, String> map) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int x = map.size();\n" //
+				+ "\n" //
+				+ "        if (map.containsValue(\"hello\")) {\n" //
+				+ "            map.values().remove(\"hello\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (map.values().remove(\"world\")) {\n" //
+				+ "            System.out.println(map);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        map.clear();\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        if (map.containsValue(\"foo\")) {\n" //
+				+ "            x++;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return x;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+	}
+
 	public void testSerialVersionBug139381() throws Exception {
 
 		JavaProjectHelper.set14CompilerOptions(fJProject1);

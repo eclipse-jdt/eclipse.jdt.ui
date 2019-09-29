@@ -18,12 +18,14 @@
  *       https://bugs.eclipse.org/bugs/show_bug.cgi?id=51540).
  *     Stephan Herrmann - Configuration for
  *		 Bug 463360 - [override method][null] generating method override should not create redundant null annotations
+ *     Fabrice TIERCELIN - Methods to identify a signature
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.dom;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -55,9 +57,9 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
-import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
@@ -81,10 +83,10 @@ import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
-import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MemberValuePair;
@@ -1575,7 +1577,6 @@ public class ASTNodes {
 			return ((SimpleName) name).isDeclaration();
 		}
 	}
-
     /**
      * Returns whether the provided method invocation invokes a method with the
      * provided method signature. The method signature is compared against the
@@ -1590,35 +1591,285 @@ public class ASTNodes {
      * @return true if the provided method invocation matches the provided method
      *         signature, false otherwise
      */
-	public static boolean usesGivenSignature(MethodInvocation node, String typeQualifiedName, String methodName,
-            String... parameterTypesQualifiedNames) {
-		if (node == null
-				|| node.resolveMethodBinding() == null
-				|| !node.resolveMethodBinding().getDeclaringClass().getQualifiedName().equals(typeQualifiedName)
-				|| !node.getName().getIdentifier().equals(methodName)) {
+	public static boolean usesGivenSignature(final MethodInvocation node, final String typeQualifiedName, final String methodName,
+			final String... parameterTypesQualifiedNames) {
+		return node != null
+				&& usesGivenSignature(node.resolveMethodBinding(), typeQualifiedName, methodName, parameterTypesQualifiedNames);
+	}
+
+	/**
+	 * Returns whether the provided method binding has the provided method signature. The method
+	 * signature is compared against the erasure of the invoked method.
+	 *
+	 * @param methodBinding the method binding to compare
+	 * @param typeQualifiedName the qualified name of the type declaring the method
+	 * @param methodName the method name
+	 * @param parameterTypesQualifiedNames the qualified names of the parameter types
+	 * @return true if the provided method invocation matches the provided method signature, false
+	 *         otherwise
+	 */
+	private static boolean usesGivenSignature(final IMethodBinding methodBinding, final String typeQualifiedName, final String methodName,
+			final String... parameterTypesQualifiedNames) {
+		// Let's do the fast checks first
+		if (methodBinding == null || !methodName.equals(methodBinding.getName())
+				|| methodBinding.getParameterTypes().length != parameterTypesQualifiedNames.length) {
 			return false;
 		}
 
-		if (node.arguments() == null && parameterTypesQualifiedNames == null) {
+		// OK more heavy checks now
+		ITypeBinding declaringClass= methodBinding.getDeclaringClass();
+		ITypeBinding implementedType= findImplementedType(declaringClass, typeQualifiedName);
+
+		if (parameterTypesMatch(implementedType, methodBinding, parameterTypesQualifiedNames)) {
 			return true;
 		}
 
-		if (node.arguments() == null || parameterTypesQualifiedNames == null) {
+		// A lot more heavy checks
+		IMethodBinding overriddenMethod= findOverridenMethod(declaringClass, typeQualifiedName, methodName,
+				parameterTypesQualifiedNames);
+
+		if (overriddenMethod != null && methodBinding.overrides(overriddenMethod)) {
 			return true;
 		}
 
-		if (node.arguments().size() == parameterTypesQualifiedNames.length) {
-			return true;
+		IMethodBinding methodDeclaration= methodBinding.getMethodDeclaration();
+		return methodDeclaration != null && methodDeclaration != methodBinding
+				&& usesGivenSignature(methodDeclaration, typeQualifiedName, methodName, parameterTypesQualifiedNames);
+	}
+
+	private static boolean parameterTypesMatch(final ITypeBinding implementedType, final IMethodBinding methodBinding,
+			final String[] parameterTypesQualifiedNames) {
+		if (implementedType != null && !implementedType.isRawType()) {
+			ITypeBinding erasure= implementedType.getErasure();
+
+			if (erasure.isGenericType() || erasure.isParameterizedType()) {
+				return parameterizedTypesMatch(implementedType, erasure, methodBinding);
+			}
 		}
 
-		for (int i= 0; i < parameterTypesQualifiedNames.length; i++) {
-			if (((Type) node.typeArguments().get(i)).resolveBinding() == null
-					|| ((Type) node.typeArguments().get(i)).resolveBinding().getQualifiedName() != parameterTypesQualifiedNames[i]) {
+		return implementedType != null && concreteTypesMatch(methodBinding.getParameterTypes(), parameterTypesQualifiedNames);
+	}
+
+	private static IMethodBinding findOverridenMethod(final ITypeBinding typeBinding, final String typeQualifiedName,
+			final String methodName, final String[] parameterTypesQualifiedNames) {
+		// Superclass
+		ITypeBinding superclassBinding= typeBinding.getSuperclass();
+
+		if (superclassBinding != null) {
+			superclassBinding= superclassBinding.getErasure();
+
+			if (typeQualifiedName.equals(superclassBinding.getErasure().getQualifiedName())) {
+				// Found the type
+				return findOverridenMethod(methodName, parameterTypesQualifiedNames,
+						superclassBinding.getDeclaredMethods());
+			}
+
+			IMethodBinding overridenMethod= findOverridenMethod(superclassBinding, typeQualifiedName, methodName,
+					parameterTypesQualifiedNames);
+
+			if (overridenMethod != null) {
+				return overridenMethod;
+			}
+		}
+
+		// Interfaces
+		for (ITypeBinding itfBinding : typeBinding.getInterfaces()) {
+			itfBinding= itfBinding.getErasure();
+
+			if (typeQualifiedName.equals(itfBinding.getQualifiedName())) {
+				// Found the type
+				return findOverridenMethod(methodName, parameterTypesQualifiedNames, itfBinding.getDeclaredMethods());
+			}
+
+			IMethodBinding overridenMethod= findOverridenMethod(itfBinding, typeQualifiedName, methodName,
+					parameterTypesQualifiedNames);
+
+			if (overridenMethod != null) {
+				return overridenMethod;
+			}
+		}
+
+		return null;
+	}
+
+	private static IMethodBinding findOverridenMethod(final String methodName, final String[] parameterTypesQualifiedNames,
+			final IMethodBinding[] declaredMethods) {
+		for (IMethodBinding methodBinding : declaredMethods) {
+			IMethodBinding methodDecl= methodBinding.getMethodDeclaration();
+
+			if (methodBinding.getName().equals(methodName) && methodDecl != null
+					&& concreteTypesMatch(methodDecl.getParameterTypes(), parameterTypesQualifiedNames)) {
+				return methodBinding;
+			}
+		}
+
+		return null;
+	}
+
+	private static boolean concreteTypesMatch(final ITypeBinding[] typeBindings, final String... typesQualifiedNames) {
+		if (typeBindings.length != typesQualifiedNames.length) {
+			return false;
+		}
+
+		for (int i= 0; i < typesQualifiedNames.length; i++) {
+			if (!typesQualifiedNames[i].equals(typeBindings[i].getQualifiedName())
+					&& !typesQualifiedNames[i].equals(Bindings.getBoxedTypeName(typeBindings[i].getQualifiedName()))
+					&& !typesQualifiedNames[i].equals(Bindings.getUnboxedTypeName(typeBindings[i].getQualifiedName()))) {
 				return false;
 			}
 		}
 
 		return true;
+	}
+
+	private static boolean parameterizedTypesMatch(final ITypeBinding clazz, final ITypeBinding clazzErasure,
+			IMethodBinding methodBinding) {
+		if (clazz.isParameterizedType() && !clazz.equals(clazzErasure)) {
+			Map<ITypeBinding, ITypeBinding> genericToConcreteTypeParamsFromClass= getGenericToConcreteTypeParamsMap(
+					clazz, clazzErasure);
+
+			for (IMethodBinding declaredMethod : clazzErasure.getDeclaredMethods()) {
+				if (declaredMethod.getName().equals(methodBinding.getName())) {
+					Map<ITypeBinding, ITypeBinding> genericToConcreteTypeParams= getGenericToConcreteTypeParamsMap(
+							methodBinding, declaredMethod);
+					genericToConcreteTypeParams.putAll(genericToConcreteTypeParamsFromClass);
+
+					if (parameterizedTypesMatch(genericToConcreteTypeParams, methodBinding, declaredMethod)) {
+						return true;
+					}
+				}
+			}
+		}
+
+		return false;
+	}
+
+	private static Map<ITypeBinding, ITypeBinding> getGenericToConcreteTypeParamsMap(final IMethodBinding method,
+			final IMethodBinding methodErasure) {
+		return getGenericToConcreteTypeParamsMap(method.getTypeArguments(), methodErasure.getTypeParameters());
+	}
+
+	private static Map<ITypeBinding, ITypeBinding> getGenericToConcreteTypeParamsMap(final ITypeBinding clazz,
+			final ITypeBinding clazzErasure) {
+		return getGenericToConcreteTypeParamsMap(clazz.getTypeArguments(), clazzErasure.getTypeParameters());
+	}
+
+	private static Map<ITypeBinding, ITypeBinding> getGenericToConcreteTypeParamsMap(final ITypeBinding[] typeParams,
+			final ITypeBinding[] genericTypeParams) {
+		final Map<ITypeBinding, ITypeBinding> results= new HashMap<>();
+		for (int i= 0; i < genericTypeParams.length && i < typeParams.length; i++) {
+			results.put(genericTypeParams[i], typeParams[i]);
+		}
+		return results;
+	}
+
+	private static boolean parameterizedTypesMatch(final Map<ITypeBinding, ITypeBinding> genericToConcreteTypeParams,
+			final IMethodBinding parameterizedMethod, final IMethodBinding genericMethod) {
+		ITypeBinding[] paramTypes= parameterizedMethod.getParameterTypes();
+		ITypeBinding[] genericParamTypes= genericMethod.getParameterTypes();
+
+		if (paramTypes.length != genericParamTypes.length) {
+			return false;
+		}
+
+		for (int i= 0; i < genericParamTypes.length; i++) {
+			ITypeBinding genericParamType= genericParamTypes[i];
+			ITypeBinding concreteParamType= null;
+
+			if (genericParamType.isArray()) {
+				ITypeBinding concreteElementType= genericToConcreteTypeParams.get(genericParamType.getElementType());
+
+				if (concreteElementType != null) {
+					concreteParamType= concreteElementType.createArrayType(genericParamType.getDimensions());
+				}
+			} else {
+				concreteParamType= genericToConcreteTypeParams.get(genericParamType);
+			}
+
+			if (concreteParamType == null) {
+				concreteParamType= genericParamType;
+			}
+
+			final ITypeBinding erasure1= paramTypes[i].getErasure();
+			final String erasureName1;
+			if (erasure1.isPrimitive()) {
+				erasureName1= Bindings.getBoxedTypeName(erasure1.getQualifiedName());
+			} else {
+				erasureName1= erasure1.getQualifiedName();
+			}
+
+			final ITypeBinding erasure2= concreteParamType.getErasure();
+			final String erasureName2;
+			if (erasure2.isPrimitive()) {
+				erasureName2= Bindings.getBoxedTypeName(erasure2.getQualifiedName());
+			} else {
+				erasureName2= erasure2.getQualifiedName();
+			}
+
+			if (!erasureName1.equals(erasureName2)) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Returns the type binding for the provided qualified type name if it can be found in the type
+	 * hierarchy of the provided type binding.
+	 *
+	 * @param typeBinding the type binding to analyze
+	 * @param qualifiedTypeName the qualified type name to find
+	 * @return the type binding for the provided qualified type name if it can be found in the type
+	 *         hierarchy of the provided type binding, or {@code null} otherwise
+	 */
+	private static ITypeBinding findImplementedType(final ITypeBinding typeBinding, final String qualifiedTypeName) {
+		if (typeBinding == null) {
+			return null;
+		}
+
+		ITypeBinding typeErasure= typeBinding.getErasure();
+
+		if (qualifiedTypeName.equals(typeBinding.getQualifiedName())
+				|| qualifiedTypeName.equals(typeErasure.getQualifiedName())) {
+			return typeBinding;
+		}
+
+		return findImplementedType2(typeBinding, qualifiedTypeName);
+	}
+
+	private static ITypeBinding findImplementedType2(final ITypeBinding typeBinding, final String qualifiedTypeName) {
+		final ITypeBinding superclass= typeBinding.getSuperclass();
+
+		if (superclass != null) {
+			String superClassQualifiedName= superclass.getErasure().getQualifiedName();
+
+			if (qualifiedTypeName.equals(superClassQualifiedName)) {
+				return superclass;
+			}
+
+			ITypeBinding implementedType= findImplementedType2(superclass, qualifiedTypeName);
+
+			if (implementedType != null) {
+				return implementedType;
+			}
+		}
+
+		for (ITypeBinding itfBinding : typeBinding.getInterfaces()) {
+			String itfQualifiedName= itfBinding.getErasure().getQualifiedName();
+
+			if (qualifiedTypeName.equals(itfQualifiedName)) {
+				return itfBinding;
+			}
+
+			ITypeBinding implementedType= findImplementedType2(itfBinding, qualifiedTypeName);
+
+			if (implementedType != null) {
+				return implementedType;
+			}
+		}
+
+		return null;
 	}
 
 	public static Modifier findModifierNode(int flag, List<IExtendedModifier> modifiers) {

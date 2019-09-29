@@ -26,6 +26,7 @@ import org.eclipse.jdt.internal.ui.fix.AutoboxingCleanUp;
 import org.eclipse.jdt.internal.ui.fix.PushDownNegationCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantModifiersCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantSemicolonsCleanUp;
+import org.eclipse.jdt.internal.ui.fix.MapMethodCleanUp;
 import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
 import org.eclipse.jdt.internal.ui.fix.TypeParametersCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnboxingCleanUp;
@@ -34,12 +35,7 @@ import org.eclipse.jdt.internal.ui.fix.UnnecessaryCodeCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
 
 public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
-
 	public static final String ID= "org.eclipse.jdt.ui.cleanup.tabpage.unnecessary_code"; //$NON-NLS-1$
-
-    public UnnecessaryCodeTabPage() {
-    	super();
-    }
 
 	@Override
 	protected AbstractCleanUp[] createPreviewCleanUps(Map<String, String> values) {
@@ -51,6 +47,7 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 				new AutoboxingCleanUp(values),
 				new UnboxingCleanUp(values),
 				new PushDownNegationCleanUp(values),
+				new MapMethodCleanUp(values),
 				new RedundantModifiersCleanUp(values),
 				new RedundantSemicolonsCleanUp(values),
 				new UnnecessaryArrayCreationCleanUp(values)
@@ -59,7 +56,6 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 
     @Override
 	protected void doCreatePreferences(Composite composite, int numColumns) {
-
     	Group unusedCodeGroup= createGroup(5, composite, CleanUpMessages.UnnecessaryCodeTabPage_GroupName_UnusedCode);
 
     	CheckboxPreference removeImports= createCheckboxPref(unusedCodeGroup, 5, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_UnusedImports, CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS, CleanUpModifyDialog.FALSE_TRUE);
@@ -97,6 +93,10 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 				CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(pushDownNegation);
 
+		CheckboxPreference mapMethod= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_UseDirectlyMapMethod,
+				CleanUpConstants.USE_DIRECTLY_MAP_METHOD, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(mapMethod);
+
 		CheckboxPreference modifiers= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_RedundantModifiers, CleanUpConstants.REMOVE_REDUNDANT_MODIFIERS, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(modifiers);
 
@@ -106,5 +106,4 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 		CheckboxPreference arrayCreation= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_UnnecessaryVarargsArrayCreation, CleanUpConstants.REMOVE_UNNECESSARY_ARRAY_CREATION, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(arrayCreation);
     }
-
 }
