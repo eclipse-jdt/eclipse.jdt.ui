@@ -1084,6 +1084,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("        try {\n");
 		buf.append("            goo().substring(2);\n");
 		buf.append("        } catch (IOException e) {\n");
+		buf.append("        } catch (ParseException e) {\n");
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
@@ -1852,6 +1853,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("    public void m1() throws IOException {\n");
 		buf.append("        try {\n");
 		buf.append("            m2();\n");
+		buf.append("        } catch (IOException e) {\n");
 		buf.append("        } catch (ParseException e) {\n");
 		buf.append("        } catch (MyException e) {\n");
 		buf.append("        }\n");

@@ -10,6 +10,7 @@ public class TestMethodThrowsException1 {
 	public void test() throws IOException {
 		try {
 			/*[*/thrower();/*]*/
+		} catch (FileNotFoundException e) {
 		} catch (SQLException e) {
 		}
 	}

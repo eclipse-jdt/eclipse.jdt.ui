@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -44,7 +44,7 @@ public class SurroundWithTryCatchAnalyzer extends SurroundWithAnalyzer {
 
 		super.endVisit(node);
 		if (enclosingNode != null && !getStatus().hasFatalError()) {
-			fExceptions= ExceptionAnalyzer.perform(enclosingNode, getSelection());
+			fExceptions= ExceptionAnalyzer.perform(enclosingNode, getSelection(), false);
 			if (fExceptions == null || fExceptions.length == 0) {
 				if (enclosingNode instanceof MethodReference) {
 					invalidSelection(RefactoringCoreMessages.SurroundWithTryCatchAnalyzer_doesNotContain);

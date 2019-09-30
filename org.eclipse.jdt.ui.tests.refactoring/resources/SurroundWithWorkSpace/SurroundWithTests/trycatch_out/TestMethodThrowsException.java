@@ -9,6 +9,7 @@ public class TestMethodThrowsException {
 	public void test() throws SQLException {
 		try {
 			/*[*/thrower();/*]*/
+		} catch (SQLException e) {
 		} catch (IOException e) {
 		}
 	}
