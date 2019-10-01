@@ -21,15 +21,30 @@ import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.ASTRequestor;
+import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+
+import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.PreferenceConstants;
+
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -408,5 +423,58 @@ public class BindingLabels18Test extends AbstractBindingLabelsTest {
 
 		lab= getBindingLabel(thread, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.F_PRE_TYPE_SIGNATURE | JavaElementLabels.F_POST_QUALIFIED);
 		assertLinkMatch(lab, "@{{org.test|TA1}} {{java.lang|String}} @{{org.test|TA2}}[] @{{org.test|TA3}}[] argss - {{org.test.C|test}}({{java.lang|String}}[][])");
+	}
+	public void testCaptureBinding18() throws CoreException {
+		IJavaProject javaProject= JavaProjectHelper.createJavaProject("P", "bin");
+		try {
+			JavaProjectHelper.addRTJar12(javaProject, false);
+			JavaProjectHelper.set12CompilerOptions(javaProject, false);
+			IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(javaProject, "src");
+	
+			IPackageFragment pack1= sourceFolder.createPackageFragment("p", false, null);
+			StringBuilder buf= new StringBuilder();
+			buf.append("package p;\n");
+			buf.append("\n");
+			buf.append("import java.util.List;\n");
+			buf.append("\n");
+			buf.append("public class Test {\n");
+			buf.append("\n");
+			buf.append("	protected <E extends Comparable<E>> List<E> createEmptySet() {\n");
+			buf.append("		return null;\n");
+			buf.append("	}\n");
+			buf.append("\n");
+			buf.append("	public void emptySet() {\n");
+			buf.append("		s = createEmptySet();\n");
+			buf.append("	}\n");
+			buf.append("\n");
+			buf.append("}");
+			String content= buf.toString();
+			ICompilationUnit cu= pack1.createCompilationUnit("Test.java", content, false, null);
+			IJavaElement enclElement= cu.getTypes()[0].getMethods()[1];
+			
+			class MyASTRequestor extends ASTRequestor {
+				CompilationUnit ast;
+				@Override
+				public void acceptAST(ICompilationUnit source, CompilationUnit unit) {
+					this.ast= unit;
+				}
+			}
+			ASTParser parser= ASTParser.newParser(AST.JLS13);
+			parser.setResolveBindings(true);
+			parser.setBindingsRecovery(true);
+			parser.setProject(javaProject);
+			MyASTRequestor requestor= new MyASTRequestor();
+			parser.createASTs(new ICompilationUnit[] {cu}, new String[0], requestor, null);
+			
+			MethodDeclaration method= ((TypeDeclaration)requestor.ast.types().get(0)).getMethods()[1];
+			Assignment assignment= (Assignment) ((ExpressionStatement) method.getBody().statements().get(0)).getExpression();
+			Name name= (Name) assignment.getLeftHandSide();
+			ITypeBinding binding= ASTResolving.guessBindingForReference(name);
+
+			String lab= JavaElementLinks.getBindingLabel(binding, enclElement, JavaElementLabels.ALL_DEFAULT, true);
+			assertLinkMatch(lab, "{{java.util|List}}<?>");
+		} finally {
+			JavaProjectHelper.delete(javaProject);
+		}
 	}
 }
