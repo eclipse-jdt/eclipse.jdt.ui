@@ -85,32 +85,39 @@ import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
 
 /**
- * This class is an extension to the existing {@link JavaContext} and includes/provides additional information
- * on the current node which the code completion was invoked on.
+ * This class is an extension to the existing {@link JavaContext} and includes/provides additional
+ * information on the current node which the code completion was invoked on.
  */
 public class JavaPostfixContext extends JavaContext {
 
-	private static final Object CONTEXT_TYPE_ID = "postfix"; //$NON-NLS-1$
-	private static final String OBJECT_SIGNATURE = "java.lang.Object"; //$NON-NLS-1$
-	private static final String ID_SEPARATOR = "��"; //$NON-NLS-1$
+	private static final Object CONTEXT_TYPE_ID= "postfix"; //$NON-NLS-1$
 
-	private static final Pattern INNER_EXPRESSION_PATTERN = Pattern.compile("\\$\\{([a-zA-Z]*):" + InnerExpressionResolver.INNER_EXPRESSION_VAR + "\\(([^\\$|\\{|\\}]*)\\)\\}"); //$NON-NLS-1$ //$NON-NLS-2$
-	private static final Pattern CLASS_NAME_PATTERN = Pattern.compile("[a-zA-Z0-9$_\\.]+"); //$NON-NLS-1$
+	private static final String OBJECT_SIGNATURE= "java.lang.Object"; //$NON-NLS-1$
+
+	private static final String ID_SEPARATOR= "��"; //$NON-NLS-1$
+
+	private static final Pattern INNER_EXPRESSION_PATTERN= Pattern.compile("\\$\\{([a-zA-Z]*):" + InnerExpressionResolver.INNER_EXPRESSION_VAR + "\\(([^\\$|\\{|\\}]*)\\)\\}"); //$NON-NLS-1$ //$NON-NLS-2$
+
+	private static final Pattern CLASS_NAME_PATTERN= Pattern.compile("[a-zA-Z0-9$_\\.]+"); //$NON-NLS-1$
 
 	private ASTNode selectedNode;
 
 	private Map<ASTNode, Region> nodeRegions;
+
 	private Map<TemplateVariable, int[]> variableOutOfRangeOffsets;
 
 	private boolean domInitialized;
+
 	private BodyDeclaration bodyDeclaration;
+
 	private ASTNode parentDeclaration;
+
 	private CompletionContext completionCtx;
 
 	public JavaPostfixContext(TemplateContextType type,
 			IDocument document, final int completionOffset, int completionLength,
 			ICompilationUnit compilationUnit) {
-		this(type, document, completionOffset, completionLength, compilationUnit, null, null,null);
+		this(type, document, completionOffset, completionLength, compilationUnit, null, null, null);
 	}
 
 	public JavaPostfixContext(TemplateContextType type,
@@ -126,20 +133,22 @@ public class JavaPostfixContext extends JavaContext {
 		super(type, document, offset, length, compilationUnit);
 
 		completionCtx= context;
-		nodeRegions = new HashMap<>();
-		variableOutOfRangeOffsets = new HashMap<>();
+		nodeRegions= new HashMap<>();
+		variableOutOfRangeOffsets= new HashMap<>();
 		nodeRegions.put(currentNode, calculateNodeRegion(currentNode));
 		nodeRegions.put(parentNode, calculateNodeRegion(parentNode));
-		selectedNode = findBestASTNodeSelection(currentNode);
+		selectedNode= findBestASTNodeSelection(currentNode);
 	}
 
 	/**
-	 * Determines and returns the <i>best</i> {@link ASTNode} to apply a postfix
-	 * template in the current context.<br/>
+	 * Determines and returns the <i>best</i> {@link ASTNode} to apply a postfix template in the
+	 * current context.<br/>
 	 * Examples for <i>best</i> {@link ASTNode}s:
 	 * <ul>
-	 * <li><code>new Integer(0).$</code> will return the {@link ASTNode} for <code>new Integer(0)</code></li>
+	 * <li><code>new Integer(0).$</code> will return the {@link ASTNode} for
+	 * <code>new Integer(0)</code></li>
 	 * </ul>
+	 * 
 	 * @param currentNode The {@link ASTNode} of the completion.
 	 * @return An {@link ASTNode} of the key set of {@link #nodeRegions}.
 	 */
@@ -152,14 +161,14 @@ public class JavaPostfixContext extends JavaContext {
 		// `1 + 1 + 1.$` should select `1 + 1 + 1` (note that the expression is not parenthesized).
 		// `foo("asdf" + true.$` should select `true` since `"asdf" + true` makes no sense for any template in this context.
 		// `"test" + true.$` should select `true` for "sif" template and `"test" + true` for "var" template.
-		ASTNode result = currentNode;
-		int currMax = getNodeBegin(currentNode) + getNodeLength(currentNode);
-		Set<ASTNode> nodes = nodeRegions.keySet();
+		ASTNode result= currentNode;
+		int currMax= getNodeBegin(currentNode) + getNodeLength(currentNode);
+		Set<ASTNode> nodes= nodeRegions.keySet();
 		for (ASTNode n : nodes) {
-			int end = getNodeBegin(n) + getNodeLength(n);
+			int end= getNodeBegin(n) + getNodeLength(n);
 			if (end > currMax && end <= getCompletionOffset()) {
-				currMax = end;
-				result = n;
+				currMax= end;
+				result= n;
 			}
 		}
 		return result;
@@ -167,16 +176,18 @@ public class JavaPostfixContext extends JavaContext {
 
 	/**
 	 * Adds a new field to the {@link AST} using the given type and variable name. The method
-	 * returns a {@link TextEdit} which can then be applied using the {@link #applyTextEdit(TextEdit)} method.
+	 * returns a {@link TextEdit} which can then be applied using the
+	 * {@link #applyTextEdit(TextEdit)} method.
 	 *
 	 * @param type fully qualified type name of the new field
 	 * @param varName suggested field name
 	 * @param publicField <code>true</code> if the new field should be public
 	 * @param staticField <code>true</code> if the new field should be static
-	 * @param finalField  <code>true</code> if the new field should be final
-	 * @param value the initialization value of the new field. If this parameter is <code>null</code> or empty the field is not initialized.
-	 * @return a {@link TextEdit} which represents the changes which would be made, or <code>null</code> if the field
-	 * can not be created.
+	 * @param finalField <code>true</code> if the new field should be final
+	 * @param value the initialization value of the new field. If this parameter is
+	 *            <code>null</code> or empty the field is not initialized.
+	 * @return a {@link TextEdit} which represents the changes which would be made, or
+	 *         <code>null</code> if the field can not be created.
 	 */
 	public TextEdit addField(String type, String varName, boolean publicField, boolean staticField, boolean finalField, String value) {
 		if (isReadOnly())
@@ -185,34 +196,34 @@ public class JavaPostfixContext extends JavaContext {
 		if (!domInitialized)
 			initDomAST();
 
-		boolean isStatic = isBodyStatic();
-		int modifiers = (!publicField) ? Modifier.PRIVATE : Modifier.PUBLIC;
+		boolean isStatic= isBodyStatic();
+		int modifiers= (!publicField) ? Modifier.PRIVATE : Modifier.PUBLIC;
 		if (isStatic || staticField) {
-			modifiers |= Modifier.STATIC;
+			modifiers|= Modifier.STATIC;
 		}
 		if (finalField) {
-			modifiers |= Modifier.FINAL;
+			modifiers|= Modifier.FINAL;
 		}
 
 		ASTRewrite rewrite= ASTRewrite.create(parentDeclaration.getAST());
 		addFieldDeclaration(rewrite, parentDeclaration, modifiers, varName, type, value);
-		TextEdit te = rewrite.rewriteAST(getDocument(), null);
+		TextEdit te= rewrite.rewriteAST(getDocument(), null);
 		return te;
 	}
 
 	private VariableDeclarationFragment addFieldDeclaration(ASTRewrite rewrite, ASTNode newTypeDecl, int modifiers, String varName, String qualifiedName, String value) {
-		ChildListPropertyDescriptor property = ASTNodes.getBodyDeclarationsProperty(newTypeDecl);
-		List<BodyDeclaration> decls = ASTNodes.getBodyDeclarations(newTypeDecl);
-		AST ast = newTypeDecl.getAST();
+		ChildListPropertyDescriptor property= ASTNodes.getBodyDeclarationsProperty(newTypeDecl);
+		List<BodyDeclaration> decls= ASTNodes.getBodyDeclarations(newTypeDecl);
+		AST ast= newTypeDecl.getAST();
 
-		VariableDeclarationFragment newDeclFrag = ast.newVariableDeclarationFragment();
+		VariableDeclarationFragment newDeclFrag= ast.newVariableDeclarationFragment();
 		newDeclFrag.setName(ast.newSimpleName(varName));
 
-		Type type = createType(Signature.createTypeSignature(qualifiedName, true), ast);
+		Type type= createType(Signature.createTypeSignature(qualifiedName, true), ast);
 
 		if (value != null && value.trim().length() > 0) {
-			Expression e = createExpression(value);
-			Expression ne = (Expression) ASTNode.copySubtree(ast, e);
+			Expression e= createExpression(value);
+			Expression ne= (Expression) ASTNode.copySubtree(ast, e);
 			newDeclFrag.setInitializer(ne);
 		} else {
 			if (Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers)) {
@@ -220,11 +231,11 @@ public class JavaPostfixContext extends JavaContext {
 			}
 		}
 
-		FieldDeclaration newDecl = ast.newFieldDeclaration(newDeclFrag);
+		FieldDeclaration newDecl= ast.newFieldDeclaration(newDeclFrag);
 		newDecl.setType(type);
 		newDecl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, modifiers));
 
-		int insertIndex = findFieldInsertIndex(decls, getCompletionOffset(), modifiers);
+		int insertIndex= findFieldInsertIndex(decls, getCompletionOffset(), modifiers);
 		rewrite.getListRewrite(newTypeDecl, property).insertAt(newDecl, insertIndex, null);
 
 		return newDeclFrag;
@@ -238,9 +249,9 @@ public class JavaPostfixContext extends JavaContext {
 	 * @return returns unqualified name of the generic type
 	 */
 	public String addImportGenericClass(String className) {
-		Matcher m = CLASS_NAME_PATTERN.matcher(className);
-		List<String> classNames = new ArrayList<>();
-		Map<String, String> classNameMapping = new HashMap<>();
+		Matcher m= CLASS_NAME_PATTERN.matcher(className);
+		List<String> classNames= new ArrayList<>();
+		Map<String, String> classNameMapping= new HashMap<>();
 		while (m.find()) {
 			classNames.add(className.substring(m.start(), m.end()));
 		}
@@ -259,19 +270,19 @@ public class JavaPostfixContext extends JavaContext {
 		 * 4. replace the unique identifiers with the mapped values
 		 */
 		Collections.sort(classNames, (arg0, arg1) -> arg1.length() - arg0.length());
-		for (int i = 0; i < classNames.size(); i++) {
-			className = className.replace(classNames.get(i), ID_SEPARATOR + i + ID_SEPARATOR);
+		for (int i= 0; i < classNames.size(); i++) {
+			className= className.replace(classNames.get(i), ID_SEPARATOR + i + ID_SEPARATOR);
 			classNameMapping.put(classNames.get(i), addImport(classNames.get(i)));
 		}
-		for (int i = 0; i < classNames.size(); i++) {
-			className = className.replace(ID_SEPARATOR + i + ID_SEPARATOR, classNameMapping.get(classNames.get(i)));
+		for (int i= 0; i < classNames.size(); i++) {
+			className= className.replace(ID_SEPARATOR + i + ID_SEPARATOR, classNameMapping.get(classNames.get(i)));
 		}
 		return className;
 	}
 
 	/**
-	 * Applies a {@link TextEdit} to the {@link IDocument} of this context and updates
-	 * the completion offset variable.
+	 * Applies a {@link TextEdit} to the {@link IDocument} of this context and updates the
+	 * completion offset variable.
 	 *
 	 * @param te {@link TextEdit} to apply
 	 * @return <code>true</code> if the method was successful, <code>false</code> otherwise
@@ -291,8 +302,8 @@ public class JavaPostfixContext extends JavaContext {
 		if (node == null) {
 			return new Region(0, 0);
 		}
-		int start = getNodeBegin(node);
-		int end = getCompletionOffset() - getPrefixKey().length() - start - 1; // TODO Not entirely correct but good enough for our needs (calculation should be similar to getNodeBegin(..))
+		int start= getNodeBegin(node);
+		int end= getCompletionOffset() - getPrefixKey().length() - start - 1; // TODO Not entirely correct but good enough for our needs (calculation should be similar to getNodeBegin(..))
 		return new Region(start, end);
 	}
 
@@ -318,111 +329,111 @@ public class JavaPostfixContext extends JavaContext {
 		// For this purpose we have to resolve the inner_expression variable of the template
 		// This approach is much faster then delegating this to the existing TemplateTranslator class
 		// (Maybe this hard-coded dependency to the inner expression variable is a little bit weird)
-		Matcher matcher = INNER_EXPRESSION_PATTERN.matcher(template.getPattern());
-		boolean result = true;
+		Matcher matcher= INNER_EXPRESSION_PATTERN.matcher(template.getPattern());
+		boolean result= true;
 
 		while (matcher.find()) {
-			String[] types = matcher.group(2).split(","); //$NON-NLS-1$
+			String[] types= matcher.group(2).split(","); //$NON-NLS-1$
 			for (String s : types) {
 				if (!Arrays.asList(InnerExpressionResolver.FLAGS).contains(s)) {
-					result = false;
+					result= false;
 					if (this.isNodeResolvingTo(selectedNode, s.trim()) == true) {
 						return true;
 					}
 				}
 			}
-	    }
+		}
 		return result;
 	}
 
 	private boolean containsNestedCapture(String signature) {
-        return signature.length() > 1 && signature.indexOf(Signature.C_CAPTURE, 1) != -1;
-    }
+		return signature.length() > 1 && signature.indexOf(Signature.C_CAPTURE, 1) != -1;
+	}
 
 	private Expression createExpression(String expr) {
-		ASTParser parser = ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
+		ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 		parser.setKind(ASTParser.K_EXPRESSION);
 		parser.setResolveBindings(true);
 		parser.setSource(expr.toCharArray());
-		ASTNode astNode = parser.createAST(new NullProgressMonitor());
+		ASTNode astNode= parser.createAST(new NullProgressMonitor());
 		return (Expression) astNode;
 	}
 
 	private Type createType(String typeSig, AST ast) {
-		int sigKind = Signature.getTypeSignatureKind(typeSig);
-        switch (sigKind) {
-            case Signature.BASE_TYPE_SIGNATURE:
-                return ast.newPrimitiveType(PrimitiveType.toCode(Signature.toString(typeSig)));
-            case Signature.ARRAY_TYPE_SIGNATURE:
-                Type elementType = createType(Signature.getElementType(typeSig), ast);
-                return ast.newArrayType(elementType, Signature.getArrayCount(typeSig));
-            case Signature.CLASS_TYPE_SIGNATURE:
-                String erasureSig = Signature.getTypeErasure(typeSig);
+		int sigKind= Signature.getTypeSignatureKind(typeSig);
+		switch (sigKind) {
+			case Signature.BASE_TYPE_SIGNATURE:
+				return ast.newPrimitiveType(PrimitiveType.toCode(Signature.toString(typeSig)));
+			case Signature.ARRAY_TYPE_SIGNATURE:
+				Type elementType= createType(Signature.getElementType(typeSig), ast);
+				return ast.newArrayType(elementType, Signature.getArrayCount(typeSig));
+			case Signature.CLASS_TYPE_SIGNATURE:
+				String erasureSig= Signature.getTypeErasure(typeSig);
 
-                String erasureName = Signature.toString(erasureSig);
-                if (erasureSig.charAt(0) == Signature.C_RESOLVED) {
-                    erasureName = addImport(erasureName);
-                }
+				String erasureName= Signature.toString(erasureSig);
+				if (erasureSig.charAt(0) == Signature.C_RESOLVED) {
+					erasureName= addImport(erasureName);
+				}
 
-                Type baseType= ast.newSimpleType(ast.newName(erasureName));
-                String[] typeArguments = Signature.getTypeArguments(typeSig);
-                if (typeArguments.length > 0) {
-                    ParameterizedType type = ast.newParameterizedType(baseType);
-                    List<Type> argNodes = type.typeArguments();
-                    for (int i = 0; i < typeArguments.length; i++) {
-                        String curr = typeArguments[i];
-                        if (containsNestedCapture(curr)) {
-                            argNodes.add(ast.newWildcardType());
-                        } else {
-                            argNodes.add(createType(curr, ast));
-                        }
-                    }
-                    return type;
-                }
-                return baseType;
-            case Signature.TYPE_VARIABLE_SIGNATURE:
-                return ast.newSimpleType(ast.newSimpleName(Signature.toString(typeSig)));
-            case Signature.WILDCARD_TYPE_SIGNATURE:
-                WildcardType wildcardType= ast.newWildcardType();
-                char ch = typeSig.charAt(0);
-                if (ch != Signature.C_STAR) {
-                    Type bound= createType(typeSig.substring(1), ast);
-                    wildcardType.setBound(bound, ch == Signature.C_EXTENDS);
-                }
-                return wildcardType;
-            case Signature.CAPTURE_TYPE_SIGNATURE:
-                return createType(typeSig.substring(1), ast);
-        }
-        return ast.newSimpleType(ast.newName(OBJECT_SIGNATURE));
+				Type baseType= ast.newSimpleType(ast.newName(erasureName));
+				String[] typeArguments= Signature.getTypeArguments(typeSig);
+				if (typeArguments.length > 0) {
+					ParameterizedType type= ast.newParameterizedType(baseType);
+					List<Type> argNodes= type.typeArguments();
+					for (int i= 0; i < typeArguments.length; i++) {
+						String curr= typeArguments[i];
+						if (containsNestedCapture(curr)) {
+							argNodes.add(ast.newWildcardType());
+						} else {
+							argNodes.add(createType(curr, ast));
+						}
+					}
+					return type;
+				}
+				return baseType;
+			case Signature.TYPE_VARIABLE_SIGNATURE:
+				return ast.newSimpleType(ast.newSimpleName(Signature.toString(typeSig)));
+			case Signature.WILDCARD_TYPE_SIGNATURE:
+				WildcardType wildcardType= ast.newWildcardType();
+				char ch= typeSig.charAt(0);
+				if (ch != Signature.C_STAR) {
+					Type bound= createType(typeSig.substring(1), ast);
+					wildcardType.setBound(bound, ch == Signature.C_EXTENDS);
+				}
+				return wildcardType;
+			case Signature.CAPTURE_TYPE_SIGNATURE:
+				return createType(typeSig.substring(1), ast);
+		}
+		return ast.newSimpleType(ast.newName(OBJECT_SIGNATURE));
 	}
 
 	@Override
 	public TemplateBuffer evaluate(Template template)
 			throws BadLocationException, TemplateException {
-		TemplateBuffer result = super.evaluate(template);
+		TemplateBuffer result= super.evaluate(template);
 
 		// After the template buffer has been created we are able to add out of range offsets
 		// This is not possible beforehand as it will result in an exception!
 		for (TemplateVariable tv : result.getVariables()) {
-            int[] outOfRangeOffsets = variableOutOfRangeOffsets.get(tv);
-            if (outOfRangeOffsets != null && outOfRangeOffsets.length > 0) {
-            	int[] offsets = tv.getOffsets();
-            	int[] newOffsets = new int[outOfRangeOffsets.length + offsets.length];
-            	System.arraycopy(offsets, 0, newOffsets, 0, offsets.length);
-            	for (int i = 0; i < outOfRangeOffsets.length; i++) {
-            		newOffsets[i + offsets.length] = outOfRangeOffsets[i];
-            	}
-            	tv.setOffsets(newOffsets);
-            }
+			int[] outOfRangeOffsets= variableOutOfRangeOffsets.get(tv);
+			if (outOfRangeOffsets != null && outOfRangeOffsets.length > 0) {
+				int[] offsets= tv.getOffsets();
+				int[] newOffsets= new int[outOfRangeOffsets.length + offsets.length];
+				System.arraycopy(offsets, 0, newOffsets, 0, offsets.length);
+				for (int i= 0; i < outOfRangeOffsets.length; i++) {
+					newOffsets[i + offsets.length]= outOfRangeOffsets[i];
+				}
+				tv.setOffsets(newOffsets);
+			}
 		}
 		return result;
 	}
 
 	private int findFieldInsertIndex(List<BodyDeclaration> decls, int currPos, int modifiers) {
-		for (int i = decls.size() - 1; i >= 0; i--) {
-			ASTNode curr = decls.get(i);
+		for (int i= decls.size() - 1; i >= 0; i--) {
+			ASTNode curr= decls.get(i);
 			if (curr instanceof FieldDeclaration && currPos > curr.getStartPosition() + curr.getLength()
-					 && ((FieldDeclaration) curr).getModifiers() == modifiers) {
+					&& ((FieldDeclaration) curr).getModifiers() == modifiers) {
 				return i + 1;
 			}
 		}
@@ -431,6 +442,7 @@ public class JavaPostfixContext extends JavaContext {
 
 	/**
 	 * Returns the {@link Region} which represents the source region of the affected statement.
+	 * 
 	 * @return the source region of the affected statement
 	 */
 	public Region getAffectedSourceRegion() {
@@ -438,7 +450,7 @@ public class JavaPostfixContext extends JavaContext {
 	}
 
 	public String getAffectedStatement() {
-		Region r = getAffectedSourceRegion();
+		Region r= getAffectedSourceRegion();
 		try {
 			return getDocument().get(r.getOffset(), r.getLength());
 		} catch (BadLocationException e) {
@@ -453,7 +465,8 @@ public class JavaPostfixContext extends JavaContext {
 	}
 
 	/**
-	 * Returns the fully qualified name the node of the current code completion invocation resolves to.
+	 * Returns the fully qualified name the node of the current code completion invocation resolves
+	 * to.
 	 *
 	 * @return a fully qualified type signature or the name of the base type.
 	 */
@@ -463,6 +476,7 @@ public class JavaPostfixContext extends JavaContext {
 
 	/**
 	 * Calculates the beginning position of a given {@link ASTNode}
+	 * 
 	 * @param node the {@link ASTNode}
 	 * @return source position of the node or -1 if the given node is <code>null</code>
 	 */
@@ -474,7 +488,7 @@ public class JavaPostfixContext extends JavaContext {
 			return ((MethodInvocation) node.getParent()).getStartPosition();
 		} else if (node.getParent() instanceof FieldAccess || node.getParent() instanceof SuperFieldAccess) {
 			return node.getParent().getStartPosition();
-		} else if  (node instanceof Name) {
+		} else if (node instanceof Name) {
 			ASTNode n= node;
 			while (n.getParent() instanceof QualifiedName) {
 				n= n.getParent();
@@ -486,6 +500,7 @@ public class JavaPostfixContext extends JavaContext {
 
 	/**
 	 * Calculates the length of a given {@link ASTNode}
+	 * 
 	 * @param node the {@link ASTNode}
 	 * @return length of the node or -1 if the given node is <code>null</code>
 	 */
@@ -497,20 +512,19 @@ public class JavaPostfixContext extends JavaContext {
 	}
 
 	/**
-	 * Returns the current prefix of the key which was typed in.
-	 * <br/>
-	 * Examples:
-	 * <code>
+	 * Returns the current prefix of the key which was typed in. <br/>
+	 * Examples: <code>
 	 * <br/>
 	 * new Object().		=> getPrefixKey() returns ""<br/>
 	 * new Object().a		=> getPrefixKey() returns "a"<br/>
 	 * new object().asdf	=> getPrefixKey() returns "asdf"<br/>
 	 * </code>
+	 * 
 	 * @return an empty string or a string which represents the prefix of the key which was typed in
 	 */
 	private String getPrefixKey() {
 		if (completionCtx != null) {
-			IDocument document = getDocument();
+			IDocument document= getDocument();
 			int start= completionCtx.getTokenStart();
 			int end= completionCtx.getTokenEnd();
 			try {
@@ -524,8 +538,8 @@ public class JavaPostfixContext extends JavaContext {
 
 	@Override
 	public int getStart() {
-		int result = super.getStart();
-		result -= getAffectedSourceRegion().getLength() + 1;
+		int result= super.getStart();
+		result-= getAffectedSourceRegion().getLength() + 1;
 		return result;
 	}
 
@@ -536,38 +550,39 @@ public class JavaPostfixContext extends JavaContext {
 		ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 		parser.setSource(getCompilationUnit());
 		parser.setResolveBindings(true);
-		ASTNode domAst = parser.createAST(new NullProgressMonitor());
+		ASTNode domAst= parser.createAST(new NullProgressMonitor());
 
-		NodeFinder nf = new NodeFinder(domAst, getCompletionOffset(), 1);
-		ASTNode cv = nf.getCoveringNode();
+		NodeFinder nf= new NodeFinder(domAst, getCompletionOffset(), 1);
+		ASTNode cv= nf.getCoveringNode();
 
-		bodyDeclaration = ASTResolving.findParentBodyDeclaration(cv);
-		parentDeclaration = ASTResolving.findParentType(cv);
-		domInitialized = true;
+		bodyDeclaration= ASTResolving.findParentBodyDeclaration(cv);
+		parentDeclaration= ASTResolving.findParentType(cv);
+		domInitialized= true;
 	}
 
 	/**
-	 * Returns <code>true</code> if the type or one of its supertypes of a given {@link ASTNode} resolves to a given type signature.
-	 * <br/>
-	 * Examples:
-	 * <br/>
+	 * Returns <code>true</code> if the type or one of its supertypes of a given {@link ASTNode}
+	 * resolves to a given type signature. <br/>
+	 * Examples: <br/>
 	 * <code>
 	 * <br/>
 	 * isNodeResolvingTo(node of type java.lang.String, "java.lang.Object") returns true<br/>
 	 * isNodeResolvingTo(node of type java.lang.String, "java.lang.Iterable") returns false<br/>
 	 * </code>
 	 *
-	 * TODO Implement this method without using the recursive helper method if there are any performance/stackoverflow issues
+	 * TODO Implement this method without using the recursive helper method if there are any
+	 * performance/stackoverflow issues
 	 *
 	 * @param node an ASTNode
 	 * @param signature a fully qualified type
-	 * @return true if the type of the given ASTNode itself or one of its superclass/superinterfaces resolves to the given signature. false otherwise.
+	 * @return true if the type of the given ASTNode itself or one of its superclass/superinterfaces
+	 *         resolves to the given signature. false otherwise.
 	 */
 	private boolean isNodeResolvingTo(ASTNode node, String signature) {
 		if (signature == null || signature.trim().length() == 0) {
 			return true;
 		}
-		ITypeBinding tb = resolveNodeToBinding(node);
+		ITypeBinding tb= resolveNodeToBinding(node);
 		if (tb != null && tb.isPrimitive()) {
 			return (new String(tb.getQualifiedName()).equals(signature));
 		} else {
@@ -576,8 +591,8 @@ public class JavaPostfixContext extends JavaContext {
 	}
 
 	private boolean isBodyStatic() {
-		boolean isAnonymous = parentDeclaration.getNodeType() == ASTNode.ANONYMOUS_CLASS_DECLARATION;
-		boolean isStatic = Modifier.isStatic(bodyDeclaration.getModifiers()) && !isAnonymous;
+		boolean isAnonymous= parentDeclaration.getNodeType() == ASTNode.ANONYMOUS_CLASS_DECLARATION;
+		boolean isStatic= Modifier.isStatic(bodyDeclaration.getModifiers()) && !isAnonymous;
 		return isStatic;
 	}
 
@@ -585,10 +600,10 @@ public class JavaPostfixContext extends JavaContext {
 		if (variableOutOfRangeOffsets.get(var) == null) {
 			variableOutOfRangeOffsets.put(var, new int[] { absoluteOffset });
 		} else {
-			int[] temp = variableOutOfRangeOffsets.get(var);
-			int[] newArr = new int[temp.length + 1];
+			int[] temp= variableOutOfRangeOffsets.get(var);
+			int[] newArr= new int[temp.length + 1];
 			System.arraycopy(temp, 0, newArr, 0, temp.length);
-			newArr[temp.length] = absoluteOffset;
+			newArr[temp.length]= absoluteOffset;
 			variableOutOfRangeOffsets.put(var, newArr);
 		}
 	}
@@ -598,16 +613,16 @@ public class JavaPostfixContext extends JavaContext {
 			return ((StringLiteral) node).resolveTypeBinding();
 		}
 
-		ITypeBinding [] res= new ITypeBinding[1];
+		ITypeBinding[] res= new ITypeBinding[1];
 		node.accept(new ASTVisitor() {
 			@Override
 			public boolean visit(SimpleName n) {
-				IBinding b = n.resolveBinding();
+				IBinding b= n.resolveBinding();
 				if (b instanceof IVariableBinding) {
-					IVariableBinding vb = (IVariableBinding) b;
+					IVariableBinding vb= (IVariableBinding) b;
 					res[0]= vb.getType();
 				} else if (b instanceof IMethodBinding) {
-					IMethodBinding mb = (IMethodBinding) b;
+					IMethodBinding mb= (IMethodBinding) b;
 					res[0]= mb.getReturnType();
 				}
 				return false;
@@ -615,9 +630,9 @@ public class JavaPostfixContext extends JavaContext {
 
 			@Override
 			public boolean visit(QualifiedName n) {
-				IBinding b = n.resolveBinding();
+				IBinding b= n.resolveBinding();
 				if (b instanceof IVariableBinding) {
-					IVariableBinding vb = (IVariableBinding) b;
+					IVariableBinding vb= (IVariableBinding) b;
 					res[0]= vb.getType();
 				}
 				return false;
@@ -667,14 +682,14 @@ public class JavaPostfixContext extends JavaContext {
 	}
 
 	private String resolveNodeToTypeString(ASTNode node) {
-		ITypeBinding b = resolveNodeToBinding(node);
+		ITypeBinding b= resolveNodeToBinding(node);
 		if (b == null) {
 			return OBJECT_SIGNATURE;
 		}
-		String result = b.getQualifiedName();
+		String result= b.getQualifiedName();
 		if (result.isEmpty() && b.isCapture()) {
 			for (ITypeBinding tb : b.getTypeBounds()) {
-				result = tb.getQualifiedName();
+				result= tb.getQualifiedName();
 				if (!result.isEmpty()) {
 					return result;
 				}
@@ -684,11 +699,14 @@ public class JavaPostfixContext extends JavaContext {
 	}
 
 	/**
-	 * This is a recursive method which performs a depth first search in the inheritance graph of the given {@link ITypeBinding}.
+	 * This is a recursive method which performs a depth first search in the inheritance graph of
+	 * the given {@link ITypeBinding}.
 	 *
 	 * @param sb a TypeBinding
 	 * @param signature a fully qualified type
-	 * @return <code>true</code> if the given TypeBinding itself or one of its superclass/superinterfaces resolves to the given signature, <code>false</code> otherwise.
+	 * @return <code>true</code> if the given TypeBinding itself or one of its
+	 *         superclass/superinterfaces resolves to the given signature, <code>false</code>
+	 *         otherwise.
 	 */
 	private boolean resolvesReferenceBindingTo(ITypeBinding sb, String signature) {
 		if (sb == null) {
@@ -697,37 +715,37 @@ public class JavaPostfixContext extends JavaContext {
 		if (new String(sb.getQualifiedName()).startsWith(signature) || (sb.isArray() && "array".equals(signature))) { //$NON-NLS-1$
 			return true;
 		}
-		List<ITypeBinding> bindings = new ArrayList<>();
+		List<ITypeBinding> bindings= new ArrayList<>();
 		Collections.addAll(bindings, sb.getInterfaces());
 		bindings.add(sb.getSuperclass());
-		boolean result = false;
-		Iterator<ITypeBinding> it = bindings.iterator();
+		boolean result= false;
+		Iterator<ITypeBinding> it= bindings.iterator();
 		while (it.hasNext() && result == false) {
-			result = resolvesReferenceBindingTo(it.next(), signature);
+			result= resolvesReferenceBindingTo(it.next(), signature);
 		}
 		return result;
 	}
 
 	public String[] suggestFieldName(String type, String[] excludes, boolean staticField, boolean finalField) throws IllegalArgumentException {
-		int dim = 0;
+		int dim= 0;
 		while (type.endsWith("[]")) { //$NON-NLS-1$
 			dim++;
-			type = type.substring(0, type.length() - 2);
+			type= type.substring(0, type.length() - 2);
 		}
 
-		IJavaProject project = getJavaProject();
-		int namingConventions = 0;
+		IJavaProject project= getJavaProject();
+		int namingConventions= 0;
 		if (staticField && finalField) {
-			namingConventions = NamingConventions.VK_STATIC_FINAL_FIELD;
+			namingConventions= NamingConventions.VK_STATIC_FINAL_FIELD;
 		} else if (staticField && !finalField) {
-			namingConventions = NamingConventions.VK_STATIC_FIELD;
+			namingConventions= NamingConventions.VK_STATIC_FIELD;
 		} else {
-			namingConventions = NamingConventions.VK_INSTANCE_FIELD;
+			namingConventions= NamingConventions.VK_INSTANCE_FIELD;
 		}
 		if (project != null)
 			return StubUtility.getVariableNameSuggestions(namingConventions, project, type, dim, Arrays.asList(excludes), true);
 
-		return new String[] {Signature.getSimpleName(type).toLowerCase()};
+		return new String[] { Signature.getSimpleName(type).toLowerCase() };
 	}
 
 	public String[] suggestFieldName(String type, boolean finalField, boolean forceStatic) {

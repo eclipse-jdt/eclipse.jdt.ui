@@ -30,36 +30,40 @@ import org.eclipse.jface.text.templates.TemplateVariable;
  */
 public class ActualTypeResolver extends TypeResolver {
 
-	private static final String EMPTY = ""; //$NON-NLS-1$
-	private static final String ARRAY_BRACKETS = "[]"; //$NON-NLS-1$
-	private static final String GENERIC_CLASS_SERPATOR = ","; //$NON-NLS-1$
-	private static final String GENERIC_CLASS_OPEN_DIAMOND = "<"; //$NON-NLS-1$
-	private static final String GENERIC_CLASS_CLOSE_DIAMOND = ">"; //$NON-NLS-1$
+	private static final String EMPTY= ""; //$NON-NLS-1$
+
+	private static final String ARRAY_BRACKETS= "[]"; //$NON-NLS-1$
+
+	private static final String GENERIC_CLASS_SERPATOR= ","; //$NON-NLS-1$
+
+	private static final String GENERIC_CLASS_OPEN_DIAMOND= "<"; //$NON-NLS-1$
+
+	private static final String GENERIC_CLASS_CLOSE_DIAMOND= ">"; //$NON-NLS-1$
 
 	@Override
 	public void resolve(TemplateVariable variable, TemplateContext context) {
-		List<String> params = variable.getVariableType().getParams();
+		List<String> params= variable.getVariableType().getParams();
 		if (params.size() > 0 && context instanceof JavaContext) {
-			String param = params.get(0);
-			JavaPostfixContext jc = (JavaPostfixContext) context;
-			TemplateVariable ref = jc.getTemplateVariable(param);
-			MultiVariable mv = (MultiVariable) variable;
+			String param= params.get(0);
+			JavaPostfixContext jc= (JavaPostfixContext) context;
+			TemplateVariable ref= jc.getTemplateVariable(param);
+			MultiVariable mv= (MultiVariable) variable;
 
 			if (ref instanceof JavaVariable) {
 				// Reference is another variable
-				JavaVariable refVar = (JavaVariable) ref;
+				JavaVariable refVar= (JavaVariable) ref;
 				jc.addDependency(refVar, mv);
 
-				param = refVar.getParamType();
+				param= refVar.getParamType();
 				if (param != null && EMPTY.equals(param) == false) {
-					param = param.replace("? extends ", EMPTY); //$NON-NLS-1$
+					param= param.replace("? extends ", EMPTY); //$NON-NLS-1$
 					if (param.endsWith(ARRAY_BRACKETS)) { // In case of List<Integer[]> we must not remove []
 						// Variable is an array, i.e. String[] or List<String>[]
 						// Actual type is supposed to be:
 						// String[]							=> String
 						// List<String>[]					=> List<String>
 						// String[][]						=> String[]
-						param = param.substring(0, param.length() - 2);
+						param= param.substring(0, param.length() - 2);
 					} else if (param.endsWith(">")) { // Generic //$NON-NLS-1$
 						// Actual type of a generic is supposed to be:
 						// List<Integer>					=> Integer
@@ -67,16 +71,16 @@ public class ActualTypeResolver extends TypeResolver {
 						// List<Map<Integer,String>>		=> Map<Integer,String>
 						// Map<Integer,String>>				=> Integer
 						// Something<Integer,Float,String>	=> Integer
-						param = param.substring(param.indexOf(GENERIC_CLASS_OPEN_DIAMOND) + 1,
+						param= param.substring(param.indexOf(GENERIC_CLASS_OPEN_DIAMOND) + 1,
 								param.lastIndexOf(GENERIC_CLASS_CLOSE_DIAMOND));
 						if (!param.contains(GENERIC_CLASS_OPEN_DIAMOND) && param.contains(GENERIC_CLASS_SERPATOR)) {
-							param = param.substring(0, param.indexOf(GENERIC_CLASS_SERPATOR));
+							param= param.substring(0, param.indexOf(GENERIC_CLASS_SERPATOR));
 						}
 					} else {
 						// The given parameter is already an actual type
 					}
 
-					String reference = jc.addImportGenericClass(param);
+					String reference= jc.addImportGenericClass(param);
 					mv.setValue(reference);
 					mv.setUnambiguous(true);
 

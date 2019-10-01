@@ -63,23 +63,23 @@ public class PostfixCompletionProposalComputer extends AbstractTemplateCompletio
 	private final PostfixTemplateEngine postfixCompletionTemplateEngine;
 
 	public PostfixCompletionProposalComputer() {
-		ContextTypeRegistry templateContextRegistry = JavaPlugin.getDefault().getTemplateContextRegistry();
-		postfixCompletionTemplateEngine = createTemplateEngine(templateContextRegistry, JavaPostfixContextType.ID_ALL);
+		ContextTypeRegistry templateContextRegistry= JavaPlugin.getDefault().getTemplateContextRegistry();
+		postfixCompletionTemplateEngine= createTemplateEngine(templateContextRegistry, JavaPostfixContextType.ID_ALL);
 	}
 
 	private static PostfixTemplateEngine createTemplateEngine(ContextTypeRegistry templateContextRegistry, String contextTypeId) {
-		TemplateContextType contextType = templateContextRegistry.getContextType(contextTypeId);
+		TemplateContextType contextType= templateContextRegistry.getContextType(contextTypeId);
 		Assert.isNotNull(contextType);
 		return new PostfixTemplateEngine(contextType);
 	}
 
 	@Override
 	protected TemplateEngine computeCompletionEngine(JavaContentAssistInvocationContext context) {
-		ICompilationUnit unit = context.getCompilationUnit();
+		ICompilationUnit unit= context.getCompilationUnit();
 		if (unit == null)
 			return null;
 
-		IJavaProject javaProject = unit.getJavaProject();
+		IJavaProject javaProject= unit.getJavaProject();
 		if (javaProject == null)
 			return null;
 
@@ -88,7 +88,7 @@ public class PostfixCompletionProposalComputer extends AbstractTemplateCompletio
 			return null;
 		}
 
-		CompletionContext coreContext = context.getCoreContext();
+		CompletionContext coreContext= context.getCoreContext();
 		if (coreContext != null) {
 			int tokenLocation= coreContext.getTokenLocation();
 			int tokenStart= coreContext.getTokenStart();
@@ -134,72 +134,72 @@ public class PostfixCompletionProposalComputer extends AbstractTemplateCompletio
 			return;
 		}
 
-		ICompilationUnit cu = (ICompilationUnit) enclosingElement.getAncestor(IJavaElement.COMPILATION_UNIT);
-		ASTParser parser = createParser(cu);
+		ICompilationUnit cu= (ICompilationUnit) enclosingElement.getAncestor(IJavaElement.COMPILATION_UNIT);
+		ASTParser parser= createParser(cu);
 		IBinding[] res;
 		try {
-			res = parser.createBindings(new IJavaElement [] { enclosingElement }, null);
+			res= parser.createBindings(new IJavaElement[] { enclosingElement }, null);
 		} catch (Exception e) {
 			return;
 		}
 
 		if (res.length > 0 && res[0] != null) {
-			parser = createParser(cu);
-			CompilationUnit cuRoot = (CompilationUnit) parser.createAST(null);
-			ASTNode completionNode = cuRoot.findDeclaringNode(res[0].getKey());
+			parser= createParser(cu);
+			CompilationUnit cuRoot= (CompilationUnit) parser.createAST(null);
+			ASTNode completionNode= cuRoot.findDeclaringNode(res[0].getKey());
 
-			ASTNode [] bestNode = new ASTNode [] {completionNode};
+			ASTNode[] bestNode= new ASTNode[] { completionNode };
 			int tokenLength= context.getToken() != null ? context.getToken().length : 0;
-			int invOffset = context.getOffset() - tokenLength - 1;
+			int invOffset= context.getOffset() - tokenLength - 1;
 			completionNode.accept(new ASTVisitor() {
 				@Override
 				public boolean visit(StringLiteral node) {
-					int start = node.getStartPosition();
+					int start= node.getStartPosition();
 					if (invOffset > start && start > bestNode[0].getStartPosition()) {
-						bestNode[0] = node;
+						bestNode[0]= node;
 					}
 					return true;
 				}
 
 				@Override
 				public boolean visit(ExpressionStatement node) {
-					int start = node.getStartPosition();
+					int start= node.getStartPosition();
 					if (invOffset > start && start > bestNode[0].getStartPosition()) {
-						bestNode[0] = node;
+						bestNode[0]= node;
 					}
 					return true;
 				}
 
 				@Override
 				public boolean visit(SimpleName node) {
-					int start = node.getStartPosition();
+					int start= node.getStartPosition();
 					if (invOffset > start && start > bestNode[0].getStartPosition()) {
-						bestNode[0] = node;
+						bestNode[0]= node;
 					}
 					return true;
 				}
 
 				@Override
 				public boolean visit(QualifiedName node) {
-					int start = node.getStartPosition();
+					int start= node.getStartPosition();
 					if (invOffset > start && start > bestNode[0].getStartPosition()) {
-						bestNode[0] = node;
+						bestNode[0]= node;
 					}
 					return true;
 				}
 
 				@Override
 				public boolean visit(BooleanLiteral node) {
-					int start = node.getStartPosition();
+					int start= node.getStartPosition();
 					if (invOffset > start && start > bestNode[0].getStartPosition()) {
-						bestNode[0] = node;
+						bestNode[0]= node;
 					}
 					return true;
 				}
 			});
 
-			completionNode = bestNode[0];
-			ASTNode completionNodeParent = findBestMatchingParentNode(completionNode);
+			completionNode= bestNode[0];
+			ASTNode completionNodeParent= findBestMatchingParentNode(completionNode);
 			postfixCompletionTemplateEngine.setASTNodes(completionNode, completionNodeParent);
 			postfixCompletionTemplateEngine.setContext(context);
 		}
@@ -208,29 +208,30 @@ public class PostfixCompletionProposalComputer extends AbstractTemplateCompletio
 	/**
 	 * This method determines the best matching parent {@link ASTNode} of the given {@link ASTNode}.
 	 * Consider the following example for the definition of <i>best matching parent</i>:<br/>
-	 * <code>("two" + 2).var$</code> has <code>"two"</code> as completion {@link ASTNode}.
-	 * The parent node is <code>"two" + 2</code> which will result in a syntactically incorrect result,
+	 * <code>("two" + 2).var$</code> has <code>"two"</code> as completion {@link ASTNode}. The
+	 * parent node is <code>"two" + 2</code> which will result in a syntactically incorrect result,
 	 * if the template is applied, because the parentheses aren't taken into account.
+	 * 
 	 * @param node The current {@link ASTNode}
 	 * @return {@link ASTNode} which either is the parent of the given node or another predecessor
-	 * 			{@link ASTNode} in the abstract syntax tree.
+	 *         {@link ASTNode} in the abstract syntax tree.
 	 */
 	private ASTNode findBestMatchingParentNode(ASTNode node) {
-		ASTNode result = node.getParent();
+		ASTNode result= node.getParent();
 		if (result instanceof InfixExpression) {
-			ASTNode completionNodeGrandParent = result.getParent();
-			int safeGuard = 0;
+			ASTNode completionNodeGrandParent= result.getParent();
+			int safeGuard= 0;
 			while (completionNodeGrandParent != null
 					&& completionNodeGrandParent instanceof ParenthesizedExpression
 					&& safeGuard++ < 64) {
-				result = completionNodeGrandParent;
-				completionNodeGrandParent = result.getParent();
+				result= completionNodeGrandParent;
+				completionNodeGrandParent= result.getParent();
 			}
 		}
 		if (node instanceof SimpleName && result instanceof SimpleType) {
-			ASTNode completionNodeGrandParent = result.getParent();
+			ASTNode completionNodeGrandParent= result.getParent();
 			if (completionNodeGrandParent instanceof ClassInstanceCreation) {
-				result = completionNodeGrandParent;
+				result= completionNodeGrandParent;
 			}
 		}
 		return result;
@@ -238,10 +239,12 @@ public class PostfixCompletionProposalComputer extends AbstractTemplateCompletio
 
 	/**
 	 * Returns true if the given offset is directly after an assist trigger character.
+	 * 
 	 * @param document the actual document of type {@link IDocument}
 	 * @param offset the current location in the document
-	 * @return <code>true</code> if the given offset is directly after an assist trigger character, <code>false</code> otherwise.
-	 * If the given offset is out of the given document <code>false</code> is returned.
+	 * @return <code>true</code> if the given offset is directly after an assist trigger character,
+	 *         <code>false</code> otherwise. If the given offset is out of the given document
+	 *         <code>false</code> is returned.
 	 */
 	private boolean isAfterTrigger(IDocument document, int offset) {
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
@@ -253,7 +256,7 @@ public class PostfixCompletionProposalComputer extends AbstractTemplateCompletio
 		}
 	}
 
-	private static ASTParser createParser (ICompilationUnit cu) {
+	private static ASTParser createParser(ICompilationUnit cu) {
 		ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 		parser.setKind(ASTParser.K_COMPILATION_UNIT);
 		parser.setProject(cu.getJavaProject());

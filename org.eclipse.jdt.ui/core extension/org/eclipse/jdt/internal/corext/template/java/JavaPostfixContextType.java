@@ -21,9 +21,10 @@ import org.eclipse.jdt.internal.corext.template.java.AbstractJavaContextType;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContext;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Position;
+
 public class JavaPostfixContextType extends AbstractJavaContextType {
 
-	public static final String ID_ALL = "postfix"; //$NON-NLS-1$
+	public static final String ID_ALL= "postfix"; //$NON-NLS-1$
 
 	public JavaPostfixContextType() {
 		this.addResolver(new InnerExpressionResolver());

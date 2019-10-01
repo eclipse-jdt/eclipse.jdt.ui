@@ -63,11 +63,11 @@ public class PostFixCompletionTest extends TestCase {
 
 	public void testStringVar() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" + 
-				"public class StringVar {\n" + 
-				"  public void test () {\n" + 
-				"    \"Some String Value\".var$\n" + 
-				"  }\n" + 
+		buf.append("package test;\n" +
+				"public class StringVar {\n" +
+				"  public void test () {\n" +
+				"    \"Some String Value\".var$\n" +
+				"  }\n" +
 				"}");
 
 		int completionIndex= getCompletionIndex(buf);
@@ -80,11 +80,11 @@ public class PostFixCompletionTest extends TestCase {
 		applyProposal(viewer, proposals, "var", completionIndex);
 
 		StringBuffer expected= new StringBuffer();
-		expected.append("package test;\n" + 
-				"public class StringVar {\n" + 
-				"  public void test () {\n" + 
-				"    String name = \"Some String Value\";\n" + 
-				"  }\n" + 
+		expected.append("package test;\n" +
+				"public class StringVar {\n" +
+				"  public void test () {\n" +
+				"    String name = \"Some String Value\";\n" +
+				"  }\n" +
 				"}");
 
 		assertEquals(expected.toString(), viewer.getDocument().get());
@@ -92,13 +92,13 @@ public class PostFixCompletionTest extends TestCase {
 
 	public void testStringVar2() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" + 
-				"\n" + 
-				"public class StringVar2 {\n" + 
-				"  public void test () {\n" + 
-				"    \"foo\".$\n" + 
-				"    if (true);\n" + 
-				"  }\n" + 
+		buf.append("package test;\n" +
+				"\n" +
+				"public class StringVar2 {\n" +
+				"  public void test () {\n" +
+				"    \"foo\".$\n" +
+				"    if (true);\n" +
+				"  }\n" +
 				"}");
 
 		int completionIndex= getCompletionIndex(buf);
@@ -111,13 +111,13 @@ public class PostFixCompletionTest extends TestCase {
 		applyProposal(viewer, proposals, "var", completionIndex);
 
 		StringBuffer expected= new StringBuffer();
-		expected.append("package test;\n" + 
-				"\n" + 
-				"public class StringVar2 {\n" + 
-				"  public void test () {\n" + 
-				"    String name = \"foo\";\n" + 
-				"    if (true);\n" + 
-				"  }\n" + 
+		expected.append("package test;\n" +
+				"\n" +
+				"public class StringVar2 {\n" +
+				"  public void test () {\n" +
+				"    String name = \"foo\";\n" +
+				"    if (true);\n" +
+				"  }\n" +
 				"}");
 
 		assertEquals(expected.toString(), viewer.getDocument().get());
@@ -125,11 +125,11 @@ public class PostFixCompletionTest extends TestCase {
 
 	public void testIntegerVar() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" + 
-				"public class IntegerVar {\n" + 
-				"  public void test () {\n" + 
-				"    new Integer(0).var$\n" + 
-				"  }\n" + 
+		buf.append("package test;\n" +
+				"public class IntegerVar {\n" +
+				"  public void test () {\n" +
+				"    new Integer(0).var$\n" +
+				"  }\n" +
 				"}");
 
 		int completionIndex= getCompletionIndex(buf);
@@ -142,11 +142,11 @@ public class PostFixCompletionTest extends TestCase {
 		applyProposal(viewer, proposals, "var", completionIndex);
 
 		StringBuffer expected= new StringBuffer();
-		expected.append("package test;\n" + 
-				"public class IntegerVar {\n" + 
-				"  public void test () {\n" + 
-				"    Integer name = new Integer(0);\n" + 
-				"  }\n" + 
+		expected.append("package test;\n" +
+				"public class IntegerVar {\n" +
+				"  public void test () {\n" +
+				"    Integer name = new Integer(0);\n" +
+				"  }\n" +
 				"}");
 
 		assertEquals(expected.toString(), viewer.getDocument().get());
@@ -154,11 +154,11 @@ public class PostFixCompletionTest extends TestCase {
 
 	public void testBooleanVar() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" + 
-				"public class BooleanVar {\n" + 
-				"  public void test () {\n" + 
-				"    false.var$\n" + 
-				"  }\n" + 
+		buf.append("package test;\n" +
+				"public class BooleanVar {\n" +
+				"  public void test () {\n" +
+				"    false.var$\n" +
+				"  }\n" +
 				"}");
 
 		int completionIndex= getCompletionIndex(buf);
@@ -171,11 +171,11 @@ public class PostFixCompletionTest extends TestCase {
 		applyProposal(viewer, proposals, "var", completionIndex);
 
 		StringBuffer expected= new StringBuffer();
-		expected.append("package test;\n" + 
-				"public class BooleanVar {\n" + 
-				"  public void test () {\n" + 
-				"    boolean false1 = false;\n" + 
-				"  }\n" + 
+		expected.append("package test;\n" +
+				"public class BooleanVar {\n" +
+				"  public void test () {\n" +
+				"    boolean false1 = false;\n" +
+				"  }\n" +
 				"}");
 
 		assertEquals(expected.toString(), viewer.getDocument().get());
@@ -183,11 +183,11 @@ public class PostFixCompletionTest extends TestCase {
 
 	public void testIntVar() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" + 
-				"public class IntVar {\n" + 
-				"  public void test () {\n" + 
-				"    (2 + 2).var$\n" + 
-				"  }\n" + 
+		buf.append("package test;\n" +
+				"public class IntVar {\n" +
+				"  public void test () {\n" +
+				"    (2 + 2).var$\n" +
+				"  }\n" +
 				"}");
 
 		int completionIndex= getCompletionIndex(buf);
@@ -200,11 +200,11 @@ public class PostFixCompletionTest extends TestCase {
 		applyProposal(viewer, proposals, "var", completionIndex);
 
 		StringBuffer expected= new StringBuffer();
-		expected.append("package test;\n" + 
-				"public class IntVar {\n" + 
-				"  public void test () {\n" + 
-				"    int name = (2 + 2);\n" + 
-				"  }\n" + 
+		expected.append("package test;\n" +
+				"public class IntVar {\n" +
+				"  public void test () {\n" +
+				"    int name = (2 + 2);\n" +
+				"  }\n" +
 				"}");
 
 		assertEquals(expected.toString(), viewer.getDocument().get());
@@ -212,11 +212,11 @@ public class PostFixCompletionTest extends TestCase {
 
 	public void testStringConcatVar() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" + 
-				"public class StringConcatVar {\n" + 
-				"  public void test () {\n" + 
-				"    (\"two\" + 2).var$\n" + 
-				"  }\n" + 
+		buf.append("package test;\n" +
+				"public class StringConcatVar {\n" +
+				"  public void test () {\n" +
+				"    (\"two\" + 2).var$\n" +
+				"  }\n" +
 				"}");
 
 		int completionIndex= getCompletionIndex(buf);
@@ -229,11 +229,11 @@ public class PostFixCompletionTest extends TestCase {
 		applyProposal(viewer, proposals, "var", completionIndex);
 
 		StringBuffer expected= new StringBuffer();
-		expected.append("package test;\n" + 
-				"public class StringConcatVar {\n" + 
-				"  public void test () {\n" + 
-				"    String name = (\"two\" + 2);\n" + 
-				"  }\n" + 
+		expected.append("package test;\n" +
+				"public class StringConcatVar {\n" +
+				"  public void test () {\n" +
+				"    String name = (\"two\" + 2);\n" +
+				"  }\n" +
 				"}");
 
 		assertEquals(expected.toString(), viewer.getDocument().get());
@@ -241,11 +241,11 @@ public class PostFixCompletionTest extends TestCase {
 
 	public void testStringConcatVar2() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" + 
-				"public class testStringConcatVar2 {\n" + 
-				"  public void test () {\n" + 
-				"    ((((\"two\" + 2)))).var$\n" + 
-				"  }\n" + 
+		buf.append("package test;\n" +
+				"public class testStringConcatVar2 {\n" +
+				"  public void test () {\n" +
+				"    ((((\"two\" + 2)))).var$\n" +
+				"  }\n" +
 				"}");
 
 		int completionIndex= getCompletionIndex(buf);
@@ -258,11 +258,11 @@ public class PostFixCompletionTest extends TestCase {
 		applyProposal(viewer, proposals, "var", completionIndex);
 
 		StringBuffer expected= new StringBuffer();
-		expected.append("package test;\n" + 
-				"public class testStringConcatVar2 {\n" + 
-				"  public void test () {\n" + 
-				"    String name = ((((\"two\" + 2))));\n" + 
-				"  }\n" + 
+		expected.append("package test;\n" +
+				"public class testStringConcatVar2 {\n" +
+				"  public void test () {\n" +
+				"    String name = ((((\"two\" + 2))));\n" +
+				"  }\n" +
 				"}");
 
 		assertEquals(expected.toString(), viewer.getDocument().get());
@@ -270,11 +270,11 @@ public class PostFixCompletionTest extends TestCase {
 
 	public void testArrayVar() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" + 
-				"public class ArrayVar {\n" + 
-				"  public void test () {\n" + 
-				"    new byte[] { 0, 1, 3 }.var$\n" + 
-				"  }\n" + 
+		buf.append("package test;\n" +
+				"public class ArrayVar {\n" +
+				"  public void test () {\n" +
+				"    new byte[] { 0, 1, 3 }.var$\n" +
+				"  }\n" +
 				"}");
 
 		int completionIndex= getCompletionIndex(buf);
@@ -287,11 +287,11 @@ public class PostFixCompletionTest extends TestCase {
 		applyProposal(viewer, proposals, "var", completionIndex);
 
 		StringBuffer expected= new StringBuffer();
-		expected.append("package test;\n" + 
-				"public class ArrayVar {\n" + 
-				"  public void test () {\n" + 
-				"    byte[] name = new byte[] { 0, 1, 3 };\n" + 
-				"  }\n" + 
+		expected.append("package test;\n" +
+				"public class ArrayVar {\n" +
+				"  public void test () {\n" +
+				"    byte[] name = new byte[] { 0, 1, 3 };\n" +
+				"  }\n" +
 				"}");
 
 		assertEquals(expected.toString(), viewer.getDocument().get());
@@ -299,13 +299,13 @@ public class PostFixCompletionTest extends TestCase {
 
 	public void testBoundedExtendsTypeParameterVar() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" + 
+		buf.append("package test;\n" +
 				"import java.util.List;\n" +
-				"public class BoundedExtendsTypeParameterVar {\n" + 
-				"  public void test () {\n" + 
-				"    List<? extends Number> x = null;\n" + 
-				"    x.get(0).var$\n" + 
-				"  }\n" + 
+				"public class BoundedExtendsTypeParameterVar {\n" +
+				"  public void test () {\n" +
+				"    List<? extends Number> x = null;\n" +
+				"    x.get(0).var$\n" +
+				"  }\n" +
 				"}");
 
 		int completionIndex= getCompletionIndex(buf);
@@ -318,13 +318,13 @@ public class PostFixCompletionTest extends TestCase {
 		applyProposal(viewer, proposals, "var", completionIndex);
 
 		StringBuffer expected= new StringBuffer();
-		expected.append("package test;\n" + 
+		expected.append("package test;\n" +
 				"import java.util.List;\n" +
-				"public class BoundedExtendsTypeParameterVar {\n" + 
-				"  public void test () {\n" + 
-				"    List<? extends Number> x = null;\n" + 
-				"    Number name = x.get(0);\n" + 
-				"  }\n" + 
+				"public class BoundedExtendsTypeParameterVar {\n" +
+				"  public void test () {\n" +
+				"    List<? extends Number> x = null;\n" +
+				"    Number name = x.get(0);\n" +
+				"  }\n" +
 				"}");
 
 		assertEquals(expected.toString(), viewer.getDocument().get());
@@ -332,13 +332,13 @@ public class PostFixCompletionTest extends TestCase {
 
 	public void testBoundedSuperTypeParameterVar() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" + 
+		buf.append("package test;\n" +
 				"import java.util.List;\n" +
-				"public class testBoundedSuperTypeParameterVar {\n" + 
-				"  public void test () {\n" + 
-				"    List<? super Number> x = null;\n" + 
-				"    x.get(0).var$\n" + 
-				"  }\n" + 
+				"public class testBoundedSuperTypeParameterVar {\n" +
+				"  public void test () {\n" +
+				"    List<? super Number> x = null;\n" +
+				"    x.get(0).var$\n" +
+				"  }\n" +
 				"}");
 
 		int completionIndex= getCompletionIndex(buf);
@@ -351,13 +351,13 @@ public class PostFixCompletionTest extends TestCase {
 		applyProposal(viewer, proposals, "var", completionIndex);
 
 		StringBuffer expected= new StringBuffer();
-		expected.append("package test;\n" + 
+		expected.append("package test;\n" +
 				"import java.util.List;\n" +
-				"public class testBoundedSuperTypeParameterVar {\n" + 
-				"  public void test () {\n" + 
-				"    List<? super Number> x = null;\n" + 
-				"    Object name = x.get(0);\n" + 
-				"  }\n" + 
+				"public class testBoundedSuperTypeParameterVar {\n" +
+				"  public void test () {\n" +
+				"    List<? super Number> x = null;\n" +
+				"    Object name = x.get(0);\n" +
+				"  }\n" +
 				"}");
 
 		assertEquals(expected.toString(), viewer.getDocument().get());
@@ -368,11 +368,11 @@ public class PostFixCompletionTest extends TestCase {
 		buf.append("package test;\n" +
 				"import java.util.Arrays;\n" +
 				"import java.util.List;\n" +
-				"public class VarForMethodInvocation {\n" + 
-				"  public void test () {\n" + 
-				"    List<String> res = Arrays.asList(\"a\", \"b\");\n" + 
-				"    res.get(0).isEmpty().var$\n" + 
-				"  }\n" + 
+				"public class VarForMethodInvocation {\n" +
+				"  public void test () {\n" +
+				"    List<String> res = Arrays.asList(\"a\", \"b\");\n" +
+				"    res.get(0).isEmpty().var$\n" +
+				"  }\n" +
 				"}");
 
 		int completionIndex= getCompletionIndex(buf);
@@ -388,11 +388,11 @@ public class PostFixCompletionTest extends TestCase {
 		expected.append("package test;\n" +
 				"import java.util.Arrays;\n" +
 				"import java.util.List;\n" +
-				"public class VarForMethodInvocation {\n" + 
-				"  public void test () {\n" + 
-				"    List<String> res = Arrays.asList(\"a\", \"b\");\n" + 
-				"    boolean name = res.get(0).isEmpty();\n" + 
-				"  }\n" + 
+				"public class VarForMethodInvocation {\n" +
+				"  public void test () {\n" +
+				"    List<String> res = Arrays.asList(\"a\", \"b\");\n" +
+				"    boolean name = res.get(0).isEmpty();\n" +
+				"  }\n" +
 				"}");
 
 		assertEquals(expected.toString(), viewer.getDocument().get());
@@ -400,19 +400,19 @@ public class PostFixCompletionTest extends TestCase {
 
 	public void testNestedQualifiedNames() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" + 
-				"public class NestedQualifiedNames {\n" + 
-				"public Foo foo; \n" + 
-				"public void foo () {\n" + 
-				"  Foo foo = new Foo ();\n" + 
-				"  foo.bar.res.$\n" + 
-				"}\n" + 
-				"public class Foo {\n" + 
-				"  public Bar bar;\n" + 
-				"}\n" + 
-				"public class Bar {\n" + 
-				"  public String res;\n" + 
-				"}\n" + 
+		buf.append("package test;\n" +
+				"public class NestedQualifiedNames {\n" +
+				"public Foo foo; \n" +
+				"public void foo () {\n" +
+				"  Foo foo = new Foo ();\n" +
+				"  foo.bar.res.$\n" +
+				"}\n" +
+				"public class Foo {\n" +
+				"  public Bar bar;\n" +
+				"}\n" +
+				"public class Bar {\n" +
+				"  public String res;\n" +
+				"}\n" +
 				"}");
 
 		int completionIndex= getCompletionIndex(buf);
@@ -425,19 +425,19 @@ public class PostFixCompletionTest extends TestCase {
 		applyProposal(viewer, proposals, "var", completionIndex);
 
 		StringBuffer expected= new StringBuffer();
-		expected.append("package test;\n" + 
-				"public class NestedQualifiedNames {\n" + 
-				"public Foo foo; \n" + 
-				"public void foo () {\n" + 
-				"  Foo foo = new Foo ();\n" + 
-				"  String name = foo.bar.res;\n" + 
-				"}\n" + 
-				"public class Foo {\n" + 
-				"  public Bar bar;\n" + 
-				"}\n" + 
-				"public class Bar {\n" + 
-				"  public String res;\n" + 
-				"}\n" + 
+		expected.append("package test;\n" +
+				"public class NestedQualifiedNames {\n" +
+				"public Foo foo; \n" +
+				"public void foo () {\n" +
+				"  Foo foo = new Foo ();\n" +
+				"  String name = foo.bar.res;\n" +
+				"}\n" +
+				"public class Foo {\n" +
+				"  public Bar bar;\n" +
+				"}\n" +
+				"public class Bar {\n" +
+				"  public String res;\n" +
+				"}\n" +
 				"}");
 
 		assertEquals(expected.toString(), viewer.getDocument().get());
@@ -445,13 +445,13 @@ public class PostFixCompletionTest extends TestCase {
 
 	public void testFieldAccess() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" + 
-				"public class FieldAccess {\n" + 
-				"public class Foo {\n" + 
-				"  public String res;\n" + 
-				"  public void foo () {\n" + 
-				"    this.res.$\n" + 
-				"  }\n" + 
+		buf.append("package test;\n" +
+				"public class FieldAccess {\n" +
+				"public class Foo {\n" +
+				"  public String res;\n" +
+				"  public void foo () {\n" +
+				"    this.res.$\n" +
+				"  }\n" +
 				"}");
 
 		int completionIndex= getCompletionIndex(buf);
@@ -464,13 +464,13 @@ public class PostFixCompletionTest extends TestCase {
 		applyProposal(viewer, proposals, "var", completionIndex);
 
 		StringBuffer expected= new StringBuffer();
-		expected.append("package test;\n" + 
-				"public class FieldAccess {\n" + 
-				"public class Foo {\n" + 
-				"  public String res;\n" + 
-				"  public void foo () {\n" + 
-				"    String name = this.res;\n" + 
-				"  }\n" + 
+		expected.append("package test;\n" +
+				"public class FieldAccess {\n" +
+				"public class Foo {\n" +
+				"  public String res;\n" +
+				"  public void foo () {\n" +
+				"    String name = this.res;\n" +
+				"  }\n" +
 				"}");
 
 		assertEquals(expected.toString(), viewer.getDocument().get());
@@ -478,13 +478,13 @@ public class PostFixCompletionTest extends TestCase {
 
 	public void testForStatement() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" + 
-				"import java.util.List;\n" + 
-				"public class ForStatement {\n" + 
-				"  public void test () {\n" + 
-				"    List<String> a;\n" + 
+		buf.append("package test;\n" +
+				"import java.util.List;\n" +
+				"public class ForStatement {\n" +
+				"  public void test () {\n" +
+				"    List<String> a;\n" +
 				"    a.$\n" +
-				"  }\n" + 
+				"  }\n" +
 				"}");
 
 		int completionIndex= getCompletionIndex(buf);
@@ -497,15 +497,15 @@ public class PostFixCompletionTest extends TestCase {
 		applyProposal(viewer, proposals, "for", completionIndex);
 
 		StringBuffer expected= new StringBuffer();
-		expected.append("package test;\n" + 
-				"import java.util.List;\n" + 
-				"public class ForStatement {\n" + 
-				"  public void test () {\n" + 
-				"    List<String> a;\n" + 
+		expected.append("package test;\n" +
+				"import java.util.List;\n" +
+				"public class ForStatement {\n" +
+				"  public void test () {\n" +
+				"    List<String> a;\n" +
 				"    for (String a2 : a) {\n" +
 				"		\n" +
 				"	}\n" +
-				"  }\n" + 
+				"  }\n" +
 				"}");
 
 		assertEquals(expected.toString(), viewer.getDocument().get());
@@ -513,11 +513,11 @@ public class PostFixCompletionTest extends TestCase {
 
 	public void testShorthandIfStatement() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" + 
-				"public class ShorthandIfStatement {\n" + 
-				"  public void test () {\n" + 
-				"    true.$\n" + 
-				"  }\n" + 
+		buf.append("package test;\n" +
+				"public class ShorthandIfStatement {\n" +
+				"  public void test () {\n" +
+				"    true.$\n" +
+				"  }\n" +
 				"}");
 
 		int completionIndex= getCompletionIndex(buf);
@@ -530,11 +530,11 @@ public class PostFixCompletionTest extends TestCase {
 		applyProposal(viewer, proposals, "sif", completionIndex);
 
 		StringBuffer expected= new StringBuffer();
-		expected.append("package test;\n" + 
-				"public class ShorthandIfStatement {\n" + 
-				"  public void test () {\n" + 
+		expected.append("package test;\n" +
+				"public class ShorthandIfStatement {\n" +
+				"  public void test () {\n" +
 				"    ((true) ?  : )\n" +
-				"  }\n" + 
+				"  }\n" +
 				"}");
 
 		assertEquals(expected.toString(), viewer.getDocument().get());
@@ -542,11 +542,11 @@ public class PostFixCompletionTest extends TestCase {
 
 	public void testConcatenatedShorthandIfStatement() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" + 
-				"public class ConcatenatedShorthandIfStatement {\n" + 
-				"  public void test () {\n" + 
-				"    System.out.println(\"two + \" + true.$\n" + 
-				"  }\n" + 
+		buf.append("package test;\n" +
+				"public class ConcatenatedShorthandIfStatement {\n" +
+				"  public void test () {\n" +
+				"    System.out.println(\"two + \" + true.$\n" +
+				"  }\n" +
 				"}");
 
 		int completionIndex= getCompletionIndex(buf);
@@ -559,11 +559,11 @@ public class PostFixCompletionTest extends TestCase {
 		applyProposal(viewer, proposals, "sif", completionIndex);
 
 		StringBuffer expected= new StringBuffer();
-		expected.append("package test;\n" + 
-				"public class ConcatenatedShorthandIfStatement {\n" + 
-				"  public void test () {\n" + 
+		expected.append("package test;\n" +
+				"public class ConcatenatedShorthandIfStatement {\n" +
+				"  public void test () {\n" +
 				"    System.out.println(\"two + \" + ((true) ?  : )\n" +
-				"  }\n" + 
+				"  }\n" +
 				"}");
 
 		assertEquals(expected.toString(), viewer.getDocument().get());
@@ -571,11 +571,11 @@ public class PostFixCompletionTest extends TestCase {
 
 	public void testNoThrownExceptions() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" + 
-				"x.$\n" + 
-				"public class NoThrownExceptions {\n" + 
-				"  public void test () {\n" + 
-				"  }\n" + 
+		buf.append("package test;\n" +
+				"x.$\n" +
+				"public class NoThrownExceptions {\n" +
+				"  public void test () {\n" +
+				"  }\n" +
 				"}");
 
 		int completionIndex= getCompletionIndex(buf);
@@ -615,8 +615,8 @@ public class PostFixCompletionTest extends TestCase {
 		}
 	}
 
-	private void applyProposal (ITextViewer viewer, List<ICompletionProposal> proposals, String name, int offset) throws Exception {
-		PostfixTemplateProposal proposal= (PostfixTemplateProposal) proposals.stream().filter(p -> ((PostfixTemplateProposal)p).getTemplate().getName().equals(name)).findFirst().get();
+	private void applyProposal(ITextViewer viewer, List<ICompletionProposal> proposals, String name, int offset) throws Exception {
+		PostfixTemplateProposal proposal= (PostfixTemplateProposal) proposals.stream().filter(p -> ((PostfixTemplateProposal) p).getTemplate().getName().equals(name)).findFirst().get();
 		proposal.apply(viewer, '0', -1, offset);
 	}
 

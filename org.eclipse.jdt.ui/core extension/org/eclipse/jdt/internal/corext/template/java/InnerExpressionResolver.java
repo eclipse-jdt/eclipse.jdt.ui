@@ -22,17 +22,18 @@ import org.eclipse.jface.text.templates.TemplateVariable;
 
 
 /**
- * This class is the resolver for the variable <code>inner_expression</code>.
- * <br/>
- * The value of the resolved variable will be the source code of the node which resolves to the <code>inner_expression</code>
- * The type of the resolved variable will be the fully qualified name or the name of the primitive type of the node which the content assist is invoked on.
+ * This class is the resolver for the variable <code>inner_expression</code>. <br/>
+ * The value of the resolved variable will be the source code of the node which resolves to the
+ * <code>inner_expression</code> The type of the resolved variable will be the fully qualified name
+ * or the name of the primitive type of the node which the content assist is invoked on.
  */
 public class InnerExpressionResolver extends SimpleTemplateVariableResolver {
 
-	public static final String INNER_EXPRESSION_VAR = "inner_expression"; //$NON-NLS-1$
+	public static final String INNER_EXPRESSION_VAR= "inner_expression"; //$NON-NLS-1$
 
-	public static final String HIDE_FLAG = "novalue"; //$NON-NLS-1$
-	public static final String[] FLAGS = { HIDE_FLAG };
+	public static final String HIDE_FLAG= "novalue"; //$NON-NLS-1$
+
+	public static final String[] FLAGS= { HIDE_FLAG };
 
 	public InnerExpressionResolver() {
 		super(INNER_EXPRESSION_VAR, ""); // TODO Add description //$NON-NLS-1$
@@ -43,15 +44,15 @@ public class InnerExpressionResolver extends SimpleTemplateVariableResolver {
 		if (!(context instanceof JavaPostfixContext))
 			return ""; //$NON-NLS-1$
 
-		return ((JavaPostfixContext)context).getAffectedStatement();
+		return ((JavaPostfixContext) context).getAffectedStatement();
 	}
 
 	@Override
 	public void resolve(TemplateVariable variable, TemplateContext context) {
 		if (context instanceof JavaPostfixContext && variable instanceof JavaVariable) {
-			JavaPostfixContext c = (JavaPostfixContext) context;
-			JavaVariable jv = (JavaVariable) variable;
-			List<String> params = variable.getVariableType().getParams();
+			JavaPostfixContext c= (JavaPostfixContext) context;
+			JavaVariable jv= (JavaVariable) variable;
+			List<String> params= variable.getVariableType().getParams();
 
 			if (!params.contains(HIDE_FLAG)) {
 				jv.setValue(resolve(context));

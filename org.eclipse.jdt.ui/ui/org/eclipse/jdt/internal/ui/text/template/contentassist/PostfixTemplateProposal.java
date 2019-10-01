@@ -27,10 +27,9 @@ import org.eclipse.jdt.internal.corext.template.java.JavaPostfixContext;
 import org.eclipse.swt.graphics.Image;
 
 /**
- * This is an extension to the existing {@link TemplateProposal} class.
- * <br/>
- * The class overrides the method {@link #validate(IDocument, int, DocumentEvent)} to
- * allow the replacement of existing input.
+ * This is an extension to the existing {@link TemplateProposal} class. <br/>
+ * The class overrides the method {@link #validate(IDocument, int, DocumentEvent)} to allow the
+ * replacement of existing input.
  */
 public class PostfixTemplateProposal extends TemplateProposal {
 
@@ -46,10 +45,10 @@ public class PostfixTemplateProposal extends TemplateProposal {
 	@Override
 	public boolean validate(IDocument document, int offset, DocumentEvent event) {
 		if (getContext() instanceof JavaPostfixContext) {
-			JavaPostfixContext c = (JavaPostfixContext) getContext();
+			JavaPostfixContext c= (JavaPostfixContext) getContext();
 			try {
-				int start = c.getStart() + c.getAffectedSourceRegion().getLength() + 1;
-				String content = document.get(start, offset - start);
+				int start= c.getStart() + c.getAffectedSourceRegion().getLength() + 1;
+				String content= document.get(start, offset - start);
 				return this.getTemplate().getName().toLowerCase().startsWith(content.toLowerCase());
 			} catch (BadLocationException e) {
 				// fall back to parent validation
