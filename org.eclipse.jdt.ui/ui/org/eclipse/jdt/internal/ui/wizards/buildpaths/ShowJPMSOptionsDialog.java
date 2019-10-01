@@ -198,11 +198,10 @@ public class ShowJPMSOptionsDialog extends Dialog {
 				buf.append(LIMIT_MODULES).append(joinedSortedList(fReduceFun.apply(limit))).append(BLANK); // ... but print in reduced form
 			}
 
-			// ... here minimal form is perfect:
-			Set<String> add= new HashSet<>(selected);
-			add.removeAll(fDefaultSystemModules);
-			if (!add.isEmpty()) { // add = selected \ default
-				buf.append(ADD_MODULES).append(joinedSortedList(add)).append(BLANK);
+			// ... here all must be explicit:
+			closureOfSelected.removeAll(fDefaultSystemModules);
+			if (!closureOfSelected.isEmpty()) { // add = selected \ default
+				buf.append(ADD_MODULES).append(joinedSortedList(closureOfSelected)).append(BLANK);
 			}
 		} else {
 			Arrays.sort(modules);
