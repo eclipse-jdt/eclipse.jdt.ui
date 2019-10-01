@@ -36,7 +36,6 @@ import org.eclipse.jface.text.DefaultPositionUpdater;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.jface.text.Position;
-import org.eclipse.jface.text.templates.DocumentTemplateContext;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateBuffer;
 import org.eclipse.jface.text.templates.TemplateContextType;
@@ -82,7 +81,7 @@ import org.eclipse.jdt.internal.ui.text.template.contentassist.MultiVariable;
 /**
  * A context for Java source.
  */
-public class JavaContextCore extends CompilationUnitContextCore implements IJavaContext {
+public class JavaContextCore extends CompilationUnitContext implements IJavaContext {
 
 	/** A code completion requester for guessing local variable names. */
 	private CompilationUnitCompletion fCompletion;
@@ -96,23 +95,6 @@ public class JavaContextCore extends CompilationUnitContextCore implements IJava
 
 	private Set<String> fCompatibleContextTypeIds;
 
-	private DocumentTemplateContext fContext;
-
-	/**
-	 * Creates a java template context.
-	 *
-	 * @param context the JavaContext instance
-	 * @param type   the context type.
-	 * @param document the document.
-	 * @param completionOffset the completion offset within the document.
-	 * @param completionLength the completion length.
-	 * @param compilationUnit the compilation unit (may be <code>null</code>).
-	 */
-	public JavaContextCore(DocumentTemplateContext context, TemplateContextType type, IDocument document, int completionOffset, int completionLength, ICompilationUnit compilationUnit) {
-		super(type, document, completionOffset, completionLength, compilationUnit);
-		this.fContext = context;
-	}
-
 	/**
 	 * Creates a java template context.
 	 *
@@ -124,22 +106,6 @@ public class JavaContextCore extends CompilationUnitContextCore implements IJava
 	 */
 	public JavaContextCore(TemplateContextType type, IDocument document, int completionOffset, int completionLength, ICompilationUnit compilationUnit) {
 		super(type, document, completionOffset, completionLength, compilationUnit);
-		this.fContext = this;
-	}
-
-	/**
-	 * Creates a java template context.
-	 *
-	 * @param context the JavaContext instance
-	 * @param type   the context type.
-	 * @param document the document.
-	 * @param completionPosition the position defining the completion offset and length
-	 * @param compilationUnit the compilation unit (may be <code>null</code>).
-	 * @since 3.2
-	 */
-	public JavaContextCore(DocumentTemplateContext context, TemplateContextType type, IDocument document, Position completionPosition, ICompilationUnit compilationUnit) {
-		super(type, document, completionPosition, compilationUnit);
-		this.fContext = context;
 	}
 
 	/**
@@ -149,11 +115,9 @@ public class JavaContextCore extends CompilationUnitContextCore implements IJava
 	 * @param document the document.
 	 * @param completionPosition the position defining the completion offset and length
 	 * @param compilationUnit the compilation unit (may be <code>null</code>).
-	 * @since 3.2
 	 */
 	public JavaContextCore(TemplateContextType type, IDocument document, Position completionPosition, ICompilationUnit compilationUnit) {
 		super(type, document, completionPosition, compilationUnit);
-		this.fContext = this;
 	}
 
 	/**
@@ -191,7 +155,7 @@ public class JavaContextCore extends CompilationUnitContextCore implements IJava
 		};
 		TemplateBuffer buffer= translator.translate(template);
 
-		getContextType().resolve(buffer, fContext);
+		getContextType().resolve(buffer, this);
 
 		rewriteImports();
 
@@ -352,13 +316,7 @@ public class JavaContextCore extends CompilationUnitContextCore implements IJava
 
 	@Override
 	public void handleException(Exception e) {
-		if (fContext != this && fContext instanceof IJavaContext) {
-			// invoke handleException() in JavaContext
-			((IJavaContext) fContext).handleException(e);
-		} else {
-			JavaManipulationPlugin.log(e);
-		}
-
+		JavaManipulationPlugin.log(e);
 	}
 
 	private CompilationUnitCompletion getCompletion() {
@@ -741,7 +699,7 @@ public class JavaContextCore extends CompilationUnitContextCore implements IJava
 	public TemplateVariable getTemplateVariable(String name) {
 		TemplateVariable variable= fVariables.get(name);
 		if (variable != null && !variable.isResolved())
-			getContextType().resolve(variable, fContext);
+			getContextType().resolve(variable, this);
 		return variable;
 	}
 

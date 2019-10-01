@@ -33,14 +33,11 @@ import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateBuffer;
 import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.TemplateException;
-import org.eclipse.jface.text.templates.TemplateVariable;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.core.manipulation.util.Strings;
-import org.eclipse.jdt.internal.corext.template.java.CompilationUnitCompletion.Variable;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -53,9 +50,10 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 /**
  * A context for Java source.
  */
-public class JavaContext extends CompilationUnitContext implements IJavaContext {
+public class JavaContext extends JavaContextCore {
 
-	private JavaContextCore fJavaContextCore;
+	/** A global state for proposals that change if a master proposal changes. */
+	protected MultiVariableGuess fMultiVariableGuess;
 
 	/**
 	 * Creates a java template context.
@@ -68,7 +66,6 @@ public class JavaContext extends CompilationUnitContext implements IJavaContext 
 	 */
 	public JavaContext(TemplateContextType type, IDocument document, int completionOffset, int completionLength, ICompilationUnit compilationUnit) {
 		super(type, document, completionOffset, completionLength, compilationUnit);
-		this.fJavaContextCore = new JavaContextCore(this, type, document, completionOffset, completionLength, compilationUnit);
 	}
 
 	/**
@@ -82,19 +79,7 @@ public class JavaContext extends CompilationUnitContext implements IJavaContext 
 	 */
 	public JavaContext(TemplateContextType type, IDocument document, Position completionPosition, ICompilationUnit compilationUnit) {
 		super(type, document, completionPosition, compilationUnit);
-		this.fJavaContextCore = new JavaContextCore(this, type, document, completionPosition, compilationUnit);
 	}
-
-	/**
-	 * Adds a context type that is also compatible. That means the context can also process templates of that context type.
-	 *
-	 * @param contextTypeId the context type to accept
-	 */
-	@Override
-	public void addCompatibleContextType(String contextTypeId) {
-		this.fJavaContextCore.addCompatibleContextType(contextTypeId);
-	}
-
 
 	/**
 	 * Returns the indentation level at the position of code completion.
@@ -119,7 +104,7 @@ public class JavaContext extends CompilationUnitContext implements IJavaContext 
 	 */
 	@Override
 	public TemplateBuffer evaluate(Template template) throws BadLocationException, TemplateException {
-		TemplateBuffer buffer= this.fJavaContextCore.evaluate(template);
+		TemplateBuffer buffer= super.evaluate(template);
 
 		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
 		boolean useCodeFormatter= prefs.getBoolean(PreferenceConstants.TEMPLATES_USE_CODEFORMATTER);
@@ -129,47 +114,6 @@ public class JavaContext extends CompilationUnitContext implements IJavaContext 
 		formatter.format(buffer, this);
 
 		return buffer;
-	}
-
-	/*
-	 * @see TemplateContext#canEvaluate(Template templates)
-	 */
-	@Override
-	public boolean canEvaluate(Template template) {
-		return this.fJavaContextCore.canEvaluate(template);
-	}
-
-	/*
-	 * @see DocumentTemplateContext#getCompletionPosition();
-	 */
-	@Override
-	public int getStart() {
-		return this.fJavaContextCore.getStart();
-	}
-
-	/*
-	 * @see org.eclipse.jdt.internal.corext.template.DocumentTemplateContext#getEnd()
-	 */
-	@Override
-	public int getEnd() {
-		return this.fJavaContextCore.getEnd();
-	}
-
-	/*
-	 * @see org.eclipse.jdt.internal.corext.template.DocumentTemplateContext#getKey()
-	 */
-	@Override
-	public String getKey() {
-		return this.fJavaContextCore.getKey();
-	}
-
-	/**
-	 * Returns the character before the start position of the completion.
-	 *
-	 * @return the character before the start position of the completion
-	 */
-	public char getCharacterBeforeStart() {
-		return this.fJavaContextCore.getCharacterBeforeStart();
 	}
 
 	@Override
@@ -190,97 +134,6 @@ public class JavaContext extends CompilationUnitContext implements IJavaContext 
 	}
 
 	/**
-	 * Returns the names of arrays available in the current {@link CompilationUnit}'s scope.
-	 *
-	 * @return the names of local arrays available in the current {@link CompilationUnit}'s scope
-	 */
-	@Override
-	public Variable[] getArrays() {
-		return this.fJavaContextCore.getArrays();
-	}
-
-	/**
-	 * Returns the names of local variables matching <code>type</code>.
-	 *
-	 * @param type the type of the variables
-	 * @return the names of local variables matching <code>type</code>
-	 * @since 3.3
-	 */
-	@Override
-	public Variable[] getLocalVariables(String type) {
-		return this.fJavaContextCore.getLocalVariables(type);
-	}
-
-	/**
-	 * Returns the names of fields matching <code>type</code>.
-	 *
-	 * @param type the type of the fields
-	 * @return the names of fields matching <code>type</code>
-	 * @since 3.3
-	 */
-	@Override
-	public Variable[] getFields(String type) {
-		return this.fJavaContextCore.getFields(type);
-	}
-
-	/**
-	 * Returns the names of iterables or arrays available in the current {@link CompilationUnit}'s scope.
-	 *
-	 * @return the names of iterables or arrays available in the current {@link CompilationUnit}'s scope
-	 */
-	@Override
-	public Variable[] getIterables() {
-		return this.fJavaContextCore.getIterables();
-	}
-
-	@Override
-	public void markAsUsed(String name) {
-		this.fJavaContextCore.markAsUsed(name);
-	}
-
-	@Override
-	public String[] suggestVariableNames(String type) throws IllegalArgumentException {
-		return this.fJavaContextCore.suggestVariableNames(type);
-	}
-
-	String[] computeExcludes() {
-		return this.fJavaContextCore.computeExcludes();
-	}
-
-	/**
-	 * Adds an import for type with type name <code>type</code> if possible.
-	 * Returns a string which can be used to reference the type.
-	 *
-	 * @param type the fully qualified name of the type to import
-	 * @return returns a type to which the type binding can be assigned to.
-	 * 	The returned type contains is unqualified when an import could be added or was already known.
-	 * 	It is fully qualified, if an import conflict prevented the import.
-	 * @since 3.4
-	 */
-	@Override
-	public String addImport(String type) {
-		return this.fJavaContextCore.addImport(type);
-	}
-
-	/**
-	 * Adds a static import for the member with name <code>qualifiedMemberName</code>. The member is
-	 * either a static field or a static method or a '*' to import all static members of a type.
-	 *
-	 * @param qualifiedMemberName the fully qualified name of the member to import or a qualified type
-	 * 			name plus a '.*' suffix.
-	 * @return returns either the simple member name if the import was successful or else the qualified name.
-	 * @since 3.4
-	 */
-	public String addStaticImport(String qualifiedMemberName) {
-		return this.fJavaContextCore.addStaticImport(qualifiedMemberName);
-	}
-
-	@Override
-	public TemplateVariable getTemplateVariable(String name) {
-		return this.fJavaContextCore.getTemplateVariable(name);
-	}
-
-	/**
 	 * Adds a multi-variable guess dependency.
 	 *
 	 * @param master the master variable - <code>slave</code> needs to be updated when
@@ -290,13 +143,14 @@ public class JavaContext extends CompilationUnitContext implements IJavaContext 
 	 */
 	@Override
 	public void addDependency(MultiVariable master, MultiVariable slave) {
-		MultiVariableGuess guess= getMultiVariableGuess();
-		if (guess == null) {
-			guess= new MultiVariableGuess();
-			setMultiVariableGuess(guess);
+		if (this.fMultiVariableGuess == null) {
+			this.fMultiVariableGuess = new MultiVariableGuess();
 		}
 
-		guess.addDependency(master, slave);
+		this.fMultiVariableGuess.addDependency(master, slave);
 	}
 
+	public MultiVariableGuess getMultiVariableGuess() {
+		return this.fMultiVariableGuess;
+	}
 }

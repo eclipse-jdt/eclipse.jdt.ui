@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,6 +14,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.template.java;
 
+import org.eclipse.core.resources.IProject;
+
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.templates.DocumentTemplateContext;
@@ -22,19 +24,20 @@ import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-
-import org.eclipse.jdt.internal.ui.text.template.contentassist.MultiVariableGuess;
+import org.eclipse.jdt.core.JavaModelException;
 
 
 /**
  * A compilation unit context.
  */
-public abstract class CompilationUnitContext extends DocumentTemplateContext implements ICompilationUnitContext {
+public class CompilationUnitContext extends DocumentTemplateContext implements ICompilationUnitContext {
 
-	/** A global state for proposals that change if a master proposal changes. */
-	protected MultiVariableGuess fMultiVariableGuess;
-	/** */
-	protected CompilationUnitContextCore fCompilationUnitContextCore;
+	/** The compilation unit, may be <code>null</code>. */
+	private final ICompilationUnit fCompilationUnit;
+	/** A flag to force evaluation in head-less mode. */
+	protected boolean fForceEvaluation;
+	/** <code>true</code> if the context has a managed (i.e. added to the document) position, <code>false</code> otherwise. */
+	private final boolean fIsManaged;
 
 	/**
 	 * Creates a compilation unit context.
@@ -45,9 +48,10 @@ public abstract class CompilationUnitContext extends DocumentTemplateContext imp
 	 * @param completionLength the completion length within the document
 	 * @param compilationUnit the compilation unit (may be <code>null</code>)
 	 */
-	protected CompilationUnitContext(TemplateContextType type, IDocument document, int completionOffset, int completionLength, ICompilationUnit compilationUnit) {
+	public CompilationUnitContext(TemplateContextType type, IDocument document, int completionOffset, int completionLength, ICompilationUnit compilationUnit) {
 		super(type, document, completionOffset, completionLength);
-		this.fCompilationUnitContextCore = new CompilationUnitContextCore(type, document, completionOffset, completionLength, compilationUnit);
+		fCompilationUnit= compilationUnit;
+		fIsManaged= false;
 	}
 
 	/**
@@ -59,9 +63,10 @@ public abstract class CompilationUnitContext extends DocumentTemplateContext imp
 	 * @param compilationUnit the compilation unit (may be <code>null</code>)
 	 * @since 3.2
 	 */
-	protected CompilationUnitContext(TemplateContextType type, IDocument document, Position completionPosition, ICompilationUnit compilationUnit) {
+	public CompilationUnitContext(TemplateContextType type, IDocument document, Position completionPosition, ICompilationUnit compilationUnit) {
 		super(type, document, completionPosition);
-		this.fCompilationUnitContextCore = new CompilationUnitContextCore(type, document, completionPosition, compilationUnit);
+		fCompilationUnit= compilationUnit;
+		fIsManaged= true;
 	}
 
 	/**
@@ -72,7 +77,7 @@ public abstract class CompilationUnitContext extends DocumentTemplateContext imp
 	 */
 	@Override
 	public final ICompilationUnit getCompilationUnit() {
-		return this.fCompilationUnitContextCore.getCompilationUnit();
+		return fCompilationUnit;
 	}
 
 	/**
@@ -84,7 +89,20 @@ public abstract class CompilationUnitContext extends DocumentTemplateContext imp
 	 */
 	@Override
 	public IJavaElement findEnclosingElement(int elementType) {
-		return this.fCompilationUnitContextCore.findEnclosingElement(elementType);
+		if (fCompilationUnit == null)
+			return null;
+
+		try {
+			IJavaElement element= fCompilationUnit.getElementAt(getStart());
+			if (element == null) {
+				element= fCompilationUnit;
+			}
+
+			return element.getAncestor(elementType);
+
+		} catch (JavaModelException e) {
+			return null;
+		}
 	}
 
 	/**
@@ -94,7 +112,7 @@ public abstract class CompilationUnitContext extends DocumentTemplateContext imp
 	 *            <code>false</code> otherwise
 	 */
 	public void setForceEvaluation(boolean evaluate) {
-		this.fCompilationUnitContextCore.setForceEvaluation(evaluate);
+		fForceEvaluation= evaluate;
 	}
 
 	/**
@@ -102,7 +120,7 @@ public abstract class CompilationUnitContext extends DocumentTemplateContext imp
 	 * @return whether evaluation is forced or not.
 	 */
 	public boolean isForceEvaluation() {
-		return this.fCompilationUnitContextCore.isForceEvaluation();
+		return fForceEvaluation;
 	}
 
 	/**
@@ -110,31 +128,20 @@ public abstract class CompilationUnitContext extends DocumentTemplateContext imp
 	 * @return if the context has a managed position.
 	 */
 	public boolean isManaged() {
-		return this.fCompilationUnitContextCore.isManaged();
+		return fIsManaged;
 	}
 
-	/**
-	 * Returns the multi-variable guess.
-	 *
-	 * @return the multi-variable guess
-	 */
-	public MultiVariableGuess getMultiVariableGuess() {
-		return fMultiVariableGuess;
-	}
-
-	/**
-	 * @param multiVariableGuess The multiVariableGuess to set.
-	 */
-	void setMultiVariableGuess(MultiVariableGuess multiVariableGuess) {
-		fMultiVariableGuess= multiVariableGuess;
-	}
-
-	protected IJavaProject getJavaProject() {
-		return this.fCompilationUnitContextCore.getJavaProject();
+	public IJavaProject getJavaProject() {
+		ICompilationUnit compilationUnit= getCompilationUnit();
+		IJavaProject project= compilationUnit == null ? null : compilationUnit.getJavaProject();
+		return project;
 	}
 
 	@Override
 	public <T> T getAdapter(Class<T> adapter) {
-		return this.fCompilationUnitContextCore.getAdapter(adapter);
+		if(adapter == IProject.class) {
+			return adapter.cast(getJavaProject().getProject());
+		}
+		return super.getAdapter(adapter);
 	}
 }

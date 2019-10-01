@@ -75,7 +75,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.search.SearchPattern;
 
-import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContext;
+import org.eclipse.jdt.internal.corext.template.java.JavaContext;
 import org.eclipse.jdt.internal.corext.template.java.JavaDocContext;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Strings;
@@ -196,7 +196,7 @@ public class TemplateProposal
 
 	/**
 	 * {@inheritDoc}
-	 * 
+	 *
 	 * @deprecated This method is no longer called by the framework and clients should overwrite
 	 *             {@link #apply(ITextViewer, char, int, int)} instead
 	 */
@@ -246,7 +246,7 @@ public class TemplateProposal
 			LinkedModeModel model= new LinkedModeModel();
 			TemplateVariable[] variables= templateBuffer.getVariables();
 
-			MultiVariableGuess guess= fContext instanceof CompilationUnitContext ? ((CompilationUnitContext) fContext).getMultiVariableGuess() : null;
+			MultiVariableGuess guess= fContext instanceof JavaContext ? ((JavaContext) fContext).getMultiVariableGuess() : null;
 
 			boolean hasPositions= false;
 			for (int i= 0; i != variables.length; i++) {
