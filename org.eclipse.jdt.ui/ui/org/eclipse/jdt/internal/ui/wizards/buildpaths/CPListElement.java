@@ -42,7 +42,6 @@ import org.eclipse.jdt.core.IModuleDescription;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.provisional.JavaModelAccess;
 
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -213,7 +212,7 @@ public class CPListElement {
 				boolean addChildren= false;
 				if (fragmentRoots.length > 0) {
 					IModuleDescription module= fragmentRoots[0].getModuleDescription();
-					if (module != null && JavaModelAccess.isSystemModule(module))
+					if (module != null && module.isSystemModule())
 						addChildren= true;
 				}
 				if (addChildren) {

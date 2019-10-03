@@ -59,7 +59,6 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.provisional.JavaModelAccess;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -822,7 +821,7 @@ class ModuleDependenciesAdapter implements IDialogFieldListener, ITreeListAdapte
 		Collection<String> allModules= masterPage.getAllModules();
 		for (IModuleDescription module : result) {
 			if (!allModules.contains(module.getElementName())) {
-				if (JavaModelAccess.isSystemModule(module)) {
+				if (module.isSystemModule()) {
 					unavailableSystemModules.add(module);
 				} else {
 					IPackageFragmentRoot pfr= (IPackageFragmentRoot) module.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);

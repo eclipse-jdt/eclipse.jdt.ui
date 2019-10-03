@@ -58,7 +58,6 @@ import org.eclipse.jdt.core.IModuleDescription;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.provisional.JavaModelAccess;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -175,7 +174,7 @@ public class ModuleSelectionDialog extends TrayDialog {
 				Object element= match.getElement();
 				if (element instanceof IModuleDescription) {
 					IModuleDescription module= (IModuleDescription) element;
-					if (!JavaModelAccess.isSystemModule(module))
+					if (!module.isSystemModule())
 						checkAddModule(result, module);
 				}
 			}
