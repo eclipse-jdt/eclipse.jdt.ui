@@ -10,7 +10,7 @@
  * Contributors:
  *     Red Hat - Initial Contribution
  *******************************************************************************/
-package org.eclipse.jdt.ui.tests.core;
+package org.eclipse.jdt.text.tests.contentassist;
 
 import java.util.Arrays;
 import java.util.List;
@@ -32,20 +32,33 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.text.java.ChainCompletionProposalComputer;
 
+import junit.framework.Test;
 import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 public class ChainCompletionTest extends TestCase {
+
+	private static final Class<ChainCompletionTest> THIS= ChainCompletionTest.class;
 
 	private IJavaProject fJProject;
 
 	private IPackageFragmentRoot javaSrc;
 
 	private IPackageFragment pkg;
+
+	public static Test suite() {
+		return setUpTest(new TestSuite(THIS));
+	}
+
+	public static Test setUpTest(Test test) {
+		return new ProjectTestSetup(test);
+	}
 
 	@Override
 	protected void setUp() throws Exception {

@@ -10,7 +10,7 @@
  * Contributors:
  *     Red Hat - Initial Contribution
  *******************************************************************************/
-package org.eclipse.jdt.ui.tests.core;
+package org.eclipse.jdt.text.tests.contentassist;
 
 import java.util.Arrays;
 import java.util.List;
@@ -32,21 +32,34 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.text.java.PostfixCompletionProposalComputer;
 import org.eclipse.jdt.internal.ui.text.template.contentassist.PostfixTemplateProposal;
 
+import junit.framework.Test;
 import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 public class PostFixCompletionTest extends TestCase {
+
+	private static final Class<PostFixCompletionTest> THIS= PostFixCompletionTest.class;
 
 	private IJavaProject fJProject;
 
 	private IPackageFragmentRoot javaSrc;
 
 	private IPackageFragment pkg;
+
+	public static Test suite() {
+		return setUpTest(new TestSuite(THIS));
+	}
+
+	public static Test setUpTest(Test test) {
+		return new ProjectTestSetup(test);
+	}
 
 	@Override
 	protected void setUp() throws Exception {
@@ -273,7 +286,7 @@ public class PostFixCompletionTest extends TestCase {
 		buf.append("package test;\n" +
 				"public class ArrayVar {\n" +
 				"  public void test () {\n" +
-				"    new byte[] { 0, 1, 3 }.var$\n" +
+				"    new byte[]{0, 1, 3}.var$\n" +
 				"  }\n" +
 				"}");
 
@@ -290,7 +303,7 @@ public class PostFixCompletionTest extends TestCase {
 		expected.append("package test;\n" +
 				"public class ArrayVar {\n" +
 				"  public void test () {\n" +
-				"    byte[] name = new byte[] { 0, 1, 3 };\n" +
+				"    byte[] name = new byte[]{0, 1, 3};\n" +
 				"  }\n" +
 				"}");
 

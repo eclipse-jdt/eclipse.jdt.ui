@@ -42,6 +42,8 @@ public class ContentAssistTestSuite {
 		suite.addTest(CodeCompletionTest.suite());
 		suite.addTest(CodeCompletionTest18.suite());
 		suite.addTest(ContinuousTypingCompletionTest.suite());
+		suite.addTest(ChainCompletionTest.suite());
+		suite.addTest(PostFixCompletionTest.suite());
 		//$JUnit-END$
 
 		return suite;
