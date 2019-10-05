@@ -722,6 +722,10 @@ public class JavaPostfixContext extends JavaContext {
 		if (new String(sb.getQualifiedName()).startsWith(signature) || (sb.isArray() && "array".equals(signature))) { //$NON-NLS-1$
 			return true;
 		}
+		if (Object.class.getName().equals(signature)) {
+			return true;
+		}
+
 		List<ITypeBinding> bindings= new ArrayList<>();
 		Collections.addAll(bindings, sb.getInterfaces());
 		bindings.add(sb.getSuperclass());
