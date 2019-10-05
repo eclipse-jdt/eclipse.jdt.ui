@@ -615,6 +615,13 @@ public class JavaPostfixContext extends JavaContext {
 
 		ITypeBinding[] res= new ITypeBinding[1];
 		node.accept(new ASTVisitor() {
+
+			@Override
+			public boolean visit(MethodInvocation n) {
+				res[0]= n.resolveTypeBinding();
+				return false;
+			}
+
 			@Override
 			public boolean visit(SimpleName n) {
 				IBinding b= n.resolveBinding();

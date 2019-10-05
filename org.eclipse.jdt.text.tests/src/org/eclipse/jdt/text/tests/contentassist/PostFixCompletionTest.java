@@ -411,6 +411,37 @@ public class PostFixCompletionTest extends TestCase {
 		assertEquals(expected.toString(), viewer.getDocument().get());
 	}
 
+	public void testVarForMethodInvocation2() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n" +
+				"public class VarForMethodInvocation2 {\n" +
+				"  public void test () {\n" +
+				"    String s = \"5\";\n" +
+				"    Integer.valueOf(s).var$\n" +
+				"  }\n" +
+				"}");
+
+		int completionIndex= getCompletionIndex(buf);
+		ICompilationUnit cu= getCompilationUnit(pkg, buf, "VarForMethodInvocation2.java");
+		List<ICompletionProposal> proposals= computeCompletionProposals(cu, completionIndex);
+
+		assertProposalsExist(Arrays.asList("var - Creates a new variable"), proposals);
+
+		ITextViewer viewer= initializeViewer(cu);
+		applyProposal(viewer, proposals, "var", completionIndex);
+
+		StringBuffer expected= new StringBuffer();
+		expected.append("package test;\n" +
+				"public class VarForMethodInvocation2 {\n" +
+				"  public void test () {\n" +
+				"    String s = \"5\";\n" +
+				"    Integer name = Integer.valueOf(s);\n" +
+				"  }\n" +
+				"}");
+
+		assertEquals(expected.toString(), viewer.getDocument().get());
+	}
+
 	public void testNestedQualifiedNames() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test;\n" +
