@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -650,6 +650,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 	private static final Key PREF_PB_REDUNDANT_SUPERINTERFACE= getJDTCoreKey(JavaCore.COMPILER_PB_REDUNDANT_SUPERINTERFACE);
 
 	private static final Key PREF_PB_UNUSED_WARNING_TOKEN= getJDTCoreKey(JavaCore.COMPILER_PB_UNUSED_WARNING_TOKEN);
+	private static final Key PREF_PB_SUPPRESS_WARNINGS_NOT_FULLY_ANALYSED= getJDTCoreKey(JavaCore.COMPILER_PB_SUPPRESS_WARNINGS_NOT_FULLY_ANALYSED);
 
 	private static final Key PREF_15_PB_UNCHECKED_TYPE_OPERATION= getJDTCoreKey(JavaCore.COMPILER_PB_UNCHECKED_TYPE_OPERATION);
 	private static final Key PREF_15_PB_FINAL_PARAM_BOUND= getJDTCoreKey(JavaCore.COMPILER_PB_FINAL_PARAMETER_BOUND);
@@ -744,7 +745,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 				PREF_PB_SYNTACTIC_NULL_ANLYSIS_FOR_FIELDS,
 				PREF_INHERIT_NULL_ANNOTATIONS,
 				PREF_PB_UNCLOSED_CLOSEABLE, PREF_PB_POTENTIALLY_UNCLOSED_CLOSEABLE, PREF_PB_EXPLICITLY_CLOSED_AUTOCLOSEABLE,
-				PREF_PB_FALLTHROUGH_CASE, PREF_PB_REDUNDANT_SUPERINTERFACE, PREF_PB_UNUSED_WARNING_TOKEN,
+				PREF_PB_FALLTHROUGH_CASE, PREF_PB_REDUNDANT_SUPERINTERFACE, PREF_PB_UNUSED_WARNING_TOKEN, PREF_PB_SUPPRESS_WARNINGS_NOT_FULLY_ANALYSED,
 				PREF_15_PB_UNCHECKED_TYPE_OPERATION, PREF_15_PB_FINAL_PARAM_BOUND, PREF_15_PB_VARARGS_ARGUMENT_NEED_CAST,
 				PREF_15_PB_AUTOBOXING_PROBLEM, PREF_15_PB_MISSING_OVERRIDE_ANNOTATION, PREF_16_PB_MISSING_OVERRIDE_ANNOTATION_FOR_INTERFACE_METHOD_IMPLEMENTATION,
 				PREF_15_PB_ANNOTATION_SUPER_INTERFACE,
@@ -1142,6 +1143,9 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_unused_suppresswarnings_token;
 		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_UNUSED_WARNING_TOKEN, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, extraIndent, node);
+
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_suppresswarnings_not_fully_analysed;
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_SUPPRESS_WARNINGS_NOT_FULLY_ANALYSED, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, extraIndent, node);
 		
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_suppress_optional_errors_label;
 		fFilteredPrefTree.addCheckBox(inner, label, PREF_PB_SUPPRESS_OPTIONAL_ERRORS, enabledDisabled, extraIndent, node);

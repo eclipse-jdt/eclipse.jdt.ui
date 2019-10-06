@@ -42,17 +42,7 @@ public class ConfigureProblemSeveritySubProcessor {
 	public static void addConfigureProblemSeverityProposal(final IInvocationContext context, final IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		final int problemId= problem.getProblemId();
 	
-		String optionId;
-		if (problemId == IProblem.ProblemNotAnalysed) {
-			String[] options= problem.getProblemArguments();
-			if (options != null && options.length > 0) {
-				optionId= options[0];
-			} else {
-				optionId= null;
-			}
-		} else {
-			optionId= JavaCore.getOptionForConfigurableSeverity(problemId);
-		}
+		String optionId= JavaCore.getOptionForConfigurableSeverity(problemId);
 		if (optionId == null)
 			return;
 
