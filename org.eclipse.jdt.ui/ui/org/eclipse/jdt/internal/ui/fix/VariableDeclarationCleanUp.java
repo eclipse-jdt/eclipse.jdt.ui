@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,28 +10,28 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc. - modified to use VariableDeclarationCleanUpCore
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.fix;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jdt.core.dom.CompilationUnit;
-
-import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-import org.eclipse.jdt.internal.corext.fix.VariableDeclarationFix;
+import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 
 import org.eclipse.jdt.ui.cleanup.CleanUpContext;
+import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
 public class VariableDeclarationCleanUp extends AbstractCleanUp {
 
+	private VariableDeclarationCleanUpCore coreCleanUp= new VariableDeclarationCleanUpCore();
+
 	public VariableDeclarationCleanUp(Map<String, String> options) {
-		super(options);
+		super();
+		setOptions(options);
 	}
 
 	public VariableDeclarationCleanUp() {
@@ -40,73 +40,28 @@ public class VariableDeclarationCleanUp extends AbstractCleanUp {
 
 	@Override
 	public CleanUpRequirements getRequirements() {
-		return new CleanUpRequirements(requireAST(), false, false, null);
+		return new CleanUpRequirements(coreCleanUp.getRequirementsCore());
 	}
 
-	private boolean requireAST() {
-		boolean addFinal= isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
-		if (!addFinal)
-			return false;
-
-		return isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS) ||
-				isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS) ||
-				isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES);
+	@Override
+	public void setOptions(CleanUpOptions options) {
+		coreCleanUp.setOptions(options);
 	}
 
 	@Override
 	public ICleanUpFix createFix(CleanUpContext context) throws CoreException {
-		CompilationUnit compilationUnit= context.getAST();
-		if (compilationUnit == null)
-			return null;
-
-		boolean addFinal= isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
-		if (!addFinal)
-			return null;
-
-		return VariableDeclarationFix.createCleanUp(compilationUnit,
-				isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS),
-				isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS),
-				isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES));
+		ICleanUpFixCore fixCore= coreCleanUp.createFixCore(context);
+		return fixCore == null ? null : new CleanUpFixWrapper(fixCore);
 	}
 
 	@Override
 	public String[] getStepDescriptions() {
-		List<String> result= new ArrayList<>();
-		if (isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL) && isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS))
-			result.add(MultiFixMessages.VariableDeclarationCleanUp_AddFinalField_description);
-		if (isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL) && isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS))
-			result.add(MultiFixMessages.VariableDeclarationCleanUp_AddFinalParameters_description);
-		if (isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL) && isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES))
-			result.add(MultiFixMessages.VariableDeclarationCleanUp_AddFinalLocals_description);
-
-		return result.toArray(new String[result.size()]);
+		return coreCleanUp.getStepDescriptions();
 	}
 
 	@Override
 	public String getPreview() {
-		StringBuilder buf= new StringBuilder();
-
-		if (isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL) && isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS)) {
-			buf.append("private final int i= 0;\n"); //$NON-NLS-1$
-		} else {
-			buf.append("private int i= 0;\n"); //$NON-NLS-1$
-		}
-		if (isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL) && isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS)) {
-			buf.append("public void foo(final int j) {\n"); //$NON-NLS-1$
-		} else {
-			buf.append("public void foo(int j) {\n"); //$NON-NLS-1$
-		}
-		if (isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL) && isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES)) {
-			buf.append("    final int k;\n"); //$NON-NLS-1$
-			buf.append("    int h;\n"); //$NON-NLS-1$
-			buf.append("    h= 0;\n"); //$NON-NLS-1$
-		} else {
-			buf.append("    int k, h;\n"); //$NON-NLS-1$
-			buf.append("    h= 0;\n"); //$NON-NLS-1$
-		}
-		buf.append("}\n"); //$NON-NLS-1$
-
-		return buf.toString();
+		return coreCleanUp.getPreview();
 	}
 
 }
