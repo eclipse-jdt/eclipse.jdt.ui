@@ -124,6 +124,7 @@ final class FormatterMessages extends NLS {
 	public static String FormatterModifyDialog_indentation_pref_indent_statements_within_switch_body;
 	public static String FormatterModifyDialog_indentation_pref_tab_policy;
 	public static String FormatterModifyDialog_indentation_pref_tab_size;
+	public static String FormatterModifyDialog_indentation_pref_text_block_indentation;
 	public static String FormatterModifyDialog_indentation_pref_use_tabs_only_for_leading_indentations;
 	public static String FormatterModifyDialog_indentation_tab_policy_MIXED;
 	public static String FormatterModifyDialog_indentation_tab_policy_SPACE;
@@ -131,6 +132,8 @@ final class FormatterMessages extends NLS {
 	public static String FormatterModifyDialog_indentation_tree_align_items_in_columns;
 	public static String FormatterModifyDialog_indentation_tree_indentation;
 	public static String FormatterModifyDialog_indentation_tree_indented_elements;
+	public static String FormatterModifyDialog_indentation_val_indentation_default;
+	public static String FormatterModifyDialog_indentation_val_indentation_preserve;
 	public static String FormatterModifyDialog_lineWrap_indentation_policy_label;
 	public static String FormatterModifyDialog_lineWrap_pref_additive_operators;
 	public static String FormatterModifyDialog_lineWrap_pref_annotations_arguments;

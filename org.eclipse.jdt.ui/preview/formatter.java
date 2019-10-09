@@ -48,6 +48,11 @@ class INDENTATION {
 class Example {
 	int[] myArray = { 1, 2, 3, 4, 5, 6 };
 	String stringWithTabs = "1	2	3	4";
+	String textBlock = """
+first line
+
+second line
+""";
 
 	void foo(int a, int b, int c, int d, int e, int f) {
 		switch (a) {

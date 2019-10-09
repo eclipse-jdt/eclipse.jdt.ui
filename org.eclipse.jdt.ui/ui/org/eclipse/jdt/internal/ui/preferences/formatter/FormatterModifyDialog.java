@@ -733,6 +733,17 @@ public class FormatterModifyDialog extends ModifyDialog {
 	private void createIndentationTree() {
 		final Section globalSection= fTree.addSection(null, FormatterMessages.FormatterModifyDialog_indentation_tree_indentation, "section-indentation"); //$NON-NLS-1$
 		createGeneralIndentationPrefs(globalSection);
+		fTree.addComboPref(globalSection, FormatterMessages.FormatterModifyDialog_indentation_pref_text_block_indentation, DefaultCodeFormatterConstants.FORMATTER_TEXT_BLOCK_INDENTATION,
+				new String[] {
+						String.valueOf(DefaultCodeFormatterConstants.INDENT_PRESERVE),
+						String.valueOf(DefaultCodeFormatterConstants.INDENT_BY_ONE),
+						String.valueOf(DefaultCodeFormatterConstants.INDENT_DEFAULT),
+						String.valueOf(DefaultCodeFormatterConstants.INDENT_ON_COLUMN) },
+				new String[] {
+						FormatterMessages.FormatterModifyDialog_indentation_val_indentation_preserve,
+						FormatterMessages.FormatterModifyDialog_lineWrap_val_indentation_by_one,
+						FormatterMessages.FormatterModifyDialog_indentation_val_indentation_default,
+						FormatterMessages.FormatterModifyDialog_lineWrap_val_indentation_on_column });
 		fTree.addGap(globalSection);
 
 		fTree.builder(FormatterMessages.FormatterModifyDialog_indentation_tree_indented_elements, null, s -> CheckboxPreference.addModifyAll(s, fImages))
