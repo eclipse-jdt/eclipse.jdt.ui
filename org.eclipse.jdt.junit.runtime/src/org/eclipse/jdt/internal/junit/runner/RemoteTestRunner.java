@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -118,7 +118,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	/**
 	 * Queue of rerun requests.
 	 */
-	private Vector fRerunRequests= new Vector(10);
+	private Vector<RerunRequest> fRerunRequests= new Vector<RerunRequest>(10);
 	/**
 	 * Thread reading from the socket
 	 */
@@ -144,6 +144,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 			super("ReaderThread"); //$NON-NLS-1$
 		}
 
+		@Override
 		public void run(){
 			try {
 				String message= null;
@@ -240,13 +241,13 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	protected final void defaultInit(String[] args) {
 		for(int i= 0; i < args.length; i++) {
 			if(args[i].toLowerCase().equals("-classnames") || args[i].toLowerCase().equals("-classname")){ //$NON-NLS-1$ //$NON-NLS-2$
-				Vector list= new Vector();
+				Vector<String> list= new Vector<String>();
 				for (int j= i+1; j < args.length; j++) {
 					if (args[j].startsWith("-")) //$NON-NLS-1$
 						break;
 					list.add(args[j]);
 				}
-				fTestClassNames= (String[]) list.toArray(new String[list.size()]);
+				fTestClassNames= list.toArray(new String[list.size()]);
 			}
 			else if(args[i].toLowerCase().equals("-test")) { //$NON-NLS-1$
 				String testName= args[i+1];
@@ -376,7 +377,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 		}
 	}
 
-	protected Class loadTestLoaderClass(String className) throws ClassNotFoundException {
+	protected Class<?> loadTestLoaderClass(String className) throws ClassNotFoundException {
 		return Class.forName(className);
 	}
 
@@ -388,11 +389,11 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 		BufferedReader br= new BufferedReader(new InputStreamReader(new FileInputStream(new File(pkgNameFile)), "UTF-8")); //$NON-NLS-1$
 		try {
 			String line;
-			Vector list= new Vector();
+			Vector<String> list= new Vector<String>();
 			while ((line= br.readLine()) != null) {
 				list.add(line);
 			}
-			fPackageNames= (String[]) list.toArray(new String[list.size()]);
+			fPackageNames= list.toArray(new String[list.size()]);
 		}
 		finally {
 			br.close();
@@ -409,11 +410,11 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 		BufferedReader br= new BufferedReader(new InputStreamReader(new FileInputStream(new File(testNameFile)), "UTF-8")); //$NON-NLS-1$
 		try {
 			String line;
-			Vector list= new Vector();
+			Vector<String> list= new Vector<String>();
 			while ((line= br.readLine()) != null) {
 				list.add(line);
 			}
-			fTestClassNames= (String[]) list.toArray(new String[list.size()]);
+			fTestClassNames= list.toArray(new String[list.size()]);
 		}
 		finally {
 			br.close();
@@ -430,11 +431,11 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 		BufferedReader br= new BufferedReader(new InputStreamReader(new FileInputStream(new File(testFailureFile)), "UTF-8")); //$NON-NLS-1$
 		try {
 			String line;
-			Vector list= new Vector();
+			Vector<String> list= new Vector<String>();
 			while ((line= br.readLine()) != null) {
 				list.add(line);
 			}
-			fFailureNames= (String[]) list.toArray(new String[list.size()]);
+			fFailureNames= list.toArray(new String[list.size()]);
 		}
 		finally {
 			br.close();
@@ -480,7 +481,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 			try {
 				wait();
 				if (!fStopped && fRerunRequests.size() > 0) {
-					RerunRequest r= (RerunRequest)fRerunRequests.remove(0);
+					RerunRequest r= fRerunRequests.remove(0);
 					rerunTest(r);
 				}
 			} catch (InterruptedException e) {
@@ -495,16 +496,16 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 			exception.printStackTrace(System.err);
 	}
 
-	protected Class[] loadClasses(String[] testClassNames) {
-		Vector classes= new Vector();
+	protected Class<?>[] loadClasses(String[] testClassNames) {
+		Vector<Class<?>> classes= new Vector<Class<?>>();
 		for (int i = 0; i < testClassNames.length; i++) {
 			String name = testClassNames[i];
-			Class clazz = loadClass(name, this);
+			Class<?> clazz = loadClass(name, this);
 			if (clazz != null) {
 				classes.add(clazz);
 			}
 		}
-		return (Class[]) classes.toArray(new Class[classes.size()]);
+		return classes.toArray(new Class[classes.size()]);
 	}
 
 	protected void notifyListenersOfTestEnd(TestExecution execution,
@@ -569,7 +570,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	 * @param r rerun request
 	 */
 	public void rerunTest(RerunRequest r) {
-		final Class[] classes= loadClasses(new String[] { r.fRerunClassName });
+		final Class<?>[] classes= loadClasses(new String[] { r.fRerunClassName });
 		ITestReference rerunTest1= fLoader.loadTests(classes, r.fRerunTestName, null, null, fIncludeExcludeTags, fUniqueId, this)[0];
 		RerunExecutionListener service= rerunExecutionListener();
 
@@ -767,8 +768,8 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 		return fLoader;
 	}
 
-	public Class loadClass(String className, RemoteTestRunner listener) {
-		Class clazz= null;
+	public Class<?> loadClass(String className, RemoteTestRunner listener) {
+		Class<?> clazz= null;
 		try {
 			clazz= getTestClassLoader().loadClass(className);
 		} catch (ClassNotFoundException e) {

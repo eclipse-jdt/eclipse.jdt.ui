@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -26,7 +26,7 @@ public class TestExecution {
 
 	private IClassifiesThrowables fClassifier;
 
-	private ArrayList fStopListeners = new ArrayList();
+	private ArrayList<IStopListener> fStopListeners = new ArrayList<IStopListener>();
 
 	public TestExecution(IListensToTestExecutions listener,
 			IClassifiesThrowables classifier) {
@@ -48,8 +48,8 @@ public class TestExecution {
 
 	public void stop() {
 		fShouldStop = true;
-		for (Iterator iter = fStopListeners.iterator(); iter.hasNext();) {
-			IStopListener listener = (IStopListener) iter.next();
+		for (Iterator<IStopListener> iter = fStopListeners.iterator(); iter.hasNext();) {
+			IStopListener listener = iter.next();
 			listener.stop();
 		}
 	}

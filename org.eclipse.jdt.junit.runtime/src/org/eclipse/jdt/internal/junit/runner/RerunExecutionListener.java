@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -26,6 +26,7 @@ public class RerunExecutionListener extends FirstRunExecutionListener {
 
 	private String fStatus = RemoteTestRunner.RERAN_OK;
 
+	@Override
 	public void notifyTestFailed(TestReferenceFailure failure) {
 		sendFailure(failure, MessageIds.RTRACE_START, MessageIds.RTRACE_END);
 
@@ -38,10 +39,12 @@ public class RerunExecutionListener extends FirstRunExecutionListener {
 			throw new IllegalArgumentException(status);
 	}
 
+	@Override
 	public void notifyTestStarted(ITestIdentifier test) {
 		// do nothing
 	}
 
+	@Override
 	public void notifyTestEnded(ITestIdentifier test) {
 		// do nothing
 	}

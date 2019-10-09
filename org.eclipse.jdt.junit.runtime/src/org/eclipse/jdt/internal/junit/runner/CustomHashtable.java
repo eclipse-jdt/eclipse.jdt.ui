@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -39,6 +39,7 @@ import java.util.NoSuchElementException;
 			value= theValue;
 		}
 
+		@Override
 		public String toString() {
 			StringBuffer buffer= new StringBuffer();
 			appendToStringWithCommaNL(buffer);
@@ -61,7 +62,7 @@ import java.util.NoSuchElementException;
 		}
 	}
 
-	private static final class EmptyEnumerator implements Enumeration {
+	private static final class EmptyEnumerator implements Enumeration<Object> {
 
 		public boolean hasMoreElements() {
 			return false;
@@ -72,7 +73,7 @@ import java.util.NoSuchElementException;
 		}
 	}
 
-	private class HashEnumerator implements Enumeration {
+	private class HashEnumerator implements Enumeration<Object> {
 
 		boolean key;
 
@@ -221,7 +222,7 @@ import java.util.NoSuchElementException;
 	 *
 	 * @return an Enumeration of the values of this Hashtable
 	 */
-	public Enumeration elements() {
+	public Enumeration<?> elements() {
 		if (elementCount == 0)
 			return emptyEnumerator;
 		return new HashEnumerator(false);
@@ -308,7 +309,7 @@ import java.util.NoSuchElementException;
 	 *
 	 * @return an Enumeration of the keys of this Hashtable
 	 */
-	public Enumeration keys() {
+	public Enumeration<?> keys() {
 		if (elementCount == 0)
 			return emptyEnumerator;
 		return new HashEnumerator(true);
@@ -422,6 +423,7 @@ import java.util.NoSuchElementException;
 	 *
 	 * @return the string representation of this Hashtable
 	 */
+	@Override
 	public String toString() {
 		if (size() == 0)
 			return "{}"; //$NON-NLS-1$

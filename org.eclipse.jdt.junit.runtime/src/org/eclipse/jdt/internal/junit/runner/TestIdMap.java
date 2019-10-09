@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -19,7 +19,7 @@ package org.eclipse.jdt.internal.junit.runner;
 import java.util.HashMap;
 
 public class TestIdMap {
-	private HashMap fIdMap= new HashMap();
+	private HashMap<ITestIdentifier, String> fIdMap= new HashMap<ITestIdentifier, String>();
 
 	private int fNextId= 1;
 

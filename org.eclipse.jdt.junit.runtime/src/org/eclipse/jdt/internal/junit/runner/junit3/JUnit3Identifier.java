@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2017 IBM Corporation and others.
+ * Copyright (c) 2006, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -32,11 +32,13 @@ class JUnit3Identifier implements ITestIdentifier {
 		return ref.getName();
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		JUnit3Identifier id = (JUnit3Identifier) obj;
 		return ref.equals(id.ref);
 	}
 
+	@Override
 	public int hashCode() {
 		return ref.hashCode();
 	}

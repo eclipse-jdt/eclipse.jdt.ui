@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -29,18 +29,18 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 public class FailuresFirstPrioritizer implements ITestPrioritizer {
-	private HashSet fPriorities;
+	private HashSet<String> fPriorities;
 
 	public FailuresFirstPrioritizer(String[] priorities) {
-		fPriorities= new HashSet(Arrays.asList(priorities));
+		fPriorities= new HashSet<String>(Arrays.asList(priorities));
 	}
 
 	public Test prioritize(Test suite) {
-		doPrioritize(suite, new ArrayList());
+		doPrioritize(suite, new ArrayList<Test>());
 		return suite;
 	}
 
-	private void doPrioritize(Test suite, List path) {
+	private void doPrioritize(Test suite, List<Test> path) {
 		if (suite instanceof TestCase) {
 			TestCase testCase= (TestCase) suite;
 			if (hasPriority(testCase))
@@ -58,21 +58,21 @@ public class FailuresFirstPrioritizer implements ITestPrioritizer {
 		}
 	}
 
-	private void loopTests(List path, TestSuite aSuite) {
-		for (Enumeration e= aSuite.tests(); e.hasMoreElements();) {
-			doPrioritize((Test)e.nextElement(), path);
+	private void loopTests(List<Test> path, TestSuite aSuite) {
+		for (Enumeration<Test> e= aSuite.tests(); e.hasMoreElements();) {
+			doPrioritize(e.nextElement(), path);
 		}
 	}
 
 
-	private void reorder(Test test, List path) {
+	private void reorder(Test test, List<Test> path) {
 		doReorder(test, path, path.size()-1);
 	}
 
-	private void doReorder(Test test, List path, int top) {
+	private void doReorder(Test test, List<Test> path, int top) {
 		if (top < 0)
 			return;
-		Test topTest= (Test) path.get(top);
+		Test topTest= path.get(top);
 		// only reorder TestSuites
 		if (topTest instanceof TestSuite) {
 			TestSuite suite= (TestSuite) topTest;
@@ -82,7 +82,8 @@ public class FailuresFirstPrioritizer implements ITestPrioritizer {
 	}
 
 	void moveTestToFront(TestSuite suite, Test test) {
-		Vector tests= (Vector)getField(suite, "fTests"); //$NON-NLS-1$
+		@SuppressWarnings("unchecked")
+		Vector<Test> tests= (Vector<Test>)getField(suite, "fTests"); //$NON-NLS-1$
 		for(int i= 0; i < tests.size(); i++) {
 			if (tests.get(i) == test) {
 				tests.remove(i);
@@ -100,7 +101,7 @@ public class FailuresFirstPrioritizer implements ITestPrioritizer {
 	    return getFieldInClass(object, fieldName, object.getClass());
 	}
 
-	private static Object getFieldInClass(Object object, String fieldName, Class clazz) {
+	private static Object getFieldInClass(Object object, String fieldName, Class<?> clazz) {
 		Field field= null;
 		if (clazz == null)
 			return null;

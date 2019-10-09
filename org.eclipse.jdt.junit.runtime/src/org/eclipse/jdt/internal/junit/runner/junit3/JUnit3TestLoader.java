@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2017 IBM Corporation and others.
+ * Copyright (c) 2006, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -39,7 +39,7 @@ public class JUnit3TestLoader implements ITestLoader {
 
 	// WANT: give test loaders a schema
 
-	public ITestReference[] loadTests(Class[] testClasses, String testName, String[] failureNames, String[] packages, String[][] includeExcludeTags, String uniqueId, RemoteTestRunner listener) {
+	public ITestReference[] loadTests(Class<?>[] testClasses, String testName, String[] failureNames, String[] packages, String[][] includeExcludeTags, String uniqueId, RemoteTestRunner listener) {
 		// instantiate all tests
 		ITestReference[] suites= new ITestReference[testClasses.length];
 		ITestPrioritizer prioritizer;
@@ -50,7 +50,7 @@ public class JUnit3TestLoader implements ITestLoader {
 			prioritizer= new NullPrioritizer();
 
 		for (int i= 0; i < suites.length; i++) {
-			Class testClassName= testClasses[i];
+			Class<?> testClassName= testClasses[i];
 			Test test= getTest(testClassName, testName, listener);
 			prioritizer.prioritize(test);
 			suites[i]= new JUnit3TestReference(test);
@@ -59,10 +59,10 @@ public class JUnit3TestLoader implements ITestLoader {
 		return suites;
 	}
 
-	private Test createTest(String testName, Class testClass) {
-		Class[] classArgs= { String.class };
+	private Test createTest(String testName, Class<?> testClass) {
+		Class<?>[] classArgs= { String.class };
 		Test test;
-		Constructor constructor= null;
+		Constructor<?> constructor= null;
 		try {
 			try {
 				constructor= testClass.getConstructor(classArgs);
@@ -85,7 +85,7 @@ public class JUnit3TestLoader implements ITestLoader {
 		return error(testName, "Could not create test \'" + testName + "\' "); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
-	public Test getTest(Class testClass, String testName, RemoteTestRunner failureListener) {
+	public Test getTest(Class<?> testClass, String testName, RemoteTestRunner failureListener) {
 		if (testName != null) {
 			return setupTest(testClass, createTest(testName, testClass), testName);
 		}
@@ -100,7 +100,7 @@ public class JUnit3TestLoader implements ITestLoader {
 			return error(JUnitMessages.getString("RemoteTestRunner.error"), JUnitMessages.getString("RemoteTestRunner.error.suite.notstatic"));//$NON-NLS-1$ //$NON-NLS-2$
 		}
 		try {
-			Test test= (Test) suiteMethod.invoke(null, new Class[0]); // static
+			Test test= (Test) suiteMethod.invoke(null, new Object[0]); // static
 			if (test != null) {
 				return test;
 			}
@@ -129,7 +129,7 @@ public class JUnit3TestLoader implements ITestLoader {
 	 * @param testName test name
 	 * @return the reloaded test, or the test wrapped with setUpTest(..) if available
 	 */
-	private Test setupTest(Class reloadedTestClass, Test reloadedTest, String testName) {
+	private Test setupTest(Class<?> reloadedTestClass, Test reloadedTest, String testName) {
 		if (reloadedTestClass == null)
 			return reloadedTest;
 
@@ -168,6 +168,7 @@ public class JUnit3TestLoader implements ITestLoader {
 	 */
 	private Test error(String testName, final String message) {
 		return new TestCase(testName) {
+			@Override
 			protected void runTest() {
 				fail(message);
 			}

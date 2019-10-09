@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2017 IBM Corporation and others.
+ * Copyright (c) 2006, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -47,7 +47,7 @@ public class JUnit3TestReference implements ITestReference {
 	private final Test fTest;
 
 	public static Object getField(Object object, String fieldName) {
-		Class clazz= object.getClass();
+		Class<? extends Object> clazz= object.getClass();
 		try {
 			Field field= clazz.getDeclaredField(fieldName);
 			field.setAccessible(true);
@@ -68,6 +68,7 @@ public class JUnit3TestReference implements ITestReference {
 		return fTest.countTestCases();
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (! (obj instanceof JUnit3TestReference))
 			return false;
@@ -76,6 +77,7 @@ public class JUnit3TestReference implements ITestReference {
 		return ref.fTest.equals(fTest);
 	}
 
+	@Override
 	public int hashCode() {
 		return fTest.hashCode();
 	}
@@ -84,11 +86,11 @@ public class JUnit3TestReference implements ITestReference {
 		if (isJUnit4TestCaseAdapter(fTest)) {
 			Method method= (Method) callJUnit4GetterMethod(fTest, "getTestMethod"); //$NON-NLS-1$
 			return MessageFormat.format(
-					MessageIds.TEST_IDENTIFIER_MESSAGE_FORMAT, new String[] { method.getName(), method.getDeclaringClass().getName() });
+					MessageIds.TEST_IDENTIFIER_MESSAGE_FORMAT, new Object[] { method.getName(), method.getDeclaringClass().getName() });
 		}
 		if (fTest instanceof TestCase) {
 			TestCase testCase= (TestCase) fTest;
-			return MessageFormat.format(MessageIds.TEST_IDENTIFIER_MESSAGE_FORMAT, new String[] { testCase.getName(), fTest.getClass().getName() });
+			return MessageFormat.format(MessageIds.TEST_IDENTIFIER_MESSAGE_FORMAT, new Object[] { testCase.getName(), fTest.getClass().getName() });
 		}
 		if (fTest instanceof TestSuite) {
 			TestSuite suite= (TestSuite) fTest;
@@ -101,7 +103,7 @@ public class JUnit3TestReference implements ITestReference {
 			return decorator.getClass().getName();
 		}
 		if (isJUnit4TestSuiteAdapter(fTest)) {
-			Class testClass= (Class) callJUnit4GetterMethod(fTest, "getTestClass"); //$NON-NLS-1$
+			Class<?> testClass= (Class<?>) callJUnit4GetterMethod(fTest, "getTestClass"); //$NON-NLS-1$
 			return testClass.getName();
 		}
 		return fTest.toString();
@@ -136,9 +138,9 @@ public class JUnit3TestReference implements ITestReference {
 				sendTreeOfChild(suite.testAt(i), notified);
 			}
 		} else if (isJUnit4TestSuiteAdapter(fTest)) {
-			List tests= (List) callJUnit4GetterMethod(fTest, "getTests"); //$NON-NLS-1$
+			List<?> tests= (List<?>) callJUnit4GetterMethod(fTest, "getTests"); //$NON-NLS-1$
 			notified.visitTreeEntry(getIdentifier(), true, tests.size(), false, "-1"); //$NON-NLS-1$
-			for (Iterator iter= tests.iterator(); iter.hasNext();) {
+			for (Iterator<?> iter= tests.iterator(); iter.hasNext();) {
 				sendTreeOfChild((Test) iter.next(), notified);
 			}
 		} else {
