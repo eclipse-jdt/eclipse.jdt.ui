@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2019 IBM Corporation and others.
+ * Copyright (c) 2012, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -278,6 +278,7 @@ public interface IProposalRelevance {
 	public static final int ADD_JAVADOC_FIELD= 1;
 	public static final int ADD_JAVADOC_TYPE= 1;
 	public static final int ADD_JAVADOC_METHOD= 1;
+	public static final int ADD_JAVADOC_MODULE= 1;
 	public static final int EXTRACT_METHOD_ERROR= 1;
 	public static final int EXTRACT_CONSTANT_ERROR= 1;
 	public static final int LINKED_NAMES_ASSIST_ERROR= 1;

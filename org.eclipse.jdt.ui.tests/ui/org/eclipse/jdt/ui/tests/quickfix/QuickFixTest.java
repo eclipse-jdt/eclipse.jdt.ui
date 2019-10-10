@@ -107,6 +107,7 @@ import org.junit.runners.Suite;
 	ChangeNonStaticToStaticTest.class,
 	MarkerResolutionTest.class,
 	JavadocQuickFixTest.class,
+	JavadocQuickFixTest9.class,
 	ConvertForLoopQuickFixTest.class,
 	ConvertIterableLoopQuickFixTest.class,
 	AdvancedQuickAssistTest.class,
@@ -124,6 +125,7 @@ import org.junit.runners.Suite;
 	AnnotateAssistTest18.class,
 	TypeAnnotationQuickFixTest.class
 })
+
 public class QuickFixTest {
 
 	public static void assertCorrectLabels(List<? extends ICompletionProposal> proposals) {

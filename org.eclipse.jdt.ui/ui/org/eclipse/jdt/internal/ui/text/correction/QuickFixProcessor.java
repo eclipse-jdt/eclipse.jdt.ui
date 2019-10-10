@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -134,8 +134,10 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.UnqualifiedFieldAccess:
 			case IProblem.JavadocMissing:
 			case IProblem.JavadocMissingParamTag:
+			case IProblem.JavadocMissingProvidesTag:
 			case IProblem.JavadocMissingReturnTag:
 			case IProblem.JavadocMissingThrowsTag:
+			case IProblem.JavadocMissingUsesTag:
 			case IProblem.JavadocUndefinedType:
 			case IProblem.JavadocAmbiguousType:
 			case IProblem.JavadocNotVisibleType:
@@ -143,6 +145,8 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.JavadocDuplicateThrowsClassName:
 			case IProblem.JavadocDuplicateReturnTag:
 			case IProblem.JavadocDuplicateParamName:
+			case IProblem.JavadocDuplicateProvidesTag:
+			case IProblem.JavadocDuplicateUsesTag:
 			case IProblem.JavadocInvalidParamName:
 			case IProblem.JavadocUnexpectedTag:
 			case IProblem.JavadocInvalidTag:
@@ -592,6 +596,8 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.JavadocMissingParamTag:
 			case IProblem.JavadocMissingReturnTag:
 			case IProblem.JavadocMissingThrowsTag:
+			case IProblem.JavadocMissingUsesTag:
+			case IProblem.JavadocMissingProvidesTag:
 				JavadocTagsSubProcessor.getMissingJavadocTagProposals(context, problem, proposals);
 				break;
 			case IProblem.JavadocInvalidThrowsClassName:
@@ -602,6 +608,10 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.JavadocUnexpectedTag:
 			case IProblem.JavadocInvalidTag:
 				JavadocTagsSubProcessor.getRemoveJavadocTagProposals(context, problem, proposals);
+				break;
+			case IProblem.JavadocDuplicateProvidesTag:
+			case IProblem.JavadocDuplicateUsesTag:
+				JavadocTagsSubProcessor.getRemoveDuplicateModuleJavadocTagProposals(context, problem, proposals);
 				break;
 			case IProblem.JavadocInvalidMemberTypeQualification:
 				JavadocTagsSubProcessor.getInvalidQualificationProposals(context, problem, proposals);
