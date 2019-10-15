@@ -566,6 +566,7 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 		List<CPListElement> selectedElements= fModuleList.getSelectedElements();
 		List<String> selectedModuleNames= new ArrayList<>();
 		Set<String> allModulesToRemove= new HashSet<>();
+		boolean removeConfirmed= false;
 		for (CPListElement selectedElement : selectedElements) {
 			if (fModuleList.getModuleKind(selectedElement) == ModuleKind.Focus) {
 				MessageDialog.openError(getShell(), NewWizardMessages.ModuleDependenciesPage_removeModule_dialog_title,
@@ -620,16 +621,19 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 			if (problemModule != null) {
 				int lastArrow= problemModule.lastIndexOf("->"); //$NON-NLS-1$
 				String leafMod= lastArrow == -1 ? problemModule : problemModule.substring(lastArrow+2);
-				MessageDialog.openError(getShell(), NewWizardMessages.ModuleDependenciesPage_removeModule_dialog_title,
-						MessageFormat.format(NewWizardMessages.ModuleDependenciesPage_removeModule_error_with_hint,
-								leafMod, 
-								MessageFormat.format(NewWizardMessages.ModuleDependenciesPage_moduleIsRequired_error_hint, problemModule)));
-				return;
+				int answer= MessageDialog.open(MessageDialog.WARNING, getShell(), NewWizardMessages.ModuleDependenciesPage_removeModule_dialog_title,
+								MessageFormat.format(NewWizardMessages.ModuleDependenciesPage_moduleIsRequired_warning, leafMod, problemModule),
+								SWT.NONE,
+								NewWizardMessages.ModuleDependenciesPage_remove_button, IDialogConstants.CANCEL_LABEL);
+				if (answer != 0) {
+					return;
+				}
+				removeConfirmed= true;
 			}
 		}
 		String seedModules= String.join(", ", selectedModuleNames); //$NON-NLS-1$
 		if (allModulesToRemove.size() == selectedModuleNames.size()) {
-			if (confirmRemoveModule(MessageFormat.format(NewWizardMessages.ModuleDependenciesPage_removingModule_message, seedModules))) {
+			if (removeConfirmed || confirmRemoveModule(MessageFormat.format(NewWizardMessages.ModuleDependenciesPage_removingModule_message, seedModules))) {
 				fModuleList.fNames.removeAll(selectedModuleNames);
 				fModuleList.refresh();
 			}
@@ -688,16 +692,21 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 
 	private String collectModulesToRemove(String mod, Set<String> modulesToRemove) {
 		if (fModuleList.fNames.contains(mod) && modulesToRemove.add(mod)) {
+			String problemModules= null; // at most one path is detected, even if several exist
 			List<String> requireds= fModuleRequiredByModules.get(mod);
 			if (requireds != null) {
 				for (String required : requireds) {
-					if (fModuleList.getModuleKind(required) == ModuleKind.Focus)
-						return required + "->" + mod; //$NON-NLS-1$
-					String problemModule= collectModulesToRemove(required, modulesToRemove);
-					if (problemModule != null)
-						return problemModule + "->" + mod; //$NON-NLS-1$
+					if (fModuleList.getModuleKind(required) == ModuleKind.Focus) {
+						// direct dependency beats any indirect one:
+						problemModules= required + "->" + mod; //$NON-NLS-1$
+						continue; // do not attempt to remove the focus module
+					}
+					String probMods= collectModulesToRemove(required, modulesToRemove);
+					if (probMods != null && problemModules == null)
+						problemModules= probMods + "->" + mod; //$NON-NLS-1$
 				}
 			}
+			return problemModules;
 		}
 		return null;
 	}

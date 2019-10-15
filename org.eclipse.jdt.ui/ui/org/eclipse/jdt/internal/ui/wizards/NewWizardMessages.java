@@ -564,7 +564,7 @@ public final class NewWizardMessages extends NLS {
 	public static String ModuleDependenciesPage_removeCurrentModule_error;
 	public static String ModuleDependenciesPage_removeModule_error_with_hint;
 	public static String ModuleDependenciesPage_removeSystemModule_error_hint;
-	public static String ModuleDependenciesPage_moduleIsRequired_error_hint;
+	public static String ModuleDependenciesPage_moduleIsRequired_warning;
 
 	public static String ModuleDependenciesAdapter_patchConflict_title;
 	public static String ModuleDependenciesAdapter_patchConflict_message;
