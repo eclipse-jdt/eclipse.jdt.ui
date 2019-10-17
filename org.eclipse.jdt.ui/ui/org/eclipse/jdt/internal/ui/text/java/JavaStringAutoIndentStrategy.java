@@ -42,6 +42,8 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.IndentAction;
+import org.eclipse.jdt.internal.ui.text.correction.PreviewFeaturesSubProcessor;
 
 
 /**
@@ -51,6 +53,8 @@ public class JavaStringAutoIndentStrategy extends DefaultIndentLineAutoEditStrat
 
 	protected String fPartitioning;
 	protected IJavaProject fProject;
+
+	private JavaMultiLineStringAutoIndentStrategy jmlsStrategy;
 
 	/**
 	 * The input string doesn't contain any line delimiter.
@@ -189,10 +193,16 @@ public class JavaStringAutoIndentStrategy extends DefaultIndentLineAutoEditStrat
 
 		IRegion line= document.getLineInformationOfOffset(offset);
 		String string= document.get(line.getOffset(), offset - line.getOffset()).trim();
+		boolean isLineDelimiter= isLineDelimiter(document, command.text);
+		boolean isTextBlock= PreviewFeaturesSubProcessor.isPreviewFeatureEnabled(fProject) && string.endsWith(IndentAction.POTENTIAL_TEXT_BLOCK_STR) && isLineDelimiter;
+		if (isTextBlock) {
+			JavaMultiLineStringAutoIndentStrategy mlsStrategy= getMultiLineStringAutoIndentStrategy();
+			mlsStrategy.customizeDocumentCommand(document, command);
+			return;
+		}
 		if (string.length() != 0 && !string.equals("+")) //$NON-NLS-1$
 			indentation += getExtraIndentAfterNewLine();
 		
-		boolean isLineDelimiter= isLineDelimiter(document, command.text);
 		if (isEditorWrapStrings() && isLineDelimiter) {
 			if (isWrappingBeforeBinaryOperator()) {
 				command.text= "\"" + command.text + indentation + "+ \"";  //$NON-NLS-1$//$NON-NLS-2$
@@ -295,5 +305,12 @@ public class JavaStringAutoIndentStrategy extends DefaultIndentLineAutoEditStrat
 				javaStringIndentAfterNewLine(document, command);
 		} catch (BadLocationException e) {
 		}
+	}
+
+	private JavaMultiLineStringAutoIndentStrategy getMultiLineStringAutoIndentStrategy() {
+		if (jmlsStrategy != null) {
+			return jmlsStrategy;
+		}
+		return new JavaMultiLineStringAutoIndentStrategy(fPartitioning, fProject);
 	}
 }
