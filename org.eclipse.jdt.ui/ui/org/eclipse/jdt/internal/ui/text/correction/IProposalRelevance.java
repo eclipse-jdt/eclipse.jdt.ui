@@ -44,7 +44,8 @@ public interface IProposalRelevance {
 	public static final int MARKER_RESOLUTION= 10;
 	public static final int CREATE_LOCAL_PREFIX_OR_SUFFIX_MATCH= 10;
 	public static final int CHANGE_NULLNESS_ANNOTATION= 10;
-	
+	public static final int REMOVE_UNNECESSARY_ARRAY_CREATION= 10;
+
 	public static final int CHANGE_NULLNESS_ANNOTATION_IN_OVERRIDDEN_METHOD= 9;
 	public static final int REMOVE_FINAL_MODIFIER= 9;
 	public static final int GETTER_SETTER_NOT_VISIBLE_FIELD= 9;
