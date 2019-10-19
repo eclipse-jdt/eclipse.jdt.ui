@@ -153,7 +153,7 @@ public class ModulePatchSourceSelectionDialog extends TrayDialog {
 			try {
 				if (project.isOpen() && project.hasNature(JavaCore.NATURE_ID)) {
 					IJavaProject jProj= JavaCore.create(project);
-					if (jProj.getModuleDescription() == null) {
+					if (jProj.getOwnModuleDescription() == null) {
 						fProjects.add(jProj);
 					}
 				}
