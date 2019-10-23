@@ -396,14 +396,13 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				return false;
 		}
 
-		if (proposals == null) {
-			return true;
-		}
-
 		final ICompilationUnit cu= context.getCompilationUnit();
 		final ExtractMethodRefactoring extractMethodRefactoring= new ExtractMethodRefactoring(context.getASTRoot(), context.getSelectionOffset(), context.getSelectionLength());
 		extractMethodRefactoring.setMethodName("extracted"); //$NON-NLS-1$
 		if (extractMethodRefactoring.checkInitialConditions(new NullProgressMonitor()).isOK()) {
+			if (proposals == null) {
+				return true;
+			}
 			String label= CorrectionMessages.QuickAssistProcessor_extractmethod_description;
 			LinkedProposalModel linkedProposalModel= new LinkedProposalModel();
 			extractMethodRefactoring.setLinkedProposalModel(linkedProposalModel);
@@ -414,8 +413,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			proposal.setCommandId(EXTRACT_METHOD_INPLACE_ID);
 			proposal.setLinkedProposalModel(linkedProposalModel);
 			proposals.add(proposal);
+			return true;
 		}
-		return true;
+		return false;
 	}
 
 
@@ -1775,6 +1775,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			options.put(CleanUpConstants.INSERT_INFERRED_TYPE_ARGUMENTS, CleanUpOptions.TRUE);
 			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new TypeParametersCleanUp(options), relevance, image, context);
 			resultingCollections.add(proposal);
+		} else {
+			return false;
 		}
 		return true;
 	}

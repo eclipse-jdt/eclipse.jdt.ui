@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -161,15 +161,17 @@ public class JavaSelectAnnotationRulerAction extends SelectMarkerRulerAction {
 				continue;
 
 			AnnotationPreference preference= fAnnotationPreferenceLookup.getAnnotationPreference(annotation);
-			if (preference == null)
-				continue;
+			if (!(annotation instanceof AssistAnnotation)) {
+				if (preference == null)
+					continue;
 
-			String key= preference.getVerticalRulerPreferenceKey();
-			if (key == null)
-				continue;
+				String key= preference.getVerticalRulerPreferenceKey();
+				if (key == null)
+					continue;
 
-			if (!fStore.getBoolean(key))
-				continue;
+				if (!fStore.getBoolean(key))
+					continue;
+			}			
 
 			boolean isReadOnly= fTextEditor instanceof ITextEditorExtension && ((ITextEditorExtension)fTextEditor).isEditorInputReadOnly();
 			if (!isReadOnly
