@@ -26,13 +26,16 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
@@ -42,6 +45,7 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -84,7 +88,7 @@ import org.eclipse.jdt.internal.ui.text.correction.ProblemLocationCore;
  */
 public class UnusedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 
-	private static class SideEffectFinder extends ASTVisitor {
+	public static class SideEffectFinder extends ASTVisitor {
 
 		private final ArrayList<Expression> fSideEffectNodes;
 
@@ -133,7 +137,7 @@ public class UnusedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 		}
 	}
 
-	private static class RemoveImportOperation extends CompilationUnitRewriteOperation {
+	public static class RemoveImportOperation extends CompilationUnitRewriteOperation {
 
 		private final ImportDeclaration fImportDeclaration;
 
@@ -180,7 +184,7 @@ public class UnusedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 		}
 	}
 
-	private static class RemoveUnusedMemberOperation extends CompilationUnitRewriteOperation {
+	public static class RemoveUnusedMemberOperation extends CompilationUnitRewriteOperation {
 
 		private final SimpleName[] fUnusedNames;
 		private boolean fForceRemove;
@@ -307,11 +311,51 @@ public class UnusedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 				} else {
 					fragments= ((VariableDeclarationStatement) varDecl).fragments();
 				}
-				Expression initializer = frag.getInitializer();
+				Expression initializer= frag.getInitializer();
 				ArrayList<Expression> sideEffects= new ArrayList<>();
 				if (initializer != null) {
 					initializer.accept(new SideEffectFinder(sideEffects));
 				}
+
+				/*
+				 * Special case for when the variable initializer is a conditional expression.
+				 * Certain actions must be taken depending on where in the conditional the side effect expressions are located.
+				 */
+				if (initializer instanceof ConditionalExpression && varDecl instanceof VariableDeclarationStatement) {
+					AST ast= rewrite.getAST();
+					ConditionalExpression ce= (ConditionalExpression) initializer;
+
+					// check if side effects and both expressions are to be removed then we remove whole statement
+					if (fForceRemove || (!checkSideEffects(sideEffects) &&
+							!checkCondtionalExpression(ce.getThenExpression()) &&
+							!checkCondtionalExpression(ce.getElseExpression()))) {
+						rewrite.remove(varDecl, group);
+						return;
+					}
+
+					IfStatement ifStatement= ast.newIfStatement();
+					ifStatement.setExpression((Expression) rewrite.createCopyTarget(getExpressionWithoutParenthezis(ce.getExpression())));
+
+					Block thenBlock= ast.newBlock();
+					// check if 'then' block contains code to keep
+					if (checkCondtionalExpression(ce.getThenExpression())) {
+						ASTNode thenExpression= rewrite.createCopyTarget(getExpressionWithoutParenthezis(ce.getThenExpression()));
+						thenBlock.statements().add(ast.newExpressionStatement((Expression) thenExpression));
+					}
+					ifStatement.setThenStatement(thenBlock);
+
+					// check if 'else' block contains code to keep
+					if (checkCondtionalExpression(ce.getElseExpression())) {
+						Block elseBlock= ast.newBlock();
+						ASTNode elseExpression= rewrite.createCopyTarget(getExpressionWithoutParenthezis(ce.getElseExpression()));
+						elseBlock.statements().add(ast.newExpressionStatement((Expression) elseExpression));
+						ifStatement.setElseStatement(elseBlock);
+					}
+
+					rewrite.replace(varDecl, ifStatement, group);
+					return;
+				}
+
 				boolean sideEffectInitializer= sideEffects.size() > 0;
 				if (fragments.size() == fUnusedNames.length) {
 					if (fForceRemove) {
@@ -366,6 +410,43 @@ public class UnusedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 					rewrite.remove(expression, group);
 				}
 			}
+		}
+
+		private static Expression getExpressionWithoutParenthezis(Expression expression) {
+			Expression currExpression= expression;
+			while (currExpression instanceof ParenthesizedExpression) {
+				currExpression= ((ParenthesizedExpression) currExpression).getExpression();
+			}
+			return currExpression;
+		}
+
+		/*
+		 * Return TRUE if the expression node type is a method, pre/posfix or assignment
+		 */
+		private static boolean checkCondtionalExpression(Expression expression) {
+			int nodeType= getExpressionWithoutParenthezis(expression).getNodeType();
+			if (nodeType == ASTNode.METHOD_INVOCATION ||
+					nodeType == ASTNode.POSTFIX_EXPRESSION ||
+					nodeType == ASTNode.PREFIX_EXPRESSION ||
+					nodeType == ASTNode.ASSIGNMENT) {
+				return true;
+			}
+			return false;
+		}
+
+		/*
+		 * Return TRUE if any of the sideEffects expression node type is a method, pre/posfix or assignment
+		 */
+		private static boolean checkSideEffects(List<Expression> sideEffects) {
+			if (sideEffects.isEmpty()) {
+				return false;
+			}
+			for (Expression expression : sideEffects) {
+				if (checkCondtionalExpression(expression)) {
+					return true;
+				}
+			}
+			return false;
 		}
 
 		private void splitUpDeclarations(ASTRewrite rewrite, TextEditGroup group, VariableDeclarationFragment frag, VariableDeclarationStatement originalStatement, List<Expression> sideEffects) {
@@ -450,7 +531,7 @@ public class UnusedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 		}
 	}
 
-	private static class RemoveCastOperation extends CompilationUnitRewriteOperation {
+	public static class RemoveCastOperation extends CompilationUnitRewriteOperation {
 
 		private final CastExpression fCast;
 
@@ -478,7 +559,7 @@ public class UnusedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 		}
 	}
 
-	private static class RemoveAllCastOperation extends CompilationUnitRewriteOperation {
+	public static class RemoveAllCastOperation extends CompilationUnitRewriteOperation {
 
 		private final LinkedHashSet<CastExpression> fUnnecessaryCasts;
 
@@ -714,11 +795,11 @@ public class UnusedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 		return new UnusedCodeFixCore(FixMessages.UnusedCodeFix_change_name, compilationUnit, result.toArray(new CompilationUnitRewriteOperation[result.size()]));
 	}
 
-	private static boolean isFormalParameterInEnhancedForStatement(SimpleName name) {
+	public static boolean isFormalParameterInEnhancedForStatement(SimpleName name) {
 		return name.getParent() instanceof SingleVariableDeclaration && name.getParent().getLocationInParent() == EnhancedForStatement.PARAMETER_PROPERTY;
 	}
 
-	private static boolean isSideEffectFree(SimpleName simpleName, CompilationUnit completeRoot) {
+	public static boolean isSideEffectFree(SimpleName simpleName, CompilationUnit completeRoot) {
 		SimpleName nameNode= (SimpleName) NodeFinder.perform(completeRoot, simpleName.getStartPosition(), simpleName.getLength());
 		SimpleName[] references= LinkedNodeFinder.findByBinding(completeRoot, nameNode.resolveBinding());
 		for (SimpleName reference : references) {
@@ -758,7 +839,7 @@ public class UnusedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 		return sideEffects.size() > 0;
 	}
 
-	private static SimpleName getUnusedName(CompilationUnit compilationUnit, IProblemLocationCore problem) {
+	public static SimpleName getUnusedName(CompilationUnit compilationUnit, IProblemLocationCore problem) {
 		ASTNode selectedNode= problem.getCoveringNode(compilationUnit);
 
 		if (selectedNode instanceof MethodDeclaration) {
@@ -770,7 +851,7 @@ public class UnusedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 		return null;
 	}
 
-	private static String getDisplayString(SimpleName simpleName, IBinding binding, boolean removeAllAssignements) {
+	public static String getDisplayString(SimpleName simpleName, IBinding binding, boolean removeAllAssignements) {
 		String name= BasicElementLabels.getJavaElementName(simpleName.getIdentifier());
 		switch (binding.getKind()) {
 			case IBinding.TYPE:
@@ -792,7 +873,7 @@ public class UnusedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 		}
 	}
 
-	private static Map<String, String> getCleanUpOptions(IBinding binding, boolean removeAll) {
+	public static Map<String, String> getCleanUpOptions(IBinding binding, boolean removeAll) {
 		Map<String, String> result= new Hashtable<>();
 
 		result.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS, CleanUpOptionsCore.TRUE);
@@ -814,12 +895,14 @@ public class UnusedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 				result.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_FELDS, CleanUpOptionsCore.TRUE);
 				result.put(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES, CleanUpOptionsCore.TRUE);
 				break;
+			default:
+				break;
 		}
 
 		return result;
 	}
 
-	private static ImportDeclaration getImportDeclaration(IProblemLocationCore problem, CompilationUnit compilationUnit) {
+	public static ImportDeclaration getImportDeclaration(IProblemLocationCore problem, CompilationUnit compilationUnit) {
 		ASTNode selectedNode= problem.getCoveringNode(compilationUnit);
 		if (selectedNode != null) {
 			ASTNode node= ASTNodes.getParent(selectedNode, ASTNode.IMPORT_DECLARATION);
