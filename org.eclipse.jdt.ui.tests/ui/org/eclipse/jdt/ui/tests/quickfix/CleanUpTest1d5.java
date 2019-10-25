@@ -926,4 +926,987 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
+
+	public void testJava50ForLoop163122_1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    void foo(Object[] x, Object[] y) {\n" //
+				+ "        for (int i = 0; i < y.length; i++)\n" //
+				+ "            for (int j = 0; j < x.length; j++)\n" //
+				+ "                System.out.println(y[i]);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
+		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS);
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    void foo(Object[] x, Object[] y) {\n" //
+				+ "        for (Object element : y) {\n" //
+				+ "            for (Object element2 : x) {\n" //
+				+ "                System.out.println(element);\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
+	public void testJava50ForLoop163122_2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    void foo(Object[] x, Object[] y) {\n" //
+				+ "        for (int i = 0; i < y.length; i++)\n" //
+				+ "            for (int j = 0; j < x.length; j++)\n" //
+				+ "                System.out.println(y[i]);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    void foo(Object[] x, Object[] y) {\n" //
+				+ "        for (Object element : y)\n" //
+				+ "            for (Object element2 : x)\n" //
+				+ "                System.out.println(element);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
+	public void testJava50ForLoop163122_3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    void foo(Object[] x, Object[] y) {\n" //
+				+ "        for (int i = 0; i < y.length; i++)\n" //
+				+ "            for (int j = 0; j < x.length; j++)\n" //
+				+ "                System.out.println(x[i]);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
+		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS);
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    void foo(Object[] x, Object[] y) {\n" //
+				+ "        for (int i = 0; i < y.length; i++) {\n" //
+				+ "            for (Object element : x) {\n" //
+				+ "                System.out.println(x[i]);\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
+	public void testJava50ForLoop163122_4() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    void foo(Object[] x, Object[] y) {\n" //
+				+ "        for (int i = 0; i < y.length; i++)\n" //
+				+ "            for (int j = 0; j < x.length; j++)\n" //
+				+ "                System.out.println(x[i]);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    void foo(Object[] x, Object[] y) {\n" //
+				+ "        for (int i = 0; i < y.length; i++)\n" //
+				+ "            for (Object element : x)\n" //
+				+ "                System.out.println(x[i]);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
+	public void testJava50ForLoop163122_5() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    void foo(Object[] x, Object[] y) {\n" //
+				+ "        for (int i = 0; i < y.length; i++)\n" //
+				+ "            for (int j = 0; j < x.length; j++)\n" //
+				+ "                System.out.println(x[j]);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
+		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS);
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    void foo(Object[] x, Object[] y) {\n" //
+				+ "        for (Object element : y) {\n" //
+				+ "            for (Object element2 : x) {\n" //
+				+ "                System.out.println(element2);\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
+	public void testJava50ForLoop110599() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "import java.util.Iterator;\n" //
+				+ "import java.util.List;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void a(int[] i, List<String> l) {\n" //
+				+ "        //Comment\n" //
+				+ "        for (int j = 0; j < i.length; j++) {\n" //
+				+ "            System.out.println(i[j]);\n" //
+				+ "        }\n" //
+				+ "        //Comment\n" //
+				+ "        for (Iterator<String> iterator = l.iterator(); iterator.hasNext();) {\n" //
+				+ "            String str = iterator.next();\n" //
+				+ "            System.out.println(str);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "import java.util.List;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void a(int[] i, List<String> l) {\n" //
+				+ "        //Comment\n" //
+				+ "        for (int element : i) {\n" //
+				+ "            System.out.println(element);\n" //
+				+ "        }\n" //
+				+ "        //Comment\n" //
+				+ "        for (String str : l) {\n" //
+				+ "            System.out.println(str);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
+	public void testJava50ForLoop269595() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void a(int[] array) {\n" //
+				+ "        for (int i = 0; i < array.length; i++) {\n" //
+				+ "            final int value = array[i];\n" //
+				+ "            System.out.println(value);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void a(final int[] array) {\n" //
+				+ "        for (final int value : array) {\n" //
+				+ "            System.out.println(value);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
+	public void testJava50ForLoop264421() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo(String[] src) {\n" //
+				+ "        for (int i = 0; i < src.length; i++) {\n" //
+				+ "            String path = src[i];\n" //
+				+ "            String output = path;\n" //
+				+ "            if (output.length() == 1) {\n" //
+				+ "                output = output + \"-XXX\";\n" //
+				+ "            }\n" //
+				+ "            System.err.println(\"path=\"+ path + \",output=\"+output);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo(String[] src) {\n" //
+				+ "        for (String path : src) {\n" //
+				+ "            String output = path;\n" //
+				+ "            if (output.length() == 1) {\n" //
+				+ "                output = output + \"-XXX\";\n" //
+				+ "            }\n" //
+				+ "            System.err.println(\"path=\"+ path + \",output=\"+output);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
+	public void testJava50ForLoop274199() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public static void main(String[] args) {\n" //
+				+ "        for (int i = 0; i < args.length; i++) {\n" //
+				+ "            String output = args[i];\n" //
+				+ "            if (output.length() == 1) {\n" //
+				+ "                output = output + \"-XXX\";\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "            String s = \"path=\" + args[i] + \",output=\" + output;\n" //
+				+ "        }\n" //
+				+ "        \n" //
+				+ "        for (int i = 0; i < args.length; i++) {\n" //
+				+ "            String output = args[i];\n" //
+				+ "            String output1 = output;\n" //
+				+ "            if (output1.length() == 1) {\n" //
+				+ "                output1 = output1 + \"-XXX\";\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "            String s = \"path=\" + args[i] + \",output=\" + output1;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public static void main(String[] args) {\n" //
+				+ "        for (String arg : args) {\n" //
+				+ "            String output = arg;\n" //
+				+ "            if (output.length() == 1) {\n" //
+				+ "                output = output + \"-XXX\";\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "            String s = \"path=\" + arg + \",output=\" + output;\n" //
+				+ "        }\n" //
+				+ "        \n" //
+				+ "        for (String output : args) {\n" //
+				+ "            String output1 = output;\n" //
+				+ "            if (output1.length() == 1) {\n" //
+				+ "                output1 = output1 + \"-XXX\";\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "            String s = \"path=\" + output + \",output=\" + output1;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
+	public void testJava50ForLoop349782() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=349782
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public int[] array;\n" //
+				+ "    public void foo() {\n" //
+				+ "        for (int i = 0; i < this.array.length; ++i) {\n" //
+				+ "            System.out.println(this.array[i]);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public int[] array;\n" //
+				+ "    public void foo() {\n" //
+				+ "        for (int element : this.array) {\n" //
+				+ "            System.out.println(element);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
+	public void testJava50ForLoop344674() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public int[] array;\n" //
+				+ "    public void foo(Object obj) {\n" //
+				+ "        for (int i = 0; i < ((E1) obj).array.length; i++) {\n" //
+				+ "            System.out.println(((E1) obj).array[i]);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public int[] array;\n" //
+				+ "    public void foo(Object obj) {\n" //
+				+ "        for (int element : ((E1) obj).array) {\n" //
+				+ "            System.out.println(element);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
+	public void testJava50ForLoop374264() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=374264
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "import java.util.Iterator;\n" //
+				+ "import java.util.List;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo(List<String> list) {\n" //
+				+ "        for (Iterator<String> iterator = list.iterator(); iterator.hasNext();) {\n" //
+				+ "            removeSecond(iterator);\n" //
+				+ "        }\n" //
+				+ "        System.out.println(list);\n" //
+				+ "    }\n" //
+				+ "    private static void removeSecond(Iterator<String> iterator) {\n" //
+				+ "        if (\"second\".equals(iterator.next())) {\n" //
+				+ "            iterator.remove();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	public void testAutoboxing() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E {\n" //
+				+ "    public static void bar() {\n" //
+				+ "        Character c = Character.valueOf('*');\n" //
+				+ "        Byte by = Byte.valueOf((byte) 0);\n" //
+				+ "        Boolean bo = Boolean.valueOf(true);\n" //
+				+ "        Integer i = Integer.valueOf(42);\n" //
+				+ "        Long l1 = Long.valueOf(42L);\n" //
+				+ "        Long l2 = Long.valueOf(42);\n" //
+				+ "        Short s = Short.valueOf((short) 42);\n" //
+				+ "        Float f = Float.valueOf(42.42F);\n" //
+				+ "        Double d = Double.valueOf(42.42);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.USE_AUTOBOXING);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E {\n" //
+				+ "    public static void bar() {\n" //
+				+ "        Character c = '*';\n" //
+				+ "        Byte by = (byte) 0;\n" //
+				+ "        Boolean bo = true;\n" //
+				+ "        Integer i = 42;\n" //
+				+ "        Long l1 = 42L;\n" //
+				+ "        Long l2 = (long) 42;\n" //
+				+ "        Short s = (short) 42;\n" //
+				+ "        Float f = 42.42F;\n" //
+				+ "        Double d = 42.42;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
+	public void testAutoboxingSpecialCases() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E {\n" //
+				+ "    public static void removeUnnecessaryValueOfCallsInPrimitiveDeclaration() {\n" //
+				+ "        char c = Character.valueOf('*');\n" //
+				+ "        byte by = Byte.valueOf((byte) 0);\n" //
+				+ "        boolean bo = Boolean.valueOf(true);\n" //
+				+ "        int i = Integer.valueOf(42);\n" //
+				+ "        long l1 = Long.valueOf(42L);\n" //
+				+ "        long l2 = Long.valueOf(42);\n" //
+				+ "        short s = Short.valueOf((short) 42);\n" //
+				+ "        float f = Float.valueOf(42.42F);\n" //
+				+ "        double d = Double.valueOf(42.42);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void doNotUseAutoboxingWithObjectDeclaration() {\n" //
+				+ "        Object c = Character.valueOf('*');\n" //
+				+ "        Object by = Byte.valueOf((byte) 0);\n" //
+				+ "        Object bo = Boolean.valueOf(true);\n" //
+				+ "        Object i = Integer.valueOf(42);\n" //
+				+ "        Object l1 = Long.valueOf(42L);\n" //
+				+ "        Object l2 = Long.valueOf(42);\n" //
+				+ "        Object s = Short.valueOf((short) 42);\n" //
+				+ "        Object f = Float.valueOf(42.42F);\n" //
+				+ "        Object d = Double.valueOf(42.42);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void directlyReturnWrapperParameter(Character c, Byte by, Boolean bo, Integer i, Long l, Short s,\n" //
+				+ "            Float f, Double d) {\n" //
+				+ "        Object myObject = null;\n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        myObject = Character.valueOf(c);\n" //
+				+ "        myObject = Byte.valueOf(by);\n" //
+				+ "        myObject = Boolean.valueOf(bo);\n" //
+				+ "        myObject = Integer.valueOf(i);\n" //
+				+ "        myObject = Long.valueOf(l);\n" //
+				+ "        myObject = Short.valueOf(s);\n" //
+				+ "        myObject = Float.valueOf(f);\n" //
+				+ "        myObject = Double.valueOf(d);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void useAutoboxingOnAssignment() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character c;\n" //
+				+ "        c = Character.valueOf('*');\n" //
+				+ "        Byte by;\n" //
+				+ "        by = Byte.valueOf((byte) 0);\n" //
+				+ "        Boolean bo1;\n" //
+				+ "        bo1 = Boolean.valueOf(true);\n" //
+				+ "        Integer i;\n" //
+				+ "        i = Integer.valueOf(42);\n" //
+				+ "        Long l1;\n" //
+				+ "        l1 = Long.valueOf(42L);\n" //
+				+ "        Long l2;\n" //
+				+ "        l2 = Long.valueOf(42);\n" //
+				+ "        Short s;\n" //
+				+ "        s = Short.valueOf((short) 42);\n" //
+				+ "        Float f;\n" //
+				+ "        f = Float.valueOf(42.42F);\n" //
+				+ "        Double d;\n" //
+				+ "        d = Double.valueOf(42.42);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void removeUnnecessaryValueOfCallsInPrimitiveAssignment() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char c;\n" //
+				+ "        c = Character.valueOf('*');\n" //
+				+ "        byte by;\n" //
+				+ "        by = Byte.valueOf((byte) 0);\n" //
+				+ "        boolean bo1;\n" //
+				+ "        bo1 = Boolean.valueOf(true);\n" //
+				+ "        int i;\n" //
+				+ "        i = Integer.valueOf(42);\n" //
+				+ "        long l1;\n" //
+				+ "        l1 = Long.valueOf(42L);\n" //
+				+ "        long l2;\n" //
+				+ "        l2 = Long.valueOf(42);\n" //
+				+ "        short s;\n" //
+				+ "        s = Short.valueOf((short) 42);\n" //
+				+ "        float f;\n" //
+				+ "        f = Float.valueOf(42.42F);\n" //
+				+ "        double d;\n" //
+				+ "        d = Double.valueOf(42.42);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void doNotUseAutoboxingWithObjectAssignment() {\n" //
+				+ "        Object c;\n" //
+				+ "        c = Character.valueOf('*');\n" //
+				+ "        Object by;\n" //
+				+ "        by = Byte.valueOf((byte) 0);\n" //
+				+ "        Object bo1;\n" //
+				+ "        bo1 = Boolean.valueOf(true);\n" //
+				+ "        Object i;\n" //
+				+ "        i = Integer.valueOf(42);\n" //
+				+ "        Object l1;\n" //
+				+ "        l1 = Long.valueOf(42L);\n" //
+				+ "        Object l2;\n" //
+				+ "        l2 = Long.valueOf(42);\n" //
+				+ "        Object s;\n" //
+				+ "        s = Short.valueOf((short) 42);\n" //
+				+ "        Object f;\n" //
+				+ "        f = Float.valueOf(42.42F);\n" //
+				+ "        Object d;\n" //
+				+ "        d = Double.valueOf(42.42);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static Character removeUnnecessaryValueOfCallsInCharacterWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Character.valueOf('*');\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static Byte removeUnnecessaryValueOfCallsInByteWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Byte.valueOf((byte) 0);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static Boolean removeUnnecessaryValueOfCallsInBooleanWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Boolean.valueOf(true);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static Integer removeUnnecessaryValueOfCallsInIntegerWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Integer.valueOf(42);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static Long removeUnnecessaryValueOfCallsInLongWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Long.valueOf(42L);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static Short removeUnnecessaryValueOfCallsInShortWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Short.valueOf((short) 42);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static Float removeUnnecessaryValueOfCallsInFloatWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Float.valueOf(42.42F);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static Double removeUnnecessaryValueOfCallsInDoubleWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Double.valueOf(42.42);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static char removeUnnecessaryValueOfCallsInCharacterPrimitive() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Character.valueOf('*');\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static byte removeUnnecessaryValueOfCallsInBytePrimitive() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Byte.valueOf((byte) 0);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static boolean removeUnnecessaryValueOfCallsInBooleanPrimitive() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Boolean.valueOf(true);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static int removeUnnecessaryValueOfCallsInIntegerPrimitive() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Integer.valueOf(42);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static long removeUnnecessaryValueOfCallsInLongPrimitive() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Long.valueOf(42L);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static short removeUnnecessaryValueOfCallsInShortPrimitive() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Short.valueOf((short) 42);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static float removeUnnecessaryValueOfCallsInFloatPrimitive() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Float.valueOf(42.42F);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static double removeUnnecessaryValueOfCallsInDoublePrimitive() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return Double.valueOf(42.42);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static Object doNotUseAutoboxingReturningObject() {\n" //
+				+ "        return Character.valueOf('a');\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.USE_AUTOBOXING);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E {\n" //
+				+ "    public static void removeUnnecessaryValueOfCallsInPrimitiveDeclaration() {\n" //
+				+ "        char c = '*';\n" //
+				+ "        byte by = (byte) 0;\n" //
+				+ "        boolean bo = true;\n" //
+				+ "        int i = 42;\n" //
+				+ "        long l1 = 42L;\n" //
+				+ "        long l2 = 42;\n" //
+				+ "        short s = (short) 42;\n" //
+				+ "        float f = 42.42F;\n" //
+				+ "        double d = 42.42;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void doNotUseAutoboxingWithObjectDeclaration() {\n" //
+				+ "        Object c = Character.valueOf('*');\n" //
+				+ "        Object by = Byte.valueOf((byte) 0);\n" //
+				+ "        Object bo = Boolean.valueOf(true);\n" //
+				+ "        Object i = Integer.valueOf(42);\n" //
+				+ "        Object l1 = Long.valueOf(42L);\n" //
+				+ "        Object l2 = Long.valueOf(42);\n" //
+				+ "        Object s = Short.valueOf((short) 42);\n" //
+				+ "        Object f = Float.valueOf(42.42F);\n" //
+				+ "        Object d = Double.valueOf(42.42);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void directlyReturnWrapperParameter(Character c, Byte by, Boolean bo, Integer i, Long l, Short s,\n" //
+				+ "            Float f, Double d) {\n" //
+				+ "        Object myObject = null;\n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        myObject = c;\n" //
+				+ "        myObject = by;\n" //
+				+ "        myObject = bo;\n" //
+				+ "        myObject = i;\n" //
+				+ "        myObject = l;\n" //
+				+ "        myObject = s;\n" //
+				+ "        myObject = f;\n" //
+				+ "        myObject = d;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void useAutoboxingOnAssignment() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character c;\n" //
+				+ "        c = '*';\n" //
+				+ "        Byte by;\n" //
+				+ "        by = (byte) 0;\n" //
+				+ "        Boolean bo1;\n" //
+				+ "        bo1 = true;\n" //
+				+ "        Integer i;\n" //
+				+ "        i = 42;\n" //
+				+ "        Long l1;\n" //
+				+ "        l1 = 42L;\n" //
+				+ "        Long l2;\n" //
+				+ "        l2 = (long) 42;\n" //
+				+ "        Short s;\n" //
+				+ "        s = (short) 42;\n" //
+				+ "        Float f;\n" //
+				+ "        f = 42.42F;\n" //
+				+ "        Double d;\n" //
+				+ "        d = 42.42;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void removeUnnecessaryValueOfCallsInPrimitiveAssignment() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char c;\n" //
+				+ "        c = '*';\n" //
+				+ "        byte by;\n" //
+				+ "        by = (byte) 0;\n" //
+				+ "        boolean bo1;\n" //
+				+ "        bo1 = true;\n" //
+				+ "        int i;\n" //
+				+ "        i = 42;\n" //
+				+ "        long l1;\n" //
+				+ "        l1 = 42L;\n" //
+				+ "        long l2;\n" //
+				+ "        l2 = 42;\n" //
+				+ "        short s;\n" //
+				+ "        s = (short) 42;\n" //
+				+ "        float f;\n" //
+				+ "        f = 42.42F;\n" //
+				+ "        double d;\n" //
+				+ "        d = 42.42;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void doNotUseAutoboxingWithObjectAssignment() {\n" //
+				+ "        Object c;\n" //
+				+ "        c = Character.valueOf('*');\n" //
+				+ "        Object by;\n" //
+				+ "        by = Byte.valueOf((byte) 0);\n" //
+				+ "        Object bo1;\n" //
+				+ "        bo1 = Boolean.valueOf(true);\n" //
+				+ "        Object i;\n" //
+				+ "        i = Integer.valueOf(42);\n" //
+				+ "        Object l1;\n" //
+				+ "        l1 = Long.valueOf(42L);\n" //
+				+ "        Object l2;\n" //
+				+ "        l2 = Long.valueOf(42);\n" //
+				+ "        Object s;\n" //
+				+ "        s = Short.valueOf((short) 42);\n" //
+				+ "        Object f;\n" //
+				+ "        f = Float.valueOf(42.42F);\n" //
+				+ "        Object d;\n" //
+				+ "        d = Double.valueOf(42.42);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static Character removeUnnecessaryValueOfCallsInCharacterWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return '*';\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static Byte removeUnnecessaryValueOfCallsInByteWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return (byte) 0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static Boolean removeUnnecessaryValueOfCallsInBooleanWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return true;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static Integer removeUnnecessaryValueOfCallsInIntegerWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return 42;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static Long removeUnnecessaryValueOfCallsInLongWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return 42L;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static Short removeUnnecessaryValueOfCallsInShortWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return (short) 42;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static Float removeUnnecessaryValueOfCallsInFloatWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return 42.42F;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static Double removeUnnecessaryValueOfCallsInDoubleWrapper() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return 42.42;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static char removeUnnecessaryValueOfCallsInCharacterPrimitive() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return '*';\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static byte removeUnnecessaryValueOfCallsInBytePrimitive() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return (byte) 0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static boolean removeUnnecessaryValueOfCallsInBooleanPrimitive() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return true;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static int removeUnnecessaryValueOfCallsInIntegerPrimitive() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return 42;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static long removeUnnecessaryValueOfCallsInLongPrimitive() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return 42L;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static short removeUnnecessaryValueOfCallsInShortPrimitive() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return (short) 42;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static float removeUnnecessaryValueOfCallsInFloatPrimitive() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return 42.42F;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static double removeUnnecessaryValueOfCallsInDoublePrimitive() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return 42.42;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static Object doNotUseAutoboxingReturningObject() {\n" //
+				+ "        return Character.valueOf('a');\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
+	public void testUseUnboxingOnPrimitiveDeclaration() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E {\n" //
+				+ "    public static void useUnboxingOnPrimitiveDeclaration(Character cObject, Byte byObject, Boolean boObject,\n" //
+				+ "            Integer iObject, Short sObject, Long lObject, Float fObject, Double dObject) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char c = cObject.charValue();\n" //
+				+ "        byte by = byObject.byteValue();\n" //
+				+ "        boolean bo = boObject.booleanValue();\n" //
+				+ "        int i = iObject.intValue();\n" //
+				+ "        short s = sObject.shortValue();\n" //
+				+ "        long l = lObject.longValue();\n" //
+				+ "        float f = fObject.floatValue();\n" //
+				+ "        double d = dObject.doubleValue();\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.USE_UNBOXING);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E {\n" //
+				+ "    public static void useUnboxingOnPrimitiveDeclaration(Character cObject, Byte byObject, Boolean boObject,\n" //
+				+ "            Integer iObject, Short sObject, Long lObject, Float fObject, Double dObject) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        char c = cObject;\n" //
+				+ "        byte by = byObject;\n" //
+				+ "        boolean bo = boObject;\n" //
+				+ "        int i = iObject;\n" //
+				+ "        short s = sObject;\n" //
+				+ "        long l = lObject;\n" //
+				+ "        float f = fObject;\n" //
+				+ "        double d = dObject;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
+	public void testDoNotUseUnboxingOnNarrowingType() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public static void doNotUseUnboxingOnNarrowingType(Character cObject, Byte byObject,\n" //
+				+ "            Integer iObject, Short sObject, Float fObject) {\n" //
+				+ "        int c = cObject.charValue();\n" //
+				+ "        int by = byObject.byteValue();\n" //
+				+ "        long i = iObject.intValue();\n" //
+				+ "        int s = sObject.shortValue();\n" //
+				+ "        double f = fObject.floatValue();\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.USE_UNBOXING);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	public void testDoNotUseUnboxingWhenTypesDontMatch() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public static void doNotUseUnboxingWhenTypesDontMatch(Byte byObject,\n" //
+				+ "            Integer iObject, Short sObject, Long lObject, Float fObject, Double dObject) {\n" //
+				+ "        short by = byObject.shortValue();\n" //
+				+ "        short i = iObject.shortValue();\n" //
+				+ "        byte s = sObject.byteValue();\n" //
+				+ "        short l = lObject.shortValue();\n" //
+				+ "        short f = fObject.shortValue();\n" //
+				+ "        short d = dObject.shortValue();\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.USE_UNBOXING);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	public void testUnboxing2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E {\n" //
+				+ "    public static void reuseWrapper(Character cObject, Byte byObject, Boolean boObject,\n" //
+				+ "            Integer iObject, Short sObject, Long lObject, Float fObject, Double dObject) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character c = cObject.charValue();\n" //
+				+ "        Byte by = byObject.byteValue();\n" //
+				+ "        Boolean bo = boObject.booleanValue();\n" //
+				+ "        Integer i = iObject.intValue();\n" //
+				+ "        Short s = sObject.shortValue();\n" //
+				+ "        Long l = lObject.longValue();\n" //
+				+ "        Float f = fObject.floatValue();\n" //
+				+ "        Double d = dObject.doubleValue();\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.USE_UNBOXING);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "public class E {\n" //
+				+ "    public static void reuseWrapper(Character cObject, Byte byObject, Boolean boObject,\n" //
+				+ "            Integer iObject, Short sObject, Long lObject, Float fObject, Double dObject) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        Character c = cObject;\n" //
+				+ "        Byte by = byObject;\n" //
+				+ "        Boolean bo = boObject;\n" //
+				+ "        Integer i = iObject;\n" //
+				+ "        Short s = sObject;\n" //
+				+ "        Long l = lObject;\n" //
+				+ "        Float f = fObject;\n" //
+				+ "        Double d = dObject;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
 }
