@@ -27,12 +27,12 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
-public class Java17ProjectTestSetup extends ProjectTestSetup {
+public class Java1d7ProjectTestSetup extends ProjectTestSetup {
 
-	public static final String PROJECT_NAME17= "TestSetupProject17";
+	public static final String PROJECT_NAME1D7= "TestSetupProject1d7";
 
 	public static IJavaProject getProject() {
-		IProject project= ResourcesPlugin.getWorkspace().getRoot().getProject(PROJECT_NAME17);
+		IProject project= ResourcesPlugin.getWorkspace().getRoot().getProject(PROJECT_NAME1D7);
 		return JavaCore.create(project);
 	}
 
@@ -41,7 +41,7 @@ public class Java17ProjectTestSetup extends ProjectTestSetup {
 		return new IClasspathEntry[] { JavaCore.newLibraryEntry(rtJarPath[0], rtJarPath[1], rtJarPath[2], true) };
 	}
 
-	public Java17ProjectTestSetup(Test test) {
+	public Java1d7ProjectTestSetup(Test test) {
 		super(test);
 	}
 
@@ -52,7 +52,7 @@ public class Java17ProjectTestSetup extends ProjectTestSetup {
 
 	@Override
 	protected IJavaProject createAndInitializeProject() throws CoreException {
-		IJavaProject javaProject= JavaProjectHelper.createJavaProject(PROJECT_NAME17, "bin");
+		IJavaProject javaProject= JavaProjectHelper.createJavaProject(PROJECT_NAME1D7, "bin");
 		javaProject.setRawClasspath(getDefaultClasspath(), null);
 		JavaProjectHelper.set17CompilerOptions(javaProject);
 		return javaProject;

@@ -33,7 +33,7 @@ import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.tests.core.Java17ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.Java1d7ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -59,7 +59,7 @@ public class ModifierCorrectionsQuickFixTest17 extends QuickFixTest {
 	}
 
 	public static Test setUpTest(Test test) {
-		return new Java17ProjectTestSetup(test);
+		return new Java1d7ProjectTestSetup(test);
 	}
 
 	@Override
@@ -75,7 +75,7 @@ public class ModifierCorrectionsQuickFixTest17 extends QuickFixTest {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setValue(PreferenceConstants.CODEGEN_ADD_COMMENTS, false);
 
-		fJProject1= Java17ProjectTestSetup.getProject();
+		fJProject1= Java1d7ProjectTestSetup.getProject();
 
 		StubUtility.setCodeTemplate(CodeTemplateContextType.METHODSTUB_ID, "", null);
 		StubUtility.setCodeTemplate(CodeTemplateContextType.CONSTRUCTORSTUB_ID, "", null);
@@ -86,7 +86,7 @@ public class ModifierCorrectionsQuickFixTest17 extends QuickFixTest {
 
 	@Override
 	protected void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJProject1, Java17ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject1, Java1d7ProjectTestSetup.getDefaultClasspath());
 	}
 
 	public void testAddSafeVarargs1() throws Exception {

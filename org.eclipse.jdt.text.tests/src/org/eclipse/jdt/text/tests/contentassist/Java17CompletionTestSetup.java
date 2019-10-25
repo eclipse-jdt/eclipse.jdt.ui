@@ -23,10 +23,10 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
-import org.eclipse.jdt.ui.tests.core.Java17ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.Java1d7ProjectTestSetup;
 
 
-class Java17CompletionTestSetup extends Java17ProjectTestSetup {
+class Java17CompletionTestSetup extends Java1d7ProjectTestSetup {
 
 	public static IPackageFragment getTestPackage() throws CoreException {
 		IJavaProject project= getProject();

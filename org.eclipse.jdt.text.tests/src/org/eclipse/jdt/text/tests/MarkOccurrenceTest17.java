@@ -27,7 +27,7 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.tests.core.Java17ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.Java1d7ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
@@ -47,11 +47,11 @@ public class MarkOccurrenceTest17 extends TestCase {
 	private static final Class<MarkOccurrenceTest17> THIS= MarkOccurrenceTest17.class;
 
 	public static Test suite() {
-		return new Java17ProjectTestSetup(new TestSuite(THIS));
+		return new Java1d7ProjectTestSetup(new TestSuite(THIS));
 	}
 
 	public static Test setUpTest(Test test) {
-		return new Java17ProjectTestSetup(test);
+		return new Java1d7ProjectTestSetup(test);
 	}
 
 	private ASTParser fParser;
@@ -69,7 +69,7 @@ public class MarkOccurrenceTest17 extends TestCase {
 	protected void setUp() throws Exception {
 		fParser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 
-		fJProject1= Java17ProjectTestSetup.getProject();
+		fJProject1= Java1d7ProjectTestSetup.getProject();
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.EDITOR_MARK_OCCURRENCES, true);
 		JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.EDITOR_MARK_IMPLEMENTORS, true);
@@ -77,7 +77,7 @@ public class MarkOccurrenceTest17 extends TestCase {
 
 	@Override
 	protected void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJProject1, Java17ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject1, Java1d7ProjectTestSetup.getDefaultClasspath());
 	}
 
 	private OccurrenceLocation[] getHighlights(StringBuffer source, int offset, int length) throws Exception {

@@ -34,7 +34,7 @@ import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.tests.core.Java17ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.Java1d7ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
@@ -68,7 +68,7 @@ public class AssistQuickFixTest17 extends QuickFixTest {
 	}
 
 	public static Test setUpTest(Test test) {
-		return new Java17ProjectTestSetup(test);
+		return new Java1d7ProjectTestSetup(test);
 	}
 
 	@Override
@@ -91,14 +91,14 @@ public class AssistQuickFixTest17 extends QuickFixTest {
 		corePrefs.setValue(JavaCore.CODEASSIST_FIELD_SUFFIXES, "");
 		corePrefs.setValue(JavaCore.CODEASSIST_STATIC_FIELD_SUFFIXES, "");
 
-		fJProject1= Java17ProjectTestSetup.getProject();
+		fJProject1= Java1d7ProjectTestSetup.getProject();
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}
 
 	@Override
 	protected void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJProject1, Java17ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject1, Java1d7ProjectTestSetup.getDefaultClasspath());
 	}
 
 	public void testConvertToMultiCatch1() throws Exception {
