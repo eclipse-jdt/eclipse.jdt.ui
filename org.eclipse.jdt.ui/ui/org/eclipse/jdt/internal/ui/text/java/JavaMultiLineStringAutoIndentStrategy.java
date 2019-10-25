@@ -25,10 +25,6 @@ import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.TextUtilities;
 
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.formatter.IndentManipulation;
-
-import org.eclipse.jdt.internal.core.manipulation.util.Strings;
-import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -64,7 +60,7 @@ public class JavaMultiLineStringAutoIndentStrategy extends JavaStringAutoIndentS
 		boolean isLineDelimiter= isLineDelimiter(document, command.text);
 		if (isEditorWrapStrings() && isLineDelimiter && isTextBlock) {
 			if (isTextBlock) {
-				indentation= getIndentation(document, command.offset, command.offset);
+				indentation= IndentAction.getTextBlockIndentationString(document, command.offset, command.offset, fProject);
 				if (hasTextBlockEnded) {
 					command.text= command.text + indentation;
 				} else {
@@ -72,7 +68,7 @@ public class JavaMultiLineStringAutoIndentStrategy extends JavaStringAutoIndentS
 					if (isCloseStringsPreferenceSet()) {
 						command.caretOffset= command.offset + command.text.length();
 						command.shiftsCaret= false;
-						command.text= command.text + System.lineSeparator() + getIndentation(document, offset, command.offset) + IndentAction.TEXT_BLOCK_STR;
+						command.text= command.text + System.lineSeparator() + IndentAction.getTextBlockIndentationString(document, offset, command.offset, fProject) + IndentAction.TEXT_BLOCK_STR;
 					}
 				}
 			} else {
@@ -81,33 +77,6 @@ public class JavaMultiLineStringAutoIndentStrategy extends JavaStringAutoIndentS
 		} else if (command.text.length() > 1 && !isLineDelimiter && isEditorEscapeStrings()) {
 			command.text= getModifiedText(command.text, indentation, delimiter, isEditorEscapeStringsNonAscii());
 		}
-	}
-
-	private String getIndentation(IDocument document, int offset, int commandOffset) throws BadLocationException {
-		IRegion line= document.getLineInformationOfOffset(offset);
-		String fullStrNoTrim= document.get(line.getOffset(), commandOffset- line.getOffset());
-		if (!fullStrNoTrim.trim().endsWith(IndentAction.TEXT_BLOCK_STR)) {
-			fullStrNoTrim= document.get(line.getOffset(),line.getLength());
-		}
-		String indentation= getLineIndentation(document, offset);
-		int startIndex= fullStrNoTrim.lastIndexOf(IndentAction.TEXT_BLOCK_STR);
-		if (fullStrNoTrim.endsWith(IndentAction.TEXT_BLOCK_STR) && startIndex != -1) {
-			int length= IndentAction.measureLengthInSpaces(fullStrNoTrim.substring(0, startIndex), CodeFormatterUtil.getTabWidth(fProject));
-			String str= IndentAction.EMPTY_STR;
-			for (int i= 0; i < length; i++) {
-				str+= IndentAction.SPACE_STR;
-			}
-			int units= Strings.computeIndentUnits(str, fProject);
-			String newStr= CodeFormatterUtil.createIndentString(units, fProject);
-			int newLength= IndentManipulation.measureIndentInSpaces(newStr, CodeFormatterUtil.getTabWidth(fProject));
-			if (newLength < length) {
-				for (int i= newLength; i < length; i++) {
-					newStr+= IndentAction.SPACE_STR;
-				}
-			}
-			indentation= newStr;
-		}
-		return indentation;
 	}
 
 	/**
@@ -177,6 +146,7 @@ public class JavaMultiLineStringAutoIndentStrategy extends JavaStringAutoIndentS
 				javaMultiLineStringIndentAfterNewLine(document, command);
 			}
 		} catch (BadLocationException e) {
+			//do nothing
 		}
 	}
 
