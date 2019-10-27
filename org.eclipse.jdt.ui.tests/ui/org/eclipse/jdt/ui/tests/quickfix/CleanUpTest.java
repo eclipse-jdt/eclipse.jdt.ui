@@ -3325,6 +3325,80 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testCodeStyleQualifyMethodAccessesImportConflictBug_552461() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "\n" //
+				+ "import static java.util.Date.parse;\n" //
+				+ "\n" //
+				+ "import java.sql.Date;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public Object addFullyQualifiedName(String dateText, Date sqlDate) {\n" //
+				+ "        return parse(dateText);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_METHOD);
+
+		sample= "" //
+				+ "package test;\n" //
+				+ "\n" //
+				+ "import static java.util.Date.parse;\n" //
+				+ "\n" //
+				+ "import java.sql.Date;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public Object addFullyQualifiedName(String dateText, Date sqlDate) {\n" //
+				+ "        return java.util.Date.parse(dateText);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
+	@Test
+	public void testCodeStyleQualifyMethodAccessesAlreadyImportedBug_552461() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "\n" //
+				+ "import static java.util.Date.parse;\n" //
+				+ "\n" //
+				+ "import java.util.Date;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public Object addFullyQualifiedName(String dateText, Date sqlDate) {\n" //
+				+ "        return parse(dateText);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_METHOD);
+
+		sample= "" //
+				+ "package test;\n" //
+				+ "\n" //
+				+ "import static java.util.Date.parse;\n" //
+				+ "\n" //
+				+ "import java.util.Date;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    public Object addFullyQualifiedName(String dateText, Date sqlDate) {\n" //
+				+ "        return Date.parse(dateText);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
+	@Test
 	public void testCodeStyle_Bug140565() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();

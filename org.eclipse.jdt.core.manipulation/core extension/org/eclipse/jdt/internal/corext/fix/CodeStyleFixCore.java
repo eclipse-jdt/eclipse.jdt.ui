@@ -48,6 +48,7 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
@@ -425,22 +426,27 @@ public class CodeStyleFixCore extends CompilationUnitRewriteOperationsFixCore {
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModelCore model) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			CompilationUnit compilationUnit= cuRewrite.getRoot();
-			importType(fDeclaringClass, fName, cuRewrite.getImportRewrite(), compilationUnit, TypeLocation.OTHER);
+			Type type= importType(fDeclaringClass, fName, cuRewrite.getImportRewrite(), compilationUnit, TypeLocation.OTHER);
 			TextEditGroup group;
 			if (fName.resolveBinding() instanceof IMethodBinding) {
 				group= createTextEditGroup(FixMessages.CodeStyleFix_QualifyMethodWithDeclClass_description, cuRewrite);
 			} else {
 				group= createTextEditGroup(FixMessages.CodeStyleFix_QualifyFieldWithDeclClass_description, cuRewrite);
 			}
+
 			IJavaElement javaElement= fDeclaringClass.getJavaElement();
+
 			if (javaElement instanceof IType) {
-				Name qualifierName= compilationUnit.getAST().newName(((IType)javaElement).getElementName());
+				IType javaElementType= (IType) javaElement;
+
+				boolean imported= !type.isNameQualifiedType() && (!type.isSimpleType() || !(((SimpleType) type).getName() instanceof QualifiedName));
+				Name qualifierName= compilationUnit.getAST()
+						.newName(imported ? javaElementType.getElementName() : javaElementType.getFullyQualifiedName());
 				SimpleName simpleName= (SimpleName)rewrite.createMoveTarget(fName);
 				QualifiedName qualifiedName= compilationUnit.getAST().newQualifiedName(qualifierName, simpleName);
 				rewrite.replace(fName, qualifiedName, group);
 			}
 		}
-
 	}
 
 	public final static class ToStaticAccessOperation extends CompilationUnitRewriteOperation {
