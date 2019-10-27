@@ -6469,6 +6469,71 @@ public class CleanUpTest extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 
+	public void testNumberSuffix() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    private long usual = 101l;\n" //
+				+ "    private long octal = 0121l;\n" //
+				+ "    private long hex = 0xdafdafdafl;\n" //
+				+ "\n" //
+				+ "    private float usualFloat = 101f;\n" //
+				+ "    private float octalFloat = 0121f;\n" //
+				+ "\n" //
+				+ "    private double usualDouble = 101d;\n" //
+				+ "\n" //
+				+ "    public long refactorIt() {\n" //
+				+ "        long localVar = 11l;\n" //
+				+ "        return localVar + 333l;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double doNotRefactor() {\n" //
+				+ "        long l = 11L;\n" //
+				+ "        float f = 11F;\n" //
+				+ "        double d = 11D;\n" //
+				+ "        float localFloat = 11f;\n" //
+				+ "        double localDouble = 11d;\n" //
+				+ "        return l + 101L + f + 11F + d + 11D + localFloat + 11f + localDouble + 11d;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.NUMBER_SUFFIX);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    private long usual = 101L;\n" //
+				+ "    private long octal = 0121L;\n" //
+				+ "    private long hex = 0xdafdafdafL;\n" //
+				+ "\n" //
+				+ "    private float usualFloat = 101f;\n" //
+				+ "    private float octalFloat = 0121f;\n" //
+				+ "\n" //
+				+ "    private double usualDouble = 101d;\n" //
+				+ "\n" //
+				+ "    public long refactorIt() {\n" //
+				+ "        long localVar = 11L;\n" //
+				+ "        return localVar + 333L;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double doNotRefactor() {\n" //
+				+ "        long l = 11L;\n" //
+				+ "        float f = 11F;\n" //
+				+ "        double d = 11D;\n" //
+				+ "        float localFloat = 11f;\n" //
+				+ "        double localDouble = 11d;\n" //
+				+ "        return l + 101L + f + 11F + d + 11D + localFloat + 11f + localDouble + 11d;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
 	public void testRemoveQualifier02() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();

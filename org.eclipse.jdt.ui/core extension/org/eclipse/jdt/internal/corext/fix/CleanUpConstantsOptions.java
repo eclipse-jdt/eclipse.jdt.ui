@@ -56,6 +56,8 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(EXPRESSIONS_USE_PARENTHESES_NEVER, CleanUpOptions.TRUE);
 		options.setOption(EXPRESSIONS_USE_PARENTHESES_ALWAYS, CleanUpOptions.FALSE);
 
+		options.setOption(NUMBER_SUFFIX, CleanUpOptions.FALSE);
+
 		//Variable Declarations
 		options.setOption(VARIABLE_DECLARATIONS_USE_FINAL, CleanUpOptions.FALSE);
 		options.setOption(VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES, CleanUpOptions.TRUE);
@@ -148,6 +150,8 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(EXPRESSIONS_USE_PARENTHESES, CleanUpOptions.FALSE);
 		options.setOption(EXPRESSIONS_USE_PARENTHESES_NEVER, CleanUpOptions.TRUE);
 		options.setOption(EXPRESSIONS_USE_PARENTHESES_ALWAYS, CleanUpOptions.FALSE);
+
+		options.setOption(NUMBER_SUFFIX, CleanUpOptions.FALSE);
 
 		//Variable Declarations
 		options.setOption(VARIABLE_DECLARATIONS_USE_FINAL, CleanUpOptions.FALSE);

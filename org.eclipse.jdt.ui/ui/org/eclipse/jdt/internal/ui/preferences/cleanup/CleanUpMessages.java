@@ -61,6 +61,10 @@ public class CleanUpMessages extends NLS {
 	public static String CodeStyleTabPage_GroupName_ControlStatments;
 	public static String CodeStyleTabPage_GroupName_Expressions;
 
+	public static String CodeStyleTabPage_GroupName_NumberLiteral;
+
+	public static String CodeStyleTabPage_CheckboxName_NumberSuffix;
+
 	public static String CodeStyleTabPage_GroupName_VariableDeclarations;
 	public static String CodeStyleTabPage_RadioName_AlwaysUseBlocks;
 	public static String CodeStyleTabPage_RadioName_AlwaysUseParantheses;
