@@ -463,10 +463,15 @@ public class ModifierCorrectionSubProcessor {
 			if (problemId == IProblem.UnexpectedStaticModifierForField && binding instanceof IVariableBinding) {
 				ITypeBinding declClass= ((IVariableBinding) binding).getDeclaringClass();
 				if (declClass.isMember()) {
-					proposals.add(new ModifierChangeCorrectionProposal(CorrectionMessages.ModifierCorrectionSubProcessor_changemodifiertostaticfinal_description, cu, binding, selectedNode, Modifier.FINAL, Modifier.VOLATILE, relevance + 1, image));
+					int modifiers= binding.getModifiers();
+					if (!Modifier.isStatic(modifiers)) {
+						proposals.add(new ModifierChangeCorrectionProposal(CorrectionMessages.ModifierCorrectionSubProcessor_changemodifiertostaticfinal_description, cu, binding, selectedNode,
+								Modifier.FINAL, Modifier.VOLATILE, relevance + 1, image));
+					}
 					ASTNode parentType= context.getASTRoot().findDeclaringNode(declClass);
 					if (parentType != null) {
-						proposals.add(new ModifierChangeCorrectionProposal(CorrectionMessages.ModifierCorrectionSubProcessor_addstatictoparenttype_description, cu, declClass, parentType, Modifier.STATIC, 0, relevance - 1, image));
+						proposals.add(new ModifierChangeCorrectionProposal(CorrectionMessages.ModifierCorrectionSubProcessor_addstatictoparenttype_description, cu, declClass, parentType,
+								Modifier.STATIC, 0, relevance - 1, image));
 					}
 				}
 			}

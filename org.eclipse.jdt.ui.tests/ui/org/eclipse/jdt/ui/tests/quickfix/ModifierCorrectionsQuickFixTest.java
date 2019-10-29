@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -3397,9 +3397,9 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 2);
 
-		String[] expected= new String[3];
+		String[] expected= new String[2];
 		buf= new StringBuffer();
 		buf.append("package pack;\n");
 		buf.append("\n");
@@ -3414,21 +3414,11 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("package pack;\n");
 		buf.append("\n");
 		buf.append("public class E {\n");
-		buf.append("    class F {\n");
-		buf.append("        static final int x;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[1]= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package pack;\n");
-		buf.append("\n");
-		buf.append("public class E {\n");
 		buf.append("    static class F {\n");
 		buf.append("        static int x;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		expected[2]= buf.toString();
+		expected[1]= buf.toString();
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
