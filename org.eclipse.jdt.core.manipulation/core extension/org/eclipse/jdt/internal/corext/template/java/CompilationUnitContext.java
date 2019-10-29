@@ -30,7 +30,7 @@ import org.eclipse.jdt.core.JavaModelException;
 /**
  * A compilation unit context.
  */
-public class CompilationUnitContext extends DocumentTemplateContext implements ICompilationUnitContext {
+public class CompilationUnitContext extends DocumentTemplateContext {
 
 	/** The compilation unit, may be <code>null</code>. */
 	private final ICompilationUnit fCompilationUnit;
@@ -75,7 +75,6 @@ public class CompilationUnitContext extends DocumentTemplateContext implements I
 	 *
 	 * @return the compilation unit of this context or <code>null</code>
 	 */
-	@Override
 	public final ICompilationUnit getCompilationUnit() {
 		return fCompilationUnit;
 	}
@@ -87,7 +86,6 @@ public class CompilationUnitContext extends DocumentTemplateContext implements I
 	 * @param elementType the element type
 	 * @return the enclosing element of the given type or <code>null</code>
 	 */
-	@Override
 	public IJavaElement findEnclosingElement(int elementType) {
 		if (fCompilationUnit == null)
 			return null;
