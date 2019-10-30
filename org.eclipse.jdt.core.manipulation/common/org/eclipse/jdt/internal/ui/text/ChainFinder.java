@@ -145,7 +145,7 @@ public class ChainFinder {
 
 		for (final IJavaElement element : findAllFieldsAndMethods(currentlyVisitedType, staticOnly)) {
 			final ChainElement newEdge= createEdge(element);
-			if (!chain.contains(newEdge)) {
+			if (newEdge.getElementType() != null && !chain.contains(newEdge)) {
 				incompleteChains.add(cloneChainAndAppendEdge(chain, newEdge));
 			}
 		}

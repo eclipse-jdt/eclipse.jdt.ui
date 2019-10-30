@@ -120,14 +120,20 @@ public class ChainCompletionProposalComputer implements IJavaCompletionProposalC
 				IJavaElement e= aprop.getJavaElement();
 				if (e != null) {
 					if (matchesExpectedPrefix(e) && !ChainFinder.isFromExcludedType(Arrays.asList(excludedTypes), e)) {
-						entrypoints.add(new ChainElement(e, false));
+						ChainElement ce= new ChainElement(e, false);
+						if (ce.getElementType() != null) {
+							entrypoints.add(ce);
+						}
 					}
 				} else {
 					IJavaElement[] visibleElements= ctx.getCoreContext().getVisibleElements(null);
 					for (IJavaElement ve : visibleElements) {
 						if (ve.getElementName().equals(aprop.getReplacementString()) && matchesExpectedPrefix(ve)
 								&& !ChainFinder.isFromExcludedType(Arrays.asList(excludedTypes), ve)) {
-							entrypoints.add(new ChainElement(ve, false));
+							ChainElement ce= new ChainElement(ve, false);
+							if (ce.getElementType() != null) {
+								entrypoints.add(ce);
+							}
 						}
 					}
 				}

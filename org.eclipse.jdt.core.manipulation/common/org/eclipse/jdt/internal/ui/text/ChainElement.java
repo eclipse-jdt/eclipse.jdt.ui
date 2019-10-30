@@ -10,8 +10,6 @@
  */
 package org.eclipse.jdt.internal.ui.text;
 
-import org.eclipse.osgi.util.NLS;
-
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -20,8 +18,6 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
-
-import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 
 /**
  * Represents a transition from Type A to Type B by some chain element ( {@link IField} access,
@@ -90,7 +86,11 @@ public class ChainElement {
 				returnType= new ChainType((IType) element);
 				break;
 			default:
-				JavaManipulationPlugin.logErrorMessage(NLS.bind("Cannot handle {0} as return type.", element));
+				/*
+				 * Other IJavaElement types may end up here that
+				 * are not relevant for chain completion. Ignore
+				 * these using fact that getElementType() == null
+				 */
 		}
 		dimension= signature == null ? 0 : Signature.getArrayCount(signature);
 	}
@@ -108,10 +108,20 @@ public class ChainElement {
 		return element;
 	}
 
+	/**
+	 * Returns the type of this chain element as an ElementType
+	 * @return the ElementType or null, if this chain element
+	 * does not support the IJavaElement that is associated.
+	 */
 	public ElementType getElementType() {
 		return elementType;
 	}
 
+	/**
+	 * Returns the return type of this chain element as a ChainType
+	 * @return the ChainType or null, if this chain element
+	 * does not support the IJavaElement that is associated.
+	 */
 	public ChainType getReturnType() {
 		return returnType;
 	}
