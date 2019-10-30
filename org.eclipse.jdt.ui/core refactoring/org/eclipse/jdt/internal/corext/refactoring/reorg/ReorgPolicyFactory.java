@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -3771,12 +3771,15 @@ public final class ReorgPolicyFactory {
 				insertRelative(newMember, nodeDestination, listRewrite);
 			}
 
-			if (!(member instanceof IInitializer)) {
-				BodyDeclaration decl= ASTNodeSearchUtil.getBodyDeclarationNode(member, sourceCuNode);
-				if (decl != null) {
-					ImportRewriteContext context= new ContextSensitiveImportRewriteContext(destinationContainer, targetRewriter.getImportRewrite());
-					ImportRewriteUtil.addImports(targetRewriter, context, decl, new HashMap<Name, String>(), new HashMap<Name, String>(), false);
-				}
+			BodyDeclaration decl= null;
+			if (member instanceof IInitializer) {
+				decl= ASTNodeSearchUtil.getInitializerNode((IInitializer)member, sourceCuNode);
+			} else {
+				decl= ASTNodeSearchUtil.getBodyDeclarationNode(member, sourceCuNode);
+			}
+			if (decl != null) {
+				ImportRewriteContext context= new ContextSensitiveImportRewriteContext(destinationContainer, targetRewriter.getImportRewrite());
+				ImportRewriteUtil.addImports(targetRewriter, context, decl, new HashMap<Name, String>(), new HashMap<Name, String>(), false);
 			}
 		}
 
