@@ -115,6 +115,8 @@ import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.MoveMethodDescriptor;
@@ -131,6 +133,7 @@ import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -2046,7 +2049,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	}
 
 	/**
-	 * Creates the method arguments for the target method declaration.
+	 * Creates the method arguments and return type for the target method declaration.
 	 *
 	 * @param rewrites
 	 *            the compilation unit rewrites
@@ -2072,6 +2075,8 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		final AstNodeFinder finder= new AnonymousClassReferenceFinder(declaration);
 		declaration.accept(finder);
 		final List<ASTNode> arguments= new ArrayList<>(declaration.parameters().size() + 1);
+		final AbstractTypeDeclaration type= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(getTargetType(), rewriter.getRoot());
+		ImportRewriteContext context= type != null ? new ContextSensitiveImportRewriteContext(type, rewriter.getImportRewrite()) : rewriter.getImportRewrite().getDefaultImportRewriteContext();
 		createArgumentList(declaration, arguments, new VisibilityAdjustingArgumentFactory(ast, rewrites, adjustments) {
 
 			@Override
@@ -2100,7 +2105,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 							variable.setType(ast.newSimpleType(ast.newSimpleName(name)));
 					}
 				} else
-					variable.setType(rewriter.getImportRewrite().addImport(type, ast));
+					variable.setType(rewriter.getImportRewrite().addImport(type, ast, context, TypeLocation.PARAMETER));
 				return variable;
 			}
 
@@ -2130,6 +2135,11 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		for (final Iterator<ASTNode> iterator= arguments.iterator(); iterator.hasNext();) {
 			node= iterator.next();
 			list.insertLast(node, null);
+		}
+		IMethodBinding method= declaration.resolveBinding();
+		if (method != null) {
+			Type returnType= rewriter.getImportRewrite().addImport(method.getReturnType(), rewriter.getRoot().getAST(), context, TypeLocation.RETURN_TYPE);
+			rewrite.set(declaration, MethodDeclaration.RETURN_TYPE2_PROPERTY, returnType, null);
 		}
 	}
 

@@ -13,6 +13,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import java.util.Hashtable;
+import java.util.Map;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
+import org.eclipse.core.runtime.Path;
+
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+
+import org.eclipse.jdt.ui.tests.core.Java18ProjectTestSetup;
+
 import junit.framework.Test;
 
 public class MoveInstanceMethodTests18 extends MoveInstanceMethodTests {
@@ -59,4 +71,40 @@ public class MoveInstanceMethodTests18 extends MoveInstanceMethodTests {
 		String selectionCuQName= "p.A";
 		helper1(cuQNames, selectionCuQName, 17, 25, 17, 28, FIELD, "fB", true, true);
 	}
+
+	// test that no redundant @NonNull annotations are created
+	public void testNoRedundantNonNull1() throws Exception {
+		IJavaProject javaProject= getRoot().getJavaProject();
+		Map<String, String> originalOptions= javaProject.getOptions(false);
+		try {
+			Hashtable<String, String> newOptions= new Hashtable<>(originalOptions);
+			newOptions.put(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
+			javaProject.setOptions(newOptions);
+			JavaProjectHelper.addLibrary(javaProject, new Path(Java18ProjectTestSetup.getJdtAnnotations20Path()));
+
+			String[] cuQNames= new String[] { "p.Source", "p.Target" };
+			String selectionCuQName= "p.Source";
+			helper1(cuQNames, selectionCuQName, 7, 19, 7, 29, PARAMETER, "t", true, true);
+		} finally {
+			javaProject.setOptions(originalOptions);
+		}
+	}
+	// test required @NonNull annotations are still created where @NonNullByDefault({}) is in effect
+	public void testNoRedundantNonNull2() throws Exception {
+		IJavaProject javaProject= getRoot().getJavaProject();
+		Map<String, String> originalOptions= javaProject.getOptions(false);
+		try {
+			Hashtable<String, String> newOptions= new Hashtable<>(originalOptions);
+			newOptions.put(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
+			javaProject.setOptions(newOptions);
+			JavaProjectHelper.addLibrary(javaProject, new Path(Java18ProjectTestSetup.getJdtAnnotations20Path()));
+
+			String[] cuQNames= new String[] { "p.Source", "p.Target" };
+			String selectionCuQName= "p.Source";
+			helper1(cuQNames, selectionCuQName, 11, 19, 11, 29, PARAMETER, "t", true, true);
+		} finally {
+			javaProject.setOptions(originalOptions);
+		}
+	}
+
 }
