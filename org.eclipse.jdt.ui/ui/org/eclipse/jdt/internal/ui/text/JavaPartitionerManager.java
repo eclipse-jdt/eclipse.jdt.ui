@@ -13,13 +13,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import org.eclipse.jface.util.PropertyChangeEvent;
-
 import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.rules.IPartitionTokenScanner;
 
@@ -43,15 +36,6 @@ public class JavaPartitionerManager implements IJavaPartitionerManager {
 
 	private static ITextEditor fEditor;
 
-	private Map<ITextEditor, IDocumentPartitioner> fEditorPartitionerMap;
-
-	private Set<FastJavaPartitioner> fPartitionerSet;
-
-	public JavaPartitionerManager() {
-		fEditorPartitionerMap= new HashMap<>();
-		fPartitionerSet= new HashSet<>();
-	}
-
 	@Override
 	public IPartitionTokenScanner getPartitionScanner() {
 		return new FastJavaPartitionScanner(EditorUtility.getJavaProject(fEditor));
@@ -65,64 +49,20 @@ public class JavaPartitionerManager implements IJavaPartitionerManager {
 	 */
 	@Override
 	public IDocumentPartitioner createDocumentPartitioner() {
-		FastJavaPartitioner partitioner= new FastJavaPartitioner(getPartitionScanner(), LEGAL_CONTENT_TYPES);
-		fPartitionerSet.add(partitioner);
-		ITextEditor editor= fEditor;
-		if(editor != null) {
-			fEditorPartitionerMap.put(editor, partitioner);
-		}
-		return partitioner;
+		return new FastJavaPartitioner(getPartitionScanner(), LEGAL_CONTENT_TYPES);
 	}
 
 	public void clearEditorInfo(ITextEditor editor) {
-		if (editor != null) {
-			IDocumentPartitioner partitioner= fEditorPartitionerMap.get(editor);
-			fEditorPartitionerMap.remove(editor);
-			if (editor == fEditor) {
-				fEditor= null;
-			}
-			fPartitionerSet.remove(partitioner);
+		if (editor == fEditor) {
+			fEditor= null;
 		}
 	}
 
 	public void dispose() {
 		fEditor= null;
-		if (fEditorPartitionerMap != null) {
-			fEditorPartitionerMap.clear();
-			fEditorPartitionerMap= null;
-		}
-		if (fPartitionerSet != null) {
-			fPartitionerSet.clear();
-			fPartitionerSet= null;
-		}
 	}
 
 	public void setEditorInfo(ITextEditor editor) {
 		fEditor= editor;
-	}
-
-	@SuppressWarnings("unused")
-	public boolean affectsBehavior(PropertyChangeEvent event) {
-		boolean affectsBehavior= false;
-		if (fPartitionerSet != null) {
-			for (FastJavaPartitioner partitioner : fPartitionerSet) {
-				if (partitioner.hasPreviewEnabledValueChanged()) {
-					affectsBehavior= true;
-					break;
-				}
-			}
-		}
-		return affectsBehavior;
-	}
-
-	@SuppressWarnings("unused")
-	public void adaptToPreferenceChange(PropertyChangeEvent event) {
-		if (fPartitionerSet != null) {
-			for (FastJavaPartitioner partitioner : fPartitionerSet) {
-				if (partitioner.hasPreviewEnabledValueChanged()) {
-					partitioner.cleanAndReConnectDocumentIfNecessary();
-				}
-			}
-		}
 	}
 }

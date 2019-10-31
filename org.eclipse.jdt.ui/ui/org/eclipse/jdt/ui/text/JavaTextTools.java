@@ -360,9 +360,6 @@ public class JavaTextTools {
 			fStringScanner.adaptToPreferenceChange(event);
 		if (fJavaDocScanner.affectsBehavior(event))
 			fJavaDocScanner.adaptToPreferenceChange(event);
-		if (fJavaPartitionerManager.affectsBehavior(event)) {
-			fJavaPartitionerManager.adaptToPreferenceChange(event);
-		}
 	}
 
 	/**
