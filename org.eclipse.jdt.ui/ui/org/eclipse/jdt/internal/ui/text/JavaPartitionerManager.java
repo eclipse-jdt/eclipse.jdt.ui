@@ -67,6 +67,10 @@ public class JavaPartitionerManager implements IJavaPartitionerManager {
 	public IDocumentPartitioner createDocumentPartitioner() {
 		FastJavaPartitioner partitioner= new FastJavaPartitioner(getPartitionScanner(), LEGAL_CONTENT_TYPES);
 		fPartitionerSet.add(partitioner);
+		ITextEditor editor= fEditor;
+		if(editor != null) {
+			fEditorPartitionerMap.put(editor, partitioner);
+		}
 		return partitioner;
 	}
 
