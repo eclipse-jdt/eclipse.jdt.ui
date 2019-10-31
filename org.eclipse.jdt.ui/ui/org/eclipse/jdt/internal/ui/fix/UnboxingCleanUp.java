@@ -109,20 +109,23 @@ public class UnboxingCleanUp extends AbstractMultiFix {
 		unit.accept(new ASTVisitor() {
 			@Override
 			public boolean visit(MethodInvocation node) {
-				if (node.getExpression() != null
-								&& node.getExpression().resolveTypeBinding().isClass()
-						&& (ASTNodes.usesGivenSignature(node, Boolean.class.getCanonicalName(), BOOLEAN_VALUE) || ASTNodes.usesGivenSignature(node, Byte.class.getCanonicalName(), BYTE_VALUE)
-								|| ASTNodes.usesGivenSignature(node, Character.class.getCanonicalName(), CHAR_VALUE)
-								|| ASTNodes.usesGivenSignature(node, Short.class.getCanonicalName(), SHORT_VALUE)
-								|| ASTNodes.usesGivenSignature(node, Integer.class.getCanonicalName(), INT_VALUE)
-								|| ASTNodes.usesGivenSignature(node, Long.class.getCanonicalName(), LONG_VALUE)
-								|| ASTNodes.usesGivenSignature(node, Float.class.getCanonicalName(), FLOAT_VALUE)
-								|| ASTNodes.usesGivenSignature(node, Double.class.getCanonicalName(), DOUBLE_VALUE))) {
-					final ITypeBinding actualResultType= ASTNodes.getTargetType(node);
+				if (node.getExpression() != null) {
+					ITypeBinding nodeBinding= node.getExpression().resolveTypeBinding();
+					if (nodeBinding != null	&& nodeBinding.isClass()
+							&& (ASTNodes.usesGivenSignature(node, Boolean.class.getCanonicalName(), BOOLEAN_VALUE)
+									|| ASTNodes.usesGivenSignature(node, Byte.class.getCanonicalName(), BYTE_VALUE)
+									|| ASTNodes.usesGivenSignature(node, Character.class.getCanonicalName(), CHAR_VALUE)
+									|| ASTNodes.usesGivenSignature(node, Short.class.getCanonicalName(), SHORT_VALUE)
+									|| ASTNodes.usesGivenSignature(node, Integer.class.getCanonicalName(), INT_VALUE)
+									|| ASTNodes.usesGivenSignature(node, Long.class.getCanonicalName(), LONG_VALUE)
+									|| ASTNodes.usesGivenSignature(node, Float.class.getCanonicalName(), FLOAT_VALUE)
+									|| ASTNodes.usesGivenSignature(node, Double.class.getCanonicalName(), DOUBLE_VALUE))) {
+						final ITypeBinding actualResultType= ASTNodes.getTargetType(node);
 
-					if (actualResultType != null && actualResultType.isAssignmentCompatible(node.resolveTypeBinding())) {
-						rewriteOperations.add(new UnboxingOperation(node));
-						return false;
+						if (actualResultType != null && actualResultType.isAssignmentCompatible(node.resolveTypeBinding())) {
+							rewriteOperations.add(new UnboxingOperation(node));
+							return false;
+						}
 					}
 				}
 				return true;
