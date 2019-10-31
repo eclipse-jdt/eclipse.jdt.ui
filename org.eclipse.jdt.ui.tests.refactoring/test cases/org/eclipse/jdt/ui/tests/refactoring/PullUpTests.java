@@ -1103,6 +1103,34 @@ public class PullUpTests extends RefactoringTest {
 				signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
 	}
 
+	public void test55() throws Exception {
+		// test for bug 355327
+		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
+		ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");
+		ICompilationUnit cuC= createCUfromTestFile(getPackageP(), "C");
+
+		IType typeA= getType(cuA, "A");
+		IType typeB= getType(cuB, "B");
+		String[] fieldNames= new String[] { "k" };
+		IField[] fields= getFields(typeB, fieldNames);
+
+		PullUpRefactoringProcessor processor= createRefactoringProcessor(fields);
+		Refactoring ref= processor.getRefactoring();
+		assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
+
+		setTargetClass(processor, 0);
+		processor.setDestinationType(typeA);
+		processor.setMembersToMove(fields);
+
+		assertTrue("final", ref.checkFinalConditions(new NullProgressMonitor()).isOK());
+
+		performChange(ref, false);
+
+		assertEqualLines("A", getFileContents(getOutputTestFileName("A")), cuA.getSource());
+		assertEqualLines("B", getFileContents(getOutputTestFileName("B")), cuB.getSource());
+		assertEqualLines("C", getFileContents(getOutputTestFileName("C")), cuC.getSource());
+	}
+
 	public void testFail0() throws Exception{
 //		printTestDisabledMessage("6538: searchDeclarationsOf* incorrect");
 		helper2(new String[]{"m"}, new String[][]{new String[0]}, true, false, 0);

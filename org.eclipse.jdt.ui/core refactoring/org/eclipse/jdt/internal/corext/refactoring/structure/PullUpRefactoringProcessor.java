@@ -1679,7 +1679,14 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 			final IMember[] typesToDelete= getMembers(fMembersToMove, IJavaElement.TYPE);
 			final IMember[] matchingElements= getMatchingElements(monitor, false);
 			final IMember[] matchingFields= getMembers(matchingElements, IJavaElement.FIELD);
-			return JavaElementUtil.merge(JavaElementUtil.merge(matchingFields, typesToDelete), fDeletedMethods);
+
+			List<IMember> toDelete= new ArrayList<>();
+			IMember[] all= JavaElementUtil.merge(matchingFields, typesToDelete);
+
+			toDelete.addAll(Arrays.asList(fMembersToMove));
+			toDelete.retainAll(Arrays.asList(all));
+
+			return JavaElementUtil.merge(toDelete.toArray(new IMember[0]), fDeletedMethods);
 		} finally {
 			monitor.done();
 		}
