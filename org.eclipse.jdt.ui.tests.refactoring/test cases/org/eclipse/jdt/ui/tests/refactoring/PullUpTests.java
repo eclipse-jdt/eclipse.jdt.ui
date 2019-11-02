@@ -216,6 +216,26 @@ public class PullUpTests extends RefactoringTest {
 		assertEqualLines(expected, actual);
 	}
 
+	private void fieldHelper1b(String[] fieldNames, int targetClassIndex) throws Exception{
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IType typeC= getType(cu, "C");
+		IField[] fields= getFields(typeC, fieldNames);
+
+		PullUpRefactoringProcessor processor= createRefactoringProcessor(fields);
+		Refactoring ref= processor.getRefactoring();
+
+		assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
+		setTargetClass(processor, targetClassIndex);
+
+		RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
+		assertTrue("precondition was supposed to pass", !checkInputResult.hasError());
+		performChange(ref, false);
+
+		String expected= getFileContents(getOutputTestFileName("A"));
+		String actual= cu.getSource();
+		assertEqualLines(expected, actual);
+	}
+
 	private void fieldHelper2(String[] fieldNames, int targetClassIndex) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType type= getType(cu, "B");
@@ -1447,11 +1467,11 @@ public class PullUpTests extends RefactoringTest {
 		fieldHelper1(new String[]{"i"}, 0);
 	}
 
-	public void testFieldFail0() throws Exception{
-		fieldHelper2(new String[]{"x"}, 0);
+	public void testField1() throws Exception{
+		fieldHelper1b(new String[]{"x"}, 1);
 	}
 
-	public void testFieldFail1() throws Exception{
+	public void testFieldFail0() throws Exception{
 		fieldHelper2(new String[]{"x"}, 0);
 	}
 

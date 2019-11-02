@@ -3,10 +3,10 @@ package p;
 class A {
 }
 
-class B extends A{
+class B extends A {
 	int x;
 }
-class C extends A{
+class C extends B {
 	boolean x;
 }
 
