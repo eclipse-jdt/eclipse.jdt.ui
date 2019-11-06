@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -48,6 +48,7 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.AddTaskAction;
+import org.eclipse.jdt.internal.ui.actions.AddTextBlockAction;
 import org.eclipse.jdt.internal.ui.actions.AllCleanUpsAction;
 import org.eclipse.jdt.internal.ui.actions.FindBrokenNLSKeysAction;
 import org.eclipse.jdt.internal.ui.actions.JDTQuickMenuCreator;
@@ -139,6 +140,7 @@ public class GenerateActionGroup extends ActionGroup {
 	private AddUnimplementedConstructorsAction fAddUnimplementedConstructors;
 	private GenerateNewConstructorUsingFieldsAction fGenerateConstructorUsingFields;
 	private AddJavaDocStubAction fAddJavaDocStub;
+	private AddTextBlockAction fAddTextBlockStub;
 	private AddBookmarkAction fAddBookmark;
 	private AddTaskAction fAddTaskAction;
 	private ExternalizeStringsAction fExternalizeStrings;
@@ -213,6 +215,10 @@ public class GenerateActionGroup extends ActionGroup {
 		fAddJavaDocStub= new AddJavaDocStubAction(editor);
 		fAddJavaDocStub.setActionDefinitionId(IJavaEditorActionDefinitionIds.ADD_JAVADOC_COMMENT);
 		editor.setAction("AddJavadocComment", fAddJavaDocStub); //$NON-NLS-1$
+		
+		fAddTextBlockStub= new AddTextBlockAction(editor);
+		fAddTextBlockStub.setActionDefinitionId(IJavaEditorActionDefinitionIds.ADD_TEXTBLOCK);
+		editor.setAction("AddTextBlock", fAddTextBlockStub); //$NON-NLS-1$
 
 		fCleanUp= new AllCleanUpsAction(editor);
 		fCleanUp.setActionDefinitionId(IJavaEditorActionDefinitionIds.CLEAN_UP);
@@ -290,7 +296,7 @@ public class GenerateActionGroup extends ActionGroup {
 
 		fAddJavaDocStub= new AddJavaDocStubAction(site);
 		fAddJavaDocStub.setActionDefinitionId(IJavaEditorActionDefinitionIds.ADD_JAVADOC_COMMENT);
-
+		
 		fAddBookmark= new AddBookmarkAction(site, true);
 		fAddBookmark.setActionDefinitionId(IWorkbenchCommandConstants.EDIT_ADD_BOOKMARK);
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -242,6 +242,10 @@ public final class ActionMessages extends NLS {
 	public static String AddJavaDocStubsAction_error_dialogTitle;
 	public static String AddJavaDocStubsAction_error_actionFailed;
 	public static String AddJavaDocStubsAction_not_applicable;
+	public static String AddTextBlockAction_label;
+	public static String AddTextBlockAction_description;
+	public static String AddTextBlockAction_tooltip;
+	public static String AddTextBlockAction_not_applicable;
 	public static String ExternalizeStringsAction_label;
 	public static String ExternalizeStringsAction_dialog_title;
 	public static String FindStringsToExternalizeAction_label;

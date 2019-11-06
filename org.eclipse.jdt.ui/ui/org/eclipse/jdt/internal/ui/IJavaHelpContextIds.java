@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -243,6 +243,7 @@ public interface IJavaHelpContextIds {
 	public static final String OPEN_HIERARCHY_ACTION= 						PREFIX + "open_hierarchy_action"; 	 //$NON-NLS-1$
 	public static final String TOGGLE_SMART_TYPING_ACTION= 					PREFIX + "toggle_smart_typing_action"; //$NON-NLS-1$
 	public static final String INDENT_ACTION= 								PREFIX + "indent_action"; //$NON-NLS-1$
+	public static final String ADD_TEXTBLOCK_ACTION= 						PREFIX + "add_textblock__action"; //$NON-NLS-1$
 
 	// Dialogs
 	public static final String MAINTYPE_SELECTION_DIALOG= PREFIX + "maintype_selection_dialog_context"; //$NON-NLS-1$

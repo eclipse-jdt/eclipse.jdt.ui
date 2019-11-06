@@ -3002,6 +3002,13 @@
                id="org.eclipse.jdt.ui.actions.AddBlockComment">
          </action>
          <action
+               definitionId="org.eclipse.jdt.ui.edit.text.java.add.textblock"
+               label="%AddTextBlockAction.label"
+               retarget="true"
+               menubarPath="org.eclipse.jdt.ui.source.menu/editGroup"
+               id="org.eclipse.jdt.ui.actions.AddTextBlock">
+         </action>
+         <action
                definitionId="org.eclipse.jdt.ui.edit.text.java.toggle.comment"
                label="%ToggleCommentAction.label"
                retarget="true"
@@ -3744,6 +3751,12 @@
             description="%ActionDefinition.removeBlockComment.description"
             categoryId="org.eclipse.jdt.ui.category.source"
             id="org.eclipse.jdt.ui.edit.text.java.remove.block.comment">
+      </command>
+      <command
+            name="%ActionDefinition.addTextBlock.name"
+            description="%ActionDefinition.addTextBlock.description"
+            categoryId="org.eclipse.jdt.ui.category.source"
+            id="org.eclipse.jdt.ui.edit.text.java.add.textblock">
       </command>
       <command
             name="%ActionDefinition.indent.name"
@@ -4537,6 +4550,11 @@
             commandId="org.eclipse.jdt.ui.edit.text.java.add.block.comment"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <!-- Command+Shift+/ opens the Help > Search menu on carbon, see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=113981 -->
+      <key
+            sequence="M1+M2+'"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId="org.eclipse.jdt.ui.edit.text.java.add.textblock"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
             platform="carbon"
             sequence="M1+M2+/"

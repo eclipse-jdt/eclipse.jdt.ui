@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -180,6 +180,13 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	 */
 	public static final String INDENT= "org.eclipse.jdt.ui.edit.text.java.indent"; //$NON-NLS-1$
 
+	/**
+	 * Action definition ID of the source -> add text block action
+	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.add.textBlock."</code>).
+	 * @since 3.20
+	 */
+	public static final String ADD_TEXTBLOCK= "org.eclipse.jdt.ui.edit.text.java.add.textblock"; //$NON-NLS-1$
+	
 	/**
 	 * Action definition ID of the source -> format action
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.format"</code>).

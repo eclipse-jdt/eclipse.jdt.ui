@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -78,6 +78,7 @@ public class CompilationUnitEditorActionContributor extends BasicCompilationUnit
 		bars.setGlobalActionHandler(JdtActionConstants.ADD_BLOCK_COMMENT, getAction(textEditor, "AddBlockComment")); //$NON-NLS-1$
 		bars.setGlobalActionHandler(JdtActionConstants.REMOVE_BLOCK_COMMENT, getAction(textEditor, "RemoveBlockComment")); //$NON-NLS-1$
 		bars.setGlobalActionHandler(JdtActionConstants.INDENT, getAction(textEditor, "Indent")); //$NON-NLS-1$
+		bars.setGlobalActionHandler(JdtActionConstants.ADD_TEXTBLOCK, getAction(textEditor, "AddTextBlock")); //$NON-NLS-1$
 
 		IAction action= getAction(textEditor, ITextEditorActionConstants.REFRESH);
 		bars.setGlobalActionHandler(ITextEditorActionConstants.REFRESH, action);

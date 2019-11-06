@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -163,6 +163,14 @@ public class JdtActionConstants {
 	 * @since 3.0
 	 */
 	public static final String INDENT= "org.eclipse.jdt.ui.actions.Indent"; //$NON-NLS-1$
+
+	/**
+	 * Source menu: name of adding text block action
+	 * (value <code>"org.eclipse.jdt.ui.actions.AddTextBlock"</code>).
+	 *
+	 * @since 3.20
+	 */
+	public static final String ADD_TEXTBLOCK= "org.eclipse.jdt.ui.actions.AddTextBlock"; //$NON-NLS-1$
 
 	/**
 	 * Source menu: name of standard Shift Right action

@@ -65,7 +65,7 @@ public class JavaMultiLineStringAutoIndentStrategy extends JavaStringAutoIndentS
 					command.text= command.text + indentation;
 				} else {
 					command.text= command.text + indentation;
-					if (isCloseStringsPreferenceSet()) {
+					if (isCloseStringsPreferenceSet(fProject)) {
 						command.caretOffset= command.offset + command.text.length();
 						command.shiftsCaret= false;
 						command.text= command.text + System.lineSeparator() + IndentAction.getTextBlockIndentationString(document, offset, command.offset, fProject) + IndentAction.TEXT_BLOCK_STR;
@@ -150,9 +150,9 @@ public class JavaMultiLineStringAutoIndentStrategy extends JavaStringAutoIndentS
 		}
 	}
 
-	private boolean isCloseStringsPreferenceSet() {
+	public static boolean isCloseStringsPreferenceSet(IJavaProject javaProject) {
 		boolean isSet= false;
-		if (fProject != null) {
+		if (javaProject != null) {
 			IPreferenceStore store= PreferenceConstants.getPreferenceStore();
 			if (store != null) {
 				isSet= store.getBoolean(PreferenceConstants.EDITOR_CLOSE_STRINGS);
