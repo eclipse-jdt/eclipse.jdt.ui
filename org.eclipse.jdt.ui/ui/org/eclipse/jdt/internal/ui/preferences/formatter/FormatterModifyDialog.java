@@ -1533,6 +1533,7 @@ public class FormatterModifyDialog extends ModifyDialog {
 						.pref(FormatterMessages.FormatterModifyDialog_comments_pref_format_html, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HTML)
 						.pref(FormatterMessages.FormatterModifyDialog_comments_pref_format_code_snippets, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_SOURCE)
 						.pref(FormatterMessages.FormatterModifyDialog_comments_pref_blank_line_before_javadoc_tags, DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_EMPTY_LINE_BEFORE_ROOT_TAGS)
+						.pref(FormatterMessages.FormatterModifyDialog_comments_pref_blank_line_beftween_different_tags, DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_EMPTY_LINE_BETWEEN_DIFFERENT_TAGS)
 						.node(createJavadocAlignOptions())
 						.gap()
 						.pref(FormatterMessages.FormatterModifyDialog_comments_pref_new_lines_at_javadoc_boundaries, DefaultCodeFormatterConstants.FORMATTER_COMMENT_NEW_LINES_AT_JAVADOC_BOUNDARIES)
@@ -1547,6 +1548,7 @@ public class FormatterModifyDialog extends ModifyDialog {
 						case DefaultCodeFormatterConstants.FORMATTER_JOIN_LINES_IN_COMMENTS:
 							return fTree.addCheckbox(parent, label, key, CheckboxPreference.TRUE_FALSE);
 						case DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_EMPTY_LINE_BEFORE_ROOT_TAGS:
+						case DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_EMPTY_LINE_BETWEEN_DIFFERENT_TAGS:
 							return fTree.addCheckbox(parent, label, key, CheckboxPreference.DO_NOT_INSERT_INSERT);
 						default:
 							return fTree.addCheckbox(parent, label, key, CheckboxPreference.FALSE_TRUE);

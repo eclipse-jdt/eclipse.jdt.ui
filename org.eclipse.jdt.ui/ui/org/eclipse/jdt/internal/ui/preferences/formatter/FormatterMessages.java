@@ -76,6 +76,7 @@ final class FormatterMessages extends NLS {
 	public static String FormatterModifyDialog_braces_val_next_line_on_wrap;
 	public static String FormatterModifyDialog_braces_val_same_line;
 	public static String FormatterModifyDialog_comments_pref_blank_line_before_javadoc_tags;
+	public static String FormatterModifyDialog_comments_pref_blank_line_beftween_different_tags;
 	public static String FormatterModifyDialog_comments_pref_enable_block;
 	public static String FormatterModifyDialog_comments_pref_enable_javadoc;
 	public static String FormatterModifyDialog_comments_pref_enable_line;
