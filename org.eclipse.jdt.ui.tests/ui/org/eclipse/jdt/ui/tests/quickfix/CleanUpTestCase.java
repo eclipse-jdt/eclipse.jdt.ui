@@ -82,6 +82,7 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileStore;
 	CleanUpTest1d5.class,
 	CleanUpTest1d7.class,
 	CleanUpTest18.class,
+	CleanUpTest1d10.class,
 	CleanUpAnnotationTest.class,
 	SaveParticipantTest.class,
 	CleanUpActionTest.class,

@@ -641,8 +641,19 @@ public class CleanUpConstants {
 	public static final String VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES= "cleanup.make_local_variable_final"; //$NON-NLS-1$
 
 	/**
-	 * Controls conversion between lambda expressions and anonymous class creations.
-	 * For detailed settings, use {@link #USE_LAMBDA} or {@link #USE_ANONYMOUS_CLASS_CREATION}
+	 * Replace type declaration by local variable type inference.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.15
+	 */
+	public static final String USE_VAR= "cleanup.use_var"; //$NON-NLS-1$
+
+	/**
+	 * Controls conversion between lambda expressions and anonymous class creations. For detailed
+	 * settings, use {@link #USE_LAMBDA} or {@link #USE_ANONYMOUS_CLASS_CREATION}
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
 	 *

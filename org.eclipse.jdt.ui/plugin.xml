@@ -7064,9 +7064,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.loop">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.VarCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.var"
+            runAfter="org.eclipse.jdt.ui.cleanup.variables">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.LambdaExpressionsCleanUp"
             id="org.eclipse.jdt.ui.cleanup.lambda"
-            runAfter="org.eclipse.jdt.ui.cleanup.variables">
+            runAfter="org.eclipse.jdt.ui.cleanup.var">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp"

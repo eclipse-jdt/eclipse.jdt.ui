@@ -27,6 +27,7 @@ import org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.LambdaExpressionAndMethodRefCleanUp;
 import org.eclipse.jdt.internal.ui.fix.LambdaExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.NumberSuffixCleanUp;
+import org.eclipse.jdt.internal.ui.fix.VarCleanUp;
 import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
 
 public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
@@ -40,10 +41,11 @@ public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
         		new ExpressionsCleanUp(values),
 				new NumberSuffixCleanUp(values),
 				new VariableDeclarationCleanUp(values),
+				new VarCleanUp(values),
 				new LambdaExpressionsCleanUp(values),
 				new LambdaExpressionAndMethodRefCleanUp(values)
-		};
-	}
+        };
+    }
 
 	@Override
 	protected void doCreatePreferences(Composite composite, int numColumns) {
@@ -83,6 +85,10 @@ public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
 		final CheckboxPreference useFinalParametersPref= createCheckboxPref(variableGroup, 1, CleanUpMessages.CodeStyleTabPage_CheckboxName_UseFinalForParameters, CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS, CleanUpModifyDialog.FALSE_TRUE);
 		final CheckboxPreference useFinalVariablesPref= createCheckboxPref(variableGroup, 1, CleanUpMessages.CodeStyleTabPage_CheckboxName_UseFinalForLocals, CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES, CleanUpModifyDialog.FALSE_TRUE);
 		registerSlavePreference(useFinalPref, new CheckboxPreference[] {useFinalFieldsPref, useFinalParametersPref, useFinalVariablesPref});
+		intent(variableGroup);
+		final CheckboxPreference useVarPref= createCheckboxPref(variableGroup, numColumns, CleanUpMessages.CodeStyleTabPage_CheckboxName_UseVar, CleanUpConstants.USE_VAR,
+				CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(useVarPref);
 
 		Group functionalInterfacesGroup= createGroup(numColumns, composite, CleanUpMessages.CodeStyleTabPage_GroupName_FunctionalInterfaces);
 
