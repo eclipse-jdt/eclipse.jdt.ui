@@ -308,6 +308,7 @@ final class FormatterMessages extends NLS {
 	public static String FormatterModifyDialog_whiteSpace_pref_after_comma_init;
 	public static String FormatterModifyDialog_whiteSpace_pref_after_comma_localvars;
 	public static String FormatterModifyDialog_whiteSpace_pref_after_ellipsis;
+	public static String FormatterModifyDialog_whiteSpace_pref_after_not_operator;
 	public static String FormatterModifyDialog_whiteSpace_pref_after_opening_angle_bracket;
 	public static String FormatterModifyDialog_whiteSpace_pref_after_opening_brace;
 	public static String FormatterModifyDialog_whiteSpace_pref_after_opening_bracket;

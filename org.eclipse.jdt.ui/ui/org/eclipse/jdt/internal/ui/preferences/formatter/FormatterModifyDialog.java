@@ -1180,7 +1180,9 @@ public class FormatterModifyDialog extends ModifyDialog {
 								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_prefix_operators, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_PREFIX_OPERATOR)
 								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_after_prefix_operators, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_PREFIX_OPERATOR)
 								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_unary_operators, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_UNARY_OPERATOR)
-								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_after_unary_operators, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_UNARY_OPERATOR))
+								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_after_unary_operators, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_UNARY_OPERATOR, pref -> {
+									fTree.addCheckbox(pref, FormatterMessages.FormatterModifyDialog_whiteSpace_pref_after_not_operator, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_NOT_OPERATOR, CheckboxPreference.DO_NOT_INSERT_INSERT);
+								}))
 						.node(fTree.builder(FormatterMessages.FormatterModifyDialog_whiteSpace_tree_binary_operators, "-binaryoperators", modAll) //$NON-NLS-1$
 								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_multiplicative_operator, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_MULTIPLICATIVE_OPERATOR)
 								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_after_multiplicative_operator, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_MULTIPLICATIVE_OPERATOR)
