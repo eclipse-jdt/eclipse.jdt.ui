@@ -284,19 +284,30 @@ public final class ChainElementAnalyzer {
 		if (cType != null) {
 			return cType;
 		}
+		// Unresolved types, same simple name, one is super-type of other
+		// Avoid caching unresolved types to prevent possible cycles
+		boolean isResolved= true;
+		String eType= Signature.getElementType(typeSig);
+		if (eType.charAt(0) == Signature.C_UNRESOLVED) {
+			isResolved= false;
+		}
 		String type= SignatureUtil.stripSignatureToFQN(typeSig);
 		IType res= null;
 		try {
 			res= proj.findType(type);
 			if (res != null) {
-				typeCache.put(typeSig, res);
+				if (isResolved) {
+					typeCache.put(typeSig, res);
+				}
 				return res;
 			}
 			String[][] resType= declType.resolveType(type);
 			if (resType != null) {
 				String fqExpectedType= JavaModelUtil.concatenateName(resType[0][0], resType[0][1]);
 				res= proj.findType(fqExpectedType);
-				typeCache.put(typeSig, res);
+				if (isResolved) {
+					typeCache.put(typeSig, res);
+				}
 				return res;
 			}
 		} catch (JavaModelException e) {

@@ -535,6 +535,52 @@ public class ChainCompletionTest extends TestCase {
 		assertProposalsExist(expected, proposals);
 	}
 
+	public void testBug552849 () throws Exception {
+		IPackageFragment pkg2= javaSrc.createPackageFragment("test2", false, null);
+		IPackageFragment pkg3= javaSrc.createPackageFragment("test3", false, null);
+
+		// test.TestBug552849 -> test.Foo -> test2.Bar -> test3.Foo
+		StringBuffer buf= new StringBuffer();
+		buf.append("import java.io.File;\n" + 
+				"package test3;\n" + 
+				"public class Foo {\n" + 
+				"	protected File fVal= \"\";\n" + 
+				"}");
+		ICompilationUnit cu= getCompilationUnit(pkg3, buf, "Foo.java");
+
+		buf= new StringBuffer();
+		buf.append("package test2;\n" + 
+				"import test3.Foo;\n" + 
+				"public class Bar extends Foo {\n" + 
+				"}");
+		cu= getCompilationUnit(pkg2, buf, "Bar.java");
+
+		buf= new StringBuffer();
+		buf.append("package test;\n" + 
+				"import test2.Bar;\n" + 
+				"public class Foo extends Bar {\n" + 
+				"}");
+		cu= getCompilationUnit(pkg, buf, "Foo.java");
+
+		buf= new StringBuffer();
+		buf.append("import java.io.File;\n" + 
+				"package test;\n" + 
+				"public class TestBug552849 extends Foo {\n" + 
+				"	public void test () {\n" + 
+				"		TestBug552849 foo = new TestBug552849();\n" + 
+				"		File res = $\n" + 
+				"	}\n" + 
+				"}");
+
+		int completionIndex= getCompletionIndex(buf);
+		cu= getCompilationUnit(pkg, buf, "TestBug552849.java");
+
+		List<ICompletionProposal> proposals= computeCompletionProposals(cu, completionIndex);
+
+		List<String> expected= Arrays.asList("foo.fVal - 2 elements");
+		assertProposalsExist(expected, proposals);
+	}
+
 	private ICompilationUnit getCompilationUnit(IPackageFragment pack, StringBuffer buf, String name) throws JavaModelException {
 		return pack.createCompilationUnit(name, buf.toString().replace("$", ""), false, null);
 	}
