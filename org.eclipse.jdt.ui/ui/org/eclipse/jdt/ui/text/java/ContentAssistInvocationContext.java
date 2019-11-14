@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2019 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,15 +13,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.text.java;
 
-import org.eclipse.swt.widgets.Display;
-
 import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITextViewer;
-import org.eclipse.jface.text.ITextViewerExtension9;
 
 /**
  * Describes the context of an invocation of content assist in a text viewer. The context knows the
@@ -118,9 +114,8 @@ public class ContentAssistInvocationContext {
 	 */
 	public IDocument getDocument() {
 		if (fDocument == null) {
-			if (fViewer == null) {
+			if (fViewer == null)
 				return null;
-			}
 			return fViewer.getDocument();
 		}
 		return fDocument;
@@ -137,15 +132,13 @@ public class ContentAssistInvocationContext {
 	public CharSequence computeIdentifierPrefix() throws BadLocationException {
 		if (fPrefix == null) {
 			IDocument document= getDocument();
-			if (document == null) {
+			if (document == null)
 				return null;
-			}
 			int end= getInvocationOffset();
 			int start= end;
 			while (--start >= 0) {
-				if (!Character.isJavaIdentifierPart(document.getChar(start))) {
+				if (!Character.isJavaIdentifierPart(document.getChar(start)))
 					break;
-				}
 			}
 			start++;
 			fPrefix= document.get(start, end - start);
@@ -188,12 +181,10 @@ public class ContentAssistInvocationContext {
 	 */
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == null) {
+		if (obj == null)
 			return false;
-		}
-		if (!getClass().equals(obj.getClass())) {
+		if (!getClass().equals(obj.getClass()))
 			return false;
-		}
 		ContentAssistInvocationContext other= (ContentAssistInvocationContext) obj;
 		return (fViewer == null && other.fViewer == null || fViewer != null && fViewer.equals(other.fViewer)) && fOffset == other.fOffset && (fDocument == null && other.fDocument == null || fDocument != null && fDocument.equals(other.fDocument));
 	}
@@ -205,27 +196,4 @@ public class ContentAssistInvocationContext {
 	public int hashCode() {
 		return 23459213 << 5 | (fViewer == null ? 0 : fViewer.hashCode() << 3) | fOffset;
 	}
-
-	private boolean inUIThread() {
-		return Display.getCurrent() != null;
-	}
-
-	/**
-	 * Return the current known selection for the viewer, usable in non-UI Thread.
-	 * @return the text selection if running in UI-Thread or viewer implements {@link ITextViewerExtension9},
-	 *         or <code>null</code> in other cases.
-	 * @since 3.20
-	 */
-	public ITextSelection getTextSelection() {
-		ITextViewer viewer = getViewer();
-		if (inUIThread()) {
-			return (ITextSelection) getViewer().getSelectionProvider().getSelection();
-		}
-		if (viewer instanceof ITextViewerExtension9) {
-			return ((ITextViewerExtension9) viewer).getLastKnownSelection();
-		}
-		return null;
-	}
-
-
 }

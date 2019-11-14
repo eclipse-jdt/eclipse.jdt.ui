@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -16,13 +16,12 @@ package org.eclipse.jdt.internal.ui.text.java;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
-import java.util.function.Consumer;
 
-import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -31,7 +30,7 @@ import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationExtension;
@@ -113,11 +112,10 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 		 */
 		@Override
 		public boolean equals(Object object) {
-			if (object instanceof ContextInformationWrapper) {
+			if (object instanceof ContextInformationWrapper)
 				return fContextInformation.equals(((ContextInformationWrapper) object).fContextInformation);
-			} else {
+			else
 				return fContextInformation.equals(object);
-			}
 		}
 
 		/*
@@ -155,15 +153,13 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 		int pos= contextPosition - 1;
 		do {
 			int paren= scanner.findOpeningPeer(pos, bound, '(', ')');
-			if (paren == JavaHeuristicScanner.NOT_FOUND) {
+			if (paren == JavaHeuristicScanner.NOT_FOUND)
 				break;
-			}
 			int token= scanner.previousToken(paren - 1, bound);
 			// next token must be a method name (identifier) or the closing angle of a
 			// constructor call of a parameterized type.
-			if (token == Symbols.TokenIDENT || token == Symbols.TokenGREATERTHAN) {
+			if (token == Symbols.TokenIDENT || token == Symbols.TokenGREATERTHAN)
 				return paren + 1;
-			}
 			pos= paren - 1;
 		} while (true);
 
@@ -175,22 +171,21 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 		List<IContextInformation> result= new ArrayList<>(proposals.size());
 		List<IContextInformation> anonymousResult= new ArrayList<>(proposals.size());
 
-		for (ICompletionProposal proposal : proposals) {
+		for (Iterator<ICompletionProposal> it= proposals.iterator(); it.hasNext();) {
+			ICompletionProposal proposal= it.next();
 			IContextInformation contextInformation= proposal.getContextInformation();
 			if (contextInformation != null) {
 				ContextInformationWrapper wrapper= new ContextInformationWrapper(contextInformation);
 				wrapper.setContextInformationPosition(offset);
-				if (proposal instanceof AnonymousTypeCompletionProposal) {
+				if (proposal instanceof AnonymousTypeCompletionProposal)
 					anonymousResult.add(wrapper);
-				} else {
+				else
 					result.add(wrapper);
-				}
 			}
 		}
 
-		if (result.size() == 0) {
+		if (result.size() == 0)
 			return anonymousResult;
-		}
 		return result;
 
 	}
@@ -224,9 +219,10 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 
 	private List<ICompletionProposal> internalComputeCompletionProposals(int offset, JavaContentAssistInvocationContext context) {
 		ICompilationUnit unit= context.getCompilationUnit();
-		if (unit == null) {
+		if (unit == null)
 			return Collections.emptyList();
-		}
+
+		ITextViewer viewer= context.getViewer();
 
 		CompletionProposalCollector collector= createCollector(context);
 		collector.setInvocationContext(context);
@@ -251,31 +247,20 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 		collector.setFavoriteReferences(getFavoriteStaticMembers());
 
 		try {
-			ITextSelection selection= context.getTextSelection();
-			if (selection != null && selection.getLength() > 0) {
-				collector.setReplacementLength(selection.getLength());
-			}
+			Point selection= viewer.getSelectedRange();
+			if (selection.y > 0)
+				collector.setReplacementLength(selection.y);
 			unit.codeComplete(offset, collector, fTimeoutProgressMonitor);
 		} catch (OperationCanceledException x) {
 			IBindingService bindingSvc= PlatformUI.getWorkbench().getAdapter(IBindingService.class);
 			String keyBinding= bindingSvc.getBestActiveBindingFormattedFor(IWorkbenchCommandConstants.EDIT_CONTENT_ASSIST);
 			fErrorMessage= Messages.format(JavaTextMessages.CompletionProcessor_error_javaCompletion_took_too_long_message, keyBinding);
 		} catch (JavaModelException x) {
-			final StyledText widget = context.getViewer().getTextWidget();
-			Consumer<Control> popup = control -> {
-				if (x.isDoesNotExist() && !unit.getJavaProject().isOnClasspath(unit)) {
-					MessageDialog.openInformation(control.getShell(), JavaTextMessages.CompletionProcessor_error_notOnBuildPath_title, JavaTextMessages.CompletionProcessor_error_notOnBuildPath_message);
-				} else {
-					ErrorDialog.openError(control.getShell(), JavaTextMessages.CompletionProcessor_error_accessing_title, JavaTextMessages.CompletionProcessor_error_accessing_message, x.getStatus());
-				}
-			};
-			if (Display.getCurrent() == null && Display.getDefault() != null) {
-				Display.getDefault().asyncExec(() -> {
-					popup.accept(widget);
-				});
-			} else {
-				popup.accept(widget);
-			}
+			Shell shell= viewer.getTextWidget().getShell();
+			if (x.isDoesNotExist() && !unit.getJavaProject().isOnClasspath(unit))
+				MessageDialog.openInformation(shell, JavaTextMessages.CompletionProcessor_error_notOnBuildPath_title, JavaTextMessages.CompletionProcessor_error_notOnBuildPath_message);
+			else
+				ErrorDialog.openError(shell, JavaTextMessages.CompletionProcessor_error_accessing_title, JavaTextMessages.CompletionProcessor_error_accessing_message, x.getStatus());
 		}
 
 		ICompletionProposal[] javaProposals= collector.getJavaCompletionProposals();
@@ -292,16 +277,15 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 		List<ICompletionProposal> proposals= new ArrayList<>(Arrays.asList(javaProposals));
 		if (proposals.size() == 0) {
 			String error= collector.getErrorMessage();
-			if (error.length() > 0) {
+			if (error.length() > 0)
 				fErrorMessage= error;
-			}
 		}
 		return proposals;
 	}
 
 	/**
 	 * Returns a new progress monitor that get cancelled after the given timeout.
-	 *
+	 * 
 	 * @param timeout the timeout in ms
 	 * @return the progress monitor
 	 * @since 3.5
@@ -310,7 +294,7 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 		return new IProgressMonitor() {
 
 			private long fEndTime;
-
+			
 			@Override
 			public void beginTask(String name, int totalWork) {
 				fEndTime= System.currentTimeMillis() + timeout;
@@ -342,16 +326,15 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 
 	/**
 	 * Returns the array with favorite static members.
-	 *
+	 * 
 	 * @return the <code>String</code> array with with favorite static members
 	 * @see CompletionRequestor#setFavoriteReferences(String[])
 	 * @since 3.3
 	 */
 	private String[] getFavoriteStaticMembers() {
 		String serializedFavorites= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS);
-		if (serializedFavorites != null && serializedFavorites.length() > 0) {
+		if (serializedFavorites != null && serializedFavorites.length() > 0)
 			return serializedFavorites.split(";"); //$NON-NLS-1$
-		}
 		return new String[0];
 	}
 
@@ -362,11 +345,10 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 	 * @return the collector
 	 */
 	protected CompletionProposalCollector createCollector(JavaContentAssistInvocationContext context) {
-		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES)) {
+		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES))
 			return new FillArgumentNamesCompletionProposalCollector(context);
-		} else {
+		else
 			return new CompletionProposalCollector(context.getCompilationUnit(), true);
-		}
 	}
 
 	/*

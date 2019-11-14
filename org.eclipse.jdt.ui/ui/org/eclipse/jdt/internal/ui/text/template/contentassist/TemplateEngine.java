@@ -104,24 +104,23 @@ public class TemplateEngine {
 	 * Inspects the context of the compilation unit around <code>completionPosition</code>
 	 * and feeds the collector with proposals.
 	 * @param viewer the text viewer
-	 * @param selectedRange the selected range
 	 * @param completionPosition the context position in the document of the text viewer
 	 * @param compilationUnit the compilation unit (may be <code>null</code>)
 	 */
-	public void complete(ITextViewer viewer, Point selectedRange, int completionPosition, ICompilationUnit compilationUnit) {
+	public void complete(ITextViewer viewer, int completionPosition, ICompilationUnit compilationUnit) {
 	    IDocument document= viewer.getDocument();
 
-		if (!(fContextType instanceof CompilationUnitContextType)) {
+		if (!(fContextType instanceof CompilationUnitContextType))
 			return;
-		}
 
-		Position position= new Position(completionPosition, selectedRange.y);
+		Point selection= viewer.getSelectedRange();
+		Position position= new Position(completionPosition, selection.y);
 
 		// remember selected text
 		String selectedText= null;
-		if (selectedRange.y != 0) {
+		if (selection.y != 0) {
 			try {
-				selectedText= document.get(selectedRange.x, selectedRange.y);
+				selectedText= document.get(selection.x, selection.y);
 				document.addPosition(position);
 				fPositions.put(document, position);
 			} catch (BadLocationException e) {}
@@ -135,7 +134,7 @@ public class TemplateEngine {
 
 		Template[] templates= JavaPlugin.getDefault().getTemplateStore().getTemplates();
 		boolean needsCheck= !isJava12OrHigherProject(compilationUnit);
-		if (selectedRange.y == 0) {
+		if (selection.y == 0) {
 			for (int i= 0; i != templates.length; i++) {
 				Template template= templates[i];
 				if (canEvaluate(context, template, needsCheck)) {
@@ -144,11 +143,10 @@ public class TemplateEngine {
 			}
 		} else {
 
-			if (context.getKey().length() == 0) {
+			if (context.getKey().length() == 0)
 				context.setForceEvaluation(true);
-			}
 
-			boolean multipleLinesSelected= areMultipleLinesSelected(document, selectedRange);
+			boolean multipleLinesSelected= areMultipleLinesSelected(viewer);
 
 			for (int i= 0; i != templates.length; i++) {
 				Template template= templates[i];
@@ -173,11 +171,10 @@ public class TemplateEngine {
 	}
 
 	protected Image getImage() {
-		if (fContextType instanceof SWTContextType) {
+		if (fContextType instanceof SWTContextType)
 			return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_SWT_TEMPLATE);
-		} else {
+		else
 			return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE);
-		}
 	}
 
 	private boolean isJava12OrHigherProject(ICompilationUnit compUnit) {
@@ -213,24 +210,25 @@ public class TemplateEngine {
 	 * Being completely selected means that all characters except the new line characters are
 	 * selected.
 	 *
-	 * @param document the document
-	 * @param selectedRange the range
+	 * @param viewer the text viewer
 	 * @return <code>true</code> if one or multiple lines are selected
+	 * @since 2.1
 	 */
-	private boolean areMultipleLinesSelected(IDocument document, Point selectedRange) {
-		if (document == null || selectedRange == null) {
+	private boolean areMultipleLinesSelected(ITextViewer viewer) {
+		if (viewer == null)
 			return false;
-		}
 
-		if (selectedRange.y == 0) {
+		Point s= viewer.getSelectedRange();
+		if (s.y == 0)
 			return false;
-		}
 
 		try {
-			int startLine= document.getLineOfOffset(selectedRange.x);
-			int endLine= document.getLineOfOffset(selectedRange.x + selectedRange.y);
+
+			IDocument document= viewer.getDocument();
+			int startLine= document.getLineOfOffset(s.x);
+			int endLine= document.getLineOfOffset(s.x + s.y);
 			IRegion line= document.getLineInformation(startLine);
-			return startLine != endLine || (selectedRange.x == line.getOffset() && selectedRange.y == line.getLength());
+			return startLine != endLine || (s.x == line.getOffset() && s.y == line.getLength());
 
 		} catch (BadLocationException x) {
 			return false;

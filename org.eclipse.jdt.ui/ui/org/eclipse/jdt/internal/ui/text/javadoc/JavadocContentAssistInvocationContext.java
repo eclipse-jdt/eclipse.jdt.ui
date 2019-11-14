@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2019 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,7 +13,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.javadoc;
 
-import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITextViewer;
 
 import org.eclipse.ui.IEditorPart;
@@ -56,11 +55,7 @@ public final class JavadocContentAssistInvocationContext extends JavaContentAssi
 	 * @return the selection length of the viewer
 	 */
 	public int getSelectionLength() {
-		ITextSelection selection = getTextSelection();
-		if (selection != null) {
-			return selection.getLength();
-		}
-		return 0;
+		return getViewer().getSelectedRange().y;
 	}
 
 	/*
@@ -68,9 +63,8 @@ public final class JavadocContentAssistInvocationContext extends JavaContentAssi
 	 */
 	@Override
 	public boolean equals(Object obj) {
-		if (!super.equals(obj)) {
+		if (!super.equals(obj))
 			return false;
-		}
 
 		return fFlags == ((JavadocContentAssistInvocationContext) obj).fFlags;
 	}

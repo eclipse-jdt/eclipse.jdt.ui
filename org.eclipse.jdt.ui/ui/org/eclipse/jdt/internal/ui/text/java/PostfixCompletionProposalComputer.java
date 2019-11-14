@@ -15,15 +15,6 @@ package org.eclipse.jdt.internal.ui.text.java;
 
 import org.eclipse.core.runtime.Assert;
 
-import org.eclipse.text.templates.ContextTypeRegistry;
-
-import org.eclipse.jface.preference.IPreferenceStore;
-
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.ITextSelection;
-import org.eclipse.jface.text.templates.TemplateContextType;
-
 import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -47,13 +38,22 @@ import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.template.java.JavaPostfixContextType;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.java.AbstractTemplateCompletionProposalComputer;
+import org.eclipse.jdt.internal.ui.text.template.contentassist.PostfixTemplateEngine;
+import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateEngine;
+
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.template.contentassist.PostfixTemplateEngine;
-import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateEngine;
+import org.eclipse.jface.preference.IPreferenceStore;
+
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.templates.TemplateContextType;
+
+import org.eclipse.text.templates.ContextTypeRegistry;
 
 /**
  * Computer that computes the template proposals for the Java postfix type.
@@ -76,17 +76,14 @@ public class PostfixCompletionProposalComputer extends AbstractTemplateCompletio
 	@Override
 	protected TemplateEngine computeCompletionEngine(JavaContentAssistInvocationContext context) {
 		ICompilationUnit unit= context.getCompilationUnit();
-		if (unit == null) {
+		if (unit == null)
 			return null;
-		}
 
 		IJavaProject javaProject= unit.getJavaProject();
-		if (javaProject == null) {
+		if (javaProject == null)
 			return null;
-		}
 
-		ITextSelection textSelection= context.getTextSelection();
-		if (textSelection != null && textSelection.getLength() > 0) {
+		if (context.getViewer().getSelectedRange().y > 0) {
 			// If there is an active selection we must not contribute to the CA
 			return null;
 		}
@@ -214,7 +211,7 @@ public class PostfixCompletionProposalComputer extends AbstractTemplateCompletio
 	 * <code>("two" + 2).var$</code> has <code>"two"</code> as completion {@link ASTNode}. The
 	 * parent node is <code>"two" + 2</code> which will result in a syntactically incorrect result,
 	 * if the template is applied, because the parentheses aren't taken into account.
-	 *
+	 * 
 	 * @param node The current {@link ASTNode}
 	 * @return {@link ASTNode} which either is the parent of the given node or another predecessor
 	 *         {@link ASTNode} in the abstract syntax tree.
@@ -242,7 +239,7 @@ public class PostfixCompletionProposalComputer extends AbstractTemplateCompletio
 
 	/**
 	 * Returns true if the given offset is directly after an assist trigger character.
-	 *
+	 * 
 	 * @param document the actual document of type {@link IDocument}
 	 * @param offset the current location in the document
 	 * @return <code>true</code> if the given offset is directly after an assist trigger character,
