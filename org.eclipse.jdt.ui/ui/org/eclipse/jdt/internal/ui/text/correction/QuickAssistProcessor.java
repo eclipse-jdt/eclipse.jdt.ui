@@ -29,6 +29,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.swt.graphics.Image;
 
@@ -140,6 +141,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
+import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2Core;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
@@ -251,6 +253,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				|| getAddElseProposals(context, coveringNode, null)
 				|| getSplitVariableProposals(context, coveringNode, null)
 				|| getAddBlockProposals(context, coveringNode, null)
+				|| getTryWithResourceProposals(context, coveringNode, null, null)
 				|| getArrayInitializerToArrayCreation(context, coveringNode, null)
 				|| getCreateInSuperClassProposals(context, coveringNode, null)
 				|| getInvertEqualsProposal(context, coveringNode, null)
@@ -311,6 +314,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getPickoutTypeFromMulticatchProposals(context, coveringNode, coveredNodes, resultingCollections);
 				getConvertToMultiCatchProposals(context, coveringNode, resultingCollections);
 				getUnrollMultiCatchProposals(context, coveringNode, resultingCollections);
+				getTryWithResourceProposals(context, coveringNode, coveredNodes, resultingCollections);
 				getUnWrapProposals(context, coveringNode, resultingCollections);
 				getJoinVariableProposals(context, coveringNode, resultingCollections);
 				getSplitVariableProposals(context, coveringNode, resultingCollections);
@@ -3141,6 +3145,284 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return true;
 		}
 		return false;
+	}
+
+	private static boolean getTryWithResourceProposals(IInvocationContext context, ASTNode node, ArrayList<ASTNode> coveredNodes, Collection<ICommandAccess> resultingCollections)
+			throws IllegalArgumentException, JavaModelException {
+
+		ASTNode parentStatement= ASTResolving.findAncestor(node, ASTNode.VARIABLE_DECLARATION_STATEMENT);
+		if (!(parentStatement instanceof VariableDeclarationStatement) &&
+				!(parentStatement instanceof ExpressionStatement) &&
+				!(node instanceof SimpleName)
+				&& (coveredNodes == null || coveredNodes.isEmpty())) {
+			return false;
+		}
+		List<ASTNode> coveredStatements= new ArrayList<>();
+		if (coveredNodes == null || coveredNodes.isEmpty() && parentStatement != null) {
+			coveredStatements.add(parentStatement);
+		} else {
+			for (ASTNode coveredNode : coveredNodes) {
+				Statement statement= ASTResolving.findParentStatement(coveredNode);
+				if (statement == null) {
+					continue;
+				}
+				if (!coveredStatements.contains(statement)) {
+					coveredStatements.add(statement);
+				}
+			}
+		}
+		List<ASTNode> coveredAutoClosableNodes= getCoveredAutoClosableNodes(coveredStatements);
+		if (coveredAutoClosableNodes.isEmpty()) {
+			return false;
+		}
+		if (isParentTryStatement(coveredAutoClosableNodes.get(0))) {
+			return false;
+		}
+		BodyDeclaration parentBodyDeclaration= ASTResolving.findParentBodyDeclaration(node);
+		int start= coveredAutoClosableNodes.get(0).getStartPosition();
+		int end= start;
+
+		for (ASTNode astNode : coveredAutoClosableNodes) {
+			int endPosition= findEndPostion(astNode);
+			end= Math.max(end, endPosition);
+		}
+
+		// recursive loop to find all nodes affected by wrapping in try block
+		List<ASTNode> nodesInRange= findNodesInRange(parentBodyDeclaration, start, end);
+		int oldEnd= end;
+		while (true) {
+			int newEnd= oldEnd;
+			for (ASTNode astNode : nodesInRange) {
+				int endPosition= findEndPostion(astNode);
+				newEnd= Math.max(newEnd, endPosition);
+			}
+			if (newEnd > oldEnd) {
+				oldEnd= newEnd;
+				nodesInRange= findNodesInRange(parentBodyDeclaration, start, newEnd);
+				continue;
+			}
+			break;
+		}
+		nodesInRange.removeAll(coveredAutoClosableNodes);
+
+		CompilationUnit cu= (CompilationUnit) node.getRoot();
+		IBuffer buffer= context.getCompilationUnit().getBuffer();
+		AST ast= node.getAST();
+		ASTRewrite rewrite= ASTRewrite.create(ast);
+		TryStatement newTryStatement= ast.newTryStatement();
+		Block newTryBody= ast.newBlock();
+		newTryStatement.setBody(newTryBody);
+		for (ASTNode coveredNode : coveredAutoClosableNodes) {
+			ASTNode findAncestor= ASTResolving.findAncestor(coveredNode, ASTNode.VARIABLE_DECLARATION_STATEMENT);
+			if (findAncestor == null) {
+				findAncestor= ASTResolving.findAncestor(coveredNode, ASTNode.ASSIGNMENT);
+			}
+			if (findAncestor instanceof VariableDeclarationStatement) {
+				VariableDeclarationStatement vds= (VariableDeclarationStatement) findAncestor;
+				String commentToken= null;
+				int extendedStatementStart= cu.getExtendedStartPosition(vds);
+				if(vds.getStartPosition() > extendedStatementStart) {
+					commentToken= buffer.getText(extendedStatementStart, vds.getStartPosition() - extendedStatementStart);
+				}
+				Type type= vds.getType();
+				String typeName= buffer.getText(type.getStartPosition(), type.getLength());
+
+				for (Object object : vds.fragments()) {
+					VariableDeclarationFragment variableDeclarationFragment= (VariableDeclarationFragment) object;
+					VariableDeclarationFragment newVariableDeclarationFragment= ast.newVariableDeclarationFragment();
+					SimpleName name= variableDeclarationFragment.getName();
+
+					if(commentToken == null) {
+						int extendedStart= cu.getExtendedStartPosition(variableDeclarationFragment);
+						commentToken= buffer.getText(extendedStart, variableDeclarationFragment.getStartPosition() - extendedStart);
+					}
+					commentToken= Strings.trimTrailingTabsAndSpaces(commentToken);
+
+					newVariableDeclarationFragment.setName(ast.newSimpleName(name.getIdentifier()));
+					Expression newExpression= null;
+					Expression initializer= variableDeclarationFragment.getInitializer();
+					if (initializer == null) {
+						rewrite.remove(coveredNode, null);
+						continue;
+					} else {
+						newExpression= (Expression) rewrite.createMoveTarget(initializer);
+					}
+					newVariableDeclarationFragment.setInitializer(newExpression);
+					VariableDeclarationExpression newVariableDeclarationExpression= ast.newVariableDeclarationExpression(newVariableDeclarationFragment);
+					newVariableDeclarationExpression.setType(
+							(Type) rewrite.createStringPlaceholder(commentToken + typeName, type.getNodeType()));
+					newTryStatement.resources().add(newVariableDeclarationExpression);
+					commentToken= null;
+				}
+			}
+		}
+
+		if (newTryStatement.resources().isEmpty()) {
+			return false;
+		}
+
+		if (!nodesInRange.isEmpty()) {
+			ASTNode firstNode= nodesInRange.get(0);
+			MethodDeclaration methodDeclaration= ASTResolving.findParentMethodDeclaration(firstNode);
+			ListRewrite listRewrite= rewrite.getListRewrite(methodDeclaration.getBody(), Block.STATEMENTS_PROPERTY);
+			ASTNode createCopyTarget= listRewrite.createMoveTarget(firstNode, nodesInRange.get(nodesInRange.size() - 1));
+			rewrite.getListRewrite(newTryBody, Block.STATEMENTS_PROPERTY).insertFirst(createCopyTarget, null);
+		}
+
+		// replace first node and delete the rest of selected nodes
+		rewrite.replace(coveredAutoClosableNodes.get(0), newTryStatement, null);
+		for (int i= 1; i < coveredAutoClosableNodes.size(); i++) {
+			rewrite.remove(coveredAutoClosableNodes.get(i), null);
+		}
+
+		String label= CorrectionMessages.QuickAssistProcessor_convert_to_try_with_resource;
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(
+				label, context.getCompilationUnit(), rewrite, IProposalRelevance.SURROUND_WITH_TRY_CATCH, image);
+		resultingCollections.add(proposal);
+		return true;
+	}
+
+	private static boolean isParentTryStatement(ASTNode astNode) {
+		while (astNode != null) {
+			if (astNode instanceof TryStatement) {
+				return true;
+			}
+			astNode= astNode.getParent();
+		}
+		return false;
+	}
+
+	private static int findEndPostion(ASTNode node) {
+		int end= node.getStartPosition() + node.getLength();
+		Map<SimpleName, IVariableBinding> nodeSimpleNameBindings= getVariableStatementBinding(node);
+		List<SimpleName> nodeNames= new ArrayList<>(nodeSimpleNameBindings.keySet());
+		if (nodeNames.isEmpty()) {
+			return -1;
+		}
+		SimpleName nodeSimpleName= nodeNames.get(0);
+		SimpleName[] coveredNodeBindings= LinkedNodeFinder.findByNode(node.getRoot(), nodeSimpleName);
+		if (coveredNodeBindings.length == 0) {
+			return -1;
+		}
+		for (ASTNode astNode : coveredNodeBindings) {
+			end= Math.max(end, (astNode.getStartPosition() + astNode.getLength()));
+		}
+		return end;
+	}
+
+	/**
+	 * Return the first auto closable nodes. When a node that isn't Autoclosable is found the method
+	 * returns.
+	 * 
+	 * @param astNodes The nodes covered.
+	 * @return List of the first AutoClosable nodes found
+	 */
+	private static List<ASTNode> getCoveredAutoClosableNodes(List<ASTNode> astNodes) {
+		List<ASTNode> autoClosableNodes= new ArrayList<>();
+		for (ASTNode astNode : astNodes) {
+			if (isAutoClosable(astNode)) {
+				autoClosableNodes.add(astNode);
+			} else {
+				return autoClosableNodes;
+			}
+		}
+		return autoClosableNodes;
+	}
+
+	private static boolean isAutoClosable(ASTNode astNode) {
+		Map<SimpleName, IVariableBinding> simpleNames= getVariableStatementBinding(astNode);
+		for (Entry<SimpleName, IVariableBinding> entry : simpleNames.entrySet()) {
+			ITypeBinding typeBinding= null;
+			switch (entry.getKey().getParent().getNodeType()) {
+				case ASTNode.VARIABLE_DECLARATION_FRAGMENT:
+				case ASTNode.VARIABLE_DECLARATION_STATEMENT:
+				case ASTNode.ASSIGNMENT:
+					typeBinding= entry.getValue().getType();
+					break;
+				default:
+					continue;
+			}
+			if (typeBinding == null) {
+				continue;
+			}
+			for (ITypeBinding superType : Bindings.getAllSuperTypes(typeBinding)) {
+				if (superType.getQualifiedName().equals("java.lang.AutoCloseable")) { //$NON-NLS-1$
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	private static Map<SimpleName, IVariableBinding> getVariableStatementBinding(ASTNode astNode) {
+		Map<SimpleName, IVariableBinding> variableBindings= new HashMap<>();
+		astNode.accept(new ASTVisitor() {
+			@Override
+			public boolean visit(VariableDeclarationStatement node) {
+				for (Object o : node.fragments()) {
+					if (o instanceof VariableDeclarationFragment) {
+						VariableDeclarationFragment vdf= (VariableDeclarationFragment) o;
+						SimpleName name= vdf.getName();
+						IBinding binding= name.resolveBinding();
+						if (binding instanceof IVariableBinding) {
+							variableBindings.put(name, (IVariableBinding) binding);
+							break;
+						}
+					}
+				}
+				return false;
+			}
+		});
+		return variableBindings;
+	}
+
+	// find all nodes (statements) that are within the start/end positions
+	private static List<ASTNode> findNodesInRange(ASTNode astNode, final int start, final int end) {
+		List<ASTNode> nodesInRange= new ArrayList<>();
+		astNode.accept(new ASTVisitor() {
+			int pre= start;
+
+			@Override
+			public void preVisit(ASTNode preNode) {
+				pre= preNode.getStartPosition();
+				super.preVisit(preNode);
+			}
+
+			@Override
+			public void postVisit(ASTNode postNode) {
+				int post= postNode.getStartPosition() + postNode.getLength();
+				if (pre >= start && post <= end) {
+					Statement statement= ASTResolving.findParentStatement(postNode);
+					loop: while (statement != null) {
+						if (statement.getParent() instanceof Statement) {
+							Statement pStatement= (Statement) statement.getParent();
+							switch (pStatement.getNodeType()) {
+								case ASTNode.BLOCK:
+									if (pStatement.getParent().getNodeType() != ASTNode.METHOD_DECLARATION) {
+										statement= pStatement;
+										continue;
+									} else {
+										break loop;
+									}
+								case ASTNode.METHOD_DECLARATION:
+									break loop;
+								default:
+									break;
+							}
+							statement= pStatement;
+						} else {
+							break;
+						}
+					}
+					if (statement != null && !nodesInRange.contains(statement)) {
+						nodesInRange.add(statement);
+					}
+				}
+				super.postVisit(postNode);
+			}
+		});
+		return nodesInRange;
 	}
 
 	private static boolean getAddBlockProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
