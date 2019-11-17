@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -169,10 +169,12 @@ public class ChkpiiTests extends TestCase {
 				out.terminate();
 		}
 
- 		if (err.getContents().length() > 0 || !new File(type.getOutputFile()).exists()) {
-			System.out.println(err.getContents());
-			System.out.flush();
-			return false;
+		if (err != null) {
+			if (err.getContents().length() > 0 || !new File(type.getOutputFile()).exists()) {
+				System.out.println(err.getContents());
+				System.out.flush();
+				return false;
+			}
 		}
  		int res= process.exitValue();
  		System.out.println("ChkpiiTests#" + getName() + "() exit value: " + res);
@@ -239,7 +241,7 @@ public class ChkpiiTests extends TestCase {
 	 * @return String
 	 */
 	private String getExec() {
-		return new File("chkpii.exe").getPath(); //$NON-NLS-1$
+		return new File("C:\\Program Files (x86)\\IBM\\CHKPII\\chkpii.exe").getPath(); //$NON-NLS-1$
 	}
 
 	private String getExcludeErrors() {
@@ -263,12 +265,11 @@ public class ChkpiiTests extends TestCase {
 	 */
 	private boolean checkLogFile(FileCategory type, StringBuffer message) {
 		String logFilePath= type.getOutputFile();
-		BufferedReader aReader= null;
 		int errors= -1, warnings= -1, notProcessed= -1, endOfSummary= -1;
 		boolean hasFailed= false;
 
-		try {
-			aReader= new BufferedReader(new InputStreamReader(new FileInputStream(logFilePath), Charset.forName("ISO-8859-1")));
+		try (BufferedReader aReader= new BufferedReader(new InputStreamReader(new FileInputStream(logFilePath), Charset.forName("ISO-8859-1")));) {
+
 			String aLine= aReader.readLine();
 			while (aLine != null) {
 				if (errors == -1)
@@ -308,15 +309,6 @@ public class ChkpiiTests extends TestCase {
 		} catch (IOException e) {
 			message.append("Error reading log file: " + logFilePath + "\n" + e.getLocalizedMessage() + "\n"); //$NON-NLS-1$
 			hasFailed= true;
-		} finally {
-			if (aReader != null) {
-				try {
-					aReader.close();
-				} catch (IOException e) {
-					message.append("Error closing log file: " + logFilePath + "\n" + e.getLocalizedMessage() + "\n"); //$NON-NLS-1$
-					hasFailed= true;
-				}
-			}
 		}
 
 		return !hasFailed;
