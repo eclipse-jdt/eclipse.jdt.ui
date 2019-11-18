@@ -14,6 +14,7 @@
 package org.eclipse.jdt.internal.ui.javaeditor;
 
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 
@@ -138,6 +139,10 @@ public class JavaAnnotationImageProvider implements IAnnotationImageProvider {
 	private Image getImage(IJavaAnnotation annotation, int imageType) {
 		if ((imageType == QUICKFIX_WARNING_IMAGE || imageType == QUICKFIX_ERROR_IMAGE || imageType == QUICKFIX_INFO_IMAGE) && fCachedImageType == imageType)
 			return fCachedImage;
+
+		if (Display.getCurrent() == null) {
+			return null;
+		}
 
 		Image image= null;
 		switch (imageType) {
