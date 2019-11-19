@@ -19,6 +19,7 @@ package org.eclipse.jdt.ui.tests.quickfix;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -427,7 +428,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		pack1.createCompilationUnit("C.java", buf.toString(), false, null);
-		
+
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
 		buf= new StringBuffer();
 		buf.append("package test2;\n");
@@ -435,15 +436,15 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("    Object o= new Inner();\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack2.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
-		
+
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class C {\n");
@@ -455,7 +456,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
-	
+
 	public void testInvisibleConstructorRequestedInSuperType() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -948,27 +949,27 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CompilationUnit astRoot= getASTRoot(cu);
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOfProblems(2, problems);
-		
+
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, problems[0], null);
-		
+
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public abstract class E {\n");
 		buf.append("    public abstract int foo();\n");
 		buf.append("}\n");
 		String expectedMakeClassAbstract= buf.toString();
-		
+
 		assertEquals(preview1, expectedMakeClassAbstract);
-		
-		
+
+
 		proposals= collectCorrections(cu, problems[1], null);
-		
+
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -2259,7 +2260,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testInvalidMultiVariableModifiers() throws Exception {
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2271,15 +2272,15 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
-		
+
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E  {\n");
@@ -2293,9 +2294,9 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
-	
+
 	public void testInvalidMultiFieldModifiers() throws Exception {
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2307,15 +2308,15 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
-		
+
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E  {\n");
@@ -2328,9 +2329,9 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
-	
+
 	public void testInvalidMultiFieldModifiers2() throws Exception {
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2342,15 +2343,15 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
-		
+
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E  {\n");
@@ -2363,7 +2364,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
-	
+
 	public void testExtendsFinalClass() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 
@@ -2988,7 +2989,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 6);
 		String[] expected= new String[3];
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1; \n");
 		buf.append("import java.util.*;\n");
@@ -3027,7 +3028,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("    };\n");
 		buf.append("};\n");
 		expected[1]= buf.toString();
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1; \n");
 		buf.append("import java.util.*;\n");
@@ -3139,7 +3140,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		expected[1]= buf.toString();
-		
+
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
@@ -3968,7 +3969,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		hashtable.put(JavaCore.COMPILER_PB_MISSING_STATIC_ON_METHOD, JavaCore.ERROR);
 		hashtable.put(JavaCore.COMPILER_PB_POTENTIALLY_MISSING_STATIC_ON_METHOD, JavaCore.WARNING);
 		JavaCore.setOptions(hashtable);
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -3996,13 +3997,13 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
-	
+
 	public void testMethodCanPotentiallyBeStatic() throws Exception {
 		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_MISSING_STATIC_ON_METHOD, JavaCore.ERROR);
 		hashtable.put(JavaCore.COMPILER_PB_POTENTIALLY_MISSING_STATIC_ON_METHOD, JavaCore.WARNING);
 		JavaCore.setOptions(hashtable);
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -4012,12 +4013,12 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
-		
+
 		String[] expected= new String[2];
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -4037,7 +4038,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		expected[1]= buf.toString();
-		
+
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
@@ -4045,7 +4046,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 	/**
 	 * Quick Fix proposes wrong visibility for overriding/overridden method.
 	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=216898
-	 * 
+	 *
 	 * @throws Exception if anything goes wrong
 	 * @since 3.9
 	 */
@@ -4091,7 +4092,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 	/**
 	 * Quick Fix proposes wrong visibility for overriding/overridden method.
 	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=216898#c1
-	 * 
+	 *
 	 * @throws Exception if anything goes wrong
 	 * @since 3.9
 	 */
@@ -4126,9 +4127,177 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	/**
+	 * Quick Fix proposes a visibility for method overriding/overridden from one interface.
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=551383
+	 *
+	 * @throws Exception if anything goes wrong
+	 * @since 4.15
+	 */
+	public void testProposesVisibilityFromOneInterfaceMethod() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
+
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public interface Interface1 {\n" //
+				+ "  String getName();\n" //
+				+ "}\n";
+		pack1.createCompilationUnit("Interface1.java", sample, false, null);
+
+		sample= "" //
+				+ "package test2;\n" //
+				+ "\n" //
+				+ "public class AbsImpl implements test1.Interface1 {\n" //
+				+ "  String getName() {\n" //
+				+ "    return \"name\";\n" //
+				+ "  }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack2.createCompilationUnit("AbsImpl.java", sample, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		List<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 2);
+	}
+
+	/**
+	 * Quick Fix does not propose a visibility for method overriding/overridden from conflicting
+	 * interfaces. https://bugs.eclipse.org/bugs/show_bug.cgi?id=551383
+	 *
+	 * @throws Exception if anything goes wrong
+	 * @since 4.15
+	 */
+	public void testDoNotProposeVisibilityFromDifferentInterfaceMethods() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+
+		String sample= "" //
+				+ "package test;\n" //
+				+ "\n" //
+				+ "public interface Interface1 {\n" //
+				+ "  String getName();\n" //
+				+ "}\n";
+		pack.createCompilationUnit("Interface1.java", sample, false, null);
+
+		sample= "" //
+				+ "package test;\n" //
+				+ "\n" //
+				+ "protected interface Interface2 {\n" //
+				+ "  protected String getName();\n" //
+				+ "}\n";
+		pack.createCompilationUnit("Interface2.java", sample, false, null);
+
+		sample= "" //
+				+ "package test;\n" //
+				+ "\n" //
+				+ "public class AbsImpl implements Interface1, Interface2 {\n" //
+				+ "  String getName() {\n" //
+				+ "    return \"name\";\n" //
+				+ "  }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("AbsImpl.java", sample, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		List<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 1);
+	}
+
+	/**
+	 * Quick Fix does not propose a visibility for method overriding/overridden from conflicting
+	 * interfaces. https://bugs.eclipse.org/bugs/show_bug.cgi?id=551383
+	 *
+	 * @throws Exception if anything goes wrong
+	 * @since 4.15
+	 */
+	public void testProposeVisibilityFromIdenticalInterfaceMethods() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
+		IPackageFragment pack3= fSourceFolder.createPackageFragment("test3", false, null);
+
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public interface Interface1 {\n" //
+				+ "  String getName();\n" //
+				+ "}\n";
+		pack1.createCompilationUnit("Interface1.java", sample, false, null);
+
+		sample= "" //
+				+ "package test2;\n" //
+				+ "\n" //
+				+ "public interface Interface2 {\n" //
+				+ "  String getName();\n" //
+				+ "}\n";
+		pack2.createCompilationUnit("Interface2.java", sample, false, null);
+
+		sample= "" //
+				+ "package test3;\n" //
+				+ "\n" //
+				+ "public class AbsImpl implements test1.Interface1, test2.Interface2 {\n" //
+				+ "  String getName() {\n" //
+				+ "    return \"name\";\n" //
+				+ "  }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack3.createCompilationUnit("AbsImpl.java", sample, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		List<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 1);
+	}
+
+	/**
+	 * Quick Fix does not propose a visibility for method overriding/overridden from conflicting
+	 * interfaces. https://bugs.eclipse.org/bugs/show_bug.cgi?id=551383
+	 *
+	 * @throws Exception if anything goes wrong
+	 * @since 4.15
+	 */
+	public void testProposeVisibilityFromMotherInterfaceMethods() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
+		IPackageFragment pack3= fSourceFolder.createPackageFragment("test3", false, null);
+
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public interface Interface1 {\n" //
+				+ "  String getName();\n" //
+				+ "}\n";
+		pack1.createCompilationUnit("Interface1.java", sample, false, null);
+
+		sample= "" //
+				+ "package test2;\n" //
+				+ "\n" //
+				+ "public interface Interface2 extends test1.Interface1 {\n" //
+				+ "}\n";
+		pack2.createCompilationUnit("Interface2.java", sample, false, null);
+
+		sample= "" //
+				+ "package test3;\n" //
+				+ "\n" //
+				+ "public class AbsImpl implements test2.Interface2 {\n" //
+				+ "  String getName() {\n" //
+				+ "    return \"name\";\n" //
+				+ "  }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack3.createCompilationUnit("AbsImpl.java", sample, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		List<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 2);
+	}
+
+	/**
 	 * Quick Fix proposes wrong visibility for overriding/overridden method.
 	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=216898#c1
-	 * 
+	 *
 	 * @throws Exception if anything goes wrong
 	 * @since 3.9
 	 */
@@ -4173,11 +4342,11 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
-	
+
 	/**
 	 * Wrong visibility for overriding method in interface.
 	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=87239
-	 * 
+	 *
 	 * @throws Exception if anything goes wrong
 	 * @since 3.9
 	 */
@@ -4219,5 +4388,5 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
-	
+
 }

@@ -17,10 +17,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.swt.graphics.Image;
 
@@ -265,10 +268,34 @@ public class ModifierCorrectionSubProcessor {
 		}
 
 		IMethodBinding overriddenInClass= null;
+		List<ITypeBinding> motherClasses= new ArrayList<>();
 		while (overriddenInClass == null && curr.getSuperclass() != null) {
 			curr= curr.getSuperclass();
+			motherClasses.add(curr);
 			overriddenInClass= Bindings.findOverriddenMethodInType(curr, method);
 		}
+
+		if (overriddenInClass == null) {
+			motherClasses.add(0, method.getDeclaringClass());
+
+			Set<IMethodBinding> methodBindings= new HashSet<>();
+
+			for (ITypeBinding motherClass : motherClasses) {
+				findOverriddenMethodInType(motherClass, method, methodBindings);
+			}
+
+			if (!methodBindings.isEmpty()) {
+				overriddenInClass= methodBindings.iterator().next();
+
+				for (IMethodBinding methodBinding : methodBindings) {
+					if (!Bindings.equalDeclarations(overriddenInClass, methodBinding)) {
+						overriddenInClass= null;
+						break;
+					}
+				}
+			}
+		}
+
 		if (overriddenInClass != null) {
 			final IMethodBinding overriddenDecl= overriddenInClass.getMethodDeclaration();
 			final ICompilationUnit overriddenMethodCU= ASTResolving.findCompilationUnitForBinding(cu, context.getASTRoot(), overriddenDecl.getDeclaringClass());
@@ -332,6 +359,21 @@ public class ModifierCorrectionSubProcessor {
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 				proposals.add(new ModifierChangeCorrectionProposal(label, targetCU, targetMethod, selectedNode, includedModifiers, excludedModifiers, IProposalRelevance.CHANGE_OVERRIDDEN_MODIFIER_2, image));
 			}
+		}
+	}
+
+	private static void findOverriddenMethodInType(ITypeBinding currentType, IMethodBinding method, Set<IMethodBinding> methodBindings) {
+		ITypeBinding[] interfaces= currentType.getInterfaces();
+		IMethodBinding overriddenInInterface;
+
+		for (ITypeBinding interface0 : interfaces) {
+			overriddenInInterface= Bindings.findOverriddenMethodInType(interface0, method);
+
+			if (overriddenInInterface != null) {
+				methodBindings.add(overriddenInInterface);
+			}
+
+			findOverriddenMethodInType(interface0, method, methodBindings);
 		}
 	}
 
