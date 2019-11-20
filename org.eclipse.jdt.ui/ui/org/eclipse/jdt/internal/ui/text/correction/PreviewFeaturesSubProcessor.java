@@ -8,6 +8,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -219,7 +223,7 @@ public class PreviewFeaturesSubProcessor {
 	public static void getNeedHigherComplianceProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		String[] args= problem.getProblemArguments();
 		if (args != null && args.length > 0) {
-			String supportedVersion= JavaCore.VERSION_13;
+			String supportedVersion= JavaCore.latestSupportedJavaVersion();
 			String arg= args[1];
 			if (arg.equals(supportedVersion)) {
 				ReorgCorrectionsSubProcessor.getNeedHigherComplianceProposals(context, problem, proposals, true, supportedVersion);
@@ -239,7 +243,7 @@ public class PreviewFeaturesSubProcessor {
 
 	public static boolean isPreviewFeatureEnabled(IJavaProject javaProject) {
 		boolean isPreviewFeatureEnabled= false;
-		if (javaProject != null && JavaModelUtil.is13OrHigher(javaProject)) {
+		if (javaProject != null && JavaModelUtil.isLatestOrHigherJavaVersion(javaProject)) {
 			IProject project= javaProject.getProject();
 			Key[] keys= ComplianceConfigurationBlock.getKeys(true);
 			boolean hasProjectSpecificOptions= OptionsConfigurationBlock.hasProjectSpecificOptions(project, keys, null);
