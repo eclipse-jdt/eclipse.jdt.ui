@@ -532,6 +532,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		copyReturnType(astRewrite, getDeclaringType().getCompilationUnit(), methodToCreateStubFor, newMethod, mapping);
 		copyParameters(astRewrite, getDeclaringType().getCompilationUnit(), methodToCreateStubFor, newMethod, mapping);
 		copyThrownExceptions(methodToCreateStubFor, newMethod);
+		copyTypeParameters(methodToCreateStubFor, newMethod);
 		newMethod.setJavadoc(createJavadocForStub(typeToCreateStubIn.getName().getIdentifier(), methodToCreateStubFor, newMethod, newCu, astRewrite));
 		ImportRewrite importRewrite= rewriter.getImportRewrite();
 		ImportRewriteContext context= new ContextSensitiveImportRewriteContext(typeToCreateStubIn, importRewrite);

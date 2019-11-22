@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2016 IBM Corporation and others.
+ * Copyright (c) 2014, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -235,5 +235,37 @@ public class PullUpTests18 extends PullUpTests {
 		assertEqualLines("IFoo", getFileContents(getOutputTestFileName("IFoo")), cuIFoo.getSource());
 		assertEqualLines("FooImpl", getFileContents(getOutputTestFileName("FooImpl")), cuFooImpl.getSource());
 		assertEqualLines("Foo", getFileContents(getOutputTestFileName("Foo")), cuFoo.getSource());
+	}
+
+	// bug 552377
+	public void testGenerics16() throws Exception {
+		ICompilationUnit cuIGeneric= createCUfromTestFile(getPackageP(), "IGeneric");
+		ICompilationUnit cuMainImpl= createCUfromTestFile(getPackageP(), "MainImpl");
+		ICompilationUnit cuOtherImpl= createCUfromTestFile(getPackageP(), "OtherImpl");
+
+		String[] methodNames= { "genericMethod" };
+		String[][] signatures= { { "QString;" } };
+
+		IType typeIGeneric= getType(cuIGeneric, "IGeneric");
+		IType typeMainImpl= getType(cuMainImpl, "MainImpl");
+		IMethod[] methods= getMethods(typeMainImpl, methodNames, signatures);
+
+		PullUpRefactoringProcessor processor= createRefactoringProcessor(methods);
+		Refactoring ref= processor.getRefactoring();
+
+		assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
+		processor.setDestinationType(typeIGeneric);
+
+		processor.setDeletedMethods(getMethods(processor.getMatchingElements(new NullProgressMonitor(), false)));
+
+		RefactoringStatus result= performRefactoring(ref);
+
+		if (result != null && result.hasError()) {
+			fail("No errors should occur: " + result.getMessageMatchingSeverity(RefactoringStatus.ERROR));
+		}
+
+		assertEqualLines("IGeneric", getFileContents(getOutputTestFileName("IGeneric")), cuIGeneric.getSource());
+		assertEqualLines("MainImpl", getFileContents(getOutputTestFileName("MainImpl")), cuMainImpl.getSource());
+		assertEqualLines("OtherImpl", getFileContents(getOutputTestFileName("OtherImpl")), cuOtherImpl.getSource());
 	}
 }
