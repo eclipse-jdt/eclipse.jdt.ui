@@ -140,14 +140,21 @@ public class RedundantModifiersCleanUp extends AbstractMultiFix {
 			@Override
 			public boolean visit(MethodDeclaration node) {
 				TypeDeclaration typeDecl= ASTNodes.getParent(node, TypeDeclaration.class);
-				if (typeDecl != null && typeDecl.isInterface()) {
-					rewriteOperations.add(new RemoveModifiersOperation(node, Modifier.ABSTRACT));
-					if (!AnonymousClassDeclaration.class.isInstance(node.getParent()) && !EnumDeclaration.class.isInstance(node.getParent())) {
-						rewriteOperations.add(new RemoveModifiersOperation(node, Modifier.PUBLIC));
+
+				if (typeDecl != null) {
+					if (typeDecl.isInterface()) {
+						if (Modifier.isAbstract(node.getModifiers())) {
+							rewriteOperations.add(new RemoveModifiersOperation(node, Modifier.ABSTRACT));
+						}
+
+						if (Modifier.isPublic(node.getModifiers()) && !AnonymousClassDeclaration.class.isInstance(node.getParent()) && !EnumDeclaration.class.isInstance(node.getParent())) {
+							rewriteOperations.add(new RemoveModifiersOperation(node, Modifier.PUBLIC));
+						}
+					} else if (Modifier.isFinal(typeDecl.getModifiers()) && Modifier.isFinal(node.getModifiers()) && !node.isVarargs()) {
+						rewriteOperations.add(new RemoveModifiersOperation(node, Modifier.FINAL));
 					}
-				} else if (typeDecl != null && Modifier.isFinal(typeDecl.getModifiers()) && Modifier.isFinal(node.getModifiers()) && !node.isVarargs()) {
-					rewriteOperations.add(new RemoveModifiersOperation(node, Modifier.FINAL));
 				}
+
 				return true;
 			}
 
@@ -164,7 +171,7 @@ public class RedundantModifiersCleanUp extends AbstractMultiFix {
 				}
 				return true;
 			}
-			
+
 			@Override
 			public boolean visit(EnumDeclaration node) {
 				TypeDeclaration typeDecl= ASTNodes.getParent(node, TypeDeclaration.class);

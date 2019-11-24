@@ -24,6 +24,7 @@ import java.util.Map;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.core.resources.IncrementalProjectBuilder;
@@ -37,10 +38,12 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTRequestor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+import org.eclipse.jdt.core.manipulation.CleanUpOptionsCore;
 
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
@@ -48,10 +51,12 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
+import org.eclipse.jdt.internal.ui.fix.RedundantModifiersCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUp;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 
@@ -59,6 +64,16 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 public class CleanUpTest extends CleanUpTestCase {
+	private class NoChangeRedundantModifiersCleanUp extends RedundantModifiersCleanUp {
+		private NoChangeRedundantModifiersCleanUp(Map<String, String> options) {
+			super(options);
+		}
+
+		@Override
+		protected ICleanUpFix createFix(CompilationUnit unit) throws CoreException {
+			return super.createFix(unit);
+		}
+	}
 
 	private static final Class<CleanUpTest> THIS= CleanUpTest.class;
 
@@ -67,13 +82,7 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	public static Test suite() {
-		return setUpTest(new TestSuite(THIS) {
-//			@Override
-//			public void addTest(Test test) {
-//				if (((TestCase) test).getName().startsWith("testJava50ForLoop"))
-//					super.addTest(test);
-//			}
-		});
+		return setUpTest(new TestSuite(THIS));
 	}
 
 	public static Test setUpTest(Test test) {
@@ -8504,6 +8513,41 @@ public class CleanUpTest extends CleanUpTestCase {
 		enable(CleanUpConstants.REMOVE_REDUNDANT_MODIFIERS);
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1, cu2, cu3, cu4, cu5 }, new String[] { expected1, expected2, expected3, expected4, expected5 });
 
+	}
+
+	public void testDoNotTouchCleanedModifiers() throws Exception {
+		// Given
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public interface ICleanInterface {\n" //
+				+ "  int MAGIC_NUMBER = 646;\n" //
+				+ "  int foo();\n" //
+				+ "  void func();\n" //
+				+ "  int bar(int bazz);\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("ICleanInterface.java", sample, false, null);
+
+		// When
+		enable(CleanUpConstants.REMOVE_REDUNDANT_MODIFIERS);
+
+		// Then
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+
+		// When
+		ASTParser parser= ASTParser.newParser(AST.JLS13);
+		parser.setKind(ASTParser.K_COMPILATION_UNIT);
+		parser.setSource(cu1);
+		parser.setResolveBindings(true);
+		CompilationUnit unit= (CompilationUnit) parser.createAST(null);
+		Map<String, String> options= new HashMap<>();
+		options.put(CleanUpConstants.REMOVE_REDUNDANT_MODIFIERS, CleanUpOptionsCore.TRUE);
+		NoChangeRedundantModifiersCleanUp cleanup= new NoChangeRedundantModifiersCleanUp(options);
+		ICleanUpFix fix= cleanup.createFix(unit);
+
+		// Then
+		assertNull("ICleanInterface should not be cleaned up", fix);
 	}
 
 	public void testRemoveRedundantSemicolons () throws Exception {
