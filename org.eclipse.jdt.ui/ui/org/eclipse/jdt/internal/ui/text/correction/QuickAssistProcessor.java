@@ -205,6 +205,7 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.NewDefiningMethodPr
 import org.eclipse.jdt.internal.ui.text.correction.proposals.RefactoringCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.RenameRefactoringProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.TypeChangeCorrectionProposal;
+import org.eclipse.jdt.internal.ui.util.ASTHelper;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 /**
@@ -4670,7 +4671,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	private boolean getSplitSwitchLabelProposal(IInvocationContext context, ASTNode coveringNode, Collection<ICommandAccess> proposals) {
 		AST ast= coveringNode.getAST();
 		// Only continue if AST has preview enabled and selected node, or its parent is a SwitchCase
-		if (!ast.isPreviewEnabled() ||
+		if (!ASTHelper.isSwitchCaseExpressionsSupportedInAST(ast) ||
 				!(coveringNode instanceof SwitchCase || coveringNode.getParent() instanceof SwitchCase)) {
 			return false;
 		}

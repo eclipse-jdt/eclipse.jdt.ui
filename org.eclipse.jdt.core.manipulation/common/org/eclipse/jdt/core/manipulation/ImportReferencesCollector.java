@@ -67,6 +67,8 @@ import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
+import org.eclipse.jdt.internal.ui.util.ASTHelper;
+
 
 /**
  * @since 1.10
@@ -305,7 +307,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 	
 	@Override
 	public boolean visit(YieldStatement node) {
-		if (node.getAST().isPreviewEnabled()) {
+		if (ASTHelper.isYieldNodeSupportedInAST(node.getAST())) {
 			evalQualifyingExpression(node.getExpression(), null);			
 		}
 		return false;

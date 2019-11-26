@@ -135,8 +135,13 @@ import org.eclipse.jdt.ui.JavaUI;
 
 public class ASTView extends ViewPart implements IShowInSource, IShowInTargetList {
 	
-	static final int JLS_LATEST= AST.JLS13;
+	static final int JLS_LATEST= AST.JLS14;
 
+	private static final int JLS14= AST.JLS14;
+	/**
+	 * @deprecated to get rid of deprecation warnings in code
+	 */
+	@Deprecated
 	private static final int JLS13= AST.JLS13;
 
 	/**
@@ -540,6 +545,7 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 				case JLS11:
 				case JLS12:
 				case JLS13:	
+				case JLS14:	
 					fCurrentASTLevel= level;
 			}
 		} catch (NumberFormatException e) {

@@ -53,6 +53,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings.DeprecatedMe
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings.VarKeywordHighlighting;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings.YieldKeywordHighlighting;
 import org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener;
+import org.eclipse.jdt.internal.ui.util.ASTHelper;
 
 
 /**
@@ -147,7 +148,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 		@Override
 		public boolean visit(YieldStatement node) {
 			AST ast= node.getAST();
-			if (ast.isPreviewEnabled() && !node.isImplicit()) {
+			if (ASTHelper.isYieldNodeSupportedInAST(ast) && !node.isImplicit()) {
 				int offset= node.getStartPosition();
 				int length= 5; // length of 'yield'
 				if (offset > -1 && length > 0) {

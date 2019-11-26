@@ -20,6 +20,8 @@ import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jdt.core.dom.*;
 
+import org.eclipse.jdt.internal.ui.util.ASTHelper;
+
 public class ASTFlattener extends GenericVisitor {
 /*
  * XXX: Keep in sync with org.eclipse.jdt.internal.core.dom.NaiveASTFlattener:
@@ -1539,7 +1541,7 @@ public class ASTFlattener extends GenericVisitor {
 
 	@Override
 	public boolean visit(SwitchCase node) {
-		if (node.getAST().isPreviewEnabled()) {
+		if (ASTHelper.isSwitchCaseExpressionsSupportedInAST(node.getAST())) {
 			if (node.isDefault()) {
 				this.fBuffer.append("default");//$NON-NLS-1$
 				this.fBuffer.append(node.isSwitchLabeledRule() ? " ->" : ":");//$NON-NLS-1$ //$NON-NLS-2$
@@ -1566,7 +1568,7 @@ public class ASTFlattener extends GenericVisitor {
 
 	@Override
 	public boolean visit(YieldStatement node) {
-		if (node.getAST().isPreviewEnabled() && node.isImplicit() && node.getExpression() == null) {
+		if (ASTHelper.isYieldNodeSupportedInAST(node.getAST()) && node.isImplicit() && node.getExpression() == null) {
 			return false;
 		}
 		this.fBuffer.append("yield"); //$NON-NLS-1$
