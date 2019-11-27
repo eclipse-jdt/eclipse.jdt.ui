@@ -11,6 +11,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Pierre-Yves B. <pyvesdev@gmail.com> - [inline] Allow inlining of local variable initialized to null. - https://bugs.eclipse.org/93850
+ *     Microsoft Corporation - copied to jdt.core.manipulation
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
