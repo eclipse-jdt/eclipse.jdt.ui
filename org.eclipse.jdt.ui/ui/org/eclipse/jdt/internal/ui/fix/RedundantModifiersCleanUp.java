@@ -127,7 +127,7 @@ public class RedundantModifiersCleanUp extends AbstractMultiFix {
 		unit.accept(new ASTVisitor() {
 			@Override
 			public boolean visit(FieldDeclaration node) {
-				TypeDeclaration typeDecl= ASTNodes.getParent(node, TypeDeclaration.class);
+				TypeDeclaration typeDecl= node.getParent() instanceof TypeDeclaration ? (TypeDeclaration) node.getParent() : null;
 				if (typeDecl != null && typeDecl.isInterface()) {
 					final int excluded= Modifier.PUBLIC | Modifier.STATIC | Modifier.FINAL;
 					if ((node.getModifiers() & excluded) > 0) {
@@ -139,7 +139,7 @@ public class RedundantModifiersCleanUp extends AbstractMultiFix {
 
 			@Override
 			public boolean visit(MethodDeclaration node) {
-				TypeDeclaration typeDecl= ASTNodes.getParent(node, TypeDeclaration.class);
+				TypeDeclaration typeDecl= node.getParent() instanceof TypeDeclaration ? (TypeDeclaration) node.getParent() : null;
 
 				if (typeDecl != null) {
 					if (typeDecl.isInterface()) {
@@ -174,7 +174,7 @@ public class RedundantModifiersCleanUp extends AbstractMultiFix {
 
 			@Override
 			public boolean visit(EnumDeclaration node) {
-				TypeDeclaration typeDecl= ASTNodes.getParent(node, TypeDeclaration.class);
+				TypeDeclaration typeDecl= node.getParent() instanceof TypeDeclaration ? (TypeDeclaration) node.getParent() : null;
 				if (typeDecl != null && Modifier.isStatic(node.getModifiers())) {
 					rewriteOperations.add(new RemoveModifiersOperation(node, Modifier.STATIC));
 				}

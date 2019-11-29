@@ -8492,8 +8492,10 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	public void testRemoveRedundantModifiers () throws Exception {
+		StringBuffer buf;
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+
+		buf= new StringBuffer();
 		buf.append("package test;\n");
 		buf.append("public abstract interface IFoo {\n");
 		buf.append("  public static final int MAGIC_NUMBER = 646;\n");
@@ -8575,8 +8577,20 @@ public class CleanUpTest extends CleanUpTestCase {
 		String expected5 = buf.toString();
 		ICompilationUnit cu5= pack1.createCompilationUnit("SafeVarargsExample.java", buf.toString(), false, null);
 
+		// Bug#553608: modifiers public static final must not be removed from inner enum within interface
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public interface Foo {\n");
+		buf.append("  enum Bar {\n");
+		buf.append("    A;\n");
+		buf.append("    public static final int B = 0;\n");
+		buf.append("  }\n");
+		buf.append("}\n");
+		String expected6 = buf.toString();
+		ICompilationUnit cu6= pack1.createCompilationUnit("NestedEnumExample.java", buf.toString(), false, null);
+		
 		enable(CleanUpConstants.REMOVE_REDUNDANT_MODIFIERS);
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1, cu2, cu3, cu4, cu5 }, new String[] { expected1, expected2, expected3, expected4, expected5 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1, cu2, cu3, cu4, cu5, cu6 }, new String[] { expected1, expected2, expected3, expected4, expected5, expected6 });
 
 	}
 
