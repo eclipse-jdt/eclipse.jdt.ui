@@ -256,9 +256,8 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		assertEqualString(preview, expected);
 	}
 
-	@Ignore("Bug 553634")
 	@Test
-	public void testKeepComment() throws Exception {
+	public void testBug553634() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
 		String sample= "" //
 				+ "package test;\r\n" //
@@ -268,9 +267,9 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 				+ "	Collection<String> c;\r\n" //
 				+ "	public A() {\r\n" //
 				+ "		for (final Iterator<String> iterator= c.iterator(); iterator.hasNext();) {\r\n" //
-				+ "			// Comment line\r\n" //
-				+ "			String test= iterator.next();\r\n" //
-				+ "			System.out.println(test);\r\n" //
+				+ "			// Comment line 1\r\n" //
+				+ "			String test= iterator.next(); // Comment 2\r\n" //
+				+ "			System.out.println(test); /* Comment 3 */\r\n" //
 				+ "		}\r\n" //
 				+ "	}\r\n" //
 				+ "}";
@@ -291,8 +290,8 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 				+ "	Collection<String> c;\r\n" //
 				+ "	public A() {\r\n" //
 				+ "		for (String test : c) {\r\n" //
-				+ "			// Comment line\r\n" //
-				+ "			System.out.println(test);\r\n" //
+				+ "			// Comment line 1\r\n" //
+				+ "			System.out.println(test); /* Comment 3 */\r\n" //
 				+ "		}\r\n" //
 				+ "	}\r\n" //
 				+ "}";

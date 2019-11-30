@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
@@ -252,6 +253,7 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 	protected Statement convert(CompilationUnitRewrite cuRewrite, final TextEditGroup group, final LinkedProposalModelCore positionGroups) throws CoreException {
 		AST ast= cuRewrite.getAST();
 		ASTRewrite astRewrite= cuRewrite.getASTRewrite();
+
 		ImportRewrite importRewrite= cuRewrite.getImportRewrite();
 		ImportRemover remover= cuRewrite.getImportRemover();
 
@@ -272,6 +274,7 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 		}
 
 		Statement body= getForStatement().getBody();
+		List<Comment> commentList= getRoot().getCommentList();
 		if (body != null) {
 			ListRewrite list;
 			if (body instanceof Block) {
@@ -279,7 +282,27 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 				for (Expression expression : fOccurrences) {
 					Statement parent= ASTNodes.getParent(expression, Statement.class);
 					if (parent != null && list.getRewrittenList().contains(parent)) {
-						list.remove(parent, null);
+						List<ASTNode> newComments= new ArrayList<>();
+						for (Comment comment : commentList) {
+							CompilationUnit cu= (CompilationUnit)parent.getRoot();
+							if (comment.getStartPosition() >= cu.getExtendedStartPosition(parent)
+									&& comment.getStartPosition() + comment.getLength() < parent.getStartPosition()) {
+								String commentString= cuRewrite.getCu().getBuffer().getText(comment.getStartPosition(), comment.getLength());
+								ASTNode newComment= astRewrite.createStringPlaceholder(commentString, comment.isBlockComment() ? ASTNode.BLOCK_COMMENT : ASTNode.LINE_COMMENT);
+								newComments.add(newComment);
+							}
+						}
+						if (!newComments.isEmpty()) {
+							ASTNode lastComment= newComments.get(0);
+							list.replace(parent, lastComment, null);
+							for (int i= 1; i < newComments.size(); ++i) {
+								ASTNode nextComment= newComments.get(i);
+								list.insertAfter(nextComment, lastComment, null);
+								lastComment= nextComment;
+							}
+						} else {
+							list.remove(parent, null);
+						}
 						remover.registerRemovedNode(parent);
 					}
 				}
