@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 2018 Angelo ZERR.
+ *  Copyright (c) 2018, 2019 Angelo ZERR.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  *  Contributors:
  *     Angelo Zerr <angelo.zerr@gmail.com> - [CodeMining] Provide Java References/Implementation CodeMinings - Bug 529127
+ *     IBM Corporation
  */
 package org.eclipse.jdt.internal.ui.preferences;
 
@@ -19,10 +20,12 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.layout.PixelConverter;
 
+import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
@@ -93,7 +96,8 @@ public class JavaEditorCodeMiningConfigurationBlock extends OptionsConfiguration
 	@Override
 	protected Control createContents(Composite parent) {
 		fPixelConverter= new PixelConverter(parent);
-		setShell(parent.getShell());
+		Shell shell= parent.getShell();
+		setShell(shell);
 
 		Composite mainComp= new Composite(parent, SWT.NONE);
 		mainComp.setFont(parent.getFont());
@@ -103,8 +107,15 @@ public class JavaEditorCodeMiningConfigurationBlock extends OptionsConfiguration
 		mainComp.setLayout(layout);
 
 		// Add enabled code mining checkbox
-		Button codeMiningEnabledCheckBox= addCheckBox(mainComp, PreferencesMessages.JavaEditorCodeMiningConfigurationBlock_enableCodeMining_label, PREF_CODEMINING_ENABLED,
-				TRUE_FALSE, 0);
+		String text= PreferencesMessages.JavaEditorCodeMiningConfigurationBlock_enableCodeMining_label;
+		Button codeMiningEnabledCheckBox= addCheckBoxWithLink(mainComp, text, PREF_CODEMINING_ENABLED, TRUE_FALSE, 0, SWT.DEFAULT, new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if ("org.eclipse.ui.preferencePages.GeneralTextEditor".equals(e.text)) { //$NON-NLS-1$
+					PreferencesUtil.createPreferenceDialogOn(shell, e.text, null, null);
+				}
+			}
+		});
 
 		// - Only if there is at least one result
 		atLeastOneCheckBox= addCheckBox(mainComp,
