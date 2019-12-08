@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2011 IBM Corporation and others.
+ * Copyright (c) 2007, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -12,6 +12,14 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
+
+import static org.junit.Assert.assertEquals;
+
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -28,33 +36,20 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpPreferenceUtil;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
-
+@RunWith(JUnit4.class)
 public class SaveParticipantTest extends CleanUpTestCase {
 
-	private static final Class<SaveParticipantTest> THIS= SaveParticipantTest.class;
-
-	public SaveParticipantTest(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
-	}
+	@Rule
+    public ProjectTestSetup projectsetup = new ProjectTestSetup();
 
 	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		super.setUp();
 
 		IEclipsePreferences node= InstanceScope.INSTANCE.getNode(JavaUI.ID_PLUGIN);
@@ -69,6 +64,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		editor.doSave(null);
 	}
 
+	@Test
 	public void testFormatAll01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -104,6 +100,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		assertEquals(expected1, cu1.getBuffer().getContents());
 	}
 
+	@Test
 	public void testFormatChanges01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -140,6 +137,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		assertEquals(expected1, cu1.getBuffer().getContents());
 	}
 
+	@Test
 	public void testFormatChanges02() throws Exception {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -174,6 +172,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		assertEquals(expected1, cu1.getBuffer().getContents());
 	}
 
+	@Test
 	public void testFormatChangesBug205177() throws Exception {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -213,6 +212,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		assertEquals(expected1, cu1.getBuffer().getContents());
 	}
 
+	@Test
 	public void testFormatChangesBug205308() throws Exception {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -249,6 +249,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		assertEquals(expected1, cu1.getBuffer().getContents());
 	}
 
+	@Test
 	public void testFormatChangesBug205301() throws Exception {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -312,6 +313,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		assertEquals(expected1, cu1.getBuffer().getContents());
 	}
 
+	@Test
 	public void testFormatChangesBug207965() throws Exception {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -354,6 +356,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		assertEquals(expected1, cu1.getBuffer().getContents());
 	}
 
+	@Test
 	public void testFormatChangesBug207965_2() throws Exception {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -391,6 +394,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		assertEquals(expected1, cu1.getBuffer().getContents());
 	}
 
+	@Test
 	public void testFormatChangesBug208568() throws Exception {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -424,6 +428,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		assertEquals(expected1, cu1.getBuffer().getContents());
 	}
 
+	@Test
 	public void testBug213248_1() throws Exception {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -457,6 +462,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		assertEquals(expected1, cu1.getBuffer().getContents());
 	}
 
+	@Test
 	public void testBug213248_2() throws Exception {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -494,6 +500,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		assertEquals(expected1, cu1.getBuffer().getContents());
 	}
 
+	@Test
 	public void testBug213248_3() throws Exception {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -528,6 +535,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		assertEquals(expected1, cu1.getBuffer().getContents());
 	}
 
+	@Test
 	public void testBug213248_4() throws Exception {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -566,6 +574,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		assertEquals(expected1, cu1.getBuffer().getContents());
 	}
 
+	@Test
 	public void testBug228659() throws Exception {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -608,6 +617,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		assertEquals(expected1, cu1.getBuffer().getContents());
 	}
 
+	@Test
 	public void testBug232768_1() throws Exception {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -652,6 +662,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		assertEquals(expected1, cu1.getBuffer().getContents());
 	}
 
+	@Test
 	public void testBug232768_2() throws Exception {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -696,6 +707,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		assertEquals(expected1, cu1.getBuffer().getContents());
 	}
 
+	@Test
 	public void testBug232768_3() throws Exception {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();

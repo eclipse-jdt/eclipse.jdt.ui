@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,8 +13,20 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Hashtable;
 import java.util.List;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -39,7 +51,7 @@ import org.eclipse.jdt.internal.corext.fix.ConvertForLoopOperation;
 import org.eclipse.jdt.internal.corext.fix.ConvertLoopOperation;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -47,31 +59,18 @@ import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.QuickAssistProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
+@RunWith(JUnit4.class)
 public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
-	private static final Class<ConvertForLoopQuickFixTest> THIS= ConvertForLoopQuickFixTest.class;
+	@Rule
+    public ProjectTestSetup projectsetup = new ProjectTestSetup();
 
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
 	private FixCorrectionProposal fConvertLoopProposal;
 
-	public ConvertForLoopQuickFixTest(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
-	}
-
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
@@ -86,14 +85,15 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		fConvertLoopProposal= null;
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 		fJProject1= null;
 		fSourceFolder= null;
 		fConvertLoopProposal= null;
 	}
 
+	@Test
 	public void testSimplestSmokeCase() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -128,6 +128,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertEqualString(preview1, expected);
 	}
 
+	@Test
 	public void testInferPrimitiveTypeElement() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -162,6 +163,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertEqualString(preview1, expected);
 	}
 
+	@Test
 	public void testInferTypeElement() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -196,6 +198,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertEqualString(preview1, expected);
 	}
 
+	@Test
 	public void testSimplestClean() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -232,6 +235,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertEqualString(preview1, expected);
 	}
 
+	@Test
 	public void testLotsOfRefereces() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -276,6 +280,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertEqualString(preview1, expected);
 	}
 
+	@Test
 	public void testInferCollectionFromInitializers() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -320,6 +325,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertEqualString(preview1, expected);
 	}
 
+	@Test
 	public void testNiceReduction() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -365,6 +371,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertEqualString(preview1, expected);
 	}
 
+	@Test
 	public void testNiceReductionArrayIsField() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -410,6 +417,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertEqualString(preview1, expected);
 	}
 
+	@Test
 	public void testArrayIsQualifiedByThis() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -455,6 +463,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertEqualString(preview1, expected);
 	}
 
+	@Test
 	public void testArrayIsAccessedByMethodInvocation() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -484,6 +493,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 	}
 
+	@Test
 	public void testArrayIsAccessedByMethodInvocation2() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -514,6 +524,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 	}
 
+	@Test
 	public void testMatrix() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -550,6 +561,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertEqualString(preview1, expected);
 	}
 
+	@Test
 	public void testMatrix2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -590,6 +602,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertEqualString(preview1, expected);
 	}
 
+	@Test
 	public void testArrayIsAssigned() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -611,6 +624,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 	}
 
+	@Test
 	public void testArrayIsAssigned2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -632,6 +646,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 	}
 
+	@Test
 	public void testArrayCannotBeInferred() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -653,6 +668,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 	}
 
+	@Test
 	public void testIndexBruteModified() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -675,6 +691,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 	}
 
+	@Test
 	public void testIndexBruteModified2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -696,6 +713,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 	}
 
+	@Test
 	public void testIndexReadOutsideArrayAccess() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -717,6 +735,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 	}
 
+	@Test
 	public void testIndexReadOutsideArrayAccess_StringConcatenation() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -738,6 +757,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 	}
 
+	@Test
 	public void testIndexReadOutsideInferredArrayAccess() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -760,6 +780,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 	}
 
+	@Test
 	public void testIndexReadOutsideInferredArrayAccess2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -784,6 +805,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 	}
 
+	@Test
 	public void testReverseTraversalIsNotAllowed() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -805,6 +827,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 	}
 
+	@Test
 	public void testCollectionIsNotArray() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -845,6 +868,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 	}
 
+	@Test
 	public void testAdditionalLocalIsNotReferenced() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -866,6 +890,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 	}
 
+	@Test
 	public void testTwoIndexesNotAllowed() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -887,6 +912,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 	}
 
+	@Test
 	public void testAdditionalLocalIsNotReferenced2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -909,6 +935,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 	}
 
+	@Test
 	public void testCollectionTypeBindingIsNull() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -930,6 +957,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 	}
 
+	@Test
 	public void testCollectionBindingIsNull() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -951,6 +979,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 	}
 
+	@Test
 	public void testCollectionsAccepted() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -987,6 +1016,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 	}
 
+	@Test
 	public void testCollectionsAccepted2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1023,6 +1053,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 	}
 
+	@Test
 	public void testCollectionsAccepted3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1059,6 +1090,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 	}
 
+	@Test
 	public void testMapCollectionsNotAccepted() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1080,6 +1112,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 	}
 
+	@Test
 	public void testMultipleCollectionsNotAccepted() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1104,6 +1137,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 	}
 
+	@Test
 	public void testBug550726() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1146,6 +1180,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 	}
 
+	@Test
 	public void testArrayAccessWithCollections() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1170,6 +1205,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 	}
 
+	@Test
 	public void testIndexDoesNotStartFromZero() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1189,6 +1225,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 	}
 
+	@Test
 	public void testBug127346() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1208,6 +1245,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 	}
 
+	@Test
 	public void testBug130139_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1229,6 +1267,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 	}
 
+	@Test
 	public void testBug130139_2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1252,6 +1291,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 	}
 
+	@Test
 	public void testBug130293_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1288,6 +1328,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertEqualString(preview1, expected);
 	}
 
+	@Test
 	public void testBug130293_2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1330,6 +1371,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertEqualString(preview1, expected);
 	}
 
+	@Test
 	public void testBug138353_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1358,6 +1400,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 	}
 
+	@Test
 	public void testBug138353_2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1384,6 +1427,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 	}
 
+	@Test
 	public void testBug148419() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1405,6 +1449,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 	}
 
+	@Test
 	public void testBug149797() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1426,6 +1471,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 	}
 
+	@Test
 	public void testBug163050_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1462,6 +1508,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertEqualString(preview1, expected);
 	}
 
+	@Test
 	public void testBug163050_2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1496,6 +1543,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertEqualString(preview1, expected);
 	}
 
+	@Test
 	public void testBug163121() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1549,6 +1597,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		return proposals;
 	}
 
+	@Test
 	public void testInitializerPrecondition01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1563,6 +1612,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertTrue(satisfiesPrecondition(cu));
 	}
 
+	@Test
 	public void testInitializerPrecondition02() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1577,6 +1627,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertFalse(satisfiesPrecondition(cu));
 	}
 
+	@Test
 	public void testInitializerPrecondition03() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1592,6 +1643,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertFalse(satisfiesPrecondition(cu));
 	}
 
+	@Test
 	public void testInitializerPrecondition04() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1607,6 +1659,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertFalse(satisfiesPrecondition(cu));
 	}
 
+	@Test
 	public void testInitializerPrecondition05() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1621,6 +1674,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertTrue(satisfiesPrecondition(cu));
 	}
 
+	@Test
 	public void testInitializerPrecondition06() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1639,6 +1693,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertFalse(satisfiesPrecondition(cu));
 	}
 
+	@Test
 	public void testExpressionPrecondition01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1653,6 +1708,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertTrue(satisfiesPrecondition(cu));
 	}
 
+	@Test
 	public void testExpressionPrecondition02() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1667,6 +1723,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertFalse(satisfiesPrecondition(cu));
 	}
 
+	@Test
 	public void testExpressionPrecondition03() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1681,6 +1738,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertFalse(satisfiesPrecondition(cu));
 	}
 
+	@Test
 	public void testExpressionPrecondition04() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1698,6 +1756,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertFalse(satisfiesPrecondition(cu));
 	}
 
+	@Test
 	public void testExpressionPrecondition05() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1713,6 +1772,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertTrue(satisfiesPrecondition(cu));
 	}
 
+	@Test
 	public void testExpressionPrecondition06() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1728,6 +1788,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertTrue(satisfiesPrecondition(cu));
 	}
 
+	@Test
 	public void testExpressionPrecondition07() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1742,6 +1803,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertTrue(satisfiesPrecondition(cu));
 	}
 
+	@Test
 	public void testExpressionPrecondition08() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1756,6 +1818,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertTrue(satisfiesPrecondition(cu));
 	}
 
+	@Test
 	public void testUpdatePrecondition01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1770,6 +1833,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertTrue(satisfiesPrecondition(cu));
 	}
 
+	@Test
 	public void testUpdatePrecondition02() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1784,6 +1848,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertTrue(satisfiesPrecondition(cu));
 	}
 
+	@Test
 	public void testUpdatePrecondition03() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1798,6 +1863,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertTrue(satisfiesPrecondition(cu));
 	}
 
+	@Test
 	public void testUpdatePrecondition04() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1812,6 +1878,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertFalse(satisfiesPrecondition(cu));
 	}
 
+	@Test
 	public void testUpdatePrecondition06() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1827,6 +1894,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertFalse(satisfiesPrecondition(cu));
 	}
 
+	@Test
 	public void testUpdatePrecondition07() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=349782
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
@@ -1842,6 +1910,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertTrue(satisfiesPrecondition(cu));
 	}
 
+	@Test
 	public void testBodyPrecondition01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1858,6 +1927,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertTrue(satisfiesPrecondition(cu));
 	}
 
+	@Test
 	public void testBodyPrecondition02() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1875,6 +1945,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertTrue(satisfiesPrecondition(cu));
 	}
 
+	@Test
 	public void testBodyPrecondition03() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1892,6 +1963,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertTrue(satisfiesPrecondition(cu));
 	}
 
+	@Test
 	public void testBodyPrecondition04() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1910,6 +1982,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertFalse(satisfiesPrecondition(cu));
 	}
 
+	@Test
 	public void testBodyPrecondition05() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1928,6 +2001,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertFalse(satisfiesPrecondition(cu));
 	}
 
+	@Test
 	public void testBodyPrecondition06() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1945,6 +2019,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertFalse(satisfiesPrecondition(cu));
 	}
 
+	@Test
 	public void testBodyPrecondition07() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1961,6 +2036,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertFalse(satisfiesPrecondition(cu));
 	}
 
+	@Test
 	public void testBodyPrecondition08() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1978,6 +2054,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertFalse(satisfiesPrecondition(cu));
 	}
 
+	@Test
 	public void testBodyPrecondition09() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1994,6 +2071,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertFalse(satisfiesPrecondition(cu));
 	}
 
+	@Test
 	public void testBodyPreconditio10() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -2010,6 +2088,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertFalse(satisfiesPrecondition(cu));
 	}
 
+	@Test
 	public void testBodyPrecondition11() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -2026,6 +2105,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertFalse(satisfiesPrecondition(cu));
 	}
 
+	@Test
 	public void testBodyPrecondition12() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -2042,6 +2122,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertFalse(satisfiesPrecondition(cu));
 	}
 
+	@Test
 	public void testBodyPrecondition13() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -2061,6 +2142,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertFalse(satisfiesPrecondition(cu));
 	}
 	
+	@Test
 	public void testBodyPrecondition344674_1() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
@@ -2079,6 +2161,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertTrue(satisfiesPrecondition(cu));
 	}
 
+	@Test
 	public void testBodyPrecondition344674_2() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
@@ -2097,6 +2180,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertTrue(satisfiesPrecondition(cu));
 	}
 
+	@Test
 	public void testBodyPrecondition344674_3() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
@@ -2115,6 +2199,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertTrue(satisfiesPrecondition(cu));
 	}
 
+	@Test
 	public void testBodyPrecondition344674_4() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
@@ -2140,6 +2225,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertFalse(satisfiesPrecondition(cu));
 	}
 
+	@Test
 	public void testBodyPrecondition344674_5() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
@@ -2165,6 +2251,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertFalse(satisfiesPrecondition(cu));
 	}
 
+	@Test
 	public void testBodyPrecondition344674_6() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
@@ -2190,6 +2277,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertFalse(satisfiesPrecondition(cu));
 	}
 
+	@Test
 	public void testBodyPrecondition344674_7() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
@@ -2215,6 +2303,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertFalse(satisfiesPrecondition(cu));
 	}
 
+	@Test
 	public void testBodyPrecondition344674_8() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
@@ -2240,6 +2329,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertFalse(satisfiesPrecondition(cu));
 	}
 
+	@Test
 	public void testBodyPrecondition344674_9() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
@@ -2264,6 +2354,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertFalse(satisfiesPrecondition(cu));
 	}
 
+	@Test
 	public void testBug110599() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -2300,6 +2391,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertEqualString(preview1, expected);
 	}
 
+	@Test
 	public void testBug175827() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -2338,6 +2430,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertEqualString(preview1, expected);
 	}
 
+	@Test
 	public void testBug214340_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -2358,6 +2451,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertFalse(satisfiesPrecondition(cu));
 	}
 
+	@Test
 	public void testBug214340_2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -2378,6 +2472,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertFalse(satisfiesPrecondition(cu));
 	}
 
+	@Test
 	public void testBug214340_3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -2418,6 +2513,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertEqualString(preview1, expected);
 	}
 
+	@Test
 	public void testBug231575_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -2435,6 +2531,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertFalse(satisfiesPrecondition(cu));
 	}
 	
+	@Test
 	public void testBug510758_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -2486,6 +2583,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertEqualString(preview1, expected);
 	}
 	
+	@Test
 	public void testBug510758_2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -2516,6 +2614,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);		
 	}
 	
+	@Test
 	public void testBug510758_3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -2546,6 +2645,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);		
 	}
 
+	@Test
 	public void testBug542936() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder orig= new StringBuilder();

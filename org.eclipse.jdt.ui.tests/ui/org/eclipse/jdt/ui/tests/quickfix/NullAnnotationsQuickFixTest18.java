@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2018 GK Software AG and others.
+ * Copyright (c) 2017, 2020 GK Software AG and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,11 +13,19 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Map;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 import org.osgi.framework.Bundle;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -45,36 +53,25 @@ import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.tests.core.Java18ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.Java18ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
+@RunWith(JUnit4.class)
 public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 
-	private static final Class<NullAnnotationsQuickFixTest18> THIS= NullAnnotationsQuickFixTest18.class;
+	@Rule
+    public ProjectTestSetup projectsetup = new Java18ProjectTestSetup();
+
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
 	private String ANNOTATION_JAR_PATH;
 
-	public NullAnnotationsQuickFixTest18(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return new Java18ProjectTestSetup(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new Java18ProjectTestSetup(test);
-	}
-
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
@@ -115,8 +112,8 @@ public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, Java18ProjectTestSetup.getDefaultClasspath());
 	}
 
@@ -128,6 +125,7 @@ public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 	 * - change local to nonnull  (covariant return)
 	 * - change super to nonnull  (equal)
 	 */
+	@Test
 	public void testBug499716_a() throws Exception {
 		fJProject1.setOption(JavaCore.COMPILER_INHERIT_NULL_ANNOTATIONS, JavaCore.ENABLED);
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -235,6 +233,7 @@ public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 	 * - change super to nonnull
 	 * No covariant parameter!
 	 */
+	@Test
 	public void testBug499716_b() throws Exception {
 		fJProject1.setOption(JavaCore.COMPILER_INHERIT_NULL_ANNOTATIONS, JavaCore.ENABLED);
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -312,6 +311,7 @@ public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 	 * - change super to nullable
 	 * No contravariant return!
 	 */
+	@Test
 	public void testBug499716_c() throws Exception {
 		fJProject1.setOption(JavaCore.COMPILER_INHERIT_NULL_ANNOTATIONS, JavaCore.ENABLED);
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -392,6 +392,7 @@ public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 	 * - change super to implicit nonnull (by removing to make default apply)
 	 * No covariant parameter!
 	 */
+	@Test
 	public void testBug499716_d() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -465,6 +466,7 @@ public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 	 * Test that no redundant null annotations are created.
 	 * Variation 1: @NonNullByDefault applies everywhere, type is non-null
 	 */
+	@Test
 	public void test443146a() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -556,6 +558,7 @@ public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 	 * Variation 2: @NonNullByDefault applies everywhere
 	 * Note, that there is no @Nullable generated for the 'local variable' case.
 	 */
+	@Test
 	public void test443146b() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -646,6 +649,7 @@ public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 	 * Test that no redundant null annotations are created.
 	 * Variation 3: @NonNullByDefault doesn't apply at the target locations (so annotations ARE expected, but not for the local variable)
 	 */
+	@Test
 	public void test443146c() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -744,6 +748,7 @@ public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 	/*
 	 * Test that no null annotations are created in inapplicable location, here: cast.
 	 */
+	@Test
 	public void test443146d() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -782,6 +787,7 @@ public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 	/*
 	 * Variation: @NonNullByDefault applies everywhere, type is a type variable
 	 */
+	@Test
 	public void test443146e() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -872,6 +878,7 @@ public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 	/*
 	 * Variation: @NonNullByDefault applies everywhere, type contains explicit @NonNull on wildcard and type variable
 	 */
+	@Test
 	public void test443146f() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -958,6 +965,7 @@ public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
+	@Test
 	public void testBug513682() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -996,6 +1004,7 @@ public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 		assertEqualString(preview, buf.toString());
 	}
 
+	@Test
 	public void testBug513209a() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -1047,6 +1056,7 @@ public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 		assertEqualString(preview, buf.toString());
 	}
 
+	@Test
 	public void testBug513209b() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -1098,6 +1108,7 @@ public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 		assertEqualString(preview, buf.toString());
 	}
 
+	@Test
 	public void testBug513209c() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -1147,6 +1158,7 @@ public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 		assertEqualString(preview, buf.toString());
 	}
 
+	@Test
 	public void testBug513209d() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -1195,6 +1207,7 @@ public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
+	@Test
 	public void testBug525424() throws Exception {		
 		Hashtable<String, String> options= JavaCore.getOptions();
 		try {
@@ -1488,69 +1501,91 @@ public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 		}
 	}
 
+	@Test
 	public void testBug531511_none_type() throws Exception {		
 		runBug531511Test(true, "", true, true);
 	}
+	@Test
 	public void testBug531511_none_decl() throws Exception {		
 		runBug531511Test(false, "", true, true);
 	}
+	@Test
 	public void testBug531511_combined_multi_first_type() throws Exception {		
 		runBug531511Test(true, "@NNApi @NNFields", false, false);
 	}
+	@Test
 	public void testBug531511_combined_multi_first_decl() throws Exception {		
 		runBug531511Test(false, "@NNApi @NNFields", false, false);
 	}
+	@Test
 	public void testBug531511_combined_multi_second_type() throws Exception {		
 		runBug531511Test(true, "@NNApi @NNFields", false, false);
 	}
+	@Test
 	public void testBug531511_combined_multi_second_decl() throws Exception {		
 		runBug531511Test(false, "@NNApi @NNFields", false, false);
 	}
+	@Test
 	public void testBug531511_param_multi_first_type() throws Exception {		
 		runBug531511Test(true, "@NNParams @NNFields", true, false);
 	}
+	@Test
 	public void testBug531511_param_multi_first_decl() throws Exception {		
 		runBug531511Test(false, "@NNParams @NNFields", true, false);
 	}
+	@Test
 	public void testBug531511_param_multi_second_type() throws Exception {		
 		runBug531511Test(true, "@NNFields @NNParams", true, false);
 	}
+	@Test
 	public void testBug531511_param_multi_second_decl() throws Exception {		
 		runBug531511Test(false, "@NNFields @NNParams", true, false);
 	}
+	@Test
 	public void testBug531511_return_multi_first_type() throws Exception {		
 		runBug531511Test(true, "@NNReturn @NNFields", false, true);
 	}
+	@Test
 	public void testBug531511_return_multi_first_decl() throws Exception {		
 		runBug531511Test(false, "@NNReturn @NNFields", false, true);
 	}
+	@Test
 	public void testBug531511_return_multi_second_type() throws Exception {		
 		runBug531511Test(true, "@NNFields @NNReturn", false, true);
 	}
+	@Test
 	public void testBug531511_return_multi_second_decl() throws Exception {		
 		runBug531511Test(false, "@NNFields @NNReturn", false, true);
 	}
+	@Test
 	public void testBug531511_boolean_default_type() throws Exception {		
 		runBug531511Test(true, "@NNBDBoolean", false, false);
 	}
+	@Test
 	public void testBug531511_boolean_default_decl() throws Exception {		
 		runBug531511Test(false, "@NNBDBoolean", false, false);
 	}
+	@Test
 	public void testBug531511_boolean_true_type() throws Exception {		
 		runBug531511Test(true, "@NNBDBoolean(true)", false, false);
 	}
+	@Test
 	public void testBug531511_boolean_true_decl() throws Exception {		
 		runBug531511Test(false, "@NNBDBoolean(true)", false, false);
 	}
+	@Test
 	public void testBug531511_boolean_false_type() throws Exception {		
 		runBug531511Test(true, "@NNBDBoolean(false)", true, true);
 	}
+	@Test
 	public void testBug531511_boolean_false_decl() throws Exception {		
 		runBug531511Test(false, "@NNBDBoolean(false)", true, true);
 	}
+	@Test
 	public void testBug531511_unconfigurable_type() throws Exception {		
 		runBug531511Test(true, "@NNBDUnconfigurable", false, false);
 	}
+	@Test
 	public void testBug531511_unconfigurable_decl() throws Exception {		
 		runBug531511Test(false, "@NNBDUnconfigurable", false, false);
 	}

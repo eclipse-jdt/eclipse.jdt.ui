@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2018 IBM Corporation and others.
+ * Copyright (c) 2017, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,6 +15,13 @@ package org.eclipse.jdt.ui.tests.quickfix;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -33,36 +40,24 @@ import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.tests.core.Java9ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.Java9ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
+@RunWith(JUnit4.class)
 public class ModifierCorrectionsQuickFixTest9 extends QuickFixTest {
 
-	private static final Class<ModifierCorrectionsQuickFixTest9> THIS= ModifierCorrectionsQuickFixTest9.class;
+	@Rule
+    public ProjectTestSetup projectsetup = new Java9ProjectTestSetup();
 
 	private IJavaProject fJProject1;
 
 	private IPackageFragmentRoot fSourceFolder;
 
-	public ModifierCorrectionsQuickFixTest9(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new Java9ProjectTestSetup(test);
-	}
-
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
@@ -83,11 +78,12 @@ public class ModifierCorrectionsQuickFixTest9 extends QuickFixTest {
 	}
 
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, Java9ProjectTestSetup.getDefaultClasspath());
 	}
 
+	@Test
 	public void testAddSafeVarargs1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -121,6 +117,7 @@ public class ModifierCorrectionsQuickFixTest9 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 	
+	@Test
 	public void testAddSafeVarargs2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -156,6 +153,7 @@ public class ModifierCorrectionsQuickFixTest9 extends QuickFixTest {
 
 	// Bug 530600 - [9][quick fix] should handle new variants of IProblem.OverridingDeprecatedMethod
 	// - since
+	@Test
 	public void testMethodOverrideDeprecated1() throws Exception {
 		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_DEPRECATION_WHEN_OVERRIDING_DEPRECATED_METHOD, JavaCore.ENABLED);
@@ -228,6 +226,7 @@ public class ModifierCorrectionsQuickFixTest9 extends QuickFixTest {
 
 	// Bug 530600 - [9][quick fix] should handle new variants of IProblem.OverridingDeprecatedMethod
 	// - forRemoval
+	@Test
 	public void testMethodOverrideDeprecated2() throws Exception {
 		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_DEPRECATION_WHEN_OVERRIDING_DEPRECATED_METHOD, JavaCore.ENABLED);
@@ -300,6 +299,7 @@ public class ModifierCorrectionsQuickFixTest9 extends QuickFixTest {
 
 	// Bug 530600 - [9][quick fix] should handle new variants of IProblem.OverridingDeprecatedMethod
 	// - since and forRemoval
+	@Test
 	public void testMethodOverrideDeprecated3() throws Exception {
 		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_DEPRECATION_WHEN_OVERRIDING_DEPRECATED_METHOD, JavaCore.ENABLED);

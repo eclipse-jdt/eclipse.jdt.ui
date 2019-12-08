@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,11 +14,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.Before;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 import org.eclipse.jdt.junit.tests.JUnitJUnitTests;
-import org.eclipse.jdt.testplugin.TestOptionsSetup;
+import org.eclipse.jdt.testplugin.TestOptions;
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.tests.browsing.PackagesViewContentProviderTests;
 import org.eclipse.jdt.ui.tests.browsing.PackagesViewContentProviderTests2;
@@ -37,51 +39,47 @@ import org.eclipse.jdt.ui.tests.wizardapi.ImporterTest;
 import org.eclipse.jdt.ui.tests.wizardapi.NewJavaProjectWizardTest;
 import org.eclipse.jdt.ui.tests.wizardapi.NewTypeWizardTest;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 
 /**
  * Test all areas of JDT UI.
  */
-public class AutomatedSuite extends TestSuite {
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+	CoreTests.class,
+	QuickFixTest.class,
 
-	/**
-	 * Returns the suite.  This is required to
-	 * use the JUnit Launcher.
-	 *
-	 * @return the test
-	 */
-	public static Test suite() {
-		return new TestOptionsSetup(new AutomatedSuite());
-	}
+	NewJavaProjectWizardTest.class,
+	NewTypeWizardTest.class,
+	ImporterTest.class,
 
-	public AutomatedSuite() {
-		super(AutomatedSuite.class.getName());
-		
-		addTest(CoreTests.suite());
-		addTest(QuickFixTest.suite());
+	PackageExplorerTests.class,
 
-		addTest(NewJavaProjectWizardTest.suite());
-		addTest(NewTypeWizardTest.suite());
-		addTest(ImporterTest.suite());
-		
-		addTest(PackageExplorerTests.suite());
+	PackagesViewContentProviderTests.class,
+	PackagesViewContentProviderTests2.class,
+	PackagesViewDeltaTests.class,
 
-		addTest(PackagesViewContentProviderTests.suite());
-		addTest(PackagesViewContentProviderTests2.suite());
-		addTest(PackagesViewDeltaTests.suite());
+	ContentProviderTests.class,
 
-		addTest(ContentProviderTests.suite());
+	CallHierarchyContentProviderTest.class,
 
-		addTest(CallHierarchyContentProviderTest.suite());
+	RefactoringTests.class,
 
-		addTest(RefactoringTests.suite());
+	SearchTest.class,
+	JUnitJUnitTests.class,
 
-		addTest(SearchTest.suite());
-		addTest(JUnitJUnitTests.suite());
+	BuildpathTestSuite.class,
 
-		addTest(BuildpathTestSuite.suite());
-
-		addTest(JarExportTests.suite());
-		addTest(PackageJavadocTests.suite());
+	JarExportTests.class,
+	PackageJavadocTests.class
+})
+public class AutomatedSuite {
+	@Before
+	protected void setUp() throws Exception {
+		JavaCore.setOptions(TestOptions.getDefaultOptions());
+		TestOptions.initializeCodeGenerationOptions();
+		// Use load since restore doesn't really restore the defaults.
+		JavaPlugin.getDefault().getCodeTemplateStore().load();
 	}
 }
-

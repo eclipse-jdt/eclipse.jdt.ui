@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -18,6 +18,13 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
+
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 
@@ -32,36 +39,23 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
+@RunWith(JUnit4.class)
 public class JavadocQuickFixTest extends QuickFixTest {
 
-	private static final Class<JavadocQuickFixTest> THIS= JavadocQuickFixTest.class;
+	@Rule
+    public ProjectTestSetup projectsetup = new ProjectTestSetup();
 
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
 
-	public JavadocQuickFixTest(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
-	}
-
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
@@ -109,12 +103,13 @@ public class JavadocQuickFixTest extends QuickFixTest {
 	}
 
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
 
 
+	@Test
 	public void testMissingParam1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -163,6 +158,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		assertProposalExists(proposals, CorrectionMessages.ConfigureProblemSeveritySubProcessor_name);
 	}
 
+	@Test
 	public void testMissingParam2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -207,6 +203,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		assertEqualString(preview1, expected);
 		assertEqualString(preview2, expected);
 	}
+	@Test
 	public void testMissingParam3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -252,6 +249,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		assertEqualString(preview2, expected);
 	}
 
+	@Test
 	public void testMissingParam4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -297,6 +295,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		assertEqualString(preview2, expected);
 	}
 
+	@Test
 	public void testMissingParam5() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -330,6 +329,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		assertEqualString(preview2, expected);
 	}
 
+	@Test
 	public void testMissingParam6() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -363,6 +363,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		assertEqualString(preview2, expected);
 	}
 
+	@Test
 	public void testMissingReturn1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -410,6 +411,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		assertEqualString(preview2, expected);
 	}
 
+	@Test
 	public void testMissingReturn2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -451,6 +453,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		assertEqualString(preview2, expected);
 	}
 
+	@Test
 	public void testMissingReturn3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -494,6 +497,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		assertEqualString(preview2, expected);
 	}
 
+	@Test
 	public void testMissingThrows() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -537,6 +541,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		assertEqualString(preview2, expected);
 	}
 
+	@Test
 	public void testInsertAllMissing1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -577,6 +582,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testInsertAllMissing2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -619,6 +625,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testInsertAllMissing3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -645,6 +652,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testInsertAllMissing4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -687,6 +695,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });	}
 
+	@Test
 	public void testRemoveParamTag1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -726,6 +735,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		assertEqualString(preview1, expected);
 	}
 
+	@Test
 	public void testRemoveParamTag2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -767,6 +777,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 	}
 
 
+	@Test
 	public void testRemoveThrowsTag1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -809,6 +820,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		assertEqualString(preview1, expected);
 	}
 
+	@Test
 	public void testRemoveThrowsTag2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -849,6 +861,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		assertEqualString(preview1, expected);
 	}
 
+	@Test
 	public void testRemoveThrowsTag3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -895,6 +908,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		assertEqualString(preview1, expected);
 	}
 
+	@Test
 	public void testRemoveReturnTag1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -938,6 +952,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		assertEqualString(preview1, expected);
 	}
 
+	@Test
 	public void testRemoveUnknownTag1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -981,6 +996,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		assertEqualString(preview1, expected);
 	}
 
+	@Test
 	public void testMissingMethodComment1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -1020,6 +1036,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		assertEqualString(preview1, expected);
 	}
 
+	@Test
 	public void testMissingMethodComment2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -1057,6 +1074,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		assertEqualString(preview1, expected);
 	}
 
+	@Test
 	public void testMissingMethodComment3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -1091,6 +1109,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		assertEqualString(preview1, expected);
 	}
 
+	@Test
 	public void testMissingMethodComment4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -1144,6 +1163,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		}
 
 
+	@Test
 	public void testMissingConstructorComment() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -1182,6 +1202,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		assertEqualString(preview1, expected);
 	}
 
+	@Test
 	public void testMissingTypeComment() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -1210,6 +1231,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		assertEqualString(preview1, expected);
 	}
 
+	@Test
 	public void testMissingFieldComment() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -1242,6 +1264,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		assertEqualString(preview1, expected);
 	}
 
+	@Test
 	public void testInvalidQualification1() throws Exception {
 		Map<String, String> original= fJProject1.getOptions(false);
 		HashMap<String, String> newOptions= new HashMap<>(original);
@@ -1300,6 +1323,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		}
 	}
 
+	@Test
 	public void testInvalidQualification2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -1346,6 +1370,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 	
+	@Test
 	public void testInvalidQualification3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		StringBuffer buf= new StringBuffer();

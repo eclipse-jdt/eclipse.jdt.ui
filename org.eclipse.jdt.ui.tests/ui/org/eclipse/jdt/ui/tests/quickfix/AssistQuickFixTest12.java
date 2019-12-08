@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 IBM Corporation and others.
+ * Copyright (c) 2019, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,6 +15,13 @@ package org.eclipse.jdt.ui.tests.quickfix;
 
 import java.util.ArrayList;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
+
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -22,49 +29,35 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
-import org.eclipse.jdt.ui.tests.core.Java12ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.Java12ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
+@RunWith(JUnit4.class)
 public class AssistQuickFixTest12 extends QuickFixTest {
 
-	private static final Class<AssistQuickFixTest12> THIS= AssistQuickFixTest12.class;
+	@Rule
+    public ProjectTestSetup projectsetup = new Java12ProjectTestSetup(true);
 
 	private IJavaProject fJProject1;
 
 	private IPackageFragmentRoot fSourceFolder;
 
-	public AssistQuickFixTest12(String name) {
-		super(name);
+	@Before
+	public void setUp() throws Exception {
 	}
 
-	public static Test suite() {
-		return new Java12ProjectTestSetup(new TestSuite(THIS), true);
-	}
-
-	public static Test setUpTest(Test test) {
-		Test testToReturn= new Java12ProjectTestSetup(test, true);
-		return testToReturn;
-	}
-
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-	}
-
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		if (fJProject1 != null) {
 			JavaProjectHelper.delete(fJProject1);
 		}
 
-		super.tearDown();
 	}
 
+	@Test
 	public void testSplitSwitchCaseStatement() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(Java12ProjectTestSetup.getDefaultClasspath(), null);
@@ -130,6 +123,7 @@ public class AssistQuickFixTest12 extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}
 
+	@Test
 	public void testSplitSwitchCaseLabelRuleStatement() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(Java12ProjectTestSetup.getDefaultClasspath(), null);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2011 IBM Corporation and others.
+ * Copyright (c) 2007, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,8 +13,16 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Hashtable;
 import java.util.Map;
+
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import org.eclipse.jface.viewers.StructuredSelection;
 
@@ -27,33 +35,21 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
 import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.actions.MultiSortMembersAction;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 /**
  * @since 3.4
  */
+@RunWith(JUnit4.class)
 public class CleanUpActionTest extends CleanUpTestCase {
 
-	private static final Class<CleanUpActionTest> THIS= CleanUpActionTest.class;
-
-	public CleanUpActionTest(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
-	}
+	@Rule
+    public ProjectTestSetup projectsetup = new ProjectTestSetup();
 
 	//205600 [clean up] 'Sort members' action uses workspace/project clean up options
+	@Test
 	public void testSortMembersAction() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("testSortMembersAction", false, null);
 		StringBuffer buf= new StringBuffer();

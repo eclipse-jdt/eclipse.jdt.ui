@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2018 GK Software AG and others.
+ * Copyright (c) 2016, 2020 GK Software AG and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -17,6 +17,12 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 import org.osgi.framework.Bundle;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -40,37 +46,26 @@ import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.tests.core.Java18ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.Java18ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 /** Tests against projects with 1.8 compliance and "old" declaration null annotations. */
+@RunWith(JUnit4.class)
 public class NullAnnotationsQuickFixTest18Mix extends QuickFixTest {
 
-	private static final Class<NullAnnotationsQuickFixTest18Mix> THIS= NullAnnotationsQuickFixTest18Mix.class;
+	@Rule
+    public ProjectTestSetup projectsetup = new Java18ProjectTestSetup();
+
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
 	private String ANNOTATION_JAR_PATH;
 
-	public NullAnnotationsQuickFixTest18Mix(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new Java18ProjectTestSetup(test);
-	}
-
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
@@ -112,8 +107,8 @@ public class NullAnnotationsQuickFixTest18Mix extends QuickFixTest {
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, Java18ProjectTestSetup.getDefaultClasspath());
 	}
 
@@ -121,6 +116,7 @@ public class NullAnnotationsQuickFixTest18Mix extends QuickFixTest {
 	// ==== Fixes:		change downstream method parameter to @Nullable
 	//					add @SW("null")
 
+	@Test
 	public void testBug473068_elided() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("testNullAnnotations", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -208,6 +204,7 @@ public class NullAnnotationsQuickFixTest18Mix extends QuickFixTest {
 	//					change downstream method parameter to @Nullable
 	//					add @SW("null")
 
+	@Test
 	public void testBug473068_explicit_type() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("testNullAnnotations", false, null);
 		StringBuffer buf= new StringBuffer();

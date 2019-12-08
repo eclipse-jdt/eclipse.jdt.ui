@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 IBM Corporation and others.
+ * Copyright (c) 2011, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,6 +15,13 @@ package org.eclipse.jdt.ui.tests.quickfix;
 
 import java.util.Hashtable;
 import java.util.List;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -34,7 +41,8 @@ import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.tests.core.Java1d7ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.Java1d7ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
@@ -42,10 +50,11 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
+@RunWith(JUnit4.class)
 public class AssistQuickFixTest17 extends QuickFixTest {
+
+	@Rule
+    public ProjectTestSetup projectsetup = new Java1d7ProjectTestSetup();
 
 	private static final String REMOVE_CATCH_CLAUSE= CorrectionMessages.QuickAssistProcessor_removecatchclause_description;
 	private static final String REPLACE_CATCH_CLAUSE_WITH_THROWS= CorrectionMessages.QuickAssistProcessor_catchclausetothrows_description;
@@ -53,26 +62,12 @@ public class AssistQuickFixTest17 extends QuickFixTest {
 	private static final String CONVERT_TO_A_SINGLE_MULTI_CATCH_BLOCK= CorrectionMessages.QuickAssistProcessor_convert_to_single_multicatch_block;
 	private static final String CONVERT_TO_SEPARATE_CATCH_BLOCKS= CorrectionMessages.QuickAssistProcessor_convert_to_multiple_singletype_catch_blocks;
 
-	private static final Class<AssistQuickFixTest17> THIS= AssistQuickFixTest17.class;
-
 	private IJavaProject fJProject1;
 
 	private IPackageFragmentRoot fSourceFolder;
 
-	public AssistQuickFixTest17(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new Java1d7ProjectTestSetup(test);
-	}
-
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
@@ -96,11 +91,12 @@ public class AssistQuickFixTest17 extends QuickFixTest {
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, Java1d7ProjectTestSetup.getDefaultClasspath());
 	}
 
+	@Test
 	public void testConvertToMultiCatch1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -141,6 +137,7 @@ public class AssistQuickFixTest17 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testConvertToMultiCatch2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -182,6 +179,7 @@ public class AssistQuickFixTest17 extends QuickFixTest {
 
 	}
 
+	@Test
 	public void testConvertToMultiCatch3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -224,6 +222,7 @@ public class AssistQuickFixTest17 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testConvertToMultiCatch4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -249,6 +248,7 @@ public class AssistQuickFixTest17 extends QuickFixTest {
 		assertProposalDoesNotExist(proposals, CONVERT_TO_A_SINGLE_MULTI_CATCH_BLOCK);
 	}
 
+	@Test
 	public void testConvertToMultiCatch5() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -272,6 +272,7 @@ public class AssistQuickFixTest17 extends QuickFixTest {
 		assertProposalDoesNotExist(proposals, CONVERT_TO_A_SINGLE_MULTI_CATCH_BLOCK);
 	}
 
+	@Test
 	public void testConvertToMultiCatch6() throws Exception {
 		//Quick assist should not be offered in 1.5 mode
 		JavaProjectHelper.set15CompilerOptions(fJProject1);
@@ -303,6 +304,7 @@ public class AssistQuickFixTest17 extends QuickFixTest {
 		}
 	}
 
+	@Test
 	public void testUnrollMultiCatch1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -343,6 +345,7 @@ public class AssistQuickFixTest17 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testUnrollMultiCatch2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -387,6 +390,7 @@ public class AssistQuickFixTest17 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testUnrollMultiCatch3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -431,6 +435,7 @@ public class AssistQuickFixTest17 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testUnrollMultiCatch4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -479,6 +484,7 @@ public class AssistQuickFixTest17 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testUnrollMultiCatch5() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -502,6 +508,7 @@ public class AssistQuickFixTest17 extends QuickFixTest {
 		assertProposalDoesNotExist(proposals, CONVERT_TO_SEPARATE_CATCH_BLOCKS);
 	}
 
+	@Test
 	public void testUnrollMultiCatch6() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=350285#c12
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -555,6 +562,7 @@ public class AssistQuickFixTest17 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testReplaceMultiCatchClauseWithThrows1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -597,6 +605,7 @@ public class AssistQuickFixTest17 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2 });
 	}
 
+	@Test
 	public void testReplaceMultiCatchClauseWithThrows2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -624,6 +633,7 @@ public class AssistQuickFixTest17 extends QuickFixTest {
 		assertProposalDoesNotExist(proposals, REPLACE_CATCH_CLAUSE_WITH_THROWS);
 	}
 
+	@Test
 	public void testReplaceMultiCatchClauseWithThrows3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -685,6 +695,7 @@ public class AssistQuickFixTest17 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2, expected3 });
 	}
 	
+	@Test
 	public void testReplaceMultiCatchClauseWithThrows4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -763,6 +774,7 @@ public class AssistQuickFixTest17 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2, expected3 });
 	}
 
+	@Test
 	public void testPickoutTypeFromMulticatch1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -854,6 +866,7 @@ public class AssistQuickFixTest17 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2, expected3, expected4 });
 	}
 
+	@Test
 	public void testPickoutTypeFromMulticatch2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -933,6 +946,7 @@ public class AssistQuickFixTest17 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2, expected3 });
 	}
 
+	@Test
 	public void testSplitDeclaration1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -959,6 +973,7 @@ public class AssistQuickFixTest17 extends QuickFixTest {
 		assertProposalDoesNotExist(proposals, "Split variable declaration");
 	}
 
+	@Test
 	public void testUnwrapTryStatement() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -985,6 +1000,7 @@ public class AssistQuickFixTest17 extends QuickFixTest {
 		assertProposalDoesNotExist(proposals, REMOVE_SURROUNDING_TRY_BLOCK);
 	}
 
+	@Test
 	public void testInferDiamondArguments() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);

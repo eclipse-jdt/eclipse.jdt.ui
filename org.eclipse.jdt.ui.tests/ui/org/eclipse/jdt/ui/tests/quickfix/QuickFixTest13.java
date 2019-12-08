@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 IBM Corporation and others.
+ * Copyright (c) 2019, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,6 +15,12 @@ package org.eclipse.jdt.ui.tests.quickfix;
 
 import java.util.ArrayList;
 
+import org.junit.After;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
+
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
@@ -27,51 +33,32 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.ui.tests.core.Java10ProjectTestSetup;
-import org.eclipse.jdt.ui.tests.core.Java13ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.Java10ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.Java13ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
+@RunWith(JUnit4.class)
 public class QuickFixTest13 extends QuickFixTest {
 
-	private static final Class<QuickFixTest13> THIS= QuickFixTest13.class;
+	@Rule
+    public ProjectTestSetup projectsetup = new Java13ProjectTestSetup(true);
 
 	private IJavaProject fJProject1;
 
 	private IPackageFragmentRoot fSourceFolder;
 
-	public QuickFixTest13(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return new Java13ProjectTestSetup(new TestSuite(THIS), true);
-	}
-
-	public static Test setUpTest(Test test) {
-		Test testToReturn= new Java13ProjectTestSetup(test, true);
-		return testToReturn;
-	}
-
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-	}
-
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		if (fJProject1 != null) {
 			JavaProjectHelper.delete(fJProject1);
 		}
-
-		super.tearDown();
 	}
 
+	@Test
 	public void testEnablePreviewsAndOpenCompilerPropertiesProposals() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(Java13ProjectTestSetup.getDefaultClasspath(), null);
@@ -133,6 +120,7 @@ public class QuickFixTest13 extends QuickFixTest {
 		assertProposalExists(proposals, label2);
 	}
 	
+	@Test
 	public void testGetNeedHigherComplianceProposalsAndEnablePreviewsProposal() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(Java10ProjectTestSetup.getDefaultClasspath(), null);
@@ -194,6 +182,7 @@ public class QuickFixTest13 extends QuickFixTest {
 		assertProposalExists(proposals, label);
 	}
 
+	@Test
 	public void testNoEnablePreviewProposal() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(Java13ProjectTestSetup.getDefaultClasspath(), null);
@@ -251,6 +240,7 @@ public class QuickFixTest13 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 0);
 	}
 
+	@Test
 	public void testAddDefaultCaseSwitchStatement1() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(Java13ProjectTestSetup.getDefaultClasspath(), null);
@@ -308,6 +298,7 @@ public class QuickFixTest13 extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}
 
+	@Test
 	public void testAddDefaultCaseSwitchStatement2() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(Java13ProjectTestSetup.getDefaultClasspath(), null);
@@ -366,6 +357,7 @@ public class QuickFixTest13 extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}
 
+	@Test
 	public void testAddDefaultCaseSwitchStatement3() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(Java13ProjectTestSetup.getDefaultClasspath(), null);
@@ -420,6 +412,7 @@ public class QuickFixTest13 extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}
 
+	@Test
 	public void testAddMissingCaseSwitchStatement1() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(Java13ProjectTestSetup.getDefaultClasspath(), null);
@@ -479,6 +472,7 @@ public class QuickFixTest13 extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}
 
+	@Test
 	public void testAddDefaultCaseSwitchExpression1() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(Java13ProjectTestSetup.getDefaultClasspath(), null);
@@ -536,6 +530,7 @@ public class QuickFixTest13 extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}
 
+	@Test
 	public void testAddDefaultCaseSwitchExpression2() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(Java13ProjectTestSetup.getDefaultClasspath(), null);
@@ -599,6 +594,7 @@ public class QuickFixTest13 extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}
 
+	@Test
 	public void testAddMissingCaseSwitchExpression() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(Java13ProjectTestSetup.getDefaultClasspath(), null);

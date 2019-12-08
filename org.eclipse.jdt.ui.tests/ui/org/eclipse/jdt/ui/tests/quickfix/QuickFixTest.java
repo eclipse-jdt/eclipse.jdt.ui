@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,6 +14,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,12 +28,10 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.StringAsserts;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.core.resources.IFile;
-
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -56,7 +58,6 @@ import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup.Proposal;
 
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
@@ -73,67 +74,57 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistPr
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewCUUsingWizardProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.RenameRefactoringProposal;
 import org.eclipse.jdt.internal.ui.text.template.contentassist.SurroundWithTemplateProposal;
-
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 /**
  */
-public class QuickFixTest extends TestCase {
-
-	public static Test suite() {
-		TestSuite suite= new TestSuite(QuickFixTest.class.getName());
-		suite.addTest(QuickFixTest9.suite());
-		suite.addTest(QuickFixTest18.suite());
-		suite.addTest(QuickFixTest13.suite());
-		suite.addTest(SerialVersionQuickFixTest.suite());
-		suite.addTest(UtilitiesTest.suite());
-		suite.addTest(UnresolvedTypesQuickFixTest.suite());
-		suite.addTest(UnresolvedVariablesQuickFixTest.suite());
-		suite.addTest(UnresolvedMethodsQuickFixTest.suite());
-		suite.addTest(UnresolvedMethodsQuickFixTest18.suite());
-		suite.addTest(ReturnTypeQuickFixTest.suite());
-		suite.addTest(LocalCorrectionsQuickFixTest.suite());
-		suite.addTest(LocalCorrectionsQuickFixTest17.suite());
-		suite.addTest(LocalCorrectionsQuickFixTest18.suite());
-		suite.addTest(TypeMismatchQuickFixTests.suite());
-		suite.addTest(ReorgQuickFixTest.suite());
-		suite.addTest(ModifierCorrectionsQuickFixTest.suite());
-		suite.addTest(ModifierCorrectionsQuickFixTest17.suite());
-		suite.addTest(ModifierCorrectionsQuickFixTest9.suite());
-		suite.addTest(GetterSetterQuickFixTest.suite());
-		suite.addTest(AssistQuickFixTest.suite());
-		suite.addTest(AssistQuickFixTest17.suite());
-		suite.addTest(AssistQuickFixTest18.suite());
-		suite.addTest(AssistQuickFixTest12.suite());
-		suite.addTest(ChangeNonStaticToStaticTest.suite());
-		suite.addTest(MarkerResolutionTest.suite());
-		suite.addTest(JavadocQuickFixTest.suite());
-		suite.addTest(ConvertForLoopQuickFixTest.suite());
-		suite.addTest(ConvertIterableLoopQuickFixTest.suite());
-		suite.addTest(AdvancedQuickAssistTest.suite());
-		suite.addTest(AdvancedQuickAssistTest17.suite());
-		suite.addTest(AdvancedQuickAssistTest18.suite());
-		suite.addTest(CleanUpTestCase.suite());
-		suite.addTest(QuickFixEnablementTest.suite());
-		suite.addTest(SurroundWithTemplateTest.suite());
-		suite.addTest(TypeParameterMismatchTest.suite());
-		suite.addTest(PropertiesFileQuickAssistTest.suite());
-		suite.addTest(NullAnnotationsQuickFixTest.suite());
-		suite.addTest(NullAnnotationsQuickFixTest18.suite());
-		suite.addTest(NullAnnotationsQuickFixTest18Mix.suite());
-		suite.addTest(AnnotateAssistTest15.suite());
-		suite.addTest(AnnotateAssistTest18.suite());
-		suite.addTest(TypeAnnotationQuickFixTest.suite());
-
-		return new ProjectTestSetup(suite);
-	}
-
-
-	public QuickFixTest(String name) {
-		super(name);
-	}
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+	QuickFixTest9.class,
+	QuickFixTest18.class,
+	QuickFixTest13.class,
+	SerialVersionQuickFixTest.class,
+	UtilitiesTest.class,
+	UnresolvedTypesQuickFixTest.class,
+	UnresolvedVariablesQuickFixTest.class,
+	UnresolvedMethodsQuickFixTest.class,
+	UnresolvedMethodsQuickFixTest18.class,
+	ReturnTypeQuickFixTest.class,
+	LocalCorrectionsQuickFixTest.class,
+	LocalCorrectionsQuickFixTest17.class,
+	LocalCorrectionsQuickFixTest18.class,
+	TypeMismatchQuickFixTests.class,
+	ReorgQuickFixTest.class,
+	ModifierCorrectionsQuickFixTest.class,
+	ModifierCorrectionsQuickFixTest17.class,
+	ModifierCorrectionsQuickFixTest9.class,
+	GetterSetterQuickFixTest.class,
+	AssistQuickFixTest.class,
+	AssistQuickFixTest17.class,
+	AssistQuickFixTest18.class,
+	AssistQuickFixTest12.class,
+	ChangeNonStaticToStaticTest.class,
+	MarkerResolutionTest.class,
+	JavadocQuickFixTest.class,
+	ConvertForLoopQuickFixTest.class,
+	ConvertIterableLoopQuickFixTest.class,
+	AdvancedQuickAssistTest.class,
+	AdvancedQuickAssistTest17.class,
+	AdvancedQuickAssistTest18.class,
+	CleanUpTestCase.class,
+	QuickFixEnablementTest.class,
+	SurroundWithTemplateTest.class,
+	TypeParameterMismatchTest.class,
+	PropertiesFileQuickAssistTest.class,
+	NullAnnotationsQuickFixTest.class,
+	NullAnnotationsQuickFixTest18.class,
+	NullAnnotationsQuickFixTest18Mix.class,
+	AnnotateAssistTest15.class,
+	AnnotateAssistTest18.class,
+	TypeAnnotationQuickFixTest.class
+})
+public class QuickFixTest {
 
 	public static void assertCorrectLabels(List<? extends ICompletionProposal> proposals) {
 		for (int i= 0; i < proposals.size(); i++) {
