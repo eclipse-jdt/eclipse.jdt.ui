@@ -66,7 +66,6 @@ public class JavaActivationTest extends TestCase {
 			"org.eclipse.core.filesystem.win32.x86",
 			"org.eclipse.core.resources.compatibility",
 			"org.eclipse.core.resources.win32",
-			"org.eclipse.core.runtime.compatibility.registry",
 			"org.eclipse.equinox.http.jetty",
 			"org.eclipse.equinox.http.registry",
 			"org.eclipse.equinox.http.servlet",
