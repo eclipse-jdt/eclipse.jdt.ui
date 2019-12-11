@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,8 +13,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 import org.eclipse.jdt.ui.tests.leaks.JavaLeakTest;
 import org.eclipse.jdt.ui.tests.leaks.TextViewerUndoManagerLeakTest;
@@ -25,25 +25,13 @@ import org.eclipse.jdt.ui.tests.search.SearchLeakTestWrapper;
 /**
  * Test for leaks
  */
-public class LeakTestSuite extends TestSuite {
-
-	/**
-	 * Returns the suite.  This is required to
-	 * use the JUnit Launcher.
-	 *
-	 * @return the test suite.
-	 */
-	public static Test suite() {
-		return new LeakTestSuite();
-	}
-
-	public LeakTestSuite() {
-		super(LeakTestSuite.class.getName());
-		addTest(JavaLeakTest.suite());
-		addTest(SearchLeakTestWrapper.suite());
-		addTest(UndoManagerLeakTest.suite());
-		addTest(TextViewerUndoManagerLeakTest.suite());
-	}
-
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+	JavaLeakTest.class,
+	SearchLeakTestWrapper.class,
+	UndoManagerLeakTest.class,
+	TextViewerUndoManagerLeakTest.class,
+})
+public class LeakTestSuite {
 }
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,32 +13,29 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.search;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import static org.junit.Assert.assertEquals;
+
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
+
+import org.eclipse.jdt.ui.tests.core.rules.JUnitSourceSetup;
 
 /**
  */
-public class WorkspaceReferenceTest extends TestCase {
+@RunWith(JUnit4.class)
+public class WorkspaceReferenceTest {
 
-	private static final Class<WorkspaceReferenceTest> THIS= WorkspaceReferenceTest.class;
+	@Rule
+	public JUnitSourceSetup projectsetup = new JUnitSourceSetup();
 
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new JUnitSourceSetup(test);
-	}
-
-	public WorkspaceReferenceTest(String name) {
-		super(name);
-	}
-
+	@Test
 	public void testSimpleMethodRef() throws Exception {
 		assertEquals(9, SearchTestHelper.countMethodRefs("junit.framework.Test", "countTestCases", new String[0]));
 	}
 
+	@Test
 	public void testFindOverridden() throws Exception {
 		assertEquals(6, SearchTestHelper.countMethodRefs("junit.framework.TestCase", "countTestCases", new String[0]));
 	}

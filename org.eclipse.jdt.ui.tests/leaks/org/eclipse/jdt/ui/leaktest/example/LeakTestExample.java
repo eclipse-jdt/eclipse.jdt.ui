@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,33 +15,28 @@ package org.eclipse.jdt.ui.leaktest.example;
 
 import java.util.ArrayList;
 
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
+
 import org.eclipse.jdt.ui.leaktest.LeakTestCase;
-import org.eclipse.jdt.ui.leaktest.LeakTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.LeakTestSetup;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
-
+@RunWith(JUnit4.class)
 public class LeakTestExample extends LeakTestCase {
 
-	private static final Class<LeakTestExample> THIS= LeakTestExample.class;
+	@Rule
+	public LeakTestSetup projectsetup = new LeakTestSetup();
 
 	private static class MyClass {
-	}
-
-
-	public static Test suite() {
-		return new LeakTestSetup(new TestSuite(THIS));
 	}
 
 	private Object fGlobalReference;
 
 	private ArrayList<Object> fGlobalList= new ArrayList<>();
 
-	public LeakTestExample(String name) {
-		super(name);
-	}
-
+	@Test
 	public void testLeakGlobalReference() throws Exception {
 		fGlobalList.clear();
 
@@ -65,6 +60,7 @@ public class LeakTestExample extends LeakTestCase {
 		assertEqualCount("after clear: ", count1, count3);
 	}
 
+	@Test
 	public void testNoLeakGlobalReference() throws Exception {
 		fGlobalList.clear();
 		Class<MyClass> cl= MyClass.class;

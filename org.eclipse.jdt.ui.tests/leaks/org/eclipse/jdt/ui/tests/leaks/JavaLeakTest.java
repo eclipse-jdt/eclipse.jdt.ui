@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,7 +13,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.leaks;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.ByteArrayInputStream;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.util.DisplayHelper;
@@ -56,7 +67,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.ui.leaktest.LeakTestCase;
-import org.eclipse.jdt.ui.leaktest.LeakTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.LeakTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
@@ -68,32 +79,21 @@ import org.eclipse.jdt.internal.ui.wizards.JavaProjectWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewClassCreationWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewInterfaceCreationWizard;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
+@RunWith(JUnit4.class)
 public class JavaLeakTest extends LeakTestCase {
+
+	@Rule
+	public LeakTestSetup projectsetup = new LeakTestSetup();
 
 	private IJavaProject fJProject;
 
-	private static final Class<JavaLeakTest> THIS= JavaLeakTest.class;
-
-	public JavaLeakTest(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new LeakTestSetup(test);
-	}
-
+	@Test
 	public void testTextEditorClose() throws Exception {
 		IFile file= createTestFile("Test.txt");
 		internalTestEditorClose(file, TextEditor.class, false);
 	}
 
+	@Test
 	public void testTextEditorCloseOneOfTwo() throws Exception {
 		IFile file1= createTestFile("Test1.txt");
 		IEditorPart editor1= EditorUtility.openInEditor(file1);
@@ -112,20 +112,23 @@ public class JavaLeakTest extends LeakTestCase {
 
 		assertTrue("Could not close editor", JavaPlugin.getActivePage().closeEditor(editor1, false));
 		editor1= null;
-		
+
 		assertInstanceCount(TextEditor.class, 0);
 	}
 
+	@Test
 	public void testTextEditorCloseAll() throws Exception {
 		IFile file= createTestFile("Test.txt");
 		internalTestEditorClose(file, TextEditor.class, true);
 	}
 
+	@Test
 	public void testPropertiesEditorClose() throws Exception {
 		IFile file= createTestFile("Test.properties");
 		internalTestEditorClose(file, PropertiesFileEditor.class, false);
 	}
 
+	@Test
 	public void testPropertiesEditorCloseOneOfTwo() throws Exception {
 		IFile file1= createTestFile("Test1.properties");
 		IEditorPart editor1= EditorUtility.openInEditor(file1);
@@ -148,16 +151,19 @@ public class JavaLeakTest extends LeakTestCase {
 		assertInstanceCount(PropertiesFileEditor.class, 0);
 	}
 
+	@Test
 	public void testPropertiesEditorCloseAll() throws Exception {
 		IFile file= createTestFile("Test.properties");
 		internalTestEditorClose(file, PropertiesFileEditor.class, true);
 	}
 
+	@Test
 	public void testJavaEditorClose() throws Exception {
 		ICompilationUnit cu= createTestCU("Test");
 		internalTestEditorClose(cu, CompilationUnitEditor.class, false);
 	}
 
+	@Test
 	public void testJavaEditorCloseOneOfTwo() throws Exception {
 		ICompilationUnit cu1= createTestCU("Test1");
 		IEditorPart editor1= EditorUtility.openInEditor(cu1);
@@ -180,11 +186,13 @@ public class JavaLeakTest extends LeakTestCase {
 		assertInstanceCount(CompilationUnitEditor.class, 0);
 	}
 
+	@Test
 	public void testJavaEditorCloseAll() throws Exception {
 		ICompilationUnit cu= createTestCU("Test");
 		internalTestEditorClose(cu, CompilationUnitEditor.class, true);
 	}
 
+	@Test
 	public void testJavaEditorBreadcrumbCloseAll() throws Exception {
 		try {
 			JavaPlugin.getDefault().getPreferenceStore().setValue(getBreadcrumbPreferenceKey(), true);
@@ -195,6 +203,7 @@ public class JavaLeakTest extends LeakTestCase {
 		}
 	}
 
+	@Test
 	public void testJavaEditorBreadcrumbClose() throws Exception {
 		try {
 			JavaPlugin.getDefault().getPreferenceStore().setValue(getBreadcrumbPreferenceKey(), true);
@@ -205,6 +214,7 @@ public class JavaLeakTest extends LeakTestCase {
 		}
 	}
 
+	@Test
 	public void testJavaEditorBreadcrumbCloseOneOfTwo1() throws Exception {
 		try {
 			JavaPlugin.getDefault().getPreferenceStore().setValue(getBreadcrumbPreferenceKey(), true);
@@ -234,6 +244,7 @@ public class JavaLeakTest extends LeakTestCase {
 		}
 	}
 
+	@Test
 	public void testJavaEditorBreadcrumbCloseOneOfTwo2() throws Exception {
 		try {
 			JavaPlugin.getDefault().getPreferenceStore().setValue(getBreadcrumbPreferenceKey(), true);
@@ -264,16 +275,16 @@ public class JavaLeakTest extends LeakTestCase {
 	}
 
 	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		super.setUp();
 		fJProject= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		assertTrue("RT not found", JavaProjectHelper.addRTJar(fJProject) != null);
 		assertTrue(JavaPlugin.getActivePage().closeAllEditors(false));
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
-		super.tearDown();
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJProject);
 	}
 
@@ -380,18 +391,21 @@ public class JavaLeakTest extends LeakTestCase {
 		return part;
 	}
 
+	@Test
 	public void testNewClassWizard() throws Exception {
 		assertInstanceCount(NewClassCreationWizard.class, 0);
 		doWizardLeakTest(new NewClassCreationWizard());
 		assertInstanceCount(NewClassCreationWizard.class, 0);
 	}
 
+	@Test
 	public void testNewInterfaceWizard() throws Exception {
 		assertInstanceCount(NewInterfaceCreationWizard.class, 0);
 		doWizardLeakTest(new NewInterfaceCreationWizard());
 		assertInstanceCount(NewInterfaceCreationWizard.class, 0);
 	}
 
+	@Test
 	public void testNewJavaProjectWizard() throws Exception {
 		assertInstanceCount(JavaProjectWizard.class, 0);
 		doWizardLeakTest(new JavaProjectWizard());
@@ -412,6 +426,7 @@ public class JavaLeakTest extends LeakTestCase {
 		dialog= null;
 	}
 
+	@Test
 	public void testJavaEditorContextMenu() throws Exception {
 		//regression test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=166761
 
@@ -450,6 +465,7 @@ public class JavaLeakTest extends LeakTestCase {
         }
 	}
 
+	@Test
 	public void testJavaEditorActionDelegate() throws Exception {
 		//regression test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=166761
 
@@ -461,7 +477,7 @@ public class JavaLeakTest extends LeakTestCase {
 		shell.forceActive();
 		// run display loop, such that GTK can send shell activate events, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=286244
 		DisplayHelper.sleep(shell.getDisplay(), 5000);
-		
+
 		IWorkbench workbench= workbenchWindow.getWorkbench();
 		part.getEditorSite().getPage().activate(part);
 		IHandlerService handlerService= workbench.getService(IHandlerService.class);

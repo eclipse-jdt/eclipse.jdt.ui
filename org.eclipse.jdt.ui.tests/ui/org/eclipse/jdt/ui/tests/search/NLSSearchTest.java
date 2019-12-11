@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2011 IBM Corporation and others.
+ * Copyright (c) 2006, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -18,9 +18,12 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -43,29 +46,19 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 
-public class NLSSearchTest extends TestCase {
+@RunWith(JUnit4.class)
+public class NLSSearchTest {
 
-	private static final Class<NLSSearchTest> THIS= NLSSearchTest.class;
+	@Rule
+	public ProjectTestSetup projectsetup = new ProjectTestSetup();
 
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
 
-	public NLSSearchTest(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
-	}
-
-	@Override
+	@Before
 	public void setUp() throws CoreException {
 		fJProject1= ProjectTestSetup.getProject();
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -78,8 +71,8 @@ public class NLSSearchTest extends TestCase {
 		pack.createCompilationUnit("NLS.java", buf.toString(), false, null);
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 		ISearchResultViewPart searchResultView= NewSearchUI.getSearchResultView();
 		if (searchResultView != null) {
@@ -100,6 +93,7 @@ public class NLSSearchTest extends TestCase {
 		return file;
 	}
 
+	@Test
 	public void test01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -117,6 +111,7 @@ public class NLSSearchTest extends TestCase {
 		NLSSearchTestHelper.assertNumberOfProblems(accessor, propertiesFile, 0);
 	}
 
+	@Test
 	public void test02() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -146,6 +141,7 @@ public class NLSSearchTest extends TestCase {
 		NLSSearchTestHelper.assertNumberOfProblems(accessor, propertiesFile, 0);
 	}
 
+	@Test
 	public void test03() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -177,6 +173,7 @@ public class NLSSearchTest extends TestCase {
 		NLSSearchTestHelper.assertHasUndefinedKey(accessor, propertiesFile, "Client_s1", (IFile)client.getCorrespondingResource(), false);
 	}
 
+	@Test
 	public void test04() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -208,6 +205,7 @@ public class NLSSearchTest extends TestCase {
 		NLSSearchTestHelper.assertHasUnusedKey(accessor, propertiesFile, "Client_s1", propertiesFile, false);
 	}
 
+	@Test
 	public void test05() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -238,6 +236,7 @@ public class NLSSearchTest extends TestCase {
 		NLSSearchTestHelper.assertHasUndefinedKey(accessor, propertiesFile, "Client_s1", (IFile)accessor.getCorrespondingResource(), true);
 	}
 
+	@Test
 	public void test06() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -270,6 +269,7 @@ public class NLSSearchTest extends TestCase {
 		NLSSearchTestHelper.assertHasDuplicateKey(accessor, propertiesFile, "Client_s1", propertiesFile);
 	}
 
+	@Test
 	public void testBug152604() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -299,6 +299,7 @@ public class NLSSearchTest extends TestCase {
 		NLSSearchTestHelper.assertNumberOfProblems(accessor, propertiesFile, 0);
 	}
 
+	@Test
 	public void testBug133810() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -337,6 +338,7 @@ public class NLSSearchTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testBug185178() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -371,7 +373,8 @@ public class NLSSearchTest extends TestCase {
 
 		NLSSearchTestHelper.assertNumberOfProblems(accessor, propertiesFile, 0);
 	}
-	
+
+	@Test
 	public void testBug247012_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -412,6 +415,7 @@ public class NLSSearchTest extends TestCase {
 		NLSSearchTestHelper.assertNumberOfProblems(accessor, propertiesFile, 0);
 	}
 
+	@Test
 	public void testBug247012_2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -452,6 +456,7 @@ public class NLSSearchTest extends TestCase {
 		NLSSearchTestHelper.assertNumberOfProblems(accessor, propertiesFile, 1);
 	}
 
+	@Test
 	public void testBug247012_3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -485,6 +490,7 @@ public class NLSSearchTest extends TestCase {
 		NLSSearchTestHelper.assertNumberOfProblems(accessor, propertiesFile, 0);
 	}
 
+	@Test
 	public void testBug247012_4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -522,6 +528,7 @@ public class NLSSearchTest extends TestCase {
 		NLSSearchTestHelper.assertHasUndefinedKey(accessor, propertiesFile, "Main.undefined", (IFile)client.getCorrespondingResource(), false);
 	}
 
+	@Test
 	public void testBug295040() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -563,6 +570,7 @@ public class NLSSearchTest extends TestCase {
 		NLSSearchTestHelper.assertNumberOfProblems(accessor, propertiesFile, 0);
 	}
 
+	@Test
 	public void testBug306168_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -601,6 +609,7 @@ public class NLSSearchTest extends TestCase {
 		NLSSearchTestHelper.assertNumberOfProblems(accessor, propertiesFile, 0);
 	}
 
+	@Test
 	public void testBug306168_2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();

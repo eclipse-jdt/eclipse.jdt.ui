@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,16 +11,17 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.ui.tests.search;
+package org.eclipse.jdt.ui.tests.core.rules;
 
 import java.io.File;
 
-import junit.extensions.TestSetup;
-import junit.framework.Test;
+import org.junit.rules.ExternalResource;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
 import org.eclipse.jdt.testplugin.TestOptions;
+
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -33,7 +34,7 @@ import org.eclipse.jdt.internal.ui.search.SearchParticipantRecord;
 import org.eclipse.jdt.internal.ui.search.SearchParticipantsExtensionPoint;
 
 
-public class JUnitSourceSetup extends TestSetup {
+public class JUnitSourceSetup extends ExternalResource {
 	public static final String PROJECT_NAME= "JUnitSource";
 	public static final String SRC_CONTAINER= "src";
 
@@ -52,17 +53,16 @@ public class JUnitSourceSetup extends TestSetup {
 		return JavaCore.create(project);
 	}
 
-	public JUnitSourceSetup(Test test, SearchParticipantsExtensionPoint participants) {
-		super(test);
+	public JUnitSourceSetup(SearchParticipantsExtensionPoint participants) {
 		fExtensionPoint= participants;
 	}
 
-	public JUnitSourceSetup(Test test) {
-		this(test, new NullExtensionPoint());
+	public JUnitSourceSetup() {
+		this( new NullExtensionPoint());
 	}
 
 	@Override
-	protected void setUp() throws Exception {
+	public void before() throws Throwable {
 		SearchParticipantsExtensionPoint.debugSetInstance(fExtensionPoint);
 		fProject= JavaProjectHelper.createJavaProject(PROJECT_NAME, "bin");
 		JavaProjectHelper.addRTJar(fProject);
@@ -74,8 +74,12 @@ public class JUnitSourceSetup extends TestSetup {
 	}
 
 	@Override
-	protected void tearDown() throws Exception {
-		JavaProjectHelper.delete(fProject);
+	public void after() {
+		try {
+			JavaProjectHelper.delete(fProject);
+		} catch (CoreException e) {
+			e.printStackTrace();
+		}
 		SearchParticipantsExtensionPoint.debugSetInstance(null);
 	}
 }

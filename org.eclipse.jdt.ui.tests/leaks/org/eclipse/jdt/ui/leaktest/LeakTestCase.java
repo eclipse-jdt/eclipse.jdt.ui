@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,6 +13,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.leaktest;
 
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Before;
+
 import org.eclipse.jdt.testplugin.util.DisplayHelper;
 
 import org.eclipse.swt.widgets.Display;
@@ -24,13 +28,11 @@ import org.eclipse.jdt.ui.leaktest.reftracker.ReferenceTracker;
 import org.eclipse.jdt.ui.leaktest.reftracker.ReferenceVisitor;
 import org.eclipse.jdt.ui.leaktest.reftracker.ReferencedObject;
 
-import junit.framework.TestCase;
-
 
 /**
  * Base class for leak test cases.
  */
-public class LeakTestCase extends TestCase {
+public class LeakTestCase {
 
 	public class MulipleCollectorVisitor extends ReferenceVisitor {
 		private ReferenceVisitor[] fVisitors;
@@ -49,10 +51,6 @@ public class LeakTestCase extends TestCase {
 			return visitChildren;
 		}
 
-	}
-
-	public LeakTestCase(String name) {
-		super(name);
 	}
 
 	private InstancesOfTypeCollector collect(String requestedTypeName) {
@@ -86,9 +84,8 @@ public class LeakTestCase extends TestCase {
 	 * @see junit.framework.TestCase#setUp()
 	 * @since 3.4
 	 */
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
+	@Before
+	public void setUp() throws Exception {
 		// Ensure active page to allow test being run
 		IWorkbenchWindow activeWindow= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 		if (activeWindow.getActivePage() == null) {
@@ -185,7 +182,7 @@ public class LeakTestCase extends TestCase {
 	/**
 	 * Assert that two counts are different. The method does not fail if the profile connection has
 	 * not established (e.g. because profiling is not supported on the given platform).
-	 * 
+	 *
 	 * @param startCount the start count
 	 * @param endCount the end count
 	 */
@@ -196,9 +193,9 @@ public class LeakTestCase extends TestCase {
 	/**
 	 * Assert that two counts are different. The method does not fail if the profile connection has
 	 * not established (e.g. because profiling is not supported on the given platform)
-	 * 
+	 *
 	 * @param message Message to be printed if the test fails.
-	 * 
+	 *
 	 * @param startCount the start count
 	 * @param endCount the end count
 	 */
@@ -212,7 +209,7 @@ public class LeakTestCase extends TestCase {
 	/**
 	 * Assert that two counts are equal. The method does not fail if the profile connection has not
 	 * established (e.g. because profiling is not supported on the given platform).
-	 * 
+	 *
 	 * @param startCount the start count
 	 * @param endCount the end count
 	 */
@@ -223,7 +220,7 @@ public class LeakTestCase extends TestCase {
 	/**
 	 * Assert that two counts are equal. The method does not fail if the profile connection has not
 	 * established (e.g. because profiling is not supported on the given platform).
-	 * 
+	 *
 	 * @param message Message to be printed if the test fails.
 	 * @param startCount the start count
 	 * @param endCount the end count

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2013 IBM Corporation and others.
+ * Copyright (c) 2007, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,11 +13,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.search;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
-import org.eclipse.jdt.ui.leaktest.LeakTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.LeakTestSetup;
 
 
 /**
@@ -27,46 +30,37 @@ import org.eclipse.jdt.ui.leaktest.LeakTestSetup;
  *
  * @since 3.4
  */
-public class SearchLeakTestWrapper extends TestCase {
+@RunWith(JUnit4.class)
+public class SearchLeakTestWrapper {
 
-	private static final Class<SearchLeakTestWrapper> THIS= SearchLeakTestWrapper.class;
+	@Rule
+	public LeakTestSetup projectsetup = new LeakTestSetup();
 
 	SearchLeakTest fTest;
-	private String fName;
 
-	public SearchLeakTestWrapper(String name) {
-		super(name);
-		fName= name;
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new LeakTestSetup(new JUnitSourceSetup(test));
-	}
-
-	@Override
-	protected void setUp() throws Exception {
-		fTest= new SearchLeakTest(fName);
+	@Before
+	public void setUp() throws Exception {
+		fTest= new SearchLeakTest();
 		fTest.setUp();
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
-		fTest.tearDown();
+	@After
+	public void tearDown() throws Exception {
+//		fTest.tearDown();
 		fTest= null;
 	}
 
+	@Test
 	public void testRemoveSearchQueries() throws Exception {
 		fTest.testRemoveSearchQueries();
 	}
 
+	@Test
 	public void testRemoveAllQueries() throws Exception {
 		fTest.testRemoveAllQueries();
 	}
 
+	@Test
 	public void testSearchResultEditorClose() throws Exception {
 		fTest.testSearchResultEditorClose();
 	}

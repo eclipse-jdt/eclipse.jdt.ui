@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,11 +14,16 @@
 
 package org.eclipse.jdt.ui.tests.search;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.List;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import org.eclipse.swt.events.TreeListener;
 import org.eclipse.swt.widgets.Control;
@@ -37,26 +42,22 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 
+import org.eclipse.jdt.ui.tests.core.rules.JUnitSourceSetup;
+
 import org.eclipse.jdt.internal.ui.search.JavaSearchResult;
 import org.eclipse.jdt.internal.ui.search.JavaSearchResultPage;
 import org.eclipse.jdt.internal.ui.search.LevelTreeContentProvider;
 
 /**
  */
-public class TreeContentProviderTest extends TestCase {
+@RunWith(JUnit4.class)
+public class TreeContentProviderTest {
 
-	private static final Class<TreeContentProviderTest> THIS= TreeContentProviderTest.class;
+	@Rule
+	public JUnitSourceSetup projectsetup = new JUnitSourceSetup();
 
 	private LevelTreeContentProvider fProvider;
 	private JavaSearchResult fResult;
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new JUnitSourceSetup(test);
-	}
 
 	static class MockTreeViewer extends AbstractTreeViewer {
 
@@ -136,15 +137,8 @@ public class TreeContentProviderTest extends TestCase {
 		}
 	}
 
-
-	public TreeContentProviderTest(String name) {
-		super(name);
-		// TODO Auto-generated constructor stub
-	}
-
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
+	@Before
+	public void setUp() throws Exception {
 		fProvider= new LevelTreeContentProvider(new JavaSearchResultPage() {
 			StructuredViewer fViewer= new MockTreeViewer();
 			@Override
@@ -161,11 +155,11 @@ public class TreeContentProviderTest extends TestCase {
 		fProvider.inputChanged(null, null, fResult);
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
-		super.tearDown();
+	@After
+	public void tearDown() throws Exception {
 	}
 
+	@Test
 	public void testSimpleAdd() throws Exception {
 		IMethod method= SearchTestHelper.getMethod("junit.framework.TestCase", "getName", new String[0]);
 		addMatch(new Match(method, 0, 1));
@@ -191,6 +185,7 @@ public class TreeContentProviderTest extends TestCase {
 		assertEquals(fProvider.getParent(project), null);
 	}
 
+	@Test
 	public void testRemove() throws Exception {
 		IMethod method= SearchTestHelper.getMethod("junit.framework.TestCase", "getName", new String[0]);
 		IType type= method.getDeclaringType();
@@ -211,6 +206,7 @@ public class TreeContentProviderTest extends TestCase {
 		assertEquals(0, fProvider.getElements(fResult).length);
 	}
 
+	@Test
 	public void testRemoveParentFirst() throws Exception {
 		IMethod method= SearchTestHelper.getMethod("junit.framework.TestCase", "getName", new String[0]);
 		IType type= method.getDeclaringType();
@@ -234,6 +230,7 @@ public class TreeContentProviderTest extends TestCase {
 		assertEquals(0, fProvider.getElements(fResult).length);
 	}
 
+	@Test
 	public void testRemoveParentLast() throws Exception {
 		IMethod method= SearchTestHelper.getMethod("junit.framework.TestCase", "getName", new String[0]);
 		IType type= method.getDeclaringType();
@@ -267,6 +264,5 @@ public class TreeContentProviderTest extends TestCase {
 		fResult.addMatch(match);
 		fProvider.elementsChanged(new Object[] { match.getElement() });
 	}
-
 
 }

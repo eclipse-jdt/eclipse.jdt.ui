@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,9 +13,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.search;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import org.eclipse.core.resources.IResource;
 
@@ -23,27 +27,19 @@ import org.eclipse.search.ui.text.IFileMatchAdapter;
 
 import org.eclipse.jdt.core.IJavaElement;
 
+import org.eclipse.jdt.ui.tests.core.rules.JUnitSourceSetup;
 import org.eclipse.jdt.internal.ui.search.JavaSearchQuery;
 import org.eclipse.jdt.internal.ui.search.JavaSearchResult;
 
 /**
  */
-public class FileAdapterTest extends TestCase {
+@RunWith(JUnit4.class)
+public class FileAdapterTest {
 
-	private static final Class<FileAdapterTest> THIS= FileAdapterTest.class;
+	@Rule
+	public JUnitSourceSetup projectsetup = new JUnitSourceSetup();
 
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new JUnitSourceSetup(test);
-	}
-
-	public FileAdapterTest(String name) {
-		super(name);
-	}
-
+	@Test
 	public void testGetFile() throws Exception {
 		JavaSearchQuery query= SearchTestHelper.runTypeRefQuery("junit.framework.Test");
 		JavaSearchResult result= (JavaSearchResult) query.getSearchResult();
