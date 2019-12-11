@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Simeon Andreev and others.
+ * Copyright (c) 2017, 2020 Simeon Andreev and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,8 +13,16 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.Arrays;
 import java.util.LinkedHashSet;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -31,9 +39,8 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ParentChecker;
 
-import junit.framework.TestCase;
-
-public class ParentCheckerTest extends TestCase {
+@RunWith(JUnit4.class)
+public class ParentCheckerTest {
 
 	private IJavaProject testProject;
 
@@ -49,9 +56,8 @@ public class ParentCheckerTest extends TestCase {
 	private IResource classD2;
 
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
+	@Before
+	public void setUp() throws Exception {
 
 		/*
 		 * The test structure is:
@@ -89,10 +95,9 @@ public class ParentCheckerTest extends TestCase {
 		classD2= createClass(package_a_b_d, "D2");
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		testProject.getProject().delete(true, true, null);
-		super.tearDown();
 	}
 
 
@@ -109,6 +114,7 @@ public class ParentCheckerTest extends TestCase {
 	 * Test removing the src folder.
 	 * All input packages should be removed, since the source folder (their parent) is removed.
 	 */
+	@Test
 	public void testRemovePackages1() {
 		IJavaElement[] folders= { src, package_a_b_c, package_a_b_d };
 		IResource[] resources= {};
@@ -121,6 +127,7 @@ public class ParentCheckerTest extends TestCase {
 	 * Test removing only packages and not the source folder.
 	 * No packages should be removed, since the source folder (their parent), is not removed.
 	 */
+	@Test
 	public void testRemovePackages2() {
 		IJavaElement[] folders= { package_a_b_c, package_a_b_d };
 		IResource[] resources= {};
@@ -133,6 +140,7 @@ public class ParentCheckerTest extends TestCase {
 	 * Test removing resources and the highest level package.
 	 * All resources should be removed.
 	 */
+	@Test
 	public void testRemoveResources1() {
 		IJavaElement[] packages= { package_a_b };
 		IResource[] resources= { classAB, classC, classD1, classD2 };
@@ -146,6 +154,7 @@ public class ParentCheckerTest extends TestCase {
 	 * Test removing resources and a package.
 	 * Only resources of that package should be removed.
 	 */
+	@Test
 	public void testRemoveResources2() {
 		IJavaElement[] packages= { package_a_b_c };
 		IResource[] resources= { classAB, classC, classD1, classD2 };
@@ -159,6 +168,7 @@ public class ParentCheckerTest extends TestCase {
 	 * Test removing resources and a package.
 	 * Only resources of that package should be removed.
 	 */
+	@Test
 	public void testRemoveResources3() {
 		IJavaElement[] packages= { package_a_b_d };
 		IResource[] resources= { classAB, classC, classD1, classD2 };
@@ -172,6 +182,7 @@ public class ParentCheckerTest extends TestCase {
 	 * Test removing everything.
 	 * Only the source folder should remain, since its parent is not in the input.
 	 */
+	@Test
 	public void testRemoveAll() {
 		IJavaElement[] folders= { src, package_a_b, package_a_b_c, package_a_b_d };
 		IResource[] resources= { classAB, classC, classD1, classD2 };

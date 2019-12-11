@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Simeon Andreev and others.
+ * Copyright (c) 2017, 2020 Simeon Andreev and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,10 +13,19 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -29,7 +38,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IsCompletelySelected;
 
-import junit.framework.TestCase;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 /**
  * Tests for {@link IsCompletelySelected}.
@@ -51,7 +60,8 @@ import junit.framework.TestCase;
  *
  * @author Simeon Andreev
  */
-public class IsCompletelySelectedTest extends TestCase {
+@RunWith(JUnit4.class)
+public class IsCompletelySelectedTest  {
 
 	private IJavaProject testProject;
 
@@ -62,10 +72,11 @@ public class IsCompletelySelectedTest extends TestCase {
 	private IPackageFragment package_a_b_c_d2;
 	private IPackageFragment package_a_b_e;
 
+	@Rule
+    public ProjectTestSetup projectsetup = new ProjectTestSetup();
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
+	@Before
+	public void setUp() throws Exception {
 
 		IProgressMonitor monitor= new NullProgressMonitor();
 
@@ -82,48 +93,54 @@ public class IsCompletelySelectedTest extends TestCase {
 		package_a_b_e= src.createPackageFragment("a.b.e", force, monitor);
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		testProject.getProject().delete(true, false, new NullProgressMonitor());
-		super.tearDown();
 	}
 
+	@Test
 	public void testPartialSelection1() throws Exception {
 		IPackageFragment[] selectedPackages= { package_a, package_a_b_e };
 		IPackageFragment[] expectedCompletelySelected= { package_a_b_e };
 		assertCorrectCompleteSelection(selectedPackages, expectedCompletelySelected);
 	}
 
+	@Test
 	public void testPartialSelection2() throws Exception {
 		IPackageFragment[] selectedPackages= { package_a_b, package_a_b_c_d1 };
 		IPackageFragment[] expectedCompletelySelected= { package_a_b_c_d1 };
 		assertCorrectCompleteSelection(selectedPackages, expectedCompletelySelected);
 	}
 
+	@Test
 	public void testPartialSelection3() throws Exception {
 		IPackageFragment[] selectedPackages= { package_a, package_a_b_c };
 		IPackageFragment[] expectedCompletelySelected= {};
 		assertCorrectCompleteSelection(selectedPackages, expectedCompletelySelected);
 	}
 
+	@Test
 	public void testPartialSelection4() throws Exception {
 		IPackageFragment[] selectedPackages= { package_a_b_c, package_a_b_c_d1 };
 		IPackageFragment[] expectedCompletelySelected= { package_a_b_c_d1 };
 		assertCorrectCompleteSelection(selectedPackages, expectedCompletelySelected);
 	}
 
+	@Test
 	public void testCompleteSelection() throws Exception {
 		IPackageFragment[] selectedPackages= allPackages();
 		IPackageFragment[] expectedCompletelySelected= selectedPackages;
 		assertCorrectCompleteSelection(selectedPackages, expectedCompletelySelected);
 	}
 
+	@Test
 	public void testCompleteSelectionOfSubPackage1() throws Exception {
 		IPackageFragment[] selectedPackages= { package_a_b_c, package_a_b_c_d1, package_a_b_c_d2 };
 		IPackageFragment[] expectedCompletelySelected= selectedPackages;
 		assertCorrectCompleteSelection(selectedPackages, expectedCompletelySelected);
 	}
 
+	@Test
 	public void testCompleteSelectionOfSubPackage2() throws Exception {
 		IPackageFragment[] selectedPackages= { package_a_b_e, package_a_b_c_d1, package_a_b_c_d2 };
 		IPackageFragment[] expectedCompletelySelected= { package_a_b_e, package_a_b_c_d1, package_a_b_c_d2 };
