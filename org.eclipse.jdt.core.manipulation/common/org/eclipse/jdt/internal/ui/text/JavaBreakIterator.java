@@ -422,6 +422,7 @@ public class JavaBreakIterator extends BreakIterator {
 	 * Creates a break iterator given a char sequence.
 	 * @param newText the new text
 	 */
+	@Override
 	public void setText(CharSequence newText) {
 		fText= newText;
 		fIterator.setText(new SequenceCharacterIterator(newText));
