@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2012 IBM Corporation and others.
+ * Copyright (c) 2008, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -28,6 +28,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.resource.JFaceResources;
@@ -279,7 +280,7 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 				ActionGroup actionGroup= createContextMenuActionGroup(selectionProvider);
 				if (actionGroup == null)
 					return;
-
+				Menu menu= null;
 				try {
 					MenuManager manager= new MenuManager();
 					actionGroup.setContext(new ActionContext(selectionProvider.getSelection()));
@@ -290,7 +291,7 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 					if (manager.isEmpty())
 						return;
 
-					Menu menu= manager.createContextMenu(fBreadcrumbViewer.getControl());
+					menu= manager.createContextMenu(fBreadcrumbViewer.getControl());
 					menu.setLocation(event.x + 10, event.y + 10);
 					menu.setVisible(true);
 					while (!menu.isDisposed() && menu.isVisible()) {
@@ -298,6 +299,12 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 							menu.getDisplay().sleep();
 					}
 				} finally {
+					if (menu != null
+							&& !menu.isDisposed()
+							&& menu.getDisplay() != null
+							&& Platform.OS_WIN32.equals(Platform.getOS())) {
+						menu.getDisplay().readAndDispatch();
+					}
 					actionGroup.dispose();
 				}
 			}
