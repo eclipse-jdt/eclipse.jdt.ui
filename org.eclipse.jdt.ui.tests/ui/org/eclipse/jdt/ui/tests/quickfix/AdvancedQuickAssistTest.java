@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -2992,6 +2992,151 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("            res = null;\n");
 		buf.append("        else\n");
 		buf.append("            res = b.toString();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	public void testReplaceConditionalWithIf9() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public int f1() {\n");
+		buf.append("        boolean b = true;\n");
+		buf.append("        return (b) ? 1 : 2;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int startOffset= buf.toString().indexOf("?");
+		AssistContext context= getCorrectionContext(cu, startOffset, 1);
+		assertNoErrors(context);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public int f1() {\n");
+		buf.append("        boolean b = true;\n");
+		buf.append("        if (b)\n");
+		buf.append("            return 1;\n");
+		buf.append("        else\n");
+		buf.append("            return 2;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	public void testReplaceConditionalWithIf10() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public int f1() {\n");
+		buf.append("        boolean b = true;\n");
+		buf.append("        int r = ((b)) ? ((1)) : ((2));\n");
+		buf.append("        return r;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int startOffset= buf.toString().indexOf("?");
+		AssistContext context= getCorrectionContext(cu, startOffset, 1);
+		assertNoErrors(context);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public int f1() {\n");
+		buf.append("        boolean b = true;\n");
+		buf.append("        int r;\n");
+		buf.append("        if (b)\n");
+		buf.append("            r = 1;\n");
+		buf.append("        else\n");
+		buf.append("            r = 2;\n");
+		buf.append("        return r;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+	public void testReplaceConditionalWithIf11() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public int f1() {\n");
+		buf.append("        boolean b = true;\n");
+		buf.append("        int r = 2;\n");
+		buf.append("        r += (((b ? 1 : 2)));\n");
+		buf.append("        return r;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int startOffset= buf.toString().indexOf("?");
+		AssistContext context= getCorrectionContext(cu, startOffset, 1);
+		assertNoErrors(context);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public int f1() {\n");
+		buf.append("        boolean b = true;\n");
+		buf.append("        int r = 2;\n");
+		buf.append("        if (b)\n");
+		buf.append("            r += 1;\n");
+		buf.append("        else\n");
+		buf.append("            r += 2;\n");
+		buf.append("        return r;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+	public void testReplaceConditionalWithIf12() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public int f1() {\n");
+		buf.append("        boolean b = true;\n");
+		buf.append("        return (((b) ? (1) : (2)));\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int startOffset= buf.toString().indexOf("?");
+		AssistContext context= getCorrectionContext(cu, startOffset, 1);
+		assertNoErrors(context);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public int f1() {\n");
+		buf.append("        boolean b = true;\n");
+		buf.append("        if (b)\n");
+		buf.append("            return 1;\n");
+		buf.append("        else\n");
+		buf.append("            return 2;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();

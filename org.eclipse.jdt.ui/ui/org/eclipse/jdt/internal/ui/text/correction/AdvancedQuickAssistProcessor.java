@@ -1943,11 +1943,15 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			}
 		}
 	}
-	
+
 	private static ReturnStatement createReturnExpression(ASTRewrite rewrite, Expression expression) {
 		AST ast= rewrite.getAST();
 		ReturnStatement thenReturn= ast.newReturnStatement();
-		thenReturn.setExpression((Expression) rewrite.createCopyTarget(expression));
+		Expression cleanExpression= expression;
+		while (cleanExpression instanceof ParenthesizedExpression) {
+			cleanExpression= ((ParenthesizedExpression) cleanExpression).getExpression();
+		}
+		thenReturn.setExpression((Expression) rewrite.createCopyTarget(cleanExpression));
 		return thenReturn;
 	}
 
@@ -1955,8 +1959,16 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		AST ast= rewrite.getAST();
 		Assignment elseAssignment= ast.newAssignment();
 		elseAssignment.setOperator(assignmentOperator);
-		elseAssignment.setLeftHandSide((Expression) rewrite.createCopyTarget(origAssignee));
-		elseAssignment.setRightHandSide((Expression) rewrite.createCopyTarget(origAssigned));
+		Expression left= origAssignee;
+		while (left instanceof ParenthesizedExpression) {
+			left= ((ParenthesizedExpression) left).getExpression();
+		}
+		Expression right= origAssigned;
+		while (right instanceof ParenthesizedExpression) {
+			right= ((ParenthesizedExpression) right).getExpression();
+		}
+		elseAssignment.setLeftHandSide((Expression) rewrite.createCopyTarget(left));
+		elseAssignment.setRightHandSide((Expression) rewrite.createCopyTarget(right));
 		ExpressionStatement statement= ast.newExpressionStatement(elseAssignment);
 		return statement;
 	}
@@ -1989,15 +2001,19 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		if (!(node instanceof ConditionalExpression)) {
 			return false;
 		}
-		covering= node;
 
-		StructuralPropertyDescriptor locationInParent= covering.getLocationInParent();
+		ASTNode parentNodeNoParenthesis= node;
+		StructuralPropertyDescriptor locationInParent= node.getLocationInParent();
+		while(locationInParent.getNodeClass() == ParenthesizedExpression.class) {
+			parentNodeNoParenthesis= parentNodeNoParenthesis.getParent();
+			locationInParent= parentNodeNoParenthesis.getLocationInParent();
+		}
 		if (locationInParent == Assignment.RIGHT_HAND_SIDE_PROPERTY) {
-			if (covering.getParent().getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
+			if (parentNodeNoParenthesis.getParent().getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
 				return false;
 			}
 		} else if (locationInParent == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
-			ASTNode statement= covering.getParent().getParent();
+			ASTNode statement= parentNodeNoParenthesis.getParent().getParent();
 			if (!(statement instanceof VariableDeclarationStatement) || statement.getLocationInParent() != Block.STATEMENTS_PROPERTY) {
 				return false;
 			}
@@ -2005,13 +2021,13 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			return false;
 		}
 
-		ConditionalExpression conditional= (ConditionalExpression) covering;
+		ConditionalExpression conditional= (ConditionalExpression) node;
 		//  we could produce quick assist
 		if (resultingCollections == null) {
 			return true;
 		}
-		//
-		AST ast= covering.getAST();
+
+		AST ast= node.getAST();
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 		// prepare new 'if' statement
 		Expression expression= conditional.getExpression();
@@ -2020,33 +2036,40 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		}
 		IfStatement ifStatement= ast.newIfStatement();
 		ifStatement.setExpression((Expression) rewrite.createCopyTarget(expression));
+
 		if (locationInParent == Assignment.RIGHT_HAND_SIDE_PROPERTY) {
-			Assignment assignment= (Assignment) covering.getParent();
+			ASTNode replaceNode= node;
+			while(!(replaceNode instanceof Assignment) && replaceNode != null) {
+				replaceNode= replaceNode.getParent();
+			}
+			Assignment assignment= (Assignment) replaceNode;
 			Expression assignee= assignment.getLeftHandSide();
 			Assignment.Operator op= assignment.getOperator();
-
 			ifStatement.setThenStatement(createAssignmentStatement(rewrite, op, assignee, conditional.getThenExpression()));
 			ifStatement.setElseStatement(createAssignmentStatement(rewrite, op, assignee, conditional.getElseExpression()));
-
-			// replace return conditional expression with if/then/else/return
-			rewrite.replace(covering.getParent().getParent(), ifStatement, null);
+			rewrite.replace(replaceNode.getParent(), ifStatement, null);
 
 		} else if (locationInParent == ReturnStatement.EXPRESSION_PROPERTY) {
+			ASTNode replaceNode= node;
+			while(!(replaceNode instanceof ReturnStatement) && replaceNode != null) {
+				replaceNode= replaceNode.getParent();
+			}
 			ifStatement.setThenStatement(createReturnExpression(rewrite, conditional.getThenExpression()));
 			ifStatement.setElseStatement(createReturnExpression(rewrite, conditional.getElseExpression()));
-			//
 			// replace return conditional expression with if/then/else/return
-			rewrite.replace(conditional.getParent(), ifStatement, null);
-		} else if (locationInParent == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
-			VariableDeclarationFragment frag= (VariableDeclarationFragment) covering.getParent();
-			Assignment.Operator op= Assignment.Operator.ASSIGN;
+			rewrite.replace(replaceNode, ifStatement, null);
 
+		} else if (locationInParent == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
+			ASTNode replaceNode= node;
+			while(!(replaceNode instanceof VariableDeclarationFragment) && replaceNode != null) {
+				replaceNode= replaceNode.getParent();
+			}
+			VariableDeclarationFragment frag= (VariableDeclarationFragment) replaceNode;
+			Assignment.Operator op= Assignment.Operator.ASSIGN;
 			Expression assignee= frag.getName();
 			ifStatement.setThenStatement(createAssignmentStatement(rewrite, op, assignee, conditional.getThenExpression()));
 			ifStatement.setElseStatement(createAssignmentStatement(rewrite, op, assignee, conditional.getElseExpression()));
-
 			rewrite.set(frag, VariableDeclarationFragment.INITIALIZER_PROPERTY, null, null); // clear initializer
-
 			ASTNode statement= frag.getParent();
 			rewrite.getListRewrite(statement.getParent(), Block.STATEMENTS_PROPERTY).insertAfter(ifStatement, statement, null);
 		}

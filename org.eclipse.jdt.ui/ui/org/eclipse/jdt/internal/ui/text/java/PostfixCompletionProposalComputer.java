@@ -150,6 +150,9 @@ public class PostfixCompletionProposalComputer extends AbstractTemplateCompletio
 			parser= createParser(cu);
 			CompilationUnit cuRoot= (CompilationUnit) parser.createAST(null);
 			ASTNode completionNode= cuRoot.findDeclaringNode(res[0].getKey());
+			if (completionNode == null) {
+				return;
+			}
 
 			ASTNode[] bestNode= new ASTNode[] { completionNode };
 			int tokenLength= context.getToken() != null ? context.getToken().length : 0;

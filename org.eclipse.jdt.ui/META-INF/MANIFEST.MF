@@ -3,7 +3,7 @@ Automatic-Module-Name: org.eclipse.jdt.ui
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.jdt.ui; singleton:=true
-Bundle-Version: 3.20.0.qualifier
+Bundle-Version: 3.20.100.qualifier
 Bundle-Activator: org.eclipse.jdt.internal.ui.JavaPlugin
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: %providerName
@@ -17,7 +17,6 @@ Export-Package: org.eclipse.jdt.internal.corext;x-friends:="org.eclipse.jdt.juni
  org.eclipse.jdt.internal.corext.fix;x-internal:=true,
  org.eclipse.jdt.internal.corext.javadoc;x-internal:=true,
  org.eclipse.jdt.internal.corext.refactoring;x-internal:=true,
- org.eclipse.jdt.internal.corext.refactoring.base;x-internal:=true,
  org.eclipse.jdt.internal.corext.refactoring.binary;x-internal:=true,
  org.eclipse.jdt.internal.corext.refactoring.changes;x-internal:=true,
  org.eclipse.jdt.internal.corext.refactoring.code;x-internal:=true,

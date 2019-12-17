@@ -17,7 +17,12 @@ package org.eclipse.jdt.internal.ui.text;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentExtension3;
+import org.eclipse.jface.text.IDocumentPartitioner;
+import org.eclipse.jface.text.ITypedRegion;
+import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.rules.ICharacterScanner;
 import org.eclipse.jface.text.rules.IPartitionTokenScanner;
 import org.eclipse.jface.text.rules.IToken;
@@ -63,6 +68,8 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaPa
 
 	/** The scanner. */
 	private final BufferedDocumentScanner fScanner= new BufferedDocumentScanner(1000);	// faster implementation
+
+	private IDocument fCurrentDocument;
 
 	/** The offset of the last returned token. */
 	private int fTokenOffset;
@@ -450,7 +457,38 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaPa
 	 					consume();
 	 					break;
 		 			} else if (scanForTextBlockClose()) {
-						fTokenLength= fTokenLength + 2;
+		 				boolean considerEndQuotes= true;
+		 				try {
+		 					IDocumentPartitioner docPartitioner= fCurrentDocument.getDocumentPartitioner();
+		 					if (fCurrentDocument instanceof IDocumentExtension3) {
+		 						docPartitioner= ((IDocumentExtension3)fCurrentDocument).getDocumentPartitioner(IJavaPartitions.JAVA_PARTITIONING);
+		 					}
+		 					if (docPartitioner instanceof FastJavaPartitioner) {
+		 						FastJavaPartitioner fjPartitioner= (FastJavaPartitioner) docPartitioner;
+		 						if (!fjPartitioner.hasPreviewEnabledValueChanged()) {
+				 					ITypedRegion originalPartition= TextUtilities.getPartition(fCurrentDocument, IJavaPartitions.JAVA_PARTITIONING, fTokenOffset, false);
+									ITypedRegion startingPartition= TextUtilities.getPartition(fCurrentDocument, IJavaPartitions.JAVA_PARTITIONING, fTokenOffset+ fTokenLength+2, false);
+									if (!originalPartition.equals(startingPartition)) {
+										String startingType= startingPartition.getType();
+										if (IJavaPartitions.JAVA_MULTI_LINE_STRING.equals(startingType)) {
+											considerEndQuotes= false;
+										}
+									}
+		 						}
+		 					}
+		 					if (!considerEndQuotes) {
+		 						for (int i=0; i< 3; i++) {
+									fScanner.unread();
+								}
+		 					}
+						} catch (BadLocationException e) {
+							//do nothing
+						}
+		 				if (considerEndQuotes) {
+		 					fTokenLength= fTokenLength + 2;
+		 				} else {
+		 					fTokenLength= fTokenLength - 1;
+		 				}
 						return postFix(MULTI_LINE_STRING);
 					} else {
 						consume();
@@ -684,7 +722,7 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaPa
 	 */
 	@Override
 	public void setPartialRange(IDocument document, int offset, int length, String contentType, int partitionOffset) {
-
+		fCurrentDocument= document;
 		fScanner.setRange(document, offset, length);
 		fTokenOffset= partitionOffset;
 		fTokenLength= 0;
@@ -710,7 +748,7 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaPa
 	 */
 	@Override
 	public void setRange(IDocument document, int offset, int length) {
-
+		fCurrentDocument= document;
 		fScanner.setRange(document, offset, length);
 		fTokenOffset= offset;
 		fTokenLength= 0;

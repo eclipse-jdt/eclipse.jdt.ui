@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,8 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Pierre-Yves B. <pyvesdev@gmail.com> - [inline] Allow inlining of local variable initialized to null. - https://bugs.eclipse.org/93850
+ *     Microsoft Corporation - copied to jdt.core.manipulation
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
@@ -97,6 +99,7 @@ import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComme
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorUtil;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringAnalyzeUtil;
 import org.eclipse.jdt.internal.corext.refactoring.rename.TempDeclarationFinder;
 import org.eclipse.jdt.internal.corext.refactoring.rename.TempOccurrenceAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
@@ -116,6 +119,8 @@ public class InlineTempRefactoring extends Refactoring {
 	private VariableDeclaration fVariableDeclaration;
 	private SimpleName[] fReferences;
 	private CompilationUnit fASTRoot;
+	private boolean fCheckResultForCompileProblems;
+	private CompilationUnitChange fChange;
 
 	/**
 	 * Creates a new inline constant refactoring.
@@ -133,6 +138,8 @@ public class InlineTempRefactoring extends Refactoring {
 
 		fASTRoot= node;
 		fVariableDeclaration= null;
+		fCheckResultForCompileProblems= true;
+		fChange= null;
 	}
 
 	/**
@@ -155,6 +162,8 @@ public class InlineTempRefactoring extends Refactoring {
 		fSelectionStart= decl.getStartPosition();
 		fSelectionLength= decl.getLength();
 		fCu= (ICompilationUnit) fASTRoot.getJavaElement();
+		fCheckResultForCompileProblems= true;
+		fChange= null;
 	}
 
     public InlineTempRefactoring(JavaRefactoringArguments arguments, RefactoringStatus status) {
@@ -163,6 +172,9 @@ public class InlineTempRefactoring extends Refactoring {
    		status.merge(initializeStatus);
     }
 
+	public void setCheckResultForCompileProblems(boolean checkResultForCompileProblems) {
+		fCheckResultForCompileProblems = checkResultForCompileProblems;
+	}
 
 	public RefactoringStatus checkIfTempSelected() {
 		VariableDeclaration decl= getVariableDeclaration();
@@ -211,20 +223,11 @@ public class InlineTempRefactoring extends Refactoring {
 			VariableDeclaration declaration= getVariableDeclaration();
 
 			result.merge(checkSelection(selected, declaration));
-			if (result.hasFatalError())
-				return result;
 
-			result.merge(checkInitializer(declaration));
 			return result;
 		} finally {
 			pm.done();
 		}
-	}
-
-    private RefactoringStatus checkInitializer(VariableDeclaration decl) {
-		if (decl.getInitializer().getNodeType() == ASTNode.NULL_LITERAL)
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InlineTemRefactoring_error_message_nulLiteralsCannotBeInlined);
-		return null;
 	}
 
 	private RefactoringStatus checkSelection(ASTNode selectedNode, VariableDeclaration decl) {
@@ -283,7 +286,14 @@ public class InlineTempRefactoring extends Refactoring {
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask("", 1); //$NON-NLS-1$
-			return new RefactoringStatus();
+			CompilationUnitRewrite cuRewrite= new CompilationUnitRewrite(fCu, fASTRoot);
+
+			inlineTemp(cuRewrite);
+			removeTemp(cuRewrite);
+
+			fChange= cuRewrite.createChange(RefactoringCoreMessages.InlineTempRefactoring_inline, false, new SubProgressMonitor(pm, 1));
+
+			return fCheckResultForCompileProblems ? RefactoringAnalyzeUtil.checkNewSource(fChange, fCu, fASTRoot, pm) : new RefactoringStatus();
 		} finally {
 			pm.done();
 		}
@@ -295,38 +305,37 @@ public class InlineTempRefactoring extends Refactoring {
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask(RefactoringCoreMessages.InlineTempRefactoring_preview, 2);
-			final Map<String, String> arguments= new HashMap<>();
-			String project= null;
-			IJavaProject javaProject= fCu.getJavaProject();
-			if (javaProject != null)
-				project= javaProject.getElementName();
 
-			final IVariableBinding binding= getVariableDeclaration().resolveBinding();
-			String text= null;
-			final IMethodBinding method= binding.getDeclaringMethod();
-			if (method != null)
-				text= BindingLabelProviderCore.getBindingLabel(method, JavaElementLabelsCore.ALL_FULLY_QUALIFIED);
-			else
-				text= BasicElementLabels.getJavaElementName('{' + JavaElementLabelsCore.ELLIPSIS_STRING + '}');
-			final String description= Messages.format(RefactoringCoreMessages.InlineTempRefactoring_descriptor_description_short, BasicElementLabels.getJavaElementName(binding.getName()));
-			final String header= Messages.format(RefactoringCoreMessages.InlineTempRefactoring_descriptor_description, new String[] { BindingLabelProviderCore.getBindingLabel(binding, JavaElementLabelsCore.ALL_FULLY_QUALIFIED), text});
-			final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
-			comment.addSetting(Messages.format(RefactoringCoreMessages.InlineTempRefactoring_original_pattern, BindingLabelProviderCore.getBindingLabel(binding, JavaElementLabelsCore.ALL_FULLY_QUALIFIED)));
-			final InlineLocalVariableDescriptor descriptor= RefactoringSignatureDescriptorFactory.createInlineLocalVariableDescriptor(project, description, comment.asString(), arguments, RefactoringDescriptor.NONE);
-			arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT, JavaRefactoringDescriptorUtil.elementToHandle(project, fCu));
-			arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION, String.valueOf(fSelectionStart) + ' ' + String.valueOf(fSelectionLength));
-
-			CompilationUnitRewrite cuRewrite= new CompilationUnitRewrite(fCu, fASTRoot);
-
-			inlineTemp(cuRewrite);
-			removeTemp(cuRewrite);
-
-			final CompilationUnitChange result= cuRewrite.createChange(RefactoringCoreMessages.InlineTempRefactoring_inline, false, new SubProgressMonitor(pm, 1));
-			result.setDescriptor(new RefactoringChangeDescriptor(descriptor));
-			return result;
+			final InlineLocalVariableDescriptor descriptor= createRefactoringDescriptor();
+			fChange.setDescriptor(new RefactoringChangeDescriptor(descriptor));
+			return fChange;
 		} finally {
 			pm.done();
 		}
+	}
+
+	private InlineLocalVariableDescriptor createRefactoringDescriptor() {
+		final Map<String, String> arguments= new HashMap<>();
+		String project= null;
+		IJavaProject javaProject= fCu.getJavaProject();
+		if (javaProject != null)
+			project= javaProject.getElementName();
+
+		final IVariableBinding binding= getVariableDeclaration().resolveBinding();
+		String text= null;
+		final IMethodBinding method= binding.getDeclaringMethod();
+		if (method != null)
+			text= BindingLabelProviderCore.getBindingLabel(method, JavaElementLabelsCore.ALL_FULLY_QUALIFIED);
+		else
+			text= BasicElementLabels.getJavaElementName('{' + JavaElementLabelsCore.ELLIPSIS_STRING + '}');
+		final String description= Messages.format(RefactoringCoreMessages.InlineTempRefactoring_descriptor_description_short, BasicElementLabels.getJavaElementName(binding.getName()));
+		final String header= Messages.format(RefactoringCoreMessages.InlineTempRefactoring_descriptor_description, new String[] { BindingLabelProviderCore.getBindingLabel(binding, JavaElementLabelsCore.ALL_FULLY_QUALIFIED), text});
+		final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
+		comment.addSetting(Messages.format(RefactoringCoreMessages.InlineTempRefactoring_original_pattern, BindingLabelProviderCore.getBindingLabel(binding, JavaElementLabelsCore.ALL_FULLY_QUALIFIED)));
+		final InlineLocalVariableDescriptor descriptor= RefactoringSignatureDescriptorFactory.createInlineLocalVariableDescriptor(project, description, comment.asString(), arguments, RefactoringDescriptor.NONE);
+		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT, JavaRefactoringDescriptorUtil.elementToHandle(project, fCu));
+		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION, String.valueOf(fSelectionStart) + ' ' + String.valueOf(fSelectionLength));
+		return descriptor;
 	}
 
 	private void inlineTemp(CompilationUnitRewrite cuRewrite) throws JavaModelException {

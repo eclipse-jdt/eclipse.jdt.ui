@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,11 +11,9 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Nikolay Metchev <nikolaymetchev@gmail.com> - [inline] Inline local variable with initializer generates assignment where left-hand side is not a variable - https://bugs.eclipse.org/394721
+  *     Pierre-Yves B. <pyvesdev@gmail.com> - [inline] Allow inlining of local variable initialized to null. - https://bugs.eclipse.org/93850
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
@@ -27,6 +25,9 @@ import org.eclipse.jdt.core.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 public class InlineTempTests extends RefactoringTest {
 
@@ -350,6 +351,11 @@ public class InlineTempTests extends RefactoringTest {
 		helper1(5, 15, 5, 16);
 	}
 
+	public void test50() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=93850
+		helper1(4, 17, 4, 18);
+	}
+
 	//------
 
 	public void testFail0() throws Exception{
@@ -406,13 +412,26 @@ public class InlineTempTests extends RefactoringTest {
 	}
 
 	public void testFail12() throws Exception{
+		printTestDisabledMessage("compile errors are ok now");
 		//test for 19851
-		helper2(10, 16, 10, 19);
+//		helper2(10, 16, 10, 19);
 	}
+
 
 	public void testFail13() throws Exception{
 //		printTestDisabledMessage("12106");
 		helper2(4, 18, 4, 19);
+	}
+
+	public void testFail14() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=93850
+		helper2(5, 17, 5, 18);
+	}
+
+	public void testFail15() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=93850
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=434747
+		helper2(5, 16, 5, 17);
 	}
 
 }

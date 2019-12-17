@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Microsoft Corporation - copied to jdt.core.manipulation
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
@@ -75,7 +76,7 @@ import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
-class RenameAnalyzeUtil {
+public class RenameAnalyzeUtil {
 
 	private static class ProblemNodeFinder {
 
@@ -143,7 +144,7 @@ class RenameAnalyzeUtil {
 		}
 	}
 
-	static class LocalAnalyzePackage {
+	public static class LocalAnalyzePackage {
 		public final TextEdit fDeclarationEdit;
 		public final TextEdit[] fOccurenceEdits;
 
@@ -157,7 +158,7 @@ class RenameAnalyzeUtil {
 		//no instance
 	}
 
-	static RefactoringStatus analyzeRenameChanges(TextChangeManager manager,  SearchResultGroup[] oldOccurrences, SearchResultGroup[] newOccurrences) {
+	public static RefactoringStatus analyzeRenameChanges(TextChangeManager manager,  SearchResultGroup[] oldOccurrences, SearchResultGroup[] newOccurrences) {
 		RefactoringStatus result= new RefactoringStatus();
 		for (int i= 0; i < oldOccurrences.length; i++) {
 			SearchResultGroup oldGroup= oldOccurrences[i];
@@ -175,7 +176,7 @@ class RenameAnalyzeUtil {
 		return result;
 	}
 
-	static ICompilationUnit findWorkingCopyForCu(ICompilationUnit[] newWorkingCopies, ICompilationUnit cu){
+	public static ICompilationUnit findWorkingCopyForCu(ICompilationUnit[] newWorkingCopies, ICompilationUnit cu){
 		ICompilationUnit original= cu == null ? null : cu.getPrimary();
 		for (int i= 0; i < newWorkingCopies.length; i++) {
 			if (newWorkingCopies[i].getPrimary().equals(original))
@@ -184,7 +185,7 @@ class RenameAnalyzeUtil {
 		return null;
 	}
 
-	static ICompilationUnit[] createNewWorkingCopies(ICompilationUnit[] compilationUnitsToModify, TextChangeManager manager, WorkingCopyOwner owner, SubProgressMonitor pm) throws CoreException {
+	public static ICompilationUnit[] createNewWorkingCopies(ICompilationUnit[] compilationUnitsToModify, TextChangeManager manager, WorkingCopyOwner owner, SubProgressMonitor pm) throws CoreException {
 		pm.beginTask("", compilationUnitsToModify.length); //$NON-NLS-1$
 		ICompilationUnit[] newWorkingCopies= new ICompilationUnit[compilationUnitsToModify.length];
 		for (int i= 0; i < compilationUnitsToModify.length; i++) {
@@ -195,7 +196,7 @@ class RenameAnalyzeUtil {
 		return newWorkingCopies;
 	}
 
-	static ICompilationUnit createNewWorkingCopy(ICompilationUnit cu, TextChangeManager manager,
+	public static ICompilationUnit createNewWorkingCopy(ICompilationUnit cu, TextChangeManager manager,
 			WorkingCopyOwner owner, SubProgressMonitor pm) throws CoreException {
 		ICompilationUnit newWc= cu.getWorkingCopy(owner, null);
 		String previewContent= manager.get(cu).getPreviewContent(new NullProgressMonitor());
@@ -259,7 +260,7 @@ class RenameAnalyzeUtil {
 
 	//TODO: Currently filters out declarations (MethodDeclarationMatch, FieldDeclarationMatch).
 	//Long term solution: only pass reference search results in.
-	static RefactoringStatus analyzeRenameChanges2(TextChangeManager manager,
+	public static RefactoringStatus analyzeRenameChanges2(TextChangeManager manager,
 			SearchResultGroup[] oldReferences, SearchResultGroup[] newReferences, String newElementName) {
 		RefactoringStatus result= new RefactoringStatus();
 
