@@ -28,6 +28,8 @@ import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
@@ -36,13 +38,14 @@ import org.eclipse.jdt.core.dom.BooleanLiteral;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
-import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.StringLiteral;
+import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.template.java.JavaPostfixContextType;
@@ -138,22 +141,23 @@ public class PostfixCompletionProposalComputer extends AbstractTemplateCompletio
 		}
 
 		ICompilationUnit cu= (ICompilationUnit) enclosingElement.getAncestor(IJavaElement.COMPILATION_UNIT);
-		ASTParser parser= createParser(cu);
-		IBinding[] res;
-		try {
-			res= parser.createBindings(new IJavaElement[] { enclosingElement }, null);
-		} catch (Exception e) {
-			return;
+		CompilationUnit cuRoot= SharedASTProviderCore.getAST(cu, SharedASTProviderCore.WAIT_NO, null);
+		if (cuRoot == null) {
+			cuRoot= (CompilationUnit) createParser(cu).createAST(null);
 		}
 
-		if (res.length > 0 && res[0] != null) {
-			parser= createParser(cu);
-			CompilationUnit cuRoot= (CompilationUnit) parser.createAST(null);
-			ASTNode completionNode= cuRoot.findDeclaringNode(res[0].getKey());
-			if (completionNode == null) {
+		if (enclosingElement instanceof IMember) {
+			ISourceRange sr;
+			try {
+				sr= ((IMember) enclosingElement).getSourceRange();
+				if (sr == null) {
+					return;
+				}
+			} catch (JavaModelException e) {
 				return;
 			}
 
+			ASTNode completionNode= NodeFinder.perform(cuRoot, sr);
 			ASTNode[] bestNode= new ASTNode[] { completionNode };
 			int tokenLength= context.getToken() != null ? context.getToken().length : 0;
 			int invOffset= context.getOffset() - tokenLength - 1;
