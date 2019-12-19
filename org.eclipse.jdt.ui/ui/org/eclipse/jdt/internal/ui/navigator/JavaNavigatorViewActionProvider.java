@@ -170,7 +170,7 @@ public class JavaNavigatorViewActionProvider extends CommonActionProvider {
 		// If no memento try to restore from preference store
 		if (showLibrariesNodeState == null) {
 			IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-			showLibrariesNodeState= new Boolean(store.getString(TAG_LIBRARIES_NODE).equals(IPreferenceStore.STRING_DEFAULT_DEFAULT) || store.getBoolean((TAG_LIBRARIES_NODE)));
+			showLibrariesNodeState= Boolean.valueOf(store.getString(TAG_LIBRARIES_NODE).equals(IPreferenceStore.STRING_DEFAULT_DEFAULT) || store.getBoolean((TAG_LIBRARIES_NODE)));
 		}
 
 		boolean showLibrariesNode = showLibrariesNodeState.booleanValue();
