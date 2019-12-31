@@ -93,7 +93,6 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 	private IMethodBinding fSizeMethodBinding;
 	private IMethodBinding fGetMethodBinding;
 	private MethodInvocation fSizeMethodAccess;
-
 	public ConvertForLoopOperation(ForStatement forStatement) {
 		this(forStatement, new String[0], false);
 	}
@@ -822,11 +821,7 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 
 	private String[] getVariableNameProposals(ITypeBinding arrayTypeBinding, IJavaProject project) {
 		String[] variableNames= getUsedVariableNames();
-		String baseName= FOR_LOOP_ELEMENT_IDENTIFIER;
-		String name= fArrayBinding.getName();
-		if (name.length() > 2 && name.charAt(name.length() - 1) == 's') {
-			baseName= name.substring(0, name.length() - 1);
-		}
+		String baseName= modifybasename(fArrayBinding.getName());
 		String[] elementSuggestions= StubUtility.getLocalNameSuggestions(project, baseName, 0, variableNames);
 
 		String type= arrayTypeBinding.getElementType().getName();
@@ -840,12 +835,9 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 
 	private String[] getVariableNameProposalsCollection(MethodInvocation sizeMethodAccess, IJavaProject project) {
 		String[] variableNames= getUsedVariableNames();
-		String baseName= FOR_LOOP_ELEMENT_IDENTIFIER;
 		Expression exp= sizeMethodAccess.getExpression();
 		String name= exp instanceof SimpleName ? ((SimpleName)exp).getFullyQualifiedName() : ""; //$NON-NLS-1$
-		if (name.length() > 2 && name.charAt(name.length() - 1) == 's') {
-			baseName= name.substring(0, name.length() - 1);
-		}
+		String baseName= modifybasename(name);
 		String[] elementSuggestions= StubUtility.getLocalNameSuggestions(project, baseName, 0, variableNames);
 
 		ITypeBinding[] typeArgs= fSizeMethodBinding.getDeclaringClass().getTypeArguments();

@@ -17,10 +17,15 @@
  **/
 package org.eclipse.jdt.internal.corext.fix;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
@@ -45,6 +50,48 @@ public abstract class ConvertLoopOperation extends CompilationUnitRewriteOperati
 	protected static final String FOR_LOOP_ELEMENT_IDENTIFIER= "element"; //$NON-NLS-1$
 
 	protected static final IStatus ERROR_STATUS= new Status(IStatus.ERROR, JavaManipulationPlugin.getPluginId(), ""); //$NON-NLS-1$
+
+	private static final Map<String, String> IRREG_NOUNS= Stream.of(
+			new AbstractMap.SimpleImmutableEntry<>("Children", "Child"), //$NON-NLS-1$ //$NON-NLS-2$
+			new AbstractMap.SimpleImmutableEntry<>("Entries", "Entry"), //$NON-NLS-1$ //$NON-NLS-2$
+			new AbstractMap.SimpleImmutableEntry<>("Proxies", "Proxy"), //$NON-NLS-1$ //$NON-NLS-2$
+			new AbstractMap.SimpleImmutableEntry<>("Indices", "Index")) //$NON-NLS-1$ //$NON-NLS-2$
+			.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+	private static final Set<String> NO_BASE_TYPES	= Stream.of(
+			new String[] {
+					/* note: ints left out intentionally */
+					"integers", //$NON-NLS-1$
+					"floats", //$NON-NLS-1$
+					"doubles", //$NON-NLS-1$
+					"booleans", //$NON-NLS-1$
+					"bytes", //$NON-NLS-1$
+					"chars", //$NON-NLS-1$
+					"shorts", //$NON-NLS-1$
+					"longs"}) //$NON-NLS-1$
+			.collect(Collectors.toSet());
+
+	private static final Set<String> CUT_PREFIX= Stream.of(
+			new String[] {
+					"all"}) //$NON-NLS-1$
+			.collect(Collectors.toSet());
+
+	private static final Set<String> IRREG_ENDINGS= Stream.of(
+			new String[] {
+					"xes", //$NON-NLS-1$
+					"ies", //$NON-NLS-1$
+					"oes", //$NON-NLS-1$
+					"ses", //$NON-NLS-1$
+					"hes", //$NON-NLS-1$
+					"zes", //$NON-NLS-1$
+					"ves", //$NON-NLS-1$
+					"ces", //$NON-NLS-1$
+					"ss",  //$NON-NLS-1$
+					"is",  //$NON-NLS-1$
+					"us",  //$NON-NLS-1$
+					"os",  //$NON-NLS-1$
+					"as"}) //$NON-NLS-1$
+			.collect(Collectors.toSet());
 
 	private final ForStatement fStatement;
 	private ConvertLoopOperation fOperation;
@@ -103,6 +150,50 @@ public abstract class ConvertLoopOperation extends CompilationUnitRewriteOperati
 		results.addAll(Arrays.asList(fUsedNames));
 
 		return results.toArray(new String[results.size()]);
+	}
+
+	protected String modifybasename(String suggestedName) {
+		String name= suggestedName;
+		for(String prefix : CUT_PREFIX) {
+			if(prefix.length() >= suggestedName.length()) {
+				continue;
+			}
+			char afterPrefix= suggestedName.charAt(prefix.length());
+			if(Character.isUpperCase(afterPrefix) || afterPrefix == '_') {
+				if(suggestedName.toLowerCase().startsWith(prefix)) {
+					String nameWithoutPrefix= suggestedName.substring(prefix.length());
+					if(nameWithoutPrefix.startsWith("_") && nameWithoutPrefix.length() > 1) { //$NON-NLS-1$
+						name= nameWithoutPrefix.substring(1);
+					} else {
+						name= nameWithoutPrefix;
+					}
+					if(name.length() == 1) {
+						return name;
+					}
+					break;
+				}
+			}
+		}
+		for(String suffix : IRREG_NOUNS.keySet()) {
+			if(name.toLowerCase().endsWith(suffix.toLowerCase())) {
+				String firstPart= name.substring(0, name.length() - suffix.length());
+				return firstPart + IRREG_NOUNS.get(suffix);
+			}
+		}
+		for(String varname : NO_BASE_TYPES) {
+			if(name.equalsIgnoreCase(varname)) {
+				return FOR_LOOP_ELEMENT_IDENTIFIER;
+			}
+		}
+		for(String suffix : IRREG_ENDINGS) {
+			if(name.toLowerCase().endsWith(suffix)) {
+				return FOR_LOOP_ELEMENT_IDENTIFIER;
+			}
+		}
+		if(name.length() > 2 && name.endsWith("s")) { //$NON-NLS-1$
+			return name.substring(0, name.length() - 1);
+		}
+		return FOR_LOOP_ELEMENT_IDENTIFIER;
 	}
 
 }
