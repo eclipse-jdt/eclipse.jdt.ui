@@ -252,7 +252,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 		private final String fCleanUpNames;
 
 		protected SlowCleanUpWarningDialog(Shell parent, String title, String cleanUpNames) {
-			super(ID, parent, title, null, null, MessageDialog.WARNING, new String[] { IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL }, 0);
+			super(ID, parent, title, null, null, MessageDialog.WARNING, new String[] { IDialogConstants.OK_LABEL}, 0);
 			fCleanUpNames= cleanUpNames;
 		}
 
