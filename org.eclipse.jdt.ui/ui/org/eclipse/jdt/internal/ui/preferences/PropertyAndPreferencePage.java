@@ -273,12 +273,7 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 	 * @return The new listener
 	 */
 	protected IStatusChangeListener getNewStatusChangedListener() {
-		return new IStatusChangeListener() {
-			@Override
-			public void statusChanged(IStatus status) {
-				setPreferenceContentStatus(status);
-			}
-		};
+		return this::setPreferenceContentStatus;
 	}
 
 	protected IStatus getPreferenceContentStatus() {

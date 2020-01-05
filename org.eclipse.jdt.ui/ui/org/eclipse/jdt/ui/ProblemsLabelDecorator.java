@@ -470,12 +470,7 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 		}
 		fListeners.add(listener);
 		if (fProblemChangedListener == null) {
-			fProblemChangedListener= new IProblemChangedListener() {
-				@Override
-				public void problemsChanged(IResource[] changedResources, boolean isMarkerChange) {
-					fireProblemsChanged(changedResources, isMarkerChange);
-				}
-			};
+			fProblemChangedListener= this::fireProblemsChanged;
 			JavaPlugin.getDefault().getProblemMarkerManager().addListener(fProblemChangedListener);
 		}
 	}

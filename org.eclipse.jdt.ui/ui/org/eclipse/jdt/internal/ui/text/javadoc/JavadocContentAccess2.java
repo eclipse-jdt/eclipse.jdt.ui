@@ -309,12 +309,7 @@ public class JavadocContentAccess2 {
 		 * 		or <code>null</code> if none could be found
 		 */
 		public CharSequence getInheritedMainDescription(IMethod method) {
-			return getInheritedDescription(method, new DescriptionGetter() {
-				@Override
-				public CharSequence getDescription(JavadocContentAccess2 contentAccess) {
-					return contentAccess.getMainDescription();
-				}
-			});
+			return getInheritedDescription(method, JavadocContentAccess2::getMainDescription);
 		}
 
 		/**
@@ -361,12 +356,7 @@ public class JavadocContentAccess2 {
 		 * 		or <code>null</code> if none could be found
 		 */
 		public CharSequence getInheritedReturnDescription(IMethod method) {
-			return getInheritedDescription(method, new DescriptionGetter() {
-				@Override
-				public CharSequence getDescription(JavadocContentAccess2 contentAccess) {
-					return contentAccess.getReturnDescription();
-				}
-			});
+			return getInheritedDescription(method, JavadocContentAccess2::getReturnDescription);
 		}
 
 		/**

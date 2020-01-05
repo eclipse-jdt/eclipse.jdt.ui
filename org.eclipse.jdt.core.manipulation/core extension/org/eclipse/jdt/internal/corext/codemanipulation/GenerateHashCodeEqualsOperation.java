@@ -478,14 +478,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 				} else if (fUseJ7HashEquals) {
 					j7Invoc.arguments().add(fAst.newSimpleName(field.getName()));
 				} else if (field.getType().isPrimitive()) {
-					Statement[] sts= createAddSimpleHashCode(field.getType(), new IHashCodeAccessProvider() {
-
-						@Override
-						public Expression getThisAccess(String name) {
-							return getThisAccessForHashCode(name);
-						}
-
-					}, field.getName(), false);
+					Statement[] sts= createAddSimpleHashCode(field.getType(), this::getThisAccessForHashCode, field.getName(), false);
 					for (Statement st : sts) {
 						body.statements().add(st);
 					}

@@ -81,12 +81,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 		setDescription(PreferencesMessages.AppearancePreferencePage_description);
 
-		IDialogFieldListener listener= new IDialogFieldListener() {
-			@Override
-			public void dialogFieldChanged(DialogField field) {
-				doDialogFieldChanged(field);
-			}
-		};
+		IDialogFieldListener listener= this::doDialogFieldChanged;
 
 		fShowMethodReturnType= new SelectionButtonDialogField(SWT.CHECK);
 		fShowMethodReturnType.setDialogFieldListener(listener);

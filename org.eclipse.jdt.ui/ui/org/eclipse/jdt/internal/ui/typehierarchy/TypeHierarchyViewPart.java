@@ -269,12 +269,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		fRestoreStateJob= null;
 
 		fHierarchyLifeCycle= new TypeHierarchyLifeCycle(this);
-		fTypeHierarchyLifeCycleListener= new ITypeHierarchyLifeCycleListener() {
-			@Override
-			public void typeHierarchyChanged(TypeHierarchyLifeCycle typeHierarchy, IType[] changedTypes) {
-				doTypeHierarchyChanged(typeHierarchy, changedTypes);
-			}
-		};
+		fTypeHierarchyLifeCycleListener= this::doTypeHierarchyChanged;
 		fHierarchyLifeCycle.addChangedListener(fTypeHierarchyLifeCycleListener);
 
 		fPropertyChangeListener= new IPropertyChangeListener() {
