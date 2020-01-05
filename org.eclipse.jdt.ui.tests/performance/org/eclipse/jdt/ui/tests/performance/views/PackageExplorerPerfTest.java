@@ -129,8 +129,7 @@ public class PackageExplorerPerfTest extends JdtPerformanceTestCase {
 		IPackageFragmentRoot classFolder= JavaProjectHelper.addClassFolderWithImport(javaProject, "classes", null, null, jreArchive);
 		((IFolder) classFolder.getResource()).getFolder("META-INF").delete(true, null);
 		
-		ZipFile zipFile= new ZipFile(jreArchive);
-		try {
+		try (ZipFile zipFile= new ZipFile(jreArchive)) {
 			for (int i= 1; i <= 5; i++) {
 				String packName= "copy" + i;
 				classFolder.createPackageFragment(packName, true, null);
@@ -138,8 +137,6 @@ public class PackageExplorerPerfTest extends JdtPerformanceTestCase {
 				JavaProjectHelper.importFilesFromZip(zipFile, folder.getFullPath(), null);
 				folder.getFolder("META-INF").delete(true, null);
 			}
-		} finally {
-			zipFile.close();
 		}
 		
 		javaProject.getProject().getWorkspace().run(new IWorkspaceRunnable() {

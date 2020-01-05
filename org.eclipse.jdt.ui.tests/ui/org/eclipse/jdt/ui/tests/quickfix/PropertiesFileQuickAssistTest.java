@@ -130,11 +130,8 @@ public class PropertiesFileQuickAssistTest extends TestCase {
 	}
 
 	private static void checkContentOfFile(String message, IFile file, String content) throws Exception {
-		InputStream in= file.getContents();
-		try {
+		try (InputStream in= file.getContents()) {
 			assertEqualLines(message, content, copyToString(in));
-		} finally {
-			in.close();
 		}
 	}
 

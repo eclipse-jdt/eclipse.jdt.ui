@@ -109,9 +109,10 @@ public class PlainJarExportTests extends TestCase {
 		data.setElements(new Object[] { fCU });
 		data.setExportClassFiles(true);
 		
-		ZipFile jar= createArchive(data);
-		ArrayList<String> entries= getSortedEntries(jar);
-		jar.close();
+		ArrayList<String> entries;
+		try (ZipFile jar= createArchive(data)) {
+			entries= getSortedEntries(jar);
+		}
 		List<String> expected= Arrays.asList(new String[] {
 				"META-INF/MANIFEST.MF\n",
 				"org/eclipse/jdt/ui/test/Main$1.class\n",
@@ -127,9 +128,10 @@ public class PlainJarExportTests extends TestCase {
 		data.setElements(new Object[] { fCU.getResource() });
 		data.setExportClassFiles(true);
 		
-		ZipFile jar= createArchive(data);
-		ArrayList<String> entries= getSortedEntries(jar);
-		jar.close();
+		ArrayList<String> entries;
+		try (ZipFile jar= createArchive(data)) {
+			entries= getSortedEntries(jar);
+		}
 		List<String> expected= Arrays.asList(new String[] { "META-INF/MANIFEST.MF\n", "org/eclipse/jdt/ui/test/Main$1.class\n",
 				"org/eclipse/jdt/ui/test/Main$MainInner.class\n",
 				"org/eclipse/jdt/ui/test/Main.class\n", });
@@ -149,9 +151,10 @@ public class PlainJarExportTests extends TestCase {
 		data.setElements(new Object[] { fCU.getResource(), externalRoot });
 		data.setExportClassFiles(true);
 
-		ZipFile jar= createArchive(data);
-		ArrayList<String> entries= getSortedEntries(jar);
-		jar.close();
+		ArrayList<String> entries;
+		try (ZipFile jar= createArchive(data)) {
+			entries= getSortedEntries(jar);
+		}
 		List<String> expected= Arrays.asList(new String[] {
 				"META-INF/MANIFEST.MF\n",
 				"org/eclipse/jdt/ui/test/Main$1.class\n",

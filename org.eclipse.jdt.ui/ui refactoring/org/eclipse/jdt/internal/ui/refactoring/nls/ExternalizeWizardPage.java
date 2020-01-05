@@ -702,9 +702,9 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		Properties props= new Properties();
 		try {
 			if (propertyFile.exists()) {
-				InputStream is= propertyFile.getContents();
-				props.load(is);
-				is.close();
+				try (InputStream is= propertyFile.getContents()) {
+					props.load(is);
+				}
 			}
 		} catch (Exception e) {
 			// sorry no property

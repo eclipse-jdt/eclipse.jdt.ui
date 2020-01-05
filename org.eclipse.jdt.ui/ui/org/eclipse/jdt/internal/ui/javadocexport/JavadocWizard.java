@@ -300,8 +300,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 			File file= File.createTempFile("javadoc-arguments", ".tmp");  //$NON-NLS-1$//$NON-NLS-2$
 			vmArgs.add('@' + file.getAbsolutePath());
 
-			BufferedWriter writer= new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), getEncoding(vmArgs)));
-			try {
+			try (BufferedWriter writer= new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), getEncoding(vmArgs)))) {
 				for (int i= 0; i < progArgs.size(); i++) {
 					String curr= progArgs.get(i);
 					curr= checkForSpaces(curr);
@@ -309,8 +308,6 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 					writer.write(curr);
 					writer.write(' ');
 				}
-			} finally {
-				writer.close();
 			}
 			String[] args= vmArgs.toArray(new String[vmArgs.size()]);
 			process= Runtime.getRuntime().exec(args);

@@ -65,17 +65,16 @@ public class FatJarRsrcUrlAntExporter extends FatJarAntExporter {
 	}
 
 	private void copyJarInJarLoader(File targetFile) throws IOException {
-		InputStream is= JavaPlugin.getDefault().getBundle().getEntry(FatJarRsrcUrlBuilder.JAR_RSRC_LOADER_ZIP).openStream();
-		OutputStream os= new FileOutputStream(targetFile);
-		byte[] buf= new byte[1024];
-		while (true) {
-			int cnt= is.read(buf);
-			if (cnt <= 0)
-				break;
-			os.write(buf, 0, cnt);
+		try (InputStream is= JavaPlugin.getDefault().getBundle().getEntry(FatJarRsrcUrlBuilder.JAR_RSRC_LOADER_ZIP).openStream();
+			OutputStream os= new FileOutputStream(targetFile);) {
+			byte[] buf= new byte[1024];
+			while (true) {
+				int cnt= is.read(buf);
+				if (cnt <= 0)
+					break;
+				os.write(buf, 0, cnt);
+			}
 		}
-		os.close();
-		is.close();
 	}
 
 	protected void buildANTScript(OutputStream outputStream, String projectName, IPath absJarfile, String mainClass, SourceInfo[] sourceInfos) throws IOException {

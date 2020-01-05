@@ -81,14 +81,11 @@ public final class SerialVersionHashOperationCore extends AbstractSerialVersionO
 			if (classfileResource == null)
 				return null;
 
-			InputStream contents= classfileResource.getContents();
-			try {
+			try (InputStream contents= classfileResource.getContents()) {
 				IClassFileReader cfReader= ToolFactory.createDefaultClassFileReader(contents, IClassFileReader.ALL);
 				if (cfReader != null) {
 					return calculateSerialVersionId(cfReader);
 				}
-			} finally {
-				contents.close();
 			}
 			return null;
 		} finally {

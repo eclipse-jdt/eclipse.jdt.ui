@@ -668,14 +668,11 @@ public class JavaProjectHelper {
 	 * @throws IOException Creation failed
 	 */
 	public static IPackageFragmentRoot addSourceContainerWithImport(IJavaProject jproject, String containerName, File zipFile, String containerEncoding, IPath[] exclusionFilters) throws InvocationTargetException, CoreException, IOException {
-		ZipFile file= new ZipFile(zipFile);
-		try {
+		try (ZipFile file= new ZipFile(zipFile)) {
 			IPackageFragmentRoot root= addSourceContainer(jproject, containerName, exclusionFilters);
 			((IContainer) root.getCorrespondingResource()).setDefaultCharset(containerEncoding, null);
 			importFilesFromZip(file, root.getPath(), null);
 			return root;
-		} finally {
-			file.close();
 		}
 	}
 
@@ -787,13 +784,10 @@ public class JavaProjectHelper {
 	 * @throws InvocationTargetException
 	 */
 	public static IPackageFragmentRoot addClassFolderWithImport(IJavaProject jproject, String containerName, IPath sourceAttachPath, IPath sourceAttachRoot, File zipFile) throws IOException, CoreException, InvocationTargetException {
-		ZipFile file= new ZipFile(zipFile);
-		try {
+		try (ZipFile file= new ZipFile(zipFile)) {
 			IPackageFragmentRoot root= addClassFolder(jproject, containerName, sourceAttachPath, sourceAttachRoot);
 			importFilesFromZip(file, root.getPath(), null);
 			return root;
-		} finally {
-			file.close();
 		}
 	}
 

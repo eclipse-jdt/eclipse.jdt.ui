@@ -202,17 +202,16 @@ public class FatJarExportTests extends TestCase {
 		// set compression
 		data.setCompress(compressJar);
 
-		//create archive
-		ZipFile generatedArchive= createArchive(data);
-
 		//assert archive content as expected
-		assertNotNull(generatedArchive);
-		assertNotNull(generatedArchive.getEntry("org/eclipse/jdt/ui/test/Main.class")); //$NON-NLS-1$
-		assertNotNull(generatedArchive.getEntry("mylib/Foo.class")); //$NON-NLS-1$
-		assertNotNull(generatedArchive.getEntry("mylib/Foo$FooInner.class")); //$NON-NLS-1$
-		assertNotNull(generatedArchive.getEntry("mylib/Foo$FooInner$FooInnerInner.class")); //$NON-NLS-1$
-
-		generatedArchive.close();
+		try ( //create archive
+			ZipFile generatedArchive = createArchive(data)) {
+			//assert archive content as expected
+			assertNotNull(generatedArchive);
+			assertNotNull(generatedArchive.getEntry("org/eclipse/jdt/ui/test/Main.class")); //$NON-NLS-1$
+			assertNotNull(generatedArchive.getEntry("mylib/Foo.class")); //$NON-NLS-1$
+			assertNotNull(generatedArchive.getEntry("mylib/Foo$FooInner.class")); //$NON-NLS-1$
+			assertNotNull(generatedArchive.getEntry("mylib/Foo$FooInner$FooInnerInner.class")); //$NON-NLS-1$
+		}
 
 		MultiStatus status= new MultiStatus(JavaUI.ID_PLUGIN, 0, "", null); //$NON-NLS-1$
 
@@ -233,27 +232,26 @@ public class FatJarExportTests extends TestCase {
 		// set compression
 		data.setCompress(compressJar);
 
-		//create archive
-		ZipFile generatedArchive= createArchive(data);
-
 		//assert archive content as expected
-		assertNotNull(generatedArchive);
-		assertNotNull(generatedArchive.getEntry("org/eclipse/jdt/ui/test/Main.class")); //$NON-NLS-1$
-		// get loader entry
-		ZipEntry loaderClassEntry= generatedArchive.getEntry("org/eclipse/jdt/internal/jarinjarloader/JarRsrcLoader.class"); //$NON-NLS-1$
-		assertNotNull(loaderClassEntry);
-		// check version of class file JarRsrcLoader (jdk 1.6 = version 50.0)
-		InputStream in = generatedArchive.getInputStream(loaderClassEntry);
-		int magic = 0;
-		for (int i= 0; i < 4; i++)
-			magic = (magic << 8) + in.read();
-		int minorVersion = ((in.read() << 8) + in.read());
-		int majorVersion = ((in.read() << 8) + in.read());
-		in.close();
-		assertEquals("loader is a class file", 0xCAFEBABE, magic); //$NON-NLS-1$
-		assertEquals("loader compiled with JDK 1.6", "50.0", majorVersion + "." + minorVersion); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-
-		generatedArchive.close();
+		try ( //create archive
+			ZipFile generatedArchive = createArchive(data)) {
+			//assert archive content as expected
+			assertNotNull(generatedArchive);
+			assertNotNull(generatedArchive.getEntry("org/eclipse/jdt/ui/test/Main.class")); //$NON-NLS-1$
+			// get loader entry
+			ZipEntry loaderClassEntry= generatedArchive.getEntry("org/eclipse/jdt/internal/jarinjarloader/JarRsrcLoader.class"); //$NON-NLS-1$
+			assertNotNull(loaderClassEntry);
+			// check version of class file JarRsrcLoader (jdk 1.6 = version 50.0)
+			InputStream in = generatedArchive.getInputStream(loaderClassEntry);
+			int magic = 0;
+			for (int i= 0; i < 4; i++)
+				magic = (magic << 8) + in.read();
+			int minorVersion = ((in.read() << 8) + in.read());
+			int majorVersion = ((in.read() << 8) + in.read());
+			in.close();
+			assertEquals("loader is a class file", 0xCAFEBABE, magic); //$NON-NLS-1$
+			assertEquals("loader compiled with JDK 1.6", "50.0", majorVersion + "." + minorVersion); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		}
 
 		MultiStatus status= new MultiStatus(JavaUI.ID_PLUGIN, 0, "", null); //$NON-NLS-1$
 
@@ -278,20 +276,19 @@ public class FatJarExportTests extends TestCase {
 		// set compression
 		data.setCompress(compressJar);
 
-		//create archive
-		ZipFile generatedArchive= createArchive(data);
-
 		//assert archive content as expected
-		assertNotNull(generatedArchive);
-		assertNotNull(generatedArchive.getEntry("org/eclipse/jdt/ui/test/Main.class")); //$NON-NLS-1$
+		try ( //create archive
+			ZipFile generatedArchive = createArchive(data)) {
+			//assert archive content as expected
+			assertNotNull(generatedArchive);
+			assertNotNull(generatedArchive.getEntry("org/eclipse/jdt/ui/test/Main.class")); //$NON-NLS-1$
 
-		// check for libraries sub-folder
-		File jarFile= new File(generatedArchive.getName());
-		String subFolderName= jarFile.getName().replaceFirst("^(.*)[.]jar$", "$1_lib"); //$NON-NLS-1$//$NON-NLS-2$
-		File subFolderDir= new File(jarFile.getParentFile(), subFolderName);
-		assertTrue("actual: '" + subFolderDir.toString() + "'", subFolderDir.isDirectory()); //$NON-NLS-1$//$NON-NLS-2$
-
-		generatedArchive.close();
+			// check for libraries sub-folder
+			File jarFile= new File(generatedArchive.getName());
+			String subFolderName= jarFile.getName().replaceFirst("^(.*)[.]jar$", "$1_lib"); //$NON-NLS-1$//$NON-NLS-2$
+			File subFolderDir= new File(jarFile.getParentFile(), subFolderName);
+			assertTrue("actual: '" + subFolderDir.toString() + "'", subFolderDir.isDirectory()); //$NON-NLS-1$//$NON-NLS-2$
+		}
 
 		MultiStatus status= new MultiStatus(JavaUI.ID_PLUGIN, 0, "", null); //$NON-NLS-1$
 
@@ -666,18 +663,13 @@ public class FatJarExportTests extends TestCase {
 	 * @throws Exception if anything went wrong
 	 */
 	private static Element readXML(IPath xmlFilePath) throws Exception {
-		InputStream in = null;
-		try {
-			in = new FileInputStream(xmlFilePath.toFile());
+		try (InputStream in = new FileInputStream(xmlFilePath.toFile())) {
 			DocumentBuilder parser= DocumentBuilderFactory.newInstance().newDocumentBuilder();
 			parser.setErrorHandler(new DefaultHandler());
 			Element root= parser.parse(new InputSource(in)).getDocumentElement();
 			in.close();
 
 			return root;
-		} finally {
-			if (in != null)
-				in.close();
 		}
 	}
 

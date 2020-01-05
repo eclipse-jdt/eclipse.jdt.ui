@@ -295,9 +295,9 @@ public class NLSHintTest extends TestCase {
     private IFile createResource(IPackageFragment pack, String resourceName, String content) throws Exception {
 	    IPath path = pack.getPath().append(resourceName);
 	    IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
-	    InputStream is = new ByteArrayInputStream(content.getBytes());
-	    file.create(is, true, new NullProgressMonitor());
-	    is.close();
+		try (InputStream is = new ByteArrayInputStream(content.getBytes())) {
+			file.create(is, true, new NullProgressMonitor());
+		}
         return file;
 	}
 

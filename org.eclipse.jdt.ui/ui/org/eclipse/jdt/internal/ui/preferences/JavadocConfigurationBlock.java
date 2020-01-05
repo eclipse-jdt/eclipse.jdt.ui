@@ -436,16 +436,11 @@ public class JavadocConfigurationBlock {
 				connection.connect();
 				res= ((HttpURLConnection) connection).getResponseCode();
 			}
-			InputStream is= null;
-			try {
-				is= connection.getInputStream();
+			try (InputStream is = connection.getInputStream()) {
 				byte[] buffer= new byte[256];
 				while (is.read(buffer) != -1) {
 					// just read
 				}
-			} finally {
-				if (is != null)
-					is.close();
 			}
 		} catch (IllegalArgumentException e) {
 			return false; // workaround for bug 91072

@@ -100,8 +100,7 @@ public class NLSSearchTestHelper {
 
 	private static String getContent(IFile entry) throws CoreException, IOException {
 		StringBuilder buf= new StringBuilder();
-		InputStream contents= entry.getContents();
-		try {
+		try (InputStream contents= entry.getContents()) {
 			char ch= (char)contents.read();
 			int avilable= contents.available();
 			while (avilable > 0 && ch != -1) {
@@ -110,8 +109,6 @@ public class NLSSearchTestHelper {
 				avilable--;
 			}
 			return buf.toString();
-		} finally {
-			contents.close();
 		}
 	}
 

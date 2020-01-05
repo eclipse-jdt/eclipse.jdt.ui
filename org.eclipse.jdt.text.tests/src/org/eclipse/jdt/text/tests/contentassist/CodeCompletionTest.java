@@ -138,13 +138,13 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		System.out.print("file contents: |");
 		File file= cu.getResource().getLocation().toFile();
 		try {
-			BufferedReader reader= new BufferedReader(new FileReader(file));
-			String line;
-			while ((line= reader.readLine()) != null) {
-				System.out.println(line);
+			try (BufferedReader reader= new BufferedReader(new FileReader(file))) {
+				String line;
+				while ((line= reader.readLine()) != null) {
+					System.out.println(line);
+				}
+				System.out.println("|");
 			}
-			System.out.println("|");
-			reader.close();
 		} catch (FileNotFoundException e1) {
 			e1.printStackTrace();
 		} catch (IOException e1) {
