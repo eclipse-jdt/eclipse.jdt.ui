@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -209,6 +209,9 @@ public class ExtractTempRefactoring extends Refactoring {
 			return false;
 		if (parent instanceof SwitchCase)
 			return false;
+		if (node instanceof SimpleName && node.getLocationInParent() != null) {
+			return !node.getLocationInParent().getId().equals("name"); //$NON-NLS-1$
+		}
 		return true;
 	}
 

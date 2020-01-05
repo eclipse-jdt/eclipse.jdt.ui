@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1162,7 +1162,52 @@ public class AssistQuickFixTest extends QuickFixTest {
 			String expected2= buf.toString();
 	
 			assertExpectedExistInProposals(proposals, new String[] { expected1, expected2 });
-		}
+	}
+
+	public void testAssignToLocal18() throws Exception { // https://bugs.eclipse.org/bugs/show_bug.cgi?id=287377
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("\n");
+		buf.append("    private E other;\n");
+		buf.append("    boolean b;\n");
+		buf.append("\n");
+		buf.append("    public void foo(boolean newB) {\n");
+		buf.append("        /*1*/other.b = newB;\n");
+		buf.append("        other.other.b = newB;\n");
+		buf.append("        other.other.other.b = newB;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		String str= "/*1*/other";
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("\n");
+		buf.append("    private E other;\n");
+		buf.append("    boolean b;\n");
+		buf.append("\n");
+		buf.append("    public void foo(boolean newB) {\n");
+		buf.append("        /*1*/E other2 = other;\n");
+		buf.append("        other2.b = newB;\n");
+		buf.append("        other2.other.b = newB;\n");
+		buf.append("        other2.other.other.b = newB;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
 
 	public void testAssignParamToField() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
