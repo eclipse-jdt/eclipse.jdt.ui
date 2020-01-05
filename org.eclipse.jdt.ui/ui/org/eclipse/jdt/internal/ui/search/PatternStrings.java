@@ -84,4 +84,7 @@ public class PatternStrings {
 	public static String getFieldSignature(IField field) {
 		return JavaElementLabels.getElementLabel(field, JavaElementLabels.F_FULLY_QUALIFIED);
 	}
+
+	private PatternStrings() {
+	}
 }

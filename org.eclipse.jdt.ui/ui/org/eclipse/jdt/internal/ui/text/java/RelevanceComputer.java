@@ -52,4 +52,7 @@ public class RelevanceComputer {
 				return baseRelevance;
 		}
 	}
+
+	private RelevanceComputer() {
+	}
 }

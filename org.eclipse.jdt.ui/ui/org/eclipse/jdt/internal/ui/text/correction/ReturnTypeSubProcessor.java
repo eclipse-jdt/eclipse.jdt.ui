@@ -352,4 +352,7 @@ public class ReturnTypeSubProcessor {
 			TypeMismatchSubProcessor.addChangeSenderTypeProposals(context, expression, retType.resolveBinding(), false, IProposalRelevance.METHOD_RETURNS_VOID, proposals);
 		}
 	}
+
+	private ReturnTypeSubProcessor() {
+	}
 }

@@ -85,4 +85,7 @@ public class RefactoringActions {
 			element= element.getAncestor(IJavaElement.TYPE);
 		return (IType)element;
 	}
+
+	private RefactoringActions() {
+	}
 }

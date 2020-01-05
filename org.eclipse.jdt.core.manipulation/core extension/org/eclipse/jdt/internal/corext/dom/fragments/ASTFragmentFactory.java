@@ -202,4 +202,7 @@ public class ASTFragmentFactory {
 			return getFragment() != null;
 		}
 	}
+
+	private ASTFragmentFactory() {
+	}
 }

@@ -260,4 +260,7 @@ public class PreviewFeaturesSubProcessor {
 		}
 		return isPreviewFeatureEnabled;
 	}
+
+	private PreviewFeaturesSubProcessor() {
+	}
 }

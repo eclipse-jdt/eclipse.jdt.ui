@@ -834,4 +834,7 @@ public class TypeContextChecker {
 		}
 		return result;
 	}
+
+	private TypeContextChecker() {
+	}
 }

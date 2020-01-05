@@ -103,4 +103,7 @@ public class TextChangeCompatibility {
 		}
 	}
 
+	private TextChangeCompatibility() {
+	}
+
 }

@@ -44,4 +44,7 @@ public class JdtViewerDropAdapterConstants {
 	 */
 	public static final int LOCATION_NONE = 4;
 
+	private JdtViewerDropAdapterConstants() {
+	}
+
 }

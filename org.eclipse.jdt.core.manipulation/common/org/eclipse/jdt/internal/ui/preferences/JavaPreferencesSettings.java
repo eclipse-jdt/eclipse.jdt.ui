@@ -34,5 +34,8 @@ public class JavaPreferencesSettings  {
 		return res;
 	}
 
+	private JavaPreferencesSettings() {
+	}
+
 }
 

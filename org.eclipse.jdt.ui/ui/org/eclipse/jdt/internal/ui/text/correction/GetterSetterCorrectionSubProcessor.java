@@ -399,4 +399,7 @@ public class GetterSetterCorrectionSubProcessor {
 		return result;
 	}
 
+	private GetterSetterCorrectionSubProcessor() {
+	}
+
 }

@@ -75,4 +75,7 @@ public class NameMatcher {
 		return Character.toLowerCase(ch1) == Character.toLowerCase(ch2);
 	}
 
+	private NameMatcher() {
+	}
+
 }

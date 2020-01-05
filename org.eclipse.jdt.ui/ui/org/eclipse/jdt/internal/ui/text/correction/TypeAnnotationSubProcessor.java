@@ -55,4 +55,7 @@ public class TypeAnnotationSubProcessor {
 				return false;
 		}
 	}
+
+	private TypeAnnotationSubProcessor() {
+	}
 }

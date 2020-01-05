@@ -88,4 +88,7 @@ public class HierarchicalDecorationContext {
 			};
 		}
 	}
+
+	private HierarchicalDecorationContext() {
+	}
 }

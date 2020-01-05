@@ -49,4 +49,7 @@ public class JEPluginImages {
 			return ImageDescriptor.getMissingImageDescriptor();
 		}
 	}
+
+	private JEPluginImages() {
+	}
 }

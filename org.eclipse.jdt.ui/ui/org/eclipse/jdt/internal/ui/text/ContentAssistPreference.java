@@ -256,5 +256,8 @@ public class ContentAssistPreference {
 	public static boolean fillArgumentsOnMethodCompletion(IPreferenceStore store) {
 		return store.getBoolean(FILL_METHOD_ARGUMENTS);
 	}
+
+	private ContentAssistPreference() {
+	}
 }
 

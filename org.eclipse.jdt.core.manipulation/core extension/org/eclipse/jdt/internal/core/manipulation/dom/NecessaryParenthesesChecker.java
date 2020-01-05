@@ -418,4 +418,7 @@ public class NecessaryParenthesesChecker {
 		}
 		return false;
 	}
+
+	private NecessaryParenthesesChecker() {
+	}
 }

@@ -106,5 +106,8 @@ public class JUnitLaunchConfigurationConstants {
 		return null;
 	}
 
+	private JUnitLaunchConfigurationConstants() {
+	}
+
 
 }

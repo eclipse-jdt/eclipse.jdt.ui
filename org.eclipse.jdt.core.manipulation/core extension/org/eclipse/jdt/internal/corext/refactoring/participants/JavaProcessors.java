@@ -50,4 +50,7 @@ public class JavaProcessors {
 		}
 		return result.toArray(new String[result.size()]);
 	}
+
+	private JavaProcessors() {
+	}
 }

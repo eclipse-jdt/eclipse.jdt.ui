@@ -64,6 +64,9 @@ public class TestOptions {
 		project.setOptions(options);
 	}
 
+	private TestOptions() {
+	}
+
 }
 
 class TestFormatterOptions {

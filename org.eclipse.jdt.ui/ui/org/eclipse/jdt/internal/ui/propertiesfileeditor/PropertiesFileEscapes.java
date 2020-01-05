@@ -343,4 +343,7 @@ public class PropertiesFileEscapes {
 		}
 		return result;
 	}
+
+	private PropertiesFileEscapes() {
+	}
 }

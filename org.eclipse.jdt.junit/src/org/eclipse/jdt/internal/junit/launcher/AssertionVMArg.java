@@ -134,4 +134,7 @@ public class AssertionVMArg {
 		}
 
 	}*/
+
+	private AssertionVMArg() {
+	}
 }

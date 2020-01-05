@@ -137,4 +137,7 @@ public class OperatorPrecedence {
 		}
 		return Integer.MAX_VALUE;
 	}
+
+	private OperatorPrecedence() {
+	}
 }

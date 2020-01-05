@@ -943,4 +943,7 @@ public class ModifierCorrectionSubProcessor {
 			proposals.add(new ModifierChangeCorrectionProposal(label, cu, binding, selectedNode, modifier, 0, IProposalRelevance.ADD_METHOD_MODIFIER, image));
 		}
 	}
+
+	private ModifierCorrectionSubProcessor() {
+	}
 }

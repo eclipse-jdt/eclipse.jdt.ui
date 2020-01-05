@@ -618,4 +618,7 @@ public class ClasspathModifierQueries {
 
 		};
 	}
+
+	private ClasspathModifierQueries() {
+	}
 }

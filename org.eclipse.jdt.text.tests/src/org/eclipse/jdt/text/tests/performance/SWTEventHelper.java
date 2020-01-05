@@ -141,4 +141,7 @@ public class SWTEventHelper {
 		fgMouseButtonEvent.button= button;
 		postEvent(display, fgMouseButtonEvent, runEventQueue);
 	}
+
+	private SWTEventHelper() {
+	}
 }

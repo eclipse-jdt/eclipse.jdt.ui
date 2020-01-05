@@ -90,4 +90,7 @@ public class UnInitializedFinalFieldSubProcessor {
 			proposals.add(new InitializeFinalFieldProposal(problem, targetCU, node, targetBinding, IProposalRelevance.CREATE_CONSTRUCTOR));
 		}
 	}
+
+	private UnInitializedFinalFieldSubProcessor() {
+	}
 }

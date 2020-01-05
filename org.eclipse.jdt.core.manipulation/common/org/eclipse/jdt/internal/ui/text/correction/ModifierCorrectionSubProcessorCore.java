@@ -137,4 +137,7 @@ public class ModifierCorrectionSubProcessorCore {
 		}
 		return null;
 	}
+
+	private ModifierCorrectionSubProcessorCore() {
+	}
 }

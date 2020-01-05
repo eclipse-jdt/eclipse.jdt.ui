@@ -182,4 +182,7 @@ public class JavadocTagsSubProcessorCore {
 		return null;
 	}
 
+	private JavadocTagsSubProcessorCore() {
+	}
+
 }

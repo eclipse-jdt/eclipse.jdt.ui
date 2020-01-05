@@ -117,4 +117,7 @@ public class InfoFilesUtil {
 		return CodeGeneration.getModuleComment(cu, moduleName, new String[0], new String[0], lineDelimiterUsed);
 	}
 
+	private InfoFilesUtil() {
+	}
+
 }

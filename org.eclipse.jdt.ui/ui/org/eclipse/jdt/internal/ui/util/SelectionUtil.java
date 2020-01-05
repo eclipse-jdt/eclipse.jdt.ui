@@ -123,4 +123,7 @@ public class SelectionUtil {
 		}
 	}
 
+	private SelectionUtil() {
+	}
+
 }

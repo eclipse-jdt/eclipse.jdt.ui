@@ -208,4 +208,7 @@ public class CoreUtility {
         return isAutoBuilding;
     }
 
+	private CoreUtility() {
+	}
+
 }

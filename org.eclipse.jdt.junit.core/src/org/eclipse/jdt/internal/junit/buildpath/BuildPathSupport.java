@@ -496,4 +496,7 @@ public class BuildPathSupport {
 	public static IClasspathEntry getJUnitApiGuardianLibraryEntry() {
 		return JUNIT_APIGUARDIAN_PLUGIN.getLibraryEntry();
 	}
+
+	private BuildPathSupport() {
+	}
 }

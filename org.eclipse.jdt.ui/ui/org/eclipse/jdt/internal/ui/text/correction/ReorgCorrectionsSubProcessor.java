@@ -646,5 +646,8 @@ public class ReorgCorrectionsSubProcessor {
 		return false;
 	}
 
+	private ReorgCorrectionsSubProcessor() {
+	}
+
 
 }

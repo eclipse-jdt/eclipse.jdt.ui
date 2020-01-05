@@ -168,5 +168,8 @@ public class SWTUtil {
 		textField.setBackground(textField.getDisplay().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
 	}
 
+	private SWTUtil() {
+	}
+
 
 }

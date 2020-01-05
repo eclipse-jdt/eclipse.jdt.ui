@@ -87,4 +87,7 @@ class Util {
 				&& getEndInclusive(thisRange) >= getEndInclusive(otherRange);
 	}
 
+	private Util() {
+	}
+
 }

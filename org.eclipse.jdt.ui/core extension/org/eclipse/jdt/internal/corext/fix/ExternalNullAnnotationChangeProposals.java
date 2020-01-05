@@ -871,4 +871,7 @@ public class ExternalNullAnnotationChangeProposals {
 			return type.getBinaryName().replace('.', '/');
 		}
 	}
+
+	private ExternalNullAnnotationChangeProposals() {
+	}
 }

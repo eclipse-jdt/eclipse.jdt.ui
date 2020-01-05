@@ -885,4 +885,7 @@ public class EditorUtility {
 		return new NullProgressMonitor();
 	}
 
+	private EditorUtility() {
+	}
+
 }

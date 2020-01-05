@@ -661,4 +661,7 @@ public class JavaRefactoringDescriptorUtil {
 		}
 	}
 
+	private JavaRefactoringDescriptorUtil() {
+	}
+
 }

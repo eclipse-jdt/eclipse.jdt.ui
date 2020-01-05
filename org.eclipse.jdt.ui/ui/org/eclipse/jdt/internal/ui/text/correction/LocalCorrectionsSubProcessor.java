@@ -2350,4 +2350,7 @@ public class LocalCorrectionsSubProcessor {
 			}
 		}
 	}
+
+	private LocalCorrectionsSubProcessor() {
+	}
 }

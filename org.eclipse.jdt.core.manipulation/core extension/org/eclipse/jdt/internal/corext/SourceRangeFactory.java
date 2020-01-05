@@ -30,4 +30,7 @@ public class SourceRangeFactory {
 		return new SourceRange(problem.getSourceStart(), problem.getSourceEnd() - problem.getSourceStart() + 1);
 	}
 
+	private SourceRangeFactory() {
+	}
+
 }

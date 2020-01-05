@@ -394,4 +394,7 @@ public class ModuleCorrectionsSubProcessor {
 		return projectModule;
 	}
 
+	private ModuleCorrectionsSubProcessor() {
+	}
+
 }

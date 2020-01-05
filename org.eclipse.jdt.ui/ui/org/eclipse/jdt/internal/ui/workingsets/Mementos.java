@@ -49,4 +49,7 @@ public class Mementos {
 	    if (factory == null) return null;
 	    return factory.createElement(memento);
 	}
+
+	private Mementos() {
+	}
 }

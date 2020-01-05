@@ -440,4 +440,7 @@ public class PropertiesQuickAssistProcessor {
 			return IJavaEditorActionDefinitionIds.RENAME_ELEMENT;
 		}
 	}
+
+	private PropertiesQuickAssistProcessor() {
+	}
 }

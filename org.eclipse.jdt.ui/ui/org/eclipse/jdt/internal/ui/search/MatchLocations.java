@@ -427,4 +427,7 @@ public class MatchLocations {
 		}
 		return count;
 	}
+
+	private MatchLocations() {
+	}
 }

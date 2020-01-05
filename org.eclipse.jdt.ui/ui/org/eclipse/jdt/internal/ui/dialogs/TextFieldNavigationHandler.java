@@ -540,4 +540,7 @@ public class TextFieldNavigationHandler {
 		public abstract void execute();
 	}
 
+	private TextFieldNavigationHandler() {
+	}
+
 }

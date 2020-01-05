@@ -17,4 +17,7 @@ package org.eclipse.jdt.internal.ui.callhierarchy;
 
 final class TreeTermination {
     public static final Object SEARCH_CANCELED = new Object();
+
+	private TreeTermination() {
+	}
 }

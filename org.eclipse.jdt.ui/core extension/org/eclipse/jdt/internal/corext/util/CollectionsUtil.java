@@ -37,4 +37,7 @@ public class CollectionsUtil {
 		A[] typedArray= collection.toArray((A[]) array);
 		return typedArray;
 	}
+
+	private CollectionsUtil() {
+	}
 }

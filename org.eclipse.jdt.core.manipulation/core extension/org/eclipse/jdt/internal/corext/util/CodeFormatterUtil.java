@@ -477,4 +477,7 @@ public class CodeFormatterUtil {
 		return edit;
 	}
 
+	private CodeFormatterUtil() {
+	}
+
 }

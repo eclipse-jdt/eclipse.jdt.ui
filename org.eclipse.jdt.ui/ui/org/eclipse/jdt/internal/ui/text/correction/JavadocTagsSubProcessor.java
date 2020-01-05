@@ -1062,4 +1062,7 @@ public class JavadocTagsSubProcessor {
 
 		proposals.add(proposal);
 	}
+
+	private JavadocTagsSubProcessor() {
+	}
 }

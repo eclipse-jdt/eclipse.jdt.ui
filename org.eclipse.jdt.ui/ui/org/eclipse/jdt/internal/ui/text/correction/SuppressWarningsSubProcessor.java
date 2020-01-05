@@ -382,4 +382,7 @@ public class SuppressWarningsSubProcessor {
 		proposals.add(proposal);
 	}
 
+	private SuppressWarningsSubProcessor() {
+	}
+
 }

@@ -2127,5 +2127,8 @@ public class UnresolvedElementsSubProcessor {
 		}
 	}
 
+	private UnresolvedElementsSubProcessor() {
+	}
+
 
 }

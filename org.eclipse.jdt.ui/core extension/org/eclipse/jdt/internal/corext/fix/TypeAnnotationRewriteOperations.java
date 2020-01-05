@@ -177,4 +177,7 @@ public class TypeAnnotationRewriteOperations {
 			listRewrite.insertLast(newAnnotation, group);
 		}
 	}
+
+	private TypeAnnotationRewriteOperations() {
+	}
 }

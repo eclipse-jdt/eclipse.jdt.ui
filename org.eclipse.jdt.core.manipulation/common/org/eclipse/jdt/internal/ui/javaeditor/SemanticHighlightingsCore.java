@@ -178,6 +178,6 @@ public class SemanticHighlightingsCore {
 	/**
 	 * Do not instantiate
 	 */
-	protected SemanticHighlightingsCore() {
+	private SemanticHighlightingsCore() {
 	}
 }

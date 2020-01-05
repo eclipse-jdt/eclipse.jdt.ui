@@ -596,4 +596,7 @@ public class JavaDocLocations {
 			return new File(url.getFile());
 		}
 	}
+
+	private JavaDocLocations() {
+	}
 }

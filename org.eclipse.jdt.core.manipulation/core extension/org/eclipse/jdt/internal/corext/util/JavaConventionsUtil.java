@@ -163,4 +163,7 @@ public class JavaConventionsUtil {
 		String[] sourceComplianceLevels= getSourceComplianceLevels(context);
 		return JavaConventions.validateTypeVariableName(name, sourceComplianceLevels[0], sourceComplianceLevels[1]);
 	}
+
+	private JavaConventionsUtil() {
+	}
 }

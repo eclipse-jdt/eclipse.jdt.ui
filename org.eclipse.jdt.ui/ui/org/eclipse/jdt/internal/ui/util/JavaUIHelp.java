@@ -143,4 +143,7 @@ public class JavaUIHelp {
 			return null;
 		}
 	}
+
+	private JavaUIHelp() {
+	}
 }

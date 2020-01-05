@@ -33,4 +33,7 @@ final class JIJConstants {
 	 * but that's not visible for the PDE builder when building the org.eclipse.jdt.ui plug-in.
 	 */
 	static final String LOADER_MAIN_CLASS                    = "org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader";  //$NON-NLS-1$
+
+	private JIJConstants() {
+	}
 }

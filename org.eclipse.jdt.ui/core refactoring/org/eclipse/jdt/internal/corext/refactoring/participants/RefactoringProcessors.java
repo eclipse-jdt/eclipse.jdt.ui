@@ -31,4 +31,7 @@ public class RefactoringProcessors {
 		}
 		return result.toArray(new String[result.size()]);
 	}
+
+	private RefactoringProcessors() {
+	}
 }

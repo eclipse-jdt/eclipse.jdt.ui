@@ -88,4 +88,7 @@ public class StatusUtil {
 				break;
 		}
 	}
+
+	private StatusUtil() {
+	}
 }

@@ -179,4 +179,7 @@ public final class RefactoringAvailabilityTesterCore  {
 		}
 		return null;
 	}
+
+	private RefactoringAvailabilityTesterCore() {
+	}
 }
