@@ -112,9 +112,7 @@ public final class ContentAssistHistory {
 				DOMSource source = new DOMSource(document);
 
 				transformer.transform(source, result);
-			} catch (TransformerException e) {
-				throw createException(e, JavaTextMessages.ContentAssistHistory_serialize_error);
-			} catch (ParserConfigurationException e) {
+			} catch (TransformerException | ParserConfigurationException e) {
 				throw createException(e, JavaTextMessages.ContentAssistHistory_serialize_error);
 			}
 		}
@@ -125,11 +123,7 @@ public final class ContentAssistHistory {
 				DocumentBuilder parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 				parser.setErrorHandler(new DefaultHandler());
 				root = parser.parse(source).getDocumentElement();
-			} catch (SAXException e) {
-				throw createException(e, JavaTextMessages.ContentAssistHistory_deserialize_error);
-			} catch (ParserConfigurationException e) {
-				throw createException(e, JavaTextMessages.ContentAssistHistory_deserialize_error);
-			} catch (IOException e) {
+			} catch (SAXException | ParserConfigurationException | IOException e) {
 				throw createException(e, JavaTextMessages.ContentAssistHistory_deserialize_error);
 			}
 

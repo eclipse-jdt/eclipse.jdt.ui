@@ -71,9 +71,7 @@ class Accessor<E> {
 			@SuppressWarnings("unchecked")
 			Class<E> clazz= (Class<E>) Class.forName(className, true, classLoader);
 			fClass= clazz;
-		} catch (ClassNotFoundException e) {
-			fail();
-		} catch (ExceptionInInitializerError e) {
+		} catch (ClassNotFoundException | ExceptionInInitializerError e) {
 			fail();
 		}
 	}
@@ -107,30 +105,20 @@ class Accessor<E> {
 			@SuppressWarnings("unchecked")
 			Class<E> clazz= (Class<E>) Class.forName(className, true, classLoader);
 			fClass= clazz;
-		} catch (ClassNotFoundException e) {
-			fail();
-		} catch (ExceptionInInitializerError e) {
+		} catch (ClassNotFoundException | ExceptionInInitializerError e) {
 			fail();
 		}
 		Constructor<E> constructor= null;
 		try {
 			constructor= fClass.getDeclaredConstructor(constructorTypes);
-		} catch (SecurityException e2) {
-			fail();
-		} catch (NoSuchMethodException e2) {
+		} catch (SecurityException | NoSuchMethodException e2) {
 			fail();
 		}
 		Assert.isNotNull(constructor);
 		constructor.setAccessible(true);
 		try {
 			fInstance= constructor.newInstance(constructorArgs);
-		} catch (IllegalArgumentException e) {
-			fail();
-		} catch (InvocationTargetException e) {
-			fail();
-		} catch (InstantiationException e) {
-			fail();
-		} catch (IllegalAccessException e) {
+		} catch (IllegalArgumentException | InvocationTargetException | InstantiationException | IllegalAccessException e) {
 			fail();
 		}
 	}
@@ -149,9 +137,7 @@ class Accessor<E> {
 			@SuppressWarnings("unchecked")
 			Class<E> clazz= (Class<E>) Class.forName(className, true, classLoader);
 			fClass= clazz;
-		} catch (ClassNotFoundException e) {
-			fail();
-		} catch (ExceptionInInitializerError e) {
+		} catch (ClassNotFoundException | ExceptionInInitializerError e) {
 			fail();
 		}
 	}
@@ -184,20 +170,14 @@ class Accessor<E> {
 		Method method= null;
 		try {
 			method= fClass.getDeclaredMethod(methodName, types);
-		} catch (SecurityException e) {
-			fail();
-		} catch (NoSuchMethodException ex) {
+		} catch (SecurityException | NoSuchMethodException e) {
 			fail();
 		}
 		Assert.isNotNull(method);
 		method.setAccessible(true);
 		try {
 			return method.invoke(fInstance, arguments);
-		} catch (IllegalArgumentException e) {
-			fail();
-		} catch (InvocationTargetException e) {
-			fail();
-		} catch (IllegalAccessException e) {
+		} catch (IllegalArgumentException | InvocationTargetException | IllegalAccessException e) {
 			fail();
 		}
 		return null;
@@ -213,9 +193,7 @@ class Accessor<E> {
 		Field field= getField(fieldName);
 		try {
 			field.set(fInstance, value);
-		} catch (IllegalArgumentException e) {
-			fail();
-		} catch (IllegalAccessException e) {
+		} catch (IllegalArgumentException | IllegalAccessException e) {
 			fail();
 		}
 	}
@@ -230,9 +208,7 @@ class Accessor<E> {
 		Field field= getField(fieldName);
 		try {
 			field.setBoolean(fInstance, value);
-		} catch (IllegalArgumentException e) {
-			fail();
-		} catch (IllegalAccessException e) {
+		} catch (IllegalArgumentException | IllegalAccessException e) {
 			fail();
 		}
 	}
@@ -247,9 +223,7 @@ class Accessor<E> {
 		Field field= getField(fieldName);
 		try {
 			field.setInt(fInstance, value);
-		} catch (IllegalArgumentException e) {
-			fail();
-		} catch (IllegalAccessException e) {
+		} catch (IllegalArgumentException | IllegalAccessException e) {
 			fail();
 		}
 	}
@@ -264,9 +238,7 @@ class Accessor<E> {
 		Field field= getField(fieldName);
 		try {
 			return field.get(fInstance);
-		} catch (IllegalArgumentException e) {
-			fail();
-		} catch (IllegalAccessException e) {
+		} catch (IllegalArgumentException | IllegalAccessException e) {
 			fail();
 		}
 		// Unreachable code
@@ -283,9 +255,7 @@ class Accessor<E> {
 		Field field= getField(fieldName);
 		try {
 			return field.getBoolean(fInstance);
-		} catch (IllegalArgumentException e) {
-			fail();
-		} catch (IllegalAccessException e) {
+		} catch (IllegalArgumentException | IllegalAccessException e) {
 			fail();
 		}
 		// Unreachable code
@@ -302,9 +272,7 @@ class Accessor<E> {
 		Field field= getField(fieldName);
 		try {
 			return field.getInt(fInstance);
-		} catch (IllegalArgumentException e) {
-			fail();
-		} catch (IllegalAccessException e) {
+		} catch (IllegalArgumentException | IllegalAccessException e) {
 			fail();
 		}
 		// Unreachable code
@@ -315,9 +283,7 @@ class Accessor<E> {
 		Field field= null;
 		try {
 			field= fClass.getDeclaredField(fieldName);
-		} catch (SecurityException e) {
-			fail();
-		} catch (NoSuchFieldException e) {
+		} catch (SecurityException | NoSuchFieldException e) {
 			fail();
 		}
 		field.setAccessible(true);

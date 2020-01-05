@@ -50,16 +50,10 @@ public class BusyIndicatorRunnableContext implements IRunnableContext {
 			public void run() {
 				try {
 					fRunnable.run(new NullProgressMonitor());
-				} catch (InvocationTargetException e) {
-					fThrowable= e;
-				} catch (InterruptedException e) {
-					fThrowable= e;
 				} catch (ThreadDeath e) {
 					fThrowable= e;
 					throw e;
-				} catch (RuntimeException e) {
-					fThrowable= e;
-				} catch (Error e) {
+				} catch (InvocationTargetException | InterruptedException | RuntimeException | Error e) {
 					fThrowable= e;
 				}
 			}
@@ -83,9 +77,7 @@ public class BusyIndicatorRunnableContext implements IRunnableContext {
 		public void run() {
 			try {
 				internalRun(fFork, fRunnable);
-			} catch (InvocationTargetException e) {
-				fThrowable= e;
-			} catch (InterruptedException e) {
+			} catch (InvocationTargetException | InterruptedException e) {
 				fThrowable= e;
 			}
 		}

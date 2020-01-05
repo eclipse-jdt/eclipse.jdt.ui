@@ -769,12 +769,9 @@ public class JavaPluginImages {
 		try {
 			URI uri= new URI("platform", null, uriPath.toString(), null); //$NON-NLS-1$
 			url= uri.toURL();
-		} catch (MalformedURLException e) {
-			// no image
-		} catch (URISyntaxException e) {
+		} catch (MalformedURLException | URISyntaxException e) {
 			// no image
 		}
-		
 		URL foundUrl= FileLocator.find(url);
 		if (foundUrl != null) {
 			return ImageDescriptor.createFromURL(url);

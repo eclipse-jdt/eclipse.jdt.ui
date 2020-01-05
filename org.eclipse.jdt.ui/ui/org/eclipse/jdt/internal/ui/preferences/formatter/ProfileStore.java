@@ -241,11 +241,7 @@ public class ProfileStore {
 		    final SAXParserFactory factory= SAXParserFactory.newInstance();
 			final SAXParser parser= factory.newSAXParser();
 			parser.parse(inputSource, handler);
-		} catch (SAXException e) {
-			throw createException(e, FormatterMessages.CodingStyleConfigurationBlock_error_reading_xml_message);
-		} catch (IOException e) {
-			throw createException(e, FormatterMessages.CodingStyleConfigurationBlock_error_reading_xml_message);
-		} catch (ParserConfigurationException e) {
+		} catch (SAXException | IOException | ParserConfigurationException e) {
 			throw createException(e, FormatterMessages.CodingStyleConfigurationBlock_error_reading_xml_message);
 		}
 		return handler.getProfiles();
@@ -304,9 +300,7 @@ public class ProfileStore {
 			transformer.setOutputProperty(OutputKeys.ENCODING, encoding);
 			transformer.setOutputProperty(OutputKeys.INDENT, "yes"); //$NON-NLS-1$
 			transformer.transform(new DOMSource(document), new StreamResult(stream));
-		} catch (TransformerException e) {
-			throw createException(e, FormatterMessages.CodingStyleConfigurationBlock_error_serializing_xml_message);
-		} catch (ParserConfigurationException e) {
+		} catch (TransformerException | ParserConfigurationException e) {
 			throw createException(e, FormatterMessages.CodingStyleConfigurationBlock_error_serializing_xml_message);
 		}
 	}

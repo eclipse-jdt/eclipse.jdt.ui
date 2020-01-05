@@ -650,17 +650,13 @@ public class JavaMergeViewer extends TextMergeViewer {
 		Field field= null;
 		try {
 			field= AbstractTextEditor.class.getDeclaredField("fSourceViewer"); //$NON-NLS-1$
-		} catch (SecurityException ex) {
-			JavaPlugin.log(ex);
-		} catch (NoSuchFieldException ex) {
+		} catch (SecurityException | NoSuchFieldException ex) {
 			JavaPlugin.log(ex);
 		}
 		field.setAccessible(true);
 		try {
 			field.set(editor, viewer);
-		} catch (IllegalArgumentException ex) {
-			JavaPlugin.log(ex);
-		} catch (IllegalAccessException ex) {
+		} catch (IllegalArgumentException | IllegalAccessException ex) {
 			JavaPlugin.log(ex);
 		}
 	}

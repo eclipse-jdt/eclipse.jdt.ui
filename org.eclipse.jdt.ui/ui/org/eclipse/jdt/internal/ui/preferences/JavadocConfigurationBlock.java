@@ -360,9 +360,7 @@ public class JavadocConfigurationBlock {
 				} else {
 					MessageDialog.openWarning(fShell, fTitle, fUnable);
 				}
-			} catch (MalformedURLException e) {
-				MessageDialog.openWarning(fShell, fTitle, fUnable);
-			} catch (URISyntaxException e) {
+			} catch (MalformedURLException | URISyntaxException e) {
 				MessageDialog.openWarning(fShell, fTitle, fUnable);
 			}
 

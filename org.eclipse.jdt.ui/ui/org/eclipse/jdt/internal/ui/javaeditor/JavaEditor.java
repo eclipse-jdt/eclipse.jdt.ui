@@ -2811,20 +2811,14 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		Method method= null;
 		try {
 			method= AbstractTextEditor.class.getDeclaredMethod("setActionActivation", new Class[] { boolean.class }); //$NON-NLS-1$
-		} catch (SecurityException ex) {
-			JavaPlugin.log(ex);
-		} catch (NoSuchMethodException ex) {
+		} catch (SecurityException | NoSuchMethodException ex) {
 			JavaPlugin.log(ex);
 		}
 		Assert.isNotNull(method);
 		method.setAccessible(true);
 		try {
 			method.invoke(this, new Object[] { Boolean.valueOf(state) });
-		} catch (IllegalArgumentException ex) {
-			JavaPlugin.log(ex);
-		} catch (InvocationTargetException ex) {
-			JavaPlugin.log(ex);
-		} catch (IllegalAccessException ex) {
+		} catch (IllegalArgumentException | InvocationTargetException | IllegalAccessException ex) {
 			JavaPlugin.log(ex);
 		}
 	}

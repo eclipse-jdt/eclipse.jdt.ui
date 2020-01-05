@@ -128,9 +128,7 @@ public class JspReconcilingStrategy implements IReconcilingStrategy, IReconcilin
 		};
 		try {
 			runnable.run(null);
-		} catch (InvocationTargetException e) {
-			e.printStackTrace();
-		} catch (InterruptedException e) {
+		} catch (InvocationTargetException | InterruptedException e) {
 			e.printStackTrace();
 		}
 	}

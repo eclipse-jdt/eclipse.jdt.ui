@@ -95,10 +95,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 	public void read(JarPackageData jarPackage) throws CoreException {
 		try {
 			readXML(jarPackage);
-		} catch (IOException ex) {
-			String message= (ex.getLocalizedMessage() != null ? ex.getLocalizedMessage() : ""); //$NON-NLS-1$
-			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, message, ex));
-		} catch (SAXException ex) {
+		} catch (IOException | SAXException ex) {
 			String message= (ex.getLocalizedMessage() != null ? ex.getLocalizedMessage() : ""); //$NON-NLS-1$
 			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, message, ex));
 		}

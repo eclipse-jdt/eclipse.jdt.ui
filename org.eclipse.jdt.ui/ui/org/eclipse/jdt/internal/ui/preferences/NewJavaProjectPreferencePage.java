@@ -168,10 +168,7 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 						res.add(JavaCore.newContainerEntry(path, isExported));
 						break;
 				}
-			} catch (NumberFormatException e) {
-				String message= PreferencesMessages.NewJavaProjectPreferencePage_error_decode;
-				JavaPlugin.log(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, message, e));
-			} catch (NoSuchElementException e) {
+			} catch (NumberFormatException | NoSuchElementException e) {
 				String message= PreferencesMessages.NewJavaProjectPreferencePage_error_decode;
 				JavaPlugin.log(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, message, e));
 			}

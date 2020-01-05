@@ -870,10 +870,7 @@ public class JavadocOptionsManager {
 			objectStreamOutput= new FileOutputStream(file);
 			JavadocWriter.writeDocument(javadocElement, encoding, objectStreamOutput);
 			return file;
-		} catch (IOException e) {
-			String message= JavadocExportMessages.JavadocOptionsManager_createXM_error;
-			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, message, e));
-		} catch (TransformerException e) {
+		} catch (IOException | TransformerException e) {
 			String message= JavadocExportMessages.JavadocOptionsManager_createXM_error;
 			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, message, e));
 		} finally {

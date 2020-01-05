@@ -281,9 +281,7 @@ public class QuickAssistLightBulbUpdater {
 			}
 		} catch (BadLocationException e) {
 			// ignore
-		} catch (IndexOutOfBoundsException e) {
-			// concurrent modification - too bad, ignore
-		} catch (ConcurrentModificationException e) {
+		} catch (IndexOutOfBoundsException | ConcurrentModificationException e) {
 			// concurrent modification - too bad, ignore
 		}
 		return false;

@@ -170,9 +170,7 @@ public class GetterSetterCorrectionSubProcessor {
 					if (Display.getCurrent() != null) {
 						try {
 							helper.perform(false, false);
-						} catch (InterruptedException e) {
-							JavaPlugin.log(e);
-						} catch (InvocationTargetException e) {
+						} catch (InterruptedException | InvocationTargetException e) {
 							JavaPlugin.log(e);
 						}
 					} else {
@@ -181,9 +179,7 @@ public class GetterSetterCorrectionSubProcessor {
 							public void run() {
 								try {
 									helper.perform(false, false);
-								} catch (InterruptedException e) {
-									JavaPlugin.log(e);
-								} catch (InvocationTargetException e) {
+								} catch (InterruptedException | InvocationTargetException e) {
 									JavaPlugin.log(e);
 								}
 							}
