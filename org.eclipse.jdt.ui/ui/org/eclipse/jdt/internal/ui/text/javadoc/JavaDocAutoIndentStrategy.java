@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -380,12 +380,84 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 			String comment= document.get(partition.getOffset(), partition.getLength());
 			if (comment.indexOf("/*", 2) != -1) //$NON-NLS-1$
 				return true; // enclosed another comment -> probably a new comment
+			if (!hasBlockComment(comment)) {
+				return true; // missing block comment end -> probably a new comment
+			}
+			if (isBlockCommentsInsideString(comment)) {
+				return true; // block comments inside strings -> probably a new comment
+			}
 
 			return false;
 
 		} catch (BadLocationException e) {
 			return false;
 		}
+	}
+
+	/**
+	 * Return true if comment has a proper block comment ending. Handle case when '&#42;/' block
+	 * comment is after a line comment '//'
+	 *
+	 * <pre>
+	 * Partial comment with block comment after line comment:
+	 * 
+	 * /&#42;&#42;
+	 *  &#42;
+	 * void Foo() {
+	 *    int a; // &#42;/
+	 * }
+	 * </pre>
+	 *
+	 * @param comment The comment block, can be partial when creating new javadoc comment
+	 * @return Return true if comment has a proper block comment ending
+	 */
+	private boolean hasBlockComment(String comment) {
+		// return early if block does not contain block comment ending '*/'
+		if (comment.indexOf("*/", 2) == -1) { //$NON-NLS-1$
+			return false;
+		}
+
+		boolean lineCommentHidesBlockComment= false;
+		for (String line : Strings.convertIntoLines(comment)) {
+			int blockCommentIndex= line.indexOf("*/"); //$NON-NLS-1$
+			int lineCommentIndex= line.indexOf("//"); //$NON-NLS-1$
+			if (lineCommentIndex != -1 && blockCommentIndex != -1) {
+				if (lineCommentIndex < blockCommentIndex) {
+					lineCommentHidesBlockComment= true;
+				}
+			}
+		}
+		return lineCommentHidesBlockComment == false;
+	}
+
+	private boolean isBlockCommentsInsideString(String comment) {
+		// return early if block does not contain block comment ending '*/' or '"' (String) token
+		if (comment.indexOf("*/") == -1 || comment.indexOf("\"") == -1) { //$NON-NLS-1$ //$NON-NLS-2$
+			return false;
+		}
+
+		boolean allBlockCommentsInsideString= true;
+		boolean stringStart= false;
+		for (int i= 0; i < comment.length(); i++) {
+			char c= comment.charAt(i);
+			if (c == '"' && !stringStart) {
+				stringStart= true;
+				continue;
+			}
+			if (c == '"' && stringStart) {
+				stringStart= false;
+				continue;
+			}
+			if (c == '*' && !stringStart) {
+				if (i < comment.length() - 1) {
+					if (comment.charAt(i + 1) == '/') {
+						// found a block end inside string
+						allBlockCommentsInsideString= false;
+					}
+				}
+			}
+		}
+		return allBlockCommentsInsideString;
 	}
 
 	private boolean isSmartMode() {
