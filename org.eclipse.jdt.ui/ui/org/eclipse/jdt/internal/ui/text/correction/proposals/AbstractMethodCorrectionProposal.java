@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -162,6 +162,7 @@ public abstract class AbstractMethodCorrectionProposal extends LinkedCorrectionP
 
 		addNewParameters(rewrite, takenNames, decl.parameters(), context);
 		addNewExceptions(rewrite, decl.thrownExceptionTypes(), context);
+		addNewJavaDoc(rewrite, decl);
 
 		Block body= null;
 		if (!isAbstractMethod && !Flags.isAbstract(decl.getModifiers())) {
@@ -217,6 +218,15 @@ public abstract class AbstractMethodCorrectionProposal extends LinkedCorrectionP
 	protected abstract void addNewTypeParameters(ASTRewrite rewrite, List<String> takenNames, List<TypeParameter> params, ImportRewriteContext context) throws CoreException;
 	protected abstract void addNewParameters(ASTRewrite rewrite, List<String> takenNames, List<SingleVariableDeclaration> params, ImportRewriteContext context) throws CoreException;
 	protected abstract void addNewExceptions(ASTRewrite rewrite, List<Type> exceptions, ImportRewriteContext context) throws CoreException;
+	/**
+	 * Add implementation in sub classes.
+	 * @param rewrite  The rewrite node
+	 * @param decl The method declaration to add JavaDoc to
+	 * @throws CoreException Might throw Exception
+	 */
+	protected void addNewJavaDoc(ASTRewrite rewrite, MethodDeclaration decl) throws CoreException {
+		// no default action
+	}
 
 	protected abstract SimpleName getNewName(ASTRewrite rewrite);
 	protected abstract Type getNewMethodType(ASTRewrite rewrite, ImportRewriteContext context) throws CoreException;

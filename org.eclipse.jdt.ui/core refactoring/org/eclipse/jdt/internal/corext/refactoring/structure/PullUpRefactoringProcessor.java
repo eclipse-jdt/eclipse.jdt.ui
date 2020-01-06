@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2019 IBM Corporation and others.
+ * Copyright (c) 2006, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1050,7 +1050,15 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		newMethod.setBody(null);
 		newMethod.setConstructor(false);
 		copyExtraDimensions(oldMethod, newMethod);
-		newMethod.setJavadoc(null);
+
+		final Javadoc oldJavadoc= oldMethod.getJavadoc();
+		if (oldJavadoc != null) {
+			String newJavadocString= ASTNodes.getNodeSource(oldJavadoc, false, true);
+			if (newJavadocString != null) {
+				newMethod.setJavadoc((Javadoc) targetRewrite.getASTRewrite().createStringPlaceholder(newJavadocString, ASTNode.JAVADOC));
+			}
+		}
+
 		int modifiers= getModifiersWithUpdatedVisibility(sourceMethod, Modifier.ABSTRACT | JdtFlags.clearFlag(Modifier.NATIVE | Modifier.FINAL, sourceMethod.getFlags()), adjustments, monitor, false, status);
 		if (oldMethod.isVarargs())
 			modifiers&= ~Flags.AccVarargs;

@@ -4867,7 +4867,6 @@ public class AssistQuickFixTest extends QuickFixTest {
 		}
 
 	public void testCreateInSuperInGeneric() throws Exception {
-
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 			StringBuffer buf= new StringBuffer();
 			buf.append("package test1;\n");
@@ -4886,6 +4885,12 @@ public class AssistQuickFixTest extends QuickFixTest {
 			buf.append("import java.io.IOException;\n");
 			buf.append("import java.util.Vector;\n");
 			buf.append("public class E extends A<String> implements IB<String> {\n");
+			buf.append("	/**\n");
+			buf.append("	 * Always return NULL\n");
+			buf.append("	 * @param count\n");
+			buf.append("	 * @return NULL\n");
+			buf.append("	 * @throws IOException\n");
+			buf.append("	 */\n");
 			buf.append("    public Vector<String> foo(int count) throws IOException {\n");
 			buf.append("        return null;\n");
 			buf.append("    }\n");
@@ -4910,6 +4915,12 @@ public class AssistQuickFixTest extends QuickFixTest {
 			buf.append("\n");
 			buf.append("public interface IB<T> {\n");
 			buf.append("\n");
+			buf.append("    /**\n");
+			buf.append("     * Always return NULL\n");
+			buf.append("     * @param count\n");
+			buf.append("     * @return NULL\n");
+			buf.append("     * @throws IOException\n");
+			buf.append("     */\n");
 			buf.append("    Vector<String> foo(int count) throws IOException;\n");
 			buf.append("}\n");
 			String expected1= buf.toString();
@@ -4925,6 +4936,12 @@ public class AssistQuickFixTest extends QuickFixTest {
 			buf.append("\n");
 			buf.append("public class A<T> {\n");
 			buf.append("\n");
+			buf.append("    /**\n");
+			buf.append("     * Always return NULL\n");
+			buf.append("     * @param count\n");
+			buf.append("     * @return NULL\n");
+			buf.append("     * @throws IOException\n");
+			buf.append("     */\n");
 			buf.append("    public Vector<String> foo(int count) throws IOException {\n");
 			buf.append("        //TODO\n");
 			buf.append("        return null;\n");
@@ -4933,7 +4950,6 @@ public class AssistQuickFixTest extends QuickFixTest {
 			String expected2= buf.toString();
 
 			assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
-
 		}
 
 	public void testChangeIfStatementToBlock() throws Exception {
