@@ -282,8 +282,9 @@ class CalleeAnalyzerVisitor extends HierarchicalASTVisitor {
 		IMethod inThisType= Bindings.findMethod(method, type);
 		if (inThisType != null)
 			return inThisType;
-		for (IType superType : JavaModelUtil.getAllSuperTypes(type, pm)) {
-			IMethod m= Bindings.findMethod(method, superType);
+		IType[] superTypes= JavaModelUtil.getAllSuperTypes(type, pm);
+		for (int i= 0; i < superTypes.length; i++) {
+			IMethod m= Bindings.findMethod(method, superTypes[i]);
 			if (m != null)
 				return m;
 		}

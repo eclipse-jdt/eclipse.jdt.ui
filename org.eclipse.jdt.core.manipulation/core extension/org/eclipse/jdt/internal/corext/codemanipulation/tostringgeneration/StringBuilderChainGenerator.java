@@ -101,8 +101,9 @@ public class StringBuilderChainGenerator extends StringBuilderGenerator {
 		ifStatement.setExpression(createInfixExpression(createMemberAccessExpression(member, true, true), Operator.NOT_EQUALS, fAst.newNullLiteral()));
 		Block thenBlock= fAst.newBlock();
 		flushTemporaryExpression();
-		for (String a : getContext().getTemplateParser().getBody()) {
-			addElement(processElement(a, member), thenBlock);
+		String[] arrayString= getContext().getTemplateParser().getBody();
+		for (int i= 0; i < arrayString.length; i++) {
+			addElement(processElement(arrayString[i], member), thenBlock);
 		}
 		if (addSeparator)
 			addElement(getContext().getTemplateParser().getSeparator(), thenBlock);

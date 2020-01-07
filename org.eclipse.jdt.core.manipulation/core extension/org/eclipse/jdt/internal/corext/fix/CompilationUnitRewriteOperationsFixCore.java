@@ -94,7 +94,8 @@ public class CompilationUnitRewriteOperationsFixCore extends AbstractFix {
 		CompilationUnitRewrite cuRewrite= new CompilationUnitRewrite((ICompilationUnit)fCompilationUnit.getJavaElement(), fCompilationUnit);
 
 		fLinkedProposalModel.clear();
-		for (CompilationUnitRewriteOperation operation : fOperations) {
+		for (int i= 0; i < fOperations.length; i++) {
+			CompilationUnitRewriteOperation operation= fOperations[i];
 			operation.rewriteAST(cuRewrite, fLinkedProposalModel);
 		}
 
@@ -108,7 +109,8 @@ public class CompilationUnitRewriteOperationsFixCore extends AbstractFix {
 	@Override
 	public String getAdditionalProposalInfo(){
 		StringBuilder sb= new StringBuilder();
-		for (CompilationUnitRewriteOperation operation : fOperations) {
+		for (int i= 0; i < fOperations.length; i++) {
+			CompilationUnitRewriteOperation operation= fOperations[i];
 			String info= operation.getAdditionalInfo();
 			if (info != null)
 				sb.append(info);

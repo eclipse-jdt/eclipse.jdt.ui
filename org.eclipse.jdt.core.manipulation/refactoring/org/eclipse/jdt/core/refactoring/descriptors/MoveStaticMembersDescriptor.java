@@ -165,8 +165,8 @@ public final class MoveStaticMembersDescriptor extends JavaRefactoringDescriptor
 		if (fMembers == null)
 			status.merge(RefactoringStatus.createFatalErrorStatus(DescriptorMessages.MoveStaticMembersDescriptor_no_members));
 		else {
-			for (IMember member : fMembers) {
-				if (member == null) {
+			for (int index= 0; index < fMembers.length; index++) {
+				if (fMembers[index] == null) {
 					status.merge(RefactoringStatus.createFatalErrorStatus(DescriptorMessages.MoveStaticMembersDescriptor_invalid_members));
 					break;
 				}

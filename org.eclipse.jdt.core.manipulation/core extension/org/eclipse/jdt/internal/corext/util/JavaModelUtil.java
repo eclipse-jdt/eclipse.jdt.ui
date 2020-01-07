@@ -168,10 +168,11 @@ public final class JavaModelUtil {
 	 * @throws JavaModelException thrown when the cu can not be accessed
 	 */
 	public static IType findTypeInCompilationUnit(ICompilationUnit cu, String typeQualifiedName) throws JavaModelException {
-		for (IType type : cu.getAllTypes()) {
-			String currName= type.getTypeQualifiedName('.');
+		IType[] types= cu.getAllTypes();
+		for (int i= 0; i < types.length; i++) {
+			String currName= types[i].getTypeQualifiedName('.');
 			if (typeQualifiedName.equals(currName)) {
-				return type;
+				return types[i];
 			}
 		}
 		return null;
@@ -351,9 +352,10 @@ public final class JavaModelUtil {
 	 * @throws JavaModelException thrown when the type can not be accessed
 	 */
 	public static IMethod findMethod(String name, String[] paramTypes, boolean isConstructor, IType type) throws JavaModelException {
-		for (IMethod method : type.getMethods()) {
-			if (isSameMethodSignature(name, paramTypes, isConstructor, method)) {
-				return method;
+		IMethod[] methods= type.getMethods();
+		for (int i= 0; i < methods.length; i++) {
+			if (isSameMethodSignature(name, paramTypes, isConstructor, methods[i])) {
+				return methods[i];
 			}
 		}
 		return null;
@@ -386,8 +388,9 @@ public final class JavaModelUtil {
 			}
 		}
 		if (!isConstructor) {
-			for (IType superInterface : hierarchy.getSuperInterfaces(type)) {
-				IMethod res= findMethodInHierarchy(hierarchy, superInterface, name, paramTypes, false);
+			IType[] superInterfaces= hierarchy.getSuperInterfaces(type);
+			for (int i= 0; i < superInterfaces.length; i++) {
+				IMethod res= findMethodInHierarchy(hierarchy, superInterfaces[i], name, paramTypes, false);
 				if (res != null) {
 					return res;
 				}
@@ -445,8 +448,9 @@ public final class JavaModelUtil {
 	 * @throws JavaModelException thrown when the type can not be accessed
 	 */
 	public static boolean hasMainMethod(IType type) throws JavaModelException {
-		for (IMethod method : type.getMethods()) {
-			if (method.isMainMethod()) {
+		IMethod[] methods= type.getMethods();
+		for (int i= 0; i < methods.length; i++) {
+			if (methods[i].isMainMethod()) {
 				return true;
 			}
 		}
@@ -593,7 +597,9 @@ public final class JavaModelUtil {
 			return true;
 		}
 		if (Flags.isInterface(hierarchy.getCachedFlags(possibleSuperType))) {
-			for (IType curr : hierarchy.getSuperInterfaces(type)) {
+			IType[] superInterfaces= hierarchy.getSuperInterfaces(type);
+			for (int i= 0; i < superInterfaces.length; i++) {
+				IType curr= superInterfaces[i];
 				if (possibleSuperType.equals(curr) || isSuperType(hierarchy, possibleSuperType, curr)) {
 					return true;
 				}
@@ -675,7 +681,9 @@ public final class JavaModelUtil {
 	 * <code>null</code> if the container can not be modified.
 	 */
 	public static IClasspathEntry findEntryInContainer(IClasspathContainer container, IPath libPath) {
-		for (IClasspathEntry curr : container.getClasspathEntries()) {
+		IClasspathEntry[] entries= container.getClasspathEntries();
+		for (int i= 0; i < entries.length; i++) {
+			IClasspathEntry curr= entries[i];
 			IClasspathEntry resolved= JavaCore.getResolvedClasspathEntry(curr);
 			if (resolved != null && libPath.equals(resolved.getPath())) {
 				return curr; // return the real entry
@@ -721,8 +729,8 @@ public final class JavaModelUtil {
 	 */
 	public static ICompilationUnit[] getAllCompilationUnits(IJavaElement[] javaElements) throws JavaModelException {
 		HashSet<ICompilationUnit> result= new HashSet<>();
-		for (IJavaElement javaElement : javaElements) {
-			addAllCus(result, javaElement);
+		for (int i= 0; i < javaElements.length; i++) {
+			addAllCus(result, javaElements[i]);
 		}
 		return result.toArray(new ICompilationUnit[result.size()]);
 	}
@@ -731,21 +739,19 @@ public final class JavaModelUtil {
 		switch (javaElement.getElementType()) {
 			case IJavaElement.JAVA_PROJECT:
 				IJavaProject javaProject= (IJavaProject) javaElement;
-				for (IPackageFragmentRoot packageFragmentRoot : javaProject.getPackageFragmentRoots()) {
-					addAllCus(collector, packageFragmentRoot);
-				}
+				IPackageFragmentRoot[] packageFragmentRoots= javaProject.getPackageFragmentRoots();
+				for (int i= 0; i < packageFragmentRoots.length; i++)
+					addAllCus(collector, packageFragmentRoots[i]);
 				return;
-
 
 			case IJavaElement.PACKAGE_FRAGMENT_ROOT:
 				IPackageFragmentRoot packageFragmentRoot= (IPackageFragmentRoot) javaElement;
 				if (packageFragmentRoot.getKind() != IPackageFragmentRoot.K_SOURCE)
 					return;
-				for (IJavaElement packageFragment : packageFragmentRoot.getChildren()) {
-					addAllCus(collector, packageFragment);
-				}
+				IJavaElement[] packageFragments= packageFragmentRoot.getChildren();
+				for (int j= 0; j < packageFragments.length; j++)
+					addAllCus(collector, packageFragments[j]);
 				return;
-
 
 			case IJavaElement.PACKAGE_FRAGMENT:
 				IPackageFragment packageFragment= (IPackageFragment) javaElement;

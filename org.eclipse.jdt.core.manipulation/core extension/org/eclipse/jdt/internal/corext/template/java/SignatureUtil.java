@@ -169,11 +169,10 @@ public final class SignatureUtil {
 				return NULL_TYPE_SIGNATURE_ARRAY;
 		}
 
-		for (char[] typeArgument : Signature.getTypeArguments(signature)) {
-			if (Arrays.equals(typeArgument, NULL_TYPE_SIGNATURE_ARRAY)) {
+		char[][] typeArguments= Signature.getTypeArguments(signature);
+		for (int i= 0; i < typeArguments.length; i++)
+			if (Arrays.equals(typeArguments[i], NULL_TYPE_SIGNATURE_ARRAY))
 				return NULL_TYPE_SIGNATURE_ARRAY;
-			}
-		}
 
 		if (signature[0] == Signature.C_SUPER) {
 			char[] type= new char[signature.length - 1];
@@ -276,7 +275,9 @@ public final class SignatureUtil {
 		}
 
 		StringBuilder res= new StringBuilder("("); //$NON-NLS-1$
-		for (char[] param : Signature.getParameterTypes(signature)) {
+		char[][] parameters= Signature.getParameterTypes(signature);
+		for (int i= 0; i < parameters.length; i++) {
+			char[] param= parameters[i];
 			res.append(getLowerBound(param));
 		}
 		res.append(')');

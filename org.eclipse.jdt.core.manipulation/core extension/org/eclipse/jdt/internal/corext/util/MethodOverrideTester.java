@@ -143,8 +143,9 @@ public class MethodOverrideTester {
 				}
 			}
 		}
-		for (IType intf : fHierarchy.getSuperInterfaces(type)) {
-			IMethod res= findOverriddenMethodInHierarchy(intf, overriding);
+		IType[] interfaces= fHierarchy.getSuperInterfaces(type);
+		for (int i= 0; i < interfaces.length; i++) {
+			IMethod res= findOverriddenMethodInHierarchy(interfaces[i], overriding);
 			if (res != null) {
 				return res; // methods from interfaces are always public and therefore visible
 			}
@@ -172,8 +173,9 @@ public class MethodOverrideTester {
 				return res;
 			}
 		}
-		for (IType superInterface : fHierarchy.getSuperInterfaces(type)) {
-			IMethod res= findOverriddenMethodInHierarchy(superInterface, overriding);
+		IType[] superInterfaces= fHierarchy.getSuperInterfaces(type);
+		for (int i= 0; i < superInterfaces.length; i++) {
+			IMethod res= findOverriddenMethodInHierarchy(superInterfaces[i], overriding);
 			if (res != null) {
 				return res;
 			}
@@ -193,7 +195,9 @@ public class MethodOverrideTester {
 		int flags= overriding.getFlags();
 		if (Flags.isPrivate(flags) || Flags.isStatic(flags) || overriding.isConstructor())
 			return null;
-		for (IMethod overridden : overriddenType.getMethods()) {
+		IMethod[] overriddenMethods= overriddenType.getMethods();
+		for (int i= 0; i < overriddenMethods.length; i++) {
+			IMethod overridden= overriddenMethods[i];
 			flags= overridden.getFlags();
 			if (Flags.isPrivate(flags) || Flags.isStatic(flags) || overridden.isConstructor())
 				continue;
@@ -215,7 +219,9 @@ public class MethodOverrideTester {
 		int flags= overridden.getFlags();
 		if (Flags.isPrivate(flags) || Flags.isStatic(flags) || overridden.isConstructor())
 			return null;
-		for (IMethod overriding : overridingType.getMethods()) {
+		IMethod[] overridingMethods= overridingType.getMethods();
+		for (int i= 0; i < overridingMethods.length; i++) {
+			IMethod overriding= overridingMethods[i];
 			flags= overriding.getFlags();
 			if (Flags.isPrivate(flags) || Flags.isStatic(flags) || overriding.isConstructor())
 				continue;
@@ -404,7 +410,8 @@ public class MethodOverrideTester {
 		ITypeParameter[] typeParameters= instantiatedType.getTypeParameters();
 
 		if (instantiatingType == null) { // the focus type
-			for (ITypeParameter curr : typeParameters) {
+			for (int i= 0; i < typeParameters.length; i++) {
+				ITypeParameter curr= typeParameters[i];
 				// use star to make type variables different from type refs
 				s.addSubstitution(curr.getElementName(), '*' + curr.getElementName(), getTypeParameterErasure(curr, instantiatedType));
 			}
@@ -417,7 +424,8 @@ public class MethodOverrideTester {
 					s.addSubstitution(curr.getElementName(), substString, erasure);
 				}
 			} else if (typeArguments.length == 0) { // raw type reference
-				for (ITypeParameter curr : typeParameters) {
+				for (int i= 0; i < typeParameters.length; i++) {
+					ITypeParameter curr= typeParameters[i];
 					String erasure= getTypeParameterErasure(curr, instantiatedType);
 					s.addSubstitution(curr.getElementName(), erasure, erasure);
 				}

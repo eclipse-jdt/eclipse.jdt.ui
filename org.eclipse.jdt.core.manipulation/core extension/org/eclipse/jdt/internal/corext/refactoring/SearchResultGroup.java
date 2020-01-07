@@ -55,8 +55,8 @@ public class SearchResultGroup {
 
 	public static IResource[] getResources(SearchResultGroup[] searchResultGroups){
 		Set<IResource> resourceSet= new HashSet<>(searchResultGroups.length);
-		for (SearchResultGroup searchResultGroup : searchResultGroups) {
-			resourceSet.add(searchResultGroup.getResource());
+		for (int i= 0; i < searchResultGroups.length; i++) {
+			resourceSet.add(searchResultGroups[i].getResource());
 		}
 		return resourceSet.toArray(new IResource[resourceSet.size()]);
 	}

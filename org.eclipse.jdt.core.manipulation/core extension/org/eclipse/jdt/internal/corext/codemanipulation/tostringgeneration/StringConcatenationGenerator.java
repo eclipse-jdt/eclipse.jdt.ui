@@ -138,8 +138,9 @@ public class StringConcatenationGenerator extends AbstractToStringGenerator {
 		cExpression.setExpression(infExpression);
 
 		SumExpressionBuilder builder= new SumExpressionBuilder(null);
-		for (String a : getContext().getTemplateParser().getBody()) {
-			addElement(processElement(a, member), builder);
+		String[] arrayString= getContext().getTemplateParser().getBody();
+		for (int i= 0; i < arrayString.length; i++) {
+			addElement(processElement(arrayString[i], member), builder);
 		}
 		if (addSeparator)
 			addElement(getContext().getTemplateParser().getSeparator(), builder);

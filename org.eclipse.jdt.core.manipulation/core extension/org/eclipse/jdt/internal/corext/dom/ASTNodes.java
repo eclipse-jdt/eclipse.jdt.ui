@@ -984,7 +984,9 @@ public class ASTNodes {
 
 		@Override
 		public boolean visit(ITypeBinding type) {
-			for (IMethodBinding candidate : type.getDeclaredMethods()) {
+			IMethodBinding[] methods= type.getDeclaredMethods();
+			for (int i= 0; i < methods.length; i++) {
+				IMethodBinding candidate= methods[i];
 				if (candidate.getMethodDeclaration() == fOriginalMethod.getMethodDeclaration()) {
 					continue;
 				}
@@ -1259,7 +1261,8 @@ public class ASTNodes {
 	}
 
 	public static ASTNode findParent(ASTNode node, StructuralPropertyDescriptor[][] pathes) {
-		for (StructuralPropertyDescriptor[] path : pathes) {
+		for (int p= 0; p < pathes.length; p++) {
+			StructuralPropertyDescriptor[] path= pathes[p];
 			ASTNode current= node;
 			int d= path.length - 1;
 			for (; d >= 0 && current != null; d--) {
@@ -1404,7 +1407,8 @@ public class ASTNodes {
 			return problems;
 		final int iterations= computeIterations(scope);
 		List<IProblem> result= new ArrayList<>(5);
-		for (IProblem problem : problems) {
+		for (int i= 0; i < problems.length; i++) {
+			IProblem problem= problems[i];
 			boolean consider= false;
 			if ((severity & PROBLEMS) == PROBLEMS)
 				consider= true;
@@ -1441,7 +1445,8 @@ public class ASTNodes {
 			return messages;
 		final int iterations= computeIterations(flags);
 		List<Message> result= new ArrayList<>(5);
-		for (Message message : messages) {
+		for (int i= 0; i < messages.length; i++) {
+			Message message= messages[i];
 			ASTNode temp= node;
 			int count= iterations;
 			do {

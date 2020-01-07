@@ -313,8 +313,9 @@ public abstract class MethodWrapper extends PlatformObject {
 
         visitor.preVisit(this);
         if (visitor.visit(this)) {
-           for (MethodWrapper methodWrapper : getCalls(progressMonitor)) {
-            	methodWrapper.accept(visitor, progressMonitor);
+            MethodWrapper[] methodWrappers= getCalls(progressMonitor);
+            for (int i= 0; i < methodWrappers.length; i++) {
+                methodWrappers[i].accept(visitor, progressMonitor);
             }
         }
         visitor.postVisit(this);

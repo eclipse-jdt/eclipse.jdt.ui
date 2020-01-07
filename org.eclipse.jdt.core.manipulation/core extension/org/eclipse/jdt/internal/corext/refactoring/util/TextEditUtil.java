@@ -68,10 +68,9 @@ public class TextEditUtil {
 		if (edit.getExclusiveEnd() != children[children.length - 1].getExclusiveEnd())
 			return false;
 
-		for (TextEdit child : children) {
-			if (!isPacked(child)) {
+		for (int i= 0; i < children.length; i++) {
+			if (!isPacked(children[i]))
 				return false;
-			}
 		}
 
 		return true;
@@ -96,7 +95,9 @@ public class TextEditUtil {
 		if (!edit.hasChildren()) {
 			result.addChild(edit);
 		} else {
-			for (TextEdit child : edit.getChildren()) {
+			TextEdit[] children= edit.getChildren();
+			for (int i= 0; i < children.length; i++) {
+				TextEdit child= children[i];
 				child.getParent().removeChild(0);
 				flatten(child, result);
 			}

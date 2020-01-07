@@ -183,8 +183,8 @@ public class ToStringTemplateParser {
 
 	protected int firstOccuranceOf(String template, String[] wantedVariables) {
 		int result= -1;
-		for (String wantedVariable : wantedVariables) {
-			int indexOf= template.indexOf(wantedVariable);
+		for (int i= 0; i < wantedVariables.length; i++) {
+			int indexOf= template.indexOf(wantedVariables[i]);
 			if (result == -1 || (indexOf > 0 && indexOf < result))
 				result= indexOf;
 		}
@@ -198,11 +198,11 @@ public class ToStringTemplateParser {
 				break;
 			String foundVariable= null;
 			int variablePosition= template.length();
-			for (String wantedVariable : wantedVariables) {
-				int position= template.indexOf(wantedVariable);
+			for (int i= 0; i < wantedVariables.length; i++) {
+				int position= template.indexOf(wantedVariables[i]);
 				if (position >= 0 && position < variablePosition) {
 					variablePosition= position;
-					foundVariable= wantedVariable;
+					foundVariable= wantedVariables[i];
 				}
 			}
 			if (variablePosition == template.length()) {

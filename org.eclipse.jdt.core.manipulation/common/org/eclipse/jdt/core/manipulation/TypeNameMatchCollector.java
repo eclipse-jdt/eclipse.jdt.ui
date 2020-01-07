@@ -61,7 +61,9 @@ public class TypeNameMatchCollector extends TypeNameMatchRequestor {
 	}
 
 	private boolean filter(String fullTypeName) {
-		for (Pattern curr : getStringMatchers()) {
+		Pattern[] matchers= getStringMatchers();
+		for (int i= 0; i < matchers.length; i++) {
+			Pattern curr= matchers[i];
 			if (curr.matcher(fullTypeName).matches()) {
 				return true;
 			}

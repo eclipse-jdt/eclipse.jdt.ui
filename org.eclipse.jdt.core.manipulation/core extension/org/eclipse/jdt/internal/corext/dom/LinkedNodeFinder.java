@@ -114,7 +114,8 @@ public class LinkedNodeFinder  {
 		int nameOffset= nameNode.getStartPosition();
 		int nameInclEnd= nameOffset + nameNode.getLength() - 1;
 
-		for (IProblem curr : problems) {
+		for (int i= 0; i < problems.length; i++) {
+			IProblem curr= problems[i];
 			if (curr.getSourceStart() == nameOffset && curr.getSourceEnd() == nameInclEnd) {
 				int kind= getProblemKind(curr);
 				if (kind != 0) {
@@ -148,7 +149,8 @@ public class LinkedNodeFinder  {
 
 		String name= nameNode.getIdentifier();
 
-		for (IProblem curr : problems) {
+		for (int i= 0; i < problems.length; i++) {
+			IProblem curr= problems[i];
 			int probStart= curr.getSourceStart();
 			int probEnd= curr.getSourceEnd() + 1;
 

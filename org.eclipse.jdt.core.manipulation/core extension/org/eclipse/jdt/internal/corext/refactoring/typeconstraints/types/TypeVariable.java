@@ -80,7 +80,8 @@ public final class TypeVariable extends AbstractTypeVariable {
 	}
 
 	private boolean doExtends(TypeVariable other) {
-		for (TType bound : fBounds) {
+		for (int i= 0; i < fBounds.length; i++) {
+			TType bound= fBounds[i];
 			if (other.equals(bound) || (bound.getKind() == TYPE_VARIABLE && ((TypeVariable)bound).doExtends(other)))
 				return true;
 		}

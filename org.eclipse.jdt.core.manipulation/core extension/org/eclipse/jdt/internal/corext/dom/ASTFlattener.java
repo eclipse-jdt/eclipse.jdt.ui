@@ -141,7 +141,8 @@ public class ASTFlattener extends GenericVisitor {
 	}
 
 	void printAnnotationsList(List<? extends Annotation> annotations) {
-		for (Annotation annotation : annotations) {
+		for (Iterator<? extends Annotation> it = annotations.iterator(); it.hasNext(); ) {
+			Annotation annotation = it.next();
 			annotation.accept(this);
 			this.fBuffer.append(' ');
 		}

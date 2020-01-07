@@ -506,7 +506,9 @@ public class ASTResolving {
 
 		// test if selector is a object method
 		ITypeBinding binding= searchRoot.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
-		for (IMethodBinding meth : binding.getDeclaredMethods()) {
+		IMethodBinding[] objectMethods= binding.getDeclaredMethods();
+		for (int i= 0; i < objectMethods.length; i++) {
+			IMethodBinding meth= objectMethods[i];
 			if (meth.getName().equals(selector) && meth.getParameterTypes().length == nArgs) {
 				return new ITypeBinding[] { binding };
 			}
@@ -532,7 +534,9 @@ public class ASTResolving {
 					return true;
 				}
 
-				for (IMethodBinding meth : node.getDeclaredMethods()) {
+				IMethodBinding[] methods= node.getDeclaredMethods();
+				for (int i= 0; i < methods.length; i++) {
+					IMethodBinding meth= methods[i];
 					if (meth.getName().equals(selector) && meth.getParameterTypes().length == nArgs) {
 						result.add(node);
 					}
@@ -869,12 +873,12 @@ public class ASTResolving {
 		} else if (type.isPrimitive()) {
 			Code code= PrimitiveType.toCode(type.getName());
 			boolean found= false;
-			for (Code order : CODE_ORDER) {
+			for (int i= 0; i < CODE_ORDER.length; i++) {
 				if (found) {
-					String typeName= order.toString();
+					String typeName= CODE_ORDER[i].toString();
 					res.add(ast.resolveWellKnownType(typeName));
 				}
-				if (code == order) {
+				if (code == CODE_ORDER[i]) {
 					found= true;
 				}
 			}
@@ -885,7 +889,9 @@ public class ASTResolving {
 	}
 
 	private static void collectRelaxingTypes(Collection<ITypeBinding> res, ITypeBinding type) {
-		for (ITypeBinding curr : type.getInterfaces()) {
+		ITypeBinding[] interfaces= type.getInterfaces();
+		for (int i= 0; i < interfaces.length; i++) {
+			ITypeBinding curr= interfaces[i];
 			if (!res.contains(curr)) {
 				res.add(curr);
 			}
@@ -947,16 +953,18 @@ public class ASTResolving {
 			return isVariableDefinedInContext(context, type);
 		}
 		if (type.isGenericType()) {
-			for (ITypeBinding typeParameter : type.getTypeParameters()) {
-				if (!isUseableTypeInContext(typeParameter, context, noWildcards)) {
+			ITypeBinding[] typeParameters= type.getTypeParameters();
+			for (int i= 0; i < typeParameters.length; i++) {
+				if (!isUseableTypeInContext(typeParameters[i], context, noWildcards)) {
 					return false;
 				}
 			}
 			return true;
 		}
 		if (type.isParameterizedType()) {
-			for (ITypeBinding typeArgument : type.getTypeArguments()) {
-				if (!isUseableTypeInContext(typeArgument, context, noWildcards)) {
+			ITypeBinding[] typeArguments= type.getTypeArguments();
+			for (int i= 0; i < typeArguments.length; i++) {
+				if (!isUseableTypeInContext(typeArguments[i], context, noWildcards)) {
 					return false;
 				}
 			}

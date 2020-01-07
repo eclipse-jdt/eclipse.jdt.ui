@@ -309,7 +309,9 @@ public class Bindings {
 	public static IVariableBinding findFieldInType(ITypeBinding type, String fieldName) {
 		if (type.isPrimitive())
 			return null;
-		for (IVariableBinding field : type.getDeclaredFields()) {
+		IVariableBinding[] fields= type.getDeclaredFields();
+		for (int i= 0; i < fields.length; i++) {
+			IVariableBinding field= fields[i];
 			if (field.getName().equals(fieldName))
 				return field;
 		}
@@ -335,8 +337,9 @@ public class Bindings {
 			if (field != null)
 				return field;
 		}
-		for (ITypeBinding intf : type.getInterfaces()) {
-			field= findFieldInHierarchy(intf, fieldName);
+		ITypeBinding[] interfaces= type.getInterfaces();
+		for (int i= 0; i < interfaces.length; i++) {
+			field= findFieldInHierarchy(interfaces[i], fieldName);
 			if (field != null) // no private fields in interfaces
 				return field;
 		}
@@ -355,15 +358,14 @@ public class Bindings {
 	public static IMethodBinding findMethodInType(ITypeBinding type, String methodName, ITypeBinding[] parameters) {
 		if (type.isPrimitive())
 			return null;
-		for (IMethodBinding method : type.getDeclaredMethods()) {
+		IMethodBinding[] methods= type.getDeclaredMethods();
+		for (int i= 0; i < methods.length; i++) {
 			if (parameters == null) {
-				if (methodName.equals(method.getName())) {
-					return method;
-				}
+				if (methodName.equals(methods[i].getName()))
+					return methods[i];
 			} else {
-				if (isEqualMethod(method, methodName, parameters)) {
-					return method;
-				}
+				if (isEqualMethod(methods[i], methodName, parameters))
+					return methods[i];
 			}
 		}
 		return null;
@@ -390,8 +392,9 @@ public class Bindings {
 			if (method != null)
 				return method;
 		}
-		for (ITypeBinding intf : type.getInterfaces()) {
-			method= findMethodInHierarchy(intf, methodName, parameters);
+		ITypeBinding[] interfaces= type.getInterfaces();
+		for (int i= 0; i < interfaces.length; i++) {
+			method= findMethodInHierarchy(interfaces[i], methodName, parameters);
 			if (method != null)
 				return method;
 		}
@@ -409,15 +412,14 @@ public class Bindings {
 	public static IMethodBinding findMethodInType(ITypeBinding type, String methodName, String[] parameters) {
 		if (type.isPrimitive())
 			return null;
-		for (IMethodBinding method : type.getDeclaredMethods()) {
+		IMethodBinding[] methods= type.getDeclaredMethods();
+		for (int i= 0; i < methods.length; i++) {
 			if (parameters == null) {
-				if (methodName.equals(method.getName())) {
-					return method;
-				}
+				if (methodName.equals(methods[i].getName()))
+					return methods[i];
 			} else {
-				if (isEqualMethod(method, methodName, parameters)) {
-					return method;
-				}
+				if (isEqualMethod(methods[i], methodName, parameters))
+					return methods[i];
 			}
 		}
 		return null;
@@ -440,15 +442,14 @@ public class Bindings {
 	public static IMethodBinding findMethodWithDeclaredParameterTypesInType(ITypeBinding type, String methodName, String[] parameters) {
 		if (type.isPrimitive())
 			return null;
-		for (IMethodBinding method : type.getDeclaredMethods()) {
+		IMethodBinding[] methods= type.getDeclaredMethods();
+		for (int i= 0; i < methods.length; i++) {
 			if (parameters == null) {
-				if (methodName.equals(method.getName())) {
-					return method;
-				}
+				if (methodName.equals(methods[i].getName()))
+					return methods[i];
 			} else {
-				if (isEqualMethod(method.getMethodDeclaration(), methodName, parameters)) {
-					return method;
-				}
+				if (isEqualMethod(methods[i].getMethodDeclaration(), methodName, parameters))
+					return methods[i];
 			}
 		}
 		return null;
@@ -474,8 +475,9 @@ public class Bindings {
 			if (method != null)
 				return method;
 		}
-		for (ITypeBinding intf : type.getInterfaces()) {
-			method= findMethodInHierarchy(intf, methodName, parameters);
+		ITypeBinding[] interfaces= type.getInterfaces();
+		for (int i= 0; i < interfaces.length; i++) {
+			method= findMethodInHierarchy(interfaces[i], methodName, parameters);
 			if (method != null)
 				return method;
 		}
@@ -490,10 +492,10 @@ public class Bindings {
 	 * @return the method binding of the method that is overridden by the specified <code>method</code>, or <code>null</code>
 	 */
 	public static IMethodBinding findOverriddenMethodInType(ITypeBinding type, IMethodBinding method) {
-		for (IMethodBinding curr : type.getDeclaredMethods()) {
-			if (isSubsignature(method, curr)) {
-				return curr;
-			}
+		IMethodBinding[] methods= type.getDeclaredMethods();
+		for (int i= 0; i < methods.length; i++) {
+			if (isSubsignature(method, methods[i]))
+				return methods[i];
 		}
 		return null;
 	}
@@ -516,8 +518,9 @@ public class Bindings {
 			if (method != null)
 				return method;
 		}
-		for (ITypeBinding intf : type.getInterfaces()) {
-			method= findOverriddenMethodInHierarchy(intf, binding);
+		ITypeBinding[] interfaces= type.getInterfaces();
+		for (int i= 0; i < interfaces.length; i++) {
+			method= findOverriddenMethodInHierarchy(interfaces[i], binding);
 			if (method != null)
 				return method;
 		}
@@ -572,8 +575,9 @@ public class Bindings {
 				}
 			}
 		}
-		for (ITypeBinding intf : type.getInterfaces()) {
-			IMethodBinding res= findOverriddenMethodInHierarchy(intf, overriding);
+		ITypeBinding[] interfaces= type.getInterfaces();
+		for (int i= 0; i < interfaces.length; i++) {
+			IMethodBinding res= findOverriddenMethodInHierarchy(interfaces[i], overriding);
 			if (res != null) {
 				methodList.add(res); // methods from interfaces are always public and therefore visible
 				if (firstOnly) {
@@ -610,8 +614,9 @@ public class Bindings {
 
 	private static void collectSuperTypes(ITypeBinding curr, Set<ITypeBinding> collection) {
 		if (collection.add(curr)) {
-			for (ITypeBinding intf : curr.getInterfaces()) {
-				collectSuperTypes(intf, collection);
+			ITypeBinding[] interfaces= curr.getInterfaces();
+			for (int i= 0; i < interfaces.length; i++) {
+				collectSuperTypes(interfaces[i], collection);
 			}
 			ITypeBinding superClass= curr.getSuperclass();
 			if (superClass != null) {
@@ -656,11 +661,12 @@ public class Bindings {
 		boolean unvisited= visited.add(type);
 		if (!unvisited)
 			return true;
-		for (ITypeBinding intf : type.getInterfaces()) {
-			if (!visitor.visit(intf)) {
+		ITypeBinding[] interfaces= type.getInterfaces();
+		for (int i= 0; i < interfaces.length; i++) {
+			if (!visitor.visit(interfaces[i])) {
 				return false;
 			}
-			if (!visitInterfaces(intf, visitor, visited)) {
+			if (!visitInterfaces(interfaces[i], visitor, visited)) {
 				return false;
 			}
 		}
@@ -806,11 +812,9 @@ public class Bindings {
 	}
 
 	private static boolean containsTypeVariables(ITypeBinding[] types) {
-		for (ITypeBinding type : types) {
-			if (containsTypeVariables(type)) {
+		for (int i= 0; i < types.length; i++)
+			if (containsTypeVariables(types[i]))
 				return true;
-			}
-		}
 		return false;
 	}
 
@@ -821,7 +825,8 @@ public class Bindings {
 			return Collections.emptySet();
 
 		Set<ITypeBinding> result= new HashSet<>(typeBounds.length);
-		for (ITypeBinding bound : typeBounds) {
+		for (int i= 0; i < typeBounds.length; i++) {
+			ITypeBinding bound= typeBounds[i];
 			if ("java.lang.Object".equals(typeBounds[0].getQualifiedName())) //$NON-NLS-1$
 				continue;
 			else if (containsTypeVariables(bound))
@@ -897,8 +902,8 @@ public class Bindings {
 			}
 		}
 		ITypeBinding[] superInterfaces= hierarchyType.getInterfaces();
-		for (ITypeBinding superInterface : superInterfaces) {
-			ITypeBinding res = findTypeInHierarchy(superInterface, fullyQualifiedTypeName);
+		for (int i= 0; i < superInterfaces.length; i++) {
+			ITypeBinding res= findTypeInHierarchy(superInterfaces[i], fullyQualifiedTypeName);
 			if (res != null) {
 				return res;
 			}
@@ -924,10 +929,11 @@ public class Bindings {
 				return superClass;
 			}
 		}
-		for (ITypeBinding superInterface : hierarchyType.getInterfaces()) {
-			ITypeBinding res= findTypeInHierarchy(superInterface, fullyQualifiedTypeName);
+		ITypeBinding[] superInterfaces= hierarchyType.getInterfaces();
+		for (int i= 0; i < superInterfaces.length; i++) {
+			ITypeBinding res= findTypeInHierarchy(superInterfaces[i], fullyQualifiedTypeName);
 			if (res != null) {
-				return superInterface;
+				return superInterfaces[i];
 			}
 		}
 		return null;
@@ -1000,8 +1006,9 @@ public class Bindings {
 		}
 
 		if (possibleSuperType.isInterface()) {
-			for (ITypeBinding superInterface : type.getInterfaces()) {
-				if (isSuperType(possibleSuperType, superInterface, considerTypeArguments)) {
+			ITypeBinding[] superInterfaces= type.getInterfaces();
+			for (int i= 0; i < superInterfaces.length; i++) {
+				if (isSuperType(possibleSuperType, superInterfaces[i], considerTypeArguments)) {
 					return true;
 				}
 			}
@@ -1039,7 +1046,9 @@ public class Bindings {
 	public static IMethod findMethod(IMethodBinding method, IType type) throws JavaModelException {
 		method= method.getMethodDeclaration();
 
-		for (IMethod candidate : type.getMethods()) {
+		IMethod[] candidates= type.getMethods();
+		for (int i= 0; i < candidates.length; i++) {
+			IMethod candidate= candidates[i];
 			if (candidate.getElementName().equals(method.getName()) && sameParameters(method, candidate)) {
 				return candidate;
 			}
@@ -1092,9 +1101,10 @@ public class Bindings {
 					return false;
 				String packageName= type.getPackage().isUnnamed() ? "" : type.getPackage().getName(); //$NON-NLS-1$
 				String typeName= getTypeQualifiedName(type);
-				for (String[] qualifiedCandidate : qualifiedCandidates) {
+				for (int i= 0; i < qualifiedCandidates.length; i++) {
+					String[] qualifiedCandidate= qualifiedCandidates[i];
 					if (	qualifiedCandidate[0].equals(packageName) &&
-						qualifiedCandidate[1].equals(typeName))
+							qualifiedCandidate[1].equals(typeName))
 						return true;
 				}
 			}
@@ -1319,10 +1329,9 @@ public class Bindings {
 	 */
 	@Deprecated
 	public static boolean containsSignatureEquivalentConstructor(IMethodBinding[] candidates, IMethodBinding overridable) {
-		for (IMethodBinding candidate : candidates) {
-			if (isSignatureEquivalentConstructor(candidate, overridable)) {
+		for (int index= 0; index < candidates.length; index++) {
+			if (isSignatureEquivalentConstructor(candidates[index], overridable))
 				return true;
-			}
 		}
 		return false;
 	}
@@ -1377,13 +1386,14 @@ public class Bindings {
 			if (!overridableErasure.isSubTypeCompatible(overriddenErasure) || !overridableErasure.getKey().equals(overriddenErasure.getKey()))
 				return false;
 		}
+		ITypeBinding[] overriddenExceptions= overridden.getExceptionTypes();
+		ITypeBinding[] overridableExceptions= overridable.getExceptionTypes();
 		boolean checked= false;
-		for (ITypeBinding overriddenException : overridden.getExceptionTypes()) {
+		for (int index= 0; index < overriddenExceptions.length; index++) {
 			checked= false;
-			for (ITypeBinding overridableException : overridable.getExceptionTypes()) {
-				if (overriddenException.isSubTypeCompatible(overridableException)) {
+			for (int offset= 0; offset < overridableExceptions.length; offset++) {
+				if (overriddenExceptions[index].isSubTypeCompatible(overridableExceptions[offset]))
 					checked= true;
-				}
 			}
 			if (!checked)
 				return false;

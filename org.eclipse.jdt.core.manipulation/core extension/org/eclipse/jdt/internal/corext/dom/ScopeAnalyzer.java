@@ -209,15 +209,17 @@ public class ScopeAnalyzer {
 			return false;
 		}
 		if (hasFlag(VARIABLES, flags)) {
-			for (IVariableBinding variableBinding : binding.getDeclaredFields()) {
-				if (requestor.acceptBinding(variableBinding)) {
+			IVariableBinding[] variableBindings= binding.getDeclaredFields();
+			for (int i= 0; i < variableBindings.length; i++) {
+				if (requestor.acceptBinding(variableBindings[i]))
 					return true;
-				}
 			}
 		}
 
 		if (hasFlag(METHODS, flags)) {
-			for (IMethodBinding curr : binding.getDeclaredMethods()) {
+			IMethodBinding[] methodBindings= binding.getDeclaredMethods();
+			for (int i= 0; i < methodBindings.length; i++) {
+				IMethodBinding curr= methodBindings[i];
 				if (isSuperInterfaceBinding && Modifier.isStatic(curr.getModifiers())) {
 					continue;
 				}
@@ -229,7 +231,9 @@ public class ScopeAnalyzer {
 		}
 
 		if (hasFlag(TYPES, flags)) {
-			for (ITypeBinding curr : binding.getDeclaredTypes()) {
+			ITypeBinding[] typeBindings= binding.getDeclaredTypes();
+			for (int i= 0; i < typeBindings.length; i++) {
+				ITypeBinding curr= typeBindings[i];
 				if (requestor.acceptBinding(curr))
 					return true;
 			}
@@ -245,10 +249,10 @@ public class ScopeAnalyzer {
 				return true;
 		}
 
-		for (ITypeBinding intf : binding.getInterfaces()) {// includes looking for methods: abstract, unimplemented methods
-			if (addInherited(intf, true, flags, requestor)) {
+		ITypeBinding[] interfaces= binding.getInterfaces(); // includes looking for methods: abstract, unimplemented methods
+		for (int i= 0; i < interfaces.length; i++) {
+			if (addInherited(interfaces[i], true, flags, requestor)) // recursive
 				return true;
-			}
 		}
 		return false;
 	}
@@ -266,10 +270,10 @@ public class ScopeAnalyzer {
 			if (requestor.acceptBinding(binding))
 				return true;
 
-			for (ITypeBinding typeParameter : binding.getTypeParameters()) {
-				if (requestor.acceptBinding(typeParameter)) {
+			ITypeBinding[] typeParameters= binding.getTypeParameters();
+			for (int i= 0; i < typeParameters.length; i++) {
+				if (requestor.acceptBinding(typeParameters[i]))
 					return true;
-				}
 			}
 		}
 
@@ -512,7 +516,8 @@ public class ScopeAnalyzer {
 	private IVariableBinding[] getEnumContants(ITypeBinding binding) {
 		IVariableBinding[] declaredFields= binding.getDeclaredFields();
 		ArrayList<IVariableBinding> res= new ArrayList<>(declaredFields.length);
-		for (IVariableBinding curr : declaredFields) {
+		for (int i= 0; i < declaredFields.length; i++) {
+			IVariableBinding curr= declaredFields[i];
 			if (curr.isEnumConstant()) {
 				res.add(curr);
 			}
@@ -521,7 +526,9 @@ public class ScopeAnalyzer {
 	}
 
 	private boolean hasEnumContants(IBinding declaration, ITypeBinding binding) {
-		for (IVariableBinding curr : binding.getDeclaredFields()) {
+		IVariableBinding[] declaredFields= binding.getDeclaredFields();
+		for (int i= 0; i < declaredFields.length; i++) {
+			IVariableBinding curr= declaredFields[i];
 			if (curr == declaration)
 				return true;
 		}
@@ -631,8 +638,9 @@ public class ScopeAnalyzer {
 			}
 		}
 		if (possibleSuperTypeDecl.isInterface()) {
-			for (ITypeBinding superInterface : type.getInterfaces()) {
-				if (isInSuperTypeHierarchy(possibleSuperTypeDecl, superInterface.getTypeDeclaration())) {
+			ITypeBinding[] superInterfaces= type.getInterfaces();
+			for (int i= 0; i < superInterfaces.length; i++) {
+				if (isInSuperTypeHierarchy(possibleSuperTypeDecl, superInterfaces[i].getTypeDeclaration())) {
 					return true;
 				}
 			}
@@ -740,7 +748,9 @@ public class ScopeAnalyzer {
 					binding= switchExpression.getExpression().resolveTypeBinding();
 				}
 				if (binding != null && binding.isEnum()) {
-					for (IVariableBinding curr : binding.getDeclaredFields()) {
+					IVariableBinding[] declaredFields= binding.getDeclaredFields();
+					for (int i= 0; i < declaredFields.length; i++) {
+						IVariableBinding curr= declaredFields[i];
 						if (curr.isEnumConstant()) {
 							fBreak= fRequestor.acceptBinding(curr);
 							if (fBreak)
@@ -903,11 +913,13 @@ public class ScopeAnalyzer {
 
 	public Collection<String> getUsedVariableNames(int offset, int length) {
 		HashSet<String> result= new HashSet<>();
-		for (IBinding b : getDeclarationsInScope(offset, VARIABLES | CHECK_VISIBILITY)) {
-			result.add(b.getName());
+		IBinding[] bindingsBefore= getDeclarationsInScope(offset, VARIABLES | CHECK_VISIBILITY);
+		for (int i= 0; i < bindingsBefore.length; i++) {
+			result.add(bindingsBefore[i].getName());
 		}
-		for (IBinding b : getDeclarationsAfter(offset + length, VARIABLES | CHECK_VISIBILITY)) {
-			result.add(b.getName());
+		IBinding[] bindingsAfter= getDeclarationsAfter(offset + length, VARIABLES | CHECK_VISIBILITY);
+		for (int i= 0; i < bindingsAfter.length; i++) {
+			result.add(bindingsAfter[i].getName());
 		}
 		List<ImportDeclaration> imports= fRoot.imports();
 		for (int i= 0; i < imports.size(); i++) {

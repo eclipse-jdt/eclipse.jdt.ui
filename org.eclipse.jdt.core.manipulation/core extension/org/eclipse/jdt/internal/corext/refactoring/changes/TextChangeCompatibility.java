@@ -68,7 +68,8 @@ public class TextChangeCompatibility {
 		}
 		TextEdit[] children= parent.getChildren();
 		// First dive down to find the right parent.
-		for (TextEdit child : children) {
+		for (int i= 0; i < children.length; i++) {
+			TextEdit child= children[i];
 			if (covers(child, edit)) {
 				insert(child, edit);
 				return;
