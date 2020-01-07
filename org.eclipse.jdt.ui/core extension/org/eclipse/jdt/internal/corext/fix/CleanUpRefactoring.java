@@ -148,14 +148,11 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 			if (Display.getCurrent() == null) {
 				final Change[] result= new Change[1];
 				final CoreException[] exs= new CoreException[1];
-				Display.getDefault().syncExec(new Runnable() {
-					@Override
-					public void run() {
-						try {
-							result[0]= CleanUpChange.super.perform(pm);
-						} catch (CoreException e) {
-							exs[0]= e;
-						}
+				Display.getDefault().syncExec(() -> {
+					try {
+						result[0]= CleanUpChange.super.perform(pm);
+					} catch (CoreException e) {
+						exs[0]= e;
 					}
 				});
 

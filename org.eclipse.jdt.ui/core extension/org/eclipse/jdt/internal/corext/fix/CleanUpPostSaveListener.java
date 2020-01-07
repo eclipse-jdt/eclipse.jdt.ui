@@ -670,12 +670,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 		if (Display.getCurrent() != null) {
 			showSlowCleanUpDialog(cleanUpNames);
 		} else {
-			Display.getDefault().asyncExec(new Runnable() {
-				@Override
-				public void run() {
-					showSlowCleanUpDialog(cleanUpNames);
-				}
-			});
+			Display.getDefault().asyncExec(() -> showSlowCleanUpDialog(cleanUpNames));
 		}
 	}
 

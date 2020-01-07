@@ -15,7 +15,6 @@ package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Set;
 
 import com.ibm.icu.text.Collator;
@@ -231,10 +230,7 @@ public class CleanUpRegistry {
 					fOptionsProvider= (ICleanUpOptionsInitializer)fElement.createExecutableExtension(ATTRIBUTE_NAME_CLASS);
 				} catch (CoreException e) {
 					JavaPlugin.log(e);
-					fOptionsProvider= new ICleanUpOptionsInitializer() {
-						@Override
-						public void setDefaultOptions(CleanUpOptions options) {
-						}
+					fOptionsProvider= options -> {
 					};
 				}
 			}
@@ -435,13 +431,10 @@ public class CleanUpRegistry {
 		}
 
 		fPageDescriptors= result.toArray(new CleanUpTabPageDescriptor[result.size()]);
-		Arrays.sort(fPageDescriptors, new Comparator<CleanUpTabPageDescriptor>() {
-			@Override
-			public int compare(CleanUpTabPageDescriptor o1, CleanUpTabPageDescriptor o2) {
-				String name1= o1.getName();
-				String name2= o2.getName();
-				return Collator.getInstance().compare(name1.replaceAll("&", ""), name2.replaceAll("&", "")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			}
+		Arrays.sort(fPageDescriptors, (o1, o2) -> {
+			String name1= o1.getName();
+			String name2= o2.getName();
+			return Collator.getInstance().compare(name1.replaceAll("&", ""), name2.replaceAll("&", "")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		});
 	}
 
