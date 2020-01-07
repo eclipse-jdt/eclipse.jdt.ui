@@ -941,6 +941,8 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 			return SearchPattern.R_CAMELCASE_MATCH;
 		} else if (isSubstringMatching() && CharOperation.substringMatch(pattern.toCharArray(), string.toCharArray())) {
 			return SearchPattern.R_SUBSTRING_MATCH;
+		} else if (isSubwordMatching() && CharOperation.subWordMatch(pattern.toCharArray(), string.toCharArray())) {
+			return SearchPattern.R_SUBWORD_MATCH;
 		} else {
 			return -1;
 		}
@@ -1001,6 +1003,11 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	 */
 	protected boolean isSubstringMatching() {
 		String value= JavaCore.getOption(JavaCore.CODEASSIST_SUBSTRING_MATCH);
+		return JavaCore.ENABLED.equals(value);
+	}
+
+	private boolean isSubwordMatching() {
+		String value= JavaCore.getOption(JavaCore.CODEASSIST_SUBWORD_MATCH);
 		return JavaCore.ENABLED.equals(value);
 	}
 
