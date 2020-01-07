@@ -14,7 +14,6 @@
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -123,13 +122,10 @@ public final class RenamePackageChange extends AbstractJavaElementRenameChange {
 
 		} else {
 			IPackageFragment[] allPackages= JavaElementUtil.getPackageAndSubpackages(pack);
-			Arrays.sort(allPackages, new Comparator<IPackageFragment>() {
-				@Override
-				public int compare(IPackageFragment o1, IPackageFragment o2) {
-					String p1= o1.getElementName();
-					String p2= o2.getElementName();
-					return p1.compareTo(p2);
-				}
+			Arrays.sort(allPackages, (o1, o2) -> {
+				String p1= o1.getElementName();
+				String p2= o2.getElementName();
+				return p1.compareTo(p2);
 			});
 			int count= allPackages.length;
 			pm.beginTask("", count); //$NON-NLS-1$

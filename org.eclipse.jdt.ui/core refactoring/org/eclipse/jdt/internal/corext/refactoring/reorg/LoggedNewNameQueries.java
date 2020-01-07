@@ -118,12 +118,6 @@ public final class LoggedNewNameQueries implements INewNameQueries {
 
 	@Override
 	public INewNameQuery createStaticQuery(final String name) {
-		return new INewNameQuery() {
-
-			@Override
-			public String getNewName() {
-				return name;
-			}
-		};
+		return () -> name;
 	}
 }

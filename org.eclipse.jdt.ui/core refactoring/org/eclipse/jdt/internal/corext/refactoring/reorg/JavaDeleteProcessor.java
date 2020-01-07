@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -310,14 +309,11 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 
 	private void checkDirtyResources(final RefactoringStatus result) throws CoreException {
 		for (IResource resource : fResources) {
-			resource.accept(new IResourceVisitor() {
-				@Override
-				public boolean visit(IResource visitedResource) throws CoreException {
-					if (visitedResource instanceof IFile) {
-						checkDirtyFile(result, (IFile)visitedResource);
-					}
-					return true;
+			resource.accept((IResourceVisitor) visitedResource -> {
+				if (visitedResource instanceof IFile) {
+					checkDirtyFile(result, (IFile)visitedResource);
 				}
+				return true;
 			}, IResource.DEPTH_INFINITE, false);
 		}
 	}
@@ -401,12 +397,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 			return;
 
 		// Move from inner to outer packages
-		Collections.sort(initialPackagesToDelete, new Comparator<IPackageFragment>() {
-			@Override
-			public int compare(IPackageFragment one, IPackageFragment two) {
-				return two.getElementName().compareTo(one.getElementName());
-			}
-		});
+		Collections.sort(initialPackagesToDelete, (one, two) -> two.getElementName().compareTo(one.getElementName()));
 
 		// Get resources and java elements which will be deleted as well
 		final Set<IResource> deletedChildren= new HashSet<>();

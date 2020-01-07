@@ -82,7 +82,6 @@ import org.eclipse.jdt.core.refactoring.participants.IRefactoringProcessorIds;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.TypeBindingVisitor;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
@@ -201,12 +200,9 @@ public class IntroduceParameterObjectProcessor extends ChangeSignatureProcessor 
 		}
 
 		private void importNodeTypes(ASTNode node, final CompilationUnitRewrite cuRewrite, final ImportRewriteContext context) {
-			ASTResolving.visitAllBindings(node, new TypeBindingVisitor() {
-				@Override
-				public boolean visit(ITypeBinding nodeBinding) {
-					importBinding(nodeBinding, cuRewrite, context);
-					return false;
-				}
+			ASTResolving.visitAllBindings(node, nodeBinding -> {
+				importBinding(nodeBinding, cuRewrite, context);
+				return false;
 			});
 		}
 	}

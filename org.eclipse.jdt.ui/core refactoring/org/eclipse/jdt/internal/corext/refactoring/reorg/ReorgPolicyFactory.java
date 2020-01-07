@@ -19,7 +19,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -2407,25 +2406,22 @@ public final class ReorgPolicyFactory {
 		private ArrayList<IJavaElement> getSortedChildren(IType parent) throws JavaModelException {
 			IJavaElement[] children= parent.getChildren();
 			ArrayList<IJavaElement> sortedChildren= new ArrayList<>(Arrays.asList(children));
-			Collections.sort(sortedChildren, new Comparator<IJavaElement>() {
-				@Override
-				public int compare(IJavaElement e1, IJavaElement e2) {
-					if (!(e1 instanceof ISourceReference))
-						return 0;
-					if (!(e2 instanceof ISourceReference))
+			Collections.sort(sortedChildren, (e1, e2) -> {
+				if (!(e1 instanceof ISourceReference))
+					return 0;
+				if (!(e2 instanceof ISourceReference))
+					return 0;
+
+				try {
+					ISourceRange sr1= ((ISourceReference)e1).getSourceRange();
+					ISourceRange sr2= ((ISourceReference)e2).getSourceRange();
+					if (sr1 == null || sr2 == null)
 						return 0;
 
-					try {
-						ISourceRange sr1= ((ISourceReference)e1).getSourceRange();
-						ISourceRange sr2= ((ISourceReference)e2).getSourceRange();
-						if (sr1 == null || sr2 == null)
-							return 0;
+					return sr1.getOffset() - sr2.getOffset();
 
-						return sr1.getOffset() - sr2.getOffset();
-
-					} catch (JavaModelException e) {
-						return 0;
-					}
+				} catch (JavaModelException e) {
+					return 0;
 				}
 			});
 			return sortedChildren;

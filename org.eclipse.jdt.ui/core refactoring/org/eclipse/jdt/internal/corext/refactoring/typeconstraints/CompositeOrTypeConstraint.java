@@ -14,7 +14,6 @@
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints;
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
@@ -36,12 +35,7 @@ public class CompositeOrTypeConstraint implements ITypeConstraint{
 
 	private static ITypeConstraint[] sort(ITypeConstraint[] constraints) {
 		//TODO bogus to sort by toString - will have to come up with something better
-		Arrays.sort(constraints, new Comparator<ITypeConstraint>(){
-			@Override
-			public int compare(ITypeConstraint o1, ITypeConstraint o2) {
-				return o2.toString().compareTo(o1.toString());
-			}
-		});
+		Arrays.sort(constraints, (o1, o2) -> o2.toString().compareTo(o1.toString()));
 		return constraints;
 	}
 

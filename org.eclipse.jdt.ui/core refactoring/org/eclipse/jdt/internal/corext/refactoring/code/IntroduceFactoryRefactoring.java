@@ -18,7 +18,6 @@ package org.eclipse.jdt.internal.corext.refactoring.code;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -1004,17 +1003,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	private boolean replaceConstructorCalls(SearchResultGroup rg, CompilationUnit unit, ASTRewrite unitRewriter, CompilationUnitChange unitChange) throws CoreException {
 		Assert.isTrue(ASTCreator.getCu(unit).equals(rg.getCompilationUnit()));
 		SearchMatch[] hits= rg.getSearchResults();
-		Arrays.sort(hits, new Comparator<SearchMatch>() {
-			/**
-			 * Sort by descending offset, such that nested constructor calls are processed first.
-			 * This is necessary, since they can only be moved into the factory method invocation
-			 * after they have been rewritten.
-			 */
-			@Override
-			public int compare(SearchMatch m1, SearchMatch m2) {
-				return m2.getOffset() - m1.getOffset();
-			}
-		});
+		Arrays.sort(hits, (m1, m2) -> m2.getOffset() - m1.getOffset());
 		
 		boolean someCallPatched= false;
 

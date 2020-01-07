@@ -17,7 +17,6 @@ package org.eclipse.jdt.internal.corext.refactoring.structure;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -495,15 +494,11 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		Assert.isNotNull(sourceRewrite);
 		Assert.isNotNull(targetRewrite);
 		Assert.isNotNull(targetDeclaration);
-		Arrays.sort(fMembers, new Comparator<IMember>() {
-
-			@Override
-			public final int compare(final IMember first, final IMember second) {
-				try {
-					return first.getSourceRange().getOffset() - second.getSourceRange().getOffset();
-				} catch (JavaModelException exception) {
-					return first.hashCode() - second.hashCode();
-				}
+		Arrays.sort(fMembers, (first, second) -> {
+			try {
+				return first.getSourceRange().getOffset() - second.getSourceRange().getOffset();
+			} catch (JavaModelException exception) {
+				return first.hashCode() - second.hashCode();
 			}
 		});
 		fTypeBindings.clear();

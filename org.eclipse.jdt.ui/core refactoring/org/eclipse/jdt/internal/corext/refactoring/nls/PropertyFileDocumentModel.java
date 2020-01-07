@@ -16,7 +16,6 @@ package org.eclipse.jdt.internal.corext.refactoring.nls;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import com.ibm.icu.text.Collator;
@@ -115,12 +114,7 @@ public class PropertyFileDocumentModel {
     public void insert(KeyValuePair[] keyValuePairs, TextChange change) {
 
         ArrayList<KeyValuePair> sorted= new ArrayList<>(Arrays.asList(keyValuePairs));
-        Collections.sort(sorted, new Comparator<KeyValuePair>() {
-			@Override
-			public int compare(KeyValuePair p1, KeyValuePair p2) {
-				return Collator.getInstance().compare(p1.fKey, p2.fKey);
-			}
-        });
+        Collections.sort(sorted, (p1, p2) -> Collator.getInstance().compare(p1.fKey, p2.fKey));
 
         for (KeyValuePair curr : sorted) {
             InsertEdit insertEdit= insert(curr);

@@ -848,13 +848,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		IASTFragment[] nodesToReplace= retainOnlyReplacableMatches(getMatchingFragments());
 		if (nodesToReplace.length == 0)
 			return getSelectedExpression();
-		Comparator<IASTFragment> comparator= new Comparator<IASTFragment>() {
-
-			@Override
-			public int compare(IASTFragment o1, IASTFragment o2) {
-				return o1.getStartPosition() - o2.getStartPosition();
-			}
-		};
+		Comparator<IASTFragment> comparator= (o1, o2) -> o1.getStartPosition() - o2.getStartPosition();
 		Arrays.sort(nodesToReplace, comparator);
 		return (IExpressionFragment) nodesToReplace[0];
 	}
