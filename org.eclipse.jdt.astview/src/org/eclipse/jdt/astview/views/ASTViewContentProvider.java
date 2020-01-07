@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (c) 2000, 2017 IBM Corporation and others.
  *
- * This program and the accompanying materials 
+ * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
@@ -62,16 +62,16 @@ public class ASTViewContentProvider implements ITreeContentProvider {
 	@Override
 	public void inputChanged(Viewer v, Object oldInput, Object newInput) {
 	}
-	
+
 	@Override
 	public void dispose() {
 	}
-	
+
 	@Override
 	public Object[] getElements(Object parent) {
 		return getChildren(parent);
 	}
-	
+
 	@Override
 	public Object getParent(Object child) {
 		if (child instanceof ASTNode) {
@@ -96,7 +96,7 @@ public class ASTViewContentProvider implements ITreeContentProvider {
 		}
 		return new Object[0];
 	}
-	
+
 	private Object[] getNodeChildren(ASTNode node) {
 		ArrayList<Object> res= new ArrayList<>();
 
@@ -104,7 +104,7 @@ public class ASTViewContentProvider implements ITreeContentProvider {
 			Expression expression= (Expression) node;
 			ITypeBinding expressionTypeBinding= expression.resolveTypeBinding();
 			res.add(createExpressionTypeBinding(node, expressionTypeBinding));
-			
+
 			// expressions:
 			if (expression instanceof Name) {
 				IBinding binding= ((Name) expression).resolveBinding();
@@ -154,7 +154,7 @@ public class ASTViewContentProvider implements ITreeContentProvider {
 			// Expression attributes:
 			res.add(new GeneralAttribute(expression, "Boxing: " + expression.resolveBoxing() + "; Unboxing: " + expression.resolveUnboxing())); //$NON-NLS-1$ //$NON-NLS-2$
 			res.add(new GeneralAttribute(expression, "ConstantExpressionValue", expression.resolveConstantExpressionValue())); //$NON-NLS-1$
-		
+
 		// references:
 		} else if (node instanceof ConstructorInvocation) {
 			IMethodBinding binding= ((ConstructorInvocation) node).resolveConstructorBinding();
@@ -171,7 +171,7 @@ public class ASTViewContentProvider implements ITreeContentProvider {
 		} else if (node instanceof Type) {
 			IBinding binding= ((Type) node).resolveBinding();
 			res.add(createBinding(node, binding));
-			
+
 		// declarations:
 		} else if (node instanceof AbstractTypeDeclaration) {
 			IBinding binding= ((AbstractTypeDeclaration) node).resolveBinding();
@@ -209,15 +209,15 @@ public class ASTViewContentProvider implements ITreeContentProvider {
 			IBinding binding= ((ModuleDeclaration) node).resolveBinding();
 			res.add(createBinding(node, binding));
 		}
- 		
-		
-		
+
+
+
 		List<StructuralPropertyDescriptor> list= node.structuralPropertiesForType();
 		for (int i= 0; i < list.size(); i++) {
 			StructuralPropertyDescriptor curr= list.get(i);
 			res.add(new NodeProperty(node, curr));
 		}
-		
+
 		if (node instanceof CompilationUnit) {
 			CompilationUnit root= (CompilationUnit) node;
 			res.add(new JavaElement(root, root.getJavaElement()));
@@ -226,10 +226,10 @@ public class ASTViewContentProvider implements ITreeContentProvider {
 			res.add(new SettingsProperty(root));
 			res.add(new WellKnownTypesProperty(root));
 		}
-		
+
 		return res.toArray();
 	}
-	
+
 	private Binding createBinding(ASTNode parent, IBinding binding) {
 		String label= Binding.getBindingLabel(binding);
 		return new Binding(parent, label, binding, true);
@@ -239,7 +239,7 @@ public class ASTViewContentProvider implements ITreeContentProvider {
 		String label= "> (Expression) type binding"; //$NON-NLS-1$
 		return new Binding(parent, label, binding, true);
 	}
-	
+
 	@Override
 	public boolean hasChildren(Object parent) {
 		return getChildren(parent).length > 0;

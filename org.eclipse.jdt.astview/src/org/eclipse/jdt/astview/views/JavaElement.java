@@ -1,13 +1,13 @@
 /*******************************************************************************
  * Copyright (c) 2000, 2005 IBM Corporation and others.
  *
- * This program and the accompanying materials 
+ * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -25,10 +25,10 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 public class JavaElement extends ASTAttribute {
 
 	private static final long LABEL_OPTIONS=
-		JavaElementLabels.F_APP_TYPE_SIGNATURE | JavaElementLabels.M_PARAMETER_TYPES | 
+		JavaElementLabels.F_APP_TYPE_SIGNATURE | JavaElementLabels.M_PARAMETER_TYPES |
 		JavaElementLabels.M_APP_RETURNTYPE | JavaElementLabels.ALL_FULLY_QUALIFIED |
 		JavaElementLabels.T_TYPE_PARAMETERS |JavaElementLabels.USE_RESOLVED;
-	
+
 	private final IJavaElement fJavaElement;
 	private final Object fParent;
 
@@ -36,11 +36,11 @@ public class JavaElement extends ASTAttribute {
 		fParent= parent;
 		fJavaElement= javaElement;
 	}
-	
+
 	public IJavaElement getJavaElement() {
 		return fJavaElement;
 	}
-	
+
 	@Override
 	public Object getParent() {
 		return fParent;
@@ -62,7 +62,7 @@ public class JavaElement extends ASTAttribute {
 					+ (fJavaElement.exists() ? "" : " (does not exist)");  //$NON-NLS-1$//$NON-NLS-2$
 		}
 	}
-	
+
 	@Override
 	public Image getImage() {
 		return null;
@@ -80,7 +80,7 @@ public class JavaElement extends ASTAttribute {
 		if (obj == null || !obj.getClass().equals(getClass())) {
 			return false;
 		}
-		
+
 		JavaElement other= (JavaElement) obj;
 		if (fParent == null) {
 			if (other.fParent != null)
@@ -88,17 +88,17 @@ public class JavaElement extends ASTAttribute {
 		} else if (! fParent.equals(other.fParent)) {
 			return false;
 		}
-		
+
 		if (fJavaElement == null) {
 			if (other.fJavaElement != null)
 				return false;
 		} else if (! fJavaElement.equals(other.fJavaElement)) {
 			return false;
 		}
-		
+
 		return true;
 	}
-	
+
 	/*
 	 * @see java.lang.Object#hashCode()
 	 */

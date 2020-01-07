@@ -39,28 +39,28 @@ import org.eclipse.jdt.core.dom.StringLiteral;
  *
  */
 public class Binding extends ASTAttribute {
-	
+
 	private final IBinding fBinding;
 	private final String fLabel;
 	private final Object fParent;
 	private final boolean fIsRelevant;
-	
+
 	public Binding(Object parent, String label, IBinding binding, boolean isRelevant) {
 		fParent= parent;
 		fBinding= binding;
 		fLabel= label;
 		fIsRelevant= isRelevant;
 	}
-	
+
 	@Override
 	public Object getParent() {
 		return fParent;
 	}
-	
+
 	public IBinding getBinding() {
 		return fBinding;
 	}
-	
+
 
 	public boolean hasBindingProperties() {
 		return fBinding != null;
@@ -69,12 +69,12 @@ public class Binding extends ASTAttribute {
 	public boolean isRelevant() {
 		return fIsRelevant;
 	}
-	
-	
+
+
 	private static boolean isType(int typeKinds, int kind) {
 		return (typeKinds & kind) != 0;
 	}
-	
+
 	@Override
 	public Object[] getChildren() {
 		try {
@@ -107,22 +107,22 @@ public class Binding extends ASTAttribute {
 					res.add(new BindingProperty(this, "CONSTANT VALUE", variableBinding.getConstantValue(), true)); //$NON-NLS-1$ //$NON-NLS-2$
 					res.add(new BindingProperty(this, "IS EFFECTIVELY FINAL", variableBinding.isEffectivelyFinal(), true)); //$NON-NLS-1$
 					break;
-					
+
 				case IBinding.PACKAGE:
 					IPackageBinding packageBinding= (IPackageBinding) fBinding;
 					res.add(new BindingProperty(this, "IS UNNAMED", packageBinding.isUnnamed(), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "IS SYNTHETIC", fBinding.isSynthetic(), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "IS DEPRECATED", fBinding.isDeprecated(), true)); //$NON-NLS-1$
 					break;
-					
+
 				case IBinding.TYPE:
 					ITypeBinding typeBinding= (ITypeBinding) fBinding;
 					res.add(new BindingProperty(this, "QUALIFIED NAME", typeBinding.getQualifiedName(), true)); //$NON-NLS-1$
-					
+
 					int typeKind= getTypeKind(typeBinding);
 					boolean isRefType= isType(typeKind, REF_TYPE);
 					final boolean isNonPrimitive= ! isType(typeKind, PRIMITIVE_TYPE);
-					
+
 					StringBuffer kinds= new StringBuffer("KIND:"); //$NON-NLS-1$
 					if (typeBinding.isArray()) kinds.append(" isArray"); //$NON-NLS-1$
 					if (typeBinding.isCapture()) kinds.append(" isCapture"); //$NON-NLS-1$
@@ -136,7 +136,7 @@ public class Binding extends ASTAttribute {
 					if (typeBinding.isInterface()) kinds.append(" isInterface"); //$NON-NLS-1$
 					if (typeBinding.isEnum()) kinds.append(" isEnum"); //$NON-NLS-1$
 					res.add(new BindingProperty(this, kinds, true)); //$NON-NLS-1$
-					
+
 					StringBuffer generics= new StringBuffer("GENERICS:"); //$NON-NLS-1$
 					if (typeBinding.isRawType()) generics.append(" isRawType"); //$NON-NLS-1$
 					if (typeBinding.isGenericType()) generics.append(" isGenericType"); //$NON-NLS-1$
@@ -162,7 +162,7 @@ public class Binding extends ASTAttribute {
 							res.add(new BindingProperty(this, createArrayTypeLabel, msg, false));
 						}
 					}
-					
+
 					StringBuffer origin= new StringBuffer("ORIGIN:"); //$NON-NLS-1$
 					if (typeBinding.isTopLevel()) origin.append(" isTopLevel"); //$NON-NLS-1$
 					if (typeBinding.isNested()) origin.append(" isNested"); //$NON-NLS-1$
@@ -170,7 +170,7 @@ public class Binding extends ASTAttribute {
 					if (typeBinding.isMember()) origin.append(" isMember"); //$NON-NLS-1$
 					if (typeBinding.isAnonymous()) origin.append(" isAnonymous"); //$NON-NLS-1$
 					res.add(new BindingProperty(this, origin, isRefType));
-					
+
 					res.add(new BindingProperty(this, "IS FROM SOURCE", typeBinding.isFromSource(), isType(typeKind, REF_TYPE | VARIABLE_TYPE | CAPTURE_TYPE))); //$NON-NLS-1$
 
 					res.add(new Binding(this, "PACKAGE", typeBinding.getPackage(), isRefType)); //$NON-NLS-1$
@@ -179,7 +179,7 @@ public class Binding extends ASTAttribute {
 					res.add(new Binding(this, "DECLARING MEMBER", typeBinding.getDeclaringMember(), typeBinding.isLocal())); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "MODIFIERS", getModifiersString(fBinding.getModifiers(), false), isRefType)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "BINARY NAME", typeBinding.getBinaryName(), true)); //$NON-NLS-1$
-					
+
 					String isTypeDeclaration= typeBinding == typeBinding.getTypeDeclaration() ? " ( == this)" : " ( != this)";
 					res.add(new Binding(this, "TYPE DECLARATION" + isTypeDeclaration, typeBinding.getTypeDeclaration(), true)); //$NON-NLS-1$
 					String isErasure= typeBinding == typeBinding.getErasure() ? " ( == this)" : " ( != this)";
@@ -203,7 +203,7 @@ public class Binding extends ASTAttribute {
 					res.add(new BindingProperty(this, "IS DEPRECATED", fBinding.isDeprecated(), isRefType)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "TYPE ANNOTATIONS", typeBinding.getTypeAnnotations(), true)); //$NON-NLS-1$
 					break;
-					
+
 				case IBinding.METHOD:
 					IMethodBinding methodBinding= (IMethodBinding) fBinding;
 					res.add(new BindingProperty(this, "IS CONSTRUCTOR", methodBinding.isConstructor(), true)); //$NON-NLS-1$
@@ -215,23 +215,23 @@ public class Binding extends ASTAttribute {
 					res.add(new BindingProperty(this, "PARAMETER TYPES", methodBinding.getParameterTypes(), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "IS VARARGS", methodBinding.isVarargs(), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "EXCEPTION TYPES", methodBinding.getExceptionTypes(), true)); //$NON-NLS-1$
-					
+
 					StringBuffer genericsM= new StringBuffer("GENERICS:"); //$NON-NLS-1$
 					if (methodBinding.isRawMethod()) genericsM.append(" isRawMethod"); //$NON-NLS-1$
 					if (methodBinding.isGenericMethod()) genericsM.append(" isGenericMethod"); //$NON-NLS-1$
 					if (methodBinding.isParameterizedMethod()) genericsM.append(" isParameterizedMethod"); //$NON-NLS-1$
 					res.add(new BindingProperty(this, genericsM, true));
-					
+
 					String isMethodDeclaration= methodBinding == methodBinding.getMethodDeclaration() ? " ( == this)" : " ( != this)";
 					res.add(new Binding(this, "METHOD DECLARATION" + isMethodDeclaration, methodBinding.getMethodDeclaration(), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "TYPE PARAMETERS", methodBinding.getTypeParameters(), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "TYPE ARGUMENTS", methodBinding.getTypeArguments(), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "IS SYNTHETIC", fBinding.isSynthetic(), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "IS DEPRECATED", fBinding.isDeprecated(), true)); //$NON-NLS-1$
-					
+
 					res.add(new BindingProperty(this, "IS ANNOTATION MEMBER", methodBinding.isAnnotationMember(), true)); //$NON-NLS-1$
 					res.add(Binding.createValueAttribute(this, "DEFAULT VALUE", methodBinding.getDefaultValue()));
-					
+
 					int parameterCount= methodBinding.getParameterTypes().length;
 					BindingProperty[] parametersAnnotations= new BindingProperty[parameterCount];
 					for (int i= 0; i < parameterCount; i++) {
@@ -239,21 +239,21 @@ public class Binding extends ASTAttribute {
 					}
 					res.add(new BindingProperty(this, "PARAMETER ANNOTATIONS", parametersAnnotations, true));
 					break;
-					
+
 				case IBinding.ANNOTATION:
 					IAnnotationBinding annotationBinding= (IAnnotationBinding) fBinding;
 					res.add(new Binding(this, "ANNOTATION TYPE", annotationBinding.getAnnotationType(), true));
 					res.add(new BindingProperty(this, "DECLARED MEMBER VALUE PAIRS", annotationBinding.getDeclaredMemberValuePairs(), true));
 					res.add(new BindingProperty(this, "ALL MEMBER VALUE PAIRS", annotationBinding.getAllMemberValuePairs(), true));
 					break;
-					
+
 				case IBinding.MEMBER_VALUE_PAIR:
 					IMemberValuePairBinding memberValuePairBinding= (IMemberValuePairBinding) fBinding;
 					res.add(new Binding(this, "METHOD BINDING", memberValuePairBinding.getMethodBinding(), true));
 					res.add(new BindingProperty(this, "IS DEFAULT", memberValuePairBinding.isDefault(), true));
 					res.add(Binding.createValueAttribute(this, "VALUE", memberValuePairBinding.getValue()));
 					break;
-				
+
 				case IBinding.MODULE:
 					IModuleBinding moduleBinding= (IModuleBinding) fBinding;
 					res.add(new BindingProperty(this, "REQUIRED MODULES", moduleBinding.getRequiredModules(), true));
@@ -265,7 +265,7 @@ public class Binding extends ASTAttribute {
 					res.add(createPropertiesWithSecondary(moduleBinding.getServices(), "SERVICES", "PROVIDES", "WITH",
 							moduleBinding::getImplementations));
 					break;
-					
+
 				default:
 					break;
 			}
@@ -327,7 +327,7 @@ public class Binding extends ASTAttribute {
 
 	private final static int GENERIC= 1 << 8;
 	private final static int PARAMETRIZED= 1 << 9;
-	
+
 	private int getTypeKind(ITypeBinding typeBinding) {
 		if (typeBinding.isArray()) return ARRAY_TYPE;
 		if (typeBinding.isCapture()) return CAPTURE_TYPE;
@@ -335,10 +335,10 @@ public class Binding extends ASTAttribute {
 		if (typeBinding.isPrimitive()) return PRIMITIVE_TYPE;
 		if (typeBinding.isTypeVariable()) return VARIABLE_TYPE;
 		if (typeBinding.isWildcardType()) return WILDCARD_TYPE;
-		
+
 		if (typeBinding.isGenericType())  return REF_TYPE | GENERIC;
 		if (typeBinding.isParameterizedType() || typeBinding.isRawType()) return REF_TYPE | PARAMETRIZED;
-		
+
 		return REF_TYPE;
 	}
 
@@ -393,7 +393,7 @@ public class Binding extends ASTAttribute {
 				case IBinding.MODULE:
 					buf.append(fBinding.getName());
 			}
-			
+
 		} else {
 			buf.append("null"); //$NON-NLS-1$
 		}
@@ -403,7 +403,7 @@ public class Binding extends ASTAttribute {
 
 	public static void appendAnnotatedQualifiedName(StringBuffer buf, ITypeBinding typeBinding) {
 		String debugString= typeBinding.toString(); // XXX: hack, but that's OK for a debugging tool...
-		if (debugString.indexOf('\n') == -1 || typeBinding.getTypeAnnotations().length != 0) {			
+		if (debugString.indexOf('\n') == -1 || typeBinding.getTypeAnnotations().length != 0) {
 			// one-liner || outermost type has type annotations
 			buf.append(debugString);
 		} else {
@@ -420,7 +420,7 @@ public class Binding extends ASTAttribute {
 	public String toString() {
 		return getLabel();
 	}
-	
+
 	/*
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
@@ -431,7 +431,7 @@ public class Binding extends ASTAttribute {
 		if (obj == null || !obj.getClass().equals(getClass())) {
 			return false;
 		}
-		
+
 		Binding other= (Binding) obj;
 		if (fParent == null) {
 			if (other.fParent != null)
@@ -439,24 +439,24 @@ public class Binding extends ASTAttribute {
 		} else if (! fParent.equals(other.fParent)) {
 			return false;
 		}
-		
+
 		if (fBinding == null) {
 			if (other.fBinding != null)
 				return false;
 		} else if (! fBinding.equals(other.fBinding)) {
 			return false;
 		}
-		
+
 		if (fLabel == null) {
 			if (other.fLabel != null)
 				return false;
 		} else if (! fLabel.equals(other.fLabel)) {
 			return false;
 		}
-		
+
 		return true;
 	}
-	
+
 	/*
 	 * @see java.lang.Object#hashCode()
 	 */
@@ -506,7 +506,7 @@ public class Binding extends ASTAttribute {
 	 * Creates an {@link ASTAttribute} for a value from
 	 * {@link IMemberValuePairBinding#getValue()} or from
 	 * {@link IMethodBinding#getDefaultValue()}.
-	 * 
+	 *
 	 * @param parent the parent node
 	 * @param name the attribute name
 	 * @param value the attribute value
@@ -517,39 +517,39 @@ public class Binding extends ASTAttribute {
 		if (value instanceof IBinding) {
 			IBinding binding= (IBinding) value;
 			res= new Binding(parent, name + ": " + getBindingLabel(binding), binding, true);
-			
+
 		} else if (value instanceof String) {
 			res= new GeneralAttribute(parent, name, getEscapedStringLiteral((String) value));
-			
+
 		} else if (value instanceof Object[]) {
 			res= new GeneralAttribute(parent, name, (Object[]) value);
-			
+
 		} else if (value instanceof ASTAttribute) {
 			res= (ASTAttribute) value;
-			
+
 		} else {
 			res= new GeneralAttribute(parent, name, value);
 		}
 		return res;
 	}
-	
+
 	public static String getEscapedStringLiteral(String stringValue) {
 		StringLiteral stringLiteral= AST.newAST(ASTView.JLS_LATEST, false).newStringLiteral();
 		stringLiteral.setLiteralValue(stringValue);
 		return stringLiteral.getEscapedValue();
 	}
-	
+
 	public static String getEscapedCharLiteral(char charValue) {
 		CharacterLiteral charLiteral= AST.newAST(ASTView.JLS_LATEST, false).newCharacterLiteral();
 		charLiteral.setCharValue(charValue);
 		return charLiteral.getEscapedValue();
 	}
-	
+
 	private static StringBuffer getModifiersString(int flags, boolean isMethod) {
 		StringBuffer sb = new StringBuffer().append("0x").append(Integer.toHexString(flags)).append(" (");
 		int prologLen= sb.length();
 		int rest= flags;
-		
+
 		rest&= ~ appendFlag(sb, flags, Modifier.PUBLIC, "public ");
 		rest&= ~ appendFlag(sb, flags, Modifier.PRIVATE, "private ");
 		rest&= ~ appendFlag(sb, flags, Modifier.PROTECTED, "protected ");
@@ -565,7 +565,7 @@ public class Binding extends ASTAttribute {
 		rest&= ~ appendFlag(sb, flags, Modifier.NATIVE, "native ");
 		rest&= ~ appendFlag(sb, flags, Modifier.ABSTRACT, "abstract ");
 		rest&= ~ appendFlag(sb, flags, Modifier.STRICTFP, "strictfp ");
-		
+
 		if (rest != 0)
 			sb.append("unknown:0x").append(Integer.toHexString(rest)).append(" ");
 		int len = sb.length();
@@ -574,7 +574,7 @@ public class Binding extends ASTAttribute {
 		sb.append(")");
 		return sb;
 	}
-	
+
 	private static int appendFlag(StringBuffer sb, int flags, int flag, String name) {
 		if ((flags & flag) != 0) {
 			sb.append(name);

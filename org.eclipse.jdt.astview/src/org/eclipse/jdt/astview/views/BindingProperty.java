@@ -1,13 +1,13 @@
 /*******************************************************************************
  * Copyright (c) 2000, 2017 IBM Corporation and others.
  *
- * This program and the accompanying materials 
+ * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -44,21 +44,21 @@ public class BindingProperty extends ASTAttribute {
 		fValues= null;
 		fIsRelevant= isRelevant;
 	}
-	
+
 	public BindingProperty(Binding parent, String name, boolean value, boolean isRelevant) {
 		fParent= parent;
 		fName= name + ": " + String.valueOf(value); //$NON-NLS-1$
 		fValues= null;
 		fIsRelevant= isRelevant;
 	}
-	
+
 	public BindingProperty(Binding parent, String name, int value, boolean isRelevant) {
 		fParent= parent;
 		fName= name + ": " + String.valueOf(value); //$NON-NLS-1$
 		fValues= null;
 		fIsRelevant= isRelevant;
 	}
-	
+
 	public BindingProperty(Binding parent, String name, IBinding[] bindings, boolean isRelevant) {
 		fParent= parent;
 		if (bindings == null) {
@@ -70,7 +70,7 @@ public class BindingProperty extends ASTAttribute {
 		}
 		fIsRelevant= isRelevant;
 	}
-	
+
 	public BindingProperty(Binding parent, String name, ASTAttribute[] children, boolean isRelevant) {
 		fParent= parent;
 		if (children == null) {
@@ -80,14 +80,14 @@ public class BindingProperty extends ASTAttribute {
 		fName= name + " (" + fValues.length + ')'; //$NON-NLS-1$
 		fIsRelevant= isRelevant;
 	}
-	
+
 	public BindingProperty(Binding parent, StringBuffer label, boolean isRelevant) {
 		fParent= parent;
 		fName= label.toString();
 		fValues= null;
 		fIsRelevant= isRelevant;
 	}
-	
+
 	private Binding[] createBindings(IBinding[] bindings, boolean isRelevant) {
 		Binding[] res= new Binding[bindings.length];
 		for (int i= 0; i < res.length; i++) {
@@ -100,7 +100,7 @@ public class BindingProperty extends ASTAttribute {
 	public Object getParent() {
 		return fParent;
 	}
-	
+
 	@Override
 	public Object[] getChildren() {
 		if (fValues != null) {
@@ -108,7 +108,7 @@ public class BindingProperty extends ASTAttribute {
 		}
 		return EMPTY;
 	}
-	
+
 	@Override
 	public String getLabel() {
 		return fName;
@@ -118,12 +118,12 @@ public class BindingProperty extends ASTAttribute {
 	public Image getImage() {
 		return null;
 	}
-	
+
 	@Override
 	public String toString() {
 		return getLabel();
 	}
-	
+
 	public boolean isRelevant() {
 		return fIsRelevant;
 	}
@@ -138,7 +138,7 @@ public class BindingProperty extends ASTAttribute {
 		if (obj == null || !obj.getClass().equals(getClass())) {
 			return false;
 		}
-		
+
 		BindingProperty other= (BindingProperty) obj;
 		if (fParent == null) {
 			if (other.fParent != null)
@@ -146,17 +146,17 @@ public class BindingProperty extends ASTAttribute {
 		} else if (! fParent.equals(other.fParent)) {
 			return false;
 		}
-		
+
 		if (fName == null) {
 			if (other.fName != null)
 				return false;
 		} else if (! fName.equals(other.fName)) {
 			return false;
 		}
-		
+
 		return true;
 	}
-	
+
 	/*
 	 * @see java.lang.Object#hashCode()
 	 */

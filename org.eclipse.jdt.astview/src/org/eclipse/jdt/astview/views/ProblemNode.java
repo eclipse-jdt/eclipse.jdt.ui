@@ -1,13 +1,13 @@
 /*******************************************************************************
  * Copyright (c) 2000, 2015 IBM Corporation and others.
  *
- * This program and the accompanying materials 
+ * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -34,7 +34,7 @@ public class ProblemNode extends ASTAttribute {
 		fParent= parent;
 		fProblem= problem;
 	}
-	
+
 	@Override
 	public Object getParent() {
 		return fParent;
@@ -44,7 +44,7 @@ public class ProblemNode extends ASTAttribute {
 	public Object[] getChildren() {
 		String[] arguments= fProblem.getArguments();
 		ArrayList<GeneralAttribute> children= new ArrayList<>();
-		
+
 		children.add(new GeneralAttribute(this, "CONSTANT NAME", getConstantName()));
 		children.add(new GeneralAttribute(this, "ID", getErrorLabel()));
 		children.add(new GeneralAttribute(this, "OPTION FOR CONFIGURABLE SEVERITY", JavaCore.getOptionForConfigurableSeverity(fProblem.getID())));
@@ -63,7 +63,7 @@ public class ProblemNode extends ASTAttribute {
 		StringBuilder buf= new StringBuilder();
 		int offset= fProblem.getSourceStart();
 		int length= fProblem.getSourceEnd() + 1 - offset;
-		
+
 		if (fProblem.isError())
 			buf.append("E");
 		if (fProblem.isWarning())
@@ -72,14 +72,14 @@ public class ProblemNode extends ASTAttribute {
 			buf.append("I");
 		buf.append('[').append(offset).append(", ").append(length).append(']').append(' ');
 		buf.append(fProblem.getMessage());
-		
+
 		return buf.toString();
 	}
-	
+
 	private String getErrorLabel() {
 		int id= fProblem.getID();
 		StringBuilder buf= new StringBuilder();
-			
+
 		if ((id & IProblem.TypeRelated) != 0) {
 			buf.append("TypeRelated + "); //$NON-NLS-1$
 		}
@@ -105,12 +105,12 @@ public class ProblemNode extends ASTAttribute {
 			buf.append("Javadoc + "); //$NON-NLS-1$
 		}
 		buf.append(id & IProblem.IgnoreCategoriesMask);
-		
+
 		buf.append(" = 0x").append(Integer.toHexString(id)).append(" = ").append(id);
-		
+
 		return buf.toString();
 	}
-	
+
 	private String getConstantName() {
 		int id= fProblem.getID();
 		for (Field f : IProblem.class.getFields()) {
@@ -124,17 +124,17 @@ public class ProblemNode extends ASTAttribute {
 		}
 		return "<UNKNOWN CONSTANT>";
 	}
-	
+
 	private String getCategoryCode() {
 		CategorizedProblem categorized= (CategorizedProblem) fProblem;
 		int categoryID= categorized.getCategoryID();
 		StringBuilder buf= new StringBuilder();
-		
+
 		switch (categoryID) {
 			case CategorizedProblem.CAT_UNSPECIFIED:
 				buf.append("Unspecified");
 				break;
-				
+
 			case CategorizedProblem.CAT_BUILDPATH:
 				buf.append("Buildpath");
 				break;
@@ -187,12 +187,12 @@ public class ProblemNode extends ASTAttribute {
 				buf.append("<UNKNOWN CATEGORY>");
 				break;
 		}
-		
+
 		buf.append(" = ").append(categoryID);
 
 		return buf.toString();
 	}
-	
+
 	@Override
 	public Image getImage() {
 		return null;
@@ -204,7 +204,7 @@ public class ProblemNode extends ASTAttribute {
 	public int getOffset() {
 		return fProblem.getSourceStart();
 	}
-	
+
 	/**
 	 * @return Returns the length of the problem
 	 */
@@ -222,7 +222,7 @@ public class ProblemNode extends ASTAttribute {
 		if (obj == null || !obj.getClass().equals(getClass())) {
 			return false;
 		}
-		
+
 		ProblemNode other= (ProblemNode) obj;
 		if (fParent == null) {
 			if (other.fParent != null)
@@ -230,17 +230,17 @@ public class ProblemNode extends ASTAttribute {
 		} else if (! fParent.equals(other.fParent)) {
 			return false;
 		}
-		
+
 		if (fProblem== null) {
 			if (other.fProblem != null)
 				return false;
 		} else if (! fProblem.equals(other.fProblem)) {
 			return false;
 		}
-		
+
 		return true;
 	}
-	
+
 	/*
 	 * @see java.lang.Object#hashCode()
 	 */

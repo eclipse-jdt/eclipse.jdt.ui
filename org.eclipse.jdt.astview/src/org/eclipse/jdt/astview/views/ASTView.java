@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -134,7 +134,7 @@ import org.eclipse.jdt.ui.JavaUI;
 
 
 public class ASTView extends ViewPart implements IShowInSource, IShowInTargetList {
-	
+
 	static final int JLS_LATEST= AST.JLS13;
 
 	private static final int JLS13= AST.JLS13;
@@ -144,31 +144,31 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 	 */
 	@Deprecated
 	private static final int JLS12= AST.JLS12;
-	
+
 	/**
 	 * @deprecated to get rid of deprecation warnings in code
 	 */
 	@Deprecated
 	private static final int JLS11= AST.JLS11;
-	
+
 	/**
 	 * @deprecated to get rid of deprecation warnings in code
 	 */
 	@Deprecated
 	private static final int JLS10= AST.JLS10;
-	
+
 	/**
 	 * @deprecated to get rid of deprecation warnings in code
 	 */
 	@Deprecated
 	private static final int JLS9= AST.JLS9;
-	
+
 	/**
 	 * @deprecated to get rid of deprecation warnings in code
 	 */
 	@Deprecated
 	private static final int JLS8= AST.JLS8;
-	
+
 	/**
 	 * @deprecated to get rid of deprecation warnings in code
 	 */
@@ -226,23 +226,23 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 				setChecked(true);
 			}
 		}
-	
+
 		public int getLevel() {
 			return fLevel;
 		}
-		
+
 		@Override
 		public void run() {
 			setASTLevel(fLevel, true);
 		}
 	}
-	
+
 	private class ASTInputKindAction extends Action {
 		public static final int USE_PARSER= 1;
 		public static final int USE_RECONCILE= 2;
 		public static final int USE_CACHE= 3;
 		public static final int USE_FOCAL= 4;
-		
+
 		private int fInputKind;
 
 		public ASTInputKindAction(String label, int inputKind) {
@@ -252,27 +252,27 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 				setChecked(true);
 			}
 		}
-	
+
 		public int getInputKind() {
 			return fInputKind;
 		}
-		
+
 		@Override
 		public void run() {
 			setASTInputType(fInputKind);
 		}
 	}
-	
-	
+
+
 	private static class ListenerMix implements ISelectionListener, IFileBufferListener, IDocumentListener, ISelectionChangedListener, IDoubleClickListener, IPartListener2 {
-		
+
 		private boolean fASTViewVisible= true;
 		private ASTView fView;
-		
+
 		public ListenerMix(ASTView view) {
 			fView= view;
 		}
-		
+
 		public void dispose() {
 			fView= null;
 		}
@@ -355,7 +355,7 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 		public void doubleClick(DoubleClickEvent event) {
 			fView.handleDoubleClick();
 		}
-		
+
 		@Override
 		public void partHidden(IWorkbenchPartReference partRef) {
 			IWorkbenchPart part= partRef.getPart(false);
@@ -466,7 +466,7 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 	private TreeViewer fViewer;
 	private ASTViewLabelProvider fASTLabelProvider;
 	private TreeViewer fTray;
-	
+
 	private DrillDownAdapter fDrillDownAdapter;
 	private Action fFocusAction;
 	private Action fRefreshAction;
@@ -486,34 +486,34 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 	private Action fLinkWithEditor;
 	private Action fAddToTrayAction;
 	private Action fDeleteAction;
-	
+
 	private ASTLevelToggle[] fASTVersionToggleActions;
 	private int fCurrentASTLevel;
-	
+
 	private ASTInputKindAction[] fASTInputKindActions;
 	private int fCurrentInputKind;
-	
+
 	private ITextEditor fEditor;
 	private ITypeRoot fTypeRoot;
 	private CompilationUnit fRoot;
 	private IDocument fCurrentDocument;
 	private ArrayList<Object> fTrayRoots;
-	
+
 	private boolean fDoLinkWithEditor;
 	private boolean fCreateBindings;
 	private NonRelevantFilter fNonRelevantFilter;
 	private boolean fStatementsRecovery;
 	private boolean fBindingsRecovery;
 	private boolean fIgnoreMethodBodies;
-	
+
 	private Object fPreviousDouble;
-	
+
 	private ListenerMix fSuperListener;
 	private ISelectionChangedListener fTrayUpdater;
 
 	private IDialogSettings fDialogSettings;
 
-	
+
 	public ASTView() {
 		fSuperListener= null;
 		fDialogSettings= ASTViewPlugin.getDefault().getDialogSettings();
@@ -539,7 +539,7 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 				case JLS10:
 				case JLS11:
 				case JLS12:
-				case JLS13:	
+				case JLS13:
 					fCurrentASTLevel= level;
 			}
 		} catch (NumberFormatException e) {
@@ -548,7 +548,7 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 		fNonRelevantFilter= new NonRelevantFilter();
 		fNonRelevantFilter.setShowNonRelevant(fDialogSettings.getBoolean(SETTINGS_SHOW_NON_RELEVANT));
 	}
-	
+
 	final void notifyWorkbenchPartClosed(IWorkbenchPartReference partRef) {
 		if (fEditor != null && fEditor.equals(partRef.getPart(false))) {
 			try {
@@ -564,18 +564,18 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 		super.setSite(site);
 		if (fSuperListener == null) {
 			fSuperListener= new ListenerMix(this);
-			
+
 			ISelectionService service= site.getWorkbenchWindow().getSelectionService();
 			service.addPostSelectionListener(fSuperListener);
 			site.getPage().addPartListener(fSuperListener);
 			FileBuffers.getTextFileBufferManager().addFileBufferListener(fSuperListener);
 		}
 	}
-	
+
 	public int getCurrentASTLevel() {
 		return fCurrentASTLevel;
 	}
-	
+
 	public int getCurrentInputKind() {
 		return fCurrentInputKind;
 	}
@@ -584,17 +584,17 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 		if (fEditor != null) {
 			uninstallModificationListener();
 		}
-		
+
 		fEditor= null;
 		fRoot= null;
-		
+
 		if (editor != null) {
 			ITypeRoot typeRoot= EditorUtility.getJavaInput(editor);
 			if (typeRoot == null) {
 				throw new CoreException(getErrorStatus("Editor not showing a CU or class file", null)); //$NON-NLS-1$
 			}
 			fTypeRoot= typeRoot;
-			
+
 			ISelection selection= editor.getSelectionProvider().getSelection();
 			if (selection instanceof ITextSelection) {
 				ITextSelection textSelection= (ITextSelection) selection;
@@ -605,12 +605,12 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 		}
 
 	}
-	
+
 	private CompilationUnit internalSetInput(ITypeRoot input, int offset, int length) throws CoreException {
 		if (input.getBuffer() == null) {
 			throw new CoreException(getErrorStatus("Input has no buffer", null)); //$NON-NLS-1$
 		}
-		
+
 		CompilationUnit root;
 		try {
 			root= createAST(input, offset);
@@ -622,7 +622,7 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 		} catch (RuntimeException e) {
 			throw new CoreException(getErrorStatus("Could not create AST:\n" + e.getMessage(), e)); //$NON-NLS-1$
 		}
-		
+
 		try {
 			ASTNode node= NodeFinder.perform(root, offset, length);
 			if (node != null) {
@@ -637,15 +637,15 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 		} catch (RuntimeException e) {
 			showAndLogError("Could not select node for editor selection", e); //$NON-NLS-1$
 		}
-		
+
 		return root;
 	}
-	
+
 	private void clearView() {
 		resetView(null);
 		setContentDescription("Open a Java editor and press the 'Show AST of active editor' toolbar button"); //$NON-NLS-1$
 	}
-	
+
 
 	private void resetView(CompilationUnit root) {
 		fViewer.setInput(root);
@@ -659,12 +659,12 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 		fFindDeclaringNodeAction.setEnabled(root != null);
 		fPreviousDouble= null; // avoid leaking AST
 	}
-	
+
 	private CompilationUnit createAST(ITypeRoot input, int offset) throws JavaModelException, CoreException {
 		long startTime;
 		long endTime;
 		CompilationUnit root;
-		
+
 		if ((getCurrentInputKind() == ASTInputKindAction.USE_RECONCILE)) {
 			final IProblemRequestor problemRequestor= new IProblemRequestor() { //strange: don't get bindings when supplying null as problemRequestor
 				@Override
@@ -699,13 +699,13 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 			} finally {
 				wc.discardWorkingCopy();
 			}
-			
+
 		} else if (input instanceof ICompilationUnit && (getCurrentInputKind() == ASTInputKindAction.USE_CACHE)) {
 			ICompilationUnit cu= (ICompilationUnit) input;
 			startTime= System.currentTimeMillis();
 			root= SharedASTProviderCore.getAST(cu, SharedASTProviderCore.WAIT_NO, null);
 			endTime= System.currentTimeMillis();
-			
+
 		} else {
 			ASTParser parser= ASTParser.newParser(fCurrentASTLevel);
 			parser.setResolveBindings(fCreateBindings);
@@ -721,8 +721,8 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 			endTime= System.currentTimeMillis();
 		}
 		if (root != null) {
-			root.accept(new StatementChecker());	
-			updateContentDescription(input, root, endTime - startTime);			
+			root.accept(new StatementChecker());
+			updateContentDescription(input, root, endTime - startTime);
 		}
 		return root;
 	}
@@ -789,11 +789,11 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 		}
 		super.dispose();
 	}
-	
+
 	private IStatus getErrorStatus(String message, Throwable th) {
 		return new Status(IStatus.ERROR, ASTViewPlugin.getPluginId(), IStatus.ERROR, message, th);
 	}
-	
+
 	@Override
 	public void createPartControl(Composite parent) {
 		fSash= new SashForm(parent, SWT.VERTICAL | SWT.SMOOTH);
@@ -813,16 +813,16 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 			}
 		});
 		fViewer.addFilter(fNonRelevantFilter);
-		
-		
+
+
 		ViewForm trayForm= new ViewForm(fSash, SWT.NONE);
 		Label label= new Label(trayForm, SWT.NONE);
 		label.setText(" Comparison Tray (* = selection in the upper tree):"); //$NON-NLS-1$
 		trayForm.setTopLeft(label);
-		
+
 		fTray= new TreeViewer(trayForm, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		trayForm.setContent(fTray.getTree());
-		
+
 		fTrayRoots= new ArrayList<>();
 		fTray.setContentProvider(new TrayContentProvider());
 		final TrayLabelProvider trayLabelProvider= new TrayLabelProvider();
@@ -868,13 +868,13 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 				fDeleteAction.setEnabled(false);
 			}
 		});
-		
+
 		makeActions();
 		hookContextMenu();
 		hookTrayContextMenu();
 		contributeToActionBars();
 		getSite().setSelectionProvider(new ASTViewSelectionProvider());
-		
+
 		try {
 			IEditorPart part= EditorUtility.getActiveEditor();
 			if (part instanceof ITextEditor) {
@@ -921,7 +921,7 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 		fTray.getControl().setMenu(menu);
 		getSite().registerContextMenu("#TrayPopupMenu", menuMgr, fTray); //$NON-NLS-1$
 	}
-	
+
 	private void contributeToActionBars() {
 		IActionBars bars = getViewSite().getActionBars();
 		fillLocalPullDown(bars.getMenuManager());
@@ -929,7 +929,7 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 		bars.setGlobalActionHandler(ActionFactory.COPY.getId(), fCopyAction);
 		bars.setGlobalActionHandler(ActionFactory.REFRESH.getId(), fFocusAction);
 		bars.setGlobalActionHandler(ActionFactory.DELETE.getId(), fDeleteAction);
-		
+
 		IHandlerService handlerService= getViewSite().getService(IHandlerService.class);
 		handlerService.activateHandler(IWorkbenchCommandConstants.NAVIGATE_TOGGLE_LINK_WITH_EDITOR, new ActionHandler(fLinkWithEditor));
 	}
@@ -1005,11 +1005,11 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 		manager.add(fCollapseAction);
 		manager.add(fLinkWithEditor);
 	}
-	
+
 	private void setASTUptoDate(boolean isuptoDate) {
 		fRefreshAction.setEnabled(!isuptoDate && fTypeRoot != null);
 	}
-	
+
 	private void makeActions() {
 		fRefreshAction = new Action() {
 			@Override
@@ -1032,14 +1032,14 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 		fClearAction.setToolTipText("Clear AST and release memory"); //$NON-NLS-1$
 		fClearAction.setEnabled(false);
 		ASTViewImages.setImageDescriptors(fClearAction, ASTViewImages.CLEAR);
-				
+
 		fASTInputKindActions= new ASTInputKindAction[] {
 				new ASTInputKindAction("Use ASTParser.&createAST", ASTInputKindAction.USE_PARSER), //$NON-NLS-1$
 				new ASTInputKindAction("Use ASTParser with &focal position", ASTInputKindAction.USE_FOCAL), //$NON-NLS-1$
 				new ASTInputKindAction("Use ICompilationUnit.&reconcile", ASTInputKindAction.USE_RECONCILE), //$NON-NLS-1$
 				new ASTInputKindAction("Use SharedASTProvider.&getAST", ASTInputKindAction.USE_CACHE) //$NON-NLS-1$
 		};
-		
+
 		fCreateBindingsAction = new Action("&Create Bindings", IAction.AS_CHECK_BOX) { //$NON-NLS-1$
 			@Override
 			public void run() {
@@ -1049,7 +1049,7 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 		fCreateBindingsAction.setChecked(fCreateBindings);
 		fCreateBindingsAction.setToolTipText("Create Bindings"); //$NON-NLS-1$
 		fCreateBindingsAction.setEnabled(true);
-		
+
 		fStatementsRecoveryAction = new Action("&Statements Recovery", IAction.AS_CHECK_BOX) { //$NON-NLS-1$
 			@Override
 			public void run() {
@@ -1058,7 +1058,7 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 		};
 		fStatementsRecoveryAction.setChecked(fStatementsRecovery);
 		fStatementsRecoveryAction.setEnabled(true);
-		
+
 		fBindingsRecoveryAction = new Action("&Bindings Recovery", IAction.AS_CHECK_BOX) { //$NON-NLS-1$
 			@Override
 			public void run() {
@@ -1067,7 +1067,7 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 		};
 		fBindingsRecoveryAction.setChecked(fBindingsRecovery);
 		fBindingsRecoveryAction.setEnabled(true);
-		
+
 		fIgnoreMethodBodiesAction = new Action("&Ignore Method Bodies", IAction.AS_CHECK_BOX) { //$NON-NLS-1$
 			@Override
 			public void run() {
@@ -1076,7 +1076,7 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 		};
 		fIgnoreMethodBodiesAction.setChecked(fIgnoreMethodBodies);
 		fIgnoreMethodBodiesAction.setEnabled(true);
-		
+
 		fFilterNonRelevantAction = new Action("&Hide Non-Relevant Attributes", IAction.AS_CHECK_BOX) { //$NON-NLS-1$
 			@Override
 			public void run() {
@@ -1095,7 +1095,7 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 		};
 		fFindDeclaringNodeAction.setToolTipText("Find Declaring Node..."); //$NON-NLS-1$
 		fFindDeclaringNodeAction.setEnabled(false);
-		
+
 		fParseBindingFromElementAction= new Action("&Parse Binding from &Element Handle...", IAction.AS_PUSH_BUTTON) { //$NON-NLS-1$
 			@Override
 			public void run() {
@@ -1104,7 +1104,7 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 		};
 		fParseBindingFromElementAction.setToolTipText("Parse Binding from Element Handle..."); //$NON-NLS-1$
 		fParseBindingFromElementAction.setEnabled(true);
-		
+
 		fParseBindingFromKeyAction= new Action("Parse Binding from &Key...", IAction.AS_PUSH_BUTTON) { //$NON-NLS-1$
 			@Override
 			public void run() {
@@ -1113,7 +1113,7 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 		};
 		fParseBindingFromKeyAction.setToolTipText("Parse Binding from Key..."); //$NON-NLS-1$
 		fParseBindingFromKeyAction.setEnabled(true);
-		
+
 		fFocusAction = new Action() {
 			@Override
 			public void run() {
@@ -1135,7 +1135,7 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 		fCollapseAction.setToolTipText("Collapse Selected Node"); //$NON-NLS-1$
 		fCollapseAction.setEnabled(false);
 		ASTViewImages.setImageDescriptors(fCollapseAction, ASTViewImages.COLLAPSE);
-		
+
 		fExpandAction = new Action() {
 			@Override
 			public void run() {
@@ -1146,16 +1146,16 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 		fExpandAction.setToolTipText("Expand Selected Node"); //$NON-NLS-1$
 		fExpandAction.setEnabled(false);
 		ASTViewImages.setImageDescriptors(fExpandAction, ASTViewImages.EXPAND);
-		
+
 		fCopyAction= new TreeCopyAction(new Tree[] {fViewer.getTree(), fTray.getTree()});
-		
+
 		fDoubleClickAction = new Action() {
 			@Override
 			public void run() {
 				performDoubleClick();
 			}
 		};
-		
+
 		fLinkWithEditor = new Action() {
 			@Override
 			public void run() {
@@ -1167,7 +1167,7 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 		fLinkWithEditor.setToolTipText("Link With Editor"); //$NON-NLS-1$
 		fLinkWithEditor.setActionDefinitionId(IWorkbenchCommandConstants.NAVIGATE_TOGGLE_LINK_WITH_EDITOR);
 		ASTViewImages.setImageDescriptors(fLinkWithEditor, ASTViewImages.LINK_WITH_EDITOR);
-			
+
 		fASTVersionToggleActions= new ASTLevelToggle[] {
 				new ASTLevelToggle("AST Level &2 (1.2)", JLS2), //$NON-NLS-1$
 				new ASTLevelToggle("AST Level &3 (1.5)", JLS3), //$NON-NLS-1$
@@ -1179,7 +1179,7 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 				new ASTLevelToggle("AST Level 1&2 (12)", JLS12), //$NON-NLS-1$
 				new ASTLevelToggle("AST Level 1&3 (13)", JLS13), //$NON-NLS-1$
 		};
-		
+
 		fAddToTrayAction= new Action() {
 			@Override
 			public void run() {
@@ -1190,7 +1190,7 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 		fAddToTrayAction.setToolTipText("Add Selected Node to Comparison Tray"); //$NON-NLS-1$
 		fAddToTrayAction.setEnabled(false);
 		ASTViewImages.setImageDescriptors(fAddToTrayAction, ASTViewImages.ADD_TO_TRAY);
-		
+
 		fDeleteAction= new Action() {
 			@Override
 			public void run() {
@@ -1203,10 +1203,10 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 		fDeleteAction.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_DELETE));
 		fDeleteAction.setId(ActionFactory.DELETE.getId());
 		fDeleteAction.setActionDefinitionId(IWorkbenchCommandConstants.EDIT_DELETE);
-		
+
 		refreshASTSettingsActions();
 	}
-	
+
 
 	private void refreshAST() throws CoreException {
 		ASTNode node= getASTNodeNearSelection((IStructuredSelection) fViewer.getSelection());
@@ -1219,13 +1219,13 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 
 		internalSetInput(fTypeRoot, offset, length);
 	}
-		
+
 	protected void setASTLevel(int level, boolean doRefresh) {
 		int oldLevel= fCurrentASTLevel;
 		fCurrentASTLevel= level;
 
 		fDialogSettings.put(SETTINGS_JLS, fCurrentASTLevel);
-		
+
 		if (doRefresh && fTypeRoot != null && oldLevel != fCurrentASTLevel) {
 			try {
 				refreshAST();
@@ -1240,7 +1240,7 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 			action.setChecked(action.getLevel() == fCurrentASTLevel);
 		}
 	}
-	
+
 	protected void setASTInputType(int inputKind) {
 		if (inputKind != fCurrentInputKind) {
 			fCurrentInputKind= inputKind;
@@ -1252,7 +1252,7 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 			performRefresh();
 		}
 	}
-	
+
 	private ASTNode getASTNodeNearSelection(IStructuredSelection selection) {
 		Object elem= selection.getFirstElement();
 		if (elem instanceof ASTAttribute) {
@@ -1262,32 +1262,32 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 		}
 		return null;
 	}
-	
+
 	private void installModificationListener() {
 		fCurrentDocument= fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
 		fCurrentDocument.addDocumentListener(fSuperListener);
 	}
-	
+
 	private void uninstallModificationListener() {
 		if (fCurrentDocument != null) {
 			fCurrentDocument.removeDocumentListener(fSuperListener);
 			fCurrentDocument= null;
 		}
 	}
-		
+
 	protected void handleDocumentDisposed() {
 		uninstallModificationListener();
 	}
-	
+
 	protected void handleDocumentChanged() {
 		setASTUptoDate(false);
 	}
-	
+
 	protected void handleSelectionChanged(ISelection selection) {
 		fExpandAction.setEnabled(!selection.isEmpty());
 		fCollapseAction.setEnabled(!selection.isEmpty());
 		fCopyAction.setEnabled(!selection.isEmpty());
-		
+
 		boolean addEnabled= false;
 		IStructuredSelection structuredSelection= (IStructuredSelection) selection;
 		if (structuredSelection.size() == 1 && fViewer.getTree().isFocusControl()) {
@@ -1322,17 +1322,17 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 					setContentDescription(e.getStatus().getMessage());
 				}
 			}
-			
+
 		} else { // fRoot != null && part == fEditor
 			doLinkWithEditor(selection);
 		}
 	}
-	
+
 	private void doLinkWithEditor(ISelection selection) {
 		ITextSelection textSelection= (ITextSelection) selection;
 		int offset= textSelection.getOffset();
 		int length= textSelection.getLength();
-		
+
 		ASTNode covering= NodeFinder.perform(fRoot, offset, length);
 		if (covering != null) {
 			fViewer.reveal(covering);
@@ -1347,7 +1347,7 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 	protected void performLinkWithEditor() {
 		fDoLinkWithEditor= fLinkWithEditor.isChecked();
 		fDialogSettings.put(SETTINGS_LINK_WITH_EDITOR, fDoLinkWithEditor);
-		
+
 
 		if (fDoLinkWithEditor && fEditor != null) {
 			ISelectionProvider selectionProvider= fEditor.getSelectionProvider();
@@ -1393,7 +1393,7 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 			}
 		}
 	}
-	
+
 	protected void performRefresh() {
 		if (fTypeRoot != null) {
 			try {
@@ -1418,44 +1418,44 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 		ASTViewPlugin.log(message, e);
 		ErrorDialog.openError(getSite().getShell(), "AST View", message, e.getStatus()); //$NON-NLS-1$
 	}
-	
+
 	private void showAndLogError(String message, Throwable e) {
 		IStatus status= new Status(IStatus.ERROR, ASTViewPlugin.getPluginId(), 0, message, e);
 		ASTViewPlugin.log(status);
 		ErrorDialog.openError(getSite().getShell(), "AST View", null, status); //$NON-NLS-1$
 	}
-		
+
 	protected void performCreateBindings() {
 		fCreateBindings= fCreateBindingsAction.isChecked();
 		fDialogSettings.put(SETTINGS_NO_BINDINGS, !fCreateBindings);
 		performRefresh();
 	}
-	
+
 	protected void performStatementsRecovery() {
 		fStatementsRecovery= fStatementsRecoveryAction.isChecked();
 		fDialogSettings.put(SETTINGS_NO_STATEMENTS_RECOVERY, !fStatementsRecovery);
 		performRefresh();
 	}
-	
+
 	protected void performBindingsRecovery() {
 		fBindingsRecovery= fBindingsRecoveryAction.isChecked();
 		fDialogSettings.put(SETTINGS_NO_BINDINGS_RECOVERY, !fBindingsRecovery);
 		performRefresh();
 	}
-	
+
 	protected void performIgnoreMethodBodies() {
 		fIgnoreMethodBodies= fIgnoreMethodBodiesAction.isChecked();
 		fDialogSettings.put(SETTINGS_IGNORE_METHOD_BODIES, fIgnoreMethodBodies);
 		performRefresh();
 	}
-	
+
 	protected void performFilterNonRelevant() {
 		boolean showNonRelevant= !fFilterNonRelevantAction.isChecked();
 		fNonRelevantFilter.setShowNonRelevant(showNonRelevant);
 		fDialogSettings.put(SETTINGS_SHOW_NON_RELEVANT, showNonRelevant);
 		fViewer.refresh();
 	}
-	
+
 	protected void performFindDeclaringNode() {
 		String msg= "Find Declaring Node from Key";
 		String key= askForKey(msg);
@@ -1476,13 +1476,13 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 		InputDialog dialog= new InputDialog(getSite().getShell(), dialogTitle, "Key: (optionally surrounded by <KEY: \"> and <\">)", "", null);
 		if (dialog.open() != Window.OK)
 			return null;
-		
+
 		String key= dialog.getValue();
 		if (key.startsWith("KEY: \"") && key.endsWith("\""))
 			key= key.substring(6, key.length() - 1);
 		return key;
 	}
-	
+
 	protected void performParseBindingFromKey() {
 		String msg= "Parse Binding from Key";
 		String key= askForKey(msg);
@@ -1517,15 +1517,15 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 		fViewer.add(viewerInput, item);
 		fViewer.setSelection(new StructuredSelection(item), true);
 	}
-	
+
 	protected void performParseBindingFromElement() {
 		InputDialog dialog= new InputDialog(getSite().getShell(), "Parse Binding from Java Element", "IJavaElement#getHandleIdentifier():", "", null);
 		if (dialog.open() != Window.OK)
 			return;
-		
+
 		String handleIdentifier= dialog.getValue();
 		IJavaElement handle= JavaCore.create(handleIdentifier);
-		
+
 		Object viewerInput= fViewer.getInput();
 		ASTAttribute item;
 		if (handle == null) {
@@ -1545,18 +1545,18 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 		fViewer.add(viewerInput, item);
 		fViewer.setSelection(new StructuredSelection(item), true);
 	}
-	
+
 	protected void performDoubleClick() {
 		if (fEditor == null) {
 			return;
 		}
-		
+
 		ISelection selection = fViewer.getSelection();
 		Object obj = ((IStructuredSelection) selection).getFirstElement();
 
 		boolean isTripleClick= (obj == fPreviousDouble);
 		fPreviousDouble= isTripleClick ? null : obj;
-		
+
 		if (obj instanceof ExceptionAttribute) {
 			Throwable exception= ((ExceptionAttribute) obj).getException();
 			if (exception != null) {
@@ -1565,11 +1565,11 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 				return;
 			}
 		}
-		
+
 		ASTNode node= null, nodeEnd= null;
 		if (obj instanceof ASTNode) {
 			node= (ASTNode) obj;
-			
+
 		} else if (obj instanceof NodeProperty) {
 			Object val= ((NodeProperty) obj).getNode();
 			if (val instanceof ASTNode) {
@@ -1583,7 +1583,7 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 					fViewer.getTree().getDisplay().beep();
 				}
 			}
-			
+
 		} else if (obj instanceof Binding) {
 			IBinding binding= ((Binding) obj).getBinding();
 			ASTNode declaring= fRoot.findDeclaringNode(binding);
@@ -1594,12 +1594,12 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 				fViewer.getTree().getDisplay().beep();
 			}
 			return;
-			
+
 		} else if (obj instanceof ProblemNode) {
 			ProblemNode problemNode= (ProblemNode) obj;
 			EditorUtility.selectInEditor(fEditor, problemNode.getOffset(), problemNode.getLength());
 			return;
-			
+
 		} else if (obj instanceof JavaElement) {
 			IJavaElement javaElement= ((JavaElement) obj).getJavaElement();
 			if (javaElement instanceof IPackageFragment) {
@@ -1625,7 +1625,7 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 			}
 			return;
 		}
-		
+
 		if (node != null) {
 			int offset= isTripleClick ? fRoot.getExtendedStartPosition(node) : node.getStartPosition();
 			int length;
@@ -1655,7 +1655,7 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 		}
 		setTraySelection(selection);
 	}
-	
+
 	private void setTraySelection(IStructuredSelection selection) {
 		fTray.setSelection(selection, true);
 		TreeItem[] itemSelection= fTray.getTree().getSelection();
@@ -1681,7 +1681,7 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 			fViewer.setSelection(new StructuredSelection(binding), true);
 		}
 	}
-		
+
 	protected void performDelete() {
 		boolean removed= false;
 		IStructuredSelection selection= (IStructuredSelection) fTray.getSelection();
@@ -1691,13 +1691,13 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 				obj= ((DynamicAttributeProperty) obj).getParent();
 			if (obj instanceof DynamicBindingProperty)
 				obj= ((DynamicBindingProperty) obj).getParent();
-			
+
 			removed|= fTrayRoots.remove(obj);
 		}
 		if (removed)
 			fTray.setInput(fTrayRoots);
 	}
-	
+
 	@Override
 	public void setFocus() {
 		fViewer.getControl().setFocus();

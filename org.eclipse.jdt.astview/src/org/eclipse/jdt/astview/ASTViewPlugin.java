@@ -1,13 +1,13 @@
 /*******************************************************************************
  * Copyright (c) 2000, 2005 IBM Corporation and others.
  *
- * This program and the accompanying materials 
+ * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -27,7 +27,7 @@ public class ASTViewPlugin extends AbstractUIPlugin {
 	public ASTViewPlugin() {
 		fgDefault= this;
 	}
-	
+
 	public static String getPluginId() {
 		return "org.eclipse.jdt.astview"; //$NON-NLS-1$
 	}
@@ -38,15 +38,15 @@ public class ASTViewPlugin extends AbstractUIPlugin {
 	public static ASTViewPlugin getDefault() {
 		return fgDefault;
 	}
-	
+
 	public static void log(IStatus status) {
 		getDefault().getLog().log(status);
 	}
-	
+
 	public static void logErrorMessage(String message) {
 		log(new Status(IStatus.ERROR, getPluginId(), IStatus.ERROR, message, null));
 	}
-	
+
 	public static void logErrorStatus(String message, IStatus status) {
 		if (status == null) {
 			logErrorMessage(message);
@@ -56,9 +56,9 @@ public class ASTViewPlugin extends AbstractUIPlugin {
 		multi.add(status);
 		log(multi);
 	}
-	
+
 	public static void log(String message, Throwable e) {
 		log(new Status(IStatus.ERROR, getPluginId(), IStatus.ERROR, message, e));
 	}
-	
+
 }

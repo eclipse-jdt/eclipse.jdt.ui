@@ -1,13 +1,13 @@
 /*******************************************************************************
  * Copyright (c) 2000, 2018 IBM Corporation and others.
  *
- * This program and the accompanying materials 
+ * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -41,21 +41,21 @@ import org.eclipse.jdt.core.dom.ASTNode;
 public class ASTViewLabelProvider extends LabelProvider implements IColorProvider, IFontProvider {
 	private int fSelectionStart;
 	private int fSelectionLength;
-	
+
 	private final Color fBlue, fRed, fDarkGray, fDarkGreen, fDarkRed;
 	private final Font fBold;
-	
+
 	//to dispose:
 	private final Font fAllocatedBoldItalic;
 	private final Color fLightRed;
 	private Color fSelectedElemBGColor;
-	
+
 	public ASTViewLabelProvider() {
 		fSelectionStart= -1;
 		fSelectionLength= -1;
-		
+
 		Display display= Display.getCurrent();
-		
+
 		fRed= display.getSystemColor(SWT.COLOR_RED);
 		fDarkGray= display.getSystemColor(SWT.COLOR_DARK_GRAY);
 		fBlue= display.getSystemColor(SWT.COLOR_DARK_BLUE);
@@ -73,7 +73,7 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 			}
 		}
 		fLightRed= new Color(display, 255, 190, 190);
-		
+
 		fBold= PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getFontRegistry().getBold(JFaceResources.DEFAULT_FONT);
 		FontData[] fontData= fBold.getFontData();
 		for (FontData fd : fontData) {
@@ -81,7 +81,7 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 		}
 		fAllocatedBoldItalic= new Font(display, fontData);
 	}
-	
+
 	public void setSelectedRange(int start, int length) {
 		fSelectionStart= start;
 		fSelectionLength= length;
@@ -97,9 +97,9 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 		} else if (obj instanceof ASTAttribute) {
 			buf.append(((ASTAttribute) obj).getLabel());
 		}
-		return buf.toString(); 
+		return buf.toString();
 	}
-	
+
 	private void getNodeType(ASTNode node, StringBuffer buf) {
 		buf.append(Signature.getSimpleName(node.getClass().getName()));
 		buf.append(" ["); //$NON-NLS-1$
@@ -114,8 +114,8 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 			buf.append(" (recovered)"); //$NON-NLS-1$
 		}
 	}
-	
-	
+
+
 	@Override
 	public Image getImage(Object obj) {
 		if (obj instanceof ASTNode) {
@@ -123,7 +123,7 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 		} else if (obj instanceof ASTAttribute) {
 			return ((ASTAttribute) obj).getImage();
 		}
-		
+
 		return null;
 //		String imageKey = ISharedImages.IMG_OBJ_ELEMENT;
 //		if (obj instanceof ASTNode) {
@@ -138,7 +138,7 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 			return fRed;
 		if ((element instanceof ExceptionAttribute) && ((ExceptionAttribute) element).getException() != null)
 			return fRed;
-		
+
 		if (element instanceof ASTNode) {
 			ASTNode node= (ASTNode) element;
 			if ((node.getFlags() & ASTNode.MALFORMED) != 0) {
@@ -177,18 +177,18 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 		}
 		return null;
 	}
-	
+
 	private boolean isNotProperlyNested(Object element) {
 		if (element instanceof ASTNode) {
 			ASTNode node= (ASTNode) element;
 			int start= node.getStartPosition();
 			int end= start + node.getLength();
-			
+
 			ASTNode parent= node.getParent();
 			if (parent != null) {
 				int parentstart= parent.getStartPosition();
 				int parentend= parentstart + parent.getLength();
-				
+
 				if (start < parentstart || end > parentend) {
 					return true;
 				}
@@ -196,7 +196,7 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 		}
 		return false;
 	}
-	
+
 	private boolean isInsideNode(ASTNode node) {
 		int start= node.getStartPosition();
 		int end= start + node.getLength();
@@ -205,7 +205,7 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 		}
 		return false;
 	}
-	
+
 	private boolean isInside(Object element) {
 		if (element instanceof ASTNode) {
 			return isInsideNode((ASTNode) element);
@@ -236,7 +236,7 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 		}
 		return null;
 	}
-	
+
 	@Override
 	public void dispose() {
 		super.dispose();
@@ -244,5 +244,5 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 		fLightRed.dispose();
 		fAllocatedBoldItalic.dispose();
 	}
-	
+
 }

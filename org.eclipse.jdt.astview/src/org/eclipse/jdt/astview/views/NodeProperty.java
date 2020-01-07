@@ -1,13 +1,13 @@
 /*******************************************************************************
  * Copyright (c) 2000, 2015 IBM Corporation and others.
  *
- * This program and the accompanying materials 
+ * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -21,20 +21,20 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 
 public class NodeProperty extends ASTAttribute {
-	
+
 	private ASTNode fParent;
 	private StructuralPropertyDescriptor fProperty;
-	
+
 	public NodeProperty(ASTNode parent, StructuralPropertyDescriptor property) {
 		fParent= parent;
 		fProperty= property;
 	}
-	
+
 	@Override
 	public Object getParent() {
 		return fParent;
 	}
-	
+
 	@Override
 	public Object[] getChildren() {
 		Object child= getNode();
@@ -50,7 +50,7 @@ public class NodeProperty extends ASTAttribute {
 	public String getLabel() {
 		StringBuilder buf= new StringBuilder();
 		buf.append(getPropertyName());
-		
+
 		if (fProperty.isSimpleProperty()) {
 			buf.append(": "); //$NON-NLS-1$
 			Object node= getNode();
@@ -76,15 +76,15 @@ public class NodeProperty extends ASTAttribute {
 	public Image getImage() {
 		return null;
 	}
-	
+
 	public Object getNode() {
 		return fParent.getStructuralProperty(fProperty);
 	}
-	
+
 	public String getPropertyName() {
 		return toConstantName(fProperty.getId());
 	}
-	
+
 	private static String toConstantName(String string) {
 		StringBuilder buf= new StringBuilder();
 		for (int i= 0; i < string.length(); i++) {
@@ -96,7 +96,7 @@ public class NodeProperty extends ASTAttribute {
 		}
 		return buf.toString();
 	}
-	
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) {
@@ -113,7 +113,7 @@ public class NodeProperty extends ASTAttribute {
 	public int hashCode() {
 		return fParent.hashCode() * 31 + fProperty.hashCode();
 	}
-	
+
 	@Override
 	public String toString() {
 		return getLabel();
