@@ -4367,6 +4367,58 @@ public class CleanUpTest extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
 	}
 
+	public void testPushDownNegationReplaceInstanceofNegationWithInfixAndOperator() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean replaceNegationWithInfixAndOperator(boolean b1, boolean b2) {\n" //
+				+ "        return !(b1 && b2 instanceof String); // another refactoring removes the parentheses\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.PUSH_DOWN_NEGATION);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean replaceNegationWithInfixAndOperator(boolean b1, boolean b2) {\n" //
+				+ "        return (!b1 || !(b2 instanceof String)); // another refactoring removes the parentheses\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+	}
+
+	public void testPushDownNegationReplaceInstanceofNegationWithInfixOrOperator() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean replaceNegationWithInfixOrOperator(boolean b1, boolean b2) {\n" //
+				+ "        return !(b1 instanceof String || b2); // another refactoring removes the parentheses\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.PUSH_DOWN_NEGATION);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean replaceNegationWithInfixOrOperator(boolean b1, boolean b2) {\n" //
+				+ "        return (!(b1 instanceof String) && !b2); // another refactoring removes the parentheses\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+	}
+
 	public void testPushDownNegationReplaceNegationWithEqualOperator() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
