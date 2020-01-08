@@ -140,10 +140,13 @@ public class PostfixCompletionProposalComputer extends AbstractTemplateCompletio
 			return;
 		}
 
+		int tokenLength= context.getToken() != null ? context.getToken().length : 0;
+		int invOffset= context.getOffset() - tokenLength - 1;
+
 		ICompilationUnit cu= (ICompilationUnit) enclosingElement.getAncestor(IJavaElement.COMPILATION_UNIT);
 		CompilationUnit cuRoot= SharedASTProviderCore.getAST(cu, SharedASTProviderCore.WAIT_NO, null);
 		if (cuRoot == null) {
-			cuRoot= (CompilationUnit) createParser(cu).createAST(null);
+			cuRoot= (CompilationUnit) createPartialParser(cu, invOffset).createAST(null);
 		}
 
 		if (enclosingElement instanceof IMember) {
@@ -159,8 +162,6 @@ public class PostfixCompletionProposalComputer extends AbstractTemplateCompletio
 
 			ASTNode completionNode= NodeFinder.perform(cuRoot, sr);
 			ASTNode[] bestNode= new ASTNode[] { completionNode };
-			int tokenLength= context.getToken() != null ? context.getToken().length : 0;
-			int invOffset= context.getOffset() - tokenLength - 1;
 			completionNode.accept(new ASTVisitor() {
 				@Override
 				public boolean visit(StringLiteral node) {
@@ -266,11 +267,12 @@ public class PostfixCompletionProposalComputer extends AbstractTemplateCompletio
 		}
 	}
 
-	private static ASTParser createParser(ICompilationUnit cu) {
+	private static ASTParser createPartialParser(ICompilationUnit cu, int position) {
 		ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 		parser.setKind(ASTParser.K_COMPILATION_UNIT);
 		parser.setProject(cu.getJavaProject());
 		parser.setSource(cu);
+		parser.setFocalPosition(position);
 		parser.setResolveBindings(true);
 		parser.setBindingsRecovery(true);
 		parser.setStatementsRecovery(true);

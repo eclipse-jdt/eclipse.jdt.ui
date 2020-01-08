@@ -491,11 +491,12 @@ public class PostFixCompletionTest extends TestCase {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test;\n" +
 				"public class FieldAccess {\n" +
-				"public class Foo {\n" +
-				"  public String res;\n" +
-				"  public void foo () {\n" +
-				"    this.res.$\n" +
-				"  }\n" +
+				"  public class Foo {\n" +
+				"    public String res;\n" +
+				"    public void foo () {\n" +
+				"      this.res.$\n" +
+				"    }\n" +
+				"  }" +
 				"}");
 
 		int completionIndex= getCompletionIndex(buf);
@@ -510,11 +511,12 @@ public class PostFixCompletionTest extends TestCase {
 		StringBuffer expected= new StringBuffer();
 		expected.append("package test;\n" +
 				"public class FieldAccess {\n" +
-				"public class Foo {\n" +
-				"  public String res;\n" +
-				"  public void foo () {\n" +
-				"    String name = this.res;\n" +
-				"  }\n" +
+				"  public class Foo {\n" +
+				"    public String res;\n" +
+				"    public void foo () {\n" +
+				"      String name = this.res;\n" +
+				"    }\n" +
+				"  }" +
 				"}");
 
 		assertEquals(expected.toString(), viewer.getDocument().get());
