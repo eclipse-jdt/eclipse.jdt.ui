@@ -197,7 +197,7 @@ public class NLSSourceModifier {
 	private int getLineEnd(IBuffer buffer, int offset) {
 		int pos= offset;
 		int length= buffer.getLength();
-		while (pos < length && !isDelemiter(buffer.getChar(pos))) {
+		while (pos < length && !isDelimiter(buffer.getChar(pos))) {
 			pos++;
 		}
 		return pos;
@@ -205,13 +205,13 @@ public class NLSSourceModifier {
 
 	private int getLineStart(IBuffer buffer, int offset) {
 		int pos= offset;
-		while (pos >= 0 && !isDelemiter(buffer.getChar(pos))) {
+		while (pos >= 0 && !isDelimiter(buffer.getChar(pos))) {
 			pos--;
 		}
 		return pos + 1;
 	}
 
-	private boolean isDelemiter(char ch) {
+	private boolean isDelimiter(char ch) {
 		for (String delim : TextUtilities.DELIMITERS) {
 			if (delim.length() == 1 && ch == delim.charAt(0)) {
 				return true;
