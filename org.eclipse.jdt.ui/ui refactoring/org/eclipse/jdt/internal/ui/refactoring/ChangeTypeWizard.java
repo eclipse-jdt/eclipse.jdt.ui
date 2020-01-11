@@ -288,7 +288,7 @@ public class ChangeTypeWizard extends RefactoringWizard {
 		 */
 		private void addTreeComponent(Composite parent) {
 			fTreeViewer= new TreeViewer(parent, SWT.SINGLE | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
-			
+
 			GridData gd= new GridData(GridData.FILL_BOTH);
 			gd.grabExcessHorizontalSpace= true;
 			gd.grabExcessVerticalSpace= true;

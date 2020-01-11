@@ -600,10 +600,10 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 					pi.setNewName(string);
 				}
 			});
-			
+
 			TableColumn columnName= viewerColumn.getColumn();
 			columnName.setText(RefactoringMessages.IntroduceParameterObjectWizard_name_column);
-			
+
 			TableColumnLayout layout= new TableColumnLayout();
 			layout.setColumnData(columnType, new ColumnWeightData(50, convertWidthInCharsToPixels(20), true));
 			layout.setColumnData(columnName, new ColumnWeightData(50, convertWidthInCharsToPixels(20), true));

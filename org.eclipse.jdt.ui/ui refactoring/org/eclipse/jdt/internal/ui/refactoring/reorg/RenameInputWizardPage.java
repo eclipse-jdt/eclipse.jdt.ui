@@ -142,7 +142,7 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 	/**
 	 * Returns the new name for the Java element or <code>null</code>
 	 * if no new name is provided
-	 * 
+	 *
 	 * @param nameUpdating the name updating
 	 *
 	 * @return the new name or <code>null</code>

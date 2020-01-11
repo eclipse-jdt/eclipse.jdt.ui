@@ -123,7 +123,7 @@ abstract class ReorgUserInputPage extends UserInputWizardPage{
 
 	/**
 	 * Set and verify the destination.
-	 * 
+	 *
 	 * @param selected the selected destination
 	 * @return the resulting status
 	 * @throws JavaModelException the JavaModelException in case it fails

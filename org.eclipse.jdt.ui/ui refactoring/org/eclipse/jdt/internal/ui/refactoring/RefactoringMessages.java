@@ -332,7 +332,7 @@ public final class RefactoringMessages extends NLS {
 	public static String ExtractTempAction_label;
 
 	public static String ExtractTempInputPage_declare_final;
-	
+
 	public static String ExtractTempInputPage_declare_type_var;
 
 	public static String ExtractTempInputPage_enter_name;

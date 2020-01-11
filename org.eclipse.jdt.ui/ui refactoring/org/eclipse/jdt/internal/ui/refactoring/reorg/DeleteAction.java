@@ -60,14 +60,14 @@ public class DeleteAction extends SelectionDispatchAction {
 
 	/**
 	 * 'Hide' button index.
-	 * 
+	 *
 	 * @since 3.5
 	 */
 	private static final int HIDE_BUTTON= 0;
 
 	/**
 	 * 'Remove' button index.
-	 * 
+	 *
 	 * @since 3.5
 	 */
 	private static final int REMOVE_BUTTON= 1;
@@ -105,7 +105,7 @@ public class DeleteAction extends SelectionDispatchAction {
 
 	/**
 	 * Removes or hides the selected working sets.
-	 * 
+	 *
 	 * @param selection the selected working sets
 	 * @since 3.5
 	 */
@@ -119,7 +119,7 @@ public class DeleteAction extends SelectionDispatchAction {
 				dialogMessage= MessageFormat.format(ReorgMessages.DeleteWorkingSet_hideworkingset_single, new Object[] { workingSet.getLabel() });
 			else
 				dialogMessage= MessageFormat.format(ReorgMessages.DeleteWorkingSet_removeorhideworkingset_single, new Object[] { workingSet.getLabel() });
-			
+
 			dialog= new MessageDialog(getShell(), ReorgMessages.DeleteWorkingSet_single, null, dialogMessage, MessageDialog.QUESTION, new String[] { ReorgMessages.DeleteWorkingSet_Hide,
 					ReorgMessages.DeleteWorkingSet_Remove,
 					IDialogConstants.CANCEL_LABEL }, 0) {
@@ -162,8 +162,8 @@ public class DeleteAction extends SelectionDispatchAction {
 
 	/**
 	 * Hides all the working sets in the list from the Package Explorer.
-	 * 
-	 * @param selection the selection of working sets 
+	 *
+	 * @param selection the selection of working sets
 	 * @since 3.8
 	 */
 	private void hideWorkingSets(List<IWorkingSet> selection) {
@@ -182,9 +182,9 @@ public class DeleteAction extends SelectionDispatchAction {
 
 	/**
 	 * Checks if the working set is the default working set.
-	 * 
+	 *
 	 * @param workingSetID the working set id, can be <code>null</code>
-	 * @return <code>true</code> if default working set, <code>false</code> otherwise 
+	 * @return <code>true</code> if default working set, <code>false</code> otherwise
 	 * @since 3.8
 	 */
 	private boolean isDefaultWorkingSet(String workingSetID) {

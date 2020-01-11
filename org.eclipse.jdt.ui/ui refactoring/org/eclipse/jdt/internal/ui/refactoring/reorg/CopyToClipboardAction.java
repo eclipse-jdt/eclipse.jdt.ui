@@ -230,7 +230,7 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 
 		/**
 		 * Gets the names of the jar entry resources and adds them to the string buffer.
-		 * 
+		 *
 		 * @param namesBuf the names buffer
 		 * @since 3.6
 		 */

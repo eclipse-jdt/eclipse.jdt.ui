@@ -501,7 +501,7 @@ public class PasteAction extends SelectionDispatchAction{
 				return fKind;
 			}
 		}
-		
+
 		private IStorage fPatchStorage;
 
 		private IPackageFragmentRoot fDestination;
@@ -530,7 +530,7 @@ public class PasteAction extends SelectionDispatchAction{
 		@Override
 		public boolean canPasteOn(IJavaElement[] javaElements, IResource[] resources, IWorkingSet[] selectedWorkingSets, List<?> selectedElements) throws JavaModelException {
 			final String text= getClipboardText(fAvailableTypes);
-			
+
 			IStorage storage= new IEncodedStorage() {
 				@Override
 				public <T> T getAdapter(Class<T> adapter) {
@@ -570,8 +570,8 @@ public class PasteAction extends SelectionDispatchAction{
 			} catch (CoreException e) {
 				// continue
 			}
-			
-			
+
+
 			if (selectedWorkingSets.length > 1)
 				return false;
 			if (resources.length != 0)
@@ -589,7 +589,7 @@ public class PasteAction extends SelectionDispatchAction{
 			} else if (selectedElements.size() != 0) {
 				return false; // e.g. ClassPathContainer
 			}
-			
+
 			computeLatestVM();
 			parseCUs(javaProject, text);
 
@@ -699,7 +699,7 @@ public class PasteAction extends SelectionDispatchAction{
 				new org.eclipse.team.internal.ui.synchronize.patch.ApplyPatchOperation(null, fPatchStorage, resource, new CompareConfiguration()).openWizard();
 				return;
 			}
-			
+
 			final IEditorPart[] editorPart= new IEditorPart[1];
 
 			IRunnableWithProgress op= new IRunnableWithProgress() {

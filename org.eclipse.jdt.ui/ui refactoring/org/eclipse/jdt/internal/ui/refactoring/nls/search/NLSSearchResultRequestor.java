@@ -230,7 +230,7 @@ class NLSSearchResultRequestor extends SearchRequestor {
 	 * Finds the key defined by the given match. The assumption is that the key is the only argument
 	 * and it is a string literal i.e. quoted ("...") or a string constant i.e. 'static final
 	 * String' defined in the same class.
-	 * 
+	 *
 	 * @param keyPositionResult reference parameter: will be filled with the position of the found
 	 *            key
 	 * @param enclosingElement enclosing java element
@@ -289,7 +289,7 @@ class NLSSearchResultRequestor extends SearchRequestor {
 				}
 				if (token != ITerminalSymbols.TokenNameRPAREN)
 					return null;
-				
+
 				if (nextToken == ITerminalSymbols.TokenNameStringLiteral) {
 					keyPositionResult.setOffset(tokenStart + 1);
 					keyPositionResult.setLength(tokenEnd - tokenStart - 1);

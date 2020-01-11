@@ -624,7 +624,7 @@ public class RenameInformationPopup implements IWidgetTokenKeeper, IWidgetTokenK
 			return;
 		}
 		fSnapPositionChanged= false;
-		
+
 		boolean isUnderLeft= fSnapPosition == SNAP_POSITION_UNDER_LEFT_FIELD;
 		boolean isOverLeft= fSnapPosition == SNAP_POSITION_OVER_LEFT_FIELD;
 		fPopupLayout.marginTop= isUnderLeft ? HAH : 0;
@@ -788,7 +788,7 @@ public class RenameInformationPopup implements IWidgetTokenKeeper, IWidgetTokenK
 			@Override
 			public void menuAboutToShow(IMenuManager manager) {
 				boolean canRefactor= ! fRenameLinkedMode.isOriginalName();
-				
+
 				IAction refactorAction= new Action(ReorgMessages.RenameInformationPopup_RenameInWorkspace) {
 					@Override
 					public void run() {

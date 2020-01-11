@@ -129,7 +129,7 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 				}
 				else {
 					if (elements.length == 1) {
-						setEnabled(RefactoringAvailabilityTester.isRenameElementAvailable(elements[0]));						
+						setEnabled(RefactoringAvailabilityTester.isRenameElementAvailable(elements[0]));
 					} else {
 						ASTNode node= javaTextSelection.resolveCoveringNode();
 						setEnabled(node instanceof SimpleName);

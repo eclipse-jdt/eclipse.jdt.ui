@@ -36,7 +36,7 @@ import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
 /**
  * Content assist processor for a precomputed, fixed set of names.
  * For each name matching the current prefix a {@link JavaCompletionProposal} will be provided,
- * using the {@link Image} passed into the constructor. 
+ * using the {@link Image} passed into the constructor.
  */
 public class JavaPrecomputedNamesAssistProcessor implements ISubjectControlContentAssistProcessor {
 	private Iterable<String> fNames;
@@ -83,7 +83,7 @@ public class JavaPrecomputedNamesAssistProcessor implements ISubjectControlConte
 	public IContextInformationValidator getContextInformationValidator() {
 		return null; //no context
 	}
-	
+
 	@Override
 	public IContextInformation[] computeContextInformation(IContentAssistSubjectControl contentAssistSubjectControl, int documentOffset) {
 		return null;

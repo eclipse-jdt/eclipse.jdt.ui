@@ -145,7 +145,7 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 			composite.setLayout(tableColumnLayout);
 			tableColumnLayout.setColumnData(columnType, new ColumnWeightData(60, true));
 			tableColumnLayout.setColumnData(columnName, new ColumnWeightData(40, true));
-			
+
 			final TableViewer viewer= new TableViewer(table);
 			viewer.setContentProvider(ArrayContentProvider.getInstance());
 			viewer.setLabelProvider(new TargetLabelProvider());

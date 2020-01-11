@@ -252,7 +252,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 		Dialog.applyDialogFont(result);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.EXTRACT_METHOD_WIZARD_PAGE);
 	}
-	
+
 	private void updateAccessModifiers() {
 		final Control[] radioButtons= accessModifiersGroup.getChildren();
 		if (fRefactoring.isDestinationInterface()) {
@@ -280,7 +280,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 			}
 		}
 	}
-	
+
 	private String getLabel(ASTNode node) {
 		if (node instanceof AbstractTypeDeclaration) {
 			return ((AbstractTypeDeclaration)node).getName().getIdentifier();
@@ -347,7 +347,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 		Label previewLabel= new Label(composite, SWT.NONE);
 		previewLabel.setText(RefactoringMessages.ExtractMethodInputPage_signature_preview);
 		layouter.perform(previewLabel);
-		
+
 		fSignaturePreview= InputPageUtil.createSignaturePreview(composite);
 		layouter.perform(fSignaturePreview.getControl());
 	}
