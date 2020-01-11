@@ -27,7 +27,7 @@ import java.net.URLDecoder;
 /**
  * This class will be compiled into the binary jar-in-jar-loader.zip. This ZIP is used for the
  * "Runnable JAR File Exporter"
- * 
+ *
  * @since 3.5
  */
 public class RsrcURLConnection extends URLConnection {
