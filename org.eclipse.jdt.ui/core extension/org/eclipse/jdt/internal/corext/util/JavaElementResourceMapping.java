@@ -208,7 +208,7 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 	private static ResourceTraversal[] getPackageFragmentTraversals(IPackageFragment pack) throws CoreException {
 		ArrayList<ResourceTraversal> res= new ArrayList<>();
 		IContainer container= (IContainer)pack.getResource();
-		
+
 		if (container != null) {
 			res.add(new ResourceTraversal(new IResource[] { container }, IResource.DEPTH_ONE, 0));
 			if (pack.exists()) { // folder may not exist any more, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=269167
@@ -219,14 +219,14 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 				}
 			}
 		}
-	
+
 		return res.toArray(new ResourceTraversal[res.size()]);
 	}
 
 	private static ResourceTraversal[] getRemotePackageFragmentTraversals(IPackageFragment pack, RemoteResourceMappingContext context, IProgressMonitor monitor) throws CoreException {
 		ArrayList<ResourceTraversal> res= new ArrayList<>();
 		IContainer container= (IContainer)pack.getResource();
-		
+
 		if (container != null) {
 			res.add(new ResourceTraversal(new IResource[] {container}, IResource.DEPTH_ONE, 0));
 			IResource[] remoteMembers= context.fetchRemoteMembers(container, monitor);
@@ -244,7 +244,7 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 		}
 		return res.toArray(new ResourceTraversal[res.size()]);
 	}
-	
+
 	private static final class CompilationUnitResourceMapping extends JavaElementResourceMapping {
 		private final ICompilationUnit fUnit;
 		private CompilationUnitResourceMapping(ICompilationUnit unit) {

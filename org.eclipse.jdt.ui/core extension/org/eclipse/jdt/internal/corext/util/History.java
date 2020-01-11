@@ -63,7 +63,7 @@ import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
  * from the list. An element can be added/renewed with a call to <code>accessed(Object)</code>.
  *
  * The history can be stored to/loaded from an xml file.
- * 
+ *
  * @param <K> key type
  * @param <V> value type
  */

@@ -192,7 +192,7 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 
 	/**
 	 * Generates a new setter method for the specified field
-	 * 
+	 *
 	 * @param field the field
 	 * @param astRewrite the AST rewrite to use
 	 * @param rewrite the list rewrite to use
@@ -322,7 +322,7 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 			}
 
 			fSkipAllExisting= (fSkipExistingQuery == null);
-			
+
 			Set<IField> accessors = new HashSet<>(Arrays.asList(fAccessorFields));
 			Set<IField> getters = new HashSet<>(Arrays.asList(fGetterFields));
 			Set<IField> setters= new HashSet<>(Arrays.asList(fSetterFields));

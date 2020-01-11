@@ -124,7 +124,7 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 		public int compare(BodyDeclaration bodyDeclaration1, BodyDeclaration bodyDeclaration2) {
 			boolean preserved1= fDoNotSortFields && isSortPreserved(bodyDeclaration1);
 			boolean preserved2= fDoNotSortFields && isSortPreserved(bodyDeclaration2);
-			
+
 			// Bug 407759: need to use a common category for all isSortPreserved members that are to be sorted in the same group:
 			int cat1= category(bodyDeclaration1);
 			if (preserved1) {
@@ -138,9 +138,9 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 			if (cat1 != cat2) {
 				return getCategoryIndex(cat1) - getCategoryIndex(cat2);
 			}
-			
+
 			// cat1 == cat2 implies preserved1 == preserved2
-			
+
 			if (preserved1) {
 				return preserveRelativeOrder(bodyDeclaration1, bodyDeclaration2);
 			}

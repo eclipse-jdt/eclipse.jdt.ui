@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -82,7 +82,7 @@ public class JavaFormatter {
 
 		/**
 		 * Creates a new tracker.
-		 * 
+		 *
 		 * @param buffer the buffer to track
 		 * @throws MalformedTreeException
 		 * @throws BadLocationException

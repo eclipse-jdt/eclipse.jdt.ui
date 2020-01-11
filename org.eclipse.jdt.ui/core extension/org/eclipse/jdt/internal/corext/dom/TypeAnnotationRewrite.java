@@ -35,7 +35,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
  * Rewrite helper for type annotations.
- * 
+ *
  * @see JDTUIHelperClasses
  * @since 3.13
  */
@@ -47,7 +47,7 @@ public class TypeAnnotationRewrite {
 	 * <p>
 	 * In a combination of {@link ElementType#TYPE_USE} and {@link ElementType#TYPE_PARAMETER}
 	 * the latter is ignored, because this is implied by the former and creates no ambiguity.</p>
-	 * 
+	 *
 	 * @param node ASTNode
 	 * @param childListProperty child list property
 	 * @param rewrite rewrite that removes the nodes

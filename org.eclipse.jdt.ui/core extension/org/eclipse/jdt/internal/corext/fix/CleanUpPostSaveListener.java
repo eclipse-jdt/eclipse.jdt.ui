@@ -149,23 +149,23 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 			try {
 				manager.connect(fFile.getFullPath(), LocationKind.IFILE, new SubProgressMonitor(pm, 1));
 				buffer= manager.getTextFileBuffer(fFile.getFullPath(), LocationKind.IFILE);
-				
+
 				final IDocument document= buffer.getDocument();
 				final long oldFileValue= fFile.getModificationStamp();
 				final LinkedList<UndoEdit> undoEditCollector= new LinkedList<>();
 				final long[] oldDocValue= new long[1];
 				final boolean[] setContentStampSuccess= { false };
-				
+
 				if (! buffer.isSynchronizationContextRequested()) {
 					performEdit(document, oldFileValue, undoEditCollector, oldDocValue, setContentStampSuccess);
-					
+
 				} else {
 					ITextFileBufferManager fileBufferManager= FileBuffers.getTextFileBufferManager();
-					
+
 					class UIRunnable implements Runnable {
 						public boolean fDone;
 						public Exception fException;
-						
+
 						@Override
 						public void run() {
 							synchronized (this) {
@@ -185,7 +185,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 						}
 					}
 					UIRunnable runnable= new UIRunnable();
-					
+
 					synchronized (runnable) {
 						fileBufferManager.execute(runnable);
 						while (! runnable.fDone) {
@@ -195,7 +195,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 							}
 						}
 					}
-					
+
 					if (runnable.fException != null) {
 						if (runnable.fException instanceof BadLocationException) {
 							throw (BadLocationException) runnable.fException;

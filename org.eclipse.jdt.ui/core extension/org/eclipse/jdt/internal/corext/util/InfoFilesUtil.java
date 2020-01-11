@@ -37,7 +37,7 @@ public class InfoFilesUtil {
 	 * Creates a compilation unit in the given package fragment with the specified file name. The
 	 * compilation unit is formatted and contains the given contents with file and type comments
 	 * prepended to it.
-	 * 
+	 *
 	 * @param fileName the name of the compilation unit
 	 * @param fileContent the contents of the compilation unit
 	 * @param pack the package fragment to create the compilation unit in

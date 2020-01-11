@@ -194,7 +194,7 @@ public class CodeFormatFix implements ICleanUpFix {
 	 * Returns the index in document of a none whitespace character between start (inclusive) and
 	 * end (inclusive) such that if more then one such character the index returned is the largest
 	 * possible (closest to end). Returns start - 1 if no such character.
-	 * 
+	 *
 	 * @param start the start
 	 * @param end the end
 	 * @param document the document

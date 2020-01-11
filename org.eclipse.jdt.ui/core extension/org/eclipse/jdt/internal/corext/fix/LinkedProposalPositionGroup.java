@@ -10,7 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Red Hat Inc. - split into LinkedProposalPositionGroupCore in 
+ *     Red Hat Inc. - split into LinkedProposalPositionGroupCore in
  *                    core manipulation
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;

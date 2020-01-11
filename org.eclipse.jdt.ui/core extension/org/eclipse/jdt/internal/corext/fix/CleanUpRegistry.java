@@ -52,7 +52,7 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 /**
  * The clean up registry provides a set of clean ups and there corresponding UI representatives.
- * 
+ *
  * @since 3.4
  */
 public class CleanUpRegistry {
@@ -104,7 +104,7 @@ public class CleanUpRegistry {
 		private static final String ATTRIBUTE_ID_CLASS= "class"; //$NON-NLS-1$
 		private static final String ATTRIBUTE_ID_NAME= "name"; //$NON-NLS-1$
 		private static final String ATTRIBUTE_NAME_KIND= "cleanUpKind"; //$NON-NLS-1$
-		
+
 		private final String fName;
 		private final IConfigurationElement fElement;
 		private int fKind;
@@ -237,7 +237,7 @@ public class CleanUpRegistry {
 			return fOptionsProvider;
 		}
 	}
-	
+
 	private static final String EXTENSION_POINT_NAME= "cleanUps"; //$NON-NLS-1$
 	private static final String CLEAN_UP_CONFIGURATION_ELEMENT_NAME= "cleanUp"; //$NON-NLS-1$
 	private static final String TABPAGE_CONFIGURATION_ELEMENT_NAME= "cleanUpConfigurationUI"; //$NON-NLS-1$
@@ -253,7 +253,7 @@ public class CleanUpRegistry {
 
 	/**
 	 * Creates and returns the registered clean ups that don't fail upon creation.
-	 * 
+	 *
 	 * @return an array of clean ups
 	 */
 	public synchronized ICleanUp[] createCleanUps() {
@@ -262,7 +262,7 @@ public class CleanUpRegistry {
 
 	/**
 	 * Creates and returns the registered clean ups that don't fail upon creation.
-	 * 
+	 *
 	 * @param ids the ids of the clean ups to create, or <code>null</code> to create all
 	 * @return an array of clean ups
 	 * @since 3.5
@@ -282,9 +282,9 @@ public class CleanUpRegistry {
 
 	/**
 	 * @param kind the kind of clean up for which to retrieve the configuratin pages
-	 * 
+	 *
 	 * @return set of clean up tab page descriptors
-	 * 
+	 *
 	 * @see CleanUpConstants#DEFAULT_CLEAN_UP_OPTIONS
 	 * @see CleanUpConstants#DEFAULT_SAVE_ACTION_OPTIONS
 	 */
@@ -302,10 +302,10 @@ public class CleanUpRegistry {
 
 	/**
 	 * Returns the default options for the specified clean up kind.
-	 * 
+	 *
 	 * @param kind the kind of clean up for which to retrieve the options
 	 * @return the default options
-	 * 
+	 *
 	 * @see CleanUpConstants#DEFAULT_CLEAN_UP_OPTIONS
 	 * @see CleanUpConstants#DEFAULT_SAVE_ACTION_OPTIONS
 	 */
@@ -343,7 +343,7 @@ public class CleanUpRegistry {
 			final CleanUpDescriptor cleanUpDescriptor= descriptors.get(i);
 			final boolean disable[]= new boolean[1];
 			ISafeRunnable runnable= new SafeRunnable() {
-				
+
 				@Override
 				public void run() throws Exception {
 					ICleanUp cleanUp= cleanUpDescriptor.createCleanUp();
@@ -420,7 +420,7 @@ public class CleanUpRegistry {
 	private synchronized void ensurePagesRegistered() {
 		if (fPageDescriptors != null)
 			return;
-		
+
 		ArrayList<CleanUpTabPageDescriptor> result= new ArrayList<>();
 
 		IExtensionPoint point= Platform.getExtensionRegistry().getExtensionPoint(JavaPlugin.getPluginId(), EXTENSION_POINT_NAME);

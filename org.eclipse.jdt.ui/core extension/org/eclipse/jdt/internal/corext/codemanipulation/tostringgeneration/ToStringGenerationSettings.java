@@ -54,7 +54,7 @@ public class ToStringGenerationSettings extends ToStringGenerationSettingsCore {
 
 	/**
 	 * Writes given custom builder settings object to the underlying dialog settings.
-	 * 
+	 *
 	 * @param customBuilderSettings1 settings to save
 	 */
 	public void writeCustomBuilderSettings(CustomBuilderSettings customBuilderSettings1) {

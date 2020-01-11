@@ -156,7 +156,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 
 	/**
 	 * Runs the operation.
-	 * 
+	 *
 	 * @param monitor The progress monitor
 	 * @throws CoreException if accessing the CU or rewritting the imports fails
 	 * @throws OperationCanceledException Runtime error thrown when operation is canceled.

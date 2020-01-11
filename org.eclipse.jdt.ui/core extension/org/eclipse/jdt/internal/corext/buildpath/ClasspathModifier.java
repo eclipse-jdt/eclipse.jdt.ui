@@ -1028,7 +1028,7 @@ public class ClasspathModifier {
 			IJavaModelStatus status= JavaConventions.validateClasspath(project, entries, outputLocation);
 			if (!status.isOK())
 				throw new JavaModelException(status);
-			
+
 			BuildPathSupport.setEEComplianceOptions(project, newEntries);
 			project.setRawClasspath(entries, outputLocation, new SubProgressMonitor(monitor, 2));
 		} finally {

@@ -72,7 +72,7 @@ public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOpera
 			boolean calculatedId,
 			boolean defaultId,
 			boolean randomId) throws CoreException {
-		
+
 		return PotentialProgrammingProblemsFixCore.checkPreConditions(project, compilationUnits, monitor, calculatedId, defaultId, randomId);
     }
 

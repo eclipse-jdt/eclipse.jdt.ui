@@ -157,7 +157,7 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 	public static boolean isMissingOverrideAnnotationInterfaceProblem(int id) {
 		return id == IProblem.MissingOverrideAnnotationForInterfaceMethodImplementation;
 	}
-	
+
 	public static boolean isMissingOverrideAnnotationProblem(int id) {
 		return id == IProblem.MissingOverrideAnnotation || id == IProblem.MissingOverrideAnnotationForInterfaceMethodImplementation;
 	}
@@ -300,12 +300,12 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 	private static void createAddOverrideAnnotationOperations(CompilationUnit compilationUnit, boolean addOverrideInterfaceAnnotation, IProblemLocation[] locations, List<CompilationUnitRewriteOperation> result) {
 		for (IProblemLocation problem : locations) {
 			int problemId= problem.getProblemId();
-			
+
 			if (isMissingOverrideAnnotationProblem(problemId)) {
 				if (!isMissingOverrideAnnotationInterfaceProblem(problemId) || addOverrideInterfaceAnnotation) {
 					ASTNode selectedNode= problem.getCoveringNode(compilationUnit);
 					if (selectedNode != null) {
-	
+
 						ASTNode declaringNode= getDeclaringNode(selectedNode);
 						if (declaringNode instanceof BodyDeclaration) {
 							BodyDeclaration declaration= (BodyDeclaration) declaringNode;

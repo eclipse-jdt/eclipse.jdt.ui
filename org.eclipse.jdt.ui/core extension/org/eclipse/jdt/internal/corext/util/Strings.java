@@ -21,7 +21,7 @@ import org.eclipse.jface.viewers.StyledString.Styler;
 
 /**
  * Helper class to provide String manipulation functions not available in standard JDK.
- * 
+ *
  * @see JDTUIHelperClasses
  */
 public class Strings extends org.eclipse.jdt.internal.core.manipulation.util.Strings {
@@ -32,7 +32,7 @@ public class Strings extends org.eclipse.jdt.internal.core.manipulation.util.Str
 	 * Sets the given <code>styler</code> to use for <code>matchingRegions</code> (obtained from
 	 * {@link org.eclipse.jdt.core.search.SearchPattern#getMatchingRegions}) in the
 	 * <code>styledString</code> starting from the given <code>index</code>.
-	 * 
+	 *
 	 * @param styledString the styled string to mark
 	 * @param index the index from which to start marking
 	 * @param matchingRegions the regions to mark
@@ -57,20 +57,20 @@ public class Strings extends org.eclipse.jdt.internal.core.manipulation.util.Str
 			}
 		}
 	}
-	
+
 	/**
 	 * Adds special marks so that that the given styled string is readable in a BiDi environment.
-	 * 
+	 *
 	 * @param styledString the styled string
 	 * @return the processed styled string
 	 * @since 3.4
 	 */
 	public static StyledString markLTR(StyledString styledString) {
-		
+
 		/*
 		 * NOTE: For performance reasons we do not call  markLTR(styledString, null)
 		 */
-		
+
 		if (!USE_TEXT_PROCESSOR)
 			return styledString;
 
@@ -84,7 +84,7 @@ public class Strings extends org.eclipse.jdt.internal.core.manipulation.util.Str
 	/**
 	 * Adds special marks so that that the given styled Java element label is readable in a BiDi
 	 * environment.
-	 * 
+	 *
 	 * @param styledString the styled string
 	 * @return the processed styled string
 	 * @since 3.6
@@ -102,7 +102,7 @@ public class Strings extends org.eclipse.jdt.internal.core.manipulation.util.Str
 
 	/**
 	 * Adds special marks so that that the given styled string is readable in a BiDi environment.
-	 * 
+	 *
 	 * @param styledString the styled string
 	 * @param delimiters the additional delimiters
 	 * @return the processed styled string
@@ -121,7 +121,7 @@ public class Strings extends org.eclipse.jdt.internal.core.manipulation.util.Str
 
 	/**
 	 * Inserts the marks into the given styled string.
-	 * 
+	 *
 	 * @param styledString the styled string
 	 * @param originalString the original string
 	 * @param processedString the processed string
