@@ -425,7 +425,7 @@ public class FullConstraintCreator extends ConstraintCreator{
 	public ITypeConstraint[] create(VariableDeclarationStatement vds){
 		return getConstraintsFromFragmentList(vds.fragments(), vds.getType());
 	}
-	
+
 	@Override
 	public ITypeConstraint[] create(ThrowStatement node) {
 		ConstraintVariable nameVariable= fConstraintVariableFactory.makeExpressionOrTypeVariable(node.getExpression(), getContext());
@@ -533,7 +533,7 @@ public class FullConstraintCreator extends ConstraintCreator{
 
 	private ITypeConstraint[] getArgumentConstraints(List<Expression> arguments, IMethodBinding methodBinding) {
 		List<ITypeConstraint> result= new ArrayList<>(arguments.size());
-		
+
 		if (methodBinding == null)
 			return new ITypeConstraint[0];
 

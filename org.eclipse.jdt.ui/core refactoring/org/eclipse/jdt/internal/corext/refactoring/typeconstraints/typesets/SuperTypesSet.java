@@ -204,7 +204,7 @@ public class SuperTypesSet extends TypeSet {
 	public int hashCode() {
 		return fLowerBounds.hashCode();
 	}
-	
+
 	@Override
 	public Iterator<TType> iterator() {
 		return enumerate().iterator();

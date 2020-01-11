@@ -187,7 +187,7 @@ public class SubTypesOfSingleton extends TypeSet {
 	/**
 	 * Returns the element type of the given TType, if an array type, or the
 	 * given TType itself, otherwise.
-	 * 
+	 *
 	 * @param t a type
 	 * @return the element type
 	 */
@@ -232,7 +232,7 @@ public class SubTypesOfSingleton extends TypeSet {
 
 		return other.fUpperBound.equals(fUpperBound);
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return fUpperBound.hashCode();

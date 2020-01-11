@@ -590,7 +590,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 			}
 		}
 	}
-	
+
 	@Override
 	public void endVisit(MethodReference node) {
 		IMethodBinding methodBinding= node.resolveMethodBinding();
@@ -660,7 +660,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 		}
 		super.endVisit(node);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.MethodInvocation)
 	 */

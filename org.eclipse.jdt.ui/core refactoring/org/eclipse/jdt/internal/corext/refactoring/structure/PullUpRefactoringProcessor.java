@@ -1199,7 +1199,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 										String targetPackage= targetRewriter.getRoot().getPackage() == null ? "" : targetRewriter.getRoot().getPackage().getName().toString(); //$NON-NLS-1$
 										String targetTypeBinding= targetPackage + "." + oldTypeBinding.getName(); //$NON-NLS-1$
 
-										// Find the same type-name field but fully qualified. 
+										// Find the same type-name field but fully qualified.
 										// In that case it won't shadow the pulled up field
 										boolean qualifiedTypeNameInTarget= true;
 										String sourceSignature= ((IField) member).getTypeSignature();
@@ -1276,7 +1276,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 							adjustor.setStatus(status);
 							adjustor.setAdjustments(adjustments);
 							if (destination.isInterface() && !JdtFlags.isPublic(method)) {
-								adjustments.put(method, new MemberVisibilityAdjustor.OutgoingMemberVisibilityAdjustment(method, Modifier.ModifierKeyword.PUBLIC_KEYWORD, RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_method_warning, new String[] { MemberVisibilityAdjustor.getLabel(method), RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_public}), JavaStatusContext.create(method))));								
+								adjustments.put(method, new MemberVisibilityAdjustor.OutgoingMemberVisibilityAdjustment(method, Modifier.ModifierKeyword.PUBLIC_KEYWORD, RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_method_warning, new String[] { MemberVisibilityAdjustor.getLabel(method), RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_public}), JavaStatusContext.create(method))));
 							} else if (needsVisibilityAdjustment(method, false, new SubProgressMonitor(subsub, 1), status)) {
 								adjustments.put(method, new MemberVisibilityAdjustor.OutgoingMemberVisibilityAdjustment(method, Modifier.ModifierKeyword.PROTECTED_KEYWORD, RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_method_warning, new String[] { MemberVisibilityAdjustor.getLabel(method), RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_protected}), JavaStatusContext.create(method))));
 							}

@@ -1846,7 +1846,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			} else {
 				ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(fCuRewrite.getRoot(), getStartPosition(), getImportRewrite());
 				newTypeNode= getImportRewrite().addImport(newTypeBinding, fCuRewrite.getAST(), importRewriteContext);
-				getImportRemover().registerAddedImports(newTypeNode);				
+				getImportRemover().registerAddedImports(newTypeNode);
 			}
 			return newTypeNode;
 		}

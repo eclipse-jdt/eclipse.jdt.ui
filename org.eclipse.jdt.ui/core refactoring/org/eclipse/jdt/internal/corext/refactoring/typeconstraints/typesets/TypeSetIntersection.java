@@ -254,7 +254,7 @@ public class TypeSetIntersection extends TypeSet {
 	public int hashCode() {
 		return fLHS.hashCode() * 37 + fRHS.hashCode();
 	}
-	
+
 	@Override
 	public String toString() {
 		return "<" + fID + ": intersect(" + fLHS + "," + fRHS + ")>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$

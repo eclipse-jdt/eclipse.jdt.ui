@@ -980,11 +980,11 @@ public final class ReorgPolicyFactory {
 						e.printStackTrace();
 					}
 				}
-				
+
 				if (copyFilesToDefaultPackage) {
 					return javaAsPackage;
 				}
-			}	
+			}
 			return getResourceDestinationAsPackageFragment(getResourceDestination());
 		}
 
@@ -1264,7 +1264,7 @@ public final class ReorgPolicyFactory {
 		public boolean canEnableQualifiedNameUpdating() {
 			return getCus().length > 0 && !JavaElementUtil.isDefaultPackage(getCommonParent());
 		}
-		
+
 		@Override
 		public boolean canUpdateJavaReferences() {
 			return true;
@@ -1621,7 +1621,7 @@ public final class ReorgPolicyFactory {
 				return false;
 			if (canUpdateQualifiedNames())
 				return false;
-			
+
 			return true;
 		}
 
@@ -1718,7 +1718,7 @@ public final class ReorgPolicyFactory {
 			IJavaElement destinationContainerAsPackage= getDestinationContainerAsJavaElement();
 			if (destinationContainerAsPackage != null && destinationContainerAsPackage.equals(commonParent))
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_parent);
-			
+
 			if (cannotUpdateReferencesForDestination())
 				superStatus.addInfo(RefactoringCoreMessages.ReorgPolicyFactory_noJavaUpdates);
 
@@ -1744,7 +1744,7 @@ public final class ReorgPolicyFactory {
 		private MoveModifications fModifications;
 
 		private boolean fUpdateReferences= true;
-		
+
 		MovePackageFragmentRootsPolicy(IPackageFragmentRoot[] roots) {
 			super(roots);
 		}
@@ -2198,7 +2198,7 @@ public final class ReorgPolicyFactory {
 	private static abstract class MoveSubCuElementsPolicy extends SubCuElementReorgPolicy implements IMovePolicy {
 
 		private CreateTargetExecutionLog fCreateTargetExecutionLog= new CreateTargetExecutionLog();
-		
+
 		private boolean fUpdateReferences= true;
 
 		MoveSubCuElementsPolicy(IJavaElement[] javaElements) {

@@ -665,7 +665,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 					list.remove(annotation, null);
 			}
 		}
-		
+
 		for (SingleVariableDeclaration param : (List<SingleVariableDeclaration>) declaration.parameters()) {
 			ListRewrite modifierRewrite= rewrite.getListRewrite(param, SingleVariableDeclaration.MODIFIERS2_PROPERTY);
 			for (IExtendedModifier extended : (List<IExtendedModifier>) param.modifiers()) {
@@ -680,7 +680,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 				}
 			}
 		}
-		
+
 		ICompilationUnit unit= sourceRewrite.getCu();
 		ITextFileBuffer buffer= RefactoringFileBuffers.acquire(unit);
 		try {
@@ -846,7 +846,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 
 	/**
 	 * Should override annotations be generated?
-	 * 
+	 *
 	 * @return <code>true</code> if annotations should be generated, <code>false</code> otherwise
 	 */
 	public final boolean isAnnotations() {
@@ -1122,7 +1122,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 
 	/**
 	 * Determines whether override annotations should be generated.
-	 * 
+	 *
 	 * @param annotations <code>true</code> to generate override annotations, <code>false</code> otherwise
 	 */
 	public final void setAnnotations(final boolean annotations) {

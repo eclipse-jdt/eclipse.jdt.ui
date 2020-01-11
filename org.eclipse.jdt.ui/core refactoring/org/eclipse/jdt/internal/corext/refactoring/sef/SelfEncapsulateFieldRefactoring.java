@@ -344,7 +344,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		pm.beginTask(NO_NAME, 12);
 		pm.setTaskName(RefactoringCoreMessages.SelfEncapsulateField_checking_preconditions);
-		
+
 		RefactoringStatus result= new RefactoringStatus();
 		fRewriter= ASTRewrite.create(fRoot.getAST());
 		fChangeManager.clear();

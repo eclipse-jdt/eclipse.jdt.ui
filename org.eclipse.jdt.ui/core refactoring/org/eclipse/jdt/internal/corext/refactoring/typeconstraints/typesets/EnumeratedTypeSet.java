@@ -46,7 +46,7 @@ public class EnumeratedTypeSet extends TypeSet {
 	/**
 	 * Constructs a new EnumeratedTypeSet with the members of Set s in it.
 	 * All elements of s must be TTypes.
-	 * 
+	 *
 	 * @param types the types
 	 * @param typeSetEnvironment the environment
 	 */
@@ -60,7 +60,7 @@ public class EnumeratedTypeSet extends TypeSet {
 
 	/**
 	 * Constructs an empty EnumeratedTypeSet.
-	 * 
+	 *
 	 * @param typeSetEnvironment the environment
 	 */
 	public EnumeratedTypeSet(TypeSetEnvironment typeSetEnvironment) {
@@ -70,7 +70,7 @@ public class EnumeratedTypeSet extends TypeSet {
 
 	/**
 	 * Constructs a new EnumeratedTypeSet with the given single TType in it.
-	 * 
+	 *
 	 * @param t the type
 	 * @param typeSetEnvironment the environment
 	 */

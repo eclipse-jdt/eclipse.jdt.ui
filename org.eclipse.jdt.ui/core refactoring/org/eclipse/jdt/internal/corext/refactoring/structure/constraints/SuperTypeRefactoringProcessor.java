@@ -139,7 +139,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 
 	/**
 	 * Returns a new ast node corresponding to the given type.
-	 * 
+	 *
 	 * @param rewrite the compilation unit rewrite to use
 	 * @param type the new type
 	 * @param node the old node

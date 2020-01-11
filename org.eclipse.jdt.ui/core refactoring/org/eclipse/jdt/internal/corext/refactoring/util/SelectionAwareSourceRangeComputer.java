@@ -113,7 +113,7 @@ public class SelectionAwareSourceRangeComputer extends TargetSourceRangeComputer
 		int newEnd= Math.max(fSelectionStart + pos, currentNode.getStartPosition() + currentNode.getLength());
 		range= fRanges.get(currentNode);
 		fRanges.put(currentNode, new SourceRange(range.getStartPosition(), newEnd - range.getStartPosition()));
-		
+
 		// The extended source range of the last child node can end after the selection.
 		// We have to ensure that the source range of such child nodes is also capped by the selection range.
 		// Example: (/*]*/TRANSFORMER::transform/*[*/)

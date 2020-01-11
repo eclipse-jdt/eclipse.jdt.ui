@@ -101,7 +101,7 @@ public class NLSHintHelper {
 
 	/**
 	 * Returns the accessor binding info or <code>null</code> if this element is not a nls'ed entry
-	 * 
+	 *
 	 * @param astRoot the ast root
 	 * @param region the text region
 	 * @param usedFullyQualifiedName boolean flag to indicate that fully qualified name is used to

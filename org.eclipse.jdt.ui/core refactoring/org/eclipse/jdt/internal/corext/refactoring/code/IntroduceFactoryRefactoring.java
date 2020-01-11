@@ -601,7 +601,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	/**
 	 * Creates and returns a new MethodDeclaration that represents the factory method to be used in
 	 * place of direct calls to the constructor in question.
-	 * 
+	 *
 	 * @param ast An AST used as a factory for various AST nodes
 	 * @param ctorBinding binding for the constructor being wrapped
 	 * @param unitRewriter the ASTRewrite to be used
@@ -650,7 +650,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 
 		return newMethod;
 	}
-	
+
 	private IMethodBinding[] getUnimplementedMethods(ITypeBinding binding) {
 		IMethodBinding[] unimplementedMethods= StubUtility2Core.getUnimplementedMethods(binding, true);
 		Arrays.sort(unimplementedMethods, new MethodsSourcePositionComparator(binding));
@@ -844,7 +844,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 		} else {
 			ctorCall= (ClassInstanceCreation)unitRewriter.get(ctorCallParent, ctorCallLocation);
 		}
-		
+
 		ListRewrite actualFactoryArgs= unitRewriter.getListRewrite(factoryMethodCall, MethodInvocation.ARGUMENTS_PROPERTY);
 		ListRewrite actualCtorArgs= unitRewriter.getListRewrite(ctorCall, ClassInstanceCreation.ARGUMENTS_PROPERTY);
 
@@ -863,7 +863,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 		List<Expression> actualCtorArgsList= actualCtorArgs.getRewrittenList();
 		for (int i=0; i < actualCtorArgsList.size(); i++) {
 			Expression actualCtorArg= actualCtorArgsList.get(i);
-			
+
 			ASTNode movedArg;
 			if (ASTNodes.isExistingNode(actualCtorArg)) {
 				movedArg= unitRewriter.createMoveTarget(actualCtorArg);
@@ -871,7 +871,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 				unitRewriter.remove(actualCtorArg, null);
 				movedArg= actualCtorArg;
 			}
-				
+
 			actualFactoryArgs.insertLast(movedArg, gd);
 		}
 
@@ -1119,7 +1119,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 * Perform the AST rewriting necessary on the given <code>CompilationUnit</code> to create the
 	 * factory method. The method will reside on the type identified by
 	 * <code>fFactoryOwningClass</code>.
-	 * 
+	 *
 	 * @param unitRewriter the ASTRewrite to be used
 	 * @param unit the <code>CompilationUnit</code> where factory method will be created
 	 * @param gd the <code>GroupDescription</code> to associate with the changes made

@@ -341,7 +341,7 @@ public class ExtractTempRefactoring extends Refactoring {
 	private ICompilationUnit fCu;
 
 	private boolean fDeclareFinal;
-	
+
 	private boolean fDeclareVarType;
 
 	private String[] fExcludedVariableNames;
@@ -790,7 +790,7 @@ public class ExtractTempRefactoring extends Refactoring {
 	public boolean declareFinal() {
 		return fDeclareFinal;
 	}
-	
+
 	public boolean declareVarType() {
 		return fDeclareVarType;
 	}
@@ -908,7 +908,7 @@ public class ExtractTempRefactoring extends Refactoring {
 
 		ASTRewrite rewrite= fCURewrite.getASTRewrite();
 		AST ast= rewrite.getAST();
-		
+
 		if (isVarTypeAllowed() && fDeclareVarType) {
 			resultingType= ast.newSimpleType(ast.newSimpleName("var")); //$NON-NLS-1$
 		} else if (expression instanceof ClassInstanceCreation && (typeBinding == null || typeBinding.getTypeArguments().length == 0)) {
@@ -1036,7 +1036,7 @@ public class ExtractTempRefactoring extends Refactoring {
 	public void setDeclareFinal(boolean declareFinal) {
 		fDeclareFinal= declareFinal;
 	}
-	
+
 	public void setDeclareVarType(boolean declareVarType) {
 		fDeclareVarType= declareVarType;
 	}
@@ -1107,7 +1107,7 @@ public class ExtractTempRefactoring extends Refactoring {
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_TYPE_VAR));
 		return new RefactoringStatus();
 	}
-	
+
 	public boolean isVarTypeAllowed() {
 		boolean isAllowed= false;
 		if (fCompilationUnitNode != null) {

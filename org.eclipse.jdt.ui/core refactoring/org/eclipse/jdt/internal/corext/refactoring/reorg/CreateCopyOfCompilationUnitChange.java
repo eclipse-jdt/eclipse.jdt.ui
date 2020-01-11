@@ -120,7 +120,7 @@ public final class CreateCopyOfCompilationUnitChange extends CreateTextFileChang
 				}
 			}
 		});
-		
+
 		engine.searchPattern(monitor);
 		// Assert.isTrue(results.length <= 1);
 		// just 1 file or none, but inaccurate matches can play bad here (see

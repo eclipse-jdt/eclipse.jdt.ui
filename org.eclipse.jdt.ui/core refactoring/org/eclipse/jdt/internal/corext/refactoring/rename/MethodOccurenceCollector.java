@@ -35,7 +35,7 @@ class MethodOccurenceCollector extends CuCollectingSearchRequestor {
 	 */
 	@SuppressWarnings("deprecation")
 	private static final int InternalTokenNameIdentifier= ITerminalSymbols.TokenNameIdentifier;
-	
+
 	private final String fName;
 
 	public MethodOccurenceCollector(String methodName) {

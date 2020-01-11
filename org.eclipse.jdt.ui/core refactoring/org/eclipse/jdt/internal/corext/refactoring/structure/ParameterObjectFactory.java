@@ -474,7 +474,7 @@ public class ParameterObjectFactory {
 	public Type createType(boolean asTopLevelClass, CompilationUnitRewrite cuRewrite, int position) {
 		String qualifier= asTopLevelClass ? fPackage : fEnclosingType;
 		String concatenateName= JavaModelUtil.concatenateName(qualifier, fClassName);
-		
+
 		ImportRewrite importRewrite= cuRewrite.getImportRewrite();
 		ContextSensitiveImportRewriteContext context= createParameterClassAwareContext(asTopLevelClass, cuRewrite, position);
 		String addedImport= importRewrite.addImport(concatenateName, context);

@@ -93,7 +93,7 @@ public final class JavaMoveProcessor extends MoveProcessor implements IQualified
 	 * Checks if <b>Java</b> references to the selected element(s) can be updated if moved to
 	 * the selected destination. Even if <code>false</code>, participants could still update
 	 * non-Java references.
-	 * 
+	 *
 	 * @return <code>true</code> iff <b>Java</b> references to the moved element can be updated
 	 * @since 3.5
 	 */
@@ -110,7 +110,7 @@ public final class JavaMoveProcessor extends MoveProcessor implements IQualified
 	public boolean canUpdateReferences() {
 		return canUpdateJavaReferences();
 	}
-	
+
 	@Override
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
 		try {

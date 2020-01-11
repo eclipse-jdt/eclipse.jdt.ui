@@ -94,7 +94,7 @@ public class ReorgUtils {
 
 	/**
 	 * Checks whether the given list contains only working sets.
-	 * 
+	 *
 	 * @param elements the list with elements to check
 	 * @return <code>true</code> if the list contains only working sets, <code>false</code>
 	 *         otherwise
@@ -112,11 +112,11 @@ public class ReorgUtils {
 
 	/**
 	 * Checks whether the given object is a working set.
-	 * 
+	 *
 	 * @param element the element to test
 	 * @return <code>true</code> if the element is a working set, <code>false</code> otherwise
 	 * @since 3.5
-	 * 
+	 *
 	 */
 
 	public static boolean isWorkingSet(Object element){
@@ -260,7 +260,7 @@ public class ReorgUtils {
 
 	/**
 	 * Returns the jar entry resources from the list of elements.
-	 * 
+	 *
 	 * @param elements the list of elements
 	 * @return the array of jar entry resources
 	 * @since 3.6

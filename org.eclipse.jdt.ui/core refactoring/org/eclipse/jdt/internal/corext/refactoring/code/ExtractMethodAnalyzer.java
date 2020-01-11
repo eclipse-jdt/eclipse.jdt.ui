@@ -142,7 +142,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 	private boolean fForceStatic;
 	private boolean fIsLastStatementSelected;
 	private SimpleName fEnclosingLoopLabel;
-	
+
 	public ExtractMethodAnalyzer(ICompilationUnit unit, Selection selection) throws CoreException {
 		super(unit, selection, false);
 	}
@@ -413,13 +413,13 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 	private String canHandleBranches() {
 		if (fReturnValue != null)
 			return RefactoringCoreMessages.ExtractMethodAnalyzer_branch_mismatch;
-		
+
 		ASTNode[] selectedNodes= getSelectedNodes();
 		final ASTNode lastSelectedNode= selectedNodes[selectedNodes.length - 1];
 		Statement body= getParentLoopBody(lastSelectedNode.getParent());
 		if (!(body instanceof Block))
 			return RefactoringCoreMessages.ExtractMethodAnalyzer_branch_mismatch;
-		
+
 		if (body != lastSelectedNode) {
 			Block block= (Block)body;
 			List<Statement> statements= block.statements();
@@ -427,12 +427,12 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 			if (lastSelectedNode != lastStatementInLoop)
 				return RefactoringCoreMessages.ExtractMethodAnalyzer_branch_mismatch;
 		}
-		
+
 		final String continueMatchesLoopProblem[]= { null };
 		for (ASTNode astNode : selectedNodes) {
 			astNode.accept(new ASTVisitor() {
 				ArrayList<String> fLocalLoopLabels= new ArrayList<>();
-				
+
 				@Override
 				public boolean visit(BreakStatement node) {
 					SimpleName label= node.getLabel();
@@ -443,7 +443,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 					}
 					return false;
 				}
-				
+
 				@Override
 				public boolean visit(LabeledStatement node) {
 					SimpleName label= node.getLabel();
@@ -451,7 +451,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 						fLocalLoopLabels.add(label.getIdentifier());
 					return true;
 				}
-				
+
 				@Override
 				public void endVisit(ContinueStatement node) {
 					SimpleName label= node.getLabel();

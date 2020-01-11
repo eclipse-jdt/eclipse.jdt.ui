@@ -287,7 +287,7 @@ public class PropertyFileDocumentModel {
 		public int getLength() {
 			return fLength;
 		}
-		
+
         private String getKeyValueText() {
 			return fKey + '=' + fValue;
         }

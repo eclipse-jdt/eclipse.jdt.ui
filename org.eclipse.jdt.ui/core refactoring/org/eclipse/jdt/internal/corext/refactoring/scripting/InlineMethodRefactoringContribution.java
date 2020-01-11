@@ -111,7 +111,7 @@ public final class InlineMethodRefactoringContribution extends JavaUIRefactoring
 			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments, null));
 		return InlineMethodRefactoring.create(unit, node, selectionStart, selectionLength);
 	}
-	
+
 	@Override
 	public RefactoringDescriptor createDescriptor() {
 		return RefactoringSignatureDescriptorFactory.createInlineMethodDescriptor();

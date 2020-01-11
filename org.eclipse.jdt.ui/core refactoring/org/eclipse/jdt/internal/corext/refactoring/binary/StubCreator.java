@@ -71,7 +71,7 @@ public class StubCreator {
 	protected void appendExpression(final String signature) {
 		appendExpression(signature, false);
 	}
-	
+
 	protected void appendExpression(String signature, boolean castNull) {
 		switch (signature.charAt(0)) {
 			case Signature.C_BOOLEAN:
@@ -124,7 +124,7 @@ public class StubCreator {
 			annotationSet.clear();
 			annotationSet= null;
 		}
-		
+
 		int flags= member.getFlags();
 		final int kind= member.getElementType();
 		if (kind == IJavaElement.TYPE) {
@@ -148,12 +148,12 @@ public class StubCreator {
 	private void appendAnnotation(IAnnotation annotation) throws JavaModelException {
 		String name= annotation.getElementName();
 		if (!fStubInvisible && name.startsWith("sun.") || name.startsWith("jdk.internal.")) //$NON-NLS-1$ //$NON-NLS-2$
-			return; // skip Sun-internal annotations 
-		
+			return; // skip Sun-internal annotations
+
 		fBuffer.append('@');
 		fBuffer.append(name.replace('$', '.'));
 		fBuffer.append('(');
-		
+
 		IMemberValuePair[] memberValuePairs= annotation.getMemberValuePairs();
 		for (IMemberValuePair pair : memberValuePairs) {
 			fBuffer.append(pair.getMemberName());
@@ -163,7 +163,7 @@ public class StubCreator {
 		}
 		if (memberValuePairs.length > 0)
 			fBuffer.deleteCharAt(fBuffer.length() - 1);
-		
+
 		fBuffer.append(')').append('\n');
 	}
 
@@ -178,7 +178,7 @@ public class StubCreator {
 			if (objects.length > 0)
 				fBuffer.deleteCharAt(fBuffer.length() - 1);
 			fBuffer.append('}');
-			
+
 		} else {
 			switch (valueKind) {
 				case IMemberValuePair.K_ANNOTATION:
@@ -187,7 +187,7 @@ public class StubCreator {
 				case IMemberValuePair.K_STRING:
 					fBuffer.append('"').append(value).append('"');
 					break;
-					
+
 				default:
 					fBuffer.append(value);
 					break;
@@ -247,7 +247,7 @@ public class StubCreator {
 				final IType superclass= declaringType.getJavaProject().findType(Signature.getSignatureQualifier(superSignature), Signature.getSignatureSimpleName(superSignature));
 				if (superclass != null) {
 					final IMethod[] superMethods= superclass.getMethods();
-					
+
 					// collect super constructors by parameter count
 					Map<Integer, List<IMethod>> superConstructorsByParamCount= new TreeMap<>();
 					boolean multi= false;
@@ -285,7 +285,7 @@ public class StubCreator {
 								if (superConstructor == null) {
 									superConstructor= constructor;
 									multi= constructors.size() != 1;
-								}									
+								}
 							}
 						}
 						if (superConstructor == null) {

@@ -147,7 +147,7 @@ public class SingletonTypeSet extends TypeSet {
 		} else
 			return false;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return fType.hashCode();

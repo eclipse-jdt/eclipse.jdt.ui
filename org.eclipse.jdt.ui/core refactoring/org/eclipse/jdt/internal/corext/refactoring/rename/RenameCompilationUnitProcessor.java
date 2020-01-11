@@ -400,7 +400,7 @@ public final class RenameCompilationUnitProcessor extends JavaRenameProcessor im
 
 	/**
 	 * Removes the extension (whatever comes after the last '.') from the given file name.
-	 * 
+	 *
 	 * @param fileName the file name
 	 * @return main type name
 	 */
