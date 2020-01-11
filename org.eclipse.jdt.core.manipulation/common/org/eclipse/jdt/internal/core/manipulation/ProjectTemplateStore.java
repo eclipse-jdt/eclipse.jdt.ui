@@ -65,9 +65,8 @@ public final class ProjectTemplateStore {
 				@Override
 				public void save() throws IOException {
 
-					TemplatePersistenceData[] templateData= ProjectTemplateStore.this.getTemplateData();
-					for (int i= 0; i < templateData.length; i++) {
-						if (isProjectSpecific(templateData[i].getId())) {
+					for (TemplatePersistenceData templateData : ProjectTemplateStore.this.getTemplateData()) {
+						if (isProjectSpecific(templateData.getId())) {
 							StringWriter output= new StringWriter();
 							TemplateReaderWriter writer= new TemplateReaderWriter();
 							writer.save(getTemplateData(false), output);
@@ -133,14 +132,11 @@ public final class ProjectTemplateStore {
 			fProjectStore.load();
 
 			Set<String> datas= new HashSet<>();
-			TemplatePersistenceData[] data= fProjectStore.getTemplateData(false);
-			for (int i= 0; i < data.length; i++) {
-				datas.add(data[i].getId());
+			for (TemplatePersistenceData d : fProjectStore.getTemplateData(false)) {
+				datas.add(d.getId());
 			}
 
-			data= fInstanceStore.getTemplateData(false);
-			for (int i= 0; i < data.length; i++) {
-				TemplatePersistenceData orig= data[i];
+			for (TemplatePersistenceData orig : fInstanceStore.getTemplateData(false)) {
 				if (!datas.contains(orig.getId())) {
 					TemplatePersistenceData copy= new TemplatePersistenceData(new Template(orig.getTemplate()), orig.isEnabled(), orig.getId());
 					fProjectStore.add(copy);

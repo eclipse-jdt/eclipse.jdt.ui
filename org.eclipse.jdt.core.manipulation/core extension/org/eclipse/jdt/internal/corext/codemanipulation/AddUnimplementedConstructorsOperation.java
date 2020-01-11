@@ -247,13 +247,13 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 			}
 
 			int deprecationCount= 0;
-			for (int i= 0; i < toImplement.length; i++) {
-				if (toImplement[i].isDeprecated())
+			for (IMethodBinding curr : toImplement) {
+				if (curr.isDeprecated()) {
 					deprecationCount++;
+				}
 			}
 			boolean createDeprecated= deprecationCount == toImplement.length;
-			for (int i= 0; i < toImplement.length; i++) {
-				IMethodBinding curr= toImplement[i];
+			for (IMethodBinding curr : toImplement) {
 				if (!curr.isDeprecated() || createDeprecated) {
 					ImportRewriteContext context= new ContextSensitiveImportRewriteContext(node, importRewrite);
 					MethodDeclaration stub= StubUtility2Core.createConstructorStub(cu, astRewrite, importRewrite, context, curr, currTypeBinding.getName(), fVisibility, fOmitSuper, true, settings, fFormatSettings);

@@ -217,10 +217,8 @@ public class ExtractClassDescriptor extends JavaRefactoringDescriptor {
 	 * @throws JavaModelException if the type does not exist or if an exception occurs while accessing its corresponding resource.
 	 */
 	public static Field[] getFields(IType type) throws JavaModelException {
-		IField[] fields= type.getFields();
 		ArrayList<Field> result= new ArrayList<>();
-		for (int i= 0; i < fields.length; i++) {
-			IField field= fields[i];
+		for (IField field : type.getFields()) {
 			if (!Flags.isStatic(field.getFlags()) && !field.isEnumConstant())
 				result.add(new Field(field.getElementName()));
 		}
@@ -238,8 +236,7 @@ public class ExtractClassDescriptor extends JavaRefactoringDescriptor {
 	 * @throws IllegalArgumentException if one of the fields is <code>null</code>
 	 */
 	public void setFields(Field[] fields) throws IllegalArgumentException {
-		for (int i= 0; i < fields.length; i++) {
-			Field field= fields[i];
+		for (Field field : fields) {
 			if (field == null)
 				throw new IllegalArgumentException("Field can not be null"); //$NON-NLS-1$
 		}

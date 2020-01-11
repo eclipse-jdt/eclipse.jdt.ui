@@ -99,9 +99,8 @@ public class ProblemLocationCore implements IProblemLocationCore {
 		StringBuilder buf= new StringBuilder();
 		buf.append("Id: ").append(getErrorCode(fId)).append('\n'); //$NON-NLS-1$
 		buf.append('[').append(fOffset).append(", ").append(fLength).append(']').append('\n'); //$NON-NLS-1$
-		String[] arg= fArguments;
-		for (int i= 0; i < arg.length; i++) {
-			buf.append(arg[i]);
+		for (String arg : fArguments) {
+			buf.append(arg);
 			buf.append('\n');
 		}
 		return buf.toString();

@@ -187,12 +187,11 @@ public abstract class AbstractToStringGenerator {
 	public MethodDeclaration generateToStringMethod() throws CoreException {
 		initialize();
 
-		String[] stringArray= fContext.getTemplateParser().getBeginning();
-		for (int i= 0; i < stringArray.length; i++) {
-			addElement(processElement(stringArray[i], null));
+		for (String element : fContext.getTemplateParser().getBeginning()) {
+			addElement(processElement(element, null));
 		}
 
-		stringArray= fContext.getTemplateParser().getBody();
+		fContext.getTemplateParser().getBody();
 		Object[] members= fContext.getSelectedMembers();
 		for (int i= 0; i < members.length; i++) {
 			if (!fContext.isSkipNulls() || getMemberType(members[i]).isPrimitive())
@@ -201,9 +200,8 @@ public abstract class AbstractToStringGenerator {
 				addMemberCheckNull(members[i], i != members.length - 1);
 		}
 
-		stringArray= fContext.getTemplateParser().getEnding();
-		for (int i= 0; i < stringArray.length; i++) {
-			addElement(processElement(stringArray[i], null));
+		for (String element : fContext.getTemplateParser().getEnding()) {
+			addElement(processElement(element, null));
 		}
 
 		complete();
@@ -230,11 +228,11 @@ public abstract class AbstractToStringGenerator {
 	 */
 	protected void createMethodComment() throws CoreException {
 		ITypeBinding object= fAst.resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
-		IMethodBinding[] objms= object.getDeclaredMethods();
 		IMethodBinding objectMethod= null;
-		for (int i= 0; i < objms.length; i++) {
-			if (objms[i].getName().equals(METHODNAME_TO_STRING) && objms[i].getParameterTypes().length == 0)
-				objectMethod= objms[i];
+		for (IMethodBinding objm : object.getDeclaredMethods()) {
+			if (objm.getName().equals(METHODNAME_TO_STRING) && objm.getParameterTypes().length == 0) {
+				objectMethod= objm;
+			}
 		}
 		if (fContext.isCreateComments()) {
 			String docString= CodeGeneration.getMethodComment(fContext.getCompilationUnit(), fContext.getTypeBinding().getQualifiedName(), toStringMethod, objectMethod, StubUtility
@@ -500,13 +498,12 @@ public abstract class AbstractToStringGenerator {
 			return;
 
 		boolean isNonPrimitive= false;
-		for (int i= 0; i < fContext.getSelectedMembers().length; i++) {
-			ITypeBinding memberType= getMemberType(fContext.getSelectedMembers()[i]);
+		for (Object selectedMember : fContext.getSelectedMembers()) {
+			ITypeBinding memberType= getMemberType(selectedMember);
 			boolean[] implementsInterfaces= implementsInterfaces(memberType.getErasure(), new String[] { "java.util.Collection", "java.util.List", "java.util.Map" }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			boolean isCollection= implementsInterfaces[0];
 			boolean isList= implementsInterfaces[1];
 			boolean isMap= implementsInterfaces[2];
-
 			if (fContext.isLimitItems() && (isCollection || isMap) && !isList) {
 				needCollectionToStringMethod= true;
 			}
@@ -593,9 +590,8 @@ public abstract class AbstractToStringGenerator {
 	 *            last member)
 	 */
 	protected void addMember(Object member, boolean addSeparator) {
-		String[] stringArray= fContext.getTemplateParser().getBody();
-		for (int i= 0; i < stringArray.length; i++) {
-			addElement(processElement(stringArray[i], member));
+		for (String element : fContext.getTemplateParser().getBody()) {
+			addElement(processElement(element, member));
 		}
 		if (addSeparator)
 			addElement(fContext.getTemplateParser().getSeparator());
@@ -861,30 +857,26 @@ public abstract class AbstractToStringGenerator {
 	protected String createNameSuggestion(String baseName, int variableKind) {
 		if (excluded == null) {
 			excluded= new HashSet<>();
-			IVariableBinding[] fields= fContext.getTypeBinding().getDeclaredFields();
-			for (int i= 0; i < fields.length; i++) {
-				excluded.add(fields[i].getName());
+			for (IVariableBinding field : fContext.getTypeBinding().getDeclaredFields()) {
+				excluded.add(field.getName());
 			}
 			ITypeBinding superType= fContext.getTypeBinding().getSuperclass();
 			while (superType != null) {
-				fields= superType.getDeclaredFields();
-				for (int i= 0; i < fields.length; i++) {
-					if (!Modifier.isPrivate(fields[i].getModifiers())) {
-						excluded.add(fields[i].getName());
+				for (IVariableBinding field : superType.getDeclaredFields()) {
+					if (!Modifier.isPrivate(field.getModifiers())) {
+						excluded.add(field.getName());
 					}
 				}
 				superType= superType.getSuperclass();
 			}
-			ITypeBinding[] types= fContext.getTypeBinding().getDeclaredTypes();
-			for (int i= 0; i < types.length; i++) {
-				excluded.add(types[i].getName());
+			for (ITypeBinding type : fContext.getTypeBinding().getDeclaredTypes()) {
+				excluded.add(type.getName());
 			}
 			superType= fContext.getTypeBinding().getSuperclass();
 			while (superType != null) {
-				types= superType.getDeclaredTypes();
-				for (int i= 0; i < types.length; i++) {
-					if (!Modifier.isPrivate(types[i].getModifiers())) {
-						excluded.add(types[i].getName());
+				for (ITypeBinding type : superType.getDeclaredTypes()) {
+					if (!Modifier.isPrivate(type.getModifiers())) {
+						excluded.add(type.getName());
 					}
 				}
 				superType= superType.getSuperclass();
@@ -907,9 +899,8 @@ public abstract class AbstractToStringGenerator {
 			if (memberType.getQualifiedName().equals(interfaceNames[i]))
 				result[i]= true;
 		}
-		ITypeBinding[] interfaces= memberType.getInterfaces();
-		for (int i= 0; i < interfaces.length; i++) {
-			boolean[] deeper= implementsInterfaces(interfaces[i].getErasure(), interfaceNames);
+		for (ITypeBinding intf : memberType.getInterfaces()) {
+			boolean[] deeper= implementsInterfaces(intf.getErasure(), interfaceNames);
 			for (int j= 0; j < interfaceNames.length; j++) {
 				result[j]= result[j] || deeper[j];
 			}

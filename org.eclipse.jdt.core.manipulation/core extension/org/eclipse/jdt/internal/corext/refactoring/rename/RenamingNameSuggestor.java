@@ -465,8 +465,8 @@ public class RenamingNameSuggestor {
 
 	private String concat(String[] suffixesNewEqual) {
 		StringBuilder returner= new StringBuilder();
-		for (int j= 0; j < suffixesNewEqual.length; j++) {
-			returner.append(suffixesNewEqual[j]);
+		for (String s : suffixesNewEqual) {
+			returner.append(s);
 		}
 		return returner.toString();
 	}
@@ -503,11 +503,11 @@ public class RenamingNameSuggestor {
 	private String findLongestPrefix(String name, String[] prefixes) {
 		String usedPrefix= ""; //$NON-NLS-1$
 		int bestLen= 0;
-		for (int i= 0; i < prefixes.length; i++) {
-			if (name.startsWith(prefixes[i])) {
-				if (prefixes[i].length() > bestLen) {
-					bestLen= prefixes[i].length();
-					usedPrefix= prefixes[i];
+		for (String prefix : prefixes) {
+			if (name.startsWith(prefix)) {
+				if (prefix.length() > bestLen) {
+					bestLen= prefix.length();
+					usedPrefix= prefix;
 				}
 			}
 		}
@@ -517,11 +517,11 @@ public class RenamingNameSuggestor {
 	private String findLongestSuffix(String name, String[] suffixes) {
 		String usedPrefix= ""; //$NON-NLS-1$
 		int bestLen= 0;
-		for (int i= 0; i < suffixes.length; i++) {
-			if (name.endsWith(suffixes[i])) {
-				if (suffixes[i].length() > bestLen) {
-					bestLen= suffixes[i].length();
-					usedPrefix= suffixes[i];
+		for (String suffix : suffixes) {
+			if (name.endsWith(suffix)) {
+				if (suffix.length() > bestLen) {
+					bestLen= suffix.length();
+					usedPrefix= suffix;
 				}
 			}
 		}

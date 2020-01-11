@@ -64,11 +64,11 @@ public final class JDTRefactoringDescriptorComment {
 		Assert.isNotNull(caption);
 		Assert.isNotNull(settings);
 		final StringBuilder buffer= new StringBuilder(128);
-		for (int index= 0; index < settings.length; index++) {
-			if (settings[index] != null && !"".equals(settings[index])) { //$NON-NLS-1$
+		for (String setting : settings) {
+			if (setting != null && !"".equals(setting)) { //$NON-NLS-1$
 				buffer.append(LINE_DELIMITER);
 				buffer.append(ELEMENT_DELIMITER);
-				buffer.append(settings[index]);
+				buffer.append(setting);
 			} else {
 				buffer.append(LINE_DELIMITER);
 				buffer.append(ELEMENT_DELIMITER);
@@ -193,11 +193,11 @@ public final class JDTRefactoringDescriptorComment {
 				else if (elements.length > 1) {
 					final StringBuilder buffer= new StringBuilder(128);
 					buffer.append(RefactoringCoreMessages.JavaRefactoringDescriptor_original_elements);
-					for (int index= 0; index < elements.length; index++) {
-						if (elements[index] != null) {
+					for (Object element : elements) {
+						if (element != null) {
 							buffer.append(LINE_DELIMITER);
 							buffer.append(ELEMENT_DELIMITER);
-							buffer.append(JavaElementLabelsCore.getTextLabel(elements[index], JavaElementLabelsCore.ALL_FULLY_QUALIFIED));
+							buffer.append(JavaElementLabelsCore.getTextLabel(element, JavaElementLabelsCore.ALL_FULLY_QUALIFIED));
 						} else {
 							buffer.append(LINE_DELIMITER);
 							buffer.append(ELEMENT_DELIMITER);
@@ -227,11 +227,11 @@ public final class JDTRefactoringDescriptorComment {
 				else if (elements.length > 1) {
 					final StringBuilder buffer= new StringBuilder(128);
 					buffer.append(RefactoringCoreMessages.JavaRefactoringDescriptor_original_elements);
-					for (int index= 0; index < elements.length; index++) {
-						if (elements[index] != null) {
+					for (Object element : elements) {
+						if (element != null) {
 							buffer.append(LINE_DELIMITER);
 							buffer.append(ELEMENT_DELIMITER);
-							buffer.append(JavaElementLabelsCore.getTextLabel(elements[index], JavaElementLabelsCore.ALL_FULLY_QUALIFIED));
+							buffer.append(JavaElementLabelsCore.getTextLabel(element, JavaElementLabelsCore.ALL_FULLY_QUALIFIED));
 						} else {
 							buffer.append(LINE_DELIMITER);
 							buffer.append(ELEMENT_DELIMITER);
