@@ -991,8 +991,9 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	}
 
 	/**
-	 * Use the given <code>ASTRewrite</code> to replace direct calls to the constructor
-	 * with calls to the newly-created factory method.
+	 * Use the given <code>ASTRewrite</code> to replace direct calls to the constructor with calls
+	 * to the newly-created factory method.
+	 * 
 	 * @param rg the <code>SearchResultGroup</code> indicating all of the constructor references
 	 * @param unit the <code>CompilationUnit</code> to be rewritten
 	 * @param unitRewriter the rewriter
@@ -1003,8 +1004,13 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	private boolean replaceConstructorCalls(SearchResultGroup rg, CompilationUnit unit, ASTRewrite unitRewriter, CompilationUnitChange unitChange) throws CoreException {
 		Assert.isTrue(ASTCreator.getCu(unit).equals(rg.getCompilationUnit()));
 		SearchMatch[] hits= rg.getSearchResults();
+		/*
+		 * Sort by descending offset, such that nested constructor calls are processed first. This
+		 * is necessary, since they can only be moved into the factory method invocation after they
+		 * have been rewritten.
+		 */
 		Arrays.sort(hits, (m1, m2) -> m2.getOffset() - m1.getOffset());
-		
+
 		boolean someCallPatched= false;
 
 		for (SearchMatch hit : hits) {
