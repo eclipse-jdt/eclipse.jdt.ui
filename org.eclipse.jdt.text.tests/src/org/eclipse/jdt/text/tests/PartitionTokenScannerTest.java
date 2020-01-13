@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -55,19 +55,20 @@ public class PartitionTokenScannerTest extends TestCase {
 	private IDocument getDocument(String name, String lineDelimiter) {
 		try {
 			InputStream stream= getClass().getResourceAsStream(name);
-			BufferedReader reader= new BufferedReader(new InputStreamReader(stream));
+			try (BufferedReader reader= new BufferedReader(new InputStreamReader(stream))) {
 
-			StringBuilder buffer= new StringBuilder();
-			String line= reader.readLine();
-			while (line != null) {
-				buffer.append(line);
-				buffer.append(lineDelimiter);
-				line= reader.readLine();
+				StringBuilder buffer= new StringBuilder();
+				String line= reader.readLine();
+				while (line != null) {
+					buffer.append(line);
+					buffer.append(lineDelimiter);
+					line= reader.readLine();
+				}
+				return new Document(buffer.toString());
 			}
 
-			return new Document(buffer.toString());
-
 		} catch (IOException e) {
+			// ignore
 		}
 
 		return null;

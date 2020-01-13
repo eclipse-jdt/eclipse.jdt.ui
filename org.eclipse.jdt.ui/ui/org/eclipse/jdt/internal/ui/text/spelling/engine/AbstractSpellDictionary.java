@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -616,29 +616,31 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 					CharsetDecoder decoder= Charset.forName(getEncoding()).newDecoder();
 					decoder.onMalformedInput(CodingErrorAction.REPORT);
 					decoder.onUnmappableCharacter(CodingErrorAction.REPORT);
-					final BufferedReader reader= new BufferedReader(new InputStreamReader(stream, decoder));
+					try (final BufferedReader reader= new BufferedReader(new InputStreamReader(stream, decoder))) {
 
-					boolean doRead= true;
-					while (doRead) {
-						try {
-							word= reader.readLine();
-						} catch (MalformedInputException ex) {
-							// Tell the decoder to replace malformed input in order to read the line.
-							decoder.onMalformedInput(CodingErrorAction.REPLACE);
-							decoder.reset();
-							word= reader.readLine();
-							decoder.onMalformedInput(CodingErrorAction.REPORT);
+						boolean doRead= true;
+						while (doRead) {
+							try {
+								word= reader.readLine();
+							} catch (MalformedInputException ex) {
+								// Tell the decoder to replace malformed input in order to read the line.
+								decoder.onMalformedInput(CodingErrorAction.REPLACE);
+								decoder.reset();
+								word= reader.readLine();
+								decoder.onMalformedInput(CodingErrorAction.REPORT);
 
-							String message= Messages.format(JavaUIMessages.AbstractSpellingDictionary_encodingError, new String[] { word, decoder.replacement(), BasicElementLabels.getURLPart(url.toString()) });
-							IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, message, ex);
-							JavaPlugin.log(status);
+								String message= Messages.format(JavaUIMessages.AbstractSpellingDictionary_encodingError,
+										new String[] { word, decoder.replacement(), BasicElementLabels.getURLPart(url.toString()) });
+								IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, message, ex);
+								JavaPlugin.log(status);
 
+								doRead= word != null;
+								continue;
+							}
 							doRead= word != null;
-							continue;
+							if (doRead)
+								hashWord(word);
 						}
-						doRead= word != null;
-						if (doRead)
-							hashWord(word);
 					}
 					return true;
 				}

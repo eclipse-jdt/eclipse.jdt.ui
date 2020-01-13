@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2019 IBM Corporation and others.
+ * Copyright (c) 2008, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -2177,6 +2177,7 @@ public class JavadocContentAccess2 {
 		return getFileContentFromAttachedSource(root, filePath);
 	}
 
+	@SuppressWarnings("resource")
 	private static String getFileContentFromAttachedSource(IPackageFragmentRoot root, String filePath) throws CoreException {
 		IPath sourceAttachmentPath= root.getSourceAttachmentPath();
 		if (sourceAttachmentPath != null) {
