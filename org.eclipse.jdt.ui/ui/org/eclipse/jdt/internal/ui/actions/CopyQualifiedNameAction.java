@@ -217,7 +217,7 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 				buf.append(getQualifiedName(elements[0]));
 				for (int i= 1; i < elements.length; i++) {
 					String qualifiedName= getQualifiedName(elements[i]);
-					buf.append(System.getProperty("line.separator")).append(qualifiedName); //$NON-NLS-1$
+					buf.append(System.lineSeparator()).append(qualifiedName);
 				}
 				data= new Object[] { buf.toString() };
 				dataTypes= new Transfer[] { TextTransfer.getInstance() };

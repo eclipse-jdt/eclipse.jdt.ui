@@ -202,7 +202,7 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 				addFileName(fileNames, resource);
 
 				if (namesBuf.length() > 0 || i > 0)
-					namesBuf.append(System.getProperty("line.separator")); //$NON-NLS-1$
+					namesBuf.append(System.lineSeparator());
 				namesBuf.append(getName(resource));
 			}
 		}
@@ -223,7 +223,7 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 				}
 
 				if (namesBuf.length() > 0 || i > 0)
-					namesBuf.append(System.getProperty("line.separator")); //$NON-NLS-1$
+					namesBuf.append(System.lineSeparator());
 				namesBuf.append(getName(element));
 			}
 		}
@@ -237,7 +237,7 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 		private void processJarEntryResources(StringBuffer namesBuf) {
 			for (int i= 0; i < fJarEntryResources.length; i++) {
 				if (namesBuf.length() > 0 || i > 0)
-					namesBuf.append(System.getProperty("line.separator")); //$NON-NLS-1$
+					namesBuf.append(System.lineSeparator());
 				namesBuf.append(getName(fJarEntryResources[i]));
 			}
 		}
