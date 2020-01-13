@@ -585,7 +585,7 @@ public class FatJarExportTests extends TestCase {
 			boolean found= false;
 			if (libName.isEmpty()) {
 				libName= ((Element)xmlZipfilesets.item(i)).getAttribute("src"); //$NON-NLS-1$
-				found= libName.equals(FatJarRsrcUrlBuilder.JAR_RSRC_LOADER_ZIP); //$NON-NLS-1$
+				found= libName.equals(FatJarRsrcUrlBuilder.JAR_RSRC_LOADER_ZIP); 
 			}
 			for (String zipfileset : zipfilesets) {
 				if (libName.equals(zipfileset)) {
@@ -980,13 +980,13 @@ public class FatJarExportTests extends TestCase {
 			assertAntScript(data, antScriptLocation(getName() + "_JiJ"), //$NON-NLS-1$
 					new PackageLibraryHandler(),
 					new String[] { "TestSetupProject/bin", "testresources/externalClassFolder" }, //$NON-NLS-1$
-					new String[] { "rtstubs15.jar" }); //$NON-NLS-1$  //$NON-NLS-2$
+					new String[] { "rtstubs15.jar" }); //$NON-NLS-1$  
 
 			// sub-folder libraries
 			data= createAndRunFatJar(fProject, getName() + "_SL", true, new CopyLibraryHandler()); //$NON-NLS-1$
 			assertAntScript(data, antScriptLocation(getName() + "_SL"), //$NON-NLS-1$
 					new CopyLibraryHandler(), new String[] { "TestSetupProject/bin", "testresources/externalClassFolder" }, //$NON-NLS-1$
-					new String[] { "rtstubs15.jar" }); //$NON-NLS-1$  //$NON-NLS-2$
+					new String[] { "rtstubs15.jar" }); //$NON-NLS-1$  
 		} finally {
 			JavaProjectHelper.removeFromClasspath(fProject, externalRoot.getPath());
 		}
