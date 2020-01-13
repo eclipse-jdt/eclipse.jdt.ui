@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -23,6 +23,7 @@
  *         (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=38093)
  *     Nikolay Metchev <nikolaymetchev@gmail.com> - Anonymous class using final parameter breaks method inlining - https://bugs.eclipse.org/269401
  *     Microsoft Corporation - copied to jdt.core.manipulation
+ *     Pierre-Yves B. <pyvesdev@gmail.com> - [inline] Inlining a local variable leads to ambiguity with overloaded methods - https://bugs.eclipse.org/434747
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
@@ -95,18 +96,15 @@ import org.eclipse.jdt.internal.corext.CorextCore;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
 import org.eclipse.jdt.internal.corext.dom.LocalVariableIndex;
 import org.eclipse.jdt.internal.corext.dom.Selection;
-import org.eclipse.jdt.internal.corext.dom.TypeBindingVisitor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowContext;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowInfo;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.InputFlowAnalyzer;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeEnvironment;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.util.NoCommentSourceRangeComputer;
@@ -195,52 +193,6 @@ public class CallInliner {
 			if (accessMode == FlowInfo.READ || accessMode == FlowInfo.UNUSED)
 				return setResult(true);
 			return setResult(false);
-		}
-	}
-
-	private static class AmbiguousMethodAnalyzer implements TypeBindingVisitor {
-		private TypeEnvironment fTypeEnvironment;
-		private TType[] fTypes;
-		private IMethodBinding fOriginal;
-
-		public AmbiguousMethodAnalyzer(TypeEnvironment typeEnvironment, IMethodBinding original, TType[] types) {
-			fTypeEnvironment= typeEnvironment;
-			fOriginal= original;
-			fTypes= types;
-		}
-		@Override
-		public boolean visit(ITypeBinding node) {
-			IMethodBinding[] methods= node.getDeclaredMethods();
-			for (int i= 0; i < methods.length; i++) {
-				IMethodBinding candidate= methods[i];
-				if (candidate == fOriginal) {
-					continue;
-				}
-				if (fOriginal.getName().equals(candidate.getName())) {
-					if (canImplicitlyCall(candidate)) {
-						return false;
-					}
-				}
-			}
-			return true;
-		}
-		/**
-		 * Returns <code>true</code> if the method can be called without explicit casts;
-		 * otherwise <code>false</code>.
-		 * @param candidate the method to test
-		 * @return <code>true</code> if the method can be called without explicit casts
-		 */
-		private boolean canImplicitlyCall(IMethodBinding candidate) {
-			ITypeBinding[] parameters= candidate.getParameterTypes();
-			if (parameters.length != fTypes.length) {
-				return false;
-			}
-			for (int i= 0; i < parameters.length; i++) {
-				if (!fTypes[i].canAssignTo(fTypeEnvironment.create(parameters[i]))) {
-					return false;
-				}
-			}
-			return true;
 		}
 	}
 
@@ -726,29 +678,9 @@ public class CallInliner {
 					JavaStatusContext.create(fCUnit, methodInvocation));
 				return false;
 			}
-			ITypeBinding[] parameters= method.getParameterTypes();
-			int argumentIndex= methodInvocation.arguments().indexOf(fInvocation);
 
 			ITypeBinding parameterType= returnExprs.get(0).resolveTypeBinding();
-			if (method.isVarargs() && argumentIndex >= parameters.length - 1) {
-				argumentIndex= parameters.length - 1;
-				parameterType= parameterType.createArrayType(1);
-			}
-			parameters[argumentIndex]= parameterType;
-
-			ITypeBinding type= ASTNodes.getReceiverTypeBinding(methodInvocation);
-			TypeBindingVisitor visitor= new AmbiguousMethodAnalyzer(
-				fTypeEnvironment, method, fTypeEnvironment.create(parameters));
-			if(!visitor.visit(type)) {
-				return true;
-			} else if (type.isInterface()) {
-				return !Bindings.visitInterfaces(type, visitor);
-			} else if (Modifier.isAbstract(type.getModifiers())) {
-				return !Bindings.visitHierarchy(type, visitor);
-			} else {
-				// it is not needed to visit interfaces if receiver is a concrete class
-				return !Bindings.visitSuperclasses(type, visitor);
-			}
+			return ASTNodes.isTargetAmbiguous((Expression) fTargetNode, parameterType);
 		} else {
 			ITypeBinding explicitCast= ASTNodes.getExplicitCast(returnExprs.get(0), (Expression)fTargetNode);
 			return explicitCast != null;

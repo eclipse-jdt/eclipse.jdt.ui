@@ -19,6 +19,8 @@
  *     Stephan Herrmann - Configuration for
  *		 Bug 463360 - [override method][null] generating method override should not create redundant null annotations
  *     Fabrice TIERCELIN - Methods to identify a signature
+ *     Pierre-Yves B. (pyvesdev@gmail.com) - contributed fix for
+ *       Bug 434747 - [inline] Inlining a local variable leads to ambiguity with overloaded methods
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.dom;
 
@@ -127,6 +129,8 @@ import org.eclipse.jdt.core.formatter.IndentManipulation;
 import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.core.manipulation.util.Strings;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeEnvironment;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -856,6 +860,11 @@ public class ASTNodes {
 		} else if (! TypeRules.canAssign(initializerType, referenceType)) {
 			if (!Bindings.containsTypeVariables(referenceType))
 				return referenceType;
+
+		} else if (!initializerType.isEqualTo(referenceType)) {
+			if (isTargetAmbiguous(reference, initializerType)) {
+				return referenceType;
+			}
 		}
 
 		return null;
@@ -875,6 +884,71 @@ public class ASTNodes {
 	 * @since 3.10
 	 */
 	public static boolean isTargetAmbiguous(Expression expression, boolean expressionIsExplicitlyTyped) {
+		ParentSummary targetSummary= getParentSummary(expression);
+		if (targetSummary == null) {
+			return false;
+		}
+
+		if (targetSummary.methodBinding != null) {
+			ITypeBinding invocationTargetType= getInvocationType(expression.getParent(), targetSummary.methodBinding, targetSummary.invocationQualifier);
+			if (invocationTargetType != null) {
+				TypeBindingVisitor visitor= new FunctionalInterfaceAmbiguousMethodAnalyzer(invocationTargetType, targetSummary.methodBinding, targetSummary.argumentIndex,
+						targetSummary.argumentCount, expressionIsExplicitlyTyped);
+				return !(visitor.visit(invocationTargetType) && Bindings.visitHierarchy(invocationTargetType, visitor));
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Checks whether overloaded methods can result in an ambiguous method call or a semantic change
+	 * when the <code>expression</code> argument is inlined.
+	 *
+	 * @param expression the method argument, which is a functional interface instance
+	 * @param initializerType the initializer type of the variable to inline
+	 * @return <code>true</code> if overloaded methods can result in an ambiguous method call or a
+	 *         semantic change, <code>false</code> otherwise
+	 *
+	 * @since 3.19
+	 */
+	public static boolean isTargetAmbiguous(Expression expression, ITypeBinding initializerType) {
+		ParentSummary parentSummary= getParentSummary(expression);
+		if (parentSummary == null) {
+			return false;
+		}
+
+		IMethodBinding methodBinding= parentSummary.methodBinding;
+		if (methodBinding != null) {
+			ITypeBinding[] parameterTypes= methodBinding.getParameterTypes();
+			int argumentIndex= parentSummary.argumentIndex;
+			if (methodBinding.isVarargs() && argumentIndex >= parameterTypes.length - 1) {
+				argumentIndex= parameterTypes.length - 1;
+				initializerType= initializerType.createArrayType(1);
+			}
+			parameterTypes[argumentIndex]= initializerType;
+
+			ITypeBinding invocationType= getInvocationType(expression.getParent(), methodBinding, parentSummary.invocationQualifier);
+			if (invocationType != null) {
+				TypeEnvironment typeEnvironment= new TypeEnvironment();
+				TypeBindingVisitor visitor= new AmbiguousMethodAnalyzer(typeEnvironment, methodBinding, typeEnvironment.create(parameterTypes));
+				if (!visitor.visit(invocationType)) {
+					return true;
+				} else if (invocationType.isInterface()) {
+					return !Bindings.visitInterfaces(invocationType, visitor);
+				} else if (Modifier.isAbstract(invocationType.getModifiers())) {
+					return !Bindings.visitHierarchy(invocationType, visitor);
+				} else {
+					// it is not needed to visit interfaces if receiver is a concrete class
+					return !Bindings.visitSuperclasses(invocationType, visitor);
+				}
+			}
+		}
+
+		return true;
+	}
+
+	private static ParentSummary getParentSummary(Expression expression) {
 		StructuralPropertyDescriptor locationInParent= expression.getLocationInParent();
 
 		while (locationInParent == ParenthesizedExpression.EXPRESSION_PROPERTY
@@ -922,19 +996,28 @@ public class ASTNodes {
 			argumentIndex= enumConstantDecl.arguments().indexOf(expression);
 			argumentCount= enumConstantDecl.arguments().size();
 		} else {
-			return false;
+			return null;
 		}
 
-		if (methodBinding != null) {
-			ITypeBinding invocationTargetType;
-			invocationTargetType= getInvocationType(parent, methodBinding, invocationQualifier);
-			if (invocationTargetType != null) {
-				TypeBindingVisitor visitor= new AmbiguousTargetMethodAnalyzer(invocationTargetType, methodBinding, argumentIndex, argumentCount, expressionIsExplicitlyTyped);
-				return !(visitor.visit(invocationTargetType) && Bindings.visitHierarchy(invocationTargetType, visitor));
-			}
-		}
+		return new ParentSummary(methodBinding, argumentIndex, argumentCount, invocationQualifier);
+	}
 
-		return true;
+	private static class ParentSummary {
+
+		private final IMethodBinding methodBinding;
+
+		private final int argumentIndex;
+
+		private final int argumentCount;
+
+		private final Expression invocationQualifier;
+
+		ParentSummary(IMethodBinding methodBinding, int argumentIndex, int argumentCount, Expression invocationQualifier) {
+			this.methodBinding= methodBinding;
+			this.argumentIndex= argumentIndex;
+			this.argumentCount= argumentCount;
+			this.invocationQualifier= invocationQualifier;
+		}
 	}
 
 	/**
@@ -978,7 +1061,56 @@ public class ASTNodes {
 		return invocationType;
 	}
 
-	private static class AmbiguousTargetMethodAnalyzer implements TypeBindingVisitor {
+	private static class AmbiguousMethodAnalyzer implements TypeBindingVisitor {
+		private TypeEnvironment fTypeEnvironment;
+		private TType[] fTypes;
+		private IMethodBinding fOriginal;
+
+		public AmbiguousMethodAnalyzer(TypeEnvironment typeEnvironment, IMethodBinding original, TType[] types) {
+			fTypeEnvironment= typeEnvironment;
+			fOriginal= original;
+			fTypes= types;
+		}
+
+		@Override
+		public boolean visit(ITypeBinding node) {
+			IMethodBinding[] methods= node.getDeclaredMethods();
+			for (int i= 0; i < methods.length; i++) {
+				IMethodBinding candidate= methods[i];
+				if (candidate == fOriginal) {
+					continue;
+				}
+				if (fOriginal.getName().equals(candidate.getName())) {
+					if (canImplicitlyCall(candidate)) {
+						return false;
+					}
+				}
+			}
+			return true;
+		}
+
+		/**
+		 * Returns <code>true</code> if the method can be called without explicit casts; otherwise
+		 * <code>false</code>.
+		 * 
+		 * @param candidate the method to test
+		 * @return <code>true</code> if the method can be called without explicit casts
+		 */
+		private boolean canImplicitlyCall(IMethodBinding candidate) {
+			ITypeBinding[] parameters= candidate.getParameterTypes();
+			if (parameters.length != fTypes.length) {
+				return false;
+			}
+			for (int i= 0; i < parameters.length; i++) {
+				if (!fTypes[i].canAssignTo(fTypeEnvironment.create(parameters[i]))) {
+					return false;
+				}
+			}
+			return true;
+		}
+	}
+
+	private static class FunctionalInterfaceAmbiguousMethodAnalyzer implements TypeBindingVisitor {
 		private ITypeBinding fDeclaringType;
 		private IMethodBinding fOriginalMethod;
 		private int fArgIndex;
@@ -994,7 +1126,7 @@ public class ASTNodes {
 		 * @param expressionIsExplicitlyTyped <code>true</code> iff the intended replacement for <code>expression</code>
 		 *         is an explicitly typed lambda expression (JLS8 15.27.1)
 		 */
-		public AmbiguousTargetMethodAnalyzer(ITypeBinding declaringType, IMethodBinding originalMethod, int argumentIndex, int argumentCount, boolean expressionIsExplicitlyTyped) {
+		public FunctionalInterfaceAmbiguousMethodAnalyzer(ITypeBinding declaringType, IMethodBinding originalMethod, int argumentIndex, int argumentCount, boolean expressionIsExplicitlyTyped) {
 			fDeclaringType= declaringType;
 			fOriginalMethod= originalMethod;
 			fArgIndex= argumentIndex;

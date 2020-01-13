@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,7 +11,8 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Nikolay Metchev <nikolaymetchev@gmail.com> - [inline] Inline local variable with initializer generates assignment where left-hand side is not a variable - https://bugs.eclipse.org/394721
-  *     Pierre-Yves B. <pyvesdev@gmail.com> - [inline] Allow inlining of local variable initialized to null. - https://bugs.eclipse.org/93850
+ *     Pierre-Yves B. <pyvesdev@gmail.com> - [inline] Allow inlining of local variable initialized to null. - https://bugs.eclipse.org/93850
+ *     Pierre-Yves B. <pyvesdev@gmail.com> - [inline] Inlining a local variable leads to ambiguity with overloaded methods - https://bugs.eclipse.org/434747
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
@@ -356,6 +357,16 @@ public class InlineTempTests extends RefactoringTest {
 		helper1(4, 17, 4, 18);
 	}
 
+	public void test51() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=434747
+		helper1(4, 16, 4, 17);
+	}
+
+	public void test52() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=434747
+		helper1(4, 14, 4, 15);
+	}
+
 	//------
 
 	public void testFail0() throws Exception{
@@ -426,12 +437,6 @@ public class InlineTempTests extends RefactoringTest {
 	public void testFail14() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=93850
 		helper2(5, 17, 5, 18);
-	}
-
-	public void testFail15() throws Exception {
-		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=93850
-		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=434747
-		helper2(5, 16, 5, 17);
 	}
 
 }
