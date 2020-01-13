@@ -70,7 +70,7 @@ public class ExceptionInfo {
 	public IJavaElement getElement() {
 		return fElement;
 	}
-	
+
 	public String getFullyQualifiedName() {
 		return fElement instanceof IType ? ((IType) fElement).getFullyQualifiedName('.') : fElement.getElementName();
 	}

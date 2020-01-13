@@ -125,8 +125,8 @@ public final class RenameJavaProjectChange extends AbstractJavaElementRenameChan
 	private void modifyClassPaths(IProgressMonitor pm) throws JavaModelException {
 		IProject[] referencing= getProject().getReferencingProjects();
 		pm.beginTask(RefactoringCoreMessages.RenameJavaProjectChange_update, referencing.length);
-		for (int i= 0; i < referencing.length; i++) {
-			IJavaProject jp= JavaCore.create(referencing[i]);
+		for (IProject p : referencing) {
+			IJavaProject jp= JavaCore.create(p);
 			if (jp != null && jp.exists()) {
 				modifyClassPath(jp, new SubProgressMonitor(pm, 1));
 			} else {

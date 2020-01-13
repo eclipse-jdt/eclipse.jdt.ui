@@ -63,12 +63,11 @@ public class TestRenameParticipantShared extends RenameParticipant implements IS
 		if ((updating != null) && getArguments() instanceof RenameTypeArguments) {
 			RenameTypeArguments arguments= (RenameTypeArguments)getArguments();
 			if (arguments.getUpdateSimilarDeclarations()) {
-				IJavaElement[] elements= arguments.getSimilarDeclarations();
-				for (int i= 0; i < elements.length; i++) {
-					IJavaElement updated= updating.getRefactoredJavaElement(elements[i]);
+				for (IJavaElement e : arguments.getSimilarDeclarations()) {
+					IJavaElement updated= updating.getRefactoredJavaElement(e);
 					if (updated!=null) {
-						fSimilarToHandle.put(elements[i].getHandleIdentifier(), getKey(updated));
-						fSimilarToNewName.put(elements[i].getHandleIdentifier(), updated.getElementName());
+						fSimilarToHandle.put(e.getHandleIdentifier(), getKey(updated));
+						fSimilarToNewName.put(e.getHandleIdentifier(), updated.getElementName());
 					}
 				}
 			}

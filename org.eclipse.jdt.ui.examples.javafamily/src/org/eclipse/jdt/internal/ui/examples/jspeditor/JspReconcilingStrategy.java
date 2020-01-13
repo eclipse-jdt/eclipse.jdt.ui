@@ -113,17 +113,14 @@ public class JspReconcilingStrategy implements IReconcilingStrategy, IReconcilin
 			 */
 			@Override
 			protected void execute(IProgressMonitor monitor) throws CoreException, InvocationTargetException, InterruptedException {
-				for (int i= 0; i < results.length; i++) {				
-
+				for (IReconcileResult r : results) {
 					if (fProgressMonitor != null && fProgressMonitor.isCanceled())
 						return;
-		
-					if (!(results[i] instanceof AnnotationAdapter))
+					if (!(r instanceof AnnotationAdapter)) {
 						continue;
-				
-					AnnotationAdapter result= (AnnotationAdapter)results[i];
+					}
+					AnnotationAdapter result= (AnnotationAdapter) r;
 					Position pos= result.getPosition();
-					
 					Annotation annotation= result.createAnnotation();
 					getAnnotationModel().addAnnotation(annotation, pos);
 				}

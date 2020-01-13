@@ -448,8 +448,7 @@ public class MethodOverrideTest extends CoreTests {
 		CompilationUnit root= (CompilationUnit) parser.createAST(null);
 		IProblem[] problems= root.getProblems();
 		boolean hasProblems= false;
-		for (int i= 0; i < problems.length; i++) {
-			IProblem prob= problems[i];
+		for (IProblem prob : problems) {
 			if (prob.isWarning() || prob.isInfo()) {
 				continue;
 			}
@@ -468,8 +467,8 @@ public class MethodOverrideTest extends CoreTests {
 		if (hasProblems) {
 			StringBuilder buf= new StringBuilder();
 			buf.append(cu.getElementName() + " has compilation problems: \n");
-			for (int i= 0; i < problems.length; i++) {
-				buf.append(problems[i].getMessage()).append('\n');
+			for (IProblem prob : problems) {
+				buf.append(prob.getMessage()).append('\n');
 			}
 			assertTrue(buf.toString(), false);
 		}
@@ -484,9 +483,7 @@ public class MethodOverrideTest extends CoreTests {
 			int start= node.getStartPosition();
 			int end= start + node.getLength();
 
-			IProblem[] problems= root.getProblems();
-			for (int i= 0; i < problems.length; i++) {
-				IProblem prob= problems[i];
+			for (IProblem prob : root.getProblems()) {
 				if (prob.getID() == IProblem.MethodMustOverride) {
 					int pos= prob.getSourceStart();
 					if (start <= pos && pos < end) {

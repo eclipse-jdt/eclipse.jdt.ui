@@ -126,8 +126,8 @@ public class JavaWorkingSetPage extends AbstractWorkingSetWizardPage {
 			try {
 				tree.getTree().setRedraw(false);
 
-				for (int i= 0; i < selection.length; i++) {
-					tree.expandToLevel(selection[i], 0);
+				for (Object s : selection) {
+					tree.expandToLevel(s, 0);
 				}
 				tree.setSelection(new StructuredSelection(selection));
 			} finally {

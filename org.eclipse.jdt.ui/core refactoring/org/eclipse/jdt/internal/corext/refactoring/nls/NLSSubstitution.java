@@ -78,8 +78,8 @@ public class NLSSubstitution {
 	public static int countItems(NLSSubstitution[] elems, int task) {
 		Assert.isTrue(task == NLSSubstitution.EXTERNALIZED || task == NLSSubstitution.IGNORED || task == NLSSubstitution.INTERNALIZED);
 		int result= 0;
-		for (int i= 0; i < elems.length; i++) {
-			if (elems[i].fState == task) {
+		for (NLSSubstitution substitution : elems) {
+			if (substitution.fState == task) {
 				result++;
 			}
 		}
@@ -267,8 +267,7 @@ public class NLSSubstitution {
 		if (fState == EXTERNALIZED) {
 			String currKey= getKey();
 			String currValue= getValueNonEmpty();
-			for (int i= 0; i < substitutions.length; i++) {
-				NLSSubstitution substitution= substitutions[i];
+			for (NLSSubstitution substitution : substitutions) {
 				if (substitution != this && substitution.getState() == EXTERNALIZED) {
 					// same key but different value
 					if (currKey.equals(substitution.getKey()) && !currValue.equals(substitution.getValueNonEmpty())) {
@@ -302,8 +301,7 @@ public class NLSSubstitution {
 	}
 
 	private boolean containsKey(NLSSubstitution[] substitutions, String key) {
-		for (int i= 0; i < substitutions.length; i++) {
-			NLSSubstitution substitution= substitutions[i];
+		for (NLSSubstitution substitution : substitutions) {
 			if (substitution == this || substitution.fState != EXTERNALIZED)
 				continue;
 
@@ -315,8 +313,7 @@ public class NLSSubstitution {
 	}
 
 	public static void updateSubtitutions(NLSSubstitution[] substitutions, Properties props, String accessorClassName) {
-		for (int i= 0; i < substitutions.length; i++) {
-			NLSSubstitution substitution= substitutions[i];
+		for (NLSSubstitution substitution : substitutions) {
 			if ((substitution.getState() == NLSSubstitution.EXTERNALIZED) && !substitution.hasStateChanged()) {
 				substitution.setInitialValue(props.getProperty(substitution.getKey()));
 				substitution.setUpdatedAccessor(accessorClassName);

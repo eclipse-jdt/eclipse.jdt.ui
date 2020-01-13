@@ -98,9 +98,7 @@ public class NLSSearchQuery implements ISearchQuery {
 					CompilationUnitEntry groupElement= new CompilationUnitEntry(NLSSearchMessages.NLSSearchResultCollector_unusedKeys, compilationUnit);
 
 					boolean hasUnusedPropertie= false;
-					IField[] fields= ((IType)wrapperClass).getFields();
-					for (int j= 0; j < fields.length; j++) {
-						IField field= fields[j];
+					for (IField field : ((IType)wrapperClass).getFields()) {
 						if (isNLSField(field)) {
 							ISourceRange sourceRange= field.getSourceRange();
 							if (sourceRange != null) {

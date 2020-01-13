@@ -34,8 +34,7 @@ public class JavaWorkingSetElementAdapter implements IWorkingSetElementAdapter {
 	public IAdaptable[] adaptElements(IWorkingSet ws, IAdaptable[] elements) {
 		ArrayList<Object> result= new ArrayList<>(elements.length);
 
-		for (int i= 0; i < elements.length; i++) {
-			IAdaptable curr= elements[i];
+		for (IAdaptable curr : elements) {
 			if (curr instanceof IJavaElement) {
 				result.add(curr);
 			} else if (curr instanceof IResource) {

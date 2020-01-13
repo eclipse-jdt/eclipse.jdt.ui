@@ -63,7 +63,7 @@ import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
  * from the list. An element can be added/renewed with a call to <code>accessed(Object)</code>.
  *
  * The history can be stored to/loaded from an xml file.
- * 
+ *
  * @param <K> key type
  * @param <V> value type
  */
@@ -247,10 +247,8 @@ public abstract class History<K, V> {
 
 	private void rebuildPositions() {
 		fPositions.clear();
-		Collection<V> values= fHistory.values();
 		int pos=0;
-		for (Iterator<V> iter= values.iterator(); iter.hasNext();) {
-			V element= iter.next();
+		for (V element : fHistory.values()) {
 			fPositions.put(getKey(element), Integer.valueOf(pos));
 			pos++;
 		}

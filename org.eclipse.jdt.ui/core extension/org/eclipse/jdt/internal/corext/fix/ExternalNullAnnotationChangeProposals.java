@@ -95,7 +95,7 @@ import org.eclipse.jdt.internal.ui.text.correction.IProposalRelevance;
 
 /**
  * Proposals for null annotations that modify external annotations, rather than Java source files.
- * 
+ *
  * @see <a href="https://bugs.eclipse.org/458200">[null] "Annotate" proposals for adding external
  *      null annotations to library classes</a>
  * @since 3.11
@@ -358,7 +358,7 @@ public class ExternalNullAnnotationChangeProposals {
 		if (binding == null || binding.isRecovered()) throw new MissingBindingException(type);
 		return binding;
 	}
-	
+
 	static IMethodBinding resolveBinding(MethodDeclaration method) {
 		IMethodBinding binding= method.resolveBinding();
 		if (binding == null || binding.isRecovered()) throw new MissingBindingException(method);
@@ -870,7 +870,7 @@ public class ExternalNullAnnotationChangeProposals {
 			fBuffer.append(resolveBinding(node).getBinaryName());
 			return false;
 		}
-	
+
 		String binaryName(ITypeBinding type) {
 			return type.getBinaryName().replace('.', '/');
 		}

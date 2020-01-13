@@ -2251,16 +2251,22 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
+		buf.append("import java.io.Serializable;\n");
+		buf.append("import java.util.List;\n");
 		buf.append("public class E {\n");
 		buf.append("    public final String foo1;\n");
 		buf.append("    public final int foo2;\n");
 		buf.append("    public final Object foo3;\n");
+		buf.append("    public final Serializable foo4;\n");
+		buf.append("    public final List<E> foo5;\n");
+		buf.append("    public final List<? super String> foo6;\n");
+		buf.append("    public final List<List<? extends String>> foo7;\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		IProblem[] problems= astRoot.getProblems();
-		assertNumberOfProblems(3, problems);
+		assertNumberOfProblems(7, problems);
 
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, problems[0], null);
 		assertNumberOfProposals(proposals, 1);
@@ -2271,10 +2277,16 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
+		buf.append("import java.io.Serializable;\n");
+		buf.append("import java.util.List;\n");
 		buf.append("public class E {\n");
 		buf.append("    public final String foo1 = \"\";\n");
 		buf.append("    public final int foo2;\n");
 		buf.append("    public final Object foo3;\n");
+		buf.append("    public final Serializable foo4;\n");
+		buf.append("    public final List<E> foo5;\n");
+		buf.append("    public final List<? super String> foo6;\n");
+		buf.append("    public final List<List<? extends String>> foo7;\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
 
@@ -2286,10 +2298,16 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
+		buf.append("import java.io.Serializable;\n");
+		buf.append("import java.util.List;\n");
 		buf.append("public class E {\n");
 		buf.append("    public final String foo1;\n");
 		buf.append("    public final int foo2 = 0;\n");
 		buf.append("    public final Object foo3;\n");
+		buf.append("    public final Serializable foo4;\n");
+		buf.append("    public final List<E> foo5;\n");
+		buf.append("    public final List<? super String> foo6;\n");
+		buf.append("    public final List<List<? extends String>> foo7;\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
 
@@ -2301,16 +2319,107 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
+		buf.append("import java.io.Serializable;\n");
+		buf.append("import java.util.List;\n");
 		buf.append("public class E {\n");
 		buf.append("    public final String foo1;\n");
 		buf.append("    public final int foo2;\n");
 		buf.append("    public final Object foo3 = new Object();\n");
+		buf.append("    public final Serializable foo4;\n");
+		buf.append("    public final List<E> foo5;\n");
+		buf.append("    public final List<? super String> foo6;\n");
+		buf.append("    public final List<List<? extends String>> foo7;\n");
 		buf.append("}\n");
 		String expected3= buf.toString();
 
-		assertEqualStringsIgnoreOrder(new String[] { preview1,preview2,preview3  }, new String[] { expected1,expected2,expected3 });
-	}
+		proposals= collectCorrections(cu, problems[3], null);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+		proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview4= getPreviewContent(proposal);
 
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.Serializable;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E {\n");
+		buf.append("    public final String foo1;\n");
+		buf.append("    public final int foo2;\n");
+		buf.append("    public final Object foo3;\n");
+		buf.append("    public final Serializable foo4 = null;\n");
+		buf.append("    public final List<E> foo5;\n");
+		buf.append("    public final List<? super String> foo6;\n");
+		buf.append("    public final List<List<? extends String>> foo7;\n");
+		buf.append("}\n");
+		String expected4= buf.toString();
+
+		proposals= collectCorrections(cu, problems[4], null);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+		proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview5= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.Serializable;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E {\n");
+		buf.append("    public final String foo1;\n");
+		buf.append("    public final int foo2;\n");
+		buf.append("    public final Object foo3;\n");
+		buf.append("    public final Serializable foo4;\n");
+		buf.append("    public final List<E> foo5 = null;\n");
+		buf.append("    public final List<? super String> foo6;\n");
+		buf.append("    public final List<List<? extends String>> foo7;\n");
+		buf.append("}\n");
+		String expected5= buf.toString();
+
+		proposals= collectCorrections(cu, problems[5], null);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+		proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview6= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.Serializable;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E {\n");
+		buf.append("    public final String foo1;\n");
+		buf.append("    public final int foo2;\n");
+		buf.append("    public final Object foo3;\n");
+		buf.append("    public final Serializable foo4;\n");
+		buf.append("    public final List<E> foo5;\n");
+		buf.append("    public final List<? super String> foo6 = null;\n");
+		buf.append("    public final List<List<? extends String>> foo7;\n");
+		buf.append("}\n");
+		String expected6= buf.toString();
+
+		proposals= collectCorrections(cu, problems[6], null);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+		proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview7= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.Serializable;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E {\n");
+		buf.append("    public final String foo1;\n");
+		buf.append("    public final int foo2;\n");
+		buf.append("    public final Object foo3;\n");
+		buf.append("    public final Serializable foo4;\n");
+		buf.append("    public final List<E> foo5;\n");
+		buf.append("    public final List<? super String> foo6;\n");
+		buf.append("    public final List<List<? extends String>> foo7 = null;\n");
+		buf.append("}\n");
+		String expected7= buf.toString();
+
+		assertEqualStringsIgnoreOrder(
+				new String[] { preview1, preview2, preview3, preview4, preview5, preview6, preview7 },
+				new String[] { expected1, expected2, expected3, expected4, expected5, expected6, expected7 });
+	}
 
 	public void testUnimplementedMethods() throws Exception {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);

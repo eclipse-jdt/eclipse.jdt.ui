@@ -85,8 +85,8 @@ public class FilteredElementTreeSelectionDialog extends ElementTreeSelectionDial
 				if (fMatchers == null || fMatchers.length == 0) {
 					return true;
 				}
-				for (int i= 0; i < fMatchers.length; i++) {
-					if (fMatchers[i].match(text)) {
+				for (StringMatcher matcher : fMatchers) {
+					if (matcher.match(text)) {
 						return true;
 					}
 				}
@@ -106,12 +106,13 @@ public class FilteredElementTreeSelectionDialog extends ElementTreeSelectionDial
 					return false;
 
 				// Also apply deep filtering to the other registered filters
-				ViewerFilter[] filters= ((TreeViewer)viewer).getFilters();
-				for (int i= 0; i < filters.length; i++) {
-					if (filters[i] == this)
+				for (ViewerFilter filter : ((TreeViewer)viewer).getFilters()) {
+					if (filter == this) {
 						continue;
-					if (!filters[i].select(viewer, element, element))
+					}
+					if (!filter.select(viewer, element, element)) {
 						return false;
+					}
 				}
 				return true;
 			}
@@ -172,9 +173,7 @@ public class FilteredElementTreeSelectionDialog extends ElementTreeSelectionDial
 						redrawFalseControl.setRedraw(false);
 						if (!narrowingDown) {
 							// collapse all
-							TreeItem[] is= treeViewer.getTree().getItems();
-							for (int i= 0; i < is.length; i++) {
-								TreeItem item= is[i];
+							for (TreeItem item : treeViewer.getTree().getItems()) {
 								if (item.getExpanded()) {
 									treeViewer.setExpandedState(item.getData(), false);
 								}

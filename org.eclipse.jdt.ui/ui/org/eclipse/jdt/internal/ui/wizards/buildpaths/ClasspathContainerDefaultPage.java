@@ -119,8 +119,7 @@ public class ClasspathContainerDefaultPage extends NewElementWizardPage implemen
 
 	@Override
 	public void initialize(IJavaProject project, IClasspathEntry[] currentEntries) {
-		for (int i= 0; i < currentEntries.length; i++) {
-			IClasspathEntry curr= currentEntries[i];
+		for (IClasspathEntry curr : currentEntries) {
 			if (curr.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
 				fUsedPaths.add(curr.getPath());
 			}

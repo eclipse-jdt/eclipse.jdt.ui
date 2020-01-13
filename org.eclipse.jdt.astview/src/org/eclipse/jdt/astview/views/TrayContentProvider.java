@@ -1,13 +1,13 @@
 /*******************************************************************************
  * Copyright (c) 2000, 2015 IBM Corporation and others.
  *
- * This program and the accompanying materials 
+ * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -25,12 +25,12 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 
 
 public class TrayContentProvider implements ITreeContentProvider {
-	
+
 	public static final int DEFAULT_CHILDREN_COUNT= 7;
-	
+
 	protected static final String N_A= "N/A"; //$NON-NLS-1$
 	protected static final Object[] EMPTY= new Object[0];
-	
+
 	/*
 	 * @see org.eclipse.jface.viewers.ITreeContentProvider#getChildren(java.lang.Object)
 	 */
@@ -39,25 +39,25 @@ public class TrayContentProvider implements ITreeContentProvider {
 		ArrayList<ExceptionAttribute> result= new ArrayList<>();
 		if (parentElement instanceof ExceptionAttribute)
 			return EMPTY;
-		
+
 		addObjectComparisons(result, parentElement);
-		
+
 		if (parentElement instanceof Binding) {
 			Binding trayElement= (Binding) parentElement;
 			IBinding trayBinding= trayElement.getBinding();
-			
+
 			addBindingComparisons(result, trayElement);
 			if (trayBinding instanceof ITypeBinding)
 				addTypeBindingComparions(result, trayElement);
 			if (trayBinding instanceof IMethodBinding)
 				addMethodBindingComparions(result, trayElement);
-			
+
 		} else {
 		}
-		
+
 		return result.toArray();
 	}
-	
+
 	private void addObjectComparisons(ArrayList<ExceptionAttribute> result, Object trayElement) {
 		class IdentityProperty extends DynamicAttributeProperty {
 			public IdentityProperty(Object parent) {
@@ -67,9 +67,9 @@ public class TrayContentProvider implements ITreeContentProvider {
 			protected String executeQuery(Object viewerObject, Object trayObject) {
 				return Boolean.toString(viewerObject == trayObject);
 			}
-		} 
+		}
 		result.add(new IdentityProperty(trayElement));
-		
+
 		class EqualsProperty extends DynamicAttributeProperty {
 			public EqualsProperty(Object parent) {
 				super(parent, "*.equals(this): ");
@@ -81,7 +81,7 @@ public class TrayContentProvider implements ITreeContentProvider {
 				else
 					return "* is null";
 			}
-		} 
+		}
 		result.add(new EqualsProperty(trayElement));
 	}
 
@@ -101,9 +101,9 @@ public class TrayContentProvider implements ITreeContentProvider {
 				else
 					return "* is null"; //$NON-NLS-1$
 			}
-		} 
+		}
 		result.add(new IsEqualToProperty(trayElement));
-		
+
 		class KeysEqualProperty extends DynamicBindingProperty {
 			public KeysEqualProperty(Binding parent) {
 				super(parent);
@@ -123,7 +123,7 @@ public class TrayContentProvider implements ITreeContentProvider {
 				else
 					return Boolean.toString(viewerBinding.getKey().equals(trayBinding.getKey()));
 			}
-		} 
+		}
 		result.add(new KeysEqualProperty(trayElement));
 	}
 
@@ -146,9 +146,9 @@ public class TrayContentProvider implements ITreeContentProvider {
 					return "* not an ITypeBinding"; //$NON-NLS-1$
 				}
 			}
-		} 
+		}
 		result.add(new IsSubTypeCompatibleProperty(trayElement));
-		
+
 		class IsCastCompatibleProperty extends DynamicBindingProperty {
 			public IsCastCompatibleProperty(Binding parent) {
 				super(parent);
@@ -167,9 +167,9 @@ public class TrayContentProvider implements ITreeContentProvider {
 					return "* not an ITypeBinding"; //$NON-NLS-1$
 				}
 			}
-		} 
+		}
 		result.add(new IsCastCompatibleProperty(trayElement));
-		
+
 		class IsAssignmentCompatibleProperty extends DynamicBindingProperty {
 			public IsAssignmentCompatibleProperty(Binding parent) {
 				super(parent);
@@ -188,7 +188,7 @@ public class TrayContentProvider implements ITreeContentProvider {
 					return "* not an ITypeBinding"; //$NON-NLS-1$
 				}
 			}
-		} 
+		}
 		result.add(new IsAssignmentCompatibleProperty(trayElement));
 	}
 
@@ -211,9 +211,9 @@ public class TrayContentProvider implements ITreeContentProvider {
 					return "* not an IMethodBinding"; //$NON-NLS-1$
 				}
 			}
-		} 
+		}
 		result.add(new OverridesProperty(trayElement));
-		
+
 		class IsSubsignatureProperty extends DynamicBindingProperty {
 			public IsSubsignatureProperty(Binding parent) {
 				super(parent);
@@ -232,7 +232,7 @@ public class TrayContentProvider implements ITreeContentProvider {
 					return "* not an IMethodBinding"; //$NON-NLS-1$
 				}
 			}
-		} 
+		}
 		result.add(new IsSubsignatureProperty(trayElement));
 	}
 
@@ -247,7 +247,7 @@ public class TrayContentProvider implements ITreeContentProvider {
 			return null;
 		}
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.viewers.ITreeContentProvider#hasChildren(java.lang.Object)
 	 */
@@ -255,7 +255,7 @@ public class TrayContentProvider implements ITreeContentProvider {
 	public boolean hasChildren(Object element) {
 		return ! (element instanceof DynamicAttributeProperty || element instanceof DynamicBindingProperty);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(java.lang.Object)
 	 */
@@ -265,7 +265,7 @@ public class TrayContentProvider implements ITreeContentProvider {
 			return ((ArrayList<?>) inputElement).toArray();
 		return EMPTY;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.viewers.IContentProvider#dispose()
 	 */
@@ -273,7 +273,7 @@ public class TrayContentProvider implements ITreeContentProvider {
 	public void dispose() {
 		// do nothing
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
 	 */

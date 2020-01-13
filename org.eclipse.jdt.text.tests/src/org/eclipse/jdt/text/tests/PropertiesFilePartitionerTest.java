@@ -396,10 +396,7 @@ public class PropertiesFilePartitionerTest extends TestCase {
 	public void testPartitionFinder() {
 		try {
 
-			ITypedRegion[] partitioning= fDocument.computePartitioning(IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING, 0, fDocument.getLength(), false);
-
-			for (int i= 0; i < partitioning.length; i++) {
-				ITypedRegion expected= partitioning[i];
+			for (ITypedRegion expected : fDocument.computePartitioning(IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING, 0, fDocument.getLength(), false)) {
 				for (int j= 0; j < expected.getLength(); j++) {
 					ITypedRegion result= fDocument.getPartition(IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING, expected.getOffset() + j, false);
 					assertTrue(expected.equals(result));

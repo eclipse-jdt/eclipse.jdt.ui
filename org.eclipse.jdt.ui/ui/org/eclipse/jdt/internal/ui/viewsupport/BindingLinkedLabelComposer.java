@@ -609,9 +609,11 @@ public class BindingLinkedLabelComposer extends JavaElementLinkedLabelComposer {
 	// consider only relevant bounds / ignore j.l.Object
 	private boolean hasRelevantBound(ITypeBinding[] bounds) {
 		if (bounds != null) {
-			for (int i= 0; i < bounds.length; i++)
-				if (bounds[i].isInterface() || bounds[i].getSuperclass() != null)
+			for (ITypeBinding bound : bounds) {
+				if (bound.isInterface() || bound.getSuperclass() != null) {
 					return true;
+				}
+			}
 		}
 		return false;
 	}

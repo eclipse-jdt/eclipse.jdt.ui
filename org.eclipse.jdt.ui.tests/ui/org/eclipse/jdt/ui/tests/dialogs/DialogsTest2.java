@@ -83,9 +83,8 @@ public class DialogsTest2 extends TestCase {
 		DialogCheck.assertDialog(dialog);
 
 		System.out.println("Result:");
-		Object[] checkedElements= dialog.getResult();
-		for (int i= 0; i < checkedElements.length; i++) {
-			System.out.println(labelProvider.getText(checkedElements[i]));
+		for (Object checkedElement : dialog.getResult()) {
+			System.out.println(labelProvider.getText(checkedElement));
 		}
 
 

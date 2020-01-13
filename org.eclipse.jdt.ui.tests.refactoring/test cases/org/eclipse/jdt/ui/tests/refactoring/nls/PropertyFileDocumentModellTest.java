@@ -49,8 +49,7 @@ public class PropertyFileDocumentModellTest extends TestCase {
 	private static void insert(IDocument document, KeyValuePair[] pairs) throws CoreException {
 		PropertyFileDocumentModel model= new PropertyFileDocumentModel(document);
 
-		for (int i= 0; i < pairs.length; i++) {
-			KeyValuePair pair= pairs[i];
+		for (KeyValuePair pair : pairs) {
 			pair.setValue(PropertyFileDocumentModel.escape(pair.getValue(), true) + model.getLineDelimiter());
 			pair.setKey(PropertyFileDocumentModel.escape(pair.getKey(), false));
 		}

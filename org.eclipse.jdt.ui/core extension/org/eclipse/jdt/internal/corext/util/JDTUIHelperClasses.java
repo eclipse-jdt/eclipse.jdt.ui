@@ -51,14 +51,14 @@ import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
  * <p>
  * New helpers preferably go into the o.e.jdt.core.manipulation bundle.
  * </p>
- * 
+ *
  * Here's a list of the most important helper classes:
- * 
+ *
  * <h2>Java Model</h2>
  * <p>
  * APIs in {@link org.eclipse.jdt.core}.
  * </p>
- * 
+ *
  * <p>
  * Static helper methods for analysis in {@link org.eclipse.jdt.internal.corext.util} and elsewhere:
  * </p>
@@ -70,21 +70,21 @@ import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
  * <li>{@link MethodOverrideTester}</li>
  * <li>{@link SuperTypeHierarchyCache}</li>
  * </ul>
- * 
+ *
  * <p>
  * Static helper methods for stubs creation:
  * </p>
  * <ul>
  * <li>{@link StubUtility}</li>
  * </ul>
- * 
- * 
+ *
+ *
  * <h2>DOM AST</h2>
  * <p>
  * APIs in {@link org.eclipse.jdt.core.dom} and {@link org.eclipse.jdt.core.dom.rewrite}.<br>
  * Core API classes that are easy to miss: {@link NodeFinder}, {@link ASTVisitor}, {@link ASTMatcher}.
  * </p>
- * 
+ *
  * <p>
  * Static helper methods for analysis:
  * </p>
@@ -96,7 +96,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
  * <li>{@link Bindings}</li>
  * <li>{@link TypeRules}</li>
  * </ul>
- * 
+ *
  * <p>
  * Static helper methods for node/stubs creation:
  * </p>
@@ -104,7 +104,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
  * <li>{@link ASTNodeFactory}</li>
  * <li>{@link StubUtility2}</li>
  * </ul>
- * 
+ *
  * <p>
  * Helper classes in {@link org.eclipse.jdt.internal.corext.dom}, e.g.:
  * </p>
@@ -113,7 +113,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
  * <li>{@link HierarchicalASTVisitor}</li>
  * <li>{@link NecessaryParenthesesChecker}</li>
  * </ul>
- * 
+ *
  * <p>
  * Helper classes for {@link ASTRewrite}:
  * </p>
@@ -127,7 +127,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
  * <li>{@link TypeAnnotationRewrite}</li>
  * <li>{@link VariableDeclarationRewrite}</li>
  * </ul>
- * 
+ *
  * <p>
  * Label and text manipulation helpers:
  * </p>
@@ -137,7 +137,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
  * <li>{@link org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels}</li>
  * <li>{@link org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels}</li>
  * </ul>
- * 
+ *
  * @noreference This class is not intended to be referenced by clients
  */
 public final class JDTUIHelperClasses {

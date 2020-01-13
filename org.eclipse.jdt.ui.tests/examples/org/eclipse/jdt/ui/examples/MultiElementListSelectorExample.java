@@ -86,8 +86,9 @@ public class MultiElementListSelectorExample {
 
 		Object[] res= d.getResult();
 		if (res != null) {
-			for (int i= 0; i < res.length; i++)
-				System.out.println(res[i]);
+			for (Object obj : res) {
+				System.out.println(obj);
+			}
 		}
 	}
 }

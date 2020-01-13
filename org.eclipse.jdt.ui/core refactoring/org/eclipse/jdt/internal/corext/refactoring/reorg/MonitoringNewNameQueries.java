@@ -13,8 +13,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
-import org.eclipse.core.runtime.OperationCanceledException;
-
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.mapping.ResourceMapping;
 
@@ -37,61 +35,49 @@ public class MonitoringNewNameQueries implements INewNameQueries {
 	}
 	@Override
 	public INewNameQuery createNewCompilationUnitNameQuery(final ICompilationUnit cu, final String initialSuggestedName) {
-		return new INewNameQuery() {
-			@Override
-			public String getNewName() throws OperationCanceledException {
-				String result= fDelegate.createNewCompilationUnitNameQuery(cu, initialSuggestedName).getNewName();
-				String newName= JavaModelUtil.getRenamedCUName(cu, result);
-				fExecutionLog.setNewName(cu, newName);
-				ResourceMapping mapping= JavaElementResourceMapping.create(cu);
-				if (mapping != null) {
-					fExecutionLog.setNewName(mapping, newName);
-				}
-				return result;
+		return () -> {
+			String result= fDelegate.createNewCompilationUnitNameQuery(cu, initialSuggestedName).getNewName();
+			String newName= JavaModelUtil.getRenamedCUName(cu, result);
+			fExecutionLog.setNewName(cu, newName);
+			ResourceMapping mapping= JavaElementResourceMapping.create(cu);
+			if (mapping != null) {
+				fExecutionLog.setNewName(mapping, newName);
 			}
+			return result;
 		};
 	}
 	@Override
 	public INewNameQuery createNewPackageFragmentRootNameQuery(final IPackageFragmentRoot root, final String initialSuggestedName) {
-		return new INewNameQuery() {
-			@Override
-			public String getNewName() throws OperationCanceledException {
-				String result= fDelegate.createNewPackageFragmentRootNameQuery(root, initialSuggestedName).getNewName();
-				fExecutionLog.setNewName(root, result);
-				ResourceMapping mapping= JavaElementResourceMapping.create(root);
-				if (mapping != null) {
-					fExecutionLog.setNewName(mapping, result);
-				}
-				return result;
+		return () -> {
+			String result= fDelegate.createNewPackageFragmentRootNameQuery(root, initialSuggestedName).getNewName();
+			fExecutionLog.setNewName(root, result);
+			ResourceMapping mapping= JavaElementResourceMapping.create(root);
+			if (mapping != null) {
+				fExecutionLog.setNewName(mapping, result);
 			}
+			return result;
 		};
 	}
 	@Override
 	public INewNameQuery createNewPackageNameQuery(final IPackageFragment pack, final String initialSuggestedName) {
-		return new INewNameQuery() {
-			@Override
-			public String getNewName() throws OperationCanceledException {
-				String result= fDelegate.createNewPackageNameQuery(pack, initialSuggestedName).getNewName();
-				fExecutionLog.setNewName(pack, result);
-				ResourceMapping mapping= JavaElementResourceMapping.create(pack);
-				if (mapping != null) {
-					int index= result.lastIndexOf('.');
-					String newFolderName= index == -1 ? result : result.substring(index + 1);
-					fExecutionLog.setNewName(mapping, newFolderName);
-				}
-				return result;
+		return () -> {
+			String result= fDelegate.createNewPackageNameQuery(pack, initialSuggestedName).getNewName();
+			fExecutionLog.setNewName(pack, result);
+			ResourceMapping mapping= JavaElementResourceMapping.create(pack);
+			if (mapping != null) {
+				int index= result.lastIndexOf('.');
+				String newFolderName= index == -1 ? result : result.substring(index + 1);
+				fExecutionLog.setNewName(mapping, newFolderName);
 			}
+			return result;
 		};
 	}
 	@Override
 	public INewNameQuery createNewResourceNameQuery(final IResource res, final String initialSuggestedName) {
-		return new INewNameQuery() {
-			@Override
-			public String getNewName() throws OperationCanceledException {
-				String result= fDelegate.createNewResourceNameQuery(res, initialSuggestedName).getNewName();
-				fExecutionLog.setNewName(res, result);
-				return result;
-			}
+		return () -> {
+			String result= fDelegate.createNewResourceNameQuery(res, initialSuggestedName).getNewName();
+			fExecutionLog.setNewName(res, result);
+			return result;
 		};
 	}
 	@Override

@@ -120,12 +120,12 @@ public class EmptyTypeSet extends TypeSet {
 	public EnumeratedTypeSet enumerate() {
 		return new EnumeratedTypeSet(getTypeSetEnvironment());
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		return obj instanceof EmptyTypeSet;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return 42;

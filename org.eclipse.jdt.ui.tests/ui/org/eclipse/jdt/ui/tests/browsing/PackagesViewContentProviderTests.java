@@ -291,9 +291,7 @@ public class PackagesViewContentProviderTests extends TestCase {
 //	}
 
 	public void testGetParentPFwithProjectFocus(){
-		Object[] children= fProvider.getChildren(fJProject2);
-		for (int i= 0; i < children.length; i++) {
-			Object object= children[i];
+		for (Object object : fProvider.getChildren(fJProject2)) {
 			fProvider.getChildren(object);
 		}
 
@@ -308,8 +306,7 @@ public class PackagesViewContentProviderTests extends TestCase {
 	public void testGetParentWithRootFocusAfterProjectFocus(){
 		//set up map with project focus
 		Object[] children= fProvider.getChildren(fJProject2);
-		for (int i= 0; i < children.length; i++) {
-			Object object= children[i];
+		for (Object object : children) {
 			fProvider.getChildren(object);
 		}
 
@@ -327,13 +324,9 @@ public class PackagesViewContentProviderTests extends TestCase {
 		assertTrue("expected children of project with focus", compareArrays(children, expectedChildren));//$NON-NLS-1$
 
 		//set up map with root focus
-		children= fProvider.getChildren(fRoot1);
-		for (int i= 0; i < children.length; i++) {
-			Object object= children[i];
+		for (Object object : fProvider.getChildren(fRoot1)) {
 			fProvider.getChildren(object);
-		}
-
-//		Object parent= fProvider.getParent(fPack41);
+		}//		Object parent= fProvider.getParent(fPack41);
 //		Object expectedParent= fPack31;
 //		assertTrue("Wrong parent found for a mid level Fragment with Project Focus", expectedParent.equals(parent));//$NON-NLS-1$
 	}
@@ -521,8 +514,7 @@ public class PackagesViewContentProviderTests extends TestCase {
 	private boolean compareArrays(Object[] children, Object[] expectedChildren) {
 		if(children.length!=expectedChildren.length)
 			return false;
-		for (int i= 0; i < children.length; i++) {
-			Object child= children[i];
+		for (Object child : children) {
 			if (child instanceof IJavaElement) {
 				IJavaElement el= (IJavaElement) child;
 				if(!contains(el, expectedChildren))
@@ -541,8 +533,7 @@ public class PackagesViewContentProviderTests extends TestCase {
 	}
 
 	private boolean contains(IResource res, Object[] expectedChildren) {
-		for (int i= 0; i < expectedChildren.length; i++) {
-			Object object= expectedChildren[i];
+		for (Object object : expectedChildren) {
 			if (object instanceof IResource) {
 				IResource expres= (IResource) object;
 				if(expres.equals(res))
@@ -553,8 +544,7 @@ public class PackagesViewContentProviderTests extends TestCase {
 	}
 
 	private boolean contains(IJavaElement fragment, Object[] expectedChildren) {
-		for (int i= 0; i < expectedChildren.length; i++) {
-			Object object= expectedChildren[i];
+		for (Object object : expectedChildren) {
 			if (object instanceof IJavaElement) {
 				IJavaElement expfrag= (IJavaElement) object;
 				if(expfrag.equals(fragment))
@@ -565,8 +555,7 @@ public class PackagesViewContentProviderTests extends TestCase {
 	}
 
 	private boolean contains(LogicalPackage lp, Object[] expectedChildren) {
-		for (int i= 0; i < expectedChildren.length; i++) {
-			Object object= expectedChildren[i];
+		for (Object object : expectedChildren) {
 			if (object instanceof LogicalPackage) {
 				LogicalPackage explp= (LogicalPackage) object;
 				if (explp.equals(lp))

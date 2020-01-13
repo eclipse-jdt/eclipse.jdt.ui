@@ -15,7 +15,6 @@
 package org.eclipse.jdt.ui.leaktest;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import org.eclipse.jdt.ui.leaktest.reftracker.ReferenceVisitor;
 import org.eclipse.jdt.ui.leaktest.reftracker.ReferencedObject;
@@ -43,8 +42,7 @@ public class InstancesOfTypeCollector extends ReferenceVisitor {
 	public String getResultString() {
 		int i= 0;
 		StringBuilder buf= new StringBuilder();
-		for (Iterator<ReferenceInfo> iterator= fResults.iterator(); iterator.hasNext();) {
-			ReferenceInfo element= iterator.next();
+		for (ReferenceInfo element : fResults) {
 			buf.append("Element ").append(i++).append('\n');
 			buf.append(element.toString()).append('\n');
 		}
@@ -74,9 +72,8 @@ public class InstancesOfTypeCollector extends ReferenceVisitor {
 			if (superclass != null && isMatchingType(superclass)) {
 				return true;
 			}
-			Class<?>[] interfaces= clazz.getInterfaces();
-			for (int i= 0; i < interfaces.length; i++) {
-				if (isMatchingType(interfaces[i])) {
+			for (Class<?> intf : clazz.getInterfaces()) {
+				if (isMatchingType(intf)) {
 					return true;
 				}
 			}

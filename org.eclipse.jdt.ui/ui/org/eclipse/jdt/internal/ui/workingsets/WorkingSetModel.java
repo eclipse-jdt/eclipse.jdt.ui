@@ -122,8 +122,8 @@ public class WorkingSetModel {
 		}
 		public void rebuild(IWorkingSet[] workingSets) {
 			clear();
-			for (int i= 0; i < workingSets.length; i++) {
-				put(workingSets[i]);
+			for (IWorkingSet workingSet : workingSets) {
+				put(workingSet);
 			}
 		}
 		public IAdaptable[] refresh(IWorkingSet ws) {
@@ -145,11 +145,11 @@ public class WorkingSetModel {
 			return oldElements;
 		}
 		private void computeDelta(List<IAdaptable> toRemove, List<IAdaptable> toAdd, IAdaptable[] oldElements, IAdaptable[] newElements) {
-			for (int i= 0; i < oldElements.length; i++) {
-				toAdd.remove(oldElements[i]);
+			for (IAdaptable oldElement : oldElements) {
+				toAdd.remove(oldElement);
 			}
-			for (int i= 0; i < newElements.length; i++) {
-				toRemove.remove(newElements[i]);
+			for (IAdaptable newElement : newElements) {
+				toRemove.remove(newElement);
 			}
 
 		}
@@ -175,8 +175,7 @@ public class WorkingSetModel {
 				return;
 			IAdaptable[] elements= ws.getElements();
 			fWorkingSetToElement.put(ws, elements);
-			for (int i= 0; i < elements.length; i++) {
-				IAdaptable element= elements[i];
+			for (IAdaptable element : elements) {
 				addElement(element, ws);
 				if (!(element instanceof IProject) && !(element instanceof IJavaProject)) {
 					fNonProjectTopLevelElements.add(element);
@@ -319,8 +318,7 @@ public class WorkingSetModel {
 
 	public Object[] addWorkingSets(Object[] elements) {
 		List<? super IWorkingSet> result= null;
-		for (int i= 0; i < elements.length; i++) {
-			Object element= elements[i];
+		for (Object element : elements) {
 			List<IWorkingSet> sets= null;
 			if (element instanceof IResource) {
 				sets= fElementMapper.getAllWorkingSetsForResource((IResource)element);
@@ -392,15 +390,15 @@ public class WorkingSetModel {
 	private List<IWorkingSet> getActiveAndAllWorkingSetsFromManagers() {
 		List<IWorkingSet> result= new ArrayList<>();
 		result.addAll(fActiveWorkingSets);
-		IWorkingSet[] locals= fLocalWorkingSetManager.getWorkingSets();
-		for (int i= 0; i < locals.length; i++) {
-			if (!result.contains(locals[i]) && isSupportedAsTopLevelElement(locals[i]))
-				result.add(locals[i]);
+		for (IWorkingSet local : fLocalWorkingSetManager.getWorkingSets()) {
+			if (!result.contains(local) && isSupportedAsTopLevelElement(local)) {
+				result.add(local);
+			}
 		}
-		IWorkingSet[] globals= PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSets();
-		for (int i= 0; i < globals.length; i++) {
-			if (!result.contains(globals[i]) && isSupportedAsTopLevelElement(globals[i]))
-				result.add(globals[i]);
+		for (IWorkingSet global : PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSets()) {
+			if (!result.contains(global) && isSupportedAsTopLevelElement(global)) {
+				result.add(global);
+			}
 		}
 
 		if (fIsSortingEnabled)
@@ -558,9 +556,7 @@ public class WorkingSetModel {
 
 		fConfigured= Boolean.valueOf(configured).booleanValue();
 		fLocalWorkingSetManager.restoreState(memento.getChild(TAG_LOCAL_WORKING_SET_MANAGER));
-		IWorkingSet[] allLocalWorkingSets= fLocalWorkingSetManager.getAllWorkingSets();
-		for (int i= 0; i < allLocalWorkingSets.length; i++) {
-			IWorkingSet ws= allLocalWorkingSets[i];
+		for (IWorkingSet ws : fLocalWorkingSetManager.getAllWorkingSets()) {
 			if (IWorkingSetIDs.OTHERS.equals(ws.getId())) {
 				// have to set the label again, since the locale could have been changed (bug 272737)
 				String otherProjectsLabel= WorkingSetMessages.WorkingSetModel_others_name;
@@ -577,9 +573,8 @@ public class WorkingSetModel {
 			fIsSortingEnabled= Boolean.valueOf(isSortingEnabled).booleanValue();
 		}
 
-		IMemento[] actives= memento.getChildren(TAG_ACTIVE_WORKING_SET);
-		for (int i= 0; i < actives.length; i++) {
-			String name= actives[i].getString(TAG_WORKING_SET_NAME);
+		for (IMemento active : memento.getChildren(TAG_ACTIVE_WORKING_SET)) {
+			String name= active.getString(TAG_WORKING_SET_NAME);
 			if (name != null) {
 				IWorkingSet ws= fLocalWorkingSetManager.getWorkingSet(name);
 				if (ws == null) {
@@ -590,9 +585,8 @@ public class WorkingSetModel {
 				}
 			}
 		}
-		IMemento[] allWorkingSets= memento.getChildren(TAG_ALL_WORKING_SETS);
-		for (int i= 0; i < allWorkingSets.length; i++) {
-			String name= allWorkingSets[i].getString(TAG_WORKING_SET_NAME);
+		for (IMemento allWorkingSet : memento.getChildren(TAG_ALL_WORKING_SETS)) {
+			String name= allWorkingSet.getString(TAG_WORKING_SET_NAME);
 			if (name != null) {
 				IWorkingSet ws= fLocalWorkingSetManager.getWorkingSet(name);
 				if (ws == null) {
@@ -681,9 +675,7 @@ public class WorkingSetModel {
 		if (!workingSet.isSelfUpdating() || workingSet.isAggregateWorkingSet())
 			return false;
 
-		IAdaptable[] elements= workingSet.getElements();
-		for (int i= 0; i < elements.length; i++) {
-			IAdaptable element= elements[i];
+		for (IAdaptable element : workingSet.getElements()) {
 			IProject p= element.getAdapter(IProject.class);
 			if (p != null && p.exists())
 				return true;

@@ -152,9 +152,7 @@ public class CodeFormatFix implements ICleanUpFix {
 						CategorizedTextEditGroup group= new CategorizedTextEditGroup(label, new GroupCategorySet(new GroupCategory(label, label, label)));
 
 						if (edit instanceof MultiTextEdit) {
-							TextEdit[] children= ((MultiTextEdit)edit).getChildren();
-							for (int i= 0; i < children.length; i++) {
-								TextEdit child= children[i];
+							for (TextEdit child : ((MultiTextEdit)edit).getChildren()) {
 								edit.removeChild(child);
 								if (!TextEditUtil.overlaps(formatEdit, child) && !TextEditUtil.overlaps(otherEdit, child)) {
 									otherEdit.addChild(child);
@@ -196,7 +194,7 @@ public class CodeFormatFix implements ICleanUpFix {
 	 * Returns the index in document of a none whitespace character between start (inclusive) and
 	 * end (inclusive) such that if more then one such character the index returned is the largest
 	 * possible (closest to end). Returns start - 1 if no such character.
-	 * 
+	 *
 	 * @param start the start
 	 * @param end the end
 	 * @param document the document

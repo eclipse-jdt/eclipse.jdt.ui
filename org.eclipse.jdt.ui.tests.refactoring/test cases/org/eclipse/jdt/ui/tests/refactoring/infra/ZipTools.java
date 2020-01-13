@@ -79,12 +79,9 @@ public class ZipTools {
 				}
 			}
 
-			IJavaElement[] packageFragments= src.getChildren();
-			for (int i= 0; i < packageFragments.length; i++) {
-				IPackageFragment packageFragment= (IPackageFragment) packageFragments[i];
-				ICompilationUnit[] cus= packageFragment.getCompilationUnits();
-				for (int j= 0; j < cus.length; j++) {
-					ICompilationUnit cu= cus[j];
+			for (IJavaElement javaelement : src.getChildren()) {
+				IPackageFragment packageFragment= (IPackageFragment) javaelement;
+				for (ICompilationUnit cu : packageFragment.getCompilationUnits()) {
 					String cuDescr= packageFragment.getElementName() + "/" + cu.getElementName();
 					Assert.assertTrue(cuDescr, zipCus.remove(cuDescr));
 				}

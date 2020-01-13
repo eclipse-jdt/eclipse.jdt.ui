@@ -40,34 +40,30 @@ public class ClasspathVMUtil {
 		}
 		String bestMatchingCompliance= null;
 		IVMInstall bestMatchingVMInstall= null;
-		IVMInstallType[] installTypes= JavaRuntime.getVMInstallTypes();
-		for (int i= 0; i < installTypes.length; i++) {
-			IVMInstall[] installs= installTypes[i].getVMInstalls();
-			for (int k= 0; k < installs.length; k++) {
-				String vmInstallCompliance= getVMInstallCompliance(installs[k], allowNullCompliance);
-
+		for (IVMInstallType installType : JavaRuntime.getVMInstallTypes()) {
+			for (IVMInstall install : installType.getVMInstalls()) {
+				String vmInstallCompliance= getVMInstallCompliance(install, allowNullCompliance);
 				if (requiredVersion.equals(vmInstallCompliance)) {
 					if (!getHighestVersion) {
-						return installs[k]; // perfect match
+						return install; // perfect match
 					}
 				} else if (JavaModelUtil.isVersionLessThan(vmInstallCompliance, requiredVersion)) {
 					continue; // no match
 
 				} else if (bestMatchingVMInstall != null) {
 					if ((!getHighestVersion && JavaModelUtil.isVersionLessThan(bestMatchingCompliance, vmInstallCompliance))
-							|| (getHighestVersion && JavaModelUtil.isVersionLessThan(vmInstallCompliance, bestMatchingCompliance))) {
+						|| (getHighestVersion && JavaModelUtil.isVersionLessThan(vmInstallCompliance, bestMatchingCompliance))) {
 						continue; // the other one is the least matching
 					}
 				}
 				if (getHighestVersion) {
 					if (JavaModelUtil.isVersionLessThan(bestMatchingCompliance, vmInstallCompliance)) {
 						bestMatchingCompliance= vmInstallCompliance;
-						bestMatchingVMInstall= installs[k];
+						bestMatchingVMInstall= install;
 					}
-				}
-				else {
+				} else {
 					bestMatchingCompliance= vmInstallCompliance;
-					bestMatchingVMInstall= installs[k];
+					bestMatchingVMInstall= install;
 				}
 			}
 		}
@@ -93,12 +89,10 @@ public class ClasspathVMUtil {
 
 	public static IExecutionEnvironment findBestMatchingEE(String requiredVersion) {
 		IExecutionEnvironmentsManager eeManager= JavaRuntime.getExecutionEnvironmentsManager();
-		IExecutionEnvironment[] ees= eeManager.getExecutionEnvironments();
 		IExecutionEnvironment bestEE= null;
 		String bestEECompliance= null;
 
-		for (int i= 0; i < ees.length; i++) {
-			IExecutionEnvironment ee= ees[i];
+		for (IExecutionEnvironment ee : eeManager.getExecutionEnvironments()) {
 			String eeCompliance= JavaModelUtil.getExecutionEnvironmentCompliance(ee);
 			String eeId= ee.getId();
 

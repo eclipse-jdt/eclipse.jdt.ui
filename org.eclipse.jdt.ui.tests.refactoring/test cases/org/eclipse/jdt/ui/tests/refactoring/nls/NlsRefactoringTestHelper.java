@@ -87,9 +87,9 @@ public class NlsRefactoringTestHelper {
 
     private IFile createFile(IPath path, String content) throws Exception {
         IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
-        InputStream iS = getInputStream(content);
-        file.create(iS, true, fNpm);
-        iS.close();
+		try (InputStream iS = getInputStream(content)) {
+			file.create(iS, true, fNpm);
+		}
         return file;
     }
 

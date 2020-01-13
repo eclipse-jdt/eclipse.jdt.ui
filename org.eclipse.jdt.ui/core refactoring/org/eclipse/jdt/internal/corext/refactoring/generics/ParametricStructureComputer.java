@@ -19,7 +19,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
 
@@ -95,8 +94,7 @@ public class ParametricStructureComputer {
 
 	private void dumpContainerStructure() {
 		System.out.println("\n*** Container Structure: ***\n"); //$NON-NLS-1$
-		for (int i= 0; i < fAllConstraintVariables.length; i++) {
-			ConstraintVariable2 v= fAllConstraintVariables[i];
+		for (ConstraintVariable2 v : fAllConstraintVariables) {
 			if (elemStructure(v) != null && !(elemStructure(v) == ParametricStructure.NONE))
 				System.out.println("elemStructure(" + v.toString() + ") = " + elemStructure(v)); //$NON-NLS-1$ //$NON-NLS-2$
 		}
@@ -116,8 +114,7 @@ public class ParametricStructureComputer {
 	private void initializeContainerStructure(){
 		if (DEBUG_INITIALIZATION)
 			System.out.println("  *** Seeding container structure ***"); //$NON-NLS-1$
-		for (int i= 0; i < fAllConstraintVariables.length; i++) {
-			ConstraintVariable2 v= fAllConstraintVariables[i];
+		for (ConstraintVariable2 v : fAllConstraintVariables) {
 			TType varType= declaredTypeOf(v);
 
 			if (varType != null) {
@@ -209,10 +206,9 @@ public class ParametricStructureComputer {
 
 		while (!fWorkList2.isEmpty()) {
 			ConstraintVariable2 v= fWorkList2.pop();
-			List<ITypeConstraint2> usedIn= fTCModel.getUsedIn(v);
 
-			for(Iterator<ITypeConstraint2> iter= usedIn.iterator(); iter.hasNext(); ) {
-				SubTypeConstraint2 stc= (SubTypeConstraint2) iter.next();
+			for (ITypeConstraint2 constraint : fTCModel.getUsedIn(v)) {
+				SubTypeConstraint2 stc= (SubTypeConstraint2) constraint;
 
 				ConstraintVariable2 lhs= stc.getLeft();
 				ConstraintVariable2 rhs= stc.getRight();
@@ -317,8 +313,7 @@ public class ParametricStructureComputer {
 		// Propagate structure from container variable to any subsidiary element variables
 		if (elemStructure(v) != ParametricStructure.NONE && fTCModel.getElementVariables(v).size() > 0) {
 			ParametricStructure t= elemStructure(v);
-			for(Iterator<CollectionElementVariable2> iterator=fTCModel.getElementVariables(v).values().iterator(); iterator.hasNext(); ) {
-				CollectionElementVariable2 typeVar= iterator.next();
+			for (CollectionElementVariable2 typeVar : fTCModel.getElementVariables(v).values()) {
 				int declarationTypeVariableIndex= typeVar.getDeclarationTypeVariableIndex();
 
 				if (declarationTypeVariableIndex != CollectionElementVariable2.NOT_DECLARED_TYPE_VARIABLE_INDEX)
@@ -372,9 +367,7 @@ public class ParametricStructureComputer {
 		if (containingStructure == null)
 			return false;
 
-		ParametricStructure[] parameters= containingStructure.getParameters();
-		for (int i= 0; i < parameters.length; i++) {
-			ParametricStructure parameter= parameters[i];
+		for (ParametricStructure parameter : containingStructure.getParameters()) {
 			if (parameter == subStructure)
 				return true;
 			else if (containsSubStructure(parameter, subStructure))
@@ -488,9 +481,8 @@ public class ParametricStructureComputer {
 
 		if (DEBUG_INITIALIZATION)
 			System.out.println("\n*** Creating Element Variables: ***\n"); //$NON-NLS-1$
-
-		for(int i= 0; i < fAllConstraintVariables.length; i++) {
-			newVars.addAll(createVariablesFor(fAllConstraintVariables[i]));
+		for (ConstraintVariable2 constraintVariable : fAllConstraintVariables) {
+			newVars.addAll(createVariablesFor(constraintVariable));
 		}
 
 //		// rmf 12/1/2004 - Add all the non-binary created vars to candidates for
@@ -540,16 +532,14 @@ public class ParametricStructureComputer {
 	private Collection<CollectionElementVariable2> createVars(Collection<CollectionElementVariable2> cvs, ParametricStructure[] parms) {
 		if (parms.length > 0) { // happens, e.g., for Properties (non-parametric)
 //			Assert.isTrue(cvs.size() == parms.length, "cvs.length==" + cvs.size() + " parms.length=" + parms.length); //assumption is wrong in presence of NOT_DECLARED_TYPE_VARIABLE_INDEX
-			for (Iterator<CollectionElementVariable2> iter= cvs.iterator(); iter.hasNext(); ) {
-				CollectionElementVariable2 childVar= iter.next();
+			for (CollectionElementVariable2 childVar : cvs) {
 				int declarationTypeVariableIndex= childVar.getDeclarationTypeVariableIndex();
 
 				if (declarationTypeVariableIndex != CollectionElementVariable2.NOT_DECLARED_TYPE_VARIABLE_INDEX)
 					setElemStructure(childVar, parms[declarationTypeVariableIndex]);
 			}
 		} else {
-			for (Iterator<CollectionElementVariable2> iter= cvs.iterator(); iter.hasNext(); ) {
-				CollectionElementVariable2 childVar= iter.next();
+			for (CollectionElementVariable2 childVar : cvs) {
 				int declarationTypeVariableIndex= childVar.getDeclarationTypeVariableIndex();
 
 				if (declarationTypeVariableIndex != CollectionElementVariable2.NOT_DECLARED_TYPE_VARIABLE_INDEX)
@@ -557,8 +547,7 @@ public class ParametricStructureComputer {
 			}
 		}
 		List<CollectionElementVariable2> result= new ArrayList<>(cvs.size() * 2);//roughly
-		for (Iterator<CollectionElementVariable2> iter= cvs.iterator(); iter.hasNext(); ) {
-			CollectionElementVariable2 childVar= iter.next();
+		for (CollectionElementVariable2 childVar : cvs) {
 			int declarationTypeVariableIndex= childVar.getDeclarationTypeVariableIndex();
 
 			if (declarationTypeVariableIndex != CollectionElementVariable2.NOT_DECLARED_TYPE_VARIABLE_INDEX) {

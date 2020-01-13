@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1162,7 +1162,52 @@ public class AssistQuickFixTest extends QuickFixTest {
 			String expected2= buf.toString();
 	
 			assertExpectedExistInProposals(proposals, new String[] { expected1, expected2 });
-		}
+	}
+
+	public void testAssignToLocal18() throws Exception { // https://bugs.eclipse.org/bugs/show_bug.cgi?id=287377
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("\n");
+		buf.append("    private E other;\n");
+		buf.append("    boolean b;\n");
+		buf.append("\n");
+		buf.append("    public void foo(boolean newB) {\n");
+		buf.append("        /*1*/other.b = newB;\n");
+		buf.append("        other.other.b = newB;\n");
+		buf.append("        other.other.other.b = newB;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		String str= "/*1*/other";
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("\n");
+		buf.append("    private E other;\n");
+		buf.append("    boolean b;\n");
+		buf.append("\n");
+		buf.append("    public void foo(boolean newB) {\n");
+		buf.append("        /*1*/E other2 = other;\n");
+		buf.append("        other2.b = newB;\n");
+		buf.append("        other2.other.b = newB;\n");
+		buf.append("        other2.other.other.b = newB;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
 
 	public void testAssignParamToField() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -3314,7 +3359,230 @@ public class AssistQuickFixTest extends QuickFixTest {
 		
 		assertExpectedExistInProposals(proposals, new String[] { ex1, ex2, ex3, ex4 });
 	}
-	
+
+	public void testJoinDeclaration6() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int x) {\n");
+		buf.append("        String var;\n");
+		buf.append("        if (x == 1)\n");
+		buf.append("           var = \"abc\";\n");
+		buf.append("        else\n");
+		buf.append("           var = \"\";\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		String str= "var";
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int x) {\n");
+		buf.append("        String var = x == 1 ? \"abc\" : \"\";\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String ex1= buf.toString();
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private String var;\n");
+		buf.append("\n");
+		buf.append("    public void foo(int x) {\n");
+		buf.append("        if (x == 1)\n");
+		buf.append("           var = \"abc\";\n");
+		buf.append("        else\n");
+		buf.append("           var = \"\";\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String ex2= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { ex1, ex2 });
+	}
+
+	public void testJoinDeclaration7() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int x) {\n");
+		buf.append("        String var;\n");
+		buf.append("        if (x == 1)\n");
+		buf.append("           var = \"abc\";\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		String str= "var";
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private String var;\n");
+		buf.append("\n");
+		buf.append("    public void foo(int x) {\n");
+		buf.append("        if (x == 1)\n");
+		buf.append("           var = \"abc\";\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String ex1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { ex1 });
+	}
+
+	public void testJoinDeclaration8() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int x) {\n");
+		buf.append("        String var;\n");
+		buf.append("        if (x == 1) {\n");
+		buf.append("           var = \"abc\";\n");
+		buf.append("        } else {\n");
+		buf.append("           var = \"def\";\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		String str= "var";
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int x) {\n");
+		buf.append("        String var = x == 1 ? \"abc\" : \"def\";\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String ex1= buf.toString();
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private String var;\n");
+		buf.append("\n");
+		buf.append("    public void foo(int x) {\n");
+		buf.append("        if (x == 1) {\n");
+		buf.append("           var = \"abc\";\n");
+		buf.append("        } else {\n");
+		buf.append("           var = \"def\";\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String ex2= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { ex1, ex2 });
+	}
+
+	public void testJoinDeclaration9() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int x) {\n");
+		buf.append("        String var;\n");
+		buf.append("        if (x == 1) {\n");
+		buf.append("           var = \"abc\";\n");
+		buf.append("        } else {\n");
+		buf.append("           var = \"def\";\n");
+		buf.append("           foo(3);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		String str= "var";
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private String var;\n");
+		buf.append("\n");
+		buf.append("    public void foo(int x) {\n");
+		buf.append("        if (x == 1) {\n");
+		buf.append("           var = \"abc\";\n");
+		buf.append("        } else {\n");
+		buf.append("           var = \"def\";\n");
+		buf.append("           foo(3);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String ex1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { ex1 });
+	}
+
+	public void testJoinDeclaration10() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int x) {\n");
+		buf.append("        String var;\n");
+		buf.append("        switch (x) {\n");
+		buf.append("        case 1:\n");
+		buf.append("           var = \"abc\";\n");
+		buf.append("           break;\n");
+		buf.append("        default:\n");
+		buf.append("           var = \"def\";\n");
+		buf.append("           break;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		String str= "var";
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private String var;\n");
+		buf.append("\n");
+		buf.append("    public void foo(int x) {\n");
+		buf.append("        switch (x) {\n");
+		buf.append("        case 1:\n");
+		buf.append("           var = \"abc\";\n");
+		buf.append("           break;\n");
+		buf.append("        default:\n");
+		buf.append("           var = \"def\";\n");
+		buf.append("           break;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String ex1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { ex1 });
+	}
+
 	private static final Class<?>[] FILTER_EQ= { LinkedNamesAssistProposal.class, RenameRefactoringProposal.class, AssignToVariableAssistProposal.class, NewJUnitTestCaseProposal.class };
 
 	public void testInvertEquals1() throws Exception {
@@ -4599,7 +4867,6 @@ public class AssistQuickFixTest extends QuickFixTest {
 		}
 
 	public void testCreateInSuperInGeneric() throws Exception {
-
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 			StringBuffer buf= new StringBuffer();
 			buf.append("package test1;\n");
@@ -4618,6 +4885,12 @@ public class AssistQuickFixTest extends QuickFixTest {
 			buf.append("import java.io.IOException;\n");
 			buf.append("import java.util.Vector;\n");
 			buf.append("public class E extends A<String> implements IB<String> {\n");
+			buf.append("	/**\n");
+			buf.append("	 * Always return NULL\n");
+			buf.append("	 * @param count\n");
+			buf.append("	 * @return NULL\n");
+			buf.append("	 * @throws IOException\n");
+			buf.append("	 */\n");
 			buf.append("    public Vector<String> foo(int count) throws IOException {\n");
 			buf.append("        return null;\n");
 			buf.append("    }\n");
@@ -4642,6 +4915,12 @@ public class AssistQuickFixTest extends QuickFixTest {
 			buf.append("\n");
 			buf.append("public interface IB<T> {\n");
 			buf.append("\n");
+			buf.append("    /**\n");
+			buf.append("     * Always return NULL\n");
+			buf.append("     * @param count\n");
+			buf.append("     * @return NULL\n");
+			buf.append("     * @throws IOException\n");
+			buf.append("     */\n");
 			buf.append("    Vector<String> foo(int count) throws IOException;\n");
 			buf.append("}\n");
 			String expected1= buf.toString();
@@ -4657,6 +4936,12 @@ public class AssistQuickFixTest extends QuickFixTest {
 			buf.append("\n");
 			buf.append("public class A<T> {\n");
 			buf.append("\n");
+			buf.append("    /**\n");
+			buf.append("     * Always return NULL\n");
+			buf.append("     * @param count\n");
+			buf.append("     * @return NULL\n");
+			buf.append("     * @throws IOException\n");
+			buf.append("     */\n");
 			buf.append("    public Vector<String> foo(int count) throws IOException {\n");
 			buf.append("        //TODO\n");
 			buf.append("        return null;\n");
@@ -4665,7 +4950,6 @@ public class AssistQuickFixTest extends QuickFixTest {
 			String expected2= buf.toString();
 
 			assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
-
 		}
 
 	public void testChangeIfStatementToBlock() throws Exception {

@@ -231,9 +231,9 @@ public class OutputLocationDialog extends StatusDialog {
 		final Class<?>[] acceptedClasses= new Class[] { IProject.class, IFolder.class };
 		IProject[] allProjects= root.getProjects();
 		ArrayList<IProject> rejectedElements= new ArrayList<>(allProjects.length);
-		for (int i= 0; i < allProjects.length; i++) {
-			if (!allProjects[i].equals(fCurrProject)) {
-				rejectedElements.add(allProjects[i]);
+		for (IProject project : allProjects) {
+			if (!project.equals(fCurrProject)) {
+				rejectedElements.add(project);
 			}
 		}
 		ViewerFilter filter= new TypedViewerFilter(acceptedClasses, rejectedElements.toArray());

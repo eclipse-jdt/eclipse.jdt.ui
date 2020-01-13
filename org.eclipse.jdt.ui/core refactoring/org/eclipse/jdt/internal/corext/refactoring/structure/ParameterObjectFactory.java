@@ -192,8 +192,7 @@ public class ParameterObjectFactory {
 		TypeDeclaration typeDeclaration= ast.newTypeDeclaration();
 		typeDeclaration.setName(ast.newSimpleName(fClassName));
 		List<BodyDeclaration> body= typeDeclaration.bodyDeclarations();
-		for (Iterator<ParameterInfo> iter= fVariables.iterator(); iter.hasNext();) {
-			ParameterInfo pi= iter.next();
+		for (ParameterInfo pi : fVariables) {
 			if (isValidField(pi)) {
 				FieldDeclaration declaration= createField(pi, cuRewrite, context);
 				listener.fieldCreated(cuRewrite, declaration, pi);
@@ -209,8 +208,7 @@ public class ParameterObjectFactory {
 		MethodDeclaration constructor= createConstructor(declaringType, cuRewrite, listener, context);
 		listener.constructorCreated(cuRewrite, constructor);
 		body.add(constructor);
-		for (Iterator<ParameterInfo> iter= fVariables.iterator(); iter.hasNext();) {
-			ParameterInfo pi= iter.next();
+		for (ParameterInfo pi : fVariables) {
 			if (fCreateGetter && isValidField(pi) && listener.isCreateGetter(pi)) {
 				MethodDeclaration getter= createGetter(pi, declaringType, cuRewrite, context);
 				listener.getterCreated(cuRewrite, getter, pi);
@@ -248,10 +246,9 @@ public class ParameterObjectFactory {
 		methodDeclaration.setBody(block);
 		List<Statement> statements= block.statements();
 		List<ParameterInfo> validParameter= new ArrayList<>();
-		for (Iterator<ParameterInfo> iter= fVariables.iterator(); iter.hasNext();) {
-			ParameterInfo pi= iter.next();
+		for (ParameterInfo pi : fVariables) {
 			if (isValidField(pi) && listener.isUseInConstructor(pi)) {
-					validParameter.add(pi);
+				validParameter.add(pi);
 			}
 		}
 
@@ -477,7 +474,7 @@ public class ParameterObjectFactory {
 	public Type createType(boolean asTopLevelClass, CompilationUnitRewrite cuRewrite, int position) {
 		String qualifier= asTopLevelClass ? fPackage : fEnclosingType;
 		String concatenateName= JavaModelUtil.concatenateName(qualifier, fClassName);
-		
+
 		ImportRewrite importRewrite= cuRewrite.getImportRewrite();
 		ContextSensitiveImportRewriteContext context= createParameterClassAwareContext(asTopLevelClass, cuRewrite, position);
 		String addedImport= importRewrite.addImport(concatenateName, context);
@@ -526,8 +523,7 @@ public class ParameterObjectFactory {
 	}
 
 	public ParameterInfo getParameterInfo(String identifier) {
-		for (Iterator<ParameterInfo> iter= fVariables.iterator(); iter.hasNext();) {
-			ParameterInfo pi= iter.next();
+		for (ParameterInfo pi : fVariables) {
 			if (pi.getOldName().equals(identifier))
 				return pi;
 		}

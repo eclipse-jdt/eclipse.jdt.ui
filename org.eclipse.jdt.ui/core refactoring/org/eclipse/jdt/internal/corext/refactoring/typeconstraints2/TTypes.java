@@ -48,9 +48,9 @@ public class TTypes {
 				return;
 
 			if (type.isTypeVariable() || type.isCaptureType()) {
-				TType[] bounds= ((AbstractTypeVariable) type).getBounds();
-				for (int i= 0; i < bounds.length; i++)
-					fWorklist.push(bounds[i].getTypeDeclaration());
+				for (TType bound : ((AbstractTypeVariable) type).getBounds()) {
+					fWorklist.push(bound.getTypeDeclaration());
+				}
 
 			} else {
 				TType superclass= type.getSuperclass();
@@ -60,9 +60,9 @@ public class TTypes {
 				} else {
 					fWorklist.push(superclass.getTypeDeclaration());
 				}
-				TType[] interfaces= type.getInterfaces();
-				for (int i= 0; i < interfaces.length; i++)
-					fWorklist.push(interfaces[i].getTypeDeclaration());
+				for (TType intf : type.getInterfaces()) {
+					fWorklist.push(intf.getTypeDeclaration());
+				}
 			}
 		}
 
@@ -88,9 +88,9 @@ public class TTypes {
 		@Override
 		public TType next() {
 			TType result= fWorklist.pop();
-			TType[] subTypes= result.getSubTypes();
-			for (int i= 0; i < subTypes.length; i++)
-				fWorklist.push(subTypes[i].getTypeDeclaration());
+			for (TType subType : result.getSubTypes()) {
+				fWorklist.push(subType.getTypeDeclaration());
+			}
 
 			return result;
 		}
@@ -138,10 +138,10 @@ public class TTypes {
 		} else if (rhs.isTypeVariable()) {
 			if (rhs.canAssignTo(lhs))
 				return true;
-			TType[] bounds= ((TypeVariable) rhs).getBounds();
-			for (int i= 0; i < bounds.length; i++) {
-				if (canAssignTo(bounds[i], lhs))
+			for (TType bound : ((TypeVariable) rhs).getBounds()) {
+				if (canAssignTo(bound, lhs)) {
 					return true;
+				}
 			}
 			return lhs.isJavaLangObject();
 

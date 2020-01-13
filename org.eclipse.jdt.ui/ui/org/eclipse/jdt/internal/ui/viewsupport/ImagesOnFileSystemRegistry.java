@@ -73,9 +73,8 @@ public class ImagesOnFileSystemRegistry {
 
 	private void delete(File file) {
 		if (file.isDirectory()) {
-			File[] listFiles= file.listFiles();
-			for (int i= 0; i < listFiles.length; i++) {
-				delete(listFiles[i]);
+			for (File f : file.listFiles()) {
+				delete(f);
 			}
 		}
 		file.delete();

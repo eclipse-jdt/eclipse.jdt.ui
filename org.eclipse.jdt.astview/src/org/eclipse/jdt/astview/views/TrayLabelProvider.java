@@ -1,13 +1,13 @@
 /*******************************************************************************
  * Copyright (c) 2000, 2006 IBM Corporation and others.
  *
- * This program and the accompanying materials 
+ * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -27,27 +27,27 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.ASTNode;
 
 public class TrayLabelProvider extends LabelProvider implements IColorProvider {
-	
+
 	private Color fBlue, fRed;
 	private Color fWidgetForeground;
-	
+
 	private Object fViewerElement;
-	
+
 	public TrayLabelProvider() {
 		Display display= Display.getCurrent();
-		
+
 		fRed= display.getSystemColor(SWT.COLOR_RED);
 		fBlue= display.getSystemColor(SWT.COLOR_DARK_BLUE);
 		fWidgetForeground= display.getSystemColor(SWT.COLOR_WIDGET_FOREGROUND);
 	}
-	
+
 	public void setViewerElement(Object viewerElement) {
 		if (fViewerElement != viewerElement) {
 			fViewerElement= viewerElement;
 			fireLabelProviderChanged(new LabelProviderChangedEvent(this));
 		}
 	}
-	
+
 	@Override
 	public String getText(Object obj) {
 		if (obj instanceof DynamicBindingProperty) {
@@ -66,7 +66,7 @@ public class TrayLabelProvider extends LabelProvider implements IColorProvider {
 			return ""; // https://bugs.eclipse.org/bugs/show_bug.cgi?id=126017
 		}
 	}
-	
+
 	@Override
 	public Image getImage(Object obj) {
 		if (obj instanceof DynamicBindingProperty) {
@@ -83,7 +83,7 @@ public class TrayLabelProvider extends LabelProvider implements IColorProvider {
 			return null;
 		}
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.viewers.IBaseLabelProvider#dispose()
 	 */
@@ -92,31 +92,31 @@ public class TrayLabelProvider extends LabelProvider implements IColorProvider {
 		super.dispose();
 		fViewerElement= null;
 	}
-	
+
 	@Override
 	public Color getForeground(Object element) {
 		if (element instanceof Binding) {
 			return fBlue;
-			
+
 		} else if (element instanceof ExceptionAttribute) {
 			if (element instanceof DynamicBindingProperty) {
 				((DynamicBindingProperty) element).setViewerElement(fViewerElement instanceof Binding ? (Binding) fViewerElement : null);
 			} else if (element instanceof DynamicAttributeProperty) {
 				((DynamicAttributeProperty) element).setViewerElement(fViewerElement);
 			}
-			
+
 			if (((ExceptionAttribute) element).getException() == null)
 //				return null; //Bug 75022: Does not work when label is updated (retains old color, doesn't get default)
 				//TODO remove hackaround when bug 75022 is fixed
 				return fWidgetForeground;
 			else
 				return fRed;
-			
+
 		} else {
 			return null; // normal color
 		}
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.viewers.IColorProvider#getBackground(java.lang.Object)
 	 */
@@ -124,5 +124,5 @@ public class TrayLabelProvider extends LabelProvider implements IColorProvider {
 	public Color getBackground(Object element) {
 		return null;
 	}
-	
+
 }

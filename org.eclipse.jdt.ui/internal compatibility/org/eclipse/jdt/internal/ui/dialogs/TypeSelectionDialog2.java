@@ -195,15 +195,13 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 	    } else {
 		    if (fValidator != null) {
 				List jElements= new ArrayList();
-				for (int i= 0; i < selection.length; i++) {
-					IType type= selection[i].getType();
+				for (TypeNameMatch typeInfo : selection) {
+					IType type= typeInfo.getType();
 					if (type != null) {
 						jElements.add(type);
 					} else {
-			    		status= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR,
-			    			Messages.format(JavaUIMessages.TypeSelectionDialog_error_type_doesnot_exist, selection[i].getFullyQualifiedName()),
-			    			null);
-			    		break;
+						status= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR, Messages.format(JavaUIMessages.TypeSelectionDialog_error_type_doesnot_exist, typeInfo.getFullyQualifiedName()), null);
+						break;
 					}
 				}
 				if (status == null) {
@@ -280,8 +278,7 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 		
 		OpenTypeHistory history= OpenTypeHistory.getInstance();
 		List result= new ArrayList(selected.length);
-		for (int i= 0; i < selected.length; i++) {
-			TypeNameMatch typeInfo= selected[i];
+		for (TypeNameMatch typeInfo : selected) {
 			IType type= typeInfo.getType();
 			if (!type.exists()) {
 				String title= JavaUIMessages.TypeSelectionDialog_errorTitle; 

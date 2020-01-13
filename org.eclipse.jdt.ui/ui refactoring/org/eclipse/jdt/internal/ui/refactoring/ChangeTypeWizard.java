@@ -251,11 +251,13 @@ public class ChangeTypeWizard extends RefactoringWizard {
 		}
 
 		private TreeItem findItem(TreeItem[] items, ITypeBinding type){
-			for (int i=0; i < items.length; i++){
-				if (items[i].getData().equals(type)) return items[i];
+			for (TreeItem item : items) {
+				if (item.getData().equals(type)) {
+					return item;
+				}
 			}
-			for (int i=0; i < items.length; i++){
-				TreeItem item= findItem(items[i].getItems(), type);
+			for (TreeItem ti : items) {
+				TreeItem item= findItem(ti.getItems(), type);
 				if (item != null) return item;
 			}
 			return null;
@@ -286,7 +288,7 @@ public class ChangeTypeWizard extends RefactoringWizard {
 		 */
 		private void addTreeComponent(Composite parent) {
 			fTreeViewer= new TreeViewer(parent, SWT.SINGLE | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
-			
+
 			GridData gd= new GridData(GridData.FILL_BOTH);
 			gd.grabExcessHorizontalSpace= true;
 			gd.grabExcessVerticalSpace= true;

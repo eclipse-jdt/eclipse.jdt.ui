@@ -19,7 +19,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -71,8 +70,7 @@ public class ReorgUtils {
 	}
 
 	public static boolean isArchiveOrExternalMember(IJavaElement[] elements) {
-		for (int i= 0; i < elements.length; i++) {
-			IJavaElement element= elements[i];
+		for (IJavaElement element : elements) {
 			IPackageFragmentRoot root= (IPackageFragmentRoot)element.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 			if (root != null && (root.isArchive() || root.isExternal()))
 				return true;
@@ -83,8 +81,8 @@ public class ReorgUtils {
 	public static boolean containsOnlyProjects(List<?> elements){
 		if (elements.isEmpty())
 			return false;
-		for(Iterator<?> iter= elements.iterator(); iter.hasNext(); ) {
-			if (! isProject(iter.next()))
+		for (Object name : elements) {
+			if (! isProject(name))
 				return false;
 		}
 		return true;
@@ -96,7 +94,7 @@ public class ReorgUtils {
 
 	/**
 	 * Checks whether the given list contains only working sets.
-	 * 
+	 *
 	 * @param elements the list with elements to check
 	 * @return <code>true</code> if the list contains only working sets, <code>false</code>
 	 *         otherwise
@@ -105,8 +103,8 @@ public class ReorgUtils {
 	public static boolean containsOnlyWorkingSets (List<?> elements){
 		if (elements.isEmpty())
 			return false;
-		for (Iterator<?> iter= elements.iterator(); iter.hasNext();) {
-			if (!isWorkingSet(iter.next()))
+		for (Object name : elements) {
+			if (!isWorkingSet(name))
 				return false;
 		}
 		return true;
@@ -114,11 +112,11 @@ public class ReorgUtils {
 
 	/**
 	 * Checks whether the given object is a working set.
-	 * 
+	 *
 	 * @param element the element to test
 	 * @return <code>true</code> if the element is a working set, <code>false</code> otherwise
 	 * @since 3.5
-	 * 
+	 *
 	 */
 
 	public static boolean isWorkingSet(Object element){
@@ -244,8 +242,7 @@ public class ReorgUtils {
 
 	public static IResource[] getResources(List<?> elements) {
 		List<IResource> resources= new ArrayList<>(elements.size());
-		for (Iterator<?> iter= elements.iterator(); iter.hasNext();) {
-			Object element= iter.next();
+		for (Object element : elements) {
 			if (element instanceof IResource)
 				resources.add((IResource) element);
 		}
@@ -254,8 +251,7 @@ public class ReorgUtils {
 
 	public static IJavaElement[] getJavaElements(List<?> elements) {
 		List<IJavaElement> resources= new ArrayList<>(elements.size());
-		for (Iterator<?> iter= elements.iterator(); iter.hasNext();) {
-			Object element= iter.next();
+		for (Object element : elements) {
 			if (element instanceof IJavaElement)
 				resources.add((IJavaElement) element);
 		}
@@ -264,15 +260,14 @@ public class ReorgUtils {
 
 	/**
 	 * Returns the jar entry resources from the list of elements.
-	 * 
+	 *
 	 * @param elements the list of elements
 	 * @return the array of jar entry resources
 	 * @since 3.6
 	 */
 	public static IJarEntryResource[] getJarEntryResources(List<?> elements) {
 		List<IJarEntryResource> resources= new ArrayList<>(elements.size());
-		for (Iterator<?> iter= elements.iterator(); iter.hasNext();) {
-			Object element= iter.next();
+		for (Object element : elements) {
 			if (element instanceof IJarEntryResource)
 				resources.add((IJarEntryResource) element);
 		}
@@ -281,8 +276,7 @@ public class ReorgUtils {
 
 	public static IWorkingSet[] getWorkingSets(List<?> elements) {
 		List<IWorkingSet> result= new ArrayList<>(1);
-		for (Iterator<?> iter= elements.iterator(); iter.hasNext();) {
-			Object element= iter.next();
+		for (Object element : elements) {
 			if (element instanceof IWorkingSet) {
 				result.add((IWorkingSet) element);
 			}
@@ -327,8 +321,7 @@ public class ReorgUtils {
 
 	public static IType[] getMainTypes(IJavaElement[] javaElements) throws JavaModelException {
 		List<IJavaElement> result= new ArrayList<>();
-		for (int i= 0; i < javaElements.length; i++) {
-			IJavaElement element= javaElements[i];
+		for (IJavaElement element : javaElements) {
 			if (element instanceof IType && JavaElementUtil.isMainType((IType)element))
 				result.add(element);
 		}
@@ -348,9 +341,10 @@ public class ReorgUtils {
 	//the result can be cast down to the requested type array
 	public static Set<IResource> getResourcesOfType(IResource[] resources, int typeMask){
 		Set<IResource> result= new HashSet<>(resources.length);
-		for (int i= 0; i < resources.length; i++) {
-			if (isOfType(resources[i], typeMask))
-				result.add(resources[i]);
+		for (IResource resource : resources) {
+			if (isOfType(resource, typeMask)) {
+				result.add(resource);
+			}
 		}
 		return result;
 	}
@@ -359,16 +353,16 @@ public class ReorgUtils {
 	//type is _not_ a mask
 	public static List<?> getElementsOfType(IJavaElement[] javaElements, int type){
 		List<IJavaElement> result= new ArrayList<>(javaElements.length);
-		for (int i= 0; i < javaElements.length; i++) {
-			if (isOfType(javaElements[i], type))
-				result.add(javaElements[i]);
+		for (IJavaElement javaElement : javaElements) {
+			if (isOfType(javaElement, type)) {
+				result.add(javaElement);
+			}
 		}
 		return result;
 	}
 
 	public static boolean hasElementsNotOfType(IResource[] resources, int typeMask) {
-		for (int i= 0; i < resources.length; i++) {
-			IResource resource= resources[i];
+		for (IResource resource : resources) {
 			if (resource != null && ! isOfType(resource, typeMask))
 				return true;
 		}
@@ -377,8 +371,7 @@ public class ReorgUtils {
 
 	//type is _not_ a mask
 	public static boolean hasElementsNotOfType(IJavaElement[] javaElements, int type) {
-		for (int i= 0; i < javaElements.length; i++) {
-			IJavaElement element= javaElements[i];
+		for (IJavaElement element : javaElements) {
 			if (element != null && ! isOfType(element, type))
 				return true;
 		}
@@ -387,8 +380,7 @@ public class ReorgUtils {
 
 	//type is _not_ a mask
 	public static boolean hasElementsOfType(IJavaElement[] javaElements, int type) {
-		for (int i= 0; i < javaElements.length; i++) {
-			IJavaElement element= javaElements[i];
+		for (IJavaElement element : javaElements) {
 			if (element != null && isOfType(element, type))
 				return true;
 		}
@@ -396,16 +388,15 @@ public class ReorgUtils {
 	}
 
 	public static boolean hasElementsOfType(IJavaElement[] javaElements, int[] types) {
-		for (int i= 0; i < types.length; i++) {
-			if (hasElementsOfType(javaElements, types[i])) return true;
+		for (int type : types) {
+			if (hasElementsOfType(javaElements, type)) return true;
 		}
 		return false;
 	}
 
 
 	public static boolean hasOnlyElementsOfType(IJavaElement[] javaElements, int[] types) {
-		for (int i= 0; i < javaElements.length; i++) {
-			IJavaElement element= javaElements[i];
+		for (IJavaElement element : javaElements) {
 			boolean found= false;
 			for (int j= 0; j < types.length && !found; j++) {
 				if (isOfType(element, types[j]))
@@ -419,8 +410,7 @@ public class ReorgUtils {
 	}
 
 	public static boolean hasElementsOfType(IResource[] resources, int typeMask) {
-		for (int i= 0; i < resources.length; i++) {
-			IResource resource= resources[i];
+		for (IResource resource : resources) {
 			if (resource != null && isOfType(resource, typeMask))
 				return true;
 		}
@@ -458,24 +448,26 @@ public class ReorgUtils {
 	}
 
 	public static IPackageFragmentRoot getCorrespondingPackageFragmentRoot(IJavaProject p) throws JavaModelException {
-		IPackageFragmentRoot[] roots= p.getPackageFragmentRoots();
-		for (int i= 0; i < roots.length; i++) {
-			if (isPackageFragmentRootCorrespondingToProject(roots[i]))
-				return roots[i];
+		for (IPackageFragmentRoot root : p.getPackageFragmentRoots()) {
+			if (isPackageFragmentRootCorrespondingToProject(root)) {
+				return root;
+			}
 		}
 		return null;
 	}
 
 	public static boolean containsLinkedResources(IResource[] resources){
-		for (int i= 0; i < resources.length; i++) {
-			if (resources[i] != null && resources[i].isLinked()) return true;
+		for (IResource resource : resources) {
+			if (resource != null && resource.isLinked()) {
+				return true;
+			}
 		}
 		return false;
 	}
 
 	public static boolean containsLinkedResources(IJavaElement[] javaElements){
-		for (int i= 0; i < javaElements.length; i++) {
-			IResource res= getResource(javaElements[i]);
+		for (IJavaElement javaElement : javaElements) {
+			IResource res= getResource(javaElement);
 			if (res != null && res.isLinked()) return true;
 		}
 		return false;
@@ -552,8 +544,7 @@ public class ReorgUtils {
 
 	public static IResource[] getNotNulls(IResource[] resources) {
 		Set<IResource> result= new LinkedHashSet<>(resources.length);
-		for (int i= 0; i < resources.length; i++) {
-			IResource resource= resources[i];
+		for (IResource resource : resources) {
 			if (resource != null)
 				result.add(resource);
 		}
@@ -562,8 +553,7 @@ public class ReorgUtils {
 
 	public static IResource[] getNotLinked(IResource[] resources) {
 		Collection<IResource> result= new LinkedHashSet<>(resources.length);
-		for (int i= 0; i < resources.length; i++) {
-			IResource resource= resources[i];
+		for (IResource resource : resources) {
 			if (resource != null && ! result.contains(resource) && ! resource.isLinked())
 				result.add(resource);
 		}
@@ -575,8 +565,7 @@ public class ReorgUtils {
 	 */
 	public static Map<ICompilationUnit, List<IJavaElement>> groupByCompilationUnit(List<IJavaElement> javaElements){
 		Map<ICompilationUnit, List<IJavaElement>> result= new HashMap<>();
-		for (Iterator<IJavaElement> iter= javaElements.iterator(); iter.hasNext();) {
-			IJavaElement element= iter.next();
+		for (IJavaElement element : javaElements) {
 			ICompilationUnit cu= ReorgUtils.getCompilationUnit(element);
 			if (cu != null){
 				if (! result.containsKey(cu))
@@ -588,8 +577,7 @@ public class ReorgUtils {
 	}
 
 	public static void splitIntoJavaElementsAndResources(Object[] elements, List<? super IJavaElement> javaElementResult, List<? super IResource> resourceResult) {
-		for (int i= 0; i < elements.length; i++) {
-			Object element= elements[i];
+		for (Object element : elements) {
 			if (element instanceof IJavaElement) {
 				javaElementResult.add((IJavaElement) element);
 			} else if (element instanceof IResource) {

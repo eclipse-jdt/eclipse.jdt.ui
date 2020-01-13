@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2019 IBM Corporation and others.
+ * Copyright (c) 2006, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1050,7 +1050,15 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		newMethod.setBody(null);
 		newMethod.setConstructor(false);
 		copyExtraDimensions(oldMethod, newMethod);
-		newMethod.setJavadoc(null);
+
+		final Javadoc oldJavadoc= oldMethod.getJavadoc();
+		if (oldJavadoc != null) {
+			String newJavadocString= ASTNodes.getNodeSource(oldJavadoc, false, true);
+			if (newJavadocString != null) {
+				newMethod.setJavadoc((Javadoc) targetRewrite.getASTRewrite().createStringPlaceholder(newJavadocString, ASTNode.JAVADOC));
+			}
+		}
+
 		int modifiers= getModifiersWithUpdatedVisibility(sourceMethod, Modifier.ABSTRACT | JdtFlags.clearFlag(Modifier.NATIVE | Modifier.FINAL, sourceMethod.getFlags()), adjustments, monitor, false, status);
 		if (oldMethod.isVarargs())
 			modifiers&= ~Flags.AccVarargs;
@@ -1191,7 +1199,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 										String targetPackage= targetRewriter.getRoot().getPackage() == null ? "" : targetRewriter.getRoot().getPackage().getName().toString(); //$NON-NLS-1$
 										String targetTypeBinding= targetPackage + "." + oldTypeBinding.getName(); //$NON-NLS-1$
 
-										// Find the same type-name field but fully qualified. 
+										// Find the same type-name field but fully qualified.
 										// In that case it won't shadow the pulled up field
 										boolean qualifiedTypeNameInTarget= true;
 										String sourceSignature= ((IField) member).getTypeSignature();
@@ -1268,7 +1276,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 							adjustor.setStatus(status);
 							adjustor.setAdjustments(adjustments);
 							if (destination.isInterface() && !JdtFlags.isPublic(method)) {
-								adjustments.put(method, new MemberVisibilityAdjustor.OutgoingMemberVisibilityAdjustment(method, Modifier.ModifierKeyword.PUBLIC_KEYWORD, RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_method_warning, new String[] { MemberVisibilityAdjustor.getLabel(method), RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_public}), JavaStatusContext.create(method))));								
+								adjustments.put(method, new MemberVisibilityAdjustor.OutgoingMemberVisibilityAdjustment(method, Modifier.ModifierKeyword.PUBLIC_KEYWORD, RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_method_warning, new String[] { MemberVisibilityAdjustor.getLabel(method), RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_public}), JavaStatusContext.create(method))));
 							} else if (needsVisibilityAdjustment(method, false, new SubProgressMonitor(subsub, 1), status)) {
 								adjustments.put(method, new MemberVisibilityAdjustor.OutgoingMemberVisibilityAdjustment(method, Modifier.ModifierKeyword.PROTECTED_KEYWORD, RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_method_warning, new String[] { MemberVisibilityAdjustor.getLabel(method), RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_protected}), JavaStatusContext.create(method))));
 							}

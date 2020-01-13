@@ -123,8 +123,7 @@ public class FieldNameProcessor implements IContentAssistProcessor, ISubjectCont
 		String prefix= input.substring(0, documentOffset);
 		ImageDescriptor imageDescriptor= JavaElementImageProvider.getFieldImageDescriptor(false, fRefactoring.getVisibility());
 		Image image= fImageRegistry.get(imageDescriptor);
-		for (int i= 0; i < fFieldNameProposals.length; i++) {
-			String tempName= fFieldNameProposals[i];
+		for (String tempName : fFieldNameProposals) {
 			if (tempName.length() == 0 || ! tempName.startsWith(prefix))
 				continue;
 			JavaCompletionProposal proposal= new JavaCompletionProposal(tempName, 0, input.length(), image, tempName, 0);

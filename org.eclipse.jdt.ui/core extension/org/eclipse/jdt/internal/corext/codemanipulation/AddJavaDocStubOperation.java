@@ -130,8 +130,7 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 			String lineDelim= TextUtilities.getDefaultLineDelimiter(document);
 			MultiTextEdit edit= new MultiTextEdit();
 
-			for (int i= 0; i < fMembers.length; i++) {
-				IMember curr= fMembers[i];
+			for (IMember curr : fMembers) {
 				int memberStartOffset= getMemberStartOffset(curr, document);
 
 				String comment= null;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -177,8 +177,8 @@ public class ExtractTempRefactoring extends Refactoring {
 
 	private static boolean allArraysEqual(ASTNode[][] arrays, int position) {
 		Object element= arrays[0][position];
-		for (int i= 0; i < arrays.length; i++) {
-			Object[] array= arrays[i];
+		for (ASTNode[] a : arrays) {
+			Object[] array= a;
 			if (!element.equals(array[position]))
 				return false;
 		}
@@ -209,6 +209,9 @@ public class ExtractTempRefactoring extends Refactoring {
 			return false;
 		if (parent instanceof SwitchCase)
 			return false;
+		if (node instanceof SimpleName && node.getLocationInParent() != null) {
+			return !node.getLocationInParent().getId().equals("name"); //$NON-NLS-1$
+		}
 		return true;
 	}
 
@@ -323,9 +326,10 @@ public class ExtractTempRefactoring extends Refactoring {
 
 	private static IASTFragment[] retainOnlyReplacableMatches(IASTFragment[] allMatches) {
 		List<IASTFragment> result= new ArrayList<>(allMatches.length);
-		for (int i= 0; i < allMatches.length; i++) {
-			if (canReplace(allMatches[i]))
-				result.add(allMatches[i]);
+		for (IASTFragment match : allMatches) {
+			if (canReplace(match)) {
+				result.add(match);
+			}
 		}
 		return result.toArray(new IASTFragment[result.size()]);
 	}
@@ -337,7 +341,7 @@ public class ExtractTempRefactoring extends Refactoring {
 	private ICompilationUnit fCu;
 
 	private boolean fDeclareFinal;
-	
+
 	private boolean fDeclareVarType;
 
 	private String[] fExcludedVariableNames;
@@ -426,8 +430,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		//TODO: should not have to prune duplicates here...
 		ASTRewrite rewrite= fCURewrite.getASTRewrite();
 		HashSet<IASTFragment> seen= new HashSet<>();
-		for (int i= 0; i < fragmentsToReplace.length; i++) {
-			IASTFragment fragment= fragmentsToReplace[i];
+		for (IASTFragment fragment : fragmentsToReplace) {
 			if (! seen.add(fragment))
 				continue;
 			SimpleName tempName= fCURewrite.getAST().newSimpleName(fTempName);
@@ -594,9 +597,8 @@ public class ExtractTempRefactoring extends Refactoring {
 
 	private RefactoringStatus checkMatchingFragments() throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
-		IASTFragment[] matchingFragments= getMatchingFragments();
-		for (int i= 0; i < matchingFragments.length; i++) {
-			ASTNode node= matchingFragments[i].getAssociatedNode();
+		for (IASTFragment matchingFragment : getMatchingFragments()) {
+			ASTNode node= matchingFragment.getAssociatedNode();
 			if (isLeftValue(node) && !isReferringToLocalVariableFromFor((Expression) node)) {
 				String msg= RefactoringCoreMessages.ExtractTempRefactoring_assigned_to;
 				result.addWarning(msg, JavaStatusContext.create(fCu, node));
@@ -788,7 +790,7 @@ public class ExtractTempRefactoring extends Refactoring {
 	public boolean declareFinal() {
 		return fDeclareFinal;
 	}
-	
+
 	public boolean declareVarType() {
 		return fDeclareVarType;
 	}
@@ -846,13 +848,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		IASTFragment[] nodesToReplace= retainOnlyReplacableMatches(getMatchingFragments());
 		if (nodesToReplace.length == 0)
 			return getSelectedExpression();
-		Comparator<IASTFragment> comparator= new Comparator<IASTFragment>() {
-
-			@Override
-			public int compare(IASTFragment o1, IASTFragment o2) {
-				return o1.getStartPosition() - o2.getStartPosition();
-			}
-		};
+		Comparator<IASTFragment> comparator= (o1, o2) -> o1.getStartPosition() - o2.getStartPosition();
 		Arrays.sort(nodesToReplace, comparator);
 		return (IExpressionFragment) nodesToReplace[0];
 	}
@@ -912,7 +908,7 @@ public class ExtractTempRefactoring extends Refactoring {
 
 		ASTRewrite rewrite= fCURewrite.getASTRewrite();
 		AST ast= rewrite.getAST();
-		
+
 		if (isVarTypeAllowed() && fDeclareVarType) {
 			resultingType= ast.newSimpleType(ast.newSimpleName("var")); //$NON-NLS-1$
 		} else if (expression instanceof ClassInstanceCreation && (typeBinding == null || typeBinding.getTypeArguments().length == 0)) {
@@ -1040,7 +1036,7 @@ public class ExtractTempRefactoring extends Refactoring {
 	public void setDeclareFinal(boolean declareFinal) {
 		fDeclareFinal= declareFinal;
 	}
-	
+
 	public void setDeclareVarType(boolean declareVarType) {
 		fDeclareVarType= declareVarType;
 	}
@@ -1111,7 +1107,7 @@ public class ExtractTempRefactoring extends Refactoring {
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_TYPE_VAR));
 		return new RefactoringStatus();
 	}
-	
+
 	public boolean isVarTypeAllowed() {
 		boolean isAllowed= false;
 		if (fCompilationUnitNode != null) {

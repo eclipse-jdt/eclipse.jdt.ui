@@ -110,8 +110,7 @@ class OverwriteHelper {
 
 	private void confirmPackageFragmentRootOverwritting(IConfirmQuery skipQuery, IConfirmQuery overwriteQuery) {
 		List<IPackageFragmentRoot> toNotOverwrite= new ArrayList<>(1);
-		for (int i= 0; i < fRoots.length; i++) {
-			IPackageFragmentRoot root= fRoots[i];
+		for (IPackageFragmentRoot root : fRoots) {
 			if (canOverwrite(root)) {
 				if (root.getResource() instanceof IContainer) {
 					if (!skip(JavaElementLabels.getElementLabel(root, JavaElementLabels.ALL_DEFAULT), skipQuery))
@@ -128,8 +127,7 @@ class OverwriteHelper {
 
 	private void confirmCuOverwritting(IConfirmQuery overwriteQuery) {
 		List<ICompilationUnit> cusToNotOverwrite= new ArrayList<>(1);
-		for (int i= 0; i < fCus.length; i++) {
-			ICompilationUnit cu= fCus[i];
+		for (ICompilationUnit cu : fCus) {
 			if (canOverwrite(cu) && ! overwrite(cu, overwriteQuery))
 				cusToNotOverwrite.add(cu);
 		}
@@ -139,8 +137,7 @@ class OverwriteHelper {
 
 	private void confirmFolderOverwritting(IConfirmQuery overwriteQuery) {
 		List<IFolder> foldersToNotOverwrite= new ArrayList<>(1);
-		for (int i= 0; i < fFolders.length; i++) {
-			IFolder folder= fFolders[i];
+		for (IFolder folder : fFolders) {
 			if (willOverwrite(folder) && ! skip(BasicElementLabels.getResourceName(folder), overwriteQuery))
 				foldersToNotOverwrite.add(folder);
 		}
@@ -150,8 +147,7 @@ class OverwriteHelper {
 
 	private void confirmFileOverwritting(IConfirmQuery overwriteQuery, IConfirmQuery skipQuery) {
 		List<IFile> filesToNotOverwrite= new ArrayList<>(1);
-		for (int i= 0; i < fFiles.length; i++) {
-			IFile file= fFiles[i];
+		for (IFile file : fFiles) {
 			if (willOverwrite(file)) {
 				IContainer destination= (IContainer) ResourceUtil.getResource(fDestination);
 				if (ParentChecker.isDescendantOf(file, destination.findMember(file.getName()))) {
@@ -169,8 +165,7 @@ class OverwriteHelper {
 
 	private void confirmPackageOverwritting(IConfirmQuery overwriteQuery){
 		List<IPackageFragment> toNotOverwrite= new ArrayList<>(1);
-		for (int i= 0; i < fPackageFragments.length; i++) {
-			IPackageFragment pack= fPackageFragments[i];
+		for (IPackageFragment pack : fPackageFragments) {
 			if (canOverwrite(pack) && ! overwrite(pack, overwriteQuery))
 				toNotOverwrite.add(pack);
 		}

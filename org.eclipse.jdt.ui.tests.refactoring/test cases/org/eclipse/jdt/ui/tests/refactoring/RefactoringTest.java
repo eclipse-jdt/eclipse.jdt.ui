@@ -146,9 +146,8 @@ public abstract class RefactoringTest extends TestCase {
 		}
 
 		if (getRoot().exists()){
-			IJavaElement[] packages= getRoot().getChildren();
-			for (int i= 0; i < packages.length; i++){
-				IPackageFragment pack= (IPackageFragment)packages[i];
+			for (IJavaElement p : getRoot().getChildren()) {
+				IPackageFragment pack= (IPackageFragment) p;
 				if (!pack.equals(getPackageP()) && !pack.equals(getPackageQ()) && pack.exists() && !pack.isReadOnly())
 					if (pack.isDefaultPackage())
 						JavaProjectHelper.deletePackage(pack); // also delete packages with subpackages
@@ -173,11 +172,9 @@ public abstract class RefactoringTest extends TestCase {
 		if (javaProject.exists()) {
 			IClasspathEntry srcEntry= getRoot().getRawClasspathEntry();
 			IClasspathEntry jreEntry= RefactoringTestSetup.getJRELibrary().getRawClasspathEntry();
-			IClasspathEntry[] cpes= javaProject.getRawClasspath();
 			ArrayList<IClasspathEntry> newCPEs= new ArrayList<>();
 			boolean cpChanged= false;
-			for (int i= 0; i < cpes.length; i++) {
-				IClasspathEntry cpe= cpes[i];
+			for (IClasspathEntry cpe : javaProject.getRawClasspath()) {
 				if (cpe.equals(srcEntry) || cpe.equals(jreEntry)) {
 					newCPEs.add(cpe);
 				} else {
@@ -189,9 +186,7 @@ public abstract class RefactoringTest extends TestCase {
 				javaProject.setRawClasspath(newCPEsArray, null);
 			}
 
-			Object[] nonJavaResources= javaProject.getNonJavaResources();
-			for (int i= 0; i < nonJavaResources.length; i++) {
-				Object kid= nonJavaResources[i];
+			for (Object kid : javaProject.getNonJavaResources()) {
 				if (kid instanceof IResource) {
 					IResource resource= (IResource) kid;
 					if (! PROJECT_RESOURCE_CHILDREN.contains(resource.getName())) {
@@ -210,31 +205,29 @@ public abstract class RefactoringTest extends TestCase {
 	}
 
 	private static void tryDeletingAllNonJavaChildResources(IPackageFragment pack) throws CoreException {
-		Object[] nonJavaKids= pack.getNonJavaResources();
-		for (int i= 0; i < nonJavaKids.length; i++) {
-			if (nonJavaKids[i] instanceof IResource) {
-				IResource resource= (IResource)nonJavaKids[i];
+		for (Object nonJavaKid : pack.getNonJavaResources()) {
+			if (nonJavaKid instanceof IResource) {
+				IResource resource= (IResource) nonJavaKid;
 				JavaProjectHelper.delete(resource);
 			}
 		}
 	}
 
 	private static void tryDeletingAllNonJavaChildResources(IPackageFragmentRoot root) throws CoreException {
-		Object[] nonJavaKids= root.getNonJavaResources();
-		for (int i= 0; i < nonJavaKids.length; i++) {
-			if (nonJavaKids[i] instanceof IResource) {
-				IResource resource= (IResource)nonJavaKids[i];
+		for (Object nonJavaKid : root.getNonJavaResources()) {
+			if (nonJavaKid instanceof IResource) {
+				IResource resource= (IResource) nonJavaKid;
 				JavaProjectHelper.delete(resource);
 			}
 		}
 	}
 
 	private static void tryDeletingAllJavaChildren(IPackageFragment pack) throws CoreException {
-		IJavaElement[] kids= pack.getChildren();
-		for (int i= 0; i < kids.length; i++){
-			if (kids[i] instanceof ISourceManipulation){
-				if (kids[i].exists() && !kids[i].isReadOnly())
-					JavaProjectHelper.delete(kids[i]);
+		for (IJavaElement kid : pack.getChildren()) {
+			if (kid instanceof ISourceManipulation) {
+				if (kid.exists() && !kid.isReadOnly()) {
+					JavaProjectHelper.delete(kid);
+				}
 			}
 		}
 	}
@@ -385,11 +378,11 @@ public abstract class RefactoringTest extends TestCase {
 
 	/* ===================  helpers  ================= */
 	protected IType getType(ICompilationUnit cu, String name) throws JavaModelException {
-		IType[] types= cu.getAllTypes();
-		for (int i= 0; i < types.length; i++)
-			if (types[i].getTypeQualifiedName('.').equals(name) ||
-			    types[i].getElementName().equals(name))
-				return types[i];
+		for (IType type : cu.getAllTypes()) {
+			if (type.getTypeQualifiedName('.').equals(name) || type.getElementName().equals(name)) {
+				return type;
+			}
+		}
 		return null;
 	}
 
@@ -466,10 +459,10 @@ public abstract class RefactoringTest extends TestCase {
 	}
 
 	public static IPackageFragmentRoot getSourceFolder(IJavaProject javaProject, String name) throws JavaModelException{
-		IPackageFragmentRoot[] roots= javaProject.getPackageFragmentRoots();
-		for (int i= 0; i < roots.length; i++) {
-			if (! roots[i].isArchive() && roots[i].getElementName().equals(name))
-				return roots[i];
+		for (IPackageFragmentRoot root : javaProject.getPackageFragmentRoots()) {
+			if (!root.isArchive() && root.getElementName().equals(name)) {
+				return root;
+			}
 		}
 		return null;
 	}
@@ -523,8 +516,8 @@ public abstract class RefactoringTest extends TestCase {
 		if (names == null )
 			return new IField[0];
 		Set<IField> fields= new HashSet<>();
-		for (int i = 0; i < names.length; i++) {
-			IField field= type.getField(names[i]);
+		for (String name : names) {
+			IField field= type.getField(name);
 			assertTrue("field " + field.getElementName() + " does not exist", field.exists());
 			fields.add(field);
 		}
@@ -535,16 +528,17 @@ public abstract class RefactoringTest extends TestCase {
 		if (names == null )
 			return new IType[0];
 		Set<IType> memberTypes= new HashSet<>();
-		for (int i = 0; i < names.length; i++) {
+		for (String name : names) {
 			IType memberType;
-			if (names[i].indexOf('.') != -1) {
-				String[] path= names[i].split("\\.");
+			if (name.indexOf('.') != -1) {
+				String[] path= name.split("\\.");
 				memberType= type.getType(path[0]);
 				for (int j= 1; j < path.length; j++) {
 					memberType= memberType.getType(path[j]);
 				}
-			} else
-				memberType= type.getType(names[i]);
+			} else {
+				memberType= type.getType(name);
+			}
 			assertTrue("member type " + memberType.getElementName() + " does not exist", memberType.exists());
 			memberTypes.add(memberType);
 		}
@@ -566,10 +560,8 @@ public abstract class RefactoringTest extends TestCase {
 
 	public static IType[] findTypes(IType[] types, String[] namesOfTypesToPullUp) {
 		List<IType> found= new ArrayList<>(types.length);
-		for (int i= 0; i < types.length; i++) {
-			IType type= types[i];
-			for (int j= 0; j < namesOfTypesToPullUp.length; j++) {
-				String name= namesOfTypesToPullUp[j];
+		for (IType type : types) {
+			for (String name : namesOfTypesToPullUp) {
 				if (type.getElementName().equals(name))
 					found.add(type);
 			}
@@ -579,10 +571,8 @@ public abstract class RefactoringTest extends TestCase {
 
 	public static IField[] findFields(IField[] fields, String[] namesOfFieldsToPullUp) {
 		List<IField> found= new ArrayList<>(fields.length);
-		for (int i= 0; i < fields.length; i++) {
-			IField field= fields[i];
-			for (int j= 0; j < namesOfFieldsToPullUp.length; j++) {
-				String name= namesOfFieldsToPullUp[j];
+		for (IField field : fields) {
+			for (String name : namesOfFieldsToPullUp) {
 				if (field.getElementName().equals(name))
 					found.add(field);
 			}
@@ -592,8 +582,7 @@ public abstract class RefactoringTest extends TestCase {
 
 	public static IMethod[] findMethods(IMethod[] selectedMethods, String[] namesOfMethods, String[][] signaturesOfMethods){
 		List<IMethod> found= new ArrayList<>(selectedMethods.length);
-		for (int i= 0; i < selectedMethods.length; i++) {
-			IMethod method= selectedMethods[i];
+		for (IMethod method : selectedMethods) {
 			String[] paramTypes= method.getParameterTypes();
 			for (int j= 0; j < namesOfMethods.length; j++) {
 				String methodName= namesOfMethods[j];

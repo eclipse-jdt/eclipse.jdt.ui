@@ -1,13 +1,13 @@
 /*******************************************************************************
  * Copyright (c) 2000, 2015 IBM Corporation and others.
  *
- * This program and the accompanying materials 
+ * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -15,7 +15,6 @@ package org.eclipse.jdt.astview.views;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.swt.dnd.Clipboard;
@@ -79,9 +78,9 @@ public class TreeCopyAction extends Action {
 				return string;
 		}
 	}
-	
+
 	private final Tree[] fTrees;
-	
+
 	public TreeCopyAction(Tree[] trees) {
 		fTrees= trees;
 		setText("&Copy"); //$NON-NLS-1$
@@ -95,19 +94,19 @@ public class TreeCopyAction extends Action {
 	@Override
 	public void run() {
 		Tree tree= null;
-		for (int i= 0; i < fTrees.length; i++) {
-			if (fTrees[i].isFocusControl()) {
-				tree= fTrees[i];
+		for (Tree t : fTrees) {
+			if (t.isFocusControl()) {
+				tree= t;
 				break;
 			}
 		}
 		if (tree == null)
 			return;
-		
+
 		TreeItem[] selection= tree.getSelection();
 		if (selection.length == 0)
 			return;
-		
+
 		Clipboard clipboard= null;
 		try {
 			clipboard= new Clipboard(tree.getDisplay());
@@ -126,9 +125,8 @@ public class TreeCopyAction extends Action {
 		HashMap<TreeItem, TreeObject> elementToTreeObj= new HashMap<>();
 		List<TreeObject> roots= new ArrayList<>();
 		int indent= Integer.MIN_VALUE;
-		
-		for (int i= 0; i < selection.length; i++) {
-			TreeItem item= selection[i];
+
+		for (TreeItem item : selection) {
 			TreeObject treeObj= elementToTreeObj.get(item);
 			if (treeObj == null) {
 				treeObj= new TreeObject(item, true);
@@ -168,8 +166,7 @@ public class TreeCopyAction extends Action {
 	}
 
 	private void appendSelectionObjects(StringBuffer buffer, int indent, List<TreeObject> selObjs) {
-		for (Iterator<TreeObject> iter= selObjs.iterator(); iter.hasNext();) {
-			TreeObject selObj= iter.next();
+		for (TreeObject selObj : selObjs) {
 			if (selObj.isSelected()) {
 				buffer.append('\n');
 				for (int d= 0; d < indent; d++)

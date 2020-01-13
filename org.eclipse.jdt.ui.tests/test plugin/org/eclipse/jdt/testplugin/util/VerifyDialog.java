@@ -134,10 +134,10 @@ public class VerifyDialog extends TitleAreaDialog {
 		GridData data = new GridData(GridData.FILL_HORIZONTAL);
 		group.setLayoutData(data);
 
-		for (int i = 0; i < _dialogTests.length; i++) {
+		for (IDialogTestPass dialogTest : _dialogTests) {
 			Button radio = new Button(group, SWT.RADIO);
-			radio.setText( _dialogTests[i].label() );
-			final int testID = _dialogTests[i].getID();
+			radio.setText(dialogTest.label());
+			final int testID = dialogTest.getID();
 			radio.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
@@ -146,7 +146,7 @@ public class VerifyDialog extends TitleAreaDialog {
 					_yesButton.setEnabled(true);
 				}
 			});
-			if ( TEST_TYPE == _dialogTests[i].getID() ) {
+			if (TEST_TYPE == dialogTest.getID()) {
 				radio.setSelection(true);
 			}
 		}
@@ -162,8 +162,8 @@ public class VerifyDialog extends TitleAreaDialog {
 		group.setLayoutData(data);
 
 		int checkListSize = 0;
-		for (int i = 0; i < _dialogTests.length; i++) {
-			int size = _dialogTests[i].checkListTexts().size();
+		for (IDialogTestPass dialogTest : _dialogTests) {
+			int size = dialogTest.checkListTexts().size();
 			if (size > checkListSize) {
 				checkListSize = size;
 			}
@@ -189,8 +189,8 @@ public class VerifyDialog extends TitleAreaDialog {
 	 */
 	private void checkYesEnable() {
 		boolean enable = true;
-		for (int i = 0; i < _checkList.length; i++) {
-			if ( !_checkList[i].getSelection() ) {
+		for (Button b : _checkList) {
+			if (!b.getSelection()) {
 				enable = false;
 			}
 		}
@@ -204,16 +204,16 @@ public class VerifyDialog extends TitleAreaDialog {
 		setTitle( test.title() );
 		setMessage( test.description() );
 		Iterator<String> iterator = test.checkListTexts().iterator();
-		for (int i = 0; i < _checkList.length; i++) {
-			if ( iterator.hasNext() ) {
-				_checkList[i].setText( iterator.next().toString() );
-				_checkList[i].setVisible(true);
-				_checkList[i].update();
+		for (Button b : _checkList) {
+			if (iterator.hasNext()) {
+				b.setText(iterator.next().toString());
+				b.setVisible(true);
+				b.update();
 			} else {
-				_checkList[i].setVisible(false);
-				_checkList[i].update();
+				b.setVisible(false);
+				b.update();
 			}
-			_checkList[i].setSelection(true);
+			b.setSelection(true);
 		}
 		_queryLabel.setText( test.queryText() );
 	}

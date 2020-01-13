@@ -89,7 +89,7 @@ public class RefactoringScanner {
 	 * <p>
 	 * <strong>NOTE:</strong> Use only for testing.
 	 * </p>
-	 * 
+	 *
 	 * @param text the text
 	 */
 	public void scan(String text) {

@@ -94,17 +94,17 @@ public final class StubUtility2 {
 
 		decl.setName(ast.newSimpleName(binding.getName()));
 		decl.setConstructor(false);
-		
+
 		ITypeBinding bindingReturnType= binding.getReturnType();
 		bindingReturnType = StubUtility2Core.replaceWildcardsAndCaptures(bindingReturnType);
-		
+
 		if (JavaModelUtil.is50OrHigher(javaProject)) {
 			StubUtility2Core.createTypeParameters(imports, context, ast, binding, decl);
-			
+
 		} else {
 			bindingReturnType= bindingReturnType.getErasure();
 		}
-		
+
 		decl.setReturnType2(imports.addImport(bindingReturnType, ast, context, TypeLocation.RETURN_TYPE));
 
 		List<SingleVariableDeclaration> parameters= StubUtility2Core.createParameters(javaProject, imports, context, ast, binding, parameterNames, decl, nullnessDefault);
@@ -181,7 +181,7 @@ public final class StubUtility2 {
 		boolean skipOverride= inInterface && declaringType == typeObject && !Modifier.isPublic(modifiers);
 
 		if (!skipOverride) {
-			StubUtility2Core.addOverrideAnnotation(settings, javaProject, rewrite, imports, decl, binding.getDeclaringClass().isInterface(), null);			
+			StubUtility2Core.addOverrideAnnotation(settings, javaProject, rewrite, imports, decl, binding.getDeclaringClass().isInterface(), null);
 		}
 
 		return decl;

@@ -588,10 +588,7 @@ public class JavaPartitionerTest extends TestCase {
 	public void testPartitionFinder() {
 		try {
 
-			ITypedRegion[] partitioning= fDocument.computePartitioning(0, fDocument.getLength());
-
-			for (int i= 0; i < partitioning.length; i++) {
-				ITypedRegion expected= partitioning[i];
+			for (ITypedRegion expected : fDocument.computePartitioning(0, fDocument.getLength())) {
 				for (int j= 0; j < expected.getLength(); j++) {
 					ITypedRegion result= fDocument.getPartition(expected.getOffset() + j);
 					assertTrue(expected.equals(result));

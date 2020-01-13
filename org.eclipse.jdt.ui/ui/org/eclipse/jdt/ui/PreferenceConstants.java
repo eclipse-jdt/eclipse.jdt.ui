@@ -2956,6 +2956,18 @@ public class PreferenceConstants {
 	public final static String FORMATTER_COMMENT_FORMATHTML= "comment_format_html"; //$NON-NLS-1$
 
 	/**
+	 * A named preference that controls whether completion processors should be called from the non-UI thread,
+	 * when they declare ability to work from non-UI Thread.
+	 * <p>Completion processors can declare whether they
+	 * require UI Thread or not in their extension description, see {@link org.eclipse.jdt.internal.ui.text.java.CompletionProposalComputerDescriptor#requiresUIThread()}.</p>
+	 * <p>Value is of type <code>Boolean</code></p>
+	 *
+	 * @since 3.21
+	 */
+	public static final String CODEASSIST_NONUITHREAD_COMPUTATION= "content_assist_noUIThread_computation"; //$NON-NLS-1$
+
+
+	/**
 	 * A named preference that controls if the Java code assist gets auto activated.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
@@ -4087,6 +4099,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.CODEASSIST_AUTOACTIVATION_DELAY, 0);
 		store.setDefault(PreferenceConstants.CODEASSIST_AUTOINSERT, true);
 		store.setDefault(PreferenceConstants.CODEASSIST_DISABLE_COMPLETION_PROPOSAL_TRIGGER_CHARS, false);
+		store.setDefault(PreferenceConstants.CODEASSIST_NONUITHREAD_COMPUTATION, false);
 		store.setDefault(PreferenceConstants.PREF_MIN_CHAIN_LENGTH, 2);
 		store.setDefault(PreferenceConstants.PREF_MAX_CHAIN_LENGTH, 4);
 		store.setDefault(PreferenceConstants.PREF_MAX_CHAINS, 20);

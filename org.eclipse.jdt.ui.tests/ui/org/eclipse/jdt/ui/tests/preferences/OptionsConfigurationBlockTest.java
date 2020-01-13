@@ -50,16 +50,14 @@ public class OptionsConfigurationBlockTest extends TestCase {
 	 * @throws Exception should not
 	 */
 	public void testKeysForOptions() throws Exception {
-		Field[] coreFields= JavaCore.class.getDeclaredFields();
 		HashMap<String, String> coreFieldLookup= new HashMap<>();
-		for (int i= 0; i < coreFields.length; i++) {
-			Field field= coreFields[i];
+		for (Field field : JavaCore.class.getDeclaredFields()) {
 			String name= field.getName();
 			if (name.startsWith("COMPILER_")
-					|| name.startsWith("CORE_")
-					|| name.startsWith("CODEASSIST_")
-					|| name.startsWith("TIMEOUT_")
-					) {
+				|| name.startsWith("CORE_")
+				|| name.startsWith("CODEASSIST_")
+				|| name.startsWith("TIMEOUT_")
+				) {
 				field.setAccessible(true);
 				String value= (String) field.get(null);
 				if (value.startsWith(JavaCore.PLUGIN_ID))
@@ -132,9 +130,7 @@ public class OptionsConfigurationBlockTest extends TestCase {
 		Key[] keys= (Key[]) (keysMethod.getParameterTypes().length > 0 ? keysMethod.invoke(null, Boolean.FALSE) : keysMethod.invoke(null));
 		HashSet<Key> keySet= new HashSet<>(Arrays.asList(keys));
 		
-		Field[] prefFields= configurationBlock.getDeclaredFields();
-		for (int i= 0; i < prefFields.length; i++) {
-			Field field= prefFields[i];
+		for (Field field : configurationBlock.getDeclaredFields()) {
 			field.setAccessible(true);
 			if (field.getType() == Key.class) {
 				Key key= (Key)field.get(null);
@@ -142,8 +138,8 @@ public class OptionsConfigurationBlockTest extends TestCase {
 				if (JavaCore.PLUGIN_ID.equals(key.getQualifier())) {
 					Object fieldName= coreFieldLookup.remove(key.getName());
 					assertTrue(
-							"No core constant for key " + key.getName() + " in class " + configurationBlock.getName(),
-							fieldName != null);
+						"No core constant for key " + key.getName() + " in class " + configurationBlock.getName(),
+						fieldName != null);
 					assertTrue(configurationBlock.getName() + "#getKeys() is missing key '" + key.getName() + "'", keyWasInKeySet);
 				}
 			}

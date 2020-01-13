@@ -68,12 +68,11 @@ public class PackageBrowseAdapter implements IStringButtonAdapter {
 	public static Object[] createPackageListInput(ICompilationUnit cu, String elementNameMatch){
 		try{
 			IJavaProject project= cu.getJavaProject();
-			IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
 			List<IPackageFragment> result= new ArrayList<>();
 			HashMap<String, Object> entered =new HashMap<>();
-			for (int i= 0; i < roots.length; i++){
-				if (canAddPackageRoot(roots[i])){
-					getValidPackages(roots[i], result, entered, elementNameMatch);
+			for (IPackageFragmentRoot root : project.getPackageFragmentRoots()) {
+				if (canAddPackageRoot(root)) {
+					getValidPackages(root, result, entered, elementNameMatch);
 				}
 			}
 			return result.toArray();
@@ -104,24 +103,22 @@ public class PackageBrowseAdapter implements IStringButtonAdapter {
 		} catch (JavaModelException e){
 			return;
 		}
-		for (int i= 0; i < children.length; i++){
-            if (children[i] instanceof IPackageFragment) {
-                IPackageFragment packageFragment = (IPackageFragment)children[i];
-                String packageName = packageFragment.getElementName();
-
-                if ((entered != null) && (entered.containsKey(packageName)) == true) {
-                    continue;
-                }
-
-			    if (canAddPackage(packageFragment)) {
-			        if ((elementNameMatch == null) || (elementNameMatch.equals(packageName))) {
-			            result.add(packageFragment);
-			            if (entered != null) {
-			                entered.put(packageName, null);
-			            }
-			        }
-			    }
-            }
+		for (IJavaElement child : children) {
+			if (child instanceof IPackageFragment) {
+				IPackageFragment packageFragment = (IPackageFragment) child;
+				String packageName = packageFragment.getElementName();
+				if ((entered != null) && (entered.containsKey(packageName)) == true) {
+					continue;
+				}
+				if (canAddPackage(packageFragment)) {
+					if ((elementNameMatch == null) || (elementNameMatch.equals(packageName))) {
+						result.add(packageFragment);
+						if (entered != null) {
+							entered.put(packageName, null);
+						}
+					}
+				}
+			}
 		}
 	}
 
@@ -137,11 +134,10 @@ public class PackageBrowseAdapter implements IStringButtonAdapter {
 
     public static List<IPackageFragment> searchAllPackages(IJavaProject project, String matcher) {
 		try{
-			IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
 			List<IPackageFragment> result= new ArrayList<>();
-			for (int i= 0; i < roots.length; i++){
-				if (canAddPackageRoot(roots[i])){
-					getValidPackages(roots[i], result, null, matcher);
+			for (IPackageFragmentRoot root : project.getPackageFragmentRoots()) {
+				if (canAddPackageRoot(root)) {
+					getValidPackages(root, result, null, matcher);
 				}
 			}
 			return result;

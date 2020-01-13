@@ -233,8 +233,7 @@ public class DeleteWizard extends RefactoringWizard {
 		}
 
 		private static boolean containsLinkedPackagesOrPackageFragmentRoots(IJavaElement[] javaElements) {
-			for (int i= 0; i < javaElements.length; i++) {
-				IJavaElement element= javaElements[i];
+			for (IJavaElement element : javaElements) {
 				if (isLinkedPackageOrPackageFragmentRoot(element))
 					return true;
 			}
@@ -242,15 +241,13 @@ public class DeleteWizard extends RefactoringWizard {
 		}
 
 		private static boolean containsLinkedResources(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
-			for (int i= 0; i < javaElements.length; i++) {
-				IJavaElement element= javaElements[i];
+			for (IJavaElement element : javaElements) {
 				if (isLinkedResource(element))
 					return true;
 				if (isDefaultPackageWithLinkedFiles(element))
 					return true;
 			}
-			for (int i= 0; i < resources.length; i++) {
-				IResource resource= resources[i];
+			for (IResource resource : resources) {
 				if (isLinked(resource))
 					return true;
 			}
@@ -261,10 +258,10 @@ public class DeleteWizard extends RefactoringWizard {
 			if (!JavaElementUtil.isDefaultPackage(firstElement))
 				return false;
 			IPackageFragment defaultPackage= (IPackageFragment)firstElement;
-			ICompilationUnit[] cus= defaultPackage.getCompilationUnits();
-			for (int i= 0; i < cus.length; i++) {
-				if (isLinkedResource(cus[i]))
+			for (ICompilationUnit cu : defaultPackage.getCompilationUnits()) {
+				if (isLinkedResource(cu)) {
 					return true;
+				}
 			}
 			return false;
 		}

@@ -81,7 +81,7 @@ public class TemplateSet {
 
 	/**
 	 * Convenience method for reading templates from a file.
-	 * 
+	 *
 	 * @param file the file
 	 * @param allowDuplicates <code>true</code> if duplicates are allowed
 	 * @throws CoreException if reading fails
@@ -114,7 +114,7 @@ public class TemplateSet {
 
 	/**
 	 * Reads templates from a XML stream and adds them to the templates
-	 * 
+	 *
 	 * @param stream the input stream
 	 * @param allowDuplicates <code>true</code> if duplicates are allowed
 	 * @throws CoreException if reading fails
@@ -160,9 +160,8 @@ public class TemplateSet {
 				String message= validateTemplate(template);
 				if (message == null) {
 					if (!allowDuplicates) {
-						Template[] templates= getTemplates(name);
-						for (int k= 0; k < templates.length; k++) {
-							remove(templates[k]);
+						for (Template t : getTemplates(name)) {
+							remove(t);
 						}
 					}
 					add(template);

@@ -161,8 +161,7 @@ public class RowLayouter {
 		if (!fOrder)
 			return;
 
-		for (int i= 0; i < controls.length; i++) {
-			Control control= controls[i];
+		for (Control control : controls) {
 			control.moveBelow(fLastControl);
 			fLastControl= control;
 		}

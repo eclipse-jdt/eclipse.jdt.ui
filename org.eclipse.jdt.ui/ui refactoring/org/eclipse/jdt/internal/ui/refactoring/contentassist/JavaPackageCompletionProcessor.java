@@ -51,7 +51,7 @@ public class JavaPackageCompletionProcessor implements IContentAssistProcessor, 
 	private IPackageFragmentRoot[] fPackageFragmentRoots;
 	private CompletionProposalComparator fComparator;
 	private ILabelProvider fLabelProvider;
-	
+
 	private Predicate<IPackageFragment> fFilter;
 
 	private char[] fProposalAutoActivationSet;
@@ -156,12 +156,11 @@ public class JavaPackageCompletionProcessor implements IContentAssistProcessor, 
 	private ICompletionProposal[] createPackagesProposals(int documentOffset, String input) {
 		ArrayList<JavaCompletionProposal> proposals= new ArrayList<>();
 		String prefix= input.substring(0, documentOffset);
-		Set<String> names= fPackageFragmentRoots.length > 1 ? new HashSet<>() : null; 
-		for (IPackageFragmentRoot packageFragmentRoot : fPackageFragmentRoots) {				
+		Set<String> names= fPackageFragmentRoots.length > 1 ? new HashSet<>() : null;
+		for (IPackageFragmentRoot packageFragmentRoot : fPackageFragmentRoots) {
 			try {
-				IJavaElement[] packageFragments= packageFragmentRoot.getChildren();
-				for (int i= 0; i < packageFragments.length; i++) {
-					IPackageFragment pack= (IPackageFragment) packageFragments[i];
+				for (IJavaElement packageFragment : packageFragmentRoot.getChildren()) {
+					IPackageFragment pack= (IPackageFragment) packageFragment;
 					String packName= pack.getElementName();
 					if (packName.length() == 0 || ! packName.startsWith(prefix))
 						continue;

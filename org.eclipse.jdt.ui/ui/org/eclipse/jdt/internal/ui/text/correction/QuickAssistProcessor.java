@@ -58,6 +58,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -171,6 +172,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.ExtractConstantRefactori
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractTempRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.code.Invocations;
 import org.eclipse.jdt.internal.corext.refactoring.code.PromoteTempToFieldRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRemover;
 import org.eclipse.jdt.internal.corext.refactoring.util.TightSourceRangeComputer;
@@ -1838,6 +1840,66 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return false;
 		}
 		ExpressionStatement assignParent= (ExpressionStatement) assignment.getParent();
+		IfStatement ifStatement= null;
+		Expression thenExpression= null;
+		Expression elseExpression= null;
+		ITypeBinding exprBinding= null;
+
+		ASTNode assignParentParent= assignParent.getParent();
+		if (assignParentParent instanceof IfStatement
+				|| (assignParentParent.getLocationInParent() == IfStatement.THEN_STATEMENT_PROPERTY
+				&& !(assignParentParent.subtreeMatch(new ASTMatcher(), statement.getParent())))) {
+			if (assignParentParent.getLocationInParent() == IfStatement.THEN_STATEMENT_PROPERTY) {
+				assignParentParent= assignParentParent.getParent();
+			}
+			ifStatement= (IfStatement) assignParentParent;
+			Statement thenStatement= getSingleStatement(ifStatement.getThenStatement());
+			Statement elseStatement= getSingleStatement(ifStatement.getElseStatement());
+			if (thenStatement == null || elseStatement == null) {
+				return false;
+			}
+
+			if (thenStatement instanceof ExpressionStatement && elseStatement instanceof ExpressionStatement) {
+				Expression inner1= ((ExpressionStatement) thenStatement).getExpression();
+				Expression inner2= ((ExpressionStatement) elseStatement).getExpression();
+				if (inner1 instanceof Assignment && inner2 instanceof Assignment) {
+					Assignment assign1= (Assignment) inner1;
+					Assignment assign2= (Assignment) inner2;
+					Expression left1= assign1.getLeftHandSide();
+					Expression left2= assign2.getLeftHandSide();
+					if (left1 instanceof Name && left2 instanceof Name && assign1.getOperator() == assign2.getOperator()) {
+						IBinding bind1= ((Name) left1).resolveBinding();
+						IBinding bind2= ((Name) left2).resolveBinding();
+						if (bind1 == bind2 && bind1 instanceof IVariableBinding) {
+							exprBinding= ((IVariableBinding) bind1).getType();
+							thenExpression= assign1.getRightHandSide();
+							elseExpression= assign2.getRightHandSide();
+						}
+					}
+				}
+			}
+			if (thenExpression == null || elseExpression == null) {
+				return false;
+			}
+		} else {
+			// Be conservative and don't allow anything but Blocks between the
+			// VariableDeclarationStatement and the ExpressionStatement to join
+			ASTNode n= assignParent.getParent();
+			ASTNode statementParent= statement.getParent();
+			ASTMatcher matcher= new ASTMatcher();
+			boolean complete= false;
+			while (!complete) {
+				if (n != null && n.getNodeType() == statementParent.getNodeType()) {
+					if (n.subtreeMatch(matcher, statementParent)) {
+						break;
+					}
+				}
+				if (n instanceof Block) {
+					n= n.getParent();
+				}
+				return false;
+			}
+		}
 
 		if (resultingCollections == null) {
 			return true;
@@ -1846,7 +1908,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		AST ast= statement.getAST();
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 		TightSourceRangeComputer sourceRangeComputer= new TightSourceRangeComputer();
-		sourceRangeComputer.addTightSourceNode(assignParent);
+		sourceRangeComputer.addTightSourceNode(ifStatement != null ? ifStatement : assignParent);
 		rewrite.setTargetSourceRangeComputer(sourceRangeComputer);
 
 		String label= CorrectionMessages.QuickAssistProcessor_joindeclaration_description;
@@ -1854,20 +1916,49 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.JOIN_VARIABLE_DECLARATION, image);
 		proposal.setCommandId(SPLIT_JOIN_VARIABLE_DECLARATION_ID);
 
-		Expression placeholder= (Expression) rewrite.createMoveTarget(assignment.getRightHandSide());
-		rewrite.set(fragment, VariableDeclarationFragment.INITIALIZER_PROPERTY, placeholder, null);
+		if (ifStatement != null) {
+			// prepare conditional expression
+			ConditionalExpression conditionalExpression= ast.newConditionalExpression();
+			Expression conditionCopy= (Expression) rewrite.createCopyTarget(ifStatement.getExpression());
+			conditionalExpression.setExpression(conditionCopy);
+			Expression thenCopy= (Expression) rewrite.createCopyTarget(thenExpression);
+			Expression elseCopy= (Expression) rewrite.createCopyTarget(elseExpression);
 
-
-		if (onFirstAccess) {
-			// replace assignment with variable declaration
-			rewrite.replace(assignParent, rewrite.createMoveTarget(statement), null);
+			IJavaProject project= context.getCompilationUnit().getJavaProject();
+			if (!JavaModelUtil.is50OrHigher(project)) {
+				ITypeBinding thenBinding= thenExpression.resolveTypeBinding();
+				ITypeBinding elseBinding= elseExpression.resolveTypeBinding();
+				if (thenBinding != null && elseBinding != null && exprBinding != null && !elseBinding.isAssignmentCompatible(thenBinding)) {
+					CastExpression castException= ast.newCastExpression();
+					ImportRewrite importRewrite= proposal.createImportRewrite(context.getASTRoot());
+					ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(node, importRewrite);
+					castException.setType(importRewrite.addImport(exprBinding, ast, importRewriteContext, TypeLocation.CAST));
+					castException.setExpression(elseCopy);
+					elseCopy= castException;
+				}
+			} else if (JavaModelUtil.is17OrHigher(project)) {
+				addExplicitTypeArgumentsIfNecessary(rewrite, proposal, thenExpression);
+				addExplicitTypeArgumentsIfNecessary(rewrite, proposal, elseExpression);
+			}
+			conditionalExpression.setThenExpression(thenCopy);
+			conditionalExpression.setElseExpression(elseCopy);
+			rewrite.set(fragment,  VariableDeclarationFragment.INITIALIZER_PROPERTY, conditionalExpression, null);
+			rewrite.remove(ifStatement, null);
 		} else {
-			// different scopes -> remove assignments, set variable initializer
-			if (ASTNodes.isControlStatementBody(assignParent.getLocationInParent())) {
-				Block block= ast.newBlock();
-				rewrite.replace(assignParent, block, null);
+			Expression placeholder= (Expression) rewrite.createMoveTarget(assignment.getRightHandSide());
+			rewrite.set(fragment, VariableDeclarationFragment.INITIALIZER_PROPERTY, placeholder, null);
+
+			if (onFirstAccess) {
+				// replace assignment with variable declaration
+				rewrite.replace(assignParent, rewrite.createMoveTarget(statement), null);
 			} else {
-				rewrite.remove(assignParent, null);
+				// different scopes -> remove assignments, set variable initializer
+				if (ASTNodes.isControlStatementBody(assignParent.getLocationInParent())) {
+					Block block= ast.newBlock();
+					rewrite.replace(assignParent, block, null);
+				} else {
+					rewrite.remove(assignParent, null);
+				}
 			}
 		}
 
@@ -1875,6 +1966,53 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		resultingCollections.add(proposal);
 		return true;
 
+	}
+
+	private static void addExplicitTypeArgumentsIfNecessary(ASTRewrite rewrite, ASTRewriteCorrectionProposal proposal, Expression invocation) {
+		if (Invocations.isResolvedTypeInferredFromExpectedType(invocation)) {
+			ITypeBinding[] typeArguments= Invocations.getInferredTypeArguments(invocation);
+			if (typeArguments == null)
+				return;
+
+			ImportRewrite importRewrite= proposal.getImportRewrite();
+			if (importRewrite == null) {
+				importRewrite= proposal.createImportRewrite((CompilationUnit) invocation.getRoot());
+			}
+			ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(invocation, importRewrite);
+
+			AST ast= invocation.getAST();
+			ListRewrite typeArgsRewrite= Invocations.getInferredTypeArgumentsRewrite(rewrite, invocation);
+
+			for (ITypeBinding typeArgument : typeArguments) {
+				Type typeArgumentNode= importRewrite.addImport(typeArgument, ast, importRewriteContext, TypeLocation.TYPE_ARGUMENT);
+				typeArgsRewrite.insertLast(typeArgumentNode, null);
+			}
+
+			if (invocation instanceof MethodInvocation) {
+				MethodInvocation methodInvocation= (MethodInvocation) invocation;
+				Expression expression= methodInvocation.getExpression();
+				if (expression == null) {
+					IMethodBinding methodBinding= methodInvocation.resolveMethodBinding();
+					if (methodBinding != null && Modifier.isStatic(methodBinding.getModifiers())) {
+						expression= ast.newName(importRewrite.addImport(methodBinding.getDeclaringClass().getTypeDeclaration(), importRewriteContext));
+					} else {
+						expression= ast.newThisExpression();
+					}
+					rewrite.set(invocation, MethodInvocation.EXPRESSION_PROPERTY, expression, null);
+				}
+			}
+		}
+	}
+
+	private static Statement getSingleStatement(Statement statement) {
+		if (statement instanceof Block) {
+			List<Statement> blockStatements= ((Block) statement).statements();
+			if (blockStatements.size() != 1) {
+				return null;
+			}
+			return blockStatements.get(0);
+		}
+		return statement;
 	}
 
 	private static boolean getSplitVariableProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {

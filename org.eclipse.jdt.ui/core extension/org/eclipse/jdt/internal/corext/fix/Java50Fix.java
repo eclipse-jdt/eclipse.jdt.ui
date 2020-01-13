@@ -157,7 +157,7 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 	public static boolean isMissingOverrideAnnotationInterfaceProblem(int id) {
 		return id == IProblem.MissingOverrideAnnotationForInterfaceMethodImplementation;
 	}
-	
+
 	public static boolean isMissingOverrideAnnotationProblem(int id) {
 		return id == IProblem.MissingOverrideAnnotation || id == IProblem.MissingOverrideAnnotationForInterfaceMethodImplementation;
 	}
@@ -281,9 +281,7 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 	}
 
 	private static void createAddDeprecatedAnnotationOperations(CompilationUnit compilationUnit, IProblemLocation[] locations, List<CompilationUnitRewriteOperation> result) {
-		for (int i= 0; i < locations.length; i++) {
-			IProblemLocation problem= locations[i];
-
+		for (IProblemLocation problem : locations) {
 			if (isMissingDeprecationProblem(problem.getProblemId())) {
 				ASTNode selectedNode= problem.getCoveringNode(compilationUnit);
 				if (selectedNode != null) {
@@ -300,15 +298,14 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 	}
 
 	private static void createAddOverrideAnnotationOperations(CompilationUnit compilationUnit, boolean addOverrideInterfaceAnnotation, IProblemLocation[] locations, List<CompilationUnitRewriteOperation> result) {
-		for (int i= 0; i < locations.length; i++) {
-			IProblemLocation problem= locations[i];
+		for (IProblemLocation problem : locations) {
 			int problemId= problem.getProblemId();
-			
+
 			if (isMissingOverrideAnnotationProblem(problemId)) {
 				if (!isMissingOverrideAnnotationInterfaceProblem(problemId) || addOverrideInterfaceAnnotation) {
 					ASTNode selectedNode= problem.getCoveringNode(compilationUnit);
 					if (selectedNode != null) {
-	
+
 						ASTNode declaringNode= getDeclaringNode(selectedNode);
 						if (declaringNode instanceof BodyDeclaration) {
 							BodyDeclaration declaration= (BodyDeclaration) declaringNode;
@@ -326,9 +323,7 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 			return null;
 
 		List<SimpleType> result= new ArrayList<>();
-		for (int i= 0; i < locations.length; i++) {
-			IProblemLocation problem= locations[i];
-
+		for (IProblemLocation problem : locations) {
 			if (isRawTypeReferenceProblem(problem.getProblemId())) {
 				ASTNode node= problem.getCoveredNode(compilationUnit);
 				if (node instanceof ClassInstanceCreation) {
@@ -371,15 +366,13 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 			return true;
 		}
 
-		IProblem[] problems= compilationUnit.getProblems();
-		for (int i= 0; i < problems.length; i++) {
-			if (problems[i].isError()) {
-				if (!(problems[i] instanceof CategorizedProblem))
+		for (IProblem problem : compilationUnit.getProblems()) {
+			if (problem.isError()) {
+				if (!(problem instanceof CategorizedProblem)) {
 					return true;
-
-				CategorizedProblem categorizedProblem= (CategorizedProblem) problems[i];
+				}
+				CategorizedProblem categorizedProblem= (CategorizedProblem) problem;
 				int categoryID= categorizedProblem.getCategoryID();
-
 				if (categoryID == CategorizedProblem.CAT_BUILDPATH)
 					return true;
 				if (categoryID == CategorizedProblem.CAT_SYNTAX)
@@ -453,10 +446,9 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 	}
 
 	private static SimpleType getRawReference(SimpleName name, CompilationUnit compilationUnit) {
-		SimpleName[] names= LinkedNodeFinder.findByNode(compilationUnit, name);
-		for (int j= 0; j < names.length; j++) {
-			if (names[j].getParent() instanceof VariableDeclarationFragment) {
-				VariableDeclarationFragment fragment= (VariableDeclarationFragment)names[j].getParent();
+		for (SimpleName n : LinkedNodeFinder.findByNode(compilationUnit, name)) {
+			if (n.getParent() instanceof VariableDeclarationFragment) {
+				VariableDeclarationFragment fragment= (VariableDeclarationFragment) n.getParent();
 				if (fragment.getParent() instanceof VariableDeclarationStatement) {
 					VariableDeclarationStatement statement= (VariableDeclarationStatement)fragment.getParent();
 					ASTNode result= (ASTNode)statement.getStructuralProperty(VariableDeclarationStatement.TYPE_PROPERTY);
@@ -468,13 +460,13 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 					if (isRawTypeReference(result))
 						return (SimpleType) result;
 				}
-			} else if (names[j].getParent() instanceof SingleVariableDeclaration) {
-				SingleVariableDeclaration declaration= (SingleVariableDeclaration)names[j].getParent();
+			} else if (n.getParent() instanceof SingleVariableDeclaration) {
+				SingleVariableDeclaration declaration= (SingleVariableDeclaration) n.getParent();
 				ASTNode result= (ASTNode)declaration.getStructuralProperty(SingleVariableDeclaration.TYPE_PROPERTY);
 				if (isRawTypeReference(result))
 					return (SimpleType) result;
-			} else if (names[j].getParent() instanceof MethodDeclaration) {
-				MethodDeclaration methodDecl= (MethodDeclaration)names[j].getParent();
+			} else if (n.getParent() instanceof MethodDeclaration) {
+				MethodDeclaration methodDecl= (MethodDeclaration) n.getParent();
 				ASTNode result= (ASTNode)methodDecl.getStructuralProperty(MethodDeclaration.RETURN_TYPE2_PROPERTY);
 				if (isRawTypeReference(result))
 					return (SimpleType) result;

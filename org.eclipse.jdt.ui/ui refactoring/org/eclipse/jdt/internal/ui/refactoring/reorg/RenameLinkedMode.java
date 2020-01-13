@@ -168,7 +168,7 @@ public class RenameLinkedMode {
 	/**
 	 * The operation on top of the undo stack when the rename is {@link #start()}ed, or
 	 * <code>null</code> if rename has not been started or the undo stack was empty.
-	 * 
+	 *
 	 * @since 3.5
 	 */
 	private IUndoableOperation fStartingUndoOperation;
@@ -228,7 +228,7 @@ public class RenameLinkedMode {
 					fStartingUndoOperation= operationHistory.getUndoOperation(undoContext);
 				}
 			}
-			
+
 			fOriginalName= nameNode.getIdentifier();
 			final int pos= nameNode.getStartPosition();
 			ASTNode[] sameNodes= LinkedNodeFinder.findByNode(root, nameNode);
@@ -401,9 +401,7 @@ public class RenameLinkedMode {
 	private void restoreFullSelection() {
 		if (fOriginalSelection.y != 0) {
 			int originalOffset= fOriginalSelection.x;
-			LinkedPosition[] positions= fLinkedPositionGroup.getPositions();
-			for (int i= 0; i < positions.length; i++) {
-				LinkedPosition position= positions[i];
+			for (LinkedPosition position : fLinkedPositionGroup.getPositions()) {
 				if (! position.isDeleted() && position.includes(originalOffset)) {
 					fEditor.getViewer().setSelectedRange(position.offset, position.length);
 					return;
@@ -451,7 +449,7 @@ public class RenameLinkedMode {
 
 		if (newName.length() == 0)
 			return null;
-		
+
 		RenameJavaElementDescriptor descriptor= createRenameDescriptor(fJavaElement, newName);
 		RenameSupport renameSupport= RenameSupport.create(descriptor);
 		return renameSupport;
@@ -478,8 +476,8 @@ public class RenameLinkedMode {
 
 	/**
 	 * Creates a rename descriptor.
-	 * 
-	 * @param javaElement element to rename 
+	 *
+	 * @param javaElement element to rename
 	 * @param newName new name
 	 * @return a rename descriptor with current settings as used in the refactoring dialogs
 	 * @throws JavaModelException if an error occurs while accessing the element
@@ -615,9 +613,7 @@ public class RenameLinkedMode {
 		Point selection= fEditor.getViewer().getSelectedRange();
 		int start= selection.x;
 		int end= start + selection.y;
-		LinkedPosition[] positions= fLinkedPositionGroup.getPositions();
-		for (int i= 0; i < positions.length; i++) {
-			LinkedPosition position= positions[i];
+		for (LinkedPosition position : fLinkedPositionGroup.getPositions()) {
 			if (position.includes(start) && position.includes(end))
 				return position;
 		}

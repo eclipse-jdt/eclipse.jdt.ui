@@ -183,8 +183,7 @@ public class ParameterEditDialog extends StatusDialog {
 			result[1]= validateName();
 			result[2]= validateType();
 		}
-		for (int i= 0; i < result.length; i++) {
-			IStatus status= result[i];
+		for (IStatus status : result) {
 			if (status != null && !status.isOK()) {
 				updateStatus(status);
 				return;

@@ -201,12 +201,9 @@ public class DynamicSourcesWorkingSetUpdater implements IWorkingSetUpdater {
 			IJavaModel model= JavaCore.create(root);
 			List<IAdaptable> testResult= new ArrayList<>();
 			List<IAdaptable> mainResult= new ArrayList<>();
-			IJavaProject[] jProjects= model.getJavaProjects();
-			for (int i= 0; i < jProjects.length; i++) {
+			for (IJavaProject project : model.getJavaProjects()) {
 				if (monitor.isCanceled() || isDisposed.get())
 					return Status.CANCEL_STATUS;
-
-				final IJavaProject project= jProjects[i];
 				if (project.getProject().isOpen()) {
 					for (IPackageFragmentRoot iPackageFragmentRoot : project.getPackageFragmentRoots()) {
 						IClasspathEntry classpathEntry= iPackageFragmentRoot.getRawClasspathEntry();

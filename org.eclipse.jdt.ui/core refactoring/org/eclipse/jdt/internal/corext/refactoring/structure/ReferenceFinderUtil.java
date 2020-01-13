@@ -61,8 +61,8 @@ public class ReferenceFinderUtil {
 	private static SearchMatch[] getTypeReferencesIn(IJavaElement[] elements, WorkingCopyOwner owner, IProgressMonitor pm) throws JavaModelException {
 		List<SearchMatch> referencedTypes= new ArrayList<>();
 		pm.beginTask("", elements.length); //$NON-NLS-1$
-		for (int i = 0; i < elements.length; i++) {
-			referencedTypes.addAll(getTypeReferencesIn(elements[i], owner, new SubProgressMonitor(pm, 1)));
+		for (IJavaElement element : elements) {
+			referencedTypes.addAll(getTypeReferencesIn(element, owner, new SubProgressMonitor(pm, 1)));
 		}
 		pm.done();
 		return referencedTypes.toArray(new SearchMatch[referencedTypes.size()]);
@@ -92,8 +92,8 @@ public class ReferenceFinderUtil {
 	private static SearchMatch[] getFieldReferencesIn(IJavaElement[] elements, WorkingCopyOwner owner, IProgressMonitor pm) throws JavaModelException {
 		List<SearchMatch> referencedFields= new ArrayList<>();
 		pm.beginTask("", elements.length); //$NON-NLS-1$
-		for (int i = 0; i < elements.length; i++) {
-			referencedFields.addAll(getFieldReferencesIn(elements[i], owner, new SubProgressMonitor(pm, 1)));
+		for (IJavaElement element : elements) {
+			referencedFields.addAll(getFieldReferencesIn(element, owner, new SubProgressMonitor(pm, 1)));
 		}
 		pm.done();
 		return referencedFields.toArray(new SearchMatch[referencedFields.size()]);
@@ -123,8 +123,8 @@ public class ReferenceFinderUtil {
 	private static SearchMatch[] getMethodReferencesIn(IJavaElement[] elements, WorkingCopyOwner owner, IProgressMonitor pm) throws JavaModelException {
 		List<SearchMatch> referencedMethods= new ArrayList<>();
 		pm.beginTask("", elements.length); //$NON-NLS-1$
-		for (int i = 0; i < elements.length; i++) {
-			referencedMethods.addAll(getMethodReferencesIn(elements[i], owner, new SubProgressMonitor(pm, 1)));
+		for (IJavaElement element : elements) {
+			referencedMethods.addAll(getMethodReferencesIn(element, owner, new SubProgressMonitor(pm, 1)));
 		}
 		pm.done();
 		return referencedMethods.toArray(new SearchMatch[referencedMethods.size()]);
@@ -139,8 +139,8 @@ public class ReferenceFinderUtil {
 
 	public static ITypeBinding[] getTypesReferencedInDeclarations(MethodDeclaration[] methods) {
 		Set<ITypeBinding> typesUsed= new HashSet<>();
-		for (int i= 0; i < methods.length; i++) {
-			typesUsed.addAll(getTypesUsedInDeclaration(methods[i]));
+		for (MethodDeclaration method : methods) {
+			typesUsed.addAll(getTypesUsedInDeclaration(method));
 		}
 		return typesUsed.toArray(new ITypeBinding[typesUsed.size()]);
 	}
@@ -175,8 +175,8 @@ public class ReferenceFinderUtil {
 	/// private helpers
 	private static Set<IJavaElement> extractElements(SearchMatch[] searchResults, int elementType) {
 		Set<IJavaElement> elements= new HashSet<>();
-		for (int i= 0; i < searchResults.length; i++) {
-			IJavaElement el= SearchUtils.getEnclosingJavaElement(searchResults[i]);
+		for (SearchMatch searchResult : searchResults) {
+			IJavaElement el= SearchUtils.getEnclosingJavaElement(searchResult);
 			if (el.exists() && el.getElementType() == elementType)
 				elements.add(el);
 		}

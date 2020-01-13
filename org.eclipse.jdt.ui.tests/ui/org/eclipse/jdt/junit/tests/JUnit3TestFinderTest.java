@@ -134,8 +134,8 @@ public class JUnit3TestFinderTest extends TestCase {
 		buf.append("    }\n");
 		buf.append("}\n");
 		IType[] invalidTests= p.createCompilationUnit("Outer2.java", buf.toString(), false, null).getAllTypes();
-		for (int i= 0; i < invalidTests.length; i++) {
-			assertTestFound(invalidTests[i], new String[] {});
+		for (IType invalidTest : invalidTests) {
+			assertTestFound(invalidTest, new String[] {});
 		}
 		assertTestFound(invalidTests[0].getCompilationUnit(), new String[] {});
 
@@ -254,8 +254,8 @@ public class JUnit3TestFinderTest extends TestCase {
 		buf.append("    }\n");
 		buf.append("}\n");
 		IType[] invalidTests= p.createCompilationUnit("Outer2.java", buf.toString(), false, null).getAllTypes();
-		for (int i= 0; i < invalidTests.length; i++) {
-			assertTestFound(invalidTests[i], new String[] {});
+		for (IType invalidTest : invalidTests) {
+			assertTestFound(invalidTest, new String[] {});
 		}
 		assertTestFound(invalidTests[0].getCompilationUnit(), new String[] {});
 

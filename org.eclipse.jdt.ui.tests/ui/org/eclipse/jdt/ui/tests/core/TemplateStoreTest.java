@@ -79,9 +79,9 @@ public class TemplateStoreTest extends CoreTests {
 	};
 
 	private TemplatePersistenceData find(String id, TemplatePersistenceData[] templateData) {
-		for (int i= 0; i < templateData.length; i++) {
-			if (templateData[i].getId().equals(id)) {
-				return templateData[i];
+		for (TemplatePersistenceData t : templateData) {
+			if (t.getId().equals(id)) {
+				return t;
 			}
 		}
 		return null;
@@ -92,13 +92,12 @@ public class TemplateStoreTest extends CoreTests {
 		store.load();
 		TemplatePersistenceData[] allTemplateDatas= store.getTemplateData();
 		assertEquals(ALL_CODE_TEMPLATES.length, allTemplateDatas.length);
-		for (int i= 0; i < ALL_CODE_TEMPLATES.length; i++) {
+		for (String t : ALL_CODE_TEMPLATES) {
 			// get it from the array
-			TemplatePersistenceData fromArray=  find(ALL_CODE_TEMPLATES[i], allTemplateDatas);
+			TemplatePersistenceData fromArray= find(t, allTemplateDatas);
 			assertNotNull(fromArray);
-
 			// get it from the store by id
-			Template fromStore=  store.findTemplateById(ALL_CODE_TEMPLATES[i]);
+			Template fromStore= store.findTemplateById(t);
 			assertNotNull(fromStore);
 			assertEquals(fromArray.getTemplate().getPattern(), fromStore.getPattern());
 		}
@@ -129,17 +128,16 @@ public class TemplateStoreTest extends CoreTests {
 
 			TemplatePersistenceData[] allTemplateDatas= projectStore.getTemplateData();
 			assertEquals(ALL_CODE_TEMPLATES.length, allTemplateDatas.length);
-			for (int i= 0; i < ALL_CODE_TEMPLATES.length; i++) {
+			for (String t : ALL_CODE_TEMPLATES) {
 				// get it from the array
-				TemplatePersistenceData fromArray=  find(ALL_CODE_TEMPLATES[i], allTemplateDatas);
+				TemplatePersistenceData fromArray= find(t, allTemplateDatas);
 				assertNotNull(fromArray);
 				// get it from the store by id
-				Template fromStore=  projectStore.findTemplateById(ALL_CODE_TEMPLATES[i]);
+				Template fromStore= projectStore.findTemplateById(t);
 				assertNotNull(fromStore);
 				assertEquals(fromArray.getTemplate().getPattern(), fromStore.getPattern());
-
 				// equal to instance
-				Template fromInstance=  instanceStore.findTemplateById(ALL_CODE_TEMPLATES[i]);
+				Template fromInstance= instanceStore.findTemplateById(t);
 				assertNotNull(fromInstance);
 				assertEquals(fromInstance.getPattern(), fromStore.getPattern());
 			}

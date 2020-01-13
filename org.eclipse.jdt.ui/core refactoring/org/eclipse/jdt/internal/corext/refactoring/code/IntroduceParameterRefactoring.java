@@ -276,26 +276,26 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 		ITypeBinding typeBinding= Bindings.normalizeForDeclarationUse(fSelectedExpression.resolveTypeBinding(), fSelectedExpression.getAST());
 		String name= fParameterName != null ? fParameterName : guessedParameterName();
 		Expression expression= fSelectedExpression instanceof ParenthesizedExpression ? ((ParenthesizedExpression)fSelectedExpression).getExpression() : fSelectedExpression;
-		
-		ImportRewrite importRewrite= cuRewrite.getImportRewrite();			
+
+		ImportRewrite importRewrite= cuRewrite.getImportRewrite();
 		ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(fSelectedExpression, importRewrite);
 		String typeName= importRewrite.addImport(typeBinding, importRewriteContext);
-		
+
 		String defaultValue= null;
 		if (expression instanceof ClassInstanceCreation && typeBinding.isParameterizedType()) {
 			ClassInstanceCreation classInstanceCreation= (ClassInstanceCreation) expression;
 			Type cicType= classInstanceCreation.getType();
 			if (cicType instanceof ParameterizedType && ((ParameterizedType) cicType).typeArguments().size() == 0) {
 				// expand the diamond:
-				AST ast= cuRewrite.getAST();				
-				Type type= importRewrite.addImport(typeBinding, ast, importRewriteContext);				
+				AST ast= cuRewrite.getAST();
+				Type type= importRewrite.addImport(typeBinding, ast, importRewriteContext);
 				classInstanceCreation.setType(type);    // Should not touch the original AST ...
 				defaultValue= ASTNodes.asFormattedString(classInstanceCreation, 0, StubUtility.getLineDelimiterUsed(cuRewrite.getCu()),
 						FormatterProfileManager.getProjectSettings(cuRewrite.getCu().getJavaProject()));
 				classInstanceCreation.setType(cicType); // ... so let's restore it right away.
 			}
 		}
-		
+
 		if (defaultValue == null) {
 			defaultValue= fSourceCU.getBuffer().getText(expression.getStartPosition(), expression.getLength());
 		}
@@ -481,8 +481,7 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 
 	private List<String> guessTempNamesFromMethodInvocation(MethodInvocation selectedMethodInvocation, String[] excludedVariableNames) {
 		String methodName= selectedMethodInvocation.getName().getIdentifier();
-		for (int i= 0; i < KNOWN_METHOD_NAME_PREFIXES.length; i++) {
-			String prefix= KNOWN_METHOD_NAME_PREFIXES[i];
+		for (String prefix : KNOWN_METHOD_NAME_PREFIXES) {
 			if (! methodName.startsWith(prefix))
 				continue; //not this prefix
 			if (methodName.length() == prefix.length())

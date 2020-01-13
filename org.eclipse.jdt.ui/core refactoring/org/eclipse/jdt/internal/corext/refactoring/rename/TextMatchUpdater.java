@@ -97,11 +97,10 @@ class TextMatchUpdater {
 			IProject[] projectsInScope= getProjectsInScope();
 
 			pm.beginTask("", projectsInScope.length); //$NON-NLS-1$
-
-			for (int i =0 ; i < projectsInScope.length; i++){
+			for (IProject project : projectsInScope) {
 				if (pm.isCanceled())
 					throw new OperationCanceledException();
-				addTextMatches(projectsInScope[i], new SubProgressMonitor(pm, 1));
+				addTextMatches(project, new SubProgressMonitor(pm, 1));
 			}
 		} finally{
 			pm.done();
@@ -114,10 +113,10 @@ class TextMatchUpdater {
 		enclosingProjectSet.addAll(Arrays.asList(enclosingProjects));
 
 		ArrayList<IProject> projectsInScope= new ArrayList<>();
-		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
-		for (int i =0 ; i < projects.length; i++){
-			if (enclosingProjectSet.contains(projects[i].getFullPath()))
-				projectsInScope.add(projects[i]);
+		for (IProject project : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
+			if (enclosingProjectSet.contains(project.getFullPath())) {
+				projectsInScope.add(project);
+			}
 		}
 
 		return projectsInScope.toArray(new IProject[projectsInScope.size()]);
@@ -141,11 +140,10 @@ class TextMatchUpdater {
 				IResource[] members= ((IContainer) resource).members();
 				pm.beginTask(task, members.length);
 				pm.subTask(task);
-				for (int i = 0; i < members.length; i++) {
+				for (IResource member : members) {
 					if (pm.isCanceled())
 						throw new OperationCanceledException();
-
-					addTextMatches(members[i], new SubProgressMonitor(pm, 1));
+					addTextMatches(member, new SubProgressMonitor(pm, 1));
 				}
 			}
 		} catch (JavaModelException e){
@@ -169,8 +167,7 @@ class TextMatchUpdater {
 	}
 
 	private void removeReferences(ICompilationUnit cu, Set<TextMatch> matches) {
-		for (int i= 0; i < fReferences.length; i++) {
-			SearchResultGroup group= fReferences[i];
+		for (SearchResultGroup group : fReferences) {
 			if (cu.equals(group.getCompilationUnit())) {
 				removeReferences(matches, group);
 			}
@@ -178,10 +175,9 @@ class TextMatchUpdater {
 	}
 
 	private void removeReferences(Set<TextMatch> matches, SearchResultGroup group) {
-		SearchMatch[] searchResults= group.getSearchResults();
-		for (int r= 0; r < searchResults.length; r++) {
+		for (SearchMatch searchResult : group.getSearchResults()) {
 			//int start= searchResults[r].getStart(); // doesn't work for pack.ReferencedType
-			int unqualifiedStart= searchResults[r].getOffset() + searchResults[r].getLength() - fCurrentNameLength;
+			int unqualifiedStart= searchResult.getOffset() + searchResult.getLength() - fCurrentNameLength;
 			for (Iterator<TextMatch> iter= matches.iterator(); iter.hasNext();) {
 				TextMatch element= iter.next();
 				if (element.getStartPosition() == unqualifiedStart)
@@ -191,8 +187,7 @@ class TextMatchUpdater {
 	}
 
 	private void addTextUpdates(ICompilationUnit cu, Set<TextMatch> matches) {
-		for (Iterator<TextMatch> resultIter= matches.iterator(); resultIter.hasNext();){
-			TextMatch match= resultIter.next();
+		for (TextMatch match : matches) {
 			if (!match.isQualified() && fOnlyQualified)
 				continue;
 			int matchStart= match.getStartPosition();

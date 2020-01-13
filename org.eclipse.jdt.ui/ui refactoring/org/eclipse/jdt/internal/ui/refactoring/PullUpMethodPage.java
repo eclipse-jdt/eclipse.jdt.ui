@@ -99,10 +99,10 @@ public class PullUpMethodPage extends UserInputWizardPage {
 	private static class PullUpFilter extends ViewerFilter {
 
 		private static boolean anySubtypeCanBeShown(final IType type, final Map<IType, IMember[]> typeToMemberArray, final ITypeHierarchy hierarchy) {
-			final IType[] subTypes= hierarchy.getSubtypes(type);
-			for (int i= 0; i < subTypes.length; i++) {
-				if (canBeShown(subTypes[i], typeToMemberArray, hierarchy))
+			for (IType subType : hierarchy.getSubtypes(type)) {
+				if (canBeShown(subType, typeToMemberArray, hierarchy)) {
 					return true;
+				}
 			}
 			return false;
 		}
@@ -115,9 +115,7 @@ public class PullUpMethodPage extends UserInputWizardPage {
 
 		private static Set<IType> computeShowableSubtypesOfMainType(final ITypeHierarchy hierarchy, final Map<IType, IMember[]> typeToMemberArray) {
 			final Set<IType> result= new HashSet<>();
-			final IType[] subtypes= hierarchy.getAllSubtypes(hierarchy.getType());
-			for (int i= 0; i < subtypes.length; i++) {
-				final IType subtype= subtypes[i];
+			for (IType subtype : hierarchy.getAllSubtypes(hierarchy.getType())) {
 				if (canBeShown(subtype, typeToMemberArray, hierarchy))
 					result.add(subtype);
 			}
@@ -246,8 +244,7 @@ public class PullUpMethodPage extends UserInputWizardPage {
 	// IType -> Set of IMember
 	private static Map<IType, HashSet<IMember>> createTypeToMemberSetMapping(final IMember[] members) {
 		final Map<IType, HashSet<IMember>> typeToMemberSet= new HashMap<>();
-		for (int i= 0; i < members.length; i++) {
-			final IMember member= members[i];
+		for (IMember member : members) {
 			final IType type= member.getDeclaringType();
 			if (!typeToMemberSet.containsKey(type))
 				typeToMemberSet.put(type, new HashSet<IMember>());
@@ -436,9 +433,10 @@ public class PullUpMethodPage extends UserInputWizardPage {
 	private IMethod[] getCheckedMethods() {
 		final Object[] checked= fTreeViewer.getCheckedElements();
 		final List<IMethod> members= new ArrayList<>(checked.length);
-		for (int i= 0; i < checked.length; i++) {
-			if (checked[i] instanceof IMethod)
-				members.add((IMethod) checked[i]);
+		for (Object c : checked) {
+			if (c instanceof IMethod) {
+				members.add((IMethod) c);
+			}
 		}
 		return members.toArray(new IMethod[members.size()]);
 	}
@@ -521,16 +519,14 @@ public class PullUpMethodPage extends UserInputWizardPage {
 	}
 
 	private void precheckElements(final ContainerCheckedTreeViewer treeViewer) {
-		final IMember[] members= fProcessor.getMembersToMove();
-		for (int i= 0; i < members.length; i++) {
-			treeViewer.setChecked(members[i], true);
+		for (IMember member : fProcessor.getMembersToMove()) {
+			treeViewer.setChecked(member, true);
 		}
 	}
 
 	private void removeAllTreeViewFilters() {
-		final ViewerFilter[] filters= fTreeViewer.getFilters();
-		for (int i= 0; i < filters.length; i++) {
-			fTreeViewer.removeFilter(filters[i]);
+		for (ViewerFilter filter : fTreeViewer.getFilters()) {
+			fTreeViewer.removeFilter(filter);
 		}
 	}
 

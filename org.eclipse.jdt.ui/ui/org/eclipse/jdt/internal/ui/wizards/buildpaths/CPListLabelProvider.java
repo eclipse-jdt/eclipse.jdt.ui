@@ -166,9 +166,9 @@ public class CPListLabelProvider extends LabelProvider implements IStyledLabelPr
 			if (patterns != null && patterns.length > 0) {
 				int patternsCount= 0;
 				StringBuilder buf= new StringBuilder();
-				for (int i= 0; i < patterns.length; i++) {
-					if (patterns[i].segmentCount() > 0) {
-						String pattern= BasicElementLabels.getPathLabel(patterns[i], false);
+				for (IPath p : patterns) {
+					if (p.segmentCount() > 0) {
+						String pattern= BasicElementLabels.getPathLabel(p, false);
 						if (patternsCount > 0) {
 							buf.append(NewWizardMessages.CPListLabelProvider_exclusion_filter_separator);
 						}
@@ -191,9 +191,9 @@ public class CPListLabelProvider extends LabelProvider implements IStyledLabelPr
 			if (patterns != null && patterns.length > 0) {
 				int patternsCount= 0;
 				StringBuilder buf= new StringBuilder();
-				for (int i= 0; i < patterns.length; i++) {
-					if (patterns[i].segmentCount() > 0) {
-						String pattern= BasicElementLabels.getPathLabel(patterns[i], false);
+				for (IPath p : patterns) {
+					if (p.segmentCount() > 0) {
+						String pattern= BasicElementLabels.getPathLabel(p, false);
 						if (patternsCount > 0) {
 							buf.append(NewWizardMessages.CPListLabelProvider_inclusion_filter_separator);
 						}

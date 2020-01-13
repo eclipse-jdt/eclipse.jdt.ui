@@ -369,9 +369,7 @@ public class JavaElementLabelComposer extends JavaElementLabelComposerCore {
 
 		if (fgPkgNameAbbreviation != null && fgPkgNameAbbreviation.length != 0) {
 
-			for (int i= 0; i < fgPkgNameAbbreviation.length; i++) {
-				PackageNameAbbreviation abbr= fgPkgNameAbbreviation[i];
-
+			for (PackageNameAbbreviation abbr : fgPkgNameAbbreviation) {
 				String abbrPrefix= abbr.getPackagePrefix();
 				if (pkgName.startsWith(abbrPrefix)) {
 					int abbrPrefixLength= abbrPrefix.length();
@@ -547,29 +545,20 @@ public class JavaElementLabelComposer extends JavaElementLabelComposerCore {
 	}
 
 	public static PackageNameAbbreviation[] parseAbbreviationPattern(String pattern) {
-		String[] parts= pattern.split("\\s*(?:\r\n?|\n)\\s*"); //$NON-NLS-1$
-
 		ArrayList<PackageNameAbbreviation> result= new ArrayList<>();
 
-		for (int i= 0; i < parts.length; i++) {
-			String part= parts[i].trim();
-
+		for (String p : pattern.split("\\s*(?:\r\n?|\n)\\s*")) { //$NON-NLS-1$
+			String part= p.trim();
 			if (part.length() == 0)
 				continue;
-
 			String[] parts2= part.split("\\s*=\\s*", 2); //$NON-NLS-1$
-
 			if (parts2.length != 2)
 				return null;
-
 			String prefix= parts2[0].trim();
 			String abbr= parts2[1].trim();
-
 			if (prefix.startsWith("#")) //$NON-NLS-1$
 				continue;
-
 			PackageNameAbbreviation pkgAbbr= new PackageNameAbbreviation(prefix, abbr);
-
 			result.add(pkgAbbr);
 		}
 

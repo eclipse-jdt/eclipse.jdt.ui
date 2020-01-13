@@ -76,8 +76,9 @@ public class RefactoringScannerTests extends RefactoringTest{
 		fScanner.scan(text);
 
 		ArrayList<Integer> expectedMatchesList= new ArrayList<>(expectedMatches.length);
-		for (int i= 0; i < expectedMatches.length; i++)
-			expectedMatchesList.add(Integer.valueOf(TextRangeUtil.getOffset(text, expectedMatches[i].fLine, expectedMatches[i].fColumn)));
+		for (Position expectedMatch : expectedMatches) {
+			expectedMatchesList.add(Integer.valueOf(TextRangeUtil.getOffset(text, expectedMatch.fLine, expectedMatch.fColumn)));
+		}
 		ArrayList<Integer> matchesList= new ArrayList<>();
 		Set<TextMatch> matches= fScanner.getMatches();
 		for (Iterator<TextMatch> iter= matches.iterator(); iter.hasNext();) {

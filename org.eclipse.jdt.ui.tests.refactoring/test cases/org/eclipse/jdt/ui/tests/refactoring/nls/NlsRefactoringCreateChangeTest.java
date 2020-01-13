@@ -773,12 +773,9 @@ public class NlsRefactoringCreateChangeTest extends TestCase {
 	}
 
 	private void checkContentOfFile(String message, IFile file, String content) throws Exception {
-		InputStream in= file.getContents();
-		try {
+		try (InputStream in= file.getContents()) {
 			String realContent= copyToString(in);
 			RefactoringTest.assertEqualLines(message, content, realContent);
-		} finally {
-			in.close();
 		}
 	}
 

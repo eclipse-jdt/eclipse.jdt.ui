@@ -52,9 +52,7 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 
 	public static void chooseNewTarget(MoveInstanceMethodProcessor processor, int newTargetType, String newTargetName) {
 		IVariableBinding target= null;
-		IVariableBinding[] targets= processor.getPossibleTargets();
-		for (int i= 0; i < targets.length; i++) {
-			IVariableBinding candidate= targets[i];
+		for (IVariableBinding candidate : processor.getPossibleTargets()) {
 			if (candidate.getName().equals(newTargetName) && typeMatches(newTargetType, candidate)) {
 				target= candidate;
 				break;

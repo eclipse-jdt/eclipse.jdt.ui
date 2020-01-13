@@ -751,9 +751,10 @@ public class ModuleDialog extends StatusDialog {
 		IClasspathAttribute[] oldAttributes= entry.getExtraAttributes();
 		IClasspathAttribute[] newAttributes= new IClasspathAttribute[oldAttributes.length];
 		int count= 0;
-		for (int i= 0; i < oldAttributes.length; i++) {
-			if (!oldAttributes[i].getName().equals(IClasspathAttribute.MODULE))
-				newAttributes[count++]= oldAttributes[i];
+		for (IClasspathAttribute oldAttribute : oldAttributes) {
+			if (!oldAttribute.getName().equals(IClasspathAttribute.MODULE)) {
+				newAttributes[count++]= oldAttribute;
+			}
 		}
 		if (count == oldAttributes.length)
 			return null;
@@ -766,25 +767,25 @@ public class ModuleDialog extends StatusDialog {
 			return fModuleNames;
 		Set<String> moduleNames= new HashSet<>();
 		if (fJavaElements != null) {
-			for (int i= 0; i < fJavaElements.length; i++) {
-				if (fJavaElements[i] instanceof IPackageFragmentRoot) {
-					IModuleDescription module= ((IPackageFragmentRoot) fJavaElements[i]).getModuleDescription();
+			for (IJavaElement element : fJavaElements) {
+				if (element instanceof IPackageFragmentRoot) {
+					IModuleDescription module= ((IPackageFragmentRoot) element).getModuleDescription();
 					if (module != null) {
 						recordModule(module, moduleNames);
 					} else {
 						try {
-							recordModule(JavaCore.getAutomaticModuleDescription(fJavaElements[i]), moduleNames);
-						} catch (JavaModelException e) {
+							recordModule(JavaCore.getAutomaticModuleDescription(element), moduleNames);
+						}catch (JavaModelException e) {
 							JavaPlugin.log(e);
 						}
 					}
-				} else if (fJavaElements[i] instanceof IJavaProject) {
+				} else if (element instanceof IJavaProject) {
 					try {
-						IModuleDescription module= ((IJavaProject) fJavaElements[i]).getModuleDescription();
+						IModuleDescription module= ((IJavaProject) element).getModuleDescription();
 						if (module != null) {
 							recordModule(module, moduleNames);
 						} else {
-							recordModule(JavaCore.getAutomaticModuleDescription(fJavaElements[i]), moduleNames);
+							recordModule(JavaCore.getAutomaticModuleDescription(element), moduleNames);
 						}
 					} catch (JavaModelException e) {
 						JavaPlugin.log(e);
@@ -798,9 +799,9 @@ public class ModuleDialog extends StatusDialog {
 	private List<String> defaultIncludedModuleNamesForUnnamedModule() {
 		if (fJavaElements != null) {
 			List<IPackageFragmentRoot> roots= new ArrayList<>();
-			for (int i= 0; i < fJavaElements.length; i++) {
-				if (fJavaElements[i] instanceof IPackageFragmentRoot) {
-					roots.add((IPackageFragmentRoot) fJavaElements[i]);
+			for (IJavaElement element : fJavaElements) {
+				if (element instanceof IPackageFragmentRoot) {
+					roots.add((IPackageFragmentRoot) element);
 				}
 			}
 			return JavaCore.defaultRootModules(roots);

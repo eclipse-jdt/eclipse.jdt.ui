@@ -115,9 +115,9 @@ public class ClasspathAttributeConfigurationDescriptors {
 	private static HashMap<String, Descriptor> readExtensions() {
 		IConfigurationElement[] elements = Platform.getExtensionRegistry().getConfigurationElementsFor(JavaUI.ID_PLUGIN, ATT_EXTENSION);
 		HashMap<String, Descriptor> descriptors= new HashMap<>(elements.length * 2);
-		for (int i= 0; i < elements.length; i++) {
+		for (IConfigurationElement element : elements) {
 			try {
-				Descriptor curr= new Descriptor(elements[i]);
+				Descriptor curr= new Descriptor(element);
 				descriptors.put(curr.getKey(), curr);
 			} catch (CoreException e) {
 				JavaPlugin.log(e);

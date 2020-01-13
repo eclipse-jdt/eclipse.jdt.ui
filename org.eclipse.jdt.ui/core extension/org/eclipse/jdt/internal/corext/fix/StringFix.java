@@ -14,7 +14,6 @@
 package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -108,13 +107,12 @@ public class StringFix implements IProposableFix, ICleanUpFix {
 	private static ICleanUpFix createCleanUp(CompilationUnit compilationUnit, boolean addNLSTag, boolean removeNLSTag, IProblemLocation[] problems) throws CoreException, JavaModelException {
 		ICompilationUnit cu= (ICompilationUnit)compilationUnit.getJavaElement();
 		if (!cu.isStructureKnown())
-			return null; //[clean up] 'Remove unnecessary $NLS-TAGS$' removes necessary ones in case of syntax errors: https://bugs.eclipse.org/bugs/show_bug.cgi?id=285814 : 
+			return null; //[clean up] 'Remove unnecessary $NLS-TAGS$' removes necessary ones in case of syntax errors: https://bugs.eclipse.org/bugs/show_bug.cgi?id=285814 :
 
 		List<CategorizedTextEditGroup> result= new ArrayList<>();
 
 		List<IProblemLocation> missingNLSProblems= new ArrayList<>();
-		for (int i= 0; i < problems.length; i++) {
-			IProblemLocation problem= problems[i];
+		for (IProblemLocation problem : problems) {
 			if (addNLSTag && problem.getProblemId() == IProblem.NonExternalizedStringLiteral) {
 				missingNLSProblems.add(problem);
 			}
@@ -132,16 +130,15 @@ public class StringFix implements IProposableFix, ICleanUpFix {
 		if (!missingNLSProblems.isEmpty()) {
 			int[] positions= new int[missingNLSProblems.size()];
 			int i=0;
-			for (Iterator<IProblemLocation> iter= missingNLSProblems.iterator(); iter.hasNext();) {
-				IProblemLocation problem= iter.next();
+			for (IProblemLocation problem : missingNLSProblems) {
 				positions[i]= problem.getOffset();
 				i++;
 			}
 			TextEdit[] edits= NLSUtil.createNLSEdits(cu, positions);
 			if (edits != null) {
-				for (int j= 0; j < edits.length; j++) {
+				for (TextEdit edit : edits) {
 					String label= FixMessages.StringFix_AddNonNls_description;
-					result.add(new CategorizedTextEditGroup(label, edits[j], new GroupCategorySet(new GroupCategory(label, label, label))));
+					result.add(new CategorizedTextEditGroup(label, edit, new GroupCategorySet(new GroupCategory(label, label, label))));
 				}
 			}
 		}
@@ -206,11 +203,10 @@ public class StringFix implements IProposableFix, ICleanUpFix {
 			return null;
 
 		CompilationUnitChange result= new CompilationUnitChange(getDisplayString(), fCompilationUnit);
-		for (int i= 0; i < fEditGroups.length; i++) {
-			TextEdit[] edits= fEditGroups[i].getTextEdits();
-			String groupName= fEditGroups[i].getName();
-			for (int j= 0; j < edits.length; j++) {
-				TextChangeCompatibility.addTextEdit(result, groupName, edits[j]);
+		for (TextEditGroup editGroup : fEditGroups) {
+			String groupName= editGroup.getName();
+			for (TextEdit edit : editGroup.getTextEdits()) {
+				TextChangeCompatibility.addTextEdit(result, groupName, edit);
 			}
 		}
 		return result;

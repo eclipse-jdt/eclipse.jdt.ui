@@ -35,7 +35,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
  * Rewrite helper for type annotations.
- * 
+ *
  * @see JDTUIHelperClasses
  * @since 3.13
  */
@@ -47,7 +47,7 @@ public class TypeAnnotationRewrite {
 	 * <p>
 	 * In a combination of {@link ElementType#TYPE_USE} and {@link ElementType#TYPE_PARAMETER}
 	 * the latter is ignored, because this is implied by the former and creates no ambiguity.</p>
-	 * 
+	 *
 	 * @param node ASTNode
 	 * @param childListProperty child list property
 	 * @param rewrite rewrite that removes the nodes
@@ -86,8 +86,7 @@ public class TypeAnnotationRewrite {
 	}
 
 	private static IAnnotationBinding findTargetAnnotation(IAnnotationBinding[] metaAnnotations) {
-		for (int i= 0; i < metaAnnotations.length; i++) {
-			IAnnotationBinding binding= metaAnnotations[i];
+		for (IAnnotationBinding binding : metaAnnotations) {
 			ITypeBinding annotationType= binding.getAnnotationType();
 			if (annotationType != null && annotationType.getQualifiedName().equals(Target.class.getName())) {
 				return binding;
@@ -97,17 +96,15 @@ public class TypeAnnotationRewrite {
 	}
 
 	private static boolean isTypeUseOnly(IAnnotationBinding binding) {
-		IMemberValuePairBinding[] pairs= binding.getAllMemberValuePairs();
 		boolean typeUseSeen= false;
 		boolean otherSeen= false;
-		for (final IMemberValuePairBinding pair : pairs) {
+		for (final IMemberValuePairBinding pair : binding.getAllMemberValuePairs()) {
 			if (pair.getKey() == null || pair.getKey().equals("value")) { //$NON-NLS-1$
 				Object value= pair.getValue();
 				if (value instanceof Object[]) {
-					Object[] values= (Object[]) value;
-					for (int k= 0; k < values.length; k++) {
-						if (values[k] instanceof IVariableBinding) {
-							String name= ((IVariableBinding) values[k]).getName();
+					for (Object v : (Object[]) value) {
+						if (v instanceof IVariableBinding) {
+							String name= ((IVariableBinding) v).getName();
 							if (name.equals(ElementType.TYPE_USE.name())) {
 								typeUseSeen= true;
 							} else if (!name.equals(ElementType.TYPE_PARAMETER.name())) {

@@ -15,7 +15,6 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
@@ -297,9 +296,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		 	CPListElement ele = projelements.get(i);
 		 	// if root node, collect the CPList elements
 		 	if(ele.isRootNodeForPath()) {
-		 		ArrayList<Object> children= ((RootCPListElement)ele).getChildren();
-		 		for (Iterator<?> iterator= children.iterator(); iterator.hasNext();) {
-		 			Object object=  iterator.next();
+		 		for (Object object : ((RootCPListElement)ele).getChildren()) {
 		 			if(object instanceof CPListElement) {
 		 				flattenedProjElements.add((CPListElement) object);
 		 			}
@@ -677,19 +674,14 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		selectable.addAll(Arrays.asList(fCurrJProject.getJavaModel().getJavaProjects()));
 		selectable.remove(fCurrJProject);
 
-		List<CPListElement> elements= fProjectsList.getElements();
-		for (int i= 0; i < elements.size(); i++) {
-			CPListElement curr= elements.get(i);
+		for (CPListElement curr : fProjectsList.getElements()) {
 			if (curr.isRootNodeForPath()) {
-				ArrayList<Object> children= ((RootCPListElement)curr).getChildren();
-				for (Iterator<?> iterator= children.iterator(); iterator.hasNext();) {
-					Object object=  iterator.next();
+				for (Object object : ((RootCPListElement)curr).getChildren()) {
 					if(object instanceof CPListElement) {
 						CPListElement cpe = (CPListElement)object;
 						IJavaProject proj= (IJavaProject) JavaCore.create(cpe.getResource());
 						selectable.remove(proj);
 					}
-					
 				}
 			}
 			IJavaProject proj= (IJavaProject) JavaCore.create(curr.getResource());

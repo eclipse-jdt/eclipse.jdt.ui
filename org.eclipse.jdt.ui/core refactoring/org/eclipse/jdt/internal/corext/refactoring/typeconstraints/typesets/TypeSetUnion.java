@@ -74,7 +74,7 @@ public class TypeSetUnion extends TypeSet {
 	public int hashCode() {
 		return fLHS.hashCode() * 37 + fRHS.hashCode();
 	}
-	
+
 	@Override
 	public TypeSet upperBound() {
 		throw new IllegalStateException("unimplemented"); //$NON-NLS-1$

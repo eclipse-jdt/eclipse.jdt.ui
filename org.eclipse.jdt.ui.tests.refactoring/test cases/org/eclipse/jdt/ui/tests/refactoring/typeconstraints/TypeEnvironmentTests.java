@@ -16,7 +16,6 @@ package org.eclipse.jdt.ui.tests.refactoring.typeconstraints;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -35,14 +34,13 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeEnvironment;
 
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTestSetup;
 import org.eclipse.jdt.ui.tests.refactoring.infra.AbstractCUTestCase;
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestPlugin;
-
-import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -117,13 +115,11 @@ public class TypeEnvironmentTests extends AbstractCUTestCase {
 		}
 		@Override
 		public void endVisit(CompilationUnit node) {
-			for (Iterator<ITypeBinding> iter= fResult.iterator(); iter.hasNext();) {
-				ITypeBinding binding= iter.next();
+			for (ITypeBinding binding : fResult) {
 				if (binding.isParameterizedType()) {
-					ITypeBinding[] args= binding.getTypeArguments();
-					for (int i= 0; i < args.length; i++) {
-						if (args[i].isWildcardType()) {
-							fWildcards.add(args[i]);
+					for (ITypeBinding arg : binding.getTypeArguments()) {
+						if (arg.isWildcardType()) {
+							fWildcards.add(arg);
 						}
 					}
 				}
@@ -150,9 +146,7 @@ public class TypeEnvironmentTests extends AbstractCUTestCase {
 		private void collectTypeArgumentBindings(ITypeBinding typeBinding, List<ITypeBinding> result) {
 			if (! typeBinding.isParameterizedType())
 				return;
-			ITypeBinding[] typeArguments= typeBinding.getTypeArguments();
-			for (int i= 0; i < typeArguments.length; i++) {
-				ITypeBinding typeArgument= typeArguments[i];
+			for (ITypeBinding typeArgument : typeBinding.getTypeArguments()) {
 				if (BUG_83616_core_wildcard_assignments && typeArgument.isParameterizedType() && typeArgument.getTypeArguments()[0].isWildcardType())
 					continue;
 				result.add(typeArgument);

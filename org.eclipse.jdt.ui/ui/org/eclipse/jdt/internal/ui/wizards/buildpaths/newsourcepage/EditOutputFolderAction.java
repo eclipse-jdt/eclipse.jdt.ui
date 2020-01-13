@@ -181,13 +181,12 @@ public class EditOutputFolderAction extends BuildpathModifierAction {
 	}
 
 	private IFolder getOldOutputFolder(final BuildpathDelta delta) {
-	    IResource[] deletedResources= delta.getDeletedResources();
 	    List<IResource> existingFolders= new ArrayList<>();
-	    for (int i= 0; i < deletedResources.length; i++) {
-	        if (deletedResources[i] instanceof IFolder && deletedResources[i].exists()) {
-	        	existingFolders.add(deletedResources[i]);
-	        }
-	    }
+		for (IResource deletedResource : delta.getDeletedResources()) {
+			if (deletedResource instanceof IFolder && deletedResource.exists()) {
+				existingFolders.add(deletedResource);
+			}
+		}
 	    if (existingFolders.size() > 0) {
 	    	if (existingFolders.size() > 1) {
 	    		String message= "Found more then one existing folders:"; //$NON-NLS-1$

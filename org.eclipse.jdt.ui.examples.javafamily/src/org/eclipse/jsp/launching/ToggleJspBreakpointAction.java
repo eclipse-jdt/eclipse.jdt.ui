@@ -44,11 +44,9 @@ public class ToggleJspBreakpointAction extends Action {
 	@Override
 	public void run() {
 		IBreakpointManager manager = DebugPlugin.getDefault().getBreakpointManager();
-		IBreakpoint[] breakpoints = manager.getBreakpoints();
 		IResource resource = getResource();
 		int lineNumber = fRulerInfo.getLineOfLastMouseButtonActivity() + 1;
-		for (int i = 0; i < breakpoints.length; i++) {
-			IBreakpoint bp = breakpoints[i];
+		for (IBreakpoint bp : manager.getBreakpoints()) {
 			if (bp instanceof IJavaStratumLineBreakpoint) {
 				IJavaStratumLineBreakpoint breakpoint = (IJavaStratumLineBreakpoint)bp;
 				if (breakpoint.getMarker().getResource().equals(resource)) {

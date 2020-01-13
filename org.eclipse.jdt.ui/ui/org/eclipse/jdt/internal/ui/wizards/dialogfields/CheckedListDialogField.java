@@ -141,8 +141,8 @@ public class CheckedListDialogField<E> extends ListDialogField<E> {
 			// workaround for bug 53853
 			Object[] checked= ((CheckboxTableViewer) fTable).getCheckedElements();
 			ArrayList<E> res= new ArrayList<>(checked.length);
-			for (int i= 0; i < checked.length; i++) {
-				res.add((E) checked[i]);
+			for (Object c : checked) {
+				res.add((E) c);
 			}
 			return res;
 		}

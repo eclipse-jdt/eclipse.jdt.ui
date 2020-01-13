@@ -142,7 +142,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 	private boolean fForceStatic;
 	private boolean fIsLastStatementSelected;
 	private SimpleName fEnclosingLoopLabel;
-	
+
 	public ExtractMethodAnalyzer(ICompilationUnit unit, Selection selection) throws CoreException {
 		super(unit, selection, false);
 	}
@@ -413,13 +413,13 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 	private String canHandleBranches() {
 		if (fReturnValue != null)
 			return RefactoringCoreMessages.ExtractMethodAnalyzer_branch_mismatch;
-		
+
 		ASTNode[] selectedNodes= getSelectedNodes();
 		final ASTNode lastSelectedNode= selectedNodes[selectedNodes.length - 1];
 		Statement body= getParentLoopBody(lastSelectedNode.getParent());
 		if (!(body instanceof Block))
 			return RefactoringCoreMessages.ExtractMethodAnalyzer_branch_mismatch;
-		
+
 		if (body != lastSelectedNode) {
 			Block block= (Block)body;
 			List<Statement> statements= block.statements();
@@ -427,24 +427,23 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 			if (lastSelectedNode != lastStatementInLoop)
 				return RefactoringCoreMessages.ExtractMethodAnalyzer_branch_mismatch;
 		}
-		
+
 		final String continueMatchesLoopProblem[]= { null };
-		for (int i= 0; i < selectedNodes.length; i++) {
-			final ASTNode astNode= selectedNodes[i];
+		for (ASTNode astNode : selectedNodes) {
 			astNode.accept(new ASTVisitor() {
 				ArrayList<String> fLocalLoopLabels= new ArrayList<>();
-				
+
 				@Override
 				public boolean visit(BreakStatement node) {
 					SimpleName label= node.getLabel();
 					if (label != null && !fLocalLoopLabels.contains(label.getIdentifier())) {
 						continueMatchesLoopProblem[0]= Messages.format(
-								RefactoringCoreMessages.ExtractMethodAnalyzer_branch_break_mismatch,
-								new Object[] { ("break " + label.getIdentifier()) }); //$NON-NLS-1$
+							RefactoringCoreMessages.ExtractMethodAnalyzer_branch_break_mismatch,
+							new Object[] { ("break " + label.getIdentifier()) }); //$NON-NLS-1$
 					}
 					return false;
 				}
-				
+
 				@Override
 				public boolean visit(LabeledStatement node) {
 					SimpleName label= node.getLabel();
@@ -452,15 +451,15 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 						fLocalLoopLabels.add(label.getIdentifier());
 					return true;
 				}
-				
+
 				@Override
 				public void endVisit(ContinueStatement node) {
 					SimpleName label= node.getLabel();
 					if (label != null && !fLocalLoopLabels.contains(label.getIdentifier())) {
 						if (fEnclosingLoopLabel == null || ! label.getIdentifier().equals(fEnclosingLoopLabel.getIdentifier())) {
 							continueMatchesLoopProblem[0]= Messages.format(
-									RefactoringCoreMessages.ExtractMethodAnalyzer_branch_continue_mismatch,
-									new Object[] { "continue " + label.getIdentifier() }); //$NON-NLS-1$
+								RefactoringCoreMessages.ExtractMethodAnalyzer_branch_continue_mismatch,
+								new Object[] { "continue " + label.getIdentifier() }); //$NON-NLS-1$
 						}
 					}
 				}
@@ -562,10 +561,11 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 	private IVariableBinding[] removeSelectedDeclarations(IVariableBinding[] bindings) {
 		List<IVariableBinding> result= new ArrayList<>(bindings.length);
 		Selection selection= getSelection();
-		for (int i= 0; i < bindings.length; i++) {
-			ASTNode decl= ((CompilationUnit)fEnclosingBodyDeclaration.getRoot()).findDeclaringNode(bindings[i]);
-			if (!selection.covers(decl))
-				result.add(bindings[i]);
+		for (IVariableBinding binding : bindings) {
+			ASTNode decl= ((CompilationUnit)fEnclosingBodyDeclaration.getRoot()).findDeclaringNode(binding);
+			if (!selection.covers(decl)) {
+				result.add(binding);
+			}
 		}
 		return result.toArray(new IVariableBinding[result.size()]);
 	}
@@ -576,14 +576,14 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 		// first remove all type variables that come from outside of the method
 		// or are covered by the selection
 		CompilationUnit compilationUnit= (CompilationUnit)fEnclosingBodyDeclaration.getRoot();
-		for (int i= 0; i < bindings.length; i++) {
-			ASTNode decl= compilationUnit.findDeclaringNode(bindings[i]);
-			if (decl == null || (!selection.covers(decl) && decl.getParent() instanceof MethodDeclaration))
-				result.add(bindings[i]);
+		for (ITypeBinding binding : bindings) {
+			ASTNode decl= compilationUnit.findDeclaringNode(binding);
+			if (decl == null || (!selection.covers(decl) && decl.getParent() instanceof MethodDeclaration)) {
+				result.add(binding);
+			}
 		}
 		// all all type variables which are needed since a local variable uses it
-		for (int i= 0; i < fArguments.length; i++) {
-			IVariableBinding arg= fArguments[i];
+		for (IVariableBinding arg : fArguments) {
 			ITypeBinding type= arg.getType();
 			if (type != null && type.isTypeVariable()) {
 				ASTNode decl= compilationUnit.findDeclaringNode(type);
@@ -612,8 +612,8 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 		IVariableBinding[] reads= argInfo.get(flowContext, FlowInfo.READ | FlowInfo.READ_POTENTIAL | FlowInfo.UNKNOWN);
 		outer: for (int i= 0; i < returnValues.length && localReads.size() < returnValues.length; i++) {
 			IVariableBinding binding= returnValues[i];
-			for (int x= 0; x < reads.length; x++) {
-				if (reads[x] == binding) {
+			for (IVariableBinding read : reads) {
+				if (read == binding) {
 					localReads.add(binding);
 					fReturnValue= binding;
 					continue outer;
@@ -643,9 +643,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 		}
 		List<IVariableBinding> callerLocals= new ArrayList<>(5);
 		FlowInfo localInfo= new InputFlowAnalyzer(flowContext, selection, false).perform(fEnclosingBodyDeclaration);
-		IVariableBinding[] writes= localInfo.get(flowContext, FlowInfo.WRITE | FlowInfo.WRITE_POTENTIAL | FlowInfo.UNKNOWN);
-		for (int i= 0; i < writes.length; i++) {
-			IVariableBinding write= writes[i];
+		for (IVariableBinding write : localInfo.get(flowContext, FlowInfo.WRITE | FlowInfo.WRITE_POTENTIAL | FlowInfo.UNKNOWN)) {
 			if (getSelection().covers(ASTNodes.findDeclaration(write, fEnclosingBodyDeclaration)))
 				callerLocals.add(write);
 		}
@@ -684,9 +682,10 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 		if (array == null)
 			return null;
 		int size= 0;
-		for (int i= 0; i < array.length; i++) {
-			if (array[i] != null)
+		for (IVariableBinding binding : array) {
+			if (binding != null) {
 				size++;
+			}
 		}
 		if (size == array.length)
 			return array;
@@ -709,8 +708,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 		if (includeRuntimeExceptions)
 			return fAllExceptions;
 		List<ITypeBinding> result= new ArrayList<>(fAllExceptions.length);
-		for (int i= 0; i < fAllExceptions.length; i++) {
-			ITypeBinding exception= fAllExceptions[i];
+		for (ITypeBinding exception : fAllExceptions) {
 			if (!includeRuntimeExceptions && Bindings.isRuntimeException(exception))
 				continue;
 			result.add(exception);

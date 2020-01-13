@@ -14,10 +14,8 @@
 package org.eclipse.jdt.ui.tests.quickfix;
 
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -158,9 +156,7 @@ public class CleanUpTestCase extends QuickFixTest {
 	private void disableAll() throws CoreException {
 		Map<String, String> settings= fProfile.getSettings();
 		CleanUpOptions options= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(CleanUpConstants.DEFAULT_CLEAN_UP_OPTIONS);
-		Set<String> keys= options.getKeys();
-		for (Iterator<String> iterator= keys.iterator(); iterator.hasNext();) {
-			String key= iterator.next();
+		for (String key : options.getKeys()) {
 			settings.put(key, CleanUpOptions.FALSE);
 		}
 		commitProfile();
@@ -232,12 +228,11 @@ public class CleanUpTestCase extends QuickFixTest {
 	}
 
 	protected RefactoringStatus performRefactoring(final CleanUpRefactoring ref, ICompilationUnit[] cus, ICleanUp[] cleanUps) throws CoreException {
-		for (int i= 0; i < cus.length; i++) {
-			ref.addCompilationUnit(cus[i]);
+		for (ICompilationUnit cu : cus) {
+			ref.addCompilationUnit(cu);
 		}
-
-		for (int i= 0; i < cleanUps.length; i++) {
-			ref.addCleanUp(cleanUps[i]);
+		for (ICleanUp cleanUp : cleanUps) {
+			ref.addCleanUp(cleanUp);
 		}
 
 		IUndoManager undoManager= getUndoManager();

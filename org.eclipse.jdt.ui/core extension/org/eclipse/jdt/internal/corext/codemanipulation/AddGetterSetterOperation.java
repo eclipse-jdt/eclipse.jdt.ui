@@ -192,7 +192,7 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 
 	/**
 	 * Generates a new setter method for the specified field
-	 * 
+	 *
 	 * @param field the field
 	 * @param astRewrite the AST rewrite to use
 	 * @param rewrite the list rewrite to use
@@ -322,16 +322,16 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 			}
 
 			fSkipAllExisting= (fSkipExistingQuery == null);
-			
+
 			Set<IField> accessors = new HashSet<>(Arrays.asList(fAccessorFields));
 			Set<IField> getters = new HashSet<>(Arrays.asList(fGetterFields));
 			Set<IField> setters= new HashSet<>(Arrays.asList(fSetterFields));
 			IField[] fields= fType.getFields(); // generate methods in order of field declarations
 			if (!fSort) {
-				for (int i= 0; i < fields.length; i++) {
-					if (accessors.contains(fields[i])) {
-						generateGetterMethod(fields[i], listRewriter);
-						generateSetterMethod(fields[i], astRewrite, listRewriter);
+				for (IField field : fields) {
+					if (accessors.contains(field)) {
+						generateGetterMethod(field, listRewriter);
+						generateSetterMethod(field, astRewrite, listRewriter);
 						monitor.worked(1);
 						if (monitor.isCanceled()) {
 							throw new OperationCanceledException();
@@ -339,18 +339,18 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 					}
 				}
 			}
-			for (int i= 0; i < fields.length; i++) {
-				if (getters.contains(fields[i])) {
-					generateGetterMethod(fields[i], listRewriter);
+			for (IField field : fields) {
+				if (getters.contains(field)) {
+					generateGetterMethod(field, listRewriter);
 					monitor.worked(1);
 					if (monitor.isCanceled()) {
 						throw new OperationCanceledException();
 					}
 				}
 			}
-			for (int i= 0; i < fields.length; i++) {
-				if (setters.contains(fields[i])) {
-					generateSetterMethod(fields[i], astRewrite, listRewriter);
+			for (IField field : fields) {
+				if (setters.contains(field)) {
+					generateSetterMethod(field, astRewrite, listRewriter);
 					monitor.worked(1);
 					if (monitor.isCanceled()) {
 						throw new OperationCanceledException();

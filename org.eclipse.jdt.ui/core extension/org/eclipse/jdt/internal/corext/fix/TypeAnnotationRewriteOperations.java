@@ -151,7 +151,7 @@ public class TypeAnnotationRewriteOperations {
 			AnnotatableType annotatableType= (AnnotatableType) target;
 			if(annotatableType.isSimpleType()) {
 				// for cleanups, if another type annotation has been moved.
-				annotatableType = (AnnotatableType) astRewrite.get(annotatableType.getParent(), annotatableType.getLocationInParent()); 
+				annotatableType = (AnnotatableType) astRewrite.get(annotatableType.getParent(), annotatableType.getLocationInParent());
 			}
 			if (annotatableType.isSimpleType()) {
 				SimpleType simpleType= (SimpleType) annotatableType;

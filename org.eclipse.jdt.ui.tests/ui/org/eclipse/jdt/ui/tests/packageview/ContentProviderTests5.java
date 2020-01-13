@@ -96,9 +96,7 @@ public class ContentProviderTests5 extends TestCase{
 		fJProject= JavaProjectHelper.createJavaProject("TestProject", "bin");
 		assertNotNull(fJProject);
 
-		Object[] resource = fJProject.getNonJavaResources();
-		for (int i = 0; i < resource.length; i++) {
-			Object object = resource[i];
+		for (Object object : fJProject.getNonJavaResources()) {
 			if (object instanceof IFile) {
 				IFile file = (IFile) object;
 				if (".classpath".equals(file.getName()))
@@ -265,8 +263,7 @@ public class ContentProviderTests5 extends TestCase{
 		assertEquals("array length", expected.length, actual.length);
 		exp: for (int i= 0; i < expected.length; i++) {
 			Object e= expected[i];
-			for (int j= 0; j < actual.length; j++) {
-				Object a= actual[j];
+			for (Object a : actual) {
 				if (e.equals(a))
 					continue exp;
 			}

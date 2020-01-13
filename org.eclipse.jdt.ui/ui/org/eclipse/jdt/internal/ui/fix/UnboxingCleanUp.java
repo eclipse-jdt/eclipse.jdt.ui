@@ -85,15 +85,16 @@ public class UnboxingCleanUp extends AbstractMultiFix {
 	public String getPreview() {
 		StringBuilder bld= new StringBuilder();
 		bld.append("\n");
-		bld.append("public class Foo {\n");
-		bld.append("    public static void bar(Character cObject) {\n");
+		bld.append("Integer integerObject = Integer.MAX_VALUE;\n");
+		bld.append("Character cObject = Character.MAX_VALUE;\n");
+		bld.append("\n");
 		if (isEnabled(CleanUpConstants.USE_UNBOXING)) {
-			bld.append("        char c = cObject;\n");
+			bld.append("int i = integerObject;\n");
+			bld.append("char c = cObject;\n");
 		} else {
-			bld.append("        char c = cObject.charValue();\n");
+			bld.append("int i = integerObject.intValue();\n");
+			bld.append("char c = cObject.charValue();\n");
 		}
-		bld.append("    }\n");
-		bld.append("}\n");
 
 		return bld.toString();
 	}

@@ -255,12 +255,12 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 		if (name != null && !name.isEmpty()) {
 			final IType declaring= getDeclaringType();
 			try {
-				final ICompilationUnit[] units= declaring.getPackageFragment().getCompilationUnits(fOwner);
 				final String newName= JavaModelUtil.getRenamedCUName(declaring.getCompilationUnit(), name);
 				ICompilationUnit result= null;
-				for (int index= 0; index < units.length; index++) {
-					if (units[index].getElementName().equals(newName))
-						result= units[index];
+				for (ICompilationUnit unit : declaring.getPackageFragment().getCompilationUnits(fOwner)) {
+					if (unit.getElementName().equals(newName)) {
+						result= unit;
+					}
 				}
 				if (result != null) {
 					final IType type= result.getType(name);
@@ -440,21 +440,21 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 			if (binding != null && binding.isClass()) {
 				final IMethodBinding[] bindings= StubUtility2Core.getVisibleConstructors(binding, true, true);
 				int deprecationCount= 0;
-				for (int i= 0; i < bindings.length; i++) {
-					if (bindings[i].isDeprecated())
+				for (IMethodBinding b : bindings) {
+					if (b.isDeprecated()) {
 						deprecationCount++;
+					}
 				}
 				final ListRewrite rewrite= targetRewrite.getASTRewrite().getListRewrite(targetDeclaration, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
 				if (rewrite != null) {
 					boolean createDeprecated= deprecationCount == bindings.length;
-					for (int i= 0; i < bindings.length; i++) {
-						IMethodBinding curr= bindings[i];
+					for (IMethodBinding curr : bindings) {
 						if (!curr.isDeprecated() || createDeprecated) {
 							MethodDeclaration stub;
 							try {
 								ImportRewriteContext context= new ContextSensitiveImportRewriteContext(targetDeclaration, targetRewrite.getImportRewrite());
 								stub= StubUtility2.createConstructorStub(targetRewrite.getCu(), targetRewrite.getASTRewrite(), targetRewrite.getImportRewrite(), context, curr, binding.getName(),
-										Modifier.PUBLIC, false, false, fSettings);
+									Modifier.PUBLIC, false, false, fSettings);
 								if (stub != null)
 									rewrite.insertLast(stub, null);
 							} catch (CoreException exception) {
@@ -697,8 +697,9 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 				final ITypeParameter[] parameters= extractedType.getTypeParameters();
 				if (parameters.length > 0) {
 					final ParameterizedType parameterized= ast.newParameterizedType(type);
-					for (int index= 0; index < parameters.length; index++)
-						parameterized.typeArguments().add(ast.newSimpleType(ast.newSimpleName(parameters[index].getElementName())));
+					for (ITypeParameter parameter : parameters) {
+						parameterized.typeArguments().add(ast.newSimpleType(ast.newSimpleName(parameter.getElementName())));
+					}
 					type= parameterized;
 				}
 			}
@@ -775,8 +776,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 				subTypes.add(declaring);
 			final Map<ICompilationUnit, Collection<IType>> unitToTypes= new HashMap<>(subTypes.size());
 			final Set<ICompilationUnit> units= new HashSet<>(subTypes.size());
-			for (int index= 0; index < subTypes.size(); index++) {
-				final IType type= subTypes.get(index);
+			for (final IType type : subTypes) {
 				final ICompilationUnit unit= type.getCompilationUnit();
 				units.add(unit);
 				Collection<IType> collection= unitToTypes.get(unit);
@@ -836,8 +836,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 								try {
 									final Collection<IType> types= unitToTypes.get(unit);
 									if (types != null) {
-										for (final Iterator<IType> innerIterator= types.iterator(); innerIterator.hasNext();) {
-											final IType currentType= innerIterator.next();
+										for (IType currentType : types) {
 											final AbstractTypeDeclaration currentDeclaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(currentType, node);
 											if (currentDeclaration != null)
 												createModifiedSubType(unit, node, extractedType, extractBindings[0], currentDeclaration, status);
@@ -1136,14 +1135,13 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 					}
 				}
 			}
-			for (Iterator<Entry<ICompilationUnit, CompilationUnitChange>> iterator= fLayerChanges.entrySet().iterator(); iterator.hasNext();) {
-				final Entry<ICompilationUnit, CompilationUnitChange> entry= iterator.next();
+			for (Entry<ICompilationUnit, CompilationUnitChange> entry : fLayerChanges.entrySet()) {
 				manager.manage(entry.getKey(), entry.getValue());
 			}
-			ICompilationUnit[] units= manager.getAllCompilationUnits();
-			for (int index= 0; index < units.length; index++) {
-				if (units[index].getPath().equals(extractedUnit.getPath()))
-					manager.remove(units[index]);
+			for (ICompilationUnit cu : manager.getAllCompilationUnits()) {
+				if (cu.getPath().equals(extractedUnit.getPath())) {
+					manager.remove(cu);
+				}
 			}
 		} finally {
 			fLayerChanges.clear();

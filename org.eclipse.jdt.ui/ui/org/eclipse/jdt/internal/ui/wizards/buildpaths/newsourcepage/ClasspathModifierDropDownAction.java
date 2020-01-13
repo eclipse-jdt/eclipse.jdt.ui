@@ -15,7 +15,6 @@
 package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.swt.widgets.Control;
@@ -154,16 +153,15 @@ public class ClasspathModifierDropDownAction extends BuildpathModifierAction imp
     }
 
 	private void update() {
-		for (Iterator<BuildpathModifierAction> iterator= fActions.iterator(); iterator.hasNext();) {
-	        BuildpathModifierAction action= iterator.next();
-	        if (action.isEnabled()) {
-	        	if (action != fFirstValidAction) {
-	        		updateButton(action);
-	        	}
-	        	fFirstValidAction= action;
-	        	return;
-	        }
-        }
+		for (BuildpathModifierAction action : fActions) {
+			if (action.isEnabled()) {
+				if (action != fFirstValidAction) {
+					updateButton(action);
+				}
+				fFirstValidAction= action;
+				return;
+			}
+		}
 		if (fFirstValidAction != null) {
 			if (fActions.size() > 0) {
 				updateButton(fActions.get(0));

@@ -18,6 +18,7 @@ import java.util.Set;
 
 import org.junit.platform.launcher.Launcher;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
+import org.junit.platform.launcher.TestExecutionListener;
 import org.junit.platform.launcher.TestIdentifier;
 import org.junit.platform.launcher.TestPlan;
 
@@ -86,7 +87,18 @@ public class JUnit5TestReference implements ITestReference {
 
 	@Override
 	public void run(TestExecution execution) {
-		fLauncher.execute(fTestPlan, new JUnit5TestListener(execution.getListener(), fRemoteTestRunner));
+		boolean foundMethodThatAvoidsRedundantDiscovery;
+		try {
+			fLauncher.getClass().getMethod("execute", TestPlan.class, TestExecutionListener[].class); //$NON-NLS-1$
+			foundMethodThatAvoidsRedundantDiscovery= true;
+		} catch (NoSuchMethodException e) {
+			foundMethodThatAvoidsRedundantDiscovery= false;
+		}
+		if (foundMethodThatAvoidsRedundantDiscovery) {
+			fLauncher.execute(fTestPlan, new JUnit5TestListener(execution.getListener(), fRemoteTestRunner));
+		} else {
+			fLauncher.execute(fRequest, new JUnit5TestListener(execution.getListener(), fRemoteTestRunner));
+		}
 	}
 
 	@Override

@@ -202,17 +202,16 @@ public class FatJarExportTests extends TestCase {
 		// set compression
 		data.setCompress(compressJar);
 
-		//create archive
-		ZipFile generatedArchive= createArchive(data);
-
 		//assert archive content as expected
-		assertNotNull(generatedArchive);
-		assertNotNull(generatedArchive.getEntry("org/eclipse/jdt/ui/test/Main.class")); //$NON-NLS-1$
-		assertNotNull(generatedArchive.getEntry("mylib/Foo.class")); //$NON-NLS-1$
-		assertNotNull(generatedArchive.getEntry("mylib/Foo$FooInner.class")); //$NON-NLS-1$
-		assertNotNull(generatedArchive.getEntry("mylib/Foo$FooInner$FooInnerInner.class")); //$NON-NLS-1$
-
-		generatedArchive.close();
+		try ( //create archive
+			ZipFile generatedArchive = createArchive(data)) {
+			//assert archive content as expected
+			assertNotNull(generatedArchive);
+			assertNotNull(generatedArchive.getEntry("org/eclipse/jdt/ui/test/Main.class")); //$NON-NLS-1$
+			assertNotNull(generatedArchive.getEntry("mylib/Foo.class")); //$NON-NLS-1$
+			assertNotNull(generatedArchive.getEntry("mylib/Foo$FooInner.class")); //$NON-NLS-1$
+			assertNotNull(generatedArchive.getEntry("mylib/Foo$FooInner$FooInnerInner.class")); //$NON-NLS-1$
+		}
 
 		MultiStatus status= new MultiStatus(JavaUI.ID_PLUGIN, 0, "", null); //$NON-NLS-1$
 
@@ -233,27 +232,26 @@ public class FatJarExportTests extends TestCase {
 		// set compression
 		data.setCompress(compressJar);
 
-		//create archive
-		ZipFile generatedArchive= createArchive(data);
-
 		//assert archive content as expected
-		assertNotNull(generatedArchive);
-		assertNotNull(generatedArchive.getEntry("org/eclipse/jdt/ui/test/Main.class")); //$NON-NLS-1$
-		// get loader entry
-		ZipEntry loaderClassEntry= generatedArchive.getEntry("org/eclipse/jdt/internal/jarinjarloader/JarRsrcLoader.class"); //$NON-NLS-1$
-		assertNotNull(loaderClassEntry);
-		// check version of class file JarRsrcLoader (jdk 1.6 = version 50.0)
-		InputStream in = generatedArchive.getInputStream(loaderClassEntry);
-		int magic = 0;
-		for (int i= 0; i < 4; i++)
-			magic = (magic << 8) + in.read();
-		int minorVersion = ((in.read() << 8) + in.read());
-		int majorVersion = ((in.read() << 8) + in.read());
-		in.close();
-		assertEquals("loader is a class file", 0xCAFEBABE, magic); //$NON-NLS-1$
-		assertEquals("loader compiled with JDK 1.6", "50.0", majorVersion + "." + minorVersion); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-
-		generatedArchive.close();
+		try ( //create archive
+			ZipFile generatedArchive = createArchive(data)) {
+			//assert archive content as expected
+			assertNotNull(generatedArchive);
+			assertNotNull(generatedArchive.getEntry("org/eclipse/jdt/ui/test/Main.class")); //$NON-NLS-1$
+			// get loader entry
+			ZipEntry loaderClassEntry= generatedArchive.getEntry("org/eclipse/jdt/internal/jarinjarloader/JarRsrcLoader.class"); //$NON-NLS-1$
+			assertNotNull(loaderClassEntry);
+			// check version of class file JarRsrcLoader (jdk 1.6 = version 50.0)
+			InputStream in = generatedArchive.getInputStream(loaderClassEntry);
+			int magic = 0;
+			for (int i= 0; i < 4; i++)
+				magic = (magic << 8) + in.read();
+			int minorVersion = ((in.read() << 8) + in.read());
+			int majorVersion = ((in.read() << 8) + in.read());
+			in.close();
+			assertEquals("loader is a class file", 0xCAFEBABE, magic); //$NON-NLS-1$
+			assertEquals("loader compiled with JDK 1.6", "50.0", majorVersion + "." + minorVersion); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		}
 
 		MultiStatus status= new MultiStatus(JavaUI.ID_PLUGIN, 0, "", null); //$NON-NLS-1$
 
@@ -278,20 +276,19 @@ public class FatJarExportTests extends TestCase {
 		// set compression
 		data.setCompress(compressJar);
 
-		//create archive
-		ZipFile generatedArchive= createArchive(data);
-
 		//assert archive content as expected
-		assertNotNull(generatedArchive);
-		assertNotNull(generatedArchive.getEntry("org/eclipse/jdt/ui/test/Main.class")); //$NON-NLS-1$
+		try ( //create archive
+			ZipFile generatedArchive = createArchive(data)) {
+			//assert archive content as expected
+			assertNotNull(generatedArchive);
+			assertNotNull(generatedArchive.getEntry("org/eclipse/jdt/ui/test/Main.class")); //$NON-NLS-1$
 
-		// check for libraries sub-folder
-		File jarFile= new File(generatedArchive.getName());
-		String subFolderName= jarFile.getName().replaceFirst("^(.*)[.]jar$", "$1_lib"); //$NON-NLS-1$//$NON-NLS-2$
-		File subFolderDir= new File(jarFile.getParentFile(), subFolderName);
-		assertTrue("actual: '" + subFolderDir.toString() + "'", subFolderDir.isDirectory()); //$NON-NLS-1$//$NON-NLS-2$
-
-		generatedArchive.close();
+			// check for libraries sub-folder
+			File jarFile= new File(generatedArchive.getName());
+			String subFolderName= jarFile.getName().replaceFirst("^(.*)[.]jar$", "$1_lib"); //$NON-NLS-1$//$NON-NLS-2$
+			File subFolderDir= new File(jarFile.getParentFile(), subFolderName);
+			assertTrue("actual: '" + subFolderDir.toString() + "'", subFolderDir.isDirectory()); //$NON-NLS-1$//$NON-NLS-2$
+		}
 
 		MultiStatus status= new MultiStatus(JavaUI.ID_PLUGIN, 0, "", null); //$NON-NLS-1$
 
@@ -305,9 +302,7 @@ public class FatJarExportTests extends TestCase {
 	private static void buildProject() throws CoreException {
 		ResourcesPlugin.getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
 
-		IMarker[] markers= ResourcesPlugin.getWorkspace().getRoot().findMarkers(null, true, IResource.DEPTH_INFINITE);
-		for (int i= 0; i < markers.length; i++) {
-			IMarker marker= markers[i];
+		for (IMarker marker : ResourcesPlugin.getWorkspace().getRoot().findMarkers(null, true, IResource.DEPTH_INFINITE)) {
 			if (marker.getAttribute(IMarker.SEVERITY, IMarker.SEVERITY_INFO) == IMarker.SEVERITY_ERROR) {
 				assertTrue((String) marker.getAttribute(IMarker.MESSAGE), false);
 			}
@@ -342,9 +337,8 @@ public class FatJarExportTests extends TestCase {
 	private static String getProblems(MultiStatus status) {
 		StringBuilder result= new StringBuilder();
 
-		IStatus[] children= status.getChildren();
-		for (int i= 0; i < children.length; i++) {
-			result.append(children[i].getMessage()).append("\n"); //$NON-NLS-1$
+		for (IStatus child : status.getChildren()) {
+			result.append(child.getMessage()).append("\n"); //$NON-NLS-1$
 		}
 
 		return result.toString();
@@ -502,8 +496,8 @@ public class FatJarExportTests extends TestCase {
 		for (int i= 0; i < xmlFilesets.getLength(); i++) {
 			String dir= ((Element)xmlFilesets.item(i)).getAttribute("dir"); //$NON-NLS-1$
 			boolean found= false;
-			for (int j= 0; j < filesets.length; j++) {
-				if (dir.endsWith(filesets[j])) {
+			for (String fileset : filesets) {
+				if (dir.endsWith(fileset)) {
 					found= true;
 					break;
 				}
@@ -524,8 +518,8 @@ public class FatJarExportTests extends TestCase {
 			String absLibPath= ((Element)xmlCopies.item(i)).getAttribute("file"); //$NON-NLS-1$
 			String libName= new File(absLibPath).getName();
 			boolean found= false;
-			for (int j= 0; j < zipfilesets.length; j++) {
-				if (libName.equals(zipfilesets[j])) {
+			for (String zipfileset : zipfilesets) {
+				if (libName.equals(zipfileset)) {
 					found= true;
 					break;
 				}
@@ -577,8 +571,8 @@ public class FatJarExportTests extends TestCase {
 		for (int i= 0; i < xmlFilesets.getLength(); i++) {
 			String dir= ((Element)xmlFilesets.item(i)).getAttribute("dir"); //$NON-NLS-1$
 			boolean found= false;
-			for (int j= 0; j < filesets.length; j++) {
-				if (dir.endsWith(filesets[j])) {
+			for (String fileset : filesets) {
+				if (dir.endsWith(fileset)) {
 					found= true;
 					break;
 				}
@@ -593,8 +587,8 @@ public class FatJarExportTests extends TestCase {
 				libName= ((Element)xmlZipfilesets.item(i)).getAttribute("src"); //$NON-NLS-1$
 				found= libName.equals(FatJarRsrcUrlBuilder.JAR_RSRC_LOADER_ZIP); //$NON-NLS-1$
 			}
-			for (int j= 0; j < zipfilesets.length; j++) {
-				if (libName.equals(zipfilesets[j])) {
+			for (String zipfileset : zipfilesets) {
+				if (libName.equals(zipfileset)) {
 					found= true;
 					break;
 				}
@@ -637,8 +631,8 @@ public class FatJarExportTests extends TestCase {
 		for (int i= 0; i < xmlFilesets.getLength(); i++) {
 			String dir= ((Element)xmlFilesets.item(i)).getAttribute("dir"); //$NON-NLS-1$
 			boolean found= false;
-			for (int j= 0; j < filesets.length; j++) {
-				if (dir.endsWith(filesets[j])) {
+			for (String fileset : filesets) {
+				if (dir.endsWith(fileset)) {
 					found= true;
 					break;
 				}
@@ -651,8 +645,8 @@ public class FatJarExportTests extends TestCase {
 			assertEquals("META-INF/*.SF", excludes); //$NON-NLS-1$
 			String src= ((Element)xmlZipfilesets.item(i)).getAttribute("src"); //$NON-NLS-1$
 			boolean found= false;
-			for (int j= 0; j < zipfilesets.length; j++) {
-				if (src.endsWith(zipfilesets[j])) {
+			for (String zipfileset : zipfilesets) {
+				if (src.endsWith(zipfileset)) {
 					found= true;
 					break;
 				}
@@ -669,18 +663,13 @@ public class FatJarExportTests extends TestCase {
 	 * @throws Exception if anything went wrong
 	 */
 	private static Element readXML(IPath xmlFilePath) throws Exception {
-		InputStream in = null;
-		try {
-			in = new FileInputStream(xmlFilePath.toFile());
+		try (InputStream in = new FileInputStream(xmlFilePath.toFile())) {
 			DocumentBuilder parser= DocumentBuilderFactory.newInstance().newDocumentBuilder();
 			parser.setErrorHandler(new DefaultHandler());
 			Element root= parser.parse(new InputSource(in)).getDocumentElement();
 			in.close();
 
 			return root;
-		} finally {
-			if (in != null)
-				in.close();
 		}
 	}
 

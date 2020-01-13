@@ -32,6 +32,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
@@ -5483,6 +5485,131 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
+	}
+
+	public void testWrapInOptional_01() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("import java.util.Optional;\n");
+		buf.append("public class E {\n");
+		buf.append("	Optional<Integer> a = 1;\n");
+		buf.append("}\n");
+
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		CompilationUnit compilationUnit= getASTRoot(cu);
+		IProblem[] problems= compilationUnit.getProblems();
+		assertNumberOfProblems(1, problems);
+
+		List<IJavaCompletionProposal> proposals= collectCorrections(cu, problems[0], null);
+
+		assertNumberOfProposals(proposals, 3);
+
+		buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("import java.util.Optional;\n");
+		buf.append("public class E {\n");
+		buf.append("	Optional<Integer> a = Optional.of(1);\n");
+		buf.append("}\n");
+		assertExpectedExistInProposals(proposals, new String[] { buf.toString() });
+
+		buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("import java.util.Optional;\n");
+		buf.append("public class E {\n");
+		buf.append("	Optional<Integer> a = Optional.empty();\n");
+		buf.append("}\n");
+		assertExpectedExistInProposals(proposals, new String[] { buf.toString() });
+	}
+
+	public void testWrapInOptional_02() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("import java.util.Optional;\n");
+		buf.append("public class E {\n");
+		buf.append("	Optional<Object> foo(int x) {\n");
+		buf.append("		return bar();\n");
+		buf.append("	}\n");
+		buf.append("	Object bar() {\n");
+		buf.append("		return null;\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		CompilationUnit compilationUnit= getASTRoot(cu);
+		IProblem[] problems= compilationUnit.getProblems();
+		assertNumberOfProblems(1, problems);
+
+		List<IJavaCompletionProposal> proposals= collectCorrections(cu, problems[0], null);
+
+		assertNumberOfProposals(proposals, 6);
+
+		buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("import java.util.Optional;\n");
+		buf.append("public class E {\n");
+		buf.append("	Optional<Object> foo(int x) {\n");
+		buf.append("		return Optional.of(bar());\n");
+		buf.append("	}\n");
+		buf.append("	Object bar() {\n");
+		buf.append("		return null;\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		assertExpectedExistInProposals(proposals, new String[] { buf.toString() });
+
+		buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("import java.util.Optional;\n");
+		buf.append("public class E {\n");
+		buf.append("	Optional<Object> foo(int x) {\n");
+		buf.append("		return Optional.ofNullable(bar());\n");
+		buf.append("	}\n");
+		buf.append("	Object bar() {\n");
+		buf.append("		return null;\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		assertExpectedExistInProposals(proposals, new String[] { buf.toString() });
+
+		buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("import java.util.Optional;\n");
+		buf.append("public class E {\n");
+		buf.append("	Optional<Object> foo(int x) {\n");
+		buf.append("		return Optional.empty();\n");
+		buf.append("	}\n");
+		buf.append("	Object bar() {\n");
+		buf.append("		return null;\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		assertExpectedExistInProposals(proposals, new String[] { buf.toString() });
+	}
+
+	public void testWrapInOptional_03() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("import java.util.Optional;\n");
+		buf.append("public class E <T> {\n");
+		buf.append("	Optional<T> a = 1;\n");
+		buf.append("}\n");
+
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		CompilationUnit compilationUnit= getASTRoot(cu);
+		IProblem[] problems= compilationUnit.getProblems();
+		assertNumberOfProblems(1, problems);
+
+		List<IJavaCompletionProposal> proposals= collectCorrections(cu, problems[0], null);
+
+		assertNumberOfProposals(proposals, 2);
+
+		buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("import java.util.Optional;\n");
+		buf.append("public class E <T> {\n");
+		buf.append("	Optional<T> a = Optional.empty();\n");
+		buf.append("}\n");
+		assertExpectedExistInProposals(proposals, new String[] { buf.toString() });
 	}
 
 }

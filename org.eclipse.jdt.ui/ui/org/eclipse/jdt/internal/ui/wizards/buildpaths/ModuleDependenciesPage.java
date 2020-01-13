@@ -726,9 +726,9 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 				// no longer relevant, remove:
 				ModuleEncapsulationDetail[] details= (ModuleEncapsulationDetail[]) value;
 				int retainCount= 0;
-				for (int i= 0; i < details.length; i++) {
-					if (!(details[i] instanceof LimitModules)) {
-						details[retainCount++]= details[i];
+				for (ModuleEncapsulationDetail detail : details) {
+					if (!(detail instanceof LimitModules)) {
+						details[retainCount++]= detail;
 					}
 				}
 				if (retainCount < details.length)

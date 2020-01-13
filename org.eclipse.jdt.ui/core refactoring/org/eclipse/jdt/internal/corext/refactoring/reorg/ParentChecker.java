@@ -91,7 +91,7 @@ public class ParentChecker {
 		commonParent= convertedToJava == null ? commonJavaElementParent : convertedToJava;
 		if (fJarResources.length != 0) {
 			commonJarResourcesParent= getCommonJarResourceParent();
-			Assert.isNotNull(commonJarResourcesParent);			
+			Assert.isNotNull(commonJarResourcesParent);
 			if (!commonJarResourcesParent.equals(commonParent))
 				return null;
 		}
@@ -100,7 +100,7 @@ public class ParentChecker {
 
 	/**
 	 * Return the common parent for the jar resources.
-	 * 
+	 *
 	 * @return the common parent for the jar resources
 	 * @since 3.6
 	 */
@@ -148,7 +148,7 @@ public class ParentChecker {
 
 	/**
 	 * Checks whether the jar resources have the same parent.
-	 * 
+	 *
 	 * @return <code>true</code> if the jar resources have the same parent, <code>false</code>
 	 *         otherwise
 	 * @since 3.6
@@ -219,10 +219,8 @@ public class ParentChecker {
 
 	private void removeResourcesDescendantsOfResources() {
 		List<IResource> subResources= new ArrayList<>(3);
-		for (int i= 0; i < fResources.length; i++) {
-			IResource subResource= fResources[i];
-			for (int j= 0; j < fResources.length; j++) {
-				IResource superResource= fResources[j];
+		for (IResource subResource : fResources) {
+			for (IResource superResource : fResources) {
 				if (isDescendantOf(subResource, superResource))
 					subResources.add(subResource);
 			}

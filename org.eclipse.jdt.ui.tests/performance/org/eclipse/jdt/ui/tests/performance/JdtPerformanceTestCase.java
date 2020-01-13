@@ -84,9 +84,7 @@ public class JdtPerformanceTestCase extends PerformanceTestCase {
 
 	private static boolean allJobsQuiet() {
 		IJobManager jobManager= Job.getJobManager();
-		Job[] jobs= jobManager.find(null);
-		for (int i= 0; i < jobs.length; i++) {
-			Job job= jobs[i];
+		for (Job job : jobManager.find(null)) {
 			int state= job.getState();
 			if (state == Job.RUNNING || state == Job.WAITING)
 				return false;

@@ -14,7 +14,6 @@
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -71,8 +70,8 @@ public final class RenamePackageChange extends AbstractJavaElementRenameChange {
 	}
 
 	private void addStamps(Map<IResource, Long> stamps, ICompilationUnit[] units) {
-		for (int i= 0; i < units.length; i++) {
-			IResource resource= units[i].getResource();
+		for (ICompilationUnit unit : units) {
+			IResource resource= unit.getResource();
 			long stamp= IResource.NULL_STAMP;
 			if (resource != null && (stamp= resource.getModificationStamp()) != IResource.NULL_STAMP) {
 				stamps.put(resource, Long.valueOf(stamp));
@@ -103,9 +102,7 @@ public final class RenamePackageChange extends AbstractJavaElementRenameChange {
 		if (!fRenameSubpackages) {
 			addStamps(stamps, pack.getCompilationUnits());
 		} else {
-			IPackageFragment[] allPackages= JavaElementUtil.getPackageAndSubpackages(pack);
-			for (int i= 0; i < allPackages.length; i++) {
-				IPackageFragment currentPackage= allPackages[i];
+			for (IPackageFragment currentPackage : JavaElementUtil.getPackageAndSubpackages(pack)) {
 				addStamps(stamps, currentPackage.getCompilationUnits());
 			}
 		}
@@ -125,13 +122,10 @@ public final class RenamePackageChange extends AbstractJavaElementRenameChange {
 
 		} else {
 			IPackageFragment[] allPackages= JavaElementUtil.getPackageAndSubpackages(pack);
-			Arrays.sort(allPackages, new Comparator<IPackageFragment>() {
-				@Override
-				public int compare(IPackageFragment o1, IPackageFragment o2) {
-					String p1= o1.getElementName();
-					String p2= o2.getElementName();
-					return p1.compareTo(p2);
-				}
+			Arrays.sort(allPackages, (o1, o2) -> {
+				String p1= o1.getElementName();
+				String p2= o2.getElementName();
+				return p1.compareTo(p2);
 			});
 			int count= allPackages.length;
 			pm.beginTask("", count); //$NON-NLS-1$
@@ -181,13 +175,13 @@ public final class RenamePackageChange extends AbstractJavaElementRenameChange {
 					IPackageFragment[] allPackages= JavaElementUtil.getPackageAndSubpackages(pack);
 					SubProgressMonitor subPm= new SubProgressMonitor(pm, 1);
 					subPm.beginTask("", allPackages.length); //$NON-NLS-1$
-					for (int i= 0; i < allPackages.length; i++) {
+					for (IPackageFragment pckg : allPackages) {
 						// don't check for read-only since we don't go through
 						// validate edit.
-						checkIfModifiable(result, allPackages[i].getResource(), VALIDATE_NOT_DIRTY);
+						checkIfModifiable(result, pckg.getResource(), VALIDATE_NOT_DIRTY);
 						if (result.hasFatalError())
 							return result;
-						isValid(result, allPackages[i], new SubProgressMonitor(subPm, 1));
+						isValid(result, pckg, new SubProgressMonitor(subPm, 1));
 					}
 				} else {
 					isValid(result, pack, new SubProgressMonitor(pm, 1));
@@ -202,9 +196,9 @@ public final class RenamePackageChange extends AbstractJavaElementRenameChange {
 	private void isValid(RefactoringStatus result, IPackageFragment pack, IProgressMonitor pm) throws JavaModelException {
 		ICompilationUnit[] units= pack.getCompilationUnits();
 		pm.beginTask("", units.length); //$NON-NLS-1$
-		for (int i= 0; i < units.length; i++) {
+		for (ICompilationUnit unit : units) {
 			pm.subTask(Messages.format(RefactoringCoreMessages.RenamePackageChange_checking_change, JavaElementLabels.getElementLabel(pack, JavaElementLabels.ALL_DEFAULT)));
-			checkIfModifiable(result, units[i].getResource(), VALIDATE_NOT_READ_ONLY | VALIDATE_NOT_DIRTY);
+			checkIfModifiable(result, unit.getResource(), VALIDATE_NOT_READ_ONLY | VALIDATE_NOT_DIRTY);
 			pm.worked(1);
 		}
 		pm.done();
@@ -217,9 +211,8 @@ public final class RenamePackageChange extends AbstractJavaElementRenameChange {
 		if (fCompilationUnitStamps != null) {
 			IPackageFragment newPack= (IPackageFragment) JavaCore.create(ResourcesPlugin.getWorkspace().getRoot().getFolder(newPath));
 			if (newPack.exists()) {
-				ICompilationUnit[] units= newPack.getCompilationUnits();
-				for (int i= 0; i < units.length; i++) {
-					IResource resource= units[i].getResource();
+				for (ICompilationUnit unit : newPack.getCompilationUnits()) {
+					IResource resource= unit.getResource();
 					if (resource != null) {
 						Long stamp= fCompilationUnitStamps.get(resource);
 						if (stamp != null) {

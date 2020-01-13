@@ -59,9 +59,10 @@ class ReadOnlyResourceFinder{
 	}
 
 	private static boolean hasReadOnlyResourcesAndSubResources(IJavaElement[] javaElements) throws CoreException {
-		for (int i= 0; i < javaElements.length; i++) {
-			if (hasReadOnlyResourcesAndSubResources(javaElements[i]))
+		for (IJavaElement javaElement : javaElements) {
+			if (hasReadOnlyResourcesAndSubResources(javaElement)) {
 				return true;
+			}
 		}
 		return false;
 	}
@@ -81,9 +82,7 @@ class ReadOnlyResourceFinder{
 				IPackageFragment pack= (IPackageFragment)javaElement;
 				if (Resources.isReadOnly(packResource))
 					return true;
-				Object[] nonJava= pack.getNonJavaResources();
-				for (int i= 0; i < nonJava.length; i++) {
-					Object object= nonJava[i];
+				for (Object object : pack.getNonJavaResources()) {
 					if (object instanceof IResource && hasReadOnlyResourcesAndSubResources((IResource)object))
 						return true;
 				}
@@ -97,9 +96,7 @@ class ReadOnlyResourceFinder{
 					return false;
 				if (Resources.isReadOnly(pfrResource))
 					return true;
-				Object[] nonJava1= root.getNonJavaResources();
-				for (int i= 0; i < nonJava1.length; i++) {
-					Object object= nonJava1[i];
+				for (Object object : root.getNonJavaResources()) {
 					if (object instanceof IResource && hasReadOnlyResourcesAndSubResources((IResource)object))
 						return true;
 				}
@@ -120,9 +117,10 @@ class ReadOnlyResourceFinder{
 	}
 
 	private static boolean hasReadOnlyResourcesAndSubResources(IResource[] resources) throws CoreException {
-		for (int i= 0; i < resources.length; i++) {
-			if (hasReadOnlyResourcesAndSubResources(resources[i]))
+		for (IResource resource : resources) {
+			if (hasReadOnlyResourcesAndSubResources(resource)) {
 				return true;
+			}
 		}
 		return false;
 	}

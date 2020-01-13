@@ -44,10 +44,8 @@ public class JspTypeQuery implements IIndexQuery {
 	@Override
 	public void computePathsKeyingIndexFiles(ArrayList requiredIndexKeys) {
 		IWorkspace workspace= ResourcesPlugin.getWorkspace();
-		IProject[] projects= workspace.getRoot().getProjects();
 		try {
-			for (int i= 0; i < projects.length; i++) {
-				IProject project= projects[i];
+			for (IProject project : workspace.getRoot().getProjects()) {
 				if (!project.isAccessible() || !project.hasNature(JavaCore.NATURE_ID))
 					continue;
 				IPath path= project.getFullPath();

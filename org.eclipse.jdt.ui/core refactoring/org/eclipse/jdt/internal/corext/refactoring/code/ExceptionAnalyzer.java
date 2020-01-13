@@ -29,8 +29,8 @@ import org.eclipse.jdt.internal.corext.refactoring.util.AbstractExceptionAnalyze
 
 	public static ITypeBinding[] perform(ASTNode[] statements) {
 		ExceptionAnalyzer analyzer= new ExceptionAnalyzer();
-		for (int i= 0; i < statements.length; i++) {
-			statements[i].accept(analyzer);
+		for (ASTNode statement : statements) {
+			statement.accept(analyzer);
 		}
 		List<ITypeBinding> exceptions= analyzer.getCurrentExceptions();
 		return exceptions.toArray(new ITypeBinding[exceptions.size()]);

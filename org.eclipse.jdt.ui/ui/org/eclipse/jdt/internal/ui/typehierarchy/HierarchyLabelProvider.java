@@ -81,16 +81,16 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 		IJavaElement[] input= fHierarchy.getInputElements();
 		if (input == null)
 			return false;
-		for (int i= 0; i < input.length; i++) {
-			if (input[i] == null || input[i].getElementType() == IJavaElement.TYPE) {
+		for (IJavaElement element : input) {
+			if (element == null || element.getElementType() == IJavaElement.TYPE) {
 				return false;
 			}
-			IJavaElement parent= type.getAncestor(input[i].getElementType());
-			if (input[i].getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
-				if (parent == null || parent.getElementName().equals(input[i].getElementName())) {
+			IJavaElement parent= type.getAncestor(element.getElementType());
+			if (element.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
+				if (parent == null || parent.getElementName().equals(element.getElementName())) {
 					return false;
 				}
-			} else if (input[i].equals(parent)) {
+			} else if (element.equals(parent)) {
 				return false;
 			}
 		}

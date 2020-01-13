@@ -17,7 +17,6 @@ package org.eclipse.jdt.ui.tests.callhierarchy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
 
 import org.junit.Assert;
 
@@ -267,10 +266,9 @@ public class CallHierarchyTestHelper {
     public void assertCalls(Collection<IMember> expectedMembers, Collection<?> calls) {
         Collection<IMember> foundMembers= new ArrayList<>();
 
-        for (Iterator<?> iter= calls.iterator(); iter.hasNext();) {
-            MethodWrapper element= (MethodWrapper) iter.next();
-            foundMembers.add(element.getMember());
-        }
+		for (MethodWrapper element : (Collection<MethodWrapper>)calls) {
+			foundMembers.add(element.getMember());
+		}
 
         Assert.assertEquals("Wrong number of calls", expectedMembers.size(), calls.size());
         Assert.assertTrue("One or more members not found", foundMembers.containsAll(expectedMembers));
@@ -292,12 +290,12 @@ public class CallHierarchyTestHelper {
 
     public MethodWrapper findMethodWrapper(IMethod method, Object[] methodWrappers) {
         MethodWrapper thirdLevelMethodWrapper= null;
-        for (int i= 0; i < methodWrappers.length; i++) {
-            if (method.equals(((MethodWrapper) methodWrappers[i]).getMember())) {
-                thirdLevelMethodWrapper= (MethodWrapper) methodWrappers[i];
-                break;
-            }
-        }
+		for (Object methodWrapper : methodWrappers) {
+			if (method.equals(((MethodWrapper) methodWrapper).getMember())) {
+				thirdLevelMethodWrapper= (MethodWrapper) methodWrapper;
+				break;
+			}
+		}
         return thirdLevelMethodWrapper;
     }
 

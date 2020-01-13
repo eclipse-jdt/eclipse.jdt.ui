@@ -148,7 +148,7 @@ public class JavaPostfixContext extends JavaContext {
 	 * <li><code>new Integer(0).$</code> will return the {@link ASTNode} for
 	 * <code>new Integer(0)</code></li>
 	 * </ul>
-	 * 
+	 *
 	 * @param currentNode The {@link ASTNode} of the completion.
 	 * @return An {@link ASTNode} of the key set of {@link #nodeRegions}.
 	 */
@@ -442,7 +442,7 @@ public class JavaPostfixContext extends JavaContext {
 
 	/**
 	 * Returns the {@link Region} which represents the source region of the affected statement.
-	 * 
+	 *
 	 * @return the source region of the affected statement
 	 */
 	public Region getAffectedSourceRegion() {
@@ -476,7 +476,7 @@ public class JavaPostfixContext extends JavaContext {
 
 	/**
 	 * Calculates the beginning position of a given {@link ASTNode}
-	 * 
+	 *
 	 * @param node the {@link ASTNode}
 	 * @return source position of the node or -1 if the given node is <code>null</code>
 	 */
@@ -500,7 +500,7 @@ public class JavaPostfixContext extends JavaContext {
 
 	/**
 	 * Calculates the length of a given {@link ASTNode}
-	 * 
+	 *
 	 * @param node the {@link ASTNode}
 	 * @return length of the node or -1 if the given node is <code>null</code>
 	 */
@@ -519,7 +519,7 @@ public class JavaPostfixContext extends JavaContext {
 	 * new Object().a		=> getPrefixKey() returns "a"<br/>
 	 * new object().asdf	=> getPrefixKey() returns "asdf"<br/>
 	 * </code>
-	 * 
+	 *
 	 * @return an empty string or a string which represents the prefix of the key which was typed in
 	 */
 	private String getPrefixKey() {

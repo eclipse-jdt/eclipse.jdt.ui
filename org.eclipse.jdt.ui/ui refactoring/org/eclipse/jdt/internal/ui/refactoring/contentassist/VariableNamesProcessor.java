@@ -128,8 +128,7 @@ public class VariableNamesProcessor implements IContentAssistProcessor, ISubject
 		ArrayList<JavaCompletionProposal> proposals= new ArrayList<>();
 		String prefix= input.substring(0, documentOffset);
 		Image image= fImageRegistry.get(fProposalImageDescriptor);
-		for (int i= 0; i < fTempNameProposals.length; i++) {
-			String tempName= fTempNameProposals[i];
+		for (String tempName : fTempNameProposals) {
 			if (tempName.length() == 0 || ! tempName.startsWith(prefix))
 				continue;
 			JavaCompletionProposal proposal= new JavaCompletionProposal(tempName, 0, input.length(), image, tempName, 0);

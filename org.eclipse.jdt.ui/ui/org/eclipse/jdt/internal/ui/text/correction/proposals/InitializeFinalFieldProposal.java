@@ -34,12 +34,16 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.PrimitiveType;
+import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.WildcardType;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
@@ -91,7 +95,9 @@ public class InitializeFinalFieldProposal extends LinkedCorrectionProposal {
 			return null;
 		}
 		AST ast= fAstNode.getAST();
-		String variableTypeName= fVariableBinding.getType().getName();
+
+		ITypeBinding type= fVariableBinding.getType();
+		String variableTypeName= type.getName();
 
 		VariableDeclarationFragment newFragment= ast.newVariableDeclarationFragment();
 		newFragment.setName(ast.newSimpleName(fVariableBinding.getName()));
@@ -100,14 +106,20 @@ public class InitializeFinalFieldProposal extends LinkedCorrectionProposal {
 		declaration.modifiers().addAll(ast.newModifiers(fVariableBinding.getModifiers()));
 
 		Expression expression= null;
-		if (fVariableBinding.getType().isPrimitive()) {
+		if (type.isPrimitive()) {
 			declaration.setType(ast.newPrimitiveType(PrimitiveType.toCode(variableTypeName)));
 			expression= ast.newNumberLiteral();
 		} else if ("String".equals(variableTypeName)) { //$NON-NLS-1$
 			declaration.setType(ast.newSimpleType(ast.newName(variableTypeName)));
 			expression= ast.newStringLiteral();
 		} else {
-			declaration.setType(ast.newSimpleType(ast.newName(variableTypeName)));
+			if (type.isParameterizedType()) {
+				Type newType= createParameterizedType(ast, type);
+				declaration.setType(newType);
+			} else {
+				SimpleType newSimpleType= ast.newSimpleType(ast.newName(variableTypeName));
+				declaration.setType(newSimpleType);
+			}
 
 			if (hasDefaultConstructor()) {
 				ClassInstanceCreation cic= ast.newClassInstanceCreation();
@@ -123,6 +135,30 @@ public class InitializeFinalFieldProposal extends LinkedCorrectionProposal {
 		rewrite.replace(field, declaration, null);
 		setEndPosition(rewrite.track(expression)); // set cursor after expression statement
 		return rewrite;
+	}
+
+	private Type createParameterizedType(AST ast, ITypeBinding typeBinding) {
+		if (typeBinding.isParameterizedType() && !typeBinding.isRawType()) {
+			Type baseType= ast.newSimpleType(ASTNodeFactory.newName(ast, typeBinding.getErasure().getName()));
+			ParameterizedType newType= ast.newParameterizedType(baseType);
+			for (int i= 0; i < typeBinding.getTypeArguments().length; i++) {
+				ITypeBinding typeArg= typeBinding.getTypeArguments()[i];
+				Type argType= createParameterizedType(ast, typeArg); // recursive call
+				newType.typeArguments().add(argType);
+			}
+			return newType;
+		} else {
+			if (!typeBinding.isTypeVariable()) {
+				if (typeBinding.isWildcardType()) {
+					String newName= typeBinding.getBound().getName();
+					WildcardType newWildcardType= ast.newWildcardType();
+					newWildcardType.setBound(ast.newSimpleType(ast.newSimpleName(newName)), typeBinding.isUpperbound());
+					return newWildcardType;
+				}
+				return ast.newSimpleType(ASTNodeFactory.newName(ast, typeBinding.getErasure().getName()));
+			}
+			return ast.newSimpleType(ast.newSimpleName(typeBinding.getName()));
+		}
 	}
 
 	private ASTRewrite doInitFieldInConstructor() {

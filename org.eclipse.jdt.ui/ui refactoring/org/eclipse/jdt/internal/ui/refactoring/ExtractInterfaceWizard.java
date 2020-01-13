@@ -243,9 +243,10 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 		}
 
 		private static boolean containsMethods(IMember[] members) {
-			for (int i= 0; i < members.length; i++) {
-				if (members[i].getElementType() == IJavaElement.METHOD)
+			for (IMember member : members) {
+				if (member.getElementType() == IJavaElement.METHOD) {
 					return true;
+				}
 			}
 			return false;
 		}

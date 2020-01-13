@@ -187,9 +187,7 @@ public class IntroduceParameterObjectTests extends RefactoringTest {
 		assertNotNull(type);
 		assertTrue(type.exists());
 		IMethod fooMethod= null;
-		IMethod[] methods= type.getMethods();
-		for (int i= 0; i < methods.length; i++) {
-			IMethod method= methods[i];
+		for (IMethod method : type.getMethods()) {
 			if ("foo".equals(method.getElementName())) {
 				fooMethod= method;
 			}

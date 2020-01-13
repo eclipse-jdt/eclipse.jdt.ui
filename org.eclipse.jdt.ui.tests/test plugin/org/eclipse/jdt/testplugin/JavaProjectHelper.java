@@ -520,10 +520,9 @@ public class JavaProjectHelper {
 			public void run(IProgressMonitor monitor) throws CoreException {
 				jproject.setRawClasspath(entries, null);
 
-				IResource[] resources= jproject.getProject().members();
-				for (int i= 0; i < resources.length; i++) {
-					if (!resources[i].getName().startsWith(".")) {
-						delete(resources[i]);
+				for (IResource resource : jproject.getProject().members()) {
+					if (!resource.getName().startsWith(".")) {
+						delete(resource);
 					}
 				}
 			}
@@ -697,14 +696,11 @@ public class JavaProjectHelper {
 	 * @throws IOException Creation failed
 	 */
 	public static IPackageFragmentRoot addSourceContainerWithImport(IJavaProject jproject, String containerName, File zipFile, String containerEncoding, IPath[] exclusionFilters) throws InvocationTargetException, CoreException, IOException {
-		ZipFile file= new ZipFile(zipFile);
-		try {
+		try (ZipFile file= new ZipFile(zipFile)) {
 			IPackageFragmentRoot root= addSourceContainer(jproject, containerName, exclusionFilters);
 			((IContainer) root.getCorrespondingResource()).setDefaultCharset(containerEncoding, null);
 			importFilesFromZip(file, root.getPath(), null);
 			return root;
-		} finally {
-			file.close();
 		}
 	}
 
@@ -816,13 +812,10 @@ public class JavaProjectHelper {
 	 * @throws InvocationTargetException
 	 */
 	public static IPackageFragmentRoot addClassFolderWithImport(IJavaProject jproject, String containerName, IPath sourceAttachPath, IPath sourceAttachRoot, File zipFile) throws IOException, CoreException, InvocationTargetException {
-		ZipFile file= new ZipFile(zipFile);
-		try {
+		try (ZipFile file= new ZipFile(zipFile)) {
 			IPackageFragmentRoot root= addClassFolder(jproject, containerName, sourceAttachPath, sourceAttachRoot);
 			importFilesFromZip(file, root.getPath(), null);
 			return root;
-		} finally {
-			file.close();
 		}
 	}
 
@@ -1009,8 +1002,8 @@ public class JavaProjectHelper {
 
 	public static void addToClasspath(IJavaProject jproject, IClasspathEntry cpe) throws JavaModelException {
 		IClasspathEntry[] oldEntries= jproject.getRawClasspath();
-		for (int i= 0; i < oldEntries.length; i++) {
-			if (oldEntries[i].equals(cpe)) {
+		for (IClasspathEntry oldEntry : oldEntries) {
+			if (oldEntry.equals(cpe)) {
 				return;
 			}
 		}

@@ -101,7 +101,7 @@ public class JarWriter3 {
 		fJarPackage= jarPackage;
 		Assert.isTrue(fJarPackage.isValid(), "The JAR package specification is invalid"); //$NON-NLS-1$
 		if (!canCreateJar(parent))
-			throw new OperationCanceledException();
+			throw new OperationCanceledException("Cannot create JAR with path: " + fJarPackage.getAbsoluteJarLocation()); //$NON-NLS-1$
 
 		try {
 			if (fJarPackage.usesManifest() && fJarPackage.areGeneratedFilesExported()) {

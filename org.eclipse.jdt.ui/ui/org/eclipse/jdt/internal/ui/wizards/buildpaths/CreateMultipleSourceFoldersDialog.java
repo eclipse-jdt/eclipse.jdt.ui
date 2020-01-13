@@ -114,8 +114,7 @@ public class CreateMultipleSourceFoldersDialog extends TrayDialog {
 		fInsertedElements= new HashSet<>();
 		fNonExistingFolders= new Hashtable<>();
 
-		for (int i= 0; i < existingElements.length; i++) {
-			CPListElement cur= existingElements[i];
+		for (CPListElement cur : existingElements) {
 			if (cur.getResource() == null || !cur.getResource().exists()) {
 				addFakeFolder(fJavaProject.getProject(), cur);
 			}
@@ -130,9 +129,9 @@ public class CreateMultipleSourceFoldersDialog extends TrayDialog {
 		IProject[] allProjects= ResourcesPlugin.getWorkspace().getRoot().getProjects();
 		ArrayList<IProject> rejectedElements= new ArrayList<>(allProjects.length);
 		IProject currProject= fJavaProject.getProject();
-		for (int i= 0; i < allProjects.length; i++) {
-			if (!allProjects[i].equals(currProject)) {
-				rejectedElements.add(allProjects[i]);
+		for (IProject project : allProjects) {
+			if (!project.equals(currProject)) {
+				rejectedElements.add(project);
 			}
 		}
 		ViewerFilter filter= new TypedViewerFilter(acceptedClasses, rejectedElements.toArray()){
@@ -196,9 +195,8 @@ public class CreateMultipleSourceFoldersDialog extends TrayDialog {
 		dialog.setInitialFocus(fJavaProject.getProject());
 
 		if (dialog.open() == Window.OK) {
-			Object[] elements= dialog.getResult();
-			for (int i= 0; i < elements.length; i++) {
-				IResource res= (IResource)elements[i];
+			for (Object element : dialog.getResult()) {
+				IResource res= (IResource) element;
 				fInsertedElements.add(new CPListElement(fJavaProject, IClasspathEntry.CPE_SOURCE, res.getFullPath(), res));
 			}
 
@@ -286,8 +284,8 @@ public class CreateMultipleSourceFoldersDialog extends TrayDialog {
 
 	private List<IResource> getExistingContainers(CPListElement[] existingElements) {
 		List<IResource> res= new ArrayList<>();
-		for (int i= 0; i < existingElements.length; i++) {
-			IResource resource= existingElements[i].getResource();
+		for (CPListElement existingElement : existingElements) {
+			IResource resource= existingElement.getResource();
 			if (resource instanceof IContainer) {
 				res.add(resource);
 			}

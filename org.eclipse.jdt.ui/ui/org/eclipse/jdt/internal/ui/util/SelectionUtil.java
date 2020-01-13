@@ -85,17 +85,15 @@ public class SelectionUtil {
 
 		// get all the view and editor parts
 		List<IWorkbenchPart> parts= new ArrayList<>();
-		IWorkbenchPartReference refs[]= page.getViewReferences();
-		for (int i= 0; i < refs.length; i++) {
-			IWorkbenchPart part= refs[i].getPart(false);
+		for (IWorkbenchPartReference ref : page.getViewReferences()) {
+			IWorkbenchPart part= ref.getPart(false);
 			if (part != null) {
 				parts.add(part);
 			}
 		}
-		refs= page.getEditorReferences();
-		for (int i= 0; i < refs.length; i++) {
-			if (refs[i].getPart(false) != null) {
-				parts.add(refs[i].getPart(false));
+		for (IWorkbenchPartReference ref : page.getEditorReferences()) {
+			if (ref.getPart(false) != null) {
+				parts.add(ref.getPart(false));
 			}
 		}
 

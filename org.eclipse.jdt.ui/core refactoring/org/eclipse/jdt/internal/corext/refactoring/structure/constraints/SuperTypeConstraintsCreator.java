@@ -100,18 +100,15 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	private static void getOriginalMethods(final IMethodBinding binding, final ITypeBinding type, final Collection<IMethodBinding> originals, final boolean implementations) {
 		final ITypeBinding ancestor= type.getSuperclass();
 		if (!implementations) {
-			final ITypeBinding[] types= type.getInterfaces();
-			for (int index= 0; index < types.length; index++)
-				getOriginalMethods(binding, types[index], originals, implementations);
+			for (ITypeBinding t : type.getInterfaces()) {
+				getOriginalMethods(binding, t, originals, implementations);
+			}
 			if (ancestor != null)
 				getOriginalMethods(binding, ancestor, originals, implementations);
 		}
 		if (implementations && ancestor != null)
 			getOriginalMethods(binding, ancestor, originals, implementations);
-		final IMethodBinding[] methods= type.getDeclaredMethods();
-		IMethodBinding method= null;
-		for (int index= 0; index < methods.length; index++) {
-			method= methods[index];
+		for (IMethodBinding method : type.getDeclaredMethods()) {
 			if (!binding.getKey().equals(method.getKey())) {
 				boolean match= false;
 				IMethodBinding current= null;
@@ -593,7 +590,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 			}
 		}
 	}
-	
+
 	@Override
 	public void endVisit(MethodReference node) {
 		IMethodBinding methodBinding= node.resolveMethodBinding();
@@ -663,7 +660,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 		}
 		super.endVisit(node);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.MethodInvocation)
 	 */

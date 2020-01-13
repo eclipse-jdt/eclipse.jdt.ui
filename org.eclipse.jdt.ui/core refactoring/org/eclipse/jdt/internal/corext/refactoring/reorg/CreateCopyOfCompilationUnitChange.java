@@ -68,9 +68,7 @@ public final class CreateCopyOfCompilationUnitChange extends CreateTextFileChang
 			return manager;
 
 		String name= RefactoringCoreMessages.CopyRefactoring_update_ref;
-		SearchMatch[] results= refs.getSearchResults();
-		for (int j= 0; j < results.length; j++) {
-			SearchMatch searchResult= results[j];
+		for (SearchMatch searchResult : refs.getSearchResults()) {
 			if (searchResult.getAccuracy() == SearchMatch.A_INACCURATE)
 				continue;
 			int offset= searchResult.getOffset();
@@ -122,14 +120,13 @@ public final class CreateCopyOfCompilationUnitChange extends CreateTextFileChang
 				}
 			}
 		});
-		
+
 		engine.searchPattern(monitor);
-		final Object[] results= engine.getResults();
 		// Assert.isTrue(results.length <= 1);
 		// just 1 file or none, but inaccurate matches can play bad here (see
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=106127)
-		for (int index= 0; index < results.length; index++) {
-			SearchResultGroup group= (SearchResultGroup) results[index];
+		for (Object result : engine.getResults()) {
+			SearchResultGroup group= (SearchResultGroup) result;
 			if (group.getCompilationUnit().equals(copy))
 				return group;
 		}

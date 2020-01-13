@@ -299,8 +299,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 		ListRewrite statements= fRewriter.getListRewrite(tryStatement.getBody(), Block.STATEMENTS_PROPERTY);
 		boolean selectedNodeRemoved= false;
 		ASTNode expressionStatement= null;
-		for (int i= 0; i < fSelectedNodes.length; i++) {
-			ASTNode node= fSelectedNodes[i];
+		for (ASTNode node : fSelectedNodes) {
 			if (node instanceof VariableDeclarationStatement && variableDeclarations.contains(node)) {
 				AST ast= getAST();
 				VariableDeclarationStatement statement= (VariableDeclarationStatement)node;
@@ -441,9 +440,8 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 
 	private List<ASTNode> getSpecialVariableDeclarationStatements() {
 		List<ASTNode> result= new ArrayList<>(3);
-		VariableDeclaration[] locals= fAnalyzer.getAffectedLocals();
-		for (int i= 0; i < locals.length; i++) {
-			ASTNode parent= locals[i].getParent();
+		for (VariableDeclaration local : fAnalyzer.getAffectedLocals()) {
+			ASTNode parent= local.getParent();
 			if (parent instanceof VariableDeclarationStatement && !result.contains(parent))
 				result.add(parent);
 		}

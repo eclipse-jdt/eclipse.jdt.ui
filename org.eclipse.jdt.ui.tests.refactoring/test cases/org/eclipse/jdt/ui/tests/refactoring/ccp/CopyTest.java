@@ -163,8 +163,8 @@ public class CopyTest extends RefactoringTest {
 		verifyValidDestination(processor, destination, location);
 		RefactoringStatus status= performRefactoring(new CopyRefactoring(processor), false);
 		assertNull("failed precondition", status);
-		for (int i= 0; i < cus.length; i++) {
-			assertEqualLines("different source in " + cus[i].getElementName(), getFileContents(getOutputTestFileName(removeExtension(cus[i].getElementName()))), cus[i].getSource());
+		for (ICompilationUnit cu : cus) {
+			assertEqualLines("different source in " + cu.getElementName(), getFileContents(getOutputTestFileName(removeExtension(cu.getElementName()))), cu.getSource());
 		}
 	}
 
@@ -2359,10 +2359,9 @@ public class CopyTest extends RefactoringTest {
 			assertTrue("source package does not exist after copying", getPackageP().exists());
 
 			IPackageFragment newPackage= null;
-			IPackageFragmentRoot[] roots= otherProject.getAllPackageFragmentRoots();
-			for (int i= 0; i < roots.length; i++) {
-				if (ReorgUtils.isSourceFolder(roots[i])){
-					newPackage= roots[i].getPackageFragment(getPackageP().getElementName());
+			for (IPackageFragmentRoot root : otherProject.getAllPackageFragmentRoots()) {
+				if (ReorgUtils.isSourceFolder(root)) {
+					newPackage= root.getPackageFragment(getPackageP().getElementName());
 					assertTrue("new package does not exist after copying", newPackage.exists());
 				}
 			}

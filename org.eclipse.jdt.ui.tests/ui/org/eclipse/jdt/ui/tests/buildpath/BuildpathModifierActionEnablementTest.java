@@ -150,28 +150,30 @@ public class BuildpathModifierActionEnablementTest extends TestCase {
     }
 
     private void assertOnlyEnabled(IAction[] enabledActions) {
-    	for (int i= 0; i < fActions.length; i++) {
-	        if (fActions[i].isEnabled()) {
-	        	assertTrue(fActions[i].getText() + " is enabled but should not be.", contains(enabledActions, fActions[i]));
-	        } else {
-	        	assertTrue(fActions[i].getText() + " is disabled but should not be.", !contains(enabledActions, fActions[i]));
-	        }
-        }
+		for (BuildpathModifierAction action : fActions) {
+			if (action.isEnabled()) {
+				assertTrue(action.getText() + " is enabled but should not be.", contains(enabledActions, action));
+			} else {
+				assertTrue(action.getText() + " is disabled but should not be.", !contains(enabledActions, action));
+			}
+		}
     }
 
 	private boolean contains(IAction[] actions, IAction action) {
-    	for (int i= 0; i < actions.length; i++) {
-	        if (actions[i] == action)
-	        	return true;
-        }
+		for (IAction a : actions) {
+			if (a == action) {
+				return true;
+			}
+		}
 	    return false;
     }
 
 	private void assertAllDisabled() {
-		for (int i= 0; i < fActions.length; i++) {
-	        if (fActions[i].isEnabled())
-	        	assertTrue(fActions[i].getText() + " is enabled but should not be.", false);
-        }
+		for (BuildpathModifierAction action : fActions) {
+			if (action.isEnabled()) {
+				assertTrue(action.getText() + " is enabled but should not be.", false);
+			}
+		}
     }
 
     public void testProjectWithOthers() {
@@ -754,20 +756,20 @@ public class BuildpathModifierActionEnablementTest extends TestCase {
     }
 
 	private void select(final StructuredSelection selection) {
-	    for (int i= 0; i < fActions.length; i++) {
-	        fActions[i].selectionChanged(new SelectionChangedEvent(new ISelectionProvider(){
+		for (BuildpathModifierAction action : fActions) {
+			action.selectionChanged(new SelectionChangedEvent(new ISelectionProvider(){
 				@Override
 				public void addSelectionChangedListener(ISelectionChangedListener listener) {}
 				@Override
 				public ISelection getSelection() {
-	                return selection;
-                }
+					return selection;
+				}
 				@Override
 				public void removeSelectionChangedListener(ISelectionChangedListener listener) {}
 				@Override
 				public void setSelection(ISelection s) {}
-	        }, selection));
-        }
+			}, selection));
+		}
     }
 
 	private ICompilationUnit createICompilationUnit(String className, IPackageFragment fragment) throws JavaModelException {

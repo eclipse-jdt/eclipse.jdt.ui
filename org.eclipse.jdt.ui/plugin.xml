@@ -7040,9 +7040,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.lambda">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.NumberSuffixCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.number_suffix"
+            runAfter="org.eclipse.jdt.ui.cleanup.expressions">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp"
             id="org.eclipse.jdt.ui.cleanup.unused_code"
-            runAfter="org.eclipse.jdt.ui.cleanup.expressions">
+            runAfter="org.eclipse.jdt.ui.cleanup.number_suffix">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.Java50CleanUp"

@@ -118,13 +118,13 @@ public class JavaWorkingSetUpdater implements IWorkingSetUpdater, IElementChange
 		synchronized(fWorkingSets) {
 			workingSets= fWorkingSets.toArray(new IWorkingSet[fWorkingSets.size()]);
 		}
-		for (int w= 0; w < workingSets.length; w++) {
-			WorkingSetDelta workingSetDelta= new WorkingSetDelta(workingSets[w]);
+		for (IWorkingSet workingSet : workingSets) {
+			WorkingSetDelta workingSetDelta= new WorkingSetDelta(workingSet);
 			processJavaDelta(workingSetDelta, event.getDelta());
 			IResourceDelta[] resourceDeltas= event.getDelta().getResourceDeltas();
 			if (resourceDeltas != null) {
-				for (int r= 0; r < resourceDeltas.length; r++) {
-					processResourceDelta(workingSetDelta, resourceDeltas[r]);
+				for (IResourceDelta resourceDelta : resourceDeltas) {
+					processResourceDelta(workingSetDelta, resourceDelta);
 				}
 			}
 			workingSetDelta.process();
@@ -157,13 +157,12 @@ public class JavaWorkingSetUpdater implements IWorkingSetUpdater, IElementChange
 		}
 		IResourceDelta[] resourceDeltas= delta.getResourceDeltas();
 		if (resourceDeltas != null) {
-			for (int i= 0; i < resourceDeltas.length; i++) {
-				processResourceDelta(result, resourceDeltas[i]);
+			for (IResourceDelta resourceDelta : resourceDeltas) {
+				processResourceDelta(result, resourceDelta);
 			}
 		}
-		IJavaElementDelta[] children= delta.getAffectedChildren();
-		for (int i= 0; i < children.length; i++) {
-			processJavaDelta(result, children[i]);
+		for (IJavaElementDelta child : delta.getAffectedChildren()) {
+			processJavaDelta(result, child);
 		}
 	}
 
@@ -191,9 +190,8 @@ public class JavaWorkingSetUpdater implements IWorkingSetUpdater, IElementChange
 		if (projectGotClosedOrOpened(resource, kind, flags))
 			return;
 
-		IResourceDelta[] children= delta.getAffectedChildren();
-		for (int i= 0; i < children.length; i++) {
-			processResourceDelta(result, children[i]);
+		for (IResourceDelta child : delta.getAffectedChildren()) {
+			processResourceDelta(result, child);
 		}
 	}
 

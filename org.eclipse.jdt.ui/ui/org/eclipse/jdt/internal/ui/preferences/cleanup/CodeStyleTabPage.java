@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -25,15 +25,11 @@ import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.LambdaExpressionsCleanUp;
+import org.eclipse.jdt.internal.ui.fix.NumberSuffixCleanUp;
 import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
 
 public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
-
 	public static final String ID= "org.eclipse.jdt.ui.cleanup.tabpage.code_style"; //$NON-NLS-1$
-
-    public CodeStyleTabPage() {
-    	super();
-    }
 
 	@Override
 	protected AbstractCleanUp[] createPreviewCleanUps(Map<String, String> values) {
@@ -41,6 +37,7 @@ public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
         		new ControlStatementsCleanUp(values),
         		new ConvertLoopCleanUp(values),
         		new ExpressionsCleanUp(values),
+				new NumberSuffixCleanUp(values),
 				new VariableDeclarationCleanUp(values),
 				new LambdaExpressionsCleanUp(values)
         };
@@ -48,7 +45,6 @@ public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
 
     @Override
 	protected void doCreatePreferences(Composite composite, int numColumns) {
-
     	Group controlGroup= createGroup(numColumns, composite, CleanUpMessages.CodeStyleTabPage_GroupName_ControlStatments);
 
     	final CheckboxPreference useBlockPref= createCheckboxPref(controlGroup, numColumns, CleanUpMessages.CodeStyleTabPage_CheckboxName_UseBlocks, CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS, CleanUpModifyDialog.FALSE_TRUE);
@@ -70,6 +66,12 @@ public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
 		final RadioPreference useParenthesesAlwaysPref= createRadioPref(expressionsGroup, 1, CleanUpMessages.CodeStyleTabPage_RadioName_AlwaysUseParantheses, CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_ALWAYS, CleanUpModifyDialog.FALSE_TRUE);
 		final RadioPreference useParenthesesNeverPref= createRadioPref(expressionsGroup, 1, CleanUpMessages.CodeStyleTabPage_RadioName_NeverUseParantheses, CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER, CleanUpModifyDialog.FALSE_TRUE);
 		registerSlavePreference(useParenthesesPref, new RadioPreference[] {useParenthesesAlwaysPref, useParenthesesNeverPref});
+
+		Group numberSuffixGroup= createGroup(numColumns, composite, CleanUpMessages.CodeStyleTabPage_GroupName_NumberLiteral);
+
+		final CheckboxPreference numberSuffixPref= createCheckboxPref(numberSuffixGroup, numColumns, CleanUpMessages.CodeStyleTabPage_CheckboxName_NumberSuffix, CleanUpConstants.NUMBER_SUFFIX,
+				CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(numberSuffixPref);
 
 		Group variableGroup= createGroup(numColumns, composite, CleanUpMessages.CodeStyleTabPage_GroupName_VariableDeclarations);
 

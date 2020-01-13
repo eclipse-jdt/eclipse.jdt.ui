@@ -1,13 +1,13 @@
 /*******************************************************************************
  * Copyright (c) 2000, 2007 IBM Corporation and others.
  *
- * This program and the accompanying materials 
+ * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -18,10 +18,10 @@ import org.eclipse.swt.graphics.Image;
 
 
 public class Error extends ExceptionAttribute {
-	
+
 	private final Object fParent;
 	private final String fLabel;
-	
+
 	public Error(Object parent, String label, Throwable thrownException) {
 		fParent= parent;
 		fLabel= label;
@@ -47,7 +47,7 @@ public class Error extends ExceptionAttribute {
 	public Object getParent() {
 		return fParent;
 	}
-	
+
 	/*
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
@@ -58,7 +58,7 @@ public class Error extends ExceptionAttribute {
 		if (obj == null || !obj.getClass().equals(getClass())) {
 			return false;
 		}
-		
+
 		Error other= (Error) obj;
 		if (fParent == null) {
 			if (other.fParent != null)
@@ -66,17 +66,17 @@ public class Error extends ExceptionAttribute {
 		} else if (! fParent.equals(other.fParent)) {
 			return false;
 		}
-		
+
 		if (fLabel == null) {
 			if (other.fLabel != null)
 				return false;
 		} else if (! fLabel.equals(other.fLabel)) {
 			return false;
 		}
-		
+
 		return true;
 	}
-	
+
 	/*
 	 * @see java.lang.Object#hashCode()
 	 */

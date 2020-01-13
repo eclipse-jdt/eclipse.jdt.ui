@@ -140,9 +140,8 @@ public class OpenTypeHistory extends History<TypeNameMatch, TypeNameMatch> {
 		*/
 
 		private boolean processChildrenDelta(IJavaElementDelta delta) {
-			IJavaElementDelta[] children= delta.getAffectedChildren();
-			for (int i= 0; i < children.length; i++) {
-				if (processDelta(children[i])) {
+			for (IJavaElementDelta child : delta.getAffectedChildren()) {
+				if (processDelta(child)) {
 					return true;
 				}
 			}

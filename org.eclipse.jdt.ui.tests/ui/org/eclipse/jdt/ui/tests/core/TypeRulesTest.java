@@ -172,12 +172,9 @@ public class TypeRulesTest extends CoreTests {
 		VariableDeclarationFragment[] targets= createVariables();
 
 		StringBuilder errors= new StringBuilder();
-		for (int k= 0; k < targets.length; k++) {
-			for (int n= 0; n < targets.length; n++) {
-				VariableDeclarationFragment f1= targets[k];
-				VariableDeclarationFragment f2= targets[n];
+		for (VariableDeclarationFragment f1 : targets) {
+			for (VariableDeclarationFragment f2 : targets) {
 				String line= f2.getName().getIdentifier() + "= " + f1.getName().getIdentifier();
-
 				StringBuilder buf= new StringBuilder();
 				buf.append("package test1;\n");
 				buf.append("public class F<T, U extends Number> extends E<T, U> {\n");
@@ -213,10 +210,8 @@ public class TypeRulesTest extends CoreTests {
 		VariableDeclarationFragment[] targets= createVariables();
 
 		StringBuilder errors= new StringBuilder();
-		for (int k= 0; k < targets.length; k++) {
-			for (int n= 0; n < targets.length; n++) {
-				VariableDeclarationFragment f1= targets[k];
-				VariableDeclarationFragment f2= targets[n];
+		for (VariableDeclarationFragment f1 : targets) {
+			for (VariableDeclarationFragment f2 : targets) {
 				String line= f2.getName().getIdentifier() + "= " + f1.getName().getIdentifier();
 
 				StringBuilder buf= new StringBuilder();
@@ -254,11 +249,8 @@ public class TypeRulesTest extends CoreTests {
 	public void testIsCastCompatible() throws Exception {
 		StringBuilder errors= new StringBuilder();
 		VariableDeclarationFragment[] targets= createVariables();
-		for (int k= 0; k < targets.length; k++) {
-			for (int n= 0; n < targets.length; n++) {
-				VariableDeclarationFragment f1= targets[k];
-				VariableDeclarationFragment f2= targets[n];
-
+		for (VariableDeclarationFragment f1 : targets) {
+			for (VariableDeclarationFragment f2 : targets) {
 				String castType= f2.resolveBinding().getType().getQualifiedName();
 				String line= castType + " x= (" + castType + ") " + f1.getName().getIdentifier();
 
@@ -297,11 +289,8 @@ public class TypeRulesTest extends CoreTests {
 	public void testCanCast() throws Exception {
 		StringBuilder errors= new StringBuilder();
 		VariableDeclarationFragment[] targets= createVariables();
-		for (int k= 0; k < targets.length; k++) {
-			for (int n= 0; n < targets.length; n++) {
-				VariableDeclarationFragment f1= targets[k];
-				VariableDeclarationFragment f2= targets[n];
-
+		for (VariableDeclarationFragment f1 : targets) {
+			for (VariableDeclarationFragment f2 : targets) {
 				String castType= f2.resolveBinding().getType().getQualifiedName();
 				String line= castType + " x= (" + castType + ") " + f1.getName().getIdentifier();
 

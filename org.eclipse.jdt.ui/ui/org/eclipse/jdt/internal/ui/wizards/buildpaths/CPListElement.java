@@ -18,7 +18,6 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -43,20 +42,19 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleEncapsulationDetail.LimitModules;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleEncapsulationDetail.ModuleAddExport;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleEncapsulationDetail.ModuleAddExpose;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleEncapsulationDetail.ModuleAddOpens;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleEncapsulationDetail.ModuleAddReads;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleEncapsulationDetail.ModulePatch;
 
 import org.eclipse.jdt.launching.JavaRuntime;
 
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleEncapsulationDetail.LimitModules;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleEncapsulationDetail.ModuleAddExport;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleEncapsulationDetail.ModuleAddExpose;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleEncapsulationDetail.ModuleAddOpens;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleEncapsulationDetail.ModuleAddReads;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleEncapsulationDetail.ModulePatch;
 
 public class CPListElement {
 
@@ -182,8 +180,7 @@ public class CPListElement {
 									return;
 								}
 							}
-							for (int i= 0; i < entries.length; i++) {
-								IClasspathEntry currEntry= entries[i];
+							for (IClasspathEntry currEntry : entries) {
 								if (currEntry != null) {
 									CPListElement curr= createFromExisting(this, currEntry, fProject);
 									fChildren.add(curr);
@@ -458,9 +455,10 @@ public class CPListElement {
 		if (moduleDetails instanceof ModuleEncapsulationDetail[]) {
 			ModuleEncapsulationDetail[] details= (ModuleEncapsulationDetail[]) moduleDetails;
 			List<T> elements= new ArrayList<>(details.length);
-			for (int i= 0; i < details.length; i++) {
-				if (clazz.isInstance(details[i]))
-					elements.add(clazz.cast(details[i]));
+			for (ModuleEncapsulationDetail detail : details) {
+				if (clazz.isInstance(detail)) {
+					elements.add(clazz.cast(detail));
+				}
 			}
 			return elements;
 		} else {
@@ -478,8 +476,8 @@ public class CPListElement {
 		if (entry instanceof CPListElementAttribute) {
 			CPListElementAttribute curr= (CPListElementAttribute) entry;
 			String key= curr.getKey();
-			for (int i= 0; i < filteredKeys.length; i++) {
-				if (key.equals(filteredKeys[i])) {
+			for (String filteredKey : filteredKeys) {
+				if (key.equals(filteredKey)) {
 					return true;
 				}
 			}
@@ -781,14 +779,13 @@ public class CPListElement {
 		elem.setAttribute(COMBINE_ACCESSRULES, Boolean.valueOf(curr.combineAccessRules()));
 
 		IClasspathAttribute[] extraAttributes= curr.getExtraAttributes();
-		for (int i= 0; i < extraAttributes.length; i++) {
-			IClasspathAttribute attrib= extraAttributes[i];
+		for (IClasspathAttribute attrib : extraAttributes) {
 			CPListElementAttribute attribElem= elem.findAttributeElement(attrib.getName());
 			if (attribElem == null) {
 				if (!isModuleAttribute(attrib.getName())) {
 					elem.createAttributeElement(attrib.getName(), attrib.getValue(), false);
 				} else if (attrib.getName().equals(MODULE)) {
-					attribElem = new CPListElementAttribute(elem, MODULE, null, true);
+					attribElem= new CPListElementAttribute(elem, MODULE, null, true);
 					attribElem.setValue(getModuleAttributeValue(attribElem, attrib, extraAttributes));
 					elem.fChildren.add(attribElem);
 				}
@@ -808,8 +805,7 @@ public class CPListElement {
 	private static Object getModuleAttributeValue(CPListElementAttribute attribElem, IClasspathAttribute attrib, IClasspathAttribute[] extraAttributes) {
 		if (ModuleAttributeConfiguration.TRUE.equals(attrib.getValue())) {
 			List<ModuleEncapsulationDetail> details= new ArrayList<>();
-			for (int j= 0; j < extraAttributes.length; j++) {
-				IClasspathAttribute otherAttrib= extraAttributes[j];
+			for (IClasspathAttribute otherAttrib : extraAttributes) {
 				if (IClasspathAttribute.PATCH_MODULE.equals(otherAttrib.getName())) {
 					details.addAll(ModulePatch.fromMultiString(attribElem, otherAttrib.getValue()));
 				} else if (IClasspathAttribute.ADD_EXPORTS.equals(otherAttrib.getName())) {
@@ -856,8 +852,8 @@ public class CPListElement {
 	public static StringBuffer appendEncodedFilter(IPath[] filters, StringBuffer buf) {
 		if (filters != null) {
 			buf.append('[').append(filters.length).append(']');
-			for (int i= 0; i < filters.length; i++) {
-				appendEncodePath(filters[i], buf).append(';');
+			for (IPath filter : filters) {
+				appendEncodePath(filter, buf).append(';');
 			}
 		} else {
 			buf.append('[').append(']');
@@ -868,9 +864,9 @@ public class CPListElement {
 	public static StringBuffer appendEncodedAccessRules(IAccessRule[] rules, StringBuffer buf) {
 		if (rules != null) {
 			buf.append('[').append(rules.length).append(']');
-			for (int i= 0; i < rules.length; i++) {
-				appendEncodePath(rules[i].getPattern(), buf).append(';');
-				buf.append(rules[i].getKind()).append(';');
+			for (IAccessRule rule : rules) {
+				appendEncodePath(rule.getPattern(), buf).append(';');
+				buf.append(rule.getKind()).append(';');
 			}
 		} else {
 			buf.append('[').append(']');
@@ -977,8 +973,7 @@ public class CPListElement {
 	public static IClasspathEntry[] convertToClasspathEntries(List<CPListElement> cpList) {
 		IClasspathEntry[] result= new IClasspathEntry[cpList.size()];
 		int i= 0;
-		for (Iterator<CPListElement> iter= cpList.iterator(); iter.hasNext();) {
-			CPListElement cur= iter.next();
+		for (CPListElement cur : cpList) {
 			result[i]= cur.getClasspathEntry();
 			i++;
 		}
@@ -996,8 +991,8 @@ public class CPListElement {
 
 	public static boolean isProjectSourceFolder(CPListElement[] existing, IJavaProject project) {
 		IPath projPath= project.getProject().getFullPath();
-		for (int i= 0; i < existing.length; i++) {
-			IClasspathEntry curr= existing[i].getClasspathEntry();
+		for (CPListElement e : existing) {
+			IClasspathEntry curr= e.getClasspathEntry();
 			if (curr.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
 				if (projPath.equals(curr.getPath())) {
 					return true;
@@ -1028,14 +1023,13 @@ public class CPListElement {
     	result.fParentContainer= fParentContainer;
     	result.fCachedEntry= null;
     	result.fChildren= new ArrayList<>(fChildren.size());
-    	for (Iterator<Object> iterator= fChildren.iterator(); iterator.hasNext();) {
-    		Object child= iterator.next();
-    		if (child instanceof CPListElement) {
-    			result.fChildren.add(((CPListElement)child).copy());
-    		} else {
-	        	result.fChildren.add(((CPListElementAttribute)child).copy());
-    		}
-        }
+		for (Object child : fChildren) {
+			if (child instanceof CPListElement) {
+				result.fChildren.add(((CPListElement)child).copy());
+			} else {
+				result.fChildren.add(((CPListElementAttribute)child).copy());
+			}
+		}
     	result.fLinkTarget= fLinkTarget;
     	result.fOrginalLinkTarget= fOrginalLinkTarget;
 	    return result;
@@ -1043,9 +1037,7 @@ public class CPListElement {
 
     public void setAttributesFromExisting(CPListElement existing) {
     	Assert.isTrue(existing.getEntryKind() == getEntryKind());
-		CPListElementAttribute[] attributes= existing.getAllAttributes();
-		for (int i= 0; i < attributes.length; i++) {
-			CPListElementAttribute curr= attributes[i];
+		for (CPListElementAttribute curr : existing.getAllAttributes()) {
 			CPListElementAttribute elem= findAttributeElement(curr.getKey());
 			if (elem == null) {
 				createAttributeElement(curr.getKey(), curr.getValue(), curr.isBuiltIn());

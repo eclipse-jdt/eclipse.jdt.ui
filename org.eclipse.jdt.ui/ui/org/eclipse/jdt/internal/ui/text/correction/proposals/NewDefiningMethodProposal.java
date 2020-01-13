@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -26,6 +26,8 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.Javadoc;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -37,6 +39,7 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
@@ -47,7 +50,7 @@ public class NewDefiningMethodProposal extends AbstractMethodCorrectionProposal 
 	private final String[] fParamNames;
 
 	public NewDefiningMethodProposal(String label, ICompilationUnit targetCU, ASTNode invocationNode, ITypeBinding binding, IMethodBinding method, String[] paramNames, int relevance) {
-		super(label,targetCU,invocationNode,binding,relevance,null);
+		super(label, targetCU, invocationNode, binding, relevance, null);
 		fMethod= method;
 		fParamNames= paramNames;
 
@@ -91,6 +94,17 @@ public class NewDefiningMethodProposal extends AbstractMethodCorrectionProposal 
 	}
 
 	@Override
+	protected void addNewJavaDoc(ASTRewrite rewrite, MethodDeclaration decl) throws CoreException {
+		final Javadoc oldJavadoc= ((MethodDeclaration) ASTNodes.findDeclaration(fMethod, getInvocationNode())).getJavadoc();
+		if (oldJavadoc != null) {
+			String newJavadocString= ASTNodes.getNodeSource(oldJavadoc, false, true);
+			if (newJavadocString != null) {
+				decl.setJavadoc((Javadoc) rewrite.createStringPlaceholder(newJavadocString, ASTNode.JAVADOC));
+			}
+		}
+	}
+
+	@Override
 	protected SimpleName getNewName(ASTRewrite rewrite) {
 		AST ast= rewrite.getAST();
 		SimpleName nameNode= ast.newSimpleName(fMethod.getName());
@@ -103,7 +117,7 @@ public class NewDefiningMethodProposal extends AbstractMethodCorrectionProposal 
 		} else {
 			int modifiers= fMethod.getModifiers();
 			if (Modifier.isPrivate(modifiers)) {
-				modifiers |= Modifier.PROTECTED;
+				modifiers|= Modifier.PROTECTED;
 			}
 			return modifiers & (Modifier.PUBLIC | Modifier.PROTECTED | Modifier.ABSTRACT | Modifier.STRICTFP);
 		}
@@ -133,8 +147,21 @@ public class NewDefiningMethodProposal extends AbstractMethodCorrectionProposal 
 	}
 
 	@Override
-	protected void addNewTypeParameters(ASTRewrite rewrite, List<String> takenNames, List<TypeParameter> params, ImportRewriteContext context) throws CoreException {
-
+	protected void addNewTypeParameters(ASTRewrite rewrite, List<String> takenNames, List<TypeParameter> typeParameters, ImportRewriteContext context) throws CoreException {
+		AST ast= rewrite.getAST();
+		ITypeBinding[] typeParams= fMethod.getTypeParameters();
+		for (int i= 0; i < typeParams.length; i++) {
+			ITypeBinding current= typeParams[i];
+			TypeParameter newTypeParameter= ast.newTypeParameter();
+			newTypeParameter.setName(ast.newSimpleName(current.getName()));
+			ITypeBinding[] typeBounds= current.getTypeBounds();
+			if (typeBounds.length != 1 || !"java.lang.Object".equals(typeBounds[0].getQualifiedName())) {//$NON-NLS-1$
+				List<Type> newTypeBounds= newTypeParameter.typeBounds();
+				for (int k= 0; k < typeBounds.length; k++) {
+					newTypeBounds.add(getImportRewrite().addImport(typeBounds[k], ast, context, TypeLocation.TYPE_BOUND));
+				}
+			}
+			typeParameters.add(newTypeParameter);
+		}
 	}
-
 }

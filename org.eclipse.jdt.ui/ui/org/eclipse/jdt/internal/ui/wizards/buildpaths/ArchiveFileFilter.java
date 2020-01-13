@@ -72,10 +72,9 @@ public class ArchiveFileFilter extends ViewerFilter {
 			if (element instanceof IProject && !((IProject)element).isOpen())
 				return false;
 			try {
-				IResource[] resources= ((IContainer)element).members();
-				for (int i= 0; i < resources.length; i++) {
+				for (IResource resource : ((IContainer)element).members()) {
 					// recursive! Only show containers that contain an archive
-					if (select(viewer, parent, resources[i])) {
+					if (select(viewer, parent, resource)) {
 						return true;
 					}
 				}
@@ -98,8 +97,8 @@ public class ArchiveFileFilter extends ViewerFilter {
 	}
 
 	public static boolean isArchiveFileExtension(String ext) {
-		for (int i= 0; i < fgArchiveExtensions.length; i++) {
-			if (ext.equalsIgnoreCase(fgArchiveExtensions[i])) {
+		for (String extension : fgArchiveExtensions) {
+			if (ext.equalsIgnoreCase(extension)) {
 				return true;
 			}
 		}

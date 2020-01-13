@@ -151,9 +151,7 @@ public class NewTypeDropDownAction extends Action implements IMenuCreator, IWork
 	public Menu getMenu(Control parent) {
 		if (fMenu == null) {
 			fMenu= new Menu(parent);
-			OpenTypeWizardAction[] actions= getActionFromDescriptors();
-			for (int i= 0; i < actions.length; i++) {
-				OpenTypeWizardAction curr= actions[i];
+			for (OpenTypeWizardAction curr : getActionFromDescriptors()) {
 				curr.setShell(fWizardShell);
 				ActionContributionItem item= new ActionContributionItem(curr);
 				item.fill(fMenu, -1);
@@ -173,9 +171,7 @@ public class NewTypeDropDownAction extends Action implements IMenuCreator, IWork
 
 		IExtensionPoint extensionPoint = Platform.getExtensionRegistry().getExtensionPoint(PlatformUI.PLUGIN_ID, PL_NEW);
 		if (extensionPoint != null) {
-			IConfigurationElement[] elements = extensionPoint.getConfigurationElements();
-			for (int i = 0; i < elements.length; i++) {
-				IConfigurationElement element= elements[i];
+			for (IConfigurationElement element : extensionPoint.getConfigurationElements()) {
 				if (element.getName().equals(TAG_WIZARD) && isJavaTypeWizard(element)) {
 					containers.add(new OpenTypeWizardAction(element));
 				}
@@ -185,15 +181,10 @@ public class NewTypeDropDownAction extends Action implements IMenuCreator, IWork
 	}
 
 	private static boolean isJavaTypeWizard(IConfigurationElement element) {
-		IConfigurationElement[] classElements= element.getChildren(TAG_CLASS);
-		if (classElements.length > 0) {
-			for (int i= 0; i < classElements.length; i++) {
-				IConfigurationElement[] paramElements= classElements[i].getChildren(TAG_PARAMETER);
-				for (int k = 0; k < paramElements.length; k++) {
-					IConfigurationElement curr= paramElements[k];
-					if (ATT_JAVATYPE.equals(curr.getAttribute(TAG_NAME))) {
-						return Boolean.valueOf(curr.getAttribute(TAG_VALUE)).booleanValue();
-					}
+		for (IConfigurationElement classElement : element.getChildren(TAG_CLASS)) {
+			for (IConfigurationElement curr : classElement.getChildren(TAG_PARAMETER)) {
+				if (ATT_JAVATYPE.equals(curr.getAttribute(TAG_NAME))) {
+					return Boolean.valueOf(curr.getAttribute(TAG_VALUE)).booleanValue();
 				}
 			}
 		}

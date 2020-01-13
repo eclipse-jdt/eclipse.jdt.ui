@@ -376,10 +376,9 @@ public class MarkOccurrenceTest extends TestCase {
 	}
 
 	private void assertOccurrenceInWidget(Position position) {
-		StyleRange[] styleRanges= fTextWidget.getStyleRanges(position.offset, position.length);
-		for (int i= 0; i < styleRanges.length; i++) {
-			if (styleRanges[i].background != null) {
-				RGB rgb= styleRanges[i].background.getRGB();
+		for (StyleRange styleRange : fTextWidget.getStyleRanges(position.offset, position.length)) {
+			if (styleRange.background != null) {
+				RGB rgb= styleRange.background.getRGB();
 				if (fgHighlightRGB.equals(rgb))
 					return;
 			}

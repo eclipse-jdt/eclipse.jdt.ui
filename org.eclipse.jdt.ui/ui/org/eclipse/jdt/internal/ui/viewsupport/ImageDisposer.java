@@ -43,8 +43,8 @@ public class ImageDisposer implements DisposeListener {
 	@Override
 	public void widgetDisposed(DisposeEvent e) {
 		if (fImages != null) {
-			for (int i= 0; i < fImages.length; i++) {
-				fImages[i].dispose();
+			for (Image image : fImages) {
+				image.dispose();
 			}
 		}
 	}

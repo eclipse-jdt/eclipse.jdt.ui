@@ -312,9 +312,9 @@ public class JavadocCompletionTest extends AbstractCompletionTest {
 
 	public void testTypeBlockTags() throws Exception {
 		tearDown();
-		for (int i= 0; i < TYPE_BLOCK_TAGS.length; i++) {
+		for (String t : TYPE_BLOCK_TAGS) {
 			setUp();
-			String tag= TYPE_BLOCK_TAGS[i];
+			String tag= t;
 			assertTypeJavadocProposal(" * @|", tag, " * " + tag);
 			tearDown();
 		}
@@ -323,10 +323,10 @@ public class JavadocCompletionTest extends AbstractCompletionTest {
 
 	public void testMethodBlockTags() throws Exception {
 		tearDown();
-		for (int i= 0; i < METHOD_BLOCK_TAGS.length; i++) {
+		for (String t : METHOD_BLOCK_TAGS) {
 			setUp();
 			addMembers(METHOD);
-			String tag= METHOD_BLOCK_TAGS[i];
+			String tag= t;
 			assertMemberJavadocProposal(" * @|", tag, " * " + tag);
 			tearDown();
 		}
@@ -335,10 +335,10 @@ public class JavadocCompletionTest extends AbstractCompletionTest {
 
 	public void testFieldBlockTags() throws Exception {
 		tearDown();
-		for (int i= 0; i < FIELD_BLOCK_TAGS.length; i++) {
+		for (String t : FIELD_BLOCK_TAGS) {
 			setUp();
 			addMembers(FIELD);
-			String tag= FIELD_BLOCK_TAGS[i];
+			String tag= t;
 			assertMemberJavadocProposal(" * @|", tag, " * " + tag);
 			tearDown();
 		}
@@ -347,9 +347,9 @@ public class JavadocCompletionTest extends AbstractCompletionTest {
 
  	public void testNoInlineAsBlockTags() throws Exception {
  		tearDown();
- 		for (int i= 0; i < TYPE_INLINE_TAGS.length; i++) {
- 			setUp();
-			String tag= TYPE_INLINE_TAGS[i];
+		for (String t : TYPE_INLINE_TAGS) {
+			setUp();
+			String tag= t;
 			assertNoMethodBodyProposals(" * @|", tag);
 			tearDown();
 		}
@@ -358,9 +358,9 @@ public class JavadocCompletionTest extends AbstractCompletionTest {
 
 	public void testTypeInlineTags() throws Exception {
  		tearDown();
-		for (int i= 0; i < TYPE_INLINE_TAGS.length; i++) {
+		for (String t : TYPE_INLINE_TAGS) {
 			setUp();
-			String tag= TYPE_INLINE_TAGS[i];
+			String tag= t;
 			assertTypeJavadocProposal(" * {@|", "{" + tag + "}", " * {" + tag + "|}");
 			tearDown();
 		}
@@ -369,10 +369,10 @@ public class JavadocCompletionTest extends AbstractCompletionTest {
 
 	public void testMethodInlineTags() throws Exception {
 		tearDown();
-		for (int i= 0; i < METHOD_INLINE_TAGS.length; i++) {
+		for (String t : METHOD_INLINE_TAGS) {
 			setUp();
 			addMembers(METHOD);
-			String tag= METHOD_INLINE_TAGS[i];
+			String tag= t;
 			assertMemberJavadocProposal(" * {@|", "{" + tag + "}", " * {" + tag + "|}");
 			tearDown();
 		}
@@ -381,10 +381,10 @@ public class JavadocCompletionTest extends AbstractCompletionTest {
 
 	public void testFieldInlineTags() throws Exception {
 		tearDown();
-		for (int i= 0; i < FIELD_INLINE_TAGS.length; i++) {
+		for (String t : FIELD_INLINE_TAGS) {
 			setUp();
 			addMembers(FIELD);
-			String tag= FIELD_INLINE_TAGS[i];
+			String tag= t;
 			assertMemberJavadocProposal(" * {@|", "{" + tag + "}", " * {" + tag + "|}");
 			tearDown();
 		}
@@ -393,8 +393,7 @@ public class JavadocCompletionTest extends AbstractCompletionTest {
 
 	public void testNoBlockAsInlineTags() throws Exception {
 		tearDown();
-		for (int i= 0; i < TYPE_BLOCK_TAGS.length; i++) {
-			String tag= TYPE_BLOCK_TAGS[i];
+		for (String tag : TYPE_BLOCK_TAGS) {
 			setUp();
 			assertNoMethodBodyProposals(" * {@|", tag);
 			tearDown();
@@ -408,9 +407,9 @@ public class JavadocCompletionTest extends AbstractCompletionTest {
  			return;
  		}
 		tearDown();
-		for (int i= 0; i < HTML_TAGS.length; i++) {
+		for (String t : HTML_TAGS) {
 			setUp();
-			String tag= HTML_TAGS[i];
+			String tag= t;
 			assertTypeJavadocProposal(" * Prefix <" + tag.charAt(0) + "| postfix", "<" + tag, " * Prefix <" + tag + ">| postfix");
 			tearDown();
 		}

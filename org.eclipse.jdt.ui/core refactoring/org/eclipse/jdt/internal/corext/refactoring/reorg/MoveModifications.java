@@ -99,10 +99,8 @@ public class MoveModifications extends RefactoringModifications {
 			IContainer resourceDestination= (IContainer) newPack.getResource();
 			createIncludingParents(resourceDestination);
 			MoveArguments arguments= new MoveArguments(resourceDestination, args.getUpdateReferences());
-			IResource[] resourcesToMove= collectResourcesOfInterest(pack);
 			Set<IResource> allMembers= new HashSet<>(Arrays.asList(resourceSource.members()));
-			for (int i= 0; i < resourcesToMove.length; i++) {
-				IResource toMove= resourcesToMove[i];
+			for (IResource toMove : collectResourcesOfInterest(pack)) {
 				getResourceModifications().addMove(toMove, arguments);
 				allMembers.remove(toMove);
 			}
@@ -121,9 +119,8 @@ public class MoveModifications extends RefactoringModifications {
 
 	public void move(ICompilationUnit unit, MoveArguments args) throws CoreException {
 		add(unit, args, null);
-		IType[] types= unit.getTypes();
-		for (int tt= 0; tt < types.length; tt++) {
-			add(types[tt], args, null);
+		for (IType type : unit.getTypes()) {
+			add(type, args, null);
 		}
 		IResource resourceDestination= getResourceDestination(args);
 		if (resourceDestination != null && unit.getResource() != null) {
@@ -150,8 +147,7 @@ public class MoveModifications extends RefactoringModifications {
 
 	@Override
 	public void buildValidateEdits(ValidateEditChecker checker) {
-		for (Iterator<Object> iter= fMoves.iterator(); iter.hasNext();) {
-			Object element= iter.next();
+		for (Object element : fMoves) {
 			if (element instanceof ICompilationUnit) {
 				ICompilationUnit unit= (ICompilationUnit)element;
 				IResource resource= unit.getResource();

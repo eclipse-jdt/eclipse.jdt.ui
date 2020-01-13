@@ -1,13 +1,13 @@
 /*******************************************************************************
  * Copyright (c) 2000, 2006 IBM Corporation and others.
  *
- * This program and the accompanying materials 
+ * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -23,10 +23,10 @@ public abstract class DynamicBindingProperty extends ExceptionAttribute {
 
 	protected static final String N_A= "N/A"; //$NON-NLS-1$
 	private final Binding fParent;
-	
+
 	private Binding fViewerElement;
 	private String fLabel= "<unknown>";
-	
+
 	public DynamicBindingProperty(Binding parent) {
 		fParent= parent;
 	}
@@ -40,11 +40,11 @@ public abstract class DynamicBindingProperty extends ExceptionAttribute {
 	public Object[] getChildren() {
 		return EMPTY;
 	}
-	
+
 	public void setViewerElement(Binding viewerElement) {
 		if (fViewerElement == viewerElement)
 			return;
-		
+
 		fViewerElement= viewerElement;
 		fException= null;
 		IBinding trayBinding= fParent.getBinding();
@@ -70,12 +70,12 @@ public abstract class DynamicBindingProperty extends ExceptionAttribute {
 		}
 		fLabel= buf.toString();
 	}
-	
+
 	/**
 	 * Executes this dynamic binding property's query in a protected environment.
 	 * A {@link RuntimeException} thrown by this method is made available via
-	 * {@link #getException()}. 
-	 * 
+	 * {@link #getException()}.
+	 *
 	 * @param viewerBinding the binding of the element selected in the AST viewer, or <code>null</code> iff none
 	 * @param trayBinding the binding of the element selected in the comparison tray, or <code>null</code> iff none
 	 * @return this property's result

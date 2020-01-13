@@ -258,11 +258,8 @@ public static void compile(String[] pathsAndContents, Map<String, String> option
 	        System.err.print(requestor.problemLog); // problem log empty if no problems
 }
 public static void createFile(String path, String contents) throws IOException {
-    FileOutputStream output = new FileOutputStream(path);
-    try {
+    try (FileOutputStream output = new FileOutputStream(path)) {
         output.write(contents.getBytes());
-    } finally {
-        output.close();
     }
 }
 public static void createJar(String[] pathsAndContents, String[] extraPathsAndContents, Map<String, String> options, ClassFileFilter classFileFilter, String[] classpath, String jarPath) throws IOException {

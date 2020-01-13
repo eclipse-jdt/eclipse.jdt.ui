@@ -15,7 +15,6 @@ package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -73,14 +72,14 @@ public class DeleteModifications extends RefactoringModifications {
 	}
 
 	public void delete(IResource[] resources) {
-		for (int i= 0; i < resources.length; i++) {
-			delete(resources[i]);
+		for (IResource resource : resources) {
+			delete(resource);
 		}
 	}
 
 	public void delete(IJavaElement[] elements) throws CoreException {
-		for (int i= 0; i < elements.length; i++) {
-			delete(elements[i]);
+		for (IJavaElement element : elements) {
+			delete(element);
 		}
 	}
 
@@ -101,9 +100,8 @@ public class DeleteModifications extends RefactoringModifications {
 				// change.
 				if (resource != null)
 					getResourceModifications().addDelete(resource);
-				IJavaProject[] referencingProjects= JavaElementUtil.getReferencingProjects((IPackageFragmentRoot) element);
-				for (int i= 0; i < referencingProjects.length; i++) {
-					IFile classpath= referencingProjects[i].getProject().getFile(".classpath"); //$NON-NLS-1$
+				for (IJavaProject referencingProject : JavaElementUtil.getReferencingProjects((IPackageFragmentRoot) element)) {
+					IFile classpath= referencingProject.getProject().getFile(".classpath"); //$NON-NLS-1$
 					getResourceModifications().addChanged(classpath);
 				}
 				return;
@@ -144,9 +142,8 @@ public class DeleteModifications extends RefactoringModifications {
 		IsCompletelySelected isCompletelySelected = new IsCompletelySelected(fPackagesToDelete, subMonitor);
 
 		ArrayList<IResource> resourcesCollector= new ArrayList<>();
-		for (Iterator<IPackageFragment> iter= fPackagesToDelete.iterator(); iter.hasNext(); ) {
+		for (IPackageFragment pack : fPackagesToDelete) {
 			subMonitor.checkCanceled();
-			IPackageFragment pack= iter.next();
 			handlePackageFragmentDelete(pack, resourcesCollector, isCompletelySelected);
 			subMonitor.worked(1);
 		}
@@ -161,9 +158,9 @@ public class DeleteModifications extends RefactoringModifications {
 	@Override
 	public RefactoringParticipant[] loadParticipants(RefactoringStatus status, RefactoringProcessor owner, String[] natures, SharableParticipants shared) {
 		List<RefactoringParticipant> result= new ArrayList<>();
-		for (Iterator<IJavaElement> iter= fDelete.iterator(); iter.hasNext();) {
+		for (IJavaElement javaElement : fDelete) {
 			result.addAll(Arrays.asList(ParticipantManager.loadDeleteParticipants(status,
-				owner, iter.next(),
+				owner, javaElement,
 				new DeleteArguments(), natures, shared)));
 		}
 		result.addAll(Arrays.asList(getResourceModifications().getParticipants(status, owner, natures, shared)));
@@ -233,8 +230,7 @@ public class DeleteModifications extends RefactoringModifications {
 			// This package is only cleared because it has subpackages (=subfolders)
 			// which are not deleted. As the package is only cleared, its folder
 			// will not be removed and so we must notify the participant of the deleted children.
-			for (int m= 0; m < members.length; m++) {
-				IResource member= members[m];
+			for (IResource member : members) {
 				if (member instanceof IFile) {
 					IFile file= (IFile)member;
 					if ("class".equals(file.getFileExtension()) && file.isDerived()) //$NON-NLS-1$

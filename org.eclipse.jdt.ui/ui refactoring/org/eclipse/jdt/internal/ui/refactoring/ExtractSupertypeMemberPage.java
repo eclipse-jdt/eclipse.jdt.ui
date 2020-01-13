@@ -316,8 +316,8 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 				if (result == Window.OK) {
 					final Object[] objects= dialog.getResult();
 					if (objects != null && objects.length > 0) {
-						for (int index= 0; index < objects.length; index++) {
-							fTypesToExtract.add((IType) objects[index]);
+						for (Object object : objects) {
+							fTypesToExtract.add((IType) object);
 						}
 						fTableViewer.setInput(fTypesToExtract.toArray());
 						handleTypesChanged();

@@ -75,8 +75,8 @@ public class RefactoringTestRepositoryProvider extends RepositoryProvider {
 
 		@Override
 		public IStatus validateEdit(IFile[] files, FileModificationValidationContext context) {
-			for (int i= 0; i < files.length; i++) {
-				fValidatedEditPaths.add(files[i].getFullPath());
+			for (IFile file : files) {
+				fValidatedEditPaths.add(file.getFullPath());
 			}
 			return makeWritable(files);
 		}
@@ -93,8 +93,7 @@ public class RefactoringTestRepositoryProvider extends RepositoryProvider {
 					new IWorkspaceRunnable() {
 						@Override
 						public void run(IProgressMonitor monitor) throws CoreException	{
-							for (int i= 0; i < resources.length; i++) {
-								IFile resource= resources[i];
+							for (IFile resource : resources) {
 								ResourceAttributes resourceAttributes = resource.getResourceAttributes();
 								if (resourceAttributes != null) {
 									resourceAttributes.setReadOnly(false);

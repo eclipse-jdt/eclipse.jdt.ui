@@ -145,7 +145,7 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 			composite.setLayout(tableColumnLayout);
 			tableColumnLayout.setColumnData(columnType, new ColumnWeightData(60, true));
 			tableColumnLayout.setColumnData(columnName, new ColumnWeightData(40, true));
-			
+
 			final TableViewer viewer= new TableViewer(table);
 			viewer.setContentProvider(ArrayContentProvider.getInstance());
 			viewer.setLabelProvider(new TargetLabelProvider());
@@ -162,10 +162,9 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 					final Object element= ((IStructuredSelection) event.getSelection()).getFirstElement();
 					if (element instanceof IVariableBinding) {
 						final IVariableBinding target= (IVariableBinding) element;
-						final IVariableBinding[] targets= fProcessor.getPossibleTargets();
 						boolean success= false;
-						for (int index= 0; index < targets.length; index++) {
-							if (Bindings.equals(target, targets[index])) {
+						for (IVariableBinding v : fProcessor.getPossibleTargets()) {
+							if (Bindings.equals(target, v)) {
 								handleTargetChanged(target);
 								success= true;
 								break;

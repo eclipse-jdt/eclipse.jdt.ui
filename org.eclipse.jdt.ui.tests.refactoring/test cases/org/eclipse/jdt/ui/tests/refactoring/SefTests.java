@@ -107,9 +107,7 @@ public class SefTests extends AbstractSelectionTestCase {
 
 	private static IField getField(ICompilationUnit unit, String fieldName) throws Exception {
 		IField result= null;
-		IType[] types= unit.getAllTypes();
-		for (int i= 0; i < types.length; i++) {
-			IType type= types[i];
+		for (IType type : unit.getAllTypes()) {
 			result= type.getField(fieldName);
 			if (result != null && result.exists())
 				break;

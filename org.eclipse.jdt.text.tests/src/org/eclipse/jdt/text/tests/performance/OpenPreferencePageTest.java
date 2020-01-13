@@ -109,12 +109,11 @@ public class OpenPreferencePageTest extends TextPerformanceTestCase {
 	}
 
 	private Tree findTree(Composite composite) {
-		Control[] children= composite.getChildren();
-		for (int i= 0; i < children.length; i++) {
-			if (children[i] instanceof Tree)
-				return (Tree)children[i];
-			else if (children[i] instanceof Composite) {
-				Tree tree= findTree((Composite)children[i]);
+		for (Control child : composite.getChildren()) {
+			if (child instanceof Tree) {
+				return (Tree) child;
+			} else if (child instanceof Composite) {
+				Tree tree= findTree((Composite) child);
 				if (tree != null)
 					return tree;
 			}
@@ -138,9 +137,10 @@ public class OpenPreferencePageTest extends TextPerformanceTestCase {
 
 	private TreeItem findTreeItem(TreeItem[] items, String string) {
 		// depth first
-		for (int i= 0; i < items.length; i++) {
-			if (string.equals(items[i].getText()))
-				return items[i];
+		for (TreeItem item : items) {
+			if (string.equals(item.getText())) {
+				return item;
+			}
 		}
 		return null;
 	}

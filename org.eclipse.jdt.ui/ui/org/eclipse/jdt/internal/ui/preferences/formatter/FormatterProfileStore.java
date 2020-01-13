@@ -76,9 +76,8 @@ public class FormatterProfileStore extends ProfileStore {
 			return null;
 
 		try {
-			// note that it's wrong to use a file reader when XML declares UTF-8: Kept for compatibility
-			final FileReader reader= new FileReader(file);
-			try {
+			try ( // note that it's wrong to use a file reader when XML declares UTF-8: Kept for compatibility
+				FileReader reader= new FileReader(file)) {
 				List<Profile> res= readProfilesFromStream(new InputSource(reader));
 				if (res != null) {
 					for (int i= 0; i < res.size(); i++) {
@@ -88,8 +87,6 @@ public class FormatterProfileStore extends ProfileStore {
 				}
 				file.delete(); // remove after successful write
 				return res;
-			} finally {
-				reader.close();
 			}
 		} catch (CoreException e) {
 			JavaPlugin.log(e); // log but ignore

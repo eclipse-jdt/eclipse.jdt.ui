@@ -13,9 +13,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.template.java;
 
-import java.util.Iterator;
-import java.util.List;
-
 import org.eclipse.jface.text.templates.TemplateContext;
 import org.eclipse.jface.text.templates.TemplateVariable;
 import org.eclipse.jface.text.templates.TemplateVariableResolver;
@@ -45,12 +42,8 @@ public class ImportsResolver extends TemplateVariableResolver {
 
 		if (context instanceof JavaContext) {
 			JavaContext jc= (JavaContext) context;
-			List<String> params= variable.getVariableType().getParams();
-			if (params.size() > 0) {
-				for (Iterator<String> iterator= params.iterator(); iterator.hasNext();) {
-					String typeName= iterator.next();
-					jc.addImport(typeName);
-				}
+			for (String typeName : variable.getVariableType().getParams()) {
+				jc.addImport(typeName);
 			}
 		} else {
 			super.resolve(variable, context);

@@ -178,9 +178,9 @@ public class ClasspathContainerWizard extends Wizard {
 
 
 	private ClasspathContainerDescriptor findDescriptorPage(ClasspathContainerDescriptor[] containers, IClasspathEntry entry) {
-		for (int i = 0; i < containers.length; i++) {
-			if (containers[i].canEdit(entry)) {
-				return containers[i];
+		for (ClasspathContainerDescriptor container : containers) {
+			if (container.canEdit(entry)) {
+				return container;
 			}
 		}
 		return null;
@@ -189,9 +189,8 @@ public class ClasspathContainerWizard extends Wizard {
 	@Override
 	public void dispose() {
 		if (fSelectionWizardPage != null) {
-			ClasspathContainerDescriptor[] descriptors= fSelectionWizardPage.getContainers();
-			for (int i= 0; i < descriptors.length; i++) {
-				descriptors[i].dispose();
+			for (ClasspathContainerDescriptor descriptor : fSelectionWizardPage.getContainers()) {
+				descriptor.dispose();
 			}
 		}
 		super.dispose();

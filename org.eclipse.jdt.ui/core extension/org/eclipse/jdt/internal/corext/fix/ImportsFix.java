@@ -21,7 +21,6 @@ import org.eclipse.text.edits.TextEdit;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.manipulation.OrganizeImportsOperation;
 import org.eclipse.jdt.core.manipulation.OrganizeImportsOperation.IChooseImportQuery;
@@ -42,12 +41,9 @@ public class ImportsFix extends TextEditFix {
 			return null;
 
 		final boolean hasAmbiguity[]= new boolean[] { false };
-		IChooseImportQuery query= new IChooseImportQuery() {
-			@Override
-			public TypeNameMatch[] chooseImports(TypeNameMatch[][] openChoices, ISourceRange[] ranges) {
-				hasAmbiguity[0]= true;
-				return new TypeNameMatch[0];
-			}
+		IChooseImportQuery query= (openChoices, ranges) -> {
+			hasAmbiguity[0]= true;
+			return new TypeNameMatch[0];
 		};
 
 		final ICompilationUnit unit= (ICompilationUnit)cu.getJavaElement();

@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
-import java.util.Iterator;
-
 import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -57,6 +55,8 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(EXPRESSIONS_USE_PARENTHESES, CleanUpOptions.FALSE);
 		options.setOption(EXPRESSIONS_USE_PARENTHESES_NEVER, CleanUpOptions.TRUE);
 		options.setOption(EXPRESSIONS_USE_PARENTHESES_ALWAYS, CleanUpOptions.FALSE);
+
+		options.setOption(NUMBER_SUFFIX, CleanUpOptions.FALSE);
 
 		//Variable Declarations
 		options.setOption(VARIABLE_DECLARATIONS_USE_FINAL, CleanUpOptions.FALSE);
@@ -151,6 +151,8 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(EXPRESSIONS_USE_PARENTHESES_NEVER, CleanUpOptions.TRUE);
 		options.setOption(EXPRESSIONS_USE_PARENTHESES_ALWAYS, CleanUpOptions.FALSE);
 
+		options.setOption(NUMBER_SUFFIX, CleanUpOptions.FALSE);
+
 		//Variable Declarations
 		options.setOption(VARIABLE_DECLARATIONS_USE_FINAL, CleanUpOptions.FALSE);
 		options.setOption(VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES, CleanUpOptions.TRUE);
@@ -218,8 +220,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 
 	public static void initDefaults(IPreferenceStore store) {
 		CleanUpOptions settings= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(CleanUpConstants.DEFAULT_CLEAN_UP_OPTIONS);
-		for (Iterator<String> iterator= settings.getKeys().iterator(); iterator.hasNext();) {
-			String key= iterator.next();
+		for (String key : settings.getKeys()) {
 			store.setDefault(key, settings.getValue(key));
 		}
 

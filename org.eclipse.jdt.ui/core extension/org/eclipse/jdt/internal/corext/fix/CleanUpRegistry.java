@@ -15,7 +15,6 @@ package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Set;
 
 import com.ibm.icu.text.Collator;
@@ -53,7 +52,7 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 /**
  * The clean up registry provides a set of clean ups and there corresponding UI representatives.
- * 
+ *
  * @since 3.4
  */
 public class CleanUpRegistry {
@@ -105,7 +104,7 @@ public class CleanUpRegistry {
 		private static final String ATTRIBUTE_ID_CLASS= "class"; //$NON-NLS-1$
 		private static final String ATTRIBUTE_ID_NAME= "name"; //$NON-NLS-1$
 		private static final String ATTRIBUTE_NAME_KIND= "cleanUpKind"; //$NON-NLS-1$
-		
+
 		private final String fName;
 		private final IConfigurationElement fElement;
 		private int fKind;
@@ -231,17 +230,14 @@ public class CleanUpRegistry {
 					fOptionsProvider= (ICleanUpOptionsInitializer)fElement.createExecutableExtension(ATTRIBUTE_NAME_CLASS);
 				} catch (CoreException e) {
 					JavaPlugin.log(e);
-					fOptionsProvider= new ICleanUpOptionsInitializer() {
-						@Override
-						public void setDefaultOptions(CleanUpOptions options) {
-						}
+					fOptionsProvider= options -> {
 					};
 				}
 			}
 			return fOptionsProvider;
 		}
 	}
-	
+
 	private static final String EXTENSION_POINT_NAME= "cleanUps"; //$NON-NLS-1$
 	private static final String CLEAN_UP_CONFIGURATION_ELEMENT_NAME= "cleanUp"; //$NON-NLS-1$
 	private static final String TABPAGE_CONFIGURATION_ELEMENT_NAME= "cleanUpConfigurationUI"; //$NON-NLS-1$
@@ -257,7 +253,7 @@ public class CleanUpRegistry {
 
 	/**
 	 * Creates and returns the registered clean ups that don't fail upon creation.
-	 * 
+	 *
 	 * @return an array of clean ups
 	 */
 	public synchronized ICleanUp[] createCleanUps() {
@@ -266,7 +262,7 @@ public class CleanUpRegistry {
 
 	/**
 	 * Creates and returns the registered clean ups that don't fail upon creation.
-	 * 
+	 *
 	 * @param ids the ids of the clean ups to create, or <code>null</code> to create all
 	 * @return an array of clean ups
 	 * @since 3.5
@@ -274,9 +270,9 @@ public class CleanUpRegistry {
 	public synchronized ICleanUp[] createCleanUps(Set<String> ids) {
 		ensureCleanUpsRegistered();
 		ArrayList<ICleanUp> result= new ArrayList<>(fCleanUpDescriptors.length);
-		for (int i= 0; i < fCleanUpDescriptors.length; i++) {
-			if (ids == null || ids.contains(fCleanUpDescriptors[i].getId())) {
-				ICleanUp cleanUp= fCleanUpDescriptors[i].createCleanUp();
+		for (CleanUpDescriptor descriptor : fCleanUpDescriptors) {
+			if (ids == null || ids.contains(descriptor.getId())) {
+				ICleanUp cleanUp= descriptor.createCleanUp();
 				if (cleanUp != null)
 					result.add(cleanUp);
 			}
@@ -286,9 +282,9 @@ public class CleanUpRegistry {
 
 	/**
 	 * @param kind the kind of clean up for which to retrieve the configuratin pages
-	 * 
+	 *
 	 * @return set of clean up tab page descriptors
-	 * 
+	 *
 	 * @see CleanUpConstants#DEFAULT_CLEAN_UP_OPTIONS
 	 * @see CleanUpConstants#DEFAULT_SAVE_ACTION_OPTIONS
 	 */
@@ -296,19 +292,20 @@ public class CleanUpRegistry {
 		ensurePagesRegistered();
 
 		ArrayList<CleanUpTabPageDescriptor> result= new ArrayList<>();
-		for (int i= 0; i < fPageDescriptors.length; i++) {
-			if (fPageDescriptors[i].getKind() == kind)
-				result.add(fPageDescriptors[i]);
+		for (CleanUpTabPageDescriptor descriptor : fPageDescriptors) {
+			if (descriptor.getKind() == kind) {
+				result.add(descriptor);
+			}
 		}
 		return result.toArray(new CleanUpTabPageDescriptor[result.size()]);
 	}
 
 	/**
 	 * Returns the default options for the specified clean up kind.
-	 * 
+	 *
 	 * @param kind the kind of clean up for which to retrieve the options
 	 * @return the default options
-	 * 
+	 *
 	 * @see CleanUpConstants#DEFAULT_CLEAN_UP_OPTIONS
 	 * @see CleanUpConstants#DEFAULT_SAVE_ACTION_OPTIONS
 	 */
@@ -316,8 +313,7 @@ public class CleanUpRegistry {
 		ensureCleanUpInitializersRegistered();
 
 		CleanUpOptions options= new CleanUpOptions();
-		for (int i= 0; i < fCleanUpInitializerDescriptors.length; i++) {
-			CleanUpInitializerDescriptor descriptor= fCleanUpInitializerDescriptors[i];
+		for (CleanUpInitializerDescriptor descriptor : fCleanUpInitializerDescriptors) {
 			if (descriptor.getKind() == kind) {
 				descriptor.getOptionsInitializer().setDefaultOptions(options);
 			}
@@ -335,10 +331,7 @@ public class CleanUpRegistry {
 		final ArrayList<CleanUpDescriptor> descriptors= new ArrayList<>();
 
 		IExtensionPoint point= Platform.getExtensionRegistry().getExtensionPoint(JavaPlugin.getPluginId(), EXTENSION_POINT_NAME);
-		IConfigurationElement[] elements= point.getConfigurationElements();
-		for (int i= 0; i < elements.length; i++) {
-			IConfigurationElement element= elements[i];
-
+		for (IConfigurationElement element : point.getConfigurationElements()) {
 			if (CLEAN_UP_CONFIGURATION_ELEMENT_NAME.equals(element.getName())) {
 				descriptors.add(new CleanUpDescriptor(element));
 			}
@@ -350,7 +343,7 @@ public class CleanUpRegistry {
 			final CleanUpDescriptor cleanUpDescriptor= descriptors.get(i);
 			final boolean disable[]= new boolean[1];
 			ISafeRunnable runnable= new SafeRunnable() {
-				
+
 				@Override
 				public void run() throws Exception {
 					ICleanUp cleanUp= cleanUpDescriptor.createCleanUp();
@@ -427,27 +420,21 @@ public class CleanUpRegistry {
 	private synchronized void ensurePagesRegistered() {
 		if (fPageDescriptors != null)
 			return;
-		
+
 		ArrayList<CleanUpTabPageDescriptor> result= new ArrayList<>();
 
 		IExtensionPoint point= Platform.getExtensionRegistry().getExtensionPoint(JavaPlugin.getPluginId(), EXTENSION_POINT_NAME);
-		IConfigurationElement[] elements= point.getConfigurationElements();
-		for (int i= 0; i < elements.length; i++) {
-			IConfigurationElement element= elements[i];
-
+		for (IConfigurationElement element : point.getConfigurationElements()) {
 			if (TABPAGE_CONFIGURATION_ELEMENT_NAME.equals(element.getName())) {
 				result.add(new CleanUpTabPageDescriptor(element));
 			}
 		}
 
 		fPageDescriptors= result.toArray(new CleanUpTabPageDescriptor[result.size()]);
-		Arrays.sort(fPageDescriptors, new Comparator<CleanUpTabPageDescriptor>() {
-			@Override
-			public int compare(CleanUpTabPageDescriptor o1, CleanUpTabPageDescriptor o2) {
-				String name1= o1.getName();
-				String name2= o2.getName();
-				return Collator.getInstance().compare(name1.replaceAll("&", ""), name2.replaceAll("&", "")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			}
+		Arrays.sort(fPageDescriptors, (o1, o2) -> {
+			String name1= o1.getName();
+			String name2= o2.getName();
+			return Collator.getInstance().compare(name1.replaceAll("&", ""), name2.replaceAll("&", "")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		});
 	}
 
@@ -458,10 +445,7 @@ public class CleanUpRegistry {
 		ArrayList<CleanUpInitializerDescriptor> result= new ArrayList<>();
 
 		IExtensionPoint point= Platform.getExtensionRegistry().getExtensionPoint(JavaPlugin.getPluginId(), EXTENSION_POINT_NAME);
-		IConfigurationElement[] elements= point.getConfigurationElements();
-		for (int i= 0; i < elements.length; i++) {
-			IConfigurationElement element= elements[i];
-
+		for (IConfigurationElement element : point.getConfigurationElements()) {
 			if (CLEAN_UP_INITIALIZER_CONFIGURATION_ELEMENT_NAME.equals(element.getName())) {
 				result.add(new CleanUpInitializerDescriptor(element));
 			}

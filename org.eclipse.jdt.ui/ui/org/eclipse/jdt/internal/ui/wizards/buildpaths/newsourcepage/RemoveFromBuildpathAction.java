@@ -138,8 +138,7 @@ public class RemoveFromBuildpathAction extends BuildpathModifierAction {
 						CPJavaProject cpProject= CPJavaProject.createFromExisting(project);
 						CPListElement[] toRemove= new CPListElement[elementsToRemove.size()];
 						int i= 0;
-						for (Iterator<Object> iterator= elementsToRemove.iterator(); iterator.hasNext();) {
-							Object element= iterator.next();
+						for (Object element : elementsToRemove) {
 							if (element instanceof IJavaProject) {
 								toRemove[i]= ClasspathModifier.getListElement(((IJavaProject)element).getPath(), cpProject.getCPListElements());
 							} else if (element instanceof IPackageFragmentRoot) {
@@ -147,8 +146,8 @@ public class RemoveFromBuildpathAction extends BuildpathModifierAction {
 							} else {
 								toRemove[i]= CPListElement.createFromExisting(((ClassPathContainer)element).getClasspathEntry(), project);
 							}
-	                        i++;
-                        }
+							i++;
+						}
 
 						BuildpathDelta delta= ClasspathModifier.removeFromBuildpath(toRemove, cpProject);
 						ClasspathModifier.commitClassPath(cpProject, new SubProgressMonitor(monitor, 10));
@@ -200,8 +199,7 @@ public class RemoveFromBuildpathAction extends BuildpathModifierAction {
 
 	private void queryToRemoveLinkedFolders(final List<Object> elementsToRemove, final List<IFolder> foldersToDelete) throws JavaModelException {
 		final Shell shell= getShell();
-		for (Iterator<?> iter= getSelectedElements().iterator(); iter.hasNext();) {
-			Object element= iter.next();
+		for (Object element : getSelectedElements()) {
 			if (element instanceof IPackageFragmentRoot) {
 				IFolder folder= getLinkedSourceFolder((IPackageFragmentRoot)element);
 				if (folder != null) {

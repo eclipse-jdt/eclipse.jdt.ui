@@ -123,10 +123,8 @@ public class DeleteTest extends RefactoringTest {
 	}
 
 	private IPackageFragmentRoot getArchiveRoot() throws JavaModelException, Exception {
-		IPackageFragmentRoot[] roots= RefactoringTestSetup.getProject().getPackageFragmentRoots();
 		IPackageFragmentRoot archive= null;
-		for (int i= 0; i < roots.length; i++) {
-			IPackageFragmentRoot root= roots[i];
+		for (IPackageFragmentRoot root : RefactoringTestSetup.getProject().getPackageFragmentRoots()) {
 			if (root.isArchive() && root.isExternal())
 				archive= root;
 		}
@@ -232,8 +230,8 @@ public class DeleteTest extends RefactoringTest {
 
 	private void assertExist(Object[] resourceOrElements, boolean exists) {
 		if (resourceOrElements != null) {
-			for (int i= 0; i < resourceOrElements.length; i++) {
-				assertExists(resourceOrElements[i], exists);
+			for (Object resourceOrElement : resourceOrElements) {
+				assertExists(resourceOrElement, exists);
 			}
 		}
 	}

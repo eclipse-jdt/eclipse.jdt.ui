@@ -110,19 +110,18 @@ public class CallHierarchy {
         fgCallHierarchyCore.setSearchScope(searchScope);
     }
 
-	/**
-	 * Checks whether the fully qualified name is ignored by the set filters.
-	 *
-	 * @param fullyQualifiedName the fully qualified name
-	 *
-	 * @return <code>true</code> if the fully qualified name is ignored
-	 */
+    /**
+     * Checks whether the fully qualified name is ignored by the set filters.
+     *
+     * @param fullyQualifiedName the fully qualified name
+     *
+     * @return <code>true</code> if the fully qualified name is ignored
+     */
     public boolean isIgnored(String fullyQualifiedName) {
-        if ((getIgnoreFilters() != null) && (getIgnoreFilters().length > 0)) {
-            for (int i = 0; i < getIgnoreFilters().length; i++) {
-                String fullyQualifiedName1 = fullyQualifiedName;
-
-                if (getIgnoreFilters()[i].match(fullyQualifiedName1)) {
+        StringMatcher[] ignoreFilters= getIgnoreFilters();
+        if (ignoreFilters != null) {
+            for (StringMatcher ignoreFilter : ignoreFilters) {
+                if (ignoreFilter.match(fullyQualifiedName)) {
                     return true;
                 }
             }

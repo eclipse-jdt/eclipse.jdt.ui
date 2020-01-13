@@ -120,12 +120,8 @@ public class JavaSourcePackageFragmentRootCompletionProcessor implements IConten
 	private ICompletionProposal[] createSourcePackageFragmentRootProposals(String prefix, int replacementLength) {
 		List<JavaCompletionProposal> proposals= new ArrayList<>();
 		try {
-			IJavaProject[] projects= fRoot.getJavaProjects();
-			for (int i= 0; i < projects.length; i++) {
-				IJavaProject project= projects[i];
-				IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
-				for (int j= 0; j < roots.length; j++) {
-					IPackageFragmentRoot root= roots[j];
+			for (IJavaProject project : fRoot.getJavaProjects()) {
+				for (IPackageFragmentRoot root : project.getPackageFragmentRoots()) {
 					if (root.exists() && (root.getKind() == IPackageFragmentRoot.K_SOURCE)) {
 						String name= root.getPath().toString();
 						if (name.length() > 1) {

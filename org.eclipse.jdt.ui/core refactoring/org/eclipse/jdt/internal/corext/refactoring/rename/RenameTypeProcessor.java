@@ -1025,7 +1025,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 				}
 			}
 		}
-		
+
 		for (ICompilationUnit conflict : conflicts) {
 			RefactoringStatusContext context= JavaStatusContext.create(conflict);
 			String message= Messages.format(RefactoringCoreMessages.RenameTypeRefactoring_another_type,

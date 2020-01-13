@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -577,11 +577,11 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 		return new RefactoringChangeDescriptor(descriptor);
 	}
 
-    private void modifyConstructorCall(CompilationUnitRewrite rewrite, ITypeBinding[] parameters) {
-        rewrite.getASTRewrite().replace(fAnonymousInnerClassNode.getParent(), createNewClassInstanceCreation(rewrite, parameters), null);
-    }
+	private void modifyConstructorCall(CompilationUnitRewrite rewrite, ITypeBinding[] parameters) {
+		rewrite.getASTRewrite().replace(fAnonymousInnerClassNode.getParent(), createNewClassInstanceCreation(rewrite, parameters), null);
+	}
 
-    private ASTNode createNewClassInstanceCreation(CompilationUnitRewrite rewrite, ITypeBinding[] parameters) {
+	private ASTNode createNewClassInstanceCreation(CompilationUnitRewrite rewrite, ITypeBinding[] parameters) {
 		AST ast= fAnonymousInnerClassNode.getAST();
 		ClassInstanceCreation newClassCreation= ast.newClassInstanceCreation();
 		newClassCreation.setAnonymousClassDeclaration(null);
@@ -600,10 +600,17 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 
 		addLinkedPosition(KEY_TYPE_NAME, newNameNode, rewrite.getASTRewrite(), true);
 
+		ClassInstanceCreation classInstanceCreation= (ClassInstanceCreation) fAnonymousInnerClassNode.getParent();
+		if (classInstanceCreation.getExpression() instanceof SimpleName) {
+			String name= ((SimpleName) classInstanceCreation.getExpression()).getIdentifier();
+			if (name != null && !name.isEmpty()) {
+				newClassCreation.setExpression(ast.newSimpleName(name));
+			}
+		}
 		return newClassCreation;
 	}
 
-    private void addArgumentsForLocalsUsedInInnerClass(ClassInstanceCreation newClassCreation) {
+	private void addArgumentsForLocalsUsedInInnerClass(ClassInstanceCreation newClassCreation) {
         IVariableBinding[] usedLocals= getUsedLocalVariables();
         for (int i= 0; i < usedLocals.length; i++) {
             final AST ast= fAnonymousInnerClassNode.getAST();
@@ -1134,6 +1141,13 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
                 {
                     return ans;
                 }
+                case ASTNode.CLASS_INSTANCE_CREATION:
+                {
+                	if(((ClassInstanceCreation)current).getExpression() != null) {
+                		// class creation is part of an expression, then we don't want static
+                		return false;
+                	}
+                }
             }
             current = current.getParent();
         }
@@ -1190,7 +1204,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_STATIC));
 		final String declareFinal= arguments.getAttribute(ATTRIBUTE_FINAL);
 		if (declareFinal != null) {
-			fDeclareFinal= Boolean.valueOf(declareStatic).booleanValue();
+			fDeclareFinal= Boolean.valueOf(declareFinal).booleanValue();
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_FINAL));
 		return new RefactoringStatus();

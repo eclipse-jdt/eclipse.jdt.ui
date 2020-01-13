@@ -97,7 +97,7 @@ public class JavaDocCommentReader extends SingleCharReader {
 
 	/**
 	 * Returns the offset of the last read character in the passed buffer.
-	 * 
+	 *
 	 * @return the offset
 	 */
 	public int getOffset() {

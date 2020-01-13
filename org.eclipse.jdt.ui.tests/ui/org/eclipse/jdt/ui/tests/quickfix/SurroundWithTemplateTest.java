@@ -112,9 +112,8 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		buf.append("};");
 
 		TemplateStore templateStore= JavaPlugin.getDefault().getTemplateStore();
-		TemplatePersistenceData[] templateData= templateStore.getTemplateData(false);
-		for (int i= 0; i < templateData.length; i++) {
-			templateStore.delete(templateData[i]);
+		for (TemplatePersistenceData t : templateStore.getTemplateData(false)) {
+			templateStore.delete(t);
 		}
 		TemplatePersistenceData surroundWithRunnableTemplate= new TemplatePersistenceData(new Template("runnable", "surround with runnable", "java", buf.toString(), false), true);
 		templateStore.add(surroundWithRunnableTemplate);

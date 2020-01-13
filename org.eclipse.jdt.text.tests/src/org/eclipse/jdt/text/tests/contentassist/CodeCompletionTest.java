@@ -138,13 +138,13 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		System.out.print("file contents: |");
 		File file= cu.getResource().getLocation().toFile();
 		try {
-			BufferedReader reader= new BufferedReader(new FileReader(file));
-			String line;
-			while ((line= reader.readLine()) != null) {
-				System.out.println(line);
+			try (BufferedReader reader= new BufferedReader(new FileReader(file))) {
+				String line;
+				while ((line= reader.readLine()) != null) {
+					System.out.println(line);
+				}
+				System.out.println("|");
 			}
-			System.out.println("|");
-			reader.close();
 		} catch (FileNotFoundException e1) {
 			e1.printStackTrace();
 		} catch (IOException e1) {
@@ -213,12 +213,9 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 	}
 
 	public static void closeAllEditors() {
-		IWorkbenchWindow[] windows= PlatformUI.getWorkbench().getWorkbenchWindows();
-		for (IWorkbenchWindow window : windows) {
-			IWorkbenchPage[] pages= window.getPages();
-			for (IWorkbenchPage page : pages) {
-				IEditorReference[] editorReferences= page.getEditorReferences();
-				for (IEditorReference editorReference : editorReferences) {
+		for (IWorkbenchWindow window : PlatformUI.getWorkbench().getWorkbenchWindows()) {
+			for (IWorkbenchPage page : window.getPages()) {
+				for (IEditorReference editorReference : page.getEditorReferences()) {
 					closeEditor(editorReference.getEditor(false));
 				}
 			}
@@ -994,13 +991,11 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 			codeComplete(cu, offset, collector);
 
-			IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
-
 			IJavaCompletionProposal proposal= null;
 
-			for (IJavaCompletionProposal proposal2 : proposals) {
-				if (proposal2.getDisplayString().startsWith("MyClass")) {
-					proposal= proposal2;
+			for (IJavaCompletionProposal p : collector.getJavaCompletionProposals()) {
+				if (p.getDisplayString().startsWith("MyClass")) {
+					proposal= p;
 				}
 			}
 			assertNotNull("no proposal for MyClass()", proposal);
@@ -1059,12 +1054,10 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 		codeComplete(cu, offset, collector);
 
-		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
-
 		IJavaCompletionProposal proposal= null;
-		for (IJavaCompletionProposal proposal2 : proposals) {
-			if (proposal2.getDisplayString().startsWith("Natural")) {
-				proposal= proposal2;
+		for (IJavaCompletionProposal p : collector.getJavaCompletionProposals()) {
+			if (p.getDisplayString().startsWith("Natural")) {
+				proposal= p;
 			}
 		}
 		assertNotNull("no proposal for enum Natural()", proposal);
@@ -1130,13 +1123,11 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 			codeComplete(cu, offset, collector);
 
-			IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
-
 			IJavaCompletionProposal proposal= null;
 
-			for (IJavaCompletionProposal proposal2 : proposals) {
-				if (proposal2.getDisplayString().startsWith("getWriter")) {
-					proposal= proposal2;
+			for (IJavaCompletionProposal p : collector.getJavaCompletionProposals()) {
+				if (p.getDisplayString().startsWith("getWriter")) {
+					proposal= p;
 				}
 			}
 			assertNotNull("no proposal for getWriter()", proposal);
@@ -1192,12 +1183,11 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 			codeComplete(cu, offset, collector);
 
-			IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
 			IJavaCompletionProposal proposal= null;
 
-			for (IJavaCompletionProposal proposal2 : proposals) {
-				if (proposal2.getDisplayString().startsWith("foo")) {
-					proposal= proposal2;
+			for (IJavaCompletionProposal p : collector.getJavaCompletionProposals()) {
+				if (p.getDisplayString().startsWith("foo")) {
+					proposal= p;
 				}
 			}
 			assertNotNull("no proposal for foo()", proposal);
@@ -1398,12 +1388,11 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 		codeComplete(cu, offset, collector);
 
-		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
 		IJavaCompletionProposal proposal= null;
 
-		for (IJavaCompletionProposal proposal2 : proposals) {
-			if (proposal2.getDisplayString().startsWith("foo")) {
-				proposal= proposal2;
+		for (IJavaCompletionProposal p : collector.getJavaCompletionProposals()) {
+			if (p.getDisplayString().startsWith("foo")) {
+				proposal= p;
 			}
 		}
 		assertNotNull("no proposal for foomethod()", proposal);
@@ -2034,11 +2023,8 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 		codeComplete(cu, offset, collector);
 
-		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
-
 		IJavaCompletionProposal toStringProposal= null;
-
-		for (IJavaCompletionProposal proposal : proposals) {
+		for (IJavaCompletionProposal proposal : collector.getJavaCompletionProposals()) {
 			if (proposal.getDisplayString().startsWith("foo")) {
 				toStringProposal= proposal;
 			}
@@ -2094,11 +2080,8 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 		codeComplete(cu, offset, collector);
 
-		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
-
 		IJavaCompletionProposal toStringProposal= null;
-
-		for (IJavaCompletionProposal proposal : proposals) {
+		for (IJavaCompletionProposal proposal : collector.getJavaCompletionProposals()) {
 			if (proposal.getDisplayString().startsWith("foo")) {
 				toStringProposal= proposal;
 			}
@@ -2155,13 +2138,11 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 			codeComplete(cu, offset, collector);
 
-			IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
-
 			IJavaCompletionProposal proposal= null;
 
-			for (IJavaCompletionProposal proposal2 : proposals) {
-				if (proposal2.getDisplayString().startsWith("setWriter")) {
-					proposal= proposal2;
+			for (IJavaCompletionProposal p : collector.getJavaCompletionProposals()) {
+				if (p.getDisplayString().startsWith("setWriter")) {
+					proposal= p;
 				}
 			}
 			assertNotNull("no proposal for setWriter()", proposal);

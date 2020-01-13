@@ -88,8 +88,9 @@ public final class TypeVariableUtil {
 		if (arguments.length == 0) {
 			variables.add(Signature.toString(signature));
 		} else {
-			for (int index= 0; index < arguments.length; index++)
-				variables.add(Signature.toString(arguments[index]));
+			for (String argument : arguments) {
+				variables.add(Signature.toString(argument));
+			}
 		}
 	}
 
@@ -116,8 +117,8 @@ public final class TypeVariableUtil {
 			final String[] signatures= getVariableSignatures(signature);
 			if (signatures.length == 0) {
 				final String variable= Signature.toString(signature);
-				for (int index= 0; index < variables.length; index++) {
-					if (variable.equals(variables[index])) {
+				for (String v : variables) {
+					if (variable.equals(v)) {
 						result= new String[] { variable};
 						break;
 					}
@@ -130,9 +131,9 @@ public final class TypeVariableUtil {
 		} else if (member instanceof IMethod) {
 			final IMethod method= (IMethod) member;
 			final HashSet<String> set= new HashSet<>();
-			final String[] types= method.getParameterTypes();
-			for (int index= 0; index < types.length; index++)
-				extractTypeVariables(types[index], set);
+			for (String type : method.getParameterTypes()) {
+				extractTypeVariables(type, set);
+			}
 			extractTypeVariables(method.getReturnType(), set);
 			final String[] arguments= parametersToVariables(((IMethod) member).getTypeParameters());
 			Collections.addAll(set, arguments);
@@ -146,12 +147,12 @@ public final class TypeVariableUtil {
 		}
 
 		final List<String> list= new ArrayList<>(variables.length);
-		String variable= null;
-		for (int index= 0; index < variables.length; index++) {
-			variable= variables[index];
-			for (int offset= 0; offset < result.length; offset++)
-				if (variable.equals(result[offset]))
-					list.add(result[offset]);
+		for (String variable : variables) {
+			for (String r : result) {
+				if (variable.equals(r)) {
+					list.add(r);
+				}
+			}
 		}
 		result= new String[list.size()];
 		list.toArray(result);
@@ -184,17 +185,15 @@ public final class TypeVariableUtil {
 			list.addAll(Arrays.asList(types));
 		} else {
 			final Set<String> mapped= new HashSet<>(types.length);
-			String type= null;
-			for (int index= 0; index < types.length; index++) {
-				for (int offset= 0; offset < mapping.length; offset++) {
-					type= types[index];
-					if (mapping[offset].getSourceName().equals(type))
+			for (String type : types) {
+				for (TypeVariableMaplet m : mapping) {
+					if (m.getSourceName().equals(type)) {
 						mapped.add(type);
+					}
 				}
 			}
 			list= new ArrayList<>(types.length - mapped.size());
-			for (int index= 0; index < types.length; index++) {
-				type= types[index];
+			for (String type : types) {
 				if (!mapped.contains(type))
 					list.add(type);
 			}

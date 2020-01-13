@@ -63,16 +63,16 @@ public abstract class TypeSet implements ITypeSet {
 	abstract public TypeSet makeClone();
 
 	/**
-	 * @param s2 another type set 
+	 * @param s2 another type set
 	 * @return intersection of this type set with the given type set
 	 */
 	protected TypeSet specialCasesIntersectedWith(TypeSet s2) {
 		return null;
 	}
-	
+
 	@Override
 	public abstract boolean equals(Object obj);
-	
+
 	@Override
 	public abstract int hashCode();
 
@@ -118,7 +118,7 @@ public abstract class TypeSet implements ITypeSet {
 	/**
 	 * Returns the TypeSet resulting from union'ing the receiver with the argument.
 	 * Does not modify the receiver or the argument sets.
-	 * 
+	 *
 	 * @param that another type set
 	 * @return the union type set
 	 */

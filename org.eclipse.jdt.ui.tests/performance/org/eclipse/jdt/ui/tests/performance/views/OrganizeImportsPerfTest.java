@@ -77,8 +77,7 @@ public class OrganizeImportsPerfTest extends JdtPerformanceTestCase {
 	}
 
 	private void addAllCUs(IJavaElement[] children, List<IJavaElement> result) throws JavaModelException {
-		for (int i= 0; i < children.length; i++) {
-			IJavaElement element= children[i];
+		for (IJavaElement element : children) {
 			if (element instanceof ICompilationUnit) {
 				result.add(element);
 			} else if (element instanceof IPackageFragmentRoot) {

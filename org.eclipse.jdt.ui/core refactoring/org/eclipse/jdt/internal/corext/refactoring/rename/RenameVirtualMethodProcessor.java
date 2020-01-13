@@ -15,7 +15,6 @@ package org.eclipse.jdt.internal.corext.refactoring.rename;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
@@ -158,9 +157,7 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 				if (isSpecialCase())
 					result.addError(RefactoringCoreMessages.RenameMethodInInterfaceRefactoring_special_case);
 				pm.worked(1);
-				IMethod[] relatedMethods= relatedTypeDeclaresMethodName(new SubProgressMonitor(pm, 1), method, name);
-				for (int i= 0; i < relatedMethods.length; i++) {
-					IMethod relatedMethod= relatedMethods[i];
+				for (IMethod relatedMethod : relatedTypeDeclaresMethodName(new SubProgressMonitor(pm, 1), method, name)) {
 					RefactoringStatusContext context= JavaStatusContext.create(relatedMethod);
 					result.addError(RefactoringCoreMessages.RenameMethodInInterfaceRefactoring_already_defined, context);
 				}
@@ -171,9 +168,7 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 						new String[]{ BasicElementLabels.getJavaElementName(method.getElementName()), "UnsatisfiedLinkError"})); //$NON-NLS-1$
 				}
 
-				IMethod[] hierarchyMethods= hierarchyDeclaresMethodName(new SubProgressMonitor(pm, 1), hierarchy, method, name);
-				for (int i= 0; i < hierarchyMethods.length; i++) {
-					IMethod hierarchyMethod= hierarchyMethods[i];
+				for (IMethod hierarchyMethod : hierarchyDeclaresMethodName(new SubProgressMonitor(pm, 1), hierarchy, method, name)) {
 					RefactoringStatusContext context= JavaStatusContext.create(hierarchyMethod);
 					if (Checks.compareParamTypes(method.getParameterTypes(), hierarchyMethod.getParameterTypes())) {
 						result.addError(Messages.format(
@@ -200,8 +195,8 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 			Set<IMethod> result= new HashSet<>();
 			Set<IType> types= getRelatedTypes();
 			pm.beginTask("", types.size()); //$NON-NLS-1$
-			for (Iterator<IType> iter= types.iterator(); iter.hasNext(); ) {
-				final IMethod found= Checks.findMethod(method, iter.next());
+			for (IType type : types) {
+				final IMethod found= Checks.findMethod(method, type);
 				final IType declaring= found.getDeclaringType();
 				result.addAll(Arrays.asList(hierarchyDeclaresMethodName(new SubProgressMonitor(pm, 1), declaring.newTypeHierarchy(new SubProgressMonitor(pm, 1)), found, newName)));
 			}
@@ -238,8 +233,8 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 	private Set<IType> getRelatedTypes() {
 		Set<IMethod> methods= getMethodsToRename();
 		Set<IType> result= new HashSet<>(methods.size());
-		for (Iterator<IMethod> iter= methods.iterator(); iter.hasNext(); ){
-			result.add(iter.next().getDeclaringType());
+		for (IMethod method : methods) {
+			result.add(method.getDeclaringType());
 		}
 		return result;
 	}
@@ -247,13 +242,11 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 	//---- Class checks -------------------------------------
 
 	private boolean classesDeclareOverridingNativeMethod(IType[] classes) throws CoreException {
-		for (int i= 0; i < classes.length; i++){
-			IMethod[] methods= classes[i].getMethods();
-			for (int j= 0; j < methods.length; j++){
-				if ((!methods[j].equals(getMethod()))
-					&& (JdtFlags.isNative(methods[j]))
-					&& (null != Checks.findSimilarMethod(getMethod(), new IMethod[]{methods[j]})))
-						return true;
+ 		for (IType type : classes) {
+			for (IMethod method : type.getMethods()) {
+				if ((!method.equals(getMethod())) && (JdtFlags.isNative(method)) && (null != Checks.findSimilarMethod(getMethod(), new IMethod[]{method}))) {
+					return true;
+				}
 			}
 		}
 		return false;

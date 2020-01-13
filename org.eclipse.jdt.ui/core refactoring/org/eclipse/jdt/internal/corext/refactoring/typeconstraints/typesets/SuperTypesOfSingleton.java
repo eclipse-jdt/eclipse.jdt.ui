@@ -221,7 +221,7 @@ public class SuperTypesOfSingleton extends TypeSet {
 	public int hashCode() {
 		return fLowerBound.hashCode();
 	}
-	
+
 	@Override
 	public String toString() {
 		return "<" + fID + ": superTypes(" + fLowerBound.getPrettySignature() + ")>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$

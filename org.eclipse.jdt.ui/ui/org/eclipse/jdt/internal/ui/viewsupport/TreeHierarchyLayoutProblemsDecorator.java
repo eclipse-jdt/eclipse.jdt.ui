@@ -55,10 +55,9 @@ public class TreeHierarchyLayoutProblemsDecorator extends ProblemsLabelDecorator
 		if (element instanceof IPackageFragment) {
 			return computePackageAdornmentFlags((IPackageFragment) element);
 		} else if (element instanceof LogicalPackage) {
-			IPackageFragment[] fragments= ((LogicalPackage) element).getFragments();
 			int res= 0;
-			for (int i= 0; i < fragments.length; i++) {
-				int flags= computePackageAdornmentFlags(fragments[i]);
+			for (IPackageFragment fragment : ((LogicalPackage) element).getFragments()) {
+				int flags= computePackageAdornmentFlags(fragment);
 				if (flags == JavaElementImageDescriptor.ERROR) {
 					return flags;
 				} else if (flags != 0 && res != JavaElementImageDescriptor.WARNING) {

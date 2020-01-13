@@ -132,8 +132,7 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 	@Override
 	public void setFilters(ViewerFilter... filters) {
 		ViewerFilter[] oldFilters= getFilters();
-		for (int i= 0; i < filters.length; i++) {
-			ViewerFilter curr= filters[i];
+		for (ViewerFilter curr : filters) {
 			if (curr instanceof JavaViewerFilter && !findAndRemove(oldFilters, curr)) {
 				((JavaViewerFilter) curr).filteringStart();
 			}
@@ -159,8 +158,7 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 	}
 
 	private void endFilterSessions(ViewerFilter[] filters) {
-		for (int i= 0; i < filters.length; i++) {
-			ViewerFilter curr= filters[i];
+		for (ViewerFilter curr : filters) {
 			if (curr instanceof JavaViewerFilter) {
 				((JavaViewerFilter) curr).filteringEnd();
 			}
@@ -189,8 +187,7 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 
 		if (changed != null && !fResourceToItemsMapper.isEmpty()) {
 			ArrayList<Object> others= new ArrayList<>();
-			for (int i= 0; i < changed.length; i++) {
-				Object curr= changed[i];
+			for (Object curr : changed) {
 				if (curr instanceof IResource) {
 					fResourceToItemsMapper.resourceChanged((IResource) curr);
 				} else {
@@ -260,8 +257,7 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 		}
 		List<Object> list= new ArrayList<>(elements.length);
 		ViewerFilter[] filters = getFilters();
-		for (int i = 0; i < elements.length; i++) {
-			Object object = elements[i];
+		for (Object object : elements) {
 			if (!isFiltered(object, parent, filters)) {
 				list.add(object);
 			}
@@ -277,8 +273,7 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 			return true;
 		}
 		ViewerFilter[] filters = getFilters();
-		for (int i = 0; i < elements.length; i++) {
-			Object object = elements[i];
+		for (Object object : elements) {
 			if (!isFiltered(object, parent, filters)) {
 				return true;
 			}
@@ -296,8 +291,7 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 	 * @return true if the element is filtered
 	 */
 	protected boolean isFiltered(Object object, Object parent, ViewerFilter[] filters) {
-		for (int i = 0; i < filters.length; i++) {
-			ViewerFilter filter = filters[i];
+		for (ViewerFilter filter : filters) {
 			if (!filter.select(this, parent, object))
 				return true;
 		}

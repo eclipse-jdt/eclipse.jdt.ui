@@ -98,11 +98,9 @@ public class WorkspaceScopeTest extends TestCase {
 
 		assertTrue(scope.encloses(fCompilationUnit));
 
-		IPackageFragmentRoot[] roots= fProject1.getAllPackageFragmentRoots();
-		for (int i= 0; i < roots.length; i++) {
-			IJavaElement[] fragments= roots[i].getChildren();
-			for (int j= 0; j < fragments.length; j++) {
-				assertFalse(scope.encloses(fragments[j]));
+		for (IPackageFragmentRoot root : fProject1.getAllPackageFragmentRoots()) {
+			for (IJavaElement fragment : root.getChildren()) {
+				assertFalse(scope.encloses(fragment));
 			}
 		}
 
@@ -121,12 +119,11 @@ public class WorkspaceScopeTest extends TestCase {
 
 		assertTrue(scope.encloses(fCompilationUnit.getParent()));
 
-		IPackageFragmentRoot[] roots= fProject1.getAllPackageFragmentRoots();
-		for (int i= 0; i < roots.length; i++) {
-			IJavaElement[] fragments= roots[i].getChildren();
-			for (int j= 0; j < fragments.length; j++) {
-				if (!fragments[j].equals(fCompilationUnit.getParent()))
-					assertFalse(scope.encloses(fragments[j]));
+		for (IPackageFragmentRoot root : fProject1.getAllPackageFragmentRoots()) {
+			for (IJavaElement fragment : root.getChildren()) {
+				if (!fragment.equals(fCompilationUnit.getParent())) {
+					assertFalse(scope.encloses(fragment));
+				}
 			}
 		}
 
@@ -154,38 +151,34 @@ public class WorkspaceScopeTest extends TestCase {
 	}
 
 	private void checkNoJreRoots(IJavaSearchScope scope, IJavaProject project) throws JavaModelException {
-		IPackageFragmentRoot[] roots= project.getAllPackageFragmentRoots();
-		for (int i= 0; i < roots.length; i++) {
-			if(scope.encloses(roots[i])) {
-				assertFalse(roots[i].isExternal());
+		for (IPackageFragmentRoot root : project.getAllPackageFragmentRoots()) {
+			if (scope.encloses(root)) {
+				assertFalse(root.isExternal());
 			} else {
-				assertTrue(roots[i].isExternal());
+				assertTrue(root.isExternal());
 			}
 		}
 	}
 
 	private void checkJreRoots(IJavaSearchScope scope, IJavaProject project) throws JavaModelException {
-		IPackageFragmentRoot[] roots= project.getAllPackageFragmentRoots();
-		for (int i= 0; i < roots.length; i++) {
-			if(scope.encloses(roots[i])) {
-				assertTrue(roots[i].isExternal());
+		for (IPackageFragmentRoot root : project.getAllPackageFragmentRoots()) {
+			if (scope.encloses(root)) {
+				assertTrue(root.isExternal());
 			} else {
-				assertFalse(roots[i].isExternal());
+				assertFalse(root.isExternal());
 			}
 		}
 	}
 
 	private void checkNoRoots(IJavaSearchScope scope, IJavaProject project) throws JavaModelException {
-		IPackageFragmentRoot[] roots= project.getAllPackageFragmentRoots();
-		for (int i= 0; i < roots.length; i++) {
-			assertFalse(scope.encloses(roots[i]));
+		for (IPackageFragmentRoot root : project.getAllPackageFragmentRoots()) {
+			assertFalse(scope.encloses(root));
 		}
 	}
 
 	private void checkAllRoots(IJavaSearchScope scope, IJavaProject project) throws JavaModelException {
-		IPackageFragmentRoot[] roots= project.getAllPackageFragmentRoots();
-		for (int i= 0; i < roots.length; i++) {
-			assertTrue(scope.encloses(roots[i]));
+		for (IPackageFragmentRoot root : project.getAllPackageFragmentRoots()) {
+			assertTrue(scope.encloses(root));
 		}
 	}
 

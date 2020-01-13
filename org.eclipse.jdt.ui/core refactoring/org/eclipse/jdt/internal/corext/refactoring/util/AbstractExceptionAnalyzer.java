@@ -148,8 +148,8 @@ public abstract class AbstractExceptionAnalyzer extends ASTVisitor {
 	protected void addExceptions(ITypeBinding[] exceptions, AST ast) {
 		if(exceptions == null)
 			return;
-		for (int i= 0; i < exceptions.length;i++) {
-			addException(exceptions[i], ast);
+		for (ITypeBinding exception : exceptions) {
+			addException(exception, ast);
 		}
 	}
 

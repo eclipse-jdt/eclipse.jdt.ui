@@ -19,7 +19,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -641,10 +640,10 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 					final IJavaProject project= element.getJavaProject();
 					if (project != null) {
 						try {
-							final IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
-							for (int index= 0; index < roots.length; index++) {
-								if (entry.equals(roots[index].getRawClasspathEntry()))
-									return roots[index];
+							for (IPackageFragmentRoot root : project.getPackageFragmentRoots()) {
+								if (entry.equals(root.getRawClasspathEntry())) {
+									return root;
+								}
 							}
 						} catch (JavaModelException exception) {
 							JavaPlugin.log(exception);
@@ -705,8 +704,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			}
 		
 		}
-		for (Iterator<Map.Entry<CPListElement, HashSet<String>>> iter= containerEntriesToUpdate.entrySet().iterator(); iter.hasNext();) {
-			Map.Entry<CPListElement, HashSet<String>> entry= iter.next();
+		for (Map.Entry<CPListElement, HashSet<String>> entry : containerEntriesToUpdate.entrySet()) {
 			CPListElement curr= entry.getKey();
 			HashSet<String> attribs= entry.getValue();
 			String[] changedAttributes= attribs.toArray(new String[attribs.size()]);
@@ -790,11 +788,10 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		String key= elem.getKey();
 		CPListElement selElement= elem.getParent();
 
-		CPListElementAttribute[] allAttributes= selElement.getAllAttributes();
 		boolean canEditEncoding= false;
-		for (int i= 0; i < allAttributes.length; i++) {
-			if (CPListElement.SOURCE_ATTACHMENT_ENCODING.equals(allAttributes[i].getKey())) {
-				canEditEncoding= !(allAttributes[i].isNonModifiable() || allAttributes[i].isNotSupported());
+		for (CPListElementAttribute attribute : selElement.getAllAttributes()) {
+			if (CPListElement.SOURCE_ATTACHMENT_ENCODING.equals(attribute.getKey())) {
+				canEditEncoding= !(attribute.isNonModifiable() || attribute.isNotSupported());
 			}
 		}
 		if (key.equals(CPListElement.SOURCEATTACHMENT)) {
@@ -1116,9 +1113,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		 	CPListElement ele= projelements.get(i);
 		 	// if root node, collect the CPList elements
 		 	if(ele.isRootNodeForPath()) {
-		 		ArrayList<Object> children= ((RootCPListElement)ele).getChildren();
-		 		for (Iterator<?> iterator= children.iterator(); iterator.hasNext();) {
-		 			Object object=  iterator.next();
+		 		for (Object object : ((RootCPListElement)ele).getChildren()) {
 		 			if(object instanceof CPListElement) {
 		 				flattenedProjElements.add((CPListElement) object);
 		 			}
@@ -1173,8 +1168,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			if (selected != null) {
 				IWorkspaceRoot root= fCurrJProject.getProject().getWorkspace().getRoot();
 				ArrayList<CPListElement> res= new ArrayList<>();
-				for (int i= 0; i < selected.length; i++) {
-					IPath curr= selected[i];
+				for (IPath curr : selected) {
 					IResource resource= root.findMember(curr);
 					if (resource instanceof IContainer) {
 						CPListElement newCPLibraryElement= newCPLibraryElement(resource);
@@ -1198,8 +1192,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			if (selected != null) {
 				ArrayList<CPListElement> res= new ArrayList<>();
 
-				for (int i= 0; i < selected.length; i++) {
-					IPath curr= selected[i];
+				for (IPath curr : selected) {
 					IResource resource= root.findMember(curr);
 					if (resource instanceof IFile) {
 						CPListElement newCPLibraryElement= newCPLibraryElement(resource);
@@ -1272,8 +1265,8 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			IPath[] selected= BuildPathDialogAccess.chooseExternalJAREntries(getShell());
 			if (selected != null) {
 				ArrayList<CPListElement> res= new ArrayList<>();
-				for (int i= 0; i < selected.length; i++) {
-					CPListElement cpListElement= new CPListElement(fCurrJProject, IClasspathEntry.CPE_LIBRARY, selected[i], null);
+				for (IPath p : selected) {
+					CPListElement cpListElement= new CPListElement(fCurrJProject, IClasspathEntry.CPE_LIBRARY, p, null);
 					cpListElement.setModuleAttributeIf9OrHigher(fCurrJProject);
 					res.add(cpListElement);
 				}
@@ -1299,8 +1292,8 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			IPath[] selected= BuildPathDialogAccess.chooseExternalClassFolderEntries(getShell());
 			if (selected != null) {
 				ArrayList<CPListElement> res= new ArrayList<>();
-				for (int i= 0; i < selected.length; i++) {
-					CPListElement cpListElement= new CPListElement(fCurrJProject, IClasspathEntry.CPE_LIBRARY, selected[i], null);
+				for (IPath p : selected) {
+					CPListElement cpListElement= new CPListElement(fCurrJProject, IClasspathEntry.CPE_LIBRARY, p, null);
 					cpListElement.setModuleAttributeIf9OrHigher(fCurrJProject);
 					res.add(cpListElement);
 				}
@@ -1330,8 +1323,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			IPath[] paths= BuildPathDialogAccess.chooseVariableEntries(getShell(), existingPathsArray);
 			if (paths != null) {
 				ArrayList<CPListElement> result= new ArrayList<>();
-				for (int i= 0; i < paths.length; i++) {
-					IPath path= paths[i];
+				for (IPath path : paths) {
 					CPListElement elem= createCPVariableElement(path);
 					if (!existingElements.contains(elem)) {
 						elem.setModuleAttributeIf9OrHigher(fCurrJProject);

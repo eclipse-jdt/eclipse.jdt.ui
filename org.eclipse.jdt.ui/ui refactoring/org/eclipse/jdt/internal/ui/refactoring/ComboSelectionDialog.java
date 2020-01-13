@@ -74,8 +74,8 @@ class ComboSelectionDialog extends Dialog{
 
 		final Combo combo= new Combo(innerComposite, SWT.READ_ONLY);
 		SWTUtil.setDefaultVisibleItemCount(combo);
-		for (int i = 0; i < fAllowedStrings.length; i++) {
-			combo.add(fAllowedStrings[i]);
+		for (String allowedString : fAllowedStrings) {
+			combo.add(allowedString);
 		}
 		combo.select(fInitialSelectionIndex);
 		fSelection= combo.getItem(combo.getSelectionIndex());
@@ -94,8 +94,8 @@ class ComboSelectionDialog extends Dialog{
 
 	private int getMaxStringLength() {
 		int max= 0;
-		for (int i= 0; i < fAllowedStrings.length; i++) {
-			max= Math.max(max, fAllowedStrings[i].length());
+		for (String allowedString : fAllowedStrings) {
+			max= Math.max(max, allowedString.length());
 		}
 		return max;
 	}

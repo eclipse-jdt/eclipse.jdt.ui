@@ -15,7 +15,6 @@ package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -65,8 +64,7 @@ public class SourceReferenceUtil {
 	public static ISourceReference[] removeAllWithParentsSelected(ISourceReference[] elems){
 		Set<ISourceReference> set= new HashSet<>(Arrays.asList(elems));
 		List<ISourceReference> result= new ArrayList<>(elems.length);
-		for (int i= 0; i < elems.length; i++) {
-			ISourceReference elem= elems[i];
+		for (ISourceReference elem : elems) {
 			if (! (elem instanceof IJavaElement))
 				result.add(elem);
 			else{
@@ -78,14 +76,11 @@ public class SourceReferenceUtil {
 	}
 
 	public static ISourceReference[] sortByOffset(ISourceReference[] methods){
-		Arrays.sort(methods, new Comparator<ISourceReference>(){
-			@Override
-			public int compare(ISourceReference o1, ISourceReference o2){
-				try{
-					return o2.getSourceRange().getOffset() - o1.getSourceRange().getOffset();
-				} catch (JavaModelException e){
-					return o2.hashCode() - o1.hashCode();
-				}
+		Arrays.sort(methods, (o1, o2) -> {
+			try{
+				return o2.getSourceRange().getOffset() - o1.getSourceRange().getOffset();
+			} catch (JavaModelException e){
+				return o2.hashCode() - o1.hashCode();
 			}
 		});
 		return methods;

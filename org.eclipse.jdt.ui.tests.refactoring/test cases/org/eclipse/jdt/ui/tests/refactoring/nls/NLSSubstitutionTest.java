@@ -87,8 +87,9 @@ public class NLSSubstitutionTest extends TestCase {
 	}
 
 	private void setPrefix(String prefix, NLSSubstitution[] subs) {
-		for (int i= 0; i < subs.length; i++)
-			subs[i].setPrefix(prefix);
+		for (NLSSubstitution sub : subs) {
+			sub.setPrefix(prefix);
+		}
 	}
 
 }

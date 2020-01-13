@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -42,7 +41,7 @@ public class ASTBatchParser {
 	private static final int MAX_AT_ONCE;
 	static {
 		long maxMemory= Runtime.getRuntime().maxMemory() / (1 << 20); // in MiB
-		
+
 		if      (maxMemory >= 2000) MAX_AT_ONCE= 400;
 		else if (maxMemory >= 1500) MAX_AT_ONCE= 300;
 		else if (maxMemory >= 1000) MAX_AT_ONCE= 200;
@@ -78,10 +77,7 @@ public class ASTBatchParser {
 		monitor.beginTask("", compilationUnits.length); //$NON-NLS-1$
 		try {
 
-			ICompilationUnit[][] splited= splitByProject(compilationUnits);
-			for (int i= 0; i < splited.length; i++) {
-				ICompilationUnit[] units= splited[i];
-
+			for (ICompilationUnit[] units : splitByProject(compilationUnits)) {
 				if (units.length <= MAX_AT_ONCE) {
 					createParser(units[0].getJavaProject()).createASTs(units, bindingKeys, requestor, new SubProgressMonitor(monitor, units.length));
 				} else {
@@ -93,7 +89,7 @@ public class ASTBatchParser {
 						List<ICompilationUnit> toParse= list.subList(cursor, end);
 
 						createParser(units[0].getJavaProject()).createASTs(toParse.toArray(new ICompilationUnit[toParse.size()]), bindingKeys, requestor,
-								new SubProgressMonitor(monitor, toParse.size()));
+							new SubProgressMonitor(monitor, toParse.size()));
 						cursor= end;
 					}
 				}
@@ -127,8 +123,7 @@ public class ASTBatchParser {
 
 		Hashtable<IJavaProject, ArrayList<ICompilationUnit>> projectTable= new Hashtable<>();
 
-		for (int i= 0; i < units.length; i++) {
-			ICompilationUnit unit= units[i];
+		for (ICompilationUnit unit : units) {
 			ArrayList<ICompilationUnit> list= projectTable.get(unit.getJavaProject());
 			if (list == null) {
 				list= new ArrayList<>();
@@ -141,8 +136,7 @@ public class ASTBatchParser {
 
 		ICompilationUnit[][] result= new ICompilationUnit[values.size()][];
 		int i= 0;
-		for (Iterator<ArrayList<ICompilationUnit>> iterator= values.iterator(); iterator.hasNext();) {
-			ArrayList<ICompilationUnit> cus= iterator.next();
+		for (ArrayList<ICompilationUnit> cus : values) {
 			result[i]= cus.toArray(new ICompilationUnit[cus.size()]);
 			i++;
 		}

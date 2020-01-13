@@ -53,9 +53,9 @@ public class MyQuickFixProcessor implements IQuickFixProcessor {
 
 	@Override
 	public IJavaCompletionProposal[] getCorrections(IInvocationContext context, IProblemLocation[] locations) throws CoreException {
-		for (int i= 0; i < locations.length; i++) {
-			if (locations[i].getProblemId() == IProblem.NumericValueOutOfRange) {
-				return getNumericValueOutOfRangeCorrection(context, locations[i]);
+		for (IProblemLocation location : locations) {
+			if (location.getProblemId() == IProblem.NumericValueOutOfRange) {
+				return getNumericValueOutOfRangeCorrection(context, location);
 			}
 		}
 		return null;

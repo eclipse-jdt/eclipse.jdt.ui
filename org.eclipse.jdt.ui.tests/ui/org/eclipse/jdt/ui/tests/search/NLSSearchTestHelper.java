@@ -67,10 +67,7 @@ public class NLSSearchTestHelper {
 	}
 
 	private static void assertResultHasUndefinedKey(String key, IFile file, boolean isAccessor, NLSSearchResult result) throws CoreException {
-		Match[] matches= result.getFileMatchAdapter().computeContainedMatches(result, file);
-
-		for (int i= 0; i < matches.length; i++) {
-			Match match= matches[i];
+		for (Match match : result.getFileMatchAdapter().computeContainedMatches(result, file)) {
 			if (match.getElement() instanceof ICompilationUnit) {
 				ICompilationUnit unit= (ICompilationUnit)match.getElement();
 				String field= unit.getSource().substring(match.getOffset(), match.getOffset() + match.getLength());
@@ -83,10 +80,7 @@ public class NLSSearchTestHelper {
 	}
 
 	private static void assertResultHasUnusedKey(String key, IFile file, boolean isAccessor, NLSSearchResult result) throws IOException, CoreException {
-		Match[] matches= result.getFileMatchAdapter().computeContainedMatches(result, file);
-
-		for (int i= 0; i < matches.length; i++) {
-			Match match= matches[i];
+		for (Match match : result.getFileMatchAdapter().computeContainedMatches(result, file)) {
 			if (match.getElement() instanceof CompilationUnitEntry) {
 				ICompilationUnit unit= ((CompilationUnitEntry)match.getElement()).getCompilationUnit();
 				String field= unit.getSource().substring(match.getOffset(), match.getOffset() + match.getLength());
@@ -106,8 +100,7 @@ public class NLSSearchTestHelper {
 
 	private static String getContent(IFile entry) throws CoreException, IOException {
 		StringBuilder buf= new StringBuilder();
-		InputStream contents= entry.getContents();
-		try {
+		try (InputStream contents= entry.getContents()) {
 			char ch= (char)contents.read();
 			int avilable= contents.available();
 			while (avilable > 0 && ch != -1) {
@@ -116,16 +109,11 @@ public class NLSSearchTestHelper {
 				avilable--;
 			}
 			return buf.toString();
-		} finally {
-			contents.close();
 		}
 	}
 
 	private static void assertResultHasDuplicateKey(String key, IFile file, NLSSearchResult result) throws CoreException, IOException {
-		Match[] matches= result.getFileMatchAdapter().computeContainedMatches(result, file);
-
-		for (int i= 0; i < matches.length; i++) {
-			Match match= matches[i];
+		for (Match match : result.getFileMatchAdapter().computeContainedMatches(result, file)) {
 			if (match.getElement() instanceof FileEntry) {
 				FileEntry entry= (FileEntry)match.getElement();
 				String content= getContent(entry.getPropertiesFile());

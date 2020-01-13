@@ -95,8 +95,8 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 					if (sequences == null)
 						return;
 
-					for (int i= 0; i < sequences.length; i++) {
-						if (sequences[i].equals(keySequence)) {
+					for (TriggerSequence sequence : sequences) {
+						if (sequence.equals(keySequence)) {
 							e.doit= false;
 							toggleHierarchy();
 							return;

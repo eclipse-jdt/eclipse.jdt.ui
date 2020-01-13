@@ -150,7 +150,7 @@ public class ExtractTempWizard extends RefactoringWizard {
 				}
 			});
 		}
-		
+
 		private void addDeclareTypeVarCheckbox(Composite result, RowLayouter layouter) {
 			if (getExtractTempRefactoring().isVarTypeAllowed()) {
 				String title= RefactoringMessages.ExtractTempInputPage_declare_type_var;

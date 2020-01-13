@@ -563,12 +563,10 @@ public class HierarchicalASTVisitorTest extends TestCase {
 	 */
 	private static Set<Class<? extends ASTNode>> getLeafASTNodeDescendants() {
 		Set<Class<? extends ASTNode>> result= new HashSet<>();
-		Method[] methods= ASTVisitor.class.getMethods();
-		for (int i= 0; i < methods.length; i++) {
-			Method method= methods[i];
+		for (Method method : ASTVisitor.class.getMethods()) {
 			if (isVisitMethod(method)) {
 				@SuppressWarnings("unchecked")
-				Class<? extends ASTNode> nodeType= (Class<? extends ASTNode>) method.getParameterTypes()[0];
+					Class<? extends ASTNode> nodeType= (Class<? extends ASTNode>) method.getParameterTypes()[0];
 				result.add(nodeType);
 			}
 		}

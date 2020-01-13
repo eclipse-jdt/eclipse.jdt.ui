@@ -131,8 +131,7 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 		Arrays.sort(names, Collator.getInstance());
 
 		ArrayList<CPUserLibraryElement> elements= new ArrayList<>(names.length);
-		for (int i= 0; i < names.length; i++) {
-			String curr= names[i];
+		for (String curr : names) {
 			IPath path= new Path(JavaCore.USER_LIBRARY_CONTAINER_ID).append(curr);
 			try {
 				IClasspathContainer container= JavaCore.getClasspathContainer(path, fProject);
@@ -334,8 +333,7 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 
 	@Override
 	public void initialize(IJavaProject project, IClasspathEntry[] currentEntries) {
-		for (int i= 0; i < currentEntries.length; i++) {
-			IClasspathEntry curr= currentEntries[i];
+		for (IClasspathEntry curr : currentEntries) {
 			if (curr.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
 				fUsedPaths.add(curr.getPath());
 			}

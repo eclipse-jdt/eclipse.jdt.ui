@@ -15,7 +15,6 @@ package org.eclipse.jdt.internal.corext.refactoring.nls;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -38,12 +37,12 @@ import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
 
+import org.eclipse.jdt.internal.core.manipulation.StubUtility;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
 import org.eclipse.jdt.internal.corext.util.Messages;
-import org.eclipse.jdt.internal.core.manipulation.StubUtility;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 
 public class NLSPropertyFileModifier {
@@ -90,13 +89,11 @@ public class NLSPropertyFileModifier {
 
 		PropertyFileDocumentModel model= new PropertyFileDocumentModel(textChange.getCurrentDocument(new NullProgressMonitor()));
 
-		for (Iterator<String> iterator= keys.iterator(); iterator.hasNext();) {
-			String key= iterator.next();
+		for (String key : keys) {
 			TextEdit edit= model.remove(key);
 			if (edit != null) {
 				TextChangeCompatibility.addTextEdit(textChange, Messages.format(NLSMessages.NLSPropertyFileModifier_remove_entry, BasicElementLabels.getJavaElementName(key)), edit);
 			}
-
 		}
 		return textChange;
 	}
@@ -131,8 +128,7 @@ public class NLSPropertyFileModifier {
 	static HashMap<String, NLSSubstitution> getNewKeyToSubstitutionMap(NLSSubstitution[] substitutions) {
 		HashMap<String, NLSSubstitution> keyToSubstMap= new HashMap<>(substitutions.length);
 		// find all duplicates
-		for (int i= 0; i < substitutions.length; i++) {
-			NLSSubstitution curr= substitutions[i];
+		for (NLSSubstitution curr : substitutions) {
 			if (curr.getState() == NLSSubstitution.EXTERNALIZED) {
 				NLSSubstitution val= keyToSubstMap.get(curr.getKey());
 				if (val == null || (val.hasPropertyFileChange() && !curr.hasPropertyFileChange())) {
@@ -152,8 +148,7 @@ public class NLSPropertyFileModifier {
 	static HashMap<String, NLSSubstitution> getOldKeyToSubstitutionMap(NLSSubstitution[] substitutions) {
 		HashMap<String, NLSSubstitution> keyToSubstMap= new HashMap<>(substitutions.length);
 		// find all duplicates
-		for (int i= 0; i < substitutions.length; i++) {
-			NLSSubstitution curr= substitutions[i];
+		for (NLSSubstitution curr : substitutions) {
 			if (curr.getInitialState() == NLSSubstitution.EXTERNALIZED) {
 				String key= curr.getInitialKey();
 				if (key != null) {
@@ -183,8 +178,7 @@ public class NLSPropertyFileModifier {
 	}
 
 	private static void addReplaceEdits(TextChange textChange, NLSSubstitution[] substitutions, Map<String, NLSSubstitution> newKeyToSubstMap, Map<String, NLSSubstitution> oldKeyToSubstMap, PropertyFileDocumentModel model) {
-		for (int i= 0; i < substitutions.length; i++) {
-			NLSSubstitution substitution= substitutions[i];
+		for (NLSSubstitution substitution : substitutions) {
 			if (doReplace(substitution, newKeyToSubstMap, oldKeyToSubstMap)) {
 				KeyValuePair initialPair= new KeyValuePair(substitution.getInitialKey(), substitution.getInitialValue());
 
@@ -217,9 +211,7 @@ public class NLSPropertyFileModifier {
 	private static void addInsertEdits(TextChange textChange, NLSSubstitution[] substitutions, Map<String, NLSSubstitution> newKeyToSubstMap, Map<String, NLSSubstitution> oldKeyToSubstMap, PropertyFileDocumentModel model) {
 		ArrayList<KeyValuePair> keyValuePairsToAdd= new ArrayList<>();
 
-		for (int i= 0; i < substitutions.length; i++) {
-			NLSSubstitution substitution= substitutions[i];
-
+		for (NLSSubstitution substitution : substitutions) {
 			if (doInsert(substitution, newKeyToSubstMap, oldKeyToSubstMap)) {
 				String value= PropertyFileDocumentModel.escape(substitution.getValueNonEmpty(), true) + model.getLineDelimiter();
 				String key= PropertyFileDocumentModel.escape(substitution.getKey(), false);
@@ -250,8 +242,7 @@ public class NLSPropertyFileModifier {
 	}
 
 	private static void addRemoveEdits(TextChange textChange, NLSSubstitution[] substitutions, Map<String, NLSSubstitution> newKeyToSubstMap, Map<String, NLSSubstitution> oldKeyToSubstMap, PropertyFileDocumentModel model) {
-		for (int i= 0; i < substitutions.length; i++) {
-			NLSSubstitution substitution= substitutions[i];
+		for (NLSSubstitution substitution : substitutions) {
 			if (doRemove(substitution, newKeyToSubstMap, oldKeyToSubstMap)) {
 				TextEdit edit= model.remove(substitution.getInitialKey());
 				if (edit != null) {

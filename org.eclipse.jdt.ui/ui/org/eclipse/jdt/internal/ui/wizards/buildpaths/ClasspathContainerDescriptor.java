@@ -115,10 +115,9 @@ public class ClasspathContainerDescriptor {
 			ClasspathContainerDescriptor defaultPage= null;
 			String defaultPageName= ClasspathContainerDefaultPage.class.getName();
 
-			IConfigurationElement[] elements = extensionPoint.getConfigurationElements();
-			for (int i = 0; i < elements.length; i++) {
+			for (IConfigurationElement element : extensionPoint.getConfigurationElements()) {
 				try {
-					ClasspathContainerDescriptor curr= new ClasspathContainerDescriptor(elements[i]);
+					ClasspathContainerDescriptor curr= new ClasspathContainerDescriptor(element);
 					if (!WorkbenchActivityHelper.filterItem(curr)) {
 						if (defaultPageName.equals(curr.getPageClass())) {
 							defaultPage= curr;

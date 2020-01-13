@@ -122,8 +122,8 @@ public class OverrideIndicatorTest extends TestCase {
 	public void testOverrideIndicatorState() {
 		testCountOverrideIndicators();
 		int count= 0;
-		for (int i= 0; i < fOverrideAnnotations.length; i++) {
-			Accessor indicator= new Accessor(fOverrideAnnotations[i], "org.eclipse.jdt.internal.ui.javaeditor.OverrideIndicatorManager$OverrideIndicator", getClass().getClassLoader());
+		for (Annotation overrideAnnotation : fOverrideAnnotations) {
+			Accessor indicator= new Accessor(overrideAnnotation, "org.eclipse.jdt.internal.ui.javaeditor.OverrideIndicatorManager$OverrideIndicator", getClass().getClassLoader());
 			if (indicator.getBoolean("fIsOverwriteIndicator"))
 				count++;
 		}
@@ -132,12 +132,12 @@ public class OverrideIndicatorTest extends TestCase {
 
 	public void testOverrideIndicatorText() {
 		testCountOverrideIndicators();
-		for (int i= 0; i < fOverrideAnnotations.length; i++) {
-			String text= fOverrideAnnotations[i].getText();
+		for (Annotation overrideAnnotation : fOverrideAnnotations) {
+			String text= overrideAnnotation.getText();
 			assertTrue(text != null
-					&& (text.equals("overrides java.lang.Object.toString")
-							|| text.equals("implements junit.framework.Test.run")
-							|| text.equals("implements junit.framework.Test.countTestCases")
+				&& (text.equals("overrides java.lang.Object.toString")
+					|| text.equals("implements junit.framework.Test.run")
+					|| text.equals("implements junit.framework.Test.countTestCases")
 					));
 		}
 	}

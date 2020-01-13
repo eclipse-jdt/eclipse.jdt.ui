@@ -51,10 +51,10 @@ public final class ExtractInterfaceConstraintsSolver extends SuperTypeConstraint
 		final TType type= variable.getType();
 		if (variable instanceof ImmutableTypeVariable2 || !type.getErasure().equals(fModel.getSubType().getErasure()))
 			return SuperTypeSet.createTypeSet(type);
-		final TType[] types= type.getInterfaces();
-		for (int index= 0; index < types.length; index++) {
-			if (types[index].getName().startsWith(fName) && types[index].getErasure().equals(fModel.getSuperType().getErasure()))
-				return SuperTypeSet.createTypeSet(type, types[index]);
+		for (TType t : type.getInterfaces()) {
+			if (t.getName().startsWith(fName) && t.getErasure().equals(fModel.getSuperType().getErasure())) {
+				return SuperTypeSet.createTypeSet(type, t);
+			}
 		}
 		return SuperTypeSet.createTypeSet(type);
 	}

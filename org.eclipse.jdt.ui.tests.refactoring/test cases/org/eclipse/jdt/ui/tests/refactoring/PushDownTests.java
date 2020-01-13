@@ -91,15 +91,14 @@ public class PushDownTests extends RefactoringTest {
 		List<IMember> membersToPushDown= Arrays.asList(merge(methodsToPushDown, fieldsToPushDown));
 		List<IMethod> methodsToDeclareAbstract= Arrays.asList(findMethods(selectedMethods, namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract));
 
-		MemberActionInfo[] infos= processor.getMemberActionInfos();
-		for (int i= 0; i < infos.length; i++) {
-			if (membersToPushDown.contains(infos[i].getMember())){
-				infos[i].setAction(MemberActionInfo.PUSH_DOWN_ACTION);
-				assertTrue(! methodsToDeclareAbstract.contains(infos[i].getMember()));
+		for (MemberActionInfo info : processor.getMemberActionInfos()) {
+			if (membersToPushDown.contains(info.getMember())) {
+				info.setAction(MemberActionInfo.PUSH_DOWN_ACTION);
+				assertTrue(!methodsToDeclareAbstract.contains(info.getMember()));
 			}
-			if (methodsToDeclareAbstract.contains(infos[i].getMember())){
-				infos[i].setAction(MemberActionInfo.PUSH_ABSTRACT_ACTION);
-				assertTrue(! membersToPushDown.contains(infos[i].getMember()));
+			if (methodsToDeclareAbstract.contains(info.getMember())) {
+				info.setAction(MemberActionInfo.PUSH_ABSTRACT_ACTION);
+				assertTrue(!membersToPushDown.contains(info.getMember()));
 			}
 		}
 	}
@@ -221,9 +220,10 @@ public class PushDownTests extends RefactoringTest {
 	private static List<IMember> getMembersToPushDown(PushDownRefactoringProcessor processor) {
 		MemberActionInfo[] infos= processor.getMemberActionInfos();
 		List<IMember> result= new ArrayList<>(infos.length);
-		for (int i= 0; i < infos.length; i++) {
-			if (infos[i].isToBePushedDown())
-				result.add(infos[i].getMember());
+		for (MemberActionInfo info : infos) {
+			if (info.isToBePushedDown()) {
+				result.add(info.getMember());
+			}
 		}
 		return result;
 	}

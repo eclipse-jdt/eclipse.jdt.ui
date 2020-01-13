@@ -73,16 +73,13 @@ public abstract class RefactoringModifications {
 			childOfInterest = IJavaElement.CLASS_FILE;
 		}
 		ArrayList<IResource> result = new ArrayList<>(children.length);
-		for (int i = 0; i < children.length; i++) {
-			IJavaElement child = children[i];
+		for (IJavaElement child : children) {
 			if (child.getElementType() == childOfInterest && child.getResource() != null) {
 				result.add(child.getResource());
 			}
 		}
 		// Gather non-java resources
-		Object[] nonJavaResources = source.getNonJavaResources();
-		for (int i= 0; i < nonJavaResources.length; i++) {
-			Object element= nonJavaResources[i];
+		for (Object element : source.getNonJavaResources()) {
 			if (element instanceof IResource) {
 				result.add((IResource) element);
 			}

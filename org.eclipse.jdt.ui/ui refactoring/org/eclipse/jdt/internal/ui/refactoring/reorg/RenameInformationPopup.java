@@ -624,7 +624,7 @@ public class RenameInformationPopup implements IWidgetTokenKeeper, IWidgetTokenK
 			return;
 		}
 		fSnapPositionChanged= false;
-		
+
 		boolean isUnderLeft= fSnapPosition == SNAP_POSITION_UNDER_LEFT_FIELD;
 		boolean isOverLeft= fSnapPosition == SNAP_POSITION_OVER_LEFT_FIELD;
 		fPopupLayout.marginTop= isUnderLeft ? HAH : 0;
@@ -788,7 +788,7 @@ public class RenameInformationPopup implements IWidgetTokenKeeper, IWidgetTokenK
 			@Override
 			public void menuAboutToShow(IMenuManager manager) {
 				boolean canRefactor= ! fRenameLinkedMode.isOriginalName();
-				
+
 				IAction refactorAction= new Action(ReorgMessages.RenameInformationPopup_RenameInWorkspace) {
 					@Override
 					public void run() {
@@ -879,9 +879,8 @@ public class RenameInformationPopup implements IWidgetTokenKeeper, IWidgetTokenK
 	private static void recursiveSetBackgroundColor(Control control, Color color) {
 		control.setBackground(color);
 		if (control instanceof Composite) {
-			Control[] children= ((Composite) control).getChildren();
-			for (int i= 0; i < children.length; i++) {
-				recursiveSetBackgroundColor(children[i], color);
+			for (Control child : ((Composite) control).getChildren()) {
+				recursiveSetBackgroundColor(child, color);
 			}
 		}
 	}

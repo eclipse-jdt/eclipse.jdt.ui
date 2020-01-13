@@ -58,7 +58,7 @@ public class SubTypesSet extends TypeSet {
 	public int hashCode() {
 		return fUpperBounds.hashCode();
 	}
-	
+
 	@Override
 	protected TypeSet specialCasesIntersectedWith(TypeSet s2) {
 		if (fUpperBounds.equals(s2))
@@ -179,7 +179,7 @@ public class SubTypesSet extends TypeSet {
 	/**
 	 * Returns the element type of the given TType, if an array type, or the
 	 * given TType itself, otherwise.
-	 * 
+	 *
 	 * @param t a type
 	 * @return the element type
 	 */

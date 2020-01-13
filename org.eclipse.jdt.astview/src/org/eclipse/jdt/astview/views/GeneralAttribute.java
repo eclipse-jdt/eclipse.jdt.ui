@@ -1,13 +1,13 @@
 /*******************************************************************************
  * Copyright (c) 2000, 2006 IBM Corporation and others.
  *
- * This program and the accompanying materials 
+ * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -18,23 +18,23 @@ import org.eclipse.swt.graphics.Image;
 
 
 public class GeneralAttribute extends ASTAttribute {
-	
+
 	private final Object fParent;
 	private final String fLabel;
 	private final Object[] fChildren;
-	
+
 	public GeneralAttribute(Object parent, String name, Object value) {
 		fParent= parent;
 		fLabel= name + ": " + String.valueOf(value);
 		fChildren= EMPTY;
 	}
-	
+
 	public GeneralAttribute(Object parent, String label) {
 		fParent= parent;
 		fLabel= label;
 		fChildren= EMPTY;
 	}
-	
+
 	public GeneralAttribute(Object parent, String name, Object[] children) {
 		fParent= parent;
 		if (children == null) {
@@ -48,7 +48,7 @@ public class GeneralAttribute extends ASTAttribute {
 			fLabel= name + " (" + String.valueOf(fChildren.length) + ')';
 		}
 	}
-	
+
 	private Object[] createChildren(Object[] children) {
 		ASTAttribute[] res= new ASTAttribute[children.length];
 		for (int i= 0; i < res.length; i++) {
@@ -73,12 +73,12 @@ public class GeneralAttribute extends ASTAttribute {
 	public String getLabel() {
 		return fLabel;
 	}
-	
+
 	@Override
 	public Image getImage() {
 		return null;
 	}
-	
+
 	/*
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
@@ -89,7 +89,7 @@ public class GeneralAttribute extends ASTAttribute {
 		if (obj == null || !obj.getClass().equals(getClass())) {
 			return false;
 		}
-		
+
 		GeneralAttribute other= (GeneralAttribute) obj;
 		if (fParent == null) {
 			if (other.fParent != null)
@@ -97,17 +97,17 @@ public class GeneralAttribute extends ASTAttribute {
 		} else if (! fParent.equals(other.fParent)) {
 			return false;
 		}
-		
+
 		if (fLabel == null) {
 			if (other.fLabel != null)
 				return false;
 		} else if (! fLabel.equals(other.fLabel)) {
 			return false;
 		}
-		
+
 		return true;
 	}
-	
+
 	/*
 	 * @see java.lang.Object#hashCode()
 	 */

@@ -24,6 +24,7 @@ import java.util.Map;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.core.resources.IncrementalProjectBuilder;
@@ -37,10 +38,12 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTRequestor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+import org.eclipse.jdt.core.manipulation.CleanUpOptionsCore;
 
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
@@ -48,10 +51,12 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
+import org.eclipse.jdt.internal.ui.fix.RedundantModifiersCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUp;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 
@@ -59,6 +64,16 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 public class CleanUpTest extends CleanUpTestCase {
+	private class NoChangeRedundantModifiersCleanUp extends RedundantModifiersCleanUp {
+		private NoChangeRedundantModifiersCleanUp(Map<String, String> options) {
+			super(options);
+		}
+
+		@Override
+		protected ICleanUpFix createFix(CompilationUnit unit) throws CoreException {
+			return super.createFix(unit);
+		}
+	}
 
 	private static final Class<CleanUpTest> THIS= CleanUpTest.class;
 
@@ -67,13 +82,7 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	public static Test suite() {
-		return setUpTest(new TestSuite(THIS) {
-//			@Override
-//			public void addTest(Test test) {
-//				if (((TestCase) test).getName().startsWith("testJava50ForLoop"))
-//					super.addTest(test);
-//			}
-		});
+		return setUpTest(new TestSuite(THIS));
 	}
 
 	public static Test setUpTest(Test test) {
@@ -1439,8 +1448,8 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		IProblem[] problems= roots[0].getProblems();
 		assertTrue(problems.length == 2);
-		for (int i= 0; i < problems.length; i++) {
-			ProblemLocation location= new ProblemLocation(problems[i]);
+		for (IProblem problem : problems) {
+			ProblemLocation location= new ProblemLocation(problem);
 			assertTrue(cleanUp.canFix(cu1, location));
 		}
 	}
@@ -6460,6 +6469,71 @@ public class CleanUpTest extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 
+	public void testNumberSuffix() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    private long usual = 101l;\n" //
+				+ "    private long octal = 0121l;\n" //
+				+ "    private long hex = 0xdafdafdafl;\n" //
+				+ "\n" //
+				+ "    private float usualFloat = 101f;\n" //
+				+ "    private float octalFloat = 0121f;\n" //
+				+ "\n" //
+				+ "    private double usualDouble = 101d;\n" //
+				+ "\n" //
+				+ "    public long refactorIt() {\n" //
+				+ "        long localVar = 11l;\n" //
+				+ "        return localVar + 333l;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double doNotRefactor() {\n" //
+				+ "        long l = 11L;\n" //
+				+ "        float f = 11F;\n" //
+				+ "        double d = 11D;\n" //
+				+ "        float localFloat = 11f;\n" //
+				+ "        double localDouble = 11d;\n" //
+				+ "        return l + 101L + f + 11F + d + 11D + localFloat + 11f + localDouble + 11d;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.NUMBER_SUFFIX);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    private long usual = 101L;\n" //
+				+ "    private long octal = 0121L;\n" //
+				+ "    private long hex = 0xdafdafdafL;\n" //
+				+ "\n" //
+				+ "    private float usualFloat = 101f;\n" //
+				+ "    private float octalFloat = 0121f;\n" //
+				+ "\n" //
+				+ "    private double usualDouble = 101d;\n" //
+				+ "\n" //
+				+ "    public long refactorIt() {\n" //
+				+ "        long localVar = 11L;\n" //
+				+ "        return localVar + 333L;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public double doNotRefactor() {\n" //
+				+ "        long l = 11L;\n" //
+				+ "        float f = 11F;\n" //
+				+ "        double d = 11D;\n" //
+				+ "        float localFloat = 11f;\n" //
+				+ "        double localDouble = 11d;\n" //
+				+ "        return l + 101L + f + 11F + d + 11D + localFloat + 11f + localDouble + 11d;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
 	public void testRemoveQualifier02() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -8418,8 +8492,10 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	public void testRemoveRedundantModifiers () throws Exception {
+		StringBuffer buf;
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
+
+		buf= new StringBuffer();
 		buf.append("package test;\n");
 		buf.append("public abstract interface IFoo {\n");
 		buf.append("  public static final int MAGIC_NUMBER = 646;\n");
@@ -8501,9 +8577,56 @@ public class CleanUpTest extends CleanUpTestCase {
 		String expected5 = buf.toString();
 		ICompilationUnit cu5= pack1.createCompilationUnit("SafeVarargsExample.java", buf.toString(), false, null);
 
+		// Bug#553608: modifiers public static final must not be removed from inner enum within interface
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public interface Foo {\n");
+		buf.append("  enum Bar {\n");
+		buf.append("    A;\n");
+		buf.append("    public static final int B = 0;\n");
+		buf.append("  }\n");
+		buf.append("}\n");
+		String expected6 = buf.toString();
+		ICompilationUnit cu6= pack1.createCompilationUnit("NestedEnumExample.java", buf.toString(), false, null);
+		
 		enable(CleanUpConstants.REMOVE_REDUNDANT_MODIFIERS);
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1, cu2, cu3, cu4, cu5 }, new String[] { expected1, expected2, expected3, expected4, expected5 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1, cu2, cu3, cu4, cu5, cu6 }, new String[] { expected1, expected2, expected3, expected4, expected5, expected6 });
 
+	}
+
+	public void testDoNotTouchCleanedModifiers() throws Exception {
+		// Given
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public interface ICleanInterface {\n" //
+				+ "  int MAGIC_NUMBER = 646;\n" //
+				+ "  int foo();\n" //
+				+ "  void func();\n" //
+				+ "  int bar(int bazz);\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("ICleanInterface.java", sample, false, null);
+
+		// When
+		enable(CleanUpConstants.REMOVE_REDUNDANT_MODIFIERS);
+
+		// Then
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+
+		// When
+		ASTParser parser= ASTParser.newParser(AST.JLS13);
+		parser.setKind(ASTParser.K_COMPILATION_UNIT);
+		parser.setSource(cu1);
+		parser.setResolveBindings(true);
+		CompilationUnit unit= (CompilationUnit) parser.createAST(null);
+		Map<String, String> options= new HashMap<>();
+		options.put(CleanUpConstants.REMOVE_REDUNDANT_MODIFIERS, CleanUpOptionsCore.TRUE);
+		NoChangeRedundantModifiersCleanUp cleanup= new NoChangeRedundantModifiersCleanUp(options);
+		ICleanUpFix fix= cleanup.createFix(unit);
+
+		// Then
+		assertNull("ICleanInterface should not be cleaned up", fix);
 	}
 
 	public void testRemoveRedundantSemicolons () throws Exception {

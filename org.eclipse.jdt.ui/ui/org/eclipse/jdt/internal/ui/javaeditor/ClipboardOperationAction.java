@@ -113,13 +113,10 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		}
 
 		public ClipboardData(byte[] bytes) throws IOException {
-			DataInputStream dataIn = new DataInputStream(new ByteArrayInputStream(bytes));
-			try {
+			try (DataInputStream dataIn = new DataInputStream(new ByteArrayInputStream(bytes))) {
 				fOriginHandle= dataIn.readUTF();
 				fTypeImports= readArray(dataIn);
 				fStaticImports= readArray(dataIn);
-			} finally {
-				dataIn.close();
 			}
 		}
 
@@ -154,13 +151,11 @@ public final class ClipboardOperationAction extends TextEditorAction {
 
 		public byte[] serialize() throws IOException {
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
-			DataOutputStream dataOut = new DataOutputStream(out);
-			try {
+			try (DataOutputStream dataOut = new DataOutputStream(out)) {
 				dataOut.writeUTF(fOriginHandle);
 				writeArray(dataOut, fTypeImports);
 				writeArray(dataOut, fStaticImports);
 			} finally {
-				dataOut.close();
 				out.close();
 			}
 

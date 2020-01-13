@@ -61,7 +61,7 @@ public class TypeFilter implements IPropertyChangeListener {
 		boolean filteredByPattern= getDefault().filter(match.getFullyQualifiedName());
 		if (filteredByPattern)
 			return true;
-		
+
 		int accessibility= match.getAccessibility();
 		switch (accessibility) {
 			case IAccessRule.K_NON_ACCESSIBLE:
@@ -115,9 +115,7 @@ public class TypeFilter implements IPropertyChangeListener {
 	 * @return <code>true</code> iff the given type is filtered out
 	 */
 	public boolean filter(String fullTypeName) {
-		StringMatcher[] matchers= getStringMatchers();
-		for (int i= 0; i < matchers.length; i++) {
-			StringMatcher curr= matchers[i];
+		for (StringMatcher curr : getStringMatchers()) {
 			if (curr.match(fullTypeName)) {
 				return true;
 			}

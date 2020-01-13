@@ -77,10 +77,11 @@ public class BuildpathModifierActionTest extends TestCase {
     }
 
 	private static void assertIsOnBuildpath(IClasspathEntry[] entries, IPath path) {
-		for (int i= 0; i < entries.length; i++) {
-	        if (entries[i].getPath().equals(path))
-	        	return;
-        }
+		for (IClasspathEntry entry : entries) {
+			if (entry.getPath().equals(path)) {
+				return;
+			}
+		}
 		assertTrue("Element with location " + path + " is not on buildpath", false);
     }
 
@@ -101,12 +102,12 @@ public class BuildpathModifierActionTest extends TestCase {
 	        	assertTrue("Resource " + createdResources[i] + " is nor file nor folder.", false);
 	        }
         }
-    	for (int i= 0; i < createdFolders.length; i++) {
-	        assertTrue("Folder at " + createdFolders[i] + " was not created", contains(createdPaths, createdFolders[i]));
-        }
-    	for (int i= 0; i < createdFiles.length; i++) {
-    		assertTrue("File at " + createdFiles[i] + " was not created", contains(createdPaths, createdFiles[i]));
-        }
+		for (IPath createdFolder : createdFolders) {
+			assertTrue("Folder at " + createdFolder + " was not created", contains(createdPaths, createdFolder));
+		}
+		for (IPath createdFile : createdFiles) {
+			assertTrue("File at " + createdFile + " was not created", contains(createdPaths, createdFile));
+		}
 
     	IResource[] deletedResources= delta.getDeletedResources();
     	IPath[] deletedPaths= new IPath[deletedResources.length];
@@ -124,12 +125,12 @@ public class BuildpathModifierActionTest extends TestCase {
 	        	assertTrue("Resource " + deletedResources[i] + " is nor file nor folder.", false);
 	        }
         }
-    	for (int i= 0; i < removedFolders.length; i++) {
-	        assertTrue("Folder at " + removedFolders[i] + " was not removed", contains(deletedPaths, removedFolders[i]));
-        }
-    	for (int i= 0; i < removedFiles.length; i++) {
-    		assertTrue("File at " + removedFiles[i] + " was not removed", contains(deletedPaths, removedFiles[i]));
-        }
+		for (IPath removedFolder : removedFolders) {
+			assertTrue("Folder at " + removedFolder + " was not removed", contains(deletedPaths, removedFolder));
+		}
+		for (IPath removedFile : removedFiles) {
+			assertTrue("File at " + removedFile + " was not removed", contains(deletedPaths, removedFile));
+		}
     }
 
     private static void assertDeltaRemovedEntries(BuildpathDelta delta, IPath[] paths) {
@@ -142,12 +143,12 @@ public class BuildpathModifierActionTest extends TestCase {
 	        removed[i]= element.getPath();
 	        i++;
         }
-    	for (int j= 0; j < paths.length; j++) {
-	        assertTrue("Entry " + paths[j] + " was not removed", contains(removed, paths[j]));
-        }
-    	for (int j= 0; j < removed.length; j++) {
-	        assertTrue("Entry " + removed[j] + " was removed", contains(paths, removed[j]));
-        }
+		for (IPath path : paths) {
+			assertTrue("Entry " + path + " was not removed", contains(removed, path));
+		}
+		for (IPath removed1 : removed) {
+			assertTrue("Entry " + removed1 + " was removed", contains(paths, removed1));
+		}
     }
 
     private static void assertDeltaAddedEntries(BuildpathDelta delta, IPath[] paths) {
@@ -160,19 +161,20 @@ public class BuildpathModifierActionTest extends TestCase {
 	        added[i]= element.getPath();
 	        i++;
         }
-    	for (int j= 0; j < paths.length; j++) {
-	        assertTrue("Entry " + paths[j] + " was not added", contains(added, paths[j]));
-        }
-    	for (int j= 0; j < added.length; j++) {
-	        assertTrue("Entry " + added[j] + " was added", contains(paths, added[j]));
-        }
+		for (IPath path : paths) {
+			assertTrue("Entry " + path + " was not added", contains(added, path));
+		}
+		for (IPath add : added) {
+			assertTrue("Entry " + add + " was added", contains(paths, add));
+		}
     }
 
     private static boolean contains(IPath[] paths, IPath path) {
-    	for (int i= 0; i < paths.length; i++) {
-	        if (paths[i].equals(path))
-	        	return true;
-        }
+		for (IPath p : paths) {
+			if (p.equals(path)) {
+				return true;
+			}
+		}
 	    return false;
     }
 

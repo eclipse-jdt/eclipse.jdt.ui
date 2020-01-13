@@ -151,8 +151,8 @@ public class RenamePackageTests extends RefactoringTest {
 		IPackageFragment[] packages= new IPackageFragment[packageNames.length];
 		for (int i= 0; i < packageFiles.length; i++){
 			packages[i]= getRoot().createPackageFragment(packageNames[i], true, null);
-			for (int j= 0; j < packageFiles[i].length; j++){
-				createCUfromTestFile(packages[i], packageFiles[i][j], packageNames[i].replace('.', '/') + "/");
+			for (String packageFile : packageFiles[i]) {
+				createCUfromTestFile(packages[i], packageFile, packageNames[i].replace('.', '/') + "/");
 				//DebugUtils.dump(cu.getElementName() + "\n" + cu.getSource());
 			}
 		}
@@ -205,13 +205,12 @@ public class RenamePackageTests extends RefactoringTest {
 				createHandles= handles.toArray(new String[handles.size()]);
 				IFolder source= (IFolder)thisPackage.getResource();
 				deleteHandles= ParticipantTesting.createHandles(source);
-				IResource members[]= source.members();
 				List<IResource> movedObjects= new ArrayList<>();
-				for (int i= 0; i < members.length; i++) {
-					if (members[i] instanceof IFolder) {
+				for (IResource member : source.members()) {
+					if (member instanceof IFolder) {
 						doDelete= false;
 					} else {
-						movedObjects.add(members[i]);
+						movedObjects.add(member);
 					}
 				}
 				moveHandles= ParticipantTesting.createHandles(movedObjects.toArray());
@@ -360,14 +359,14 @@ public class RenamePackageTests extends RefactoringTest {
 				String packageName= getNewPackageName(fPackageNames[i]);
 				String packagePath= packageName.replace('.', '/') + "/";
 
-				for (int j= 0; j < fPackageFileNames[i].length; j++){
+				for (String packageFileName : fPackageFileNames[i]) {
 					String expected;
 					if (fTestWithDummyFiles) {
-						expected= getDummyContents(packageName, fPackageFileNames[i][j]);
+						expected= getDummyContents(packageName, packageFileName);
 					} else {
-						expected= getFileContents(getOutputTestFileName(fPackageFileNames[i][j], packagePath));
+						expected= getFileContents(getOutputTestFileName(packageFileName, packagePath));
 					}
-					ICompilationUnit cu= getRoot().getPackageFragment(packageName).getCompilationUnit(fPackageFileNames[i][j] + ".java");
+					ICompilationUnit cu= getRoot().getPackageFragment(packageName).getCompilationUnit(packageFileName + ".java");
 					String actual= cu.getSource();
 					assertEqualLines("invalid update in file " + cu.getElementName(), expected,	actual);
 				}
@@ -385,10 +384,9 @@ public class RenamePackageTests extends RefactoringTest {
 		}
 
 		public void checkOriginalState() throws Exception {
-			IJavaElement[] rootChildren= getRoot().getChildren();
 			ArrayList<String> existingPacks= new ArrayList<>();
-			for (int i= 0; i < rootChildren.length; i++) {
-				existingPacks.add(rootChildren[i].getElementName());
+			for (IJavaElement javaelement : getRoot().getChildren()) {
+				existingPacks.add(javaelement.getElementName());
 			}
 			assertEqualSets(Arrays.asList(fPackageNames), existingPacks);
 
@@ -397,22 +395,21 @@ public class RenamePackageTests extends RefactoringTest {
 				String packagePath= packageName.replace('.', '/') + "/";
 				IPackageFragment pack= getRoot().getPackageFragment(packageName);
 
-				IJavaElement[] packChildren= pack.getChildren();
 				ArrayList<String> existingCUs= new ArrayList<>();
-				for (int j= 0; j < packChildren.length; j++) {
-					String cuName= packChildren[j].getElementName();
+				for (IJavaElement javaelement : pack.getChildren()) {
+					String cuName= javaelement.getElementName();
 					existingCUs.add(cuName.substring(0, cuName.length() - 5));
 				}
 				assertEqualSets(Arrays.asList(fPackageFileNames[i]), existingCUs);
 
-				for (int j= 0; j < fPackageFileNames[i].length; j++){
+				for (String packageFileName : fPackageFileNames[i]) {
 					String expected;
 					if (fTestWithDummyFiles) {
-						expected= getDummyContents(packageName, fPackageFileNames[i][j]);
+						expected= getDummyContents(packageName, packageFileName);
 					} else {
-						expected= getFileContents(getInputTestFileName(fPackageFileNames[i][j], packagePath));
+						expected= getFileContents(getInputTestFileName(packageFileName, packagePath));
 					}
-					ICompilationUnit cu= pack.getCompilationUnit(fPackageFileNames[i][j] + ".java");
+					ICompilationUnit cu= pack.getCompilationUnit(packageFileName + ".java");
 					String actual= cu.getSource();
 					assertEqualLines("invalid undo in file " + cu.getElementName(), expected,	actual);
 				}
@@ -558,8 +555,7 @@ public class RenamePackageTests extends RefactoringTest {
 	}
 
 	private void checkMappingUnchanged(IJavaElementMapper jm, IResourceMapper rm, Object[] resOrJEs) {
-		for (int i= 0; i < resOrJEs.length; i++) {
-			Object resOrJE= resOrJEs[i];
+		for (Object resOrJE : resOrJEs) {
 			if (resOrJE instanceof IJavaElement) {
 				IJavaElement javaElement= (IJavaElement) resOrJE;
 				resOrJE= javaElement.getResource();
@@ -573,8 +569,7 @@ public class RenamePackageTests extends RefactoringTest {
 	}
 
 	private void checkMappingChanged(IJavaElementMapper jm, IResourceMapper rm, Object[][] resOrJeToChangeds) {
-		for (int i= 0; i < resOrJeToChangeds.length; i++) {
-			Object[] resOrJeToChanged= resOrJeToChangeds[i];
+		for (Object[] resOrJeToChanged : resOrJeToChangeds) {
 			Object resOrJE= resOrJeToChanged[0];
 			Object changed= resOrJeToChanged[1];
 			if (resOrJE instanceof IJavaElement) {
@@ -1001,9 +996,7 @@ public class RenamePackageTests extends RefactoringTest {
 
 		assertFalse(status.hasError());
 		assertTrue(status.hasWarning());
-		RefactoringStatusEntry[] statusEntries= status.getEntries();
-		for (int i= 0; i < statusEntries.length; i++) {
-			RefactoringStatusEntry entry= statusEntries[i];
+		for (RefactoringStatusEntry entry : status.getEntries()) {
 			assertTrue(entry.isWarning());
 			assertTrue(entry.getCode() == RefactoringStatusCodes.MAIN_METHOD);
 		}

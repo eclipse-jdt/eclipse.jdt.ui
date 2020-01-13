@@ -212,6 +212,7 @@ public class JavaWordIterator extends BreakIterator {
 	 * Sets the text as <code>CharSequence</code>.
 	 * @param newText the new text
 	 */
+	@Override
 	public void setText(CharSequence newText) {
 		fIterator.setText(newText);
 		first();

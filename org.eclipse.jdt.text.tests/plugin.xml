@@ -36,5 +36,15 @@
             type="java.lang.Object">
       </propertyTester>
    </extension>
-
+	<extension
+		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
+		id="LongCompletionProposalComputer">
+		<javaCompletionProposalComputer
+			class="org.eclipse.jdt.text.tests.contentassist.LongCompletionProposalComputer"
+			categoryId="org.eclipse.jdt.ui.javaAllProposalCategory"
+			requiresUIThread="false">
+			<partition type="__dftl_partition_content_type"/>
+			<partition type="__java_string"/>
+		</javaCompletionProposalComputer>
+	</extension>
 </plugin>

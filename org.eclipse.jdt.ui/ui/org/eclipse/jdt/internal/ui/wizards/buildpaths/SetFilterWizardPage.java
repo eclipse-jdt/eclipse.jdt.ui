@@ -188,8 +188,8 @@ public class SetFilterWizardPage extends NewElementWizardPage {
 		IPath[] pattern= (IPath[]) entryToEdit.getAttribute(key);
 
 		ArrayList<String> elements= new ArrayList<>(pattern.length);
-		for (int i= 0; i < pattern.length; i++) {
-			String patternName= pattern[i].toString();
+		for (IPath p : pattern) {
+			String patternName= p.toString();
 			if (patternName.length() > 0)
 				elements.add(patternName);
 		}
@@ -354,8 +354,8 @@ public class SetFilterWizardPage extends NewElementWizardPage {
 
 		IPath[] res= ExclusionInclusionEntryDialog.chooseExclusionPattern(getShell(), fCurrSourceFolder, title, message, null, true);
 		if (res != null) {
-			for (int i= 0; i < res.length; i++) {
-				field.addElement(res[i].toString());
+			for (IPath p : res) {
+				field.addElement(p.toString());
 			}
 		}
 	}

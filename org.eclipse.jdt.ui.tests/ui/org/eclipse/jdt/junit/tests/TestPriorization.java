@@ -17,7 +17,6 @@ package org.eclipse.jdt.junit.tests;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jdt.internal.junit.runner.FailuresFirstPrioritizer;
@@ -352,8 +351,7 @@ public class TestPriorization extends TestCase {
 
 	private static String enumerate(List<String> list) {
 		StringBuilder buf= new StringBuilder();
-		for (Iterator<String> iter= list.iterator(); iter.hasNext();) {
-			String s= iter.next();
+		for (String s : list) {
 			buf.append(s).append('\n');
 		}
 		return buf.toString();

@@ -55,7 +55,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
  */
 public final class SuperTypeConstraintsModel {
 
-	/** Customized implementation of a hash set 
+	/** Customized implementation of a hash set
 	 * @param <E> the element type */
 	private static class HashedSet<E> extends AbstractSet<E> {
 
@@ -341,8 +341,9 @@ public final class SuperTypeConstraintsModel {
 				else {
 					final ConstraintVariable2[] variables= second.getContributingVariables();
 					first.addAll(variables);
-					for (int index= 0; index < variables.length; index++)
-						variables[index].setTypeEquivalenceSet(first);
+					for (ConstraintVariable2 variable : variables) {
+						variable.setTypeEquivalenceSet(first);
+					}
 				}
 			}
 		}

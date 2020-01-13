@@ -109,15 +109,14 @@ public class MethodChecks {
 		try {
 			IType[] classes= hierarchy.getAllClasses();
 			subMonitor.beginTask("", classes.length); //$NON-NLS-1$
-			for (int i= 0; i < classes.length; i++) {
-				final IType clazz= classes[i];
+			for (IType clazz : classes) {
 				IType[] superinterfaces= null;
 				if (clazz.equals(hierarchy.getType()))
 					superinterfaces= hierarchy.getAllSuperInterfaces(clazz);
 				else
 					superinterfaces= clazz.newSupertypeHierarchy(new SubProgressMonitor(subMonitor, 1)).getAllSuperInterfaces(clazz);
-				for (int j= 0; j < superinterfaces.length; j++) {
-					IMethod found= Checks.findSimilarMethod(method, superinterfaces[j]);
+				for (IType superinterface : superinterfaces) {
+					IMethod found= Checks.findSimilarMethod(method, superinterface);
 					if (found != null && !found.equals(method))
 						return found;
 				}

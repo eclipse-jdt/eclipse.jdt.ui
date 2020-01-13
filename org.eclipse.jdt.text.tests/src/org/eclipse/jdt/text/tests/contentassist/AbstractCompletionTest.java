@@ -498,14 +498,13 @@ public class AbstractCompletionTest extends TestCase {
 	}
 
 	private ICompletionProposal findNamedProposal(String prefix, IRegion selection) {
-		ICompletionProposal[] proposals= collectProposals(selection);
-
 		ICompletionProposal found= null;
-		for (int i= 0; i < proposals.length; i++) {
-			String displayString= proposals[i].getDisplayString();
+		for (ICompletionProposal proposal : collectProposals(selection)) {
+			String displayString= proposal.getDisplayString();
 			if (displayString.startsWith(prefix)) {
-				if (found == null || displayString.equals(prefix))
-					found= proposals[i];
+				if (found == null || displayString.equals(prefix)) {
+					found= proposal;
+				}
 			}
 		}
 		return found;

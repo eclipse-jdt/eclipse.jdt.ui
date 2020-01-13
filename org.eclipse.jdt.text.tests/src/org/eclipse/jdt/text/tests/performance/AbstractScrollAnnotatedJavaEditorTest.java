@@ -50,8 +50,7 @@ public abstract class AbstractScrollAnnotatedJavaEditorTest extends ScrollEditor
 	}
 
 	private void renameMemberDecls(IDocument document, IMember[] members) throws JavaModelException, BadLocationException {
-		for (int j= 0; j < members.length; j++) {
-			IMember member= members[j];
+		for (IMember member : members) {
 			ISourceRange range= member.getNameRange();
 			if (range != null)
 				document.replace(range.getOffset(), 2, "XX");
@@ -70,9 +69,7 @@ public abstract class AbstractScrollAnnotatedJavaEditorTest extends ScrollEditor
 		try {
 			IDocument document= EditorTestHelper.getDocument((ITextEditor) editor);
 			ICompilationUnit unit= JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(javaEditor.getEditorInput());
-			IType[] allTypes= unit.getAllTypes();
-			for (int i= 0; i < allTypes.length; i++) {
-				IType type= allTypes[i];
+			for (IType type : unit.getAllTypes()) {
 				renameMemberDecls(document, type.getMethods());
 				renameMemberDecls(document, type.getFields());
 			}

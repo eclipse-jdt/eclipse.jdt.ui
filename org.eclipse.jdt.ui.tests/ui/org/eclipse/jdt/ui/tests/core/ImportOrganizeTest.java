@@ -97,9 +97,9 @@ public class ImportOrganizeTest extends CoreTests {
 					assertNotNull(name + "-query-setset" + i, selection);
 					assertTrue(name + "-query-setlen" + i, selection.length > 0);
 					TypeNameMatch found= null;
-					for (int k= 0; k < selection.length; k++) {
-						if (selection[k].getFullyQualifiedName().equals(choices[i])) {
-							found= selection[k];
+					for (TypeNameMatch s : selection) {
+						if (s.getFullyQualifiedName().equals(choices[i])) {
+							found= s;
 						}
 					}
 					assertNotNull(name + "-query-notfound" + i, found);
@@ -1685,14 +1685,13 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[] { "org.eclipse.jdt", "org.eclipse" };
 
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
-		for (int i= 0; i < types.length; i++) {
-			String pack= Signature.getQualifier(types[i]);
-			String name= Signature.getSimpleName(types[i]);
-
+		for (String type : types) {
+			String pack= Signature.getQualifier(type);
+			String name= Signature.getSimpleName(type);
 			IPackageFragment pack2= sourceFolder.createPackageFragment(pack, false, null);
 			StringBuilder buf= new StringBuilder();
-			buf.append("package "); buf.append(pack); buf.append(";\n");
-			buf.append("public class "); buf.append(name); buf.append(" {\n");
+			buf.append("package ").append(pack).append(";\n");
+			buf.append("public class ").append(name).append(" {\n");
 			buf.append("}\n");
 			pack2.createCompilationUnit(name + ".java", buf.toString(), false, null);
 		}
@@ -1755,15 +1754,14 @@ public class ImportOrganizeTest extends CoreTests {
 		int threshold= 3;
 
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
-		for (int i= 0; i < types.length; i++) {
-			String pack= Signature.getQualifier(types[i]);
+		for (String type : types) {
+			String pack= Signature.getQualifier(type);
 			if (!pack.startsWith("java.")) {
-				String name= Signature.getSimpleName(types[i]);
-
+				String name= Signature.getSimpleName(type);
 				IPackageFragment pack2= sourceFolder.createPackageFragment(pack, false, null);
 				StringBuilder buf= new StringBuilder();
-				buf.append("package "); buf.append(pack); buf.append(";\n");
-				buf.append("public class "); buf.append(name); buf.append(" {\n");
+				buf.append("package ").append(pack).append(";\n");
+				buf.append("public class ").append(name).append(" {\n");
 				buf.append("}\n");
 				pack2.createCompilationUnit(name + ".java", buf.toString(), false, null);
 			}
@@ -1823,15 +1821,14 @@ public class ImportOrganizeTest extends CoreTests {
 		int threshold= 99;
 
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
-		for (int i= 0; i < types.length; i++) {
-			String pack= Signature.getQualifier(types[i]);
+		for (String type : types) {
+			String pack= Signature.getQualifier(type);
 			if (!pack.startsWith("java.")) {
-				String name= Signature.getSimpleName(types[i]);
-
+				String name= Signature.getSimpleName(type);
 				IPackageFragment pack2= sourceFolder.createPackageFragment(pack, false, null);
 				StringBuilder buf= new StringBuilder();
-				buf.append("package "); buf.append(pack); buf.append(";\n");
-				buf.append("public class "); buf.append(name); buf.append(" {\n");
+				buf.append("package ").append(pack).append(";\n");
+				buf.append("public class ").append(name).append(" {\n");
 				buf.append("}\n");
 				pack2.createCompilationUnit(name + ".java", buf.toString(), false, null);
 			}
@@ -3524,8 +3521,8 @@ public class ImportOrganizeTest extends CoreTests {
 			scope.remove(PreferenceConstants.ORGIMPORTS_ONDEMANDTHRESHOLD);
 		} else {
 			StringBuilder buf= new StringBuilder();
-			for (int i= 0; i < order.length; i++) {
-				buf.append(order[i]);
+			for (String o : order) {
+				buf.append(o);
 				buf.append(';');
 			}
 			scope.put(PreferenceConstants.ORGIMPORTS_IMPORTORDER, buf.toString());

@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.stream.Stream;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -525,5 +526,9 @@ public final class CompletionProposalComputerRegistry {
 	 */
 	public boolean computingCompletionRequiresUIThread() {
 		return fDescriptors.stream().anyMatch(CompletionProposalComputerDescriptor::requiresUIThread);
+	}
+
+	public Stream<String> getComputersRequiringUIThreadNames() {
+		return fDescriptors.stream().filter(CompletionProposalComputerDescriptor::requiresUIThread).map(CompletionProposalComputerDescriptor::getName);
 	}
 }
