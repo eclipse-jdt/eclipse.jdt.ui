@@ -97,17 +97,18 @@ public abstract class FatJarAntExporter {
 		public String substitute(String path) {
 			int len= 0;
 			String result= path;
-			for (String basePath : pathSubstitutions.keySet()) {
+			for (Map.Entry<String, String> entry : pathSubstitutions.entrySet()) {
+				String basePath = entry.getKey();
 				if (basePath.length() < len) {
 					continue;
 				}
 				if (path.equals(basePath)) {
-					result= pathSubstitutions.get(basePath);
+					result= entry.getValue();
 					break;
 				}
 				if (path.startsWith(basePath + File.separator)) {
 					len= basePath.length();
-					result= pathSubstitutions.get(basePath) + path.substring(len);
+					result= entry.getValue() + path.substring(len);
 				}
 			}
 			return result;

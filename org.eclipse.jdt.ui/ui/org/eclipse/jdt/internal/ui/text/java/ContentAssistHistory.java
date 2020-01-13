@@ -94,11 +94,12 @@ public final class ContentAssistHistory {
 				rootElement.setAttribute(ATTRIBUTE_MAX_RHS, Integer.toString(history.fMaxRHS));
 				document.appendChild(rootElement);
 
-				for (String lhs : history.fLHSCache.keySet()) {
+				for (Entry<String, MRUSet<String>> entry : history.fLHSCache.entrySet()) {
+					String lhs = entry.getKey();
 					Element lhsElement= document.createElement(NODE_LHS);
 					lhsElement.setAttribute(ATTRIBUTE_NAME, lhs);
 					rootElement.appendChild(lhsElement);
-					for (String rhs : history.fLHSCache.get(lhs)) {
+					for (String rhs : entry.getValue()) {
 						Element rhsElement= document.createElement(NODE_RHS);
 						rhsElement.setAttribute(ATTRIBUTE_NAME, rhs);
 						lhsElement.appendChild(rhsElement);

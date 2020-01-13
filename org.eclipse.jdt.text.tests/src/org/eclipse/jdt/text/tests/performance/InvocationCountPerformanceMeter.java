@@ -268,8 +268,9 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 		public void print(Object key1) {
 			System.out.println(key1.toString() + ":"); //$NON-NLS-1$
 			Map<Object, Integer> results= fResultsMap.get(key1);
-			for (Object key : results.keySet()) {
-				System.out.println("\t" + key + ": " + results.get(key).intValue()); //$NON-NLS-1$ //$NON-NLS-2$
+			for (Map.Entry<Object, Integer> entry : results.entrySet()) {
+				Object key = entry.getKey();
+				System.out.println("\t" + key + ": " + entry.getValue().intValue()); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 	}

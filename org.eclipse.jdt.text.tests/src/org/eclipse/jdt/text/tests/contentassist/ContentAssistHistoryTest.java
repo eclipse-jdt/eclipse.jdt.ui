@@ -248,8 +248,9 @@ public class ContentAssistHistoryTest extends TestCase {
 
 	private static void assertEqualMap(String message, Map<String, List<String>> expected, Map<String, RHSHistory> actual) {
 		assertEquals(message, expected.size(), actual.size());
-		for (String type : expected.keySet()) {
-			assertEquals(message, expected.get(type), actual.get(type).getTypes());
+		for (Map.Entry<String, List<String>> entry : expected.entrySet()) {
+			String type = entry.getKey();
+			assertEquals(message, entry.getValue(), actual.get(type).getTypes());
 		}
 	}
 

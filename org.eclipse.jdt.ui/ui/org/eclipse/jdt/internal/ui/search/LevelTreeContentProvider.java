@@ -259,8 +259,9 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 		}
 
 		viewer.remove(toRemove.toArray());
-		for (Object parent : toAdd.keySet()) {
-			HashSet<Object> children= (HashSet<Object>) toAdd.get(parent);
+		for (Map.Entry<Object, Set<Object>> entry : toAdd.entrySet()) {
+			Object parent = entry.getKey();
+			HashSet<Object> children= (HashSet<Object>) entry.getValue();
 			viewer.add(parent, children.toArray());
 		}
 		for (Iterator<Object> elementsToUpdate= toUpdate.iterator(); elementsToUpdate.hasNext();) {

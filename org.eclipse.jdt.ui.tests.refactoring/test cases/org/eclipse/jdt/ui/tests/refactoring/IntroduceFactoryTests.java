@@ -487,14 +487,15 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	}
 
 	private void createProjectPackageStructure(Map<String, Set<String>> projName2PkgNames, Map<String, IJavaProject> projName2Project, Map<IJavaProject, IPackageFragmentRoot> proj2PkgRoot) throws CoreException, JavaModelException {
-		for (String projName : projName2PkgNames.keySet()) {
+		for (Map.Entry<String, Set<String>> entry : projName2PkgNames.entrySet()) {
+			String projName = entry.getKey();
 			IJavaProject project= JavaProjectHelper.createJavaProject(projName, "bin");
 			IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(project, CONTAINER);
 			JavaProjectHelper.addRTJar(project);
 			Set<IPackageFragment> pkgs= new HashSet<>();
 			projName2Project.put(projName, project);
 			proj2PkgRoot.put(project, root);
-			for (String pkgName : projName2PkgNames.get(projName)) {
+			for (String pkgName : entry.getValue()) {
 				pkgs.add(root.createPackageFragment(pkgName, true, null));
 			}
 		}

@@ -152,8 +152,9 @@ public class CleanUpPreferenceUtil {
 
     public static void saveSaveParticipantOptions(IScopeContext context, Map<String, String> settings) {
     	IEclipsePreferences node= context.getNode(JavaUI.ID_PLUGIN);
-		for (String key : settings.keySet()) {
-			node.put(SAVE_PARTICIPANT_KEY_PREFIX + key, settings.get(key));
+		for (Map.Entry<String, String> entry : settings.entrySet()) {
+			String key = entry.getKey();
+			node.put(SAVE_PARTICIPANT_KEY_PREFIX + key, entry.getValue());
 		}
     }
 
