@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 IBM Corporation and others.
+ * Copyright (c) 2019, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -29,6 +29,7 @@ public class ASTHelper {
 			case ASTNode.YIELD_STATEMENT:
 				return ast.apiLevel() >= AST.JLS14;
 			case ASTNode.TEXT_BLOCK:
+			case ASTNode.RECORD_DECLARATION:	
 				return ast.isPreviewEnabled();
 		}
 		return true;
@@ -48,5 +49,9 @@ public class ASTHelper {
 
 	public static boolean isSwitchCaseExpressionsSupportedInAST(AST ast) {
 		return isNodeTypeSupportedInAST(ast, ASTNode.SWITCH_CASE);
+	}
+	
+	public static boolean isRecordDeclarationNodeSupportedInAST(AST ast) {
+		return isNodeTypeSupportedInAST(ast, ASTNode.RECORD_DECLARATION);
 	}
 }

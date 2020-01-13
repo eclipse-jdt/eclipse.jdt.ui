@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -8,6 +8,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -40,6 +44,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.RecordDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
@@ -50,6 +55,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingManager.HighlightedPosition;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingManager.Highlighting;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings.DeprecatedMemberHighlighting;
+import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings.RecordKeywordHighlighting;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings.VarKeywordHighlighting;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings.YieldKeywordHighlighting;
 import org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener;
@@ -155,6 +161,25 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 					for (int i= 0; i < fJobSemanticHighlightings.length; i++) {
 						SemanticHighlighting semanticHighlighting= fJobSemanticHighlightings[i];
 						if (semanticHighlighting instanceof YieldKeywordHighlighting) {
+							addPosition(offset, length, fJobHighlightings[i]);
+							return false;
+						}
+					}
+				}
+			}
+			return true;
+		}
+		
+		@Override
+		public boolean visit(RecordDeclaration node) {
+			AST ast= node.getAST();
+			if (ASTHelper.isRecordDeclarationNodeSupportedInAST(ast)) {
+				int offset= node.getRestrictedIdentifierStartPosition();
+				int length= 6; // length of 'record'
+				if (offset > -1 && length > 0) {
+					for (int i= 0; i < fJobSemanticHighlightings.length; i++) {
+						SemanticHighlighting semanticHighlighting= fJobSemanticHighlightings[i];
+						if (semanticHighlighting instanceof RecordKeywordHighlighting) {
 							addPosition(offset, length, fJobHighlightings[i]);
 							return false;
 						}
