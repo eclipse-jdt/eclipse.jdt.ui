@@ -167,7 +167,7 @@ public class PostfixCompletionProposalComputer extends AbstractTemplateCompletio
 				@Override
 				public boolean visit(StringLiteral node) {
 					int start= node.getStartPosition();
-					if (invOffset > start && start > bestNode[0].getStartPosition()) {
+					if (invOffset > start && start >= bestNode[0].getStartPosition()) {
 						bestNode[0]= node;
 					}
 					return true;
@@ -176,7 +176,7 @@ public class PostfixCompletionProposalComputer extends AbstractTemplateCompletio
 				@Override
 				public boolean visit(ExpressionStatement node) {
 					int start= node.getStartPosition();
-					if (invOffset > start && start > bestNode[0].getStartPosition()) {
+					if (invOffset > start && start >= bestNode[0].getStartPosition()) {
 						bestNode[0]= node;
 					}
 					return true;
@@ -185,7 +185,7 @@ public class PostfixCompletionProposalComputer extends AbstractTemplateCompletio
 				@Override
 				public boolean visit(SimpleName node) {
 					int start= node.getStartPosition();
-					if (invOffset > start && start > bestNode[0].getStartPosition()) {
+					if (invOffset > start && start >= bestNode[0].getStartPosition()) {
 						bestNode[0]= node;
 					}
 					return true;
@@ -194,7 +194,7 @@ public class PostfixCompletionProposalComputer extends AbstractTemplateCompletio
 				@Override
 				public boolean visit(QualifiedName node) {
 					int start= node.getStartPosition();
-					if (invOffset > start && start > bestNode[0].getStartPosition()) {
+					if (invOffset > start && start >= bestNode[0].getStartPosition()) {
 						bestNode[0]= node;
 					}
 					return true;
@@ -203,7 +203,7 @@ public class PostfixCompletionProposalComputer extends AbstractTemplateCompletio
 				@Override
 				public boolean visit(BooleanLiteral node) {
 					int start= node.getStartPosition();
-					if (invOffset > start && start > bestNode[0].getStartPosition()) {
+					if (invOffset > start && start >= bestNode[0].getStartPosition()) {
 						bestNode[0]= node;
 					}
 					return true;
