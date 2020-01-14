@@ -487,7 +487,7 @@ public abstract class AbstractToStringGenerator {
 			toStringMethod.getBody().statements().add(0, createMaxLenDeclaration());
 		}
 		createMethodComment();
-		toStringMethod.setProperty(OVERWRITE_METHOD_PROPERTY, Boolean.valueOf(true));
+		toStringMethod.setProperty(OVERWRITE_METHOD_PROPERTY, Boolean.TRUE);
 	}
 
 	/**
