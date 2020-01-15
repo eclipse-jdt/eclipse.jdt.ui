@@ -54,6 +54,7 @@ public class UnnecessaryArrayCreationFix extends CompilationUnitRewriteOperation
 					List arguments= m.arguments();
 					ArrayInitializer initializer= node.getInitializer();
 					if (arguments.size() > 0 && arguments.get(arguments.size() - 1) == node
+							&& node.getType().getDimensions() == 1
 							&& initializer != null && initializer.expressions() != null) {
 						IMethodBinding binding= m.resolveMethodBinding();
 						if (binding != null && binding.isVarargs() && binding.getParameterTypes().length == arguments.size()) {
@@ -65,6 +66,7 @@ public class UnnecessaryArrayCreationFix extends CompilationUnitRewriteOperation
 					List arguments= m.arguments();
 					ArrayInitializer initializer= node.getInitializer();
 					if (arguments.size() > 0 && arguments.get(arguments.size() - 1) == node
+							&& node.getType().getDimensions() == 1
 							&& initializer != null && initializer.expressions() != null) {
 						IMethodBinding binding= m.resolveMethodBinding();
 						if (binding != null && binding.isVarargs() && binding.getParameterTypes().length == arguments.size()) {

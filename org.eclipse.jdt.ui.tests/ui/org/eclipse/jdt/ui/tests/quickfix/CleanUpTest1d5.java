@@ -2235,6 +2235,10 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "  public int bar2() {\n" //
 				+ "      return foo(\"a\", \"b\", new String[] {\"c\", \"d\"});\n" //
 				+ "  };\n" //
+				+ "  public int foo2(String[] ...x) { return x.length; }\n" //
+				+ "  public int bar3() {\n" //
+				+ "      return foo2(new String[][] { new String[] {\"a\", \"b\"}});\n" //
+				+ "  };\n" //
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("X.java", sample, false, null);
 
@@ -2248,6 +2252,10 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "  };\n" //
 				+ "  public int bar2() {\n" //
 				+ "      return foo(\"a\", \"b\", new String[] {\"c\", \"d\"});\n" //
+				+ "  };\n" //
+				+ "  public int foo2(String[] ...x) { return x.length; }\n" //
+				+ "  public int bar3() {\n" //
+				+ "      return foo2(new String[][] { new String[] {\"a\", \"b\"}});\n" //
 				+ "  };\n" //
 				+ "}\n";
 		String expected1= sample;
