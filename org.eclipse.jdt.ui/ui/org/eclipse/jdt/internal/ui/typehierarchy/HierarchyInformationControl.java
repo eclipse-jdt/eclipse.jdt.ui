@@ -189,7 +189,7 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 		if (filterType.equals(typeToFindIn)) {
 			return filterMethod;
 		}
-		
+
 		ITypeHierarchy hierarchy= fLifeCycle.getHierarchy();
 
 		boolean filterOverrides= JavaModelUtil.isSuperType(hierarchy, typeToFindIn, filterType);

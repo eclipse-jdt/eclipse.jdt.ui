@@ -17,7 +17,7 @@ package org.eclipse.jdt.ui.text.java.correction;
 /**
  * Correction proposals can implement this interface to be invokable by a command (which can be
  * bound to a keyboard shortcut).
- * 
+ *
  * @since 3.8
  */
 public interface ICommandAccess {
@@ -34,7 +34,7 @@ public interface ICommandAccess {
 
 	/**
 	 * Returns the id of the command that should invoke this correction proposal.
-	 * 
+	 *
 	 * @return the id of the command or <code>null</code> if this proposal does not have a command.
 	 *         This id must start with {@link #COMMAND_ID_PREFIX} to be recognized as a correction
 	 *         command. In addition, the id must end with {@link #ASSIST_SUFFIX} to be recognized as

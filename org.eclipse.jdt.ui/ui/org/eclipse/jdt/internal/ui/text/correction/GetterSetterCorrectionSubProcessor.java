@@ -268,7 +268,7 @@ public class GetterSetterCorrectionSubProcessor {
 
 	/**
 	 * Proposes a getter for this field.
-	 * 
+	 *
 	 * @param context the proposal parameter
 	 * @param relevance relevance of this proposal
 	 * @return the proposal if available or null
@@ -334,7 +334,7 @@ public class GetterSetterCorrectionSubProcessor {
 
 	/**
 	 * Proposes a setter for this field.
-	 * 
+	 *
 	 * @param context the proposal parameter
 	 * @param relevance relevance of this proposal
 	 * @return the proposal if available or null

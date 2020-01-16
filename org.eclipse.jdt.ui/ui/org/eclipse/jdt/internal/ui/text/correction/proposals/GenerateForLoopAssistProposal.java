@@ -84,7 +84,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 
 	/**
 	 * Creates an instance of a {@link GenerateForLoopAssistProposal}.
-	 * 
+	 *
 	 * @param cu the current {@link ICompilationUnit}
 	 * @param currentStatement the {@link ExpressionStatement} representing the statement on which
 	 *            the assist was called
@@ -149,7 +149,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 
 	/**
 	 * Helper to generate a <code>foreach</code> loop to iterate over an {@link Iterable}.
-	 * 
+	 *
 	 * @param ast the {@link AST} instance to rewrite the loop to
 	 * @return the complete {@link ASTRewrite} object
 	 */
@@ -183,7 +183,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 	/**
 	 * Helper to generate an iterator based <code>for</code> loop to iterate over an
 	 * {@link Iterable}.
-	 * 
+	 *
 	 * @param ast the {@link AST} instance to rewrite the loop to
 	 * @return the complete {@link ASTRewrite} object
 	 */
@@ -219,7 +219,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 	/**
 	 * Generates the initializer for an iterator based <code>for</code> loop, which declares and
 	 * initializes the variable to loop over.
-	 * 
+	 *
 	 * @param rewrite the instance of {@link ASTRewrite}
 	 * @param loopVariableName the proposed name of the loop variable
 	 * @return a {@link VariableDeclarationExpression} to use as initializer
@@ -246,7 +246,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 	 * Generates the Assignment in an iterator based for, used in the first statement of an iterator
 	 * based <code>for</code> loop body, to retrieve the next element of the {@link Iterable}
 	 * instance.
-	 * 
+	 *
 	 * @param rewrite the current instance of {@link ASTRewrite}
 	 * @param loopOverType the {@link ITypeBinding} of the loop variable
 	 * @param loopVariableName the name of the loop variable
@@ -280,7 +280,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 
 	/**
 	 * Helper to generate an index based <code>for</code> loop to iterate over an array.
-	 * 
+	 *
 	 * @param ast the current {@link AST} instance to generate the {@link ASTRewrite} for
 	 * @return an applicable {@link ASTRewrite} instance
 	 */
@@ -311,7 +311,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 	 * Creates an {@link Assignment} as first expression appearing in a <code>for</code> loop's
 	 * body. This Assignment declares a local variable and initializes it using the array's current
 	 * element identified by the loop index.
-	 * 
+	 *
 	 * @param rewrite the current {@link ASTRewrite} instance
 	 * @param loopVariableName the name of the index variable in String representation
 	 * @return a completed {@link Assignment} containing the mentioned declaration and
@@ -346,7 +346,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 
 	/**
 	 * Creates an {@link InfixExpression} which is linked to the group of the variableToIncrement.
-	 * 
+	 *
 	 * @param rewrite the current {@link ASTRewrite} instance
 	 * @param variableToIncrement the name of the variable to generate the {@link InfixExpression}
 	 *            for
@@ -372,7 +372,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 	/**
 	 * Creates a {@link PostfixExpression} used to increment the loop variable of a <code>for</code>
 	 * loop to iterate over an array.
-	 * 
+	 *
 	 * @param rewrite the current {@link ASTRewrite} instance
 	 * @param variableToIncrement the name of the variable to increment
 	 * @return a filled {@link PostfixExpression} realizing an incrementation of the specified
@@ -391,7 +391,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 	/**
 	 * Generates a {@link VariableDeclarationExpression}, which initializes the loop variable to
 	 * iterate over an array.
-	 * 
+	 *
 	 * @param ast the current {@link AST} instance
 	 * @param loopVariableName the name of the variable which should be initialized
 	 * @return a filled {@link VariableDeclarationExpression}, declaring a int variable, which is
@@ -415,7 +415,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 	/**
 	 * Helper to generate an index based <code>for</code> loop to iterate over a {@link List}
 	 * implementation.
-	 * 
+	 *
 	 * @param ast the current {@link AST} instance to generate the {@link ASTRewrite} for
 	 * @return an applicable {@link ASTRewrite} instance
 	 */
@@ -447,7 +447,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 	 * Creates an {@link Assignment} as first expression appearing in an index based
 	 * <code>for</code> loop's body. This Assignment declares a local variable and initializes it
 	 * using the {@link List}'s current element identified by the loop index.
-	 * 
+	 *
 	 * @param rewrite the current {@link ASTRewrite} instance
 	 * @param loopVariableName the name of the index variable in String representation
 	 * @return a completed {@link Assignment} containing the mentioned declaration and
@@ -484,7 +484,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 	/**
 	 * Resolves name proposals by the given basename and adds a {@link LinkedPosition} to the
 	 * returned {@link SimpleName} expression.
-	 * 
+	 *
 	 * @param rewrite the current instance of an {@link ASTRewrite}
 	 * @param basename the base string to use for proposal calculation
 	 * @param excludedName a name that cannot be used for the variable; <code>null</code> if none
@@ -508,7 +508,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 	/**
 	 * Generates an empty statement, which is shown as blank line and is set as end position for the
 	 * cursor.
-	 * 
+	 *
 	 * @param rewrite the current {@link ASTRewrite} instance
 	 * @return an empty statement, shown as blank line
 	 */
@@ -520,7 +520,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 
 	/**
 	 * Retrieves name proposals for a fresh local variable.
-	 * 
+	 *
 	 * @param basename the basename of the proposals
 	 * @param excludedName a name that cannot be used for the variable; <code>null</code> if none
 	 * @return an array of proposal strings
@@ -543,7 +543,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 	/**
 	 * Extracts the type parameter of the variable contained in fCurrentExpression or the elements
 	 * type to iterate over an array using <code>foreach</code>.
-	 * 
+	 *
 	 * @param ast the current {@link AST} instance
 	 * @return the {@link ITypeBinding} of the elements to iterate over
 	 */

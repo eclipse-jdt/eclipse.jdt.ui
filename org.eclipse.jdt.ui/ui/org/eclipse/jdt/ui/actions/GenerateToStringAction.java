@@ -63,19 +63,19 @@ import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
  * <p>
  * The action is applicable to structured selections containing elements of type
  * {@link org.eclipse.jdt.core.IType}.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 3.5
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class GenerateToStringAction extends GenerateMethodAbstractAction {
-	
+
 	private static final String METHODNAME_TO_STRING= "toString"; //$NON-NLS-1$
-	
+
 	private List<IVariableBinding> fFields;
 
 	private List<IVariableBinding> fInheritedFields;
@@ -112,7 +112,7 @@ public class GenerateToStringAction extends GenerateMethodAbstractAction {
 	 * The action requires that the selection provided by the site's selection
 	 * provider is of type
 	 * {@link org.eclipse.jface.viewers.IStructuredSelection}.
-	 * 
+	 *
 	 * @param site the workbench site providing context information for this
 	 *            action
 	 */
@@ -127,9 +127,9 @@ public class GenerateToStringAction extends GenerateMethodAbstractAction {
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call
 	 * this constructor.
-	 * 
+	 *
 	 * @param editor the compilation unit editor
-	 * 
+	 *
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public GenerateToStringAction(CompilationUnitEditor editor) {
@@ -180,7 +180,7 @@ public class GenerateToStringAction extends GenerateMethodAbstractAction {
 	IWorkspaceRunnable createOperation(Object[] selectedBindings, CodeGenerationSettings settings, boolean regenerate, IJavaElement type, IJavaElement elementPosition) {
 		return operation= GenerateToStringOperation.createOperation(fTypeBinding, selectedBindings, fUnit, elementPosition, (ToStringGenerationSettings)settings, true, false);
 	}
-	
+
 	@Override
 	CodeGenerationSettings createSettings(IType type, SourceActionDialog dialog) {
 		ToStringGenerationSettings settings= ((GenerateToStringDialog) dialog).getGenerationSettings();
@@ -232,7 +232,7 @@ public class GenerateToStringAction extends GenerateMethodAbstractAction {
 				}
 			}
 			populateMembers(fInheritedFields, type.getFields(), fieldsToBindings);
-			
+
 			for (IMethodBinding candidateMethod : typeBinding.getDeclaredMethods()) {
 				if (!Modifier.isPrivate(candidateMethod.getModifiers()) && !Modifier.isStatic(candidateMethod.getModifiers()) && candidateMethod.getParameterTypes().length == 0 && !candidateMethod.getReturnType().getName().equals("void") && !contains(fMethods, candidateMethod) && !contains(fInheritedMethods, candidateMethod) && !candidateMethod.getName().equals("clone")) { //$NON-NLS-1$ //$NON-NLS-2$
 					methodsToBindings.put(candidateMethod.getJavaElement(), candidateMethod);
@@ -240,14 +240,14 @@ public class GenerateToStringAction extends GenerateMethodAbstractAction {
 			}
 			populateMembers(fInheritedMethods, type.getMethods(), methodsToBindings);
 		}
-		
+
 		return true;
 	}
 
 	/**
 	 * Populates <code>result</code> with the bindings from <code>membersToBindings</code>, sorted
 	 * in the order of <code>allMembers</code>.
-	 * 
+	 *
 	 * @param result list of bindings from membersToBindings, sorted in source order
 	 * @param allMembers all member elements in source order
 	 * @param membersToBindings map from {@link IMember} to {@link IBinding}

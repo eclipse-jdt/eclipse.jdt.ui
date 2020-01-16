@@ -461,7 +461,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		fVersionDependentRules.add(j14Matcher);
 
 		VersionedWordMatcher j15Matcher= new VersionedWordMatcher(defaultToken, JavaCore.VERSION_1_5, version);
-		
+
 		token= getToken(IJavaColorConstants.JAVA_KEYWORD);
 		for (String fgJava15Keyword : fgJava15Keywords) {
 			j15Matcher.addWord(fgJava15Keyword, token);

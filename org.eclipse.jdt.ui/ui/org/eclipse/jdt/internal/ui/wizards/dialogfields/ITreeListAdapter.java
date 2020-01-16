@@ -17,7 +17,7 @@ import org.eclipse.swt.events.KeyEvent;
 
 /**
  * Change listener used by <code>TreeListDialogField</code>
- * 
+ *
  * @param <E> the type of the root elements
  */
 public interface ITreeListAdapter<E> {

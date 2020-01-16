@@ -186,7 +186,7 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	 * @since 3.20
 	 */
 	public static final String ADD_TEXTBLOCK= "org.eclipse.jdt.ui.edit.text.java.add.textblock"; //$NON-NLS-1$
-	
+
 	/**
 	 * Action definition ID of the source -> format action
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.format"</code>).
@@ -235,7 +235,7 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	/**
 	 * Action definition ID of the source -> surround with try/multi-catch action (value
 	 * <code>"org.eclipse.jdt.ui.edit.text.java.surround.with.try.multicatch"</code>).
-	 * 
+	 *
 	 * @since 3.7.1
 	 */
 	public static final String SURROUND_WITH_TRY_MULTI_CATCH= "org.eclipse.jdt.ui.edit.text.java.surround.with.try.multicatch"; //$NON-NLS-1$
@@ -510,7 +510,7 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	 * @since 3.6
 	 */
 	public static final String OPEN_IMPLEMENTATION= "org.eclipse.jdt.ui.edit.text.java.open.implementation"; //$NON-NLS-1$
-	
+
 	/**
 	 * Action definition ID of the navigate -> open super implementation action
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.open.super.implementation"</code>).

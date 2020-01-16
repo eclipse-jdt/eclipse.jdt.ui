@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -49,7 +49,7 @@ public interface IJavaPartitions {
 	 * The identifier of the Java character partition content type.
 	 */
 	String JAVA_CHARACTER= "__java_character";  //$NON-NLS-1$
-	
+
 	/**
 	 * The identifier multi-line (JEP 355: Text Block) String partition content type.
 	 * @since 3.20

@@ -22,7 +22,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**
  * An image descriptor that draws a focus adornment on top of a base image.
- * 
+ *
  * @since 3.7
  */
 public class FocusDescriptor extends CompositeImageDescriptor {

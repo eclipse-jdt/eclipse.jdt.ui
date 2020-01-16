@@ -89,11 +89,11 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileManager
  * to the local variable has no effect on the original field.</p>
  * <p>Rrespects scoping if the problem occurs inside the initialization
  * of a local variable (by moving statements into the new then block).</p>
- * 
+ *
  * @since 3.9
  */
 public class ExtractToNullCheckedLocalProposal extends LinkedCorrectionProposal {
-	
+
 	private static final String LOCAL_NAME_POSITION_GROUP = "localName"; //$NON-NLS-1$
 
 	/** Protocol for rearranging the bits and pieces into a new code structure. */
@@ -102,7 +102,7 @@ public class ExtractToNullCheckedLocalProposal extends LinkedCorrectionProposal 
 		final Statement origStmt;
 		final Block block;
 		final TextEditGroup group;
-		
+
 		RearrangeStrategy(Statement origStmt, Block block, TextEditGroup group) {
 			this.origStmt= origStmt;
 			this.block= block;
@@ -134,9 +134,9 @@ public class ExtractToNullCheckedLocalProposal extends LinkedCorrectionProposal 
 
 		/** Strategy implementation for modifying statement list of the parent block. */
 		private static class ModifyBlock extends RearrangeStrategy {
-	
+
 			final ListRewrite blockRewrite;
-	
+
 			ModifyBlock(Statement origStmt, Block enclosingBlock, ASTRewrite rewrite, TextEditGroup group) {
 				super(origStmt, enclosingBlock, group);
 				// we're going to modify this block, create the rewrite for this task:
@@ -144,7 +144,7 @@ public class ExtractToNullCheckedLocalProposal extends LinkedCorrectionProposal 
 			}
 			@Override
 			public void insertLocalDecl(VariableDeclarationStatement localDecl) {
-				this.blockRewrite.insertBefore(localDecl, this.origStmt, this.group);			
+				this.blockRewrite.insertBefore(localDecl, this.origStmt, this.group);
 			}
 			@Override
 			public Statement createMoveTargetForOrigStmt() {
@@ -154,9 +154,9 @@ public class ExtractToNullCheckedLocalProposal extends LinkedCorrectionProposal 
 			public void insertIfStatement(IfStatement ifStmt, Block thenBlock) {
 				// inside a block replace old statement with wrapping if-statement
 				this.blockRewrite.replace(this.origStmt, ifStmt, this.group);
-			}	
+			}
 		}
-		
+
 		/** Variant that also respects scoping of an existing local variable declaration. */
 		private static class ModifyBlockWithLocalDecl extends ModifyBlock {
 			ModifyBlockWithLocalDecl(Statement origStmt, Block enclosingBlock, ASTRewrite rewrite, TextEditGroup group) {
@@ -179,9 +179,9 @@ public class ExtractToNullCheckedLocalProposal extends LinkedCorrectionProposal 
 
 		/** Strategy implementation for replacing a single statement with a new block. */
 		private static class ReplaceStatement extends RearrangeStrategy {
-	
+
 			final ASTRewrite rewrite;
-	
+
 			ReplaceStatement(Statement origStmt, ASTRewrite rewrite, TextEditGroup group) {
 				// did not have a block, create one now to hold new statements:
 				super(origStmt, rewrite.getAST().newBlock(), group);
@@ -189,7 +189,7 @@ public class ExtractToNullCheckedLocalProposal extends LinkedCorrectionProposal 
 			}
 			@Override
 			public void insertLocalDecl(VariableDeclarationStatement localDecl) {
-				this.block.statements().add(localDecl);	
+				this.block.statements().add(localDecl);
 			}
 			@Override
 			public Statement createMoveTargetForOrigStmt() {
@@ -200,14 +200,14 @@ public class ExtractToNullCheckedLocalProposal extends LinkedCorrectionProposal 
 				// did not have a block: add if-statement to new block
 				this.block.statements().add(ifStmt);
 				// and replace the single statement with this block
-				this.rewrite.replace(this.origStmt, this.block, this.group);			
+				this.rewrite.replace(this.origStmt, this.block, this.group);
 			}
 		}
 	}
 
 	private SimpleName fieldReference;
 	private CompilationUnit compilationUnit;
-	private ASTNode enclosingMethod; // MethodDeclaration or Initializer 
+	private ASTNode enclosingMethod; // MethodDeclaration or Initializer
 
 	public ExtractToNullCheckedLocalProposal(ICompilationUnit cu, CompilationUnit compilationUnit, SimpleName fieldReference, ASTNode enclosingMethod) {
 		super(FixMessages.ExtractToNullCheckedLocalProposal_extractToCheckedLocal_proposalName, cu, null, 100, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
@@ -218,7 +218,7 @@ public class ExtractToNullCheckedLocalProposal extends LinkedCorrectionProposal 
 
 	@Override
 	protected ASTRewrite getRewrite() throws CoreException {
-		
+
 		// infrastructure:
 		AST ast= this.compilationUnit.getAST();
 		ASTRewrite rewrite= ASTRewrite.create(ast);
@@ -231,7 +231,7 @@ public class ExtractToNullCheckedLocalProposal extends LinkedCorrectionProposal 
 		Statement origStmt= ASTNodes.getParent(this.fieldReference, Statement.class);
 		// determine suitable strategy for rearranging elements towards a new code structure:
 		RearrangeStrategy rearrangeStrategy= RearrangeStrategy.create(origStmt, rewrite, group);
-		
+
 		Expression toReplace;
 		ASTNode directParent= this.fieldReference.getParent();
 		if (directParent instanceof FieldAccess) {
@@ -253,19 +253,19 @@ public class ExtractToNullCheckedLocalProposal extends LinkedCorrectionProposal 
 		localFrag.setName(ast.newSimpleName(localName));
 		// ... initialization
 		localFrag.setInitializer((Expression) ASTNode.copySubtree(ast, toReplace));
-		
+
 		rearrangeStrategy.insertLocalDecl(localDecl);
 
 		// if statement:
 		IfStatement ifStmt= ast.newIfStatement();
-		
+
 		// condition:
 		InfixExpression nullCheck= ast.newInfixExpression();
 		nullCheck.setLeftOperand(ast.newSimpleName(localName));
 		nullCheck.setRightOperand(ast.newNullLiteral());
 		nullCheck.setOperator(InfixExpression.Operator.NOT_EQUALS);
 		ifStmt.setExpression(nullCheck);
-		
+
 		// then block: the original statement
 		Block thenBlock = ast.newBlock();
 		thenBlock.statements().add(rearrangeStrategy.createMoveTargetForOrigStmt());
@@ -274,7 +274,7 @@ public class ExtractToNullCheckedLocalProposal extends LinkedCorrectionProposal 
 		SimpleName dereferencedName= ast.newSimpleName(localName);
 		rewrite.replace(toReplace, dereferencedName, group);
 
-		
+
 		// else block: a Todo comment
 		Block elseBlock = ast.newBlock();
 		String elseStatement= "// TODO "+FixMessages.ExtractToNullCheckedLocalProposal_todoHandleNullDescription; //$NON-NLS-1$
@@ -288,14 +288,14 @@ public class ExtractToNullCheckedLocalProposal extends LinkedCorrectionProposal 
 		EmptyStatement todoNode= (EmptyStatement) rewrite.createStringPlaceholder(elseStatement, ASTNode.EMPTY_STATEMENT);
 		elseBlock.statements().add(todoNode);
 		ifStmt.setElseStatement(elseBlock);
-		
+
 		// link all three occurrences of the new local variable:
 		addLinkedPosition(rewrite.track(localFrag.getName()), true/*first*/, LOCAL_NAME_POSITION_GROUP);
 		addLinkedPosition(rewrite.track(nullCheck.getLeftOperand()), false, LOCAL_NAME_POSITION_GROUP);
 		addLinkedPosition(rewrite.track(dereferencedName), false, LOCAL_NAME_POSITION_GROUP);
 
 		rearrangeStrategy.insertIfStatement(ifStmt, thenBlock);
-		
+
 		return rewrite;
 	}
 
@@ -310,7 +310,7 @@ public class ExtractToNullCheckedLocalProposal extends LinkedCorrectionProposal 
 		return StubUtility.getLocalNameSuggestions(javaProject, identifier, 0, names)[0];
 	}
 
-	/** 
+	/**
 	 * Create a fresh type reference
 	 * @param typeBinding the type we want to refer to
 	 * @param ast AST for creating new nodes
@@ -322,10 +322,10 @@ public class ExtractToNullCheckedLocalProposal extends LinkedCorrectionProposal 
 		int dimensions= typeBinding.getDimensions();
 		if (dimensions > 0)
 			typeBinding= typeBinding.getElementType();
-		
+
 		// unwrap parameterized type:
 		ITypeBinding[] typeArguments= typeBinding.getTypeArguments();
-		typeBinding= typeBinding.getErasure();	
+		typeBinding= typeBinding.getErasure();
 
 		// create leaf type:
 		Type elementType = (typeBinding.isPrimitive())
@@ -339,7 +339,7 @@ public class ExtractToNullCheckedLocalProposal extends LinkedCorrectionProposal 
 				parameterizedType.typeArguments().add(newType(typeArgument, ast, imports));
 			elementType = parameterizedType;
 		}
-		
+
 		// re-wrap as array type:
 		if (dimensions > 0)
 			return ast.newArrayType(elementType, dimensions);

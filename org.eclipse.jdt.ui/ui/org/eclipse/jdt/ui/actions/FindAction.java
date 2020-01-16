@@ -300,7 +300,7 @@ public abstract class FindAction extends SelectionDispatchAction {
 
 	/**
 	 * Executes this action for the given Java element List.
-	 * 
+	 *
 	 * @param elements the Java elements to be found
 	 * @since 3.12
 	 */
@@ -392,7 +392,7 @@ public abstract class FindAction extends SelectionDispatchAction {
 	boolean isLastElement() {
 		return numberOfElements == processedElementIndex;
 	}
-	
+
 	boolean isFirstElement() {
 		return processedElementIndex == 1;
 	}

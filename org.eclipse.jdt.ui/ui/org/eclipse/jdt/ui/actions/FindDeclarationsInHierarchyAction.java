@@ -115,7 +115,7 @@ public class FindDeclarationsInHierarchyAction extends FindDeclarationsAction {
 		String description= factory.getHierarchyScopeDescription(type);
 		return new ElementQuerySpecification(element, getLimitTo(), scope, description);
 	}
-	
+
 	@Override
 	boolean canOperateOn(IStructuredSelection sel) {
 		if (sel == null || sel.isEmpty() || sel.size() > 1) {

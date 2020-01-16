@@ -18,7 +18,7 @@ import org.eclipse.swt.widgets.Composite;
 
 /**
  * Provides the UI to configure a clean up.
- * 
+ *
  * @since 3.5
  */
 public interface ICleanUpConfigurationUI {
@@ -29,14 +29,14 @@ public interface ICleanUpConfigurationUI {
 	 * <strong>Note:</strong> If an option gets changed in the UI then this must immediately update
 	 * the corresponding option in the here given clean up options.
 	 * </p>
-	 * 
+	 *
 	 * @param options the options to modify
 	 */
 	public void setOptions(CleanUpOptions options);
 
 	/**
 	 * Creates the contents for this clean up configuration UI.
-	 * 
+	 *
 	 * @param parent the parent composite
 	 * @return created content control
 	 */
@@ -44,21 +44,21 @@ public interface ICleanUpConfigurationUI {
 
 	/**
 	 * Returns the number of clean ups that can be configured.
-	 * 
+	 *
 	 * @return the number of clean ups that can be configured
 	 */
 	public int getCleanUpCount();
 
 	/**
 	 * Returns the number of selected clean ups.
-	 * 
+	 *
 	 * @return the number of selected clean ups at the moment
 	 */
 	public int getSelectedCleanUpCount();
 
 	/**
 	 * A code snippet which complies to the current settings.
-	 * 
+	 *
 	 * @return a code snippet
 	 */
 	public String getPreview();

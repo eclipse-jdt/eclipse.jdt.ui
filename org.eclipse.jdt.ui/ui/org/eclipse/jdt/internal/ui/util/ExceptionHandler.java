@@ -66,7 +66,7 @@ public class ExceptionHandler {
 	/**
 	 * Handles the given <code>IStatus</code>. The workbench shell is used as a parent for the
 	 * dialog window.
-	 * 
+	 *
 	 * @param status the <code>IStatus</code> to be handled
 	 * @param title the dialog window's window title
 	 * @param message message to be displayed by the dialog window

@@ -38,14 +38,14 @@ import org.eclipse.jdt.core.IJavaProject;
  * <p>
  * At the end {@link #checkPostConditions(IProgressMonitor)} is called.
  * </p>
- * 
+ *
  * @since 3.5
  */
 public interface ICleanUp {
 
 	/**
 	 * Sets the options that will be used.
-	 * 
+	 *
 	 * @param options the options to use
 	 */
 	void setOptions(CleanUpOptions options);
@@ -55,7 +55,7 @@ public interface ICleanUp {
 	 * <p>
 	 * <strong>Note:</strong> This method must only be called after the options have been set.
 	 * </p>
-	 * 
+	 *
 	 * @return descriptions an array of {@linkplain String strings} or <code>null</code>
 	 */
 	String[] getStepDescriptions();
@@ -65,7 +65,7 @@ public interface ICleanUp {
 	 * <p>
 	 * <strong>Note:</strong> This method must only be called after the options have been set.
 	 * </p>
-	 * 
+	 *
 	 * @return the requirements used for {@link #createFix(CleanUpContext)} to work
 	 */
 	CleanUpRequirements getRequirements();
@@ -74,7 +74,7 @@ public interface ICleanUp {
 	 * After call to checkPreConditions clients will start creating fixes for
 	 * <code>compilationUnits</code> in <code>project</code> unless the result of checkPreConditions
 	 * contains a fatal error
-	 * 
+	 *
 	 * @param project the project to clean up
 	 * @param compilationUnits an array of compilation units to clean up, all member of <code>project</code>
 	 * @param monitor the monitor to show progress
@@ -86,7 +86,7 @@ public interface ICleanUp {
 	/**
 	 * Create an <code>ICleanUpFix</code> which fixes all problems in <code>context</code> or
 	 * <code>null</code> if nothing to fix.
-	 * 
+	 *
 	 * @param context a context containing all information requested by {@link #getRequirements()}
 	 * @return the fix for the problems or <code>null</code> if nothing to fix
 	 * @throws CoreException if an unexpected error occurred
@@ -95,7 +95,7 @@ public interface ICleanUp {
 
 	/**
 	 * Called when done cleaning up.
-	 * 
+	 *
 	 * @param monitor the monitor to show progress
 	 * @return the result of the postcondition check, not null
 	 * @throws CoreException if an unexpected error occurred

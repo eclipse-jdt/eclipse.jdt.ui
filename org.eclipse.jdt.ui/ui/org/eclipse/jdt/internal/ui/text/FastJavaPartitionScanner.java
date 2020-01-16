@@ -316,9 +316,9 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaPa
 							fTokenLength= fPrefixLength;
 							break;
 						}
-					}		
+					}
 					else {
-						fLast= NONE; // ignore fLast	
+						fLast= NONE; // ignore fLast
 						if (fTokenLength > 0)
 							return preFix(JAVA, STRING, NONE, 1);
 						else {

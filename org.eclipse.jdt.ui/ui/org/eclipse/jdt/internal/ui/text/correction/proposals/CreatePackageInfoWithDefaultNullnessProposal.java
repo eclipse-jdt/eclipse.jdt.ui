@@ -128,13 +128,13 @@ public final class CreatePackageInfoWithDefaultNullnessProposal extends ChangeCo
 	}
 
 	public void resolve(MultiFixTarget[] problems, IProgressMonitor monitor) throws CoreException {
-		/* 
-		 * if there are multiple problems for different source folders with the same package and they are in the same project, 
+		/*
+		 * if there are multiple problems for different source folders with the same package and they are in the same project,
 		 * only create a package-info.java in one of them. prefer main sources to test sources, for now by sorting by folder
 		 * name (e.g. "/proj/src/main/java" < "/proj/src/test/java", "/proj/src" < "/proj/src-tests").
-		 * 
-		 * similar, if they are in different projects and one is on the classpath of the other, create it in the 
-		 * project that cannot see the other. 
+		 *
+		 * similar, if they are in different projects and one is on the classpath of the other, create it in the
+		 * project that cannot see the other.
 		 */
 		HashMap<String, ArrayList<MultiFixTarget>> packageToTarget= new HashMap<>();
 		ArrayList<IPackageFragment> removeList= new ArrayList<>();

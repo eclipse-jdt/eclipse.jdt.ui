@@ -122,12 +122,12 @@ public class JarWriter3 {
 			throw JarPackagerUtil.createCoreException(exception.getLocalizedMessage(), exception);
 		}
 	}
-	
+
 	/**
 	 * Creates the directory entries for the given path and writes it to the current archive.
-	 * 
+	 *
 	 * @param destinationPath the path to add
-	 * 
+	 *
 	 * @throws IOException if an I/O error has occurred
 	 */
 	protected void addDirectories(IPath destinationPath) throws IOException {
@@ -136,9 +136,9 @@ public class JarWriter3 {
 
 	/**
 	 * Creates the directory entries for the given path and writes it to the current archive.
-	 * 
+	 *
 	 * @param destPath the path to add
-	 * 
+	 *
 	 * @throws IOException if an I/O error has occurred
 	 * @since 3.5
 	 */
