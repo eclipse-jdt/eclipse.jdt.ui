@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2011 IBM Corporation and others.
+ * Copyright (c) 2003, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,7 +13,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.navigator;
 
-import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.viewers.TreeViewer;
 
@@ -29,59 +28,59 @@ import org.eclipse.jdt.ui.actions.OpenAction;
 import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
 
 public class PackageExplorerOpenActionProvider extends CommonActionProvider {
-
-
-	private IAction fOpenAndExpand;
+	private OpenAndExpand fOpenAndExpand;
 	private OpenEditorActionGroup fOpenGroup;
 
-	private boolean fInViewPart = false;
+	private boolean fInViewPart;
 
 	@Override
 	public void fillActionBars(IActionBars actionBars) {
 		if (fInViewPart) {
 			fOpenGroup.fillActionBars(actionBars);
 
-			if (fOpenAndExpand == null && fOpenGroup.getOpenAction().isEnabled()) // TODO: is not updated!
+			if (fOpenAndExpand == null && fOpenGroup.getOpenAction().isEnabled()) {
 				actionBars.setGlobalActionHandler(ICommonActionConstants.OPEN, fOpenGroup.getOpenAction());
-			else if (fOpenAndExpand != null && fOpenAndExpand.isEnabled())
-				actionBars.setGlobalActionHandler(ICommonActionConstants.OPEN, fOpenAndExpand);
+			} else if (fOpenAndExpand != null) {
+				// Enabling will be updated on selection change however the fillActionBars can also be triggered
+				// from selection change listener and might run before action enabling is matching the current selection
+				fOpenAndExpand.update(fOpenAndExpand.getSelection());
+				if (fOpenAndExpand.isEnabled()) {
+					actionBars.setGlobalActionHandler(ICommonActionConstants.OPEN, fOpenAndExpand);
+				}
+			}
 		}
-
 	}
 
 	@Override
 	public void fillContextMenu(IMenuManager menu) {
-
-		if (fInViewPart) {
-			if (fOpenGroup.getOpenAction().isEnabled()) {
-				fOpenGroup.fillContextMenu(menu);
-			}
+		if (fInViewPart && fOpenGroup.getOpenAction().isEnabled()) {
+			fOpenGroup.fillContextMenu(menu);
 		}
 	}
 
 	@Override
 	public void init(ICommonActionExtensionSite site) {
-
 		ICommonViewerWorkbenchSite workbenchSite = null;
-		if (site.getViewSite() instanceof ICommonViewerWorkbenchSite)
+		if (site.getViewSite() instanceof ICommonViewerWorkbenchSite) {
 			workbenchSite = (ICommonViewerWorkbenchSite) site.getViewSite();
+		}
 
-		if (workbenchSite != null) {
-			if (workbenchSite.getPart() != null && workbenchSite.getPart() instanceof IViewPart) {
-				IViewPart viewPart = (IViewPart) workbenchSite.getPart();
+		if (workbenchSite != null && workbenchSite.getPart() != null && workbenchSite.getPart() instanceof IViewPart) {
+			IViewPart viewPart = (IViewPart) workbenchSite.getPart();
 
-				fOpenGroup = new OpenEditorActionGroup(viewPart);
+			fOpenGroup = new OpenEditorActionGroup(viewPart);
 
-				if (site.getStructuredViewer() instanceof TreeViewer)
-					fOpenAndExpand = new OpenAndExpand(workbenchSite.getSite(), (OpenAction) fOpenGroup.getOpenAction(), (TreeViewer) site.getStructuredViewer());
-				fInViewPart = true;
+			if (site.getStructuredViewer() instanceof TreeViewer) {
+				fOpenAndExpand = new OpenAndExpand(workbenchSite.getSite(), (OpenAction) fOpenGroup.getOpenAction(), (TreeViewer) site.getStructuredViewer());
 			}
+			fInViewPart = true;
 		}
 	}
 
 	@Override
 	public void setContext(ActionContext context) {
 		super.setContext(context);
+
 		if (fInViewPart) {
 			fOpenGroup.setContext(context);
 		}
@@ -93,9 +92,10 @@ public class PackageExplorerOpenActionProvider extends CommonActionProvider {
 	 */
 	@Override
 	public void dispose() {
-		if (fOpenGroup != null)
+		if (fOpenGroup != null) {
 			fOpenGroup.dispose();
+		}
+
 		super.dispose();
 	}
-
 }
