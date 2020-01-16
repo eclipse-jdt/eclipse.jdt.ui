@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2019 IBM Corporation and others.
+ * Copyright (c) 2005, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -32,6 +32,7 @@ import org.eclipse.jdt.internal.corext.template.java.SignatureUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.text.CompletionTimeoutProgressMonitor;
 import org.eclipse.jdt.internal.ui.text.java.ContentAssistHistory.RHSHistory;
 
 /**
@@ -303,7 +304,7 @@ public class JavaContentAssistInvocationContext extends ContentAssistInvocationC
 		collector.setIgnored(CompletionProposal.KEYWORD, false);
 
 		try {
-			cu.codeComplete(getInvocationOffset(), collector);
+			cu.codeComplete(getInvocationOffset(), collector, new CompletionTimeoutProgressMonitor());
 			if (fCoreContext == null) {
 				fCoreContext= collector.getContext();
 			}

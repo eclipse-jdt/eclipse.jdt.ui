@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Nicolaj Hoess.
+ * Copyright (c) 2019, 2020 Nicolaj Hoess and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -55,6 +55,7 @@ import org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.CompletionTimeoutProgressMonitor;
 import org.eclipse.jdt.internal.ui.text.template.contentassist.PostfixTemplateEngine;
 import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateEngine;
 
@@ -127,7 +128,7 @@ public class PostfixCompletionProposalComputer extends AbstractTemplateCompletio
 			collector.setInvocationContext(context);
 			collector.setRequireExtendedContext(true);
 			try {
-				cu.codeComplete(context.getInvocationOffset(), collector);
+				cu.codeComplete(context.getInvocationOffset(), collector, new CompletionTimeoutProgressMonitor());
 			} catch (JavaModelException e) {
 				// continue
 			}

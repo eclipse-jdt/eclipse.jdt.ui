@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -36,6 +36,8 @@ import org.eclipse.jdt.core.manipulation.TypeKinds;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.TypeFilter;
+
+import org.eclipse.jdt.internal.ui.text.CompletionTimeoutProgressMonitor;
 
 public class SimilarElementsRequestor extends CompletionRequestor {
 
@@ -165,7 +167,7 @@ public class SimilarElementsRequestor extends CompletionRequestor {
 
 	private SimilarElement[] process(ICompilationUnit cu, int pos) throws JavaModelException {
 		try {
-			cu.codeComplete(pos, this);
+			cu.codeComplete(pos, this, new CompletionTimeoutProgressMonitor());
 			processKeywords();
 			return fResult.toArray(new SimilarElement[fResult.size()]);
 		} finally {
@@ -279,7 +281,7 @@ public class SimilarElementsRequestor extends CompletionRequestor {
 			}
 			requestor.setFavoriteReferences(favorites);
 			
-			newCU.codeComplete(offset, requestor);
+			newCU.codeComplete(offset, requestor, new CompletionTimeoutProgressMonitor());
 			
 			return result.toArray(new String[result.size()]);
 		} finally {
