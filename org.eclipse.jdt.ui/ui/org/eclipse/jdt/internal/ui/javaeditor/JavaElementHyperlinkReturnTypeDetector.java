@@ -31,7 +31,7 @@ import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 
 /**
  * Java element method return type hyperlink detector.
- * 
+ *
  * @since 3.7
  */
 public class JavaElementHyperlinkReturnTypeDetector extends JavaElementHyperlinkDetector {

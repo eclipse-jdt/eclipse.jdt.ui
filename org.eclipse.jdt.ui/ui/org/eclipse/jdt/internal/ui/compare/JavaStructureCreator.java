@@ -369,7 +369,7 @@ public class JavaStructureCreator extends StructureCreator {
 	/**
 	 * Tries to detect certain combinations of additions and deletions as renames or signature
 	 * changes and folders them into a single node.
-	 * 
+	 *
 	 * @param differencer the differencer
 	 * @param root the diff container root
 	 */

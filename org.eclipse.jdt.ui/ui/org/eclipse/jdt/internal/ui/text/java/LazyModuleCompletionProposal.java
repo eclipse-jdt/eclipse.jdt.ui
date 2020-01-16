@@ -23,7 +23,7 @@ import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 public class LazyModuleCompletionProposal extends LazyJavaCompletionProposal {
 
 	private ICompilationUnit fCompilationUnit;
-	
+
 	public LazyModuleCompletionProposal(CompletionProposal proposal, JavaContentAssistInvocationContext context) {
 		super(proposal, context);
 		fCompilationUnit= context.getCompilationUnit();

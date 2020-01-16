@@ -485,7 +485,7 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 		boolean matchingBrackets= getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_MATCHING_BRACKETS);
 		boolean highlightBracketAtCaretLocation= getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_HIGHLIGHT_BRACKET_AT_CARET_LOCATION);
 		boolean enclosingBrackets= getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_ENCLOSING_BRACKETS);
-		
+
 		fBracketHighlightingCheckbox.setSelection(matchingBrackets);
 		fEnclosingBracketsRadioButton.setSelection(enclosingBrackets);
 		if (!enclosingBrackets) {

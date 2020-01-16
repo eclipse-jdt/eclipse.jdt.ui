@@ -339,25 +339,25 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 
         return null;
     }
-    
+
 	/**
 	 * Sets the viewer's background color to the given control's background color.
 	 * The background color is <em>only</em> set if it's visibly distinct from the
 	 * default Java source text color.
-	 * 
+	 *
 	 * @param control the control with the default background color
 	 * @since 3.7
 	 */
 	public void adaptBackgroundColor(Control control) {
 		// workaround for dark editor background color, see https://bugs.eclipse.org/330680
-		
+
 		Color defaultColor= control.getBackground();
 		float[] defaultBgHSB= defaultColor.getRGB().getHSB();
-		
+
 		Color javaDefaultColor= JavaUI.getColorManager().getColor(IJavaColorConstants.JAVA_DEFAULT);
 		RGB javaDefaultRGB= javaDefaultColor != null ? javaDefaultColor.getRGB() : new RGB(255, 255, 255);
 		float[] javaDefaultHSB= javaDefaultRGB.getHSB();
-		
+
 		if (Math.abs(defaultBgHSB[2] - javaDefaultHSB[2]) >= 0.5f) {
 			getTextWidget().setBackground(defaultColor);
 			if (fBackgroundColor != null) {

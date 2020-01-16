@@ -44,7 +44,7 @@ public class JavaWorkingSetUpdater implements IWorkingSetUpdater, IElementChange
 	 */
 	@Deprecated
 	public static final String ID= IWorkingSetIDs.JAVA;
-	
+
 
 	private List<IWorkingSet> fWorkingSets;
 

@@ -58,7 +58,7 @@ public class JavaTypeCompletionProposal extends JavaCompletionProposal {
 	public JavaTypeCompletionProposal(String replacementString, ICompilationUnit cu, int replacementOffset, int replacementLength, Image image, StyledString displayString, int relevance, String fullyQualifiedTypeName) {
 		this(replacementString, cu, replacementOffset, replacementLength, image, displayString, relevance, fullyQualifiedTypeName, null);
 	}
-	
+
 	public JavaTypeCompletionProposal(String replacementString, ICompilationUnit cu, int replacementOffset, int replacementLength, Image image, StyledString displayString, int relevance, String fullyQualifiedTypeName, JavaContentAssistInvocationContext invocationContext) {
 		super(replacementString, replacementOffset, replacementLength, image, displayString, relevance, false, invocationContext);
 		fCompilationUnit= cu;
@@ -68,7 +68,7 @@ public class JavaTypeCompletionProposal extends JavaCompletionProposal {
 
 	/**
 	 * Updates the replacement string.
-	 * 
+	 *
 	 * @param document the document
 	 * @param trigger the trigger
 	 * @param offset the offset

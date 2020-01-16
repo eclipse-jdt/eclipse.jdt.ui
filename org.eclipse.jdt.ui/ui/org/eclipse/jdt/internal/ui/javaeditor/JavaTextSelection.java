@@ -64,14 +64,14 @@ public class JavaTextSelection extends TextSelection {
 
 	/**
 	 * Indicates whether the selection node has been checked to be of type <code>Annotation</code>.
-	 * 
+	 *
 	 * @since 3.7
 	 */
 	private boolean fInAnnotationRequested;
 
 	/**
 	 * Indicates whether selection node is of type <code>Annotation</code>.
-	 * 
+	 *
 	 * @since 3.7
 	 */
 	private boolean fInAnnotation;
@@ -233,7 +233,7 @@ public class JavaTextSelection extends TextSelection {
 	/**
 	 * Resolves the selected nodes and returns <code>true</code> if the node or any of its ancestors
 	 * is of type <code>Annotation</code>, <code>false</code> otherwise.
-	 * 
+	 *
 	 * @return <code>true</code> if the node or any of its ancestors is of type
 	 *         <code>Annotation</code>, <code>false</code> otherwise
 	 * @since 3.7

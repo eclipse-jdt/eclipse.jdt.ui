@@ -837,7 +837,7 @@ public final class JavaIndenter {
 
 	/**
 	 * Tells whether the given string is a continuation expression.
-	 * 
+	 *
 	 * @param offset the offset for which the check is done
 	 * @return <code>true</code> if the offset is part of a string continuation, <code>false</code>
 	 *         otherwise
@@ -858,7 +858,7 @@ public final class JavaIndenter {
 
 	/**
 	 * Checks if extra indentation for second line of string continuation is required.
-	 * 
+	 *
 	 * @param offset the offset for which the check is done
 	 * @return returns <code>true</code> if extra indentation for second line of string continuation
 	 *         is required
@@ -922,7 +922,7 @@ public final class JavaIndenter {
 	 * findReferencePosition(offset, danglingElse, matchBrace, matchParen, matchCase, throwsClause)}
 	 * where <code>throwsClause</code> indicates whether a throws clause was found at
 	 * <code>position</code>.
-	 * 
+	 *
 	 * @param offset the offset for which the reference is computed
 	 * @param danglingElse whether a dangling else should be assumed at <code>position</code>
 	 * @param matchBrace whether the position of the matching brace should be returned instead of
@@ -945,7 +945,7 @@ public final class JavaIndenter {
 	 * a method declaration where parameters should be aligned), <code>fAlign</code> will contain
 	 * the absolute position of the alignment reference in <code>fDocument</code>, otherwise
 	 * <code>fAlign</code> is set to <code>JavaHeuristicScanner.NOT_FOUND</code>.
-	 * 
+	 *
 	 * @param offset the offset for which the reference is computed
 	 * @param danglingElse whether a dangling else should be assumed at <code>position</code>
 	 * @param matchBrace whether the position of the matching brace should be returned instead of
@@ -1163,12 +1163,12 @@ public final class JavaIndenter {
 	/**
 	 * Checks whether the Symbols.TokenLBRACE after <code>offset</code> probably represents the
 	 * beginning of a method body declaration.
-	 * 
+	 *
 	 * @param offset the document offset for which {@link #peekChar(int) peekChar(offset)} returns
 	 *            Symbols.TokenLBRACE
 	 * @return <code>true</code> if the left brace after <code>offset</code> looks like the
 	 *         beginning of a method body declaration, <code>false</code> otherwise
-	 * 
+	 *
 	 * @since 3.9
 	 */
 	private boolean looksLikeMethodDeclLBrace(int offset) {
@@ -1210,7 +1210,7 @@ public final class JavaIndenter {
 	/**
 	 * Checks if the statement at position is itself a continuation of the previous, else sets the
 	 * indentation to Continuation Indent.
-	 * 
+	 *
 	 * @return the position of the token
 	 * @since 3.7
 	 */
@@ -1235,7 +1235,7 @@ public final class JavaIndenter {
 
 	/**
 	 * Checks if the semicolon at the current position is part of a for statement.
-	 * 
+	 *
 	 * @return returns <code>true</code> if current position is part of for statement
 	 * @since 3.7
 	 */
@@ -1263,7 +1263,7 @@ public final class JavaIndenter {
 
 	/**
 	 * Checks if the semicolon at the current position is part of a try with resources statement.
-	 * 
+	 *
 	 * @return returns <code>true</code> if current position is part of try with resources statement
 	 * @since 3.7
 	 */
@@ -1635,7 +1635,7 @@ public final class JavaIndenter {
 
 	/**
 	 * Returns the contents of the current token.
-	 * 
+	 *
 	 * @return the contents of the current token
 	 * @throws BadLocationException if the indices are out of bounds
 	 * @since 3.1
@@ -1826,7 +1826,7 @@ public final class JavaIndenter {
 
 	/**
 	 * Checks if the semicolon at the current position is part of enum body declaration.
-	 * 
+	 *
 	 * @return returns <code>true</code> if the semicolon at the current position is part of enum
 	 *         body declaration
 	 * @since 3.11
@@ -1901,14 +1901,14 @@ public final class JavaIndenter {
 	 * be a <code>catch</code> or <code>finally</code> keyword. Returns <code>true</code> if a
 	 * matching <code>try</code> could be found, <code>false</code> otherwise. The cursor (
 	 * <code>fPosition</code>) is set to the offset of the <code>try</code> token.
-	 * 
+	 *
 	 * @return <code>true</code> if a matching <code>try</code> token was found, <code>false</code>
 	 *         otherwise
 	 * @since 3.7
 	 */
 	private boolean skipNextTRY() {
 		Assert.isTrue(fToken == Symbols.TokenCATCH || fToken == Symbols.TokenFINALLY);
-	
+
 		while (true) {
 			nextToken();
 			switch (fToken) {
@@ -1919,11 +1919,11 @@ public final class JavaIndenter {
 				case Symbols.TokenGREATERTHAN:
 					skipScope();
 					break;
-	
+
 				case Symbols.TokenTRY:
 					// found it
 					return true;
-	
+
 					// shortcut scope starts
 				case Symbols.TokenLPAREN:
 				case Symbols.TokenLBRACE:
@@ -2013,7 +2013,7 @@ public final class JavaIndenter {
 	/**
 	 * Checks whether the current position represents a method call in string continuation. The
 	 * current token should represent the left parenthesis of method call.
-	 * 
+	 *
 	 * @return <code>true</code> if the current position looks like a method call in string
 	 *         continuation, <code>false</code> otherwise
 	 * @since 3.11
@@ -2080,7 +2080,7 @@ public final class JavaIndenter {
 	/**
 	 * Returns <code>true</code> if the current tokens look like an annotation (i.e. an annotation
 	 * name (potentially qualified) preceded by an at-sign).
-	 * 
+	 *
 	 * @return <code>true</code> if the current position looks like an annotation.
 	 * @since 3.7
 	 */
@@ -2099,7 +2099,7 @@ public final class JavaIndenter {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Returns <code>true</code> if the current tokens look like an anonymous type declaration
 	 * header (i.e. a type name (potentially qualified) and a new keyword). The heuristic calls

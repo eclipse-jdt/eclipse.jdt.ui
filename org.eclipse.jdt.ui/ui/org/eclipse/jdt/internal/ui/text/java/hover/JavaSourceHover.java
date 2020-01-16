@@ -91,7 +91,7 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 
 	/**
 	 * The hovered Java element to get the source.
-	 * 
+	 *
 	 * @since 3.14
 	 */
 	private IJavaElement fJavaElement;

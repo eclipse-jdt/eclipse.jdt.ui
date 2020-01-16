@@ -83,8 +83,8 @@ public final class JavaHeuristicScanner implements Symbols {
 		/**
 		 * Asks the condition to return the next position to query. The default
 		 * is to return the next/previous position.
-		 * 
-		 * @param position the position 
+		 *
+		 * @param position the position
 		 * @param forward <code>true</code> if next position should be returned
 		 * @return the next position to scan
 		 */
@@ -701,7 +701,7 @@ public final class JavaHeuristicScanner implements Symbols {
 	 * <code>position</code> and &gt; <code>bound</code> and
 	 * <code>Character.isWhitespace(fDocument.getChar(pos))</code> evaluates to <code>false</code>
 	 * and the position can be in any partition.
-	 * 
+	 *
 	 * @param position the first character position in <code>fDocument</code> to be considered
 	 * @param bound the first position in <code>fDocument</code> to not consider any more, with
 	 *            <code>bound</code> &lt; <code>position</code>, or <code>UNBOUND</code>
@@ -718,7 +718,7 @@ public final class JavaHeuristicScanner implements Symbols {
 	 * Finds the lowest position <code>p</code> in <code>fDocument</code> such that
 	 * <code>start</code> &lt;= p &lt; <code>bound</code> and
 	 * <code>condition.stop(fDocument.getChar(p), p)</code> evaluates to <code>true</code>.
-	 * 
+	 *
 	 * @param start the first character position in <code>fDocument</code> to be considered
 	 * @param bound the first position in <code>fDocument</code> to not consider any more, with
 	 *            <code>bound</code> &gt; <code>start</code>, or <code>UNBOUND</code>

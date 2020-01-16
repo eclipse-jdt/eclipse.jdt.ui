@@ -133,7 +133,7 @@ public final class JavaModelLabelProvider extends AppearanceAwareLabelProvider {
 
 	/**
 	 * Tells whether the folder's project is a Java project.
-	 * 
+	 *
 	 * @param folder the folder
 	 * @return <code>true</code> if the folder is in a Java project
 	 * @since 3.6

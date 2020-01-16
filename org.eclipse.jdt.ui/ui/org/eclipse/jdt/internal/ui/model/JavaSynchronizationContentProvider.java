@@ -143,7 +143,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 
 	/**
 	 * Returns the java element associated with the project.
-	 * 
+	 *
 	 * @param project the project, can be <code>null</code>
 	 * @return the associated java element, or <code>null</code> if the project is not a Java
 	 *         project

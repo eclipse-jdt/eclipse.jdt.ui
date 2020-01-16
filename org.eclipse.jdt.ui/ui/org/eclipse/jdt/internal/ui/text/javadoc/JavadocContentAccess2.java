@@ -124,7 +124,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
 public class JavadocContentAccess2 {
 
 	private static final String BASE_URL_COMMENT_INTRO= "<!-- baseURL=\""; //$NON-NLS-1$
-	
+
 	private static final String BLOCK_TAG_START= "<dl>"; //$NON-NLS-1$
 	private static final String BLOCK_TAG_END= "</dl>"; //$NON-NLS-1$
 
@@ -145,12 +145,12 @@ public class JavadocContentAccess2 {
 	 * >1.5</a>, and <a href=
 	 * "http://download.oracle.com/javase/6/docs/technotes/tools/windows/javadoc.html#inheritingcomments"
 	 * >1.6</a>.
-	 * 
+	 *
 	 * <p>
 	 * Unfortunately, the implementation is broken in Javadoc implementations since 1.5, see <a
 	 * href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6376959">Sun's bug</a>.
 	 * </p>
-	 * 
+	 *
 	 * <p>
 	 * We adhere to the spec.
 	 * </p>
@@ -226,7 +226,7 @@ public class JavadocContentAccess2 {
 
 		/**
 		 * Visits the super interfaces of the given type in the given hierarchy, thereby skipping already visited types.
-		 * 
+		 *
 		 * @param visited set of visited types
 		 * @param currentType type whose super interfaces should be visited
 		 * @param typeHierarchy type hierarchy (must include <code>currentType</code>)
@@ -281,7 +281,7 @@ public class JavadocContentAccess2 {
 		private static interface DescriptionGetter {
 			/**
 			 * Returns a Javadoc tag description or <code>null</code>.
-			 * 
+			 *
 			 * @param contentAccess the content access
 			 * @return the description, or <code>null</code> if none
 			 * @throws JavaModelException unexpected problem
@@ -476,7 +476,7 @@ public class JavadocContentAccess2 {
 	 * Either an IMember or an IPackageFragment.
 	 */
 	private final IJavaElement fElement;
-	
+
 	/**
 	 * The method, or <code>null</code> if {@link #fElement} is not a method where @inheritDoc could
 	 * work.
@@ -674,7 +674,7 @@ public class JavadocContentAccess2 {
 		String rawJavadoc= buf.getText(javadocRange.getOffset(), javadocRange.getLength());
 		return javadoc2HTML(member, element, rawJavadoc);
 	}
-	
+
 	private static String getJavaFxPropertyDoc(IMember member) throws JavaModelException {
 		// XXX: should not do this by default (but we don't have settings for Javadoc, see https://bugs.eclipse.org/424283 )
 		if (member instanceof IMethod) {
@@ -711,13 +711,13 @@ public class JavadocContentAccess2 {
 		}
 		return null;
 	}
-	
+
 	private static String firstToLower(String propertyName) {
 		char[] c = propertyName.toCharArray();
 		c[0] = Character.toLowerCase(c[0]);
 		return String.valueOf(c);
 	}
-	
+
 	private static Javadoc getJavadocNode(IJavaElement element, String rawJavadoc) {
 		//FIXME: take from SharedASTProvider if available
 		//Caveat: Javadoc nodes are not available when Javadoc processing has been disabled!
@@ -748,17 +748,17 @@ public class JavadocContentAccess2 {
 	private static CompilationUnit createAST(IJavaElement element, String cuSource) {
 		Assert.isNotNull(element);
 		ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
-		
+
 		IJavaProject javaProject= element.getJavaProject();
 		parser.setProject(javaProject);
 		Map<String, String> options= javaProject.getOptions(true);
 		options.put(JavaCore.COMPILER_DOC_COMMENT_SUPPORT, JavaCore.ENABLED); // workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=212207
 		parser.setCompilerOptions(options);
-		
+
 		parser.setSource(cuSource.toCharArray());
 		return (CompilationUnit) parser.createAST(null);
 	}
-	
+
 	private static String javadoc2HTML(IMember member, IJavaElement element, String rawJavadoc) {
 		Javadoc javadoc= getJavadocNode(member, rawJavadoc);
 
@@ -1398,11 +1398,11 @@ public class JavadocContentAccess2 {
 		return null;
 	}
 
-		
+
 	private void handleContentElements(List<? extends ASTNode> nodes) {
 		handleContentElements(nodes, false);
 	}
-	
+
 	private void handleContentElements(List<? extends ASTNode> nodes, boolean skipLeadingWhitespace) {
 		ASTNode previousNode= null;
 		for (ASTNode child : nodes) {
@@ -1534,7 +1534,7 @@ public class JavadocContentAccess2 {
 	}
 
 	private boolean handleValueTag(TagElement node) {
-		
+
 		List<? extends ASTNode> fragments= node.fragments();
 		try {
 			if (!(fElement instanceof IMember)) {
@@ -1567,13 +1567,13 @@ public class JavadocContentAccess2 {
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 		}
-		
+
 		return false;
 	}
 
 	private boolean handleConstantValue(IField field, boolean link) throws JavaModelException {
 		String text= null;
-		
+
 		ISourceRange nameRange= field.getNameRange();
 		if (SourceRange.isAvailable(nameRange)) {
 			CompilationUnit cuNode= SharedASTProviderCore.getAST(field.getTypeRoot(), SharedASTProviderCore.WAIT_ACTIVE_ONLY, null);
@@ -1595,14 +1595,14 @@ public class JavadocContentAccess2 {
 				}
 			}
 		}
-		
+
 		if (text == null) {
 			Object constant= field.getConstant();
 			if (constant != null) {
 				text= constant.toString();
 			}
 		}
-		
+
 		if (text != null) {
 			text= HTMLPrinter.convertToHTMLContentWithWhitespace(text);
 			if (link) {
@@ -2020,7 +2020,7 @@ public class JavadocContentAccess2 {
 	private static boolean isWhitespaceTextElement(Object fragment) {
 		if (!(fragment instanceof TextElement))
 			return false;
-		
+
 		TextElement textElement= (TextElement) fragment;
 		return textElement.getText().trim().length() == 0;
 	}
@@ -2052,7 +2052,7 @@ public class JavadocContentAccess2 {
 
 	/**
 	 * Returns the Javadoc for a PackageDeclaration.
-	 * 
+	 *
 	 * @param packageDeclaration the Java element whose Javadoc has to be retrieved
 	 * @return the package documentation in HTML format or <code>null</code> if there is no
 	 *         associated Javadoc
@@ -2072,7 +2072,7 @@ public class JavadocContentAccess2 {
 	/**
 	 * Returns the Javadoc for a package which could be present in package.html, package-info.java
 	 * or from an attached Javadoc.
-	 * 
+	 *
 	 * @param packageFragment the package which is requesting for the document
 	 * @return the document content in HTML format or <code>null</code> if there is no associated
 	 *         Javadoc
@@ -2183,12 +2183,12 @@ public class JavadocContentAccess2 {
 		if (sourceAttachmentPath != null) {
 			File file= null ;
 			String encoding= null;
-			
+
 			if (sourceAttachmentPath.getDevice() == null) {
 				//the path could be a workspace relative path to a zip or to the source folder
 				IWorkspaceRoot wsRoot= ResourcesPlugin.getWorkspace().getRoot();
 				IResource res= wsRoot.findMember(sourceAttachmentPath);
-				
+
 				if (res instanceof IFile) {
 					// zip in the workspace
 					IPath location= res.getLocation();
@@ -2196,7 +2196,7 @@ public class JavadocContentAccess2 {
 						return null;
 					file= location.toFile();
 					encoding= ((IFile) res).getCharset(false);
-					
+
 				} else if (res instanceof IContainer) {
 					// folder in the workspace
 					res= ((IContainer) res).findMember(filePath);
@@ -2208,10 +2208,10 @@ public class JavadocContentAccess2 {
 					return getContentsFromInputStream(((IFile) res).getContents(), encoding);
 				}
 			}
-			
+
 			if (file == null || !file.exists())
 				file= sourceAttachmentPath.toFile();
-			
+
 			if (file.isDirectory()) {
 				//the path is an absolute filesystem path to the source folder
 				IPath packagedocPath= sourceAttachmentPath.append(filePath);
@@ -2315,7 +2315,7 @@ public class JavadocContentAccess2 {
 
 	/**
 	 * Reads the content of the IFile.
-	 * 
+	 *
 	 * @param file the file whose content has to be read
 	 * @return the content of the file
 	 * @throws CoreException if the file could not be successfully connected or disconnected
@@ -2340,7 +2340,7 @@ public class JavadocContentAccess2 {
 
 	/**
 	 * Reads the content of the java.io.File.
-	 * 
+	 *
 	 * @param file the file whose content has to be read
 	 * @return the content of the file
 	 * @throws CoreException if the file could not be successfully connected or disconnected

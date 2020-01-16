@@ -94,7 +94,7 @@ public class JavaElementLinks {
 
 		/**
 		 * Handle link to given URL to open in browser.
-		 * 
+		 *
 		 * @param url the url to show
 		 * @param display the current display
 		 * @return <code>true</code> if the handler could open the link <code>false</code> if the
@@ -179,7 +179,7 @@ public class JavaElementLinks {
 		@Override
 		protected String getSimpleTypeName(IJavaElement enclosingElement, String typeSig) {
 			String typeName= super.getSimpleTypeName(enclosingElement, typeSig);
-			
+
 			String title= ""; //$NON-NLS-1$
 			String qualifiedName= Signature.toString(Signature.getTypeErasure(typeSig));
 			int qualifierLength= qualifiedName.length() - typeName.length() - 1;
@@ -191,7 +191,7 @@ public class JavaElementLinks {
 					title= qualifiedName; // Not expected. Just show the whole qualifiedName.
 				}
 			}
-			
+
 			try {
 				String uri= createURI(JAVADOC_SCHEME, enclosingElement, qualifiedName, null, null);
 				return createHeaderLink(uri, typeName, title);
@@ -200,7 +200,7 @@ public class JavaElementLinks {
 				return typeName;
 			}
 		}
-		
+
 		@Override
 		protected String getMemberName(IJavaElement enclosingElement, String typeName, String memberName) {
 			try {
@@ -211,7 +211,7 @@ public class JavaElementLinks {
 				return memberName;
 			}
 		}
-		
+
 		@Override
 		protected void appendAnnotationLabels(IAnnotation[] annotations, long flags) throws JavaModelException {
 			fBuffer.append("<span style='font-weight:normal;'>"); //$NON-NLS-1$
@@ -277,7 +277,7 @@ public class JavaElementLinks {
 				try {
 					uri= new URI(loc);
 				} catch (URISyntaxException e) {
-					JavaPlugin.log(e); // log bad URL, but proceed in the hope that handleExternalLink(..) can deal with it 
+					JavaPlugin.log(e); // log bad URL, but proceed in the hope that handleExternalLink(..) can deal with it
 				}
 
 				String scheme= uri == null ? null : uri.getScheme();
@@ -417,7 +417,7 @@ public class JavaElementLinks {
 			if (element instanceof IMember && !(element instanceof IType)) {
 				element= ((IMember) element).getDeclaringType();
 			}
-			
+
 			if (element instanceof IPackageFragment) {
 				try {
 					IPackageFragment root= (IPackageFragment) element;
@@ -431,7 +431,7 @@ public class JavaElementLinks {
 					JavaPlugin.log(e);
 				}
 			}
-			
+
 			if (element instanceof IType) {
 				try {
 					IType type= (IType) element;
@@ -466,7 +466,7 @@ public class JavaElementLinks {
 										if (method.getElementName().equals(refMemberName) && method.getNumberOfParameters() == paramSignatures.length)
 											return method;
 									}
-									
+
 									// reference can also point to method from supertype:
 									ITypeHierarchy hierarchy= SuperTypeHierarchyCache.getTypeHierarchy(type);
 									method= JavaModelUtil.findMethodInHierarchy(hierarchy, type, refMemberName, paramSignatures, false);
@@ -504,13 +504,13 @@ public class JavaElementLinks {
 		// We follow the javadoc tool's implementation and only support fully-qualified type references:
 		IJavaProject javaProject= pack.getJavaProject();
 		return javaProject.findType(refTypeName, (IProgressMonitor) null);
-		
+
 		// This implementation would make sense, but the javadoc tool doesn't support it:
 //		IClassFile classFile= pack.getClassFile(JavaModelUtil.PACKAGE_INFO_CLASS);
 //		if (classFile.exists()) {
 //			return resolveType(classFile.getType(), refTypeName);
 //		}
-//		
+//
 //		// check if refTypeName is a qualified name
 //		int firstDot= refTypeName.indexOf('.');
 //		if (firstDot != -1) {
@@ -525,13 +525,13 @@ public class JavaElementLinks {
 //				return javaProject.findType(refTypeName, (IProgressMonitor) null);
 //			}
 //		}
-//		
+//
 //		ICompilationUnit cu= pack.getCompilationUnit(JavaModelUtil.PACKAGE_INFO_JAVA);
 //		if (! cu.exists()) {
 //			// refTypeName is a simple name in the package-info.java from the source attachment. Sorry, we give up here...
 //			return null;
 //		}
-//		
+//
 //		// refTypeName is a simple name in a CU. Let's play the shadowing rules of JLS7 6.4.1:
 //		// 1) single-type import
 //		// 2) enclosing package
@@ -553,17 +553,17 @@ public class JavaElementLinks {
 //				imports[i]= null;
 //			}
 //		}
-//		
+//
 //		// 2) enclosing package
 //		IType type= javaProject.findType(pack.getElementName() + '.' + refTypeName, (IProgressMonitor) null);
 //		if (type != null)
 //			return type;
-//		
+//
 //		// 3) java.lang.* (JLS7 7.3)
 //		type= javaProject.findType("java.lang." + refTypeName, (IProgressMonitor) null); //$NON-NLS-1$
 //		if (type != null)
 //			return type;
-//		
+//
 //		// 4) on-demand import
 //		for (int i= 0; i < imports.length; i++) {
 //			IImportDeclaration importDecl= imports[i];
@@ -645,7 +645,7 @@ public class JavaElementLinks {
 
 	/**
 	 * Creates a link with the given URI and label text.
-	 * 
+	 *
 	 * @param uri the URI
 	 * @param label the label
 	 * @return the HTML link
@@ -654,10 +654,10 @@ public class JavaElementLinks {
 	public static String createLink(String uri, String label) {
 		return "<a href='" + uri + "'>" + label + "</a>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
-	
+
 	/**
 	 * Creates a header link with the given URI and label text.
-	 * 
+	 *
 	 * @param uri the URI
 	 * @param label the label
 	 * @return the HTML link
@@ -666,10 +666,10 @@ public class JavaElementLinks {
 	public static String createHeaderLink(String uri, String label) {
 		return createHeaderLink(uri, label, ""); //$NON-NLS-1$
 	}
-	
+
 	/**
 	 * Creates a link with the given URI, label and title text.
-	 * 
+	 *
 	 * @param uri the URI
 	 * @param label the label
 	 * @param title the title to be displayed while hovering over the link (can be empty)
@@ -680,12 +680,12 @@ public class JavaElementLinks {
 		if (title.length() > 0) {
 			title= " title='" + title + "'";  //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		return "<a class='header' href='" + uri + "'" + title + ">" + label + "</a>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
+		return "<a class='header' href='" + uri + "'" + title + ">" + label + "</a>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 	}
-	
+
 	/**
 	 * Returns the label for a Java element with the flags as defined by {@link JavaElementLabels}.
-	 * Referenced element names in the label (except the given element's name) are rendered as 
+	 * Referenced element names in the label (except the given element's name) are rendered as
 	 * header links.
 	 *
 	 * @param element the element to render

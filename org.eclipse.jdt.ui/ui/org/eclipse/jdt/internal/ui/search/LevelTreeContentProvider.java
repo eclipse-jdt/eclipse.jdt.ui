@@ -202,7 +202,7 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 
 	/**
 	 * Tries to remove the given element from the list of stored siblings.
-	 * 
+	 *
 	 * @param element potential child
 	 * @param parent potential parent
 	 * @return returns true if it really was a remove (i.e. element was a child of parent).

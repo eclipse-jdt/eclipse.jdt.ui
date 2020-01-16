@@ -301,7 +301,7 @@ public class JavadocConfigurationBlock {
 				IPath jarPath= new Path(jarPathUri.getSchemeSpecificPart());
 				URI insidePathUri= new URI(insidePathStr);
 				String insidePath= insidePathUri.getSchemeSpecificPart();
-				
+
 				fArchivePathField.setText(insidePath);
 				if (isWorkspaceArchive) {
 					fArchiveField.setText(jarPath.makeRelative().toString());
@@ -403,7 +403,7 @@ public class JavadocConfigurationBlock {
 				suc= checkURLConnection(elementlistURL);
 				foundElementList= true;
 			}
-			
+
 			suc= suc && checkURLConnection(indexURL);
 			if (suc) {
 				showConfirmValidationDialog(indexURL, foundElementList);
@@ -785,14 +785,14 @@ public class JavadocConfigurationBlock {
 			} else {
 				baseUri= new File(jarLoc).toURI();
 			}
-			
+
 			if (innerPath.length() == 0 || innerPath.charAt(0) != '/') {
 				innerPath= '/' + innerPath;
 			}
 			String encodedInnerPath= new URI(null, null, innerPath, null, null).getRawSchemeSpecificPart();
-			
+
 			return new URI("jar:" + encodeExclamationMarks(baseUri.toString()) + '!' + encodeExclamationMarks(encodedInnerPath)).toURL(); //$NON-NLS-1$
-			
+
 		} catch (URISyntaxException e) {
 			throw new MalformedURLException(e.getMessage());
 		}

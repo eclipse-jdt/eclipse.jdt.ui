@@ -236,7 +236,7 @@ public class JavaCorrectionProcessor implements org.eclipse.jface.text.quickassi
 			int length= viewer != null ? viewer.getSelectedRange().y : 0;
 			context= new AssistContext(cu, viewer, part, documentOffset, length);
 		}
-		
+
 		Annotation[] annotations= fAssistant.getAnnotationsAtOffset();
 
 		fErrorMessage= null;

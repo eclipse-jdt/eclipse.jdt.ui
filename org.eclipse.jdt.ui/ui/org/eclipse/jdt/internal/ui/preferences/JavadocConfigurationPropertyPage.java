@@ -160,7 +160,7 @@ public class JavadocConfigurationPropertyPage extends PropertyPage implements IS
 	protected Control createContents(Composite parent) {
 		if (!fIsValidElement || fIsReadOnly) {
 			Composite inner= new Composite(parent, SWT.NONE);
-			
+
 			if (fIsReadOnly) {
 				GridLayout layout= new GridLayout();
 				layout.marginWidth= 0;
@@ -168,7 +168,7 @@ public class JavadocConfigurationPropertyPage extends PropertyPage implements IS
 
 				Label label= new Label(inner, SWT.WRAP);
 				label.setText(PreferencesMessages.JavadocConfigurationPropertyPage_location_path);
-				
+
 				Text location= new Text(inner, SWT.READ_ONLY | SWT.WRAP);
 				SWTUtil.fixReadonlyTextBackground(location);
 				GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);

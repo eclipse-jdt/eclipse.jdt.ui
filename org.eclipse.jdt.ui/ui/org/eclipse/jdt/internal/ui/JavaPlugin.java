@@ -447,7 +447,7 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 					workingSet.setLabel(label);
 			} else {
 				logErrorMessage("found existing workingset with name=\"" + name + "\" but id=\"" + workingSet.getId() + "\""); //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
-			}			
+			}
 		}
 		IWorkingSet oldWorkingSet= workingSetManager.getWorkingSet(oldname);
 		if (oldWorkingSet != null && id.equals(oldWorkingSet.getId())) {
@@ -568,7 +568,7 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 
 	/**
 	 * Private deprecated method to avoid deprecation warnings
-	 * 
+	 *
 	 * @return the deprecated buffer factory
 	 * @deprecated to avoid deprecation warnings
 	 */
@@ -626,7 +626,7 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 
 	/**
 	 * Returns the Java Core plug-in preferences.
-	 * 
+	 *
 	 * @return the Java Core plug-in preferences
 	 * @since 3.7
 	 */
@@ -875,7 +875,7 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 
 	/**
 	 * Flushes the instance scope of this plug-in.
-	 * 
+	 *
 	 * @since 3.7
 	 */
 	public static void flushInstanceScope() {
@@ -889,7 +889,7 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	/**
 	 * Returns the registry of the extensions to the
 	 * <code>org.eclipse.jdt.ui.javaFoldingStructureProvider</code> extension point.
-	 * 
+	 *
 	 * @return the registry of contributed <code>IJavaFoldingStructureProvider</code>
 	 * @since 3.0
 	 */

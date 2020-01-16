@@ -49,14 +49,14 @@ public final class JavaUIMessages extends NLS {
 	public static String OpenTypeAction_dialogTitle;
 	public static String OpenTypeAction_dialogMessage;
 	public static String OpenTypeSelectionDialog_open;
-	
+
 
 	public static String JavaUI_defaultDialogMessage;
 
 	public static String MultiElementListSelectionDialog_pageInfoMessage;
 	public static String PackageSelectionDialog_progress_findEmpty;
 	public static String PackageSelectionDialog_progress_search;
-	
+
 
 	public static String TypeInfoViewer_job_label;
 	public static String TypeInfoViewer_job_error;
@@ -82,7 +82,7 @@ public final class JavaUIMessages extends NLS {
 	public static String TypeSelectionDialog_error3Message;
 	public static String TypeSelectionDialog_error3Title;
 	public static String TypeSelectionDialog_progress_consistency;
-	
+
 	/**
 	 * DO NOT REMOVE, used in a product.
 	 * @deprecated As of 3.6
@@ -234,7 +234,7 @@ public final class JavaUIMessages extends NLS {
 
 	public static String JavaOutlineControl_statusFieldText_hideInheritedMembers;
 	public static String JavaOutlineControl_statusFieldText_showInheritedMembers;
-	
+
 	public static String WithoutTestCodeDecorator_suffix_withoutTestCode;
 
 	public static String RenameSupport_not_available;

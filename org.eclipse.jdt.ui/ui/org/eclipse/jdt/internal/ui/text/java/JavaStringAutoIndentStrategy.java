@@ -202,7 +202,7 @@ public class JavaStringAutoIndentStrategy extends DefaultIndentLineAutoEditStrat
 		}
 		if (string.length() != 0 && !string.equals("+")) //$NON-NLS-1$
 			indentation += getExtraIndentAfterNewLine();
-		
+
 		if (isEditorWrapStrings() && isLineDelimiter) {
 			if (isWrappingBeforeBinaryOperator()) {
 				command.text= "\"" + command.text + indentation + "+ \"";  //$NON-NLS-1$//$NON-NLS-2$
@@ -223,7 +223,7 @@ public class JavaStringAutoIndentStrategy extends DefaultIndentLineAutoEditStrat
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
 		return preferenceStore.getBoolean(PreferenceConstants.EDITOR_ESCAPE_STRINGS);
 	}
-	
+
 	protected boolean isEditorEscapeStringsNonAscii() {
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
 		return preferenceStore.getBoolean(PreferenceConstants.EDITOR_ESCAPE_STRINGS_NON_ASCII);
@@ -251,7 +251,7 @@ public class JavaStringAutoIndentStrategy extends DefaultIndentLineAutoEditStrat
 		}
 		return formatterContinuationIndentationSize;
 	}
-	
+
 	private int getBinaryOperatorAlignmentStyle() {
 		String binaryAlignmentValue= getCoreFormatterOption(
 				DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_STRING_CONCATENATION);
@@ -268,7 +268,7 @@ public class JavaStringAutoIndentStrategy extends DefaultIndentLineAutoEditStrat
 		// read settings
 		int formatterContinuationIndentationSize= getContinuationIndentationSize();
 		int binaryAlignmentValue= getBinaryOperatorAlignmentStyle();
-		
+
 		// work out indent
 		int indentSize= formatterContinuationIndentationSize;
 		if (binaryAlignmentValue == DefaultCodeFormatterConstants.INDENT_BY_ONE) {
@@ -276,7 +276,7 @@ public class JavaStringAutoIndentStrategy extends DefaultIndentLineAutoEditStrat
 		} else if (binaryAlignmentValue == DefaultCodeFormatterConstants.INDENT_ON_COLUMN) {
 			// there is no obvious way to work out the current column indent
 		}
-		
+
 		// generate indentation string with correct size
 		return CodeFormatterUtil.createIndentString(indentSize, fProject);
 	}

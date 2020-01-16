@@ -171,7 +171,7 @@ public class JavaSelectAnnotationRulerAction extends SelectMarkerRulerAction {
 
 				if (!fStore.getBoolean(key))
 					continue;
-			}			
+			}
 
 			boolean isReadOnly= fTextEditor instanceof ITextEditorExtension && ((ITextEditorExtension)fTextEditor).isEditorInputReadOnly();
 			if (!isReadOnly

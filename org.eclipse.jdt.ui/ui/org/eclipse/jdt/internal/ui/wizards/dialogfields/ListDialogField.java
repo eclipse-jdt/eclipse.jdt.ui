@@ -62,7 +62,7 @@ import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
  * Typical buttons are 'Add', 'Remove', 'Up' and 'Down'.
  * List model is independent of widget creation.
  * DialogFields controls are: Label, List and Composite containing buttons.
- * 
+ *
  * @param <E> the type of the list elements
  */
 public class ListDialogField<E> extends DialogField {

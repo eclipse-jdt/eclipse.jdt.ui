@@ -118,7 +118,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	private boolean dragDropEnabled;
 	private Object draggedItemsLibrary;
 	private boolean fromModularLibrary;
-	
+
 	public LibrariesWorkbookPage(CheckedListDialogField<CPListElement> classPathList, IWorkbenchPreferenceContainer pageContainer) {
 		fClassPathList= classPathList;
 		fPageContainer= pageContainer;
@@ -212,27 +212,27 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				} else {
 					rootModulepath.addCPListElement(cpe);
 				}
-					
+
 			}
 		}
 		libelements.add(rootModulepath);
 		libelements.add(rootClasspath);
 		fLibrariesList.setTreeExpansionLevel(2);
 		fLibrariesList.setElements(libelements);
-		
+
 		fLibrariesList.enableButton(IDX_ADDEXT, false);
 		fLibrariesList.enableButton(IDX_ADDFOL, false);
 		fLibrariesList.enableButton(IDX_ADDEXTFOL, false);
 		fLibrariesList.enableButton(IDX_ADDJAR, false);
 		fLibrariesList.enableButton(IDX_ADDLIB, false);
 		fLibrariesList.enableButton(IDX_ADDVAR, false);
-		
+
 		if (!dragDropEnabled) {
 			enableDragDropSupport();
 		}
-		
+
 	}
-	
+
 	private CPListElement checkAndUpdateIfModularJRE(CPListElement cpe) {
 		boolean modularJava= false;
 		IVMInstall vmInstall= JavaRuntime.getVMInstall(cpe.getPath());
@@ -241,7 +241,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		}
 		if (modularJava) {
 			// If JRE is updated to modular JRE, then cpe element has to be recreated
-			// so as to have the modular structure 
+			// so as to have the modular structure
 			cpe= CPListElement.create(cpe.getClasspathEntry(), true, fCurrJProject);
 		}
 		return cpe;
@@ -380,7 +380,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		}
 		return false;
 	}
-	
+
 	boolean hasRootNodes(){
 		if (fLibrariesList == null)
 			return false;
@@ -520,14 +520,14 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			if (!elementsToAdd.isEmpty() && (index == IDX_ADDFOL)) {
 				askForAddingExclusionPatternsDialog(elementsToAdd);
 			}
-			
+
 			if(!hasRootNodes()) {
 				fLibrariesList.addElements(elementsToAdd);
 			} else {
 				// on root nodes, only additions allowed, rest disabled
 				List<Object> selectedElements= fLibrariesList.getSelectedElements();
 				List<CPListElement> elements= fLibrariesList.getElements();
-				// sanity check, button should only be enabled if exactly one root node is selected 
+				// sanity check, button should only be enabled if exactly one root node is selected
 				if(selectedElements.size() != 1) {
 					return;
 				}
@@ -549,8 +549,8 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 					}
 					isModuleRootExpanded= true;
 				}
-				selectedCPElement.addCPListElement(elementsToAdd);					
-				
+				selectedCPElement.addCPListElement(elementsToAdd);
+
 				fLibrariesList.setElements(elements);
 				fLibrariesList.refresh();
 				fLibrariesList.getTreeViewer().expandToLevel(2);
@@ -697,12 +697,12 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				}
 				fLibrariesList.getTreeViewer().remove(selElements.toArray());
 				fLibrariesList.dialogFieldChanged();
-				
+
 			}
 			else {
 				fLibrariesList.removeElements(selElements);
 			}
-		
+
 		}
 		for (Map.Entry<CPListElement, HashSet<String>> entry : containerEntriesToUpdate.entrySet()) {
 			CPListElement curr= entry.getKey();
@@ -721,11 +721,11 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			Object elem= selElements.get(i);
 			if (elem instanceof CPListElementAttribute) {
 				CPListElementAttribute attrib= (CPListElementAttribute) elem;
-				
+
 				if (IClasspathAttribute.MODULE.equals(attrib.getKey())) {
 					return false;
 				}
-						
+
 				if (attrib.isNonModifiable()) {
 					return false;
 				}
@@ -770,12 +770,12 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			return;
 		}
 		Object elem= selElements.get(0);
-		
+
 		boolean canEdit= false;
 		if(hasRootNodes()) {
-			canEdit= ((RootCPListElement)fLibrariesList.getElement(0)).getChildren().indexOf(elem) != -1 || 
+			canEdit= ((RootCPListElement)fLibrariesList.getElement(0)).getChildren().indexOf(elem) != -1 ||
 					((RootCPListElement)fLibrariesList.getElement(1)).getChildren().indexOf(elem) != -1 ;
-			
+
 		}
 		if (canEdit || fLibrariesList.getIndexOfElement(elem) != -1 ) {
 			editElementEntry((CPListElement) elem);
@@ -844,7 +844,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				attributeUpdated(selElement, changedAttributes);
 				if(key.equals(CPListElement.TEST) || key.equals(CPListElement.WITHOUT_TEST_CODE)) {
 					fLibrariesList.refresh(elem.getParent());
-				} else { 
+				} else {
 					fLibrariesList.refresh(elem);
 				}
 				fClassPathList.dialogFieldChanged(); // validate
@@ -1037,7 +1037,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		fLibrariesList.enableButton(IDX_REPLACE, getSelectedPackageFragmentRoot() != null);
 
 		boolean addEnabled= containsOnlyTopLevelEntries(selElements);
-	
+
 		fLibrariesList.enableButton(IDX_ADDEXT, addEnabled);
 		fLibrariesList.enableButton(IDX_ADDFOL, addEnabled);
 		fLibrariesList.enableButton(IDX_ADDEXTFOL, addEnabled);
@@ -1090,7 +1090,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				//module attribute should always be enabled
 				return true;
 			}
-			
+
 			return true;
 		}
 		return false;

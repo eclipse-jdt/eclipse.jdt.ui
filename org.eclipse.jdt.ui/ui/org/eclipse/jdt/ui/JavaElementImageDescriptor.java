@@ -106,21 +106,21 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 
 	/**
 	 * Flag to render the 'default' method adornment.
-	 * 
+	 *
 	 * @since 3.10
 	 */
 	public final static int DEFAULT_METHOD= 0x10000;
 
 	/**
 	 * Flag to render the 'default' annotation adornment.
-	 * 
+	 *
 	 * @since 3.10
 	 */
 	public final static int ANNOTATION_DEFAULT= 0x20000;
 
 	/**
 	 * Flag to render the info adornment.
-	 * 
+	 *
 	 * @since 3.12
 	 */
 	public final static int INFO= 0x40000;
@@ -309,12 +309,12 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 		if ((flags & SYNCHRONIZED) != 0) {
 			addBottomRightImage(JavaPluginImages.DESC_OVR_SYNCH, pos);
 		}
-		
+
 		// types:
 		if ((flags & RUNNABLE) != 0) {
 			addBottomRightImage(JavaPluginImages.DESC_OVR_RUN, pos);
 		}
-		
+
 		// fields:
 		if ((flags & TRANSIENT) != 0) {
 			addBottomRightImage(JavaPluginImages.DESC_OVR_TRANSIENT, pos);

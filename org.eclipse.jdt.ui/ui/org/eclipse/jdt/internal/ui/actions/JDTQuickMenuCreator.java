@@ -35,7 +35,7 @@ import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
 /**
  * Java editor aware quick menu creator. In the given editor, the menu will be aligned with the word
  * at the current offset.
- * 
+ *
  * @since 3.5
  */
 public abstract class JDTQuickMenuCreator extends QuickMenuCreator {
@@ -96,7 +96,7 @@ public abstract class JDTQuickMenuCreator extends QuickMenuCreator {
 
 	/**
 	 * Returns a handler that can create and open the quick menu.
-	 * 
+	 *
 	 * @return a handler that can create and open the quick menu
 	 */
 	public IHandler createHandler() {

@@ -613,14 +613,14 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 	 * Formats the code associated with the elements selected in the Outline view. The action
 	 * requires that the selection provided by the site's selection provider is of type
 	 * {@link IStructuredSelection}
-	 * 
+	 *
 	 * @since 3.7
 	 */
 	private class FormatElementAction extends SelectionDispatchAction {
 
 		/**
 		 * Creates a new <code>FormatViewElementAction</code>.
-		 * 
+		 *
 		 * @param site the site providing context information for this action
 		 */
 		FormatElementAction(IPageSite site) {
@@ -630,7 +630,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		/**
 		 * Executes the action based on the Structured Selection. This formats the non-overlapping
 		 * element(s) that have been selected in the view.
-		 * 
+		 *
 		 * @param selection the current selection
 		 */
 		@Override
@@ -667,7 +667,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		/**
 		 * Parses the selections for non-overlapping elements and returns their source regions
 		 * ordered by their offsets.
-		 * 
+		 *
 		 * @param selection the selected elements
 		 * @param document the document containing the selected elements
 		 * @return the array of ordered source regions
@@ -705,7 +705,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		/**
 		 * Calculates the region of the element. The start is at beginning of its first line if from
 		 * the source start to the beginning of the line is all whitespace.
-		 * 
+		 *
 		 * @param element the element whose regions is to be calculated
 		 * @param document the document containing the element whose region is to be calculated
 		 * @return the region for the element
@@ -735,7 +735,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 
 		/**
 		 * Checks if element has an enclosing parent among other selected elements.
-		 * 
+		 *
 		 * @param element the element to be checked for overlap against all elements
 		 * @param allElements the list of all elements
 		 * @return <code>true</code> if the element has a parent in the list of all elements
@@ -756,7 +756,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 
 		/**
 		 * Notifies the action of a change in the Selection.
-		 * 
+		 *
 		 * @param selection the new Structured Selection
 		 */
 		@Override
@@ -788,14 +788,14 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 
 	/**
 	 * Action for Collapse All.
-	 * 
+	 *
 	 * @since 3.7
 	 */
 	private CollapseAllAction fCollapseAllAction;
 
 	/**
 	 * Action for Format Element
-	 * 
+	 *
 	 * @since 3.7
 	 */
 	private FormatElementAction fFormatElement;

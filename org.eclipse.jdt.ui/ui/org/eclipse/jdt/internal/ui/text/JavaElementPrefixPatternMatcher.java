@@ -21,11 +21,11 @@ import org.eclipse.jdt.internal.ui.util.StringMatcher;
 /**
  * A pattern matcher for labels from {@link JavaElementLabels} where the label starts with the name
  * of the element (appended method return type or post qualifications are OK).
- * 
+ *
  * If the pattern starts with a valid Java identifier, the name from the label is matched
  * with a {@link PatternMatcher} and the rest is matched with a {@link StringMatcher}.
  * Otherwise, the whole label is matched with a {@link StringMatcher}.
- * 
+ *
  * @since 3.8
  */
 public class JavaElementPrefixPatternMatcher {
@@ -47,7 +47,7 @@ public class JavaElementPrefixPatternMatcher {
 			rest= pattern;
 		}
 		fElementNamePattern= elementNameEnd == 0 ? null : new PatternMatcher(elementName);
-		
+
 		boolean ignoreCase= rest.toLowerCase().equals(rest);
 		fRestPattern= new StringMatcher(rest + STAR, ignoreCase, false);
 	}
@@ -61,19 +61,19 @@ public class JavaElementPrefixPatternMatcher {
 			}
 			return len;
 		}
-		
+
 		return 0;
 	}
 
 	public boolean matches(String label) {
 		int elementNameEnd= findNameEnd(label);
-		
+
 		if (fElementNamePattern == null)
 			return fRestPattern.match(label);
-		
+
 		if (! fElementNamePattern.matches(label.substring(0, elementNameEnd)))
 			return false;
-		
+
 		return fRestPattern.match(label.substring(elementNameEnd));
 	}
 }

@@ -214,7 +214,7 @@ public class JavaTextTools {
 	}
 
 	/**
-	 * Returns a java partitioner manager which is to be 
+	 * Returns a java partitioner manager which is to be
 	 * used for Java text viewers
 	 *
 	 * @return a java partitioner manager
