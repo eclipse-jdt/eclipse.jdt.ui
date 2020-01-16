@@ -256,7 +256,7 @@ public class CallHierarchyUI {
 
 	/**
 	 * Finds the first Call Hierarchy view part instance that is not pinned.
-	 * 
+	 *
 	 * @param page the active page
 	 * @return the Call Hierarchy view part to open or <code>null</code> if none found
 	 * @since 3.7
@@ -287,7 +287,7 @@ public class CallHierarchyUI {
 
 	/**
 	 * Adds the activated view part to the head of the list.
-	 * 
+	 *
 	 * @param view the Call Hierarchy view part
 	 * @since 3.7
 	 */
@@ -298,7 +298,7 @@ public class CallHierarchyUI {
 
 	/**
 	 * Removes the closed view part from the list.
-	 * 
+	 *
 	 * @param view the closed view part
 	 * @since 3.7
 	 */
@@ -343,7 +343,7 @@ public class CallHierarchyUI {
 
 	/**
 	 * Clears the history and updates all the open views.
-	 * 
+	 *
 	 * @since 3.7
 	 */
 	void clearHistory() {
@@ -355,7 +355,7 @@ public class CallHierarchyUI {
 
 	/**
 	 * Returns the method history.
-	 * 
+	 *
 	 * @return the method history
 	 * @since 3.7
 	 */

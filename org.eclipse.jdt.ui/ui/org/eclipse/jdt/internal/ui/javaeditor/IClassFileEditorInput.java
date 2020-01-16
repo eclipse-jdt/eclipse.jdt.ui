@@ -25,7 +25,7 @@ public interface IClassFileEditorInput extends IEditorInput {
 
 	/**
 	 * Returns the class file acting as input.
-	 * 
+	 *
 	 * @return the class file
 	 */
 	public IClassFile getClassFile();

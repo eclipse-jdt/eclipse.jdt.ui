@@ -26,7 +26,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
 /**
  * The action to expand the selected member hierarchy with constructor calls.
- * 
+ *
  * @since 3.5
  */
 class ExpandWithConstructorsAction extends Action {
@@ -43,7 +43,7 @@ class ExpandWithConstructorsAction extends Action {
 
 	/**
 	 * Creates the action for expanding the hierarchy with constructor calls.
-	 * 
+	 *
 	 * @param callHierarchyViewPart the call hierarchy view part
 	 * @param callHierarchyViewer the call hierarchy viewer
 	 */
@@ -83,7 +83,7 @@ class ExpandWithConstructorsAction extends Action {
 
 	/**
 	 * Gets the selection from the call hierarchy view part.
-	 * 
+	 *
 	 * @return the current selection
 	 */
 	private ISelection getSelection() {
@@ -92,7 +92,7 @@ class ExpandWithConstructorsAction extends Action {
 
 	/**
 	 * Checks whether this action can be added for the selected element in the call hierarchy.
-	 * 
+	 *
 	 * @return <code> true</code> if the action can be added, <code>false</code> otherwise
 	 */
 	public boolean canActionBeAdded() {
@@ -101,7 +101,7 @@ class ExpandWithConstructorsAction extends Action {
 		ISelection selection= getSelection();
 		if (selection.isEmpty())
 			return false;
-		
+
 		boolean allElementsChecked= true;
 		IStructuredSelection structuredSelection= (IStructuredSelection)selection;
 		CallerMethodWrapper[] wrappers= new CallerMethodWrapper[structuredSelection.size()];
@@ -110,7 +110,7 @@ class ExpandWithConstructorsAction extends Action {
 			Object element= iter.next();
 			if (!(element instanceof CallerMethodWrapper) || element instanceof RealCallers)
 				return false;
-			
+
 			wrappers[i]= (CallerMethodWrapper)element;
 			if (!CallHierarchyContentProvider.canExpandWithConstructors(wrappers[i]))
 				return false;

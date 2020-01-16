@@ -108,7 +108,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 
 /**
  * Dialog for the generate toString() action.
- * 
+ *
  * @since 3.5
  */
 public class GenerateToStringDialog extends SourceActionDialog {
@@ -536,7 +536,7 @@ public class GenerateToStringDialog extends SourceActionDialog {
 			/**
 			 * Checks if the end of the first string is equal to the beginning of of the second
 			 * string.
-			 * 
+			 *
 			 * @param s1 first String
 			 * @param s2 second String
 			 * @return length of overlapping segment (0 if strings don't overlap)
@@ -1154,7 +1154,7 @@ public class GenerateToStringDialog extends SourceActionDialog {
 	private static final int DOWN_BUTTON= IDialogConstants.CLIENT_ID + 2;
 
 	private static final int UP_BUTTON= IDialogConstants.CLIENT_ID + 1;
-	
+
 	private static final int SORT_BUTTON= IDialogConstants.CLIENT_ID + 3;
 
 	protected Button[] fButtonControls;
@@ -1308,7 +1308,7 @@ public class GenerateToStringDialog extends SourceActionDialog {
 		buttonComposite.setLayout(layout);
 
 		createUpDownButtons(buttonComposite);
-		
+
 		createButton(buttonComposite, SORT_BUTTON, JavaUIMessages.GenerateToStringDialog_sort_button, false);
 
 		layout.marginHeight= 0;
@@ -1323,7 +1323,7 @@ public class GenerateToStringDialog extends SourceActionDialog {
 		createButton(parent, IDialogConstants.OK_ID, JavaUIMessages.GenerateToStringDialog_generate_button, true);
 		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
 	}
-	
+
 	@Override
 	protected void buttonPressed(int buttonId) {
 		super.buttonPressed(buttonId);

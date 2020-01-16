@@ -30,7 +30,7 @@ public interface IJavaAnnotation {
 
 	/**
 	 * Returns the type of the annotation.
-	 * 
+	 *
 	 * @return the type of the annotation
 	 * @see org.eclipse.jface.text.source.Annotation#getType()
 	 */
@@ -38,7 +38,7 @@ public interface IJavaAnnotation {
 
 	/**
 	 * Returns whether this annotation is persistent.
-	 * 
+	 *
 	 * @return <code>true</code> if this annotation is persistent, <code>false</code> otherwise
 	 * @see org.eclipse.jface.text.source.Annotation#isPersistent()
 	 */
@@ -46,7 +46,7 @@ public interface IJavaAnnotation {
 
 	/**
 	 * Returns whether this annotation is marked as deleted.
-	 * 
+	 *
 	 * @return <code>true</code> if annotation is marked as deleted, <code>false</code> otherwise
 	 * @see org.eclipse.jface.text.source.Annotation#isMarkedDeleted()
 	 */
@@ -54,7 +54,7 @@ public interface IJavaAnnotation {
 
 	/**
 	 * Returns the text associated with this annotation.
-	 * 
+	 *
 	 * @return the text associated with this annotation or <code>null</code>
 	 * @see org.eclipse.jface.text.source.Annotation#getText()
 	 */
@@ -109,7 +109,7 @@ public interface IJavaAnnotation {
 
 	/**
 	 * Returns the compilation unit corresponding to the document on which the annotation.
-	 * 
+	 *
 	 * @return the compilation unit or <code>null</code> if no corresponding compilation unit exists
 	 */
 	ICompilationUnit getCompilationUnit();

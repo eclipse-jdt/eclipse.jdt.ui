@@ -195,7 +195,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 			return false;
 		}
 	}
-	
+
 	private abstract static class LaunchConfigurationElement {
 
 		public abstract ILaunchConfiguration getLaunchConfiguration();
@@ -433,7 +433,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 
 	/**
 	 * Creates a new label with an optional bold font.
-	 * 
+	 *
 	 * @param parent the parent control
 	 * @param text the label text
 	 * @param bold bold or not
@@ -451,7 +451,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 
 	/**
 	 * Create the export options specification widgets.
-	 * 
+	 *
 	 * @param parent org.eclipse.swt.widgets.Composite
 	 */
 	protected void createLibraryHandlingGroup(Composite parent) {
@@ -590,10 +590,10 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 
 	/**
 	 * Gets the absolute location relative to the workspace.
-	 * 
+	 *
 	 * @param location the location
 	 * @return the absolute path for the location of the file
-	 * 
+	 *
 	 * @since 3.8
 	 */
 	private IPath getAbsoluteLocation(IPath location) {
@@ -617,7 +617,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 	/**
 	 * Returns a boolean indicating whether the passed File handle is is valid and available for
 	 * use.
-	 * 
+	 *
 	 * @param antScriptFile the ant script
 	 * @return boolean
 	 */

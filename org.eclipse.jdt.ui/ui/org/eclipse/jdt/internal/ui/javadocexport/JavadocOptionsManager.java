@@ -420,7 +420,7 @@ public class JavadocOptionsManager {
 		String extraOptions= element.getAttribute(EXTRAOPTIONS);
 		if (extraOptions.length() > 0) {
 			ExecutionArguments tokens= new ExecutionArguments("", extraOptions); //$NON-NLS-1$
-			
+
 			boolean vmarg= false;
 			for (String curr : tokens.getProgramArgumentsArray()) {
 				if (curr.length() > 0 && curr.charAt(0) == '-') {

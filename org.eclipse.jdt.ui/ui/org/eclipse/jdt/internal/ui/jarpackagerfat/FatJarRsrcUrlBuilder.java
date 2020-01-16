@@ -47,14 +47,14 @@ import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
 /**
  * A jar builder which copies the referenced libraries into the generated jar and adds a special
  * class loader which allows to load the classes from the referenced libraries.
- * 
+ *
  * @since 3.5
  */
 public class FatJarRsrcUrlBuilder extends FatJarBuilder {
 
 	public static final String BUILDER_ID= "org.eclipse.jdt.ui.fat_jar_rsrc_url_builder"; //$NON-NLS-1$
 	public static final String JAR_RSRC_LOADER_ZIP= "jar-in-jar-loader.zip"; //$NON-NLS-1$
-	
+
 	private Set<String> jarNames;
 	private JarPackageData fJarPackage;
 
@@ -80,7 +80,7 @@ public class FatJarRsrcUrlBuilder extends FatJarBuilder {
 	public boolean isRemoveSigners() {
 		return false;
 	}
-	
+
 	@Override
 	public String getManifestClasspath() {
 		return "."; //$NON-NLS-1$
@@ -113,7 +113,7 @@ public class FatJarRsrcUrlBuilder extends FatJarBuilder {
 		jarNames.add(jarName);
 		JarEntry newEntry = new JarEntry(jarName);
 		newEntry.setMethod(ZipEntry.STORED);
-		byte[] readBuffer= new byte[4096];             
+		byte[] readBuffer= new byte[4096];
 		try {
 			if (!fJarPackage.isCompressed())
 				JarPackagerUtil.calculateCrcAndSize(newEntry, new FileInputStream(jarPathFile), readBuffer);

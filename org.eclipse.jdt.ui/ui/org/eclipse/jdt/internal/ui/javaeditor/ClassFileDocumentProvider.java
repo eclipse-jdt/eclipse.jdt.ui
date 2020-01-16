@@ -74,7 +74,7 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 
 		/**
 		 * Default constructor.
-		 * 
+		 *
 		 * @param input the class file editor input
 		 */
 		public ClassFileSynchronizer(IClassFileEditorInput input) {
@@ -112,7 +112,7 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 
 		/**
 		 * Recursively check whether the class file has been deleted.
-		 * 
+		 *
 		 * @param input the package fragment root
 		 * @param delta the Java element delta
 		 * @return <code>true</code> if delta processing can be stopped
@@ -399,7 +399,7 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 
 	/**
 	 * Fires input changes to input change listeners.
-	 * 
+	 *
 	 * @param input the class file editor input
 	 */
 	protected void fireInputChanged(IClassFileEditorInput input) {
@@ -410,7 +410,7 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 
 	/**
 	 * Adds an input change listener.
-	 * 
+	 *
 	 * @param listener the input change listener
 	 */
 	public void addInputChangeListener(InputChangeListener listener) {
@@ -419,7 +419,7 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 
 	/**
 	 * Removes an input change listener.
-	 * 
+	 *
 	 * @param listener the input change listener
 	 */
 	public void removeInputChangeListener(InputChangeListener listener) {

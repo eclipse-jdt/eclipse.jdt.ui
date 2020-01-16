@@ -941,7 +941,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 					return false;
 				return super.requestWidgetToken(requester, priority);
 			}
-			
+
 			@Override
 			public boolean canDoOperation(int operation) {
 				if (operation == JavaSourceViewer.ANNOTATE_CLASS_FILE)

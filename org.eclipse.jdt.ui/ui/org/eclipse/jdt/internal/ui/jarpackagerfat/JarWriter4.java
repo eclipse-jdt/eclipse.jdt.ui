@@ -11,7 +11,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Ferenc Hechler <ferenc_hechler@users.sourceforge.net> - [jar exporter] Deploy java application as executable jar - https://bugs.eclipse.org/bugs/show_bug.cgi?id=83258
- *     Ferenc Hechler <ferenc_hechler@users.sourceforge.net> - [jar application] ANT build file does not create Class-Path Entry in Manifest - https://bugs.eclipse.org/bugs/show_bug.cgi?id=220257 
+ *     Ferenc Hechler <ferenc_hechler@users.sourceforge.net> - [jar application] ANT build file does not create Class-Path Entry in Manifest - https://bugs.eclipse.org/bugs/show_bug.cgi?id=220257
  *     Ferenc Hechler <ferenc_hechler@users.sourceforge.net> - [jar exporter] export directory entries in "Runnable JAR File" - https://bugs.eclipse.org/bugs/show_bug.cgi?id=243163
  *     Ferenc Hechler <ferenc_hechler@users.sourceforge.net> - [jar application] add Jar-in-Jar ClassLoader option - https://bugs.eclipse.org/bugs/show_bug.cgi?id=219530
  *******************************************************************************/

@@ -45,7 +45,7 @@ import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 
 /**
  * Java element declared type hyperlink for variables.
- * 
+ *
  * @since 3.7
  */
 public class JavaElementDeclaredTypeHyperlink implements IHyperlink {
@@ -55,10 +55,10 @@ public class JavaElementDeclaredTypeHyperlink implements IHyperlink {
 	private final IJavaElement fElement;
 	private final String fTypeSig;
 	private final boolean fQualify;
-	
+
 	/**
 	 * Creates a new Java element declared type hyperlink for variables.
-	 * 
+	 *
 	 * @param region the region of the link
 	 * @param openAction the action to use to open the Java elements
 	 * @param element the Java element to open
@@ -71,7 +71,7 @@ public class JavaElementDeclaredTypeHyperlink implements IHyperlink {
 
 	/**
 	 * Creates a new Java element declared type hyperlink for variables.
-	 * 
+	 *
 	 * @param region the region of the link
 	 * @param openAction the action to use to open the Java elements
 	 * @param element the Java element to open
@@ -186,11 +186,11 @@ public class JavaElementDeclaredTypeHyperlink implements IHyperlink {
 	private void openElementAndShowErrorInStatusLine() {
 		try {
 			IEditorPart editor= JavaUI.openInEditor(fElement);
-			
+
 			editor.getSite().getShell().getDisplay().beep();
 			if (editor instanceof JavaEditor)
 				((JavaEditor)editor).setStatusLineErrorMessage(JavaEditorMessages.JavaElementDeclaredTypeHyperlink_error_msg);
-			
+
 		} catch (PartInitException e) {
 			JavaPlugin.log(e);
 		} catch (CoreException e) {

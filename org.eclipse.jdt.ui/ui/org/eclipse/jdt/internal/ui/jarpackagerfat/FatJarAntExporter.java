@@ -63,7 +63,7 @@ public abstract class FatJarAntExporter {
 	private static final String ANT_PROPERTYNAME_DIR_BUILDFILE= "dir.buildfile"; //$NON-NLS-1$
 	private static final String ANT_PROPERTYNAME_DIR_WORKSPACE= "dir.workspace"; //$NON-NLS-1$
 	private static final String ANT_PROPERTYNAME_DIR_JARFILE= "dir.jarfile"; //$NON-NLS-1$
-	
+
 	private static final String ANT_PROPERTY_DIR_BUILDFILE= "${"+ANT_PROPERTYNAME_DIR_BUILDFILE+"}"; //$NON-NLS-1$ //$NON-NLS-2$
 	private static final String ANT_PROPERTY_DIR_WORKSPACE= "${"+ANT_PROPERTYNAME_DIR_WORKSPACE+"}"; //$NON-NLS-1$ //$NON-NLS-2$
 	private static final String ANT_PROPERTY_DIR_JARFILE= "${"+ANT_PROPERTYNAME_DIR_JARFILE+"}"; //$NON-NLS-1$ //$NON-NLS-2$
@@ -84,7 +84,7 @@ public abstract class FatJarAntExporter {
 	/**
 	 * Helper class for path-substitutions.
 	 * This class manages a set of path substitutions.
-	 * On apply the longest substitution is chosen.  
+	 * On apply the longest substitution is chosen.
 	 */
 	private static class PathSubstituter {
 		private Map<String, String> pathSubstitutions= new HashMap<>();
@@ -114,17 +114,17 @@ public abstract class FatJarAntExporter {
 			return result;
 		}
 	}
-	
+
 	private ILaunchConfiguration fLaunchConfiguration;
 	private IPath fAbsJarfile;
 	private IPath fAntScriptLocation;
-	
+
 	private String fBuildfileDir;
 	private String fWorkspaceDir;
 	private String fJarfileDir;
-	
+
 	private PathSubstituter pathSubstituter;
-	
+
 	/**
 	 * Create an instance of the ANT exporter. An ANT exporter can generate an ANT script
 	 * at the given ant script location for the given launch configuration
@@ -247,7 +247,7 @@ public abstract class FatJarAntExporter {
 		return result;
 	}
 
-	
+
 	/**
 	 * Adds dir properties to ANT-Buildfile:
 	 * <ul>
@@ -255,32 +255,32 @@ public abstract class FatJarAntExporter {
 	 * <li>&lt;property name="dir.workspace" value="${dir.buildfile}/../.." /&gt;</li>
 	 * <li>&lt;property name="dir.jarfile" value="C:/TEMP" /&gt;</li>
 	 * </ul>
-	 * 
+	 *
 	 * @param document the DOM document of the ant build script
 	 * @param project the project tag
 	 */
 	protected void addBaseDirProperties(Document document, Element project) {
-		
+
 		Node comment= document.createComment("define folder properties"); //$NON-NLS-1$
 		project.appendChild(comment);
-		
+
 		Element property= document.createElement("property"); //$NON-NLS-1$
-		property.setAttribute("name", ANT_PROPERTYNAME_DIR_BUILDFILE); //$NON-NLS-1$ 
-		property.setAttribute("value", "."); //$NON-NLS-1$ //$NON-NLS-2$ 
+		property.setAttribute("name", ANT_PROPERTYNAME_DIR_BUILDFILE); //$NON-NLS-1$
+		property.setAttribute("value", "."); //$NON-NLS-1$ //$NON-NLS-2$
 		project.appendChild(property);
 
 		property= document.createElement("property"); //$NON-NLS-1$
-		property.setAttribute("name", ANT_PROPERTYNAME_DIR_WORKSPACE); //$NON-NLS-1$ 
-		property.setAttribute("value", getWorkspaceRelativeDir()); //$NON-NLS-1$ 
+		property.setAttribute("name", ANT_PROPERTYNAME_DIR_WORKSPACE); //$NON-NLS-1$
+		property.setAttribute("value", getWorkspaceRelativeDir()); //$NON-NLS-1$
 		project.appendChild(property);
 
 		property= document.createElement("property"); //$NON-NLS-1$
-		property.setAttribute("name", ANT_PROPERTYNAME_DIR_JARFILE); //$NON-NLS-1$ 
-		property.setAttribute("value", getJarfileRelativeDir()); //$NON-NLS-1$ 
+		property.setAttribute("name", ANT_PROPERTYNAME_DIR_JARFILE); //$NON-NLS-1$
+		property.setAttribute("value", getJarfileRelativeDir()); //$NON-NLS-1$
 		project.appendChild(property);
 	}
 
-	
+
 	/**
 	 * Converts the given filename relative to any of the ant-property-dirs:
 	 * <ul>
@@ -288,8 +288,8 @@ public abstract class FatJarAntExporter {
 	 * <li>workspace-dir (eclipse workspace dir)</li>
 	 * <li>jarfile-dir (where the jar is written to)</li>
 	 * </ul>
-	 * 
-	 * @param absFilename filename whose base dir is substituted 
+	 *
+	 * @param absFilename filename whose base dir is substituted
 	 * @return either the original filename or a relative path from one of the base-dirs
 	 */
 	protected String substituteBaseDirs(String absFilename) {
@@ -307,7 +307,7 @@ public abstract class FatJarAntExporter {
 
 	/**
 	 * Returns the workspace-dir path relative to buildfile-dir.
-	 * 
+	 *
 	 * @return the relative path for the workspace-dir
 	 */
 	protected String getWorkspaceRelativeDir() {
@@ -333,7 +333,7 @@ public abstract class FatJarAntExporter {
 
 	/**
 	 * Returns jarfile-dir path relative to buildfile-dir or workspace-dir.
-	 * 
+	 *
 	 * @return the relative path for the jarfile-dir
 	 */
 	protected String getJarfileRelativeDir() {
@@ -345,10 +345,10 @@ public abstract class FatJarAntExporter {
 		return result;
 	}
 
-	
+
 	/**
 	 * Create an ANT script at the given location.
-	 * 
+	 *
 	 * @param antScriptLocation to write ANT script to
 	 * @param projectName base project for informational purpose only
 	 * @param absJarfile path to the destination

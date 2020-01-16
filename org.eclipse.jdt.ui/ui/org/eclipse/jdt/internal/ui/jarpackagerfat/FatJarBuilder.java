@@ -32,7 +32,7 @@ import org.eclipse.jdt.internal.ui.jarpackager.JarBuilder;
 
 /**
  * A builder which is able to handle referenced libraries.
- * 
+ *
  * @since 3.4
  */
 public abstract class FatJarBuilder extends JarBuilder implements IJarBuilderExtension {

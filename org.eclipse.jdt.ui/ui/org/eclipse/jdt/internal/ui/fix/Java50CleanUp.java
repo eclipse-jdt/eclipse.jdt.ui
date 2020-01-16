@@ -154,15 +154,15 @@ public class Java50CleanUp extends AbstractMultiFix {
 	@Override
 	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocation problem) {
 		int id= problem.getProblemId();
-		
+
 		if (Java50Fix.isMissingOverrideAnnotationProblem(id)) {
 			if (isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS) && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE)) {
 				return ! Java50Fix.isMissingOverrideAnnotationInterfaceProblem(id) || isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE_FOR_INTERFACE_METHOD_IMPLEMENTATION);
 			}
-			
+
 		} else if (Java50Fix.isMissingDeprecationProblem(id)) {
 			return isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS) && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED);
-			
+
 		} else if (Java50Fix.isRawTypeReferenceProblem(id)) {
 			return isEnabled(CleanUpConstants.VARIABLE_DECLARATION_USE_TYPE_ARGUMENTS_FOR_RAW_TYPE_REFERENCES);
 		}
@@ -173,13 +173,13 @@ public class Java50CleanUp extends AbstractMultiFix {
 	@Override
 	public int computeNumberOfFixes(CompilationUnit compilationUnit) {
 		int result= 0;
-		
+
 		boolean addAnnotations= isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS);
 		boolean addMissingOverride= addAnnotations && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE);
 		boolean addMissingOverrideInterfaceMethods= addMissingOverride && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE_FOR_INTERFACE_METHOD_IMPLEMENTATION);
 		boolean addMissingDeprecated= addAnnotations && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED);
 		boolean useTypeArgs= isEnabled(CleanUpConstants.VARIABLE_DECLARATION_USE_TYPE_ARGUMENTS_FOR_RAW_TYPE_REFERENCES);
-		
+
 		for (IProblem problem : compilationUnit.getProblems()) {
 			int id= problem.getID();
 			if (addMissingOverride && Java50Fix.isMissingOverrideAnnotationProblem(id))

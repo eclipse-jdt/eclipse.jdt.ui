@@ -41,7 +41,7 @@ class HistoryDropDownAction extends Action implements IMenuCreator {
 
 		/**
 		 * Creates a clear history action.
-		 * 
+		 *
 		 * @param view the Call Hierarchy view part
 		 */
 		public ClearHistoryAction(CallHierarchyViewPart view) {

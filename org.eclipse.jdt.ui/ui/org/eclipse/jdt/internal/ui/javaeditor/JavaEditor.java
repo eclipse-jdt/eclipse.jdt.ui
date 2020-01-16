@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Tom Eicher <eclipse@tom.eicher.name> - [formatting] 'Format Element' in JavaDoc does also format method body - https://bugs.eclipse.org/bugs/show_bug.cgi?id=238746
@@ -1503,14 +1503,14 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 	/**
 	 * Preference key for highlighting bracket at caret location.
-	 * 
+	 *
 	 * @since 3.8
 	 */
 	protected final static String HIGHLIGHT_BRACKET_AT_CARET_LOCATION= PreferenceConstants.EDITOR_HIGHLIGHT_BRACKET_AT_CARET_LOCATION;
-	
+
 	/**
 	 * Preference key for enclosing brackets.
-	 * 
+	 *
 	 * @since 3.8
 	 */
 	protected final static String ENCLOSING_BRACKETS= PreferenceConstants.EDITOR_ENCLOSING_BRACKETS;
@@ -1745,32 +1745,32 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 	/**
 	 * Time when last error message got set.
-	 * 
+	 *
 	 * @since 3.5
 	 */
 	private long fErrorMessageTime;
 
 	/**
 	 * Timeout for the error message.
-	 * 
+	 *
 	 * @since 3.5
 	 */
 	private static final long ERROR_MESSAGE_TIMEOUT= 1000;
 
 	/**
 	 * Previous location history for goto matching bracket action.
-	 * 
+	 *
 	 * @since 3.8
 	 */
 	private List<IRegion> fPreviousSelections;
 
 	/**
 	 * Java code mining manager
-	 * 
+	 *
 	 * @since 3.14
 	 */
 	private JavaCodeMiningManager fJavaCodeMiningManager;
-	
+
 	/**
 	 * Returns the most narrow java element including the given offset.
 	 *
@@ -2649,7 +2649,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			PlatformUI.getWorkbench().removeWindowListener(fActivationListener);
 			fActivationListener= null;
 		}
-		
+
 		if (fEncodingSupport != null) {
 			fEncodingSupport.dispose();
 			fEncodingSupport= null;
@@ -2803,7 +2803,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * don't want to make this risky method API at this point, since Java editor breadcrumb might
 	 * become a Platform UI feature during 3.5 and hence we can then delete this workaround.
 	 * </p>
-	 * 
+	 *
 	 * @param state <code>true</code> if activated
 	 * @since 3.4
 	 */
@@ -4250,7 +4250,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 	/**
 	 * Returns the bracket matcher.
-	 * 
+	 *
 	 * @return the bracket matcher
 	 * @since 3.8
 	 */
@@ -4260,7 +4260,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 	/**
 	 * Checks whether called from Outline view.
-	 * 
+	 *
 	 * @return <code>true</code> if called by Outline view
 	 * @since 3.9
 	 */
@@ -4347,11 +4347,11 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * {@link PreferenceConstants#EDITOR_JAVA_CODEMINING_PREFIX}. It provides the capability for
 	 * external plug-ins to contribute with a custom {@link ICodeMiningProvider} and refresh the Java
 	 * Editor mining when preferences changed.
-	 * 
+	 *
 	 * @param property the name of the preference property that changed
-	 * 
+	 *
 	 * @return <code>true</code> if the given property is a Java code mining preference.
-	 * 
+	 *
 	 * @since 3.14
 	 */
 	private boolean isJavaCodeMiningPreference(String property) {

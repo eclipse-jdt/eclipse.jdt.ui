@@ -289,7 +289,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 						if (document.getChar(offset - 1) == '{')
 							return new ExitFlags(ILinkedModeListener.EXIT_ALL, true);
 
-						// see bug 308217: while overriding a method and using '(' followed by parameter type to filter the content assist proposals, if ')' is added 
+						// see bug 308217: while overriding a method and using '(' followed by parameter type to filter the content assist proposals, if ')' is added
 						// automatically on typing '(', pressing return key should not result in jumping after ')' instead of applying the selected proposal.
 						if (document.getChar(offset) == ')' && sourceViewer instanceof AdaptedSourceViewer && ((AdaptedSourceViewer) sourceViewer).getContentAssistant() instanceof ContentAssistant) {
 							ContentAssistant contentAssistant= (ContentAssistant) ((AdaptedSourceViewer) sourceViewer).getContentAssistant();
@@ -426,7 +426,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			return identifier.length() > 0
 					&& Character.isUpperCase(identifier.charAt(0));
 		}
-		
+
 		private boolean isAngularIntroducer(String identifier) {
 			return identifier.length() > 0
 					&& (Character.isUpperCase(identifier.charAt(0))
@@ -436,7 +436,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 							|| identifier.startsWith("protected") //$NON-NLS-1$
 							|| identifier.startsWith("private")); //$NON-NLS-1$
 		}
-		
+
 		private boolean isMultilineSelection() {
 			ISelection selection= getSelectionProvider().getSelection();
 			if (selection instanceof ITextSelection) {
@@ -1179,7 +1179,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 
 	/**
 	 * Returns the refactor action group.
-	 * 
+	 *
 	 * @return the refactor action group, or <code>null</code> if there is none
 	 * @since 3.5
 	 */
@@ -1189,7 +1189,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 
 	/**
 	 * Returns the generate action group.
-	 * 
+	 *
 	 * @return the generate action group, or <code>null</code> if there is none
 	 * @since 3.5
 	 */
@@ -1856,7 +1856,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 
 	/**
 	 * Returns the correction command installer.
-	 * 
+	 *
 	 * @return the correction command installer, or <code>null</code> if there is none
 	 * @since 3.5
 	 */

@@ -157,7 +157,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 
 	/**
 	 * Creates an instance of this class.
-	 * 
+	 *
 	 * @param jarPackage the JAR package data
 	 */
 	public JarManifestWizardPage(JarPackageData jarPackage) {

@@ -91,16 +91,16 @@ public class CreateModuleInfoAction implements IObjectActionDelegate {
 			Object data= button.getLayoutData();
 			if (data instanceof GridData) {
 				GridData gridData= (GridData) data;
-				gridData.widthHint+= button.getText().length(); 
+				gridData.widthHint+= button.getText().length();
 				button.setLayoutData(gridData);
 			}
 		}
 	}
-	
+
 	private static final String MODULE_INFO_JAVA_FILENAME= JavaModelUtil.MODULE_INFO_JAVA;
 
 	private ISelection fSelection;
-	
+
 	@Override
 	public void selectionChanged(IAction action, ISelection selection) {
 		fSelection= selection;
@@ -183,7 +183,7 @@ public class CreateModuleInfoAction implements IObjectActionDelegate {
 				IWorkbenchWizard moduleInfoWizard= new NewModuleInfoWizard(javaProject, packageFragmentRoots, targetPkgFragmentRoot);
 				WizardDialog dialog= new ModuleInfoCreationDialog(getDisplay().getActiveShell(), moduleInfoWizard);
 				dialog.setHelpAvailable(false);
-				dialog.create();				
+				dialog.create();
 				dialog.open();
 			} catch (CoreException e) {
 				JavaPlugin.log(e);

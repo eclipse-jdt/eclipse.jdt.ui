@@ -30,7 +30,7 @@ import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 
 /**
  * Configuration dialog for default "Expand with Constructors" behavior.
- * 
+ *
  * @since 3.5
  */
 class ExpandWithConstructorsDialog extends TrayDialog {
@@ -41,7 +41,7 @@ class ExpandWithConstructorsDialog extends TrayDialog {
 	protected ExpandWithConstructorsDialog(Shell parentShell) {
 		super(parentShell);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
 	 */
@@ -49,7 +49,7 @@ class ExpandWithConstructorsDialog extends TrayDialog {
 	protected boolean isResizable() {
 		return true;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.dialogs.StatusDialog#configureShell(org.eclipse.swt.widgets.Shell)
 	 */

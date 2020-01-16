@@ -351,7 +351,7 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 	/**
 	 * Checks whether the given name belongs to a {@link ClassInstanceCreation} and if so, returns
 	 * its constructor binding.
-	 * 
+	 *
 	 * @param nameNode the name node
 	 * @return the constructor binding or <code>null</code> if not found
 	 * @since 3.7

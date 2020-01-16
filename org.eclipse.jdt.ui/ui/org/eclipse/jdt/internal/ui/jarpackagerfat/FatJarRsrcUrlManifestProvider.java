@@ -29,7 +29,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * A manifest provider creates manifest files for a fat jar with a JAR in JAR loader.
- * 
+ *
  * @since 3.5
  */
 public class FatJarRsrcUrlManifestProvider extends FatJarManifestProvider {
@@ -50,12 +50,12 @@ public class FatJarRsrcUrlManifestProvider extends FatJarManifestProvider {
 			}
 		}
 		String manifestRsrcClasspath= getManifestRsrcClasspath(jarNames);
-		ownManifest.getMainAttributes().putValue(JIJConstants.REDIRECTED_CLASS_PATH_MANIFEST_NAME, manifestRsrcClasspath); 
+		ownManifest.getMainAttributes().putValue(JIJConstants.REDIRECTED_CLASS_PATH_MANIFEST_NAME, manifestRsrcClasspath);
 	}
 
 	public String getManifestRsrcClasspath(ArrayList<String> jarNames) {
 		StringBuilder result= new StringBuilder();
-		result.append(JIJConstants.CURRENT_DIR); 
+		result.append(JIJConstants.CURRENT_DIR);
 		for (String jarName : jarNames) {
 			try {
 				jarName= URLEncoder.encode(jarName, "UTF-8"); //$NON-NLS-1$
@@ -69,7 +69,7 @@ public class FatJarRsrcUrlManifestProvider extends FatJarManifestProvider {
 
 	/**
 	 * Hook for subclasses to add additional manifest entries.
-	 * 
+	 *
 	 * @param	manifest	the manifest to which the entries should be added
 	 * @param	jarPackage	the JAR package specification
 	 */

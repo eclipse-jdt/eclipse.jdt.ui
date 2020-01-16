@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -181,10 +181,10 @@ public class EditorUtility {
 
 		return openInEditor(input, getEditorID(input), activate);
 	}
-	
+
 	/**
 	 * Tries to find the editor for the given input element.
-	 * 
+	 *
 	 * @param inputElement the input element
 	 * @param activate <code>true</code> if the found editor should be activated
 	 * @return the editor or <code>null</code>
@@ -607,7 +607,7 @@ public class EditorUtility {
 	/**
 	 * Returns the Java project for a given text editor or <code>null</code> if no corresponding
 	 * Java project exists.
-	 * 
+	 *
 	 * @param editor the text editor
 	 *
 	 * @return the corresponding Java project
@@ -767,7 +767,7 @@ public class EditorUtility {
 	 * occurred. Each region in the result spans over the size of at least one line. If successive
 	 * lines have changed a region spans over the size of all successive lines. The regions include
 	 * line delimiters.
-	 * 
+	 *
 	 * @param buffer the buffer to compare contents from
 	 * @param monitor to report progress to
 	 * @return the regions of the changed lines
@@ -817,7 +817,7 @@ public class EditorUtility {
 				 * Return regions of all lines which differ comparing <code>oldDocument</code>s
 				 * content with <code>currentDocument</code>s content. Successive lines are merged
 				 * into one region.
-				 * 
+				 *
 				 * @param oldDocument a document containing the old content
 				 * @param currentDocument a document containing the current content
 				 * @return the changed regions

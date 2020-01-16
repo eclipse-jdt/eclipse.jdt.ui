@@ -107,7 +107,7 @@ class CallHierarchyViewer extends TreeViewer {
 
 	/**
 	 * Wraps the roots of a MethodWrapper tree in a dummy root in order to show it in the tree.
-	 * 
+	 *
 	 * @param roots The visible roots of the MethodWrapper tree.
 	 * @param addRoots <code>true</code> if the roots need to be added to the existing roots,
 	 *            <code>false</code> otherwise
@@ -151,7 +151,7 @@ class CallHierarchyViewer extends TreeViewer {
 
 	/**
 	 * {@inheritDoc}
-	 * 
+	 *
 	 * @since 3.7
 	 */
 	@Override
@@ -169,7 +169,7 @@ class CallHierarchyViewer extends TreeViewer {
 
 	/**
 	 * {@inheritDoc}
-	 * 
+	 *
 	 * @since 3.7
 	 */
 	@Override
@@ -180,18 +180,18 @@ class CallHierarchyViewer extends TreeViewer {
 
 	/**
 	 * Sets the constructor node.
-	 * 
+	 *
 	 * @param wrapper the constructor caller method wrapper
 	 * @since 3.7
 	 */
 	private void setConstructorToExpand(CallerMethodWrapper wrapper) {
 		fConstructorToExpand= wrapper;
-		
+
 	}
 
 	/**
 	 * Expands the constructor node when in expand with constructors mode.
-	 * 
+	 *
 	 * @since 3.7
 	 */
 	void expandConstructorNode() {

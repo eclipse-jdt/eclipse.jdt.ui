@@ -38,7 +38,7 @@ public class CompilationUnitAnnotationModelEvent  extends AnnotationModelEvent {
 
 	/**
 	 * Constructor for CompilationUnitAnnotationModelEvent.
-	 * 
+	 *
 	 * @param model the annotation model
 	 * @param underlyingResource The annotation model's underlying resource
 	 */
@@ -114,7 +114,7 @@ public class CompilationUnitAnnotationModelEvent  extends AnnotationModelEvent {
 
 	/**
 	 * Returns the annotation model's underlying resource.
-	 * 
+	 *
 	 * @return the underlying resource
 	 */
 	public IResource getUnderlyingResource() {

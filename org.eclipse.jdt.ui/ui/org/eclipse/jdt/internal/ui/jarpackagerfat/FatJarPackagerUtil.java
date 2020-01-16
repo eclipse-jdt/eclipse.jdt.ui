@@ -81,7 +81,7 @@ public final class FatJarPackagerUtil {
 	 * Increment of "[name][.ext]" is "[name]_2[.ext]<br>
 	 * Increment of "[name]_2[.ext]" is "[name]_3[.ext]<br>
 	 * [.ext] might be empty<br>
-	 * 
+	 *
 	 * @param fileName the file name to increment
 	 * @return incremented filename
 	 */

@@ -171,7 +171,7 @@ public final class JarImportWizard extends BinaryRefactoringHistoryWizard implem
 	 *         <code>false</code> otherwise
 	 */
 	public static boolean isValidClassPathEntry(final IClasspathEntry entry) {
-		// for root classpath or module path 
+		// for root classpath or module path
 		if(entry == null){
 			return false;
 		}

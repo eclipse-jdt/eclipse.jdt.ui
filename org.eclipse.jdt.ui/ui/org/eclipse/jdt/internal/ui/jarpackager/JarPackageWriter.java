@@ -68,7 +68,7 @@ public class JarPackageWriter extends Object implements IJarDescriptionWriter {
 	/**
 	 * Create a JarPackageWriter on the given output stream. It is the clients responsibility to
 	 * close the output stream.
-	 * 
+	 *
 	 * @param outputStream the the output stream
 	 * @param encoding the encoding
 	 */
@@ -90,7 +90,7 @@ public class JarPackageWriter extends Object implements IJarDescriptionWriter {
 
 	/**
 	 * Writes a XML representation of the JAR specification to to the underlying stream.
-	 * 
+	 *
 	 * @param jarPackage the JAR package data
 	 * @exception IOException if writing to the underlying stream fails
 	 */
@@ -238,7 +238,7 @@ public class JarPackageWriter extends Object implements IJarDescriptionWriter {
 
 	/**
 	 * Closes this stream. It is the client's responsibility to close the stream.
-	 * 
+	 *
 	 * @throws CoreException if closing the stream fails
 	 */
     @Override
