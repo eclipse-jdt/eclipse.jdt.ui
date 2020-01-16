@@ -49,7 +49,7 @@ public class CastCorrectionProposal extends LinkedCorrectionProposal {
 
 	/**
 	 * Creates a cast correction proposal.
-	 * 
+	 *
 	 * @param label the display name of the proposal
 	 * @param targetCU the compilation unit that is modified
 	 * @param nodeToCast the node to cast

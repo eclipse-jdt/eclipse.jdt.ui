@@ -97,11 +97,11 @@ public class CorrectPackageDeclarationProposal extends CUCorrectionProposal {
 		}
 		return (Messages.format(CorrectionMessages.CorrectPackageDeclarationProposal_change_description, JavaElementLabels.getElementLabel(parentPack, JavaElementLabels.ALL_DEFAULT)));
 	}
-	
+
 	public static boolean isValidProposal(ICompilationUnit cu) {
 		boolean isValid= true;
 		IPackageFragment parentPack= (IPackageFragment) cu.getParent();
-		try {			
+		try {
 			IPackageDeclaration[] decls= cu.getPackageDeclarations();
 			if (parentPack.isDefaultPackage() && decls.length > 0) {
 				IJavaProject jProject = parentPack.getJavaProject();

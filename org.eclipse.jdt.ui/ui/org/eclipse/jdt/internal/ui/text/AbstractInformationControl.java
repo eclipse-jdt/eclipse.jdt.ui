@@ -119,12 +119,12 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 			}
 			return out.toArray();
 		}
-		
+
 		@Override
 		public boolean select(Viewer viewer, Object parentElement, Object element) {
 			return selectTreePath(viewer, new TreePath(new Object[] { parentElement }), element);
 		}
-		
+
 		public boolean selectTreePath(Viewer viewer, TreePath parentPath, Object element) {
 			// Avoid endless loops, see https://bugs.eclipse.org/395202 :
 			// Cut off children of elements that are shown repeatedly.
@@ -133,7 +133,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 					return false;
 				}
 			}
-			
+
 			JavaElementPrefixPatternMatcher matcher= getMatcher();
 			if (matcher == null || !(viewer instanceof TreeViewer))
 				return true;
@@ -447,7 +447,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	 *
 	 * @param pattern the pattern
 	 * @param update <code>true</code> if the viewer should be updated
-	 * 
+	 *
 	 * @see JavaElementPrefixPatternMatcher
 	 */
 	protected void setMatcherString(String pattern, boolean update) {
@@ -548,11 +548,11 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 		// Check root elements
 		return findElement(selectItems(items[0].getParent().getItems(), items), null, false);
 	}
-	
+
 	private boolean canSkip(TreeItem item, TreeItem[] toBeSkipped) {
 		if (toBeSkipped == null)
 			return false;
-		
+
 		for (TreeItem curr : toBeSkipped) {
 			if (curr == item) {
 				return true;

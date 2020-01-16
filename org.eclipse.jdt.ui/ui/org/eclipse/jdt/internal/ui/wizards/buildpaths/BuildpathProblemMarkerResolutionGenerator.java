@@ -129,7 +129,7 @@ public class BuildpathProblemMarkerResolutionGenerator implements IMarkerResolut
 				}
 			});
 		}
-		
+
 		String optionId= JavaCore.getOptionForConfigurableBuildPathProblemSeverity(id);
 
 
@@ -259,7 +259,7 @@ public class BuildpathProblemMarkerResolutionGenerator implements IMarkerResolut
 			return fImage;
 		}
 	}
-	
+
 	private static class ConfigureSeverityResolution implements IMarkerResolution2, IMarkerResolutionRelevance {
 		private final IJavaProject fProject;
 		private String fOptionId;
@@ -329,7 +329,7 @@ public class BuildpathProblemMarkerResolutionGenerator implements IMarkerResolut
 	private static class OpenRequiredProjectMarkerResolution implements IMarkerResolution2, IMarkerResolutionRelevance {
 
 		private final ArrayList<IProject> closedProjects= new ArrayList<>();
-		
+
 		public OpenRequiredProjectMarkerResolution(IMarker marker) {
 			try {
 				// collect required closed projects

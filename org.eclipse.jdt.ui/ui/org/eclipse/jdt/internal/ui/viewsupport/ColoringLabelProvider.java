@@ -30,7 +30,7 @@ public class ColoringLabelProvider extends DecoratingStyledCellLabelProvider imp
 
 	public static final Styler HIGHLIGHT_STYLE= StyledString.createColorRegistryStyler(null, ColoredViewersManager.HIGHLIGHT_BG_COLOR_NAME);
 	public static final Styler HIGHLIGHT_WRITE_STYLE= StyledString.createColorRegistryStyler(null, ColoredViewersManager.HIGHLIGHT_WRITE_BG_COLOR_NAME);
-	
+
 	public static final Styler INHERITED_STYLER= StyledString.createColorRegistryStyler(ColoredViewersManager.INHERITED_COLOR_NAME, null);
 
 	public ColoringLabelProvider(IStyledLabelProvider labelProvider) {
@@ -61,9 +61,9 @@ public class ColoringLabelProvider extends DecoratingStyledCellLabelProvider imp
 		if (viewer == null) {
 			return;
 		}
-		
+
 		boolean needsUpdate= false;
-		
+
 		boolean showColoredLabels= ColoredViewersManager.showColoredLabels();
 		if (showColoredLabels != isOwnerDrawEnabled()) {
 			setOwnerDrawEnabled(showColoredLabels);

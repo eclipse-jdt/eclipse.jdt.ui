@@ -131,7 +131,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		fAbbreviatePackageNames= new SelectionButtonDialogField(SWT.CHECK);
 		fAbbreviatePackageNames.setDialogFieldListener(listener);
 		fAbbreviatePackageNames.setLabelText(PreferencesMessages.AppearancePreferencePage_pkgNamePatternAbbreviateEnable_label);
-		
+
 		fAbbreviatePackageNamePattern= new TextBoxDialogField();
 		fAbbreviatePackageNamePattern.setDialogFieldListener(listener);
 		fAbbreviatePackageNamePattern.setLabelText(PreferencesMessages.AppearancePreferencePage_pkgNamePatternAbbreviate_label);

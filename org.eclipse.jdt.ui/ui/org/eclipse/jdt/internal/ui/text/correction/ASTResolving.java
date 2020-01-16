@@ -35,7 +35,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 /**
  * JDT-UI-internal helper methods to find AST nodes or bindings.
- * 
+ *
  * @see JDTUIHelperClasses
  */
 public class ASTResolving extends org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving {

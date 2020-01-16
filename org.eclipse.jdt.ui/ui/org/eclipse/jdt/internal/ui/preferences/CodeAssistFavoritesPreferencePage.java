@@ -36,7 +36,7 @@ public class CodeAssistFavoritesPreferencePage extends PropertyAndPreferencePage
 
 	/**
 	 * The ID of this preference page.
-	 * 
+	 *
 	 * @since 3.6
 	 */
 	public static final String PAGE_ID= "org.eclipse.jdt.ui.preferences.CodeAssistPreferenceFavorites"; //$NON-NLS-1$

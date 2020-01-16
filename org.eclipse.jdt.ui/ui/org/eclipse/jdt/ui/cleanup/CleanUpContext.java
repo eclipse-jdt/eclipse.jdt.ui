@@ -21,14 +21,14 @@ import org.eclipse.jdt.core.manipulation.CleanUpContextCore;
 
 /**
  * The context that contains all information required by a clean up to create a fix.
- * 
+ *
  * @since 3.5
  */
 public class CleanUpContext extends CleanUpContextCore {
 
 	/**
 	 * Creates a new clean up context.
-	 * 
+	 *
 	 * @param unit the compilation unit
 	 * @param ast the AST, can be <code>null</code> if {@link CleanUpRequirements#requiresAST()}
 	 *            returns <code>false</code>. The AST is guaranteed to contain changes made by

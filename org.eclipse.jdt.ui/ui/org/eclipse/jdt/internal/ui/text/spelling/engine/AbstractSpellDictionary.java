@@ -100,7 +100,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 		}
 	}
 
-	
+
 	/**
 	 * Canonical name for UTF-8 encoding
 	 * @since 3.6
@@ -147,7 +147,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 
 	/**
 	 * Returns the initial size of dictionary.
-	 * 
+	 *
 	 * @return The initial size of dictionary.
 	 * @since 3.6
 	 */

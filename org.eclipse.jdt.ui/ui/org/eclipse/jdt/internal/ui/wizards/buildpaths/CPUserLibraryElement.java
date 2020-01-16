@@ -82,7 +82,7 @@ public class CPUserLibraryElement {
 	/**
 	 * Creates a new user library element with the given name and children and sets itself as the
 	 * parent container to each given child element.
-	 * 
+	 *
 	 * @param name the name of the library element
 	 * @param isSystemLibrary <code>true</code> if the library is a system library,
 	 *            <code>false</code> otherwise

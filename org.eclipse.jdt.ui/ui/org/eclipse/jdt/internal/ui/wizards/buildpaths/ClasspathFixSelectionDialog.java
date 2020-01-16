@@ -205,7 +205,7 @@ public class ClasspathFixSelectionDialog extends StatusDialog {
 			fFixSelectionTable.addSelectionChangedListener(listener);
 
 			Dialog.applyDialogFont(table);
-			
+
 			GridData gridData= new GridData(SWT.FILL, SWT.FILL, true, true);
 			gridData.heightHint= table.getItemHeight() * Math.max(4, Math.min(10, count));
 			gridData.widthHint= convertWidthInCharsToPixels(50);

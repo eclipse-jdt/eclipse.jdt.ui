@@ -31,7 +31,7 @@ public abstract class AbstractCleanUpTabPage extends CleanUpTabPage {
 
 	protected abstract AbstractCleanUp[] createPreviewCleanUps(Map<String, String> values);
 
-	/* 
+	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpTabPage#setWorkingValues(java.util.Map)
 	 */
 	@Override
@@ -41,14 +41,14 @@ public abstract class AbstractCleanUpTabPage extends CleanUpTabPage {
 		setOptions(new MapCleanUpOptions(workingValues));
 	}
 
-	/* 
+	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.cleanup.ICleanUpTabPage#setOptions(org.eclipse.jdt.internal.ui.fix.CleanUpOptions)
 	 */
 	@Override
 	public void setOptions(CleanUpOptions options) {
 	}
 
-	/* 
+	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.cleanup.ICleanUpTabPage#getPreview()
 	 */
 	@Override
@@ -56,7 +56,7 @@ public abstract class AbstractCleanUpTabPage extends CleanUpTabPage {
 		if (fPreviewCleanUps == null) {
 			fPreviewCleanUps= createPreviewCleanUps(fValues);
 		}
-	
+
 		StringBuilder buf= new StringBuilder();
 		for (AbstractCleanUp fPreviewCleanUp : fPreviewCleanUps) {
 			buf.append(fPreviewCleanUp.getPreview());

@@ -128,7 +128,7 @@ public class AddModuleRequiresCorrectionProposal extends ChangeCorrectionProposa
 	/**
 	 * Returns the list of package fragments for the matching types based on a given string pattern. The
 	 * remaining parameters are used to narrow down the type of expected results.
-	 * 
+	 *
 	 * @param stringPattern the given pattern
 	 * @param typeRule determines the nature of the searched elements
 	 * @param javaElement limits the search scope to this element

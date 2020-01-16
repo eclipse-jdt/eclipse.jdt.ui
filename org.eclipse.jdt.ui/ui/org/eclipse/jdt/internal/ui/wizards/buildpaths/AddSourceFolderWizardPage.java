@@ -105,7 +105,7 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 
 			fLinkLocation.setLabelText(NewWizardMessages.LinkFolderDialog_dependenciesGroup_locationLabel_desc);
 			fLinkLocation.setButtonLabel(NewWizardMessages.LinkFolderDialog_dependenciesGroup_browseButton_desc);
-			fLinkLocation.setDialogFieldListener(this);			
+			fLinkLocation.setDialogFieldListener(this);
 
 			fVariables= new SelectionButtonDialogField(SWT.PUSH);
 			fVariables.setLabelText(NewWizardMessages.LinkFolderDialog_dependenciesGroup_variables_desc);

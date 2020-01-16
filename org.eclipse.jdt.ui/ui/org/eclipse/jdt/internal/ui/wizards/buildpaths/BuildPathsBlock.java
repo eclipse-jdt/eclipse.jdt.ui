@@ -762,21 +762,21 @@ public class BuildPathsBlock {
 	public void configureJavaProject(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 		configureJavaProject(null, monitor);
 	}
-	
+
 	public void configureJavaProject(String newProjectCompliance, IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 		flush(fClassPathList.getElements(), getOutputLocation(), getJavaProject(), newProjectCompliance, monitor);
 		initializeTimeStamps();
 
 		updateUI();
 	}
-	
+
 	/**
 	 * Sets the configured build path and output location to the given Java project.
 	 * If the project already exists, only build paths are updated.
 	 * <p>
 	 * If the classpath contains an Execution Environment entry, the EE's compiler compliance options
 	 * are used as project-specific options (unless the classpath already contained the same Execution Environment)
-	 * 
+	 *
 	 * @param classPathEntries the new classpath entries (list of {@link CPListElement})
 	 * @param outputLocation the output location
 	 * @param javaProject the Java project
@@ -1152,8 +1152,8 @@ public class BuildPathsBlock {
 	public void setFocus() {
 		fSourceContainerPage.setFocus();
     }
-	
+
 	public BuildPathBasePage getSourceContainerPage() {
 		return fSourceContainerPage;
-	}	
+	}
 }

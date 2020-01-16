@@ -144,7 +144,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 			try {
 				MultiFixTarget[] problems= getCleanUpTargets(markers);
 
-				if (fProposal instanceof CreatePackageInfoWithDefaultNullnessProposal) {					
+				if (fProposal instanceof CreatePackageInfoWithDefaultNullnessProposal) {
 					((CreatePackageInfoWithDefaultNullnessProposal) fProposal).resolve(problems, monitor);
 					return;
 				}

@@ -56,21 +56,21 @@ public class AssistContext extends TextInvocationContext implements IInvocationC
 		fEditor= editor;
 		fWaitFlag= waitFlag;
 	}
-	
+
 	/*
 	 * @since 3.5
 	 */
 	public AssistContext(ICompilationUnit cu, ISourceViewer sourceViewer, int offset, int length, SharedASTProviderCore.WAIT_FLAG waitFlag) {
 		this(cu, sourceViewer, null, offset, length, waitFlag);
 	}
-	
+
 	/*
 	 * @since 3.5
 	 */
 	public AssistContext(ICompilationUnit cu, ISourceViewer sourceViewer, IEditorPart editor, int offset, int length) {
 		this(cu, sourceViewer, editor, offset, length, SharedASTProviderCore.WAIT_YES);
 	}
-	
+
 	/*
 	 * Constructor for CorrectionContext.
 	 * @since 3.4
@@ -94,7 +94,7 @@ public class AssistContext extends TextInvocationContext implements IInvocationC
 	public ICompilationUnit getCompilationUnit() {
 		return fCompilationUnit;
 	}
-	
+
 	/**
 	 * Returns the editor or <code>null</code> if none.
 	 * @return an <code>IEditorPart</code> or <code>null</code> if none

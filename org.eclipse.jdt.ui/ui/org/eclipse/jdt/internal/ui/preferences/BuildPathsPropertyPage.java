@@ -144,7 +144,7 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 		}
 		return super.okToLeave();
 	}
-	
+
 	@Override
 	public void setVisible(boolean visible) {
 		if (fBuildPathsBlock != null) {

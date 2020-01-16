@@ -28,19 +28,19 @@ import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposal;
 public class ASTRewriteRemoveImportsCorrectionProposal extends ASTRewriteCorrectionProposal{
 
 	private ImportRemover fImportRemover;
-	
+
 	public ASTRewriteRemoveImportsCorrectionProposal(String name, ICompilationUnit cu, ASTRewrite rewrite, int relevance) {
 		super(name, cu, rewrite, relevance);
 	}
 
 	public ASTRewriteRemoveImportsCorrectionProposal(String name, ICompilationUnit cu, ASTRewrite rewrite, int relevance, Image image) {
-		super(name, cu, rewrite, relevance, image);		
+		super(name, cu, rewrite, relevance, image);
 	}
-	
+
 	public void setImportRemover(ImportRemover remover) {
 		fImportRemover= remover;
 	}
-	
+
 	@Override
 	protected ASTRewrite getRewrite() throws CoreException {
 		ASTRewrite rewrite= super.getRewrite();
@@ -50,5 +50,5 @@ public class ASTRewriteRemoveImportsCorrectionProposal extends ASTRewriteCorrect
 		}
 		return rewrite;
 	}
-	
+
 }

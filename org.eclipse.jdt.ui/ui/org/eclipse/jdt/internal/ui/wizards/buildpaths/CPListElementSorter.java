@@ -99,7 +99,7 @@ public class CPListElementSorter extends ViewerComparator {
                 			return -1;
                 		}
                 	}
-                	
+
                 }
                 return getComparator().compare(name1, name2);
             }

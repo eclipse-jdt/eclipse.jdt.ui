@@ -258,14 +258,14 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 
 		/**
 		 * Section ID for the WorkingSetModelAwareSelectionDialog class.
-		 * 
+		 *
 		 * @since 3.5
 		 */
 		private static final String DIALOG_SETTINGS_SECTION= "WorkingSetModelAwareSelectionDialog"; //$NON-NLS-1$
 
 		/**
 		 * Key associated with the 'Show Only PE Visible Working Sets' check box.
-		 * 
+		 *
 		 * @since 3.5
 		 */
 		private static final String SETTINGS_SHOW_VISIBLE_ONLY= "ShowVisibleOnly"; //$NON-NLS-1$
@@ -331,7 +331,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 
 		/**
 		 * {@inheritDoc}
-		 * 
+		 *
 		 * @since 3.5
 		 */
 		@Override
@@ -544,7 +544,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 						isSortingEnabled= dialog.isSortingEnabled();
 						fWorkingSetModel.setWorkingSets(dialog.getAllWorkingSets(), isSortingEnabled, dialog.getSelection());
 					}
-					
+
 					recalculateCheckedState(dialog.getNewlyAddedWorkingSets());
 				}
 			});
@@ -667,7 +667,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 
 		for (int i= 0; i < workingSets.length; i++) {
 			IWorkingSet workingSet= workingSets[i];
-			
+
 			int checkCount= 0;
 			for (IAdaptable element : elements) {
 				if (checkedWorkingSets == null) {
@@ -689,7 +689,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 	private void updateWorkingSets(IWorkingSet[] newWorkingSets, IWorkingSet[] grayedWorkingSets, IAdaptable[] elements) {
 		HashSet<IWorkingSet> selectedSets= new HashSet<>(Arrays.asList(newWorkingSets));
 		HashSet<IWorkingSet> grayedSets= new HashSet<>(Arrays.asList(grayedWorkingSets));
-		
+
 		for (IWorkingSet workingSet : getAllWorkingSets()) {
 			if (isValidWorkingSet(workingSet) && !selectedSets.contains(workingSet) && !grayedSets.contains(workingSet)) {
 				for (IAdaptable element : elements) {
@@ -724,7 +724,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 
 	/**
 	 * Adds the given working set to the set of currently active working sets.
-	 * 
+	 *
 	 * @param workingSet working set to be activated
 	 * @since 3.5
 	 */
@@ -742,7 +742,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 
 	/**
 	 * Returns an array of currently active WorkingSets.
-	 * 
+	 *
 	 * @return array of active working sets or <code>null</code> if none
 	 * @since 3.5
 	 */

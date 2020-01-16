@@ -117,7 +117,7 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 
 	/**
 	 * Method detectClasspath.
-	 * 
+	 *
 	 * @param monitor The progress monitor (not null)
 	 * @throws CoreException in case of any failure
 	 */
@@ -291,7 +291,7 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 			parser.setFocalPosition(0);
 			CompilationUnit root= (CompilationUnit)parser.createAST(null);
 			PackageDeclaration packDecl= root.getPackage();
-			
+
 			IPath packPath= file.getParent().getFullPath();
 			String cuName= file.getName();
 			if (packDecl == null) {

@@ -117,16 +117,16 @@ public final class CodeFormatingTabPage extends AbstractCleanUpTabPage {
 		Group sortMembersGroup= createGroup(numColumns, composite, CleanUpMessages.CodeFormatingTabPage_SortMembers_GroupName);
 
 		final CheckboxPreference sortMembersPref= createCheckboxPref(sortMembersGroup, numColumns, CleanUpMessages.CodeFormatingTabPage_SortMembers_CheckBoxLabel, CleanUpConstants.SORT_MEMBERS, CleanUpModifyDialog.FALSE_TRUE);
-		
+
 		intent(sortMembersGroup);
 		final Button nullRadio= new Button(sortMembersGroup, SWT.RADIO);
 		nullRadio.setText(CleanUpMessages.CodeFormatingTabPage_SortMembersExclusive_radio0);
 		nullRadio.setLayoutData(createGridData(numColumns - 1, GridData.FILL_HORIZONTAL, SWT.DEFAULT));
 		nullRadio.setFont(composite.getFont());
-		
+
 		intent(sortMembersGroup);
 		final RadioPreference sortAllPref= createRadioPref(sortMembersGroup, numColumns - 1, CleanUpMessages.CodeFormatingTabPage_SortMembersFields_CheckBoxLabel, CleanUpConstants.SORT_MEMBERS_ALL, CleanUpModifyDialog.FALSE_TRUE);
-		
+
 		intent(sortMembersGroup);
 		final Label warningImage= new Label(sortMembersGroup, SWT.LEFT | SWT.WRAP);
 		warningImage.setImage(Dialog.getImage(Dialog.DLG_IMG_MESSAGE_WARNING));

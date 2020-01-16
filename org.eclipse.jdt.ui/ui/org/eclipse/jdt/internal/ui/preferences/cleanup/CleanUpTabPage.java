@@ -49,7 +49,7 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 
 	/**
 	 * @param kind the kind of clean up to configure
-	 * 
+	 *
 	 * @see CleanUpConstants#DEFAULT_CLEAN_UP_OPTIONS
 	 * @see CleanUpConstants#DEFAULT_SAVE_ACTION_OPTIONS
 	 */
@@ -130,7 +130,7 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 
 	/**
 	 * Connects master and slave checkboxes.
-	 * 
+	 *
 	 * @param master the master
 	 * @param slaves direct slaves of the master
 	 * @param subSlaves indirect slaves, i.e. a slave is a master of its subSlave).
@@ -154,7 +154,7 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 				}
 			}
 		}
-		
+
 		master.addObserver(new Observer() {
 			@Override
 			public void update(Observable o, Object arg) {
@@ -173,7 +173,7 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 				}
 			}
 		});
-		
+
 		for (CheckboxPreference slave : slaves) {
 			slave.addObserver(new Observer() {
 				@Override
@@ -182,7 +182,7 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 				}
 			});
 		}
-		
+
 		if (master.getChecked()) {
 			for (CheckboxPreference slave : slaves) {
 				if (slave.getChecked() && master.getEnabled()) {
@@ -209,7 +209,7 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 
 	/**
 	 * Creates a spacer control with a pre-defined width.
-	 * 
+	 *
 	 * @param parent the parent composite
 	 */
 	// should be called "createSpacer"

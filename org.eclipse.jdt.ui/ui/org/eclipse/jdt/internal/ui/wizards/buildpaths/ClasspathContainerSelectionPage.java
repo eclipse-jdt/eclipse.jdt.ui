@@ -60,7 +60,7 @@ public class ClasspathContainerSelectionPage extends WizardPage {
 
 	/**
 	 * Constructor for ClasspathContainerWizardPage.
-	 * 
+	 *
 	 * @param containerPages the array of container pages
 	 */
 	protected ClasspathContainerSelectionPage(ClasspathContainerDescriptor[] containerPages) {

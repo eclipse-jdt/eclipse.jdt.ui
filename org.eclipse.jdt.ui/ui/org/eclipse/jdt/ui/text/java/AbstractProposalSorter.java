@@ -53,7 +53,7 @@ public abstract class AbstractProposalSorter implements Comparator<ICompletionPr
 	 * <p>
 	 * Clients may override, the default implementation does nothing.
 	 * </p>
-	 * 
+	 *
 	 * @param context the context of the content assist invocation
 	 */
 	public void beginSorting(ContentAssistInvocationContext context) {
@@ -61,12 +61,12 @@ public abstract class AbstractProposalSorter implements Comparator<ICompletionPr
 
 	/**
 	 * The orderings imposed by an implementation need not be consistent with equals.
-	 * 
+	 *
 	 * @param p1 the first proposal to be compared
 	 * @param p2 the second proposal to be compared
 	 * @return a negative integer, zero, or a positive integer as the first argument is less than,
 	 *         equal to, or greater than the second
-	 * 
+	 *
 	 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
 	 */
 	@Override
