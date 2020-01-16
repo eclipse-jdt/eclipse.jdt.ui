@@ -34,7 +34,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 /**
  * Cleanup for adding required null annotations.
- * 
+ *
  * Crafted after the lead of Java50CleanUp
  */
 public class NullAnnotationsCleanUp extends AbstractMultiFix {

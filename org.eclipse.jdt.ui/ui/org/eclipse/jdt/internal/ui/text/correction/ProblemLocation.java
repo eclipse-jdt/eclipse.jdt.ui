@@ -28,9 +28,9 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaMarkerAnnotation;
 public class ProblemLocation extends ProblemLocationCore implements IProblemLocation {
 
 	public ProblemLocation(int offset, int length, IJavaAnnotation annotation) {
-		super(offset, length, annotation.getId(), 
-				annotation.getArguments() != null ? annotation.getArguments() : new String[0], 
-						JavaMarkerAnnotation.ERROR_ANNOTATION_TYPE.equals(annotation.getType()), 
+		super(offset, length, annotation.getId(),
+				annotation.getArguments() != null ? annotation.getArguments() : new String[0],
+						JavaMarkerAnnotation.ERROR_ANNOTATION_TYPE.equals(annotation.getType()),
 						annotation.getMarkerType() != null ? annotation.getMarkerType() : IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER);
 	}
 

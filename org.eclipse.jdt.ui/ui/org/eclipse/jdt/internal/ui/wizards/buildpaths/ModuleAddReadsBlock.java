@@ -136,7 +136,7 @@ public class ModuleAddReadsBlock {
 
 	/**
 	 * Gets the add-reads value entered by the user
-	 * @return the add-reads value, or an empty string if any of the fields was left empty. 
+	 * @return the add-reads value, or an empty string if any of the fields was left empty.
 	 */
 	public String getValue() {
 		String sourceModule= getSourceModuleText();
@@ -265,7 +265,7 @@ public class ModuleAddReadsBlock {
 			status.setError(Messages.format(NewWizardMessages.ModuleAddExportsBlock_illegalTargetModule_error, value));
 		}
 		return status;
-		
+
 	}
 
 	private void doStatusLineUpdate() {

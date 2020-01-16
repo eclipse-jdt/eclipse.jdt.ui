@@ -32,7 +32,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * The properties file correction assistant.
- * 
+ *
  * @since 3.7
  */
 public class PropertiesCorrectionAssistant extends QuickAssistAssistant {

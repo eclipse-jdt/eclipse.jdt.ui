@@ -661,7 +661,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 				if (fViewer.testFindItem(parent) != null)
 					postRefresh(parent, PARENT, element, runnables);
 				return true;
-				
+
 			} else if (element instanceof IPackageFragmentRoot) {
 				// libs and class folders can show up twice (in library container and as resource at original location)
 				IResource resource= element.getResource();

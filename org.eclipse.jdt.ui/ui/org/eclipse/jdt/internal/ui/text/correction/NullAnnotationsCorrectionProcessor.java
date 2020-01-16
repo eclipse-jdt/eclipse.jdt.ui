@@ -158,7 +158,7 @@ public class NullAnnotationsCorrectionProcessor {
 	public static void addExtractCheckedLocalProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		CompilationUnit compilationUnit = context.getASTRoot();
 		ICompilationUnit cu= (ICompilationUnit) compilationUnit.getJavaElement();
-	
+
 		ASTNode selectedNode= problem.getCoveringNode(compilationUnit);
 
 		SimpleName name= findProblemFieldName(selectedNode, problem.getProblemId());
@@ -170,7 +170,7 @@ public class NullAnnotationsCorrectionProcessor {
 			method= ASTNodes.getParent(selectedNode, Initializer.class);
 		if (method == null)
 			return;
-		
+
 		proposals.add(new ExtractToNullCheckedLocalProposal(cu, compilationUnit, name, method));
 	}
 	private static SimpleName findProblemFieldName(ASTNode selectedNode, int problemID) {

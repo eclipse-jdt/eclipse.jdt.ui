@@ -83,7 +83,7 @@ public abstract class NewElementWizard extends Wizard implements INewWizard {
 	/**
 	 * Subclasses should override to perform the actions of the wizard. This method is run in the
 	 * wizard container's context as a workspace runnable.
-	 * 
+	 *
 	 * @param monitor the progress monitor
 	 * @throws InterruptedException when the operation is cancelled
 	 * @throws CoreException if the element cannot be created

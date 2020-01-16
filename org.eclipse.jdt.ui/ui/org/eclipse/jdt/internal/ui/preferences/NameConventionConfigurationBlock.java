@@ -402,7 +402,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		fUseIsForBooleanGettersBox.doFillIntoGrid(composite, 3);
 
 		fUseOverrideAnnotation.doFillIntoGrid(composite, 3);
-		
+
 		Link seeProblemSeverity= new Link(composite, SWT.WRAP);
 		data= new GridData(SWT.BEGINNING, SWT.CENTER, true, false, 3, 1);
 		seeProblemSeverity.setLayoutData(data);
@@ -421,7 +421,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 				}
 			}
 		});
-		
+
 		DialogField.createEmptySpace(composite, 3);
 
 		fExceptionName.doFillIntoGrid(composite, 2);

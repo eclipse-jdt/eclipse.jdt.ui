@@ -43,12 +43,12 @@ public class PropertiesFileDocumentProvider extends TextFileDocumentProvider {
 
 	/**
 	 * Checks whether the passed file editor input defines a Java properties file.
-	 * 
+	 *
 	 * @param element the file editor input
 	 * @return <code>true</code> if element defines a Java properties file, <code>false</code>
 	 *         otherwise
 	 * @throws CoreException
-	 * 
+	 *
 	 * @since 3.7
 	 */
 	public static boolean isJavaPropertiesFile(Object element) throws CoreException {

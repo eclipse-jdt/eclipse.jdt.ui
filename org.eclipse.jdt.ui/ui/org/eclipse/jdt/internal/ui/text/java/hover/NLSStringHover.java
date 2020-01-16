@@ -120,12 +120,12 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 
 	/**
 	 * Returns the hover input.
-	 * 
+	 *
 	 * @param textViewer the viewer on which the hover popup should be shown
 	 * @param hoverRegion the text range in the viewer which is used to determine the hover display
 	 *            information
 	 * @return the hover popup display input, or <code>null</code> if none available
-	 * 
+	 *
 	 * @see #getHoverInfo2(ITextViewer, IRegion)
 	 */
 	private NLSHoverControlInput internalGetHoverInfo(ITextViewer textViewer, IRegion hoverRegion) {
@@ -238,10 +238,10 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 		HTMLPrinter.addPageEpilog(buffer);
 		return buffer.toString();
 	}
-	
+
 	/**
 	 * The input for NLS hover.
-	 * 
+	 *
 	 * @since 3.5
 	 */
 	private static class NLSHoverControlInput {
@@ -253,7 +253,7 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 
 		/**
 		 * Creates the NLS hover input.
-		 * 
+		 *
 		 * @param information the hover info (string with simple HTML)
 		 * @param propertiesFile the properties file, or <code>null</code> if not found
 		 * @param key the NLS key
@@ -269,7 +269,7 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 
 	/**
 	 * The NLS hover control.
-	 * 
+	 *
 	 * @since 3.5
 	 */
 	static class NLSHoverControl extends DefaultInformationControl implements IInformationControlExtension2 {
@@ -281,7 +281,7 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 
 		/**
 		 * Creates a resizable NLS hover control with the given shell as parent.
-		 * 
+		 *
 		 * @param parent the parent shell
 		 * @param tbm the toolbar manager or <code>null</code> if toolbar is not desired
 		 */
@@ -292,7 +292,7 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 
 		/**
 		 * Creates an NLS hover control with the given shell as parent.
-		 * 
+		 *
 		 * @param parent the parent shell
 		 * @param tooltipAffordanceString the text to be used in the status field or
 		 *            <code>null</code> to hide the status field
@@ -307,7 +307,7 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 		@Override
 		public void setInput(Object input) {
 			Assert.isLegal(input instanceof NLSHoverControlInput);
-			
+
 			NLSHoverControlInput info= (NLSHoverControlInput)input;
 			setInformation(info.fInformation);
 			fInput= info;
@@ -315,7 +315,7 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 
 		/**
 		 * Returns the control input.
-		 * 
+		 *
 		 * @return the control input
 		 */
 		public NLSHoverControlInput getInput() {
@@ -325,7 +325,7 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 
 	/**
 	 * Presenter control creator.
-	 * 
+	 *
 	 * @since 3.5
 	 */
 	private static final class PresenterControlCreator extends AbstractReusableInformationControlCreator {
@@ -345,7 +345,7 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 
 	/**
 	 * Hover control creator.
-	 * 
+	 *
 	 * @since 3.5
 	 */
 	private static final class HoverControlCreator extends AbstractReusableInformationControlCreator {
@@ -357,7 +357,7 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 
 		/**
 		 * Creates the hover control creator.
-		 * 
+		 *
 		 * @param presenterControlCreator the presenter control creator
 		 */
 		public HoverControlCreator(IInformationControlCreator presenterControlCreator) {
@@ -383,14 +383,14 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 
 	/**
 	 * The hover control creator.
-	 * 
+	 *
 	 * @since 3.5
 	 */
 	private IInformationControlCreator fHoverControlCreator;
 
 	/**
 	 * The presentation control creator.
-	 * 
+	 *
 	 * @since 3.5
 	 */
 	private IInformationControlCreator fPresenterControlCreator;
@@ -420,11 +420,11 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 
 	/**
 	 * Action that opens the current hover NLS string in properties file.
-	 * 
+	 *
 	 * @since 3.5
 	 */
 	private static final class OpenPropertiesFileAction extends Action {
-		
+
 		/**
 		 * The NLS hover control.
 		 */
@@ -432,7 +432,7 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 
 		/**
 		 * Creates the action for opening properties file.
-		 * 
+		 *
 		 * @param control the NLS hover control
 		 */
 		public OpenPropertiesFileAction(NLSHoverControl control) {

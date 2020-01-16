@@ -30,7 +30,7 @@ public class OpenBrowserUtil {
 
 	/**
 	 * Opens the given url in the browser as choosen in the preferences.
-	 * 
+	 *
 	 * @param url the URL
 	 * @param display the display
 	 * @since 3.6
@@ -46,7 +46,7 @@ public class OpenBrowserUtil {
 
 	/**
 	 * Opens the given URL in an external browser.
-	 * 
+	 *
 	 * @param url the URL
 	 * @param display the display
 	 * @since 3.6
@@ -86,7 +86,7 @@ public class OpenBrowserUtil {
 
 	/**
 	 * DO NOT REMOVE, used in a product.
-	 * 
+	 *
 	 * @param url the URL
 	 * @param display the display
 	 * @param title the title

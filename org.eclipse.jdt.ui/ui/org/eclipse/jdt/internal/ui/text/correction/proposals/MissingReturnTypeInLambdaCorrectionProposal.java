@@ -45,7 +45,7 @@ public class MissingReturnTypeInLambdaCorrectionProposal extends MissingReturnTy
 	protected AST getAST() {
 		return lambdaExpression.getAST();
 	}
-	
+
 	@Override
 	public ITypeBinding getReturnTypeBinding() {
 		IMethodBinding methodBinding= lambdaExpression.resolveMethodBinding();
@@ -55,22 +55,22 @@ public class MissingReturnTypeInLambdaCorrectionProposal extends MissingReturnTy
 		return null;
 	}
 
-	
+
 	@Override
 	protected CompilationUnit getCU() {
 		return (CompilationUnit) lambdaExpression.getRoot();
 	}
-	
+
 	@Override
 	protected Expression createDefaultExpression(AST ast) {
 		return ASTNodeFactory.newDefaultExpression(ast, getReturnTypeBinding());
 	}
-	
+
 	@Override
 	protected ASTNode getBody() {
 		return lambdaExpression.getBody();
 	}
-	
+
 	@Override
 	protected int getModifiers() {
 		return 0;

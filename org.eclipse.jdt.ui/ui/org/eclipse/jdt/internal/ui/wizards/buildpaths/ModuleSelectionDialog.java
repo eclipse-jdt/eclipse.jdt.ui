@@ -83,13 +83,13 @@ public class ModuleSelectionDialog extends TrayDialog {
 	private Button fOkButton;
 	private Runnable fFlipMessage; // may show a wait message first, use this to flip to the normal message
 	private SelectionButtonDialogField fSelectAllCheckbox;
-	
+
 	boolean fInSetSelection= false; // to avoid re-entrance -> StackOverflow
 	boolean fWaitingForSearch= false;
 
 	// internal storage and a client-provided function:
 	private Set<String> fAllIncluded; 		// transitive closure over modules already shown
-	private List<String> fAvailableModules;	// additional modules outside fAllIncluded 
+	private List<String> fAvailableModules;	// additional modules outside fAllIncluded
 	private Function<List<String>, Set<String>> fClosureComputation;
 	private Map<String,IModuleDescription> fModulesByName= new HashMap<>();
 	private Map<String,ModuleKind> fKinds= new HashMap<>();
@@ -103,7 +103,7 @@ public class ModuleSelectionDialog extends TrayDialog {
 	 * @param javaProject the java project whose build path is being configured
 	 * @param jreEntry a classpath entry representing the JRE system library
 	 * @param shownModules list of modules already shown in the LHS list ({@link ModuleDependenciesList})
-	 * @param closureComputation a function from module names to their full transitive closure over 'requires'. 
+	 * @param closureComputation a function from module names to their full transitive closure over 'requires'.
 	 * @return the configured dialog
 	 */
 	public static ModuleSelectionDialog forSystemModules(Shell shell, IJavaProject javaProject, IClasspathEntry jreEntry, List<String> shownModules, Function<List<String>, Set<String>> closureComputation) {
@@ -202,7 +202,7 @@ public class ModuleSelectionDialog extends TrayDialog {
 		}
 		return new ArrayList<>(result);
 	}
-	
+
 	boolean isJREChild(IJavaProject jPrj, IPackageFragmentRoot root) {
 		try {
 			IClasspathEntry cpEntry= jPrj.getClasspathEntryFor(root.getPath());
@@ -256,7 +256,7 @@ public class ModuleSelectionDialog extends TrayDialog {
 		super.configureShell(newShell);
 		newShell.setText(fTitle);
 	}
-	
+
 	@Override
 	protected int getShellStyle() {
 		return super.getShellStyle() | SWT.RESIZE;
@@ -266,7 +266,7 @@ public class ModuleSelectionDialog extends TrayDialog {
 	protected Control createDialogArea(Composite parent) {
 		Composite composite= (Composite) super.createDialogArea(parent);
 		Label message= new Label(composite, SWT.NONE);
-		
+
 		TableViewer tableViewer= new TableViewer(composite, SWT.MULTI | SWT.BORDER);
 		tableViewer.setContentProvider(new ListContentProvider());
 		tableViewer.setLabelProvider(new ModulesLabelProvider(fKinds::get, s -> false));
@@ -287,10 +287,10 @@ public class ModuleSelectionDialog extends TrayDialog {
 			message.setText(fMessage);
 		}
 		if (fAvailableModules != null) {
-			tableViewer.setInput(fAvailableModules);			
+			tableViewer.setInput(fAvailableModules);
 		}
 		fViewer= tableViewer;
-		
+
 		fSelectAllCheckbox= new SelectionButtonDialogField(SWT.CHECK);
 		fSelectAllCheckbox.setLabelText(NewWizardMessages.ModuleSelectionDialog_selectAll_button);
 		fSelectAllCheckbox.setSelection(false);

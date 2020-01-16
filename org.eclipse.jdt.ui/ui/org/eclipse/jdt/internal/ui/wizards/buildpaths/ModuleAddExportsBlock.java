@@ -88,7 +88,7 @@ public class ModuleAddExportsBlock {
 	private Control fSWTWidget;
 
 	private final ModuleAddExpose fInitialValue;
-	
+
 	private IJavaElement[] fSourceJavaElements;
 	private Collection<String> fPossibleTargetModules;
 
@@ -121,7 +121,7 @@ public class ModuleAddExportsBlock {
 		fTargetModules= new StringDialogField();
 		fTargetModules.setDialogFieldListener(adapter);
 		fTargetModules.setLabelText(NewWizardMessages.AddExportsBlock_targetModules_label);
-		
+
 		fExposeKindButtons= new SelectionButtonDialogFieldGroup(SWT.RADIO, EXPORTS_OPENS_LABELS, 2);
 		fExposeKindButtons.setSelection(IDX_EXPORTS, initialValue instanceof ModuleAddExport);
 		fExposeKindButtons.setSelection(IDX_OPENS, initialValue instanceof ModuleAddOpens);
@@ -201,7 +201,7 @@ public class ModuleAddExportsBlock {
 
 	/**
 	 * Gets the add-export value entered by the user
-	 * @return the add-export value, or an empty string if any of the fields was left empty. 
+	 * @return the add-export value, or an empty string if any of the fields was left empty.
 	 */
 	public String getValue() {
 		String sourceModule= getSourceModuleText();
@@ -286,7 +286,7 @@ public class ModuleAddExportsBlock {
 		}
 
 		DialogField.createEmptySpace(composite, 2);
-		
+
 		fExposeKindButtons.doFillIntoGrid(composite, 2);
 
 		Dialog.applyDialogFont(composite);

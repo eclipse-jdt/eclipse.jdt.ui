@@ -21,7 +21,7 @@ import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 /**
  * A pattern matcher can match strings against various kinds of patterns supported by {@link SearchPattern}:
  * Prefix, "*" and "?" patterns, camelCase, exact match with " " or "<" at the end of the pattern.
- * 
+ *
  * @since 3.8
  */
 public class PatternMatcher {

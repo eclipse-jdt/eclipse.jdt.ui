@@ -169,7 +169,7 @@ public class MissingReturnTypeCorrectionProposal extends LinkedCorrectionProposa
 		}
 		return true;
 	}
-	
+
 	protected Expression createDefaultExpression(AST ast) {
 		return ASTNodeFactory.newDefaultExpression(ast, fMethodDecl.getReturnType2(), fMethodDecl.getExtraDimensions());
 	}

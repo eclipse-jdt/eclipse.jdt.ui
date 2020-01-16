@@ -49,7 +49,7 @@ public abstract class MemberProposalInfo extends ProposalInfo {
 
 	/**
 	 * Returns the java element that this computer corresponds to, possibly <code>null</code>.
-	 * 
+	 *
 	 * @return the java element that this computer corresponds to, possibly <code>null</code>
 	 * @throws JavaModelException if accessing the java model fails
 	 */

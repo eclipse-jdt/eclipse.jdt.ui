@@ -64,7 +64,7 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.EditAnnotator;
 
 /**
  * The properties file quick assist processor.
- * 
+ *
  * @since 3.8
  */
 public class PropertiesQuickAssistProcessor {
@@ -90,7 +90,7 @@ public class PropertiesQuickAssistProcessor {
 		getCreateFieldsInAccessorClassProposals(invocationContext, resultingCollections);
 		getRemovePropertiesProposals(invocationContext, resultingCollections);
 		getRenameKeysProposals(invocationContext, resultingCollections);
-	
+
 		if (resultingCollections.size() == 0)
 			return null;
 		return resultingCollections.toArray(new ICompletionProposal[resultingCollections.size()]);
@@ -113,13 +113,13 @@ public class PropertiesQuickAssistProcessor {
 					return false;
 				}
 			}
-	
+
 			ITypedRegion partition= null;
 			if (document instanceof IDocumentExtension3)
 				partition= ((IDocumentExtension3)document).getPartition(IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING, invocationContext.getOffset(), false);
 			if (partition == null)
 				return false;
-	
+
 			String type= partition.getType();
 			if (!(type.equals(IPropertiesFilePartitions.PROPERTY_VALUE) || type.equals(IDocument.DEFAULT_CONTENT_TYPE))) {
 				return false;
@@ -127,7 +127,7 @@ public class PropertiesQuickAssistProcessor {
 			proposalOffset= partition.getOffset();
 			proposalLength= partition.getLength();
 			text= document.get(proposalOffset, proposalLength);
-	
+
 			if (type.equals(IPropertiesFilePartitions.PROPERTY_VALUE)) {
 				text= text.substring(1); //see PropertiesFilePartitionScanner()
 				proposalOffset++;
@@ -138,7 +138,7 @@ public class PropertiesQuickAssistProcessor {
 			proposalLength= selectionLength;
 			text= document.get(proposalOffset, proposalLength);
 		}
-	
+
 		if (PropertiesFileEscapes.containsUnescapedBackslash(text)) {
 			if (resultingCollections == null)
 				return true;

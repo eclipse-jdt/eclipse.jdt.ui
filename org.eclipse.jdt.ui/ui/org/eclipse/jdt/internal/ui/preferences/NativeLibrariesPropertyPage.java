@@ -138,7 +138,7 @@ public class NativeLibrariesPropertyPage extends PropertyPage implements IStatus
 	protected Control createContents(Composite parent) {
 		if (!fIsValidElement || fIsReadOnly) {
 			Composite inner= new Composite(parent, SWT.NONE);
-			
+
 			if (fIsReadOnly) {
 				GridLayout layout= new GridLayout();
 				layout.marginWidth= 0;
@@ -146,7 +146,7 @@ public class NativeLibrariesPropertyPage extends PropertyPage implements IStatus
 
 				Label label= new Label(inner, SWT.WRAP);
 				label.setText(PreferencesMessages.NativeLibrariesPropertyPage_location_path);
-				
+
 				Text location= new Text(inner, SWT.READ_ONLY | SWT.WRAP);
 				SWTUtil.fixReadonlyTextBackground(location);
 				GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);

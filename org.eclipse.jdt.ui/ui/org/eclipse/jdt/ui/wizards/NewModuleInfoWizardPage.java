@@ -88,7 +88,7 @@ public class NewModuleInfoWizardPage extends NewTypeWizardPage{
 	// -------- Initialization ---------
 
 	/**
-	 * The wizard owning this page is responsible for calling this method with the 
+	 * The wizard owning this page is responsible for calling this method with the
 	 * current selection's project. The project is used to initialize the fields of the wizard page.
 	 *
 	 * @param project used to initialize the fields
@@ -199,9 +199,9 @@ public class NewModuleInfoWizardPage extends NewTypeWizardPage{
 
 	/**
 	 * Validates the module name and returns the status of the validation.
-	 * 
+	 *
 	 * @param moduleName the module name
-	 * 
+	 *
 	 * @return the status of the validation
 	 */
 	private IStatus getModuleStatus(String moduleName) {

@@ -25,7 +25,7 @@ import org.eclipse.jface.text.TextUtilities;
 /**
  * Double click strategy that selects the partition if double click occurs at the partition
  * boundaries.
- * 
+ *
  * @since 3.5
  */
 public class PartitionDoubleClickSelector extends DefaultTextDoubleClickStrategy {
@@ -39,7 +39,7 @@ public class PartitionDoubleClickSelector extends DefaultTextDoubleClickStrategy
 
 	/**
 	 * Creates a new partition double click selector for the given document partitioning.
-	 * 
+	 *
 	 * @param partitioning the document partitioning
 	 * @param leftBorder number of characters to ignore from the left border of the partition
 	 * @param rightBorder number of characters to ignore from the right border of the partition
@@ -50,7 +50,7 @@ public class PartitionDoubleClickSelector extends DefaultTextDoubleClickStrategy
 
 	/**
 	 * Creates a new partition double click selector for the given document partitioning.
-	 * 
+	 *
 	 * @param partitioning the document partitioning
 	 * @param leftBorder number of characters to ignore from the left border of the partition
 	 * @param rightBorder number of characters to ignore from the right border of the partition

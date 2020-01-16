@@ -189,7 +189,7 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
 						}
 					}
 				} else {
-					setDisplayName(Messages.format(CorrectionMessages.NewCUCompletionUsingWizardProposal_createnewenum_inpackage_description, containerLabel));					
+					setDisplayName(Messages.format(CorrectionMessages.NewCUCompletionUsingWizardProposal_createnewenum_inpackage_description, containerLabel));
 				}
 				break;
 			case K_ANNOTATION:
@@ -209,7 +209,7 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
 						}
 					}
 				} else {
-					setDisplayName(Messages.format(CorrectionMessages.NewCUCompletionUsingWizardProposal_createnewannotation_inpackage_description, containerLabel));					
+					setDisplayName(Messages.format(CorrectionMessages.NewCUCompletionUsingWizardProposal_createnewannotation_inpackage_description, containerLabel));
 				}
 				break;
 			default:

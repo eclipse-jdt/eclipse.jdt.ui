@@ -95,11 +95,11 @@ public class ModuleCorrectionsSubProcessor {
 			return JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		}
 	}
-	
+
 	private static class ModulepathFixCorrectionProposal extends CUCorrectionProposal {
 
 		private final String fModuleSearchStr;
-		
+
 		protected ModulepathFixCorrectionProposal(ICompilationUnit cu, String moduleSearchStr) {
 			super(CorrectionMessages.ReorgCorrectionsSubProcessor_project_seup_fix_description, cu, -10, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
 			fModuleSearchStr= DefaultModulepathFixProcessor.MODULE_SEARCH + moduleSearchStr;
@@ -112,8 +112,8 @@ public class ModuleCorrectionsSubProcessor {
 				context= new BusyIndicatorRunnableContext();
 			}
 			Shell shell= JavaPlugin.getActiveWorkbenchShell();
-			ClasspathFixSelectionDialog.openClasspathFixSelectionDialog(shell, getCompilationUnit().getJavaProject(), fModuleSearchStr, context);			
-		}		
+			ClasspathFixSelectionDialog.openClasspathFixSelectionDialog(shell, getCompilationUnit().getJavaProject(), fModuleSearchStr, context);
+		}
 
 		@Override
 		public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
@@ -183,7 +183,7 @@ public class ModuleCorrectionsSubProcessor {
 				int oldCount= proposals.size();
 				addModifyClassPathProposals(proposals, javaProject, node);
 				if (oldCount == proposals.size()) {
-					proposals.add(new ModulepathFixCorrectionProposal(context.getCompilationUnit(),  node.getFullyQualifiedName()));					
+					proposals.add(new ModulepathFixCorrectionProposal(context.getCompilationUnit(),  node.getFullyQualifiedName()));
 				}
 			}
 		}
@@ -220,7 +220,7 @@ public class ModuleCorrectionsSubProcessor {
 		} catch (OperationCanceledException e) {
 			//do nothing
 		}
-		
+
 		IClasspathEntry[] existingEntries= javaProject.readRawClasspath();
 		if (existingEntries != null && existingEntries.length > 0) {
 			for (int i= 0; i < moduleDescriptions.size(); i++) {
@@ -324,7 +324,7 @@ public class ModuleCorrectionsSubProcessor {
 			case IClasspathEntry.CPE_CONTAINER:
 				return JavaCore.newContainerEntry(entry.getPath(), entry.getAccessRules(), extraAttributes, entry.isExported());
 			case IClasspathEntry.CPE_VARIABLE:
-				return JavaCore.newVariableEntry(entry.getPath(), entry.getSourceAttachmentPath(), entry.getSourceAttachmentRootPath(), 
+				return JavaCore.newVariableEntry(entry.getPath(), entry.getSourceAttachmentPath(), entry.getSourceAttachmentRootPath(),
 						entry.getAccessRules(), extraAttributes, entry.isExported());
 			default:
 				return entry; // other kinds are not handled
@@ -368,7 +368,7 @@ public class ModuleCorrectionsSubProcessor {
 		}
 		return null;
 	}
-	
+
 	public static IModuleDescription getModuleDescription(IJavaElement element) {
 		IModuleDescription projectModule= null;
 		try {

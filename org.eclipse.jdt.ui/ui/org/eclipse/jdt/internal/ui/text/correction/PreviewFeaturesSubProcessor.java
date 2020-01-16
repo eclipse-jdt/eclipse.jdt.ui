@@ -64,14 +64,14 @@ import org.eclipse.jdt.internal.ui.util.CoreUtility;
 public class PreviewFeaturesSubProcessor {
 	private static final String CONFIGURE_COMPILER_PROBLEM_SEVERITY_DIALOG_ID= "configure_compiler_settings_dialog_id"; //$NON-NLS-1$
 	private static final String ENABLED= "enabled"; //$NON-NLS-1$
-	
+
 	private static class EnablePreviewFeatureProposal extends ChangeCorrectionProposal implements IWorkspaceRunnable {
-		
+
 		private final IJavaProject fJavaProject;
 		private IProject fProject;
 		private Job fUpdateJob;
 		private boolean fChangeOnWorkspace;
-		 
+
 
 		public EnablePreviewFeatureProposal(String name, IJavaProject project, boolean changeOnWorkspace, int relevance) {
 			super(name, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
@@ -81,14 +81,14 @@ public class PreviewFeaturesSubProcessor {
 			if (fJavaProject != null) {
 				fProject= fJavaProject.getProject();
 			}
-			
+
 		}
 
 		@Override
 		public void run(IProgressMonitor monitor) throws CoreException {
 			fUpdateJob= CoreUtility.getBuildJob(fChangeOnWorkspace ? null : fProject.getProject());
 		}
-		
+
 		@Override
 		public void apply(IDocument document) {
 			if (fJavaProject == null) {
@@ -115,7 +115,7 @@ public class PreviewFeaturesSubProcessor {
 				fUpdateJob.schedule();
 			}
 		}
-		
+
 		@Override
 		public String getAdditionalProposalInfo(IProgressMonitor monitor) {
 			if (fChangeOnWorkspace) {
@@ -123,7 +123,7 @@ public class PreviewFeaturesSubProcessor {
 			}else {
 				return CorrectionMessages.PreviewFeaturesSubProcessor_enable_preview_features_info;
 			}
-			
+
 		}
 	}
 
@@ -131,21 +131,21 @@ public class PreviewFeaturesSubProcessor {
 
 		IJavaProject javaProject= context.getCompilationUnit().getJavaProject();
 		boolean hasProjectSpecificOptions= hasProjectSpecificOptions(javaProject);
-		
+
 		String label= CorrectionMessages.PreviewFeaturesSubProcessor_open_compliance_page_enable_preview_features;
 		if (hasProjectSpecificOptions) {
 			label= CorrectionMessages.PreviewFeaturesSubProcessor_open_compliance_properties_page_enable_preview_features;
 		}
-		
+
 		ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(label, null, IProposalRelevance.ENABLE_PREVIEW_FEATURES,
 				JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)) {
 
 			@Override
 			public void apply(IDocument document) {
-				
+
 				Shell shell= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 				boolean usePropertyPage;
-				
+
 				if (!hasProjectSpecificOptions) {
 					String message= Messages.format(
 							JavaHoverMessages.ProblemHover_chooseCompilerSettingsTypeDialog_message,
@@ -202,7 +202,7 @@ public class PreviewFeaturesSubProcessor {
 
 		proposals.add(proposal);
 	}
-	
+
 	public static void getEnablePreviewFeaturesProposal(IInvocationContext context, Collection<ICommandAccess> proposals) {
 		IJavaProject javaProject= context.getCompilationUnit().getJavaProject();
 		if (javaProject != null) {
@@ -213,9 +213,9 @@ public class PreviewFeaturesSubProcessor {
 			}
 			EnablePreviewFeatureProposal enableProposal= new EnablePreviewFeatureProposal(label, javaProject, changeOnWorkspace, IProposalRelevance.ENABLE_PREVIEW_FEATURES);
 			proposals.add(enableProposal);
-		}	
-	}	
-	
+		}
+	}
+
 	public static void getNeedHigherComplianceProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		String[] args= problem.getProblemArguments();
 		if (args != null && args.length > 0) {

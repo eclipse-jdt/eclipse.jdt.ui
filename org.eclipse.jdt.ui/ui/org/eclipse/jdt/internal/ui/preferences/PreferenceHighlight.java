@@ -61,7 +61,7 @@ public final class PreferenceHighlight implements PaintListener {
 	 * Adds the highlight feature to a pair of controls, that is an arrow painted between the label
 	 * and the main control for easier selection and to show when the control has focus. Both
 	 * controls must have the same parent.
-	 * 
+	 *
 	 * @param labelControl the control acting as label
 	 * @param mainControl the main control
 	 * @param autoFocus if true, focus highlight will be switched automatically based on main

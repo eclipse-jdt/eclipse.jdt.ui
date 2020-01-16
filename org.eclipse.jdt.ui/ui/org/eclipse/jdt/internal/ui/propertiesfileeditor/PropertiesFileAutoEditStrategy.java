@@ -43,7 +43,7 @@ import org.eclipse.ui.progress.WorkbenchJob;
 /**
  * Auto edit strategy that escapes a character if it cannot be encoded in the .properties file's
  * encoding.
- * 
+ *
  * <p>
  * A quick assist to escape backslashes is offered iff the pasted text is not perfectly correct for
  * the .properties file, i.e. if the text contains
@@ -53,7 +53,7 @@ import org.eclipse.ui.progress.WorkbenchJob;
  * <li>a character which requires Unicode escapes</li>
  * </ul>
  * </p>
- * 
+ *
  * @since 3.7
  */
 public class PropertiesFileAutoEditStrategy implements IAutoEditStrategy {

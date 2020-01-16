@@ -84,7 +84,7 @@ public final class MethodProposalInfo extends MemberProposalInfo {
 	 * Finds a method in a type. This searches for a method with the same name and signature.
 	 * Parameter types are only compared by the simple name, no resolving for the fully qualified
 	 * type name is done. Constructors are only compared by parameters, not the name.
-	 * 
+	 *
 	 * @param name The name of the method to find
 	 * @param paramTypes The type signatures of the parameters e.g. <code>{"QString;","I"}</code>
 	 * @param isConstructor If the method is a constructor
@@ -196,7 +196,7 @@ public final class MethodProposalInfo extends MemberProposalInfo {
 						String ourParamName= computeSimpleTypeName(paramTypes[i], typeVariables);
 						String otherParamName1= computeSimpleTypeName(otherParams[i + syntheticParameterCorrection], typeVariables);
 						String otherParamName2= computeSimpleTypeName(otherParamsFromSignature[i + syntheticParameterCorrection], typeVariables);
-	
+
 						if (!ourParamName.equals(otherParamName1) && !ourParamName.equals(otherParamName2)) {
 							return false;
 						}

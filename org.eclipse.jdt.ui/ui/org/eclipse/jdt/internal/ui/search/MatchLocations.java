@@ -137,11 +137,11 @@ public class MatchLocations {
 			if (fSearchFor == IJavaSearchConstants.METHOD || fSearchFor == IJavaSearchConstants.FIELD) {
 				createButton(composite, SearchMessages.MatchLocations_this_label, IJavaSearchConstants.THIS_REFERENCE);
 				createButton(composite, SearchMessages.MatchLocations_implicit_this_label, IJavaSearchConstants.IMPLICIT_THIS_REFERENCE);
-	
+
 				createButton(composite, SearchMessages.MatchLocations_super_label, IJavaSearchConstants.SUPER_REFERENCE);
 				createButton(composite, SearchMessages.MatchLocations_qualified_label, IJavaSearchConstants.QUALIFIED_REFERENCE);
 			}
-			
+
 			if (fSearchFor == IJavaSearchConstants.METHOD || fSearchFor == IJavaSearchConstants.CONSTRUCTOR) {
 				createButton(composite, SearchMessages.MatchLocations_method_reference_label, IJavaSearchConstants.METHOD_REFERENCE_EXPRESSION);
 			}
@@ -156,14 +156,14 @@ public class MatchLocations {
 			createButton(group, SearchMessages.MatchLocations_imports_label, IJavaSearchConstants.IMPORT_DECLARATION_TYPE_REFERENCE);
 			createButton(group, SearchMessages.MatchLocations_super_types_label, IJavaSearchConstants.SUPERTYPE_TYPE_REFERENCE);
 			addSeparator(group);
-			
+
 			createButton(group, SearchMessages.MatchLocations_annotations_label , IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE);
 			addSeparator(group);
 
 			createButton(group, SearchMessages.MatchLocations_field_types_label, IJavaSearchConstants.FIELD_DECLARATION_TYPE_REFERENCE);
 			createButton(group, SearchMessages.MatchLocations_local_types_label, IJavaSearchConstants.LOCAL_VARIABLE_DECLARATION_TYPE_REFERENCE);
 			addSeparator(group);
-			
+
 			createButton(group, SearchMessages.MatchLocations_method_types_label, IJavaSearchConstants.RETURN_TYPE_REFERENCE);
 			createButton(group, SearchMessages.MatchLocations_parameter_types_label, IJavaSearchConstants.PARAMETER_DECLARATION_TYPE_REFERENCE);
 			createButton(group, SearchMessages.MatchLocations_thrown_exceptions_label, IJavaSearchConstants.THROWS_CLAUSE_TYPE_REFERENCE);

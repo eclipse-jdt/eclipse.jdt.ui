@@ -84,7 +84,7 @@ public class ProposalInfo {
 
 	/**
 	 * Extracts the Javadoc for the given Java element and returns it as HTML.
-	 * 
+	 *
 	 * @param element the Java element to get the documentation for
 	 * @return the Javadoc for Java element or <code>null</code> if the Javadoc is not available
 	 * @throws CoreException if fetching the Javadoc for the given element failed connected

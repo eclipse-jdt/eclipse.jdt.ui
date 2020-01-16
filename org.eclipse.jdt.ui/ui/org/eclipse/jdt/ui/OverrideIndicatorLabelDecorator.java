@@ -150,7 +150,7 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
-	 * 
+	 *
 	 * @param method The element to decorate
 	 * @return Resulting decorations (combination of JavaElementImageDescriptor.IMPLEMENTS and
 	 *         JavaElementImageDescriptor.OVERRIDES)
@@ -201,7 +201,7 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
-	 * 
+	 *
 	 * @param type The declaring type of the method to decorate.
 	 * @param hierarchy The type hierarchy of the declaring type.
 	 * @param name The name of the method to find.
@@ -209,7 +209,7 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 	 * @return The resulting decoration.
 	 * @throws JavaModelException if accessing a Java Model element fails
 	 * @deprecated Not used anymore. This method is not accurate for methods in generic types.
-	 * 
+	 *
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	@Deprecated

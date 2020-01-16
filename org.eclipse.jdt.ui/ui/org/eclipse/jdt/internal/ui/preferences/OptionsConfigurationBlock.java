@@ -208,7 +208,7 @@ public abstract class OptionsConfigurationBlock {
 			return fValues.length -1; // assume the last option is the least severe
 		}
 	}
-	
+
 	protected static class LinkControlData extends ControlData {
 		private Link fLink;
 
@@ -219,7 +219,7 @@ public abstract class OptionsConfigurationBlock {
 		public void setLink(Link link) {
 			fLink= link;
 		}
-		
+
 		public Link getLink() {
 			return fLink;
 		}
@@ -234,7 +234,7 @@ public abstract class OptionsConfigurationBlock {
 
 		/**
 		 * Constructs a new instance of PreferenceTree with vertical bar according to the parameters.
-		 * 
+		 *
 		 * @param configBlock the Options Configuration block
 		 * @param parentComposite the parent composite
 		 * @param label the label, or <code>null</code> if none
@@ -245,7 +245,7 @@ public abstract class OptionsConfigurationBlock {
 
 		/**
 		 * Constructs a new instance of PreferenceTree according to the parameters.
-		 * 
+		 *
 		 * @param configBlock the Options Configuration block
 		 * @param parentComposite the parent composite
 		 * @param label the label, or <code>null</code> if none
@@ -552,7 +552,7 @@ public abstract class OptionsConfigurationBlock {
 		link.setLayoutData(gd);
 		link.setData(key);
 		data.setLink(link);
-		
+
 		// toggle checkbox when user clicks unlinked text in link:
 		final boolean[] linkSelected= { false };
 		link.addSelectionListener(new SelectionAdapter() {
@@ -621,7 +621,7 @@ public abstract class OptionsConfigurationBlock {
 
 		return comboBox;
 	}
-	
+
 	protected Combo addInversedComboBox(Composite parent, String label, Key key, String[] values, String[] valueLabels, int indent) {
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gd.horizontalIndent= indent;
@@ -681,7 +681,7 @@ public abstract class OptionsConfigurationBlock {
 		fLabels.put(textBox, labelControl);
 
 		updateText(textBox);
-		
+
 		textBox.addModifyListener(getTextModifyListener());
 
 		GridData data= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
@@ -887,7 +887,7 @@ public abstract class OptionsConfigurationBlock {
 
 	/**
 	 * Checks a setting.
-	 * 
+	 *
 	 * @param key a key
 	 * @param value an assumed value for the key
 	 * @return <code>true</code> iff the given key's value is equal to the given value
@@ -898,7 +898,7 @@ public abstract class OptionsConfigurationBlock {
 
 	/**
 	 * Returns the value for the key.
-	 * 
+	 *
 	 * @param key the key
 	 * @return the stored value
 	 */
@@ -917,11 +917,11 @@ public abstract class OptionsConfigurationBlock {
 	/**
 	 * Sets the option <code>key</code> to the value <code>value</code>.
 	 * Note that callers have to make sure the corresponding controls are updated afterwards.
-	 * 
+	 *
 	 * @param key the option key
 	 * @param value the new value
 	 * @return the old value
-	 * 
+	 *
 	 * @see #updateControls()
 	 * @see #updateCheckBox(Button)
 	 * @see #updateCombo(Combo)
@@ -939,11 +939,11 @@ public abstract class OptionsConfigurationBlock {
 	/**
 	 * Sets the option <code>key</code> to the value <code>value</code>.
 	 * Note that callers have to make sure the corresponding controls are updated afterwards.
-	 * 
+	 *
 	 * @param key the option key
 	 * @param value the new value
 	 * @return the old value
-	 * 
+	 *
 	 * @see #updateControls()
 	 * @see #updateCheckBox(Button)
 	 * @see #updateCombo(Combo)
@@ -967,7 +967,7 @@ public abstract class OptionsConfigurationBlock {
 	protected String getStoredValue(Key key) {
 		return key.getStoredValue(fLookupOrder, false, fManager);
 	}
-	
+
 	/**
 	 * Returns the value as actually stored in the preference store, without considering
 	 * the working copy store.
@@ -981,7 +981,7 @@ public abstract class OptionsConfigurationBlock {
 
 	/**
 	 * Reverts the given options to the stored values.
-	 * 
+	 *
 	 * @param keys the options to revert
 	 * @since 3.5
 	 */
@@ -994,7 +994,7 @@ public abstract class OptionsConfigurationBlock {
 
 	/**
 	 * Updates fields and validates settings.
-	 * 
+	 *
 	 * @param changedKey key that changed, or <code>null</code>, if all changed.
 	 * @param oldValue old value or <code>null</code>
 	 * @param newValue new value or <code>null</code>
@@ -1248,7 +1248,7 @@ public abstract class OptionsConfigurationBlock {
 	protected Link getCheckBoxLink(Key key) {
 		if (fCheckBoxes == null)
 			return null;
-		
+
 		for (int i= fCheckBoxes.size() - 1; i >= 0; i--) {
 			Button curr= fCheckBoxes.get(i);
 			ControlData data= (ControlData) curr.getData();
@@ -1258,7 +1258,7 @@ public abstract class OptionsConfigurationBlock {
 		}
 		return null;
 	}
-	
+
 	protected Combo getComboBox(Key key) {
 		for (int i= fComboBoxes.size() - 1; i >= 0; i--) {
 			Combo curr= fComboBoxes.get(i);
@@ -1291,7 +1291,7 @@ public abstract class OptionsConfigurationBlock {
 		}
 		return null;
 	}
-	
+
 	protected Control findControl(Key key) {
 		Combo comboBox= getComboBox(key);
 		if (comboBox != null) {
@@ -1318,7 +1318,7 @@ public abstract class OptionsConfigurationBlock {
 		combo.setEnabled(enabled);
 		label.setEnabled(enabled);
 	}
-	
+
 	protected void setTextFieldEnabled(Key key, boolean enabled) {
 		Text text= getTextControl(key);
 		Label label= fLabels.get(text);

@@ -69,7 +69,7 @@ class ModuleDependenciesList {
 	public static final Point MEDIUM_SIZE= new Point(20, 16);
 
 	static ImageDescriptor DESC_OBJ_MODULE= new JavaElementImageDescriptor(JavaPluginImages.DESC_OBJS_MODULE, 0, MEDIUM_SIZE);
-	
+
 	static class ModulesLabelProvider extends LabelProvider implements ITableLabelProvider {
 		Function<String,ModuleKind> fGetModuleKind;
 		private Predicate<String> fHasConfiguredDetails;
@@ -87,7 +87,7 @@ class ModuleDependenciesList {
 			);
 			return JavaPlugin.getImageDescriptorRegistry().get(imgDesc);
 		}
-		
+
 		@Override
 		public String getColumnText(Object element, int columnIndex) {
 			String moduleName= element.toString();
@@ -98,9 +98,9 @@ class ModuleDependenciesList {
 		}
 	}
 
-	enum ModuleKind { 
+	enum ModuleKind {
 		Normal, Focus, System, UpgradedSystem, Automatic;
-		
+
 		public ImageDescriptor getDecoration() {
 			switch (this) {
 				case Focus:
@@ -192,7 +192,7 @@ class ModuleDependenciesList {
 		fInitialNames.clear();
 		fInitialNames.addAll(fNames);
 	}
-	
+
 	public boolean isModified() {
 		return !fInitialNames.equals(fNames);
 	}
@@ -209,7 +209,7 @@ class ModuleDependenciesList {
 		CPListElement topEntry= topElem instanceof CPListElement ? (CPListElement) topElem : elem;
 		ModuleKind kind= ModuleKind.Normal;
 		if (LibrariesWorkbookPage.isJREContainer(topEntry.getPath())) {
-			kind= ModuleKind.System; 
+			kind= ModuleKind.System;
 		} else {
 			IModuleDescription module= fModules.get(elem);
 			if (module != null && module.isAutoModule()) {
@@ -235,7 +235,7 @@ class ModuleDependenciesList {
 		}
 		return ModuleKind.Normal;
 	}
-	
+
 	public ModuleKind getModuleKind(CPListElement element) {
 		return getModuleKind(fElem2ModName.get(element));
 	}

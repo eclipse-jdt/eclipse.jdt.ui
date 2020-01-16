@@ -107,7 +107,7 @@ public class ModifierChangeCorrectionProposal extends LinkedCorrectionProposal {
 						ICompilationUnit unit= getCompilationUnit();
 						String delimiter= unit.findRecommendedLineSeparator();
 						String bodyStatement= ""; //$NON-NLS-1$
-						
+
 						Block body= ast.newBlock();
 						rewrite.set(methodDecl, MethodDeclaration.BODY_PROPERTY, body, null);
 						Type returnType= methodDecl.getReturnType2();
@@ -129,11 +129,11 @@ public class ModifierChangeCorrectionProposal extends LinkedCorrectionProposal {
 			}
 			ModifierRewrite listRewrite= ModifierRewrite.create(rewrite, declNode);
 			PositionInformation trackedDeclNode= listRewrite.setModifiers(fIncludedModifiers, fExcludedModifiers, null);
-			
+
 			LinkedProposalPositionGroup positionGroup= new LinkedProposalPositionGroup("group"); //$NON-NLS-1$
 			positionGroup.addPosition(trackedDeclNode);
 			getLinkedProposalModel().addPositionGroup(positionGroup);
-			
+
 			if (boundNode != null) {
 				// only set end position if in same CU
 				setEndPosition(rewrite.track(fNode));

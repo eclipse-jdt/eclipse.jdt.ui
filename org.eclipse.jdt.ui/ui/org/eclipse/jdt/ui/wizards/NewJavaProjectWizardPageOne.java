@@ -346,7 +346,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		private void updateEnableState() {
 			if (fDetectGroup == null)
 				return;
-			
+
 			final boolean detect= fDetectGroup.mustDetect();
 			fStdRadio.setEnabled(!detect);
 			fSrcBinRadio.setEnabled(!detect);
@@ -449,7 +449,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			fUseEEJRE.doFillIntoGrid(fGroup, 1);
 			Combo eeComboControl= fEECombo.getComboControl(fGroup);
 			eeComboControl.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, true, false));
-			
+
 			fUseProjectJRE.doFillIntoGrid(fGroup, 1);
 			Combo comboControl= fJRECombo.getComboControl(fGroup);
 			comboControl.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, true, false));
@@ -1001,7 +1001,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 					}
 				}
 			}
-			
+
 			// validate the location
 			final IStatus locationStatus= workspace.validateProjectLocation(handle, projectPath);
 			if (!locationStatus.isOK()) {
@@ -1262,7 +1262,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 
 	/**
 	 * Updates the JRE container with module info
-	 * 
+	 *
 	 * @param cpEntries array containing jre container without module attribute
 	 * @param newPath JRE path
 	 * @return array containing JRE container with module attribute if modular
@@ -1308,7 +1308,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		extraAttributes[extraAttributes.length-1]= JavaCore.newClasspathAttribute(IClasspathAttribute.MODULE, TRUE);
 		return extraAttributes;
 	}
-	
+
 	/**
 	 * Returns the source class path entries to be added on new projects.
 	 * The underlying resources may not exist. All entries that are returned must be of kind

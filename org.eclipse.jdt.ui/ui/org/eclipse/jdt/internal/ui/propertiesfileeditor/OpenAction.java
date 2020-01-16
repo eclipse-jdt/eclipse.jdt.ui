@@ -27,7 +27,7 @@ import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 3.1
  */
 public class OpenAction extends SelectionDispatchAction {
