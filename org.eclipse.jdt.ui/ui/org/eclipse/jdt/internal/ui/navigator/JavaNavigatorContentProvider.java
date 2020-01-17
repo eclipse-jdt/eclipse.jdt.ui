@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2018 IBM Corporation and others.
+ * Copyright (c) 2003, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -263,8 +263,8 @@ public class JavaNavigatorContentProvider extends
 		Object parent = modification.getParent();
 		// As of 3.3, we no longer re-parent additions to IProject.
 		if (parent instanceof IContainer) {
-			IJavaElement element = JavaCore.create((IContainer) parent);
-			if (element != null && element.exists()) {
+			IJavaElement element = convert((IContainer) parent);
+			if (element != null) {
 				// we don't convert the root
 				if( !(element instanceof IJavaModel) && !(element instanceof IJavaProject))
 					modification.setParent(element);
@@ -273,6 +273,18 @@ public class JavaNavigatorContentProvider extends
 			}
 		}
 		return false;
+	}
+
+	private static IJavaElement convert(IResource resource) {
+		IJavaProject javaProject= JavaCore.create(resource.getProject());
+		if (javaProject == null) {
+			return null;
+		}
+		IJavaElement javaElement= JavaCore.create(resource, javaProject);
+		if (javaElement == null || !javaElement.exists()) {
+			return null;
+		}
+		return javaElement;
 	}
 
 	/**
@@ -291,8 +303,8 @@ public class JavaNavigatorContentProvider extends
 			Object child = childrenItr.next();
 			// only convert IFolders and IFiles
 			if (child instanceof IFolder || child instanceof IFile) {
-				IJavaElement newChild = JavaCore.create((IResource) child);
-				if (newChild != null && newChild.exists()) {
+				IJavaElement newChild = convert((IResource) child);
+				if (newChild != null) {
 					IJavaProject javaProject= newChild.getJavaProject();
 					if (javaProject != null && javaProject.isOnClasspath(newChild)) {
 						childrenItr.remove();
