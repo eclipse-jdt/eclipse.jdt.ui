@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,9 +14,12 @@
 package org.eclipse.jdt.internal.ui;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.Set;
+import java.util.StringTokenizer;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -39,6 +42,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 
 import org.eclipse.core.resources.IFile;
@@ -202,6 +206,8 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 
 
 	private WorkingCopyManager fWorkingCopyManager;
+
+	private static final String CODE_ASSIST_MIGRATED= "code_assist_migrated"; //$NON-NLS-1$
 
 	/**
 	 * @deprecated to avoid deprecation warning
@@ -431,6 +437,7 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 
 		JavaManipulation.setCodeTemplateStore(getCodeTemplateStore());
 		JavaManipulation.setCodeTemplateContextRegistry(getCodeTemplateContextRegistry());
+		disableNewCodeAssistCategoryPreferences();
 	}
 
 	private void createOrUpdateWorkingSet(String name, String oldname, String label, final String id) {
@@ -1025,5 +1032,81 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 		DEBUG_BREADCRUMB_ITEM_DROP_DOWN= options.getBooleanOption("org.eclipse.jdt.ui/debug/BreadcrumbItemDropDown", false); //$NON-NLS-1$
 		DEBUG_TYPE_CONSTRAINTS= options.getBooleanOption("org.eclipse.jdt.ui/debug/TypeConstraints", false); //$NON-NLS-1$
 		DEBUG_RESULT_COLLECTOR= options.getBooleanOption("org.eclipse.jdt.ui/debug/ResultCollector", false); //$NON-NLS-1$
+	}
+
+	/**
+	 * Add only 'initializeCodeAssistCategoryDisabled(String)' calls here for
+	 * proposal category id of *NEW* features meant to be disabled by deafult.
+	 *
+	 * Eg. initializeCodeAssistCategoryDisabled("org.eclipse.jdt.ui.javaPostfixProposalCategory"); //$NON-NLS-1$
+	 *
+	 * The call must be added here in addition to setting default disablement in
+	 * {@link PreferenceConstants} CODEASSIST_EXCLUDED_CATEGORIES and CODEASSIST_CATEGORY_ORDER.
+	 * This will only work correctly for newly added proposal categories for a given release.
+	 */
+	private static void disableNewCodeAssistCategoryPreferences() {
+		// Eg. initializeCodeAssistCategoryDisabled("org.eclipse.jdt.ui.javaPostfixProposalCategory"); //$NON-NLS-1$
+	}
+
+	/**
+	 * Disable (by default) the given category id for both the default content
+	 * assist list (CODEASSIST_EXCLUDED_CATEGORIES) and the cycling content
+	 * assist list (CODEASSIST_CATEGORY_ORDER)
+	 *
+	 * @param id The category id for the proposal feature to disable by default
+	 */
+	@SuppressWarnings("unused")
+	private static void initializeCodeAssistCategoryDisabled(String id) {
+		// If preference migrated, nothing to do
+		if (isCodeAssistMigrated(id)) {
+			return;
+		}
+
+		String currPrefExcludedValue= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.CODEASSIST_EXCLUDED_CATEGORIES);
+		Set<String> disabled= new HashSet<>();
+		StringTokenizer tok= new StringTokenizer(currPrefExcludedValue, "\0");  //$NON-NLS-1$
+		while (tok.hasMoreTokens()) {
+			disabled.add(tok.nextToken());
+		}
+
+		// preference not migrated, and not in user preferences
+		if (!disabled.isEmpty() && !disabled.contains(id)) {
+			String newPrefExcludedValue= currPrefExcludedValue + id + "\0"; //$NON-NLS-1$
+			PreferenceConstants.getPreferenceStore().setValue(PreferenceConstants.CODEASSIST_EXCLUDED_CATEGORIES, newPrefExcludedValue);
+
+			// retrieve the id=rank to add from CODEASSIST_CATEGORY_ORDER from the default preferences
+			String defPrefOrderValue= PreferenceConstants.getPreferenceStore().getDefaultString(PreferenceConstants.CODEASSIST_CATEGORY_ORDER);
+			tok= new StringTokenizer(defPrefOrderValue, "\0"); //$NON-NLS-1$
+			while (tok.hasMoreTokens()) {
+				StringTokenizer inner= new StringTokenizer(tok.nextToken(), ":"); //$NON-NLS-1$
+				String key= inner.nextToken();
+				int rank= Integer.parseInt(inner.nextToken());
+				if (id.equals(key)) {
+					String currPrefOrderValue= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.CODEASSIST_CATEGORY_ORDER);
+					String newPreferenceOrderValue= currPrefOrderValue + id + ":" + rank + "\0"; //$NON-NLS-1$ //$NON-NLS-2$
+					PreferenceConstants.getPreferenceStore().setValue(PreferenceConstants.CODEASSIST_CATEGORY_ORDER, newPreferenceOrderValue);
+				}
+			}
+		}
+
+		// set as migrated
+		setCodeAssistMigrated(id);
+	}
+
+	private static boolean isCodeAssistMigrated(String id) {
+		String key= CODE_ASSIST_MIGRATED + "_" + id; //$NON-NLS-1$
+		boolean res= Platform.getPreferencesService().getBoolean(JavaPlugin.getPluginId(), key, false, null);
+		return res;
+	}
+
+	private static void setCodeAssistMigrated(String id) {
+		String key= CODE_ASSIST_MIGRATED + "_" + id; //$NON-NLS-1$
+		IEclipsePreferences preferences= InstanceScope.INSTANCE.getNode(JavaPlugin.getPluginId());
+		preferences.putBoolean(key, true);
+		try {
+			preferences.flush();
+		} catch (BackingStoreException e) {
+			JavaPlugin.log(e);
+		}
 	}
 }
