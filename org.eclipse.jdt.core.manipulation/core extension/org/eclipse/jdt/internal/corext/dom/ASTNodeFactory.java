@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,6 +11,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Red Hat Inc. - refactored to jdt.core.manipulation
+ *     Fabrice TIERCELIN - Methods to identify a signature
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.dom;
 
@@ -38,6 +39,7 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.ParameterizedType;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
@@ -55,7 +57,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2Core;
 /**
  * JDT-UI-internal helper methods to create new {@link ASTNode}s.
  * Complements <code>AST#new*(..)</code> and <code>ImportRewrite#add*(..)</code>.
- * 
+ *
  * see JDTUIHelperClasses
  */
 public class ASTNodeFactory {
@@ -84,6 +86,41 @@ public class ASTNodeFactory {
 
 	private ASTNodeFactory() {
 		// no instance;
+	}
+
+	/**
+	 * Parenthesizes the provided expression if its type requires it.
+	 *
+	 * @param ast The AST to create the resulting node with.
+	 * @param expression the expression to conditionally return parenthesized
+	 * @return the parenthesized expression of the provided expression to return or this expression
+	 *         itself
+	 */
+	public static Expression parenthesizeIfNeeded(AST ast, Expression expression) {
+		switch (expression.getNodeType()) {
+			case ASTNode.ASSIGNMENT:
+			case ASTNode.CAST_EXPRESSION:
+			case ASTNode.CONDITIONAL_EXPRESSION:
+			case ASTNode.INFIX_EXPRESSION:
+			case ASTNode.INSTANCEOF_EXPRESSION:
+				return parenthesize(ast, expression);
+
+			default:
+				return expression;
+		}
+	}
+
+	/**
+	 * Builds a new {@link ParenthesizedExpression} instance.
+	 *
+	 * @param ast The AST to create the resulting node with.
+	 * @param expression the expression to wrap with parentheses
+	 * @return a new parenthesized expression
+	 */
+	public static ParenthesizedExpression parenthesize(AST ast, Expression expression) {
+		final ParenthesizedExpression pe= ast.newParenthesizedExpression();
+		pe.setExpression(expression);
+		return pe;
 	}
 
 	public static ASTNode newStatement(AST ast, String content) {
@@ -139,7 +176,7 @@ public class ASTNodeFactory {
 	 * Returns an {@link ArrayType} that adds one dimension to the given type node.
 	 * If the given node is already an ArrayType, then a new {@link Dimension}
 	 * without annotations is inserted at the first position.
-	 * 
+	 *
 	 * @param type the type to be wrapped
 	 * @return the array type
 	 * @since 3.10
@@ -170,13 +207,13 @@ public class ASTNodeFactory {
 	 * Returns the new type node corresponding to the type of the given declaration
 	 * including the extra dimensions. If the type is a {@link UnionType}, use the LUB type.
 	 * If the <code>importRewrite</code> is <code>null</code>, the type may be fully-qualified.
-	 * 
+	 *
 	 * @param ast The AST to create the resulting type with.
 	 * @param declaration The variable declaration to get the type from
 	 * @param importRewrite the import rewrite to use, or <code>null</code>
 	 * @param context the import rewrite context, or <code>null</code>
 	 * @return a new type node created with the given AST.
-	 * 
+	 *
 	 * @since 3.7.1
 	 */
 	public static Type newType(AST ast, VariableDeclaration declaration, ImportRewrite importRewrite, ImportRewriteContext context) {
@@ -206,9 +243,9 @@ public class ASTNodeFactory {
 				return type;
 			}
 		}
-		
+
 		type= (Type) ASTNode.copySubtree(ast, type);
-		
+
 		List<Dimension> extraDimensions= declaration.extraDimensions();
 		if (!extraDimensions.isEmpty()) {
 			ArrayType arrayType;
@@ -281,14 +318,14 @@ public class ASTNodeFactory {
 	/**
 	 * Returns the new type node representing the return type of <code>lambdaExpression</code>
 	 * including the extra dimensions.
-	 * 
+	 *
 	 * @param lambdaExpression the lambda expression
 	 * @param ast the AST to create the return type with
 	 * @param importRewrite the import rewrite to use, or <code>null</code>
 	 * @param context the import rewrite context, or <code>null</code>
 	 * @return a new type node created with the given AST representing the return type of
 	 *         <code>lambdaExpression</code>
-	 * 
+	 *
 	 * @since 3.10
 	 */
 	public static Type newReturnType(LambdaExpression lambdaExpression, AST ast, ImportRewrite importRewrite, ImportRewriteContext context) {

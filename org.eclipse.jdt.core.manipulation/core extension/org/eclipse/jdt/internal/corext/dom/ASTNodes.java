@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -416,6 +416,24 @@ public class ASTNodes {
 
 	public static boolean isStatic(BodyDeclaration declaration) {
 		return Modifier.isStatic(declaration.getModifiers());
+	}
+
+	/**
+	 * True if the method is static, false if it is not or null if it is unknown.
+	 *
+	 * @param method The method
+	 * @return True if the method is static, false if it is not or null if it is unknown.
+	 */
+	public static Boolean isStatic(final MethodInvocation method) {
+		Expression calledType= method.getExpression();
+
+		if (method.resolveMethodBinding() != null) {
+			return (method.resolveMethodBinding().getModifiers() & Modifier.STATIC) != 0;
+		} else if ((calledType instanceof Name) && ((Name) calledType).resolveBinding().getKind() == IBinding.TYPE) {
+			return Boolean.TRUE;
+		}
+
+		return null;
 	}
 
 	public static List<BodyDeclaration> getBodyDeclarations(ASTNode node) {
@@ -1302,6 +1320,35 @@ public class ASTNodes {
 		return current;
 	}
 
+    /**
+     * Returns the same node after removing any parentheses around it.
+     *
+     * @param node the node around which parentheses must be removed
+     * @return the same node after removing any parentheses around it. If there are
+     *         no parentheses around it then the exact same node is returned
+     */
+    public static ASTNode getUnparenthesedExpression(ASTNode node) {
+        if (node instanceof Expression) {
+            return getUnparenthesedExpression((Expression) node);
+        }
+        return node;
+    }
+
+    /**
+     * Returns the same expression after removing any parentheses around it.
+     *
+     * @param expression the expression around which parentheses must be removed
+     * @return the same expression after removing any parentheses around it If there
+     *         are no parentheses around it then the exact same expression is
+     *         returned
+     */
+    public static Expression getUnparenthesedExpression(Expression expression) {
+		if (expression != null && expression.getNodeType() == ASTNode.PARENTHESIZED_EXPRESSION) {
+            return getUnparenthesedExpression(((ParenthesizedExpression) expression).getExpression());
+        }
+        return expression;
+    }
+
 	/**
 	 * Returns <code>true</code> iff <code>parent</code> is a true ancestor of <code>node</code>
 	 * (i.e. returns <code>false</code> if <code>parent == node</code>).
@@ -1577,6 +1624,7 @@ public class ASTNodes {
 			return ((SimpleName) name).isDeclaration();
 		}
 	}
+
     /**
      * Returns whether the provided method invocation invokes a method with the
      * provided method signature. The method signature is compared against the
@@ -1608,7 +1656,7 @@ public class ASTNodes {
 	 * @return true if the provided method invocation matches the provided method signature, false
 	 *         otherwise
 	 */
-	private static boolean usesGivenSignature(final IMethodBinding methodBinding, final String typeQualifiedName, final String methodName,
+	public static boolean usesGivenSignature(final IMethodBinding methodBinding, final String typeQualifiedName, final String methodName,
 			final String... parameterTypesQualifiedNames) {
 		// Let's do the fast checks first
 		if (methodBinding == null || !methodName.equals(methodBinding.getName())
