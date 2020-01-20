@@ -21,7 +21,6 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
@@ -285,17 +284,15 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 					if (!initializers)
 						return children;
 
-					Vector<IJavaElement> v= new Vector<>();
+					ArrayList<IJavaElement> v= new ArrayList<>();
 					for (IJavaElement child : children) {
 						if (matches(child)) {
 							continue;
 						}
-						v.addElement(child);
+						v.add(child);
 					}
 
-					IJavaElement[] result= new IJavaElement[v.size()];
-					v.copyInto(result);
-					return result;
+					return v.toArray(new IJavaElement[v.size()]);
 				}
 
 				@Override
