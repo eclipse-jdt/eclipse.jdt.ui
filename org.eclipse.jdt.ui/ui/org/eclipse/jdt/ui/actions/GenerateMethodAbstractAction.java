@@ -88,12 +88,12 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 /**
  * An abstract class containing elements common for <code>GenerateHashCodeEqualsAction</code> and
  * <code>GenerateToStringAction</code>
- * 
+ *
  * since 3.5
  */
 abstract class GenerateMethodAbstractAction extends SelectionDispatchAction {
 
-	
+
 	CompilationUnitEditor fEditor;
 	CompilationUnit fUnit;
 	ITypeBinding fTypeBinding;
@@ -123,7 +123,7 @@ abstract class GenerateMethodAbstractAction extends SelectionDispatchAction {
 
 	/**
 	 * Can this action be enabled on the specified selection?
-	 * 
+	 *
 	 * @param selection the selection to test
 	 * @return <code>true</code> if it can be enabled, <code>false</code>
 	 *         otherwise
@@ -145,7 +145,7 @@ abstract class GenerateMethodAbstractAction extends SelectionDispatchAction {
 
 	/**
 	 * Returns the single selected type from the specified selection.
-	 * 
+	 *
 	 * @param selection the selection
 	 * @return a single selected type, or <code>null</code>
 	 * @throws JavaModelException if the kind of the selection cannot be
@@ -225,15 +225,15 @@ abstract class GenerateMethodAbstractAction extends SelectionDispatchAction {
 
 	/**
 	 * Runs the action.
-	 * 
+	 *
 	 * @param shell the shell to use
 	 * @param type the type to generate stubs for
 	 * @throws CoreException if an error occurs
 	 */
 	void run(Shell shell, IType type) throws CoreException {
-	
+
 		initialize(type);
-	
+
 		boolean regenerate= false;
 		if (isMethodAlreadyImplemented(fTypeBinding)) {
   			regenerate= MessageDialog.openQuestion(getShell(), getErrorCaption(), Messages.format(ActionMessages.GenerateMethodAbstractAction_already_has_this_method_error, new String[] {
@@ -243,19 +243,19 @@ abstract class GenerateMethodAbstractAction extends SelectionDispatchAction {
 				return;
 			}
 		}
-	
+
 		if (!generateCandidates()) {
 			MessageDialog.openInformation(getShell(), getErrorCaption(),
 					getNoMembersError());
 			notifyResult(false);
 			return;
 		}
-		
+
 		final SourceActionDialog dialog= createDialog(shell, type);
 		final int dialogResult= dialog.open();
-		
+
 		if (dialogResult == Window.OK) {
-	
+
 			final Object[] selected= dialog.getResult();
 			if (selected == null) {
 				notifyResult(false);
@@ -263,16 +263,16 @@ abstract class GenerateMethodAbstractAction extends SelectionDispatchAction {
 			}
 			final CodeGenerationSettings settings= createSettings(type, dialog);
 			final IWorkspaceRunnable operation= createOperation(selected, settings, regenerate, type, dialog.getElementPosition());
-	
+
 			ITypeBinding superclass= fTypeBinding.getSuperclass();
 			RefactoringStatus status= new RefactoringStatus();
-	
+
 			status.merge(checkGeneralConditions(type, settings, selected));
-			
+
 			if (!"java.lang.Object".equals(superclass.getQualifiedName())) { //$NON-NLS-1$
 				status.merge(checkSuperClass(superclass));
 			}
-			
+
 			if (fTypeBinding.isMember() && !Modifier.isStatic(fTypeBinding.getModifiers())) {
 				status.merge(checkEnclosingClass(fTypeBinding.getDeclaringClass()));
 			}
@@ -280,7 +280,7 @@ abstract class GenerateMethodAbstractAction extends SelectionDispatchAction {
 			for (Object s : selected) {
 				status.merge(checkMember(s));
 			}
-	
+
 			if (status.hasEntries()) {
 				Dialog d= RefactoringUI.createLightWeightStatusDialog(status, getShell(), getErrorCaption());
 				if (d.open() != Window.OK) {
@@ -291,7 +291,7 @@ abstract class GenerateMethodAbstractAction extends SelectionDispatchAction {
 
 			final IEditorPart editor= JavaUI.openInEditor(type.getCompilationUnit());
 			final IRewriteTarget target= editor != null ? (IRewriteTarget) editor.getAdapter(IRewriteTarget.class) : null;
-	
+
 			if (target != null)
 				target.beginCompoundChange();
 			try {
@@ -314,7 +314,7 @@ abstract class GenerateMethodAbstractAction extends SelectionDispatchAction {
 
 
 	/**
-	 * 
+	 *
 	 * @param type the type for which a method is created
 	 * @param dialog the dialog box where the user has defined his preferences
 	 * @return settings applicable for this action
@@ -324,7 +324,7 @@ abstract class GenerateMethodAbstractAction extends SelectionDispatchAction {
 		settings.createComments= dialog.getGenerateComment();
 		return settings;
 	}
-	
+
 	/**
 	 * @return Message to be shown when a method cannot be generated due to lack of appropriate members
 	 */
@@ -334,12 +334,12 @@ abstract class GenerateMethodAbstractAction extends SelectionDispatchAction {
 	 * @return Caption for a dialog with error message
 	 */
 	abstract String getErrorCaption();
-	
+
 	abstract IWorkspaceRunnable createOperation(Object[] selectedBindings, CodeGenerationSettings settings, boolean regenerate, IJavaElement type, IJavaElement elementPosition);
 
 	/**
 	 * Checks whether general requirements are fulfilled
-	 * 
+	 *
 	 * @param type the type for which a method is created
 	 * @param settings preferences define by the user
 	 * @param selected the type's members selected to be used in generated method
@@ -349,19 +349,19 @@ abstract class GenerateMethodAbstractAction extends SelectionDispatchAction {
 
 	/**
 	 * Checks whether a member fulfills requirements expected by method generator
-	 * 
+	 *
 	 * @param object member binding to be checked
 	 * @return RefactoringStatus containing information about eventual problems
 	 */
 	abstract RefactoringStatus checkMember(Object object);
-	
+
 	/**
 	 * Checks whether the superclass fulfills requirements expected by method generator
 	 * @param superclass superclass type binding to be checked
 	 * @return RefactoringStatus containing information about eventual problems
 	 */
 	abstract RefactoringStatus checkSuperClass(ITypeBinding superclass);
-	
+
 	/**
 	 * Checks whether the enclosing class fulfills requirements expected by method generator
 	 * @param enclosingClass enclosing class type binding to be checked
@@ -371,7 +371,7 @@ abstract class GenerateMethodAbstractAction extends SelectionDispatchAction {
 
 	/**
 	 * Creates the action's main dialog.
-	 * 
+	 *
 	 * @param shell the shell to use
 	 * @param type the type to generate stubs for
 	 * @return a dialog with generator-specific options
@@ -389,13 +389,13 @@ abstract class GenerateMethodAbstractAction extends SelectionDispatchAction {
 	abstract boolean generateCandidates() throws JavaModelException;
 
 	/**
-	 * 
+	 *
 	 * @return The message displayed when the method is already implemented in the type.
 	 */
 	abstract String getAlreadyImplementedErrorMethodName();
 
 	/**
-	 * 
+	 *
 	 * @param typeBinding Type to be checked
 	 * @return true if given type already contains the method to be generated
 	 */

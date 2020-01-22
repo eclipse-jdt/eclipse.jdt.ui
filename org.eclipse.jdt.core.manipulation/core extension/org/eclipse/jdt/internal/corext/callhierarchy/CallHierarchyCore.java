@@ -112,8 +112,7 @@ public class CallHierarchyCore {
 
 	private MethodWrapper[] getRoots(IMember[] members, boolean callers) {
 		ArrayList<MethodWrapper> roots= new ArrayList<>();
-        for (int i= 0; i < members.length; i++) {
-			IMember member= members[i];
+		for (IMember member : members) {
 			if (member instanceof IType) {
 				IType type= (IType) member;
 				try {
@@ -122,8 +121,7 @@ public class CallHierarchyCore {
 						if (constructors.length == 0) {
 							addRoot(member, roots, callers); // IType is a stand-in for the non-existing default constructor
 						} else {
-							for (int j= 0; j < constructors.length; j++) {
-								IMethod constructor= constructors[j];
+							for (IMethod constructor : constructors) {
 								addRoot(constructor, roots, callers);
 							}
 						}
@@ -189,13 +187,12 @@ public class CallHierarchyCore {
 	 */
     public boolean isIgnored(String fullyQualifiedName) {
         if ((getIgnoreFilters() != null) && (getIgnoreFilters().length > 0)) {
-            for (int i= 0; i < getIgnoreFilters().length; i++) {
-                String fullyQualifiedName1= fullyQualifiedName;
-
-                if (getIgnoreFilters()[i].match(fullyQualifiedName1)) {
-                    return true;
-                }
-            }
+        	for (StringMatcher ignoreFilter : getIgnoreFilters()) {
+        		String fullyQualifiedName1= fullyQualifiedName;
+        		if (ignoreFilter.match(fullyQualifiedName1)) {
+        			return true;
+        		}
+        	}
         }
 
         return false;

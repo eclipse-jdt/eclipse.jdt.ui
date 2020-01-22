@@ -116,11 +116,12 @@ public class FatJarManifestProvider implements IManifestProvider {
 		Map<String, Attributes> mergedEntries= mergedManifest.getEntries();
 		for (Manifest otherManifest : otherManifests) {
 			Map<String, Attributes> otherEntries= otherManifest.getEntries();
-			for (String attributeName : otherEntries.keySet()) {
+			for (Map.Entry<String, Attributes> entry : otherEntries.entrySet()) {
+				String attributeName = entry.getKey();
 				if (mergedEntries.containsKey(attributeName)) {
 					// TODO: WARNING
 				} else {
-					mergedEntries.put(attributeName, otherEntries.get(attributeName));
+					mergedEntries.put(attributeName, entry.getValue());
 				}
 			}
 		}

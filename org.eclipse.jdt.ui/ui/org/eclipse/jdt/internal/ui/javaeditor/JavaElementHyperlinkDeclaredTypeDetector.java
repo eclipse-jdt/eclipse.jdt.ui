@@ -33,7 +33,7 @@ import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 
 /**
  * Java element variable declaration type hyperlink detector.
- * 
+ *
  * @since 3.7
  */
 public class JavaElementHyperlinkDeclaredTypeDetector extends JavaElementHyperlinkDetector {
@@ -63,7 +63,7 @@ public class JavaElementHyperlinkDeclaredTypeDetector extends JavaElementHyperli
 
 	/**
 	 * Returns the type signature of the element.
-	 * 
+	 *
 	 * @param element an instance of <code>ILocalVariable</code> or <code>IField</code>
 	 * @return the type signature of the element
 	 * @throws JavaModelException if this element does not exist or if an exception occurs while

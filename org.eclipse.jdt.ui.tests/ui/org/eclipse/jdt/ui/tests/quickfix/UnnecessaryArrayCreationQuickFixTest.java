@@ -265,6 +265,25 @@ public class UnnecessaryArrayCreationQuickFixTest extends QuickFixTest {
 		assertNull(fRemoveArrayCreationProposal);
 	}
 
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=559175
+	public void testNoMethodProposalCase5() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Arrays;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("		List<String> list = Arrays.asList(new String[][] {new String[] {\"a\"}});\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		fetchConvertingProposal(buf, cu, 0);
+
+		assertNull(fRemoveArrayCreationProposal);
+	}
+
 	public void testSuperCase1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -554,6 +573,32 @@ public class UnnecessaryArrayCreationQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
 		fetchConvertingProposal2(buf, cu, 0);
+
+		assertNull(fRemoveArrayCreationProposal);
+	}
+
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=559175
+	public void testNoSuperMethodProposalCase5() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Arrays;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class A {\n");
+		buf.append("    private class A1 {\n");
+		buf.append("        public String[] foo(int x, String[] ... b) {\n");
+		buf.append("            return b[0];\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("    private class A2 extends A1 {\n");
+		buf.append("        public String[] foo(int x) {\n");
+		buf.append("            return super.foo(x, new String[][] { new String[] {\"a\"}});\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		fetchConvertingProposal(buf, cu, 0);
 
 		assertNull(fRemoveArrayCreationProposal);
 	}

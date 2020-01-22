@@ -153,7 +153,7 @@ public final class JarPackagerUtil {
 
 	/**
 	 * Gets the name of the manifest's main class
-	 * 
+	 *
 	 * @param jarPackage the Jar package data
 	 * @return a string with the name
 	 */
@@ -195,7 +195,7 @@ public final class JarPackagerUtil {
 
 	/**
 	 * Tells whether the specified manifest main class is valid.
-	 * 
+	 *
 	 * @param data the Jar package data
 	 * @param context the runnable context
 	 * @return <code>true</code> if a main class is specified and valid
@@ -287,11 +287,11 @@ public final class JarPackagerUtil {
 	 * Opens the archive file at the given location.<br>
 	 * <em>Note: It is the caller's responsibility to close the returned
 	 * {@link ZipFile}.</em>
-	 * 
+	 *
 	 * @param location the location of the archive file
 	 * @return the archive or <code>null</code> if it could not be retrieved
 	 * @throws CoreException if the archive could not be read
-	 * 
+	 *
 	 * @since 3.4
 	 */
 	public static ZipFile getArchiveFile(IPath location) throws CoreException {

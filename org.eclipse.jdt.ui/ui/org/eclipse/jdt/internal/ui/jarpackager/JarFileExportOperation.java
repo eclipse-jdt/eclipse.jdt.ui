@@ -515,7 +515,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 
 	/**
 	 * Tells whether the given resource is an internal JAR.
-	 * 
+	 *
 	 * @param resource the resource to test
 	 * @return <code>true</code> if it is an internal JAR, <code>false</code> otherwise
 	 * @since 3.6
@@ -523,11 +523,11 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 	private boolean isInternalJar(IResource resource) {
 		if (resource.getType() != IResource.FILE)
 			return false;
-		
+
 		IJavaElement je= JavaCore.create(resource);
 		if (je == null || je.getElementType() != IJavaElement.PACKAGE_FRAGMENT_ROOT)
 			return false;
-		
+
 		IPackageFragmentRoot root= (IPackageFragmentRoot)je;
 		return root.isArchive() && !root.isExternal();
 	}
@@ -909,7 +909,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 
 	/**
 	 * Handles core exceptions that are thrown by {@link IJarBuilder#writeFile(IFile, IPath)}.
-	 * 
+	 *
 	 * @param ex the core exception
 	 * @since 3.5
 	 */

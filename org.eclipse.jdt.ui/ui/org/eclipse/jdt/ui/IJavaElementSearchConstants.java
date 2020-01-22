@@ -107,11 +107,11 @@ public interface IJavaElementSearchConstants {
 	 * @since 3.1
 	 */
 	public static final int CONSIDER_CLASSES_AND_ENUMS= 1 << 10;
-	
+
 	/**
 	 * Search scope constant indicating that interfaces and annotation types
 	 * should be considered.
-	 * 
+	 *
 	 * @since 3.8
 	 */
 	public static final int CONSIDER_INTERFACES_AND_ANNOTATIONS= 1 << 11;

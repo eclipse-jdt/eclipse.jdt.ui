@@ -513,8 +513,9 @@ public class ChangeTypeRefactoring extends Refactoring {
 			arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION, Integer.valueOf(fSelectionStart).toString() + " " + Integer.valueOf(fSelectionLength).toString()); //$NON-NLS-1$
 			arguments.put(ATTRIBUTE_TYPE, fSelectedType.getQualifiedName());
 			final DynamicValidationRefactoringChange result= new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.ChangeTypeRefactoring_allChanges);
-			for (ICompilationUnit icu : relevantVarsByUnit.keySet()) {
-				Set<ConstraintVariable> cVars= relevantVarsByUnit.get(icu);
+			for (Map.Entry<ICompilationUnit, Set<ConstraintVariable>> entry : relevantVarsByUnit.entrySet()) {
+				ICompilationUnit icu = entry.getKey();
+				Set<ConstraintVariable> cVars= entry.getValue();
 				CompilationUnitChange cuChange= new CompilationUnitChange(getName(), icu);
 				addAllChangesFor(icu, cVars, cuChange);
 				result.add(cuChange);

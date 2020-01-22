@@ -76,11 +76,7 @@ public final class ReferenceTracker {
 			} finally {
 				setAccessible(fld, isAccessible);
 			}
-		} catch (IllegalArgumentException e) {
-			handleError(e, fld);
-		} catch (IllegalAccessException e) {
-			handleError(e, fld);
-		} catch (ExceptionInInitializerError e) {
+		} catch (IllegalArgumentException | IllegalAccessException | ExceptionInInitializerError e) {
 			handleError(e, fld);
 		}
 	}

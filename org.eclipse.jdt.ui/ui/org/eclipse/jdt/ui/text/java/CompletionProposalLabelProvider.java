@@ -70,12 +70,12 @@ public class CompletionProposalLabelProvider {
 	 * <p>
 	 * Examples:
 	 * </p>
-	 * 
+	 *
 	 * <pre>
 	 *   &quot;void method(int i, String s)&quot; -&gt; &quot;int i, String s&quot;
 	 *   &quot;? extends Number method(java.lang.String s, ? super Number n)&quot; -&gt; &quot;String s, Number n&quot;
 	 * </pre>
-	 * 
+	 *
 	 * @param proposal the proposal to create the parameter list for
 	 * @return the list of comma-separated parameters suitable for display
 	 */

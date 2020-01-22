@@ -136,7 +136,7 @@ class NLSSearchResultRequestor extends SearchRequestor {
 		if (javaElement instanceof ISourceReference) {
 			String source= ((ISourceReference) javaElement).getSource();
 			if (source != null) {
-				if (source.indexOf("NLS.initializeMessages") != -1) //$NON-NLS-1$
+				if (source.contains("NLS.initializeMessages")) //$NON-NLS-1$
 					return;
 			}
 		}

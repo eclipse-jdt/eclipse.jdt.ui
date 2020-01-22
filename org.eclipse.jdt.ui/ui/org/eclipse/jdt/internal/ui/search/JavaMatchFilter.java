@@ -50,7 +50,7 @@ abstract class JavaMatchFilter extends MatchFilter {
 
 	/**
 	 * Returns whether this filter is applicable for this query.
-	 * 
+	 *
 	 * @param query the query
 	 * @return <code>true</code> if this match filter is applicable for the given query
 	 */
@@ -202,7 +202,7 @@ abstract class MainOrTestFilter extends JavaMatchFilter {
 	public boolean isApplicable(JavaSearchQuery query) {
 		return true;
 	}
-	
+
 	protected static IClasspathEntry determineClassPathEntry(JavaElementMatch match) {
 		final Object element= match.getElement();
 		if (element instanceof IJavaElement) {
@@ -510,10 +510,10 @@ abstract class GenericTypeFilter extends JavaMatchFilter {
 			}
 			if (typeParameters == null)
 				return false;
-			
+
 			if (typeParameters.length > 0)
 				return true;
-			
+
 			element= element.getParent();
 		}
 		return false;

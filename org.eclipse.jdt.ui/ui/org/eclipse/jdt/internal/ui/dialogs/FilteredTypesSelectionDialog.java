@@ -248,7 +248,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		fTypeInfoUtil= new TypeInfoUtil(extension != null ? extension.getImageProvider() : null);
 
 		fTypeInfoLabelProvider= new TypeItemLabelProvider();
-		
+
 		setListLabelProvider(fTypeInfoLabelProvider);
 		setListSelectionLabelDecorator(fTypeInfoLabelProvider);
 
@@ -601,7 +601,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		IProgressMonitor remainingMonitor;
 		SubMonitor subMonitor= SubMonitor.convert(monitor, JavaUIMessages.TypeSelectionDialog_progress_consistency, 10);
 		if (ConsistencyRunnable.needsExecution()) {
-			
+
 			try {
 				ConsistencyRunnable runnable= new ConsistencyRunnable();
 				runnable.run(subMonitor.split(1));
@@ -1031,11 +1031,11 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 		/**
 		 * Matches text with filter.
-		 * 
+		 *
 		 * @param text the text to match with the filter
 		 * @return never returns
 		 * @throws UnsupportedOperationException always
-		 * 
+		 *
 		 * @deprecated not used
 		 */
 		@Deprecated
@@ -1156,11 +1156,11 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			int result= compareName(leftInfo.getSimpleTypeName(), rightInfo.getSimpleTypeName());
 			if (result != 0)
 				return result;
-			
+
 			result= compareDeprecation(leftInfo.getModifiers(), rightInfo.getModifiers());
 			if (result != 0)
 				return result;
-			
+
 			result= compareTypeContainerName(leftInfo.getTypeContainerName(), rightInfo.getTypeContainerName());
 			if (result != 0)
 				return result;
@@ -1188,7 +1188,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 				return leftString.compareTo(rightString);
 			}
 		}
-		
+
 		private int compareDeprecation(int leftType, int rightType) {
 			boolean rightIsDeprecated= Flags.isDeprecated(rightType);
 			if (Flags.isDeprecated(leftType))

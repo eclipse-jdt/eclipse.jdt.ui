@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Tom Eicher <eclipse@tom.eicher.name> - [content assist] prefix complete casted method proposals - https://bugs.eclipse.org/bugs/show_bug.cgi?id=247547
@@ -79,7 +79,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 			return fProposal.getRequiredProposals()[0].getReplaceStart();
 		return super.getPrefixCompletionStart(document, completionOffset);
 	}
-	
+
 	@Override
 	public CharSequence getPrefixCompletionText(IDocument document, int completionOffset) {
 		if (hasArgumentList() || fProposal.getKind() == CompletionProposal.CONSTRUCTOR_INVOCATION) {
@@ -135,7 +135,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 
 	/**
 	 * Returns whether we automatically complete the method with a semicolon.
-	 * 
+	 *
 	 * @return <code>true</code> if the return type of the method is void, <code>false</code>
 	 *         otherwise
 	 * @since 3.9

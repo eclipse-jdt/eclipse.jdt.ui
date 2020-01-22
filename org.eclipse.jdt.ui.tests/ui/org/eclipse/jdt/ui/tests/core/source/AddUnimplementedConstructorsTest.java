@@ -666,7 +666,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		JavaModelUtil.reconcile(testClass.getCompilationUnit());
 
 		IMethod[] existingMethods= testClass.getMethods();
-		checkMethods(new String[] { "Test1"}, existingMethods); //$NON-NLS-1$ //$NON-NLS-2$
+		checkMethods(new String[] { "Test1"}, existingMethods); //$NON-NLS-1$ 
 
 		StringBuilder buf= new StringBuilder();
 		buf.append("public class Test1 extends A {\n");
@@ -702,7 +702,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		JavaModelUtil.reconcile(testClass.getCompilationUnit());
 
 		IMethod[] existingMethods= testClass.getMethods();
-		checkMethods(new String[] { "Test1"}, existingMethods); //$NON-NLS-1$ //$NON-NLS-2$
+		checkMethods(new String[] { "Test1"}, existingMethods); //$NON-NLS-1$ 
 
 		StringBuilder buf= new StringBuilder();
 		buf.append("public class Test1 implements A {\n");
@@ -739,7 +739,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		JavaModelUtil.reconcile(testClass.getCompilationUnit());
 
 		IMethod[] createdMethods= testClass.getMethods();
-		checkMethods(new String[] { "Test1"}, createdMethods); //$NON-NLS-1$ //$NON-NLS-2$
+		checkMethods(new String[] { "Test1"}, createdMethods); //$NON-NLS-1$ 
 
 		StringBuilder buf= new StringBuilder();
 		buf.append("public class Test1 extends A {\n");
@@ -822,7 +822,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		JavaModelUtil.reconcile(testClass.getCompilationUnit());
 
 		IMethod[] createdMethods= testClass.getMethods();
-		checkMethods(new String[] { "Test1"}, createdMethods); //$NON-NLS-1$ //$NON-NLS-2$
+		checkMethods(new String[] { "Test1"}, createdMethods); //$NON-NLS-1$ 
 
 		checkDefaultConstructorWithCommentWithSuper(createdMethods[0].getSource());
 
@@ -916,7 +916,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		IMethod[] createdMethods= testClass.getMethods();
 		String fullSource= testClass.getCompilationUnit().getSource();
 
-		checkMethods(new String[] { "Test1"}, createdMethods); //$NON-NLS-1$ //$NON-NLS-2$
+		checkMethods(new String[] { "Test1"}, createdMethods); //$NON-NLS-1$ 
 
 		StringBuilder buf= new StringBuilder();
 		buf.append("package ibm.util.bogus;\n");

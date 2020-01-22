@@ -30,6 +30,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
+import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
@@ -277,7 +278,13 @@ public class PushDownNegationCleanUp extends AbstractMultiFix {
 					} else {
 						PrefixExpression prefixExpression= ast.newPrefixExpression();
 						prefixExpression.setOperator(PrefixExpression.Operator.NOT);
-						prefixExpression.setOperand((Expression) rewrite.createCopyTarget(anOperand));
+						if (anOperand instanceof InstanceofExpression) {
+							ParenthesizedExpression parenExpression= ast.newParenthesizedExpression();
+							parenExpression.setExpression((Expression) rewrite.createCopyTarget(anOperand));
+							prefixExpression.setOperand(parenExpression);
+						} else {
+							prefixExpression.setOperand((Expression) rewrite.createCopyTarget(anOperand));
+						}
 
 						it.set(prefixExpression);
 					}

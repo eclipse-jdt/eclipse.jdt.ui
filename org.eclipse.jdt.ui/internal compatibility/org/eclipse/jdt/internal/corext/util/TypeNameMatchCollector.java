@@ -19,7 +19,7 @@ import org.eclipse.jdt.core.search.TypeNameMatch;
 
 /**
  * Note: this is required for (abandoned) Scala-IDE
- * 
+ *
  * @deprecated Use {@link org.eclipse.jdt.core.manipulation.TypeNameMatchCollector} instead.
  */
 @Deprecated

@@ -85,9 +85,9 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 		fASTRoot= root;
 		if (node == null)
 			return SearchMessages.ExceptionOccurrencesFinder_no_exception;
-		
+
 		// The ExceptionOccurrencesFinder selects the whole type, no matter what part of it was selected. MethodExitsFinder behaves similar.
-		
+
 		if (node instanceof Name) {
 			node= ASTNodes.getTopMostName((Name) node);
 		}
@@ -105,13 +105,13 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 				fException= ((Name) node).resolveTypeBinding();
 				fStart= method;
 			}
-			
+
 		} else {
 			Type type= ASTNodes.getTopMostType(node);
 			if (type == null) {
 				return SearchMessages.ExceptionOccurrencesFinder_no_exception;
 			}
-			
+
 			// in method's "throws" list:
 			if (type.getLocationInParent() == MethodDeclaration.THROWN_EXCEPTION_TYPES_PROPERTY) {
 				MethodDeclaration method= ASTResolving.findParentMethodDeclaration(node);
@@ -121,7 +121,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 				fException= type.resolveBinding();
 				fStart= method;
 			}
-			
+
 			// in catch clause:
 			Type topType= type;
 			if (type.getLocationInParent() == UnionType.TYPES_PROPERTY) {
@@ -318,7 +318,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 		}
 		return super.visit(node);
 	}
-	
+
 	@Override
 	public boolean visit(SuperConstructorInvocation node) {
 		if (matches(node.resolveConstructorBinding())) {

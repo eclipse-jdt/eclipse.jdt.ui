@@ -49,7 +49,7 @@ public class DialogField {
 
 	/**
 	 * Sets the label of the dialog field.
-	 * 
+	 *
 	 * @param labeltext the label text
 	 */
 	public void setLabelText(String labeltext) {
@@ -63,7 +63,7 @@ public class DialogField {
 
 	/**
 	 * Defines the listener for this dialog field.
-	 * 
+	 *
 	 * @param listener the dialog field listener
 	 */
 	public final void setDialogFieldListener(IDialogFieldListener listener) {
@@ -84,7 +84,7 @@ public class DialogField {
 	/**
 	 * Tries to set the focus to the dialog field. Returns <code>true</code> if the dialog field can
 	 * take focus. To be reimplemented by dialog field implementors.
-	 * 
+	 *
 	 * @return <code>true</code> if the dialog field can take focus
 	 */
 	public boolean setFocus() {
@@ -114,7 +114,7 @@ public class DialogField {
 	 * Creates all controls of the dialog field and fills it to a composite. The composite is
 	 * assumed to have <code>GridLayout</code> as layout. The dialog field will adjust its controls'
 	 * spans to the number of columns given. To be reimplemented by dialog field implementors.
-	 * 
+	 *
 	 * @param parent the parent composite
 	 * @param nColumns number of columns
 	 * @return controls of dialog field
@@ -131,7 +131,7 @@ public class DialogField {
 	/**
 	 * Returns the number of columns of the dialog field. To be reimplemented by dialog field
 	 * implementors.
-	 * 
+	 *
 	 * @return the number of columns of the dialog field
 	 */
 	public int getNumberOfControls() {
@@ -148,7 +148,7 @@ public class DialogField {
 
 	/**
 	 * Creates or returns the created label widget.
-	 * 
+	 *
 	 * @param parent The parent composite or <code>null</code> if the widget has already been
 	 *            created.
 	 * @return the label widget
@@ -173,7 +173,7 @@ public class DialogField {
 
 	/**
 	 * Creates a spacer control.
-	 * 
+	 *
 	 * @param parent The parent composite
 	 * @return the spacer control
 	 */
@@ -184,7 +184,7 @@ public class DialogField {
 	/**
 	 * Creates a spacer control with the given span. The composite is assumed to have
 	 * <code>GridLayout</code> as layout.
-	 * 
+	 *
 	 * @param parent The parent composite
 	 * @param span the given span
 	 * @return the spacer control
@@ -204,7 +204,7 @@ public class DialogField {
 
 	/**
 	 * Tests is the control is not <code>null</code> and not disposed.
-	 * 
+	 *
 	 * @param control the Control
 	 * @return <code>true</code> if the control is not <code>null</code> and not disposed.
 	 */
@@ -216,7 +216,7 @@ public class DialogField {
 
 	/**
 	 * Sets the enable state of the dialog field.
-	 * 
+	 *
 	 * @param enabled enable state
 	 */
 	public final void setEnabled(boolean enabled) {
@@ -246,7 +246,7 @@ public class DialogField {
 
 	/**
 	 * Gets the enable state of the dialog field.
-	 * 
+	 *
 	 * @return the enable state
 	 */
 	public final boolean isEnabled() {

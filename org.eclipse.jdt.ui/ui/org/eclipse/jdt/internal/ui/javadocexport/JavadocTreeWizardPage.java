@@ -115,7 +115,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 
 	/**
 	 * Constructor for JavadocTreeWizardPage.
-	 * 
+	 *
 	 * @param pageName the page name
 	 * @param store the store
 	 */
@@ -423,7 +423,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	 * Receives of list of elements selected by the user and passes them to the CheckedTree. List
 	 * can contain multiple projects and elements from different projects. If the list of seletected
 	 * elements is empty a default project is selected.
-	 * 
+	 *
 	 * @param sourceElements an array with the source elements
 	 */
 	private void setTreeChecked(IJavaElement[] sourceElements) {
@@ -500,7 +500,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	/**
 	 * Gets a list of elements to generated javadoc for from each project. Javadoc can be generated
 	 * for either a IPackageFragment or a ICompilationUnit.
-	 * 
+	 *
 	 * @param projects an array with Java projects
 	 * @return an array with the source elements
 	 */

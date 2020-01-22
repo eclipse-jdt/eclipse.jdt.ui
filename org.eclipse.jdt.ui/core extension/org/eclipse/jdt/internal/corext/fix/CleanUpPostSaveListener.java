@@ -606,9 +606,10 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 
 		Map<String, String> projectOptions= project.getOptions(true);
 
-		for (String key : cleanUpOptions.keySet()) {
+		for (Map.Entry<String, String> entry : cleanUpOptions.entrySet()) {
+			String key = entry.getKey();
 			String projectOption= projectOptions.get(key);
-			String cleanUpOption= cleanUpOptions.get(key);
+			String cleanUpOption= entry.getValue();
 			if (!strongerEquals(projectOption, cleanUpOption))
 				return false;
 		}

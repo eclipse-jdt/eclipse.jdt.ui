@@ -49,7 +49,7 @@ public class JavadocProblemsPreferencePage extends PropertyAndPreferencePage {
 	public JavadocProblemsPreferencePage() {
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 //		setDescription("Note: Disabling Javadoc processing will also ignore references in Javadoc comments for search, refactorings, content assist, organize imports, etc.");
-		
+
 		// only used when page is shown programmatically
 		setTitle(PreferencesMessages.JavadocProblemsPreferencePage_title);
 	}

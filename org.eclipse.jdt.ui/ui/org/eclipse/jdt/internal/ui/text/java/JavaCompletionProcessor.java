@@ -111,7 +111,7 @@ public class JavaCompletionProcessor extends ContentAssistProcessor {
 	private IJavaProject getJavaProject() {
 		return EditorUtility.getJavaProject(fEditor.getEditorInput());
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.ContentAssistProcessor#filterAndSort(java.util.List, org.eclipse.core.runtime.IProgressMonitor)
 	 */

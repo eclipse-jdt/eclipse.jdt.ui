@@ -1132,10 +1132,11 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 				final ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 				ICompilationUnit current= null;
 				final Map<ICompilationUnit, SearchResultGroup> groups= new HashMap<>();
-				for (IJavaProject project : firstPass.keySet()) {
+				for (Map.Entry<IJavaProject, Set<SearchResultGroup>> entry : firstPass.entrySet()) {
+					IJavaProject project = entry.getKey();
 					if (level == 3 && !JavaModelUtil.is50OrHigher(project))
 						level= 2;
-					collection= firstPass.get(project);
+					collection= entry.getValue();
 					if (collection != null) {
 						for (SearchResultGroup group : collection) {
 							for (SearchMatch match : group.getSearchResults()) {

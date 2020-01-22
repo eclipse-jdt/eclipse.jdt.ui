@@ -97,7 +97,7 @@ class CopyCallHierarchyAction extends Action {
 
 	/**
 	 * Adds the specified {@link TreeItem}'s text to the StringBuffer.
-	 * 
+	 *
 	 * @param item the tree item
 	 * @param indent the indent size
 	 * @param buf the string buffer

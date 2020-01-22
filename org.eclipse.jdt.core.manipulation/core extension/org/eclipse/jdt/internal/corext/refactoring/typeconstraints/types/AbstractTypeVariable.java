@@ -66,9 +66,10 @@ public abstract class AbstractTypeVariable extends TType {
 	protected final boolean checkAssignmentBound(TType rhs) {
 		if (fBounds.length == 0)
 			return true;
-		for (int i= 0; i < fBounds.length; i++) {
-			if (rhs.canAssignTo(fBounds[i]))
+		for (TType bound : fBounds) {
+			if (rhs.canAssignTo(bound)) {
 				return true;
+			}
 		}
 		return false;
 	}
@@ -76,9 +77,10 @@ public abstract class AbstractTypeVariable extends TType {
 	protected final boolean canAssignOneBoundTo(TType lhs) {
 		if (fBounds.length == 0)
 			return lhs.isJavaLangObject();
-		for (int i= 0; i < fBounds.length; i++) {
-			if (fBounds[i].canAssignTo(lhs))
+		for (TType bound : fBounds) {
+			if (bound.canAssignTo(lhs)) {
 				return true;
+			}
 		}
 		return false;
 	}

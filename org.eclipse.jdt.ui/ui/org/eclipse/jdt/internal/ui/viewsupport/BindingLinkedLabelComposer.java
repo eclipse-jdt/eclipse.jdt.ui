@@ -55,7 +55,7 @@ public class BindingLinkedLabelComposer extends JavaElementLinkedLabelComposer {
 	private static final String INIT_NAME= ""; //$NON-NLS-1$
 
 	private static final long M_ALL_QUALIFIED= JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_FULLY_QUALIFIED;
-	
+
 	private static final long IS_POST_QUALIFICATION= 1L << 63;
 	private static final long TP_BOUNDS= 1L << 62;
 
@@ -146,13 +146,13 @@ public class BindingLinkedLabelComposer extends JavaElementLinkedLabelComposer {
 				fBuffer.append(' ');
 			}
 		}
-		
+
 		// return type
 		if (getFlag(flags, JavaElementLabels.M_PRE_RETURNTYPE) && !method.isConstructor() && !isInitializer) {
 			appendTypeBindingLabel(method.getReturnType(), flags);
 			fBuffer.append(' ');
 		}
-		
+
 		// qualification
 		if (getFlag(flags, JavaElementLabels.M_FULLY_QUALIFIED | JavaElementLabels.T_CONTAINER_QUALIFIED)) {
 			appendTypeBindingLabel(method.getDeclaringClass(), qualificationFlags);
@@ -164,13 +164,13 @@ public class BindingLinkedLabelComposer extends JavaElementLinkedLabelComposer {
 		} else {
 			appendNameLink(method, origMethod);
 		}
-		
+
 		if (!isInitializer) {
 			// constructor type arguments
 			if (getFlag(flags, JavaElementLabels.T_TYPE_PARAMETERS) && method.isConstructor()) {
 				appendTypeArgumentsBindingLabel(method.getTypeArguments(), null, flags);
 			}
-			
+
 			// parameters
 			fBuffer.append('(');
 			if (getFlag(flags, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES)) {
@@ -266,8 +266,8 @@ public class BindingLinkedLabelComposer extends JavaElementLinkedLabelComposer {
 				}
 			}
 			fBuffer.append(')');
-	
-	
+
+
 			if (getFlag(flags, JavaElementLabels.M_EXCEPTIONS)) {
 				ITypeBinding[] types= method.getExceptionTypes();
 				if (types.length > 0) {
@@ -279,7 +279,7 @@ public class BindingLinkedLabelComposer extends JavaElementLinkedLabelComposer {
 					}
 				}
 			}
-	
+
 			if (getFlag(flags, JavaElementLabels.M_APP_TYPE_PARAMETERS)) {
 				int offset= fBuffer.length();
 				if (method.isParameterizedMethod()) {
@@ -293,7 +293,7 @@ public class BindingLinkedLabelComposer extends JavaElementLinkedLabelComposer {
 				}
 			}
 		}
-		
+
 		// post qualification
 		if (getFlag(flags, JavaElementLabels.M_POST_QUALIFIED)) {
 			fBuffer.append(JavaElementLabels.CONCAT_STRING);
@@ -333,7 +333,7 @@ public class BindingLinkedLabelComposer extends JavaElementLinkedLabelComposer {
 		} else {
 			fBuffer.append(variable.getName());
 		}
-		
+
 		if (getFlag(flags, JavaElementLabels.F_POST_QUALIFIED)) {
 			fBuffer.append(JavaElementLabels.CONCAT_STRING);
 			appendVariableQualification(variable, getPostQualificationFlags(qualificationFlags));
@@ -420,7 +420,7 @@ public class BindingLinkedLabelComposer extends JavaElementLinkedLabelComposer {
 				IAnnotationBinding[] typeAnnotations= typeAtDimension.getTypeAnnotations();
 				if (typeAnnotations.length > 0) {
 					appendAnnotationLabels(typeAnnotations, typeRefFlags, true, false);
-				}				
+				}
 				fBuffer.append('[').append(']');
 				typeAtDimension = typeAtDimension.getComponentType();
 			}
@@ -690,7 +690,7 @@ public class BindingLinkedLabelComposer extends JavaElementLinkedLabelComposer {
 				title= qualifiedName; // Not expected. Just show the whole qualifiedName.
 			}
 		}
-		
+
 		try {
 			String uri= createURI(JAVADOC_SCHEME, fEnclosingElement, qualifiedName, null, null);
 			return createHeaderLink(uri, typeName, title);

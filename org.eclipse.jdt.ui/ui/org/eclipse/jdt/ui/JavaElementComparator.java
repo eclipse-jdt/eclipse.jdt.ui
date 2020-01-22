@@ -98,12 +98,12 @@ public class JavaElementComparator extends ViewerComparator {
 	public JavaElementComparator() {
 		this(false);
 	}
-	
+
 	/**
 	 * Constructor.
-	 * 
+	 *
 	 * @param sortPFRByName When <code>true</code> {@link IPackageFragmentRoot}s are sorted by name and not by their classpath order
-	 * 
+	 *
 	 * @since 3.14
 	 */
 	public JavaElementComparator(boolean sortPFRByName) {
@@ -112,7 +112,7 @@ public class JavaElementComparator extends ViewerComparator {
 		fSortPFRByName = sortPFRByName;
 	}
 
-		
+
 	@Override
 	public int category(Object element) {
 		if (element instanceof IJavaElement) {

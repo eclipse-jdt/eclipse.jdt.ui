@@ -55,7 +55,7 @@ class FiltersDialog extends StatusDialog {
         newShell.setText(CallHierarchyMessages.FiltersDialog_filter);
         PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.CALL_HIERARCHY_FILTERS_DIALOG);
     }
-    
+
     @Override
 	protected boolean isResizable() {
     	return true;
@@ -128,7 +128,7 @@ class FiltersDialog extends StatusDialog {
                 CallHierarchyMessages.FiltersDialog_filterTestCode, true);
     }
 
-    
+
     /**
      * Creates a check box button with the given parent and text.
      *

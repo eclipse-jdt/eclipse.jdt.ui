@@ -145,13 +145,13 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		public FallbackInformationPresenter() {
 			super(false);
 		}
-		
+
 		@Override
 		public String updatePresentation(Drawable drawable, String hoverInfo, TextPresentation presentation, int maxWidth, int maxHeight) {
 			String warningInfo= JavaHoverMessages.JavadocHover_fallback_warning;
 			String warning= super.updatePresentation(drawable, warningInfo, presentation, maxWidth, maxHeight);
 			presentation.clear();
-			
+
 			String content= super.updatePresentation(drawable, hoverInfo, presentation, maxWidth, maxHeight);
 			return content + "\n\n" + warning; //$NON-NLS-1$
 		}
@@ -312,7 +312,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 
 		/**
 		 * Creates a new PresenterControlCreator.
-		 * 
+		 *
 		 * @param site the site or <code>null</code> if none
 		 * @since 3.6
 		 */
@@ -436,10 +436,10 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 						return fInformationPresenterControlCreator;
 					}
 				};
-				
+
 				JFaceResources.getColorRegistry().addListener(this); // So propertyChange() method is triggered in context of IPropertyChangeListener
 				setHoverColors();
-				
+
 				addLinkListener(iControl);
 				return iControl;
 			} else {
@@ -466,11 +466,11 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				setHoverColors();
 			}
 		}
-		
+
 		private void setHoverColors() {
 			ColorRegistry registry = JFaceResources.getColorRegistry();
-			Color fgRGB = registry.get("org.eclipse.jdt.ui.Javadoc.foregroundColor"); //$NON-NLS-1$ 
-			Color bgRGB = registry.get("org.eclipse.jdt.ui.Javadoc.backgroundColor"); //$NON-NLS-1$ 
+			Color fgRGB = registry.get("org.eclipse.jdt.ui.Javadoc.foregroundColor"); //$NON-NLS-1$
+			Color bgRGB = registry.get("org.eclipse.jdt.ui.Javadoc.backgroundColor"); //$NON-NLS-1$
 			iControl.setForegroundColor(fgRGB);
 			iControl.setBackgroundColor(bgRGB);
 		}
@@ -566,7 +566,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		if (!(element instanceof IPackageFragment)) {
 			return JavaUI.openInEditor(element);
 		}
-		
+
 		IPackageFragment packageFragment= (IPackageFragment) element;
 		ITypeRoot typeRoot;
 		IPackageFragmentRoot root= (IPackageFragmentRoot) packageFragment.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
@@ -596,7 +596,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		view.tryToReveal(packageFragment);
 		return null;
 	}
-	
+
 	private static void addLinkListener(final BrowserInformationControl control) {
 		control.addLocationListener(JavaElementLinks.createLocationListener(new JavaElementLinks.ILinkHandler() {
 			@Override
@@ -682,7 +682,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	 * Returns the first package with a valid Javadoc when there are multiple packages with the same
 	 * name in the project. If no package could be found with a valid Javadoc then returns the first
 	 * package in the array. If the array does not contain package, then return the array unaltered.
-	 * 
+	 *
 	 * @param elements array from which to filter duplicate packages
 	 * @return the first package with a valid Javadoc. If no package is found with a valid Javadoc
 	 *         then return the first element in the array if the element is of type
@@ -727,7 +727,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		int leadingImageWidth= 0;
 
 		elements= filterDuplicatePackages(elements);
-		
+
 		if (elements.length > 1) {
 			for (IJavaElement el : elements) {
 				HTMLPrinter.startBulletList(buffer);
@@ -787,10 +787,10 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			return null;
 
 		if (buffer.length() > 0) {
-	
+
 			ColorRegistry registry = JFaceResources.getColorRegistry();
-			RGB fgRGB = registry.getRGB("org.eclipse.jdt.ui.Javadoc.foregroundColor"); //$NON-NLS-1$ 
-			RGB bgRGB= registry.getRGB("org.eclipse.jdt.ui.Javadoc.backgroundColor"); //$NON-NLS-1$ 
+			RGB fgRGB = registry.getRGB("org.eclipse.jdt.ui.Javadoc.foregroundColor"); //$NON-NLS-1$
+			RGB bgRGB= registry.getRGB("org.eclipse.jdt.ui.Javadoc.backgroundColor"); //$NON-NLS-1$
 
 			HTMLPrinter.insertPageProlog(buffer, 0, fgRGB, bgRGB, JavadocHover.getStyleSheet());
 			if (base != null) {
@@ -806,7 +806,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 
 	private static String getInfoText(IJavaElement element, ITypeRoot editorInputElement, IRegion hoverRegion, boolean allowImage) {
 		long flags= getHeaderFlags(element);
-		
+
 		boolean haveSource= editorInputElement instanceof ICompilationUnit;
 		ASTNode node= haveSource ? getHoveredASTNode(editorInputElement, hoverRegion) : null;
 		IBinding binding= getHoverBinding(element, node);
@@ -846,7 +846,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 
 	/**
 	 * Returns the default value of the given annotation type method.
-	 * 
+	 *
 	 * @param method the method
 	 * @param editorInputElement the editor input element
 	 * @param hoverRegion the hover region in the editor
@@ -908,7 +908,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	}
 
 	/**
-	 * Try to acquire a binding corresponding to the given element 
+	 * Try to acquire a binding corresponding to the given element
 	 * for more precise information about (type) annotations.
 	 *
 	 * Currently this lookup is only enabled when null-annotations are enabled for the project.
@@ -937,7 +937,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		}
 		return null;
 	}
-	
+
 	private static String getImageURL(IJavaElement element) {
 		String imageName= null;
 		URL imageUrl= JavaPlugin.getDefault().getImagesOnFSRegistry().getImageURL(element);
@@ -964,7 +964,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 
 	/**
 	 * Tells whether the given field is static final.
-	 * 
+	 *
 	 * @param field the member to test
 	 * @return <code>true</code> if static final
 	 * @since 3.4
@@ -1015,7 +1015,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		CompilationUnit unit= SharedASTProviderCore.getAST(editorInputElement, SharedASTProviderCore.WAIT_ACTIVE_ONLY, null);
 		if (unit == null)
 			return null;
-		
+
 		return NodeFinder.perform(unit, hoverRegion.getOffset(),	hoverRegion.getLength());
 	}
 
@@ -1052,7 +1052,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 
 	/**
 	 * Loads and returns the style sheet associated with either Javadoc hover or the view.
-	 * 
+	 *
 	 * @param styleSheetName the style sheet name of either the Javadoc hover or the view
 	 * @return the style sheet, or <code>null</code> if unable to load
 	 * @since 3.4
@@ -1097,7 +1097,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		int labelTop= 2;
 
 		buf.append("<div style='word-wrap: break-word; position: relative; "); //$NON-NLS-1$
-		
+
 		String imageSrcPath= allowImage ? getImageURL(element) : null;
 		if (imageSrcPath != null) {
 			buf.append("margin-left: ").append(labelLeft).append("px; "); //$NON-NLS-1$ //$NON-NLS-2$
@@ -1136,9 +1136,9 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				buf.append("</a>"); //$NON-NLS-1$
 			}
 		}
-		
+
 		buf.append(label);
-		
+
 		buf.append("</div>"); //$NON-NLS-1$
 		return buf.toString();
 	}
@@ -1180,26 +1180,26 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		if (!(element instanceof IPackageFragment)) {
 			if (!(element instanceof IAnnotatable))
 				return null;
-			
+
 			if (((IAnnotatable)element).getAnnotations().length == 0)
 				return null;
 		}
-		
+
 		IBinding binding= getHoveredNodeBinding(element, editorInputElement, hoverRegion);
 		if (binding == null)
 			return null;
-		
+
 		IAnnotationBinding[] annotations= binding.getAnnotations();
 		if (annotations.length == 0)
 			return null;
-		
+
 		StringBuffer buf= new StringBuffer();
 		for (IAnnotationBinding annotation : annotations) {
 			//TODO: skip annotations that don't have an @Documented annotation?
 			addAnnotation(buf, annotation, true);
 			buf.append("<br>"); //$NON-NLS-1$
 		}
-		
+
 		return buf.toString();
 	}
 
@@ -1220,7 +1220,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				return resolveSuperclassConstructor(superTypeDeclaration, constructorBinding);
 			}
 			return simpleName.resolveBinding();
-			
+
 		} else if (node instanceof SuperConstructorInvocation) {
 			return ((SuperConstructorInvocation) node).resolveConstructorBinding();
 		} else if (node instanceof ConstructorInvocation) {
@@ -1249,7 +1249,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			String uri= JavaElementLinks.createURI(JavaElementLinks.JAVADOC_SCHEME, javaElement);
 			addLink(buf, uri, annotation.getName());
 		}
-		
+
 		IMemberValuePairBinding[] mvPairs= annotation.getDeclaredMemberValuePairs();
 		if (mvPairs.length > 0) {
 			buf.append('(');
@@ -1284,7 +1284,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				addLink(buf, uri, name);
 			}
 			buf.append(".class"); //$NON-NLS-1$
-			
+
 		} else if (value instanceof IVariableBinding) { // only enum constants
 			IVariableBinding variableBinding= (IVariableBinding)value;
 			IJavaElement variable= variableBinding.getJavaElement();
@@ -1295,17 +1295,17 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				String name= variable.getElementName();
 				addLink(buf, uri, name);
 			}
-				
+
 		} else if (value instanceof IAnnotationBinding) {
 			IAnnotationBinding annotationBinding= (IAnnotationBinding)value;
 			addAnnotation(buf, annotationBinding, addLinks);
-			
+
 		} else if (value instanceof String) {
 			buf.append(ASTNodes.getEscapedStringLiteral((String)value));
-			
+
 		} else if (value instanceof Character) {
 			buf.append(ASTNodes.getEscapedCharacterLiteral(((Character)value).charValue()));
-			
+
 		} else if (value instanceof Object[]) {
 			Object[] values= (Object[])value;
 			buf.append('{');
@@ -1316,7 +1316,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				addValue(buf, values[i], addLinks);
 			}
 			buf.append('}');
-			
+
 		} else { // primitive types (except char) or null
 			buf.append(String.valueOf(value));
 		}

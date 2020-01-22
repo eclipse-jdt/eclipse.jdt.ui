@@ -84,11 +84,11 @@ public class Jsp2JavaTagHandler implements ITagHandler {
 	@Override
 	public int backTranslateOffsetInLine(String originalLine, String translatedLine, int offsetInTranslatedLine) {
 		int javaPartitionStart= 0;
-		if (originalLine.indexOf("<%") != -1) //$NON-NLS-1$
+		if (originalLine.contains("<%")) //$NON-NLS-1$
 			javaPartitionStart= handleJavaSection(originalLine, offsetInTranslatedLine);
-		else if (originalLine.indexOf("<jsp:useBean id=\"") != -1)  { //$NON-NLS-1$
+		else if (originalLine.contains("<jsp:useBean id=\""))  { //$NON-NLS-1$
 			javaPartitionStart= handleUseBeanTag(originalLine, offsetInTranslatedLine);
-		} else if (originalLine.indexOf("<c:out value=\"${") != -1)  { //$NON-NLS-1$
+		} else if (originalLine.contains("<c:out value=\"${"))  { //$NON-NLS-1$
 			javaPartitionStart= handleTagLib(originalLine, offsetInTranslatedLine);
 		}
 		return javaPartitionStart;

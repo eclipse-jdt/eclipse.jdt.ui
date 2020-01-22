@@ -301,7 +301,7 @@ public final class ClipboardOperationAction extends TextEditorAction {
 
 	/**
 	 * Returns whether the Smart Insert Mode is selected.
-	 * 
+	 *
 	 * @return <code>true</code> if the Smart Insert Mode is selected
 	 * @since 3.7
 	 */

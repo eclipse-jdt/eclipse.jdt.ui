@@ -39,7 +39,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 
 /**
  * Alternate, stripped down quick assist processor for the annotate class file action.
- * 
+ *
  * @see <a href="https://bugs.eclipse.org/458200">[null] "Annotate" proposals for adding external
  *      null annotations to library classes</a>
  * @since 3.11

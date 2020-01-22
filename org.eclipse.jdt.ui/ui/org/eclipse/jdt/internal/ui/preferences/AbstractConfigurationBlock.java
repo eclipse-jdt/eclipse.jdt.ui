@@ -128,7 +128,7 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 
 		/**
 		 * Creates a new section manager.
-		 * 
+		 *
 		 * @param dialogSettingsStore the dialog store
 		 * @param lastOpenKey the preference key
 		 */

@@ -35,7 +35,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Java element super implementation hyperlink.
- * 
+ *
  * @since 3.7
  */
 public class JavaElementSuperImplementationHyperlink implements IHyperlink {
@@ -47,7 +47,7 @@ public class JavaElementSuperImplementationHyperlink implements IHyperlink {
 
 	/**
 	 * Creates a new Java element super implementation hyperlink for methods.
-	 * 
+	 *
 	 * @param region the region of the link
 	 * @param openAction the action to use to open the java elements
 	 * @param method the method to open
@@ -99,7 +99,7 @@ public class JavaElementSuperImplementationHyperlink implements IHyperlink {
 
 	/**
 	 * Finds the super implementation of the method.
-	 * 
+	 *
 	 * @param method the method
 	 * @return the super implementation of the method if any or <code>null</code>
 	 * @throws JavaModelException if an exception occurs while creating the type hierarchy to find

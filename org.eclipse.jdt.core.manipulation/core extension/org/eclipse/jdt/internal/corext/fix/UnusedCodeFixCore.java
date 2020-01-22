@@ -782,8 +782,8 @@ public class UnusedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 				}
 			}
 		}
-		for (ASTNode node : variableDeclarations.keySet()) {
-			List<SimpleName> names= variableDeclarations.get(node);
+		for (Map.Entry<ASTNode, List<SimpleName>> entry : variableDeclarations.entrySet()) {
+			List<SimpleName> names= entry.getValue();
 			result.add(new RemoveUnusedMemberOperation(names.toArray(new SimpleName[0]), false));
 		}
 		if (unnecessaryCasts.size() > 0)

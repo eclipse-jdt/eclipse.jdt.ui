@@ -679,10 +679,10 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 					if (memberInfo.getMember().equals(fMembersToMove[index])) {
 						switch (memberInfo.getAction()) {
 							case MemberActionInfo.PUSH_ABSTRACT_ACTION:
-								arguments.put(ATTRIBUTE_ABSTRACT + (index + 1), Boolean.valueOf(true).toString());
+								arguments.put(ATTRIBUTE_ABSTRACT + (index + 1), Boolean.TRUE.toString());
 								break;
 							case MemberActionInfo.PUSH_DOWN_ACTION:
-								arguments.put(ATTRIBUTE_PUSH + (index + 1), Boolean.valueOf(true).toString());
+								arguments.put(ATTRIBUTE_PUSH + (index + 1), Boolean.TRUE.toString());
 								break;
 						}
 					}

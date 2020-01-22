@@ -134,7 +134,7 @@ public class JavaSearchQuery implements ISearchQuery {
 
 			SearchPattern pattern= null;
 			String stringPattern= null;
-			
+
 			if (fPatternDataList.size() == 1) {
 				if (getFirstSpecification() instanceof ElementQuerySpecification) {
 					IJavaElement element= ((ElementQuerySpecification) getFirstSpecification()).getElement();

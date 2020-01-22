@@ -628,7 +628,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 
 	/**
 	 * Create a new instance of the content provider to use for the Java editor breadcrumb.
-	 * 
+	 *
 	 * @return a new content provider
 	 * @since 3.5
 	 */
@@ -862,7 +862,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 
 			if (element instanceof IOrdinaryClassFile)
 				element= ((IOrdinaryClassFile) element).getType();
-			
+
 			if (element instanceof IModularClassFile)
 				element= ((IModularClassFile) element).getModule();
 

@@ -29,7 +29,7 @@ public class ChangeCaseProposal extends WordCorrectionProposal {
 
 	/**
 	 * Creates a new change case proposal.
-	 * 
+	 *
 	 * @param arguments The problem arguments associated with the spelling problem
 	 * @param offset The offset in the document where to apply the proposal
 	 * @param length The length in the document to apply the proposal

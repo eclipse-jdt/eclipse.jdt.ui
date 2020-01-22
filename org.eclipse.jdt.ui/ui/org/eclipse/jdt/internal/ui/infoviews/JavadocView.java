@@ -293,16 +293,16 @@ public class JavadocView extends AbstractInfoView {
 	/**
 	 * Action to open the selection in an external browser. If the selection is a java element its
 	 * corresponding javadoc is shown if possible. If it is an URL the URL's content is shown.
-	 * 
+	 *
 	 * The action is disabled if the selection cannot be opened.
-	 * 
+	 *
 	 * @since 3.6
 	 */
 	private static class OpenInBrowserAction extends OpenAttachedJavadocAction {
 
 		/**
 		 * Create a new ShowExternalJavadocAction
-		 * 
+		 *
 		 * @param site the site
 		 */
 		public OpenInBrowserAction(IWorkbenchSite site) {
@@ -931,7 +931,7 @@ public class JavadocView extends AbstractInfoView {
 
 	/**
 	 * {@inheritDoc}
-	 * 
+	 *
 	 * @param input a String containing the HTML to be shown in the view, or <code>null</code>
 	 */
 	@Override
@@ -983,7 +983,7 @@ public class JavadocView extends AbstractInfoView {
 
 	/**
 	 * Returns the Javadoc of the Java element in HTML format.
-	 * 
+	 *
 	 * @param result the Java elements for which to get the Javadoc
 	 * @param activePart the active part if any
 	 * @param selection the selection of the active site if any
@@ -1153,7 +1153,7 @@ public class JavadocView extends AbstractInfoView {
 
 	/**
 	 * Gets the label for the given member.
-	 * 
+	 *
 	 * @param member the Java member
 	 * @param constantValue the constant value if any
 	 * @param defaultValue the default value of the annotation type member, if any
@@ -1244,7 +1244,7 @@ public class JavadocView extends AbstractInfoView {
 
 				}
 			}
-			
+
 			if (element == null && selection instanceof ITextSelection) {
 				ITextSelection textSelection= (ITextSelection) selection;
 				if (part instanceof AbstractDecoratedTextEditor) {
@@ -1388,13 +1388,13 @@ public class JavadocView extends AbstractInfoView {
 	/**
 	 * Returns the constant value for a field that is referenced by the currently active type. This
 	 * method does may not run in the main UI thread.
-	 * 
+	 *
 	 * @param activeType the type that is currently active
 	 * @param field the field that is being referenced (usually not declared in
 	 *            <code>activeType</code>)
 	 * @param selection the region in <code>activeType</code> that contains the field reference
 	 * @param monitor a progress monitor
-	 * 
+	 *
 	 * @return the constant value for the given field or <code>null</code> if none
 	 * @since 3.4
 	 */

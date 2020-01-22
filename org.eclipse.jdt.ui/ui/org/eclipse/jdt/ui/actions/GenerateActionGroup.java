@@ -207,7 +207,7 @@ public class GenerateActionGroup extends ActionGroup {
 		fHashCodeEquals= new GenerateHashCodeEqualsAction(editor);
 		fHashCodeEquals.setActionDefinitionId(IJavaEditorActionDefinitionIds.GENERATE_HASHCODE_EQUALS);
 		editor.setAction("GenerateHashCodeEquals", fHashCodeEquals); //$NON-NLS-1$
-		
+
 		fToString= new GenerateToStringAction(editor);
 		fToString.setActionDefinitionId(IJavaEditorActionDefinitionIds.GENERATE_TOSTRING);
 		editor.setAction("GenerateToString", fToString); //$NON-NLS-1$
@@ -215,7 +215,7 @@ public class GenerateActionGroup extends ActionGroup {
 		fAddJavaDocStub= new AddJavaDocStubAction(editor);
 		fAddJavaDocStub.setActionDefinitionId(IJavaEditorActionDefinitionIds.ADD_JAVADOC_COMMENT);
 		editor.setAction("AddJavadocComment", fAddJavaDocStub); //$NON-NLS-1$
-		
+
 		fAddTextBlockStub= new AddTextBlockAction(editor);
 		fAddTextBlockStub.setActionDefinitionId(IJavaEditorActionDefinitionIds.ADD_TEXTBLOCK);
 		editor.setAction("AddTextBlock", fAddTextBlockStub); //$NON-NLS-1$
@@ -290,13 +290,13 @@ public class GenerateActionGroup extends ActionGroup {
 
 		fHashCodeEquals= new GenerateHashCodeEqualsAction(site);
 		fHashCodeEquals.setActionDefinitionId(IJavaEditorActionDefinitionIds.GENERATE_HASHCODE_EQUALS);
-		
+
 		fToString= new GenerateToStringAction(site);
 		fToString.setActionDefinitionId(IJavaEditorActionDefinitionIds.GENERATE_TOSTRING);
 
 		fAddJavaDocStub= new AddJavaDocStubAction(site);
 		fAddJavaDocStub.setActionDefinitionId(IJavaEditorActionDefinitionIds.ADD_JAVADOC_COMMENT);
-		
+
 		fAddBookmark= new AddBookmarkAction(site, true);
 		fAddBookmark.setActionDefinitionId(IWorkbenchCommandConstants.EDIT_ADD_BOOKMARK);
 
@@ -402,7 +402,7 @@ public class GenerateActionGroup extends ActionGroup {
 	 */
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
-	 * 
+	 *
 	 * @noreference This method is not intended to be referenced by clients.
 	 * @deprecated As of 3.5, this method is no longer called
 	 */

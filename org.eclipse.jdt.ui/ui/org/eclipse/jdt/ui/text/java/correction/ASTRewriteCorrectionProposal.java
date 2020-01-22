@@ -37,7 +37,7 @@ import org.eclipse.jdt.internal.ui.JavaUIStatus;
  * A proposal for quick fixes and quick assists that works on an AST rewrite. Either a rewrite is
  * directly passed in the constructor or the method {@link #getRewrite()} is overridden to provide
  * the AST rewrite that is evaluated on the document when the proposal is applied.
- * 
+ *
  * @since 3.8
  */
 public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
@@ -47,7 +47,7 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 
 	/**
 	 * Constructs an AST rewrite correction proposal.
-	 * 
+	 *
 	 * @param name the display name of the proposal
 	 * @param cu the compilation unit that is modified
 	 * @param rewrite the AST rewrite that is invoked when the proposal is applied or
@@ -63,7 +63,7 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 
 	/**
 	 * Constructs an AST rewrite correction proposal. Uses the default image for this proposal.
-	 * 
+	 *
 	 * @param name the display name of the proposal
 	 * @param cu the compilation unit that is modified
 	 * @param rewrite the AST rewrite that is invoked when the proposal is applied or
@@ -76,7 +76,7 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 
 	/**
 	 * Returns the import rewrite used for this compilation unit.
-	 * 
+	 *
 	 * @return the import rewrite or <code>null</code> if no import rewrite has been set
 	 * @nooverride This method is not intended to be re-implemented or extended by clients.
 	 */
@@ -86,7 +86,7 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 
 	/**
 	 * Sets the import rewrite used for this compilation unit.
-	 * 
+	 *
 	 * @param rewrite the import rewrite
 	 * @nooverride This method is not intended to be re-implemented or extended by clients.
 	 */
@@ -96,7 +96,7 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 
 	/**
 	 * Creates and sets the import rewrite used for this compilation unit.
-	 * 
+	 *
 	 * @param astRoot the AST for the current CU
 	 * @return the created import rewrite
 	 * @nooverride This method is not intended to be re-implemented or extended by clients.

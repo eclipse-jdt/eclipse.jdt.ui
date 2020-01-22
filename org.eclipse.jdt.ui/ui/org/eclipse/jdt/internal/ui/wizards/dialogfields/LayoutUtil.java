@@ -154,7 +154,7 @@ public class LayoutUtil {
 	 * <strong>Note:</strong> Use this method instead of {@link LayoutConstants#getIndent()} for
 	 * compatibility reasons.
 	 * </p>
-	 * 
+	 *
 	 * @return the indent of dependent controls, in pixels.
 	 * @since 3.9
 	 */

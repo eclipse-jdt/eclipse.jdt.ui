@@ -22,7 +22,7 @@ import org.eclipse.jface.text.Region;
 
 /**
  * Provides the inherited double click behavior and allows <code>@identifier</code> to be selected.
- * 
+ *
  * @since 3.1
  */
 public class JavadocDoubleClickStrategy extends PartitionDoubleClickSelector {
@@ -34,7 +34,7 @@ public class JavadocDoubleClickStrategy extends PartitionDoubleClickSelector {
 
 	/**
 	 * Returns a region describing the word around <code>position</code>.
-	 * 
+	 *
 	 * @param document the document
 	 * @param position the offset around which to return the word
 	 * @return the word's region, or <code>null</code> for no selection
@@ -51,7 +51,7 @@ public class JavadocDoubleClickStrategy extends PartitionDoubleClickSelector {
 			IRegion line= document.getLineInformationOfOffset(position);
 			if (position == line.getOffset() + line.getLength())
 				return null;
-			
+
 			int start= word.getOffset();
 			int end= start + word.getLength();
 

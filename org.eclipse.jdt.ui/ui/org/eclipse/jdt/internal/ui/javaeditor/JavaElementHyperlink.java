@@ -45,7 +45,7 @@ public class JavaElementHyperlink implements IHyperlink {
 
 	/**
 	 * Creates a new Java element hyperlink.
-	 * 
+	 *
 	 * @param region the region of the link
 	 * @param openAction the action to use to open the java elements
 	 * @param element the java element to open or <code>null</code> if {@link OpenAction} should be

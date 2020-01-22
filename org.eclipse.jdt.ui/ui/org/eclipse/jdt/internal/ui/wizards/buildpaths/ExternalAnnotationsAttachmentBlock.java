@@ -167,7 +167,7 @@ public class ExternalAnnotationsAttachmentBlock {
 
 	/**
 	 * Gets the external annotation path chosen by the user
-	 * @return the external annotation path, or Path.EMPTY if no path is selected. 
+	 * @return the external annotation path, or Path.EMPTY if no path is selected.
 	 */
 	public IPath getAnnotationsPath() {
 		return getFilePath();
@@ -426,7 +426,7 @@ public class ExternalAnnotationsAttachmentBlock {
 					if (selectedObject instanceof IResource && ((IResource) selectedObject).isVirtual())
 						return new StatusInfo(IStatus.ERROR, NewWizardMessages.AnnotationsAttachmentBlock_filename_error_virtual);
 				}
-				return new Status(IStatus.OK, PlatformUI.PLUGIN_ID, IStatus.OK, "", null); //$NON-NLS-1$ 
+				return new Status(IStatus.OK, PlatformUI.PLUGIN_ID, IStatus.OK, "", null); //$NON-NLS-1$
 			}
 		});
 		if (dialog.open() == Window.OK) {

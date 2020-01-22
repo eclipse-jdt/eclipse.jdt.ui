@@ -49,24 +49,24 @@ import org.eclipse.jdt.internal.ui.preferences.PreferencesAccess;
  * formatters, nothing is shown.
  */
 public class CustomCodeFormatterBlock extends Observable {
-	
+
 	private static class FormatterContribution {
 		public String fId;
 		public String fName;
-		
+
 		public FormatterContribution(String id, String name) {
 			fId= id;
 			fName= name;
 		}
 	}
-	
+
 	private static final String ATTR_NAME = "name"; //$NON-NLS-1$
 	private static final String ATTR_ID = "id"; //$NON-NLS-1$
 
 	private IEclipsePreferences fPrefs;
 	private String fDefaultFormatterId;
 	private FormatterContribution[] fFormatters;
-	
+
 	private Combo fFormatterCombo;
 
 	public CustomCodeFormatterBlock(IProject project, PreferencesAccess access) {

@@ -400,7 +400,7 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 	 *
 	 * <pre>
 	 * Partial comment with block comment after line comment:
-	 * 
+	 *
 	 * /&#42;&#42;
 	 *  &#42;
 	 * void Foo() {

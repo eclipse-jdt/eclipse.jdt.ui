@@ -16,7 +16,7 @@ package org.eclipse.jdt.internal.ui.workingsets;
 
 /**
  * Working set ID constants.
- * 
+ *
  * @since 3.5
  */
 public interface IWorkingSetIDs {

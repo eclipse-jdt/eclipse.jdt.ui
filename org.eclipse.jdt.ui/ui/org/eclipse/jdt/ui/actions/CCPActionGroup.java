@@ -62,7 +62,7 @@ public class CCPActionGroup extends ActionGroup {
 	 * Creates a new <code>CCPActionGroup</code>. The group requires that the selection provided by
 	 * the view part's selection provider is of type
 	 * <code>org.eclipse.jface.viewers.IStructuredSelection</code>.
-	 * 
+	 *
 	 * @param part the view part that owns this action group
 	 * @param includeOnlyCopyActions <code>true</code> if the group only includes the copy actions,
 	 *            <code>false</code> to include all actions
@@ -112,7 +112,7 @@ public class CCPActionGroup extends ActionGroup {
 	/**
 	 * Creates a new <code>CCPActionGroup</code>. The group requires that the selection provided by
 	 * the given selection provider is of type {@link IStructuredSelection}.
-	 * 
+	 *
 	 * @param site the site that will own the action group.
 	 * @param specialSelectionProvider the selection provider used instead of the sites selection
 	 *            provider.

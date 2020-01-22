@@ -103,7 +103,7 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 	public void addLinkedPosition(ITrackedNodePosition position, int sequenceRank, String groupID) {
 		getLinkedProposalModel().getPositionGroup(groupID, true).addPosition(position, sequenceRank);
 	}
-	
+
 	/**
 	 * Sets the end position of the linked mode to the end of the passed range.
 	 * @param position The position that describes the end position of the linked mode.

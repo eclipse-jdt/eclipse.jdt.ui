@@ -225,7 +225,7 @@ public class JdtActionConstants {
 	/**
 	 * Source menu: name of standard Surround with try/multi-catch block global action (value
 	 * <code>"org.eclipse.jdt.ui.actions.SurroundWithTryMultiCatch"</code>).
-	 * 
+	 *
 	 * @since 3.7.1
 	 */
 	public static final String SURROUND_WITH_TRY_MULTI_CATCH= "org.eclipse.jdt.ui.actions.SurroundWithTryMultiCatch"; //$NON-NLS-1$

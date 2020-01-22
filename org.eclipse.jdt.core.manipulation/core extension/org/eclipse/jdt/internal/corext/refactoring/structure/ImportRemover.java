@@ -307,16 +307,15 @@ public class ImportRemover {
 	}
 
 	public void applyRemoves(ImportRewrite importRewrite) {
-		IBinding[] bindings= getImportsToRemove();
-		for (int i= 0; i < bindings.length; i++) {
-			if (bindings[i] instanceof ITypeBinding) {
-				ITypeBinding typeBinding= (ITypeBinding) bindings[i];
+		for (IBinding b : getImportsToRemove()) {
+			if (b instanceof ITypeBinding) {
+				ITypeBinding typeBinding= (ITypeBinding) b;
 				importRewrite.removeImport(typeBinding.getTypeDeclaration().getQualifiedName());
-			} else if (bindings[i] instanceof IMethodBinding) {
-				IMethodBinding binding= (IMethodBinding) bindings[i];
+			} else if (b instanceof IMethodBinding) {
+				IMethodBinding binding= (IMethodBinding) b;
 				importRewrite.removeStaticImport(binding.getDeclaringClass().getQualifiedName() + '.' + binding.getName());
-			} else if (bindings[i] instanceof IVariableBinding) {
-				IVariableBinding binding= (IVariableBinding) bindings[i];
+			} else if (b instanceof IVariableBinding) {
+				IVariableBinding binding= (IVariableBinding) b;
 				importRewrite.removeStaticImport(binding.getDeclaringClass().getQualifiedName() + '.' + binding.getName());
 			}
 		}

@@ -740,7 +740,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 
 		/**
 		 * Overlays value with problem annotation.
-		 * 
+		 *
 		 * @param value the value
 		 * @param problemAnnotation the problem annotation
 		 */
@@ -1167,7 +1167,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 	 * XXX: Workaround for https://bugs.eclipse.org/307756, see comment 2 on how a better solution
 	 * could look like.
 	 * </p>
-	 * 
+	 *
 	 * @param editorInput the editor input to test
 	 * @return <code>true</code> if it is an instance of
 	 *         <code>org.eclipse.team.internal.ui.history.FileRevisionEditorInput</code>
@@ -1621,7 +1621,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 	 * assumed to be called in the UI thread i.e. if they open a dialog they must ensure it ends up
 	 * in the UI thread.
 	 * </p>
-	 * 
+	 *
 	 * @param info compilation unit info
 	 * @param changedRegions the array with the changed regions
 	 * @param listeners the listeners to notify

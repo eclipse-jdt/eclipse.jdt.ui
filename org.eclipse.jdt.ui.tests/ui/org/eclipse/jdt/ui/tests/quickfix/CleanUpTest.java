@@ -4367,6 +4367,58 @@ public class CleanUpTest extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
 	}
 
+	public void testPushDownNegationReplaceInstanceofNegationWithInfixAndOperator() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean replaceNegationWithInfixAndOperator(boolean b1, boolean b2) {\n" //
+				+ "        return !(b1 && b2 instanceof String); // another refactoring removes the parentheses\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.PUSH_DOWN_NEGATION);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean replaceNegationWithInfixAndOperator(boolean b1, boolean b2) {\n" //
+				+ "        return (!b1 || !(b2 instanceof String)); // another refactoring removes the parentheses\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+	}
+
+	public void testPushDownNegationReplaceInstanceofNegationWithInfixOrOperator() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean replaceNegationWithInfixOrOperator(boolean b1, boolean b2) {\n" //
+				+ "        return !(b1 instanceof String || b2); // another refactoring removes the parentheses\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.PUSH_DOWN_NEGATION);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean replaceNegationWithInfixOrOperator(boolean b1, boolean b2) {\n" //
+				+ "        return (!(b1 instanceof String) && !b2); // another refactoring removes the parentheses\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+	}
+
 	public void testPushDownNegationReplaceNegationWithEqualOperator() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -4699,6 +4751,144 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "public class E1 {\n" //
 				+ "    public boolean replaceNegationAndNotEqualOperator(int i1, int i2) {\n" //
 				+ "        return (i1 == i2 /* another refactoring removes the parentheses */);\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+	}
+
+	public void testMapMethodRatherThanKeySetMethod() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Map;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public int replaceUnnecesaryCallsToMapKeySet(Map<String, String> map) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int x = map.keySet().size();\n" //
+				+ "\n" //
+				+ "        if (map.keySet().contains(\"hello\")) {\n" //
+				+ "            map.keySet().remove(\"hello\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (map.keySet().remove(\"world\")) {\n" //
+				+ "            // Cannot replace, because `map.removeKey(\"world\") != null` is not strictly equivalent\n" //
+				+ "            System.out.println(map);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        map.keySet().clear();\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        if (map.keySet().isEmpty()) {\n" //
+				+ "            x++;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return x;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.USE_DIRECTLY_MAP_METHOD);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Map;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public int replaceUnnecesaryCallsToMapKeySet(Map<String, String> map) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int x = map.size();\n" //
+				+ "\n" //
+				+ "        if (map.containsKey(\"hello\")) {\n" //
+				+ "            map.remove(\"hello\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (map.keySet().remove(\"world\")) {\n" //
+				+ "            // Cannot replace, because `map.removeKey(\"world\") != null` is not strictly equivalent\n" //
+				+ "            System.out.println(map);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        map.clear();\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        if (map.isEmpty()) {\n" //
+				+ "            x++;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return x;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+	}
+
+	public void testMapMethodRatherThanValuesMethod() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Map;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public int replaceUnnecesaryCallsToMapValues(Map<String, String> map) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int x = map.values().size();\n" //
+				+ "\n" //
+				+ "        if (map.values().contains(\"hello\")) {\n" //
+				+ "            map.values().remove(\"hello\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (map.values().remove(\"world\")) {\n" //
+				+ "            System.out.println(map);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        map.values().clear();\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        if (map.values().contains(\"foo\")) {\n" //
+				+ "            x++;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return x;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.USE_DIRECTLY_MAP_METHOD);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Map;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public int replaceUnnecesaryCallsToMapValues(Map<String, String> map) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        int x = map.size();\n" //
+				+ "\n" //
+				+ "        if (map.containsValue(\"hello\")) {\n" //
+				+ "            map.values().remove(\"hello\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        if (map.values().remove(\"world\")) {\n" //
+				+ "            System.out.println(map);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment also\n" //
+				+ "        map.clear();\n" //
+				+ "\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        if (map.containsValue(\"foo\")) {\n" //
+				+ "            x++;\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return x;\n" //
 				+ "    }\n" //
 				+ "}\n";
 
@@ -8158,7 +8348,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		assertTrue(entries.length == 1);
 		String message= entries[0].getMessage();
 		assertTrue(message, entries[0].isInfo());
-		assertTrue(message, message.indexOf("ambiguous") != -1);
+		assertTrue(message, message.contains("ambiguous"));
 	}
 
 	public void testOrganizeImports02() throws Exception {
@@ -8177,7 +8367,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		assertTrue(entries.length == 1);
 		String message= entries[0].getMessage();
 		assertTrue(message, entries[0].isInfo());
-		assertTrue(message, message.indexOf("parse") != -1);
+		assertTrue(message, message.contains("parse"));
 	}
 
 	public void testOrganizeImportsBug202266() throws Exception {

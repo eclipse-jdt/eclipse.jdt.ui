@@ -228,37 +228,37 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 		} else {
 			String lastSegment= entry.getPath().lastSegment();
 			if (JUNIT4.equals(version)) {
-				if (lastSegment.indexOf("junit") != -1) { //$NON-NLS-1$
+				if (lastSegment.contains("junit")) { //$NON-NLS-1$
 					return JUnitPreferencesConstants.JUNIT4_JAVADOC;
 				} else {
 					return JUnitPreferencesConstants.HAMCREST_CORE_JAVADOC;
 				}
 			} else if (JUNIT5.equals(version)) {
-				if (lastSegment.indexOf("jupiter.api") != -1) { //$NON-NLS-1$
+				if (lastSegment.contains("jupiter.api")) { //$NON-NLS-1$
 					return JUnitPreferencesConstants.JUNIT_JUPITER_API_JAVADOC;
-				} else if (lastSegment.indexOf("jupiter.engine") != -1) { //$NON-NLS-1$
+				} else if (lastSegment.contains("jupiter.engine")) { //$NON-NLS-1$
 					return JUnitPreferencesConstants.JUNIT_JUPITER_ENGINE_JAVADOC;
-				} else if (lastSegment.indexOf("jupiter.migrationsupport") != -1) { //$NON-NLS-1$
+				} else if (lastSegment.contains("jupiter.migrationsupport")) { //$NON-NLS-1$
 					return JUnitPreferencesConstants.JUNIT_JUPITER_MIGRATIONSUPPORT_JAVADOC;
-				} else if (lastSegment.indexOf("jupiter.params") != -1) { //$NON-NLS-1$
+				} else if (lastSegment.contains("jupiter.params")) { //$NON-NLS-1$
 					return JUnitPreferencesConstants.JUNIT_JUPITER_PARAMS_JAVADOC;
-				} else if (lastSegment.indexOf("platform.commons") != -1) { //$NON-NLS-1$
+				} else if (lastSegment.contains("platform.commons")) { //$NON-NLS-1$
 					return JUnitPreferencesConstants.JUNIT_PLATFORM_COMMONS_JAVADOC;
-				} else if (lastSegment.indexOf("platform.engine") != -1) { //$NON-NLS-1$
+				} else if (lastSegment.contains("platform.engine")) { //$NON-NLS-1$
 					return JUnitPreferencesConstants.JUNIT_PLATFORM_ENGINE_JAVADOC;
-				} else if (lastSegment.indexOf("platform.launcher") != -1) { //$NON-NLS-1$
+				} else if (lastSegment.contains("platform.launcher")) { //$NON-NLS-1$
 					return JUnitPreferencesConstants.JUNIT_PLATFORM_LAUNCHER_JAVADOC;
-				} else if (lastSegment.indexOf("platform.runner") != -1) { //$NON-NLS-1$
+				} else if (lastSegment.contains("platform.runner")) { //$NON-NLS-1$
 					return JUnitPreferencesConstants.JUNIT_PLATFORM_RUNNER_JAVADOC;
-				} else if (lastSegment.indexOf("platform.suite.api") != -1) { //$NON-NLS-1$
+				} else if (lastSegment.contains("platform.suite.api")) { //$NON-NLS-1$
 					return JUnitPreferencesConstants.JUNIT_PLATFORM_SUITE_API_JAVADOC;
-				} else if (lastSegment.indexOf("vintage.engine") != -1) { //$NON-NLS-1$
+				} else if (lastSegment.contains("vintage.engine")) { //$NON-NLS-1$
 					return JUnitPreferencesConstants.JUNIT_VINTAGE_ENGINE_JAVADOC;
-				} else if (lastSegment.indexOf("opentest4j") != -1) { //$NON-NLS-1$
+				} else if (lastSegment.contains("opentest4j")) { //$NON-NLS-1$
 					return JUnitPreferencesConstants.JUNIT_OPENTEST4J_JAVADOC;
-				} else if (lastSegment.indexOf("apiguardian") != -1) { //$NON-NLS-1$
+				} else if (lastSegment.contains("apiguardian")) { //$NON-NLS-1$
 					return JUnitPreferencesConstants.JUNIT_APIGUARDIAN_JAVADOC;
-				} else if (lastSegment.indexOf("junit") != -1) { //$NON-NLS-1$
+				} else if (lastSegment.contains("junit")) { //$NON-NLS-1$
 					return JUnitPreferencesConstants.JUNIT4_JAVADOC;
 				} else {
 					return JUnitPreferencesConstants.HAMCREST_CORE_JAVADOC;

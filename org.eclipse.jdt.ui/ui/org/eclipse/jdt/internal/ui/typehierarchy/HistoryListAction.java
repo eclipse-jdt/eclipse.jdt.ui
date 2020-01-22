@@ -110,7 +110,7 @@ public class HistoryListAction extends Action {
 				public Image getImage(Object element) {
 					IJavaElement[] elem= (IJavaElement[])element;
 					return super.getImage(elem[0]);
-					
+
 				}
 			};
 
@@ -193,7 +193,7 @@ public class HistoryListAction extends Action {
 
 		/**
 		 * Gets the remaining elements in the list.
-		 * 
+		 *
 		 * @return the remaining elements in the list
 		 * @since 3.7
 		 */

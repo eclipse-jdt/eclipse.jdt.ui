@@ -32,7 +32,7 @@ import org.eclipse.jdt.internal.ui.actions.IndentAction;
 import org.eclipse.jdt.internal.ui.text.correction.PreviewFeaturesSubProcessor;
 
 public class JavaMultiLineStringAutoIndentStrategy extends JavaStringAutoIndentStrategy {
-	
+
 	public JavaMultiLineStringAutoIndentStrategy(String partitioning, IJavaProject project) {
 		super(partitioning, project);
 	}
@@ -49,7 +49,7 @@ public class JavaMultiLineStringAutoIndentStrategy extends JavaStringAutoIndentS
 		String indentation= getLineIndentation(document, command.offset);
 		String delimiter= TextUtilities.getDefaultLineDelimiter(document);
 
-		IRegion line= document.getLineInformationOfOffset(offset);		
+		IRegion line= document.getLineInformationOfOffset(offset);
 		String fullStr= document.get(line.getOffset(),command.offset- line.getOffset()).trim();
 		if (!fullStr.endsWith(IndentAction.TEXT_BLOCK_STR)) {
 			fullStr= document.get(line.getOffset(),line.getLength()).trim();

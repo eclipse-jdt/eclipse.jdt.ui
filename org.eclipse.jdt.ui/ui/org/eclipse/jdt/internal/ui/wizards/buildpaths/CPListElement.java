@@ -109,11 +109,11 @@ public class CPListElement {
 	public CPListElement(Object parent, IJavaProject project, int entryKind, IPath path, IResource res, IPath linkTarget) {
 		this(parent, project, entryKind, path, false, res, linkTarget);
 	}
-	
+
 	public CPListElement(Object parent, IJavaProject project, int entryKind, IPath path, boolean newElement, IResource res, IPath linkTarget) {
 		this(parent, project, null, entryKind, path, null, newElement, res, linkTarget);
 	}
-	
+
 	public CPListElement(Object parent, IJavaProject project, IClasspathEntry entry, int entryKind, IPath path, IModuleDescription module, boolean newElement, IResource res, IPath linkTarget) {
 		fProject= project;
 
@@ -523,7 +523,7 @@ public class CPListElement {
 
 	/**
 	 * Sets the parent container.
-	 * 
+	 *
 	 * @param parent the parent container
 	 * @since 3.7
 	 */
@@ -705,7 +705,7 @@ public class CPListElement {
 		//Note: Some old clients of this method could actually mean create(parent, curr, true, project)
 		return create(parent, curr, null, false, project);
 	}
-	
+
 	public static CPListElement create(IClasspathEntry curr, boolean newElement, IJavaProject project) {
 		return create(null, curr, null, newElement, project);
 	}
@@ -1058,7 +1058,7 @@ public class CPListElement {
 			moduleAttribute.setValue(new ModuleEncapsulationDetail[0]);
 		}
 	}
-	
+
 	public void updateExtraAttributeOfClasspathEntry() {
 		if (fChildren != null) {
 			for (int i= 0; i < fChildren.size(); i++) {
@@ -1084,9 +1084,9 @@ public class CPListElement {
 	boolean isModulePathRootNode() {
 		return false;
 	}
-	
+
 	boolean isClassPathRootNode() {
-		return false; 
+		return false;
 	}
 
 

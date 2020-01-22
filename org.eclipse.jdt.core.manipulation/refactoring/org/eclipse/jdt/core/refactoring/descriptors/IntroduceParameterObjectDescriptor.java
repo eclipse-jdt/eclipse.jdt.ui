@@ -528,8 +528,7 @@ public class IntroduceParameterObjectDescriptor extends JavaRefactoringDescripto
 				result.addFatalError("The number of parameters does not match the number of parameters of the method"); //$NON-NLS-1$
 			}
 			boolean hasParameterObject= false;
-			for (int i= 0; i < fParameters.length; i++) {
-				Parameter parameter= fParameters[i];
+			for (Parameter parameter : fParameters) {
 				if (parameter.isCreateField()) {
 					String fieldName= parameter.getFieldName();
 					if (fieldName == null)

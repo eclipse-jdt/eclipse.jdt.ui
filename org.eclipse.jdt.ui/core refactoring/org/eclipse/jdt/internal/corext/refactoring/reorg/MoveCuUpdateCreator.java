@@ -111,8 +111,9 @@ public class MoveCuUpdateCreator {
 	}
 
 	private void addImportRewriteUpdates(TextChangeManager changeManager) throws CoreException {
-		for (ICompilationUnit cu : fImportRewrites.keySet()) {
-			ImportRewrite importRewrite= fImportRewrites.get(cu);
+		for (Map.Entry<ICompilationUnit, ImportRewrite> entry : fImportRewrites.entrySet()) {
+			ICompilationUnit cu = entry.getKey();
+			ImportRewrite importRewrite= entry.getValue();
 			if (importRewrite != null && importRewrite.hasRecordedChanges()) {
 				TextChangeCompatibility.addTextEdit(changeManager.get(cu), RefactoringCoreMessages.MoveCuUpdateCreator_update_imports, importRewrite.rewriteImports(null));
 			}

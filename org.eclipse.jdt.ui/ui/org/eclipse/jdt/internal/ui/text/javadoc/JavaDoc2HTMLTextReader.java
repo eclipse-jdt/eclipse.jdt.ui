@@ -107,7 +107,7 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 
 	private String substituteQualification(String qualification) {
 		String result;
-		if (qualification.indexOf("<a") == -1) { //$NON-NLS-1$
+		if (!qualification.contains("<a")) { //$NON-NLS-1$
 			// No tag at all, use smart way
 			result= qualification.replace('#', '.');
 		} else {

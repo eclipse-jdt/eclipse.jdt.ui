@@ -140,8 +140,7 @@ public class TypeEnvironment {
 	public static ITypeBinding[] createTypeBindings(TType[] types, IJavaProject project) {
 		final Map<String, Object> mapping= new HashMap<>();
 		List<String> keys= new ArrayList<>();
-		for (int i= 0; i < types.length; i++) {
-			TType type= types[i];
+		for (TType type : types) {
 			String bindingKey= type.getBindingKey();
 			mapping.put(bindingKey, type);
 			keys.add(bindingKey);
@@ -309,8 +308,8 @@ public class TypeEnvironment {
 	}
 
 	private void cacheSubTypes(TType[] interfaces, TType result) {
-		for (int i= 0; i < interfaces.length; i++) {
-			cacheSubType(interfaces[i], result);
+		for (TType intf : interfaces) {
+			cacheSubType(intf, result);
 		}
 	}
 

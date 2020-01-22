@@ -169,11 +169,7 @@ public class TemplateSet {
 					throwReadException(null);
 				}
 			}
-		} catch (ParserConfigurationException e) {
-			throwReadException(e);
-		} catch (IOException e) {
-			throwReadException(e);
-		} catch (SAXException e) {
+		} catch (ParserConfigurationException | IOException | SAXException e) {
 			throwReadException(e);
 		}
 	}
@@ -274,9 +270,7 @@ public class TemplateSet {
 
 			transformer.transform(source, result);
 
-		} catch (ParserConfigurationException e) {
-			throwWriteException(e);
-		} catch (TransformerException e) {
+		} catch (ParserConfigurationException | TransformerException e) {
 			throwWriteException(e);
 		}
 	}

@@ -7,10 +7,13 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
+<<<<<<< HEAD
  * 
  * This is an implementation of an early-draft specification developed under the Java
  * Community Process (JCP) and is made available for testing and evaluation purposes
  * only. The code is not compatible with any specification of the JCP.
+=======
+>>>>>>> refs/remotes/origin/master
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -925,7 +928,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 
 	private String loadPreviewContentFromFile(String filename) {
 		String line;
-		String separator= System.getProperty("line.separator"); //$NON-NLS-1$
+		String separator= System.lineSeparator();
 		StringBuilder buffer= new StringBuilder(512);
 		BufferedReader reader= null;
 		try {

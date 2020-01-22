@@ -217,7 +217,7 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 				buf.append(getQualifiedName(elements[0]));
 				for (int i= 1; i < elements.length; i++) {
 					String qualifiedName= getQualifiedName(elements[i]);
-					buf.append(System.getProperty("line.separator")).append(qualifiedName); //$NON-NLS-1$
+					buf.append(System.lineSeparator()).append(qualifiedName);
 				}
 				data= new Object[] { buf.toString() };
 				dataTypes= new Transfer[] { TextTransfer.getInstance() };
@@ -351,7 +351,7 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 	/**
 	 * Checks whether the given name belongs to a {@link ClassInstanceCreation} and if so, returns
 	 * its constructor binding.
-	 * 
+	 *
 	 * @param nameNode the name node
 	 * @return the constructor binding or <code>null</code> if not found
 	 * @since 3.7

@@ -18,7 +18,7 @@ package org.eclipse.jdt.internal.ui.text.correction;
 
 /**
  * Interface defining relevance values for quick fixes/assists.
- * 
+ *
  * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposal#getRelevance()
  * @since 3.9
  */
@@ -30,7 +30,7 @@ public interface IProposalRelevance {
 	public static final int CREATE_NON_STATIC_ACCESS_USING_DECLARING_TYPE= 12;
 	public static final int CREATE_INDIRECT_ACCESS_TO_STATIC= 12;
 	public static final int CREATE_NON_STATIC_ACCESS_USING_INSTANCE_TYPE= 11;
-	
+
 	public static final int REMOVE_UNUSED_CAST= 10;
 	public static final int ADD_UNIMPLEMENTED_METHODS= 10;
 	public static final int UNUSED_MEMBER= 10;
@@ -100,7 +100,7 @@ public interface IProposalRelevance {
 	public static final int RETURN_ALLOCATED_OBJECT_MATCH= 7;
 	public static final int CREATE_LOCAL= 7;
 	public static final int CHANGE_WORKSPACE_COMPLIANCE= 7;
-	
+
 	public static final int REMOVE_SEMICOLON= 6;
 	public static final int CREATE_METHOD_IN_SUPER= 6;
 	public static final int QUALIFY_LHS= 6;

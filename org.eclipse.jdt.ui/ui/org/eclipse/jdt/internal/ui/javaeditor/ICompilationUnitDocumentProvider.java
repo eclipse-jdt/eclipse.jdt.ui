@@ -48,7 +48,7 @@ public interface ICompilationUnitDocumentProvider extends IDocumentProvider, IDo
 	/**
 	 * Saves the content of the given document to the given element. This method has only an effect
 	 * if it is called when directly or indirectly inside <code>saveDocument</code>.
-	 * 
+	 *
 	 * @param monitor the progress monitor
 	 * @param element the element to which to save
 	 * @param document the document to save

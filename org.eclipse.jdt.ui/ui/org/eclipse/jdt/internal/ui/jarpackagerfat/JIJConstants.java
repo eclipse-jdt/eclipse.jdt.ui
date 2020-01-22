@@ -16,18 +16,18 @@ package org.eclipse.jdt.internal.ui.jarpackagerfat;
 
 /**
  * Constants used in the fat Jar packager.
- * 
+ *
  * Some of these are duplicated in JIJConstants in the source for the jar in jar loader:
  * {@link org.eclipse.jdt.internal.jarinjarloader}.
- * 
+ *
  * @since 3.6
  */
 final class JIJConstants {
-	
+
 	static final String REDIRECTED_CLASS_PATH_MANIFEST_NAME  = "Rsrc-Class-Path";  //$NON-NLS-1$
 	static final String REDIRECTED_MAIN_CLASS_MANIFEST_NAME  = "Rsrc-Main-Class";  //$NON-NLS-1$
 	static final String CURRENT_DIR                          = "./";  //$NON-NLS-1$
-	
+
 	/**
 	 * This is <code>{@link org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader}.class.getName()</code>,
 	 * but that's not visible for the PDE builder when building the org.eclipse.jdt.ui plug-in.

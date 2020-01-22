@@ -92,7 +92,7 @@ public class JavaElementLine {
 
 	/**
 	 * Returns the line number.
-	 * 
+	 *
 	 * @return the line number, starting at 0
 	 */
 	public int getLineNumber() {

@@ -370,7 +370,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
 	/**
 	 * Returns the current call mode.
-	 * 
+	 *
 	 * @return the current call mode: CALL_MODE_CALLERS or CALL_MODE_CALLEES
 	 * @since 3.5
 	 */
@@ -398,7 +398,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
 	/**
 	 * Fetches the search scope with the appropriate include mask.
-	 * 
+	 *
 	 * @param includeMask the include mask
 	 * @return the search scope with the appropriate include mask
 	 * @since 3.7
@@ -531,7 +531,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
 	/**
 	 * Tells whether the given part reference references this view.
-	 * 
+	 *
 	 * @param partRef the workbench part reference
 	 * @return <code>true</code> if the given part reference references this view
 	 * @since 3.7
@@ -889,7 +889,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 			}
 		};
 	}
-	
+
     /**
      * Returns the current selection.
      * @return selection
@@ -958,7 +958,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
 	/**
 	 * Updates the input, history and description for the new input.
-	 * 
+	 *
 	 * @param currentInput the current input
 	 * @param entry the new input elements
 	 * @since 3.7
@@ -971,7 +971,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
 	/**
 	 * Updates the history with the latest input.
-	 * 
+	 *
 	 * @param currentInput the current input
 	 * @param entry the new input elements
 	 * @since 3.7
@@ -1021,7 +1021,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         if (fExpandWithConstructorsAction.canActionBeAdded()) {
         	menu.appendToGroup(GROUP_FOCUS, fExpandWithConstructorsAction);
         }
-        
+
         if (fRemoveFromViewAction.canActionBeAdded()){
         	menu.appendToGroup(GROUP_FOCUS, fRemoveFromViewAction);
         }
@@ -1159,7 +1159,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
 	/**
 	 * Sets the content description.
-	 * 
+	 *
 	 * @param includeMask the include mask
 	 * @since 3.7
 	 */
@@ -1171,7 +1171,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
 	/**
 	 * Gets the include mask.
-	 * 
+	 *
 	 * @return the include mask
 	 * @since 3.7
 	 */
@@ -1181,7 +1181,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
 	/**
 	 * Computes the content description for the call hierarchy computation.
-	 * 
+	 *
 	 * @param includeMask the include mask
 	 * @return the content description
 	 * @since 3.7
@@ -1290,7 +1290,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
     /**
      * Returns the call hierarchy viewer.
-     * 
+     *
      * @return the call hierarchy viewer
      * @since 3.5
      */
@@ -1300,7 +1300,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
 	/**
 	 * Returns the location viewer.
-	 * 
+	 *
 	 * @return the location viewer
 	 * @since 3.6
 	 */
@@ -1310,7 +1310,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
 	/**
 	 * Marks the view as pinned.
-	 * 
+	 *
 	 * @param pinned if <code>true</code> the view is marked as pinned
 	 * @since 3.7
 	 */
@@ -1320,7 +1320,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
 	/**
 	 * Indicates whether the Call Hierarchy view is pinned.
-	 * 
+	 *
 	 * @return <code>true</code> if the view is pinned, <code>false</code> otherwise
 	 * @since 3.7
 	 */
@@ -1330,7 +1330,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
 	/**
 	 * Returns the method history.
-	 * 
+	 *
 	 * @return the method history
 	 * @since 3.7
 	 */
@@ -1351,7 +1351,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
 	/**
 	 * Fetches the progress service for the workbench part site.
-	 * 
+	 *
 	 * @return the progress service for the workbench part site
 	 * @since 3.7
 	 */
@@ -1365,14 +1365,14 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
 	/**
 	 * Adds the new input elements to the current list.
-	 * 
+	 *
 	 * @param newElements the new input elements to add
 	 * @since 3.7
 	 */
 	void addInputElements(IMember[] newElements) {
 		// Caveat: RemoveFromViewAction#run() disposes TreeItems. When we add a previously removed element,
 		// we have to consider the real Tree state, not only fInputElements.
-		
+
 		List<IMember> inputElements= Arrays.asList(fInputElements);
 		List<IMember> treeElements= new ArrayList<>();
 		for (TreeItem treeItem : fCallHierarchyViewer.getTree().getItems()) {
@@ -1380,11 +1380,11 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 			if (data instanceof MethodWrapper)
 				treeElements.add(((MethodWrapper) data).getMember());
 		}
-		
+
 		List<IMember> newInput= new ArrayList<>();
 		newInput.addAll(inputElements);
 		List<IMember> addedElements= new ArrayList<>();
-		
+
 		for (IMember newElement : newElements) {
 			if (! inputElements.contains(newElement))
 				newInput.add(newElement);
@@ -1401,7 +1401,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
 	/**
 	 * Updates the view with the newly added input elements.
-	 * 
+	 *
 	 * @param newElements the newly added elements
 	 * @since 3.7
 	 */
@@ -1413,7 +1413,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 			roots= CallHierarchy.getDefault().getCallerRoots(newElements);
 		else
 			roots= CallHierarchy.getDefault().getCalleeRoots(newElements);
-		CallHierarchyViewer hierarchyViewer= getViewer();		
+		CallHierarchyViewer hierarchyViewer= getViewer();
 		TreeRoot treeRoot= hierarchyViewer.getTreeRoot(roots, true);
 		hierarchyViewer.add(treeRoot, (Object[]) roots);
 		for (MethodWrapper root : roots) {

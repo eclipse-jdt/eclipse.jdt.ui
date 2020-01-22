@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Red Hat Inc. and others.
+ * Copyright (c) 2019, 2020 Red Hat Inc. and others.
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -491,11 +491,12 @@ public class PostFixCompletionTest extends TestCase {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test;\n" +
 				"public class FieldAccess {\n" +
-				"public class Foo {\n" +
-				"  public String res;\n" +
-				"  public void foo () {\n" +
-				"    this.res.$\n" +
-				"  }\n" +
+				"  public class Foo {\n" +
+				"    public String res;\n" +
+				"    public void foo () {\n" +
+				"      this.res.$\n" +
+				"    }\n" +
+				"  }" +
 				"}");
 
 		int completionIndex= getCompletionIndex(buf);
@@ -510,11 +511,12 @@ public class PostFixCompletionTest extends TestCase {
 		StringBuffer expected= new StringBuffer();
 		expected.append("package test;\n" +
 				"public class FieldAccess {\n" +
-				"public class Foo {\n" +
-				"  public String res;\n" +
-				"  public void foo () {\n" +
-				"    String name = this.res;\n" +
-				"  }\n" +
+				"  public class Foo {\n" +
+				"    public String res;\n" +
+				"    public void foo () {\n" +
+				"      String name = this.res;\n" +
+				"    }\n" +
+				"  }" +
 				"}");
 
 		assertEquals(expected.toString(), viewer.getDocument().get());
@@ -550,6 +552,41 @@ public class PostFixCompletionTest extends TestCase {
 				"		\n" +
 				"	}\n" +
 				"  }\n" +
+				"}");
+
+		assertEquals(expected.toString(), viewer.getDocument().get());
+	}
+
+	public void testForStatement2() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n" +
+				"import java.util.List;\n" +
+				"public class ForStatement2 {\n" +
+				"	public int test (String [] inp) {\n" +
+				"		inp.fo$\n" +
+				"		return 0;\n" +
+				"	}\n" +
+				"}");
+
+		int completionIndex= getCompletionIndex(buf);
+		ICompilationUnit cu= getCompilationUnit(pkg, buf, "ForStatement2.java");
+		List<ICompletionProposal> proposals= computeCompletionProposals(cu, completionIndex);
+
+		assertProposalsExist(Arrays.asList("for - Creates a for statement"), proposals);
+
+		ITextViewer viewer= initializeViewer(cu);
+		applyProposal(viewer, proposals, "for", completionIndex);
+
+		StringBuffer expected= new StringBuffer();
+		expected.append("package test;\n" +
+				"import java.util.List;\n" +
+				"public class ForStatement2 {\n" +
+				"	public int test (String [] inp) {\n" +
+				"		for (String inp2 : inp) {\n" +
+				"			\n" +
+				"		}\n" +
+				"		return 0;\n" +
+				"	}\n" +
 				"}");
 
 		assertEquals(expected.toString(), viewer.getDocument().get());

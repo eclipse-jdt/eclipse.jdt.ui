@@ -62,6 +62,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.FontRegistry;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLayoutData;
 import org.eclipse.jface.viewers.ColumnPixelData;
@@ -70,7 +71,6 @@ import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.IFontProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -751,18 +751,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		fTableViewer.setColumnProperties(PROPERTIES);
 		fTableViewer.setCellModifier(new CellModifier());
 
-		fTableViewer.setContentProvider(new IStructuredContentProvider() {
-			@Override
-			public Object[] getElements(Object inputElement) {
-				return fSubstitutions;
-			}
-			@Override
-			public void dispose() {
-			}
-			@Override
-			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-			}
-		});
+		fTableViewer.setContentProvider(ArrayContentProvider.getInstance());
 		fTableViewer.addFilter(new ViewerFilter() {
 			@Override
 			public boolean select(Viewer viewer, Object parentElement, Object element) {
@@ -776,7 +765,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 
 
 		fTableViewer.setLabelProvider(new NLSSubstitutionLabelProvider());
-		fTableViewer.setInput(new Object());
+		fTableViewer.setInput(fSubstitutions);
 
 		fTableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override

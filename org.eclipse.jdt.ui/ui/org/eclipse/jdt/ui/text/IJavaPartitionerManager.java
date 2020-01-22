@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -17,9 +17,9 @@ import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.rules.IPartitionTokenScanner;
 
 /**
- * This IDocumentPartitioner Manager manages the creation of the IDocumentPartitioner 
+ * This IDocumentPartitioner Manager manages the creation of the IDocumentPartitioner
  * and the corresponding IPartitionTokenScanner.
- * 
+ *
  * @since 3.20
  */
 public interface IJavaPartitionerManager {

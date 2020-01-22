@@ -113,7 +113,7 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 		 */
 		if (hoverRegion.getLength() == 0)
 			return null;
-		
+
 		IDocument document= textViewer.getDocument();
 		if (document != null && isInheritDoc(document, hoverRegion))
 			return null;
@@ -131,7 +131,7 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 
 	/**
 	 * Returns whether the word is "inheritDoc".
-	 * 
+	 *
 	 * @param document the document
 	 * @param wordRegion the word region
 	 * @return <code>true</code> iff the word is "inheritDoc"
@@ -162,7 +162,7 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 
 	/**
 	 * Delegate method for {@link JavaInformationProvider#getInformationPresenterControlCreator()}
-	 * 
+	 *
 	 * @return the information control creator or null if none is available
 	 * @since 3.4
 	 */

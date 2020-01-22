@@ -629,7 +629,7 @@ public class ExpandWithConstructorsConfigurationBlock extends OptionsConfigurati
 
 	/**
 	 * Creates a single output string from the list of strings using a delimiter.
-	 * 
+	 *
 	 * @param list the input list of types and/or methods
 	 * @return the single output string from the list of strings using a delimiter
 	 */

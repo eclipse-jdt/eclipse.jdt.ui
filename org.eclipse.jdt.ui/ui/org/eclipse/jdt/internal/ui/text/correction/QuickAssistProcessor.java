@@ -1531,7 +1531,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 		ImportRewrite importRewrite= StubUtility.createImportRewrite(context.getASTRoot(), true);
 
-		rewrite.set(lambda, LambdaExpression.PARENTHESES_PROPERTY, Boolean.valueOf(true), null);
+		rewrite.set(lambda, LambdaExpression.PARENTHESES_PROPERTY, Boolean.TRUE, null);
 		ContextSensitiveImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(lambda, importRewrite);
 		ITypeBinding[] parameterTypes= methodBinding.getParameterTypes();
 		for (int i= 0; i < noOfLambdaParams; i++) {
@@ -1617,7 +1617,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		ImportRewrite importRewrite= StubUtility.createImportRewrite(context.getASTRoot(), true);
 
-		rewrite.set(lambda, LambdaExpression.PARENTHESES_PROPERTY, Boolean.valueOf(true), null);
+		rewrite.set(lambda, LambdaExpression.PARENTHESES_PROPERTY, Boolean.TRUE, null);
 		for (int i= 0; i < noOfLambdaParams; i++) {
 			VariableDeclaration param= lambdaParameters.get(i);
 			Type oldType= null;
@@ -1705,7 +1705,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		ImportRewrite importRewrite= StubUtility.createImportRewrite(context.getASTRoot(), true);
 
-		rewrite.set(lambda, LambdaExpression.PARENTHESES_PROPERTY, Boolean.valueOf(true), null);
+		rewrite.set(lambda, LambdaExpression.PARENTHESES_PROPERTY, Boolean.TRUE, null);
 		boolean removeImports= false;
 		for (int i= 0; i < noOfLambdaParams; i++) {
 			VariableDeclaration param= lambdaParameters.get(i);

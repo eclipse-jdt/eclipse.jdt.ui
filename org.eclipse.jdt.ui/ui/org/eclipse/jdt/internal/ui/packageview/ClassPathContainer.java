@@ -147,7 +147,7 @@ public class ClassPathContainer extends PackageFragmentRootContainer {
 				return false;
 			return true;
 		}
-		
+
 	}
 
 	public ClassPathContainer(IJavaProject parent, IClasspathEntry entry) {

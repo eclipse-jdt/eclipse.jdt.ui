@@ -451,7 +451,7 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OVR_OPENS= createUnManagedCached(T_OVR, "opens_pkg_ovr.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_READS= createUnManagedCached(T_OVR, "reads_mod_ovr.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_PATCH= createUnManagedCached(T_OVR, "patch_ovr.png"); //$NON-NLS-1$
-	
+
     // Call Hierarchy
     public static final ImageDescriptor DESC_OVR_RECURSIVE= createUnManaged(T_OVR, "recursive_co.png");              //$NON-NLS-1$
     public static final ImageDescriptor DESC_OVR_MAX_LEVEL= createUnManaged(T_OVR, "maxlevel_co.png");                    //$NON-NLS-1$
@@ -567,11 +567,11 @@ public class JavaPluginImages {
 
 	private static class SmallIntMap<V> {
 		private static int fgSize = 1;
-		
+
 		private int[] keys = new int[fgSize];
 		@SuppressWarnings("unchecked")
 		private V[] values = (V[]) new Object[fgSize];
-		
+
 		/**
 		 * @param key any int except for 0
 		 * @param computer computes the value for the given key
@@ -769,12 +769,9 @@ public class JavaPluginImages {
 		try {
 			URI uri= new URI("platform", null, uriPath.toString(), null); //$NON-NLS-1$
 			url= uri.toURL();
-		} catch (MalformedURLException e) {
-			// no image
-		} catch (URISyntaxException e) {
+		} catch (MalformedURLException | URISyntaxException e) {
 			// no image
 		}
-		
 		URL foundUrl= FileLocator.find(url);
 		if (foundUrl != null) {
 			return ImageDescriptor.createFromURL(url);

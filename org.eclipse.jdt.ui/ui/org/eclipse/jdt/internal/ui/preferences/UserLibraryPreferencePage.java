@@ -631,9 +631,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 				DOMSource source = new DOMSource(document);
 				StreamResult result = new StreamResult(stream);
 				transformer.transform(source, result);
-			} catch (ParserConfigurationException e) {
-				throw new IOException(e.getMessage());
-			} catch (TransformerException e) {
+			} catch (ParserConfigurationException | TransformerException e) {
 				throw new IOException(e.getMessage());
 			} finally {
 				try {
@@ -654,9 +652,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 				DocumentBuilder parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 				parser.setErrorHandler(new DefaultHandler());
 				cpElement = parser.parse(new InputSource(stream)).getDocumentElement();
-			} catch (SAXException e) {
-				throw new IOException(PreferencesMessages.UserLibraryPreferencePage_LoadSaveDialog_load_badformat);
-			} catch (ParserConfigurationException e) {
+			} catch (SAXException | ParserConfigurationException e) {
 				throw new IOException(PreferencesMessages.UserLibraryPreferencePage_LoadSaveDialog_load_badformat);
 			} finally {
 				stream.close();

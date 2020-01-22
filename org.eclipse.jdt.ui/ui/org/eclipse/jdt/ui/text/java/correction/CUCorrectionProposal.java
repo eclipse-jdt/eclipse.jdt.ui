@@ -57,7 +57,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * <p>
  * The proposal takes care of the preview of the changes as proposal information.
  * </p>
- * 
+ *
  * @since 3.8
  */
 public class CUCorrectionProposal extends ChangeCorrectionProposal implements ICUCorrectionProposal {
@@ -67,7 +67,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 
 	/**
 	 * Constructs a correction proposal working on a compilation unit with a given text change.
-	 * 
+	 *
 	 * @param name the name that is displayed in the proposal selection dialog
 	 * @param cu the compilation unit to which the change can be applied
 	 * @param change the change that is executed when the proposal is applied or <code>null</code>
@@ -88,7 +88,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 	/**
 	 * Constructs a correction proposal working on a compilation unit with a given text change. Uses
 	 * the default image for this proposal.
-	 * 
+	 *
 	 * @param name the name that is displayed in the proposal selection dialog
 	 * @param cu the compilation unit to which the change can be applied
 	 * @param change the change that is executed when the proposal is applied or <code>null</code>
@@ -106,7 +106,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 	 * Users have to override {@link #addEdits(IDocument, TextEdit)} to provide the text edits or
 	 * {@link #createTextChange()} to provide a text change.
 	 * </p>
-	 * 
+	 *
 	 * @param name the name that is displayed in the proposal selection dialog
 	 * @param cu the compilation unit on that the change works
 	 * @param relevance the relevance of this proposal
@@ -124,7 +124,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 	 * <p>
 	 * The default implementation does not add any edits
 	 * </p>
-	 * 
+	 *
 	 * @param document content of the underlying compilation unit. To be accessed read only.
 	 * @param editRoot The root edit to add all edits to
 	 * @throws CoreException can be thrown if adding the edits is failing.
@@ -137,7 +137,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 	public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
 		return fProposalCore.getAdditionalProposalInfo(monitor);
 	}
-	
+
 	@Override
 	public void apply(IDocument document) {
 		try {
@@ -228,7 +228,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 	 *
 	 * @return the preview of the changed compilation unit
 	 * @throws CoreException if the creation of the change failed
-	 * 
+	 *
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	public String getPreviewContent() throws CoreException {
@@ -247,11 +247,11 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 
 	/**
 	 * Returns whether the changed compilation unit was not previously open in an editor.
-	 * 
+	 *
 	 * @return <code>true</code> if the changed compilation unit was not previously open in an
 	 *         editor, <code>false</code> if the changed compilation unit was already open in an
 	 *         editor
-	 * 
+	 *
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	protected boolean didOpenEditor() {

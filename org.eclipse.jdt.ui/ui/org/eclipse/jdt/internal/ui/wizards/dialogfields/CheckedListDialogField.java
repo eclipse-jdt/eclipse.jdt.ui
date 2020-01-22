@@ -35,7 +35,7 @@ import org.eclipse.jface.viewers.TableViewer;
  * A list with check boxes and a button bar. Typical buttons are 'Check All' and 'Uncheck All'.
  * List model is independent of widget creation.
  * DialogFields controls are: Label, List and Composite containing buttons.
- * 
+ *
  * @param <E> the type of the list elements
  */
 public class CheckedListDialogField<E> extends ListDialogField<E> {
@@ -59,7 +59,7 @@ public class CheckedListDialogField<E> extends ListDialogField<E> {
 	 * Sets the index of the 'check all' button in the button label array passed in the constructor.
 	 * The behavior of the button marked as the check button will then be handled internally.
 	 * (enable state, button invocation behavior)
-	 * 
+	 *
 	 * @param checkAllButtonIndex the index of the check all button
 	 */
 	public void setCheckAllButtonIndex(int checkAllButtonIndex) {
@@ -71,7 +71,7 @@ public class CheckedListDialogField<E> extends ListDialogField<E> {
 	 * Sets the index of the 'uncheck all' button in the button label array passed in the
 	 * constructor. The behavior of the button marked as the uncheck button will then be handled
 	 * internally. (enable state, button invocation behavior)
-	 * 
+	 *
 	 * @param uncheckAllButtonIndex the index of the check all button
 	 */
 	public void setUncheckAllButtonIndex(int uncheckAllButtonIndex) {
@@ -132,7 +132,7 @@ public class CheckedListDialogField<E> extends ListDialogField<E> {
 
 	/**
 	 * Gets the checked elements.
-	 * 
+	 *
 	 * @return the list of checked elements
 	 */
 	@SuppressWarnings("unchecked")
@@ -153,7 +153,7 @@ public class CheckedListDialogField<E> extends ListDialogField<E> {
 
 	/**
 	 * Returns the number of checked elements.
-	 * 
+	 *
 	 * @return the number of checked elements
 	 */
 	public int getCheckedSize() {
@@ -162,7 +162,7 @@ public class CheckedListDialogField<E> extends ListDialogField<E> {
 
 	/**
 	 * Returns true if the element is checked.
-	 * 
+	 *
 	 * @param obj the element to check
 	 * @return <code>true</code> if the given element is checked
 	 */
@@ -184,7 +184,7 @@ public class CheckedListDialogField<E> extends ListDialogField<E> {
 
 	/**
 	 * Sets the checked elements.
-	 * 
+	 *
 	 * @param list the list of checked elements
 	 */
 	public void setCheckedElements(Collection<E> list) {
@@ -197,7 +197,7 @@ public class CheckedListDialogField<E> extends ListDialogField<E> {
 
 	/**
 	 * Sets the checked state of an element.
-	 * 
+	 *
 	 * @param object the element for which to set the state
 	 * @param state the checked state
 	 */
@@ -208,7 +208,7 @@ public class CheckedListDialogField<E> extends ListDialogField<E> {
 
 	/**
 	 * Sets the checked state of an element. No dialog changed listener is informed.
-	 * 
+	 *
 	 * @param object the element for which to set the state
 	 * @param state the checked state
 	 */
@@ -240,7 +240,7 @@ public class CheckedListDialogField<E> extends ListDialogField<E> {
 
 	/**
 	 * Sets the check state of all elements.
-	 * 
+	 *
 	 * @param state the checked state
 	 */
 	public void checkAll(boolean state) {

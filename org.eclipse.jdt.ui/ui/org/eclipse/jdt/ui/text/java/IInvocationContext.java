@@ -51,7 +51,7 @@ public interface IInvocationContext {
 	 * The returned AST is shared and therefore protected and cannot be modified.
 	 * The client must check the AST API level and do nothing if they are given an AST
 	 * they can't handle.
-	 * 
+	 *
 	 * @see org.eclipse.jdt.core.dom.AST#apiLevel()
 	 * @return the root of the AST corresponding to the current compilation unit
 	 */
@@ -64,7 +64,7 @@ public interface IInvocationContext {
 	 * @return the covered node, or <code>null</code> if the selection is empty or too short to cover an entire node
 	 */
 	ASTNode getCoveredNode();
-	
+
 	/**
 	 * Returns the innermost node that fully contains the selection. A node also contains the zero-length selection on either end.
 	 * <p>

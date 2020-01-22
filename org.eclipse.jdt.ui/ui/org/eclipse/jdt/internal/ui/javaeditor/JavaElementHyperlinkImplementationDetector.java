@@ -29,7 +29,7 @@ import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 
 /**
  * Java element implementation hyperlink detector for types and methods.
- * 
+ *
  * @since 3.5
  */
 public class JavaElementHyperlinkImplementationDetector extends JavaElementHyperlinkDetector {

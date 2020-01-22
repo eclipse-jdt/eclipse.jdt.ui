@@ -164,7 +164,7 @@ public final class JavaUI {
 	/**
 	 * The editor part id of the module-info.java editor (value
 	 * <code>"org.eclipse.jdt.ui.ModuleInfoEditor"</code>).
-	 * 
+	 *
 	 * @since 3.14
 	 */
 	public static final String ID_MODULE_INFO_EDITOR= 	"org.eclipse.jdt.ui.ModuleInfoEditor"; //$NON-NLS-1$
@@ -172,7 +172,7 @@ public final class JavaUI {
 	/**
 	 * The editor part id of the module-info.class editor (value
 	 * <code>"org.eclipse.jdt.ui.ModuleInfoClassFileEditor"</code>).
-	 * 
+	 *
 	 * @since 3.14
 	 */
 	public static final String ID_MODULE_INFO_CF_EDITOR= "org.eclipse.jdt.ui.ModuleInfoClassFileEditor"; //$NON-NLS-1$
@@ -180,7 +180,7 @@ public final class JavaUI {
 	/**
 	 * The editor part id of the module-info.class editor with no source (value
 	 * <code>"org.eclipse.jdt.ui.ModuleInfoClassFileEditorNoSource"</code>).
-	 * 
+	 *
 	 * @since 3.14
 	 */
 	public static final String ID_MODULE_INFO_CF_EDITOR_NO_SOURCE= "org.eclipse.jdt.ui.ModuleInfoClassFileEditorNoSource"; //$NON-NLS-1$
@@ -299,18 +299,18 @@ public final class JavaUI {
 	 * @since 3.15
 	 */
 	public static final String ID_COMPILER_COMPLIANCE_PROPERTY_PAGE= "org.eclipse.jdt.ui.propertyPages.CompliancePreferencePage"; //$NON-NLS-1$
-	
+
 	/**
 	 * @since 3.15
 	 */
 	public static final String ID_JAVA_BUILD_PREFERENCE_PROPERTY_PAGE= "org.eclipse.jdt.ui.propertyPages.JavaBuildPreferencePage"; //$NON-NLS-1$
-	
+
 	/**
 	 * The class org.eclipse.debug.core.model.IProcess allows attaching String properties to
 	 * processes. The Java UI contributes a property page for IProcess that will show the contents
 	 * of the property with this key. The intent of this property is to show the command line a
 	 * process was launched with.
-	 * 
+	 *
 	 * @deprecated As of 1.0
 	 */
 	@Deprecated

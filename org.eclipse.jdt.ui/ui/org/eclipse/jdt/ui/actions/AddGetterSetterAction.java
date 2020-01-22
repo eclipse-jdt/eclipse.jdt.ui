@@ -392,7 +392,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 
 	/**
 	 * Creates a key used in hash maps for a method signature (gettersettername+arguments(fqn)).
-	 * 
+	 *
 	 * @param methodName the method name
 	 * @param field the filed
 	 * @return the signature
@@ -924,7 +924,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		private boolean allowSettersForFinals() {
 			return fAllowSettersForFinals;
 		}
-		
+
 		@Override
 		protected Button createButton(Composite parent, int id, String label, boolean defaultButton) {
 			if(id == IDialogConstants.OK_ID) {
@@ -933,7 +933,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 				return super.createButton(parent, id, label, defaultButton);
 			}
 		}
-		
+
 		public void allowSettersForFinals(boolean allowSettersForFinals) {
 			if (fAllowSettersForFinals != allowSettersForFinals) {
 				fAllowSettersForFinals= allowSettersForFinals;

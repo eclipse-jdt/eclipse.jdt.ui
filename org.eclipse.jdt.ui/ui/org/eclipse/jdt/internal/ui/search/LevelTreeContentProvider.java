@@ -202,7 +202,7 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 
 	/**
 	 * Tries to remove the given element from the list of stored siblings.
-	 * 
+	 *
 	 * @param element potential child
 	 * @param parent potential parent
 	 * @return returns true if it really was a remove (i.e. element was a child of parent).
@@ -259,8 +259,9 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 		}
 
 		viewer.remove(toRemove.toArray());
-		for (Object parent : toAdd.keySet()) {
-			HashSet<Object> children= (HashSet<Object>) toAdd.get(parent);
+		for (Map.Entry<Object, Set<Object>> entry : toAdd.entrySet()) {
+			Object parent = entry.getKey();
+			HashSet<Object> children= (HashSet<Object>) entry.getValue();
 			viewer.add(parent, children.toArray());
 		}
 		for (Iterator<Object> elementsToUpdate= toUpdate.iterator(); elementsToUpdate.hasNext();) {

@@ -105,7 +105,7 @@ public class AddWordProposal implements IJavaCompletionProposal {
 
 	/**
 	 * Asks the user whether he wants to configure a user dictionary.
-	 * 
+	 *
 	 * @param shell the shell
 	 * @return <code>true</code> if the user wants to configure the user dictionary
 	 * @since 3.3

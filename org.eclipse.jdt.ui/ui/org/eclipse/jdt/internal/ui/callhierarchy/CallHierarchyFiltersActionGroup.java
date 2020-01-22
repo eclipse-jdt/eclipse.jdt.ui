@@ -55,13 +55,13 @@ public class CallHierarchyFiltersActionGroup extends ActionGroup {
     	ShowExpandWithConstructorsDialogAction() {
     		setText(CallHierarchyMessages.ShowExpandWithConstructorsDialogAction_text);
     	}
-    	
+
     	@Override
 		public void run() {
     		openExpandWithConstructorsDialog();
     	}
     }
-    
+
     private IViewPart fPart;
 
     /**
@@ -100,7 +100,7 @@ public class CallHierarchyFiltersActionGroup extends ActionGroup {
 
         dialog.open();
     }
-    
+
     private void openExpandWithConstructorsDialog() {
     	Shell parentShell= fPart.getViewSite().getShell();
 		new ExpandWithConstructorsDialog(parentShell).open();

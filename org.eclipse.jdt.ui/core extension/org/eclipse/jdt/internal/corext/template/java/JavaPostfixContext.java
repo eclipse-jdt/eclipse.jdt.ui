@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Nicolaj Hoess.
+ * Copyright (c) 2019, 2020 Nicolaj Hoess and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -164,9 +164,11 @@ public class JavaPostfixContext extends JavaContext {
 		ASTNode result= currentNode;
 		int currMax= getNodeBegin(currentNode) + getNodeLength(currentNode);
 		Set<ASTNode> nodes= nodeRegions.keySet();
+		int tokenLength= (completionCtx != null && completionCtx.getToken() != null) ? completionCtx.getToken().length : 0;
+		int invOffset= completionCtx != null ? completionCtx.getOffset() - tokenLength - 1 : getCompletionOffset();
 		for (ASTNode n : nodes) {
 			int end= getNodeBegin(n) + getNodeLength(n);
-			if (end > currMax && end <= getCompletionOffset()) {
+			if (end > currMax && end <= invOffset) {
 				currMax= end;
 				result= n;
 			}

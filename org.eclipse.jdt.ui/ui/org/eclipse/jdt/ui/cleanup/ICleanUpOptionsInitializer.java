@@ -16,14 +16,14 @@ package org.eclipse.jdt.ui.cleanup;
 
 /**
  * Initializes the default options for a clean up kind.
- * 
+ *
  * @since 3.5
  */
 public interface ICleanUpOptionsInitializer {
 
 	/**
 	 * Sets the default options of this initializer.
-	 * 
+	 *
 	 * @param options the clean up options
 	 */
 	public void setDefaultOptions(CleanUpOptions options);

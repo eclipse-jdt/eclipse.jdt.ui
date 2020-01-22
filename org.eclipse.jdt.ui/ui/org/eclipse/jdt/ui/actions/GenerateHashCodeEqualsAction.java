@@ -72,7 +72,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
  * @since 3.2
  */
 public final class GenerateHashCodeEqualsAction extends GenerateMethodAbstractAction {
-	
+
 	private static final String METHODNAME_HASH_CODE= "hashCode"; //$NON-NLS-1$
 	private static final String METHODNAME_EQUALS= "equals"; //$NON-NLS-1$
 
@@ -144,7 +144,7 @@ public final class GenerateHashCodeEqualsAction extends GenerateMethodAbstractAc
 		if (someType.isTypeVariable()) {
 			someType= someType.getErasure();
 		}
-		
+
 		while (true) {
 			for (IMethodBinding declaredMethod : someType.getDeclaredMethods()) {
 				if (declaredMethod.getName().equals(METHODNAME_EQUALS)) {
@@ -174,7 +174,7 @@ public final class GenerateHashCodeEqualsAction extends GenerateMethodAbstractAc
 				break;
 			}
 		}
-		
+
 		return info;
 	}
 
@@ -243,7 +243,7 @@ public final class GenerateHashCodeEqualsAction extends GenerateMethodAbstractAc
 				}
 			}
 		}
-		
+
 		ITypeBinding superclass= fTypeBinding.getSuperclass();
 		if (!"java.lang.Object".equals(superclass.getQualifiedName())) //$NON-NLS-1$
 			superClassInfo= getTypeInfo(superclass, true);

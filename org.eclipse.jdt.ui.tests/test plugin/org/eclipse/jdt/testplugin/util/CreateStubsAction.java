@@ -134,7 +134,7 @@ public final class CreateStubsAction implements IObjectActionDelegate {
 		final IStructuredSelection structuredSelection= (IStructuredSelection) selection;
 
 		Shell shell= fTargetPart.getSite().getShell();
-		String initialValue= JavaTestPlugin.getDefault().getDialogSettings().get(SETTINGS_ID_STUBS_PROJECT); //$NON-NLS-1$
+		String initialValue= JavaTestPlugin.getDefault().getDialogSettings().get(SETTINGS_ID_STUBS_PROJECT); 
 		if (initialValue == null)
 			initialValue = "stubs"; //$NON-NLS-1$
 		final InputDialog inputDialog= new InputDialog(shell, CREATE_STUBS_DIALOG_TITLE, "Target project name:", initialValue, new IInputValidator() { //$NON-NLS-1$
@@ -149,7 +149,7 @@ public final class CreateStubsAction implements IObjectActionDelegate {
 		try {
 
 			final String name= inputDialog.getValue();
-			JavaTestPlugin.getDefault().getDialogSettings().put(SETTINGS_ID_STUBS_PROJECT, name); //$NON-NLS-1$
+			JavaTestPlugin.getDefault().getDialogSettings().put(SETTINGS_ID_STUBS_PROJECT, name); 
 			long start= System.currentTimeMillis();
 
 			ArrayList<String> defaultPackages= new ArrayList<>(Arrays.asList(DEFAULT_PACKAGES));

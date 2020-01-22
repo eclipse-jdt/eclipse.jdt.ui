@@ -26,7 +26,7 @@ import org.eclipse.jdt.internal.corext.util.JDTUIHelperClasses;
  * @since 3.4
  */
 public class BasicElementLabels extends org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels {
-	
+
 	/**
 	 * Returns a label for a working set
 	 *

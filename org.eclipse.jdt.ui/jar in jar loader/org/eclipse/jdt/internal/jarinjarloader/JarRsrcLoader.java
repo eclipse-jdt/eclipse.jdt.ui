@@ -32,16 +32,16 @@ import java.util.jar.Manifest;
 /**
  * This class will be compiled into the binary jar-in-jar-loader.zip. This ZIP is used for the
  * "Runnable JAR File Exporter"
- * 
+ *
  * @since 3.5
  */
 public class JarRsrcLoader {
- 
+
 	private static class ManifestInfo {
 		String rsrcMainClass;
 		String[] rsrcClassPath;
 	}
-	
+
 	public static void main(String[] args) throws ClassNotFoundException, IllegalArgumentException, IllegalAccessException, InvocationTargetException, SecurityException, NoSuchMethodException, IOException {
 		ManifestInfo mi = getManifestInfo();
 		ClassLoader cl = Thread.currentThread().getContextClassLoader();
@@ -49,15 +49,15 @@ public class JarRsrcLoader {
 		URL[] rsrcUrls = new URL[mi.rsrcClassPath.length];
 		for (int i = 0; i < mi.rsrcClassPath.length; i++) {
 			String rsrcPath = mi.rsrcClassPath[i];
-			if (rsrcPath.endsWith(JIJConstants.PATH_SEPARATOR)) 
-				rsrcUrls[i] = new URL(JIJConstants.INTERNAL_URL_PROTOCOL_WITH_COLON + rsrcPath); 
+			if (rsrcPath.endsWith(JIJConstants.PATH_SEPARATOR))
+				rsrcUrls[i] = new URL(JIJConstants.INTERNAL_URL_PROTOCOL_WITH_COLON + rsrcPath);
 			else
-				rsrcUrls[i] = new URL(JIJConstants.JAR_INTERNAL_URL_PROTOCOL_WITH_COLON + rsrcPath + JIJConstants.JAR_INTERNAL_SEPARATOR);    
+				rsrcUrls[i] = new URL(JIJConstants.JAR_INTERNAL_URL_PROTOCOL_WITH_COLON + rsrcPath + JIJConstants.JAR_INTERNAL_SEPARATOR);
 		}
 		ClassLoader jceClassLoader = new URLClassLoader(rsrcUrls, getParentClassLoader());
 		Thread.currentThread().setContextClassLoader(jceClassLoader);
 		Class c = Class.forName(mi.rsrcMainClass, true, jceClassLoader);
-		Method main = c.getMethod(JIJConstants.MAIN_METHOD_NAME, new Class[]{args.getClass()}); 
+		Method main = c.getMethod(JIJConstants.MAIN_METHOD_NAME, new Class[]{args.getClass()});
 		main.invoke((Object)null, new Object[]{args});
 	}
 
@@ -78,7 +78,7 @@ public class JarRsrcLoader {
 
 	private static ManifestInfo getManifestInfo() throws IOException {
 		Enumeration resEnum;
-		resEnum = Thread.currentThread().getContextClassLoader().getResources(JarFile.MANIFEST_NAME); 
+		resEnum = Thread.currentThread().getContextClassLoader().getResources(JarFile.MANIFEST_NAME);
 		while (resEnum.hasMoreElements()) {
 			try {
 				URL url = (URL)resEnum.nextElement();
@@ -87,10 +87,10 @@ public class JarRsrcLoader {
 					ManifestInfo result = new ManifestInfo();
 					Manifest manifest = new Manifest(is);
 					Attributes mainAttribs = manifest.getMainAttributes();
-					result.rsrcMainClass = mainAttribs.getValue(JIJConstants.REDIRECTED_MAIN_CLASS_MANIFEST_NAME); 
-					String rsrcCP = mainAttribs.getValue(JIJConstants.REDIRECTED_CLASS_PATH_MANIFEST_NAME); 
+					result.rsrcMainClass = mainAttribs.getValue(JIJConstants.REDIRECTED_MAIN_CLASS_MANIFEST_NAME);
+					String rsrcCP = mainAttribs.getValue(JIJConstants.REDIRECTED_CLASS_PATH_MANIFEST_NAME);
 					if (rsrcCP == null)
-						rsrcCP = JIJConstants.DEFAULT_REDIRECTED_CLASSPATH; 
+						rsrcCP = JIJConstants.DEFAULT_REDIRECTED_CLASSPATH;
 					result.rsrcClassPath = splitSpaces(rsrcCP);
 					if ((result.rsrcMainClass != null) && !result.rsrcMainClass.trim().isEmpty())
 							return result;
@@ -107,12 +107,12 @@ public class JarRsrcLoader {
 	/**
 	 * JDK 1.3.1 does not support String.split(), so we have to do it manually. Skip all spaces
 	 * (tabs are not handled)
-	 * 
+	 *
 	 * @param line the line to split
 	 * @return array of strings
 	 */
 	private static String[] splitSpaces(String line) {
-		if (line == null) 
+		if (line == null)
 			return null;
 		List result = new ArrayList();
 		int firstPos = 0;
@@ -123,7 +123,7 @@ public class JarRsrcLoader {
 			if (lastPos > firstPos) {
 				result.add(line.substring(firstPos, lastPos));
 			}
-			firstPos = lastPos+1; 
+			firstPos = lastPos+1;
 		}
 		return (String[]) result.toArray(new String[result.size()]);
 	}

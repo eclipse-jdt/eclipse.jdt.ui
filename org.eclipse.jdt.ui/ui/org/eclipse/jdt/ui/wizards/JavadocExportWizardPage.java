@@ -140,7 +140,7 @@ public abstract class JavadocExportWizardPage {
 
 	/**
 	 * Called when the command line arguments are collected. Clients can add or modify arguments.
-	 * 
+	 *
 	 * @param vmOptions A {@link List} of {@link String} with the VM arguments.
 	 * @param toolOptions A {@link List} of {@link String} with the Javadoc tool arguments. See the
 	 *            <a href=
@@ -152,7 +152,7 @@ public abstract class JavadocExportWizardPage {
 
 	/**
 	 * Called when the Javadoc ANT script is generated.
-	 * 
+	 *
 	 * @param xmlDocument The XML element for the 'javadoc' node. Clients can add or modify
 	 *            arguments. See the <a
 	 *            href="http://ant.apache.org/manual/Tasks/javadoc.html">Javadoc ANT task</a>

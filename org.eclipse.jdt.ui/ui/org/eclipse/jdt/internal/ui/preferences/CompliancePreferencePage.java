@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -118,7 +118,7 @@ public class CompliancePreferencePage extends PropertyAndPreferencePage {
 			fConfigurationBlock.enablePreferenceContent(enable);
 		}
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.dialogs.DialogPage#setVisible(boolean)
 	 * @since 3.5

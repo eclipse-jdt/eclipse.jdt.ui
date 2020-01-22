@@ -35,12 +35,12 @@ public class JavaElementHistoryPageSource extends ElementLocalHistoryPageSource 
 	 * Returns true if the given IJavaElement maps to a JavaNode. The JavaHistoryAction uses this
 	 * function to determine whether a selected Java element can be replaced by some piece of code
 	 * from the local history.
-	 * 
+	 *
 	 * @param je the Java element
 	 * @return <code>true</code> if there are editions available for the given Java element,
 	 *         <code>false</code> otherwise
-	 * 
-	 * 
+	 *
+	 *
 	 */
 	public static boolean hasEdition(IJavaElement je) {
 

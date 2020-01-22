@@ -174,7 +174,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 		super(ignoreAll);
 		fJavaProject= project;
 		fCompilationUnit= cu;
-		
+
 		fIsTestCodeExcluded = cu != null && !isTestSource(project, cu);
 
 		fUserReplacementLength= -1;
@@ -182,7 +182,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 			setRequireExtendedContext(true);
 		}
 	}
-	
+
 	private boolean isTestSource(IJavaProject project, ICompilationUnit cu) {
 		try {
 			IClasspathEntry[] resolvedClasspath= project.getResolvedClasspath(true);

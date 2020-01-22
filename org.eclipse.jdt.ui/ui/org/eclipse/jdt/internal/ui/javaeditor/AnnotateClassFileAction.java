@@ -20,7 +20,7 @@ import org.eclipse.jface.text.source.SourceViewer;
 
 /**
  * Action to add external null annotations from a ClassFileEditor.
- * 
+ *
  * @see <a href="https://bugs.eclipse.org/458201">[null] Offer new command "Annotate" on
  *      ClassFileEditor</a>
  * @since 3.11

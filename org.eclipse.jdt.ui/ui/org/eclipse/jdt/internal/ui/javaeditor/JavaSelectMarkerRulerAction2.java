@@ -96,7 +96,7 @@ public class JavaSelectMarkerRulerAction2 extends SelectAnnotationRulerAction {
 
 	/**
 	 * Checks whether the given annotation is a breakpoint annotation.
-	 * 
+	 *
 	 * @param annotation the annotation
 	 * @return <code>true</code> if the annotation is a breakpoint annotation
 	 */

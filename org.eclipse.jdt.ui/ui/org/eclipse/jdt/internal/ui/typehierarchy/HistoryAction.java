@@ -69,7 +69,7 @@ public class HistoryAction extends Action {
 
 	/**
 	 * Fetches the label for the java element.
-	 * 
+	 *
 	 * @param element the java element
 	 * @return the label for the java element
 	 * @since 3.7
@@ -80,7 +80,7 @@ public class HistoryAction extends Action {
 
 	/**
 	 * Fetches the label for all the java elements.
-	 * 
+	 *
 	 * @param elements the java elements
 	 * @return the label for all the java elements
 	 * @since 3.7
@@ -105,7 +105,7 @@ public class HistoryAction extends Action {
 
 	/**
 	 * Fetches the short label for the java element.
-	 * 
+	 *
 	 * @param element the java element
 	 * @return the short label for the java element
 	 * @since 3.7

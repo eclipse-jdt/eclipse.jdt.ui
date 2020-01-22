@@ -67,7 +67,7 @@ public class AddTextBlockAction extends SelectionDispatchAction {
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * 
+	 *
 	 * @param editor the compilation unit editor
 	 *
 	 * @noreference This constructor is not intended to be referenced by clients.

@@ -395,7 +395,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			layout.marginLeft= 5;
 			layout.verticalSpacing= 2;
 			composite.setLayout(layout);
-			
+
 			List<Link> list= new ArrayList<>();
 			for (ICompletionProposal prop : proposals) {
 				list.add(createCompletionProposalLink(composite, prop, 1)); // Original link for single fix, hence pass 1 for count
@@ -491,7 +491,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 				layout.marginHeight= 0;
 				parent.setLayout(layout);
 			}
-			
+
 			Label proposalImage= new Label(parent, SWT.NONE);
 			proposalImage.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
 			Image image= isMultiFix ? JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_MULTI_FIX) : proposal.getImage();

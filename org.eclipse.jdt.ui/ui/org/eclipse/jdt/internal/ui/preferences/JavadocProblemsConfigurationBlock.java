@@ -181,16 +181,16 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 			GridData gd= new GridData();
 			gd.horizontalSpan= nColumns;
 			ignoreOptionalProblemsLink.setLayoutData(gd);
-			
+
 			spacer= new Composite(outer, SWT.NONE);
 			GridDataFactory.fillDefaults().span(nColumns, 1).hint(1, 5).applyTo(spacer);
 		}
-		
+
 		String label= PreferencesMessages.JavadocProblemsConfigurationBlock_pb_javadoc_support_label;
 		addCheckBox(outer, label, PREF_JAVADOC_SUPPORT, enabledDisabled, 0);
 
 		int indent= fPixelConverter.convertWidthInCharsToPixels(4);
-		
+
 		layout = new GridLayout();
 		layout.numColumns= nColumns;
 		layout.marginHeight= 0;
@@ -202,10 +202,10 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 		composite.setLayoutData(new GridData(GridData.FILL, GridData.FILL, false, true));
 
 		fJavadocComposite= composite;
-		
+
 		spacer= new Composite(composite, SWT.NONE);
 		GridDataFactory.fillDefaults().span(nColumns, 1).hint(1, 5).applyTo(spacer);
-		
+
 		Label description= new Label(composite, SWT.WRAP);
 		description.setText(PreferencesMessages.JavadocProblemsConfigurationBlock_javadoc_description);
 		GridData gd= new GridData();
@@ -258,7 +258,7 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 
 		label= PreferencesMessages.JavadocProblemsConfigurationBlock_pb_missing_comments_method_type_parameter_label;
 		addCheckBox(composite, label, PREF_PB_MISSING_JAVADOC_TAGS_METHOD_TYPE_PARAMETERS, disabledEnabled, indent);
-		
+
 
 		spacer= new Composite(composite, SWT.NONE);
 		GridDataFactory.fillDefaults().span(nColumns, 1).hint(1, 5).applyTo(spacer);

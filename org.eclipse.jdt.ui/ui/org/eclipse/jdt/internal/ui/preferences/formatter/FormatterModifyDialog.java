@@ -850,7 +850,7 @@ public class FormatterModifyDialog extends ModifyDialog {
 
 	private void createAlignOnColumnPrefs(Section parentSection) {
 		class CheckboxSpinnerPreference extends Preference<Button> {
-			
+
 			Spinner fSpinner;
 
 			CheckboxSpinnerPreference(Button checkbox, Spinner spinner, String label, String key) {
@@ -915,7 +915,7 @@ public class FormatterModifyDialog extends ModifyDialog {
 				DefaultCodeFormatterConstants.FORMATTER_ALIGN_VARIABLE_DECLARATIONS_ON_COLUMNS, CheckboxPreference.FALSE_TRUE);
 		final CheckboxPreference alignAssignmentsPref= fTree.addCheckbox(alignSection, FormatterMessages.FormatterModifyDialog_indentation_pref_align_assignment_statements_on_columns,
 				DefaultCodeFormatterConstants.FORMATTER_ALIGN_ASSIGNMENT_STATEMENTS_ON_COLUMNS, CheckboxPreference.FALSE_TRUE);
-		
+
 		fTree.addGap(alignSection);
 		final CheckboxPreference useSpacesPref= fTree.addCheckbox(alignSection, FormatterMessages.FormatterModifyDialog_indentation_pref_align_with_spaces,
 				DefaultCodeFormatterConstants.FORMATTER_ALIGN_WITH_SPACES, CheckboxPreference.FALSE_TRUE);
@@ -1560,10 +1560,10 @@ public class FormatterModifyDialog extends ModifyDialog {
 		Preference<?> javadocMaster= section.findChildPreference(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_JAVADOC_COMMENT);
 		Preference<?> blockMaster= section.findChildPreference(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_BLOCK_COMMENT);
 		Preference<?> headerMaster= section.findChildPreference(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HEADER);
-		
+
 		Predicate<String> javadocChecker= v -> javadocMaster.getValue().equals(DefaultCodeFormatterConstants.TRUE) || headerMaster.getValue().equals(DefaultCodeFormatterConstants.TRUE);
 		Predicate<String> blockChecker= v -> blockMaster.getValue().equals(DefaultCodeFormatterConstants.TRUE) || headerMaster.getValue().equals(DefaultCodeFormatterConstants.TRUE);
-		
+
 		List<PreferenceTreeNode<?>> mainItems= section.getChildren();
 		Function<String, Section> sectionFinder= key -> mainItems.stream().filter(n -> n instanceof Section)
 				.map(n -> (Section) n).filter(n -> n.getKey().endsWith(key)).findAny().get();
@@ -1725,7 +1725,7 @@ public class FormatterModifyDialog extends ModifyDialog {
 
 	/**
 	 * {@inheritDoc}
-	 * 
+	 *
 	 * @since 3.5
 	 */
 	@Override

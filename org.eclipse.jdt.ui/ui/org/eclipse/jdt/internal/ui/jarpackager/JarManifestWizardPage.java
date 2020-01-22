@@ -157,7 +157,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 
 	/**
 	 * Creates an instance of this class.
-	 * 
+	 *
 	 * @param jarPackage the JAR package data
 	 */
 	public JarManifestWizardPage(JarPackageData jarPackage) {
@@ -474,9 +474,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 			MainMethodSearchEngine engine= new MainMethodSearchEngine();
 			try {
 				fMainTypes= engine.searchMainMethods(getContainer(), searchScope, 0);
-			} catch (InvocationTargetException ex) {
-				// null
-			} catch (InterruptedException e) {
+			} catch (InvocationTargetException | InterruptedException ex) {
 				// null
 			}
 		}

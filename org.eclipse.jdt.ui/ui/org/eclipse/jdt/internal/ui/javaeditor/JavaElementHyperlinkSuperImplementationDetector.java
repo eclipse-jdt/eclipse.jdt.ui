@@ -31,7 +31,7 @@ import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 
 /**
  * Java element super implementation hyperlink detector for methods.
- * 
+ *
  * @since 3.7
  */
 public class JavaElementHyperlinkSuperImplementationDetector extends JavaElementHyperlinkDetector {
@@ -48,7 +48,7 @@ public class JavaElementHyperlinkSuperImplementationDetector extends JavaElement
 
 	/**
 	 * Indicates whether a method is overridden.
-	 * 
+	 *
 	 * @param method the method to check
 	 * @return <code>true</code> if the method is overridden, <code>false</code> otherwise
 	 */

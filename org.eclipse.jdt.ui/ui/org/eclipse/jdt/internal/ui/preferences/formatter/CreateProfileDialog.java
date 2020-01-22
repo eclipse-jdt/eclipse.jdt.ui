@@ -94,7 +94,7 @@ public class CreateProfileDialog extends StatusDialog {
 
 		final Composite composite= (Composite) super.createDialogArea(parent);
 		((GridLayout) composite.getLayout()).numColumns= numColumns;
-		
+
 		// Create "Profile name:" label
 		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = numColumns;

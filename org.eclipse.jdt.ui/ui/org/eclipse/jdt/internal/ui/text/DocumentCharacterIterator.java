@@ -47,7 +47,7 @@ public class DocumentCharacterIterator implements CharacterIterator, CharSequenc
 
 	/**
 	 * Creates an iterator for the entire document.
-	 * 
+	 *
 	 * @param document the document backing this iterator
 	 * @throws BadLocationException if the indices are out of bounds
 	 */
@@ -57,7 +57,7 @@ public class DocumentCharacterIterator implements CharacterIterator, CharSequenc
 
 	/**
 	 * Creates an iterator, starting at offset <code>first</code>.
-	 * 
+	 *
 	 * @param document the document backing this iterator
 	 * @param first the first character to consider
 	 * @throws BadLocationException if the indices are out of bounds
@@ -69,7 +69,7 @@ public class DocumentCharacterIterator implements CharacterIterator, CharSequenc
 	/**
 	 * Creates an iterator for the document contents from <code>first</code> (inclusive) to
 	 * <code>last</code> (exclusive).
-	 * 
+	 *
 	 * @param document the document backing this iterator
 	 * @param first the first character to consider
 	 * @param last the last character index to consider

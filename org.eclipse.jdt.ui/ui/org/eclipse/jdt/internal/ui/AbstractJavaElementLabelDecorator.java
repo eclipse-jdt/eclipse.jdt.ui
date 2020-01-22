@@ -93,7 +93,7 @@ public abstract class AbstractJavaElementLabelDecorator implements ILightweightL
 			fChangeListener= null;
 		}
 	}
-	
+
 	private void fireChange(IJavaElement[] elements) {
 		if (fListeners != null && !fListeners.isEmpty()) {
 			LabelProviderChangedEvent event= new LabelProviderChangedEvent(this, elements);

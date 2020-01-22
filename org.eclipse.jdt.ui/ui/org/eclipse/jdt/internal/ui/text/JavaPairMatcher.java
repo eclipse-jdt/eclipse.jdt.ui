@@ -84,7 +84,7 @@ public final class JavaPairMatcher extends DefaultCharacterPairMatcher implement
 	/**
 	 * Returns <code>true</code> if the character at the specified offset is a less-than sign, rather than
 	 * the opening angle bracket of a type parameter list.
-	 * 
+	 *
 	 * @param document a document
 	 * @param offset an offset within the document
 	 * @return <code>true</code> if the character at the specified offset is a less-than sign
@@ -102,7 +102,7 @@ public final class JavaPairMatcher extends DefaultCharacterPairMatcher implement
 
 	/**
 	 * Checks if the angular bracket at <code>offset</code> is a type parameter opening bracket.
-	 * 
+	 *
 	 * @param offset the offset of the opening bracket
 	 * @param document the document
 	 * @param scanner a java heuristic scanner on <code>document</code>
@@ -142,7 +142,7 @@ public final class JavaPairMatcher extends DefaultCharacterPairMatcher implement
 	/**
 	 * Returns true if the character at the specified offset is a greater-than sign, rather than an
 	 * type parameter list close angle bracket.
-	 * 
+	 *
 	 * @param document a document
 	 * @param offset an offset within the document
 	 * @return true if the character at the specified offset is a greater-than sign
@@ -161,7 +161,7 @@ public final class JavaPairMatcher extends DefaultCharacterPairMatcher implement
 
 	/**
 	 * Checks if the angular bracket at <code>offset</code> is a type parameter closing bracket.
-	 * 
+	 *
 	 * @param offset the offset of the closing bracket
 	 * @param document the document
 	 * @param scanner a java heuristic scanner on <code>document</code>

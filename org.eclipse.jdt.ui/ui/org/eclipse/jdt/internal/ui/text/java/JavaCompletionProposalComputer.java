@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -53,6 +53,7 @@ import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
+import org.eclipse.jdt.internal.ui.text.CompletionTimeoutProgressMonitor;
 import org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner;
 import org.eclipse.jdt.internal.ui.text.Symbols;
 
@@ -130,14 +131,12 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 		}
 	}
 
-	private static final long JAVA_CODE_ASSIST_TIMEOUT= Long.getLong("org.eclipse.jdt.ui.codeAssistTimeout", 5000).longValue(); // ms //$NON-NLS-1$
-
 	private String fErrorMessage;
 
 	private final IProgressMonitor fTimeoutProgressMonitor;
 
 	public JavaCompletionProposalComputer() {
-		fTimeoutProgressMonitor= createTimeoutProgressMonitor(JAVA_CODE_ASSIST_TIMEOUT);
+		fTimeoutProgressMonitor= new CompletionTimeoutProgressMonitor();
 	}
 
 	protected int guessContextInformationPosition(ContentAssistInvocationContext context) {
@@ -297,47 +296,6 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 			}
 		}
 		return proposals;
-	}
-
-	/**
-	 * Returns a new progress monitor that get cancelled after the given timeout.
-	 *
-	 * @param timeout the timeout in ms
-	 * @return the progress monitor
-	 * @since 3.5
-	 */
-	private IProgressMonitor createTimeoutProgressMonitor(final long timeout) {
-		return new IProgressMonitor() {
-
-			private long fEndTime;
-
-			@Override
-			public void beginTask(String name, int totalWork) {
-				fEndTime= System.currentTimeMillis() + timeout;
-			}
-			@Override
-			public boolean isCanceled() {
-				return fEndTime <= System.currentTimeMillis();
-			}
-			@Override
-			public void done() {
-			}
-			@Override
-			public void internalWorked(double work) {
-			}
-			@Override
-			public void setCanceled(boolean value) {
-			}
-			@Override
-			public void setTaskName(String name) {
-			}
-			@Override
-			public void subTask(String name) {
-			}
-			@Override
-			public void worked(int work) {
-			}
-		};
 	}
 
 	/**

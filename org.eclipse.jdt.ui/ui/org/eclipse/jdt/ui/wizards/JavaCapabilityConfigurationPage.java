@@ -268,7 +268,7 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 	public void configureJavaProject(IProgressMonitor monitor) throws CoreException, InterruptedException {
 		configureJavaProject(null, monitor);
 	}
-	
+
 	/**
 	 * Adds the Java nature to the project (if not set yet) and configures the build classpath.
 	 *

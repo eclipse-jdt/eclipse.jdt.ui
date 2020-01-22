@@ -75,7 +75,7 @@ public class FilteredPreferenceTree {
 
 	/**
 	 * A node in <code>FilteredPreferenceTree</code>.
-	 * 
+	 *
 	 * @param <T> type of the node's main control
 	 */
 	public static class PreferenceTreeNode<T extends Control> {
@@ -122,7 +122,7 @@ public class FilteredPreferenceTree {
 		 * The <code>label</code> and the <code>key</code> must not be <code>null</code> if the node
 		 * has a corresponding UI control.
 		 * </p>
-		 * 
+		 *
 		 * @param label the label text
 		 * @param control the control associated with this node,
 		 * @param showAllChildren tells whether all children should be shown even if just one child
@@ -466,7 +466,7 @@ public class FilteredPreferenceTree {
 
 	/**
 	 * Return the time delay that should be used when scheduling the filter refresh job.
-	 * 
+	 *
 	 * @return a time delay in milliseconds before the job should run
 	 */
 	private long getRefreshJobDelay() {

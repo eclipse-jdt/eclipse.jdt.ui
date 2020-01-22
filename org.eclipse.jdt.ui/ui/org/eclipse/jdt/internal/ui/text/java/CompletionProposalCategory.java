@@ -68,7 +68,7 @@ public final class CompletionProposalCategory {
 	private final IConfigurationElement fElement;
 	/** The image descriptor for this category, or <code>null</code> if none specified. */
 	private final ImageDescriptor fImage;
-	
+
 	/** The enablement expression for this category, or <code>null</code> if none specified. */
 	private final Expression fEnablementExpression;
 
@@ -84,7 +84,7 @@ public final class CompletionProposalCategory {
 	 * Flag indicating whether any completion engine associated with this category requests
 	 * resorting of its proposals after filtering is triggered. Filtering is, e.g., triggered when a
 	 * user continues typing with an open completion window.
-	 * 
+	 *
 	 * @since 3.8
 	 */
 	private boolean fNeedsSortingAfterFiltering;
@@ -100,7 +100,7 @@ public final class CompletionProposalCategory {
 			fName= fId;
 		else
 			fName= name;
-		
+
 		IConfigurationElement[] children= fElement.getChildren(ExpressionTagNames.ENABLEMENT);
 		if (children.length == 1) {
 			ExpressionConverter parser= ExpressionConverter.getDefault();
@@ -109,7 +109,7 @@ public final class CompletionProposalCategory {
 		else {
 			fEnablementExpression = null;
 		}
-		
+
 		String icon= element.getAttribute(ICON);
 		ImageDescriptor img= null;
 		if (icon != null) {
@@ -175,7 +175,7 @@ public final class CompletionProposalCategory {
 
 	/**
 	 * Returns the enablement element of the described extension.
-	 * 
+	 *
 	 * @return the enablement expression or <code>null</code> if it is not specified
 	 * @since 3.8.1
 	 */
@@ -289,10 +289,10 @@ public final class CompletionProposalCategory {
 	public void setSortOrder(int sortOrder) {
 		fSortOrder= sortOrder;
 	}
-	
+
 	/**
 	 * Determines if the project matches any enablement expression defined on the extension.
-	 * 
+	 *
 	 * @param javaProject the Java project against which to test the enablement expression, can be
 	 *            <code>null</code>
 	 * @return <code>true</code> if any enablement expression matches the given project or if the
@@ -304,11 +304,11 @@ public final class CompletionProposalCategory {
 		if (fEnablementExpression == null) {
 			return true;
 		}
-		
+
 		if (javaProject == null) {
 			return false;
 		}
-		
+
 		try {
 			EvaluationContext evalContext= new EvaluationContext(null, javaProject);
 			evalContext.addVariable("project", javaProject); //$NON-NLS-1$
@@ -316,7 +316,7 @@ public final class CompletionProposalCategory {
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
 		}
-		
+
 		return false;
 	}
 
@@ -409,7 +409,7 @@ public final class CompletionProposalCategory {
 	/**
 	 * Returns whether any completion proposal computer associated with this category requires
 	 * proposals to be sorted again after filtering.
-	 * 
+	 *
 	 * @return <code>true</code> if any completion proposal computer in this category requires
 	 *         proposals to be sorted.
 	 */

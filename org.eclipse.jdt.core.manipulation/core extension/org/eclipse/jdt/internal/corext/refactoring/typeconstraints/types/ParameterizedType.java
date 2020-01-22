@@ -141,9 +141,8 @@ public final class ParameterizedType extends HierarchyType {
 			if (result != null)
 				return result;
 		}
-		TType[] interfaces= getInterfaces();
-		for (int i= 0; i < interfaces.length; i++) {
-			type= interfaces[i];
+		for (TType intf : getInterfaces()) {
+			type= intf;
 			if (type != null && type.getKind() == PARAMETERIZED_TYPE) {
 				result= ((ParameterizedType)type).findSameDeclaration(targetDeclaration);
 				if (result != null)

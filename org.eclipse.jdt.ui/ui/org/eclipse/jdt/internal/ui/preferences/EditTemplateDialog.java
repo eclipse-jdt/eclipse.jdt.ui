@@ -639,7 +639,7 @@ public class EditTemplateDialog extends StatusDialog {
 	 * <p>
 	 * This implementation rejects invalid XML characters.
 	 * </p>
-	 * 
+	 *
 	 * @param pattern the pattern to verify
 	 * @return <code>true</code> if the pattern is valid
 	 * @since 3.6
@@ -655,7 +655,7 @@ public class EditTemplateDialog extends StatusDialog {
 
 	/**
 	 * Checks whether the given string is a valid template name.
-	 * 
+	 *
 	 * @param name the string to test
 	 * @return <code>true</code> if the name is valid
 	 * @since 3.3.1

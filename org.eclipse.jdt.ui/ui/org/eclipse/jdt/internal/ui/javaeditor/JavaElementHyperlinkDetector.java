@@ -104,7 +104,7 @@ public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 
 			if (JavaElementHyperlinkDetector.class == getClass() && findBreakOrContinueTarget(input, region) != null)
 				return new IHyperlink[] { new JavaElementHyperlink(wordRegion, (SelectionDispatchAction)openAction, null, false) };
-			
+
 			if (JavaElementHyperlinkDetector.class == getClass() && findSwitchCaseTarget(input, region) != null)
 				return new IHyperlink[] { new JavaElementHyperlink(wordRegion, (SelectionDispatchAction) openAction, null, false) };
 
@@ -122,21 +122,21 @@ public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 			}
 			if (elements.length == 0)
 				return null;
-			
+
 			ArrayList<IHyperlink> links= new ArrayList<>(elements.length);
 			for (IJavaElement element : elements) {
 				addHyperlinks(links, wordRegion, (SelectionDispatchAction)openAction, element, elements.length > 1, (JavaEditor)textEditor);
 			}
 			if (links.size() == 0)
 				return null;
-			
+
 			return CollectionsUtil.toArray(links, IHyperlink.class);
 
 		} catch (JavaModelException e) {
 			return null;
 		}
 	}
-	
+
 	@Override
 	public void dispose() {
 		super.dispose();
@@ -147,7 +147,7 @@ public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 
 	/**
 	 * Returns whether the word is "inheritDoc".
-	 * 
+	 *
 	 * @param document the document
 	 * @param wordRegion the word region
 	 * @return <code>true</code> iff the word is "inheritDoc"
@@ -164,7 +164,7 @@ public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 
 	/**
 	 * Creates and adds Java element hyperlinks.
-	 * 
+	 *
 	 * @param hyperlinksCollector the list to which hyperlinks should be added
 	 * @param wordRegion the region of the link
 	 * @param openAction the action to use to open the Java elements
@@ -172,7 +172,7 @@ public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 	 * @param qualify <code>true</code> if the hyperlink text should show a qualified name for
 	 *            element
 	 * @param editor the active Java editor
-	 * 
+	 *
 	 * @since 3.5
 	 */
 	protected void addHyperlinks(List<IHyperlink> hyperlinksCollector, IRegion wordRegion, SelectionDispatchAction openAction, IJavaElement element, boolean qualify, JavaEditor editor) {
@@ -207,7 +207,7 @@ public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 
 	/**
 	 * Finds the target for break or continue node.
-	 * 
+	 *
 	 * @param input the editor input
 	 * @param region the region
 	 * @return the break or continue target location or <code>null</code> if none
@@ -248,7 +248,7 @@ public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 
 	/**
 	 * Finds the target for switch-case node.
-	 * 
+	 *
 	 * @param input the editor input
 	 * @param region the region
 	 * @return the switch-case target location or <code>null</code> if none

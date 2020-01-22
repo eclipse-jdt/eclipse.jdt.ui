@@ -476,8 +476,7 @@ public class JavaElementLabelComposerCore {
 
 
 	protected void appendAnnotationLabels(IAnnotation[] annotations, long flags) throws JavaModelException {
-		for (int j= 0; j < annotations.length; j++) {
-			IAnnotation annotation= annotations[j];
+		for (IAnnotation annotation : annotations) {
 			appendAnnotationLabel(annotation, flags);
 			fBuffer.append(' ');
 		}

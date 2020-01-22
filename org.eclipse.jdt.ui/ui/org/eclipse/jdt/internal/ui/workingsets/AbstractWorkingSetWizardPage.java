@@ -37,10 +37,10 @@ import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -54,6 +54,7 @@ import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.IWorkingSetPage;
+
 
 /**
  * A tree viewer on the left is used to show the workspace content, a table viewer on the
@@ -405,22 +406,8 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 
 		configureTable(fTable);
 
-		fTable.setContentProvider(new IStructuredContentProvider() {
-
-			@Override
-			public Object[] getElements(Object inputElement) {
-				return fSelectedElements.toArray();
-			}
-
-			@Override
-			public void dispose() {
-			}
-
-			@Override
-			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-			}
-
-		});
+		fTable.setContentProvider(ArrayContentProvider.getInstance());
+		fTable.setInput(fSelectedElements);
 	}
 
 	/*

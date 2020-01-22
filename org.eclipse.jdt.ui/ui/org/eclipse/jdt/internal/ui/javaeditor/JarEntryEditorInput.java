@@ -60,7 +60,7 @@ public class JarEntryEditorInput implements IStorageEditorInput {
 	public int hashCode() {
 		return fJarEntryFile.hashCode();
 	}
-	
+
 	/*
 	 * @see IEditorInput#getPersistable()
 	 */

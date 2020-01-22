@@ -76,11 +76,11 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Java element implementation hyperlink.
- * 
+ *
  * @since 3.5
  */
 public class JavaElementImplementationHyperlink implements IHyperlink {
-	
+
 	private final IRegion fRegion;
 	private final SelectionDispatchAction fOpenAction;
 	private final IJavaElement fElement;
@@ -93,7 +93,7 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 
 	/**
 	 * Creates a new Java element implementation hyperlink for types and methods.
-	 * 
+	 *
 	 * @param region the region of the link
 	 * @param openAction the action to use to open the java elements
 	 * @param javaElement the element (type or method) to open
@@ -152,7 +152,7 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 	 * If there's only one implementor that element is opened in the editor, otherwise the Quick
 	 * Hierarchy is opened.
 	 * </p>
-	 * 
+	 *
 	 * @param editor the editor
 	 * @param region the region of the selection
 	 * @param javaElement the method or type
@@ -335,7 +335,7 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 
 	/**
 	 * Checks whether or not a method can be overridden.
-	 * 
+	 *
 	 * @param method the method
 	 * @return <code>true</code> if the method cannot be overridden, <code>false</code> otherwise
 	 * @throws JavaModelException if this element does not exist or if an exception occurs while
@@ -349,7 +349,7 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 
 	/**
 	 * Checks whether a full type hierarchy is needed to search for implementors.
-	 * 
+	 *
 	 * @param monitor the progress monitor
 	 * @param method the method
 	 * @param receiverType the receiver type

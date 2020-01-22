@@ -100,13 +100,13 @@ public class JavaMergeViewer extends TextMergeViewer {
 	public JavaMergeViewer(Composite parent, int styles, CompareConfiguration mp) {
 		super(parent, styles | SWT.LEFT_TO_RIGHT, mp);
 	}
-	
+
 	private IPreferenceStore getPreferenceStore() {
 		if (fPreferenceStore == null)
 			setPreferenceStore(createChainedPreferenceStore(null));
 		return fPreferenceStore;
 	}
-	
+
 	@Override
 	protected void handleDispose(DisposeEvent event) {
 		setPreferenceStore(null);
@@ -231,7 +231,7 @@ public class JavaMergeViewer extends TextMergeViewer {
 				((CompilationUnitEditorAdapter)editor).setEditable(state);
 		}
 	}
-	
+
 	/*
 	 * @see org.eclipse.compare.contentmergeviewer.TextMergeViewer#isEditorBacked(org.eclipse.jface.text.ITextViewer)
 	 * @since 3.5
@@ -468,7 +468,7 @@ public class JavaMergeViewer extends TextMergeViewer {
 			fPreferenceStore.addPropertyChangeListener(fPreferenceChangeListener);
 		}
 	}
-	
+
 	/*
 	 * @see org.eclipse.compare.contentmergeviewer.TextMergeViewer#createSourceViewer(org.eclipse.swt.widgets.Composite, int)
 	 * @since 3.5
@@ -495,7 +495,7 @@ public class JavaMergeViewer extends TextMergeViewer {
 
 		return sourceViewer;
 	}
-	
+
 	@Override
 	protected void setActionsActivated(SourceViewer sourceViewer, boolean state) {
 		if (fEditor != null) {
@@ -528,7 +528,7 @@ public class JavaMergeViewer extends TextMergeViewer {
 			}
 		}
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T getAdapter(Class<T> adapter) {
@@ -549,7 +549,7 @@ public class JavaMergeViewer extends TextMergeViewer {
 		private boolean fInputSet = false;
 		private int fTextOrientation;
 		private boolean fEditable;
-		
+
 		CompilationUnitEditorAdapter(int textOrientation) {
 			super();
 			fTextOrientation = textOrientation;
@@ -591,7 +591,7 @@ public class JavaMergeViewer extends TextMergeViewer {
 				protected void handleDispose() {
 					super.handleDispose();
 
-					// dispose the compilation unit adapter 
+					// dispose the compilation unit adapter
 					dispose();
 
 					fEditor.remove(this);
@@ -650,17 +650,13 @@ public class JavaMergeViewer extends TextMergeViewer {
 		Field field= null;
 		try {
 			field= AbstractTextEditor.class.getDeclaredField("fSourceViewer"); //$NON-NLS-1$
-		} catch (SecurityException ex) {
-			JavaPlugin.log(ex);
-		} catch (NoSuchFieldException ex) {
+		} catch (SecurityException | NoSuchFieldException ex) {
 			JavaPlugin.log(ex);
 		}
 		field.setAccessible(true);
 		try {
 			field.set(editor, viewer);
-		} catch (IllegalArgumentException ex) {
-			JavaPlugin.log(ex);
-		} catch (IllegalAccessException ex) {
+		} catch (IllegalArgumentException | IllegalAccessException ex) {
 			JavaPlugin.log(ex);
 		}
 	}

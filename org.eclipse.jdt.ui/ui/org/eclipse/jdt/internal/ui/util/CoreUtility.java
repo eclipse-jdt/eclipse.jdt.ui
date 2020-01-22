@@ -191,7 +191,7 @@ public class CoreUtility {
 	/**
 	 * Sets whether building automatically is enabled in the workspace or not and returns the old
 	 * value.
-	 * 
+	 *
 	 * @param state <code>true</code> if automatically building is enabled, <code>false</code>
 	 *            otherwise
 	 * @return the old state

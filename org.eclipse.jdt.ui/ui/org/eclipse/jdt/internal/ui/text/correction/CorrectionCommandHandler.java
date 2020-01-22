@@ -74,7 +74,7 @@ public class CorrectionCommandHandler extends AbstractHandler {
 
 	/**
 	 * Try to execute the correction command.
-	 * 
+	 *
 	 * @return <code>true</code> iff the correction could be started
 	 * @since 3.6
 	 */

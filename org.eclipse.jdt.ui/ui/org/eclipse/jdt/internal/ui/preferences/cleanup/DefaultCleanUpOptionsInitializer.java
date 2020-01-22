@@ -22,7 +22,7 @@ import org.eclipse.jdt.ui.cleanup.ICleanUpOptionsInitializer;
 
 /**
  * The clean up initializer for clean up mode.
- * 
+ *
  * @since 3.5
  */
 public class DefaultCleanUpOptionsInitializer implements ICleanUpOptionsInitializer {

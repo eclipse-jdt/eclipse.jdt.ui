@@ -57,7 +57,7 @@ public class CleanUpModifyDialog extends ModifyDialog {
 
 	private final List<IModifyDialogTabPage> fTabPages= new ArrayList<>();
 	private TabFolder fTabFolder;
-	
+
 	private final String fKeyLastFocus;
 
 	/**
@@ -136,7 +136,7 @@ public class CleanUpModifyDialog extends ModifyDialog {
 			fPages[i]= page;
 		}
 	}
-	
+
 	private final void addTabPage(String title, IModifyDialogTabPage tabPage) {
 		final TabItem tabItem= new TabItem(fTabFolder, SWT.NONE);
 		applyDialogFont(tabItem.getControl());

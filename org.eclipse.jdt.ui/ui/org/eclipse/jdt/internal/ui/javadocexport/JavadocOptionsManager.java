@@ -420,7 +420,7 @@ public class JavadocOptionsManager {
 		String extraOptions= element.getAttribute(EXTRAOPTIONS);
 		if (extraOptions.length() > 0) {
 			ExecutionArguments tokens= new ExecutionArguments("", extraOptions); //$NON-NLS-1$
-			
+
 			boolean vmarg= false;
 			for (String curr : tokens.getProgramArgumentsArray()) {
 				if (curr.length() > 0 && curr.charAt(0) == '-') {
@@ -870,10 +870,7 @@ public class JavadocOptionsManager {
 			objectStreamOutput= new FileOutputStream(file);
 			JavadocWriter.writeDocument(javadocElement, encoding, objectStreamOutput);
 			return file;
-		} catch (IOException e) {
-			String message= JavadocExportMessages.JavadocOptionsManager_createXM_error;
-			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, message, e));
-		} catch (TransformerException e) {
+		} catch (IOException | TransformerException e) {
 			String message= JavadocExportMessages.JavadocOptionsManager_createXM_error;
 			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, message, e));
 		} finally {

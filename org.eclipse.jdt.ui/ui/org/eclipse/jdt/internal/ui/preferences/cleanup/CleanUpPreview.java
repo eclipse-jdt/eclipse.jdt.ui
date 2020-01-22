@@ -95,7 +95,7 @@ public class CleanUpPreview extends JavaPreview {
 			if (formatter instanceof IContentFormatterExtension) {
 				final IContentFormatterExtension extension = (IContentFormatterExtension) formatter;
 				context.setProperty(FormattingContextProperties.CONTEXT_PREFERENCES, JavaCore.getOptions());
-				context.setProperty(FormattingContextProperties.CONTEXT_DOCUMENT, Boolean.valueOf(true));
+				context.setProperty(FormattingContextProperties.CONTEXT_DOCUMENT, Boolean.TRUE);
 				extension.format(fPreviewDocument, context);
 			} else
 				formatter.format(fPreviewDocument, new Region(0, fPreviewDocument.getLength()));

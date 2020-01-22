@@ -178,7 +178,7 @@ public class Checks {
 	 */
 	public static RefactoringStatus checkTypeName(String name, IJavaElement context) {
 		//fix for: 1GF5Z0Z: ITPJUI:WINNT - assertion failed after renameType refactoring
-		if (name.indexOf(".") != -1) //$NON-NLS-1$
+		if (name.contains(".")) //$NON-NLS-1$
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.Checks_no_dot);
 		else
 			return checkName(name, JavaConventionsUtil.validateJavaTypeName(name, context));
@@ -273,8 +273,9 @@ public class Checks {
 
 	public static RefactoringStatus checkForMainAndNativeMethods(IType[] types) throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
-		for (int i= 0; i < types.length; i++)
-			result.merge(checkForMainAndNativeMethods(types[i]));
+		for (IType type : types) {
+			result.merge(checkForMainAndNativeMethods(type));
+		}
 		return result;
 	}
 
@@ -287,18 +288,17 @@ public class Checks {
 
 	private static RefactoringStatus checkForMainAndNativeMethods(IMethod[] methods) throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
-		for (int i= 0; i < methods.length; i++) {
-			if (JdtFlags.isNative(methods[i])){
-				String typeName= JavaElementLabelsCore.getElementLabel(methods[i].getDeclaringType(), JavaElementLabelsCore.ALL_FULLY_QUALIFIED);
-				String methodName= JavaElementLabelsCore.getElementLabel(methods[i], JavaElementLabelsCore.ALL_DEFAULT);
+		for (IMethod method : methods) {
+			if (JdtFlags.isNative(method)) {
+				String typeName= JavaElementLabelsCore.getElementLabel(method.getDeclaringType(), JavaElementLabelsCore.ALL_FULLY_QUALIFIED);
+				String methodName= JavaElementLabelsCore.getElementLabel(method, JavaElementLabelsCore.ALL_DEFAULT);
 				String msg= Messages.format(RefactoringCoreMessages.Checks_method_native,
-								new String[]{typeName, methodName, "UnsatisfiedLinkError"});//$NON-NLS-1$
-				result.addEntry(RefactoringStatus.ERROR, msg, JavaStatusContext.create(methods[i]), JavaManipulation.getPreferenceNodeId(), RefactoringStatusCodes.NATIVE_METHOD);
+					new String[]{typeName, methodName, "UnsatisfiedLinkError"});//$NON-NLS-1$
+				result.addEntry(RefactoringStatus.ERROR, msg, JavaStatusContext.create(method), JavaManipulation.getPreferenceNodeId(), RefactoringStatusCodes.NATIVE_METHOD);
 			}
-			if (methods[i].isMainMethod()) {
-				String msg= Messages.format(RefactoringCoreMessages.Checks_has_main,
-						JavaElementLabelsCore.getElementLabel(methods[i].getDeclaringType(), JavaElementLabelsCore.ALL_FULLY_QUALIFIED));
-				result.addEntry(RefactoringStatus.WARNING, msg, JavaStatusContext.create(methods[i]), JavaManipulation.getPreferenceNodeId(), RefactoringStatusCodes.MAIN_METHOD);
+			if (method.isMainMethod()) {
+				String msg= Messages.format(RefactoringCoreMessages.Checks_has_main, JavaElementLabelsCore.getElementLabel(method.getDeclaringType(), JavaElementLabelsCore.ALL_FULLY_QUALIFIED));
+				result.addEntry(RefactoringStatus.WARNING, msg, JavaStatusContext.create(method), JavaManipulation.getPreferenceNodeId(), RefactoringStatusCodes.MAIN_METHOD);
 			}
 		}
 		return result;
@@ -544,8 +544,7 @@ public class Checks {
 	 */
 	public static IMethod findSimilarMethod(IMethod method, IMethod[] methods) throws JavaModelException {
 		boolean isConstructor= method.isConstructor();
-		for (int i= 0; i < methods.length; i++) {
-			IMethod otherMethod= methods[i];
+		for (IMethod otherMethod : methods) {
 			if (otherMethod.isConstructor() == isConstructor && method.isSimilar(otherMethod))
 				return otherMethod;
 		}
@@ -595,8 +594,8 @@ public class Checks {
 	public static SearchResultGroup[] excludeCompilationUnits(SearchResultGroup[] grouped, RefactoringStatus status) throws JavaModelException{
 		List<SearchResultGroup> result= new ArrayList<>();
 		boolean wasEmpty= grouped.length == 0;
-		for (int i= 0; i < grouped.length; i++){
-			IResource resource= grouped[i].getResource();
+		for (SearchResultGroup g : grouped) {
+			IResource resource= g.getResource();
 			IJavaElement element= JavaCore.create(resource);
 			if (! (element instanceof ICompilationUnit))
 				continue;
@@ -606,7 +605,7 @@ public class Checks {
 				status.addError(Messages.format(RefactoringCoreMessages.Checks_cannot_be_parsed, BasicElementLabels.getPathLabel(cu.getPath(), false)));
 				continue; //removed, go to the next one
 			}
-			result.add(grouped[i]);
+			result.add(g);
 		}
 
 		if ((!wasEmpty) && result.isEmpty())
@@ -617,8 +616,9 @@ public class Checks {
 
 	public static RefactoringStatus checkCompileErrorsInAffectedFiles(SearchResultGroup[] grouped) throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
-		for (int i= 0; i < grouped.length; i++)
-			checkCompileErrorsInAffectedFile(result, grouped[i].getResource());
+		for (SearchResultGroup g : grouped) {
+			checkCompileErrorsInAffectedFile(result, g.getResource());
+		}
 		return result;
 	}
 
@@ -629,8 +629,8 @@ public class Checks {
 
 	public static RefactoringStatus checkCompileErrorsInAffectedFiles(SearchResultGroup[] references, IResource declaring) throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
-		for (int i= 0; i < references.length; i++){
-			IResource resource= references[i].getResource();
+		for (SearchResultGroup reference : references) {
+			IResource resource= reference.getResource();
 			if (resource.equals(declaring))
 				declaring= null;
 			checkCompileErrorsInAffectedFile(result, resource);
@@ -642,10 +642,10 @@ public class Checks {
 
 	private static boolean hasCompileErrors(IResource resource) throws JavaModelException {
 		try {
-			IMarker[] problemMarkers= resource.findMarkers(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, true, IResource.DEPTH_INFINITE);
-			for (int i= 0; i < problemMarkers.length; i++) {
-				if (problemMarkers[i].getAttribute(IMarker.SEVERITY, -1) == IMarker.SEVERITY_ERROR)
+			for (IMarker problemMarker : resource.findMarkers(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, true, IResource.DEPTH_INFINITE)) {
+				if (problemMarker.getAttribute(IMarker.SEVERITY, -1) == IMarker.SEVERITY_ERROR) {
 					return true;
+				}
 			}
 			return false;
 		} catch (JavaModelException e){
@@ -680,10 +680,10 @@ public class Checks {
 
 		IContainer container= (IContainer)res;
 		try {
-			IResource[] children= container.members();
-			for (int i= 0; i < children.length; i++) {
-				if (isReadOnly(children[i]))
+			for (IResource child : container.members()) {
+				if (isReadOnly(child)) {
 					return true;
+				}
 			}
 			return false;
 		} catch (JavaModelException e){
@@ -726,8 +726,8 @@ public class Checks {
 		ResourceChangeChecker checker= context.getChecker(ResourceChangeChecker.class);
 		IResourceChangeDescriptionFactory deltaFactory= checker.getDeltaFactory();
 
-		for (int i= 0; i < filesToModify.length; i++) {
-			deltaFactory.change(filesToModify[i]);
+		for (IFile file : filesToModify) {
+			deltaFactory.change(file);
 		}
 	}
 
@@ -852,9 +852,10 @@ public class Checks {
 			if (! iType.isClass())
 				return false;
 			IType[] superTypes= iType.newSupertypeHierarchy(pm).getAllSupertypes(iType);
-			for (int i= 0; i < superTypes.length; i++) {
-				if ("java.lang.Throwable".equals(superTypes[i].getFullyQualifiedName())) //$NON-NLS-1$
+			for (IType superType : superTypes) {
+				if ("java.lang.Throwable".equals(superType.getFullyQualifiedName())) { //$NON-NLS-1$
 					return true;
+				}
 			}
 			return false;
 		} finally{

@@ -260,7 +260,7 @@ public class DocumentAdapter implements IBuffer, IDocumentListener, ITextEditCap
 
 	/**
 	 * Constructs a new document adapter.
-	 * 
+	 *
 	 * @param owner the owner of this buffer
 	 * @param fileStore the file store of the file that backs the buffer
 	 * @param path the path of the file that backs the buffer
@@ -629,7 +629,7 @@ public class DocumentAdapter implements IBuffer, IDocumentListener, ITextEditCap
 	 * {@inheritDoc}
 	 * <p>
 	 * <strong>Note:</strong> This implementation applies the edits in a rewrite session.
-	 * 
+	 *
 	 * @since 3.4
 	 */
 	@Override

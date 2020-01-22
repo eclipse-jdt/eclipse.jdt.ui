@@ -162,8 +162,9 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 
 	private void fill(Map<String, String> settings, Map<String, String> sharedSettings) {
 		sharedSettings.clear();
-		for (String key : settings.keySet()) {
-			sharedSettings.put(key, settings.get(key));
+		for (Map.Entry<String, String> entry : settings.entrySet()) {
+			String key = entry.getKey();
+			sharedSettings.put(key, entry.getValue());
 		}
     }
 

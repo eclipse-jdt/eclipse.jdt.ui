@@ -388,7 +388,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		if (searchFor != FIELD && (limitTo == READ_ACCESSES || limitTo == WRITE_ACCESSES)) {
 			limitTo= REFERENCES;
 		}
-		
+
 		if (searchFor != TYPE /*&& searchFor != FIELD*/ && searchFor != METHOD && searchFor != CONSTRUCTOR && limitTo == SPECIFIC_REFERENCES) {
 			limitTo= REFERENCES;
 		}
@@ -753,7 +753,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		if (searchFor == FIELD) {
 			buttons.add(createButton(fLimitToGroup, SWT.RADIO, SearchMessages.SearchPage_limitTo_readReferences, READ_ACCESSES, limitTo == READ_ACCESSES));
 			buttons.add(createButton(fLimitToGroup, SWT.RADIO, SearchMessages.SearchPage_limitTo_writeReferences, WRITE_ACCESSES, limitTo == WRITE_ACCESSES));
-			
+
 //			buttons.add(createMethodLocationRadio(limitTo == SPECIFIC_REFERENCES));
 		}
 

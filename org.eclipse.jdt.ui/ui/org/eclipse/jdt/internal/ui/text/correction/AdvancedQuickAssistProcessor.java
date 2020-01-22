@@ -1036,23 +1036,23 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 
 		// replace conditions in outer IfStatement
 		rewrite.set(ifStatement, IfStatement.EXPRESSION_PROPERTY, leftCondition, null);
-		
+
 		// prepare inner IfStatement
 		IfStatement innerIf= ast.newIfStatement();
-		
+
 		innerIf.setExpression(rightCondition);
 		innerIf.setThenStatement((Statement) rewrite.createMoveTarget(ifStatement.getThenStatement()));
 		Block innerBlock= ast.newBlock();
 		innerBlock.statements().add(innerIf);
-		
+
 		Statement elseStatement= ifStatement.getElseStatement();
 		if (elseStatement != null) {
 			innerIf.setElseStatement((Statement) rewrite.createCopyTarget(elseStatement));
 		}
-		
+
 		// replace outer thenStatement
 		rewrite.replace(ifStatement.getThenStatement(), innerBlock, null);
-		
+
 		// add correction proposal
 		String label= CorrectionMessages.AdvancedQuickAssistProcessor_splitAndCondition_description;
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
@@ -1660,31 +1660,31 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		} else {
 			return false;
 		}
-		
-		
+
+
 		// only + is valid for combining strings
 		if (!(infixExpression.getOperator().equals(InfixExpression.Operator.PLUS))) {
 			return false;
 		}
-		
+
 		// all expressions must be strings
 		Expression leftOperand= infixExpression.getLeftOperand();
 		Expression rightOperand= infixExpression.getRightOperand();
 		if (!(leftOperand instanceof StringLiteral && rightOperand instanceof StringLiteral)) {
 			return false;
 		}
-		
+
 		StringLiteral leftString= (StringLiteral) leftOperand;
 		StringLiteral rightString= (StringLiteral) rightOperand;
-		
+
 		if (resultingCollections == null) {
 			return true;
 		}
-		
+
 		// begin building combined string
 		StringBuilder stringBuilder= new StringBuilder(leftString.getLiteralValue());
 		stringBuilder.append(rightString.getLiteralValue());
-		
+
 		// append extended string literals
 		for (Object operand : infixExpression.extendedOperands()) {
 			if (!(operand instanceof StringLiteral))
@@ -1692,15 +1692,15 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			StringLiteral stringLiteral= (StringLiteral) operand;
 			stringBuilder.append(stringLiteral.getLiteralValue());
 		}
-		
+
 		// prepare new string literal
 		AST ast= node.getAST();
 		StringLiteral combinedStringLiteral= ast.newStringLiteral();
 		combinedStringLiteral.setLiteralValue(stringBuilder.toString());
-		
+
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 		rewrite.replace(infixExpression, combinedStringLiteral, null);
-		
+
 		// add correction proposal
 		String label= CorrectionMessages.AdvancedQuickAssistProcessor_combineSelectedStrings;
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
@@ -1708,7 +1708,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		resultingCollections.add(proposal);
 		return true;
 	}
-	
+
 	private static boolean getPickOutStringProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
 		// we work with String's
 		if (!(node instanceof StringLiteral)) {
@@ -1913,21 +1913,21 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			ITypeBinding[] typeArguments= Invocations.getInferredTypeArguments(invocation);
 			if (typeArguments == null)
 				return;
-			
+
 			ImportRewrite importRewrite= proposal.getImportRewrite();
 			if (importRewrite == null) {
 				importRewrite= proposal.createImportRewrite((CompilationUnit) invocation.getRoot());
 			}
 			ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(invocation, importRewrite);
-			
+
 			AST ast= invocation.getAST();
 			ListRewrite typeArgsRewrite= Invocations.getInferredTypeArgumentsRewrite(rewrite, invocation);
-			
+
 			for (ITypeBinding typeArgument : typeArguments) {
 				Type typeArgumentNode= importRewrite.addImport(typeArgument, ast, importRewriteContext, TypeLocation.TYPE_ARGUMENT);
 				typeArgsRewrite.insertLast(typeArgumentNode, null);
 			}
-			
+
 			if (invocation instanceof MethodInvocation) {
 				MethodInvocation methodInvocation= (MethodInvocation) invocation;
 				Expression expression= methodInvocation.getExpression();
@@ -2486,7 +2486,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 					}
 					currentBlock= null;
 				}
-				
+
 				if (defaultFound) {
 					// This gets too complicated. We only support 'default' as last SwitchCase.
 					return false;
@@ -2587,7 +2587,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		}
 		if (expression == null)
 			return null;
-		
+
 		if (isStringsInSwitch) {
 			MethodInvocation methodInvocation= ast.newMethodInvocation();
 			methodInvocation.setName(ast.newSimpleName("equals")); //$NON-NLS-1$
@@ -2689,7 +2689,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 						isMethodInvocationCase= true;
 						if (!(((MethodInvocation) currentExpression).getName().getIdentifier()).equals("equals")) //$NON-NLS-1$
 							return false;
-	
+
 						MethodInvocation invocation= (MethodInvocation) currentExpression;
 						leftOperand= invocation.getExpression();
 						if (leftOperand == null)
@@ -2703,7 +2703,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 								return false;
 							}
 						}
-						
+
 						List<Expression> arguments= invocation.arguments();
 						if (arguments.size() != 1)
 							return false;
@@ -2717,17 +2717,17 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 								return false;
 							}
 						}
-	
-	
+
+
 					} else if (currentExpression instanceof InfixExpression) {
 						InfixExpression infixExpression= (InfixExpression) currentExpression;
 						Operator operator= infixExpression.getOperator();
 						if (!(operator.equals(InfixExpression.Operator.CONDITIONAL_OR) || operator.equals(InfixExpression.Operator.EQUALS)))
 							return false;
-	
+
 						leftOperand= infixExpression.getLeftOperand();
 						rightOperand= infixExpression.getRightOperand();
-	
+
 						if (operator.equals(InfixExpression.Operator.EQUALS)) {
 							ITypeBinding typeBinding= leftOperand.resolveTypeBinding();
 							if (typeBinding != null && typeBinding.getQualifiedName().equals("java.lang.String")) { //$NON-NLS-1$
@@ -2740,7 +2740,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 					} else {
 						return false;
 					}
-	
+
 					if (leftOperand.resolveConstantExpressionValue() != null) {
 						caseExpressions.add(leftOperand);
 						expression= rightOperand;
@@ -2771,17 +2771,17 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 					if (expression == null) { // paranoidal check: this condition should never be true
 						return false;
 					}
-					
+
 					if (currentExpression.getParent() instanceof InfixExpression) {
 						currentExpression= getNextSiblingExpression(currentExpression);
 					} else {
 						currentExpression= null;
 					}
-	
+
 					if (switchExpression == null) {
 						switchExpression= expression;
 					}
-	
+
 					if (!switchExpression.subtreeMatch(new ASTMatcher(), expression)) {
 						return false;
 					}
@@ -2795,7 +2795,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			} else {
 				thenStatement= currentIf.getThenStatement();
 			}
-			
+
 			for (SwitchCase switchCaseStatement : createSwitchCaseStatements(ast, rewrite, caseExpressions)) {
 				switchStatement.statements().add(switchCaseStatement);
 			}
@@ -2836,7 +2836,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		if (switchExpression == null)
 			return false;
 		switchStatement.setExpression((Expression) rewrite.createCopyTarget(switchExpression));
-		
+
 		if (handleNullArg) {
 			if (executeDefaultOnNullExpression) {
 				IfStatement newIfStatement= ast.newIfStatement();

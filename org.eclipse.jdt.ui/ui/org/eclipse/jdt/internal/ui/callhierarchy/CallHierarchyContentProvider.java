@@ -56,7 +56,7 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
 	 * <strong> It has been replaced in 3.6 by API:
 	 * {@link PreferenceConstants#PREF_DEFAULT_EXPAND_WITH_CONSTRUCTORS_MEMBERS}</strong>
 	 * </p>
-	 * 
+	 *
 	 * @since 3.5
 	 */
 	public static final String OLD_PREF_DEFAULT_EXPAND_WITH_CONSTRUCTORS= "CallHierarchy.defaultExpandWithConstructors"; //$NON-NLS-1$
@@ -163,8 +163,8 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
 	/**
 	 * Sets the default "expand with constructors" mode for the method wrapper. Does nothing if the
 	 * mode has already been set.
-	 * 
-	 * 
+	 *
+	 *
 	 * @param wrapper the caller method wrapper
 	 * @since 3.5
 	 */
@@ -195,7 +195,7 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
 
 	/**
 	 * Checks whether given caller method wrapper can be expanded with constructors.
-	 * 
+	 *
 	 * @param wrapper the caller method wrapper
 	 * @return <code> true</code> if the wrapper can be expanded with constructors, <code>false</code> otherwise
 	 * @since 3.5
@@ -213,24 +213,24 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
 		}
 		return true;
 	}
-	
+
 	/**
 	 * Checks if the method or its declaring type matches the pre-defined array of methods and types
 	 * for default expand with constructors.
-	 * 
+	 *
 	 * @param method the wrapped method
 	 * @return <code>true</code> if method or type matches the pre-defined list, <code>false</code>
 	 *         otherwise
-	 * 
+	 *
 	 * @since 3.5
 	 */
 	static boolean isInTheDefaultExpandWithConstructorList(IMethod method) {
 		String serializedMembers= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.PREF_DEFAULT_EXPAND_WITH_CONSTRUCTORS_MEMBERS);
 		if (serializedMembers.length() == 0)
 			return false;
-		
+
 		String[] defaultMemberPatterns= serializedMembers.split(";"); //$NON-NLS-1$
-		
+
 		String methodName= method.getElementName();
 		IType declaringType= method.getDeclaringType();
 		String declaringTypeName= declaringType.getFullyQualifiedName('.');
@@ -248,7 +248,7 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
 		} catch (JavaModelException e) {
 			return false;
 		}
-		
+
 		for (String defaultMemberPattern : defaultMemberPatterns) {
 			int pos= defaultMemberPattern.lastIndexOf('.');
 			String defaultTypeName= defaultMemberPattern.substring(0, pos);
@@ -279,10 +279,10 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
 
 	/**
 	 * Strips type arguments from the given type name and returns only erased type name.
-	 * 
+	 *
 	 * @param typeName the type name
 	 * @return the erased type name
-	 * 
+	 *
 	 * @since 3.6
 	 */
 	private static String stripTypeArguments(String typeName) {
@@ -318,7 +318,7 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
 
     /**
      * Returns whether the given element is an "Expand witch Constructors" node.
-     * 
+     *
 	 * @param element a method wrapped
 	 * @return <code>true</code> iff the element is an "Expand witch Constructors" node
 	 * @since 3.5
@@ -329,22 +329,22 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
 
 	/**
      * Collapses and refreshes the given element when search has been canceled.
-     * 
+     *
      * @param element the element on which search has been canceled and which has to be collapsed
      * @since 3.5
      */
     protected void collapseAndRefresh(MethodWrapper element) {
     	CallHierarchyViewer viewer= fPart.getViewer();
-    	
+
 		/* Problem case: The user expands the RealCallers node and then unchecks "Expand with Constructors"
 		 * while the search for the real callers is still in progress.
-		 * 
+		 *
 		 * In this scenario, the RealCallers is not even part of the current tree any more, since the
 		 * ExpandWithConstructorsAction already toggled the flag and refreshed the tree.
-    	 * 
+    	 *
     	 * But since setExpandedState(element, false) walks up the getParent() chain of the given element,
     	 * this causes the parent's children to be created, which would wrongly start a deferred search.
-    	 * 
+    	 *
     	 * The fix is to do nothing when the RealCaller's parent is expandWithConstructors.
 		 */
     	boolean elementStays= true;
@@ -354,13 +354,13 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
 		if (elementStays) {
     		viewer.setExpandedState(element, false);
     	}
-    	
+
     	viewer.refresh(element);
     }
 
 	/**
      * Returns the call hierarchy view part.
-	 * 
+	 *
 	 * @return the call hierarchy view part
 	 * @since 3.5
 	 */

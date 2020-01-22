@@ -109,7 +109,7 @@ public abstract class BuildPathBasePage {
 					return false;
 				default:
 					throw new IllegalStateException(Messages.format(NewWizardMessages.BuildPathBasePage_unexpectedAnswer_error, String.valueOf(answer)));
-			}			
+			}
 		}
 		ModuleDialog dialog= new ModuleDialog(shell, selElement, selectedJavaElements, this);
 		int res= dialog.open();
@@ -281,7 +281,7 @@ public abstract class BuildPathBasePage {
 	public abstract Control getControl(Composite parent);
 
 	public abstract void setFocus();
-	
+
 
 	protected boolean getRootExpansionState(TreeListDialogField<CPListElement> list, boolean isClassPathRoot) {
 		for (CPListElement cpListElement : list.getElements()) {

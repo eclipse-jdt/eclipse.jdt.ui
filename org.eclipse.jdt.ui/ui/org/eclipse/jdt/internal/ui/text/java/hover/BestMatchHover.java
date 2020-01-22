@@ -131,11 +131,11 @@ public class BestMatchHover extends AbstractJavaEditorTextHover {
 	public Object getHoverInfo2(ITextViewer textViewer, IRegion hoverRegion) {
 		return getHoverInfo2(textViewer, hoverRegion, false);
 	}
-	
+
 	/**
 	 * Returns the information which should be presented when a hover or persistent popup is shown
 	 * for the specified hover region.
-	 * 
+	 *
 	 * @param textViewer the viewer on which the hover popup should be shown
 	 * @param hoverRegion the text range in the viewer which is used to determine the hover display
 	 *            information
@@ -143,9 +143,9 @@ public class BestMatchHover extends AbstractJavaEditorTextHover {
 	 *            information presenter. In this case, the method only considers text hovers for
 	 *            which a proper IInformationControlCreator is available that can supply focusable
 	 *            and resizable information controls.
-	 * 
+	 *
 	 * @return the hover popup display information, or <code>null</code> if none available
-	 * 
+	 *
 	 * @see ITextHoverExtension2#getHoverInfo2(ITextViewer, IRegion)
 	 * @since 3.8
 	 */

@@ -22,12 +22,12 @@ import org.eclipse.jdt.core.manipulation.CleanUpOptionsCore;
 
 /**
  * Allows to set and retrieve clean up settings for given options keys.
- * 
+ *
  * @since 3.5
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class CleanUpOptions extends CleanUpOptionsCore {
-	
+
 	/**
 	 * True value
 	 */
@@ -42,7 +42,7 @@ public class CleanUpOptions extends CleanUpOptionsCore {
 
 	/**
 	 * Creates a new CleanUpOptions instance with the given options.
-	 * 
+	 *
 	 * @param options map that maps clean ups keys (<code>String</code>) to a non-<code>null</code>
 	 *            string value
 	 */
@@ -56,22 +56,22 @@ public class CleanUpOptions extends CleanUpOptionsCore {
 	public CleanUpOptions() {
 		super();
 	}
-	
+
 	@Override
 	public Set<String> getKeys() {
 		return super.getKeys();
 	}
-	
+
 	@Override
 	public void setOption(String key, String value) {
 		super.setOption(key, value);
 	}
-	
+
 	@Override
 	public String getValue(String key) {
 		return super.getValue(key);
 	}
-	
+
 	@Override
 	public boolean isEnabled(String key) {
 		return super.isEnabled(key);

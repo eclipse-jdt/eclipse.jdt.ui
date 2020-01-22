@@ -78,9 +78,10 @@ public abstract class HierarchyType extends TType {
 	private boolean doIsSubType(HierarchyType other) {
 		if (fSuperclass != null && (other.isTypeEquivalentTo(fSuperclass) || fSuperclass.doIsSubType(other)))
 			return true;
-		for (int i= 0; i < fInterfaces.length; i++) {
-			if (other.isTypeEquivalentTo(fInterfaces[i]) || fInterfaces[i].doIsSubType(other))
+		for (HierarchyType intf : fInterfaces) {
+			if (other.isTypeEquivalentTo(intf) || intf.doIsSubType(other)) {
 				return true;
+			}
 		}
 		return false;
 	}

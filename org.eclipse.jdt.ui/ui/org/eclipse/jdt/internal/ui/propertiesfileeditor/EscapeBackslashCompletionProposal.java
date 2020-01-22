@@ -25,7 +25,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**
  * Proposal to escape or unescape backslashes.
- * 
+ *
  * @since 3.7
  */
 public class EscapeBackslashCompletionProposal implements ICompletionProposal {
@@ -40,7 +40,7 @@ public class EscapeBackslashCompletionProposal implements ICompletionProposal {
 
 	/**
 	 * Constructor for EscapeBackslashCompletionProposal.
-	 * 
+	 *
 	 * @param proposalText the proposal text
 	 * @param offset offset of the proposal
 	 * @param length length of the proposal

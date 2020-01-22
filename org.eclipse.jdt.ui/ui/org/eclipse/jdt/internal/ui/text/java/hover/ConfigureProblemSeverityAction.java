@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -187,7 +187,7 @@ public class ConfigureProblemSeverityAction extends Action {
 			case ERRORS_WARNINGS:
 				keys= ProblemSeveritiesConfigurationBlock.getKeys();
 				break;
-			default: 
+			default:
 				return false; // cannot happen
 		}
 		return OptionsConfigurationBlock.hasProjectSpecificOptions(fProject.getProject(), keys, null);

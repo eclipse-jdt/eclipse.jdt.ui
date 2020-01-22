@@ -993,7 +993,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	/**
 	 * Use the given <code>ASTRewrite</code> to replace direct calls to the constructor with calls
 	 * to the newly-created factory method.
-	 * 
+	 *
 	 * @param rg the <code>SearchResultGroup</code> indicating all of the constructor references
 	 * @param unit the <code>CompilationUnit</code> to be rewritten
 	 * @param unitRewriter the rewriter

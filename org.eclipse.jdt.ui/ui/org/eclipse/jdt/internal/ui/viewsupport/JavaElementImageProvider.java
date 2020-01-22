@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Matt Chapman, mpchapman@gmail.com - 89977 Make JDT .java agnostic
@@ -87,7 +87,7 @@ public class JavaElementImageProvider {
 	}
 
 	private ImageDescriptorRegistry fRegistry;
-	
+
 	private boolean fDecorateTestCodeContainerIcons;
 
 	public JavaElementImageProvider() {
@@ -259,7 +259,7 @@ public class JavaElementImageProvider {
 									else
 										return JavaPluginImages.DESC_OBJS_EXTJAR;
 								} else {
-									if(isTest) 
+									if(isTest)
 										return JavaPluginImages.DESC_OBJS_EXTJAR_WSRC_TEST;
 									else
 										return JavaPluginImages.DESC_OBJS_EXTJAR_WSRC;
@@ -339,7 +339,7 @@ public class JavaElementImageProvider {
 
 				case IJavaElement.ANNOTATION:
 					return JavaPluginImages.DESC_OBJS_ANNOTATION;
-					
+
 				case IJavaElement.JAVA_MODULE:
 					return JavaPluginImages.DESC_OBJS_MODULE;
 

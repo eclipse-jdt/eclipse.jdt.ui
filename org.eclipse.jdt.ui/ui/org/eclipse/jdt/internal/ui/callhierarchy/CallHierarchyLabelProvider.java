@@ -88,7 +88,7 @@ class CallHierarchyLabelProvider extends AppearanceAwareLabelProvider {
 		if (isNormalMethodWrapper(element)) {
 			MethodWrapper wrapper= (MethodWrapper)element;
 			String decorated= getElementLabel(wrapper);
-			
+
 			if (isSpecialConstructorNode(wrapper)) {
 				decorated= Messages.format(CallHierarchyMessages.CallHierarchyLabelProvider_constructor_label, decorated);
 			}
@@ -102,7 +102,7 @@ class CallHierarchyLabelProvider extends AppearanceAwareLabelProvider {
 		if (isNormalMethodWrapper(element)) {
 			MethodWrapper wrapper= (MethodWrapper)element;
 			String decorated= getElementLabel(wrapper);
-			
+
 			StyledString styledLabel= super.getStyledText(wrapper.getMember());
 			StyledString styledDecorated= StyledCellLabelProvider.styleDecoratedString(decorated, StyledString.COUNTER_STYLER, styledLabel);
 			if (isSpecialConstructorNode(wrapper)) {
@@ -111,26 +111,26 @@ class CallHierarchyLabelProvider extends AppearanceAwareLabelProvider {
 			}
 			return styledDecorated;
 		}
-		
+
 		String specialLabel= getSpecialLabel(element);
 		Styler styler= element instanceof RealCallers ? ColoringLabelProvider.INHERITED_STYLER : null;
 		return new StyledString(specialLabel, styler);
 	}
 
-	
+
 	private boolean isNormalMethodWrapper(Object element) {
 		return element instanceof MethodWrapper && ((MethodWrapper)element).getMember() != null && !(element instanceof RealCallers);
 	}
-	
+
 	private boolean isSpecialConstructorNode(MethodWrapper wrapper) {
 		MethodWrapper parentWrapper= wrapper.getParent();
 		if (!CallHierarchyContentProvider.isExpandWithConstructors(parentWrapper))
 			return false;
-		
+
 		IMember member= wrapper.getMember();
 		if (member instanceof IType)
 			return true;
-		
+
 		try {
 			return member instanceof IMethod && ((IMethod)member).isConstructor();
 		} catch (JavaModelException e) {

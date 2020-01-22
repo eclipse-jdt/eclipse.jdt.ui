@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -47,6 +47,7 @@ import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+import org.eclipse.jdt.internal.ui.text.CompletionTimeoutProgressMonitor;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.JavaTypeCompletionProposal;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
@@ -181,7 +182,7 @@ public class CUPositionCompletionProcessor implements IContentAssistProcessor, I
 			int cuPrefixLength= fCompletionContextRequestor.getBeforeString().length();
 			fCompletionRequestor.setOffsetReduction(cuPrefixLength);
 
-			cu.codeComplete(cuPrefixLength + documentOffset, fCompletionRequestor);
+			cu.codeComplete(cuPrefixLength + documentOffset, fCompletionRequestor, new CompletionTimeoutProgressMonitor());
 
 			JavaCompletionProposal[] proposals= fCompletionRequestor.getResults();
 			if (proposals.length == 0) {

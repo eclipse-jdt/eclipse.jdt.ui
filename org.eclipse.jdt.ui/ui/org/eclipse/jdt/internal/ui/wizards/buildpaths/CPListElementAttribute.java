@@ -136,7 +136,7 @@ public class CPListElementAttribute {
         CPListElementAttribute attrib= (CPListElementAttribute)obj;
         return attrib.fKey== this.fKey && attrib.getParent().getPath().equals(fParent.getPath());
     }
-    
+
     @Override
 	public int hashCode() {
     	return fKey.hashCode() * 89 + fParent.getPath().hashCode();
