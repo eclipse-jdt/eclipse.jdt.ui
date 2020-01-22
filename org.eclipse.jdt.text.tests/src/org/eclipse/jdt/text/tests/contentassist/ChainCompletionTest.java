@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Red Hat Inc. and others.
+ * Copyright (c) 2019, 2020 Red Hat Inc. and others.
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -579,6 +579,31 @@ public class ChainCompletionTest extends TestCase {
 
 		List<String> expected= Arrays.asList("foo.fVal - 2 elements");
 		assertProposalsExist(expected, proposals);
+	}
+
+	public void testBug559385 () throws Exception {
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n" + 
+				"public @interface Command {\n" + 
+				"	String name();\n" + 
+				"}");
+		ICompilationUnit cu= getCompilationUnit(pkg, buf, "Command.java");
+
+		buf= new StringBuffer();
+		buf.append("package test;\n" + 
+				"import java.util.concurrent.Callable;\n" + 
+				"@Command(name = $\"\")\n" + 
+				"public class TestBug559385 implements Callable<String> {\n" + 
+				"	@Override\n" + 
+				"	public String call() throws Exception {\n" + 
+				"		return null;\n" + 
+				"	}\n" + 
+				"}");
+		cu= getCompilationUnit(pkg, buf, "TestBug559385.java");
+		int completionIndex= getCompletionIndex(buf);
+
+		List<ICompletionProposal> proposals= computeCompletionProposals(cu, completionIndex);
+		assertTrue(proposals.size() > 0);
 	}
 
 	private ICompilationUnit getCompilationUnit(IPackageFragment pack, StringBuffer buf, String name) throws JavaModelException {
