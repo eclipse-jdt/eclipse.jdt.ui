@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2020 IBM Corporation and others.
+ * Copyright (c) 2013, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,7 +10,6 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Fabrice TIERCELIN - Lambda expression cleanup
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
@@ -31,6 +30,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 public class CleanUpTest18 extends CleanUpTestCase {
+
 	private static final Class<CleanUpTest18> THIS= CleanUpTest18.class;
 
 	public CleanUpTest18(String name) {
@@ -40,7 +40,7 @@ public class CleanUpTest18 extends CleanUpTestCase {
 	public static Test suite() {
 		return setUpTest(new TestSuite(THIS));
 	}
-
+	
 	public static Test setUpTest(Test test) {
 		return new Java18ProjectTestSetup(test);
 	}
@@ -59,195 +59,6 @@ public class CleanUpTest18 extends CleanUpTestCase {
 	@Override
 	protected IClasspathEntry[] getDefaultClasspath() throws CoreException {
 		return Java18ProjectTestSetup.getDefaultClasspath();
-	}
-
-	public void testRemoveParenthesesOnLambdaExpression() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import static java.util.Calendar.getInstance;\n" //
-				+ "import static java.util.Calendar.getAvailableLocales;\n" //
-				+ "\n" //
-				+ "import java.time.Instant;\n" //
-				+ "import java.util.ArrayList;\n" //
-				+ "import java.util.Calendar;\n" //
-				+ "import java.util.Date;\n" //
-				+ "import java.util.Locale;\n" //
-				+ "import java.util.Vector;\n" //
-				+ "import java.util.function.BiFunction;\n" //
-				+ "import java.util.function.Function;\n" //
-				+ "import java.util.function.Supplier;\n" //
-				+ "\n" //
-				+ "public class E extends Date {\n" //
-				+ "    public String changeableText = \"foo\";\n" //
-				+ "\n" //
-				+ "    public Function<String, String> removeParentheses() {\n" //
-				+ "        return (someString) -> someString.trim().toLowerCase();\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public Function<String, String> doNotRemoveParenthesesWithSingleVariableDeclaration() {\n" //
-				+ "        return (String someString) -> someString.trim().toLowerCase();\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public BiFunction<String, String, Integer> doNotRemoveParenthesesWithTwoParameters() {\n" //
-				+ "        return (someString, anotherString) -> someString.trim().compareTo(anotherString.trim());\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public Supplier<Boolean> doNotRemoveParenthesesWithNoParameter() {\n" //
-				+ "        return () -> {System.out.println(\"foo\");return true;};\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public Function<String, String> removeReturnAndBrackets() {\n" //
-				+ "        return someString -> {return someString.trim().toLowerCase();};\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public Function<String, String> removeReturnAndBracketsWithParentheses() {\n" //
-				+ "        return someString -> {return someString.trim().toLowerCase() + \"bar\";};\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public Function<String, String> doNotRemoveReturnWithSeveralStatements() {\n" //
-				+ "        return someString -> {String trimmed = someString.trim();\n" //
-				+ "        return trimmed.toLowerCase();};\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public Supplier<ArrayList<String>> useCreationReference() {\n" //
-				+ "        return () -> new ArrayList<>();\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public Function<Integer, ArrayList<String>> useCreationReferenceWithParameter() {\n" //
-				+ "        return capacity -> new ArrayList<>(capacity);\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public Function<Integer, ArrayList<String>> useCreationReferenceWithParameterAndType() {\n" //
-				+ "        // TODO this can be refactored like useCreationReferenceWithParameter\n" //
-				+ "        return (Integer capacity) -> new ArrayList<>(capacity);\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public Function<Integer, ArrayList<String>> doNotRefactorWithExpressions() {\n" //
-				+ "        return capacity -> new ArrayList<>(capacity + 1);\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public BiFunction<Integer, Integer, Vector<String>> useCreationReferenceWithParameters() {\n" //
-				+ "        return (initialCapacity, capacityIncrement) -> new Vector<>(initialCapacity, capacityIncrement);\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public BiFunction<Integer, Integer, Vector<String>> doNotRefactorShuffledParams() {\n" //
-				+ "        return (initialCapacity, capacityIncrement) -> new Vector<>(capacityIncrement, initialCapacity);\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public Function<Date, Long> useMethodReference() {\n" //
-				+ "        return date -> date.getTime();\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public BiFunction<Date, Date, Integer> useMethodReferenceWithParameter() {\n" //
-				+ "        return (date, anotherDate) -> date.compareTo(anotherDate);\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public Function<String, Long> useTypeReference() {\n" //
-				+ "        return numberInText -> Long.getLong(numberInText);\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public BiFunction<Date, Date, Integer> useMethodReferenceWithParameter() {\n" //
-				+ "        return (date, anotherDate) -> date.compareTo(anotherDate);\n" //
-				+ "    }\n" //
-				+ "}\n";
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
-
-		enable(CleanUpConstants.SIMPLIFY_LAMBDA_EXPRESSION_AND_METHOD_REF);
-
-		sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import static java.util.Calendar.getInstance;\n" //
-				+ "import static java.util.Calendar.getAvailableLocales;\n" //
-				+ "\n" //
-				+ "import java.time.Instant;\n" //
-				+ "import java.util.ArrayList;\n" //
-				+ "import java.util.Calendar;\n" //
-				+ "import java.util.Date;\n" //
-				+ "import java.util.Locale;\n" //
-				+ "import java.util.Vector;\n" //
-				+ "import java.util.function.BiFunction;\n" //
-				+ "import java.util.function.Function;\n" //
-				+ "import java.util.function.Supplier;\n" //
-				+ "\n" //
-				+ "public class E extends Date {\n" //
-				+ "    public String changeableText = \"foo\";\n" //
-				+ "\n" //
-				+ "    public Function<String, String> removeParentheses() {\n" //
-				+ "        return someString -> someString.trim().toLowerCase();\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public Function<String, String> doNotRemoveParenthesesWithSingleVariableDeclaration() {\n" //
-				+ "        return (String someString) -> someString.trim().toLowerCase();\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public BiFunction<String, String, Integer> doNotRemoveParenthesesWithTwoParameters() {\n" //
-				+ "        return (someString, anotherString) -> someString.trim().compareTo(anotherString.trim());\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public Supplier<Boolean> doNotRemoveParenthesesWithNoParameter() {\n" //
-				+ "        return () -> {System.out.println(\"foo\");return true;};\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public Function<String, String> removeReturnAndBrackets() {\n" //
-				+ "        return someString -> someString.trim().toLowerCase();\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public Function<String, String> removeReturnAndBracketsWithParentheses() {\n" //
-				+ "        return someString -> (someString.trim().toLowerCase() + \"bar\");\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public Function<String, String> doNotRemoveReturnWithSeveralStatements() {\n" //
-				+ "        return someString -> {String trimmed = someString.trim();\n" //
-				+ "        return trimmed.toLowerCase();};\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public Supplier<ArrayList<String>> useCreationReference() {\n" //
-				+ "        return ArrayList::new;\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public Function<Integer, ArrayList<String>> useCreationReferenceWithParameter() {\n" //
-				+ "        return ArrayList::new;\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public Function<Integer, ArrayList<String>> useCreationReferenceWithParameterAndType() {\n" //
-				+ "        // TODO this can be refactored like useCreationReferenceWithParameter\n" //
-				+ "        return (Integer capacity) -> new ArrayList<>(capacity);\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public Function<Integer, ArrayList<String>> doNotRefactorWithExpressions() {\n" //
-				+ "        return capacity -> new ArrayList<>(capacity + 1);\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public BiFunction<Integer, Integer, Vector<String>> useCreationReferenceWithParameters() {\n" //
-				+ "        return Vector::new;\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public BiFunction<Integer, Integer, Vector<String>> doNotRefactorShuffledParams() {\n" //
-				+ "        return (initialCapacity, capacityIncrement) -> new Vector<>(capacityIncrement, initialCapacity);\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public Function<Date, Long> useMethodReference() {\n" //
-				+ "        return Date::getTime;\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public BiFunction<Date, Date, Integer> useMethodReferenceWithParameter() {\n" //
-				+ "        return Date::compareTo;\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public Function<String, Long> useTypeReference() {\n" //
-				+ "        return Long::getLong;\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public BiFunction<Date, Date, Integer> useMethodReferenceWithParameter() {\n" //
-				+ "        return Date::compareTo;\n" //
-				+ "    }\n" //
-				+ "}\n";
-		String expected1= sample;
-
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
 	public void testConvertToLambda01() throws Exception {
@@ -280,10 +91,10 @@ public class CleanUpTest18 extends CleanUpTestCase {
 		String expected1= buf.toString();
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
-
+		
 		disable(CleanUpConstants.USE_LAMBDA);
 		enable(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
-
+		
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
 	}
 
@@ -328,10 +139,10 @@ public class CleanUpTest18 extends CleanUpTestCase {
 		String expected1= buf.toString();
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
-
+		
 		disable(CleanUpConstants.USE_LAMBDA);
 		enable(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
-
+		
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
 	}
 
@@ -398,10 +209,10 @@ public class CleanUpTest18 extends CleanUpTestCase {
 		buf.append("}\n");
 		String original= buf.toString();
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", original, false, null);
-
+		
 		enable(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES);
 		enable(CleanUpConstants.USE_LAMBDA);
-
+		
 		buf= new StringBuffer();
 		buf.append("package test;\n");
 		buf.append("import java.util.concurrent.Executors;\n");
@@ -411,12 +222,12 @@ public class CleanUpTest18 extends CleanUpTestCase {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-
+		
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
-
+		
 		disable(CleanUpConstants.USE_LAMBDA);
 		enable(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
-
+		
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
 	}
 
@@ -562,10 +373,10 @@ public class CleanUpTest18 extends CleanUpTestCase {
 		String expected1= buf.toString();
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
-
+		
 		disable(CleanUpConstants.USE_LAMBDA);
 		enable(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
-
+		
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
 	}
 
@@ -658,10 +469,10 @@ public class CleanUpTest18 extends CleanUpTestCase {
 		buf.append("}\n");
 		String original= buf.toString();
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", original, false, null);
-
+	
 		enable(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES);
 		enable(CleanUpConstants.USE_LAMBDA);
-
+	
 		buf= new StringBuffer();
 		buf.append("package test;\n");
 		buf.append("\n");
@@ -707,12 +518,12 @@ public class CleanUpTest18 extends CleanUpTestCase {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-
+	
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
-
+		
 		disable(CleanUpConstants.USE_LAMBDA);
 		enable(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
-
+		
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
 	}
 
@@ -751,10 +562,10 @@ public class CleanUpTest18 extends CleanUpTestCase {
 		buf.append("@FunctionalInterface interface ZV { void zoo(); }\n");
 		String original= buf.toString();
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", original, false, null);
-
+		
 		enable(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES);
 		enable(CleanUpConstants.USE_LAMBDA);
-
+		
 		buf= new StringBuffer();
 		buf.append("package test;\n");
 		buf.append("public interface E {\n");
@@ -776,12 +587,12 @@ public class CleanUpTest18 extends CleanUpTestCase {
 		buf.append("@FunctionalInterface interface ZI { int  zoo(); }\n");
 		buf.append("@FunctionalInterface interface ZV { void zoo(); }\n");
 		String expected1= buf.toString();
-
+		
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
-
+		
 		disable(CleanUpConstants.USE_LAMBDA);
 		enable(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
-
+		
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
 	}
 
@@ -951,10 +762,10 @@ public class CleanUpTest18 extends CleanUpTestCase {
 		buf.append("}\n");
 		String original= buf.toString();
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", original, false, null);
-
+	
 		enable(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES);
 		enable(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
-
+	
 		buf= new StringBuffer();
 		buf.append("package test;\n");
 		buf.append("import java.util.*;\n");
@@ -987,12 +798,12 @@ public class CleanUpTest18 extends CleanUpTestCase {
 		buf.append("    };\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-
+	
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
-
+		
 		disable(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
 		enable(CleanUpConstants.USE_LAMBDA);
-
+		
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
 	}
 
@@ -1055,10 +866,10 @@ public class CleanUpTest18 extends CleanUpTestCase {
 		buf.append("}\n");
 		String original= buf.toString();
 		ICompilationUnit cu1= pack1.createCompilationUnit("Test.java", original, false, null);
-
+	
 		enable(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES);
 		enable(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
-
+	
 		buf= new StringBuffer();
 		buf.append("package test;\n");
 		buf.append("\n");
@@ -1074,12 +885,12 @@ public class CleanUpTest18 extends CleanUpTestCase {
 		buf.append("    };\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-
+	
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
-
+	
 		disable(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
 		enable(CleanUpConstants.USE_LAMBDA);
-
+	
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
 	}
 

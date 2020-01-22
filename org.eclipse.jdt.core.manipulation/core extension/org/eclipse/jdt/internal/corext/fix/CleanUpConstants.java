@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -677,19 +677,6 @@ public class CleanUpConstants {
 	 * @since 3.10
 	 */
 	public static final String USE_ANONYMOUS_CLASS_CREATION= "cleanup.use_anonymous_class_creation"; //$NON-NLS-1$
-
-	/**
-	 * Removes useless parenthesis, return statements and brackets from lambda expressions and
-	 * method references.
-	 * <p>
-	 * Possible values: {TRUE, FALSE}
-	 * <p>
-	 *
-	 * @see CleanUpOptionsCore#TRUE
-	 * @see CleanUpOptionsCore#FALSE
-	 * @since 4.15
-	 */
-	public static final String SIMPLIFY_LAMBDA_EXPRESSION_AND_METHOD_REF= "cleanup.simplify_lambda_expression_and_method_ref"; //$NON-NLS-1$
 
 	/**
 	 * Adds type parameters to raw type references.
