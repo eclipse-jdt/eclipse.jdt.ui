@@ -128,11 +128,11 @@ public class StringCleanUp extends AbstractMultiFix {
 		try {
 			ICompilationUnit cu= (ICompilationUnit)compilationUnit.getJavaElement();
 			if (!cu.isStructureKnown())
-				return 0; //[clean up] 'Remove unnecessary $NLS-TAGS$' removes necessary ones in case of syntax errors: https://bugs.eclipse.org/bugs/show_bug.cgi?id=285814 : 
+				return 0; //[clean up] 'Remove unnecessary $NLS-TAGS$' removes necessary ones in case of syntax errors: https://bugs.eclipse.org/bugs/show_bug.cgi?id=285814 :
 		} catch (JavaModelException e) {
 			return 0;
 		}
-		
+
 		int result= 0;
 		IProblem[] problems= compilationUnit.getProblems();
 		if (isEnabled(CleanUpConstants.ADD_MISSING_NLS_TAGS))

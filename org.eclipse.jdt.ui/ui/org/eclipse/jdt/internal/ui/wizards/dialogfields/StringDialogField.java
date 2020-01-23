@@ -41,7 +41,7 @@ public class StringDialogField extends DialogField {
 		super();
 		fText= ""; //$NON-NLS-1$
 	}
-	
+
 	public void setContentAssistProcessor(IContentAssistProcessor processor) {
 	    fContentAssistProcessor= processor;
 	    if (fContentAssistProcessor != null && isOkToUse(fTextControl)) {
@@ -90,7 +90,7 @@ public class StringDialogField extends DialogField {
 
 	/**
 	 * Tries to set the focus to the string dialog field.
-	 * 
+	 *
 	 * @param selectText <code>true</code> if the text should be selected in the string dialog
 	 *            field. Otherwise, the text is left unselected and the caret is placed at the end
 	 *            of the text
@@ -116,7 +116,7 @@ public class StringDialogField extends DialogField {
 	public boolean setFocus() {
 		return setFocus(true);
 	}
-	
+
 	// ------- ui creation
 
 	/**
@@ -151,7 +151,7 @@ public class StringDialogField extends DialogField {
 
 	/**
 	 * Creates and returns a new text control.
-	 * 
+	 *
 	 * @param parent the parent
 	 * @return the text control
 	 * @since 3.6

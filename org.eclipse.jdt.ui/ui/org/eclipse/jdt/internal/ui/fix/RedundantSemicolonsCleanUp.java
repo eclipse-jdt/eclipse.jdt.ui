@@ -122,7 +122,7 @@ public class RedundantSemicolonsCleanUp extends AbstractMultiFix implements ICle
 			textedits.add(new TextEditGroup(label, edit));
 		}
 	}
-	
+
 	@Override
 	protected ICleanUpFix createFix(CompilationUnit unit) throws CoreException {
 		if (!isEnabled(CleanUpConstants.REMOVE_REDUNDANT_SEMICOLONS)) {
@@ -176,7 +176,7 @@ public class RedundantSemicolonsCleanUp extends AbstractMultiFix implements ICle
 				}
 				return false;
 			}
-			
+
 			@Override
 			public boolean visit(Block node) {
 				if (!(node.getParent() instanceof LambdaExpression)) {

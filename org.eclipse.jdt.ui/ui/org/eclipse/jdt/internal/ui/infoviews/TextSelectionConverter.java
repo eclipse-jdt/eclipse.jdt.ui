@@ -47,7 +47,7 @@ class TextSelectionConverter {
 
 	/**
 	 * Finds and returns the Java elements for the given editor selection.
-	 * 
+	 *
 	 * @param editor the Java editor
 	 * @param selection the text selection
 	 * @return the Java elements for the given editor selection
@@ -59,7 +59,7 @@ class TextSelectionConverter {
 
 	/**
 	 * Finds and returns the Java element that contains the text selection in the given editor.
-	 * 
+	 *
 	 * @param editor the Java editor
 	 * @param selection the text selection
 	 * @return the Java elements for the given editor selection

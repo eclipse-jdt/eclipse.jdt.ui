@@ -177,7 +177,7 @@ public final class SaveParticipantRegistry {
 	/**
 	 * Tells whether one of the active post save listeners needs to be informed about the changed
 	 * region in this save cycle.
-	 * 
+	 *
 	 * @param unit the unit which is about to be saved
 	 * @return true if the change regions need do be determined
 	 * @throws CoreException if something went wrong

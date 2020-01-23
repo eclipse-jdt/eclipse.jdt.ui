@@ -187,7 +187,7 @@ public abstract class SurroundWith {
 	/**
 	 * Selected nodes in <code>context</code> under <code>selection</code> or null if no valid
 	 * selection.
-	 * 
+	 *
 	 * @param context The context in which the proposal is applied.
 	 * @return Selected nodes or null if no valid selection.
 	 * @throws CoreException if the analyzer cannot be created
@@ -488,7 +488,7 @@ public abstract class SurroundWith {
 
 	/**
 	 * Makes the given statement final.
-	 * 
+	 *
 	 * @param statement the statment
 	 * @param rewrite the AST rewrite
 	 */
@@ -535,7 +535,7 @@ public abstract class SurroundWith {
 
 	/**
 	 * Get a list rewrite for statement sequence node is element
-	 * 
+	 *
 	 * @param node the AST node
 	 * @param rewrite AST rewrite
 	 * @return The list rewrite

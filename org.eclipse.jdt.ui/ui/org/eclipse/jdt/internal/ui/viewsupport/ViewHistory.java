@@ -26,7 +26,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 
 /**
  * History support for a view.
- * 
+ *
  * @param <E> the type of elements managed by this history
  */
 public abstract class ViewHistory<E> {

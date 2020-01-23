@@ -105,7 +105,7 @@ public class WorkingSetFilter extends JavaViewerFilter {
 					IProject project= ((IJavaProject) fJavaElement).getProject();
 					if (!project.isAccessible()) {
 						// If our project is closed, return true only if the "other" is the same project
-						// to keep closed projects in the working sets 
+						// to keep closed projects in the working sets
 						if (other instanceof IJavaProject) {
 							IProject otherProject= ((IJavaProject) other).getProject();
 							return project.equals(otherProject);
@@ -138,7 +138,7 @@ public class WorkingSetFilter extends JavaViewerFilter {
 		/**
 		 * Check whether the given parent is an ancestor of the given element
 		 * or the same as the element.
-		 * 
+		 *
 		 * @param elem the element
 		 * @param parent the anchestor
 		 * @return <code>true</code> if it is an ancestor

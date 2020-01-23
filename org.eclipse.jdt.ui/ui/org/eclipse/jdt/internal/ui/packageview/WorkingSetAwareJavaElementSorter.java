@@ -28,18 +28,18 @@ public class WorkingSetAwareJavaElementSorter extends JavaElementComparator {
 	 */
 	public WorkingSetAwareJavaElementSorter () {
 	}
-	
+
 	/**
 	 * Constructor.
-	 * 
+	 *
 	 * @param sortPFRByName When <code>true</code> {@link IPackageFragmentRoot}s are sorted by name and not by their classpath order
-	 * 
+	 *
 	 * @since 3.14
 	 */
 	public WorkingSetAwareJavaElementSorter(boolean sortPFRByName) {
 		super(sortPFRByName);
 	}
-	
+
 	@Override
 	public int compare(Viewer viewer, Object e1, Object e2) {
 		if (e1 instanceof IWorkingSet || e2 instanceof IWorkingSet)

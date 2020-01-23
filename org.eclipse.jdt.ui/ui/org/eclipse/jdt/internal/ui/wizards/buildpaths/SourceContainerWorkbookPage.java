@@ -89,7 +89,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		protected Shell getShell() {
 			return SourceContainerWorkbookPage.this.getShell();
 		}
-		
+
 		@Override
 		public void propertyChange(PropertyChangeEvent event) {
 			if (event.getProperty().equals(IAction.RESULT)) {

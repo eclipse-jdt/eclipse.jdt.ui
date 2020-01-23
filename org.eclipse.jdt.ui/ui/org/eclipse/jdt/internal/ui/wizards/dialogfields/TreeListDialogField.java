@@ -57,7 +57,7 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
  * Typical buttons are 'Add', 'Remove', 'Up' and 'Down'.
  * Tree model is independent of widget creation.
  * DialogFields controls are: Label, Tree, and Composite containing buttons.
- * 
+ *
  * @param <E> the type of the root elements
  */
 public class TreeListDialogField<E> extends DialogField {
@@ -274,7 +274,7 @@ public class TreeListDialogField<E> extends DialogField {
 			});
 			fTree.setContentProvider(fTreeViewerAdapter);
 			if(fLabelProvider instanceof IStyledLabelProvider) {
-				fTree.setLabelProvider(new DelegatingStyledCellLabelProvider((IStyledLabelProvider) fLabelProvider));				
+				fTree.setLabelProvider(new DelegatingStyledCellLabelProvider((IStyledLabelProvider) fLabelProvider));
 			} else {
 				fTree.setLabelProvider(fLabelProvider);
 			}
@@ -302,7 +302,7 @@ public class TreeListDialogField<E> extends DialogField {
 	public TreeViewer getTreeViewer() {
 		return fTree;
 	}
-	
+
 	/**
 	 * @param idx the index of the button
 	 * @return the button control, or <code>null</code> if the UI has not been created yet
@@ -875,7 +875,7 @@ public class TreeListDialogField<E> extends DialogField {
 		}
 		return result;
 	}
-	
+
 	public void expandElement(Object element, int level) {
 		if (isOkToUse(fTreeControl)) {
 			fTree.expandToLevel(element, level);

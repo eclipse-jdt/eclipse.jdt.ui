@@ -208,7 +208,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 
 		/**
 		 * Initialize with the given offset, length and highlighting key.
-		 * 
+		 *
 		 * @param offset the offset
 		 * @param length the length
 		 * @param key the highlighting key as returned by

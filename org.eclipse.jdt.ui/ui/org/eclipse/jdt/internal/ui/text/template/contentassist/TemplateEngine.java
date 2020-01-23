@@ -106,7 +106,7 @@ public class TemplateEngine {
 	 * @param viewer the text viewer
 	 * @param completionPosition the context position in the document of the text viewer
 	 * @param compilationUnit the compilation unit (may be <code>null</code>)
-	 * 
+	 *
 	 * @deprecated Use {@link #complete(ITextViewer, Point, int, ICompilationUnit)} instead.
 	 */
 	@Deprecated

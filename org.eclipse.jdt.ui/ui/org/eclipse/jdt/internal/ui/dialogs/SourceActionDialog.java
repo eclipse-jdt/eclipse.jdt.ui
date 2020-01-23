@@ -83,7 +83,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	 * <li>{@link #INSERT_LAST_INDEX}</li>
 	 * <li>{@link #INSERT_POSITION_FROM_EDITOR}</li>
 	 * </ul>
-	 * 
+	 *
 	 * <strong>Note:</strong> Since 3.4.2 the key is "InsertPosition.v2" instead of "InsertPosition"
 	 * in order to reset to the new defaults.
 	 */
@@ -427,7 +427,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	protected Text createFilterComposite(@SuppressWarnings("unused") Composite inner) {
 		return null; // No filter as default
 	}
-		
+
 	/**
 	 * Clients override to provide link control
 	 *
@@ -717,7 +717,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	protected IDialogSettings getDialogBoundsSettings() {
 		return JavaPlugin.getDefault().getDialogSettingsSection("DialogBounds_" + getClass().getSimpleName()); //$NON-NLS-1$
 	}
-	
+
 	@SuppressWarnings("unused")
 	protected void addMethodSearchFilter(Text filterText, CheckboxTreeViewer treeViewer) {
 		//Default is do nothing

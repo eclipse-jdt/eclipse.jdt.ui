@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Renaud Waldura &lt;renaud+eclipse@waldura.com&gt; - New class/interface with wizard
@@ -313,7 +313,7 @@ public class UnresolvedElementsSubProcessor {
 
 		// similar variables
 		addSimilarVariableProposals(cu, astRoot, binding, resolvedField, simpleName, isWriteAccess, proposals);
-		
+
 		if (binding == null) {
 			addStaticImportFavoriteProposals(context, simpleName, false, proposals);
 		}
@@ -609,7 +609,7 @@ public class UnresolvedElementsSubProcessor {
 
 		IJavaProject javaProject= cu.getJavaProject();
 		int kind= evauateTypeKind(selectedNode, javaProject);
-		
+
 		if (kind == TypeKinds.REF_TYPES) {
 			addEnhancedForWithoutTypeProposals(cu, selectedNode, proposals);
 		}
@@ -649,7 +649,7 @@ public class UnresolvedElementsSubProcessor {
 					if (name.equals("var")) { //$NON-NLS-1$
 						isVarTypeProblem= true;
 					}
-				}				
+				}
 			}
 			if (isVarTypeProblem) {
 				// check if "var" is present as lambda parameter type
@@ -659,14 +659,14 @@ public class UnresolvedElementsSubProcessor {
 					parent= parent.getParent();
 					if (parent.getLocationInParent() == LambdaExpression.PARAMETERS_PROPERTY) {
 						isVarInLambdaParamType= true;
-					}						
+					}
 				}
-				
+
 				if (isVarInLambdaParamType) {
 					ReorgCorrectionsSubProcessor.getNeedHigherComplianceProposals(context, problem, proposals, JavaCore.VERSION_11);
 				} else {
-					ReorgCorrectionsSubProcessor.getNeedHigherComplianceProposals(context, problem, proposals, JavaCore.VERSION_10);						
-				}		
+					ReorgCorrectionsSubProcessor.getNeedHigherComplianceProposals(context, problem, proposals, JavaCore.VERSION_10);
+				}
 			}
 		}
 
@@ -706,7 +706,7 @@ public class UnresolvedElementsSubProcessor {
 			kind &= ~TypeKinds.ANNOTATIONS; // only propose annotations when there are no other suggestions
 		}
 		addNewTypeProposals(cu, node, kind, IProposalRelevance.NEW_TYPE, proposals);
-		
+
 		ReorgCorrectionsSubProcessor.addProjectSetupFixProposal(context, problem, node.getFullyQualifiedName(), proposals);
 	}
 
@@ -722,7 +722,7 @@ public class UnresolvedElementsSubProcessor {
 						int relevance= StubUtility.hasLocalVariableName(cu.getJavaProject(), name) ? 10 : 7;
 						String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_create_loop_variable_description, BasicElementLabels.getJavaElementName(name));
 						Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
-						
+
 						proposals.add(new NewVariableCorrectionProposal(label, cu, NewVariableCorrectionProposal.LOCAL, simpleName, null, relevance, image));
 					}
 				}
@@ -738,10 +738,10 @@ public class UnresolvedElementsSubProcessor {
 			if (!isImportName)
 				return;
 		}
-		
+
 		final IJavaProject javaProject= cu.getJavaProject();
 		String name= node.getFullyQualifiedName();
-		
+
 		String nullityAnnotation= null;
 		String[] annotationNameOptions= { JavaCore.COMPILER_NULLABLE_ANNOTATION_NAME, JavaCore.COMPILER_NONNULL_ANNOTATION_NAME, JavaCore.COMPILER_NONNULL_BY_DEFAULT_ANNOTATION_NAME };
 		Hashtable<String, String> defaultOptions= JavaCore.getDefaultOptions();
@@ -761,7 +761,7 @@ public class UnresolvedElementsSubProcessor {
 		Bundle[] annotationsBundles= JavaPlugin.getDefault().getBundles("org.eclipse.jdt.annotation", version); //$NON-NLS-1$
 		if (annotationsBundles == null)
 			return;
-		
+
 		if (! cu.getJavaProject().getProject().hasNature("org.eclipse.pde.PluginNature")) //$NON-NLS-1$
 			addCopyAnnotationsJarProposal(cu, node, nullityAnnotation, annotationsBundles[0], proposals);
 	}
@@ -808,7 +808,7 @@ public class UnresolvedElementsSubProcessor {
 				CompilationUnitChange addImportChange= createAddImportChange(cu, name, fullyQualifiedName);
 				return new CompositeChange(changeName, new Change[] { copyFileChange, addEntryChange, addImportChange});
 			}
-			
+
 			@Override
 			public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
 				return CorrectionMessages.UnresolvedElementsSubProcessor_copy_annotation_jar_info;
@@ -1255,7 +1255,7 @@ public class UnresolvedElementsSubProcessor {
 			}
 			addParameterMissmatchProposals(context, problem, parameterMismatchs, invocationNode, arguments, proposals);
 		}
-		
+
 		if (sender == null) {
 			addStaticImportFavoriteProposals(context, nameNode, true, proposals);
 		}
@@ -1276,7 +1276,7 @@ public class UnresolvedElementsSubProcessor {
 		}
 
 	}
-	
+
 	private static void addStaticImportFavoriteProposals(IInvocationContext context, SimpleName node, boolean isMethod, Collection<ICommandAccess> proposals) throws JavaModelException {
 		IJavaProject project= context.getCompilationUnit().getJavaProject();
 		if (JavaModelUtil.is50OrHigher(project)) {
@@ -1288,16 +1288,16 @@ public class UnresolvedElementsSubProcessor {
 
 			CompilationUnit root= context.getASTRoot();
 			AST ast= root.getAST();
-			
+
 			String name= node.getIdentifier();
 			for (String curr : SimilarElementsRequestor.getStaticImportFavorites(context.getCompilationUnit(), name, isMethod, favourites)) {
 				ImportRewrite importRewrite= StubUtility.createImportRewrite(root, true);
 				ASTRewrite astRewrite= ASTRewrite.create(ast);
-				
+
 				String label;
 				String qualifiedTypeName= Signature.getQualifier(curr);
 				String elementLabel= BasicElementLabels.getJavaElementName(JavaModelUtil.concatenateName(Signature.getSimpleName(qualifiedTypeName), name));
-				
+
 				String res= importRewrite.addStaticImport(qualifiedTypeName, name, isMethod, new ContextSensitiveImportRewriteContext(root, node.getStartPosition(), importRewrite));
 				int dot= res.lastIndexOf('.');
 				if (dot != -1) {
@@ -1316,7 +1316,7 @@ public class UnresolvedElementsSubProcessor {
 			}
 		}
 	}
-	
+
 
 	private static void addNewMethodProposals(ICompilationUnit cu, CompilationUnit astRoot, Expression sender, List<Expression> arguments, boolean isSuperInvocation, ASTNode invocationNode, String methodName, Collection<ICommandAccess> proposals) throws JavaModelException {
 		ITypeBinding nodeParentType= Bindings.getBindingOfParentType(invocationNode);
@@ -1341,7 +1341,7 @@ public class UnresolvedElementsSubProcessor {
 				if (parameterTypes != null) {
 					String sig= org.eclipse.jdt.internal.ui.text.correction.ASTResolving.getMethodSignature(methodName, parameterTypes, false);
 					boolean is18OrHigher= JavaModelUtil.is18OrHigher(targetCU.getJavaProject());
-					boolean isSenderTypeAbstractClass = (senderDeclBinding.getModifiers() &  Modifier.ABSTRACT) > 0; 
+					boolean isSenderTypeAbstractClass = (senderDeclBinding.getModifiers() &  Modifier.ABSTRACT) > 0;
 					boolean isSenderBindingInterface= senderDeclBinding.isInterface();
 					if (nodeParentType == senderDeclBinding) {
 						label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createmethod_description, sig);
@@ -1781,11 +1781,11 @@ public class UnresolvedElementsSubProcessor {
 					proposal.setDisplayName(Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_addargumentcast_description, arg));
 					proposals.add(proposal);
 				}
-				
+
 				TypeMismatchSubProcessor.addChangeSenderTypeProposals(context, nodeToCast, castType, false, IProposalRelevance.CAST_ARGUMENT_2, proposals);
 			}
 		}
-		
+
 		if (nDiffs == 2) { // try to swap
 			int idx1= indexOfDiff[0];
 			int idx2= indexOfDiff[1];

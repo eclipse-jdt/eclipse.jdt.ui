@@ -76,7 +76,7 @@ public class TypeArgumentMismatchSubProcessor {
 		if (!(selectedNode instanceof SimpleName)) {
 			return;
 		}
-		
+
 		QuickAssistProcessor.getInferDiamondArgumentsProposal(context, selectedNode, null, proposals);
 	}
 

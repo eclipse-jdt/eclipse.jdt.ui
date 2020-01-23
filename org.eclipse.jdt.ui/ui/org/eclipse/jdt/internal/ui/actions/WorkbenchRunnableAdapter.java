@@ -50,7 +50,7 @@ public class WorkbenchRunnableAdapter implements IRunnableWithProgress, IThreadL
 
 	/**
 	 * Runs a workspace runnable with the workspace lock.
-	 * 
+	 *
 	 * @param runnable the runnable
 	 */
 	public WorkbenchRunnableAdapter(IWorkspaceRunnable runnable) {
@@ -60,7 +60,7 @@ public class WorkbenchRunnableAdapter implements IRunnableWithProgress, IThreadL
 	/**
 	 * Runs a workspace runnable with the given lock or <code>null</code> to run with no lock at
 	 * all.
-	 * 
+	 *
 	 * @param runnable the runnable
 	 * @param rule the scheduling rule, or <code>null</code>
 	 */
@@ -72,7 +72,7 @@ public class WorkbenchRunnableAdapter implements IRunnableWithProgress, IThreadL
 	/**
 	 * Runs a workspace runnable with the given lock or <code>null</code> to run with no lock at
 	 * all.
-	 * 
+	 *
 	 * @param runnable the runnable
 	 * @param rule the scheduling rule, or <code>null</code>
 	 * @param transfer <code>true</code> iff the rule is to be transfered to the modal context
@@ -86,7 +86,7 @@ public class WorkbenchRunnableAdapter implements IRunnableWithProgress, IThreadL
 
 	/**
 	 * Returns the scheduling rule, or <code>null</code> if none.
-	 * 
+	 *
 	 * @return the scheduling rule, or <code>null</code> if none
 	 */
 	public ISchedulingRule getSchedulingRule() {

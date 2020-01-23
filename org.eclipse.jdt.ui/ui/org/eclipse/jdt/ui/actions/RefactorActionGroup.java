@@ -450,11 +450,11 @@ public class RefactorActionGroup extends ActionGroup {
 	 * Sets actionDefinitionId, updates enablement, adds to fActions,
 	 * and adds selection changed listener if provider is not <code>null</code>.
 	 *
-	 * @param action the action 
+	 * @param action the action
 	 * @param provider can be <code>null</code>
 	 * @param specialProvider a special selection provider or <code>null</code>
 	 * @param selection the selection
-	 * @param actionDefinitionId the action definition id 
+	 * @param actionDefinitionId the action definition id
 	 */
 	private void initUpdatingAction(SelectionDispatchAction action, ISelectionProvider provider, ISelectionProvider specialProvider, ISelection selection, String actionDefinitionId) {
 		action.setActionDefinitionId(actionDefinitionId);

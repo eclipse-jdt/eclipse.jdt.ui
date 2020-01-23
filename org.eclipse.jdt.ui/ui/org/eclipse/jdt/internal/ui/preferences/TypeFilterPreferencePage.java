@@ -155,10 +155,10 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
 		fFilterListField.setRemoveButtonIndex(IDX_REMOVE);
 
 		fFilterListField.enableButton(IDX_EDIT, false);
-		
+
 		fHideForbiddenField= new SelectionButtonDialogField(SWT.CHECK);
 		fHideForbiddenField.setLabelText(PreferencesMessages.TypeFilterPreferencePage_hideForbidden_label);
-		
+
 		fHideDiscouragedField= new SelectionButtonDialogField(SWT.CHECK);
 		fHideDiscouragedField.setLabelText(PreferencesMessages.TypeFilterPreferencePage_hideDiscouraged_label);
 
@@ -194,18 +194,18 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
 		LayoutUtil.setHorizontalGrabbing(fFilterListField.getListControl(null));
 
 		fFilterListField.getTableViewer().setComparator(new ViewerComparator());
-		
+
 		Label spacer= new Label(composite, SWT.LEFT );
 		GridData gd= new GridData(SWT.DEFAULT, convertHeightInCharsToPixels(1) / 2);
 		gd.horizontalSpan= 2;
 		spacer.setLayoutData(gd);
-		
+
 		String label= PreferencesMessages.TypeFilterPreferencePage_restricted_link;
 		Map<String, String> targetInfo= new java.util.HashMap<>(2);
 		targetInfo.put(ProblemSeveritiesPreferencePage.DATA_SELECT_OPTION_KEY,	JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE);
 		targetInfo.put(ProblemSeveritiesPreferencePage.DATA_SELECT_OPTION_QUALIFIER, JavaCore.PLUGIN_ID);
 		createPreferencePageLink(composite, label, targetInfo);
-		
+
 		fHideForbiddenField.doFillIntoGrid(composite, 2);
 		fHideDiscouragedField.doFillIntoGrid(composite, 2);
 
@@ -240,7 +240,7 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
 
 		fFilterListField.setElements(res);
 		fFilterListField.setCheckedElements(Arrays.asList(enabledEntries));
-		
+
 		boolean hideForbidden= getJDTCoreOption(JavaCore.CODEASSIST_FORBIDDEN_REFERENCE_CHECK, fromDefault);
 		fHideForbiddenField.setSelection(hideForbidden);
 		boolean hideDiscouraged= getJDTCoreOption(JavaCore.CODEASSIST_DISCOURAGED_REFERENCE_CHECK, fromDefault);

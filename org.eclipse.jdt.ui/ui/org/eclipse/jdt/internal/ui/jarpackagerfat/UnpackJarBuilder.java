@@ -43,19 +43,19 @@ import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
 
 /**
  * A jar builder which extracts the required libraries into a folder next to the generated jar.
- * 
+ *
  * @since 3.5
  */
 public class UnpackJarBuilder extends FatJarBuilder {
 
 	public static final String BUILDER_ID= "org.eclipse.jdt.ui.unpack_jar_builder"; //$NON-NLS-1$
 	private static final String SUBFOLDER_SUFFIX= "_lib"; //$NON-NLS-1$
-	
+
 	private final String fSubfolder;
 	private final IPath fSubfolderPath;
 
 	private JarPackageData fJarPackage;
-	
+
 	private Set<String> jarNames;
 
 	public UnpackJarBuilder(JarPackageData jarPackage) {
@@ -86,7 +86,7 @@ public class UnpackJarBuilder extends FatJarBuilder {
 	public boolean isRemoveSigners() {
 		return false;
 	}
-	
+
 	@Override
 	public IManifestProvider getManifestProvider() {
 		return new FatJarManifestProvider(this);
@@ -122,7 +122,7 @@ public class UnpackJarBuilder extends FatJarBuilder {
 
 	/**
 	 * creates the subfolder or cleanup an existing subfolder. A dialog will ask the user.
-	 * 
+	 *
 	 * @param parent the parent for the dialog, or <code>null</code> if no dialog should be
 	 *            presented
 	 * @param allowOverwrite true if the packager is allowed to overwrite existing folders
@@ -191,5 +191,5 @@ public class UnpackJarBuilder extends FatJarBuilder {
 			}
 		}
 	}
-	
+
 }

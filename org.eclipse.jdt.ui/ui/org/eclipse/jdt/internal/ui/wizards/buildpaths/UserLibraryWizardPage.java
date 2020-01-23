@@ -248,7 +248,7 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 			fLibrarySelector.setFocus();
 		}
 	}
-	
+
 	@Override
 	public boolean finish() {
 		return true;

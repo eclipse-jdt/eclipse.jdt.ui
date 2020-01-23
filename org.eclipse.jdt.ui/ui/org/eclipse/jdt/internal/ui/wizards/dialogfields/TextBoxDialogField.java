@@ -24,7 +24,7 @@ import org.eclipse.swt.widgets.Text;
  * Dialog field containing a label and a multi-line text control.
  */
 public class TextBoxDialogField extends StringDialogField {
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField#createTextControl(org.eclipse.swt.widgets.Composite)
 	 * @since 3.6

@@ -102,7 +102,7 @@ public class RemoveBlockCommentAction extends BlockCommentAction {
 		IDocument document = getTextEditor().getDocumentProvider().getDocument(editorInput);
 		int startLine = document.getLineOfOffset(partOffset);
 		int lines = document.getNumberOfLines(partOffset, partition.getLength());
-		
+
 		for(int line = startLine; line < startLine + lines; line++) {
 			int lineOffset = document.getLineOffset(line);
 			int lineLength = document.getLineLength(line);
@@ -125,7 +125,7 @@ public class RemoveBlockCommentAction extends BlockCommentAction {
 			}
 		}
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.actions.AddBlockCommentAction#validSelection(org.eclipse.jface.text.ITextSelection)
 	 */

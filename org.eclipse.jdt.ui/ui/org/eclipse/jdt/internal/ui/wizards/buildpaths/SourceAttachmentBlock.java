@@ -140,7 +140,7 @@ public class SourceAttachmentBlock {
 		} catch (CoreException e) {
 			//do nothing
 		}
-		
+
 		int kind= entry.getEntryKind();
 		Assert.isTrue(kind == IClasspathEntry.CPE_LIBRARY || kind == IClasspathEntry.CPE_VARIABLE);
 
