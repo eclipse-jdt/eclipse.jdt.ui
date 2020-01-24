@@ -223,6 +223,7 @@ public class MoveCuUpdateCreator {
 		for (IType destinationType : getDestinationPackageTypes()) {
 			importEdit.removeImport(destinationType.getFullyQualifiedName('.'));
 		}
+		importEdit.removeImport(fDestination.getElementName().concat(".*")); //$NON-NLS-1$
 	}
 
 	private IType[] getDestinationPackageTypes() throws JavaModelException {

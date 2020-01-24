@@ -980,6 +980,65 @@ public class MoveTest extends RefactoringTest {
 				});
 	}
 
+	public void testDestination_yes_cuToOtherPackageBug21008() throws Exception {
+		ParticipantTesting.reset();
+
+		StringBuffer buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("import q.*;\n");
+		buf.append("\n");
+		buf.append("public class Class2 {\n");
+		buf.append("    Class1 c;\n");
+		buf.append("    Class3 c3;\n");
+		buf.append("    InnerClass3 ic3;\n");
+		buf.append("}\n");
+		ICompilationUnit toMove= getPackageP().createCompilationUnit("Class2.java", buf.toString(), false, new NullProgressMonitor());
+
+		buf= new StringBuffer();
+		buf.append("package q;\n");
+		buf.append("public class Class1 {\n");
+		buf.append("}\n");
+		getPackageQ().createCompilationUnit("Class1.java", buf.toString(), false, new NullProgressMonitor());
+
+		buf= new StringBuffer();
+		buf.append("package q;\n");
+		buf.append("public class Class3 {\n");
+		buf.append("    public interface InnerClass3 {\n");
+		buf.append("    }\n");
+		buf.append("{\n");
+		getPackageQ().createCompilationUnit("Class3.java", buf.toString(), false, new NullProgressMonitor());
+
+		String[] handles= ParticipantTesting.createHandles(new Object[] { toMove, toMove.getTypes()[0], toMove.getResource() });
+		JavaMoveProcessor processor= verifyEnabled(new IResource[] {}, new IJavaElement[] { toMove }, createReorgQueries());
+
+		verifyValidDestination(processor, getPackageQ());
+
+		assertTrue("source file does not exist before moving", toMove.exists());
+		RefactoringStatus status= performRefactoring(processor, true);
+		assertEquals(null, status);
+		assertTrue("source file exists after moving", !toMove.exists());
+		ICompilationUnit newCu= getPackageQ().getCompilationUnit(toMove.getElementName());
+		assertTrue("new file does not exist after moving", newCu.exists());
+
+		buf= new StringBuffer();
+		buf.append("package q;\n");
+		buf.append("\n");
+		buf.append("public class Class2 {\n");
+		buf.append("    Class1 c;\n");
+		buf.append("    Class3 c3;\n");
+		buf.append("    InnerClass3 ic3;\n");
+		buf.append("}\n");
+		assertEqualLines(buf.toString(), newCu.getSource());
+
+		ParticipantTesting.testMove(handles,
+				new MoveArguments[] {
+						new MoveArguments(getPackageQ(), processor.getUpdateReferences()),
+						new MoveArguments(getPackageQ(), processor.getUpdateReferences()),
+						new MoveArguments(getPackageQ().getResource(), processor.getUpdateReferences())
+				});
+	}
+
 	public void testDestination_yes_cuToOtherPackageWithMultiRoot() throws Exception {
 		ParticipantTesting.reset();
 		//regression test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=47788
