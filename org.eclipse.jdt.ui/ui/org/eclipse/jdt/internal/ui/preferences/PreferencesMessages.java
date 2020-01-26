@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -847,6 +847,7 @@ public final class PreferencesMessages extends NLS {
 	public static String ProblemSeveritiesConfigurationBlock_pb_null_reference;
 	public static String ProblemSeveritiesConfigurationBlock_pb_null_spec_violation;
 	public static String ProblemSeveritiesConfigurationBlock_pb_null_unchecked_conversion;
+	public static String ProblemSeveritiesConfigurationBlock_pb_null_annotated_type_argument_to_unannotated;
 	public static String ProblemSeveritiesConfigurationBlock_pb_pessimistic_analysis_for_free_type_variables;
 	public static String ProblemSeveritiesConfigurationBlock_pb_nonnull_typevar_maybe_legacy;
 	public static String ProblemSeveritiesConfigurationBlock_pb_potential_null_reference;
