@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -7,6 +7,10 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -179,6 +183,8 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 				return 109;
 			} else if (CodeTemplateContextType.CATCHBLOCK_ID.equals(id)) {
 				return 110;
+			} else if (CodeTemplateContextType.RECORDBODY_ID.equals(id)) {
+				return 111;
 			} else if (CodeTemplateContextType.FILECOMMENT_ID.equals(id)) {
 				return 1;
 			} else if (CodeTemplateContextType.TYPECOMMENT_ID.equals(id)) {
@@ -237,6 +243,8 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 				return PreferencesMessages.CodeTemplateBlock_interfacebody_label;
 			} else if (CodeTemplateContextType.ENUMBODY_ID.equals(id)) {
 				return PreferencesMessages.CodeTemplateBlock_enumbody_label;
+			} else if (CodeTemplateContextType.RECORDBODY_ID.equals(id)) {
+				return PreferencesMessages.CodeTemplateBlock_recordbody_label;
 			} else if (CodeTemplateContextType.ANNOTATIONBODY_ID.equals(id)) {
 				return PreferencesMessages.CodeTemplateBlock_annotationbody_label;
 			} else if (CodeTemplateContextType.FILECOMMENT_ID.equals(id)) {

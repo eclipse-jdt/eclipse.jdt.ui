@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -7,6 +7,10 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -47,6 +51,7 @@ public class CodeTemplateContextType extends TemplateContextType {
 	public static final String CLASSBODY_CONTEXTTYPE= "classbody_context"; //$NON-NLS-1$
 	public static final String INTERFACEBODY_CONTEXTTYPE= "interfacebody_context"; //$NON-NLS-1$
 	public static final String ENUMBODY_CONTEXTTYPE= "enumbody_context"; //$NON-NLS-1$
+	public static final String RECORDBODY_CONTEXTTYPE= "recordbody_context"; //$NON-NLS-1$
 	public static final String ANNOTATIONBODY_CONTEXTTYPE= "annotationbody_context"; //$NON-NLS-1$
 	public static final String FILECOMMENT_CONTEXTTYPE= "filecomment_context"; //$NON-NLS-1$
 	public static final String TYPECOMMENT_CONTEXTTYPE= "typecomment_context"; //$NON-NLS-1$
@@ -75,6 +80,7 @@ public class CodeTemplateContextType extends TemplateContextType {
 	public static final String CLASSBODY_ID= CODETEMPLATES_PREFIX + "classbody"; //$NON-NLS-1$
 	public static final String INTERFACEBODY_ID= CODETEMPLATES_PREFIX + "interfacebody"; //$NON-NLS-1$
 	public static final String ENUMBODY_ID= CODETEMPLATES_PREFIX + "enumbody"; //$NON-NLS-1$
+	public static final String RECORDBODY_ID= CODETEMPLATES_PREFIX + "recordbody"; //$NON-NLS-1$
 	public static final String ANNOTATIONBODY_ID= CODETEMPLATES_PREFIX + "annotationbody"; //$NON-NLS-1$
 	public static final String FIELDCOMMENT_ID= CODETEMPLATES_PREFIX + "field" + COMMENT_SUFFIX; //$NON-NLS-1$
 	public static final String METHODCOMMENT_ID= CODETEMPLATES_PREFIX + "method" + COMMENT_SUFFIX; //$NON-NLS-1$
@@ -113,6 +119,7 @@ public class CodeTemplateContextType extends TemplateContextType {
 	public static final String CLASS_BODY= "classbody"; //$NON-NLS-1$
 	public static final String INTERFACE_BODY= "interfacebody"; //$NON-NLS-1$
 	public static final String ENUM_BODY= "enumbody"; //$NON-NLS-1$
+	public static final String RECORD_BODY= "recordbody"; //$NON-NLS-1$
 	public static final String ANNOTATION_BODY= "annotationbody"; //$NON-NLS-1$
 	public static final String TYPE_COMMENT= "typecomment"; //$NON-NLS-1$
 	public static final String FILE_COMMENT= "filecomment"; //$NON-NLS-1$
@@ -212,7 +219,8 @@ public class CodeTemplateContextType extends TemplateContextType {
 		} else if (CLASSBODY_CONTEXTTYPE.equals(contextName) ||
 				INTERFACEBODY_CONTEXTTYPE.equals(contextName) ||
 				ENUMBODY_CONTEXTTYPE.equals(contextName) ||
-				ANNOTATIONBODY_CONTEXTTYPE.equals(contextName)) {
+				ANNOTATIONBODY_CONTEXTTYPE.equals(contextName) ||
+				RECORDBODY_CONTEXTTYPE.equals(contextName)) {
 			addResolver(new CodeTemplateVariableResolver(TYPENAME,  JavaManipulationMessages.CodeTemplateContextType_variable_description_typename));
 			addCompilationUnitVariables();
 		} else if (TYPECOMMENT_CONTEXTTYPE.equals(contextName)) {
@@ -328,6 +336,7 @@ public class CodeTemplateContextType extends TemplateContextType {
 		registry.addContextType(new CodeTemplateContextType(CodeTemplateContextType.INTERFACEBODY_CONTEXTTYPE));
 		registry.addContextType(new CodeTemplateContextType(CodeTemplateContextType.ENUMBODY_CONTEXTTYPE));
 		registry.addContextType(new CodeTemplateContextType(CodeTemplateContextType.ANNOTATIONBODY_CONTEXTTYPE));
+		registry.addContextType(new CodeTemplateContextType(CodeTemplateContextType.RECORDBODY_CONTEXTTYPE));
 
 		registry.addContextType(new CodeTemplateContextType(CodeTemplateContextType.FILECOMMENT_CONTEXTTYPE));
 		registry.addContextType(new CodeTemplateContextType(CodeTemplateContextType.TYPECOMMENT_CONTEXTTYPE));

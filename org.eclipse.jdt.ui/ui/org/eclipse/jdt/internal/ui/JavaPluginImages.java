@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -7,6 +7,10 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -115,6 +119,12 @@ public class JavaPluginImages {
 	public static final String IMG_OBJS_ENUM_PROTECTED= NAME_PREFIX + "enum_protected_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_ENUM_PRIVATE= NAME_PREFIX + "enum_private_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_ENUM_ALT= NAME_PREFIX + "enum_alt_obj.gif"; //$NON-NLS-1$
+
+	public static final String IMG_OBJS_RECORD= NAME_PREFIX + "record_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_RECORD_DEFAULT= NAME_PREFIX + "record_default_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_RECORD_PROTECTED= NAME_PREFIX + "record_protected_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_RECORD_PRIVATE= NAME_PREFIX + "record_private_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_RECORD_ALT= NAME_PREFIX + "record_alt_obj.gif"; //$NON-NLS-1$
 
 	public static final String IMG_OBJS_CUNIT= NAME_PREFIX + "jcu_obj.gif"; 				//$NON-NLS-1$
 	public static final String IMG_OBJS_CUNIT_RESOURCE= NAME_PREFIX + "jcu_resource_obj.gif"; 				//$NON-NLS-1$
@@ -292,6 +302,12 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OBJS_ENUM_PRIVATE= createManagedFromKey(T_OBJ, IMG_OBJS_ENUM_PRIVATE);
 	public static final ImageDescriptor DESC_OBJS_ENUM_ALT= createManagedFromKey(T_OBJ, IMG_OBJS_ENUM_ALT);
 
+	public static final ImageDescriptor DESC_OBJS_RECORD= createManagedFromKey(T_OBJ, IMG_OBJS_RECORD);
+	public static final ImageDescriptor DESC_OBJS_RECORD_DEFAULT= createManagedFromKey(T_OBJ, IMG_OBJS_RECORD_DEFAULT);
+	public static final ImageDescriptor DESC_OBJS_RECORD_PROTECTED= createManagedFromKey(T_OBJ, IMG_OBJS_RECORD_PROTECTED);
+	public static final ImageDescriptor DESC_OBJS_RECORD_PRIVATE= createManagedFromKey(T_OBJ, IMG_OBJS_RECORD_PRIVATE);
+	public static final ImageDescriptor DESC_OBJS_RECORD_ALT= createManagedFromKey(T_OBJ, IMG_OBJS_RECORD_ALT);
+	
 	public static final ImageDescriptor DESC_OBJS_JAR= createManagedFromKey(T_OBJ, IMG_OBJS_JAR);
 	public static final ImageDescriptor DESC_OBJS_JAR_TEST= createManagedFromKey(T_OBJ, IMG_OBJS_JAR_TEST);
 	public static final ImageDescriptor DESC_OBJS_EXTJAR= createManagedFromKey(T_OBJ, IMG_OBJS_EXTJAR);
@@ -441,6 +457,7 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OVR_FOCUS= createUnManagedCached(T_OVR, "focus_ovr.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_ANNOTATION= createUnManagedCached(T_OVR, "annotation_tsk.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_ENUM= createUnManagedCached(T_OVR, "enum_tsk.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_RECORD= createUnManagedCached(T_OVR, "record_tsk.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_INTERFACE= createUnManagedCached(T_OVR, "interface_tsk.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_CLASS= createUnManagedCached(T_OVR, "class_tsk.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_ABSTRACT_CLASS= createUnManagedCached(T_OVR, "class_abs_tsk.png"); //$NON-NLS-1$
@@ -459,6 +476,7 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_WIZBAN_NEWCLASS= createUnManaged(T_WIZBAN, "newclass_wiz.png"); 			//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_NEWINT= createUnManaged(T_WIZBAN, "newint_wiz.png"); 				//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_NEWENUM= createUnManaged(T_WIZBAN, "newenum_wiz.png"); 				//$NON-NLS-1$
+	public static final ImageDescriptor DESC_WIZBAN_NEWRECORD= createUnManaged(T_WIZBAN, "newrecord_wiz.png"); 				//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_NEWANNOT= createUnManaged(T_WIZBAN, "newannotation_wiz.png"); 				//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_NEWJPRJ= createUnManaged(T_WIZBAN, "newjprj_wiz.png"); 			//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_NEWSRCFOLDR= createUnManaged(T_WIZBAN, "newsrcfldr_wiz.png"); 	//$NON-NLS-1$
