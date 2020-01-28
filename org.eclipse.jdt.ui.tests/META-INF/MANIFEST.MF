@@ -24,6 +24,7 @@ Export-Package:
  org.eclipse.jdt.ui.tests.callhierarchy;x-internal:=true,
  org.eclipse.jdt.ui.tests.chkpii;x-internal:=true,
  org.eclipse.jdt.ui.tests.core;x-internal:=true,
+ org.eclipse.jdt.ui.tests.core.rules;x-internal:=true,
  org.eclipse.jdt.ui.tests.core.source;x-internal:=true,
  org.eclipse.jdt.ui.tests.dialogs;x-internal:=true,
  org.eclipse.jdt.ui.tests.jarexport;x-internal:=true,
