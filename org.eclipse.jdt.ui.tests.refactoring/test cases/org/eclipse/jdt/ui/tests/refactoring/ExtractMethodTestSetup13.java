@@ -20,12 +20,12 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import junit.framework.Test;
 
-public class ExtractMethodTestSetup12 extends Java12Setup {
+public class ExtractMethodTestSetup13 extends Java13Setup {
 
-	private IPackageFragment fTry12Package;
+	private IPackageFragment fTry13Package;
 	private IPackageFragment fInvalidSelectionPackage;
 
-	public ExtractMethodTestSetup12(Test test) {
+	public ExtractMethodTestSetup13(Test test) {
 		super(test);
 	}
 
@@ -36,12 +36,12 @@ public class ExtractMethodTestSetup12 extends Java12Setup {
 		RefactoringCore.getUndoManager().flush();
 
 		IPackageFragmentRoot root= getDefaultSourceFolder();
-		fTry12Package= root.createPackageFragment("try12_in", true, null);
-		fInvalidSelectionPackage= root.createPackageFragment("invalidSelection12", true, null);
+		fTry13Package= root.createPackageFragment("try13_in", true, null);
+		fInvalidSelectionPackage= root.createPackageFragment("invalidSelection13", true, null);
 	}
 
-	public IPackageFragment getTry12Package() {
-		return fTry12Package;
+	public IPackageFragment getTry13Package() {
+		return fTry13Package;
 	}
 
 	public IPackageFragment getInvalidSelectionPackage() {
