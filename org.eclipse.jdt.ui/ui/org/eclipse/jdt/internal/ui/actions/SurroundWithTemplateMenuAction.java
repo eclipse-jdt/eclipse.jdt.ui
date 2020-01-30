@@ -361,7 +361,7 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 		ITextSelection selection= getTextSelection(editor);
 		if (selection == null)
 			return false;
-		
+
 		IDocument document= editor.getDocumentProvider().getDocument(editor.getEditorInput());
 		try {
 			String contentType= TextUtilities.getContentType(document, IJavaPartitions.JAVA_PARTITIONING, selection.getOffset(), true);
@@ -396,7 +396,7 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 				j++;
 			}
 		}
-		if (result.size() == 0)
+		if (result.isEmpty())
 			return null;
 
 		return result.toArray(new IAction[result.size()]);

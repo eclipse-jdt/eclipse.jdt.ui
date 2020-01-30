@@ -42,7 +42,7 @@ public class RefactoringCorrectionProposal extends LinkedCorrectionProposal {
 
 	/**
 	 * Can be overridden by clients to perform expensive initializations of the refactoring
-	 * 
+	 *
 	 * @param refactoring the refactoring
 	 * @throws CoreException if something goes wrong during init
 	 */
@@ -61,7 +61,7 @@ public class RefactoringCorrectionProposal extends LinkedCorrectionProposal {
 		}
 		return (TextChange) fRefactoring.createChange(new NullProgressMonitor());
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal#getAdditionalProposalInfo(org.eclipse.core.runtime.IProgressMonitor)
 	 * @since 3.6

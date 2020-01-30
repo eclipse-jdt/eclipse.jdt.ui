@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2017 GK Software AG and others.
+ * Copyright (c) 2015, 2020 GK Software AG and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,8 +13,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.ByteArrayInputStream;
 import java.util.List;
+
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -39,36 +49,25 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.compiler.CompilationResult;
 
 import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.quickfix.JarUtil.ClassFileFilter;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
+@RunWith(JUnit4.class)
 public class AnnotateAssistTest15 extends AbstractAnnotateAssistTests {
+	
+	@Rule
+    public ProjectTestSetup projectsetup = new ProjectTestSetup();
 
 	protected static final String ANNOTATION_PATH= "annots";
 	
 	protected static final Class<?> THIS= AnnotateAssistTest15.class;
 	
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
-	}
-	
-	public AnnotateAssistTest15(String name) {
-		super(name);
-	}
-
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		fJProject1= ProjectTestSetup.getProject();
 		fJProject1.getProject().getFolder(ANNOTATION_PATH).create(true, true, null);
 		fJProject1.setOption(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
@@ -79,6 +78,7 @@ public class AnnotateAssistTest15 extends AbstractAnnotateAssistTests {
 	/*
 	 * Assert that the "Annotate" command can be invoked on a ClassFileEditor
 	 */
+	@Test
 	public void testAnnotateReturn() throws Exception {
 		
 		String MY_MAP_PATH= "pack/age/MyMap";
@@ -151,6 +151,7 @@ public class AnnotateAssistTest15 extends AbstractAnnotateAssistTests {
 	 * Assert two proposals ("@NonNull" and "@Nullable") on a simple return type (type variable).
 	 * Apply the second proposal and check the effect.
 	 */
+	@Test
 	public void testAnnotateReturn2() throws Exception {
 		
 		String MY_MAP_PATH= "pack/age/MyMap";
@@ -210,6 +211,7 @@ public class AnnotateAssistTest15 extends AbstractAnnotateAssistTests {
 	 * Assert two proposals ("@NonNull" and "Remove") if annotation file already says "@Nullable".
 	 * Apply the second proposal and check the effect.
 	 */
+	@Test
 	public void testAnnotateRemove() throws Exception {
 		
 		String MY_MAP_PATH= "pack/age/MyMap";
@@ -280,6 +282,7 @@ public class AnnotateAssistTest15 extends AbstractAnnotateAssistTests {
 	 * The method already has a 2-line entry (i.e., not yet annotated).
 	 * Apply the second proposal and check the effect.
 	 */
+	@Test
 	public void testAnnotateParameter_Array1() throws Exception {
 		
 		String X_PATH= "pack/age/X";
@@ -351,6 +354,7 @@ public class AnnotateAssistTest15 extends AbstractAnnotateAssistTests {
 	 * 
 	 * Cf. {@link AnnotateAssistTest15#testAnnotateParameter_Array1()}
 	 */
+	@Test
 	public void testAnnotateParameter_Varargs1() throws Exception {
 		
 		String X_PATH= "pack/age/X";
@@ -420,6 +424,7 @@ public class AnnotateAssistTest15 extends AbstractAnnotateAssistTests {
 	 * Assert two proposals ("@NonNull" and "@Nullable") on a parameter of a constructor.
 	 * Apply the second proposal and check the effect.
 	 */
+	@Test
 	public void testAnnotateConstructorParameter() throws Exception {
 		
 		String X_PATH= "pack/age/X";
@@ -489,6 +494,7 @@ public class AnnotateAssistTest15 extends AbstractAnnotateAssistTests {
 	 * Assert two proposals ("@NonNull" and "@Nullable") on a simple field type (type variable).
 	 * Apply the second proposal and check the effect.
 	 */
+	@Test
 	public void testAnnotateField1() throws Exception {
 		
 		String NODE_PATH= "pack/age/Node";
@@ -548,6 +554,7 @@ public class AnnotateAssistTest15 extends AbstractAnnotateAssistTests {
 	 * Assert two proposals ("@NonNull" and "@Nullable") on a parameterized field type.
 	 * Apply the second proposal and check the effect.
 	 */
+	@Test
 	public void testAnnotateField2() throws Exception {
 		
 		String NODE_PATH= "pack/age/Node";
@@ -603,6 +610,7 @@ public class AnnotateAssistTest15 extends AbstractAnnotateAssistTests {
 		}
 	}
 
+	@Test
 	public void testBug466232() throws Exception {
 		final String MISSINGPATH= "pack/age/Missing";
 		String CLASS2_PATH= "pack/age/Class2";

@@ -18,11 +18,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
-import junit.framework.TestCase;
-
+import org.eclipse.jdt.junit.JUnitCore;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
-
-import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -30,6 +27,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.junit.launcher.ITestKind;
@@ -38,6 +36,8 @@ import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
 import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
 
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
+
+import junit.framework.TestCase;
 
 
 public class TestTestSearchEngine extends TestCase {
@@ -49,8 +49,7 @@ public class TestTestSearchEngine extends TestCase {
 		super.setUp();
 		fProject= JavaProjectHelper.createJavaProject("TestProject", "bin");
 		JavaProjectHelper.addRTJar(fProject);
-		JavaProjectHelper.addVariableEntry(fProject, new Path(
-			"JUNIT_HOME/junit.jar"), null, null);
+		JavaProjectHelper.addToClasspath(fProject, JavaCore.newContainerEntry(JUnitCore.JUNIT4_CONTAINER_PATH));
 		fRoot= JavaProjectHelper.addSourceContainer(fProject, "src");
 	}
 

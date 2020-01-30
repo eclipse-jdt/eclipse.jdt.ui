@@ -19,7 +19,7 @@ public class RelevanceComputer {
 
 	/**
 	 * Computes the relevance for a given <code>CompletionProposal</code>.
-	 * 
+	 *
 	 * @param proposal the proposal to compute the relevance for
 	 * @return the relevance for <code>proposal</code>
 	 */

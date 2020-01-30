@@ -227,7 +227,7 @@ public class SmartBackspaceManager {
 
 	/**
 	 * Installs the receiver on a text viewer.
-	 * 
+	 *
 	 * @param viewer the text viewer
 	 */
 	public void install(ITextViewer viewer) {

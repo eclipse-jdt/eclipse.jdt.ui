@@ -297,7 +297,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 
 		/**
 		 * Set the key which is used to store the value.
-		 * 
+		 *
 		 * @param key New value
 		 */
 		public final void setKey(String key) {
@@ -387,7 +387,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 
 		/**
 		 * Create a new CheckboxPreference.
-		 * 
+		 *
 		 * @param parentComposite The composite on which the SWT widgets are added.
 		 * @param indent how many levels of indentation to apply.
 		 * @param label The label text for this Preference.
@@ -727,7 +727,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 
 		private StringPreference(Text control, String label, String key) {
 			super(control, label, key, FilteredPreferenceTree.TEXT_VALUE_MATCHER);
-			
+
 			fControl.addModifyListener(e -> updateValue());
 
 			fControl.addFocusListener(new FocusAdapter() {
@@ -760,7 +760,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 		/**
 		 * Helper class for easy, call-chain based building of subtrees that contain only Sections and one
 		 * type of preference.
-		 * 
+		 *
 		 * @param <T> Type of preference or section built
 		 */
 		public abstract class SimpleTreeBuilder<T extends PreferenceTreeNode<?>> {
@@ -995,7 +995,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 				}
 			}
 			int c= in.read();
-			while (c != '.' && c != -1) { // some extra nodes in stored tree 
+			while (c != '.' && c != -1) { // some extra nodes in stored tree
 				readExpansionState(new PreferenceTreeNode<>(null, null, false), in);
 				c= in.read();
 			}
@@ -1068,10 +1068,10 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 	 * The default focus manager. It knows all widgets which can have the focus and listens for
 	 * focusGained events, on which it stores the index of the current focus holder. When the dialog
 	 * is restarted, <code>restoreFocus()</code> sets the focus to the last control which had it.
-	 * 
+	 *
 	 * Focus manager also makes sure that proper preview is displayed for currently focused
 	 * preference.
-	 * 
+	 *
 	 * The standard Preference objects are managed by this focus manager if they are created using
 	 * the respective factory methods. Other SWT widgets can be added in subclasses when they are
 	 * created.
@@ -1540,7 +1540,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 		PreferenceTreeNode<?> currentNode= fFocusManager.fCurrentlyFocused;
 		if (currentNode == null)
 			return null;
-		
+
 		// try this node
 		String previewCode= doGetPreviewCode(currentNode);
 		if (previewCode != null)

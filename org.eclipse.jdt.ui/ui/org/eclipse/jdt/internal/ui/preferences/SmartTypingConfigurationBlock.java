@@ -127,7 +127,7 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 
 	/**
 	 * Adds the Smart Insert Mode note to the preference page.
-	 * 
+	 *
 	 * @param parent the parent composite
 	 * @since 3.7
 	 */
@@ -172,7 +172,7 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 
 	/**
 	 * Adds Indentation section to the preference page.
-	 * 
+	 *
 	 * @param parent the parent composite
 	 * @since 3.7
 	 */

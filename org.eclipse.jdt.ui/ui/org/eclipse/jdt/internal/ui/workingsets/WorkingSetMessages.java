@@ -78,7 +78,7 @@ public final class WorkingSetMessages extends NLS {
 	public static String WorkingSetConfigurationDialog_sort_working_sets;
 
 	public static String RemoveWorkingSetElementAction_label;
-	
+
 	public static String JavaMainSourcesWorkingSet_name;
 	public static String JavaTestSourcesWorkingSet_name;
 	public static String JavaSourcesWorkingSets_updating;

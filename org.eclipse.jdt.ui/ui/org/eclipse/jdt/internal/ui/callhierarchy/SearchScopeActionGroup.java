@@ -70,7 +70,7 @@ class SearchScopeActionGroup extends ActionGroup {
 
 	/**
 	 * Returns the current search scope.
-	 * 
+	 *
 	 * @param includeMask the include mask
 	 * @return the current search scope
 	 * @since 3.7
@@ -349,7 +349,7 @@ class SearchScopeActionGroup extends ActionGroup {
 
 	/**
 	 * Fetches the full description of the scope with the appropriate include mask.
-	 * 
+	 *
 	 * @param includeMask the include mask
 	 * @return the description of the scope with the appropriate include mask
 	 * @since 3.7

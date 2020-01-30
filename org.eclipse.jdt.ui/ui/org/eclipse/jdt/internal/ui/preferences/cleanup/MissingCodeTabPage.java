@@ -44,19 +44,19 @@ public final class MissingCodeTabPage extends AbstractCleanUpTabPage {
     	Group annotationsGroup= createGroup(numColumns, composite, CleanUpMessages.MissingCodeTabPage_GroupName_Annotations);
 
 		final CheckboxPreference annotationsPref= createCheckboxPref(annotationsGroup, numColumns, CleanUpMessages.MissingCodeTabPage_CheckboxName_AddMissingAnnotations, CleanUpConstants.ADD_MISSING_ANNOTATIONS, CleanUpModifyDialog.FALSE_TRUE);
-		
+
 		intent(annotationsGroup);
 		final CheckboxPreference overridePref= createCheckboxPref(annotationsGroup, numColumns - 1, CleanUpMessages.MissingCodeTabPage_CheckboxName_AddMissingOverrideAnnotations, CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE, CleanUpModifyDialog.FALSE_TRUE);
 		intent(annotationsGroup);
 		intent(annotationsGroup);
 		final CheckboxPreference overrideInterfacePref= createCheckboxPref(annotationsGroup, numColumns - 2, CleanUpMessages.MissingCodeTabPage_CheckboxName_AddMissingOverrideInterfaceAnnotations, CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE_FOR_INTERFACE_METHOD_IMPLEMENTATION, CleanUpModifyDialog.FALSE_TRUE);
-		
+
 		intent(annotationsGroup);
 		final CheckboxPreference deprecatedPref= createCheckboxPref(annotationsGroup, numColumns - 1, CleanUpMessages.MissingCodeTabPage_CheckboxName_AddMissingDeprecatedAnnotations, CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED, CleanUpModifyDialog.FALSE_TRUE);
-		
+
 		registerSlavePreference(annotationsPref, new CheckboxPreference[] {overridePref, deprecatedPref}, new CheckboxPreference[][] {{overrideInterfacePref}, {}});
 		registerSlavePreference(overridePref, new CheckboxPreference[] {overrideInterfacePref});
-		
+
 		overrideInterfacePref.setEnabled(overridePref.getEnabled() && overridePref.getChecked());
 
 		if (!isSaveAction()) {

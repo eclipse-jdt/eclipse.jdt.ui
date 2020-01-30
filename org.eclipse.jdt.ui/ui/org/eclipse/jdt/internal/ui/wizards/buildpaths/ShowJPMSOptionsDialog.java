@@ -58,7 +58,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
  */
 // inspired by org.eclipse.debug.internal.ui.launchConfigurations.ShowCommandLineDialog
 public class ShowJPMSOptionsDialog extends Dialog {
-	
+
 	private static final String BLANK= " "; //$NON-NLS-1$
 	private static final String COMMA= ","; //$NON-NLS-1$
 	private static final String OPTION_START= "--"; //$NON-NLS-1$

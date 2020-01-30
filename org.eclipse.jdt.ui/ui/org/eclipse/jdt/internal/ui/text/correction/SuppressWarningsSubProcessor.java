@@ -110,7 +110,7 @@ public class SuppressWarningsSubProcessor {
 		if (node == null) {
 			return;
 		}
-		
+
 		ASTNode target= node;
 		int relevance= IProposalRelevance.ADD_SUPPRESSWARNINGS;
 		do {
@@ -119,7 +119,7 @@ public class SuppressWarningsSubProcessor {
 				return;
 			target= target.getParent();
 		} while (target != null);
-		
+
 		ASTNode importStatement= ASTNodes.getParent(node, ImportDeclaration.class);
 		if (importStatement != null && !context.getASTRoot().types().isEmpty()) {
 			target= (ASTNode) context.getASTRoot().types().get(0);
@@ -246,14 +246,14 @@ public class SuppressWarningsSubProcessor {
 
 	/**
 	 * Adds a SuppressWarnings proposal if possible and returns whether parent nodes should be processed or not (and with what relevance).
-	 * 
+	 *
 	 * @param cu the compilation unit
 	 * @param node the node on which to add a SuppressWarning token
 	 * @param warningToken the warning token to add
 	 * @param relevance the proposal's relevance
 	 * @param proposals collector to which the proposal should be added
 	 * @return <code>0</code> if no further proposals should be added to parent nodes, or the relevance of the next proposal
-	 * 
+	 *
 	 * @since 3.6
 	 */
 	private static int addSuppressWarningsProposalIfPossible(ICompilationUnit cu, ASTNode node, String warningToken, int relevance, Collection<ICommandAccess> proposals) {

@@ -109,7 +109,7 @@ public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOpera
 					}
 				}
 			}
-			if (declarationNodes.size() == 0)
+			if (declarationNodes.isEmpty())
 				return null;
 
 			for (Iterator<ASTNode> iter= declarationNodes.iterator(); iter.hasNext();) {

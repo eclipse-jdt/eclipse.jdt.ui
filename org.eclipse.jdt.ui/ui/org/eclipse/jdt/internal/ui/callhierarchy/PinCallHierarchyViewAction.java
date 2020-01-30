@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -24,7 +24,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**
  * The action to pin the Call Hierarchy view.
- * 
+ *
  * @since 3.7
  */
 class PinCallHierarchyViewAction extends Action {
@@ -32,7 +32,7 @@ class PinCallHierarchyViewAction extends Action {
 
 	/**
 	 * Constructs a 'Pin Call Hierarchy view' action.
-	 * 
+	 *
 	 * @param view the Call Hierarchy view
 	 */
 	public PinCallHierarchyViewAction(CallHierarchyViewPart view) {

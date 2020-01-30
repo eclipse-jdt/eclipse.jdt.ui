@@ -2912,9 +2912,9 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	private static SwitchCase[] createSwitchCaseStatements(AST ast, ASTRewrite rewrite, List<Expression> caseExpressions) {
-		int len= (caseExpressions.size() == 0) ? 1 : caseExpressions.size();
+		int len= (caseExpressions.isEmpty()) ? 1 : caseExpressions.size();
 		SwitchCase[] switchCaseStatements= new SwitchCase[len];
-		if (caseExpressions.size() == 0) {
+		if (caseExpressions.isEmpty()) {
 			switchCaseStatements[0]= ast.newSwitchCase();
 			if (!ASTHelper.isSwitchCaseExpressionsSupportedInAST(ast)) {
 				switchCaseStatements[0].setExpression(null);

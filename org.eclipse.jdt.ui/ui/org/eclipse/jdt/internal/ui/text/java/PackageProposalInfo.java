@@ -49,7 +49,7 @@ public class PackageProposalInfo extends ProposalInfo {
 
 	/**
 	 * Resolves to a PackageFragment.
-	 * 
+	 *
 	 * @return the <code>IPackageFragment</code> or <code>null</code> if no Java element can be found
 	 * @throws JavaModelException thrown if the given path is <code>null</code> or absolute
 	 * @since 3.9

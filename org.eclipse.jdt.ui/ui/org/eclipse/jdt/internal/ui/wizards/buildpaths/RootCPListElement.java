@@ -22,7 +22,7 @@ import org.eclipse.jdt.core.IJavaProject;
  * RootCPListElement is special type of CPListElement whose children are CPListElement. They
  * represent the root node in the java build path tab and it may be possible to add or remove CPList
  * element from their children. They don't have any classpath entry corresponding to it
- * 
+ *
  * @author Vikas Chandra
  */
 public class RootCPListElement extends CPListElement {

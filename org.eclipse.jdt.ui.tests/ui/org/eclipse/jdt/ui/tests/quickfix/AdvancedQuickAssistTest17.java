@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 IBM Corporation and others.
+ * Copyright (c) 2011, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,6 +15,13 @@ package org.eclipse.jdt.ui.tests.quickfix;
 
 import java.util.Hashtable;
 import java.util.List;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -34,39 +41,26 @@ import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.tests.core.Java1d7ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.Java1d7ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
+@RunWith(JUnit4.class)
 public class AdvancedQuickAssistTest17 extends QuickFixTest {
 
-	private static final Class<AdvancedQuickAssistTest17> THIS= AdvancedQuickAssistTest17.class;
+	@Rule
+    public ProjectTestSetup projectsetup = new Java1d7ProjectTestSetup();
 
 	private IJavaProject fJProject1;
 
 	private IPackageFragmentRoot fSourceFolder;
 
-	public AdvancedQuickAssistTest17(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new Java1d7ProjectTestSetup(test);
-	}
-
-
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
@@ -91,11 +85,12 @@ public class AdvancedQuickAssistTest17 extends QuickFixTest {
 	}
 
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, Java1d7ProjectTestSetup.getDefaultClasspath());
 	}
 
+	@Test
 	public void testConvertSwitchToIf() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -158,6 +153,7 @@ public class AdvancedQuickAssistTest17 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2 });
 	}
 
+	@Test
 	public void testConvertIfToSwitch1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -206,6 +202,7 @@ public class AdvancedQuickAssistTest17 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testConvertIfToSwitch2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -234,6 +231,7 @@ public class AdvancedQuickAssistTest17 extends QuickFixTest {
 		assertProposalDoesNotExist(proposals, CorrectionMessages.AdvancedQuickAssistProcessor_convertIfElseToSwitch);
 	}
 
+	@Test
 	public void testConvertIfToSwitch3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -304,6 +302,7 @@ public class AdvancedQuickAssistTest17 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2 });
 	}
 
+	@Test
 	public void testConvertIfToSwitch4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -374,6 +373,7 @@ public class AdvancedQuickAssistTest17 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2 });
 	}
 
+	@Test
 	public void testConvertIfToSwitch5() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -435,6 +435,7 @@ public class AdvancedQuickAssistTest17 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2 });
 	}
 
+	@Test
 	public void testReplaceReturnConditionWithIf4() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=112443
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -472,6 +473,7 @@ public class AdvancedQuickAssistTest17 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 	
+	@Test
 	public void testReplaceReturnIfWithCondition3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -511,6 +513,7 @@ public class AdvancedQuickAssistTest17 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {expected1});
 	}
 	
+	@Test
 	public void testReplaceReturnIfWithCondition4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -551,6 +554,7 @@ public class AdvancedQuickAssistTest17 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {expected1});
 	}
 	
+	@Test
 	public void testConvertIfToSwitch() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();

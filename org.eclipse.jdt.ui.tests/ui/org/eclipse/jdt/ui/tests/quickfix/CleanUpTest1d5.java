@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 IBM Corporation and others.
+ * Copyright (c) 2019, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,6 +13,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
+
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -22,28 +27,18 @@ import org.eclipse.jdt.core.IPackageFragment;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
-import org.eclipse.jdt.ui.tests.core.Java1d5ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.Java1d5ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 /**
  * Tests the cleanup features related to Java 5.
  */
+@RunWith(JUnit4.class)
 public class CleanUpTest1d5 extends CleanUpTestCase {
-	private static final Class<CleanUpTest1d5> THIS= CleanUpTest1d5.class;
 
-	public CleanUpTest1d5(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new Java1d5ProjectTestSetup(test);
-	}
+	@Rule
+    public ProjectTestSetup projectsetup = new Java1d5ProjectTestSetup();
 
 	@Override
 	protected IJavaProject getProject() {
@@ -55,6 +50,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		return Java1d5ProjectTestSetup.getDefaultClasspath();
 	}
 
+	@Test
 	public void testJava50ForLoop01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -92,6 +88,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	@Test
 	public void testJava50ForLoop02() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -139,6 +136,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	@Test
 	public void testJava50ForLoop03() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -176,6 +174,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	@Test
 	public void testJava50ForLoop04() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -221,6 +220,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	@Test
 	public void testJava50ForLoop05() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -238,6 +238,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
 	}
 
+	@Test
 	public void testJava50ForLoop06() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -255,6 +256,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
 	}
 
+	@Test
 	public void testJava50ForLoop07() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -272,6 +274,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
 	}
 
+	@Test
 	public void testJava50ForLoop08() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -290,6 +293,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
 	}
 
+	@Test
 	public void testJava50ForLoop09() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -320,6 +324,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	@Test
 	public void testJava50ForLoop10() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -339,6 +344,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
 	}
 
+	@Test
 	public void testJava50ForLoop11() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -376,6 +382,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	@Test
 	public void testJava50ForLoop12() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -407,6 +414,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	@Test
 	public void testJava50ForLoop13() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -426,6 +434,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
 	}
 
+	@Test
 	public void testJava50ForLoop14() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -483,6 +492,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	@Test
 	public void testJava50ForLoop15() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -516,6 +526,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	@Test
 	public void testJava50ForLoopBug548002() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -543,6 +554,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	@Test
 	public void testJava50ForLoopBug550334() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -576,6 +588,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	@Test
 	public void testJava50ForLoopBug550672() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -613,6 +626,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	@Test
 	public void testBug550726() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -650,6 +664,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	@Test
 	public void testJava50ForLoopBug154939() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -670,6 +685,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
 	}
 
+	@Test
 	public void testJava50ForLoop160218() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -705,6 +721,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	@Test
 	public void testJava50ForLoop159449() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -755,6 +772,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	@Test
 	public void testJava50ForLoop160283_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -797,6 +815,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	@Test
 	public void testJava50ForLoop160283_2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -839,6 +858,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	@Test
 	public void testJava50ForLoop160312() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -872,6 +892,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	@Test
 	public void testJava50ForLoop160270() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -927,6 +948,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	@Test
 	public void testJava50ForLoop163122_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -960,6 +982,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	@Test
 	public void testJava50ForLoop163122_2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -989,6 +1012,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	@Test
 	public void testJava50ForLoop163122_3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -1022,6 +1046,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	@Test
 	public void testJava50ForLoop163122_4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -1051,6 +1076,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	@Test
 	public void testJava50ForLoop163122_5() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -1084,6 +1110,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	@Test
 	public void testJava50ForLoop110599() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -1127,6 +1154,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	@Test
 	public void testJava50ForLoop269595() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -1160,6 +1188,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	@Test
 	public void testJava50ForLoop264421() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -1198,6 +1227,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	@Test
 	public void testJava50ForLoop274199() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -1256,6 +1286,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	@Test
 	public void testJava50ForLoop349782() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=349782
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -1288,6 +1319,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	@Test
 	public void testJava50ForLoop344674() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -1320,6 +1352,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	@Test
 	public void testJava50ForLoop374264() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=374264
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -1347,6 +1380,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
 	}
 
+	@Test
 	public void testAutoboxing() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -1388,6 +1422,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	@Test
 	public void testAutoboxingSpecialCases() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -1781,6 +1816,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	@Test
 	public void testDoNotUseAutoboxingOnString() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -1802,6 +1838,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
 	}
 
+	@Test
 	public void testUseUnboxingOnPrimitiveDeclaration() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -1845,6 +1882,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	@Test
 	public void testDoNotUseUnboxingOnNarrowingType() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -1866,6 +1904,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
 	}
 
+	@Test
 	public void testDoNotUseUnboxingWhenTypesDontMatch() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -1888,6 +1927,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
 	}
 
+	@Test
 	public void testUnboxing2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -1931,6 +1971,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	@Test
 	public void testUnboxing3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -1991,6 +2032,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	@Test
 	public void testUnboxing4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -2019,6 +2061,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	@Test
 	public void testUnboxing5() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -2047,6 +2090,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	@Test
 	public void testUnboxing6() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -2075,6 +2119,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	@Test
 	public void testUnboxing7() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -2103,6 +2148,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	@Test
 	public void testUnboxing8() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -2131,6 +2177,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	@Test
 	public void testUnboxing9() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -2159,6 +2206,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	@Test
 	public void testUnboxing10() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -2187,6 +2235,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	@Test
 	public void testUnboxing11() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -2215,6 +2264,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	@Test
 	public void testUnboxingInArrayAccess() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -2243,6 +2293,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	@Test
 	public void testUnnecessaryArrayBug550129() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		String sample= "" //

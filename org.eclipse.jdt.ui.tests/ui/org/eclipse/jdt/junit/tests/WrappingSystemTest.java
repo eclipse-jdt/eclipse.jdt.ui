@@ -16,13 +16,13 @@ package org.eclipse.jdt.junit.tests;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.jdt.junit.JUnitCore;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Table;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jface.viewers.StructuredSelection;
 
@@ -43,6 +43,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.junit.ui.FailureTableDisplay;
@@ -140,8 +141,7 @@ public class WrappingSystemTest extends TestCase implements ILaunchesListener2 {
 			JavaModelException {
 		// have to set up an 1.3 project to avoid requiring a 5.0 VM
 		JavaProjectHelper.addRTJar13(fProject);
-		JavaProjectHelper.addVariableEntry(fProject, new Path(
-				"JUNIT_HOME/junit.jar"), null, null);
+		JavaProjectHelper.addToClasspath(fProject, JavaCore.newContainerEntry(JUnitCore.JUNIT4_CONTAINER_PATH));
 
 		IPackageFragmentRoot root = JavaProjectHelper.addSourceContainer(
 				fProject, "src");

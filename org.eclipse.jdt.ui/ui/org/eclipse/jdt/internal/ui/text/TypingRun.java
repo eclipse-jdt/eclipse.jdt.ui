@@ -69,7 +69,7 @@ public final class TypingRun {
 
 		/**
 		 * Private constructor for type safe enumeration.
-		 * 
+		 *
 		 * @param isModification the flag indicating whether it is a modification
 		 * @param name the name
 		 */

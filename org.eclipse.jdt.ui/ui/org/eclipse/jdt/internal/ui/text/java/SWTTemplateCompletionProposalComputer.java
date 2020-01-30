@@ -176,7 +176,7 @@ public class SWTTemplateCompletionProposalComputer extends AbstractTemplateCompl
 
 	/**
 	 * Tells whether SWT is on the given project's class path.
-	 * 
+	 *
 	 * @param javaProject the Java project
 	 * @return <code>true</code> if the given project's class path
 	 */

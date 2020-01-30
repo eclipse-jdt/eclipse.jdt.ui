@@ -56,10 +56,10 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
  * Helper to save dirty editors prior to starting a refactoring.
- * 
+ *
  * @see PreferenceConstants#REFACTOR_SAVE_ALL_EDITORS
  * @since 3.5
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class RefactoringSaveHelper {
@@ -81,16 +81,16 @@ public class RefactoringSaveHelper {
 	 * Save mode to not save any editors.
 	 */
 	public static final int SAVE_NOTHING= 3;
-	
+
 	/**
 	 * Save mode to save all editors that are known to cause trouble for Java refactorings, e.g.
 	 * editors on compilation units that are not in working copy mode.
 	 */
 	public static final int SAVE_REFACTORING= 4;
-	
+
 	/**
 	 * Creates a refactoring save helper with the given save mode.
-	 * 
+	 *
 	 * @param saveMode one of the SAVE_* constants
 	 */
 	public RefactoringSaveHelper(int saveMode) {
@@ -104,7 +104,7 @@ public class RefactoringSaveHelper {
 	/**
 	 * Saves all editors. Depending on the {@link PreferenceConstants#REFACTOR_SAVE_ALL_EDITORS}
 	 * preference, the user is asked to save affected dirty editors.
-	 * 
+	 *
 	 * @param shell the parent shell for the confirmation dialog
 	 * @return <code>true</code> if save was successful and refactoring can proceed;
 	 * 		false if the refactoring must be cancelled
@@ -187,13 +187,13 @@ public class RefactoringSaveHelper {
 
 	/**
 	 * Returns whether this save helper did actually save any files.
-	 * 
+	 *
 	 * @return <code>true</code> iff files have been saved
 	 */
 	public boolean didSaveFiles() {
 		return fFilesSaved;
 	}
-	
+
 	private boolean askSaveAllDirtyEditors(Shell shell, IEditorPart[] dirtyEditors) {
 		final boolean canSaveAutomatically= fSaveMode != SAVE_ALL_ALWAYS_ASK;
 		if (canSaveAutomatically && RefactoringSavePreferences.getSaveAllEditors()) //must save everything

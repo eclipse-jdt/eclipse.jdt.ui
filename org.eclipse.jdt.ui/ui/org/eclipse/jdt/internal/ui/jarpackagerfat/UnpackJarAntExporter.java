@@ -43,7 +43,7 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 /**
  * Create an ANT script for a runnable JAR wit libraries in a sub-folder. The script is generated
  * based on the classpath of the selected launch-configuration.
- * 
+ *
  * @since 3.5
  */
 public class UnpackJarAntExporter extends FatJarAntExporter {

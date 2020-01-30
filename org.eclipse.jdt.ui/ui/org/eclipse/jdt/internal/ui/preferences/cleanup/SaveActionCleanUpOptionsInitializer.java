@@ -22,7 +22,7 @@ import org.eclipse.jdt.ui.cleanup.ICleanUpOptionsInitializer;
 
 /**
  * The clean up initializer for save actions.
- * 
+ *
  * @since 3.5
  */
 public class SaveActionCleanUpOptionsInitializer implements ICleanUpOptionsInitializer {

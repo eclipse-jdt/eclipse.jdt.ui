@@ -68,7 +68,7 @@ public class SelectionConverter {
 	 * structured selection.</li>
 	 * <li><code>default</code>: returns an empty structured selection.</li>
 	 * </ul>
-	 * 
+	 *
 	 * @param part the part
 	 * @return the selection
 	 * @throws JavaModelException thrown when the type root can not be accessed
@@ -130,7 +130,7 @@ public class SelectionConverter {
 
 	/**
 	 * Perform a code resolve at the current selection of an editor
-	 * 
+	 *
 	 * @param editor the editor
 	 * @return the resolved elements (only from primary working copies)
 	 * @throws JavaModelException when the type root can not be accessed
@@ -141,7 +141,7 @@ public class SelectionConverter {
 
 	/**
 	 * Perform a code resolve at the current selection of an editor
-	 * 
+	 *
 	 * @param editor the editor
 	 * @param primaryOnly if <code>true</code> only primary working copies will be returned
 	 * @return the resolved elements
@@ -157,7 +157,7 @@ public class SelectionConverter {
 
 	/**
 	 * Perform a code resolve in a separate thread.
-	 * 
+	 *
 	 * @param editor the editor
 	 * @param primaryOnly if <code>true</code> only primary working copies will be returned
 	 * @return the resolved elements
@@ -176,7 +176,7 @@ public class SelectionConverter {
 
 	/**
 	 * Returns the element surrounding the selection of the given editor.
-	 * 
+	 *
 	 * @param editor the editor
 	 * @return the element surrounding the current selection (only from primary working copies), or <code>null</code> if none
 	 * @throws JavaModelException if the Java type root does not exist or if an exception occurs
@@ -188,7 +188,7 @@ public class SelectionConverter {
 
 	/**
 	 * Returns the element surrounding the selection of the given editor.
-	 * 
+	 *
 	 * @param editor the editor
 	 * @param primaryOnly if <code>true</code> only primary working copies will be returned
 	 * @return the element surrounding the current selection, or <code>null</code> if none

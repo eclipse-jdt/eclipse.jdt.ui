@@ -458,7 +458,7 @@ public class DialogPackageExplorer implements IMenuListener, IPostSelectionProvi
      * @param elements the object to be selected and displayed
      */
     public void setSelection(final List<?> elements) {
-        if (elements == null || elements.size() == 0)
+        if (elements == null || elements.isEmpty())
             return;
 		try {
 	        ResourcesPlugin.getWorkspace().run(new IWorkspaceRunnable() {

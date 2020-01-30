@@ -62,7 +62,7 @@ public class WorkingSetModel {
 
 	/**
 	 * Key associated with the sort state of working sets.
-	 * 
+	 *
 	 * @since 3.5
 	 */
 	private static final String TAG_SORT_WORKING_SETS= "sortWorkingSets"; //$NON-NLS-1$
@@ -79,13 +79,13 @@ public class WorkingSetModel {
 
 	/**
 	 * Value of the sorted state of working sets.
-	 * 
+	 *
 	 * @since 3.5
 	 */
 	private boolean fIsSortingEnabled;
 
 	/**
-	 * List of all working sets. 
+	 * List of all working sets.
 	 * @since 3.7
 	 */
 	private List<IWorkingSet> fAllWorkingSets;
@@ -371,7 +371,7 @@ public class WorkingSetModel {
 
 	/**
 	 * Returns the array of all working sets.
-	 * 
+	 *
 	 * @return the array of all working sets
 	 * @since 3.7
 	 */
@@ -383,7 +383,7 @@ public class WorkingSetModel {
 
 	/**
 	 * Returns the list containing active and all working sets from the working set managers.
-	 * 
+	 *
 	 * @return the list of all the working sets
 	 * @since 3.7
 	 */
@@ -408,7 +408,7 @@ public class WorkingSetModel {
 
 	/**
 	 * Adds newly created working sets to the list of all working sets.
-	 * 
+	 *
 	 * @param result the list of all working sets from the working set managers
 	 * @since 3.7
 	 */
@@ -427,7 +427,7 @@ public class WorkingSetModel {
 	 * ordering of the active working sets must be same in both allWorkingSets and activeWorkingSets
 	 * arrays, else the method throws an <code>IllegalArgumentException</code.
 	 * </p>
-	 * 
+	 *
 	 * @param allWorkingSets the array of all working sets
 	 * @param isSortingEnabled <code>true</code> if sorting is enabled, <code>false</code> otherwise
 	 * @param activeWorkingSets the array of active working sets
@@ -448,9 +448,9 @@ public class WorkingSetModel {
 	 * Note: If the relative ordering of the active working sets is not same in both fAllWorkingSets
 	 * and fActiveWorkingSets, fAllWorkingSets is re-ordered according to fActiveWorkingSets.
 	 * </p>
-	 * 
+	 *
 	 * @param workingSets the active working sets to be set
-	 * 
+	 *
 	 */
 	public void setActiveWorkingSets(IWorkingSet[] workingSets) {
 		Assert.isLegal(Arrays.asList(getAllWorkingSets()).containsAll(Arrays.asList(workingSets)));
@@ -469,7 +469,7 @@ public class WorkingSetModel {
 	/**
 	 * Adjusts the relative ordering of the active working sets in fAllWorkingSets according to
 	 * fActiveWorkingSets.
-	 * 
+	 *
 	 * @since 3.7
 	 */
 	private void adjustOrderingOfAllWorkingSets() {
@@ -492,7 +492,7 @@ public class WorkingSetModel {
 	/**
 	 * Checks if the order of active working sets is different in the active and all working set
 	 * lists.
-	 * 
+	 *
 	 * @param allWorkingSets the list of all working sets
 	 * @param activeWorkingSets the list of active working sets
 	 * @return <code>true</code> if the order is different, <code>false</code> otherwise
@@ -512,7 +512,7 @@ public class WorkingSetModel {
 
 	/**
 	 * Sets the active working sets.
-	 * 
+	 *
 	 * @param workingSets the array of working sets
 	 * @param isSortingEnabled <code>true</code> if sorting is enabled, <code>false</code> otherwise
 	 * @since 3.5
@@ -545,7 +545,7 @@ public class WorkingSetModel {
 
 	/**
 	 * Restore localWorkingSetManager and active working sets.
-	 * 
+	 *
 	 * @param memento a memento
 	 * @return whether the restore was successful
 	 */
@@ -565,7 +565,7 @@ public class WorkingSetModel {
 				}
 			}
 		}
-		
+
 		String isSortingEnabled= memento.getString(TAG_SORT_WORKING_SETS);
 		if (isSortingEnabled == null) {
 			fIsSortingEnabled= false;
@@ -662,7 +662,7 @@ public class WorkingSetModel {
 
 	/**
 	 * Tells whether the given working set is supported as top-level element
-	 * 
+	 *
 	 * @param workingSet the working set to test
 	 * @return <code>true</code> if the given working set is supported as top-level element
 	 * @since 3.6
@@ -716,7 +716,7 @@ public class WorkingSetModel {
 
 	/**
 	 * Returns whether sorting is enabled for working sets.
-	 * 
+	 *
 	 * @return <code>true</code> if sorting is enabled, <code>false</code> otherwise
 	 * @since 3.5
 	 */

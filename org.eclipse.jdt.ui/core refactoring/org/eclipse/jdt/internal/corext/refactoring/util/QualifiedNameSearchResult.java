@@ -59,7 +59,7 @@ public class QualifiedNameSearchResult {
 
 	public Change getSingleChange(IFile[] alreadyTouchedFiles) {
 		Collection<TextChange> values= fChanges.values();
-		if (values.size() == 0)
+		if (values.isEmpty())
 			return null;
 
 		CompositeChange result= new CompositeChange(RefactoringCoreMessages.QualifiedNameSearchResult_change_name);

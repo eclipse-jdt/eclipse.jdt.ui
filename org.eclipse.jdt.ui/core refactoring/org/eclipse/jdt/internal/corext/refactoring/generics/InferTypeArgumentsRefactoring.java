@@ -405,7 +405,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 	 * @return the new type arguments, or <code>null</code> iff an argument could not be inferred
 	 */
 	private static Type[] getTypeArguments(Type baseType, ArrayList<CollectionElementVariable2> typeArgumentCvs, CompilationUnitRewrite rewrite, InferTypeArgumentsTCModel tCModel, boolean leaveUnconstraindRaw) {
-		if (typeArgumentCvs.size() == 0)
+		if (typeArgumentCvs.isEmpty())
 			return null;
 
 		Type[] typeArguments= new Type[typeArgumentCvs.size()];

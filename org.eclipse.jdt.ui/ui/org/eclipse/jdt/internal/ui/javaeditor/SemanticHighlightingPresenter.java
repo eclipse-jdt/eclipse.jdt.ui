@@ -466,7 +466,7 @@ public class SemanticHighlightingPresenter extends SemanticHighlightingPresenter
 	 * Add a position with the given range and highlighting unconditionally, only from UI thread.
 	 * The position will also be registered on the document. The text presentation is not
 	 * invalidated.
-	 * 
+	 *
 	 * @param offset The range offset
 	 * @param length The range length
 	 * @param highlighting the highlighting

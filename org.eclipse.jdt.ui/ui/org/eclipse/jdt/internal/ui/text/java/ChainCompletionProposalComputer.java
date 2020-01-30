@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010, 2019 Darmstadt University of Technology and others
+ * Copyright (c) 2010, 2020 Darmstadt University of Technology and others
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,7 +27,6 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
@@ -63,8 +62,6 @@ public class ChainCompletionProposalComputer implements IJavaCompletionProposalC
 
 	private String error;
 
-	private IJavaElement invocationSite;
-
 	private String[] excludedTypes;
 
 	@Override
@@ -96,7 +93,6 @@ public class ChainCompletionProposalComputer implements IJavaCompletionProposalC
 			// try to continue
 		}
 
-		invocationSite= ctx.getCoreContext().getEnclosingElement();
 		return true;
 	}
 
@@ -158,7 +154,7 @@ public class ChainCompletionProposalComputer implements IJavaCompletionProposalC
 			excludedTypes[i]= "L" + excludedTypes[i].replace('.', '/'); //$NON-NLS-1$
 		}
 
-		final IType invocationType= ((IMember) invocationSite).getCompilationUnit().findPrimaryType();
+		final IType invocationType= ctx.getCompilationUnit().findPrimaryType();
 
 		final List<ChainType> expectedTypes= ChainElementAnalyzer.resolveBindingsForExpectedTypes(ctx.getProject(), ctx.getCoreContext());
 		final ChainFinder finder= new ChainFinder(expectedTypes, Arrays.asList(excludedTypes), invocationType);

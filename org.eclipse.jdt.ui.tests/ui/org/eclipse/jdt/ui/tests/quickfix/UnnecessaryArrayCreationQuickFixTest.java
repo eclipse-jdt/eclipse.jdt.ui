@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Red Hat Inc. and others.
+ * Copyright (c) 2019, 2020 Red Hat Inc. and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,8 +13,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
 import java.util.Hashtable;
 import java.util.List;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -29,7 +39,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -37,31 +47,18 @@ import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.QuickAssistProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
+@RunWith(JUnit4.class)
 public class UnnecessaryArrayCreationQuickFixTest extends QuickFixTest {
 
-	private static final Class<UnnecessaryArrayCreationQuickFixTest> THIS= UnnecessaryArrayCreationQuickFixTest.class;
+	@Rule
+    public ProjectTestSetup projectsetup = new ProjectTestSetup();
 
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
 	private FixCorrectionProposal fRemoveArrayCreationProposal;
 
-	public UnnecessaryArrayCreationQuickFixTest(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
-	}
-
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
@@ -76,14 +73,15 @@ public class UnnecessaryArrayCreationQuickFixTest extends QuickFixTest {
 		fRemoveArrayCreationProposal= null;
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 		fJProject1= null;
 		fSourceFolder= null;
 		fRemoveArrayCreationProposal= null;
 	}
 
+	@Test
 	public void testMethodCase1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -118,6 +116,7 @@ public class UnnecessaryArrayCreationQuickFixTest extends QuickFixTest {
 		assertEqualString(preview1, expected);
 	}
 
+	@Test
 	public void testMethodCase2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -152,6 +151,7 @@ public class UnnecessaryArrayCreationQuickFixTest extends QuickFixTest {
 		assertEqualString(preview1, expected);
 	}
 
+	@Test
 	public void testMethodCase3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -186,6 +186,7 @@ public class UnnecessaryArrayCreationQuickFixTest extends QuickFixTest {
 		assertEqualString(preview1, expected);
 	}
 
+	@Test
 	public void testNoMethodProposalCase1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -204,6 +205,7 @@ public class UnnecessaryArrayCreationQuickFixTest extends QuickFixTest {
 		assertNull(fRemoveArrayCreationProposal);
 	}
 
+	@Test
 	public void testNoMethodProposalCase2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -225,6 +227,7 @@ public class UnnecessaryArrayCreationQuickFixTest extends QuickFixTest {
 		assertNull(fRemoveArrayCreationProposal);
 	}
 
+	@Test
 	public void testNoMethodProposalCase3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -247,6 +250,7 @@ public class UnnecessaryArrayCreationQuickFixTest extends QuickFixTest {
 	}
 
 	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=558614
+	@Test
 	public void testNoMethodProposalCase4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -265,6 +269,7 @@ public class UnnecessaryArrayCreationQuickFixTest extends QuickFixTest {
 		assertNull(fRemoveArrayCreationProposal);
 	}
 
+	@Test
 	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=559175
 	public void testNoMethodProposalCase5() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -284,6 +289,7 @@ public class UnnecessaryArrayCreationQuickFixTest extends QuickFixTest {
 		assertNull(fRemoveArrayCreationProposal);
 	}
 
+	@Test
 	public void testSuperCase1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -332,6 +338,7 @@ public class UnnecessaryArrayCreationQuickFixTest extends QuickFixTest {
 		assertEqualString(preview1, expected);
 	}
 
+	@Test
 	public void testSuperCase2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -380,6 +387,7 @@ public class UnnecessaryArrayCreationQuickFixTest extends QuickFixTest {
 		assertEqualString(preview1, expected);
 	}
 
+	@Test
 	public void testSuperCase3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -428,6 +436,7 @@ public class UnnecessaryArrayCreationQuickFixTest extends QuickFixTest {
 		assertEqualString(preview1, expected);
 	}
 
+	@Test
 	public void testSuperCase4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -476,6 +485,7 @@ public class UnnecessaryArrayCreationQuickFixTest extends QuickFixTest {
 		assertEqualString(preview1, expected);
 	}
 
+	@Test
 	public void testNoSuperMethodProposalCase1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -501,6 +511,7 @@ public class UnnecessaryArrayCreationQuickFixTest extends QuickFixTest {
 		assertNull(fRemoveArrayCreationProposal);
 	}
 
+	@Test
 	public void testNoSuperMethodProposalCase2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -526,6 +537,7 @@ public class UnnecessaryArrayCreationQuickFixTest extends QuickFixTest {
 		assertNull(fRemoveArrayCreationProposal);
 	}
 
+	@Test
 	public void testNoSuperMethodProposalCase3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();

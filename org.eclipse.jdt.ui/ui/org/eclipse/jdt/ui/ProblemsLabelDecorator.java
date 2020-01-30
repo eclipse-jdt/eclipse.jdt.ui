@@ -268,7 +268,7 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 		}
 		return false;
 	}
-	
+
 	private boolean isIgnoringOptionalProblems(IJavaProject project) throws JavaModelException {
 		IPath projectPath= project.getPath();
 		IClasspathEntry[] rawClasspath= project.getRawClasspath();
@@ -322,24 +322,24 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 
 	private int getPackageErrorTicksFromMarkers(IPackageFragment pack) throws CoreException {
 		// Packages are special: They must not consider markers on subpackages.
-		
+
 		IResource res= pack.getResource();
 		if (res == null || !res.isAccessible()) {
 			return 0;
 		}
-		
+
 		// markers on package itself (e.g. missing @NonNullByDefault)
 		int severity= findMaxProblemSeverity(res, IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
 		if (severity == IMarker.SEVERITY_ERROR)
 			return ERRORTICK_ERROR;
-		
+
 		// markers on CUs
 		for (ICompilationUnit cu : pack.getCompilationUnits()) {
 			severity= Math.max(severity, findMaxProblemSeverity(cu.getResource(), IMarker.PROBLEM, true, IResource.DEPTH_ZERO));
 			if (severity == IMarker.SEVERITY_ERROR)
 				return ERRORTICK_ERROR;
 		}
-		
+
 		// markers on files and folders
 		for (Object object : pack.getNonJavaResources()) {
 			if (object instanceof IResource) {
@@ -349,7 +349,7 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 					return ERRORTICK_ERROR;
 			}
 		}
-		
+
 		// SEVERITY_ERROR already handled above
 		if (severity == IMarker.SEVERITY_WARNING) {
 			return ERRORTICK_WARNING;
@@ -359,7 +359,7 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 		}
 		return 0;
 	}
-	
+
 	private int findMaxProblemSeverity (IResource res, String type, boolean includeSubtypes, int depth) throws CoreException {
 		try {
 			return res.findMaxProblemSeverity(type, includeSubtypes, depth);
@@ -470,12 +470,7 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 		}
 		fListeners.add(listener);
 		if (fProblemChangedListener == null) {
-			fProblemChangedListener= new IProblemChangedListener() {
-				@Override
-				public void problemsChanged(IResource[] changedResources, boolean isMarkerChange) {
-					fireProblemsChanged(changedResources, isMarkerChange);
-				}
-			};
+			fProblemChangedListener= this::fireProblemsChanged;
 			JavaPlugin.getDefault().getProblemMarkerManager().addListener(fProblemChangedListener);
 		}
 	}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 IBM Corporation and others.
+ * Copyright (c) 2019, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,6 +15,12 @@ package org.eclipse.jdt.ui.tests.quickfix;
 
 import java.util.ArrayList;
 
+import org.junit.After;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
+
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
@@ -25,82 +31,34 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
-import org.eclipse.jdt.ui.tests.core.Java14ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.Java14ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
+@RunWith(JUnit4.class)
 public class QuickFixTest14 extends QuickFixTest {
 
-	private static final Class<QuickFixTest14> THIS= QuickFixTest14.class;
+//	private static final Class<QuickFixTest14> THIS= QuickFixTest14.class;
+	
+    @Rule
+    public ProjectTestSetup projectsetup = new Java14ProjectTestSetup(true);
 
-	private IJavaProject fJProject1;
+    private IJavaProject fJProject1;
 
-	private IPackageFragmentRoot fSourceFolder;
+    private IPackageFragmentRoot fSourceFolder;
 
-	public QuickFixTest14(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return new Java14ProjectTestSetup(new TestSuite(THIS), true);
-	}
-
-	public static Test setUpTest(Test test) {
-		Test testToReturn= new Java14ProjectTestSetup(test, true);
-		return testToReturn;
-	}
-
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-	}
-
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		if (fJProject1 != null) {
 			JavaProjectHelper.delete(fJProject1);
 		}
-
-		super.tearDown();
 	}
 
+//	@Test
 //	public void testEnablePreviewsAndOpenCompilerPropertiesProposals() throws Exception {
 //		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 //		fJProject1.setRawClasspath(Java14ProjectTestSetup.getDefaultClasspath(), null);
-//		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
-//		
-//		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
-//		
-//		
-//		StringBuffer buf= new StringBuffer();
-//		buf.append("module test {\n");
-//		buf.append("}\n");
-//		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-//		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
-//		
-//		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-//		buf= new StringBuffer();
-//		buf.append("package test;\n");
-//		buf.append("public record Rec() {\n");
-//		buf.append("}\n");
-//		ICompilationUnit cu= pack.createCompilationUnit("Rec.java", buf.toString(), false, null);
-//		
-//		CompilationUnit astRoot= getASTRoot(cu);
-//		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1, null);
-//		
-//		assertNumberOfProposals(proposals, 2);
-//		String label1= CorrectionMessages.PreviewFeaturesSubProcessor_enable_preview_features;
-//		assertProposalExists(proposals, label1);
-//		String label2= CorrectionMessages.PreviewFeaturesSubProcessor_open_compliance_properties_page_enable_preview_features;
-//		assertProposalExists(proposals, label2);
-//	}
-//	
-//	public void testGetNeedHigherComplianceProposalsAndEnablePreviewsProposal() throws Exception {
-//		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-//		fJProject1.setRawClasspath(Java13ProjectTestSetup.getDefaultClasspath(), null);
 //		JavaProjectHelper.set13CompilerOptions(fJProject1, false);
 //		
 //		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -115,12 +73,104 @@ public class QuickFixTest14 extends QuickFixTest {
 //		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
 //		buf= new StringBuffer();
 //		buf.append("package test;\n");
-//		buf.append("public record Rec() {\n");
+//		buf.append("public class Cls {\n");
+//		buf.append("  String foo(Day day) {\n");
+//		buf.append("	int x = 0;\n");
+//		buf.append("	var today = switch(day){\n");
+//		buf.append("		case SATURDAY, SUNDAY: yield \"Weekend day\";\n");
+//		buf.append("		case MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY: {\n");
+//		buf.append("   	 		var kind = \"Working day\";\n");
+//		buf.append("    		yield kind;\n");
+//		buf.append("		}\n");
+//		buf.append("		default: {\n");
+//		buf.append("    		var kind = day.name();\n");
+//		buf.append("   	 		System.out.println(kind + x);\n");
+//		buf.append("   	 		throw new IllegalArgumentException(\"Invalid day: \" + kind);\n");
+//		buf.append("		}\n");
+//		buf.append("  	};\n");
+//		buf.append("  	return today;\n");
+//		buf.append("  }\n");
 //		buf.append("}\n");
-//		ICompilationUnit cu= pack.createCompilationUnit("Rec.java", buf.toString(), false, null);
+//		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+//		
+//		buf= new StringBuffer();
+//		buf= new StringBuffer();
+//		buf.append("package test;\n");
+//		buf.append("public enum Day {\n");
+//		buf.append("	SUNDAY,\n");
+//		buf.append("	MONDAY,\n");
+//		buf.append("	TUESDAY,\n");
+//		buf.append("	WEDNESDAY,\n");
+//		buf.append("	THURSDAY,\n");
+//		buf.append("	FRIDAY,\n");
+//		buf.append("	SATURDAY\n");
+//		buf.append("}\n");
+//		pack.createCompilationUnit("Day.java", buf.toString(), false, null);
 //		
 //		CompilationUnit astRoot= getASTRoot(cu);
-//		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1, null);
+//		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 11, null);
+//		
+//		assertNumberOfProposals(proposals, 2);
+//		String label1= CorrectionMessages.PreviewFeaturesSubProcessor_enable_preview_features;
+//		assertProposalExists(proposals, label1);
+//		String label2= CorrectionMessages.PreviewFeaturesSubProcessor_open_compliance_properties_page_enable_preview_features;
+//		assertProposalExists(proposals, label2);
+//	}
+//	
+//	@Test
+//	public void testGetNeedHigherComplianceProposalsAndEnablePreviewsProposal() throws Exception {
+//		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+//		fJProject1.setRawClasspath(Java10ProjectTestSetup.getDefaultClasspath(), null);
+//		JavaProjectHelper.set12CompilerOptions(fJProject1, false);
+//		
+//		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+//		
+//		
+//		StringBuffer buf= new StringBuffer();
+//		buf.append("module test {\n");
+//		buf.append("}\n");
+//		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+//		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+//		
+//		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+//		buf= new StringBuffer();
+//		buf.append("package test;\n");
+//		buf.append("public class Cls {\n");
+//		buf.append("  String foo(Day day) {\n");
+//		buf.append("	int x = 0;\n");
+//		buf.append("	var today = switch(day){\n");
+//		buf.append("		case SATURDAY, SUNDAY: yield \"Weekend day\";\n");
+//		buf.append("		case MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY: {\n");
+//		buf.append("   	 		var kind = \"Working day\";\n");
+//		buf.append("    		yield kind;\n");
+//		buf.append("		}\n");
+//		buf.append("		default: {\n");
+//		buf.append("    		var kind = day.name();\n");
+//		buf.append("   	 		System.out.println(kind + x);\n");
+//		buf.append("   	 		throw new IllegalArgumentException(\"Invalid day: \" + kind);\n");
+//		buf.append("		}\n");
+//		buf.append("  	};\n");
+//		buf.append("  	return today;\n");
+//		buf.append("  }\n");
+//		buf.append("}\n");
+//		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+//		
+//		buf= new StringBuffer();
+//		buf= new StringBuffer();
+//		buf.append("package test;\n");
+//		buf.append("public enum Day {\n");
+//		buf.append("	SUNDAY,\n");
+//		buf.append("	MONDAY,\n");
+//		buf.append("	TUESDAY,\n");
+//		buf.append("	WEDNESDAY,\n");
+//		buf.append("	THURSDAY,\n");
+//		buf.append("	FRIDAY,\n");
+//		buf.append("	SATURDAY\n");
+//		buf.append("}\n");
+//		pack.createCompilationUnit("Day.java", buf.toString(), false, null);
+//		
+//		CompilationUnit astRoot= getASTRoot(cu);
+//		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 10, null);
 //		
 //		assertNumberOfProposals(proposals, 1);
 //		String label1= Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_change_project_compliance_description, "13");
@@ -129,6 +179,7 @@ public class QuickFixTest14 extends QuickFixTest {
 //		assertProposalExists(proposals, label);
 //	}
 
+	@Test
 	public void testNoEnablePreviewProposal() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(Java14ProjectTestSetup.getDefaultClasspath(), null);
@@ -156,6 +207,7 @@ public class QuickFixTest14 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 0);
 	}
 
+	@Test
 	public void testAddDefaultCaseSwitchStatement1() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(Java14ProjectTestSetup.getDefaultClasspath(), null);
@@ -213,6 +265,7 @@ public class QuickFixTest14 extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}
 
+	@Test
 	public void testAddDefaultCaseSwitchStatement2() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(Java14ProjectTestSetup.getDefaultClasspath(), null);
@@ -271,6 +324,7 @@ public class QuickFixTest14 extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}
 
+	@Test
 	public void testAddDefaultCaseSwitchStatement3() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(Java14ProjectTestSetup.getDefaultClasspath(), null);
@@ -325,6 +379,7 @@ public class QuickFixTest14 extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}
 
+	@Test
 	public void testAddMissingCaseSwitchStatement1() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(Java14ProjectTestSetup.getDefaultClasspath(), null);
@@ -384,6 +439,7 @@ public class QuickFixTest14 extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}
 
+	@Test
 	public void testAddDefaultCaseSwitchExpression1() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(Java14ProjectTestSetup.getDefaultClasspath(), null);
@@ -441,6 +497,7 @@ public class QuickFixTest14 extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}
 
+	@Test
 	public void testAddDefaultCaseSwitchExpression2() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(Java14ProjectTestSetup.getDefaultClasspath(), null);
@@ -504,6 +561,7 @@ public class QuickFixTest14 extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}
 
+	@Test
 	public void testAddMissingCaseSwitchExpression() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(Java14ProjectTestSetup.getDefaultClasspath(), null);

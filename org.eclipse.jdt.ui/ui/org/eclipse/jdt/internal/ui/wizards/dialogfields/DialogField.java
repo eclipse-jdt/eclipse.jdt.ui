@@ -71,7 +71,7 @@ public class DialogField {
 	}
 
 	/**
-	 * Programatical invocation of a dialog field change.
+	 * Programmatical invocation of a dialog field change.
 	 */
 	public void dialogFieldChanged() {
 		if (fDialogFieldListener != null) {

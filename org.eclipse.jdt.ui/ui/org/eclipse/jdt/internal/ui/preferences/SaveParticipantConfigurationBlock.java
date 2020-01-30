@@ -102,12 +102,7 @@ class SaveParticipantConfigurationBlock implements IPreferenceAndPropertyConfigu
 	 */
 	@Override
 	public void dispose() {
-		delegateToPreferenceConfiguration(new IDelegateOperation() {
-			@Override
-			public void run(ISaveParticipantPreferenceConfiguration block) {
-				block.dispose();
-			}
-		});
+		delegateToPreferenceConfiguration(ISaveParticipantPreferenceConfiguration::dispose);
 	}
 
 	/*
@@ -132,12 +127,7 @@ class SaveParticipantConfigurationBlock implements IPreferenceAndPropertyConfigu
 	 */
 	@Override
 	public void performDefaults() {
-		delegateToPreferenceConfiguration(new IDelegateOperation() {
-			@Override
-			public void run(ISaveParticipantPreferenceConfiguration block) {
-				block.performDefaults();
-			}
-		});
+		delegateToPreferenceConfiguration(ISaveParticipantPreferenceConfiguration::performDefaults);
 	}
 
 	/*
@@ -145,32 +135,17 @@ class SaveParticipantConfigurationBlock implements IPreferenceAndPropertyConfigu
 	 */
 	@Override
 	public void performOk() {
-		delegateToPreferenceConfiguration(new IDelegateOperation() {
-			@Override
-			public void run(ISaveParticipantPreferenceConfiguration block) {
-				block.performOk();
-			}
-		});
+		delegateToPreferenceConfiguration(ISaveParticipantPreferenceConfiguration::performOk);
 	}
 
 	@Override
 	public void enableProjectSettings() {
-		delegateToPreferenceConfiguration(new IDelegateOperation() {
-			@Override
-			public void run(ISaveParticipantPreferenceConfiguration block) {
-				block.enableProjectSettings();
-			}
-		});
+		delegateToPreferenceConfiguration(ISaveParticipantPreferenceConfiguration::enableProjectSettings);
 	}
 
 	@Override
 	public void disableProjectSettings() {
-		delegateToPreferenceConfiguration(new IDelegateOperation() {
-			@Override
-			public void run(ISaveParticipantPreferenceConfiguration block) {
-				block.disableProjectSettings();
-			}
-		});
+		delegateToPreferenceConfiguration(ISaveParticipantPreferenceConfiguration::disableProjectSettings);
 	}
 
 	private void delegateToPreferenceConfiguration(IDelegateOperation op) {

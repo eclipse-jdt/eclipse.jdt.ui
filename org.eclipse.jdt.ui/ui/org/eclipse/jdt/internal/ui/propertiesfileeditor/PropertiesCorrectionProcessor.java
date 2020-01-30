@@ -44,7 +44,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 /**
  * The properties file correction processor. Clients can set pre-computed proposals, and if set the
  * processor returns only these pre-computed proposals.
- * 
+ *
  * @since 3.7
  */
 public class PropertiesCorrectionProcessor implements org.eclipse.jface.text.quickassist.IQuickAssistProcessor {
@@ -133,7 +133,7 @@ public class PropertiesCorrectionProcessor implements org.eclipse.jface.text.qui
 
 	/**
 	 * Sets the pre-computed proposals.
-	 * 
+	 *
 	 * @param preComputedProposals the pre-computed proposals
 	 */
 	public void setProposals(ICompletionProposal[] preComputedProposals) {

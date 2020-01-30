@@ -37,7 +37,7 @@ public abstract class AbstractJavaElementLabelDecorator implements ILightweightL
 		public void elementChanged(ElementChangedEvent event) {
 			List<IJavaElement> changed= new ArrayList<>();
 			processDelta(event.getDelta(), changed);
-			if (changed.size() == 0)
+			if (changed.isEmpty())
 				return;
 
 			fireChange(changed.toArray(new IJavaElement[changed.size()]));

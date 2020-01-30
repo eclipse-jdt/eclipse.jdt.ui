@@ -32,13 +32,13 @@ import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 /**
  * Action to surround a set of statements with a try/multi-catch block.
- * 
+ *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @since 3.7.1
- * 
+ *
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class SurroundWithTryMultiCatchAction extends SurroundWithTryCatchAction {
@@ -80,7 +80,7 @@ public class SurroundWithTryMultiCatchAction extends SurroundWithTryCatchAction 
 	boolean isApplicable() {
 		if (!super.isApplicable())
 			return false;
-		
+
 		ICompilationUnit compilationUnit= SelectionConverter.getInputAsCompilationUnit(fEditor);
 		IJavaProject javaProject= compilationUnit.getJavaProject();
 		return JavaModelUtil.is17OrHigher(javaProject);

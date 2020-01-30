@@ -115,7 +115,7 @@ public class Resources {
 			if (resource.getType() == IResource.FILE && isReadOnly(resource))
 				readOnlyFiles.add(resource);
 		}
-		if (readOnlyFiles.size() == 0)
+		if (readOnlyFiles.isEmpty())
 			return Status.OK_STATUS;
 
 		Map<IFile, Long> oldTimeStamps= createModificationStampMap(readOnlyFiles);

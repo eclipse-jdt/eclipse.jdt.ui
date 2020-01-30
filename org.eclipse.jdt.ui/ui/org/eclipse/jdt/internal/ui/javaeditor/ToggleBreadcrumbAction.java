@@ -54,14 +54,14 @@ public class ToggleBreadcrumbAction extends ResourceAction implements IPropertyC
 	 *
 	 * @param page the workbench page
 	 * @param inContextMenu <code>true</code> iff this action is shown in the context menu of a breadcrumb
-	 * 
+	 *
 	 * @since 3.7
 	 */
 	public ToggleBreadcrumbAction(IWorkbenchPage page, boolean inContextMenu) {
 		super(JavaEditorMessages.getBundleForConstructedKeys(),
 				inContextMenu ? "ToggleBreadcrumbAction.Hide." : "ToggleBreadcrumbAction.", //$NON-NLS-1$ //$NON-NLS-2$
 				inContextMenu ? IAction.AS_PUSH_BUTTON : IAction.AS_CHECK_BOX);
-		
+
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.TOGGLE_BREADCRUMB_ACTION);
 		fPage= page;
 		if (!inContextMenu) {
@@ -70,7 +70,7 @@ public class ToggleBreadcrumbAction extends ResourceAction implements IPropertyC
 		}
 		update();
 	}
-	
+
 	/*
 	 * @see IAction#actionPerformed
 	 */
@@ -117,7 +117,7 @@ public class ToggleBreadcrumbAction extends ResourceAction implements IPropertyC
 
 	/**
 	 * Returns the preference key for the breadcrumb. The value depends on the current perspective.
-	 * 
+	 *
 	 * @return the preference key to use
 	 */
 	private String getPreferenceKey() {

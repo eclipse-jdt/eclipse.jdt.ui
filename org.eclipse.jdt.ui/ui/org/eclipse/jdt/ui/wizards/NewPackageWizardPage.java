@@ -143,7 +143,7 @@ public class NewPackageWizardPage extends NewTypeWizardPage {
 
 		PackageFieldAdapter adapter= new PackageFieldAdapter();
 
-		fPackageDialogField= new StringDialogField(); 
+		fPackageDialogField= new StringDialogField();
 		fPackageDialogField.setDialogFieldListener(adapter);
 		fPackageDialogField.setLabelText(NewWizardMessages.NewPackageWizardPage_package_label);
 
@@ -336,9 +336,9 @@ public class NewPackageWizardPage extends NewTypeWizardPage {
 
 	/**
 	 * Validates the package name and returns the status of the validation.
-	 * 
+	 *
 	 * @param packName the package name
-	 * 
+	 *
 	 * @return the status of the validation
 	 */
 	private IStatus getPackageStatus(String packName) {
@@ -401,7 +401,7 @@ public class NewPackageWizardPage extends NewTypeWizardPage {
 		}
 		return status;
 	}
-	
+
 	private boolean packageDocumentationAlreadyExists(IPackageFragment pack) throws JavaModelException {
 		ICompilationUnit packageInfoJava= pack.getCompilationUnit(PACKAGE_INFO_JAVA_FILENAME);
 		if (packageInfoJava.exists()) {
@@ -526,7 +526,7 @@ public class NewPackageWizardPage extends NewTypeWizardPage {
 
 		IPackageFragmentRoot root= getPackageFragmentRoot();
 		IPackageFragment pack= root.getPackageFragment(getPackageText());
-		
+
 		if (pack.exists()) {
 			fCreatedPackageFragment= pack;
 		} else {
@@ -646,5 +646,5 @@ public class NewPackageWizardPage extends NewTypeWizardPage {
 		}
 		return buf.toString();
 	}
-	
+
 }

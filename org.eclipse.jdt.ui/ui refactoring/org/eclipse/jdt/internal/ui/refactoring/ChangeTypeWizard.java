@@ -223,7 +223,7 @@ public class ChangeTypeWizard extends RefactoringWizard {
 
 				if (internalError) {
 					setPageComplete(false);
-				} else if (fValidTypes == null || fValidTypes.size() == 0){
+				} else if (fValidTypes == null || fValidTypes.isEmpty()){
 					ChangeTypeInputPage.this.setErrorMessage(RefactoringMessages.ChangeTypeWizard_declCannotBeChanged);
 					setPageComplete(false);
 				} else {

@@ -31,10 +31,10 @@ public class TreeRoot {
     MethodWrapper[] getRoots() {
         return fRoots;
     }
-    
+
 	/**
 	 * Adds the new roots to the list.
-	 * 
+	 *
 	 * @param roots the roots to add
 	 * @since 3.7
 	 */

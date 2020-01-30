@@ -36,7 +36,7 @@ import org.eclipse.jdt.internal.ui.search.SearchMessages;
 
 /**
  * Class to show the Search In dialog.
- * 
+ *
  * @since 3.7
  */
 class SearchInDialog extends TrayDialog {
@@ -52,7 +52,7 @@ class SearchInDialog extends TrayDialog {
 	/**
 	 * Section ID for the SearchInDialog class.
 	 */
-	private static final String DIALOG_SETTINGS_SECTION= "SearchInDialog"; //$NON-NLS-1$	
+	private static final String DIALOG_SETTINGS_SECTION= "SearchInDialog"; //$NON-NLS-1$
 
 	private static final String SEARCH_IN_SOURCES= "SearchInSources"; //$NON-NLS-1$
 
@@ -79,7 +79,7 @@ class SearchInDialog extends TrayDialog {
 
 	/**
 	 * Returns the integer value of the strings.
-	 * 
+	 *
 	 * @param str the array of strings
 	 * @return the integer value of the strings
 	 */
@@ -115,7 +115,7 @@ class SearchInDialog extends TrayDialog {
 		newShell.setText(CallHierarchyMessages.SearchInDialog_title);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.CALL_HIERARCHY_SEARCH_IN_DIALOG);
 	}
-	
+
 	@Override
 	protected boolean isResizable() {
 		return true;
@@ -133,7 +133,7 @@ class SearchInDialog extends TrayDialog {
 
 	/**
 	 * Creates the search in options.
-	 * 
+	 *
 	 * @param parent the parent composite
 	 * @return the group control
 	 */
@@ -166,12 +166,12 @@ class SearchInDialog extends TrayDialog {
 	 */
 	protected void updateOKStatus() {
 		boolean isValidMask= getIncludeMask() != 0;
-		getButton(OK).setEnabled(isValidMask);		
+		getButton(OK).setEnabled(isValidMask);
 	}
 
 	/**
 	 * Returns the include mask.
-	 * 
+	 *
 	 * @return the include mask
 	 */
 	int getIncludeMask() {
@@ -188,7 +188,7 @@ class SearchInDialog extends TrayDialog {
 
 	/**
 	 * Returns the value of the given button.
-	 * 
+	 *
 	 * @param button the button for which to fetch value
 	 * @return the value of the button
 	 */
@@ -198,7 +198,7 @@ class SearchInDialog extends TrayDialog {
 
 	/**
 	 * Creates and returns the button.
-	 * 
+	 *
 	 * @param parent the parent composite
 	 * @param style the style of control to construct
 	 * @param text the text for the button
@@ -232,7 +232,7 @@ class SearchInDialog extends TrayDialog {
 
 	/**
 	 * Indicates whether the include mask has changed.
-	 * 
+	 *
 	 * @return the includeMaskChanged <code>true</code> if the include mask has changed,
 	 *         <code>false</code> otherwise
 	 */

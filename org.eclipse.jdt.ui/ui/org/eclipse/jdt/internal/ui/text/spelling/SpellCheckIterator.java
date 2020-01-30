@@ -38,7 +38,7 @@ public class SpellCheckIterator implements ISpellCheckIterator {
 
 	/**
 	 * The token that denotes whitespace.
-	 * 
+	 *
 	 * @since 3.6
 	 */
 	private static final int WHITE_SPACE_TOKEN= -1;

@@ -37,7 +37,7 @@ public class TypeAnnotationSubProcessor {
 		TypeAnnotationFix fix= TypeAnnotationFix.createMoveAnnotationsToTypeAnnotationsFix(context.getASTRoot(), problem);
 		if (fix == null)
 			return;
-	
+
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		Map<String, String> options= new Hashtable<>();
 		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new NullAnnotationsCleanUp(options, problem.getProblemId()), IProposalRelevance.REMOVE_REDUNDANT_NULLNESS_ANNOTATION, image, context);

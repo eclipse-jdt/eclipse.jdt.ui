@@ -119,7 +119,7 @@ public abstract class StructureSelectionAction extends Action {
 
 	/**
 	 * Subclasses determine the actual new selection.
-	 * 
+	 *
 	 * @param oldSourceRange the selected range
 	 * @param sr the current type root
 	 * @param selAnalyzer the selection analyzer

@@ -248,7 +248,7 @@ public class RippleMethodFinder2 {
 			if (alienType.isInterface())
 				hasAlienInterfaces= true;
 		}
-		if (alienTypes.size() == 0) //no nasty marriage scenarios without types to marry with...
+		if (alienTypes.isEmpty()) //no nasty marriage scenarios without types to marry with...
 			return toArray(relatedMethods);
 		if (! hasRelatedInterfaces && ! hasAlienInterfaces) //no nasty marriage scenarios without interfaces...
 			return toArray(relatedMethods);
@@ -302,7 +302,7 @@ public class RippleMethodFinder2 {
 				}
 			}
 
-			if (marriedAlienTypeReps.size() == 0)
+			if (marriedAlienTypeReps.isEmpty())
 				return toArray(relatedMethods);
 
 			for (Iterator<IType> iter= marriedAlienTypeReps.iterator(); iter.hasNext();) {

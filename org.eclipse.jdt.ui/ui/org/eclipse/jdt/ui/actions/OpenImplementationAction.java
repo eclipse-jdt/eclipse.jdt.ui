@@ -43,7 +43,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * The action is applicable to selections containing elements of type <code>
  * IMethod</code> or <code>IType</code>.
  * </p>
- * 
+ *
  * @since 3.6
  * @noextend This class is not intended to be subclassed by clients.
  */
@@ -57,7 +57,7 @@ public class OpenImplementationAction extends SelectionDispatchAction {
 
 	/**
 	 * Creates an <code>OpenImplementationAction</code>.
-	 * 
+	 *
 	 * @param site the workbench site
 	 */
 	protected OpenImplementationAction(IWorkbenchSite site) {
@@ -71,7 +71,7 @@ public class OpenImplementationAction extends SelectionDispatchAction {
 	/**
 	 * Creates an <code>OpenImplementationAction</code>. Note: This constructor is for internal use
 	 * only. Clients should not call this constructor.
-	 * 
+	 *
 	 * @param editor the editor
 	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
@@ -123,7 +123,7 @@ public class OpenImplementationAction extends SelectionDispatchAction {
 
 	/**
 	 * Returns the dialog title.
-	 * 
+	 *
 	 * @return the dialog title
 	 */
 	private String getDialogTitle() {

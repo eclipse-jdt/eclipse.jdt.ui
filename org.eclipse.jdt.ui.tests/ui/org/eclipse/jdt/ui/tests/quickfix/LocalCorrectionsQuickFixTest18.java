@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2019 IBM Corporation and others.
+ * Copyright (c) 2014, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,6 +15,13 @@ package org.eclipse.jdt.ui.tests.quickfix;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.NullTestUtils;
@@ -34,39 +41,25 @@ import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.tests.core.Java18ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.Java18ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
+@RunWith(JUnit4.class)
 public class LocalCorrectionsQuickFixTest18 extends QuickFixTest {
 
-	private static final Class<LocalCorrectionsQuickFixTest18> THIS= LocalCorrectionsQuickFixTest18.class;
+	@Rule
+    public ProjectTestSetup projectsetup = new Java18ProjectTestSetup();
 
 	private IJavaProject fJProject1;
 
 	private IPackageFragmentRoot fSourceFolder;
 
-
-	public LocalCorrectionsQuickFixTest18(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new Java18ProjectTestSetup(test);
-	}
-
-
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
@@ -91,11 +84,12 @@ public class LocalCorrectionsQuickFixTest18 extends QuickFixTest {
 	}
 
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, Java18ProjectTestSetup.getDefaultClasspath());
 	}
 
+	@Test
 	public void testUncaughtExceptionTypeUseAnnotation1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -138,6 +132,7 @@ public class LocalCorrectionsQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testUncaughtExceptionInLambda1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -175,6 +170,7 @@ public class LocalCorrectionsQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected });
 	}
 
+	@Test
 	public void testUncaughtExceptionInLambda2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -220,6 +216,7 @@ public class LocalCorrectionsQuickFixTest18 extends QuickFixTest {
 		assertProposalDoesNotExist(proposals, CorrectionMessages.LocalCorrectionsSubProcessor_addthrows_description);
 	}
 
+	@Test
 	public void testUncaughtExceptionInLambda3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -271,6 +268,7 @@ public class LocalCorrectionsQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
+	@Test
 	public void testUncaughtExceptionInLambda4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -334,6 +332,7 @@ public class LocalCorrectionsQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
+	@Test
 	public void testUncaughtExceptionInLambda5() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -407,6 +406,7 @@ public class LocalCorrectionsQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
+	@Test
 	public void testUncaughtExceptionInLambda6() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -480,6 +480,7 @@ public class LocalCorrectionsQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
+	@Test
 	public void testUncaughtExceptionInLambda7() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -556,6 +557,7 @@ public class LocalCorrectionsQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
+	@Test
 	public void testUncaughtExceptionInMethodReference1() throws Exception { // ExpressionMethodReference
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -601,6 +603,7 @@ public class LocalCorrectionsQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
+	@Test
 	public void testUncaughtExceptionInMethodReference2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -652,6 +655,7 @@ public class LocalCorrectionsQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
+	@Test
 	public void testUncaughtExceptionInMethodReference3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -707,6 +711,7 @@ public class LocalCorrectionsQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
+	@Test
 	public void testUncaughtExceptionInMethodReference4() throws Exception { // Generic lambda not allowed
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -731,6 +736,7 @@ public class LocalCorrectionsQuickFixTest18 extends QuickFixTest {
 		assertProposalDoesNotExist(proposals, CorrectionMessages.LocalCorrectionsSubProcessor_surroundwith_trycatch_description);
 	}
 
+	@Test
 	public void testUncaughtExceptionInMethodReference5() throws Exception { // CreationReference
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -782,6 +788,7 @@ public class LocalCorrectionsQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
+	@Test
 	public void testUncaughtExceptionInMethodReference6() throws Exception { // TypeMethodReference
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -831,6 +838,7 @@ public class LocalCorrectionsQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
+	@Test
 	public void testUncaughtExceptionInMethodReference7() throws Exception { // SuperMethodReference
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -877,6 +885,7 @@ public class LocalCorrectionsQuickFixTest18 extends QuickFixTest {
 	}
 
 
+	@Test
 	public void testOverrideDefaultMethod1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -941,6 +950,7 @@ public class LocalCorrectionsQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
+	@Test
 	public void testOverrideDefaultMethod2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -1005,6 +1015,7 @@ public class LocalCorrectionsQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
+	@Test
 	public void testOverrideDefaultMethod3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -1071,6 +1082,7 @@ public class LocalCorrectionsQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
+	@Test
 	public void testOverrideDefaultMethod4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -1134,6 +1146,7 @@ public class LocalCorrectionsQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
+	@Test
 	public void testOverrideDefaultMethod_multiLevel() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -1204,6 +1217,7 @@ public class LocalCorrectionsQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
+	@Test
 	public void testOverrideDefaultMethod_noParam() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -1267,6 +1281,7 @@ public class LocalCorrectionsQuickFixTest18 extends QuickFixTest {
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
+	@Test
 	public void testCorrectVariableType() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -1311,6 +1326,7 @@ public class LocalCorrectionsQuickFixTest18 extends QuickFixTest {
 		String expected1= buf.toString();
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
+	@Test
 	public void testBug528875() throws Exception {
 		try {
 			Hashtable<String, String> options= JavaCore.getOptions();

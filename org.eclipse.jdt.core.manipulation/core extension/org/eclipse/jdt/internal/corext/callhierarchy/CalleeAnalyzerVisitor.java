@@ -336,7 +336,7 @@ class CalleeAnalyzerVisitor extends HierarchicalASTVisitor {
         Collection<IJavaElement> implementingMethods = CallHierarchyCore.getDefault()
                                                         .getImplementingMethods(calledMethod);
 
-        if ((implementingMethods.size() == 0) || (implementingMethods.size() > 1)) {
+        if ((implementingMethods.isEmpty()) || (implementingMethods.size() > 1)) {
             return calledMethod;
         } else {
             return (IMethod) implementingMethods.iterator().next();

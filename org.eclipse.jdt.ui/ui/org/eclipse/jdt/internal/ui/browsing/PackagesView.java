@@ -606,7 +606,7 @@ public class PackagesView extends JavaBrowsingPart{
 				if(element instanceof LogicalPackage){
 					LogicalPackage el= (LogicalPackage) element;
 					ILabelDecorator decorator= getLabelDecorator();
-					
+
 					Image image= super.getImage(el);
 					for (IPackageFragment fragment : el.getFragments()) {
 						Image decoratedImage= decorator.decorateImage(image, fragment);

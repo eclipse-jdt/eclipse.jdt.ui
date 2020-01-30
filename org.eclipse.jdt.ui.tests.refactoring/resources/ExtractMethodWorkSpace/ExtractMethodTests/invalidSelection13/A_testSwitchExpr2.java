@@ -1,4 +1,4 @@
-package try12_in;
+package try13_in;
 
 public class A_testSwitchExpr1 {
 	String foo(Day day) {

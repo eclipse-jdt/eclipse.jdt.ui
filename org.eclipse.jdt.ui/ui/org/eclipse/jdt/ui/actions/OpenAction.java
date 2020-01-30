@@ -209,7 +209,7 @@ public class OpenAction extends SelectionDispatchAction {
 
 	/**
 	 * Sets the error message in the status line.
-	 * 
+	 *
 	 * @since 3.7
 	 */
 	private void setStatusLineMessage() {
@@ -279,7 +279,7 @@ public class OpenAction extends SelectionDispatchAction {
 						setStatusLineMessage();
 						return;
 					}
-					
+
 				} else {
 					boolean activateOnOpen= fEditor != null ? true : OpenStrategy.activateOnOpen();
 					IEditorPart part= EditorUtility.openInEditor(javaElement, activateOnOpen);
@@ -326,7 +326,7 @@ public class OpenAction extends SelectionDispatchAction {
 			typeRoot= (packageFragment).getCompilationUnit(JavaModelUtil.PACKAGE_INFO_JAVA);
 		if (typeRoot.exists())
 			return typeRoot;
-		
+
 		Object[] nonJavaResources= (packageFragment).getNonJavaResources();
 		for (Object nonJavaResource : nonJavaResources) {
 			if (nonJavaResource instanceof IFile) {

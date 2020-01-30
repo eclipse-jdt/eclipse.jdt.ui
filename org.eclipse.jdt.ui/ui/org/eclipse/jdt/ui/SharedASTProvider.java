@@ -114,7 +114,7 @@ public final class SharedASTProvider {
 	 * <p>
 	 * Clients are not allowed to modify the AST and must not keep any references.
 	 * </p>
-	 * 
+	 *
 	 * @param element the {@link ITypeRoot}, must not be <code>null</code>
 	 * @param waitFlag {@link #WAIT_YES}, {@link #WAIT_NO} or {@link #WAIT_ACTIVE_ONLY}
 	 * @param progressMonitor the progress monitor or <code>null</code>

@@ -146,7 +146,7 @@ public class ParticipantTesting {
 
 	public static void testSimilarElements(List<String> similarList, List<String> similarNewNameList, List<String> similarNewHandleList) {
 		Assert.assertEquals(similarList.size(), similarNewNameList.size());
-		if (similarList.size() == 0) {
+		if (similarList.isEmpty()) {
 			TestRenameParticipantShared.testNumberOfSimilarElements(0);
 		} else {
 			TestRenameParticipantShared.testSimilarElements(similarList, similarNewNameList, similarNewHandleList);

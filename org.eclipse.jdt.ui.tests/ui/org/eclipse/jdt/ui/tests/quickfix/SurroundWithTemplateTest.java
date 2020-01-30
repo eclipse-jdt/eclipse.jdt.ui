@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -18,6 +18,13 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -43,37 +50,24 @@ import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.QuickTemplateProcessor;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
+@RunWith(JUnit4.class)
 public class SurroundWithTemplateTest extends QuickFixTest {
 
-	private static final Class<SurroundWithTemplateTest> THIS= SurroundWithTemplateTest.class;
+	@Rule
+    public ProjectTestSetup projectsetup = new ProjectTestSetup();
 
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
 
-	public SurroundWithTemplateTest(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
-	}
-
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
@@ -97,8 +91,8 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
 
@@ -125,6 +119,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		return Arrays.asList(templateProposals);
 	}
 
+	@Test
 	public void testSurroundWithRunnable1() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -162,6 +157,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
 
+	@Test
 	public void testSurroundWithRunnable2() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -219,6 +215,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
 
+	@Test
 	public void testSurroundWithRunnable3() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -280,6 +277,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
 
+	@Test
 	public void testSurroundWithRunnable4() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -324,6 +322,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
 
+	@Test
 	public void testSurroundWithRunnable5() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -364,6 +363,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
 
+	@Test
 	public void testSurroundWithRunnable6() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -407,6 +407,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
 
+	@Test
 	public void testSurroundWithRunnable7() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -446,6 +447,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
 
+	@Test
 	public void testSurroundWithRunnable8() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -497,6 +499,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
 
+	@Test
 	public void testSurroundWithRunnable9() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -538,6 +541,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
 
+	@Test
 	public void testSurroundWithRunnable10() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -583,6 +587,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
 
+	@Test
 	public void testSurroundWithRunnable11() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -623,6 +628,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
 
+	@Test
 	public void testSurroundWithRunnable12() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -661,6 +667,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
 
+	@Test
 	public void testSurroundWithRunnable13() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -703,6 +710,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
 
+	@Test
 	public void testSurroundWithRunnable14() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -743,6 +751,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
 
+	@Test
 	public void testSurroundWithRunnable15() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -787,6 +796,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
 
+	@Test
 	public void testSurroundWithRunnable16() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -828,6 +838,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
 
+	@Test
 	public void testSurroundWithRunnable17() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -868,6 +879,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
 
+	@Test
 	public void testSurroundWithRunnable18() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -908,6 +920,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
 
+	@Test
 	public void testSurroundWithRunnable19() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -951,6 +964,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
 
+	@Test
 	public void testSurroundWithRunnable20() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -992,6 +1006,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
 
+	@Test
 	public void testSurroundWithRunnable21() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -1034,6 +1049,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
 
+	@Test
 	public void testSurroundWithRunnable22() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -1084,6 +1100,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
 
+	@Test
 	public void testSurroundWithRunnable23() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -1125,6 +1142,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
 
+	@Test
 	public void testSurroundWithRunnable24() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -1171,6 +1189,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
 	/*
+	@Test
 	public void testSurroundWithRunnable25() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -1221,6 +1240,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
 
+	@Test
 	public void testSurroundWithRunnable26() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -1273,6 +1293,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}*/
 
+	@Test
 	public void testSurroundWithRunnable27() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -1313,6 +1334,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
 
+	@Test
 	public void testSurroundWithRunnable28() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -1358,6 +1380,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
 
+	@Test
 	public void testSurroundWithRunnable29() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -1405,6 +1428,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
 
+	@Test
 	public void testSurroundWithRunnable30() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -1443,6 +1467,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
 	}
 
+	@Test
 	public void testSurroundWithRunnableBug133560() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -1482,6 +1507,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {buf.toString()});
 	}
 
+	@Test
 	public void testSurroundWithRunnableBug233278() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -1533,6 +1559,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {buf.toString()});
 	}
 
+	@Test
 	public void testSurroundWithRunnableBug138323() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -1568,6 +1595,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {buf.toString()});
 	}
 
+	@Test
 	public void testSurroundWithBug162549() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);

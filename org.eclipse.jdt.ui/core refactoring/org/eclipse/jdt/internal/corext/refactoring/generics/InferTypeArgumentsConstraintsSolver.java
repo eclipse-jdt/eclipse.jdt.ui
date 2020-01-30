@@ -308,13 +308,13 @@ public class InferTypeArgumentsConstraintsSolver {
 				}
 			}
 
-			if (interfaceCandidates == null || interfaceCandidates.size() == 0) {
+			if (interfaceCandidates == null || interfaceCandidates.isEmpty()) {
 				return null;
 			} else if (interfaceCandidates.size() == 1) {
 				return interfaceCandidates.get(0);
 			} else {
 				ArrayList<TType> nontaggingCandidates= getNonTaggingInterfaces(interfaceCandidates);
-				if (nontaggingCandidates.size() != 0) {
+				if (!nontaggingCandidates.isEmpty()) {
 					return Collections.min(nontaggingCandidates, TTypeComparator.INSTANCE);
 				} else {
 					return Collections.min(interfaceCandidates, TTypeComparator.INSTANCE);
@@ -345,7 +345,7 @@ public class InferTypeArgumentsConstraintsSolver {
 				nonTagging.add(interf);
 		}
 
-		if (unresolvedTypes.size() != 0) {
+		if (!unresolvedTypes.isEmpty()) {
 			for (TType interf : unresolvedTypes) {
 				if (isTaggingInterface(interf)) {
 					fInterfaceTaggingCache.put(interf, Boolean.TRUE);

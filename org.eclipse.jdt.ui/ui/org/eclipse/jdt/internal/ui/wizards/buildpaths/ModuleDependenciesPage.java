@@ -170,7 +170,7 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 		fClassPathList= classPathList;
 		fContext= context;
 		fSWTControl= null;
-		
+
 		String[] buttonLabels= new String[] {
 				NewWizardMessages.ModuleDependenciesPage_modules_remove_button,
 				/* */ null,
@@ -223,7 +223,7 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 
 		fModuleList.createViewer(left, converter);
 		fModuleList.setSelectionChangedListener((elems, mod) -> selectModule(elems, mod));
-		
+
 		fAddSystemModuleButton= new Button(left, SWT.NONE);
 		fAddSystemModuleButton.setText(NewWizardMessages.ModuleDependenciesPage_addSystemModule_button);
 		fAddSystemModuleButton.addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> addSystemModules()));
@@ -710,7 +710,7 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 		}
 		return null;
 	}
-	
+
 	private boolean confirmRemoveModule(String message) {
 		int answer= MessageDialog.open(MessageDialog.QUESTION, getShell(),
 				NewWizardMessages.ModuleDependenciesPage_removeModule_dialog_title, message, SWT.NONE,
@@ -806,7 +806,7 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 	}
 
 	/**
-	 * Find a module attribute in the current classpath that satisfies the given predicate. 
+	 * Find a module attribute in the current classpath that satisfies the given predicate.
 	 * @param predicate this predicate must be fulfilled by any detail of a found module attribte
 	 * @return if a predicate match was found the enclosing module attribute will be returned, else {@code null}
 	 */
@@ -823,7 +823,7 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 		}
 		return null;
 	}
-	
+
 	public void showJMPSOptionsDialog() {
 		new ShowJPMSOptionsDialog(getShell(), fClassPathList, allDefaultSystemModules(), this::closure, this::reduceNames).open();
 	}

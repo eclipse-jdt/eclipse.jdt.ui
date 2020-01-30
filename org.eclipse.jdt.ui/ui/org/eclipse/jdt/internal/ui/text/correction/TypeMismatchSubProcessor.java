@@ -425,7 +425,7 @@ public class TypeMismatchSubProcessor {
 					undeclaredExceptions.add(methodExceptions[i]);
 				}
 			}
-			if (undeclaredExceptions.size() == 0) {
+			if (undeclaredExceptions.isEmpty()) {
 				return;
 			}
 			String label= Messages.format(CorrectionMessages.TypeMismatchSubProcessor_removeexceptions_description, BasicElementLabels.getJavaElementName(methodDeclBinding.getName()));
@@ -510,12 +510,12 @@ public class TypeMismatchSubProcessor {
 				int relevance= StubUtility.hasLocalVariableName(cu.getJavaProject(), name) ? 10 : 7;
 				String label= Messages.format(CorrectionMessages.TypeMismatchSubProcessor_create_loop_variable_description, BasicElementLabels.getJavaElementName(name));
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
-				
+
 				proposals.add(new NewVariableCorrectionProposal(label, cu, NewVariableCorrectionProposal.LOCAL, simpleName, null, relevance, image));
 				return;
 			}
 		}
-		
+
 		String label= Messages.format(CorrectionMessages.TypeMismatchSubProcessor_incompatible_for_each_type_description, new String[] { BasicElementLabels.getJavaElementName(parameter.getName().getIdentifier()), BindingLabelProvider.getBindingLabel(expectedBinding, BindingLabelProvider.DEFAULT_TEXTFLAGS) });
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		ASTRewrite rewrite= ASTRewrite.create(ast);

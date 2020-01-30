@@ -225,7 +225,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 					if (createPackageInfoWithDefaultNullnessProposal.fProblemId == id)
 						result.add(marker);
 				}
-				if (result.size() == 0)
+				if (result.isEmpty())
 					return NO_MARKERS;
 
 				return result.toArray(new IMarker[result.size()]);
@@ -264,7 +264,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 				}
 			}
 
-			if (result.size() == 0)
+			if (result.isEmpty())
 				return NO_MARKERS;
 
 			return result.toArray(new IMarker[result.size()]);

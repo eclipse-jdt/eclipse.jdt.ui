@@ -246,7 +246,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 
 	/**
 	 * Indicates whether the restore job was canceled explicitly.
-	 * 
+	 *
 	 * @since 3.6
 	 */
 	private boolean fRestoreJobCanceledExplicitly= true;
@@ -254,7 +254,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	/**
 	 * Indicates whether empty viewers should keep showing. If false, replace them with
 	 * fEmptyTypesViewer.
-	 * 
+	 *
 	 * @since 3.6
 	 */
 	private boolean fKeepShowingEmptyViewers= true;
@@ -269,12 +269,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		fRestoreStateJob= null;
 
 		fHierarchyLifeCycle= new TypeHierarchyLifeCycle(this);
-		fTypeHierarchyLifeCycleListener= new ITypeHierarchyLifeCycleListener() {
-			@Override
-			public void typeHierarchyChanged(TypeHierarchyLifeCycle typeHierarchy, IType[] changedTypes) {
-				doTypeHierarchyChanged(typeHierarchy, changedTypes);
-			}
-		};
+		fTypeHierarchyLifeCycleListener= this::doTypeHierarchyChanged;
 		fHierarchyLifeCycle.addChangedListener(fTypeHierarchyLifeCycleListener);
 
 		fPropertyChangeListener= new IPropertyChangeListener() {
@@ -411,7 +406,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 
 	/**
 	 * Goes to the selected entry, without updating the order of history entries.
-	 * 
+	 *
 	 * @param entry the entry to open
 	 */
 	public void gotoHistoryEntry(IJavaElement[] entry) {
@@ -433,7 +428,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 
 	/**
 	 * Sets the history entries.
-	 * 
+	 *
 	 * @param elems the history elements to set
 	 */
 	public void setHistoryEntries(IJavaElement[] elems) {
@@ -444,7 +439,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 
 	/**
 	 * Sets the history entries.
-	 * 
+	 *
 	 * @param elems the history elements to set
 	 * @since 3.7
 	 */
@@ -511,7 +506,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	/**
 	 * Returns the input element of the type hierarchy. Can be of type <code>IType</code> or
 	 * <code>IPackageFragment</code>
-	 * 
+	 *
 	 * @return the input element
 	 */
 	@Override
@@ -521,14 +516,14 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 
 	/**
 	 * Returns the input elements of the type hierarchy.
-	 * 
+	 *
 	 * @return the input elements
 	 * @since 3.7
 	 */
 	public IJavaElement[] getInputElements() {
 		return fInputElements;
 	}
-	
+
 
 	/**
 	 * Sets the input to a new element.
@@ -542,7 +537,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 
 	/**
 	 * Sets the input to a new element.
-	 * 
+	 *
 	 * @param javaElements the input java elements
 	 * @since 3.7
 	 */
@@ -642,7 +637,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 
 	/**
 	 * Updates the viewers, toolbar buttons and tooltip.
-	 * 
+	 *
 	 * @since 3.6
 	 */
 	public void updateViewers() {
@@ -664,8 +659,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		updateToolbarButtons();
 		updateToolTipAndDescription();
 		showMembersInHierarchy(false);
-		fPagebook.showPage(fTypeMethodsSplitter);		
-		fSelectInEditor= true;		
+		fPagebook.showPage(fTypeMethodsSplitter);
+		fSelectInEditor= true;
 	}
 
 	private void processOutstandingEvents() {
@@ -681,7 +676,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		updateHierarchyViewer(false);
 		updateToolbarButtons();
 		updateToolTipAndDescription();
-		getViewSite().getActionBars().getStatusLineManager().setMessage(""); //$NON-NLS-1$		
+		getViewSite().getActionBars().getStatusLineManager().setMessage(""); //$NON-NLS-1$
 	}
 
 	/*
@@ -1335,7 +1330,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				if (types.size() == 1) {
 					fSelectedType= (IType) types.get(0);
 					updateMethodViewer(fSelectedType);
-				} else if (types.size() == 0) {
+				} else if (types.isEmpty()) {
 					// method selected, no change
 				}
 				if (nSelected == 1 && fSelectInEditor) {
@@ -1697,7 +1692,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			inputList.add(input);
 			elementId= memento.getString(TAG_INPUT + ++i);
 		}
-		if (inputList == null || inputList.size() == 0) {
+		if (inputList == null || inputList.isEmpty()) {
 			doRestoreState(memento, input);
 		} else {
 			final IJavaElement[] hierarchyInput= inputList.toArray(new IJavaElement[inputList.size()]);
@@ -1751,7 +1746,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 
 	/**
 	 * Restores the state of the type hierarchy view from the memento.
-	 * 
+	 *
 	 * @param memento the memento
 	 * @param input the input java elements
 	 * @since 3.7
@@ -1892,7 +1887,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 
 	/**
 	 * Sets the empty viewer when the user cancels the computation.
-	 * 
+	 *
 	 * @since 3.6
 	 */
 	public void showEmptyViewer() {
@@ -1944,10 +1939,10 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 
 	/**
 	 * Sets whether empty viewers should keep showing. If false, replace with fEmptyTypesViewer.
-	 * 
+	 *
 	 * @param keepShowingEmptyViewers <code>true</code> if the empty viewers can be shown,
 	 *            <code>false otherwise
-	 * 
+	 *
 	 * @since 3.6
 	 */
 	public void setKeepShowingEmptyViewers(boolean keepShowingEmptyViewers) {

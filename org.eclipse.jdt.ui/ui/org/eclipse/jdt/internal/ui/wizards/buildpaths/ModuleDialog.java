@@ -131,7 +131,7 @@ public class ModuleDialog extends StatusDialog {
 		public String getColumnText(Object element, int columnIndex) {
 			return element.toString();
 		}
-		
+
 	}
 
 	public class AddDetailsLabelProvider extends LabelProvider implements ITableLabelProvider {
@@ -179,7 +179,7 @@ public class ModuleDialog extends StatusDialog {
 	private static final int IDX_AVAILABLE= 0;
 	private static final int IDX_INCLUDED= 1;
 	private static final int IDX_IMPLICITLY_INCLUDED= 2;
-	
+
 	private BuildPathBasePage fBasePage;
 
 	private Button fAddIncludedButton;
@@ -188,16 +188,16 @@ public class ModuleDialog extends StatusDialog {
 
 	private final SelectionButtonDialogField fIsPatchCheckbox;
 	private final StringDialogField fPatchedModule;
-	
+
 	private final ListDialogField<ModuleAddExpose> fAddExportsList;
 
 	private final ListDialogField<ModuleAddReads> fAddReadsList;
-	
+
 	private final CPListElement fCurrCPElement;
 	/** The element(s) targeted by the current CP entry, which will be the source module(s) of the added exports. */
 	private IJavaElement[] fJavaElements;
 	private Set<String> fModuleNames;
-	
+
 	private Map<String,List<String>> fModule2RequiredModules;
 
 	private static final int IDX_ADD= 0;
@@ -273,9 +273,9 @@ public class ModuleDialog extends StatusDialog {
 		composite.setLayout(layout);
 
 		Label description= new Label(composite, SWT.WRAP);
-		
+
 		description.setText(getDescriptionString());
-		
+
 		GridData data= new GridData(SWT.FILL, SWT.CENTER, false, false, 3, 1);
 		data.widthHint= convertWidthInCharsToPixels(100);
 		description.setLayoutData(data);
@@ -303,7 +303,7 @@ public class ModuleDialog extends StatusDialog {
 		updateStatus(new StatusInfo(IStatus.WARNING, NewWizardMessages.ModuleDialog_deprecated_warning));
 		return composite;
 	}
-	
+
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		if (fBasePage.fSWTControl != null) {
@@ -352,7 +352,7 @@ public class ModuleDialog extends StatusDialog {
 		contentsPage.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		// top
-		createContentListContents(contentsPage, 
+		createContentListContents(contentsPage,
 				NewWizardMessages.ModuleDialog_availableModules_list,
 				NewWizardMessages.ModuleDialog_availableModules_tooltip,
 				IDX_AVAILABLE, IDX_INCLUDED);
@@ -495,7 +495,7 @@ public class ModuleDialog extends StatusDialog {
 		fAddIncludedButton.setImage(sharedImages.getImage(org.eclipse.ui.ISharedImages.IMG_TOOL_FORWARD));
 		fAddIncludedButton.setToolTipText(NewWizardMessages.ModuleDialog_addToIncluded_tooltip);
 		fAddIncludedButton.addSelectionListener(widgetSelectedAdapter(e -> moveModuleEntry(IDX_AVAILABLE, IDX_INCLUDED)));
-		
+
 		fRemoveIncludedButton= new Button(box, SWT.PUSH);
 		fRemoveIncludedButton.setImage(sharedImages.getImage(org.eclipse.ui.ISharedImages.IMG_TOOL_BACK));
 		fRemoveIncludedButton.setToolTipText(NewWizardMessages.ModuleDialog_removeFromIncluded_tooltip);
@@ -552,7 +552,7 @@ public class ModuleDialog extends StatusDialog {
 	}
 
 	// ======== updating & validation: ========
-	
+
 	protected void doPatchSelectionChanged(DialogField field) {
 		fPatchedModule.setEnabled(fIsPatchCheckbox.isSelected() && moduleNames().size() != 1);
 		validateDetails(field);
@@ -819,7 +819,7 @@ public class ModuleDialog extends StatusDialog {
 						requiredModules= new ArrayList<>();
 						fModule2RequiredModules.put(moduleName, requiredModules);
 					}
-					requiredModules.add(required);					
+					requiredModules.add(required);
 				}
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);
@@ -887,7 +887,7 @@ public class ModuleDialog extends StatusDialog {
 		}
 		return module != null ? module.getElementName() : JavaModelUtil.ALL_UNNAMED;
 	}
-	
+
 	private boolean isUnnamedModule() {
 		IModuleDescription module= null;
 		try {
@@ -895,7 +895,7 @@ public class ModuleDialog extends StatusDialog {
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 		}
-		return module == null;		
+		return module == null;
 	}
 
 	// -------- TypeRestrictionAdapter --------
@@ -960,7 +960,7 @@ public class ModuleDialog extends StatusDialog {
 				} else {
 					field.removeElement(export);
 				}
-			}			
+			}
 		}
 	}
 

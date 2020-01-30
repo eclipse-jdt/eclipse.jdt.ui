@@ -71,7 +71,7 @@ public class SourceAttachmentDialog extends StatusDialog {
 
 		setTitle(NewWizardMessages.SourceAttachmentDialog_title);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
 	 * @since 3.4

@@ -151,11 +151,11 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 
 		Label label= new Label(inner, SWT.LEFT + SWT.WRAP);
 		label.setLayoutData(gd);
-		
+
 		try {
 			if (root != null) {
 				message= message + "\n\n" + PreferencesMessages.SourceAttachmentPropertyPage_location_path; //$NON-NLS-1$
-				
+
 				Text location= new Text(inner, SWT.READ_ONLY | SWT.WRAP);
 				SWTUtil.fixReadonlyTextBackground(location);
 				gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
@@ -171,7 +171,7 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 			JavaPlugin.log(e);
 			// don't show location
 		}
-		
+
 		label.setText(message);
 		return inner;
 	}

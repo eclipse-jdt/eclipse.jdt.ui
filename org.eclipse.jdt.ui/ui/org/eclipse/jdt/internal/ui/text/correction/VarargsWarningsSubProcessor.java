@@ -94,15 +94,15 @@ public class VarargsWarningsSubProcessor {
 		MethodDeclaration methodDeclaration= ASTResolving.findParentMethodDeclaration(coveringNode);
 		if (methodDeclaration == null)
 			return;
-		
+
 		IMethodBinding methodBinding= methodDeclaration.resolveBinding();
 		if (methodBinding == null)
 			return;
-		
+
 		int modifiers= methodBinding.getModifiers();
 		if (!Modifier.isStatic(modifiers) && !Modifier.isFinal(modifiers) && !Modifier.isPrivate(modifiers) && ! methodBinding.isConstructor())
-			return; 
-		
+			return;
+
 		String label= CorrectionMessages.VarargsWarningsSubProcessor_add_safevarargs_label;
 		AddSafeVarargsProposal proposal= new AddSafeVarargsProposal(label, context.getCompilationUnit(), methodDeclaration, null, IProposalRelevance.ADD_SAFEVARARGS);
 		proposals.add(proposal);
@@ -123,7 +123,7 @@ public class VarargsWarningsSubProcessor {
 		}
 		if (methodBinding == null)
 			return;
-		
+
 		String label= Messages.format(CorrectionMessages.VarargsWarningsSubProcessor_add_safevarargs_to_method_label, methodBinding.getName());
 
 		ITypeBinding declaringType= methodBinding.getDeclaringClass();

@@ -133,7 +133,7 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 		Object[] elements= selection.toArray();
 		if (elements.length == 0)
 			return false;
-		
+
 		if (elements.length == 1) {
 			Object input= elements[0];
 			if (input instanceof LogicalPackage)
@@ -158,7 +158,7 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 					// continue below
 			}
 		}
-		
+
 		// strategy: allow non-IJavaElements (e.g. an IResource), but stop for invalid IJavaElements
 		boolean hasValidElement= false;
 		for (Object input : elements) {
@@ -168,7 +168,7 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 			}
 			if (!(input instanceof IJavaElement))
 				continue;
-			
+
 			switch (((IJavaElement)input).getElementType()) {
 				case IJavaElement.PACKAGE_FRAGMENT_ROOT:
 				case IJavaElement.JAVA_PROJECT:
@@ -238,7 +238,7 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 				validElements.add(element);
 			}
 		}
-		if (validElements.size() == 0) {
+		if (validElements.isEmpty()) {
 			IStatus status= createStatus(ActionMessages.OpenTypeHierarchyAction_messages_no_java_elements);
 			ErrorDialog.openError(getShell(), getDialogTitle(), ActionMessages.OpenTypeHierarchyAction_messages_title, status);
 			return;

@@ -328,7 +328,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 	 * @since 3.3
 	 */
 	protected boolean isEmpty() {
-		return fHashBuckets.size() == 0;
+		return fHashBuckets.isEmpty();
 	}
 
 	/**
@@ -451,7 +451,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 		neighborhood.remove(hash);
 		final Set<RankedWordProposal> matches= getCandidates(word, sentence, neighborhood);
 
-		if (matches.size() == 0 && candidates.size() == 0)
+		if (matches.isEmpty() && candidates.isEmpty())
 			getCandidates(word, sentence, candidates);
 
 		candidates.addAll(matches);

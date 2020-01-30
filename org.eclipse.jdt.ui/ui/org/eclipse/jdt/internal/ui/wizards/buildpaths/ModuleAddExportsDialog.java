@@ -86,7 +86,7 @@ public class ModuleAddExportsDialog extends StatusDialog {
 	@Override
 	public void create() {
 		super.create();
-		updateButtonsEnableState(ModuleDialog.newSilentError()); // silently disable OK button until user input is given 
+		updateButtonsEnableState(ModuleDialog.newSilentError()); // silently disable OK button until user input is given
 	}
 
 	@Override

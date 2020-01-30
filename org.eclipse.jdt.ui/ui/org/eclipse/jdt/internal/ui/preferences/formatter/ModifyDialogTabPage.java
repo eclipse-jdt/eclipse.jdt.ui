@@ -477,7 +477,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 
 	/**
 	 * Wrapper around a text field which requests a string input.
-	 * 
+	 *
 	 * @since 3.6
 	 */
 	protected final class StringPreference extends Preference {
@@ -487,7 +487,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 		 * <p>
 		 * The default implementation declares all non-<code>null</code> values as valid.
 		 * </p>
-		 * 
+		 *
 		 * @since 3.6
 		 */
 		protected class Validator {
@@ -508,7 +508,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 
 		/**
 		 * Creates a new <code>StringPreference</code>.
-		 * 
+		 *
 		 * @param composite the composite on which the SWT widgets are added.
 		 * @param numColumns the number of columns in the composite's {@link GridLayout}
 		 * @param preferences the map to store the values.
@@ -808,7 +808,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 	 * Subclasses should implement <code>doCreatePreferences</code> and <code>doCreatePreview</code>
 	 * may also be overridden as necessary.
 	 * </p>
-	 * 
+	 *
 	 * @param parent The parent composite
 	 * @return Created content control
 	 */

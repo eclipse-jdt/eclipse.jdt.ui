@@ -162,6 +162,10 @@ public class PostfixCompletionProposalComputer extends AbstractTemplateCompletio
 			}
 
 			ASTNode completionNode= NodeFinder.perform(cuRoot, sr);
+			if (completionNode == null) {
+				return;
+			}
+
 			ASTNode[] bestNode= new ASTNode[] { completionNode };
 			completionNode.accept(new ASTVisitor() {
 				@Override

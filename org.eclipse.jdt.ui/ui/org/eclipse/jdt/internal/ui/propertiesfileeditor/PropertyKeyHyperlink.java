@@ -94,7 +94,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 /**
  * Properties key hyperlink.
- * 
+ *
  * @since 3.1
  */
 public class PropertyKeyHyperlink implements IHyperlink {
@@ -335,7 +335,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 
 				return name;
 			}
-			
+
 			@Override
 			protected ImageDescriptor decorateImage(ImageDescriptor input, Object element) {
 				KeyReference keyRef= (KeyReference)element;
@@ -473,7 +473,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 										throw new InvocationTargetException(e);
 									}
 								}
-								if (result.size() == 0) {
+								if (result.isEmpty()) {
 									//maybe not an eclipse style NLS string
 									String searchString;
 									if (useDoubleQuotedKey) {

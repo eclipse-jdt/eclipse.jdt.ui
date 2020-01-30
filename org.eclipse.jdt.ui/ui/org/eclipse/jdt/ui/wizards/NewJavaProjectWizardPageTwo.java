@@ -592,7 +592,7 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 	public void dispose() {
 		super.dispose();
 	}
-	
+
 	private void setCompilerCompliance(String compilerCompliance) {
 		BuildPathsBlock buildPathsBlock= getBuildPathsBlock();
 		if (buildPathsBlock != null) {
@@ -602,7 +602,7 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 			}
 		}
 	}
-	
+
 	private void createJavaProjectModuleInfoFile() {
 		String compilerCompliance= fFirstPage.getCompilerCompliance();
 		if (compilerCompliance == null) {
@@ -619,14 +619,14 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 						action.run(null);
 					}
 				});
-				
+
 			}
 		}
 	}
-	
+
 	boolean isCreateModuleInfoFile() {
 		BuildPathsBlock buildPathsBlock= getBuildPathsBlock();
-		if (buildPathsBlock != null) {		
+		if (buildPathsBlock != null) {
 			BuildPathBasePage sourceContainerPage= buildPathsBlock.getSourceContainerPage();
 			if (sourceContainerPage instanceof NewSourceContainerWorkbookPage) {
 				return ((NewSourceContainerWorkbookPage) sourceContainerPage).isCreateModuleInfoFile();

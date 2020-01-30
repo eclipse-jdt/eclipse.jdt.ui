@@ -102,7 +102,7 @@ class DeleteChangeCreator {
 		}
 
 		Map<ICompilationUnit, List<IJavaElement>> grouped= ReorgUtils.groupByCompilationUnit(getElementsSmallerThanCu(javaElements));
-		if (grouped.size() != 0 ){
+		if (!grouped.isEmpty() ){
 			Assert.isNotNull(manager);
 			for (Map.Entry<ICompilationUnit, List<IJavaElement>> entry : grouped.entrySet()) {
 				ICompilationUnit cu = entry.getKey();

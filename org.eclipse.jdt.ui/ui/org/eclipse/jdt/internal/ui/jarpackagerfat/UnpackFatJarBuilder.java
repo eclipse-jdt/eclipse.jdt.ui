@@ -32,7 +32,7 @@ import org.eclipse.jdt.ui.jarpackager.IManifestProvider;
 
 /**
  * A jar builder wich unpacks all referenced libraries into the generated jar.
- * 
+ *
  * @since 3.5
  */
 public class UnpackFatJarBuilder extends FatJarBuilder {
@@ -70,7 +70,7 @@ public class UnpackFatJarBuilder extends FatJarBuilder {
 		File zipFile1 = new File(zipFile.getName());
 		try {
 			String zipFileCanonical = zipFile1.getCanonicalPath();
-		
+
 			while (jarEntriesEnum.hasMoreElements()) {
 				ZipEntry zipEntry= jarEntriesEnum.nextElement();
 				if (!zipEntry.isDirectory()) {

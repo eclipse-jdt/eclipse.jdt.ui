@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Matt Chapman, mpchapman@gmail.com - 89977 Make JDT .java agnostic
@@ -183,7 +183,7 @@ public class ReorgCorrectionsSubProcessor {
 
 		// correct package declaration
 		int relevance= cu.getPackageDeclarations().length == 0 ? IProposalRelevance.MISSING_PACKAGE_DECLARATION : IProposalRelevance.CORRECT_PACKAGE_DECLARATION; // bug 38357
-		if (CorrectPackageDeclarationProposal.isValidProposal(cu)) {		
+		if (CorrectPackageDeclarationProposal.isValidProposal(cu)) {
 			proposals.add(new CorrectPackageDeclarationProposal(cu, problem, relevance));
 		}
 
@@ -500,7 +500,7 @@ public class ReorgCorrectionsSubProcessor {
 
 		private boolean isEEOnClasspath(IExecutionEnvironment ee) throws JavaModelException {
 			IPath eePath= JavaRuntime.newJREContainerPath(ee);
-			
+
 			for (IClasspathEntry entry: fProject.getRawClasspath()) {
 				if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER && entry.getPath().equals(eePath))
 					return true;
@@ -565,7 +565,7 @@ public class ReorgCorrectionsSubProcessor {
 	/**
 	 * Adds a proposal to increase the compiler compliance level as well as set --enable-previews
 	 * option.
-	 * 
+	 *
 	 * @param context the context
 	 * @param problem the current problem
 	 * @param proposals the resulting proposals
@@ -581,7 +581,7 @@ public class ReorgCorrectionsSubProcessor {
 		} else {
 			proposals.add(new ChangeToRequiredCompilerCompliance(label1, project, false, requiredVersion, IProposalRelevance.CHANGE_PROJECT_COMPLIANCE));
 		}
-		
+
 
 		if (project.getOption(JavaCore.COMPILER_COMPLIANCE, false) == null) {
 			String label2= Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_change_workspace_compliance_description, requiredVersion);

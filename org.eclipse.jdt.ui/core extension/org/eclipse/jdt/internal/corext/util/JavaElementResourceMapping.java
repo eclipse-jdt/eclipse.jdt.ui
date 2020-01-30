@@ -405,7 +405,7 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 				toProcess.add(fragment);
 			}
 		}
-		if (toProcess.size() == 0)
+		if (toProcess.isEmpty())
 			return null;
 		return new LogicalPackageResourceMapping(toProcess.toArray(new IPackageFragment[toProcess.size()]));
 	}

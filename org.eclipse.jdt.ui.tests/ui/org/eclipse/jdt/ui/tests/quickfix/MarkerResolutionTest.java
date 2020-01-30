@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,6 +15,13 @@ package org.eclipse.jdt.ui.tests.quickfix;
 
 import java.util.Arrays;
 import java.util.Hashtable;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -45,18 +52,18 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.examples.AddTestMarkersAction;
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionAssistant;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
+@RunWith(JUnit4.class)
 public class MarkerResolutionTest extends QuickFixTest {
 
+	@Rule
+    public ProjectTestSetup projectsetup = new ProjectTestSetup();
 
 	private static final class TextViewerContext implements IQuickAssistInvocationContext {
 
@@ -94,27 +101,13 @@ public class MarkerResolutionTest extends QuickFixTest {
 	}
 
 
-	private static final Class<MarkerResolutionTest> THIS= MarkerResolutionTest.class;
-
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
 
 	private boolean BUG_46227= true;
 
-	public MarkerResolutionTest(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
-	}
-
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
@@ -129,8 +122,8 @@ public class MarkerResolutionTest extends QuickFixTest {
 	}
 
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
 
@@ -148,6 +141,7 @@ public class MarkerResolutionTest extends QuickFixTest {
 	}
 
 
+	@Test
 	public void testQuickFix() throws Exception {
 		if (BUG_46227)
 			return;
@@ -196,6 +190,7 @@ public class MarkerResolutionTest extends QuickFixTest {
 		}
 	}
 
+	@Test
 	public void testQuickFixAfterModification() throws Exception {
 		if (BUG_46227)
 			return;

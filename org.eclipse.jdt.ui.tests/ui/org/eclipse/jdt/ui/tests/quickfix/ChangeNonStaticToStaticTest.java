@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,6 +15,13 @@ package org.eclipse.jdt.ui.tests.quickfix;
 
 import java.util.Hashtable;
 import java.util.Map;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -44,35 +51,22 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
 import org.eclipse.jdt.ui.cleanup.ICleanUp;
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUp;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
+@RunWith(JUnit4.class)
 public class ChangeNonStaticToStaticTest extends QuickFixTest {
 
-	private static final Class<ChangeNonStaticToStaticTest> THIS= ChangeNonStaticToStaticTest.class;
+	@Rule
+    public ProjectTestSetup projectsetup = new ProjectTestSetup();
 
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
 
-	public ChangeNonStaticToStaticTest(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
-	}
-
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
@@ -97,8 +91,8 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
 
@@ -121,6 +115,7 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 	    return new CodeStyleCleanUp(options);
     }
 
+	@Test
 	public void testNonStaticAccessTest01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -152,6 +147,7 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
 	}
 
+	@Test
 	public void testNonStaticAccessTest02() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -183,6 +179,7 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
 	}
 
+	@Test
 	public void testNonStaticAccessTest03() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -214,6 +211,7 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
 	}
 
+	@Test
 	public void testNonStaticAccessTest04() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -264,6 +262,7 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
 	}
 
+	@Test
 	public void testNonStaticAccessTest05() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -311,6 +310,7 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
 	}
 
+	@Test
 	public void testNonStaticAccessTest06() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -358,6 +358,7 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
 	}
 
+	@Test
 	public void testNonStaticAccessTest07() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -406,6 +407,7 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
 	}
 
+	@Test
 	public void testNonStaticAccessTest08() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -460,6 +462,7 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
 	}
 
+	@Test
 	public void testNonStaticAccessTest09() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -515,6 +518,7 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
 	}
 
+	@Test
 	public void testNonStaticAccessTest10() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -555,6 +559,7 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
 	}
 
+	@Test
 	public void testNonStaticAccessTest11() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -595,6 +600,7 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
 	}
 
+	@Test
 	public void testNonStaticAccessTest12() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();

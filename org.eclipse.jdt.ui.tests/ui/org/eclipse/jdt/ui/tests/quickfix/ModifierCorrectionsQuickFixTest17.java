@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 IBM Corporation and others.
+ * Copyright (c) 2011, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,6 +15,13 @@ package org.eclipse.jdt.ui.tests.quickfix;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -33,37 +40,25 @@ import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.tests.core.Java1d7ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.Java1d7ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
+@RunWith(JUnit4.class)
 public class ModifierCorrectionsQuickFixTest17 extends QuickFixTest {
 
-	private static final Class<ModifierCorrectionsQuickFixTest17> THIS= ModifierCorrectionsQuickFixTest17.class;
+	@Rule
+    public ProjectTestSetup projectsetup = new Java1d7ProjectTestSetup();
 
 	private IJavaProject fJProject1;
 
 	private IPackageFragmentRoot fSourceFolder;
 
-	public ModifierCorrectionsQuickFixTest17(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new Java1d7ProjectTestSetup(test);
-	}
-
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
@@ -84,11 +79,12 @@ public class ModifierCorrectionsQuickFixTest17 extends QuickFixTest {
 	}
 
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, Java1d7ProjectTestSetup.getDefaultClasspath());
 	}
 
+	@Test
 	public void testAddSafeVarargs1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -122,6 +118,7 @@ public class ModifierCorrectionsQuickFixTest17 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
+	@Test
 	public void testAddSafeVarargs2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -155,6 +152,7 @@ public class ModifierCorrectionsQuickFixTest17 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
+	@Test
 	public void testAddSafeVarargs3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -190,6 +188,7 @@ public class ModifierCorrectionsQuickFixTest17 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
+	@Test
 	public void testAddSafeVarargs4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -219,6 +218,7 @@ public class ModifierCorrectionsQuickFixTest17 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
+	@Test
 	public void testAddSafeVarargs5() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -240,6 +240,7 @@ public class ModifierCorrectionsQuickFixTest17 extends QuickFixTest {
 		assertProposalDoesNotExist(proposals, CorrectionMessages.VarargsWarningsSubProcessor_add_safevarargs_label);
 	}
 
+	@Test
 	public void testAddSafeVarargsToDeclaration1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -283,6 +284,7 @@ public class ModifierCorrectionsQuickFixTest17 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
+	@Test
 	public void testAddSafeVarargsToDeclaration2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -328,6 +330,7 @@ public class ModifierCorrectionsQuickFixTest17 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
+	@Test
 	public void testAddSafeVarargsToDeclaration3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -370,6 +373,7 @@ public class ModifierCorrectionsQuickFixTest17 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
+	@Test
 	public void testAddSafeVarargsToDeclaration4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -419,6 +423,7 @@ public class ModifierCorrectionsQuickFixTest17 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
+	@Test
 	public void testAddSafeVarargsToDeclaration5() throws Exception {
 		JavaProjectHelper.set15CompilerOptions(fJProject1);
 		try {
@@ -448,6 +453,7 @@ public class ModifierCorrectionsQuickFixTest17 extends QuickFixTest {
 		}
 	}
 
+	@Test
 	public void testRemoveSafeVarargs1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -481,6 +487,7 @@ public class ModifierCorrectionsQuickFixTest17 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
+	@Test
 	public void testRemoveSafeVarargs2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -514,6 +521,7 @@ public class ModifierCorrectionsQuickFixTest17 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
+	@Test
 	public void testRemoveSafeVarargs3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		StringBuffer buf= new StringBuffer();

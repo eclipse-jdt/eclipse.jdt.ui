@@ -127,5 +127,5 @@ public class WorkingSetFindAction extends FindAction {
 		return fAction.getOperationUnavailableMessage();
 	}
 
-	
+
 }

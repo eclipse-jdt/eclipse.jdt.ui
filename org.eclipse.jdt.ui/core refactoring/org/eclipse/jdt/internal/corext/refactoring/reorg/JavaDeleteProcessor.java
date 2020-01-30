@@ -393,7 +393,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 		@SuppressWarnings("unchecked")
 		final List<IPackageFragment> initialPackagesToDelete= (List<IPackageFragment>) ReorgUtils.getElementsOfType(fJavaElements, IJavaElement.PACKAGE_FRAGMENT);
 
-		if (initialPackagesToDelete.size() == 0)
+		if (initialPackagesToDelete.isEmpty())
 			return;
 
 		// Move from inner to outer packages

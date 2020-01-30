@@ -53,9 +53,9 @@ public abstract class ModuleEncapsulationDetail {
 
 	/**
 	 * Retrieve the java element(s) targeted by a given classpath entry.
-	 * @param currentProject the Java project holding the classpath entry 
+	 * @param currentProject the Java project holding the classpath entry
 	 * @param path the path value of the classpath entry
-	 * @return either an array of {@link IPackageFragmentRoot} or a singleton array of {@link IJavaProject} 
+	 * @return either an array of {@link IPackageFragmentRoot} or a singleton array of {@link IJavaProject}
 	 * 	targeted by the given classpath entry, or {@code null} if no not found
 	 */
 	public static IJavaElement[] getTargetJavaElements(IJavaProject currentProject, IPath path) {
@@ -123,7 +123,7 @@ public abstract class ModuleEncapsulationDetail {
 
 		public final String fModule;
 		public final String fPaths;
-		
+
 		public ModulePatch(String value, CPListElementAttribute attribElem) {
 			int eqIdx= value.indexOf('=');
 			if (eqIdx == -1) {
@@ -141,7 +141,7 @@ public abstract class ModuleEncapsulationDetail {
 			fPaths= paths;
 			fAttribElem= attribElem;
 		}
-		
+
 		public ModulePatch addLocations(String newLocations) {
 			String mergedPaths= fPaths + File.pathSeparatorChar + newLocations;
 			return new ModulePatch(fModule, mergedPaths, fAttribElem);
@@ -266,7 +266,7 @@ public abstract class ModuleEncapsulationDetail {
 						}
 					}
 					// non-source location as-is:
-					return resource.getLocation().toString(); 
+					return resource.getLocation().toString();
 				}
 			}
 			return null;
@@ -487,7 +487,7 @@ public abstract class ModuleEncapsulationDetail {
 	 * Node in the tree of CPListElement et al, representing a limit-modules directive.
 	 */
 	static class LimitModules extends ModuleEncapsulationDetail {
-		
+
 		public static LimitModules fromString(CPListElementAttribute attribElem, String value) {
 			String[] modules= value.split(","); //$NON-NLS-1$
 			for (int i= 0; i < modules.length; i++) {
@@ -495,7 +495,7 @@ public abstract class ModuleEncapsulationDetail {
 			}
 			return new LimitModules(Arrays.asList(modules), attribElem);
 		}
-		
+
 		public final Collection<String> fExplicitlyIncludedModules;
 
 		public LimitModules(Collection<String> explicitlyIncludedModules, CPListElementAttribute attribElem) {

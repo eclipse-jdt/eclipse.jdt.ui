@@ -169,7 +169,7 @@ public class HistoryListAction extends Action {
         	} else {
         		fResult= selected.get(0);
         	}
-        	fHistoryList.enableButton(0, fHistoryList.getSize() > selected.size() && selected.size() != 0);
+        	fHistoryList.enableButton(0, fHistoryList.getSize() > selected.size() && !selected.isEmpty());
         	fHistoryStatus= status;
         	updateStatus(status);
         }

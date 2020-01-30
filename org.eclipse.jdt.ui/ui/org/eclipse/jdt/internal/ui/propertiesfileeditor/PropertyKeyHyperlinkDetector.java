@@ -51,7 +51,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 /**
  * Properties key hyperlink detector.
- * 
+ *
  * @since 3.1
  */
 public class PropertyKeyHyperlinkDetector extends AbstractHyperlinkDetector {

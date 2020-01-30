@@ -185,7 +185,7 @@ public abstract class ProfileConfigurationBlock {
 
 		/**
 		 * Exports all the profiles to a file.
-		 * 
+		 *
 		 * @since 3.6
 		 */
 		private void exportAllButtonPressed() {
@@ -379,7 +379,7 @@ public abstract class ProfileConfigurationBlock {
 
 	/**
 	 * Notifies that a preference has been changed.
-	 * 
+	 *
 	 * @param event the preference change event
 	 */
 	protected void preferenceChanged(PreferenceChangeEvent event) {

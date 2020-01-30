@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 IBM Corporation and others.
+ * Copyright (c) 2016, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,6 +13,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
+
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -22,26 +27,14 @@ import org.eclipse.jdt.core.IPackageFragment;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
-import org.eclipse.jdt.ui.tests.core.Java1d7ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.Java1d7ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
+@RunWith(JUnit4.class)
 public class CleanUpTest1d7 extends CleanUpTestCase {
 
-	private static final Class<CleanUpTest1d7> THIS= CleanUpTest1d7.class;
-
-	public CleanUpTest1d7(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new Java1d7ProjectTestSetup(test);
-	}
+	@Rule
+    public ProjectTestSetup projectsetup = new Java1d7ProjectTestSetup();
 
 	@Override
 	protected IJavaProject getProject() {
@@ -53,6 +46,7 @@ public class CleanUpTest1d7 extends CleanUpTestCase {
 		return Java1d7ProjectTestSetup.getDefaultClasspath();
 	}
 
+	@Test
 	public void testRemoveRedundantTypeArguments1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //

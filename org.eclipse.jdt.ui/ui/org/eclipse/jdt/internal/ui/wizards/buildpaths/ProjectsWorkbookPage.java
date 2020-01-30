@@ -75,7 +75,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 	private final TreeListDialogField<CPListElement> fProjectsList;
 
 	private final IWorkbenchPreferenceContainer fPageContainer;
-	
+
 	private boolean dragDropEnabled;
 	private Object draggedItemsProject;
 	private boolean fromModularProject;
@@ -124,7 +124,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 			if(JavaModelUtil.is9OrHigher(fCurrJProject)) {
 				updateProjectsListWithRootNode();
 				return;
-			}	
+			}
 			// add the projects-cpentries that are already on the class path
 			List<CPListElement> cpelements= fClassPathList.getElements();
 
@@ -138,7 +138,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 			}
 			fProjectsList.setElements(checkedProjects);
 	}
-	
+
 	boolean hasRootNodes(){
 		if (fProjectsList == null)
 			return false;
@@ -170,7 +170,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		}
 		checkedProjects.add(rootModulepath);
 		checkedProjects.add(rootClasspath);
-		
+
 		fProjectsList.setTreeExpansionLevel(2);
 		fProjectsList.setElements(checkedProjects);
 		fProjectsList.enableButton(IDX_ADDPROJECT, false);
@@ -178,7 +178,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 			enableDragDropSupport();
 		}
 	}
-	
+
 	private void enableDragDropSupport() {
 		dragDropEnabled= true;
 		int ops= DND.DROP_MOVE;
@@ -290,7 +290,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 
 	private void updateClasspathList() {
 		List<CPListElement> projelements= fProjectsList.getElements();
-		
+
 		 List<CPListElement> flattenedProjElements = new ArrayList<>();
 		 for ( int i =0; i < projelements.size(); i++ ) {
 		 	CPListElement ele = projelements.get(i);
@@ -423,7 +423,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 				List<Object> selectedElements= fProjectsList.getSelectedElements();
 				List<CPListElement> elements= fProjectsList.getElements();
 				// if nothing selected, do nothing
-				if(selectedElements.size()==0)
+				if(selectedElements.isEmpty())
 					return;
 				boolean isClassRootExpanded= getRootExpansionState(fProjectsList, true);
 				boolean isModuleRootExpanded= getRootExpansionState(fProjectsList, false);
@@ -440,12 +440,12 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 							Object attribute= cpListElement.getAttribute(IClasspathAttribute.MODULE);
 							if(attribute == null) {
 								cpListElement.setAttribute(IClasspathAttribute.MODULE, new ModuleEncapsulationDetail[0]);
-								
+
 							}
 						}
 						isModuleRootExpanded= true;
 					}
-					((RootCPListElement)selectedElements.get(i)).addCPListElement(elementsToAdd);					
+					((RootCPListElement)selectedElements.get(i)).addCPListElement(elementsToAdd);
 				}
 				fProjectsList.setElements(elements);
 				fProjectsList.refresh();
@@ -453,7 +453,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 				setRootExpansionState(fProjectsList, isClassRootExpanded, true);
 				setRootExpansionState(fProjectsList, isModuleRootExpanded, false);
 			}
-			
+
 			if (index == IDX_ADDPROJECT && !hasRootNodes()) {
 				fProjectsList.refresh();
 			}
@@ -493,17 +493,17 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 				}
 				fProjectsList.getTreeViewer().remove(selElements.toArray());
 				fProjectsList.dialogFieldChanged();
-				
+
 			}
 			else {
 				fProjectsList.removeElements(selElements);
 			}
-		
+
 		}
 	}
 
 	private boolean canRemove(List<?> selElements) {
-		if (selElements.size() == 0) {
+		if (selElements.isEmpty()) {
 			return false;
 		}
 
@@ -604,7 +604,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 			}
 			if(key.equals(CPListElement.TEST) || key.equals(CPListElement.WITHOUT_TEST_CODE)) {
 				fProjectsList.refresh(elem.getParent());
-			} else { 
+			} else {
 				fProjectsList.refresh(elem);
 			}
 			fClassPathList.dialogFieldChanged(); // validate

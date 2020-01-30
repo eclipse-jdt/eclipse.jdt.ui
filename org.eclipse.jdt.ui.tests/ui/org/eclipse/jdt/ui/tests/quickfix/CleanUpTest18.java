@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2018 IBM Corporation and others.
+ * Copyright (c) 2013, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,6 +13,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
+
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -24,29 +30,18 @@ import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
-import org.eclipse.jdt.ui.tests.core.Java18ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.Java18ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
+@RunWith(JUnit4.class)
 public class CleanUpTest18 extends CleanUpTestCase {
 
-	private static final Class<CleanUpTest18> THIS= CleanUpTest18.class;
-
-	public CleanUpTest18(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-	
-	public static Test setUpTest(Test test) {
-		return new Java18ProjectTestSetup(test);
-	}
+	@Rule
+    public ProjectTestSetup projectsetup = new Java18ProjectTestSetup();
 
 	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		super.setUp();
 		StubUtility.setCodeTemplate(CodeTemplateContextType.OVERRIDECOMMENT_ID, "", null);
 	}
@@ -61,6 +56,7 @@ public class CleanUpTest18 extends CleanUpTestCase {
 		return Java18ProjectTestSetup.getDefaultClasspath();
 	}
 
+	@Test
 	public void testConvertToLambda01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -98,6 +94,7 @@ public class CleanUpTest18 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
 	}
 
+	@Test
 	public void testConvertToLambda02() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -146,6 +143,7 @@ public class CleanUpTest18 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
 	}
 
+	@Test
 	public void testConvertToLambda03() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -186,6 +184,7 @@ public class CleanUpTest18 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
 	}
 
+	@Test
 	public void testConvertToLambdaNestedWithImports() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -232,6 +231,7 @@ public class CleanUpTest18 extends CleanUpTestCase {
 	}
 
 	// fix for https://bugs.eclipse.org/bugs/show_bug.cgi?id=434507#c5
+	@Test
 	public void testConvertToLambdaAmbiguous01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -381,6 +381,7 @@ public class CleanUpTest18 extends CleanUpTestCase {
 	}
 
 	// fix for https://bugs.eclipse.org/bugs/show_bug.cgi?id=434507#c5
+	@Test
 	public void testConvertToLambdaAmbiguous02() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -528,6 +529,7 @@ public class CleanUpTest18 extends CleanUpTestCase {
 	}
 
 	// fix for https://bugs.eclipse.org/bugs/show_bug.cgi?id=434507#c2
+	@Test
 	public void testConvertToLambdaAmbiguous03() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -596,6 +598,7 @@ public class CleanUpTest18 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
 	}
 
+	@Test
 	public void testConvertToLambdaConflictingNames() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -707,6 +710,7 @@ public class CleanUpTest18 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	@Test
 	public void testConvertToLambdaWithMethodAnnotations() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -747,6 +751,7 @@ public class CleanUpTest18 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	@Test
 	public void testConvertToAnonymousWithWildcards() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -807,6 +812,7 @@ public class CleanUpTest18 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
 	}
 
+	@Test
 	public void testConvertToAnonymousWithWildcards1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -850,6 +856,7 @@ public class CleanUpTest18 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
 	}
 
+	@Test
 	public void testConvertToAnonymousWithJoinedSAM() throws Exception {
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=428526#c1 and #c6
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
@@ -894,6 +901,7 @@ public class CleanUpTest18 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
 	}
 
+	@Test
 	public void testConvertToLambdaWithNonFunctionalTargetType() throws Exception {
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=468457
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
@@ -942,6 +950,7 @@ public class CleanUpTest18 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
 	}
 
+	@Test
 	public void testConvertToLambdaWithSynchronizedOrStrictfp() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuilder buf= new StringBuilder();

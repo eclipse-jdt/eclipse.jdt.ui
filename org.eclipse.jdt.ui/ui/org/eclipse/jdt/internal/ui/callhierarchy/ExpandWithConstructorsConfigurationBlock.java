@@ -375,7 +375,7 @@ public class ExpandWithConstructorsConfigurationBlock extends OptionsConfigurati
 		 */
 		private boolean canRemove(ListDialogField<String> field) {
 			List<String> selected= field.getSelectedElements();
-			return selected.size() != 0;
+			return !selected.isEmpty();
 		}
 
 		/* )

@@ -260,7 +260,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		protected void populateFilters(List<String> activeList, List<String> inactiveList) {
 			fFilters= new ArrayList<>(activeList.size() + inactiveList.size());
 			populateList(activeList, true);
-			if (inactiveList.size() != 0)
+			if (!inactiveList.isEmpty())
 				populateList(inactiveList, false);
 		}
 

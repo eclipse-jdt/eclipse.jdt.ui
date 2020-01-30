@@ -46,7 +46,7 @@ public class ModuleProposalInfo extends ProposalInfo {
 
 	/**
 	 * Resolves to an IModuleDescription.
-	 * 
+	 *
 	 * @return the <code>IModuleDescription</code> or <code>null</code> if no Java element can be found
 	 * @throws JavaModelException thrown if the given path is <code>null</code> or absolute
 	 */

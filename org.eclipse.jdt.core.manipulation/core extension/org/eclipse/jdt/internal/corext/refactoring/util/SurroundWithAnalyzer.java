@@ -129,7 +129,7 @@ public class SurroundWithAnalyzer extends CodeAnalyzer {
 	}
 
 	protected void postProcessSelectedNodes(List<ASTNode> selectedNodes) {
-		if (selectedNodes == null || selectedNodes.size() == 0)
+		if (selectedNodes == null || selectedNodes.isEmpty())
 			return;
 		if (selectedNodes.size() == 1) {
 			ASTNode node= selectedNodes.get(0);

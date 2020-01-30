@@ -240,7 +240,7 @@ public class ParameterGuessingProposal extends JavaMethodCompletionProposal {
 	/**
 	 * Creates the completion string. Offsets and Lengths are set to the offsets and lengths of the
 	 * parameters.
-	 * 
+	 *
 	 * @return the completion string
 	 * @throws JavaModelException if parameter guessing failed
 	 */

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2017 GK Software AG and others.
+ * Copyright (c) 2015, 2020 GK Software AG and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,8 +13,17 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.io.ByteArrayInputStream;
 import java.util.List;
+
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import org.eclipse.core.runtime.Path;
 
@@ -27,33 +36,24 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.tests.core.Java18ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.Java18ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
+@RunWith(JUnit4.class)
 public class AnnotateAssistTest18 extends AbstractAnnotateAssistTests {
+
+	@Rule
+    public ProjectTestSetup projectsetup = new Java18ProjectTestSetup();
 
 	protected static final String ANNOTATION_PATH= "annots";
 
 	protected static final Class<?> THIS= AnnotateAssistTest18.class;
 	
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new Java18ProjectTestSetup(test);
-	}
-	public AnnotateAssistTest18(String name) {
-		super(name);
-	}
-
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		fJProject1= Java18ProjectTestSetup.getProject();
 		fJProject1.getProject().getFolder(ANNOTATION_PATH).create(true, true, null);
 		fJProject1.setOption(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
@@ -65,6 +65,7 @@ public class AnnotateAssistTest18 extends AbstractAnnotateAssistTests {
 	 * Apply the second proposal and check the effect.
 	 * @throws Exception multiple causes
 	 */
+	@Test
 	public void testAnnotateParameter_TypeArgument() throws Exception {
 		
 		String X_PATH= "pack/age/X";
@@ -135,6 +136,7 @@ public class AnnotateAssistTest18 extends AbstractAnnotateAssistTests {
 	 * Assert NO proposals on the primitive leaf type of an array type.
 	 * @throws Exception multiple causes
 	 */
+	@Test
 	public void testAnnotateParameter_ArrayOfPrimitive() throws Exception {
 		
 		String X_PATH= "pack/age/X";
@@ -168,6 +170,7 @@ public class AnnotateAssistTest18 extends AbstractAnnotateAssistTests {
 	 * Apply the second proposal and check the effect.
 	 * @throws Exception multiple causes
 	 */
+	@Test
 	public void testAnnotateParameter_WildcardBound() throws Exception {
 		
 		String X_PATH= "pack/age/X";
@@ -242,6 +245,7 @@ public class AnnotateAssistTest18 extends AbstractAnnotateAssistTests {
 	 * Cf. {@link AnnotateAssistTest15#testAnnotateParameter_Array1()}
 	 * @throws Exception multiple causes
 	 */
+	@Test
 	public void testAnnotateParameter_Array2() throws Exception {
 		
 		String X_PATH= "pack/age/X";
@@ -314,6 +318,7 @@ public class AnnotateAssistTest18 extends AbstractAnnotateAssistTests {
 	 * Cf. {@link AnnotateAssistTest15#testAnnotateParameter_Array1()}
 	 * @throws Exception multiple causes
 	 */
+	@Test
 	public void testAnnotateParameter_Array3() throws Exception {
 		
 		String X_PATH= "pack/age/X";
@@ -388,6 +393,7 @@ public class AnnotateAssistTest18 extends AbstractAnnotateAssistTests {
 	 * Cf. {@link AnnotateAssistTest18#testAnnotateParameter_Array3()}
 	 * @throws Exception multiple causes
 	 */
+	@Test
 	public void testAnnotateParameter_Array4() throws Exception {
 		
 		String X_PATH= "pack/age/X";
@@ -462,6 +468,7 @@ public class AnnotateAssistTest18 extends AbstractAnnotateAssistTests {
 	 * Cf. {@link AnnotateAssistTest18#testAnnotateParameter_Array3()}
 	 * @throws Exception multiple causes
 	 */
+	@Test
 	public void testAnnotateParameter_Array5() throws Exception {
 		
 		String X_PATH= "pack/age/X";
@@ -535,6 +542,7 @@ public class AnnotateAssistTest18 extends AbstractAnnotateAssistTests {
 	 * 
 	 * @throws Exception multiple causes
 	 */
+	@Test
 	public void testAnnotateMethod_Array1() throws Exception {
 		
 		String X_PATH= "pack/age/X";
@@ -607,6 +615,7 @@ public class AnnotateAssistTest18 extends AbstractAnnotateAssistTests {
 	 * 
 	 * @throws Exception multiple causes
 	 */
+	@Test
 	public void testAnnotateMethod_Array2() throws Exception {
 		
 		String X_PATH= "pack/age/X";
@@ -679,6 +688,7 @@ public class AnnotateAssistTest18 extends AbstractAnnotateAssistTests {
 	 * Cf. {@link AnnotateAssistTest18#testAnnotateParameter_Array3()}
 	 * @throws Exception multiple causes
 	 */
+	@Test
 	public void testAnnotateParameter_Varargs1() throws Exception {
 		
 		String X_PATH= "pack/age/X";
@@ -752,6 +762,7 @@ public class AnnotateAssistTest18 extends AbstractAnnotateAssistTests {
 	 * Cf. {@link AnnotateAssistTest18#testAnnotateParameter_Varargs1()}
 	 * @throws Exception multiple causes
 	 */
+	@Test
 	public void testAnnotateParameter_Varargs2() throws Exception {
 		
 		String X_PATH= "pack/age/X";
@@ -825,6 +836,7 @@ public class AnnotateAssistTest18 extends AbstractAnnotateAssistTests {
 	 * Cf. {@link AnnotateAssistTest18#testAnnotateParameter_Array3()}
 	 * @throws Exception multiple causes
 	 */
+	@Test
 	public void testAnnotateParameter_Varargs3() throws Exception {
 		
 		String X_PATH= "pack/age/X";
@@ -896,6 +908,7 @@ public class AnnotateAssistTest18 extends AbstractAnnotateAssistTests {
 	 * Then repeat for another type parameter (to check merging of changes)
 	 * @throws Exception multiple causes
 	 */
+	@Test
 	public void testAnnotateMethod_TypeParameter1() throws Exception {
 		
 		String X_PATH= "pack/age/X";
@@ -996,6 +1009,7 @@ public class AnnotateAssistTest18 extends AbstractAnnotateAssistTests {
 	 * Then repeat for another type parameter (to check merging of changes)
 	 * @throws Exception multiple causes
 	 */
+	@Test
 	public void testAnnotateMethod_TypeParameter2() throws Exception {
 		
 		String X_PATH= "pack/age/X";
@@ -1093,6 +1107,7 @@ public class AnnotateAssistTest18 extends AbstractAnnotateAssistTests {
 	 * Apply the second proposal and check the effect.
 	 * @throws Exception multiple causes
 	 */
+	@Test
 	public void testAnnotateField1() throws Exception {
 		
 		String NODE_PATH= "pack/age/Node";

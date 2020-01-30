@@ -714,7 +714,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	}
 
 	private boolean canRemove(List<?> selElements) {
-		if (selElements.size() == 0) {
+		if (selElements.isEmpty()) {
 			return false;
 		}
 		for (int i= 0; i < selElements.size(); i++) {
@@ -1050,7 +1050,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		if(hasRootNodes()==false) {
 			return super.containsOnlyTopLevelEntries(selElements);
 		}
-		if (selElements.size() == 0 || selElements.size() > 1) {
+		if (selElements.isEmpty() || selElements.size() > 1) {
 			return false;
 		}
 		for (int i= 0; i < selElements.size(); i++) {

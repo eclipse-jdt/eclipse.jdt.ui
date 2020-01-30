@@ -502,7 +502,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			InputStream is= new ByteArrayInputStream(bytes);
 			try {
 				List<Profile> res= ProfileStore.readProfilesFromStream(new InputSource(is));
-				if (res == null || res.size() == 0)
+				if (res == null || res.isEmpty())
 					return JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(CleanUpConstants.DEFAULT_CLEAN_UP_OPTIONS).getMap();
 
 				CustomProfile profile= (CustomProfile)res.get(0);

@@ -150,7 +150,7 @@ public class OpenViewActionGroup extends ActionGroup {
 	public OpenViewActionGroup(JavaEditor part) {
 		fEditorIsOwner= true;
 		fShowShowInMenu= false;
-		
+
 		fOpenImplementation= new OpenImplementationAction(part);
 		fOpenImplementation.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_IMPLEMENTATION);
 		part.setAction("OpenImplementation", fOpenImplementation); //$NON-NLS-1$
@@ -200,7 +200,7 @@ public class OpenViewActionGroup extends ActionGroup {
 		fOpenImplementation= new OpenImplementationAction(site);
 		fOpenImplementation.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_IMPLEMENTATION);
 		fOpenImplementation.setSpecialSelectionProvider(specialProvider);
-		
+
 		fOpenSuperImplementation= new OpenSuperImplementationAction(site);
 		fOpenSuperImplementation.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_SUPER_IMPLEMENTATION);
 		fOpenSuperImplementation.setSpecialSelectionProvider(specialProvider);

@@ -198,7 +198,7 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 	public static Java50Fix createRawTypeReferenceFix(CompilationUnit compilationUnit, IProblemLocation problem) {
 		List<CompilationUnitRewriteOperation> operations= new ArrayList<>();
 		SimpleType node= createRawTypeReferenceOperations(compilationUnit, new IProblemLocation[] {problem}, operations);
-		if (operations.size() == 0)
+		if (operations.isEmpty())
 			return null;
 
 		return new Java50Fix(Messages.format(FixMessages.Java50Fix_AddTypeArguments_description,  BasicElementLabels.getJavaElementName(node.getName().getFullyQualifiedName())), compilationUnit, operations.toArray(new CompilationUnitRewriteOperation[operations.size()]));
@@ -234,7 +234,7 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 		if (rawTypeReference)
 			createRawTypeReferenceOperations(compilationUnit, locations, operations);
 
-		if (operations.size() == 0)
+		if (operations.isEmpty())
 			return null;
 
 		String fixName;
@@ -273,7 +273,7 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 			createRawTypeReferenceOperations(compilationUnit, problems, operations);
 
 
-		if (operations.size() == 0)
+		if (operations.isEmpty())
 			return null;
 
 		CompilationUnitRewriteOperation[] operationsArray= operations.toArray(new CompilationUnitRewriteOperation[operations.size()]);
@@ -349,7 +349,7 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 			}
 		}
 
-		if (result.size() == 0)
+		if (result.isEmpty())
 			return null;
 
 		SimpleType[] types= result.toArray(new SimpleType[result.size()]);

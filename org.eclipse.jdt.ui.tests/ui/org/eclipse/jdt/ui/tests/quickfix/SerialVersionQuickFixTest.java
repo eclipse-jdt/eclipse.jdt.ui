@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,8 +13,17 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
+import static org.junit.Assert.assertTrue;
+
 import java.util.ArrayList;
 import java.util.Hashtable;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -35,34 +44,25 @@ import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.launching.JavaRuntime;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 /**
  *
  */
+@RunWith(JUnit4.class)
 public class SerialVersionQuickFixTest extends QuickFixTest {
+
+	@Rule
+    public ProjectTestSetup projectsetup = new ProjectTestSetup();
 
 	private static final String DEFAULT_VALUE= "1L";
 
 	private static final String FIELD_COMMENT= "/* Test */";
 
 	private static final String FIELD_DECLARATION= "private static final long serialVersionUID = ";
-
-	private static final Class<SerialVersionQuickFixTest> THIS= SerialVersionQuickFixTest.class;
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
-	}
 
 	public static void assertEqualPreview(final String preview, final String buffer) {
 		final int index= buffer.indexOf(SerialVersionQuickFixTest.FIELD_DECLARATION);
@@ -78,12 +78,8 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 
 	private IPackageFragmentRoot fSourceFolder;
 
-	public SerialVersionQuickFixTest(String name) {
-		super(name);
-	}
-
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		JavaRuntime.getDefaultVMInstall();
 		fProject= ProjectTestSetup.getProject();
 
@@ -109,11 +105,12 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fProject, "src"); //$NON-NLS-1$
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.clear(fProject, ProjectTestSetup.getDefaultClasspath());
 	}
 
+	@Test
 	public void testLocalClass() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test3", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -184,6 +181,7 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 	}
 
 
+	@Test
 	public void testAnonymousClass() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test3", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -241,6 +239,7 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
+	@Test
 	public void testInnerClass() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test2", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -299,6 +298,7 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 	}
 
 
+	@Test
 	public void testOuterClass() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -341,6 +341,7 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
+	@Test
 	public void testOuterClass2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test3", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -416,6 +417,7 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
+	@Test
 	public void testOuterClass3() throws Exception {
 		// longer package
 

@@ -229,6 +229,7 @@ public final class NewWizardMessages extends NLS {
 	public static String NewJavaProjectWizardPageOne_dialog_title;
 	public static String NewJavaProjectWizardPageOne_directory_message;
 	public static String NewJavaProjectWizardPageOne_JREGroup_link_description;
+	public static String NewJavaProjectWizardPageOne_JREGroup_unspecified_compliance;
 	public static String NewJavaProjectWizardPageOne_JREGroup_default_compliance;
 	public static String NewJavaProjectWizardPageOne_JREGroup_specific_compliance;
 	public static String NewJavaProjectWizardPageOne_JREGroup_specific_EE;
@@ -783,7 +784,7 @@ public final class NewWizardMessages extends NLS {
 	public static String CPListLabelProvider_without_test_code_label;
 	public static String CPListLabelProvider_test_yes;
 	public static String CPListLabelProvider_test_no;
-	
+
 	public static String HintTextGroup_NoAction;
 
 	public static String NewSourceContainerWorkbookPage_HintTextGroup_title;
@@ -940,7 +941,7 @@ public final class NewWizardMessages extends NLS {
 	public static String EditVariableEntryDialog_filename_empty;
 
 	public static String CPListLabelProvider_external_annotations_location_label;
-	
+
 	public static String NewModuleInfoWizard_title;
 	public static String NewModuleInfoWizard_updateProject_job;
 	public static String NewModuleInfoWizardPage_title;

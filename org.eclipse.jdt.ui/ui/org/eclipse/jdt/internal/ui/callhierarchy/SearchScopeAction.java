@@ -31,7 +31,7 @@ abstract class SearchScopeAction extends Action {
 
 	/**
 	 * Fetches the search scope with the appropriate include mask.
-	 * 
+	 *
 	 * @param includeMask the include mask
 	 * @return the search scope with the appropriate include mask
 	 * @since 3.7
@@ -49,7 +49,7 @@ abstract class SearchScopeAction extends Action {
 
 	/**
 	 * Fetches the description of the scope with the appropriate include mask.
-	 * 
+	 *
 	 * @param includeMask the include mask
 	 * @return the description of the scope with the appropriate include mask
 	 * @since 3.7

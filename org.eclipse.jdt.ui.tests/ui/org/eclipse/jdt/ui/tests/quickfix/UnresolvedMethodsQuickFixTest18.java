@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2018 IBM Corporation and others.
+ * Copyright (c) 2014, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -16,6 +16,13 @@ package org.eclipse.jdt.ui.tests.quickfix;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.NullTestUtils;
@@ -39,7 +46,8 @@ import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.tests.core.Java18ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.Java18ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
@@ -47,30 +55,18 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
+@RunWith(JUnit4.class)
 public class UnresolvedMethodsQuickFixTest18 extends QuickFixTest {
-	private static final Class<UnresolvedMethodsQuickFixTest18> THIS= UnresolvedMethodsQuickFixTest18.class;
+
+	@Rule
+    public ProjectTestSetup projectsetup = new Java18ProjectTestSetup();
 
 	private IJavaProject fJProject1;
 
 	private IPackageFragmentRoot fSourceFolder;
 
-	public UnresolvedMethodsQuickFixTest18(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new Java18ProjectTestSetup(test);
-	}
-
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
@@ -91,11 +87,12 @@ public class UnresolvedMethodsQuickFixTest18 extends QuickFixTest {
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, Java18ProjectTestSetup.getDefaultClasspath());
 	}
 
+	@Test
 	public void testStaticInterfaceMethodNotInherited() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -120,6 +117,7 @@ public class UnresolvedMethodsQuickFixTest18 extends QuickFixTest {
 		assertProposalDoesNotExist(proposals, Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_changemethod_description, "bar"));
 	}
 
+	@Test
 	public void testCreateMethodQuickFix1() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -157,6 +155,7 @@ public class UnresolvedMethodsQuickFixTest18 extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { getPreviewContent(proposal) }, new String[] { buf.toString() });
 	}
 
+	@Test
 	public void testCreateMethodQuickFix2() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -196,6 +195,7 @@ public class UnresolvedMethodsQuickFixTest18 extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { getPreviewContent(proposal) }, new String[] { buf.toString() });
 	}
 
+	@Test
 	public void testCreateMethodQuickFix3() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -244,6 +244,7 @@ public class UnresolvedMethodsQuickFixTest18 extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { getPreviewContent(proposal1), getPreviewContent(proposal2) }, new String[] { buf1.toString(), buf.toString() });
 	}
 
+	@Test
 	public void testCreateMethodQuickFix4() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -280,6 +281,7 @@ public class UnresolvedMethodsQuickFixTest18 extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { getPreviewContent(proposal) }, new String[] { buf.toString() });
 	}
 
+	@Test
 	public void testCreateMethodQuickFix5() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -316,6 +318,7 @@ public class UnresolvedMethodsQuickFixTest18 extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { getPreviewContent(proposal) }, new String[] { buf.toString() });
 	}
 
+	@Test
 	public void testCreateMethodQuickFix6() throws Exception {
 		StringBuffer buf1= new StringBuffer();
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -368,6 +371,7 @@ public class UnresolvedMethodsQuickFixTest18 extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { getPreviewContent(proposal1), getPreviewContent(proposal2) }, new String[] { buf1.toString(), buf.toString() });
 	}
 
+	@Test
 	public void testCreateMethodQuickFix7() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -401,6 +405,7 @@ public class UnresolvedMethodsQuickFixTest18 extends QuickFixTest {
 		buf.append("}\n");
 		assertEqualStringsIgnoreOrder(new String[] { getPreviewContent(proposal) }, new String[] { buf.toString() });
 	}
+	@Test
 	public void testBug514213_avoidRedundantNonNullWhenCreatingMissingMethodForOverride() throws Exception {
 		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
@@ -502,6 +507,7 @@ public class UnresolvedMethodsQuickFixTest18 extends QuickFixTest {
 		assertProposalPreviewEquals(buf.toString(), "Create 'f()' in super type 'I2'", proposals);		
 	}
 
+	@Test
 	public void testBug514213_avoidRedundantNonNullWhenCreatingMissingMethodForInvocation() throws Exception {
 		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
@@ -607,6 +613,7 @@ public class UnresolvedMethodsQuickFixTest18 extends QuickFixTest {
 		buf.append("}");
 		assertProposalPreviewEquals(buf.toString(), "Create method 'g(Number, Number)' in type 'I2'", proposals2);		
 	}
+	@Test
 	public void testBug528876() throws Exception {
 		NullTestUtils.prepareNullTypeAnnotations(fSourceFolder);
 		try {

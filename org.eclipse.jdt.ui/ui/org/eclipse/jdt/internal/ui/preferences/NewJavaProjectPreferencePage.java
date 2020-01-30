@@ -74,7 +74,7 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
  * <p>
  * See {@link PreferenceConstants} on how to access or change these values through public API.
  * </p>
- * 
+ *
  * @since 2.0
  */
 public class NewJavaProjectPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {

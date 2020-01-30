@@ -60,7 +60,7 @@ import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 			fNodes.add(node);
 		}
 		public boolean hasCorrectNesting(ASTNode node) {
-			if (fNodes.size() == 0)
+			if (fNodes.isEmpty())
 				return true;
 			ASTNode parent= node.getParent();
 			if(fNodes.get(0).getParent() != parent)

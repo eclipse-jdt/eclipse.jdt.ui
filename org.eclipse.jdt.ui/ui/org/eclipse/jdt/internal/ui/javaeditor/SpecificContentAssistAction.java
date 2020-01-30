@@ -61,7 +61,7 @@ final class SpecificContentAssistAction extends Action implements IUpdate {
 
 	/**
 	 * Creates a new action for a certain proposal category.
-	 * 
+	 *
 	 * @param category the completion proposal category
 	 */
 	public SpecificContentAssistAction(CompletionProposalCategory category) {
@@ -107,15 +107,15 @@ final class SpecificContentAssistAction extends Action implements IUpdate {
 	private boolean computeEnablement(ITextEditor editor) {
 		if (editor == null)
 			return false;
-		
+
 		ITextOperationTarget target= editor.getAdapter(ITextOperationTarget.class);
 		if (target == null || ! target.canDoOperation(ISourceViewer.CONTENTASSIST_PROPOSALS))
 			return false;
-		
+
 		IJavaProject javaProject = EditorUtility.getJavaProject(editor.getEditorInput());
 		if (! fCategory.matches(javaProject))
 			return false;
-		
+
 		ISelection selection= editor.getSelectionProvider().getSelection();
 		return isValidSelection(selection);
 	}

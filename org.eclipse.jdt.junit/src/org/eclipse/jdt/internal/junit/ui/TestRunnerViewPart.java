@@ -2213,12 +2213,7 @@ action enablement
 	}
 
 	private void postSyncProcessChanges() {
-		postSyncRunnable(new Runnable() {
-			@Override
-			public void run() {
-				processChangesInUI();
-			}
-		});
+		postSyncRunnable(this::processChangesInUI);
 	}
 
 	public void warnOfContentChange() {

@@ -89,12 +89,12 @@ class ModuleDependenciesAdapter implements IDialogFieldListener, ITreeListAdapte
 	private static final int IDX_EXPOSE_PACKAGE= 3;
 
 	private static final int IDX_PATCH= 5;
-	
+
 	private static final int IDX_EDIT= 7;
 
 	private static final int IDX_JPMS_OPTIONS= 9;
 
-	/** Supertype of the two synthetic toplevel tree nodes {@link DeclaredDetails} and {@link ConfiguredDetails} */ 
+	/** Supertype of the two synthetic toplevel tree nodes {@link DeclaredDetails} and {@link ConfiguredDetails} */
 	abstract static class Details {
 
 		/** the module selected in the LHS pane, for which details are being shown / edited in this RHS pane. */
@@ -108,7 +108,7 @@ class ModuleDependenciesAdapter implements IDialogFieldListener, ITreeListAdapte
 		}
 
 		/**
-		 * Answer the module of the current IJavaProject for which the build path is being configured. 
+		 * Answer the module of the current IJavaProject for which the build path is being configured.
 		 * @return the module of the current project, or {@code null}.
 		 */
 		protected IModuleDescription getContextModule() {
@@ -202,13 +202,13 @@ class ModuleDependenciesAdapter implements IDialogFieldListener, ITreeListAdapte
 	static class ConfiguredDetails extends Details {
 		private ModuleKind fKind;
 		private ModuleDependenciesPage fDependenciesPage;
-	
+
 		public ConfiguredDetails(IModuleDescription focusModule, CPListElement elem, ModuleKind moduleKind, ModuleDependenciesPage dependenciesPage) {
 			super(focusModule, elem);
 			fKind= moduleKind;
 			fDependenciesPage= dependenciesPage;
 		}
-		
+
 		public Object[] getChildren() {
 			// For containers like JRE / Libraries: aggregate attribute is in the parent
 			Object parent= fElem.getParentContainer();
@@ -241,7 +241,7 @@ class ModuleDependenciesAdapter implements IDialogFieldListener, ITreeListAdapte
 					ModuleAddReads moduleAddReads= (ModuleAddReads) detail;
 					if (filterModule == null || filterModule.equals(moduleAddReads.fSourceModule)) {
 						filteredDetails.add(new ReadModule(moduleAddReads.fTargetModule, this));
-					}								
+					}
 				} else if (detail instanceof ModulePatch) {
 					ModulePatch modulePatch= (ModulePatch) detail;
 					if (filterModule == null || filterModule.equals(modulePatch.fModule)) {
@@ -449,7 +449,7 @@ class ModuleDependenciesAdapter implements IDialogFieldListener, ITreeListAdapte
 
 			IClasspathEntry jreEntry= fDependenciesPage.findSystemLibraryElement().getClasspathEntry();
 			ModuleSelectionDialog dialog= ModuleSelectionDialog.forReads(shell, fElem.getJavaProject(), jreEntry, irrelevantModules);
-			if (dialog.open() != 0) {				
+			if (dialog.open() != 0) {
 				return false;
 			}
 			List<IModuleDescription> result= dialog.getResult();
@@ -545,9 +545,9 @@ class ModuleDependenciesAdapter implements IDialogFieldListener, ITreeListAdapte
 		}
 
 		private boolean unpatchModule(Shell shell, String moduleToUnpatch, String oldPath, String newPath) {
-			String pathKind= oldPath.indexOf('/', 1) != -1 
+			String pathKind= oldPath.indexOf('/', 1) != -1
 					? NewWizardMessages.ModuleDependenciesAdapter_sourceFolder_kind : NewWizardMessages.ModuleDependenciesAdapter_project_kind;
-			if (!MessageDialog.openQuestion(shell, NewWizardMessages.ModuleDependenciesAdapter_patchConflict_title, 
+			if (!MessageDialog.openQuestion(shell, NewWizardMessages.ModuleDependenciesAdapter_patchConflict_title,
 					MessageFormat.format(NewWizardMessages.ModuleDependenciesAdapter_patchConflict_message,
 							pathKind, oldPath.substring(1), moduleToUnpatch, newPath.substring(1), fFocusModule.getElementName()))) {
 				return false;
@@ -783,7 +783,7 @@ class ModuleDependenciesAdapter implements IDialogFieldListener, ITreeListAdapte
 			return super.getImage(element);
 		}
 	}
-	
+
 	static class ElementSorter extends CPListElementSorter {
 		@Override
 		public int compare(Viewer viewer, Object e1, Object e2) {
@@ -883,7 +883,7 @@ class ModuleDependenciesAdapter implements IDialogFieldListener, ITreeListAdapte
 		int numDetails= countConfiguredDetails();
 		switch (index) {
 			case IDX_REMOVE:
-				if (selectedElements.size() == 0) {
+				if (selectedElements.isEmpty()) {
 					// no detail selected, remove the module(s) (with question):
 					fModuleDependenciesPage.removeModules();
 				} else {
@@ -923,7 +923,7 @@ class ModuleDependenciesAdapter implements IDialogFieldListener, ITreeListAdapte
 				throw new IllegalArgumentException("Non-existent button index "+index); //$NON-NLS-1$
 		}
 		int newNum= countConfiguredDetails();
-		if ((numDetails == 0 || newNum == 0) && numDetails != newNum) { 
+		if ((numDetails == 0 || newNum == 0) && numDetails != newNum) {
 			fModuleDependenciesPage.refreshModulesList(); // let ModuleDependenciesList react to changes in hasConfiguredDetails()
 		}
 	}

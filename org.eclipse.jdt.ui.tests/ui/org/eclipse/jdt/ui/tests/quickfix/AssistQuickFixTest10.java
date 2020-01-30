@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 IBM Corporation and others.
+ * Copyright (c) 2018, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -18,6 +18,13 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
+
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 
@@ -34,19 +41,19 @@ import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.tests.core.Java10ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.Java10ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.TypeChangeCorrectionProposal;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
+@RunWith(JUnit4.class)
 public class AssistQuickFixTest10 extends QuickFixTest {
-
-	private static final Class<AssistQuickFixTest10> THIS= AssistQuickFixTest10.class;
+	
+	@Rule
+    public ProjectTestSetup projectsetup = new Java10ProjectTestSetup();
 
 	private static final Class<?>[] TYPE_CHANGE_PROPOSAL_TYPE= { TypeChangeCorrectionProposal.class };
 
@@ -54,32 +61,24 @@ public class AssistQuickFixTest10 extends QuickFixTest {
 
 	private IPackageFragmentRoot fSourceFolder;
 
-	public AssistQuickFixTest10(String name) {
-		super(name);
-	}
+//	public static Test setUpTest(Test test) {
+//		return new Java10ProjectTestSetup(test) {
+//			@Override
+//			protected void setUp() throws Exception {
+//				JavaProjectHelper.PERFORM_DUMMY_SEARCH++;
+//				super.setUp();
+//			}
+//
+//			@Override
+//			protected void tearDown() throws Exception {
+//				super.tearDown();
+//				JavaProjectHelper.PERFORM_DUMMY_SEARCH--;
+//			}
+//		};
+//	}
 
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new Java10ProjectTestSetup(test) {
-			@Override
-			protected void setUp() throws Exception {
-				JavaProjectHelper.PERFORM_DUMMY_SEARCH++;
-				super.setUp();
-			}
-
-			@Override
-			protected void tearDown() throws Exception {
-				super.tearDown();
-				JavaProjectHelper.PERFORM_DUMMY_SEARCH--;
-			}
-		};
-	}
-
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
@@ -94,11 +93,12 @@ public class AssistQuickFixTest10 extends QuickFixTest {
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, Java10ProjectTestSetup.getDefaultClasspath());
 	}
 
+	@Test
 	public void testChangeVarTypeToBindingTypeProposal() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("module test {\n");
@@ -135,6 +135,7 @@ public class AssistQuickFixTest10 extends QuickFixTest {
 		assertEqualString(preview, buf.toString());
 	}
 
+	@Test
 	public void testChangeTypeToVarTypeProposal() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("module test {\n");
@@ -172,6 +173,7 @@ public class AssistQuickFixTest10 extends QuickFixTest {
 
 	}
 
+	@Test
 	public void testChangeVarTypeToBindingTypeProposalWithTypeAnnotation() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("module test {\n");
@@ -218,6 +220,7 @@ public class AssistQuickFixTest10 extends QuickFixTest {
 		assertEqualString(preview, buf.toString());
 	}
 
+	@Test
 	public void testChangeTypeToVarTypeProposalWithoutTypeAnnotation() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("module test {\n");
@@ -265,6 +268,7 @@ public class AssistQuickFixTest10 extends QuickFixTest {
 
 	}
 	
+	@Test
 	public void testChangeVarToTypeNoTypeChangeProposal() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("module test {\n");
@@ -303,6 +307,7 @@ public class AssistQuickFixTest10 extends QuickFixTest {
 
 	}
 	
+	@Test
 	public void testChangeTypeToVarChangeProposalRemoveUnusedImport() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("module test {\n");
@@ -351,6 +356,7 @@ public class AssistQuickFixTest10 extends QuickFixTest {
 		assertEqualString(preview, buf.toString());
 	}
 
+	@Test
 	public void testChangeTypeToVarChangeProposalDonotRemoveUsedImport() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("module test {\n");
@@ -402,6 +408,7 @@ public class AssistQuickFixTest10 extends QuickFixTest {
 		assertEqualString(preview, buf.toString());
 	}
 
+	@Test
 	public void testChangeParametrizedTypeToVarTypeProposalDoesNotLoseTypeArguments() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("module test {\n");

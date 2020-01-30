@@ -619,7 +619,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 							}
 						}
 
-						if (fBracketLevelStack.size() == 0) {
+						if (fBracketLevelStack.isEmpty()) {
 							document.removePositionUpdater(fUpdater);
 							try {
 								document.removePositionCategory(CATEGORY);

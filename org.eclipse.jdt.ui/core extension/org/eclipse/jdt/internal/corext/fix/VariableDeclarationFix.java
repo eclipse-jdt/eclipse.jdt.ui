@@ -41,7 +41,7 @@ public class VariableDeclarationFix extends CompilationUnitRewriteOperationsFix 
 				selectedNode.accept(visitor);
 			}
 		}
-		if (ops.size() == 0)
+		if (ops.isEmpty())
 			return null;
 
 		CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation[] result= ops.toArray(new CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation[ops.size()]);

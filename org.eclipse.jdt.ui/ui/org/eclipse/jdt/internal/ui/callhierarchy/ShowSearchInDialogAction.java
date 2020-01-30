@@ -20,7 +20,7 @@ import org.eclipse.jface.window.Window;
 
 /**
  * Action class to create and open the search in dialog.
- * 
+ *
  * @since 3.7
  */
 public class ShowSearchInDialogAction extends Action {
@@ -30,9 +30,9 @@ public class ShowSearchInDialogAction extends Action {
 
 	/**
 	 * Action to show the <code>SearchInDialog</code>.
-	 * 
+	 *
 	 * @param part the call hierarchy view part
-	 * @param viewer the call hierarchy viewer	
+	 * @param viewer the call hierarchy viewer
 	 */
 	public ShowSearchInDialogAction(CallHierarchyViewPart part, CallHierarchyViewer viewer) {
 		Assert.isNotNull(part);
@@ -44,7 +44,7 @@ public class ShowSearchInDialogAction extends Action {
 
 	/**
 	 * Returns the <code>SearchInDialog</code>.
-	 * 
+	 *
 	 * @return the <code>searchInDialog</code>
 	 */
 	public SearchInDialog getSearchInDialog() {

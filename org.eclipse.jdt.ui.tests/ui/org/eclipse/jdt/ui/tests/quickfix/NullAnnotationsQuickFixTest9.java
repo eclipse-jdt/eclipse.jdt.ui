@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 IBM Corporation and others.
+ * Copyright (c) 2018, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,6 +15,13 @@ package org.eclipse.jdt.ui.tests.quickfix;
 
 import java.util.ArrayList;
 import java.util.Map;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -32,16 +39,16 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.core.ClasspathAttribute;
 
-import org.eclipse.jdt.ui.tests.core.Java9ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.Java9ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
+@RunWith(JUnit4.class)
 public class NullAnnotationsQuickFixTest9 extends QuickFixTest {
 
-	private static final Class<NullAnnotationsQuickFixTest9> THIS= NullAnnotationsQuickFixTest9.class;
+	@Rule
+    public ProjectTestSetup projectsetup = new Java9ProjectTestSetup();
 
 	private IJavaProject fJProject1;
 
@@ -49,21 +56,8 @@ public class NullAnnotationsQuickFixTest9 extends QuickFixTest {
 
 	private IPackageFragmentRoot fSourceFolder;
 
-	public NullAnnotationsQuickFixTest9(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return new Java9ProjectTestSetup(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		Test testToReturn= new Java9ProjectTestSetup(test);
-		return testToReturn;
-	}
-
-	@Override
-	protected void setUp() throws CoreException {
+	@Before
+	public void setUp() throws CoreException {
 		fJProject2= JavaProjectHelper.createJavaProject("annots", "bin");
 		JavaProjectHelper.set9CompilerOptions(fJProject2);
 		JavaProjectHelper.addRTJar9(fJProject2);
@@ -140,17 +134,17 @@ public class NullAnnotationsQuickFixTest9 extends QuickFixTest {
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		if (fJProject1 != null) {
 			JavaProjectHelper.delete(fJProject1);
 		}
 		if (fJProject2 != null) {
 			JavaProjectHelper.delete(fJProject2);
 		}
-		super.tearDown();
 	}
 
+	@Test
 	public void testBug530580a() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("@annots.NonNullByDefault module test {\n");
@@ -240,6 +234,7 @@ public class NullAnnotationsQuickFixTest9 extends QuickFixTest {
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
+	@Test
 	public void testBug530580b() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("@annots.NonNullByDefault module test {\n");

@@ -41,7 +41,7 @@ public class ProblemTableViewer extends TableViewer implements ResourceToItemsMa
 
 	/**
 	 * Constructor for ProblemTableViewer.
-	 * 
+	 *
 	 * @param parent the parent composite
 	 */
 	public ProblemTableViewer(Composite parent) {
@@ -51,7 +51,7 @@ public class ProblemTableViewer extends TableViewer implements ResourceToItemsMa
 
 	/**
 	 * Constructor for ProblemTableViewer.
-	 * 
+	 *
 	 * @param parent the parent composite
 	 * @param style the style
 	 */
@@ -62,7 +62,7 @@ public class ProblemTableViewer extends TableViewer implements ResourceToItemsMa
 
 	/**
 	 * Constructor for ProblemTableViewer.
-	 * 
+	 *
 	 * @param table the table
 	 */
 	public ProblemTableViewer(Table table) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Simeon Andreev and others.
+ * Copyright (c) 2017, 2020 Simeon Andreev and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,15 +13,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+	IsCompletelySelectedTest.class,
+	ParentCheckerTest.class
+})
 public class RefactoringTests {
-
-	public static Test suite() {
-		TestSuite suite= new TestSuite(RefactoringTests.class.getName());
-		suite.addTestSuite(IsCompletelySelectedTest.class);
-		suite.addTestSuite(ParentCheckerTest.class);
-		return suite;
-	}
 }

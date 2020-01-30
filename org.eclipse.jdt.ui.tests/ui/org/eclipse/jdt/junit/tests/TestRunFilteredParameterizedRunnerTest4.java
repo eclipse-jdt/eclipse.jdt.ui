@@ -20,8 +20,6 @@ import org.eclipse.jdt.junit.model.ITestElement.ProgressState;
 import org.eclipse.jdt.junit.model.ITestElement.Result;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
-import org.eclipse.core.runtime.Path;
-
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 
@@ -45,7 +43,6 @@ public class TestRunFilteredParameterizedRunnerTest4 extends AbstractTestRunList
 	@Override
 	protected void setUp() throws Exception {
 		fProject= JavaProjectHelper.createJavaProject("TestRunListenerTest", "bin");
-		JavaProjectHelper.addVariableEntry(fProject, new Path("JUNIT_HOME/junit.jar"), null, null);
 		JavaProjectHelper.addToClasspath(fProject, JavaCore.newContainerEntry(JUnitCore.JUNIT4_CONTAINER_PATH));
 		JavaProjectHelper.addRTJar15(fProject);
 		String source=

@@ -22,11 +22,11 @@ import org.eclipse.ui.IWorkingSet;
 
 /**
  * Comparator class to sort working sets, optionally keeping the default working set at the top.
- * 
+ *
  * @since 3.5
  */
 public class WorkingSetComparator implements Comparator<IWorkingSet> {
-	
+
 	private Collator fCollator= Collator.getInstance();
 
 	/**
@@ -46,7 +46,7 @@ public class WorkingSetComparator implements Comparator<IWorkingSet> {
 	 * Creates a new instance of working set comparator and initializes the boolean field value to
 	 * the given value, which determines whether or not the default working set is kept on top while
 	 * sorting the working sets.
-	 * 
+	 *
 	 * @param isOtherWorkingSetOnTop <code>true</code> if default working set is to be retained at
 	 *            the top, <code>false</code> otherwise
 	 */
@@ -59,7 +59,7 @@ public class WorkingSetComparator implements Comparator<IWorkingSet> {
 	 * the second argument is the default working set and if the boolean
 	 * <code>fIsOtherWorkingSetOnTop</code> is set, to keep the default working set on top while
 	 * sorting.
-	 * 
+	 *
 	 * @see Comparator#compare(Object, Object)
 	 */
 	@Override
@@ -67,10 +67,10 @@ public class WorkingSetComparator implements Comparator<IWorkingSet> {
 
 		if (fIsOtherWorkingSetOnTop && IWorkingSetIDs.OTHERS.equals(w1.getId()))
 			return -1;
-		
+
 		if (fIsOtherWorkingSetOnTop && IWorkingSetIDs.OTHERS.equals(w2.getId()))
 			return 1;
-		
+
 		return fCollator.compare(w1.getLabel(), w2.getLabel());
 	}
 }

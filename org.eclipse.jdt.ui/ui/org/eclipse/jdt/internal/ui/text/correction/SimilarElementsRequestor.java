@@ -236,29 +236,29 @@ public class SimilarElementsRequestor extends CompletionRequestor {
 			addType(proposal.getSignature(), proposal.getFlags(), proposal.getRelevance());
 		}
 	}
-	
-	
+
+
 	public static String[] getStaticImportFavorites(ICompilationUnit cu, final String elementName, boolean isMethod, String[] favorites) throws JavaModelException {
 		StringBuilder dummyCU= new StringBuilder();
 		String packName= cu.getParent().getElementName();
 		IType type= cu.findPrimaryType();
 		if (type == null)
 			return new String[0];
-		
+
 		if (packName.length() > 0) {
 			dummyCU.append("package ").append(packName).append(';'); //$NON-NLS-1$
 		}
 		dummyCU.append("public class ").append(type.getElementName()).append("{\n static {\n").append(elementName); // static initializer  //$NON-NLS-1$//$NON-NLS-2$
 		int offset= dummyCU.length();
 		dummyCU.append("\n}\n }"); //$NON-NLS-1$
-		
+
 		ICompilationUnit newCU= null;
 		try {
 			newCU= cu.getWorkingCopy(null);
 			newCU.getBuffer().setContents(dummyCU.toString());
-			
+
 			final HashSet<String> result= new HashSet<>();
-			
+
 			CompletionRequestor requestor= new CompletionRequestor(true) {
 				@Override
 				public void accept(CompletionProposal proposal) {
@@ -271,7 +271,7 @@ public class SimilarElementsRequestor extends CompletionRequestor {
 					}
 				}
 			};
-			
+
 			if (isMethod) {
 				requestor.setIgnored(CompletionProposal.METHOD_REF, false);
 				requestor.setAllowsRequiredProposals(CompletionProposal.METHOD_REF, CompletionProposal.METHOD_IMPORT, true);
@@ -280,9 +280,9 @@ public class SimilarElementsRequestor extends CompletionRequestor {
 				requestor.setAllowsRequiredProposals(CompletionProposal.FIELD_REF, CompletionProposal.FIELD_IMPORT, true);
 			}
 			requestor.setFavoriteReferences(favorites);
-			
+
 			newCU.codeComplete(offset, requestor, new CompletionTimeoutProgressMonitor());
-			
+
 			return result.toArray(new String[result.size()]);
 		} finally {
 			if (newCU != null) {

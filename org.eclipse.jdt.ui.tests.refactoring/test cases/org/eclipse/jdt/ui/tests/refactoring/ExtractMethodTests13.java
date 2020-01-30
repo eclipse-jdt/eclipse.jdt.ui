@@ -15,20 +15,20 @@ package org.eclipse.jdt.ui.tests.refactoring;
 
 import junit.framework.Test;
 
-public class ExtractMethodTests12 extends ExtractMethodTests {
-	private static ExtractMethodTestSetup12 fgTestSetup;
+public class ExtractMethodTests13 extends ExtractMethodTests {
+	private static ExtractMethodTestSetup13 fgTestSetup;
 
-	public ExtractMethodTests12(String name) {
+	public ExtractMethodTests13(String name) {
 		super(name);
 	}
 
 	public static Test suite() {
-		fgTestSetup= new ExtractMethodTestSetup12(new NoSuperTestsSuite(ExtractMethodTests12.class));
+		fgTestSetup= new ExtractMethodTestSetup13(new NoSuperTestsSuite(ExtractMethodTests13.class));
 		return fgTestSetup;
 	}
 
 	public static Test setUpTest(Test test) {
-		fgTestSetup= new ExtractMethodTestSetup12(test);
+		fgTestSetup= new ExtractMethodTestSetup13(test);
 		return fgTestSetup;
 	}
 
@@ -37,12 +37,12 @@ public class ExtractMethodTests12 extends ExtractMethodTests {
 		performTest(fgTestSetup.getInvalidSelectionPackage(), "A", INVALID_SELECTION, null);
 	}
 
-	protected void try12Test() throws Exception {
-		performTest(fgTestSetup.getTry12Package(), "A", COMPARE_WITH_OUTPUT, "try12_out");
+	protected void try13Test() throws Exception {
+		performTest(fgTestSetup.getTry13Package(), "A", COMPARE_WITH_OUTPUT, "try13_out");
 	}
 
 	public void testSwitchExpr1() throws Exception {
-		try12Test();
+		try13Test();
 	}
 
 	public void testSwitchExpr2() throws Exception {

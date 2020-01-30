@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2019 IBM Corporation and others.
+ * Copyright (c) 2013, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -18,6 +18,13 @@ package org.eclipse.jdt.ui.tests.quickfix;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.NullTestUtils;
@@ -41,7 +48,8 @@ import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.fix.FixMessages;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.tests.core.Java18ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.Java18ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
@@ -49,42 +57,33 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
+@RunWith(JUnit4.class)
 public class AssistQuickFixTest18 extends QuickFixTest {
 
-	private static final Class<AssistQuickFixTest18> THIS= AssistQuickFixTest18.class;
+	@Rule
+    public ProjectTestSetup projectsetup = new Java18ProjectTestSetup();
 
 	private IJavaProject fJProject1;
 
 	private IPackageFragmentRoot fSourceFolder;
 
-	public AssistQuickFixTest18(String name) {
-		super(name);
-	}
+//	public static Test setUpTest() {
+//		return new Java18ProjectTestSetup() {
+//			@Override
+//			protected void setUp() throws Exception {
+//				JavaProjectHelper.PERFORM_DUMMY_SEARCH++;
+//				super.setUp();
+//			}
+//			@Override
+//			protected void tearDown() throws Exception {
+//				super.tearDown();
+//				JavaProjectHelper.PERFORM_DUMMY_SEARCH--;
+//			}
+//		};
+//	}
 
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new Java18ProjectTestSetup(test) {
-			@Override
-			protected void setUp() throws Exception {
-				JavaProjectHelper.PERFORM_DUMMY_SEARCH++;
-				super.setUp();
-			}
-			@Override
-			protected void tearDown() throws Exception {
-				super.tearDown();
-				JavaProjectHelper.PERFORM_DUMMY_SEARCH--;
-			}
-		};
-	}
-
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
@@ -99,11 +98,12 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, Java18ProjectTestSetup.getDefaultClasspath());
 	}
 
+	@Test
 	public void testAssignParamToField1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -123,6 +123,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 0);
 	}
 
+	@Test
 	public void testAssignParamToField2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -142,6 +143,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 0);
 	}
 
+	@Test
 	public void testConvertToLambda1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -191,6 +193,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testConvertToLambda2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -240,6 +243,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testConvertToLambda3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -273,6 +277,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertProposalDoesNotExist(proposals, FixMessages.LambdaExpressionsFix_convert_to_lambda_expression);
 	}
 
+	@Test
 	public void testConvertToLambda4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -304,6 +309,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertProposalDoesNotExist(proposals, FixMessages.LambdaExpressionsFix_convert_to_lambda_expression);
 	}
 
+	@Test
 	public void testConvertToLambda5() throws Exception {
 		//Quick assist should not be offered in 1.7 mode
 		JavaProjectHelper.set17CompilerOptions(fJProject1);
@@ -339,6 +345,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		}
 	}
 
+	@Test
 	public void testConvertToLambda6() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -368,6 +375,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertProposalDoesNotExist(proposals, FixMessages.LambdaExpressionsFix_convert_to_lambda_expression);
 	}
 
+	@Test
 	public void testConvertToLambda7() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -397,6 +405,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertProposalDoesNotExist(proposals, FixMessages.LambdaExpressionsFix_convert_to_lambda_expression);
 	}
 
+	@Test
 	public void testConvertToLambda8() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -442,6 +451,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testConvertToLambda9() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -487,6 +497,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testConvertToLambda10() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -547,6 +558,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testConvertToLambda11() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -609,6 +621,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testConvertToLambda12() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -671,6 +684,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testConvertToLambda13() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -698,6 +712,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertProposalDoesNotExist(proposals, FixMessages.LambdaExpressionsFix_convert_to_lambda_expression);
 	}
 
+	@Test
 	public void testConvertToLambda14() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -748,6 +763,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testConvertToLambda15() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -800,6 +816,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testConvertToLambda16() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -850,6 +867,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testConvertToLambda17() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -898,6 +916,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testConvertToLambda18() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -956,6 +975,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testConvertToLambda19() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1024,6 +1044,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected });
 	}
 
+	@Test
 	public void testConvertToLambda20() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -1064,6 +1085,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected });
 	}
 
+	@Test
 	public void testConvertToLambda21() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -1114,6 +1136,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected });
 	}
 
+	@Test
 	public void testConvertToLambda22() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1270,6 +1293,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected });
 	}
 
+	@Test
 	public void testConvertToLambda23() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1356,6 +1380,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected });
 	}
 
+	@Test
 	public void testConvertToLambda24() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -1402,6 +1427,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected });
 	}
 
+	@Test
 	public void testConvertToLambda25() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1423,6 +1449,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 0);
 	}
 
+	@Test
 	public void testConvertToLambda26() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -1444,6 +1471,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 0);
 	}
 
+	@Test
 	public void testConvertToLambda27() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -1504,6 +1532,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testConvertToLambdaAmbiguousOverridden() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -1545,6 +1574,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 	
+	@Test
 	public void testConvertToAnonymousClassCreation1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -1595,6 +1625,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testConvertToAnonymousClassCreation2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -1645,6 +1676,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testConvertToAnonymousClassCreation3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -1691,6 +1723,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testConvertToAnonymousClassCreation4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -1737,6 +1770,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testConvertToAnonymousClassCreation5() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -1797,6 +1831,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testConvertToAnonymousClassCreation6() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -1878,6 +1913,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testConvertToAnonymousClassCreation8() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -1947,6 +1983,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testConvertToAnonymousClassCreation9() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -2034,6 +2071,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testConvertToAnonymousClassCreationWithParameterName() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -2068,6 +2106,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testChangeLambdaBodyToBlock1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -2107,6 +2146,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testChangeLambdaBodyToBlock2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -2148,6 +2188,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testChangeLambdaBodyToBlock3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -2189,6 +2230,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testChangeLambdaBodyToBlock4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -2228,6 +2270,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testChangeLambdaBodyToExpression1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -2267,6 +2310,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testChangeLambdaBodyToExpression2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -2312,6 +2356,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testChangeLambdaBodyToExpression3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -2351,6 +2396,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testChangeLambdaBodyToExpression4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -2389,6 +2435,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testChangeLambdaBodyToExpression5() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -2427,6 +2474,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testChangeLambdaBodyToExpression6() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -2450,6 +2498,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_change_lambda_body_to_expression);
 	}
 
+	@Test
 	public void testChangeLambdaBodyToExpression7() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -2475,6 +2524,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_change_lambda_body_to_expression);
 	}
 
+	@Test
 	public void testChangeLambdaBodyToExpression8() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -2500,6 +2550,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_change_lambda_body_to_expression);
 	}
 
+	@Test
 	public void testBug433754() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -2536,6 +2587,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testAddInferredLambdaParamTypes1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -2568,6 +2620,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testAddInferredLambdaParamTypes2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -2596,6 +2649,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testAddInferredLambdaParamTypes3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -2627,6 +2681,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_add_inferred_lambda_parameter_types);
 	}
 
+	@Test
 	public void testAddInferredLambdaParamTypes4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -2674,6 +2729,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testConvertMethodReferenceToLambda1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -2712,6 +2768,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testConvertMethodReferenceToLambda2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -2736,6 +2793,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_lambda_expression);
 	}
 
+	@Test
 	public void testConvertMethodReferenceToLambda3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf1= new StringBuilder();
@@ -2864,6 +2922,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected });
 	}
 
+	@Test
 	public void testConvertMethodReferenceToLambda4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -2898,6 +2957,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testConvertMethodReferenceToLambda5() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf1= new StringBuilder();
@@ -3003,6 +3063,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected });
 	}
 
+	@Test
 	public void testConvertMethodReferenceToLambda6() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf1= new StringBuilder();
@@ -3194,6 +3255,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected });
 	}
 
+	@Test
 	public void testConvertMethodReferenceToLambda7() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf1= new StringBuilder();
@@ -3279,6 +3341,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected });
 	}
 
+	@Test
 	public void testConvertMethodReferenceToLambda8() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -3311,6 +3374,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testConvertMethodReferenceToLambda9() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -3349,6 +3413,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testConvertMethodReferenceToLambda10() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -3391,6 +3456,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testConvertMethodReferenceToLambda11() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test01", false, null);
 		StringBuilder buf1= new StringBuilder();
@@ -3808,6 +3874,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected });
 	}
 
+	@Test
 	public void testConvertLambdaToMethodReference1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -3931,6 +3998,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_method_reference);
 	}
 
+	@Test
 	public void testConvertLambdaToMethodReference2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf1= new StringBuilder();
@@ -4011,6 +4079,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testConvertLambdaToMethodReference3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf1= new StringBuilder();
@@ -4371,6 +4440,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testConvertLambdaToMethodReference4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf1= new StringBuilder();
@@ -4503,6 +4573,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testConvertLambdaToMethodReference5() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf1= new StringBuilder();
@@ -4569,6 +4640,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	@Test
 	public void testFixParenthesesInLambdaExpressionAdd() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf1= new StringBuilder();
@@ -4599,6 +4671,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected });
 	}
 
+	@Test
 	public void testFixParenthesesInLambdaExpressionRemove() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf1= new StringBuilder();
@@ -4629,6 +4702,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected });
 	}
 
+	@Test
 	public void testFixParenthesesInLambdaExpressionCannotRemove1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -4649,6 +4723,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_removeParenthesesInLambda);
 	}
 
+	@Test
 	public void testFixParenthesesInLambdaExpressionCannotRemove2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -4670,6 +4745,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_removeParenthesesInLambda);
 	}
 
+	@Test
 	public void testFixParenthesesInLambdaExpressionCannotRemove3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf1= new StringBuilder();
@@ -4691,6 +4767,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_removeParenthesesInLambda);
 	}
 
+	@Test
 	public void testBug514203_wildCard() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -4738,6 +4815,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		
 	}
 
+	@Test
 	public void testBug514203_capture1() throws Exception {
 		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
@@ -4837,6 +4915,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		
 	}
 
+	@Test
 	public void testBug514203_capture2() throws Exception {
 		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
@@ -4944,6 +5023,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		
 	}
 
+	@Test
 	public void testBug514203_capture3() throws Exception {
 		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
@@ -5055,6 +5135,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		
 	}
 
+	@Test
 	public void testBug514203_lambdaNN() throws Exception {
 		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
@@ -5269,6 +5350,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("}\n");
 		assertProposalPreviewEquals(buf.toString(), "Convert to anonymous class creation", proposals2);
 	}
+	@Test
 	public void testBug514203_annotatedParametrizedType() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -5313,6 +5395,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertProposalPreviewEquals(buf.toString(), "Convert to anonymous class creation", proposals);		
 	}
 	
+	@Test
 	public void testNoRedundantNonNullInConvertArrayForLoop() throws Exception {
 		NullTestUtils.prepareNullTypeAnnotations(fSourceFolder);
 		try {
@@ -5350,6 +5433,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 			NullTestUtils.disableAnnotationBasedNullAnalysis(fSourceFolder);
 		}
 	}
+	@Test
 	public void testNoRedundantNonNullInConvertIterableForLoop() throws Exception {
 		NullTestUtils.prepareNullTypeAnnotations(fSourceFolder);
 		try {
@@ -5391,6 +5475,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		}
 	}
 
+	@Test
 	public void testSurroundWithTryWithResource() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		StringBuffer bufOrg= new StringBuffer();

@@ -29,7 +29,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
 /**
  * This action removes a single node from the Call Hierarchy view.
- * 
+ *
  * @since 3.6
  */
 class RemoveFromViewAction extends Action{
@@ -68,7 +68,7 @@ class RemoveFromViewAction extends Action{
 	/**
 	 * Removes the selected nodes from the view with out modifying the underlying view input. Thus
 	 * on refresh of the view the removed nodes are also brought back to the view.
-	 * 
+	 *
 	 * @see org.eclipse.jface.action.Action#run()
 	 * @since 3.9
 	 */
@@ -81,7 +81,7 @@ class RemoveFromViewAction extends Action{
 
 	/**
 	 * Gets the selection from the call hierarchy view part.
-	 * 
+	 *
 	 * @return the current selection
 	 */
 	private ISelection getSelection() {
@@ -90,7 +90,7 @@ class RemoveFromViewAction extends Action{
 
 	/**
 	 * Checks whether this action can be added for the selected element in the call hierarchy.
-	 * 
+	 *
 	 * @return <code> true</code> if the action can be added, <code>false</code> otherwise
 	 */
 	protected boolean canActionBeAdded() {
@@ -115,7 +115,7 @@ class RemoveFromViewAction extends Action{
 
 	/**
 	 * Checks whether the children are being fetched for a node recursively.
-	 * 
+	 *
 	 * @param item the parent node
 	 * @return <code>false</code> when children are currently being fetched for a node,
 	 *         <code>true</code> otherwise

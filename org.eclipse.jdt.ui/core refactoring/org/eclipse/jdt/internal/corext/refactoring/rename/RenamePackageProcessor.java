@@ -764,12 +764,12 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 						TextChangeCompatibility.addTextEdit(fTextChangeManager.get(cu), RefactoringCoreMessages.RenamePackageRefactoring_update_reference, createTextChange(result));
 					}
 				}
-				if (fReferencesToTypesInNamesakes.size() != 0) {
+				if (!fReferencesToTypesInNamesakes.isEmpty()) {
 					SearchResultGroup typeRefsRequiringOldNameImport= extractGroupFor(cu, fReferencesToTypesInNamesakes);
 					if (typeRefsRequiringOldNameImport != null)
 						addTypeImports(typeRefsRequiringOldNameImport);
 				}
-				if (fReferencesToTypesInPackage.size() != 0) {
+				if (!fReferencesToTypesInPackage.isEmpty()) {
 					SearchResultGroup typeRefsRequiringNewNameImport= extractGroupFor(cu, fReferencesToTypesInPackage);
 					if (typeRefsRequiringNewNameImport != null)
 						updateTypeImports(typeRefsRequiringNewNameImport);
@@ -777,13 +777,13 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 				pm.worked(1);
 			}
 
-			if (fReferencesToTypesInNamesakes.size() != 0) {
+			if (!fReferencesToTypesInNamesakes.isEmpty()) {
 				for (SearchResultGroup referencesToTypesInNamesakes : fReferencesToTypesInNamesakes) {
 					addTypeImports(referencesToTypesInNamesakes);
 					pm.worked(1);
 				}
 			}
-			if (fReferencesToTypesInPackage.size() != 0) {
+			if (!fReferencesToTypesInPackage.isEmpty()) {
 				for (SearchResultGroup namesakeReferencesToPackage : fReferencesToTypesInPackage) {
 					updateTypeImports(namesakeReferencesToPackage);
 					pm.worked(1);
