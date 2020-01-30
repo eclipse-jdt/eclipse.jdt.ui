@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -231,6 +231,14 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.surround.with.try.catch"</code>).
 	 */
 	public static final String SURROUND_WITH_TRY_CATCH= "org.eclipse.jdt.ui.edit.text.java.surround.with.try.catch"; //$NON-NLS-1$
+
+	/**
+	 * Action definition ID of the source -> surround with try-with-resources action
+	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.surround.with.try.with.resources"</code>).
+	 *
+	 * @since 3.21
+	 */
+	public static final String SURROUND_WITH_TRY_WITH_RESOURCES= "org.eclipse.jdt.ui.edit.text.java.surround.with.try.with.resources"; //$NON-NLS-1$
 
 	/**
 	 * Action definition ID of the source -> surround with try/multi-catch action (value

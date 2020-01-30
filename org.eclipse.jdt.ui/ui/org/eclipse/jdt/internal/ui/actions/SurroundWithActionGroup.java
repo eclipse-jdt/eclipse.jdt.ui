@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -29,6 +29,7 @@ import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.JdtActionConstants;
 import org.eclipse.jdt.ui.actions.SurroundWithTryCatchAction;
 import org.eclipse.jdt.ui.actions.SurroundWithTryMultiCatchAction;
+import org.eclipse.jdt.ui.actions.SurroundWithTryWithResourcesAction;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
@@ -38,6 +39,7 @@ public class SurroundWithActionGroup extends ActionGroup {
 	private CompilationUnitEditor fEditor;
 	private SurroundWithTryCatchAction fSurroundWithTryCatchAction;
 	private SurroundWithTryMultiCatchAction fSurroundWithTryMultiCatchAction;
+	private SurroundWithTryWithResourcesAction fSurroundWithTryWithResourcesAction;
 	private final String fGroup;
 
 	public SurroundWithActionGroup(CompilationUnitEditor editor, String group) {
@@ -45,12 +47,14 @@ public class SurroundWithActionGroup extends ActionGroup {
 		fGroup= group;
 		fSurroundWithTryCatchAction= createSurroundWithTryCatchAction(fEditor);
 		fSurroundWithTryMultiCatchAction= createSurroundWithTryMultiCatchAction(fEditor);
+		fSurroundWithTryWithResourcesAction= createSurroundWithTryWithResourcesAction(fEditor);
 	}
 
 	@Override
 	public void fillActionBars(IActionBars actionBar) {
 		actionBar.setGlobalActionHandler(JdtActionConstants.SURROUND_WITH_TRY_CATCH, fSurroundWithTryCatchAction);
 		actionBar.setGlobalActionHandler(JdtActionConstants.SURROUND_WITH_TRY_MULTI_CATCH, fSurroundWithTryMultiCatchAction);
+		actionBar.setGlobalActionHandler(JdtActionConstants.SURROUND_WITH_TRY_WITH_RESOURCES, fSurroundWithTryWithResourcesAction);
 	}
 
 	/**
@@ -81,7 +85,8 @@ public class SurroundWithActionGroup extends ActionGroup {
 			@Override
 			public void menuAboutToShow(IMenuManager manager) {
 				manager.removeAll();
-				SurroundWithTemplateMenuAction.fillMenu(manager, fEditor, fSurroundWithTryCatchAction, fSurroundWithTryMultiCatchAction);
+				SurroundWithTemplateMenuAction.fillMenu(manager, fEditor, fSurroundWithTryCatchAction, 
+						fSurroundWithTryMultiCatchAction, fSurroundWithTryWithResourcesAction);
 			}
 		});
 	}
@@ -92,6 +97,15 @@ public class SurroundWithActionGroup extends ActionGroup {
 		result.setImageDescriptor(JavaPluginImages.getDescriptor(JavaPluginImages.IMG_CORRECTION_CHANGE));
 		result.setActionDefinitionId(IJavaEditorActionDefinitionIds.SURROUND_WITH_TRY_CATCH);
 		editor.setAction("SurroundWithTryCatch", result); //$NON-NLS-1$
+		return result;
+	}
+
+	static SurroundWithTryWithResourcesAction createSurroundWithTryWithResourcesAction(CompilationUnitEditor editor) {
+		SurroundWithTryWithResourcesAction result= new SurroundWithTryWithResourcesAction(editor);
+		result.setText(ActionMessages.SurroundWithTemplateMenuAction_SurroundWithTryWithResourcesActionName);
+		result.setImageDescriptor(JavaPluginImages.getDescriptor(JavaPluginImages.IMG_CORRECTION_CHANGE));
+		result.setActionDefinitionId(IJavaEditorActionDefinitionIds.SURROUND_WITH_TRY_WITH_RESOURCES);
+		editor.setAction("SurroundWithTryWithResources", result); //$NON-NLS-1$
 		return result;
 	}
 

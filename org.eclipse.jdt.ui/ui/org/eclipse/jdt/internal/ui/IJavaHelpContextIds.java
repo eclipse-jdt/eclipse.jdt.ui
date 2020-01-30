@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -195,6 +195,7 @@ public interface IJavaHelpContextIds {
 	public static final String SELF_ENCAPSULATE_ACTION=									PREFIX + "self_encapsulate_action"; //$NON-NLS-1$
 	public static final String SHOW_IN_NAVIGATOR_VIEW_ACTION= 						PREFIX + "show_in_navigator_action"; //$NON-NLS-1$
 	public static final String SURROUND_WITH_TRY_CATCH_ACTION= 						PREFIX + "surround_with_try_catch_action"; //$NON-NLS-1$
+	public static final String SURROUND_WITH_TRY_WITH_RESOURCES_ACTION= 						PREFIX + "surround_with_try_with_resources_action"; //$NON-NLS-1$
 	public static final String OPEN_RESOURCE_ACTION= 										PREFIX + "open_resource_action"; //$NON-NLS-1$
 	public static final String SELECT_WORKING_SET_ACTION= 								PREFIX + "select_working_set_action"; //$NON-NLS-1$
 	public static final String STRUCTURED_SELECTION_HISTORY_ACTION= 				PREFIX + "structured_selection_history_action"; //$NON-NLS-1$

@@ -3732,6 +3732,12 @@
             id="org.eclipse.jdt.ui.edit.text.java.surround.with.try.multicatch">
       </command>
       <command
+            name="%ActionDefinition.surroundWith.tryWithResources.name"
+            description="%ActionDefinition.surroundWith.tryWithResources.description"
+            categoryId="org.eclipse.jdt.ui.category.source"
+            id="org.eclipse.jdt.ui.edit.text.java.surround.with.try.with.resources">
+      </command>
+      <command
             name="%ActionDefinition.cleanUp.name"
             description="%ActionDefinition.cleanUp.description"
             categoryId="org.eclipse.jdt.ui.category.source"
