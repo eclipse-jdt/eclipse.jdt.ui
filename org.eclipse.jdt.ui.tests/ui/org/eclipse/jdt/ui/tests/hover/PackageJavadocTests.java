@@ -11,7 +11,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.ui.tests.packageHover;
+package org.eclipse.jdt.ui.tests.hover;
 
 import java.io.File;
 import java.net.URL;

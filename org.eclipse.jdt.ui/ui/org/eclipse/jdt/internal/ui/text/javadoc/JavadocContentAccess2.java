@@ -36,6 +36,7 @@ import java.util.zip.ZipFile;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
@@ -1539,18 +1540,22 @@ public class JavadocContentAccess2 {
 				Object first= fragments.get(0);
 				if (first instanceof MemberRef) {
 					MemberRef memberRef= (MemberRef) first;
-					if (memberRef.getQualifier() == null) {
-						SimpleName name= memberRef.getName();
-						IType type= fElement instanceof IType ? (IType) fElement : ((IMember) fElement).getDeclaringType();
-						while (type != null) {
-							IField field= type.getField(name.getIdentifier());
-							if (field != null && field.exists()) {
-								if (JdtFlags.isStatic(field) && JdtFlags.isFinal(field))
-									return handleConstantValue(field, true);
-								break;
-							}
-							type= type.getDeclaringType();
+					IType type= fElement instanceof IType ? (IType) fElement : ((IMember) fElement).getDeclaringType();
+					if (memberRef.getQualifier() != null) {
+						String[][] qualifierTypes= type.resolveType(memberRef.getQualifier().getFullyQualifiedName());
+						if (qualifierTypes != null && qualifierTypes.length == 1) {
+							type= type.getJavaProject().findType(String.join(".", qualifierTypes[0]), (IProgressMonitor)null); //$NON-NLS-1$
 						}
+					}
+					SimpleName name= memberRef.getName();
+					while (type != null) {
+						IField field= type.getField(name.getIdentifier());
+						if (field != null && field.exists()) {
+							if (JdtFlags.isStatic(field) && JdtFlags.isFinal(field))
+								return handleConstantValue(field, true);
+							break;
+						}
+						type= type.getDeclaringType();
 					}
 				}
 			}
