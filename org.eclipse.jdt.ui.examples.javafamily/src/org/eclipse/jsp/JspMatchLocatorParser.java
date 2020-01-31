@@ -53,18 +53,18 @@ public class JspMatchLocatorParser extends AbstractJspParser {
 	}
 
 	public void match(IFile resource, String matchString, ISearchResultCollector collector) {
-		
+
 		fResource= resource;
 		fMatchString= matchString;
 		fCollector= collector;
 		Reader reader= null;
-		
+
 		try {
 			reader= new InputStreamReader(fResource.getContents());
 		} catch (CoreException e1) {
 			e1.printStackTrace();
 		}
-				
+
 		try {
 			parse(reader);
 		} catch (IOException e2) {

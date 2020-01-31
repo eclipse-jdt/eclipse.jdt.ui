@@ -24,7 +24,7 @@ import org.eclipse.ui.texteditor.DefaultMarkerAnnotationAccess;
 
 /**
  * A simple JSP Editor.
- * 
+ *
  * @since 3.0
  */
 public class JspEditor extends TextEditor {
@@ -36,8 +36,8 @@ public class JspEditor extends TextEditor {
 		super();
 		setSourceViewerConfiguration(new JspSourceViewerConfiguration(this));
 		setDocumentProvider(new FileDocumentProvider());
-		
-		
+
+
 		/*
 		 * FIXME:
 		 * This would be the right thing to do. Currently

@@ -50,7 +50,7 @@ public class JspReconcilingStrategy implements IReconcilingStrategy, IReconcilin
 	private IReconcileStep fFirstStep;
 	private ITextEditor fTextEditor;
 	private IProgressMonitor fProgressMonitor;
-	
+
 	public JspReconcilingStrategy(ISourceViewer sourceViewer, ITextEditor textEditor) {
 		fTextEditor= textEditor;
 		IReconcileStep javaReconcileStep= new JavaReconcileStep(getFile());
@@ -64,7 +64,7 @@ public class JspReconcilingStrategy implements IReconcilingStrategy, IReconcilin
 	public void setDocument(IDocument document) {
 		fFirstStep.setInputModel(new DocumentAdapter(document));
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.reconciler.IReconcilingStrategy#reconcile(org.eclipse.jface.text.reconciler.DirtyRegion, org.eclipse.jface.text.IRegion)
 	 */
@@ -73,7 +73,7 @@ public class JspReconcilingStrategy implements IReconcilingStrategy, IReconcilin
 		removeTemporaryAnnotations();
 		process(fFirstStep.reconcile(dirtyRegion, subRegion));
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.reconciler.IReconcilingStrategy#reconcile(org.eclipse.jface.text.IRegion)
 	 */
@@ -90,7 +90,7 @@ public class JspReconcilingStrategy implements IReconcilingStrategy, IReconcilin
 	public void setProgressMonitor(IProgressMonitor monitor) {
 		fFirstStep.setProgressMonitor(monitor);
 		fProgressMonitor= monitor;
-		
+
 	}
 
 	/*
@@ -99,11 +99,11 @@ public class JspReconcilingStrategy implements IReconcilingStrategy, IReconcilin
 	@Override
 	public void initialReconcile() {
 		fFirstStep.reconcile(null);
-		
+
 	}
 
 	private void process(final IReconcileResult[] results) {
-		
+
 		if (results == null)
 			return;
 
@@ -132,7 +132,7 @@ public class JspReconcilingStrategy implements IReconcilingStrategy, IReconcilin
 			e.printStackTrace();
 		}
 	}
-	
+
 	private IAnnotationModel getAnnotationModel()  {
 		return fTextEditor.getDocumentProvider().getAnnotationModel(fTextEditor.getEditorInput());
 	}
@@ -141,7 +141,7 @@ public class JspReconcilingStrategy implements IReconcilingStrategy, IReconcilin
 	 * XXX: A "real" implementation must be smarter
 	 * 		i.e. don't remove and add the annotations
 	 * 		which are the same.
-	 */	
+	 */
 	private void removeTemporaryAnnotations() {
 		Iterator iter= getAnnotationModel().getAnnotationIterator();
 		while (iter.hasNext())  {
@@ -158,7 +158,7 @@ public class JspReconcilingStrategy implements IReconcilingStrategy, IReconcilin
 		IEditorInput input= fTextEditor.getEditorInput();
 		if (!(input instanceof IFileEditorInput))
 			return null;
-		
-		return ((IFileEditorInput)input).getFile();			
+
+		return ((IFileEditorInput)input).getFile();
 	}
 }

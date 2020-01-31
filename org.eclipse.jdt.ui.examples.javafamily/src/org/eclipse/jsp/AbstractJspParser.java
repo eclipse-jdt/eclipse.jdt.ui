@@ -16,18 +16,18 @@ package org.eclipse.jsp;
 import java.io.IOException;
 import java.io.Reader;
 
-public abstract class AbstractJspParser { 
-	
+public abstract class AbstractJspParser {
+
 	private Reader fReader;
 	private boolean fHasUnread;
 	private int fUnread;
 	private int fPos;
 	protected int fLines= 1;
-	
+
 	AbstractJspParser() {
 		super();
 	}
-	
+
 	private int getc() throws IOException {
 		fPos++;
 		if (fHasUnread) {
@@ -47,13 +47,13 @@ public abstract class AbstractJspParser {
 		}
 		return ch;
 	}
-	
+
 	private void ungetc(int c) {
 		fHasUnread= true;
 		fUnread= c;
 		fPos--;
 	}
-	
+
 	private void parseDirective() throws IOException {
 		StringBuilder sb= new StringBuilder();
 		int pos= fPos;
@@ -70,7 +70,7 @@ public abstract class AbstractJspParser {
 			sb.append((char)c);
 		}
 	}
-	
+
 	private void parseTag(boolean endTag) throws IOException {
 		StringBuilder sb= new StringBuilder();
 		int pos= fPos;
@@ -93,7 +93,7 @@ public abstract class AbstractJspParser {
 			sb.append((char)c);
 		}
 	}
-	
+
 	private void parseComment() throws IOException {
 		while (true) {
 			int c = getc();
@@ -127,13 +127,13 @@ public abstract class AbstractJspParser {
 			sb.append((char)c);
 		}
 	}
-	
+
 	protected void java(char tagType, String contents, int line) {
 		// empty implementation
 	}
 
 	private void parseAttributes(int pos, String s) {
-		
+
 		boolean hasValue= false;
 		StringBuilder name= new StringBuilder();
 		StringBuffer value= new StringBuffer();
@@ -143,14 +143,14 @@ public abstract class AbstractJspParser {
 		int startName= 0;
 		int startValue= 0;
 		char c= s.charAt(i++);
-		
+
 		try {
 			while (true) {
-				
-				// whitespace		
+
+				// whitespace
 				while (Character.isWhitespace(c))
 					c= s.charAt(i++);
-					
+
 				startName= i;
 				while (Character.isLetterOrDigit(c) || c == ':') {
 					name.append(c);
@@ -160,19 +160,19 @@ public abstract class AbstractJspParser {
 					// avoid endless loop, e.g. for <!DOCTYPE html>
 					return;
 				}
-				
-				// whitespace		
+
+				// whitespace
 				while (Character.isWhitespace(c))
 					c= s.charAt(i++);
-					
+
 				hasValue= false;
 				if (c == '=') {
 					c= s.charAt(i++);
-					
+
 					// value
 					while (Character.isWhitespace(c))
 						c= s.charAt(i++);
-						
+
 					startValue= i;
 
 					// Special handling for this taglib tag
@@ -197,14 +197,14 @@ public abstract class AbstractJspParser {
 					}
 					hasValue= true;
 				}
-					
+
 				if (ix == 0)  {
 					startTag= name.toString();
 					startTag(false, startTag, startName+pos);
-				} else 
+				} else
 					tagAttribute(name.toString(), hasValue ? value.toString() : null, startName+pos, startValue+pos);
 				ix++;
-				
+
 				name.setLength(0);
 				value.setLength(0);
 			}
@@ -212,40 +212,40 @@ public abstract class AbstractJspParser {
 			// we don't log this exception because it is used
 			// as one way to exit the scanning loop
 		}
-		
+
 		if (name.length() > 0) {
 			if (ix == 0)
 				startTag(false, name.toString(), startName+pos);
-			else 
+			else
 				tagAttribute(name.toString(), hasValue ? value.toString() : null, startName+pos, startValue+pos);
 		}
-		
+
 		endTag(false);
 	}
-	
+
 	protected void startTag(boolean endTag, String name, int startName) {
 		// empty implementation
 	}
-	
+
 	protected void tagAttribute(String attrName, String value, int startName, int startValue) {
 		// empty implementation
 	}
-	
+
 	protected void endTag(boolean end) {
 		// empty implementation
 	}
-	
+
 	protected void text(String t, int line) {
 		// empty implementation
 	}
-	
+
 	void parse(Reader reader) throws IOException {
 		int c;
 		StringBuilder buffer= new StringBuilder();
 		fPos= 0;
 		fLines= 1;
 		int line= fLines;
-		fReader= reader;	
+		fReader= reader;
 
 		while (true) {
 			c= getc();
@@ -273,7 +273,7 @@ public abstract class AbstractJspParser {
 						} else {
 							ungetc(c);
 							continue;
-						}	
+						}
 						break;
 					case '@':
 						parseDirective();

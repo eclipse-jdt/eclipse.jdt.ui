@@ -36,11 +36,11 @@ public class JspTypeQuery implements IIndexQuery {
 
 	private IType fType;
 	private JspMatchLocatorParser fParser;
-	
+
 	public JspTypeQuery(IType type) {
 		fType= type;
 	}
-	
+
 	@Override
 	public void computePathsKeyingIndexFiles(ArrayList requiredIndexKeys) {
 		IWorkspace workspace= ResourcesPlugin.getWorkspace();

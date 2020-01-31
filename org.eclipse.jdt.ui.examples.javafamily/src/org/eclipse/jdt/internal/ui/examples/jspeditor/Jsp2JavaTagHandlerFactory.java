@@ -20,11 +20,11 @@ import org.eclipse.jface.text.source.translation.ITagHandlerFactory;
 /**
  * First cut of JSP to Java tag handler factory.
  * Only one handler is used to do the job.
- * 
+ *
  * @since 3.0
  */
 public class Jsp2JavaTagHandlerFactory implements ITagHandlerFactory {
-	
+
 	private ITagHandler fTagHandler= new Jsp2JavaTagHandler();
 
 	/*

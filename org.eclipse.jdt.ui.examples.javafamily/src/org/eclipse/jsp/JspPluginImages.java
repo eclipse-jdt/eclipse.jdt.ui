@@ -30,22 +30,22 @@ import org.eclipse.debug.core.DebugPlugin;
  */
 public class JspPluginImages {
 
-	/** 
+	/**
 	 * The image registry containing <code>Image</code>s.
 	 */
 	private static ImageRegistry imageRegistry;
-	
+
 	/**
 	 * A table of all the <code>ImageDescriptor</code>s.
 	 */
 	private static HashMap imageDescriptors;
-	
+
 	/* Declare Common paths */
 	private static URL ICON_BASE_URL= null;
 
 	static {
 		String pathSuffix = "icons/full/"; //$NON-NLS-1$
-			
+
 		try {
 			ICON_BASE_URL= new URL(JspUIPlugin.getDefault().getBundle().getEntry("/"), pathSuffix); //$NON-NLS-1$
 		} catch (MalformedURLException e) {
@@ -62,10 +62,10 @@ public class JspPluginImages {
 	//private final static String WIZBAN= "wizban/"; //basic colors - size 16x16 //$NON-NLS-1$
 	//private final static String OVR= "ovr16/"; //basic colors - size 7x8 //$NON-NLS-1$
 	//private final static String VIEW= "cview16/"; // views //$NON-NLS-1$
-	
+
 	public final static String IMG_OBJ_TOMCAT = "IMG_TOMCAT"; //$NON-NLS-1$
 	public final static String IMG_OBJ_JSP = "IMG_OBJ_JSP"; //$NON-NLS-1$
-	
+
 	/**
 	 * Declare all images
 	 */
@@ -91,7 +91,7 @@ public class JspPluginImages {
 		imageRegistry.put(key, desc);
 		imageDescriptors.put(key, desc);
 	}
-	
+
 	/**
 	 * Returns the ImageRegistry.
 	 */
@@ -144,7 +144,7 @@ public class JspPluginImages {
 	public static Image getImage(String key) {
 		return getImageRegistry().get(key);
 	}
-	
+
 	/**
 	 * Returns the <code>ImageDescriptor<code> identified by the given key,
 	 * or <code>null</code> if it does not exist.
@@ -155,12 +155,12 @@ public class JspPluginImages {
 		}
 		return (ImageDescriptor)imageDescriptors.get(key);
 	}
-	
+
 	private static URL makeIconFileURL(String iconPath) throws MalformedURLException {
 		if (ICON_BASE_URL == null) {
 			throw new MalformedURLException();
 		}
-			
+
 		return new URL(ICON_BASE_URL, iconPath);
 	}
 }

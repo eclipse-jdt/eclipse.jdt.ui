@@ -50,9 +50,9 @@ public class RenameTypeParticipant extends RenameParticipant {
 
 	@Override
 	public String getName() {
-		return JspMessages.RenameTypeParticipant_name; 
+		return JspMessages.RenameTypeParticipant_name;
 	}
-	
+
 	@Override
 	public RefactoringStatus checkConditions(IProgressMonitor pm, CheckConditionsContext context) {
 		return new RefactoringStatus();
@@ -74,7 +74,7 @@ public class RenameTypeParticipant extends RenameParticipant {
 			}
 		};
 		JspUIPlugin.getDefault().search(new JspTypeQuery(fType), collector, pm);
-		
+
 		if (changes.isEmpty())
 			return null;
 		CompositeChange result= new CompositeChange("JSP updates"); //$NON-NLS-1$
@@ -83,7 +83,7 @@ public class RenameTypeParticipant extends RenameParticipant {
 		}
 		return result;
 	}
-	
+
 	private String computeNewName() {
 		String newName= getArguments().getNewName();
 		String currentName= fType.getFullyQualifiedName();

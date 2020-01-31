@@ -48,26 +48,26 @@ import org.eclipse.ui.editors.text.TextEditorPreferenceConstants;
 /**
  */
 public class JspUIPlugin extends AbstractUIPlugin implements IResourceChangeListener {
-		
+
 	/**
 	 * The id of the JavaFamilyExample plugin (value <code>"org.eclipse.jdt.ui.examples.javafamily"</code>).
-	 */	
+	 */
 	public static final String ID_PLUGIN= "org.eclipse.jdt.ui.examples.javafamily"; //$NON-NLS-1$
 
 	public static final String JSP_TYPE= "jsp"; //$NON-NLS-1$
-	
+
 	private static final boolean DEBUG= false;
 	private static JspUIPlugin fgDefault;
 	private static boolean fgJSPIndexingIsEnabled= false;
-	
+
 	private SearchEngine fSearchEngine;
-	
+
 	public JspUIPlugin() {
 		super();
 		fgDefault= this;
 		fSearchEngine= SearchEngine.getSearchEngine();
 	}
-	
+
 	public static JspUIPlugin getDefault() {
 		return fgDefault;
 	}
@@ -77,7 +77,7 @@ public class JspUIPlugin extends AbstractUIPlugin implements IResourceChangeList
 			fgJSPIndexingIsEnabled= enable;
 			IWorkspace workspace= ResourcesPlugin.getWorkspace();
 			if (enable) {
-				
+
 				IResourceProxyVisitor visitor=
 					new IResourceProxyVisitor() {
 						@Override
@@ -100,24 +100,24 @@ public class JspUIPlugin extends AbstractUIPlugin implements IResourceChangeList
 				} catch (CoreException e) {
 					log("visiting jsp files", e); //$NON-NLS-1$
 				}
-				
+
 				workspace.addResourceChangeListener(this,
 	//					IResourceChangeEvent.PRE_AUTO_BUILD |
 	//					IResourceChangeEvent.POST_AUTO_BUILD |
 						IResourceChangeEvent.POST_CHANGE |
 						IResourceChangeEvent.PRE_DELETE |
 						IResourceChangeEvent.PRE_CLOSE
-				);					
+				);
 			} else {
-				workspace.removeResourceChangeListener(this);					
+				workspace.removeResourceChangeListener(this);
 			}
 		}
 	}
-		
+
 	boolean isJSPIndexingOn() {
 		return fgJSPIndexingIsEnabled;
 	}
-	
+
 	@Override
 	public void resourceChanged(IResourceChangeEvent event) {
 		if ( !fgJSPIndexingIsEnabled || event == null)
@@ -148,7 +148,7 @@ public class JspUIPlugin extends AbstractUIPlugin implements IResourceChangeList
 										if ((delta.getFlags() & IResourceDelta.CONTENT) != 0)
 											jspAdded(file);
 										break;
-									}					
+									}
 								}
 							}
 						}
@@ -160,32 +160,32 @@ public class JspUIPlugin extends AbstractUIPlugin implements IResourceChangeList
 			log("processing resource delta", e); //$NON-NLS-1$
 		}
 	}
-	
+
 	public static void log(String message, Throwable e) {
 		getDefault().getLog().log(new Status(IStatus.ERROR, ID_PLUGIN, IStatus.ERROR, message, e));
 	}
-	
+
 	void jspAdded(IFile jspFile) {
-		if (DEBUG) System.out.println("Added: " + jspFile); //$NON-NLS-1$		
+		if (DEBUG) System.out.println("Added: " + jspFile); //$NON-NLS-1$
 		JspIndexParser indexer= new JspIndexParser(jspFile);
 		fSearchEngine.add(jspFile.getProject().getFullPath(), indexer);
 	}
-	
+
 	void jspRemoved(IFile jspFile) {
 		if (DEBUG) System.out.println("Removed: " + jspFile); //$NON-NLS-1$
 		fSearchEngine.remove(jspFile.getFullPath().toString(), jspFile.getProject().getFullPath());
 	}
-	
+
 	public void search(IIndexQuery query, ISearchResultCollector resultCollector, IProgressMonitor pm) {
 		fSearchEngine.search(query, resultCollector, pm, SearchEngine.WAIT_UNTIL_READY_TO_SEARCH);
 	}
-	
+
 	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		initializeDefaultPreferences();
 	}
-		
+
 	@Override
 	public void stop(BundleContext context) throws Exception {
 		try {
@@ -194,12 +194,12 @@ public class JspUIPlugin extends AbstractUIPlugin implements IResourceChangeList
 			super.stop(context);
 		}
 	}
-	
+
 	private void initializeDefaultPreferences() {
 		IPreferenceStore prefs= getPreferenceStore();
 		TextEditorPreferenceConstants.initializeDefaultValues(prefs);
 	}
-	
+
 	/**
 	 * Returns the standard display to be used. The method first checks, if
 	 * the thread calling this method has an associated display. If so, this
@@ -210,12 +210,12 @@ public class JspUIPlugin extends AbstractUIPlugin implements IResourceChangeList
 		if (display == null) {
 			display= Display.getDefault();
 		}
-		return display;		
+		return display;
 	}
-	
+
 	@Override
 	protected ImageRegistry createImageRegistry() {
 		return JspPluginImages.initializeImageRegistry();
-	}	
-		
+	}
+
 }

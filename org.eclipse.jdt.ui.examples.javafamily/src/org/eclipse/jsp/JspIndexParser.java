@@ -25,26 +25,26 @@ import org.eclipse.core.runtime.*;
  * @author weinand
  */
 public class JspIndexParser extends AbstractJspParser implements IIndexer {
-	
+
 	public static final String JSP_TYPE_REF= "jsp_typeRef";	//$NON-NLS-1$
-	
+
 	IFile fFile;
 	String fFilePath;
 	boolean fInUseBean;
 	String fId;
 	String fClass;
 	IIndex fOutput;
-	
+
 
 	JspIndexParser(IFile resource) {
 		fFile= resource;
 	}
-	
+
 	@Override
 	protected void startTag(boolean endTag, String name, int startName) {
 		fInUseBean= "jsp:useBean".equals(name); //$NON-NLS-1$
 	}
-	
+
 	@Override
 	protected void tagAttribute(String attrName, String value, int startName, int startValue) {
 		if (fInUseBean) {
@@ -54,7 +54,7 @@ public class JspIndexParser extends AbstractJspParser implements IIndexer {
 				fClass= value;
 		}
 	}
-	
+
 	@Override
 	protected void endTag(boolean end) {
 		if (fInUseBean) {
@@ -62,23 +62,23 @@ public class JspIndexParser extends AbstractJspParser implements IIndexer {
 
 				String s= JSP_TYPE_REF + "/" + fClass; //$NON-NLS-1$
 				System.out.println("  " + s); //$NON-NLS-1$
-				fOutput.addRef(s, fFilePath);				
+				fOutput.addRef(s, fFilePath);
 
 				fId= fClass= null;
 			}
 			fInUseBean= false;
 		}
 	}
-	
+
 	@Override
 	public void index(IIndex indexerOutput) throws IOException {
-		
+
 		String type= fFile.getFileExtension();
 		if (type != null && JspUIPlugin.JSP_TYPE.equalsIgnoreCase(type)) {
-			
+
 			// Add the name of the file to the index
 			String path= fFile.getFullPath().toString();
-			
+
 			String encoding= null;
 			try {
 				encoding= fFile.getCharset();
@@ -86,18 +86,18 @@ public class JspIndexParser extends AbstractJspParser implements IIndexer {
 			}
 			if (encoding == null)
 				encoding= ResourcesPlugin.getEncoding();
-			
+
 			String s= null;
 			IPath location= fFile.getLocation();
 			if (location == null)
 				s= ""; //$NON-NLS-1$
 			else
 				s= new String(Util.getFileCharContent(location.toFile(), encoding));
-			
+
 			try {
 				Reader reader= new StringReader(s);
 				fOutput= indexerOutput;
-				fFilePath= path;			
+				fFilePath= path;
 				parse(reader);
 			} catch (IOException e) {
 				e.printStackTrace();

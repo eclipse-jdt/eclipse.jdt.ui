@@ -30,7 +30,7 @@ public class JavaFamilyExamplePreferencePage extends PreferencePage implements I
 	protected Control createContents(Composite parent) {
 		Composite c= new Composite(parent, SWT.NULL);
 		//c.setLayout(new FillLayout());
-		
+
 		final Button b= new Button(c, SWT.NULL);
 		b.setText(getButtonLabel());
 		b.addSelectionListener(new SelectionAdapter() {
@@ -41,16 +41,16 @@ public class JavaFamilyExamplePreferencePage extends PreferencePage implements I
 			}
 		});
 		b.pack();
-		
+
 		return c;
 	}
-	
+
 	private String getButtonLabel() {
 		if (JspUIPlugin.getDefault().isJSPIndexingOn())
 			return "Stop JSP Indexing"; //$NON-NLS-1$
 		return "Start JSP Indexing"; //$NON-NLS-1$
 	}
-	
+
 	@Override
 	public void init(IWorkbench workbench) {
 		// empty implementation

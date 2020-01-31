@@ -18,8 +18,8 @@ import java.util.HashSet;
 public interface IIndex {
 
 	void addRef(String word, String path);
-	
+
 	void remove(String path);
-	
+
 	void queryPrefix(HashSet result, String prefix);
 }

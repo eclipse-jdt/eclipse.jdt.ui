@@ -104,7 +104,7 @@ public class Binding extends ASTAttribute {
 					res.add(new Binding(this, "VARIABLE DECLARATION", variableBinding.getVariableDeclaration(), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "IS SYNTHETIC", fBinding.isSynthetic(), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "IS DEPRECATED", fBinding.isDeprecated(), true)); //$NON-NLS-1$
-					res.add(new BindingProperty(this, "CONSTANT VALUE", variableBinding.getConstantValue(), true)); //$NON-NLS-1$ 
+					res.add(new BindingProperty(this, "CONSTANT VALUE", variableBinding.getConstantValue(), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "IS EFFECTIVELY FINAL", variableBinding.isEffectivelyFinal(), true)); //$NON-NLS-1$
 					break;
 
@@ -135,7 +135,7 @@ public class Binding extends ASTAttribute {
 					if (typeBinding.isClass()) kinds.append(" isClass"); //$NON-NLS-1$
 					if (typeBinding.isInterface()) kinds.append(" isInterface"); //$NON-NLS-1$
 					if (typeBinding.isEnum()) kinds.append(" isEnum"); //$NON-NLS-1$
-					res.add(new BindingProperty(this, kinds, true)); 
+					res.add(new BindingProperty(this, kinds, true));
 
 					StringBuffer generics= new StringBuffer("GENERICS:"); //$NON-NLS-1$
 					if (typeBinding.isRawType()) generics.append(" isRawType"); //$NON-NLS-1$
@@ -144,7 +144,7 @@ public class Binding extends ASTAttribute {
 					if (!isType(typeKind, GENERIC | PARAMETRIZED)) {
 						generics.append(" (non-generic, non-parameterized)");
 					}
-					res.add(new BindingProperty(this, generics, isRefType)); 
+					res.add(new BindingProperty(this, generics, isRefType));
 
 					res.add(new Binding(this, "ELEMENT TYPE", typeBinding.getElementType(), isType(typeKind, ARRAY_TYPE))); //$NON-NLS-1$
 					res.add(new Binding(this, "COMPONENT TYPE", typeBinding.getComponentType(), isType(typeKind, ARRAY_TYPE))); //$NON-NLS-1$
