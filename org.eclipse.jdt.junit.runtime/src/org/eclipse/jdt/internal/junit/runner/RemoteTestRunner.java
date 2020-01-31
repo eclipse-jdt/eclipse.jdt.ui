@@ -405,7 +405,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 			}
 		}
 	}
-	
+
 	private void readTestNames(String testNameFile) throws IOException {
 		BufferedReader br= new BufferedReader(new InputStreamReader(new FileInputStream(new File(testNameFile)), "UTF-8")); //$NON-NLS-1$
 		try {
@@ -590,8 +590,8 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	}
 
 	public void visitTreeEntry(ITestIdentifier identifier, boolean hasChildren, int testCount, boolean isDynamicTest, String parentId) {
-		String treeEntry= getTestId(identifier) + ',' + escapeText(identifier.getName()) + ',' + hasChildren + ',' + testCount 
-				+ ',' + isDynamicTest + ',' + parentId + ',' + escapeText(identifier.getDisplayName()) + ',' + escapeText(identifier.getParameterTypes()) 
+		String treeEntry= getTestId(identifier) + ',' + escapeText(identifier.getName()) + ',' + hasChildren + ',' + testCount
+				+ ',' + isDynamicTest + ',' + parentId + ',' + escapeText(identifier.getDisplayName()) + ',' + escapeText(identifier.getParameterTypes())
 				+ ',' + escapeText(identifier.getUniqueId());
 		notifyTestTreeEntry(treeEntry);
 	}

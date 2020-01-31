@@ -94,7 +94,7 @@ public class LayoutUtil {
 
 	/**
 	 * Sets the horizontal indent of a dependent control. Assumes that GridData is used.
-	 * 
+	 *
 	 * @param control the control
 	 */
 	public static void setHorizontalIndent(Control control) {
@@ -110,7 +110,7 @@ public class LayoutUtil {
 	 * <strong>Note:</strong> Use this method instead of {@link LayoutConstants#getIndent()} for
 	 * compatibility reasons.
 	 * </p>
-	 * 
+	 *
 	 * @return the indent of dependent controls, in pixels.
 	 */
 	public static final int getIndent() {
@@ -119,7 +119,7 @@ public class LayoutUtil {
 
 	/**
 	 * Sets the horizontal grabbing of a control to true. Assumes that GridData is used.
-	 * 
+	 *
 	 * @param control the control
 	 */
 	public static void setHorizontalGrabbing(Control control) {
@@ -131,9 +131,9 @@ public class LayoutUtil {
 
 	/**
 	 * Sets the vertical grabbing of a control to true. Assumes that GridData is used.
-	 * 
+	 *
 	 * @param control the control
-	 * 
+	 *
 	 */
 	public static void setVerticalGrabbing(Control control) {
 		Object ld= control.getLayoutData();
@@ -146,7 +146,7 @@ public class LayoutUtil {
 
 	/**
 	 * Sets the width hint of a control. Assumes that GridData is used.
-	 * 
+	 *
 	 * @param control the control
 	 * @param widthHint the preferred width in pixels
 	 */
@@ -159,7 +159,7 @@ public class LayoutUtil {
 
 	/**
 	 * Sets the heightHint hint of a control. Assumes that GridData is used.
-	 * 
+	 *
 	 * @param control the control
 	 * @param heightHint the preferred height in pixels
 	 */

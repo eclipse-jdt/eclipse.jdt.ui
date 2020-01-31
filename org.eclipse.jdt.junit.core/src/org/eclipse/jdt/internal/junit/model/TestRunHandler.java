@@ -72,7 +72,7 @@ public class TestRunHandler extends DefaultHandler {
 	public TestRunHandler(IProgressMonitor monitor) {
 		fMonitor= monitor;
 	}
-	
+
 	public TestRunHandler(TestRunSession testRunSession) {
 		fTestRunSession= testRunSession;
 	}
@@ -98,7 +98,7 @@ public class TestRunHandler extends DefaultHandler {
 		}
 		if (Thread.interrupted())
 			throw new OperationCanceledException();
-		
+
 		switch (qName) {
 		case IXMLTags.NODE_TESTRUN:
 			if (fTestRunSession == null) {

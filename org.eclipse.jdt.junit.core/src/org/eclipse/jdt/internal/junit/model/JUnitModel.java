@@ -137,7 +137,7 @@ public final class JUnitModel {
 		private void connectTestRunner(ILaunch launch, IJavaProject javaProject, int port) {
 			TestRunSession testRunSession= new TestRunSession(launch, javaProject, port);
 			addTestRunSession(testRunSession);
-			
+
 			for (TestRunListener listener : JUnitCorePlugin.getDefault().getNewTestRunListeners()) {
 				listener.sessionLaunched(testRunSession);
 			}
@@ -351,11 +351,11 @@ public final class JUnitModel {
 	public void addTestRunSession(TestRunSession testRunSession) {
 		Assert.isNotNull(testRunSession);
 		ArrayList<TestRunSession> toRemove= new ArrayList<>();
-		
+
 		synchronized (this) {
 			Assert.isLegal(! fTestRunSessions.contains(testRunSession));
 			fTestRunSessions.addFirst(testRunSession);
-			
+
 			int maxCount = Platform.getPreferencesService().getInt(JUnitCorePlugin.CORE_PLUGIN_ID, JUnitPreferencesConstants.MAX_TEST_RUNS, 10, null);
 			int size= fTestRunSessions.size();
 			if (size > maxCount) {
@@ -369,7 +369,7 @@ public final class JUnitModel {
 				}
 			}
 		}
-		
+
 		for (int i= 0; i < toRemove.size(); i++) {
 			TestRunSession oldSession= toRemove.get(i);
 			notifyTestRunSessionRemoved(oldSession);
@@ -421,10 +421,10 @@ public final class JUnitModel {
 		monitor.beginTask(ModelMessages.JUnitModel_importing_from_url, IProgressMonitor.UNKNOWN);
 		final String trimmedUrl= url.trim().replaceAll("\r\n?|\n", ""); //$NON-NLS-1$ //$NON-NLS-2$
 		final TestRunHandler handler= new TestRunHandler(monitor);
-		
+
 		final CoreException[] exception= { null };
 		final TestRunSession[] session= { null };
-		
+
 		Thread importThread= new Thread("JUnit URL importer") { //$NON-NLS-1$
 			@Override
 			public void run() {
@@ -453,7 +453,7 @@ public final class JUnitModel {
 			}
 		};
 		importThread.start();
-		
+
 		while (session[0] == null && exception[0] == null && !monitor.isCanceled()) {
 			try {
 				Thread.sleep(100);
@@ -469,7 +469,7 @@ public final class JUnitModel {
 				throw new InterruptedException();
 			}
 		}
-		
+
 		JUnitCorePlugin.getModel().addTestRunSession(session[0]);
 		monitor.done();
 		return session[0];

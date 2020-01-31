@@ -162,7 +162,7 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 				qualifiedName= "org.junit.jupiter.api.TestFactory"; //$NON-NLS-1$
 				break;
 			case "Testable": //$NON-NLS-1$
-				qualifiedName= "org.junit.platform.commons.annotation.Testable"; //$NON-NLS-1$				
+				qualifiedName= "org.junit.platform.commons.annotation.Testable"; //$NON-NLS-1$
 				break;
 			case "TestTemplate": //$NON-NLS-1$
 				qualifiedName= "org.junit.jupiter.api.TestTemplate"; //$NON-NLS-1$

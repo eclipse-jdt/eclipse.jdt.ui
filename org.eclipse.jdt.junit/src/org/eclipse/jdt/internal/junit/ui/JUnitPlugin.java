@@ -256,7 +256,7 @@ public class JUnitPlugin extends AbstractUIPlugin {
 
 	/**
 	 * Returns a service with the specified name or <code>null</code> if none.
-	 * 
+	 *
 	 * @param serviceName name of service
 	 * @return service object or <code>null</code> if none
 	 * @since 3.5
@@ -343,7 +343,7 @@ public class JUnitPlugin extends AbstractUIPlugin {
 		}
 		return section;
 	}
-	
+
 	public static void asyncShowTestRunnerViewPart() {
 		getDisplay().asyncExec(new Runnable() {
 			@Override
@@ -372,7 +372,7 @@ public class JUnitPlugin extends AbstractUIPlugin {
 			return null;
 		}
 	}
-	
+
 	private static Display getDisplay() {
 //			Shell shell= getActiveWorkbenchShell();
 //			if (shell != null) {

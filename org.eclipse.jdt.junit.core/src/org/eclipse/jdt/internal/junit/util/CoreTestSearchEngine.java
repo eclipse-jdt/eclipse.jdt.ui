@@ -266,7 +266,7 @@ public class CoreTestSearchEngine {
 		new SearchEngine().search(suitePattern, participants, scope, requestor, pm);
 	}
 
-	
+
 // --- copied from org.eclipse.jdt.internal.corext.util.JavaModelUtil: ---
 	/**
 	 * @param version1 the first version
@@ -299,7 +299,7 @@ public class CoreTestSearchEngine {
 
 	/**
 	 * Checks if the given project or workspace has source compliance 1.8 or greater.
-	 * 
+	 *
 	 * @param project the project to test or <code>null</code> to test the workspace settings
 	 * @return <code>true</code> if the given project or workspace has source compliance 1.8 or
 	 *         greater.

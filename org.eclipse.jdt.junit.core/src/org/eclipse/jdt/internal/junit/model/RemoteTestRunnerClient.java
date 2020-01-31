@@ -38,7 +38,7 @@ import org.eclipse.jdt.internal.junit.runner.RemoteTestRunner;
  * marshaling of the different messages.
  */
 public class RemoteTestRunnerClient {
-	
+
 	public abstract class ListenerSafeRunnable implements ISafeRunnable {
 		@Override
 		public void handleException(Throwable exception) {
@@ -570,7 +570,7 @@ public class RemoteTestRunnerClient {
 	/**
 	 * Returns a comparison result from the given buffer.
 	 * Removes the terminating line delimiter.
-	 * 
+	 *
 	 * @param buf the comparison result
 	 * @return the result or <code>null</code> if empty
 	 * @since 3.7
@@ -579,7 +579,7 @@ public class RemoteTestRunnerClient {
 		int length= buf.length();
 		if (length == 0)
 			return null;
-		
+
 		char last= buf.charAt(length - 1);
 		if (last == '\n') {
 			if (length > 1 && buf.charAt(length - 2) == '\r')
@@ -591,7 +591,7 @@ public class RemoteTestRunnerClient {
 		}
 		return buf.toString();
 	}
-	
+
 	private void notifyTestRunTerminated() {
 		// fix for 77771 RemoteTestRunnerClient doing work after junit shutdown [JUnit]
 		if (JUnitCorePlugin.isStopped())

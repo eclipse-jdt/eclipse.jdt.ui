@@ -21,7 +21,7 @@ import org.eclipse.jdt.junit.model.ITestRunSession;
  * or as a contribution to the <code>org.eclipse.jdt.junit.testRunListeners</code> extension point.
  * The latter approach has the advantage that the contributing plug-in is automatically loaded when a test run starts.
  * <p>
- * A test run starts with the call to {@link #sessionLaunched(ITestRunSession)} and 
+ * A test run starts with the call to {@link #sessionLaunched(ITestRunSession)} and
  * {@link #sessionStarted(ITestRunSession)}, followed by calls to
  * {@link #testCaseStarted(ITestCaseElement)} and {@link #testCaseFinished(ITestCaseElement)}
  * for all test cases contained in the tree.
@@ -34,7 +34,7 @@ import org.eclipse.jdt.junit.model.ITestRunSession;
  * @since 3.3
  */
 public abstract class TestRunListener {
-	
+
 	/**
 	 * A test run session has been launched. The test tree is not available yet.
 	 * <p>
@@ -47,7 +47,7 @@ public abstract class TestRunListener {
 	 */
 	public void sessionLaunched(ITestRunSession session) {
 	}
-	
+
 	/**
 	 * A test run session has started. The test tree can be accessed through the session element.
 	 * <p>

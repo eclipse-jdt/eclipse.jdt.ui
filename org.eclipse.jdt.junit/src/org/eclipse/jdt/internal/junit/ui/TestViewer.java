@@ -111,13 +111,13 @@ public class TestViewer {
 				return ! fTestRunSession.isRunning() && status == Status.RUNNING;  // rerunning
 		}
 	}
-	
+
 	private final class IgnoredOnlyFilter extends ViewerFilter {
 		@Override
 		public boolean select(Viewer viewer, Object parentElement, Object element) {
 			return select(((TestElement) element));
 		}
-		
+
 		public boolean select(TestElement testElement) {
 			if (hasIgnoredInTestResult(testElement))
 				return true;
@@ -128,9 +128,9 @@ public class TestViewer {
 		/**
 		 * Checks whether a test was skipped i.e. it was ignored (<code>@Ignored</code>) or had any
 		 * assumption failure.
-		 * 
+		 *
 		 * @param testElement the test element (a test suite or a single test case)
-		 * 
+		 *
 		 * @return <code>true</code> if the test element or any of its children has
 		 *         {@link Result#IGNORED} test result
 		 */
@@ -468,7 +468,7 @@ public class TestViewer {
 			fViewerbook.setRedraw(true);
 		}
 	}
-	
+
 	/**
 	 * It makes sense to display either failed or ignored tests, not both together.
 	 *

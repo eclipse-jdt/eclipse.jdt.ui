@@ -40,7 +40,7 @@ public class SuiteClassesContentProvider implements IStructuredContentProvider {
 	public SuiteClassesContentProvider() {
 		this(false);
 	}
-	
+
 	public SuiteClassesContentProvider(boolean includeJunit4Tests) {
 		this.fIncludeJunit4Tests = includeJunit4Tests;
 	}
@@ -72,7 +72,7 @@ public class SuiteClassesContentProvider implements IStructuredContentProvider {
 			} else {
 				new JUnit3TestFinder().findTestsInContainer(pack, result, null);
 			}
-			
+
 			return result;
 		} catch (CoreException e) {
 			JUnitPlugin.log(e);
@@ -87,11 +87,11 @@ public class SuiteClassesContentProvider implements IStructuredContentProvider {
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 	}
-	
+
 	public void setIncludeJunit4Tests(boolean includeJunit4Tests) {
 		fIncludeJunit4Tests= includeJunit4Tests;
 	}
-	
+
 	public boolean isIncludeJunit4Tests() {
 		return fIncludeJunit4Tests;
 	}

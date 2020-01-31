@@ -134,7 +134,7 @@ public class JUnit5TestListener implements TestExecutionListener {
 			return new FailedComparison(expectedStr, actualStr);
 		}
 
-		// Avoid reference to ComparisonFailure initially to avoid NoClassDefFoundError for ComparisonFailure when junit.jar is not on the build path 
+		// Avoid reference to ComparisonFailure initially to avoid NoClassDefFoundError for ComparisonFailure when junit.jar is not on the build path
 		String classname= exception.getClass().getName();
 		if (classname.equals("junit.framework.ComparisonFailure")) { //$NON-NLS-1$
 			junit.framework.ComparisonFailure comparisonFailure= (junit.framework.ComparisonFailure) exception;

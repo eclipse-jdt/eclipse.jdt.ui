@@ -87,7 +87,7 @@ public interface ITestRunListener2 {
 	 *  displayName: the display name of the test
 	 *  parameterTypes: comma-separated list of method parameter types if applicable, otherwise an empty string
 	 *  uniqueId: the unique ID of the test provided by JUnit launcher, otherwise an empty string
-	 *  
+	 *
 	 *  Example: 324968,testPass(junit.tests.MyTest),false,1,false,-1,A simple test case,&quot;&quot;,&quot;&quot;
 	 * </pre>
 	 *

@@ -374,7 +374,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		SWTUtil.setButtonDimensionHint(fShowInAllViewsCheckBox);
 		setShowInAllViewsCheckBoxSelection(JUnitUIPreferencesConstants.getShowInAllViews());
 	}
-	
+
 	/**
 	 * Programatic access to enable assertions checkbox
 	 * @return boolean indicating check box selected or not
@@ -390,11 +390,11 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 	public boolean getShowInAllViewsCheckBoxSelection() {
 		return fShowInAllViewsCheckBox.getSelection();
 	}
-	
+
 	public void setShowInAllViewsCheckBoxSelection(boolean selected) {
 		fShowInAllViewsCheckBox.setSelection(selected);
 	}
-	
+
 	/*
 	 * Create a group to contain the step filter related widgets
 	 */

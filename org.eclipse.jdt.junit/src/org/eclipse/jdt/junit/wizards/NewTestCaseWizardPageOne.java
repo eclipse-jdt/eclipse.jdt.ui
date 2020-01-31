@@ -171,7 +171,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 
 	/**
 	 * Available JUnit versions.
-	 * 
+	 *
 	 * @since 3.11
 	 */
 	public enum JUnitVersion {
@@ -323,7 +323,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 
 	/**
 	 * Specifies the JUnit version to create the test.
-	 * 
+	 *
 	 * @param version the JUnit version
 	 * @since 3.11
 	 */
@@ -352,7 +352,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 
 	/**
 	 * Specifies if the JUnit version radio buttons are enabled.
-	 * 
+	 *
 	 * @param enabled if <code>true</code>, the JUnit version radio buttons are enabled; otherwise they
 	 *            are read-only
 	 * @since 3.11
@@ -384,7 +384,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 
 	/**
 	 * Returns the JUnit version to create the test.
-	 * 
+	 *
 	 * @return the JUnit version to create the test
 	 * @since 3.11
 	 */
@@ -403,7 +403,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 
 	/**
 	 * Returns whether the super class name is one of the default super class names.
-	 * 
+	 *
 	 * @return <code>true</code> if the super class name is one of the default super class names,
 	 *         <code>false</code> otherwise
 	 * @since 3.7
@@ -994,22 +994,22 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 
 	private void createSetUp(IType type, ImportsManager imports) throws CoreException {
 		String annotationType= fJUnitVersion == JUnitVersion.VERSION_4 ? "org.junit.Before" : "org.junit.jupiter.api.BeforeEach"; //$NON-NLS-1$ //$NON-NLS-2$
-		createSetupStubs(type, "setUp", false, annotationType, imports); //$NON-NLS-1$ 
+		createSetupStubs(type, "setUp", false, annotationType, imports); //$NON-NLS-1$
 	}
 
 	private void createTearDown(IType type, ImportsManager imports) throws CoreException {
 		String annotationType= fJUnitVersion == JUnitVersion.VERSION_4 ? "org.junit.After" : "org.junit.jupiter.api.AfterEach"; //$NON-NLS-1$ //$NON-NLS-2$
-		createSetupStubs(type, "tearDown", false, annotationType, imports); //$NON-NLS-1$ 
+		createSetupStubs(type, "tearDown", false, annotationType, imports); //$NON-NLS-1$
 	}
 
 	private void createSetUpClass(IType type, ImportsManager imports) throws CoreException {
 		String annotationType= fJUnitVersion == JUnitVersion.VERSION_4 ? "org.junit.BeforeClass" : "org.junit.jupiter.api.BeforeAll"; //$NON-NLS-1$ //$NON-NLS-2$
-		createSetupStubs(type, "setUpBeforeClass", true, annotationType, imports); //$NON-NLS-1$ 
+		createSetupStubs(type, "setUpBeforeClass", true, annotationType, imports); //$NON-NLS-1$
 	}
 
 	private void createTearDownClass(IType type, ImportsManager imports) throws CoreException {
 		String annotationType= fJUnitVersion == JUnitVersion.VERSION_4 ? "org.junit.AfterClass" : "org.junit.jupiter.api.AfterAll"; //$NON-NLS-1$ //$NON-NLS-2$
-		createSetupStubs(type, "tearDownAfterClass", true, annotationType, imports); //$NON-NLS-1$ 
+		createSetupStubs(type, "tearDownAfterClass", true, annotationType, imports); //$NON-NLS-1$
 	}
 
 	private void createTestMethodStubs(IType type, ImportsManager imports) throws CoreException {
@@ -1039,7 +1039,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 
 	/**
 	 * Creates a test method.
-	 * 
+	 *
 	 * @param type the type to create the method
 	 * @param imports the imports manager
 	 * @param method the method or <code>null</code>
@@ -1388,7 +1388,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 	 * returned. Implementors can override this behavior to return the name of a
 	 * subclass instead.
 	 *
-	 * @return the fully qualified name of a subclass of the JUnit 3 TestCase class. 
+	 * @return the fully qualified name of a subclass of the JUnit 3 TestCase class.
 	 *
 	 * @since 3.7
 	 */
@@ -1398,7 +1398,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 
 	/**
 	 * Returns the default value for the super class field.
-	 * 
+	 *
 	 * @return the default value for the super class field
 	 * @since 3.7
 	 */

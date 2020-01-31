@@ -397,7 +397,7 @@ public abstract class TestElement implements ITestElement {
 	/**
 	 * Returns the display name of the test. Can be <code>null</code>. In that case, use
 	 * {@link TestElement#getTestName() getTestName()}.
-	 * 
+	 *
 	 * @return the test display name, can be <code>null</code>
 	 */
 	public String getDisplayName() {
@@ -416,7 +416,7 @@ public abstract class TestElement implements ITestElement {
 	/**
 	 * Returns the unique ID of the test element. Can be <code>null</code> as it is applicable to JUnit
 	 * 5 and above.
-	 * 
+	 *
 	 * @return the unique ID of the test, can be <code>null</code>
 	 */
 	public String getUniqueId() {

@@ -61,31 +61,31 @@ public class JUnitCore {
 	/**
 	 * ID of the JUnit {@linkplain IClasspathContainer classpath container}.
 	 * The general format of classpath entries using this container is unspecified.
-	 * 
+	 *
 	 * @see #JUNIT3_CONTAINER_PATH
 	 * @see #JUNIT4_CONTAINER_PATH
 	 * @see #JUNIT5_CONTAINER_PATH
 	 * @since 3.6
 	 */
 	public static final String JUNIT_CONTAINER_ID= "org.eclipse.jdt.junit.JUNIT_CONTAINER"; //$NON-NLS-1$
-	
+
 	/**
 	 * Path of the JUnit 3 {@linkplain IClasspathContainer classpath container}.
-	 * 
+	 *
 	 * @since 3.6
 	 */
 	public final static IPath JUNIT3_CONTAINER_PATH= new Path(JUNIT_CONTAINER_ID).append("3"); //$NON-NLS-1$
-	
+
 	/**
 	 * Path of the JUnit 4 {@linkplain IClasspathContainer classpath container}.
-	 * 
+	 *
 	 * @since 3.6
 	 */
 	public final static IPath JUNIT4_CONTAINER_PATH= new Path(JUNIT_CONTAINER_ID).append("4"); //$NON-NLS-1$
 
 	/**
 	 * Path of the JUnit 5 {@linkplain IClasspathContainer classpath container}.
-	 * 
+	 *
 	 * @since 3.10
 	 */
 	public final static IPath JUNIT5_CONTAINER_PATH= new Path(JUNIT_CONTAINER_ID).append("5"); //$NON-NLS-1$
@@ -138,14 +138,14 @@ public class JUnitCore {
 
 	/**
 	 * Finds types that contain JUnit tests in the given container.
-	 * 
+	 *
 	 * @param container the container
 	 * @param monitor the progress monitor used to report progress and request cancelation,
 	 *   or <code>null</code> if none
 	 * @return test types inside the given container
 	 * @throws CoreException when a problem occurs while accessing <code>container</code> or its children
 	 * @throws OperationCanceledException if the operation has been canceled
-	 * 
+	 *
 	 * @since 3.5
 	 */
 	public static IType[] findTestTypes(IJavaElement container, IProgressMonitor monitor) throws CoreException, OperationCanceledException {
@@ -158,11 +158,11 @@ public class JUnitCore {
 
 	/**
 	 * Exports the given test run session into an XML report file.
-	 * 
+	 *
 	 * @param testRunSession the test run session
 	 * @param file the destination
 	 * @throws CoreException if an error occurred
-	 * 
+	 *
 	 * @since 3.7
 	 */
 	public static void exportTestRunSession(ITestRunSession testRunSession, File file) throws CoreException {
@@ -171,17 +171,17 @@ public class JUnitCore {
 
 	/**
 	 * Exports the given test run session to an output stream.
-	 * 
+	 *
 	 * @param testRunSession the test run session
 	 * @param output the output stream
 	 * @throws CoreException if an error occurred
-	 * 
+	 *
 	 * @since 3.7
 	 */
 	public static void exportTestRunSession(ITestRunSession testRunSession, OutputStream output) throws CoreException {
 		try {
 			JUnitModel.exportTestRunSession((TestRunSession)testRunSession, output);
-			
+
 		} catch (TransformerException exception) {
 			String pluginID= JUnitCorePlugin.getPluginId();
 			String message= ModelMessages.JUnitModel_could_not_export;
@@ -191,11 +191,11 @@ public class JUnitCore {
 
 	/**
 	 * Imports a test run session from the given file.
-	 * 
+	 *
 	 * @param file a file containing a test run session transcript
 	 * @return the imported test run session
 	 * @throws CoreException if the import failed
-	 * 
+	 *
 	 * @since 3.7
 	 */
 	public static ITestRunSession importTestRunSession(File file) throws CoreException {
@@ -204,24 +204,24 @@ public class JUnitCore {
 
 	/**
 	 * Imports a test run session from the given URL.
-	 * 
+	 *
 	 * @param url an URL to a test run session transcript
 	 * @param monitor a progress monitor for cancellation
 	 * @return the imported test run session, or <code>null</code> if the import has been cancelled
 	 * @throws CoreException if the import failed
-	 * 
+	 *
 	 * @since 3.7
 	 */
 	public static ITestRunSession importTestRunSession(final String url, IProgressMonitor monitor) throws CoreException {
 		try {
 			return JUnitModel.importTestRunSession(url, monitor);
-			
+
 		} catch (InvocationTargetException exception) {
 			String pluginID= JUnitCorePlugin.getPluginId();
 			String message= ModelMessages.JUnitModel_could_not_import;
 			Throwable throwable= exception.getCause() != null ? exception.getCause() : exception;
 			throw new CoreException(new Status(IStatus.ERROR, pluginID, message, throwable));
-			
+
 		} catch (InterruptedException interrupt) {
 			return null;
 		}

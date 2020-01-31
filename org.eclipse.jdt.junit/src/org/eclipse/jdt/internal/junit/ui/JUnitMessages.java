@@ -168,23 +168,23 @@ public final class JUnitMessages extends NLS {
 	public static String JUnitLaunchConfigurationTab_testdialog_message;
 
 	public static String JUnitLaunchConfigurationTab_testdialog_title;
-	
+
 	public static String JUnitLaunchConfigurationTab_addtag_label;
-	
+
 	public static String JUnitLaunchConfigurationTab_addtag_text;
-	
+
 	public static String JUnitLaunchConfigurationTab_includetag_checkbox_label;
-	
+
 	public static String JUnitLaunchConfigurationTab_excludetag_checkbox_label;
-	
+
 	public static String JUnitLaunchConfigurationTab_includetags_description;
-	
+
 	public static String JUnitLaunchConfigurationTab_excludetags_description;
-	
+
 	public static String JUnitLaunchConfigurationTab_addincludeexcludetagdialog_title;
-	
+
 	public static String JUnitLaunchConfigurationTab_includetag_empty_error;
-	
+
 	public static String JUnitLaunchConfigurationTab_excludetag_empty_error;
 
 	public static String JUnitLaunchShortcut_dialog_title;

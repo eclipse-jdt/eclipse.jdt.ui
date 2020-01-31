@@ -731,7 +731,7 @@ public class TestRunSession implements ITestRunSession {
 		@Override
 		public void testEnded(String testId, String testName) {
 			boolean isIgnored= testName.startsWith(MessageIds.IGNORED_TEST_PREFIX);
-			
+
 			TestElement testElement= getTestElement(testId);
 			if (testElement == null) {
 				testElement= createUnrootedTestElement(testId, testName);
