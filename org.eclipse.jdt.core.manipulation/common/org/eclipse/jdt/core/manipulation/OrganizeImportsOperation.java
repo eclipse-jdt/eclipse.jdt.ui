@@ -560,7 +560,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		CompilationUnit astRoot= fASTRoot;
 		if (astRoot == null) {
 			astRoot= CoreASTProvider.getInstance().getAST(fCompilationUnit, CoreASTProvider.WAIT_YES, subMonitor.split(2));
-		} 
+		}
 		subMonitor.setWorkRemaining(7);
 
 		ImportRewrite importsRewrite= CodeStyleConfiguration.createImportRewrite(astRoot, false);

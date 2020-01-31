@@ -344,7 +344,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 		ASTNode declaringType= ASTResolving.findParentType(fTempDeclarationNode);
 		if (declaringType instanceof TypeDeclaration && ((TypeDeclaration) declaringType).isInterface())
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.PromoteTempToFieldRefactoring_interface_methods);
-		
+
 		result.merge(checkTempTypeForLocalTypeUsage());
 		if (result.hasFatalError())
 		    return result;

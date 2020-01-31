@@ -97,7 +97,7 @@ public class ModifierRewrite {
 
 	/**
 	 * Sets the given modifiers. Removes all other flags, but leaves annotations in place.
-	 * 
+	 *
 	 * @param modifiers the modifiers to set
 	 * @param editGroup the edit group in which to collect the corresponding text edits, or
 	 *            <code>null</code> if ungrouped
@@ -110,7 +110,7 @@ public class ModifierRewrite {
 	/**
 	 * Sets the included modifiers and removes the excluded modifiers. Does not touch other flags
 	 * and leaves annotations in place.
-	 * 
+	 *
 	 * @param included the modifiers to set
 	 * @param excluded the modifiers to remove
 	 * @param editGroup the edit group in which to collect the corresponding text edits, or
@@ -124,7 +124,7 @@ public class ModifierRewrite {
 	/**
 	 * Sets the included visibility modifiers and removes existing visibility modifiers. Does not
 	 * touch other flags and leaves annotations in place.
-	 * 
+	 *
 	 * @param visibilityFlags the new visibility modifiers
 	 * @param editGroup the edit group in which to collect the corresponding text edits, or
 	 *            <code>null</code> if ungrouped
@@ -137,7 +137,7 @@ public class ModifierRewrite {
 	public void copyAllModifiers(ASTNode otherDecl, TextEditGroup editGroup) {
 		copyAllModifiers(otherDecl, editGroup, false);
 	}
-	
+
 	public void copyAllModifiers(ASTNode otherDecl, TextEditGroup editGroup, boolean copyIndividually) {
 		ListRewrite modifierList= evaluateListRewrite(fModifierRewrite.getASTRewrite(), otherDecl);
 		List<IExtendedModifier> originalList= modifierList.getOriginalList();
@@ -176,7 +176,7 @@ public class ModifierRewrite {
 	/**
 	 * Sets the given modifiers and removes all other modifiers that match the consideredFlags mask.
 	 * Does not touch other flags and leaves annotations in place.
-	 * 
+	 *
 	 * @param modifiers the modifiers to set
 	 * @param consideredFlags mask of modifiers to consider
 	 * @param editGroup the edit group in which to collect the corresponding text edits, or

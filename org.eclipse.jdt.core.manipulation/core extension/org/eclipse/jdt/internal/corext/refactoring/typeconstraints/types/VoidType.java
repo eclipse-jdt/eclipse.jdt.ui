@@ -41,7 +41,7 @@ public final class VoidType extends TType {
 	public int hashCode() {
 		return 12345;
 	}
-	
+
 	@Override
 	protected boolean doCanAssignTo(TType lhs) {
 		return false;

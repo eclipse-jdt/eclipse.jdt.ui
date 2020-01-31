@@ -33,7 +33,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
  * <p>
  * For nodes inside "tight" nodes, the source range is the extended source range, unless this would
  * violate the no-overlapping condition from the superclass.
- * 
+ *
  * @since 3.2
  */
 public class TightSourceRangeComputer extends TargetSourceRangeComputer {
@@ -41,7 +41,7 @@ public class TightSourceRangeComputer extends TargetSourceRangeComputer {
 
 	/**
 	 * Add the given node to the set of "tight" nodes.
-	 * 
+	 *
 	 * @param reference a node
 	 * @since 3.2
 	 */

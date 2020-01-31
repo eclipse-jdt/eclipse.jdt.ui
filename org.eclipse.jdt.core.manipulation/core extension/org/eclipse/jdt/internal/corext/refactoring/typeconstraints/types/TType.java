@@ -25,10 +25,10 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 /**
  * TTypes are lightweight fully-resolved type objects that stand for {@link ITypeBinding}s.
  * TTypes can answer basic questions about the relationship between types.
- * 
+ *
  * They do not hold references to their corresponding {@link ITypeBinding}s, and they
  * don't carry any information about members of a type.
- * 
+ *
  * @see TypeEnvironment
  * @see TType#canAssignTo(TType)
  * @see HierarchyType#isSubType(HierarchyType)
@@ -78,7 +78,7 @@ public abstract class TType {
 	/**
 	 * Creates a new type with the given environment as an owner.
 	 * The type environment <em>must</em> call {@link #initialize(ITypeBinding)} after using this constructor.
-	 * 
+	 *
 	 * @param environment owner
 	 */
 	protected TType(TypeEnvironment environment) {
@@ -88,7 +88,7 @@ public abstract class TType {
 	/**
 	 * Creates a new type with the given environment as an owner.
 	 * The type environment must <em>not</em> call {@link #initialize(ITypeBinding)} after using this constructor.
-	 * 
+	 *
 	 * @param environment owner
 	 * @param key this type's binding key
 	 */
@@ -482,7 +482,7 @@ public abstract class TType {
 
 	@Override
 	public abstract int hashCode();
-	
+
 	/**
 	 * Performs the actual equals check.
 	 *
@@ -544,7 +544,7 @@ public abstract class TType {
 	 * Returns whether the receiver type is type equivalent to the other type.
 	 * This method considers the erasure for generic, raw and parameterized
 	 * types.
-	 * 
+	 *
 	 * @param other the other type
 	 * @return whether the receiver is type equivalent to other
 	 */
@@ -557,7 +557,7 @@ public abstract class TType {
 	 * a type argument of a parameterized type is compatible with the given type
 	 * <code>rhs</code>. For example if
 	 * <code>List&lt;this&gt;= List&lt;rhs&gt;</code> is a valid assignment.
-	 * 
+	 *
 	 * @param rhs the right-hand-side type
 	 * @return <code>true</code> iff <code>this</code> contains <code>rhs</code> according to JLS3 4.5.1.1
 	 */

@@ -47,7 +47,7 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.EditAnnotator;
  * <p>
  * The proposal takes care of the preview of the changes as proposal information.
  * </p>
- * 
+ *
  * @since 1.11
  */
 public class CUCorrectionProposalCore extends ChangeCorrectionProposalCore implements ICUCorrectionProposal {
@@ -57,7 +57,7 @@ public class CUCorrectionProposalCore extends ChangeCorrectionProposalCore imple
 
 	/**
 	 * Constructs a correction proposal working on a compilation unit with a given text change.
-	 * 
+	 *
 	 * @param proposal ICUCorrectionProposal to use
 	 * @param name the name that is displayed in the proposal selection dialog
 	 * @param cu the compilation unit to which the change can be applied
@@ -77,7 +77,7 @@ public class CUCorrectionProposalCore extends ChangeCorrectionProposalCore imple
 
 	/**
 	 * Constructs a correction proposal working on a compilation unit with a given text change.
-	 * 
+	 *
 	 * @param name the name that is displayed in the proposal selection dialog
 	 * @param cu the compilation unit to which the change can be applied
 	 * @param change the change that is executed when the proposal is applied or <code>null</code>
@@ -100,7 +100,7 @@ public class CUCorrectionProposalCore extends ChangeCorrectionProposalCore imple
 	 * Users have to override {@link #addEdits(IDocument, TextEdit)} to provide the text edits or
 	 * {@link #createTextChange()} to provide a text change.
 	 * </p>
-	 * 
+	 *
 	 * @param name the name that is displayed in the proposal selection dialog
 	 * @param cu the compilation unit on that the change works
 	 * @param relevance the relevance of this proposal
@@ -116,7 +116,7 @@ public class CUCorrectionProposalCore extends ChangeCorrectionProposalCore imple
 	 * <p>
 	 * The default implementation does not add any edits
 	 * </p>
-	 * 
+	 *
 	 * @param document content of the underlying compilation unit. To be accessed read only.
 	 * @param editRoot The root edit to add all edits to
 	 * @throws CoreException can be thrown if adding the edits is failing.
@@ -141,7 +141,7 @@ public class CUCorrectionProposalCore extends ChangeCorrectionProposalCore imple
 		}
 		return buf.toString();
 	}
-	
+
 	@Override
 	public void apply() throws CoreException {
 		performChange();
@@ -219,7 +219,7 @@ public class CUCorrectionProposalCore extends ChangeCorrectionProposalCore imple
 	 *
 	 * @return the preview of the changed compilation unit
 	 * @throws CoreException if the creation of the change failed
-	 * 
+	 *
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	public String getPreviewContent() throws CoreException {

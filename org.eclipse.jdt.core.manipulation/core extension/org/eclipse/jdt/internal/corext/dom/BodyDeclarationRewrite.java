@@ -31,9 +31,9 @@ import org.eclipse.jdt.internal.core.manipulation.MembersOrderPreferenceCacheCom
 
 /**
  * Rewrite helper for body declarations.
- * 
+ *
  * @see ASTNodes#getBodyDeclarationsProperty(ASTNode)
- * 
+ *
  * @since 1.10
  */
 public class BodyDeclarationRewrite {

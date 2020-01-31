@@ -31,7 +31,7 @@ import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 /**
  * Class to annotate edits made by a quick fix/assist to be shown via the quick fix pop-up preview.
  * E.g. the added changes are shown in bold.
- * 
+ *
  * @since 3.8
  */
 public class EditAnnotator extends TextEditVisitor {

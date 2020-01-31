@@ -22,7 +22,7 @@ import org.eclipse.ltk.core.refactoring.TextChange;
  * @since 1.11
  */
 public interface ICUCorrectionProposal {
-	
+
 	/**
 	 * Returns the text change that is invoked when the change is applied.
 	 *

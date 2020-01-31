@@ -15,7 +15,7 @@
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
 public class CodeGenerationSettingsConstants {
-	
+
 	/**
 	 * A named preference that controls if comment stubs will be added
 	 * automatically to newly created types and methods.
@@ -24,7 +24,7 @@ public class CodeGenerationSettingsConstants {
 	 * </p>
 	 */
 	public static final String CODEGEN_ADD_COMMENTS= "org.eclipse.jdt.ui.javadoc"; //$NON-NLS-1$
-	
+
 	/**
 	 * A named preference that controls whether the keyword "this" will be added
 	 * automatically to field accesses in generated methods.
@@ -33,7 +33,7 @@ public class CodeGenerationSettingsConstants {
 	 * </p>
 	 */
 	public static final String CODEGEN_KEYWORD_THIS= "org.eclipse.jdt.ui.keywordthis"; //$NON-NLS-1$
-	
+
 	/**
 	 * A named preference that controls whether to add a override annotation for newly created methods
 	 * <p>

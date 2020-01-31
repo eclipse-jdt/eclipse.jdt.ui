@@ -70,7 +70,7 @@ public final class PrimitiveType extends TType {
 	public int hashCode() {
 		return fId;
 	}
-	
+
 	@Override
 	protected boolean doCanAssignTo(TType lhs) {
 		if (lhs.getKind() != PRIMITIVE_TYPE) {

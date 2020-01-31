@@ -28,7 +28,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 /**
  * Rewrite helper for {@link Statement}s. Ensures that
  * the replacement nodes are enclosed in a Block if necessary.
- * 
+ *
  * see JDTUIHelperClasses
  */
 public class StatementRewrite extends ReplaceRewrite {

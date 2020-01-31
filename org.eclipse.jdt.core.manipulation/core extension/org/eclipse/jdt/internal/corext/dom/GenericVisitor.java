@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -43,7 +43,7 @@ public class GenericVisitor extends ASTVisitor {
 
 	/**
 	 * Visits the given type-specific AST node.
-	 * 
+	 *
 	 * @param node the AST note to visit
 	 * @return <code>true</code> if the children of this node should be visited, and
 	 *         <code>false</code> if the children of this node should be skipped
@@ -54,7 +54,7 @@ public class GenericVisitor extends ASTVisitor {
 
 	/**
 	 * Visits the given type-specific AST node.
-	 * 
+	 *
 	 * @param node the AST note to visit
 	 */
 	protected void endVisitNode(ASTNode node) {

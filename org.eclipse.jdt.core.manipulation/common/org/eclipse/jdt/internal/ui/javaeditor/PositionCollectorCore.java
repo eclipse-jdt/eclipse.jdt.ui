@@ -30,7 +30,7 @@ import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 
 /**
  * Collects positions from the AST.
- * 
+ *
  * @since 1.11
  */
 public abstract class PositionCollectorCore extends GenericVisitor {
@@ -85,7 +85,7 @@ public abstract class PositionCollectorCore extends GenericVisitor {
 	 * @since 3.5
 	 */
 	@Override
-	public abstract boolean visit(SuperConstructorInvocation node); 
+	public abstract boolean visit(SuperConstructorInvocation node);
 
 	@Override
 	public abstract boolean visit(SimpleType node);
@@ -94,7 +94,7 @@ public abstract class PositionCollectorCore extends GenericVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.SimpleName)
 	 */
 	@Override
-	public abstract boolean visit(SimpleName node); 
+	public abstract boolean visit(SimpleName node);
 
 	/**
 	 * Retain the positions completely contained in the given range.
@@ -102,5 +102,5 @@ public abstract class PositionCollectorCore extends GenericVisitor {
 	 * @param length The range length
 	 */
 	protected abstract void retainPositions(int offset, int length);
-	
+
 }

@@ -36,15 +36,15 @@ import org.eclipse.jdt.core.dom.StringLiteral;
  * method using <code>String.format()</code>. This style ignores <i>skip null values</i> option.
  * <p>
  * Generated methods look like this:
- * 
+ *
  * <pre>
  * public String toString() {
  * 	return String.format(&quot;FooClass( field1=%s, field2=%s )&quot;, field1, field2);
  * }
  * </pre>
- * 
+ *
  * </p>
- * 
+ *
  * @since 3.5
  */
 public class StringFormatGenerator extends AbstractToStringGenerator {
@@ -68,7 +68,7 @@ public class StringFormatGenerator extends AbstractToStringGenerator {
 			formatClass= "java.lang.String"; //$NON-NLS-1$
 		else
 			formatClass= "java.text.MessageFormat"; //$NON-NLS-1$
-		MethodInvocation formatInvocation= createMethodInvocation(addImport(formatClass), "format", null); //$NON-NLS-1$ 
+		MethodInvocation formatInvocation= createMethodInvocation(addImport(formatClass), "format", null); //$NON-NLS-1$
 		StringLiteral literal= fAst.newStringLiteral();
 		literal.setLiteralValue(buffer.toString());
 		formatInvocation.arguments().add(literal);

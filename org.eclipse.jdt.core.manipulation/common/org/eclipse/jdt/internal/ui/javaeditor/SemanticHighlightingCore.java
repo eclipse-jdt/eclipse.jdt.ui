@@ -16,7 +16,7 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 /**
  * Semantic highlighting
- * 
+ *
  * @since 1.11
  */
 public abstract class SemanticHighlightingCore {

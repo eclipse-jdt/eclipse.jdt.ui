@@ -36,7 +36,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
  * <li><code>m1</code> and <code>m2</code> are defined in the same type (<code>T</code> or any
  * supertype of <code>T</code>), that type doesn't have a source attachment and name of
  * <code>m1</code> alphabetically precedes name of <code>m2</code></li>
- * 
+ *
  * <li><code>m2</code> is defined in <code>T</code> and <code>m1</code> is defined in any supertype
  * of <code>T</code></li>
  * <li><code>m2</code> is defined in a superclass of <code>T</code> and <code>m1</code> is defined

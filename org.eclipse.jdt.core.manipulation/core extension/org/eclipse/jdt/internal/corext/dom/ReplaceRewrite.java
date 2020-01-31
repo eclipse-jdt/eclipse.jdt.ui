@@ -28,7 +28,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 /**
  * Rewrite helper for situations where one node can be replaced by many new nodes.
- * 
+ *
  * see JDTUIHelperClasses
  */
 public class ReplaceRewrite {

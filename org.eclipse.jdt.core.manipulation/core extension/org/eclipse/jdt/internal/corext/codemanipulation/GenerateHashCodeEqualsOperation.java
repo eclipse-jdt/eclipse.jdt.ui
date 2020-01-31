@@ -150,7 +150,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 	private static final String METHODNAME_GETCLASS= "getClass"; //$NON-NLS-1$
 
 	private static final String METHODNAME_EQUALS= "equals"; //$NON-NLS-1$
-	
+
 	private static final String METHODNAME_DEEP_EQUALS= "deepEquals"; //$NON-NLS-1$
 
 	private static final String METHODNAME_HASH_CODE= "hashCode"; //$NON-NLS-1$
@@ -426,7 +426,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 
 		Block body= fAst.newBlock();
 		hashCodeMethod.setBody(body);
-	
+
 		boolean needsNoSuperCall= needsNoSuperCall(fType, METHODNAME_HASH_CODE, new ITypeBinding[0]);
 		boolean memberType= isMemberType();
 		ReturnStatement endReturn= fAst.newReturnStatement();
@@ -1085,7 +1085,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 
 		return ifSt;
 	}
-	
+
 	private Statement createMultiArrayComparison(String name) {
 		MethodInvocation invoc= fAst.newMethodInvocation();
 		invoc.setName(fAst.newSimpleName(METHODNAME_DEEP_EQUALS));

@@ -38,7 +38,7 @@ public final class NullType extends TType {
 	public int hashCode() {
 		return 1234;
 	}
-	
+
 	@Override
 	public String getName() {
 		return "null";  //$NON-NLS-1$

@@ -65,7 +65,7 @@ public class NLSElement {
 
 	/**
 	 * Sets the actual string value.
-	 * 
+	 *
 	 * @param value the value
 	 */
 	public void setValue(String value) {
@@ -74,7 +74,7 @@ public class NLSElement {
 
 	/**
 	 * Sets the tag position if one is associated with the NLS element.
-	 * 
+	 *
 	 * @param start the start offset
 	 * @param length the length
 	 */
@@ -85,7 +85,7 @@ public class NLSElement {
 	/**
 	 * Returns the tag position for this element. The method can return <code>null</code>. In this
 	 * case no tag has been found for this NLS element.
-	 * 
+	 *
 	 * @return the new tag region region
 	 */
 	public Region getTagPosition() {
@@ -94,7 +94,7 @@ public class NLSElement {
 
 	/**
 	 * Returns whether this element has an associated $NON-NLS-*$ tag.
-	 * 
+	 *
 	 * @return <code>true</code> if the NLS element has an associated $NON-NLS-*$ tag
 	 */
 	public boolean hasTag() {

@@ -631,7 +631,7 @@ public final class MemberVisibilityAdjustor {
 		boolean adjust= true;
 		final IType declaring= member.getDeclaringType();
 		if (declaring != null && (JavaModelUtil.isInterfaceOrAnnotation(declaring)
-				|| (member instanceof IField) && Flags.isEnum(member.getFlags()) 
+				|| (member instanceof IField) && Flags.isEnum(member.getFlags())
 				|| declaring.equals(fReferenced)))
 			adjust= false;
 		if (adjust && hasLowerVisibility(member.getFlags(), keywordToVisibility(threshold)) && needsVisibilityAdjustment(member, threshold))

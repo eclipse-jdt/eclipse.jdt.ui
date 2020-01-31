@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -291,7 +291,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 		doVisitChildren(node.annotations());
 		return false;
 	}
-	
+
 	@Override
 	public boolean visit(LabeledStatement node) {
 		doVisitNode(node.getBody());
@@ -302,15 +302,15 @@ public class ImportReferencesCollector extends GenericVisitor {
 	public boolean visit(ContinueStatement node) {
 		return false;
 	}
-	
+
 	@Override
 	public boolean visit(YieldStatement node) {
 		if (node.getAST().isPreviewEnabled()) {
-			evalQualifyingExpression(node.getExpression(), null);			
+			evalQualifyingExpression(node.getExpression(), null);
 		}
 		return false;
 	}
-	
+
 	/*
 	 * @see ASTVisitor#visit(ThisExpression)
 	 */
@@ -319,7 +319,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 		typeRefFound(node.getQualifier());
 		return false;
 	}
-	
+
 	@Override
 	public boolean visit(SuperFieldAccess node) {
 		typeRefFound(node.getQualifier());
@@ -372,7 +372,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 		doVisitChildren(node.typeArguments());
 		return false;
 	}
-	
+
 	@Override
 	public boolean visit(ExpressionMethodReference node) {
 		evalQualifyingExpression(node.getExpression(), node.getName());
@@ -386,7 +386,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 		doVisitChildren(node.typeArguments());
 		return false;
 	}
-	
+
 	@Override
 	public boolean visit(TypeMethodReference node) {
 		doVisitNode(node.getType());
@@ -408,7 +408,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 		}
 		return false;
 	}
-	
+
 	/*
 	 * @see ASTVisitor#visit(SuperConstructorInvocation)
 	 */
@@ -491,7 +491,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 			doVisitNode(node.getReturnType2());
 		}
 		// name not visited
-		
+
 		int apiLevel= node.getAST().apiLevel();
 		if (apiLevel >= AST.JLS8) {
 			doVisitNode(node.getReceiverType());
@@ -568,7 +568,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 		}
 		return false;
 	}
-	
+
 	@Override
 	public boolean visit(MethodRefParameter node) {
 		doVisitNode(node.getType());

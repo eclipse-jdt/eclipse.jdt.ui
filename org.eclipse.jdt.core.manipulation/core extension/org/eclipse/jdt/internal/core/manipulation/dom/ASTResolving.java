@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -665,7 +665,7 @@ public class ASTResolving {
 	/**
 	 * The node's enclosing method declaration or <code>null</code> if
 	 * the node is not inside a method and is not a method declaration itself.
-	 * 
+	 *
 	 * @param node a node
 	 * @return the enclosing method declaration or <code>null</code>
 	 */
@@ -684,11 +684,11 @@ public class ASTResolving {
 	/**
 	 * Returns the lambda expression node which encloses the given <code>node</code>, or
 	 * <code>null</code> if none.
-	 * 
+	 *
 	 * @param node the node
 	 * @return the enclosing lambda expression node for the given <code>node</code>, or
 	 *         <code>null</code> if none
-	 * 
+	 *
 	 * @since 3.10
 	 */
 	public static LambdaExpression findEnclosingLambdaExpression(ASTNode node) {
@@ -715,7 +715,7 @@ public class ASTResolving {
 	 * </p>
 	 * @param node the node
 	 * @param nodeType the node type constant from {@link ASTNode}
-	 * @return the closest ancestor of <code>node</code> (including <code>node</code> itself) 
+	 * @return the closest ancestor of <code>node</code> (including <code>node</code> itself)
 	 *         whose type is <code>nodeType</code>, or <code>null</code> if none
 	 */
 	public static ASTNode findAncestor(ASTNode node, int nodeType) {
@@ -985,7 +985,7 @@ public class ASTResolving {
 	 *     if false, the type of an expression x (R r= x)
 	 * @param ast the current AST
 	 * @return the normalized binding or null when only the 'null' binding
-	 * 
+	 *
 	 * @see Bindings#normalizeForDeclarationUse(ITypeBinding, AST)
 	 */
 	public static ITypeBinding normalizeWildcardType(ITypeBinding wildcardType, boolean isBindingToAssign, AST ast) {

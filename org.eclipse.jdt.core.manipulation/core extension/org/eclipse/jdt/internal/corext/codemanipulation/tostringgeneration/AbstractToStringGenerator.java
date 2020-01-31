@@ -76,7 +76,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
  * which lists all selected fields and methods. What exactly is listed and how members are separated
  * is determined by a format template.
  * <p>
- * 
+ *
  * <p>
  * To print out items of arrays and/or limit number items printed for arrays, collections and so on,
  * various methods are used according to actual jdk compatibility:
@@ -133,7 +133,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
  * Additionally, if helper method is generated it is also used for other members members (even if
  * other solution could be used), as it makes the code cleaner.
  * </p>
- * 
+ *
  * @since 3.5
  */
 public abstract class AbstractToStringGenerator {
@@ -148,7 +148,7 @@ public abstract class AbstractToStringGenerator {
 
 	final private String MAX_LEN_VARIABLE_NAME= "maxLen"; //$NON-NLS-1$
 	protected String fMaxLenVariableName= MAX_LEN_VARIABLE_NAME;
-	
+
 	/**
 	* The name of the property that every <code>MethodDeclaration</code> generated should have.
 	* This property determines whether the method should be overwritten if already exists. The data
@@ -180,7 +180,7 @@ public abstract class AbstractToStringGenerator {
 	/**
 	 * This method is an implementation of Director in Builder pattern. It goes through all elements
 	 * of the format template and calls methods responsible for processing them.
-	 * 
+	 *
 	 * @return declaration of the generated <code>toString()</code> method
 	 * @throws CoreException if creation failed
 	 */
@@ -223,7 +223,7 @@ public abstract class AbstractToStringGenerator {
 	/**
 	 * adds a comment (if necessary) and an <code>@Override</code> annotation to the generated
 	 * method
-	 * 
+	 *
 	 * @throws CoreException if creation failed
 	 */
 	protected void createMethodComment() throws CoreException {
@@ -248,7 +248,7 @@ public abstract class AbstractToStringGenerator {
 	/**
 	 * Creates a method that takes a <code>Collection</code> or an Array and returns a
 	 * <code>String</code> containing it's first <code>fSettings.limitValue</code> elements
-	 * 
+	 *
 	 * @param array if true, generated method will convert array to string, otherwise -
 	 *            <code>Collection</code>
 	 * @return <code>arrayToString(Object[] array)</code> or </code>collectionToString(Collection
@@ -428,7 +428,7 @@ public abstract class AbstractToStringGenerator {
 			Expression indexExpression= createInfixExpression(fAst.newSimpleName(indexName), Operator.LESS, fAst.newSimpleName(maxLenParamName));
 			forStatement.setExpression(createInfixExpression(createMethodInvocation(iteratorName, "hasNext", null), Operator.CONDITIONAL_AND, indexExpression)); //$NON-NLS-1$
 
-			//if (i > 0) 
+			//if (i > 0)
 			//stringBuilder.append(iterator.next());
 			MethodInvocation nextInvocation= createMethodInvocation(iteratorName, "next", null); //$NON-NLS-1$
 			forBlock.statements().add(fAst.newExpressionStatement(createMethodInvocation(stringBuilderName, appendMethodName, nextInvocation)));
@@ -472,14 +472,14 @@ public abstract class AbstractToStringGenerator {
 
 		Block body= fAst.newBlock();
 		toStringMethod.setBody(body);
-		
+
 		fMaxLenVariableName= createNameSuggestion(MAX_LEN_VARIABLE_NAME, NamingConventions.VK_LOCAL);
 	}
 
 	/**
 	 * This method is called at the end of the process of generating <code>toString</code> method.
 	 * It should make sure the processed properly and clean the environment.
-	 * 
+	 *
 	 * @throws CoreException if creation failed
 	 */
 	protected void complete() throws CoreException {
@@ -521,7 +521,7 @@ public abstract class AbstractToStringGenerator {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param templateElement the template element, see constants in {@link ToStringTemplateParser}
 	 * @param member the member
 	 * @return <code>String</code> or <code>Expression</code> switching
@@ -575,7 +575,7 @@ public abstract class AbstractToStringGenerator {
 	/**
 	 * Adds an element to the generated <code>toString</code> method. This method is called for
 	 * every element of the format template.
-	 * 
+	 *
 	 * @param element String or expression to be added (<code>IVariableBinding</code> or
 	 *            <code>IMethodBinding</code>
 	 */
@@ -584,7 +584,7 @@ public abstract class AbstractToStringGenerator {
 	/**
 	 * Adds a member to the <code>toString</code> method. This method is called for every member if
 	 * "Skip null values" options is unchecked.
-	 * 
+	 *
 	 * @param member a member to be added
 	 * @param addSeparator true, if separator should be added after the member (i.e. this is not the
 	 *            last member)
@@ -602,7 +602,7 @@ public abstract class AbstractToStringGenerator {
 	 * This method is called for every non-primitive type member if "Skip null values" options is
 	 * checked, or for every <code>Collection</code> and <code>Map</code> member if there's a limit
 	 * for number of elements.
-	 * 
+	 *
 	 * @param member a member to be added
 	 * @param addSeparator true, if separator should be added after the member (i.e. this is not the
 	 *            last member)
@@ -613,7 +613,7 @@ public abstract class AbstractToStringGenerator {
 
 	/**
 	 * Creates an invocation of a method that takes zero or one argument
-	 * 
+	 *
 	 * @param expression the receiver expression
 	 * @param methodName the method name
 	 * @param argument the argument, can be <code>null</code> if the method does not take any arguments
@@ -630,7 +630,7 @@ public abstract class AbstractToStringGenerator {
 
 	/**
 	 * Creates an invocation of a method that takes zero or one argument
-	 * 
+	 *
 	 * @param receiver the receiver name
 	 * @param methodName the method name
 	 * @param argument the argument, can be <code>null</code> if the method does not take any arguments
@@ -639,10 +639,10 @@ public abstract class AbstractToStringGenerator {
 	protected MethodInvocation createMethodInvocation(String receiver, String methodName, Expression argument) {
 		return createMethodInvocation(fAst.newName(receiver), methodName, argument);
 	}
-	
+
 	/**
 	 * Creates a statement that can be used as for/while/if-then-else block
-	 * 
+	 *
 	 * @param expression an expression
 	 * @return a single-line statement, or a block, depending on settings
 	 */
@@ -843,7 +843,7 @@ public abstract class AbstractToStringGenerator {
 	/**
 	 * Adds an import to the class. This method should be used for every class reference added to
 	 * the generated code.
-	 * 
+	 *
 	 * @param typeName a fully qualified name of a type
 	 * @return simple name of a class if the import was added and fully qualified name if there was
 	 *         a conflict
@@ -852,7 +852,7 @@ public abstract class AbstractToStringGenerator {
 		String importedName= fContext.getImportRewrite().addImport(typeName);
 		return fAst.newName(importedName);
 	}
-	
+
 	private Set<String> excluded;
 	protected String createNameSuggestion(String baseName, int variableKind) {
 		if (excluded == null) {
@@ -887,7 +887,7 @@ public abstract class AbstractToStringGenerator {
 
 	/**
 	 * Checks whether given type implements given interface
-	 * 
+	 *
 	 * @param memberType binding of the type to check
 	 * @param interfaceNames fully qualified names of the interfaces to seek for
 	 * @return array of booleans, every element is set to true if interface at the same position in
@@ -909,7 +909,7 @@ public abstract class AbstractToStringGenerator {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param member <code>IVariableBinding</code> or <code>IMethodBinding</code> representing a
 	 *            member
 	 * @param templateElement the template element
@@ -929,7 +929,7 @@ public abstract class AbstractToStringGenerator {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param member member to check
 	 * @return type of field or method's return type
 	 */

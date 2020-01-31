@@ -42,17 +42,17 @@ public class Invocations {
 				return ((MethodInvocation)invocation).arguments();
 			case ASTNode.SUPER_METHOD_INVOCATION:
 				return ((SuperMethodInvocation)invocation).arguments();
-				
+
 			case ASTNode.CONSTRUCTOR_INVOCATION:
 				return ((ConstructorInvocation)invocation).arguments();
 			case ASTNode.SUPER_CONSTRUCTOR_INVOCATION:
 				return ((SuperConstructorInvocation)invocation).arguments();
-				
+
 			case ASTNode.CLASS_INSTANCE_CREATION:
 				return ((ClassInstanceCreation)invocation).arguments();
 			case ASTNode.ENUM_CONSTANT_DECLARATION:
 				return ((EnumConstantDeclaration)invocation).arguments();
-				
+
 			default:
 				throw new IllegalArgumentException(invocation.toString());
 		}
@@ -64,39 +64,39 @@ public class Invocations {
 				return MethodInvocation.ARGUMENTS_PROPERTY;
 			case ASTNode.SUPER_METHOD_INVOCATION:
 				return SuperMethodInvocation.ARGUMENTS_PROPERTY;
-				
+
 			case ASTNode.CONSTRUCTOR_INVOCATION:
 				return ConstructorInvocation.ARGUMENTS_PROPERTY;
 			case ASTNode.SUPER_CONSTRUCTOR_INVOCATION:
 				return SuperConstructorInvocation.ARGUMENTS_PROPERTY;
-				
+
 			case ASTNode.CLASS_INSTANCE_CREATION:
 				return ClassInstanceCreation.ARGUMENTS_PROPERTY;
 			case ASTNode.ENUM_CONSTANT_DECLARATION:
 				return EnumConstantDeclaration.ARGUMENTS_PROPERTY;
-				
+
 			default:
 				throw new IllegalArgumentException(invocation.toString());
 		}
 	}
-	
+
 	public static Expression getExpression(ASTNode invocation) {
 		switch (invocation.getNodeType()) {
 			case ASTNode.METHOD_INVOCATION:
 				return ((MethodInvocation)invocation).getExpression();
 			case ASTNode.SUPER_METHOD_INVOCATION:
 				return null;
-				
+
 			case ASTNode.CONSTRUCTOR_INVOCATION:
 				return null;
 			case ASTNode.SUPER_CONSTRUCTOR_INVOCATION:
 				return ((SuperConstructorInvocation)invocation).getExpression();
-				
+
 			case ASTNode.CLASS_INSTANCE_CREATION:
 				return ((ClassInstanceCreation)invocation).getExpression();
 			case ASTNode.ENUM_CONSTANT_DECLARATION:
 				return null;
-				
+
 			default:
 				throw new IllegalArgumentException(invocation.toString());
 		}
@@ -107,19 +107,19 @@ public class Invocations {
 		return type == ASTNode.METHOD_INVOCATION || type == ASTNode.SUPER_METHOD_INVOCATION ||
 			type == ASTNode.CONSTRUCTOR_INVOCATION;
 	}
-	
+
 	public static boolean isInvocationWithArguments(ASTNode node) {
 		switch (node.getNodeType()) {
 			case ASTNode.METHOD_INVOCATION:
 			case ASTNode.SUPER_METHOD_INVOCATION:
-				
+
 			case ASTNode.CONSTRUCTOR_INVOCATION:
 			case ASTNode.SUPER_CONSTRUCTOR_INVOCATION:
-				
+
 			case ASTNode.CLASS_INSTANCE_CREATION:
 			case ASTNode.ENUM_CONSTANT_DECLARATION:
 				return true;
-				
+
 			default:
 				return false;
 		}
@@ -131,17 +131,17 @@ public class Invocations {
 				return ((MethodInvocation)invocation).resolveMethodBinding();
 			case ASTNode.SUPER_METHOD_INVOCATION:
 				return ((SuperMethodInvocation)invocation).resolveMethodBinding();
-				
+
 			case ASTNode.CONSTRUCTOR_INVOCATION:
 				return ((ConstructorInvocation)invocation).resolveConstructorBinding();
 			case ASTNode.SUPER_CONSTRUCTOR_INVOCATION:
 				return ((SuperConstructorInvocation)invocation).resolveConstructorBinding();
-				
+
 			case ASTNode.CLASS_INSTANCE_CREATION:
 				return ((ClassInstanceCreation)invocation).resolveConstructorBinding();
 			case ASTNode.ENUM_CONSTANT_DECLARATION:
 				return ((EnumConstantDeclaration)invocation).resolveConstructorBinding();
-				
+
 			default:
 				throw new IllegalArgumentException(invocation.toString());
 		}
@@ -150,7 +150,7 @@ public class Invocations {
 	public static boolean isResolvedTypeInferredFromExpectedType(Expression invocation) {
 		if (invocation == null)
 			return false;
-		
+
 		switch (invocation.getNodeType()) {
 			case ASTNode.METHOD_INVOCATION:
 				return ((MethodInvocation) invocation).isResolvedTypeInferredFromExpectedType();
@@ -158,12 +158,12 @@ public class Invocations {
 				return ((SuperMethodInvocation) invocation).isResolvedTypeInferredFromExpectedType();
 			case ASTNode.CLASS_INSTANCE_CREATION:
 				return ((ClassInstanceCreation) invocation).isResolvedTypeInferredFromExpectedType();
-				
+
 			default:
 				return false;
 		}
 	}
-	
+
 	public static ListRewrite getInferredTypeArgumentsRewrite(ASTRewrite rewrite, Expression invocation) {
 		switch (invocation.getNodeType()) {
 			case ASTNode.METHOD_INVOCATION:
@@ -173,7 +173,7 @@ public class Invocations {
 			case ASTNode.CLASS_INSTANCE_CREATION:
 				Type type= ((ClassInstanceCreation) invocation).getType();
 				return rewrite.getListRewrite(type, ParameterizedType.TYPE_ARGUMENTS_PROPERTY);
-				
+
 			default:
 				throw new IllegalArgumentException(invocation.toString());
 		}
@@ -192,7 +192,7 @@ public class Invocations {
 				Type type= ((ClassInstanceCreation) invocation).getType();
 				ITypeBinding typeBinding= type.resolveBinding();
 				return typeBinding == null ? null : typeBinding.getTypeArguments();
-				
+
 			default:
 				throw new IllegalArgumentException(invocation.toString());
 		}

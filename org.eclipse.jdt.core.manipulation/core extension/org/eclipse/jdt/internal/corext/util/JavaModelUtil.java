@@ -70,7 +70,7 @@ import org.eclipse.jdt.launching.environments.IExecutionEnvironment;
  */
 // @see JDTUIHelperClasses
 public final class JavaModelUtil {
-	
+
 	/**
 	 * The latest available {@link JavaCore}{@code #VERSION_*} level.
 	 * @since 3.7
@@ -102,7 +102,7 @@ public final class JavaModelUtil {
 	 * @since 3.8
 	 */
 	public static final String PACKAGE_INFO_JAVA= "package-info.java"; //$NON-NLS-1$
-	
+
 	/**
 	 * The name of the package-info.class file.
 	 * @since 3.9
@@ -137,7 +137,7 @@ public final class JavaModelUtil {
 	 * Finds a type container by container name. The returned element will be of type
 	 * <code>IType</code> or a <code>IPackageFragment</code>. <code>null</code> is returned if the
 	 * type container could not be found.
-	 * 
+	 *
 	 * @param jproject The Java project defining the context to search
 	 * @param typeContainerName A dot separated name of the type container
 	 * @return returns the container
@@ -253,7 +253,7 @@ public final class JavaModelUtil {
 	/**
 	 * Returns whether the two names match. They match if they
 	 * are equal, or if they are the same name but one is missing a dot-separated qualifier.
-	 * 
+	 *
 	 * @param nameA a potentially qualified name
 	 * @param nameB a potentially qualified name
 	 * @return <code>true</code> iff the given names match
@@ -489,7 +489,7 @@ public final class JavaModelUtil {
 	 *
 	 * @param refTypeSig the type name in signature notation (for example 'QVector') this can also be an array type, but dimensions will be ignored.
 	 * @param declaringType the context for resolving (type where the reference was made in)
-	 * @param enclosingTypeSeparator the enclosing type separator used in the qualified type name 
+	 * @param enclosingTypeSeparator the enclosing type separator used in the qualified type name
 	 * @return returns the fully qualified type name or build-in-type name. if a unresolved type couldn't be resolved null is returned
 	 * @throws JavaModelException thrown when the type can not be accessed
 	 */
@@ -540,7 +540,7 @@ public final class JavaModelUtil {
 
 	/**
 	 * Checks whether the given type signature is from a primitive type.
-	 * 
+	 *
 	 * @param typeSignature the type signature string to check
 	 * @return <code>true</code> if the type is a primitive type, <code> false</code> otherwise
 	 * @throws JavaModelException if this element does not exist or if an exception occurs while
@@ -687,7 +687,7 @@ public final class JavaModelUtil {
 	/**
 	 * Returns the classpath entry of the given package fragment root. This is the raw entry, except
 	 * if the root is a referenced library, in which case it's the resolved entry.
-	 * 
+	 *
 	 * @param root a package fragment root
 	 * @return the corresponding classpath entry
 	 * @throws JavaModelException if accessing the entry failed
@@ -789,11 +789,11 @@ public final class JavaModelUtil {
 	public static boolean is50OrHigher(String compliance) {
 		return !isVersionLessThan(compliance, JavaCore.VERSION_1_5);
 	}
-	
+
 	public static boolean is16OrHigher(String compliance) {
 		return !isVersionLessThan(compliance, JavaCore.VERSION_1_6);
 	}
-	
+
 	public static boolean is17OrHigher(String compliance) {
 		return !isVersionLessThan(compliance, JavaCore.VERSION_1_7);
 	}
@@ -805,7 +805,7 @@ public final class JavaModelUtil {
 	public static boolean is9OrHigher(String compliance) {
 		return !isVersionLessThan(compliance, JavaCore.VERSION_9);
 	}
-	
+
 	public static boolean is10OrHigher(String compliance) {
 		return !isVersionLessThan(compliance, JavaCore.VERSION_10);
 	}
@@ -841,10 +841,10 @@ public final class JavaModelUtil {
 	public static boolean is17OrHigher(IJavaProject project) {
 		return is17OrHigher(getSourceCompliance(project));
 	}
-	
+
 	/**
 	 * Checks if the given project or workspace has source compliance 1.8 or greater.
-	 * 
+	 *
 	 * @param project the project to test or <code>null</code> to test the workspace settings
 	 * @return <code>true</code> if the given project or workspace has source compliance 1.8 or
 	 *         greater.
@@ -855,7 +855,7 @@ public final class JavaModelUtil {
 
 	/**
 	 * Checks if the given project or workspace has source compliance 9 or greater.
-	 * 
+	 *
 	 * @param project the project to test or <code>null</code> to test the workspace settings
 	 * @return <code>true</code> if the given project or workspace has source compliance 9 or
 	 *         greater.
@@ -866,7 +866,7 @@ public final class JavaModelUtil {
 
 	/**
 	 * Checks if the given project or workspace has source compliance 10 or greater.
-	 * 
+	 *
 	 * @param project the project to test or <code>null</code> to test the workspace settings
 	 * @return <code>true</code> if the given project or workspace has source compliance 10 or greater.
 	 */
@@ -876,21 +876,21 @@ public final class JavaModelUtil {
 
 	/**
 	 * Checks if the given project or workspace has source compliance 11 or greater.
-	 * 
+	 *
 	 * @param project the project to test or <code>null</code> to test the workspace settings
 	 * @return <code>true</code> if the given project or workspace has source compliance 11 or greater.
 	 */
 	public static boolean is11OrHigher(IJavaProject project) {
 		return is11OrHigher(getSourceCompliance(project));
 	}
-	
+
 	public static boolean is12OrHigher(IJavaProject project) {
 		return is12OrHigher(getSourceCompliance(project));
 	}
 
 	/**
 	 * Checks if the given project or workspace has source compliance 13 or greater.
-	 * 
+	 *
 	 * @param project the project to test or <code>null</code> to test the workspace settings
 	 * @return <code>true</code> if the given project or workspace has source compliance 13 or greater.
 	 */
@@ -901,7 +901,7 @@ public final class JavaModelUtil {
 	private static String getSourceCompliance(IJavaProject project) {
 		return project != null ? project.getOption(JavaCore.COMPILER_SOURCE, true) : JavaCore.getOption(JavaCore.COMPILER_SOURCE);
 	}
-	
+
 	/**
 	 * Checks if the JRE of the given project or workspace default JRE have source compliance 1.5 or
 	 * greater.
@@ -968,7 +968,7 @@ public final class JavaModelUtil {
 			if (compliance instanceof String)
 				return (String)compliance;
 		}
-		
+
 		// fallback:
 		String desc= executionEnvironment.getId();
 		if (desc.indexOf(JavaCore.VERSION_13) != -1) {
@@ -1058,7 +1058,7 @@ public final class JavaModelUtil {
 
 	/**
 	 * Tells whether the given type root represents a module.
-	 * 
+	 *
 	 * @param typeRoot the type root to test
 	 * @return <code>true</code> if the given type root is a module-info.java CU or a module-info.class class file.
 	 * @since 3.14
@@ -1070,7 +1070,7 @@ public final class JavaModelUtil {
 
 	/**
 	 * Tells whether the given Java element represents a module.
-	 * 
+	 *
 	 * @param javaElement the Java element to test
 	 * @return <code>true</code> if the given Java element represents a module.
 	 * @since 3.14
@@ -1084,7 +1084,7 @@ public final class JavaModelUtil {
 	 * Tells whether the given package fragment contains any ordinary compilation unit,
 	 * not counting the modular compilation unit module-info.java nor its class file module-info.class.
 	 * @param fragment a package fragment to test
-	 * @return true iff at least one ordinary compilation unit (or class file) was found. 
+	 * @return true iff at least one ordinary compilation unit (or class file) was found.
 	 * @throws JavaModelException if the package fragment does not exist or if an
 	 *      exception occurs while accessing its corresponding resource
 	 * @since 3.14
@@ -1103,7 +1103,7 @@ public final class JavaModelUtil {
 
 	/**
 	 * Applies a text edit to a compilation unit.
-	 * 
+	 *
 	 * @param cu the compilation unit to apply the edit to
 	 * @param edit the edit to apply
 	 * @param save is set, save the CU after the edit has been applied

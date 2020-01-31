@@ -40,7 +40,7 @@ import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
  * A type environment comprises a set of {@link TType}s that stand for Java {@link ITypeBinding}s.
  * In contrast to type bindings, TTypes of the same type environment also work across project boundaries and
  * across compiler environments, i.e. a type environment can handle bindings from multiple {@link ASTParser} sessions.
- * 
+ *
  * @see TType
  */
 public class TypeEnvironment {
@@ -174,7 +174,7 @@ public class TypeEnvironment {
 	public TypeEnvironment(boolean rememberSubtypes) {
 		this(rememberSubtypes, false);
 	}
-	
+
 	public TypeEnvironment(boolean rememberSubtypes, boolean removeCapures) {
 		if (rememberSubtypes) {
 			fSubTypes= new HashMap<>();
@@ -234,7 +234,7 @@ public class TypeEnvironment {
 	 * has already created its first hierarchy type or it has been initialized explicitly.
 	 *
 	 * @return the TType for java.lang.Object
-	 * 
+	 *
 	 * @see #initializeJavaLangObject(IJavaProject)
 	 */
 	public TType getJavaLangObject() {
@@ -244,11 +244,11 @@ public class TypeEnvironment {
 	public void initializeJavaLangObject(IJavaProject project) {
 		if (OBJECT_TYPE != null)
 			return;
-		
+
 		TType objectType= createStandardType("java.lang.Object", project); //$NON-NLS-1$
 		Assert.isTrue(objectType.isJavaLangObject());
 	}
-	
+
 	void initializeJavaLangObject(ITypeBinding object) {
 		if (OBJECT_TYPE != null)
 			return;

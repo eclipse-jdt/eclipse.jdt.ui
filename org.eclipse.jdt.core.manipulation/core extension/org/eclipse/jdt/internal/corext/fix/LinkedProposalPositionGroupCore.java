@@ -110,7 +110,7 @@ public class LinkedProposalPositionGroupCore {
 
 	/**
 	 * A position that contains all of the given tracked node positions.
-	 * 
+	 *
 	 * @since 3.7
 	 */
 	public static class TrackedNodesPosition extends PositionInformation {
@@ -119,7 +119,7 @@ public class LinkedProposalPositionGroupCore {
 
 		/**
 		 * A position that contains all of the given tracked node positions.
-		 * 
+		 *
 		 * @param pos the positions
 		 */
 		public TrackedNodesPosition(Collection<ITrackedNodePosition> pos) {
@@ -154,7 +154,7 @@ public class LinkedProposalPositionGroupCore {
 
 	/**
 	 * A position for the start of the given tracked node position.
-	 * 
+	 *
 	 * @since 3.7
 	 */
 	public static class StartPositionInformation extends PositionInformation {
@@ -163,7 +163,7 @@ public class LinkedProposalPositionGroupCore {
 
 		/**
 		 * A position for the start of the given tracked node position.
-		 * 
+		 *
 		 * @param pos the position
 		 */
 		public StartPositionInformation(ITrackedNodePosition pos) {

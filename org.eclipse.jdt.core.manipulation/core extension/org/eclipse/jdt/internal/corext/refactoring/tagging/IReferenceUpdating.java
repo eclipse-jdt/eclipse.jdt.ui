@@ -17,14 +17,14 @@ public interface IReferenceUpdating {
 
 	/**
 	 * Informs the refactoring object whether references should be updated.
-	 * 
+	 *
 	 * @param update <code>true</code> to enable reference updating
 	 */
 	public void setUpdateReferences(boolean update);
 
 	/**
 	 * Asks the refactoring object whether references should be updated.
-	 * 
+	 *
 	 * @return <code>true</code> iff reference updating is enabled
 	 */
 	public boolean getUpdateReferences();

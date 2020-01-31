@@ -112,7 +112,7 @@ import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 /**
  * Implementations for {@link CodeGeneration} APIs, and other helper methods
  * to create source code stubs based on {@link IJavaElement}s.
- * 
+ *
  * See StubUtility2
  * See JDTUIHelperClasses
  */
@@ -379,7 +379,7 @@ public class StubUtility {
 
 	/**
 	 * Don't use this method directly, use CodeGeneration.
-	 * 
+	 *
 	 * @param templateID the template id of the type body to get. Valid id's are
 	 *            {@link CodeTemplateContextType#CLASSBODY_ID},
 	 *            {@link CodeTemplateContextType#INTERFACEBODY_ID},
@@ -885,7 +885,7 @@ public class StubUtility {
 
 	/**
 	 * Returns the line delimiter which is used in the specified project.
-	 * 
+	 *
 	 * @param project the java project, or <code>null</code>
 	 * @return the used line delimiter
 	 */
@@ -939,7 +939,7 @@ public class StubUtility {
 
 	/**
 	 * Evaluates the indentation used by a Java element. (in tabulators)
-	 * 
+	 *
 	 * @param elem the element to get the indent of
 	 * @return return the indent unit
 	 * @throws JavaModelException thrown if the element could not be accessed
@@ -969,7 +969,7 @@ public class StubUtility {
 
 	/**
 	 * Returns the element after the give element.
-	 * 
+	 *
 	 * @param member a Java element
 	 * @return the next sibling of the given element or <code>null</code>
 	 * @throws JavaModelException thrown if the element could not be accessed
@@ -1109,7 +1109,7 @@ public class StubUtility {
 	/**
 	 * Returns variable name suggestions for the given base name. This is a layer over the JDT.Core
 	 * NamingConventions API to fix its shortcomings. JDT UI code should only use this API.
-	 * 
+	 *
 	 * @param variableKind specifies what type the variable is: {@link NamingConventions#VK_LOCAL},
 	 *            {@link NamingConventions#VK_PARAMETER}, {@link NamingConventions#VK_STATIC_FIELD},
 	 *            {@link NamingConventions#VK_INSTANCE_FIELD}, or
@@ -1122,7 +1122,7 @@ public class StubUtility {
 	 *            are excluded
 	 * @param evaluateDefault if set, the result is guaranteed to contain at least one result. If
 	 *            not, the result can be an empty array.
-	 * 
+	 *
 	 * @return the name suggestions sorted by relevance (best proposal first). If
 	 *         <code>evaluateDefault</code> is set to true, the returned array is never empty. If
 	 *         <code>evaluateDefault</code> is set to false, an empty array is returned if there is
@@ -1379,7 +1379,7 @@ public class StubUtility {
 		}
 		return names;
 	}
-	
+
 	public static String getBaseName(IField field) throws JavaModelException {
 		return NamingConventions.getBaseName(getFieldKind(field.getFlags()), field.getElementName(), field.getJavaProject());
 	}
@@ -1390,7 +1390,7 @@ public class StubUtility {
 
 	/**
 	 * Returns the kind of the given binding.
-	 * 
+	 *
 	 * @param binding variable binding
 	 * @return one of the <code>NamingConventions.VK_*</code> constants
 	 * @since 3.5
@@ -1527,7 +1527,7 @@ public class StubUtility {
 
 	/**
 	 * Only to be used by tests
-	 * 
+	 *
 	 * @param templateId the template id
 	 * @param pattern the new pattern
 	 * @param project not used
