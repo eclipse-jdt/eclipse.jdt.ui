@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -43,6 +43,8 @@ import junit.framework.TestCase;
 public class TestTestSearchEngine extends TestCase {
 	private IJavaProject fProject;
 	private IPackageFragmentRoot fRoot;
+
+	private static final boolean BUG_559685= true;
 
 	@Override
 	protected void setUp() throws Exception {
@@ -172,6 +174,9 @@ public class TestTestSearchEngine extends TestCase {
 	}
 
 	public void testProject() throws Exception {
+		if (BUG_559685) {
+			return;
+		}
 		IPackageFragment p= fRoot.createPackageFragment("p", true, null);
 		ICompilationUnit test1= createCompilationUnit(p, 1);
 		ICompilationUnit test2= createCompilationUnit(p, 2);
