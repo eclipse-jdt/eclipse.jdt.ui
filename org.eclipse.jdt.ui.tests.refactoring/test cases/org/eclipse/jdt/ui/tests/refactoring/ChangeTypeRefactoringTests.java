@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -534,6 +534,19 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 		};
 		StringAsserts.assertEqualStringsIgnoreOrder(actual, expected);
 	}
+
+	public void testParameterParametricType() throws Exception {
+		Collection<String> types= helper1(4, 21, 4, 38, "java.util.List<java.lang.String>").getValidTypeNames();
+		String[] actual= types.toArray(new String[types.size()]);
+		String[] expected= {
+				"java.util.List<java.lang.String>",
+				"java.util.AbstractList<java.lang.String>",
+				"java.util.Collection<java.lang.String>",
+				"java.util.AbstractCollection<java.lang.String>"
+		};
+		StringAsserts.assertEqualStringsIgnoreOrder(actual, expected);
+	}
+
 	public void testParametricLocalVar() throws Exception {
 		Collection<String> types= helper1(14, 9, 14, 20, "java.lang.Iterable<java.lang.String>").getValidTypeNames();
 		String[] actual= types.toArray(new String[types.size()]);
