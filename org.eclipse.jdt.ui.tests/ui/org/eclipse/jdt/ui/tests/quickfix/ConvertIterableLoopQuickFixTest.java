@@ -182,6 +182,52 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		String expected= buf.toString();
 		assertEqualString(preview, expected);
 	}
+
+	/**
+	 * quickfix creates strange indentation because of the return in the start statement
+	 * see https://bugs.eclipse.org/bugs/show_bug.cgi?id=553635
+	 * @throws Exception
+	 */
+	@Ignore("Bug 553635")
+	@Test
+	public void testIndentation() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\r\n");
+		buf.append("import java.util.Collection;\r\n");
+		buf.append("import java.util.Iterator;\r\n");
+		buf.append("public class A {\r\n");
+		buf.append("	Collection<String> c;\r\n");
+		buf.append("	public A() {\r\n");
+		buf.append("		for (final Iterator<String> iterator= c.\r\niterator(); iterator.hasNext();) {\r\n");
+		buf.append("			String test= iterator.next();\r\n");
+		buf.append("			System.out.println(test);\r\n");
+		buf.append("		}\r\n");buf.append("	}\r\n");
+		buf.append("}");
+		ICompilationUnit unit= pack.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(buf, unit);
+
+		assertNotNull(fConvertLoopProposal);
+
+		assertCorrectLabels(proposals);
+
+		String preview= getPreviewContent(fConvertLoopProposal);
+
+		buf= new StringBuffer();
+		buf.append("package test;\r\n");
+		buf.append("import java.util.Collection;\r\n");
+		buf.append("public class A {\r\n");
+		buf.append("	Collection<String> c;\r\n");
+		buf.append("	public A() {\r\n");
+		buf.append("		for (String test : c) {\r\n");
+		buf.append("			System.out.println(test);\r\n");
+		buf.append("		}\r\n");
+		buf.append("	}\r\n");
+		buf.append("}");
+		String expected= buf.toString();
+		assertEqualString(preview, expected);
+	}
 	
 	@Test
 	public void testEnumeration() throws Exception {

@@ -28,9 +28,10 @@ import org.eclipse.jdt.ui.tests.browsing.PackagesViewDeltaTests;
 import org.eclipse.jdt.ui.tests.buildpath.BuildpathTestSuite;
 import org.eclipse.jdt.ui.tests.callhierarchy.CallHierarchyContentProviderTest;
 import org.eclipse.jdt.ui.tests.core.CoreTests;
+import org.eclipse.jdt.ui.tests.hover.JavadocHoverTests;
+import org.eclipse.jdt.ui.tests.hover.PackageJavadocTests;
 import org.eclipse.jdt.ui.tests.jarexport.JarExportTests;
 import org.eclipse.jdt.ui.tests.model.ContentProviderTests;
-import org.eclipse.jdt.ui.tests.packageHover.PackageJavadocTests;
 import org.eclipse.jdt.ui.tests.packageview.PackageExplorerTests;
 import org.eclipse.jdt.ui.tests.quickfix.QuickFixTest;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTests;
@@ -72,7 +73,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 	BuildpathTestSuite.class,
 
 	JarExportTests.class,
-	PackageJavadocTests.class
+	PackageJavadocTests.class,
+	JavadocHoverTests.class
 })
 public class AutomatedSuite {
 	@Before

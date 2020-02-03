@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -41,6 +41,8 @@ public class JUnit3TestFinderTest extends TestCase {
 	private IJavaProject fProject;
 	private IPackageFragmentRoot fRoot;
 
+	private static final boolean BUG_559685= true;
+
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -59,6 +61,9 @@ public class JUnit3TestFinderTest extends TestCase {
 	}
 
 	public void testTestCase() throws Exception {
+		if (BUG_559685) {
+			return;
+		}
 		IPackageFragment p= fRoot.createPackageFragment("p", true, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package p;\n");
@@ -174,7 +179,9 @@ public class JUnit3TestFinderTest extends TestCase {
 	}
 
 	public void testSuite() throws Exception {
-
+		if (BUG_559685) {
+			return;
+		}
 		IPackageFragment p= fRoot.createPackageFragment("p", true, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package p;\n");
@@ -309,7 +316,9 @@ public class JUnit3TestFinderTest extends TestCase {
 	}
 
 	public void testTestInterface() throws Exception {
-
+		if (BUG_559685) {
+			return;
+		}
 		IPackageFragment p= fRoot.createPackageFragment("p", true, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package p;\n");
