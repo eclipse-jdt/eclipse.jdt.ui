@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -114,7 +115,7 @@ public class MapMethodCleanUp extends AbstractMultiFix {
 		    public boolean visit(MethodInvocation mi) {
 		        MethodInvocation miExpression= ASTNodes.as(mi.getExpression(), MethodInvocation.class);
 
-				if (miExpression != null) {
+				if (miExpression != null && miExpression.getExpression() != null && ASTNodes.as(miExpression.getExpression(), ThisExpression.class) == null) {
 					String subAggregateClass;
 
 					if (ASTNodes.usesGivenSignature(miExpression, Map.class.getCanonicalName(), "keySet")) { //$NON-NLS-1$

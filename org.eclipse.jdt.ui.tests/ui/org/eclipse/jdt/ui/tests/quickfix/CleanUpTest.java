@@ -5008,6 +5008,50 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testDoNotUseMapMethodInsideMapImplementation() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.HashMap;\n" //
+				+ "import java.util.Map;\n" //
+				+ "\n" //
+				+ "public class E1<K,V> extends HashMap<K,V> {\n" //
+				+ "    @Override\n" //
+				+ "    public boolean containsKey(Object key) {\n" //
+				+ "        return keySet().contains(key);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.USE_DIRECTLY_MAP_METHOD);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
+	public void testDoNotUseMapMethodInsideThisMapImplementation() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.HashMap;\n" //
+				+ "import java.util.Map;\n" //
+				+ "\n" //
+				+ "public class E1<K,V> extends HashMap<K,V> {\n" //
+				+ "    @Override\n" //
+				+ "    public boolean containsKey(Object key) {\n" //
+				+ "        return this.keySet().contains(key);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.USE_DIRECTLY_MAP_METHOD);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
 	public void testSerialVersionBug139381() throws Exception {
 
 		JavaProjectHelper.set14CompilerOptions(fJProject1);
@@ -9005,7 +9049,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("}\n");
 		String expected6 = buf.toString();
 		ICompilationUnit cu6= pack1.createCompilationUnit("NestedEnumExample.java", buf.toString(), false, null);
-		
+
 		enable(CleanUpConstants.REMOVE_REDUNDANT_MODIFIERS);
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1, cu2, cu3, cu4, cu5, cu6 }, new String[] { expected1, expected2, expected3, expected4, expected5, expected6 });
 
