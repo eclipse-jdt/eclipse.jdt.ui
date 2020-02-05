@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,13 +13,20 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.packageview;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -64,7 +71,8 @@ import org.eclipse.jdt.internal.ui.util.CoreUtility;
  *
  * @since 3.0+
  */
-public class ContentProviderTests5 extends TestCase{
+@RunWith(JUnit4.class)
+public class ContentProviderTests5{
 	private boolean fEnableAutoBuildAfterTesting;
 	private ITreeContentProvider fProvider;
 
@@ -73,17 +81,8 @@ public class ContentProviderTests5 extends TestCase{
 	private IFile fDotProject;
 	private IPackageFragmentRoot jdk;
 
-	public ContentProviderTests5(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return new TestSuite(ContentProviderTests5.class);
-	}
-
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
+	@Before
+	public void setUp() throws Exception {
 
 		IWorkspace workspace= ResourcesPlugin.getWorkspace();
 		assertNotNull(workspace);
@@ -138,9 +137,8 @@ public class ContentProviderTests5 extends TestCase{
 		JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.APPEARANCE_FOLD_PACKAGES_IN_PACKAGE_EXPLORER, fold);
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
-		super.tearDown();
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJProject);
 
 		if (fEnableAutoBuildAfterTesting)
@@ -151,6 +149,7 @@ public class ContentProviderTests5 extends TestCase{
 		return new ByteArrayInputStream(string.getBytes(ResourcesPlugin.getEncoding()));
 	}
 
+	@Test
 	public void testProjectSource1() throws Exception { //bug 35851, 66694
 		IPath[] inclusionFilters= {new Path("**"), new Path("excl/incl/")};
 		IPath[] exclusionFilters= {new Path("excl/*"), new Path("x/*.java"), new Path("y/")};
@@ -201,6 +200,7 @@ public class ContentProviderTests5 extends TestCase{
 		assertEqualElements(new Object[] {yX, yhidden},	fProvider.getChildren(y));
 	}
 
+	@Test
 	public void testNestedSource1() throws Exception { //bug 35851, 66694
 //		<classpathentry excluding="a-b/a/b/" kind="src" path="src"/>
 //		<classpathentry kind="src" path="src/a-b/a/b"/>
@@ -236,6 +236,7 @@ public class ContentProviderTests5 extends TestCase{
 		assertEqualElements(new Object[] {b}, fProvider.getChildren(defaultAbab));
 	}
 
+	@Test
 	public void testInclExcl1() throws Exception { //bug 35851, 66694
 //		<classpathentry including="a/b/c/" excluding="a/b/c/d/" kind="src" path="src2"/>
 		IPath[] inclusionFilters= {new Path("a/b/c/")};

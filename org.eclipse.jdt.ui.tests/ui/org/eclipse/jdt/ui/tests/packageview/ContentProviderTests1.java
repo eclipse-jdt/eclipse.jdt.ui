@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,9 +13,15 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.packageview;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
@@ -55,17 +61,9 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
  *
  * @since 2.1
  */
-public class ContentProviderTests1 extends TestCase {
+@RunWith(JUnit4.class)
+public class ContentProviderTests1{
 
-
-
-	public static Test suite() {
-		TestSuite suite= new TestSuite(ContentProviderTests1.class.getName());
-		//$JUnit-BEGIN$
-	   suite.addTestSuite(ContentProviderTests1.class);
-		//$JUnit-END$
-		return suite;
-	}
 
 	private IJavaProject fJProject1;
 	private IJavaProject fJProject2;
@@ -104,49 +102,50 @@ public class ContentProviderTests1 extends TestCase {
 	private boolean fEnableAutoBuildAfterTesting;
 	private ICompilationUnit fCU3;
 
-	public ContentProviderTests1(String name) {
-		super(name);
-	}
-
 	//---------Test for getChildren-------------------
-
+	@Test
 	public void testGetChildrenProjectWithSourceFolders() throws Exception{
 		Object[] expectedChildren= new Object[]{fRoot1, fDotClasspathFile, fDotProjectFile};
 		Object[] children= fProvider.getChildren(fJProject2);
 		assertTrue("Wrong children found for project", compareArrays(children, expectedChildren));//$NON-NLS-1$
 	}
 
-
+	@Test
 	public void testGetChildrentMidLevelFragment() throws Exception{
 		Object[] expectedChildren= new Object[]{fPack4, fPack5};
 		Object[] children= fProvider.getChildren(fPack3);
 		assertTrue("Wrong children found for PackageFragment",compareArrays(children, expectedChildren));//$NON-NLS-1$
 	}
 
+	@Test
 	public void testGetChildrenBottomLevelFragment() throws Exception{
 		Object[] expectedChildren= new Object[]{fCU1};
 		Object[] children= fProvider.getChildren(fPack2);
 		assertTrue("Wrong children found for PackageFragment",compareArrays(children, expectedChildren));//$NON-NLS-1$
 	}
 
+	@Test
 	public void testGetChildrenMidLevelFragmentInArchive() throws Exception{
 		Object[] expectedChildren= new Object[]{fPackJunitSamplesMoney, fCUAllTests, fCUSimpleTest, fCUVectorTest };
 		Object[] children= fProvider.getChildren(fPackJunitSamples);
 		assertTrue("wrong chidren found for mid level PackageFragment in Archive", compareArrays(children, expectedChildren));//$NON-NLS-1$
 	}
 
+	@Test
 	public void testGetChildrenBottomLevelFragmentInArchive() throws Exception{
 		Object[] expectedChildren= new Object[]{fCUIMoney, fCUMoney, fCUMoneyBag, fCUMoneyTest};
 		Object[] children= fProvider.getChildren(fPackJunitSamplesMoney);
 		assertTrue("wrong children found for a bottom PackageFragment in PackageFragmentRoot Archive", compareArrays(children, expectedChildren));	//$NON-NLS-1$
 	}
 
+	@Test
 	public void testGetChildrenSourceFolder() throws Exception {
 		Object[] expectedChildren = new Object[] { fPack1, fPack2, fPack3, fRoot1.getPackageFragment("")};//$NON-NLS-1$
 		Object[] children = fProvider.getChildren(fRoot1);
 		assertTrue("Wrong children found for PackageFragmentRoot", compareArrays(children, expectedChildren));//$NON-NLS-1$
 	}
 
+	@Test
 	public void testGetChildrenArchive(){	Object[] expectedChildren= new Object[]{fPackJunit, fArchiveFragmentRoot.getPackageFragment("")};//$NON-NLS-1$
 		Object[] children= fProvider.getChildren(fArchiveFragmentRoot);
 		assertTrue("Wrong child found for PackageFragmentRoot Archive", compareArrays(children,expectedChildren));//$NON-NLS-1$
@@ -154,29 +153,34 @@ public class ContentProviderTests1 extends TestCase {
 
 	//---------------Get Parent Tests-----------------------------
 
+	@Test
 	public void testGetParentArchive() throws Exception{
 		Object parent= fProvider.getParent(fArchiveFragmentRoot);
 		assertTrue("Wrong parent found for PackageFragmentRoot Archive", parent==fJProject1);//$NON-NLS-1$
 	}
 
+	@Test
 	public void testGetParentMidLevelFragmentInArchive() throws Exception{
 		Object expectedParent= fPackJunitSamples;
 		Object parent= fProvider.getParent(fPackJunitSamplesMoney);
 		assertTrue("Wrong parent found for a NON top level PackageFragment in an Archive", expectedParent.equals(parent));//$NON-NLS-1$
 	}
 
+	@Test
 	public void testGetParentTopLevelFragmentInArchive() throws Exception{
 		Object expectedParent= fPackJunit;
 		Object parent= fProvider.getParent(fPackJunitSamples);
 		assertTrue("Wrong parent found for a top level PackageFragment in an Archive", expectedParent.equals(parent));	//$NON-NLS-1$
 	}
 
+	@Test
 	public void testGetParentTopLevelFragment() throws Exception{
 		Object expectedParent= fRoot1;
 		Object parent= fProvider.getParent(fPack3);
 		assertTrue("Wrong parent found for a top level PackageFragment", expectedParent.equals(parent));//$NON-NLS-1$
 	}
 
+	@Test
 	public void testGetParentMidLevelFragment() throws Exception{
 		Object expectedParent= fPack3;
 		Object parent= fProvider.getParent(fPack4);
@@ -184,6 +188,7 @@ public class ContentProviderTests1 extends TestCase {
 	}
 
 
+	@Test
 	public void testDeleteBottomLevelFragment() throws Exception{
 
 		//send a delta indicating fragment deleted
@@ -199,6 +204,7 @@ public class ContentProviderTests1 extends TestCase {
 		assertEquals("No refreshes", 0, fMyPart.getRefreshedObject().size());//$NON-NLS-1$
 	}
 
+	@Test
 	public void testAddBottomLevelFragment() throws Exception {
 		IPackageFragment test= fRoot1.createPackageFragment("test", true, null);//$NON-NLS-1$
 
@@ -215,6 +221,7 @@ public class ContentProviderTests1 extends TestCase {
 		assertEquals("No refreshes", 0, fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testChangedTopLevelPackageFragment() throws Exception {
 		//send a delta indicating fragment deleted
 		IElementChangedListener listener= (IElementChangedListener) fProvider;
@@ -227,6 +234,7 @@ public class ContentProviderTests1 extends TestCase {
 		assertEquals("No refresh happened", 0, fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testChangeBottomLevelPackageFragment() throws Exception{
 		//send a delta indicating fragment deleted
 		fMyPart.clear();
@@ -240,6 +248,7 @@ public class ContentProviderTests1 extends TestCase {
 		assertEquals("No refresh happened", 0, fMyPart.getRefreshedObject().size());//$NON-NLS-1$
 	}
 
+	@Test
 	public void testRemoveCUsFromPackageFragment() throws Exception{
 
 		//send a delta indicating fragment deleted
@@ -254,6 +263,7 @@ public class ContentProviderTests1 extends TestCase {
 		assertEquals("One refresh", 1, fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testRemoveCUFromPackageFragment() throws Exception {
 
 		//send a delta indicating fragment deleted
@@ -269,6 +279,7 @@ public class ContentProviderTests1 extends TestCase {
 		assertEquals("No refreshes", 0, fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testBug65240() throws Exception {
 		IClasspathEntry[] rawClasspath= fJProject2.getRawClasspath();
 		IClasspathEntry src1= rawClasspath[0];
@@ -321,9 +332,8 @@ public class ContentProviderTests1 extends TestCase {
 	/**
 	 * @see TestCase#setUp()
 	 */
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
+	@Before
+	public void setUp() throws Exception {
 
 		fWorkspace= ResourcesPlugin.getWorkspace();
 		assertNotNull(fWorkspace);
@@ -428,8 +438,8 @@ public class ContentProviderTests1 extends TestCase {
 	/**
 	 * @see TestCase#tearDown()
 	 */
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		fArchiveFragmentRoot.close();
 
 		JavaProjectHelper.delete(fJProject1);
@@ -439,7 +449,6 @@ public class ContentProviderTests1 extends TestCase {
 		if (fEnableAutoBuildAfterTesting)
 			CoreUtility.setAutoBuilding(true);
 
-		super.tearDown();
 	}
 
 	/**

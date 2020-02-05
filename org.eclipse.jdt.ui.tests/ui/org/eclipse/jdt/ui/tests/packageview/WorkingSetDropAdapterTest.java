@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,10 +13,17 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.packageview;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -49,8 +56,8 @@ import org.eclipse.jdt.internal.ui.packageview.WorkingSetDropAdapter;
 import org.eclipse.jdt.internal.ui.workingsets.IWorkingSetIDs;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetModel;
 
-
-public class WorkingSetDropAdapterTest extends TestCase {
+@RunWith(JUnit4.class)
+public class WorkingSetDropAdapterTest {
 
 	private IJavaProject fProject;
 	private PackageExplorerPart fPackageExplorer;
@@ -58,9 +65,8 @@ public class WorkingSetDropAdapterTest extends TestCase {
 	private WorkingSetDropAdapter fAdapter;
 
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
+	@Before
+	public void setUp() throws Exception {
 		fProject= JavaProjectHelper.createJavaProject("Test", "bin");
 		IWorkbenchPage activePage= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
 		fPackageExplorer= (PackageExplorerPart)activePage.showView(JavaUI.ID_PACKAGES);
@@ -68,21 +74,22 @@ public class WorkingSetDropAdapterTest extends TestCase {
 		fAdapter= new WorkingSetDropAdapter(fPackageExplorer);
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.delete(fProject);
 		IWorkbenchPage activePage= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
 		activePage.hideView(fPackageExplorer);
 		assertTrue(fPackageExplorer.getTreeViewer().getTree().isDisposed());
-		super.tearDown();
 	}
 
+	@Test
 	public void testInvalidTarget2() throws Exception {
 		ITreeSelection selection= createSelection(fProject, null);
 
 		performDnD(DND.DROP_NONE, selection, fProject);
 	}
 
+	@Test
 	public void testInvalidSource1() throws Exception {
 		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(fProject, "src");
 
@@ -92,6 +99,7 @@ public class WorkingSetDropAdapterTest extends TestCase {
 		performDnD(DND.DROP_NONE, selection, target);
 	}
 
+	@Test
 	public void testInvalidSource2() throws Exception {
 		JavaProjectHelper.addSourceContainer(fProject, "src");
 		IFolder folder= fProject.getProject().getFolder("folder");
@@ -103,6 +111,7 @@ public class WorkingSetDropAdapterTest extends TestCase {
 		performDnD(DND.DROP_NONE, selection, target);
 	}
 
+	@Test
 	public void testAddProject() throws Exception {
 		ITreeSelection selection= createSelection(fProject, null);
 
@@ -114,6 +123,7 @@ public class WorkingSetDropAdapterTest extends TestCase {
 		assertEquals(fProject, elements[0]);
 	}
 
+	@Test
 	public void testMoveProject() throws Exception {
 		IWorkingSet source= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet(
 			"Source", new IAdaptable[] {fProject});
@@ -131,6 +141,7 @@ public class WorkingSetDropAdapterTest extends TestCase {
 		assertEquals(0, elements.length);
 	}
 
+	@Test
 	public void testMoveToOthersProject() throws Exception {
 		IWorkingSet source= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet(
 			"Source", new IAdaptable[] {fProject});
@@ -150,6 +161,7 @@ public class WorkingSetDropAdapterTest extends TestCase {
 		assertEquals(0, elements.length);
 	}
 
+	@Test
 	public void testRearrange1() throws Exception {
 		IWorkingSet workingSets[]= createJavaWorkingSets(new String[] { "ws1", "ws2", "ws3" });
 
@@ -179,6 +191,7 @@ public class WorkingSetDropAdapterTest extends TestCase {
 		return sets;
 	}
 
+	@Test
 	public void testRearrange2() throws Exception {
 		IWorkingSet workingSets[]= createJavaWorkingSets(new String[] { "ws1", "ws2", "ws3" });
 
@@ -191,6 +204,7 @@ public class WorkingSetDropAdapterTest extends TestCase {
 		assertEquals(workingSets[1], actual[2]);
 	}
 
+	@Test
 	public void testRearrange3() throws Exception {
 		IWorkingSet workingSets[]= createJavaWorkingSets(new String[] { "ws1", "ws2", "ws3" });
 

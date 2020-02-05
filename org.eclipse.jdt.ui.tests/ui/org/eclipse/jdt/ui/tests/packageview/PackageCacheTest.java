@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Simeon Andreev and others.
+ * Copyright (c) 2017, 2020 Simeon Andreev and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.packageview;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -20,7 +22,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -34,13 +40,12 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.internal.ui.packageview.PackageCache;
 
-import junit.framework.TestCase;
-
 /**
  * Tests for {@link PackageCache}.
  *
  */
-public class PackageCacheTest extends TestCase {
+@RunWith(JUnit4.class)
+public class PackageCacheTest {
 
 	private IJavaProject testProject;
 
@@ -58,9 +63,8 @@ public class PackageCacheTest extends TestCase {
 	private PackageCache packageCache;
 
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
+	@Before
+	public void setUp() throws Exception {
 
 		IProgressMonitor monitor= new NullProgressMonitor();
 
@@ -81,10 +85,9 @@ public class PackageCacheTest extends TestCase {
 		packageCache= new PackageCache(src);
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		testProject.getProject().delete(true, false, new NullProgressMonitor());
-		super.tearDown();
 	}
 
 
