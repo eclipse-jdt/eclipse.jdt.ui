@@ -13,9 +13,15 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.wizardapi;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import org.eclipse.core.runtime.IPath;
 
@@ -36,12 +42,8 @@ import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPage;
 
-public class NewJavaProjectWizardTest extends TestCase {
-
-
-	public static Test suite() {
-		return new TestSuite(NewJavaProjectWizardTest.class);
-	}
+@RunWith(JUnit4.class)
+public class NewJavaProjectWizardTest {
 
 	private class TestNewJavaProjectWizardPage extends NewJavaProjectWizardPage {
 
@@ -77,24 +79,16 @@ public class NewJavaProjectWizardTest extends TestCase {
 
 	}
 
-
 	private static final String PROJECT_NAME = "DummyProject";
 	private static final String OTHER_PROJECT_NAME = "OtherProject";
 
-
 	private TestNewJavaProjectWizardPage fWizardPage;
-
-	public NewJavaProjectWizardTest(String name) {
-		super(name);
-	}
 
 	/**
 	 * @see TestCase#setUp()
 	 */
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-
+	@Before
+	public void setUp() throws Exception {
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 
 		IProject project= root.getProject(PROJECT_NAME);
@@ -106,8 +100,8 @@ public class NewJavaProjectWizardTest extends TestCase {
 	/**
 	 * @see TestCase#tearDown()
 	 */
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 		IProject project= root.getProject(PROJECT_NAME);
 		if (project.exists()) {
@@ -119,7 +113,6 @@ public class NewJavaProjectWizardTest extends TestCase {
 			project.delete(true, null);
 		}
 
-		super.tearDown();
 	}
 
 	private IPath getJREEntryPath() {
@@ -142,6 +135,7 @@ public class NewJavaProjectWizardTest extends TestCase {
 		assertEquals("h", classpath[1].getPath(), getJREEntryPath());
 	}
 
+	@Test
 	public void testBasicSet() throws Exception {
 		fWizardPage.initBuildPath();
 		IProject project= fWizardPage.getProjectHandle();
@@ -151,7 +145,7 @@ public class NewJavaProjectWizardTest extends TestCase {
 		assertBasicBuildPath(project, outputLocation, classpath);
 	}
 
-
+	@Test
 	public void testBasicCreate() throws Exception {
 		IProject project= fWizardPage.getProjectHandle();
 
@@ -167,6 +161,7 @@ public class NewJavaProjectWizardTest extends TestCase {
 		assertBasicBuildPath(jproj.getProject(), outputLocation, classpath);
 	}
 
+	@Test
 	public void testProjectChange() throws Exception {
 		fWizardPage.initBuildPath();
 		IProject project= fWizardPage.getProjectHandle();
@@ -204,6 +199,7 @@ public class NewJavaProjectWizardTest extends TestCase {
 		assertEquals("g", classpath[2].getPath(), getJREEntryPath());
 	}
 
+	@Test
 	public void testUserSet() throws Exception {
 		IProject project= fWizardPage.getProjectHandle();
 
@@ -231,6 +227,7 @@ public class NewJavaProjectWizardTest extends TestCase {
 		assertBasicBuildPath(project, outputLocation1, classpath1);
 	}
 
+	@Test
 	public void testUserCreate() throws Exception {
 		IProject project= fWizardPage.getProjectHandle();
 
@@ -256,6 +253,7 @@ public class NewJavaProjectWizardTest extends TestCase {
 		assertUserBuildPath(jproj.getProject(), outputLocation, classpath);
 	}
 
+	@Test
 	public void testReadExisting() throws Exception {
 		IProject project= fWizardPage.getProjectHandle();
 
@@ -285,6 +283,7 @@ public class NewJavaProjectWizardTest extends TestCase {
 		assertUserBuildPath(project, outputLocation1, classpath1);
 	}
 
+	@Test
 	public void testExistingOverwrite() throws Exception {
 		IProject project= fWizardPage.getProjectHandle();
 
@@ -311,6 +310,3 @@ public class NewJavaProjectWizardTest extends TestCase {
 		assertUserBuildPath(project, outputLocation1, classpath1);
 	}
 }
-
-
-
