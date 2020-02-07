@@ -578,7 +578,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 	}
 
 	public IJavaProject[] getProjects() {
-		return fProjects.keySet().toArray(new IJavaProject[fProjects.keySet().size()]);
+		return fProjects.keySet().toArray(new IJavaProject[fProjects.size()]);
 	}
 
 	public void setLeaveFilesDirty(boolean leaveFilesDirty) {

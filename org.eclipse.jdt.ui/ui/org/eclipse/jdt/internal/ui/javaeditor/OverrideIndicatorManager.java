@@ -224,7 +224,7 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 					fAnnotationModel.addAnnotation(mapEntry.getKey(), mapEntry.getValue());
 				}
 			}
-			fOverrideAnnotations= annotationMap.keySet().toArray(new Annotation[annotationMap.keySet().size()]);
+			fOverrideAnnotations= annotationMap.keySet().toArray(new Annotation[annotationMap.size()]);
 		}
 	}
 

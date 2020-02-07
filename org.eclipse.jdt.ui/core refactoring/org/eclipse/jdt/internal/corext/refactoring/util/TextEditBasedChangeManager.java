@@ -14,6 +14,7 @@
 package org.eclipse.jdt.internal.corext.refactoring.util;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -90,12 +91,7 @@ public class TextEditBasedChangeManager {
 		Set<ICompilationUnit> cuSet= fMap.keySet();
 		ICompilationUnit[] cus= cuSet.toArray(new ICompilationUnit[cuSet.size()]);
 		// sort by cu name:
-		Arrays.sort(cus, (o1, o2) -> {
-			String name1= o1.getElementName();
-			String name2= o2.getElementName();
-			return name1.compareTo(name2);
-		});
-
+		Arrays.sort(cus, Comparator.comparing(ICompilationUnit::getElementName));
 		TextEditBasedChange[] textChanges= new TextEditBasedChange[cus.length];
 		for (int i= 0; i < cus.length; i++) {
 			textChanges[i]= fMap.get(cus[i]);
@@ -109,7 +105,7 @@ public class TextEditBasedChangeManager {
 	 * @return all compilation units managed by this instance
 	 */
 	public ICompilationUnit[] getAllCompilationUnits(){
-		return fMap.keySet().toArray(new ICompilationUnit[fMap.keySet().size()]);
+		return fMap.keySet().toArray(new ICompilationUnit[fMap.size()]);
 	}
 
 	/**

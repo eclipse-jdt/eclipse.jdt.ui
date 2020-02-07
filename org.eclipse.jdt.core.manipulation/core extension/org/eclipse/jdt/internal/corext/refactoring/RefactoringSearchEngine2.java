@@ -386,7 +386,7 @@ public final class RefactoringSearchEngine2 {
 					iterator.remove();
 			}
 		}
-		final SearchResultGroup[] result= new SearchResultGroup[grouped.keySet().size()];
+		final SearchResultGroup[] result= new SearchResultGroup[grouped.size()];
 		int index= 0;
 		for (final Iterator<IResource> iterator= grouped.keySet().iterator(); iterator.hasNext();) {
 			resource= iterator.next();

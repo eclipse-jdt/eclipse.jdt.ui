@@ -818,7 +818,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 			adjustor.adjustVisibility(new SubProgressMonitor(monitor, 1));
 			final Map<String, ITypeBinding> parameters= new LinkedHashMap<>();
 			addTypeParameters(fSourceRewrite.getRoot(), fType, parameters);
-			final ITypeBinding[] bindings= new ITypeBinding[parameters.values().size()];
+			final ITypeBinding[] bindings= new ITypeBinding[parameters.size()];
 			parameters.values().toArray(bindings);
 			final Map<ICompilationUnit, SearchMatch[]> typeReferences= createTypeReferencesMapping(new SubProgressMonitor(monitor, 1), status);
 			Map<ICompilationUnit, SearchMatch[]> constructorReferences= null;

@@ -1050,7 +1050,7 @@ public final class MemberVisibilityAdjustor {
 	 */
 	public final void rewriteVisibility(final ICompilationUnit unit, final IProgressMonitor monitor) throws JavaModelException {
 		try {
-			monitor.beginTask("", fAdjustments.keySet().size()); //$NON-NLS-1$
+			monitor.beginTask("", fAdjustments.size()); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.MemberVisibilityAdjustor_adjusting);
 			IMember member= null;
 			IVisibilityAdjustment adjustment= null;
@@ -1076,7 +1076,7 @@ public final class MemberVisibilityAdjustor {
 	 */
 	public final void rewriteVisibility(final IProgressMonitor monitor) throws JavaModelException {
 		try {
-			monitor.beginTask("", fAdjustments.keySet().size()); //$NON-NLS-1$
+			monitor.beginTask("", fAdjustments.size()); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.MemberVisibilityAdjustor_adjusting);
 			IMember member= null;
 			IVisibilityAdjustment adjustment= null;

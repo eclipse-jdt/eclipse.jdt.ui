@@ -446,7 +446,7 @@ public final class PushDownWizard extends RefactoringWizard {
 						selectedMembers[0].getMember(), JavaElementLabels.M_PARAMETER_TYPES)) : Messages.format(RefactoringMessages.PushDownInputPage_Mark_selected_members_plural, String
 						.valueOf(selectedMembers.length));
 				final Map<String, Integer> stringMapping= createStringMappingForSelectedElements();
-				final String[] keys= stringMapping.keySet().toArray(new String[stringMapping.keySet().size()]);
+				final String[] keys= stringMapping.keySet().toArray(new String[stringMapping.size()]);
 				Arrays.sort(keys);
 				final int initialSelectionIndex= getInitialSelectionIndexForEditDialog(stringMapping, keys);
 

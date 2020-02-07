@@ -183,7 +183,7 @@ public class RefactoringSearchEngine {
 			}
 		}
 
-		SearchResultGroup[] result= new SearchResultGroup[grouped.keySet().size()];
+		SearchResultGroup[] result= new SearchResultGroup[grouped.size()];
 		int i= 0;
 		for (Iterator<IResource> iter= grouped.keySet().iterator(); iter.hasNext();) {
 			IResource resource= iter.next();

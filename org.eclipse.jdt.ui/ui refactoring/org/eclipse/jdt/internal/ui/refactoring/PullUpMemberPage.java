@@ -731,7 +731,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 							JavaElementLabels.M_PARAMETER_TYPES))
 					: Messages.format(RefactoringMessages.PullUpInputPage1_Mark_selected_members_plural, String.valueOf(selectedMembers.length));
 			final Map<String, Integer> stringMapping= createStringMappingForSelectedMembers();
-			final String[] keys= stringMapping.keySet().toArray(new String[stringMapping.keySet().size()]);
+			final String[] keys= stringMapping.keySet().toArray(new String[stringMapping.size()]);
 			Arrays.sort(keys);
 			final int initialSelectionIndex= getInitialSelectionIndexForEditDialog(stringMapping, keys);
 			final ComboSelectionDialog dialog= new ComboSelectionDialog(getShell(), shellTitle, labelText, keys, initialSelectionIndex);

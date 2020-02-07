@@ -114,7 +114,7 @@ public class TextChangeManager {
 	 * @return all compilation units managed by this instance
 	 */
 	public ICompilationUnit[] getAllCompilationUnits(){
-		return fMap.keySet().toArray(new ICompilationUnit[fMap.keySet().size()]);
+		return fMap.keySet().toArray(new ICompilationUnit[fMap.size()]);
 	}
 
 	/**
