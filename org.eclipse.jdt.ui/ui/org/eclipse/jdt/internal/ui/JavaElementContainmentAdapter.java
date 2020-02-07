@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -16,17 +16,14 @@ package org.eclipse.jdt.internal.ui;
 import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.ui.IContainmentAdapter;
 
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaModel;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 public class JavaElementContainmentAdapter implements IContainmentAdapter {
-
-	private IJavaModel fJavaModel= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
 
 	@Override
 	public boolean contains(Object workingSetElement, Object element, int flags) {
@@ -43,11 +40,7 @@ public class JavaElementContainmentAdapter implements IContainmentAdapter {
 			if (element instanceof IAdaptable) {
 				resource= ((IAdaptable)element).getAdapter(IResource.class);
 				if (resource != null) {
-					if (fJavaModel.contains(resource)) {
-						jElement= JavaCore.create(resource);
-						if (jElement != null && !jElement.exists())
-							jElement= null;
-					}
+					jElement= findJavaElement(resource);
 				}
 			}
 		}
@@ -62,6 +55,18 @@ public class JavaElementContainmentAdapter implements IContainmentAdapter {
 			return contains(workingSetJavaElement, resource, flags);
 		}
 		return false;
+	}
+
+	private static IJavaElement findJavaElement(IResource resource) {
+		IJavaProject project= JavaCore.create(resource.getProject());
+		if (project == null) {
+			return null;
+		}
+		IJavaElement javaElement= JavaCore.create(resource, project);
+		if (javaElement != null && javaElement.exists()) {
+			return javaElement;
+		}
+		return null;
 	}
 
 	private boolean contains(IJavaElement workingSetElement, IJavaElement element, int flags) {
