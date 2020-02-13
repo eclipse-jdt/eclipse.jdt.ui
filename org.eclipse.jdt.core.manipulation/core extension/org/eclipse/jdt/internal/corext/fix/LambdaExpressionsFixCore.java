@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2019 IBM Corporation and others.
+ * Copyright (c) 2013, 2020 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -39,10 +39,13 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -50,6 +53,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
@@ -66,6 +70,7 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
+import org.eclipse.jdt.core.util.IModifierConstants;
 
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -198,6 +203,109 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 			}
 			return true;
 		}
+	}
+
+	public static final class FinalFieldAccessInFieldDeclarationFinder extends HierarchicalASTVisitor {
+
+		private MethodDeclaration fMethodDeclaration;
+		private ASTNode fFieldDeclaration;
+		static boolean hasReference(MethodDeclaration node) {
+			try {
+				FinalFieldAccessInFieldDeclarationFinder finder= new FinalFieldAccessInFieldDeclarationFinder();
+				ClassInstanceCreation cic= (ClassInstanceCreation) node.getParent().getParent();
+				cic.getType().resolveBinding();
+				finder.fMethodDeclaration= node;
+				finder.fFieldDeclaration= finder.findFieldDeclaration(node);
+				if (finder.fFieldDeclaration == null) {
+					return false;
+				}
+				node.accept(finder);
+			} catch (AbortSearchException e) {
+				return true;
+			}
+			return false;
+		}
+
+		private ASTNode findFieldDeclaration(ASTNode node) {
+			while (node != null) {
+				if (node instanceof FieldDeclaration) {
+					return node;
+				}
+				if (node instanceof AbstractTypeDeclaration) {
+					return null;
+				}
+				node= node.getParent();
+			}
+			return null;
+		}
+
+		@Override
+		public boolean visit(AnonymousClassDeclaration node) {
+			return false;
+		}
+
+		@Override
+		public boolean visit(BodyDeclaration node) {
+			return false;
+		}
+
+		@Override
+		public boolean visit(MethodDeclaration node) {
+			return node == fMethodDeclaration;
+		}
+
+		private void checkForUninitializedFinalReference(IBinding binding) {
+			if (binding instanceof IVariableBinding) {
+				int modifiers= ((IVariableBinding)binding).getModifiers();
+				if ((modifiers & IModifierConstants.ACC_FINAL) == IModifierConstants.ACC_FINAL) {
+					if (((IVariableBinding) binding).isField()) {
+						ASTNode decl= ((CompilationUnit)fMethodDeclaration.getRoot()).findDeclaringNode(binding);
+						if (decl instanceof VariableDeclaration && ((VariableDeclaration)decl).getInitializer() == null) {
+							throw new AbortSearchException();
+						}
+					}
+				}
+			}
+		}
+
+		@Override
+		public boolean visit(SuperFieldAccess node) {
+			IVariableBinding binding= node.resolveFieldBinding();
+			if (binding == null) {
+				return true;
+			}
+			IVariableBinding decl= binding.getVariableDeclaration();
+			checkForUninitializedFinalReference(decl);
+			return true;
+		}
+
+		@Override
+		public boolean visit(SimpleName node) {
+			node.getParent();
+			IBinding binding= node.resolveBinding();
+			checkForUninitializedFinalReference(binding);
+			return true;
+		}
+
+		@Override
+		public boolean visit(QualifiedName node) {
+			node.getParent();
+			IBinding binding= node.resolveBinding();
+			checkForUninitializedFinalReference(binding);
+			return true;
+		}
+
+		@Override
+		public boolean visit(FieldAccess node) {
+			IVariableBinding binding= node.resolveFieldBinding();
+			if (binding == null) {
+				return true;
+			}
+			IVariableBinding decl= binding.getVariableDeclaration();
+			checkForUninitializedFinalReference(decl);
+			return true;
+		}
+
 	}
 
 	public static final class SuperThisQualifier extends HierarchicalASTVisitor {
@@ -694,6 +802,13 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 
 		// lambda cannot refer to 'this'/'super' literals
 		if (SuperThisReferenceFinder.hasReference(methodDecl)) {
+			return false;
+		}
+
+		// lambda cannot access this and so we should avoid lambda conversion
+		// when anonymous class is used to initialize field and refers to
+		// final fields that may or may not be initialized
+		if (FinalFieldAccessInFieldDeclarationFinder.hasReference(methodDecl)) {
 			return false;
 		}
 

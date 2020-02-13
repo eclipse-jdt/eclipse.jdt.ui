@@ -1238,4 +1238,59 @@ public class CleanUpTest18 extends CleanUpTestCase {
 
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
 	}
+
+	// fix for https://bugs.eclipse.org/bugs/show_bug.cgi?id=560018
+	@Test
+	public void testConvertToLambdaInFieldInitializerWithFinalFieldReference() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		String buf= ""
+				+ "package test;\n"
+				+ "public class C1 {\n"
+				+ "    final String s;\n"
+				+ "    Runnable run1 = new Runnable() {\n"
+				+ "        @Override\n"
+				+ "        public void run() {\n"
+				+ "            System.out.println(s\n"
+				+ "        }\n"
+				+ "    };\n"
+				+ "    public C1() {\n"
+				+ "        s = \"abc\";\n"
+				+ "    };\n"
+				+ "}\n";
+		ICompilationUnit cu= pack1.createCompilationUnit("C1.java", buf, false, null);
+
+		enable(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES);
+		enable(CleanUpConstants.USE_LAMBDA);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	// fix for https://bugs.eclipse.org/bugs/show_bug.cgi?id=560018
+	@Test
+	public void testConvertToLambdaInFieldInitializerWithFinalFieldReference2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		String buf= ""
+				+ "package test;\n"
+				+ "public class C1 {\n"
+				+ "    final String s = \"abc\";\n"
+				+ "    Runnable run1 = new Runnable() {\n"
+				+ "        @Override\n"
+				+ "        public void run() {\n"
+				+ "            System.out.println(s);\n"
+				+ "        }\n"
+				+ "    };\n"
+				+ "}\n";
+		ICompilationUnit cu= pack1.createCompilationUnit("C1.java", buf, false, null);
+
+		enable(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES);
+		enable(CleanUpConstants.USE_LAMBDA);
+
+		String expected1= ""
+				+ "package test;\n"
+				+ "public class C1 {\n"
+				+ "    final String s = \"abc\";\n"
+				+ "    Runnable run1 = () -> System.out.println(s);\n"
+				+ "}\n";
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected1 });
+	}
 }
