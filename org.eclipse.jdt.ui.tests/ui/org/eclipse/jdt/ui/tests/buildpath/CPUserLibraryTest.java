@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 GK Software SE and others.
+ * Copyright (c) 2018-2020 GK Software SE and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,9 +13,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.buildpath;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.junit.Test;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
@@ -30,11 +34,7 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPUserLibraryElement;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ITreeListAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.TreeListDialogField;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
-public class CPUserLibraryTest extends TestCase {
+public class CPUserLibraryTest {
 
 	/** Make {@link #getSortedChildren(Object)} accessible. */
 	static class MyTreeViewer extends TreeViewer {
@@ -65,14 +65,7 @@ public class CPUserLibraryTest extends TestCase {
 		}
 	}
 
-	public CPUserLibraryTest(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return new TestSuite(CPUserLibraryTest.class);
-	}
-
+	@Test
 	public void testUserLibrarySorting() {
 		Shell parent= new Shell();
 		try {

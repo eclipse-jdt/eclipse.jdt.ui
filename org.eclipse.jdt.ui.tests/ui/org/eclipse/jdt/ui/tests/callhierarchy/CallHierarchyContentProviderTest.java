@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,9 +14,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.callhierarchy;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -31,24 +35,15 @@ import org.eclipse.jdt.internal.ui.callhierarchy.CallHierarchyContentProvider;
 import org.eclipse.jdt.internal.ui.callhierarchy.CallHierarchyUI;
 import org.eclipse.jdt.internal.ui.callhierarchy.TreeRoot;
 
-public class CallHierarchyContentProviderTest extends TestCase {
+public class CallHierarchyContentProviderTest{
     private static final int DEFAULT_MAX_DEPTH= 10;
-
-    private static final Class<CallHierarchyContentProviderTest> THIS= CallHierarchyContentProviderTest.class;
 
     private CallHierarchyTestHelper helper;
 
     private CallHierarchyContentProvider fProvider;
-    public CallHierarchyContentProviderTest(String name) {
-        super(name);
-    }
 
-    public static Test suite() {
-		return new TestSuite(THIS);
-    }
-
-    @Override
-	protected void setUp() throws Exception {
+    @Before
+	public void setUp() throws Exception {
         helper= new CallHierarchyTestHelper();
         helper.setUp();
 
@@ -57,8 +52,8 @@ public class CallHierarchyContentProviderTest extends TestCase {
         CallHierarchyUI.getDefault().setMaxCallDepth(DEFAULT_MAX_DEPTH);
     }
 
-    @Override
-	protected void tearDown() throws Exception {
+    @After
+	public void tearDown() throws Exception {
         helper.tearDown();
         helper= null;
 
@@ -71,6 +66,7 @@ public class CallHierarchyContentProviderTest extends TestCase {
      * @throws JavaModelException
      * @throws CoreException
      */
+    @Test
     public void testGetChildrenOfCalleeRoot() throws JavaModelException, CoreException {
         helper.createSimpleClasses();
 
@@ -107,6 +103,7 @@ public class CallHierarchyContentProviderTest extends TestCase {
      * @throws JavaModelException
      * @throws CoreException
      */
+    @Test
     public void testGetChildrenOfCallerRoot() throws JavaModelException, CoreException {
         helper.createSimpleClasses();
 
@@ -138,6 +135,7 @@ public class CallHierarchyContentProviderTest extends TestCase {
      * @throws JavaModelException
      * @throws CoreException
      */
+    @Test
     public void testGetChildrenOfCallerMaxDepth() throws JavaModelException, CoreException {
         helper.createSimpleClasses();
 
@@ -171,6 +169,7 @@ public class CallHierarchyContentProviderTest extends TestCase {
      * @throws JavaModelException
      * @throws CoreException
      */
+    @Test
     public void testGetChildrenOfCalleeMaxDepth() throws JavaModelException, CoreException {
         helper.createSimpleClasses();
 
@@ -209,6 +208,7 @@ public class CallHierarchyContentProviderTest extends TestCase {
     * @throws JavaModelException
     * @throws CoreException
     */
+    @Test
     public void testGetChildrenOfCalleeRecursive() throws JavaModelException, CoreException {
         helper.createSimpleClasses();
 
@@ -237,6 +237,7 @@ public class CallHierarchyContentProviderTest extends TestCase {
      * @throws JavaModelException
      * @throws CoreException
      */
+    @Test
     public void testGetChildrenOfCallerRecursive() throws JavaModelException, CoreException {
         helper.createSimpleClasses();
 

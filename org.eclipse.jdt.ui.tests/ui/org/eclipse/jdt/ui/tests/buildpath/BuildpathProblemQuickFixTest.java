@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Till Brychcy and others.
+ * Copyright (c) 2020 Till Brychcy and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,9 +13,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.buildpath;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Arrays;
+
+import org.junit.After;
+import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -42,30 +47,14 @@ import org.eclipse.jdt.internal.launching.JREContainerInitializer;
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMInstall2;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
-public class BuildpathProblemQuickFixTest extends TestCase {
+public class BuildpathProblemQuickFixTest {
 
 	private IJavaProject fJavaProject1;
 
 	private IJavaProject fJavaProject2;
 
-	public BuildpathProblemQuickFixTest(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return new TestSuite(BuildpathProblemQuickFixTest.class);
-	}
-
-	@Override
-	protected void setUp() throws Exception {
-	}
-
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		if (fJavaProject1 != null) {
 			JavaProjectHelper.delete(fJavaProject1);
 			fJavaProject1= null;
@@ -113,6 +102,7 @@ public class BuildpathProblemQuickFixTest extends TestCase {
 		return result;
 	}
 
+	@Test
 	public void test1Incomplete() throws CoreException, IOException {
 		fJavaProject1= JavaProjectHelper.createJavaProject("1_Incomplete", "bin");
 		fJavaProject1.getProject().getFolder("src").create(true, true, null);
@@ -130,7 +120,7 @@ public class BuildpathProblemQuickFixTest extends TestCase {
 		fJavaProject1.getProject().getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
 
 		IMarker[] markers= fJavaProject1.getResource().findMarkers("org.eclipse.jdt.core.buildpath_problem", true, IResource.DEPTH_INFINITE);
-		assertEquals("Project '1_Incomplete' is missing required Java project: '1_MissingProject'", (String) markers[0].getAttribute(IMarker.MESSAGE));
+		assertEquals("Project '1_Incomplete' is missing required Java project: '1_MissingProject'", markers[0].getAttribute(IMarker.MESSAGE));
 		assertEquals(1, markers.length);
 		IMarkerResolution[] resolutions= sortResolutions(IDE.getMarkerHelpRegistry().getResolutions(markers[0]));
 		assertEquals(3, resolutions.length);
@@ -139,6 +129,7 @@ public class BuildpathProblemQuickFixTest extends TestCase {
 		assertEquals("Configure problem severity", resolutions[2].getLabel());
 	}
 
+	@Test
 	public void test2Cyclic() throws CoreException, IOException {
 		fJavaProject1= JavaProjectHelper.createJavaProject("2_CyclicA", "bin");
 		fJavaProject1.getProject().getFolder("src").create(true, true, null);
@@ -172,7 +163,7 @@ public class BuildpathProblemQuickFixTest extends TestCase {
 
 		IMarker[] markers= fJavaProject1.getResource().findMarkers("org.eclipse.jdt.core.buildpath_problem", true, IResource.DEPTH_INFINITE);
 		assertEquals("One or more cycles were detected in the build path of project '2_CyclicA'. The paths towards the cycle and cycle are:\n" +
-				"->{2_CyclicA, 2_CyclicB}", (String) markers[0].getAttribute(IMarker.MESSAGE));
+				"->{2_CyclicA, 2_CyclicB}", markers[0].getAttribute(IMarker.MESSAGE));
 		assertEquals(1, markers.length);
 		IMarkerResolution[] resolutions= sortResolutions(IDE.getMarkerHelpRegistry().getResolutions(markers[0]));
 		assertEquals(2, resolutions.length);
@@ -180,6 +171,7 @@ public class BuildpathProblemQuickFixTest extends TestCase {
 		assertEquals("Configure problem severity", resolutions[1].getLabel());
 	}
 
+	@Test
 	public void test3RequiredBinaryLevel() throws CoreException, IOException {
 		IPath container= new Path("org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7");
 		IVMInstall vm= JREContainerInitializer.resolveVM(container);
@@ -244,7 +236,7 @@ public class BuildpathProblemQuickFixTest extends TestCase {
 		IMarker[] markers= fJavaProject1.getResource().findMarkers("org.eclipse.jdt.core.buildpath_problem", true, IResource.DEPTH_INFINITE);
 		assertEquals(
 				"Incompatible .class files version in required binaries. Project '3_JDKLevelLow' is targeting a 1.7 runtime, but is compiled against '3_JDKLevelHigh' which requires a 1.8 runtime",
-				(String) markers[0].getAttribute(IMarker.MESSAGE));
+				markers[0].getAttribute(IMarker.MESSAGE));
 		assertEquals(1, markers.length);
 		IMarkerResolution[] resolutions= sortResolutions(IDE.getMarkerHelpRegistry().getResolutions(markers[0]));
 		assertEquals(2, resolutions.length);
@@ -252,6 +244,7 @@ public class BuildpathProblemQuickFixTest extends TestCase {
 		assertEquals("Configure problem severity", resolutions[1].getLabel());
 	}
 
+	@Test
 	public void test4OutOverlap() throws CoreException, IOException {
 		fJavaProject1= JavaProjectHelper.createJavaProject("4_OutOverlap", "bin");
 		fJavaProject1.getProject().getFolder("src").create(true, true, null);
@@ -271,7 +264,7 @@ public class BuildpathProblemQuickFixTest extends TestCase {
 		fJavaProject1.getProject().getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
 
 		IMarker[] markers= fJavaProject1.getResource().findMarkers("org.eclipse.jdt.core.buildpath_problem", true, IResource.DEPTH_INFINITE);
-		assertEquals("Source folder 'src' in project '4_OutOverlap' cannot output to distinct source folder 'other'", (String) markers[0].getAttribute(IMarker.MESSAGE));
+		assertEquals("Source folder 'src' in project '4_OutOverlap' cannot output to distinct source folder 'other'", markers[0].getAttribute(IMarker.MESSAGE));
 		assertEquals(1, markers.length);
 		IMarkerResolution[] resolutions= sortResolutions(IDE.getMarkerHelpRegistry().getResolutions(markers[0]));
 		assertEquals(2, resolutions.length);
@@ -279,6 +272,7 @@ public class BuildpathProblemQuickFixTest extends TestCase {
 		assertEquals("Configure problem severity", resolutions[1].getLabel());
 	}
 
+	@Test
 	public void test7Cyclic() throws CoreException, IOException {
 		fJavaProject1= JavaProjectHelper.createJavaProject("7_OnlyMain", "bin");
 		fJavaProject1.getProject().getFolder("src").create(true, true, null);
@@ -314,7 +308,7 @@ public class BuildpathProblemQuickFixTest extends TestCase {
 		fJavaProject1.getProject().getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
 
 		IMarker[] markers= fJavaProject1.getResource().findMarkers("org.eclipse.jdt.core.buildpath_problem", true, IResource.DEPTH_INFINITE);
-		assertEquals("Project has only main sources but depends on project '7_OnlyTest' which has only test sources.", (String) markers[0].getAttribute(IMarker.MESSAGE));
+		assertEquals("Project has only main sources but depends on project '7_OnlyTest' which has only test sources.", markers[0].getAttribute(IMarker.MESSAGE));
 		assertEquals(1, markers.length);
 		IMarkerResolution[] resolutions= sortResolutions(IDE.getMarkerHelpRegistry().getResolutions(markers[0]));
 		assertEquals(2, resolutions.length);
