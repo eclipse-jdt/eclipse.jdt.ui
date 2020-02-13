@@ -1,13 +1,13 @@
 /*******************************************************************************
  * Copyright (c) 2000, 2007 IBM Corporation and others.
  *
- * This program and the accompanying materials 
+ * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -56,16 +56,16 @@ public class JEMarker extends JEAttribute {
 			return e.getClass().getSimpleName();
 		}
 	}
-	
+
 	public IMarker getMarker() {
 		return fMarker;
 	}
-	
+
 	@Override
 	public Object getWrappedObject() {
 		return fMarker;
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -73,7 +73,7 @@ public class JEMarker extends JEAttribute {
 		if (obj == null || !obj.getClass().equals(getClass())) {
 			return false;
 		}
-		
+
 		JEMarker other= (JEMarker) obj;
 		if (! fParent.equals(other.fParent)) {
 			return false;
@@ -84,13 +84,13 @@ public class JEMarker extends JEAttribute {
 		if (! fMarker.equals(other.fMarker)) {
 			return false;
 		}
-		
+
 		return true;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return fParent.hashCode() + fName.hashCode() + fMarker.hashCode();
 	}
-	
+
 }

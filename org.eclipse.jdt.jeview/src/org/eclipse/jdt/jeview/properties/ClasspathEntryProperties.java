@@ -30,16 +30,16 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.jeview.JEViewPlugin;
 
 public class ClasspathEntryProperties implements IPropertySource {
-	
+
 	private static abstract class Property extends GenericProperty<IClasspathEntry> {
 		public Property(String name) {
 			super(IClasspathEntry.class, name);
 		}
 	}
-	
+
 	private static HashMap<String, Property> fgIdToProperty= new HashMap<>();
 	private static LinkedHashMap<Class<?>, List<Property>> fgTypeToProperty= new LinkedHashMap<>();
-	
+
 	static {
 		addProperty(new Property("combineAccessRules") {
 			@Override public Object compute(IClasspathEntry entry) {
@@ -82,7 +82,7 @@ public class ClasspathEntryProperties implements IPropertySource {
 			}
 		});
 	}
-	
+
 	private static void addProperty(Property property) {
 		fgIdToProperty.put(property.getId(), property);
 		List<Property> properties= fgTypeToProperty.get(property.getType());
@@ -92,7 +92,7 @@ public class ClasspathEntryProperties implements IPropertySource {
 		}
 		properties.add(property);
 	}
-	
+
 	static String getContentKindString(int kind) {
 		String name;
 		switch (kind) {
@@ -108,7 +108,7 @@ public class ClasspathEntryProperties implements IPropertySource {
 		}
 		return kind + " (" + name + ")";
 	}
-	
+
 	static String getEntryKindString(int kind) {
 		String name;
 		switch (kind) {
@@ -133,14 +133,14 @@ public class ClasspathEntryProperties implements IPropertySource {
 		}
 		return kind + " (" + name + ")";
 	}
-	
-	
+
+
 	protected IClasspathEntry fEntry;
 
 	public ClasspathEntryProperties(IClasspathEntry entry) {
 		fEntry= entry;
 	}
-	
+
 	@Override
 	public IPropertyDescriptor[] getPropertyDescriptors() {
 		List<IPropertyDescriptor> result= new ArrayList<>();
@@ -153,7 +153,7 @@ public class ClasspathEntryProperties implements IPropertySource {
 		}
 		return result.toArray(new IPropertyDescriptor[result.size()]);
 	}
-	
+
 	@Override
 	public Object getPropertyValue(Object id) {
 		Property property= fgIdToProperty.get(id);
@@ -172,22 +172,22 @@ public class ClasspathEntryProperties implements IPropertySource {
 			}
 		}
 	}
-	
+
 	@Override
 	public void setPropertyValue(Object name, Object value) {
 		// do nothing
 	}
-	
+
 	@Override
 	public Object getEditableValue() {
 		return this;
 	}
-	
+
 	@Override
 	public boolean isPropertySet(Object property) {
 		return false;
 	}
-	
+
 	@Override
 	public void resetPropertyValue(Object property) {
 		// do nothing

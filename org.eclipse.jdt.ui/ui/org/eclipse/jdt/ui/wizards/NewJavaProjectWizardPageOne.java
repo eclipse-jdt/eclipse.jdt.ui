@@ -442,7 +442,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 							break;
 					}
 				}, Display.getDefault()::asyncExec);
-				
+
 			CompletableFuture.runAsync(this::initializeJvmFields)
 				.thenAcceptAsync((VOID) -> {
 					if (fGroup.isDisposed()) {
@@ -457,11 +457,11 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 					notifyObservers();
 				}, Display.getDefault()::asyncExec);
 		}
-		
-		
+
+
 		private void initializeJvmFields () {
 			fDefaultJVMLabel= getDefaultJVMLabel();
-			
+
 			fInstalledJVMs= getWorkspaceJREs();
 			Arrays.sort(fInstalledJVMs, new Comparator<IVMInstall>() {
 				@Override
@@ -1041,7 +1041,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 				setPageComplete(false);
 				return;
 			}
-			
+
 			if (fJREGroup.fUseEEJRE.isSelected() && fJREGroup.fEECombo.getItems().length == 0) {
 				setPageComplete(false);
 				return;
@@ -1050,7 +1050,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 				setPageComplete(false);
 				return;
 			}
-			
+
 			setPageComplete(true);
 
 			setErrorMessage(null);

@@ -22,11 +22,11 @@ import org.eclipse.jdt.core.JavaModelException;
 
 
 public class JEMemberValuePair extends JEAttribute {
-	
+
 	private final JEAttribute fParent;
 	private String fName; // can be null
 	private IMemberValuePair fMemberValuePair; // can be null
-	
+
 	JEMemberValuePair(JEAttribute parent, String name, IMemberValuePair memberValuePair) {
 		Assert.isNotNull(parent);
 		fParent= parent;
@@ -37,12 +37,12 @@ public class JEMemberValuePair extends JEAttribute {
 	JEMemberValuePair(JEAttribute parent, IMemberValuePair memberValuePair) {
 		this(parent, null, memberValuePair);
 	}
-	
+
 	@Override
 	public JEAttribute getParent() {
 		return fParent;
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -50,7 +50,7 @@ public class JEMemberValuePair extends JEAttribute {
 		if (obj == null || !obj.getClass().equals(getClass())) {
 			return false;
 		}
-		
+
 		JEMemberValuePair other= (JEMemberValuePair) obj;
 		if (fParent == null) {
 			if (other.fParent != null)
@@ -58,36 +58,36 @@ public class JEMemberValuePair extends JEAttribute {
 		} else if (! fParent.equals(other.fParent)) {
 			return false;
 		}
-		
+
 		if (fName == null) {
 			if (other.fName != null)
 				return false;
 		} else if (! fName.equals(other.fName)) {
 			return false;
 		}
-		
+
 		if (fMemberValuePair == null) {
 			if (other.fMemberValuePair != null)
 				return false;
 		} else if (! fMemberValuePair.getMemberName().equals(other.fMemberValuePair.getMemberName())) {
 			return false;
 		}
-		
+
 		return true;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return (fParent != null ? fParent.hashCode() : 0)
 				+ (fName != null ? fName.hashCode() : 0)
 				+ (fMemberValuePair != null ? fMemberValuePair.getMemberName().hashCode() : 0);
 	}
-	
+
 	@Override
 	public Object getWrappedObject() {
 		return fMemberValuePair;
 	}
-	
+
 	@Override
 	public JEAttribute[] getChildren() {
 		if (fMemberValuePair == null)
@@ -114,13 +114,13 @@ public class JEMemberValuePair extends JEAttribute {
 	static JEAttribute createMVPairValue(JEAttribute parent, String name, Object value) {
 		if ((value instanceof Object[])) {
 			return createArrayValuedMVPair(parent, name, (Object[]) value);
-		
+
 		} else if (value instanceof IAnnotation) {
 			return new JavaElement(parent, name, (IAnnotation) value);
-		
+
 		} else if (value != null) {
 			return new JavaElementProperty(parent, name, value);
-			
+
 		} else {
 			return new Null(parent, name);
 		}
@@ -133,7 +133,7 @@ public class JEMemberValuePair extends JEAttribute {
 				JEAttribute[] children= new JEAttribute[values.length];
 				for (int i= 0; i < values.length; i++) {
 					Object value= values[i];
-					String childName= value == null ? "" : value.getClass().getSimpleName(); 
+					String childName= value == null ? "" : value.getClass().getSimpleName();
 					children[i]= createMVPairValue(this, childName, value);
 				}
 				return children;

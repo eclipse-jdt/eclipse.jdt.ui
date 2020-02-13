@@ -50,17 +50,17 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.jeview.JEViewPlugin;
 
 public class JavaElementProperties implements IPropertySource {
-	
+
 	private static HashMap<String, Property> fgIdToProperty= new HashMap<>();
 	private static LinkedHashMap<Class<?>, List<Property>> fgTypeToProperty= new LinkedHashMap<>();
-	
-	
+
+
 	private static abstract class Property {
 		private final Class<?> fType;
 		private final String fName;
 		private final String fId;
 		private final PropertyDescriptor fDescriptor;
-		
+
 		public Property(Class<?> type, String name) {
 			fType= type;
 			fName= name;
@@ -72,26 +72,26 @@ public class JavaElementProperties implements IPropertySource {
 
 		public abstract Object compute(IJavaElement javaElement) throws JavaModelException;
 
-		
+
 		public Class<?> getType() {
 			return fType;
 		}
-		
-		
+
+
 		public String getName() {
 			return fName;
 		}
-		
+
 		public String getId() {
 			return fId;
 		}
-		
+
 		public PropertyDescriptor getDescriptor() {
 			return fDescriptor;
 		}
-		
+
 	}
-	
+
 	static {
 		addJavaElementProperties();
 		addClassFileProperties();
@@ -242,7 +242,7 @@ public class JavaElementProperties implements IPropertySource {
 			}
 		});
 	}
-	
+
 	private static void addMemberProperties() {
 		addProperty(new Property(IMember.class, "javadocRange") {
 			@Override public Object compute(IJavaElement element) throws JavaModelException {
@@ -530,13 +530,13 @@ public class JavaElementProperties implements IPropertySource {
 		}
 		properties.add(property);
 	}
-	
+
 	protected IJavaElement fJavaElement;
 
 	public JavaElementProperties(IJavaElement javaElement) {
 		fJavaElement= javaElement;
 	}
-	
+
 	@Override
 	public IPropertyDescriptor[] getPropertyDescriptors() {
 		List<IPropertyDescriptor> result= new ArrayList<>();
@@ -549,7 +549,7 @@ public class JavaElementProperties implements IPropertySource {
 		}
 		return result.toArray(new IPropertyDescriptor[result.size()]);
 	}
-	
+
 	@Override
 	public Object getPropertyValue(Object id) {
 		Property property= fgIdToProperty.get(id);
@@ -626,7 +626,7 @@ public class JavaElementProperties implements IPropertySource {
 		}
 		return elementType + " (" + name + ")";
 	}
-	
+
 	static String getSourceRangeString(ISourceRange range) {
 		return range == null ? "null" : range.getOffset() + " + " + range.getLength();
 	}
@@ -635,7 +635,7 @@ public class JavaElementProperties implements IPropertySource {
 		StringBuffer sb = new StringBuffer().append("0x").append(Integer.toHexString(flags)).append(" (");
 		int prologLen= sb.length();
 		int rest= flags;
-		
+
 		rest&= ~ appendFlag(sb, flags, Flags.AccPublic, "public ");
 		rest&= ~ appendFlag(sb, flags, Flags.AccPrivate, "private ");
 		rest&= ~ appendFlag(sb, flags, Flags.AccProtected, "protected ");
@@ -663,7 +663,7 @@ public class JavaElementProperties implements IPropertySource {
 		if (isMethod) {
 			rest&= ~ appendFlag(sb, flags, Flags.AccAnnotationDefault, "default(annotation) ");
 		}
-		
+
 		if (rest != 0)
 			sb.append("unknown:0x").append(Integer.toHexString(rest)).append(" ");
 		int len = sb.length();
@@ -672,7 +672,7 @@ public class JavaElementProperties implements IPropertySource {
 		sb.append(")");
 		return sb.toString();
 	}
-	
+
 	private static int appendFlag(StringBuffer sb, int flags, int flag, String name) {
 		if ((flags & flag) != 0) {
 			sb.append(name);
@@ -686,10 +686,10 @@ public class JavaElementProperties implements IPropertySource {
 		StringBuffer sb = new StringBuffer().append("0x").append(Integer.toHexString(kind)).append(" (");
 		int prologLen= sb.length();
 		int rest= kind;
-		
+
 		rest&= ~ appendFlag(sb, kind, IPackageFragmentRoot.K_BINARY, "binary ");
 		rest&= ~ appendFlag(sb, kind, IPackageFragmentRoot.K_SOURCE, "source ");
-		
+
 		if (rest != 0)
 			sb.append("unknown:0x").append(Integer.toHexString(rest));
 		int len = sb.length();
@@ -698,29 +698,29 @@ public class JavaElementProperties implements IPropertySource {
 		sb.append(")");
 		return sb.toString();
 	}
-	
+
 	static String getSchedulingRuleString(ISchedulingRule schedulingRule) {
 		if (schedulingRule == null)
 			return null;
 		else
 			return schedulingRule.getClass().getSimpleName() + ": " + schedulingRule.toString();
 	}
-	
+
 	@Override
 	public void setPropertyValue(Object name, Object value) {
 		// do nothing
 	}
-	
+
 	@Override
 	public Object getEditableValue() {
 		return this;
 	}
-	
+
 	@Override
 	public boolean isPropertySet(Object property) {
 		return false;
 	}
-	
+
 	@Override
 	public void resetPropertyValue(Object property) {
 		// do nothing

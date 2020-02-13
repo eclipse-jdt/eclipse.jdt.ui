@@ -30,11 +30,11 @@ import org.eclipse.jdt.core.JavaCore;
 
 
 public class JEClasspathEntry extends JEAttribute {
-	
+
 	private final JEAttribute fParent; // can be null
 	private final String fName; // can be null
 	final IClasspathEntry fEntry;
-	
+
 	JEClasspathEntry(JEAttribute parent, String name, IClasspathEntry entry) {
 		Assert.isNotNull(entry);
 		fParent= parent;
@@ -46,7 +46,7 @@ public class JEClasspathEntry extends JEAttribute {
 	public JEAttribute getParent() {
 		return fParent;
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -54,7 +54,7 @@ public class JEClasspathEntry extends JEAttribute {
 		if (obj == null || !obj.getClass().equals(getClass())) {
 			return false;
 		}
-		
+
 		JEClasspathEntry other= (JEClasspathEntry) obj;
 		if (fParent == null) {
 			if (other.fParent != null)
@@ -62,33 +62,33 @@ public class JEClasspathEntry extends JEAttribute {
 		} else if (! fParent.equals(other.fParent)) {
 			return false;
 		}
-		
+
 		if (fName == null) {
 			if (other.fName != null)
 				return false;
 		} else if (! fName.equals(other.fName)) {
 			return false;
 		}
-		
+
 		return true;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return (fParent != null ? fParent.hashCode() : 0)
 				+ (fName != null ? fName.hashCode() : 0)
 				+ fEntry.hashCode();
 	}
-	
+
 	@Override
 	public Object getWrappedObject() {
 		return fEntry;
 	}
-	
+
 	@Override
 	public JEAttribute[] getChildren() {
 		ArrayList<JEAttribute> result= new ArrayList<>();
-		
+
 		result.add(new JavaElementChildrenProperty(this, "ACCESS RULES") {
 			@Override protected JEAttribute[] computeChildren() throws CoreException {
 				IAccessRule[] accessRules= fEntry.getAccessRules();
@@ -170,7 +170,7 @@ public class JEClasspathEntry extends JEAttribute {
 				return children;
 			}
 		});
-		
+
 		return result.toArray(new JEAttribute[result.size()]);
 	}
 
@@ -181,7 +181,7 @@ public class JEClasspathEntry extends JEAttribute {
 			label= fName +  ": " + label;
 		return label;
 	}
-	
+
 	public static JEAttribute compute(JEAttribute parent, String name, Callable<IClasspathEntry> computer) {
 		try {
 			IClasspathEntry entry= computer.call();
@@ -198,5 +198,5 @@ public class JEClasspathEntry extends JEAttribute {
 			return new JEClasspathEntry(parent, name, entry);
 		}
 	}
-	
+
 }

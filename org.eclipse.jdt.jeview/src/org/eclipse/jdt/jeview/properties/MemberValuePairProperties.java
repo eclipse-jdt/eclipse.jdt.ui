@@ -24,14 +24,14 @@ import org.eclipse.ui.views.properties.PropertyDescriptor;
 import org.eclipse.jdt.core.IMemberValuePair;
 
 public class MemberValuePairProperties implements IPropertySource {
-	
+
 	private static final String C_MEMBER_VALUE_PAIR= "IMemberValuePair";
-	
+
 	private static final String P_MEMBER_NAME= "org.eclipse.jdt.jeview.IMemberValuePair.memberName";
 	private static final String P_VALUE_KIND= "org.eclipse.jdt.jeview.IMemberValuePair.valueKind";
-	
+
 	protected IMemberValuePair fMemberValuePair;
-	
+
 	private static final ArrayList<IPropertyDescriptor> MEMBER_VALUE_PAIR_PROPERTY_DESCRIPTORS= new ArrayList<>();
 	static {
 		addResourceDescriptor(new PropertyDescriptor(P_MEMBER_NAME, "memberName"));
@@ -43,18 +43,18 @@ public class MemberValuePairProperties implements IPropertySource {
 		descriptor.setCategory(C_MEMBER_VALUE_PAIR);
 		MEMBER_VALUE_PAIR_PROPERTY_DESCRIPTORS.add(descriptor);
 	}
-	
+
 
 	public MemberValuePairProperties(IMemberValuePair memberValuePair) {
 		fMemberValuePair= memberValuePair;
 	}
-	
+
 	@Override
 	public IPropertyDescriptor[] getPropertyDescriptors() {
 		ArrayList<IPropertyDescriptor> result= new ArrayList<>(MEMBER_VALUE_PAIR_PROPERTY_DESCRIPTORS);
 		return result.toArray(new IPropertyDescriptor[result.size()]);
 	}
-	
+
 	@Override
 	public Object getPropertyValue(Object name) {
 		if (name.equals(P_MEMBER_NAME)) {
@@ -62,30 +62,30 @@ public class MemberValuePairProperties implements IPropertySource {
 		} else 	if (name.equals(P_VALUE_KIND)) {
 			return getValueKindName(fMemberValuePair.getValueKind());
 		}
-		
+
 		return null;
 	}
-	
+
 	@Override
 	public void setPropertyValue(Object name, Object value) {
 		// do nothing
 	}
-	
+
 	@Override
 	public Object getEditableValue() {
 		return this;
 	}
-	
+
 	@Override
 	public boolean isPropertySet(Object property) {
 		return false;
 	}
-	
+
 	@Override
 	public void resetPropertyValue(Object property) {
 		// do nothing
 	}
-	
+
 	static String getValueKindName(int valueKind) {
 		String name= "UNKNOWN";
 		Field[] fields= IMemberValuePair.class.getFields();
@@ -103,5 +103,5 @@ public class MemberValuePairProperties implements IPropertySource {
 		}
 		return valueKind + " (" + name + ")";
 	}
-	
+
 }

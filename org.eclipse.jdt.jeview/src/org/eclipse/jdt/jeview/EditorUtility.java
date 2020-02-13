@@ -1,13 +1,13 @@
 /*******************************************************************************
  * Copyright (c) 2000, 2015 IBM Corporation and others.
  *
- * This program and the accompanying materials 
+ * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -47,8 +47,8 @@ public class EditorUtility {
 		}
 		return null;
 	}
-	
-	
+
+
 	public static IOpenable getJavaInput(IEditorPart part) {
 		IEditorInput editorInput= part.getEditorInput();
 		if (editorInput != null) {
@@ -57,28 +57,28 @@ public class EditorUtility {
 				return (IOpenable) input;
 			}
 		}
-		return null;	
+		return null;
 	}
 
 	/**
 	 * Note: This is an inlined version of {@link JavaUI#getEditorInputJavaElement(IEditorInput)},
 	 * which is not available in 3.1.
-	 * 
+	 *
 	 * @param editorInput the editor input
 	 * @return the Java element wrapped by <code>editorInput</code> or <code>null</code> if none
 	 */
 	private static IJavaElement javaUIgetEditorInputJavaElement(IEditorInput editorInput) {
 		Assert.isNotNull(editorInput);
-		IJavaElement je= JavaUI.getWorkingCopyManager().getWorkingCopy(editorInput); 
+		IJavaElement je= JavaUI.getWorkingCopyManager().getWorkingCopy(editorInput);
 		if (je != null)
 			return je;
-		
+
 		/*
 		 * This needs works, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=120340
 		 */
 		return editorInput.getAdapter(IJavaElement.class);
 	}
-	
+
 	public static void selectInEditor(ITextEditor editor, int offset, int length) {
 		IEditorPart active = getActiveEditor();
 		if (active != editor) {
