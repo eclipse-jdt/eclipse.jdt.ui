@@ -43,58 +43,9 @@
     <resource path="core extension/org/eclipse/jdt/internal/corext/dom/ASTFlattener.java" type="org.eclipse.jdt.internal.corext.dom.ASTFlattener">
         <filter comment="For Java 13 Enable Preview support" id="640712815">
             <message_arguments>
-                <message_argument value="ASTNode"/>
-                <message_argument value="ASTFlattener"/>
-                <message_argument value="getAST()"/>
-            </message_arguments>
-        </filter>
-        <filter comment="For Java 13 Enable Preview support" id="640712815">
-            <message_arguments>
-                <message_argument value="SwitchCase"/>
-                <message_argument value="ASTFlattener"/>
-                <message_argument value="expressions()"/>
-            </message_arguments>
-        </filter>
-        <filter comment="For Java 13 Enable Preview support" id="640712815">
-            <message_arguments>
-                <message_argument value="SwitchCase"/>
-                <message_argument value="ASTFlattener"/>
-                <message_argument value="isSwitchLabeledRule()"/>
-            </message_arguments>
-        </filter>
-        <filter comment="For Java 13 Enable Preview support" id="640712815">
-            <message_arguments>
-                <message_argument value="SwitchExpression"/>
-                <message_argument value="ASTFlattener"/>
-                <message_argument value="getExpression()"/>
-            </message_arguments>
-        </filter>
-        <filter comment="For Java 13 Enable Preview support" id="640712815">
-            <message_arguments>
-                <message_argument value="SwitchExpression"/>
-                <message_argument value="ASTFlattener"/>
-                <message_argument value="statements()"/>
-            </message_arguments>
-        </filter>
-        <filter comment="For Java 13 Enable Preview support" id="640712815">
-            <message_arguments>
                 <message_argument value="TextBlock"/>
                 <message_argument value="ASTFlattener"/>
                 <message_argument value="getEscapedValue()"/>
-            </message_arguments>
-        </filter>
-        <filter comment="For Java 13 Enable Preview support" id="640712815">
-            <message_arguments>
-                <message_argument value="YieldStatement"/>
-                <message_argument value="ASTFlattener"/>
-                <message_argument value="getExpression()"/>
-            </message_arguments>
-        </filter>
-        <filter comment="For Java 13 Enable Preview support" id="640712815">
-            <message_arguments>
-                <message_argument value="YieldStatement"/>
-                <message_argument value="ASTFlattener"/>
-                <message_argument value="isImplicit()"/>
             </message_arguments>
         </filter>
     </resource>
