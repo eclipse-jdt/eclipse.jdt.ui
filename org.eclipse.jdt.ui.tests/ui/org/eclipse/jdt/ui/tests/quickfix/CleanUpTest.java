@@ -9032,7 +9032,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
 
 		// When
-		ASTParser parser= ASTParser.newParser(AST.JLS13);
+		ASTParser parser= ASTParser.newParser(AST.JLS14);
 		parser.setKind(ASTParser.K_COMPILATION_UNIT);
 		parser.setSource(cu1);
 		parser.setResolveBindings(true);
