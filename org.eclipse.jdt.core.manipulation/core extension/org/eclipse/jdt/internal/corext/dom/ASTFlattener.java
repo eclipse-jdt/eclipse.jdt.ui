@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -8,6 +8,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  * 
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -1322,6 +1326,61 @@ public class ASTFlattener extends GenericVisitor {
 		this.fBuffer.append(".");//$NON-NLS-1$
 		printTypeAnnotations(node);
 		node.getName().accept(this);
+		return false;
+	}
+
+	@Override
+	public boolean visit(RecordDeclaration node) {
+		if (node.getJavadoc() != null) {
+			node.getJavadoc().accept(this);
+		}
+		printModifiers(node.modifiers());
+		this.fBuffer.append("record ");//$NON-NLS-1$
+		node.getName().accept(this);
+		this.fBuffer.append(" ");//$NON-NLS-1$
+		
+		if (!node.typeParameters().isEmpty()) {
+			this.fBuffer.append("<");//$NON-NLS-1$
+			for (Iterator<TypeParameter> it = node.typeParameters().iterator(); it.hasNext(); ) {
+				TypeParameter t = it.next();
+				t.accept(this);
+				if (it.hasNext()) {
+					this.fBuffer.append(",");//$NON-NLS-1$
+				}
+			}
+			this.fBuffer.append(">");//$NON-NLS-1$
+		}
+		this.fBuffer.append(" ");//$NON-NLS-1$
+		this.fBuffer.append("(");//$NON-NLS-1$
+		for (Iterator<SingleVariableDeclaration> it = node.recordComponents().iterator(); it.hasNext(); ) {
+			SingleVariableDeclaration v = it.next();
+			v.accept(this);
+			if (it.hasNext()) {
+				this.fBuffer.append(",");//$NON-NLS-1$
+			}
+		}
+		this.fBuffer.append(")");//$NON-NLS-1$
+		if (!node.superInterfaceTypes().isEmpty()) {
+			this.fBuffer.append(" implements ");//$NON-NLS-1$
+			for (Iterator<Type> it = node.superInterfaceTypes().iterator(); it.hasNext(); ) {
+				Type t = it.next();
+				t.accept(this);
+				if (it.hasNext()) {
+					this.fBuffer.append(", ");//$NON-NLS-1$
+				}
+			}
+			this.fBuffer.append(" ");//$NON-NLS-1$
+		}
+		this.fBuffer.append("{");//$NON-NLS-1$
+		if (!node.bodyDeclarations().isEmpty()) {
+			this.fBuffer.append("\n");//$NON-NLS-1$
+			for (Iterator<BodyDeclaration> it = node.bodyDeclarations().iterator(); it.hasNext(); ) {
+				BodyDeclaration d = it.next();
+				d.accept(this);
+				// other body declarations include trailing punctuation
+			}
+		}
+		this.fBuffer.append("}\n");//$NON-NLS-1$
 		return false;
 	}
 

@@ -8,38 +8,6 @@
             </message_arguments>
         </filter>
     </resource>
-    <resource path="core refactoring/org/eclipse/jdt/internal/corext/refactoring/code/flow/FlowAnalyzer.java" type="org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowAnalyzer">
-        <filter comment="For Java 13 Enable Preview feature" id="640712815">
-            <message_arguments>
-                <message_argument value="SwitchExpression"/>
-                <message_argument value="FlowAnalyzer"/>
-                <message_argument value="getExpression()"/>
-            </message_arguments>
-        </filter>
-        <filter comment="For Java 13 Enable Preview feature" id="640712815">
-            <message_arguments>
-                <message_argument value="SwitchExpression"/>
-                <message_argument value="FlowAnalyzer"/>
-                <message_argument value="statements()"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="core refactoring/org/eclipse/jdt/internal/corext/refactoring/code/flow/InputFlowAnalyzer.java" type="org.eclipse.jdt.internal.corext.refactoring.code.flow.InputFlowAnalyzer">
-        <filter comment="For Java 13 Enable Preview feature" id="640712815">
-            <message_arguments>
-                <message_argument value="SwitchExpression"/>
-                <message_argument value="InputFlowAnalyzer"/>
-                <message_argument value="getExpression()"/>
-            </message_arguments>
-        </filter>
-        <filter comment="For Java 13 Enable Preview feature" id="640712815">
-            <message_arguments>
-                <message_argument value="SwitchExpression"/>
-                <message_argument value="InputFlowAnalyzer"/>
-                <message_argument value="statements()"/>
-            </message_arguments>
-        </filter>
-    </resource>
     <resource path="core refactoring/org/eclipse/jdt/internal/corext/refactoring/scripting/JavaUIRefactoringContribution.java" type="org.eclipse.jdt.internal.corext.refactoring.scripting.JavaUIRefactoringContribution">
         <filter id="571473929">
             <message_arguments>
@@ -144,20 +112,20 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="ui/org/eclipse/jdt/internal/ui/javaeditor/SemanticHighlightingReconciler.java" type="org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingReconciler$PositionCollector">
+        <filter comment="For Java 14 preview features" id="640712815">
+            <message_arguments>
+                <message_argument value="RecordDeclaration"/>
+                <message_argument value="PositionCollector"/>
+                <message_argument value="getRestrictedIdentifierStartPosition()"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="ui/org/eclipse/jdt/internal/ui/text/JavaOutlineInformationControl.java" type="org.eclipse.jdt.internal.ui.text.JavaOutlineInformationControl$OutlineTreeViewer">
         <filter id="571473929">
             <message_arguments>
                 <message_argument value="TreeViewer"/>
                 <message_argument value="OutlineTreeViewer"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="ui/org/eclipse/jdt/internal/ui/text/correction/AdvancedQuickAssistProcessor.java" type="org.eclipse.jdt.internal.ui.text.correction.AdvancedQuickAssistProcessor">
-        <filter comment="For Java 13 Enable Preview feature" id="640712815">
-            <message_arguments>
-                <message_argument value="SwitchCase"/>
-                <message_argument value="AdvancedQuickAssistProcessor"/>
-                <message_argument value="expressions()"/>
             </message_arguments>
         </filter>
     </resource>

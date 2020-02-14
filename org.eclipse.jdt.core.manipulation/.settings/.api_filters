@@ -41,6 +41,55 @@
         </filter>
     </resource>
     <resource path="core extension/org/eclipse/jdt/internal/corext/dom/ASTFlattener.java" type="org.eclipse.jdt.internal.corext.dom.ASTFlattener">
+        <filter comment="For Java 14 preview features" id="640712815">
+            <message_arguments>
+                <message_argument value="AbstractTypeDeclaration"/>
+                <message_argument value="ASTFlattener"/>
+                <message_argument value="bodyDeclarations()"/>
+            </message_arguments>
+        </filter>
+        <filter comment="For Java 14 preview features" id="640712815">
+            <message_arguments>
+                <message_argument value="AbstractTypeDeclaration"/>
+                <message_argument value="ASTFlattener"/>
+                <message_argument value="getName()"/>
+            </message_arguments>
+        </filter>
+        <filter comment="For Java 14 preview features" id="640712815">
+            <message_arguments>
+                <message_argument value="BodyDeclaration"/>
+                <message_argument value="ASTFlattener"/>
+                <message_argument value="getJavadoc()"/>
+            </message_arguments>
+        </filter>
+        <filter comment="For Java 14 preview features" id="640712815">
+            <message_arguments>
+                <message_argument value="BodyDeclaration"/>
+                <message_argument value="ASTFlattener"/>
+                <message_argument value="modifiers()"/>
+            </message_arguments>
+        </filter>
+        <filter comment="For Java 14 preview features" id="640712815">
+            <message_arguments>
+                <message_argument value="RecordDeclaration"/>
+                <message_argument value="ASTFlattener"/>
+                <message_argument value="recordComponents()"/>
+            </message_arguments>
+        </filter>
+        <filter comment="For Java 14 preview features" id="640712815">
+            <message_arguments>
+                <message_argument value="RecordDeclaration"/>
+                <message_argument value="ASTFlattener"/>
+                <message_argument value="superInterfaceTypes()"/>
+            </message_arguments>
+        </filter>
+        <filter comment="For Java 14 preview features" id="640712815">
+            <message_arguments>
+                <message_argument value="RecordDeclaration"/>
+                <message_argument value="ASTFlattener"/>
+                <message_argument value="typeParameters()"/>
+            </message_arguments>
+        </filter>
         <filter comment="For Java 13 Enable Preview support" id="640712815">
             <message_arguments>
                 <message_argument value="TextBlock"/>
