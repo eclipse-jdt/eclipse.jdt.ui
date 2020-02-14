@@ -103,6 +103,20 @@
             <message_arguments>
                 <message_argument value="ASTVisitor"/>
                 <message_argument value="GenericVisitor"/>
+                <message_argument value="endVisit(TextBlock)"/>
+            </message_arguments>
+        </filter>
+        <filter comment="For Java 13 Enable Preview support" id="642777099">
+            <message_arguments>
+                <message_argument value="ASTVisitor"/>
+                <message_argument value="GenericVisitor"/>
+                <message_argument value="endVisit(YieldStatement)"/>
+            </message_arguments>
+        </filter>
+        <filter comment="For Java 13 Enable Preview support" id="642777099">
+            <message_arguments>
+                <message_argument value="ASTVisitor"/>
+                <message_argument value="GenericVisitor"/>
                 <message_argument value="visit(SwitchExpression)"/>
             </message_arguments>
         </filter>
