@@ -334,6 +334,10 @@ public class GenericVisitor extends ASTVisitor {
 		endVisitNode(node);
 	}
 	@Override
+	public void endVisit(RecordDeclaration node) {
+		endVisitNode(node);
+	}
+	@Override
 	public void endVisit(RequiresDirective node) {
 		endVisitNode(node);
 	}
@@ -744,6 +748,10 @@ public class GenericVisitor extends ASTVisitor {
 	}
 	@Override
 	public boolean visit(QualifiedType node) {
+		return visitNode(node);
+	}
+	@Override
+	public boolean visit(RecordDeclaration node) {
 		return visitNode(node);
 	}
 	@Override
