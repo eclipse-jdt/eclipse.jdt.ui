@@ -43,8 +43,6 @@ import org.eclipse.jdt.core.manipulation.JavaManipulation;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroupCore;
 
-import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
-
 /**
   */
 public class ModifierCorrectionSubProcessorCore {
