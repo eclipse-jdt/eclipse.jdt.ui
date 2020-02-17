@@ -192,9 +192,9 @@ public class PluginsNotLoadedTest extends TestCase {
 				 * This activates the EGit UI bundle very early.
 				 * Because of that, EGit's org.eclipse.egit.ui.team.MergeTool command's handler class is loaded,
 				 * which in turn activates the org.eclipse.compare bundle on startup.
-				 * 
+				 *
 				 * org.eclipse.pde.ui also contributes a sourceProvider, that's why we don't test for it...
-				 * 
+				 *
 				 * Workaround is to remove org.eclipse.compare iff EGit is present:
 				 */
 				if (Platform.getBundle("org.eclipse.egit.ui") != null) {

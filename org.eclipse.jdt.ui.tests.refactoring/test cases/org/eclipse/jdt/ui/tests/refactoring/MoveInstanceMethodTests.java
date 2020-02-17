@@ -446,12 +446,12 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 	public void test41() throws Exception {
 		helper1(new String[] { "p.A" }, "p.A", 4, 10, 4, 10, PARAMETER, "b", true, true);
 	}
-	
+
 	// Test problem with parameterized nested class (bug 342074)
 	public void test42() throws Exception {
 		helper1(new String[] { "p.A", "p.B", "p.Outer" }, "p.A", 6, 17, 6, 20, PARAMETER, "b", true, true);
 	}
-	
+
 	// Test problem with enum (bug 339980)
 	public void test43() throws Exception {
 		helper1(new String[] { "p.A" }, "p.A", 10, 10, 10, 20, PARAMETER, "fooBar", true, true);
@@ -471,7 +471,7 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 	public void test46() throws Exception {
 		helper1(new String[] { "p.A", "p.B" }, "p.A", 6, 10, 6, 13, PARAMETER, "b", true, true);
 	}
-	
+
 	// bug 385550
 	public void test47() throws Exception {
 		helper1(new String[] { "p.A" }, "p.A", 8, 17, 8, 17, PARAMETER, "target", true, true);
@@ -481,12 +481,12 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 	public void test48() throws Exception {
 		helper1(new String[] { "p.A", "p.B", "q.C" }, "p.B", 3, 17, 3, 17, PARAMETER, "c", true, true);
 	}
-	
+
 	//bug 356687
 	public void test49() throws Exception {
 		helper1(new String[] {"p.A"}, "p.A", 5, 10, 5, 11, FIELD, "b", true, true);
 	}
-	
+
 	//bug 356687
 	public void test50() throws Exception {
 		helper1(new String[] {"p.A"}, "p.A", 4, 10, 4, 11, PARAMETER, "b", true, true);
@@ -501,27 +501,27 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 	public void test52() throws Exception {
 		helper1(new String[] {"p.A"}, "p.A", 5, 10, 5, 11, FIELD, "b", true, true);
 	}
-	
+
 	//bug 356687
 	public void test53() throws Exception {
 		helper1(new String[] {"p.A"}, "p.A", 4, 10, 4, 11, PARAMETER, "b", true, true);
 	}
-	
+
 	//bug 356687
 	public void test54() throws Exception {
 		helper1(new String[] {"p.A"}, "p.A", 4, 15, 4, 16, PARAMETER, "b", false, false);
 	}
-	
+
 	//bug 356687
 	public void test55() throws Exception {
 		helper1(new String[] {"p.A"}, "p.A", 4, 17, 4, 18, FIELD, "b", true, true);
 	}
-	
+
 	//bug 356687
 	public void test56() throws Exception {
 		helper1(new String[] {"p.A"}, "p.A", 3, 17, 3, 18, PARAMETER, "b", true, true);
 	}
-	
+
 	//bug 356687
 	public void test57() throws Exception {
 		helper1(new String[] { "p.A" }, "p.A", 5, 17, 5, 18, PARAMETER, "b", true, true);
@@ -576,7 +576,7 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 	public void test67() throws Exception {
 		helper1(new String[] { "A" }, "A", 6, 14, 6, 15, FIELD, "b", true, true);
 	}
-	
+
 	// bug 441217
 	public void test68() throws Exception {
 		helper1(new String[] { "A" }, "A", 6, 16, 6, 17, PARAMETER, "d", true, true);
@@ -659,12 +659,12 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 	public void testFail15() throws Exception {
 		failHelper1(new String[] { "A" }, "A", 3, 17, 3, 18, FIELD, "fB", true, true);
 	}
-	
+
 	// bug 436997 - references enclosing instance
 	public void testFail16() throws Exception {
 		failHelper1(new String[] { "p1.A", "p1.B"}, "p1.A", 8, 14, 8, 15, PARAMETER, "b", true, true);
 	}
-	
+
 	// Cannot move static method
 	public void testFail2() throws Exception {
 		failHelper1(new String[] { "p1.A", "p2.B"}, "p1.A", 6, 23, 6, 24, PARAMETER, "b", true, true);

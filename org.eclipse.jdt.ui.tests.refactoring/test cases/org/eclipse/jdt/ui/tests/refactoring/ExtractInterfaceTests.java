@@ -767,26 +767,26 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		fGenerateAnnotations= true; // should not generate because project is 1.5
 		standardPassingTest();
 	}
-	
+
 	public void test109() throws Exception{
 		// Generate @Override in 1.6 project
 		fGenerateAnnotations= true;
 		RefactoringTestSetup refactoringTestSetup= new RefactoringTestSetup(null);
 		try {
 			JavaProjectHelper.addRTJar16(getRoot().getJavaProject());
-			
+
 			standardPassingTest();
-			
+
 			refactoringTestSetup.tearDown();
 		} finally {
 			refactoringTestSetup.setUp();
 		}
 	}
-	
+
 	public void test110() throws Exception{
 		validatePassingTest("A", "I", true, true);
 	}
-	
+
 	public void testPaperExample0() throws Exception{
 		String[] names= new String[]{"add", "addAll", "iterator"};
 		String[][] signatures= new String[][]{new String[]{"QComparable;"}, new String[]{"QA;"}, new String[0]};

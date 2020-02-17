@@ -137,7 +137,7 @@ public class MockPluginView extends PackageExplorerPart {
 			fAddedObject= object;
 			fAddedParentObject= parentObject;
 		}
-		
+
 		@Override
 		public Widget[] testFindItems(Object element) {
 			return new Widget[1]; // for https://bugs.eclipse.org/311212
@@ -146,7 +146,7 @@ public class MockPluginView extends PackageExplorerPart {
 
 	/**
 	 * Returns whether the given object was refreshed.
-	 * 
+	 *
 	 * @param c the object to test
 	 * @return <code>true</code> if the object was refreshed
 	 */
@@ -207,7 +207,7 @@ public class MockPluginView extends PackageExplorerPart {
 
 	/**
 	 * Sets the folding preference.
-	 * 
+	 *
 	 * @param fold <code>true</code> to enable folding, <code>false</code> otherwise
 	 */
 	public void setFolding(boolean fold) {

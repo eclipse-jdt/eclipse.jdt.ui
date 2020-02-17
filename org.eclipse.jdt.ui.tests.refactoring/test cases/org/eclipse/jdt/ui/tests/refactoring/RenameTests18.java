@@ -168,10 +168,10 @@ public class RenameTests18 extends RefactoringTest {
 			 * cu.getBuffer() is a jdt.internal.core.Buffer and not a DocumentAdapter.
 			 * The cu is NOT in working copy mode.
 			 * Somehow, the BecomeWorkingCopyOperation failed.
-			 * 
+			 *
 			 * Observation: The A.java files contain secondary types. Maybe a threading problem
 			 * with the indexer?
-			 * 
+			 *
 			 * A failing test execution order of RenameTests18 with jdk7:
 			 * - green: testMethodReference0
 			 * - fails: testLambda0
@@ -210,7 +210,7 @@ public class RenameTests18 extends RefactoringTest {
 	public void testLambda2() throws Exception {
 		renameLocalVariable("renamedIi", true);
 	}
-	
+
 	public void testLambda3() throws Exception {
 		renameLocalVariable("x_renamed", true);
 	}
@@ -265,12 +265,12 @@ public class RenameTests18 extends RefactoringTest {
 	private void renameMethodInInterface() throws Exception{
 		renameMethod("m", "k", new String[0], true, true, false);
 	}
-	
+
 	// method with a lambda method as reference
 	public void testMethod0() throws Exception{
 		renameMethodInInterface();
 	}
-	
+
 	// method with method references as reference
 	public void testMethod1() throws Exception{
 		renameMethodInInterface();

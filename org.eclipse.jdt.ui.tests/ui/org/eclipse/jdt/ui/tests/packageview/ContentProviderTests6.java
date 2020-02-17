@@ -58,7 +58,7 @@ import org.eclipse.jdt.internal.ui.util.CoreUtility;
  * <ul>
  * <li>Bug 357450: Class folder in Java project have refresh problem</li>
  * </ul>
- * 
+ *
  * @since 3.9
  */
 @RunWith(JUnit4.class)

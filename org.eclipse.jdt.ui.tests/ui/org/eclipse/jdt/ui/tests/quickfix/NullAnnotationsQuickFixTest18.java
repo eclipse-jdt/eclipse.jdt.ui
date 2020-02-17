@@ -133,7 +133,7 @@ public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 		buf.append("@org.eclipse.jdt.annotation.NonNullByDefault\n");
 		buf.append("package test1;\n");
 		pack1.createCompilationUnit("package-info.java", buf.toString(), false, null);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
@@ -241,7 +241,7 @@ public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 		buf.append("@org.eclipse.jdt.annotation.NonNullByDefault\n");
 		buf.append("package test1;\n");
 		pack1.createCompilationUnit("package-info.java", buf.toString(), false, null);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
@@ -399,7 +399,7 @@ public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 		buf.append("@org.eclipse.jdt.annotation.NonNullByDefault\n");
 		buf.append("package test1;\n");
 		pack1.createCompilationUnit("package-info.java", buf.toString(), true, null);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
@@ -473,7 +473,7 @@ public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 		buf.append("@org.eclipse.jdt.annotation.NonNullByDefault\n");
 		buf.append("package test1;\n");
 		pack1.createCompilationUnit("package-info.java", buf.toString(), true, null);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Map;\n");
@@ -565,7 +565,7 @@ public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 		buf.append("@org.eclipse.jdt.annotation.NonNullByDefault\n");
 		buf.append("package test1;\n");
 		pack1.createCompilationUnit("package-info.java", buf.toString(), true, null);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Map;\n");
@@ -656,7 +656,7 @@ public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 		buf.append("@org.eclipse.jdt.annotation.NonNullByDefault\n");
 		buf.append("package test1;\n");
 		pack1.createCompilationUnit("package-info.java", buf.toString(), true, null);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Map;\n");
@@ -672,16 +672,16 @@ public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 		buf.append("	}\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("Test.java", buf.toString(), false, null);
-	
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 4);
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
-	
+
 		assertEqualString(proposal.getDisplayString(), "Create field 'x'");
-	
+
 		String preview= getPreviewContent(proposal);
-	
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Map;\n");
@@ -699,13 +699,13 @@ public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 		buf.append("	}\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
-	
+
 		proposal= (CUCorrectionProposal)proposals.get(1);
-	
+
 		assertEqualString(proposal.getDisplayString(), "Create parameter 'x'");
-	
+
 		preview= getPreviewContent(proposal);
-	
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Map;\n");
@@ -721,13 +721,13 @@ public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 		buf.append("	}\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
-	
+
 		proposal= (CUCorrectionProposal)proposals.get(2);
-	
+
 		assertEqualString(proposal.getDisplayString(), "Create local variable 'x'");
-	
+
 		preview= getPreviewContent(proposal);
-	
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Map;\n");
@@ -762,16 +762,16 @@ public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 		buf.append("	}\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("Test.java", buf.toString(), false, null);
-	
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 3);
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
-	
+
 		assertEqualString(proposal.getDisplayString(), "Add cast to 'Map<String, Integer>'");
-	
+
 		String preview= getPreviewContent(proposal);
-	
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Map;\n");
@@ -794,7 +794,7 @@ public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 		buf.append("@org.eclipse.jdt.annotation.NonNullByDefault\n");
 		buf.append("package test1;\n");
 		pack1.createCompilationUnit("package-info.java", buf.toString(), true, null);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Map;\n");
@@ -885,7 +885,7 @@ public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 		buf.append("@org.eclipse.jdt.annotation.NonNullByDefault\n");
 		buf.append("package test1;\n");
 		pack1.createCompilationUnit("package-info.java", buf.toString(), true, null);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Map;\n");
@@ -1024,11 +1024,11 @@ public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 		buf.append("@NonNullByDefault\n");
 		buf.append("public class B extends A {\n");
 		buf.append("   @Override\n");
-		buf.append("   public void SomeMethod(\n"); 
-		buf.append("      String[] a)\n"); 
+		buf.append("   public void SomeMethod(\n");
+		buf.append("      String[] a)\n");
 		buf.append("   {\n");
 		buf.append("\n");
-		buf.append("   }\n"); 
+		buf.append("   }\n");
 		buf.append("}\n");
 		ICompilationUnit cu=pack1.createCompilationUnit("B.java", buf.toString(), false, null);
 
@@ -1047,11 +1047,11 @@ public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 		buf.append("@NonNullByDefault\n");
 		buf.append("public class B extends A {\n");
 		buf.append("   @Override\n");
-		buf.append("   public void SomeMethod(\n"); 
-		buf.append("      String @Nullable [] a)\n"); 
+		buf.append("   public void SomeMethod(\n");
+		buf.append("      String @Nullable [] a)\n");
 		buf.append("   {\n");
 		buf.append("\n");
-		buf.append("   }\n"); 
+		buf.append("   }\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
@@ -1076,11 +1076,11 @@ public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 		buf.append("@NonNullByDefault\n");
 		buf.append("public class B extends A {\n");
 		buf.append("   @Override\n");
-		buf.append("   public void SomeMethod(\n"); 
-		buf.append("      int[][] a)\n"); 
+		buf.append("   public void SomeMethod(\n");
+		buf.append("      int[][] a)\n");
 		buf.append("   {\n");
 		buf.append("\n");
-		buf.append("   }\n"); 
+		buf.append("   }\n");
 		buf.append("}\n");
 		ICompilationUnit cu=pack1.createCompilationUnit("B.java", buf.toString(), false, null);
 
@@ -1099,11 +1099,11 @@ public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 		buf.append("@NonNullByDefault\n");
 		buf.append("public class B extends A {\n");
 		buf.append("   @Override\n");
-		buf.append("   public void SomeMethod(\n"); 
-		buf.append("      int @Nullable [][] a)\n"); 
+		buf.append("   public void SomeMethod(\n");
+		buf.append("      int @Nullable [][] a)\n");
 		buf.append("   {\n");
 		buf.append("\n");
-		buf.append("   }\n"); 
+		buf.append("   }\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
@@ -1127,11 +1127,11 @@ public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class B extends A {\n");
 		buf.append("   @Override\n");
-		buf.append("   public void SomeMethod(\n"); 
-		buf.append("      String @NonNull [] a)\n"); 
+		buf.append("   public void SomeMethod(\n");
+		buf.append("      String @NonNull [] a)\n");
 		buf.append("   {\n");
 		buf.append("\n");
-		buf.append("   }\n"); 
+		buf.append("   }\n");
 		buf.append("}\n");
 		ICompilationUnit cu=pack1.createCompilationUnit("B.java", buf.toString(), false, null);
 
@@ -1149,11 +1149,11 @@ public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("public class B extends A {\n");
 		buf.append("   @Override\n");
-		buf.append("   public void SomeMethod(\n"); 
-		buf.append("      String @Nullable [] a)\n"); 
+		buf.append("   public void SomeMethod(\n");
+		buf.append("      String @Nullable [] a)\n");
 		buf.append("   {\n");
 		buf.append("\n");
-		buf.append("   }\n"); 
+		buf.append("   }\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
@@ -1180,7 +1180,7 @@ public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 		buf.append("   public String[][][] SomeMethod()\n");
 		buf.append("   {\n");
 		buf.append("		return new String[0][][];\n");
-		buf.append("   }\n"); 
+		buf.append("   }\n");
 		buf.append("}\n");
 		ICompilationUnit cu=pack1.createCompilationUnit("B.java", buf.toString(), false, null);
 
@@ -1203,12 +1203,12 @@ public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 		buf.append("   public String @NonNull [][][] SomeMethod()\n");
 		buf.append("   {\n");
 		buf.append("		return new String[0][][];\n");
-		buf.append("   }\n"); 
+		buf.append("   }\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
 	@Test
-	public void testBug525424() throws Exception {		
+	public void testBug525424() throws Exception {
 		Hashtable<String, String> options= JavaCore.getOptions();
 		try {
 			Hashtable<String, String> myOptions= new Hashtable<>(options);
@@ -1312,7 +1312,7 @@ public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 			JavaCore.setOptions(options);
 		}
 	}
-	public void runBug531511Test(boolean useTypeAnnotations, String defaultNullnessAnnotations, boolean expectReturnAnnotation, boolean expectParamAnnotation) throws Exception {		
+	public void runBug531511Test(boolean useTypeAnnotations, String defaultNullnessAnnotations, boolean expectReturnAnnotation, boolean expectParamAnnotation) throws Exception {
 		Map<String, String> options= fJProject1.getOptions(false);
 		try {
 			Hashtable<String, String> myOptions= new Hashtable<>(options);
@@ -1448,7 +1448,7 @@ public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 			buf.append("   @NonNull public Object someMethod(@NonNull Object p);\n");
 			buf.append("}\n");
 			api.createCompilationUnit("I.java", buf.toString(), false, null);
-			
+
 			IPackageFragment test= fSourceFolder.createPackageFragment("test", false, null);
 			buf= new StringBuffer();
 			buf.append("@my.NonNullByDefault(my.DefaultLocation.TYPE_BOUND)\n"); // create irrelevant package default, so no tested combination will be redunant
@@ -1459,7 +1459,7 @@ public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 			fJProject1.getProject().getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
 			IMarker[] markers= fJProject1.getResource().findMarkers(null, true, IResource.DEPTH_INFINITE);
 			assertEquals(0, markers.length);
-			
+
 			// actual test begins here
 			buf= new StringBuffer();
 			buf.append("package test;\n");
@@ -1502,91 +1502,91 @@ public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 	}
 
 	@Test
-	public void testBug531511_none_type() throws Exception {		
+	public void testBug531511_none_type() throws Exception {
 		runBug531511Test(true, "", true, true);
 	}
 	@Test
-	public void testBug531511_none_decl() throws Exception {		
+	public void testBug531511_none_decl() throws Exception {
 		runBug531511Test(false, "", true, true);
 	}
 	@Test
-	public void testBug531511_combined_multi_first_type() throws Exception {		
+	public void testBug531511_combined_multi_first_type() throws Exception {
 		runBug531511Test(true, "@NNApi @NNFields", false, false);
 	}
 	@Test
-	public void testBug531511_combined_multi_first_decl() throws Exception {		
+	public void testBug531511_combined_multi_first_decl() throws Exception {
 		runBug531511Test(false, "@NNApi @NNFields", false, false);
 	}
 	@Test
-	public void testBug531511_combined_multi_second_type() throws Exception {		
+	public void testBug531511_combined_multi_second_type() throws Exception {
 		runBug531511Test(true, "@NNApi @NNFields", false, false);
 	}
 	@Test
-	public void testBug531511_combined_multi_second_decl() throws Exception {		
+	public void testBug531511_combined_multi_second_decl() throws Exception {
 		runBug531511Test(false, "@NNApi @NNFields", false, false);
 	}
 	@Test
-	public void testBug531511_param_multi_first_type() throws Exception {		
+	public void testBug531511_param_multi_first_type() throws Exception {
 		runBug531511Test(true, "@NNParams @NNFields", true, false);
 	}
 	@Test
-	public void testBug531511_param_multi_first_decl() throws Exception {		
+	public void testBug531511_param_multi_first_decl() throws Exception {
 		runBug531511Test(false, "@NNParams @NNFields", true, false);
 	}
 	@Test
-	public void testBug531511_param_multi_second_type() throws Exception {		
+	public void testBug531511_param_multi_second_type() throws Exception {
 		runBug531511Test(true, "@NNFields @NNParams", true, false);
 	}
 	@Test
-	public void testBug531511_param_multi_second_decl() throws Exception {		
+	public void testBug531511_param_multi_second_decl() throws Exception {
 		runBug531511Test(false, "@NNFields @NNParams", true, false);
 	}
 	@Test
-	public void testBug531511_return_multi_first_type() throws Exception {		
+	public void testBug531511_return_multi_first_type() throws Exception {
 		runBug531511Test(true, "@NNReturn @NNFields", false, true);
 	}
 	@Test
-	public void testBug531511_return_multi_first_decl() throws Exception {		
+	public void testBug531511_return_multi_first_decl() throws Exception {
 		runBug531511Test(false, "@NNReturn @NNFields", false, true);
 	}
 	@Test
-	public void testBug531511_return_multi_second_type() throws Exception {		
+	public void testBug531511_return_multi_second_type() throws Exception {
 		runBug531511Test(true, "@NNFields @NNReturn", false, true);
 	}
 	@Test
-	public void testBug531511_return_multi_second_decl() throws Exception {		
+	public void testBug531511_return_multi_second_decl() throws Exception {
 		runBug531511Test(false, "@NNFields @NNReturn", false, true);
 	}
 	@Test
-	public void testBug531511_boolean_default_type() throws Exception {		
+	public void testBug531511_boolean_default_type() throws Exception {
 		runBug531511Test(true, "@NNBDBoolean", false, false);
 	}
 	@Test
-	public void testBug531511_boolean_default_decl() throws Exception {		
+	public void testBug531511_boolean_default_decl() throws Exception {
 		runBug531511Test(false, "@NNBDBoolean", false, false);
 	}
 	@Test
-	public void testBug531511_boolean_true_type() throws Exception {		
+	public void testBug531511_boolean_true_type() throws Exception {
 		runBug531511Test(true, "@NNBDBoolean(true)", false, false);
 	}
 	@Test
-	public void testBug531511_boolean_true_decl() throws Exception {		
+	public void testBug531511_boolean_true_decl() throws Exception {
 		runBug531511Test(false, "@NNBDBoolean(true)", false, false);
 	}
 	@Test
-	public void testBug531511_boolean_false_type() throws Exception {		
+	public void testBug531511_boolean_false_type() throws Exception {
 		runBug531511Test(true, "@NNBDBoolean(false)", true, true);
 	}
 	@Test
-	public void testBug531511_boolean_false_decl() throws Exception {		
+	public void testBug531511_boolean_false_decl() throws Exception {
 		runBug531511Test(false, "@NNBDBoolean(false)", true, true);
 	}
 	@Test
-	public void testBug531511_unconfigurable_type() throws Exception {		
+	public void testBug531511_unconfigurable_type() throws Exception {
 		runBug531511Test(true, "@NNBDUnconfigurable", false, false);
 	}
 	@Test
-	public void testBug531511_unconfigurable_decl() throws Exception {		
+	public void testBug531511_unconfigurable_decl() throws Exception {
 		runBug531511Test(false, "@NNBDUnconfigurable", false, false);
 	}
 }

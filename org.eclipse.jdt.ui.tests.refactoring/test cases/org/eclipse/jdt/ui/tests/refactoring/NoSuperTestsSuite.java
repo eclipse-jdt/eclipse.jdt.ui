@@ -20,7 +20,7 @@ import junit.framework.TestSuite;
 /**
  * Test suite that only includes tests from the given test class, but not
  * tests from super classes.
- * 
+ *
  * @since 3.7
  */
 public class NoSuperTestsSuite extends TestSuite {
@@ -29,13 +29,13 @@ public class NoSuperTestsSuite extends TestSuite {
 	 * (in {@link junit.framework.TestSuite#addTestMethod}).
 	 * Alternative would have been to copy most of the implementation of TestSuite.
 	 */
-	
+
 	private static final Class<? extends Test> WARNING_TEST_CLASS= warning(null).getClass();
 
 	public NoSuperTestsSuite(Class<? extends Test> theClass) {
 		super(theClass);
 	}
-	
+
 	/**
 	 * Adds the given test to this suite, but only if the test was declared in
 	 * the test object's class (and not in a superclass).
@@ -54,7 +54,7 @@ public class NoSuperTestsSuite extends TestSuite {
 			super.addTest(test);
 		}
 	}
-	
+
 	@Override
 	public void addTestSuite(Class<? extends TestCase> testClass) {
 		super.addTest(new NoSuperTestsSuite(testClass));

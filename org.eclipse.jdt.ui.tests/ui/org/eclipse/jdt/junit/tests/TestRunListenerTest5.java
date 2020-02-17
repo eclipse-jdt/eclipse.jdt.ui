@@ -50,7 +50,7 @@ public class TestRunListenerTest5 extends AbstractTestRunListenerTest {
 			JUnitCore.removeTestRunListener(testRunListener);
 		}
 	}
-	
+
 	@Override
 	protected void setUp() throws Exception {
 		fProject= JavaProjectHelper.createJavaProject("TestRunListenerTest", "bin");
@@ -76,7 +76,7 @@ public class TestRunListenerTest5 extends AbstractTestRunListenerTest {
 		String[] actual= runSequenceTest(aTestCase);
 		assertEqualLog(expectedSequence, actual);
 	}
-	
+
 	public void testFail() throws Exception {
 		String source=
 			"package pack;\n" +

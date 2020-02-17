@@ -312,7 +312,7 @@ public class MarkOccurrenceTest17 extends TestCase {
 		OccurrenceLocation[] ranges= { find(s, "void", 1), find(s, "reader", 1), find(s, "FileReader", 3), find(s, "read", 3), find(s, "}", 2), find(s, "}", 3) };
 		checkSelection(s, offset, length, ranges);
 	}
-	
+
 	public void testThrowingException1() throws Exception {
 		fFinder= new ExceptionOccurrencesFinder();
 		StringBuffer s= new StringBuffer();

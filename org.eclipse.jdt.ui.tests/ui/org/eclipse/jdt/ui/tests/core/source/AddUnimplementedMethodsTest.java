@@ -96,7 +96,7 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		fJavaProject.setOptions(options);
 
 		assertNotNull(JavaProjectHelper.addRTJar(fJavaProject));
-		
+
 		StubUtility.setCodeTemplate(CodeTemplateContextType.METHODSTUB_ID, "${body_statement}\n// TODO", null);
 
 		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(fJavaProject, "src");
@@ -257,7 +257,7 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		buf.append("  int getArea();\r\n");
 		buf.append("}\r\n");
 		fPackage.createCompilationUnit("Shape.java", buf.toString(), false, null);
-		
+
 		buf= new StringBuffer();
 		buf.append("package ibm.util;\n");
 		buf.append("interface Circle extends Shape {\r\n");
@@ -265,23 +265,23 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		buf.append("}\r\n");
 		buf.append("\r\n");
 		fPackage.createCompilationUnit("Circle.java", buf.toString(), false, null);
-		
+
 		buf= new StringBuffer();
 		buf.append("package ibm.util;\n");
 		buf.append("public class DefaultCircle implements Circle {\n");
 		buf.append("}\n");
 		ICompilationUnit cu= fPackage.getCompilationUnit("DefaultCircle.java");
 		IType testClass= cu.createType(buf.toString(), null, true, null);
-		
+
 		testHelper(testClass, -1, false);
-		
+
 		IMethod[] methods= testClass.getMethods();
 		checkMethodsInOrder(new String[] { "getX", "getY", "getEdges", "getArea", "getR"}, methods);
-		
+
 		IImportDeclaration[] imports= cu.getImports();
 		checkImports(new String[0], imports);
 	}
-	
+
 	public void testInsertAt() throws Exception {
 		fJavaProject= JavaProjectHelper.createJavaProject("DummyProject", "bin");
 		assertNotNull(JavaProjectHelper.addRTJar(fJavaProject));
@@ -396,11 +396,11 @@ public class AddUnimplementedMethodsTest extends TestCase {
 	public void testJLS4() throws Exception {
 		doTestOldAstLevel(AST.JLS4);
 	}
-	
+
 	public void testJLS8() throws Exception {
 		doTestOldAstLevel(AST.JLS8);
 	}
-	
+
 	/**
 	 * @param astLevel AST.JLS*
 	 * @throws Exception
@@ -424,9 +424,9 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		assertNotNull("Could not find type declaration node", declaration);
 		ITypeBinding binding= declaration.resolveBinding();
 		assertNotNull("Binding for type declaration could not be resolved", binding);
-		
+
 		IMethodBinding[] overridableMethods= StubUtility2Core.getOverridableMethods(unit.getAST(), binding, false);
-		
+
 		AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(unit, binding, overridableMethods, -1, true, true, true);
 		op.run(new NullProgressMonitor());
 
@@ -435,7 +435,7 @@ public class AddUnimplementedMethodsTest extends TestCase {
 
 		IImportDeclaration[] imports= cu.getImports();
 		checkImports(new String[] { "java.util.Date", "java.util.Hashtable", "java.util.Vector", "java.util.ArrayList" }, imports);
-		
+
 		IProblem[] problems= parser.parse(cu, true).getProblems();
 		assertArrayEquals(new IProblem[0], problems);
 	}
@@ -466,7 +466,7 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		}
 		assertEquals(Strings.concatenate(expected, ", "), Strings.concatenate(actualNames, ", "));
 	}
-	
+
 	private void checkMethods(String[] expected, IMethod[] methods) {
 		int nMethods= methods.length;
 		int nExpected= expected.length;

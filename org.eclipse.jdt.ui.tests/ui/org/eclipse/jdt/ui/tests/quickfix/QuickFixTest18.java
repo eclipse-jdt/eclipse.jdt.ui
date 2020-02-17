@@ -1516,7 +1516,7 @@ public class QuickFixTest18 extends QuickFixTest {
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
-	
+
 	// remove redundant @NonNull on field type
 	@Test
 	public void testRemoveRedundantNonNull() throws Exception {
@@ -1559,7 +1559,7 @@ public class QuickFixTest18 extends QuickFixTest {
 		options.put(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
 		JavaCore.setOptions(options);
 		JavaProjectHelper.addLibrary(fJProject1, new Path(Java18ProjectTestSetup.getJdtAnnotations20Path()));
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 
 		StringBuffer buf;
@@ -1623,7 +1623,7 @@ public class QuickFixTest18 extends QuickFixTest {
 		buf.append("		i2.h(n1, n2);\n");
 		buf.append("	}\n");
 		buf.append("}");
-		assertProposalPreviewEquals(buf.toString(), "Change method 'g(Number, Number)' to 'g(Boolean, Boolean)'", proposals1);		
+		assertProposalPreviewEquals(buf.toString(), "Change method 'g(Number, Number)' to 'g(Boolean, Boolean)'", proposals1);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1648,7 +1648,7 @@ public class QuickFixTest18 extends QuickFixTest {
 		buf.append("		i2.h(n1, n2);\n");
 		buf.append("	}\n");
 		buf.append("}");
-		assertProposalPreviewEquals(buf.toString(), "Change method 'h(Number, Number)' to 'h(Boolean, Boolean)'", proposals2);		
+		assertProposalPreviewEquals(buf.toString(), "Change method 'h(Number, Number)' to 'h(Boolean, Boolean)'", proposals2);
 	}
 	@Test
 	public void testBug514580_avoidRedundantNonNullInTypeChange_field() throws Exception {
@@ -1656,7 +1656,7 @@ public class QuickFixTest18 extends QuickFixTest {
 		options.put(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
 		JavaCore.setOptions(options);
 		JavaProjectHelper.addLibrary(fJProject1, new Path(Java18ProjectTestSetup.getJdtAnnotations20Path()));
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 
 		StringBuffer buf;
@@ -1746,7 +1746,7 @@ public class QuickFixTest18 extends QuickFixTest {
 		buf.append("\n");
 		buf.append("	}\n");
 		buf.append("}");
-		assertProposalPreviewEquals(buf.toString(), "Change type of 'f1' to 'String'", proposals1);		
+		assertProposalPreviewEquals(buf.toString(), "Change type of 'f1' to 'String'", proposals1);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1821,7 +1821,7 @@ public class QuickFixTest18 extends QuickFixTest {
 		buf.append("\n");
 		buf.append("	}\n");
 		buf.append("}");
-		assertProposalPreviewEquals(buf.toString(), "Change return type of 'g(..)' to 'Map<? extends Number, Integer>[]'", proposals1);		
+		assertProposalPreviewEquals(buf.toString(), "Change return type of 'g(..)' to 'Map<? extends Number, Integer>[]'", proposals1);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1858,7 +1858,7 @@ public class QuickFixTest18 extends QuickFixTest {
 		buf.append("\n");
 		buf.append("	}\n");
 		buf.append("}");
-		assertProposalPreviewEquals(buf.toString(), "Change return type of 'g(..)' to 'Map<? extends Number, Integer>[]'", proposals2);		
+		assertProposalPreviewEquals(buf.toString(), "Change return type of 'g(..)' to 'Map<? extends Number, Integer>[]'", proposals2);
 	}
 	@Test
 	public void testBug514580_avoidRedundantNonNullInTypeChange_local() throws Exception {
@@ -1866,7 +1866,7 @@ public class QuickFixTest18 extends QuickFixTest {
 		options.put(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
 		JavaCore.setOptions(options);
 		JavaProjectHelper.addLibrary(fJProject1, new Path(Java18ProjectTestSetup.getJdtAnnotations20Path()));
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 
 		StringBuffer buf;
@@ -1954,7 +1954,7 @@ public class QuickFixTest18 extends QuickFixTest {
 		buf.append("	}\n");
 		buf.append("}\n");
 		buf.append("");
-		assertProposalPreviewEquals(buf.toString(), "Change type of 'l1' to 'String'", proposals1);		
+		assertProposalPreviewEquals(buf.toString(), "Change type of 'l1' to 'String'", proposals1);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1991,7 +1991,7 @@ public class QuickFixTest18 extends QuickFixTest {
 		buf.append("	}\n");
 		buf.append("}\n");
 		buf.append("");
-		assertProposalPreviewEquals(buf.toString(), "Change type of 'l2' to 'String'", proposals2);		
+		assertProposalPreviewEquals(buf.toString(), "Change type of 'l2' to 'String'", proposals2);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2027,7 +2027,7 @@ public class QuickFixTest18 extends QuickFixTest {
 		buf.append("	}\n");
 		buf.append("}\n");
 		buf.append("");
-		assertProposalPreviewEquals(buf.toString(), "Change return type of 'h(..)' to 'Map<? extends Number, Integer>[]'", proposals1);		
+		assertProposalPreviewEquals(buf.toString(), "Change return type of 'h(..)' to 'Map<? extends Number, Integer>[]'", proposals1);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2063,7 +2063,7 @@ public class QuickFixTest18 extends QuickFixTest {
 		buf.append("	}\n");
 		buf.append("}\n");
 		buf.append("");
-		assertProposalPreviewEquals(buf.toString(), "Change return type of 'h(..)' to 'Map<? extends Number, Integer>[]'", proposals2);		
+		assertProposalPreviewEquals(buf.toString(), "Change return type of 'h(..)' to 'Map<? extends Number, Integer>[]'", proposals2);
 	}
 
 	// bug 420116 : create parameter quickfix should be offered

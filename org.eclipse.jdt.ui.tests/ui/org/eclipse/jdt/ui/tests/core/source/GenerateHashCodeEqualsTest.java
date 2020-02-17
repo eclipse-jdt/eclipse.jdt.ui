@@ -983,7 +983,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	/**
 	 * Test with J7+ Objects.hash and Objects.equals method calls
 	 * Using non-array instance variables and Enum
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void testHashCodeEqualsIn17() throws Exception {
@@ -1046,11 +1046,11 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 
 		compareSource(expected, a.getSource());
 	}
-	
+
 	/**
 	 * Test with J7+ Objects.hash and Objects.equals method calls
 	 * Using unique non-array instance variables
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void testHashCodeEqualsUniqueFieldIn17() throws Exception {
@@ -1094,11 +1094,11 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 
 		compareSource(expected, a.getSource());
 	}
-	
+
 	/**
 	 * Test with J7+ Objects.hash and Objects.equals method calls
 	 * Using non-array instance variables with 'instanceof' comparison
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void testHashCodeEqualsInstanceOfIn17() throws Exception {
@@ -1155,11 +1155,11 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 
 		compareSource(expected, a.getSource());
 	}
-	
+
 	/**
 	 * Test with J7+ Objects.hash and Objects.equals method calls
 	 * Using 1-dim array amongst other instance variables
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void testHashCodeEqualsArrayIn17() throws Exception {
@@ -1294,7 +1294,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 
 		compareSource(expected, a.getSource());
 	}
-	
+
 	/**
 	 * Test with J7+ Objects.hash and Objects.equals method calls
 	 * Using 1-dim Serializable array amongst other instance variables
@@ -1365,7 +1365,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 
 		compareSource(expected, a.getSource());
 	}
-	
+
 	/**
 	 * Test with J7+ Objects.hash and Objects.equals method calls
 	 * Using 1-dim Object array amongst other instance variables
@@ -1434,7 +1434,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 
 		compareSource(expected, a.getSource());
 	}
-	
+
 	/**
 	 * Test with J7+ Objects.hash and Objects.equals method calls
 	 * Using 1-dim type variable arrays extending Serializable and Number
@@ -1486,7 +1486,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 
 		compareSource(expected, a.getSource());
 	}
-	
+
 	/**
 	 * Test with J7+ Objects.hash and Objects.equals method calls
 	 * Using multidimensional array amongst other instance variables
@@ -1555,11 +1555,11 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 
 		compareSource(expected, a.getSource());
 	}
-	
+
 	/**
 	 * Test with J7+ Objects.hash and Objects.equals method calls
 	 * Using both multidimensional and 1-dimensional primitive arrays amongst other instance variables
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void testHashCodeEqualsVariousArraysIn17() throws Exception {
@@ -1628,11 +1628,11 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 
 		compareSource(expected, a.getSource());
 	}
-	
+
 	/**
 	 * Test with J7+ Objects.hash and Objects.equals method calls
 	 * Using ONLY multidimensional and 1-dimensional arrays as instance variables
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void testHashCodeEqualsOnlyArraysIn17() throws Exception {
@@ -1680,7 +1680,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 
 		compareSource(expected, a.getSource());
 	}
-	
+
 	/**
 	 * Test member types
 	 *
@@ -1975,7 +1975,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 
 	/**
 	 * Test with J7+ Objects.hash and Objects.equals method calls Using sub-type
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void testSubTypeIn17() throws Exception {
@@ -2040,7 +2040,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 
 	/**
 	 * Test implementation based only on super class
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void testSubTypeNoFields() throws Exception {
@@ -2151,7 +2151,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	 * @throws Exception rarely
 	 */
 	public void testAbstractSuperMethods() throws Exception {
-	
+
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
 				"\r\n" +
 				"abstract class Super {\r\n" +
@@ -2163,10 +2163,10 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"	String name;\r\n" +
 				"}" +
 				"", true, null);
-	
+
 		IField[] fields= getFields(a.getType("Sub"), new String[] {"name" });
 		runOperation(a.getType("Sub"), fields, null, false, false, false, false, false);
-	
+
 		String expected= "package p;\r\n" +
 				"\r\n" +
 				"abstract class Super {\r\n" +
@@ -2203,10 +2203,10 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"	}\r\n" +
 				"}" +
 				"";
-	
+
 		compareSource(expected, a.getSource());
 	}
-	
+
 	/**
 	 * Test that generated equals() should use Arrays.deepEquals() instead of Arrays.equals() for projects with compliance >= 1.5
 	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=304176

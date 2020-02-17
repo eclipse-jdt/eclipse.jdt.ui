@@ -54,7 +54,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
  * <p>
  * For details see https://bugs.eclipse.org/bugs/show_bug.cgi?id=262389
  * </p>
- * 
+ *
  * @since 3.5
  */
 public class JavaModelOpCompundUndoTest extends TestCase {
@@ -157,7 +157,7 @@ public class JavaModelOpCompundUndoTest extends TestCase {
 
 		assertEquals(CU_CONTENTS, fDocument.get());
 		fUndoManager.beginCompoundChange();
-		
+
 		IMethod foo= JavaModelUtil.findMethod("foo", new String[0], false, fCompilationUnit.findPrimaryType());
 		IMethod bar= JavaModelUtil.findMethod("bar", new String[0], false, fCompilationUnit.findPrimaryType());
 		IJavaModel model= JavaCore.create(JavaPlugin.getWorkspace().getRoot());
@@ -169,6 +169,6 @@ public class JavaModelOpCompundUndoTest extends TestCase {
 
 		fUndoManager.undo();
 		assertEquals(CU_CONTENTS, fDocument.get());
-		
+
 	}
 }

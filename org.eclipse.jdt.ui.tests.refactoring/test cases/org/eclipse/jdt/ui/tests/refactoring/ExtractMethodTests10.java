@@ -37,7 +37,7 @@ public class ExtractMethodTests10 extends ExtractMethodTests {
 	}
 
 	//====================================================================================
-	// Testing var type 
+	// Testing var type
 	//====================================================================================
 
 	public void testVar1() throws Exception {

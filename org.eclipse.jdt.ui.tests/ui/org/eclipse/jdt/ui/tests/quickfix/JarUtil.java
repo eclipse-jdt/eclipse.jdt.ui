@@ -169,7 +169,7 @@ private static class Requestor implements ICompilerRequestor {
 	public String outputPath;
 	public String problemLog = "";
 	private ClassFileFilter classFileFilter= null;
-	
+
 	public Requestor(ClassFileFilter classFileFilter) {
 		if (classFileFilter != null) {
 			this.classFileFilter = classFileFilter;
@@ -223,7 +223,7 @@ public static void compile(String[] pathsAndContents, Map<String, String> option
         } else {
         	classpath = classLibs;
         }
-        
+
         INameEnvironment nameEnvironment = new FileSystem(classpath, new String[] {}, null);
         IErrorHandlingPolicy errorHandlingPolicy =
             new IErrorHandlingPolicy() {

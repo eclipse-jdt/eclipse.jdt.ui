@@ -84,26 +84,26 @@ public class BindingLabels18Test extends AbstractBindingLabelsTest {
 		IMethod invokeExact= methodHandle.getMethod("invokeExact", new String[] {
 				Signature.createArraySignature(Signature.createTypeSignature("java.lang.Object", true), 1)
 		});
-		
+
 		String lab= getBindingLabel(invokeExact, JavaElementLabels.ALL_DEFAULT);
 		assertLinkMatch(lab, "invokeExact({{java.lang|Object}}...)");
-	
+
 		lab= getBindingLabel(invokeExact, JavaElementLabels.M_PARAMETER_NAMES);
 		assertEqualString(lab, "invokeExact(arg0)");
-	
+
 		lab= getBindingLabel(invokeExact, JavaElementLabels.M_PARAMETER_TYPES);
 		assertLinkMatch(lab, "invokeExact({{java.lang|Object}}...)");
-		
+
 		lab= getBindingLabel(invokeExact, JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_PARAMETER_TYPES);
 		assertLinkMatch(lab, "invokeExact({{java.lang|Object}}... arg0)");
-		
+
 		lab= getBindingLabel(invokeExact, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.USE_RESOLVED);
 		assertLinkMatch(lab, "invokeExact({{java.lang|Object}}...)");
 	}
 
 	private IJavaElement createInvokeReference(String invocation) throws CoreException, JavaModelException {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
-		
+
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
 		StringBuilder buf= new StringBuilder();
 		buf.append("package org.test;\n");
@@ -115,7 +115,7 @@ public class BindingLabels18Test extends AbstractBindingLabelsTest {
 		buf.append("}\n");
 		String content= buf.toString();
 		ICompilationUnit cu= pack1.createCompilationUnit("Test.java", content, false, null);
-		
+
 		IJavaElement elem= cu.codeSelect(content.indexOf("invoke("), 0)[0];
 		return elem;
 	}
@@ -123,107 +123,107 @@ public class BindingLabels18Test extends AbstractBindingLabelsTest {
 	private void assertInvokeUnresolved(IJavaElement elem) {
 		String lab= getBindingLabel(elem, JavaElementLabels.ALL_DEFAULT);
 		assertLinkMatch(lab, "invoke({{java.lang|Object}}...)");
-		
+
 		lab= getBindingLabel(elem, JavaElementLabels.M_PARAMETER_NAMES);
 		assertEqualString(lab, "invoke(arg0)");
-		
+
 		lab= getBindingLabel(elem, JavaElementLabels.M_PARAMETER_TYPES);
 		assertLinkMatch(lab, "invoke({{java.lang|Object}}...)");
-		
+
 		lab= getBindingLabel(elem, JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PRE_RETURNTYPE);
 		assertLinkMatch(lab, "{{java.lang|Object}} invoke({{java.lang|Object}}... arg0)");
 	}
 
 	public void testMethodLabelPolymorphicSignatureReference0() throws Exception {
 		IJavaElement elem= createInvokeReference("mh.invoke()");
-		
+
 		assertInvokeUnresolved(elem);
-		
+
 		String lab= getBindingLabel(elem, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.USE_RESOLVED);
 		assertEqualString(lab, "invoke()");
-		
+
 		lab= getBindingLabel(elem, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.USE_RESOLVED);
 		assertEqualString(lab, "invoke()");
-		
+
 		lab= getBindingLabel(elem, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.USE_RESOLVED);
 		assertLinkMatch(lab, "void invoke()");
 	}
 
 	public void testMethodLabelPolymorphicSignatureReference0Ret() throws Exception {
 		IJavaElement elem= createInvokeReference("String s= (String) mh.invoke()");
-		
+
 		assertInvokeUnresolved(elem);
-		
+
 		String lab= getBindingLabel(elem, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.USE_RESOLVED);
 		assertEqualString(lab, "invoke()");
-		
+
 		lab= getBindingLabel(elem, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.USE_RESOLVED);
 		assertEqualString(lab, "invoke()");
-		
+
 		lab= getBindingLabel(elem, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.USE_RESOLVED);
 		assertLinkMatch(lab, "{{java.lang|Object}} invoke()");
 	}
-	
+
 	public void testMethodLabelPolymorphicSignatureReference1() throws Exception {
 		IJavaElement elem= createInvokeReference("mh.invoke(1)");
-		
+
 		assertInvokeUnresolved(elem);
-		
+
 		String lab= getBindingLabel(elem, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.USE_RESOLVED);
 		assertEqualString(lab, "invoke(int)");
-		
+
 		lab= getBindingLabel(elem, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.USE_RESOLVED);
 		assertEqualString(lab, "invoke(int)");
-		
+
 		lab= getBindingLabel(elem, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.USE_RESOLVED);
 		assertLinkMatch(lab, "void invoke(int arg00)");
 	}
-	
+
 	public void testMethodLabelPolymorphicSignatureReference1Array() throws Exception {
 		IJavaElement elem= createInvokeReference("mh.invoke(new Object[42])");
-		
+
 		assertInvokeUnresolved(elem);
-		
+
 		String lab= getBindingLabel(elem, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.USE_RESOLVED);
 		assertLinkMatch(lab, "invoke({{java.lang|Object}}[])");
-		
+
 		lab= getBindingLabel(elem, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.USE_RESOLVED);
 		assertLinkMatch(lab, "invoke({{java.lang|Object}}[])");
-		
+
 		lab= getBindingLabel(elem, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.USE_RESOLVED);
 		assertLinkMatch(lab, "void invoke({{java.lang|Object}}[] arg00)");
 	}
-	
+
 	public void testMethodLabelPolymorphicSignatureReference2() throws Exception {
 		IJavaElement elem= createInvokeReference("mh.invoke('a', new Integer[0][])");
-		
+
 		assertInvokeUnresolved(elem);
-		
+
 		String lab= getBindingLabel(elem, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.USE_RESOLVED);
 		assertLinkMatch(lab, "invoke(char, {{java.lang|Integer}}[][])");
-		
+
 		lab= getBindingLabel(elem, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.USE_RESOLVED);
 		assertLinkMatch(lab, "invoke(char, {{java.lang|Integer}}[][])");
-		
+
 		lab= getBindingLabel(elem, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.USE_RESOLVED);
 		assertLinkMatch(lab, "void invoke(char arg00, {{java.lang|Integer}}[][] arg01)");
 	}
-	
+
 	public void testMethodLabelPolymorphicSignatureReference3Ret() throws Exception {
 		IJavaElement elem= createInvokeReference("long l= (long) mh.invoke('a', new java.util.ArrayList<String>(), null)");
-		
+
 		assertInvokeUnresolved(elem);
-		
+
 		String lab= getBindingLabel(elem, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.USE_RESOLVED);
 		assertLinkMatch(lab, "invoke(char, {{java.util|ArrayList}}<{{java.util.ArrayList|E}}>, {{java.lang|Void}})");
-		
+
 		lab= getBindingLabel(elem, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.USE_RESOLVED);
 		assertLinkMatch(lab, "invoke(char, {{java.util|ArrayList}}, {{java.lang|Void}})");
-		
+
 		lab= getBindingLabel(elem, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.USE_RESOLVED);
 		assertLinkMatch(lab, "{{java.lang|Object}} invoke(char arg00, {{java.util|ArrayList}} arg01, {{java.lang|Void}} arg02)");
 	}
-	
+
 	public void testTypeLabelLambda1() throws Exception {
 
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -247,7 +247,7 @@ public class BindingLabels18Test extends AbstractBindingLabelsTest {
 		lab= getBindingLabel(lambdaMethod, JavaElementLabels.T_FULLY_QUALIFIED
 				| JavaElementLabels.M_POST_QUALIFIED | JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES);
 		assertLinkMatch(lab, "accept(int i) - {{org.test.C}}.{{org.test.C|c}}.() -> {...} {{java.util.function|IntConsumer}}");
-		
+
 		IJavaElement lambdaType= lambdaMethod.getParent();
 		lab= getBindingLabel(lambdaType, JavaElementLabels.T_POST_QUALIFIED);
 // Bindings don't have the split identity of a lambda as expected from JavaElementLabelsTest18
@@ -281,7 +281,7 @@ public class BindingLabels18Test extends AbstractBindingLabelsTest {
 		lab= getBindingLabel(lambdaMethod, JavaElementLabels.T_FULLY_QUALIFIED
 				| JavaElementLabels.M_POST_QUALIFIED | JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES);
 		assertLinkMatch(lab, "accept({{java.util.function.Consumer|T}} arg0) - {{org.test.C}}.{{org.test.C|c}}.() -> {...} {{java.util.function|Consumer}}");
-		
+
 		IJavaElement lambdaType= lambdaMethod.getParent();
 		lab= getBindingLabel(lambdaType, JavaElementLabels.T_POST_QUALIFIED);
 		assertLinkMatch(lab, "accept(...) - {{org.test.C}}.{{org.test.C|c}}.() -> {...} {{java.util.function|Consumer}}");
@@ -332,11 +332,11 @@ public class BindingLabels18Test extends AbstractBindingLabelsTest {
 		IJavaElement[] elems= cu.codeSelect(content.lastIndexOf("s)"), 1);
 		IJavaElement thread= elems[0];
 		String lab= getBindingLabel(thread, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.ALL_FULLY_QUALIFIED | JavaElementLabels.USE_RESOLVED);
-		assertLinkMatch(lab, "{{org.test.C}}.{{org.test.C|t}}.{{org.test.C.t|new Thread() {...}}}.{{org.test.C.t.new Thread() {...}|run}}()." + 
+		assertLinkMatch(lab, "{{org.test.C}}.{{org.test.C|t}}.{{org.test.C.t|new Thread() {...}}}.{{org.test.C.t.new Thread() {...}|run}}()." +
 								"() -> {...} {{java.util.function|Consumer}}.{{java.util.function.Consumer<java.lang.String>|accept}}({{java.lang|String}}).s");
 
 		lab= getBindingLabel(thread, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.F_PRE_TYPE_SIGNATURE | JavaElementLabels.F_POST_QUALIFIED);
-		assertLinkMatch(lab, "{{java.lang|String}} s - {{org.test.C}}.{{org.test.C|t}}.{{org.test.C.t|new Thread() {...}}}.{{org.test.C.t.new Thread() {...}|run}}()." + 
+		assertLinkMatch(lab, "{{java.lang|String}} s - {{org.test.C}}.{{org.test.C|t}}.{{org.test.C.t|new Thread() {...}}}.{{org.test.C.t.new Thread() {...}|run}}()." +
 								"() -> {...} {{java.util.function|Consumer}}.{{java.util.function.Consumer|accept}}({{java.util.function.Consumer|T}})");
 	}
 
@@ -430,7 +430,7 @@ public class BindingLabels18Test extends AbstractBindingLabelsTest {
 			JavaProjectHelper.addRTJar12(javaProject, false);
 			JavaProjectHelper.set12CompilerOptions(javaProject, false);
 			IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(javaProject, "src");
-	
+
 			IPackageFragment pack1= sourceFolder.createPackageFragment("p", false, null);
 			StringBuilder buf= new StringBuilder();
 			buf.append("package p;\n");
@@ -451,7 +451,7 @@ public class BindingLabels18Test extends AbstractBindingLabelsTest {
 			String content= buf.toString();
 			ICompilationUnit cu= pack1.createCompilationUnit("Test.java", content, false, null);
 			IJavaElement enclElement= cu.getTypes()[0].getMethods()[1];
-			
+
 			class MyASTRequestor extends ASTRequestor {
 				CompilationUnit ast;
 				@Override
@@ -465,7 +465,7 @@ public class BindingLabels18Test extends AbstractBindingLabelsTest {
 			parser.setProject(javaProject);
 			MyASTRequestor requestor= new MyASTRequestor();
 			parser.createASTs(new ICompilationUnit[] {cu}, new String[0], requestor, null);
-			
+
 			MethodDeclaration method= ((TypeDeclaration)requestor.ast.types().get(0)).getMethods()[1];
 			Assignment assignment= (Assignment) ((ExpressionStatement) method.getBody().statements().get(0)).getExpression();
 			Name name= (Name) assignment.getLeftHandSide();

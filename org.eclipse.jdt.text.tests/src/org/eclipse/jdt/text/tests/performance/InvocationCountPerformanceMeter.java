@@ -541,7 +541,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	 * Returns the JNI-style signature of the given method. See
 	 * http://download.oracle.com/javase/6/docs
 	 * /jdk/api/jpda/jdi/com/sun/jdi/doc-files/signature.html
-	 * 
+	 *
 	 * @param method the method
 	 * @return the JNI style signature
 	 */
@@ -553,7 +553,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	 * Returns the JNI-style signature of the given constructor. See
 	 * http://download.oracle.com/javase
 	 * /6/docs/jdk/api/jpda/jdi/com/sun/jdi/doc-files/signature.html
-	 * 
+	 *
 	 * @param constructor the constructor
 	 * @return the JNI style signature
 	 */
@@ -565,7 +565,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	 * Returns the JNI-style signature of the given parameter types. See
 	 * http://download.oracle.com/javase
 	 * /6/docs/jdk/api/jpda/jdi/com/sun/jdi/doc-files/signature.html
-	 * 
+	 *
 	 * @param paramTypes the parameter types
 	 * @return the JNI style signature
 	 */
@@ -582,7 +582,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	 * Returns the JNI-style signature of the given class. See
 	 * http://download.oracle.com/javase/6/docs
 	 * /jdk/api/jpda/jdi/com/sun/jdi/doc-files/signature.html
-	 * 
+	 *
 	 * @param clazz the class
 	 * @return the JNI style signature
 	 */

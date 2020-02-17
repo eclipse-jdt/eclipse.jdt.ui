@@ -65,7 +65,7 @@ import junit.framework.TestSuite;
 public class CodeCompletionTest18 extends AbstractCompletionTest {
 
 	private static final Class<CodeCompletionTest18> THIS= CodeCompletionTest18.class;
-	
+
 	public static Test suite() {
 		return new Java18ProjectTestSetup(new TestSuite(THIS));
 	}
@@ -153,8 +153,8 @@ public class CodeCompletionTest18 extends AbstractCompletionTest {
 		String contents=
 			"package test1\n" +
 			"public class X {\n" +
-			"    void foo() {\n" + 
-			"        java.util.Comparator.reverseOrder().  // content assist after '.' => NPE\n" + 
+			"    void foo() {\n" +
+			"        java.util.Comparator.reverseOrder().  // content assist after '.' => NPE\n" +
 			"    }\n" +
 			"}\n";
 		ICompilationUnit cu= pack1.createCompilationUnit("X.java", contents, false, null);
@@ -186,8 +186,8 @@ public class CodeCompletionTest18 extends AbstractCompletionTest {
 		String expectedContents=
 				"package test1\n" +
 				"public class X {\n" +
-				"    void foo() {\n" + 
-				"        java.util.Comparator.reverseOrder().thenComparingLong()  // content assist after '.' => NPE\n" + 
+				"    void foo() {\n" +
+				"        java.util.Comparator.reverseOrder().thenComparingLong()  // content assist after '.' => NPE\n" +
 				"    }\n" +
 				"}\n";
 		assertEquals(expectedContents, doc.get());
@@ -311,20 +311,20 @@ public class CodeCompletionTest18 extends AbstractCompletionTest {
 		buf.append("    getSize\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("I.java", buf.toString(), false, null);
-	
+
 		String str= "getSize";
 		int offset= buf.toString().lastIndexOf(str) + str.length();
-	
+
 		CompletionProposalCollector collector= createCollector(cu, offset);
 		collector.setReplacementLength(0);
 		codeComplete(cu, offset, collector);
-	
+
 		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
 		assertEquals(1, proposals.length);
 		IEditorPart part= JavaUI.openInEditor(cu);
 		IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
 		proposals[0].apply(doc);
-	
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public interface I {\n");
@@ -795,26 +795,26 @@ public class CodeCompletionTest18 extends AbstractCompletionTest {
 			buf.append("}\n");
 			buf.append("");
 			String contents= buf.toString();
-	
+
 			ICompilationUnit cu= pack1.createCompilationUnit("A.java", contents, false, null);
-	
+
 			String str= "new A(";
-	
+
 			int offset= contents.indexOf(str) + str.length();
-	
+
 			CompletionProposalCollector collector= createCollector(cu, offset);
 			collector.setReplacementLength(0);
-	
+
 			codeComplete(cu, offset, collector);
-	
+
 			IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
-	
+
 			assertNumberOf("proposals", proposals.length, 1);
-	
+
 			IDocument doc= new Document(contents);
-	
+
 			proposals[0].apply(doc);
-	
+
 			buf= new StringBuffer();
 			buf.append("package test1;\n");
 			buf.append("\n");

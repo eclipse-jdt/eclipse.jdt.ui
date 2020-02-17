@@ -87,36 +87,36 @@ public class PackageExplorerShowInTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject, "src");
 		IPackageFragment pack= sourceFolder.createPackageFragment("p", true, null);
 		ICompilationUnit cu= pack.createCompilationUnit("A.java", "package p;\nclass A {\n\n}", true, null);
-		
+
 		IStructuredSelection selection= (IStructuredSelection) fPackageExplorer.convertSelection(new StructuredSelection(cu));
 		assertEquals(1, selection.size());
 		assertEquals(cu, selection.getFirstElement());
-		
+
 		selection= (IStructuredSelection) fPackageExplorer.convertSelection(new StructuredSelection(pack));
 		assertEquals(1, selection.size());
 		assertEquals(pack, selection.getFirstElement());
-		
+
 		selection= (IStructuredSelection) fPackageExplorer.convertSelection(new StructuredSelection(sourceFolder));
 		assertEquals(1, selection.size());
 		assertEquals(sourceFolder, selection.getFirstElement());
-		
+
 		selection= (IStructuredSelection) fPackageExplorer.convertSelection(new StructuredSelection(fJProject));
 		assertEquals(1, selection.size());
 		assertEquals(fJProject, selection.getFirstElement());
-		
+
 		// check corresponding resources:
 		selection= (IStructuredSelection) fPackageExplorer.convertSelection(new StructuredSelection(cu.getResource()));
 		assertEquals(1, selection.size());
 		assertEquals(cu, selection.getFirstElement());
-		
+
 		selection= (IStructuredSelection) fPackageExplorer.convertSelection(new StructuredSelection(pack.getResource()));
 		assertEquals(1, selection.size());
 		assertEquals(pack, selection.getFirstElement());
-		
+
 		selection= (IStructuredSelection) fPackageExplorer.convertSelection(new StructuredSelection(sourceFolder.getResource()));
 		assertEquals(1, selection.size());
 		assertEquals(sourceFolder, selection.getFirstElement());
-		
+
 		selection= (IStructuredSelection) fPackageExplorer.convertSelection(new StructuredSelection(fJProject.getProject()));
 		assertEquals(1, selection.size());
 		assertEquals(fJProject, selection.getFirstElement());
@@ -173,21 +173,21 @@ public class PackageExplorerShowInTests {
 		folder.create(true, true, null);
 		IFile file= folder.getFile("A.java");
 		file.create(new ByteArrayInputStream("package p;\nclass A {\n\n}".getBytes()), true, null);
-		
+
 		IStructuredSelection selection= (IStructuredSelection) fPackageExplorer.convertSelection(new StructuredSelection(file));
 		assertEquals(1, selection.size());
 		assertEquals(file, selection.getFirstElement());
-		
+
 		IEditorPart editor= EditorUtility.openInEditor(file);
 		try {
 			selection= (IStructuredSelection) fPackageExplorer.convertSelection(new StructuredSelection(file));
 			assertEquals(1, selection.size());
 			assertEquals(file, selection.getFirstElement());
-			
+
 			selection= (IStructuredSelection) fPackageExplorer.convertSelection(new StructuredSelection(JavaCore.create(file)));
 			assertEquals(1, selection.size());
 			assertEquals(file, selection.getFirstElement());
-			
+
 			selection= (IStructuredSelection) fPackageExplorer.convertSelection(new StructuredSelection(folder));
 			assertEquals(1, selection.size());
 			assertEquals(folder, selection.getFirstElement());

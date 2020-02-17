@@ -356,7 +356,7 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	public void test_287378() throws Exception {
 		performBugTest();
 	}
-	
+
 	public void test_267386() throws Exception {
 		performBugTest();
 	}
@@ -506,7 +506,7 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	public void test91470() throws Exception {
 		performArgumentTest();
 	}
-	
+
 	//see bug 269401
 	public void testFinalParameter1() throws Exception {
 		performArgumentTest();
@@ -521,7 +521,7 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	public void testFinalParameter3() throws Exception {
 		performArgumentTest();
 	}
-	
+
 	/* *********************** Name Conflict Tests ******************************* */
 
 	private void performNameConflictTest() throws Exception {
@@ -847,7 +847,7 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	public void testHierarchyOverloadedMultiLevel() throws Exception {
 		performCastTest();
 	}
-	
+
 	public void testHierarchyOverloadedPrivate() throws Exception {
 		performCastTest();
 	}
@@ -967,7 +967,7 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	public void testParameterizedType6() throws Exception {
 		performGenericTest();
 	}
-	
+
 	public void testParameterizedMethod() throws Exception {
 		performGenericTest();
 	}

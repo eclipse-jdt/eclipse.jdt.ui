@@ -67,8 +67,8 @@ public class CodeFormatterTest9 extends CodeFormatterTest {
 		String formatted= format(cu, 0, 0);
 
 		String expected=
-			"module pack {\n" + 
-			"    requires java.something;\n" + 
+			"module pack {\n" +
+			"    requires java.something;\n" +
 			"}\n";
 		assertEqualString(formatted, expected);
 	}
@@ -77,9 +77,9 @@ public class CodeFormatterTest9 extends CodeFormatterTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		String original= "module     pack { requires java   .something   ; }  \n ";
 		ICompilationUnit cu= pack1.createCompilationUnit("SomeClass.java", original, false, null);
-		
+
 		String formatted= format(cu, 0, 0);
-		
+
 		String expected= "module     pack { requires java   .something   ; }\n";
 		assertEqualString(formatted, expected);
 	}

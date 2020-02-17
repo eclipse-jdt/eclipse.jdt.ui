@@ -1,6 +1,6 @@
 /*******************************************************************************
  * Copyright (c) 2019, 2020 Red Hat Inc. and others.
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
@@ -122,12 +122,12 @@ public class ChainCompletionTest extends TestCase {
 
 	public void testPrimitiveCompletion() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" + 
-				"public class Foo {\n" + 
-				"  public void foo () {\n" + 
-				"    String s = \"\";\n" + 
-				"    int length = $\n" + 
-				"  }\n" + 
+		buf.append("package test;\n" +
+				"public class Foo {\n" +
+				"  public void foo () {\n" +
+				"    String s = \"\";\n" +
+				"    int length = $\n" +
+				"  }\n" +
 				"}");
 
 		int completionIndex= getCompletionIndex(buf);
@@ -455,8 +455,8 @@ public class ChainCompletionTest extends TestCase {
 				"  public static class Subtype extends CompletionOnSupertypeMemberInMethod {\n" +
 				"  }\n" +
 				"\n" +
-				"  public Boolean findMe() {\n" + 
-				"    return Boolean.TRUE;\n" + 
+				"  public Boolean findMe() {\n" +
+				"    return Boolean.TRUE;\n" +
 				"  }\n" +
 				"\n" +
 				"  public static void test_onAttribute() {\n" +
@@ -476,17 +476,17 @@ public class ChainCompletionTest extends TestCase {
 
 	public void testCompletionOnThisAndLocal() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("import java.util.Collection;\n" + 
-				"import java.util.HashMap;\n" + 
-				"import java.util.Map;\n" + 
-				"\n" + 
-				"package test;\n" + 
-				"\n" + 
-				"public class TestCompletionOnThisAndLocal {\n" + 
-				"  public void method() {\n" + 
-				"    final Map map = new HashMap();\n" + 
-				"    final Collection c = $ \n" + 
-				"  }\n" + 
+		buf.append("import java.util.Collection;\n" +
+				"import java.util.HashMap;\n" +
+				"import java.util.Map;\n" +
+				"\n" +
+				"package test;\n" +
+				"\n" +
+				"public class TestCompletionOnThisAndLocal {\n" +
+				"  public void method() {\n" +
+				"    final Map map = new HashMap();\n" +
+				"    final Collection c = $ \n" +
+				"  }\n" +
 				"}");
 
 		int completionIndex= getCompletionIndex(buf);
@@ -504,26 +504,26 @@ public class ChainCompletionTest extends TestCase {
 
 	public void testCompletionOnType() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" + 
-				"\n" + 
-				"public class TestCompletionOnType {\n" + 
-				"  public class S {\n" + 
-				"\n" + 
-				"    private static S INSTANCE = new S();\n" + 
-				"    private S () {}\n" + 
-				"\n" + 
-				"    public Integer findMe() {\n" + 
-				"      return 0;\n" + 
-				"    }\n" + 
-				"\n" + 
-				"    public static S getInstance() {\n" + 
-				"      return INSTANCE;\n" + 
-				"    }\n" + 
-				"  }\n" + 
-				"\n" + 
-				"  public void __test() {\n" + 
-				"    Integer i = S.$\n" + 
-				"  } \n" + 
+		buf.append("package test;\n" +
+				"\n" +
+				"public class TestCompletionOnType {\n" +
+				"  public class S {\n" +
+				"\n" +
+				"    private static S INSTANCE = new S();\n" +
+				"    private S () {}\n" +
+				"\n" +
+				"    public Integer findMe() {\n" +
+				"      return 0;\n" +
+				"    }\n" +
+				"\n" +
+				"    public static S getInstance() {\n" +
+				"      return INSTANCE;\n" +
+				"    }\n" +
+				"  }\n" +
+				"\n" +
+				"  public void __test() {\n" +
+				"    Integer i = S.$\n" +
+				"  } \n" +
 				"}");
 
 		int completionIndex= getCompletionIndex(buf);
@@ -541,35 +541,35 @@ public class ChainCompletionTest extends TestCase {
 
 		// test.TestBug552849 -> test.Foo -> test2.Bar -> test3.Foo
 		StringBuffer buf= new StringBuffer();
-		buf.append("import java.io.File;\n" + 
-				"package test3;\n" + 
-				"public class Foo {\n" + 
-				"	protected File fVal= \"\";\n" + 
+		buf.append("import java.io.File;\n" +
+				"package test3;\n" +
+				"public class Foo {\n" +
+				"	protected File fVal= \"\";\n" +
 				"}");
 		ICompilationUnit cu= getCompilationUnit(pkg3, buf, "Foo.java");
 
 		buf= new StringBuffer();
-		buf.append("package test2;\n" + 
-				"import test3.Foo;\n" + 
-				"public class Bar extends Foo {\n" + 
+		buf.append("package test2;\n" +
+				"import test3.Foo;\n" +
+				"public class Bar extends Foo {\n" +
 				"}");
 		cu= getCompilationUnit(pkg2, buf, "Bar.java");
 
 		buf= new StringBuffer();
-		buf.append("package test;\n" + 
-				"import test2.Bar;\n" + 
-				"public class Foo extends Bar {\n" + 
+		buf.append("package test;\n" +
+				"import test2.Bar;\n" +
+				"public class Foo extends Bar {\n" +
 				"}");
 		cu= getCompilationUnit(pkg, buf, "Foo.java");
 
 		buf= new StringBuffer();
-		buf.append("import java.io.File;\n" + 
-				"package test;\n" + 
-				"public class TestBug552849 extends Foo {\n" + 
-				"	public void test () {\n" + 
-				"		TestBug552849 foo = new TestBug552849();\n" + 
-				"		File res = $\n" + 
-				"	}\n" + 
+		buf.append("import java.io.File;\n" +
+				"package test;\n" +
+				"public class TestBug552849 extends Foo {\n" +
+				"	public void test () {\n" +
+				"		TestBug552849 foo = new TestBug552849();\n" +
+				"		File res = $\n" +
+				"	}\n" +
 				"}");
 
 		int completionIndex= getCompletionIndex(buf);
@@ -583,21 +583,21 @@ public class ChainCompletionTest extends TestCase {
 
 	public void testBug559385 () throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" + 
-				"public @interface Command {\n" + 
-				"	String name();\n" + 
+		buf.append("package test;\n" +
+				"public @interface Command {\n" +
+				"	String name();\n" +
 				"}");
 		ICompilationUnit cu= getCompilationUnit(pkg, buf, "Command.java");
 
 		buf= new StringBuffer();
-		buf.append("package test;\n" + 
-				"import java.util.concurrent.Callable;\n" + 
-				"@Command(name = $\"\")\n" + 
-				"public class TestBug559385 implements Callable<String> {\n" + 
-				"	@Override\n" + 
-				"	public String call() throws Exception {\n" + 
-				"		return null;\n" + 
-				"	}\n" + 
+		buf.append("package test;\n" +
+				"import java.util.concurrent.Callable;\n" +
+				"@Command(name = $\"\")\n" +
+				"public class TestBug559385 implements Callable<String> {\n" +
+				"	@Override\n" +
+				"	public String call() throws Exception {\n" +
+				"		return null;\n" +
+				"	}\n" +
 				"}");
 		cu= getCompilationUnit(pkg, buf, "TestBug559385.java");
 		int completionIndex= getCompletionIndex(buf);

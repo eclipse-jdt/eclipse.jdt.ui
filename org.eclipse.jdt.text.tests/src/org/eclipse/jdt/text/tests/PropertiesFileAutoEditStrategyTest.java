@@ -43,7 +43,7 @@ import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 /**
  * PropertiesFileAutoEditStratergyTest
- * 
+ *
  * @since 3.7
  */
 public class PropertiesFileAutoEditStrategyTest extends TestCase {
@@ -295,7 +295,7 @@ public class PropertiesFileAutoEditStrategyTest extends TestCase {
 		assertEquals("\\u2603 \\\\u2603", fDocumentCommand.text);
 		assertNull(proposal);
 	}
-	
+
 	public void testPasteFromPropertiesFileISO_8859_1_06() throws Exception {
 		fDocumentCommand.text= "key=value\\\nsecond line";
 		Object proposal= performTestISO_8859_1();
@@ -315,7 +315,7 @@ public class PropertiesFileAutoEditStrategyTest extends TestCase {
 		fDocumentCommand.text= "\u2603";
 		performTestUTF8();
 		assertEquals("\u2603", fDocumentCommand.text);
-		
+
 		fPropertiesFileUTF8.setCharset(ISO_8859_1, null);
 
 		fDocumentCommand.text= "\u2603";
@@ -329,9 +329,9 @@ public class PropertiesFileAutoEditStrategyTest extends TestCase {
 		fDocumentCommand.text= "\u2603";
 		performTestISO_8859_1();
 		assertEquals("\\u2603", fDocumentCommand.text);
-		
+
 		fPropertiesFileISO_8859_1.setCharset(UTF_8, null);
-		
+
 		fDocumentCommand.text= "\u2603";
 		performTestISO_8859_1();
 		assertEquals("\u2603", fDocumentCommand.text);

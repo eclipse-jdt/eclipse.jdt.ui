@@ -44,7 +44,7 @@ import junit.framework.TestSuite;
 public class MoveInnerToTopLevelTests extends RefactoringTest {
 
 	private static final boolean BUG_304827= true; // too many imports, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=304827
-	
+
 	private static final String FIELD_COMMENT= "/** Comment */";
 	private static final Class<MoveInnerToTopLevelTests> clazz= MoveInnerToTopLevelTests.class;
 	private static final String REFACTORING_PATH= "MoveInnerToTopLevel/";
@@ -368,35 +368,35 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 	public void test39() throws Exception {
 		validatePassingTest("A", "B", "p", new String[] { "A"}, new String[] { "p"}, null, false, true, false, false);
 	}
-	
+
 	// change visibility: https://bugs.eclipse.org/319069
 	public void test40() throws Exception {
 		validatePassingTest("A", "B", "p", new String[] { "A"}, new String[] { "p"}, null, false, true, false, false);
 	}
-	
+
 	// change visibility: https://bugs.eclipse.org/319069
 	public void test41() throws Exception {
 		validatePassingTest("A", "B", "p", new String[] { "A"}, new String[] { "p"}, null, false, true, false, false);
 	}
-	
+
 	// change visibility: https://bugs.eclipse.org/319069
 	public void test42() throws Exception {
 		validatePassingTest("A", "B", "p", new String[] { "A"}, new String[] { "p"}, null, false, true, false, false);
 	}
-	
+
 	public void test43() throws Exception {
 		validatePassingTest("A", "B", "p", new String[] { "A"}, new String[] { "p"}, "", false, true, false, false);
 	}
-	
+
 	public void test44() throws Exception {
 		validatePassingTest("A", "B", "p", new String[] { "A"}, new String[] { "p"}, "a", true, true, true, true);
 	}
-	
+
 	// static context: https://bugs.eclipse.org/bugs/show_bug.cgi?id=385237
 	public void test_static_context_0() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, null, false, false);
 	}
-	
+
 	// --- Non static
 
 	public void test_nonstatic_0() throws Exception{
@@ -588,7 +588,7 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		StubUtility.setCodeTemplate(CodeTemplateContextType.FILECOMMENT_ID, fileCommentTemplate, null);
 		String newFileTemplate= "${filecomment}\n${package_declaration}\n\n${typecomment}\n${type_declaration}";
 		StubUtility.setCodeTemplate(CodeTemplateContextType.NEWTYPE_ID, newFileTemplate, null);
-		
+
 		try {
 			validatePassingTest("A", "B", "p", new String[] { "A" }, new String[] { "p" }, null, false, true, false, false);
 		} finally {
@@ -596,7 +596,7 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 			StubUtility.setCodeTemplate(CodeTemplateContextType.FILECOMMENT_ID, fileCommentTemplate, null);
 		}
 	}
-	
+
 	public void test_nonstatic_49() throws Exception {
 		validatePassingTest("A", "B", "p", new String[] { "A" }, new String[] { "p" }, "a", false, true, true, true);
 	}

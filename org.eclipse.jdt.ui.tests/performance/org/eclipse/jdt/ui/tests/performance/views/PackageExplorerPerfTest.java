@@ -128,7 +128,7 @@ public class PackageExplorerPerfTest extends JdtPerformanceTestCase {
 		File jreArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.RT_STUBS_15);
 		IPackageFragmentRoot classFolder= JavaProjectHelper.addClassFolderWithImport(javaProject, "classes", null, null, jreArchive);
 		((IFolder) classFolder.getResource()).getFolder("META-INF").delete(true, null);
-		
+
 		try (ZipFile zipFile= new ZipFile(jreArchive)) {
 			for (int i= 1; i <= 5; i++) {
 				String packName= "copy" + i;
@@ -138,7 +138,7 @@ public class PackageExplorerPerfTest extends JdtPerformanceTestCase {
 				folder.getFolder("META-INF").delete(true, null);
 			}
 		}
-		
+
 		javaProject.getProject().getWorkspace().run(new IWorkspaceRunnable() {
 			@Override
 			public void run(IProgressMonitor monitor) throws CoreException {
@@ -146,20 +146,20 @@ public class PackageExplorerPerfTest extends JdtPerformanceTestCase {
 			}
 		}, null);
 		getViewer().expandToLevel(classFolder, 1);
-		
+
 		PackageExplorerPart view= getView();
 		view.selectAndReveal(classFolder); // runs pending updates
-		
+
 		joinBackgroudActivities();
 		touchAllFilesOnDisk((IFolder) classFolder.getResource());
-		
-		
+
+
 		startMeasuring();
 		javaProject.getProject().refreshLocal(IResource.DEPTH_INFINITE, null);
 		view.selectAndReveal(classFolder); // runs pending updates
 		finishMeasurements();
 	}
-	
+
 	private void touchAllFilesOnDisk(IFolder folder) throws CoreException {
 		final long now= System.currentTimeMillis();
 		folder.accept(new IResourceVisitor() {

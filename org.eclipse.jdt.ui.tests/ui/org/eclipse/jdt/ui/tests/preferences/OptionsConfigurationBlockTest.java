@@ -107,9 +107,9 @@ public class OptionsConfigurationBlockTest extends TestCase {
 				JavaCore.COMPILER_PB_UNUSED_TYPE_ARGUMENTS_FOR_METHOD_INVOCATION, // maybe for 1.7
 
 				JavaCore.CODEASSIST_IMPLICIT_QUALIFICATION, // TODO: not used: bug?
-				
+
 				JavaCore.COMPILER_PB_DEAD_CODE_IN_TRIVIAL_IF_STATEMENT, // default is good (don't flag trivial 'if (DEBUG)')
-				
+
 				JavaCore.CODEASSIST_DISCOURAGED_REFERENCE_CHECK, // is on the Type Filters page now, see https://bugs.eclipse.org/218487
 				JavaCore.CODEASSIST_FORBIDDEN_REFERENCE_CHECK,   // is on the Type Filters page now, see https://bugs.eclipse.org/218487
 		}));
@@ -129,7 +129,7 @@ public class OptionsConfigurationBlockTest extends TestCase {
 		keysMethod.setAccessible(true);
 		Key[] keys= (Key[]) (keysMethod.getParameterTypes().length > 0 ? keysMethod.invoke(null, Boolean.FALSE) : keysMethod.invoke(null));
 		HashSet<Key> keySet= new HashSet<>(Arrays.asList(keys));
-		
+
 		for (Field field : configurationBlock.getDeclaredFields()) {
 			field.setAccessible(true);
 			if (field.getType() == Key.class) {
@@ -144,7 +144,7 @@ public class OptionsConfigurationBlockTest extends TestCase {
 				}
 			}
 		}
-		
+
 		assertEquals(configurationBlock.getName() + "#getKeys() includes keys that are not declared in the class", Collections.emptySet(), keySet);
 	}
 }

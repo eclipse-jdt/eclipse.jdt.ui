@@ -61,7 +61,7 @@ public class TextPerformanceTestCase extends TestCase {
 		}
 	}
 	static boolean DEBUG= false;
-	
+
 	private static final SimpleDateFormat DATE_FORMAT= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS Z", Locale.US);
 
 

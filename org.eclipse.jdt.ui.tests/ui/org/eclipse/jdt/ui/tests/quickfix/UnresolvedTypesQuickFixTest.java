@@ -1049,10 +1049,10 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		CompilationUnit astRoot= getASTRoot(cu);
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOfProblems(2, problems);
-		
+
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, problems[0], null);
 		proposals.addAll(collectCorrections(cu, problems[1], null));
-		
+
 		assertCorrectLabels(proposals);
 
 		String[] expected= new String[3];
@@ -1523,11 +1523,11 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 	}
 
-	
+
 	/**
 	 * Offers to raise visibility of method instead of class.
 	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=94755
-	 * 
+	 *
 	 * @throws Exception if anything goes wrong
 	 * @since 3.9
 	 */
@@ -1537,7 +1537,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
 
 		StringBuffer buf= new StringBuffer();
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("class B {\n");
@@ -1599,13 +1599,13 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 3, 1);
-		
+
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 6);
-		
+
 		String[] expected= new String[1];
 		buf= new StringBuffer();
 		buf.append("package pack;\n");
@@ -1619,7 +1619,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		expected[0]= buf.toString();
-		
+
 		assertExpectedExistInProposals(proposals, expected);
 	}
 	@Test

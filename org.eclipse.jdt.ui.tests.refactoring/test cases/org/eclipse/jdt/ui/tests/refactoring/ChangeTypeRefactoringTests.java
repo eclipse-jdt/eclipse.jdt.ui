@@ -95,7 +95,7 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 		String fullName= TEST_PATH_PREFIX + getRefactoringPath() + "positive/" + fileName + ".java";
 		return createCU(pack, fileName + ".java", getFileContents(fullName));
 	}
-	
+
 	private ICompilationUnit createAdditionalCUForNegative(String fileName, IPackageFragment pack) throws Exception {
 		String fullName= TEST_PATH_PREFIX + getRefactoringPath() + "negative/" + fileName + ".java";
 		return createCU(pack, fileName + ".java", getFileContents(fullName));
@@ -145,8 +145,8 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 
 		assertEqualLines(getFileContents(canonAfterSrcName), cu.getSource());
 	}
-	
-	protected ChangeTypeRefactoring failHelper2(int startLine, int startColumn, int endLine, int endColumn, 
+
+	protected ChangeTypeRefactoring failHelper2(int startLine, int startColumn, int endLine, int endColumn,
 			String selectedTypeName, IPackageFragment pack) throws Exception {
 		ICompilationUnit	cu= createCUfromTestFile(pack, false, true);
 		ISourceRange		selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
@@ -154,7 +154,7 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 		performRefactoring(ref);
 		return ref;
 	}
-	
+
 
 	//--- TESTS
 	public void testLocalVarName() throws Exception {
@@ -619,7 +619,7 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 		};
 		StringAsserts.assertEqualStringsIgnoreOrder(actual, expected);
 	}
-	
+
 	// tests that are supposed to fail
 
 	public void testInvalidSelection() throws Exception {

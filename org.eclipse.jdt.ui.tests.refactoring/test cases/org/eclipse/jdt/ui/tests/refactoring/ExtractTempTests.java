@@ -653,7 +653,7 @@ public class ExtractTempTests extends RefactoringTest {
 	public void test102() throws Exception {
 		helper1(9, 24, 9, 29, true, false, "temp", "j");
 	}
-	
+
 	public void test103() throws Exception {
 		//test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=243101
 		helper1(7, 21, 7, 33, true, false, "temp", "valueOf");
@@ -688,12 +688,12 @@ public class ExtractTempTests extends RefactoringTest {
 		//test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=335173
 		helper1(5, 20, 5, 29, true, false, "temp", "i");
 	}
-	
+
 	public void test110() throws Exception {
 		//test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=65875
 		helper1(6, 9, 6, 25, true, false, "temp", "calculateCount");
 	}
-	
+
 	public void test111() throws Exception {
 		//test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=65875
 		helper1(11, 9, 11, 25, true, false, "temp", "calculateCount");
@@ -713,7 +713,7 @@ public class ExtractTempTests extends RefactoringTest {
 		//test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=406347
 		helper1(7, 17, 7, 22, true, false, "temp", "i");
 	}
-	
+
 	public void testZeroLengthSelection0() throws Exception {
 //		printTestDisabledMessage("test for bug 30146");
 		helper1(4, 18, 4, 18, true, false, "temp", "j");

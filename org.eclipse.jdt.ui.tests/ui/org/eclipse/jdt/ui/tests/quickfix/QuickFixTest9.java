@@ -166,7 +166,7 @@ public class QuickFixTest9 extends QuickFixTest {
 		proposals= collectCorrections(cu, astRoot, 2, 1);
 		assertProposalExists(proposals, proposalStr);
 	}
-	
+
 	@Test
 	public void testAddModuleRequiresProposalForFullyQualifiedType() throws Exception {
 		StringBuffer buf= new StringBuffer();
@@ -190,7 +190,7 @@ public class QuickFixTest9 extends QuickFixTest {
 
 		assertProposalExists(proposals, proposalStr);
 	}
-	
+
 	@Test
 	public void testAddNewTypeProposals() throws Exception {
 		StringBuilder buf= new StringBuilder();

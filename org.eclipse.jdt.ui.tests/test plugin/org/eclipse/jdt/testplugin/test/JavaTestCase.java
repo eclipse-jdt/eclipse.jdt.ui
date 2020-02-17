@@ -45,7 +45,7 @@ public class JavaTestCase extends TestCase {
 
 	/**
 	 * Creates a new test Java project.
-	 * 
+	 *
 	 * @throws Exception in case of any problem
 	 */
 	@Override
@@ -63,7 +63,7 @@ public class JavaTestCase extends TestCase {
 
 	/**
 	 * Removes the test java project.
-	 * 
+	 *
 	 * @throws Exception in case of any problem
 	 */
 	@Override

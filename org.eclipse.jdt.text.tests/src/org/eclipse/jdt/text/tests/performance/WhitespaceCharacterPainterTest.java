@@ -31,7 +31,7 @@ import junit.framework.TestSuite;
 /**
  * Measure the time spent while scrolling in the text editor with 'Show whitespace characters'
  * option enabled.
- * 
+ *
  * @since 3.7
  */
 public class WhitespaceCharacterPainterTest extends ScrollEditorTest {
@@ -43,7 +43,7 @@ public class WhitespaceCharacterPainterTest extends ScrollEditorTest {
 	public static Test suite() {
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
-	
+
 	public static Test setUpTest(Test test) {
 		return new PerformanceTestSetup(test) {
 			@Override
@@ -53,7 +53,7 @@ public class WhitespaceCharacterPainterTest extends ScrollEditorTest {
 				field.setAccessible(true);
 				Set<?> set = (Set<?>) field.get(null);
 				set.clear();
-				
+
 				super.setUp();
 			}
 		};
@@ -78,7 +78,7 @@ public class WhitespaceCharacterPainterTest extends ScrollEditorTest {
 
 	/**
 	 * Measure the time spent while scrolling page wise in the text editor.
-	 * 
+	 *
 	 * @throws Exception if something goes wrong
 	 */
 	public void testScrollTextEditorPageWise() throws Exception {
@@ -87,7 +87,7 @@ public class WhitespaceCharacterPainterTest extends ScrollEditorTest {
 
 	/**
 	 * Measure the time spent while scrolling line wise in the text editor.
-	 * 
+	 *
 	 * @throws Exception if something goes wrong
 	 */
 	public void testScrollTextEditorLineWiseMoveCaret2() throws Exception {
@@ -96,7 +96,7 @@ public class WhitespaceCharacterPainterTest extends ScrollEditorTest {
 
 	/**
 	 * Measure the time spent while scrolling and selecting line wise in the text editor.
-	 * 
+	 *
 	 * @throws Exception if something goes wrong
 	 */
 	public void testScrollTextEditorLineWiseSelect2() throws Exception {
@@ -105,7 +105,7 @@ public class WhitespaceCharacterPainterTest extends ScrollEditorTest {
 
 	/**
 	 * Measure the time spent while scrolling line wise without moving the caret in the text editor.
-	 * 
+	 *
 	 * @throws Exception if something goes wrong
 	 */
 	public void testScrollTextEditorLineWise2() throws Exception {

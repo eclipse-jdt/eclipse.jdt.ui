@@ -43,9 +43,9 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 public class ExtractMethodTests extends AbstractSelectionTestCase {
-	
+
 	private static final boolean BUG_405778= true; //XXX: [1.8][dom ast] method body recovery broken (empty body)
-	
+
 	private static ExtractMethodTestSetup fgTestSetup;
 
 	public ExtractMethodTests(String name) {
@@ -676,9 +676,9 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	public void test196() throws Exception {
 		invalidSelectionTest();
 	}
-	
+
 	//---- continue not possible
-	
+
 	public void test197() throws Exception {
 		invalidSelectionTest();
 	}
@@ -986,7 +986,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	public void test374() throws Exception {
 		validSelectionTestChecked();
 	}
-	
+
 	//====================================================================================
 	// Testing Extracted result
 	//====================================================================================
@@ -1634,7 +1634,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	public void test728() throws Exception {
 		returnTest();
 	}
-	
+
 	// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=213519
 	public void test729() throws Exception {
 		returnTest();
@@ -1644,7 +1644,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	public void test730() throws Exception {
 		returnTest();
 	}
-	
+
 	// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=213519
 	public void test731() throws Exception {
 		returnTest();
@@ -1659,12 +1659,12 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	public void test733() throws Exception {
 		returnTest();
 	}
-	
+
 	// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=97413
 	public void test734() throws Exception {
 		returnTest();
 	}
-	
+
 	// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=285554
 	public void test735() throws Exception {
 		returnTest();
@@ -1707,51 +1707,51 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	public void test758() throws Exception {
 		branchTest();
 	}
-	
+
 	public void test759() throws Exception {
 		branchTest();
 	}
-	
+
 	public void test760() throws Exception {
 		branchTest();
 	}
-	
+
 	public void test761() throws Exception {
 		branchTest();
 	}
-	
+
 	public void test762() throws Exception {
 		branchTest();
 	}
-	
+
 	public void test763() throws Exception {
 		branchTest();
 	}
-	
+
 	public void test764() throws Exception {
 		branchTest();
 	}
-	
+
 	public void test765() throws Exception {
 		branchTest();
 	}
-	
+
 	public void test766() throws Exception {
 		branchTest();
 	}
-	
+
 	public void test767() throws Exception {
 		branchTest();
 	}
-	
+
 	public void test768() throws Exception {
 		branchTest();
 	}
-	
+
 	public void test769() throws Exception {
 		branchTest();
 	}
-	
+
 	//---- Test for CUs with compiler errors
 
 	public void test800() throws Exception {
@@ -1911,19 +1911,19 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	public void test980() throws Exception {
 		duplicatesTest(); // for https://bugs.eclipse.org/bugs/show_bug.cgi?id=264606
 	}
-	
+
 	public void test981() throws Exception {
 		duplicatesTest(); // for https://bugs.eclipse.org/bugs/show_bug.cgi?id=264606
 	}
-	
+
 	public void test982() throws Exception {
 		duplicatesTest(); // for https://bugs.eclipse.org/bugs/show_bug.cgi?id=264606
 	}
-	
+
 	public void test983() throws Exception {
 		duplicatesTest(); // for https://bugs.eclipse.org/bugs/show_bug.cgi?id=264606
 	}
-	
+
 	public void test984() throws Exception {
 		duplicatesTest(); // for https://bugs.eclipse.org/bugs/show_bug.cgi?id=264606
 	}
@@ -1939,11 +1939,11 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	public void test987() throws Exception {
 		duplicatesTest(); // for https://bugs.eclipse.org/bugs/show_bug.cgi?id=264606
 	}
-	
+
 	public void test988() throws Exception{
 		duplicatesTest();
 	}
-	
+
 	public void test989() throws Exception{
 		duplicatesTest();
 	}
@@ -1997,7 +1997,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	public void test1053() throws Exception {
 		destinationTest(1);
 	}
-	
+
 	//https://bugs.eclipse.org/bugs/show_bug.cgi?id=318127
 	public void test1054() throws Exception {
 		destinationTest(1);
@@ -2022,23 +2022,23 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	public void test1058() throws Exception {
 		destinationTest(2);
 	}
-	
+
 	public void test1059() throws Exception {
 		destinationTest(0);
 	}
-	
+
 	public void test1060() throws Exception {
 		destinationTest(1);
 	}
-	
+
 	public void test1061() throws Exception {
 		destinationTest(1);
 	}
-	
+
 	public void test1062() throws Exception {
 		destinationTest(2);
 	}
-	
+
 	//---- Test Generics --------------------------------------------------
 
 	public void test1100() throws Exception {
@@ -2124,11 +2124,11 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	public void test1120() throws Exception {
 		genericTest(); //https://bugs.eclipse.org/bugs/show_bug.cgi?id=369295
 	}
-	
+
 	public void test1121() throws Exception {
 		genericTest();
 	}
-	
+
 	public void test1122() throws Exception {
 		genericTest();
 	}

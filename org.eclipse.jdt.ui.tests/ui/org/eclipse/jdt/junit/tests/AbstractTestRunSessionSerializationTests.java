@@ -122,7 +122,7 @@ public class AbstractTestRunSessionSerializationTests extends TestCase {
 
 	private void assertEqualXML(String expected, String actual) {
 		/*
-		 * Strips &#13; and &#10; 
+		 * Strips &#13; and &#10;
 		 */
 		String regex0= "&#1[03];";
 		/*

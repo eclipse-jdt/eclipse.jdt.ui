@@ -23,7 +23,7 @@ import org.eclipse.jface.text.source.AnnotationPainter;
  * Counts number of repaints (
  * {@link AnnotationPainter#paintControl(org.eclipse.swt.events.PaintEvent)}) when typing on a line
  * with annotations shown as squiggles in the text editor.
- * 
+ *
  * @since 3.1
  * @deprecated since INVOCATION_COUNT dimension is no longer supported.
  */

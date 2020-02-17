@@ -78,20 +78,20 @@ public class MethodOverrideTest18 extends MethodOverrideTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("MyFunction.java", buf.toString(), false, null);
-		
+
 		CompilationUnit root= assertNoCompilationError(cu);
 		IType focusType= cu.getTypes()[0];
-		
+
 		int vStart= buf.indexOf("v))");
 		ILocalVariable v= (ILocalVariable) cu.codeSelect(vStart, 1)[0];
 		IType overridingType= v.getDeclaringMember().getDeclaringType();
-		
+
 		LambdaExpression lambda= (LambdaExpression) NodeFinder.perform(root, buf.indexOf("->"), 2);
 		ITypeBinding overridingTypeBinding= lambda.resolveTypeBinding();
-		
+
 		IType overriddenType= focusType;
 		ITypeBinding overriddenTypeBinding= ((TypeDeclaration) root.types().get(0)).resolveBinding();
-		
+
 		doOverrideTests(root, focusType, overridingType, overridingTypeBinding, overriddenType, overriddenTypeBinding);
 	}
 

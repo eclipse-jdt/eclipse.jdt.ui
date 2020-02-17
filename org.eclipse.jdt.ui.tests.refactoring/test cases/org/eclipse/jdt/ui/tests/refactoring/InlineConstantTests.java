@@ -294,19 +294,19 @@ public class InlineConstantTests extends RefactoringTest {
 	public void test31() throws Exception { // test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=265448
 		helper1("p.A", 4, 23, 4, 28, true, true);
 	}
-	
+
 	public void test32() throws Exception { // test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=265448
 		helper1("p.A", 4, 23, 4, 28, true, true);
 	}
-	
+
 	public void test33() throws Exception { // test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=279715
 		helper1("p.A", 5, 29, 5, 30, true, true);
 	}
-	
+
 	public void test34() throws Exception { // test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=297760
 		helper1("p.A", 4, 24, 4, 25, true, true);
 	}
-	
+
 	public void test35() throws Exception { // test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=335173
 		helper1("p.A", 4, 22, 4, 23, true, true);
 	}

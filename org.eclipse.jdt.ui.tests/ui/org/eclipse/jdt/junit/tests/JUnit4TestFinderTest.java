@@ -327,17 +327,17 @@ public class JUnit4TestFinderTest extends TestCase {
 
 		File lib= JavaTestPlugin.getDefault().getFileInPlugin(new Path("testresources/stacktest.jar"));
 		JavaProjectHelper.addLibrary(fProject, Path.fromOSString(lib.getPath()));
-		
+
 		assertTestFound(validTest4, new String[] { "Test7"});
 		assertTestFound(validTest4.getCompilationUnit(), new String[] { "Test7" });
-		
+
 		String[] validTestsP= { "p.Test1", "p.Test2", "p.Test3", "p.Test5"};
 		assertTestFound(p, validTestsP);
-		
+
 		String[] validTests= new String[validTestsP.length + 1];
 		System.arraycopy(validTestsP, 0, validTests, 0, validTestsP.length);
 		validTests[validTestsP.length]= "Test7";
-		
+
 		assertTestFound(fRoot, validTests);
 		assertTestFound(fProject, validTests);
 	}

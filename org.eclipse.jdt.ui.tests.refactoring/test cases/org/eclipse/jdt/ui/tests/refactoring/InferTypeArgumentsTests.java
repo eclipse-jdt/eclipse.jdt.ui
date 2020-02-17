@@ -463,5 +463,5 @@ public class InferTypeArgumentsTests extends RefactoringTest {
 		// regression test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=216627
 		performCuOK();
 	}
-	
+
 }

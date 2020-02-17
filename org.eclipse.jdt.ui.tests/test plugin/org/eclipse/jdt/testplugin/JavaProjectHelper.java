@@ -83,7 +83,7 @@ public class JavaProjectHelper {
 	 * If external code increases this counter, then it MUST decrease it again (e.g. in TestSetup's setUp/tearDown).
 	 */
 	public static int PERFORM_DUMMY_SEARCH= 0;
-	
+
 	/**
 	 * @deprecated use {@link #RT_STUBS_15}
 	 */
@@ -205,7 +205,7 @@ public class JavaProjectHelper {
 
 	/**
 	 * Sets the compiler options to 9 for the given project.
-	 * 
+	 *
 	 * @param project the java project
 	 * @since 3.14
 	 */
@@ -217,7 +217,7 @@ public class JavaProjectHelper {
 
 	/**
 	 * Sets the compiler options to 10 for the given project.
-	 * 
+	 *
 	 * @param project the java project
 	 * @since 3.14
 	 */
@@ -226,10 +226,10 @@ public class JavaProjectHelper {
 		set10CompilerOptions(options);
 		project.setOptions(options);
 	}
-	
+
 	/**
 	 * Sets the compiler options to 12 for the given project.
-	 * 
+	 *
 	 * @param project the java project
 	 * @param enable_preview_feature sets enable-preview compliance project option based on the value specified.
 	 * @since 3.18
@@ -240,13 +240,13 @@ public class JavaProjectHelper {
 		if (enable_preview_feature) {
 			options.put(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES, JavaCore.ENABLED);
 			options.put(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
-		}		
+		}
 		project.setOptions(options);
 	}
-	
+
 	/**
 	 * Sets the compiler options to 13 for the given project.
-	 * 
+	 *
 	 * @param project the java project
 	 * @param enable_preview_feature sets enable-preview compliance project option based on the value specified.
 	 * @since 3.19
@@ -257,13 +257,13 @@ public class JavaProjectHelper {
 		if (enable_preview_feature) {
 			options.put(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES, JavaCore.ENABLED);
 			options.put(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
-		}		
+		}
 		project.setOptions(options);
 	}
 
 	/**
 	 * Sets the compiler options to 1.8 for the given project.
-	 * 
+	 *
 	 * @param project the java project
 	 * @since 3.10
 	 */
@@ -282,7 +282,7 @@ public class JavaProjectHelper {
 		JavaProjectHelper.set17CompilerOptions(options);
 		project.setOptions(options);
 	}
-	
+
 	/**
 	 * Sets the compiler options to 1.6 for the given project.
 	 * @param project the java project
@@ -292,7 +292,7 @@ public class JavaProjectHelper {
 		JavaProjectHelper.set16CompilerOptions(options);
 		project.setOptions(options);
 	}
-	
+
 	/**
 	 * Sets the compiler options to 1.5 for the given project.
 	 * @param project the java project
@@ -316,7 +316,7 @@ public class JavaProjectHelper {
 
 	/**
 	 * Sets the compiler options to 9.
-	 * 
+	 *
 	 * @param options the compiler options to configure
 	 */
 	public static void set9CompilerOptions(Map<String, String> options) {
@@ -325,25 +325,25 @@ public class JavaProjectHelper {
 
 	/**
 	 * Sets the compiler options to 10.
-	 * 
+	 *
 	 * @param options the compiler options to configure
 	 */
 	public static void set10CompilerOptions(Map<String, String> options) {
 		JavaCore.setComplianceOptions(JavaCore.VERSION_10, options);
 	}
-	
+
 	/**
 	 * Sets the compiler options to 12.
-	 * 
+	 *
 	 * @param options the compiler options to configure
 	 */
 	public static void set12CompilerOptions(Map<String, String> options) {
 		JavaCore.setComplianceOptions(JavaCore.VERSION_12, options);
 	}
-	
+
 	/**
 	 * Sets the compiler options to 13.
-	 * 
+	 *
 	 * @param options the compiler options to configure
 	 */
 	public static void set13_CompilerOptions(Map<String, String> options) {
@@ -352,7 +352,7 @@ public class JavaProjectHelper {
 
 	/**
 	 * Sets the compiler options to 1.8
-	 * 
+	 *
 	 * @param options the compiler options to configure
 	 * @since 3.10
 	 */
@@ -367,7 +367,7 @@ public class JavaProjectHelper {
 	public static void set17CompilerOptions(Map<String, String> options) {
 		JavaCore.setComplianceOptions(JavaCore.VERSION_1_7, options);
 	}
-	
+
 	/**
 	 * Sets the compiler options to 1.6
 	 * @param options The compiler options to configure
@@ -430,7 +430,7 @@ public class JavaProjectHelper {
 	/**
 	 * Removes a resource. Retries if deletion failed (e.g. because the indexer
 	 * still locks the file).
-	 * 
+	 *
 	 * @param resource the resource to delete
 	 * @throws CoreException if operation failed
 	 */
@@ -452,11 +452,11 @@ public class JavaProjectHelper {
 			}
 		}
 	}
-	
+
 	/**
 	 * Removes a package fragment. Retries if deletion failed (e.g. because the indexer
 	 * still locks a file).
-	 * 
+	 *
 	 * @param pack the package to delete
 	 * @throws CoreException if operation failed
 	 */
@@ -512,7 +512,7 @@ public class JavaProjectHelper {
 	public static void mustPerformDummySearch(IJavaElement element) throws JavaModelException {
 		performDummySearch(SearchEngine.createJavaSearchScope(new IJavaElement[] { element }), true);
 	}
-	
+
 	public static void performDummySearch() throws JavaModelException {
 		performDummySearch(SearchEngine.createWorkspaceScope(), PERFORM_DUMMY_SEARCH > 0);
 	}
@@ -526,18 +526,18 @@ public class JavaProjectHelper {
 		 * Workaround for intermittent test failures. The problem is that the Java indexer
 		 * may still be reading a file that has just been created, but a test already tries to delete
 		 * the file again.
-		 * 
+		 *
 		 * This can theoretically also happen in real life, but it's expected to be very rare,
 		 * and there's no good solution for the problem, since the Java indexer should not
 		 * take a workspace lock for these files.
-		 * 
+		 *
 		 * performDummySearch() was found to be a performance bottleneck, so we've disabled it in most situations.
 		 * Use a mustPerformDummySearch() method if you really need it and you can't
 		 * use a delete(..) method that retries a few times before failing.
 		 */
 		if (!doIt)
 			return;
-		
+
 		new SearchEngine().searchAllTypeNames(
 				null,
 				SearchPattern.R_EXACT_MATCH,
@@ -855,13 +855,13 @@ public class JavaProjectHelper {
 		set12CompilerOptions(jproject, enable_preview_feature);
 		return addLibrary(jproject, rtJarPath[0], rtJarPath[1], rtJarPath[2]);
 	}
-	
+
 	public static IPackageFragmentRoot addRTJar_13(IJavaProject jproject, boolean enable_preview_feature) throws CoreException {
 		IPath[] rtJarPath= findRtJar(RT_STUBS13);
 		set13CompilerOptions(jproject, enable_preview_feature);
 		return addLibrary(jproject, rtJarPath[0], rtJarPath[1], rtJarPath[2]);
 	}
-	
+
 	/**
 	 * Adds a variable entry with source attachment to a IJavaProject.
 	 * Can return null if variable can not be resolved.

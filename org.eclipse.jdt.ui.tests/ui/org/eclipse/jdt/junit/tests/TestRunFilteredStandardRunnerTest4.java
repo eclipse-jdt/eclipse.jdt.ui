@@ -40,7 +40,7 @@ public class TestRunFilteredStandardRunnerTest4 extends AbstractTestRunListenerT
 			JUnitCore.removeTestRunListener(testRunListener);
 		}
 	}
-	
+
 	@Override
 	protected void setUp() throws Exception {
 		fProject= JavaProjectHelper.createJavaProject("TestRunListenerTest", "bin");
@@ -69,7 +69,7 @@ public class TestRunFilteredStandardRunnerTest4 extends AbstractTestRunListenerT
 		String[] actual= runTreeTest(fATestCase, "test1Succeed", 4);
 		assertEqualLog(expectedSequence, actual);
 	}
-	
+
 	public void testFilterToTest2Fail() throws Exception {
 		String[] expectedSequence= new String[] {
 				TestRunListeners.sessionAsString("ATestCase test2Fail", ProgressState.COMPLETED, Result.FAILURE, 0),
@@ -78,7 +78,7 @@ public class TestRunFilteredStandardRunnerTest4 extends AbstractTestRunListenerT
 		String[] actual= runTreeTest(fATestCase, "test2Fail", 4);
 		assertEqualLog(expectedSequence, actual);
 	}
-	
+
 	public void testFilterToNoTestsRemain() throws Exception {
 		String[] expectedSequence= new String[] {
 				TestRunListeners.sessionAsString("ATestCase thisdoesnotexist", ProgressState.COMPLETED, Result.ERROR, 0),
@@ -88,5 +88,5 @@ public class TestRunFilteredStandardRunnerTest4 extends AbstractTestRunListenerT
 		assertEqualLog(expectedSequence, actual);
 	}
 
-	
+
 }

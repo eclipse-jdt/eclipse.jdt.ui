@@ -60,7 +60,7 @@ public class HTMLTidyTest extends TestCase {
 	 * a Java launch configuration with program argument<br>
 	 * <code>"${resource_loc}"</code><br>
 	 * (including double quotes!).
-	 * 
+	 *
 	 * @param args 1 argument: Absolute path to a file or folder
 	 * @throws Exception if checking fails
 	 */

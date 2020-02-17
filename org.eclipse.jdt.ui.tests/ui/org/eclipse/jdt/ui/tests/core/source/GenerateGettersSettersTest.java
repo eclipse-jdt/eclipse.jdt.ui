@@ -161,7 +161,7 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 
 	/**
 	 * Tests normal getter/setter generation for one field.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void testDoneWithSmartIs() throws Exception {
@@ -193,7 +193,7 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 
 	/**
 	 * Tests normal getter/setter generation for one field.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void testIsDoneWithSmartIs() throws Exception {
@@ -225,7 +225,7 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 
 	/**
 	 * Tests normal getter/setter generation for one field.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void testDoneWithoutSmartIs() throws Exception {
@@ -262,7 +262,7 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 
 	/**
 	 * Tests normal getter/setter generation for one field.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void testIsDoneWithoutSmartIs() throws Exception {

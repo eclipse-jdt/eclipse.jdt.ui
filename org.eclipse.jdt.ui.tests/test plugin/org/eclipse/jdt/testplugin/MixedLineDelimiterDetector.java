@@ -174,7 +174,7 @@ public class MixedLineDelimiterDetector  {
 
 	/**
 	 * Finds files with mixed line delimiters.
-	 * 
+	 *
 	 * @param resource the resource to search
 	 * @return the resources with mixed line delimiters
 	 */

@@ -291,59 +291,59 @@ public class TestRunListenerTest3 extends AbstractTestRunListenerTest {
 		String[] actual= runTreeTest(aTestCase, 6);
 		assertEqualLog(expectedTree, actual);
 	}
-	
+
 	public void testTreeJUnit4TestAdapter() throws Exception {
 		// regression test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=397747
 		IClasspathEntry cpe= JavaCore.newContainerEntry(JUnitCore.JUNIT4_CONTAINER_PATH);
 		JavaProjectHelper.clear(fProject, new IClasspathEntry[] { cpe });
 		JavaProjectHelper.addRTJar15(fProject);
-		
+
 		String source=
-				"package test;\n" + 
-				"\n" + 
-				"import junit.framework.JUnit4TestAdapter;\n" + 
-				"import junit.framework.TestCase;\n" + 
-				"import junit.framework.TestSuite;\n" + 
-				"\n" + 
-				"import org.junit.Test;\n" + 
-				"import org.junit.runner.RunWith;\n" + 
-				"import org.junit.runners.Suite;\n" + 
-				"import org.junit.runners.Suite.SuiteClasses;\n" + 
-				"\n" + 
-				"public class MyTestSuite {\n" + 
-				"	public static junit.framework.Test suite() {\n" + 
-				"		TestSuite suite = new TestSuite();\n" + 
-				"		suite.addTest(new JUnit4TestAdapter(JUnit4TestSuite.class));\n" + 
-				"		suite.addTestSuite(JUnit3TestCase.class);\n" + 
-				"		return suite;\n" + 
-				"	}\n" + 
-				"	\n" + 
-				"	@RunWith(Suite.class)\n" + 
-				"	@SuiteClasses({JUnit4TestCase.class})\n" + 
-				"	public static class JUnit4TestSuite {}\n" + 
-				"	\n" + 
-				"	public static class JUnit4TestCase {\n" + 
-				"		@Test public void testA() {}\n" + 
-				"		@Test public void testB() {}\n" + 
-				"	}\n" + 
-				"	\n" + 
-				"	public static class JUnit3TestCase extends TestCase {\n" + 
-				"		public void testC() {}\n" + 
-				"		public void testD() {}\n" + 
-				"		public void testE() {}\n" + 
-				"	}\n" + 
+				"package test;\n" +
+				"\n" +
+				"import junit.framework.JUnit4TestAdapter;\n" +
+				"import junit.framework.TestCase;\n" +
+				"import junit.framework.TestSuite;\n" +
+				"\n" +
+				"import org.junit.Test;\n" +
+				"import org.junit.runner.RunWith;\n" +
+				"import org.junit.runners.Suite;\n" +
+				"import org.junit.runners.Suite.SuiteClasses;\n" +
+				"\n" +
+				"public class MyTestSuite {\n" +
+				"	public static junit.framework.Test suite() {\n" +
+				"		TestSuite suite = new TestSuite();\n" +
+				"		suite.addTest(new JUnit4TestAdapter(JUnit4TestSuite.class));\n" +
+				"		suite.addTestSuite(JUnit3TestCase.class);\n" +
+				"		return suite;\n" +
+				"	}\n" +
+				"	\n" +
+				"	@RunWith(Suite.class)\n" +
+				"	@SuiteClasses({JUnit4TestCase.class})\n" +
+				"	public static class JUnit4TestSuite {}\n" +
+				"	\n" +
+				"	public static class JUnit4TestCase {\n" +
+				"		@Test public void testA() {}\n" +
+				"		@Test public void testB() {}\n" +
+				"	}\n" +
+				"	\n" +
+				"	public static class JUnit3TestCase extends TestCase {\n" +
+				"		public void testC() {}\n" +
+				"		public void testD() {}\n" +
+				"		public void testE() {}\n" +
+				"	}\n" +
 				"}\n";
 		IType aTestCase= createType(source, "test", "MyTestSuite.java");
-		
+
 		String[] expectedTree= new String[] {
 				TestRunListeners.sessionAsString("MyTestSuite", ProgressState.COMPLETED, Result.OK, 0),
 				TestRunListeners.suiteAsString("junit.framework.TestSuite", ProgressState.COMPLETED, Result.OK, null, 1),
-				
+
 				TestRunListeners.suiteAsString("test.MyTestSuite.JUnit4TestSuite", ProgressState.COMPLETED, Result.OK, null, 2),
 				TestRunListeners.suiteAsString("test.MyTestSuite.JUnit4TestCase", ProgressState.COMPLETED, Result.OK, null, 3),
 				TestRunListeners.testCaseAsString("testA", "test.MyTestSuite.JUnit4TestCase", ProgressState.COMPLETED, Result.OK, null, 4),
 				TestRunListeners.testCaseAsString("testB", "test.MyTestSuite.JUnit4TestCase", ProgressState.COMPLETED, Result.OK, null, 4),
-				
+
 				TestRunListeners.suiteAsString("test.MyTestSuite.JUnit3TestCase", ProgressState.COMPLETED, Result.OK, null, 2),
 				TestRunListeners.testCaseAsString("testC", "test.MyTestSuite.JUnit3TestCase", ProgressState.COMPLETED, Result.OK, null, 3),
 				TestRunListeners.testCaseAsString("testD", "test.MyTestSuite.JUnit3TestCase", ProgressState.COMPLETED, Result.OK, null, 3),

@@ -271,42 +271,42 @@ public class InlineTempTests extends RefactoringTest {
 		// add explicit cast for primitive types: https://bugs.eclipse.org/bugs/show_bug.cgi?id=46216
 		helper1(5, 14, 5, 15);
 	}
-	
+
 	public void test34() throws Exception{
 		// add explicit cast for boxing: https://bugs.eclipse.org/bugs/show_bug.cgi?id=201434#c4
 		helper1(5, 17, 5, 17);
 	}
-	
+
 	public void test35() throws Exception{
 		// add explicit cast for unchecked conversion: https://bugs.eclipse.org/bugs/show_bug.cgi?id=201434#c0
 		helper1(7, 32, 7, 36);
 	}
-	
+
 	public void test36() throws Exception{
 		// parenthesize complex cast expression
 		helper1(6, 21, 6, 24);
 	}
-	
+
 	public void test37() throws Exception{
 		// parameterized method invocation needs class expression: https://bugs.eclipse.org/bugs/show_bug.cgi?id=277968
 		helper1(5, 16, 5, 17);
 	}
-	
+
 	public void test38() throws Exception{
 		// parameterized method invocation needs this expression: https://bugs.eclipse.org/bugs/show_bug.cgi?id=277968
 		helper1(5, 16, 5, 17);
 	}
-	
+
 	public void test39() throws Exception{
 		// parameterized method invocation needs to keep super expression: https://bugs.eclipse.org/bugs/show_bug.cgi?id=277968
 		helper1(5, 16, 5, 17);
 	}
-	
+
 	public void test40() throws Exception{
 		// better cast for unboxing: https://bugs.eclipse.org/bugs/show_bug.cgi?id=297868
 		helper1(5, 43, 5, 46);
 	}
-	
+
 	public void test41() throws Exception {
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=335173
 		helper1(5, 13, 5, 14);
@@ -326,7 +326,7 @@ public class InlineTempTests extends RefactoringTest {
 		// don't add unnecessary cast to wildcard-parameterized type https://bugs.eclipse.org/bugs/show_bug.cgi?id=338271
 		helper1(7, 35, 7, 41);
 	}
-	
+
 	public void test45() throws Exception {
 		// don't delete comment right before the local variable declaration (bug 295200)
 		helper1(5, 18, 5, 22);

@@ -46,7 +46,7 @@ import org.eclipse.jdt.internal.ui.packageview.PackageExplorerContentProvider;
  * <ul>
  * <li>Bug 501507: [1.9] Consider displaying the module-info.java file in the source folder root
  * </ul>
- * 
+ *
  * @since 3.14
  */
 @RunWith(JUnit4.class)
@@ -59,9 +59,9 @@ public class ContentProviderTests7 {
 
 	// test matrix:
 	//	 Criterion (true/false):														NameSegment:
-	// 		no ordinary CU in dlft package	/ with ordinary CU in dflt package	=		Module1 		/ Module2 
+	// 		no ordinary CU in dlft package	/ with ordinary CU in dflt package	=		Module1 		/ Module2
 	//		hierarchical layout				/ flat layout		 				= 		Hierarchical	/ Flat
-	// 		empty module-info				/ real module						= 		Empty			/ 
+	// 		empty module-info				/ real module						= 		Empty			/
 	//   Checking in each test:
 	// 		- children of fSrcFolder
 	//		- children of the default package
@@ -82,10 +82,10 @@ public class ContentProviderTests7 {
 	}
 
 	private void createEmptyClass(IPackageFragment fragment, String name, String packageName) throws JavaModelException {
-		String packDecl= packageName != null ? "package "+packageName+";\n" : ""; 
+		String packDecl= packageName != null ? "package "+packageName+";\n" : "";
 		fragment.createCompilationUnit(name+".java", packDecl+"public class "+name+" {}\n", true, null);
 	}
-	
+
 	private IJavaElement getModuleInfo() {
 		return fSrcFolder.getPackageFragment("").getCompilationUnit("module-info.java");
 	}
@@ -95,7 +95,7 @@ public class ContentProviderTests7 {
 		provider.setIsFlatLayout(isFlatLayout);
 		return provider.getChildren(src);
 	}
-	
+
 	private void assertResults(Object[][] actual, Object[] expectedSrcFolderChildren, Object[] expectedDefaultPkgChildren) {
 		assertTrue("Wrong children found for source folder", compareArrays(actual[0], expectedSrcFolderChildren));
 		assertTrue("Wrong children found for default package", compareArrays(actual[1], expectedDefaultPkgChildren));//$NON-NLS-1$
@@ -131,7 +131,7 @@ public class ContentProviderTests7 {
 		};
 		assertResults(actualResult, expectedChildren, NO_CHILDREN);
 	}
-	
+
 	@Test
 	public void testModule1Flat() throws Exception {
 		Object[][] actualResult= runTest(false, true, true);
@@ -165,7 +165,7 @@ public class ContentProviderTests7 {
 		};
 		assertResults(actualResult, expectedChildren, new Object[] {fSrcFolder.getPackageFragment("").getCompilationUnit("DefC.java") } );
 	}
-	
+
 	@Test
 	public void testModule2EmptyFlat() throws Exception {
 		Object[][] actualResult= runTest(true, true, false);

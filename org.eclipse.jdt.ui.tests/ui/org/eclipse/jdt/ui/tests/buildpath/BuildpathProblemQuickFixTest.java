@@ -171,7 +171,7 @@ public class BuildpathProblemQuickFixTest extends TestCase {
 		fJavaProject1.getProject().getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
 
 		IMarker[] markers= fJavaProject1.getResource().findMarkers("org.eclipse.jdt.core.buildpath_problem", true, IResource.DEPTH_INFINITE);
-		assertEquals("One or more cycles were detected in the build path of project '2_CyclicA'. The paths towards the cycle and cycle are:\n" + 
+		assertEquals("One or more cycles were detected in the build path of project '2_CyclicA'. The paths towards the cycle and cycle are:\n" +
 				"->{2_CyclicA, 2_CyclicB}", (String) markers[0].getAttribute(IMarker.MESSAGE));
 		assertEquals(1, markers.length);
 		IMarkerResolution[] resolutions= sortResolutions(IDE.getMarkerHelpRegistry().getResolutions(markers[0]));
@@ -189,7 +189,7 @@ public class BuildpathProblemQuickFixTest extends TestCase {
 		if (vm instanceof IVMInstall2) {
 			String version= ((IVMInstall2) vm).getJavaVersion();
 			if (version == null || !version.startsWith(JavaCore.VERSION_1_7)) {
-				// higher version instead of JavaSE 1.7 not found: 
+				// higher version instead of JavaSE 1.7 not found:
 				// skip test as error against vm's class files would be reported
 				return;
 			}

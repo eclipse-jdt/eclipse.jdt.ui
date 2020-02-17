@@ -417,34 +417,34 @@ public class BracketInserterTest extends TestCase {
 
 	public void testAngleBracketsBeforeTypeArgument15() throws Exception {
 		use15();
-		
+
 		String PRE= "new ArrayList";
 		String POST= "String>();";
-		
+
 		fDocument.replace(BODY_OFFSET, 0, PRE + POST);
 		setCaret(BODY_OFFSET + PRE.length());
-		
+
 		type('<');
-		
+
 		assertEquals(PRE + '<' + POST, fDocument.get(BODY_OFFSET, PRE.length() + 1 + POST.length()));
 		assertFalse(LinkedModeModel.hasInstalledModel(fDocument));
 	}
-	
+
 	public void testAngleBracketsBeforeWildcard15() throws Exception {
 		use15();
-		
+
 		String PRE= "new ArrayList";
 		String POST= "? extends Number>();";
-		
+
 		fDocument.replace(BODY_OFFSET, 0, PRE + POST);
 		setCaret(BODY_OFFSET + PRE.length());
-		
+
 		type('<');
-		
+
 		assertEquals(PRE + '<' + POST, fDocument.get(BODY_OFFSET, PRE.length() + 1 + POST.length()));
 		assertFalse(LinkedModeModel.hasInstalledModel(fDocument));
 	}
-	
+
 	public void testAngleBracketsAfterIdentifierOnFirstColumn1_15() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=347734
 		use15();

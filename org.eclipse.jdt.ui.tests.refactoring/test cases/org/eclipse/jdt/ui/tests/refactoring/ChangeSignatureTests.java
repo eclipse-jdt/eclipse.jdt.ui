@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -1614,14 +1614,14 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int[] deletedIndices= null;
 		int newVisibility= Modifier.PUBLIC;
 		String newReturnTypeName= "void";
-		
+
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
 		int aStart= cu.getSource().lastIndexOf("a(");
 		IMethod method= (IMethod) cu.getElementAt(aStart);
 		assertTrue(method.exists());
 		helperDoAll(method, newParamInfo, newIndices, oldParamNames, newParamNames, newParamTypeNames, permutation, newVisibility, deletedIndices, newReturnTypeName, false);
 	}
-	
+
 	public void testAddSyntaxError01()throws Exception{ // https://bugs.eclipse.org/bugs/show_bug.cgi?id=191349
 		String refNameIn= "A_testAddSyntaxError01_Ref_in.java";
 		String refNameOut= "A_testAddSyntaxError01_Ref_out.java";
@@ -2212,7 +2212,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		String newReturnTypeName= null;
 		helperDoAll("C", "foo", signature, newParamInfo, newIndices, oldParamNames, newParamNames, newParameterTypeNames, permutation, newVisibility, deletedIndices, newReturnTypeName);
 	}
-	
+
 	public void testDelegate01() throws Exception {
 		// simple reordering with delegate
 		helper1(new String[]{"j", "i"}, new String[]{"I", "QString;"}, null, null, true);
@@ -2263,6 +2263,6 @@ public class ChangeSignatureTests extends RefactoringTest {
 		String[] signature= {};
 		helperRenameMethod(signature, "renamed", true, false);
 	}
-	
+
 }
 

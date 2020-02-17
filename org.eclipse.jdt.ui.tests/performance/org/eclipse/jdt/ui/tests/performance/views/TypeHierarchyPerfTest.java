@@ -90,13 +90,13 @@ public class TypeHierarchyPerfTest extends JdtPerformanceTestCase {
 
 	public void testOpenObjectHierarchy() throws Exception {
 		//cold
-		
-		// make sure stuff like the Intro view gets closed and we start with a clean Java perspective: 
+
+		// make sure stuff like the Intro view gets closed and we start with a clean Java perspective:
 		IWorkbenchWindow activeWorkbenchWindow= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 		IWorkbenchPage page= activeWorkbenchWindow.getActivePage();
 		page.close();
 		page= activeWorkbenchWindow.openPage(JavaUI.ID_PERSPECTIVE, ResourcesPlugin.getWorkspace().getRoot());
-		
+
 		measureOpenHierarchy(MyTestSetup.fJProject1.findType("java.lang.Object"));
 		Performance.getDefault().assertPerformanceInAbsoluteBand(fPerformanceMeter, Dimension.ELAPSED_PROCESS, 0, 2000);
 	}
@@ -110,22 +110,22 @@ public class TypeHierarchyPerfTest extends JdtPerformanceTestCase {
 	public void testOpenObjectHierarchy2() throws Exception {
 		//warm
 		tagAsSummary("Open type hierarchy on Object", Dimension.ELAPSED_PROCESS);
-		
+
 		IJavaElement element= MyTestSetup.fJProject1.findType("java.lang.Object");
 		IWorkbenchWindow workbenchWindow= JavaPlugin.getActiveWorkbenchWindow();
-		
+
 		TypeHierarchyViewPart viewPart= OpenTypeHierarchyUtil.open(element, workbenchWindow);
-		
+
 		for (int i= 0; i < 10; i++) {
 			viewPart.setInputElement(MyTestSetup.fJProject1.findType("java.lang.String"));
 			viewPart.getSite().getPage().hideView(viewPart);
-			
+
 			joinBackgroudActivities();
 			startMeasuring();
 			viewPart= OpenTypeHierarchyUtil.open(element, workbenchWindow);
 			stopMeasuring();
 		}
-		
+
 		commitMeasurements();
 		assertPerformanceInRelativeBand(Dimension.ELAPSED_PROCESS, -100, +10);
 	}

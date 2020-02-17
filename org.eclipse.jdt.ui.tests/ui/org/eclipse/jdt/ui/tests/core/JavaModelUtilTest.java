@@ -122,9 +122,9 @@ public class JavaModelUtilTest extends TestCase {
         assertMatching(true, "org.junit.Test", "Test");
         assertMatching(true, "X.Test", "Test");
         assertMatching(true, "Test", "Test");
-        
+
         assertMatching(true, "java.lang.Thread.State", "Thread.State");
-        
+
         assertMatching(false, "org.junit.Test", "org.junitX.Test");
         assertMatching(false, "org.junit.Test", "X.Test");
         assertMatching(false, "org.junit.Test", "Xorg.junit.Test");
@@ -132,7 +132,7 @@ public class JavaModelUtilTest extends TestCase {
         assertMatching(false, "Test", "Test.X");
         assertMatching(false, "Test", ".Test");
     }
-    
+
     private void assertMatching(boolean matching, String nameA, String nameB) {
     	assertEquals(matching, JavaModelUtil.isMatchingName(nameA, nameB));
     	assertEquals(matching, JavaModelUtil.isMatchingName(nameB, nameA));

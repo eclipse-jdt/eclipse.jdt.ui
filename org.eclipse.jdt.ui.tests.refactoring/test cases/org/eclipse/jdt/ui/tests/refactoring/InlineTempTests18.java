@@ -54,7 +54,7 @@ public class InlineTempTests18 extends InlineTempTests {
 	public void test2() throws Exception {
 		helper1(5, 20, 5, 25);
 	}
-	
+
 	@Override
 	public void test3() throws Exception {
 		helper1(9, 29, 9, 36);

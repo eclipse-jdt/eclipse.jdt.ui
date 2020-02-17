@@ -5297,7 +5297,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 
 		enable(CleanUpConstants.SORT_MEMBERS);
 		enable(CleanUpConstants.SORT_MEMBERS_ALL);
-		
+
 		enable(CleanUpConstants.REMOVE_REDUNDANT_MODIFIERS);
 		enable(CleanUpConstants.REMOVE_REDUNDANT_SEMICOLONS);
 
@@ -5309,9 +5309,9 @@ public class CleanUpStressTest extends CleanUpTestCase {
 		for (ICompilationUnit cu : units) {
 			String previewContent= getNormalizedContent(new Document(cu.getBuffer().getContents()));
 			String compilationUnitName= getCompilationUnitName(cu);
-			
+
 			String expected= fExpectedChangesAllTests.get(compilationUnitName);
-			
+
 			assertTrue("No expected value in table for " + compilationUnitName, expected != null);
 			assertEquals("Content not as expected for " + compilationUnitName, expected, previewContent);
 		}

@@ -28,7 +28,7 @@ import org.eclipse.jface.text.rules.WordRule;
 
 /**
  * Performance tests for {@link WordRule}.
- * 
+ *
  * @since 3.6
  */
 public class WordRulePerformanceTest extends TextPerformanceTestCase2 {

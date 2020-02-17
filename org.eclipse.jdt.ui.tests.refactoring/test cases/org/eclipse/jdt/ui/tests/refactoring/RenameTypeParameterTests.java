@@ -191,7 +191,7 @@ public class RenameTypeParameterTests extends RefactoringTest {
 	public void test15() throws Exception {
 		helper2("T", "S", "A", true);
 	}
-	
+
 // ------------------------------------------------
 
 	public void testFail0() throws Exception {
