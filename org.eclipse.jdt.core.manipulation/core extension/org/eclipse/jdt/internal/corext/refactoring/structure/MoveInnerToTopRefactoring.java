@@ -36,7 +36,6 @@ import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.IRefactoringStatusEntryComparator;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -371,13 +370,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 	}
 
 	private static boolean containsStatusEntry(final RefactoringStatus status, final RefactoringStatusEntry other) {
-		return status.getEntries(new IRefactoringStatusEntryComparator() {
-
-			@Override
-			public final int compare(final RefactoringStatusEntry entry1, final RefactoringStatusEntry entry2) {
-				return entry1.getMessage().compareTo(entry2.getMessage());
-			}
-		}, other).length > 0;
+		return status.getEntries((entry1, entry2) -> entry1.getMessage().compareTo(entry2.getMessage()), other).length > 0;
 	}
 
 	private static AbstractTypeDeclaration findTypeDeclaration(IType enclosing, AbstractTypeDeclaration[] declarations) {

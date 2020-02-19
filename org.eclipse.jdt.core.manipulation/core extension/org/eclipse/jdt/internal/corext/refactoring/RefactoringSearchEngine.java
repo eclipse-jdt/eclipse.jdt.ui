@@ -28,7 +28,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.resources.IResource;
 
-import org.eclipse.ltk.core.refactoring.IRefactoringStatusEntryComparator;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 
@@ -216,12 +215,7 @@ public class RefactoringSearchEngine {
 	}
 
 	private static boolean containsStatusEntry(final RefactoringStatus status, final RefactoringStatusEntry other) {
-		return status.getEntries(new IRefactoringStatusEntryComparator() {
-			@Override
-			public final int compare(final RefactoringStatusEntry entry1, final RefactoringStatusEntry entry2) {
-				return entry1.getMessage().compareTo(entry2.getMessage());
-			}
-		}, other).length > 0;
+		return status.getEntries((entry1, entry2) -> entry1.getMessage().compareTo(entry2.getMessage()), other).length > 0;
 	}
 
 	private static void addStatusErrors(RefactoringStatus status, boolean hasPotentialMatches, boolean hasNonCuMatches) {

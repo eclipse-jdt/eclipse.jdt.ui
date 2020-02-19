@@ -728,15 +728,11 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 		body.statements().add(forStatement);
 
 		Block forBody= fAst.newBlock();
-		Statement[] statements= createAddSimpleHashCode(binding, new IHashCodeAccessProvider() {
-
-			@Override
-			public Expression getThisAccess(String name) {
-				ArrayAccess a= fAst.newArrayAccess();
-				a.setArray(fAst.newSimpleName(VARIABLE_NAME_HASHCODE_PARAM));
-				a.setIndex(fAst.newSimpleName(name));
-				return a;
-			}
+		Statement[] statements= createAddSimpleHashCode(binding, name -> {
+			ArrayAccess a= fAst.newArrayAccess();
+			a.setArray(fAst.newSimpleName(VARIABLE_NAME_HASHCODE_PARAM));
+			a.setIndex(fAst.newSimpleName(name));
+			return a;
 		}, VARIABLE_NAME_INDEX, true);
 		for (Statement statement : statements) {
 			forBody.statements().add(statement);

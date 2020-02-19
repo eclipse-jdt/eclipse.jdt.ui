@@ -16,7 +16,6 @@ package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -661,16 +660,13 @@ public class CodeStyleFixCore extends CompilationUnitRewriteOperationsFixCore {
 		}
 		// Make sure qualifiers are processed inside-out and left-to-right, so that
 		// ToStaticAccessOperation#extractQualifier(..) extracts qualifiers in execution order:
-		Collections.sort(operations, new Comparator<ToStaticAccessOperation>() {
-			@Override
-			public int compare(ToStaticAccessOperation o1, ToStaticAccessOperation o2) {
-				if (ASTNodes.isParent(o1.fQualifier, o2.fQualifier)) {
-					return -1;
-				} else if (ASTNodes.isParent(o2.fQualifier, o1.fQualifier)) {
-					return 1;
-				} else {
-					return o1.fQualifier.getStartPosition() - o2.fQualifier.getStartPosition();
-				}
+		Collections.sort(operations, (o1, o2) -> {
+			if (ASTNodes.isParent(o1.fQualifier, o2.fQualifier)) {
+				return -1;
+			} else if (ASTNodes.isParent(o2.fQualifier, o1.fQualifier)) {
+				return 1;
+			} else {
+				return o1.fQualifier.getStartPosition() - o2.fQualifier.getStartPosition();
 			}
 		});
 		result.addAll(operations);

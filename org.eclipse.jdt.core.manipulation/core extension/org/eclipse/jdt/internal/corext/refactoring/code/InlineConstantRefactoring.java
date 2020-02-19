@@ -116,7 +116,6 @@ import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.dom.fragments.ASTFragmentFactory;
 import org.eclipse.jdt.internal.corext.dom.fragments.IExpressionFragment;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.IRefactoringSearchRequestor;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorUtil;
@@ -915,12 +914,7 @@ public class InlineConstantRefactoring extends Refactoring {
 		engine.setFiltering(true, true);
 		engine.setScope(RefactoringScopeFactory.create(fField));
 		engine.setStatus(status);
-		engine.setRequestor(new IRefactoringSearchRequestor() {
-			@Override
-			public SearchMatch acceptSearchMatch(SearchMatch match) {
-				return match.isInsideDocComment() ? null : match;
-			}
-		});
+		engine.setRequestor(match -> match.isInsideDocComment() ? null : match);
 		engine.searchPattern(new SubProgressMonitor(pm, 1));
 		return (SearchResultGroup[]) engine.getResults();
 	}

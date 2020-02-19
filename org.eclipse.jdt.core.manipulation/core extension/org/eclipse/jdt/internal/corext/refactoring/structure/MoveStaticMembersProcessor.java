@@ -18,7 +18,6 @@ package org.eclipse.jdt.internal.corext.refactoring.structure;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -1081,12 +1080,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		}
 
 		//Sorting members is important for field declarations referring to previous fields.
-		Arrays.sort(result, new Comparator<BodyDeclaration>() {
-			@Override
-			public int compare(BodyDeclaration o1, BodyDeclaration o2) {
-				return o1.getStartPosition() - o2.getStartPosition();
-			}
-		});
+		Arrays.sort(result, (o1, o2) -> o1.getStartPosition() - o2.getStartPosition());
 		return result;
 	}
 

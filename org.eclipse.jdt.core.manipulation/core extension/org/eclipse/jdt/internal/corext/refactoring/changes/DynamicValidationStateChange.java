@@ -102,12 +102,7 @@ public class DynamicValidationStateChange extends CompositeChange implements Wor
 	@Override
 	public Change perform(IProgressMonitor pm) throws CoreException {
 		final Change[] result= new Change[1];
-		IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
-			@Override
-			public void run(IProgressMonitor monitor) throws CoreException {
-				result[0]= DynamicValidationStateChange.super.perform(monitor);
-			}
-		};
+		IWorkspaceRunnable runnable= monitor -> result[0]= DynamicValidationStateChange.super.perform(monitor);
 		JavaCore.run(runnable, fSchedulingRule, pm);
 		return result[0];
 	}

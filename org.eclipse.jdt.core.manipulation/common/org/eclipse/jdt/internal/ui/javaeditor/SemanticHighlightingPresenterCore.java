@@ -299,12 +299,7 @@ public class SemanticHighlightingPresenterCore {
 		if (isCanceled())
 			return null;
 
-		Runnable runnable= new Runnable() {
-			@Override
-			public void run() {
-				updatePresentationCore(document, added, removed);
-			}
-		};
+		Runnable runnable= () -> updatePresentationCore(document, added, removed);
 		return runnable;
 	}
 

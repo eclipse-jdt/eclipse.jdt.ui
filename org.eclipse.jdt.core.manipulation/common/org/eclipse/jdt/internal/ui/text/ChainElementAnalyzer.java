@@ -36,49 +36,37 @@ public final class ChainElementAnalyzer {
 
 	private static final Map<String, IType> typeCache= new HashMap<>();
 
-	private static final Predicate<IField> NON_STATIC_FIELDS_ONLY_FILTER = new Predicate<IField>() {
-		@Override
-		public boolean test(IField t) {
-			try {
-				return !Flags.isStatic(t.getFlags());
-			} catch (JavaModelException e) {
-				return true;
-			}
+	private static final Predicate<IField> NON_STATIC_FIELDS_ONLY_FILTER = t -> {
+		try {
+			return !Flags.isStatic(t.getFlags());
+		} catch (JavaModelException e) {
+			return true;
 		}
-    };
+	};
 
-    private static final Predicate<IMethod> RELEVANT_NON_STATIC_METHODS_ONLY_FILTER = new Predicate<IMethod>() {
-		@Override
-		public boolean test(IMethod m) {
-			try {
-				return !Flags.isStatic(m.getFlags()) && !isVoid(m) && !m.isConstructor();
-			} catch (JavaModelException e) {
-				return false;
-			}
+    private static final Predicate<IMethod> RELEVANT_NON_STATIC_METHODS_ONLY_FILTER = m -> {
+		try {
+			return !Flags.isStatic(m.getFlags()) && !isVoid(m) && !m.isConstructor();
+		} catch (JavaModelException e) {
+			return false;
 		}
-    };
+	};
 
-    private static final Predicate<IField> STATIC_FIELDS_ONLY_FILTER = new Predicate<IField>() {
-		@Override
-		public boolean test(IField t) {
-			try {
-				return Flags.isStatic(t.getFlags());
-			} catch (JavaModelException e) {
-				return false;
-			}
+    private static final Predicate<IField> STATIC_FIELDS_ONLY_FILTER = t -> {
+		try {
+			return Flags.isStatic(t.getFlags());
+		} catch (JavaModelException e) {
+			return false;
 		}
-    };
+	};
 
-    private static final Predicate<IMethod> STATIC_NON_VOID_NON_PRIMITIVE_METHODS_ONLY_FILTER = new Predicate<IMethod>() {
-		@Override
-		public boolean test(IMethod m) {
-			try {
-				return Flags.isStatic(m.getFlags()) && !isVoid(m) && !m.isConstructor();
-			} catch (JavaModelException e) {
-				return false;
-			}
+    private static final Predicate<IMethod> STATIC_NON_VOID_NON_PRIMITIVE_METHODS_ONLY_FILTER = m -> {
+		try {
+			return Flags.isStatic(m.getFlags()) && !isVoid(m) && !m.isConstructor();
+		} catch (JavaModelException e) {
+			return false;
 		}
-    };
+	};
 
     private ChainElementAnalyzer() {
     }

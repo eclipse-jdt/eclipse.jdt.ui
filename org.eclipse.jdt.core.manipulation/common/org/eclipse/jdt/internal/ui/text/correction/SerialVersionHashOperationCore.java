@@ -21,7 +21,6 @@ import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-import java.util.Comparator;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
@@ -193,23 +192,13 @@ public final class SerialVersionHashOperationCore extends AbstractSerialVersionO
 
 	private static char[][] getSortedInterfacesNames(IClassFileReader cfReader) {
 		char[][] interfaceNames= cfReader.getInterfaceNames();
-		Arrays.sort(interfaceNames, new Comparator<char[]>() {
-			@Override
-			public int compare(char[] o1, char[] o2) {
-				return CharOperation.compareTo(o1, o2);
-			}
-		});
+		Arrays.sort(interfaceNames, (o1, o2) -> CharOperation.compareTo(o1, o2));
 		return interfaceNames;
 	}
 
 	private static IFieldInfo[] getSortedFields(IClassFileReader cfReader) {
 		IFieldInfo[] allFields= cfReader.getFieldInfos();
-		Arrays.sort(allFields, new Comparator<IFieldInfo>() {
-			@Override
-			public int compare(IFieldInfo o1, IFieldInfo o2) {
-				return CharOperation.compareTo(o1.getName(), o2.getName());
-			}
-		});
+		Arrays.sort(allFields, (o1, o2) -> CharOperation.compareTo(o1.getName(), o2.getName()));
 		return allFields;
 	}
 
@@ -225,20 +214,17 @@ public final class SerialVersionHashOperationCore extends AbstractSerialVersionO
 
 	private static IMethodInfo[] getSortedMethods(IClassFileReader cfReader) {
 		IMethodInfo[] allMethods= cfReader.getMethodInfos();
-		Arrays.sort(allMethods, new Comparator<IMethodInfo>() {
-			@Override
-			public int compare(IMethodInfo mi1, IMethodInfo mi2) {
-				if (mi1.isConstructor() != mi2.isConstructor()) {
-					return mi1.isConstructor() ? -1 : 1;
-				} else if (mi1.isConstructor()) {
-					return 0;
-				}
-				int res= CharOperation.compareTo(mi1.getName(), mi2.getName());
-				if (res != 0) {
-					return res;
-				}
-				return CharOperation.compareTo(mi1.getDescriptor(), mi2.getDescriptor());
+		Arrays.sort(allMethods, (mi1, mi2) -> {
+			if (mi1.isConstructor() != mi2.isConstructor()) {
+				return mi1.isConstructor() ? -1 : 1;
+			} else if (mi1.isConstructor()) {
+				return 0;
 			}
+			int res= CharOperation.compareTo(mi1.getName(), mi2.getName());
+			if (res != 0) {
+				return res;
+			}
+			return CharOperation.compareTo(mi1.getDescriptor(), mi2.getDescriptor());
 		});
 		return allMethods;
 	}
