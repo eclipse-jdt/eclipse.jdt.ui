@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -7,6 +7,10 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -264,7 +268,7 @@ public class JavaProjectHelper {
 
 	/**
 	 * Sets the compiler options to 13 for the given project.
-	 * 
+	 *
 	 * @param project the java project
 	 * @param enable_preview_feature sets enable-preview compliance project option based on the
 	 *            value specified.
@@ -371,7 +375,7 @@ public class JavaProjectHelper {
 
 	/**
 	 * Sets the compiler options to 14.
-	 * 
+	 *
 	 * @param options the compiler options to configure
 	 */
 	public static void set14_CompilerOptions(Map<String, String> options) {
@@ -887,6 +891,12 @@ public class JavaProjectHelper {
 	public static IPackageFragmentRoot addRTJar_13(IJavaProject jproject, boolean enable_preview_feature) throws CoreException {
 		IPath[] rtJarPath= findRtJar(RT_STUBS13);
 		set13CompilerOptions(jproject, enable_preview_feature);
+		return addLibrary(jproject, rtJarPath[0], rtJarPath[1], rtJarPath[2]);
+	}
+
+	public static IPackageFragmentRoot addRTJar_14(IJavaProject jproject, boolean enable_preview_feature) throws CoreException {
+		IPath[] rtJarPath= findRtJar(RT_STUBS14);
+		set14CompilerOptions(jproject, enable_preview_feature);
 		return addLibrary(jproject, rtJarPath[0], rtJarPath[1], rtJarPath[2]);
 	}
 

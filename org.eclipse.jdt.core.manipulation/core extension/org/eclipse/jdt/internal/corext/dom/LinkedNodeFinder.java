@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -8,12 +8,17 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.dom;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
@@ -28,7 +33,11 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.NodeFinder;
+import org.eclipse.jdt.core.dom.RecordDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+
+import org.eclipse.jdt.internal.ui.util.ASTHelper;
 
 
 /**
@@ -41,6 +50,62 @@ public class LinkedNodeFinder  {
 
 	private LinkedNodeFinder() {
 	}
+
+
+	public static SimpleName getAssociatedRecordComponentNode(SimpleName simpleName) {
+		SimpleName rcName= null;
+		ASTNode parent= simpleName;
+		if (simpleName == null) {
+			return null;
+		}
+		if (!ASTHelper.isRecordDeclarationNodeSupportedInAST(simpleName.getAST())) {
+			return null;
+		}
+		IBinding binding= simpleName.resolveBinding();
+		if (binding instanceof IVariableBinding) {
+			IVariableBinding vbinding= (IVariableBinding) binding;
+			IVariableBinding bBinding= vbinding.getVariableDeclaration();
+			if (!bBinding.isField()) {
+				return null;
+			}
+			ITypeBinding typeBinding= vbinding.getDeclaringClass().getTypeDeclaration();
+			if (!typeBinding.isRecord()) {
+				return null;
+			}
+		} else if (binding instanceof IMethodBinding) {
+			IMethodBinding mBinding = (IMethodBinding)binding;
+			ITypeBinding typeBinding= mBinding.getDeclaringClass().getTypeDeclaration();
+			IMethodBinding bBinding= mBinding.getMethodDeclaration();
+			if (bBinding.getParameterTypes().length != 0 || !typeBinding.isRecord()) {
+				return null;
+			}
+
+		} else {
+			return null;
+		}
+		RecordDeclaration recordDeclaration= null;
+		while(parent != null) {
+			parent= parent.getParent();
+			if (parent instanceof RecordDeclaration) {
+				recordDeclaration= (RecordDeclaration) parent;
+				break;
+			}
+		}
+		if (recordDeclaration != null) {
+			List<ASTNode> ff=recordDeclaration.recordComponents();
+			for (ASTNode nd : ff) {
+				if (nd instanceof SingleVariableDeclaration) {
+					SimpleName name= ((SingleVariableDeclaration) nd).getName();
+					if (simpleName.getIdentifier().equals(name.getIdentifier())) {
+						rcName= name;
+						break;
+					}
+				}
+			}
+		}
+		return rcName;
+	}
+
 
 
 	/**
@@ -69,6 +134,11 @@ public class LinkedNodeFinder  {
 	public static SimpleName[] findByNode(ASTNode root, SimpleName name) {
 		IBinding binding = name.resolveBinding();
 		if (binding != null) {
+			SimpleName recNode= getAssociatedRecordComponentNode(name);
+			if (recNode != null) {
+				IBinding recBinding= recNode.resolveBinding();
+				return findByBinding(root, recBinding);
+			}
 			return findByBinding(root, binding);
 		}
 		SimpleName[] names= findByProblems(root, name);
@@ -238,9 +308,17 @@ public class LinkedNodeFinder  {
 				return false;
 			}
 			binding= getDeclaration(binding);
-
+			SimpleName rcNode= getAssociatedRecordComponentNode(node);
 			if (fBinding == binding) {
 				fResult.add(node);
+			} else if (rcNode != null) {
+				IBinding rcBinding= rcNode.resolveBinding();
+				if (rcBinding != null) {
+					rcBinding= getDeclaration(rcBinding);
+					if (fBinding == rcBinding) {
+						fResult.add(node);
+					}
+				}
 			} else if (binding.getKind() != fBinding.getKind()) {
 				return false;
 			} else if (binding.getKind() == IBinding.METHOD) {

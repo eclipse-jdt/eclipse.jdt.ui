@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -7,6 +7,10 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -60,6 +64,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -99,7 +104,6 @@ import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
 import org.eclipse.jdt.ui.refactoring.RefactoringSaveHelper;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 public class RenameFieldProcessor extends JavaRenameProcessor implements IReferenceUpdating, ITextUpdating, IDelegateUpdating {
 
@@ -110,6 +114,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	private static final String ATTRIBUTE_DEPRECATE= "deprecate"; //$NON-NLS-1$
 
 	protected IField fField;
+	private boolean fIsRecordComponent= false;
 	private SearchResultGroup[] fReferences;
 	private TextChangeManager fChangeManager;
 	protected boolean fUpdateReferences;
@@ -161,12 +166,14 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		fDelegateUpdating= false;
 		fDelegateDeprecation= true;
 		fIsComposite= true;
+		fIsRecordComponent= false;
 	}
 
 	private void initialize(IField field) {
-		fField= field;
-		if (fField != null)
+		assignField(field);
+		if (fField != null) {
 			setNewElementName(fField.getElementName());
+		}
 		fUpdateReferences= true;
 		fUpdateTextualMatches= false;
 
@@ -217,6 +224,12 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			IMethod setter= getSetter();
 			if (setter != null) {
 				result.rename(setter, new RenameArguments(getNewSetterName(), getUpdateReferences()));
+			}
+		}
+		if (fIsRecordComponent) {
+			IMethod accessor= getAccessor();
+			if (accessor != null) {
+				result.rename(accessor, new RenameArguments(getNewElementName(), getUpdateReferences()));
 			}
 		}
 		return result;
@@ -367,6 +380,10 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		return GetterSetterUtil.getSetter(fField);
 	}
 
+	private IMethod getAccessor() throws CoreException {
+		return JavaModelUtil.findMethod(fField.getElementName(), new String[0], false, fField.getDeclaringType());
+	}
+
 	public String getNewGetterName() throws CoreException {
 		IMethod primaryGetterCandidate= JavaModelUtil.findMethod(GetterSetterUtil.getGetterName(fField, new String[0]), new String[0], false, fField.getDeclaringType());
 		if (! JavaModelUtil.isBoolean(fField) || (primaryGetterCandidate != null && primaryGetterCandidate.exists()))
@@ -421,6 +438,8 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 				count++;
 			if (fRenameSetter && getSetter() != null)
 				count++;
+			if (fIsRecordComponent && getAccessor() != null)
+				count++;
 		} catch (CoreException e) {
 			// no-op
 		}
@@ -439,7 +458,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			String message= Messages.format(RefactoringCoreMessages.RenameFieldRefactoring_deleted, BasicElementLabels.getFileName(fField.getCompilationUnit()));
 			return RefactoringStatus.createFatalErrorStatus(message);
 		}
-		fField= primary;
+		assignField(primary);
 
 		return Checks.checkIfCuBroken(fField);
 	}
@@ -705,6 +724,12 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			pm.worked(1);
 		}
 
+		if (fIsRecordComponent) {
+			addAccessorOccurrences(new SubProgressMonitor(pm, 1), result);
+		} else {
+			pm.worked(1);
+		}
+
 		if (fUpdateTextualMatches) {
 			addTextMatches(new SubProgressMonitor(pm, 5));
 		} else {
@@ -754,7 +779,9 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			addMethodDelegate(getGetter(), getNewGetterName(), rewrite);
 		if (getSetter() != null && fRenameSetter)
 			addMethodDelegate(getSetter(), getNewSetterName(), rewrite);
-
+		if (fIsRecordComponent && getAccessor() != null) {
+			addMethodDelegate(getAccessor(), getNewElementName(), rewrite);
+		}
 		final CompilationUnitChange change= rewrite.createChange(true);
 		if (change != null) {
 			change.setKeepPreviewEdits(true);
@@ -809,6 +836,14 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		addAccessorOccurrences(pm, getSetter(), RefactoringCoreMessages.RenameFieldRefactoring_Update_setter_occurrence, getNewSetterName(), status);
 	}
 
+	private void addAccessorOccurrences(IProgressMonitor pm, RefactoringStatus status) throws CoreException {
+		if (getAccessor() != null) {
+			addAccessorOccurrences(pm, getAccessor(), RefactoringCoreMessages.RenameFieldRefactoring_Update_getter_occurrence, getNewElementName(), status);
+		} else {
+			addFieldAccessorOccurrences(pm, RefactoringCoreMessages.RenameFieldRefactoring_Update_getter_occurrence, getNewElementName(), status);
+		}
+	}
+
 	private void addAccessorOccurrences(IProgressMonitor pm, IMethod accessor, String editName, String newAccessorName, RefactoringStatus status) throws CoreException {
 		Assert.isTrue(accessor.exists());
 
@@ -829,8 +864,43 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		}
 	}
 
+	private void addFieldAccessorOccurrences(IProgressMonitor pm, String editName, String newAccessorName, RefactoringStatus status) throws CoreException {
+		Assert.isTrue(fField.exists());
+
+		IJavaSearchScope scope= RefactoringScopeFactory.create(fField.getDeclaringType());
+		SearchPattern pattern= SearchPattern.createPattern(fField.getElementName(), IJavaSearchConstants.METHOD,
+				IJavaSearchConstants.REFERENCES, SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE | SearchPattern.R_ERASURE_MATCH);
+		SearchResultGroup[] groupedResults= RefactoringSearchEngine.search(
+				pattern, scope, new MethodOccurenceCollector(fField.getElementName()), pm, status);
+		for (SearchResultGroup groupedResult : groupedResults) {
+			ICompilationUnit cu= groupedResult.getCompilationUnit();
+			if (cu == null)
+				continue;
+			SearchMatch[] results= groupedResult.getSearchResults();
+			for (SearchMatch searchResult : results) {
+				TextEdit edit= new ReplaceEdit(searchResult.getOffset(), searchResult.getLength(), newAccessorName);
+				addTextEdit(fChangeManager.get(cu), editName, edit);
+			}
+		}
+	}
+
 	private void addTextMatches(IProgressMonitor pm) throws CoreException {
 		TextMatchUpdater.perform(pm, createRefactoringScope(), this, fChangeManager, fReferences);
+	}
+
+	private void assignField(IField field) {
+		fField= field;
+		fIsRecordComponent= false;
+		if (fField != null) {
+			IJavaElement parent= fField.getDeclaringType();
+			try {
+				if (parent instanceof IType && ((IType) parent).isRecord() && !Flags.isStatic(fField.getFlags())) {
+					fIsRecordComponent= true;
+				}
+			} catch (JavaModelException e) {
+				//do nothing
+			}
+		}
 	}
 
 	//----------------
@@ -916,7 +986,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			if (element == null || !element.exists() || element.getElementType() != IJavaElement.FIELD)
 				return JavaRefactoringDescriptorUtil.createInputFatalStatus(element, getProcessorName(), IJavaRefactorings.RENAME_FIELD);
 			else
-				fField= (IField) element;
+				assignField((IField) element);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
 		final String name= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME);

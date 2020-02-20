@@ -172,6 +172,25 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="core extension/org/eclipse/jdt/internal/corext/dom/LinkedNodeFinder.java">
+        <filter id="0"/>
+    </resource>
+    <resource path="core extension/org/eclipse/jdt/internal/corext/dom/LinkedNodeFinder.java" type="org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder">
+        <filter id="640712815">
+            <message_arguments>
+                <message_argument value="ITypeBinding"/>
+                <message_argument value="LinkedNodeFinder"/>
+                <message_argument value="isRecord()"/>
+            </message_arguments>
+        </filter>
+        <filter id="640712815">
+            <message_arguments>
+                <message_argument value="RecordDeclaration"/>
+                <message_argument value="LinkedNodeFinder"/>
+                <message_argument value="recordComponents()"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="core extension/org/eclipse/jdt/internal/corext/dom/ScopeAnalyzer.java" type="org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer">
         <filter comment="For Java 13 Enable Preview feature" id="640712815">
             <message_arguments>
