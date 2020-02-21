@@ -1092,7 +1092,7 @@ public class ASTNodes {
 		/**
 		 * Returns <code>true</code> if the method can be called without explicit casts; otherwise
 		 * <code>false</code>.
-		 * 
+		 *
 		 * @param candidate the method to test
 		 * @return <code>true</code> if the method can be called without explicit casts
 		 */
