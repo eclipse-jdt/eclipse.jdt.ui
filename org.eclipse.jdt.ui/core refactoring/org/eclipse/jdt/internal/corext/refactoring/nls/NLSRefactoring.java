@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -186,7 +186,7 @@ public class NLSRefactoring extends Refactoring {
 			}
 			pm.worked(1);
 
-			result.merge(validateModifiesFiles());
+			result.merge(validateModifiesFiles(pm));
 			if (result.hasFatalError()) {
 				return result;
 			}
@@ -309,8 +309,8 @@ public class NLSRefactoring extends Refactoring {
 		return getAccessorCUPath();
 	}
 
-	private RefactoringStatus validateModifiesFiles() {
-		return Checks.validateModifiesFiles(getAllFilesToModify(), getValidationContext());
+	private RefactoringStatus validateModifiesFiles(IProgressMonitor pm) throws CoreException {
+		return Checks.validateModifiesFiles(getAllFilesToModify(), getValidationContext(), pm);
 	}
 
 	//should stop checking if fatal error

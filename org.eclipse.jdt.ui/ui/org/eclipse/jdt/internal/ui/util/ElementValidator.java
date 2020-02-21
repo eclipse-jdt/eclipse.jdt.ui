@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -18,10 +18,14 @@ import java.util.Set;
 
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
 
@@ -172,6 +176,19 @@ public class ElementValidator {
 
 	private static boolean checkInSync(IResource[] resources, Shell parent, String title) {
 		IStatus status= Resources.checkInSync(resources);
+		if (!status.isOK()) {
+			boolean autoRefresh= Platform.getPreferencesService().getBoolean(ResourcesPlugin.PI_RESOURCES, ResourcesPlugin.PREF_LIGHTWEIGHT_AUTO_REFRESH, false, null);
+			if (autoRefresh) {
+				for (IResource resource : resources) {
+					try {
+						resource.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
+					} catch (CoreException e) {
+						break;
+					}
+					status= Resources.checkInSync(resources);
+				}
+			}
+		}
 		if (status.isOK())
 			return true;
 		ErrorDialog.openError(parent, title,

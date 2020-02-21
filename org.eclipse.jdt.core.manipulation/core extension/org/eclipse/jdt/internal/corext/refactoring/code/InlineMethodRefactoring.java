@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -280,7 +280,7 @@ public class InlineMethodRefactoring extends Refactoring {
 		}
 
 		IFile[] filesToBeModified= getFilesToBeModified(units);
-		result.merge(Checks.validateModifiesFiles(filesToBeModified, getValidationContext()));
+		result.merge(Checks.validateModifiesFiles(filesToBeModified, getValidationContext(), pm));
 		if (result.hasFatalError())
 			return result;
 		result.merge(ResourceChangeChecker.checkFilesToBeChanged(filesToBeModified, new SubProgressMonitor(pm, 1)));

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -70,7 +70,9 @@ import org.eclipse.jdt.core.dom.ASTRequestor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.dom.ASTBatchParser;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MultiStateCompilationUnitChange;
@@ -89,9 +91,7 @@ import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.fix.IMultiFix.MultiFixContext;
 import org.eclipse.jdt.internal.ui.fix.MapCleanUpOptions;
-import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.ui.refactoring.IScheduledRefactoring;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 public class CleanUpRefactoring extends Refactoring implements IScheduledRefactoring {
 
@@ -658,7 +658,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 
 			List<IResource> files= new ArrayList<>();
 			findFilesToBeModified(change, files);
-			result.merge(Checks.validateModifiesFiles(files.toArray(new IFile[files.size()]), getValidationContext()));
+			result.merge(Checks.validateModifiesFiles(files.toArray(new IFile[files.size()]), getValidationContext(), pm));
 		} finally {
 			pm.done();
 		}

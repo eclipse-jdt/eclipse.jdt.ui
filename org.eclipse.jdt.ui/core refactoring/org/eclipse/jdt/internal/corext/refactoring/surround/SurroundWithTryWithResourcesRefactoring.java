@@ -190,7 +190,7 @@ public class SurroundWithTryWithResourcesRefactoring extends Refactoring {
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		return Checks.validateModifiesFiles(
 			ResourceUtil.getFiles(new ICompilationUnit[]{fCUnit}),
-			getValidationContext());
+			getValidationContext(), pm);
 	}
 
 	/* non Java-doc

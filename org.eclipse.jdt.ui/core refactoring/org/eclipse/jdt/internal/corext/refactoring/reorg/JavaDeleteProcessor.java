@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -29,7 +29,9 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -37,6 +39,7 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceVisitor;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.mapping.IResourceChangeDescriptionFactory;
 
 import org.eclipse.core.filebuffers.FileBuffers;
@@ -240,9 +243,39 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		Assert.isNotNull(fDeleteQueries);//must be set before checking activation
 		RefactoringStatus result= new RefactoringStatus();
-		result.merge(RefactoringStatus.create(Resources.checkInSync(ReorgUtils.getNotLinked(fResources))));
+		IResource[] resources= ReorgUtils.getNotLinked(fResources);
+		IStatus status= Resources.checkInSync(resources);
+		if (!status.isOK()) {
+			boolean autoRefresh= Platform.getPreferencesService().getBoolean(ResourcesPlugin.PI_RESOURCES, ResourcesPlugin.PREF_LIGHTWEIGHT_AUTO_REFRESH, false, null);
+			if (autoRefresh) {
+				for (IResource resource : resources) {
+					try {
+						resource.refreshLocal(IResource.DEPTH_INFINITE, pm);
+					} catch (CoreException e) {
+						break;
+					}
+					status= Resources.checkInSync(resources);
+				}
+			}
+		}
+		result.merge(RefactoringStatus.create(status));
 		IResource[] javaResources= ReorgUtils.getResources(fJavaElements);
-		result.merge(RefactoringStatus.create(Resources.checkInSync(ReorgUtils.getNotNulls(javaResources))));
+		resources= ReorgUtils.getNotNulls(javaResources);
+		status= Resources.checkInSync(resources);
+		if (!status.isOK()) {
+			boolean autoRefresh= Platform.getPreferencesService().getBoolean(ResourcesPlugin.PI_RESOURCES, ResourcesPlugin.PREF_LIGHTWEIGHT_AUTO_REFRESH, false, null);
+			if (autoRefresh) {
+				for (IResource resource : resources) {
+					try {
+						resource.refreshLocal(IResource.DEPTH_INFINITE, pm);
+					} catch (CoreException e) {
+						break;
+					}
+					status= Resources.checkInSync(resources);
+				}
+			}
+		}
+		result.merge(RefactoringStatus.create(status));
 		for (IJavaElement element : fJavaElements) {
 			if (element instanceof IType && ((IType)element).isAnonymous()) {
 				// work around for bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=44450

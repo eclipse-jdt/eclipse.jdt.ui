@@ -93,6 +93,10 @@ import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.ConvertAnonymousDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
+import org.eclipse.jdt.internal.core.manipulation.BindingLabelProviderCore;
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
+import org.eclipse.jdt.internal.core.manipulation.StubUtility;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -113,11 +117,6 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.text.correction.ModifierCorrectionSubProcessorCore;
-
-import org.eclipse.jdt.internal.core.manipulation.BindingLabelProviderCore;
-import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
-import org.eclipse.jdt.internal.core.manipulation.StubUtility;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 
@@ -285,7 +284,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
         RefactoringStatus result= Checks.validateModifiesFiles(
         	ResourceUtil.getFiles(new ICompilationUnit[]{fCu}),
-			getValidationContext());
+			getValidationContext(), pm);
 		if (result.hasFatalError())
 		    return result;
 

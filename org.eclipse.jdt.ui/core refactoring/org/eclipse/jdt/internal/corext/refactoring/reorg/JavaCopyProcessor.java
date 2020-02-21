@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -23,10 +23,13 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
@@ -92,9 +95,39 @@ public final class JavaCopyProcessor extends CopyProcessor implements IReorgDest
 	@Override
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
-		result.merge(RefactoringStatus.create(Resources.checkInSync(ReorgUtils.getNotNulls(fCopyPolicy.getResources()))));
+		IResource[] resources= ReorgUtils.getNotNulls(fCopyPolicy.getResources());
+		IStatus status= Resources.checkInSync(resources);
+		if (!status.isOK()) {
+			boolean autoRefresh= Platform.getPreferencesService().getBoolean(ResourcesPlugin.PI_RESOURCES, ResourcesPlugin.PREF_LIGHTWEIGHT_AUTO_REFRESH, false, null);
+			if (autoRefresh) {
+				for (IResource resource : resources) {
+					try {
+						resource.refreshLocal(IResource.DEPTH_INFINITE, pm);
+					} catch (CoreException e) {
+						break;
+					}
+					status= Resources.checkInSync(resources);
+				}
+			}
+		}
+		result.merge(RefactoringStatus.create(status));
 		IResource[] javaResources= ReorgUtils.getResources(fCopyPolicy.getJavaElements());
-		result.merge(RefactoringStatus.create(Resources.checkInSync(ReorgUtils.getNotNulls(javaResources))));
+		resources= ReorgUtils.getNotNulls(javaResources);
+		status= Resources.checkInSync(resources);
+		if (!status.isOK()) {
+			boolean autoRefresh= Platform.getPreferencesService().getBoolean(ResourcesPlugin.PI_RESOURCES, ResourcesPlugin.PREF_LIGHTWEIGHT_AUTO_REFRESH, false, null);
+			if (autoRefresh) {
+				for (IResource resource : resources) {
+					try {
+						resource.refreshLocal(IResource.DEPTH_INFINITE, pm);
+					} catch (CoreException e) {
+						break;
+					}
+					status= Resources.checkInSync(resources);
+				}
+			}
+		}
+		result.merge(RefactoringStatus.create(status));
 		return result;
 	}
 

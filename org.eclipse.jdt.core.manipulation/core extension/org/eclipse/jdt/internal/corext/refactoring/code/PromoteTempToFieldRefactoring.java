@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -323,7 +323,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		RefactoringStatus result= Checks.validateModifiesFiles(
 			ResourceUtil.getFiles(new ICompilationUnit[]{fCu}),
-			getValidationContext());
+			getValidationContext(), pm);
 		if (result.hasFatalError())
 			return result;
 

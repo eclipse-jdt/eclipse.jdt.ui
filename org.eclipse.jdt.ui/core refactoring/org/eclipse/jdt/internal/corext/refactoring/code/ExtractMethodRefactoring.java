@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -302,7 +302,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			return mergeTextSelectionStatus(result);
 
 		IFile[] changedFiles= ResourceUtil.getFiles(new ICompilationUnit[]{fCUnit});
-		result.merge(Checks.validateModifiesFiles(changedFiles, getValidationContext()));
+		result.merge(Checks.validateModifiesFiles(changedFiles, getValidationContext(), pm));
 		if (result.hasFatalError())
 			return result;
 		result.merge(ResourceChangeChecker.checkFilesToBeChanged(changedFiles, new SubProgressMonitor(pm, 1)));
