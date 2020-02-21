@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 IBM Corporation and others.
+ * Copyright (c) 2005, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,15 +13,19 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.model;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.ByteArrayInputStream;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 
-import junit.framework.ComparisonFailure;
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.ComparisonFailure;
+import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -52,8 +56,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 
-
-public class ContentProviderTests extends TestCase {
+public class ContentProviderTests {
 
 	private IWorkspace fWorkspace;
 	private IJavaProject fJProject1;
@@ -66,14 +69,8 @@ public class ContentProviderTests extends TestCase {
 	private IPackageFragment fPackageFragment2;
 	private IFile fFile1;
 
-	public static Test suite() {
-		return new TestSuite(ContentProviderTests.class);
-	}
-
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-
+	@Before
+	public void setUp() throws Exception {
 		fWorkspace= ResourcesPlugin.getWorkspace();
 		assertNotNull(fWorkspace);
 		IWorkspaceDescription workspaceDesc= fWorkspace.getDescription();
@@ -103,13 +100,12 @@ public class ContentProviderTests extends TestCase {
 		setUpMockView();
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJProject1);
 		if (fEnableAutoBuildAfterTesting)
 			CoreUtility.setAutoBuilding(true);
 		tearDownMockView();
-		super.tearDown();
 	}
 
 	private void setUpMockView() throws CoreException {
@@ -148,6 +144,7 @@ public class ContentProviderTests extends TestCase {
 			throw new ComparisonFailure(message, expList.toString(), actList.toString());
 	}
 
+	@Test
 	public void testOutgoingDeletion148118() {
 		IProject project = (IProject)fJProject1.getResource();
 		fMyPart.addOutgoingDeletion(project, "f1/a");
@@ -170,6 +167,7 @@ public class ContentProviderTests extends TestCase {
 		assertEqualSets("Expected children of f2 does not match actual children", expectedChildren, children);
 	}
 
+	@Test
 	public void testOutgoingChangeInNonPackage261198() throws Exception {
 		IProject project = (IProject)fJProject1.getResource();
 
@@ -198,6 +196,7 @@ public class ContentProviderTests extends TestCase {
 		assertEqualSets("Expected children of no-package does not match actual children", expectedChildren, children);
 	}
 
+	@Test
 	public void testOutgoingPackageDeletion269167() throws Exception {
 		IProject project = (IProject)fJProject1.getResource();
 
@@ -219,6 +218,7 @@ public class ContentProviderTests extends TestCase {
 		assertEqualSets("Expected children of project does not match actual children", expectedChildren, children);
 	}
 
+	@Test
 	public void testIncomingAddition159884() {
 		IProject project = (IProject)fJProject1.getResource();
 		fMyPart.addIncomingAddition(project, "f1/newFolder/");
@@ -245,6 +245,7 @@ public class ContentProviderTests extends TestCase {
 		assertEqualSets("Expected children of new folder does not match actual children", expectedChildren, children);
 	}
 
+	@Test
 	public void testIncomingAddition159884Part2() {
 		IProject project = (IProject)fJProject1.getResource();
 		fMyPart.addIncomingAddition(project, "f1/newFolder/a");

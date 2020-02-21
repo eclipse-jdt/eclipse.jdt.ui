@@ -13,6 +13,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.core.runtime.CoreException;
@@ -43,42 +48,30 @@ import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.tests.core.rules.Java18ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 public class BindingLabels18Test extends AbstractBindingLabelsTest {
 
-	private static final Class<BindingLabels18Test> THIS= BindingLabels18Test.class;
-
-	public BindingLabels18Test(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new Java18ProjectTestSetup(test);
-	}
+	@Rule
+	public Java18ProjectTestSetup j18p= new Java18ProjectTestSetup();
 
 	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		fJProject1= Java18ProjectTestSetup.getProject();
-
 		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
 		store.setValue(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES, false);
 	}
 
 	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, Java18ProjectTestSetup.getDefaultClasspath());
 	}
 
-
+	@Test
 	public void testMethodLabelPolymorphicSignatureDeclaration() throws Exception {
 		IType methodHandle= fJProject1.findType("java.lang.invoke.MethodHandle");
 		IMethod invokeExact= methodHandle.getMethod("invokeExact", new String[] {
@@ -134,6 +127,7 @@ public class BindingLabels18Test extends AbstractBindingLabelsTest {
 		assertLinkMatch(lab, "{{java.lang|Object}} invoke({{java.lang|Object}}... arg0)");
 	}
 
+	@Test
 	public void testMethodLabelPolymorphicSignatureReference0() throws Exception {
 		IJavaElement elem= createInvokeReference("mh.invoke()");
 
@@ -149,6 +143,7 @@ public class BindingLabels18Test extends AbstractBindingLabelsTest {
 		assertLinkMatch(lab, "void invoke()");
 	}
 
+	@Test
 	public void testMethodLabelPolymorphicSignatureReference0Ret() throws Exception {
 		IJavaElement elem= createInvokeReference("String s= (String) mh.invoke()");
 
@@ -164,6 +159,7 @@ public class BindingLabels18Test extends AbstractBindingLabelsTest {
 		assertLinkMatch(lab, "{{java.lang|Object}} invoke()");
 	}
 
+	@Test
 	public void testMethodLabelPolymorphicSignatureReference1() throws Exception {
 		IJavaElement elem= createInvokeReference("mh.invoke(1)");
 
@@ -179,6 +175,7 @@ public class BindingLabels18Test extends AbstractBindingLabelsTest {
 		assertLinkMatch(lab, "void invoke(int arg00)");
 	}
 
+	@Test
 	public void testMethodLabelPolymorphicSignatureReference1Array() throws Exception {
 		IJavaElement elem= createInvokeReference("mh.invoke(new Object[42])");
 
@@ -194,6 +191,7 @@ public class BindingLabels18Test extends AbstractBindingLabelsTest {
 		assertLinkMatch(lab, "void invoke({{java.lang|Object}}[] arg00)");
 	}
 
+	@Test
 	public void testMethodLabelPolymorphicSignatureReference2() throws Exception {
 		IJavaElement elem= createInvokeReference("mh.invoke('a', new Integer[0][])");
 
@@ -209,6 +207,7 @@ public class BindingLabels18Test extends AbstractBindingLabelsTest {
 		assertLinkMatch(lab, "void invoke(char arg00, {{java.lang|Integer}}[][] arg01)");
 	}
 
+	@Test
 	public void testMethodLabelPolymorphicSignatureReference3Ret() throws Exception {
 		IJavaElement elem= createInvokeReference("long l= (long) mh.invoke('a', new java.util.ArrayList<String>(), null)");
 
@@ -224,6 +223,7 @@ public class BindingLabels18Test extends AbstractBindingLabelsTest {
 		assertLinkMatch(lab, "{{java.lang|Object}} invoke(char arg00, {{java.util|ArrayList}} arg01, {{java.lang|Void}} arg02)");
 	}
 
+	@Test
 	public void testTypeLabelLambda1() throws Exception {
 
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -255,6 +255,7 @@ public class BindingLabels18Test extends AbstractBindingLabelsTest {
 //		assertLinkMatch(lab, "() -> {...} IntConsumer - org.test.C.c");
 	}
 
+	@Test
 	public void testTypeLabelLambda2() throws Exception {
 
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -287,6 +288,7 @@ public class BindingLabels18Test extends AbstractBindingLabelsTest {
 		assertLinkMatch(lab, "accept(...) - {{org.test.C}}.{{org.test.C|c}}.() -> {...} {{java.util.function|Consumer}}");
 	}
 
+	@Test
 	public void testAnonymousClassInLambda1() throws Exception {
 
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -311,6 +313,7 @@ public class BindingLabels18Test extends AbstractBindingLabelsTest {
 		assertLinkMatch(lab, "new Thread() {...} - {{org.test.C}}.{{org.test.C|c}}.() -> {...}");
 	}
 
+	@Test
 	public void testLambdaInAnonymousClass1() throws Exception {
 
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -340,6 +343,7 @@ public class BindingLabels18Test extends AbstractBindingLabelsTest {
 								"() -> {...} {{java.util.function|Consumer}}.{{java.util.function.Consumer|accept}}({{java.util.function.Consumer|T}})");
 	}
 
+	@Test
 	public void testLambdaInInstanceInitializer() throws Exception {
 
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -365,6 +369,7 @@ public class BindingLabels18Test extends AbstractBindingLabelsTest {
 		assertLinkMatch(lab, "{{java.lang|String}} s - {{org.test.C}}.{...}.() -> {...} {{java.util.function|Consumer}}.{{java.util.function.Consumer|accept}}({{java.util.function.Consumer|T}})");
 	}
 
+	@Test
 	public void testAnnotatedArrayDimension1() throws Exception {
 
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -394,6 +399,7 @@ public class BindingLabels18Test extends AbstractBindingLabelsTest {
 		assertLinkMatch(lab, "{{java.lang|String}}[] @{{org.test|TAnn}}[] argss - {{org.test.C|test}}({{java.lang|String}}[][])");
 	}
 
+	@Test
 	public void testAnnotatedArrayDimension2() throws Exception {
 
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -424,6 +430,7 @@ public class BindingLabels18Test extends AbstractBindingLabelsTest {
 		lab= getBindingLabel(thread, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.F_PRE_TYPE_SIGNATURE | JavaElementLabels.F_POST_QUALIFIED);
 		assertLinkMatch(lab, "@{{org.test|TA1}} {{java.lang|String}} @{{org.test|TA2}}[] @{{org.test|TA3}}[] argss - {{org.test.C|test}}({{java.lang|String}}[][])");
 	}
+	@Test
 	public void testCaptureBinding18() throws CoreException {
 		IJavaProject javaProject= JavaProjectHelper.createJavaProject("P", "bin");
 		try {

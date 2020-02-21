@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,11 +13,17 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core.source;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 import java.util.Hashtable;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -46,27 +52,20 @@ import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.codemanipulation.AddUnimplementedConstructorsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.tests.core.CoreTests;
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
-import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileManager;
 
 public class AddUnimplementedConstructorsTest extends CoreTests {
 
-	private static final Class<AddUnimplementedConstructorsTest> THIS= AddUnimplementedConstructorsTest.class;
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
-	}
+	@Rule
+	public ProjectTestSetup pts= new ProjectTestSetup();
 
 	private IType fClassA, fClassB, fClassC;
 
@@ -75,10 +74,6 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 	private IPackageFragment fPackage;
 
 	private CodeGenerationSettings fSettings;
-
-	public AddUnimplementedConstructorsTest(String name) {
-		super(name);
-	}
 
 	private void checkDefaultConstructorWithCommentWithSuper(String con) throws IOException {
 		StringBuilder buf= new StringBuilder();
@@ -152,13 +147,13 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 	/**
 	 * Creates a new test Java project.
 	 */
-	@Override
-	protected void setUp() {
+	@Before
+	public void setUp() {
 		initCodeTemplates();
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJavaProject);
 		fJavaProject= null;
 		fPackage= null;
@@ -168,6 +163,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 	/*
 	 * basic test: test with default constructor only
 	 */
+	@Test
 	public void testDefaultConstructorToOverride() throws Exception {
 		fJavaProject= JavaProjectHelper.createJavaProject("DummyProject", "bin");
 		assertNotNull(JavaProjectHelper.addRTJar(fJavaProject));
@@ -211,6 +207,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 	/*
 	 * basic test: test with 8 constructors to override
 	 */
+	@Test
 	public void testEightConstructorsToOverride() throws Exception {
 		fJavaProject= JavaProjectHelper.createJavaProject("DummyProject", "bin");
 		assertNotNull(JavaProjectHelper.addRTJar(fJavaProject));
@@ -346,6 +343,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 	 * basic test: test with 5 constructors to override. Class C extends B extends Class
 	 * A.
 	 */
+	@Test
 	public void testFiveConstructorsToOverrideWithTwoLevelsOfInheritance() throws Exception {
 		fJavaProject= JavaProjectHelper.createJavaProject("DummyProject", "bin");
 		assertNotNull(JavaProjectHelper.addRTJar(fJavaProject));
@@ -468,6 +466,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 	/*
 	 * basic test: test with 4 constructors to override. Class B extends Class A.
 	 */
+	@Test
 	public void testFourConstructorsToOverride() throws Exception {
 		fJavaProject= JavaProjectHelper.createJavaProject("DummyProject", "bin");
 		assertNotNull(JavaProjectHelper.addRTJar(fJavaProject));
@@ -565,6 +564,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 	/*
 	 * found 4 with 5 constructors, 1 already overridden
 	 */
+	@Test
 	public void testFourConstructorsToOverrideWithOneExistingConstructor() throws Exception {
 		fJavaProject= JavaProjectHelper.createJavaProject("DummyProject", "bin");
 		assertNotNull(JavaProjectHelper.addRTJar(fJavaProject));
@@ -644,6 +644,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 	/*
 	 * basic test: test with nothing to override
 	 */
+	@Test
 	public void testNoConstructorsToOverrideAvailable() throws Exception {
 		fJavaProject= JavaProjectHelper.createJavaProject("DummyProject", "bin");
 		assertNotNull(JavaProjectHelper.addRTJar(fJavaProject));
@@ -680,6 +681,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 	/*
 	 * basic test: test an Interface to make sure no exception is thrown
 	 */
+	@Test
 	public void testNoConstructorsToOverrideWithInterface() throws Exception {
 		fJavaProject= JavaProjectHelper.createJavaProject("DummyProject", "bin");
 		assertNotNull(JavaProjectHelper.addRTJar(fJavaProject));
@@ -716,6 +718,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 	/*
 	 * nothing found with default constructor
 	 */
+	@Test
 	public void testNoConstructorsToOverrideWithOneExistingConstructors() throws Exception {
 		fJavaProject= JavaProjectHelper.createJavaProject("DummyProject", "bin");
 		assertNotNull(JavaProjectHelper.addRTJar(fJavaProject));
@@ -754,6 +757,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 	/*
 	 * nothing found with 3 constructors
 	 */
+	@Test
 	public void testNoConstructorsToOverrideWithThreeExistingConstructors() throws Exception {
 		fJavaProject= JavaProjectHelper.createJavaProject("DummyProject", "bin");
 		assertNotNull(JavaProjectHelper.addRTJar(fJavaProject));
@@ -800,6 +804,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 	/*
 	 * basic test: test with one constructor
 	 */
+	@Test
 	public void testOneConstructorToOverride() throws Exception {
 		fJavaProject= JavaProjectHelper.createJavaProject("DummyProject", "bin");
 		assertNotNull(JavaProjectHelper.addRTJar(fJavaProject));
@@ -843,6 +848,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 	/*
 	 * found one with constructor which isn't default or the same as existing
 	 */
+	@Test
 	public void testOneConstructorToOverrideNotDefault() throws Exception {
 		fJavaProject= JavaProjectHelper.createJavaProject("DummyProject", "bin");
 		assertNotNull(JavaProjectHelper.addRTJar(fJavaProject));
@@ -892,6 +898,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 	/*
 	 * found one with constructor needs import statement
 	 */
+	@Test
 	public void testOneConstructorWithImportStatement() throws Exception {
 		fJavaProject= JavaProjectHelper.createJavaProject("DummyProject", "bin");
 		assertNotNull(JavaProjectHelper.addRTJar(fJavaProject));
@@ -942,6 +949,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 	/*
 	 * basic test: test with 3 constructors to override
 	 */
+	@Test
 	public void testThreeConstructorsToOverride() throws Exception {
 		fJavaProject= JavaProjectHelper.createJavaProject("DummyProject", "bin");
 		assertNotNull(JavaProjectHelper.addRTJar(fJavaProject));
@@ -979,6 +987,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 	/*
 	 * basic test: test with 2 constructors to override
 	 */
+	@Test
 	public void testTwoConstructorsToOverride() throws Exception {
 		fJavaProject= JavaProjectHelper.createJavaProject("DummyProject", "bin");
 		assertNotNull(JavaProjectHelper.addRTJar(fJavaProject));
@@ -1032,6 +1041,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 	/*
 	 * found 2 with 5 constructors, 3 already overridden
 	 */
+	@Test
 	public void testTwoConstructorsToOverrideWithThreeExistingConstructors() throws Exception {
 		fJavaProject= JavaProjectHelper.createJavaProject("DummyProject", "bin");
 		assertNotNull(JavaProjectHelper.addRTJar(fJavaProject));
@@ -1098,6 +1108,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		compareSource(buf.toString(), testClass.getSource());
 	}
 
+	@Test
 	public void testInsertAt() throws Exception {
 		fJavaProject= JavaProjectHelper.createJavaProject("DummyProject", "bin");
 		assertNotNull(JavaProjectHelper.addRTJar(fJavaProject));

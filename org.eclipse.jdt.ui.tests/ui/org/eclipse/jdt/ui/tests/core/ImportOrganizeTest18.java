@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,7 +15,10 @@ package org.eclipse.jdt.ui.tests.core;
 
 import java.util.Hashtable;
 
-import junit.framework.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -29,28 +32,19 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.core.manipulation.OrganizeImportsOperation;
 import org.eclipse.jdt.core.manipulation.OrganizeImportsOperation.IChooseImportQuery;
 
+import org.eclipse.jdt.ui.tests.core.rules.Java18ProjectTestSetup;
+
 
 public class ImportOrganizeTest18 extends ImportOrganizeTest {
 
-	private static final Class<ImportOrganizeTest18> THIS= ImportOrganizeTest18.class;
+	@Rule
+	public Java18ProjectTestSetup j18p= new Java18ProjectTestSetup();
 
 	private IJavaProject fJProject1;
 
-	public ImportOrganizeTest18(String name) {
-		super(name);
-	}
-
-	public static Test setUpTest(Test test) {
-		return new Java18ProjectTestSetup(test);
-	}
-
-	public static Test suite() {
-		return setUpTest(new NoSuperTestsSuite(THIS));
-	}
-
-
 	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		fJProject1= Java18ProjectTestSetup.getProject();
 
 		Hashtable<String, String> options= TestOptions.getDefaultOptions();
@@ -60,11 +54,13 @@ public class ImportOrganizeTest18 extends ImportOrganizeTest {
 
 
 	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		setOrganizeImportSettings(null, 99, 99, fJProject1);
 		JavaProjectHelper.clear(fJProject1, Java18ProjectTestSetup.getDefaultClasspath());
 	}
 
+	@Test
 	public void testTypeUseAnnotationImport1() throws Exception { // PrimitiveType
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -101,6 +97,7 @@ public class ImportOrganizeTest18 extends ImportOrganizeTest {
 		assertEqualString(cu.getSource(), buf.toString());
 	}
 
+	@Test
 	public void testTypeUseAnnotationImport2() throws Exception { // SimpleType
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -138,6 +135,7 @@ public class ImportOrganizeTest18 extends ImportOrganizeTest {
 		assertEqualString(cu.getSource(), buf.toString());
 	}
 
+	@Test
 	public void testTypeUseAnnotationImport3() throws Exception { // QualifiedType
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -187,6 +185,7 @@ public class ImportOrganizeTest18 extends ImportOrganizeTest {
 		assertEqualString(cu.getSource(), buf.toString());
 	}
 
+	@Test
 	public void testTypeUseAnnotationImport4() throws Exception { // PackageQualifiedType
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -224,6 +223,7 @@ public class ImportOrganizeTest18 extends ImportOrganizeTest {
 		assertEqualString(cu.getSource(), buf.toString());
 	}
 
+	@Test
 	public void testTypeUseAnnotationImport5() throws Exception { // WildcardType
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -261,6 +261,7 @@ public class ImportOrganizeTest18 extends ImportOrganizeTest {
 		assertEqualString(cu.getSource(), buf.toString());
 	}
 
+	@Test
 	public void testTypeUseAnnotationImport6() throws Exception { // ArrayType
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -297,6 +298,7 @@ public class ImportOrganizeTest18 extends ImportOrganizeTest {
 		assertEqualString(cu.getSource(), buf.toString());
 	}
 
+	@Test
 	public void testStaticMethodReferenceImports_bug424172() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -336,6 +338,7 @@ public class ImportOrganizeTest18 extends ImportOrganizeTest {
 		assertEqualString(cu.getSource(), buf.toString());
 	}
 
+	@Test
 	public void testMethodReferenceImports_bug424227() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 

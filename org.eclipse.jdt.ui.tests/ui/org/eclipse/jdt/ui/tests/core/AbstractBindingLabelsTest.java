@@ -13,10 +13,16 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.junit.After;
+import org.junit.Before;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -34,24 +40,20 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
 
 public abstract class AbstractBindingLabelsTest extends CoreTests {
 
-	public AbstractBindingLabelsTest(String name) {
-		super(name);
-	}
 
 	protected IJavaProject fJProject1;
 	protected boolean fHaveSource= true;
 
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		fJProject1= ProjectTestSetup.getProject();
 
 		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
 		store.setValue(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES, false);
 	}
 
-
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
 

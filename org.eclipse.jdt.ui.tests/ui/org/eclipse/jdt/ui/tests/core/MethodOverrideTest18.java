@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 IBM Corporation and others.
+ * Copyright (c) 2014, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,7 +15,10 @@ package org.eclipse.jdt.ui.tests.core;
 
 import java.util.Hashtable;
 
-import junit.framework.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -33,27 +36,19 @@ import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
+import org.eclipse.jdt.ui.tests.core.rules.Java18ProjectTestSetup;
+
 public class MethodOverrideTest18 extends MethodOverrideTest {
 
-	private static final Class<MethodOverrideTest18> THIS= MethodOverrideTest18.class;
-
-	public static Test suite() {
-		return setUpTest(new NoSuperTestsSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new Java18ProjectTestSetup(test);
-	}
+	@Rule
+	public Java18ProjectTestSetup j18p= new Java18ProjectTestSetup();
 
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSrc;
 
-	public MethodOverrideTest18(String name) {
-		super(name);
-	}
-
 	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		fJProject1= Java18ProjectTestSetup.getProject();
 		fSrc= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -62,11 +57,12 @@ public class MethodOverrideTest18 extends MethodOverrideTest {
 	}
 
 	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, Java18ProjectTestSetup.getDefaultClasspath());
 	}
 
-
+	@Test
 	public void testOverrideLambda1() throws Exception {
 		IPackageFragment pack1= fSrc.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();

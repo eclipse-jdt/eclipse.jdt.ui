@@ -13,6 +13,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Rule;
+import org.junit.Test;
+
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.text.templates.TemplatePersistenceData;
@@ -24,36 +32,14 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.core.manipulation.ProjectTemplateStore;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 public class TemplateStoreTest extends CoreTests {
 
-	private static final Class<TemplateStoreTest> THIS= TemplateStoreTest.class;
+	@Rule
+	public ProjectTestSetup pts= new ProjectTestSetup();
 
 	private IJavaProject fJProject1;
-
-	public TemplateStoreTest(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
-	}
-
-
-	@Override
-	protected void setUp() throws Exception {
-	}
-
-
-	@Override
-	protected void tearDown() throws Exception {
-	}
 
 	private static final String[] ALL_CODE_TEMPLATES= new String[] {
 		CodeTemplateContextType.CATCHBLOCK_ID,
@@ -88,6 +74,7 @@ public class TemplateStoreTest extends CoreTests {
 		return null;
 	}
 
+	@Test
 	public void testInstanceCodeTemplates() throws Exception {
 		ProjectTemplateStore store= new ProjectTemplateStore(null);
 		store.load();
@@ -118,6 +105,7 @@ public class TemplateStoreTest extends CoreTests {
 	}
 
 
+	@Test
 	public void testProjectCodeTemplates1() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		try {
@@ -185,6 +173,7 @@ public class TemplateStoreTest extends CoreTests {
 	}
 
 
+	@Test
 	public void testProjectCodeTemplates2() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		try {
@@ -225,6 +214,5 @@ public class TemplateStoreTest extends CoreTests {
 			JavaProjectHelper.delete(fJProject1);
 		}
 	}
-
 
 }

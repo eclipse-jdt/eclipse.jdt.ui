@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,35 +14,25 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core.source;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+
 
 /**
  *
  * Tests for the actions in the source menu
  *
  */
-public class SourceActionTests extends TestCase {
-
-	public static Test suite() {
-
-		TestSuite suite= new TestSuite(SourceActionTests.class.getName());
-		suite.addTest(AddUnimplementedMethodsTest.suite());
-		suite.addTest(GenerateGettersSettersTest.suite());
-		suite.addTest(GenerateDelegateMethodsTest.suite());
-		suite.addTest(AddUnimplementedConstructorsTest.suite());
-		suite.addTest(GenerateConstructorUsingFieldsTest.suite());
-		suite.addTest(GenerateHashCodeEqualsTest.suite());
-		suite.addTest(GenerateToStringTest.suite());
-
-		return new ProjectTestSetup(suite);
-	}
-
-	public SourceActionTests(String name) {
-		super(name);
-	}
-
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+AddUnimplementedMethodsTest.class,
+GenerateGettersSettersTest.class,
+GenerateDelegateMethodsTest.class,
+AddUnimplementedConstructorsTest.class,
+GenerateConstructorUsingFieldsTest.class,
+GenerateHashCodeEqualsTest.class,
+GenerateToStringTest.class
+})
+public class SourceActionTests {
 }

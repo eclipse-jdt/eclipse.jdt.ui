@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,11 +13,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core;
 
-import java.io.IOException;
+import static org.junit.Assert.assertTrue;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import java.io.IOException;
 
 import org.eclipse.jdt.testplugin.StringAsserts;
 
@@ -29,55 +27,8 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 
-import org.eclipse.jdt.ui.tests.core.source.SourceActionTests;
 
-
-public class CoreTests extends TestCase {
-
-	public static Test suite() {
-
-		TestSuite suite= new TestSuite(CoreTests.class.getName());
-		suite.addTest(AddImportTest.suite());
-		suite.addTest(SourceActionTests.suite());
-		suite.addTest(ASTNodesInsertTest.suite());
-		suite.addTest(BindingsNameTest.suite());
-		suite.addTest(CallHierarchyTest.suite());
-		suite.addTest(ClassPathDetectorTest.suite());
-		suite.addTest(CodeFormatterUtilTest.suite());
-		suite.addTest(CodeFormatterTest.suite());
-		suite.addTest(CodeFormatterTest9.suite());
-		suite.addTest(CodeFormatterMigrationTest.suite());
-		suite.addTest(HierarchicalASTVisitorTest.suite());
-		suite.addTest(ImportOrganizeTest.suite());
-		suite.addTest(ImportOrganizeTest18.suite());
-		suite.addTest(JavaElementLabelsTest.suite());
-		suite.addTest(JavaElementLabelsTest18.suite());
-		suite.addTest(BindingLabelsTest.suite());
-		suite.addTest(BindingLabels18Test.suite());
-		suite.addTest(JavaElementPropertyTesterTest.suite());
-		suite.addTest(JavaModelUtilTest.suite());
-		suite.addTest(MethodOverrideTest.suite());
-		suite.addTest(MethodOverrideTest18.suite());
-		suite.addTest(NameProposerTest.suite());
-		suite.addTest(OverrideTest.suite());
-		suite.addTest(PartialASTTest.suite());
-		suite.addTest(ScopeAnalyzerTest.suite());
-		suite.addTest(TemplateStoreTest.suite());
-		suite.addTest(TypeHierarchyTest.suite());
-		suite.addTest(TypeRulesTest.suite());
-		suite.addTest(TypeInfoTest.suite());
-		suite.addTest(StringsTest.suite());
-		suite.addTest(IndentManipulationTest.suite());
-		suite.addTest(SelectionHistoryTest.suite());
-		suite.addTest(ASTProviderTest.suite());
-		suite.addTest(JDTFlagsTest18.suite());
-
-		return new ProjectTestSetup(suite);
-	}
-
-	public CoreTests(String name) {
-		super(name);
-	}
+public class CoreTests {
 
 	public static void assertEqualString(String actual, String expected) {
 		StringAsserts.assertEqualString(actual, expected);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,8 +13,15 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.Hashtable;
 import java.util.List;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -36,35 +43,22 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.internal.corext.dom.BodyDeclarationRewrite;
-
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 /**
   */
 public class ASTNodesInsertTest extends CoreTests {
 
-	private static final Class<ASTNodesInsertTest> THIS= ASTNodesInsertTest.class;
+	@Rule
+	public ProjectTestSetup pts= new ProjectTestSetup();
 
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
 
-	public ASTNodesInsertTest(String name) {
-		super(name);
-	}
-
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 
 		fJProject1= ProjectTestSetup.getProject();
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -73,11 +67,12 @@ public class ASTNodesInsertTest extends CoreTests {
 		JavaCore.setOptions(options);
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
 
+	@Test
 	public void testInsert1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -126,6 +121,7 @@ public class ASTNodesInsertTest extends CoreTests {
 
 	}
 
+	@Test
 	public void testInsert2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -175,6 +171,7 @@ public class ASTNodesInsertTest extends CoreTests {
 		assertEquals(1, insertionIndex); // after the inner
 	}
 
+	@Test
 	public void testInsert3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -227,6 +224,7 @@ public class ASTNodesInsertTest extends CoreTests {
 		assertEquals(5, insertionIndex); // after the inner
 	}
 
+	@Test
 	public void testInsert4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -310,6 +308,5 @@ public class ASTNodesInsertTest extends CoreTests {
 		parser.setResolveBindings(true);
 		return (CompilationUnit) parser.createAST(null);
 	}
-
 
 }

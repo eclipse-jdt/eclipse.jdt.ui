@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 IBM Corporation and others.
+ * Copyright (c) 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -12,6 +12,9 @@
  *     Stephan Herrmann - Contribution for Bug 403917 - [1.8] Render TYPE_USE annotations in Javadoc hover/view
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core;
+
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -31,33 +34,19 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 
 /**
  * This test suite is copied and adjusted from {@link JavaElementLabelsTest}
  */
 public class BindingLabelsTest extends AbstractBindingLabelsTest {
 
-	private static final Class<BindingLabelsTest> THIS= BindingLabelsTest.class;
+	@Rule
+	public ProjectTestSetup pts= new ProjectTestSetup();
 
-
-	public BindingLabelsTest(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
-	}
-
+	@Test
 	public void testTypeLabelOuter() throws Exception {
 
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -89,6 +78,7 @@ public class BindingLabelsTest extends AbstractBindingLabelsTest {
  */
 	}
 
+	@Test
 	public void testTypeLabelInner() throws Exception {
 
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -127,6 +117,7 @@ public class BindingLabelsTest extends AbstractBindingLabelsTest {
  */
 	}
 
+	@Test
 	public void testTypeLabelLocal() throws Exception {
 
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -163,6 +154,7 @@ public class BindingLabelsTest extends AbstractBindingLabelsTest {
  */
 	}
 
+	@Test
 	public void testTypeParameterLabelType() throws Exception {
 
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -224,6 +216,7 @@ public class BindingLabelsTest extends AbstractBindingLabelsTest {
  */
 	}
 
+	@Test
 	public void testTypeParameterLabelMethod() throws Exception {
 
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -262,6 +255,7 @@ public class BindingLabelsTest extends AbstractBindingLabelsTest {
 		assertLinkMatch(lab, "NoBound - {{org.test.X}}.{{org.test.X|method}}({{org.test.X.method(...)|Element}}, NoBound)");
 	}
 
+	@Test
 	public void testTypeLabelAnonymous() throws Exception {
 
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -298,6 +292,7 @@ public class BindingLabelsTest extends AbstractBindingLabelsTest {
  */
 	}
 
+	@Test
 	public void testTypeLabelAnonymousInAnonymous() throws Exception {
 
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -344,6 +339,7 @@ public class BindingLabelsTest extends AbstractBindingLabelsTest {
  */
 	}
 
+	@Test
 	public void testTypeLabelAnonymousInFieldInitializer() throws Exception {
 
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -378,6 +374,7 @@ public class BindingLabelsTest extends AbstractBindingLabelsTest {
  */
 	}
 
+	@Test
 	public void testTypeLabelAnonymousInInitializer() throws Exception {
 
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -414,6 +411,7 @@ public class BindingLabelsTest extends AbstractBindingLabelsTest {
  */
 	}
 
+	@Test
 	public void testTypeLabelWildcards() throws Exception {
 
 			IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -443,6 +441,7 @@ public class BindingLabelsTest extends AbstractBindingLabelsTest {
 
 		}
 
+	@Test
 	public void testPackageLabels() throws Exception {
 
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -549,6 +548,7 @@ public class BindingLabelsTest extends AbstractBindingLabelsTest {
  */
 	}
 
+	@Test
 	public void testMethodLabelVarargsDeclaration() throws Exception {
 
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -581,6 +581,7 @@ public class BindingLabelsTest extends AbstractBindingLabelsTest {
 		assertLinkMatch(lab, "foo(int, {{java.lang|String}}...)");
 	}
 
+	@Test
 	public void testMethodLabelVarargsReference0() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -617,14 +618,17 @@ public class BindingLabelsTest extends AbstractBindingLabelsTest {
 		assertLinkMatch(lab, "asList({{java.lang|Object}}...)");
 	}
 
+	@Test
 	public void testMethodLabelVarargsReference1() throws Exception {
 		assertMethodLabelVarargsReference("1");
 	}
 
+	@Test
 	public void testMethodLabelVarargsReference2() throws Exception {
 		assertMethodLabelVarargsReference("1, 2");
 	}
 
+	@Test
 	public void testMethodLabelVarargsReference3() throws Exception {
 		assertMethodLabelVarargsReference("1, 2, Integer.valueOf(3)");
 	}
@@ -665,7 +669,7 @@ public class BindingLabelsTest extends AbstractBindingLabelsTest {
 		assertLinkMatch(lab, "asList({{java.lang|Integer}}...)");
 	}
 
-
+	@Test
 	public void testMethodLabelAnnotatedParameters() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
@@ -705,6 +709,7 @@ public class BindingLabelsTest extends AbstractBindingLabelsTest {
 	}
 
 	// disabled, because we cannot retrieve a binding for the selected element: local variable inside instance initializer
+	@Test
 	public void testLocalClassInInitializer() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -741,6 +746,7 @@ public class BindingLabelsTest extends AbstractBindingLabelsTest {
 //		assertLinkMatch(lab, "{{org.test.LambdaTests}}.{...}.{{org.test.LambdaTests.{...}.|Local}}.Local()");
 	}
 
+	@Test
 	public void testLocalClassInStaticInitializer() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -772,6 +778,7 @@ public class BindingLabelsTest extends AbstractBindingLabelsTest {
 		assertLinkMatch(lab, "{{org.test.LambdaTests.{...}|Local}} toStringL - {{org}}.{{test}}.{{LambdaTests}}.{...}");
 	}
 
+	@Test
 	public void testRecursiveType() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -796,6 +803,7 @@ public class BindingLabelsTest extends AbstractBindingLabelsTest {
 		assertLinkMatch(lab, "V extends {{java.lang|Comparable}}<? super V> - {{org.test.TypeTest}}.{{org.test.TypeTest|compare}}(V)");
 	}
 
+	@Test
 	public void testMultipleTypeVariables() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2014 IBM Corporation and others.
+ * Copyright (c) 2013, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,13 +13,17 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.hover;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.net.URL;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
@@ -44,11 +48,10 @@ import org.eclipse.jdt.internal.core.JavaElement;
 import org.eclipse.jdt.internal.corext.CorextMessages;
 
 import org.eclipse.jdt.ui.tests.core.CoreTests;
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.text.java.hover.JavadocBrowserInformationControlInput;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavadocHover;
-
 
 /**
  * Tests for fetching package Javadoc.
@@ -57,18 +60,12 @@ import org.eclipse.jdt.internal.ui.text.java.hover.JavadocHover;
  */
 public class PackageJavadocTests extends CoreTests {
 
-
-	public PackageJavadocTests(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(PackageJavadocTests.class));
-	}
+	@Rule
+	public ProjectTestSetup pts= new ProjectTestSetup();
 
 	private IJavaProject fJProject1;
 
-
+	@Test
 	public void testGetDocFromPackageHtml_src() throws Exception {
 
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(new Path("testresources/PackageJavadocTests/JavadocHover_src.zip"));
@@ -90,6 +87,7 @@ public class PackageJavadocTests extends CoreTests {
 	}
 
 
+	@Test
 	public void testGetDocFromPackageInfoJava_src() throws Exception {
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(new Path("testresources/PackageJavadocTests/JavadocHover_src.zip"));
 
@@ -108,6 +106,7 @@ public class PackageJavadocTests extends CoreTests {
 		Assert.assertTrue(actualHtmlContent, actualHtmlContent.contains("This is the test content"));
 	}
 
+	@Test
 	public void testGetDocFromPackageHtml_archive() throws Exception {
 
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(new Path("testresources/PackageJavadocTests/JavadocHover_src.zip"));
@@ -160,6 +159,7 @@ public class PackageJavadocTests extends CoreTests {
 	}
 
 
+	@Test
 	public void testGetDocFromSourceAttachmentRootPath() throws Exception {
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(new Path("testresources/PackageJavadocTests/JavadocHover_src.zip"));
 		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
@@ -195,6 +195,7 @@ public class PackageJavadocTests extends CoreTests {
 	}
 
 
+	@Test
 	public void testGetPackageAttacheddoc() throws Exception {
 		//  https://docs.oracle.com/javase/8/docs/api/
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(new Path("testresources/PackageJavadocTests/JavadocHover_src.zip"));
@@ -249,6 +250,7 @@ public class PackageJavadocTests extends CoreTests {
 	 *
 	 * @throws Exception when the test case fails
 	 */
+	@Test
 	public void testPackageInfoWithReferenceLinks() throws Exception {
 
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(new Path("testresources/PackageJavadocTests/JavadocHover_src.zip"));
@@ -268,6 +270,7 @@ public class PackageJavadocTests extends CoreTests {
 		Assert.assertTrue(actualHtmlContent, actualHtmlContent.contains("The pack is a test package. This doc contains references"));
 	}
 
+	@Test
 	public void testPackageWithNoJavadoc() throws Exception {
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(new Path("testresources/PackageJavadocTests/JavadocHover_src.zip"));
 		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
@@ -300,6 +303,7 @@ public class PackageJavadocTests extends CoreTests {
 		Assert.assertTrue(actualHtmlContent, actualHtmlContent.contains(CorextMessages.JavaDocLocations_noAttachedJavadoc));
 	}
 
+	@Test
 	public void testFailToAccessAttachedJavadoc() throws Exception {
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(new Path("testresources/PackageJavadocTests/JavadocHover_src.zip"));
 
@@ -338,19 +342,15 @@ public class PackageJavadocTests extends CoreTests {
 
 	}
 
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
-	}
-
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		fJProject1= ProjectTestSetup.getProject();
 
 	}
 
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
 

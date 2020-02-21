@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 IBM Corporation and others.
+ * Copyright (c) 2017, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,6 +15,10 @@ package org.eclipse.jdt.ui.tests.core;
 
 import java.util.Hashtable;
 
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 
@@ -25,27 +29,16 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.eclipse.jdt.ui.tests.core.rules.Java9ProjectTestSetup;
 
 public class CodeFormatterTest9 extends CodeFormatterTest {
 
-	private static final Class<CodeFormatterTest9> THIS= CodeFormatterTest9.class;
-
-	public CodeFormatterTest9(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new Java9ProjectTestSetup(test);
-	}
+	@Rule
+	public Java9ProjectTestSetup j9p= new Java9ProjectTestSetup();
 
 	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		JavaProjectHelper.addRequiredProject(fJProject1, Java9ProjectTestSetup.getProject());
 
@@ -59,6 +52,7 @@ public class CodeFormatterTest9 extends CodeFormatterTest {
 		JavaCore.setOptions(options);
 	}
 
+	@Test
 	public void testFormatModule() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		String original= "module     pack { requires java   .something   ; }  \n ";
@@ -73,6 +67,7 @@ public class CodeFormatterTest9 extends CodeFormatterTest {
 		assertEqualString(formatted, expected);
 	}
 
+	@Test
 	public void testFormatModuleInWrongFile() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		String original= "module     pack { requires java   .something   ; }  \n ";

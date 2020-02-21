@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,10 +13,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core;
 
+import static org.junit.Assert.assertNotNull;
+
 import java.util.Hashtable;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -42,32 +46,22 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 
 public class CodeFormatterUtilTest extends CoreTests {
 
-	private static final Class<CodeFormatterUtilTest> THIS= CodeFormatterUtilTest.class;
+	@Rule
+	public ProjectTestSetup pts= new ProjectTestSetup();
 
 	private IJavaProject fJProject1;
 
-	public CodeFormatterUtilTest(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
-	}
-
-
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		JavaProjectHelper.addRequiredProject(fJProject1, ProjectTestSetup.getProject());
 
@@ -78,9 +72,8 @@ public class CodeFormatterUtilTest extends CoreTests {
 		JavaCore.setOptions(options);
 	}
 
-
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJProject1);
 	}
 
@@ -133,6 +126,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 	}
 
 
+	@Test
 	public void testCU() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -158,6 +152,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 		assertEqualString(formatted, expected);
 	}
 
+	@Test
 	public void testCUIndented() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -183,6 +178,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 		assertEqualString(formatted, expected);
 	}
 
+	@Test
 	public void testCUNewAPI() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -211,6 +207,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 		assertEqualString(formatted, expected);
 	}
 
+	@Test
 	public void testCUNewAPI2() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -245,6 +242,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 		assertEqualString(formatted, expected);
 	}
 
+	@Test
 	public void testCUWithPos() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -279,6 +277,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 		assertEqualString(curr1, word1);
 	}
 
+	@Test
 	public void testPackage() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("  package   com . test1;");
@@ -297,6 +296,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 		assertEqualString(document.get(), buf.toString());
 	}
 
+	@Test
 	public void testPackageWithPos() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package   com . test1;");
@@ -331,6 +331,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 
 	}
 
+	@Test
 	public void testVarDeclStatemenetWithPos() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("x[ ]=\nnew  int[ offset]");
@@ -365,6 +366,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 
 	}
 
+	@Test
 	public void testJavadoc() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("/** bar\n");
@@ -403,6 +405,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 
 	}
 
+	@Test
 	public void testJavadoc2() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("/** bar\n");
@@ -441,6 +444,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 
 	}
 
+	@Test
 	public void testJavadoc3() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("/** bar\n");
@@ -480,6 +484,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 
 	}
 
+	@Test
 	public void testCatchClause() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("catch\n");
@@ -517,6 +522,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 
 	}
 
+	@Test
 	public void testCatchStringLiteral() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("\"Hello\" ");
@@ -537,6 +543,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 
 	}
 
+	@Test
 	public void testFormatSubstring() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");

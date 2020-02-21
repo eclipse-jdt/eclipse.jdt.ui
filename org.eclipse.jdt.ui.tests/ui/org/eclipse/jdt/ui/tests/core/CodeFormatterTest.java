@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2017 IBM Corporation and others.
+ * Copyright (c) 2007, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,10 +15,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core;
 
+import static org.junit.Assert.assertNotNull;
+
 import java.util.Hashtable;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -46,31 +50,22 @@ import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
+
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 public class CodeFormatterTest extends CoreTests {
 
-	private static final Class<CodeFormatterTest> THIS= CodeFormatterTest.class;
-
 	protected IJavaProject fJProject1;
 
 	protected IPackageFragmentRoot fSourceFolder;
 
-	public CodeFormatterTest(String name) {
-		super(name);
-	}
+	@Rule
+	public ProjectTestSetup pts= new ProjectTestSetup();
 
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
-	}
-
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		JavaProjectHelper.addRequiredProject(fJProject1, ProjectTestSetup.getProject());
 
@@ -83,8 +78,8 @@ public class CodeFormatterTest extends CoreTests {
 		JavaCore.setOptions(options);
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJProject1);
 	}
 
@@ -113,6 +108,7 @@ public class CodeFormatterTest extends CoreTests {
 		}
 	}
 
+	@Test
 	public void testFormatSelection() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -158,6 +154,7 @@ public class CodeFormatterTest extends CoreTests {
 		assertEqualString(formatted, expected);
 	}
 
+	@Test
 	public void testFormatFieldDeclWithExtraWhitespace() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -194,6 +191,7 @@ public class CodeFormatterTest extends CoreTests {
 	 * Tests that "Format Element" formats the surrounding Java Element (including comment) when
 	 * invoked in the default (code) partition.
 	 */
+	@Test
 	public void testFormatElement() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		String original=
@@ -235,6 +233,7 @@ public class CodeFormatterTest extends CoreTests {
 	/*
 	 * Tests that "Format Element" only formats the surrounding javadoc, despite its name.
 	 */
+	@Test
 	public void testFormatElementInJavadoc() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		String original=
@@ -276,6 +275,7 @@ public class CodeFormatterTest extends CoreTests {
 	/*
 	 * Tests that "Format Element" only formats the surrounding comment, despite its name.
 	 */
+	@Test
 	public void testFormatElementInComment() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		String original=

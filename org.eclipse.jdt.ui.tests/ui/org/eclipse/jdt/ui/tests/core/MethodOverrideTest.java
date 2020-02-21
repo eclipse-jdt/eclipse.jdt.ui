@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,8 +13,17 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Hashtable;
 import java.util.List;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -46,55 +55,41 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import org.eclipse.jdt.internal.corext.dom.ASTFlattener;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.MethodOverrideTester;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 public class MethodOverrideTest extends CoreTests {
-
-
 	/**
 	 * See bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=111093
 	 */
 
-	private static final Class<MethodOverrideTest> THIS= MethodOverrideTest.class;
+	@Rule
+	public ProjectTestSetup pts= new ProjectTestSetup();
+
 	private static final boolean DEBUG_SHOWRESULTS= true;
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
-	}
 
 	private IJavaProject fJProject1;
 
-	public MethodOverrideTest(String name) {
-		super(name);
-	}
-
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		fJProject1= ProjectTestSetup.getProject();
-
 		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		JavaCore.setOptions(options);
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
 
+	@Test
 	public void testOverride0() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -120,6 +115,7 @@ public class MethodOverrideTest extends CoreTests {
 		doOverrideTests(cu, 2, 1, 0); // B and A
 	}
 
+	@Test
 	public void testOverride1() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -157,6 +153,7 @@ public class MethodOverrideTest extends CoreTests {
 		doOverrideTests(cu, 1, 1, 0); // B and A
 	}
 
+	@Test
 	public void testOverride2() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -180,6 +177,7 @@ public class MethodOverrideTest extends CoreTests {
 		doOverrideTests(cu, 1, 1, 0); // B and A
 	}
 
+	@Test
 	public void testOverride3() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -202,6 +200,7 @@ public class MethodOverrideTest extends CoreTests {
 		doOverrideTests(cu, 1, 1, 0); // B and A
 	}
 
+	@Test
 	public void testOverride4() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -229,6 +228,7 @@ public class MethodOverrideTest extends CoreTests {
 		doOverrideTests(cu, 1, 1, 0); // B and A
 	}
 
+	@Test
 	public void testOverrideMethodTypeParams1() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -269,6 +269,7 @@ public class MethodOverrideTest extends CoreTests {
 		doOverrideTests(cu, 1, 1, 0); // B and A
 	}
 
+	@Test
 	public void testOverrideRaw1() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -353,7 +354,7 @@ public class MethodOverrideTest extends CoreTests {
 
 					System.out.println();
 					System.out.println("====================================");
-					System.out.println(getName());
+					System.out.println("getName()");
 					System.out.println("====================================");
 
 					System.out.println("IMethodBinding.overrides(): " +  String.valueOf(bindingOverrides));

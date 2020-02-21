@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2015 IBM Corporation and others.
+ * Copyright (c) 2008, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,12 +13,17 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.preferences;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+
+import org.junit.Test;
 
 import org.eclipse.jdt.core.JavaCore;
 
@@ -30,25 +35,14 @@ import org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock.Key;
 import org.eclipse.jdt.internal.ui.preferences.ProblemSeveritiesConfigurationBlock;
 import org.eclipse.jdt.internal.ui.preferences.TodoTaskConfigurationBlock;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
-public class OptionsConfigurationBlockTest extends TestCase {
-
-	/*
-	 * NOTE: This test is not contained in the build test suite, since missing
-	 * UI should not make the build go red.
-	 */
-	public static Test suite() {
-		return new TestSuite(OptionsConfigurationBlockTest.class);
-	}
+public class OptionsConfigurationBlockTest {
 
 	/**
 	 * Reflective test that ensures that all options from {@link JavaCore} are used in the UI.
 	 *
 	 * @throws Exception should not
 	 */
+	@Test
 	public void testKeysForOptions() throws Exception {
 		HashMap<String, String> coreFieldLookup= new HashMap<>();
 		for (Field field : JavaCore.class.getDeclaredFields()) {

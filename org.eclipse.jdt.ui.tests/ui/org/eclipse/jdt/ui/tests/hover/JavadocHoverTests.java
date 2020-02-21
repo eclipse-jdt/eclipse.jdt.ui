@@ -13,6 +13,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.hover;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.core.runtime.Path;
@@ -34,38 +42,26 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 
 import org.eclipse.jdt.ui.tests.core.CoreTests;
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.text.java.hover.JavadocBrowserInformationControlInput;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavadocHover;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 public class JavadocHoverTests extends CoreTests {
 
-	public JavadocHoverTests(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(JavadocHoverTests.class));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
-	}
+	@Rule
+	public ProjectTestSetup pts= new ProjectTestSetup();
 
 	private IJavaProject fJProject1;
 
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		fJProject1= ProjectTestSetup.getProject();
 		JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
 
@@ -84,6 +80,7 @@ public class JavadocHoverTests extends CoreTests {
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 		return root.getFile(new Path(path));
 	}
+	@Test
 	public void testValueTag() throws Exception {
 		String source=
 				"package p;\n" +

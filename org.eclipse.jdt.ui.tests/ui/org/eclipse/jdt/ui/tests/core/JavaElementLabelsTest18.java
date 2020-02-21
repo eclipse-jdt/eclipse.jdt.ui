@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 IBM Corporation and others.
+ * Copyright (c) 2011, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -12,6 +12,11 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -31,43 +36,29 @@ import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.PreferenceConstants;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
+import org.eclipse.jdt.ui.tests.core.rules.Java18ProjectTestSetup;
 
 public class JavaElementLabelsTest18 extends CoreTests {
 
-	private static final Class<JavaElementLabelsTest18> THIS= JavaElementLabelsTest18.class;
+	@Rule
+	public Java18ProjectTestSetup j18p= new Java18ProjectTestSetup();
 
 	private IJavaProject fJProject1;
 
-	public JavaElementLabelsTest18(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new Java18ProjectTestSetup(test);
-	}
-
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		fJProject1= Java18ProjectTestSetup.getProject();
 
 		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
 		store.setValue(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES, false);
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, Java18ProjectTestSetup.getDefaultClasspath());
 	}
 
-
+	@Test
 	public void testMethodLabelPolymorphicSignatureDeclaration() throws Exception {
 		IType methodHandle= fJProject1.findType("java.lang.invoke.MethodHandle");
 		IMethod invokeExact= methodHandle.getMethod("invokeExact", new String[] {
@@ -123,6 +114,7 @@ public class JavaElementLabelsTest18 extends CoreTests {
 		assertEqualString(lab, "Object invoke(Object... arg0)");
 	}
 
+	@Test
 	public void testMethodLabelPolymorphicSignatureReference0() throws Exception {
 		IJavaElement elem= createInvokeReference("mh.invoke()");
 
@@ -138,6 +130,7 @@ public class JavaElementLabelsTest18 extends CoreTests {
 		assertEqualString(lab, "void invoke()");
 	}
 
+	@Test
 	public void testMethodLabelPolymorphicSignatureReference0Ret() throws Exception {
 		IJavaElement elem= createInvokeReference("String s= (String) mh.invoke()");
 
@@ -153,6 +146,7 @@ public class JavaElementLabelsTest18 extends CoreTests {
 		assertEqualString(lab, "Object invoke()");
 	}
 
+	@Test
 	public void testMethodLabelPolymorphicSignatureReference1() throws Exception {
 		IJavaElement elem= createInvokeReference("mh.invoke(1)");
 
@@ -168,6 +162,7 @@ public class JavaElementLabelsTest18 extends CoreTests {
 		assertEqualString(lab, "void invoke(int arg00)");
 	}
 
+	@Test
 	public void testMethodLabelPolymorphicSignatureReference1Array() throws Exception {
 		IJavaElement elem= createInvokeReference("mh.invoke(new Object[42])");
 
@@ -183,6 +178,7 @@ public class JavaElementLabelsTest18 extends CoreTests {
 		assertEqualString(lab, "void invoke(Object[] arg00)");
 	}
 
+	@Test
 	public void testMethodLabelPolymorphicSignatureReference2() throws Exception {
 		IJavaElement elem= createInvokeReference("mh.invoke('a', new Integer[0][])");
 
@@ -198,6 +194,7 @@ public class JavaElementLabelsTest18 extends CoreTests {
 		assertEqualString(lab, "void invoke(char arg00, Integer[][] arg01)");
 	}
 
+	@Test
 	public void testMethodLabelPolymorphicSignatureReference3Ret() throws Exception {
 		IJavaElement elem= createInvokeReference("long l= (long) mh.invoke('a', new java.util.ArrayList<String>(), null)");
 
@@ -213,6 +210,7 @@ public class JavaElementLabelsTest18 extends CoreTests {
 		assertEqualString(lab, "Object invoke(char arg00, ArrayList arg01, Void arg02)");
 	}
 
+	@Test
 	public void testTypeLabelLambda1() throws Exception {
 
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -242,6 +240,7 @@ public class JavaElementLabelsTest18 extends CoreTests {
 		assertEqualString(lab, "() -> {...} IntConsumer - org.test.C.c");
 	}
 
+	@Test
 	public void testTypeLabelLambda2() throws Exception {
 
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,8 +13,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -34,37 +36,24 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.PreferenceConstants;
-
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 public class JavaElementLabelsTest extends CoreTests {
 
-	private static final Class<JavaElementLabelsTest> THIS= JavaElementLabelsTest.class;
+	@Rule
+	public ProjectTestSetup pts= new ProjectTestSetup();
 
 	private IJavaProject fJProject1;
 
-	public JavaElementLabelsTest(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
-	}
-
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		fJProject1= ProjectTestSetup.getProject();
-
 		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
 		store.setValue(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES, false);
 	}
 
-
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
 
@@ -73,6 +62,7 @@ public class JavaElementLabelsTest extends CoreTests {
 		assertEqualString(lab, expectedLabel);
 	}
 
+	@Test
 	public void testTypeLabelOuter() throws Exception {
 
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -102,6 +92,7 @@ public class JavaElementLabelsTest extends CoreTests {
 		assertEqualString(lab, "TestSetupProject/src - org.test.Outer");
 	}
 
+	@Test
 	public void testTypeLabelInner() throws Exception {
 
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -138,6 +129,7 @@ public class JavaElementLabelsTest extends CoreTests {
 		assertEqualString(lab, "TestSetupProject/src - org.test.Outer.Inner");
 	}
 
+	@Test
 	public void testTypeLabelLocal() throws Exception {
 
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -172,6 +164,7 @@ public class JavaElementLabelsTest extends CoreTests {
 		assertEqualString(lab, "TestSetupProject/src - org.test.Outer.foo(...).Local");
 	}
 
+	@Test
 	public void testTypeParameterLabelType() throws Exception {
 
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -226,6 +219,7 @@ public class JavaElementLabelsTest extends CoreTests {
 		assertEqualString(lab, "TypeParams<Q extends ArrayList<? extends Number>, Element extends Map<String, Integer> & Serializable, NoBound> - org.test");
 	}
 
+	@Test
 	public void testTypeParameterLabelMethod() throws Exception {
 
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -264,6 +258,7 @@ public class JavaElementLabelsTest extends CoreTests {
 		assertEqualString(lab, "NoBound - org.test.X.method(Element, NoBound)");
 	}
 
+	@Test
 	public void testTypeLabelAnonymous() throws Exception {
 
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -298,6 +293,7 @@ public class JavaElementLabelsTest extends CoreTests {
 		assertEqualString(lab, "TestSetupProject/src - org.test.Outer.foo(...).new Object() {...}");
 	}
 
+	@Test
 	public void testTypeLabelAnonymousInAnonymous() throws Exception {
 
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -336,6 +332,7 @@ public class JavaElementLabelsTest extends CoreTests {
 		assertEqualString(lab, "TestSetupProject/src - org.test.Outer.foo(...).new Object() {...}.xoo().new Serializable() {...}");
 	}
 
+	@Test
 	public void testTypeLabelAnonymousInFieldInitializer() throws Exception {
 
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -368,6 +365,7 @@ public class JavaElementLabelsTest extends CoreTests {
 		assertEqualString(lab, "TestSetupProject/src - org.test.Outer.o.new Thread() {...}");
 	}
 
+	@Test
 	public void testTypeLabelAnonymousInInitializer() throws Exception {
 
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -402,6 +400,7 @@ public class JavaElementLabelsTest extends CoreTests {
 		assertEqualString(lab, "TestSetupProject/src - org.test.Outer.{...}.new Object() {...}");
 	}
 
+	@Test
 	public void testTypeLabelWildcards() throws Exception {
 
 			IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -431,6 +430,7 @@ public class JavaElementLabelsTest extends CoreTests {
 
 		}
 
+	@Test
 	public void testPackageLabels() throws Exception {
 
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -511,6 +511,7 @@ public class JavaElementLabelsTest extends CoreTests {
 		}
 	}
 
+	@Test
 	public void testMethodLabelVarargsDeclaration() throws Exception {
 
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -543,6 +544,7 @@ public class JavaElementLabelsTest extends CoreTests {
 		assertEqualString(lab, "foo(int, String...)");
 	}
 
+	@Test
 	public void testMethodLabelVarargsReference0() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -579,14 +581,17 @@ public class JavaElementLabelsTest extends CoreTests {
 		assertEqualString(lab, "asList(Object...)");
 	}
 
+	@Test
 	public void testMethodLabelVarargsReference1() throws Exception {
 		assertMethodLabelVarargsReference("1");
 	}
 
+	@Test
 	public void testMethodLabelVarargsReference2() throws Exception {
 		assertMethodLabelVarargsReference("1, 2");
 	}
 
+	@Test
 	public void testMethodLabelVarargsReference3() throws Exception {
 		assertMethodLabelVarargsReference("1, 2, Integer.valueOf(3)");
 	}
@@ -627,7 +632,7 @@ public class JavaElementLabelsTest extends CoreTests {
 		assertEqualString(lab, "asList(Integer...)");
 	}
 
-
+	@Test
 	public void testMethodLabelAnnotatedParameters() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);

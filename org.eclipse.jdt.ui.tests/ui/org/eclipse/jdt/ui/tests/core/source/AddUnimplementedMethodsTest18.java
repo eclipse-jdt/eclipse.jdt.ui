@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2016 IBM Corporation and others.
+ * Copyright (c) 2015, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -12,6 +12,14 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core.source;
+
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -39,46 +47,32 @@ import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
-import org.eclipse.jdt.ui.tests.core.Java18ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.Java18ProjectTestSetup;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+public class AddUnimplementedMethodsTest18 {
 
-public class AddUnimplementedMethodsTest18 extends TestCase {
-
-	private static final Class<AddUnimplementedMethodsTest18> THIS= AddUnimplementedMethodsTest18.class;
+	@Rule
+	public Java18ProjectTestSetup j18p= new Java18ProjectTestSetup();
 
 	private IJavaProject fJavaProject;
 
 	private IPackageFragment fPackage;
 
-	public AddUnimplementedMethodsTest18(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new Java18ProjectTestSetup(test);
-	}
-
-	@Override
-	protected void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJavaProject, Java18ProjectTestSetup.getDefaultClasspath());
-		fJavaProject= null;
-		fPackage= null;
-	}
-
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		fJavaProject= Java18ProjectTestSetup.getProject();
 		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(fJavaProject, "src");
 		fPackage= root.createPackageFragment("ibm.util", true, null);
 	}
 
+	@After
+	public void tearDown() throws Exception {
+		JavaProjectHelper.clear(fJavaProject, Java18ProjectTestSetup.getDefaultClasspath());
+		fJavaProject= null;
+		fPackage= null;
+	}
+
+	@Test
 	public void testBug460521() throws Exception {
 		StringBuilder buf= new StringBuilder();
 		buf.append("interface I {\n");
