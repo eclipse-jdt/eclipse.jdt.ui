@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2020 IBM Corporation and others.
+ * Copyright (c) 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -8,14 +8,22 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
+ * derived from corresponding file in org.eclipse.jdt.junit.tests
+ * instead extending TestSetup for junit4 ExternalResource is extended
+ * to allow use as junit "@Rule"
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.junit.tests;
+package org.eclipse.jdt.ui.tests.core.rules;
+
+import org.junit.rules.ExternalResource;
 
 import org.eclipse.jdt.junit.JUnitCore;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
+
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.core.resources.IFolder;
 
@@ -24,14 +32,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
-import junit.extensions.TestSetup;
-import junit.framework.Test;
-/**
- *
- * @Deprecated use org.eclipse.jdt.ui.tests.core.rules.JUnitWorkspaceTestSetup as @Rule instead
- *
- */
-public class JUnitWorkspaceTestSetup extends TestSetup {
+
+public class JUnitWorkspaceTestSetup extends ExternalResource {
 
 	public static final String WORKSPACE_PATH= "testresources/JUnitWorkspace/";
 
@@ -39,12 +41,11 @@ public class JUnitWorkspaceTestSetup extends TestSetup {
 	private static final String PROJECT_NAME_4= "JUnit4Tests";
 	private static final String SRC_NAME= "src";
 
-	private boolean fJUnit4;
+	boolean fJUnit4;
 	private static IJavaProject fgProject;
 	private static IPackageFragmentRoot fgRoot;
 
-	public JUnitWorkspaceTestSetup(Test test, boolean jUnit4) {
-		super(test);
+	public JUnitWorkspaceTestSetup(boolean jUnit4) {
 		fJUnit4= jUnit4;
 	}
 
@@ -61,7 +62,7 @@ public class JUnitWorkspaceTestSetup extends TestSetup {
 	}
 
 	@Override
-	protected void setUp() throws Exception {
+	protected void before() throws Throwable {
 		if (fJUnit4) {
 			fgProject= JavaProjectHelper.createJavaProject(PROJECT_NAME_4, "bin");
 			JavaProjectHelper.addRTJar(fgProject);
@@ -79,8 +80,12 @@ public class JUnitWorkspaceTestSetup extends TestSetup {
 	}
 
 	@Override
-	protected void tearDown() throws Exception {
-		JavaProjectHelper.delete(fgProject);
+	protected void after() {
+		try {
+			JavaProjectHelper.delete(fgProject);
+		} catch (CoreException e) {
+			e.printStackTrace();
+		}
 		fgProject= null;
 		fgRoot= null;
 	}

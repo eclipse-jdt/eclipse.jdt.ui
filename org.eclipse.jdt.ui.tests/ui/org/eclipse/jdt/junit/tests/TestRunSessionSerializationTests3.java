@@ -16,8 +16,8 @@ package org.eclipse.jdt.junit.tests;
 
 import java.io.File;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
@@ -25,47 +25,51 @@ import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jdt.internal.junit.model.JUnitModel;
 
+import org.eclipse.jdt.ui.tests.core.rules.JUnitWorkspaceTestSetup;
+
 public class TestRunSessionSerializationTests3 extends AbstractTestRunSessionSerializationTests {
 
-	public static Test setUpTest(Test test) {
-		return new JUnitWorkspaceTestSetup(test, false);
-	}
+	@Rule
+	public JUnitWorkspaceTestSetup jwts= new JUnitWorkspaceTestSetup(false);
 
-	public static Test suite() {
-		return new JUnitWorkspaceTestSetup(new TestSuite(TestRunSessionSerializationTests3.class), false);
-	}
-
+	@Test
 	public void testATestCase() throws Exception {
 		String test= "ATestCase";
 		runCUTest(test);
 	}
 
+	@Test
 	public void testATestCase_testSucceed() throws Exception {
 		String testType= "ATestCase";
 		String method= "testSucceed";
 		runMethodTest(testType, method);
 	}
 
+	@Test
 	public void testATestSuite() throws Exception {
 		String test= "ATestSuite";
 		runCUTest(test);
 	}
 
+	@Test
 	public void testFailures() throws Exception {
 		String test= "Failures";
 		runCUTest(test);
 	}
 
+	@Test
 	public void testAllTests() throws Exception {
 		String test= "AllTests";
 		runCUTest(test);
 	}
 
+	@Test
 	public void testFailingSuite() throws Exception {
 		String test= "FailingSuite";
 		runCUTest(test);
 	}
 
+	@Test
 	public void testImportAntSuite() throws Exception {
 		Path testsPath= new Path(JUnitWorkspaceTestSetup.getProjectPath() + "ant/result/TESTS-TestSuites.xml");
 		File testsFile= JavaTestPlugin.getDefault().getFileInPlugin(testsPath);

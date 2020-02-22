@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2017 IBM Corporation and others.
+ * Copyright (c) 2006, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,6 +13,9 @@
  *******************************************************************************/
 
 package org.eclipse.jdt.junit.tests;
+
+import org.junit.Before;
+import org.junit.Test;
 
 import org.eclipse.jdt.junit.JUnitCore;
 import org.eclipse.jdt.junit.TestRunListener;
@@ -52,12 +55,14 @@ public class TestRunListenerTest5 extends AbstractTestRunListenerTest {
 	}
 
 	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		fProject= JavaProjectHelper.createJavaProject("TestRunListenerTest", "bin");
 		JavaProjectHelper.addToClasspath(fProject, JavaCore.newContainerEntry(JUnitCore.JUNIT5_CONTAINER_PATH));
 		JavaProjectHelper.addRTJar18(fProject);
 	}
 
+	@Test
 	public void testOK() throws Exception {
 		String source=
 				"package pack;\n" +
@@ -97,6 +102,7 @@ public class TestRunListenerTest5 extends AbstractTestRunListenerTest {
 		assertEqualLog(expectedSequence, actual);
 	}
 
+	@Test
 	public void testTreeOnSessionStarted() throws Exception {
 		String source=
 				"package pack;\n" +
@@ -115,6 +121,7 @@ public class TestRunListenerTest5 extends AbstractTestRunListenerTest {
 		assertEqualLog(expectedTree, actual);
 	}
 
+	@Test
 	public void testTreeOnSessionEnded() throws Exception {
 		String source=
 				"package pack;\n" +
@@ -134,6 +141,7 @@ public class TestRunListenerTest5 extends AbstractTestRunListenerTest {
 		assertEqualLog(expectedTree, actual);
 	}
 
+	@Test
 	public void testThatLauncherLibGetsAdded() throws Exception {
 		JavaProjectHelper.removeFromClasspath(fProject, JUnitCore.JUNIT5_CONTAINER_PATH);
 		JavaProjectHelper.addToClasspath(fProject, BuildPathSupport.getJUnitJupiterApiLibraryEntry());

@@ -223,9 +223,6 @@ public class ContentProviderTests6 {
 		assertNotNull(fProvider);
 	}
 
-	/**
-	 * @see TestCase#tearDown()
-	 */
 	@After
 	public void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJProject);

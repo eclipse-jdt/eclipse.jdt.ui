@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,11 +13,15 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.browsing;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.File;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
@@ -50,15 +54,7 @@ import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 
 
-public class PackagesViewContentProviderTests2 extends TestCase {
-
-	public static Test suite() {
-		TestSuite suite= new TestSuite(PackagesViewContentProviderTests2.class.getName());
-		//$JUnit-BEGIN$
-		suite.addTestSuite(PackagesViewContentProviderTests2.class);
-		//$JUnit-END$
-		return suite;
-	}
+public class PackagesViewContentProviderTests2 {
 
 	private IJavaProject fJProject1;
 	private IJavaProject fJProject2;
@@ -101,18 +97,16 @@ public class PackagesViewContentProviderTests2 extends TestCase {
 	private boolean fEnableAutoBuildAfterTesting;
 	private IPackageFragment fPack102;
 
-	public PackagesViewContentProviderTests2(String name) {
-		super(name);
-	}
-
 	//----------- getElement in flat view ------------------------------
 
+	@Test
 	public void testGetElementsPackageFragmentRoot() throws Exception {
 		Object[] children= fProvider.getElements(fRoot1);
 		Object[] expectedChildren= new Object[] { fPack21, fPack31, fPack41, fPack51, fPack61, fPack81, fPack91, fPackDefault1 };
 		assertTrue("Wrong children found for PackageFragment", compareArrays(children, expectedChildren)); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testGetElementsProject() throws Exception {
 
 		LogicalPackage cp3= new LogicalPackage(fPack31);
@@ -144,6 +138,7 @@ public class PackagesViewContentProviderTests2 extends TestCase {
 	}
 
 	//---------------Delta Tests-----------------------------
+	@Test
 	public void testRemovePackageNotLogicalPackage() throws Exception {
 		//initialise Map
 		fProvider.getElements(fJProject2);
@@ -161,6 +156,7 @@ public class PackagesViewContentProviderTests2 extends TestCase {
 		assertTrue("Correct package removed", fMyPart.getRemovedObject().contains(fPack12)); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testRemovePackageInTwoPackageLogicalPackage() throws Exception {
 
 		//initialise map
@@ -187,6 +183,7 @@ public class PackagesViewContentProviderTests2 extends TestCase {
 		assertTrue("Correct guy added", fInternalPack10.equals(addedObject)); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testRemovePackageFromLogicalPackage() throws Exception {
 
 		//initialise map
@@ -206,6 +203,7 @@ public class PackagesViewContentProviderTests2 extends TestCase {
 		assertTrue("Refresh did not happened", !fMyPart.hasRefreshHappened()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testRemoveCUFromPackageNotLogicalPackage() throws Exception {
 
 		//initialise Map
@@ -234,6 +232,7 @@ public class PackagesViewContentProviderTests2 extends TestCase {
 			fail("Too many refreshes (" + fMyPart.getRefreshedObject().size() + "):\n" + fMyPart.getRefreshedObject());
 	}
 
+	@Test
 	public void testAddCUFromPackageNotLogicalPackage() throws Exception {
 
 		ICompilationUnit cu= fPack81.createCompilationUnit("Object.java", "", true, null); //$NON-NLS-1$//$NON-NLS-2$
@@ -258,6 +257,7 @@ public class PackagesViewContentProviderTests2 extends TestCase {
 			fail("Too many refreshes (" + fMyPart.getRefreshedObject().size() + "):\n" + fMyPart.getRefreshedObject());
 	}
 
+	@Test
 	public void testAddFragmentToLogicalPackage() throws Exception {
 
 		//create package fragment to be added
@@ -280,6 +280,7 @@ public class PackagesViewContentProviderTests2 extends TestCase {
 		assertTrue("Refresh did not happened", !fMyPart.hasRefreshHappened()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testAddPackageNotLogicalPackage() throws Exception {
 
 		//initialise Map
@@ -299,6 +300,7 @@ public class PackagesViewContentProviderTests2 extends TestCase {
 		assertTrue("Correct package added", fMyPart.getAddedObject().contains(test)); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testAddPackageToCreateLogicalPackage() throws Exception {
 		//initialise map
 		fProvider.getElements(fJProject2);
@@ -333,10 +335,8 @@ public class PackagesViewContentProviderTests2 extends TestCase {
 	/*
 	 * @see TestCase#setUp()
 	 */
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-
+	@Before
+	public void setUp() throws Exception {
 		fWorkspace= ResourcesPlugin.getWorkspace();
 		assertNotNull(fWorkspace);
 
@@ -462,8 +462,8 @@ public class PackagesViewContentProviderTests2 extends TestCase {
 	/*
 	 * @see TestCase#tearDown()
 	 */
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 
 		JavaProjectHelper.delete(fJProject1);
 		JavaProjectHelper.delete(fJProject2);
@@ -472,8 +472,6 @@ public class PackagesViewContentProviderTests2 extends TestCase {
 
 		if (fEnableAutoBuildAfterTesting)
 			CoreUtility.setAutoBuilding(true);
-
-		super.tearDown();
 	}
 
 	private boolean compareArrays(Object[] children, Object[] expectedChildren) {

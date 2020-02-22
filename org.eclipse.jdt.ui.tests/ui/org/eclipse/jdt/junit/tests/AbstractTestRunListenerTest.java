@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,9 +13,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.junit.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 import java.util.ArrayList;
 
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
 
 import org.eclipse.jdt.junit.JUnitCore;
 import org.eclipse.jdt.junit.launcher.JUnitLaunchShortcut;
@@ -50,7 +54,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants;
 
 
-public class AbstractTestRunListenerTest extends TestCase {
+public class AbstractTestRunListenerTest {
 
 	public static class TestRunLog {
 		private ArrayList<String> fLog;
@@ -86,16 +90,16 @@ public class AbstractTestRunListenerTest extends TestCase {
 	IJavaProject fProject;
 	private boolean fLaunchHasTerminated= false;
 
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		fProject= JavaProjectHelper.createJavaProject("TestRunListenerTest", "bin");
 		// have to set up an 1.3 project to avoid requiring a 5.0 VM
 		JavaProjectHelper.addRTJar13(fProject);
 		JavaProjectHelper.addToClasspath(fProject, JavaCore.newContainerEntry(JUnitCore.JUNIT4_CONTAINER_PATH));
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.delete(fProject);
 	}
 

@@ -247,9 +247,6 @@ public class ContentProviderTests7 {
 		return false;
 	}
 
-	/**
-	 * @see TestCase#tearDown()
-	 */
 	@After
 	public void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJProject);

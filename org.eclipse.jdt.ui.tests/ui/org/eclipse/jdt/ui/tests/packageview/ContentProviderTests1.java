@@ -329,9 +329,6 @@ public class ContentProviderTests1{
 //	}
 
 
-	/**
-	 * @see TestCase#setUp()
-	 */
 	@Before
 	public void setUp() throws Exception {
 
@@ -435,9 +432,6 @@ public class ContentProviderTests1{
 		assertNotNull(fProvider);
 	}
 
-	/**
-	 * @see TestCase#tearDown()
-	 */
 	@After
 	public void tearDown() throws Exception {
 		fArchiveFragmentRoot.close();

@@ -202,10 +202,6 @@ public class ContentProviderTests4{
 
 
 	//-------------------Set up methods--------------------------------
-	/**
-	 * @see TestCase#setUp()
-	 */
-
 	@Before
 	public void setUp() throws Exception {
 		fWorkspace= ResourcesPlugin.getWorkspace();
@@ -302,9 +298,6 @@ public class ContentProviderTests4{
 		assertNotNull(fProvider);
 	}
 
-	/**
-	 * @see TestCase#tearDown()
-	 */
 	@After
 	public void tearDown() throws Exception {
 

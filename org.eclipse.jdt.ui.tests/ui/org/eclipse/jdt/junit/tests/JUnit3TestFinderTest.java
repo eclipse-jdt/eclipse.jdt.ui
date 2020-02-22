@@ -13,7 +13,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.junit.tests;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.HashSet;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import org.eclipse.jdt.junit.JUnitCore;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -33,16 +39,13 @@ import org.eclipse.jdt.internal.junit.launcher.ITestFinder;
 import org.eclipse.jdt.internal.junit.launcher.ITestKind;
 import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
 
-import junit.framework.TestCase;
 
-
-public class JUnit3TestFinderTest extends TestCase {
+public class JUnit3TestFinderTest {
 	private IJavaProject fProject;
 	private IPackageFragmentRoot fRoot;
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
+	@Before
+	public void setUp() throws Exception {
 		fProject= JavaProjectHelper.createJavaProject("TestProject", "bin");
 		JavaProjectHelper.addRTJar(fProject);
 		IClasspathEntry cpe= JavaCore.newContainerEntry(JUnitCore.JUNIT3_CONTAINER_PATH);
@@ -51,12 +54,12 @@ public class JUnit3TestFinderTest extends TestCase {
 		fRoot= JavaProjectHelper.addSourceContainer(fProject, "src");
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.delete(fProject);
-		super.tearDown();
 	}
 
+	@Test
 	public void testTestCase() throws Exception {
 		IPackageFragment p= fRoot.createPackageFragment("p", true, null);
 		StringBuffer buf= new StringBuffer();
@@ -172,6 +175,7 @@ public class JUnit3TestFinderTest extends TestCase {
 		assertTestFound(fProject, validTests);
 	}
 
+	@Test
 	public void testSuite() throws Exception {
 		IPackageFragment p= fRoot.createPackageFragment("p", true, null);
 		StringBuffer buf= new StringBuffer();
@@ -306,6 +310,7 @@ public class JUnit3TestFinderTest extends TestCase {
 		assertTestFound(fProject, validTests);
 	}
 
+	@Test
 	public void testTestInterface() throws Exception {
 		IPackageFragment p= fRoot.createPackageFragment("p", true, null);
 		StringBuffer buf= new StringBuffer();

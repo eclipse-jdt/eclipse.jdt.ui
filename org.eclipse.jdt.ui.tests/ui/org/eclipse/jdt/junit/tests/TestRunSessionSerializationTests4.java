@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2010 IBM Corporation and others.
+ * Copyright (c) 2007, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -16,10 +16,8 @@ package org.eclipse.jdt.junit.tests;
 
 import java.io.File;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestResult;
-import junit.framework.TestSuite;
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.jdt.junit.JUnitCore;
 import org.eclipse.jdt.junit.TestRunListener;
@@ -31,49 +29,29 @@ import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
 import org.eclipse.core.runtime.Path;
 
-import org.eclipse.jdt.core.JavaCore;
-
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.junit.model.JUnitModel;
 
-import org.eclipse.jdt.launching.IVMInstall;
-import org.eclipse.jdt.launching.IVMInstall2;
-import org.eclipse.jdt.launching.JavaRuntime;
+import org.eclipse.jdt.ui.tests.core.rules.JUnit4WorkspaceTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.JUnitWorkspaceTestSetup;
 
 public class TestRunSessionSerializationTests4 extends AbstractTestRunSessionSerializationTests {
 
-	public static Test setUpTest(Test test) {
-		IVMInstall defaultVMInstall= JavaRuntime.getDefaultVMInstall();
-		if (defaultVMInstall instanceof IVMInstall2) {
-			IVMInstall2 install2= (IVMInstall2) defaultVMInstall;
-			String version= JavaModelUtil.getCompilerCompliance(install2, JavaCore.VERSION_1_4);
-			if (JavaModelUtil.is50OrHigher(version))
-				return new JUnitWorkspaceTestSetup(test, true);
-		}
+	@Rule
+	public JUnit4WorkspaceTestSetup jwts= new JUnit4WorkspaceTestSetup();
 
-		return new TestCase("TestRunSessionSerializationTests4 disabled because VM < 5.0") {
-			@Override
-			public void run(TestResult result) {
-				result.startTest(this);
-				result.endTest(this);
-			}
-		};
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(TestRunSessionSerializationTests4.class));
-	}
-
+	@Test
 	public void testATestCase() throws Exception {
 		String test= "ATestCase";
 		runCUTest(test);
 	}
 
+	@Test
 	public void testATestSuite() throws Exception {
 		String test= "ATestSuite";
 		runCUTest(test);
 	}
 
+	@Test
 	public void testFailures() throws Exception {
 		String test= "Failures";
 
@@ -115,11 +93,13 @@ public class TestRunSessionSerializationTests4 extends AbstractTestRunSessionSer
 		}
 	}
 
+	@Test
 	public void testAllTests() throws Exception {
 		String test= "AllTests";
 		runCUTest(test);
 	}
 
+	@Test
 	public void testImportAntSuite() throws Exception {
 		Path testsPath= new Path(JUnitWorkspaceTestSetup.getProjectPath() + "ant/result/TESTS-TestSuites.xml");
 		File testsFile= JavaTestPlugin.getDefault().getFileInPlugin(testsPath);

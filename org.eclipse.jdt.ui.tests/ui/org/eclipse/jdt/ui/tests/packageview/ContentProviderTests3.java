@@ -412,9 +412,6 @@ public class ContentProviderTests3{
 		assertNotNull(fProvider);
 	}
 
-	/**
-	 * @see TestCase#tearDown()
-	 */
 	@After
 	public void tearDown() throws Exception {
 		fArchiveFragmentRoot.close();

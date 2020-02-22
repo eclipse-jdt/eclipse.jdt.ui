@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,11 +13,15 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.browsing;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
@@ -50,15 +54,7 @@ import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 
 
-public class PackagesViewDeltaTests extends TestCase {
-
-	public static Test suite() {
-		TestSuite suite= new TestSuite(PackagesViewDeltaTests.class.getName());
-		//$JUnit-BEGIN$
-		suite.addTestSuite(PackagesViewDeltaTests.class);
-		//$JUnit-END$
-		return suite;
-	}
+public class PackagesViewDeltaTests {
 
 	private IJavaProject fJProject;
 
@@ -92,12 +88,9 @@ public class PackagesViewDeltaTests extends TestCase {
 	private IPackageFragment fPack102;
 	private boolean fEnableAutoBuildAfterTesting;
 
-	public PackagesViewDeltaTests(String name) {
-		super(name);
-	}
-
 	//-----------------Remove delta test cases------------------
 
+	@Test
 	public void testRemoveTopLevelFragmentNotLogicalPackage() throws Exception {
 
 		//create a logical package for packages with name "pack3"
@@ -122,6 +115,7 @@ public class PackagesViewDeltaTests extends TestCase {
 		assertTrue("Correct package removed", fMyPart.getRemovedObject().contains(fPack12)); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testRemoveBottomLevelFragmentNotLogicalPackage() throws Exception {
 
 		//initialise Map
@@ -142,6 +136,7 @@ public class PackagesViewDeltaTests extends TestCase {
 	//This is a bogus test because this situation could never occure
 	//while fPack42 exists you cannot remove fPack32 still it tests
 	//correct delta handeling.
+	@Test
 	public void testRemoveFragmentInMultiFragmentLogicalPackage() throws Exception {
 
 		//initialise the map
@@ -183,6 +178,7 @@ public class PackagesViewDeltaTests extends TestCase {
 
 	}
 
+	@Test
 	public void testRemoveBottomLevelFragmentInMultiFragmentLogicalPackage() throws Exception {
 
 		//delete a fragment
@@ -231,6 +227,7 @@ public class PackagesViewDeltaTests extends TestCase {
 		assertTrue("PackageFragment removed from logical package", lp.equals(expectedChild)); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testRemoveFragmentInTwoFragmentLogicalPackage() throws Exception {
 
 		//create a logical package child of cp
@@ -276,6 +273,7 @@ public class PackagesViewDeltaTests extends TestCase {
 	}
 
 	//-----------------------Add delta test cases----------------------------------
+	@Test
 	public void testAddTopLevelFragmentNotLogicalPackage() throws Exception {
 
 		//initialise Map
@@ -295,6 +293,7 @@ public class PackagesViewDeltaTests extends TestCase {
 		assertTrue("Correct package added", fMyPart.getAddedObject().contains(test)); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testAddFragmentToLogicalPackage() throws Exception {
 
 		//create a logical package with name "pack3.pack4"
@@ -318,6 +317,7 @@ public class PackagesViewDeltaTests extends TestCase {
 		assertTrue("Refresh did not happened", !fMyPart.hasRefreshHappened()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testAddCUFromFragmentNotLogicalPackageVisible() throws Exception {
 
 		//create a logical package for packages with name "pack3"
@@ -347,6 +347,7 @@ public class PackagesViewDeltaTests extends TestCase {
 		assertEquals("Correct number of refreshes", 1, fMyPart.getRefreshedObject().size());//$NON-NLS-1$
 	}
 
+	@Test
 	public void testAddCUFromFragmentNotLogicalPackageNotVisible() throws Exception {
 
 		//create a logical package for packages with name "pack3"
@@ -374,6 +375,7 @@ public class PackagesViewDeltaTests extends TestCase {
 		assertEquals("Correct number of refreshes", 1, fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testRemoveCUFromFragmentNotLogicalPackage() throws Exception {
 
 		//create a logical package for packages with name "pack3"
@@ -405,6 +407,7 @@ public class PackagesViewDeltaTests extends TestCase {
 		assertEquals("Correct number of refreshes", 1, fMyPart.getRefreshedObject().size());//$NON-NLS-1$
 	}
 
+	@Test
 	public void testRemoveCUFromFragmentNotLogicalPackageWithParentNotVisible() throws Exception {
 
 		//create a logical package for packages with name "pack3"
@@ -432,6 +435,7 @@ public class PackagesViewDeltaTests extends TestCase {
 		assertEquals("Correct number of refreshes", 1, fMyPart.getRefreshedObject().size());//$NON-NLS-1$
 	}
 
+	@Test
 	public void testAddBottomLevelFragmentNotLogicalPackage() throws Exception {
 
 		//create a logical package for packages with name "pack3"
@@ -459,10 +463,8 @@ public class PackagesViewDeltaTests extends TestCase {
 	/*
 	 * @see TestCase#setUp()
 	 */
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-
+	@Before
+	public void setUp() throws Exception {
 		fWorkspace= ResourcesPlugin.getWorkspace();
 		assertNotNull(fWorkspace);
 
@@ -552,8 +554,8 @@ public class PackagesViewDeltaTests extends TestCase {
 	/*
 	 * @see TestCase#tearDown()
 	 */
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 
 		JavaProjectHelper.delete(fJProject);
 		fProvider.inputChanged(null, null, null);
@@ -561,8 +563,6 @@ public class PackagesViewDeltaTests extends TestCase {
 
 		if (fEnableAutoBuildAfterTesting)
 			CoreUtility.setAutoBuilding(true);
-
-		super.tearDown();
 	}
 
 	/**

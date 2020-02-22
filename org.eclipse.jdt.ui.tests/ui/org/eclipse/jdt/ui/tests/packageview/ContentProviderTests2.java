@@ -191,10 +191,6 @@ public class ContentProviderTests2{
 
 
 	//-------------------Set up methods--------------------------------
-	/**
-	 * @see TestCase#setUp()
-	 */
-
 	@Before
 	public void setUp() throws Exception {
 
@@ -289,9 +285,6 @@ public class ContentProviderTests2{
 		assertNotNull(fProvider);
 	}
 
-	/**
-	 * @see TestCase#tearDown()
-	 */
 	@After
 	public void tearDown() throws Exception {
 		fInternalRoot1.close();

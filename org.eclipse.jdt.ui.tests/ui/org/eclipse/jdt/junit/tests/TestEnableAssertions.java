@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2016 IBM Corporation and others.
+ * Copyright (c) 2006, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,7 +14,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.junit.tests;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.util.DialogCheck;
 
@@ -40,13 +43,15 @@ import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-public class TestEnableAssertions extends TestCase {
+public class TestEnableAssertions {
 	private static final String configName = "NoOneWouldEverThinkOfUsingANameLikeThis"; //$NON-NLS-1$
 
+	@Test
 	public void testAssertionsOnByDefault() {
 		assertTrue(AssertionVMArg.getEnableAssertionsPreference());
 	}
 
+	@Test
 	public void testEnableAssertionsInWizard() {
 		JUnitPreferencePage page = new JUnitPreferencePage();
 
@@ -63,6 +68,7 @@ public class TestEnableAssertions extends TestCase {
 		assertFalse(AssertionVMArg.getEnableAssertionsPreference());
 	}
 
+	@Test
 	public void testJUnitTabGroupSetDefaults() {
 		IWorkbenchPart activePart= JavaPlugin.getActiveWorkbenchWindow().getPartService().getActivePart();
 		if (activePart != null) {

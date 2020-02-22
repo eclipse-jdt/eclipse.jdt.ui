@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2017 IBM Corporation and others.
+ * Copyright (c) 2005, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,48 +14,36 @@
 
 package org.eclipse.jdt.junit.tests;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+// TODO disabled unreliable tests driving the event loop:
+//WrappingSystemTest.class,
+//WrappingUnitTest.class,
+
+TestEnableAssertions.class,
+TestPriorization.class,
+TestTestSearchEngine.class,
+
+TestRunListenerTest3.class,
+TestRunListenerTest4.class,
+TestRunListenerTest5.class,
+
+TestRunFilteredStandardRunnerTest4.class,
+TestRunFilteredParameterizedRunnerTest4.class,
+
+TestRunSessionSerializationTests3.class,
+TestRunSessionSerializationTests4.class,
+
+JUnit3TestFinderTest.class,
+JUnit4TestFinderTest.class,
+/**
+ * @param suite the suite
+ * @deprecated to hide deprecation warning
+ */
+//LegacyTestRunListenerTest.class
+})
 public class JUnitJUnitTests {
-
-	public static Test suite() {
-		TestSuite suite= new TestSuite(JUnitJUnitTests.class.getName());
-		//$JUnit-BEGIN$
-
-		// TODO disabled unreliable tests driving the event loop:
-//		suite.addTestSuite(WrappingSystemTest.class);
-//		suite.addTestSuite(WrappingUnitTest.class);
-
-		suite.addTestSuite(TestEnableAssertions.class);
-		suite.addTestSuite(TestPriorization.class);
-		suite.addTestSuite(TestTestSearchEngine.class);
-
-		addDeprecatedTests(suite);
-
-		suite.addTestSuite(TestRunListenerTest3.class);
-		suite.addTestSuite(TestRunListenerTest4.class);
-		suite.addTestSuite(TestRunListenerTest5.class);
-
-		suite.addTestSuite(TestRunFilteredStandardRunnerTest4.class);
-		suite.addTestSuite(TestRunFilteredParameterizedRunnerTest4.class);
-
-		suite.addTest(TestRunSessionSerializationTests3.suite());
-		suite.addTest(TestRunSessionSerializationTests4.suite());
-
-		suite.addTestSuite(JUnit3TestFinderTest.class);
-		suite.addTestSuite(JUnit4TestFinderTest.class);
-		//$JUnit-END$
-		return suite;
-	}
-
-	/**
-	 * @param suite the suite
-	 * @deprecated to hide deprecation warning
-	 */
-	@Deprecated
-	private static void addDeprecatedTests(TestSuite suite) {
-		suite.addTestSuite(LegacyTestRunListenerTest.class);
-	}
-
 }

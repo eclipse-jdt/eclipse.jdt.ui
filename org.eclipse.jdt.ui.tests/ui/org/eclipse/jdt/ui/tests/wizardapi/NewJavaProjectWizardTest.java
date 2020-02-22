@@ -84,9 +84,6 @@ public class NewJavaProjectWizardTest {
 
 	private TestNewJavaProjectWizardPage fWizardPage;
 
-	/**
-	 * @see TestCase#setUp()
-	 */
 	@Before
 	public void setUp() throws Exception {
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
@@ -97,9 +94,6 @@ public class NewJavaProjectWizardTest {
 		fWizardPage.setProjectHandle(project);
 	}
 
-	/**
-	 * @see TestCase#tearDown()
-	 */
 	@After
 	public void tearDown() throws Exception {
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();

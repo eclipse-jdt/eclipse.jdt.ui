@@ -13,9 +13,15 @@
  *******************************************************************************/
 package org.eclipse.jdt.junit.tests;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.File;
 import java.util.Arrays;
 import java.util.HashSet;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import org.eclipse.jdt.junit.JUnitCore;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -37,17 +43,14 @@ import org.eclipse.jdt.internal.junit.launcher.ITestFinder;
 import org.eclipse.jdt.internal.junit.launcher.ITestKind;
 import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
 
-import junit.framework.TestCase;
 
-
-public class JUnit4TestFinderTest extends TestCase {
+public class JUnit4TestFinderTest {
 
 	private IJavaProject fProject;
 	private IPackageFragmentRoot fRoot;
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
+	@Before
+	public void setUp() throws Exception {
 		fProject= JavaProjectHelper.createJavaProject("TestProject", "bin");
 		JavaProjectHelper.addRTJar(fProject);
 		IClasspathEntry cpe= JavaCore.newContainerEntry(JUnitCore.JUNIT4_CONTAINER_PATH);
@@ -57,16 +60,16 @@ public class JUnit4TestFinderTest extends TestCase {
 		fRoot= JavaProjectHelper.addSourceContainer(fProject, "src");
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.delete(fProject);
-		super.tearDown();
 	}
 
 	/**
 	 * Copy from {@link JUnit3TestFinderTest}: All tests must work in Junit 4 as well
 	 * @throws Exception if it fails
 	 */
+	@Test
 	public void testTestCase() throws Exception {
 		IPackageFragment p= fRoot.createPackageFragment("p", true, null);
 		StringBuffer buf= new StringBuffer();
@@ -182,6 +185,7 @@ public class JUnit4TestFinderTest extends TestCase {
 		assertTestFound(fProject, validTests);
 	}
 
+	@Test
 	public void testSuiteFinder() throws Exception {
 		IPackageFragment p= fRoot.createPackageFragment("p", true, null);
 		StringBuilder buf= new StringBuilder();
@@ -204,6 +208,7 @@ public class JUnit4TestFinderTest extends TestCase {
 		assertTestFound(fProject, validTests);
 	}
 
+	@Test
 	public void testRunWith() throws Exception {
 		IPackageFragment p= fRoot.createPackageFragment("p", true, null);
 		StringBuffer buf= new StringBuffer();
@@ -330,6 +335,7 @@ public class JUnit4TestFinderTest extends TestCase {
 		assertTestFound(fProject, validTests);
 	}
 
+	@Test
 	public void testTestAnnotation() throws Exception {
 		IPackageFragment p= fRoot.createPackageFragment("p", true, null);
 		StringBuffer buf= new StringBuffer();
@@ -396,6 +402,7 @@ public class JUnit4TestFinderTest extends TestCase {
 		assertTestFound(fProject, validTests);
 	}
 
+	@Test
 	public void testTestAnnotation_bug204682() throws Exception {
 
 		IPackageFragment p= fRoot.createPackageFragment("p", true, null);
@@ -418,6 +425,7 @@ public class JUnit4TestFinderTest extends TestCase {
 		assertTestFound(validTest1.getCompilationUnit(), new String[] { });
 	}
 
+	@Test
 	public void testTestAnnotation2() throws Exception {
 
 		IPackageFragment p= fRoot.createPackageFragment("p", true, null);

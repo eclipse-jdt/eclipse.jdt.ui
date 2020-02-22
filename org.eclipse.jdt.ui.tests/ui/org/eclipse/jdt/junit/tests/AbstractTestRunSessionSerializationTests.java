@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2017 IBM Corporation and others.
+ * Copyright (c) 2007, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -16,6 +16,12 @@
  *******************************************************************************/
 
 package org.eclipse.jdt.junit.tests;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -55,9 +61,9 @@ import org.eclipse.jdt.internal.junit.model.JUnitModel;
 import org.eclipse.jdt.internal.junit.model.TestRunSession;
 import org.eclipse.jdt.internal.junit.model.TestSuiteElement;
 
-import junit.framework.TestCase;
+import org.eclipse.jdt.ui.tests.core.rules.JUnitWorkspaceTestSetup;
 
-public class AbstractTestRunSessionSerializationTests extends TestCase {
+public class AbstractTestRunSessionSerializationTests {
 
 	private static final int TIMEOUT= 10 * 1000;
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2013 IBM Corporation and others.
+ * Copyright (c) 2006, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,6 +13,9 @@
  *******************************************************************************/
 
 package org.eclipse.jdt.junit.tests;
+
+import org.junit.Before;
+import org.junit.Test;
 
 import org.eclipse.jdt.junit.JUnitCore;
 import org.eclipse.jdt.junit.TestRunListener;
@@ -42,7 +45,8 @@ public class TestRunFilteredStandardRunnerTest4 extends AbstractTestRunListenerT
 	}
 
 	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		fProject= JavaProjectHelper.createJavaProject("TestRunListenerTest", "bin");
 		JavaProjectHelper.addToClasspath(fProject, JavaCore.newContainerEntry(JUnitCore.JUNIT4_CONTAINER_PATH));
 		JavaProjectHelper.addRTJar15(fProject);
@@ -61,6 +65,7 @@ public class TestRunFilteredStandardRunnerTest4 extends AbstractTestRunListenerT
 		fATestCase= createType(source, "pack", "ATestCase.java");
 	}
 
+	@Test
 	public void testFilterToTest1Succeed() throws Exception {
 		String[] expectedSequence= new String[] {
 				TestRunListeners.sessionAsString("ATestCase test1Succeed", ProgressState.COMPLETED, Result.OK, 0),
