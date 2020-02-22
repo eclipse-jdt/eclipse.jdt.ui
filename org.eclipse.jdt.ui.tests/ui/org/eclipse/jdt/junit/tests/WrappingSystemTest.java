@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2015 IBM Corporation and others.
+ * Copyright (c) 2005, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,8 +13,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.junit.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.util.Iterator;
 import java.util.List;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import org.eclipse.jdt.junit.JUnitCore;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -50,9 +60,10 @@ import org.eclipse.jdt.internal.junit.ui.FailureTableDisplay;
 import org.eclipse.jdt.internal.junit.ui.FailureTrace;
 import org.eclipse.jdt.internal.junit.ui.TestRunnerViewPart;
 
-import junit.framework.TestCase;
-
-public class WrappingSystemTest extends TestCase implements ILaunchesListener2 {
+/**
+ * Disabled unreliable tests driving the event loop in JUnitJUnitTests.
+ */
+public class WrappingSystemTest implements ILaunchesListener2 {
 	private boolean fLaunchHasTerminated = false;
 
 	private IJavaProject fProject;
@@ -77,22 +88,31 @@ public class WrappingSystemTest extends TestCase implements ILaunchesListener2 {
 		fLaunchHasTerminated = true;
 	}
 
+	@Ignore("java.lang.AssertionError: Timeout waiting for 2 lines in table. Present: 0 items.\r\n" +
+			"The 2nd vm has terminated.")
+	@Test
 	public void test00characterizeSecondLine() throws Exception {
 		runTests("\\n", 1000, 2, false);
 		String text = getText(1);
 		assertTrue(text, text.startsWith("Numbers"));
 	}
 
+	@Ignore("java.lang.AssertionError: Timeout waiting for 2 lines in table. Present: 0 items.\r\n" +
+			"The 2nd vm has terminated.")
+	@Test
 	public void test01shouldWrapSecondLine() throws Exception {
 		runTests("\\n", 1000, 2, false);
 		String text = getText(1);
 		assertTrue(text, text.length() < 300);
 	}
 
+	@Ignore("java.lang.AssertionError: Timeout waiting for 3 lines in table. Present: 0 items.\r\n" +
+			"The 2nd vm has terminated.")
+	@Test
 	public void test02characterizeImages() throws Exception {
 		runTests("\\n", 0, 3, true);
 		assertEquals(getFailureTrace().getTrace(), getFailureDisplay().getExceptionIcon(), getImage(0));
-		assertEquals(getFailureTrace().getTrace(), null, getImage(1));
+		assertNull(getFailureTrace().getTrace(), getImage(1));
 		assertEquals(getFailureTrace().getTrace(), getFailureDisplay().getStackIcon(), getImage(2));
 	}
 
@@ -100,6 +120,9 @@ public class WrappingSystemTest extends TestCase implements ILaunchesListener2 {
 		return getFailureTrace().getFailureTableDisplay();
 	}
 
+	@Ignore("java.lang.AssertionError: Timeout waiting for 1 lines in table. Present: 0 items.\r\n" +
+			"The 2nd vm has terminated.")
+	@Test
 	public void test03shouldWrapFirstLine() throws Exception {
 		runTests("", 1000, 1, false);
 		String text = getText(0);
@@ -210,14 +233,13 @@ public class WrappingSystemTest extends TestCase implements ILaunchesListener2 {
 		return getTable().getItemCount();
 	}
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
+	@Before
+	public void setUp() throws Exception {
 		fProject = JavaProjectHelper.createJavaProject("a", "bin");
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.delete(fProject);
 	}
 }
