@@ -67,8 +67,8 @@ public abstract class AbstractMultiFixCore extends AbstractCleanUpCore implement
 	 */
 	protected static int getNumberOfProblems(IProblem[] problems, int problemId) {
 		int result= 0;
-		for (int i= 0; i < problems.length; i++) {
-			if (problems[i].getID() == problemId)
+		for (IProblem problem : problems) {
+			if (problem.getID() == problemId)
 				result++;
 		}
 		return result;
@@ -100,8 +100,7 @@ public abstract class AbstractMultiFixCore extends AbstractCleanUpCore implement
 	protected static IProblemLocationCore[] filter(IProblemLocationCore[] problems, int[] problemIds) {
 		ArrayList<IProblemLocationCore> result= new ArrayList<>();
 
-		for (int i= 0; i < problems.length; i++) {
-			IProblemLocationCore problem= problems[i];
+		for (IProblemLocationCore problem : problems) {
 			if (contains(problemIds, problem.getProblemId()) && !contains(result, problem)) {
 				result.add(problem);
 			}
@@ -111,8 +110,7 @@ public abstract class AbstractMultiFixCore extends AbstractCleanUpCore implement
 	}
 
 	private static boolean contains(ArrayList<IProblemLocationCore> problems, IProblemLocationCore problem) {
-		for (int i= 0; i < problems.size(); i++) {
-			IProblemLocationCore existing= problems.get(i);
+		for (IProblemLocationCore existing : problems) {
 			if (existing.getProblemId() == problem.getProblemId() && existing.getOffset() == problem.getOffset() && existing.getLength() == problem.getLength()) {
 				return true;
 			}
@@ -122,8 +120,8 @@ public abstract class AbstractMultiFixCore extends AbstractCleanUpCore implement
 	}
 
 	private static boolean contains(int[] ids, int id) {
-		for (int i= 0; i < ids.length; i++) {
-			if (ids[i] == id)
+		for (int id2 : ids) {
+			if (id2 == id)
 				return true;
 		}
 		return false;

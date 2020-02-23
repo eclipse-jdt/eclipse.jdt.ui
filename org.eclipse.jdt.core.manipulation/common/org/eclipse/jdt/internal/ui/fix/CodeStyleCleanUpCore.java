@@ -215,15 +215,15 @@ public class CodeStyleCleanUpCore extends AbstractMultiFixCore {
 		if (isEnabled(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS) && isEnabled(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS))
 			result+= getNumberOfProblems(problems, IProblem.UnqualifiedFieldAccess);
 		if (isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS) && isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_SUBTYPE_ACCESS)) {
-			for (int i=0;i<problems.length;i++) {
-				int id= problems[i].getID();
+			for (IProblem problem : problems) {
+				int id= problem.getID();
 				if (id == IProblem.IndirectAccessToStaticField || id == IProblem.IndirectAccessToStaticMethod)
 					result++;
 			}
 		}
 		if (isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS) && isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS)) {
-			for (int i=0;i<problems.length;i++) {
-				int id= problems[i].getID();
+			for (IProblem problem : problems) {
+				int id= problem.getID();
 				if (id == IProblem.NonStaticAccessToStaticField || id == IProblem.NonStaticAccessToStaticMethod)
 					result++;
 			}

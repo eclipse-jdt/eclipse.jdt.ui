@@ -126,8 +126,7 @@ public class ModifierCorrectionSubProcessorCore {
 	}
 
 	private static Modifier findVisibilityModifier(List<IExtendedModifier> modifiers) {
-		for (int i= 0; i < modifiers.size(); i++) {
-			IExtendedModifier curr= modifiers.get(i);
+		for (IExtendedModifier curr : modifiers) {
 			if (curr instanceof Modifier) {
 				Modifier modifier= (Modifier) curr;
 				ModifierKeyword keyword= modifier.getKeyword();

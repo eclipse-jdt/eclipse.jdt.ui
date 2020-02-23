@@ -109,13 +109,10 @@ public final class SerialVersionHashOperationCore extends AbstractSerialVersionO
 		int classModifiers= mod & (Flags.AccPublic | Flags.AccFinal | Flags.AccInterface | Flags.AccAbstract);
 
 		doos.writeInt(classModifiers); // class modifiers
-		char[][] interfaces= getSortedInterfacesNames(cfReader);
-		for (int i= 0; i < interfaces.length; i++) {
-			doos.writeUTF(getClassName(interfaces[i]));
+		for (char[] interface1 : getSortedInterfacesNames(cfReader)) {
+			doos.writeUTF(getClassName(interface1));
 		}
-		IFieldInfo[] sortedFields= getSortedFields(cfReader);
-		for (int i= 0; i < sortedFields.length; i++) {
-			IFieldInfo curr= sortedFields[i];
+		for (IFieldInfo curr : getSortedFields(cfReader)) {
 			int flags= curr.getAccessFlags();
 			if (!Flags.isPrivate(flags) || (!Flags.isStatic(flags) && !Flags.isTransient(flags))) {
 				doos.writeUTF(new String(curr.getName()));
@@ -128,9 +125,7 @@ public final class SerialVersionHashOperationCore extends AbstractSerialVersionO
 			doos.writeInt(Flags.AccStatic);
 			doos.writeUTF("()V"); //$NON-NLS-1$
 		}
-		IMethodInfo[] sortedMethods= getSortedMethods(cfReader);
-		for (int i= 0; i < sortedMethods.length; i++) {
-			IMethodInfo curr= sortedMethods[i];
+		for (IMethodInfo curr : getSortedMethods(cfReader)) {
 			int flags= curr.getAccessFlags();
 			if (!Flags.isPrivate(flags) && !curr.isClinit()) {
 				doos.writeUTF(new String(curr.getName()));
@@ -145,9 +140,7 @@ public final class SerialVersionHashOperationCore extends AbstractSerialVersionO
 	private static int getClassModifiers(IClassFileReader cfReader) {
 		IInnerClassesAttribute innerClassesAttribute= cfReader.getInnerClassesAttribute();
 		if (innerClassesAttribute != null) {
-			IInnerClassesAttributeEntry[] entries = innerClassesAttribute.getInnerClassAttributesEntries();
-			for (int i= 0; i < entries.length; i++) {
-				IInnerClassesAttributeEntry entry = entries[i];
+			for (IInnerClassesAttributeEntry entry : innerClassesAttribute.getInnerClassAttributesEntries()) {
 				char[] innerClassName = entry.getInnerClassName();
 				if (innerClassName != null) {
 					if (CharOperation.equals(cfReader.getClassName(), innerClassName)) {
@@ -203,9 +196,8 @@ public final class SerialVersionHashOperationCore extends AbstractSerialVersionO
 	}
 
 	private static boolean hasStaticClassInitializer(IClassFileReader cfReader) {
-		IMethodInfo[] methodInfos= cfReader.getMethodInfos();
-		for (int i= 0; i < methodInfos.length; i++) {
-			if (methodInfos[i].isClinit()) {
+		for (IMethodInfo methodInfo : cfReader.getMethodInfos()) {
+			if (methodInfo.isClinit()) {
 				return true;
 			}
 		}
@@ -251,9 +243,7 @@ public final class SerialVersionHashOperationCore extends AbstractSerialVersionO
 
 		name += ".class"; //$NON-NLS-1$
 
-		IResource[] classFiles= JavaCore.getGeneratedResources(region, false);
-		for (int i= 0; i < classFiles.length; i++) {
-			IResource resource= classFiles[i];
+		for (IResource resource : JavaCore.getGeneratedResources(region, false)) {
 			if (resource.getType() == IResource.FILE && resource.getName().equals(name)) {
 				return (IFile) resource;
 			}

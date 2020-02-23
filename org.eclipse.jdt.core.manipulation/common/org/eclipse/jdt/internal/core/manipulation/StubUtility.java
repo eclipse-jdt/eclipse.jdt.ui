@@ -492,9 +492,8 @@ public class StubUtility {
 			if (position == null || position.getLength() > 0) {
 				continue;
 			}
-			int[] offsets= position.getOffsets();
-			for (int k= 0; k < offsets.length; k++) {
-				int line= doc.getLineOfOffset(offsets[k]);
+			for (int offset2 : position.getOffsets()) {
+				int line= doc.getLineOfOffset(offset2);
 				IRegion lineInfo= doc.getLineInformation(line);
 				int offset= lineInfo.getOffset();
 				String str= doc.get(offset, lineInfo.getLength());
@@ -562,17 +561,17 @@ public class StubUtility {
 		String lineStart= textBuffer.get(region.getOffset(), offset - region.getOffset());
 
 		StringBuilder buf= new StringBuilder();
-		for (int i= 0; i < providesNames.length; i++) {
+		for (String providesName : providesNames) {
 			if (buf.length() > 0) {
 				buf.append(lineDelimiter).append(lineStart);
 			}
-			buf.append("@provides ").append(providesNames[i]); //$NON-NLS-1$
+			buf.append("@provides ").append(providesName); //$NON-NLS-1$
 		}
-		for (int i= 0; i < usesNames.length; i++) {
+		for (String usesName : usesNames) {
 			if (buf.length() > 0) {
 				buf.append(lineDelimiter).append(lineStart);
 			}
-			buf.append("@uses ").append(usesNames[i]); //$NON-NLS-1$
+			buf.append("@uses ").append(usesName); //$NON-NLS-1$
 		}
 		if (buf.length() == 0 && isAllCommentWhitespace(lineStart)) {
 			int prevLine= textBuffer.getLineOfOffset(offset) - 1;
@@ -874,12 +873,12 @@ public class StubUtility {
 	}
 
 	private static boolean isAllCommentWhitespace(String lineStart) {
-		for (int i= 0; i < lineStart.length(); i++) {
-			char ch= lineStart.charAt(i);
+		for (char ch : lineStart.toCharArray()) {
 			if (!Character.isWhitespace(ch) && ch != '*') {
 				return false;
 			}
 		}
+
 		return true;
 	}
 
@@ -1171,8 +1170,7 @@ public class StubUtility {
 			String string= assignedExpression instanceof StringLiteral ? ((StringLiteral)assignedExpression).getLiteralValue() : ((NumberLiteral)assignedExpression).getToken();
 			StringBuilder res= new StringBuilder();
 			boolean needsUnderscore= false;
-			for (int i= 0; i < string.length(); i++) {
-				char ch= string.charAt(i);
+			for (char ch : string.toCharArray()) {
 				if (Character.isJavaIdentifierPart(ch)) {
 					if (res.length() == 0 && !Character.isJavaIdentifierStart(ch) || needsUnderscore) {
 						res.append('_');
