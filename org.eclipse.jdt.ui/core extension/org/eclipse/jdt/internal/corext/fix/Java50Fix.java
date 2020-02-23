@@ -14,7 +14,6 @@
 package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -131,9 +130,8 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 				ParameterizedType type= nodes[i];
 				List<Type> args= type.typeArguments();
 				int j= 0;
-				for (Iterator<Type> iter= args.iterator(); iter.hasNext();) {
+				for (Type argType : args) {
 					LinkedProposalPositionGroup group= new LinkedProposalPositionGroup("G" + i + "_" + j); //$NON-NLS-1$ //$NON-NLS-2$
-					Type argType= iter.next();
 					if (!positionGroups.hasLinkedPositions()) {
 						group.addPosition(astRewrite.track(argType), true);
 					} else {

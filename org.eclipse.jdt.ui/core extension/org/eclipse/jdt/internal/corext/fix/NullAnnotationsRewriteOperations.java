@@ -17,7 +17,6 @@ package org.eclipse.jdt.internal.corext.fix;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
 import java.util.EnumSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -334,8 +333,7 @@ public class NullAnnotationsRewriteOperations {
 					return;
 				}
 
-				for (Iterator<IExtendedModifier> iterator= modifiers.iterator(); iterator.hasNext();) {
-					IExtendedModifier modifier= iterator.next();
+				for (IExtendedModifier modifier : modifiers) {
 					if (modifier instanceof MarkerAnnotation) {
 						MarkerAnnotation annotation= (MarkerAnnotation) modifier;
 						IAnnotationBinding annotationBinding= annotation.resolveAnnotationBinding();

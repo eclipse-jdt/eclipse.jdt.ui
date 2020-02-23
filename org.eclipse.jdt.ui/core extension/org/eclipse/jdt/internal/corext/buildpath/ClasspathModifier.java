@@ -334,10 +334,9 @@ public class ClasspathModifier {
 	 */
 	public static CPListElement getClasspathEntry(List<CPListElement> elements, IPackageFragmentRoot root) throws JavaModelException {
 		IClasspathEntry entry= root.getRawClasspathEntry();
-		for (int i= 0; i < elements.size(); i++) {
-			CPListElement element= elements.get(i);
+		for (CPListElement element : elements) {
 			if (element.getPath().equals(root.getPath()) && element.getEntryKind() == entry.getEntryKind())
-				return elements.get(i);
+				return element;
 		}
 		CPListElement newElement= CPListElement.createFromExisting(entry, root.getJavaProject());
 		elements.add(newElement);
@@ -989,9 +988,9 @@ public class ClasspathModifier {
 	 * the second <code>CPListElement</code> parameter itself if there is no match.
 	 */
 	public static CPListElement getClasspathEntry(List<CPListElement> elements, CPListElement cpElement) {
-		for (int i= 0; i < elements.size(); i++) {
-			if (elements.get(i).getPath().equals(cpElement.getPath()))
-				return elements.get(i);
+		for (CPListElement element : elements) {
+			if (element.getPath().equals(cpElement.getPath()))
+				return element;
 		}
 		elements.add(cpElement);
 		return cpElement;
@@ -1006,8 +1005,7 @@ public class ClasspathModifier {
 	 * no match could be found
 	 */
 	public static CPListElement getListElement(IPath path, List<CPListElement> elements) {
-		for (int i= 0; i < elements.size(); i++) {
-			CPListElement element= elements.get(i);
+		for (CPListElement element : elements) {
 			if (element.getEntryKind() == IClasspathEntry.CPE_SOURCE && element.getPath().equals(path)) {
 				return element;
 			}
@@ -1247,8 +1245,7 @@ public class ClasspathModifier {
 	public static void setNewEntry(List<CPListElement> existingEntries, List<CPListElement> newEntries, IJavaProject project, IProgressMonitor monitor) throws CoreException {
 		try {
 			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_SetNewEntry, existingEntries.size());
-			for (int i= 0; i < newEntries.size(); i++) {
-				CPListElement entry= newEntries.get(i);
+			for (CPListElement entry : newEntries) {
 				validateAndAddEntry(entry, existingEntries, project);
 				monitor.worked(1);
 			}
@@ -1316,8 +1313,7 @@ public class ClasspathModifier {
 				}
 			}
 
-			for (int i= 0; i < existingEntries.size(); i++) {
-				CPListElement curr= existingEntries.get(i);
+			for (CPListElement curr : existingEntries) {
 				if (curr.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
 					if (path.equals(curr.getPath()) && !project.getPath().equals(path)) {
 						rootStatus.setError(NewWizardMessages.NewSourceFolderWizardPage_error_AlreadyExisting);
@@ -1430,8 +1426,8 @@ public class ClasspathModifier {
 						return false;
 				}
 
-				for (int i= 0; i < fEntries.length; i++) {
-					if (isInvalid(fEntries[i], outputLocation))
+				for (IClasspathEntry entry : fEntries) {
+					if (isInvalid(entry, outputLocation))
 						return false;
 				}
 				return true;

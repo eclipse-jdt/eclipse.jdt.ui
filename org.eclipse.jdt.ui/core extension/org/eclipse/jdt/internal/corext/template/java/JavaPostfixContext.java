@@ -382,8 +382,7 @@ public class JavaPostfixContext extends JavaContext {
 				if (typeArguments.length > 0) {
 					ParameterizedType type= ast.newParameterizedType(baseType);
 					List<Type> argNodes= type.typeArguments();
-					for (int i= 0; i < typeArguments.length; i++) {
-						String curr= typeArguments[i];
+					for (String curr : typeArguments) {
 						if (containsNestedCapture(curr)) {
 							argNodes.add(ast.newWildcardType());
 						} else {

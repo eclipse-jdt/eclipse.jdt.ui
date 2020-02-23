@@ -25,7 +25,6 @@ import org.eclipse.text.edits.DeleteEdit;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
-import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -205,8 +204,7 @@ public class CodeFormatFix implements ICleanUpFix {
 		CompilationUnitChange change= new CompilationUnitChange("", cu); //$NON-NLS-1$
 		change.setEdit(resultEdit);
 
-		for (int i= 0, size= groups.size(); i < size; i++) {
-			TextEditGroup group= groups.get(i);
+		for (CategorizedTextEditGroup group : groups) {
 			change.addTextEditGroup(group);
 		}
 

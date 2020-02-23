@@ -61,10 +61,9 @@ public class ElementTypeResolver extends TemplateVariableResolver {
 	private void resolve(MultiVariable variable, JavaVariable master, JavaContext context) {
 		Object[] choices= master.getChoices();
 		if (choices instanceof Variable[]) {
-			Variable[] variables= (Variable[]) choices;
 
-			for (int i= 0; i < variables.length; i++)
-				variable.setChoices(variables[i], variables[i].getMemberTypeNames());
+			for (Variable variable2 : (Variable[]) choices)
+				variable.setChoices(variable2, variable2.getMemberTypeNames());
 
 			context.addDependency(master, variable);
 			variable.setKey(master.getCurrentChoice());

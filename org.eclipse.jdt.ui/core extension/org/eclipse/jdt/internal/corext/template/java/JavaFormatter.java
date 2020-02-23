@@ -191,8 +191,7 @@ public class JavaFormatter {
 			}
 
 			List<TypedPosition> positions= new ArrayList<>();
-			for (Iterator<TextEdit> it= edits.iterator(); it.hasNext();) {
-				TextEdit edit= it.next();
+			for (TextEdit edit : edits) {
 				try {
 					// abuse TypedPosition to piggy back the original contents of the position
 					final TypedPosition pos= new TypedPosition(edit.getOffset(), edit.getLength(), markerToOriginal.get(edit));
@@ -214,8 +213,7 @@ public class JavaFormatter {
 		private void removeRangeMarkers(List<TypedPosition> positions, IDocument document, TemplateVariable[] variables) throws MalformedTreeException, BadLocationException, BadPositionCategoryException {
 
 			// revert previous changes
-			for (Iterator<TypedPosition> it= positions.iterator(); it.hasNext();) {
-				TypedPosition position= it.next();
+			for (TypedPosition position : positions) {
 				// remove and re-add in order to not confuse ExclusivePositionUpdater
 				document.removePosition(CATEGORY, position);
 				final String original= position.getType();

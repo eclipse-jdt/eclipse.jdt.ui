@@ -15,7 +15,6 @@ package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -105,8 +104,7 @@ public class CleanUpPreferenceUtil {
     	boolean hasValues= false;
 		for (KeySet keySet : CleanUpProfileManager.KEY_SETS) {
 			IEclipsePreferences preferences= context.getNode(keySet.getNodeName());
-			for (final Iterator<String> keyIter = keySet.getKeys().iterator(); keyIter.hasNext(); ) {
-				final String key= keyIter.next();
+			for (String key : keySet.getKeys()) {
 				String val= preferences.get(key, null);
 				if (val != null) {
 					hasValues= true;

@@ -16,7 +16,6 @@ package org.eclipse.jdt.internal.corext.fix;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -403,9 +402,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 					}
 				}
 
-				for (Iterator<ICompilationUnit> iterator= sourceList.iterator(); iterator.hasNext();) {
-					ICompilationUnit cu= iterator.next();
-
+				for (ICompilationUnit cu : sourceList) {
 					monitor.worked(1);
 
 					requestor.acceptSource(cu);
@@ -421,8 +418,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		}
 
 		public void dispose() {
-			for (Iterator<ICompilationUnit> iterator= fWorkingCopies.values().iterator(); iterator.hasNext();) {
-				ICompilationUnit cu= iterator.next();
+			for (ICompilationUnit cu : fWorkingCopies.values()) {
 				try {
 					cu.discardWorkingCopy();
 				} catch (JavaModelException e) {
@@ -462,8 +458,8 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 					result[i]= change;
 				} else {
 					MultiStateCompilationUnitChange mscuc= new MultiStateCompilationUnitChange(getChangeName(unit), unit);
-					for (int j= 0; j < changes.size(); j++) {
-						mscuc.addChange(createGroupFreeChange(changes.get(j)));
+					for (CleanUpChange change : changes) {
+						mscuc.addChange(createGroupFreeChange(change));
 					}
 					mscuc.setSaveMode(saveMode);
 					result[i]= mscuc;
@@ -484,8 +480,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 
 		private void applyChange(ICompilationUnit compilationUnit, List<CleanUpChange> changes) throws JavaModelException, CoreException {
 			IDocument document= new Document(changes.get(0).getCurrentContent(new NullProgressMonitor()));
-			for (int i= 0; i < changes.size(); i++) {
-				CleanUpChange change= changes.get(i);
+			for (CleanUpChange change : changes) {
 				TextEdit edit= change.getEdit().copy();
 
 				try {

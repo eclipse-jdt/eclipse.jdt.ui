@@ -21,8 +21,8 @@ import static org.eclipse.jdt.core.util.ExternalAnnotationUtil.annotateMethodPar
 import static org.eclipse.jdt.core.util.ExternalAnnotationUtil.annotateMethodReturnType;
 import static org.eclipse.jdt.core.util.ExternalAnnotationUtil.annotateMethodTypeParameter;
 import static org.eclipse.jdt.core.util.ExternalAnnotationUtil.extractGenericSignature;
-import static org.eclipse.jdt.core.util.ExternalAnnotationUtil.extractGenericTypeSignature;
 import static org.eclipse.jdt.core.util.ExternalAnnotationUtil.extractGenericTypeParametersSignature;
+import static org.eclipse.jdt.core.util.ExternalAnnotationUtil.extractGenericTypeSignature;
 import static org.eclipse.jdt.core.util.ExternalAnnotationUtil.getAnnotationFile;
 import static org.eclipse.jdt.internal.ui.text.spelling.WordCorrectionProposal.getHtmlRepresentation;
 
@@ -674,10 +674,8 @@ public class ExternalNullAnnotationChangeProposals {
 			ArrayType arrayType= (ArrayType) type;
 			left= new StringBuilder(arrayType.getElementType().toString());
 			dimsRight= new StringBuilder();
-			@SuppressWarnings("rawtypes")
-			List dimensions= arrayType.dimensions();
-			for (int i= 0; i < dimensions.size(); i++) {
-				Dimension dimension= (Dimension) dimensions.get(i);
+			for (Object dimension2 : arrayType.dimensions()) {
+				Dimension dimension= (Dimension) dimension2;
 				if (dimension.getStartPosition() + dimension.getLength() <= offset)
 					left.append("[]"); //$NON-NLS-1$
 				else
@@ -712,10 +710,8 @@ public class ExternalNullAnnotationChangeProposals {
 		if (type.getNodeType() == ASTNode.ARRAY_TYPE) {
 			ArrayType arrayType= (ArrayType) type;
 			StringBuilder buf= new StringBuilder(arrayType.getElementType().toString());
-			@SuppressWarnings("rawtypes")
-			List dimensions= arrayType.dimensions();
-			for (int i= 0; i < dimensions.size(); i++) {
-				Dimension dimension= (Dimension) dimensions.get(i);
+			for (Object dimension2 : arrayType.dimensions()) {
+				Dimension dimension= (Dimension) dimension2;
 				if (dimension.getStartPosition() + dimension.getLength() > offset)
 					buf.append("[]"); //$NON-NLS-1$
 			}
@@ -802,9 +798,9 @@ public class ExternalNullAnnotationChangeProposals {
 			@SuppressWarnings("rawtypes")
 			List dimensions= array.dimensions();
 			boolean annotated= false;
-			for (int i= 0; i < dimensions.size(); i++) {
+			for (Object dimension2 : dimensions) {
 				fBuffer.append('[');
-				Dimension dimension= (Dimension) dimensions.get(i);
+				Dimension dimension= (Dimension) dimension2;
 				if (!annotated && array == fFocusType && dimension.getStartPosition() + dimension.getLength() > fOffset) {
 					fBuffer.append(fAnnotation);
 					annotated= true;

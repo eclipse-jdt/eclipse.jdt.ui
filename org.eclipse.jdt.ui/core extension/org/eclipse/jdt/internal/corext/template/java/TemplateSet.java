@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -306,9 +305,7 @@ public class TemplateSet {
 	}
 
 	private boolean exists(Template template) {
-		for (Iterator<Template> iterator = fTemplates.iterator(); iterator.hasNext();) {
-			Template anotherTemplate = iterator.next();
-
+		for (Template anotherTemplate : fTemplates) {
 			if (template.equals(anotherTemplate))
 				return true;
 		}
@@ -349,8 +346,7 @@ public class TemplateSet {
 	 */
 	public Template[] getTemplates(String name) {
 		ArrayList<Template> res= new ArrayList<>();
-		for (Iterator<Template> iterator= fTemplates.iterator(); iterator.hasNext();) {
-			Template curr= iterator.next();
+		for (Template curr : fTemplates) {
 			if (curr.getName().equals(name)) {
 				res.add(curr);
 			}
@@ -365,8 +361,7 @@ public class TemplateSet {
 	 * @return the first template with the given name
 	 */
 	public Template getFirstTemplate(String name) {
-		for (Iterator<Template> iterator= fTemplates.iterator(); iterator.hasNext();) {
-			Template curr= iterator.next();
+		for (Template curr : fTemplates) {
 			if (curr.getName().equals(name)) {
 				return curr;
 			}
