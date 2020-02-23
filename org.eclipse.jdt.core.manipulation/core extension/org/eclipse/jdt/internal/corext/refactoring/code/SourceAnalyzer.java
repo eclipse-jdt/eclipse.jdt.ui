@@ -426,8 +426,7 @@ class SourceAnalyzer  {
 		if (!result.hasFatalError()) {
 			List<SingleVariableDeclaration> parameters= fDeclaration.parameters();
 			fParameters= new HashMap<>(parameters.size() * 2);
-			for (Iterator<SingleVariableDeclaration> iter= parameters.iterator(); iter.hasNext();) {
-				SingleVariableDeclaration element= iter.next();
+			for (SingleVariableDeclaration element : parameters) {
 				IVariableBinding binding= element.resolveBinding();
 				if (binding == null) {
 					result.addFatalError(
@@ -449,21 +448,19 @@ class SourceAnalyzer  {
 					JavaStatusContext.create(fTypeRoot));
 				return result;
 			}
-			ITypeBinding[] typeParameters= declaringType.getTypeParameters();
-			for (int i= 0; i < typeParameters.length; i++) {
-				NameData data= new NameData(typeParameters[i].getName());
+			for (ITypeBinding typeParameter : declaringType.getTypeParameters()) {
+				NameData data= new NameData(typeParameter.getName());
 				fTypeParameterReferences.add(data);
-				fTypeParameterMapping.put(typeParameters[i], data);
+				fTypeParameterMapping.put(typeParameter, data);
 			}
 
 			fMethodTypeParameterReferences= new ArrayList<>(0);
 			fMethodTypeParameterMapping= new HashMap<>();
 			IMethodBinding method= declarationBinding;
-			typeParameters= method.getTypeParameters();
-			for (int i= 0; i < typeParameters.length; i++) {
-				NameData data= new NameData(typeParameters[i].getName());
+			for (ITypeBinding typeParameter : method.getTypeParameters()) {
+				NameData data= new NameData(typeParameter.getName());
 				fMethodTypeParameterReferences.add(data);
-				fMethodTypeParameterMapping.put(typeParameters[i], data);
+				fMethodTypeParameterMapping.put(typeParameter, data);
 			}
 
 		}

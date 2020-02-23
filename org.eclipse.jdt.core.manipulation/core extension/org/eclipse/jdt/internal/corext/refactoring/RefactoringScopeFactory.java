@@ -17,7 +17,6 @@ package org.eclipse.jdt.internal.corext.refactoring;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -45,9 +44,8 @@ public class RefactoringScopeFactory {
 	 * Adds to <code> projects </code> IJavaProject objects for all projects directly or indirectly referencing focus. @param projects IJavaProjects will be added to this set
 	 */
 	private static void addReferencingProjects(IJavaProject focus, Set<IJavaProject> projects) throws JavaModelException {
-		IProject[] referencingProjects= focus.getProject().getReferencingProjects();
-		for (int i= 0; i < referencingProjects.length; i++) {
-			IJavaProject candidate= JavaCore.create(referencingProjects[i]);
+		for (IProject referencingProject : focus.getProject().getReferencingProjects()) {
+			IJavaProject candidate= JavaCore.create(referencingProject);
 			if (candidate == null || projects.contains(candidate) || !candidate.exists())
 				continue; // break cycle
 			IClasspathEntry entry= getReferencingClassPathEntry(candidate, focus);
@@ -60,9 +58,8 @@ public class RefactoringScopeFactory {
 	}
 
 	private static void addRelatedReferencing(IJavaProject focus, Set<IJavaProject> projects) throws CoreException {
-		IProject[] referencingProjects= focus.getProject().getReferencingProjects();
-		for (int i= 0; i < referencingProjects.length; i++) {
-			IJavaProject candidate= JavaCore.create(referencingProjects[i]);
+		for (IProject referencingProject : focus.getProject().getReferencingProjects()) {
+			IJavaProject candidate= JavaCore.create(referencingProject);
 			if (candidate == null || projects.contains(candidate) || !candidate.exists())
 				continue; // break cycle
 			IClasspathEntry entry= getReferencingClassPathEntry(candidate, focus);
@@ -77,9 +74,8 @@ public class RefactoringScopeFactory {
 	}
 
 	private static void addRelatedReferenced(IJavaProject focus, Set<IJavaProject> projects) throws CoreException {
-		IProject[] referencedProjects= focus.getProject().getReferencedProjects();
-		for (int i= 0; i < referencedProjects.length; i++) {
-			IJavaProject candidate= JavaCore.create(referencedProjects[i]);
+		for (IProject referencedProject : focus.getProject().getReferencedProjects()) {
+			IJavaProject candidate= JavaCore.create(referencedProject);
 			if (candidate == null || projects.contains(candidate) || !candidate.exists())
 				continue; // break cycle
 			IClasspathEntry entry= getReferencingClassPathEntry(focus, candidate);
@@ -189,8 +185,8 @@ public class RefactoringScopeFactory {
 	 */
 	public static IJavaSearchScope createReferencedScope(IJavaElement[] javaElements) {
 		Set<IJavaProject> projects= new HashSet<>();
-		for (int i= 0; i < javaElements.length; i++) {
-			projects.add(javaElements[i].getJavaProject());
+		for (IJavaElement javaElement : javaElements) {
+			projects.add(javaElement.getJavaProject());
 		}
 		IJavaProject[] prj= projects.toArray(new IJavaProject[projects.size()]);
 		return SearchEngine.createJavaSearchScope(prj, true);
@@ -206,8 +202,8 @@ public class RefactoringScopeFactory {
 	 */
 	public static IJavaSearchScope createReferencedScope(IJavaElement[] javaElements, int includeMask) {
 		Set<IJavaProject> projects= new HashSet<>();
-		for (int i= 0; i < javaElements.length; i++) {
-			projects.add(javaElements[i].getJavaProject());
+		for (IJavaElement javaElement : javaElements) {
+			projects.add(javaElement.getJavaProject());
 		}
 		IJavaProject[] prj= projects.toArray(new IJavaProject[projects.size()]);
 		return SearchEngine.createJavaSearchScope(prj, includeMask);
@@ -231,14 +227,10 @@ public class RefactoringScopeFactory {
 	 * @return Array of IPackageFragmentRoot, one element for each packageFragmentRoot which lies within a project in <code> projects </code> .
 	 */
 	private static IPackageFragmentRoot[] getAllScopeElements(IJavaProject project, boolean onlySourceRoots) throws JavaModelException {
-		Collection<IJavaProject> referencingProjects= getReferencingProjects(project);
 		List<IPackageFragmentRoot> result= new ArrayList<>();
-		for (Iterator<IJavaProject> it= referencingProjects.iterator(); it.hasNext();) {
-			IJavaProject javaProject= it.next();
-			IPackageFragmentRoot[] roots= javaProject.getPackageFragmentRoots();
+		for (IJavaProject javaProject : getReferencingProjects(project)) {
 			// Add all package fragment roots except archives
-			for (int i= 0; i < roots.length; i++) {
-				IPackageFragmentRoot root= roots[i];
+			for (IPackageFragmentRoot root : javaProject.getPackageFragmentRoots()) {
 				if (!onlySourceRoots || root.getKind() == IPackageFragmentRoot.K_SOURCE)
 					result.add(root);
 			}
@@ -252,9 +244,7 @@ public class RefactoringScopeFactory {
 	private static IClasspathEntry getReferencingClassPathEntry(IJavaProject referencingProject, IJavaProject referencedProject) throws JavaModelException {
 		IClasspathEntry result= null;
 		IPath path= referencedProject.getProject().getFullPath();
-		IClasspathEntry[] classpath= referencingProject.getResolvedClasspath(true);
-		for (int i= 0; i < classpath.length; i++) {
-			IClasspathEntry entry= classpath[i];
+		for (IClasspathEntry entry : referencingProject.getResolvedClasspath(true)) {
 			if (entry.getEntryKind() == IClasspathEntry.CPE_PROJECT && path.equals(entry.getPath())) {
 				if (entry.isExported())
 					return entry;

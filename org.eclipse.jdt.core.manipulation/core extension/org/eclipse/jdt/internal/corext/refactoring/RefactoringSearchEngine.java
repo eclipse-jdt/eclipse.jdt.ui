@@ -84,8 +84,7 @@ public class RefactoringSearchEngine {
 		}
 
 		List<IJavaElement> result= new ArrayList<>(requestor.resources.size());
-		for (Iterator<IResource> iter= requestor.resources.iterator(); iter.hasNext(); ) {
-			IResource resource= iter.next();
+		for (IResource resource : requestor.resources) {
 			IJavaElement element= JavaCore.create(resource);
 			if (element instanceof ICompilationUnit) {
 				result.add(element);
@@ -164,8 +163,7 @@ public class RefactoringSearchEngine {
 		boolean hasPotentialMatches= false;
 		boolean hasNonCuMatches= false;
 
-		for (Iterator<SearchMatch> iter= matchList.iterator(); iter.hasNext();) {
-			SearchMatch searchMatch= iter.next();
+		for (SearchMatch searchMatch : matchList) {
 			if (searchMatch.getAccuracy() == SearchMatch.A_INACCURATE)
 				hasPotentialMatches= true;
 			if (! grouped.containsKey(searchMatch.getResource()))
@@ -184,8 +182,7 @@ public class RefactoringSearchEngine {
 
 		SearchResultGroup[] result= new SearchResultGroup[grouped.size()];
 		int i= 0;
-		for (Iterator<IResource> iter= grouped.keySet().iterator(); iter.hasNext();) {
-			IResource resource= iter.next();
+		for (IResource resource : grouped.keySet()) {
 			List<SearchMatch> searchMatches= grouped.get(resource);
 			SearchMatch[] matchArray= searchMatches.toArray(new SearchMatch[searchMatches.size()]);
 			result[i]= new SearchResultGroup(resource, matchArray);

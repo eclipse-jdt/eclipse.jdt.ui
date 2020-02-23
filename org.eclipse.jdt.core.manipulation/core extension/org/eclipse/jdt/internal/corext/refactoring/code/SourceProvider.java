@@ -23,7 +23,6 @@ package org.eclipse.jdt.internal.corext.refactoring.code;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
@@ -138,8 +137,7 @@ public class SourceProvider {
 		fTypeRoot= typeRoot;
 		fDeclaration= declaration;
 		List<SingleVariableDeclaration> parameters= fDeclaration.parameters();
-		for (Iterator<SingleVariableDeclaration> iter= parameters.iterator(); iter.hasNext();) {
-			SingleVariableDeclaration element= iter.next();
+		for (SingleVariableDeclaration element : parameters) {
 			ParameterData data= new ParameterData(element);
 			element.setProperty(ParameterData.PROPERTY, data);
 		}
@@ -304,8 +302,7 @@ public class SourceProvider {
 
 	public boolean returnTypeMatchesReturnExpressions() {
 		ITypeBinding returnType= getReturnType();
-		for (Iterator<Expression> iter= fReturnExpressions.iterator(); iter.hasNext();) {
-			Expression expression= iter.next();
+		for (Expression expression : fReturnExpressions) {
 			if (!Bindings.equals(returnType, expression.resolveTypeBinding()))
 				return false;
 		}
@@ -395,9 +392,7 @@ public class SourceProvider {
 			IRegion region= ranges.get(0);
 			split= region.getOffset() + region.getLength();
 		}
-		TextEdit[] edits= dummy.removeChildren();
-		for (int i= 0; i < edits.length; i++) {
-			TextEdit edit= edits[i];
+		for (TextEdit edit : dummy.removeChildren()) {
 			int pos= edit.getOffset() >= split ? 1 : 0;
 			markers[pos].addChild(edit);
 		}
@@ -445,8 +440,8 @@ public class SourceProvider {
 				}
 				ParameterData parameter= getParameterData(i);
 				List<SimpleName> references= parameter.references();
-				for (Iterator<SimpleName> iter= references.iterator(); iter.hasNext();) {
-					ASTNode element= iter.next();
+				for (SimpleName simpleName : references) {
+					ASTNode element= simpleName;
 					Expression newExpression= (Expression)rewriter.createStringPlaceholder(expressionString, expression.getNodeType());
 					AST ast= rewriter.getAST();
 					ITypeBinding explicitCast= ASTNodes.getExplicitCast(expression, (Expression)element);
@@ -473,13 +468,11 @@ public class SourceProvider {
 
 	private void makeNamesUnique(ASTRewrite rewriter, CodeScopeBuilder.Scope scope) {
 		Collection<NameData> usedCalleeNames= fAnalyzer.getUsedNames();
-		for (Iterator<NameData> iter= usedCalleeNames.iterator(); iter.hasNext();) {
-			SourceAnalyzer.NameData nd= iter.next();
+		for (NameData nd : usedCalleeNames) {
 			if (scope.isInUse(nd.getName())) {
 				String newName= scope.createName(nd.getName(), true);
 				List<SimpleName> references= nd.references();
-				for (Iterator<SimpleName> refs= references.iterator(); refs.hasNext();) {
-					SimpleName element= refs.next();
+				for (SimpleName element : references) {
 					ASTNode newNode= rewriter.createStringPlaceholder(newName, ASTNode.SIMPLE_NAME);
 					rewriter.replace(element, newNode, null);
 				}
@@ -491,8 +484,8 @@ public class SourceProvider {
 		if (context.receiver == null)
 			return;
 		List<Expression> implicitReceivers= fAnalyzer.getImplicitReceivers();
-		for (Iterator<Expression> iter= implicitReceivers.iterator(); iter.hasNext();) {
-			ASTNode node= iter.next();
+		for (Expression expression : implicitReceivers) {
+			ASTNode node= expression;
 			ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(node, context.importer);
 			if (node instanceof MethodInvocation) {
 				final MethodInvocation inv= (MethodInvocation)node;
@@ -523,8 +516,8 @@ public class SourceProvider {
 
 	private void updateTypeReferences(ASTRewrite rewriter, CallContext context) {
 		ImportRewrite importer= context.importer;
-		for (Iterator<SimpleName> iter= fAnalyzer.getTypesToImport().iterator(); iter.hasNext();) {
-			Name element= iter.next();
+		for (SimpleName simpleName : fAnalyzer.getTypesToImport()) {
+			Name element= simpleName;
 			ITypeBinding binding= ASTNodes.getTypeBinding(element);
 			if (binding != null && !binding.isLocal()) {
 				// We have collected names not types. So we have to import
@@ -544,8 +537,8 @@ public class SourceProvider {
 
 	private void updateStaticReferences(ASTRewrite rewriter, CallContext context) {
 		ImportRewrite importer= context.importer;
-		for (Iterator<SimpleName> iter= fAnalyzer.getStaticsToImport().iterator(); iter.hasNext();) {
-			Name element= iter.next();
+		for (SimpleName simpleName : fAnalyzer.getStaticsToImport()) {
+			Name element= simpleName;
 			IBinding binding= element.resolveBinding();
 			if (binding != null) {
 				String s= importer.addStaticImport(binding);
@@ -607,8 +600,7 @@ public class SourceProvider {
 			SourceAnalyzer.NameData refData= typeParameterReferences.get(i);
 			List<SimpleName> references= refData.references();
 			String newName= typeArguments[i].getName();
-			for (Iterator<SimpleName> iter= references.iterator(); iter.hasNext();) {
-				SimpleName name= iter.next();
+			for (SimpleName name : references) {
 				rewriter.replace(name, rewriter.createStringPlaceholder(newName, ASTNode.SIMPLE_NAME), null);
 			}
 		}

@@ -259,8 +259,7 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 
 	private void endVisitConditional(GenericSequentialFlowInfo info, ASTNode condition, ASTNode[] branches) {
 		info.merge(getFlowInfo(condition), fFlowContext);
-		for (int i= 0; i < branches.length; i++) {
-			ASTNode branch= branches[i];
+		for (ASTNode branch : branches) {
 			if (branch != null && fSelection.coveredBy(branch)) {
 				info.merge(getFlowInfo(branch), fFlowContext);
 				break;

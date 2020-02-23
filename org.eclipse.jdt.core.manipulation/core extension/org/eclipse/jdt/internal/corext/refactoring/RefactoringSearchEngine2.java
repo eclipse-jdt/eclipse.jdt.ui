@@ -302,14 +302,10 @@ public final class RefactoringSearchEngine2 {
 	 * <code>&lt;IJavaProject, Collection&lt;ICompilationUnit&gt;&gt;</code> if it is {@link #GRANULARITY_COMPILATION_UNIT}).
 	 */
 	public final Map<IJavaProject, ? extends Set<?>> getAffectedProjects() {
-		IJavaProject project= null;
-		ICompilationUnit unit= null;
 		if (fGranularity == GRANULARITY_COMPILATION_UNIT) {
 			final Map<IJavaProject, Set<ICompilationUnit>> map= new HashMap<>();
-			final ICompilationUnit[] units= getAffectedCompilationUnits();
-			for (int index= 0; index < units.length; index++) {
-				unit= units[index];
-				project= unit.getJavaProject();
+			for (ICompilationUnit unit : getAffectedCompilationUnits()) {
+				IJavaProject project= unit.getJavaProject();
 				if (project != null) {
 					Set<ICompilationUnit> set= map.get(project);
 					if (set == null) {
@@ -322,13 +318,10 @@ public final class RefactoringSearchEngine2 {
 			return map;
 		} else {
 			final Map<IJavaProject, Set<SearchResultGroup>> map= new HashMap<>();
-			final SearchResultGroup[] groups= getGroupedMatches();
-			SearchResultGroup group= null;
-			for (int index= 0; index < groups.length; index++) {
-				group= groups[index];
-				unit= group.getCompilationUnit();
+			for (SearchResultGroup group : getGroupedMatches()) {
+				ICompilationUnit unit= group.getCompilationUnit();
 				if (unit != null) {
-					project= unit.getJavaProject();
+					IJavaProject project= unit.getJavaProject();
 					if (project != null) {
 						Set<SearchResultGroup> set= map.get(project);
 						if (set == null) {
@@ -370,8 +363,8 @@ public final class RefactoringSearchEngine2 {
 		List<SearchMatch> matches= null;
 		IResource resource= null;
 		SearchMatch match= null;
-		for (final Iterator<?> iterator= getSearchMatches().iterator(); iterator.hasNext();) {
-			match= (SearchMatch) iterator.next();
+		for (Object name : getSearchMatches()) {
+			match= (SearchMatch) name;
 			resource= match.getResource();
 			if (!grouped.containsKey(resource))
 				grouped.put(resource, new ArrayList<SearchMatch>(4));

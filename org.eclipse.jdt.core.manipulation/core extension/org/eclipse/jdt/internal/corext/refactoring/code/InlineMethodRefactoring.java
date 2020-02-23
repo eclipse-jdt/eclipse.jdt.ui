@@ -287,8 +287,7 @@ public class InlineMethodRefactoring extends Refactoring {
 		checkOverridden(result, new SubProgressMonitor(pm, 4));
 		IProgressMonitor sub= new SubProgressMonitor(pm, 15);
 		sub.beginTask("", units.length * 3); //$NON-NLS-1$
-		for (int c= 0; c < units.length; c++) {
-			ICompilationUnit unit= units[c];
+		for (ICompilationUnit unit : units) {
 			sub.subTask(Messages.format(RefactoringCoreMessages.InlineMethodRefactoring_processing,  BasicElementLabels.getFileName(unit)));
 			CallInliner inliner= null;
 			try {
@@ -300,14 +299,12 @@ public class InlineMethodRefactoring extends Refactoring {
 				if (bodies.length == 0)
 					continue;
 				inliner= new CallInliner(unit, (CompilationUnit) bodies[0].getRoot(), fSourceProvider);
-				for (int b= 0; b < bodies.length; b++) {
-					BodyDeclaration body= bodies[b];
+				for (BodyDeclaration body : bodies) {
 					inliner.initialize(body);
 					RefactoringStatus nestedInvocations= new RefactoringStatus();
 					ASTNode[] invocations= removeNestedCalls(nestedInvocations, unit,
 						fTargetProvider.getInvocations(body, new SubProgressMonitor(sub, 2)));
-					for (int i= 0; i < invocations.length; i++) {
-						ASTNode invocation= invocations[i];
+					for (ASTNode invocation : invocations) {
 						result.merge(inliner.initialize(invocation, fTargetProvider.getStatusSeverity()));
 						if (result.hasFatalError())
 							break;
@@ -439,8 +436,8 @@ public class InlineMethodRefactoring extends Refactoring {
 	private IFile[] getFilesToBeModified(ICompilationUnit[] units) {
 		List<IFile> result= new ArrayList<>(units.length + 1);
 		IFile file;
-		for (int i= 0; i < units.length; i++) {
-			file= getFile(units[i]);
+		for (ICompilationUnit unit : units) {
+			file= getFile(unit);
 			if (file != null)
 				result.add(file);
 		}
@@ -499,12 +496,12 @@ public class InlineMethodRefactoring extends Refactoring {
 	}
 	private void checkTypes(RefactoringStatus result, IMethod method, IType[] types, String key, IProgressMonitor pm) {
 		pm.beginTask("", types.length); //$NON-NLS-1$
-		for (int i= 0; i < types.length; i++) {
+		for (IType type : types) {
 			pm.worked(1);
-			IMethod[] overridden= types[i].findMethods(method);
+			IMethod[] overridden= type.findMethods(method);
 			if (overridden != null && overridden.length > 0) {
 				result.addError(
-					Messages.format(key, JavaElementLabelsCore.getElementLabel(types[i], JavaElementLabelsCore.ALL_DEFAULT)),
+					Messages.format(key, JavaElementLabelsCore.getElementLabel(type, JavaElementLabelsCore.ALL_DEFAULT)),
 					JavaStatusContext.create(overridden[0]));
 			}
 		}
@@ -521,17 +518,17 @@ public class InlineMethodRefactoring extends Refactoring {
 			removeNestedCalls(status, unit, parents, invocations, i);
 		}
 		List<ASTNode> result= new ArrayList<>();
-		for (int i= 0; i < invocations.length; i++) {
-			if (invocations[i] != null)
-				result.add(invocations[i]);
+		for (ASTNode invocation : invocations) {
+			if (invocation != null)
+				result.add(invocation);
 		}
 		return result.toArray(new ASTNode[result.size()]);
 	}
 
 	private void removeNestedCalls(RefactoringStatus status, ICompilationUnit unit, ASTNode[] parents, ASTNode[] invocations, int index) {
 		ASTNode invocation= invocations[index];
-		for (int i= 0; i < parents.length; i++) {
-			ASTNode parent= parents[i];
+		for (ASTNode parent2 : parents) {
+			ASTNode parent= parent2;
 			while (parent != null) {
 				if (parent == invocation) {
 					status.addError(RefactoringCoreMessages.InlineMethodRefactoring_nestedInvocation,

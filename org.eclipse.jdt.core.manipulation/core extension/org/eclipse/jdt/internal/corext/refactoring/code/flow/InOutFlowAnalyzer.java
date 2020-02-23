@@ -39,8 +39,7 @@ public class InOutFlowAnalyzer extends FlowAnalyzer {
 	public FlowInfo perform(ASTNode[] selectedNodes) {
 		FlowContext context= getFlowContext();
 		GenericSequentialFlowInfo result= createSequential();
-		for (int i= 0; i < selectedNodes.length; i++) {
-			ASTNode node= selectedNodes[i];
+		for (ASTNode node : selectedNodes) {
 			node.accept(this);
 			result.merge(getFlowInfo(node), context);
 		}
@@ -101,8 +100,7 @@ public class InOutFlowAnalyzer extends FlowAnalyzer {
 	private void clearAccessMode(FlowInfo info, List<? extends ASTNode> nodes) {
 		if (nodes== null || nodes.isEmpty() || info == null)
 			return;
-		for (Iterator<? extends ASTNode> iter= nodes.iterator(); iter.hasNext(); ) {
-			Object node= iter.next();
+		for (ASTNode node : nodes) {
 			Iterator<VariableDeclarationFragment> fragments= null;
 			if (node instanceof VariableDeclarationStatement) {
 				fragments= ((VariableDeclarationStatement)node).fragments().iterator();

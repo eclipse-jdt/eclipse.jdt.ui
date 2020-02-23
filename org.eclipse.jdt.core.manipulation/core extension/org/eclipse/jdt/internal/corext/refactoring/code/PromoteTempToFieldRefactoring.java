@@ -395,8 +395,8 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 		if (type instanceof TypeDeclaration) {
 			FieldDeclaration[] fields= ((TypeDeclaration) type).getFields();
 			List<String> result= new ArrayList<>(fields.length);
-			for (int i= 0; i < fields.length; i++) {
-				for (Iterator<VariableDeclarationFragment> iter= fields[i].fragments().iterator(); iter.hasNext();) {
+			for (FieldDeclaration field2 : fields) {
+				for (Iterator<VariableDeclarationFragment> iter= field2.fragments().iterator(); iter.hasNext();) {
 					VariableDeclarationFragment field= iter.next();
 					result.add(field.getName().getIdentifier());
 				}
@@ -482,9 +482,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 		Assert.isTrue(!isDeclaredInAnonymousClass());
 		final AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) getMethodDeclaration().getParent();
 		if (declaration instanceof TypeDeclaration) {
-			MethodDeclaration[] methods= ((TypeDeclaration) declaration).getMethods();
-			for (int i= 0; i < methods.length; i++) {
-				MethodDeclaration method= methods[i];
+			for (MethodDeclaration method : ((TypeDeclaration) declaration).getMethods()) {
 				if (!method.isConstructor())
 					continue;
 				NameCollector nameCollector= new NameCollector(method) {
@@ -506,12 +504,9 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 	}
 
     private RefactoringStatus checkClashesWithExistingFields(){
-        FieldDeclaration[] existingFields= getFieldDeclarations();
-        for (int i= 0; i < existingFields.length; i++) {
-            FieldDeclaration declaration= existingFields[i];
-			VariableDeclarationFragment[] fragments= (VariableDeclarationFragment[]) declaration.fragments().toArray(new VariableDeclarationFragment[declaration.fragments().size()]);
-			for (int j= 0; j < fragments.length; j++) {
-                VariableDeclarationFragment fragment= fragments[j];
+        for (FieldDeclaration declaration : getFieldDeclarations()) {
+            VariableDeclarationFragment[] fragments= (VariableDeclarationFragment[]) declaration.fragments().toArray(new VariableDeclarationFragment[declaration.fragments().size()]);
+			for (VariableDeclarationFragment fragment : fragments) {
                 if (fFieldName.equals(fragment.getName().getIdentifier())){
                 	//cannot conflict with more than 1 name
                 	RefactoringStatusContext context= JavaStatusContext.create(fCu, fragment);
@@ -525,8 +520,8 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     private FieldDeclaration[] getFieldDeclarations() {
     	List<BodyDeclaration> bodyDeclarations= ASTNodes.getBodyDeclarations(getMethodDeclaration().getParent());
     	List<FieldDeclaration> fields= new ArrayList<>(1);
-    	for (Iterator<BodyDeclaration> iter= bodyDeclarations.iterator(); iter.hasNext();) {
-	        Object each= iter.next();
+    	for (BodyDeclaration bodyDeclaration : bodyDeclarations) {
+	        Object each= bodyDeclaration;
 	        if (each instanceof FieldDeclaration)
 	        	fields.add((FieldDeclaration) each);
         }
@@ -578,11 +573,9 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 		}
     	TempOccurrenceAnalyzer analyzer= new TempOccurrenceAnalyzer(fTempDeclarationNode, false);
 		analyzer.perform();
-    	SimpleName[] tempRefs= analyzer.getReferenceNodes(); // no javadocs (refactoring not for parameters)
 
-
-		for (int j= 0; j < tempRefs.length; j++) {
-			SimpleName occurence= tempRefs[j];
+		// no javadocs (refactoring not for parameters)
+		for (SimpleName occurence : analyzer.getReferenceNodes()) {
 			if (noNameChange) {
 				addLinkedName(rewrite, occurence, false);
 			} else {
@@ -611,9 +604,9 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     		int insertionIndex= computeInsertIndexForNewConstructor(declaration);
 			rewrite.getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newConstructor, insertionIndex, null);
     	} else {
-    		for (int index= 0; index < constructors.length; index++) {
-                if (shouldInsertTempInitialization(constructors[index]))
-                    addFieldInitializationToConstructor(rewrite, constructors[index]);
+    		for (MethodDeclaration constructor : constructors) {
+                if (shouldInsertTempInitialization(constructor))
+                    addFieldInitializationToConstructor(rewrite, constructor);
             }
     	}
     }
@@ -678,8 +671,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 		if (typeDeclaration instanceof TypeDeclaration) {
 			MethodDeclaration[] allMethods= ((TypeDeclaration) typeDeclaration).getMethods();
 			List<MethodDeclaration> result= new ArrayList<>(Math.min(allMethods.length, 1));
-			for (int i= 0; i < allMethods.length; i++) {
-				MethodDeclaration declaration= allMethods[i];
+			for (MethodDeclaration declaration : allMethods) {
 				if (declaration.isConstructor())
 					result.add(declaration);
 			}

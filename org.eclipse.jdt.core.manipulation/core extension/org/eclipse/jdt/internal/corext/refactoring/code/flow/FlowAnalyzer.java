@@ -290,8 +290,8 @@ abstract class FlowAnalyzer extends GenericVisitor {
 	protected void process(GenericSequentialFlowInfo info, List<? extends ASTNode> nodes) {
 		if (nodes == null)
 			return;
-		for (Iterator<? extends ASTNode> iter= nodes.iterator(); iter.hasNext();) {
-			info.merge(getFlowInfo(iter.next()), fFlowContext);
+		for (ASTNode node : nodes) {
+			info.merge(getFlowInfo(node), fFlowContext);
 		}
 	}
 
@@ -325,8 +325,8 @@ abstract class FlowAnalyzer extends GenericVisitor {
 			node.getBody().accept(this);
 			fFlowContext.popExceptions();
 			List<CatchClause> catchClauses= node.catchClauses();
-			for (Iterator<CatchClause> iter= catchClauses.iterator(); iter.hasNext();) {
-				iter.next().accept(this);
+			for (CatchClause catchClause : catchClauses) {
+				catchClause.accept(this);
 			}
 			Block finallyBlock= node.getFinally();
 			if (finallyBlock != null) {
@@ -354,8 +354,7 @@ abstract class FlowAnalyzer extends GenericVisitor {
 		int start= -1, end= -1;
 		GenericSequentialFlowInfo info= null;
 
-		for (Iterator<Statement> iter= statements.iterator(); iter.hasNext();) {
-			Statement statement= iter.next();
+		for (Statement statement : statements) {
 			if (statement instanceof SwitchCase) {
 				SwitchCase switchCase= (SwitchCase) statement;
 				if (switchCase.isDefault()) {
@@ -392,9 +391,8 @@ abstract class FlowAnalyzer extends GenericVisitor {
 		SwitchFlowInfo switchFlowInfo= createSwitch();
 		setFlowInfo(node, switchFlowInfo);
 		switchFlowInfo.mergeTest(getFlowInfo(expression), fFlowContext);
-		FlowInfo[] cases= data.getInfos();
-		for (int i= 0; i < cases.length; i++)
-			switchFlowInfo.mergeCase(cases[i], fFlowContext);
+		for (FlowInfo case1 : data.getInfos())
+			switchFlowInfo.mergeCase(case1, fFlowContext);
 		switchFlowInfo.mergeDefault(data.hasDefaultCase(), fFlowContext);
 		switchFlowInfo.removeLabel(null);
 	}
@@ -1071,8 +1069,7 @@ abstract class FlowAnalyzer extends GenericVisitor {
 			return;
 		MessageSendFlowInfo info= createMessageSendFlowInfo();
 		setFlowInfo(node, info);
-		for (Iterator<Expression> iter= arguments.iterator(); iter.hasNext();) {
-			Expression arg= iter.next();
+		for (Expression arg : arguments) {
 			info.mergeArgument(getFlowInfo(arg), fFlowContext);
 		}
 		info.mergeReceiver(getFlowInfo(receiver), fFlowContext);

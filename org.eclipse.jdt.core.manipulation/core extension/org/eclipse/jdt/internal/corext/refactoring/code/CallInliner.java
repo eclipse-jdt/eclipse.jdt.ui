@@ -29,7 +29,6 @@ package org.eclipse.jdt.internal.corext.refactoring.code;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -564,8 +563,8 @@ public class CallInliner {
 	private void addNewLocals(TextEditGroup textEditGroup) {
 		if (fLocals.isEmpty())
 			return;
-		for (Iterator<VariableDeclarationStatement> iter= fLocals.iterator(); iter.hasNext();) {
-			ASTNode element= iter.next();
+		for (VariableDeclarationStatement variableDeclarationStatement : fLocals) {
+			ASTNode element= variableDeclarationStatement;
 			fListRewrite.insertAt(element, fInsertionIndex++, textEditGroup);
 		}
 	}
@@ -711,8 +710,7 @@ public class CallInliner {
 	private Set<Expression> crossCheckArguments(List<Expression> arguments) {
 		final Set<IBinding> assigned= new HashSet<>();
 		final Set<Expression> result= new HashSet<>();
-		for (Iterator<Expression> iter= arguments.iterator(); iter.hasNext();) {
-			final Expression expression= iter.next();
+		for (Expression expression : arguments) {
 			expression.accept(new ASTVisitor() {
 				@Override
 				public boolean visit(Assignment node) {
@@ -728,8 +726,7 @@ public class CallInliner {
 				}
 			});
 		}
-		for (Iterator<Expression> iter= arguments.iterator(); iter.hasNext();) {
-			final Expression expression= iter.next();
+		for (Expression expression : arguments) {
 			if (!result.contains(expression)) {
 				expression.accept(new HierarchicalASTVisitor() {
 					@Override

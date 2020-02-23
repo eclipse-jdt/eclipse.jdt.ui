@@ -71,8 +71,7 @@ public class SearchResultGroup {
 	public String toString() {
 		StringBuilder buf= new StringBuilder(fResouce.getFullPath().toString());
 		buf.append('\n');
-		for (int i= 0; i < fSearchMatches.size(); i++) {
-			SearchMatch match= fSearchMatches.get(i);
+		for (SearchMatch match : fSearchMatches) {
 			buf.append("  ").append(match.getOffset()).append(", ").append(match.getLength()); //$NON-NLS-1$//$NON-NLS-2$
 			buf.append(match.getAccuracy() == SearchMatch.A_ACCURATE ? "; acc" : "; inacc"); //$NON-NLS-1$//$NON-NLS-2$
 			if (match.isInsideDocComment())

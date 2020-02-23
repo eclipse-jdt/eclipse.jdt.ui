@@ -271,10 +271,9 @@ public class InlineConstantRefactoring extends Refactoring {
 					if (! (referenceContext instanceof VariableDeclarationFragment
 							|| referenceContext instanceof SingleVariableDeclaration
 							|| referenceContext instanceof Assignment)) {
-						ITypeBinding[] typeArguments= Invocations.getInferredTypeArguments(invocation);
 						ListRewrite typeArgsRewrite= Invocations.getInferredTypeArgumentsRewrite(fInitializerRewrite, invocation);
-						for (int i= 0; i < typeArguments.length; i++) {
-							Type typeArgument= fNewLocationCuRewrite.getImportRewrite().addImport(typeArguments[i], fNewLocationCuRewrite.getAST(), fNewLocationContext, TypeLocation.TYPE_ARGUMENT);
+						for (ITypeBinding typeArgument2 : Invocations.getInferredTypeArguments(invocation)) {
+							Type typeArgument= fNewLocationCuRewrite.getImportRewrite().addImport(typeArgument2, fNewLocationCuRewrite.getAST(), fNewLocationContext, TypeLocation.TYPE_ARGUMENT);
 							fNewLocationCuRewrite.getImportRemover().registerAddedImports(typeArgument);
 							typeArgsRewrite.insertLast(typeArgument, null);
 						}
@@ -493,8 +492,8 @@ public class InlineConstantRefactoring extends Refactoring {
 		}
 
 		public CompilationUnitChange getChange() throws CoreException {
-			for (int i= 0; i < fReferences.length; i++)
-				inlineReference(fReferences[i]);
+			for (Expression fReference : fReferences)
+				inlineReference(fReference);
 
 			removeConstantDeclarationIfNecessary();
 
@@ -827,11 +826,9 @@ public class InlineConstantRefactoring extends Refactoring {
 			ImportReferencesCollector.collect(getInitializer(), fField.getJavaProject(), null, new ArrayList<SimpleName>(), staticImportsInInitializer);
 
 			if (getReplaceAllReferences()) {
-				SearchResultGroup[] searchResultGroups= findReferences(pm, result);
-				for (int i= 0; i < searchResultGroups.length; i++) {
+				for (SearchResultGroup group : findReferences(pm, result)) {
 					if (pm.isCanceled())
 						throw new OperationCanceledException();
-					SearchResultGroup group= searchResultGroups[i];
 					ICompilationUnit cu= group.getCompilationUnit();
 
 					CompilationUnitRewrite cuRewrite= getCuRewrite(cu);
@@ -857,8 +854,7 @@ public class InlineConstantRefactoring extends Refactoring {
 
 			if (getRemoveDeclaration() && getReplaceAllReferences()) {
 				boolean declarationRemoved= false;
-				for (Iterator<CompilationUnitChange> iter= changes.iterator(); iter.hasNext();) {
-					CompilationUnitChange change= iter.next();
+				for (CompilationUnitChange change : changes) {
 					if (change.getCompilationUnit().equals(fDeclarationCuRewrite.getCu())) {
 						declarationRemoved= true;
 						break;

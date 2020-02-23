@@ -63,8 +63,8 @@ public final class RefactoringAvailabilityTesterCore  {
 	}
 
 	public static boolean isMoveStaticAvailable(final IMember[] members) throws JavaModelException {
-		for (int index= 0; index < members.length; index++) {
-			if (!isMoveStaticAvailable(members[index]))
+		for (IMember member : members) {
+			if (!isMoveStaticAvailable(member))
 				return false;
 		}
 		return true;
@@ -105,8 +105,8 @@ public final class RefactoringAvailabilityTesterCore  {
 		final IType type= members[0].getDeclaringType();
 		if (type == null)
 			return false;
-		for (int index= 0; index < members.length; index++) {
-			if (!type.equals(members[index].getDeclaringType()))
+		for (IMember member : members) {
+			if (!type.equals(member.getDeclaringType()))
 				return false;
 		}
 		return true;

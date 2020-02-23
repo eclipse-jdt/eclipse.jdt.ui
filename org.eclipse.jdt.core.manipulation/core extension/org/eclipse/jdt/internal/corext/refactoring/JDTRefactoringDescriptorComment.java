@@ -15,7 +15,6 @@ package org.eclipse.jdt.internal.corext.refactoring;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
@@ -146,8 +145,7 @@ public final class JDTRefactoringDescriptorComment {
 			buffer.append(LINE_DELIMITER);
 			buffer.append(Messages.format(RefactoringCoreMessages.JavaRefactoringDescriptorComment_original_project, BasicElementLabels.getResourceName(fProject)));
 		}
-		for (final Iterator<String> iterator= fSettings.iterator(); iterator.hasNext();) {
-			final String setting= iterator.next();
+		for (String setting : fSettings) {
 			buffer.append(LINE_DELIMITER);
 			buffer.append(Messages.format(RefactoringCoreMessages.JavaRefactoringDescriptor_inferred_setting_pattern, setting));
 		}
