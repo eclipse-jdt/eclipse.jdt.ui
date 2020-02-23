@@ -219,12 +219,10 @@ public class PackageCacheTest {
 	 * which computes the single child package of a package (if any).
 	 */
 	private IPackageFragment findSinglePackageChild(IPackageFragment fragment) throws Exception {
-		IJavaElement[] children= src.getChildren();
 		String prefix= fragment.getElementName() + '.';
 		int prefixLen= prefix.length();
 		IPackageFragment found= null;
-		for (int i= 0; i < children.length; ++i) {
-			IJavaElement element= children[i];
+		for (IJavaElement element : src.getChildren()) {
 			String name= element.getElementName();
 			if (name.startsWith(prefix) && name.length() > prefixLen && name.indexOf('.', prefixLen) == -1) {
 				if (found == null) {

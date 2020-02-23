@@ -126,8 +126,7 @@ public class TypeInfoTest extends TestCase {
 		findTypeRef(result, "junit.runner.Version");
 
 
-		for (int i= 0; i < result.size(); i++) {
-			TypeNameMatch ref= result.get(i);
+		for (TypeNameMatch ref : result) {
 			//System.out.println(ref.getTypeName());
 			assertResolve(ref);
 
@@ -149,8 +148,7 @@ public class TypeInfoTest extends TestCase {
 	}
 
 	private void findTypeRef(List<TypeNameMatch> refs, String fullname) {
-		for (int i= 0; i <refs.size(); i++) {
-			TypeNameMatch curr= refs.get(i);
+		for (TypeNameMatch curr : refs) {
 			if (fullname.equals(curr.getFullyQualifiedName())) {
 				return;
 			}
@@ -191,8 +189,7 @@ public class TypeInfoTest extends TestCase {
 
 		assertEquals("wrong element count", 51, result.size());
 		//System.out.println("Elements found: " + result.size());
-		for (int i= 0; i < result.size(); i++) {
-			TypeNameMatch ref= result.get(i);
+		for (TypeNameMatch ref : result) {
 			//System.out.println(ref.getTypeName());
 			assertResolve(ref);
 		}

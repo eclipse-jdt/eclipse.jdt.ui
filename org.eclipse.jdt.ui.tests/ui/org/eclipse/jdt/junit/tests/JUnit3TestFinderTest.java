@@ -14,7 +14,6 @@
 package org.eclipse.jdt.junit.tests;
 
 import java.util.HashSet;
-import java.util.Iterator;
 
 import junit.framework.TestCase;
 
@@ -401,8 +400,8 @@ public class JUnit3TestFinderTest extends TestCase {
 		finder.findTestsInContainer(container, set, null);
 
 		HashSet<String> namesFound= new HashSet<>();
-		for (Iterator<IType> iterator= set.iterator(); iterator.hasNext();) {
-			namesFound.add(iterator.next().getFullyQualifiedName('.'));
+		for (IType iType : set) {
+			namesFound.add(iType.getFullyQualifiedName('.'));
 		}
 		String[] actuals= namesFound.toArray(new String[namesFound.size()]);
 		StringAsserts.assertEqualStringsIgnoreOrder(actuals, expectedValidTests);

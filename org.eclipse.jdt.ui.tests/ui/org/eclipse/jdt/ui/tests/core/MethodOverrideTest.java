@@ -498,9 +498,9 @@ public class MethodOverrideTest extends CoreTests {
 
 	private boolean hasOverrideAnnotation(MethodDeclaration declaration) {
 		List<IExtendedModifier> list= declaration.modifiers();
-		for (int i= 0; i < list.size(); i++) {
-			if (list.get(i) instanceof Annotation) {
-				return "Override".equals(((Annotation) list.get(i)).getTypeName().getFullyQualifiedName());
+		for (IExtendedModifier element : list) {
+			if (element instanceof Annotation) {
+				return "Override".equals(((Annotation) element).getTypeName().getFullyQualifiedName());
 			}
 		}
 		return false;

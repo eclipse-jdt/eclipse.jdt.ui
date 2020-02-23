@@ -16,7 +16,6 @@ package org.eclipse.jdt.junit.tests;
 import java.io.File;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
 
 import junit.framework.TestCase;
 
@@ -472,8 +471,7 @@ public class JUnit4TestFinderTest extends TestCase {
 		set.addAll(Arrays.asList(JUnitCore.findTestTypes(container, null)));
 
 		HashSet<String> namesFound= new HashSet<>();
-		for (Iterator<IType> iterator= set.iterator(); iterator.hasNext();) {
-			IType curr= iterator.next();
+		for (IType curr : set) {
 			namesFound.add(curr.getFullyQualifiedName('.'));
 		}
 		String[] actuals= namesFound.toArray(new String[namesFound.size()]);

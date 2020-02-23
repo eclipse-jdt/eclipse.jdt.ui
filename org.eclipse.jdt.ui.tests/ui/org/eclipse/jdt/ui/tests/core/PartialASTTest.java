@@ -152,23 +152,22 @@ public class PartialASTTest extends CoreTests {
 
 	private void assertAllBindings(CompilationUnit astRoot) {
 		List<AbstractTypeDeclaration> list= astRoot.types();
-		for (int i= 0; i < list.size(); i++) {
-			TypeDeclaration decl= (TypeDeclaration) list.get(i);
+		for (AbstractTypeDeclaration element : list) {
+			TypeDeclaration decl= (TypeDeclaration) element;
 			assertTrue(decl.resolveBinding() != null);
 
 			if (!decl.isInterface() && decl.getSuperclassType() != null) {
 				assertTrue(decl.getSuperclassType().resolveBinding() != null);
 			}
 			List<Type> interfaces= decl.superInterfaceTypes();
-			for (int j= 0; j < interfaces.size(); j++) {
-				assertTrue(interfaces.get(j).resolveBinding() != null);
+			for (Type interface1 : interfaces) {
+				assertTrue(interface1.resolveBinding() != null);
 			}
 
 			for (MethodDeclaration meth : decl.getMethods()) {
 				assertTrue(meth.resolveBinding() != null);
 				List<SingleVariableDeclaration> params= meth.parameters();
-				for (int n= 0; n < params.size(); n++) {
-					SingleVariableDeclaration arg= params.get(n);
+				for (SingleVariableDeclaration arg : params) {
 					assertTrue(arg.resolveBinding() != null);
 				}
 				if (!meth.isConstructor()) {

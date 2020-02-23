@@ -98,8 +98,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 
 		boolean addReturnType= true, doRename= true;
 
-		for (int i= 0; i < proposals.size(); i++) {
-			Object elem= proposals.get(i);
+		for (IJavaCompletionProposal elem : proposals) {
 			if (elem instanceof ASTRewriteCorrectionProposal) {
 				ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) elem;
 				assertTrue("duplicated entries", addReturnType);
@@ -156,8 +155,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 
 		boolean addReturnType= true, doRename= true;
 
-		for (int i= 0; i < proposals.size(); i++) {
-			Object elem= proposals.get(i);
+		for (IJavaCompletionProposal elem : proposals) {
 			if (elem instanceof ASTRewriteCorrectionProposal) {
 				ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) elem;
 				assertTrue("duplicated entries", addReturnType);
@@ -245,8 +243,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 
 		boolean addReturnType= true, doRename= true;
 
-		for (int i= 0; i < proposals.size(); i++) {
-			Object elem= proposals.get(i);
+		for (IJavaCompletionProposal elem : proposals) {
 			if (elem instanceof ASTRewriteCorrectionProposal) {
 				ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) elem;
 				assertTrue("duplicated entries", addReturnType);
@@ -347,8 +344,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 
 		boolean addReturnType= true, doRename= true;
 
-		for (int i= 0; i < proposals.size(); i++) {
-			Object elem= proposals.get(i);
+		for (IJavaCompletionProposal elem : proposals) {
 			if (elem instanceof ASTRewriteCorrectionProposal) {
 				ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) elem;
 				assertTrue("duplicated entries", addReturnType);
@@ -401,8 +397,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 
 		boolean addReturnType= true, doRename= true;
 
-		for (int i= 0; i < proposals.size(); i++) {
-			Object elem= proposals.get(i);
+		for (IJavaCompletionProposal elem : proposals) {
 			if (elem instanceof ASTRewriteCorrectionProposal) {
 				ASTRewriteCorrectionProposal proposal= (ASTRewriteCorrectionProposal) elem;
 				assertTrue("duplicated entries", addReturnType);

@@ -13,7 +13,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.buildpath;
 
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -138,8 +137,7 @@ public class BuildpathModifierActionTest extends TestCase {
     	assertTrue("Expected " + paths.length + " is " + removedEntries.size(), removedEntries.size() == paths.length);
     	IPath[] removed= new IPath[removedEntries.size()];
     	int i= 0;
-    	for (Iterator<CPListElement> iterator= removedEntries.iterator(); iterator.hasNext();) {
-	        CPListElement element= iterator.next();
+    	for (CPListElement element : removedEntries) {
 	        removed[i]= element.getPath();
 	        i++;
         }
@@ -156,8 +154,7 @@ public class BuildpathModifierActionTest extends TestCase {
     	assertTrue("Expected " + paths.length + " is " + addedEntries.size(), addedEntries.size() == paths.length);
     	IPath[] added= new IPath[addedEntries.size()];
     	int i= 0;
-    	for (Iterator<CPListElement> iterator= addedEntries.iterator(); iterator.hasNext();) {
-	        CPListElement element= iterator.next();
+    	for (CPListElement element : addedEntries) {
 	        added[i]= element.getPath();
 	        i++;
         }

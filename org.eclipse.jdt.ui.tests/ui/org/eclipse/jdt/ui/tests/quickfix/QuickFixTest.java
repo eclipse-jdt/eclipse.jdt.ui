@@ -197,8 +197,8 @@ public class QuickFixTest {
 
 	public static TypeDeclaration findTypeDeclaration(CompilationUnit astRoot, String simpleTypeName) {
 		List<AbstractTypeDeclaration> types= astRoot.types();
-		for (int i= 0; i < types.size(); i++) {
-			TypeDeclaration elem= (TypeDeclaration) types.get(i);
+		for (AbstractTypeDeclaration type : types) {
+			TypeDeclaration elem= (TypeDeclaration) type;
 			if (simpleTypeName.equals(elem.getName().getIdentifier())) {
 				return elem;
 			}
@@ -218,8 +218,7 @@ public class QuickFixTest {
 	public static VariableDeclarationFragment findFieldDeclaration(TypeDeclaration typeDecl, String fieldName) {
 		for (FieldDeclaration field : typeDecl.getFields()) {
 			List<VariableDeclarationFragment> list= field.fragments();
-			for (int k= 0; k < list.size(); k++) {
-				VariableDeclarationFragment fragment= list.get(k);
+			for (VariableDeclarationFragment fragment : list) {
 				if (fieldName.equals(fragment.getName().getIdentifier())) {
 					return fragment;
 				}

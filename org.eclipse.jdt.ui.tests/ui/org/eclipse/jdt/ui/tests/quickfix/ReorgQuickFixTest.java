@@ -256,8 +256,8 @@ public class ReorgQuickFixTest extends QuickFixTest {
 
 		boolean hasRename= true, hasMove= true;
 
-		for (int i= 0; i < proposals.size(); i++) {
-			ChangeCorrectionProposal curr= (ChangeCorrectionProposal) proposals.get(i);
+		for (IJavaCompletionProposal proposal2 : proposals) {
+			ChangeCorrectionProposal curr= (ChangeCorrectionProposal) proposal2;
 			if (curr instanceof CorrectPackageDeclarationProposal) {
 				assertTrue("Duplicated proposal", hasRename);
 				hasRename= false;
@@ -305,8 +305,8 @@ public class ReorgQuickFixTest extends QuickFixTest {
 
 		boolean hasRename= true, hasMove= true;
 
-		for (int i= 0; i < proposals.size(); i++) {
-			ChangeCorrectionProposal curr= (ChangeCorrectionProposal) proposals.get(i);
+		for (IJavaCompletionProposal proposal2 : proposals) {
+			ChangeCorrectionProposal curr= (ChangeCorrectionProposal) proposal2;
 			if (curr instanceof CorrectPackageDeclarationProposal) {
 				assertTrue("Duplicated proposal", hasRename);
 				hasRename= false;
@@ -354,8 +354,8 @@ public class ReorgQuickFixTest extends QuickFixTest {
 
 		boolean hasRename= true, hasMove= true;
 
-		for (int i= 0; i < proposals.size(); i++) {
-			ChangeCorrectionProposal curr= (ChangeCorrectionProposal) proposals.get(i);
+		for (IJavaCompletionProposal proposal2 : proposals) {
+			ChangeCorrectionProposal curr= (ChangeCorrectionProposal) proposal2;
 			if (curr instanceof CorrectPackageDeclarationProposal) {
 				assertTrue("Duplicated proposal", hasRename);
 				hasRename= false;
@@ -401,8 +401,8 @@ public class ReorgQuickFixTest extends QuickFixTest {
 
 		boolean hasRename= true, hasMove= true;
 
-		for (int i= 0; i < proposals.size(); i++) {
-			ChangeCorrectionProposal curr= (ChangeCorrectionProposal) proposals.get(i);
+		for (IJavaCompletionProposal proposal2 : proposals) {
+			ChangeCorrectionProposal curr= (ChangeCorrectionProposal) proposal2;
 			if (curr instanceof CorrectPackageDeclarationProposal) {
 				assertTrue("Duplicated proposal", hasRename);
 				hasRename= false;
@@ -480,8 +480,8 @@ public class ReorgQuickFixTest extends QuickFixTest {
 
 		boolean hasRename= true, hasMove= true;
 
-		for (int i= 0; i < proposals.size(); i++) {
-			ChangeCorrectionProposal curr= (ChangeCorrectionProposal) proposals.get(i);
+		for (IJavaCompletionProposal proposal2 : proposals) {
+			ChangeCorrectionProposal curr= (ChangeCorrectionProposal) proposal2;
 			if (curr instanceof CorrectMainTypeNameProposal) {
 				assertTrue("Duplicated proposal", hasRename);
 				hasRename= false;
@@ -528,8 +528,8 @@ public class ReorgQuickFixTest extends QuickFixTest {
 
 		boolean hasRename= true, hasMove= true;
 
-		for (int i= 0; i < proposals.size(); i++) {
-			ChangeCorrectionProposal curr= (ChangeCorrectionProposal) proposals.get(i);
+		for (IJavaCompletionProposal proposal2 : proposals) {
+			ChangeCorrectionProposal curr= (ChangeCorrectionProposal) proposal2;
 			if (curr instanceof CorrectMainTypeNameProposal) {
 				assertTrue("Duplicated proposal", hasRename);
 				hasRename= false;

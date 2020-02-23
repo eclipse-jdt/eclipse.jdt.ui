@@ -1956,8 +1956,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal localProposal= null;
-		for (int i = 0; i < proposals.size(); i++) {
-			Object curr= proposals.get(i);
+		for (IJavaCompletionProposal curr : proposals) {
 			if (curr instanceof NewVariableCorrectionProposal && ((NewVariableCorrectionProposal) curr).getVariableKind() == NewVariableCorrectionProposal.LOCAL) {
 				localProposal= (CUCorrectionProposal) curr;
 			}
@@ -1998,8 +1997,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal localProposal= null;
-		for (int i = 0; i < proposals.size(); i++) {
-			Object curr= proposals.get(i);
+		for (IJavaCompletionProposal curr : proposals) {
 			if (curr instanceof NewVariableCorrectionProposal && ((NewVariableCorrectionProposal) curr).getVariableKind() == NewVariableCorrectionProposal.LOCAL) {
 				localProposal= (CUCorrectionProposal) curr;
 			}
@@ -2041,8 +2039,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal localProposal= null;
-		for (int i = 0; i < proposals.size(); i++) {
-			Object curr= proposals.get(i);
+		for (IJavaCompletionProposal curr : proposals) {
 			if (curr instanceof NewVariableCorrectionProposal && ((NewVariableCorrectionProposal) curr).getVariableKind() == NewVariableCorrectionProposal.LOCAL) {
 				localProposal= (CUCorrectionProposal) curr;
 			}
