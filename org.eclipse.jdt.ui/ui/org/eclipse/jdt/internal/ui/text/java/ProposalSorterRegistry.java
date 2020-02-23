@@ -16,7 +16,6 @@ package org.eclipse.jdt.internal.ui.text.java;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -82,9 +81,7 @@ public final class ProposalSorterRegistry {
 		IExtensionRegistry registry= Platform.getExtensionRegistry();
 		List<IConfigurationElement> elements= new ArrayList<>(Arrays.asList(registry.getConfigurationElementsFor(JavaPlugin.getPluginId(), EXTENSION_POINT)));
 
-		for (Iterator<IConfigurationElement> iter= elements.iterator(); iter.hasNext();) {
-			IConfigurationElement element= iter.next();
-
+		for (IConfigurationElement element : elements) {
 			try {
 
 				ProposalSorterHandle handle= new ProposalSorterHandle(element);

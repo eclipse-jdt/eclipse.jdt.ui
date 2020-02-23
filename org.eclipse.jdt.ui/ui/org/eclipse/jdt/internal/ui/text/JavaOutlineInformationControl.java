@@ -40,9 +40,9 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.bindings.TriggerSequence;
 import org.eclipse.jface.bindings.keys.KeySequence;
 import org.eclipse.jface.bindings.keys.SWTKeySupport;
-import org.eclipse.jface.bindings.TriggerSequence;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
@@ -356,10 +356,9 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 					ITypeHierarchy th= getSuperTypeHierarchy(type);
 					if (th != null) {
 						List<Object> children= new ArrayList<>();
-						IType[] superClasses= th.getAllSupertypes(type);
 						children.addAll(Arrays.asList(super.getChildren(type)));
-						for (int i= 0, scLength= superClasses.length; i < scLength; i++)
-							children.addAll(Arrays.asList(super.getChildren(superClasses[i])));
+						for (IType superClass : th.getAllSupertypes(type))
+							children.addAll(Arrays.asList(super.getChildren(superClass)));
 						return children.toArray();
 					}
 				}

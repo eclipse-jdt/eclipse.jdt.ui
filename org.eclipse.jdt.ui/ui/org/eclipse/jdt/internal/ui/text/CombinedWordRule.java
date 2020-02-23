@@ -350,8 +350,8 @@ public class CombinedWordRule implements IRule {
 				} while (c != ICharacterScanner.EOF && fDetector.isWordPart((char) c));
 				scanner.unread();
 
-				for (int i= 0, n= fMatchers.size(); i < n; i++) {
-					IToken token= fMatchers.get(i).evaluate(scanner, fBuffer);
+				for (WordMatcher matcher : fMatchers) {
+					IToken token= matcher.evaluate(scanner, fBuffer);
 					if (!token.isUndefined())
 						return token;
 				}

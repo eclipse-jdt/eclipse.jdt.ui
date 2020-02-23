@@ -27,7 +27,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -2248,9 +2247,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		collectInfixPlusOperands(oldInfixExpression, operands);
 
 		Statement lastAppend= insertAfter;
-		for (Iterator<Expression> iter= operands.iterator(); iter.hasNext();) {
-			Expression operand= iter.next();
-
+		for (Expression operand : operands) {
 			MethodInvocation appendIncovationExpression= ast.newMethodInvocation();
 			appendIncovationExpression.setName(ast.newSimpleName("append")); //$NON-NLS-1$
 			SimpleName bufferNameReference= ast.newSimpleName(bufferName);
@@ -2299,8 +2296,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			collectInfixPlusOperands(infixExpression.getLeftOperand(), collector);
 			collectInfixPlusOperands(infixExpression.getRightOperand(), collector);
 			List<Expression> extendedOperands= infixExpression.extendedOperands();
-			for (Iterator<Expression> iter= extendedOperands.iterator(); iter.hasNext();) {
-				collectInfixPlusOperands(iter.next(), collector);
+			for (Expression expression2 : extendedOperands) {
+				collectInfixPlusOperands(expression2, collector);
 			}
 
 		} else {
@@ -2366,9 +2363,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		List<Expression> formatArguments= new ArrayList<>();
 		String formatString= ""; //$NON-NLS-1$
 		int i= 0;
-		for (Iterator<Expression> iterator= operands.iterator(); iterator.hasNext();) {
-			Expression operand= iterator.next();
-
+		for (Expression operand : operands) {
 			if (operand instanceof StringLiteral) {
 				String value= ((StringLiteral) operand).getEscapedValue();
 				value= value.substring(1, value.length() - 1);
@@ -2428,8 +2423,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		arguments.add(formatStringArgument);
 
 		if (is50OrHigher) {
-			for (Iterator<Expression> iterator= formatArguments.iterator(); iterator.hasNext();) {
-				arguments.add(iterator.next());
+			for (Expression expression : formatArguments) {
+				arguments.add(expression);
 			}
 		} else {
 			ArrayCreation objectArrayCreation= ast.newArrayCreation();
@@ -2441,8 +2436,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			ArrayInitializer arrayInitializer= ast.newArrayInitializer();
 
 			List<Expression> initializerExpressions= arrayInitializer.expressions();
-			for (Iterator<Expression> iterator= formatArguments.iterator(); iterator.hasNext();) {
-				initializerExpressions.add(iterator.next());
+			for (Expression expression : formatArguments) {
+				initializerExpressions.add(expression);
 			}
 			objectArrayCreation.setInitializer(arrayInitializer);
 
@@ -2731,8 +2726,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	private static void removeException(ASTRewrite rewrite, UnionType unionType, Type exception) {
 		ListRewrite listRewrite= rewrite.getListRewrite(unionType, UnionType.TYPES_PROPERTY);
 		List<Type> types= unionType.types();
-		for (Iterator<Type> iterator= types.iterator(); iterator.hasNext();) {
-			Type type= iterator.next();
+		for (Type type : types) {
 			if (type.equals(exception)) {
 				listRewrite.remove(type, null);
 			}
@@ -2778,8 +2772,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	private static boolean isNotYetThrown(ITypeBinding binding, List<Type> thrownExceptions) {
-		for (int i= 0; i < thrownExceptions.size(); i++) {
-			Type name= thrownExceptions.get(i);
+		for (Type name : thrownExceptions) {
 			ITypeBinding elem= name.resolveBinding();
 			if (elem != null) {
 				if (Bindings.isSuperType(elem, binding)) { // existing exception is base class of new
@@ -2840,8 +2833,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		SingleVariableDeclaration newSingleVariableDeclaration= ast.newSingleVariableDeclaration();
 		UnionType newUnionType= ast.newUnionType();
 		List<Type> types= newUnionType.types();
-		for (int i= 0; i < coveredNodes.size(); i++) {
-			ASTNode typeNode= coveredNodes.get(i);
+		for (ASTNode typeNode : coveredNodes) {
 			types.add((Type) rewrite.createCopyTarget(typeNode));
 			rewrite.remove(typeNode, null);
 		}
@@ -2898,8 +2890,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		String commonSource= null;
 		try {
 			IBuffer buffer= context.getCompilationUnit().getBuffer();
-			for (Iterator<CatchClause> iterator= catchClauses.iterator(); iterator.hasNext();) {
-				CatchClause catchClause1= iterator.next();
+			for (CatchClause catchClause1 : catchClauses) {
 				Block body= catchClause1.getBody();
 				String source= buffer.getText(body.getStartPosition(), body.getLength());
 				if (commonSource == null) {
@@ -2926,13 +2917,12 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		UnionType newUnionType= ast.newUnionType();
 		List<Type> types= newUnionType.types();
-		for (Iterator<CatchClause> iterator= catchClauses.iterator(); iterator.hasNext();) {
-			CatchClause catchClause1= iterator.next();
+		for (CatchClause catchClause1 : catchClauses) {
 			Type type= catchClause1.getException().getType();
 			if (type instanceof UnionType) {
 				List<Type> types2= ((UnionType) type).types();
-				for (Iterator<Type> iterator2= types2.iterator(); iterator2.hasNext();) {
-					types.add((Type) rewrite.createCopyTarget(iterator2.next()));
+				for (Type type2 : types2) {
+					types.add((Type) rewrite.createCopyTarget(type2));
 				}
 			} else {
 				types.add((Type) rewrite.createCopyTarget(type));
@@ -3024,8 +3014,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		//newCatchClause#setBody() destroys the formatting, hence copy statement by statement.
 		List<Statement> statements= catchClause.getBody().statements();
-		for (Iterator<Statement> iterator2= statements.iterator(); iterator2.hasNext();) {
-			newCatchClause.getBody().statements().add(rewrite.createCopyTarget(iterator2.next()));
+		for (Statement statement : statements) {
+			newCatchClause.getBody().statements().add(rewrite.createCopyTarget(statement));
 		}
 	}
 
@@ -3192,8 +3182,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			label= CorrectionMessages.QuickAssistProcessor_unwrap_trystatement;
 		} else if (outer instanceof AnonymousClassDeclaration) {
 			List<BodyDeclaration> decls= ((AnonymousClassDeclaration) outer).bodyDeclarations();
-			for (int i= 0; i < decls.size(); i++) {
-				BodyDeclaration elem= decls.get(i);
+			for (BodyDeclaration elem : decls) {
 				if (elem instanceof MethodDeclaration) {
 					Block curr= ((MethodDeclaration) elem).getBody();
 					if (curr != null && !curr.statements().isEmpty()) {

@@ -14,7 +14,6 @@
 package org.eclipse.jdt.internal.ui.search;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -188,12 +187,12 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 	public boolean visit(TryStatement node) {
 		int currentSize= fCaughtExceptions.size();
 		List<CatchClause> catchClauses= node.catchClauses();
-		for (Iterator<CatchClause> iter= catchClauses.iterator(); iter.hasNext();) {
-			Type type= iter.next().getException().getType();
+		for (CatchClause catchClause : catchClauses) {
+			Type type= catchClause.getException().getType();
 			if (type instanceof UnionType) {
 				List<Type> types= ((UnionType) type).types();
-				for (Iterator<Type> iterator= types.iterator(); iterator.hasNext();) {
-					addCaughtException(iterator.next());
+				for (Type type2 : types) {
+					addCaughtException(type2);
 				}
 			} else {
 				addCaughtException(type);
@@ -202,8 +201,8 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 		node.getBody().accept(this);
 
 		List<Expression> resources= node.resources();
-		for (Iterator<Expression> iterator= resources.iterator(); iterator.hasNext();) {
-			iterator.next().accept(this);
+		for (Expression expression : resources) {
+			expression.accept(this);
 		}
 
 		//check if the method could exit as a result of resource#close()
@@ -252,8 +251,8 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 		}
 
 		// visit catch and finally
-		for (Iterator<CatchClause> iter= catchClauses.iterator(); iter.hasNext();) {
-			iter.next().accept(this);
+		for (CatchClause catchClause : catchClauses) {
+			catchClause.accept(this);
 		}
 		if (node.getFinally() != null)
 			node.getFinally().accept(this);
@@ -342,8 +341,7 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 	}
 
 	private boolean isCaught(ITypeBinding binding) {
-		for (Iterator<ITypeBinding> iter= fCaughtExceptions.iterator(); iter.hasNext();) {
-			ITypeBinding catchException= iter.next();
+		for (ITypeBinding catchException : fCaughtExceptions) {
 			if (catches(catchException, binding))
 				return true;
 		}

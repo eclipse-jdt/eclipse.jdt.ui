@@ -247,8 +247,7 @@ public abstract class SurroundWith {
 			rewrite.replace(selectedNodes[0], wrap, null);
 			ListRewrite listRewrite= rewrite.getListRewrite(wrap, Block.STATEMENTS_PROPERTY);
 
-			for (Iterator<ASTNode> iterator= inserted.iterator(); iterator.hasNext();) {
-				ASTNode node= iterator.next();
+			for (ASTNode node : inserted) {
 				listRewrite.insertLast(node, null);
 			}
 
@@ -256,8 +255,7 @@ public abstract class SurroundWith {
 			ListRewrite listRewrite= getListRewrite(selectedNodes[0], rewrite);
 
 			ASTNode current= selectedNodes[selectedNodes.length - 1];
-			for (Iterator<ASTNode> iterator= inserted.iterator(); iterator.hasNext();) {
-				ASTNode node= iterator.next();
+			for (ASTNode node : inserted) {
 				listRewrite.insertAfter(node, current, null);
 				current= node;
 			}

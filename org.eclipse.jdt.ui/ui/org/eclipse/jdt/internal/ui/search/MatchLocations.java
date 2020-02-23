@@ -191,8 +191,7 @@ public class MatchLocations {
 		}
 
 		protected final void performSelectAction(boolean selectAll) {
-			for (int i= 0; i < fButtons.size(); i++) {
-				Button button= fButtons.get(i);
+			for (Button button : fButtons) {
 				button.setSelection(selectAll);
 			}
 			validateSettings();
@@ -245,8 +244,7 @@ public class MatchLocations {
 
 		private void validateSettings() {
 			int selected= 0;
-			for (int i= 0; i < fButtons.size(); i++) {
-				Button button= fButtons.get(i);
+			for (Button button : fButtons) {
 				if (button.getSelection()) {
 					selected |= getIntValue(button);
 				}

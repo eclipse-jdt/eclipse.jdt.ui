@@ -213,8 +213,7 @@ public class SuppressWarningsSubProcessor {
 		}
 
 		private static Expression findValue(List<MemberValuePair> keyValues) {
-			for (int i= 0, len= keyValues.size(); i < len; i++) {
-				MemberValuePair curr= keyValues.get(i);
+			for (MemberValuePair curr : keyValues) {
 				if ("value".equals(curr.getName().getIdentifier())) { //$NON-NLS-1$
 					return curr.getValue();
 				}

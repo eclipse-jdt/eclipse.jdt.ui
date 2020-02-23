@@ -1778,9 +1778,7 @@ public class LocalCorrectionsSubProcessor {
 		}
 
 		boolean hasDefault=false;
-		List<Statement> statements= switchStatements;
-		for (int i= 0; i < statements.size(); i++) {
-			Statement curr= statements.get(i);
+		for (Statement curr : switchStatements) {
 			if (curr instanceof SwitchCase) {
 				SwitchCase switchCase= (SwitchCase) curr;
 				if (switchCase.getAST().isPreviewEnabled()) {
@@ -1855,9 +1853,8 @@ public class LocalCorrectionsSubProcessor {
 			String label= CorrectionMessages.LocalCorrectionsSubProcessor_add_missing_cases_description;
 			LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), astRewrite, IProposalRelevance.ADD_MISSING_CASE_STATEMENTS, image);
 
-			for (int i= 0; i < enumConstNames.size(); i++) {
+			for (String enumConstName : enumConstNames) {
 				SwitchCase newSwitchCase= ast.newSwitchCase();
-				String enumConstName= enumConstNames.get(i);
 				Name newName= ast.newName(enumConstName);
 				if (ast.isPreviewEnabled()) {
 					newSwitchCase.expressions().add(newName);

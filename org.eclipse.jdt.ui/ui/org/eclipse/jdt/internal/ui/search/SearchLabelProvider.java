@@ -14,7 +14,6 @@
 package org.eclipse.jdt.internal.ui.search;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.swt.graphics.Color;
@@ -183,8 +182,7 @@ public abstract class SearchLabelProvider extends AppearanceAwareLabelProvider {
 			fPotentialMatchFgColor= null;
 		}
 		fSearchPreferences.removePropertyChangeListener(fSearchPropertyListener);
-		for (Iterator<ILabelProvider> labelProviders = fLabelProviderMap.values().iterator(); labelProviders.hasNext();) {
-			ILabelProvider labelProvider = labelProviders.next();
+		for (ILabelProvider labelProvider : fLabelProviderMap.values()) {
 			labelProvider.dispose();
 		}
 
@@ -198,8 +196,7 @@ public abstract class SearchLabelProvider extends AppearanceAwareLabelProvider {
 	@Override
 	public void addListener(ILabelProviderListener listener) {
 		super.addListener(listener);
-		for (Iterator<ILabelProvider> labelProviders = fLabelProviderMap.values().iterator(); labelProviders.hasNext();) {
-			ILabelProvider labelProvider = labelProviders.next();
+		for (ILabelProvider labelProvider : fLabelProviderMap.values()) {
 			labelProvider.addListener(listener);
 		}
 	}
@@ -214,8 +211,7 @@ public abstract class SearchLabelProvider extends AppearanceAwareLabelProvider {
 	@Override
 	public void removeListener(ILabelProviderListener listener) {
 		super.removeListener(listener);
-		for (Iterator<ILabelProvider> labelProviders = fLabelProviderMap.values().iterator(); labelProviders.hasNext();) {
-			ILabelProvider labelProvider = labelProviders.next();
+		for (ILabelProvider labelProvider : fLabelProviderMap.values()) {
 			labelProvider.removeListener(listener);
 		}
 	}

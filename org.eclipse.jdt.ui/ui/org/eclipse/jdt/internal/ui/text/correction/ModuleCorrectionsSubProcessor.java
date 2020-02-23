@@ -223,8 +223,7 @@ public class ModuleCorrectionsSubProcessor {
 
 		IClasspathEntry[] existingEntries= javaProject.readRawClasspath();
 		if (existingEntries != null && existingEntries.length > 0) {
-			for (int i= 0; i < moduleDescriptions.size(); i++) {
-				IModuleDescription moduleDesc= moduleDescriptions.get(i);
+			for (IModuleDescription moduleDesc : moduleDescriptions) {
 				IPackageFragmentRoot root= (IPackageFragmentRoot) moduleDesc.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 				if (root != null) {
 					IClasspathEntry entry= null;

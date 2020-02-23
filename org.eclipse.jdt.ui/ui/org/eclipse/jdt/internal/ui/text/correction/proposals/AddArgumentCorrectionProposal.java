@@ -69,8 +69,7 @@ public class AddArgumentCorrectionProposal extends LinkedCorrectionProposal {
 
 	private ChildListPropertyDescriptor getProperty() {
 		List<StructuralPropertyDescriptor> list= fCallerNode.structuralPropertiesForType();
-		for (int i= 0; i < list.size(); i++) {
-			StructuralPropertyDescriptor curr= list.get(i);
+		for (StructuralPropertyDescriptor curr : list) {
 			if (curr.isChildListProperty() && "arguments".equals(curr.getId())) { //$NON-NLS-1$
 				return (ChildListPropertyDescriptor) curr;
 			}

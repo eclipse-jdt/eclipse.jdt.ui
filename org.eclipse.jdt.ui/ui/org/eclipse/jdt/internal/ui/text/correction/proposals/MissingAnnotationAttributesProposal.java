@@ -82,8 +82,7 @@ public class MissingAnnotationAttributesProposal extends LinkedCorrectionProposa
 		Set<String> implementedAttribs= new HashSet<>();
 		if (fAnnotation instanceof NormalAnnotation) {
 			List<MemberValuePair> list= ((NormalAnnotation) fAnnotation).values();
-			for (int i= 0; i < list.size(); i++) {
-				MemberValuePair curr= list.get(i);
+			for (MemberValuePair curr : list) {
 				implementedAttribs.add(curr.getName().getIdentifier());
 			}
 		} else if (fAnnotation instanceof SingleMemberAnnotation){

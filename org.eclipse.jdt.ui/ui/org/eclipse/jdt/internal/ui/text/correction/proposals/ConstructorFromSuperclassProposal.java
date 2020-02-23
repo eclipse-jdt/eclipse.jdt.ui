@@ -120,8 +120,7 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 
 	private void addLinkedRanges(ASTRewrite rewrite, MethodDeclaration newStub) {
 		List<SingleVariableDeclaration> parameters= newStub.parameters();
-		for (int i= 0; i < parameters.size(); i++) {
-			SingleVariableDeclaration curr= parameters.get(i);
+		for (SingleVariableDeclaration curr : parameters) {
 			String name= curr.getName().getIdentifier();
 			addLinkedPosition(rewrite.track(curr.getType()), false, "arg_type_" + name); //$NON-NLS-1$
 			addLinkedPosition(rewrite.track(curr.getName()), false, "arg_name_" + name); //$NON-NLS-1$

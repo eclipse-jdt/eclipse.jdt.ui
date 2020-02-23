@@ -13,7 +13,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -81,8 +80,7 @@ public class CorrectMainTypeNameProposal extends ASTRewriteCorrectionProposal {
 	}
 
 	private AbstractTypeDeclaration findTypeDeclaration(List<AbstractTypeDeclaration> types, String name) {
-		for (Iterator<AbstractTypeDeclaration> iter= types.iterator(); iter.hasNext();) {
-			AbstractTypeDeclaration decl= iter.next();
+		for (AbstractTypeDeclaration decl : types) {
 			if (name.equals(decl.getName().getIdentifier())) {
 				return decl;
 			}

@@ -344,8 +344,8 @@ public class JavadocTagsSubProcessor {
 				Set<String> sameKindLeadingNames= getPreviousParamNames(params, decl);
 
 				List<TypeParameter> typeParams= methodDeclaration.typeParameters();
-				for (int i= 0; i < typeParams.size(); i++) {
-					String curr= '<' + typeParams.get(i).getName().getIdentifier() + '>';
+				for (TypeParameter typeParam : typeParams) {
+					String curr= '<' + typeParam.getName().getIdentifier() + '>';
 					sameKindLeadingNames.add(curr);
 				}
 				insertTag(tagsRewriter, newTag, sameKindLeadingNames);
@@ -703,8 +703,7 @@ public class JavadocTagsSubProcessor {
 
 	public static Set<String> getPreviousTypeParamNames(List<TypeParameter> typeParams, ASTNode missingNode) {
 		Set<String> previousNames=  new HashSet<>();
-		for (int i = 0; i < typeParams.size(); i++) {
-			TypeParameter curr= typeParams.get(i);
+		for (TypeParameter curr : typeParams) {
 			if (curr == missingNode) {
 				return previousNames;
 			}
@@ -739,8 +738,7 @@ public class JavadocTagsSubProcessor {
 
 	private static Set<String> getPreviousParamNames(List<SingleVariableDeclaration> params, ASTNode missingNode) {
 		Set<String> previousNames=  new HashSet<>();
-		for (int i = 0; i < params.size(); i++) {
-			SingleVariableDeclaration curr= params.get(i);
+		for (SingleVariableDeclaration curr : params) {
 			if (curr == missingNode) {
 				return previousNames;
 			}

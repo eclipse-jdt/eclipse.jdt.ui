@@ -223,8 +223,8 @@ public class JavaCommentScanner extends AbstractJavaScanner{
 		List<WordMatcher> matchers= createMatchers();
 		if (matchers.size() > 0) {
 			CombinedWordRule combinedWordRule= new CombinedWordRule(new AtJavaIdentifierDetector(), defaultToken);
-			for (int i= 0, n= matchers.size(); i < n; i++)
-				combinedWordRule.addWordMatcher(matchers.get(i));
+			for (WordMatcher matcher : matchers)
+				combinedWordRule.addWordMatcher(matcher);
 			list.add(combinedWordRule);
 		}
 

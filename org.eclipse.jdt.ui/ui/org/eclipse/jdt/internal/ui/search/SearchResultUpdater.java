@@ -14,7 +14,6 @@
 package org.eclipse.jdt.internal.ui.search;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IAdaptable;
@@ -88,8 +87,8 @@ public class SearchResultUpdater implements IElementChangedListener, IQueryListe
 	}
 
 	private boolean isContainedInRemoved(Set<IAdaptable> removedElements, Object object) {
-		for (Iterator<IAdaptable> elements= removedElements.iterator(); elements.hasNext();) {
-			if (isParentOf(elements.next(), object))
+		for (IAdaptable iAdaptable : removedElements) {
+			if (isParentOf(iAdaptable, object))
 				return true;
 		}
 		return false;

@@ -264,8 +264,8 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 			HashSet<Object> children= (HashSet<Object>) entry.getValue();
 			viewer.add(parent, children.toArray());
 		}
-		for (Iterator<Object> elementsToUpdate= toUpdate.iterator(); elementsToUpdate.hasNext();) {
-			viewer.refresh(elementsToUpdate.next());
+		for (Object object : toUpdate) {
+			viewer.refresh(object);
 		}
 
 	}

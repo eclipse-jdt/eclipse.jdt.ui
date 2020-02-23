@@ -81,8 +81,8 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		 * @return <code>true</code> iff the character is an operator, <code>false</code> otherwise.
 		 */
 		public boolean isOperator(char character) {
-			for (int index= 0; index < JAVA_OPERATORS.length; index++) {
-				if (JAVA_OPERATORS[index] == character)
+			for (char element : JAVA_OPERATORS) {
+				if (element == character)
 					return true;
 			}
 			return false;
@@ -133,8 +133,8 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		 * @return <code>true</code> iff the character is a bracket, <code>false</code> otherwise.
 		 */
 		public boolean isBracket(char character) {
-			for (int index= 0; index < JAVA_BRACKETS.length; index++) {
-				if (JAVA_BRACKETS[index] == character)
+			for (char element : JAVA_BRACKETS) {
+				if (element == character)
 					return true;
 			}
 			return false;

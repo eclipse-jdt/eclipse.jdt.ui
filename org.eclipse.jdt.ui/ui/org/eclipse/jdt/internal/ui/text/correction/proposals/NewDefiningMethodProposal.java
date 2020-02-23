@@ -149,16 +149,14 @@ public class NewDefiningMethodProposal extends AbstractMethodCorrectionProposal 
 	@Override
 	protected void addNewTypeParameters(ASTRewrite rewrite, List<String> takenNames, List<TypeParameter> typeParameters, ImportRewriteContext context) throws CoreException {
 		AST ast= rewrite.getAST();
-		ITypeBinding[] typeParams= fMethod.getTypeParameters();
-		for (int i= 0; i < typeParams.length; i++) {
-			ITypeBinding current= typeParams[i];
+		for (ITypeBinding current : fMethod.getTypeParameters()) {
 			TypeParameter newTypeParameter= ast.newTypeParameter();
 			newTypeParameter.setName(ast.newSimpleName(current.getName()));
 			ITypeBinding[] typeBounds= current.getTypeBounds();
 			if (typeBounds.length != 1 || !"java.lang.Object".equals(typeBounds[0].getQualifiedName())) {//$NON-NLS-1$
 				List<Type> newTypeBounds= newTypeParameter.typeBounds();
-				for (int k= 0; k < typeBounds.length; k++) {
-					newTypeBounds.add(getImportRewrite().addImport(typeBounds[k], ast, context, TypeLocation.TYPE_BOUND));
+				for (ITypeBinding typeBound : typeBounds) {
+					newTypeBounds.add(getImportRewrite().addImport(typeBound, ast, context, TypeLocation.TYPE_BOUND));
 				}
 			}
 			typeParameters.add(newTypeParameter);

@@ -104,8 +104,7 @@ public class DefaultModulepathFixProcessor extends DefaultClasspathFixProcessor 
 		HashMap<IClasspathEntry, IModuleDescription> classPathEntryToModuleMap= new HashMap<>();
 		HashSet<IClasspathEntry> classpaths= new HashSet<>();
 		HashSet<String> typesWithModule= new HashSet<>();
-		for (int i= 0; i < res.size(); i++) {
-			IModuleDescription curr= res.get(i);
+		for (IModuleDescription curr : res) {
 			if (curr != null) {
 				IPackageFragmentRoot root= (IPackageFragmentRoot) curr.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 				try {
@@ -138,8 +137,7 @@ public class DefaultModulepathFixProcessor extends DefaultClasspathFixProcessor 
 
 
 		HashSet<Object> addedClaspaths= new HashSet<>();
-		for (int i= 0; i < res.size(); i++) {
-			IModuleDescription curr= res.get(i);
+		for (IModuleDescription curr : res) {
 			if (curr != null) {
 				IPackageFragmentRoot root= (IPackageFragmentRoot) curr.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 				try {

@@ -518,8 +518,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			// if there is no block, create it
 			ifParentBlock= ast.newBlock();
 			ifParentBlock.statements().add(newIf);
-			for (Iterator<Statement> iter= getUnwrappedStatements(ifStatement.getThenStatement()).iterator(); iter.hasNext();) {
-				Statement statement= iter.next();
+			for (Statement statement : getUnwrappedStatements(ifStatement.getThenStatement())) {
 				ifParentBlock.statements().add(rewrite.createMoveTarget(statement));
 			}
 			// replace 'if' statement as body with new block
@@ -533,8 +532,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			ListRewrite listRewriter= rewrite.getListRewrite(ifParentBlock, (ChildListPropertyDescriptor) ifStatement.getLocationInParent());
 			listRewriter.replace(ifStatement, newIf, null);
 			// add statements from 'then' to the end of block
-			for (Iterator<Statement> iter= getUnwrappedStatements(ifStatement.getThenStatement()).iterator(); iter.hasNext();) {
-				Statement statement= iter.next();
+			for (Statement statement : getUnwrappedStatements(ifStatement.getThenStatement())) {
 				listRewriter.insertLast(rewrite.createMoveTarget(statement), null);
 			}
 		}
@@ -568,8 +566,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		final ASTRewrite rewrite= ASTRewrite.create(ast);
 		// check sub-expressions in fully covered nodes
 		boolean hasChanges= false;
-		for (Iterator<ASTNode> iter= coveredNodes.iterator(); iter.hasNext();) {
-			ASTNode covered= iter.next();
+		for (ASTNode covered : coveredNodes) {
 			Expression coveredExpression= getBooleanExpression(covered);
 			if (coveredExpression != null) {
 				Expression inversedExpression= getInversedExpression(rewrite, coveredExpression);
@@ -1083,9 +1080,9 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			return ASTNodes.getExclusiveEnd(left);
 		}
 		List<Expression> extended= infixExpression.extendedOperands();
-		for (int i= 0; i < extended.size(); i++) {
+		for (Expression element : extended) {
 			left= right;
-			right= extended.get(i);
+			right= element;
 			if (isSelectingOperator(left, right, offset, length)) {
 				return ASTNodes.getExclusiveEnd(left);
 			}
@@ -1099,8 +1096,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			return false;
 		// check that all covered nodes are IfStatement's with same 'then' statement and without 'else'
 		String commonThenSource= null;
-		for (Iterator<ASTNode> iter= coveredNodes.iterator(); iter.hasNext();) {
-			ASTNode node= iter.next();
+		for (ASTNode node : coveredNodes) {
 			if (!(node instanceof IfStatement))
 				return false;
 			//
@@ -1131,8 +1127,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		InfixExpression condition= null;
 		boolean hasRightOperand= false;
 		Statement thenStatement= null;
-		for (Iterator<ASTNode> iter= coveredNodes.iterator(); iter.hasNext();) {
-			IfStatement ifStatement= (IfStatement) iter.next();
+		for (ASTNode astNode : coveredNodes) {
+			IfStatement ifStatement= (IfStatement) astNode;
 			if (thenStatement == null)
 				thenStatement= (Statement) rewrite.createCopyTarget(ifStatement.getThenStatement());
 			if (condition == null) {
@@ -1156,8 +1152,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		newIf.setThenStatement(thenStatement);
 		//
 		ListRewrite listRewriter= null;
-		for (Iterator<ASTNode> iter= coveredNodes.iterator(); iter.hasNext();) {
-			IfStatement ifStatement= (IfStatement) iter.next();
+		for (ASTNode astNode : coveredNodes) {
+			IfStatement ifStatement= (IfStatement) astNode;
 			if (listRewriter == null) {
 				Block sourceBlock= (Block) ifStatement.getParent();
 				//int insertIndex = sourceBlock.statements().indexOf(ifStatement);
@@ -1458,8 +1454,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		breakInfixOperationAtOperation(rewrite, infixExpression.getRightOperand(), operator, operatorOffset, removeParentheses, res);
 
 		List<Expression> extended= infixExpression.extendedOperands();
-		for (int i= 0; i < extended.size(); i++) {
-			breakInfixOperationAtOperation(rewrite, extended.get(i), operator, operatorOffset, removeParentheses, res);
+		for (Expression element : extended) {
+			breakInfixOperationAtOperation(rewrite, element, operator, operatorOffset, removeParentheses, res);
 		}
 	}
 
@@ -2181,8 +2177,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				};
 				Expression inversedExpression= getInversedExpression(rewrite, expression, provider);
 				// if any name was not renamed during expression inverting, we can not already rename it, so fail to create assist
-				for (Iterator<SimpleName> iter= overlapNames.iterator(); iter.hasNext();) {
-					Object o= iter.next();
+				for (SimpleName simpleName : overlapNames) {
+					Object o= simpleName;
 					if (!renamedNames.contains(o)) {
 						return false;
 					}
@@ -2361,8 +2357,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			return false;
 		}
 		// check that all selected nodes are 'if' statements with only 'then' statement
-		for (Iterator<ASTNode> iter= coveredNodes.iterator(); iter.hasNext();) {
-			ASTNode node= iter.next();
+		for (ASTNode node : coveredNodes) {
 			if (!(node instanceof IfStatement)) {
 				return false;
 			}
@@ -2383,8 +2378,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		IfStatement firstNewIfStatement= null;
 		//
 		IfStatement prevIfStatement= null;
-		for (Iterator<ASTNode> iter= coveredNodes.iterator(); iter.hasNext();) {
-			IfStatement ifStatement= (IfStatement) iter.next();
+		for (ASTNode astNode : coveredNodes) {
+			IfStatement ifStatement= (IfStatement) astNode;
 			// prepare new 'if' statement
 			IfStatement newIfStatement= ast.newIfStatement();
 			newIfStatement.setExpression((Expression) rewrite.createMoveTarget(ifStatement.getExpression()));
@@ -2549,8 +2544,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			currentIfStatement.setElseStatement(defaultBlock);
 		}
 		// remove unnecessary blocks in blocks
-		for (int i= 0; i < allBlocks.size(); i++) {
-			Block block= allBlocks.get(i);
+		for (Block block : allBlocks) {
 			List<Statement> statements= block.statements();
 			if (statements.size() == 1 && statements.get(0) instanceof Block) {
 				Block innerBlock= (Block) statements.remove(0);

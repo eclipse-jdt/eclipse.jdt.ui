@@ -14,7 +14,6 @@
 package org.eclipse.jdt.internal.ui.text.java;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -82,8 +81,8 @@ public class JavaTypeCompletionProposalComputer extends JavaCompletionProposalCo
 					// compute minmimum relevance and already proposed list
 					int relevance= Integer.MAX_VALUE;
 					Set<String> proposed= new HashSet<>();
-					for (Iterator<ICompletionProposal> it= types.iterator(); it.hasNext();) {
-						AbstractJavaCompletionProposal p= (AbstractJavaCompletionProposal) it.next();
+					for (ICompletionProposal iCompletionProposal : types) {
+						AbstractJavaCompletionProposal p= (AbstractJavaCompletionProposal) iCompletionProposal;
 						IJavaElement element= p.getJavaElement();
 						if (element instanceof IType)
 							proposed.add(((IType) element).getFullyQualifiedName());

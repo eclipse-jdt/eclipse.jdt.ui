@@ -14,7 +14,6 @@
 package org.eclipse.jdt.internal.ui.search;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -154,8 +153,8 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 
 	private void handleResourceDeclarations(TryStatement tryStatement) {
 		List<Expression> resources= tryStatement.resources();
-		for (Iterator<Expression> iterator= resources.iterator(); iterator.hasNext();) {
-			iterator.next().accept(this);
+		for (Expression expression : resources) {
+			expression.accept(this);
 		}
 
 		//check if the exception is thrown as a result of resource#close()
@@ -297,8 +296,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 			}
 		}
 		List<Type> thrownExceptionTypes= node.thrownExceptionTypes();
-		for (Iterator<Type> iter= thrownExceptionTypes.iterator(); iter.hasNext(); ) {
-			Type type = iter.next();
+		for (Type type : thrownExceptionTypes) {
 			if (type != fSelectedNode && Bindings.equals(fException, type.resolveBinding())) {
 				fResult.add(new OccurrenceLocation(type.getStartPosition(), type.getLength(), 0, fDescription));
 			}
@@ -350,12 +348,12 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 	public boolean visit(TryStatement node) {
 		int currentSize= fCaughtExceptions.size();
 		List<CatchClause> catchClauses= node.catchClauses();
-		for (Iterator<CatchClause> iter= catchClauses.iterator(); iter.hasNext();) {
-			Type type= iter.next().getException().getType();
+		for (CatchClause catchClause : catchClauses) {
+			Type type= catchClause.getException().getType();
 			if (type instanceof UnionType) {
 				List<Type> types= ((UnionType) type).types();
-				for (Iterator<Type> iterator= types.iterator(); iterator.hasNext();) {
-					addCaughtException(iterator.next());
+				for (Type type2 : types) {
+					addCaughtException(type2);
 				}
 			} else {
 				addCaughtException(type);
@@ -372,8 +370,8 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 		}
 
 		// visit catch and finally
-		for (Iterator<CatchClause> iter= catchClauses.iterator(); iter.hasNext();) {
-			iter.next().accept(this);
+		for (CatchClause catchClause : catchClauses) {
+			catchClause.accept(this);
 		}
 		if (node.getFinally() != null)
 			node.getFinally().accept(this);
@@ -419,8 +417,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 	}
 
 	private boolean isCaught(ITypeBinding binding) {
-		for (Iterator<ITypeBinding> iter= fCaughtExceptions.iterator(); iter.hasNext();) {
-			ITypeBinding catchException= iter.next();
+		for (ITypeBinding catchException : fCaughtExceptions) {
 			if (catches(catchException, binding))
 				return true;
 		}

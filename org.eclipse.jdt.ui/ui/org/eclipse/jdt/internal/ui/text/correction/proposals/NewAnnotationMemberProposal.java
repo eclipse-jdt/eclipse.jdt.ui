@@ -128,8 +128,7 @@ public class NewAnnotationMemberProposal extends LinkedCorrectionProposal {
 
 	private int evaluateModifiers(AnnotationTypeDeclaration targetTypeDecl) {
 		List<BodyDeclaration> methodDecls= targetTypeDecl.bodyDeclarations();
-		for (int i= 0; i < methodDecls.size(); i++) {
-			Object curr= methodDecls.get(i);
+		for (BodyDeclaration curr : methodDecls) {
 			if (curr instanceof AnnotationTypeMemberDeclaration) {
 				return ((AnnotationTypeMemberDeclaration) curr).getModifiers();
 			}

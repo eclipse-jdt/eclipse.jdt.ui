@@ -147,8 +147,7 @@ public class ReorgCorrectionsSubProcessor {
 
 		boolean found= false;
 		List<AbstractTypeDeclaration> types= root.types();
-		for (int i= 0; i < types.size(); i++) {
-			AbstractTypeDeclaration curr= types.get(i);
+		for (AbstractTypeDeclaration curr : types) {
 			if (parentType != curr) {
 				if (newTypeName.equals(curr.getName().getIdentifier())) {
 					return;

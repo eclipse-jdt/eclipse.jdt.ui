@@ -74,8 +74,7 @@ public class ReturnTypeSubProcessor {
 
 		public ITypeBinding getTypeBinding(AST ast) {
 			boolean couldBeObject= false;
-			for (int i= 0; i < fResult.size(); i++) {
-				ReturnStatement node= fResult.get(i);
+			for (ReturnStatement node : fResult) {
 				Expression expr= node.getExpression();
 				if (expr != null) {
 					ITypeBinding binding= Bindings.normalizeTypeBinding(expr.resolveTypeBinding());
