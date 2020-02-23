@@ -177,8 +177,8 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 		@Override
 		protected void open(ISelection selection, boolean activate) {
 			if (selection instanceof IStructuredSelection) {
-				for (Iterator<?> iter= ((IStructuredSelection)selection).iterator(); iter.hasNext();) {
-					boolean noError= CallHierarchyUI.openInEditor(iter.next(), getSite().getShell(), OpenStrategy.activateOnOpen());
+				for (Object object : ((IStructuredSelection)selection)) {
+					boolean noError= CallHierarchyUI.openInEditor(object, getSite().getShell(), OpenStrategy.activateOnOpen());
 					if (!noError)
 						return;
 				}
@@ -750,8 +750,8 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
      * @param entry the history entry
      */
     public void gotoHistoryEntry(IMember[] entry) {
-    	for (Iterator<IMember[]> iter= getMethodHistory().iterator(); iter.hasNext(); ) {
-			if (Arrays.equals(entry, iter.next())) {
+    	for (IMember[] name : getMethodHistory()) {
+			if (Arrays.equals(entry, name)) {
 				setInputElements(entry);
 				return;
 			}

@@ -186,8 +186,8 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 
 	private void addFragmentsToMap(List<IAdaptable> elements) {
 		List<IPackageFragment> packageFragments= new ArrayList<>();
-		for (Iterator<IAdaptable> iter= elements.iterator(); iter.hasNext();) {
-			Object elem= iter.next();
+		for (IAdaptable iAdaptable : elements) {
+			Object elem= iAdaptable;
 			if (elem instanceof IPackageFragment)
 				packageFragments.add((IPackageFragment) elem);
 		}

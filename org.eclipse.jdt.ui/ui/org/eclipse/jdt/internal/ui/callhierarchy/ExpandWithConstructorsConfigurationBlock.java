@@ -49,6 +49,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
+
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -60,7 +62,6 @@ import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
 import org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -269,13 +270,7 @@ public class ExpandWithConstructorsConfigurationBlock extends OptionsConfigurati
 		 *         <code>false</code> otherwise
 		 */
 		private boolean doesExist(String name) {
-			for (int i= 0; i < fExistingEntries.size(); i++) {
-				String entry= fExistingEntries.get(i);
-				if (name.equals(entry)) {
-					return true;
-				}
-			}
-			return false;
+			return fExistingEntries.contains(name);
 		}
 
 
@@ -634,14 +629,7 @@ public class ExpandWithConstructorsConfigurationBlock extends OptionsConfigurati
 	 * @return the single output string from the list of strings using a delimiter
 	 */
 	public static String serializeMembers(List<String> list) {
-		int size= list.size();
-		StringBuilder buf= new StringBuilder();
-		for (int i= 0; i < size; i++) {
-			buf.append(list.get(i));
-			if (i < size - 1)
-				buf.append(';');
-		}
-		return buf.toString();
+		return String.join(";", list.toArray(new String[list.size()])); //$NON-NLS-1$
 	}
 
 }

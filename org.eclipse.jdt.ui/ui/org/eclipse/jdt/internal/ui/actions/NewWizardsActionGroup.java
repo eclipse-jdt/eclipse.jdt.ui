@@ -14,7 +14,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.actions;
 
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.IResource;
@@ -88,8 +87,8 @@ public class NewWizardsActionGroup extends ActionGroup {
 			return true;
 
 		List<?> list= sel.toList();
-		for (Iterator<?> iterator= list.iterator(); iterator.hasNext();) {
-			if (!isNewTarget(iterator.next()))
+		for (Object name : list) {
+			if (!isNewTarget(name))
 				return false;
 		}
 

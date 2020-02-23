@@ -14,7 +14,6 @@
 package org.eclipse.jdt.internal.ui.browsing;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
@@ -93,8 +92,7 @@ public class LogicalPackage extends PlatformObject {
 	}
 
 	public boolean hasSubpackages() throws JavaModelException {
-		for (Iterator<IPackageFragment> iter= fPackages.iterator(); iter.hasNext();) {
-			IPackageFragment pack= iter.next();
+		for (IPackageFragment pack : fPackages) {
 			if (pack.hasSubpackages()) {
 				return true;
 			}

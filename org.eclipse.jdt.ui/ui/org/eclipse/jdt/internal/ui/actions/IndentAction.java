@@ -15,7 +15,6 @@
 package org.eclipse.jdt.internal.ui.actions;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.ResourceBundle;
 
 import org.eclipse.swt.custom.BusyIndicator;
@@ -299,9 +298,8 @@ public class IndentAction extends TextEditorAction {
 			return edits.get(0);
 
 		MultiTextEdit result= new MultiTextEdit();
-		for (Iterator<ReplaceEdit> iterator= edits.iterator(); iterator.hasNext();) {
-			TextEdit edit= iterator.next();
-			result.addChild(edit);
+		for (ReplaceEdit replaceEdit : edits) {
+			result.addChild(replaceEdit);
 		}
 
 		return result;
@@ -605,11 +603,11 @@ public class IndentAction extends TextEditorAction {
 			return 0;
 		else {
 			int size= 0;
-			int l= indent.length();
 			int tabSize= getTabSize(project);
 
-			for (int i= 0; i < l; i++)
-				size += indent.charAt(i) == '\t' ? tabSize : 1;
+			for (char c : indent.toCharArray()) {
+				size += c == '\t' ? tabSize : 1;
+			}
 			return size;
 		}
 	}
@@ -625,10 +623,12 @@ public class IndentAction extends TextEditorAction {
 		String tab;
 		if (JavaCore.SPACE.equals(getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, project))) {
 			int size= getTabSize(project);
-			StringBuilder buf= new StringBuilder();
-			for (int i= 0; i< size; i++)
-				buf.append(' ');
-			tab= buf.toString();
+
+			if (size < 1) {
+				tab= ""; //$NON-NLS-1$
+			} else {
+				tab= String.format("%" + size + "s", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			}
 		} else
 			tab= "\t"; //$NON-NLS-1$
 

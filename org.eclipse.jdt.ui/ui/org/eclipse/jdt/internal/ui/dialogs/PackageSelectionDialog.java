@@ -173,8 +173,8 @@ public class PackageSelectionDialog extends ElementListSelectionDialog {
 				monitor.beginTask(JavaUIMessages.PackageSelectionDialog_progress_findEmpty, packageList.size());
 				try {
 					ArrayList<IPackageFragment> res= new ArrayList<>(packageList.size());
-					for (int i= 0; i < packageList.size(); i++) {
-						IPackageFragment pkg= (IPackageFragment) packageList.get(i);
+					for (IJavaElement element : packageList) {
+						IPackageFragment pkg= (IPackageFragment) element;
 						if (pkg.hasChildren() || !pkg.hasSubpackages()) {
 							res.add(pkg);
 						}

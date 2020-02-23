@@ -231,8 +231,8 @@ public class OccurrencesSearchMenuAction implements IWorkbenchWindowPulldownDele
 		if (activeActions.isEmpty()) {
 			manager.add(NO_ACTION_AVAILABLE);
 		} else {
-			for (int i= 0; i < activeActions.size(); i++) {
-				manager.add(activeActions.get(i));
+			for (IAction activeAction : activeActions) {
+				manager.add(activeAction);
 			}
 		}
 	}

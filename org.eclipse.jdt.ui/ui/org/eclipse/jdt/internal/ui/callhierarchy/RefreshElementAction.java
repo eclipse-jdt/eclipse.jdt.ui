@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jface.action.Action;
@@ -65,8 +64,8 @@ public class RefreshElementAction extends Action {
 			return;
 		}
 		List<MethodWrapper> toExpand= new ArrayList<>();
-		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
-			MethodWrapper element= (MethodWrapper)iter.next();
+		for (Object object : selection) {
+			MethodWrapper element= (MethodWrapper) object;
 			boolean isExpanded= fViewer.getExpandedState(element);
 			element.removeFromCache();
 			if (isExpanded) {
@@ -75,8 +74,7 @@ public class RefreshElementAction extends Action {
 			}
 			fViewer.refresh(element);
 		}
-		for (Iterator<MethodWrapper> iter= toExpand.iterator(); iter.hasNext();) {
-			MethodWrapper elem= iter.next();
+		for (MethodWrapper elem : toExpand) {
 			fViewer.setExpandedState(elem, true);
 		}
 	}

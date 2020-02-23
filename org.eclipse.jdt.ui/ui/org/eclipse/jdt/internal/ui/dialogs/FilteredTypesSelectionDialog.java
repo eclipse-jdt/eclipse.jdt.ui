@@ -392,16 +392,16 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 		List<IType> resultToReturn= new ArrayList<>();
 
-		for (int i= 0; i < newResult.size(); i++) {
-			if (newResult.get(i) instanceof TypeNameMatch) {
-				IType type= ((TypeNameMatch) newResult.get(i)).getType();
+		for (Object element : newResult) {
+			if (element instanceof TypeNameMatch) {
+				IType type= ((TypeNameMatch) element).getType();
 				if (type.exists()) {
 					// items are added to history in the
 					// org.eclipse.ui.dialogs.FilteredItemsSelectionDialog#computeResult()
 					// method
 					resultToReturn.add(type);
 				} else {
-					TypeNameMatch typeInfo= (TypeNameMatch) newResult.get(i);
+					TypeNameMatch typeInfo= (TypeNameMatch) element;
 					IPackageFragmentRoot root= typeInfo.getPackageFragmentRoot();
 					String containerName= JavaElementLabels.getElementLabel(root, JavaElementLabels.ROOT_QUALIFIED);
 					String message= Messages.format(JavaUIMessages.FilteredTypesSelectionDialog_dialogMessage, new String[] { TypeNameMatchLabelProvider.getText(typeInfo, TypeNameMatchLabelProvider.SHOW_FULLYQUALIFIED), containerName });
