@@ -16,7 +16,6 @@ package org.eclipse.jdt.internal.core.manipulation.dom;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -483,8 +482,7 @@ public class ASTResolving {
 	}
 
 	public static ITypeBinding guessVariableType(List<VariableDeclarationFragment> fragments) {
-		for (Iterator<VariableDeclarationFragment> iter= fragments.iterator(); iter.hasNext();) {
-			VariableDeclarationFragment frag= iter.next();
+		for (VariableDeclarationFragment frag : fragments) {
 			if (frag.getInitializer() != null) {
 				return Bindings.normalizeTypeBinding(frag.getInitializer().resolveTypeBinding());
 			}

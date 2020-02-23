@@ -17,7 +17,6 @@ package org.eclipse.jdt.internal.corext.codemanipulation.tostringgeneration;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -372,8 +371,7 @@ public abstract class AbstractToStringGenerator {
 			// i < length;
 			forStatement.setExpression(createInfixExpression(fAst.newSimpleName(indexName), Operator.LESS, fAst.newSimpleName(lengthParamName)));
 
-			for (Iterator<ITypeBinding> iterator= typesThatNeedArrayToStringMethod.iterator(); iterator.hasNext();) {
-				ITypeBinding typeBinding= iterator.next();
+			for (ITypeBinding typeBinding : typesThatNeedArrayToStringMethod) {
 				//if (array instanceof int[]) {
 				String typeName= typeBinding.getName();
 				PrimitiveType.Code code= null;

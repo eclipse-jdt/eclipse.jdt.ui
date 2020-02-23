@@ -214,23 +214,21 @@ public class CustomBuilderGenerator extends AbstractToStringGenerator {
 		try {
 			IJavaProject javaProject= getContext().getTypeBinding().getJavaElement().getJavaProject();
 			IType type= javaProject.findType(getContext().getCustomBuilderClass());
-			IType[] types= type.newSupertypeHierarchy(null).getAllClasses();
-			for (int i= 0; i < types.length; i++) {
-				IMethod[] methods= types[i].getMethods();
-				for (int j= 0; j < methods.length; j++) {
-					if (!Flags.isPublic(methods[j].getFlags()) || !methods[j].getElementName().equals(getContext().getCustomBuilderAppendMethod()))
+			for (IType type2 : type.newSupertypeHierarchy(null).getAllClasses()) {
+				for (IMethod method : type2.getMethods()) {
+					if (!Flags.isPublic(method.getFlags()) || !method.getElementName().equals(getContext().getCustomBuilderAppendMethod()))
 						continue;
-					String[] parameterTypes= methods[j].getParameterTypes();
+					String[] parameterTypes= method.getParameterTypes();
 					AppendMethodInformation appendMethodInformation= new AppendMethodInformation();
 					String specyficType;
 					switch (parameterTypes.length) {
 					case 1:
-						specyficType= JavaModelUtil.getResolvedTypeName(parameterTypes[0], types[i]);
+						specyficType= JavaModelUtil.getResolvedTypeName(parameterTypes[0], type2);
 						appendMethodInformation.methodType= 1;
 						break;
 					case 2:
-						String resolvedParameterTypeName1= JavaModelUtil.getResolvedTypeName(parameterTypes[0], types[i]);
-						String resolvedParameterTypeName2= JavaModelUtil.getResolvedTypeName(parameterTypes[1], types[i]);
+						String resolvedParameterTypeName1= JavaModelUtil.getResolvedTypeName(parameterTypes[0], type2);
+						String resolvedParameterTypeName2= JavaModelUtil.getResolvedTypeName(parameterTypes[1], type2);
 						if (resolvedParameterTypeName1.equals("java.lang.String")) {//$NON-NLS-1$
 							specyficType= resolvedParameterTypeName2;
 							appendMethodInformation.methodType= 3;
@@ -244,7 +242,7 @@ public class CustomBuilderGenerator extends AbstractToStringGenerator {
 						continue;
 					}
 
-					String returnTypeName= JavaModelUtil.getResolvedTypeName(methods[j].getReturnType(), types[i]);
+					String returnTypeName= JavaModelUtil.getResolvedTypeName(method.getReturnType(), type2);
 					IType returnType= javaProject.findType(returnTypeName);
 					appendMethodInformation.returnsBuilder= (returnType != null) && returnType.newSupertypeHierarchy(null).contains(type);
 

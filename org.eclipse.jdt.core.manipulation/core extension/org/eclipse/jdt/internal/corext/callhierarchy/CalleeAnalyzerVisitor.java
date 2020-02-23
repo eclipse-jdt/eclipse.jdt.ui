@@ -16,7 +16,6 @@
 package org.eclipse.jdt.internal.corext.callhierarchy;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -126,8 +125,7 @@ class CalleeAnalyzerVisitor extends HierarchicalASTVisitor {
 
     	if (isNodeWithinMethod(node)) {
     		List<BodyDeclaration> bodyDeclarations= node.bodyDeclarations();
-    		for (Iterator<BodyDeclaration> iter= bodyDeclarations.iterator(); iter.hasNext(); ) {
-				BodyDeclaration bodyDeclaration= iter.next();
+    		for (BodyDeclaration bodyDeclaration : bodyDeclarations) {
 				if (bodyDeclaration instanceof MethodDeclaration) {
 					MethodDeclaration child= (MethodDeclaration) bodyDeclaration;
 					if (child.isConstructor()) {

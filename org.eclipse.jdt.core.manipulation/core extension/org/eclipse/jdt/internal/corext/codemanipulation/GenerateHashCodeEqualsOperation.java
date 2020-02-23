@@ -21,7 +21,6 @@ package org.eclipse.jdt.internal.corext.codemanipulation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
@@ -351,9 +350,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 				addMethod(rewriter, equalsMethod, hashCodeMethod, oldHash);
 
 				// helpers
-				for (final Iterator<ITypeBinding> iterator= fCustomHashCodeTypes.iterator(); iterator.hasNext();) {
-					final ITypeBinding binding= iterator.next();
-
+				for (ITypeBinding binding : fCustomHashCodeTypes) {
 					if (findMethodToReplace(list, METHODNAME_HASH_CODE, objectAsParam) == null) {
 						final MethodDeclaration helperDecl= createHashCodeHelper(binding);
 						addHelper(rewriter, null, helperDecl);
@@ -381,8 +378,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 	}
 
 	private BodyDeclaration findMethodToReplace(final List<BodyDeclaration> list, String name, ITypeBinding[] paramTypes) {
-		for (final Iterator<BodyDeclaration> iterator= list.iterator(); iterator.hasNext();) {
-			final BodyDeclaration bodyDecl= iterator.next();
+		for (BodyDeclaration bodyDecl : list) {
 			if (bodyDecl instanceof MethodDeclaration) {
 				final MethodDeclaration method= (MethodDeclaration) bodyDecl;
 				final IMethodBinding binding= method.resolveBinding();

@@ -180,8 +180,7 @@ public class Implementors {
         subProgressMonitor.beginTask("", types.length); //$NON-NLS-1$
 
         try {
-            for (int i = 0; i < types.length; i++) {
-                IType type = types[i];
+            for (IType type : types) {
                 IMethod[] methods = type.findMethods(method);
 
                 if (methods != null) {

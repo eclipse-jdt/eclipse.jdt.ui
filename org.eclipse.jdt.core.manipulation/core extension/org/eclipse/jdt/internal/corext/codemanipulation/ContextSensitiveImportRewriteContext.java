@@ -15,7 +15,6 @@
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -121,8 +120,7 @@ public class ContextSensitiveImportRewriteContext extends ImportRewriteContext {
 		}
 
 		List<AbstractTypeDeclaration> list= fCompilationUnit.types();
-		for (Iterator<AbstractTypeDeclaration> iter= list.iterator(); iter.hasNext();) {
-			AbstractTypeDeclaration type= iter.next();
+		for (AbstractTypeDeclaration type : list) {
 			ITypeBinding binding= type.resolveBinding();
 			if (binding != null) {
 				if (isSameType(binding, qualifier, name)) {

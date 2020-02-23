@@ -174,8 +174,8 @@ public final class StubUtility2Core {
 		}
 
 		List<String> prohibited= new ArrayList<>();
-		for (final Iterator<SingleVariableDeclaration> iterator= parameters.iterator(); iterator.hasNext();)
-			prohibited.add(iterator.next().getName().getIdentifier());
+		for (SingleVariableDeclaration singleVariableDeclaration : parameters)
+			prohibited.add(singleVariableDeclaration.getName().getIdentifier());
 		String param= null;
 		List<String> list= new ArrayList<>(prohibited);
 		String[] excluded= null;
@@ -252,8 +252,8 @@ public final class StubUtility2Core {
 		MethodInvocation invocation= ast.newMethodInvocation();
 		invocation.setName(ast.newSimpleName(delegate.getName()));
 		List<Expression> arguments= invocation.arguments();
-		for (int i= 0; i < params.size(); i++)
-			arguments.add(ast.newSimpleName(params.get(i).getName().getIdentifier()));
+		for (SingleVariableDeclaration param : params)
+			arguments.add(ast.newSimpleName(param.getName().getIdentifier()));
 		if (settings.useKeywordThis) {
 			FieldAccess access= ast.newFieldAccess();
 			access.setExpression(ast.newThisExpression());
@@ -550,8 +550,7 @@ public final class StubUtility2Core {
 	}
 
 	private static IMethodBinding findMethodBinding(IMethodBinding method, List<IMethodBinding> allMethods) {
-		for (int i= 0; i < allMethods.size(); i++) {
-			IMethodBinding curr= allMethods.get(i);
+		for (IMethodBinding curr : allMethods) {
 			if (Bindings.isSubsignature(method, curr)) {
 				return curr;
 			}
@@ -560,8 +559,7 @@ public final class StubUtility2Core {
 	}
 
 	private static IMethodBinding findOverridingMethod(IMethodBinding method, List<IMethodBinding> allMethods) {
-		for (int i= 0; i < allMethods.size(); i++) {
-			IMethodBinding curr= allMethods.get(i);
+		for (IMethodBinding curr : allMethods) {
 			if (Bindings.areOverriddenMethods(curr, method) || Bindings.isSubsignature(curr, method))
 				return curr;
 		}

@@ -18,7 +18,6 @@
 package org.eclipse.jdt.internal.corext.callhierarchy;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.core.runtime.Assert;
@@ -92,8 +91,8 @@ public abstract class MethodWrapper extends PlatformObject {
         MethodWrapper[] result = new MethodWrapper[fElements.size()];
         int i = 0;
 
-        for (Iterator<String> iter = fElements.keySet().iterator(); iter.hasNext();) {
-            MethodCall methodCall = getMethodCallFromMap(fElements, iter.next());
+        for (String string : fElements.keySet()) {
+            MethodCall methodCall = getMethodCallFromMap(fElements, string);
             result[i++] = createMethodWrapper(methodCall);
         }
 
@@ -266,10 +265,10 @@ public abstract class MethodWrapper extends PlatformObject {
     private void performSearch(IProgressMonitor progressMonitor) {
         fElements = findChildren(progressMonitor);
 
-        for (Iterator<String> iter = fElements.keySet().iterator(); iter.hasNext();) {
+        for (String string : fElements.keySet()) {
             checkCanceled(progressMonitor);
 
-            MethodCall methodCall = getMethodCallFromMap(fElements, iter.next());
+            MethodCall methodCall = getMethodCallFromMap(fElements, string);
             addCallToCache(methodCall);
         }
     }

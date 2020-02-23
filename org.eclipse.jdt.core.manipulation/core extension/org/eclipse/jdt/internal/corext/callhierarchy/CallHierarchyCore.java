@@ -20,7 +20,6 @@ package org.eclipse.jdt.internal.corext.callhierarchy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -259,8 +258,8 @@ public class CallHierarchyCore {
     public static boolean arePossibleInputElements(List<?> elements) {
 		if (elements.size() < 1)
 			return false;
-		for (Iterator<?> iter= elements.iterator(); iter.hasNext();) {
-			if (! isPossibleInputElement(iter.next()))
+		for (Object name : elements) {
+			if (! isPossibleInputElement(name))
 				return false;
 		}
 		return true;

@@ -106,9 +106,7 @@ public class GenerateToStringOperation implements IWorkspaceRunnable {
 				if (replace == null || ((Boolean)toStringMethod.getProperty(AbstractToStringGenerator.OVERWRITE_METHOD_PROPERTY)).booleanValue())
 					insertMethod(toStringMethod, rewriter, replace);
 
-				List<MethodDeclaration> helperMethods= fGenerator.generateHelperMethods();
-				for (Iterator<MethodDeclaration> iterator= helperMethods.iterator(); iterator.hasNext();) {
-					MethodDeclaration method= iterator.next();
+				for (MethodDeclaration method : fGenerator.generateHelperMethods()) {
 					replace= findMethodToReplace(list, method);
 					if (replace == null || ((Boolean)method.getProperty(AbstractToStringGenerator.OVERWRITE_METHOD_PROPERTY)).booleanValue()) {
 						insertMethod(method, rewriter, replace);
@@ -165,8 +163,7 @@ public class GenerateToStringOperation implements IWorkspaceRunnable {
 	 *         null if not found
 	 */
 	protected BodyDeclaration findMethodToReplace(final List<BodyDeclaration> list, MethodDeclaration method) {
-		for (final Iterator<BodyDeclaration> iterator= list.iterator(); iterator.hasNext();) {
-			final BodyDeclaration bodyDecl= iterator.next();
+		for (BodyDeclaration bodyDecl : list) {
 			if (bodyDecl instanceof MethodDeclaration) {
 				final MethodDeclaration method2= (MethodDeclaration)bodyDecl;
 				if (method2.getName().getIdentifier().equals(method.getName().getIdentifier()) && method2.parameters().size() == method.parameters().size()) {
