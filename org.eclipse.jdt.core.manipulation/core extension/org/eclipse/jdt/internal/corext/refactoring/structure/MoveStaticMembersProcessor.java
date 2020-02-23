@@ -233,8 +233,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		List<MoveParticipant> result= new ArrayList<>();
 		MoveArguments args= new MoveArguments(fDestinationType, true);
 		String[] natures= JavaProcessors.computeAffectedNaturs(fMembersToMove);
-		for (int i= 0; i < fMembersToMove.length; i++) {
-			IMember member= fMembersToMove[i];
+		for (IMember member : fMembersToMove) {
 			result.addAll(Arrays.asList(ParticipantManager.loadMoveParticipants(
 				status, this, member, args, natures, sharedParticipants)));
 		}
@@ -246,8 +245,8 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 	@Override
 	public boolean canEnableDelegateUpdating() {
 		try {
-			for (int i= 0; i < fMembersToMove.length; i++) {
-				if (isDelegateCreationAvailable(fMembersToMove[i]))
+			for (IMember element : fMembersToMove) {
+				if (isDelegateCreationAvailable(element))
 					return true;
 			}
 		} catch (JavaModelException e) {
@@ -344,8 +343,8 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 	}
 
 	private boolean hasUnresolvedMemberBinding() {
-		for (int i= 0; i < fMemberBindings.length; i++) {
-			if (fMemberBindings[i] == null)
+		for (IBinding memberBinding : fMemberBindings) {
+			if (memberBinding == null)
 				return true;
 		}
 		return false;
@@ -397,10 +396,9 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 
 			List<ICompilationUnit> modifiedCus= new ArrayList<>();
 			createChange(modifiedCus, result, new SubProgressMonitor(pm, 7));
-			IFile[] changedFiles= getAllFilesToModify(modifiedCus);
 			ResourceChangeChecker checker= context.getChecker(ResourceChangeChecker.class);
-			for (int i= 0; i < changedFiles.length; i++) {
-				checker.getDeltaFactory().change(changedFiles[i]);
+			for (IFile changedFile : getAllFilesToModify(modifiedCus)) {
+				checker.getDeltaFactory().change(changedFile);
 			}
 
 			return result;
@@ -413,13 +411,12 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		Set<IResource> result= new HashSet<>();
 		IResource resource= fDestinationType.getCompilationUnit().getResource();
 		result.add(resource);
-		for (int i= 0; i < fMembersToMove.length; i++) {
-			resource= fMembersToMove[i].getCompilationUnit().getResource();
+		for (IMember element : fMembersToMove) {
+			resource= element.getCompilationUnit().getResource();
 			if (resource != null)
 				result.add(resource);
 		}
-		for (Iterator<ICompilationUnit> iter= modifiedCus.iterator(); iter.hasNext();) {
-			ICompilationUnit unit= iter.next();
+		for (ICompilationUnit unit : modifiedCus) {
 			if (unit.getResource() != null)
 				result.add(unit.getResource());
 		}
@@ -535,19 +532,18 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		if (memberToMove instanceof IType) { // recursively check accessibility of member type's members
 			IJavaElement[] typeMembers= ((IType) memberToMove).getChildren();
 			pm.beginTask(RefactoringCoreMessages.MoveMembersRefactoring_checking, typeMembers.length + 1);
-			for (int i= 0; i < typeMembers.length; i++) {
-				if (typeMembers[i] instanceof IInitializer)
+			for (IJavaElement typeMember : typeMembers) {
+				if (typeMember instanceof IInitializer)
 					pm.worked(1);
 				else
-					result.merge(checkMovedMemberAvailability((IMember) typeMembers[i], new SubProgressMonitor(pm, 1)));
+					result.merge(checkMovedMemberAvailability((IMember) typeMember, new SubProgressMonitor(pm, 1)));
 			}
 		} else {
 			pm.beginTask(RefactoringCoreMessages.MoveMembersRefactoring_checking, 1);
 		}
 
-		IType[] blindAccessorTypes= getTypesNotSeeingMovedMember(memberToMove, new SubProgressMonitor(pm, 1), result);
-		for (int k= 0; k < blindAccessorTypes.length; k++) {
-			String message= createNonAccessibleMemberMessage(memberToMove, blindAccessorTypes[k],/*moved*/true);
+		for (IType blindAccessorType : getTypesNotSeeingMovedMember(memberToMove, new SubProgressMonitor(pm, 1), result)) {
+			String message= createNonAccessibleMemberMessage(memberToMove, blindAccessorType,/*moved*/true);
 			result.addError(message, JavaStatusContext.create(memberToMove));
 		}
 		pm.done();
@@ -559,11 +555,8 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 			return new IType[0];
 
 		HashSet<IType> blindAccessorTypes= new HashSet<>(); // referencing, but access to destination type illegal
-		SearchResultGroup[] references= getReferences(member, new SubProgressMonitor(pm, 1), status);
-		for (int i = 0; i < references.length; i++) {
-			SearchMatch[] searchResults= references[i].getSearchResults();
-			for (int k= 0; k < searchResults.length; k++) {
-				SearchMatch searchResult= searchResults[k];
+		for (SearchResultGroup reference : getReferences(member, new SubProgressMonitor(pm, 1), status)) {
+			for (SearchMatch searchResult : reference.getSearchResults()) {
 				IJavaElement element= SearchUtils.getEnclosingJavaElement(searchResult);
 				IType type= (IType) element.getAncestor(IJavaElement.TYPE);
 				if (type != null //reference can e.g. be an import declaration
@@ -691,8 +684,8 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		if (! referenceCU.equals(fSource.getCu()))
 			return false;
 		int referenceStart= result.getOffset();
-		for (int i= 0; i < fMembersToMove.length; i++) {
-			ISourceRange range= fMembersToMove[i].getSourceRange();
+		for (IMember element : fMembersToMove) {
+			ISourceRange range= element.getSourceRange();
 			if (range.getOffset() <= referenceStart && range.getOffset() + range.getLength() >= referenceStart)
 				return true;
 		}
@@ -702,14 +695,14 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 	private RefactoringStatus checkNativeMovedMethods(IProgressMonitor pm) throws JavaModelException{
 		pm.beginTask(RefactoringCoreMessages.MoveMembersRefactoring_checking, fMembersToMove.length);
 		RefactoringStatus result= new RefactoringStatus();
-		for (int i= 0; i < fMembersToMove.length; i++) {
-			if (fMembersToMove[i].getElementType() != IJavaElement.METHOD)
+		for (IMember element : fMembersToMove) {
+			if (element.getElementType() != IJavaElement.METHOD)
 				continue;
-			if (! JdtFlags.isNative(fMembersToMove[i]))
+			if (! JdtFlags.isNative(element))
 				continue;
 			String message= Messages.format(RefactoringCoreMessages.MoveMembersRefactoring_native,
-				JavaElementUtil.createMethodSignature((IMethod)fMembersToMove[i]));
-			result.addWarning(message, JavaStatusContext.create(fMembersToMove[i]));
+				JavaElementUtil.createMethodSignature((IMethod)element));
+			result.addWarning(message, JavaStatusContext.create(element));
 			pm.worked(1);
 		}
 		pm.done();
@@ -735,12 +728,10 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 
 		try {
 			Map<IMember, IncomingMemberVisibilityAdjustment> adjustments= new HashMap<>();
-			IMember member= null;
 			SubProgressMonitor sub= new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL);
 			sub.beginTask(RefactoringCoreMessages.MoveMembersRefactoring_creating, fMembersToMove.length);
 			Set<IMember> rewritten= new HashSet<>();
-			for (int index= 0; index < fMembersToMove.length; index++) {
-				member= fMembersToMove[index];
+			for (IMember member : fMembersToMove) {
 				final MemberVisibilityAdjustor adjustor= new MemberVisibilityAdjustor(fDestinationType, member);
 				adjustor.setAdjustments(adjustments);
 				adjustor.setStatus(status);
@@ -764,8 +755,8 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 				// error message if not (for example, when moving into a private type)
 				status.merge(checkMovedMemberAvailability(member, new SubProgressMonitor(sub, 1)));
 				// Put rewrite info into code and into status
-				for (final Iterator<IMember> iterator= rewritten.iterator(); iterator.hasNext();) {
-					adjustments.remove(iterator.next());
+				for (IMember iMember : rewritten) {
+					adjustments.remove(iMember);
 				}
 				rewritten.addAll(adjustments.keySet());
 				adjustor.rewriteVisibility(new NullProgressMonitor());
@@ -806,8 +797,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 			final MemberVisibilityAdjustor adjustor= new MemberVisibilityAdjustor(fDestinationType, fDestinationType);
 			sub= new SubProgressMonitor(monitor, 1);
 			sub.beginTask(RefactoringCoreMessages.MoveMembersRefactoring_creating, units.length);
-			for (int index= 0; index < units.length; index++) {
-				ICompilationUnit unit= units[index];
+			for (ICompilationUnit unit : units) {
 				CompilationUnitRewrite rewrite= getCuRewrite(unit);
 				adjustor.setRewrites(Collections.singletonMap(unit, rewrite));
 				adjustor.setAdjustments(adjustments);
@@ -909,8 +899,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		boolean targetNeedsSourceImport= false;
 		boolean isSourceNotTarget= fSource != fTarget;
 		Set<IBinding> exclude= new HashSet<>();
-		for (int i= 0; i < members.length; i++) {
-			BodyDeclaration declaration= members[i];
+		for (BodyDeclaration declaration : members) {
 			if (declaration instanceof AbstractTypeDeclaration) {
 				AbstractTypeDeclaration type= (AbstractTypeDeclaration) declaration;
 				ITypeBinding binding= type.resolveBinding();
@@ -932,8 +921,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 			}
 		}
 		ImportRewriteContext context= new ContextSensitiveImportRewriteContext(getDestinationNode(), fTarget.getImportRewrite());
-		for (int i= 0; i < members.length; i++) {
-			BodyDeclaration declaration= members[i];
+		for (BodyDeclaration declaration : members) {
 			if (isSourceNotTarget)
 				typeRefs.addAll(TypeReferenceFinder.perform(declaration));
 			MovedMemberAnalyzer analyzer= new MovedMemberAnalyzer(fSource, fMemberBindings, fSourceBinding, target);
@@ -979,8 +967,8 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 			fTarget.getImportRewrite().addImport(fSourceBinding, context);
 		}
 		if (isSourceNotTarget) {
-			for (Iterator<IBinding> iter= typeRefs.iterator(); iter.hasNext();) {
-				ITypeBinding binding= (ITypeBinding) iter.next();
+			for (IBinding iBinding : typeRefs) {
+				ITypeBinding binding= (ITypeBinding) iBinding;
 				fTarget.getImportRewrite().addImport(binding, context);
 			}
 		}

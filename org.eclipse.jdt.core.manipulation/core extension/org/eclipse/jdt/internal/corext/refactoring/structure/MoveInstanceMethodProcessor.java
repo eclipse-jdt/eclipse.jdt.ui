@@ -114,9 +114,9 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.MoveMethodDescriptor;
@@ -487,8 +487,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 		private boolean isParameterName(String name) {
 			List<SingleVariableDeclaration> parameters= fDeclaration.parameters();
-			for (Iterator<SingleVariableDeclaration> iterator= parameters.iterator(); iterator.hasNext();) {
-				SingleVariableDeclaration decl= iterator.next();
+			for (SingleVariableDeclaration decl : parameters) {
 				if (name.equals(decl.getName().getIdentifier())) {
 					return true;
 				}
@@ -770,10 +769,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		 */
 		public ReadyOnlyFieldFinder(final ITypeBinding binding) {
 			Assert.isNotNull(binding);
-			final IVariableBinding[] bindings= binding.getDeclaredFields();
-			IVariableBinding variable= null;
-			for (int index= 0; index < bindings.length; index++) {
-				variable= bindings[index];
+			for (IVariableBinding variable : binding.getDeclaredFields()) {
 				if (!variable.isSynthetic() && !fFound.contains(variable.getKey())) {
 					fFound.add(variable.getKey());
 					fBindings.add(variable);
@@ -1100,11 +1096,8 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		Assert.isNotNull(declaration);
 		final IVariableBinding[] parameters= getArgumentBindings(declaration);
 		final List<ITypeBinding> types= new ArrayList<>(parameters.length);
-		IVariableBinding binding= null;
-		ITypeBinding type= null;
-		for (int index= 0; index < parameters.length; index++) {
-			binding= parameters[index];
-			type= binding.getType();
+		for (IVariableBinding binding : parameters) {
+			ITypeBinding type= binding.getType();
 			if (type != null)
 				types.add(type);
 		}
@@ -1242,9 +1235,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		try {
 			monitor.beginTask("", methods.length); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.MoveInstanceMethodProcessor_checking);
-			IMethod method= null;
-			for (int index= 0; index < methods.length; index++) {
-				method= methods[index];
+			for (IMethod method : methods) {
 				if (method.getElementName().equals(fMethodName) && method.getParameterTypes().length == newParamCount)
 					status.merge(RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_method_already_exists, new String[] { BasicElementLabels.getJavaElementName(fMethodName), BasicElementLabels.getJavaElementName(fTargetType.getElementName()) }), JavaStatusContext.create(method)));
 				monitor.worked(1);
@@ -1277,8 +1268,8 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		try {
 			monitor.beginTask("", parameters.size()); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.MoveInstanceMethodProcessor_checking);
-			for (final Iterator<SingleVariableDeclaration> iterator= parameters.iterator(); iterator.hasNext();) {
-				variable= iterator.next();
+			for (SingleVariableDeclaration singleVariableDeclaration : parameters) {
+				variable= singleVariableDeclaration;
 				if (fTargetName.equals(variable.getName().getIdentifier())) {
 					status.merge(RefactoringStatus.createErrorStatus(RefactoringCoreMessages.MoveInstanceMethodProcessor_target_name_already_used, JavaStatusContext.create(fMethod)));
 					break;
@@ -1586,15 +1577,14 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		if (declaration != null) {
 			final List<SingleVariableDeclaration> parameters= declaration.parameters();
 			VariableDeclaration variable= null;
-			for (int index= 0; index < parameters.size(); index++) {
-				variable= parameters.get(index);
+			for (SingleVariableDeclaration parameter : parameters) {
+				variable= parameter;
 				names.add(variable.getName().getIdentifier());
 			}
 			final Block body= declaration.getBody();
 			if (body != null) {
-				final IBinding[] bindings= new ScopeAnalyzer(fSourceRewrite.getRoot()).getDeclarationsAfter(body.getStartPosition(), ScopeAnalyzer.VARIABLES);
-				for (int index= 0; index < bindings.length; index++)
-					names.add(bindings[index].getName());
+				for (IBinding binding : new ScopeAnalyzer(fSourceRewrite.getRoot()).getDeclarationsAfter(body.getStartPosition(), ScopeAnalyzer.VARIABLES))
+					names.add(binding.getName());
 			}
 		}
 		final String[] result= new String[names.size()];
@@ -1618,28 +1608,25 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			final IMethodBinding method= declaration.resolveBinding();
 			if (method != null) {
 				final ITypeBinding declaring= method.getDeclaringClass();
-				IVariableBinding[] bindings= getArgumentBindings(declaration);
 				ITypeBinding binding= null;
-				for (int index= 0; index < bindings.length; index++) {
-					binding= bindings[index].getType();
+				for (IVariableBinding binding2 : getArgumentBindings(declaration)) {
+					binding= binding2.getType();
 					if ((binding.isClass() || binding.isEnum() || is18OrHigherInterface(binding)) && binding.isFromSource()) {
-						possibleTargets.add(bindings[index]);
-						candidateTargets.add(bindings[index]);
+						possibleTargets.add(binding2);
+						candidateTargets.add(binding2);
 					}
 				}
 				final ReadyOnlyFieldFinder visitor= new ReadyOnlyFieldFinder(declaring);
 				declaration.accept(visitor);
-				bindings= visitor.getReadOnlyFields();
-				for (int index= 0; index < bindings.length; index++) {
-					binding= bindings[index].getType();
+				for (IVariableBinding binding2 : visitor.getReadOnlyFields()) {
+					binding= binding2.getType();
 					if ((binding.isClass() || is18OrHigherInterface(binding)) && binding.isFromSource())
-						possibleTargets.add(bindings[index]);
+						possibleTargets.add(binding2);
 				}
-				bindings= visitor.getDeclaredFields();
-				for (int index= 0; index < bindings.length; index++) {
-					binding= bindings[index].getType();
+				for (IVariableBinding binding2 : visitor.getDeclaredFields()) {
+					binding= binding2.getType();
 					if ((binding.isClass() || is18OrHigherInterface(binding)) && binding.isFromSource())
-						candidateTargets.add(bindings[index]);
+						candidateTargets.add(binding2);
 				}
 			}
 			fPossibleTargets= new IVariableBinding[possibleTargets.size()];
@@ -2181,8 +2168,8 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			TagElement element= null;
 			TagElement reference= null;
 			IVariableBinding binding= null;
-			for (int index= 0; index < bindings.length; index++) {
-				binding= bindings[index];
+			for (IVariableBinding binding2 : bindings) {
+				binding= binding2;
 				for (final Iterator<TagElement> iterator= comment.tags().iterator(); iterator.hasNext();) {
 					element= iterator.next();
 					name= element.getTagName();
@@ -2261,9 +2248,8 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		final IRegion range= new Region(declaration.getStartPosition(), declaration.getLength());
 		final RangeMarker marker= new RangeMarker(range.getOffset(), range.getLength());
 		final IJavaProject project= fMethod.getJavaProject();
-		final TextEdit[] edits= rewrite.rewriteAST(document, project.getOptions(true)).removeChildren();
-		for (int index= 0; index < edits.length; index++)
-			marker.addChild(edits[index]);
+		for (TextEdit edit : rewrite.rewriteAST(document, project.getOptions(true)).removeChildren())
+			marker.addChild(edit);
 		final MultiTextEdit result= new MultiTextEdit();
 		result.addChild(marker);
 		final TextEditProcessor processor= new TextEditProcessor(document, new MultiTextEdit(0, document.getLength()), TextEdit.UPDATE_REGIONS);
@@ -2441,17 +2427,13 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 					IJavaElement element= null;
 					ICompilationUnit unit= null;
 					CompilationUnitRewrite rewrite= null;
-					SearchResultGroup group= null;
-					for (int index= 0; index < groups.length; index++) {
-						group= groups[index];
+					for (SearchResultGroup group : groups) {
 						element= JavaCore.create(group.getResource());
 						if (element instanceof ICompilationUnit) {
 							matches= group.getSearchResults();
 							unit= (ICompilationUnit) element;
 							rewrite= getCompilationUnitRewrite(rewrites, unit);
-							SearchMatch match= null;
-							for (int offset= 0; offset < matches.length; offset++) {
-								match= matches[offset];
+							for (SearchMatch match : matches) {
 								if (match.getAccuracy() == SearchMatch.A_INACCURATE) {
 									status.merge(RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_inline_inaccurate, BasicElementLabels.getFileName(unit)), JavaStatusContext.create(unit, new SourceRange(match.getOffset(), match.getLength()))));
 									result= false;
@@ -2558,18 +2540,14 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			IJavaElement element= null;
 			ICompilationUnit unit= null;
 			CompilationUnitRewrite rewrite= null;
-			SearchResultGroup group= null;
-			for (int index= 0; index < groups.length; index++) {
-				group= groups[index];
+			for (SearchResultGroup group : groups) {
 				element= JavaCore.create(group.getResource());
 				unit= group.getCompilationUnit();
 				if (element instanceof ICompilationUnit) {
 					matches= group.getSearchResults();
 					unit= (ICompilationUnit) element;
 					rewrite= getCompilationUnitRewrite(rewrites, unit);
-					SearchMatch match= null;
-					for (int offset= 0; offset < matches.length; offset++) {
-						match= matches[offset];
+					for (SearchMatch match : matches) {
 						if (match.getAccuracy() == SearchMatch.A_INACCURATE) {
 							status.merge(RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_inline_inaccurate, BasicElementLabels.getFileName(unit)), JavaStatusContext.create(unit, new SourceRange(match.getOffset(), match.getLength()))));
 						} else
@@ -2676,10 +2654,9 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 					while (binding != null && !foundStatic) {
 						if (Flags.isStatic(binding.getModifiers()))
 							foundStatic= true;
-						final ITypeBinding[] bindings= binding.getTypeArguments();
-						for (int index= 0; index < bindings.length; index++) {
+						for (ITypeBinding binding2 : binding.getTypeArguments()) {
 							for (int offset= 0; offset < parameters.length; offset++) {
-								if (parameters[offset].getName().equals(bindings[index].getName())) {
+								if (parameters[offset].getName().equals(binding2.getName())) {
 									rewriter.remove((ASTNode) rewriter.getOriginalList().get(offset), null);
 									status.addWarning(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_present_type_parameter_warning, new Object[] { BasicElementLabels.getJavaElementName(parameters[offset].getName()), BindingLabelProviderCore.getBindingLabel(binding, JavaElementLabelsCore.ALL_FULLY_QUALIFIED) }), JavaStatusContext.create(fMethod));
 								}
@@ -2706,10 +2683,9 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		final ITypeBinding type= fTarget.getDeclaringClass();
 		if (type != null) {
 			boolean shadows= false;
-			final IVariableBinding[] bindings= getArgumentBindings(declaration);
 			IVariableBinding variable= null;
-			for (int index= 0; index < bindings.length; index++) {
-				variable= bindings[index];
+			for (IVariableBinding binding : getArgumentBindings(declaration)) {
+				variable= binding;
 				if (fMethod.getDeclaringType().getField(variable.getName()).exists()) {
 					shadows= true;
 					break;

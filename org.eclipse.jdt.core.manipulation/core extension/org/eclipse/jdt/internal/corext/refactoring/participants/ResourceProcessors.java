@@ -36,8 +36,8 @@ public class ResourceProcessors {
 	public static String[] computeAffectedNatures(IResource[] resources) throws CoreException {
 		Set<String> result= new HashSet<>();
 		Set<IProject> visitedProjects= new HashSet<>();
-		for (int i= 0; i < resources.length; i++) {
-			computeNatures(result, visitedProjects, resources[i].getProject());
+		for (IResource resource : resources) {
+			computeNatures(result, visitedProjects, resource.getProject());
 		}
 		return result.toArray(new String[result.size()]);
 	}
@@ -48,9 +48,8 @@ public class ResourceProcessors {
 		String[] pns= focus.getDescription().getNatureIds();
 		result.addAll(Arrays.asList(pns));
 		visitedProjects.add(focus);
-		IProject[] referencing= focus.getReferencingProjects();
-		for (int i= 0; i < referencing.length; i++) {
-			computeNatures(result, visitedProjects, referencing[i]);
+		for (IProject element : focus.getReferencingProjects()) {
+			computeNatures(result, visitedProjects, element);
 		}
 	}
 }

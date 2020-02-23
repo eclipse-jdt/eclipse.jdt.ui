@@ -50,6 +50,7 @@ import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
@@ -57,8 +58,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
-
-import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 
 /**
  * This class is used to find references to constructors.
@@ -104,16 +103,14 @@ public class ConstructorReferenceFinder {
 	//XXX this method is a workaround for jdt core bug 27236
 	private SearchResultGroup[] removeUnrealReferences(SearchResultGroup[] groups) {
 		List<SearchResultGroup> result= new ArrayList<>(groups.length);
-		for (int i= 0; i < groups.length; i++) {
-			SearchResultGroup group= groups[i];
+		for (SearchResultGroup group : groups) {
 			ICompilationUnit cu= group.getCompilationUnit();
 			if (cu == null)
 				continue;
 			CompilationUnit cuNode= new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL).parse(cu, false);
 			SearchMatch[] allSearchResults= group.getSearchResults();
 			List<SearchMatch> realConstructorReferences= new ArrayList<>(Arrays.asList(allSearchResults));
-			for (int j= 0; j < allSearchResults.length; j++) {
-				SearchMatch searchResult= allSearchResults[j];
+			for (SearchMatch searchResult : allSearchResults) {
 				if (! isRealConstructorReferenceNode(ASTNodeSearchUtil.getAstNode(searchResult, cuNode)))
 					realConstructorReferences.remove(searchResult);
 			}
@@ -188,15 +185,12 @@ public class ConstructorReferenceFinder {
 		IJavaSearchScope scope= RefactoringScopeFactory.create(fType);
 		SearchResultGroup[] refs= RefactoringSearchEngine.search(pattern, owner, scope, pm, status);
 		List<SearchMatch> result= new ArrayList<>();
-		for (int i= 0; i < refs.length; i++) {
-			SearchResultGroup group= refs[i];
+		for (SearchResultGroup group : refs) {
 			ICompilationUnit cu= group.getCompilationUnit();
 			if (cu == null)
 				continue;
 			CompilationUnit cuNode= new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL).parse(cu, false);
-			SearchMatch[] results= group.getSearchResults();
-			for (int j= 0; j < results.length; j++) {
-				SearchMatch searchResult= results[j];
+			for (SearchMatch searchResult : group.getSearchResults()) {
 				ASTNode node= ASTNodeSearchUtil.getAstNode(searchResult, cuNode);
 				if (isImplicitConstructorReferenceNodeInClassCreations(node))
 					result.add(searchResult);
@@ -225,8 +219,8 @@ public class ConstructorReferenceFinder {
 	private List<SearchMatch> getImplicitConstructorReferencesFromHierarchy(WorkingCopyOwner owner, IProgressMonitor pm) throws JavaModelException{
 		IType[] subTypes= getNonBinarySubtypes(owner, fType, pm);
 		List<SearchMatch> result= new ArrayList<>(subTypes.length);
-		for (int i= 0; i < subTypes.length; i++) {
-			result.addAll(getAllSuperConstructorInvocations(subTypes[i]));
+		for (IType subType : subTypes) {
+			result.addAll(getAllSuperConstructorInvocations(subType));
 		}
 		return result;
 	}
@@ -239,9 +233,9 @@ public class ConstructorReferenceFinder {
 			hierarchy= type.newSupertypeHierarchy(owner, monitor);
 		IType[] subTypes= hierarchy.getAllSubtypes(type);
 		List<IType> result= new ArrayList<>(subTypes.length);
-		for (int i= 0; i < subTypes.length; i++) {
-			if (! subTypes[i].isBinary()) {
-				result.add(subTypes[i]);
+		for (IType subType : subTypes) {
+			if (! subType.isBinary()) {
+				result.add(subType);
 			}
 		}
 		return result.toArray(new IType[result.size()]);
@@ -252,10 +246,10 @@ public class ConstructorReferenceFinder {
 		IMethod[] constructors= JavaElementUtil.getAllConstructors(type);
 		CompilationUnit cuNode= new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL).parse(type.getCompilationUnit(), false);
 		List<SearchMatch> result= new ArrayList<>(constructors.length);
-		for (int i= 0; i < constructors.length; i++) {
-			ASTNode superCall= getSuperConstructorCallNode(constructors[i], cuNode);
+		for (IMethod constructor : constructors) {
+			ASTNode superCall= getSuperConstructorCallNode(constructor, cuNode);
 			if (superCall != null)
-				result.add(createSearchResult(superCall, constructors[i]));
+				result.add(createSearchResult(superCall, constructor));
 		}
 		return result;
 	}

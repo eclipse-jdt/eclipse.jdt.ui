@@ -17,7 +17,6 @@ package org.eclipse.jdt.internal.corext.refactoring.rename;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
@@ -70,9 +69,9 @@ public class RefactoringAnalyzeUtil {
 
 	public static RefactoringStatus reportProblemNodes(String modifiedWorkingCopySource, SimpleName[] problemNodes) {
 		RefactoringStatus result= new RefactoringStatus();
-		for (int i= 0; i < problemNodes.length; i++) {
-			RefactoringStatusContext context= new JavaStringStatusContext(modifiedWorkingCopySource, SourceRangeFactory.create(problemNodes[i]));
-			result.addError(Messages.format(RefactoringCoreMessages.RefactoringAnalyzeUtil_name_collision, BasicElementLabels.getJavaElementName(problemNodes[i].getIdentifier())), context);
+		for (SimpleName problemNode : problemNodes) {
+			RefactoringStatusContext context= new JavaStringStatusContext(modifiedWorkingCopySource, SourceRangeFactory.create(problemNode));
+			result.addError(Messages.format(RefactoringCoreMessages.RefactoringAnalyzeUtil_name_collision, BasicElementLabels.getJavaElementName(problemNode.getIdentifier())), context);
 		}
 		return result;
 	}
@@ -96,10 +95,10 @@ public class RefactoringAnalyzeUtil {
 		Set<IProblem> subResult= new HashSet<>();
 		Set<IProblem> oldProblems= getOldProblems(oldCuNode);
 		IProblem[] newProblems= ASTNodes.getProblems(newCUNode, ASTNodes.INCLUDE_ALL_PARENTS, ASTNodes.PROBLEMS);
-		for (int i= 0; i < newProblems.length; i++) {
-			IProblem correspondingOld= findCorrespondingProblem(oldProblems, newProblems[i]);
+		for (IProblem newProblem : newProblems) {
+			IProblem correspondingOld= findCorrespondingProblem(oldProblems, newProblem);
 			if (correspondingOld == null)
-				subResult.add(newProblems[i]);
+				subResult.add(newProblem);
 		}
 		return subResult.toArray(new IProblem[subResult.size()]);
 	}
@@ -109,8 +108,7 @@ public class RefactoringAnalyzeUtil {
 		String newCuSource= change.getPreviewContent(new NullProgressMonitor());
 		CompilationUnit newCuNode= new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL).parse(newCuSource, originalCu, true, true, pm);
 		IProblem[] newProblems= getIntroducedCompileProblems(newCuNode, oldCuNode);
-		for (int i= 0; i < newProblems.length; i++) {
-			IProblem problem= newProblems[i];
+		for (IProblem problem : newProblems) {
 			if (problem.isError())
 				result.addEntry(new RefactoringStatusEntry((problem.isError() ? RefactoringStatus.ERROR : RefactoringStatus.WARNING), problem.getMessage(),
 						new JavaStringStatusContext(newCuSource, SourceRangeFactory.create(problem))));
@@ -123,8 +121,7 @@ public class RefactoringAnalyzeUtil {
 	}
 
 	private static IProblem findCorrespondingProblem(Set<IProblem> oldProblems, IProblem iProblem) {
-		for (Iterator<IProblem> iter= oldProblems.iterator(); iter.hasNext();) {
-			IProblem oldProblem= iter.next();
+		for (IProblem oldProblem : oldProblems) {
 			if (isCorresponding(oldProblem, iProblem))
 				return oldProblem;
 		}

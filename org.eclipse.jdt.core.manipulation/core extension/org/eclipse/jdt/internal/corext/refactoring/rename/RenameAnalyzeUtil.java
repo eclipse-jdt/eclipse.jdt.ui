@@ -19,7 +19,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -62,8 +61,10 @@ import org.eclipse.jdt.core.search.FieldDeclarationMatch;
 import org.eclipse.jdt.core.search.MethodDeclarationMatch;
 import org.eclipse.jdt.core.search.SearchMatch;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.SourceRangeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
@@ -72,9 +73,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
-
-import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 public class RenameAnalyzeUtil {
 
@@ -160,14 +158,12 @@ public class RenameAnalyzeUtil {
 
 	public static RefactoringStatus analyzeRenameChanges(TextChangeManager manager,  SearchResultGroup[] oldOccurrences, SearchResultGroup[] newOccurrences) {
 		RefactoringStatus result= new RefactoringStatus();
-		for (int i= 0; i < oldOccurrences.length; i++) {
-			SearchResultGroup oldGroup= oldOccurrences[i];
+		for (SearchResultGroup oldGroup : oldOccurrences) {
 			SearchMatch[] oldSearchResults= oldGroup.getSearchResults();
 			ICompilationUnit cunit= oldGroup.getCompilationUnit();
 			if (cunit == null)
 				continue;
-			for (int j= 0; j < oldSearchResults.length; j++) {
-				SearchMatch oldSearchResult= oldSearchResults[j];
+			for (SearchMatch oldSearchResult : oldSearchResults) {
 				if (! RenameAnalyzeUtil.existsInNewOccurrences(oldSearchResult, newOccurrences, manager)){
 					addShadowsError(cunit, oldSearchResult, result);
 				}
@@ -178,9 +174,9 @@ public class RenameAnalyzeUtil {
 
 	public static ICompilationUnit findWorkingCopyForCu(ICompilationUnit[] newWorkingCopies, ICompilationUnit cu){
 		ICompilationUnit original= cu == null ? null : cu.getPrimary();
-		for (int i= 0; i < newWorkingCopies.length; i++) {
-			if (newWorkingCopies[i].getPrimary().equals(original))
-				return newWorkingCopies[i];
+		for (ICompilationUnit newWorkingCopy : newWorkingCopies) {
+			if (newWorkingCopy.getPrimary().equals(original))
+				return newWorkingCopy;
 		}
 		return null;
 	}
@@ -214,10 +210,9 @@ public class RenameAnalyzeUtil {
 		if (oldEditRange == null)
 			return false;
 
-		SearchMatch[] newSearchResults= newGroup.getSearchResults();
 		int oldRangeOffset = oldEditRange.getOffset();
-		for (int i= 0; i < newSearchResults.length; i++) {
-			if (newSearchResults[i].getOffset() == oldRangeOffset)
+		for (SearchMatch newSearchResult : newGroup.getSearchResults()) {
+			if (newSearchResult.getOffset() == oldRangeOffset)
 				return true;
 		}
 		return false;
@@ -229,10 +224,9 @@ public class RenameAnalyzeUtil {
 			return null;
 
 		IRegion oldMatchRange= createTextRange(searchResult);
-		TextEditChangeGroup[] editChanges= change.getTextEditChangeGroups();
-		for (int i= 0; i < editChanges.length; i++) {
-			if (oldMatchRange.equals(editChanges[i].getRegion()))
-				return TextEdit.getCoverage(change.getPreviewEdits(editChanges[i].getTextEdits()));
+		for (TextEditChangeGroup editChange : change.getTextEditChangeGroups()) {
+			if (oldMatchRange.equals(editChange.getRegion()))
+				return TextEdit.getCoverage(change.getPreviewEdits(editChange.getTextEdits()));
 		}
 		return null;
 	}
@@ -249,9 +243,9 @@ public class RenameAnalyzeUtil {
 	}
 
 	private static SearchResultGroup findOccurrenceGroup(IResource resource, SearchResultGroup[] newOccurrences) {
-		for (int i= 0; i < newOccurrences.length; i++) {
-			if (newOccurrences[i].getResource().equals(resource))
-				return newOccurrences[i];
+		for (SearchResultGroup newOccurrence : newOccurrences) {
+			if (newOccurrence.getResource().equals(resource))
+				return newOccurrence;
 		}
 		return null;
 	}
@@ -265,14 +259,13 @@ public class RenameAnalyzeUtil {
 		RefactoringStatus result= new RefactoringStatus();
 
 		HashMap<ICompilationUnit, SearchMatch[]> cuToNewResults= new HashMap<>(newReferences.length);
-		for (int i1= 0; i1 < newReferences.length; i1++) {
-			ICompilationUnit cu= newReferences[i1].getCompilationUnit();
+		for (SearchResultGroup newReference : newReferences) {
+			ICompilationUnit cu= newReference.getCompilationUnit();
 			if (cu != null)
-				cuToNewResults.put(cu.getPrimary(), newReferences[i1].getSearchResults());
+				cuToNewResults.put(cu.getPrimary(), newReference.getSearchResults());
 		}
 
-		for (int i= 0; i < oldReferences.length; i++) {
-			SearchResultGroup oldGroup= oldReferences[i];
+		for (SearchResultGroup oldGroup : oldReferences) {
 			SearchMatch[] oldMatches= oldGroup.getSearchResults();
 			ICompilationUnit cu= oldGroup.getCompilationUnit();
 			if (cu == null)
@@ -280,8 +273,7 @@ public class RenameAnalyzeUtil {
 
 			SearchMatch[] newSearchMatches= cuToNewResults.remove(cu);
 			if (newSearchMatches == null) {
-				for (int j = 0; j < oldMatches.length; j++) {
-					SearchMatch oldMatch = oldMatches[j];
+				for (SearchMatch oldMatch : oldMatches) {
 					addShadowsError(cu, oldMatch, result);
 				}
 			} else {
@@ -289,12 +281,9 @@ public class RenameAnalyzeUtil {
 			}
 		}
 
-		for (Iterator<Entry<ICompilationUnit, SearchMatch[]>> iter= cuToNewResults.entrySet().iterator(); iter.hasNext();) {
-			Entry<ICompilationUnit, SearchMatch[]> entry= iter.next();
+		for (Entry<ICompilationUnit, SearchMatch[]> entry : cuToNewResults.entrySet()) {
 			ICompilationUnit cu= entry.getKey();
-			SearchMatch[] newSearchMatches= entry.getValue();
-			for (int i= 0; i < newSearchMatches.length; i++) {
-				SearchMatch newMatch= newSearchMatches[i];
+			for (SearchMatch newMatch : entry.getValue()) {
 				addReferenceShadowedError(cu, newMatch, newElementName, result);
 			}
 		}
@@ -304,17 +293,14 @@ public class RenameAnalyzeUtil {
 	private static void analyzeChanges(ICompilationUnit cu, TextChange change,
 			SearchMatch[] oldMatches, SearchMatch[] newMatches, String newElementName, RefactoringStatus result) {
 		Map<Integer, SearchMatch> updatedOldOffsets= getUpdatedChangeOffsets(change, oldMatches);
-		for (int i= 0; i < newMatches.length; i++) {
-			SearchMatch newMatch= newMatches[i];
+		for (SearchMatch newMatch : newMatches) {
 			Integer offsetInNew= Integer.valueOf(newMatch.getOffset());
 			SearchMatch oldMatch= updatedOldOffsets.remove(offsetInNew);
 			if (oldMatch == null) {
 				addReferenceShadowedError(cu, newMatch, newElementName, result);
 			}
 		}
-		for (Iterator<SearchMatch> iter= updatedOldOffsets.values().iterator(); iter.hasNext();) {
-			// remaining old matches are not found any more -> they have been shadowed
-			SearchMatch oldMatch= iter.next();
+		for (SearchMatch oldMatch : updatedOldOffsets.values()) {
 			addShadowsError(cu, oldMatch, result);
 		}
 	}
@@ -328,8 +314,7 @@ public class RenameAnalyzeUtil {
 	private static Map<Integer, SearchMatch> getUpdatedChangeOffsets(TextChange change, SearchMatch[] oldMatches) {
 		Map<Integer, SearchMatch> updatedOffsets= new HashMap<>();
 		Map<Integer, Integer> oldToUpdatedOffsets= getEditChangeOffsetUpdates(change);
-		for (int i= 0; i < oldMatches.length; i++) {
-			SearchMatch oldMatch= oldMatches[i];
+		for (SearchMatch oldMatch : oldMatches) {
 			Integer updatedOffset= oldToUpdatedOffsets.get(Integer.valueOf(oldMatch.getOffset()));
 			if (updatedOffset == null)
 				updatedOffset= Integer.valueOf(-1); //match not updated
@@ -346,8 +331,7 @@ public class RenameAnalyzeUtil {
 	private static Map<Integer, Integer> getEditChangeOffsetUpdates(TextChange change) {
 		TextEditChangeGroup[] editChanges= change.getTextEditChangeGroups();
 		Map<Integer, Integer> offsetUpdates= new HashMap<>(editChanges.length);
-		for (int i= 0; i < editChanges.length; i++) {
-			TextEditChangeGroup editChange= editChanges[i];
+		for (TextEditChangeGroup editChange : editChanges) {
 			IRegion oldRegion= editChange.getRegion();
 			if (oldRegion == null)
 				continue;
@@ -427,18 +411,18 @@ public class RenameAnalyzeUtil {
 		if (result.hasError())
 			return result;
 
-		for (int i= 0; i < analyzePackages.length; i++) {
-			ASTNode enclosing= getEnclosingBlockOrMethodOrLambda(analyzePackages[i].fDeclarationEdit, cuChange, newCUNode);
+		for (LocalAnalyzePackage analyzePackage : analyzePackages) {
+			ASTNode enclosing= getEnclosingBlockOrMethodOrLambda(analyzePackage.fDeclarationEdit, cuChange, newCUNode);
 
 			// get new declaration
-			IRegion newRegion= RefactoringAnalyzeUtil.getNewTextRange(analyzePackages[i].fDeclarationEdit, cuChange);
+			IRegion newRegion= RefactoringAnalyzeUtil.getNewTextRange(analyzePackage.fDeclarationEdit, cuChange);
 			ASTNode newDeclaration= NodeFinder.perform(newCUNode, newRegion.getOffset(), newRegion.getLength());
 			Assert.isTrue(newDeclaration instanceof Name);
 
 			VariableDeclaration declaration= getVariableDeclaration((Name) newDeclaration);
 			Assert.isNotNull(declaration);
 
-			SimpleName[] problemNodes= ProblemNodeFinder.getProblemNodes(enclosing, declaration, analyzePackages[i].fOccurenceEdits, cuChange);
+			SimpleName[] problemNodes= ProblemNodeFinder.getProblemNodes(enclosing, declaration, analyzePackage.fOccurenceEdits, cuChange);
 			result.merge(RefactoringAnalyzeUtil.reportProblemNodes(newCuSource, problemNodes));
 		}
 		return result;
@@ -467,9 +451,7 @@ public class RenameAnalyzeUtil {
 
 	private static RefactoringStatus analyzeCompileErrors(String newCuSource, CompilationUnit newCUNode, CompilationUnit oldCUNode) {
 		RefactoringStatus result= new RefactoringStatus();
-		IProblem[] newProblems= RefactoringAnalyzeUtil.getIntroducedCompileProblems(newCUNode, oldCUNode);
-		for (int i= 0; i < newProblems.length; i++) {
-			IProblem problem= newProblems[i];
+		for (IProblem problem : RefactoringAnalyzeUtil.getIntroducedCompileProblems(newCUNode, oldCUNode)) {
 			if (problem.isError())
 				result.addEntry(new RefactoringStatusEntry((problem.isError() ? RefactoringStatus.ERROR : RefactoringStatus.WARNING), problem.getMessage(), new JavaStringStatusContext(newCuSource,
 						SourceRangeFactory.create(problem))));

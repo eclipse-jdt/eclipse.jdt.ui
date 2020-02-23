@@ -44,8 +44,8 @@ public class JavaProcessors {
 
 	public static String[] computeAffectedNaturs(IJavaElement[] elements) throws CoreException {
 		Set<String> result= new HashSet<>();
-		for (int i= 0; i < elements.length; i++) {
-			String[] natures= computeAffectedNatures(elements[i]);
+		for (IJavaElement element : elements) {
+			String[] natures= computeAffectedNatures(element);
 			result.addAll(Arrays.asList(natures));
 		}
 		return result.toArray(new String[result.size()]);

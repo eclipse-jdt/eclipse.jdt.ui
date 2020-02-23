@@ -71,8 +71,7 @@ public class JavadocUtil {
 		if (methodDeclaration.parameters().size() == 0)
 			return true;
 		List<TagElement> tags= javadoc.tags();
-		for (Iterator<TagElement> iter= tags.iterator(); iter.hasNext();) {
-			TagElement element= iter.next();
+		for (TagElement element : tags) {
 			if (TagElement.TAG_PARAM.equals(element.getTagName()))
 				return true;
 		}

@@ -517,11 +517,9 @@ public final class MemberVisibilityAdjustor {
 		if (member.equals(fReferenced) || Modifier.isPublic(member.getFlags()))
 			return;
 
-		final SearchResultGroup[] references= findReferences(member, monitor);
-		for (int i= 0; i < references.length; i++) {
-			final SearchMatch[] searchResults= references[i].getSearchResults();
-			for (int k= 0; k < searchResults.length; k++) {
-				final IJavaElement referenceToMember= (IJavaElement) searchResults[k].getElement();
+		for (SearchResultGroup reference : findReferences(member, monitor)) {
+			for (SearchMatch searchResult : reference.getSearchResults()) {
+				final IJavaElement referenceToMember= (IJavaElement) searchResult.getElement();
 				if (fAdjustments.get(member) == null && referenceToMember instanceof IMember && !isInsideMovedMember(referenceToMember)) {
 					// check whether the member is still visible from the
 					// destination. As we are moving a type, the destination is
@@ -579,12 +577,10 @@ public final class MemberVisibilityAdjustor {
 		try {
 			monitor.beginTask("", groups.length); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.MemberVisibilityAdjustor_checking);
-			SearchMatch[] matches= null;
 			boolean adjusted= false;
-			for (int index= 0; index < groups.length; index++) {
-				matches= groups[index].getSearchResults();
-				for (int offset= 0; offset < matches.length; offset++) {
-					final Object element= matches[offset].getElement();
+			for (SearchResultGroup group : groups) {
+				for (SearchMatch match : group.getSearchResults()) {
+					final Object element= match.getElement();
 					if (element instanceof IMember && !isInsideMovedMember((IMember) element)) {
 						// found one reference which is not inside the moved
 						// element => adjust visibility of the moved element
@@ -683,16 +679,11 @@ public final class MemberVisibilityAdjustor {
 		try {
 			monitor.beginTask("", groups.length); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.MemberVisibilityAdjustor_checking);
-			IJavaElement element= null;
-			SearchMatch[] matches= null;
-			SearchResultGroup group= null;
-			for (int index= 0; index < groups.length; index++) {
-				group= groups[index];
-				element= JavaCore.create(group.getResource());
+			for (SearchResultGroup group : groups) {
+				IJavaElement element= JavaCore.create(group.getResource());
 				if (element instanceof ICompilationUnit) {
-					matches= group.getSearchResults();
-					for (int offset= 0; offset < matches.length; offset++)
-						adjustOutgoingVisibility(matches[offset], new SubProgressMonitor(monitor, 1));
+					for (SearchMatch match : group.getSearchResults())
+						adjustOutgoingVisibility(match, new SubProgressMonitor(monitor, 1));
 				} // else if (element != null)
 				// fStatus.merge(RefactoringStatus.createStatus(fFailureSeverity, RefactoringCoreMessages.getFormattedString("MemberVisibilityAdjustor.binary.outgoing.project", new String[] { element.getJavaProject().getElementName(), getLabel(fReferenced)}), null, null, RefactoringStatusEntry.NO_CODE, null)); //$NON-NLS-1$
 				// else if (group.getResource() != null)
@@ -1237,10 +1228,7 @@ public final class MemberVisibilityAdjustor {
 			keyword= ModifierKeyword.PRIVATE_KEYWORD;
 		else {
 			final ITypeHierarchy hierarchy= getTypeHierarchy(referencing, new SubProgressMonitor(monitor, 1));
-			final IType[] types= hierarchy.getSupertypes(referencing);
-			IType superType= null;
-			for (int index= 0; index < types.length; index++) {
-				superType= types[index];
+			for (IType superType : hierarchy.getSupertypes(referencing)) {
 				if (superType.equals(referenced.getDeclaringType())) {
 					keyword= ModifierKeyword.PROTECTED_KEYWORD;
 					return keyword;
@@ -1275,10 +1263,7 @@ public final class MemberVisibilityAdjustor {
 			tmp= tmp.getDeclaringType();
 		}
 		final ITypeHierarchy hierarchy= getTypeHierarchy(referencing, new SubProgressMonitor(monitor, 1));
-		final IType[] types= hierarchy.getSupertypes(referencing);
-		IType superType= null;
-		for (int index= 0; index < types.length; index++) {
-			superType= types[index];
+		for (IType superType : hierarchy.getSupertypes(referencing)) {
 			if (superType.equals(referenced.getDeclaringType())) {
 				return ModifierKeyword.PROTECTED_KEYWORD;
 			}
@@ -1310,10 +1295,7 @@ public final class MemberVisibilityAdjustor {
 			keyword= ModifierKeyword.PRIVATE_KEYWORD;
 		else {
 			final ITypeHierarchy hierarchy= getTypeHierarchy(referencing, new SubProgressMonitor(monitor, 1));
-			final IType[] types= hierarchy.getSupertypes(referencing);
-			IType superType= null;
-			for (int index= 0; index < types.length; index++) {
-				superType= types[index];
+			for (IType superType : hierarchy.getSupertypes(referencing)) {
 				if (superType.equals(referenced)) {
 					keyword= null;
 					return keyword;

@@ -15,7 +15,6 @@
 package org.eclipse.jdt.internal.corext.refactoring.nls;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
@@ -70,9 +69,9 @@ public class NLSLine {
 	public String toString() {
 		StringBuilder result= new StringBuilder();
 		result.append("Line: " + fLineNumber + "\n"); //$NON-NLS-2$ //$NON-NLS-1$
-		for (Iterator<NLSElement> iter= fElements.iterator(); iter.hasNext(); ) {
+		for (NLSElement nlsElement : fElements) {
 			result.append("\t"); //$NON-NLS-1$
-			result.append(iter.next().toString());
+			result.append(nlsElement.toString());
 			result.append("\n"); //$NON-NLS-1$
 		}
 		return result.toString();

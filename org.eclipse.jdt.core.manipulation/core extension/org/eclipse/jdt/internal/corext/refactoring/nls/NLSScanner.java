@@ -180,11 +180,10 @@ public class NLSScanner {
 			}
 			token= scanner.getNextToken();
 		}
-		NLSLine[] result;
-		result= lines.toArray(new NLSLine[lines.size()]);
+		NLSLine[] result= lines.toArray(new NLSLine[lines.size()]);
 		IDocument document= new Document(String.valueOf(scanner.getSource()));
-		for (int i= 0; i < result.length; i++) {
-			setTagPositions(document, result[i]);
+		for (NLSLine element : result) {
+			setTagPositions(document, element);
 		}
 		return result;
 	}

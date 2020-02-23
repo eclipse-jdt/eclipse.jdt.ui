@@ -20,7 +20,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 import com.ibm.icu.text.Collator;
@@ -117,15 +116,13 @@ public class NLSUtil {
 	public static TextEdit[] createNLSEdits(ICompilationUnit cu, int[] positions) throws CoreException {
 		List<InsertEdit> result= new ArrayList<>();
 		try {
-			NLSLine[] allLines= NLSScanner.scan(cu);
-			for (int i= 0; i < allLines.length; i++) {
-				NLSLine line= allLines[i];
+			for (NLSLine line : NLSScanner.scan(cu)) {
 				NLSElement[] elements= line.getElements();
 				for (int j= 0; j < elements.length; j++) {
 					NLSElement element= elements[j];
 					if (!element.hasTag()) {
-						for (int k= 0; k < positions.length; k++) {
-							if (isPositionInElement(element, positions[k])) {
+						for (int position : positions) {
+							if (isPositionInElement(element, position)) {
 								int editOffset;
 								if (j==0) {
 									if (elements.length > j+1) {
@@ -158,9 +155,7 @@ public class NLSUtil {
 	private static NLSLine scanCurrentLine(ICompilationUnit cu, int position) throws JavaModelException {
 		try {
 			Assert.isTrue(position >= 0 && position <= cu.getBuffer().getLength());
-			NLSLine[] allLines= NLSScanner.scan(cu);
-			for (int i= 0; i < allLines.length; i++) {
-				NLSLine line= allLines[i];
+			for (NLSLine line : NLSScanner.scan(cu)) {
 				if (findElement(line, position) != null)
 					return line;
 			}
@@ -178,9 +173,7 @@ public class NLSUtil {
 	}
 
 	private static NLSElement findElement(NLSLine line, int position) {
-		NLSElement[] elements= line.getElements();
-		for (int i= 0; i < elements.length; i++) {
-			NLSElement element= elements[i];
+		for (NLSElement element : line.getElements()) {
 			if (isPositionInElement(element, position))
 				return element;
 		}
@@ -246,9 +239,7 @@ public class NLSUtil {
 
 		int invertDistance= Integer.MIN_VALUE;
 		int i= 0;
-		for (Iterator<String> iterator= keys.iterator(); iterator.hasNext();) {
-			String string= iterator.next();
-
+		for (String string : keys) {
 			int currentInvertDistance= invertDistance(key, string);
 			if (currentInvertDistance > invertDistance) {
 				invertDistance= currentInvertDistance;

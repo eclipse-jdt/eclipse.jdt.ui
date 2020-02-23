@@ -143,22 +143,19 @@ public class ImportRemover {
 			}
 		});
 
-		for (Iterator<SimpleName> iterator= importNames.iterator(); iterator.hasNext();) {
-			SimpleName name= iterator.next();
+		for (SimpleName name : importNames) {
 			if (isInRemoved(name, removedStartsEnds))
 				removedRefs.add(name);
 			else
 				unremovedRefs.add(name);
 		}
-		for (Iterator<SimpleName> iterator= staticNames.iterator(); iterator.hasNext();) {
-			SimpleName name= iterator.next();
+		for (SimpleName name : staticNames) {
 			if (isInRemoved(name, removedStartsEnds))
 				removedRefs.add(name);
 			else
 				unremovedRefs.add(name);
 		}
-		for (Iterator<ImportDeclaration> iterator= fInlinedStaticImports.iterator(); iterator.hasNext(); ) {
-			ImportDeclaration importDecl= iterator.next();
+		for (ImportDeclaration importDecl : fInlinedStaticImports) {
 			Name name= importDecl.getName();
 			if (name instanceof QualifiedName)
 				name= ((QualifiedName) name).getName();
@@ -190,8 +187,7 @@ public class ImportRemover {
 			return new IBinding[0];
 
 		HashMap<String, IBinding> potentialRemoves= getPotentialRemoves(removedRefs);
-		for (Iterator<SimpleName> iterator= unremovedRefs.iterator(); iterator.hasNext();) {
-			SimpleName name= iterator.next();
+		for (SimpleName name : unremovedRefs) {
 			potentialRemoves.remove(name.getIdentifier());
 		}
 
@@ -201,8 +197,7 @@ public class ImportRemover {
 
 	private HashMap<String, IBinding> getPotentialRemoves(List<SimpleName> removedRefs) {
 		HashMap<String, IBinding>potentialRemoves= new HashMap<>();
-		for (Iterator<SimpleName> iterator= removedRefs.iterator(); iterator.hasNext();) {
-			SimpleName name= iterator.next();
+		for (SimpleName name : removedRefs) {
 			if (fAddedImports.contains(name.getIdentifier()) || hasAddedStaticImport(name))
 				continue;
 			IBinding binding= name.resolveBinding();

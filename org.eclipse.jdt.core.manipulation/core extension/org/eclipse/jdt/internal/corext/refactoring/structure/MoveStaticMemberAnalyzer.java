@@ -211,8 +211,8 @@ import org.eclipse.jdt.internal.corext.refactoring.util.JavaStatusContext;
 	protected boolean isMovedMember(IBinding binding) {
 		if (binding == null)
 			return false;
-		for (int i= 0; i < fMembers.length; i++) {
-			if (Bindings.equalDeclarations(fMembers[i], binding))
+		for (IBinding member : fMembers) {
+			if (Bindings.equalDeclarations(member, binding))
 				return true;
 		}
 		return false;

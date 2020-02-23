@@ -71,8 +71,8 @@ public class ASTNodeSearchUtil {
 
 	public static ASTNode[] getAstNodes(SearchMatch[] searchResults, CompilationUnit cuNode) {
 		List<ASTNode> result= new ArrayList<>(searchResults.length);
-		for (int i= 0; i < searchResults.length; i++) {
-			ASTNode node= getAstNode(searchResults[i], cuNode);
+		for (SearchMatch searchResult : searchResults) {
+			ASTNode node= getAstNode(searchResult, cuNode);
 			if (node != null)
 				result.add(node);
 		}
@@ -258,8 +258,8 @@ public class ASTNodeSearchUtil {
 
 	public static ASTNode[] findNodes(SearchMatch[] searchResults, CompilationUnit cuNode) {
 		List<ASTNode> result= new ArrayList<>(searchResults.length);
-		for (int i= 0; i < searchResults.length; i++) {
-			ASTNode node= findNode(searchResults[i], cuNode);
+		for (SearchMatch searchResult : searchResults) {
+			ASTNode node= findNode(searchResult, cuNode);
 			if (node != null)
 				result.add(node);
 		}

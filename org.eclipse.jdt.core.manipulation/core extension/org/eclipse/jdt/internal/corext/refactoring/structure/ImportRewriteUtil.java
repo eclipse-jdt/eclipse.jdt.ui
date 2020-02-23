@@ -16,7 +16,6 @@ package org.eclipse.jdt.internal.corext.refactoring.structure;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -80,8 +79,8 @@ public final class ImportRewriteUtil {
 		final ImportRemover remover= rewrite.getImportRemover();
 		Name name= null;
 		IBinding binding= null;
-		for (final Iterator<SimpleName> iterator= types.iterator(); iterator.hasNext();) {
-			name= iterator.next();
+		for (SimpleName simpleName : types) {
+			name= simpleName;
 			binding= name.resolveBinding();
 			if (binding instanceof ITypeBinding) {
 				final ITypeBinding type= (ITypeBinding) binding;
@@ -91,8 +90,8 @@ public final class ImportRewriteUtil {
 				}
 			}
 		}
-		for (final Iterator<SimpleName> iterator= members.iterator(); iterator.hasNext();) {
-			name= iterator.next();
+		for (SimpleName simpleName : members) {
+			name= simpleName;
 			binding= name.resolveBinding();
 			if (binding instanceof IVariableBinding) {
 				final IVariableBinding variable= (IVariableBinding) binding;
@@ -147,8 +146,8 @@ public final class ImportRewriteUtil {
 
 		Name name= null;
 		IBinding binding= null;
-		for (final Iterator<SimpleName> iterator= types.iterator(); iterator.hasNext();) {
-			name= iterator.next();
+		for (SimpleName simpleName : types) {
+			name= simpleName;
 			binding= name.resolveBinding();
 			if (binding instanceof ITypeBinding) {
 				final ITypeBinding type= (ITypeBinding) binding;
@@ -156,8 +155,8 @@ public final class ImportRewriteUtil {
 					typeBindings.add(type);
 			}
 		}
-		for (final Iterator<SimpleName> iterator= members.iterator(); iterator.hasNext();) {
-			name= iterator.next();
+		for (SimpleName simpleName : members) {
+			name= simpleName;
 			binding= name.resolveBinding();
 			if (binding != null && (excludeBindings == null || !excludeBindings.contains(binding)))
 				staticBindings.add(binding);

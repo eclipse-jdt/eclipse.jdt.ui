@@ -195,8 +195,8 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 				expression.accept(this);
 			}
 			List<Expression> arguments= node.arguments();
-			for (int i= 0; i < arguments.size(); i++) {
-				arguments.get(i).accept(this);
+			for (Expression argument : arguments) {
+				argument.accept(this);
 			}
 			return false;
 		}
@@ -355,16 +355,16 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 	}
 
 	private static boolean containsNonStatic(MethodInvocation[] invocations) {
-		for (int i= 0; i < invocations.length; i++) {
-			if (!isStatic(invocations[i]))
+		for (MethodInvocation invocation : invocations) {
+			if (!isStatic(invocation))
 				return true;
 		}
 		return false;
 	}
 
 	private static boolean containsNonStatic(SimpleName[] fieldNames) {
-		for (int i= 0; i < fieldNames.length; i++) {
-			if (!isStaticFieldName(fieldNames[i]))
+		for (SimpleName fieldName : fieldNames) {
+			if (!isStaticFieldName(fieldName))
 				return true;
 		}
 		return false;
@@ -382,8 +382,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 
 	private static AbstractTypeDeclaration findTypeDeclaration(IType enclosing, AbstractTypeDeclaration[] declarations) {
 		String typeName= enclosing.getElementName();
-		for (int i= 0; i < declarations.length; i++) {
-			AbstractTypeDeclaration declaration= declarations[i];
+		for (AbstractTypeDeclaration declaration : declarations) {
 			if (declaration.getName().getIdentifier().equals(typeName))
 				return declaration;
 		}
@@ -395,8 +394,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 		types.add(type);
 		AbstractTypeDeclaration[] declarations= (AbstractTypeDeclaration[]) unit.types().toArray(new AbstractTypeDeclaration[unit.types().size()]);
 		AbstractTypeDeclaration declaration= null;
-		for (final Iterator<IType> iterator= types.iterator(); iterator.hasNext();) {
-			IType enclosing= iterator.next();
+		for (IType enclosing : types) {
 			declaration= findTypeDeclaration(enclosing, declarations);
 			Assert.isNotNull(declaration);
 			declarations= getAbstractTypeDeclarations(declaration);
@@ -436,8 +434,8 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 		try {
 			IField[] fields= type.getFields();
 			List<String> result= new ArrayList<>(fields.length);
-			for (int i= 0; i < fields.length; i++) {
-				result.add(fields[i].getElementName());
+			for (IField field : fields) {
+				result.add(field.getElementName());
 			}
 			return result.toArray(new String[result.size()]);
 		} catch (JavaModelException e) {
@@ -453,10 +451,9 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 	}
 
 	private static String[] getParameterNamesOfAllConstructors(IType type) throws JavaModelException {
-		IMethod[] constructors= JavaElementUtil.getAllConstructors(type);
 		Set<String> result= new HashSet<>();
-		for (int i= 0; i < constructors.length; i++) {
-			result.addAll(Arrays.asList(constructors[i].getParameterNames()));
+		for (IMethod constructor : JavaElementUtil.getAllConstructors(type)) {
+			result.addAll(Arrays.asList(constructor.getParameterNames()));
 		}
 		return result.toArray(new String[result.size()]);
 	}
@@ -581,9 +578,8 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 				names.add(parameter.getName().getIdentifier());
 			}
 			final ListRewrite rewriter= rewrite.getListRewrite(type, TypeDeclaration.TYPE_PARAMETERS_PROPERTY);
-			String name= null;
-			for (int index= 0; index < parameters.length; index++) {
-				name= parameters[index].getName();
+			for (ITypeBinding parameter2 : parameters) {
+				String name= parameter2.getName();
 				if (!names.contains(name)) {
 					parameter= type.getAST().newTypeParameter();
 					parameter.setName(type.getAST().newSimpleName(name));
@@ -693,9 +689,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 	private RefactoringStatus checkConstructorParameterNames() {
 		RefactoringStatus result= new RefactoringStatus();
 		CompilationUnit cuNode= new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL).parse(fType.getCompilationUnit(), false);
-		MethodDeclaration[] nodes= getConstructorDeclarationNodes(findTypeDeclaration(fType, cuNode));
-		for (int i= 0; i < nodes.length; i++) {
-			MethodDeclaration constructor= nodes[i];
+		for (MethodDeclaration constructor : getConstructorDeclarationNodes(findTypeDeclaration(fType, cuNode))) {
 			for (Iterator<SingleVariableDeclaration> iter= constructor.parameters().iterator(); iter.hasNext();) {
 				SingleVariableDeclaration param= iter.next();
 				if (fEnclosingInstanceFieldName.equals(param.getName().getIdentifier())) {
@@ -844,8 +838,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 			}
 			monitor.worked(1);
 			ICompilationUnit inputCU= fType.getCompilationUnit();
-			for (final Iterator<ICompilationUnit> iterator= getMergedSet(typeReferences.keySet(), constructorReferences.keySet()).iterator(); iterator.hasNext();) {
-				final ICompilationUnit unit= iterator.next();
+			for (ICompilationUnit unit : getMergedSet(typeReferences.keySet(), constructorReferences.keySet())) {
 				final CompilationUnitRewrite targetRewrite= getCompilationUnitRewrite(unit);
 				createCompilationUnitRewrite(bindings, targetRewrite, typeReferences, constructorReferences, adjustor.getAdjustments().containsKey(fType), inputCU, unit, false, status, monitor);
 				if (unit.equals(inputCU)) {
@@ -943,12 +936,10 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 				ModifierRewrite.create(rewrite, declaration).setModifiers(newFlags, groupMove);
 			}
 		}
-		ASTNode[] references= getReferenceNodesIn(root, typeReferences, targetUnit);
-		for (int index= 0; index < references.length; index++)
-			updateTypeReference(parameters, references[index], targetRewrite, targetUnit);
-		references= getReferenceNodesIn(root, constructorReferences, targetUnit);
-		for (int index= 0; index < references.length; index++)
-			updateConstructorReference(parameters, references[index], targetRewrite, targetUnit);
+		for (ASTNode reference : getReferenceNodesIn(root, typeReferences, targetUnit))
+			updateTypeReference(parameters, reference, targetRewrite, targetUnit);
+		for (ASTNode reference : getReferenceNodesIn(root, constructorReferences, targetUnit))
+			updateConstructorReference(parameters, reference, targetRewrite, targetUnit);
 	}
 
 	private void createConstructor(final AbstractTypeDeclaration declaration, final ASTRewrite rewrite) throws CoreException {
@@ -989,10 +980,8 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 
 	// Map<ICompilationUnit, SearchMatch[]>
 	private Map<ICompilationUnit, SearchMatch[]> createConstructorReferencesMapping(IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
-		SearchResultGroup[] groups= ConstructorReferenceFinder.getConstructorReferences(fType, pm, status);
 		Map<ICompilationUnit, SearchMatch[]> result= new HashMap<>();
-		for (int i= 0; i < groups.length; i++) {
-			SearchResultGroup group= groups[i];
+		for (SearchResultGroup group : ConstructorReferenceFinder.getConstructorReferences(fType, pm, status)) {
 			ICompilationUnit cu= group.getCompilationUnit();
 			if (cu == null)
 				continue;
@@ -1038,8 +1027,8 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 		final Type type= ASTNodeFactory.newType(ast, fType.getDeclaringType().getTypeQualifiedName('.'));
 		if (parameters.length > 0) {
 			final ParameterizedType parameterized= ast.newParameterizedType(type);
-			for (int index= 0; index < parameters.length; index++)
-				parameterized.typeArguments().add(ast.newSimpleType(ast.newSimpleName(parameters[index].getElementName())));
+			for (ITypeParameter parameter : parameters)
+				parameterized.typeArguments().add(ast.newSimpleType(ast.newSimpleName(parameter.getElementName())));
 			return parameterized;
 		}
 		return type;
@@ -1114,10 +1103,8 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 		engine.setScope(RefactoringScopeFactory.create(fType));
 		engine.setStatus(status);
 		engine.searchPattern(new SubProgressMonitor(pm, 1));
-		final SearchResultGroup[] groups= (SearchResultGroup[]) engine.getResults();
 		Map<ICompilationUnit, SearchMatch[]> result= new HashMap<>();
-		for (int i= 0; i < groups.length; i++) {
-			SearchResultGroup group= groups[i];
+		for (SearchResultGroup group : (SearchResultGroup[]) engine.getResults()) {
 			ICompilationUnit cu= group.getCompilationUnit();
 			if (cu == null)
 				continue;
@@ -1142,11 +1129,10 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 
 	private MethodDeclaration[] getConstructorDeclarationNodes(final AbstractTypeDeclaration declaration) {
 		if (declaration instanceof TypeDeclaration) {
-			final MethodDeclaration[] declarations= ((TypeDeclaration) declaration).getMethods();
 			final List<MethodDeclaration> result= new ArrayList<>(2);
-			for (int index= 0; index < declarations.length; index++) {
-				if (declarations[index].isConstructor())
-					result.add(declarations[index]);
+			for (MethodDeclaration declaration2 : ((TypeDeclaration) declaration).getMethods()) {
+				if (declaration2.isConstructor())
+					result.add(declaration2);
 			}
 			return result.toArray(new MethodDeclaration[result.size()]);
 		}
@@ -1219,8 +1205,8 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 			raw= true;
 		if (parameters != null && parameters.length > 0 && !raw) {
 			final ParameterizedType type= ast.newParameterizedType(ast.newSimpleType(ast.newName(fQualifiedTypeName)));
-			for (int index= 0; index < parameters.length; index++)
-				type.typeArguments().add(ast.newSimpleType(ast.newSimpleName(parameters[index].getName())));
+			for (ITypeBinding parameter : parameters)
+				type.typeArguments().add(ast.newSimpleType(ast.newSimpleName(parameter.getName())));
 			return type;
 		}
 		return ast.newName(fQualifiedTypeName);
@@ -1234,8 +1220,8 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 			raw= true;
 		if (parameters != null && parameters.length > 0 && !raw) {
 			final ParameterizedType type= ast.newParameterizedType(ast.newSimpleType(ast.newSimpleName(fType.getElementName())));
-			for (int index= 0; index < parameters.length; index++)
-				type.typeArguments().add(ast.newSimpleType(ast.newSimpleName(parameters[index].getName())));
+			for (ITypeBinding parameter : parameters)
+				type.typeArguments().add(ast.newSimpleType(ast.newSimpleName(parameter.getName())));
 			return type;
 		}
 		return ast.newSimpleType(ast.newSimpleName(fType.getElementName()));
@@ -1349,14 +1335,10 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 	}
 
 	private void modifyAccessToFieldsFromEnclosingInstance(CompilationUnitRewrite targetRewrite, SimpleName[] simpleNames, AbstractTypeDeclaration declaration) {
-		IBinding binding= null;
-		SimpleName simpleName= null;
-		IVariableBinding variable= null;
-		for (int index= 0; index < simpleNames.length; index++) {
-			simpleName= simpleNames[index];
-			binding= simpleName.resolveBinding();
+		for (SimpleName simpleName : simpleNames) {
+			IBinding binding= simpleName.resolveBinding();
 			if (binding != null && binding instanceof IVariableBinding && !(simpleName.getParent() instanceof FieldAccess)) {
-				variable= (IVariableBinding) binding;
+				IVariableBinding variable= (IVariableBinding) binding;
 				final FieldAccess access= simpleName.getAST().newFieldAccess();
 				access.setExpression(createAccessExpressionToEnclosingInstanceFieldText(simpleName, variable, declaration));
 				access.setName(simpleName.getAST().newSimpleName(simpleName.getIdentifier()));
@@ -1367,11 +1349,8 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 	}
 
 	private void modifyAccessToMethodsFromEnclosingInstance(CompilationUnitRewrite targetRewrite, MethodInvocation[] methodInvocations, AbstractTypeDeclaration declaration) {
-		IMethodBinding binding= null;
-		MethodInvocation invocation= null;
-		for (int index= 0; index < methodInvocations.length; index++) {
-			invocation= methodInvocations[index];
-			binding= invocation.resolveMethodBinding();
+		for (MethodInvocation invocation : methodInvocations) {
+			IMethodBinding binding= invocation.resolveMethodBinding();
 			if (binding != null) {
 				final Expression target= invocation.getExpression();
 				if (target == null) {
@@ -1388,11 +1367,10 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 	}
 
 	private void modifyConstructors(AbstractTypeDeclaration declaration, ASTRewrite rewrite) throws CoreException {
-		final MethodDeclaration[] declarations= getConstructorDeclarationNodes(declaration);
-		for (int index= 0; index < declarations.length; index++) {
-			Assert.isTrue(declarations[index].isConstructor());
-			addParameterToConstructor(rewrite, declarations[index]);
-			setEnclosingInstanceFieldInConstructor(rewrite, declarations[index]);
+		for (MethodDeclaration declaration2 : getConstructorDeclarationNodes(declaration)) {
+			Assert.isTrue(declaration2.isConstructor());
+			addParameterToConstructor(rewrite, declaration2);
+			setEnclosingInstanceFieldInConstructor(rewrite, declaration2);
 		}
 	}
 

@@ -28,13 +28,12 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
-
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 public class MemberCheckUtil {
 
@@ -44,13 +43,13 @@ public class MemberCheckUtil {
 
 	public static RefactoringStatus checkMembersInDestinationType(IMember[] members, IType destinationType) throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
-		for (int i= 0; i < members.length; i++) {
-			if (members[i].getElementType() == IJavaElement.METHOD)
-				checkMethodInType(destinationType, result, (IMethod)members[i]);
-			else if (members[i].getElementType() == IJavaElement.FIELD)
-				checkFieldInType(destinationType, result, (IField)members[i]);
-			else if (members[i].getElementType() == IJavaElement.TYPE)
-				checkTypeInType(destinationType, result, (IType)members[i]);
+		for (IMember member : members) {
+			if (member.getElementType() == IJavaElement.METHOD)
+				checkMethodInType(destinationType, result, (IMethod)member);
+			else if (member.getElementType() == IJavaElement.FIELD)
+				checkFieldInType(destinationType, result, (IField)member);
+			else if (member.getElementType() == IJavaElement.TYPE)
+				checkTypeInType(destinationType, result, (IType)member);
 		}
 		return result;
 	}
@@ -109,9 +108,7 @@ public class MemberCheckUtil {
 	}
 
 	private static void checkHierarchyOfEnclosedTypes(IType destinationType, RefactoringStatus result, IType type) throws JavaModelException {
-		IType[] enclosedTypes= getAllEnclosedTypes(type);
-		for (int i= 0; i < enclosedTypes.length; i++) {
-			IType enclosedType= enclosedTypes[i];
+		for (IType enclosedType : getAllEnclosedTypes(type)) {
 			if (destinationType.getElementName().equals(enclosedType.getElementName())){
 				String message= Messages.format(RefactoringCoreMessages.MemberCheckUtil_type_name_conflict3,
 						new String[] { getQualifiedLabel(enclosedType), getQualifiedLabel(type)});
@@ -135,8 +132,7 @@ public class MemberCheckUtil {
 		List<IType> result= new ArrayList<>(2);
 		IType[] directlyEnclosed= type.getTypes();
 		result.addAll(Arrays.asList(directlyEnclosed));
-		for (int i= 0; i < directlyEnclosed.length; i++) {
-			IType enclosedType= directlyEnclosed[i];
+		for (IType enclosedType : directlyEnclosed) {
 			result.addAll(Arrays.asList(getAllEnclosedTypes(enclosedType)));
 		}
 		return result.toArray(new IType[result.size()]);
@@ -165,9 +161,9 @@ public class MemberCheckUtil {
 		String[] paramTypes= method.getParameterTypes();
 		boolean isConstructor= method.isConstructor();
 
-		for (int i= 0; i < allMethods.length; i++) {
-			if (JavaModelUtil.isSameMethodSignature(name, paramTypes, isConstructor, allMethods[i]))
-				return allMethods[i];
+		for (IMethod m : allMethods) {
+			if (JavaModelUtil.isSameMethodSignature(name, paramTypes, isConstructor, m))
+				return m;
 		}
 		return null;
 	}

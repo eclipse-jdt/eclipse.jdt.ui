@@ -16,7 +16,6 @@
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -295,8 +294,7 @@ public class CompilationUnitRewrite {
 				if (!isEmptyEdit(rewriteEdit)) {
 					multiEdit.addChild(rewriteEdit);
 					if (generateGroups) {
-						for (Iterator<TextEditGroup> iter= fTextEditGroups.iterator(); iter.hasNext();) {
-							TextEditGroup group= iter.next();
+						for (TextEditGroup group : fTextEditGroups) {
 							cuChange.addTextEditGroup(group);
 						}
 					}
@@ -394,8 +392,7 @@ public class CompilationUnitRewrite {
 	}
 
 	private void clearGroupDescriptionEdits() {
-		for (Iterator<TextEditGroup> iter= fTextEditGroups.iterator(); iter.hasNext();) {
-			TextEditGroup group= iter.next();
+		for (TextEditGroup group : fTextEditGroups) {
 			group.clearTextEdits();
 		}
 	}

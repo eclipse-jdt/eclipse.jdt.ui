@@ -15,7 +15,6 @@
 package org.eclipse.jdt.internal.corext.refactoring.util;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -49,8 +48,7 @@ public class TightSourceRangeComputer extends TargetSourceRangeComputer {
 		fTightSourceRangeNodes.add(reference);
 
 	    List<StructuralPropertyDescriptor> properties= reference.structuralPropertiesForType();
-	    for (Iterator<StructuralPropertyDescriptor> iterator= properties.iterator(); iterator.hasNext();) {
-	        StructuralPropertyDescriptor descriptor= iterator.next();
+	    for (StructuralPropertyDescriptor descriptor : properties) {
 	        if (descriptor.isChildProperty()) {
 	        	ASTNode child= (ASTNode)reference.getStructuralProperty(descriptor);
 	        	if (child != null && isExtending(child, reference)) {
