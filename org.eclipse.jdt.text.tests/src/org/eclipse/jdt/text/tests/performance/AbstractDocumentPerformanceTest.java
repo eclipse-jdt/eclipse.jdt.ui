@@ -192,9 +192,9 @@ public abstract class AbstractDocumentPerformanceTest extends TextPerformanceTes
 
 		meter.start();
 		for (int times = 0; times < 4; times++)
-			for (int i = 0; i < indices.length; i++) {
-				fDocument.replace(indices[i], REPLACE_LENGTH, null);
-				fDocument.replace(indices[i], 0, replace);
+			for (int index : indices) {
+				fDocument.replace(index, REPLACE_LENGTH, null);
+				fDocument.replace(index, 0, replace);
 			}
 		meter.stop();
 	}

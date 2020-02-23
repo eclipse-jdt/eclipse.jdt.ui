@@ -256,18 +256,17 @@ public class PluginsNotLoadedTest extends TestCase {
 
 	public void _testPrintNotLoaded() {
 		Bundle bundle= Platform.getBundle("org.eclipse.jdt.text.tests");
-		Bundle[] bundles= bundle.getBundleContext().getBundles();
-		for (int i= 0; i < bundles.length; i++) {
-			if (bundles[i].getState() != Bundle.ACTIVE)
-				System.out.println(bundles[i].getSymbolicName());
+		for (Bundle bundle2 : bundle.getBundleContext().getBundles()) {
+			if (bundle2.getState() != Bundle.ACTIVE)
+				System.out.println(bundle2.getSymbolicName());
 		}
 	}
 
 	public void testPluginsNotLoaded() {
 		StringBuffer buf= new StringBuffer();
-		for (int i= 0; i < NOT_LOADED_BUNDLES.length; i++) {
-			Bundle bundle= Platform.getBundle(NOT_LOADED_BUNDLES[i]);
-			if (NOT_LOADED_BUNDLES[i].contains("org.junit"))
+		for (String element : NOT_LOADED_BUNDLES) {
+			Bundle bundle= Platform.getBundle(element);
+			if (element.contains("org.junit"))
 				System.out.println();
 			if (bundle == null) {
 				// log bundles that cannot be found:
@@ -276,7 +275,7 @@ public class PluginsNotLoadedTest extends TestCase {
 //				buf.append('\n');
 			} else if (bundle.getState() == Bundle.ACTIVE) {
 				buf.append("- ");
-				buf.append(NOT_LOADED_BUNDLES[i]);
+				buf.append(element);
 				buf.append('\n');
 			}
 		}

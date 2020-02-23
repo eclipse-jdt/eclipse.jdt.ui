@@ -287,8 +287,8 @@ public abstract class ScrollEditorTest extends TextPerformanceTestCase {
 
 				final int[] keyCodes= mode.SCROLL_COMBO;
 				// press keys
-				for (int j= 0; j < keyCodes.length; j++) {
-					SWTEventHelper.keyCodeDown(display, keyCodes[j], false);
+				for (int keyCode : keyCodes) {
+					SWTEventHelper.keyCodeDown(display, keyCode, false);
 				}
 
 				int topIndex= 0;

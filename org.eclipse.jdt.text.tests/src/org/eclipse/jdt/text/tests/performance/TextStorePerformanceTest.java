@@ -158,9 +158,9 @@ public abstract class TextStorePerformanceTest extends TextPerformanceTestCase2 
 
 		meter.start();
 		for (int times = 0; times < 4; times++)
-			for (int i = 0; i < indices.length; i++) {
-				fTextStore.replace(indices[i], REPLACE_LENGTH, null);
-				fTextStore.replace(indices[i], 0, replace);
+			for (int index : indices) {
+				fTextStore.replace(index, REPLACE_LENGTH, null);
+				fTextStore.replace(index, 0, replace);
 			}
 		meter.stop();
 	}

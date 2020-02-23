@@ -19,7 +19,6 @@ import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
@@ -139,8 +138,8 @@ public class TextPerformanceTestCase extends TestCase {
 		super.tearDown();
 		EditorsUI.getPreferenceStore().setToDefault(SpellingService.PREFERENCE_SPELLING_ENABLED);
 		if (fPerformanceMeters != null)
-			for (Iterator<PerformanceMeter> iter= fPerformanceMeters.iterator(); iter.hasNext();)
-				iter.next().dispose();
+			for (PerformanceMeter performanceMeter : fPerformanceMeters)
+				performanceMeter.dispose();
 
 //		if (DEBUG)
 //			System.out.println(DATE_FORMAT.format(new Date()) + ": tearDown " + getClass().getName() + "." + getName());
@@ -365,8 +364,8 @@ public class TextPerformanceTestCase extends TestCase {
 	 */
 	protected final void commitAllMeasurements() {
 		if (fPerformanceMeters != null)
-			for (Iterator<PerformanceMeter> iter= fPerformanceMeters.iterator(); iter.hasNext();)
-				iter.next().commit();
+			for (PerformanceMeter performanceMeter : fPerformanceMeters)
+				performanceMeter.commit();
 	}
 
 	/**
@@ -389,8 +388,8 @@ public class TextPerformanceTestCase extends TestCase {
 	 */
 	protected final void assertAllPerformance() {
 		if (fPerformanceMeters != null)
-			for (Iterator<PerformanceMeter> iter= fPerformanceMeters.iterator(); iter.hasNext();)
-				assertPerformance(iter.next());
+			for (PerformanceMeter performanceMeter : fPerformanceMeters)
+				assertPerformance(performanceMeter);
 	}
 
 	/**

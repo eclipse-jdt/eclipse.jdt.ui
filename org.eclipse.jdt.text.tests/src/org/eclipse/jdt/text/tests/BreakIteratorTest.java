@@ -33,15 +33,14 @@ public class BreakIteratorTest extends TestCase {
 		fBreakIterator.setText(ci.toString());
 
 		// test next()
-		for (int i = 0; i < positions.length; i++) {
+		for (int position : positions) {
 			int pos= fBreakIterator.next();
-			assertEquals(positions[i], pos);
+			assertEquals(position, pos);
 		}
 
 		// test following()
 		int idx= 0;
-		for (int i = 0; i < positions.length; i++) {
-			int position= positions[i];
+		for (int position : positions) {
 			while (idx < position) {
 				if (!illegalPos(ci, idx))
 					assertEquals(position, fBreakIterator.following(idx));

@@ -120,8 +120,8 @@ public abstract class NonInitialTypingTest extends TextPerformanceTestCase {
 			if (i >= warmUpRuns)
 				fMeter.start();
 
-			for (int j= 0; j < METHOD.length; j++) {
-				keyboardProbe.pressChar(METHOD[j], display);
+			for (char element : METHOD) {
+				keyboardProbe.pressChar(element, display);
 				EditorTestHelper.runEventQueue();
 			}
 

@@ -13,9 +13,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.performance;
 
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.junit.Assert;
@@ -104,14 +102,11 @@ final class DifferenceMeter extends InternalPerformanceMeter {
 	 * @see org.eclipse.test.internal.performance.InternalPerformanceMeter#printSample(java.io.PrintStream, org.eclipse.test.internal.performance.data.Sample)
 	 */
 	private DataPoint difference(DataPoint minuend, DataPoint subtrahend) {
-		Collection<Dim> mDims= minuend.getDimensions2();
 		int step= minuend.getStep();
 		Assert.assertEquals(step, subtrahend.getStep());
 
 		Map<Dim, Scalar> scalars= new HashMap<>();
-		for (Iterator<Dim> it= mDims.iterator(); it.hasNext();) {
-			Dim dimension= it.next();
-
+		for (Dim dimension : minuend.getDimensions2()) {
 			Scalar m= minuend.getScalar(dimension);
 			Scalar s= subtrahend.getScalar(dimension);
 

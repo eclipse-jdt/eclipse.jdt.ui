@@ -2214,12 +2214,9 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 			// make sure we get an import rewrite context
 			SharedASTProviderCore.getAST(cu, SharedASTProviderCore.WAIT_YES, null);
 
-			List<ICompletionProposal> proposals= computer.computeCompletionProposals(context, null);
-
 			ICompletionProposal proposal= null;
 
-			for (int i= 0; i < proposals.size(); i++) {
-				ICompletionProposal curr= proposals.get(i);
+			for (ICompletionProposal curr : computer.computeCompletionProposals(context, null)) {
 				if (curr.getDisplayString().startsWith("foo")) {
 					proposal= curr;
 				}
@@ -2296,8 +2293,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 			ICompletionProposal proposal= null;
 
-			for (int i= 0; i < proposals.size(); i++) {
-				ICompletionProposal curr= proposals.get(i);
+			for (ICompletionProposal curr : proposals) {
 				if (curr.getDisplayString().startsWith("foo()")) {
 					proposal= curr;
 				}
@@ -2610,8 +2606,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 			ICompletionProposal proposal= null;
 
-			for (int i= 0; i < proposals.size(); i++) {
-				ICompletionProposal curr= proposals.get(i);
+			for (ICompletionProposal curr : proposals) {
 				if (curr instanceof AbstractJavaCompletionProposal) {
 					AbstractJavaCompletionProposal javaProposal= (AbstractJavaCompletionProposal) curr;
 					if (javaProposal.getReplacementString().equals("ARRAY_CONTENTS")) {

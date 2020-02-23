@@ -151,9 +151,9 @@ public class LineTrackerPerformanceTest extends TextPerformanceTestCase {
 
 		meter.start();
 		for (int times= 0; times < 300; times++) {
-			for (int i= 0; i < indices.length; i++) {
-				fLineTracker.replace(indices[i], 100, null);
-				fLineTracker.replace(indices[i], 0, replace);
+			for (int index : indices) {
+				fLineTracker.replace(index, 100, null);
+				fLineTracker.replace(index, 0, replace);
 			}
 		}
 		meter.stop();

@@ -19,7 +19,6 @@ import java.lang.reflect.Constructor;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -256,8 +255,8 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 		 * Prints the results.
 		 */
 		public void print() {
-			for (Iterator<Object> iter= fResultsMap.keySet().iterator(); iter.hasNext();)
-				print(iter.next());
+			for (Object object : fResultsMap.keySet())
+				print(object);
 		}
 
 		/**
@@ -572,8 +571,8 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	private String getJNISignature(Class<?>[] paramTypes) {
 		StringBuilder signature= new StringBuilder();
 		signature.append('(');
-		for (int i = 0; i < paramTypes.length; ++i)
-			signature.append(getJNISignature(paramTypes[i]));
+		for (Class<?> paramType : paramTypes)
+			signature.append(getJNISignature(paramType));
 		signature.append(')');
 		return signature.toString();
 	}

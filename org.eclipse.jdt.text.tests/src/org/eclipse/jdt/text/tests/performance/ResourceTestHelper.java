@@ -20,7 +20,6 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
@@ -172,8 +171,8 @@ public class ResourceTestHelper {
 
 	private static void replacePositions(StringBuffer c, int origLength, String string, List<Integer> positions) {
 		int offset= 0;
-		for (Iterator<Integer> iter= positions.iterator(); iter.hasNext();) {
-			int position= iter.next().intValue();
+		for (Integer integer : positions) {
+			int position= integer.intValue();
 			c.replace(offset + position, offset + position + origLength, string);
 			offset += string.length() - origLength;
 		}

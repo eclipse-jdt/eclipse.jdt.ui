@@ -13,10 +13,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
-import junit.extensions.TestSetup;
-import junit.framework.Test;
-import junit.framework.TestCase;
-
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.text.tests.performance.EditorTestHelper;
 import org.eclipse.jdt.text.tests.performance.ResourceTestHelper;
@@ -41,6 +37,10 @@ import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingManager;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingPresenter;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings;
+
+import junit.extensions.TestSetup;
+import junit.framework.Test;
+import junit.framework.TestCase;
 
 
 public class AbstractSemanticHighlightingTest extends TestCase {
@@ -80,8 +80,8 @@ public class AbstractSemanticHighlightingTest extends TestCase {
 			IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 
 			SemanticHighlighting[] semanticHighlightings= SemanticHighlightings.getSemanticHighlightings();
-			for (int i= 0, n= semanticHighlightings.length; i < n; i++) {
-				String enabledPreferenceKey= SemanticHighlightings.getEnabledPreferenceKey(semanticHighlightings[i]);
+			for (SemanticHighlighting semanticHighlighting : semanticHighlightings) {
+				String enabledPreferenceKey= SemanticHighlightings.getEnabledPreferenceKey(semanticHighlighting);
 				if (!store.isDefault(enabledPreferenceKey))
 					store.setToDefault(enabledPreferenceKey);
 			}
@@ -125,8 +125,7 @@ public class AbstractSemanticHighlightingTest extends TestCase {
 		StringBuilder buf= new StringBuilder();
 		IDocument document= fSourceViewer.getDocument();
 		buf.append("Position[] expected= new Position[] {\n");
-		for (int i= 0, n= positions.length; i < n; i++) {
-			Position position= positions[i];
+		for (Position position : positions) {
 			int line= document.getLineOfOffset(position.getOffset());
 			int column= position.getOffset() - document.getLineOffset(line);
 			buf.append("\tcreatePosition(" + line + ", " + column + ", " + position.getLength() + "),\n");
@@ -161,9 +160,7 @@ public class AbstractSemanticHighlightingTest extends TestCase {
 
 	private static void disableAllSemanticHighlightings() {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		SemanticHighlighting[] semanticHilightings= SemanticHighlightings.getSemanticHighlightings();
-		for (int i= 0, n= semanticHilightings.length; i < n; i++) {
-			SemanticHighlighting semanticHilighting= semanticHilightings[i];
+		for (SemanticHighlighting semanticHilighting : SemanticHighlightings.getSemanticHighlightings()) {
 			if (store.getBoolean(SemanticHighlightings.getEnabledPreferenceKey(semanticHilighting)))
 				store.setValue(SemanticHighlightings.getEnabledPreferenceKey(semanticHilighting), false);
 		}

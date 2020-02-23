@@ -49,9 +49,9 @@ public abstract class OpenEditorTest extends TextPerformanceTestCase {
 	}
 
 	protected void measureOpenInEditor(IFile[] files, PerformanceMeter performanceMeter, boolean closeEach) throws PartInitException {
-		for (int i= 0, n= files.length; i < n; i++) {
+		for (IFile file : files) {
 			performanceMeter.start();
-			AbstractTextEditor editor= (AbstractTextEditor) EditorTestHelper.openInEditor(files[i], true);
+			AbstractTextEditor editor= (AbstractTextEditor) EditorTestHelper.openInEditor(file, true);
 			performanceMeter.stop();
 			EditorTestHelper.joinReconciler(EditorTestHelper.getSourceViewer(editor), 100, 10000, 100);
 			if (closeEach) {

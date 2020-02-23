@@ -103,15 +103,14 @@ public abstract class ActivateEditorTest extends TextPerformanceTestCase {
 		for (int i= 0; i < runs; i++) {
 			assertTrue(editors.length == 0 || editors[0] != page.getActivePart());
 			performanceMeter.start();
-			for (int j= 0, n= editors.length; j < n; j++) {
-				AbstractTextEditor editor= editors[j];
+			for (AbstractTextEditor editor : editors) {
 				page.activate(editor);
 				waitUntilReady(editor);
 				EditorTestHelper.runEventQueue(editor);
 			}
 			performanceMeter.stop();
-			for (int j= 0, n= editors.length; j < n; j++)
-				EditorTestHelper.joinReconciler(EditorTestHelper.getSourceViewer(editors[j]), 100, 10000, 100);
+			for (AbstractTextEditor editor : editors)
+				EditorTestHelper.joinReconciler(EditorTestHelper.getSourceViewer(editor), 100, 10000, 100);
 		}
 	}
 
