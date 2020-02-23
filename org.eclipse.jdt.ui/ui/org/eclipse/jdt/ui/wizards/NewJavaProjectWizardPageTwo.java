@@ -25,7 +25,6 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.swt.widgets.Display;
@@ -388,8 +387,7 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 				}
 			}
 
-			for (Iterator<IFileStore> iterator= fOrginalFolders.iterator(); iterator.hasNext();) {
-				IFileStore deleted= iterator.next();
+			for (IFileStore deleted : fOrginalFolders) {
 				deleted.mkdir(EFS.NONE, null);
 			}
 		} catch (CoreException e) {

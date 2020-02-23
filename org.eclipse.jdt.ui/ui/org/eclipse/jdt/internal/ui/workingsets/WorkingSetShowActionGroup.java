@@ -14,7 +14,6 @@
 package org.eclipse.jdt.internal.ui.workingsets;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
@@ -64,8 +63,8 @@ public class WorkingSetShowActionGroup extends ActionGroup implements IWorkingSe
 
 	@Override
 	public void cleanViewMenu(IMenuManager menuManager) {
-		for (Iterator<IContributionItem> iter= fContributions.iterator(); iter.hasNext();) {
-			IContributionItem removed= menuManager.remove(iter.next());
+		for (IContributionItem iContributionItem : fContributions) {
+			IContributionItem removed= menuManager.remove(iContributionItem);
 			if (removed != null) {
 				removed.dispose();
 			}

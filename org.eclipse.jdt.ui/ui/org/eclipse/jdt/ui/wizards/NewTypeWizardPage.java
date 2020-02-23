@@ -20,7 +20,6 @@ import java.math.BigDecimal;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -1512,8 +1511,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 */
 	public void setSuperInterfaces(List<String> interfacesNames, boolean canBeModified) {
 		ArrayList<InterfaceWrapper> interfaces= new ArrayList<>(interfacesNames.size());
-		for (Iterator<String> iter= interfacesNames.iterator(); iter.hasNext();) {
-			interfaces.add(new InterfaceWrapper(iter.next()));
+		for (String string : interfacesNames) {
+			interfaces.add(new InterfaceWrapper(string));
 		}
 		fSuperInterfacesDialogField.setElements(interfaces);
 		fSuperInterfacesDialogField.setEnabled(canBeModified);
@@ -1998,9 +1997,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 
 		if (root != null) {
 			List<InterfaceWrapper> elements= fSuperInterfacesDialogField.getElements();
-			int nElements= elements.size();
-			for (int i= 0; i < nElements; i++) {
-				String intfname= elements.get(i).interfaceName;
+			for (InterfaceWrapper element : elements) {
+				String intfname= element.interfaceName;
 				Type type= TypeContextChecker.parseSuperInterface(intfname);
 				if (type == null) {
 					status.setError(Messages.format(NewWizardMessages.NewTypeWizardPage_error_InvalidSuperInterfaceName, BasicElementLabels.getJavaElementName(intfname)));
@@ -2298,9 +2296,9 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				if (enclosingType.isEnum()) {
 					IField[] fields = enclosingType.getFields();
 					if (fields.length > 0) {
-						for (int i = 0, max = fields.length; i < max; i++) {
-							if (!fields[i].isEnumConstant()) {
-								sibling = fields[i];
+						for (IField field : fields) {
+							if (!field.isEnumConstant()) {
+								sibling = field;
 								break;
 							}
 						}
@@ -2386,8 +2384,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	private Set<String> getExistingImports(CompilationUnit root) {
 		List<ImportDeclaration> imports= root.imports();
 		Set<String> res= new HashSet<>(imports.size());
-		for (int i= 0; i < imports.size(); i++) {
-			res.add(ASTNodes.asString(imports.get(i)));
+		for (ImportDeclaration import1 : imports) {
+			res.add(ASTNodes.asString(import1));
 		}
 		return res;
 	}
@@ -2414,8 +2412,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				int id= curr.getID();
 				if (id == IProblem.UnusedImport || id == IProblem.NotVisibleType) { // not visible problems hide unused -> remove both
 					int pos= curr.getSourceStart();
-					for (int k= 0; k < importsDecls.size(); k++) {
-						ImportDeclaration decl= importsDecls.get(k);
+					for (ImportDeclaration decl : importsDecls) {
 						if (decl.getStartPosition() <= pos && pos < decl.getStartPosition() + decl.getLength()) {
 							if (existingImports.isEmpty() || !existingImports.contains(ASTNodes.asString(decl))) {
 								String name= decl.getName().getFullyQualifiedName();

@@ -98,8 +98,7 @@ public class OpenProjectAction extends SelectionDispatchAction implements IResou
 		IResourceDelta delta = event.getDelta();
 		if (delta != null) {
 			IResourceDelta[] projDeltas = delta.getAffectedChildren(IResourceDelta.CHANGED);
-			for (int i = 0; i < projDeltas.length; ++i) {
-				IResourceDelta projDelta = projDeltas[i];
+			for (IResourceDelta projDelta : projDeltas) {
 				if ((projDelta.getFlags() & IResourceDelta.OPEN) != 0) {
 					setEnabled(hasClosedProjectsInWorkspace());
 					return;

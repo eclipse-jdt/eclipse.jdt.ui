@@ -18,7 +18,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -510,8 +509,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 
 	private static List<IField> reorderFields(List<IField> collection, Set<IField> set) {
 		final List<IField> list= new ArrayList<>(collection.size());
-		for (final Iterator<IField> iterator= set.iterator(); iterator.hasNext();) {
-			final IField field= iterator.next();
+		for (IField field : set) {
 			if (collection.contains(field))
 				list.add(field);
 		}

@@ -102,31 +102,31 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 
 		public GrayedCheckedModelElement[] getChecked() {
 			ArrayList<GrayedCheckedModelElement> result= new ArrayList<>();
-			for (int i= 0; i < fElements.size(); i++) {
-				if (fElements.get(i).isChecked())
-					result.add(fElements.get(i));
+			for (GrayedCheckedModelElement element : fElements) {
+				if (element.isChecked())
+					result.add(element);
 			}
 			return result.toArray(new GrayedCheckedModelElement[result.size()]);
 		}
 
 		public GrayedCheckedModelElement[] getGrayed() {
 			ArrayList<GrayedCheckedModelElement> result= new ArrayList<>();
-			for (int i= 0; i < fElements.size(); i++) {
-				if (fElements.get(i).isGrayed())
-					result.add(fElements.get(i));
+			for (GrayedCheckedModelElement element : fElements) {
+				if (element.isGrayed())
+					result.add(element);
 			}
 			return result.toArray(new GrayedCheckedModelElement[result.size()]);
 		}
 
 		public void selectAll() {
-			for (int i= 0; i < fElements.size(); i++) {
-				fElements.get(i).select();
+			for (GrayedCheckedModelElement fElement : fElements) {
+				fElement.select();
 			}
 		}
 
 		public void deselectAll() {
-			for (int i= 0; i < fElements.size(); i++) {
-				fElements.get(i).deselect();
+			for (GrayedCheckedModelElement fElement : fElements) {
+				fElement.deselect();
 			}
 		}
 
@@ -581,8 +581,8 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 		@Override
 		protected void cancelPressed() {
 			IWorkingSetManager manager= PlatformUI.getWorkbench().getWorkingSetManager();
-			for (int i= 0; i < fCreatedWorkingSets.size(); i++) {
-				manager.removeWorkingSet(fCreatedWorkingSets.get(i));
+			for (IWorkingSet fCreatedWorkingSet : fCreatedWorkingSets) {
+				manager.removeWorkingSet(fCreatedWorkingSet);
 			}
 
 			super.cancelPressed();
@@ -776,13 +776,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 		if (!set.isEditable())
 			return false;
 
-		for (String v : VALID_WORKING_SET_IDS) {
-			if (v.equals(set.getId())) {
-				return true;
-			}
-		}
-
-		return false;
+		return Arrays.asList(VALID_WORKING_SET_IDS).contains(set.getId());
 	}
 
 	private static IAdaptable adapt(IWorkingSet set, IAdaptable element) {
@@ -796,13 +790,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 	}
 
 	private static boolean contains(IWorkingSet set, IAdaptable adaptedElement) {
-		for (IAdaptable element : set.getElements()) {
-			if (element.equals(adaptedElement)) {
-				return true;
-			}
-		}
-
-		return false;
+		return Arrays.asList(set.getElements()).contains(adaptedElement);
 	}
 
 	private static void remove(IWorkingSet workingSet, IAdaptable adaptedElement) {

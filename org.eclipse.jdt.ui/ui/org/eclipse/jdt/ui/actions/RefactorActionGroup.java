@@ -14,7 +14,6 @@
 package org.eclipse.jdt.ui.actions;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.swt.events.MenuAdapter;
@@ -578,8 +577,8 @@ public class RefactorActionGroup extends ActionGroup {
 			}
 		} else {
 			ISelection selection= fSelectionProvider.getSelection();
-			for (Iterator<SelectionDispatchAction> iter= fActions.iterator(); iter.hasNext(); ) {
-				iter.next().update(selection);
+			for (SelectionDispatchAction selectionDispatchAction : fActions) {
+				selectionDispatchAction.update(selection);
 			}
 			if (fillRefactorMenu(refactorSubmenu) > 0)
 				menu.appendToGroup(fGroupName, refactorSubmenu);
@@ -682,18 +681,18 @@ public class RefactorActionGroup extends ActionGroup {
 			ITextSelection textSelection= (ITextSelection)fEditor.getSelectionProvider().getSelection();
 			JavaTextSelection javaSelection= new JavaTextSelection(element, getDocument(), textSelection.getOffset(), textSelection.getLength());
 
-			for (Iterator<SelectionDispatchAction> iter= fActions.iterator(); iter.hasNext(); ) {
-				iter.next().update(javaSelection);
+			for (SelectionDispatchAction selectionDispatchAction : fActions) {
+				selectionDispatchAction.update(javaSelection);
 			}
 			fillRefactorMenu(menu);
-			for (Iterator<SelectionDispatchAction> iter= fActions.iterator(); iter.hasNext(); ) {
-				iter.next().update(textSelection);
+			for (SelectionDispatchAction selectionDispatchAction : fActions) {
+				selectionDispatchAction.update(textSelection);
 			}
 
 		} else {
 			ISelection selection= fSelectionProvider.getSelection();
-			for (Iterator<SelectionDispatchAction> iter= fActions.iterator(); iter.hasNext(); ) {
-				iter.next().update(selection);
+			for (SelectionDispatchAction selectionDispatchAction : fActions) {
+				selectionDispatchAction.update(selection);
 			}
 			fillRefactorMenu(menu);
 		}

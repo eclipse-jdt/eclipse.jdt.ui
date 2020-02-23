@@ -18,7 +18,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -134,11 +133,11 @@ public class WorkingSetModel {
 			List<IAdaptable> toRemove= new ArrayList<>(Arrays.asList(oldElements));
 			List<IAdaptable> toAdd= new ArrayList<>(Arrays.asList(newElements));
 			computeDelta(toRemove, toAdd, oldElements, newElements);
-			for (Iterator<IAdaptable> iter= toAdd.iterator(); iter.hasNext();) {
-				addElement(iter.next(), ws);
+			for (IAdaptable iAdaptable : toAdd) {
+				addElement(iAdaptable, ws);
 			}
-			for (Iterator<IAdaptable> iter= toRemove.iterator(); iter.hasNext();) {
-				removeElement(iter.next(), ws);
+			for (IAdaptable iAdaptable : toRemove) {
+				removeElement(iAdaptable, ws);
 			}
 			if (toRemove.size() > 0 || toAdd.size() > 0)
 				fWorkingSetToElement.put(ws, newElements);
@@ -413,8 +412,7 @@ public class WorkingSetModel {
 	 * @since 3.7
 	 */
 	private void addNewlyCreatedWorkingSets(List<IWorkingSet> result) {
-		for (Iterator<IWorkingSet> iter= result.iterator(); iter.hasNext();) {
-			IWorkingSet set= iter.next();
+		for (IWorkingSet set : result) {
 			if (!fAllWorkingSets.contains(set))
 				fAllWorkingSets.add(set);
 		}
@@ -474,8 +472,7 @@ public class WorkingSetModel {
 	 */
 	private void adjustOrderingOfAllWorkingSets() {
 		int countActive= 0;
-		for (Iterator<IWorkingSet> iter= fAllWorkingSets.iterator(); iter.hasNext();) {
-			IWorkingSet set= iter.next();
+		for (IWorkingSet set : fAllWorkingSets) {
 			if (fActiveWorkingSets.contains(set)) {
 				IWorkingSet workingSet= fActiveWorkingSets.get(countActive++);
 				if (!workingSet.equals(set)) {
@@ -500,8 +497,7 @@ public class WorkingSetModel {
 	 */
 	private boolean isOrderDifferentInWorkingSetLists(List<IWorkingSet> allWorkingSets, List<IWorkingSet> activeWorkingSets) {
 		int count= 0;
-		for (Iterator<IWorkingSet> iter= allWorkingSets.iterator(); iter.hasNext();) {
-			IWorkingSet set= iter.next();
+		for (IWorkingSet set : allWorkingSets) {
 			if (activeWorkingSets.contains(set)) {
 				if (!activeWorkingSets.get(count++).equals(set))
 					return true;
@@ -526,14 +522,12 @@ public class WorkingSetModel {
 		memento.putBoolean(TAG_SORT_WORKING_SETS, fIsSortingEnabled);
 		memento.putBoolean(TAG_CONFIGURED, fConfigured);
 		fLocalWorkingSetManager.saveState(memento.createChild(TAG_LOCAL_WORKING_SET_MANAGER));
-		for (Iterator<IWorkingSet> iter= fActiveWorkingSets.iterator(); iter.hasNext();) {
+		for (IWorkingSet workingSet : fActiveWorkingSets) {
 			IMemento active= memento.createChild(TAG_ACTIVE_WORKING_SET);
-			IWorkingSet workingSet= iter.next();
 			active.putString(TAG_WORKING_SET_NAME, workingSet.getName());
 		}
-		for (Iterator<IWorkingSet> iter= Arrays.asList(getAllWorkingSets()).iterator(); iter.hasNext();) {
+		for (IWorkingSet workingSet : Arrays.asList(getAllWorkingSets())) {
 			IMemento allWorkingSet= memento.createChild(TAG_ALL_WORKING_SETS);
-			IWorkingSet workingSet= iter.next();
 			if (isSupportedAsTopLevelElement(workingSet))
 				allWorkingSet.putString(TAG_WORKING_SET_NAME, workingSet.getName());
 		}

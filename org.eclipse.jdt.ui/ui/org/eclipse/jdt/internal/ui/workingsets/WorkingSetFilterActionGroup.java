@@ -15,7 +15,6 @@ package org.eclipse.jdt.internal.ui.workingsets;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.swt.widgets.Shell;
@@ -291,8 +290,8 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 
 	@Override
 	public void cleanViewMenu(IMenuManager menuManager) {
-		for (Iterator<IContributionItem> iter= fContributions.iterator(); iter.hasNext();) {
-			IContributionItem removed= menuManager.remove(iter.next());
+		for (IContributionItem iContributionItem : fContributions) {
+			IContributionItem removed= menuManager.remove(iContributionItem);
 			if (removed != null) {
 				removed.dispose();
 			}

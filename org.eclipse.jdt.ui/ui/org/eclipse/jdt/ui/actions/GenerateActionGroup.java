@@ -15,7 +15,6 @@
 package org.eclipse.jdt.ui.actions;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.commands.IHandler;
@@ -501,8 +500,7 @@ public class GenerateActionGroup extends ActionGroup {
 	public void dispose() {
 		if (fRegisteredSelectionListeners != null) {
 			ISelectionProvider provider= fSelectionProvider;
-			for (Iterator<ISelectionChangedListener> iter= fRegisteredSelectionListeners.iterator(); iter.hasNext();) {
-				ISelectionChangedListener listener= iter.next();
+			for (ISelectionChangedListener listener : fRegisteredSelectionListeners) {
 				provider.removeSelectionChangedListener(listener);
 			}
 		}

@@ -16,7 +16,6 @@ package org.eclipse.jdt.ui.actions;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IStatus;
@@ -271,8 +270,7 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 	private static IStatus compileCandidates(List<IJavaElement> result, List<IJavaElement> elements) {
 		IStatus ok= Status.OK_STATUS;
 		boolean onlyContainers= true;
-		for (Iterator<IJavaElement> iter= elements.iterator(); iter.hasNext();) {
-			IJavaElement elem= iter.next();
+		for (IJavaElement elem : elements) {
 			try {
 				switch (elem.getElementType()) {
 					case IJavaElement.INITIALIZER:
