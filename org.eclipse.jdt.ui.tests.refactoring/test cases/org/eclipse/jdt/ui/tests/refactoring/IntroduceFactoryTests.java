@@ -17,7 +17,6 @@ package org.eclipse.jdt.ui.tests.refactoring;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -438,8 +437,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 			doMultiUnitTest(CUs, testPath, inputFileBaseNames, null);
 
 		} finally {
-			for (Iterator<IJavaProject> iter= proj2PkgRoot.keySet().iterator(); iter.hasNext();) {
-				IJavaProject project= iter.next();
+			for (IJavaProject project : proj2PkgRoot.keySet()) {
 				if (project.exists()) {
 					try {
 						project.getProject().delete(true, null);

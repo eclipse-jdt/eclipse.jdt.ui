@@ -16,11 +16,7 @@ package org.eclipse.jdt.ui.tests.refactoring;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -47,6 +43,9 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoringPr
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 public class PullUpTests extends RefactoringTest {
 
@@ -186,12 +185,10 @@ public class PullUpTests extends RefactoringTest {
 		IMethod[] expectedMethods= getMethods(type, expectedMethodNames, expectedMethodSignatures);
 		List<IMember> expected= Arrays.asList(merge(expectedFields, expectedMethods));
 		assertEquals("incorrect size", expected.size(), required.size());
-		for (Iterator<IMember> iter= expected.iterator(); iter.hasNext();) {
-			Object each= iter.next();
+		for (IMember each : expected) {
 			assertTrue ("required does not contain " + each, required.contains(each));
 		}
-		for (Iterator<IMember> iter= required.iterator(); iter.hasNext();) {
-			Object each= iter.next();
+		for (IMember each : required) {
 			assertTrue ("expected does not contain " + each, expected.contains(each));
 		}
 	}

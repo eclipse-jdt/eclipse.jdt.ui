@@ -15,8 +15,6 @@ package org.eclipse.jdt.ui.tests.refactoring;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
-import java.util.Set;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScanner;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScanner.TextMatch;
@@ -80,9 +78,7 @@ public class RefactoringScannerTests extends RefactoringTest{
 			expectedMatchesList.add(Integer.valueOf(TextRangeUtil.getOffset(text, expectedMatch.fLine, expectedMatch.fColumn)));
 		}
 		ArrayList<Integer> matchesList= new ArrayList<>();
-		Set<TextMatch> matches= fScanner.getMatches();
-		for (Iterator<TextMatch> iter= matches.iterator(); iter.hasNext();) {
-			TextMatch element= iter.next();
+		for (TextMatch element : fScanner.getMatches()) {
 			matchesList.add(Integer.valueOf(element.getStartPosition()));
 		}
 		Collections.sort(matchesList);

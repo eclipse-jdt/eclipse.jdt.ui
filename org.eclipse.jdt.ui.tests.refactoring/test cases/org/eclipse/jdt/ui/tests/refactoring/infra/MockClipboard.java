@@ -16,7 +16,6 @@ package org.eclipse.jdt.ui.tests.refactoring.infra;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -46,8 +45,7 @@ public class MockClipboard extends Clipboard{
 	@Override
 	public TransferData[] getAvailableTypes() {
 		Set<TransferData> result= new HashSet<>();
-		for (Iterator<Transfer> iter= fContents.keySet().iterator(); iter.hasNext();) {
-			Transfer transfer= iter.next();
+		for (Transfer transfer : fContents.keySet()) {
 			result.addAll(Arrays.asList(transfer.getSupportedTypes()));
 		}
 		return result.toArray(new TransferData[result.size()]);

@@ -15,7 +15,6 @@ package org.eclipse.jdt.ui.tests.refactoring;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -239,8 +238,8 @@ public class ChangeSignatureTests extends RefactoringTest {
 	private void markAsDeleted(List<ParameterInfo> list, int[] deleted) {
 		if (deleted == null)
 			return;
-		for (int i= 0; i < deleted.length; i++) {
-			list.get(deleted[i]).markAsDeleted();
+		for (int element : deleted) {
+			list.get(element).markAsDeleted();
 		}
 	}
 
@@ -352,8 +351,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 	}
 
 	private static int indexOfOldName(List<ParameterInfo> infos, String string) {
-		for (Iterator<ParameterInfo> iter= infos.iterator(); iter.hasNext();) {
-			ParameterInfo info= iter.next();
+		for (ParameterInfo info : infos) {
 			if (info.getOldName().equals(string))
 				return infos.indexOf(info);
 		}
@@ -511,16 +509,15 @@ public class ChangeSignatureTests extends RefactoringTest {
 
 
 	private void mangleExceptions(List<ExceptionInfo> list, String[] removeExceptions, String[] addExceptions, ICompilationUnit cu) throws Exception {
-		for (Iterator<ExceptionInfo> iter= list.iterator(); iter.hasNext(); ) {
-			ExceptionInfo info= iter.next();
+		for (ExceptionInfo info : list) {
 			String name= info.getFullyQualifiedName();
-			for (int i= 0; i < removeExceptions.length; i++) {
-				if (name.equals(removeExceptions[i]))
+			for (String removeException : removeExceptions) {
+				if (name.equals(removeException))
 					info.markAsDeleted();
 			}
 		}
-		for (int i= 0; i < addExceptions.length; i++) {
-			IType type= cu.getJavaProject().findType(addExceptions[i]);
+		for (String addException : addExceptions) {
+			IType type= cu.getJavaProject().findType(addException);
 			list.add(ExceptionInfo.createInfoForAddedException(type));
 		}
 	}

@@ -17,7 +17,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.List;
 import java.util.TreeMap;
 
@@ -89,8 +88,8 @@ public class DeleteTest extends RefactoringTest {
 				suite.addTest(test);
 			}
 		}
-		for (Iterator<TestCase> iter= lastTests.values().iterator(); iter.hasNext();) {
-			suite.addTest(iter.next());
+		for (TestCase testCase : lastTests.values()) {
+			suite.addTest(testCase);
 		}
 		return new RefactoringTestSetup(suite);
 	}

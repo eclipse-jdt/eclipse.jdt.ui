@@ -51,8 +51,8 @@ public final class DebugUtils {
 	}
 
 	public static void dumpCollectionCollection(Collection<?> c) {
-		for (Iterator<?> iter= c.iterator(); iter.hasNext(); ){
-			dumpCollection("", (List<?>) iter.next()); //$NON-NLS-1$
+		for (Object name : c) {
+			dumpCollection("", (List<?>) name); //$NON-NLS-1$
 		}
 	}
 
@@ -62,8 +62,8 @@ public final class DebugUtils {
 			System.out.println("null"); //$NON-NLS-1$
 			return;
 		}
-		for (Iterator<?> iter= c.iterator(); iter.hasNext(); ){
-			System.out.println(iter.next().toString());
+		for (Object name : c) {
+			System.out.println(name.toString());
 		}
 	}
 
