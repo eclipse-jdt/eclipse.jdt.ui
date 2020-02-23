@@ -67,9 +67,9 @@ public class NameResolver extends TemplateVariableResolver {
 
 			refVar.getAllChoices();
 			Object[] types= flatten(refVar.getAllChoices());
-			for (int i= 0; i < types.length; i++) {
-				String[] names= jc.suggestVariableNames(mv.toString(types[i]));
-				mv.setChoices(types[i], names);
+			for (Object type : types) {
+				String[] names= jc.suggestVariableNames(mv.toString(type));
+				mv.setChoices(type, names);
 			}
 
 			mv.setKey(refVar.getCurrentChoice());
@@ -85,8 +85,8 @@ public class NameResolver extends TemplateVariableResolver {
 
 	private Object[] flatten(Object[][] allValues) {
 		List<Object> flattened= new ArrayList<>(allValues.length);
-		for (int i= 0; i < allValues.length; i++) {
-			flattened.addAll(Arrays.asList(allValues[i]));
+		for (Object[] allValue : allValues) {
+			flattened.addAll(Arrays.asList(allValue));
 		}
 		return flattened.toArray(new Object[flattened.size()]);
 	}

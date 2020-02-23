@@ -17,7 +17,6 @@ import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -126,8 +125,7 @@ public class Resources {
 
 		IStatus modified= null;
 		Map<IFile, Long> newTimeStamps= createModificationStampMap(readOnlyFiles);
-		for (Iterator<IFile> iter= oldTimeStamps.keySet().iterator(); iter.hasNext();) {
-			IFile file= iter.next();
+		for (IFile file : oldTimeStamps.keySet()) {
 			if (!oldTimeStamps.get(file).equals(newTimeStamps.get(file)))
 				modified= addModified(modified, file);
 		}
@@ -138,8 +136,8 @@ public class Resources {
 
 	private static Map<IFile, Long> createModificationStampMap(List<IResource> files){
 		Map<IFile, Long> map= new HashMap<>();
-		for (Iterator<IResource> iter= files.iterator(); iter.hasNext(); ) {
-			IFile file= (IFile)iter.next();
+		for (IResource iResource : files) {
+			IFile file= (IFile)iResource;
 			map.put(file, Long.valueOf(file.getModificationStamp()));
 		}
 		return map;

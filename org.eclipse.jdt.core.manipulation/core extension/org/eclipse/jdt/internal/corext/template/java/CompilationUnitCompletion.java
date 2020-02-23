@@ -184,8 +184,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 				} else {
 					ITypeHierarchy hierarchy= sub.newSupertypeHierarchy(null);
 					IType[] allTypes= hierarchy.getAllTypes();
-					for (int i= 0; i < allTypes.length; i++) {
-						IType type= allTypes[i];
+					for (IType type : allTypes) {
 						if (type.getElementName().equals(supertype))
 							return true;
 					}
@@ -225,8 +224,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 					ITypeHierarchy hierarchy= sub.newSupertypeHierarchy(null);
 					IType[] allTypes= hierarchy.getAllTypes();
 					List<IType> matches= new ArrayList<>();
-					for (int i= 0; i < allTypes.length; i++) {
-						IType type= allTypes[i];
+					for (IType type : allTypes) {
 						if (type.getElementName().equals(supertype))
 							matches.add(type);
 					}
@@ -322,10 +320,10 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 			List<String> all= new ArrayList<>();
 			IType[] supertypes= getSupertypes(type);
 			if (fUnit != null) {
-				for (int i= 0; i < supertypes.length; i++) {
+				for (IType supertype : supertypes) {
 					try {
 						TypeParameterResolver util= new TypeParameterResolver(this);
-						String[] result= util.computeBinding(supertypes[i].getFullyQualifiedName(), index);
+						String[] result= util.computeBinding(supertype.getFullyQualifiedName(), index);
 						all.addAll(Arrays.asList(result));
 					} catch (JavaModelException e) {
 					} catch (IndexOutOfBoundsException e) {
@@ -501,8 +499,8 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 				ITypeParameter formalParameter= typeParameters[k];
 				if (formalParameter.getElementName().equals(SignatureUtil.stripSignatureToFQN(match))) {
 					String[] bounds= formalParameter.getBounds();
-					for (int i= 0; i < bounds.length; i++) {
-						String boundSignature= Signature.createTypeSignature(bounds[i], true);
+					for (String bound : bounds) {
+						String boundSignature= Signature.createTypeSignature(bound, true);
 						addBound(SignatureUtil.qualifySignature(boundSignature, subType));
 					}
 					computeTypeParameterBinding(subType, k);
@@ -569,8 +567,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 		 */
 		private String findMatchingSuperTypeSignature(IType subType, IType superType) throws JavaModelException {
 			String[] signatures= getSuperTypeSignatures(subType, superType);
-			for (int i= 0; i < signatures.length; i++) {
-				String signature= signatures[i];
+			for (String signature : signatures) {
 				String qualified= SignatureUtil.qualifySignature(signature, subType);
 				String subFQN= SignatureUtil.stripSignatureToFQN(qualified);
 
@@ -680,8 +677,8 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 				ITypeHierarchy hierarchy= subType.newSupertypeHierarchy(null);
 				IType[] types= hierarchy.getAllSupertypes(subType);
 
-				for (int i= 0; i < types.length; i++)
-					if (types[i].equals(superType))
+				for (IType type : types)
+					if (type.equals(superType))
 						return true;
 			} catch (JavaModelException e) {
 				// ignore and return false
@@ -759,10 +756,10 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 		if (fUnit != null) {
 			try {
 				IType[] cuTypes= fUnit.getAllTypes();
-				for (int i= 0; i < cuTypes.length; i++) {
-					String fqn= cuTypes[i].getFullyQualifiedName();
+				for (IType cuType : cuTypes) {
+					String fqn= cuType.getFullyQualifiedName();
 					String sig= Signature.createTypeSignature(fqn, true);
-					fLocalTypes.put(sig, cuTypes[i].getElementName());
+					fLocalTypes.put(sig, cuType.getElementName());
 				}
 			} catch (JavaModelException e) {
 				// ignore

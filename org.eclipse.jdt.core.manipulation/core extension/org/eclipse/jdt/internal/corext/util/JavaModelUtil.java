@@ -604,8 +604,8 @@ public final class JavaModelUtil {
 
 	public static boolean isExcludedPath(IPath resourcePath, IPath[] exclusionPatterns) {
 		char[] path = resourcePath.toString().toCharArray();
-		for (int i = 0, length = exclusionPatterns.length; i < length; i++) {
-			char[] pattern= exclusionPatterns[i].toString().toCharArray();
+		for (IPath exclusionPattern : exclusionPatterns) {
+			char[] pattern= exclusionPattern.toString().toCharArray();
 			if (CharOperation.pathMatch(pattern, path, true, '/')) {
 				return true;
 			}
@@ -626,8 +626,8 @@ public final class JavaModelUtil {
 	public static boolean isExcluded(IPath resourcePath, char[][] exclusionPatterns) {
 		if (exclusionPatterns == null) return false;
 		char[] path = resourcePath.toString().toCharArray();
-		for (int i = 0, length = exclusionPatterns.length; i < length; i++)
-			if (CharOperation.pathMatch(exclusionPatterns[i], path, true, '/'))
+		for (char[] exclusionPattern : exclusionPatterns)
+			if (CharOperation.pathMatch(exclusionPattern, path, true, '/'))
 				return true;
 		return false;
 	}

@@ -16,7 +16,6 @@ package org.eclipse.jdt.internal.corext.template.java;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jface.text.templates.TemplateContext;
@@ -74,8 +73,8 @@ public abstract class AbstractVariableResolver extends TemplateVariableResolver 
 				jv.setParamType(type);
 			} else {
 				ArrayList<Variable> variables= new ArrayList<>();
-				for (Iterator<String> iterator= params.iterator(); iterator.hasNext();) {
-					variables.addAll(Arrays.asList(getVisibleVariables(iterator.next(), jc)));
+				for (String string : params) {
+					variables.addAll(Arrays.asList(getVisibleVariables(string, jc)));
 				}
 				fVariables= variables.toArray(new Variable[variables.size()]);
 

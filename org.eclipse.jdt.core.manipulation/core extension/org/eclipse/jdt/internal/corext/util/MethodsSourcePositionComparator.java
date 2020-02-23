@@ -100,11 +100,11 @@ public class MethodsSourcePositionComparator implements Comparator<IMethodBindin
 		}
 
 		ITypeBinding[] interfaces= fTypeBinding.getInterfaces();
-		for (int i= 0; i < interfaces.length; i++) {
-			if (firstMethodType.equals(interfaces[i])) {
+		for (ITypeBinding interface1 : interfaces) {
+			if (firstMethodType.equals(interface1)) {
 				return 1;
 			}
-			if (secondMethodType.equals(interfaces[i])) {
+			if (secondMethodType.equals(interface1)) {
 				return -1;
 			}
 		}

@@ -163,15 +163,7 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
 
 			try {
 				String[] arguments= method.getParameterNames();
-				StringBuilder buffer= new StringBuilder();
-
-				for (int i= 0; i < arguments.length; i++) {
-					if (i > 0)
-						buffer.append(", "); //$NON-NLS-1$
-					buffer.append(arguments[i]);
-				}
-
-				return buffer.toString();
+				return String.join(", ", arguments); //$NON-NLS-1$
 
 			} catch (JavaModelException e) {
 				return null;
@@ -195,8 +187,7 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
 	@Override
 	protected void validateVariables(TemplateVariable[] variables) throws TemplateException {
 		// check for multiple cursor variables
-		for (int i= 0; i < variables.length; i++) {
-			TemplateVariable var= variables[i];
+		for (TemplateVariable var : variables) {
 			if (var.getType().equals(GlobalTemplateVariables.Cursor.NAME)) {
 				if (var.getOffsets().length > 1) {
 					throw new TemplateException(JavaTemplateMessages.ContextType_error_multiple_cursor_variables);

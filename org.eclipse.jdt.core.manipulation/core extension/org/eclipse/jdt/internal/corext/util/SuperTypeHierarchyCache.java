@@ -156,8 +156,7 @@ public class SuperTypeHierarchyCache {
 				// find obsolete entries or remove entry that was least recently accessed
 				HierarchyCacheEntry oldest= null;
 				ArrayList<HierarchyCacheEntry> obsoleteHierarchies= new ArrayList<>(CACHE_SIZE);
-				for (int i= 0; i < nEntries; i++) {
-					HierarchyCacheEntry entry= fgHierarchyCache.get(i);
+				for (HierarchyCacheEntry entry : fgHierarchyCache) {
 					ITypeHierarchy curr= entry.getTypeHierarchy();
 					if (!curr.exists() || hierarchy.contains(curr.getType())) {
 						obsoleteHierarchies.add(entry);
@@ -168,8 +167,8 @@ public class SuperTypeHierarchyCache {
 					}
 				}
 				if (!obsoleteHierarchies.isEmpty()) {
-					for (int i= 0; i < obsoleteHierarchies.size(); i++) {
-						removeHierarchyEntryFromCache(obsoleteHierarchies.get(i));
+					for (HierarchyCacheEntry obsoleteHierarchie : obsoleteHierarchies) {
+						removeHierarchyEntryFromCache(obsoleteHierarchie);
 					}
 				} else if (oldest != null) {
 					removeHierarchyEntryFromCache(oldest);

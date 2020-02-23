@@ -575,8 +575,8 @@ public class JavaContextCore extends CompilationUnitContext implements IJavaCont
 	 */
 	private boolean hasMethod(IType type, String name) throws JavaModelException {
 		IMethod[] methods= type.getMethods();
-		for (int i= 0; i < methods.length; i++) {
-			if (name.equals(methods[i].getElementName()))
+		for (IMethod method : methods) {
+			if (name.equals(method.getElementName()))
 				return true;
 		}
 
@@ -641,8 +641,7 @@ public class JavaContextCore extends CompilationUnitContext implements IJavaCont
 		new SearchEngine().searchAllTypeNames(null, 0, simpleTypeName.toCharArray(), SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE, getSearchForConstant(typeKinds), searchScope, requestor, IJavaSearchConstants.FORCE_IMMEDIATE_SEARCH, monitor);
 
 		ArrayList<TypeNameMatch> typeRefsFound= new ArrayList<>(typeInfos.size());
-		for (int i= 0, len= typeInfos.size(); i < len; i++) {
-			TypeNameMatch curr= typeInfos.get(i);
+		for (TypeNameMatch curr : typeInfos) {
 			if (curr.getPackageName().length() > 0) { // do not suggest imports from the default package
 				if (isOfKind(curr, typeKinds, is50OrHigher) && isVisible(curr, cu)) {
 					typeRefsFound.add(curr);

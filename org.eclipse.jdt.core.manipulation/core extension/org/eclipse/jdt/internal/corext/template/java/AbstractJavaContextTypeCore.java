@@ -140,8 +140,8 @@ public abstract class AbstractJavaContextTypeCore extends CompilationUnitContext
 				Variable[] iterables= getVariablesInContextScope(jc);
 				if (iterables.length > 0) {
 
-					for (int i= 0; i < iterables.length; i++)
-						mv.setChoices(iterables[i], iterables[i].getMemberTypeNames());
+					for (Variable iterable : iterables)
+						mv.setChoices(iterable, iterable.getMemberTypeNames());
 
 					TemplateVariable master= jc.getTemplateVariable(fMasterName);
 					if (master instanceof MultiVariable) {
@@ -219,9 +219,9 @@ public abstract class AbstractJavaContextTypeCore extends CompilationUnitContext
 
 		        Variable[] iterables= getLocalVariables(jc);
 				if (iterables.length > 0) {
-					for (int i= 0; i < iterables.length; i++) {
-						String[] elements= jc.suggestVariableNames(iterables[i].getMemberTypeNames()[0]);
-						mv.setChoices(iterables[i], elements);
+					for (Variable iterable : iterables) {
+						String[] elements= jc.suggestVariableNames(iterable.getMemberTypeNames()[0]);
+						mv.setChoices(iterable, elements);
 					}
 
 
