@@ -440,8 +440,7 @@ public abstract class OptionsConfigurationBlock {
 			if (!fExpandableComposites.isEmpty()) {
 				ExpandableComposite expandable= getParentExpandableComposite(control);
 				if (expandable != null) {
-					for (int i= 0; i < fExpandableComposites.size(); i++) {
-						ExpandableComposite curr= fExpandableComposites.get(i);
+					for (ExpandableComposite curr : fExpandableComposites) {
 						curr.setExpanded(curr == expandable);
 					}
 					expandedStateChanged(expandable);

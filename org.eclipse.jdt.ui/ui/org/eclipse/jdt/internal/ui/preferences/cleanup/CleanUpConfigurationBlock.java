@@ -15,7 +15,6 @@
 package org.eclipse.jdt.internal.ui.preferences.cleanup;
 
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
@@ -162,10 +161,7 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 
 	private void fill(Map<String, String> settings, Map<String, String> sharedSettings) {
 		sharedSettings.clear();
-		for (Map.Entry<String, String> entry : settings.entrySet()) {
-			String key = entry.getKey();
-			sharedSettings.put(key, entry.getValue());
-		}
+		sharedSettings.putAll(settings);
     }
 
 	@Override
@@ -248,8 +244,8 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 				}
 
 				List<Profile> newProfiles= fProfileStore.readProfilesFromString((String)event.getNewValue());
-				for (Iterator<Profile> iterator= newProfiles.iterator(); iterator.hasNext();) {
-					CustomProfile profile= (CustomProfile)iterator.next();
+				for (Profile profile2 : newProfiles) {
+					CustomProfile profile= (CustomProfile)profile2;
 					fProfileManager.addProfile(profile);
 				}
 

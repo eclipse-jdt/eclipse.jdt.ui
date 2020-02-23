@@ -242,20 +242,17 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 	 */
 	@Override
 	protected void performDefaults() {
-		for (int i= 0; i < fCheckBoxes.size(); i++) {
-			Button button= fCheckBoxes.get(i);
+		for (Button button : fCheckBoxes) {
 			String key= (String) button.getData();
 			IPreferenceStore buttonPreferenceStore = (IPreferenceStore) button.getData(PREFERENCE_STORE_KEY);
 			button.setSelection(buttonPreferenceStore.getDefaultBoolean(key));
 		}
 		IPreferenceStore store= getPreferenceStore();
-		for (int i= 0; i < fRadioButtons.size(); i++) {
-			Button button= fRadioButtons.get(i);
+		for (Button button : fRadioButtons) {
 			String[] info= (String[]) button.getData();
 			button.setSelection(info[1].equals(store.getDefaultString(info[0])));
 		}
-		for (int i= 0; i < fTextControls.size(); i++) {
-			Text text= fTextControls.get(i);
+		for (Text text : fTextControls) {
 			String key= (String) text.getData();
 			text.setText(store.getDefaultString(key));
 		}
@@ -267,22 +264,19 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 	 */
 	@Override
 	public boolean performOk() {
-		for (int i= 0; i < fCheckBoxes.size(); i++) {
-			Button button= fCheckBoxes.get(i);
+		for (Button button : fCheckBoxes) {
 			String key= (String) button.getData();
 			IPreferenceStore buttonPreferenceStore = (IPreferenceStore) button.getData(PREFERENCE_STORE_KEY);
 			buttonPreferenceStore.setValue(key, button.getSelection());
 		}
 		IPreferenceStore store= getPreferenceStore();
-		for (int i= 0; i < fRadioButtons.size(); i++) {
-			Button button= fRadioButtons.get(i);
+		for (Button button : fRadioButtons) {
 			if (button.getSelection()) {
 				String[] info= (String[]) button.getData();
 				store.setValue(info[0], info[1]);
 			}
 		}
-		for (int i= 0; i < fTextControls.size(); i++) {
-			Text text= fTextControls.get(i);
+		for (Text text : fTextControls) {
 			String key= (String) text.getData();
 			store.setValue(key, text.getText());
 		}

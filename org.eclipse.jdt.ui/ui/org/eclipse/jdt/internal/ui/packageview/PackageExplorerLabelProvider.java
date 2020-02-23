@@ -14,7 +14,6 @@
 package org.eclipse.jdt.internal.ui.packageview;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.swt.graphics.Image;
@@ -148,8 +147,8 @@ public class PackageExplorerLabelProvider extends AppearanceAwareLabelProvider {
 	@Override
 	public void dispose() {
 		if (fWorkingSetImages != null) {
-			for (Iterator<Image> iter= fWorkingSetImages.values().iterator(); iter.hasNext();) {
-				iter.next().dispose();
+			for (Image image : fWorkingSetImages.values()) {
+				image.dispose();
 			}
 		}
 		super.dispose();

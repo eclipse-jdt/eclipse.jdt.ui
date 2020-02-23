@@ -195,8 +195,8 @@ public class ProfileStore {
 			try {
 				List<Profile> res= readProfilesFromStream(new InputSource(is));
 				if (res != null) {
-					for (int i= 0; i < res.size(); i++) {
-						fProfileVersioner.update((CustomProfile) res.get(i));
+					for (Profile re : res) {
+						fProfileVersioner.update((CustomProfile) re);
 					}
 				}
 				return res;
@@ -287,8 +287,7 @@ public class ProfileStore {
 
 			document.appendChild(rootElement);
 
-			for(final Iterator<Profile> iter= profiles.iterator(); iter.hasNext();) {
-				final Profile profile= iter.next();
+			for (Profile profile : profiles) {
 				if (profile.isProfileToSave()) {
 					final Element profileElement= createProfileElement(profile, document, profileVersioner);
 					rootElement.appendChild(profileElement);

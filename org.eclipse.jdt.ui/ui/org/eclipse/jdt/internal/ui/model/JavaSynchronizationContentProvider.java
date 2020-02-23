@@ -676,8 +676,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 		}
 		// Remove any java projects that correspond to deleted or closed projects
 		final Set<IProject> removed= getDeletedProjects(event);
-		for (final Iterator<IJavaProject> iterator= existing.iterator(); iterator.hasNext();) {
-			final IJavaProject element= iterator.next();
+		for (IJavaProject element : existing) {
 			if (removed.contains(element.getResource()))
 				removals.add(element);
 		}
@@ -692,8 +691,8 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 				if (!removals.isEmpty())
 					viewer.remove(viewer.getInput(), removals.toArray());
 				if (!refreshes.isEmpty()) {
-					for (final Iterator<IJavaProject> iter= refreshes.iterator(); iter.hasNext();)
-						viewer.refresh(iter.next());
+					for (IJavaProject iJavaProject : refreshes)
+						viewer.refresh(iJavaProject);
 				}
 			} finally {
 				tree.setRedraw(true);

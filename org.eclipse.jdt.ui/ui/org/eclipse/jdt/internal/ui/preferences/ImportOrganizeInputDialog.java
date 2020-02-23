@@ -238,8 +238,7 @@ public class ImportOrganizeInputDialog extends StatusDialog {
 	}
 
 	private boolean doesExist(String name, boolean isStatic) {
-		for (int i= 0; i < fExistingEntries.size(); i++) {
-			ImportOrderEntry entry= fExistingEntries.get(i);
+		for (ImportOrderEntry entry : fExistingEntries) {
 			if (name.equals(entry.name) && isStatic == entry.isStatic) {
 				return true;
 			}

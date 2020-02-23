@@ -14,7 +14,6 @@
 
 package org.eclipse.jdt.internal.ui.preferences.formatter;
 
-import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.jdt.core.JavaCore;
@@ -130,16 +129,15 @@ public class ProfileVersioner implements IProfileVersioner {
 			version18to19(oldSettings);
 			//$FALL-THROUGH$
 		default:
-		    for (final Iterator<String> iter= oldSettings.keySet().iterator(); iter.hasNext(); ) {
-		        final String key= iter.next();
-		        if (!newSettings.containsKey(key))
-		            continue;
+				for (String key : oldSettings.keySet()) {
+				    if (!newSettings.containsKey(key))
+				        continue;
 
-		        final String value= oldSettings.get(key);
-		        if (value != null) {
-		            newSettings.put(key, value);
-		        }
-		    }
+				    final String value= oldSettings.get(key);
+				    if (value != null) {
+				        newSettings.put(key, value);
+				    }
+				}
 		    // copy over profile options (not formatter settings)
 		    if (oldSettings.containsKey(JavaCore.JAVA_FORMATTER)) {
 		        newSettings.put(JavaCore.JAVA_FORMATTER, oldSettings.get(JavaCore.JAVA_FORMATTER));

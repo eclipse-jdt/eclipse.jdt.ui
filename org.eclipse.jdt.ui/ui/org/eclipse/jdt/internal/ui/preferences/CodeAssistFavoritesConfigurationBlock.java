@@ -51,6 +51,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
+
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -61,7 +63,6 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -223,13 +224,7 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 		}
 
 		private boolean doesExist(String name) {
-			for (int i= 0; i < fExistingEntries.size(); i++) {
-				String entry= fExistingEntries.get(i);
-				if (name.equals(entry)) {
-					return true;
-				}
-			}
-			return false;
+			return fExistingEntries.contains(name);
 		}
 
 
@@ -476,14 +471,7 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 	}
 
 	private static String serializeFavorites(List<String> favorites) {
-		int size= favorites.size();
-		StringBuilder buf= new StringBuilder();
-		for (int i= 0; i < size; i++) {
-			buf.append(favorites.get(i));
-			if (i < size -1)
-				buf.append(';');
-		}
-		return buf.toString();
+		return String.join(";", favorites.toArray(new String[favorites.size()])); //$NON-NLS-1$
 	}
 
 }

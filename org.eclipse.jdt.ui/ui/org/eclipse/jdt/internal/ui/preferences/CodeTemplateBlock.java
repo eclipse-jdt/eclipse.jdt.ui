@@ -526,10 +526,10 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 	}
 
 	private void updateTemplate(TemplatePersistenceData data) {
-		for (TemplatePersistenceData d : fTemplateStore.getTemplateData()) {
-			String id= d.getId();
+		for (TemplatePersistenceData templatePersistenceData : fTemplateStore.getTemplateData()) {
+			String id= templatePersistenceData.getId();
 			if (id != null && id.equals(data.getId())) {
-				d.setTemplate(data.getTemplate());
+				templatePersistenceData.setTemplate(data.getTemplate());
 				break;
 			}
 		}
@@ -541,8 +541,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 
 	private void export(List<Object> selected) {
 		Set<Object> datas= new HashSet<>();
-		for (int i= 0; i < selected.size(); i++) {
-			Object curr= selected.get(i);
+		for (Object curr : selected) {
 			if (curr instanceof TemplatePersistenceData) {
 				datas.add(curr);
 			} else {

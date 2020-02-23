@@ -481,18 +481,15 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 	@Override
 	protected void performDefaults() {
 		IPreferenceStore store= getPreferenceStore();
-		for (int i= 0; i < fCheckBoxes.size(); i++) {
-			Button button= fCheckBoxes.get(i);
+		for (Button button : fCheckBoxes) {
 			String key= (String) button.getData();
 			button.setSelection(store.getDefaultBoolean(key));
 		}
-		for (int i= 0; i < fRadioButtons.size(); i++) {
-			Button button= fRadioButtons.get(i);
+		for (Button button : fRadioButtons) {
 			String[] info= (String[]) button.getData();
 			button.setSelection(info[1].equals(store.getDefaultString(info[0])));
 		}
-		for (int i= 0; i < fTextControls.size(); i++) {
-			Text text= fTextControls.get(i);
+		for (Text text : fTextControls) {
 			String key= (String) text.getData();
 			text.setText(store.getDefaultString(key));
 		}
@@ -510,20 +507,17 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 	@Override
 	public boolean performOk() {
 		IPreferenceStore store= getPreferenceStore();
-		for (int i= 0; i < fCheckBoxes.size(); i++) {
-			Button button= fCheckBoxes.get(i);
+		for (Button button : fCheckBoxes) {
 			String key= (String) button.getData();
 			store.setValue(key, button.getSelection());
 		}
-		for (int i= 0; i < fRadioButtons.size(); i++) {
-			Button button= fRadioButtons.get(i);
+		for (Button button : fRadioButtons) {
 			if (button.getSelection()) {
 				String[] info= (String[]) button.getData();
 				store.setValue(info[0], info[1]);
 			}
 		}
-		for (int i= 0; i < fTextControls.size(); i++) {
-			Text text= fTextControls.get(i);
+		for (Text text : fTextControls) {
 			String key= (String) text.getData();
 			store.setValue(key, text.getText());
 		}

@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -143,13 +142,11 @@ public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements Trans
 			ReorgUtils.splitIntoJavaElementsAndResources(fElementsToAdds, realJavaElements, realResource);
 			if (fElementsToAdds.length != realJavaElements.size() + realResource.size())
 				return DND.DROP_NONE;
-			for (Iterator<IJavaElement> iter= realJavaElements.iterator(); iter.hasNext();) {
-				IJavaElement element= iter.next();
+			for (IJavaElement element : realJavaElements) {
 				if (ReorgUtils.containsElementOrParent(fCurrentElements, element))
 					return DND.DROP_NONE;
 			}
-			for (Iterator<IResource> iter= realResource.iterator(); iter.hasNext();) {
-				IResource element= iter.next();
+			for (IResource element : realResource) {
 				if (ReorgUtils.containsElementOrParent(fCurrentElements, element))
 					return DND.DROP_NONE;
 			}
@@ -256,8 +253,7 @@ public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements Trans
 		if (eventDetail == DND.DROP_MOVE) {
 			ITreeSelection treeSelection= (ITreeSelection)fSelection;
 			Map<IWorkingSet, List<Object>> workingSets= groupByWorkingSets(treeSelection.getPaths());
-			for (Iterator<IWorkingSet> iter= workingSets.keySet().iterator(); iter.hasNext();) {
-				IWorkingSet ws= iter.next();
+			for (IWorkingSet ws : workingSets.keySet()) {
 				List<Object> toRemove= workingSets.get(ws);
 				List<IAdaptable> currentElements= new ArrayList<>(Arrays.asList(ws.getElements()));
 				currentElements.removeAll(toRemove);

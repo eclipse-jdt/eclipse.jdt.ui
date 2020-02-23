@@ -149,8 +149,7 @@ class SaveParticipantConfigurationBlock implements IPreferenceAndPropertyConfigu
 	}
 
 	private void delegateToPreferenceConfiguration(IDelegateOperation op) {
-		for (int i= 0; i < fConfigurations.size(); i++) {
-	        ISaveParticipantPreferenceConfiguration block= fConfigurations.get(i);
+		for (ISaveParticipantPreferenceConfiguration block : fConfigurations) {
 	        op.run(block);
         }
 	}

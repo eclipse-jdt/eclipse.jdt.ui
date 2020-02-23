@@ -13,7 +13,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences.cleanup;
 
-import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
@@ -60,8 +59,7 @@ public class CleanUpProfileVersioner implements IProfileVersioner {
 				updateFrom1To2(oldSettings);
 				//$FALL-THROUGH$
 			default:
-				for (final Iterator<String> iter= oldSettings.keySet().iterator(); iter.hasNext();) {
-					final String key= iter.next();
+				for (String key : oldSettings.keySet()) {
 					if (!newSettings.containsKey(key))
 						continue;
 

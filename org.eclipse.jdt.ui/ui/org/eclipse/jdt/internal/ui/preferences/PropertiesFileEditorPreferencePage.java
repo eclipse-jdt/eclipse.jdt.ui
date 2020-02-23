@@ -650,8 +650,8 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 
 		initializeFields();
 
-		for (int i= 0, n= fSyntaxColorListModel.length; i < n; i++)
-			fHighlightingColorList.add(new HighlightingColorListItem (fSyntaxColorListModel[i][0], fSyntaxColorListModel[i][1], fSyntaxColorListModel[i][1] + BOLD, fSyntaxColorListModel[i][1] + ITALIC, fSyntaxColorListModel[i][1] + STRIKETHROUGH, fSyntaxColorListModel[i][1] + UNDERLINE, null));
+		for (String[] syntaxColor : fSyntaxColorListModel)
+			fHighlightingColorList.add(new HighlightingColorListItem (syntaxColor[0], syntaxColor[1], syntaxColor[1] + BOLD, syntaxColor[1] + ITALIC, syntaxColor[1] + STRIKETHROUGH, syntaxColor[1] + UNDERLINE, null));
 
 		fHighlightingColorListViewer.setInput(fHighlightingColorList);
 		fHighlightingColorListViewer.setSelection(new StructuredSelection(fHighlightingColorListViewer.getElementAt(0)));

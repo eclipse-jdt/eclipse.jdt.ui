@@ -439,9 +439,8 @@ public class FilteredPreferenceTree {
 			labelMatcher= createStringMatcher(filterText);
 		} else {
 			if (index == 0 && !fExpectMultiWordValueMatch) {
-				int i= 0;
-				for (; i < filterText.length(); i++) {
-					char ch= filterText.charAt(i);
+				int i= filterText.length();
+				for (char ch : filterText.toCharArray()) {
 					if (ch == ' ' || ch == '\t') {
 						break;
 					}
@@ -488,8 +487,8 @@ public class FilteredPreferenceTree {
 		//update children
 		List<PreferenceTreeNode<?>> children= node.getChildren();
 		if (children != null) {
-			for (int i= 0; i < children.size(); i++) {
-				updateUI(children.get(i));
+			for (PreferenceTreeNode<?> element : children) {
+				updateUI(element);
 			}
 		}
 	}
@@ -530,9 +529,8 @@ public class FilteredPreferenceTree {
 		} else {
 			bfsNodes.addAll(fRoot.getChildren());
 		}
-		for (int i= 0; i < bfsNodes.size(); i++) {
-			PreferenceTreeNode<?> node= bfsNodes.get(i);
-			bfsNodes.addAll(bfsNodes.get(i).getChildren());
+		for (PreferenceTreeNode<?> node : bfsNodes) {
+			bfsNodes.addAll(node.getChildren());
 			if (node.getControl() instanceof ExpandableComposite)
 				((ExpandableComposite) node.getControl()).setExpanded(expanded);
 		}

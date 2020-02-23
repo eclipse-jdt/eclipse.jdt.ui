@@ -80,8 +80,8 @@ public class FormatterProfileStore extends ProfileStore {
 				FileReader reader= new FileReader(file)) {
 				List<Profile> res= readProfilesFromStream(new InputSource(reader));
 				if (res != null) {
-					for (int i= 0; i < res.size(); i++) {
-						fProfileVersioner.update((CustomProfile) res.get(i));
+					for (Profile re : res) {
+						fProfileVersioner.update((CustomProfile) re);
 					}
 					writeProfiles(res, instanceScope);
 				}

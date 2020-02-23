@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
@@ -388,8 +387,7 @@ public abstract class ProfileManager extends Observable {
 		fProfiles= new HashMap<>();
 		fProfilesByName= new ArrayList<>();
 
-		for (final Iterator<Profile> iter = profiles.iterator(); iter.hasNext();) {
-			final Profile profile= iter.next();
+		for (Profile profile : profiles) {
 			if (profile instanceof CustomProfile) {
 				((CustomProfile)profile).setManager(this);
 			}
@@ -427,8 +425,7 @@ public abstract class ProfileManager extends Observable {
 					}
 				} else {
 					// old version: look for similar
-					for (final Iterator<Profile> iter = fProfilesByName.iterator(); iter.hasNext();) {
-						Profile curr= iter.next();
+					for (Profile curr : fProfilesByName) {
 						if (curr.hasEqualSettings(map, allKeys)) {
 							matching= curr;
 							break;
@@ -481,8 +478,7 @@ public abstract class ProfileManager extends Observable {
 	public static boolean hasProjectSpecificSettings(IScopeContext context, KeySet[] keySets) {
 		for (KeySet keySet : keySets) {
 			IEclipsePreferences preferences= context.getNode(keySet.getNodeName());
-			for (final Iterator<String> keyIter= keySet.getKeys().iterator(); keyIter.hasNext();) {
-				final String key= keyIter.next();
+			for (String key : keySet.getKeys()) {
 				Object val= preferences.get(key, null);
 				if (val != null) {
 					return true;
@@ -518,8 +514,7 @@ public abstract class ProfileManager extends Observable {
 		boolean hasValues= false;
 		for (KeySet keySet : fKeySets) {
 			IEclipsePreferences preferences= context.getNode(keySet.getNodeName());
-			for (final Iterator<String> keyIter = keySet.getKeys().iterator(); keyIter.hasNext(); ) {
-				final String key= keyIter.next();
+			for (String key : keySet.getKeys()) {
 				String val= preferences.get(key, null);
 				if (val != null) {
 					hasValues= true;
@@ -559,8 +554,7 @@ public abstract class ProfileManager extends Observable {
 
 	private boolean updatePreferences(IEclipsePreferences prefs, List<String> keys, Map<String, String> profileOptions) {
 		boolean hasChanges= false;
-		for (final Iterator<String> keyIter = keys.iterator(); keyIter.hasNext(); ) {
-			final String key= keyIter.next();
+		for (String key : keys) {
 			final String oldVal= prefs.get(key, null);
 			final String val= profileOptions.get(key);
 			if (val == null) {
@@ -623,8 +617,7 @@ public abstract class ProfileManager extends Observable {
 	public String[] getSortedDisplayNames() {
 		final String[] sortedNames= new String[fProfilesByName.size()];
 		int i= 0;
-		for (final Iterator<Profile> iter = fProfilesByName.iterator(); iter.hasNext();) {
-			Profile curr= iter.next();
+		for (Profile curr : fProfilesByName) {
 			sortedNames[i++]= curr.getName();
 		}
 		return sortedNames;
@@ -685,8 +678,7 @@ public abstract class ProfileManager extends Observable {
 	 * @return Returns <code>true</code> if a profile with the given name exists
 	 */
 	public boolean containsName(String name) {
-		for (final Iterator<Profile> iter = fProfilesByName.iterator(); iter.hasNext();) {
-			Profile curr= iter.next();
+		for (Profile curr : fProfilesByName) {
 			if (name.equals(curr.getName())) {
 				return true;
 			}

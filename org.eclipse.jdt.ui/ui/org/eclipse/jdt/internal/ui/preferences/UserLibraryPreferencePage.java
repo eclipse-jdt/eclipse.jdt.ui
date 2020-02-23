@@ -208,8 +208,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 			if (name.length() == 0) {
 				return new StatusInfo(IStatus.ERROR, PreferencesMessages.UserLibraryPreferencePage_LibraryNameDialog_name_error_entername);
 			}
-			for (int i= 0; i < fExistingLibraries.size(); i++) {
-				CPUserLibraryElement curr= fExistingLibraries.get(i);
+			for (CPUserLibraryElement curr : fExistingLibraries) {
 				if (curr != fElementToEdit && name.equals(curr.getName())) {
 					return new StatusInfo(IStatus.ERROR, Messages.format(PreferencesMessages.UserLibraryPreferencePage_LibraryNameDialog_name_error_exists, name));
 				}
@@ -499,14 +498,12 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 				}
 			} else {
 				HashSet<String> map= new HashSet<>(fExistingLibraries.size());
-				for (int k= 0; k < fExistingLibraries.size(); k++) {
-					CPUserLibraryElement elem= fExistingLibraries.get(k);
+				for (CPUserLibraryElement elem : fExistingLibraries) {
 					map.add(elem.getName());
 				}
 				int nReplaced= 0;
 				List<CPUserLibraryElement> elements= getLoadedLibraries();
-				for (int i= 0; i < elements.size(); i++) {
-					CPUserLibraryElement curr= elements.get(i);
+				for (CPUserLibraryElement curr : elements) {
 					if (map.contains(curr.getName())) {
 						nReplaced++;
 					}
@@ -578,11 +575,10 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 
 				rootElement.setAttribute(TAG_VERSION, CURRENT_VERSION);
 
-				for (int i= 0; i < libraries.size(); i++) {
+				for (CPUserLibraryElement curr : libraries) {
 					Element libraryElement= document.createElement(TAG_LIBRARY);
 					rootElement.appendChild(libraryElement);
 
-					CPUserLibraryElement curr= libraries.get(i);
 					libraryElement.setAttribute(TAG_NAME, curr.getName());
 					libraryElement.setAttribute(TAG_SYSTEMLIBRARY, String.valueOf(curr.isSystemLibrary()));
 
@@ -842,9 +838,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 			Object selectedLibrary= map.get(DATA_LIBRARY_TO_SELECT);
 			boolean createIfNotExists= Boolean.TRUE.equals(map.get(DATA_DO_CREATE));
 			if (selectedLibrary instanceof String) {
-				int nElements= fLibraryList.getSize();
-				for (int i= 0; i < nElements; i++) {
-					CPUserLibraryElement curr= fLibraryList.getElement(i);
+				for (CPUserLibraryElement curr : fLibraryList.getElements()) {
 					if (curr.getName().equals(selectedLibrary)) {
 						fLibraryList.selectElements(new StructuredSelection(curr));
 						fLibraryList.expandElement(curr, 1);
@@ -935,8 +929,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		int nExisting= list.size();
 
 		HashSet<CPUserLibraryElement> newEntries= new HashSet<>(list.size());
-		for (int i= 0; i < nExisting; i++) {
-			CPUserLibraryElement element= list.get(i);
+		for (CPUserLibraryElement element : list) {
 			boolean contained= oldNames.remove(element.getName());
 			if (!contained) {
 				newEntries.add(element);
@@ -1156,8 +1149,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 
 	private void doRemove(List<Object> selected) {
 		Object selectionAfter= null;
-		for (int i= 0; i < selected.size(); i++) {
-			Object curr= selected.get(i);
+		for (Object curr : selected) {
 			if (curr instanceof CPUserLibraryElement) {
 				fLibraryList.removeElement((CPUserLibraryElement) curr);
 			} else if (curr instanceof CPListElement) {
@@ -1269,8 +1261,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		LoadSaveDialog dialog= new LoadSaveDialog(getShell(), false, existing, fDialogSettings);
 		if (dialog.open() == Window.OK) {
 			HashMap<String, CPUserLibraryElement> map= new HashMap<>(existing.size());
-			for (int k= 0; k < existing.size(); k++) {
-				CPUserLibraryElement elem= existing.get(k);
+			for (CPUserLibraryElement elem : existing) {
 				map.put(elem.getName(), elem);
 			}
 
@@ -1320,8 +1311,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		if (list.isEmpty()) {
 			return false;
 		}
-		for (int i= 0; i < list.size(); i++) {
-			Object elem= list.get(i);
+		for (Object elem : list) {
 			if (elem instanceof CPListElementAttribute) {
 				CPListElementAttribute attrib= (CPListElementAttribute) elem;
 				if (attrib.isNonModifiable()) {
@@ -1353,8 +1343,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 
 	private CPUserLibraryElement getCommonParent(List<?> list) {
 		CPUserLibraryElement parent= null;
-		for (int i= 0, len= list.size(); i < len; i++) {
-			Object curr= list.get(i);
+		for (Object curr : list) {
 			if (curr instanceof CPListElement) {
 				Object elemParent= ((CPListElement) curr).getParentContainer();
 				if (parent == null) {

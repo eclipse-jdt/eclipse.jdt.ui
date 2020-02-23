@@ -92,8 +92,7 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 				if (e.getState()) {
 					try {
 						fIsBeingManaged= true;
-						for (Iterator<ExpandableComposite> iter= fSections.iterator(); iter.hasNext();) {
-							ExpandableComposite composite= iter.next();
+						for (ExpandableComposite composite : fSections) {
 							if (composite != source)
 								composite.setExpanded(false);
 						}

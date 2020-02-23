@@ -58,8 +58,7 @@ public class TodoTaskInputDialog extends StatusDialog {
 		super(parent);
 
 		fExistingNames= new ArrayList<>(existingEntries.size());
-		for (int i= 0; i < existingEntries.size(); i++) {
-			TodoTask curr= existingEntries.get(i);
+		for (TodoTask curr : existingEntries) {
 			if (!curr.equals(task)) {
 				fExistingNames.add(curr.name);
 			}
