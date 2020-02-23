@@ -14,6 +14,8 @@
 package org.eclipse.jdt.internal.ui.jarpackager;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -148,12 +150,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	 */
 	protected boolean areAllChildrenWhiteChecked(Object treeElement) {
 		Object[] children= getTreeChildren(treeElement);
-		for (int i= 0; i < children.length; ++i) {
-			if (!fWhiteCheckedTreeItems.contains(children[i]))
-				return false;
-		}
-
-		return true;
+		return fWhiteCheckedTreeItems.containsAll(Arrays.asList(children));
 	}
 	/**
 	 *	Returns a boolean indicating whether all list elements associated with
@@ -175,8 +172,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	 * @param elements
 	 */
 	protected void checkNewTreeElements(Object[] elements) {
-		for (int i= 0; i < elements.length; ++i) {
-			Object currentElement= elements[i];
+		for (Object currentElement : elements) {
 			boolean checked= fCheckedStateStore.containsKey(currentElement);
 			fTreeViewer.setChecked(currentElement, checked);
 			fTreeViewer.setGrayed(
@@ -294,8 +290,8 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 		// if any children of treeElement are still gray-checked then treeElement
 		// must remain gray-checked as well
 		Object[] children= getTreeChildren(treeElement);
-		for (int i= 0; i < children.length; ++i) {
-			if (fCheckedStateStore.containsKey(children[i]))
+		for (Object element : children) {
+			if (fCheckedStateStore.containsKey(element))
 				return true;
 		}
 
@@ -323,8 +319,8 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 		// statuses will be needed to determine the white-checked status for
 		// this tree element
 		Object[] children= getTreeChildren(treeElement);
-		for (int i= 0; i < children.length; ++i)
-			determineWhiteCheckedDescendents(children[i]);
+		for (Object element : children)
+			determineWhiteCheckedDescendents(element);
 
 		// now determine the white-checked status for this tree element
 		if (determineShouldBeWhiteChecked(treeElement))
@@ -611,8 +607,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 		if (state) {
 			Object[] listItems= getListElements(treeElement);
 			List<Object> listItemsChecked= new ArrayList<>();
-			for (int i= 0; i < listItems.length; ++i)
-				listItemsChecked.add(listItems[i]);
+			Collections.addAll(listItemsChecked, listItems);
 
 			fCheckedStateStore.put(treeElement, listItemsChecked);
 		} else
@@ -624,8 +619,8 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 
 		// now logically check/uncheck all children as well
 		Object[] children= getTreeChildren(treeElement);
-		for (int i= 0; i < children.length; ++i) {
-			setTreeChecked(children[i], state);
+		for (Object child : children) {
+			setTreeChecked(child, state);
 		}
 	}
 	/**

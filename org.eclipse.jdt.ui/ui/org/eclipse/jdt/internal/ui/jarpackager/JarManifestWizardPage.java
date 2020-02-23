@@ -17,7 +17,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.jar.Attributes;
@@ -909,8 +908,8 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 	 */
 	protected SelectionDialog createPackageDialog(Set<IJavaElement> packageFragments) {
 		List<IPackageFragment> packages= new ArrayList<>(packageFragments.size());
-		for (Iterator<IJavaElement> iter= packageFragments.iterator(); iter.hasNext();) {
-			IPackageFragment fragment= (IPackageFragment)iter.next();
+		for (IJavaElement iJavaElement : packageFragments) {
+			IPackageFragment fragment= (IPackageFragment)iJavaElement;
 			boolean containsJavaElements= false;
 			int kind;
 			try {
@@ -1008,9 +1007,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 	 */
 	private Set<IJavaElement> getPackagesForSelectedResources() {
 		Set<IJavaElement> packages= new HashSet<>();
-		int n= fJarPackage.getElements().length;
-		for (int i= 0; i < n; i++) {
-			Object element= fJarPackage.getElements()[i];
+		for (Object element : fJarPackage.getElements()) {
 			if (element instanceof ICompilationUnit) {
 				packages.add(((ICompilationUnit) element).getParent());
 			}

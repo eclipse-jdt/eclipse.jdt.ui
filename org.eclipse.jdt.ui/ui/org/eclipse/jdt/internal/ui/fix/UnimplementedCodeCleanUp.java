@@ -197,9 +197,9 @@ public class UnimplementedCodeCleanUp extends AbstractMultiFix {
 		StringBuilder buf= new StringBuilder();
 		buf.append(indent);
 		char[] codeArray= code.toCharArray();
-		for (int i= 0; i < codeArray.length; i++) {
-			buf.append(codeArray[i]);
-			if (codeArray[i] == '\n')
+		for (char element : codeArray) {
+			buf.append(element);
+			if (element == '\n')
 				buf.append(indent);
 		}
 		buf.append("\n"); //$NON-NLS-1$

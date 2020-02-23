@@ -70,8 +70,8 @@ public class OutputFolderFilter extends ViewerFilter {
 
 				// Check output location for each class path entry
 				IClasspathEntry[] cpEntries= jProject.getRawClasspath();
-				for (int i= 0, length= cpEntries.length; i < length; i++) {
-					IPath outputLocation= cpEntries[i].getOutputLocation();
+				for (IClasspathEntry cpEntrie : cpEntries) {
+					IPath outputLocation= cpEntrie.getOutputLocation();
 					if (outputLocation != null && outputLocation.equals(folderPath))
 						return false;
 				}

@@ -15,7 +15,6 @@
 package org.eclipse.jdt.internal.ui.fix;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 
 import com.ibm.icu.text.MessageFormat;
@@ -85,8 +84,8 @@ public class SortMembersCleanUp extends AbstractCleanUp {
 
 			try {
 				RefactoringStatus result= new RefactoringStatus();
-    			for (Iterator<IResource> iterator= fTouchedFiles.iterator(); iterator.hasNext();) {
-    	            IFile file= (IFile)iterator.next();
+    			for (IResource iResource : fTouchedFiles) {
+    	            IFile file= (IFile)iResource;
     	            if (containsRelevantMarkers(file)) {
     	            	String fileLocation= BasicElementLabels.getPathLabel(file.getProjectRelativePath(), false);
     	            	String projectName= file.getProject().getName();

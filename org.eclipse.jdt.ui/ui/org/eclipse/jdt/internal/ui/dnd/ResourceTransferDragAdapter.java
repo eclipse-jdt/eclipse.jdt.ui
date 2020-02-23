@@ -14,7 +14,6 @@
 package org.eclipse.jdt.internal.ui.dnd;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.swt.dnd.DND;
@@ -103,8 +102,7 @@ public class ResourceTransferDragAdapter extends DragSourceAdapter implements Tr
 			return EMPTY_LIST;
 		IStructuredSelection selection= (IStructuredSelection)s;
 		List<IResource> result= new ArrayList<>(selection.size());
-		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
-			Object element= iter.next();
+		for (Object element : selection) {
 			IResource resource= null;
 			if (element instanceof IJavaElement) {
 				// don't use IAdaptable as for members only the top level type adapts
@@ -125,8 +123,7 @@ public class ResourceTransferDragAdapter extends DragSourceAdapter implements Tr
 			JavaUIMessages.ResourceTransferDragAdapter_cannot_delete_resource,
 			null);
 		List<IResource> resources= convertSelection();
-		for (Iterator<IResource> iter= resources.iterator(); iter.hasNext();) {
-			IResource resource= iter.next();
+		for (IResource resource : resources) {
 			try {
 				resource.delete(true, null);
 			} catch (CoreException e) {

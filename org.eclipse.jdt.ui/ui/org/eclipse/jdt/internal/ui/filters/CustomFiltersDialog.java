@@ -284,9 +284,9 @@ public class CustomFiltersDialog extends SelectionDialog {
 	protected void okPressed() {
 		if (fBuiltInFilters != null) {
 			ArrayList<FilterDescriptor> result= new ArrayList<>();
-			for (int i= 0; i < fBuiltInFilters.length; ++i) {
-				if (fCheckBoxList.getChecked(fBuiltInFilters[i]))
-					result.add(fBuiltInFilters[i]);
+			for (FilterDescriptor fBuiltInFilter : fBuiltInFilters) {
+				if (fCheckBoxList.getChecked(fBuiltInFilter))
+					result.add(fBuiltInFilter);
 			}
 			setResult(result);
 		}
@@ -428,8 +428,7 @@ public class CustomFiltersDialog extends SelectionDialog {
 	private static String escapeSeparator(String pattern, String separator) {
 		int length= pattern.length();
 		StringBuilder buf= new StringBuilder(length);
-		for (int i= 0; i < length; i++) {
-			char ch= pattern.charAt(i);
+		for (char ch : pattern.toCharArray()) {
 			if (separator.equals(String.valueOf(ch)))
 				buf.append(ch);
 			buf.append(ch);

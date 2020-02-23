@@ -155,8 +155,7 @@ public class PushDownNegationCleanUp extends AbstractMultiFix {
 		}
 
 		RemoveDoubleNegationOperation lastDoubleNegation= null;
-		for (int i= 0; i < rewriteOperations.size(); ++i) {
-			CompilationUnitRewriteOperation op= rewriteOperations.get(i);
+		for (CompilationUnitRewriteOperation op : rewriteOperations) {
 			if (op instanceof ReplacementOperation) {
 				ReplacementOperation chainedOp= (ReplacementOperation) op;
 				if (lastDoubleNegation != null && chainedOp.getNode().subtreeMatch(new ASTMatcher(), lastDoubleNegation.getReplacementExpression())) {
