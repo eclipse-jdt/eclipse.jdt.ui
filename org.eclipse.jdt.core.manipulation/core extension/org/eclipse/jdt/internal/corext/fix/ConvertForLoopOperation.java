@@ -712,8 +712,8 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 		LinkedProposalPositionGroupCore pg= positionGroups.getPositionGroup(parameterName, true);
 		if (fElementDeclaration != null)
 			pg.addProposal(parameterName, 10);
-		for (int i= 0; i < proposals.length; i++) {
-			pg.addProposal(proposals[i], 10);
+		for (String proposal : proposals) {
+			pg.addProposal(proposal, 10);
 		}
 
 		AST ast= forStatement.getAST();

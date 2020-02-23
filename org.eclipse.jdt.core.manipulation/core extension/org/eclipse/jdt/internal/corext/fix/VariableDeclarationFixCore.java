@@ -18,7 +18,6 @@ package org.eclipse.jdt.internal.corext.fix;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -131,8 +130,7 @@ public class VariableDeclarationFixCore extends CompilationUnitRewriteOperations
 				handleFragments(node.fragments(), node);
 
 			List<VariableDeclarationFragment> fragments= node.fragments();
-			for (Iterator<VariableDeclarationFragment> iterator= fragments.iterator(); iterator.hasNext();) {
-				VariableDeclarationFragment fragment= iterator.next();
+			for (VariableDeclarationFragment fragment : fragments) {
 				Expression initializer= fragment.getInitializer();
 				if (initializer != null) {
 					initializer.accept(this);
@@ -148,8 +146,7 @@ public class VariableDeclarationFixCore extends CompilationUnitRewriteOperations
 				handleFragments(node.fragments(), node);
 
 			List<VariableDeclarationFragment> fragments= node.fragments();
-			for (Iterator<VariableDeclarationFragment> iterator= fragments.iterator(); iterator.hasNext();) {
-				VariableDeclarationFragment fragment= iterator.next();
+			for (VariableDeclarationFragment fragment : fragments) {
 				Expression initializer= fragment.getInitializer();
 				if (initializer != null) {
 					initializer.accept(this);
@@ -184,8 +181,7 @@ public class VariableDeclarationFixCore extends CompilationUnitRewriteOperations
 		private boolean handleFragments(List<VariableDeclarationFragment> list, ASTNode declaration) {
 			List<VariableDeclarationFragment> toChange= new ArrayList<>();
 
-			for (Iterator<VariableDeclarationFragment> iter= list.iterator(); iter.hasNext();) {
-				VariableDeclarationFragment fragment= iter.next();
+			for (VariableDeclarationFragment fragment : list) {
 				SimpleName name= fragment.getName();
 				IBinding resolveBinding= name.resolveBinding();
 				if (canAddFinal(resolveBinding, declaration)) {
@@ -234,8 +230,7 @@ public class VariableDeclarationFixCore extends CompilationUnitRewriteOperations
 
 			HashSet<IMethodBinding> writingConstructorBindings= new HashSet<>();
 			ArrayList<MethodDeclaration> writingConstructors= new ArrayList<>();
-			for (int i= 0; i < writes.size(); i++) {
-	            SimpleName name= writes.get(i);
+			for (SimpleName name : writes) {
 	            MethodDeclaration constructor= getWritingConstructor(name);
 	            if (writingConstructors.contains(constructor))//variable is written twice or more in constructor
 	            	return false;
@@ -251,8 +246,7 @@ public class VariableDeclarationFixCore extends CompilationUnitRewriteOperations
 				writingConstructorBindings.add(constructorBinding);
             }
 
-			for (int i= 0; i < writingConstructors.size(); i++) {
-	            MethodDeclaration constructor= writingConstructors.get(i);
+			for (MethodDeclaration constructor : writingConstructors) {
 	            if (callsWritingConstructor(constructor, writingConstructorBindings))//writing constructor calls other writing constructor
 	            	return false;
             }
@@ -262,15 +256,14 @@ public class VariableDeclarationFixCore extends CompilationUnitRewriteOperations
 			if (typeDecl == null)
 				return false;
 
-			MethodDeclaration[] methods= typeDecl.getMethods();
-			for (int i= 0; i < methods.length; i++) {
-	            if (methods[i].isConstructor()) {
-	            	IMethodBinding methodBinding= methods[i].resolveBinding();
+			for (MethodDeclaration method : typeDecl.getMethods()) {
+	            if (method.isConstructor()) {
+	            	IMethodBinding methodBinding= method.resolveBinding();
 	            	if (methodBinding == null)
 	            		return false;
 
 	            	if (!writingConstructorBindings.contains(methodBinding)) {
-	            		if (!callsWritingConstructor(methods[i], writingConstructorBindings))//non writing constructor does not call a writing constructor
+	            		if (!callsWritingConstructor(method, writingConstructorBindings))//non writing constructor does not call a writing constructor
 	            			return false;
 	            	}
 	            }
@@ -326,9 +319,7 @@ public class VariableDeclarationFixCore extends CompilationUnitRewriteOperations
 
 		private boolean isWrittenInTypeConstructors(List<SimpleName> writes, ITypeBinding declaringClass) {
 
-			for (int i= 0; i < writes.size(); i++) {
-	            SimpleName name= writes.get(i);
-
+			for (SimpleName name : writes) {
 	            MethodDeclaration methodDeclaration= getWritingConstructor(name);
 	            if (methodDeclaration == null)
 	            	return false;
@@ -475,8 +466,7 @@ public class VariableDeclarationFixCore extends CompilationUnitRewriteOperations
 		if (selectedNodes.length == 1) {
 			selectedNodes[0].accept(visitor);
 		} else {
-			for (int i= 0; i < selectedNodes.length; i++) {
-				ASTNode selectedNode= selectedNodes[i];
+			for (ASTNode selectedNode : selectedNodes) {
 				selectedNode.accept(visitor);
 			}
 		}

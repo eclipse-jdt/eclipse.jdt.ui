@@ -17,7 +17,6 @@ package org.eclipse.jdt.internal.corext.fix;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -359,9 +358,7 @@ public class CodeStyleFixCore extends CompilationUnitRewriteOperationsFixCore {
 
 		private boolean hasConflict(int startPosition, SimpleName name, int flag) {
 			ScopeAnalyzer analyzer= new ScopeAnalyzer(fCompilationUnit);
-			IBinding[] declarationsInScope= analyzer.getDeclarationsInScope(startPosition, flag);
-			for (int i= 0; i < declarationsInScope.length; i++) {
-				IBinding decl= declarationsInScope[i];
+			for (IBinding decl : analyzer.getDeclarationsInScope(startPosition, flag)) {
 				if (decl.getName().equals(name.getIdentifier()) && name.resolveBinding() != decl)
 					return true;
 			}
@@ -611,8 +608,7 @@ public class CodeStyleFixCore extends CompilationUnitRewriteOperationsFixCore {
 
 		List<CompilationUnitRewriteOperation> operations= new ArrayList<>();
 		if (addThisQualifier) {
-			for (int i= 0; i < problems.length; i++) {
-				IProblemLocationCore problem= problems[i];
+			for (IProblemLocationCore problem : problems) {
 				if (problem.getProblemId() == IProblem.UnqualifiedFieldAccess) {
 					AddThisQualifierOperation operation= getUnqualifiedFieldAccessResolveOperation(compilationUnit, problem);
 					if (operation != null)
@@ -636,8 +632,7 @@ public class CodeStyleFixCore extends CompilationUnitRewriteOperationsFixCore {
 
 		List<ToStaticAccessOperation> operations= new ArrayList<>();
 		HashMap<ASTNode, Block> createdBlocks= new HashMap<>();
-		for (int i= 0; i < problems.length; i++) {
-			IProblemLocationCore problem= problems[i];
+		for (IProblemLocationCore problem : problems) {
 			boolean isNonStaticAccess= changeNonStaticAccessToStatic && isNonStaticAccess(problem);
 			boolean isIndirectStaticAccess= changeIndirectStaticAccessToDirect && isIndirectStaticAccess(problem);
 			if (isNonStaticAccess || isIndirectStaticAccess) {
@@ -646,8 +641,7 @@ public class CodeStyleFixCore extends CompilationUnitRewriteOperationsFixCore {
 					ToStaticAccessOperation op= nonStaticAccessInformation[0];
 
 					Expression qualifier= op.fQualifier;
-					for (Iterator<CompilationUnitRewriteOperation> it= result.iterator(); it.hasNext();) { // see bug 346230
-						CompilationUnitRewriteOperation oper= it.next();
+					for (CompilationUnitRewriteOperation oper : result) { // see bug 346230
 						if (oper instanceof CodeStyleFixCore.AddThisQualifierOperation
 								&& ((CodeStyleFixCore.AddThisQualifierOperation) oper).fName.equals(qualifier)) {
 							result.remove(oper);

@@ -15,7 +15,6 @@
 package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -98,9 +97,8 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 			if (result != null)
 				return result;
 		}
-		final ITypeBinding[] types= binding.getInterfaces();
-		for (int index= 0; index < types.length; index++) {
-			final ITypeBinding result= getSuperType(types[index], name);
+		for (ITypeBinding type2 : binding.getInterfaces()) {
+			final ITypeBinding result= getSuperType(type2, name);
 			if (result != null)
 				return result;
 		}
@@ -251,8 +249,8 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 		final LinkedProposalPositionGroupCore pg= positionGroups.getPositionGroup(name, true);
 		if (fElementVariable != null)
 			pg.addProposal(name, 10);
-		for (int i= 0; i < names.length; i++) {
-			pg.addProposal(names[i], 10);
+		for (String name2 : names) {
+			pg.addProposal(name2, 10);
 		}
 
 		final Statement body= getForStatement().getBody();
@@ -260,8 +258,8 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 			final ListRewrite list;
 			if (body instanceof Block) {
 				list= astRewrite.getListRewrite(body, Block.STATEMENTS_PROPERTY);
-				for (final Iterator<Expression> iterator= fOccurrences.iterator(); iterator.hasNext();) {
-					final Statement parent= ASTNodes.getParent(iterator.next(), Statement.class);
+				for (Expression expression : fOccurrences) {
+					final Statement parent= ASTNodes.getParent(expression, Statement.class);
 					if (parent != null && list.getRewrittenList().contains(parent)) {
 						list.remove(parent, null);
 						remover.registerRemovedNode(parent);
@@ -344,19 +342,17 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 		fEnhancedForLoop.setParameter(declaration);
 		fEnhancedForLoop.setExpression(getExpression(astRewrite));
 
-		for (Iterator<Expression> iterator= getForStatement().initializers().iterator(); iterator.hasNext();) {
-			ASTNode node= iterator.next();
+		for (Object node : getForStatement().initializers()) {
 			if (node instanceof VariableDeclarationExpression) {
 				VariableDeclarationExpression variableDeclarationExpression= (VariableDeclarationExpression) node;
 				remover.registerRemovedNode(variableDeclarationExpression.getType());
 			} else {
-				remover.registerRemovedNode(node);
+				remover.registerRemovedNode((ASTNode) node);
 			}
 		}
 
-		for (Iterator<Expression> iterator= getForStatement().updaters().iterator(); iterator.hasNext();) {
-			ASTNode node= iterator.next();
-			remover.registerRemovedNode(node);
+		for (Object object : getForStatement().updaters()) {
+			remover.registerRemovedNode((ASTNode) object);
 		}
 
 		return fEnhancedForLoop;
@@ -391,8 +387,8 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 				resultStatus= new StatusInfo(IStatus.WARNING, FixMessages.ConvertIterableLoopOperation_RemoveUpdateExpressions_Warning);
 			}
 
-			for (final Iterator<Expression> outer= getForStatement().initializers().iterator(); outer.hasNext();) {
-				final Expression initializer= outer.next();
+			for (final Object outer : getForStatement().initializers()) {
+				final Expression initializer= (Expression) outer;
 				if (initializer instanceof VariableDeclarationExpression) {
 					final VariableDeclarationExpression declaration= (VariableDeclarationExpression)initializer;
 					List<VariableDeclarationFragment> fragments= declaration.fragments();

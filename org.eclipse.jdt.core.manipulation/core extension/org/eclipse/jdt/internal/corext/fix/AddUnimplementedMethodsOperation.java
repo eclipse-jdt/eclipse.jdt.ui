@@ -102,8 +102,7 @@ public class AddUnimplementedMethodsOperation extends CompilationUnitRewriteOper
 
 		ImportRewrite imports= cuRewrite.getImportRewrite();
 
-		for (int i= 0; i < unimplementedMethods.length; i++) {
-			IMethodBinding curr= unimplementedMethods[i];
+		for (IMethodBinding curr : unimplementedMethods) {
 			MethodDeclaration newMethodDecl= StubUtility2Core.createImplementationStubCore(unit, rewrite, imports, context, curr, curr.getDeclaringClass(), settings, false, fTypeNode, false);
 			listRewrite.insertLast(newMethodDecl, createTextEditGroup(CorrectionMessages.AddUnimplementedMethodsOperation_AddMissingMethod_group, cuRewrite));
 		}
@@ -123,9 +122,9 @@ public class AddUnimplementedMethodsOperation extends CompilationUnitRewriteOper
 			buf.append(Messages.format(CorrectionMessages.UnimplementedMethodsCorrectionProposal_info_plural, String.valueOf(methodsToOverride.length)));
 		}
 		buf.append("</b><ul>"); //$NON-NLS-1$
-		for (int i= 0; i < methodsToOverride.length; i++) {
+		for (IMethodBinding element : methodsToOverride) {
 			buf.append("<li>"); //$NON-NLS-1$
-			buf.append(BindingLabelProviderCore.getBindingLabel(methodsToOverride[i], JavaElementLabelsCore.ALL_FULLY_QUALIFIED));
+			buf.append(BindingLabelProviderCore.getBindingLabel(element, JavaElementLabelsCore.ALL_FULLY_QUALIFIED));
 			buf.append("</li>"); //$NON-NLS-1$
 		}
 		buf.append("</ul>"); //$NON-NLS-1$

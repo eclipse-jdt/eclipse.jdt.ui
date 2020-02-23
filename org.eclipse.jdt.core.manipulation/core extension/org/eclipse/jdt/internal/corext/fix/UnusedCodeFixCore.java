@@ -224,9 +224,8 @@ public class UnusedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 				rewrite.remove(declaration, group);
 			} else if (binding.getKind() == IBinding.VARIABLE) {
 				SimpleName nameNode= (SimpleName) NodeFinder.perform(completeRoot, simpleName.getStartPosition(), simpleName.getLength());
-				SimpleName[] references= LinkedNodeFinder.findByBinding(completeRoot, nameNode.resolveBinding());
-				for (int i= 0; i < references.length; i++) {
-					removeVariableReferences(rewrite, references[i], group);
+				for (SimpleName reference : LinkedNodeFinder.findByBinding(completeRoot, nameNode.resolveBinding())) {
+					removeVariableReferences(rewrite, reference, group);
 				}
 
 				IVariableBinding bindingDecl= ((IVariableBinding) nameNode.resolveBinding()).getVariableDeclaration();
@@ -782,8 +781,7 @@ public class UnusedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 				}
 			}
 		}
-		for (Map.Entry<ASTNode, List<SimpleName>> entry : variableDeclarations.entrySet()) {
-			List<SimpleName> names= entry.getValue();
+		for (List<SimpleName> names : variableDeclarations.values()) {
 			result.add(new RemoveUnusedMemberOperation(names.toArray(new SimpleName[0]), false));
 		}
 		if (unnecessaryCasts.size() > 0)

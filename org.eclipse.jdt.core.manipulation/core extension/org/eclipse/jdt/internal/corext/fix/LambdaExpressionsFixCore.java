@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -616,8 +615,7 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			AST ast= rewrite.getAST();
 
-			for (Iterator<LambdaExpression> iterator= fExpressions.iterator(); iterator.hasNext();) {
-				LambdaExpression lambdaExpression= iterator.next();
+			for (LambdaExpression lambdaExpression : fExpressions) {
 				TextEditGroup group= createTextEditGroup(FixMessages.LambdaExpressionsFix_convert_to_anonymous_class_creation, cuRewrite);
 
 				ITypeBinding lambdaTypeBinding= lambdaExpression.resolveTypeBinding();
