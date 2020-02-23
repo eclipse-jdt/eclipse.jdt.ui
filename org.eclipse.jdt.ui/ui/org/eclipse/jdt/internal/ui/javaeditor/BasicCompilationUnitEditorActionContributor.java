@@ -16,7 +16,6 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jface.action.IAction;
@@ -122,8 +121,7 @@ public class BasicCompilationUnitEditorActionContributor extends BasicJavaEditor
 			caMenu.add(fRetargetContentAssist);
 			Collection<CompletionProposalCategory> descriptors= CompletionProposalComputerRegistry.getDefault().getProposalCategories();
 			List<IAction> specificAssistActions= new ArrayList<>(descriptors.size());
-			for (Iterator<CompletionProposalCategory> it= descriptors.iterator(); it.hasNext();) {
-				final CompletionProposalCategory cat= it.next();
+			for (CompletionProposalCategory cat : descriptors) {
 				if (cat.hasComputers()) {
 					IAction caAction= new SpecificContentAssistAction(cat);
 					caMenu.add(caAction);

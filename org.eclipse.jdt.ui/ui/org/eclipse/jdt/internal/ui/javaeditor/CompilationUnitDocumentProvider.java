@@ -760,8 +760,8 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			Object value= getAnnotations(position);
 			if (value instanceof List) {
 				List<?> list= (List<?>) value;
-				for (Iterator<?> e = list.iterator(); e.hasNext();)
-					setOverlay(e.next(), problemAnnotation);
+				for (Object name : list)
+					setOverlay(name, problemAnnotation);
 			} else {
 				setOverlay(value, problemAnnotation);
 			}

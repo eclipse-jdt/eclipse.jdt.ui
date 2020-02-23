@@ -102,14 +102,12 @@ public class SemanticHighlightingPresenter extends SemanticHighlightingPresenter
 
 		int minStart= Integer.MAX_VALUE;
 		int maxEnd= Integer.MIN_VALUE;
-		for (int i= 0, n= removedPositions.size(); i < n; i++) {
-			Position position= removedPositions.get(i);
+		for (Position position : removedPositions) {
 			int offset= position.getOffset();
 			minStart= Math.min(minStart, offset);
 			maxEnd= Math.max(maxEnd, offset + position.getLength());
 		}
-		for (int i= 0, n= addedPositions.size(); i < n; i++) {
-			Position position= addedPositions.get(i);
+		for (Position position : addedPositions) {
 			int offset= position.getOffset();
 			minStart= Math.min(minStart, offset);
 			maxEnd= Math.max(maxEnd, offset + position.getLength());
@@ -445,8 +443,8 @@ public class SemanticHighlightingPresenter extends SemanticHighlightingPresenter
 	 * @param highlighting The highlighting
 	 */
 	public void highlightingStyleChanged(Highlighting highlighting) {
-		for (int i= 0, n= fPositions.size(); i < n; i++) {
-			HighlightedPosition position= (HighlightedPosition) fPositions.get(i);
+		for (Position fPosition : fPositions) {
+			HighlightedPosition position= (HighlightedPosition) fPosition;
 			if (position.getHighlighting() == highlighting)
 				fSourceViewer.invalidateTextPresentation(position.getOffset(), position.getLength());
 		}
@@ -456,8 +454,7 @@ public class SemanticHighlightingPresenter extends SemanticHighlightingPresenter
 	 * Invalidate text presentation of all positions.
 	 */
 	private void invalidateTextPresentation() {
-		for (int i= 0, n= fPositions.size(); i < n; i++) {
-			Position position= fPositions.get(i);
+		for (Position position : fPositions) {
 			fSourceViewer.invalidateTextPresentation(position.getOffset(), position.getLength());
 		}
 	}

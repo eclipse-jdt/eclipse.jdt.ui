@@ -239,8 +239,8 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 			if (fAnnotationModel instanceof IAnnotationModelExtension) {
 				((IAnnotationModelExtension)fAnnotationModel).replaceAnnotations(fOverrideAnnotations, null);
 			} else {
-				for (int i= 0, length= fOverrideAnnotations.length; i < length; i++)
-					fAnnotationModel.removeAnnotation(fOverrideAnnotations[i]);
+				for (Annotation fOverrideAnnotation : fOverrideAnnotations)
+					fAnnotationModel.removeAnnotation(fOverrideAnnotation);
 			}
 			fOverrideAnnotations= null;
 		}

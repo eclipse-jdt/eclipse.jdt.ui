@@ -76,6 +76,7 @@ import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
@@ -89,7 +90,6 @@ import org.eclipse.jdt.internal.ui.actions.OpenBrowserUtil;
 import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 
 public class JavadocWizard extends Wizard implements IExportWizard {
@@ -301,8 +301,8 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 			vmArgs.add('@' + file.getAbsolutePath());
 
 			try (BufferedWriter writer= new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), getEncoding(vmArgs)))) {
-				for (int i= 0; i < progArgs.size(); i++) {
-					String curr= progArgs.get(i);
+				for (String progArg : progArgs) {
+					String curr= progArg;
 					curr= checkForSpaces(curr);
 
 					writer.write(curr);
@@ -381,8 +381,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 		}
 		StringBuilder buf= new StringBuilder();
 		buf.append('\'');
-		for (int i= 0; i < curr.length(); i++) {
-			char ch= curr.charAt(i);
+		for (char ch : curr.toCharArray()) {
 			if (ch == '\\' || ch == '\'') {
 				buf.append('\\');
 			}

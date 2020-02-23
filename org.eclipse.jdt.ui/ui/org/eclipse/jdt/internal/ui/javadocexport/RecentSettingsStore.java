@@ -15,7 +15,6 @@ package org.eclipse.jdt.internal.ui.javadocexport;
 
 import java.net.URL;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -121,9 +120,7 @@ public class RecentSettingsStore {
 
 		//Write all project information to DialogSettings.
 		Set<IJavaProject> keys= fPerProjectSettings.keySet();
-		for (Iterator<IJavaProject> iter= keys.iterator(); iter.hasNext();) {
-
-			IJavaProject curr= iter.next();
+		for (IJavaProject curr : keys) {
 
 			IDialogSettings proj= projectsSection.addNewSection(curr.getElementName());
 			if (!keys.contains(curr)) {
@@ -147,16 +144,7 @@ public class RecentSettingsStore {
 		}
 		data.setDestination(destination);
 		data.setAntpath(antpath);
-
-		StringBuilder refs= new StringBuilder();
-		for (int i= 0; i < hrefs.length; i++) {
-			if (i > 0) {
-				refs.append(REF_SEPARATOR);
-			}
-			refs.append(hrefs[i]);
-
-		}
-		data.setHRefs(refs.toString());
+		data.setHRefs(String.join(String.valueOf(REF_SEPARATOR), hrefs));
 	}
 
 	public static String[] getRefTokens(String refs) {

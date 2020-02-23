@@ -2163,8 +2163,7 @@ public class SemanticHighlightings {
 	 */
 	public static void initDefaults(IPreferenceStore store) {
 		SemanticHighlighting[] semanticHighlightings= getSemanticHighlightings();
-		for (int i= 0, n= semanticHighlightings.length; i < n; i++) {
-			SemanticHighlighting semanticHighlighting= semanticHighlightings[i];
+		for (SemanticHighlighting semanticHighlighting : semanticHighlightings) {
 			setDefaultAndFireEvent(store, SemanticHighlightings.getColorPreferenceKey(semanticHighlighting), semanticHighlighting.getDefaultTextColor());
 			store.setDefault(SemanticHighlightings.getBoldPreferenceKey(semanticHighlighting), semanticHighlighting.isBoldByDefault());
 			store.setDefault(SemanticHighlightings.getItalicPreferenceKey(semanticHighlighting), semanticHighlighting.isItalicByDefault());

@@ -57,7 +57,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings.YieldKeyword
 import org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener;
 import org.eclipse.jdt.internal.ui.util.ASTHelper;
 
-
 /**
  * Semantic highlighting reconciler - Background thread implementation.
  *
@@ -397,12 +396,11 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 
 
 
-		for (int i= 0, n= subtrees.length; i < n; i++)
-			subtrees[i].accept(fCollector);
+		for (ASTNode subtree : subtrees)
+			subtree.accept(fCollector);
 		List<Position> oldPositions= fRemovedPositions;
 		List<Position> newPositions= new ArrayList<>(fNOfRemovedPositions);
-		for (int i= 0, n= oldPositions.size(); i < n; i ++) {
-			Position current= oldPositions.get(i);
+		for (Position current : oldPositions) {
 			if (current != null)
 				newPositions.add(current);
 		}

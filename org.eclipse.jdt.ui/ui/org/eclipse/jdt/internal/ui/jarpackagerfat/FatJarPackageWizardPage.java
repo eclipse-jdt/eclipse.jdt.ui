@@ -725,8 +725,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 		}
 
 		ArrayList<IJavaProject> result= new ArrayList<>();
-		for (int i= 0, size= projectNames.size(); i < size; i++) {
-			String name= projectNames.get(i);
+		for (String name : projectNames) {
 			IJavaProject project= getJavaProject(name);
 			if (project != null)
 				result.add(project);
@@ -871,8 +870,8 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 		}
 
 		for (Iterator<IResource> iterator= resources.iterator(); iterator.hasNext();) {
-			IResource element= iterator.next();
-			if (element == null)
+			IResource resource= iterator.next();
+			if (resource == null)
 				iterator.remove();
 		}
 
@@ -897,8 +896,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 	public void dispose() {
 		super.dispose();
 		if (fLauchConfigurationModel != null) {
-			for (int i= 0, size= fLauchConfigurationModel.size(); i < size; i++) {
-				LaunchConfigurationElement element= fLauchConfigurationModel.get(i);
+			for (LaunchConfigurationElement element : fLauchConfigurationModel) {
 				element.dispose();
 			}
 		}

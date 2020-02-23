@@ -210,8 +210,8 @@ public final class ASTProvider implements IASTSharedValues {
 
 		// Ensure existing windows get connected
 		IWorkbenchWindow[] windows= PlatformUI.getWorkbench().getWorkbenchWindows();
-		for (int i= 0, length= windows.length; i < length; i++)
-			windows[i].getPartService().addPartListener(fActivationListener);
+		for (IWorkbenchWindow window : windows)
+			window.getPartService().addPartListener(fActivationListener);
 	}
 
 	void activeJavaEditorChanged(IWorkbenchPart editor) {

@@ -14,7 +14,6 @@
 package org.eclipse.jdt.internal.ui.javaeditor;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -404,8 +403,8 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 	 */
 	protected void fireInputChanged(IClassFileEditorInput input) {
 		List<InputChangeListener> list= new ArrayList<>(fInputListeners);
-		for (Iterator<InputChangeListener> i = list.iterator(); i.hasNext();)
-			i.next().inputChanged(input);
+		for (InputChangeListener inputChangeListener : list)
+			inputChangeListener.inputChanged(input);
 	}
 
 	/**

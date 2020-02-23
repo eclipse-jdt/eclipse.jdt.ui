@@ -674,14 +674,7 @@ public class JavadocOptionsManager {
 	}
 
 	private String flatStringList(String[] paths) {
-		StringBuilder buf= new StringBuilder();
-		for (int i= 0; i < paths.length; i++) {
-			if (i > 0) {
-				buf.append(File.pathSeparatorChar);
-			}
-			buf.append(paths[i]);
-		}
-		return buf.toString();
+		return String.join(String.valueOf(File.pathSeparatorChar), paths);
 	}
 
 	private String[] arrayFromFlatString(String str) {
@@ -814,8 +807,7 @@ public class JavadocOptionsManager {
 		// bug 74132
 		String hostPrefix= "-J-Dhttp.proxyHost="; //$NON-NLS-1$
 		String portPrefix= "-J-Dhttp.proxyPort="; //$NON-NLS-1$
-		for (int i= 0; i < vmOptions.size(); i++) {
-			String curr= vmOptions.get(i);
+		for (String curr : vmOptions) {
 			if (curr.startsWith(hostPrefix) || curr.startsWith(portPrefix)) {
 				return;
 			}
@@ -1044,9 +1036,9 @@ public class JavadocOptionsManager {
 
 	private IJavaElement[] getInitialElementsFromSelection(List<?> candidates) {
 		ArrayList<IJavaElement> res= new ArrayList<>();
-		for (int i= 0; i < candidates.size(); i++) {
+		for (Object candidate : candidates) {
 			try {
-				IJavaElement elem= getSelectableJavaElement(candidates.get(i));
+				IJavaElement elem= getSelectableJavaElement(candidate);
 				if (elem != null) {
 					res.add(elem);
 				}
@@ -1105,9 +1097,9 @@ public class JavadocOptionsManager {
 			return false;
 		}
 
-		for (IJavaElement element : root.getChildren()) {
-			if (element instanceof IPackageFragment) {
-				IPackageFragment fragment= (IPackageFragment) element;
+		for (IJavaElement child : root.getChildren()) {
+			if (child instanceof IPackageFragment) {
+				IPackageFragment fragment= (IPackageFragment) child;
 				if (containsCompilationUnits(fragment)) {
 					return true;
 				}

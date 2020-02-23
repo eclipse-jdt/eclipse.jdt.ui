@@ -3066,8 +3066,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				int[] stateMasks= configuration.getConfiguredTextHoverStateMasks(getSourceViewer(), t);
 
 				if (stateMasks != null) {
-					for (int j= 0; j < stateMasks.length; j++)	{
-						int stateMask= stateMasks[j];
+					for (int stateMask : stateMasks) {
 						ITextHover textHover= configuration.getTextHover(sourceViewer, t, stateMask);
 						((ITextViewerExtension2)sourceViewer).setTextHover(textHover, t, stateMask);
 					}
@@ -3255,12 +3254,11 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			// Add occurrence annotations
 			int length= fLocations.length;
 			Map<Annotation, Position> annotationMap= new HashMap<>(length);
-			for (int i= 0; i < length; i++) {
+			for (OccurrenceLocation location : fLocations) {
 
 				if (isCanceled(progressMonitor))
 					return Status.CANCEL_STATUS;
 
-				OccurrenceLocation location= fLocations[i];
 				Position position= new Position(location.getOffset(), location.getLength());
 
 				String description= location.getDescription();
@@ -3497,8 +3495,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			if (annotationModel instanceof IAnnotationModelExtension) {
 				((IAnnotationModelExtension)annotationModel).replaceAnnotations(fOccurrenceAnnotations, null);
 			} else {
-				for (int i= 0, length= fOccurrenceAnnotations.length; i < length; i++)
-					annotationModel.removeAnnotation(fOccurrenceAnnotations[i]);
+				for (Annotation fOccurrenceAnnotation : fOccurrenceAnnotations)
+					annotationModel.removeAnnotation(fOccurrenceAnnotation);
 			}
 			fOccurrenceAnnotations= null;
 		}

@@ -445,8 +445,8 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 	 * Dispose the semantic highlightings.
 	 */
 	private void disposeHighlightings() {
-		for (int i= 0, n= fSemanticHighlightings.length; i < n; i++)
-			removeColor(SemanticHighlightings.getColorPreferenceKey(fSemanticHighlightings[i]));
+		for (SemanticHighlighting fSemanticHighlighting : fSemanticHighlightings)
+			removeColor(SemanticHighlightings.getColorPreferenceKey(fSemanticHighlighting));
 
 		fSemanticHighlightings= null;
 		fHighlightings= null;

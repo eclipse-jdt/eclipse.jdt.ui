@@ -346,8 +346,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 			case LINK_REFERENCES:
 				fLinkRefStatus= new StatusInfo();
 				List<JavadocLinkRef> list= fListDialogField.getCheckedElements();
-				for (int i= 0; i < list.size(); i++) {
-					JavadocLinkRef curr= list.get(i);
+				for (JavadocLinkRef curr : list) {
 					URL url= curr.getURL();
 					if (url == null) {
 						fLinkRefStatus.setWarning(JavadocExportMessages.JavadocStandardWizardPage_nolinkref_error);

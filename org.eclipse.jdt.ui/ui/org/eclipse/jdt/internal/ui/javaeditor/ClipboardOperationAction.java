@@ -74,7 +74,6 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
-import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.manipulation.ImportReferencesCollector;
@@ -426,8 +425,8 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		if (selection.getLength() < 30) {
 			String text= selection.getText();
 			if (text != null) {
-				for (int i= 0; i < text.length(); i++) {
-					if (!Character.isJavaIdentifierPart(text.charAt(i))) {
+				for (char c : text.toCharArray()) {
+					if (!Character.isJavaIdentifierPart(c)) {
 						return true;
 					}
 				}
@@ -466,8 +465,7 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		}
 
 		HashSet<String> namesToImport= new HashSet<>(typeImportsRefs.size());
-		for (int i= 0; i < typeImportsRefs.size(); i++) {
-			Name curr= typeImportsRefs.get(i);
+		for (SimpleName curr : typeImportsRefs) {
 			IBinding binding= curr.resolveBinding();
 			if (binding != null && binding.getKind() == IBinding.TYPE) {
 				ITypeBinding typeBinding= (ITypeBinding) binding;
@@ -488,8 +486,7 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		}
 
 		HashSet<String> staticsToImport= new HashSet<>(staticImportsRefs.size());
-		for (int i= 0; i < staticImportsRefs.size(); i++) {
-			Name curr= staticImportsRefs.get(i);
+		for (SimpleName curr : staticImportsRefs) {
 			IBinding binding= curr.resolveBinding();
 			if (binding != null) {
 				StringBuilder buf= new StringBuilder(Bindings.getImportName(binding));
