@@ -132,8 +132,7 @@ public class JavaUILabelProvider implements ILabelProvider, IColorProvider, ISty
 
 	protected Image decorateImage(Image image, Object element) {
 		if (fLabelDecorators != null && image != null) {
-			for (int i= 0; i < fLabelDecorators.size(); i++) {
-				ILabelDecorator decorator= fLabelDecorators.get(i);
+			for (ILabelDecorator decorator : fLabelDecorators) {
 				image= decorator.decorateImage(image, element);
 			}
 		}
@@ -152,8 +151,7 @@ public class JavaUILabelProvider implements ILabelProvider, IColorProvider, ISty
 
 	protected String decorateText(String text, Object element) {
 		if (fLabelDecorators != null && text.length() > 0) {
-			for (int i= 0; i < fLabelDecorators.size(); i++) {
-				ILabelDecorator decorator= fLabelDecorators.get(i);
+			for (ILabelDecorator decorator : fLabelDecorators) {
 				String decorated= decorator.decorateText(text, element);
 				if (decorated != null) {
 					text= decorated;
@@ -189,8 +187,7 @@ public class JavaUILabelProvider implements ILabelProvider, IColorProvider, ISty
 	@Override
 	public void dispose() {
 		if (fLabelDecorators != null) {
-			for (int i= 0; i < fLabelDecorators.size(); i++) {
-				ILabelDecorator decorator= fLabelDecorators.get(i);
+			for (ILabelDecorator decorator : fLabelDecorators) {
 				decorator.dispose();
 			}
 			fLabelDecorators= null;
@@ -202,8 +199,7 @@ public class JavaUILabelProvider implements ILabelProvider, IColorProvider, ISty
 	@Override
 	public void addListener(ILabelProviderListener listener) {
 		if (fLabelDecorators != null) {
-			for (int i= 0; i < fLabelDecorators.size(); i++) {
-				ILabelDecorator decorator= fLabelDecorators.get(i);
+			for (ILabelDecorator decorator : fLabelDecorators) {
 				decorator.addListener(listener);
 			}
 		}
@@ -218,8 +214,7 @@ public class JavaUILabelProvider implements ILabelProvider, IColorProvider, ISty
 	@Override
 	public void removeListener(ILabelProviderListener listener) {
 		if (fLabelDecorators != null) {
-			for (int i= 0; i < fLabelDecorators.size(); i++) {
-				ILabelDecorator decorator= fLabelDecorators.get(i);
+			for (ILabelDecorator decorator : fLabelDecorators) {
 				decorator.removeListener(listener);
 			}
 		}

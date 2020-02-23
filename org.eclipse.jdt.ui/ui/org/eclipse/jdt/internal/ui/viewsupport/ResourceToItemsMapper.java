@@ -67,8 +67,8 @@ public class ResourceToItemsMapper {
 		} else { // List of Items
 			@SuppressWarnings("unchecked")
 			List<Item> list= (List<Item>) obj;
-			for (int k= 0; k < list.size(); k++) {
-				updateItem(list.get(k));
+			for (Item element : list) {
+				updateItem(element);
 			}
 		}
 	}

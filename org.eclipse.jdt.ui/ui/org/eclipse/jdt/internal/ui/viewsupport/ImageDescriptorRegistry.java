@@ -15,7 +15,6 @@ package org.eclipse.jdt.internal.ui.viewsupport;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.swt.graphics.Image;
@@ -71,8 +70,7 @@ public class ImageDescriptorRegistry {
 	 * Disposes all images managed by this registry.
 	 */
 	public void dispose() {
-		for (Iterator<Image> iter= fRegistry.values().iterator(); iter.hasNext(); ) {
-			Image image= iter.next();
+		for (Image image : fRegistry.values()) {
 			image.dispose();
 		}
 		fRegistry.clear();

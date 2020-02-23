@@ -14,6 +14,8 @@
 
 package org.eclipse.jdt.internal.ui.text.spelling.engine;
 
+import java.util.Arrays;
+
 /**
  * Default phonetic hash provider for english languages.
  * <p>
@@ -148,12 +150,7 @@ public final class DefaultPhoneticHashProvider implements IPhoneticHashProvider 
 			return false;
 
 		final String checkable= new String(token, offset, length);
-		for (int index= 0; index < candidates.length; index++) {
-
-			if (candidates[index].equals(checkable))
-				return true;
-		}
-		return false;
+		return hasOneOf(candidates, checkable);
 	}
 
 	/**
@@ -168,13 +165,7 @@ public final class DefaultPhoneticHashProvider implements IPhoneticHashProvider 
 	 *               candidates, <code>false</code> otherwise.
 	 */
 	protected static final boolean hasOneOf(final String[] candidates, final String token) {
-
-		for (int index= 0; index < candidates.length; index++) {
-
-			if (token.contains(candidates[index]))
-				return true;
-		}
-		return false;
+		return Arrays.asList(candidates).contains(token);
 	}
 
 	/**
@@ -195,9 +186,9 @@ public final class DefaultPhoneticHashProvider implements IPhoneticHashProvider 
 		if (offset >= 0 && offset < length) {
 
 			final char character= token[offset];
-			for (int index= 0; index < VOWEL_CHARACTERS.length; index++) {
+			for (char element : VOWEL_CHARACTERS) {
 
-				if (VOWEL_CHARACTERS[index] == character)
+				if (element == character)
 					return true;
 			}
 		}

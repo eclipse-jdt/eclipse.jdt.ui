@@ -249,8 +249,7 @@ public class JavadocContentAccess2 {
 					return result;
 				}
 			}
-			for (Iterator<IType> iter= toVisitChildren.iterator(); iter.hasNext(); ) {
-				IType child= iter.next();
+			for (IType child : toVisitChildren) {
 				Object result= visitInheritDocInterfaces(visited, child, typeHierarchy);
 				if (result != InheritDocVisitor.CONTINUE)
 					return result;
@@ -869,8 +868,7 @@ public class JavadocContentAccess2 {
 	private void parameterToHTML() {
 		String elementName= fElement.getElementName();
 		List<TagElement> tags= fJavadoc.tags();
-		for (Iterator<TagElement> iter= tags.iterator(); iter.hasNext();) {
-			TagElement tag= iter.next();
+		for (TagElement tag : tags) {
 			String tagName= tag.getTagName();
 			if (TagElement.TAG_PARAM.equals(tagName)) {
 				List<? extends ASTNode> fragments= tag.fragments();
@@ -943,8 +941,7 @@ public class JavadocContentAccess2 {
 		List<TagElement> hidden= new ArrayList<>(1);
 
 		List<TagElement> tags= fJavadoc.tags();
-		for (Iterator<TagElement> iter= tags.iterator(); iter.hasNext(); ) {
-			TagElement tag= iter.next();
+		for (TagElement tag : tags) {
 			String tagName= tag.getTagName();
 			if (tagName == null) {
 				start= tag;
@@ -1220,8 +1217,7 @@ public class JavadocContentAccess2 {
 			fLiteralContent= 0;
 
 			List<TagElement> tags= fJavadoc.tags();
-			for (Iterator<TagElement> iter= tags.iterator(); iter.hasNext(); ) {
-				TagElement tag= iter.next();
+			for (TagElement tag : tags) {
 				String tagName= tag.getTagName();
 				if (tagName == null) {
 					handleContentElements(tag.fragments());
@@ -1241,8 +1237,7 @@ public class JavadocContentAccess2 {
 			fLiteralContent= 0;
 
 			List<TagElement> tags= fJavadoc.tags();
-			for (Iterator<TagElement> iter= tags.iterator(); iter.hasNext(); ) {
-				TagElement tag= iter.next();
+			for (TagElement tag : tags) {
 				String tagName= tag.getTagName();
 				if (TagElement.TAG_RETURN.equals(tagName)) {
 					handleContentElements(tag.fragments());
@@ -1274,8 +1269,7 @@ public class JavadocContentAccess2 {
 
 			String typeParamName= typeParameterNames.get(typeParamIndex);
 			List<TagElement> tags= fJavadoc.tags();
-			for (Iterator<TagElement> iter= tags.iterator(); iter.hasNext();) {
-				TagElement tag= iter.next();
+			for (TagElement tag : tags) {
 				String tagName= tag.getTagName();
 				if (TagElement.TAG_PARAM.equals(tagName)) {
 					List<? extends ASTNode> fragments= tag.fragments();
@@ -1323,8 +1317,7 @@ public class JavadocContentAccess2 {
 
 			String paramName= parameterNames[paramIndex];
 			List<TagElement> tags= fJavadoc.tags();
-			for (Iterator<TagElement> iter= tags.iterator(); iter.hasNext(); ) {
-				TagElement tag= iter.next();
+			for (TagElement tag : tags) {
 				String tagName= tag.getTagName();
 				if (TagElement.TAG_PARAM.equals(tagName)) {
 					List<? extends ASTNode> fragments= tag.fragments();
@@ -1364,8 +1357,7 @@ public class JavadocContentAccess2 {
 			fLiteralContent= 0;
 
 			List<TagElement> tags= fJavadoc.tags();
-			for (Iterator<TagElement> iter= tags.iterator(); iter.hasNext(); ) {
-				TagElement tag= iter.next();
+			for (TagElement tag : tags) {
 				String tagName= tag.getTagName();
 				if (TagElement.TAG_THROWS.equals(tagName) || TagElement.TAG_EXCEPTION.equals(tagName)) {
 					List<? extends ASTNode> fragments= tag.fragments();
@@ -1752,8 +1744,7 @@ public class JavadocContentAccess2 {
 
 		handleBlockTagTitle(title);
 
-		for (Iterator<TagElement> iter= tags.iterator(); iter.hasNext(); ) {
-			TagElement tag= iter.next();
+		for (TagElement tag : tags) {
 			fBuf.append(BlOCK_TAG_ENTRY_START);
 			if (TagElement.TAG_SEE.equals(tag.getTagName())) {
 				handleSeeTag(tag);
@@ -1778,8 +1769,7 @@ public class JavadocContentAccess2 {
 	}
 
 	private void handleBlockTags(List<TagElement> tags) {
-		for (Iterator<TagElement> iter= tags.iterator(); iter.hasNext(); ) {
-			TagElement tag= iter.next();
+		for (TagElement tag : tags) {
 			handleBlockTagTitle(tag.getTagName());
 			fBuf.append(BlOCK_TAG_ENTRY_START);
 			handleContentElements(tag.fragments());
@@ -1803,8 +1793,7 @@ public class JavadocContentAccess2 {
 
 		handleBlockTagTitle(JavaDocMessages.JavaDoc2HTMLTextReader_throws_section);
 
-		for (Iterator<TagElement> iter= tags.iterator(); iter.hasNext(); ) {
-			TagElement tag= iter.next();
+		for (TagElement tag : tags) {
 			fBuf.append(BlOCK_TAG_ENTRY_START);
 			handleThrowsTag(tag);
 			fBuf.append(BlOCK_TAG_ENTRY_END);
@@ -1843,8 +1832,7 @@ public class JavadocContentAccess2 {
 		String tagTitle= isTypeParameters ? JavaDocMessages.JavaDoc2HTMLTextReader_type_parameters_section : JavaDocMessages.JavaDoc2HTMLTextReader_parameters_section;
 		handleBlockTagTitle(tagTitle);
 
-		for (Iterator<TagElement> iter= tags.iterator(); iter.hasNext(); ) {
-			TagElement tag= iter.next();
+		for (TagElement tag : tags) {
 			fBuf.append(BlOCK_TAG_ENTRY_START);
 			handleParamTag(tag);
 			fBuf.append(BlOCK_TAG_ENTRY_END);
@@ -2021,8 +2009,8 @@ public class JavadocContentAccess2 {
 	}
 
 	private boolean containsOnlyNull(List<String> parameterNames) {
-		for (Iterator<String> iter= parameterNames.iterator(); iter.hasNext(); ) {
-			if (iter.next() != null)
+		for (String string : parameterNames) {
+			if (string != null)
 				return false;
 		}
 		return true;

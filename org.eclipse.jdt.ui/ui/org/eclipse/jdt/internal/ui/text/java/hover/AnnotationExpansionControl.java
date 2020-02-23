@@ -14,7 +14,6 @@
 package org.eclipse.jdt.internal.ui.text.java.hover;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
@@ -839,15 +838,15 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 
 		// create modified styles (with background)
 		List<StyleRange> shadedRanges= new ArrayList<>(undoRanges.size());
-		for (Iterator<StyleRange> it= undoRanges.iterator(); it.hasNext(); ) {
-			StyleRange range= (StyleRange) it.next().clone();
+		for (StyleRange styleRange : undoRanges) {
+			StyleRange range= (StyleRange) styleRange.clone();
 			shadedRanges.add(range);
 			range.background= getHighlightColor(disp);
 		}
 
 		// set the ranges one by one
-		for (Iterator<StyleRange> iter= shadedRanges.iterator(); iter.hasNext(); ) {
-			text.setStyleRange(iter.next());
+		for (StyleRange styleRange : shadedRanges) {
+			text.setStyleRange(styleRange);
 
 		}
 

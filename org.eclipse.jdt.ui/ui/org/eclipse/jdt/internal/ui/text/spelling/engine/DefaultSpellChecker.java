@@ -44,9 +44,9 @@ public class DefaultSpellChecker implements ISpellChecker {
 	 */
 	protected static boolean isDigits(final String word) {
 
-		for (int index= 0; index < word.length(); index++) {
+		for (char c : word.toCharArray()) {
 
-			if (Character.isDigit(word.charAt(index)))
+			if (Character.isDigit(c))
 				return true;
 		}
 		return false;
@@ -176,10 +176,8 @@ public class DefaultSpellChecker implements ISpellChecker {
 			copy= new HashSet<>(fDictionaries);
 		}
 
-		ISpellDictionary dictionary= null;
-		for (final Iterator<ISpellDictionary> iterator= copy.iterator(); iterator.hasNext();) {
+		for (ISpellDictionary dictionary : copy) {
 
-			dictionary= iterator.next();
 			if (dictionary.acceptsWords())
 				return true;
 		}
@@ -195,8 +193,7 @@ public class DefaultSpellChecker implements ISpellChecker {
 		}
 
 		final String addable= word.toLowerCase();
-		for (final Iterator<ISpellDictionary> iterator= copy.iterator(); iterator.hasNext();) {
-			ISpellDictionary dictionary= iterator.next();
+		for (ISpellDictionary dictionary : copy) {
 			if (dictionary.acceptsWords())
 				dictionary.addWord(addable);
 		}
@@ -275,12 +272,9 @@ public class DefaultSpellChecker implements ISpellChecker {
 			copy= new HashSet<>(fDictionaries);
 		}
 
-		ISpellDictionary dictionary= null;
 		final HashSet<RankedWordProposal> proposals= new HashSet<>();
 
-		for (final Iterator<ISpellDictionary> iterator= copy.iterator(); iterator.hasNext();) {
-
-			dictionary= iterator.next();
+		for (ISpellDictionary dictionary : copy) {
 			proposals.addAll(dictionary.getProposals(word, sentence));
 		}
 		return proposals;
@@ -303,10 +297,7 @@ public class DefaultSpellChecker implements ISpellChecker {
 		if (fIgnored.contains(word.toLowerCase()))
 			return true;
 
-		ISpellDictionary dictionary= null;
-		for (final Iterator<ISpellDictionary> iterator= copy.iterator(); iterator.hasNext();) {
-
-			dictionary= iterator.next();
+		for (ISpellDictionary dictionary : copy) {
 			if (dictionary.isCorrect(word))
 				return true;
 		}

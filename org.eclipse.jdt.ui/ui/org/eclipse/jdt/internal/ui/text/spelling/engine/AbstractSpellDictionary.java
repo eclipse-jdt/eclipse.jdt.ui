@@ -38,6 +38,7 @@ import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaUI;
@@ -45,7 +46,6 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 
 /**
@@ -61,17 +61,6 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 	 */
 	private static class ByteArrayWrapper {
 
-		private static int hashCode(byte[] array) {
-			int prime= 31;
-			if (array == null)
-				return 0;
-			int result= 1;
-			for (int index= 0; index < array.length; index++) {
-				result= prime * result + array[index];
-			}
-			return result;
-		}
-
 		private byte[] byteArray;
 
 		public ByteArrayWrapper(byte[] byteArray) {
@@ -79,10 +68,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 		}
 		@Override
 		public int hashCode() {
-			final int prime= 31;
-			int result= 1;
-			result= prime * result + ByteArrayWrapper.hashCode(byteArray);
-			return result;
+			return 31 + Arrays.hashCode(byteArray);
 		}
 
 		@Override
@@ -194,9 +180,9 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 		final StringBuilder buffer= new StringBuilder(BUFFER_CAPACITY);
 		final HashSet<RankedWordProposal> result= new HashSet<>(BUCKET_CAPACITY * hashs.size());
 
-		for (int index= 0; index < hashs.size(); index++) {
+		for (String hash2 : hashs) {
 
-			hash= hashs.get(index);
+			hash= hash2;
 
 			final Object candidates= getCandidates(hash);
 			if (candidates == null)
@@ -292,10 +278,10 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 		final ArrayList<byte[]> candidateList= (ArrayList<byte[]>)candidates;
 		final ArrayList<RankedWordProposal> matches= new ArrayList<>(candidateList.size());
 
-		for (int index= 0; index < candidateList.size(); index++) {
+		for (byte[] element : candidateList) {
 			String candidate;
 			try {
-				candidate= new String(candidateList.get(index), UTF_8);
+				candidate= new String(element, UTF_8);
 			} catch (UnsupportedEncodingException e) {
 				JavaPlugin.log(e);
 				return;
@@ -400,9 +386,9 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 
 		while (true) {
 
-			for (int index= 0; index < mutators.length; index++) {
+			for (char mutator : mutators) {
 
-				characters[offset]= mutators[index];
+				characters[offset]= mutator;
 				neighborhood.add(fHashProvider.getHash(new String(characters)));
 			}
 
@@ -419,9 +405,9 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 		for (int index= 0; index < word.length(); index++) {
 
 			mutated= characters[index];
-			for (int mutator= 0; mutator < mutators.length; mutator++) {
+			for (char mutator2 : mutators) {
 
-				characters[index]= mutators[mutator];
+				characters[index]= mutator2;
 				neighborhood.add(fHashProvider.getHash(new String(characters)));
 			}
 			characters[index]= mutated;
@@ -546,8 +532,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 			JavaPlugin.log(e);
 			return false;
 		}
-		for (int index= 0; index < candidateList.size(); index++) {
-			byte[] candidate= candidateList.get(index);
+		for (byte[] candidate : candidateList) {
 			if (Arrays.equals(candidate, wordBytes) || Arrays.equals(candidate, lowercaseWordBytes)) {
 				return true;
 			}
