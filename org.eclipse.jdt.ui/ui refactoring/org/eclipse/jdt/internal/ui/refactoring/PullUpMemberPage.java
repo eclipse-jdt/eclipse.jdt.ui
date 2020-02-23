@@ -17,7 +17,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -794,8 +793,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 		final int commonActionCode= getCommonActionCodeForSelectedInfos();
 		if (commonActionCode == -1)
 			return 0;
-		for (final Iterator<String> iter= stringMapping.keySet().iterator(); iter.hasNext();) {
-			final String key= iter.next();
+		for (String key : stringMapping.keySet()) {
 			final int action= stringMapping.get(key).intValue();
 			if (commonActionCode == action) {
 				for (int i= 0; i < keys.length; i++) {

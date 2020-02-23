@@ -523,8 +523,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 				public void widgetSelected(SelectionEvent e) {
 					int[] indices= tv.getTable().getSelectionIndices();
 					Arrays.sort(indices);
-					for (int i= 0; i <indices.length; i++) {
-						int idx= indices[i];
+					for (int idx : indices) {
 						ParameterInfo pi= (ParameterInfo) tv.getElementAt(idx);
 						fProcessor.moveFieldUp(pi);
 					}

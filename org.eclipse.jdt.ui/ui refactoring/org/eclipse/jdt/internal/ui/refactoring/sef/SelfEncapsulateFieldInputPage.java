@@ -16,7 +16,6 @@ package org.eclipse.jdt.internal.ui.refactoring.sef;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
@@ -267,8 +266,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 
 	private void updateEnablements() {
 		boolean enable=!(fRefactoring.isUsingLocalSetter()&&fRefactoring.isUsingLocalGetter());
-		for (Iterator<Control> iter= fEnablements.iterator(); iter.hasNext();) {
-			Control control= iter.next();
+		for (Control control : fEnablements) {
 			control.setEnabled(enable);
 		}
 	}

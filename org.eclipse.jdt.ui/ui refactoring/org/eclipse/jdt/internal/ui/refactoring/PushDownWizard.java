@@ -17,7 +17,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -495,8 +494,7 @@ public final class PushDownWizard extends RefactoringWizard {
 			final int commonActionCode= getCommonActionCodeForSelectedInfos();
 			if (commonActionCode == -1)
 				return 0;
-			for (final Iterator<String> iterator= mapping.keySet().iterator(); iterator.hasNext();) {
-				final String key= iterator.next();
+			for (String key : mapping.keySet()) {
 				final int action= mapping.get(key).intValue();
 				if (commonActionCode == action) {
 					for (int index= 0; index < keys.length; index++) {

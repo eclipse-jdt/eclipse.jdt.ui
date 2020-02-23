@@ -16,7 +16,6 @@ package org.eclipse.jdt.internal.ui.refactoring.reorg;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -326,8 +325,7 @@ class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 
 		@Override
 		public void dispose() {
-			for (Iterator<Image> iter= fDescriptorImageMap.values().iterator(); iter.hasNext();) {
-				Image image= iter.next();
+			for (Image image : fDescriptorImageMap.values()) {
 				image.dispose();
 			}
 			super.dispose();
@@ -632,8 +630,7 @@ class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 	private void initializeRefFromUI() {
 		IJavaElement[] selected= getCheckedSimilarElements();
 		Map<IJavaElement, Boolean> selection= getRenameTypeProcessor().getSimilarElementsToSelection();
-		for (Iterator<IJavaElement> iter= selection.keySet().iterator(); iter.hasNext();) {
-			IJavaElement element= iter.next();
+		for (IJavaElement element : selection.keySet()) {
 			selection.put(element, Boolean.FALSE);
 		}
 		for (IJavaElement s : selected) {
@@ -666,10 +663,8 @@ class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 	}
 
 	private void restoreSelectionAndNames(final Map<IJavaElement, Boolean> selection) {
-		final Map<IJavaElement, Boolean> selectedElements= selection;
-		for (Iterator<IJavaElement> iter= selectedElements.keySet().iterator(); iter.hasNext();) {
-			IJavaElement element= iter.next();
-			boolean isSelected= selectedElements.get(element).booleanValue();
+		for (IJavaElement element : selection.keySet()) {
+			boolean isSelected= selection.get(element).booleanValue();
 			fTreeViewer.setChecked(element, isSelected);
 			fTreeViewer.update(element, null);
 		}

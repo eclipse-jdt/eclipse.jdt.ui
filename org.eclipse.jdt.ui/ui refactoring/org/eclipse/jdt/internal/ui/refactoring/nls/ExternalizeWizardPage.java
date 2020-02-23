@@ -97,6 +97,7 @@ import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.refactoring.nls.KeyValuePair;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSSubstitution;
@@ -114,7 +115,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileEscapes;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -1122,9 +1122,8 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	}
 
 	private void revertStateOfSelection() {
-		List<?> selection= getSelectedTableEntries();
-		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
-			NLSSubstitution substitution= (NLSSubstitution) iter.next();
+		for (Object name : getSelectedTableEntries()) {
+			NLSSubstitution substitution= (NLSSubstitution) name;
 			substitution.revert();
 		}
 		fTableViewer.refresh();
@@ -1176,8 +1175,8 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		Assert.isTrue(state == NLSSubstitution.EXTERNALIZED || state == NLSSubstitution.IGNORED || state == NLSSubstitution.INTERNALIZED);
 		List<?> selected= getSelectedTableEntries();
 		String[] props= new String[]{PROPERTIES[STATE_PROP]};
-		for (Iterator<?> iter= selected.iterator(); iter.hasNext();) {
-			NLSSubstitution substitution= (NLSSubstitution) iter.next();
+		for (Object name : selected) {
+			NLSSubstitution substitution= (NLSSubstitution) name;
 			substitution.setState(state);
 			if ((substitution.getState() == NLSSubstitution.EXTERNALIZED) && substitution.hasStateChanged()) {
 				substitution.generateKey(fSubstitutions, getProperties(fNLSRefactoring.getPropertyFileHandle()));

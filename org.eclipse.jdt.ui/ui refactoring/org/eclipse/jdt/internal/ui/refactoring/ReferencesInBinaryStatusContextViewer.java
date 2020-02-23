@@ -15,7 +15,6 @@ package org.eclipse.jdt.internal.ui.refactoring;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -144,8 +143,7 @@ public class ReferencesInBinaryStatusContextViewer implements IStatusContextView
 
 		ReferencesInBinaryContext binariesContext= (ReferencesInBinaryContext) input;
 		List<SearchMatch> matches= binariesContext.getMatches();
-		for (Iterator<SearchMatch> iter= matches.iterator(); iter.hasNext();) {
-			SearchMatch match= iter.next();
+		for (SearchMatch match : matches) {
 			Object element= match.getElement();
 			if (element != null)
 				contentProvider.add(element);
@@ -259,9 +257,9 @@ public class ReferencesInBinaryStatusContextViewer implements IStatusContextView
 			NewSearchResultCollector collector= new NewSearchResultCollector(fResult, false);
 			collector.beginReporting();
 
-			for (Iterator<SearchMatch> iter= matches.iterator(); iter.hasNext();) {
+			for (SearchMatch searchMatch : matches) {
 				try {
-					collector.acceptSearchMatch(iter.next());
+					collector.acceptSearchMatch(searchMatch);
 				} catch (CoreException e) {
 					// ignore
 				}

@@ -91,8 +91,8 @@ public final class InputPageUtil {
 
 	private static List<Integer> convertToIntegerList(int[] array) {
 		List<Integer> result= new ArrayList<>(array.length);
-		for (int i= 0; i < array.length; i++) {
-			result.add(Integer.valueOf(array[i]));
+		for (int element : array) {
+			result.add(Integer.valueOf(element));
 		}
 		return result;
 	}

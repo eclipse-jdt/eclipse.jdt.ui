@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -440,8 +439,7 @@ public class PasteAction extends SelectionDispatchAction{
 				int maxVisibility= JdtFlags.VISIBILITY_CODE_INVALID;
 
 				// Public types must be in separate CUs:
-				for (Iterator<AbstractTypeDeclaration> iter= types.iterator(); iter.hasNext(); ) {
-					AbstractTypeDeclaration type= iter.next();
+				for (AbstractTypeDeclaration type : types) {
 					if (typeName == null) {
 						// first in group:
 						maxVisibility= JdtFlags.getVisibilityCode(type);
@@ -1177,13 +1175,11 @@ public class PasteAction extends SelectionDispatchAction{
 				List<IJavaElement> realJavaElements= new ArrayList<>();
 				List<IResource> realResource= new ArrayList<>();
 				ReorgUtils.splitIntoJavaElementsAndResources(resources, realJavaElements, realResource);
-				for (Iterator<IJavaElement> iter= realJavaElements.iterator(); iter.hasNext();) {
-					IJavaElement element= iter.next();
+				for (IJavaElement element : realJavaElements) {
 					if (!ReorgUtils.containsElementOrParent(elements, element))
 						elements.add(element);
 				}
-				for (Iterator<IResource> iter= realResource.iterator(); iter.hasNext();) {
-					IResource element= iter.next();
+				for (IResource element : realResource) {
 					if (!ReorgUtils.containsElementOrParent(elements, element))
 						elements.add(element);
 				}

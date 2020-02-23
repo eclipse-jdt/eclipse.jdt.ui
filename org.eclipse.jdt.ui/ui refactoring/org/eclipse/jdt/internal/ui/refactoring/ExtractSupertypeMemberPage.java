@@ -303,8 +303,7 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 				final LinkedList<IType> list= new LinkedList<>(Arrays.asList(fCandidateTypes));
 				for (final Iterator<IType> outer= list.iterator(); outer.hasNext();) {
 					final IType first= outer.next();
-					for (final Iterator<IType> inner= fTypesToExtract.iterator(); inner.hasNext();) {
-						final IType second= inner.next();
+					for (IType second : fTypesToExtract) {
 						if (second.getFullyQualifiedName().equals(first.getFullyQualifiedName()))
 							outer.remove();
 					}

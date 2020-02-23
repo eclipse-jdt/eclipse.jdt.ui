@@ -16,7 +16,6 @@ package org.eclipse.jdt.internal.ui.refactoring;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
@@ -699,8 +698,8 @@ public class ChangeParametersControl extends Composite {
 		}
 		res.addAll(deleted);
 		elements.clear();
-		for (Iterator<ParameterInfo> iter= res.iterator(); iter.hasNext();) {
-			elements.add(iter.next());
+		for (ParameterInfo parameterInfo : res) {
+			elements.add(parameterInfo);
 		}
 	}
 
@@ -712,8 +711,8 @@ public class ChangeParametersControl extends Composite {
 		if (indc.length == 0)
 			return false;
 		int invalid= up ? 0 : notDeletedInfosCount - 1;
-		for (int i= 0; i < indc.length; i++) {
-			if (indc[i] == invalid)
+		for (int element : indc) {
+			if (element == invalid)
 				return false;
 		}
 		return true;

@@ -168,8 +168,8 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 			if (availableVisibilities.length == 0) {
 				combo.setEnabled(false);
 			} else {
-				for (int i= 0; i < availableVisibilities.length; i++) {
-					combo.add(getAccessModifierString(availableVisibilities[i]));
+				for (int availableVisibility : availableVisibilities) {
+					combo.add(getAccessModifierString(availableVisibility));
 				}
 				combo.addSelectionListener(new SelectionAdapter() {
 					@Override

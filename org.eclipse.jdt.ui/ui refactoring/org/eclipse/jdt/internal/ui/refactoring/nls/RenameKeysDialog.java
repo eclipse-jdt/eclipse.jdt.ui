@@ -68,8 +68,7 @@ public class RenameKeysDialog extends StatusDialog {
 	@Override
 	protected void okPressed() {
 		String prefix= fNameField.getText();
-		for (int i= 0; i < fSelectedSubstitutions.size(); i++) {
-			NLSSubstitution sub= fSelectedSubstitutions.get(i);
+		for (NLSSubstitution sub : fSelectedSubstitutions) {
 			String newKey= prefix + sub.getKey().substring(fCommonPrefixLength);
 			sub.setKey(newKey);
 		}
@@ -78,8 +77,7 @@ public class RenameKeysDialog extends StatusDialog {
 
 	private String getInitialPrefix(List<NLSSubstitution> selectedSubstitutions) {
 		String prefix= null;
-		for (int i= 0; i < selectedSubstitutions.size(); i++) {
-			NLSSubstitution sub= selectedSubstitutions.get(i);
+		for (NLSSubstitution sub : selectedSubstitutions) {
 			String curr= sub.getKey();
 			if (prefix == null) {
 				prefix= curr;

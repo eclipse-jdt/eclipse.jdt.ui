@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -232,8 +231,7 @@ public class PullUpMethodPage extends UserInputWizardPage {
 		final Map<IType, HashSet<IMember>> typeToMemberSet= createTypeToMemberSetMapping(members);
 
 		final Map<IType, IMember[]> typeToMemberArray= new HashMap<>();
-		for (final Iterator<IType> iter= typeToMemberSet.keySet().iterator(); iter.hasNext();) {
-			final IType type= iter.next();
+		for (IType type : typeToMemberSet.keySet()) {
 			final Set<IMember> memberSet= typeToMemberSet.get(type);
 			final IMember[] memberArray= memberSet.toArray(new IMember[memberSet.size()]);
 			typeToMemberArray.put(type, memberArray);

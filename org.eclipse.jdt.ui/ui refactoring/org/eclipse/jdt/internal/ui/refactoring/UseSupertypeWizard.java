@@ -16,7 +16,6 @@ package org.eclipse.jdt.internal.ui.refactoring;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -292,8 +291,8 @@ public class UseSupertypeWizard extends RefactoringWizard{
 
 		private int countFilesWithValue(int i) {
 			int count= 0;
-			for (Iterator<IType> iter= fFileCount.keySet().iterator(); iter.hasNext();) {
-				if (fFileCount.get(iter.next()).intValue() == i)
+			for (IType iType : fFileCount.keySet()) {
+				if (fFileCount.get(iType).intValue() == i)
 					count++;
 			}
 			return count;

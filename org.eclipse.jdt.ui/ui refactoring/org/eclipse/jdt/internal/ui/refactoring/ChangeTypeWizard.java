@@ -167,8 +167,7 @@ public class ChangeTypeWizard extends RefactoringWizard {
 
 		@Override
 		public void dispose() {
-			for (Iterator<Image> iter= fGrayImages.values().iterator(); iter.hasNext();) {
-				Image image= iter.next();
+			for (Image image : fGrayImages.values()) {
 				image.dispose();
 			}
 			fGrayImages.clear();
@@ -239,8 +238,7 @@ public class ChangeTypeWizard extends RefactoringWizard {
 
 			// first, find a most general valid type (there may be more than one)
 			ITypeBinding type= types.iterator().next();
-			for (Iterator<ITypeBinding> it= types.iterator(); it.hasNext(); ){
-				ITypeBinding other= it.next();
+			for (ITypeBinding other : types) {
 				if (getGeneralizeTypeRefactoring().isSubTypeOf(type, other)){
 					type= other;
 				}
