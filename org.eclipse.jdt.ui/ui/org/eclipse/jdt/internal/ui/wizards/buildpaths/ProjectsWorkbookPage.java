@@ -292,8 +292,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		List<CPListElement> projelements= fProjectsList.getElements();
 
 		 List<CPListElement> flattenedProjElements = new ArrayList<>();
-		 for ( int i =0; i < projelements.size(); i++ ) {
-		 	CPListElement ele = projelements.get(i);
+		 for (CPListElement ele : projelements) {
 		 	// if root node, collect the CPList elements
 		 	if(ele.isRootNodeForPath()) {
 		 		for (Object object : ((RootCPListElement)ele).getChildren()) {
@@ -319,9 +318,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 				}
 			}
 		}
-		for (int i= 0; i < flattenedProjElements.size(); i++) {
-			cpelements.add(flattenedProjElements.get(i));
-		}
+		cpelements.addAll(flattenedProjElements);
 		if (remove || (flattenedProjElements.size() > 0)) {
 			fClassPathList.setElements(cpelements);
 		}
@@ -428,14 +425,14 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 				boolean isClassRootExpanded= getRootExpansionState(fProjectsList, true);
 				boolean isModuleRootExpanded= getRootExpansionState(fProjectsList, false);
 				fProjectsList.removeAllElements();
-				for (int i= 0; i < selectedElements.size(); i++) {
-					if( ((CPListElement)selectedElements.get(i)).isClassPathRootNode()) {
+				for (Object selectedElement : selectedElements) {
+					if( ((CPListElement)selectedElement).isClassPathRootNode()) {
 						for (CPListElement cpListElement : elementsToAdd) {
 							cpListElement.setAttribute(IClasspathAttribute.MODULE, null);
 						}
 						isClassRootExpanded= true;
 					}
-					if( ((CPListElement)selectedElements.get(i)).isModulePathRootNode()) {
+					if( ((CPListElement)selectedElement).isModulePathRootNode()) {
 						for (CPListElement cpListElement : elementsToAdd) {
 							Object attribute= cpListElement.getAttribute(IClasspathAttribute.MODULE);
 							if(attribute == null) {
@@ -445,7 +442,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 						}
 						isModuleRootExpanded= true;
 					}
-					((RootCPListElement)selectedElements.get(i)).addCPListElement(elementsToAdd);
+					((RootCPListElement)selectedElement).addCPListElement(elementsToAdd);
 				}
 				fProjectsList.setElements(elements);
 				fProjectsList.refresh();

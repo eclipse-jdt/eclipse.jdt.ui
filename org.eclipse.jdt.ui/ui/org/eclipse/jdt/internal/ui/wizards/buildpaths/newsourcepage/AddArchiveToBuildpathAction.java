@@ -139,8 +139,8 @@ public class AddArchiveToBuildpathAction extends BuildpathModifierAction {
 
     		List<CPListElement> addedEntries= delta.getAddedEntries();
 			List<IJavaElement> result= new ArrayList<>(addedEntries.size());
-			for (int i= 0; i < addedEntries.size(); i++) {
-				IClasspathEntry entry= addedEntries.get(i).getClasspathEntry();
+			for (CPListElement addedEntrie : addedEntries) {
+				IClasspathEntry entry= addedEntrie.getClasspathEntry();
 				IJavaElement elem= project.findPackageFragmentRoot(entry.getPath());
 				if (elem != null) {
 					result.add(elem);

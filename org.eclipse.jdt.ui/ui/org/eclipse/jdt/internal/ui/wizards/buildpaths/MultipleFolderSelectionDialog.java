@@ -16,7 +16,6 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -128,8 +127,7 @@ public class MultipleFolderSelectionDialog extends SelectionStatusDialog impleme
 			}
 		} else {
 			ArrayList<Object> res= new ArrayList<>();
-			for (int i= 0; i < checked.length; i++) {
-				Object elem= checked[i];
+			for (Object elem : checked) {
 				if (!fExisting.contains(elem)) {
 					res.add(elem);
 				}
@@ -163,8 +161,8 @@ public class MultipleFolderSelectionDialog extends SelectionStatusDialog impleme
 
 				fViewer.expandToLevel(2);
 				if (fExisting != null) {
-					for (Iterator<Object> iter= fExisting.iterator(); iter.hasNext();) {
-						fViewer.reveal(iter.next());
+					for (Object object : fExisting) {
+						fViewer.reveal(object);
 					}
 				}
 
@@ -194,8 +192,8 @@ public class MultipleFolderSelectionDialog extends SelectionStatusDialog impleme
 
 		fViewer.setComparator(new ResourceComparator(ResourceComparator.NAME));
 		if (fFilters != null) {
-			for (int i = 0; i != fFilters.size(); i++)
-				fViewer.addFilter(fFilters.get(i));
+			for (ViewerFilter filter : fFilters)
+				fViewer.addFilter(filter);
 		}
 
 		fViewer.setInput(fInput);

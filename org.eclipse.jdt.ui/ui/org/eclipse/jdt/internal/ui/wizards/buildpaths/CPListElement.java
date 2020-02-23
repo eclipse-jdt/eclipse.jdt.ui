@@ -239,8 +239,7 @@ public class CPListElement {
 
 	private IClasspathAttribute[] getClasspathAttributes() {
 		ArrayList<IClasspathAttribute> res= new ArrayList<>();
-		for (int i= 0; i < fChildren.size(); i++) {
-			Object curr= fChildren.get(i);
+		for (Object curr : fChildren) {
 			if (curr instanceof CPListElementAttribute) {
 				CPListElementAttribute elem= (CPListElementAttribute) curr;
 				if (!elem.isBuiltIn()) {
@@ -418,8 +417,7 @@ public class CPListElement {
 	}
 
 	public CPListElementAttribute findAttributeElement(String key) {
-		for (int i= 0; i < fChildren.size(); i++) {
-			Object curr= fChildren.get(i);
+		for (Object curr : fChildren) {
 			if (curr instanceof CPListElementAttribute) {
 				CPListElementAttribute elem= (CPListElementAttribute) curr;
 				if (key.equals(elem.getKey())) {
@@ -441,8 +439,7 @@ public class CPListElement {
 
 	public CPListElementAttribute[] getAllAttributes() {
 		ArrayList<Object> res= new ArrayList<>();
-		for (int i= 0; i < fChildren.size(); i++) {
-			Object curr= fChildren.get(i);
+		for (Object curr : fChildren) {
 			if (curr instanceof CPListElementAttribute) {
 				res.add(curr);
 			}
@@ -495,8 +492,7 @@ public class CPListElement {
 		int nChildren= fChildren.size();
 		ArrayList<Object> res= new ArrayList<>(nChildren);
 
-		for (int i= 0; i < nChildren; i++) {
-			Object curr= fChildren.get(i);
+		for (Object curr : fChildren) {
 			if (!isFiltered(curr, filteredKeys)) {
 				res.add(curr);
 			}
@@ -651,8 +647,7 @@ public class CPListElement {
 	 * @return Returns a boolean
 	 */
 	public boolean hasMissingChildren() {
-		for (int i= 0; i < fChildren.size(); i++) {
-			Object curr= fChildren.get(i);
+		for (Object curr : fChildren) {
 			if (curr instanceof CPListElement && ((CPListElement) curr).isMissing()) {
 				return true;
 			}
@@ -884,8 +879,7 @@ public class CPListElement {
 			appendEncodePath(getLinkTarget(), buf).append(';');
 		}
 		buf.append(Boolean.valueOf(fIsExported)).append(';');
-		for (int i= 0; i < fChildren.size(); i++) {
-			Object curr= fChildren.get(i);
+		for (Object curr : fChildren) {
 			if (curr instanceof CPListElementAttribute) {
 				CPListElementAttribute elem= (CPListElementAttribute) curr;
 				if (elem.isBuiltIn()) {
@@ -1061,8 +1055,7 @@ public class CPListElement {
 
 	public void updateExtraAttributeOfClasspathEntry() {
 		if (fChildren != null) {
-			for (int i= 0; i < fChildren.size(); i++) {
-				Object curr= fChildren.get(i);
+			for (Object curr : fChildren) {
 				if (curr instanceof CPListElementAttribute) {
 					CPListElementAttribute elem= (CPListElementAttribute) curr;
 					String key= elem.getKey();

@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -54,13 +53,13 @@ import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.actions.AbstractOpenWizardAction;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
 
@@ -81,8 +80,8 @@ public class CreateMultipleSourceFoldersDialog extends TrayDialog {
 			List<Object> result= new ArrayList<>();
 			//all keys with value element
 			Set<IFolder> keys= fNonExistingFolders.keySet();
-			for (Iterator<IFolder> iter= keys.iterator(); iter.hasNext();) {
-				Object key= iter.next();
+			for (IFolder iFolder : keys) {
+				Object key= iFolder;
 				if (fNonExistingFolders.get(key).equals(element)) {
 					result.add(key);
 				}
@@ -291,10 +290,7 @@ public class CreateMultipleSourceFoldersDialog extends TrayDialog {
 			}
 		}
 		Set<IFolder> keys= fNonExistingFolders.keySet();
-		for (Iterator<IFolder> iter= keys.iterator(); iter.hasNext();) {
-			IFolder folder= iter.next();
-			res.add(folder);
-		}
+		res.addAll(keys);
 		return res;
 	}
 

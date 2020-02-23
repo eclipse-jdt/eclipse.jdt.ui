@@ -121,8 +121,7 @@ public class ResetAllOutputFoldersAction extends BuildpathModifierAction {
         	monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_Resetting, selection.size());
         	List<CPListElement> entries= ClasspathModifier.getExistingEntries(project);
         	List<Object> result= new ArrayList<>();
-        	for (int i= 0; i < selection.size(); i++) {
-        		Object element= selection.get(i);
+        	for (CPListElementAttribute element : selection) {
         		if (element instanceof IJavaElement) {
         			IJavaElement javaElement= (IJavaElement) element;
         			IPackageFragmentRoot root;
@@ -134,7 +133,7 @@ public class ResetAllOutputFoldersAction extends BuildpathModifierAction {
         			ClasspathModifier.resetFilters(javaElement, entry, project, new SubProgressMonitor(monitor, 1));
         			result.add(javaElement);
         		} else {
-        			CPListElement selElement= ((CPListElementAttribute) element).getParent();
+        			CPListElement selElement= element.getParent();
         			CPListElement entry= ClasspathModifier.getClasspathEntry(entries, selElement);
         			CPListElementAttribute outputFolder= ClasspathModifier.resetOutputFolder(entry, project);
         			result.add(outputFolder);

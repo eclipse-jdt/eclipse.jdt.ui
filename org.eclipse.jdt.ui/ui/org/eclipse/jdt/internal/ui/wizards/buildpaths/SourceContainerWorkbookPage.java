@@ -14,7 +14,6 @@
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.equinox.bidi.StructuredTextTypeHandlerFactory;
@@ -203,8 +202,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 
 		boolean useFolderOutputs= false;
 		List<CPListElement> cpelements= fClassPathList.getElements();
-		for (int i= 0; i < cpelements.size(); i++) {
-			CPListElement cpe= cpelements.get(i);
+		for (CPListElement cpe : cpelements) {
 			if (cpe.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
 				folders.add(cpe);
 				boolean hasOutputFolder= (cpe.getAttribute(CPListElement.OUTPUT) != null);
@@ -217,8 +215,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		fFoldersList.setElements(folders);
 		fUseFolderOutputs.setSelection(useFolderOutputs);
 
-		for (int i= 0; i < folders.size(); i++) {
-			CPListElement cpe= folders.get(i);
+		for (CPListElement cpe : folders) {
 			IPath[] ePatterns= (IPath[]) cpe.getAttribute(CPListElement.EXCLUSION);
 			IPath[] iPatterns= (IPath[])cpe.getAttribute(CPListElement.INCLUSION);
 			boolean hasOutputFolder= (cpe.getAttribute(CPListElement.OUTPUT) != null);
@@ -244,8 +241,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 
 		// expand
 		List<CPListElement> elements= fFoldersList.getElements();
-		for (int i= 0; i < elements.size(); i++) {
-			CPListElement elem= elements.get(i);
+		for (CPListElement elem : elements) {
 			IPath[] exclusionPatterns= (IPath[]) elem.getAttribute(CPListElement.EXCLUSION);
 			IPath[] inclusionPatterns= (IPath[]) elem.getAttribute(CPListElement.INCLUSION);
 			IPath output= (IPath) elem.getAttribute(CPListElement.OUTPUT);
@@ -507,8 +503,8 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			fFoldersList.refresh();
 			fClassPathList.dialogFieldChanged(); // validate
 		} else {
-			for (Iterator<Object> iter= selElements.iterator(); iter.hasNext();) {
-				CPListElement element= (CPListElement)iter.next();
+			for (Object object : selElements) {
+				CPListElement element= (CPListElement)object;
 				if (element.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
 					for (CPListElement modified : ClasspathModifier.removeFilters(element.getPath(), fCurrJProject, fFoldersList.getElements())) {
 						fFoldersList.refresh(modified);
@@ -524,8 +520,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		if (selElements.isEmpty()) {
 			return false;
 		}
-		for (int i= 0; i < selElements.size(); i++) {
-			Object elem= selElements.get(i);
+		for (Object elem : selElements) {
 			if (elem instanceof CPListElementAttribute) {
 				CPListElementAttribute attrib= (CPListElementAttribute) elem;
 				String key= attrib.getKey();

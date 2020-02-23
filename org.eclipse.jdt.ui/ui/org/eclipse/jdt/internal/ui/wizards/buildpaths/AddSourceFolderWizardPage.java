@@ -237,20 +237,20 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 		fOrginalInclusionFilters= new Hashtable<>();
 		fOrginalExlusionFiltersCopy= new Hashtable<>();
 		fOrginalInclusionFiltersCopy= new Hashtable<>();
-		for (CPListElement element : existingEntries) {
-			IPath[] exlusions= (IPath[])element.getAttribute(CPListElement.EXCLUSION);
+		for (CPListElement existingEntry : existingEntries) {
+			IPath[] exlusions= (IPath[])existingEntry.getAttribute(CPListElement.EXCLUSION);
 			if (exlusions != null) {
 				IPath[] save= new IPath[exlusions.length];
 				System.arraycopy(exlusions, 0, save, 0, save.length);
-				fOrginalExlusionFiltersCopy.put(element, save);
-				fOrginalExlusionFilters.put(element, exlusions);
+				fOrginalExlusionFiltersCopy.put(existingEntry, save);
+				fOrginalExlusionFilters.put(existingEntry, exlusions);
 			}
-			IPath[] inclusions= (IPath[])element.getAttribute(CPListElement.INCLUSION);
+			IPath[] inclusions= (IPath[])existingEntry.getAttribute(CPListElement.INCLUSION);
 			if (inclusions != null) {
 				IPath[] save= new IPath[inclusions.length];
 				System.arraycopy(inclusions, 0, save, 0, save.length);
-				fOrginalInclusionFiltersCopy.put(element, save);
-				fOrginalInclusionFilters.put(element, inclusions);
+				fOrginalInclusionFiltersCopy.put(existingEntry, save);
+				fOrginalInclusionFilters.put(existingEntry, inclusions);
 			}
 		}
 
@@ -540,12 +540,12 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 	}
 
 	public void restore() {
-		for (CPListElement element : fExistingEntries) {
-			if (fOrginalExlusionFilters.containsKey(element)) {
-				element.setAttribute(CPListElement.EXCLUSION, fOrginalExlusionFiltersCopy.get(element));
+		for (CPListElement existingEntry : fExistingEntries) {
+			if (fOrginalExlusionFilters.containsKey(existingEntry)) {
+				existingEntry.setAttribute(CPListElement.EXCLUSION, fOrginalExlusionFiltersCopy.get(existingEntry));
 			}
-			if (fOrginalInclusionFilters.containsKey(element)) {
-				element.setAttribute(CPListElement.INCLUSION, fOrginalInclusionFiltersCopy.get(element));
+			if (fOrginalInclusionFilters.containsKey(existingEntry)) {
+				existingEntry.setAttribute(CPListElement.INCLUSION, fOrginalInclusionFiltersCopy.get(existingEntry));
 			}
 		}
 		fNewElement.setPath(fOrginalPath);
@@ -553,12 +553,12 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 
 	private void restoreCPElements() {
 		if (fNewElement.getPath() != null) {
-			for (CPListElement element : fExistingEntries) {
-				if (fOrginalExlusionFilters.containsKey(element)) {
-					element.setAttribute(CPListElement.EXCLUSION, fOrginalExlusionFilters.get(element));
+			for (CPListElement existingEntry : fExistingEntries) {
+				if (fOrginalExlusionFilters.containsKey(existingEntry)) {
+					existingEntry.setAttribute(CPListElement.EXCLUSION, fOrginalExlusionFilters.get(existingEntry));
 				}
-				if (fOrginalInclusionFilters.containsKey(element)) {
-					element.setAttribute(CPListElement.INCLUSION, fOrginalInclusionFilters.get(element));
+				if (fOrginalInclusionFilters.containsKey(existingEntry)) {
+					existingEntry.setAttribute(CPListElement.INCLUSION, fOrginalInclusionFilters.get(existingEntry));
 				}
 			}
 
@@ -583,34 +583,34 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 			newPath= newPath.removeFirstSegments(projPath.segmentCount()).addTrailingSeparator();
 		}
 
-		for (CPListElement element : fExistingEntries) {
-			IPath elementPath= element.getPath();
+		for (CPListElement existingEntry : fExistingEntries) {
+			IPath elementPath= existingEntry.getPath();
 			if (projPath.isPrefixOf(elementPath)) {
 				elementPath= elementPath.removeFirstSegments(projPath.segmentCount());
 				if (elementPath.segmentCount() > 0)
 					elementPath= elementPath.addTrailingSeparator();
 			}
 
-			IPath[] exlusions= (IPath[])element.getAttribute(CPListElement.EXCLUSION);
+			IPath[] exlusions= (IPath[])existingEntry.getAttribute(CPListElement.EXCLUSION);
 			if (exlusions != null) {
 				for (int i= 0; i < exlusions.length; i++) {
 					if (elementPath.append(exlusions[i]).equals(oldPath)) {
-						fModifiedElements.add(element);
+						fModifiedElements.add(existingEntry);
 						exlusions[i]= newPath.removeFirstSegments(elementPath.segmentCount());
 					}
 				}
-				element.setAttribute(CPListElement.EXCLUSION, exlusions);
+				existingEntry.setAttribute(CPListElement.EXCLUSION, exlusions);
 			}
 
-			IPath[] inclusion= (IPath[])element.getAttribute(CPListElement.INCLUSION);
+			IPath[] inclusion= (IPath[])existingEntry.getAttribute(CPListElement.INCLUSION);
 			if (inclusion != null) {
 				for (int i= 0; i < inclusion.length; i++) {
 					if (elementPath.append(inclusion[i]).equals(oldPath)) {
-						fModifiedElements.add(element);
+						fModifiedElements.add(existingEntry);
 						inclusion[i]= newPath.removeFirstSegments(elementPath.segmentCount());
 					}
 				}
-				element.setAttribute(CPListElement.INCLUSION, inclusion);
+				existingEntry.setAttribute(CPListElement.INCLUSION, inclusion);
 			}
 		}
 	}
@@ -705,8 +705,7 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 
 	private void addExclusionPatterns(CPListElement newEntry, List<CPListElement> existing, Set<CPListElement> modifiedEntries) {
 		IPath entryPath= newEntry.getPath();
-		for (int i= 0; i < existing.size(); i++) {
-			CPListElement curr= existing.get(i);
+		for (CPListElement curr : existing) {
 			IPath currPath= curr.getPath();
 			if (curr != newEntry && curr.getEntryKind() == IClasspathEntry.CPE_SOURCE && currPath.isPrefixOf(entryPath)) {
 				boolean added= curr.addToExclusions(entryPath);

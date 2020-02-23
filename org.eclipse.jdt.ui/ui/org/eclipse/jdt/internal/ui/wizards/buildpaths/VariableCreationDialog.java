@@ -216,9 +216,8 @@ public class VariableCreationDialog extends StatusDialog {
 		if (fElement != null && fElement.getName().equals(name)) {
 			return false;
 		}
-		for (int i= 0; i < fExistingNames.size(); i++) {
-			CPVariableElement elem= fExistingNames.get(i);
-			if (name.equals(elem.getName())){
+		for (CPVariableElement existingName : fExistingNames) {
+			if (name.equals(existingName.getName())){
 				return true;
 			}
 		}

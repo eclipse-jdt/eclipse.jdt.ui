@@ -16,7 +16,6 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.swt.widgets.Shell;
@@ -188,8 +187,7 @@ public class RemoveFromBuildpathAction extends BuildpathModifierAction {
 		try {
 			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_RemoveFromBuildpath, folders.size());
 
-			for (Iterator<IFolder> iter= folders.iterator(); iter.hasNext();) {
-				IFolder folder= iter.next();
+			for (IFolder folder : folders) {
 				folder.delete(true, true, new SubProgressMonitor(monitor, 1));
 			}
 		} finally {
@@ -245,9 +243,7 @@ public class RemoveFromBuildpathAction extends BuildpathModifierAction {
 			return false;
 
 		try {
-			for (Iterator<?> iter= elements.iterator(); iter.hasNext();) {
-				Object element= iter.next();
-
+			for (Object element : elements) {
 				if (element instanceof IJavaProject) {
 					IJavaProject project= (IJavaProject)element;
 					if (!ClasspathModifier.isSourceFolder(project))

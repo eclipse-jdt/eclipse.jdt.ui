@@ -15,7 +15,6 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.swt.widgets.Shell;
@@ -190,8 +189,8 @@ public class EditOutputFolderAction extends BuildpathModifierAction {
 	    if (existingFolders.size() > 0) {
 	    	if (existingFolders.size() > 1) {
 	    		String message= "Found more then one existing folders:"; //$NON-NLS-1$
-	    		for (Iterator<IResource> iterator= existingFolders.iterator(); iterator.hasNext();) {
-	                IFolder folder= (IFolder)iterator.next();
+	    		for (IResource iResource : existingFolders) {
+	                IFolder folder= (IFolder)iResource;
 	                message+= "\n" + folder.toString(); //$NON-NLS-1$
 	            }
 	    		Assert.isTrue(false, message);

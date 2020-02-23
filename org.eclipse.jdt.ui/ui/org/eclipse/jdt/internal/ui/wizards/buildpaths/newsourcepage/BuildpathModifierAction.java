@@ -124,8 +124,8 @@ public abstract class BuildpathModifierAction extends Action implements ISelecti
 	}
 
 	protected void informListeners(BuildpathDelta delta) {
-		for (Iterator<IBuildpathModifierListener> iterator= fListeners.iterator(); iterator.hasNext();) {
-	        iterator.next().buildpathChanged(delta);
+		for (IBuildpathModifierListener iBuildpathModifierListener : fListeners) {
+	        iBuildpathModifierListener.buildpathChanged(delta);
         }
 	}
 

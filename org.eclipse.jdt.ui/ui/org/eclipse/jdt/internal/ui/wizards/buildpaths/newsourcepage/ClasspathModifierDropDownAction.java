@@ -132,8 +132,7 @@ public class ClasspathModifierDropDownAction extends BuildpathModifierAction imp
      * @param menu the menu to be populated
      */
     private void createEntries(Menu menu) {
-        for(int i= 0; i < fActions.size(); i++) {
-            IAction action= fActions.get(i);
+        for (BuildpathModifierAction action : fActions) {
             addActionToMenu(menu, action);
         }
     }

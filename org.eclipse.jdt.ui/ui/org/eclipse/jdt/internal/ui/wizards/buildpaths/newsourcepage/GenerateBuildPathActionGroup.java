@@ -14,7 +14,6 @@
 package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jface.action.Action;
@@ -203,8 +202,7 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 		final ConfigureBuildPathAction configure= new ConfigureBuildPathAction(site);
 		fActions.add(configure);
 
-		for (Iterator<Action> iter= fActions.iterator(); iter.hasNext();) {
-			Action action= iter.next();
+		for (Action action : fActions) {
 			if (action instanceof ISelectionChangedListener) {
 				ISelectionChangedListener listener= (ISelectionChangedListener)action;
 				selectionProvider.addSelectionChangedListener(listener);
@@ -241,8 +239,7 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 	private void fillViewSubMenu(IMenuManager source) {
         int added= 0;
         int i=0;
-        for (Iterator<Action> iter= fActions.iterator(); iter.hasNext();) {
-			Action action= iter.next();
+        for (Action action : fActions) {
 			if (action instanceof IUpdate)
 				((IUpdate) action).update();
 
@@ -290,8 +287,7 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
     	IStructuredSelection selection= (IStructuredSelection)sel;
     	if (selection.isEmpty())
 			return false;
-    	for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
-			Object element= iter.next();
+    	for (Object element : selection) {
 			if (element instanceof IWorkingSet)
 				return false;
 		}
@@ -301,8 +297,7 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 	@Override
 	public void dispose() {
 		if (fActions != null) {
-			for (Iterator<Action> iter= fActions.iterator(); iter.hasNext();) {
-				Action action= iter.next();
+			for (Action action : fActions) {
 				if (action instanceof ISelectionChangedListener)
 					fSelectionProvider.removeSelectionChangedListener((ISelectionChangedListener) action);
 			}

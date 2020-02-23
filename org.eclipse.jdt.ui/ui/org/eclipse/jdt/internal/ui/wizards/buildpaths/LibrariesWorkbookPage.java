@@ -17,6 +17,7 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -175,9 +176,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		List<CPListElement> cpelements= fClassPathList.getElements();
 		List<CPListElement> libelements= new ArrayList<>(cpelements.size());
 
-		int nElements= cpelements.size();
-		for (int i= 0; i < nElements; i++) {
-			CPListElement cpe= cpelements.get(i);
+		for (CPListElement cpe : cpelements) {
 			if (isEntryKind(cpe.getEntryKind())) {
 				libelements.add(cpe);
 			}
@@ -191,10 +190,8 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		List<CPListElement> cpelements= fClassPathList.getElements();
 		List<CPListElement> libelements= new ArrayList<>(cpelements.size());
 
-		int nElements= cpelements.size();
 		int size= fLibrariesList.getElements().size();
-		for (int i= 0; i < nElements; i++) {
-			CPListElement cpe= cpelements.get(i);
+		for (CPListElement cpe : cpelements) {
 			if (isEntryKind(cpe.getEntryKind())) {
 				if (size > 0) {
 					// only for update
@@ -373,12 +370,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		if (path == null)
 			return false;
 		String[] segments= path.segments();
-		for (String seg : segments) {
-			if (seg.equals(JavaRuntime.JRE_CONTAINER)) {
-				return true;
-			}
-		}
-		return false;
+		return Arrays.asList(segments).contains(JavaRuntime.JRE_CONTAINER);
 	}
 
 	boolean hasRootNodes(){
@@ -505,8 +497,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			List<CPListElement> cplist= fLibrariesList.getElements();
 			List<CPListElement> elementsToAdd= new ArrayList<>(nElementsChosen);
 
-			for (int i= 0; i < nElementsChosen; i++) {
-				CPListElement curr= libentries[i];
+			for (CPListElement curr : libentries) {
 				boolean contains= cplist.contains(curr);
 				if(hasRootNodes()) {
 					contains= hasCurrentElement(cplist,curr);
@@ -717,8 +708,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		if (selElements.isEmpty()) {
 			return false;
 		}
-		for (int i= 0; i < selElements.size(); i++) {
-			Object elem= selElements.get(i);
+		for (Object elem : selElements) {
 			if (elem instanceof CPListElementAttribute) {
 				CPListElementAttribute attrib= (CPListElementAttribute) elem;
 
@@ -1053,8 +1043,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		if (selElements.isEmpty() || selElements.size() > 1) {
 			return false;
 		}
-		for (int i= 0; i < selElements.size(); i++) {
-			Object elem= selElements.get(i);
+		for (Object elem : selElements) {
 			if (elem instanceof CPListElement) {
 				if (!((CPListElement) elem).isRootNodeForPath()) {
 					return false;
@@ -1109,8 +1098,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	private void updateClasspathList() {
 		 List<CPListElement> projelements= fLibrariesList.getElements();
 		 List<CPListElement> flattenedProjElements= new ArrayList<>();
-		 for ( int i =0; i < projelements.size(); i++ ) {
-		 	CPListElement ele= projelements.get(i);
+		 for (CPListElement ele : projelements) {
 		 	// if root node, collect the CPList elements
 		 	if(ele.isRootNodeForPath()) {
 		 		for (Object object : ((RootCPListElement)ele).getChildren()) {
@@ -1229,8 +1217,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		}
 
 		List<CPListElement> cplist= fLibrariesList.getElements();
-		for (int i= 0; i < cplist.size(); i++) {
-			CPListElement elem= cplist.get(i);
+		for (CPListElement elem : cplist) {
 			if (elem.getEntryKind() == IClasspathEntry.CPE_LIBRARY && (elem != existing)) {
 				IResource resource= elem.getResource();
 				if (resource instanceof IContainer) {
@@ -1244,8 +1231,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	private IPath[] getUsedJARFiles(CPListElement existing) {
 		List<IPath> res= new ArrayList<>();
 		List<CPListElement> cplist= fLibrariesList.getElements();
-		for (int i= 0; i < cplist.size(); i++) {
-			CPListElement elem= cplist.get(i);
+		for (CPListElement elem : cplist) {
 			if (elem.getEntryKind() == IClasspathEntry.CPE_LIBRARY && (elem != existing)) {
 				IResource resource= elem.getResource();
 				if (resource instanceof IFile) {
@@ -1311,8 +1297,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	private CPListElement[] openVariableSelectionDialog(CPListElement existing) {
 		List<CPListElement> existingElements= fLibrariesList.getElements();
 		ArrayList<IPath> existingPaths= new ArrayList<>(existingElements.size());
-		for (int i= 0; i < existingElements.size(); i++) {
-			CPListElement elem= existingElements.get(i);
+		for (CPListElement elem : existingElements) {
 			if (elem.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
 				existingPaths.add(elem.getPath());
 			}
@@ -1419,8 +1404,8 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	public void setSelection(List<?> selElements, boolean expand) {
 		fLibrariesList.selectElements(new StructuredSelection(selElements));
 		if (expand) {
-			for (int i= 0; i < selElements.size(); i++) {
-				fLibrariesList.expandElement(selElements.get(i), 1);
+			for (Object selElement : selElements) {
+				fLibrariesList.expandElement(selElement, 1);
 			}
 		}
 	}

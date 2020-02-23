@@ -16,7 +16,6 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -51,6 +50,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.buildpath.BuildpathDelta;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -60,7 +60,6 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathBasePage;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
@@ -233,8 +232,7 @@ public class AddFolderToBuildpathAction extends BuildpathModifierAction {
 			}
 
 			List<CPListElement> newEntries= new ArrayList<>();
-			for (int i= 0; i < elements.size(); i++) {
-				Object element= elements.get(i);
+			for (Object element : elements) {
 				CPListElement entry;
 				if (element instanceof IResource)
 					entry= ClasspathModifier.addToClasspath((IResource) element, existingEntries, newEntries, project, new SubProgressMonitor(monitor, 1));
@@ -254,8 +252,8 @@ public class AddFolderToBuildpathAction extends BuildpathModifierAction {
         	informListeners(delta);
 
 			List<IJavaElement> result= new ArrayList<>();
-			for (int i= 0; i < newEntries.size(); i++) {
-				IClasspathEntry entry= newEntries.get(i).getClasspathEntry();
+			for (CPListElement newEntrie : newEntries) {
+				IClasspathEntry entry= newEntrie.getClasspathEntry();
 				IJavaElement root;
 				if (entry.getPath().equals(project.getPath()))
 					root= project;
@@ -277,8 +275,7 @@ public class AddFolderToBuildpathAction extends BuildpathModifierAction {
 		if (elements.size() == 0)
 			return false;
 		try {
-			for (Iterator<?> iter= elements.iterator(); iter.hasNext();) {
-				Object element= iter.next();
+			for (Object element : elements) {
 				if (element instanceof IJavaProject) {
 					if (ClasspathModifier.isSourceFolder((IJavaProject)element))
 						return false;

@@ -117,8 +117,7 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 		HashSet<String> oldNames= new HashSet<>();
 		HashSet<String> oldCheckedNames= new HashSet<>();
 		List<CPUserLibraryElement> oldElements= fLibrarySelector.getElements();
-		for (int i= 0; i < oldElements.size(); i++) {
-			CPUserLibraryElement curr= oldElements.get(i);
+		for (CPUserLibraryElement curr : oldElements) {
 			oldNames.add(curr.getName());
 			if (fLibrarySelector.isChecked(curr)) {
 				oldCheckedNames.add(curr.getName());
@@ -182,8 +181,7 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 		} else if (fIsEditMode && nSelected > 1) {
 			return new StatusInfo(IStatus.ERROR, NewWizardMessages.UserLibraryWizardPage_error_selectonlyone);
 		}
-		for (int i= 0; i < selected.size(); i++) {
-			CPUserLibraryElement curr= selected.get(i);
+		for (CPUserLibraryElement curr : selected) {
 			if (fUsedPaths.contains(curr.getPath())) {
 				return new StatusInfo(IStatus.ERROR, NewWizardMessages.UserLibraryWizardPage_error_alreadyoncp);
 			}
@@ -296,8 +294,7 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 		updateLibraryList();
 		if (selected != null) {
 			List<CPUserLibraryElement> elements= fLibrarySelector.getElements();
-			for (int i= 0; i < elements.size(); i++) {
-				CPUserLibraryElement curr= elements.get(i);
+			for (CPUserLibraryElement curr : elements) {
 				if (curr.getName().equals(selected)) {
 					fLibrarySelector.setChecked(curr, true);
 					return;

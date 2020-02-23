@@ -375,14 +375,13 @@ public class VariableBlock {
 			IPath[] paths= new IPath[nVariables];
 			int k= 0;
 
-			for (int i= 0; i < fToChange.size(); i++) {
-				CPVariableElement curr= fToChange.get(i);
+			for (CPVariableElement curr : fToChange) {
 				names[k]= curr.getName();
 				paths[k]= curr.getPath();
 				k++;
 			}
-			for (int i= 0; i < fToRemove.size(); i++) {
-				names[k]= fToRemove.get(i);
+			for (String element : fToRemove) {
+				names[k]= element;
 				paths[k]= null;
 				k++;
 			}
