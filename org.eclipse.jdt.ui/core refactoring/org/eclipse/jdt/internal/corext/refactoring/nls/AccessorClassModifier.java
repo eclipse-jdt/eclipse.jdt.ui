@@ -15,7 +15,6 @@ package org.eclipse.jdt.internal.corext.refactoring.nls;
 
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -182,8 +181,7 @@ public class AccessorClassModifier {
 		MultiTextEdit multiTextEdit= new MultiTextEdit();
 		change.setEdit(multiTextEdit);
 
-		for (int i= 0; i < fields.size(); i++) {
-			String field= fields.get(i);
+		for (String field : fields) {
 			NLSSubstitution substitution= new NLSSubstitution(NLSSubstitution.EXTERNALIZED, field, null, null, null);
 			sourceModification.addKey(substitution, change);
 		}
@@ -204,8 +202,7 @@ public class AccessorClassModifier {
 		MultiTextEdit multiTextEdit= new MultiTextEdit();
 		change.setEdit(multiTextEdit);
 
-		for (int i= 0; i < fields.size(); i++) {
-			String field= fields.get(i);
+		for (String field : fields) {
 			NLSSubstitution substitution= new NLSSubstitution(NLSSubstitution.EXTERNALIZED, field, null, null, null);
 			sourceModification.removeKey(substitution, change);
 		}
@@ -292,8 +289,7 @@ public class AccessorClassModifier {
 			fFields.add(fieldDeclaration);
 		} else {
 			ArrayList<String> identifiers= new ArrayList<>();
-			for (Iterator<FieldDeclaration> iterator= fFields.iterator(); iterator.hasNext();) {
-				FieldDeclaration field= iterator.next();
+			for (FieldDeclaration field : fFields) {
 				VariableDeclarationFragment fragment= (VariableDeclarationFragment) field.fragments().get(0);
 				identifiers.add(fragment.getName().getIdentifier());
 			}

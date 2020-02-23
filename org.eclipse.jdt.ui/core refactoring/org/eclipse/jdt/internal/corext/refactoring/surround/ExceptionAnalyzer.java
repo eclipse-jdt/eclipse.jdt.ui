@@ -93,8 +93,8 @@ public class ExceptionAnalyzer extends AbstractExceptionAnalyzer {
 		List<ITypeBinding> exceptions= analyzer.getCurrentExceptions();
 		if (enclosingNode.getNodeType() == ASTNode.METHOD_DECLARATION) {
 			List<Type> thrownExceptions= ((MethodDeclaration) enclosingNode).thrownExceptionTypes();
-			for (Iterator<Type> thrown= thrownExceptions.iterator(); thrown.hasNext();) {
-				ITypeBinding thrownException= thrown.next().resolveBinding();
+			for (Type type : thrownExceptions) {
+				ITypeBinding thrownException= type.resolveBinding();
 				if (thrownException != null && forceRemove) {
 					updateExceptionsList(exceptions, thrownException);
 				}

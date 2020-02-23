@@ -174,11 +174,7 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 	}
 
 	protected static boolean areAllFragmentsDeleted(final FieldDeclaration declaration, final List<ASTNode> declarationNodes) {
-		for (final Iterator<VariableDeclarationFragment> iterator= declaration.fragments().iterator(); iterator.hasNext();) {
-			if (!declarationNodes.contains(iterator.next()))
-				return false;
-		}
-		return true;
+		return declarationNodes.containsAll(declaration.fragments());
 	}
 
 	protected static RefactoringStatus checkProjectCompliance(CompilationUnitRewrite sourceRewriter, IType destination, IMember[] members) {
@@ -217,20 +213,22 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 
 	protected static void copyExtraDimensions(final VariableDeclaration oldVarDeclaration, final VariableDeclaration newVarDeclaration) {
 		final AST ast= newVarDeclaration.getAST();
-		for (int index= 0, n= oldVarDeclaration.extraDimensions().size(); index < n; index++)
-			newVarDeclaration.extraDimensions().add(ASTNode.copySubtree(ast, (Dimension) oldVarDeclaration.extraDimensions().get(index)));
+		for (Object extraDimension : oldVarDeclaration.extraDimensions()) {
+			newVarDeclaration.extraDimensions().add(ASTNode.copySubtree(ast, (Dimension) extraDimension));
+		}
 	}
 
 	protected static void copyExtraDimensions(final MethodDeclaration oldMethod, final MethodDeclaration newMethod) {
 		final AST ast= newMethod.getAST();
-		for (int index= 0, n= oldMethod.extraDimensions().size(); index < n; index++)
-			newMethod.extraDimensions().add(ASTNode.copySubtree(ast, (Dimension) oldMethod.extraDimensions().get(index)));
+		for (Object extraDimension : oldMethod.extraDimensions()) {
+			newMethod.extraDimensions().add(ASTNode.copySubtree(ast, (Dimension) extraDimension));
+		}
 	}
 
 	protected static void copyAnnotations(final FieldDeclaration oldField, final FieldDeclaration newField) {
 		final AST ast= newField.getAST();
-		for (int index= 0, n= oldField.modifiers().size(); index < n; index++) {
-			final IExtendedModifier modifier= (IExtendedModifier) oldField.modifiers().get(index);
+		for (Object element : oldField.modifiers()) {
+			final IExtendedModifier modifier= (IExtendedModifier) element;
 			final List<IExtendedModifier> modifiers= newField.modifiers();
 			if (modifier.isAnnotation() && !modifiers.contains(modifier))
 				modifiers.add((IExtendedModifier) ASTNode.copySubtree(ast, (Annotation) modifier));
@@ -239,8 +237,8 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 
 	protected static void copyAnnotations(final MethodDeclaration oldMethod, final MethodDeclaration newMethod) {
 		final AST ast= newMethod.getAST();
-		for (int index= 0, n= oldMethod.modifiers().size(); index < n; index++) {
-			final IExtendedModifier modifier= (IExtendedModifier) oldMethod.modifiers().get(index);
+		for (Object element : oldMethod.modifiers()) {
+			final IExtendedModifier modifier= (IExtendedModifier) element;
 			final List<IExtendedModifier> modifiers= newMethod.modifiers();
 			if (modifier.isAnnotation() && !modifiers.contains(modifier))
 				modifiers.add((IExtendedModifier) ASTNode.copySubtree(ast, (Annotation) modifier));
@@ -259,14 +257,16 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 
 	protected static void copyThrownExceptions(final MethodDeclaration oldMethod, final MethodDeclaration newMethod) {
 		final AST ast= newMethod.getAST();
-		for (int index= 0, n= oldMethod.thrownExceptionTypes().size(); index < n; index++)
-			newMethod.thrownExceptionTypes().add(ASTNode.copySubtree(ast, (Type) oldMethod.thrownExceptionTypes().get(index)));
+		for (Object thrownExceptionType : oldMethod.thrownExceptionTypes()) {
+			newMethod.thrownExceptionTypes().add(ASTNode.copySubtree(ast, (Type) thrownExceptionType));
+		}
 	}
 
 	protected static void copyTypeParameters(final MethodDeclaration oldMethod, final MethodDeclaration newMethod) {
 		final AST ast= newMethod.getAST();
-		for (int index= 0, n= oldMethod.typeParameters().size(); index < n; index++)
-			newMethod.typeParameters().add(ASTNode.copySubtree(ast, (TypeParameter) oldMethod.typeParameters().get(index)));
+		for (Object typeParameter : oldMethod.typeParameters()) {
+			newMethod.typeParameters().add(ASTNode.copySubtree(ast, (TypeParameter) typeParameter));
+		}
 	}
 
 	protected static String createLabel(final IMember member) {
@@ -446,8 +446,7 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 
 	protected static void deleteDeclarationNodes(final CompilationUnitRewrite sourceRewriter, final boolean sameCu, final CompilationUnitRewrite unitRewriter, final List<IMember> members, final GroupCategorySet set) throws JavaModelException {
 		final List<ASTNode> declarationNodes= getDeclarationNodes(unitRewriter.getRoot(), members);
-		for (final Iterator<ASTNode> iterator= declarationNodes.iterator(); iterator.hasNext();) {
-			final ASTNode node= iterator.next();
+		for (ASTNode node : declarationNodes) {
 			final ASTRewrite rewriter= unitRewriter.getASTRewrite();
 			final ImportRemover remover= unitRewriter.getImportRemover();
 			if (node instanceof VariableDeclarationFragment) {
@@ -473,8 +472,7 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 
 	protected static List<ASTNode> getDeclarationNodes(final CompilationUnit cuNode, final List<IMember> members) throws JavaModelException {
 		final List<ASTNode> result= new ArrayList<>(members.size());
-		for (final Iterator<IMember> iterator= members.iterator(); iterator.hasNext();) {
-			final IMember member= iterator.next();
+		for (IMember member : members) {
 			ASTNode node= null;
 			if (member instanceof IField) {
 				if (Flags.isEnum(member.getFlags()))
@@ -624,8 +622,8 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 
 	protected void copyParameters(final ASTRewrite rewrite, final ICompilationUnit unit, final MethodDeclaration oldMethod, final MethodDeclaration newMethod, final TypeVariableMaplet[] mapping) throws JavaModelException {
 		SingleVariableDeclaration newDeclaration= null;
-		for (int index= 0, size= oldMethod.parameters().size(); index < size; index++) {
-			final SingleVariableDeclaration oldDeclaration= (SingleVariableDeclaration) oldMethod.parameters().get(index);
+		for (Object parameter : oldMethod.parameters()) {
+			final SingleVariableDeclaration oldDeclaration= (SingleVariableDeclaration) parameter;
 			if (mapping.length > 0)
 				newDeclaration= createPlaceholderForSingleVariableDeclaration(oldDeclaration, unit, mapping, rewrite);
 			else

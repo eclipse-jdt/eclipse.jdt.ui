@@ -206,8 +206,7 @@ public class RippleMethodFinder2 {
 		fRootTypes= null;
 
 		Map<IType, List<IType>> partitioning= new HashMap<>();
-		for (Iterator<IType> iter= fTypeToMethod.keySet().iterator(); iter.hasNext();) {
-			IType type= iter.next();
+		for (IType type : fTypeToMethod.keySet()) {
 			IType rep= fUnionFind.find(type);
 			List<IType> types= partitioning.get(rep);
 			if (types == null)
@@ -225,8 +224,7 @@ public class RippleMethodFinder2 {
 		List<IType> relatedTypes= partitioning.get(methodTypeRep);
 		boolean hasRelatedInterfaces= false;
 		List<IMethod> relatedMethods= new ArrayList<>();
-		for (Iterator<IType> iter= relatedTypes.iterator(); iter.hasNext();) {
-			IType relatedType= iter.next();
+		for (IType relatedType : relatedTypes) {
 			relatedMethods.add(fTypeToMethod.get(relatedType));
 			if (relatedType.isInterface())
 				hasRelatedInterfaces= true;
@@ -241,8 +239,7 @@ public class RippleMethodFinder2 {
 		alienDeclarations.removeAll(relatedMethods);
 		Set<IType> alienTypes= new LinkedHashSet<>();
 		boolean hasAlienInterfaces= false;
-		for (Iterator<IMethod> iter= alienDeclarations.iterator(); iter.hasNext();) {
-			IMethod alienDeclaration= iter.next();
+		for (IMethod alienDeclaration : alienDeclarations) {
 			IType alienType= alienDeclaration.getDeclaringType();
 			alienTypes.add(alienType);
 			if (alienType.isInterface())
@@ -275,9 +272,8 @@ public class RippleMethodFinder2 {
 		List<IType> relatedTypesToProcess= new ArrayList<>(relatedTypes);
 		while (relatedTypesToProcess.size() > 0) {
 			//TODO: would only need subtype hierarchies of all top-of-ripple relatedTypesToProcess
-			for (Iterator<IType> iter= relatedTypesToProcess.iterator(); iter.hasNext();) {
+			for (IType relatedType : relatedTypesToProcess) {
 				checkCanceled(pm);
-				IType relatedType= iter.next();
 				ITypeHierarchy hierarchy= hierarchy(pm, owner, relatedType);
 				IType[] allSubTypes= hierarchy.getAllSubtypes(relatedType);
 				relatedSubTypes.addAll(Arrays.asList(allSubTypes));
@@ -285,9 +281,8 @@ public class RippleMethodFinder2 {
 			relatedTypesToProcess.clear(); //processed; make sure loop terminates
 
 			HashSet<IType> marriedAlienTypeReps= new HashSet<>();
-			for (Iterator<IType> iter= alienTypes.iterator(); iter.hasNext();) {
+			for (IType alienType : alienTypes) {
 				checkCanceled(pm);
-				IType alienType= iter.next();
 				IMethod alienMethod= fTypeToMethod.get(alienType);
 				ITypeHierarchy hierarchy= hierarchy(pm, owner, alienType);
 
@@ -305,11 +300,9 @@ public class RippleMethodFinder2 {
 			if (marriedAlienTypeReps.isEmpty())
 				return toArray(relatedMethods);
 
-			for (Iterator<IType> iter= marriedAlienTypeReps.iterator(); iter.hasNext();) {
-				IType marriedAlienTypeRep= iter.next();
+			for (IType marriedAlienTypeRep : marriedAlienTypeReps) {
 				List<IType> marriedAlienTypes= partitioning.get(marriedAlienTypeRep);
-				for (Iterator<IType> iterator= marriedAlienTypes.iterator(); iterator.hasNext();) {
-					IType marriedAlienInterfaceType= iterator.next();
+				for (IType marriedAlienInterfaceType : marriedAlienTypes) {
 					relatedMethods.add(fTypeToMethod.get(marriedAlienInterfaceType));
 				}
 				alienTypes.removeAll(marriedAlienTypes); //not alien any more
@@ -396,9 +389,7 @@ public class RippleMethodFinder2 {
 	private ITypeHierarchy getCachedHierarchy(IType type, WorkingCopyOwner owner, IProgressMonitor monitor) throws JavaModelException {
 		IType rep= fUnionFind.find(type);
 		if (rep != null) {
-			Collection<IType> collection= fRootReps.get(rep);
-			for (Iterator<IType> iter= collection.iterator(); iter.hasNext();) {
-				IType root= iter.next();
+			for (IType root : fRootReps.get(rep)) {
 				ITypeHierarchy hierarchy= fRootHierarchies.get(root);
 				if (hierarchy == null) {
 					hierarchy= root.newTypeHierarchy(owner, new SubProgressMonitor(monitor, 1));
@@ -460,8 +451,7 @@ public class RippleMethodFinder2 {
 
 	private void createTypeToMethod() {
 		fTypeToMethod= new HashMap<>();
-		for (Iterator<IMethod> iter= fDeclarations.iterator(); iter.hasNext();) {
-			IMethod declaration= iter.next();
+		for (IMethod declaration : fDeclarations) {
 			fTypeToMethod.put(declaration.getDeclaringType(), declaration);
 		}
 	}
@@ -469,17 +459,14 @@ public class RippleMethodFinder2 {
 	private void createUnionFind() throws JavaModelException {
 		fRootTypes= new HashSet<>(fTypeToMethod.keySet());
 		fUnionFind= new UnionFind();
-		for (Iterator<IType> iter= fTypeToMethod.keySet().iterator(); iter.hasNext();) {
-			IType type= iter.next();
+		for (IType type : fTypeToMethod.keySet()) {
 			fUnionFind.init(type);
 		}
-		for (Iterator<IType> iter= fTypeToMethod.keySet().iterator(); iter.hasNext();) {
-			IType type= iter.next();
+		for (IType type : fTypeToMethod.keySet()) {
 			uniteWithSupertypes(type, type);
 		}
 		fRootReps= new MultiMap<>();
-		for (Iterator<IType> iter= fRootTypes.iterator(); iter.hasNext();) {
-			IType type= iter.next();
+		for (IType type : fRootTypes) {
 			IType rep= fUnionFind.find(type);
 			if (rep != null)
 				fRootReps.put(rep, type);

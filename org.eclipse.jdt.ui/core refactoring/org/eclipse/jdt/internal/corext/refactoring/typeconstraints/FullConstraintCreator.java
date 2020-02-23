@@ -111,8 +111,7 @@ public class FullConstraintCreator extends ConstraintCreator{
 		List<ITypeConstraint> constraints= new ArrayList<>();
 		Type type= getTypeParent(arrayInitializer);
 		ConstraintVariable typeVariable= fConstraintVariableFactory.makeTypeVariable(type);
-		for (int i= 0; i < expressions.size(); i++) {
-			Expression each= expressions.get(i);
+		for (Expression each : expressions) {
 			ITypeConstraint[] c= fTypeConstraintFactory.createSubtypeConstraint(
 					fConstraintVariableFactory.makeExpressionOrTypeVariable(each, getContext()),
 					typeVariable);
@@ -463,10 +462,8 @@ public class FullConstraintCreator extends ConstraintCreator{
 		Collection<ITypeConstraint> result= new ArrayList<>();
 		IVariableBinding fieldBinding= fragment.resolveBinding();
 		Assert.isTrue(fieldBinding.isField());
-		Set<ITypeBinding> declaringTypes= getDeclaringSuperTypes(fieldBinding);
 		ConstraintVariable hiddingFieldVar= fConstraintVariableFactory.makeDeclaringTypeVariable(fieldBinding);
-		for (Iterator<ITypeBinding> iter= declaringTypes.iterator(); iter.hasNext();) {
-			ITypeBinding declaringSuperType= iter.next();
+		for (ITypeBinding declaringSuperType : getDeclaringSuperTypes(fieldBinding)) {
 			IVariableBinding hiddenField= findField(fieldBinding, declaringSuperType);
 			Assert.isTrue(hiddenField.isField());
 			ConstraintVariable hiddenFieldVar= fConstraintVariableFactory.makeDeclaringTypeVariable(hiddenField);
@@ -497,9 +494,7 @@ public class FullConstraintCreator extends ConstraintCreator{
 
 	private Collection<ITypeConstraint> getConstraintsForOverriding(IMethodBinding overridingMethod) {
 		Collection<ITypeConstraint> result= new ArrayList<>();
-		Set<ITypeBinding> declaringSupertypes= getDeclaringSuperTypes(overridingMethod);
-		for (Iterator<ITypeBinding> iter= declaringSupertypes.iterator(); iter.hasNext();) {
-			ITypeBinding superType= iter.next();
+		for (ITypeBinding superType : getDeclaringSuperTypes(overridingMethod)) {
 			IMethodBinding overriddenMethod= findMethod(overridingMethod, superType);
 			Assert.isNotNull(overriddenMethod);//because we asked for declaring types
 			if (Bindings.equals(overridingMethod, overriddenMethod))
@@ -674,8 +669,7 @@ public class FullConstraintCreator extends ConstraintCreator{
 	protected static IMethodBinding[] getRootDefs(IMethodBinding methodBinding) {
 		Set<ITypeBinding> declaringSuperTypes= getDeclaringSuperTypes(methodBinding);
 		Set<IMethodBinding> result= new LinkedHashSet<>();
-		for (Iterator<ITypeBinding> iter= declaringSuperTypes.iterator(); iter.hasNext();) {
-			ITypeBinding type= iter.next();
+		for (ITypeBinding type : declaringSuperTypes) {
 			if (! containsASuperType(type, declaringSuperTypes))
 				result.add(findMethod(methodBinding, type));
 		}
@@ -692,8 +686,7 @@ public class FullConstraintCreator extends ConstraintCreator{
 	 * 		which is a strict supertype of <code>type</code>
 	 */
 	private static boolean containsASuperType(ITypeBinding type, Set<ITypeBinding> declaringSuperTypes) {
-		for (Iterator<ITypeBinding> iter= declaringSuperTypes.iterator(); iter.hasNext();) {
-			ITypeBinding maybeSuperType= iter.next();
+		for (ITypeBinding maybeSuperType : declaringSuperTypes) {
 			if (! Bindings.equals(maybeSuperType, type) && Bindings.isSuperType(maybeSuperType, type))
 				return true;
 		}
@@ -710,8 +703,7 @@ public class FullConstraintCreator extends ConstraintCreator{
 		if (allSuperTypes.isEmpty())
 			allSuperTypes.add(methodBinding.getDeclaringClass()); //TODO: Why only iff empty? The declaring class is not a supertype ...
 		Set<ITypeBinding> result= new HashSet<>();
-		for (Iterator<ITypeBinding> iter= allSuperTypes.iterator(); iter.hasNext();) {
-			ITypeBinding type= iter.next();
+		for (ITypeBinding type : allSuperTypes) {
 			if (findMethod(methodBinding, type) != null)
 				result.add(type);
 		}

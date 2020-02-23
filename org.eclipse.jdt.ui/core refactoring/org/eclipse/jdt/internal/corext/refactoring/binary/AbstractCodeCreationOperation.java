@@ -17,7 +17,6 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.filesystem.EFS;
@@ -146,8 +145,7 @@ public abstract class AbstractCodeCreationOperation implements IWorkspaceRunnabl
 		monitor.beginTask(getOperationLabel(), 100 * fPackages.size());
 		try {
 			final StringBuilder builder= new StringBuilder(128);
-			for (final Iterator<IPackageFragment> iterator= fPackages.iterator(); iterator.hasNext();) {
-				final IPackageFragment fragment= iterator.next();
+			for (IPackageFragment fragment : fPackages) {
 				final IProgressMonitor subMonitor= new SubProgressMonitor(monitor, 100);
 				final IClassFile[] files= fragment.getClassFiles(); // safe, but implies this operation cannot create module-info CU, which it probably should.
 				final int size= files.length;
@@ -171,10 +169,10 @@ public abstract class AbstractCodeCreationOperation implements IWorkspaceRunnabl
 				final IProgressMonitor subsubMonitor= new SubProgressMonitor(subMonitor, 30);
 				try {
 					subsubMonitor.beginTask(getOperationLabel(), size * 100);
-					for (int index= 0; index < size; index++) {
+					for (IClassFile file : files) {
 						if (subMonitor.isCanceled())
 							throw new OperationCanceledException();
-						run(files[index], store, new SubProgressMonitor(subsubMonitor, 100));
+						run(file, store, new SubProgressMonitor(subsubMonitor, 100));
 					}
 				} finally {
 					subsubMonitor.done();

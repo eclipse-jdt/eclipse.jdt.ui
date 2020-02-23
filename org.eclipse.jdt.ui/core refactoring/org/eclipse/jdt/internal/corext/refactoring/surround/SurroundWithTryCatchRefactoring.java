@@ -312,8 +312,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 					}
 				}
 				List<VariableDeclarationFragment> fragments= copy.fragments();
-				for (Iterator<VariableDeclarationFragment> iter= fragments.iterator(); iter.hasNext();) {
-					VariableDeclarationFragment fragment= iter.next();
+				for (VariableDeclarationFragment fragment : fragments) {
 					fragment.setInitializer(null);
 				}
 
@@ -341,8 +340,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 				fragments= statement.fragments();
 				if (!fragments.isEmpty()) {
 					List<ExpressionStatement> newExpressionStatements= new ArrayList<>();
-					for (Iterator<VariableDeclarationFragment> iter= fragments.iterator(); iter.hasNext();) {
-						VariableDeclarationFragment fragment= iter.next();
+					for (VariableDeclarationFragment fragment : fragments) {
 						Expression initializer= fragment.getInitializer();
 						if (initializer != null) {
 							Assignment assignment= ast.newAssignment();
@@ -426,8 +424,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 
 		for (Iterator<ITypeBinding> subtypeIterator= filteredExceptions.iterator(); subtypeIterator.hasNext();) {
 			ITypeBinding iTypeBinding= subtypeIterator.next();
-			for (Iterator<ITypeBinding> supertypeIterator= filteredExceptions.iterator(); supertypeIterator.hasNext();) {
-				ITypeBinding superTypeBinding= supertypeIterator.next();
+			for (ITypeBinding superTypeBinding : filteredExceptions) {
 				if (!iTypeBinding.equals(superTypeBinding) && iTypeBinding.isSubTypeCompatible(superTypeBinding)) {
 					subtypeIterator.remove();
 					break;

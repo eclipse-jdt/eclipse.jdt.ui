@@ -16,7 +16,6 @@ package org.eclipse.jdt.internal.corext.refactoring.typeconstraints;
 
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.core.runtime.Assert;
@@ -114,8 +113,7 @@ public class ConstraintVariableFactory implements IConstraintVariableFactory {
 		if (fBindingMap.containsKey(binding)){
 			return fBindingMap.get(binding);
 		} else {
-			for (Iterator<IBinding> it= fBindingMap.keySet().iterator(); it.hasNext(); ){
-				IBinding b2= it.next();
+			for (IBinding b2 : fBindingMap.keySet()) {
 				if (Bindings.equals(binding, b2)){
 					fBindingMap.put(binding, b2);
 					return b2;

@@ -14,7 +14,6 @@
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -111,8 +110,7 @@ public class LocalTypeAnalyzer extends ASTVisitor {
 	}
 
 	private boolean checkBinding(List<AbstractTypeDeclaration> declarations, ITypeBinding binding) {
-		for (Iterator<AbstractTypeDeclaration> iter= declarations.iterator(); iter.hasNext();) {
-			AbstractTypeDeclaration declaration= iter.next();
+		for (AbstractTypeDeclaration declaration : declarations) {
 			if (declaration.resolveBinding() == binding) {
 				return true;
 			}

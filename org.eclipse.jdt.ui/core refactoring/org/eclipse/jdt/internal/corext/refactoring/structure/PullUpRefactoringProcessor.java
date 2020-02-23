@@ -106,6 +106,7 @@ import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.PullUpDescriptor;
 
+import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
@@ -147,8 +148,6 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileManager;
-
-import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 
 /**
  * Refactoring processor for the pull up refactoring.
@@ -335,8 +334,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		if (isInterface) {
 			 final Collection<IType> remove= new ArrayList<>();
 			 final List<IType> list= new ArrayList<>(Arrays.asList(hierarchy.getSubtypes(type)));
-			 for (final Iterator<IType> iterator= list.iterator(); iterator.hasNext();) {
-	            final IType element= iterator.next();
+			 for (IType element : list) {
 	            if (element.isInterface())
 	            	remove.add(element);
             }
@@ -345,11 +343,11 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		 } else
 			 types= hierarchy.getSubclasses(type);
 		final Set<IType> result= new HashSet<>();
-		for (int index= 0; index < types.length; index++) {
-			if (!isInterface && JdtFlags.isAbstract(types[index]))
-				result.addAll(getAffectedSubTypes(hierarchy, types[index]));
+		for (IType type2 : types) {
+			if (!isInterface && JdtFlags.isAbstract(type2))
+				result.addAll(getAffectedSubTypes(hierarchy, type2));
 			else
-				result.add(types[index]);
+				result.add(type2);
 		}
 		return result;
 	}
@@ -473,8 +471,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 			try {
 				sub.beginTask(RefactoringCoreMessages.PullUpRefactoring_calculating_required, requiredMethods.length);
 				isStatic= JdtFlags.isStatic(member);
-				for (int index= 0; index < requiredMethods.length; index++) {
-					final IMethod requiredMethod= requiredMethods[index];
+				for (IMethod requiredMethod : requiredMethods) {
 					if (isStatic && !JdtFlags.isStatic(requiredMethod))
 						continue;
 					if (isRequiredPullableMember(queue, requiredMethod) && !(MethodChecks.isVirtual(requiredMethod) && isAvailableInDestination(requiredMethod, new SubProgressMonitor(sub, 1))))
@@ -488,8 +485,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 			try {
 				sub.beginTask(RefactoringCoreMessages.PullUpRefactoring_calculating_required, requiredFields.length);
 				isStatic= JdtFlags.isStatic(member);
-				for (int index= 0; index < requiredFields.length; index++) {
-					final IField requiredField= requiredFields[index];
+				for (final IField requiredField : requiredFields) {
 					if (isStatic && !JdtFlags.isStatic(requiredField))
 						continue;
 					if (isRequiredPullableMember(queue, requiredField))
@@ -503,8 +499,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 			try {
 				sub.beginTask(RefactoringCoreMessages.PullUpRefactoring_calculating_required, requiredMethods.length);
 				isStatic= JdtFlags.isStatic(member);
-				for (int index= 0; index < requiredTypes.length; index++) {
-					final IType requiredType= requiredTypes[index];
+				for (final IType requiredType : requiredTypes) {
 					if (isStatic && !JdtFlags.isStatic(requiredType))
 						continue;
 					if (isRequiredPullableMember(queue, requiredType))
@@ -553,8 +548,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		final IMethod[] methods= getAbstractMethods();
 		try {
 			monitor.beginTask(RefactoringCoreMessages.PullUpRefactoring_checking, affected.size());
-			for (final Iterator<IType> iter= affected.iterator(); iter.hasNext();) {
-				final IType type= iter.next();
+			for (IType type : affected) {
 				if (type.equals(declaringType))
 					continue;
 				final AbstractTypeDeclaration declaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(type, unitRewriter.getRoot());
@@ -562,8 +556,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 				final IProgressMonitor subMonitor= new SubProgressMonitor(monitor, 1);
 				try {
 					subMonitor.beginTask(RefactoringCoreMessages.PullUpRefactoring_checking, methods.length);
-					for (int j= 0; j < methods.length; j++) {
-						final IMethod method= methods[j];
+					for (final IMethod method : methods) {
 						if (null == JavaModelUtil.findMethod(method.getElementName(), method.getParameterTypes(), method.isConstructor(), type)) {
 							addMethodStubForAbstractMethod(method, root, declaration, unit, unitRewriter, adjustments, new SubProgressMonitor(subMonitor, 1), status);
 						}
@@ -626,8 +619,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		final IField[] accessedFields= ReferenceFinderUtil.getFieldsReferencedIn(fMembersToMove, fOwner, new SubProgressMonitor(monitor, 1));
 
 		final IType destination= getDestinationType();
-		for (int i= 0; i < accessedFields.length; i++) {
-			final IField field= accessedFields[i];
+		for (final IField field : accessedFields) {
 			if (!field.exists())
 				continue;
 
@@ -654,8 +646,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		final IMethod[] accessedMethods= ReferenceFinderUtil.getMethodsReferencedIn(fMembersToMove, fOwner, new SubProgressMonitor(monitor, 1));
 
 		final IType destination= getDestinationType();
-		for (int index= 0; index < accessedMethods.length; index++) {
-			final IMethod method= accessedMethods[index];
+		for (final IMethod method : accessedMethods) {
 			if (!method.exists())
 				continue;
 			boolean isAccessible= pulledUpList.contains(method) || deletedList.contains(method) || declaredAbstractList.contains(method) || canBeAccessedFrom(method, destination, hierarchy);
@@ -674,11 +665,9 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 
 	private RefactoringStatus checkAccessedTypes(final IProgressMonitor monitor, final ITypeHierarchy hierarchy) throws JavaModelException {
 		final RefactoringStatus result= new RefactoringStatus();
-		final IType[] accessedTypes= getTypesReferencedInMovedMembers(monitor);
 		final IType destination= getDestinationType();
 		final List<IMember> pulledUpList= Arrays.asList(fMembersToMove);
-		for (int index= 0; index < accessedTypes.length; index++) {
-			final IType type= accessedTypes[index];
+		for (final IType type : getTypesReferencedInMovedMembers(monitor)) {
 			if (!type.exists())
 				continue;
 
@@ -709,8 +698,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		if (fDestinationType.isInterface())
 			return;
 		final List<IMethod> toDeclareAbstract= Arrays.asList(fAbstractMethods);
-		for (final Iterator<IMember> iter= notDeletedMembersInSubtypes.iterator(); iter.hasNext();) {
-			final IMember member= iter.next();
+		for (IMember member : notDeletedMembersInSubtypes) {
 			if (member.getElementType() == IJavaElement.METHOD && !toDeclareAbstract.contains(member)) {
 				final IMethod method= ((IMethod) member);
 				if (method.getDeclaringType().getPackageFragment().equals(fDestinationType.getPackageFragment())) {
@@ -742,14 +730,14 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 
 	private void checkFieldTypes(final IProgressMonitor monitor, final RefactoringStatus status) throws JavaModelException {
 		final Map<IMember, Set<IMember>> mapping= getMatchingMembers(getDestinationTypeHierarchy(monitor), getDestinationType(), true);
-		for (int i= 0; i < fMembersToMove.length; i++) {
-			if (fMembersToMove[i].getElementType() != IJavaElement.FIELD)
+		for (IMember element : fMembersToMove) {
+			if (element.getElementType() != IJavaElement.FIELD)
 				continue;
-			final IField field= (IField) fMembersToMove[i];
+			final IField field= (IField) element;
 			final String type= Signature.toString(field.getTypeSignature());
 			Assert.isTrue(mapping.containsKey(field));
-			for (final Iterator<IMember> iter= mapping.get(field).iterator(); iter.hasNext();) {
-				final IField matchingField= (IField) iter.next();
+			for (IMember member : mapping.get(field)) {
+				final IField matchingField= (IField) member;
 				if (field.equals(matchingField))
 					continue;
 				if (type.equals(Signature.toString(matchingField.getTypeSignature())))
@@ -804,8 +792,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 	private RefactoringStatus checkFinalFields(final IProgressMonitor monitor) throws JavaModelException {
 		final RefactoringStatus result= new RefactoringStatus();
 		monitor.beginTask(RefactoringCoreMessages.PullUpRefactoring_checking, fMembersToMove.length);
-		for (int index= 0; index < fMembersToMove.length; index++) {
-			final IMember member= fMembersToMove[index];
+		for (final IMember member : fMembersToMove) {
 			if (member.getElementType() == IJavaElement.FIELD) {
 				if (!JdtFlags.isStatic(member)) {
 					if (JdtFlags.isFinal(member)) {
@@ -839,8 +826,8 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 				final TypeVariableMaplet[] mapping= TypeVariableUtil.subTypeToInheritedType(declaring);
 				IMember member= null;
 				int length= 0;
-				for (int index= 0; index < pullables.length; index++) {
-					member= pullables[index];
+				for (IMember pullable : pullables) {
+					member= pullable;
 					final String[] unmapped= TypeVariableUtil.getUnmappedVariables(mapping, declaring, member);
 					length= unmapped.length;
 
@@ -909,10 +896,9 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 			final Set<IType> skippedTypes= getSkippedSuperTypes(new SubProgressMonitor(monitor, 1));
 			final IType[] skipped= skippedTypes.toArray(new IType[skippedTypes.size()]);
 			final RefactoringStatus result= new RefactoringStatus();
-			for (int i= 0; i < fMembersToMove.length; i++) {
-				final IMember element= fMembersToMove[i];
-				for (int j= 0; j < skipped.length; j++) {
-					result.merge(checkIfDeclaredIn(element, skipped[j]));
+			for (final IMember element : fMembersToMove) {
+				for (IType element2 : skipped) {
+					result.merge(checkIfDeclaredIn(element, element2));
 				}
 			}
 			return result;
@@ -964,8 +950,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		final Set<IMember> notDeletedMembers= getNotDeletedMembers(new SubProgressMonitor(monitor, 1));
 		final Set<IMember> notDeletedMembersInTargetType= new HashSet<>();
 		final Set<IMember> notDeletedMembersInSubtypes= new HashSet<>();
-		for (final Iterator<IMember> iter= notDeletedMembers.iterator(); iter.hasNext();) {
-			final IMember member= iter.next();
+		for (IMember member : notDeletedMembers) {
 			if (getDestinationType().equals(member.getDeclaringType()))
 				notDeletedMembersInTargetType.add(member);
 			else
@@ -981,17 +966,16 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 
 	private void checkMethodReturnTypes(final IProgressMonitor monitor, final RefactoringStatus status, final Set<IMember> notDeletedMembersInSubtypes) throws JavaModelException {
 		final Map<IMember, Set<IMember>> mapping= getMatchingMembers(getDestinationTypeHierarchy(monitor), getDestinationType(), true);
-		final IMember[] members= getCreatedDestinationMembers();
-		for (int i= 0; i < members.length; i++) {
-			if (members[i].getElementType() != IJavaElement.METHOD)
+		for (IMember member : getCreatedDestinationMembers()) {
+			if (member.getElementType() != IJavaElement.METHOD)
 				continue;
-			final IMethod method= (IMethod) members[i];
+			final IMethod method= (IMethod) member;
 			if (mapping.containsKey(method)) {
 				final Set<IMember> set= mapping.get(method);
 				if (set != null) {
 					final String returnType= Signature.toString(Signature.getReturnType(method.getSignature()).toString());
-					for (final Iterator<IMember> iter= set.iterator(); iter.hasNext();) {
-						final IMethod matchingMethod= (IMethod) iter.next();
+					for (IMember iMember : set) {
+						final IMethod matchingMethod= (IMethod) iMember;
 						if (method.equals(matchingMethod))
 							continue;
 						if (!notDeletedMembersInSubtypes.contains(matchingMethod))
@@ -1134,8 +1118,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 			final IProgressMonitor sub= new SubProgressMonitor(monitor, 1);
 			try {
 				sub.beginTask(RefactoringCoreMessages.PullUpRefactoring_checking, units.length * 11);
-				for (int index= 0; index < units.length; index++) {
-					ICompilationUnit unit= units[index];
+				for (ICompilationUnit unit : units) {
 					if (!(source.equals(unit) || target.equals(unit) || deleteMap.containsKey(unit) || affectedMap.containsKey(unit))) {
 						sub.worked(10);
 						continue;
@@ -1255,16 +1238,14 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 							subsub.worked(1);
 						}
 						subsub.done();
-						for (int offset= 0; offset < fAbstractMethods.length; offset++)
-							createAbstractMethod(fAbstractMethods[offset], sourceRewriter, root, declaration, mapping, rewrite, adjustments, new SubProgressMonitor(sub, 1), status);
+						for (IMethod abstractMethod : fAbstractMethods)
+							createAbstractMethod(abstractMethod, sourceRewriter, root, declaration, mapping, rewrite, adjustments, new SubProgressMonitor(sub, 1), status);
 					} else
 						sub.worked(2);
 					if (unit.equals(sourceRewriter.getCu())) {
 						final IProgressMonitor subsub= new SubProgressMonitor(sub, 1);
 						subsub.beginTask(RefactoringCoreMessages.PullUpRefactoring_checking, fAbstractMethods.length * 2);
-						IMethod method= null;
-						for (int offset= 0; offset < fAbstractMethods.length; offset++) {
-							method= fAbstractMethods[offset];
+						for (IMethod method : fAbstractMethods) {
 							adjustor= new MemberVisibilityAdjustor(destination, method);
 							adjustor.setRewrite(sourceRewriter.getASTRewrite(), root);
 							adjustor.setRewrites(fCompilationUnitRewrites);
@@ -1328,9 +1309,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 						rewriteTypeOccurrences(manager, sourceRewriter, current, new HashSet<String>(), status, new SubProgressMonitor(monitor, 16));
 				} finally {
 					subMonitor.done();
-					ICompilationUnit[] cus= manager.getAllCompilationUnits();
-					for (int index= 0; index < cus.length; index++) {
-						ICompilationUnit unit= cus[index];
+					for (ICompilationUnit unit : manager.getAllCompilationUnits()) {
 						CompilationUnitChange current= (CompilationUnitChange) manager.get(unit);
 						if (change != null && current.getEdit() == null)
 							manager.remove(unit);
@@ -1350,8 +1329,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 			return new HashMap<>(0);
 		final Set<IType> affected= getAffectedSubTypes(getDestinationTypeHierarchy(monitor), getDestinationType());
 		final Map<ICompilationUnit, ArrayList<IType>> result= new HashMap<>();
-		for (final Iterator<IType> iterator= affected.iterator(); iterator.hasNext();) {
-			final IType type= iterator.next();
+		for (IType type : affected) {
 			final ICompilationUnit unit= type.getCompilationUnit();
 			if (!result.containsKey(unit))
 				result.put(unit, new ArrayList<IType>(1));
@@ -1379,10 +1357,8 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 	}
 
 	private Map<ICompilationUnit, ArrayList<IMember>> createMembersToDeleteMap(final IProgressMonitor monitor) throws JavaModelException {
-		final IMember[] membersToDelete= getMembersToDelete(monitor);
 		final Map<ICompilationUnit, ArrayList<IMember>> result= new HashMap<>();
-		for (int i= 0; i < membersToDelete.length; i++) {
-			final IMember member= membersToDelete[i];
+		for (final IMember member : getMembersToDelete(monitor)) {
 			final ICompilationUnit cu= member.getCompilationUnit();
 			if (!result.containsKey(cu))
 				result.put(cu, new ArrayList<IMember>(1));
@@ -1481,9 +1457,9 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		final IMethod[] abstractPulledUp= getAbstractMethodsToPullUp();
 		final Set<IMember> result= new LinkedHashSet<>(toDeclareAbstract.length + abstractPulledUp.length + fMembersToMove.length);
 		if (fDestinationType.isInterface()) {
-			for (int i= 0; i < fMembersToMove.length; i++) {
-				if (fMembersToMove[i].getElementType() == IJavaElement.METHOD) {
-					result.add(fMembersToMove[i]);
+			for (IMember element : fMembersToMove) {
+				if (element.getElementType() == IJavaElement.METHOD) {
+					result.add(element);
 				}
 			}
 		}
@@ -1494,8 +1470,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 
 	private IMethod[] getAbstractMethodsToPullUp() throws JavaModelException {
 		final List<IMember> result= new ArrayList<>(fMembersToMove.length);
-		for (int i= 0; i < fMembersToMove.length; i++) {
-			final IMember member= fMembersToMove[i];
+		for (final IMember member : fMembersToMove) {
 			if (member instanceof IMethod && JdtFlags.isAbstract(member))
 				result.add(member);
 		}
@@ -1530,8 +1505,8 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 	private ICompilationUnit[] getAffectedCompilationUnits(final IProgressMonitor monitor) throws JavaModelException {
 		final IType[] allSubtypes= getDestinationTypeHierarchy(monitor).getAllSubtypes(getDestinationType());
 		final Set<ICompilationUnit> result= new HashSet<>(allSubtypes.length);
-		for (int i= 0; i < allSubtypes.length; i++) {
-			ICompilationUnit cu= allSubtypes[i].getCompilationUnit();
+		for (IType subtype : allSubtypes) {
+			ICompilationUnit cu= subtype.getCompilationUnit();
 			if (cu != null)
 				result.add(cu);
 		}
@@ -1544,8 +1519,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		final IType[] superTypes= declaring.newSupertypeHierarchy(fOwner, monitor).getAllSupertypes(declaring);
 		final List<IType> list= new ArrayList<>(superTypes.length);
 		int binary= 0;
-		for (int index= 0; index < superTypes.length; index++) {
-			final IType type= superTypes[index];
+		for (final IType type : superTypes) {
 			if (type != null && type.exists() && !type.isReadOnly() && !type.isBinary() && !"java.lang.Object".equals(type.getFullyQualifiedName())) { //$NON-NLS-1$
 				list.add(type);
 			} else {
@@ -1626,10 +1600,10 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 			final Set<IMember> result= new HashSet<>();
 			final IType destination= getDestinationType();
 			final Map<IMember, Set<IMember>> matching= getMatchingMembers(getDestinationTypeHierarchy(monitor), getDestinationType(), includeAbstract);
-			for (final Iterator<IMember> iterator= matching.keySet().iterator(); iterator.hasNext();) {
-				final IMember key= iterator.next();
+			for (Entry<IMember, Set<IMember>> entry : matching.entrySet()) {
+				IMember key= entry.getKey();
 				Assert.isTrue(!key.getDeclaringType().equals(destination));
-				result.addAll(matching.get(key));
+				result.addAll(entry.getValue());
 			}
 			return result.toArray(new IMember[result.size()]);
 		} finally {
@@ -1640,27 +1614,24 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 	private Map<IMember, Set<IMember>> getMatchingMembers(final ITypeHierarchy hierarchy, final IType type, final boolean includeAbstract) throws JavaModelException {
 		final Map<IMember, Set<IMember>> result= new HashMap<>();
 		result.putAll(getMatchingMembersMapping(type));
-		final IType[] subTypes= hierarchy.getAllSubtypes(type);
-		for (int i= 0; i < subTypes.length; i++) {
-			final Map<IMember, Set<IMember>> map= getMatchingMembersMapping(subTypes[i]);
+		for (IType subType : hierarchy.getAllSubtypes(type)) {
+			final Map<IMember, Set<IMember>> map= getMatchingMembersMapping(subType);
 			mergeMaps(result, map);
 			upgradeMap(result, map);
 		}
 		if (includeAbstract)
 			return result;
 
-		for (int i= 0; i < fAbstractMethods.length; i++) {
-			if (result.containsKey(fAbstractMethods[i]))
-				result.remove(fAbstractMethods[i]);
+		for (IMethod abstractMethod : fAbstractMethods) {
+			if (result.containsKey(abstractMethod))
+				result.remove(abstractMethod);
 		}
 		return result;
 	}
 
 	private Map<IMember, Set<IMember>> getMatchingMembersMapping(final IType initial) throws JavaModelException {
 		final Map<IMember, Set<IMember>> result= new HashMap<>();
-		final IMember[] members= getCreatedDestinationMembers();
-		for (int i= 0; i < members.length; i++) {
-			final IMember member= members[i];
+		for (final IMember member : getCreatedDestinationMembers()) {
 			if (member instanceof IMethod) {
 				final IMethod method= (IMethod) member;
 				final IMethod found= MemberCheckUtil.findMethod(method, initial.getMethods());
@@ -1932,14 +1903,11 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 				try {
 					subMonitor.beginTask("", collection.size() * 10); //$NON-NLS-1$
 					subMonitor.setTaskName(RefactoringCoreMessages.ExtractInterfaceProcessor_creating);
-					TType estimate= null;
-					ISourceConstraintVariable variable= null;
-					ITypeConstraintVariable constraint= null;
-					for (final Iterator<ITypeConstraintVariable> iterator= collection.iterator(); iterator.hasNext();) {
-						variable= iterator.next();
+					for (ITypeConstraintVariable iTypeConstraintVariable : collection) {
+						ISourceConstraintVariable variable= iTypeConstraintVariable;
 						if (variable instanceof ITypeConstraintVariable) {
-							constraint= (ITypeConstraintVariable) variable;
-							estimate= (TType) constraint.getData(SuperTypeConstraintsSolver.DATA_TYPE_ESTIMATE);
+							ITypeConstraintVariable constraint= (ITypeConstraintVariable) variable;
+							TType estimate= (TType) constraint.getData(SuperTypeConstraintsSolver.DATA_TYPE_ESTIMATE);
 							if (estimate != null) {
 								final CompilationUnitRange range= constraint.getRange();
 								if (isTouched)
@@ -1988,13 +1956,11 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 						if (subDeclaration != null) {
 							final ITypeBinding subBinding= subDeclaration.resolveBinding();
 							if (subBinding != null) {
-								String name= null;
 								ITypeBinding superBinding= null;
-								final ITypeBinding[] superBindings= Bindings.getAllSuperTypes(subBinding);
-								for (int index= 0; index < superBindings.length; index++) {
-									name= superBindings[index].getName();
+								for (ITypeBinding superBinding2 : Bindings.getAllSuperTypes(subBinding)) {
+									String name= superBinding2.getName();
 									if (name.startsWith(fDestinationType.getElementName()))
-										superBinding= superBindings[index];
+										superBinding= superBinding2;
 								}
 								if (superBinding != null) {
 									solveSuperTypeConstraints(unit, node, subType, subBinding, superBinding, new SubProgressMonitor(monitor, 80), status);

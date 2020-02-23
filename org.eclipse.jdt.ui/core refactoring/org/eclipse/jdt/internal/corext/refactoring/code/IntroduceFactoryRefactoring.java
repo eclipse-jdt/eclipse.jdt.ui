@@ -521,12 +521,10 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 
 		SearchResultGroup[] groups= (SearchResultGroup[]) engine.getResults();
 
-		if (groups.length != 0) {
-			for (SearchResultGroup rg : groups) {
-				for (SearchMatch match : rg.getSearchResults()) {
-					if (match.getAccuracy() == SearchMatch.A_ACCURATE) {
-						return (IType) match.getElement();
-					}
+		for (SearchResultGroup rg : groups) {
+			for (SearchMatch match : rg.getSearchResults()) {
+				if (match.getAccuracy() == SearchMatch.A_ACCURATE) {
+					return (IType) match.getElement();
 				}
 			}
 		}
@@ -861,9 +859,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 		factoryMethodCall.setName(ast.newSimpleName(fNewMethodName));
 
 		List<Expression> actualCtorArgsList= actualCtorArgs.getRewrittenList();
-		for (int i=0; i < actualCtorArgsList.size(); i++) {
-			Expression actualCtorArg= actualCtorArgsList.get(i);
-
+		for (Expression actualCtorArg : actualCtorArgsList) {
 			ASTNode movedArg;
 			if (ASTNodes.isExistingNode(actualCtorArg)) {
 				movedArg= unitRewriter.createMoveTarget(actualCtorArg);

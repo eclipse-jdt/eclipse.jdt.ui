@@ -16,7 +16,6 @@ package org.eclipse.jdt.internal.corext.refactoring;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -120,11 +119,11 @@ public class TypedSource {
 		//Map<ICompilationUnit, List<IJavaElement>>
 		Map<ICompilationUnit, List<IJavaElement>> grouped= ReorgUtils.groupByCompilationUnit(Arrays.asList(javaElements));
 		List<TypedSource> result= new ArrayList<>(javaElements.length);
-		for (Iterator<ICompilationUnit> iter= grouped.keySet().iterator(); iter.hasNext();) {
-			ICompilationUnit cu= iter.next();
-			for (Iterator<IJavaElement> iterator= grouped.get(cu).iterator(); iterator.hasNext();) {
+		for (Map.Entry<ICompilationUnit, List<IJavaElement>> entry : grouped.entrySet()) {
+			ICompilationUnit cu= entry.getKey();
+			for (IJavaElement javaElement : entry.getValue()) {
 				SourceTuple tuple= new SourceTuple(cu);
-				TypedSource[] ts= createTypedSources(iterator.next(), tuple);
+				TypedSource[] ts= createTypedSources(javaElement, tuple);
 				if (ts != null)
 					result.addAll(Arrays.asList(ts));
 			}

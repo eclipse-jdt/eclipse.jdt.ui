@@ -18,7 +18,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -747,9 +746,9 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 				adjustor.rewriteVisibility(new SubProgressMonitor(monitor, 1));
 			}
 			final TextEditBasedChangeManager manager= new TextEditBasedChangeManager();
-			for (final Iterator<ICompilationUnit> iterator= rewrites.keySet().iterator(); iterator.hasNext();) {
-				ICompilationUnit unit= iterator.next();
-				rewrite= rewrites.get(unit);
+			for (Map.Entry<ICompilationUnit, CompilationUnitRewrite> entry : rewrites.entrySet()) {
+				ICompilationUnit unit= entry.getKey();
+				rewrite= entry.getValue();
 				if (rewrite != null)
 					manager.manage(unit, rewrite.createChange(true));
 			}

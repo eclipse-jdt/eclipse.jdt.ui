@@ -972,8 +972,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		}
 
 		List<Expression> arguments= invocation.arguments();
-		for (int i= 0; i < fParameterInfos.size(); i++) {
-			ParameterInfo parameter= fParameterInfos.get(i);
+		for (ParameterInfo parameter : fParameterInfos) {
 			arguments.add(ASTNodeFactory.newName(fAST, getMappedName(duplicate, parameter)));
 		}
 		if (fLinkedProposalModel != null) {
@@ -1136,8 +1135,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		ImportRewriteContext context= new ContextSensitiveImportRewriteContext(enclosingBodyDeclaration, fImportRewriter);
 
 		List<SingleVariableDeclaration> parameters= result.parameters();
-		for (int i= 0; i < fParameterInfos.size(); i++) {
-			ParameterInfo info= fParameterInfos.get(i);
+		for (ParameterInfo info : fParameterInfos) {
 			VariableDeclaration infoDecl= getVariableDeclaration(info);
 			SingleVariableDeclaration parameter= fAST.newSingleVariableDeclaration();
 			parameter.modifiers().addAll(ASTNodeFactory.newModifiers(fAST, ASTNodes.getModifiers(infoDecl)));
@@ -1156,8 +1154,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 
 	private ITypeBinding[] computeLocalTypeVariables(int modifier) {
 		List<ITypeBinding> result= new ArrayList<>(Arrays.asList(fAnalyzer.getTypeVariables()));
-		for (int i= 0; i < fParameterInfos.size(); i++) {
-			ParameterInfo info= fParameterInfos.get(i);
+		for (ParameterInfo info : fParameterInfos) {
 			processVariable(result, info.getOldBinding(), modifier);
 		}
 		for (IVariableBinding methodLocal : fAnalyzer.getMethodLocals()) {

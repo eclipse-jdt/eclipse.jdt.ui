@@ -14,7 +14,6 @@
 package org.eclipse.jdt.internal.corext.refactoring.util;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
 
@@ -104,8 +103,8 @@ public abstract class AbstractExceptionAnalyzer extends ASTVisitor {
 		node.getBody().accept(this);
 
 		List<Expression> resources= node.resources();
-		for (Iterator<Expression> iterator= resources.iterator(); iterator.hasNext();) {
-			iterator.next().accept(this);
+		for (Expression expression : resources) {
+			expression.accept(this);
 		}
 
 		// Remove those exceptions that get catch by following catch blocks
@@ -114,13 +113,13 @@ public abstract class AbstractExceptionAnalyzer extends ASTVisitor {
 			handleCatchArguments(catchClauses);
 		List<ITypeBinding> current= fTryStack.pop();
 		fCurrentExceptions= fTryStack.peek();
-		for (Iterator<ITypeBinding> iter= current.iterator(); iter.hasNext();) {
-			addException(iter.next(), node.getAST());
+		for (ITypeBinding typeBinding : current) {
+			addException(typeBinding, node.getAST());
 		}
 
 		// visit catch and finally
-		for (Iterator<CatchClause> iter= catchClauses.iterator(); iter.hasNext(); ) {
-			iter.next().accept(this);
+		for (CatchClause catchClause : catchClauses) {
+			catchClause.accept(this);
 		}
 		if (node.getFinally() != null)
 			node.getFinally().accept(this);
@@ -164,12 +163,12 @@ public abstract class AbstractExceptionAnalyzer extends ASTVisitor {
 	}
 
 	private void handleCatchArguments(List<CatchClause> catchClauses) {
-		for (Iterator<CatchClause> iter= catchClauses.iterator(); iter.hasNext(); ) {
-			Type type= iter.next().getException().getType();
+		for (CatchClause catchClause : catchClauses) {
+			Type type= catchClause.getException().getType();
 			if (type instanceof UnionType) {
 				List<Type> types= ((UnionType) type).types();
-				for (Iterator<Type> iterator= types.iterator(); iterator.hasNext();) {
-					removeCaughtExceptions(iterator.next().resolveBinding());
+				for (Type type2 : types) {
+					removeCaughtExceptions(type2.resolveBinding());
 				}
 			} else {
 				removeCaughtExceptions(type.resolveBinding());
@@ -180,8 +179,7 @@ public abstract class AbstractExceptionAnalyzer extends ASTVisitor {
 	private void removeCaughtExceptions(ITypeBinding catchTypeBinding) {
 		if (catchTypeBinding == null)
 			return;
-		for (Iterator<ITypeBinding> exceptions= new ArrayList<>(fCurrentExceptions).iterator(); exceptions.hasNext();) {
-			ITypeBinding throwTypeBinding= exceptions.next();
+		for (ITypeBinding throwTypeBinding : new ArrayList<>(fCurrentExceptions)) {
 			if (catches(catchTypeBinding, throwTypeBinding))
 				fCurrentExceptions.remove(throwTypeBinding);
 		}

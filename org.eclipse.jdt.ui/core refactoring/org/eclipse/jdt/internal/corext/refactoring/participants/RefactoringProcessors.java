@@ -25,8 +25,8 @@ public class RefactoringProcessors {
 
 	public static String[] getNatures(IProject[] projects) throws CoreException {
 		Set<String> result= new HashSet<>();
-		for (int i= 0; i < projects.length; i++) {
-			String[] pns= projects[i].getDescription().getNatureIds();
+		for (IProject project : projects) {
+			String[] pns= project.getDescription().getNatureIds();
 			Collections.addAll(result, pns);
 		}
 		return result.toArray(new String[result.size()]);

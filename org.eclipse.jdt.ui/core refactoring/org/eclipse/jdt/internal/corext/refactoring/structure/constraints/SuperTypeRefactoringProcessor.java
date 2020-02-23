@@ -327,9 +327,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 			monitor.beginTask("", 100); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.ExtractInterfaceProcessor_creating);
 			final ImportRewrite rewrite= StubUtility.createImportRewrite(unit, true);
-			ITypeBinding type= null;
-			for (final Iterator<ITypeBinding> iterator= fTypeBindings.iterator(); iterator.hasNext();) {
-				type= iterator.next();
+			for (ITypeBinding type : fTypeBindings) {
 				if (type.isTypeVariable()) {
 					for (ITypeBinding bound : type.getTypeBounds()) {
 						rewrite.addImport(bound);
@@ -337,9 +335,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 				}
 				rewrite.addImport(type);
 			}
-			IBinding binding= null;
-			for (final Iterator<IBinding> iterator= fStaticBindings.iterator(); iterator.hasNext();) {
-				binding= iterator.next();
+			for (IBinding binding : fStaticBindings) {
 				rewrite.addStaticImport(binding);
 			}
 			final IDocument document= new Document();
@@ -377,11 +373,9 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 		Assert.isNotNull(sourceDeclaration);
 		Assert.isNotNull(targetDeclaration);
 		if (sourceDeclaration instanceof TypeDeclaration) {
-			TypeParameter parameter= null;
 			final ListRewrite rewrite= targetRewrite.getListRewrite(targetDeclaration, TypeDeclaration.TYPE_PARAMETERS_PROPERTY);
-			for (final Iterator<TypeParameter> iterator= ((TypeDeclaration) sourceDeclaration).typeParameters().iterator(); iterator.hasNext();) {
-				parameter= iterator.next();
-				rewrite.insertLast(ASTNode.copySubtree(targetRewrite.getAST(), parameter), null);
+			for (Object parameter : ((TypeDeclaration) sourceDeclaration).typeParameters()) {
+				rewrite.insertLast(ASTNode.copySubtree(targetRewrite.getAST(), (TypeParameter) parameter), null);
 				ImportRewriteUtil.collectImports(subType.getJavaProject(), sourceDeclaration, fTypeBindings, fStaticBindings, false);
 			}
 		}
@@ -543,9 +537,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 		for (ASTNode node : nodes) {
 			IJavaProject project= RefactoringASTParser.getCompilationUnit(node).getJavaProject();
 			if (project != null) {
-				final List<IField> fields= getReferencingFields(node, project);
-				for (int offset= 0; offset < fields.size(); offset++) {
-					IField field= fields.get(offset);
+				for (IField field : getReferencingFields(node, project)) {
 					Set<ICompilationUnit> set= units.get(project);
 					if (set == null) {
 						set= new HashSet<>();
@@ -641,9 +633,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 			if (parent instanceof FieldDeclaration) {
 				final List<VariableDeclarationFragment> fragments= ((FieldDeclaration) parent).fragments();
 				result= new ArrayList<>(fragments.size());
-				VariableDeclarationFragment fragment= null;
-				for (final Iterator<VariableDeclarationFragment> iterator= fragments.iterator(); iterator.hasNext();) {
-					fragment= iterator.next();
+				for (VariableDeclarationFragment fragment : fragments) {
 					final IField field= getCorrespondingField(fragment);
 					if (field != null)
 						result.add(field);
@@ -1000,9 +990,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 				final Map<IJavaProject, Collection<ICompilationUnit>> projects= new HashMap<>();
 				Collection<ICompilationUnit> collection= null;
 				IJavaProject project= null;
-				ICompilationUnit current= null;
-				for (final Iterator<ICompilationUnit> iterator= units.iterator(); iterator.hasNext();) {
-					current= iterator.next();
+				for (ICompilationUnit current : units) {
 					project= current.getJavaProject();
 					collection= projects.get(project);
 					if (collection == null) {

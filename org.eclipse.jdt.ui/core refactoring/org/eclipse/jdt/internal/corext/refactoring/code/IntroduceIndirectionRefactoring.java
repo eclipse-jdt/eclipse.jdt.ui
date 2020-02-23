@@ -19,7 +19,6 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -486,8 +485,8 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 		fTextChangeManager= new TextChangeManager();
 		fIntermediaryFirstParameterType= null;
 		fIntermediaryTypeBinding= null;
-		for (Iterator<CompilationUnitRewrite> iter= fRewrites.values().iterator(); iter.hasNext();)
-			iter.next().clearASTAndImportRewrites();
+		for (CompilationUnitRewrite compilationUnitRewrite : fRewrites.values())
+			compilationUnitRewrite.clearASTAndImportRewrites();
 
 		int startupTicks= 5;
 		int hierarchyTicks= 5;
@@ -600,9 +599,8 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 		// Need to adjust the overridden methods of the target method.
 		ITypeHierarchy hierarchy= fTargetMethod.getDeclaringType().newTypeHierarchy(null);
 		MethodOverrideTester tester= new MethodOverrideTester(fTargetMethod.getDeclaringType(), hierarchy);
-		IType[] subtypes= hierarchy.getAllSubtypes(fTargetMethod.getDeclaringType());
-		for (int i= 0; i < subtypes.length; i++) {
-			IMethod method= tester.findOverridingMethodInType(subtypes[i], fTargetMethod);
+		for (IType subtype : hierarchy.getAllSubtypes(fTargetMethod.getDeclaringType())) {
+			IMethod method= tester.findOverridingMethodInType(subtype, fTargetMethod);
 			if (method != null && method.exists()) {
 				result.merge(adjustVisibility(method, neededVisibility, monitor));
 				if (monitor.isCanceled())

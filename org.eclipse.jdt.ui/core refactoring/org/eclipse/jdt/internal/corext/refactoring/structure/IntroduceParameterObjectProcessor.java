@@ -79,6 +79,9 @@ import org.eclipse.jdt.core.refactoring.descriptors.IntroduceParameterObjectDesc
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 import org.eclipse.jdt.core.refactoring.participants.IRefactoringProcessorIds;
 
+import org.eclipse.jdt.internal.core.manipulation.StubUtility;
+import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -90,10 +93,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
-import org.eclipse.jdt.internal.core.manipulation.StubUtility;
-import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 public class IntroduceParameterObjectProcessor extends ChangeSignatureProcessor {
 
@@ -237,10 +236,8 @@ public class IntroduceParameterObjectProcessor extends ChangeSignatureProcessor 
 			if (body != null) { // abstract methods don't have bodies
 				final ASTRewrite rewriter= cuRewrite.getASTRewrite();
 				ListRewrite bodyStatements= rewriter.getListRewrite(body, Block.STATEMENTS_PROPERTY);
-				List<ParameterInfo> managedParams= getParameterInfos();
 				ImportRewriteContext context=new ContextSensitiveImportRewriteContext(body, cuRewrite.getImportRewrite());
-				for (Iterator<ParameterInfo> iter= managedParams.iterator(); iter.hasNext();) {
-					final ParameterInfo pi= iter.next();
+				for (ParameterInfo pi : getParameterInfos()) {
 					if (isValidField(pi)) {
 						if (isReadOnly(pi, body, parameters, null)) {
 							body.accept(new ASTVisitor(false) {
