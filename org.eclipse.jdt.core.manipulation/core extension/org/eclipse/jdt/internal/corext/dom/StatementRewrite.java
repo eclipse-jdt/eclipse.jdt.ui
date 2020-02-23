@@ -45,8 +45,8 @@ public class StatementRewrite extends ReplaceRewrite {
 		if (ASTNodes.isControlStatementBody(fDescriptor)) {
 			Block block= ast.newBlock();
 			ListRewrite statements= fRewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
-			for (int i= 0; i < replacements.length; i++) {
-				statements.insertLast(replacements[i], description);
+			for (ASTNode replacement : replacements) {
+				statements.insertLast(replacement, description);
 			}
 			fRewrite.replace(fToReplace[0], block, description);
 		} else {

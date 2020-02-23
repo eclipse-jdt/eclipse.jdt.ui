@@ -116,8 +116,8 @@ public class VariableDeclarationRewrite {
 						modifierRewrite= ModifierRewrite.create(rewrite, currentMovedFragment.fDeclaration);
 						ListRewrite listRewrite= rewrite.getListRewrite(currentMovedFragment.fDeclaration, FieldDeclaration.MODIFIERS2_PROPERTY);
 						List<IExtendedModifier> extendedList= listRewrite.getRewrittenList();
-						for (int i= 0; i < extendedList.size(); i++) {
-							ASTNode curr= (ASTNode)extendedList.get(i);
+						for (IExtendedModifier element : extendedList) {
+							ASTNode curr= (ASTNode)element;
 							if (curr instanceof Modifier)
 								rewrite.remove(curr, group);
 						}

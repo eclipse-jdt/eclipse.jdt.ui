@@ -296,8 +296,8 @@ class AssociativeInfixExpressionFragment extends ASTFragment implements IExpress
 
 	private IASTFragment[] getSubFragmentsWithAnotherNodeMatching(IASTFragment toMatch) {
 		IASTFragment[] result= new IASTFragment[0];
-		for (Iterator<Expression> iter= getOperands().iterator(); iter.hasNext();) {
-			ASTNode operand= iter.next();
+		for (Expression expression : getOperands()) {
+			ASTNode operand= expression;
 			result= union(result, ASTMatchingFragmentFinder.findMatchingFragments(operand, (ASTFragment)toMatch));
 		}
 		return result;

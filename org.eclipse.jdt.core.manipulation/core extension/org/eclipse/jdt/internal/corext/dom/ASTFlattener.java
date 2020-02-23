@@ -99,8 +99,8 @@ public class ASTFlattener extends GenericVisitor {
 	 * (element type: <code>IExtendedModifier</code>)
 	 */
 	private void printModifiers(List<IExtendedModifier> ext) {
-		for (Iterator<IExtendedModifier> it= ext.iterator(); it.hasNext();) {
-			ASTNode p= (ASTNode) it.next();
+		for (IExtendedModifier iExtendedModifier : ext) {
+			ASTNode p= (ASTNode) iExtendedModifier;
 			p.accept(this);
 			this.fBuffer.append(" ");//$NON-NLS-1$
 		}
@@ -217,8 +217,7 @@ public class ASTFlattener extends GenericVisitor {
 	public boolean visit(AnonymousClassDeclaration node) {
 		this.fBuffer.append("{");//$NON-NLS-1$
 		List<BodyDeclaration> bodyDeclarations= node.bodyDeclarations();
-		for (Iterator<BodyDeclaration> it= bodyDeclarations.iterator(); it.hasNext();) {
-			BodyDeclaration b= it.next();
+		for (BodyDeclaration b : bodyDeclarations) {
 			b.accept(this);
 		}
 		this.fBuffer.append("}");//$NON-NLS-1$
@@ -292,8 +291,7 @@ public class ASTFlattener extends GenericVisitor {
 		} else {
 			node.getElementType().accept(this);
 			List<Dimension> dimensions = node.dimensions();
-			for (int i = 0; i < dimensions.size() ; i++) {
-				Dimension dimension = dimensions.get(i);
+			for (Dimension dimension : dimensions) {
 				dimension.accept(this);
 			}
 		}
@@ -796,9 +794,8 @@ public class ASTFlattener extends GenericVisitor {
 		final List<Expression>extendedOperands = node.extendedOperands();
 		if (!extendedOperands.isEmpty()) {
 			this.fBuffer.append(' ');
-			for (Iterator<Expression> it = extendedOperands.iterator(); it.hasNext(); ) {
+			for (Expression e : extendedOperands) {
 				this.fBuffer.append(node.getOperator().toString()).append(' ');
-				Expression e = it.next();
 				e.accept(this);
 			}
 		}
@@ -1041,8 +1038,7 @@ public class ASTFlattener extends GenericVisitor {
 		this.fBuffer.append(")");//$NON-NLS-1$
 		if (node.getAST().apiLevel() >= JLS8) {
 			List<Dimension> dimensions = node.extraDimensions();
-			for (Iterator<Dimension> it= dimensions.iterator(); it.hasNext(); ) {
-				Dimension e= it.next();
+			for (Dimension e : dimensions) {
 				e.accept(this);
 			}
 		} else {
@@ -1403,8 +1399,7 @@ public class ASTFlattener extends GenericVisitor {
 		node.getName().accept(this);
 		if (node.getAST().apiLevel() >= JLS8) {
 			List<Dimension> dimensions = node.extraDimensions();
-			for (Iterator<Dimension> it= dimensions.iterator(); it.hasNext(); ) {
-				Dimension e= it.next();
+			for (Dimension e : dimensions) {
 				e.accept(this);
 			}
 		} else {
@@ -1903,8 +1898,7 @@ public class ASTFlattener extends GenericVisitor {
 		node.getName().accept(this);
 		if (node.getAST().apiLevel() >= JLS8) {
 			List<Dimension> dimensions = node.extraDimensions();
-			for (Iterator<Dimension> it= dimensions.iterator(); it.hasNext(); ) {
-				Dimension e= it.next();
+			for (Dimension e : dimensions) {
 				e.accept(this);
 			}
 		} else {

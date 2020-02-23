@@ -285,8 +285,8 @@ public class ScopeAnalyzer {
 			} else if (hasFlag(TYPES, flags)) {
 				if (fRoot.findDeclaringNode(binding) != null) {
 					List<AbstractTypeDeclaration> types= fRoot.types();
-					for (int i= 0; i < types.size(); i++) {
-						if (requestor.acceptBinding(types.get(i).resolveBinding()))
+					for (AbstractTypeDeclaration type : types) {
+						if (requestor.acceptBinding(type.resolveBinding()))
 							return true;
 					}
 				}
@@ -910,8 +910,7 @@ public class ScopeAnalyzer {
 			result.add(b.getName());
 		}
 		List<ImportDeclaration> imports= fRoot.imports();
-		for (int i= 0; i < imports.size(); i++) {
-			ImportDeclaration decl= imports.get(i);
+		for (ImportDeclaration decl : imports) {
 			if (decl.isStatic() && !decl.isOnDemand()) {
 				result.add(ASTNodes.getSimpleNameIdentifier(decl.getName()));
 			}

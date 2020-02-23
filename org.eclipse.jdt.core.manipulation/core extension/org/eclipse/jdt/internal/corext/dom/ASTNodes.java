@@ -1075,8 +1075,7 @@ public class ASTNodes {
 		@Override
 		public boolean visit(ITypeBinding node) {
 			IMethodBinding[] methods= node.getDeclaredMethods();
-			for (int i= 0; i < methods.length; i++) {
-				IMethodBinding candidate= methods[i];
+			for (IMethodBinding candidate : methods) {
 				if (candidate == fOriginal) {
 					continue;
 				}
@@ -2053,8 +2052,7 @@ public class ASTNodes {
 	}
 
 	public static Modifier findModifierNode(int flag, List<IExtendedModifier> modifiers) {
-		for (int i= 0; i < modifiers.size(); i++) {
-			Object curr= modifiers.get(i);
+		for (IExtendedModifier curr : modifiers) {
 			if (curr instanceof Modifier && ((Modifier) curr).getKeyword().toFlagValue() == flag) {
 				return (Modifier) curr;
 			}

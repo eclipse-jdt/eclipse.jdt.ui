@@ -15,7 +15,6 @@
 package org.eclipse.jdt.internal.corext.dom;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -65,8 +64,8 @@ public class CodeScopeBuilder extends ASTVisitor {
 			if (fStart <= start && start + length <= fStart + fLength) {
 				if (fChildren == null)
 					return this;
-				for (Iterator<Scope> iter= fChildren.iterator(); iter.hasNext();) {
-					Scope scope= iter.next().findScope(start, length);
+				for (Scope child : fChildren) {
+					Scope scope= child.findScope(start, length);
 					if (scope != null)
 						return scope;
 				}
@@ -88,8 +87,7 @@ public class CodeScopeBuilder extends ASTVisitor {
 			if (internalIsInUse(name))
 				return true;
 			if (fChildren != null) {
-				for (Iterator<Scope> iter= fChildren.iterator(); iter.hasNext();) {
-					Scope child= iter.next();
+				for (Scope child : fChildren) {
 					if (fCursorOffset < child.fStart && child.isInUseDown(name)) {
 						return true;
 					}
@@ -110,8 +108,7 @@ public class CodeScopeBuilder extends ASTVisitor {
 				return true;
 			if (fChildren == null)
 				return false;
-			for (Iterator<Scope> iter= fChildren.iterator(); iter.hasNext();) {
-				Scope scope= iter.next();
+			for (Scope scope : fChildren) {
 				if (scope.isInUseDown(name))
 					return true;
 			}
