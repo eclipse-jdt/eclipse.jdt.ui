@@ -358,16 +358,6 @@
 	<!-- javadoc completions -->
 	<extension
 		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
-		id="LegacyJavadocCompletionProposalComputer_no">
-		<javaCompletionProposalComputer
-			class="org.eclipse.jdt.internal.ui.text.javadoc.LegacyJavadocCompletionProposalComputer"
-			categoryId="org.eclipse.jdt.ui.javaNoTypeProposalCategory"
-			requiresUIThread="false">
-			<partition type="__java_javadoc"/>
-		</javaCompletionProposalComputer>
-	</extension>
-	<extension
-		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
 		id="JavadocCompletionProposalComputer_no">
 		<javaCompletionProposalComputer
 			requiresUIThread="false"
@@ -383,16 +373,6 @@
 			requiresUIThread="false"
 			class="org.eclipse.jdt.internal.ui.text.javadoc.HTMLTagCompletionProposalComputer"
 			categoryId="org.eclipse.jdt.ui.javaNoTypeProposalCategory">
-			<partition type="__java_javadoc"/>
-		</javaCompletionProposalComputer>
-	</extension>
-	<extension
-		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
-		id="LegacyJavadocCompletionProposalComputer_all">
-		<javaCompletionProposalComputer
-			requiresUIThread="false"
-			class="org.eclipse.jdt.internal.ui.text.javadoc.LegacyJavadocCompletionProposalComputer"
-			categoryId="org.eclipse.jdt.ui.javaAllProposalCategory">
 			<partition type="__java_javadoc"/>
 		</javaCompletionProposalComputer>
 	</extension>
