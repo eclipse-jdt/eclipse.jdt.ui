@@ -13,14 +13,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.template.java;
 
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.Position;
+
 import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ASTNode;
-
-import org.eclipse.jdt.internal.corext.template.java.AbstractJavaContextType;
-import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContext;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.Position;
 
 public class JavaPostfixContextType extends AbstractJavaContextType {
 
