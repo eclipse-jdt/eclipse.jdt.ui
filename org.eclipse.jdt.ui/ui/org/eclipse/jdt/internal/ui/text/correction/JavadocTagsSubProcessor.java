@@ -39,6 +39,7 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
@@ -76,6 +77,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.manipulation.CodeGeneration;
 
+import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -929,9 +931,14 @@ public class JavadocTagsSubProcessor {
 				return;
 			}
 			int line= cu.getLineNumber(problem.getOffset());
-			int start= cu.getPosition(line, 0) - System.lineSeparator().length();
+			IJavaElement javaElement= cu.getJavaElement();
+			if (javaElement == null) {
+				return;
+			}
+			String lineDelimiter= StubUtility.getLineDelimiterUsed(javaElement);
+			int start= cu.getPosition(line, 0) - lineDelimiter.length();
 			int column= cu.getColumnNumber(node.getStartPosition());
-			int length= node.getLength() + column + System.lineSeparator().length();
+			int length= node.getLength() + column + lineDelimiter.length();
 			String label= Messages.format(CorrectionMessages.JavadocTagsSubProcessor_removeduplicatetag_description, ((TextElement)((TagElement)node).fragments().get(0)).getText().trim());
 			CUCorrectionProposal proposal= new ReplaceCorrectionProposal(label, context.getCompilationUnit(), start, length,
 					"", IProposalRelevance.REMOVE_TAG); //$NON-NLS-1$
