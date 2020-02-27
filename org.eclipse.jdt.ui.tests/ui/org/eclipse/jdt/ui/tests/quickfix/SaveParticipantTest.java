@@ -943,4 +943,64 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		assertEquals(expected1, cu1.getBuffer().getContents());
 	}
 
+	@Test
+	public void testFormatChangeBug560429() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\r\n");
+		buf.append("import java.util.ArrayList;\r\n");
+		buf.append("import java.util.Iterator;\r\n");
+		buf.append("import java.util.List;\r\n");
+		buf.append("public class A {\r\n");
+		buf.append("	public A() {\r\n");
+		buf.append("		List<List<Integer>> mylistlist=new ArrayList<>();\r\n");
+		buf.append("		for (Iterator<List<Integer>> mylistlistiterator= mylistlist.iterator(); mylistlistiterator.hasNext(); ) {\r\n");
+		buf.append("			for (Iterator<Integer> mylistiterator= mylistlistiterator.next().iterator(); mylistiterator.hasNext(); ) {\r\n");
+		buf.append("				int foo= mylistiterator.next().intValue();\r\n");
+		buf.append("			}\r\n");
+		buf.append("		}\r\n");
+		buf.append("	}\r\n");
+		buf.append("}");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		buf= new StringBuffer();
+		buf.append("package test;\r\n");
+		buf.append("import java.util.ArrayList;\r\n");
+		buf.append("import java.util.Iterator;\r\n");
+		buf.append("import java.util.List;\r\n");
+		buf.append("public class A {\r\n");
+		buf.append("	public A() {\r\n");
+		buf.append("		List<List<Integer>> mylistlist=new ArrayList<>();\r\n");
+		buf.append("		for (Iterator<List<Integer>> mylistlistiterator= mylistlist.iterator(); mylistlistiterator.hasNext(); ) {\r\n");
+		buf.append("			for (Iterator<Integer> mylistiterator= mylistlistiterator.next().iterator(); mylistiterator.hasNext(); ) {\r\n");
+		buf.append("				int foo= mylistiterator.next().intValue();\r\n");
+		buf.append("			}\r\n");
+		buf.append("		}\r\n");
+		buf.append("	}\r\n");
+		buf.append("}");
+
+		editCUInEditor(cu1, buf.toString());
+
+		buf= new StringBuffer();
+		buf.append("package test;\r\n");
+		buf.append("import java.util.ArrayList;\r\n");
+		buf.append("import java.util.List;\r\n");
+		buf.append("public class A {\r\n");
+		buf.append("	public A() {\r\n");
+		buf.append("		List<List<Integer>> mylistlist=new ArrayList<>();\r\n");
+		buf.append("		for (List<Integer> list : mylistlist) {\r\n");
+		buf.append("			for (Integer integer : list) {\r\n");
+		buf.append("				int foo= integer.intValue();\r\n");
+		buf.append("			}\r\n");
+		buf.append("		}\r\n");
+		buf.append("	}\r\n");
+		buf.append("}");
+
+		String expected1= buf.toString();
+
+		assertEquals(expected1, cu1.getBuffer().getContents());
+	}
+
 }

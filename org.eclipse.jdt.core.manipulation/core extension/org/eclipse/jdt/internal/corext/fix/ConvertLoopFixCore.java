@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 IBM Corporation and others.
+ * Copyright (c) 2019, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -40,6 +40,7 @@ public class ConvertLoopFixCore extends CompilationUnitRewriteOperationsFixCore 
 		private final boolean fFindForLoopsToConvert;
 		private final boolean fConvertIterableForLoops;
 		private final boolean fMakeFinal;
+		private ConvertLoopOperation fParentOperation;
 
 		public ControlStatementFinder(boolean findForLoopsToConvert, boolean convertIterableForLoops, boolean makeFinal, List<ConvertLoopOperation> resultingCollection) {
 			fFindForLoopsToConvert= findForLoopsToConvert;
@@ -47,6 +48,7 @@ public class ConvertLoopFixCore extends CompilationUnitRewriteOperationsFixCore 
 			fMakeFinal= makeFinal;
 			fResult= resultingCollection;
 			fUsedNames= new Hashtable<>();
+			fParentOperation= null;
 		}
 
 		@Override
@@ -54,6 +56,10 @@ public class ConvertLoopFixCore extends CompilationUnitRewriteOperationsFixCore 
 			if (fFindForLoopsToConvert || fConvertIterableForLoops) {
 				ForStatement current= node;
 				ConvertLoopOperation operation= getConvertOperation(current);
+				if (fParentOperation != null) {
+					fParentOperation.setChildLoopOperation(operation);
+				}
+				fParentOperation= operation;
 				ConvertLoopOperation oldOperation= null;
 				while (operation != null) {
 					if (oldOperation == null) {
@@ -66,6 +72,8 @@ public class ConvertLoopFixCore extends CompilationUnitRewriteOperationsFixCore 
 						current= (ForStatement)current.getBody();
 						oldOperation= operation;
 						operation= getConvertOperation(current);
+						oldOperation.setChildLoopOperation(operation);
+						fParentOperation= operation;
 					} else {
 						operation= null;
 					}

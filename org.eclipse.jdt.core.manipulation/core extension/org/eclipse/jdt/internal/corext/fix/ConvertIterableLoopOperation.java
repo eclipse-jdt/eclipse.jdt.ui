@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2019 IBM Corporation and others.
+ * Copyright (c) 2005, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -25,6 +25,7 @@ import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
@@ -53,19 +54,17 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import org.eclipse.jdt.internal.core.manipulation.StubUtility;
+import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRemover;
 import org.eclipse.jdt.internal.corext.refactoring.util.TightSourceRangeComputer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-
-import org.eclipse.jdt.internal.core.manipulation.StubUtility;
-import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 /**
  * Operation to convert for loops over iterables to enhanced for loops.
@@ -278,8 +277,22 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 					final SimpleName node= ast.newSimpleName(text);
 					astRewrite.replace(expression, node, group);
 					remover.registerRemovedNode(expression);
+					checkChildOperations(expression, node);
 					pg.addPosition(astRewrite.track(node), false);
 					return false;
+				}
+
+				private void checkChildOperations(Expression newExpression, SimpleName node) {
+					ConvertLoopOperation child= getChildLoopOperation();
+					while (child != null) {
+						if (child instanceof ConvertIterableLoopOperation) {
+							Expression exp= ((ConvertIterableLoopOperation) child).getExpression();
+							if (newExpression.subtreeMatch(new ASTMatcher(), exp)) {
+								((ConvertIterableLoopOperation)child).setExpression(node);
+							}
+						}
+						child= child.getChildLoopOperation();
+					}
 				}
 
 				@Override
@@ -347,6 +360,14 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 		}
 
 		return fEnhancedForLoop;
+	}
+
+	public Expression getExpression() {
+		return fExpression;
+	}
+
+	public void setExpression(Expression exp) {
+		fExpression= exp;
 	}
 
 	/**

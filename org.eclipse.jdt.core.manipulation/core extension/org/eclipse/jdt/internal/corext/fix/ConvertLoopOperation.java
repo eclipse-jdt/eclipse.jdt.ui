@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2019 IBM Corporation and others.
+ * Copyright (c) 2005, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -95,6 +95,7 @@ public abstract class ConvertLoopOperation extends CompilationUnitRewriteOperati
 
 	private final ForStatement fStatement;
 	private ConvertLoopOperation fOperation;
+	private ConvertLoopOperation fChildLoopOperation;
 	private final String[] fUsedNames;
 
 	public ConvertLoopOperation(ForStatement statement, String[] usedNames) {
@@ -104,6 +105,14 @@ public abstract class ConvertLoopOperation extends CompilationUnitRewriteOperati
 
 	public void setBodyConverter(ConvertLoopOperation operation) {
 		fOperation= operation;
+	}
+
+	public void setChildLoopOperation(ConvertLoopOperation operation) {
+		fChildLoopOperation= operation;
+	}
+
+	public ConvertLoopOperation getChildLoopOperation() {
+		return fChildLoopOperation;
 	}
 
 	public abstract String getIntroducedVariableName();
