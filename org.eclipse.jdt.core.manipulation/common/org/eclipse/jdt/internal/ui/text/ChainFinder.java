@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010, 2019 Darmstadt University of Technology and others.
+ * Copyright (c) 2010, 2020 Darmstadt University of Technology and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,6 +38,8 @@ public class ChainFinder {
 
 	private final Map<String, Boolean> assignableCache= new HashMap<>();
 
+	private volatile boolean isCanceled;
+
 	public ChainFinder(final List<ChainType> expectedTypes, final List<String> excludedTypes,
 			final IType receiverType) {
 		this.expectedTypes= expectedTypes;
@@ -60,11 +62,15 @@ public class ChainFinder {
 		}
 	}
 
+	public void cancel() {
+		isCanceled= true;
+	}
+
 	private void searchChainsForExpectedType(final ChainType expectedType, final int expectedDimensions,
 			final List<ChainElement> entrypoints, final int maxChains, final int minDepth, final int maxDepth) {
 		final LinkedList<LinkedList<ChainElement>> incompleteChains= prepareQueue(entrypoints);
 
-		while (!incompleteChains.isEmpty()) {
+		while (!incompleteChains.isEmpty() && !isCanceled) {
 			final LinkedList<ChainElement> chain= incompleteChains.poll();
 			final ChainElement edge= chain.getLast();
 			if (isValidEndOfChain(edge, expectedType, expectedDimensions)) {

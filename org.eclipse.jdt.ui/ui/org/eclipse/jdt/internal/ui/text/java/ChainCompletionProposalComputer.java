@@ -168,6 +168,7 @@ public class ChainCompletionProposalComputer implements IJavaCompletionProposalC
 			long timeout= Long.parseLong(JavaManipulation.getPreference(PreferenceConstants.PREF_CHAIN_TIMEOUT, ctx.getProject()));
 			future.get(timeout, TimeUnit.SECONDS);
 		} catch (final Exception e) {
+			finder.cancel();
 			executor.shutdownNow();
 			setError("Timeout during call chain computation."); //$NON-NLS-1$
 		}
