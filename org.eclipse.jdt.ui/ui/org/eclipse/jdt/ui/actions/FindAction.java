@@ -396,9 +396,8 @@ public abstract class FindAction extends SelectionDispatchAction {
 			workingSets = toUpdate.get();
 		}
 		SearchUtil.updateLRUWorkingSets(workingSets);
-		IJavaSearchScope scope= factory.createJavaSearchScope(workingSets, JavaSearchScopeFactory.NO_PROJ);
 		String description= factory.getWorkingSetScopeDescription(workingSets, JavaSearchScopeFactory.NO_PROJ);
-		return new ElementQuerySpecification(element, action.getLimitTo(), scope, description);
+		return new LazyScopeQuerySpecification(element, action.getLimitTo(), () -> factory.createJavaSearchScope(workingSets, JavaSearchScopeFactory.NO_PROJ), description);
 	}
 
 	abstract int getLimitTo();
