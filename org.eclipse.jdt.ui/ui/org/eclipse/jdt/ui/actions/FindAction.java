@@ -17,6 +17,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IStatus;
@@ -29,6 +30,7 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.progress.IProgressService;
@@ -358,10 +360,45 @@ public abstract class FindAction extends SelectionDispatchAction {
 	 * @throws InterruptedException thrown when the user interrupted the query selection
 	 */
 	QuerySpecification createQuery(IJavaElement element) throws JavaModelException, InterruptedException {
+		return createDefaultQuery(element);
+	}
+
+	QuerySpecification createDefaultQuery(IJavaElement element) {
 		JavaSearchScopeFactory factory= JavaSearchScopeFactory.getInstance();
 		IJavaSearchScope scope= factory.createWorkspaceScope(true);
 		String description= factory.getWorkspaceScopeDescription(true);
 		return new ElementQuerySpecification(element, getLimitTo(), scope, description);
+	}
+
+	/**
+	 * @param element non null
+	 * @param action non null
+	 * @param toUpdate working sets array reference that will be updated in this method
+	 * @return {@link QuerySpecification} for given object and action, that depends on action state
+	 * @throws InterruptedException if working sets query fail
+	 */
+	static QuerySpecification createQueryWithWorkingSets(IJavaElement element, FindAction action, AtomicReference<IWorkingSet[]> toUpdate) throws InterruptedException {
+		JavaSearchScopeFactory factory= JavaSearchScopeFactory.getInstance();
+
+		final IWorkingSet[] workingSets;
+		if (toUpdate.get() == null && action.isFirstElement()) {
+			workingSets= factory.queryWorkingSets();
+			if (workingSets == null) {
+				return action.createDefaultQuery(element); // workspace
+			}
+			if (action.isMultiSelect()) {
+				toUpdate.set(workingSets);
+			}
+		} else if (action.isMultiSelect() && action.isLastElement()) {
+			workingSets = toUpdate.get();
+			toUpdate.set(null);
+		} else {
+			workingSets = toUpdate.get();
+		}
+		SearchUtil.updateLRUWorkingSets(workingSets);
+		IJavaSearchScope scope= factory.createJavaSearchScope(workingSets, JavaSearchScopeFactory.NO_PROJ);
+		String description= factory.getWorkingSetScopeDescription(workingSets, JavaSearchScopeFactory.NO_PROJ);
+		return new ElementQuerySpecification(element, action.getLimitTo(), scope, description);
 	}
 
 	abstract int getLimitTo();

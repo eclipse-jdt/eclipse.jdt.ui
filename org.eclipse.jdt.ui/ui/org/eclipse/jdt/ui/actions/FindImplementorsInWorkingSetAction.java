@@ -13,23 +13,21 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
 
-import org.eclipse.jdt.ui.search.ElementQuerySpecification;
 import org.eclipse.jdt.ui.search.QuerySpecification;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
-import org.eclipse.jdt.internal.ui.search.SearchUtil;
 
 /**
  * Finds implementors of the selected element in working sets.
@@ -104,23 +102,10 @@ public class FindImplementorsInWorkingSetAction extends FindImplementorsAction {
 
 	@Override
 	QuerySpecification createQuery(IJavaElement element) throws JavaModelException, InterruptedException {
-		JavaSearchScopeFactory factory= JavaSearchScopeFactory.getInstance();
-
-		IWorkingSet[] workingSets= fWorkingSets;
-		if (fWorkingSets == null && isFirstElement()) {
-			workingSets= factory.queryWorkingSets();
-			if (workingSets == null)
-				return super.createQuery(element); // workspace
-			if (isMultiSelect()) {
-				fWorkingSets= workingSets;
-			}
-		} else if (isMultiSelect() && isLastElement()) {
-			fWorkingSets= null;
-		}
-		SearchUtil.updateLRUWorkingSets(workingSets);
-		IJavaSearchScope scope= factory.createJavaSearchScope(workingSets, JavaSearchScopeFactory.NO_PROJ);
-		String description= factory.getWorkingSetScopeDescription(workingSets, JavaSearchScopeFactory.NO_PROJ);
-		return new ElementQuerySpecification(element, getLimitTo(), scope, description);
+		AtomicReference<IWorkingSet[]> toUpdate = new AtomicReference<>(fWorkingSets);
+		QuerySpecification query = createQueryWithWorkingSets(element, this, toUpdate);
+		fWorkingSets = toUpdate.get();
+		return query;
 	}
 
 }
