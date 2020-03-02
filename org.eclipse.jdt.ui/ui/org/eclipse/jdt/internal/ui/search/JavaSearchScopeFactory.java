@@ -111,7 +111,7 @@ public class JavaSearchScopeFactory {
 
 		Set<IJavaElement> javaElements= new HashSet<>(workingSets.length * 10);
 		for (IWorkingSet workingSet : workingSets) {
-			if (workingSet.isEmpty() && workingSet.isAggregateWorkingSet()) {
+			if (workingSet.isAggregateWorkingSet() && workingSet.isEmpty()) {
 				return createWorkspaceScope(includeMask);
 			}
 			addJavaElements(javaElements, workingSet);

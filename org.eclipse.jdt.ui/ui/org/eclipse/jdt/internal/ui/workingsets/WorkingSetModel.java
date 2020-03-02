@@ -669,11 +669,15 @@ public class WorkingSetModel {
 	 */
 	public static boolean isSupportedAsTopLevelElement(IWorkingSet workingSet) {
 		Object id= workingSet.getId();
-		if (IWorkingSetIDs.OTHERS.equals(id) || IWorkingSetIDs.JAVA.equals(id) || IWorkingSetIDs.RESOURCE.equals(id))
+		if (IWorkingSetIDs.OTHERS.equals(id) || IWorkingSetIDs.JAVA.equals(id) || IWorkingSetIDs.RESOURCE.equals(id)) {
 			return true;
-
-		if (!workingSet.isSelfUpdating() || workingSet.isAggregateWorkingSet())
+		}
+		if(IWorkingSetIDs.DYNAMIC_SOURCES.equals(id)) {
 			return false;
+		}
+		if (!workingSet.isSelfUpdating() || workingSet.isAggregateWorkingSet()) {
+			return false;
+		}
 
 		for (IAdaptable element : workingSet.getElements()) {
 			IProject p= element.getAdapter(IProject.class);
