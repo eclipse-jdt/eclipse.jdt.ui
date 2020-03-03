@@ -49,9 +49,9 @@ import org.eclipse.jdt.internal.junit.JUnitPreferencesConstants;
 
 public class BuildPathSupport {
 
-	
+
 	public static class JUnitPluginDescription {
-		
+
 		private final String bundleId;
 		private final VersionRange versionRange;
 		private final String bundleRoot;
@@ -59,7 +59,7 @@ public class BuildPathSupport {
 		private final String sourceBundleId;
 		private final String repositorySource;
 		private final String javadocPreferenceKey;
-		
+
 		private String resolvedVersion = null;
 
 		public JUnitPluginDescription(String bundleId, VersionRange versionRange, String bundleRoot, String binaryImportedRoot, String sourceBundleId, String repositorySource, String javadocPreferenceKey) {
@@ -71,11 +71,11 @@ public class BuildPathSupport {
 			this.repositorySource= repositorySource;
 			this.javadocPreferenceKey= javadocPreferenceKey;
 		}
-		
+
 		public IPath getBundleLocation() {
 			return getBundleLocation(bundleId, versionRange);
 		}
-		
+
 		public IPath getSourceBundleLocation() {
 			return getSourceLocation(getBundleLocation());
 		}
@@ -83,7 +83,7 @@ public class BuildPathSupport {
 		private IPath getBundleLocation(String aBundleId, VersionRange aVersionRange) {
 			return getBundleLocation(aBundleId, aVersionRange, false);
 		}
-		
+
 		private IPath getBundleLocation(String aBundleId, VersionRange aVersionRange, boolean isSourceBundle) {
 			BundleInfo bundleInfo = P2Utils.findBundle(aBundleId, aVersionRange, isSourceBundle);
 			if (bundleInfo != null) {
@@ -114,7 +114,7 @@ public class BuildPathSupport {
 			}
 			return null;
 		}
-		
+
 		private IPath getBundleFileLocation(String aBundleId, VersionRange aVersionRange, String filePath) {
 			BundleInfo bundleInfo = P2Utils.findBundle(aBundleId, aVersionRange, false);
 
@@ -222,7 +222,7 @@ public class BuildPathSupport {
 				} else {
 					attributes= new IClasspathAttribute[] { JavaCore.newClasspathAttribute(IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME, javadocLocation) };
 				}
-				
+
 				return JavaCore.newLibraryEntry(bundleRootLocation, srcLocation, null, getAccessRules(), attributes, false);
 			}
 			return null;
@@ -238,7 +238,7 @@ public class BuildPathSupport {
 				// Try source in workspace (from repository)
 				srcLocation= getLocationIfExists(bundleLocation, repositorySource);
 			}
-			
+
 			if (srcLocation == null) {
 				if (bundleLocation != null) {
 					// Try exact version
@@ -288,13 +288,13 @@ public class BuildPathSupport {
 		}
 	}
 
-	
+
 	public static final JUnitPluginDescription JUNIT3_PLUGIN= new JUnitPluginDescription(
 			"org.junit", new VersionRange("[3.8.2,3.9)"), "junit.jar", "junit.jar", "org.junit.source", "source-bundle/", JUnitPreferencesConstants.JUNIT3_JAVADOC); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
-	
+
 	public static final JUnitPluginDescription JUNIT4_PLUGIN= new JUnitPluginDescription(
 			"org.junit", new VersionRange("[4.7.0,5.0.0)"), "junit.jar", "junit.jar", "org.junit.source", "source-bundle/", JUnitPreferencesConstants.JUNIT4_JAVADOC); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
-	
+
 	private static final JUnitPluginDescription HAMCREST_CORE_PLUGIN= new JUnitPluginDescription(
 			"org.hamcrest.core", new VersionRange("[1.1.0,2.0.0)"), null, "org.hamcrest.core_1.*.jar", "org.hamcrest.core.source", "source-bundle/", JUnitPreferencesConstants.HAMCREST_CORE_JAVADOC); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 
@@ -357,7 +357,7 @@ public class BuildPathSupport {
 			};
 		}
 	};
-	
+
 	/**
 	 * @return the JUnit3 classpath container
 	 */
@@ -400,7 +400,7 @@ public class BuildPathSupport {
 	public static IClasspathEntry getJUnit4as3LibraryEntry() {
 		return JUNIT4_AS_3_PLUGIN.getLibraryEntry();
 	}
-	
+
 	/**
 	 * @return the org.hamcrest.core library, or <code>null</code> if not available
 	 */
@@ -477,7 +477,7 @@ public class BuildPathSupport {
 	public static IClasspathEntry getJUnitVintageEngineLibraryEntry() {
 		return JUNIT_VINTAGE_ENGINE_PLUGIN.getLibraryEntry();
 	}
-	
+
 	/**
 	 * @return the org.opentest4j library, or <code>null</code> if not available
 	 */

@@ -32,7 +32,7 @@ public class NullTestUtils {
 		options.put(JavaCore.COMPILER_NULLABLE_ANNOTATION_NAME, "annots.Nullable");
 		options.put(JavaCore.COMPILER_NONNULL_BY_DEFAULT_ANNOTATION_NAME, "annots.NonNullByDefault");
 		sourceFolder.getJavaProject().setOptions(options);
-		
+
 		IPackageFragment pack0= sourceFolder.createPackageFragment("annots", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package annots;\n");
@@ -40,14 +40,14 @@ public class NullTestUtils {
 		buf.append("@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS)\n");
 		buf.append("public @interface NonNull {}\n");
 		pack0.createCompilationUnit("NonNull.java", buf.toString(), false, null);
-	
+
 		buf= new StringBuffer();
 		buf.append("package annots;\n");
 		buf.append("\n");
 		buf.append("@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS)\n");
 		buf.append("public @interface Nullable {}\n");
 		pack0.createCompilationUnit("Nullable.java", buf.toString(), false, null);
-	
+
 		buf= new StringBuffer();
 		buf.append("package annots;\n");
 		buf.append("\n");
@@ -55,7 +55,7 @@ public class NullTestUtils {
 		buf.append("@Target({ ElementType.PACKAGE, ElementType.TYPE, ElementType.METHOD, ElementType.CONSTRUCTOR })\n");
 		buf.append("@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS)\n");
 		buf.append("public @interface NonNullByDefault { boolean value() default true; }\n");
-		pack0.createCompilationUnit("NonNullByDefault.java", buf.toString(), false, null);	
+		pack0.createCompilationUnit("NonNullByDefault.java", buf.toString(), false, null);
 	}
 
 	// note: use disableAnnotationBasedNullAnalysis, if the project is reused between test cases
@@ -67,7 +67,7 @@ public class NullTestUtils {
 		options.put(JavaCore.COMPILER_NULLABLE_ANNOTATION_NAME, "annots.Nullable");
 		options.put(JavaCore.COMPILER_NONNULL_BY_DEFAULT_ANNOTATION_NAME, "annots.NonNullByDefault");
 		project.setOptions(options);
-		
+
 		IPackageFragment pack0= sourceFolder.createPackageFragment("annots", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package annots;\n");
@@ -78,7 +78,7 @@ public class NullTestUtils {
 		buf.append("@Target({ ElementType.TYPE_USE })\n");
 		buf.append("public @interface NonNull {}\n");
 		pack0.createCompilationUnit("NonNull.java", buf.toString(), false, null);
-	
+
 		buf= new StringBuffer();
 		buf.append("package annots;\n");
 		buf.append("\n");
@@ -88,13 +88,13 @@ public class NullTestUtils {
 		buf.append("@Target({ ElementType.TYPE_USE })\n");
 		buf.append("public @interface Nullable {}\n");
 		pack0.createCompilationUnit("Nullable.java", buf.toString(), false, null);
-	
+
 		buf= new StringBuffer();
 		buf.append("package annots;\n");
 		buf.append("\n");
 		buf.append("public enum DefaultLocation { PARAMETER, RETURN_TYPE, FIELD, TYPE_BOUND, TYPE_ARGUMENT, ARRAY_CONTENTS, TYPE_PARAMETER }\n");
 		pack0.createCompilationUnit("DefaultLocation.java", buf.toString(), false, null);
-	
+
 		buf= new StringBuffer();
 		buf.append("package annots;\n");
 		buf.append("\n");
@@ -106,7 +106,7 @@ public class NullTestUtils {
 		buf.append("public @interface NonNullByDefault { DefaultLocation[] value() default {PARAMETER, RETURN_TYPE, FIELD, TYPE_BOUND, TYPE_ARGUMENT}; }\n");
 		pack0.createCompilationUnit("NonNullByDefault.java", buf.toString(), false, null);
 	}
-	
+
 	// for test classes where the project is not deleted for each test case
 	public static void disableAnnotationBasedNullAnalysis(IPackageFragmentRoot sourceFolder) {
 		IJavaProject project= sourceFolder.getJavaProject();

@@ -303,7 +303,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 	 * <code>{@link #createLaunchConfiguration(IJavaElement, String) createLaunchConfiguration}(element, null)</code>.
 	 * Extenders are recommended to extend the two-args method instead of this method.
 	 * </p>
-	 * 
+	 *
 	 * @param element element to launch
 	 *
 	 * @return a launch configuration working copy for the given element
@@ -322,7 +322,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 	 * <p>Clients can extend this method (should call super) to configure additional attributes on the
 	 * launch configuration working copy.
 	 * </p>
-	 * 
+	 *
 	 * @param element element to launch
 	 * @param testName name of the test to launch, e.g. the method name or an artificial name
 	 *            created by a JUnit runner, or <code>null</code> if none. The testName is
@@ -388,7 +388,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 	/**
 	 * Computes a human-readable name for a launch configuration. The name serves as a suggestion and
 	 * it's the caller's responsibility to make it valid and unique.
-	 * 
+	 *
 	 * @param element The Java Element that will be executed.
 	 * @param fullTestName The test name. See
 	 *            org.eclipse.jdt.internal.junit4.runner.DescriptionMatcher for supported formats.

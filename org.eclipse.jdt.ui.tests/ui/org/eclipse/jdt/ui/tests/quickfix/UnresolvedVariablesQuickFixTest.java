@@ -1491,7 +1491,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 	public void testStaticImportFavorite1() throws Exception {
 		IPreferenceStore preferenceStore= PreferenceConstants.getPreferenceStore();
 		preferenceStore.setValue(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS, "java.lang.Math.*");
-		try {		
+		try {
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 			StringBuffer buf= new StringBuffer();
 			buf.append("package pack;\n");
@@ -1502,12 +1502,12 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 			buf.append("    }\n");
 			buf.append("}\n");
 			ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-	
+
 			CompilationUnit astRoot= getASTRoot(cu);
 			ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-	
+
 			assertCorrectLabels(proposals);
-	
+
 			String[] expected= new String[1];
 			buf= new StringBuffer();
 			buf.append("package pack;\n");
@@ -1520,7 +1520,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 			buf.append("    }\n");
 			buf.append("}\n");
 			expected[0]= buf.toString();
-	
+
 			assertExpectedExistInProposals(proposals, expected);
 		} finally {
 			preferenceStore.setValue(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS, "");
@@ -2762,12 +2762,12 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
-	
-	
+
+
 	/**
 	 * Wrong quick fixes when accessing protected field in subclass in different package.
 	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=280819#c2
-	 * 
+	 *
 	 * @throws Exception if anything goes wrong
 	 * @since 3.9
 	 */
@@ -2775,7 +2775,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 	public void testVarParameterAccess() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
-		
+
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class Base {\n");

@@ -68,7 +68,7 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		int offset= buf.toString().indexOf("for");
 		return fetchConvertingProposal(cu, offset);
 	}
-	
+
 	private List<IJavaCompletionProposal> fetchConvertingProposal(ICompilationUnit cu, int offset) throws Exception {
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
@@ -228,7 +228,7 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		String expected= buf.toString();
 		assertEqualString(preview, expected);
 	}
-	
+
 	@Test
 	public void testEnumeration() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
@@ -1207,7 +1207,7 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		String expected= buf.toString();
 		assertEqualString(preview, expected);
 	}
-	
+
 	@Test
 	public void testBug510758_1() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
@@ -1234,7 +1234,7 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		assertNull(fConvertLoopProposal);
 		assertCorrectLabels(proposals);
 	}
-	
+
 	@Test
 	public void testBug510758_2() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
@@ -1258,7 +1258,7 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		offset= buf.indexOf("for", offset+1);
 		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(unit, offset);
 		assertNotNull(fConvertLoopProposal);
-		
+
 		String preview= getPreviewContent(fConvertLoopProposal);
 
 		buf= new StringBuffer();
@@ -1276,7 +1276,7 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 
 		String expected= buf.toString();
 		assertEqualString(preview, expected);
-		
+
 		assertCorrectLabels(proposals);
 	}
 }

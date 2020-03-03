@@ -65,7 +65,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowInfo;
 	public boolean isUnused() {
 		return fAccessMode == FlowInfo.UNUSED;
 	}
-	
+
 	public boolean isFinal() {
 		return Modifier.isFinal(fDeclaration.getModifiers());
 	}

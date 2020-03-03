@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -229,6 +229,14 @@ public class JdtActionConstants {
 	 * @since 3.7.1
 	 */
 	public static final String SURROUND_WITH_TRY_MULTI_CATCH= "org.eclipse.jdt.ui.actions.SurroundWithTryMultiCatch"; //$NON-NLS-1$
+
+	/**
+	 * Source menu: name of standard Surround with try-with-resources block global action (value
+	 * <code>"org.eclipse.jdt.ui.actions.SurroundWithTryWithResources"</code>).
+	 *
+	 * @since 3.21
+	 */
+	public static final String SURROUND_WITH_TRY_WITH_RESOURCES= "org.eclipse.jdt.ui.actions.SurroundWithTryWithResources"; //$NON-NLS-1$
 
 	/**
 	 * Source menu: name of standard Override Methods global action

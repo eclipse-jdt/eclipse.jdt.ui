@@ -20,7 +20,7 @@ import org.eclipse.jface.text.source.translation.ITranslatorResultCollector;
 
 /**
  * Collects the result for the JspTranslator.
- * 
+ *
  * @since 3.0
  */
 public class JspTranslatorResultCollector implements ITranslatorResultCollector {
@@ -28,7 +28,7 @@ public class JspTranslatorResultCollector implements ITranslatorResultCollector 
 	private StringBuffer fDeclarations= new StringBuffer();
 	private StringBuffer fContent= new StringBuffer();
 	private StringBuffer fLocalDeclarations= new StringBuffer();
-	
+
 	private ArrayList fContentLines= new ArrayList();
 	private ArrayList fDeclarationLines= new ArrayList();
 	private ArrayList fLocalDeclarationLines= new ArrayList();

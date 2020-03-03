@@ -27,16 +27,16 @@ import org.junit.runner.Description;
  * A description is considered to have failures if its name or one of its transitive
  * children's names are in the failures list.
  * If neither or both have failures, returns 0.
- * 
+ *
  * @since 3.6
  */
 public class FailuresFirstSorter implements Comparator<Description> {
 
 	private final Set<String> failuresList;
-	
+
 	/**
 	 * Creates a sorter.
-	 * 
+	 *
 	 * @param failuresList list of failed tests based on the description's display string
 	 */
 	public FailuresFirstSorter(String[] failuresList) {
@@ -47,12 +47,12 @@ public class FailuresFirstSorter implements Comparator<Description> {
 	 * Compares two descriptions based on the failure list.
 	 * @param d1 the first Description to compare with
 	 * @param d2 the second Description to compare with
-	 * @return -1 if only d1 has failures, 1 if only d2 has failures, 0 otherwise 
+	 * @return -1 if only d1 has failures, 1 if only d2 has failures, 0 otherwise
 	 */
 	public int compare(Description d1, Description d2) {
 		boolean d1HasFailures = hasFailures(d1);
 		boolean d2HasFailures = hasFailures(d2);
-		
+
 		if (d1HasFailures) {
 			return -1;
 		} else if (d2HasFailures) {

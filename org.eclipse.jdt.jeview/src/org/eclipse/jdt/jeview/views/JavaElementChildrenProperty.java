@@ -36,7 +36,7 @@ public abstract class JavaElementChildrenProperty extends JEAttribute {
 		if (obj == null || !obj.getClass().equals(getClass())) {
 			return false;
 		}
-		
+
 		JavaElementChildrenProperty other= (JavaElementChildrenProperty) obj;
 		if (fParent == null) {
 			if (other.fParent != null)
@@ -44,28 +44,28 @@ public abstract class JavaElementChildrenProperty extends JEAttribute {
 		} else if (! fParent.equals(other.fParent)) {
 			return false;
 		}
-		
+
 		if (fName == null) {
 			if (other.fName != null)
 				return false;
 		} else if (! fName.equals(other.fName)) {
 			return false;
 		}
-		
+
 		return true;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return (fParent != null ? fParent.hashCode() : 0)
 				+ (fName != null ? fName.hashCode() : 0);
 	}
-	
+
 	@Override
 	public Object getWrappedObject() {
 		return getChildren().length;
 	}
-	
+
 	@Override
 	public JEAttribute[] getChildren() {
 		try {

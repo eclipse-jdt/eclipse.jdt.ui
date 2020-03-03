@@ -1108,7 +1108,7 @@ public class JavaHeuristicScannerTest extends TestCase {
 		indent= fScanner.computeIndentation(offset).toString();
 		assertEquals("\t\t\t", indent);
 	}
-	
+
 	public void testDefaultMethod1() {
 		StringBuilder buf= new StringBuilder();
 		buf.append("interface I {\n");

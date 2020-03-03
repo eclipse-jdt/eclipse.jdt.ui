@@ -31,7 +31,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgDestination;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 
@@ -128,7 +127,7 @@ public interface IReorgPolicy extends IReorgDestinationValidator {
 		 * Checks if <b>Java</b> references to the selected element(s) can be updated if moved to
 		 * the selected destination. Even if <code>false</code>, participants could still update
 		 * non-Java references.
-		 * 
+		 *
 		 * @return <code>true</code> iff <b>Java</b> references to the moved element can be updated
 		 * @since 3.5
 		 */

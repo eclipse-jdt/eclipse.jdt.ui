@@ -33,7 +33,7 @@ import junit.framework.Test;
 public class Java12ProjectTestSetup extends ProjectTestSetup {
 
 	public static final String PROJECT_NAME12= "TestSetupProject12";
-	
+
 	private boolean enable_preview_feature;
 
 	public static IJavaProject getProject() {

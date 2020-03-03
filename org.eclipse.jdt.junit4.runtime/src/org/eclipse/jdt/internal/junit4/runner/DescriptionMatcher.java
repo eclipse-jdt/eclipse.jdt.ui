@@ -23,7 +23,7 @@ import org.junit.runners.Parameterized;
 
 /**
  * This class matches JUnit's {@link Description} against a string.
- * 
+ *
  * See {@link #create(Class, String)} for details.
  */
 public abstract class DescriptionMatcher {
@@ -76,7 +76,7 @@ public abstract class DescriptionMatcher {
 	 * This class extracts the leading chars from {@link Description#getMethodName()} which are a
 	 * valid Java identifier. If this identifier equals this class' identifier, the Description is
 	 * matched.
-	 * 
+	 *
 	 * Please be aware that {@link Description#getMethodName()} can be any value a JUnit runner has
 	 * computed. It is not necessarily a valid method name. For example, {@link Parameterized} uses
 	 * the format 'methodname[i]', with 'i' being the row index in the table of test data.
@@ -115,7 +115,7 @@ public abstract class DescriptionMatcher {
 	/**
 	 * Creates a matcher object that can decide for {@link Description}s whether they match the
 	 * supplied 'matchString' or not.
-	 * 
+	 *
 	 * Several strategies for matching are applied:
 	 * <ul>
 	 * <li>if 'matchString' equals {@link Description#getDisplayName()}, it's always a match</li>
@@ -126,12 +126,12 @@ public abstract class DescriptionMatcher {
 	 * 'matchString' is a Java identifier, it matches Descriptions via leading identifiers. See
 	 * {@link LeadingIdentifierMatcher}</li>
 	 * </ul>
-	 * 
+	 *
 	 * @param clazz A class that is used when 'matchString' does not have the format
 	 *            methodName(className).
-	 * 
+	 *
 	 * @param matchString A string to match JUnit's {@link Description}s against.
-	 * 
+	 *
 	 * @return A matcher object.
 	 */
 	public static DescriptionMatcher create(Class<?> clazz, String matchString) {

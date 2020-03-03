@@ -86,13 +86,13 @@ public class JavaElementPrefixPatternMatcherTest extends TestCase {
 
 	private static void doMatch(String pattern, String... labelStrings) {
 		JavaElementPrefixPatternMatcher matcher= new JavaElementPrefixPatternMatcher(pattern);
-		
+
 		ArrayList<String> matched= new ArrayList<>();
 		for (String label : ALL_STRING_CONSTANTS) {
 			if (matcher.matches(label))
 				matched.add(label);
 		}
-		
+
 		StringAsserts.assertEqualStringsIgnoreOrder(CollectionsUtil.toArray(matched, String.class), labelStrings);
 	}
 
@@ -105,7 +105,7 @@ public class JavaElementPrefixPatternMatcherTest extends TestCase {
 		doMatch("*", ALL_STRING_CONSTANTS);
 	}
 
-	
+
 	public void testMethodPattern_1() throws Exception {
 		doMatch("*tos", toString_int_int, toString_int);
 	}
@@ -144,13 +144,13 @@ public class JavaElementPrefixPatternMatcherTest extends TestCase {
 	}
 
 	public void testMethodPattern_10() throws Exception {
-		doMatch("to*ng(", toString_int_int, toString_int);		
+		doMatch("to*ng(", toString_int_int, toString_int);
 	}
 
 	public void testMethodPattern_11() throws Exception {
 		doMatch("tS*ng(");
 	}
-	
+
 	public void testReturnPattern_1() throws Exception {
 		doMatch("*: int", parseInt_String, parseInt_String_int, MIN_VALUE__int);
 	}
@@ -163,7 +163,7 @@ public class JavaElementPrefixPatternMatcherTest extends TestCase {
 	public void testFieldPattern_1() throws Exception {
 		doMatch("DT : ", DigitTens__char_);
 	}
-	
+
 
 	public void testTypePattern_2() throws Exception {
 		doMatch("AI", AtomicInteger);

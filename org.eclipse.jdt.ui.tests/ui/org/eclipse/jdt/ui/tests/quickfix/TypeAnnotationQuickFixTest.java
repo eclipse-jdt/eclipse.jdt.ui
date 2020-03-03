@@ -134,10 +134,10 @@ public class TypeAnnotationQuickFixTest extends QuickFixTest {
 		for (int p= 0; p < nProblems; p++) {
 			ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, nProblems, p, null);
 			assertCorrectLabels(proposals);
-			
+
 			CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 			String preview= getPreviewContent(proposal);
-			
+
 			String expected= prefix +
 					"public class Test {\n" +
 					testCaseSpecificOutputs[p] + "\n" +
@@ -310,7 +310,7 @@ public class TypeAnnotationQuickFixTest extends QuickFixTest {
 				"@Nullable test.File f1a, f1b;",
 				"test.@Nullable File f1a, f1b;");
 	}
-	
+
 	@Test
 	public void testNormalAnnotationP4() throws Exception {
 		runQuickFixTest(

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -245,15 +245,19 @@ public final class CorrectionMessages extends NLS {
 	public static String UnresolvedElementsSubProcessor_arraychangetolength_description;
 	public static String UnresolvedElementsSubProcessor_addnewkeyword_description;
 	public static String JavadocTagsSubProcessor_addjavadoc_method_description;
+	public static String JavadocTagsSubProcessor_addjavadoc_module_description;
 	public static String JavadocTagsSubProcessor_addjavadoc_type_description;
 	public static String JavadocTagsSubProcessor_addjavadoc_field_description;
 	public static String JavadocTagsSubProcessor_addjavadoc_paramtag_description;
+	public static String JavadocTagsSubProcessor_addjavadoc_providestag_description;
 	public static String JavadocTagsSubProcessor_addjavadoc_throwstag_description;
 	public static String JavadocTagsSubProcessor_addjavadoc_returntag_description;
+	public static String JavadocTagsSubProcessor_addjavadoc_usestag_description;
 	public static String JavadocTagsSubProcessor_addjavadoc_enumconst_description;
 	public static String JavadocTagsSubProcessor_addjavadoc_allmissing_description;
 	public static String JavadocTagsSubProcessor_qualifylinktoinner_description;
 	public static String JavadocTagsSubProcessor_removetag_description;
+	public static String JavadocTagsSubProcessor_removeduplicatetag_description;
 	public static String NoCorrectionProposal_description;
 	public static String MarkerResolutionProposal_additionaldesc;
 	public static String NewCUCompletionUsingWizardProposal_createclass_description;

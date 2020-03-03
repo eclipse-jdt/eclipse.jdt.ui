@@ -175,7 +175,7 @@ public class JUnitContainerWizardPage extends NewElementWizardPage implements IC
 
 		setControl(composite);
 	}
-	
+
 	@Override
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);

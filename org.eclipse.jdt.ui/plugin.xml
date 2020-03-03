@@ -3749,6 +3749,12 @@
             id="org.eclipse.jdt.ui.edit.text.java.surround.with.try.multicatch">
       </command>
       <command
+            name="%ActionDefinition.surroundWith.tryWithResources.name"
+            description="%ActionDefinition.surroundWith.tryWithResources.description"
+            categoryId="org.eclipse.jdt.ui.category.source"
+            id="org.eclipse.jdt.ui.edit.text.java.surround.with.try.with.resources">
+      </command>
+      <command
             name="%ActionDefinition.cleanUp.name"
             description="%ActionDefinition.cleanUp.description"
             categoryId="org.eclipse.jdt.ui.category.source"
@@ -7072,9 +7078,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.lambda">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.LambdaExpressionAndMethodRefCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.lambda_and_method_ref"
+            runAfter="org.eclipse.jdt.ui.cleanup.expressions">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.NumberSuffixCleanUp"
             id="org.eclipse.jdt.ui.cleanup.number_suffix"
-            runAfter="org.eclipse.jdt.ui.cleanup.expressions">
+            runAfter="org.eclipse.jdt.ui.cleanup.lambda_and_method_ref">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp"

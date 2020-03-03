@@ -411,7 +411,7 @@ public class UnresolvedMethodsQuickFixTest18 extends QuickFixTest {
 		options.put(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
 		JavaCore.setOptions(options);
 		JavaProjectHelper.addLibrary(fJProject1, new Path(Java18ProjectTestSetup.getJdtAnnotations20Path()));
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 
 		StringBuffer buf;
@@ -476,7 +476,7 @@ public class UnresolvedMethodsQuickFixTest18 extends QuickFixTest {
 		buf.append("		return null;\n");
 		buf.append("	}\n");
 		buf.append("}");
-		assertProposalPreviewEquals(buf.toString(), "Create 'f()' in super type 'I1'", proposals);		
+		assertProposalPreviewEquals(buf.toString(), "Create 'f()' in super type 'I1'", proposals);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -504,7 +504,7 @@ public class UnresolvedMethodsQuickFixTest18 extends QuickFixTest {
 		buf.append("		return null;\n");
 		buf.append("	}\n");
 		buf.append("}");
-		assertProposalPreviewEquals(buf.toString(), "Create 'f()' in super type 'I2'", proposals);		
+		assertProposalPreviewEquals(buf.toString(), "Create 'f()' in super type 'I2'", proposals);
 	}
 
 	@Test
@@ -513,7 +513,7 @@ public class UnresolvedMethodsQuickFixTest18 extends QuickFixTest {
 		options.put(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
 		JavaCore.setOptions(options);
 		JavaProjectHelper.addLibrary(fJProject1, new Path(Java18ProjectTestSetup.getJdtAnnotations20Path()));
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 
 		StringBuffer buf;
@@ -582,7 +582,7 @@ public class UnresolvedMethodsQuickFixTest18 extends QuickFixTest {
 		buf.append("		return x1 == x2;\n");
 		buf.append("	}\n");
 		buf.append("}");
-		assertProposalPreviewEquals(buf.toString(), "Create method 'g(Number, Number)' in type 'I1'", proposals1);		
+		assertProposalPreviewEquals(buf.toString(), "Create method 'g(Number, Number)' in type 'I1'", proposals1);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -611,7 +611,7 @@ public class UnresolvedMethodsQuickFixTest18 extends QuickFixTest {
 		buf.append("		return x1 == x2;\n");
 		buf.append("	}\n");
 		buf.append("}");
-		assertProposalPreviewEquals(buf.toString(), "Create method 'g(Number, Number)' in type 'I2'", proposals2);		
+		assertProposalPreviewEquals(buf.toString(), "Create method 'g(Number, Number)' in type 'I2'", proposals2);
 	}
 	@Test
 	public void testBug528876() throws Exception {
@@ -633,13 +633,13 @@ public class UnresolvedMethodsQuickFixTest18 extends QuickFixTest {
 			buf.append("\n");
 			buf.append("");
 			ICompilationUnit cu= pack1.createCompilationUnit("Bla.java", buf.toString(), false, null);
-		
+
 			CompilationUnit astRoot= getASTRoot(cu);
 			ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		
+
 			assertCorrectLabels(proposals);
 			assertNumberOfProposals(proposals, 1);
-		
+
 			buf= new StringBuffer();
 			buf.append("package pack;\n");
 			buf.append("import annots.*;\n");
@@ -656,7 +656,7 @@ public class UnresolvedMethodsQuickFixTest18 extends QuickFixTest {
 			buf.append("}\n");
 			buf.append("\n");
 			buf.append("");
-		
+
 			assertProposalPreviewEquals(buf.toString(), "Create attribute 'x()'", proposals);
 		} finally {
 			NullTestUtils.disableAnnotationBasedNullAnalysis(fSourceFolder);

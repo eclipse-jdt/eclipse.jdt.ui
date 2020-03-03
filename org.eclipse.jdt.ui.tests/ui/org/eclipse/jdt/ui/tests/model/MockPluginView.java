@@ -215,12 +215,12 @@ public class MockPluginView extends ViewPart implements INavigatorContentService
 		IDiff diff= createOutgoingChange(project,path);
 		add(diff);
 	}
-	
+
 	private IDiff createOutgoingChange(IProject project, String path) {
 		ResourceDiff diff= createResourceDiff(project, path, IDiff.CHANGE);
 		return new ThreeWayDiff(diff, null);
 	}
-	
+
 	private void add(IDiff diff) {
 		((ResourceDiffTree)fContext.getDiffTree()).add(diff);
 	}

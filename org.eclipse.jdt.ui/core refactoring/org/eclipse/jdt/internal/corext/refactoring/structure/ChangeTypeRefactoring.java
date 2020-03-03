@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -57,6 +57,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.QualifiedName;
@@ -100,6 +101,7 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ConstraintCol
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ConstraintOperator;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ConstraintVariable;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ConstraintVariableFactory;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.DeclaringTypeVariable;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ExpressionVariable;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.FullConstraintCreator;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ITypeConstraint;
@@ -1224,12 +1226,13 @@ public class ChangeTypeRefactoring extends Refactoring {
 	}
 
 	private boolean isValidSimpleConstraint(ITypeBinding type,
-											Collection<ConstraintVariable> relevantVars,
-											SimpleTypeConstraint stc){
+			Collection<ConstraintVariable> relevantVars,
+			SimpleTypeConstraint stc) {
 		if (relevantVars.contains(stc.getLeft())) { // upper bound
-			if (!isSubTypeOf(type, findType(stc.getRight()))) {
-				return false;
+			if (isSubTypeOf(type, findType(stc.getRight()))) {
+				return true;
 			}
+			return checkSuperTypeScope(type);
 		}
 		return true;
 	}
@@ -1252,6 +1255,43 @@ public class ChangeTypeRefactoring extends Refactoring {
 		return false;
 	}
 
+	private boolean checkSuperTypeScope(ITypeBinding superType) {
+		if ("java.lang.Object".equals(superType.getQualifiedName())) { //$NON-NLS-1$
+			return false; // we'll never propose Object
+		}
+
+		for (ITypeConstraint tc : fRelevantConstraints) {
+			if (tc.isSimpleTypeConstraint()) {
+				SimpleTypeConstraint stc= (SimpleTypeConstraint) tc;
+
+				ITypeBinding typeBinding= stc.getRight().getBinding();
+				boolean isMethodFromObject= "java.lang.Object".equals(typeBinding.getQualifiedName()); //$NON-NLS-1$
+				if (isMethodFromObject) {
+					if (superType.isInterface() || Modifier.isAbstract(superType.getModifiers())) {
+						return false;
+					}
+					continue;
+				}
+
+				if (stc.getRight() instanceof DeclaringTypeVariable) {
+					IBinding memberBinding= ((DeclaringTypeVariable) stc.getRight()).getMemberBinding();
+					if (memberBinding instanceof IMethodBinding) {
+						IMethodBinding methodBinding= Bindings.findMethodInHierarchy(superType, memberBinding.getName(), (ITypeBinding[]) null);
+						if (methodBinding == null) {
+							if (!(superType.isInterface() && isMethodFromObject)) {
+								return false;
+							}
+						}
+					}
+				} else {
+					if (!isSubTypeOf(superType, typeBinding)) {
+						return false;
+					}
+				}
+			}
+		}
+		return true;
+	}
 
 	private ITypeBinding findType(ConstraintVariable cv) {
 		return cv.getBinding();

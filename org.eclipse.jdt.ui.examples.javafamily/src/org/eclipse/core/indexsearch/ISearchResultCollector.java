@@ -21,7 +21,7 @@ import org.eclipse.core.runtime.CoreException;
  * query to a <code>SearchEngine</code>. Clients must implement this interface and pass
  * an instance to the <code>search(...)</code> methods.
  * <p>
- * The order of the results is unspecified. Clients must not rely on this order to display results, 
+ * The order of the results is unspecified. Clients must not rely on this order to display results,
  * but they should sort these results.
  * <p>
  * Clients may implement this interface.
@@ -30,7 +30,7 @@ import org.eclipse.core.runtime.CoreException;
  * @see SearchEngine#search
  */
 public interface ISearchResultCollector {
-	
+
 	/**
 	 * Accepts the given search result.
 	 *

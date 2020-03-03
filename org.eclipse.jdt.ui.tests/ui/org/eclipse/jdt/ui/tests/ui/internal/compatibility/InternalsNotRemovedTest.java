@@ -18,7 +18,7 @@ import org.eclipse.text.tests.Accessor;
 
 /**
  * Ensures that internal code which is used by a product doesn't get removed.
- * 
+ *
  * @deprecated to hide deprecation warnings
  * @since 3.6
  */

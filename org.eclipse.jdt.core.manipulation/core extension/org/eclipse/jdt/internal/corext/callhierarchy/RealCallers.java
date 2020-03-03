@@ -15,14 +15,14 @@ package org.eclipse.jdt.internal.corext.callhierarchy;
 
 /**
  * Class for the real callers.
- * 
+ *
  * @since 3.5
  */
 	public class RealCallers extends CallerMethodWrapper {
 
 		/**
 		 * Sets the parent method wrapper.
-		 * 
+		 *
 		 * @param methodWrapper the method wrapper
 		 * @param methodCall the method call
 		 */

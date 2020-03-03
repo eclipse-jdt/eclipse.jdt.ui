@@ -185,11 +185,11 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 	@Override
 	public void requestClasspathContainerUpdate(IPath containerPath, IJavaProject project, IClasspathContainer containerSuggestion) throws CoreException {
 		IEclipsePreferences preferences= InstanceScope.INSTANCE.getNode(JUnitCorePlugin.CORE_PLUGIN_ID);
-		
+
 		IClasspathEntry[] entries= containerSuggestion.getClasspathEntries();
 		if (entries.length >= 1 && isValidJUnitContainerPath(containerPath)) {
 			String version= containerPath.segment(1);
-			
+
 			// only modifiable entry is Javadoc location
 			for (IClasspathEntry entry : entries) {
 				String preferenceKey= getPreferenceKey(entry, version);
@@ -200,7 +200,7 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 					if (!defaultValue.equals(preferences.get(preferenceKey, defaultValue))) {
 						preferences.put(preferenceKey, defaultValue);
 					}
-					
+
 					/*
 					* The following would be correct, but would not allow to revert to the default.
 					* There's no concept of "default value" for a classpath attribute, see

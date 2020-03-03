@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -19,6 +19,8 @@
  *     Stephan Herrmann - Configuration for
  *		 Bug 463360 - [override method][null] generating method override should not create redundant null annotations
  *     Fabrice TIERCELIN - Methods to identify a signature
+ *     Pierre-Yves B. (pyvesdev@gmail.com) - contributed fix for
+ *       Bug 434747 - [inline] Inlining a local variable leads to ambiguity with overloaded methods
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.dom;
 
@@ -127,6 +129,8 @@ import org.eclipse.jdt.core.formatter.IndentManipulation;
 import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.core.manipulation.util.Strings;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeEnvironment;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -416,6 +420,24 @@ public class ASTNodes {
 
 	public static boolean isStatic(BodyDeclaration declaration) {
 		return Modifier.isStatic(declaration.getModifiers());
+	}
+
+	/**
+	 * True if the method is static, false if it is not or null if it is unknown.
+	 *
+	 * @param method The method
+	 * @return True if the method is static, false if it is not or null if it is unknown.
+	 */
+	public static Boolean isStatic(final MethodInvocation method) {
+		Expression calledType= method.getExpression();
+
+		if (method.resolveMethodBinding() != null) {
+			return (method.resolveMethodBinding().getModifiers() & Modifier.STATIC) != 0;
+		} else if ((calledType instanceof Name) && ((Name) calledType).resolveBinding().getKind() == IBinding.TYPE) {
+			return Boolean.TRUE;
+		}
+
+		return null;
 	}
 
 	public static List<BodyDeclaration> getBodyDeclarations(ASTNode node) {
@@ -838,6 +860,11 @@ public class ASTNodes {
 		} else if (! TypeRules.canAssign(initializerType, referenceType)) {
 			if (!Bindings.containsTypeVariables(referenceType))
 				return referenceType;
+
+		} else if (!initializerType.isEqualTo(referenceType)) {
+			if (isTargetAmbiguous(reference, initializerType)) {
+				return referenceType;
+			}
 		}
 
 		return null;
@@ -857,6 +884,71 @@ public class ASTNodes {
 	 * @since 3.10
 	 */
 	public static boolean isTargetAmbiguous(Expression expression, boolean expressionIsExplicitlyTyped) {
+		ParentSummary targetSummary= getParentSummary(expression);
+		if (targetSummary == null) {
+			return false;
+		}
+
+		if (targetSummary.methodBinding != null) {
+			ITypeBinding invocationTargetType= getInvocationType(expression.getParent(), targetSummary.methodBinding, targetSummary.invocationQualifier);
+			if (invocationTargetType != null) {
+				TypeBindingVisitor visitor= new FunctionalInterfaceAmbiguousMethodAnalyzer(invocationTargetType, targetSummary.methodBinding, targetSummary.argumentIndex,
+						targetSummary.argumentCount, expressionIsExplicitlyTyped);
+				return !(visitor.visit(invocationTargetType) && Bindings.visitHierarchy(invocationTargetType, visitor));
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Checks whether overloaded methods can result in an ambiguous method call or a semantic change
+	 * when the <code>expression</code> argument is inlined.
+	 *
+	 * @param expression the method argument, which is a functional interface instance
+	 * @param initializerType the initializer type of the variable to inline
+	 * @return <code>true</code> if overloaded methods can result in an ambiguous method call or a
+	 *         semantic change, <code>false</code> otherwise
+	 *
+	 * @since 3.19
+	 */
+	public static boolean isTargetAmbiguous(Expression expression, ITypeBinding initializerType) {
+		ParentSummary parentSummary= getParentSummary(expression);
+		if (parentSummary == null) {
+			return false;
+		}
+
+		IMethodBinding methodBinding= parentSummary.methodBinding;
+		if (methodBinding != null) {
+			ITypeBinding[] parameterTypes= methodBinding.getParameterTypes();
+			int argumentIndex= parentSummary.argumentIndex;
+			if (methodBinding.isVarargs() && argumentIndex >= parameterTypes.length - 1) {
+				argumentIndex= parameterTypes.length - 1;
+				initializerType= initializerType.createArrayType(1);
+			}
+			parameterTypes[argumentIndex]= initializerType;
+
+			ITypeBinding invocationType= getInvocationType(expression.getParent(), methodBinding, parentSummary.invocationQualifier);
+			if (invocationType != null) {
+				TypeEnvironment typeEnvironment= new TypeEnvironment();
+				TypeBindingVisitor visitor= new AmbiguousMethodAnalyzer(typeEnvironment, methodBinding, typeEnvironment.create(parameterTypes));
+				if (!visitor.visit(invocationType)) {
+					return true;
+				} else if (invocationType.isInterface()) {
+					return !Bindings.visitInterfaces(invocationType, visitor);
+				} else if (Modifier.isAbstract(invocationType.getModifiers())) {
+					return !Bindings.visitHierarchy(invocationType, visitor);
+				} else {
+					// it is not needed to visit interfaces if receiver is a concrete class
+					return !Bindings.visitSuperclasses(invocationType, visitor);
+				}
+			}
+		}
+
+		return true;
+	}
+
+	private static ParentSummary getParentSummary(Expression expression) {
 		StructuralPropertyDescriptor locationInParent= expression.getLocationInParent();
 
 		while (locationInParent == ParenthesizedExpression.EXPRESSION_PROPERTY
@@ -904,19 +996,28 @@ public class ASTNodes {
 			argumentIndex= enumConstantDecl.arguments().indexOf(expression);
 			argumentCount= enumConstantDecl.arguments().size();
 		} else {
-			return false;
+			return null;
 		}
 
-		if (methodBinding != null) {
-			ITypeBinding invocationTargetType;
-			invocationTargetType= getInvocationType(parent, methodBinding, invocationQualifier);
-			if (invocationTargetType != null) {
-				TypeBindingVisitor visitor= new AmbiguousTargetMethodAnalyzer(invocationTargetType, methodBinding, argumentIndex, argumentCount, expressionIsExplicitlyTyped);
-				return !(visitor.visit(invocationTargetType) && Bindings.visitHierarchy(invocationTargetType, visitor));
-			}
-		}
+		return new ParentSummary(methodBinding, argumentIndex, argumentCount, invocationQualifier);
+	}
 
-		return true;
+	private static class ParentSummary {
+
+		private final IMethodBinding methodBinding;
+
+		private final int argumentIndex;
+
+		private final int argumentCount;
+
+		private final Expression invocationQualifier;
+
+		ParentSummary(IMethodBinding methodBinding, int argumentIndex, int argumentCount, Expression invocationQualifier) {
+			this.methodBinding= methodBinding;
+			this.argumentIndex= argumentIndex;
+			this.argumentCount= argumentCount;
+			this.invocationQualifier= invocationQualifier;
+		}
 	}
 
 	/**
@@ -960,7 +1061,56 @@ public class ASTNodes {
 		return invocationType;
 	}
 
-	private static class AmbiguousTargetMethodAnalyzer implements TypeBindingVisitor {
+	private static class AmbiguousMethodAnalyzer implements TypeBindingVisitor {
+		private TypeEnvironment fTypeEnvironment;
+		private TType[] fTypes;
+		private IMethodBinding fOriginal;
+
+		public AmbiguousMethodAnalyzer(TypeEnvironment typeEnvironment, IMethodBinding original, TType[] types) {
+			fTypeEnvironment= typeEnvironment;
+			fOriginal= original;
+			fTypes= types;
+		}
+
+		@Override
+		public boolean visit(ITypeBinding node) {
+			IMethodBinding[] methods= node.getDeclaredMethods();
+			for (int i= 0; i < methods.length; i++) {
+				IMethodBinding candidate= methods[i];
+				if (candidate == fOriginal) {
+					continue;
+				}
+				if (fOriginal.getName().equals(candidate.getName())) {
+					if (canImplicitlyCall(candidate)) {
+						return false;
+					}
+				}
+			}
+			return true;
+		}
+
+		/**
+		 * Returns <code>true</code> if the method can be called without explicit casts; otherwise
+		 * <code>false</code>.
+		 *
+		 * @param candidate the method to test
+		 * @return <code>true</code> if the method can be called without explicit casts
+		 */
+		private boolean canImplicitlyCall(IMethodBinding candidate) {
+			ITypeBinding[] parameters= candidate.getParameterTypes();
+			if (parameters.length != fTypes.length) {
+				return false;
+			}
+			for (int i= 0; i < parameters.length; i++) {
+				if (!fTypes[i].canAssignTo(fTypeEnvironment.create(parameters[i]))) {
+					return false;
+				}
+			}
+			return true;
+		}
+	}
+
+	private static class FunctionalInterfaceAmbiguousMethodAnalyzer implements TypeBindingVisitor {
 		private ITypeBinding fDeclaringType;
 		private IMethodBinding fOriginalMethod;
 		private int fArgIndex;
@@ -976,7 +1126,7 @@ public class ASTNodes {
 		 * @param expressionIsExplicitlyTyped <code>true</code> iff the intended replacement for <code>expression</code>
 		 *         is an explicitly typed lambda expression (JLS8 15.27.1)
 		 */
-		public AmbiguousTargetMethodAnalyzer(ITypeBinding declaringType, IMethodBinding originalMethod, int argumentIndex, int argumentCount, boolean expressionIsExplicitlyTyped) {
+		public FunctionalInterfaceAmbiguousMethodAnalyzer(ITypeBinding declaringType, IMethodBinding originalMethod, int argumentIndex, int argumentCount, boolean expressionIsExplicitlyTyped) {
 			fDeclaringType= declaringType;
 			fOriginalMethod= originalMethod;
 			fArgIndex= argumentIndex;
@@ -1302,6 +1452,35 @@ public class ASTNodes {
 		return current;
 	}
 
+    /**
+     * Returns the same node after removing any parentheses around it.
+     *
+     * @param node the node around which parentheses must be removed
+     * @return the same node after removing any parentheses around it. If there are
+     *         no parentheses around it then the exact same node is returned
+     */
+    public static ASTNode getUnparenthesedExpression(ASTNode node) {
+        if (node instanceof Expression) {
+            return getUnparenthesedExpression((Expression) node);
+        }
+        return node;
+    }
+
+    /**
+     * Returns the same expression after removing any parentheses around it.
+     *
+     * @param expression the expression around which parentheses must be removed
+     * @return the same expression after removing any parentheses around it If there
+     *         are no parentheses around it then the exact same expression is
+     *         returned
+     */
+    public static Expression getUnparenthesedExpression(Expression expression) {
+		if (expression != null && expression.getNodeType() == ASTNode.PARENTHESIZED_EXPRESSION) {
+            return getUnparenthesedExpression(((ParenthesizedExpression) expression).getExpression());
+        }
+        return expression;
+    }
+
 	/**
 	 * Returns <code>true</code> iff <code>parent</code> is a true ancestor of <code>node</code>
 	 * (i.e. returns <code>false</code> if <code>parent == node</code>).
@@ -1577,6 +1756,7 @@ public class ASTNodes {
 			return ((SimpleName) name).isDeclaration();
 		}
 	}
+
     /**
      * Returns whether the provided method invocation invokes a method with the
      * provided method signature. The method signature is compared against the
@@ -1608,7 +1788,7 @@ public class ASTNodes {
 	 * @return true if the provided method invocation matches the provided method signature, false
 	 *         otherwise
 	 */
-	private static boolean usesGivenSignature(final IMethodBinding methodBinding, final String typeQualifiedName, final String methodName,
+	public static boolean usesGivenSignature(final IMethodBinding methodBinding, final String typeQualifiedName, final String methodName,
 			final String... parameterTypesQualifiedNames) {
 		// Let's do the fast checks first
 		if (methodBinding == null || !methodName.equals(methodBinding.getName())

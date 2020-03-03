@@ -139,7 +139,7 @@ public class ASTFlattener extends GenericVisitor {
 			this.fBuffer.append('>');
 		}
 	}
-	
+
 	void printTypeAnnotations(AnnotatableType node) {
 		if (node.getAST().apiLevel() >= JLS8) {
 			printAnnotationsList(node.annotations());
@@ -535,7 +535,7 @@ public class ASTFlattener extends GenericVisitor {
 		this.fBuffer.append(";");//$NON-NLS-1$
 		return false;
 	}
-	
+
 	/*
 	 * @see ASTVisitor#visit(CreationReference)
 	 */
@@ -1643,7 +1643,7 @@ public class ASTFlattener extends GenericVisitor {
 		visitSwitchNode(node);
 		return false;
 	}
-	
+
 	@Override
 	public boolean visit(SwitchExpression node) {
 		visitSwitchNode(node);

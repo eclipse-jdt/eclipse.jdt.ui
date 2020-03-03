@@ -567,7 +567,7 @@ public class PackagesViewDeltaTests extends TestCase {
 
 	/**
 	 * Method compareArrays. Both arrays must be of IPackageFragments or compare will fail.
-	 * 
+	 *
 	 * @param children the children
 	 * @param expectedChildren the expected children
 	 * @return boolean returns true if the arrays contain the same elements

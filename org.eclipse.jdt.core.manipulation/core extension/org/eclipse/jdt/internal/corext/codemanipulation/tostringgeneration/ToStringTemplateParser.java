@@ -48,7 +48,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationMessages;
  * variable and exactly one <code>${otherMembers}</code> variable. Additionally, no
  * <code>${member.*}</code> variables can follow the <code>${otherMembers}</code> variable.
  * </p>
- * 
+ *
  * @since 3.5
  */
 public class ToStringTemplateParser {
@@ -126,7 +126,7 @@ public class ToStringTemplateParser {
 	/**
 	 * This method is used in {@link #parseTemplate(String)} to determine what member specific
 	 * variables are expected in a template.
-	 * 
+	 *
 	 * @return member related variables recognized by this parser
 	 */
 	protected String[] getMemberRelatedVariables() {
@@ -136,7 +136,7 @@ public class ToStringTemplateParser {
 	/**
 	 * This method is used in {@link #parseTemplate(String)} to determine what object related
 	 * variables are expected in a template.
-	 * 
+	 *
 	 * @return object related variables recognized by this parser
 	 */
 	protected String[] getObjectRelatedVariables() {
@@ -146,7 +146,7 @@ public class ToStringTemplateParser {
 	/**
 	 * This method is used in {@link #parseTemplate(String)}. It returns all variables returned by
 	 * {@link #getMemberRelatedVariables()} and {@link #getObjectRelatedVariables()} (sum of sets).
-	 * 
+	 *
 	 * @return member and object related variables recognized by this parser (all variables but
 	 *         {$otherMembers})
 	 */

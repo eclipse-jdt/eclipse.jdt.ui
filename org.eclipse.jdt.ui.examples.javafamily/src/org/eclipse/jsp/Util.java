@@ -17,7 +17,7 @@ import java.io.*;
 import java.io.File;
 
 public class Util {
-	
+
 	static char[] getChars(String s) {
 		int l= s.length();
 		char[] cc= new char[l];
@@ -25,7 +25,7 @@ public class Util {
 			s.getChars(0, l, cc, 0);
 		return cc;
 	}
-	
+
 	static char[] getFileCharContent(File file, String encoding) throws IOException {
 		System.out.println("****jdt.internal.compiler.util.Util.getFileCharContent: " + file + " " + encoding); //$NON-NLS-1$ //$NON-NLS-2$
 		InputStream stream = null;

@@ -94,7 +94,7 @@ public abstract class AbstractAnnotateAssistTests extends QuickFixTest {
 								String annotationpath, String compliance, ClassFileFilter classFileFilter) throws CoreException, IOException
 	{
 		IProject project= createLibrary(javaProject, jarName, sourceZipName, pathAndContents, compliance, classFileFilter);
-	
+
 		String projectPath= '/' + project.getName() + '/';
 		IClasspathEntry entry= JavaCore.newLibraryEntry(
 				new Path(projectPath + jarName),
@@ -148,7 +148,7 @@ public abstract class AbstractAnnotateAssistTests extends QuickFixTest {
 	protected static void assertEqualLines(String message, String expected, String actual) {
 		String[] expectedLines= Strings.convertIntoLines(expected);
 		String[] actualLines= Strings.convertIntoLines(actual);
-	
+
 		String expected2= (expectedLines == null ? null : Strings.concatenate(expectedLines, "\n"));
 		String actual2= (actualLines == null ? null : Strings.concatenate(actualLines, "\n"));
 		assertEquals(message, expected2, actual2);

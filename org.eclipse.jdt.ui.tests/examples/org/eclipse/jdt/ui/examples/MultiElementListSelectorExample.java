@@ -73,7 +73,7 @@ public class MultiElementListSelectorExample {
 				elements[i][k]= "elem-" + i + "-" + k;
 			}
 		}
-		
+
 		Display display= new Display();
 		MultiElementListSelectionDialog d= new MultiElementListSelectionDialog(new Shell(display), elementRenderer);
 		d.setTitle("Title");

@@ -647,7 +647,7 @@ public class ImportOrganizeTest extends CoreTests {
 		buf.append("}\n");
 		assertEqualString(cu.getSource(), buf.toString());
 	}
-	
+
 	public void testImportToStarWithComments() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -2444,7 +2444,7 @@ public class ImportOrganizeTest extends CoreTests {
 		assertEquals(2, op.getNumberOfImportsAdded());
 		assertEquals(1, op.getNumberOfImportsRemoved());
 	}
-	
+
 	public void testImportCountAddandRemoveWithComments() throws Exception {
 	    IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -3184,10 +3184,10 @@ public class ImportOrganizeTest extends CoreTests {
 		buf.append("}\n");
 		assertEqualString(cu.getSource(), buf.toString());
 	}
-	
+
 	public void testJavadocImports_bug319860() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
-		
+
 		IPackageFragment pack0= sourceFolder.createPackageFragment("p", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package p;\n");
@@ -3204,13 +3204,13 @@ public class ImportOrganizeTest extends CoreTests {
 		buf.append("    public class C {}\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack0.createCompilationUnit("Main.java", buf.toString(), false, null);
-		
+
 		String[] order= new String[] {};
 		IChooseImportQuery query= createQuery("JavadocImports_bug319860", new String[] {}, new int[] {});
-		
+
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
-		
+
 		buf= new StringBuffer();
 		buf.append("package p;\n");
 		buf.append("\n");

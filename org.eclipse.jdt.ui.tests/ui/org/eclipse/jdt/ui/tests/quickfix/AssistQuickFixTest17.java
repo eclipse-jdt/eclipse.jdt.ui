@@ -694,7 +694,7 @@ public class AssistQuickFixTest17 extends QuickFixTest {
 
 		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2, expected3 });
 	}
-	
+
 	@Test
 	public void testReplaceMultiCatchClauseWithThrows4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -838,7 +838,7 @@ public class AssistQuickFixTest17 extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected3= buf.toString();
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.lang.reflect.InvocationTargetException;\n");

@@ -51,7 +51,7 @@ public class JUnitCorePlugin extends Plugin {
 	private static JUnitCorePlugin fgPlugin= null;
 
 	public static final String CORE_PLUGIN_ID= "org.eclipse.jdt.junit.core"; //$NON-NLS-1$
-	
+
 	/**
 	 * Plug-in ID of the <b>UI</b> plug-in ("org.eclipse.jdt.junit").
 	 * @see #CORE_PLUGIN_ID
@@ -151,7 +151,7 @@ public class JUnitCorePlugin extends Plugin {
 
 	/**
 	 * Returns a service with the specified name or <code>null</code> if none.
-	 * 
+	 *
 	 * @param serviceName name of service
 	 * @return service object or <code>null</code> if none
 	 * @since 3.5
@@ -278,7 +278,7 @@ public class JUnitCorePlugin extends Plugin {
 	 */
 	public ListenerList<TestRunListener> getNewTestRunListeners() {
 		loadTestRunListeners();
-		
+
 		return fNewTestRunListeners;
 	}
 

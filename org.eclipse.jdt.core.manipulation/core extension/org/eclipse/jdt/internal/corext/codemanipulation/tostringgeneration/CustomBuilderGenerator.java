@@ -67,7 +67,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
  * </p>
  * <p>
  * Generated methods look like this:
- * 
+ *
  * <pre>
  * public String toString() {
  * 	ExternalBuilder builder= new ExternalBuilder();
@@ -76,9 +76,9 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
  * 	return builder.toString();
  * }
  * </pre>
- * 
+ *
  * </p>
- * 
+ *
  * @since 3.5
  */
 public class CustomBuilderGenerator extends AbstractToStringGenerator {
@@ -117,9 +117,9 @@ public class CustomBuilderGenerator extends AbstractToStringGenerator {
 
 	/**
 	 * Information about versions of append method in the builder type
-	 * 
+	 *
 	 * key: String - fully qualified name of a member type
-	 * 
+	 *
 	 * value: {@link AppendMethodInformation} - information about corresponding method
 	 */
 	private HashMap<String, AppendMethodInformation> appendMethodSpecificTypes= new HashMap<>();

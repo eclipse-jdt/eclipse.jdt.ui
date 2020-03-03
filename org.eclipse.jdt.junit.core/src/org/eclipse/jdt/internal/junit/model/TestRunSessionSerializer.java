@@ -90,7 +90,7 @@ public class TestRunSessionSerializer implements XMLReader {
 			addCDATA(atts, IXMLTags.ATTR_INCLUDE_TAGS, includeTags);
 		}
 		String excludeTags= fTestRunSession.getExcludeTags();
-		if (excludeTags != null && !excludeTags.trim().isEmpty()) { 
+		if (excludeTags != null && !excludeTags.trim().isEmpty()) {
 			addCDATA(atts, IXMLTags.ATTR_EXCLUDE_TAGS, excludeTags);
 		}
 		startElement(IXMLTags.NODE_TESTRUN, atts);
@@ -174,14 +174,14 @@ public class TestRunSessionSerializer implements XMLReader {
 
 	private void addFailure(TestElement testElement) throws SAXException {
 		FailureTrace failureTrace= testElement.getFailureTrace();
-		
+
 		if (testElement.isAssumptionFailure()) {
 			startElement(IXMLTags.NODE_SKIPPED, NO_ATTS);
 			if (failureTrace != null) {
 				addCharacters(failureTrace.getTrace());
 			}
 			endElement(IXMLTags.NODE_SKIPPED);
-			
+
 		} else if (failureTrace != null) {
 			AttributesImpl failureAtts= new AttributesImpl();
 //				addCDATA(failureAtts, IXMLTags.ATTR_MESSAGE, xx);
@@ -226,10 +226,10 @@ public class TestRunSessionSerializer implements XMLReader {
 		string= escapeNonUnicodeChars(string);
 		fHandler.characters(string.toCharArray(), 0, string.length());
 	}
-	
+
 	/**
 	 * Replaces all non-Unicode characters in the given string.
-	 * 
+	 *
 	 * @param string a string
 	 * @return string with Java-escapes
 	 * @since 3.6

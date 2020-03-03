@@ -472,7 +472,7 @@ public class AdvancedQuickAssistTest17 extends QuickFixTest {
 
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
-	
+
 	@Test
 	public void testReplaceReturnIfWithCondition3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -512,7 +512,7 @@ public class AdvancedQuickAssistTest17 extends QuickFixTest {
 
 		assertExpectedExistInProposals(proposals, new String[] {expected1});
 	}
-	
+
 	@Test
 	public void testReplaceReturnIfWithCondition4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -530,14 +530,14 @@ public class AdvancedQuickAssistTest17 extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		int offset= buf.toString().indexOf("if");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
-		
+
 		assertCorrectLabels(proposals);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.io.IOException;\n");
@@ -548,12 +548,12 @@ public class AdvancedQuickAssistTest17 extends QuickFixTest {
 		buf.append("        return a > 0 ? Collections.<String, IOException>emptyMap() : Collections.<String, IOException>singletonMap(\"none\", null);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		
+
 		String expected1= buf.toString();
-		
+
 		assertExpectedExistInProposals(proposals, new String[] {expected1});
 	}
-	
+
 	@Test
 	public void testConvertIfToSwitch() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);

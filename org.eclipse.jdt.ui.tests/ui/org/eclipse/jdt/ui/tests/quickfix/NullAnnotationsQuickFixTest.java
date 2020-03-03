@@ -2063,16 +2063,16 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 			StringBuilder buf= new StringBuilder();
 			buf.append("package test1;\n");
 			ICompilationUnit cu= pack1.createCompilationUnit("package-info.java", buf.toString(), false, null);
-	
+
 			CompilationUnit astRoot= getASTRoot(cu);
 			ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 			assertNumberOfProposals(proposals, 2);
 			CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
-	
+
 			assertEqualString(proposal.getDisplayString(), "Add '@NonNullByDefault' to the package declaration");
-	
+
 			String preview= getPreviewContent(proposal);
-	
+
 			buf= new StringBuilder();
 			buf.append("@org.eclipse.jdt.annotation.NonNullByDefault\n");
 			buf.append("package test1;\n");
@@ -2108,14 +2108,14 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 			assertNumberOfProposals(proposals, 2);
 			IJavaCompletionProposal proposal= proposals.get(0);
-	
+
 			assertEqualString(proposal.getDisplayString(), "Add package-info.java with '@NonNullByDefault'");
 			proposal.apply(null);
 
 			cu.getJavaProject().getProject().build(IncrementalProjectBuilder.FULL_BUILD, null);
 
 			assertEquals(0, pack1.getResource().findMarkers(null, true, IResource.DEPTH_INFINITE).length);
-			
+
 			ICompilationUnit packageInfoCU= pack1.getCompilationUnit("package-info.java");
 			StringBuilder expected=new StringBuilder();
 			expected.append("/**\n");
@@ -2288,7 +2288,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 			((CreatePackageInfoWithDefaultNullnessProposal) proposal).resolve(problems, new NullProgressMonitor());
 
 			cu1.getJavaProject().getProject().getWorkspace().build(IncrementalProjectBuilder.INCREMENTAL_BUILD, null);
-			
+
 			assertEquals(0, cu1.getJavaProject().getProject().findMarkers(null, true, IResource.DEPTH_INFINITE).length);
 			assertEquals(0, cu2.getJavaProject().getProject().findMarkers(null, true, IResource.DEPTH_INFINITE).length);
 
@@ -2384,7 +2384,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 			((CreatePackageInfoWithDefaultNullnessProposal) proposal).resolve(problems, new NullProgressMonitor());
 
 			cu1.getJavaProject().getProject().getWorkspace().build(IncrementalProjectBuilder.INCREMENTAL_BUILD, null);
-			
+
 			assertEquals(0, cu1.getJavaProject().getProject().findMarkers(null, true, IResource.DEPTH_INFINITE).length);
 			assertEquals(0, cu2.getJavaProject().getProject().findMarkers(null, true, IResource.DEPTH_INFINITE).length);
 

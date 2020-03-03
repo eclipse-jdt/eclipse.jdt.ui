@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -12,11 +12,9 @@
  *     IBM Corporation - initial API and implementation
  *     Nikolay Metchev <nikolaymetchev@gmail.com> - [inline] problem with fields from generic types - https://bugs.eclipse.org/218431
  *     Nikolay Metchev <nikolaymetchev@gmail.com> - [inline] Inline local variable with initializer generates assignment where left-hand side is not a variable - https://bugs.eclipse.org/394721
+ *     Pierre-Yves B. <pyvesdev@gmail.com> - [inline] Inlining a local variable leads to ambiguity with overloaded methods - https://bugs.eclipse.org/434747
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -26,13 +24,15 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
 
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineConstantRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
-import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 public class InlineConstantTests extends RefactoringTest {
 	private static final Class<InlineConstantTests> clazz = InlineConstantTests.class;
@@ -294,19 +294,19 @@ public class InlineConstantTests extends RefactoringTest {
 	public void test31() throws Exception { // test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=265448
 		helper1("p.A", 4, 23, 4, 28, true, true);
 	}
-	
+
 	public void test32() throws Exception { // test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=265448
 		helper1("p.A", 4, 23, 4, 28, true, true);
 	}
-	
+
 	public void test33() throws Exception { // test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=279715
 		helper1("p.A", 5, 29, 5, 30, true, true);
 	}
-	
+
 	public void test34() throws Exception { // test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=297760
 		helper1("p.A", 4, 24, 4, 25, true, true);
 	}
-	
+
 	public void test35() throws Exception { // test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=335173
 		helper1("p.A", 4, 22, 4, 23, true, true);
 	}
@@ -339,6 +339,10 @@ public class InlineConstantTests extends RefactoringTest {
 
 	public void test42() throws Exception { // test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=394721
 		helper1("p.A", 4, 32, 4, 33, true, true);
+	}
+
+	public void test43() throws Exception { // test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=434747
+		helper1("p.A", 4, 39, 4, 40, true, true);
 	}
 
 	// -- testing failing preconditions

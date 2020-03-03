@@ -23,16 +23,16 @@ import org.eclipse.ui.views.properties.PropertyDescriptor;
 import org.eclipse.jdt.core.IJarEntryResource;
 
 public class JarEntryResourceProperties implements IPropertySource {
-	
+
 	private static final String C_JAR_ENTRY_RESOURCE= "IJarEntryResource";
-	
+
 	private static final String P_NAME= "org.eclipse.jdt.jeview.IJarEntryResource.name";
 	private static final String P_FULL_PATH= "org.eclipse.jdt.jeview.IJarEntryResource.fullPath";
 	private static final String P_IS_FILE= "org.eclipse.jdt.jeview.IJarEntryResource.isFile";
 	private static final String P_IS_READ_ONLY= "org.eclipse.jdt.jeview.IJarEntryResource.isReadOnly";
-	
+
 	protected IJarEntryResource fJarEntryResource;
-	
+
 	private static final ArrayList<IPropertyDescriptor> JAR_ENTRY_RESOURCE_PROPERTY_DESCRIPTORS= new ArrayList<>();
 	static {
 		addResourceDescriptor(new PropertyDescriptor(P_NAME, "name"));
@@ -46,18 +46,18 @@ public class JarEntryResourceProperties implements IPropertySource {
 		descriptor.setCategory(C_JAR_ENTRY_RESOURCE);
 		JAR_ENTRY_RESOURCE_PROPERTY_DESCRIPTORS.add(descriptor);
 	}
-	
+
 
 	public JarEntryResourceProperties(IJarEntryResource jarEntryResource) {
 		fJarEntryResource= jarEntryResource;
 	}
-	
+
 	@Override
 	public IPropertyDescriptor[] getPropertyDescriptors() {
 		ArrayList<IPropertyDescriptor> result= new ArrayList<>(JAR_ENTRY_RESOURCE_PROPERTY_DESCRIPTORS);
 		return result.toArray(new IPropertyDescriptor[result.size()]);
 	}
-	
+
 	@Override
 	public Object getPropertyValue(Object name) {
 		if (name.equals(P_NAME)) {
@@ -69,25 +69,25 @@ public class JarEntryResourceProperties implements IPropertySource {
 		} else 	if (name.equals(P_IS_READ_ONLY)) {
 			return fJarEntryResource.isReadOnly();
 		}
-		
+
 		return null;
 	}
-	
+
 	@Override
 	public void setPropertyValue(Object name, Object value) {
 		// do nothing
 	}
-	
+
 	@Override
 	public Object getEditableValue() {
 		return this;
 	}
-	
+
 	@Override
 	public boolean isPropertySet(Object property) {
 		return false;
 	}
-	
+
 	@Override
 	public void resetPropertyValue(Object property) {
 		// do nothing

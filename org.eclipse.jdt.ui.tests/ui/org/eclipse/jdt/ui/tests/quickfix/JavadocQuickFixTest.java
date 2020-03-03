@@ -1334,7 +1334,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-		
+
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("pack2", false, null);
 		buf= new StringBuffer();
 		buf.append("package pack2;\n");
@@ -1347,13 +1347,13 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		buf.append("public class E {\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack2.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		
+
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 2);
-		
+
 		String[] expected= new String[1];
 		buf= new StringBuffer();
 		buf.append("package pack2;\n");
@@ -1366,10 +1366,10 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		buf.append("public class E {\n");
 		buf.append("}\n");
 		expected[0]= buf.toString();
-		
+
 		assertExpectedExistInProposals(proposals, expected);
 	}
-	
+
 	@Test
 	public void testInvalidQualification3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
@@ -1382,7 +1382,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-		
+
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("pack2", false, null);
 		buf= new StringBuffer();
 		buf.append("package pack2;\n");
@@ -1395,13 +1395,13 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		buf.append("public class E {\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack2.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		
+
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 2);
-		
+
 		String[] expected= new String[1];
 		buf= new StringBuffer();
 		buf.append("package pack2;\n");
@@ -1414,7 +1414,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		buf.append("public class E {\n");
 		buf.append("}\n");
 		expected[0]= buf.toString();
-		
+
 		assertExpectedExistInProposals(proposals, expected);
 	}
 

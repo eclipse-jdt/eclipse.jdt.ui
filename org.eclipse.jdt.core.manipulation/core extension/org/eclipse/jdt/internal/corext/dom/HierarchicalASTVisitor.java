@@ -644,7 +644,7 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
 	public void endVisit(StringLiteral node) {
 		endVisit((Expression)node);
 	}
-	
+
 	@Override
 	public boolean visit(SuperFieldAccess node) {
 		return visit((Expression)node);
@@ -659,7 +659,7 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
 	public boolean visit(SuperMethodInvocation node) {
 		return visit((Expression)node);
 	}
-	
+
 	@Override
 	public boolean visit(TextBlock node) {
 		return visit((Expression)node);
@@ -674,7 +674,7 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
 	public void endVisit(TextBlock node) {
 		endVisit((Expression)node);
 	}
-	
+
 	@Override
 	public boolean visit(ThisExpression node) {
 		return visit((Expression)node);
@@ -771,12 +771,12 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
 	public boolean visit(ModuleDeclaration node) {
 		return visit((ASTNode)node);
 	}
-	
+
 	@Override
 	public void endVisit(ModuleDeclaration node) {
 		endVisit((ASTNode)node);
 	}
-	
+
 	//---- Begin ModuleDirective Hierarchy ----------------------------------
 
 	public boolean visit(ModuleDirective node) {
@@ -788,11 +788,11 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
 	}
 
 	//---- Begin ModulePackageAccess Hierarchy ----------------------------------
-	
+
 	public boolean visit(ModulePackageAccess node) {
 		return visit((ModuleDirective)node);
 	}
-	
+
 	public void endVisit(ModulePackageAccess node) {
 		endVisit((ModuleDirective)node);
 	}
@@ -801,7 +801,7 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
 	public boolean visit(ExportsDirective node) {
 		return visit((ModulePackageAccess)node);
 	}
-	
+
 	@Override
 	public void endVisit(ExportsDirective node) {
 		endVisit((ModulePackageAccess)node);
@@ -811,24 +811,24 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
 	public boolean visit(OpensDirective node) {
 		return visit((ModulePackageAccess)node);
 	}
-	
+
 	@Override
 	public void endVisit(OpensDirective node) {
 		endVisit((ModulePackageAccess)node);
 	}
-	
+
 	//---- End ModulePackageAccess Hierarchy ------------------------------------
-	
+
 	@Override
 	public boolean visit(ProvidesDirective node) {
 		return visit((ModuleDirective)node);
 	}
-	
+
 	@Override
 	public void endVisit(ProvidesDirective node) {
 		endVisit((ModuleDirective)node);
 	}
-	
+
 	@Override
 	public boolean visit(RequiresDirective node) {
 		return visit((ModuleDirective)node);
@@ -843,24 +843,24 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
 	public boolean visit(UsesDirective node) {
 		return visit((ModuleDirective)node);
 	}
-	
+
 	@Override
 	public void endVisit(UsesDirective node) {
 		endVisit((ModuleDirective)node);
 	}
-	
+
 	//---- End ModuleDirective Hierarchy ------------------------------------
-	
+
 	@Override
 	public boolean visit(ModuleModifier node) {
 		return visit((ASTNode)node);
 	}
-	
+
 	@Override
 	public void endVisit(ModuleModifier node) {
 		endVisit((ASTNode)node);
 	}
-	
+
 	@Override
 	public boolean visit(PackageDeclaration node) {
 		return visit((ASTNode)node);

@@ -67,7 +67,7 @@ public class SWTTestProject {
 
 		IProject project= createExistingProject(PROJECT);
 		fProject= JavaCore.create(project);
-		
+
 		/* Can't use the default system JRE:
 		 * - some classes in the archive are not 1.4 compliant, e.g. GridData uses 'enum' as identifier
 		 * - search engine reports wrong inaccurate matches, see bug 443411
@@ -75,7 +75,7 @@ public class SWTTestProject {
 		 */
 		JavaProjectHelper.removeFromClasspath(fProject, new Path(JavaRuntime.JRE_CONTAINER));
 		JavaProjectHelper.addRTJar13(fProject);
-		
+
 		Assert.assertTrue(fProject.exists());
 	}
 

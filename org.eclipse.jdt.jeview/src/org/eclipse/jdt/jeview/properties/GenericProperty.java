@@ -18,12 +18,12 @@ import org.eclipse.ui.views.properties.PropertyDescriptor;
 import org.eclipse.jdt.core.JavaModelException;
 
 public abstract class GenericProperty<T> {
-	
+
 	private final Class<T> fType;
 	private final String fName;
 	private final String fId;
 	private final PropertyDescriptor fDescriptor;
-	
+
 	public GenericProperty(Class<T> type, String name) {
 		fType= type;
 		fName= name;
@@ -35,22 +35,22 @@ public abstract class GenericProperty<T> {
 
 	public abstract Object compute(T element) throws JavaModelException;
 
-	
+
 	public Class<T> getType() {
 		return fType;
 	}
-	
-	
+
+
 	public String getName() {
 		return fName;
 	}
-	
+
 	public String getId() {
 		return fId;
 	}
-	
+
 	public PropertyDescriptor getDescriptor() {
 		return fDescriptor;
 	}
-	
+
 }

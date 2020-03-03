@@ -31,11 +31,11 @@ import org.eclipse.jdt.core.JavaCore;
 
 
 public class JEResource extends JEAttribute {
-	
+
 	private final JEAttribute fParent; // can be null
 	private final String fName; // can be null
 	private IResource fResource;
-	
+
 	JEResource(JEAttribute parent, String name, IResource resource) {
 		Assert.isNotNull(resource);
 		fParent= parent;
@@ -47,7 +47,7 @@ public class JEResource extends JEAttribute {
 	public JEAttribute getParent() {
 		return fParent;
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -55,7 +55,7 @@ public class JEResource extends JEAttribute {
 		if (obj == null || !obj.getClass().equals(getClass())) {
 			return false;
 		}
-		
+
 		JEResource other= (JEResource) obj;
 		if (fParent == null) {
 			if (other.fParent != null)
@@ -63,29 +63,29 @@ public class JEResource extends JEAttribute {
 		} else if (! fParent.equals(other.fParent)) {
 			return false;
 		}
-		
+
 		if (fName == null) {
 			if (other.fName != null)
 				return false;
 		} else if (! fName.equals(other.fName)) {
 			return false;
 		}
-		
+
 		return true;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return (fParent != null ? fParent.hashCode() : 0)
 				+ (fName != null ? fName.hashCode() : 0)
 				+ fResource.hashCode();
 	}
-	
+
 	@Override
 	public Object getWrappedObject() {
 		return fResource;
 	}
-	
+
 	public IResource getResource() {
 		return fResource;
 	}
@@ -93,15 +93,15 @@ public class JEResource extends JEAttribute {
 	@Override
 	public JEAttribute[] getChildren() {
 		ArrayList<JEAttribute> result= new ArrayList<>();
-		
+
 		IContainer parent= fResource.getParent();
 		if (parent != null )
 			result.add(new JEResource(this, "PARENT", parent));
 		else
 			result.add(new JavaElementProperty(this, "PARENT", parent));
-		
+
 		result.add(new JavaElement(this, "JavaCore.create(..)", JavaCore.create(fResource)));
-		
+
 		if (fResource instanceof IContainer) {
 			final IContainer container= (IContainer) fResource;
 //			result.add(new JavaElementProperty(this, "ModificationStamp") {
@@ -154,7 +154,7 @@ public class JEResource extends JEAttribute {
 				return children;
 			}
 		});
-		
+
 		return result.toArray(new JEAttribute[result.size()]);
 	}
 

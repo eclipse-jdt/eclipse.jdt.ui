@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -20,7 +20,6 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.core.manipulation.CoreASTProvider;
 
 
 /**
@@ -112,7 +111,7 @@ public class SharedASTProviderCore {
 	 * <p>
 	 * Clients are not allowed to modify the AST and must not keep any references.
 	 * </p>
-	 * 
+	 *
 	 * @param element the {@link ITypeRoot}, must not be <code>null</code>
 	 * @param waitFlag {@link #WAIT_YES}, {@link #WAIT_NO} or {@link #WAIT_ACTIVE_ONLY}
 	 * @param progressMonitor the progress monitor or <code>null</code>

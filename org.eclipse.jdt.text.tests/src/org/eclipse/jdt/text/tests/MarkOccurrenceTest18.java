@@ -171,36 +171,36 @@ public class MarkOccurrenceTest18 extends TestCase {
 		s.append("        }\n");
 		s.append("    }\n");
 		s.append("}\n");
-		
+
 		fFinder= new ExceptionOccurrencesFinder();
 		int offset= 8 + s.indexOf("@throws E.InnerException"); // in Javadoc
 		int length= 0;
 		OccurrenceLocation[] ranges= { find(s, "E.InnerException", 1), find(s, "@Critical() E.@Critical() InnerException", 1),
 				find(s, "throw", 3), find(s, "throw", 4) };
 		checkSelection(s, offset, length, ranges);
-		
+
 		fFinder= new ExceptionOccurrencesFinder();
 		offset= 1 + s.indexOf("@Critical() E.@Critical() InnerException"); // in annotation
 		length= 0;
 		checkSelection(s, offset, length, ranges);
-		
+
 		fFinder= new ExceptionOccurrencesFinder();
 		offset= s.indexOf("E.@Critical() InnerException"); // in annotated type qualifier
 		length= 1;
 		checkSelection(s, offset, length, ranges);
-		
+
 		fFinder= new ExceptionOccurrencesFinder();
 		offset= 1 + s.indexOf("InnerException e)"); // in annotated catch type (does NOT include modifier "@Critical() "!)
 		length= 0;
 		ranges= new OccurrenceLocation[] { find(s, "foo", 2), find(s, "E.@Critical() InnerException", 3)};
 		checkSelection(s, offset, length, ranges);
-		
+
 		fFinder= new ExceptionOccurrencesFinder();
 		offset= s.indexOf("RuntimeException |"); // in annotated union type
 		length= 0;
 		ranges= new OccurrenceLocation[] { find(s, "foo", 3), find(s, "RuntimeException", 2)};
 		checkSelection(s, offset, length, ranges);
-		
+
 		fFinder= new ExceptionOccurrencesFinder();
 		offset= s.indexOf("He"); // in annotation expression
 		length= 0;

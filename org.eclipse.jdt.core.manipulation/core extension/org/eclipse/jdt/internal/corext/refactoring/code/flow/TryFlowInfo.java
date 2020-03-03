@@ -23,7 +23,7 @@ class TryFlowInfo extends FlowInfo {
 	public void mergeResources(FlowInfo info, FlowContext context) {
 		if (info == null)
 			return;
-		
+
 		mergeSequential(info, context);
 	}
 

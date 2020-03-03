@@ -53,7 +53,7 @@ public class BindingLabels9Test extends AbstractBindingLabelsTest {
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, Java9ProjectTestSetup.getDefaultClasspath());
 	}
-	
+
 
 	public void testModuleWithCategory1() throws Exception {
 

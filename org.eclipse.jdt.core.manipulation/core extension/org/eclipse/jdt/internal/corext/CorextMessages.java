@@ -34,7 +34,7 @@ public final class CorextMessages extends NLS {
 	public static String JavaDocLocations_noAttachedSource;
 	public static String JavaDocLocations_noAttachments;
 	public static String JavaDocLocations_noInformation;
-	
+
 	public static String History_error_serialize;
 	public static String History_error_read;
 	public static String TypeInfoHistory_consistency_check;

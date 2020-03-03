@@ -60,7 +60,7 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 /**
  * JDT-UI-internal helper methods to find AST nodes for {@link SearchMatch}es or {@link IJavaElement}s. :
- * 
+ *
  * see JDTUIHelperClasses
  */
 public class ASTNodeSearchUtil {

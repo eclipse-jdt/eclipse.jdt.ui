@@ -15,8 +15,6 @@ package org.eclipse.jdt.internal.corext.template.java;
 
 import java.util.List;
 
-import org.eclipse.jdt.internal.corext.template.java.JavaContext;
-import org.eclipse.jdt.internal.corext.template.java.JavaVariable;
 import org.eclipse.jdt.internal.corext.template.java.TypeResolver;
 import org.eclipse.jdt.internal.ui.text.template.contentassist.MultiVariable;
 import org.eclipse.jface.text.templates.TemplateContext;

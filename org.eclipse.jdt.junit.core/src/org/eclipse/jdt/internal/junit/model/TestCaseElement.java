@@ -69,7 +69,7 @@ public class TestCaseElement extends TestElement implements ITestCaseElement {
 		else
 			return super.getTestResult(includeChildren);
 	}
-	
+
 	public void setIgnored(boolean ignored) {
 		fIgnored= ignored;
 	}

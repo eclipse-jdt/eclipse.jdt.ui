@@ -29,7 +29,7 @@ import org.eclipse.ui.texteditor.ITextEditor;
 
 /**
  * Configuration information for a simple JSP source viewer.
- * 
+ *
  * @since 3.0
  */
 public class JspSourceViewerConfiguration extends SourceViewerConfiguration {
@@ -39,13 +39,13 @@ public class JspSourceViewerConfiguration extends SourceViewerConfiguration {
 	/**
 	 * Creates a new JSP source viewer configuration that behaves according to
 	 * the specification of this class' methods.
-	 * 
+	 *
 	 * @param textEditor the text editor
 	 */
 	public JspSourceViewerConfiguration(ITextEditor textEditor) {
 		fTextEditor= textEditor;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getReconciler(org.eclipse.jface.text.source.ISourceViewer)
 	 */

@@ -1732,7 +1732,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 					// replace move target parameter with new target
 					arguments.add(factory.getTargetNode());
 				} else {
-					// drop unused move target parameter 
+					// drop unused move target parameter
 				}
 			} else {
 				arguments.add(factory.getArgumentNode(binding, i == size - 1));

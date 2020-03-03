@@ -46,14 +46,14 @@ import org.eclipse.jdt.internal.corext.util.SearchUtils;
 public class CallerMethodWrapper extends MethodWrapper {
 	/**
 	 * Value of the expand with constructors mode.
-	 * 
+	 *
 	 * @since 3.5
 	 */
 	private boolean fExpandWithConstructors;
 
 	/**
 	 * Tells whether the expand with constructors mode has been set.
-	 * 
+	 *
 	 * @see #setExpandWithConstructors(boolean)
 	 * @since 3.5
 	 */
@@ -179,10 +179,10 @@ public class CallerMethodWrapper extends MethodWrapper {
 
 	/**
 	 * Returns the value of expand with constructors mode.
-	 * 
+	 *
 	 * @return <code>true</code> if in expand with constructors mode, <code>false</code> otherwise or if not yet set
 	 * @see #isExpandWithConstructorsSet()
-	 * 
+	 *
 	 * @since 3.5
 	 */
 	public boolean getExpandWithConstructors() {
@@ -191,7 +191,7 @@ public class CallerMethodWrapper extends MethodWrapper {
 
 	/**
 	 * Sets the expand with constructors mode.
-	 * 
+	 *
 	 * @param value <code>true</code> if in expand with constructors mode, <code>false</code>
 	 *            otherwise
 	 * @since 3.5
@@ -204,7 +204,7 @@ public class CallerMethodWrapper extends MethodWrapper {
 
 	/**
 	 * Tells whether the expand with constructors mode has been set.
-	 * 
+	 *
 	 * @return <code>true</code> if expand with constructors mode has been set explicitly, <code>false</code> otherwise
 	 * @see #setExpandWithConstructors(boolean)
 	 * @since 3.5

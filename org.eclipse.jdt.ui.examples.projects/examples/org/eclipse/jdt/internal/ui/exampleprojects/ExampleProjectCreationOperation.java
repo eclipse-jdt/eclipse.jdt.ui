@@ -60,9 +60,7 @@ public class ExampleProjectCreationOperation implements IRunnableWithProgress {
 		fOverwriteQuery= overwriteQuery;
 	}
 
-	/*
-	 * @see IRunnableWithProgress#run(IProgressMonitor)
-	 */
+	@Override
 	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 		if (monitor == null) {
 			monitor= new NullProgressMonitor();

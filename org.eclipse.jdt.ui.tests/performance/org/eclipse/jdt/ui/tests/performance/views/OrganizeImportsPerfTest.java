@@ -101,10 +101,10 @@ public class OrganizeImportsPerfTest extends JdtPerformanceTestCase {
 	public void testOrganizeImport() throws Exception {
 		measure(Performance.getDefault().getNullPerformanceMeter(), 10);
 		measure(fPerformanceMeter, 10);
-		
-		// test is too short and hence the relative numbers spread too far (but still in an acceptable absolute band) 
+
+		// test is too short and hence the relative numbers spread too far (but still in an acceptable absolute band)
 //		tagAsSummary("Organize Imports", Dimension.ELAPSED_PROCESS);
-		
+
 		commitMeasurements();
 		Performance.getDefault().assertPerformance(fPerformanceMeter);
 	}
@@ -117,7 +117,7 @@ public class OrganizeImportsPerfTest extends JdtPerformanceTestCase {
 			CompilationUnit[] roots= createASTs(cus);
 
 			joinBackgroudActivities();
-			
+
 			performanceMeter.start();
 			for (int i= 0; i < roots.length; i++) {
 				OrganizeImportsOperation op= new OrganizeImportsOperation(cus[i], roots[i], true, true, true, null);
@@ -125,7 +125,7 @@ public class OrganizeImportsPerfTest extends JdtPerformanceTestCase {
 			}
 			performanceMeter.stop();
 		}
-		
+
 	}
 
 }

@@ -26,7 +26,7 @@ import java.util.Map;
  * the order that key-value mappings are provided by the specified map's entry set iterator. <i>No
  * other methods generate entry accesses.</i> In particular, operations on collection-views do
  * <i>not</i> affect the order of iteration of the backing map.
- * 
+ *
  * @param <K> type of the keys
  * @param <V> type of the values
  */
@@ -37,7 +37,7 @@ public class LRUMap<K,V> extends LinkedHashMap<K,V> {
 
 	/**
 	 * Creates an empty LRU map with the given maximum size.
-	 * 
+	 *
 	 * @param maxSize the maximum number of elements in the cache
 	 */
 	public LRUMap(int maxSize) {

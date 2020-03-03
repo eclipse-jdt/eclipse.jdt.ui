@@ -142,7 +142,7 @@ public class RefactoringASTParser {
 	 * Turns all errors, warnings and infos into ignore and disables task tags. The customizable set of
 	 * compiler options only contains additional Eclipse options. The standard JDK compiler options
 	 * can't be changed anyway.
-	 * 
+	 *
 	 * @param element an element (not the Java model)
 	 * @return compiler options
 	 */

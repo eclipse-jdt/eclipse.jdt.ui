@@ -22,7 +22,7 @@ import org.eclipse.jface.text.source.translation.ITagHandler;
 import org.eclipse.jface.text.source.translation.ITranslatorResultCollector;
 
 /**
- * 
+ *
  * @since 3.0
  */
 public class Jsp2JavaTagHandler implements ITagHandler {
@@ -35,7 +35,7 @@ public class Jsp2JavaTagHandler implements ITagHandler {
 	private String fSource;
 	private boolean fInDeclaration;
 	private boolean fInJavaSection;
-	
+
 
 	/*
 	 * @see org.eclipse.jface.text.source.ITagHandler#canHandleTag(java.lang.String)
@@ -102,7 +102,7 @@ public class Jsp2JavaTagHandler implements ITagHandler {
 		int javaFileOffset= "System.out.println(".length(); //$NON-NLS-1$
 		return jspLineStr.indexOf("<c:out value=\"${") + 16 - javaFileOffset; //$NON-NLS-1$
 	}
-	
+
 	/*
 	 * This is a good example where the relative line offset in the Java
 	 * document cannot be directly mapped back to Jsp document.
@@ -116,7 +116,7 @@ public class Jsp2JavaTagHandler implements ITagHandler {
 
 		int typeStart= jspLineStr.indexOf("class=\"") + 7; //$NON-NLS-1$
 		int typeLength= Math.max(0, jspLineStr.indexOf('"', typeStart) - typeStart);
-					
+
 		if (relativeLineOffsetInJava < typeLength)  {
 			javaPartitionStart= typeStart;
 		} else if (relativeLineOffsetInJava < typeLength + variableNameLength)
@@ -136,7 +136,7 @@ public class Jsp2JavaTagHandler implements ITagHandler {
 		Assert.isTrue(resultCollector instanceof JspTranslatorResultCollector);
 
 		JspTranslatorResultCollector jspResultCollector= (JspTranslatorResultCollector)resultCollector;
-		
+
 		if (fInUseBean) {
 			if (fId != null && fClass != null) {
 				jspResultCollector.appendLocalDeclaration(fClass + " " + fId + "= new " + fClass + "();\n", sourceLineNumber); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -158,7 +158,7 @@ public class Jsp2JavaTagHandler implements ITagHandler {
 					jspResultCollector.appendContent(out.toString() + "\n", sourceLineNumber++); //$NON-NLS-1$
 					out.setLength(0);
 				} else {
-					out.append(c);	
+					out.append(c);
 				}
 			}
 			if (out.length() > 0)  {
@@ -174,7 +174,7 @@ public class Jsp2JavaTagHandler implements ITagHandler {
 					jspResultCollector.appendDeclaration(out.toString() + "\n", sourceLineNumber++); //$NON-NLS-1$
 					out.setLength(0);
 				} else {
-					out.append(c);	
+					out.append(c);
 				}
 			}
 			if (out.length() > 0)  {

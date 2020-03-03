@@ -36,7 +36,7 @@ public class TomcatClasspathProvider extends StandardClasspathProvider {
 	/**
 	 * Tomcat requires <code>tools.jar</code> and <code>bootstrap.jar</code> on its
 	 * classpath.
-	 * 
+	 *
 	 * @see org.eclipse.jdt.launching.IRuntimeClasspathProvider#computeUnresolvedClasspath(org.eclipse.debug.core.ILaunchConfiguration)
 	 */
 	@Override
@@ -53,8 +53,8 @@ public class TomcatClasspathProvider extends StandardClasspathProvider {
 			IRuntimeClasspathEntry r = JavaRuntime.newArchiveRuntimeClasspathEntry(path);
 			r.setClasspathProperty(IRuntimeClasspathEntry.USER_CLASSES);
 			rtes.add(r);
-			// add class libraries to bootpath			
-			boolean tools = false; // keeps track of whether a tools.jar was found	
+			// add class libraries to bootpath
+			boolean tools = false; // keeps track of whether a tools.jar was found
 			for (LibraryLocation lib : JavaRuntime.getLibraryLocations(vm)) {
 				if (lib.getSystemLibraryPath().toString().endsWith("tools.jar")) { //$NON-NLS-1$
 					tools = true;

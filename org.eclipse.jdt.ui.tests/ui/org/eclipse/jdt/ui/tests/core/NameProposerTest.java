@@ -106,7 +106,7 @@ public class NameProposerTest extends TestCase {
 		assertEqualString("isModified", GetterSetterUtil.getGetterName(f5, excluded));
 		assertEqualString("setTouched", GetterSetterUtil.getSetterName(f6, excluded));
 		assertEqualString("isTouched", GetterSetterUtil.getGetterName(f6, excluded));
-		
+
 		assertEqualString("setConst", GetterSetterUtil.getSetterName(f7, excluded));
 		assertEqualString("getConst", GetterSetterUtil.getGetterName(f7, excluded));
 		assertEqualString("setMyConstAnt", GetterSetterUtil.getSetterName(f8, excluded));

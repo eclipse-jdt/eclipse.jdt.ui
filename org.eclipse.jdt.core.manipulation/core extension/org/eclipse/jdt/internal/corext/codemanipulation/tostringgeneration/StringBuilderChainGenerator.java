@@ -33,7 +33,7 @@ import org.eclipse.jdt.core.dom.InfixExpression.Operator;
  * </p>
  * <p>
  * Generated methods look like this:
- * 
+ *
  * <pre>
  * public String toString() {
  * 	StringBuilder builder= new StringBuilder();
@@ -41,9 +41,9 @@ import org.eclipse.jdt.core.dom.InfixExpression.Operator;
  * 	return builder.toString();
  * }
  * </pre>
- * 
+ *
  * </p>
- * 
+ *
  * @since 3.5
  */
 public class StringBuilderChainGenerator extends StringBuilderGenerator {

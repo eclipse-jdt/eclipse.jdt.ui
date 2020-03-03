@@ -25,41 +25,41 @@ import org.eclipse.jdt.internal.ui.examples.jspeditor.JspTranslatorResultCollect
 
 
 public class JspTranslator extends AbstractJspParser implements ITranslator {
-	
+
 	private StringBuffer fDeclarations= new StringBuffer();
 	private StringBuffer fContent= new StringBuffer();
 	private StringBuffer fLocalDeclarations= new StringBuffer();
-	
+
 	private ArrayList fContentLines= new ArrayList();
 	private ArrayList fDeclarationLines= new ArrayList();
 	private ArrayList fLocalDeclarationLines= new ArrayList();
 	private int[] fSmap;
-	
+
 	private ITagHandlerFactory fTagHandlerFactor;
 	private ITagHandler fCurrentTagHandler;
 
 	private JspTranslatorResultCollector fResultCollector;
-	
-	
+
+
 	public JspTranslator() {
-		
-		// Links for passing parameters to the tag handlers 
+
+		// Links for passing parameters to the tag handlers
 		fResultCollector= new JspTranslatorResultCollector(fDeclarations, fLocalDeclarations, fContent, fDeclarationLines, fLocalDeclarationLines, fContentLines);
 	}
-		
+
 	@Override
 	protected void startTag(boolean endTag, String name, int startName) {
 
 		fCurrentTagHandler= fTagHandlerFactor.getHandler(name);
 	}
-	
+
 	@Override
 	protected void tagAttribute(String attrName, String value, int startName, int startValue) {
 
 		if (fCurrentTagHandler != null)
 			fCurrentTagHandler.addAttribute(attrName, value, fLines);
 	}
-	
+
 	@Override
 	protected void endTag(boolean end) {
 
@@ -70,7 +70,7 @@ public class JspTranslator extends AbstractJspParser implements ITranslator {
 				ex.printStackTrace();
 			}
 	}
-	
+
 	@Override
 	protected void java(char ch, String java, int line) {
 
@@ -91,7 +91,7 @@ public class JspTranslator extends AbstractJspParser implements ITranslator {
 			e.printStackTrace();
 		}
 	}
-	
+
 	@Override
 	protected void text(String t, int line) {
 		int i= 0;
@@ -103,7 +103,7 @@ public class JspTranslator extends AbstractJspParser implements ITranslator {
 				fContentLines.add(Integer.valueOf(line++));
 				out.setLength(0);
 			} else {
-				out.append(c);	
+				out.append(c);
 			}
 		}
 		if (out.length() > 0)  {
@@ -111,23 +111,23 @@ public class JspTranslator extends AbstractJspParser implements ITranslator {
 			fContentLines.add(Integer.valueOf(line));
 		}
 	}
-	
+
 	private void resetTranslator() {
 		fDeclarations.setLength(0);
 		fContent.setLength(0);
 		fLocalDeclarations.setLength(0);
-		
+
 		fLocalDeclarationLines.clear();
 		fContentLines.clear();
 		fDeclarationLines.clear();
-		
+
 	}
 
 	@Override
 	public String translate(Reader reader, String name) throws IOException  {
 
 		StringBuilder buffer= new StringBuilder();
-		
+
 		resetTranslator();
 		parse(reader);
 
@@ -152,7 +152,7 @@ public class JspTranslator extends AbstractJspParser implements ITranslator {
 		buffer.append("  public void out() {\n"); //$NON-NLS-1$
 		fSmap[line]= fSmap[line - 1] + 1;
 		line++;
-		
+
 		if (fLocalDeclarations.length() > 0)  {
 			buffer.append(fLocalDeclarations.toString());
 			System.out.println(fLocalDeclarations);
@@ -161,7 +161,7 @@ public class JspTranslator extends AbstractJspParser implements ITranslator {
 				fSmap[line++]= ((Integer)fLocalDeclarationLines.get(i)).intValue();
 			}
 		}
-		
+
 		buffer.append(fContent.toString());
 		System.out.println(fContent);
 		for (int i= 0; i < fContentLines.size(); i++)  {
@@ -173,18 +173,18 @@ public class JspTranslator extends AbstractJspParser implements ITranslator {
 		fSmap[line]= fSmap[line - 1];
 
 		line++;
-		
+
 		buffer.append("}\n"); //$NON-NLS-1$
 		fSmap[line]= fSmap[line - 2];
-		
+
 		for (int i= 0; i < fSmap.length; i++)
 			System.out.println("" + i + " -> " + fSmap[i]); //$NON-NLS-1$ //$NON-NLS-2$
-		
+
 		System.out.println(buffer.toString());
-		
+
 		return buffer.toString();
 	}
-	
+
 	@Override
 	public int[] getLineMapping()  {
 		return fSmap;

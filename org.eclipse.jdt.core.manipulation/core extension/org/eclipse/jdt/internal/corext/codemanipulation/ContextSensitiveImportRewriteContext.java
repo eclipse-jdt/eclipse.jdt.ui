@@ -61,19 +61,19 @@ public class ContextSensitiveImportRewriteContext extends ImportRewriteContext {
 
 	/**
 	 * Creates an import rewrite context at the given node's start position.
-	 * 
+	 *
 	 * @param node the node to use as context
 	 * @param importRewrite the import rewrite
-	 * 
+	 *
 	 * @since 3.6
 	 */
 	public ContextSensitiveImportRewriteContext(ASTNode node, ImportRewrite importRewrite) {
 		this((CompilationUnit) node.getRoot(), node.getStartPosition(), importRewrite, RedundantNullnessTypeAnnotationsFilter.createIfConfigured(node));
 	}
-	
+
 	/**
 	 * Creates an import rewrite context at the given start position.
-	 * 
+	 *
 	 * @param compilationUnit the root (must have resolved bindings)
 	 * @param position the context position
 	 * @param importRewrite the import rewrite
@@ -233,7 +233,7 @@ public class ContextSensitiveImportRewriteContext extends ImportRewriteContext {
 		}
 		return fImportedNames;
 	}
-	
+
 	@Override
 	public IAnnotationBinding[] removeRedundantTypeAnnotations(IAnnotationBinding[] annotations, TypeLocation location, ITypeBinding type) {
 		RedundantNullnessTypeAnnotationsFilter redundantTypeAnnotationsFilter= fRedundantTypeAnnotationsFilter;

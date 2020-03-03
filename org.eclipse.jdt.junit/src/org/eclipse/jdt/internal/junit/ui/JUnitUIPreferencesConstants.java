@@ -21,7 +21,7 @@ import org.eclipse.core.runtime.preferences.InstanceScope;
 
 /**
  * Defines constants which are used to refer to values in the plugin's preference store.
- * 
+ *
  * @since 3.7
  */
 public class JUnitUIPreferencesConstants {

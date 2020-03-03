@@ -27,8 +27,8 @@ import org.eclipse.core.runtime.Assert;
  * <p>
  * <strong>Note:</strong> Copied from org.eclipse.text.tests.
  * </p>
- * @param <E> The 
- * 
+ * @param <E> The
+ *
  * @since 3.5
  */
 class Accessor<E> {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -20,9 +20,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExternalResource;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
+
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jdt.core.IClassFile;
@@ -38,15 +46,10 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerContentProvider;
 
-import junit.extensions.TestSetup;
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+@RunWith(JUnit4.class)
+public class HierarchicalContentProviderTests {
 
-
-public class HierarchicalContentProviderTests extends TestCase {
-
-	private static class MyTestSetup extends TestSetup {
+	private static class MyTestSetup extends ExternalResource {
 
 		public static IJavaProject fJProject;
 		public static IPackageFragmentRoot fJAR;
@@ -54,11 +57,8 @@ public class HierarchicalContentProviderTests extends TestCase {
 
 		public static List<String> fExpectedInJAR, fExpectedInCF;
 
-		public MyTestSetup(Test test) {
-			super(test);
-		}
 		@Override
-		protected void setUp() throws Exception {
+		protected void before() throws Exception {
 			fJProject= JavaProjectHelper.createJavaProject("Testing", "bin");
 			JavaProjectHelper.addRTJar(fJProject);
 
@@ -83,38 +83,21 @@ public class HierarchicalContentProviderTests extends TestCase {
 		}
 
 		@Override
-		protected void tearDown() throws Exception {
-			JavaProjectHelper.delete(fJProject);
+		protected void after() {
+			try {
+				JavaProjectHelper.delete(fJProject);
+			} catch (CoreException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			fExpectedInJAR= null;
 			fExpectedInCF= null;
 		}
 	}
 
 
-	private static final Class<HierarchicalContentProviderTests> THIS= HierarchicalContentProviderTests.class;
-
-	public HierarchicalContentProviderTests(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new MyTestSetup(test);
-	}
-
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-	}
-
-	@Override
-	protected void tearDown() throws Exception {
-		super.tearDown();
-	}
-
+	@Rule
+	public MyTestSetup mytestsetup=new MyTestSetup();
 
 	private static void testAndAdd(Object curr, List<String> res) {
 		if (curr instanceof ICompilationUnit || curr instanceof IClassFile) {
@@ -123,21 +106,25 @@ public class HierarchicalContentProviderTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testJARHierarchical() {
 		List<String> res= collectChildren(MyTestSetup.fJAR, false, false);
 		assertEquals(MyTestSetup.fExpectedInJAR, res);
 	}
 
+	@Test
 	public void testJARFoldedHierarchical() {
 		List<String> res= collectChildren(MyTestSetup.fJAR, true, false);
 		assertEquals(MyTestSetup.fExpectedInJAR, res);
 	}
 
+	@Test
 	public void testClassFolderHierarchical() {
 		List<String> res= collectChildren(MyTestSetup.fClassfolder, false, false);
 		assertEquals(MyTestSetup.fExpectedInCF, res);
 	}
 
+	@Test
 	public void testClassFolderFoldedHierarchical() {
 		List<String> res= collectChildren(MyTestSetup.fClassfolder, true, false);
 		assertEquals(MyTestSetup.fExpectedInCF, res);
@@ -147,7 +134,7 @@ public class HierarchicalContentProviderTests extends TestCase {
 
 
 	private void assertEquals(List<String> expected, List<String> current) {
-		assertEquals(getString(expected), getString(current));
+		Assert.assertEquals(getString(expected), getString(current));
 	}
 
 

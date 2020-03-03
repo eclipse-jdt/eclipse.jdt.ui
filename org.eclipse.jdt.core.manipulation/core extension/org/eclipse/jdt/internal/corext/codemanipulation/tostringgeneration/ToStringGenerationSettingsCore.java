@@ -111,9 +111,9 @@ public class ToStringGenerationSettingsCore extends CodeGenerationSettings {
 	/**
 	 * Returns a copy of customBuilderSettings. Changes made in the returned object will not affect
 	 * this settings object.  To save changes made to the object, use:
-	 * 
+	 *
 	 * ToStringGenerationSettings#writeCustomBuilderSettings(ToStringGenerationSettings.CustomBuilderSettings)
-	 * 
+	 *
 	 * @return copy of custom builder settings object
 	 */
 	public CustomBuilderSettings getCustomBuilderSettings() {

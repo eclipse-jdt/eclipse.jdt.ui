@@ -390,7 +390,7 @@ public class InlineTempRefactoring extends Refactoring {
 				}
 			}
 		}
-		
+
 		Expression copy= (Expression) rewrite.getASTRewrite().createCopyTarget(initializer);
 		AST ast= rewrite.getAST();
 		if (NecessaryParenthesesChecker.needsParentheses(initializer, reference.getParent(), reference.getLocationInParent())) {
@@ -398,7 +398,7 @@ public class InlineTempRefactoring extends Refactoring {
 			parenthesized.setExpression(copy);
 			copy= parenthesized;
 		}
-		
+
 		ITypeBinding explicitCast= ASTNodes.getExplicitCast(initializer, reference);
 		if (explicitCast != null) {
 			CastExpression cast= ast.newCastExpression();
@@ -411,7 +411,7 @@ public class InlineTempRefactoring extends Refactoring {
 			ImportRewriteContext context= new ContextSensitiveImportRewriteContext(reference, rewrite.getImportRewrite());
 			cast.setType(rewrite.getImportRewrite().addImport(explicitCast, ast, context, TypeLocation.CAST));
 			copy= cast;
-			
+
 		} else if (initializer instanceof ArrayInitializer && ASTNodes.getDimensions(varDecl) > 0) {
 			ArrayType newType= (ArrayType) ASTNodeFactory.newType(ast, varDecl);
 
@@ -426,12 +426,12 @@ public class InlineTempRefactoring extends Refactoring {
 	private String createParameterizedInvocation(Expression invocation, ITypeBinding[] typeArguments, CompilationUnitRewrite cuRewrite) throws JavaModelException {
 		ASTRewrite rewrite= ASTRewrite.create(invocation.getAST());
 		ListRewrite typeArgsRewrite= Invocations.getInferredTypeArgumentsRewrite(rewrite, invocation);
-		
+
 		for (ITypeBinding typeArgument : typeArguments) {
 			Type typeArgumentNode = cuRewrite.getImportRewrite().addImport(typeArgument, cuRewrite.getAST());
 			typeArgsRewrite.insertLast(typeArgumentNode, null);
 		}
-		
+
 		if (invocation instanceof MethodInvocation) {
 			MethodInvocation methodInvocation= (MethodInvocation) invocation;
 			Expression expression= methodInvocation.getExpression();

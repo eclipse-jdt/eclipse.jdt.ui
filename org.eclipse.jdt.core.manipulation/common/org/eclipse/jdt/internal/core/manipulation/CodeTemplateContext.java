@@ -52,7 +52,7 @@ public class CodeTemplateContext extends TemplateContext {
 		}
 		return super.getAdapter(adapter);
 	}
-	
+
 	public IJavaProject getJavaProject() {
 		return fProject;
 	}

@@ -1,6 +1,6 @@
 /*******************************************************************************
  * Copyright (c) 2019 Red Hat Inc. and others.
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
@@ -75,10 +75,10 @@ public class TemplateCompletionTests extends TestCase {
 		applyProposal(viewer, proposals, "new_class", completionIndex);
 
 		StringBuffer expected= new StringBuffer();
-		expected.append("   package test;\n" + 
-				"\n" + 
-				"public class EmptyFile  {\n" + 
-				"\n" + 
+		expected.append("   package test;\n" +
+				"\n" +
+				"public class EmptyFile  {\n" +
+				"\n" +
 				"}");
 
 		assertEquals(expected.toString(), viewer.getDocument().get());

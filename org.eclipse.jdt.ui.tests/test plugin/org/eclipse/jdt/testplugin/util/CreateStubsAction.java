@@ -134,7 +134,7 @@ public final class CreateStubsAction implements IObjectActionDelegate {
 		final IStructuredSelection structuredSelection= (IStructuredSelection) selection;
 
 		Shell shell= fTargetPart.getSite().getShell();
-		String initialValue= JavaTestPlugin.getDefault().getDialogSettings().get(SETTINGS_ID_STUBS_PROJECT); 
+		String initialValue= JavaTestPlugin.getDefault().getDialogSettings().get(SETTINGS_ID_STUBS_PROJECT);
 		if (initialValue == null)
 			initialValue = "stubs"; //$NON-NLS-1$
 		final InputDialog inputDialog= new InputDialog(shell, CREATE_STUBS_DIALOG_TITLE, "Target project name:", initialValue, new IInputValidator() { //$NON-NLS-1$
@@ -149,11 +149,11 @@ public final class CreateStubsAction implements IObjectActionDelegate {
 		try {
 
 			final String name= inputDialog.getValue();
-			JavaTestPlugin.getDefault().getDialogSettings().put(SETTINGS_ID_STUBS_PROJECT, name); 
+			JavaTestPlugin.getDefault().getDialogSettings().put(SETTINGS_ID_STUBS_PROJECT, name);
 			long start= System.currentTimeMillis();
 
 			ArrayList<String> defaultPackages= new ArrayList<>(Arrays.asList(DEFAULT_PACKAGES));
-			
+
 			ProgressMonitorDialog progressMonitorDialog= new ProgressMonitorDialog(shell);
 			progressMonitorDialog.run(true, true, new IRunnableWithProgress() {
 
@@ -163,7 +163,7 @@ public final class CreateStubsAction implements IObjectActionDelegate {
 						createJavaProject(name);
 						IFolder target = ResourcesPlugin.getWorkspace().getRoot().getProject(inputDialog.getValue()).getFolder("src"); //$NON-NLS-1$
 						List<IPackageFragment> packageFragments= new ArrayList<>();
-						
+
 						boolean checkCompletionOfDefaultPackages= false;
 						for (Object sel : structuredSelection.toList()) {
 							if (sel instanceof IPackageFragment) {
@@ -198,7 +198,7 @@ public final class CreateStubsAction implements IObjectActionDelegate {
 			if (!defaultPackages.isEmpty() ) {
 				message+= "\n\nNo stubs generated for packages: " + defaultPackages.toString();
 			}
-			MessageDialog.openInformation(fTargetPart.getSite().getShell(), CREATE_STUBS_DIALOG_TITLE, message); 
+			MessageDialog.openInformation(fTargetPart.getSite().getShell(), CREATE_STUBS_DIALOG_TITLE, message);
 		} catch (InterruptedException e) {
 			// Do not log
 		} catch (InvocationTargetException e) {

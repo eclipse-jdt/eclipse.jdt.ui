@@ -22,7 +22,7 @@ public class Null extends JEAttribute {
 
 	private final JEAttribute fParent;
 	private final String fName;
-	
+
 	public Null(JEAttribute parent, String name) {
 		Assert.isNotNull(parent);
 		Assert.isNotNull(name);
@@ -44,7 +44,7 @@ public class Null extends JEAttribute {
 	public Object getWrappedObject() {
 		return null;
 	}
-	
+
 	@Override
 	public String getLabel() {
 		return fName + ": null";
@@ -57,7 +57,7 @@ public class Null extends JEAttribute {
 		if (obj == null || !obj.getClass().equals(getClass())) {
 			return false;
 		}
-		
+
 		Null other= (Null) obj;
 		if (! fParent.equals(other.fParent)) {
 			return false;
@@ -65,10 +65,10 @@ public class Null extends JEAttribute {
 		if (! fName.equals(other.fName)) {
 			return false;
 		}
-		
+
 		return true;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return fParent.hashCode() + fName.hashCode();

@@ -46,7 +46,7 @@ public class CPUserLibraryTest extends TestCase {
 			return super.getSortedChildren(parentElementOrTreePath);
 		}
 	}
-	/** Install our own {@link MyTreeViewer}. 
+	/** Install our own {@link MyTreeViewer}.
 	 * @param <E> the type of the root elements.
 	 */
 	static class MyTreeListDialogField<E> extends TreeListDialogField<E> {

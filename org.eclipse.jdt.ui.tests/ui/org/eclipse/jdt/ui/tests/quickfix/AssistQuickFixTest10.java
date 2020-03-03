@@ -51,7 +51,7 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.TypeChangeCorrectio
 
 @RunWith(JUnit4.class)
 public class AssistQuickFixTest10 extends QuickFixTest {
-	
+
 	@Rule
     public ProjectTestSetup projectsetup = new Java10ProjectTestSetup();
 
@@ -267,7 +267,7 @@ public class AssistQuickFixTest10 extends QuickFixTest {
 		assertEqualString(preview, buf.toString());
 
 	}
-	
+
 	@Test
 	public void testChangeVarToTypeNoTypeChangeProposal() throws Exception {
 		StringBuffer buf= new StringBuffer();
@@ -306,7 +306,7 @@ public class AssistQuickFixTest10 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 0);
 
 	}
-	
+
 	@Test
 	public void testChangeTypeToVarChangeProposalRemoveUnusedImport() throws Exception {
 		StringBuffer buf= new StringBuffer();
@@ -415,7 +415,7 @@ public class AssistQuickFixTest10 extends QuickFixTest {
 		buf.append("}\n");
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
 		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
-		
+
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
 		buf= new StringBuffer();
 		buf.append("package test;\n\n");
@@ -447,7 +447,7 @@ public class AssistQuickFixTest10 extends QuickFixTest {
 		assertEqualString(preview, buf.toString());
 
 	}
-	
+
 	private static final ArrayList<IJavaCompletionProposal> getExpectedProposals(ArrayList<IJavaCompletionProposal> proposals, Class<?>[] expectedTypes) {
 		ArrayList<IJavaCompletionProposal> expected= new ArrayList<>(proposals);
 		if (expectedTypes != null && expectedTypes.length > 0) {

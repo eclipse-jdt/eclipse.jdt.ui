@@ -40,7 +40,7 @@ public class Error extends JEAttribute {
 		if (obj == null || !obj.getClass().equals(getClass())) {
 			return false;
 		}
-		
+
 		Error other= (Error) obj;
 		if (fParent == null) {
 			if (other.fParent != null)
@@ -48,31 +48,31 @@ public class Error extends JEAttribute {
 		} else if (! fParent.equals(other.fParent)) {
 			return false;
 		}
-		
+
 		if (fName == null) {
 			if (other.fName != null)
 				return false;
 		} else if (! fName.equals(other.fName)) {
 			return false;
 		}
-		
+
 		if (fException == null) {
 			if (other.fException != null)
 				return false;
 		} else if (! fException.equals(other.fException)) {
 			return false;
 		}
-		
+
 		return true;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return (fParent != null ? fParent.hashCode() : 0)
 				+ (fName != null ? fName.hashCode() : 0)
 				+ (fException != null ? fException.hashCode() : 0);
 	}
-	
+
 	@Override
 	public JEAttribute[] getChildren() {
 		return EMPTY;
@@ -86,7 +86,7 @@ public class Error extends JEAttribute {
 	public Exception getException() {
 		return fException;
 	}
-	
+
 	@Override
 	public Object getWrappedObject() {
 		return fException;

@@ -37,10 +37,10 @@ import org.eclipse.debug.core.model.IBreakpoint;
  * ToggleJspBreakpointAction
  */
 public class ToggleJspBreakpointAction extends Action {
-	
+
 	private ITextEditor fEditor;
 	private IVerticalRulerInfo fRulerInfo;
-	
+
 	@Override
 	public void run() {
 		IBreakpointManager manager = DebugPlugin.getDefault().getBreakpointManager();
@@ -64,7 +64,7 @@ public class ToggleJspBreakpointAction extends Action {
 		}
 		createBreakpoint();
 	}
-	
+
 	protected void createBreakpoint() {
 		IResource resource = getResource();
 		int lineNumber = fRulerInfo.getLineOfLastMouseButtonActivity() + 1;

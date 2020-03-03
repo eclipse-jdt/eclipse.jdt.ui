@@ -300,7 +300,7 @@ public final class StubUtility2Core {
 		}
 		return decl;
 	}
-	
+
 	public static MethodDeclaration createImplementationStubCore(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports, ImportRewriteContext context,
 			IMethodBinding binding, ITypeBinding targetType, CodeGenerationSettings settings, boolean inInterface,
 			ASTNode astNode, boolean snippetStringSupport) throws CoreException {
@@ -312,7 +312,7 @@ public final class StubUtility2Core {
 			IMethodBinding binding, String[] parameterNames, ITypeBinding targetType, CodeGenerationSettings settings, boolean inInterface, ASTNode astNode, boolean snippetStringSupport) throws CoreException {
 		Assert.isNotNull(imports);
 		Assert.isNotNull(rewrite);
-		
+
 		AST ast= rewrite.getAST();
 		String type= Bindings.getTypeQualifiedName(targetType);
 
@@ -493,7 +493,7 @@ public final class StubUtility2Core {
 					}
 					type= type.getComponentType();
 				}
-				
+
 				Type elementType= imports.addImport(type, ast, context);
 				if (dimensions == 1) {
 					var.setType(elementType);
@@ -570,7 +570,7 @@ public final class StubUtility2Core {
 
 	private static void findUnimplementedInterfaceMethods(ITypeBinding typeBinding, HashSet<ITypeBinding> visited,
 			ArrayList<IMethodBinding> allMethods, IPackageBinding currPack, ArrayList<IMethodBinding> toImplement) {
-		
+
 		if (visited.add(typeBinding)) {
 			nextMethod: for (IMethodBinding curr : typeBinding.getDeclaredMethods()) {
 				for (Iterator<IMethodBinding> allIter= allMethods.iterator(); allIter.hasNext();) {
@@ -624,7 +624,7 @@ public final class StubUtility2Core {
 		}
 		modifiers= modifiers & ~Modifier.ABSTRACT & ~Modifier.NATIVE & ~Modifier.PRIVATE;
 		IAnnotationBinding[] annotations= method.getAnnotations();
-		
+
 		if (modifiers != Modifier.NONE && annotations.length > 0) {
 			// need an AST of the source method to preserve order of modifiers
 			IMethod iMethod= (IMethod) method.getJavaElement();
@@ -664,16 +664,16 @@ public final class StubUtility2Core {
 				}
 			}
 		}
-		
+
 		ArrayList<IExtendedModifier> result= new ArrayList<>();
-		
+
 		for (IAnnotationBinding annotation : annotations) {
 			if (StubUtility2Core.isCopyOnInheritAnnotation(annotation.getAnnotationType(), javaProject, nullnessDefault, TypeLocation.RETURN_TYPE))
 				result.add(importRewrite.addAnnotation(annotation, ast, context));
 		}
-		
+
 		result.addAll(ASTNodeFactory.newModifiers(ast, modifiers));
-		
+
 		return result;
 	}
 
@@ -925,7 +925,7 @@ public final class StubUtility2Core {
 	/**
 	 * Adds <code>@Override</code> annotation to <code>methodDecl</code> if not already present and
 	 * if requested by code style settings or compiler errors/warnings settings.
-	 * 
+	 *
 	 * @param settings the code generation style settings, may be <code>null</code>
 	 * @param project the Java project used to access the compiler settings
 	 * @param rewrite the ASTRewrite
@@ -991,7 +991,7 @@ public final class StubUtility2Core {
 		}
 		return null;
 	}
-	
+
 	public static ITypeBinding replaceWildcardsAndCaptures(ITypeBinding type) {
 		while (type.isWildcardType() || type.isCapture() || (type.isArray() && type.getElementType().isCapture())) {
 			ITypeBinding bound = type.getBound();
@@ -999,7 +999,7 @@ public final class StubUtility2Core {
 		}
 		return type;
 	}
-	
+
 	/**
 	 * Creates a new stub utility.
 	 */

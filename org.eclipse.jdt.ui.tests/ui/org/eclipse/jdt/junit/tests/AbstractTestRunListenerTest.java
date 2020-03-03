@@ -117,7 +117,7 @@ public class AbstractTestRunListenerTest extends TestCase {
 	protected void launchJUnit(IJavaElement aTest, String testKindID) throws CoreException {
 		launchJUnit(aTest, testKindID, (String)null);
 	}
-	
+
 	protected void launchJUnit(IJavaElement aTest, String testKindID, String testName) throws CoreException {
 		ResourcesPlugin.getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
 		IMarker[] markers= aTest.getJavaProject().getProject().findMarkers(null, true, IResource.DEPTH_INFINITE);
@@ -201,11 +201,11 @@ public class AbstractTestRunListenerTest extends TestCase {
 	protected String[] launchJUnit(IJavaElement aTest, final TestRunLog log) throws CoreException {
 		return launchJUnit(aTest, null, log);
 	}
-	
+
 	protected String[] launchJUnit(IJavaElement aTest, String testKindID, final TestRunLog log) throws CoreException {
 		return launchJUnit(aTest, testKindID, null, log);
 	}
-	
+
 	protected String[] launchJUnit(IJavaElement aTest, String testKindID, String testName, final TestRunLog log) throws CoreException {
 		launchJUnit(aTest, testKindID, testName);
 

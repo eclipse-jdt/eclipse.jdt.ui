@@ -48,7 +48,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
  * Utility methods for the Java Model.
- * 
+ *
  * @see JavaModelUtil (a better place for new methods)
  * see JDTUIHelperClasses
  */

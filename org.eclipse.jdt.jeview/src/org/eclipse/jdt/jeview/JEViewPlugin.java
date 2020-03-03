@@ -36,7 +36,7 @@ public class JEViewPlugin extends AbstractUIPlugin {
 	public static String getPluginId() {
 		return "org.eclipse.jdt.jeview"; //$NON-NLS-1$
 	}
-	
+
 	@Override
 	public void stop(BundleContext context) throws Exception {
 		super.stop(context);
@@ -56,19 +56,19 @@ public class JEViewPlugin extends AbstractUIPlugin {
 	public static IWorkspace getWorkspace() {
 		return ResourcesPlugin.getWorkspace();
 	}
-	
+
 	public static void log(IStatus status) {
 		getDefault().getLog().log(status);
 	}
-	
+
 	public static void logErrorMessage(String message) {
 		log(new Status(IStatus.ERROR, getPluginId(), IStatus.ERROR, message, null));
 	}
-	
+
 	public static void logMessage(String message) {
 		log(new Status(IStatus.INFO, getPluginId(), IStatus.INFO, message, null));
 	}
-	
+
 	public static void logErrorStatus(String message, IStatus status) {
 		if (status == null) {
 			logErrorMessage(message);
@@ -78,12 +78,12 @@ public class JEViewPlugin extends AbstractUIPlugin {
 		multi.add(status);
 		log(multi);
 	}
-	
+
 	public static void log(String message, Throwable e) {
-		log(new Status(IStatus.ERROR, getPluginId(), IStatus.ERROR, message, e)); 
+		log(new Status(IStatus.ERROR, getPluginId(), IStatus.ERROR, message, e));
 	}
-	
+
 	public static void log(Throwable e) {
-		log(new Status(IStatus.ERROR, getPluginId(), IStatus.ERROR, e.getLocalizedMessage(), e)); 
+		log(new Status(IStatus.ERROR, getPluginId(), IStatus.ERROR, e.getLocalizedMessage(), e));
 	}
 }

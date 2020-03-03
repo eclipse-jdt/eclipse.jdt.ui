@@ -271,7 +271,7 @@ public abstract class FlowInfo {
 	/**
 	 * Checks whether the given local variable binding has the given access
 	 * mode.
-	 * 
+	 *
 	 * @param context the flow context used during flow analysis
 	 * @param local local variable of interest
 	 * @param mode the access mode of the local variable

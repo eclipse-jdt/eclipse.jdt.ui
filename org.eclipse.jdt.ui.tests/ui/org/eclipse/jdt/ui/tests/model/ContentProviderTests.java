@@ -140,10 +140,10 @@ public class ContentProviderTests extends TestCase {
 	private static void assertEqualSets(String message, Object[] expected, Object[] actual) {
 		List<Object> expList= Arrays.asList(expected);
 		List<Object> actList= Arrays.asList(actual);
-		
+
 		LinkedHashSet<Object> exp= new LinkedHashSet<>(expList);
 		LinkedHashSet<Object> act= new LinkedHashSet<>(actList);
-		
+
 		if (!exp.equals(act))
 			throw new ComparisonFailure(message, expList.toString(), actList.toString());
 	}
@@ -172,38 +172,38 @@ public class ContentProviderTests extends TestCase {
 
 	public void testOutgoingChangeInNonPackage261198() throws Exception {
 		IProject project = (IProject)fJProject1.getResource();
-		
+
 		IFolder f1= ((IFolder) fPackageFragment1.getResource());
 		IFolder noPackage= f1.getFolder("no-package");
 		noPackage.create(false, true, null);
-		
+
 		IFile textfile = noPackage.getFile("textfile.txt");
-		textfile.create(new ByteArrayInputStream("Hi".getBytes()), false, null);		
-		
+		textfile.create(new ByteArrayInputStream("Hi".getBytes()), false, null);
+
 		fMyPart.addOutgoingChange(project, "f1/no-package/textfile.txt");
-		
+
 		// Children of project
 		Object[] expectedChildren = new Object[] { fPackageFragment1 };
 		Object[] children = fProvider.getChildren(fJProject1);
 		assertEqualSets("Expected children of project does not match actual children", expectedChildren, children);
-		
+
 		// Children of fragment 1
 		expectedChildren = new Object[] { noPackage };
 		children = fProvider.getChildren(fPackageFragment1);
 		assertEqualSets("Expected children of f1 does not match actual children", expectedChildren, children);
-		
+
 		// Children of no-package
 		expectedChildren = new Object[] { textfile };
 		children = fProvider.getChildren(noPackage);
 		assertEqualSets("Expected children of no-package does not match actual children", expectedChildren, children);
 	}
-	
+
 	public void testOutgoingPackageDeletion269167() throws Exception {
 		IProject project = (IProject)fJProject1.getResource();
-		
+
 		fMyPart.addOutgoingDeletion(project, "f3/");
 		IFolder f3= project.getFolder("f3");
-		
+
 		IPackageFragment packageFragment3= (IPackageFragment)JavaCore.create(f3);
 		LogicalPackage logicalPackage3= new LogicalPackage(packageFragment3);
 		ResourceMapping resourceMapping= logicalPackage3.getAdapter(ResourceMapping.class);
@@ -212,13 +212,13 @@ public class ContentProviderTests extends TestCase {
 		assertEqualSets("", new IResource[] { f3 }, traversals[0].getResources());
 		assertEquals(IResource.DEPTH_ONE, traversals[0].getDepth());
 		assertEquals(0, traversals[0].getFlags());
-		
+
 		// Children of project
 		Object[] expectedChildren = new Object[] { f3 };
 		Object[] children = fProvider.getChildren(fJProject1);
 		assertEqualSets("Expected children of project does not match actual children", expectedChildren, children);
 	}
-	
+
 	public void testIncomingAddition159884() {
 		IProject project = (IProject)fJProject1.getResource();
 		fMyPart.addIncomingAddition(project, "f1/newFolder/");

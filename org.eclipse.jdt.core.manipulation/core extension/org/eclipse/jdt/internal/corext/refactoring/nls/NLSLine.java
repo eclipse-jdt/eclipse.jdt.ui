@@ -38,7 +38,7 @@ public class NLSLine {
 
 	/**
 	 * Adds a NLS element to this line.
-	 * 
+	 *
 	 * @param element the NLS element
 	 */
 	public void add(NLSElement element) {

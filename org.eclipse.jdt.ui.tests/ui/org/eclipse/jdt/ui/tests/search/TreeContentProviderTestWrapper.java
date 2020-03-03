@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,9 +14,14 @@
 
 package org.eclipse.jdt.ui.tests.search;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
+
+import org.eclipse.jdt.ui.tests.core.rules.JUnitSourceSetup;
 
 /**
  * This class is a wrapper for {@link org.eclipse.jdt.ui.tests.search.TreeContentProviderTest}
@@ -25,54 +30,46 @@ import junit.framework.TestSuite;
  *
  * @since 3.1
  */
-public class TreeContentProviderTestWrapper extends TestCase {
-
-	private static final Class<TreeContentProviderTestWrapper> THIS= TreeContentProviderTestWrapper.class;
+@RunWith(JUnit4.class)
+public class TreeContentProviderTestWrapper {
 
 	TreeContentProviderTest fTest;
-	private String fName;
 
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
+	@Rule
+	public JUnitSourceSetup projectsetup = new JUnitSourceSetup();
 
-	public static Test setUpTest(Test test) {
-		return new JUnitSourceSetup(test);
-	}
-
-	public TreeContentProviderTestWrapper(String name) {
-		super(name);
-		fName= name;
-	}
-
-	@Override
-	protected void setUp() throws Exception {
-		fTest= new TreeContentProviderTest(fName);
+	@Before
+	public void setUp() throws Exception {
+		fTest= new TreeContentProviderTest();
 		fTest.setUp();
 	}
-
 
 	/*
 	 * @see junit.framework.TestCase#tearDown()
 	 * @since 3.1
 	 */
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		fTest.tearDown();
 		fTest= null;
 	}
+
+	@Test
 	public void testSimpleAdd() throws Exception {
 		fTest.testSimpleAdd();
 	}
 
+	@Test
 	public void testRemove() throws Exception {
 		fTest.testRemove();
 	}
 
+	@Test
 	public void testRemoveParentFirst() throws Exception {
 		fTest.testRemoveParentFirst();
 	}
 
+	@Test
 	public void testRemoveParentLast() throws Exception {
 		fTest.testRemoveParentLast();
 	}

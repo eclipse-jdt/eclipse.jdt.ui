@@ -37,7 +37,7 @@ import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
 
 /**
  * Utilities to read and write bundle and source information files.
- * 
+ *
  * @since 3.5
  */
 class P2Utils {
@@ -47,7 +47,7 @@ class P2Utils {
 	 * <p>
 	 * The first match will be returned if more than one bundle matches the arguments.
 	 * </p>
-	 * 
+	 *
 	 * @param symbolicName the symbolic name
 	 * @param version the bundle version
 	 * @param isSourceBundle <code>true</code> if it is a source bundle <code>false</code> otherwise
@@ -65,7 +65,7 @@ class P2Utils {
 	 * <p>
 	 * The best match (latest version) will be returned if more than one bundle matches the arguments.
 	 * </p>
-	 * 
+	 *
 	 * @param symbolicName the symbolic name
 	 * @param versionRange the version range for the bundle version
 	 * @param isSourceBundle <code>true</code> if it is a source bundle <code>false</code> otherwise
@@ -94,7 +94,7 @@ class P2Utils {
 		} catch (IOException e) {
 			JUnitCorePlugin.log(e);
 		}
-		
+
 		if (bundles != null) {
 			for (BundleInfo bundleInfo : bundles) {
 				if (symbolicName.equals(bundleInfo.getSymbolicName())) {
@@ -117,18 +117,18 @@ class P2Utils {
 
 	/**
 	 * Returns the bundle location path.
-	 * 
+	 *
 	 * @param bundleInfo the bundle info or <code>null</code>
 	 * @return the bundle location or <code>null</code> if it is not possible to convert to a path
 	 */
 	public static IPath getBundleLocationPath(BundleInfo bundleInfo) {
 		if (bundleInfo == null)
 			return null;
-	
+
 		URI bundleLocation= bundleInfo.getLocation();
 		if (bundleLocation == null)
 			return null;
-		
+
 		try {
 			URL localFileURL= FileLocator.toFileURL(URIUtil.toURL(bundleLocation));
 			URI localFileURI= new URI(localFileURL.toExternalForm());

@@ -52,7 +52,7 @@ import org.eclipse.jdt.internal.ui.text.java.hover.JavadocHover;
 
 /**
  * Tests for fetching package Javadoc.
- * 
+ *
  * @since 3.9
  */
 public class PackageJavadocTests extends CoreTests {
@@ -246,7 +246,7 @@ public class PackageJavadocTests extends CoreTests {
 	/**
 	 * Package Javadoc hover throws NullPointerException if package-info.java contains references.
 	 * This test case is to test the fix.
-	 * 
+	 *
 	 * @throws Exception when the test case fails
 	 */
 	public void testPackageInfoWithReferenceLinks() throws Exception {
@@ -296,7 +296,7 @@ public class PackageJavadocTests extends CoreTests {
 		packageFragment= (IPackageFragment)codeSelect[0];
 		JavadocBrowserInformationControlInput hoverInfo= JavadocHover.getHoverInfo(new IJavaElement[] { packageFragment }, cu, new Region(offset, length), null);
 		String actualHtmlContent= hoverInfo.getHtml();
-		
+
 		Assert.assertTrue(actualHtmlContent, actualHtmlContent.contains(CorextMessages.JavaDocLocations_noAttachedJavadoc));
 	}
 

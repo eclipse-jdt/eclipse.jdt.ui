@@ -411,7 +411,7 @@ public class ExtractClassTests extends RefactoringTest {
 		fDescriptor.setCreateTopLevel(false);
 		runRefactoring(false);
 	}
-	
+
 	// see bug 394547
 	public void testNested1() throws Exception {
 		IType outer= setupType();

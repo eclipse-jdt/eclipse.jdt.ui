@@ -107,6 +107,7 @@ import org.junit.runners.Suite;
 	ChangeNonStaticToStaticTest.class,
 	MarkerResolutionTest.class,
 	JavadocQuickFixTest.class,
+	JavadocQuickFixTest9.class,
 	ConvertForLoopQuickFixTest.class,
 	ConvertIterableLoopQuickFixTest.class,
 	AdvancedQuickAssistTest.class,
@@ -276,7 +277,7 @@ public class QuickFixTest {
 	protected static final ArrayList<ICompletionProposal> collectAllCorrections(ICompilationUnit cu, CompilationUnit astRoot, int nProblems) throws CoreException {
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOfProblems(nProblems, problems);
-		
+
 		ArrayList<ICompletionProposal> corrections= new ArrayList<>();
 		for (int i= 0; i < nProblems; i++) {
 			corrections.addAll(collectCorrections(cu, problems[i], null));
@@ -447,7 +448,7 @@ public class QuickFixTest {
 		}
 		return previewContent;
 	}
-	
+
 	private static String getSEFPreviewContent(SelfEncapsulateFieldProposal sefp) throws CoreException {
 		ICompilationUnit compilationUnit= sefp.getField().getCompilationUnit();
 		TextFileChange change= sefp.getChange((IFile) compilationUnit.getResource());

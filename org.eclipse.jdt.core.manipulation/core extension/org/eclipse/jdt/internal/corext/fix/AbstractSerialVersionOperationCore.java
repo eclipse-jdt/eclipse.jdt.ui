@@ -69,7 +69,7 @@ public abstract class AbstractSerialVersionOperationCore extends CompilationUnit
 
 	/**
 	 * Adds an initializer to the specified variable declaration fragment.
-	 * 
+	 *
 	 * @param fragment the variable declaration fragment to add an initializer
 	 * @param declarationNode the declartion node
 	 * @return false if no id could be calculated

@@ -144,7 +144,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 	TreeViewer fViewer;
 	private DrillDownAdapter fDrillDownAdapter;
 	JERoot fInput;
-	
+
 	private Action fFocusAction;
 	private Action fFindTypeAction;
 	private Action fFindType2Action;
@@ -160,9 +160,9 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 	private Action fCompareAction;
 	private Action fPropertiesAction;
 	Action fDoubleClickAction;
-	
+
 	private Action fLogDeltasAction;
-	
+
 	private PropertySheetPage fPropertySheetPage;
 
 	private static class InputDialog extends org.eclipse.jface.dialogs.InputDialog {
@@ -193,7 +193,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		void fireSelectionChanged() {
 			if (fSelectionChangedListeners != null) {
 				IStructuredSelection selection = getSelection();
-				
+
 				if (fLastSelection != null) {
 					List<?> newSelection = selection.toList();
 					List<?> oldSelection = fLastSelection.toList();
@@ -214,15 +214,15 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 					}
 				}
 				fLastSelection= selection;
-				
+
 				SelectionChangedEvent event= new SelectionChangedEvent(this, selection);
-				
+
 				for (ISelectionChangedListener listener : fSelectionChangedListeners) {
 					listener.selectionChanged(event);
 				}
 			}
 		}
-		
+
 		@Override
 		public void addSelectionChangedListener(ISelectionChangedListener listener) {
 			fSelectionChangedListeners.add(listener);
@@ -236,7 +236,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 				Object element= iter.next();
 				if (element instanceof JavaElement) {
 					IJavaElement javaElement= ((JavaElement) element).getJavaElement();
-					if (javaElement != null && ! (javaElement instanceof IJavaModel)) // various selection listeners assume getJavaProject() is non-null 
+					if (javaElement != null && ! (javaElement instanceof IJavaModel)) // various selection listeners assume getJavaProject() is non-null
 						externalSelection.add(javaElement);
 				} else if (element instanceof JEResource) {
 					IResource resource= ((JEResource) element).getResource();
@@ -262,7 +262,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 			//not supported
 		}
 	}
-	
+
 	public JavaElementView() {
 		//
 	}
@@ -280,7 +280,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 				} else {
 					setContentDescription("");
 				}
-				
+
 			}
 		};
 		fViewer.setContentProvider(new JEViewContentProvider());
@@ -310,7 +310,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 	void setSingleInput(Object javaElementOrResource) {
 		setInput(Collections.singleton(javaElementOrResource));
 	}
-	
+
 	void setInput(Collection<?> javaElementsOrResources) {
 		fInput= new JERoot(javaElementsOrResources);
 		fViewer.setInput(fInput);
@@ -328,7 +328,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 	void setEmptyInput() {
 		setInput(Collections.emptySet());
 	}
-	
+
 	private void hookContextMenu() {
 		MenuManager menuMgr = new MenuManager("#PopupMenu");
 		menuMgr.setRemoveAllWhenShown(true);
@@ -367,7 +367,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		manager.add(fResetAction);
 		manager.add(fRefreshAction);
 		manager.add(new Separator());
-		
+
 		if (! getSite().getSelectionProvider().getSelection().isEmpty()) {
 			MenuManager showInSubMenu= new MenuManager(getShowInMenuLabel());
 			IWorkbenchWindow workbenchWindow= getSite().getWorkbenchWindow();
@@ -376,10 +376,10 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		}
 		addElementActionsOrNot(manager);
 		manager.add(new Separator());
-		
+
 		manager.add(fCopyAction);
 		manager.add(new Separator());
-		
+
 		fDrillDownAdapter.addNavigationActions(manager);
 		manager.add(new Separator());
 		// Other plug-ins can contribute there actions here
@@ -401,7 +401,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 
 		return "Sho&w In" + '\t' + keyBinding;
 	}
-	
+
 	private void addFocusActionOrNot(IMenuManager manager) {
 		if (fViewer.getSelection() instanceof IStructuredSelection) {
 			IStructuredSelection structuredSelection= (IStructuredSelection) fViewer.getSelection();
@@ -425,7 +425,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 			}
 		}
 	}
-	
+
 	private void addElementActionsOrNot(IMenuManager manager) {
 		if (fViewer.getSelection() instanceof IStructuredSelection) {
 			IStructuredSelection structuredSelection= (IStructuredSelection) fViewer.getSelection();
@@ -448,7 +448,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 			}
 		}
 	}
-	
+
 	private void addCompareActionOrNot(IMenuManager manager) {
 		if (fViewer.getSelection() instanceof ITreeSelection) {
 			ITreeSelection treeSelection = (ITreeSelection) fViewer.getSelection();
@@ -457,7 +457,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 			}
 		}
 	}
-	
+
 	private void fillLocalToolBar(IToolBarManager manager) {
 		manager.add(fCodeSelectAction);
 		manager.add(fElementAtAction);
@@ -491,7 +491,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 					setEmptyInput();
 					return;
 				}
-				
+
 				IJavaElement[] resolved;
 				try {
 					resolved= codeResolve(javaElement, (ITextSelection) selection);
@@ -503,12 +503,12 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 					setEmptyInput();
 					return;
 				}
-				
+
 				setInput(Arrays.asList(resolved));
 			}
 		};
 		fCodeSelectAction.setToolTipText("Set input from current editor's selection (codeSelect)");
-		
+
 		fElementAtAction= new Action("Set Input from Editor location (&getElementAt)", JEPluginImages.IMG_SET_FOCUS) {
 			@Override public void run() {
 				IEditorPart editor= getSite().getPage().getActiveEditor();
@@ -532,7 +532,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 					setEmptyInput();
 					return;
 				}
-				
+
 				IJavaElement resolved;
 				try {
 					resolved= getElementAtOffset(javaElement, (ITextSelection) selection);
@@ -544,12 +544,12 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 					setEmptyInput();
 					return;
 				}
-				
+
 				setSingleInput(resolved);
 			}
 		};
 		fElementAtAction.setToolTipText("Set input from current editor's selection location (getElementAt)");
-		
+
 		fCreateFromHandleAction= new Action("Create From &Handle...") {
 			@Override public void run() {
 				InputDialog dialog= new InputDialog(getSite().getShell(), "Create Java Element From Handle Identifier", "&Handle identifier:", "", null);
@@ -560,7 +560,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 				setSingleInput(javaElement);
 			}
 		};
-		
+
 		fFocusAction= new Action() {
 			@Override public void run() {
 				Object selected= ((IStructuredSelection) fViewer.getSelection()).getFirstElement();
@@ -572,16 +572,16 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 			}
 		};
 		fFocusAction.setToolTipText("Focus on Selection");
-		
+
 		fFindTypeAction= new Action() {
 			@Override public void run() {
 				Object selected= ((IStructuredSelection) fViewer.getSelection()).getFirstElement();
 				final IJavaProject project= (IJavaProject) ((JavaElement) selected).getJavaElement();
-				
+
 				InputDialog dialog= new InputDialog(getSite().getShell(), "IJavaProject#findType(String fullyQualifiedName)", "fullyQualifiedName:", "", null);
 				if (dialog.open() != Window.OK)
 					return;
-				
+
 				final String fullyQualifiedName= dialog.getValue();
 				try {
 					IType type = project.findType(fullyQualifiedName);
@@ -594,17 +594,17 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 			}
 		};
 		fFindTypeAction.setText("findType(String)...");
-		
+
 		fFindType2Action= new Action() {
 			@Override public void run() {
 				Object selected= ((IStructuredSelection) fViewer.getSelection()).getFirstElement();
 				final IJavaProject project= (IJavaProject) ((JavaElement) selected).getJavaElement();
-				
+
 				InputDialog dialog= new InputDialog(getSite().getShell(), "IJavaProject#findType(String fullyQualifiedName, IProgressMonitor pm)", "fullyQualifiedName:", "", null);
 				if (dialog.open() != Window.OK)
 					return;
 				final String fullyQualifiedName= dialog.getValue();
-				
+
 				class Runner implements IRunnableWithProgress {
 					IType type;
 					@Override
@@ -630,17 +630,17 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 			}
 		};
 		fFindType2Action.setText("findType(String, IProgressMonitor)...");
-		
+
 		fResolveTypeAction= new Action() {
 			@Override public void run() {
 				Object selected= ((IStructuredSelection) fViewer.getSelection()).getFirstElement();
 				final IType type= (IType) ((JavaElement) selected).getJavaElement();
-				
+
 				InputDialog dialog= new InputDialog(getSite().getShell(), "IType#resolveType(String typeName)", "typeName:", "", null);
 				if (dialog.open() != Window.OK)
 					return;
 				final String typeName= dialog.getValue();
-				
+
 				JavaElementChildrenProperty element= new JavaElementChildrenProperty(fInput, "'" + type.getFullyQualifiedName() + "'.resolveType(\"" + typeName +"\")") {
 					@Override protected JEAttribute[] computeChildren() throws Exception {
 						String[][] resolvedTypes= type.resolveType(typeName);
@@ -661,17 +661,17 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 			}
 		};
 		fResolveTypeAction.setText("resolveType(String)...");
-		
+
 		fGetAnnotationAction= new Action() {
 			@Override public void run() {
 				Object selected= ((IStructuredSelection) fViewer.getSelection()).getFirstElement();
 				final IAnnotatable annotatable= (IAnnotatable) ((JavaElement) selected).getJavaElement();
-				
+
 				InputDialog dialog= new InputDialog(getSite().getShell(), "IAnnotatable#getAnnotation(String name)", "name:", "", null);
 				if (dialog.open() != Window.OK)
 					return;
 				final String name= dialog.getValue();
-				
+
 				JavaElementChildrenProperty element= new JavaElementChildrenProperty(fInput, "'" + ((IJavaElement) annotatable).getElementName() + "'.getAnnotation(\"" + name +"\")") {
 					@Override protected JEAttribute[] computeChildren() throws Exception {
 						IAnnotation annotation= annotatable.getAnnotation(name);
@@ -684,17 +684,17 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 			}
 		};
 		fGetAnnotationAction.setText("getAnnotation(String)...");
-		
+
 		fCreateFromBindingKeyAction= new Action("Create From &Binding Key...") {
 			@Override public void run() {
 				Object selected= ((IStructuredSelection) fViewer.getSelection()).getFirstElement();
 				final IJavaProject project= (IJavaProject) ((JavaElement) selected).getJavaElement();
-				
+
 				InputDialog dialog= new InputDialog(getSite().getShell(), "IJavaProject#findElement(String bindingKey, WorkingCopyOwner owner)", "&bindingKey:", "", null);
 				if (dialog.open() != Window.OK)
 					return;
 				final String bindingKey= dialog.getValue();
-				
+
 				class Runner implements IRunnableWithProgress {
 					IJavaElement element;
 					@Override
@@ -719,14 +719,14 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 				fViewer.setSelection(new StructuredSelection(element));
 			}
 		};
-		
+
 		fResetAction= new Action("&Reset View", getJavaModelImageDescriptor()) {
 			@Override public void run() {
 				reset();
 			}
 		};
 		fResetAction.setToolTipText("Reset View to JavaModel");
-		
+
 		fRefreshAction= new Action("Re&fresh", JEPluginImages.IMG_REFRESH) {
 			@Override public void run() {
 				BusyIndicator.showWhile(getSite().getShell().getDisplay(), new Runnable() {
@@ -739,9 +739,9 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		};
 		fRefreshAction.setToolTipText("Refresh");
 		fRefreshAction.setActionDefinitionId("org.eclipse.ui.file.refresh");
-		
+
 		fCopyAction= new TreeCopyAction(new Tree[] {fViewer.getTree()});
-		
+
 		fPropertiesAction= new Action("&Properties", JEPluginImages.IMG_PROPERTIES) {
 			@Override
 			public void run() {
@@ -758,14 +758,14 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 			}
 		};
 		fPropertiesAction.setActionDefinitionId(IWorkbenchCommandConstants.FILE_PROPERTIES);
-		
+
 		fDoubleClickAction = new Action() {
 			private Object fPreviousDouble;
 
 			@Override public void run() {
 				ISelection selection = fViewer.getSelection();
 				Object obj = ((IStructuredSelection)selection).getFirstElement();
-				
+
 				boolean isSecondDoubleClick= (obj == fPreviousDouble);
 				fPreviousDouble= isSecondDoubleClick ? null : obj;
 
@@ -775,7 +775,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 						switch (javaElement.getElementType()) {
 							case IJavaElement.JAVA_MODEL :
 								break;
-								
+
 							case IJavaElement.JAVA_PROJECT :
 							case IJavaElement.PACKAGE_FRAGMENT_ROOT :
 							case IJavaElement.PACKAGE_FRAGMENT :
@@ -795,7 +795,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 									showAndLogError("Could not show element", e1);
 								}
 								break;
-								
+
 							default :
 								try {
 									IEditorPart editorPart= JavaUI.openInEditor(javaElement);
@@ -814,11 +814,11 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 								}
 						}
 					}
-					
+
 				} else if (obj instanceof Error) {
 					Error error= (Error) obj;
 					JEViewPlugin.log(error.getException());
-					
+
 				} else if (obj instanceof JEMarker) {
 					JEMarker marker= (JEMarker) obj;
 					try {
@@ -829,7 +829,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 				}
 			}
 		};
-		
+
 		fCompareAction= new Action() {
 			@Override public void run() {
 				TreePath[] selection= ((ITreeSelection) fViewer.getSelection()).getPaths();
@@ -839,16 +839,16 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 				boolean equals1= first != null && first.equals(second);
 				boolean equals2= second != null && second.equals(first);
 				boolean inconsistentEquals= equals1 != equals2;
-				
+
 				String msg= "==: " + identical + "\nequals(..): " + (inconsistentEquals ? "INCONSISTENT" : equals1);
 				MessageDialog.openInformation(fViewer.getTree().getShell(), "Comparison", msg);
 			}
 		};
 		fCompareAction.setText("C&ompare with Each Other...");
 
-		
+
 		fLogDeltasAction= new Action("Log Java element deltas", IAction.AS_CHECK_BOX) {
-			
+
 			private IElementChangedListener fListener= new IElementChangedListener() {
 				@Override
 				@SuppressWarnings("deprecation")
@@ -871,7 +871,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 					JEViewPlugin.logMessage(event.getDelta().toString() + type);
 				}
 			};
-			
+
 			@Override public void run() {
 				String message;
 				if (!isChecked()) {
@@ -884,10 +884,10 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 				MessageDialog.openInformation(fViewer.getTree().getShell(), "Log Java Element Deltas", message);
 			}
 		};
-		
+
 	}
 
-	
+
 	static IJavaElement[] codeResolve(IJavaElement input, ITextSelection selection) throws JavaModelException {
 		if (input instanceof ICodeAssist) {
 			if (input instanceof ICompilationUnit) {
@@ -899,7 +899,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		}
 		return new IJavaElement[0];
 	}
-	
+
 	static IJavaElement getElementAtOffset(IJavaElement input, ITextSelection selection) throws JavaModelException {
 		if (input instanceof ICompilationUnit) {
 			ICompilationUnit cunit= (ICompilationUnit) input;
@@ -918,18 +918,18 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		}
 		return input;
 	}
-	
+
 	/* see JavaModelUtil.reconcile((ICompilationUnit) input) */
 	static void reconcile(ICompilationUnit unit) throws JavaModelException {
 		synchronized(unit)  {
 			unit.reconcile(
-				ICompilationUnit.NO_AST, 
-				false /* don't force problem detection */, 
-				null /* use primary owner */, 
+				ICompilationUnit.NO_AST,
+				false /* don't force problem detection */,
+				null /* use primary owner */,
 				null /* no progress monitor */);
 		}
 	}
-	
+
 	private ImageDescriptor getJavaModelImageDescriptor() {
 		JavaElementLabelProvider lp= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_SMALL_ICONS);
 		Image modelImage= lp.getImage(getJavaModel());
@@ -946,18 +946,18 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 			}
 		});
 	}
-	
+
 	void showAndLogError(String message, CoreException e) {
 		JEViewPlugin.log(message, e);
 		ErrorDialog.openError(getSite().getShell(), "JavaElement View", message, e.getStatus()); //$NON-NLS-1$
 	}
-	
+
 	void showAndLogError(String message, Exception e) {
 		IStatus status= new Status(IStatus.ERROR, JEViewPlugin.getPluginId(), 0, message, e);
 		JEViewPlugin.log(status);
 		ErrorDialog.openError(getSite().getShell(), "JavaElement View", null, status); //$NON-NLS-1$
 	}
-	
+
 	void showMessage(String message) {
 		MessageDialog.openInformation(
 			fViewer.getControl().getShell(),
@@ -997,7 +997,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 				}
 			}
 		}
-		
+
 		Object input= context.getInput();
 		if (input instanceof IEditorInput) {
 			Object elementOfInput= getElementOfInput((IEditorInput)context.getInput());
@@ -1009,13 +1009,13 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 
 		return false;
 	}
-	
+
 	Object getElementOfInput(IEditorInput input) {
 		Object adapted= input.getAdapter(IClassFile.class);
 		if (adapted != null) {
 			return adapted;
 		}
-		
+
 		if (input instanceof IFileEditorInput) {
 			IFile file= ((IFileEditorInput)input).getFile();
 			IJavaElement javaElement= JavaCore.create(file);
@@ -1033,7 +1033,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		}
 		return null;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T getAdapter(Class<T> adapter) {

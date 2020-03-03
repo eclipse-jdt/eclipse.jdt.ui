@@ -235,7 +235,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
 		ArrayList<String> previews= new ArrayList<>();
 		ArrayList<String> expecteds= new ArrayList<>();
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -252,7 +252,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		addPreviewAndExpected(proposals, buf, expecteds, previews);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -265,7 +265,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		addPreviewAndExpected(proposals, buf, expecteds, previews);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -279,7 +279,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		addPreviewAndExpected(proposals, buf, expecteds, previews);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -293,7 +293,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		addPreviewAndExpected(proposals, buf, expecteds, previews);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -309,7 +309,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
 		assertEqualStringsIgnoreOrder(previews, expecteds);
 	}
-	
+
 	@Test
 	public void testJoinAndIfStatements1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -1098,7 +1098,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertProposalDoesNotExist(proposals, "Put '>' expression in parentheses");
-		
+
 	}
 
 	@Test
@@ -1120,7 +1120,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertProposalDoesNotExist(proposals, "Put '>' expression in parentheses");
-		
+
 	}
 
 	@Test
@@ -1426,13 +1426,13 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		int offset= buf.toString().indexOf("if");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
-		
+
 		assertCorrectLabels(proposals);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test;\n");
 		buf.append("public class E {\n");
@@ -1445,7 +1445,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-		
+
 		assertExpectedExistInProposals(proposals, new String[] {expected1});
 	}
 
@@ -1463,13 +1463,13 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-	
+
 		int offset= buf.toString().indexOf("if (");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
-	
+
 		assertCorrectLabels(proposals);
-	
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -1481,7 +1481,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-	
+
 		assertExpectedExistInProposals(proposals, new String[] {expected1});
 	}
 
@@ -4607,15 +4607,15 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		int offset= buf.toString().indexOf("switch");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
-		
+
 		assertNumberOfProposals(proposals, 0);
 	}
-	
+
 	@Test
 	public void testConvertIfToSwitch1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -5904,7 +5904,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		assertProposalDoesNotExist(proposals, "Pick out selected part of String");
 
 	}
-	
+
 	@Test
 	public void testCombineStringsProposals1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -5923,7 +5923,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertCorrectLabels(proposals);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -5936,7 +5936,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected });
 
 	}
-	
+
 	@Test
 	public void testCombineStringsProposals2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -5955,7 +5955,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertCorrectLabels(proposals);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -5968,7 +5968,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected });
 
 	}
-	
+
 	@Test
 	public void testCombineStringsProposals3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -5988,7 +5988,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		assertProposalDoesNotExist(proposals, CorrectionMessages.AdvancedQuickAssistProcessor_combineSelectedStrings);
 
 	}
-	
+
 	@Test
 	public void testCombineStringsProposals4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -6007,7 +6007,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertCorrectLabels(proposals);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -6020,7 +6020,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected });
 
 	}
-	
+
 	@Test
 	public void testCombineStringsProposals5() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);

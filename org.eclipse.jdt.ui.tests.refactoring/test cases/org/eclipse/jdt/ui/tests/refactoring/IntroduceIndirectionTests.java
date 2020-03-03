@@ -242,7 +242,7 @@ public class IntroduceIndirectionTests extends RefactoringTest {
 		} finally {
 			getRoot().getJavaProject().setOption(JavaCore.COMPILER_PB_MISSING_JAVADOC_TAGS_METHOD_TYPE_PARAMETERS, JavaCore.DISABLED);
 		}
-		
+
 	}
 
 	public void test19() throws Exception {

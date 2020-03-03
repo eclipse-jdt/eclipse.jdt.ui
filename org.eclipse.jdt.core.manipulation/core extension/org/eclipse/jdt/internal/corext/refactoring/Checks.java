@@ -211,7 +211,7 @@ public class Checks {
 	/**
 	 * Returns OK status if the new name is OK, i.e. when no file with that name exists.
 	 * The name of the given CU is not OK.
-	 * 
+	 *
 	 * @param cu CU to rename
 	 * @param newBareName the new name of the CU (without extension)
 	 * @return the status: FATAL if the CU already exists, OK if OK
@@ -879,7 +879,7 @@ public class Checks {
 		}
 		if (e instanceof Annotation)
 			return NOT_RVALUE_MISC;
-			
+
 
 		ITypeBinding tb= e.resolveTypeBinding();
 		boolean guessingRequired= false;

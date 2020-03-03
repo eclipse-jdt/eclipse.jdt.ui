@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -12,6 +12,16 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.leaks;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
@@ -26,17 +36,18 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.TextViewer;
 
 import org.eclipse.jdt.ui.leaktest.LeakTestCase;
-import org.eclipse.jdt.ui.leaktest.LeakTestSetup;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.eclipse.jdt.ui.tests.core.rules.LeakTestSetup;
 
 /**
  * Test for leaks in DefaultUndoManager.
  *
  * @since 3.1
  */
+@RunWith(JUnit4.class)
 public class UndoManagerLeakTest extends LeakTestCase {
+
+	@Rule
+	public LeakTestSetup projectsetup = new LeakTestSetup();
 
 	/** The maximum undo level. */
 	private static final int MAX_UNDO_LEVEL= 256;
@@ -48,22 +59,12 @@ public class UndoManagerLeakTest extends LeakTestCase {
 	/** The undo manager. */
 	private IUndoManager fUndoManager;
 
-	public static Test suite() {
-		return new LeakTestSetup(new TestSuite(UndoManagerLeakTest.class));
-	}
-
-	/*
-	 * @see TestCase#TestCase(String)
-	 */
-	public UndoManagerLeakTest(final String name) {
-		super(name);
-	}
-
 	/*
 	 *  @see TestCase#setUp()
 	 */
 	@Override
-	protected void setUp() {
+	@Before
+	public void setUp() {
 		fShell= new Shell();
 		fUndoManager= new DefaultUndoManager(MAX_UNDO_LEVEL);
 		fTextViewer= new TextViewer(fShell, SWT.NONE);
@@ -71,6 +72,7 @@ public class UndoManagerLeakTest extends LeakTestCase {
 		fUndoManager.connect(fTextViewer);
 	}
 
+	@Test
 	public void testUndoManagerLeak() {
 		internalTestConvertLineDelimiters();
 		internalTestRandomAccess();

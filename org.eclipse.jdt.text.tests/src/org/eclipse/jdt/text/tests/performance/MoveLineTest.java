@@ -62,7 +62,7 @@ public abstract class MoveLineTest extends TextPerformanceTestCase {
 
 	/**
 	 * Measures the time to move a line within a large file.
-	 * 
+	 *
 	 * @throws Exception if something goes wrong while moving a line
 	 */
 	public void test() throws Exception {
@@ -97,7 +97,7 @@ public abstract class MoveLineTest extends TextPerformanceTestCase {
 			for (int j= 0; j < DISTANCE; j++) {
 				event.type= SWT.KeyDown;
 				display.post(event);
-				
+
 				event.type= SWT.KeyUp;
 				display.post(event);
 			}

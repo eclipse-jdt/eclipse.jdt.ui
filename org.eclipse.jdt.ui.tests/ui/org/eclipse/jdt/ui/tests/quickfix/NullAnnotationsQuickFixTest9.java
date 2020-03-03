@@ -154,7 +154,7 @@ public class NullAnnotationsQuickFixTest9 extends QuickFixTest {
 		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Map;\n");
@@ -244,7 +244,7 @@ public class NullAnnotationsQuickFixTest9 extends QuickFixTest {
 		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import annots.*;\n");

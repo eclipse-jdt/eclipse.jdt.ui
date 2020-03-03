@@ -658,15 +658,15 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu1=pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu1);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu1, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
-		
+
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -680,7 +680,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-		
+
 		assertEqualString(preview1, expected1);
 	}
 
@@ -1313,13 +1313,13 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2, expected3 });
 	}
-	
+
 	@Test
 	public void testMethodInAnonymous4() throws Exception {
 		// bug 266032
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -1332,15 +1332,15 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		CompilationUnit astRoot= getASTRoot(cu1);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu1, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
-		
+
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -1356,10 +1356,10 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-		
+
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -1372,7 +1372,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
-		
+
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 	}
 
@@ -3061,7 +3061,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 				"Create abstract method 'foo()' in type 'A'"
 		});
 	}
-	
+
 	@Test
 	public void testCreateAbstractMethodInAbstractParentWithAbstractClass() throws Exception {
 
@@ -3602,7 +3602,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 	public void testParameterMismatchMoreArguments4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
-	
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -3612,15 +3612,15 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-	
+
 		CompilationUnit astRoot= getASTRoot(cu1);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu1, astRoot);
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
-	
+
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
-	
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -3630,10 +3630,10 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-	
+
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
-	
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -3646,10 +3646,10 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
-	
+
 		proposal= (CUCorrectionProposal) proposals.get(2);
 		String preview3= getPreviewContent(proposal);
-	
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -3659,8 +3659,8 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected3= buf.toString();
-	
-	
+
+
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2, expected3 });
 	}
 
@@ -5360,12 +5360,12 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
-	
+
 	@Test
 	public void testStaticImportFavorite1() throws Exception {
 		IPreferenceStore preferenceStore= PreferenceConstants.getPreferenceStore();
 		preferenceStore.setValue(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS, "java.lang.Math.*");
-		try {		
+		try {
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 			StringBuffer buf= new StringBuffer();
 			buf.append("package pack;\n");
@@ -5376,12 +5376,12 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			buf.append("    }\n");
 			buf.append("}\n");
 			ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-	
+
 			CompilationUnit astRoot= getASTRoot(cu);
 			ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-	
+
 			assertCorrectLabels(proposals);
-	
+
 			String[] expected= new String[1];
 			buf= new StringBuffer();
 			buf.append("package pack;\n");
@@ -5394,18 +5394,18 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			buf.append("    }\n");
 			buf.append("}\n");
 			expected[0]= buf.toString();
-	
+
 			assertExpectedExistInProposals(proposals, expected);
 		} finally {
 			preferenceStore.setValue(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS, "");
 		}
 	}
-	
+
 	@Test
 	public void testStaticImportFavorite2() throws Exception {
 		IPreferenceStore preferenceStore= PreferenceConstants.getPreferenceStore();
 		preferenceStore.setValue(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS, "java.lang.Math.max");
-		try {		
+		try {
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 			StringBuffer buf= new StringBuffer();
 			buf.append("package pack;\n");
@@ -5416,12 +5416,12 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			buf.append("    }\n");
 			buf.append("}\n");
 			ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-	
+
 			CompilationUnit astRoot= getASTRoot(cu);
 			ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-	
+
 			assertCorrectLabels(proposals);
-	
+
 			String[] expected= new String[1];
 			buf= new StringBuffer();
 			buf.append("package pack;\n");
@@ -5432,7 +5432,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			buf.append("    }\n");
 			buf.append("}\n");
 			expected[0]= buf.toString();
-	
+
 			assertExpectedExistInProposals(proposals, expected);
 		} finally {
 			preferenceStore.setValue(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS, "");
@@ -5459,7 +5459,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test2;\n");
 		buf.append("import test1.A;\n");

@@ -54,7 +54,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
  * <p>
  * A workspace runnable to add implementation for <code>{@link java.lang.Object#toString()}</code>
  * </p>
- * 
+ *
  * @since 3.5
  */
 public class GenerateToStringOperation implements IWorkspaceRunnable {
@@ -158,7 +158,7 @@ public class GenerateToStringOperation implements IWorkspaceRunnable {
 
 	/**
 	 * Determines if given method exists in a given list
-	 * 
+	 *
 	 * @param list list of method to search through
 	 * @param method method to find
 	 * @return declaration of method from the list that has the same name and parameter types, or
@@ -217,7 +217,7 @@ public class GenerateToStringOperation implements IWorkspaceRunnable {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param toStringStyle id number of the code style (its position in the array returned by
 	 *            {@link #getStyleNames()}
 	 * @return a toString() generator implementing given code style
@@ -251,7 +251,7 @@ public class GenerateToStringOperation implements IWorkspaceRunnable {
 	/**
 	 * Creates new <code>GenerateToStringOperation</code>, using <code>settings.toStringStyle</code>
 	 * field to choose the right subclass.
-	 * 
+	 *
 	 * @param typeBinding binding for the type for which the toString() method will be created
 	 * @param selectedBindings bindings for the typetype's members to be used in created method
 	 * @param unit a compilation unit containing the type

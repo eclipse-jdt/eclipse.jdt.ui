@@ -16,7 +16,7 @@ package org.eclipse.jface.text.source.translation;
 
 /**
  * Tagging interface for a translator result collector.
- * 
+ *
  * @since 3.0
  */
 public interface ITranslatorResultCollector {

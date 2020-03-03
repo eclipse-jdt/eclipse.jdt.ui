@@ -1345,13 +1345,13 @@ public class LocalCorrectionsQuickFixTest18 extends QuickFixTest {
 			buf.append("    }\n");
 			buf.append("}\n");
 			ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-			
+
 			CompilationUnit astRoot= getASTRoot(cu);
 			ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
-			
+
 			assertCorrectLabels(proposals);
 			assertNumberOfProposals(proposals, 6);
-			
+
 			buf= new StringBuffer();
 			buf.append("package pack;\n");
 			buf.append("import java.util.*;\n");
@@ -1362,7 +1362,7 @@ public class LocalCorrectionsQuickFixTest18 extends QuickFixTest {
 			buf.append("        ArrayList<String> x=new ArrayList<String>();\n");
 			buf.append("    }\n");
 			buf.append("}\n");
-			
+
 			assertProposalPreviewEquals(buf.toString(), "Change type to 'ArrayList<String>'", proposals);
 		} finally {
 			NullTestUtils.disableAnnotationBasedNullAnalysis(fSourceFolder);

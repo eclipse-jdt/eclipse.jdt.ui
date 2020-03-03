@@ -45,7 +45,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 /**
  * Measures the time to spell check a large compilation unit.
- * 
+ *
  * @since 3.6
  */
 public class SpellCheckingTest extends TextPerformanceTestCase {
@@ -124,7 +124,7 @@ public class SpellCheckingTest extends TextPerformanceTestCase {
 		private int fProblemCount;
 		private boolean fPrintCount;
 
-		
+
 		public SpellingProblemCollector(boolean printCount) {
 			fPrintCount= printCount;
 		}

@@ -39,7 +39,7 @@ public class RenameTests {
 		suite.addTest(RenameNonPrivateFieldTests.suite());
 		suite.addTest(RenameJavaProjectTests.suite());
 		suite.addTest(RenameTests18.suite());
-		
+
 		//XXX: NOT part of AllRefactoringTests. Also add suites there!
 
 		return suite;

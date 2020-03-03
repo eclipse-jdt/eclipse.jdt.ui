@@ -16,9 +16,18 @@
 
 package org.eclipse.jdt.ui.tests.wizardapi;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.StringAsserts;
@@ -42,7 +51,7 @@ import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.wizards.NewAnnotationWizardPage;
 import org.eclipse.jdt.ui.wizards.NewClassWizardPage;
 import org.eclipse.jdt.ui.wizards.NewEnumWizardPage;
@@ -52,33 +61,19 @@ import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
 /**
  *
  */
-public class NewTypeWizardTest extends TestCase {
-	private static final Class<NewTypeWizardTest> THIS= NewTypeWizardTest.class;
-
+@RunWith(JUnit4.class)
+public class NewTypeWizardTest {
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
 
-	public NewTypeWizardTest(String name) {
-		super(name);
-	}
+	@Rule
+	public ProjectTestSetup projectsetup = new ProjectTestSetup();
 
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
@@ -108,11 +103,12 @@ public class NewTypeWizardTest extends TestCase {
 	}
 
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
 
+	@Test
 	public void testCreateClass1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 
@@ -152,6 +148,7 @@ public class NewTypeWizardTest extends TestCase {
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
 	}
 
+	@Test
 	public void testCreateClass2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 
@@ -193,7 +190,7 @@ public class NewTypeWizardTest extends TestCase {
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
 	}
 
-
+	@Test
 	public void testCreateClass3() throws Exception {
 
 		IPackageFragment pack0= fSourceFolder.createPackageFragment("pack", false, null);
@@ -252,6 +249,7 @@ public class NewTypeWizardTest extends TestCase {
 
 	}
 
+	@Test
 	public void testCreateClass4() throws Exception {
 
 		IPackageFragment pack0= fSourceFolder.createPackageFragment("pack", false, null);
@@ -317,7 +315,7 @@ public class NewTypeWizardTest extends TestCase {
 
 	}
 
-
+	@Test
 	public void testCreateInnerClass1() throws Exception {
 
 		IPackageFragment pack0= fSourceFolder.createPackageFragment("pack", false, null);
@@ -371,8 +369,7 @@ public class NewTypeWizardTest extends TestCase {
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
 	}
 
-
-
+	@Test
 	public void testCreateClassExtraImports1() throws Exception {
 
 		String newFileTemplate= "${filecomment}\n${package_declaration}\n\nimport java.util.Map;\n\n${typecomment}\n${type_declaration}";
@@ -422,6 +419,7 @@ public class NewTypeWizardTest extends TestCase {
 
 	}
 
+	@Test
 	public void testCreateClassExtraImports2() throws Exception {
 
 		IPackageFragment pack0= fSourceFolder.createPackageFragment("pack", false, null);
@@ -487,6 +485,7 @@ public class NewTypeWizardTest extends TestCase {
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
 	}
 
+	@Test
 	public void testCreateClassExtraImports3() throws Exception {
 
 		IPackageFragment pack0= fSourceFolder.createPackageFragment("pack", false, null);
@@ -558,7 +557,7 @@ public class NewTypeWizardTest extends TestCase {
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
 	}
 
-
+	@Test
 	public void testCreateInterface() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 
@@ -598,6 +597,7 @@ public class NewTypeWizardTest extends TestCase {
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
 	}
 
+	@Test
 	public void testCreateEnum() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 
@@ -633,6 +633,7 @@ public class NewTypeWizardTest extends TestCase {
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
 	}
 
+	@Test
 	public void testCreateAnnotation() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 
@@ -667,6 +668,7 @@ public class NewTypeWizardTest extends TestCase {
 
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
 	}
+
 
 	public void typeBodyTest( NewTypeWizardPage wizardPage, String templateID, String templateBody, String expectedBody,
 	    String packageName, String typeName, String typeKeyword) throws Exception {
@@ -719,6 +721,7 @@ public class NewTypeWizardTest extends TestCase {
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
 	}
 
+	@Test
 	public void testCreateClassWithBody() throws Exception
 	{
 		typeBodyTest( new NewClassWizardPage(),
@@ -730,6 +733,7 @@ public class NewTypeWizardTest extends TestCase {
 			"class" );
 	}
 
+	@Test
 	public void testCreateInterfaceWithBody() throws Exception
 	{
 		typeBodyTest( new NewInterfaceWizardPage(),
@@ -741,6 +745,7 @@ public class NewTypeWizardTest extends TestCase {
 			"interface" );
 	}
 
+	@Test
 	public void testCreateEnumWithBody() throws Exception
 	{
 		typeBodyTest( new NewEnumWizardPage(),
@@ -752,6 +757,7 @@ public class NewTypeWizardTest extends TestCase {
 			"enum" );
 	}
 
+	@Test
 	public void testCreateAnnotationWithBody() throws Exception
 	{
 		typeBodyTest( new NewAnnotationWizardPage(),
@@ -763,6 +769,7 @@ public class NewTypeWizardTest extends TestCase {
 			"@interface" );
 	}
 
+	@Test
 	public void testAttemptCreateExistingClass() throws Exception
 	{
 		// Foo1.java and Foo2.java in test1

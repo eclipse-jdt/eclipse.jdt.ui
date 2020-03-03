@@ -281,7 +281,7 @@ public class CodeStyleFixCore extends CompilationUnitRewriteOperationsFixCore {
 					//the field. It's possible that the inner type inherits the same field. We must not remove
 					//the qualifier in this case.
 					return true;
-				
+
 				ITypeBinding enclosingTypeBinding= Bindings.getBindingOfParentType(node);
 				if (enclosingTypeBinding == null || Bindings.isSuperType(variablesDeclaringClass, enclosingTypeBinding))
 					//We have a reference to a field of an outer type, and this type inherited
@@ -474,7 +474,7 @@ public class CodeStyleFixCore extends CompilationUnitRewriteOperationsFixCore {
 			Statement statement= ASTResolving.findParentStatement(qualifier);
 			if (statement == null)
 				return;
-			
+
 			ASTRewrite astRewrite= cuRewrite.getASTRewrite();
 			AST ast= cuRewrite.getAST();
 
@@ -710,7 +710,7 @@ public class CodeStyleFixCore extends CompilationUnitRewriteOperationsFixCore {
 		if (accessBinding != null && qualifier != null) {
 			if (conservative && ASTResolving.findParentStatement(qualifier) == null)
 				return null;
-			
+
 			ToStaticAccessOperation declaring= null;
 			ITypeBinding declaringTypeBinding= getDeclaringTypeBinding(accessBinding);
 			if (declaringTypeBinding != null) {

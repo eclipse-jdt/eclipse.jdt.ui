@@ -184,10 +184,10 @@ public interface ITestElement {
 	 * <strong>Note:</strong> The elapsed time is only valid for
 	 * {@link ITestElement.ProgressState#COMPLETED} test elements.
 	 * </p>
-	 * 
+	 *
 	 * @return total execution time for the test element in seconds, or {@link Double#NaN} if
 	 *         the state of the element is not {@link ITestElement.ProgressState#COMPLETED}
-	 * 
+	 *
 	 * @since 3.4
 	 */
 	public double getElapsedTimeInSeconds();

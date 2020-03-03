@@ -35,11 +35,11 @@ import org.eclipse.core.resources.ResourcesPlugin;
  * This class may be instantiated; it is not intended to be subclassed.
  */
 public class SearchEngine {
-	
+
 	static class MyIndex implements IIndex {
-		
+
 		private HashMap fMap= new HashMap();
-		
+
 		@Override
 		public void addRef(String word, String path) {
 			System.err.println("Index.add: " + path + " " + word); //$NON-NLS-1$ //$NON-NLS-2$
@@ -50,13 +50,13 @@ public class SearchEngine {
 			}
 			words.put(word, word);
 		}
-		
+
 		@Override
 		public void remove(String path) {
 			System.err.println("Index.remove: " + path); //$NON-NLS-1$
 			fMap.remove(path);
 		}
-		
+
 		@Override
 		public void queryPrefix(HashSet results, String w) {
 			Iterator iter= fMap.keySet().iterator();
@@ -68,7 +68,7 @@ public class SearchEngine {
 			}
 		}
 	}
-		
+
 	/* Waiting policies */
 	/**
 	 * The search operation throws an <code>org.eclipse.core.runtime.OperationCanceledException</code>
@@ -81,16 +81,16 @@ public class SearchEngine {
 	 */
 	public static int WAIT_UNTIL_READY_TO_SEARCH = 1;
 
-	
+
 	private static SearchEngine fgSearchEngine;
-	
+
 	private HashMap fIndexes= new HashMap();
-		
+
 	private SearchEngine() {
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @return
 	 */
 	public static SearchEngine getSearchEngine() {
@@ -98,7 +98,7 @@ public class SearchEngine {
 			fgSearchEngine= new SearchEngine();
 		return fgSearchEngine;
 	}
-		
+
 	/**
 	 * Trigger removal of a resource to an index
 	 * Note: the actual operation is performed in background
@@ -108,7 +108,7 @@ public class SearchEngine {
 		if (index != null)
 			index.remove(resourceName);
 	}
-	
+
 	public void add(IPath indexedContainer, IIndexer indexer) {
 		IIndex index= getIndex(indexedContainer, true);
 		try {
@@ -131,17 +131,17 @@ public class SearchEngine {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Perform the given query against the index and return results via the resultCollector.
 	 */
 	public void search(IIndexQuery search, ISearchResultCollector resultCollector,
 						IProgressMonitor progressMonitor, int waitingPolicy) {
-				
+
 		HashSet pathCollector= new HashSet();
 		IProgressMonitor pm= progressMonitor == null ? null : new SubProgressMonitor(progressMonitor, 5);
 		execute(search, pathCollector, pm);
-		
+
 		/* TODO_SEARCH */
 		for (IFile file : getFiles(pathCollector, ResourcesPlugin.getWorkspace())) {
 			search.locateMatches(file, resultCollector);
@@ -156,7 +156,7 @@ public class SearchEngine {
 		}
 		return ix;
 	}
-	
+
 	private boolean execute(IIndexQuery search, HashSet pathCollector, IProgressMonitor progressMonitor) {
 
 		if (progressMonitor != null && progressMonitor.isCanceled())
@@ -185,7 +185,7 @@ public class SearchEngine {
 			}
 		}
 	}
-	
+
 	private IIndex[] getIndexes(IIndexQuery search) {
 		IPath[] fIndexKeys= null; // cache of the keys for looking index up
 		ArrayList requiredIndexKeys= new ArrayList();

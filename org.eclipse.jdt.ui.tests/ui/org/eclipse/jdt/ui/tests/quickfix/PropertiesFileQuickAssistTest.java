@@ -200,7 +200,7 @@ public class PropertiesFileQuickAssistTest {
 		buf.append("Test_1=Hello1\n");
 		buf.append("Test_2=Hello2\n");
 		IFile file= createPropertyFile(pack1, "Accessor.properties", buf.toString());
-		
+
 		int offset= buf.toString().indexOf("est_1");
 		PropertiesAssistContext context= createAssistContext(file, offset, 0);
 		List<ICompletionProposal> proposals= collectAssists(context);

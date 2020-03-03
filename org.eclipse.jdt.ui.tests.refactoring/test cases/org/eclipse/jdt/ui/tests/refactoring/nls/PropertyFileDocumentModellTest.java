@@ -288,13 +288,13 @@ public class PropertyFileDocumentModellTest extends TestCase {
 	public void testRemovingOfKey2() throws Exception {
 		Document props= new Document("org.eclipse.1=value1\n" + " org.eclipse.2           =  value2   \n" + "org.eclipse.3=value3\n");
 		PropertyFileDocumentModel modell= new PropertyFileDocumentModel(props);
-		
+
 		DeleteEdit deleteEdit= modell.remove("org.eclipse.2");
 		deleteEdit.apply(props);
-		
+
 		assertEquals("org.eclipse.1=value1\n" + "org.eclipse.3=value3\n", props.get());
 	}
-	
+
 	public void testRemovingOfLastKey() throws Exception {
 		Document props= new Document("org.eclipse.1=value1\n" + "org.eclipse.2=value2\n" + "org.eclipse.3=value3\n");
 		PropertyFileDocumentModel modell= new PropertyFileDocumentModel(props);

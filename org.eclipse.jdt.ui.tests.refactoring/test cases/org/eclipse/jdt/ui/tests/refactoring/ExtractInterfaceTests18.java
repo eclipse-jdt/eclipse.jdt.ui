@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -66,7 +66,7 @@ public class ExtractInterfaceTests18 extends ExtractInterfaceTests {
 		String className= "A";
 		String extendingInterfaceName= "I1";
 		String newInterfaceName= "B";
-	
+
 		IType clas= getType(createCUfromTestFile(getPackageP(), getTopLevelTypeName(className)), className);
 		ICompilationUnit cu= clas.getCompilationUnit();
 		IPackageFragment pack= (IPackageFragment)cu.getParent();
@@ -125,14 +125,14 @@ public class ExtractInterfaceTests18 extends ExtractInterfaceTests {
 	}
 
 	public void testLambda1() throws Exception {
-		// bug 488420 
+		// bug 488420
 		String[] names= new String[] { "m1" };
 		String[][] signatures= new String[][] { new String[0] };
 		validatePassingTest("X", new String[] { "X", "Util" }, "I", true, names, signatures, null);
 	}
 
 	public void testLambda2() throws Exception {
-		// bug 488420 
+		// bug 488420
 		String[] names= new String[] { "m1" };
 		String[][] signatures= new String[][] { new String[0] };
 		validatePassingTest("X", new String[] { "X", "Util" }, "I", true, names, signatures, null);

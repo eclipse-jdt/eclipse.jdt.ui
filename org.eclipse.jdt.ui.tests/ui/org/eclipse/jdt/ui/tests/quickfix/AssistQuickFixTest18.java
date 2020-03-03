@@ -1533,6 +1533,74 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 	}
 
 	@Test
+	public void testConvertToLambda28() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		String buf=
+		"package test;\n" +
+		"public class C1 {\n" +
+		"    private final String s;\n" +
+		"    Runnable run = new Runnable() {\n" +
+		"        @Override\n" +
+		"        public void run() {\n" +
+		"           for (int i=0; i < s.length(); ++i) {\n" +
+		"               int j = i;\n" +
+		"           }\n" +
+		"        }\n" +
+		"    };\n" +
+		"    public C1() {\n" +
+		"        s = \"abc\";\n" +
+		"    }\n" +
+		"}\n";
+		ICompilationUnit cu= pack1.createCompilationUnit("C1.java", buf, false, null);
+
+		int offset= buf.toString().indexOf("new");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 0);
+	}
+
+	@Test
+	public void testConvertToLambda29() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		String buf= ""
+				+ "package test;\n"
+				+ "public class C1 {\n"
+				+ "    private final String s = \"ABC\";\n"
+				+ "    Runnable run = new Runnable() {\n"
+				+ "        @Override\n"
+				+ "        public void run() {\n"
+				+ "           for (int i=0; i < s.length(); ++i) {\n"
+				+ "               int j = i;\n"
+				+ "           }\n"
+				+ "        }\n"
+				+ "    };\n"
+				+ "}\n";
+		ICompilationUnit cu= pack1.createCompilationUnit("C1.java", buf, false, null);
+
+		int offset= buf.toString().indexOf("new");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		String expected1= ""
+				+ "package test;\n"
+				+ "public class C1 {\n"
+				+ "    private final String s = \"ABC\";\n"
+			    + "    Runnable run = () -> {\n"
+			    + "       for (int i=0; i < s.length(); ++i) {\n"
+			    + "           int j = i;\n"
+			    + "       }\n"
+			    + "    };\n"
+				+ "}\n";
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	@Test
 	public void testConvertToLambdaAmbiguousOverridden() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -1551,7 +1619,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("Test.java", buf.toString(), false, null);
-		
+
 		int offset= buf.toString().indexOf("public boolean test(");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
@@ -1573,7 +1641,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
-	
+
 	@Test
 	public void testConvertToAnonymousClassCreation1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -2081,15 +2149,15 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("    IntFunction<String> toString= (int i) -> Integer.toString(i);\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-	
+
 		int offset= buf.toString().indexOf("->");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
-	
+
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
-	
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.function.IntFunction;\n");
@@ -2102,7 +2170,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("    };\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-	
+
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
@@ -3430,14 +3498,14 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E10.java", buf.toString(), false, null);
-		
+
 		int offset= buf.toString().indexOf("::") + 1;
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.lang.annotation.*;\n");
@@ -3452,7 +3520,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-		
+
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
@@ -4812,7 +4880,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("    };\n");
 		buf.append("}\n");
 		assertProposalPreviewEquals(buf.toString(), "Convert to anonymous class creation", proposals);
-		
+
 	}
 
 	@Test
@@ -4821,7 +4889,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		options.put(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
 		JavaCore.setOptions(options);
 		JavaProjectHelper.addLibrary(fJProject1, new Path(Java18ProjectTestSetup.getJdtAnnotations20Path()));
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 
 		StringBuffer buf;
@@ -4912,7 +4980,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("	}\n");
 		buf.append("}\n");
 		assertProposalPreviewEquals(buf.toString(), "Convert to anonymous class creation", proposals);
-		
+
 	}
 
 	@Test
@@ -4921,7 +4989,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		options.put(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
 		JavaCore.setOptions(options);
 		JavaProjectHelper.addLibrary(fJProject1, new Path(Java18ProjectTestSetup.getJdtAnnotations20Path()));
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 
 		StringBuffer buf;
@@ -5020,7 +5088,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("	}\n");
 		buf.append("}\n");
 		assertProposalPreviewEquals(buf.toString(), "Convert to anonymous class creation", proposals);
-		
+
 	}
 
 	@Test
@@ -5029,7 +5097,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		options.put(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
 		JavaCore.setOptions(options);
 		JavaProjectHelper.addLibrary(fJProject1, new Path(Java18ProjectTestSetup.getJdtAnnotations20Path()));
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 
 		StringBuffer buf;
@@ -5132,7 +5200,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("	}\n");
 		buf.append("}\n");
 		assertProposalPreviewEquals(buf.toString(), "Convert to anonymous class creation", proposals);
-		
+
 	}
 
 	@Test
@@ -5141,7 +5209,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		options.put(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
 		JavaCore.setOptions(options);
 		JavaProjectHelper.addLibrary(fJProject1, new Path(Java18ProjectTestSetup.getJdtAnnotations20Path()));
-		
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 
 		StringBuffer buf;
@@ -5213,8 +5281,8 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("");
 		pack1.createCompilationUnit("Test.java", buf.toString(), false, null);
 
-		// --- Classes in which the quick assists are checked (without and with NonNullByDefault in effect at the target location) --- 
-		
+		// --- Classes in which the quick assists are checked (without and with NonNullByDefault in effect at the target location) ---
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("\n");
@@ -5252,7 +5320,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		List<IJavaCompletionProposal> proposals2= collectAssists(context2, false);
 
 		// --- Convert to method reference without and with NNBD ---
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("\n");
@@ -5282,7 +5350,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertProposalPreviewEquals(buf.toString(), "Convert to method reference", proposals2);
 
 		// --- Add inferred lambda parameter types without and with NNBD ---
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("\n");
@@ -5330,7 +5398,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("	}\n");
 		buf.append("}\n");
 		assertProposalPreviewEquals(buf.toString(), "Convert to anonymous class creation", proposals1);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("\n");
@@ -5392,9 +5460,9 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("        }\n");
 		buf.append("    };\n");
 		buf.append("}\n");
-		assertProposalPreviewEquals(buf.toString(), "Convert to anonymous class creation", proposals);		
+		assertProposalPreviewEquals(buf.toString(), "Convert to anonymous class creation", proposals);
 	}
-	
+
 	@Test
 	public void testNoRedundantNonNullInConvertArrayForLoop() throws Exception {
 		NullTestUtils.prepareNullTypeAnnotations(fSourceFolder);
@@ -5414,7 +5482,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 
 	        AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("for"), 0);
 			ArrayList<IJavaCompletionProposal> proposals= collectAssists(context, false);
-			
+
 			assertCorrectLabels(proposals);
 			assertNumberOfProposals(proposals, 3);
 
@@ -5454,7 +5522,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 
 	        AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("for"), 0);
 			ArrayList<IJavaCompletionProposal> proposals= collectAssists(context, false);
-			
+
 			assertCorrectLabels(proposals);
 			assertNumberOfProposals(proposals, 3);
 

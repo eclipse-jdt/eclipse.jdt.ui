@@ -304,7 +304,7 @@ public class MethodOverrideTest extends CoreTests {
 		}
 
 		IType focusType= types[focusIndex];
-		
+
 		IType overridingType= types[overridingIndex];
 		ITypeBinding overridingTypeBinding= typeBindings[overridingIndex];
 		assertSameType(overridingType, overridingTypeBinding);

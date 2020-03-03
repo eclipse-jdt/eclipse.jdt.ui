@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,11 +13,16 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.packageview;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.ByteArrayInputStream;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -53,10 +58,11 @@ import org.eclipse.jdt.internal.ui.util.CoreUtility;
  * <ul>
  * <li>Bug 357450: Class folder in Java project have refresh problem</li>
  * </ul>
- * 
+ *
  * @since 3.9
  */
-public class ContentProviderTests6 extends TestCase {
+@RunWith(JUnit4.class)
+public class ContentProviderTests6 {
 	private boolean fEnableAutoBuildAfterTesting;
 
 	private IWorkbenchPage page;
@@ -67,19 +73,7 @@ public class ContentProviderTests6 extends TestCase {
 	private IJavaProject fJProject;
 	private IPackageFragmentRoot classFolder;
 
-
-	public ContentProviderTests6(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		TestSuite suite= new TestSuite(ContentProviderTests6.class.getName());
-		//$JUnit-BEGIN$
-		suite.addTestSuite(ContentProviderTests6.class);
-		//$JUnit-END$
-		return suite;
-	}
-
+	@Test
 	public void testAddFileToClassFolder() throws Exception {
 		IFile file= ((IFolder)classFolder.getResource()).getFile("testFile.class"); //$NON-NLS-1$
 		if (!file.exists()) {
@@ -100,6 +94,7 @@ public class ContentProviderTests6 extends TestCase {
 		assertions();
 	}
 
+	@Test
 	public void testAddFolderToClassFolder() throws Exception {
 		IFolder folder= ((IFolder)classFolder.getResource()).getFolder("testFolder"); //$NON-NLS-1$
 		if (!folder.exists()) {
@@ -120,6 +115,7 @@ public class ContentProviderTests6 extends TestCase {
 		assertions();
 	}
 
+	@Test
 	public void testRemoveFileFromClassFolder() throws Exception {
 		IFile file= ((IFolder)classFolder.getResource()).getFile("testFile.class"); //$NON-NLS-1$
 		if (!file.exists()) {
@@ -141,6 +137,7 @@ public class ContentProviderTests6 extends TestCase {
 		assertions();
 	}
 
+	@Test
 	public void testRemoveFolderFromClassFolder() throws Exception {
 		IFolder folder= ((IFolder)classFolder.getResource()).getFolder("testFolder"); //$NON-NLS-1$
 		if (!folder.exists()) {
@@ -162,6 +159,7 @@ public class ContentProviderTests6 extends TestCase {
 		assertions();
 	}
 
+	@Test
 	public void testChangeClassInProject() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject, "src");
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
@@ -191,9 +189,8 @@ public class ContentProviderTests6 extends TestCase {
 	/*
 	 * @see TestCase#setUp()
 	 */
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
+	@Before
+	public void setUp() throws Exception {
 		IWorkspaceDescription workspaceDesc= ResourcesPlugin.getWorkspace().getDescription();
 		fEnableAutoBuildAfterTesting= workspaceDesc.isAutoBuilding();
 		if (fEnableAutoBuildAfterTesting)
@@ -229,9 +226,8 @@ public class ContentProviderTests6 extends TestCase {
 	/**
 	 * @see TestCase#tearDown()
 	 */
-	@Override
-	protected void tearDown() throws Exception {
-		super.tearDown();
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJProject);
 		if (fEnableAutoBuildAfterTesting)
 			CoreUtility.setAutoBuilding(true);

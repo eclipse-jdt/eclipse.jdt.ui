@@ -83,7 +83,7 @@ public class NLSUtil {
 	/**
 	 * Creates and returns an NLS tag edit for a string that is at the specified position in a
 	 * compilation unit.
-	 * 
+	 *
 	 * @param cu the compilation unit
 	 * @param position position of the string
 	 * @return the edit, or <code>null</code> if the string is already NLSed or the edit could not
@@ -107,7 +107,7 @@ public class NLSUtil {
 	/**
 	 * Creates and returns NLS tag edits for strings that are at the specified positions in a
 	 * compilation unit.
-	 * 
+	 *
 	 * @param cu the compilation unit
 	 * @param positions positions of the strings
 	 * @return the edit, or <code>null</code> if all strings are already NLSed or the edits could

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -62,6 +62,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.actions.SurroundWithTryCatchAction;
 import org.eclipse.jdt.ui.actions.SurroundWithTryMultiCatchAction;
+import org.eclipse.jdt.ui.actions.SurroundWithTryWithResourcesAction;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
@@ -169,14 +170,17 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 		return fMenu;
 	}
 
-	public static void fillMenu(IMenuManager menu, CompilationUnitEditor editor, SurroundWithTryCatchAction surroundWithTryCatchAction, SurroundWithTryMultiCatchAction surroundWithTryMultiCatchAction) {
+	public static void fillMenu(IMenuManager menu, CompilationUnitEditor editor, SurroundWithTryCatchAction surroundWithTryCatchAction,
+			SurroundWithTryMultiCatchAction surroundWithTryMultiCatchAction, SurroundWithTryWithResourcesAction surroundWithTryWithResourcesAction) {
 		IAction[] actions= getTemplateActions(editor);
 
 		surroundWithTryCatchAction.update(editor.getSelectionProvider().getSelection());
 		boolean addSurroundWithTryCatchAction= surroundWithTryCatchAction.isEnabled() && !isInJavadoc(editor);
 		boolean addSurroundWithTryMultiCatchAction= surroundWithTryMultiCatchAction.isEnabled() && !isInJavadoc(editor);
+		boolean addSurroundWithTryWithResourcesAction= surroundWithTryWithResourcesAction.isEnabled() && !isInJavadoc(editor);
 
-		if ((actions == null || actions.length == 0) && (!addSurroundWithTryCatchAction && !addSurroundWithTryMultiCatchAction)) {
+		if ((actions == null || actions.length == 0) &&
+				(!addSurroundWithTryCatchAction && !addSurroundWithTryMultiCatchAction && !addSurroundWithTryWithResourcesAction)) {
 			menu.add(NONE_APPLICABLE_ACTION);
 		} else {
 			if (addSurroundWithTryCatchAction)
@@ -184,6 +188,10 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 
 			if (addSurroundWithTryMultiCatchAction)
 				menu.add(surroundWithTryMultiCatchAction);
+
+			if (addSurroundWithTryWithResourcesAction) {
+				menu.add(surroundWithTryWithResourcesAction);
+			}
 
 			menu.add(new Separator(TEMPLATE_GROUP));
 			for (int i= 0; actions != null && i < actions.length; i++)
@@ -233,7 +241,8 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 			protected void fillMenu(IMenuManager menu) {
 				SurroundWithTryCatchAction surroundWithTryCatch= SurroundWithActionGroup.createSurroundWithTryCatchAction(editor);
 				SurroundWithTryMultiCatchAction surroundWithTryMultiCatch= SurroundWithActionGroup.createSurroundWithTryMultiCatchAction(editor);
-				SurroundWithTemplateMenuAction.fillMenu(menu, editor, surroundWithTryCatch, surroundWithTryMultiCatch);
+				SurroundWithTryWithResourcesAction surroundWithTryWithResources= SurroundWithActionGroup.createSurroundWithTryWithResourcesAction(editor);
+				SurroundWithTemplateMenuAction.fillMenu(menu, editor, surroundWithTryCatch, surroundWithTryMultiCatch, surroundWithTryWithResources);
 			}
 		}.createMenu();
 	}
@@ -269,10 +278,13 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 		if (addSurroundWith) {
 			SurroundWithTryCatchAction surroundWithTryCatch= SurroundWithActionGroup.createSurroundWithTryCatchAction(editor);
 			SurroundWithTryMultiCatchAction surroundWithTryMultiCatch= SurroundWithActionGroup.createSurroundWithTryMultiCatchAction(editor);
+			SurroundWithTryWithResourcesAction surroundWithTryWithResources= SurroundWithActionGroup.createSurroundWithTryWithResourcesAction(editor);
 
 			ActionContributionItem surroundWithTryCatchItem= new ActionContributionItem(surroundWithTryCatch);
 			ActionContributionItem surroundWithTryMultiCatchItem= new ActionContributionItem(surroundWithTryMultiCatch);
+			ActionContributionItem surroundWithTryWithResourcesItem= new ActionContributionItem(surroundWithTryWithResources);
 			surroundWithTryCatchItem.fill(menu, -1);
+			surroundWithTryWithResourcesItem.fill(menu, -1);
 			surroundWithTryMultiCatchItem.fill(menu, -1);
 		}
 

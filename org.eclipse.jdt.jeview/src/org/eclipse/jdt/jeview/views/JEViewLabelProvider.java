@@ -29,51 +29,51 @@ import org.eclipse.jdt.jeview.JEPluginImages;
 
 
 public class JEViewLabelProvider extends LabelProvider /*implements IColorProvider, IFontProvider*/ {
-		
+
 	JavaElementLabelProvider fJavaElementLabelProvider;
 	private Image fChildrenImg;
 	private Image fInfoImg;
-	
+
 	public JEViewLabelProvider() {
 		fChildrenImg= JEPluginImages.IMG_CHILDREN.createImage();
 		fInfoImg= JEPluginImages.IMG_INFO.createImage();
 		fJavaElementLabelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_SMALL_ICONS);
 	}
-	
-	
+
+
 	@Override
 	public String getText(Object element) {
 		if (element instanceof JEAttribute)
 			return ((JEAttribute) element).getLabel();
 		return super.getText(element);
 	}
-	
+
 	@Override
 	public Image getImage(Object element) {
 		if (element instanceof JavaElement) {
 			return fJavaElementLabelProvider.getImage(((JavaElement) element).getJavaElement());
-			
+
 		} else if (element instanceof JEResource) {
 			return fJavaElementLabelProvider.getImage(((JEResource) element).getResource());
-			
+
 		} else if (element instanceof JEJarEntryResource) {
 			return fJavaElementLabelProvider.getImage(((JEJarEntryResource) element).getJarEntryResource());
-			
+
 		} else if (element instanceof JavaElementProperty) {
 			return fInfoImg;
-			
+
 		} else if (element instanceof JEMemberValuePair) {
 			return fInfoImg;
-			
+
 		} else if (element instanceof JavaElementChildrenProperty) {
 			return fChildrenImg;
-			
+
 		} else if (element instanceof JEClasspathEntry) {
 			return fChildrenImg;
-			
+
 		} else if (element instanceof Error) {
 			return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJS_ERROR_TSK);
-			
+
 		} else if (element instanceof JEMarker) {
 			JEMarker marker= (JEMarker) element;
 			Object severity= marker.getMarkerAttribute(IMarker.SEVERITY);
@@ -89,12 +89,12 @@ public class JEViewLabelProvider extends LabelProvider /*implements IColorProvid
 				}
 			}
 			return null;
-			
+
 		} else {
 			return super.getImage(element);
 		}
 	}
-	
+
 	@Override
 	public void dispose() {
 		super.dispose();

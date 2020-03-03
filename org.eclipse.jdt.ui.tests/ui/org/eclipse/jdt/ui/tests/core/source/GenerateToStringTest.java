@@ -176,12 +176,12 @@ public class GenerateToStringTest extends SourceTestCase {
 
 	/**
 	 * Compares source with expected and asserts that no new compile errors have been created.
-	 * 
+	 *
 	 * @param expected source
 	 * @param cu compilation unit
 	 * @param oldCUNode the old AST root
 	 * @throws Exception if test failed if test failed
-	 * 
+	 *
 	 * @since 3.5
 	 */
 	private void compareSourceAssertCompilation(String expected, ICompilationUnit cu, CompilationUnit oldCUNode) throws Exception {
@@ -201,7 +201,7 @@ public class GenerateToStringTest extends SourceTestCase {
 
 	/**
 	 * string concatenation - basic functionality and comment
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testConcatComment() throws Exception {
@@ -242,7 +242,7 @@ public class GenerateToStringTest extends SourceTestCase {
 
 	/**
 	 * string concatenation - skip nulls
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testConcatNulls() throws Exception {
@@ -283,7 +283,7 @@ public class GenerateToStringTest extends SourceTestCase {
 
 	/**
 	 * string concatenation - custom array toString without limit of elements
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testConcatArray() throws Exception {
@@ -323,7 +323,7 @@ public class GenerateToStringTest extends SourceTestCase {
 
 	/**
 	 * string concatenation - limit of elements but not in arrays
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testConcatLimit() throws Exception {
@@ -378,7 +378,7 @@ public class GenerateToStringTest extends SourceTestCase {
 
 	/**
 	 * string concatenation - custom array toString and limit of elements
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testConcatArrayLimit() throws Exception {
@@ -436,7 +436,7 @@ public class GenerateToStringTest extends SourceTestCase {
 
 	/**
 	 * string concatenation - custom Array, limit elements, java 1.4 compatibility
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testConcatArrayLimit1_4() throws Exception {
@@ -499,7 +499,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * string concatenation - custom Array, limit elements, java 1.4 compatibility, unique variable
 	 * names needed
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testConcatArrayLimit1_4Unique() throws Exception {
@@ -555,7 +555,7 @@ public class GenerateToStringTest extends SourceTestCase {
 
 	/**
 	 * string concatenation - custom Array, limit elements, java 1.5 compatibility
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testConcatArrayLimit1_5() throws Exception {
@@ -620,7 +620,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * string concatenation - custom Array, limit elements, java 1.5 compatibility, unique names
 	 * needed
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testConcatArrayLimit1_5Unique() throws Exception {
@@ -677,7 +677,7 @@ public class GenerateToStringTest extends SourceTestCase {
 
 	/**
 	 * string concatenation - custom Array, limit elements to 0
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testConcatArrayLimitZero() throws Exception {
@@ -730,7 +730,7 @@ public class GenerateToStringTest extends SourceTestCase {
 
 	/**
 	 * string concatenation - custom Array, limit elements to 0, skip nulls
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testConcatArrayLimitZeroNulls() throws Exception {
@@ -784,7 +784,7 @@ public class GenerateToStringTest extends SourceTestCase {
 
 	/**
 	 * string concatenation - 'use keyword this' and no one-line blocks
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testConcatArrayLimitThisNoBlock() throws Exception {
@@ -845,7 +845,7 @@ public class GenerateToStringTest extends SourceTestCase {
 
 	/**
 	 * string concatenation - custom array, limit elements, skip nulls
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testConcatArrayLimitNulls() throws Exception {
@@ -906,7 +906,7 @@ public class GenerateToStringTest extends SourceTestCase {
 
 	/**
 	 * string concatenation - custom array, limit elements, no members require helper method
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testConcatArrayLimitNoHelpers() throws Exception {
@@ -964,7 +964,7 @@ public class GenerateToStringTest extends SourceTestCase {
 
 	/**
 	 * string builder - different template
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testConcatTemplate() throws Exception {
@@ -1006,7 +1006,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * string concatenation - replacing existing toString() and arrayToString(array,int), leaving
 	 * toString(Collection)
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testConcatReplace() throws Exception {
@@ -1059,7 +1059,7 @@ public class GenerateToStringTest extends SourceTestCase {
 
 	/**
 	 * string builder - skip nulls
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testBuilderNulls() throws Exception {
@@ -1089,7 +1089,7 @@ public class GenerateToStringTest extends SourceTestCase {
 
 	/**
 	 * string builder - custom array toString without limit of elements
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testBuilderArray() throws Exception {
@@ -1118,7 +1118,7 @@ public class GenerateToStringTest extends SourceTestCase {
 
 	/**
 	 * string builder - limit of elements but not in arrays
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testBuilderLimit() throws Exception {
@@ -1158,7 +1158,7 @@ public class GenerateToStringTest extends SourceTestCase {
 
 	/**
 	 * string builder - custom array toString and limit of elements
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testBuilderArrayLimit() throws Exception {
@@ -1205,7 +1205,7 @@ public class GenerateToStringTest extends SourceTestCase {
 
 	/**
 	 * string builder - custom array, limit of elements, without java 5.0 compatibility
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testBuilderArrayLimit1_4() throws Exception {
@@ -1257,7 +1257,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * string builder - custom array, limit of elements, without java 5.0 compatibility, unique
 	 * names needed
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testBuilderArrayLimit1_4Unique() throws Exception {
@@ -1304,7 +1304,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * string builder - custom array, limit of elements, skip nulls, use keyword this, no one-line
 	 * blocks
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testBuilderArrayLimitNullsThisNoBlocks() throws Exception {
@@ -1357,7 +1357,7 @@ public class GenerateToStringTest extends SourceTestCase {
 
 	/**
 	 * string builder - custom array, limit elements, skip nulls
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testBuilderArrayLimitNulls() throws Exception {
@@ -1410,7 +1410,7 @@ public class GenerateToStringTest extends SourceTestCase {
 
 	/**
 	 * string builder - custom array, limit elements, no members require helper methods
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testBuilderArrayLimitNoHelpers() throws Exception {
@@ -1452,7 +1452,7 @@ public class GenerateToStringTest extends SourceTestCase {
 
 	/**
 	 * string builder - custom array, limit elements to 0
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testBuilderArrayLimitZero() throws Exception {
@@ -1492,7 +1492,7 @@ public class GenerateToStringTest extends SourceTestCase {
 
 	/**
 	 * string builder - custom array, limit elements to 0, skip nulls
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testBuilderArrayLimitZeroNulls() throws Exception {
@@ -1534,7 +1534,7 @@ public class GenerateToStringTest extends SourceTestCase {
 
 	/**
 	 * string builder, chained calls - skip nulls
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testChainedBuilderNulls() throws Exception {
@@ -1563,7 +1563,7 @@ public class GenerateToStringTest extends SourceTestCase {
 
 	/**
 	 * string builder, chained calls - custom array toString without limit of elements
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testChainedBuilderArray() throws Exception {
@@ -1606,7 +1606,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * string builder, chained calls - custom array toString without limit of elements, unique names
 	 * needed
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testChainedBuilderArrayUnique() throws Exception {
@@ -1657,7 +1657,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * string builder, chained calls - custom array, limit of elements, without java 5.0
 	 * compatibility
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testChainedBuilderArrayLimit1_4() throws Exception {
@@ -1723,7 +1723,7 @@ public class GenerateToStringTest extends SourceTestCase {
 
 	/**
 	 * string builder, chained calls - custom array, JDK 1.5 compatybility
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testChainedBuilderArray1_5() throws Exception {
@@ -1781,7 +1781,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * string builder, chained calls - custom array, limit of elements, skip nulls, use keyword
 	 * this, no one-line blocks
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testChainedBuilderArrayLimitNullsThisNoBlocks() throws Exception {
@@ -1831,7 +1831,7 @@ public class GenerateToStringTest extends SourceTestCase {
 
 	/**
 	 * String.format() - basic test
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testFormat() throws Exception {
@@ -1872,7 +1872,7 @@ public class GenerateToStringTest extends SourceTestCase {
 
 	/**
 	 * String.format() - custom array toString without limit of elements
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testFormatArray() throws Exception {
@@ -1913,7 +1913,7 @@ public class GenerateToStringTest extends SourceTestCase {
 
 	/**
 	 * String.format() - limit of elements but not arrays
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testFormatLimit() throws Exception {
@@ -1969,7 +1969,7 @@ public class GenerateToStringTest extends SourceTestCase {
 
 	/**
 	 * String.format() - custom array toString and limit of elements
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testFormatArrayLimit() throws Exception {
@@ -2029,7 +2029,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * String.format() - custom array toString, limit of elements, JDK 1.5, no members require
 	 * helper methods
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testFormatArrayLimit1_5NoHelpers() throws Exception {
@@ -2083,7 +2083,7 @@ public class GenerateToStringTest extends SourceTestCase {
 
 	/**
 	 * String.format() - custom array toString and limit number of elements to 0
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testFormatArrayLimitZero() throws Exception {
@@ -2137,7 +2137,7 @@ public class GenerateToStringTest extends SourceTestCase {
 
 	/**
 	 * String.format() - custom array, limit of elements, 'use keyword this'
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testFormatLimitThis() throws Exception {
@@ -2195,7 +2195,7 @@ public class GenerateToStringTest extends SourceTestCase {
 
 	/**
 	 * String.format() - custom array, limit of elements, jdk 1.4
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testFormatLimit1_4() throws Exception {
@@ -2253,7 +2253,7 @@ public class GenerateToStringTest extends SourceTestCase {
 
 	/**
 	 * Custom ToString() builder - basic case
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testCustomBuilder() throws Exception {
@@ -2279,7 +2279,7 @@ public class GenerateToStringTest extends SourceTestCase {
 
 	/**
 	 * Custom ToString() builder - skip nulls
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testCustomBuilderNulls() throws Exception {
@@ -2307,7 +2307,7 @@ public class GenerateToStringTest extends SourceTestCase {
 
 	/**
 	 * Custom ToString() builder - custom array toString without limit of elements
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testCustomBuilderArray() throws Exception {
@@ -2334,7 +2334,7 @@ public class GenerateToStringTest extends SourceTestCase {
 
 	/**
 	 * Custom ToString() builder - limit of elements but not arrays
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testCustomBuilderLimit() throws Exception {
@@ -2373,7 +2373,7 @@ public class GenerateToStringTest extends SourceTestCase {
 
 	/**
 	 * Custom ToString() builder - custom array toString and limit of elements
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testCustomBuilderArrayLimit() throws Exception {
@@ -2418,7 +2418,7 @@ public class GenerateToStringTest extends SourceTestCase {
 
 	/**
 	 * Custom ToString() builder - custom array toString and limit of elements, unique names needed
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testCustomBuilderArrayLimitUnique() throws Exception {
@@ -2460,7 +2460,7 @@ public class GenerateToStringTest extends SourceTestCase {
 
 	/**
 	 * Custom ToString() builder - skip nulls, use keyword this, no one-line blocks
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testCustomBuilderNullsThisNoBlocks() throws Exception {
@@ -2499,7 +2499,7 @@ public class GenerateToStringTest extends SourceTestCase {
 
 	/**
 	 * Custom ToString() builder - custom array, limit elements, skip nulls
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testCustomBuilderArrayLimitNulls() throws Exception {
@@ -2547,7 +2547,7 @@ public class GenerateToStringTest extends SourceTestCase {
 
 	/**
 	 * Custom ToString() builder - chained calls
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testChainedCustomBuilder() throws Exception {
@@ -2592,7 +2592,7 @@ public class GenerateToStringTest extends SourceTestCase {
 
 	/**
 	 * Custom ToString() builder - chained calls, skip nulls
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testChainedCustomBuilderNulls() throws Exception {
@@ -2621,7 +2621,7 @@ public class GenerateToStringTest extends SourceTestCase {
 
 	/**
 	 * Custom ToString() builder - chained calls, add comment
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testChainedCustomBuilderComments() throws Exception {
@@ -2667,7 +2667,7 @@ public class GenerateToStringTest extends SourceTestCase {
 
 	/**
 	 * Custom toString() builder - alternative class, basic case
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testAlternativeCustomBuilder() throws Exception {
@@ -2723,7 +2723,7 @@ public class GenerateToStringTest extends SourceTestCase {
 
 	/**
 	 * Custom toString() builder - alternative class, unique names needed
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testAlternativeCustomBuilderUnique() throws Exception {
@@ -2796,7 +2796,7 @@ public class GenerateToStringTest extends SourceTestCase {
 
 	/**
 	 * Custom toString() builder - alternative class, skip nulls
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testAlternativeCustomBuilderNulls() throws Exception {
@@ -2859,7 +2859,7 @@ public class GenerateToStringTest extends SourceTestCase {
 
 	/**
 	 * Custom toString() builder - alternative class, chained calls
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testChainedAlternativeCustomBuilderCreator() throws Exception {
@@ -2909,10 +2909,10 @@ public class GenerateToStringTest extends SourceTestCase {
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
-	
+
 	/**
 	 * string builder - custom array, limit elements, JDK1.4, use prefixes and suffixes for local variables and parameters
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testBuilderArrayLimit1_4Prefixes() throws Exception {
@@ -2922,7 +2922,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n"
 				+ "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n" + "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
-		
+
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "hashMap", "intArray", "integerCollection", "list", "wildCollection", "charArrayMethod"});
 		fSettings2.customArrayToString= true;
 		fSettings2.limitElements= true;
@@ -3017,7 +3017,7 @@ public class GenerateToStringTest extends SourceTestCase {
 
 	/**
 	 * Custom toString() builder - alternative class, chained calls, skip nulls
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testChainedAlternativeCustomBuilderNulls() throws Exception {
@@ -3081,7 +3081,7 @@ public class GenerateToStringTest extends SourceTestCase {
 	/**
 	 * Custom toString() builder - alternative class with append method that takes only one argument
 	 * for most of the types
-	 * 
+	 *
 	 * @throws Exception if test failed
 	 */
 	public void testChainedOneArgumentCustomBuilders() throws Exception {

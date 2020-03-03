@@ -28,7 +28,7 @@ public class DocumentAdapter implements IReconcilableModel {
 
 	/**
 	 * Creates a text model adapter for the given document.
-	 * 
+	 *
 	 * @param document
 	 */
 	public DocumentAdapter(IDocument document) {

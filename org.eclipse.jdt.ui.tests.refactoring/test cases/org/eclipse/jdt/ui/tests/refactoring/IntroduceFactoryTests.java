@@ -219,7 +219,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 
 		assertEqualLines(getName() + ": ", getFileContents(outputFileName), newSource);
 	}
-	
+
 	private void doSingleUnitTestWithWarning(boolean protectConstructor, ICompilationUnit cu, String outputFileName) throws Exception, JavaModelException, IOException {
 		ISourceRange selection= findSelectionInSource(cu.getSource());
 		IntroduceFactoryRefactoring ref= new IntroduceFactoryRefactoring(cu, selection.getOffset(), selection.getLength());
@@ -274,7 +274,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 
 		doSingleUnitTest(protectConstructor, cu, getBugTestFileName(null, getPackageP(), baseFileName, false));
 	}
-	
+
 	protected void singleUnitBugHelperWithWarning(String baseFileName, boolean protectConstructor)
 			throws Exception
 	{
@@ -751,23 +751,23 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	public void test250660() throws Exception {
 		singleUnitBugHelper("HasAnonymous", true);
 	}
-	
+
 	public void test74759() throws Exception {
 		singleUnitBugHelper("Test", true);
 	}
-	
+
 	public void test298281() throws Exception {
 		singleUnitBugHelper("Thing", true);
 	}
-	
+
 	public void test395016_1() throws Exception {
 		singleUnitBugHelperWithWarning("AbstractClass", true);
 	}
-	
+
 	public void test395016_2() throws Exception {
 		singleUnitBugHelperWithWarning("AbstractMethod", true);
 	}
-	
+
 	public void testFactoryClash() throws Exception {
 		failHelper(RefactoringStatus.ERROR);
 	}

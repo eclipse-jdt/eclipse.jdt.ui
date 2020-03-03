@@ -41,17 +41,17 @@ public class IntroduceParameterTests17 extends IntroduceParameterTests {
 	public void testSimple17_Catch2() throws Exception {
 		performOK();
 	}
-	
+
 	public void testSimple17_NewInstance2() throws Exception {
 		performOK();
 	}
-	
+
 	public void testSimple17_NewInstance3() throws Exception {
 		performOK();
 	}
-	
+
 	public void testSimple17_NewInstance4() throws Exception {
 		performOK();
 	}
-	
+
 }

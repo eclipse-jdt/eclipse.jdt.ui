@@ -69,11 +69,11 @@ public class TestEnableAssertions extends TestCase {
 			ISelectionProvider selectionProvider= activePart.getSite().getSelectionProvider();
 			if (selectionProvider != null) {
 				// make sure there's no active selection, otherwise JUnitLaunchConfigurationTab#setDefaults(ILaunchConfigurationWorkingCopy)
-				// can fail because it tries to initialize attributes on a selection 
+				// can fail because it tries to initialize attributes on a selection
 				selectionProvider.setSelection(new StructuredSelection());
 			}
 		}
-		
+
 		JUnitTabGroup testSubject= new JUnitTabGroup();
 		tabGroupSetDefaultTester(testSubject);
 	}

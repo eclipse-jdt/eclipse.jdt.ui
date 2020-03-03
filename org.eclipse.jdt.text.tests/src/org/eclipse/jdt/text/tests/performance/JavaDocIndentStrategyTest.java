@@ -125,7 +125,7 @@ public class JavaDocIndentStrategyTest extends TextPerformanceTestCase implement
 	 * Places the caret behind a Javadoc prefix after which the declaration of a method with many
 	 * arguments and declared exceptions follows and measures the time it takes to auto edit when
 	 * entering a newline. See also <code>testResources/javaDocIndentStrategyTest1/Test.java<code>.
-	 * 
+	 *
 	 * @throws Exception if something fails while executing this test
 	 */
 	public void testJavaDocIndentStrategy() throws Exception {

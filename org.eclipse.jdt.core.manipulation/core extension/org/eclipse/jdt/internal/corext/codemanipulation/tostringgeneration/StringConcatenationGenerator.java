@@ -33,15 +33,15 @@ import org.eclipse.jdt.core.dom.InfixExpression.Operator;
  * </p>
  * <p>
  * Generated methods look like this:
- * 
+ *
  * <pre>
  * public String toString() {
  * 	return &quot;FooClass( field1=&quot; + field1 + &quot;, field2=&quot; + field2 + &quot;, method1()=&quot; + method1 + &quot;)&quot;;
  * }
  * </pre>
- * 
+ *
  * </p>
- * 
+ *
  * @since 3.5
  */
 public class StringConcatenationGenerator extends AbstractToStringGenerator {

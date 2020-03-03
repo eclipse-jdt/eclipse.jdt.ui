@@ -46,7 +46,7 @@ import org.eclipse.jdt.internal.junit.model.TestElement;
  * A pane that shows a stack trace of a failed test.
  */
 public class FailureTrace implements IMenuListener {
-	
+
 	/**
 	 * Internal property change listener for handling workbench font changes.
 	 */
@@ -113,7 +113,7 @@ public class FailureTrace implements IMenuListener {
 				}
 			}
 		});
-		
+
 		fFontPropertyChangeListener = new FontPropertyChangeListener();
 		JFaceResources.getFontRegistry().addListener(fFontPropertyChangeListener);
 

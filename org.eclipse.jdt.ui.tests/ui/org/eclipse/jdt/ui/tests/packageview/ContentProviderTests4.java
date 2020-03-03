@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,11 +13,16 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.packageview;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
@@ -52,16 +57,8 @@ import org.eclipse.jdt.internal.ui.util.CoreUtility;
  *
  * @since 2.1
  */
-public class ContentProviderTests4 extends TestCase{
-
-	public static Test suite() {
-		TestSuite suite= new TestSuite(ContentProviderTests4.class.getName());
-		//$JUnit-BEGIN$
-	   suite.addTestSuite(ContentProviderTests4.class);
-		//$JUnit-END$
-		return suite;
-	}
-
+@RunWith(JUnit4.class)
+public class ContentProviderTests4{
 
 	private IPackageFragmentRoot fRoot1;
 	private IPackageFragment fPack1;
@@ -98,52 +95,56 @@ public class ContentProviderTests4 extends TestCase{
 	private File myInternalLibJar;
 	private boolean fEnableAutoBuildAfterTesting;
 
-	public ContentProviderTests4(String name) {
-		super(name);
-	}
-
+	@Test
 	public void testGetChildrenProject() throws Exception{
 		Object[] expectedChildren= new Object[]{fPack1, fPack2, fPack3, fDefaultPackage, fFile1, fFile2,fInternalRoot1,jdk};
 		Object[] children= fProvider.getChildren(fJProject3);
 		assertTrue("Wrong children found for project with folding", compareArrays(children, expectedChildren)); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testGetChildrenDefaultProject(){
 		Object[] expectedChildren= new Object[]{fCUinDefault};
 		Object[] children= fProvider.getChildren(fDefaultPackage);
 		assertTrue("Wrong children found for default package with folding", compareArrays(children, expectedChildren));	 //$NON-NLS-1$
 	}
 
+	@Test
 	public void testGetChildrentMidLevelFragment() throws Exception{
 		Object[] expectedChildren= new Object[]{fPack4, fPack6};
 		Object[] children= fProvider.getChildren(fPack3);
 		assertTrue("Wrong children found for PackageFragment with folding",compareArrays(children, expectedChildren)); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testGetChildrenBottomLevelFragment() throws Exception{
 		Object[] expectedChildren= new Object[]{};
 		Object[] children= fProvider.getChildren(fPack1);
 		assertTrue("Wrong children found for PackageFragment with folding",compareArrays(children, expectedChildren)); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testGetChildrenBottomLevelFragmentWithCU() throws Exception{
 		Object[] expectedChildren= new Object[]{fCU1};
 		Object[] children= fProvider.getChildren(fPack2);
 		assertTrue("Wrong children found for PackageFragment with folding",compareArrays(children, expectedChildren)); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testGetChildrenBottomLevelFragmenWithCU2() throws Exception{
 		Object[] expectedChildren= new Object[]{fCU2};
 		Object[] children= fProvider.getChildren(fPack6);
 		assertTrue("Wrong children found for PackageFragment with folding",compareArrays(children, expectedChildren)); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testGetChildrenMidLevelFragmentInInternalArchive() throws Exception{
 		Object[] expectedChildren= new Object[]{fC, fD, fAClassFile};
 		Object[] children= fProvider.getChildren(fA);
 		assertTrue("wrong children found for a NON bottom PackageFragment in PackageFragmentRoot Internal Archive with folding", compareArrays(children, expectedChildren)); //$NON-NLS-1$
 	}
 
+	@Test
 	public void testGetChildrenBottomLevelFragmentInInternalArchive() throws Exception{
 		Object[] expectedChildren= new Object[]{fYClassFile};
 		Object[] children= fProvider.getChildren(fY);
@@ -158,35 +159,41 @@ public class ContentProviderTests4 extends TestCase{
 
 	//---------------Get Parent Tests-----------------------------
 
+	@Test
 	public void testGetParentArchive() throws Exception{
 		Object parent= fProvider.getParent(fInternalRoot1);
 		assertTrue("Wrong parent found for PackageFragmentRoot Archive with folding", parent==fJProject3);//$NON-NLS-1$
 	}
 
+	@Test
 	public void testGetParentMidLevelFragmentInArchive() throws Exception{
 		Object expectedParent= fA;
 		Object parent= fProvider.getParent(fC);
 		assertTrue("Wrong parent found for a NON top level PackageFragment in an Archive with folding", expectedParent.equals(parent));//$NON-NLS-1$
 	}
 
+	@Test
 	public void testGetParentTopLevelFragmentInArchive() throws Exception{
 		Object expectedParent= fInternalRoot1;
 		Object parent= fProvider.getParent(fA);
 		assertTrue("Wrong parent found for a top level PackageFragment in an Archive with folding", expectedParent.equals(parent));	//$NON-NLS-1$
 	}
 
+	@Test
 	public void testGetParentTopLevelFragment() throws Exception{
 		Object expectedParent= fJProject3;
 		Object parent= fProvider.getParent(fPack3);
 		assertTrue("Wrong parent found for a top level PackageFragment with folding", expectedParent.equals(parent));//$NON-NLS-1$
 	}
 
+	@Test
 	public void testGetParentMidLevelFragment() throws Exception{
 		Object expectedParent= fPack3;
 		Object parent= fProvider.getParent(fPack6);
 		assertTrue("Wrong parent found for a NON top level PackageFragment with folding", expectedParent.equals(parent));//$NON-NLS-1$
 	}
 
+	@Test
 	public void testGetParentMidLevelFragment2() throws Exception{
 		Object expectedParent= fPack3;
 		Object parent= fProvider.getParent(fPack5);
@@ -199,10 +206,8 @@ public class ContentProviderTests4 extends TestCase{
 	 * @see TestCase#setUp()
 	 */
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-
+	@Before
+	public void setUp() throws Exception {
 		fWorkspace= ResourcesPlugin.getWorkspace();
 		assertNotNull(fWorkspace);
 		IWorkspaceDescription workspaceDesc= fWorkspace.getDescription();
@@ -300,8 +305,8 @@ public class ContentProviderTests4 extends TestCase{
 	/**
 	 * @see TestCase#tearDown()
 	 */
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 
 		fInternalRoot1.close();
 		JavaProjectHelper.delete(fJProject3);
@@ -310,7 +315,6 @@ public class ContentProviderTests4 extends TestCase{
 		if (fEnableAutoBuildAfterTesting)
 			CoreUtility.setAutoBuilding(true);
 
-		super.tearDown();
 	}
 
 	/**

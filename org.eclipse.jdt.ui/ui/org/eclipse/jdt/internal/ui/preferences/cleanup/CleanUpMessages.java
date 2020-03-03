@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -76,6 +76,7 @@ public class CleanUpMessages extends NLS {
 	public static String CodeStyleTabPage_CheckboxName_ConvertFunctionalInterfaces;
 	public static String CodeStyleTabPage_RadioName_UseLambdaWherePossible;
 	public static String CodeStyleTabPage_RadioName_UseAnonymous;
+	public static String CodeStyleTabPage_CheckboxName_SimplifyLambdaExpressionAndMethodRefSyntax;
 
 	public static String ContributedCleanUpTabPage_ErrorPage_message;
 

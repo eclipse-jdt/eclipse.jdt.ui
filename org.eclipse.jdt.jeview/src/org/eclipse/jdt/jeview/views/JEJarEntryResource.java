@@ -24,11 +24,11 @@ import org.eclipse.jdt.core.IJavaElement;
 
 
 public class JEJarEntryResource extends JEAttribute {
-	
+
 	private final JEAttribute fParent; // can be null
 	private final String fName; // can be null
 	private IJarEntryResource fJarEntryResource;
-	
+
 	JEJarEntryResource(JEAttribute parent, String name, IJarEntryResource jarEntryResource) {
 		Assert.isNotNull(jarEntryResource);
 		fParent= parent;
@@ -40,7 +40,7 @@ public class JEJarEntryResource extends JEAttribute {
 	public JEAttribute getParent() {
 		return fParent;
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -48,7 +48,7 @@ public class JEJarEntryResource extends JEAttribute {
 		if (obj == null || !obj.getClass().equals(getClass())) {
 			return false;
 		}
-		
+
 		JEJarEntryResource other= (JEJarEntryResource) obj;
 		if (fParent == null) {
 			if (other.fParent != null)
@@ -56,29 +56,29 @@ public class JEJarEntryResource extends JEAttribute {
 		} else if (! fParent.equals(other.fParent)) {
 			return false;
 		}
-		
+
 		if (fName == null) {
 			if (other.fName != null)
 				return false;
 		} else if (! fName.equals(other.fName)) {
 			return false;
 		}
-		
+
 		return true;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return (fParent != null ? fParent.hashCode() : 0)
 				+ (fName != null ? fName.hashCode() : 0)
 				+ fJarEntryResource.hashCode();
 	}
-	
+
 	@Override
 	public Object getWrappedObject() {
 		return fJarEntryResource;
 	}
-	
+
 	public IJarEntryResource getJarEntryResource() {
 		return fJarEntryResource;
 	}
@@ -86,15 +86,15 @@ public class JEJarEntryResource extends JEAttribute {
 	@Override
 	public JEAttribute[] getChildren() {
 		ArrayList<JEAttribute> result= new ArrayList<>();
-		
+
 		Object parent= fJarEntryResource.getParent();
 		if (parent instanceof IJarEntryResource)
 			result.add(new JEJarEntryResource(this, "PARENT", (IJarEntryResource) parent));
 		else
 			result.add(new JavaElement(this, "PARENT", (IJavaElement) parent));
-		
+
 		result.add(new JavaElement(this, "PACKAGE FRAGMENT ROOT", fJarEntryResource.getPackageFragmentRoot()));
-		
+
 		result.add(new JavaElementChildrenProperty(this, "CHILDREN") {
 			@Override protected JEAttribute[] computeChildren() throws CoreException {
 				IJarEntryResource[] jarEntryResources= getJarEntryResource().getChildren();

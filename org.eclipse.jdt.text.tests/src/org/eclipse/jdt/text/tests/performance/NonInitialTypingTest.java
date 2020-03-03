@@ -102,7 +102,7 @@ public abstract class NonInitialTypingTest extends TextPerformanceTestCase {
 
 	/**
 	 * Measures the time to type in one single method into a large file.
-	 * 
+	 *
 	 * @throws BadLocationException if the insert position can't be detected
 	 */
 	public void testTypeAMethod() throws BadLocationException {

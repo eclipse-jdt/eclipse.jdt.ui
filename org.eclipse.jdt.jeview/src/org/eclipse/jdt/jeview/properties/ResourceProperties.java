@@ -23,9 +23,9 @@ import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
 
 public class ResourceProperties implements IPropertySource {
-	
+
 	private static final String C_RESOURCE= "IResource";
-	
+
 	private static final String P_NAME= "org.eclipse.jdt.jeview.IResource.name";
 	private static final String P_FULL_PATH= "org.eclipse.jdt.jeview.IResource.fullPath";
 	private static final String P_LOCATION= "org.eclipse.jdt.jeview.IResource.location";
@@ -41,9 +41,9 @@ public class ResourceProperties implements IPropertySource {
 	private static final String P_IS_PHANTOM= "org.eclipse.jdt.jeview.IResource.isPhantom";
 	private static final String P_IS_TEAM_PRIVATE_MEMBER= "org.eclipse.jdt.jeview.IResource.isTeamPrivateMember";
 	private static final String P_IS_VIRTUAL= "org.eclipse.jdt.jeview.IResource.isVirtual";
-	
+
 	protected IResource fResource;
-	
+
 	private static final ArrayList<IPropertyDescriptor> RESOURCE_PROPERTY_DESCRIPTORS= new ArrayList<>();
 	static {
 		addResourceDescriptor(new PropertyDescriptor(P_NAME, "name"));
@@ -68,12 +68,12 @@ public class ResourceProperties implements IPropertySource {
 		descriptor.setCategory(C_RESOURCE);
 		RESOURCE_PROPERTY_DESCRIPTORS.add(descriptor);
 	}
-	
+
 
 	public ResourceProperties(IResource resource) {
 		fResource= resource;
 	}
-	
+
 	@Override
 	public IPropertyDescriptor[] getPropertyDescriptors() {
 		ArrayList<IPropertyDescriptor> result= new ArrayList<>(RESOURCE_PROPERTY_DESCRIPTORS);
@@ -81,11 +81,11 @@ public class ResourceProperties implements IPropertySource {
 //			result.addAll(MEMBER_PROPERTY_DESCRIPTORS);
 //		if (fJavaElement instanceof IParent)
 //			result.addAll(PARENT_PROPERTY_DESCRIPTORS);
-		
+
 		return result.toArray(new IPropertyDescriptor[result.size()]);
 	}
 
-	
+
 	@Override
 	public Object getPropertyValue(Object name) {
 		if (name.equals(P_NAME)) {
@@ -119,25 +119,25 @@ public class ResourceProperties implements IPropertySource {
 		} else 	if (name.equals(P_IS_VIRTUAL)) {
 			return fResource.isVirtual();
 		}
-		
+
 		return null;
 	}
-	
+
 	@Override
 	public void setPropertyValue(Object name, Object value) {
 		// do nothing
 	}
-	
+
 	@Override
 	public Object getEditableValue() {
 		return this;
 	}
-	
+
 	@Override
 	public boolean isPropertySet(Object property) {
 		return false;
 	}
-	
+
 	@Override
 	public void resetPropertyValue(Object property) {
 		// do nothing

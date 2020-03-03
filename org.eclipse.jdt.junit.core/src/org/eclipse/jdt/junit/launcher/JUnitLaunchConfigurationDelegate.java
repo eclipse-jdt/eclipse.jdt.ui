@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     David Saff (saff@mit.edu) - bug 102632: [JUnit] Support for JUnit 4.
@@ -170,7 +170,7 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 			}
 
 			String mainTypeName= verifyMainTypeName(configuration);
-			
+
 
 			File workingDir = verifyWorkingDirectory(configuration);
 			String workingDirName = null;
@@ -221,7 +221,7 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 			runConfig.setWorkingDirectory(workingDirName);
 			runConfig.setVMSpecificAttributesMap(vmAttributesMap);
 			runConfig.setPreviewEnabled(supportsPreviewFeatures(configuration));
-			
+
 			if (!JavaRuntime.isModularConfiguration(configuration)) {
 				// Bootpath
 				runConfig.setBootClassPath(getBootpath(configuration));
@@ -447,7 +447,7 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 				programArguments.add("-packageNameFile"); //$NON-NLS-1$
 				programArguments.add(fileName);
 				for (String pkgName : pkgNames) {
-					if (!DEFAULT.equals(pkgName)) { // skip --add-opens for default package 
+					if (!DEFAULT.equals(pkgName)) { // skip --add-opens for default package
 						collectAddOpensVmArgs(addOpensTargets, addOpensVmArgs, pkgName, configuration);
 					}
 				}
@@ -534,7 +534,7 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 			IJavaProject javaProject= getJavaProject(configuration);
 			String sourceModuleName= javaProject.getModuleDescription().getElementName();
 			addOpensVmArgs.add("--add-opens"); //$NON-NLS-1$
-			addOpensVmArgs.add(sourceModuleName + "/" + pkgName + "=" + addOpensTargets); //$NON-NLS-1$ //$NON-NLS-2$			
+			addOpensVmArgs.add(sourceModuleName + "/" + pkgName + "=" + addOpensTargets); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 
@@ -648,7 +648,7 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 	 *             launch(...)} has been replaced with the call to
 	 *             {@link JUnitLaunchConfigurationDelegate#getClasspathAndModulepath(ILaunchConfiguration)
 	 *             getClasspathAndModulepath(ILaunchConfiguration)}.
-	 * 
+	 *
 	 */
 	@Override
 	@Deprecated

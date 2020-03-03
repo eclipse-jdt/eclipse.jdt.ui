@@ -24,7 +24,7 @@ import org.junit.runner.manipulation.NoTestsRemainException;
 /**
  * This filter keeps all matched {@link Description}s in a tree, including the children and
  * container of the matched Description.
- * 
+ *
  * It is allowed to match more than one Description.
  */
 public class SubForestFilter extends Filter {

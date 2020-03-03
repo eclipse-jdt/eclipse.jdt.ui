@@ -65,7 +65,7 @@ import org.eclipse.jdt.internal.core.BufferManager;
 public class JavaReconcileStep extends AbstractReconcileStep {
 
 	private AnnotationTypeLookup fAnnotationTypeLookup= EditorsUI.getAnnotationTypeLookup();
-	
+
 	private static class TemporaryWorkingCopyOwner extends WorkingCopyOwner  {
 
 
@@ -80,10 +80,10 @@ public class JavaReconcileStep extends AbstractReconcileStep {
 	}
 
 	private class ProblemAdapter extends AnnotationAdapter  {
-		
+
 		private IProblem fProblem;
 		private Position fPosition;
-		
+
 		ProblemAdapter(IProblem problem)  {
 			fProblem= problem;
 		}
@@ -100,7 +100,7 @@ public class JavaReconcileStep extends AbstractReconcileStep {
 			int start= fProblem.getSourceStart();
 			if (start < 0)
 				return null;
-				
+
 			int length= fProblem.getSourceEnd() - fProblem.getSourceStart() + 1;
 			if (length < 0)
 				return null;
@@ -110,29 +110,29 @@ public class JavaReconcileStep extends AbstractReconcileStep {
 				type= IMarker.SEVERITY_ERROR;
 			else if (fProblem.isWarning())
 				type= IMarker.SEVERITY_WARNING;
-				
+
 			return new Annotation(fAnnotationTypeLookup.getAnnotationType(IMarker.PROBLEM, type), false, fProblem.getMessage());
 		}
-		
+
 		private Position createPositionFromProblem() {
 			int start= fProblem.getSourceStart();
 			if (start < 0)
 				return null;
-				
+
 			int length= fProblem.getSourceEnd() - fProblem.getSourceStart() + 1;
 			if (length < 0)
 				return null;
-				
+
 			return new Position(start, length);
 		}
 	}
 
 	private class ProblemRequestor implements IProblemRequestor  {
-		
+
 		private List fCollectedProblems;
 		private boolean fIsActive= false;
 		private boolean fIsRunning= false;
-	
+
 		/*
 		 * @see IProblemRequestor#beginReporting()
 		 */
@@ -141,7 +141,7 @@ public class JavaReconcileStep extends AbstractReconcileStep {
 			fIsRunning= true;
 			fCollectedProblems= new ArrayList();
 		}
-		
+
 		/*
 		 * @see IProblemRequestor#acceptProblem(IProblem)
 		 */
@@ -150,7 +150,7 @@ public class JavaReconcileStep extends AbstractReconcileStep {
 			if (isActive())
 				fCollectedProblems.add(problem);
 		}
-	
+
 		/*
 		 * @see IProblemRequestor#endReporting()
 		 */
@@ -165,7 +165,7 @@ public class JavaReconcileStep extends AbstractReconcileStep {
 //			if (isCanceled())
 //				return;
 		}
-		
+
 		public IReconcileResult[] getReconcileResult() {
 			Assert.isTrue(!fIsRunning);
 
@@ -174,10 +174,10 @@ public class JavaReconcileStep extends AbstractReconcileStep {
 
 			for (int i= 0; i < size; i++)
 				result[i]= new ProblemAdapter((IProblem)fCollectedProblems.get(i));
-			
+
 			return result;
 		}
-		
+
 		/*
 		 * @see IProblemRequestor#isActive()
 		 */
@@ -185,10 +185,10 @@ public class JavaReconcileStep extends AbstractReconcileStep {
 		public boolean isActive() {
 			return fIsActive && fCollectedProblems != null && !isCanceled();
 		}
-		
+
 		/**
 		 * Sets the active state of this problem requestor.
-		 * 
+		 *
 		 * @param isActive the state of this problem requestor
 		 */
 		public void setIsActive(boolean isActive) {
@@ -220,13 +220,13 @@ public class JavaReconcileStep extends AbstractReconcileStep {
 	 * Adapts an <code>ICompilationUnit</code> to the <code>ITextModel</code> interface.
 	 */
 	class CompilationUnitAdapter implements IReconcilableModel {
-		
+
 		private ICompilationUnit fCompilationUnit;
-		
+
 		CompilationUnitAdapter(ICompilationUnit cu) {
 			fCompilationUnit= cu;
 		}
-		
+
 		private ICompilationUnit getCompilationUnit() {
 			return fCompilationUnit;
 		}
@@ -277,7 +277,7 @@ public class JavaReconcileStep extends AbstractReconcileStep {
 			return null;
 
 		System.out.println("reconciling java model..."); //$NON-NLS-1$
-		
+
 		IBuffer buffer;
 		try {
 			buffer= cu.getBuffer();
@@ -285,7 +285,7 @@ public class JavaReconcileStep extends AbstractReconcileStep {
 			e.printStackTrace();
 			buffer= null;
 		}
-		
+
 		if (buffer != null)
 			buffer.setContents(((DocumentAdapter)getInputModel()).getDocument().get());
 
@@ -310,7 +310,7 @@ public class JavaReconcileStep extends AbstractReconcileStep {
 	public IReconcilableModel getModel() {
 		return fWorkingCopy;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.corext.util.WorkingCopyUtil#getNewWorkingCopy
 	 */
@@ -319,7 +319,7 @@ public class JavaReconcileStep extends AbstractReconcileStep {
 		IContainer parent= jspFile.getParent();
 		IPackageFragment packageFragment= null;
 		IJavaElement je= JavaCore.create(parent);
-		
+
 		if (je == null || !je.exists())
 			return null;
 
@@ -334,12 +334,12 @@ public class JavaReconcileStep extends AbstractReconcileStep {
 
 			case IJavaElement.JAVA_PROJECT:
 				IJavaProject jProject= (IJavaProject)je;
-	
+
 				if (!jProject.exists())  {
 					System.out.println("Abort reconciling: cannot create working copy: JSP is not in a Java project"); //$NON-NLS-1$
 					return null;
 				}
-					
+
 				packageFragmentRoot= null;
 				IPackageFragmentRoot[] packageFragmentRoots= jProject.getPackageFragmentRoots();
 				int i= 0;
@@ -360,9 +360,9 @@ public class JavaReconcileStep extends AbstractReconcileStep {
 			default :
 				return null;
 		}
-		
+
 		fProblemRequestor= new ProblemRequestor();
-		
+
 		return packageFragment.getCompilationUnit("Demo.java").getWorkingCopy(fTemporaryWorkingCopyOwner, fProblemRequestor, getProgressMonitor()); //$NON-NLS-1$
 	}
 }

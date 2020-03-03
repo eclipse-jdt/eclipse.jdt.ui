@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -95,7 +95,7 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 		String fullName= TEST_PATH_PREFIX + getRefactoringPath() + "positive/" + fileName + ".java";
 		return createCU(pack, fileName + ".java", getFileContents(fullName));
 	}
-	
+
 	private ICompilationUnit createAdditionalCUForNegative(String fileName, IPackageFragment pack) throws Exception {
 		String fullName= TEST_PATH_PREFIX + getRefactoringPath() + "negative/" + fileName + ".java";
 		return createCU(pack, fileName + ".java", getFileContents(fullName));
@@ -145,8 +145,8 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 
 		assertEqualLines(getFileContents(canonAfterSrcName), cu.getSource());
 	}
-	
-	protected ChangeTypeRefactoring failHelper2(int startLine, int startColumn, int endLine, int endColumn, 
+
+	protected ChangeTypeRefactoring failHelper2(int startLine, int startColumn, int endLine, int endColumn,
 			String selectedTypeName, IPackageFragment pack) throws Exception {
 		ICompilationUnit	cu= createCUfromTestFile(pack, false, true);
 		ISourceRange		selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
@@ -154,7 +154,7 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 		performRefactoring(ref);
 		return ref;
 	}
-	
+
 
 	//--- TESTS
 	public void testLocalVarName() throws Exception {
@@ -534,6 +534,19 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 		};
 		StringAsserts.assertEqualStringsIgnoreOrder(actual, expected);
 	}
+
+	public void testParameterParametricType() throws Exception {
+		Collection<String> types= helper1(4, 21, 4, 38, "java.util.List<java.lang.String>").getValidTypeNames();
+		String[] actual= types.toArray(new String[types.size()]);
+		String[] expected= {
+				"java.util.List<java.lang.String>",
+				"java.util.AbstractList<java.lang.String>",
+				"java.util.Collection<java.lang.String>",
+				"java.util.AbstractCollection<java.lang.String>"
+		};
+		StringAsserts.assertEqualStringsIgnoreOrder(actual, expected);
+	}
+
 	public void testParametricLocalVar() throws Exception {
 		Collection<String> types= helper1(14, 9, 14, 20, "java.lang.Iterable<java.lang.String>").getValidTypeNames();
 		String[] actual= types.toArray(new String[types.size()]);
@@ -606,7 +619,7 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 		};
 		StringAsserts.assertEqualStringsIgnoreOrder(actual, expected);
 	}
-	
+
 	// tests that are supposed to fail
 
 	public void testInvalidSelection() throws Exception {

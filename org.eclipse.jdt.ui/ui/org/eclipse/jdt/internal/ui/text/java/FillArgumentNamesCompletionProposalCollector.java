@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,6 +15,7 @@ package org.eclipse.jdt.internal.ui.text.java;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
+import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -98,7 +99,9 @@ public final class FillArgumentNamesCompletionProposalCollector extends Completi
 
 		char[] completion= typeProposal.getCompletion();
 		// don't add parameters for import-completions nor for proposals with an empty completion (e.g. inside the type argument list)
-		if (completion.length > 0 && (completion[completion.length - 1] == ';' || completion[completion.length - 1] == '.'))
+		if (completion.length > 0 && completion[completion.length - 1] == '.')
+			return super.createJavaCompletionProposal(typeProposal);
+		if (getInvocationContext().getCoreContext().getTokenLocation() == CompletionContext.TL_IN_IMPORT)
 			return super.createJavaCompletionProposal(typeProposal);
 
 		LazyJavaCompletionProposal newProposal= new LazyGenericTypeProposal(typeProposal, getInvocationContext());

@@ -57,7 +57,7 @@ public class JUnitHomeInitializer extends ClasspathVariableInitializer {
 			IPath sourceLocation= BuildPathSupport.JUNIT3_PLUGIN.getSourceBundleLocation();
 			if (sourceLocation == null)
 				sourceLocation= BuildPathSupport.JUNIT4_PLUGIN.getSourceBundleLocation(); // JUnit 4 includes most of JUnit 3, so let's cheat
-			
+
 			if (sourceLocation != null) {
 				JavaCore.setClasspathVariable(JUnitCorePlugin.JUNIT_SRC_HOME, sourceLocation, null);
 			} else {

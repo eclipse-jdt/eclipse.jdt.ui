@@ -387,7 +387,7 @@ abstract class FlowAnalyzer extends GenericVisitor {
 	protected void endVisit(SwitchExpression node, SwitchData data) {
 		preEndVisit(node, node.getExpression(), data);
 	}
-	
+
 	private void preEndVisit(ASTNode node, Expression expression, SwitchData data) {
 		SwitchFlowInfo switchFlowInfo= createSwitch();
 		setFlowInfo(node, switchFlowInfo);

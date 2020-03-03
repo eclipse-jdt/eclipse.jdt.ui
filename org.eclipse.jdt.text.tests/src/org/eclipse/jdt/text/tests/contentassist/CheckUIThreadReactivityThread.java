@@ -17,7 +17,7 @@ import org.eclipse.swt.widgets.Display;
  * request and computes how long it take for display to process the request.
  * The time to handle request is time when display is busy doing other work, so
  * it's actually a UI Freeze.
- * 
+ *
  * This could be moved to SWT or other common place where we need to check
  * UI Freezes and reused form there,
  */

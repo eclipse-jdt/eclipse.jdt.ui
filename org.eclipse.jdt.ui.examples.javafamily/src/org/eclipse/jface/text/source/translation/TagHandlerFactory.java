@@ -22,7 +22,7 @@ import org.eclipse.core.runtime.Assert;
 
 /**
  * Default implementation of a tag handler factory
- * 
+ *
  * @since 3.0
  */
 public class TagHandlerFactory implements ITagHandlerFactory {
@@ -32,7 +32,7 @@ public class TagHandlerFactory implements ITagHandlerFactory {
 	public void addTagHandler(String tag, ITagHandler handler)  {
 		Assert.isNotNull(tag);
 		Assert.isNotNull(handler);
-		
+
 		fHandlers.put(tag, handler);
 	}
 

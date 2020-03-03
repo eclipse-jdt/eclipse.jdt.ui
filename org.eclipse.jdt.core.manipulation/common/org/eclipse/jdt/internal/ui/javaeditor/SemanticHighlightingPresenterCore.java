@@ -248,7 +248,7 @@ public class SemanticHighlightingPresenterCore {
 	 * Add a position with the given range and highlighting unconditionally, only from UI thread.
 	 * The position will also be registered on the document. The text presentation is not
 	 * invalidated.
-	 * 
+	 *
 	 * @param event The document event
 	 * @param category The category
 	 * @param offset The range offset

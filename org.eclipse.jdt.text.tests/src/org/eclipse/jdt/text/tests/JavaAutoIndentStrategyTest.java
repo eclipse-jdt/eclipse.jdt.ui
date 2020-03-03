@@ -35,7 +35,7 @@ import org.eclipse.jdt.internal.ui.text.java.JavaAutoIndentStrategy;
 
 /**
  * JavaAutoIndentStrategyTest.
- * 
+ *
  * @since 3.6
  */
 public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener {
@@ -403,7 +403,7 @@ public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener
 		buf.append("}");
 		assertEquals(buf.toString(), fDocument.get());
 	}
-	
+
 	public void testSmartIndentAfterNewLine10() {
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=404879
 		fDocument.setInitialLineDelimiter("\r\n");

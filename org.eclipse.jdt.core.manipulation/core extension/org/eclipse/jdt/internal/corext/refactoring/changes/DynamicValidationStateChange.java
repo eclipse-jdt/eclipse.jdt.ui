@@ -42,7 +42,7 @@ public class DynamicValidationStateChange extends CompositeChange implements Wor
 	private ISchedulingRule fSchedulingRule;
 
 	private static final long DO_NOT_EXPIRE= -1;
-	
+
 	// 30 minutes
 	private static final long LIFE_TIME= 30 * 60 * 1000;
 
@@ -71,7 +71,7 @@ public class DynamicValidationStateChange extends CompositeChange implements Wor
 			fTimeStamp= 0;
 		}
 	}
-	
+
 	@Override
 	public void initializeValidationData(IProgressMonitor pm) {
 		super.initializeValidationData(pm);

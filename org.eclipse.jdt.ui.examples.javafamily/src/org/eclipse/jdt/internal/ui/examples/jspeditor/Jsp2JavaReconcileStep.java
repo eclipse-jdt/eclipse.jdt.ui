@@ -34,14 +34,14 @@ import org.eclipse.jface.text.source.translation.ITranslator;
 import org.eclipse.jsp.JspTranslator;
 
 /**
- * This reconcile step has a JSP source document as 
+ * This reconcile step has a JSP source document as
  * input model and maintains a document that contains the Java
  * source.
  *
  * @since 3.0
  */
 public class Jsp2JavaReconcileStep extends AbstractReconcileStep {
-	
+
 	private DocumentAdapter fModel;
 	private ITranslator fJspTranslator;
 
@@ -60,7 +60,7 @@ public class Jsp2JavaReconcileStep extends AbstractReconcileStep {
 		super(step);
 		initialize();
 	}
-	
+
 	protected void initialize()  {
 		fJspTranslator= new JspTranslator();
 		fJspTranslator.setTagHandlerFactory(new Jsp2JavaTagHandlerFactory());
@@ -74,7 +74,7 @@ public class Jsp2JavaReconcileStep extends AbstractReconcileStep {
 		Assert.isTrue(getInputModel() instanceof DocumentAdapter, "wrong model"); //$NON-NLS-1$
 
 		System.out.println("reconciling jsp2java..."); //$NON-NLS-1$
-		
+
 		Reader reader= new StringReader(((DocumentAdapter)fInputModel).getDocument().get());
 		try {
 			String javaSource= fJspTranslator.translate(reader, "Demo"); //$NON-NLS-1$
@@ -119,16 +119,16 @@ public class Jsp2JavaReconcileStep extends AbstractReconcileStep {
 			int javaLine;
 			try {
 				javaLine= fModel.getDocument().getLineOfOffset(pos.offset);
-				
+
 				// Adjust offset to be relative to line beginning
 				pos.offset -= fModel.getDocument().getLineOffset(javaLine);
 				int relativeLineOffsetInJava= pos.offset;
 
 				int jspLine= smap[javaLine + 1]; // document is 0-based, smap is 1-based
-				
+
 				// Add Jsp line offset
 				pos.offset += ((DocumentAdapter)getInputModel()).getDocument().getLineOffset(jspLine-1); // document is 0-based, smap is 1-based
-				
+
 				String jspLineStr= ((DocumentAdapter)getInputModel()).getDocument().get(((DocumentAdapter)getInputModel()).getDocument().getLineOffset(jspLine-1), ((DocumentAdapter)getInputModel()).getDocument().getLineLength(jspLine-1));
 
 				// XXX: Once partitioner is in place the partition can be used to ease section detection

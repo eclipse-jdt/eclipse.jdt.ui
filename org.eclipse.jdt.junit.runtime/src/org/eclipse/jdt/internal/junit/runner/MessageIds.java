@@ -121,7 +121,7 @@ public class MessageIds {
 	 * uniqueId = the unique ID of the test provided by JUnit launcher, otherwise an empty string
 	 * <br>
 	 * See: ITestRunListener2#testTreeEntry
-	 * 
+	 *
 	 */
 	public static final String TEST_TREE= "%TSTTREE"; //$NON-NLS-1$
 	/**

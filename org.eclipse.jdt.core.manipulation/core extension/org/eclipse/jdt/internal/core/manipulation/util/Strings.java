@@ -54,7 +54,7 @@ public class Strings {
 
 	/**
 	 * Adds special marks so that that the given string is readable in a BiDi environment.
-	 * 
+	 *
 	 * @param string the string
 	 * @return the processed styled string
 	 * @since 3.4
@@ -68,7 +68,7 @@ public class Strings {
 
 	/**
 	 * Adds special marks so that that the given string is readable in a BiDi environment.
-	 * 
+	 *
 	 * @param string the string
 	 * @param delimiters the delimiters
 	 * @return the processed styled string
@@ -84,7 +84,7 @@ public class Strings {
 	/**
 	 * Adds special marks so that that the given Java element label is readable in a BiDi
 	 * environment.
-	 * 
+	 *
 	 * @param string the string
 	 * @return the processed styled string
 	 * @since 3.6

@@ -116,7 +116,7 @@ public class ModifierCorrectionsQuickFixTest9 extends QuickFixTest {
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
-	
+
 	@Test
 	public void testAddSafeVarargs2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);

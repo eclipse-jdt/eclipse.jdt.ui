@@ -249,7 +249,7 @@ public class BreakContinueTargetFinderTest extends TestCase{
 		s.append("      }\n");
 		s.append("   }\n");
 		s.append("}\n");
-		int offset= s.indexOf("break") + 2; // inside 'break' 
+		int offset= s.indexOf("break") + 2; // inside 'break'
 		int length= 0;
 		OccurrenceLocation[] ranges= { find(s, "baz", 1), find(s, ";", 4) };
 		checkSelection(s, offset, length, ranges);

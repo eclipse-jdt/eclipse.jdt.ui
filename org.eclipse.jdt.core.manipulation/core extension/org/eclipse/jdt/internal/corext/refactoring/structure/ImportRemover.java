@@ -75,7 +75,7 @@ public class ImportRemover {
 	private final String PROPERTY_KEY= String.valueOf(System.currentTimeMillis());
 	private final String REMOVED= "removed"; //$NON-NLS-1$
 	private final String RETAINED= "retained"; //$NON-NLS-1$
-	
+
 	private Set<String> fAddedImports= new HashSet<>();
 
 	private Set<StaticImportData> fAddedStaticImports= new HashSet<>();
@@ -142,7 +142,7 @@ public class ImportRemover {
 				super.postVisit(node);
 			}
 		});
-		
+
 		for (Iterator<SimpleName> iterator= importNames.iterator(); iterator.hasNext();) {
 			SimpleName name= iterator.next();
 			if (isInRemoved(name, removedStartsEnds))
@@ -258,7 +258,7 @@ public class ImportRemover {
 				addName(node.getName());
 				return false;
 			}
-			
+
 			@Override
 			public boolean visit(QualifiedName node) {
 				addName(node.getName());

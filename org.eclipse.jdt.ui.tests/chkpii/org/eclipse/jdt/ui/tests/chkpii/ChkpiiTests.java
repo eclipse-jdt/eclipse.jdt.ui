@@ -117,7 +117,7 @@ public class ChkpiiTests extends TestCase {
 	public static Test suite() {
 		return new TestSuite(ChkpiiTests.class);
 	}
-	
+
 	public void testHTMLFiles() {
 		assertChkpii(HTML);
 	}
@@ -349,7 +349,7 @@ public class ChkpiiTests extends TestCase {
 
 	/**
 	 * Constructor for EmptyDirectoriesTest.
-	 * 
+	 *
 	 * @param name the test name
 	 */
 	public ChkpiiTests(String name) {

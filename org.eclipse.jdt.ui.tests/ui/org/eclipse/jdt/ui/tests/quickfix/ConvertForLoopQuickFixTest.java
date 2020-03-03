@@ -2138,10 +2138,10 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		buf.append("\n");		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
+
 		assertFalse(satisfiesPrecondition(cu));
 	}
-	
+
 	@Test
 	public void testBodyPrecondition344674_1() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
@@ -2530,12 +2530,12 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 		assertFalse(satisfiesPrecondition(cu));
 	}
-	
+
 	@Test
 	public void testBug510758_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
-		
+
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    private Object[] array;\n");
@@ -2554,7 +2554,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 
 		assertTrue(satisfiesPrecondition(cu));
-		
+
 		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(buf, cu);
 
 		assertNotNull(fConvertLoopProposal);
@@ -2582,12 +2582,12 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		String expected= buf.toString();
 		assertEqualString(preview1, expected);
 	}
-	
+
 	@Test
 	public void testBug510758_2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
-		
+
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    private Object[] array;\n");
@@ -2606,19 +2606,19 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 
 		assertFalse(satisfiesPrecondition(cu));
-		
+
 		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(buf, cu);
 
 		assertNull(fConvertLoopProposal);
 
-		assertCorrectLabels(proposals);		
+		assertCorrectLabels(proposals);
 	}
-	
+
 	@Test
 	public void testBug510758_3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
-		
+
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    private Object[] array;\n");
@@ -2637,12 +2637,12 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 
 		assertFalse(satisfiesPrecondition(cu));
-		
+
 		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(buf, cu);
 
 		assertNull(fConvertLoopProposal);
 
-		assertCorrectLabels(proposals);		
+		assertCorrectLabels(proposals);
 	}
 
 	@Test
@@ -2670,7 +2670,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", orig.toString(), false, null);
 
 		assertTrue(satisfiesPrecondition(cu));
-		
+
 		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(orig, cu);
 
 		assertNotNull(fConvertLoopProposal);

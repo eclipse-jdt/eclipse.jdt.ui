@@ -66,7 +66,7 @@ public class SurroundWithTests17 extends SurroundWithTests {
 	public void testSimple2() throws Exception {
 		tryCatchTest();
 	}
-	
+
 	public void testMultiTryCatch() throws Exception {
 		tryCatchTest();
 	}

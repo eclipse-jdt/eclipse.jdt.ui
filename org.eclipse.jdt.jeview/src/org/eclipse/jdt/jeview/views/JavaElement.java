@@ -48,7 +48,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 
 public class JavaElement extends JEAttribute {
-	
+
 	private static final long LABEL_OPTIONS= JavaElementLabels.F_APP_TYPE_SIGNATURE | JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_APP_RETURNTYPE | JavaElementLabels.ALL_FULLY_QUALIFIED | JavaElementLabels.T_TYPE_PARAMETERS | JavaElementLabels.USE_RESOLVED;
 
 	private final JEAttribute fParent; //can be null
@@ -60,7 +60,7 @@ public class JavaElement extends JEAttribute {
 		fName= name;
 		fJavaElement= element;
 	}
-	
+
 	public JavaElement(JEAttribute parent, IJavaElement element) {
 		this(parent, null, element);
 	}
@@ -69,11 +69,11 @@ public class JavaElement extends JEAttribute {
 	public JEAttribute getParent() {
 		return fParent;
 	}
-	
+
 	public IJavaElement getJavaElement() {
 		return fJavaElement;
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -81,7 +81,7 @@ public class JavaElement extends JEAttribute {
 		if (obj == null || !obj.getClass().equals(getClass())) {
 			return false;
 		}
-		
+
 		JavaElement other= (JavaElement) obj;
 		if (fParent == null) {
 			if (other.fParent != null)
@@ -89,24 +89,24 @@ public class JavaElement extends JEAttribute {
 		} else if (! fParent.equals(other.fParent)) {
 			return false;
 		}
-		
+
 		if (fName == null) {
 			if (other.fName != null)
 				return false;
 		} else if (! fName.equals(other.fName)) {
 			return false;
 		}
-		
+
 		if (fJavaElement == null) {
 			if (other.fJavaElement != null)
 				return false;
 		} else if (! fJavaElement.equals(other.fJavaElement)) {
 			return false;
 		}
-		
+
 		return true;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return (fParent != null ? fParent.hashCode() : 0)
@@ -118,13 +118,13 @@ public class JavaElement extends JEAttribute {
 	public Object getWrappedObject() {
 		return fJavaElement;
 	}
-	
+
 	@Override
 	public String getLabel() {
 		StringBuilder sb= new StringBuilder();
 		if (fName != null)
 			sb.append(fName).append(": ");
-		
+
 		if (fJavaElement == null) {
 			sb.append("java element: null");
 		} else {
@@ -141,15 +141,15 @@ public class JavaElement extends JEAttribute {
 	public JEAttribute[] getChildren() {
 		if (fJavaElement == null)
 			return EMPTY;
-		
+
 		ArrayList<JEAttribute> result= new ArrayList<>();
-		
+
 		if (fJavaElement instanceof IParent) {
 			addParentChildren(result, (IParent) fJavaElement);
 		}
-		
+
 		addJavaElementChildren(result, fJavaElement);
-		
+
 		if (fJavaElement instanceof IJavaModel)
 			addJavaModelChildren(result, (IJavaModel) fJavaElement);
 		if (fJavaElement instanceof IJavaProject)
@@ -158,7 +158,7 @@ public class JavaElement extends JEAttribute {
 			addPackageFragmentRootChildren(result, (IPackageFragmentRoot) fJavaElement);
 		if (fJavaElement instanceof IPackageFragment)
 			addPackageFragmentChildren(result, (IPackageFragment) fJavaElement);
-		
+
 		if (fJavaElement instanceof ITypeRoot)
 			addTypeRootChildren(result, (ITypeRoot) fJavaElement);
 		if (fJavaElement instanceof IOrdinaryClassFile)
@@ -167,26 +167,26 @@ public class JavaElement extends JEAttribute {
 			addModularClassFileChildren(result, (IModularClassFile) fJavaElement);
 		if (fJavaElement instanceof ICompilationUnit)
 			addCompilationUnitChildren(result, (ICompilationUnit) fJavaElement);
-		
+
 		if (fJavaElement instanceof IType)
 			addTypeChildren(result, (IType) fJavaElement);
 		if (fJavaElement instanceof IMethod)
 			addMethodChildren(result, (IMethod) fJavaElement);
 		if (fJavaElement instanceof IMember)
 			addMemberChildren(result, (IMember) fJavaElement);
-		
+
 		if (fJavaElement instanceof ITypeParameter)
 			addTypeParameterChildren(result, (ITypeParameter) fJavaElement);
 		if (fJavaElement instanceof ILocalVariable)
 			addLocalVariableChildren(result, (ILocalVariable) fJavaElement);
-		
+
 		if (fJavaElement instanceof IAnnotation)
 			addAnnotationChildren(result, (IAnnotation) fJavaElement);
 		if (fJavaElement instanceof IAnnotatable)
 			addAnnotatableChildren(result, (IAnnotatable) fJavaElement);
-		
+
 		return result.toArray(new JEAttribute[result.size()]);
-		
+
 	}
 
 	private void addParentChildren(ArrayList<JEAttribute> result, final IParent parent) {
@@ -296,7 +296,7 @@ public class JavaElement extends JEAttribute {
 			}
 		});
 	}
-	
+
 	private void addPackageFragmentRootChildren(ArrayList<JEAttribute> result, final IPackageFragmentRoot packageFragmentRoot) {
 		result.add(new JavaElementChildrenProperty(this, "NON JAVA RESOURCES") {
 			@Override
@@ -338,7 +338,7 @@ public class JavaElement extends JEAttribute {
 			}
 		});
 	}
-	
+
 	private void addTypeRootChildren(ArrayList<JEAttribute> result, final ITypeRoot typeRoot) {
 		result.add(JavaElement.compute(this, "FIND PRIMARY TYPE", new Callable<IJavaElement>() {
 			@Override
@@ -347,7 +347,7 @@ public class JavaElement extends JEAttribute {
 			}
 		}));
 	}
-	
+
 	private void addClassFileChildren(ArrayList<JEAttribute> result, final IOrdinaryClassFile classFile) {
 		result.add(JavaElement.compute(this, "TYPE", new Callable<IJavaElement>() {
 			@Override
@@ -356,7 +356,7 @@ public class JavaElement extends JEAttribute {
 			}
 		}));
 	}
-	
+
 	private void addModularClassFileChildren(ArrayList<JEAttribute> result, final IModularClassFile classFile) {
 		result.add(JavaElement.compute(this, "MODULE", new Callable<IJavaElement>() {
 			@Override
@@ -395,7 +395,7 @@ public class JavaElement extends JEAttribute {
 			}
 		});
 	}
-	
+
 	private void addMemberChildren(ArrayList<JEAttribute> result, final IMember member) {
 		result.add(new JavaElement(this, "CLASS FILE", member.getClassFile()));
 		result.add(new JavaElement(this, "COMPILATION UNIT", member.getCompilationUnit()));
@@ -408,7 +408,7 @@ public class JavaElement extends JEAttribute {
 			}
 		});
 	}
-	
+
 	private void addAnnotationChildren(ArrayList<JEAttribute> result, final IAnnotation annotation) {
 		result.add(new JavaElementChildrenProperty(this, "MEMBER VALUE PAIRS") {
 			@Override
@@ -418,7 +418,7 @@ public class JavaElement extends JEAttribute {
 			}
 		});
 	}
-	
+
 	private void addAnnotatableChildren(ArrayList<JEAttribute> result, final IAnnotatable annotatable) {
 		result.add(new JavaElementChildrenProperty(this, "ANNOTATIONS") {
 			@Override
@@ -428,7 +428,7 @@ public class JavaElement extends JEAttribute {
 			}
 		});
 	}
-	
+
 	private void addTypeChildren(ArrayList<JEAttribute> result, final IType type) {
 		result.add(new JavaElementProperty(this, "IS RESOLVED", type.isResolved()));
 		result.add(new JavaElementProperty(this, "KEY", type.getKey()));
@@ -445,14 +445,14 @@ public class JavaElement extends JEAttribute {
 				return createStrings(this, type.getTypeParameterSignatures());
 			}
 		});
-		
+
 		result.add(new JavaElementProperty(this, "SUPERCLASS NAME") {
 			@Override
 			protected Object computeValue() throws Exception {
 				return type.getSuperclassName();
 			}
 		});
-		
+
 		result.add(new JavaElementProperty(this, "SUPERCLASS TYPE SIGNATURE") {
 			@Override
 			protected Object computeValue() throws Exception {
@@ -471,7 +471,7 @@ public class JavaElement extends JEAttribute {
 				return createStrings(this, type.getSuperInterfaceTypeSignatures());
 			}
 		});
-		
+
 		result.add(new JavaElementChildrenProperty(this, "FIELDS") {
 			@Override
 			protected JEAttribute[] computeChildren() throws JavaModelException {
@@ -541,7 +541,7 @@ public class JavaElement extends JEAttribute {
 			result.add(new Error(this, "DEFAULT_VALUE", e));
 		}
 	}
-	
+
 	private void addTypeParameterChildren(ArrayList<JEAttribute> result, final ITypeParameter typeParameter) {
 		result.add(new JavaElement(this, "TYPE ROOT", typeParameter.getTypeRoot()));
 		result.add(new JavaElement(this, "DECLARING MEMBER", typeParameter.getDeclaringMember()));
@@ -558,12 +558,12 @@ public class JavaElement extends JEAttribute {
 			}
 		});
 	}
-	
+
 	private void addLocalVariableChildren(ArrayList<JEAttribute> result, final ILocalVariable localVariable) {
 		result.add(new JavaElement(this, "TYPE ROOT", localVariable.getTypeRoot()));
 		result.add(new JavaElement(this, "DECLARING MEMBER", localVariable.getDeclaringMember()));
 	}
-	
+
 	static JavaElement[] createJavaElements(JEAttribute parent, Object[] javaElements) {
 		JavaElement[] jeChildren= new JavaElement[javaElements.length];
 		for (int i= 0; i < javaElements.length; i++) {
@@ -571,7 +571,7 @@ public class JavaElement extends JEAttribute {
 		}
 		return jeChildren;
 	}
-	
+
 	static JavaElement[] createJavaElements(JEAttribute parent, IJavaElement[] javaElements) {
 		JavaElement[] jeChildren= new JavaElement[javaElements.length];
 		for (int i= 0; i < javaElements.length; i++) {
@@ -579,7 +579,7 @@ public class JavaElement extends JEAttribute {
 		}
 		return jeChildren;
 	}
-	
+
 	static JEAttribute[] createResources(JEAttribute parent, Object[] resources) {
 		JEAttribute[] resourceChildren= new JEAttribute[resources.length];
 		for (int i= 0; i < resources.length; i++) {
@@ -593,7 +593,7 @@ public class JavaElement extends JEAttribute {
 		}
 		return resourceChildren;
 	}
-	
+
 	static JEAttribute[] createMemberValuePairs(JEAttribute parent, IMemberValuePair[] mvPairs) {
 		JEAttribute[] mvPairChildren= new JEAttribute[mvPairs.length];
 		for (int i= 0; i < mvPairs.length; i++) {
@@ -602,7 +602,7 @@ public class JavaElement extends JEAttribute {
 		}
 		return mvPairChildren;
 	}
-	
+
 	static JEAttribute[] createCPEntries(JEAttribute parent, IClasspathEntry[] entries) {
 		JEAttribute[] entryChildren= new JEAttribute[entries.length];
 		for (int i= 0; i < entries.length; i++) {
@@ -620,7 +620,7 @@ public class JavaElement extends JEAttribute {
 				return o1.getKey().compareTo(o2.getKey());
 			}
 		});
-		
+
 		JEAttribute[] children= new JEAttribute[entries.size()];
 		for (int i= 0; i < entries.size(); i++) {
 			Entry<String, String> entry= entries.get(i);
@@ -628,7 +628,7 @@ public class JavaElement extends JEAttribute {
 		}
 		return children;
 	}
-	
+
 	static JEAttribute[] createStrings(JEAttribute parent, String[] strings) {
 		JEAttribute[] children= new JEAttribute[strings.length];
 		for (int i= 0; i < strings.length; i++) {
@@ -645,7 +645,7 @@ public class JavaElement extends JEAttribute {
 			return new Error(parent, name, e);
 		}
 	}
-	
+
 	public static JEAttribute create(JEAttribute parent, String name, IJavaElement javaElement) {
 		if (javaElement == null) {
 			return new Null(parent, name);

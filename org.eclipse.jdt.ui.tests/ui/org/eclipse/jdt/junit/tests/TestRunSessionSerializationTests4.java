@@ -76,7 +76,7 @@ public class TestRunSessionSerializationTests4 extends AbstractTestRunSessionSer
 
 	public void testFailures() throws Exception {
 		String test= "Failures";
-		
+
 		TestRunLog log= new TestRunLog();
 		final TestRunListener testRunListener= new TestRunListeners.SequenceTest(log);
 		JUnitCore.addTestRunListener(testRunListener);
@@ -87,25 +87,25 @@ public class TestRunSessionSerializationTests4 extends AbstractTestRunSessionSer
 
 					"testCaseStarted-"  + TestRunListeners.testCaseAsString("testNasty", "pack.Failures", ProgressState.RUNNING, Result.UNDEFINED, null, 0),
 					"testCaseFinished-" + TestRunListeners.testCaseAsString("testNasty", "pack.Failures", ProgressState.COMPLETED, Result.FAILURE, new FailureTrace("java.lang.AssertionError", null, null), 0),
-					
+
 					"testCaseStarted-"  + TestRunListeners.testCaseAsString("ignored", "pack.Failures", ProgressState.RUNNING, Result.UNDEFINED, null, 0),
 					"testCaseFinished-" + TestRunListeners.testCaseAsString("ignored", "pack.Failures", ProgressState.COMPLETED, Result.IGNORED, null, 0),
-					
+
 					"testCaseStarted-"  + TestRunListeners.testCaseAsString("testError", "pack.Failures", ProgressState.RUNNING, Result.UNDEFINED, null, 0),
 					"testCaseFinished-" + TestRunListeners.testCaseAsString("testError", "pack.Failures", ProgressState.COMPLETED, Result.ERROR, new FailureTrace("java.lang.IllegalStateException", null, null), 0),
-					
+
 					"testCaseStarted-"  + TestRunListeners.testCaseAsString("errorExpected", "pack.Failures", ProgressState.RUNNING, Result.UNDEFINED, null, 0),
 					"testCaseFinished-" + TestRunListeners.testCaseAsString("errorExpected", "pack.Failures", ProgressState.COMPLETED, Result.OK, null, 0),
-					
+
 					"testCaseStarted-"  + TestRunListeners.testCaseAsString("errorExpectedOther", "pack.Failures", ProgressState.RUNNING, Result.UNDEFINED, null, 0),
 					"testCaseFinished-" + TestRunListeners.testCaseAsString("errorExpectedOther", "pack.Failures", ProgressState.COMPLETED, Result.ERROR, new FailureTrace("java.lang.Exception", null, null), 0),
-					
+
 					"testCaseStarted-"  + TestRunListeners.testCaseAsString("compareTheStuff", "pack.Failures", ProgressState.RUNNING, Result.UNDEFINED, null, 0),
 					"testCaseFinished-" + TestRunListeners.testCaseAsString("compareTheStuff", "pack.Failures", ProgressState.COMPLETED, Result.FAILURE, new FailureTrace("org.junit.ComparisonFailure", "\nHello World.\n\n", "\n\nHello my friend."), 0),
-					
+
 					"testCaseStarted-"  + TestRunListeners.testCaseAsString("testCompareNull", "pack.Failures", ProgressState.RUNNING, Result.UNDEFINED, null, 0),
 					"testCaseFinished-" + TestRunListeners.testCaseAsString("testCompareNull", "pack.Failures", ProgressState.COMPLETED, Result.FAILURE, new FailureTrace("java.lang.AssertionError", null, null), 0),
-					
+
 					"sessionFinished-" + TestRunListeners.sessionAsString("Failures", ProgressState.COMPLETED, Result.ERROR, 0)
 				};
 			String[] actual= log.getLog();

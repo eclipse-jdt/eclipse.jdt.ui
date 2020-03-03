@@ -34,7 +34,7 @@ class ToStringGenerationContext {
 	private ITypeBinding fType;
 
 	private ToStringGenerationSettingsCore fSettings;
-	
+
 	private ToStringGenerationSettingsCore.CustomBuilderSettings fCustomBuilderSettings;
 
 	private CompilationUnitRewrite fRewrite;
@@ -116,23 +116,23 @@ class ToStringGenerationContext {
 	public boolean isSkipNulls() {
 		return fSettings.skipNulls;
 	}
-	
+
 	public String getCustomBuilderClass() {
 		return fCustomBuilderSettings.className;
 	}
-	
+
 	public String getCustomBuilderVariableName() {
 		return fCustomBuilderSettings.variableName;
 	}
-	
+
 	public String getCustomBuilderAppendMethod() {
 		return fCustomBuilderSettings.appendMethod;
 	}
-	
+
 	public String getCustomBuilderResultMethod() {
 		return fCustomBuilderSettings.resultMethod;
 	}
-	
+
 	public boolean isCustomBuilderChainedCalls() {
 		return fCustomBuilderSettings.chainCalls;
 	}

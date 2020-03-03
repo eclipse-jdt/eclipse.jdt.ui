@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *   David Saff (saff@mit.edu) - initial API and implementation
  *             (bug 102632: [JUnit] Support for JUnit 4.)

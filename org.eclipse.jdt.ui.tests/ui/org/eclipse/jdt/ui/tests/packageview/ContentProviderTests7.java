@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 GK Software AG, and others.
+ * Copyright (c) 2017, 2020 GK Software AG, and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -12,6 +12,15 @@
  *     Stephan Herrmann - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.packageview;
+
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -32,44 +41,27 @@ import org.eclipse.jdt.internal.core.ClasspathAttribute;
 
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerContentProvider;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
-
 /**
  * Tests for the PackageExplorerContentProvider.
  * <ul>
  * <li>Bug 501507: [1.9] Consider displaying the module-info.java file in the source folder root
  * </ul>
- * 
+ *
  * @since 3.14
  */
-public class ContentProviderTests7 extends TestCase {
+@RunWith(JUnit4.class)
+public class ContentProviderTests7 {
 
 	private static Object[] NO_CHILDREN= new Object[0];
 
 	private IJavaProject fJProject;
 	private IPackageFragmentRoot fSrcFolder;
 
-
-	public ContentProviderTests7(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		TestSuite suite= new TestSuite(ContentProviderTests7.class.getName());
-		//$JUnit-BEGIN$
-		suite.addTestSuite(ContentProviderTests7.class);
-		//$JUnit-END$
-		return suite;
-	}
-
 	// test matrix:
 	//	 Criterion (true/false):														NameSegment:
-	// 		no ordinary CU in dlft package	/ with ordinary CU in dflt package	=		Module1 		/ Module2 
+	// 		no ordinary CU in dlft package	/ with ordinary CU in dflt package	=		Module1 		/ Module2
 	//		hierarchical layout				/ flat layout		 				= 		Hierarchical	/ Flat
-	// 		empty module-info				/ real module						= 		Empty			/ 
+	// 		empty module-info				/ real module						= 		Empty			/
 	//   Checking in each test:
 	// 		- children of fSrcFolder
 	//		- children of the default package
@@ -90,10 +82,10 @@ public class ContentProviderTests7 extends TestCase {
 	}
 
 	private void createEmptyClass(IPackageFragment fragment, String name, String packageName) throws JavaModelException {
-		String packDecl= packageName != null ? "package "+packageName+";\n" : ""; 
+		String packDecl= packageName != null ? "package "+packageName+";\n" : "";
 		fragment.createCompilationUnit(name+".java", packDecl+"public class "+name+" {}\n", true, null);
 	}
-	
+
 	private IJavaElement getModuleInfo() {
 		return fSrcFolder.getPackageFragment("").getCompilationUnit("module-info.java");
 	}
@@ -103,12 +95,13 @@ public class ContentProviderTests7 extends TestCase {
 		provider.setIsFlatLayout(isFlatLayout);
 		return provider.getChildren(src);
 	}
-	
+
 	private void assertResults(Object[][] actual, Object[] expectedSrcFolderChildren, Object[] expectedDefaultPkgChildren) {
 		assertTrue("Wrong children found for source folder", compareArrays(actual[0], expectedSrcFolderChildren));
 		assertTrue("Wrong children found for default package", compareArrays(actual[1], expectedDefaultPkgChildren));//$NON-NLS-1$
 	}
 
+	@Test
 	public void testModule1EmptyHierarchical() throws Exception {
 		Object[][] actualResult= runTest(false, false, false);
 		Object[] expectedChildren= new Object[] {
@@ -118,6 +111,7 @@ public class ContentProviderTests7 extends TestCase {
 		assertResults(actualResult, expectedChildren, NO_CHILDREN);
 	}
 
+	@Test
 	public void testModule1Hierarchical() throws Exception {
 		Object[][] actualResult= runTest(false, false, true);
 		Object[] expectedChildren= new Object[]{
@@ -127,6 +121,7 @@ public class ContentProviderTests7 extends TestCase {
 		assertResults(actualResult, expectedChildren, NO_CHILDREN);
 	}
 
+	@Test
 	public void testModule1EmptyFlat() throws Exception {
 		Object[][] actualResult= runTest(false, true, false);
 		Object[] expectedChildren= new Object[] {
@@ -136,7 +131,8 @@ public class ContentProviderTests7 extends TestCase {
 		};
 		assertResults(actualResult, expectedChildren, NO_CHILDREN);
 	}
-	
+
+	@Test
 	public void testModule1Flat() throws Exception {
 		Object[][] actualResult= runTest(false, true, true);
 		Object[] expectedChildren= new Object[] {
@@ -147,6 +143,7 @@ public class ContentProviderTests7 extends TestCase {
 		assertResults(actualResult, expectedChildren, NO_CHILDREN);
 	}
 
+	@Test
 	public void testModule2EmptyHierarchical() throws Exception {
 		Object[][] actualResult= runTest(true, false, false);
 		createEmptyClass(fSrcFolder.getPackageFragment(""), "DefC", null);
@@ -158,6 +155,7 @@ public class ContentProviderTests7 extends TestCase {
 		assertResults(actualResult, expectedChildren, new Object[] {fSrcFolder.getPackageFragment("").getCompilationUnit("DefC.java") } );
 	}
 
+	@Test
 	public void testModule2Hierarchical() throws Exception {
 		Object[][] actualResult= runTest(true, false, true);
 		Object[] expectedChildren= new Object[] {
@@ -167,7 +165,8 @@ public class ContentProviderTests7 extends TestCase {
 		};
 		assertResults(actualResult, expectedChildren, new Object[] {fSrcFolder.getPackageFragment("").getCompilationUnit("DefC.java") } );
 	}
-	
+
+	@Test
 	public void testModule2EmptyFlat() throws Exception {
 		Object[][] actualResult= runTest(true, true, false);
 		Object[] expectedChildren= new Object[] {
@@ -179,6 +178,7 @@ public class ContentProviderTests7 extends TestCase {
 		assertResults(actualResult, expectedChildren, new Object[] {fSrcFolder.getPackageFragment("").getCompilationUnit("DefC.java") } );
 	}
 
+	@Test
 	public void testModule2Flat() throws Exception {
 		Object[][] actualResult= runTest(true, true, true);
 		Object[] expectedChildren= new Object[] {
@@ -193,9 +193,8 @@ public class ContentProviderTests7 extends TestCase {
 	/*
 	 * @see TestCase#setUp()
 	 */
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
+	@Before
+	public void setUp() throws Exception {
 		fJProject= JavaProjectHelper.createJavaProject("TestProject", "bin");//$NON-NLS-1$//$NON-NLS-2$
 		assertNotNull("project null", fJProject);//$NON-NLS-1$
 		IPath[] rtJarPath= JavaProjectHelper.findRtJar(JavaProjectHelper.RT_STUBS_9);
@@ -251,9 +250,8 @@ public class ContentProviderTests7 extends TestCase {
 	/**
 	 * @see TestCase#tearDown()
 	 */
-	@Override
-	protected void tearDown() throws Exception {
-		super.tearDown();
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJProject);
 	}
 }

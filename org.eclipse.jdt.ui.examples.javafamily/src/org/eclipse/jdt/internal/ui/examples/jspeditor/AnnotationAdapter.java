@@ -21,21 +21,21 @@ import org.eclipse.jface.text.source.Annotation;
 
 /**
  * Adapts a temporary or persitent annotation to a reconcile result.
- * 
+ *
  * @since 3.0
  */
 public abstract class AnnotationAdapter implements IReconcileResult {
 
 	/**
 	 * Creates and returns the annotation adapted by this adapter.
-	 * 
+	 *
 	 * @return an annotation (can be temporary or persistent)
 	 */
 	public abstract Annotation createAnnotation();
-	
+
 	/**
 	 * The position of the annotation adapted by this adapter.
-	 * 
+	 *
 	 * @return the position
 	 */
 	public abstract Position getPosition();

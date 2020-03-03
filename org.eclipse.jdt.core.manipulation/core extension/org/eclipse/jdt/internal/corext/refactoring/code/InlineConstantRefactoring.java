@@ -279,7 +279,7 @@ public class InlineConstantRefactoring extends Refactoring {
 							fNewLocationCuRewrite.getImportRemover().registerAddedImports(typeArgument);
 							typeArgsRewrite.insertLast(typeArgument, null);
 						}
-						
+
 						if (invocation instanceof MethodInvocation) {
 							MethodInvocation methodInvocation= (MethodInvocation) invocation;
 							Expression expression= methodInvocation.getExpression();
@@ -514,7 +514,7 @@ public class InlineConstantRefactoring extends Refactoring {
 				return;
 
 			TextEditGroup msg= fCuRewrite.createGroupDescription(RefactoringCoreMessages.InlineConstantRefactoring_Inline);
-			
+
 			Expression newReference;
 			boolean isStringPlaceholder= false;
 
@@ -532,7 +532,7 @@ public class InlineConstantRefactoring extends Refactoring {
 				ImportRewriteContext context= new ContextSensitiveImportRewriteContext(reference, fCuRewrite.getImportRewrite());
 				cast.setType(fCuRewrite.getImportRewrite().addImport(explicitCast, ast, context, TypeLocation.CAST));
 				newReference= cast;
-				
+
 			} else if (fInitializer instanceof ArrayInitializer) {
 				ArrayCreation arrayCreation= ast.newArrayCreation();
 				ArrayType arrayType= (ArrayType) ASTNodeFactory.newType(ast, fOriginalDeclaration);
@@ -547,7 +547,7 @@ public class InlineConstantRefactoring extends Refactoring {
 				ImportRewriteContext context= new ContextSensitiveImportRewriteContext(reference, fCuRewrite.getImportRewrite());
 				fCuRewrite.getImportRewrite().addImport(typeToAddToImport, context);
 				fCuRewrite.getImportRemover().registerAddedImport(typeToAddToImport.getName());
-				
+
 			} else {
 				newReference= (Expression) fCuRewrite.getASTRewrite().createStringPlaceholder(modifiedInitializer, reference.getNodeType());
 				isStringPlaceholder= true;
@@ -652,7 +652,7 @@ public class InlineConstantRefactoring extends Refactoring {
 
 	/**
 	 * Creates a new inline constant refactoring.
-	 * 
+	 *
 	 * @param unit the compilation unit, or <code>null</code> if invoked by scripting
 	 * @param node the compilation unit node, or <code>null</code> if invoked by scripting
 	 * @param selectionStart the start of the selection
