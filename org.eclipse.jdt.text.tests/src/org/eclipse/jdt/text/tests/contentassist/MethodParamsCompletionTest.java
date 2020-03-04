@@ -94,4 +94,14 @@ public class MethodParamsCompletionTest extends AbstractCompletionTest {
 		typeAndVerify(",", "fList.add(arg0, |arg1|);");
 	}
 
+	public void testDontExitWithUnblancedParenthesis() throws Exception {
+		assertMethodBodyProposal("fList.|", "add(O", "fList.add(|arg0|)");
+		typeAndVerify("(1 + \")\" + 2)", "fList.add((1 + \")\" + 2)|)");
+	}
+
+	public void testDontExitWithUnblancedParenthesis_voidReturn() throws Exception {
+		assertMethodBodyProposal("fList.|", "add(int", "fList.add(|arg0|, arg1);");
+		typeAndVerify(",(1 + 2)", "fList.add(arg0, (1 + 2)|);");
+	}
+
 }

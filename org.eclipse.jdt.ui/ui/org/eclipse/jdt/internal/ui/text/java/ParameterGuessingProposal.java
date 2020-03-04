@@ -175,13 +175,8 @@ public class ParameterGuessingProposal extends JavaMethodCompletionProposal {
 								}
 							}
 						} else if (event.character == ')') {
-							try {
-								ITypedRegion partition= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, offset2 + length, false);
-								if (!IDocument.DEFAULT_CONTENT_TYPE.equals(partition.getType())) {
-									return null;
-								}
-							} catch (BadLocationException e) {
-								// continue; not serious enough to log
+							if (!canExitLinkedMode(ui, document, offset2, length)) {
+								return null;
 							}
 							if (exitChar != ')') {
 								// exit from link mode when user is in the last ')' position.
@@ -212,6 +207,46 @@ public class ParameterGuessingProposal extends JavaMethodCompletionProposal {
 			JavaPlugin.log(e);
 			openErrorDialog(e);
 		}
+	}
+
+	private boolean canExitLinkedMode(LinkedModeUI ui, IDocument document, int offset, int length) {
+		try {
+			int selectionEnd= offset + length;
+			ITypedRegion partition= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, selectionEnd, false);
+			if (!IDocument.DEFAULT_CONTENT_TYPE.equals(partition.getType())) {
+				return false;
+			}
+
+			IRegion argumentRegion= ui.getSelectedRegion();
+
+			int openParens= 0;
+			int pos= argumentRegion.getOffset();
+			while (pos < selectionEnd) {
+				ITypedRegion p= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, pos, false);
+				int end= p.getOffset() + p.getLength();
+				if (IDocument.DEFAULT_CONTENT_TYPE.equals(p.getType())) { // don't count parenthesis in strings, comments, etc.
+					String argumentTextFromPartition= document.get(pos, Math.min(selectionEnd, end) - pos);
+					for (int i= 0; i < argumentTextFromPartition.length(); i++) {
+						char c= argumentTextFromPartition.charAt(i);
+						if (c == '(') {
+							openParens++;
+						} else if (c == ')') {
+							openParens--;
+						}
+					}
+				}
+
+				pos= end;
+			}
+
+			if (openParens > 0) {
+				return false;
+			}
+
+		} catch (BadLocationException e) {
+			// continue; not serious enough to log
+		}
+		return true;
 	}
 
 	/*
@@ -308,7 +343,7 @@ public class ParameterGuessingProposal extends JavaMethodCompletionProposal {
 	 * Returns the currently active java editor, or <code>null</code> if it
 	 * cannot be determined.
 	 *
-	 * @return  the currently active java editor, or <code>null</code>
+	 * @return the currently active java editor, or <code>null</code>
 	 */
 	private JavaEditor getJavaEditor() {
 		IEditorPart part= JavaPlugin.getActivePage().getActiveEditor();
