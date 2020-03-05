@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.Status;
 
 import org.eclipse.text.edits.DeleteEdit;
 import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
 
@@ -37,7 +38,9 @@ import org.eclipse.ltk.core.refactoring.GroupCategory;
 import org.eclipse.ltk.core.refactoring.GroupCategorySet;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
 import org.eclipse.jdt.internal.corext.refactoring.util.TextEditUtil;
@@ -83,7 +86,26 @@ public class CodeFormatFix implements ICleanUpFix {
 				if (!TextEditUtil.isPacked(formatEdit)) {
 					formatEdit= TextEditUtil.flatten(formatEdit);
 				}
-
+				if (removeTrailingWhitespacesAll || removeTrailingWhitespacesIgnorEmpty) {
+					// look for inserted javadoc comments that end with a space and remove trailing space
+					Map<String, String> settings= DefaultCodeFormatterConstants.getJavaConventionsSettings();
+					if (JavaCore.INSERT.equals(settings.get(DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_EMPTY_LINE_BEFORE_ROOT_TAGS))
+							|| JavaCore.INSERT.equals(settings.get(DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_EMPTY_LINE_BETWEEN_DIFFERENT_TAGS))) {
+						if (edit instanceof MultiTextEdit) {
+							TextEdit[] edits= edit.getChildren();
+							if (trimInsertedJavadocComments(edits)) {
+								edit.removeChildren();
+								edit.addChildren(edits);
+							}
+						} else if (edit instanceof ReplaceEdit) {
+							TextEdit[] edits= new TextEdit[] { edit };
+							if (trimInsertedJavadocComments(edits)) {
+								formatEdit.removeChild(edit);
+								formatEdit.addChild(edits[0]);
+							}
+						}
+					}
+				}
 				String label= MultiFixMessages.CodeFormatFix_description;
 				CategorizedTextEditGroup group= new CategorizedTextEditGroup(label, new GroupCategorySet(new GroupCategory(label, label, label)));
 				group.addTextEdit(edit);
@@ -91,6 +113,7 @@ public class CodeFormatFix implements ICleanUpFix {
 				groups.add(group);
 			}
 		}
+
 
 		MultiTextEdit otherEdit= new MultiTextEdit();
 		if ((removeTrailingWhitespacesAll || removeTrailingWhitespacesIgnorEmpty || correctIndentation)) {
@@ -188,6 +211,23 @@ public class CodeFormatFix implements ICleanUpFix {
 		}
 
 		return new CodeFormatFix(change);
+	}
+
+	private static boolean trimInsertedJavadocComments(TextEdit[] edits) {
+		boolean modified= false;
+		for (int i= 0; i < edits.length; ++i) {
+			if (edits[i] instanceof ReplaceEdit) {
+				ReplaceEdit replaceEdit= (ReplaceEdit)edits[i];
+				String text= replaceEdit.getText();
+				if (text.length() > 1 &&
+						Character.isWhitespace(text.charAt(0)) &&
+						text.endsWith("* ")) { //$NON-NLS-1$
+					edits[i]= new ReplaceEdit(replaceEdit.getOffset(), replaceEdit.getLength(), replaceEdit.getText().substring(1));
+					modified= true;
+				}
+			}
+		}
+		return modified;
 	}
 
 	/**
