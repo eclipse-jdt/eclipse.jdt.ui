@@ -315,11 +315,8 @@ public class JavaCorrectionProcessor implements org.eclipse.jface.text.quickassi
 
 	private static void collectMarkerProposals(SimpleMarkerAnnotation annotation, Collection<IJavaCompletionProposal> proposals) {
 		IMarker marker= annotation.getMarker();
-		IMarkerResolution[] res= IDE.getMarkerHelpRegistry().getResolutions(marker);
-		if (res.length > 0) {
-			for (IMarkerResolution re : res) {
-				proposals.add(new MarkerResolutionProposal(re, marker));
-			}
+		for (IMarkerResolution resolution : IDE.getMarkerHelpRegistry().getResolutions(marker)) {
+			proposals.add(new MarkerResolutionProposal(resolution, marker));
 		}
 	}
 

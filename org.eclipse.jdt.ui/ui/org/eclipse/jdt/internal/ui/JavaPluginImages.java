@@ -21,7 +21,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.function.IntFunction;
 
 import org.osgi.framework.Bundle;
@@ -686,9 +686,8 @@ public class JavaPluginImages {
 				display = Display.getDefault();
 			}
 			fgImageRegistry= new ImageRegistry(display);
-			for (Iterator<String> iter= fgAvoidSWTErrorMap.keySet().iterator(); iter.hasNext();) {
-				String key= iter.next();
-				fgImageRegistry.put(key, fgAvoidSWTErrorMap.get(key));
+			for (Entry<String, ImageDescriptor> entry : fgAvoidSWTErrorMap.entrySet()) {
+				fgImageRegistry.put(entry.getKey(), entry.getValue());
 			}
 			fgAvoidSWTErrorMap= null;
 		}

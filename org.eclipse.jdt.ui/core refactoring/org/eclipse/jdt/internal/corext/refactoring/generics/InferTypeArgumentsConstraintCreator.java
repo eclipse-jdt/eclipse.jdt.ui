@@ -428,6 +428,7 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 		for (ConstraintVariable2 parameterTypeCv : parameterTypeCvs) {
 			if (parameterTypeCv != null) {
 				hasParameterElementCvs= true;
+				break;
 			}
 		}
 

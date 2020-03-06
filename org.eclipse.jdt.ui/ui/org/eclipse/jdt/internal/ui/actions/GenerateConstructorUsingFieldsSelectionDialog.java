@@ -367,12 +367,9 @@ public class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionD
 
 	List<?> getElementList() {
 		IStructuredSelection selection= (IStructuredSelection) getTreeViewer().getSelection();
-		List<?> elements= selection.toList();
-		ArrayList<Object> elementList= new ArrayList<>();
+		@SuppressWarnings("unchecked")
+		ArrayList<?> elementList= new ArrayList<>(selection.toList());
 
-		for (int i= 0; i < elements.size(); i++) {
-			elementList.add(elements.get(i));
-		}
 		return elementList;
 	}
 

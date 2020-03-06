@@ -369,17 +369,15 @@ public class JavaMergeViewer extends TextMergeViewer {
 				case JavaNode.CLASS:
 					// append after last class
 					children= javaContainer.getChildren();
-					if (children.length > 0) {
-						for (int i= children.length-1; i >= 0; i--) {
-							JavaNode child= (JavaNode) children[i];
-							switch (child.getTypeCode()) {
-							case JavaNode.CLASS:
-							case JavaNode.IMPORT_CONTAINER:
-							case JavaNode.PACKAGE:
-							case JavaNode.FIELD:
-								p= child.getRange();
-								return p.getOffset() + p.getLength();
-							}
+					for (int i= children.length-1; i >= 0; i--) {
+						JavaNode child= (JavaNode) children[i];
+						switch (child.getTypeCode()) {
+						case JavaNode.CLASS:
+						case JavaNode.IMPORT_CONTAINER:
+						case JavaNode.PACKAGE:
+						case JavaNode.FIELD:
+							p= child.getRange();
+							return p.getOffset() + p.getLength();
 						}
 					}
 					return javaContainer.getAppendPosition().getOffset();

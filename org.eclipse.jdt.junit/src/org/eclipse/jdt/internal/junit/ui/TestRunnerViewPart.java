@@ -422,8 +422,7 @@ public class TestRunnerViewPart extends ViewPart {
 			for (TestRunSession testRunSession : testRunSessions) {
 				JUnitCorePlugin.getModel().removeTestRunSession(testRunSession);
 			}
-			for (Iterator<TestRunSession> iter= remainingEntries.iterator(); iter.hasNext();) {
-				TestRunSession remaining= iter.next();
+			for (TestRunSession remaining : remainingEntries) {
 				remaining.swapOut();
 			}
 		}
@@ -1666,8 +1665,8 @@ action enablement
 	}
 
 	private void disposeImages() {
-		for (int i= 0; i < fImagesToDispose.size(); i++) {
-			fImagesToDispose.get(i).dispose();
+		for (Image imageToDispose : fImagesToDispose) {
+			imageToDispose.dispose();
 		}
 	}
 
@@ -2035,8 +2034,8 @@ action enablement
 		viewMenu.add(new Separator());
 
 		MenuManager layoutSubMenu= new MenuManager(JUnitMessages.TestRunnerViewPart_layout_menu);
-		for (int i = 0; i < fToggleOrientationActions.length; ++i) {
-			layoutSubMenu.add(fToggleOrientationActions[i]);
+		for (ToggleOrientationAction toggleOrientationAction : fToggleOrientationActions) {
+			layoutSubMenu.add(toggleOrientationAction);
 		}
 		viewMenu.add(layoutSubMenu);
 		viewMenu.add(new Separator());
@@ -2231,8 +2230,8 @@ action enablement
 			return;
 		boolean horizontal = orientation == VIEW_ORIENTATION_HORIZONTAL;
 		fSashForm.setOrientation(horizontal ? SWT.HORIZONTAL : SWT.VERTICAL);
-		for (int i = 0; i < fToggleOrientationActions.length; ++i)
-			fToggleOrientationActions[i].setChecked(fOrientation == fToggleOrientationActions[i].getOrientation());
+		for (ToggleOrientationAction toggleOrientationAction : fToggleOrientationActions)
+			toggleOrientationAction.setChecked(fOrientation == toggleOrientationAction.getOrientation());
 		fCurrentOrientation = orientation;
 		GridLayout layout= (GridLayout) fCounterComposite.getLayout();
 		setCounterColumns(layout);

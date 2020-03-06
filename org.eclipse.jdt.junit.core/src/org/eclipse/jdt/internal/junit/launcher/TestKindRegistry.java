@@ -18,7 +18,6 @@ package org.eclipse.jdt.internal.junit.launcher;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
@@ -70,9 +69,8 @@ public class TestKindRegistry {
 			return;
 
 		ArrayList<TestKind> items= new ArrayList<>();
-		for (Iterator<IConfigurationElement> iter= getConfigurationElements().iterator(); iter.hasNext();) {
-			IConfigurationElement element= iter.next();
-			items.add(new TestKind(element));
+		for (IConfigurationElement configurationElement : getConfigurationElements()) {
+			items.add(new TestKind(configurationElement));
 		}
 
 		Collections.sort(items, new Comparator<TestKind>() {
@@ -168,12 +166,8 @@ public class TestKindRegistry {
 
 	private ArrayList<IConfigurationElement> getConfigurationElements() {
 		ArrayList<IConfigurationElement> items= new ArrayList<>();
-		IExtension[] extensions= fPoint.getExtensions();
-		for (IExtension extension : extensions) {
-			IConfigurationElement[] elements= extension.getConfigurationElements();
-			for (IConfigurationElement element : elements) {
-				items.add(element);
-			}
+		for (IExtension extension : fPoint.getExtensions()) {
+			Collections.addAll(items, extension.getConfigurationElements());
 		}
 		return items;
 	}

@@ -698,9 +698,7 @@ public class ChangeParametersControl extends Composite {
 		}
 		res.addAll(deleted);
 		elements.clear();
-		for (ParameterInfo parameterInfo : res) {
-			elements.add(parameterInfo);
-		}
+		elements.addAll(res);
 	}
 
 	private boolean canMove(boolean up) {

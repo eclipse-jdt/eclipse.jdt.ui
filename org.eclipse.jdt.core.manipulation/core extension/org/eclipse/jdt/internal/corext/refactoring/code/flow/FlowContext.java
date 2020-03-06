@@ -15,7 +15,6 @@
 package org.eclipse.jdt.internal.corext.refactoring.code.flow;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
@@ -133,9 +132,9 @@ public class FlowContext {
 	}
 
 	boolean isExceptionCaught(ITypeBinding excpetionType) {
-		for (Iterator<List<CatchClause>> exceptions= fExceptionStack.iterator(); exceptions.hasNext(); ) {
-			for (Iterator<CatchClause> catchClauses= exceptions.next().iterator(); catchClauses.hasNext(); ) {
-				SingleVariableDeclaration caughtException= catchClauses.next().getException();
+		for (List<CatchClause> exceptions : fExceptionStack) {
+			for (CatchClause catchClause : exceptions) {
+				SingleVariableDeclaration caughtException= catchClause.getException();
 				IVariableBinding binding= caughtException.resolveBinding();
 				if (binding == null)
 					continue;

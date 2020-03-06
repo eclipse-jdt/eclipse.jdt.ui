@@ -242,8 +242,8 @@ public class CheckedTableSelectionDialog extends SelectionStatusDialog {
 		});
 
 		if (fFilters != null) {
-			for (int i= 0; i != fFilters.size(); i++)
-				fViewer.addFilter(fFilters.get(i));
+			for (ViewerFilter filter : fFilters)
+				fViewer.addFilter(filter);
 		}
 
 		fViewer.setInput(fInput);
@@ -292,8 +292,7 @@ public class CheckedTableSelectionDialog extends SelectionStatusDialog {
 		Object[] elements= fContentProvider.getElements(input);
 		if (elements.length > 0) {
 			if (fFilters != null) {
-				for (int i= 0; i < fFilters.size(); i++) {
-					ViewerFilter curr= fFilters.get(i);
+				for (ViewerFilter curr : fFilters) {
 					elements= curr.filter(fViewer, input, elements);
 				}
 			}

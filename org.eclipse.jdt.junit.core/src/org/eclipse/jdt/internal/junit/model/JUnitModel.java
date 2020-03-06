@@ -370,8 +370,7 @@ public final class JUnitModel {
 			}
 		}
 
-		for (int i= 0; i < toRemove.size(); i++) {
-			TestRunSession oldSession= toRemove.get(i);
+		for (TestRunSession oldSession : toRemove) {
 			notifyTestRunSessionRemoved(oldSession);
 		}
 		notifyTestRunSessionAdded(testRunSession);

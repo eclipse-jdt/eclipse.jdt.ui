@@ -799,8 +799,8 @@ public class TestViewer {
 		List<ITestElement> children= Arrays.asList(root.getChildren());
 		if (! showNext)
 			children= new ReverseList<>(children);
-		for (int i= 0; i < children.size(); i++) {
-			TestElement child= (TestElement) children.get(i);
+		for (ITestElement element : children) {
+			TestElement child= (TestElement) element;
 			if (child.getStatus().isErrorOrFailure()) {
 				if (child instanceof TestCaseElement) {
 					return child;

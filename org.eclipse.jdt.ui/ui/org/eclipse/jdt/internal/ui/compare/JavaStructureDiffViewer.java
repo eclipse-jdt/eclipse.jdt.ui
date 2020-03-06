@@ -119,11 +119,11 @@ class JavaStructureDiffViewer extends StructureDiffViewer implements IElementCha
 		Object o= getRoot();
 		if (o != null) {
 			Object[] children= getSortedChildren(o);
-			if (children != null && children.length > 0) {
+			if (children != null) {
 				for (Object child : children) {
 					o= child;
 					Object[] sortedChildren= getSortedChildren(o);
-					if (sortedChildren != null && sortedChildren.length > 0) {
+					if (sortedChildren != null) {
 						for (Object sortedChild : sortedChildren) {
 							o= sortedChild;
 							if (o instanceof DiffNode) {

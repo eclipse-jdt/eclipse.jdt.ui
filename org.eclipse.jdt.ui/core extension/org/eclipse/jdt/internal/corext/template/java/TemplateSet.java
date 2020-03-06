@@ -305,12 +305,7 @@ public class TemplateSet {
 	}
 
 	private boolean exists(Template template) {
-		for (Template anotherTemplate : fTemplates) {
-			if (template.equals(anotherTemplate))
-				return true;
-		}
-
-		return false;
+		return fTemplates.contains(template);
 	}
 
 	/**

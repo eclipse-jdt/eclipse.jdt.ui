@@ -16,7 +16,6 @@ package org.eclipse.jdt.internal.junit.launcher;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
@@ -145,8 +144,7 @@ public class JUnit4TestFinder implements ITestFinder {
 			new SearchEngine().search(annotationsPattern, searchParticipants, scope, requestor, new SubProgressMonitor(pm, 2));
 
 			// find all classes in the region
-			for (Iterator<IType> iterator= candidates.iterator(); iterator.hasNext();) {
-				IType curr= iterator.next();
+			for (IType curr : candidates) {
 				if (CoreTestSearchEngine.isAccessibleClass(curr) && !Flags.isAbstract(curr.getFlags()) && region.contains(curr)) {
 					result.add(curr);
 				}

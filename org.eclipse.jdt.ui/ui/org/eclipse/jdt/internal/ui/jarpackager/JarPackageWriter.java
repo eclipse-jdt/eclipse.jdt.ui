@@ -159,7 +159,7 @@ public class JarPackageWriter extends Object implements IJarDescriptionWriter {
 		refactoring.setAttribute("structuralOnly", "" + jarPackage.isExportStructuralOnly()); //$NON-NLS-1$ //$NON-NLS-2$
 		refactoring.setAttribute("deprecationInfo", "" + jarPackage.isDeprecationAware()); //$NON-NLS-1$ //$NON-NLS-2$
 		final IProject[] projects= jarPackage.getRefactoringProjects();
-		if (projects != null && projects.length > 0) {
+		if (projects != null) {
 			for (int index= 0; index < projects.length; index++)
 				refactoring.setAttribute("project" + (index + 1), projects[index].getName()); //$NON-NLS-1$
 		}
