@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -12,10 +12,6 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
-
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 
 import org.junit.Assert;
 
@@ -31,6 +27,10 @@ import org.eclipse.jdt.ui.text.IJavaPartitions;
 
 import org.eclipse.jdt.internal.ui.text.FastJavaPartitionScanner;
 import org.eclipse.jdt.internal.ui.text.java.SmartSemicolonAutoEditStrategy;
+
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 /**
  * SmartSemicolonAutoEditStrategyTest
@@ -252,6 +252,13 @@ public class SmartSemicolonAutoEditStrategyTest extends TestCase {
 		fDocument.set("  Object object=new Object();");
 		verifyBracePosition(27, 28);
 		verifyBracePosition(28, 28);
+	}
+
+	public void testBraceLambdaBlock() throws BadLocationException {
+		fDocument.set("  new Thread(() -> );");
+		verifyBracePosition(18, 18);
+		verifyBracePosition(19, 19);
+		verifyBracePosition(20, 20);
 	}
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -278,6 +278,9 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 				insertPos= computeAfterTryDoElse(document, line, offset);
 			}
 			if (insertPos == -1) {
+				insertPos= computeAfterLambdaArrow(document, line, offset, partitioning);
+			}
+			if (insertPos == -1) {
 				insertPos= computeAfterParenthesis(document, line, offset, partitioning);
 			}
 			break;
@@ -377,6 +380,31 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 				|| looksLike(doc, p, "finally")  //$NON-NLS-1$
 				|| looksLike(doc, p, "else"))  //$NON-NLS-1$
 			return p + 1 - line.getOffset();
+
+		return -1;
+	}
+
+	/**
+	 * Computes an insert position for an opening brace if <code>offset</code> maps to a position immediately after a lambda arrow.
+	 *
+	 * @param doc the document being modified
+	 * @param line the current line under investigation
+	 * @param offset the offset of the caret position, relative to the line start.
+	 * @param partitioning the document partitioning
+	 * @return an insert position relative to the line start if <code>line</code> contains a lambda arrow at or before <code>offset</code>, -1 otherwise
+	 */
+	private static int computeAfterLambdaArrow(IDocument doc, ITextSelection line, int offset, String partitioning)  {
+		int absoluteOffset= offset + line.getOffset();
+		int p= firstNonWhitespaceBackward(doc, absoluteOffset - 1, partitioning, -1);
+		if (p <= 0)
+			return -1;
+
+		try {
+			if (doc.get(p - 1, 2).equals("->")) { //$NON-NLS-1$
+				return offset;
+			}
+		} catch (BadLocationException e) {
+		}
 
 		return -1;
 	}
