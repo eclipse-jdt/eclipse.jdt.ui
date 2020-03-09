@@ -177,6 +177,11 @@ public class SmartSemicolonAutoEditStrategyTest extends TestCase {
 		verifySemicolonPosition(24, 24);
 	}
 
+	public void testSemicolonInString() throws BadLocationException {
+		fDocument.set("  new Thread(\"\")");
+		verifySemicolonPosition(14, -1);
+	}
+
 	/* brace tests */
 
 	public void testBraceClassDef() throws BadLocationException {
@@ -259,6 +264,16 @@ public class SmartSemicolonAutoEditStrategyTest extends TestCase {
 		verifyBracePosition(18, 18);
 		verifyBracePosition(19, 19);
 		verifyBracePosition(20, 20);
+	}
+
+	public void testBraceInString() throws BadLocationException {
+		fDocument.set("  new Thread(\"\")");
+		verifyBracePosition(14, 14);
+	}
+
+	public void testBraceInString2() throws BadLocationException {
+		fDocument.set("  System.out.write(\"((?\\\"{\\\\\\\"\\\\\\\":\\\"+()+\\\",\\\":\\\"ss\\\").());try {\");");
+		verifyBracePosition(50, 50);
 	}
 
 }

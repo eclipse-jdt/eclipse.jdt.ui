@@ -270,6 +270,10 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 		if (text == null)
 			return 0;
 
+		if (!isDefaultPartition(document, offset + line.getOffset(),partitioning)) {
+			return -1;
+		}
+
 		int insertPos;
 		switch (character) {
 		case BRACECHAR:
