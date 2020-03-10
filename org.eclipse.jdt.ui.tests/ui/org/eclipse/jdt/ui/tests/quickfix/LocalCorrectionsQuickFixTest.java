@@ -2458,6 +2458,108 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	@Test
+	public void testUninitializedField_2() throws Exception {
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=37872
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public final int foo;\n");
+		buf.append("    public E() {\n");
+		buf.append("    }\n");
+		buf.append("    public E(int bar) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOfProblems(2, problems);
+
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, problems[0], null);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public final int foo;\n");
+		buf.append("    public E() {\n");
+		buf.append("        this.foo = 0;\n");
+		buf.append("    }\n");
+		buf.append("    public E(int bar) {\n");
+		buf.append("        this.foo = 0;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		proposals= collectCorrections(cu, problems[1], null);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		assertEqualStringsIgnoreOrder(
+				new String[] { preview1 },
+				new String[] { expected1 });
+	}
+
+	@Test
+	public void testUninitializedField_3() throws Exception {
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=37872
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public final int foo;\n");
+		buf.append("    public E() {\n");
+		buf.append("        this(1);\n");
+		buf.append("    }\n");
+		buf.append("    public E(int bar1) {\n");
+		buf.append("    }\n");
+		buf.append("    public E(int bar1, int bar2) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOfProblems(2, problems);
+
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, problems[0], null);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public final int foo;\n");
+		buf.append("    public E() {\n");
+		buf.append("        this(1);\n");
+		buf.append("    }\n");
+		buf.append("    public E(int bar1) {\n");
+		buf.append("        this.foo = 0;\n");
+		buf.append("    }\n");
+		buf.append("    public E(int bar1, int bar2) {\n");
+		buf.append("        this.foo = 0;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		proposals= collectCorrections(cu, problems[0], null);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		assertEqualStringsIgnoreOrder(
+				new String[] { preview1 },
+				new String[] { expected1 });
+	}
+
+	@Test
 	public void testUnimplementedMethods() throws Exception {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
 		StringBuffer buf= new StringBuffer();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 IBM Corporation and others.
+ * Copyright (c) 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -200,10 +200,22 @@ public class InitializeFinalFieldProposal extends LinkedCorrectionProposal {
 
 		for (MethodDeclaration md : cv.getNodes()) {
 			Block body= md.getBody();
-			rewrite.getListRewrite(body, Block.STATEMENTS_PROPERTY).insertAt(statement, 0, null);
-			setEndPosition(rewrite.track(assignment)); // set cursor after expression statement
+			// check if we call this(), then we can't add initialization here
+			if (!hasThisCall(body)) {
+				rewrite.getListRewrite(body, Block.STATEMENTS_PROPERTY).insertAt(statement, 0, null);
+				setEndPosition(rewrite.track(assignment)); // set cursor after expression statement
+			}
 		}
 		return rewrite;
+	}
+
+	private boolean hasThisCall(Block body) {
+		for (Object object : body.statements()) {
+			if (((ASTNode) object).getNodeType() == ASTNode.CONSTRUCTOR_INVOCATION) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private boolean hasDefaultConstructor(ITypeBinding type) {
