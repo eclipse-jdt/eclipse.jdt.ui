@@ -32,6 +32,15 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="ui refactoring/org/eclipse/jdt/internal/ui/refactoring/actions/RenameJavaElementAction.java" type="org.eclipse.jdt.internal.ui.refactoring.actions.RenameJavaElementAction">
+        <filter id="640712815">
+            <message_arguments>
+                <message_argument value="IType"/>
+                <message_argument value="RenameJavaElementAction"/>
+                <message_argument value="isRecord()"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="ui refactoring/org/eclipse/jdt/internal/ui/refactoring/nls/ExternalizeWizardPage.java" type="org.eclipse.jdt.internal.ui.refactoring.nls.ExternalizeWizardPage">
         <filter id="571519004">
             <message_arguments>

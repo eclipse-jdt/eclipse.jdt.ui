@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -7,6 +7,10 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -24,8 +28,10 @@ import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
@@ -208,6 +214,19 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 		IJavaElement[] elements= SelectionConverter.codeResolve(fEditor);
 		if (elements == null || elements.length != 1)
 			return null;
+		if (elements[0].getElementType() == IJavaElement.LOCAL_VARIABLE) {
+			IJavaElement element= elements[0];
+			IJavaElement parent= element.getParent();
+			if(parent != null && parent.getElementType() == IJavaElement.FIELD) {
+				IField parentField= (IField) parent;
+				IJavaElement topParent= parent.getParent();
+				if(topParent != null && topParent.getElementType() == IJavaElement.TYPE) {
+					if (((IType)topParent).isRecord()) {
+						return parentField;
+					}
+				}
+			}
+		}
 		return elements[0];
 	}
 
