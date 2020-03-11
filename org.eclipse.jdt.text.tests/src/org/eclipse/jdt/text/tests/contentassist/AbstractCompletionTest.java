@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,13 +13,17 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.contentassist;
 
+import java.lang.reflect.Field;
 import java.util.Hashtable;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 import org.eclipse.jdt.text.tests.performance.EditorTestHelper;
 
+import org.eclipse.swt.custom.VerifyKeyListener;
+import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Event;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -33,6 +37,8 @@ import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.TextSelection;
+import org.eclipse.jface.text.TextViewer;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension;
@@ -327,23 +333,54 @@ public class AbstractCompletionTest extends TestCase {
 	}
 
 	private void assertProposal(String selector, StringBuffer contents, IRegion preSelection, StringBuffer result, IRegion expectedSelection) throws CoreException {
+		if (fEditor != null) {
+			EditorTestHelper.closeEditor(fEditor);
+		}
+
 		fCU= createCU(getAnonymousTestPackage(), contents.toString());
 		fEditor= (JavaEditor) EditorUtility.openInEditor(fCU);
-		IDocument doc;
-		ITextSelection postSelection;
-		try {
-			ICompletionProposal proposal= findNonNullProposal(selector, preSelection);
-			doc= fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
-			apply(fEditor, doc, proposal, preSelection);
-			postSelection= (ITextSelection) fEditor.getSelectionProvider().getSelection();
-		} finally {
-			EditorTestHelper.closeEditor(fEditor);
-			fEditor= null;
-		}
+
+		ICompletionProposal proposal= findNonNullProposal(selector, preSelection);
+		IDocument doc= fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
+		apply(fEditor, doc, proposal, preSelection);
+		ITextSelection postSelection= (ITextSelection) fEditor.getSelectionProvider().getSelection();
 
 		assertEquals(result.toString(), doc.get());
 		assertEquals(expectedSelection.getOffset(), postSelection.getOffset());
 		assertEquals(expectedSelection.getLength(), postSelection.getLength());
+	}
+
+	protected void typeAndVerify(String typedText, String expectedResult) throws Exception {
+		StringBuffer expected= new StringBuffer();
+		IRegion expectedSelection= assembleMethodBodyTestCUExtractSelection(expected, expectedResult, fAfterImports);
+
+		IDocument document= fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
+		Field declaredField= TextViewer.class.getDeclaredField("fVerifyKeyListenersManager");
+		declaredField.setAccessible(true);
+		VerifyKeyListener verifyKeyListeners= (VerifyKeyListener) declaredField.get(fEditor.getViewer());
+
+		for (char c : typedText.toCharArray()) {
+			Event event= new Event();
+			event.widget= fEditor.getViewer().getTextWidget();
+			VerifyEvent e= new VerifyEvent(event);
+			e.character= c;
+			e.doit= true;
+
+			verifyKeyListeners.verifyKey(e);
+
+			if (!e.doit)
+				continue;
+
+			ITextSelection selection= (ITextSelection) fEditor.getSelectionProvider().getSelection();
+
+			document.replace(selection.getOffset(), selection.getLength(), String.valueOf(c));
+			fEditor.getSelectionProvider().setSelection(new TextSelection(selection.getOffset() + 1, 0));
+		}
+
+		assertEquals(expected.toString(), document.get());
+		ITextSelection actualSelection= (ITextSelection) fEditor.getSelectionProvider().getSelection();
+		assertEquals(expectedSelection.getOffset(), actualSelection.getOffset());
+		assertEquals(expectedSelection.getLength(), actualSelection.getLength());
 	}
 
 	private void assertIncrementalCompletion(StringBuffer contents, IRegion preSelection, StringBuffer result, IRegion expectedSelection) throws CoreException {

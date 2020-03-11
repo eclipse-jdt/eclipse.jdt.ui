@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2013 IBM Corporation and others.
+ * Copyright (c) 2005, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,10 +13,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.contentassist;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
-
-import org.eclipse.jdt.ui.PreferenceConstants;
 
 /**
  *
@@ -67,6 +67,31 @@ public class MethodParamsCompletionTest extends AbstractCompletionTest {
 	public void testOverwriteMethodWithParam2() throws Exception {
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_INSERT_COMPLETION, false);
 		assertMethodBodyProposal("fList.|bar", "add(int", "fList.add(|arg0|, arg1);");
+	}
+
+	public void testParenthesisExits() throws Exception {
+		assertMethodBodyProposal("fList.|", "add(O", "fList.add(|arg0|)");
+		typeAndVerify(")", "fList.add(arg0)|");
+	}
+
+	public void testParenthesisExits_voidReturn() throws Exception {
+		assertMethodBodyProposal("fList.|", "add(int", "fList.add(|arg0|, arg1);");
+		typeAndVerify(",)", "fList.add(arg0, arg1);|");
+	}
+
+	public void testDontExitFromStringLiteral() throws Exception {
+		assertMethodBodyProposal("fList.|", "add(O", "fList.add(|arg0|)");
+		typeAndVerify("\")\"", "fList.add(\")\"|)");
+	}
+
+	public void testDontExitFromStringLiteral_voidReturn() throws Exception {
+		assertMethodBodyProposal("fList.|", "add(int", "fList.add(|arg0|, arg1);");
+		typeAndVerify(",\")\"", "fList.add(arg0, \")\"|);");
+	}
+
+	public void testCommaSkipsToNextArg() throws Exception {
+		assertMethodBodyProposal("fList.|", "add(int", "fList.add(|arg0|, arg1);");
+		typeAndVerify(",", "fList.add(arg0, |arg1|);");
 	}
 
 }

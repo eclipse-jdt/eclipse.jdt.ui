@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -174,11 +174,21 @@ public class ParameterGuessingProposal extends JavaMethodCompletionProposal {
 									}
 								}
 							}
-						} else if (event.character == ')' && exitChar != ')') {
-							// exit from link mode when user is in the last ')' position.
-							Position position= fPositions[fPositions.length - 1];
-							if (position.offset <= offset2 && offset2 + length <= position.offset + position.length) {
-								return new ExitFlags(ILinkedModeListener.UPDATE_CARET, false);
+						} else if (event.character == ')') {
+							try {
+								ITypedRegion partition= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, offset2 + length, false);
+								if (!IDocument.DEFAULT_CONTENT_TYPE.equals(partition.getType())) {
+									return null;
+								}
+							} catch (BadLocationException e) {
+								// continue; not serious enough to log
+							}
+							if (exitChar != ')') {
+								// exit from link mode when user is in the last ')' position.
+								Position position= fPositions[fPositions.length - 1];
+								if (position.offset <= offset2 && offset2 + length <= position.offset + position.length) {
+									return new ExitFlags(ILinkedModeListener.UPDATE_CARET, false);
+								}
 							}
 						}
 						return super.doExit(model2, event, offset2, length);
