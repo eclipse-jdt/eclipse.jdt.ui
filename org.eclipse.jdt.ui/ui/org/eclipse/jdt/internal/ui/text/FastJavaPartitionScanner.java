@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -468,6 +468,7 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaPa
 		 						if (!fjPartitioner.hasPreviewEnabledValueChanged()) {
 				 					ITypedRegion originalPartition= TextUtilities.getPartition(fCurrentDocument, IJavaPartitions.JAVA_PARTITIONING, fTokenOffset, false);
 									ITypedRegion startingPartition= TextUtilities.getPartition(fCurrentDocument, IJavaPartitions.JAVA_PARTITIONING, fTokenOffset+ fTokenLength+2, false);
+									fjPartitioner.resetPositionCache();
 									if (!originalPartition.equals(startingPartition)) {
 										String startingType= startingPartition.getType();
 										if (IJavaPartitions.JAVA_MULTI_LINE_STRING.equals(startingType)) {
