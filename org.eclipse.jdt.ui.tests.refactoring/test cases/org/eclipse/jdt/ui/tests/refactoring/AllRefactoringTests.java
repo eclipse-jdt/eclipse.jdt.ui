@@ -100,7 +100,7 @@ public class AllRefactoringTests {
 		//--fields
 		suite.addTest(RenamePrivateFieldTests.suite());
 		suite.addTest(RenameNonPrivateFieldTests.suite());
-		suite.addTest(RenameRecordComponentFieldTests.suite());
+		suite.addTest(RenameRecordElementsTests.suite());
 
 		//--initializers
 		suite.addTest(MoveInitializerTests.suite());

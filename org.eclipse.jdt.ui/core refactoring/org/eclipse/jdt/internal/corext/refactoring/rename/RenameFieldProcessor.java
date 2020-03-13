@@ -507,6 +507,13 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 				pm.worked(1);
 			}
 
+			if (getAccessor() != null && fIsRecordComponent){
+				result.merge(checkAccessor(new SubProgressMonitor(pm, 1), getAccessor(), getNewElementName()));
+				result.merge(Checks.checkIfConstructorName(getAccessor(), getNewElementName(), fField.getDeclaringType().getElementName()));
+			} else {
+				pm.worked(1);
+			}
+
 			result.merge(createChanges(new SubProgressMonitor(pm, 10)));
 			if (result.hasFatalError())
 				return result;

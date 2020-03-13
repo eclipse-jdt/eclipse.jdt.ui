@@ -1,5 +1,5 @@
 package p;
-class B(){
+class B{
 
 	public int val() {
 		A a= new A(10);
