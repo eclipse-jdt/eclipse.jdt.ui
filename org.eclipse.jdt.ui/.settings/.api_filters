@@ -235,6 +235,24 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="ui/org/eclipse/jdt/internal/ui/text/correction/proposals/InitializeFinalFieldProposal.java" type="org.eclipse.jdt.internal.ui.text.correction.proposals.InitializeFinalFieldProposal">
+        <filter id="640712815">
+            <message_arguments>
+                <message_argument value="AbstractTypeDeclaration"/>
+                <message_argument value="InitializeFinalFieldProposal"/>
+                <message_argument value="getName()"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="ui/org/eclipse/jdt/internal/ui/text/correction/proposals/InitializeFinalFieldProposal.java" type="org.eclipse.jdt.internal.ui.text.correction.proposals.InitializeFinalFieldProposal$RecordComponentVisitor">
+        <filter id="640712815">
+            <message_arguments>
+                <message_argument value="RecordDeclaration"/>
+                <message_argument value="RecordComponentVisitor"/>
+                <message_argument value="recordComponents()"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="ui/org/eclipse/jdt/internal/ui/util/ViewerPane.java" type="org.eclipse.jdt.internal.ui.util.ViewerPane">
         <filter id="571473929">
             <message_arguments>
