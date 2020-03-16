@@ -45,9 +45,9 @@ import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.text.Chain;
 import org.eclipse.jdt.internal.ui.text.ChainElement;
+import org.eclipse.jdt.internal.ui.text.ChainElementAnalyzer;
 import org.eclipse.jdt.internal.ui.text.ChainFinder;
 import org.eclipse.jdt.internal.ui.text.ChainType;
-import org.eclipse.jdt.internal.ui.text.ChainElementAnalyzer;
 import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateProposal;
 
 public class ChainCompletionProposalComputer implements IJavaCompletionProposalComputer {
@@ -97,6 +97,10 @@ public class ChainCompletionProposalComputer implements IJavaCompletionProposalC
 	}
 
 	private boolean shouldPerformCompletionOnExpectedType() {
+		if (ctx.getCoreContext() == null) {
+			return false;
+		}
+
 		AST ast;
 		CompilationUnit cuNode= SharedASTProviderCore.getAST(ctx.getCompilationUnit(), SharedASTProviderCore.WAIT_NO, null);
 		if (cuNode != null) {
