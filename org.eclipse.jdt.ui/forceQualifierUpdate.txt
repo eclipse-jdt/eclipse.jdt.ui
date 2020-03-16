@@ -2,3 +2,4 @@
 Bug 509973 - Comparator errors in I20170105-0320
 Bug 530709 - Comparator errors in jdt debug and jdt ui in I20180204-2000
 Adopt changed return type of JavaManipulation.setPreferenceNodeId(String) (bug 506239)
+Bug 561135 - Comparator errors due to lambda generation order in build I20200315-2240
