@@ -218,7 +218,7 @@ public class CodeFormatFix implements ICleanUpFix {
 				ReplaceEdit replaceEdit= (ReplaceEdit)edits[i];
 				String text= replaceEdit.getText();
 				if (text.length() > 1 &&
-						Character.isWhitespace(text.charAt(0)) &&
+						(text.charAt(0) == ' ' || text.charAt(0) == '\t') &&
 						text.endsWith("* ")) { //$NON-NLS-1$
 					edits[i]= new ReplaceEdit(replaceEdit.getOffset(), replaceEdit.getLength(), replaceEdit.getText().substring(1));
 					modified= true;
