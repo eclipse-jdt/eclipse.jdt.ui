@@ -7,10 +7,6 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
- * This is an implementation of an early-draft specification developed under the Java
- * Community Process (JCP) and is made available for testing and evaluation purposes
- * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -29,7 +25,7 @@ public class ASTHelper {
 			case ASTNode.YIELD_STATEMENT:
 				return ast.apiLevel() >= AST.JLS14;
 			case ASTNode.TEXT_BLOCK:
-			case ASTNode.RECORD_DECLARATION:	
+			case ASTNode.RECORD_DECLARATION:
 				return ast.isPreviewEnabled();
 		}
 		return true;
@@ -50,7 +46,7 @@ public class ASTHelper {
 	public static boolean isSwitchCaseExpressionsSupportedInAST(AST ast) {
 		return isNodeTypeSupportedInAST(ast, ASTNode.SWITCH_CASE);
 	}
-	
+
 	public static boolean isRecordDeclarationNodeSupportedInAST(AST ast) {
 		return isNodeTypeSupportedInAST(ast, ASTNode.RECORD_DECLARATION);
 	}

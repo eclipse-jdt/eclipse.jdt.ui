@@ -8,10 +8,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
- * This is an implementation of an early-draft specification developed under the Java
- * Community Process (JCP) and is made available for testing and evaluation purposes
- * only. The code is not compatible with any specification of the JCP.
- *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Matt Chapman, mpchapman@gmail.com - 89977 Make JDT .java agnostic
@@ -604,7 +600,7 @@ public class JavaElementImageProvider {
 		else
 			return JavaPluginImages.DESC_OBJS_ANNOTATION_DEFAULT;
 	}
-	
+
 	private static ImageDescriptor getInnerRecordImageDescriptor(boolean isInInterfaceOrAnnotation, int flags) {
 		if (Flags.isPublic(flags) || isInInterfaceOrAnnotation)
 			return JavaPluginImages.DESC_OBJS_RECORD;

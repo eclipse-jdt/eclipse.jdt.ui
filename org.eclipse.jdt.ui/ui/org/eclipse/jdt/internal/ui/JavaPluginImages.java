@@ -8,10 +8,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
- * This is an implementation of an early-draft specification developed under the Java
- * Community Process (JCP) and is made available for testing and evaluation purposes
- * only. The code is not compatible with any specification of the JCP.
- *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 83258 [jar exporter] Deploy java application as executable jar
@@ -307,7 +303,7 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OBJS_RECORD_PROTECTED= createManagedFromKey(T_OBJ, IMG_OBJS_RECORD_PROTECTED);
 	public static final ImageDescriptor DESC_OBJS_RECORD_PRIVATE= createManagedFromKey(T_OBJ, IMG_OBJS_RECORD_PRIVATE);
 	public static final ImageDescriptor DESC_OBJS_RECORD_ALT= createManagedFromKey(T_OBJ, IMG_OBJS_RECORD_ALT);
-	
+
 	public static final ImageDescriptor DESC_OBJS_JAR= createManagedFromKey(T_OBJ, IMG_OBJS_JAR);
 	public static final ImageDescriptor DESC_OBJS_JAR_TEST= createManagedFromKey(T_OBJ, IMG_OBJS_JAR_TEST);
 	public static final ImageDescriptor DESC_OBJS_EXTJAR= createManagedFromKey(T_OBJ, IMG_OBJS_EXTJAR);

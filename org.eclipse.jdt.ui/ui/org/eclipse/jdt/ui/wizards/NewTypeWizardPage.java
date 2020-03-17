@@ -8,10 +8,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
- * This is an implementation of an early-draft specification developed under the Java
- * Community Process (JCP) and is made available for testing and evaluation purposes
- * only. The code is not compatible with any specification of the JCP.
- *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     John Kaplan, johnkaplantech@gmail.com - 108071 [code templates] template for body of newly created class
@@ -122,6 +118,7 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
+import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 import org.eclipse.jdt.internal.corext.codemanipulation.AddUnimplementedConstructorsOperation;
@@ -157,9 +154,6 @@ import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaPackageCompleti
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.PreviewFeaturesSubProcessor;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
-
-import org.eclipse.jdt.internal.core.manipulation.StubUtility;
-
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.SuperInterfaceSelectionDialog;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -453,7 +447,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 
 	/**
 	 * Constant to signal that the created type is an record.
-	 * @since 3.21 BETA_JAVA14
+	 * @since 3.21
 	 * @noreference This field is not intended to be referenced by clients.
 	 */
 	public static final int RECORD_TYPE = 5;

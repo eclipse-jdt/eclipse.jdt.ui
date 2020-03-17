@@ -8,10 +8,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
- * This is an implementation of an early-draft specification developed under the Java
- * Community Process (JCP) and is made available for testing and evaluation purposes
- * only. The code is not compatible with any specification of the JCP.
- * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Andre Soereng <andreis@fast.no> - [syntax highlighting] highlight numbers - https://bugs.eclipse.org/bugs/show_bug.cgi?id=63573
@@ -220,7 +216,7 @@ public class SemanticHighlightings {
 	 * A named preference part that controls the highlighting of 'record' keywords.
 	 */
 	public static final String RECORD_KEYWORD= SemanticHighlightingsCore.RECORD_KEYWORD;
-	
+
 	/**
 	 * Semantic highlightings
 	 */
@@ -2021,7 +2017,7 @@ public class SemanticHighlightings {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Semantic highlighting for 'yield' keyword.
 	 */

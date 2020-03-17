@@ -8,10 +8,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
- * This is an implementation of an early-draft specification developed under the Java
- * Community Process (JCP) and is made available for testing and evaluation purposes
- * only. The code is not compatible with any specification of the JCP.
- *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -67,6 +63,7 @@ import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
@@ -102,7 +99,6 @@ import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
 import org.eclipse.jdt.ui.refactoring.RefactoringSaveHelper;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 public abstract class RenameMethodProcessor extends JavaRenameProcessor implements IReferenceUpdating, IDelegateUpdating {
 
@@ -202,8 +198,8 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		return result;
 	}
 
-	
-	
+
+
 	@Override
 	protected IFile[] getChangedFiles() throws CoreException {
 		return ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits());

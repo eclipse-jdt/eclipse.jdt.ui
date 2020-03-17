@@ -7,10 +7,6 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
- * This is an implementation of an early-draft specification developed under the Java
- * Community Process (JCP) and is made available for testing and evaluation purposes
- * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -1338,7 +1334,7 @@ public class ASTFlattener extends GenericVisitor {
 		this.fBuffer.append("record ");//$NON-NLS-1$
 		node.getName().accept(this);
 		this.fBuffer.append(" ");//$NON-NLS-1$
-		
+
 		if (!node.typeParameters().isEmpty()) {
 			this.fBuffer.append("<");//$NON-NLS-1$
 			for (Iterator<TypeParameter> it = node.typeParameters().iterator(); it.hasNext(); ) {

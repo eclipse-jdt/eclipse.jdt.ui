@@ -8,10 +8,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
- * This is an implementation of an early-draft specification developed under the Java
- * Community Process (JCP) and is made available for testing and evaluation purposes
- * only. The code is not compatible with any specification of the JCP.
- *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     John Kaplan, johnkaplantech@gmail.com - 108071 [code templates] template for body of newly created class
@@ -43,6 +39,8 @@ import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.text.edits.DeleteEdit;
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.templates.TemplatePersistenceData;
+import org.eclipse.text.templates.TemplateStoreCore;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -51,8 +49,6 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateBuffer;
 import org.eclipse.jface.text.templates.TemplateException;
-import org.eclipse.text.templates.TemplatePersistenceData;
-import org.eclipse.text.templates.TemplateStoreCore;
 import org.eclipse.jface.text.templates.TemplateVariable;
 
 import org.eclipse.jdt.core.Flags;
@@ -106,11 +102,10 @@ import org.eclipse.jdt.core.manipulation.CodeGeneration;
 import org.eclipse.jdt.core.manipulation.CodeStyleConfiguration;
 import org.eclipse.jdt.core.manipulation.JavaManipulation;
 
-import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.core.manipulation.util.Strings;
-
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 
 /**
