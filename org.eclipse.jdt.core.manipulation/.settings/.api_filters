@@ -7,6 +7,12 @@
                 <message_argument value="1.13.0"/>
             </message_arguments>
         </filter>
+        <filter comment="This is for Java14 work" id="924844039">
+            <message_arguments>
+                <message_argument value="1.13.150"/>
+                <message_argument value="1.13.100"/>
+            </message_arguments>
+        </filter>
     </resource>
     <resource path="common/org/eclipse/jdt/core/manipulation/ImportReferencesCollector.java" type="org.eclipse.jdt.core.manipulation.ImportReferencesCollector">
         <filter comment="For Java 13 Enable Preview support" id="640712815">
@@ -171,9 +177,6 @@
                 <message_argument value="visit(YieldStatement)"/>
             </message_arguments>
         </filter>
-    </resource>
-    <resource path="core extension/org/eclipse/jdt/internal/corext/dom/LinkedNodeFinder.java">
-        <filter id="0"/>
     </resource>
     <resource path="core extension/org/eclipse/jdt/internal/corext/dom/LinkedNodeFinder.java" type="org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder">
         <filter id="640712815">
