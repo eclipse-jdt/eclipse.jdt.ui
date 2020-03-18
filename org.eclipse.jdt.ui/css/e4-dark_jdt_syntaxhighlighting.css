@@ -95,6 +95,8 @@ IEclipsePreferences#org-eclipse-jdt-ui:org-eclipse-jdt-ui { /* pseudo attribute 
 		'semanticHighlighting.typeParameter.enabled=true'
 		'semanticHighlighting.typeParameter.bold=false'
 		'semanticHighlighting.varKeyword.color=204,120,50'
+		'semanticHighlighting.yieldKeyword.color=204,120,50'
+		'semanticHighlighting.recordKeyword.color=204,120,50'
 		'sourceHoverBackgroundColor=68,68,68'
 }
 
