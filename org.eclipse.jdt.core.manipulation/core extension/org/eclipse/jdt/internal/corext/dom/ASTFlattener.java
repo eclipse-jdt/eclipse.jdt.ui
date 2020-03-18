@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -19,6 +19,8 @@ import java.util.List;
 import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jdt.core.dom.*;
+
+import org.eclipse.jdt.internal.ui.util.ASTHelper;
 
 public class ASTFlattener extends GenericVisitor {
 /*
@@ -1320,6 +1322,61 @@ public class ASTFlattener extends GenericVisitor {
 	}
 
 	@Override
+	public boolean visit(RecordDeclaration node) {
+		if (node.getJavadoc() != null) {
+			node.getJavadoc().accept(this);
+		}
+		printModifiers(node.modifiers());
+		this.fBuffer.append("record ");//$NON-NLS-1$
+		node.getName().accept(this);
+		this.fBuffer.append(" ");//$NON-NLS-1$
+
+		if (!node.typeParameters().isEmpty()) {
+			this.fBuffer.append("<");//$NON-NLS-1$
+			for (Iterator<TypeParameter> it = node.typeParameters().iterator(); it.hasNext(); ) {
+				TypeParameter t = it.next();
+				t.accept(this);
+				if (it.hasNext()) {
+					this.fBuffer.append(",");//$NON-NLS-1$
+				}
+			}
+			this.fBuffer.append(">");//$NON-NLS-1$
+		}
+		this.fBuffer.append(" ");//$NON-NLS-1$
+		this.fBuffer.append("(");//$NON-NLS-1$
+		for (Iterator<SingleVariableDeclaration> it = node.recordComponents().iterator(); it.hasNext(); ) {
+			SingleVariableDeclaration v = it.next();
+			v.accept(this);
+			if (it.hasNext()) {
+				this.fBuffer.append(",");//$NON-NLS-1$
+			}
+		}
+		this.fBuffer.append(")");//$NON-NLS-1$
+		if (!node.superInterfaceTypes().isEmpty()) {
+			this.fBuffer.append(" implements ");//$NON-NLS-1$
+			for (Iterator<Type> it = node.superInterfaceTypes().iterator(); it.hasNext(); ) {
+				Type t = it.next();
+				t.accept(this);
+				if (it.hasNext()) {
+					this.fBuffer.append(", ");//$NON-NLS-1$
+				}
+			}
+			this.fBuffer.append(" ");//$NON-NLS-1$
+		}
+		this.fBuffer.append("{");//$NON-NLS-1$
+		if (!node.bodyDeclarations().isEmpty()) {
+			this.fBuffer.append("\n");//$NON-NLS-1$
+			for (Iterator<BodyDeclaration> it = node.bodyDeclarations().iterator(); it.hasNext(); ) {
+				BodyDeclaration d = it.next();
+				d.accept(this);
+				// other body declarations include trailing punctuation
+			}
+		}
+		this.fBuffer.append("}\n");//$NON-NLS-1$
+		return false;
+	}
+
+	@Override
 	public boolean visit(RequiresDirective node) {
 		this.fBuffer.append("requires");//$NON-NLS-1$
 		this.fBuffer.append(" ");//$NON-NLS-1$
@@ -1533,7 +1590,7 @@ public class ASTFlattener extends GenericVisitor {
 
 	@Override
 	public boolean visit(SwitchCase node) {
-		if (node.getAST().isPreviewEnabled()) {
+		if (ASTHelper.isSwitchCaseExpressionsSupportedInAST(node.getAST())) {
 			if (node.isDefault()) {
 				this.fBuffer.append("default");//$NON-NLS-1$
 				this.fBuffer.append(node.isSwitchLabeledRule() ? " ->" : ":");//$NON-NLS-1$ //$NON-NLS-2$
@@ -1560,7 +1617,7 @@ public class ASTFlattener extends GenericVisitor {
 
 	@Override
 	public boolean visit(YieldStatement node) {
-		if (node.getAST().isPreviewEnabled() && node.isImplicit() && node.getExpression() == null) {
+		if (ASTHelper.isYieldNodeSupportedInAST(node.getAST()) && node.isImplicit() && node.getExpression() == null) {
 			return false;
 		}
 		this.fBuffer.append("yield"); //$NON-NLS-1$

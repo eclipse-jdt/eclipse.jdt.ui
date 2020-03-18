@@ -83,7 +83,7 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses({
 	QuickFixTest9.class,
 	QuickFixTest18.class,
-	QuickFixTest13.class,
+	QuickFixTest14.class,
 	SerialVersionQuickFixTest.class,
 	UtilitiesTest.class,
 	UnresolvedTypesQuickFixTest.class,

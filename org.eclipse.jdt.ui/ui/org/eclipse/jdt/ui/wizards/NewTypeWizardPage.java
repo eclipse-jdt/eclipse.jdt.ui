@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -118,6 +118,7 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
+import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 import org.eclipse.jdt.internal.corext.codemanipulation.AddUnimplementedConstructorsOperation;
@@ -151,10 +152,8 @@ import org.eclipse.jdt.internal.ui.refactoring.contentassist.CompletionContextRe
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaPackageCompletionProcessor;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
+import org.eclipse.jdt.internal.ui.text.correction.PreviewFeaturesSubProcessor;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
-
-import org.eclipse.jdt.internal.core.manipulation.StubUtility;
-
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.SuperInterfaceSelectionDialog;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -447,6 +446,13 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	public static final int ANNOTATION_TYPE = 4;
 
 	/**
+	 * Constant to signal that the created type is an record.
+	 * @since 3.21
+	 * @noreference This field is not intended to be referenced by clients.
+	 */
+	public static final int RECORD_TYPE = 5;
+
+	/**
 	 * Creates a new <code>NewTypeWizardPage</code>.
 	 *
 	 * @param isClass <code>true</code> if a new class is to be created; otherwise
@@ -532,8 +538,12 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 					NewWizardMessages.NewTypeWizardPage_modifiers_static
 		        };
 		    }
-		    else
-		        buttonNames2= new String[] {};
+			else {
+				if (fTypeKind == RECORD_TYPE) {
+					buttonNames2= new String[] {NewWizardMessages.NewTypeWizardPage_modifiers_static};
+				} else
+					buttonNames2= new String[] {};
+			}
 		}
 
 		fOtherMdfButtons= new SelectionButtonDialogFieldGroup(SWT.CHECK, buttonNames2, 4);
@@ -1594,7 +1604,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		if ((fTypeKind == ANNOTATION_TYPE || fTypeKind == ENUM_TYPE) && !status.matches(IStatus.ERROR)) {
 	    	if (root != null && !JavaModelUtil.is50OrHigher(root.getJavaProject())) {
 	    		// error as createType will fail otherwise (bug 96928)
-				return new StatusInfo(IStatus.ERROR, Messages.format(NewWizardMessages.NewTypeWizardPage_warning_NotJDKCompliant, BasicElementLabels.getJavaElementName(root.getJavaProject().getElementName())));
+	    		return new StatusInfo(IStatus.ERROR, Messages.format(NewWizardMessages.NewTypeWizardPage_warning_NotJDKCompliant, BasicElementLabels.getJavaElementName(root.getJavaProject().getElementName())));
 	    	}
 	    	if (fTypeKind == ENUM_TYPE) {
 		    	try {
@@ -1604,6 +1614,24 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		    	} catch (JavaModelException e) {
 		    	    JavaPlugin.log(e);
 		    	}
+	    	}
+	    }
+		if ((fTypeKind == RECORD_TYPE) && !status.matches(IStatus.ERROR)) {
+	    	if (root != null) {
+	    		if (!JavaModelUtil.is14OrHigher(root.getJavaProject())) {
+	    			return new StatusInfo(IStatus.ERROR, Messages.format(NewWizardMessages.NewTypeWizardPage_warning_NotJDKCompliant2, new String[] {BasicElementLabels.getJavaElementName(root.getJavaProject().getElementName()), "14" })); //$NON-NLS-1$
+	    		} else if (!PreviewFeaturesSubProcessor.isPreviewFeatureEnabled(root.getJavaProject())) {
+	    			return new StatusInfo(IStatus.ERROR, Messages.format(NewWizardMessages.NewTypeWizardPage_warning_PreviewFeatureNotEnabled, BasicElementLabels.getJavaElementName(root.getJavaProject().getElementName())));
+	    		}
+	    		try {
+		    	    // if findType(...) == null then Record is unavailable
+		    	    if (findType(root.getJavaProject(), "java.lang.Record") == null) //$NON-NLS-1$
+		    	        return new StatusInfo(IStatus.WARNING, NewWizardMessages.NewTypeWizardPage_warning_RecordClassNotFound);
+		    	} catch (JavaModelException e) {
+		    	    JavaPlugin.log(e);
+		    	}
+	    	} else {
+	    		return new StatusInfo(IStatus.WARNING, NewWizardMessages.NewTypeWizardPage_warning_RecordClassNotFound);
 	    	}
 	    }
 
@@ -2548,9 +2576,16 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				type= "@interface "; //$NON-NLS-1$
 				templateID= CodeGeneration.ANNOTATION_BODY_TEMPLATE_ID;
 				break;
+			case RECORD_TYPE:
+				type= "record "; //$NON-NLS-1$
+				templateID= CodeGeneration.RECORD_BODY_TEMPLATE_ID;
+				break;
 		}
 		buf.append(type);
 		buf.append(getTypeName());
+		if (fTypeKind == RECORD_TYPE) {
+			buf.append("()"); //$NON-NLS-1$
+		}
 		writeSuperClass(buf, imports);
 		writeSuperInterfaces(buf, imports);
 

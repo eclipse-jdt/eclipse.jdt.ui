@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -487,6 +487,16 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
 	@Override
 	public void endVisit(YieldStatement node) {
 		endVisit((Statement)node);
+	}
+
+	@Override
+	public boolean visit(RecordDeclaration node) {
+		return visit((AbstractTypeDeclaration) node);
+	}
+
+	@Override
+	public void endVisit(RecordDeclaration node) {
+		endVisit((AbstractTypeDeclaration) node);
 	}
 
 	//---- Begin MethodReference Hierarchy ----------------------------------

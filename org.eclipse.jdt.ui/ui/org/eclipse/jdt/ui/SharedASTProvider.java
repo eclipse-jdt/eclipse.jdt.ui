@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2019 IBM Corporation and others.
+ * Copyright (c) 2007, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -33,7 +33,7 @@ import org.eclipse.jdt.core.manipulation.CoreASTProvider;
  * <p>Clients can make the following assumptions about the AST:</p>
  * <ul>
  *    <li>the AST has a {@link ITypeRoot} as source: {@link CompilationUnit#getTypeRoot()} is not null.</li>
- *    <li>the {@link AST#apiLevel() AST API level} is {@link AST#JLS13 API level 13} or higher</li>
+ *    <li>the {@link AST#apiLevel() AST API level} is {@link AST#JLS14 API level 14} or higher</li>
  *    <li>the AST has bindings resolved ({@link AST#hasResolvedBindings()})</li>
  *    <li>{@link AST#hasStatementsRecovery() statement} and {@link AST#hasBindingsRecovery() bindings}
  *           recovery are enabled

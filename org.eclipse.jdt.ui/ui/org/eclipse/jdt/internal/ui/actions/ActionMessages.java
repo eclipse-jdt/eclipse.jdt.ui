@@ -425,6 +425,9 @@ public final class ActionMessages extends NLS {
 	public static String OpenNewEnumWizardAction_text;
 	public static String OpenNewEnumWizardAction_description;
 	public static String OpenNewEnumWizardAction_tooltip;
+	public static String OpenNewRecordWizardAction_text;
+	public static String OpenNewRecordWizardAction_description;
+	public static String OpenNewRecordWizardAction_tooltip;
 	public static String OpenNewInterfaceWizardAction_text;
 	public static String OpenNewInterfaceWizardAction_description;
 	public static String OpenNewInterfaceWizardAction_tooltip;

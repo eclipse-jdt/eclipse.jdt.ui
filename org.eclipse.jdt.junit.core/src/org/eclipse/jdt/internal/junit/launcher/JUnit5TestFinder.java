@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2019 IBM Corporation and others.
+ * Copyright (c) 2016, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -256,7 +256,7 @@ public class JUnit5TestFinder implements ITestFinder {
 			if (CoreTestSearchEngine.hasSuiteMethod(type)) { // since JUnit 4.3.1
 				return true;
 			}
-			ASTParser parser= ASTParser.newParser(AST.JLS13);
+			ASTParser parser= ASTParser.newParser(AST.JLS14);
 			if (type.getCompilationUnit() != null) {
 				parser.setSource(type.getCompilationUnit());
 			} else if (!isAvailable(type.getSourceRange())) { // class file with no source

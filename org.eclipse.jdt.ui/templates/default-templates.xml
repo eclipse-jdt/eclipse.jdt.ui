@@ -275,4 +275,10 @@ public enum ${class_name} ${line_selection}${cursor} {
 
 }</template>
 
+<template name="new_record" description="%Templates.new_record" id="org.eclipse.jdt.ui.templates.new_record" context="java-empty" enabled="true" autoinsert="false">${package_declaration}
+
+public record ${class_name}(${cursor})${line_selection} {
+
+}</template>
+
 </templates>

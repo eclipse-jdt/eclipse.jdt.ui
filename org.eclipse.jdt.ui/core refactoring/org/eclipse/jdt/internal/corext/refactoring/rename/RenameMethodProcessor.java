@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -63,6 +63,7 @@ import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
@@ -98,7 +99,6 @@ import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
 import org.eclipse.jdt.ui.refactoring.RefactoringSaveHelper;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 public abstract class RenameMethodProcessor extends JavaRenameProcessor implements IReferenceUpdating, IDelegateUpdating {
 
@@ -145,7 +145,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	}
 
 	protected void initialize(IMethod method) {
-		fMethod= method;
+		assignMethod(method);
 		if (!fInitialized) {
 			if (method != null)
 				setNewElementName(method.getElementName());
@@ -197,6 +197,8 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		}
 		return result;
 	}
+
+
 
 	@Override
 	protected IFile[] getChangedFiles() throws CoreException {
@@ -263,6 +265,10 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 
 	protected Set<IMethod> getMethodsToRename() {
 		return fMethodsToRename;
+	}
+
+	protected void assignMethod(IMethod method) {
+		fMethod= method;
 	}
 
 	//---- IReferenceUpdating -----------------------------------
@@ -477,7 +483,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		return RefactoringScopeFactory.create(method, true, false);
 	}
 
-	private SearchPattern createOccurrenceSearchPattern() {
+	protected SearchPattern createOccurrenceSearchPattern() {
 		HashSet<IMethod> methods= new HashSet<>(fMethodsToRename);
 		methods.add(fMethod);
 		IMethod[] ms= methods.toArray(new IMethod[methods.size()]);
@@ -765,7 +771,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		}
 	}
 
-	private TextChangeManager createChanges(IProgressMonitor pm, RefactoringStatus status) throws CoreException {
+	protected TextChangeManager createChanges(IProgressMonitor pm, RefactoringStatus status) throws CoreException {
 		if (!fIsComposite)
 			fChangeManager.clear();
 		addOccurrences(fChangeManager, pm, status);
@@ -883,7 +889,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 					if (methods != null && methods.length == 1 && methods[0] != null) {
 						if (!methods[0].exists())
 							return JavaRefactoringDescriptorUtil.createInputFatalStatus(methods[0], refactoring, IJavaRefactorings.RENAME_METHOD);
-						fMethod= methods[0];
+						assignMethod(methods[0]);
 						initializeWorkingCopyOwner();
 					} else
 						return JavaRefactoringDescriptorUtil.createInputFatalStatus(null, refactoring, IJavaRefactorings.RENAME_METHOD);

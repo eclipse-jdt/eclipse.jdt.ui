@@ -47,6 +47,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.text.correction.PreviewFeaturesSubProcessor;
 
 
 public class TemplateEngine {
@@ -57,6 +58,8 @@ public class TemplateEngine {
 
 	private static String Switch_Name = "switch"; //$NON-NLS-1$
 	private static String Switch_Default = "switch case statement"; //$NON-NLS-1$
+
+	private static String NEW_RECORD_TEMPLATE_NAME= "new_record"; //$NON-NLS-1$
 
 	/** The context type. */
 	private TemplateContextType fContextType;
@@ -205,12 +208,15 @@ public class TemplateEngine {
 		return false;
 	}
 
-	private boolean isTemplateAllowed(Template template) {
+	private boolean isTemplateAllowed(Template template, CompilationUnitContext context) {
 		if (Switch_Name.equals(template.getName())) {
 			if (Switch_Default.equals(template.getDescription())) {
 				return true;
 			}
 			return false;
+		}
+		if (NEW_RECORD_TEMPLATE_NAME.equals(template.getName()) && PreviewFeaturesSubProcessor.isPreviewFeatureEnabled(context.getJavaProject())) {
+			return true;
 		}
 		return true;
 	}
@@ -219,7 +225,7 @@ public class TemplateEngine {
 		if (!needsCheck) {
 			return context.canEvaluate(template);
 		}
-		if (isTemplateAllowed(template)) {
+		if (isTemplateAllowed(template, context)) {
 			return context.canEvaluate(template);
 		}
 		return false;

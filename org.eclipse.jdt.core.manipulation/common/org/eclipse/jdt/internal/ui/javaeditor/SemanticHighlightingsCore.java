@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2019 IBM Corporation and others.
+ * Copyright (c) 2018, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -169,6 +169,11 @@ public class SemanticHighlightingsCore {
 	 * A named preference part that controls the highlighting of 'yield' keywords.
 	 */
 	public static final String YIELD_KEYWORD= "yieldKeyword"; //$NON-NLS-1$
+
+	/**
+	 * A named preference part that controls the highlighting of 'record' keywords.
+	 */
+	public static final String RECORD_KEYWORD= "recordKeyword"; //$NON-NLS-1$
 
 	/**
 	 * Do not instantiate

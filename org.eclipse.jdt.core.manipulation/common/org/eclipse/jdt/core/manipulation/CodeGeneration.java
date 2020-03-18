@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -67,6 +67,14 @@ public class CodeGeneration {
 	 * @since 3.2
 	 */
 	public static final String ANNOTATION_BODY_TEMPLATE_ID= CodeTemplateContextType.ANNOTATIONBODY_ID;
+
+	/**
+	 * Constant ID for the type kind to be used in {@link #getTypeBody(String, ICompilationUnit, String, String)} to get the code template used
+	 * for a new record type body.
+	 * @noreference This field is not intended to be referenced by clients.
+	 * @since 1.13
+	 */
+	public static final String RECORD_BODY_TEMPLATE_ID= CodeTemplateContextType.RECORDBODY_ID;
 
 	private static final String[] EMPTY= new String[0];
 

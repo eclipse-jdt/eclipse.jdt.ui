@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- *
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -66,6 +66,8 @@ import org.eclipse.jdt.core.dom.YieldStatement;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+import org.eclipse.jdt.internal.ui.util.ASTHelper;
 
 
 /**
@@ -305,7 +307,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 
 	@Override
 	public boolean visit(YieldStatement node) {
-		if (node.getAST().isPreviewEnabled()) {
+		if (ASTHelper.isYieldNodeSupportedInAST(node.getAST())) {
 			evalQualifyingExpression(node.getExpression(), null);
 		}
 		return false;

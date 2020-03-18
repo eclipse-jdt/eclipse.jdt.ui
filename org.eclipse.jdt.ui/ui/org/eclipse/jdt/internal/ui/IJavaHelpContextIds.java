@@ -72,6 +72,8 @@ public interface IJavaHelpContextIds {
 	public static final String OPEN_INTERFACE_WIZARD_ACTION= 							PREFIX + "open_interface_wizard_action"; //$NON-NLS-1$
 	/** @since 3.2 */
 	public static final String OPEN_ENUM_WIZARD_ACTION= 							PREFIX + "open_enum_wizard_action"; //$NON-NLS-1$
+	/** @since 3.20 */
+	public static final String OPEN_RECORD_WIZARD_ACTION= 							PREFIX + "open_record_wizard_action"; //$NON-NLS-1$
 	/** @since 3.2 */
 	public static final String OPEN_ANNOTATION_WIZARD_ACTION= 							PREFIX + "open_annotation_wizard_action"; //$NON-NLS-1$
 
@@ -426,6 +428,12 @@ public interface IJavaHelpContextIds {
 	public static final String MOVE_MEMBERS_WIZARD_PAGE= 						PREFIX + "move_members_wizard_page_context"; //$NON-NLS-1$
 	public static final String MOVE_INNER_TO_TOP_WIZARD_PAGE= 				PREFIX + "move_inner_to_top_wizard_page_context"; //$NON-NLS-1$
 	public static final String PULL_UP_WIZARD_PAGE= 									PREFIX + "pull_up_wizard_page_context"; //$NON-NLS-1$
+
+	/**
+	 * @noreference This field is not intended to be referenced by clients.
+	 */
+	public static final String NEW_RECORD_WIZARD_PAGE= PREFIX + "new_record_wizard_page_context"; //$NON-NLS-1$
+
 	/**
 	 * @since 3.2
 	 */

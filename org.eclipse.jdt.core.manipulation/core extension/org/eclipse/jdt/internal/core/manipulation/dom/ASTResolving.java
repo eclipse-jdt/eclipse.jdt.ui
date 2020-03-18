@@ -94,6 +94,8 @@ import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.TypeBindingVisitor;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
+import org.eclipse.jdt.internal.ui.util.ASTHelper;
+
 /**
  * Helper methods to find AST nodes or bindings.
  */
@@ -295,7 +297,7 @@ public class ASTResolving {
 			break;
 		case ASTNode.SWITCH_CASE:
 			SwitchCase switchCase= (SwitchCase) parent;
-			if (node.equals(switchCase.getExpression()) || (switchCase.getAST().isPreviewEnabled() && switchCase.expressions().contains(node))) {
+			if (node.equals(switchCase.getExpression()) || (ASTHelper.isSwitchCaseExpressionsSupportedInAST(switchCase.getAST()) && switchCase.expressions().contains(node))) {
 				ASTNode caseParent= switchCase.getParent();
 				if (caseParent instanceof SwitchStatement) {
 					return ((SwitchStatement) caseParent).getExpression().resolveTypeBinding();

@@ -149,6 +149,7 @@ public final class PreferencesMessages extends NLS {
 	public static String JavaEditorPreferencePage_keywords;
 	public static String JavaEditorPreferencePage_varKeyword;
 	public static String JavaEditorPreferencePage_yieldKeyword;
+	public static String JavaEditorPreferencePage_recordKeyword;
 	public static String JavaEditorPreferencePage_strings;
 	public static String JavaEditorPreferencePage_others;
 	public static String JavaEditorPreferencePage_operators;
@@ -604,6 +605,7 @@ public final class PreferencesMessages extends NLS {
 	public static String CodeTemplateBlock_classbody_label;
 	public static String CodeTemplateBlock_interfacebody_label;
 	public static String CodeTemplateBlock_enumbody_label;
+	public static String CodeTemplateBlock_recordbody_label;
 	public static String CodeTemplateBlock_annotationbody_label;
 	public static String CodeTemplateBlock_typecomment_label;
 	public static String CodeTemplateBlock_fieldcomment_label;
@@ -838,6 +840,7 @@ public final class PreferencesMessages extends NLS {
 	public static String ComplianceConfigurationBlock_version_11;
 	public static String ComplianceConfigurationBlock_version_12;
 	public static String ComplianceConfigurationBlock_version_13;
+	public static String ComplianceConfigurationBlock_version_14;
 	public static String ComplianceConfigurationBlock_versionCLDC11;
 	public static String ComplianceConfigurationBlock_src_greater_compliance;
 	public static String ComplianceConfigurationBlock_classfile_greater_compliance;

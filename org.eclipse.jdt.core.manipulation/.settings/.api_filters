@@ -1,5 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <component id="org.eclipse.jdt.core.manipulation" version="2">
+    <resource path="META-INF/MANIFEST.MF">
+        <filter id="924844039">
+            <message_arguments>
+                <message_argument value="1.13.100"/>
+                <message_argument value="1.13.0"/>
+            </message_arguments>
+        </filter>
+        <filter comment="This is for Java14 work" id="924844039">
+            <message_arguments>
+                <message_argument value="1.13.150"/>
+                <message_argument value="1.13.100"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="common/org/eclipse/jdt/core/manipulation/ImportReferencesCollector.java" type="org.eclipse.jdt.core.manipulation.ImportReferencesCollector">
         <filter comment="For Java 13 Enable Preview support" id="640712815">
             <message_arguments>
@@ -33,39 +47,53 @@
         </filter>
     </resource>
     <resource path="core extension/org/eclipse/jdt/internal/corext/dom/ASTFlattener.java" type="org.eclipse.jdt.internal.corext.dom.ASTFlattener">
-        <filter comment="For Java 13 Enable Preview support" id="640712815">
+        <filter comment="For Java 14 preview features" id="640712815">
             <message_arguments>
-                <message_argument value="ASTNode"/>
+                <message_argument value="AbstractTypeDeclaration"/>
                 <message_argument value="ASTFlattener"/>
-                <message_argument value="getAST()"/>
+                <message_argument value="bodyDeclarations()"/>
             </message_arguments>
         </filter>
-        <filter comment="For Java 13 Enable Preview support" id="640712815">
+        <filter comment="For Java 14 preview features" id="640712815">
             <message_arguments>
-                <message_argument value="SwitchCase"/>
+                <message_argument value="AbstractTypeDeclaration"/>
                 <message_argument value="ASTFlattener"/>
-                <message_argument value="expressions()"/>
+                <message_argument value="getName()"/>
             </message_arguments>
         </filter>
-        <filter comment="For Java 13 Enable Preview support" id="640712815">
+        <filter comment="For Java 14 preview features" id="640712815">
             <message_arguments>
-                <message_argument value="SwitchCase"/>
+                <message_argument value="BodyDeclaration"/>
                 <message_argument value="ASTFlattener"/>
-                <message_argument value="isSwitchLabeledRule()"/>
+                <message_argument value="getJavadoc()"/>
             </message_arguments>
         </filter>
-        <filter comment="For Java 13 Enable Preview support" id="640712815">
+        <filter comment="For Java 14 preview features" id="640712815">
             <message_arguments>
-                <message_argument value="SwitchExpression"/>
+                <message_argument value="BodyDeclaration"/>
                 <message_argument value="ASTFlattener"/>
-                <message_argument value="getExpression()"/>
+                <message_argument value="modifiers()"/>
             </message_arguments>
         </filter>
-        <filter comment="For Java 13 Enable Preview support" id="640712815">
+        <filter comment="For Java 14 preview features" id="640712815">
             <message_arguments>
-                <message_argument value="SwitchExpression"/>
+                <message_argument value="RecordDeclaration"/>
                 <message_argument value="ASTFlattener"/>
-                <message_argument value="statements()"/>
+                <message_argument value="recordComponents()"/>
+            </message_arguments>
+        </filter>
+        <filter comment="For Java 14 preview features" id="640712815">
+            <message_arguments>
+                <message_argument value="RecordDeclaration"/>
+                <message_argument value="ASTFlattener"/>
+                <message_argument value="superInterfaceTypes()"/>
+            </message_arguments>
+        </filter>
+        <filter comment="For Java 14 preview features" id="640712815">
+            <message_arguments>
+                <message_argument value="RecordDeclaration"/>
+                <message_argument value="ASTFlattener"/>
+                <message_argument value="typeParameters()"/>
             </message_arguments>
         </filter>
         <filter comment="For Java 13 Enable Preview support" id="640712815">
@@ -75,22 +103,22 @@
                 <message_argument value="getEscapedValue()"/>
             </message_arguments>
         </filter>
-        <filter comment="For Java 13 Enable Preview support" id="640712815">
-            <message_arguments>
-                <message_argument value="YieldStatement"/>
-                <message_argument value="ASTFlattener"/>
-                <message_argument value="getExpression()"/>
-            </message_arguments>
-        </filter>
-        <filter comment="For Java 13 Enable Preview support" id="640712815">
-            <message_arguments>
-                <message_argument value="YieldStatement"/>
-                <message_argument value="ASTFlattener"/>
-                <message_argument value="isImplicit()"/>
-            </message_arguments>
-        </filter>
     </resource>
     <resource path="core extension/org/eclipse/jdt/internal/corext/dom/GenericVisitor.java" type="org.eclipse.jdt.internal.corext.dom.GenericVisitor">
+        <filter comment="For Java 13 Enable Preview support" id="642777099">
+            <message_arguments>
+                <message_argument value="ASTVisitor"/>
+                <message_argument value="GenericVisitor"/>
+                <message_argument value="endVisit(TextBlock)"/>
+            </message_arguments>
+        </filter>
+        <filter comment="For Java 13 Enable Preview support" id="642777099">
+            <message_arguments>
+                <message_argument value="ASTVisitor"/>
+                <message_argument value="GenericVisitor"/>
+                <message_argument value="endVisit(YieldStatement)"/>
+            </message_arguments>
+        </filter>
         <filter comment="For Java 13 Enable Preview support" id="642777099">
             <message_arguments>
                 <message_argument value="ASTVisitor"/>
@@ -147,6 +175,22 @@
                 <message_argument value="ASTVisitor"/>
                 <message_argument value="HierarchicalASTVisitor"/>
                 <message_argument value="visit(YieldStatement)"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="core extension/org/eclipse/jdt/internal/corext/dom/LinkedNodeFinder.java" type="org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder">
+        <filter id="640712815">
+            <message_arguments>
+                <message_argument value="ITypeBinding"/>
+                <message_argument value="LinkedNodeFinder"/>
+                <message_argument value="isRecord()"/>
+            </message_arguments>
+        </filter>
+        <filter id="640712815">
+            <message_arguments>
+                <message_argument value="RecordDeclaration"/>
+                <message_argument value="LinkedNodeFinder"/>
+                <message_argument value="recordComponents()"/>
             </message_arguments>
         </filter>
     </resource>

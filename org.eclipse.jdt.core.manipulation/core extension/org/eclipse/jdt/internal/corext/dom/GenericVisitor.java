@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -334,6 +334,10 @@ public class GenericVisitor extends ASTVisitor {
 		endVisitNode(node);
 	}
 	@Override
+	public void endVisit(RecordDeclaration node) {
+		endVisitNode(node);
+	}
+	@Override
 	public void endVisit(RequiresDirective node) {
 		endVisitNode(node);
 	}
@@ -434,6 +438,10 @@ public class GenericVisitor extends ASTVisitor {
 		endVisitNode(node);
 	}
 	@Override
+	public void endVisit(TextBlock node) {
+		endVisitNode(node);
+	}
+	@Override
 	public void endVisit(UnionType node) {
 		endVisitNode(node);
 	}
@@ -459,6 +467,11 @@ public class GenericVisitor extends ASTVisitor {
 	}
 	@Override
 	public void endVisit(WildcardType node) {
+		endVisitNode(node);
+	}
+
+	@Override
+	public void endVisit(YieldStatement node) {
 		endVisitNode(node);
 	}
 
@@ -735,6 +748,10 @@ public class GenericVisitor extends ASTVisitor {
 	}
 	@Override
 	public boolean visit(QualifiedType node) {
+		return visitNode(node);
+	}
+	@Override
+	public boolean visit(RecordDeclaration node) {
 		return visitNode(node);
 	}
 	@Override

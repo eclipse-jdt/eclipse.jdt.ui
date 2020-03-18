@@ -76,6 +76,8 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Resources;
 
+import org.eclipse.jdt.internal.ui.util.ASTHelper;
+
 /**
  * This class defines a set of reusable static checks methods.
  */
@@ -389,7 +391,7 @@ public class Checks {
 	public static boolean isEnumCase(ASTNode node) {
 		if (node instanceof SwitchCase) {
 			final SwitchCase caze= (SwitchCase) node;
-			if (node.getAST().isPreviewEnabled()) {
+			if (ASTHelper.isSwitchCaseExpressionsSupportedInAST(node.getAST())) {
 				List<Expression> expressions= caze.expressions();
 				boolean isEnumConst= true;
 				for (Expression expression : expressions) {

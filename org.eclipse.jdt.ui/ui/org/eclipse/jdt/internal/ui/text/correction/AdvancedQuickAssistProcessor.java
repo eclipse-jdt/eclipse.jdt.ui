@@ -124,6 +124,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposal;
+import org.eclipse.jdt.internal.ui.util.ASTHelper;
 
 /**
  */
@@ -2470,7 +2471,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			Statement statement= iter.next();
 			if (statement instanceof SwitchCase) {
 				SwitchCase switchCase= (SwitchCase) statement;
-				if (ast.isPreviewEnabled() && switchCase.expressions().size() > 1) {
+				if (ASTHelper.isSwitchCaseExpressionsSupportedInAST(ast) && switchCase.expressions().size() > 1) {
 					return false;
 				}
 				// special case: pass through
@@ -2571,7 +2572,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 	private static Expression createSwitchCaseCondition(AST ast, ASTRewrite rewrite, ImportRewrite importRewrite, ImportRewriteContext importRewriteContext, Name switchExpression,
 			SwitchCase switchCase, boolean isStringsInSwitch, boolean preserveNPE) {
 		Expression expression= null;
-		if (ast.isPreviewEnabled()) {
+		if (ASTHelper.isSwitchCaseExpressionsSupportedInAST(ast)) {
 			if (switchCase.expressions().size() == 1) {
 				expression= (Expression) switchCase.expressions().get(0);
 			}
@@ -2909,7 +2910,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		SwitchCase[] switchCaseStatements= new SwitchCase[len];
 		if (caseExpressions.isEmpty()) {
 			switchCaseStatements[0]= ast.newSwitchCase();
-			if (!ast.isPreviewEnabled()) {
+			if (!ASTHelper.isSwitchCaseExpressionsSupportedInAST(ast)) {
 				switchCaseStatements[0].setExpression(null);
 			}
 		} else {
@@ -2917,7 +2918,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				ASTNode astNode= caseExpressions.get(i);
 				switchCaseStatements[i]= ast.newSwitchCase();
 				Expression copyTarget= (Expression) rewrite.createCopyTarget(astNode);
-				if (ast.isPreviewEnabled()) {
+				if (ASTHelper.isSwitchCaseExpressionsSupportedInAST(ast)) {
 					switchCaseStatements[i].expressions().add(copyTarget);
 				} else {
 					switchCaseStatements[i].setExpression(copyTarget);

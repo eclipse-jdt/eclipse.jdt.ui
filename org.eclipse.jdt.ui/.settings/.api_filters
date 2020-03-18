@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <component id="org.eclipse.jdt.ui" version="2">
+    <resource path="META-INF/MANIFEST.MF">
+        <filter comment="This is for Java14 work" id="924844039">
+            <message_arguments>
+                <message_argument value="3.21.50"/>
+                <message_argument value="3.21.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="core refactoring/org/eclipse/jdt/internal/corext/refactoring/code/ReplaceInvocationsRefactoring.java" type="org.eclipse.jdt.internal.corext.refactoring.code.ReplaceInvocationsRefactoring">
         <filter id="571519004">
             <message_arguments>
@@ -8,35 +16,12 @@
             </message_arguments>
         </filter>
     </resource>
-    <resource path="core refactoring/org/eclipse/jdt/internal/corext/refactoring/code/flow/FlowAnalyzer.java" type="org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowAnalyzer">
-        <filter comment="For Java 13 Enable Preview feature" id="640712815">
+    <resource path="core refactoring/org/eclipse/jdt/internal/corext/refactoring/rename/RenameVirtualMethodProcessor.java" type="org.eclipse.jdt.internal.corext.refactoring.rename.RenameVirtualMethodProcessor">
+        <filter id="640712815">
             <message_arguments>
-                <message_argument value="SwitchExpression"/>
-                <message_argument value="FlowAnalyzer"/>
-                <message_argument value="getExpression()"/>
-            </message_arguments>
-        </filter>
-        <filter comment="For Java 13 Enable Preview feature" id="640712815">
-            <message_arguments>
-                <message_argument value="SwitchExpression"/>
-                <message_argument value="FlowAnalyzer"/>
-                <message_argument value="statements()"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="core refactoring/org/eclipse/jdt/internal/corext/refactoring/code/flow/InputFlowAnalyzer.java" type="org.eclipse.jdt.internal.corext.refactoring.code.flow.InputFlowAnalyzer">
-        <filter comment="For Java 13 Enable Preview feature" id="640712815">
-            <message_arguments>
-                <message_argument value="SwitchExpression"/>
-                <message_argument value="InputFlowAnalyzer"/>
-                <message_argument value="getExpression()"/>
-            </message_arguments>
-        </filter>
-        <filter comment="For Java 13 Enable Preview feature" id="640712815">
-            <message_arguments>
-                <message_argument value="SwitchExpression"/>
-                <message_argument value="InputFlowAnalyzer"/>
-                <message_argument value="statements()"/>
+                <message_argument value="IType"/>
+                <message_argument value="RenameVirtualMethodProcessor"/>
+                <message_argument value="isRecord()"/>
             </message_arguments>
         </filter>
     </resource>
@@ -61,6 +46,15 @@
             <message_arguments>
                 <message_argument value="CheckboxTableViewer"/>
                 <message_argument value="PullPushCheckboxTableViewer"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="ui refactoring/org/eclipse/jdt/internal/ui/refactoring/actions/RenameJavaElementAction.java" type="org.eclipse.jdt.internal.ui.refactoring.actions.RenameJavaElementAction">
+        <filter id="640712815">
+            <message_arguments>
+                <message_argument value="IType"/>
+                <message_argument value="RenameJavaElementAction"/>
+                <message_argument value="isRecord()"/>
             </message_arguments>
         </filter>
     </resource>
@@ -144,20 +138,20 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="ui/org/eclipse/jdt/internal/ui/javaeditor/SemanticHighlightingReconciler.java" type="org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingReconciler$PositionCollector">
+        <filter comment="For Java 14 preview features" id="640712815">
+            <message_arguments>
+                <message_argument value="RecordDeclaration"/>
+                <message_argument value="PositionCollector"/>
+                <message_argument value="getRestrictedIdentifierStartPosition()"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="ui/org/eclipse/jdt/internal/ui/text/JavaOutlineInformationControl.java" type="org.eclipse.jdt.internal.ui.text.JavaOutlineInformationControl$OutlineTreeViewer">
         <filter id="571473929">
             <message_arguments>
                 <message_argument value="TreeViewer"/>
                 <message_argument value="OutlineTreeViewer"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="ui/org/eclipse/jdt/internal/ui/text/correction/AdvancedQuickAssistProcessor.java" type="org.eclipse.jdt.internal.ui.text.correction.AdvancedQuickAssistProcessor">
-        <filter comment="For Java 13 Enable Preview feature" id="640712815">
-            <message_arguments>
-                <message_argument value="SwitchCase"/>
-                <message_argument value="AdvancedQuickAssistProcessor"/>
-                <message_argument value="expressions()"/>
             </message_arguments>
         </filter>
     </resource>
@@ -258,6 +252,24 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="ui/org/eclipse/jdt/internal/ui/text/correction/proposals/InitializeFinalFieldProposal.java" type="org.eclipse.jdt.internal.ui.text.correction.proposals.InitializeFinalFieldProposal">
+        <filter id="640712815">
+            <message_arguments>
+                <message_argument value="AbstractTypeDeclaration"/>
+                <message_argument value="InitializeFinalFieldProposal"/>
+                <message_argument value="getName()"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="ui/org/eclipse/jdt/internal/ui/text/correction/proposals/InitializeFinalFieldProposal.java" type="org.eclipse.jdt.internal.ui.text.correction.proposals.InitializeFinalFieldProposal$RecordComponentVisitor">
+        <filter id="640712815">
+            <message_arguments>
+                <message_argument value="RecordDeclaration"/>
+                <message_argument value="RecordComponentVisitor"/>
+                <message_argument value="recordComponents()"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="ui/org/eclipse/jdt/internal/ui/util/ViewerPane.java" type="org.eclipse.jdt.internal.ui.util.ViewerPane">
         <filter id="571473929">
             <message_arguments>
@@ -303,6 +315,14 @@
             <message_arguments>
                 <message_argument value="org.eclipse.jdt.ui.text.IJavaPartitions"/>
                 <message_argument value="JAVA_MULTI_LINE_STRING"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="ui/org/eclipse/jdt/ui/wizards/NewTypeWizardPage.java" type="org.eclipse.jdt.ui.wizards.NewTypeWizardPage">
+        <filter id="336658481">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.ui.wizards.NewTypeWizardPage"/>
+                <message_argument value="RECORD_TYPE"/>
             </message_arguments>
         </filter>
     </resource>

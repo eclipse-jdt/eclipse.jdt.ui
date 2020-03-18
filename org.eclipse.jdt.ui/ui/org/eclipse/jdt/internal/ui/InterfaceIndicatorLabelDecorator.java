@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -197,6 +197,8 @@ public class InterfaceIndicatorLabelDecorator extends AbstractJavaElementLabelDe
 			type= JavaPluginImages.DESC_OVR_ANNOTATION;
 		} else if (Flags.isEnum(flags)) {
 			type= JavaPluginImages.DESC_OVR_ENUM;
+		} else if (Flags.isRecord(flags)) {
+			type= JavaPluginImages.DESC_OVR_RECORD;
 		} else if (Flags.isInterface(flags)) {
 			type= JavaPluginImages.DESC_OVR_INTERFACE;
 		} else if (/* is class */ Flags.isAbstract(flags)) {

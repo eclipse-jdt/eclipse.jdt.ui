@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -77,7 +77,7 @@ public final class JavaModelUtil {
 	 */
 	public static final String VERSION_LATEST;
 	static {
-		VERSION_LATEST= JavaCore.VERSION_13; // make sure it is not inlined
+		VERSION_LATEST= JavaCore.VERSION_14; // make sure it is not inlined
 	}
 
 	public static final int VALIDATE_EDIT_CHANGED_CONTENT= 10003;
@@ -822,6 +822,10 @@ public final class JavaModelUtil {
 		return !isVersionLessThan(compliance, JavaCore.VERSION_13);
 	}
 
+	public static boolean is14OrHigher(String compliance) {
+		return !isVersionLessThan(compliance, JavaCore.VERSION_14);
+	}
+
 	/**
 	 * Checks if the given project or workspace has source compliance 1.5 or greater.
 	 *
@@ -898,8 +902,36 @@ public final class JavaModelUtil {
 		return is13OrHigher(getSourceCompliance(project));
 	}
 
+	/**
+	 * Checks if the given project or workspace has source compliance 14 or greater.
+	 *
+	 * @param project the project to test or <code>null</code> to test the workspace settings
+	 * @return <code>true</code> if the given project or workspace has source compliance 14 or
+	 *         greater.
+	 */
+	public static boolean is14OrHigher(IJavaProject project) {
+		return is14OrHigher(getSourceCompliance(project));
+	}
+
 	private static String getSourceCompliance(IJavaProject project) {
 		return project != null ? project.getOption(JavaCore.COMPILER_SOURCE, true) : JavaCore.getOption(JavaCore.COMPILER_SOURCE);
+	}
+
+	/**
+	 * Checks if the given project or workspace has source compliance greater than or equal to the
+	 * latest supported Java version.
+	 *
+	 * @param project the project to test or <code>null</code> to test the workspace settings
+	 *
+	 * @return <code>true</code> if the given project or workspace has source compliance greater
+	 *         than or equal to the latest supported Java version.
+	 */
+	public static boolean isLatestOrHigherJavaVersion(IJavaProject project) {
+		return isLatestOrHigherJavaVersion(getSourceCompliance(project));
+	}
+
+	public static boolean isLatestOrHigherJavaVersion(String compliance) {
+		return !isVersionLessThan(compliance, JavaCore.latestSupportedJavaVersion());
 	}
 
 	/**
@@ -931,6 +963,8 @@ public final class JavaModelUtil {
 		String version= vMInstall.getJavaVersion();
 		if (version == null) {
 			return defaultCompliance;
+		} else if (version.startsWith(JavaCore.VERSION_14)) {
+			return JavaCore.VERSION_14;
 		} else if (version.startsWith(JavaCore.VERSION_13)) {
 			return JavaCore.VERSION_13;
 		} else if (version.startsWith(JavaCore.VERSION_12)) {
@@ -971,7 +1005,9 @@ public final class JavaModelUtil {
 
 		// fallback:
 		String desc= executionEnvironment.getId();
-		if (desc.indexOf(JavaCore.VERSION_13) != -1) {
+		if (desc.indexOf(JavaCore.VERSION_14) != -1) {
+			return JavaCore.VERSION_14;
+		} else if (desc.indexOf(JavaCore.VERSION_13) != -1) {
 			return JavaCore.VERSION_13;
 		} else if (desc.indexOf(JavaCore.VERSION_12) != -1) {
 			return JavaCore.VERSION_12;
