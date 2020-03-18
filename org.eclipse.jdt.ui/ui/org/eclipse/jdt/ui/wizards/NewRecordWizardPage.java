@@ -36,9 +36,9 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
  * To implement a different kind of a new record wizard page, extend <code>NewTypeWizardPage</code>.
  * </p>
  *
- * @since 3.21
  *
  * @noextend This class is not intended to be subclassed by clients.
+ * @noreference This class is not intended to be referenced by clients.
  */
 public class NewRecordWizardPage extends NewTypeWizardPage {
 

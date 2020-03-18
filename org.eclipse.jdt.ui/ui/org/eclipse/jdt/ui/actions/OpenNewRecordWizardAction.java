@@ -38,9 +38,9 @@ import org.eclipse.jdt.internal.ui.wizards.NewRecordCreationWizard;
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
  *
- * @since 3.21
  *
  * @noextend This class is not intended to be subclassed by clients.
+ * @noreference This class is not intended to be referenced by clients.
  */
 public class OpenNewRecordWizardAction extends AbstractOpenWizardAction {
 

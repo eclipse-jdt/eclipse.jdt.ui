@@ -72,7 +72,7 @@ public class CodeGeneration {
 	 * Constant ID for the type kind to be used in {@link #getTypeBody(String, ICompilationUnit, String, String)} to get the code template used
 	 * for a new record type body.
 	 * @noreference This field is not intended to be referenced by clients.
-	 * @since 1.13
+	 * @since 1.14
 	 */
 	public static final String RECORD_BODY_TEMPLATE_ID= CodeTemplateContextType.RECORDBODY_ID;
 
