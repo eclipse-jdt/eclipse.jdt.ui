@@ -45,7 +45,7 @@
 
     <delete dir="${jdt-folder}" quiet="true"/>
     <condition property="java9vmargs" value="--add-opens java.base/jdk.internal.loader=ALL-UNNAMED --add-opens jdk.localedata/sun.util.resources.cldr.provider=ALL-UNNAMED --add-opens jdk.localedata/sun.util.resources.provider=ALL-UNNAMED --add-opens java.base/jdk.internal.module=ALL-UNNAMED --add-opens java.base/java.lang.module=ALL-UNNAMED --add-opens java.base/jdk.internal.reflect=ALL-UNNAMED --add-opens java.base/jdk.internal.ref=ALL-UNNAMED --add-opens java.base/jdk.internal.math=ALL-UNNAMED --add-opens java.base/jdk.internal.misc=ALL-UNNAMED --add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED" else="">
-      <matches pattern="^(9|10|11|12|13|14)$" string="${ant.java.version}" />
+    	<javaversion atleast="9"/>
     </condition>
     
 	<ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
