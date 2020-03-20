@@ -15,8 +15,6 @@ package org.eclipse.jdt.junit.tests;
 
 import java.util.HashSet;
 
-import junit.framework.TestCase;
-
 import org.eclipse.jdt.junit.JUnitCore;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.StringAsserts;
@@ -35,12 +33,12 @@ import org.eclipse.jdt.internal.junit.launcher.ITestFinder;
 import org.eclipse.jdt.internal.junit.launcher.ITestKind;
 import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
 
+import junit.framework.TestCase;
+
 
 public class JUnit3TestFinderTest extends TestCase {
 	private IJavaProject fProject;
 	private IPackageFragmentRoot fRoot;
-
-	private static final boolean BUG_559685= true;
 
 	@Override
 	protected void setUp() throws Exception {
@@ -60,9 +58,6 @@ public class JUnit3TestFinderTest extends TestCase {
 	}
 
 	public void testTestCase() throws Exception {
-		if (BUG_559685) {
-			return;
-		}
 		IPackageFragment p= fRoot.createPackageFragment("p", true, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package p;\n");
@@ -178,9 +173,6 @@ public class JUnit3TestFinderTest extends TestCase {
 	}
 
 	public void testSuite() throws Exception {
-		if (BUG_559685) {
-			return;
-		}
 		IPackageFragment p= fRoot.createPackageFragment("p", true, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package p;\n");
@@ -315,9 +307,6 @@ public class JUnit3TestFinderTest extends TestCase {
 	}
 
 	public void testTestInterface() throws Exception {
-		if (BUG_559685) {
-			return;
-		}
 		IPackageFragment p= fRoot.createPackageFragment("p", true, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package p;\n");

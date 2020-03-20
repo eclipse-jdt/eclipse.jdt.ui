@@ -44,8 +44,6 @@ public class TestTestSearchEngine extends TestCase {
 	private IJavaProject fProject;
 	private IPackageFragmentRoot fRoot;
 
-	private static final boolean BUG_559685= true;
-
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -174,9 +172,6 @@ public class TestTestSearchEngine extends TestCase {
 	}
 
 	public void testProject() throws Exception {
-		if (BUG_559685) {
-			return;
-		}
 		IPackageFragment p= fRoot.createPackageFragment("p", true, null);
 		ICompilationUnit test1= createCompilationUnit(p, 1);
 		ICompilationUnit test2= createCompilationUnit(p, 2);

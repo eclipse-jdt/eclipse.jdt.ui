@@ -101,15 +101,20 @@ public class BuildPathSupport {
 						}
 					}
 				}
-				if (bestMatch != null) {
-					try {
-						resolvedVersion = bestMatch.getVersion().toString();
+				if (bestMatch == null) {
+					return null;
+				}
+				resolvedVersion = bestMatch.getVersion().toString();
+				try {
+					if (bundleRoot == null) {
+						return new Path(FileLocator.getBundleFile(bestMatch).getAbsolutePath());
+					} else { // need the exploded jar
 						URL rootUrl= bestMatch.getEntry("/"); //$NON-NLS-1$
 						URL fileRootUrl= FileLocator.toFileURL(rootUrl);
 						return new Path(fileRootUrl.getPath());
-					} catch (IOException ex) {
-						JUnitCorePlugin.log(ex);
 					}
+				} catch (IOException ex) {
+					JUnitCorePlugin.log(ex);
 				}
 			}
 			return null;
@@ -293,7 +298,7 @@ public class BuildPathSupport {
 			"org.junit", new VersionRange("[3.8.2,3.9)"), "junit.jar", "junit.jar", "org.junit.source", "source-bundle/", JUnitPreferencesConstants.JUNIT3_JAVADOC); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 
 	public static final JUnitPluginDescription JUNIT4_PLUGIN= new JUnitPluginDescription(
-			"org.junit", new VersionRange("[4.7.0,5.0.0)"), "junit.jar", "junit.jar", "org.junit.source", "source-bundle/", JUnitPreferencesConstants.JUNIT4_JAVADOC); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+			"org.junit", new VersionRange("[4.13.0,5.0.0)"), null, "org.junit_4.*.jar", "org.junit.source", "source-bundle/", JUnitPreferencesConstants.JUNIT4_JAVADOC); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 
 	private static final JUnitPluginDescription HAMCREST_CORE_PLUGIN= new JUnitPluginDescription(
 			"org.hamcrest.core", new VersionRange("[1.1.0,2.0.0)"), null, "org.hamcrest.core_1.*.jar", "org.hamcrest.core.source", "source-bundle/", JUnitPreferencesConstants.HAMCREST_CORE_JAVADOC); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$

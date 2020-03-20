@@ -39,9 +39,6 @@
             <include>org/eclipse/jdt/ui/tests/AutomatedSuite.class</include>
             <include>org/eclipse/jdt/ui/tests/LeakTestSuite.class</include>
           </includes>
-          <explodedBundles>
-            <bundle>org.junit</bundle>
-          </explodedBundles>
           <dependencies>
             <dependency>
               <type>eclipse-plugin</type>
