@@ -1,11 +1,11 @@
 package p;
 
-import java.security.Permission;
+import java.util.Date;
 
 class A {
-	java.security.acl.Permission m(Permission xperm, java.security.acl.Permission[][] xacl) {
-		Object o1= xacl;
-		Object o2= xperm;
+	java.sql.Date m(Date xdate, java.sql.Date[][] xsql) {
+		Object o1= xsql;
+		Object o2= xdate;
 		return null;
 	}
 }

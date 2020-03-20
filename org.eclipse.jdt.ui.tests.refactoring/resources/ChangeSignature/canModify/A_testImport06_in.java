@@ -1,11 +1,11 @@
 package p;
 
-import java.security.Permission;
+import java.util.Date;
 
 class A {
-	Cloneable m(Permission perm, java.security.acl.Permission acl) {
-		Object o1= perm;
-		Object o2= acl;
+	Cloneable m(Date date, java.sql.Date sql) {
+		Object o1= date;
+		Object o2= sql;
 		return null;
 	}
 }

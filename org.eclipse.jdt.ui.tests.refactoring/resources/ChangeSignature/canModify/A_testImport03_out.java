@@ -1,16 +1,16 @@
 package p;
 
-import java.security.acl.Permission;
+import java.sql.Date;
 
 abstract class A {
-	public abstract int m(Permission p, java.security.Permission pp);
+	public abstract int m(Date d, java.util.Date dd);
 	protected void finalize() {
 		m(0, 0);
 	}
 }
 
 class B extends A {
-	public int m(Permission p, java.security.Permission pp) {
+	public int m(Date d, java.util.Date dd) {
 		return 17;
 	}
 }

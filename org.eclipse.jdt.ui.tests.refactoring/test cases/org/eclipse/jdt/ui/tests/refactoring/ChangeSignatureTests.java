@@ -1713,8 +1713,8 @@ public class ChangeSignatureTests extends RefactoringTest {
 
 	public void testFailImport01() throws Exception {
 		String[] signature= {};
-		String[] newTypes= {"Permission"};
-		String[] newNames= {"p"};
+		String[] newTypes= {"Date"};
+		String[] newNames= {"d"};
 		String[] newDefaultValues= {"null"};
 		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
 		int[] newIndices= {0};
@@ -1723,9 +1723,9 @@ public class ChangeSignatureTests extends RefactoringTest {
 
 	public void testImport01() throws Exception {
 		String[] signature= {};
-		String[] newTypes= {"java.security.acl.Permission", "Permission"};
-		String[] newNames= {"acl", "p"};
-		String[] newDefaultValues= {"null", "perm"};
+		String[] newTypes= {"java.sql.Date", "Date"};
+		String[] newNames= {"sql", "d"};
+		String[] newDefaultValues= {"null", "date"};
 		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
 		int[] newIndices= {0, 0};
 		helperAdd(signature, newParamInfo, newIndices);
@@ -1733,8 +1733,8 @@ public class ChangeSignatureTests extends RefactoringTest {
 
 	public void testImport02() throws Exception {
 		String[] signature= {};
-		String[] newTypes= {"Permission", "java.security.acl.Permission"};
-		String[] newNames= {"p", "acl"};
+		String[] newTypes= {"Date", "java.sql.Date"};
+		String[] newNames= {"d", "sql"};
 		String[] newDefaultValues= {"null", "null"};
 		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
 		int[] newIndices= {0, 0};
@@ -1743,8 +1743,8 @@ public class ChangeSignatureTests extends RefactoringTest {
 
 	public void testImport03() throws Exception {
 		String[] signature= {};
-		String[] newTypes= {"java.security.acl.Permission", "java.security.Permission"};
-		String[] newNames= {"p", "pp"};
+		String[] newTypes= {"java.sql.Date", "java.util.Date"};
+		String[] newNames= {"d", "dd"};
 		String[] newDefaultValues= {"0", "0"};
 		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
 		int[] newIndices= {0, 0};
@@ -1780,20 +1780,20 @@ public class ChangeSignatureTests extends RefactoringTest {
 	}
 
 	public void testImport06() throws Exception {
-		String[] signature= {"QPermission;", "Qjava.security.acl.Permission;"};
+		String[] signature= {"QDate;", "Qjava.sql.Date;"};
 		String[] newNames= null;
 		String[] newTypes= null;
 		String[] newDefaultValues= null;
 		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
 		int[] newIndices= {};
 
-		String[] oldParamNames= {"perm", "acl"};
-		String[] newParamNames= {"xacl", "xperm"};
-		String[] newParamTypeNames= {"java.security.acl.Permission [] []", "java.security.Permission"};
+		String[] oldParamNames= {"date", "sql"};
+		String[] newParamNames= {"xsql", "xdate"};
+		String[] newParamTypeNames= {"java.sql.Date [] []", "java.util.Date"};
 		int[] permutation= {1, 0};
 		int[] deletedIndices= null;
 		int newVisibility= Modifier.NONE;
-		String newReturnTypeName= "java.security.acl.Permission";
+		String newReturnTypeName= "java.sql.Date";
 		helperDoAll("A", "m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, newParamTypeNames, permutation, newVisibility, deletedIndices, newReturnTypeName);
 	}
 

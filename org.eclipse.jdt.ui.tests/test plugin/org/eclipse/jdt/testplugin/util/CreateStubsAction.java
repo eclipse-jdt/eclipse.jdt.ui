@@ -72,7 +72,6 @@ public final class CreateStubsAction implements IObjectActionDelegate {
 			"java.nio.charset",
 			"java.nio.charset.spi",
 			"java.security",
-			"java.security.acl",
 			"java.security.cert",
 			"java.security.interfaces",
 			"java.security.spec",

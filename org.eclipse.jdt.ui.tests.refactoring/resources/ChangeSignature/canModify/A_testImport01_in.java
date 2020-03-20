@@ -1,10 +1,10 @@
 package p;
 
-import java.security.Permission;
+import java.util.Date;
 
 abstract class A {
 	public abstract int m();
-	Permission perm;
+	Date date;
 	protected void finalize() {
 		m();
 	}
