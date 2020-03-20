@@ -85,7 +85,7 @@ public class SurroundWithActionGroup extends ActionGroup {
 			@Override
 			public void menuAboutToShow(IMenuManager manager) {
 				manager.removeAll();
-				SurroundWithTemplateMenuAction.fillMenu(manager, fEditor, fSurroundWithTryCatchAction, 
+				SurroundWithTemplateMenuAction.fillMenu(manager, fEditor, fSurroundWithTryCatchAction,
 						fSurroundWithTryMultiCatchAction, fSurroundWithTryWithResourcesAction);
 			}
 		});
