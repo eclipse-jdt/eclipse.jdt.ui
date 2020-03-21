@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
+import java.util.Objects;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -170,7 +172,7 @@ public class ExtractConstantWizard extends RefactoringWizard {
 				Button radio= new Button(group, SWT.RADIO);
 				radio.setText(labels[i]);
 				radio.setData(data[i]);
-				if ((data[i] == null && fAccessModifier == null) || (data[i] != null && data[i].equals(fAccessModifier)))
+				if (Objects.equals(data[i], fAccessModifier))
 					radio.setSelection(true);
 				radio.addSelectionListener(new SelectionAdapter() {
 					@Override

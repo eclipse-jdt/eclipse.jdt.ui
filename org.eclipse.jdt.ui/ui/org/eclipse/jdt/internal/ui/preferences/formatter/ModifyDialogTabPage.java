@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences.formatter;
 
+import java.util.Objects;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -572,7 +574,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 				fSelected= fOldSelected;
 			else
 				fSelected= input;
-			if ((fSelected == null && fOldSelected != null) || (fSelected != null && !fSelected.equals(fOldSelected))) {
+			if (!Objects.equals(fSelected, fOldSelected)) {
 				saveSelected();
 				fText.setText(fSelected);
 			}
@@ -584,7 +586,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 			final String errorText= fInputValidator != null ? fInputValidator.isValid(text) : null;
 			if (errorText == null) {
 				updateStatus(null);
-				if ((fSelected == null && text != null) || (fSelected != null && !fSelected.equals(text))) {
+				if (!Objects.equals(fSelected, text)) {
 					fSelected= text;
 					saveSelected();
 				}

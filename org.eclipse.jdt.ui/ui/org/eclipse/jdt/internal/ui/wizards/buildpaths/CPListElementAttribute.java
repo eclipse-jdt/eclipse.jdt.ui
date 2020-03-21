@@ -136,10 +136,8 @@ public class CPListElementAttribute {
         if (!(obj instanceof CPListElementAttribute))
             return false;
         CPListElementAttribute attrib= (CPListElementAttribute)obj;
-        if(!Objects.equals(attrib.fKey, this.fKey)) {
-        	return false;
-        }
-        return Objects.equals(attrib.getParent().getPath(),fParent.getPath());
+        return Objects.equals(attrib.fKey, this.fKey)
+        		&& Objects.equals(attrib.getParent().getPath(), fParent.getPath());
     }
 
     @Override

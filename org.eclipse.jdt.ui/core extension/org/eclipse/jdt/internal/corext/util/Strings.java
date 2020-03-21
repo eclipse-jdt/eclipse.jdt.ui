@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.util;
 
+import java.util.Objects;
+
 import org.eclipse.osgi.util.TextProcessor;
 
 import org.eclipse.jface.action.LegacyActionTools;
@@ -76,7 +78,7 @@ public class Strings extends org.eclipse.jdt.internal.core.manipulation.util.Str
 
 		String inputString= styledString.getString();
 		String string= TextProcessor.process(inputString);
-		if ((string == null && inputString != null) || (string != null && !string.equals(inputString)))
+		if (!Objects.equals(string, inputString))
 			insertMarks(styledString, inputString, string);
 		return styledString;
 	}
@@ -95,7 +97,7 @@ public class Strings extends org.eclipse.jdt.internal.core.manipulation.util.Str
 
 		String inputString= styledString.getString();
 		String string= TextProcessor.process(inputString, JAVA_ELEMENT_DELIMITERS);
-		if ((string == null && inputString != null) || (string != null && !string.equals(inputString)))
+		if (!Objects.equals(string, inputString))
 			insertMarks(styledString, inputString, string);
 		return styledString;
 	}
@@ -114,7 +116,7 @@ public class Strings extends org.eclipse.jdt.internal.core.manipulation.util.Str
 
 		String inputString= styledString.getString();
 		String string= TextProcessor.process(inputString, delimiters);
-		if ((string == null && inputString != null) || (string != null && !string.equals(inputString)))
+		if (!Objects.equals(string, inputString))
 			insertMarks(styledString, inputString, string);
 		return styledString;
 	}
