@@ -76,7 +76,7 @@ public class Strings extends org.eclipse.jdt.internal.core.manipulation.util.Str
 
 		String inputString= styledString.getString();
 		String string= TextProcessor.process(inputString);
-		if (string != inputString)
+		if ((string == null && inputString != null) || (string != null && !string.equals(inputString)))
 			insertMarks(styledString, inputString, string);
 		return styledString;
 	}
@@ -95,7 +95,7 @@ public class Strings extends org.eclipse.jdt.internal.core.manipulation.util.Str
 
 		String inputString= styledString.getString();
 		String string= TextProcessor.process(inputString, JAVA_ELEMENT_DELIMITERS);
-		if (string != inputString)
+		if ((string == null && inputString != null) || (string != null && !string.equals(inputString)))
 			insertMarks(styledString, inputString, string);
 		return styledString;
 	}
@@ -114,7 +114,7 @@ public class Strings extends org.eclipse.jdt.internal.core.manipulation.util.Str
 
 		String inputString= styledString.getString();
 		String string= TextProcessor.process(inputString, delimiters);
-		if (string != inputString)
+		if ((string == null && inputString != null) || (string != null && !string.equals(inputString)))
 			insertMarks(styledString, inputString, string);
 		return styledString;
 	}

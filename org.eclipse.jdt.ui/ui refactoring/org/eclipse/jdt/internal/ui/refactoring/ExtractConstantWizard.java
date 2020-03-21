@@ -170,7 +170,7 @@ public class ExtractConstantWizard extends RefactoringWizard {
 				Button radio= new Button(group, SWT.RADIO);
 				radio.setText(labels[i]);
 				radio.setData(data[i]);
-				if (data[i] == fAccessModifier)
+				if ((data[i] == null && fAccessModifier == null) || (data[i] != null && data[i].equals(fAccessModifier)))
 					radio.setSelection(true);
 				radio.addSelectionListener(new SelectionAdapter() {
 					@Override

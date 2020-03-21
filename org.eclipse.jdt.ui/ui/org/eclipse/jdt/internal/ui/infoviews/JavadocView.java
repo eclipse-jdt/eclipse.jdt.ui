@@ -1207,7 +1207,7 @@ public class JavadocView extends AbstractInfoView {
 			try {
 				int offset= ((ITextSelection)selection).getOffset();
 				String partition= ((IDocumentExtension3)document).getContentType(IJavaPartitions.JAVA_PARTITIONING, offset, false);
-				return  partition != IJavaPartitions.JAVA_DOC;
+				return !IJavaPartitions.JAVA_DOC.equals(partition);
 			} catch (BadPartitioningException ex) {
 				return false;
 			} catch (BadLocationException ex) {

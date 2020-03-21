@@ -526,10 +526,10 @@ public abstract class AbstractToStringGenerator {
 	 */
 	protected Object processElement(String templateElement, Object member) {
 		Object result= templateElement;
-		if (templateElement == ToStringTemplateParser.OBJECT_NAME_VARIABLE) {
+		if (ToStringTemplateParser.OBJECT_NAME_VARIABLE.equals(templateElement)) {
 			result= fContext.getTypeBinding().getName();
 		}
-		if (templateElement == ToStringTemplateParser.OBJECT_GET_NAME_VARIABLE) {
+		if (ToStringTemplateParser.OBJECT_GET_NAME_VARIABLE.equals(templateElement)) {
 			//this.getClass().getName()
 			MethodInvocation getClassInvocation= fAst.newMethodInvocation();
 			if (fContext.isKeywordThis())
@@ -540,13 +540,13 @@ public abstract class AbstractToStringGenerator {
 			getNameInvocation.setName(fAst.newSimpleName("getName")); //$NON-NLS-1$
 			result= getNameInvocation;
 		}
-		if (templateElement == ToStringTemplateParser.OBJECT_SUPER_TOSTRING_VARIABLE) {
+		if (ToStringTemplateParser.OBJECT_SUPER_TOSTRING_VARIABLE.equals(templateElement)) {
 			//super.toString()
 			SuperMethodInvocation superToStringInvocation= fAst.newSuperMethodInvocation();
 			superToStringInvocation.setName(fAst.newSimpleName(METHODNAME_TO_STRING));
 			result= superToStringInvocation;
 		}
-		if (templateElement == ToStringTemplateParser.OBJECT_HASHCODE_VARIABLE) {
+		if (ToStringTemplateParser.OBJECT_HASHCODE_VARIABLE.equals(templateElement)) {
 			//this.hashCode()
 			MethodInvocation hashCodeInvocation= fAst.newMethodInvocation();
 			if (fContext.isKeywordThis())
@@ -554,14 +554,14 @@ public abstract class AbstractToStringGenerator {
 			hashCodeInvocation.setName(fAst.newSimpleName("hashCode")); //$NON-NLS-1$
 			result= hashCodeInvocation;
 		}
-		if (templateElement == ToStringTemplateParser.OBJECT_SYSTEM_HASHCODE_VARIABLE) {
+		if (ToStringTemplateParser.OBJECT_SYSTEM_HASHCODE_VARIABLE.equals(templateElement)) {
 			//system.identityHashCode(this)
 			result= createMethodInvocation(addImport("java.lang.System"), "identityHashCode", fAst.newThisExpression()); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		if (templateElement == ToStringTemplateParser.MEMBER_NAME_VARIABLE || templateElement == ToStringTemplateParser.MEMBER_NAME_PARENTHESIS_VARIABLE) {
+		if (ToStringTemplateParser.MEMBER_NAME_VARIABLE.equals(templateElement) || ToStringTemplateParser.MEMBER_NAME_PARENTHESIS_VARIABLE.equals(templateElement)) {
 			result= getMemberName(member, templateElement);
 		}
-		if (templateElement == ToStringTemplateParser.MEMBER_VALUE_VARIABLE) {
+		if (ToStringTemplateParser.MEMBER_VALUE_VARIABLE.equals(templateElement)) {
 			result= createMemberAccessExpression(member, false, fContext.isSkipNulls());
 		}
 		if (result instanceof StringLiteral)
@@ -919,7 +919,7 @@ public abstract class AbstractToStringGenerator {
 		}
 		if (member instanceof IMethodBinding) {
 			String result= ((IMethodBinding)member).getName();
-			if (templateElement == ToStringTemplateParser.MEMBER_NAME_PARENTHESIS_VARIABLE)
+			if (ToStringTemplateParser.MEMBER_NAME_PARENTHESIS_VARIABLE.equals(templateElement))
 				result+= "()"; //$NON-NLS-1$
 			return result;
 		}

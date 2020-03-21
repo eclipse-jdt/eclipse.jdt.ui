@@ -232,7 +232,7 @@ public class EditOutputFolderAction extends BuildpathModifierAction {
 				return true;
 			} else if (element instanceof CPListElementAttribute) {
 				CPListElementAttribute attribute= (CPListElementAttribute)element;
-				if (attribute.getKey() != CPListElement.OUTPUT)
+				if (!CPListElement.OUTPUT.equals(attribute.getKey()))
 					return false;
 
 				return true;

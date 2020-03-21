@@ -88,7 +88,7 @@ public class StringFormatGenerator extends AbstractToStringGenerator {
 
 	@Override
 	protected Object processElement(String templateElement, Object member) {
-		if (templateElement == ToStringTemplateParser.MEMBER_VALUE_VARIABLE) {
+		if (ToStringTemplateParser.MEMBER_VALUE_VARIABLE.equals(templateElement)) {
 			return createMemberAccessExpression(member, false, false);
 		}
 		return super.processElement(templateElement, member);

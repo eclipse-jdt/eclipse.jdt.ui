@@ -28,7 +28,6 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.jface.text.IRegion;
@@ -67,6 +66,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.MethodOverrideTester;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
@@ -304,7 +304,7 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 					JavaEditorMessages.JavaElementImplementationHyperlink_hyperlinkText,
 					JavaEditorMessages.JavaElementImplementationHyperlink_error_no_implementations_found_message, status);
 		} catch (InterruptedException e) {
-			if (e.getMessage() != dummyString) {
+			if (e.getMessage() != null && !e.getMessage().isEmpty()) {
 				return;
 			}
 		}

@@ -39,7 +39,7 @@ public abstract class TextEditorTestSetup extends TestSetup {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		if (getEditorId() == DEFAULT_EDITOR_ID)
+		if (DEFAULT_EDITOR_ID.equals(getEditorId()))
 			fEditor= (AbstractTextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(getFile()), true);
 		else
 			fEditor= (AbstractTextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(getFile()), getEditorId(), true);

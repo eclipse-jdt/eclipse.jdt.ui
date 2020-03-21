@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -99,7 +99,7 @@ public class AddBlockCommentAction extends BlockCommentAction {
 		Assert.isTrue(partOffset <= offset, "illegal partition"); //$NON-NLS-1$
 
 		// first partition: mark start of comment
-		if (partType == IDocument.DEFAULT_CONTENT_TYPE) {
+		if (IDocument.DEFAULT_CONTENT_TYPE.equals(partType)) {
 			// Java code: right where selection starts
 			edits.add(factory.createEdit(offset, 0, getCommentStart()));
 		} else if (isSpecialPartition(partType)) {
@@ -141,11 +141,11 @@ public class AddBlockCommentAction extends BlockCommentAction {
 
 		boolean wasJavadoc= false; // true if the previous partition is javadoc
 
-		if (partType == IJavaPartitions.JAVA_DOC) {
+		if (IJavaPartitions.JAVA_DOC.equals(partType)) {
 
 			wasJavadoc= true;
 
-		} else if (partType == IJavaPartitions.JAVA_MULTI_LINE_COMMENT) {
+		} else if (IJavaPartitions.JAVA_MULTI_LINE_COMMENT.equals(partType)) {
 
 			// already in a comment - remove ending mark
 			edits.add(factory.createEdit(partEndOffset - tokenLength, tokenLength, "")); //$NON-NLS-1$
@@ -161,17 +161,17 @@ public class AddBlockCommentAction extends BlockCommentAction {
 
 			// if previous was javadoc, and the current one is not a comment,
 			// then add a block comment start
-			if (partType == IDocument.DEFAULT_CONTENT_TYPE
+			if (IDocument.DEFAULT_CONTENT_TYPE.equals(partType)
 					|| isSpecialPartition(partType)) {
 				edits.add(factory.createEdit(partition.getOffset(), 0, getCommentStart()));
 			}
 
 		} else { // !wasJavadoc
 
-			if (partType == IJavaPartitions.JAVA_DOC) {
+			if (IJavaPartitions.JAVA_DOC.equals(partType)) {
 				// if next is javadoc, end block comment before
 				edits.add(factory.createEdit(partition.getOffset(), 0, getCommentEnd()));
-			} else if (partType == IJavaPartitions.JAVA_MULTI_LINE_COMMENT) {
+			} else if (IJavaPartitions.JAVA_MULTI_LINE_COMMENT.equals(partType)) {
 				// already in a comment - remove startToken
 				edits.add(factory.createEdit(partition.getOffset(), getCommentStart().length(), "")); //$NON-NLS-1$
 			}
@@ -196,7 +196,7 @@ public class AddBlockCommentAction extends BlockCommentAction {
 
 		String partType= partition.getType();
 
-		if (partType == IDocument.DEFAULT_CONTENT_TYPE) {
+		if (IDocument.DEFAULT_CONTENT_TYPE.equals(partType)) {
 			// normal java: end comment where selection ends
 			edits.add(factory.createEdit(endOffset, 0, getCommentEnd()));
 		} else if (isSpecialPartition(partType)) {
@@ -214,9 +214,9 @@ public class AddBlockCommentAction extends BlockCommentAction {
 	 * @return <code>true</code> if <code>partType</code> is special, <code>false</code> otherwise
 	 */
 	private boolean isSpecialPartition(String partType) {
-		return partType == IJavaPartitions.JAVA_CHARACTER
-				|| partType == IJavaPartitions.JAVA_STRING
-				|| partType == IJavaPartitions.JAVA_SINGLE_LINE_COMMENT;
+		return IJavaPartitions.JAVA_CHARACTER.equals(partType)
+				|| IJavaPartitions.JAVA_STRING.equals(partType)
+				|| IJavaPartitions.JAVA_SINGLE_LINE_COMMENT.equals(partType);
 	}
 
 	/*

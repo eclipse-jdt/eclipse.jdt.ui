@@ -208,7 +208,7 @@ class NLSSearchResultRequestor extends SearchRequestor {
 	 * @return <code>true</code> if the key is defined, <code>false</code> otherwise
 	 */
 	private boolean isKeyDefined(String key) {
-		if (key == NO_KEY)
+		if (NO_KEY.equals(key))
 			return false;
 
 		fUsedPropertyNames.add(key);

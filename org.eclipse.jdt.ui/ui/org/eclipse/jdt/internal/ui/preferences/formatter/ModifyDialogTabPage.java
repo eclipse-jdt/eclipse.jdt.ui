@@ -572,7 +572,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 				fSelected= fOldSelected;
 			else
 				fSelected= input;
-			if (fSelected != fOldSelected) {
+			if ((fSelected == null && fOldSelected != null) || (fSelected != null && !fSelected.equals(fOldSelected))) {
 				saveSelected();
 				fText.setText(fSelected);
 			}
@@ -584,7 +584,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 			final String errorText= fInputValidator != null ? fInputValidator.isValid(text) : null;
 			if (errorText == null) {
 				updateStatus(null);
-				if (fSelected != text) {
+				if ((fSelected == null && text != null) || (fSelected != null && !fSelected.equals(text))) {
 					fSelected= text;
 					saveSelected();
 				}

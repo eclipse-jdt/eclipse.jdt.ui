@@ -317,7 +317,7 @@ public class NewPackageWizardPage extends NewTypeWizardPage {
 	@Override
 	protected void handleFieldChanged(String fieldName) {
 		super.handleFieldChanged(fieldName);
-		if (fieldName == CONTAINER) {
+		if (CONTAINER.equals(fieldName)) {
 			fPackageStatus= getPackageStatus(getPackageText());
 		}
 		// do status line update

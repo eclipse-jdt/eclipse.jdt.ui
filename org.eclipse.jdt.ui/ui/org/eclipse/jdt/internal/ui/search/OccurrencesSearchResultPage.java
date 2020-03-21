@@ -331,7 +331,7 @@ public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
 			String id= ((OccurrencesSearchQuery) input.getQuery()).getFinderId();
 			if (id == OccurrencesFinder.ID) {
 				finder= new OccurrencesFinder();
-			} else if (id == ExceptionOccurrencesFinder.ID) {
+			} else if (ExceptionOccurrencesFinder.ID.equals(id)) {
 				finder= new ExceptionOccurrencesFinder();
 			} else {
 				finder= new ImplementOccurrencesFinder();
