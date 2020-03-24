@@ -30,9 +30,6 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.CreationReference;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionMethodReference;
-import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -51,6 +48,9 @@ import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeMethodReference;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
@@ -148,7 +148,9 @@ public class LambdaExpressionAndMethodRefCleanUp extends AbstractMultiFix {
 					ClassInstanceCreation ci= (ClassInstanceCreation) node.getBody();
 
 					List<Expression> arguments= ci.arguments();
-					if (node.parameters().size() == arguments.size() && areSameIdentifiers(node, arguments)) {
+					if (node.parameters().size() == arguments.size()
+							&& areSameIdentifiers(node, arguments)
+							&& ci.getAnonymousClassDeclaration() == null) {
 						rewriteOperations.add(new ReplaceByCreationReferenceOperation(node, ci));
 						return false;
 					}
