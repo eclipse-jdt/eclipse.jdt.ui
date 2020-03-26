@@ -72,6 +72,7 @@ public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
 		final RadioPreference useParenthesesAlwaysPref= createRadioPref(expressionsGroup, 1, CleanUpMessages.CodeStyleTabPage_RadioName_AlwaysUseParantheses, CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_ALWAYS, CleanUpModifyDialog.FALSE_TRUE);
 		final RadioPreference useParenthesesNeverPref= createRadioPref(expressionsGroup, 1, CleanUpMessages.CodeStyleTabPage_RadioName_NeverUseParantheses, CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER, CleanUpModifyDialog.FALSE_TRUE);
 		registerSlavePreference(useParenthesesPref, new RadioPreference[] {useParenthesesAlwaysPref, useParenthesesNeverPref});
+		intent(expressionsGroup);
 		final CheckboxPreference useLazyLogicalPref= createCheckboxPref(expressionsGroup, 1, CleanUpMessages.CodeStyleTabPage_CheckboxName_UseLazyLogicalOperator,
 				CleanUpConstants.USE_LAZY_LOGICAL_OPERATOR, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(useLazyLogicalPref);
