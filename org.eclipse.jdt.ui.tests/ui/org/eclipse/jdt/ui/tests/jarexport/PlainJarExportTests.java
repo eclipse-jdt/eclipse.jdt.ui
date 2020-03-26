@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2015 IBM Corporation and others.
+ * Copyright (c) 2008, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,6 +13,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.jarexport;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,6 +25,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TestName;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
@@ -45,34 +55,28 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.jarpackager.IJarExportRunnable;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+public class PlainJarExportTests {
+	@Rule
+	public ProjectTestSetup pts= new ProjectTestSetup();
 
+	@Rule
+	public TestName tn= new TestName();
 
-public class PlainJarExportTests extends TestCase {
-
-	private static final Class<PlainJarExportTests> THIS= PlainJarExportTests.class;
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
+	@BeforeClass
+	public static void setUpTest() {
 		System.setProperty("jdt.bug.367669", "non-null");
-		return new ProjectTestSetup(test);
 	}
 
 	private IJavaProject fProject;
 	private IPackageFragmentRoot fMainRoot;
 	private ICompilationUnit fCU;
 
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		fProject= ProjectTestSetup.getProject();
 
 		Map<String, String> options= fProject.getOptions(false);
@@ -97,13 +101,13 @@ public class PlainJarExportTests extends TestCase {
 		fCU= fragment.createCompilationUnit("Main.java", buf.toString(), true, null);
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.clear(fProject, ProjectTestSetup.getDefaultClasspath());
 	}
 
-
-	public void testExportCu() throws Exception {
+	@Test
+	public void exportCu() throws Exception {
 		JarPackageData data= createJarPackageData();
 
 		data.setElements(new Object[] { fCU });
@@ -122,7 +126,8 @@ public class PlainJarExportTests extends TestCase {
 		assertEquals(expected.toString(), entries.toString());
 	}
 
-	public void testExportFile() throws Exception {
+	@Test
+	public void exportFile() throws Exception {
 		JarPackageData data= createJarPackageData();
 
 		data.setElements(new Object[] { fCU.getResource() });
@@ -140,7 +145,8 @@ public class PlainJarExportTests extends TestCase {
 	}
 
 	//https://bugs.eclipse.org/bugs/show_bug.cgi?id=229052
-	public void testExternalClassFolder() throws Exception {
+	@Test
+	public void externalClassFolder() throws Exception {
 		JarPackageData data= createJarPackageData();
 
 		File classFolder= JavaTestPlugin.getDefault().getFileInPlugin(new Path("testresources/externalClassFolder/"));//$NON-NLS-1$
@@ -169,6 +175,10 @@ public class PlainJarExportTests extends TestCase {
 		data.setBuildIfNeeded(true);
 		data.setOverwrite(true);
 		return data;
+	}
+
+	private String getName() {
+		return tn.getMethodName();
 	}
 
 	private static ZipFile createArchive(JarPackageData data) throws Exception, CoreException {

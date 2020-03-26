@@ -14,6 +14,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.testplugin;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -67,14 +70,10 @@ import org.eclipse.jdt.core.search.TypeNameRequestor;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 
-import junit.framework.TestCase;
-
-
 /**
  * Helper methods to set up a IJavaProject.
  */
 public class JavaProjectHelper {
-
 	/**
 	 * XXX: Flag to enable/disable dummy search to synchronize with indexer. See https://bugs.eclipse.org/391927 .
 	 * <p>
@@ -194,10 +193,11 @@ public class JavaProjectHelper {
 		IJavaProject project= createJavaProject(projectName, outputFolderName);
 
 		IPackageFragmentRoot jdk= JavaProjectHelper.addVariableRTJar(project, "JRE_LIB_TEST", null, null);//$NON-NLS-1$
-		TestCase.assertNotNull(jdk);
+		assertNotNull(jdk);
 
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JUNIT_SRC_381);
-		TestCase.assertTrue(junitSrcArchive != null && junitSrcArchive.exists());
+		assertNotNull(junitSrcArchive);
+		assertTrue(junitSrcArchive.exists());
 
 		JavaProjectHelper.addSourceContainerWithImport(project, srcContainerName, junitSrcArchive, JUNIT_SRC_ENCODING);
 
@@ -1027,8 +1027,8 @@ public class JavaProjectHelper {
 	 */
 	public static IPath[] findRtJar(IPath rtStubsPath) throws CoreException {
 		File rtStubs= JavaTestPlugin.getDefault().getFileInPlugin(rtStubsPath);
-		TestCase.assertNotNull(rtStubs);
-		TestCase.assertTrue(rtStubs.exists());
+		assertNotNull(rtStubs);
+		assertTrue(rtStubs.exists());
 		return new IPath[] {
 			Path.fromOSString(rtStubs.getPath()),
 			null,

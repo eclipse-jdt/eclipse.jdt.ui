@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,8 +13,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core.source;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import static org.junit.Assert.assertEquals;
+
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -37,14 +39,14 @@ import org.eclipse.jdt.core.dom.Modifier;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.AddGetterSetterOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.IRequestQuery;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 
 /**
  * Tests generation of getters and setters.
@@ -53,22 +55,10 @@ import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
  *
  */
 public class GenerateGettersSettersTest extends SourceTestCase {
-
-	static final Class<GenerateGettersSettersTest> THIS= GenerateGettersSettersTest.class;
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
-	}
+	@Rule
+	public ProjectTestSetup pts= new ProjectTestSetup();
 
 	private static final IField[] NOFIELDS= new IField[] {};
-
-	public GenerateGettersSettersTest(String name) {
-		super(name);
-	}
 
 	private IType createNewType(String fQName) throws JavaModelException {
 		final String pkg= fQName.substring(0, fQName.lastIndexOf('.'));
@@ -132,6 +122,7 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 	 *
 	 * @throws Exception
 	 */
+	@Test
 	public void test0() throws Exception {
 
 		IField field1= fClassA.createField("String field1;", null, false, new NullProgressMonitor());
@@ -164,7 +155,8 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 	 *
 	 * @throws Exception
 	 */
-	public void testDoneWithSmartIs() throws Exception {
+	@Test
+	public void doneWithSmartIs() throws Exception {
 
 		IField field1= fClassA.createField("boolean done;", null, false, new NullProgressMonitor());
 		runOperation(NOFIELDS, NOFIELDS, new IField[] { field1 });
@@ -196,7 +188,8 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 	 *
 	 * @throws Exception
 	 */
-	public void testIsDoneWithSmartIs() throws Exception {
+	@Test
+	public void isDoneWithSmartIs() throws Exception {
 
 		IField field1= fClassA.createField("boolean isDone;", null, false, new NullProgressMonitor());
 		runOperation(NOFIELDS, NOFIELDS, new IField[] { field1 });
@@ -228,7 +221,8 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 	 *
 	 * @throws Exception
 	 */
-	public void testDoneWithoutSmartIs() throws Exception {
+	@Test
+	public void doneWithoutSmartIs() throws Exception {
 		final IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		try {
 			store.setValue(PreferenceConstants.CODEGEN_IS_FOR_GETTERS, false);
@@ -265,7 +259,8 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 	 *
 	 * @throws Exception
 	 */
-	public void testIsDoneWithoutSmartIs() throws Exception {
+	@Test
+	public void isDoneWithoutSmartIs() throws Exception {
 		final IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		try {
 			store.setValue(PreferenceConstants.CODEGEN_IS_FOR_GETTERS, false);
@@ -301,6 +296,7 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 	 * No setter for final fields (if skipped by user, as per parameter)
 	 * @throws Exception
 	 */
+	@Test
 	public void test1() throws Exception {
 
 		IField field1= fClassA.createField("final String field1 = null;", null, false, new NullProgressMonitor());
@@ -332,6 +328,7 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 	 * Tests if full-qualified field declaration type is also full-qualified in setter parameter.
 	 * @throws Exception
 	 */
+	@Test
 	public void test2() throws Exception {
 
 		createNewType("q.Other");
@@ -365,6 +362,7 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 	 * Test parameterized types in field declarations
 	 * @throws Exception
 	 */
+	@Test
 	public void test3() throws Exception {
 
 		ICompilationUnit b= fPackageP.createCompilationUnit("B.java", "package p;\r\n" +
@@ -409,6 +407,7 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 	 * Tests enum typed fields
 	 * @throws Exception
 	 */
+	@Test
 	public void test4() throws Exception {
 
 		IType theEnum= fClassA.createType("private enum ENUM { C,D,E };", null, false, null);
@@ -443,6 +442,7 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 	 * Test generation for more than one field
 	 * @throws Exception
 	 */
+	@Test
 	public void test5() throws Exception {
 
 		createNewType("q.Other");
@@ -528,6 +528,7 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 	 * Some more fields, this time sorted
 	 * @throws Exception
 	 */
+	@Test
 	public void test6() throws Exception {
 
 		IField field1= fClassA.createField("private String a;", null, false, new NullProgressMonitor());
@@ -586,6 +587,7 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 	 * Test getter/setter generation in anonymous type
 	 * @throws Exception
 	 */
+	@Test
 	public void test7() throws Exception {
 
 		ICompilationUnit b= fPackageP.createCompilationUnit("B.java", "package p;\r\n" +
@@ -636,6 +638,7 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 	 * Tests other modifiers for the generated getters
 	 * @throws Exception
 	 */
+	@Test
 	public void test8() throws Exception {
 
 		IField field1= fClassA.createField("private Object o;", null, false, new NullProgressMonitor());
@@ -660,6 +663,7 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 	 * Verify existing getters are not overwritten, and setters are created
 	 * @throws Exception
 	 */
+	@Test
 	public void test9() throws Exception {
 
 		ICompilationUnit b= fPackageP.createCompilationUnit("B.java", "package p;\r\n" +
@@ -707,6 +711,7 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 	 * one variable and only a setter for another.
 	 * @throws Exception
 	 */
+	@Test
 	public void test10() throws Exception {
 
 		ICompilationUnit b= fPackageP.createCompilationUnit("B.java", "package p;\r\n" +
@@ -755,6 +760,7 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 	 * Tests insertion of members before a certain method.
 	 * @throws Exception
 	 */
+	@Test
 	public void test11() throws Exception {
 
 		ICompilationUnit b= fPackageP.createCompilationUnit("B.java", "public class B {\r\n" +
@@ -841,7 +847,8 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 		compareSource(expected, classB.getSource());
 	}
 
-	public void testInsertSetterAtLocation() throws Exception {
+	@Test
+	public void insertSetterAtLocation() throws Exception {
 		StringBuilder buf= new StringBuilder();
 		buf.append("/**\n");
 		buf.append("	 * @return Returns the x.\n");
@@ -854,7 +861,8 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 		assertInsertAt(expectedGetter, true);
 	}
 
-	public void testInsertGetterAtLocation() throws Exception {
+	@Test
+	public void insertGetterAtLocation() throws Exception {
 		StringBuilder buf= new StringBuilder();
 		buf.append("/**\n");
 		buf.append("	 * @param x The x to set.\n");
@@ -867,7 +875,8 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 		assertInsertAt(expectedSetter, false);
 	}
 
-	public void testInsertGetterAtLocation2() throws Exception {
+	@Test
+	public void insertGetterAtLocation2() throws Exception {
 		StringBuilder buf= new StringBuilder();
 		buf.append("/**\n");
 		buf.append("	 * @param x The x to set.\n");

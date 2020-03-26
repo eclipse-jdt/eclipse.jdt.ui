@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,11 +13,17 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Arrays;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -33,31 +39,20 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import org.eclipse.jdt.internal.corext.dom.Bindings;
-
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 
-public class OverrideTest extends TestCase {
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
-	private static final Class<OverrideTest> THIS= OverrideTest.class;
+public class OverrideTest {
+	@Rule
+	public ProjectTestSetup pts= new ProjectTestSetup();
 
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
 	private IPackageFragment fPackage;
 
-	public OverrideTest(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
-	}
-
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		JavaProjectHelper.addRTJar(fJProject1);
 
@@ -65,8 +60,8 @@ public class OverrideTest extends TestCase {
 		fPackage= fSourceFolder.createPackageFragment("override.test", false, null);
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJProject1);
 	}
 
@@ -77,6 +72,7 @@ public class OverrideTest extends TestCase {
 		return (CompilationUnit) parser.createAST(null);
 	}
 
+	@Test
 	public void test14Overloaded() throws Exception {
 		StringBuilder buf= new StringBuilder();
 		buf.append("package override.test;\n");
@@ -92,7 +88,7 @@ public class OverrideTest extends TestCase {
 
 		CompilationUnit astRoot= createAST(cu);
 		IProblem[] problems= astRoot.getProblems();
-		assertTrue(problems.length == 0);
+		assertEquals(0, problems.length);
 
 		TypeDeclaration top= (TypeDeclaration) astRoot.types().get(0);
 		IMethodBinding topInteger= top.getMethods()[0].resolveBinding();
@@ -107,6 +103,7 @@ public class OverrideTest extends TestCase {
 		assertNull(Bindings.findOverriddenMethod(subObject, true));
 	}
 
+	@Test
 	public void test14Overloaded2() throws Exception {
 		StringBuilder buf= new StringBuilder();
 		buf.append("package override.test;\n");
@@ -131,7 +128,7 @@ public class OverrideTest extends TestCase {
 
 		CompilationUnit astRoot= createAST(cu);
 		IProblem[] problems= astRoot.getProblems();
-		assertTrue(problems.length == 0);
+		assertEquals(0, problems.length);
 
 		TypeDeclaration iTop= (TypeDeclaration) astRoot.types().get(0);
 		IMethodBinding iTopInteger= iTop.getMethods()[0].resolveBinding();
@@ -151,6 +148,7 @@ public class OverrideTest extends TestCase {
 		assertSame(iTopInteger, Bindings.findOverriddenMethod(sub2Integer, true));
 	}
 
+	@Test
 	public void test15Bug100233() throws Exception {
 		StringBuilder buf= new StringBuilder();
 		buf.append("package override.test;\n");
@@ -180,7 +178,7 @@ public class OverrideTest extends TestCase {
 
 		CompilationUnit astRoot= createAST(cu);
 		IProblem[] problems= astRoot.getProblems();
-		assertTrue(problems.length == 0);
+		assertEquals(0, problems.length);
 
 		TypeDeclaration a= (TypeDeclaration) astRoot.types().get(0);
 		IMethodBinding ag2= a.getMethods()[1].resolveBinding();
@@ -193,6 +191,7 @@ public class OverrideTest extends TestCase {
 		assertSame(ag2, Bindings.findOverriddenMethod(bg2, true).getMethodDeclaration()); // found method is from parameterized superclass
 	}
 
+	@Test
 	public void test15Bug97027() throws Exception {
 		StringBuilder buf= new StringBuilder();
 		buf.append("package override.test;\n");
@@ -207,9 +206,9 @@ public class OverrideTest extends TestCase {
 
 		CompilationUnit astRoot= createAST(cu);
 		IProblem[] problems= astRoot.getProblems();
-		assertTrue(problems.length == 1);
+		assertEquals(1, problems.length);
 		assertTrue(problems[0].isError());
-		assertTrue(problems[0].getID() == IProblem.MethodNameClash);
+		assertEquals(IProblem.MethodNameClash, problems[0].getID());
 
 		TypeDeclaration bb= (TypeDeclaration) astRoot.types().get(1);
 		IMethodBinding bbtest= bb.getMethods()[0].resolveBinding();
@@ -217,6 +216,7 @@ public class OverrideTest extends TestCase {
 		assertNull(Bindings.findOverriddenMethod(bbtest, true));
 	}
 
+	@Test
 	public void test15JLS3_842() throws Exception {
 		StringBuilder buf= new StringBuilder();
 		buf.append("package override.test;\n");
@@ -234,7 +234,7 @@ public class OverrideTest extends TestCase {
 		IProblem[] problems= astRoot.getProblems();
 		assertEquals(1, problems.length);
 		assertTrue(problems[0].isWarning());
-		assertTrue(problems[0].getID() == IProblem.UnsafeReturnTypeOverride);
+		assertEquals(IProblem.UnsafeReturnTypeOverride, problems[0].getID());
 
 		TypeDeclaration collectionConverter= (TypeDeclaration) astRoot.types().get(0);
 		IMethodBinding collectionConverter_toList= collectionConverter.getMethods()[0].resolveBinding();
@@ -245,6 +245,7 @@ public class OverrideTest extends TestCase {
 		assertSame(collectionConverter_toList, Bindings.findOverriddenMethod(overrider_toList, true));
 	}
 
+	@Test
 	public void test15JLS3_848_1() throws Exception {
 		StringBuilder buf= new StringBuilder();
 		buf.append("package override.test;\n");
@@ -271,6 +272,7 @@ public class OverrideTest extends TestCase {
 		assertSame(ccopy, Bindings.findOverriddenMethod(dcopy, true));
 	}
 
+	@Test
 	public void test15JLS3_848_2() throws Exception {
 		StringBuilder buf= new StringBuilder();
 		buf.append("package override.test;\n");
@@ -300,6 +302,7 @@ public class OverrideTest extends TestCase {
 		assertSame(stringSorter_toList, Bindings.findOverriddenMethod(overrider_toList, true));
 	}
 
+	@Test
 	public void test15JLS3_848_3() throws Exception {
 		StringBuilder buf= new StringBuilder();
 		buf.append("package override.test;\n");
@@ -328,6 +331,7 @@ public class OverrideTest extends TestCase {
 		assertSame(cid, Bindings.findOverriddenMethod(didString, true).getMethodDeclaration());
 	}
 
+	@Test
 	public void test15JLS3_848_4() throws Exception {
 		StringBuilder buf= new StringBuilder();
 		buf.append("package override.test;\n");
@@ -362,6 +366,7 @@ public class OverrideTest extends TestCase {
 		assertEquals(iid, Bindings.findOverriddenMethod(didInteger, true).getMethodDeclaration());
 	}
 
+	@Test
 	public void test15ClassTypeVars1() throws Exception {
 		StringBuilder buf= new StringBuilder();
 		buf.append("package override.test;\n");
@@ -390,6 +395,7 @@ public class OverrideTest extends TestCase {
 		assertNull(Bindings.findOverriddenMethod(btakeTS, true));
 	}
 
+	@Test
 	public void test15ClassTypeVars2() throws Exception {
 		StringBuilder buf= new StringBuilder();
 		buf.append("package override.test;\n");
@@ -449,6 +455,7 @@ public class OverrideTest extends TestCase {
 		assertEquals(bm, Bindings.findOverriddenMethod(emInteger, true).getMethodDeclaration());
 	}
 
+	@Test
 	public void test15MethodTypeVars1() throws Exception {
 		StringBuilder buf= new StringBuilder();
 		buf.append("package override.test;\n");
@@ -480,6 +487,7 @@ public class OverrideTest extends TestCase {
 		assertNull(Bindings.findOverriddenMethod(btakeSTS, true));
 	}
 
+	@Test
 	public void test15MethodTypeVars2() throws Exception {
 		StringBuilder buf= new StringBuilder();
 		buf.append("package override.test;\n");
@@ -513,6 +521,7 @@ public class OverrideTest extends TestCase {
 		assertNull(Bindings.findOverriddenMethod(btake3, true));
 	}
 
+	@Test
 	public void test15MethodTypeVars3() throws Exception {
 		StringBuilder buf= new StringBuilder();
 		buf.append("package override.test;\n");
@@ -540,6 +549,7 @@ public class OverrideTest extends TestCase {
 		assertNull(Bindings.findOverriddenMethod(btake2, true));
 	}
 
+	@Test
 	public void test15MethodTypeVars4() throws Exception {
 		StringBuilder buf= new StringBuilder();
 		buf.append("package override.test;\n");
@@ -565,6 +575,7 @@ public class OverrideTest extends TestCase {
 		assertEquals(am, Bindings.findOverriddenMethod(bm, true));
 	}
 
+	@Test
 	public void test15MethodTypeVars5() throws Exception {
 		StringBuilder buf= new StringBuilder();
 		buf.append("package override.test;\n");
@@ -588,6 +599,7 @@ public class OverrideTest extends TestCase {
 		assertNull(Bindings.findOverriddenMethod(bm, true));
 	}
 
+	@Test
 	public void test15MethodTypeVars6() throws Exception {
 		StringBuilder buf= new StringBuilder();
 		buf.append("package override.test;\n");
@@ -614,6 +626,7 @@ public class OverrideTest extends TestCase {
 		assertEquals(am, Bindings.findOverriddenMethod(bm, true));
 	}
 
+	@Test
 	public void test15Bug99608() throws Exception {
 		StringBuilder buf= new StringBuilder();
 		buf.append("package override.test;\n");
@@ -645,6 +658,7 @@ public class OverrideTest extends TestCase {
 		assertEquals(topRemove, Bindings.findOverriddenMethod(subRemove, true).getMethodDeclaration());
 	}
 
+	@Test
 	public void test15Bug90114() throws Exception {
 		StringBuilder buf= new StringBuilder();
 		buf.append("package override.test;\n");
@@ -670,6 +684,7 @@ public class OverrideTest extends TestCase {
 		assertNull(Bindings.findOverriddenMethod(xnotOverridden, true));
 	}
 
+	@Test
 	public void test15Bug89516primitive() throws Exception {
 		StringBuilder buf= new StringBuilder();
 		buf.append("package override.test;\n");
@@ -692,6 +707,7 @@ public class OverrideTest extends TestCase {
 		assertNull(Bindings.findOverriddenMethod(testAdd, true));
 	}
 
+	@Test
 	public void test15Bug105669() throws Exception {
 		StringBuilder buf= new StringBuilder();
 		buf.append("package override.test;\n");
@@ -718,6 +734,7 @@ public class OverrideTest extends TestCase {
 		assertTrue(Arrays.asList(vector.getDeclaredMethods()).contains(overridden));
 	}
 
+	@Test
 	public void test15Bug107105() throws Exception {
 		StringBuilder buf= new StringBuilder();
 		buf.append("package override.test;\n");

@@ -13,12 +13,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core.source;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.lang.reflect.Modifier;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
-import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -42,13 +43,12 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.internal.corext.codemanipulation.AddCustomConstructorOperation;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
-
-import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 /**
  * Tests generation of constructors using fields
@@ -57,20 +57,8 @@ import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
  *
  */
 public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
-
-	static final Class<GenerateConstructorUsingFieldsTest> THIS= GenerateConstructorUsingFieldsTest.class;
-
-	public GenerateConstructorUsingFieldsTest(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
-	}
+	@Rule
+	public ProjectTestSetup pts= new ProjectTestSetup();
 
 	public void runOperation(IType type, IField[] fields, IMethod superConstructor, IJavaElement insertBefore, boolean createComments, boolean omitSuper, int visibility) throws CoreException {
 
@@ -81,7 +69,7 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 
 		IVariableBinding[] bindings= new IVariableBinding[fields.length];
 		for (int i= 0; i < fields.length; i++) {
-			Assert.assertTrue(fields[i].exists());
+			assertTrue(fields[i].exists());
 			VariableDeclarationFragment frag= ASTNodeSearchUtil.getFieldDeclarationFragmentNode(fields[i], unit);
 			bindings[i]= frag.resolveBinding();
 		}
@@ -138,6 +126,7 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 	 *
 	 * @throws Exception
 	 */
+	@Test
 	public void test01() throws Exception {
 
 		runIt("A",
@@ -170,6 +159,7 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 	 *
 	 * @throws Exception
 	 */
+	@Test
 	public void test02() throws Exception {
 
 		printTestDisabledMessage("see bug 113052 (import issue)");
@@ -226,6 +216,7 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 	 *
 	 * @throws Exception
 	 */
+	@Test
 	public void test03() throws Exception {
 
 		runIt("A", new String[] { "firstField", "secondField", "beforeHandThirdField" },
@@ -267,6 +258,7 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 	 *
 	 * @throws Exception
 	 */
+	@Test
 	public void test04() throws Exception {
 
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
@@ -305,6 +297,7 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 	 *
 	 * @throws Exception
 	 */
+	@Test
 	public void test05() throws Exception {
 
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
@@ -334,6 +327,7 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 	 *
 	 * @throws Exception
 	 */
+	@Test
 	public void test06() throws Exception {
 
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
@@ -363,6 +357,7 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 	 *
 	 * @throws Exception
 	 */
+	@Test
 	public void test07() throws Exception {
 
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
@@ -391,6 +386,7 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 	 *
 	 * @throws Exception
 	 */
+	@Test
 	public void test08() throws Exception {
 
 		fPackageP.createCompilationUnit("B.java", "package p;\r\n" +
@@ -439,6 +435,7 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 	 *
 	 * @throws Exception
 	 */
+	@Test
 	public void test09() throws Exception {
 
 		runIt("A", new String[] { "field1" },
@@ -469,6 +466,7 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 	 *
 	 * @throws Exception
 	 */
+	@Test
 	public void test10() throws Exception {
 
 		runIt("A", new String[] { "field1" },
@@ -498,6 +496,7 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 	 *
 	 * @throws Exception
 	 */
+	@Test
 	public void test11() throws Exception {
 
 		runIt("A", new String[] { "startDate", "endDate" },
@@ -535,6 +534,7 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 	 * @throws Exception
 	 *
 	 */
+	@Test
 	public void test12() throws Exception {
 
 		ICompilationUnit unit= fPackageP.createCompilationUnit("SuperA.java", "package p;\r\n" +
@@ -584,6 +584,7 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 	 *
 	 * @throws Exception
 	 */
+	@Test
 	public void test13() throws Exception {
 
 		ICompilationUnit unit= fPackageP.createCompilationUnit("SuperA.java", "package p;\r\n" +
@@ -634,6 +635,7 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 	 * Inner types
 	 * @throws Exception
 	 */
+	@Test
 	public void test14() throws Exception {
 
 		ICompilationUnit unit= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
@@ -669,6 +671,7 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 				"}", unit.getSource());
 	}
 
+	@Test
 	public void test15() throws Exception {
 
 		ICompilationUnit unit= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
@@ -704,7 +707,8 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 				"", unit.getSource());
 	}
 
-	public void testInsertAt1() throws Exception {
+	@Test
+	public void insertAt1() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package p;\n");
 		buf.append("\n");

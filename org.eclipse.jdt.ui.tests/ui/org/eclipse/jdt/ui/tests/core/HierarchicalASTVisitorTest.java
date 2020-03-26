@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,11 +13,17 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+
+import org.junit.Test;
 
 import org.eclipse.core.runtime.Assert;
 
@@ -39,12 +45,8 @@ import org.eclipse.jdt.core.dom.VariableDeclaration;
 
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
 @SuppressWarnings("javadoc")
-public class HierarchicalASTVisitorTest extends TestCase {
+public class HierarchicalASTVisitorTest {
 	private static class TestHierarchicalASTVisitor extends HierarchicalASTVisitor {
 
 		//---- BEGIN <REGION TO BE UPDATED IN RESPONSE TO ASTNode HIERARCHY CHANGES> ---------------------
@@ -413,7 +415,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 			 * method corresponding to XX's superclass, YY. We check here that
 			 * fNodeClassForCalledMethod was set to the superclass of clazz.
 			 */
-			assertTrue(getSuperMethodNotCalledMessageFor(clazz, isEndVisit), clazz.getSuperclass().equals(fNodeClassForCalledMethod));
+			assertEquals(getSuperMethodNotCalledMessageFor(clazz, isEndVisit), clazz.getSuperclass(), fNodeClassForCalledMethod);
 		}
 		private String getSuperMethodNotCalledMessageFor(Class<? extends ASTNode> clazz, boolean isEndVisit) {
 			return getMethodSignatureFor(clazz, isEndVisit) + " in HierarchicalASTVisitor should call " + getMethodSignatureFor(clazz.getSuperclass(), isEndVisit) + ", the visitor method for its superclass.";
@@ -428,18 +430,9 @@ public class HierarchicalASTVisitorTest extends TestCase {
 		}
 	}
 
-	private static final Class<HierarchicalASTVisitorTest> THIS_CLASS= HierarchicalASTVisitorTest.class;
-
 	private Set<Class<? extends ASTNode>> fLeaves;
 
-	public HierarchicalASTVisitorTest(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return new TestSuite(THIS_CLASS);
-	}
-
+	@Test
 	public void test() {
 		fLeaves= getLeafASTNodeDescendants();
 		Set<Class<? extends ASTNode>> allASTNodeDescendants= computeAllDescendantsFromLeaves(fLeaves.iterator(), ASTNode.class);
@@ -495,7 +488,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 			HierarchicalASTVisitor.class.getDeclaredMethod(getVisitMethodName(isEndVisit), new Class[] { nodeClass });
 		} catch (NoSuchMethodException e) {
 			String signature= getVisitMethodName(isEndVisit) + "(" + getSimpleName(nodeClass) + ")";
-			assertTrue("HierarchicalASTVisitor must be updated to reflect a change in the ASTNode hierarchy.  No method " + signature + " was found in HierarchicalASTVisitor.", false);
+			fail("HierarchicalASTVisitor must be updated to reflect a change in the ASTNode hierarchy.  No method " + signature + " was found in HierarchicalASTVisitor.");
 		}
 	}
 

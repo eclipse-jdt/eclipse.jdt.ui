@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,12 +13,16 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
@@ -42,12 +46,14 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.core.manipulation.JavaElementPropertyTester;
 
-public class JavaElementPropertyTesterTest extends TestCase {
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
-	private static final Class<JavaElementPropertyTesterTest> THIS= JavaElementPropertyTesterTest.class;
+public class JavaElementPropertyTesterTest {
+	@Rule
+	public ProjectTestSetup pts= new ProjectTestSetup();
 
 	private IJavaProject fJProject1;
-	private IJavaProject fOtherProject,  fOtherClosedProject;
+	private IJavaProject fOtherProject, fOtherClosedProject;
 
 	private static final IPath LIB= new Path("testresources/mylib.jar");
 
@@ -58,28 +64,15 @@ public class JavaElementPropertyTesterTest extends TestCase {
 	private IPackageFragment fPack;
 	private ICompilationUnit fCU;
 
-	public JavaElementPropertyTesterTest(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
-	}
-
-
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		fOtherProject= JavaCore.create(createSimpleProject("SimpleProject", true));
 		fOtherClosedProject= JavaCore.create(createSimpleProject("SimpleProject", false));
 
 		fJProject1= JavaProjectHelper.createJavaProject("Test", "bin");
 
 		fJDK= JavaProjectHelper.addRTJar(fJProject1);
-		assertTrue("jdk not found", fJDK != null);
+		assertNotNull("jdk not found", fJDK);
 		assertTrue(fJDK.exists());
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -97,8 +90,8 @@ public class JavaElementPropertyTesterTest extends TestCase {
 		fFolder= fJProject1.getPackageFragmentRoot(folder);
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJProject1);
 		fOtherProject.getProject().delete(true, null);
 		fOtherClosedProject.getProject().delete(true, null);
@@ -119,7 +112,8 @@ public class JavaElementPropertyTesterTest extends TestCase {
 	}
 
 
-	public void testJavaElementPropertyTester() {
+	@Test
+	public void javaElementPropertyTester() {
 		JavaElementPropertyTester tester= new JavaElementPropertyTester();
 
 		assertEquals(true, tester.test(fJProject1, JavaElementPropertyTester.NAME, new Object[0], "Test"));
@@ -168,8 +162,5 @@ public class JavaElementPropertyTesterTest extends TestCase {
 		assertEquals(false, tester.test(fOtherClosedProject, JavaElementPropertyTester.HAS_TYPE_ON_CLASSPATH, args, "org.test.A"));
 
 		assertEquals(true, tester.test(fSourceFolder, JavaElementPropertyTester.HAS_TYPE_ON_CLASSPATH, args, "java.util.ArrayList"));
-
 	}
-
-
 }

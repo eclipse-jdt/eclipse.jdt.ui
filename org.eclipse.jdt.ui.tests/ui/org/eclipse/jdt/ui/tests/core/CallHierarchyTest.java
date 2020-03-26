@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,12 +14,16 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.util.ArrayList;
 import java.util.Collection;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
@@ -33,28 +37,19 @@ import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
 
 import org.eclipse.jdt.ui.tests.callhierarchy.CallHierarchyTestHelper;
 
-public class CallHierarchyTest extends TestCase {
+public class CallHierarchyTest {
     private static final String[] EMPTY= new String[0];
-    private static final Class<CallHierarchyTest> THIS= CallHierarchyTest.class;
 
     private CallHierarchyTestHelper helper;
 
-    public CallHierarchyTest(String name) {
-        super(name);
-    }
-
-	public static Test suite() {
-		return new TestSuite(THIS);
-    }
-
-    @Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
         helper= new CallHierarchyTestHelper();
         helper.setUp();
     }
 
-    @Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
         helper.tearDown();
         helper= null;
     }
@@ -70,7 +65,8 @@ public class CallHierarchyTest extends TestCase {
 		return methodWrappers[0];
 	}
 
-    public void testCallers() throws Exception {
+	@Test
+	public void callers() throws Exception {
         helper.createSimpleClasses();
 
         IMethod method= helper.getMethod1();
@@ -95,7 +91,8 @@ public class CallHierarchyTest extends TestCase {
         helper.assertCalls(expectedSecondLevelMethods, wrapper2.getCalls(new NullProgressMonitor()));
     }
 
-    public void testCallersNoResults() throws Exception {
+	@Test
+	public void callersNoResults() throws Exception {
         helper.createSimpleClasses();
 
         IMethod method= helper.getMethod4();
@@ -111,7 +108,8 @@ public class CallHierarchyTest extends TestCase {
         helper.assertCalls(expectedMethods, cachedCalls);
     }
 
-    public void testCallees() throws Exception {
+	@Test
+	public void callees() throws Exception {
         helper.createSimpleClasses();
 
         IMethod method= helper.getMethod4();
@@ -137,7 +135,8 @@ public class CallHierarchyTest extends TestCase {
         helper.assertCalls(expectedMethodsTo3, wrapper2.getCalls(new NullProgressMonitor()));
     }
 
-    public void testCalleesNoResults() throws Exception {
+	@Test
+	public void calleesNoResults() throws Exception {
         helper.createSimpleClasses();
 
         IMethod method= helper.getMethod1();
@@ -153,7 +152,8 @@ public class CallHierarchyTest extends TestCase {
         helper.assertCalls(expectedMethods, cachedCalls);
     }
 
-    public void testRecursiveCallers() throws Exception {
+	@Test
+	public void recursiveCallers() throws Exception {
         helper.createSimpleClasses();
 
         IMethod method1= helper.getRecursiveMethod1();
@@ -184,7 +184,8 @@ public class CallHierarchyTest extends TestCase {
         assertRecursive(callsTo1, true);
     }
 
-    public void testRecursiveCallees() throws Exception {
+	@Test
+	public void recursiveCallees() throws Exception {
         helper.createSimpleClasses();
 
         IMethod method1= helper.getRecursiveMethod1();
@@ -219,7 +220,8 @@ public class CallHierarchyTest extends TestCase {
      * Tests calls that origin from an inner class
      * @throws Exception
      */
-    public void testInnerClassCallers() throws Exception {
+	@Test
+	public void innerClassCallers() throws Exception {
         helper.createInnerClass();
 
         IMethod someMethod= helper.getType1().getMethod("outerMethod1", EMPTY);
@@ -245,7 +247,8 @@ public class CallHierarchyTest extends TestCase {
      * Tests callees that enter an inner class
      * @throws Exception
      */
-    public void testInnerClassCalleesEntering() throws Exception {
+	@Test
+	public void innerClassCalleesEntering() throws Exception {
         helper.createInnerClass();
 
         IMethod someMethod= helper.getType1().getMethod("outerMethod2", EMPTY);
@@ -271,7 +274,8 @@ public class CallHierarchyTest extends TestCase {
      * Tests callees that exits an inner class
      * @throws Exception
      */
-    public void testInnerClassCalleesExiting() throws Exception {
+	@Test
+	public void innerClassCalleesExiting() throws Exception {
         helper.createInnerClass();
 
         IMethod someMethod= helper.getType1().getMethod("outerMethod1", EMPTY);
@@ -297,7 +301,8 @@ public class CallHierarchyTest extends TestCase {
      * Tests calls that origin from an inner class
      * @throws Exception
      */
-    public void testAnonymousInnerClassCallers() throws Exception {
+	@Test
+	public void anonymousInnerClassCallers() throws Exception {
         helper.createAnonymousInnerClass();
 
         IMethod someMethod= helper.getType1().getMethod("someMethod", EMPTY);
@@ -316,7 +321,8 @@ public class CallHierarchyTest extends TestCase {
      * Tests calls that origin from an inner class
      * @throws Exception
      */
-    public void testAnonymousInnerClassOnInterfaceCallees() throws Exception {
+	@Test
+	public void anonymousInnerClassOnInterfaceCallees() throws Exception {
     	//regression test for bug 37290 call hierarchy: Searching for callees into anonymous inner classes fails
         helper.createAnonymousInnerClass();
 
@@ -336,7 +342,8 @@ public class CallHierarchyTest extends TestCase {
      * Tests calls that origin from an inner class
      * @throws Exception
      */
-    public void testAnonymousInnerClassInsideMethodCallees() throws Exception {
+	@Test
+	public void anonymousInnerClassInsideMethodCallees() throws Exception {
         //regression test for bug 56732 call hierarchy: Call Hierarchy doesn't show callees of method from anonymous type
         helper.createAnonymousInnerClassInsideMethod();
 
@@ -363,7 +370,8 @@ public class CallHierarchyTest extends TestCase {
      * Tests calls that origin from an inner class
      * @throws Exception
      */
-    public void testAnonymousInnerClassOnClassCallees() throws Exception {
+	@Test
+	public void anonymousInnerClassOnClassCallees() throws Exception {
 		//regression test for bug 37290 call hierarchy: Searching for callees into anonymous inner classes fails
         helper.createAnonymousInnerClass();
 
@@ -383,7 +391,8 @@ public class CallHierarchyTest extends TestCase {
      * Tests calls that origin from a static initializer block.
      * @throws Exception
      */
-    public void testInitializerCallers() throws Exception {
+	@Test
+	public void initializerCallers() throws Exception {
         helper.createStaticInitializerClass();
 
         IMethod someMethod= helper.getType1().getMethod("someMethod", EMPTY);
@@ -399,7 +408,8 @@ public class CallHierarchyTest extends TestCase {
         helper.assertCalls(expectedCallers, callers);
     }
 
-    public void testImplicitConstructorCallers() throws Exception {
+	@Test
+	public void implicitConstructorCallers() throws Exception {
         helper.createSimpleClasses();
 
         IMethod constructorA= helper.getType1().getMethod("A", EMPTY);
@@ -413,7 +423,8 @@ public class CallHierarchyTest extends TestCase {
         helper.assertCalls(expectedCallers, callers);
     }
 
-    public void testImplicitConstructorCallees() throws Exception {
+	@Test
+	public void implicitConstructorCallees() throws Exception {
         helper.createImplicitConstructorClasses();
 
         IMethod constructorB= helper.getType2().getMethods()[0];
@@ -427,7 +438,8 @@ public class CallHierarchyTest extends TestCase {
         helper.assertCalls(expectedCallers, callers);
     }
 
-    public void testLineNumberCallers() throws Exception {
+	@Test
+	public void lineNumberCallers() throws Exception {
         helper.createSimpleClasses();
 
         MethodWrapper wrapper= getSingleCallerRoot(helper.getMethod1());
@@ -441,7 +453,8 @@ public class CallHierarchyTest extends TestCase {
         assertEquals("Wrong line number", 12, recursiveMethod1Wrapper.getMethodCall().getFirstCallLocation().getLineNumber());
     }
 
-    public void testLineNumberCallees() throws Exception {
+	@Test
+	public void lineNumberCallees() throws Exception {
         helper.createSimpleClasses();
 
         MethodWrapper wrapper= getSingleCalleeRoot(helper.getMethod2());

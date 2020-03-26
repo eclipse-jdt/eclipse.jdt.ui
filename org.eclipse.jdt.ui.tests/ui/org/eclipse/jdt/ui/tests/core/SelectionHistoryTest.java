@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,34 +13,24 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core;
 
+import static org.junit.Assert.fail;
+
 import java.text.Collator;
 import java.util.Arrays;
 import java.util.Comparator;
+
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.w3c.dom.Element;
 
 import org.eclipse.jdt.internal.corext.util.History;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
-
-public class SelectionHistoryTest extends TestCase {
-
-	private static final Class<SelectionHistoryTest> THIS= SelectionHistoryTest.class;
-
-	public SelectionHistoryTest(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
-	}
+public class SelectionHistoryTest {
+	@Rule
+	public ProjectTestSetup pts= new ProjectTestSetup();
 
 	private void assertEquals(String[] actual, String[] expected) {
 		if (expected == null && actual == null)
@@ -50,14 +40,14 @@ public class SelectionHistoryTest extends TestCase {
 			StringBuffer buf= new StringBuffer();
 			buf.append("Expected array is null, actual is: ");
 			stringArrayToString(actual, buf);
-			assertTrue(buf.toString(), false);
+			fail(buf.toString());
 		}
 
 		if (expected != null && actual == null) {
 			StringBuffer buf= new StringBuffer();
 			buf.append("Actual array is null, expected is: ");
 			stringArrayToString(expected, buf);
-			assertTrue(buf.toString(), false);
+			fail(buf.toString());
 		}
 
 		if (expected.length != actual.length) {
@@ -67,7 +57,7 @@ public class SelectionHistoryTest extends TestCase {
 			stringArrayToString(expected, buf);
 			buf.append("\nActual: ");
 			stringArrayToString(actual, buf);
-			assertTrue(buf.toString(), false);
+			fail(buf.toString());
 		}
 
 		for (int i= 0; i < actual.length; i++) {
@@ -78,7 +68,7 @@ public class SelectionHistoryTest extends TestCase {
 				stringArrayToString(expected, buf);
 				buf.append("\nActual: ");
 				stringArrayToString(actual, buf);
-				assertTrue(buf.toString(), false);
+				fail(buf.toString());
 			}
 		}
 	}
@@ -134,7 +124,8 @@ public class SelectionHistoryTest extends TestCase {
 
 	}
 
-	public void testOrganizeImportHistory01() throws Exception {
+	@Test
+	public void organizeImportHistory01() throws Exception {
 		History<String, String> history= new TestHistory();
 		Comparator<String> comparator= new TestHistoryComparator(history);
 
@@ -145,7 +136,8 @@ public class SelectionHistoryTest extends TestCase {
 		assertEquals(strings, expected);
 	}
 
-	public void testOrganizeImportHistory02() throws Exception {
+	@Test
+	public void organizeImportHistory02() throws Exception {
 		History<String, String> history= new TestHistory();
 		Comparator<String> comparator= new TestHistoryComparator(history);
 
@@ -157,7 +149,8 @@ public class SelectionHistoryTest extends TestCase {
 		assertEquals(strings, expected);
 	}
 
-	public void testOrganizeImportHistory03() throws Exception {
+	@Test
+	public void organizeImportHistory03() throws Exception {
 		History<String, String> history= new TestHistory();
 		Comparator<String> comparator= new TestHistoryComparator(history);
 
@@ -169,7 +162,8 @@ public class SelectionHistoryTest extends TestCase {
 		assertEquals(strings, expected);
 	}
 
-	public void testOrganizeImportHistory04() throws Exception {
+	@Test
+	public void organizeImportHistory04() throws Exception {
 		History<String, String> history= new TestHistory();
 		Comparator<String> comparator= new TestHistoryComparator(history);
 
@@ -182,7 +176,8 @@ public class SelectionHistoryTest extends TestCase {
 		assertEquals(strings, expected);
 	}
 
-	public void testOrganizeImportHistory05() throws Exception {
+	@Test
+	public void organizeImportHistory05() throws Exception {
 		History<String, String> history= new TestHistory();
 		Comparator<String> comparator= new TestHistoryComparator(history);
 
@@ -195,5 +190,4 @@ public class SelectionHistoryTest extends TestCase {
 		Arrays.sort(strings, comparator);
 		assertEquals(strings, expected);
 	}
-
 }

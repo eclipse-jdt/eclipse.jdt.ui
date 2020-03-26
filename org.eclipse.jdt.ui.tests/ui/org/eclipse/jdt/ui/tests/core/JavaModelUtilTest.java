@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,11 +13,17 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
@@ -41,12 +47,13 @@ import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
+
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 
-
-public class JavaModelUtilTest extends TestCase {
-
-	private static final Class<JavaModelUtilTest> THIS= JavaModelUtilTest.class;
+public class JavaModelUtilTest {
+	@Rule
+	public ProjectTestSetup pts= new ProjectTestSetup();
 
 	private IJavaProject fJProject1;
 	private IJavaProject fJProject2;
@@ -55,21 +62,8 @@ public class JavaModelUtilTest extends TestCase {
 
 	private static final IPath LIB= new Path("testresources/mylib.jar");
 
-	public JavaModelUtilTest(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
-	}
-
-
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		IWorkspace workspace= JavaTestPlugin.getWorkspace();
 		assertNotNull(workspace);
 
@@ -84,7 +78,7 @@ public class JavaModelUtilTest extends TestCase {
 		fJProject2= JavaProjectHelper.createJavaProject("TestProject2", "bin");
 
 		IPackageFragmentRoot jdk= JavaProjectHelper.addVariableRTJar(fJProject1, "JRE_LIB_TEST", null, null);
-		assertTrue("jdk not found", jdk != null);
+		assertNotNull("jdk not found", jdk);
 
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
 		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
@@ -108,8 +102,8 @@ public class JavaModelUtilTest extends TestCase {
 	}
 
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJProject1);
 		JavaProjectHelper.delete(fJProject2);
 
@@ -117,7 +111,8 @@ public class JavaModelUtilTest extends TestCase {
 			CoreUtility.setAutoBuilding(true);
 	}
 
-    public void testIsMatchingName() {
+	@Test
+	public void isMatchingName() {
         assertMatching(true, "org.junit.Test", "org.junit.Test");
         assertMatching(true, "org.junit.Test", "Test");
         assertMatching(true, "X.Test", "Test");
@@ -141,10 +136,11 @@ public class JavaModelUtilTest extends TestCase {
 	private void assertElementName(String name, IJavaElement elem, int type) {
 		assertNotNull(name, elem);
 		assertEquals(name + "-name", name, elem.getElementName());
-		assertTrue(name + "-type", type == elem.getElementType());
+		assertEquals(name + "-type", type, elem.getElementType());
 	}
 
-	public void testFindType() throws Exception {
+	@Test
+	public void findType() throws Exception {
 		IType type= fJProject1.findType("junit.extensions.ExceptionTestCase");
 		assertElementName("ExceptionTestCase", type, IJavaElement.TYPE);
 
@@ -173,7 +169,8 @@ public class JavaModelUtilTest extends TestCase {
 		assertElementName("InnerInner", type, IJavaElement.TYPE);
 	}
 
-	public void testFindTypeContainer() throws Exception {
+	@Test
+	public void findTypeContainer() throws Exception {
 		IJavaElement elem= JavaModelUtil.findTypeContainer(fJProject1, "junit.extensions");
 		assertElementName("junit.extensions", elem, IJavaElement.PACKAGE_FRAGMENT);
 
@@ -199,7 +196,8 @@ public class JavaModelUtilTest extends TestCase {
 		assertElementName("Inner", elem, IJavaElement.TYPE);
 	}
 
-	public void testFindTypeInCompilationUnit() throws Exception {
+	@Test
+	public void findTypeInCompilationUnit() throws Exception {
 		ICompilationUnit cu= (ICompilationUnit) fJProject1.findElement(new Path("junit/tests/framework/TestCaseTest.java"));
 		assertElementName("TestCaseTest.java", cu, IJavaElement.COMPILATION_UNIT);
 
@@ -228,10 +226,11 @@ public class JavaModelUtilTest extends TestCase {
 		IClasspathEntry entry= root.getRawClasspathEntry();
 		assertNotNull(name + "-nocp", entry);
 		assertEquals(name + "-wrongpath", entry.getPath(), path);
-		assertTrue(name + "-wrongtype", type == entry.getEntryKind());
+		assertEquals(name + "-wrongtype", type, entry.getEntryKind());
 	}
 
-	public void testGetRawClasspathEntry() throws Exception {
+	@Test
+	public void getRawClasspathEntry() throws Exception {
 		IType type= fJProject1.findType("junit.extensions.ExceptionTestCase");
 		assertElementName("ExceptionTestCase", type, IJavaElement.TYPE);
 		IPath path= fJProject1.getProject().getFullPath().append("src");
@@ -263,7 +262,7 @@ public class JavaModelUtilTest extends TestCase {
 		}
 		IMethod meth= JavaModelUtil.findMethod(methName, sig, isConstructor, type);
 		assertElementName(methName, meth, IJavaElement.METHOD);
-		assertTrue("methName-nparam1", meth.getParameterTypes().length == paramTypeNames.length);
+		assertEquals("methName-nparam1", meth.getParameterTypes().length, paramTypeNames.length);
 
 		for (int i= 0; i < paramTypeNames.length; i++) {
 			// create as resolved
@@ -272,10 +271,11 @@ public class JavaModelUtilTest extends TestCase {
 		}
 		meth= JavaModelUtil.findMethod(methName, sig, isConstructor, type);
 		assertElementName(methName, meth, IJavaElement.METHOD);
-		assertTrue("methName-nparam2", meth.getParameterTypes().length == paramTypeNames.length);
+		assertEquals("methName-nparam2", meth.getParameterTypes().length, paramTypeNames.length);
 	}
 
-	public void testFindMethod() throws Exception {
+	@Test
+	public void findMethod() throws Exception {
 		IType type= fJProject1.findType("junit.framework.Assert");
 		assertElementName("Assert", type, IJavaElement.TYPE);
 
@@ -309,7 +309,7 @@ public class JavaModelUtilTest extends TestCase {
 		}
 		IMethod meth= JavaModelUtil.findMethodInHierarchy(hierarchy, type, methName, sig, isConstructor);
 		assertElementName(methName, meth, IJavaElement.METHOD);
-		assertTrue("methName-nparam1", meth.getParameterTypes().length == paramTypeNames.length);
+		assertEquals("methName-nparam1", meth.getParameterTypes().length, paramTypeNames.length);
 		assertEquals("methName-decltype", declaringTypeName, meth.getDeclaringType().getFullyQualifiedName('.'));
 
 		for (int i= 0; i < paramTypeNames.length; i++) {
@@ -319,11 +319,12 @@ public class JavaModelUtilTest extends TestCase {
 		}
 		meth= JavaModelUtil.findMethodInHierarchy(hierarchy, type, methName, sig, isConstructor);
 		assertElementName(methName, meth, IJavaElement.METHOD);
-		assertTrue("methName-nparam2", meth.getParameterTypes().length == paramTypeNames.length);
+		assertEquals("methName-nparam2", meth.getParameterTypes().length, paramTypeNames.length);
 		assertEquals("methName-decltype", declaringTypeName, meth.getDeclaringType().getFullyQualifiedName('.'));
 	}
 
-	public void testFindMethodInHierarchy() throws Exception {
+	@Test
+	public void findMethodInHierarchy() throws Exception {
 		IType type= fJProject1.findType("junit.extensions.TestSetup");
 		assertElementName("TestSetup", type, IJavaElement.TYPE);
 
@@ -331,7 +332,8 @@ public class JavaModelUtilTest extends TestCase {
 		assertFindMethodInHierarchy("toString", new String[] {} , false, type, "junit.extensions.TestDecorator");
 	}
 
-	public void testHasMainMethod() throws Exception {
+	@Test
+	public void hasMainMethod() throws Exception {
 		IType type= fJProject1.findType("junit.samples.money.MoneyTest");
 		assertElementName("MoneyTest", type, IJavaElement.TYPE);
 
@@ -340,12 +342,11 @@ public class JavaModelUtilTest extends TestCase {
 		type= fJProject1.findType("junit.framework.TestResult");
 		assertElementName("TestResult", type, IJavaElement.TYPE);
 
-		assertTrue("TestResult-hasmain", !JavaModelUtil.hasMainMethod(type));
+		assertFalse("TestResult-hasmain", JavaModelUtil.hasMainMethod(type));
 
 		type= fJProject1.findType("junit.samples.VectorTest");
 		assertElementName("VectorTest", type, IJavaElement.TYPE);
 
 		assertTrue("VectorTest-nomain", JavaModelUtil.hasMainMethod(type));
 	}
-
 }

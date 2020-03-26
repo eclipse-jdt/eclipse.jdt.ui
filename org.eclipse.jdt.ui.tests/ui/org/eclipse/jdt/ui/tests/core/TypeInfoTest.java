@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,13 +13,20 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
@@ -41,29 +48,17 @@ import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.TypeNameMatch;
 import org.eclipse.jdt.core.search.TypeNameMatchRequestor;
 
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
-
-public class TypeInfoTest extends TestCase {
-
-	private static final Class<TypeInfoTest> THIS= TypeInfoTest.class;
+public class TypeInfoTest {
+	@Rule
+	public ProjectTestSetup pts= new ProjectTestSetup();
 
 	private IJavaProject fJProject1;
 	private IJavaProject fJProject2;
 
-	public TypeInfoTest(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
-	}
-
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		assertNotNull("jre is null", JavaProjectHelper.addRTJar(fJProject1));
 
@@ -71,15 +66,13 @@ public class TypeInfoTest extends TestCase {
 		assertNotNull("jre is null", JavaProjectHelper.addRTJar(fJProject2));
 	}
 
-
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJProject1);
 		JavaProjectHelper.delete(fJProject2);
-
 	}
 
-
+	@Test
 	public void test1() throws Exception {
 
 		// add Junit source to project 2
@@ -131,19 +124,15 @@ public class TypeInfoTest extends TestCase {
 			assertResolve(ref);
 
 		}
-		assertTrue("Should find 8 elements, is " + result.size(), result.size() == 8);
+		assertEquals("Should find 8 elements, is " + result.size(), 8, result.size());
 
 
 	}
 
 	private void assertResolve(TypeNameMatch ref) {
 		IType resolvedType= ref.getType();
-		if (resolvedType == null) {
-			assertTrue("Could not be resolved: " + ref.toString(), false);
-		}
-		if (!resolvedType.exists()) {
-			assertTrue("Resolved type does not exist: " + ref.toString(), false);
-		}
+		assertNotNull("Could not be resolved: " + ref.toString(), resolvedType);
+		assertTrue("Resolved type does not exist: " + ref.toString(), resolvedType.exists());
 		StringAsserts.assertEqualString(resolvedType.getFullyQualifiedName('.'), ref.getFullyQualifiedName());
 	}
 
@@ -153,10 +142,11 @@ public class TypeInfoTest extends TestCase {
 				return;
 			}
 		}
-		assertTrue("Type not found: " + fullname, false);
+		fail("Type not found: " + fullname);
 	}
 
 
+	@Test
 	public void test2() throws Exception {
 		ArrayList<TypeNameMatch> result= new ArrayList<>();
 
@@ -196,7 +186,8 @@ public class TypeInfoTest extends TestCase {
 	}
 
 
-	public void test_bug44772() throws Exception {
+	@Test
+	public void bug44772() throws Exception {
 		File lib= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.MYLIB);
 
 		JavaProjectHelper.addLibraryWithImport(fJProject1, Path.fromOSString(lib.getPath()), null, null); // as internal
@@ -219,14 +210,12 @@ public class TypeInfoTest extends TestCase {
 			requestor,
 			IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
 			null);
-		assertEquals("result size", result.size(), 2);
+		assertEquals("result size", 2, result.size());
 		IType type1= result.get(0).getType();
 		IType type2= result.get(1).getType();
 
 		assertNotNull(type1);
 		assertNotNull(type2);
-		assertFalse(type1.equals(type2));
-
+		assertNotEquals(type1, type2);
 	}
-
 }

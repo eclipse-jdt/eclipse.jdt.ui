@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,17 +10,21 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 83258 [jar exporter] Deploy java application as executable jar
  *******************************************************************************/
-package org.eclipse.jdt.ui.tests.jarexport;
+ package org.eclipse.jdt.ui.tests.performance.views;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-	PlainJarExportTests.class,
-	FatJarExportTests.class
+	PackageExplorerPerfTest.class,
+	PackageExplorerColdPerfTest.class,
+	PackageExplorerEmptyPerfTest.class,
+	PackageExplorerWarmPerfTest.class,
+	PackageExplorerWorkspacePerfTest.class,
+	PackageExplorerWorkspaceWarmPerfTest.class,
+	TypeHierarchyPerfTest.class
 })
-public class JarExportTests {
+public class ViewPerformanceTestSuite {
 }

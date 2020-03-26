@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,10 +13,15 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core.source;
 
+import static org.junit.Assert.assertNotNull;
+
 import java.io.IOException;
 import java.util.Hashtable;
 
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.rules.TestName;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.StringAsserts;
@@ -38,7 +43,10 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
-public class SourceTestCase extends TestCase {
+public class SourceTestCase {
+
+	@Rule
+	public TestName tn=new TestName();
 
 	private IJavaProject fJavaProject;
 
@@ -51,10 +59,6 @@ public class SourceTestCase extends TestCase {
 	private ICompilationUnit fCuA;
 
 	protected IPackageFragmentRoot fRoot;
-
-	public SourceTestCase(String name) {
-		super(name);
-	}
 
 	private void initCodeTemplates() {
 		Hashtable<String, String> options= TestOptions.getDefaultOptions();
@@ -92,8 +96,8 @@ public class SourceTestCase extends TestCase {
 		fSettings.createComments= true;
 	}
 
-	@Override
-	protected void setUp() throws CoreException {
+	@Before
+	public void setUp() throws CoreException {
 
 		fJavaProject= JavaProjectHelper.createJavaProject("DummyProject", "bin");
 		assertNotNull(JavaProjectHelper.addRTJar(fJavaProject));
@@ -106,8 +110,8 @@ public class SourceTestCase extends TestCase {
 		initCodeTemplates();
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJavaProject);
 		fJavaProject= null;
 		fPackageP= null;
@@ -119,6 +123,10 @@ public class SourceTestCase extends TestCase {
 
 	protected void printTestDisabledMessage(String explanation) {
 		System.out.println("\n" + getClass().getName() + "::" + getName() + " disabled (" + explanation + ")");
+	}
+
+	private String getName() {
+		return tn.getMethodName();
 	}
 
 }

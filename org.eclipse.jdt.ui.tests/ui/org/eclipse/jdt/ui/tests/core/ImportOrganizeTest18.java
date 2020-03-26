@@ -34,17 +34,14 @@ import org.eclipse.jdt.core.manipulation.OrganizeImportsOperation.IChooseImportQ
 
 import org.eclipse.jdt.ui.tests.core.rules.Java18ProjectTestSetup;
 
-
 public class ImportOrganizeTest18 extends ImportOrganizeTest {
-
 	@Rule
 	public Java18ProjectTestSetup j18p= new Java18ProjectTestSetup();
 
 	private IJavaProject fJProject1;
 
-	@Override
 	@Before
-	public void setUp() throws Exception {
+	public void before() throws Exception {
 		fJProject1= Java18ProjectTestSetup.getProject();
 
 		Hashtable<String, String> options= TestOptions.getDefaultOptions();
@@ -53,15 +50,14 @@ public class ImportOrganizeTest18 extends ImportOrganizeTest {
 	}
 
 
-	@Override
 	@After
-	public void tearDown() throws Exception {
+	public void after() throws Exception {
 		setOrganizeImportSettings(null, 99, 99, fJProject1);
 		JavaProjectHelper.clear(fJProject1, Java18ProjectTestSetup.getDefaultClasspath());
 	}
 
 	@Test
-	public void testTypeUseAnnotationImport1() throws Exception { // PrimitiveType
+	public void typeUseAnnotationImport1() throws Exception { // PrimitiveType
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack0= sourceFolder.createPackageFragment("pack0", false, null);
@@ -98,7 +94,7 @@ public class ImportOrganizeTest18 extends ImportOrganizeTest {
 	}
 
 	@Test
-	public void testTypeUseAnnotationImport2() throws Exception { // SimpleType
+	public void typeUseAnnotationImport2() throws Exception { // SimpleType
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack0= sourceFolder.createPackageFragment("pack0", false, null);
@@ -136,7 +132,7 @@ public class ImportOrganizeTest18 extends ImportOrganizeTest {
 	}
 
 	@Test
-	public void testTypeUseAnnotationImport3() throws Exception { // QualifiedType
+	public void typeUseAnnotationImport3() throws Exception { // QualifiedType
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack0= sourceFolder.createPackageFragment("pack0", false, null);
@@ -186,7 +182,7 @@ public class ImportOrganizeTest18 extends ImportOrganizeTest {
 	}
 
 	@Test
-	public void testTypeUseAnnotationImport4() throws Exception { // PackageQualifiedType
+	public void typeUseAnnotationImport4() throws Exception { // PackageQualifiedType
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack0= sourceFolder.createPackageFragment("pack0", false, null);
@@ -224,7 +220,7 @@ public class ImportOrganizeTest18 extends ImportOrganizeTest {
 	}
 
 	@Test
-	public void testTypeUseAnnotationImport5() throws Exception { // WildcardType
+	public void typeUseAnnotationImport5() throws Exception { // WildcardType
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack0= sourceFolder.createPackageFragment("pack0", false, null);
@@ -262,7 +258,7 @@ public class ImportOrganizeTest18 extends ImportOrganizeTest {
 	}
 
 	@Test
-	public void testTypeUseAnnotationImport6() throws Exception { // ArrayType
+	public void typeUseAnnotationImport6() throws Exception { // ArrayType
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack0= sourceFolder.createPackageFragment("pack0", false, null);
@@ -299,7 +295,7 @@ public class ImportOrganizeTest18 extends ImportOrganizeTest {
 	}
 
 	@Test
-	public void testStaticMethodReferenceImports_bug424172() throws Exception {
+	public void staticMethodReferenceImports_bug424172() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack0= sourceFolder.createPackageFragment("p", false, null);
@@ -339,7 +335,7 @@ public class ImportOrganizeTest18 extends ImportOrganizeTest {
 	}
 
 	@Test
-	public void testMethodReferenceImports_bug424227() throws Exception {
+	public void methodReferenceImports_bug424227() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack0= sourceFolder.createPackageFragment("p0", false, null);
@@ -386,5 +382,4 @@ public class ImportOrganizeTest18 extends ImportOrganizeTest {
 		buf.append("}\n");
 		assertEqualString(cu.getSource(), buf.toString());
 	}
-
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,8 +14,17 @@
 package org.eclipse.jdt.ui.tests.core.source;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.Hashtable;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -58,35 +67,18 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
-public class AddUnimplementedMethodsTest extends TestCase {
-
-	private static final Class<AddUnimplementedMethodsTest> THIS= AddUnimplementedMethodsTest.class;
+public class AddUnimplementedMethodsTest {
+	@Rule
+	public ProjectTestSetup pts= new ProjectTestSetup();
 
 	private IJavaProject fJavaProject;
 	private IPackageFragment fPackage;
 	private IType fClassA, fInterfaceB, fClassC, fClassD, fInterfaceE;
 
-
-	public AddUnimplementedMethodsTest(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
-	}
-
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		fJavaProject= JavaProjectHelper.createJavaProject("DummyProject", "bin");
 
 		Hashtable<String, String> options= TestOptions.getDefaultOptions();
@@ -133,8 +125,8 @@ public class AddUnimplementedMethodsTest extends TestCase {
 	}
 
 
-	@Override
-	protected void tearDown () throws Exception {
+	@After
+	public void tearDown () throws Exception {
 		JavaProjectHelper.delete(fJavaProject);
 		fJavaProject= null;
 		fPackage= null;
@@ -148,6 +140,7 @@ public class AddUnimplementedMethodsTest extends TestCase {
 	/*
 	 * basic test: extend an abstract class and an interface
 	 */
+	@Test
 	public void test1() throws Exception {
 		ICompilationUnit cu= fPackage.getCompilationUnit("Test1.java");
 		IType testClass= cu.createType("public class Test1 extends A implements B {\n}\n", null, true, null);
@@ -164,6 +157,7 @@ public class AddUnimplementedMethodsTest extends TestCase {
 	/*
 	 * method c() of interface B is already implemented by class C
 	 */
+	@Test
 	public void test2() throws Exception {
 
 		ICompilationUnit cu= fPackage.getCompilationUnit("Test2.java");
@@ -182,6 +176,7 @@ public class AddUnimplementedMethodsTest extends TestCase {
 	/*
 	 * method c() is implemented in C but made abstract again in class D
 	 */
+	@Test
 	public void test3() throws Exception {
 		ICompilationUnit cu= fPackage.getCompilationUnit("Test3.java");
 		IType testClass= cu.createType("public class Test3 extends D {\n}\n", null, true, null);
@@ -193,12 +188,12 @@ public class AddUnimplementedMethodsTest extends TestCase {
 
 		IImportDeclaration[] imports= cu.getImports();
 		checkImports(new String[] { "java.util.Hashtable", "java.util.Enumeration" }, imports);
-
 	}
 
 	/*
 	 * method c() defined in both interfaces B and E
 	 */
+	@Test
 	public void test4() throws Exception {
 		ICompilationUnit cu= fPackage.getCompilationUnit("Test4.java");
 		IType testClass= cu.createType("public class Test4 implements B, E {\n}\n", null, true, null);
@@ -212,7 +207,8 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		checkImports(new String[] { "java.util.Hashtable", "java.util.NoSuchElementException" }, imports);
 	}
 
-	public void testBug119171() throws Exception {
+	@Test
+	public void bug119171() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package ibm.util;\n");
 		buf.append("import java.util.Properties;\n");
@@ -247,7 +243,8 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		checkImports(new String[0], imports);
 	}
 
-	public void testBug297183() throws Exception {
+	@Test
+	public void bug297183() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package ibm.util;\n");
 		buf.append("interface Shape {\r\n");
@@ -282,7 +279,8 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		checkImports(new String[0], imports);
 	}
 
-	public void testInsertAt() throws Exception {
+	@Test
+	public void insertAt() throws Exception {
 		fJavaProject= JavaProjectHelper.createJavaProject("DummyProject", "bin");
 		assertNotNull(JavaProjectHelper.addRTJar(fJavaProject));
 
@@ -357,7 +355,8 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		}
 	}
 
-	public void testBug480682() throws Exception {
+	@Test
+	public void bug480682() throws Exception {
 		StringBuilder buf= new StringBuilder();
 		buf.append("public class Test480682 extends Base {\n");
 		buf.append("}\n");
@@ -384,7 +383,8 @@ public class AddUnimplementedMethodsTest extends TestCase {
 	 * @deprecated tests deprecated API
 	 */
 	@Deprecated
-	public void testJLS3() throws Exception {
+	@Test
+	public void jLS3() throws Exception {
 		doTestOldAstLevel(AST.JLS3);
 	}
 
@@ -393,11 +393,13 @@ public class AddUnimplementedMethodsTest extends TestCase {
 	 * @deprecated tests deprecated API
 	 */
 	@Deprecated
-	public void testJLS4() throws Exception {
+	@Test
+	public void jLS4() throws Exception {
 		doTestOldAstLevel(AST.JLS4);
 	}
 
-	public void testJLS8() throws Exception {
+	@Test
+	public void jLS8() throws Exception {
 		doTestOldAstLevel(AST.JLS8);
 	}
 
@@ -470,7 +472,7 @@ public class AddUnimplementedMethodsTest extends TestCase {
 	private void checkMethods(String[] expected, IMethod[] methods) {
 		int nMethods= methods.length;
 		int nExpected= expected.length;
-		assertTrue("" + nExpected + " methods expected, is " + nMethods, nMethods == nExpected);
+		assertEquals("" + nExpected + " methods expected, is " + nMethods, nExpected, nMethods);
 		for (int i= 0; i < nExpected; i++) {
 			String methName= expected[i];
 			assertTrue("method " + methName + " expected", nameContained(methName, methods));
@@ -491,7 +493,7 @@ public class AddUnimplementedMethodsTest extends TestCase {
 			for (IImportDeclaration i : imports) {
 				buf.append(i).append("\n");
 			}
-			assertTrue(buf.toString(), false);
+			fail(buf.toString());
 		}
 		for (int i= 0; i < nExpected; i++) {
 			String impName= expected[i];

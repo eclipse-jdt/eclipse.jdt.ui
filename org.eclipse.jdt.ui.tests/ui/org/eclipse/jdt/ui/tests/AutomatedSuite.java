@@ -20,6 +20,7 @@ import org.junit.runners.Suite;
 
 import org.eclipse.jdt.junit.tests.JUnitJUnitTests;
 import org.eclipse.jdt.testplugin.TestOptions;
+
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.tests.browsing.PackagesViewContentProviderTests;
@@ -27,6 +28,7 @@ import org.eclipse.jdt.ui.tests.browsing.PackagesViewContentProviderTests2;
 import org.eclipse.jdt.ui.tests.browsing.PackagesViewDeltaTests;
 import org.eclipse.jdt.ui.tests.buildpath.BuildpathTestSuite;
 import org.eclipse.jdt.ui.tests.callhierarchy.CallHierarchyContentProviderTest;
+import org.eclipse.jdt.ui.tests.core.CoreTestSuite;
 import org.eclipse.jdt.ui.tests.core.CoreTests;
 import org.eclipse.jdt.ui.tests.hover.JavadocHoverTests;
 import org.eclipse.jdt.ui.tests.hover.PackageJavadocTests;
@@ -49,6 +51,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
 	CoreTests.class,
+	CoreTestSuite.class,
 	QuickFixTest.class,
 
 	NewJavaProjectWizardTest.class,

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2012 IBM Corporation and others.
+ * Copyright (c) 2007, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -20,6 +20,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.jarexport;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -30,10 +36,12 @@ import java.util.zip.ZipFile;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TestName;
 import org.xml.sax.InputSource;
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -83,7 +91,7 @@ import org.eclipse.jdt.launching.VMRunnerConfiguration;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.jarpackager.IJarExportRunnable;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
@@ -96,26 +104,26 @@ import org.eclipse.jdt.internal.ui.jarpackagerfat.FatJarPackageWizardPage.Packag
 import org.eclipse.jdt.internal.ui.jarpackagerfat.FatJarRsrcUrlBuilder;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 
-public class FatJarExportTests extends TestCase {
+public class FatJarExportTests {
 
-	private static final Class<FatJarExportTests> THIS= FatJarExportTests.class;
+	@Rule
+	public ProjectTestSetup pts=new ProjectTestSetup();
+
+	@Rule
+	public TestName tn=new TestName();
 
 	private static final int JAVA_RUN_TIMEOUT= 50; // 10th of a second
 
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
+	@BeforeClass
+	public static void setUpTest() {
 		System.setProperty("jdt.bug.367669", "non-null");
-		return new ProjectTestSetup(test);
 	}
 
 	private IJavaProject fProject;
 	private IPackageFragmentRoot fMainRoot;
 
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		fProject= ProjectTestSetup.getProject();
 
 		Map<String, String> options= fProject.getOptions(false);
@@ -139,8 +147,8 @@ public class FatJarExportTests extends TestCase {
 		fragment.createCompilationUnit("Main.java", buf.toString(), true, null); //$NON-NLS-1$
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.clear(fProject, ProjectTestSetup.getDefaultClasspath());
 	}
 
@@ -303,9 +311,7 @@ public class FatJarExportTests extends TestCase {
 		ResourcesPlugin.getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
 
 		for (IMarker marker : ResourcesPlugin.getWorkspace().getRoot().findMarkers(null, true, IResource.DEPTH_INFINITE)) {
-			if (marker.getAttribute(IMarker.SEVERITY, IMarker.SEVERITY_INFO) == IMarker.SEVERITY_ERROR) {
-				assertTrue((String) marker.getAttribute(IMarker.MESSAGE), false);
-			}
+			assertNotEquals((String) marker.getAttribute(IMarker.MESSAGE), IMarker.SEVERITY_ERROR, marker.getAttribute(IMarker.SEVERITY, IMarker.SEVERITY_INFO));
 		}
 	}
 
@@ -673,7 +679,12 @@ public class FatJarExportTests extends TestCase {
 		}
 	}
 
-	public void testExportSameSrcRoot() throws Exception {
+	private String getName() {
+		return tn.getMethodName();
+	}
+
+	@Test
+	public void exportSameSrcRoot() throws Exception {
 		IPackageFragment pack= fMainRoot.createPackageFragment("mylib", true, null); //$NON-NLS-1$
 		try {
 			pack.createCompilationUnit("Foo.java", getFooContent(), true, null); //$NON-NLS-1$
@@ -700,8 +711,8 @@ public class FatJarExportTests extends TestCase {
 		}
 	}
 
-
-	public void testExportSrcRootWithOutputFolder() throws Exception {
+	@Test
+	public void exportSrcRootWithOutputFolder() throws Exception {
 		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(fProject, "other", new IPath[0], new IPath[0], "otherout"); //$NON-NLS-1$  //$NON-NLS-2$
 		try {
 			IPackageFragment pack= root.createPackageFragment("mylib", true, null); //$NON-NLS-1$
@@ -730,7 +741,8 @@ public class FatJarExportTests extends TestCase {
 		}
 	}
 
-	public void testExportOtherSrcRoot() throws Exception {
+	@Test
+	public void exportOtherSrcRoot() throws Exception {
 		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(fProject, "other"); //$NON-NLS-1$
 		try {
 			IPackageFragment pack= root.createPackageFragment("mylib", true, null); //$NON-NLS-1$
@@ -759,7 +771,8 @@ public class FatJarExportTests extends TestCase {
 		}
 	}
 
-	public void testExportOtherProject() throws Exception {
+	@Test
+	public void exportOtherProject() throws Exception {
 		IJavaProject otherProject= JavaProjectHelper.createJavaProject("OtherProject", "bin"); //$NON-NLS-1$  //$NON-NLS-2$
 		try {
 			otherProject.setRawClasspath(ProjectTestSetup.getDefaultClasspath(), null);
@@ -794,7 +807,8 @@ public class FatJarExportTests extends TestCase {
 		}
 	}
 
-	public void testExportInternalLib() throws Exception {
+	@Test
+	public void exportInternalLib() throws Exception {
 		File lib= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.MYLIB_STDOUT);
 		IPackageFragmentRoot root= JavaProjectHelper.addLibraryWithImport(fProject, Path.fromOSString(lib.getPath()), null, null);
 
@@ -823,7 +837,8 @@ public class FatJarExportTests extends TestCase {
 		}
 	}
 
-	public void testExportInternalLib_UncompressedJar() throws Exception {
+	@Test
+	public void exportInternalLib_UncompressedJar() throws Exception {
 		File lib= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.MYLIB_STDOUT);
 		IPackageFragmentRoot root= JavaProjectHelper.addLibraryWithImport(fProject, Path.fromOSString(lib.getPath()), null, null);
 
@@ -851,7 +866,8 @@ public class FatJarExportTests extends TestCase {
 		}
 	}
 
-	public void testExportExternalLib() throws Exception {
+	@Test
+	public void exportExternalLib() throws Exception {
 		File lib= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.MYLIB_STDOUT);
 		IPackageFragmentRoot root= JavaProjectHelper.addLibrary(fProject, Path.fromOSString(lib.getPath()));
 
@@ -879,7 +895,8 @@ public class FatJarExportTests extends TestCase {
 		}
 	}
 
-	public void testClassFolder() throws Exception {
+	@Test
+	public void classFolder() throws Exception {
 		File lib= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.MYLIB_STDOUT);
 
 		IPackageFragmentRoot root= JavaProjectHelper.addClassFolderWithImport(fProject, "cf", null, null, lib); //$NON-NLS-1$
@@ -907,7 +924,8 @@ public class FatJarExportTests extends TestCase {
 		}
 	}
 
-	public void testVariable() throws Exception {
+	@Test
+	public void variable() throws Exception {
 		File lib= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.MYLIB_STDOUT);
 		JavaCore.setClasspathVariable("MYLIB", Path.fromOSString(lib.getPath()), null); //$NON-NLS-1$
 
@@ -936,7 +954,8 @@ public class FatJarExportTests extends TestCase {
 		}
 	}
 
-	public void testSignedLibs() throws Exception {
+	@Test
+	public void signedLibs() throws Exception {
 		File lib= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.MYLIB_SIG);
 		IPackageFragmentRoot root= JavaProjectHelper.addLibraryWithImport(fProject, Path.fromOSString(lib.getPath()), null, null);
 
@@ -964,7 +983,8 @@ public class FatJarExportTests extends TestCase {
 		}
 	}
 
-	public void testExternalClassFolder() throws Exception {
+	@Test
+	public void externalClassFolder() throws Exception {
 		File classFolder= JavaTestPlugin.getDefault().getFileInPlugin(new Path("testresources/externalClassFolder/"));//$NON-NLS-1$
 		assertTrue("class folder not found", classFolder != null && classFolder.exists());//$NON-NLS-1$
 		IPackageFragmentRoot externalRoot= JavaProjectHelper.addLibrary(fProject, Path.fromOSString(classFolder.getPath()), null, null);

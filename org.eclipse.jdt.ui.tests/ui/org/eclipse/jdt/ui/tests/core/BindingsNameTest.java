@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,7 +13,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.List;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -30,37 +37,22 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import org.eclipse.jdt.internal.corext.dom.Bindings;
-
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 /**
   */
-public class BindingsNameTest extends TestCase {
-
-	private static final Class<BindingsNameTest> THIS= BindingsNameTest.class;
+public class BindingsNameTest {
+	@Rule
+	public ProjectTestSetup pts= new ProjectTestSetup();
 
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
 	private ICompilationUnit fCompilationUnit;
 
-	public BindingsNameTest(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
-	}
-
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		JavaProjectHelper.addRTJar13(fJProject1);
 
@@ -87,16 +79,16 @@ public class BindingsNameTest extends TestCase {
 		fCompilationUnit= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 	}
 
-
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJProject1);
 	}
 
-	public void testGetFullyQualifiedName() throws Exception {
+	@Test
+	public void getFullyQualifiedName() throws Exception {
 		CompilationUnit astRoot= createAST(fCompilationUnit);
 		IProblem[] problems= astRoot.getProblems();
-		assertTrue(problems.length == 0);
+		assertEquals(0, problems.length);
 
 		TypeDeclaration typeDeclaration= (TypeDeclaration) astRoot.types().get(0);
 		MethodDeclaration methodDeclaration= typeDeclaration.getMethods()[0];
@@ -120,10 +112,11 @@ public class BindingsNameTest extends TestCase {
 		assertEquals("X[][][]", fullNames[7]);
 	}
 
-	public void testGetTypeQualifiedName() throws Exception {
+	@Test
+	public void getTypeQualifiedName() throws Exception {
 		CompilationUnit astRoot= createAST(fCompilationUnit);
 		IProblem[] problems= astRoot.getProblems();
-		assertTrue(problems.length == 0);
+		assertEquals(0, problems.length);
 
 		TypeDeclaration typeDeclaration= (TypeDeclaration) astRoot.types().get(0);
 		MethodDeclaration methodDeclaration= typeDeclaration.getMethods()[0];
@@ -147,10 +140,11 @@ public class BindingsNameTest extends TestCase {
 		assertEquals("X[][][]", fullNames[7]);
 	}
 
-	public void testGetAllNameComponents() throws Exception {
+	@Test
+	public void getAllNameComponents() throws Exception {
 		CompilationUnit astRoot= createAST(fCompilationUnit);
 		IProblem[] problems= astRoot.getProblems();
-		assertTrue(problems.length == 0);
+		assertEquals(0, problems.length);
 
 		TypeDeclaration typeDeclaration= (TypeDeclaration) astRoot.types().get(0);
 		MethodDeclaration methodDeclaration= typeDeclaration.getMethods()[0];
@@ -174,10 +168,11 @@ public class BindingsNameTest extends TestCase {
 		assertEqualArray(new String[] { "X[][][]" }, fullNames[7]);
 	}
 
-	public void testGetNameComponents() throws Exception {
+	@Test
+	public void getNameComponents() throws Exception {
 		CompilationUnit astRoot= createAST(fCompilationUnit);
 		IProblem[] problems= astRoot.getProblems();
-		assertTrue(problems.length == 0);
+		assertEquals(0, problems.length);
 
 		TypeDeclaration typeDeclaration= (TypeDeclaration) astRoot.types().get(0);
 		MethodDeclaration methodDeclaration= typeDeclaration.getMethods()[0];
@@ -214,5 +209,4 @@ public class BindingsNameTest extends TestCase {
 		parser.setResolveBindings(true);
 		return (CompilationUnit) parser.createAST(null);
 	}
-
 }

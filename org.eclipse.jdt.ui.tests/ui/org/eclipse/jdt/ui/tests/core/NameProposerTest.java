@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,9 +13,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -29,35 +32,22 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 
-
-public class NameProposerTest extends TestCase {
-
-	private static final Class<NameProposerTest> THIS= NameProposerTest.class;
-
+public class NameProposerTest {
 	private IJavaProject fJProject1;
 
-	public NameProposerTest(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return new TestSuite(THIS);
-	}
-
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		assertTrue("rt not found", JavaProjectHelper.addRTJar(fJProject1) != null);
+		assertNotNull("rt not found", JavaProjectHelper.addRTJar(fJProject1));
 	}
 
-
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJProject1);
 	}
 
-
-	public void testGetterSetterName() throws Exception {
+	@Test
+	public void getterSetterName() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);

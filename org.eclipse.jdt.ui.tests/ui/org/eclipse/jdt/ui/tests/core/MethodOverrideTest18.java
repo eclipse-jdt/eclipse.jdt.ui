@@ -39,16 +39,14 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.ui.tests.core.rules.Java18ProjectTestSetup;
 
 public class MethodOverrideTest18 extends MethodOverrideTest {
-
 	@Rule
 	public Java18ProjectTestSetup j18p= new Java18ProjectTestSetup();
 
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSrc;
 
-	@Override
 	@Before
-	public void setUp() throws Exception {
+	public void before() throws Exception {
 		fJProject1= Java18ProjectTestSetup.getProject();
 		fSrc= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -56,14 +54,13 @@ public class MethodOverrideTest18 extends MethodOverrideTest {
 		JavaCore.setOptions(options);
 	}
 
-	@Override
 	@After
-	public void tearDown() throws Exception {
+	public void after() throws Exception {
 		JavaProjectHelper.clear(fJProject1, Java18ProjectTestSetup.getDefaultClasspath());
 	}
 
 	@Test
-	public void testOverrideLambda1() throws Exception {
+	public void overrideLambda1() throws Exception {
 		IPackageFragment pack1= fSrc.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
@@ -90,6 +87,4 @@ public class MethodOverrideTest18 extends MethodOverrideTest {
 
 		doOverrideTests(root, focusType, overridingType, overridingTypeBinding, overriddenType, overriddenTypeBinding);
 	}
-
-
 }
