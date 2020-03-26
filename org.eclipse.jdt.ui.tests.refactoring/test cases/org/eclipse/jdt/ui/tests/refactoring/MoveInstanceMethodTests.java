@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -16,9 +16,6 @@
  *     Nikolay Metchev <nikolaymetchev@gmail.com> - [move method] Annotation error in applying move-refactoring to inherited methods - https://bugs.eclipse.org/404471
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -39,6 +36,9 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodP
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 public class MoveInstanceMethodTests extends RefactoringTest {
 
@@ -580,6 +580,11 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 	// bug 441217
 	public void test68() throws Exception {
 		helper1(new String[] { "A" }, "A", 6, 16, 6, 17, PARAMETER, "d", true, true);
+	}
+
+	// bug 486175
+	public void test69() throws Exception {
+		helper1(new String[] { "p1.A", "p2.B"}, "p1.A", 11, 17, 11, 23, FIELD, "b", true, true);
 	}
 
 	// Move mA1 to field fB, do not inline delegator

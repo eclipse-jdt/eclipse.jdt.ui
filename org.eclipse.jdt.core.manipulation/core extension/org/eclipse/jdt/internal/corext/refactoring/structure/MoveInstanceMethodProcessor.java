@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -595,6 +595,11 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 							IType type= (IType) declaring.getJavaElement();
 							if (type != null) {
 								rewrite.set(node, MethodInvocation.EXPRESSION_PROPERTY, ast.newName(type.getTypeQualifiedName('.')), null);
+								ITypeBinding root= declaring;
+								while (root.isNested()) {
+									root= root.getDeclaringClass();
+								}
+								fTargetRewrite.getImportRewrite().addImport(root);
 							}
 						}
 					}
