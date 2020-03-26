@@ -86,7 +86,7 @@ public class ModuleAddReadsBlock {
 
 		fSourceModuleStatus= new StatusInfo();
 
-		IDialogFieldListener adapter= field -> addReadsDialogFieldChanged(field);
+		IDialogFieldListener adapter= this::addReadsDialogFieldChanged;
 
 		// create the dialog fields (no widgets yet)
 		fSourceModule= new StringDialogField();

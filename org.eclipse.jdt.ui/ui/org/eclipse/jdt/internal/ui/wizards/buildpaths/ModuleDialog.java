@@ -225,11 +225,11 @@ public class ModuleDialog extends StatusDialog {
 
 		fIsPatchCheckbox= new SelectionButtonDialogField(SWT.CHECK);
 		fIsPatchCheckbox.setLabelText(NewWizardMessages.ModuleDialog_patches_module_label);
-		fIsPatchCheckbox.setDialogFieldListener(field -> doPatchSelectionChanged(field));
+		fIsPatchCheckbox.setDialogFieldListener(this::doPatchSelectionChanged);
 
 		fPatchedModule= new StringDialogField();
 		fPatchedModule.setLabelText(NewWizardMessages.ModuleDialog_patched_module_label);
-		fPatchedModule.setDialogFieldListener(field -> validateDetails(field));
+		fPatchedModule.setDialogFieldListener(this::validateDetails);
 
 		fAddExportsList= createDetailListContents(entryToEdit, NewWizardMessages.ModuleDialog_exports_label, new AddExportsAdapter(), ModuleAddExpose.class);
 		fAddReadsList= createDetailListContents(entryToEdit, NewWizardMessages.ModuleDialog_reads_label, new AddReadsAdapter(), ModuleAddReads.class);

@@ -31,12 +31,7 @@ import org.eclipse.jface.text.templates.TemplateVariableResolver;
 
 public class TemplateVariableProcessor implements IContentAssistProcessor {
 
-	private static Comparator<TemplateVariableProposal> fgTemplateVariableProposalComparator= new Comparator<TemplateVariableProposal>() {
-		@Override
-		public int compare(TemplateVariableProposal proposal0, TemplateVariableProposal proposal1) {
-			return proposal0.getDisplayString().compareTo(proposal1.getDisplayString());
-		}
-	};
+	private static Comparator<TemplateVariableProposal> fgTemplateVariableProposalComparator= Comparator.comparing(TemplateVariableProposal::getDisplayString);
 
 
 	/** the context type */

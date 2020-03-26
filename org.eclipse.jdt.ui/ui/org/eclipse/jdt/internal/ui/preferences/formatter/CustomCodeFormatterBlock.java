@@ -196,12 +196,7 @@ public class CustomCodeFormatterBlock extends Observable {
 				}
 			}
 		}
-		Collections.sort(formatters, new Comparator<FormatterContribution>() {
-			@Override
-			public int compare(FormatterContribution o1, FormatterContribution o2) {
-				return o1.fName.compareTo(o2.fName);
-			}
-		});
+		Collections.sort(formatters, Comparator.comparing((FormatterContribution o1) -> o1.fName));
 		fFormatters= CollectionsUtil.toArray(formatters, FormatterContribution.class);
 	}
 }

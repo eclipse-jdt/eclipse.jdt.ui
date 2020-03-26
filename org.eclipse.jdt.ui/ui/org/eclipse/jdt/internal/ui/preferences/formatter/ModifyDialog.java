@@ -902,7 +902,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 					doValidate();
 					return true;
 				};
-				((Preference<?>) node).init(fWorkingValues, validator , () -> valuesModified());
+				((Preference<?>) node).init(fWorkingValues, validator, ModifyDialog.this::valuesModified);
 			}
 
 			if (!(node instanceof Section)) {

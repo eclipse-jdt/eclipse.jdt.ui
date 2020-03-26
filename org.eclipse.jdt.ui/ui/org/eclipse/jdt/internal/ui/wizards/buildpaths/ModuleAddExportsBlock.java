@@ -107,7 +107,7 @@ public class ModuleAddExportsBlock {
 		fSourceModuleStatus= new StatusInfo();
 		fPackageStatus= new StatusInfo();
 
-		IDialogFieldListener adapter= field -> addExportsDialogFieldChanged(field);
+		IDialogFieldListener adapter= this::addExportsDialogFieldChanged;
 
 		// create the dialog fields (no widgets yet)
 		fSourceModule= new StringDialogField();

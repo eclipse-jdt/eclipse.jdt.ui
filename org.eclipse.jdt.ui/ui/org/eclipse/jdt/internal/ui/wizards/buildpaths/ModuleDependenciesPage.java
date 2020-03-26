@@ -222,7 +222,7 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 		title.setText(NewWizardMessages.ModuleDependenciesPage_modules_label);
 
 		fModuleList.createViewer(left, converter);
-		fModuleList.setSelectionChangedListener((elems, mod) -> selectModule(elems, mod));
+		fModuleList.setSelectionChangedListener(this::selectModule);
 
 		fAddSystemModuleButton= new Button(left, SWT.NONE);
 		fAddSystemModuleButton.setText(NewWizardMessages.ModuleDependenciesPage_addSystemModule_button);
