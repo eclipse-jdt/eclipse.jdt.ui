@@ -56,6 +56,50 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testConvertToLambdaAndQualifyNextField() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= ""
+				+ "package test;\n"
+				+ "\n"
+				+ "public class C1 {\n"
+				+ "    static final String previousField = \"abc\";\n"
+				+ "\n"
+				+ "    Runnable run1 = new Runnable() {\n"
+				+ "        @Override\n"
+				+ "        public void run() {\n"
+				+ "            System.out.println(previousField + instanceField + classField + getString());\n"
+				+ "        }\n"
+				+ "    };\n"
+				+ "\n"
+				+ "    static final String classField = \"abc\";\n"
+				+ "    final String instanceField = \"abc\";\n"
+				+ "    public void getString() {\n"
+				+ "        return \"\";\n"
+				+ "    }\n"
+				+ "}\n";
+		ICompilationUnit cu= pack1.createCompilationUnit("C1.java", sample, false, null);
+
+		enable(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES);
+		enable(CleanUpConstants.USE_LAMBDA);
+
+		String expected= ""
+				+ "package test;\n"
+				+ "\n"
+				+ "public class C1 {\n"
+				+ "    static final String previousField = \"abc\";\n"
+				+ "\n"
+				+ "    Runnable run1 = () -> System.out.println(previousField + this.instanceField + C1.classField + getString());\n"
+				+ "\n"
+				+ "    static final String classField = \"abc\";\n"
+				+ "    final String instanceField = \"abc\";\n"
+				+ "    public void getString() {\n"
+				+ "        return \"\";\n"
+				+ "    }\n"
+				+ "}\n";
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
 	public void testDoNotRefactorWithExpressions() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //

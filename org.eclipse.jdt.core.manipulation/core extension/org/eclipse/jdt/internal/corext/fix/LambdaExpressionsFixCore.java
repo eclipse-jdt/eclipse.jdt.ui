@@ -62,6 +62,7 @@ import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
@@ -401,9 +402,9 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 		@Override
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModelCore model) throws CoreException {
 
-			ASTRewrite rewrite= cuRewrite.getASTRewrite();
+			final ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			ImportRemover importRemover= cuRewrite.getImportRemover();
-			AST ast= rewrite.getAST();
+			final AST ast= rewrite.getAST();
 
 			HashMap<ClassInstanceCreation, HashSet<String>> cicToNewNames= new HashMap<>();
 			for (int i= 0; i < fExpressions.size(); i++) {
@@ -467,10 +468,70 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 						}
 					}
 				}
+
+				@SuppressWarnings("unchecked")
+				final ASTNode field= ASTNodes.getFirstAncestorOrNull(classInstanceCreation, FieldDeclaration.class, BodyDeclaration.class);
+
+				if (field instanceof FieldDeclaration) {
+					FieldDeclaration fieldDeclaration= (FieldDeclaration) field;
+
+					@SuppressWarnings("unchecked")
+					ASTNode declarationClass= ASTNodes.getFirstAncestorOrNull(fieldDeclaration, TypeDeclaration.class);
+
+					if (declarationClass instanceof TypeDeclaration) {
+						TypeDeclaration typeDeclaration= (TypeDeclaration) declarationClass;
+
+						final List<FieldDeclaration> nextFields= new ArrayList<>();
+						boolean isBefore= true;
+
+						for (FieldDeclaration oneField : typeDeclaration.getFields()) {
+							if (oneField == fieldDeclaration) {
+								isBefore= false;
+							}
+
+							if (!isBefore) {
+								nextFields.add(oneField);
+							}
+						}
+
+						ASTVisitor visitor= new ASTVisitor() {
+							@Override
+							public boolean visit(final SimpleName node) {
+								ASTNode declaration= ASTNodes.findDeclaration(node.resolveBinding(), declarationClass);
+
+								if (declaration != null
+										&& declaration instanceof VariableDeclarationFragment
+										&& declaration.getParent() instanceof FieldDeclaration) {
+									FieldDeclaration currentField= (FieldDeclaration) declaration.getParent();
+
+									if (nextFields.contains(currentField)) {
+										if ((currentField.getModifiers() & Modifier.STATIC) != 0) {
+											SimpleName copyOfClassName= (SimpleName) rewrite.createCopyTarget(typeDeclaration.getName());
+											QualifiedName replacement= ast.newQualifiedName(copyOfClassName, (SimpleName) rewrite.createMoveTarget(node));
+											rewrite.replace(node, replacement, group);
+										} else {
+											FieldAccess newFieldAccess= ast.newFieldAccess();
+											newFieldAccess.setExpression(ast.newThisExpression());
+											newFieldAccess.setName((SimpleName) rewrite.createMoveTarget(node));
+											rewrite.replace(node, newFieldAccess, group);
+										}
+
+										return false;
+									}
+								}
+
+								return true;
+							}
+						};
+						lambdaBody.accept(visitor);
+					}
+				}
+
 				//TODO: Bug 421479: [1.8][clean up][quick assist] convert anonymous to lambda must consider lost scope of interface
 				//				lambdaBody.accept(new InterfaceAccessQualifier(rewrite, classInstanceCreation.getType().resolveBinding())); //TODO: maybe need a separate ASTRewrite and string placeholder
 
 				lambdaExpression.setBody(ASTNodes.getCopyOrReplacement(rewrite, lambdaBody, group));
+
 				Expression replacement= lambdaExpression;
 				ITypeBinding targetTypeBinding= ASTNodes.getTargetType(classInstanceCreation);
 				if (ASTNodes.isTargetAmbiguous(classInstanceCreation, ASTNodes.isExplicitlyTypedLambda(lambdaExpression)) || targetTypeBinding.getFunctionalInterfaceMethod() == null) {
