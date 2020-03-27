@@ -718,6 +718,22 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		}
 	}
 
+	@Override
+	public void performDefaults() {
+		super.performDefaults();
+		performReleasePreferenceDefault();
+	}
+
+	private void performReleasePreferenceDefault() {
+		String defValue= getDefaultValue(PREF_RELEASE);
+		if (defValue == null) {
+			defValue= DISABLED;
+		}
+		fCompilerReleaseCheck.setSelection(DISABLED.equals(defValue) ? false : true);
+		setValue(PREF_RELEASE, defValue);
+		updateReleaseOptionStatus();
+	}
+
 	private void validateComplianceStatus() {
 		if (fJRE50InfoText != null && !fJRE50InfoText.isDisposed()) {
 			boolean isVisible= false;
@@ -1369,12 +1385,13 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 			if (isOriginalDefaultCompliance(complianceLevel)) {
 				Map<String, String> complianceOptions= new HashMap<>();
 				JavaModelUtil.setComplianceOptions(complianceOptions, complianceLevel);
+				String releaseVal= complianceOptions.get(PREF_RELEASE.getName());
 				setDefaultValue(PREF_COMPLIANCE, complianceOptions.get(PREF_COMPLIANCE.getName()));
 				setDefaultValue(PREF_PB_ASSERT_AS_IDENTIFIER, complianceOptions.get(PREF_PB_ASSERT_AS_IDENTIFIER.getName()));
 				setDefaultValue(PREF_PB_ENUM_AS_IDENTIFIER, complianceOptions.get(PREF_PB_ENUM_AS_IDENTIFIER.getName()));
 				setDefaultValue(PREF_SOURCE_COMPATIBILITY, complianceOptions.get(PREF_SOURCE_COMPATIBILITY.getName()));
 				setDefaultValue(PREF_CODEGEN_TARGET_PLATFORM, complianceOptions.get(PREF_CODEGEN_TARGET_PLATFORM.getName()));
-				setDefaultValue(PREF_RELEASE, DISABLED);
+				setDefaultValue(PREF_RELEASE, releaseVal != null ? releaseVal : DISABLED);
 				if (JavaCore.compareJavaVersions(complianceLevel, JavaCore.VERSION_10) > 0) {
 					setDefaultValue(PREF_ENABLE_PREVIEW, complianceOptions.get(PREF_ENABLE_PREVIEW.getName()));
 					setDefaultValue(PREF_PB_REPORT_PREVIEW, complianceOptions.get(PREF_PB_REPORT_PREVIEW.getName()));
