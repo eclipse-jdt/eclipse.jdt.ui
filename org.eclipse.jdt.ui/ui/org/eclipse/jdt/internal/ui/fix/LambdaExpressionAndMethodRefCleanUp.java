@@ -55,6 +55,7 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
@@ -206,7 +207,17 @@ public class LambdaExpressionAndMethodRefCleanUp extends AbstractMultiFix {
 							return false;
 						}
 
-						if (calledExpression instanceof StringLiteral || calledExpression instanceof NumberLiteral
+						if (calledExpression == null) {
+							if (methodBinding != null) {
+								ITypeBinding calledType= methodBinding.getDeclaringClass();
+								ITypeBinding enclosingType= Bindings.getBindingOfParentType(node);
+
+								if (calledType != null && Bindings.isSuperType(calledType, enclosingType)) {
+									rewriteOperations.add(new ReplaceByMethodReferenceOperation(node, methodInvocation));
+									return false;
+								}
+							}
+						} else if (calledExpression instanceof StringLiteral || calledExpression instanceof NumberLiteral
 								|| calledExpression instanceof ThisExpression) {
 							rewriteOperations.add(new ReplaceByMethodReferenceOperation(node, methodInvocation));
 							return false;
