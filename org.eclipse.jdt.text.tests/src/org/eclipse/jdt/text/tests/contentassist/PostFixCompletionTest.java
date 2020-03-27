@@ -13,6 +13,7 @@
 package org.eclipse.jdt.text.tests.contentassist;
 
 import java.util.Arrays;
+import java.util.Hashtable;
 import java.util.List;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -30,7 +31,9 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
@@ -63,6 +66,11 @@ public class PostFixCompletionTest extends TestCase {
 
 	@Override
 	protected void setUp() throws Exception {
+		Hashtable<String, String> options= JavaCore.getDefaultOptions();
+		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
+		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "2");
+		JavaCore.setOptions(options);
+
 		fJProject= JavaProjectHelper.createJavaProject("TestProject", "bin");
 		JavaProjectHelper.addRTJar18(fJProject);
 		javaSrc= JavaProjectHelper.addSourceContainer(fJProject, "src");
@@ -286,7 +294,7 @@ public class PostFixCompletionTest extends TestCase {
 		buf.append("package test;\n" +
 				"public class ArrayVar {\n" +
 				"  public void test () {\n" +
-				"    new byte[]{0, 1, 3}.var$\n" +
+				"    new byte[] { 0, 1, 3 }.var$\n" +
 				"  }\n" +
 				"}");
 
@@ -303,7 +311,7 @@ public class PostFixCompletionTest extends TestCase {
 		expected.append("package test;\n" +
 				"public class ArrayVar {\n" +
 				"  public void test () {\n" +
-				"    byte[] name = new byte[]{0, 1, 3};\n" +
+				"    byte[] name = new byte[] { 0, 1, 3 };\n" +
 				"  }\n" +
 				"}");
 
@@ -442,6 +450,49 @@ public class PostFixCompletionTest extends TestCase {
 		assertEquals(expected.toString(), viewer.getDocument().get());
 	}
 
+	public void testVarForAnonymousClass() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n" +
+				"import java.io.File;\n" +
+				"import java.io.FileFilter;\n" +
+				"public class Test {\n" +
+				"  public void test() {\n" +
+				"    new File(\"\").listFiles(new FileFilter() {\n" +
+				"      @Override\n" +
+				"      public boolean accept(File pathname) {\n" +
+				"        return false;\n" +
+				"      }\n" +
+				"    }).var$\n" +
+				"  } \n" +
+				"}");
+
+		int completionIndex= getCompletionIndex(buf);
+		ICompilationUnit cu= getCompilationUnit(pkg, buf, "VarForAnonymousClass.java");
+		List<ICompletionProposal> proposals= computeCompletionProposals(cu, completionIndex);
+
+		assertProposalsExist(Arrays.asList("var - Creates a new variable"), proposals);
+
+		ITextViewer viewer= initializeViewer(cu);
+		applyProposal(viewer, proposals, "var", completionIndex);
+
+		StringBuffer expected= new StringBuffer();
+		expected.append("package test;\n" +
+				"import java.io.File;\n" +
+				"import java.io.FileFilter;\n" +
+				"public class Test {\n" +
+				"  public void test() {\n" +
+				"    File[] name = new File(\"\").listFiles(new FileFilter() {\n" +
+				"      @Override\n" +
+				"      public boolean accept(File pathname) {\n" +
+				"        return false;\n" +
+				"      }\n" +
+				"    });\n" +
+				"  } \n" +
+				"}");
+
+		assertEquals(expected.toString(), viewer.getDocument().get());
+	}
+
 	public void testNestedQualifiedNames() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test;\n" +
@@ -549,8 +600,8 @@ public class PostFixCompletionTest extends TestCase {
 				"  public void test () {\n" +
 				"    List<String> a;\n" +
 				"    for (String a2 : a) {\n" +
-				"		\n" +
-				"	}\n" +
+				"      \n" +
+				"    }\n" +
 				"  }\n" +
 				"}");
 
@@ -562,10 +613,10 @@ public class PostFixCompletionTest extends TestCase {
 		buf.append("package test;\n" +
 				"import java.util.List;\n" +
 				"public class ForStatement2 {\n" +
-				"	public int test (String [] inp) {\n" +
-				"		inp.fo$\n" +
-				"		return 0;\n" +
-				"	}\n" +
+				"  public int test (String [] inp) {\n" +
+				"    inp.fo$\n" +
+				"    return 0;\n" +
+				"  }\n" +
 				"}");
 
 		int completionIndex= getCompletionIndex(buf);
@@ -581,12 +632,12 @@ public class PostFixCompletionTest extends TestCase {
 		expected.append("package test;\n" +
 				"import java.util.List;\n" +
 				"public class ForStatement2 {\n" +
-				"	public int test (String [] inp) {\n" +
-				"		for (String inp2 : inp) {\n" +
-				"			\n" +
-				"		}\n" +
-				"		return 0;\n" +
-				"	}\n" +
+				"  public int test (String [] inp) {\n" +
+				"    for (String inp2 : inp) {\n" +
+				"      \n" +
+				"    }\n" +
+				"    return 0;\n" +
+				"  }\n" +
 				"}");
 
 		assertEquals(expected.toString(), viewer.getDocument().get());

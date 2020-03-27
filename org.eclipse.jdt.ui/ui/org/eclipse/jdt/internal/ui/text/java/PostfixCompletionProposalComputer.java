@@ -38,7 +38,10 @@ import org.eclipse.jdt.core.dom.BooleanLiteral;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
@@ -209,6 +212,23 @@ public class PostfixCompletionProposalComputer extends AbstractTemplateCompletio
 					int start= node.getStartPosition();
 					if (invOffset > start && start >= bestNode[0].getStartPosition()) {
 						bestNode[0]= node;
+					}
+					return true;
+				}
+
+				@Override
+				public boolean visit(MethodInvocation node) {
+					IMethodBinding methodBinding= node.resolveMethodBinding();
+					if (methodBinding != null) {
+						ITypeBinding retBinding= methodBinding.getReturnType();
+						if (!"void".equals(retBinding.getName())) { //$NON-NLS-1$
+							int start= node.getStartPosition();
+							int end= start + node.getLength() - 1;
+							if (invOffset > start && invOffset == end + 1) {
+								bestNode[0]= node;
+								return false;
+							}
+						}
 					}
 					return true;
 				}
