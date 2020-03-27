@@ -1020,7 +1020,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 				invoc.setExpression(getQualifiedName(JAVA_UTIL_OBJECTS));
 				invoc.setName(fAst.newSimpleName(METHODNAME_EQUALS));
 			}
-			invoc.arguments().add(fAst.newSimpleName(name));
+			invoc.arguments().add(getThisAccessForEquals(name));
 			invoc.arguments().add(getOtherAccess(name));
 			return invoc;
 		}

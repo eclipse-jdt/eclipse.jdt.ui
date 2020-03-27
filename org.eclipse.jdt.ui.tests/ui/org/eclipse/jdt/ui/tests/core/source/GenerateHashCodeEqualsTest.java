@@ -2039,6 +2039,52 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	}
 
 	/**
+	 * Test with J7+ Objects.hash and Objects.equals method calls with class with "other" field
+	 * (https://bugs.eclipse.org/bugs/show_bug.cgi?id=561517)
+	 *
+	 * @throws Exception
+	 */
+	public void testOtherFieldIn17() throws Exception {
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
+				"\r\n" +
+				"public class A {\r\n" +
+				"	private String other;\r\n" +
+				"}\r\n" +
+				"", true, null);
+
+		IField[] fields= getFields(a.getType("A"), new String[] { "other" });
+		runJ7Operation(a.getType("A"), fields, false);
+
+		String expected= "package p;\r\n" +
+				"\r\n" +
+				"import java.util.Objects;\r\n" +
+				"\r\n" +
+				"public class A {\r\n" +
+				"	private String other;\r\n" +
+				"\r\n" +
+				"	@Override\r\n" +
+				"	public int hashCode() {\r\n" +
+				"		return Objects.hash(other);\r\n" +
+				"	}\r\n" +
+				"\r\n" +
+				"	@Override\r\n" +
+				"	public boolean equals(Object obj) {\r\n" +
+				"		if (this == obj)\r\n" +
+				"			return true;\r\n" +
+				"		if (obj == null)\r\n" +
+				"			return false;\r\n" +
+				"		if (getClass() != obj.getClass())\r\n" +
+				"			return false;\r\n" +
+				"		A other = (A) obj;\r\n" +
+				"		return Objects.equals(this.other, other.other);\r\n" +
+				"	}\r\n" +
+				"}\r\n" +
+				"";
+
+		compareSource(expected, a.getSource());
+	}
+
+	/**
 	 * Test implementation based only on super class
 	 *
 	 * @throws Exception
