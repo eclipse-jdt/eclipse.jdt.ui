@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,72 +13,77 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring.nls;
 
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
+import org.junit.Test;
 
 import org.eclipse.jface.text.Document;
 
 import org.eclipse.jdt.internal.corext.refactoring.nls.SimpleLineReader;
 
-public class SimpleLineReaderTest extends TestCase {
-
-	public static TestSuite suite() {
-		return new TestSuite(SimpleLineReaderTest.class);
-	}
-
-    public void testSimpleLineReader() throws Exception {
+public class SimpleLineReaderTest {
+	@Test
+	public void simpleLineReader() throws Exception {
         SimpleLineReader reader = new SimpleLineReader(new Document("aha\noho\r\n\r\n\n"));
         assertEquals("aha\n", reader.readLine());
         assertEquals("oho\r\n", reader.readLine());
         assertEquals("\r\n", reader.readLine());
         assertEquals("\n", reader.readLine());
-        assertEquals(null, reader.readLine());
+        assertNull(reader.readLine());
     }
 
-    public void testSimpleLineReaderWithEmptyString() {
+	@Test
+	public void simpleLineReaderWithEmptyString() {
         SimpleLineReader simpleLineReader = new SimpleLineReader(new Document(""));
-        assertEquals(null, simpleLineReader.readLine());
+        assertNull(simpleLineReader.readLine());
     }
 
-    public void testSimpleLineReaderWithEscapedLF() {
+	@Test
+	public void simpleLineReaderWithEscapedLF() {
         SimpleLineReader simpleLineReader = new SimpleLineReader(new Document("a\nb\\nc\n"));
         assertEquals("a\n", simpleLineReader.readLine());
         assertEquals("b\\nc\n", simpleLineReader.readLine());
-        assertEquals(null, simpleLineReader.readLine());
+        assertNull(simpleLineReader.readLine());
     }
 
-    public void testSimpleLineReaderWithEscapedCR() {
+	@Test
+	public void simpleLineReaderWithEscapedCR() {
         SimpleLineReader simpleLineReader = new SimpleLineReader(new Document("a\nb\\rc\r"));
         assertEquals("a\n", simpleLineReader.readLine());
         assertEquals("b\\rc\r", simpleLineReader.readLine());
-        assertEquals(null, simpleLineReader.readLine());
+        assertNull(simpleLineReader.readLine());
     }
 
-    public void testSimpleLineReaderWithCR() {
+	@Test
+	public void simpleLineReaderWithCR() {
         SimpleLineReader simpleLineReader = new SimpleLineReader(new Document("a\rb\r"));
         assertEquals("a\r", simpleLineReader.readLine());
         assertEquals("b\r", simpleLineReader.readLine());
-        assertEquals(null, simpleLineReader.readLine());
+        assertNull(simpleLineReader.readLine());
     }
 
-    public void testSimpleLineReaderWithoutNL() {
+	@Test
+	public void simpleLineReaderWithoutNL() {
         SimpleLineReader simpleLineReader = new SimpleLineReader(new Document("="));
         assertEquals("=", simpleLineReader.readLine());
-        assertEquals(null, simpleLineReader.readLine());
+        assertNull(simpleLineReader.readLine());
     }
 
-    public void testSimpleLineReaderWithMissingNL() {
+	@Test
+	public void simpleLineReaderWithMissingNL() {
         SimpleLineReader simpleLineReader = new SimpleLineReader(new Document("a\rb"));
         assertEquals("a\r", simpleLineReader.readLine());
         assertEquals("b", simpleLineReader.readLine());
-        assertEquals(null, simpleLineReader.readLine());
+        assertNull(simpleLineReader.readLine());
     }
 
-    public void testSimpleLineReaderWithLineContinue1() {
+	@Test
+	public void simpleLineReaderWithLineContinue1() {
         SimpleLineReader simpleLineReader = new SimpleLineReader(new Document("aaa\\\nbbb\nccc\n"));
         assertEquals("aaa\\\nbbb\n", simpleLineReader.readLine());
         assertEquals("ccc\n", simpleLineReader.readLine());
-        assertEquals(null, simpleLineReader.readLine());
+        assertNull(simpleLineReader.readLine());
     }
 
 }

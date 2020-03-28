@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,24 +13,17 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring.nls;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.Properties;
 
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.Test;
 
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSSubstitution;
 
-public class NLSSubstitutionTest extends TestCase {
-
-	public NLSSubstitutionTest(String name) {
-		super(name);
-	}
-
-	public static TestSuite suite() {
-		return new TestSuite(NLSSubstitutionTest.class);
-	}
-
-	public void testGeneratedKey() {
+public class NLSSubstitutionTest {
+	@Test
+	public void generatedKey() {
 		NLSSubstitution[] substitutions = {
 				new NLSSubstitution(NLSSubstitution.EXTERNALIZED, "key.0", "v1", null, null),
 				new NLSSubstitution(NLSSubstitution.EXTERNALIZED, "key.2", "v2", null, null)
@@ -44,7 +37,8 @@ public class NLSSubstitutionTest extends TestCase {
 		assertEquals("key.1", subs.getKey());
 	}
 
-	public void testGeneratedKey2() {
+	@Test
+	public void generatedKey2() {
 		NLSSubstitution[] substitutions = {
 				new NLSSubstitution(NLSSubstitution.EXTERNALIZED, "key.0", "v1", null, null),
 				new NLSSubstitution(NLSSubstitution.INTERNALIZED, "v2", null)
@@ -60,7 +54,8 @@ public class NLSSubstitutionTest extends TestCase {
 		assertEquals("key.2", subs.getKey());
 	}
 
-	public void testGeneratedKeyBug202815() {
+	@Test
+	public void generatedKeyBug202815() {
 		NLSSubstitution substitution= new NLSSubstitution(NLSSubstitution.IGNORED, "v1", null);
 		substitution.setState(NLSSubstitution.EXTERNALIZED);
 		substitution.setPrefix("key.");
@@ -72,13 +67,15 @@ public class NLSSubstitutionTest extends TestCase {
 		assertEquals("key.1", substitution.getKey());
 	}
 
-	public void testGetKeyWithoutPrefix() {
+	@Test
+	public void getKeyWithoutPrefix() {
 	    NLSSubstitution substitution = new NLSSubstitution(NLSSubstitution.EXTERNALIZED, "key", "value", null, null);
 	    substitution.setPrefix("test.");
 	    assertEquals("key", substitution.getKey());
 	}
 
-	public void testGetKeyWithPrefix() {
+	@Test
+	public void getKeyWithPrefix() {
 	    NLSSubstitution substitution = new NLSSubstitution(NLSSubstitution.INTERNALIZED, "value", null);
 	    substitution.setState(NLSSubstitution.EXTERNALIZED);
 	    substitution.setKey("key");

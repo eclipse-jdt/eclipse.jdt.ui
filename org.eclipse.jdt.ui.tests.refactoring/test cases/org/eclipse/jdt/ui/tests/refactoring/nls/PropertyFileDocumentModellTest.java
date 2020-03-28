@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,8 +13,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring.nls;
 
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import static org.junit.Assert.assertEquals;
+
+import org.junit.Test;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -32,16 +33,7 @@ import org.eclipse.jdt.internal.corext.refactoring.nls.PropertyFileDocumentModel
 
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 
-public class PropertyFileDocumentModellTest extends TestCase {
-
-	public PropertyFileDocumentModellTest(String name) {
-		super(name);
-	}
-
-	public static TestSuite suite() {
-		return new TestSuite(PropertyFileDocumentModellTest.class);
-	}
-
+public class PropertyFileDocumentModellTest {
 	private static void insert(IDocument document, String key, String value) throws CoreException {
 		insert(document, new KeyValuePair[] {new KeyValuePair(key, value)});
 	}
@@ -59,7 +51,8 @@ public class PropertyFileDocumentModellTest extends TestCase {
 		change.perform(new NullProgressMonitor());
 	}
 
-	public void testInsertIntoEmptyDoc() throws Exception {
+	@Test
+	public void insertIntoEmptyDoc() throws Exception {
 		Document props= new Document();
 
 		insert(props, "key", "value");
@@ -68,7 +61,8 @@ public class PropertyFileDocumentModellTest extends TestCase {
 				"key=value\n", props.get());
 	}
 
-	public void testInsertIntoDoc() throws Exception {
+	@Test
+	public void insertIntoDoc() throws Exception {
 		Document props= new Document(
 				"org.eclipse.nls.1=value\n" +
 				"org.eclipse=value\n");
@@ -81,7 +75,8 @@ public class PropertyFileDocumentModellTest extends TestCase {
 				"org.eclipse=value\n", props.get());
 	}
 
-	public void testInsertIntoDoc2() throws Exception {
+	@Test
+	public void insertIntoDoc2() throws Exception {
 		Document props= new Document(
 				"org.1=value\n" +
 				"org.2=value\n");
@@ -94,7 +89,8 @@ public class PropertyFileDocumentModellTest extends TestCase {
 				"org.2=value\n", props.get());
 	}
 
-	public void testInsertIntoDoc3() throws Exception {
+	@Test
+	public void insertIntoDoc3() throws Exception {
 		Document props= new Document(
 				"Test_B_1=value\n" +
 				"Test_A_1=value\n");
@@ -107,7 +103,8 @@ public class PropertyFileDocumentModellTest extends TestCase {
 				"Test_A_1=value\n", props.get());
 	}
 
-	public void testInsertIntoDoc4() throws Exception {
+	@Test
+	public void insertIntoDoc4() throws Exception {
 		Document props= new Document(
 				"Test_Aa=value\n" +
 				"Test_Ab=value\n" +
@@ -126,7 +123,8 @@ public class PropertyFileDocumentModellTest extends TestCase {
 				"Test_Bc=", props.get());
 	}
 
-	public void testManyInsertsIntoDoc() throws Exception {
+	@Test
+	public void manyInsertsIntoDoc() throws Exception {
 		Document props= new Document(
 				"org.eclipse.nls.1=value\n" +
 				"\n" +
@@ -153,7 +151,8 @@ public class PropertyFileDocumentModellTest extends TestCase {
 				props.get());
 	}
 
-	public void testManyInsertsIntoDoc2() throws Exception {
+	@Test
+	public void manyInsertsIntoDoc2() throws Exception {
 		Document props= new Document(
 				"key_b=value\n" +
 				"\n" +
@@ -170,7 +169,8 @@ public class PropertyFileDocumentModellTest extends TestCase {
 				"key_z=value\n", props.get());
 	}
 
-	public void testManyInsertsIntoDoc3() throws Exception {
+	@Test
+	public void manyInsertsIntoDoc3() throws Exception {
 		Document props= new Document(
 				"key_a=value\n" +
 				"\n" +
@@ -186,7 +186,8 @@ public class PropertyFileDocumentModellTest extends TestCase {
 				"key_b_2=value\n", props.get());
 	}
 
-	public void testManyInsertsIntoDoc4() throws Exception {
+	@Test
+	public void manyInsertsIntoDoc4() throws Exception {
 		Document props= new Document(
 				"Clazz.Pong=Pong\n" +
 				"Clazz.Ping=Ping\n");
@@ -202,7 +203,8 @@ public class PropertyFileDocumentModellTest extends TestCase {
 				"Clazz.Pizza=value\n", props.get());
 	}
 
-	public void testManyInsertsIntoDoc5() throws Exception {
+	@Test
+	public void manyInsertsIntoDoc5() throws Exception {
 		Document props= new Document(
 				"Clazz.Pong=Pong\n" +
 				"Clazz.Ping=Ping\n");
@@ -218,7 +220,8 @@ public class PropertyFileDocumentModellTest extends TestCase {
 				"Clazz.Ping=Ping\n", props.get());
 	}
 
-	public void testBlockInsertsIntoDoc() throws Exception {
+	@Test
+	public void blockInsertsIntoDoc() throws Exception {
 		Document props= new Document(
 				"org.eclipse.1=value\n" +
 				"org.eclipse.2=value\n");
@@ -232,7 +235,8 @@ public class PropertyFileDocumentModellTest extends TestCase {
 				"org.eclipse.nls.2=value\n", props.get());
 	}
 
-	public void testInsertIntoDocWithBlankLines1() throws Exception {
+	@Test
+	public void insertIntoDocWithBlankLines1() throws Exception {
 		Document props= new Document(
 				"org.eclipse=value\n" +
 				"\n" +
@@ -247,7 +251,8 @@ public class PropertyFileDocumentModellTest extends TestCase {
 				"org.eclipse.test=value2\n", props.get());
 	}
 
-	public void testInsertIntoDocWithBlankLines2() throws Exception {
+	@Test
+	public void insertIntoDocWithBlankLines2() throws Exception {
 		Document props= new Document(
 				"a.b=v\n" +
 				"\n" +
@@ -262,7 +267,8 @@ public class PropertyFileDocumentModellTest extends TestCase {
 				"org.eclipse.test=value\n", props.get());
 	}
 
-	public void testInsertIntoDocWithDifferentSeperationChar() throws Exception {
+	@Test
+	public void insertIntoDocWithDifferentSeperationChar() throws Exception {
 		Document props= new Document(
 				"org.eclipse.ok:value\n" +
 				"org.eclipse.what value\n");
@@ -275,7 +281,8 @@ public class PropertyFileDocumentModellTest extends TestCase {
 				"org.eclipse.what value\n", props.get());
 	}
 
-	public void testRemovingOfKey() throws Exception {
+	@Test
+	public void removingOfKey() throws Exception {
 		Document props= new Document("org.eclipse.1=value1\n" + "org.eclipse.2=value2\n" + "org.eclipse.3=value3\n");
 		PropertyFileDocumentModel modell= new PropertyFileDocumentModel(props);
 
@@ -285,7 +292,8 @@ public class PropertyFileDocumentModellTest extends TestCase {
 		assertEquals("org.eclipse.1=value1\n" + "org.eclipse.3=value3\n", props.get());
 	}
 
-	public void testRemovingOfKey2() throws Exception {
+	@Test
+	public void removingOfKey2() throws Exception {
 		Document props= new Document("org.eclipse.1=value1\n" + " org.eclipse.2           =  value2   \n" + "org.eclipse.3=value3\n");
 		PropertyFileDocumentModel modell= new PropertyFileDocumentModel(props);
 
@@ -295,7 +303,8 @@ public class PropertyFileDocumentModellTest extends TestCase {
 		assertEquals("org.eclipse.1=value1\n" + "org.eclipse.3=value3\n", props.get());
 	}
 
-	public void testRemovingOfLastKey() throws Exception {
+	@Test
+	public void removingOfLastKey() throws Exception {
 		Document props= new Document("org.eclipse.1=value1\n" + "org.eclipse.2=value2\n" + "org.eclipse.3=value3\n");
 		PropertyFileDocumentModel modell= new PropertyFileDocumentModel(props);
 
@@ -305,7 +314,8 @@ public class PropertyFileDocumentModellTest extends TestCase {
 		assertEquals("org.eclipse.1=value1\n" + "org.eclipse.2=value2\n", props.get());
 	}
 
-	public void testReplacementOfKeyValuePair() throws Exception {
+	@Test
+	public void replacementOfKeyValuePair() throws Exception {
 		Document props= new Document("org.eclipse.1=value1\n" + "org.eclipse.2=value2\n" + "org.eclipse.3=value3\n");
 		PropertyFileDocumentModel modell= new PropertyFileDocumentModel(props);
 
@@ -316,7 +326,8 @@ public class PropertyFileDocumentModellTest extends TestCase {
 	}
 
 	// Escaping stuff
-	public void testEscapingOfComments() throws Exception {
+	@Test
+	public void escapingOfComments() throws Exception {
 		Document props= new Document();
 
 		insert(props, "key", "value!please escape");
@@ -325,7 +336,8 @@ public class PropertyFileDocumentModellTest extends TestCase {
 				"key=value\\!please escape\n", props.get());
 	}
 
-	public void testEscapingOfLineBreaks() throws Exception {
+	@Test
+	public void escapingOfLineBreaks() throws Exception {
 		Document props= new Document();
 
 		insert(props, "key", "value1\nvalue2\r");
@@ -334,7 +346,8 @@ public class PropertyFileDocumentModellTest extends TestCase {
 				"key=value1\\nvalue2\\r\n", props.get());
 	}
 
-	public void testEscapingOfTab() throws Exception {
+	@Test
+	public void escapingOfTab() throws Exception {
 		Document props= new Document();
 
 		insert(props, "key", "value1\tvalue2");
@@ -343,7 +356,8 @@ public class PropertyFileDocumentModellTest extends TestCase {
 				"key=value1\\tvalue2\n", props.get());
 	}
 
-	public void testEscapingOfFormFeed() throws Exception {
+	@Test
+	public void escapingOfFormFeed() throws Exception {
 		Document props= new Document();
 
 		insert(props, "key", "value1\fvalue2");
@@ -352,7 +366,8 @@ public class PropertyFileDocumentModellTest extends TestCase {
 				"key=value1\\fvalue2\n", props.get());
 	}
 
-	public void testEscapingOfBackspace() throws Exception {
+	@Test
+	public void escapingOfBackspace() throws Exception {
 		Document props= new Document();
 
 		insert(props, "key", "value1\bvalue2");
@@ -361,7 +376,8 @@ public class PropertyFileDocumentModellTest extends TestCase {
 				"key=value1\\u0008value2\n", props.get());
 	}
 
-	public void testEscapingOfEscapes() throws Exception {
+	@Test
+	public void escapingOfEscapes() throws Exception {
 		Document props= new Document();
 
 		insert(props, "key", "c:\\demo\\demo.java");
@@ -370,7 +386,8 @@ public class PropertyFileDocumentModellTest extends TestCase {
 				"key=c:\\\\demo\\\\demo.java\n", props.get());
 	}
 
-	public void testEscapingOfISO8859() throws Exception {
+	@Test
+	public void escapingOfISO8859() throws Exception {
 		Document props= new Document();
 
 		insert(props, "key", "\u00e4");
@@ -378,7 +395,8 @@ public class PropertyFileDocumentModellTest extends TestCase {
 		RefactoringTest.assertEqualLines("key=ä\n", props.get());
 	}
 
-	public void testEscapingOfUniCode() throws Exception {
+	@Test
+	public void escapingOfUniCode() throws Exception {
 		Document props= new Document();
 
 		insert(props, "key", "\u0926");
@@ -386,7 +404,8 @@ public class PropertyFileDocumentModellTest extends TestCase {
 		RefactoringTest.assertEqualLines("key=\\u0926\n", props.get());
 	}
 
-	public void testEscapingOfLeadingWhiteSpaces() throws Exception {
+	@Test
+	public void escapingOfLeadingWhiteSpaces() throws Exception {
 		Document props= new Document();
 
 		insert(props, "key", "  test");

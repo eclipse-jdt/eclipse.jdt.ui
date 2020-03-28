@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,11 +13,16 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring.nls;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Properties;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -32,18 +37,17 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSMessages;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSSubstitution;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
-
-public class NlsRefactoringCheckFinalConditionsTest extends TestCase {
-
-	private static final Class<NlsRefactoringCheckFinalConditionsTest> THIS= NlsRefactoringCheckFinalConditionsTest.class;
+public class NlsRefactoringCheckFinalConditionsTest {
+	@Rule
+	public ProjectTestSetup pts= new ProjectTestSetup();
 
 	//private IPath fPropertyFilePath;
 	private IPackageFragment fAccessorPackage;
@@ -54,30 +58,19 @@ public class NlsRefactoringCheckFinalConditionsTest extends TestCase {
 	private IPackageFragment fResourceBundlePackage;
 	private String fResourceBundleName;
 
-	public NlsRefactoringCheckFinalConditionsTest(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
-	}
-
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		javaProject= ProjectTestSetup.getProject();
 		fHelper= new NlsRefactoringTestHelper(javaProject);
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.clear(javaProject, ProjectTestSetup.getDefaultClasspath());
 	}
 
-	public void testCheckInputWithoutExistingPropertiesFile() throws Exception {
+	@Test
+	public void checkInputWithoutExistingPropertiesFile() throws Exception {
 		ICompilationUnit cu= fHelper.getCu("/TestSetupProject/src1/p/WithStrings.java");
 		IFile propertyFile= fHelper.getFile("/TestSetupProject/src2/p/test.properties");
 		propertyFile.delete(false, fHelper.fNpm);
@@ -96,7 +89,8 @@ public class NlsRefactoringCheckFinalConditionsTest extends TestCase {
 	/*
 	 * no substitutions -> nothing to do
 	 */
-	public void testCheckInputWithNoSubstitutions() throws Exception {
+	@Test
+	public void checkInputWithNoSubstitutions() throws Exception {
 		ICompilationUnit cu= fHelper.getCu("/TestSetupProject/src1/p/WithoutStrings.java"); //$NON-NLS-1$
 		initDefaultValues();
 
@@ -106,7 +100,8 @@ public class NlsRefactoringCheckFinalConditionsTest extends TestCase {
 	/*
 	 * substitution checks
 	 */
-	public void testCheckInputWithSubstitutionPatterns() throws Exception {
+	@Test
+	public void checkInputWithSubstitutionPatterns() throws Exception {
 		ICompilationUnit cu= fHelper.getCu("/TestSetupProject/src1/p/WithStrings.java"); //$NON-NLS-1$
 		initDefaultValues();
 

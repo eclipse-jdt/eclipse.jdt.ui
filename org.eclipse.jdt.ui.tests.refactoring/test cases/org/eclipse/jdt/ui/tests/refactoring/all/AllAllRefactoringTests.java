@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,22 +13,19 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring.all;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
-import org.eclipse.jdt.testplugin.TestOptionsSetup;
-
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+	org.eclipse.jdt.ui.tests.refactoring.actions.AllTests.class,
+	org.eclipse.jdt.ui.tests.refactoring.nls.NLSTestSuite.class,
+	org.eclipse.jdt.ui.tests.refactoring.AllTests.class,
+	org.eclipse.jdt.ui.tests.refactoring.extensions.AllTests.class,
+	org.eclipse.jdt.ui.tests.refactoring.changes.AllTests.class,
+	org.eclipse.jdt.ui.tests.refactoring.ccp.AllTests.class,
+	org.eclipse.jdt.ui.tests.refactoring.typeconstraints.AllTests.class
+})
 public class AllAllRefactoringTests {
-	public static Test suite ( ) {
-		TestSuite suite= new TestSuite(AllAllRefactoringTests.class.getName());
-		suite.addTest(org.eclipse.jdt.ui.tests.refactoring.actions.AllTests.suite());
-		suite.addTest(org.eclipse.jdt.ui.tests.refactoring.nls.NLSTestSuite.suite());
-		suite.addTest(org.eclipse.jdt.ui.tests.refactoring.AllTests.suite());
-		suite.addTest(org.eclipse.jdt.ui.tests.refactoring.extensions.AllTests.suite());
-		suite.addTest(org.eclipse.jdt.ui.tests.refactoring.changes.AllTests.suite());
-		suite.addTest(org.eclipse.jdt.ui.tests.refactoring.ccp.AllTests.suite());
-		suite.addTest(org.eclipse.jdt.ui.tests.refactoring.typeconstraints.AllTests.suite());
-	    return new TestOptionsSetup(suite);
-	}
 }
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,12 +13,15 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring.nls;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.Hashtable;
 import java.util.Properties;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.StringAsserts;
@@ -50,28 +53,20 @@ import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileCha
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ASTCreator;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-public class NLSSourceModifierTest extends TestCase {
-
-	private static final Class<NLSSourceModifierTest> THIS= NLSSourceModifierTest.class;
+public class NLSSourceModifierTest {
+	@Rule
+	public ProjectTestSetup pts= new ProjectTestSetup();
 
     private IJavaProject javaProject;
 
     private IPackageFragmentRoot fSourceFolder;
 
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
-	}
-
-    @Override
-	protected void setUp() throws Exception {
+    @Before
+	public void setUp() throws Exception {
     	Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
@@ -93,16 +88,13 @@ public class NLSSourceModifierTest extends TestCase {
         fSourceFolder = JavaProjectHelper.addSourceContainer(javaProject, "src");
     }
 
-    @Override
-	protected void tearDown() throws Exception {
+    @After
+	public void tearDown() throws Exception {
         JavaProjectHelper.clear(javaProject, ProjectTestSetup.getDefaultClasspath());
     }
 
-    public NLSSourceModifierTest(String name) {
-        super(name);
-    }
-
-    public void testFromSkippedToTranslated() throws Exception {
+	@Test
+	public void fromSkippedToTranslated() throws Exception {
 
         String klazz =
             "public class Test {\n" +
@@ -131,7 +123,8 @@ public class NLSSourceModifierTest extends TestCase {
             	doc.get());
     }
 
-   public void testFromSkippedToTranslatedEclipseNew() throws Exception {
+	@Test
+	public void fromSkippedToTranslatedEclipseNew() throws Exception {
 
         String klazz =
             "public class Test {\n" +
@@ -180,7 +173,8 @@ public class NLSSourceModifierTest extends TestCase {
       StringAsserts.assertEqualStringIgnoreDelim(accessor, expected);
     }
 
-    public void testFromSkippedToNotTranslated() throws Exception {
+	@Test
+	public void fromSkippedToNotTranslated() throws Exception {
 
         String klazz =
             "public class Test {\n" +
@@ -208,7 +202,8 @@ public class NLSSourceModifierTest extends TestCase {
             	doc.get());
     }
 
-    public void testFromSkippedToNotTranslatedEclipse() throws Exception {
+	@Test
+	public void fromSkippedToNotTranslatedEclipse() throws Exception {
 
         String klazz =
             "public class Test {\n" +
@@ -259,7 +254,8 @@ public class NLSSourceModifierTest extends TestCase {
     /*
      * TODO: the key should be 0
      */
-    public void testFromNotTranslatedToTranslated() throws Exception {
+	@Test
+	public void fromNotTranslatedToTranslated() throws Exception {
 
         String klazz =
             "public class Test {\n" +
@@ -289,7 +285,8 @@ public class NLSSourceModifierTest extends TestCase {
             	doc.get());
     }
 
-  public void testFromNotTranslatedToTranslatedEclipse() throws Exception {
+	@Test
+	public void fromNotTranslatedToTranslatedEclipse() throws Exception {
 
         String klazz =
             "public class Test {\n" +
@@ -340,7 +337,8 @@ public class NLSSourceModifierTest extends TestCase {
         StringAsserts.assertEqualStringIgnoreDelim(accessor, expected);
     }
 
-    public void testFromNotTranslatedToSkipped() throws Exception {
+	@Test
+	public void fromNotTranslatedToSkipped() throws Exception {
 
         String klazz =
             "public class Test {\n" +
@@ -368,7 +366,8 @@ public class NLSSourceModifierTest extends TestCase {
             	doc.get());
     }
 
-    public void testFromNotTranslatedToSkippedEclipse() throws Exception {
+	@Test
+	public void fromNotTranslatedToSkippedEclipse() throws Exception {
 
         String klazz =
             "public class Test {\n" +
@@ -421,7 +420,8 @@ public class NLSSourceModifierTest extends TestCase {
 		return hint.getSubstitutions();
 	}
 
-	public void testFromTranslatedToNotTranslated() throws Exception {
+	@Test
+	public void fromTranslatedToNotTranslated() throws Exception {
 
         String klazz =
             "package test;\n" +
@@ -462,7 +462,8 @@ public class NLSSourceModifierTest extends TestCase {
             	doc.get());
     }
 
-	public void testFromTranslatedToNotTranslatedEclipse() throws Exception {
+	@Test
+	public void fromTranslatedToNotTranslatedEclipse() throws Exception {
 
         String klazz =
             "package test;\n" +
@@ -534,7 +535,8 @@ public class NLSSourceModifierTest extends TestCase {
         assertEquals(expected, accessorDoc.get());
     }
 
-    public void testFromTranslatedToSkipped() throws Exception {
+	@Test
+	public void fromTranslatedToSkipped() throws Exception {
 
         String klazz =
             "package test;\n" +
@@ -575,7 +577,8 @@ public class NLSSourceModifierTest extends TestCase {
             	doc.get());
     }
 
-    public void testFromTranslatedToSkippedEclipse() throws Exception {
+	@Test
+	public void fromTranslatedToSkippedEclipse() throws Exception {
 
         String klazz =
             "package test;\n" +
@@ -647,7 +650,8 @@ public class NLSSourceModifierTest extends TestCase {
         assertEquals(expected, accessorDoc.get());
     }
 
-    public void testReplacementOfKey() throws Exception {
+	@Test
+	public void replacementOfKey() throws Exception {
         String klazz =
             "package test;\n" +
             "public class Test {\n" +
@@ -686,7 +690,8 @@ public class NLSSourceModifierTest extends TestCase {
             	doc.get());
     }
 
-    public void testReplacementOfKeyEclipse() throws Exception {
+	@Test
+	public void replacementOfKeyEclipse() throws Exception {
         String klazz =
             "package test;\n" +
             "public class Test {\n" +
@@ -760,7 +765,8 @@ public class NLSSourceModifierTest extends TestCase {
     }
 
     //https://bugs.eclipse.org/bugs/show_bug.cgi?id=223865
-	public void testReplacementOfKeysBug223865() throws Exception {
+	@Test
+	public void replacementOfKeysBug223865() throws Exception {
 
 		String klazz=
 			"package test;\n" +
@@ -842,7 +848,8 @@ public class NLSSourceModifierTest extends TestCase {
 		assertEquals(expected, accessorDoc.get());
 	}
 
-    public void testBug95708_1() throws Exception {
+	@Test
+	public void bug95708_1() throws Exception {
         String klazz =
             "public class Test {\n" +
             "	private String str1=\"whatever\";\n" +
@@ -895,7 +902,8 @@ public class NLSSourceModifierTest extends TestCase {
         StringAsserts.assertEqualStringIgnoreDelim(accessor, expected);
     }
 
-    public void  testBug95708_2() throws Exception {
+	@Test
+	public void bug95708_2() throws Exception {
         String klazz =
             "public class Test {\n" +
             "	private String str1=Accessor.key_0;\n" +
@@ -967,7 +975,8 @@ public class NLSSourceModifierTest extends TestCase {
         assertEquals(expected, accessorDoc.get());
     }
 
-    public void  testInsertionOrder1() throws Exception {
+	@Test
+	public void insertionOrder1() throws Exception {
          String klazz =
              "public class Test {\n" +
              "	private String str1=Accessor.key_b;\n" +
@@ -1056,7 +1065,8 @@ public class NLSSourceModifierTest extends TestCase {
          assertEquals(expected, accessorDoc.get());
      }
 
-    public void  testInsertionOrder2() throws Exception {
+	@Test
+	public void insertionOrder2() throws Exception {
         String klazz =
             "public class Test {\n" +
             "	private String str1=Accessor.key_b;\n" +
@@ -1147,7 +1157,8 @@ public class NLSSourceModifierTest extends TestCase {
         assertEquals(expected, accessorDoc.get());
     }
 
-    public void  testInsertionOrder3() throws Exception {
+	@Test
+	public void insertionOrder3() throws Exception {
         StringBuffer buf= new StringBuffer();
         buf.append("package test;\n");
         buf.append("public class Test {\n");
@@ -1238,7 +1249,8 @@ public class NLSSourceModifierTest extends TestCase {
         assertEquals(expected, accessorDoc.get());
     }
 
-    public void  testInsertionOrder4() throws Exception {
+	@Test
+	public void insertionOrder4() throws Exception {
         StringBuffer buf= new StringBuffer();
         buf.append("package test;\n");
         buf.append("public class Test {\n");
@@ -1346,7 +1358,8 @@ public class NLSSourceModifierTest extends TestCase {
         assertEquals(expected, accessorDoc.get());
     }
 
-    public void testBug131323() throws Exception {
+	@Test
+	public void bug131323() throws Exception {
 
         String klazz =
             "public class Test {\n" +

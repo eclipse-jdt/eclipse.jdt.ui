@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,12 +13,15 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring.nls;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -37,11 +40,11 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSHint;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ASTCreator;
 
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
-public class NLSHintTest extends TestCase {
-
-	private static final Class<NLSHintTest> THIS= NLSHintTest.class;
+public class NLSHintTest {
+	@Rule
+	public ProjectTestSetup pts= new ProjectTestSetup();
 
     private IJavaProject javaProject;
 
@@ -60,34 +63,22 @@ public class NLSHintTest extends TestCase {
 		"	}\n" +
 		"}\n";
 
-
-    public NLSHintTest(String arg) {
-        super(arg);
-    }
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
-	}
-
-    @Override
-	protected void setUp() throws Exception {
+    @Before
+	public void setUp() throws Exception {
         javaProject = ProjectTestSetup.getProject();
         fSourceFolder = JavaProjectHelper.addSourceContainer(javaProject, "src");
     }
 
-    @Override
-	protected void tearDown() throws Exception {
+    @After
+	public void tearDown() throws Exception {
         JavaProjectHelper.clear(javaProject, ProjectTestSetup.getDefaultClasspath());
     }
 
     /*
      * documents bug 57622.
      */
-    public void testNlsedButNotTranslated() throws Exception {
+	@Test
+	public void nlsedButNotTranslated() throws Exception {
     	IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
     	String klazz =
     		"package test;\n" +
@@ -102,7 +93,8 @@ public class NLSHintTest extends TestCase {
     /*
      * documents bug 59074
      */
-    public void testLooksLikeAccessor() throws Exception {
+	@Test
+	public void looksLikeAccessor() throws Exception {
         IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
         String klazz =
             "package test;\n" +
@@ -120,7 +112,8 @@ public class NLSHintTest extends TestCase {
     /*
      * nlsed-String must be an argument of method.
      */
-    public void testNoAccessorClassHint1() throws Exception {
+	@Test
+	public void noAccessorClassHint1() throws Exception {
     	IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
     	String klazz =
     		"package test;\n" +
@@ -135,7 +128,8 @@ public class NLSHintTest extends TestCase {
     /*
      * method has no necessary static modifier.
      */
-    public void testNoAccessorClassHint2() throws Exception {
+	@Test
+	public void noAccessorClassHint2() throws Exception {
     	IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
     	String klazz =
     		"package test;\n" +
@@ -158,7 +152,8 @@ public class NLSHintTest extends TestCase {
     /*
      * accessor class does not exist.
      */
-    public void testNoAccessorClassHint3() throws Exception {
+	@Test
+	public void noAccessorClassHint3() throws Exception {
         IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
         String klazz = "package test;\n" + TEST_KLAZZ;
         ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
@@ -166,7 +161,8 @@ public class NLSHintTest extends TestCase {
         assertEquals("Messages", hint.getAccessorClassName());
     }
 
-    public void testAccessorClassAndPackageHint() throws Exception {
+	@Test
+	public void accessorClassAndPackageHint() throws Exception {
         IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
         String klazz = "package test;\n" + TEST_KLAZZ;
         ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
@@ -179,7 +175,8 @@ public class NLSHintTest extends TestCase {
         assertEquals(pack, hint.getAccessorClassPackage());
     }
 
-	public void testPackageHintWithNoPackage() throws Exception {
+	@Test
+	public void packageHintWithNoPackage() throws Exception {
         IPackageFragment pack = fSourceFolder.createPackageFragment("", false, null);
         ICompilationUnit cu= pack.createCompilationUnit("Test.java", TEST_KLAZZ, false, null);
 
@@ -189,7 +186,8 @@ public class NLSHintTest extends TestCase {
         assertEquals(pack, hint.getAccessorClassPackage());
     }
 
-    public void testPackageHintWithDifferentPackages() throws Exception {
+	@Test
+	public void packageHintWithDifferentPackages() throws Exception {
         IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
         String klazz =
             "package test;\n" +
@@ -205,7 +203,8 @@ public class NLSHintTest extends TestCase {
         assertEquals(fooPackage, hint.getAccessorClassPackage());
     }
 
-    public void testResourceBundleHint() throws Exception {
+	@Test
+	public void resourceBundleHint() throws Exception {
         IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
         String klazz = "package test;\n" + TEST_KLAZZ;
         ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
@@ -216,7 +215,8 @@ public class NLSHintTest extends TestCase {
         assertEquals("test.properties", hint.getResourceBundleName());
     }
 
-    public void testResourceBundleHintWithDifferentPackagesAndClassGetName() throws Exception {
+	@Test
+	public void resourceBundleHintWithDifferentPackagesAndClassGetName() throws Exception {
         IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
         String klazz =
             "package test;\n" +
@@ -239,7 +239,8 @@ public class NLSHintTest extends TestCase {
         assertEquals("TestMessages.properties", hint.getResourceBundleName());
     }
 
-    public void testResourceBundlePackageHint() throws Exception {
+	@Test
+	public void resourceBundlePackageHint() throws Exception {
         IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
         String klazz =
             "package test;\n" +
@@ -255,7 +256,8 @@ public class NLSHintTest extends TestCase {
         assertEquals(pack, hint.getResourceBundlePackage());
     }
 
-    public void testResourceBundlePackageHintWithClassGetName() throws Exception {
+	@Test
+	public void resourceBundlePackageHintWithClassGetName() throws Exception {
         IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
         String klazz =
             "package test;\n" +
@@ -282,7 +284,8 @@ public class NLSHintTest extends TestCase {
 
 
 
-    public void testPackageHintWithoutPreviousNLSing() throws Exception {
+	@Test
+	public void packageHintWithoutPreviousNLSing() throws Exception {
         IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
         String klazz = "package test;\n" + TEST_KLAZZ;
         ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);

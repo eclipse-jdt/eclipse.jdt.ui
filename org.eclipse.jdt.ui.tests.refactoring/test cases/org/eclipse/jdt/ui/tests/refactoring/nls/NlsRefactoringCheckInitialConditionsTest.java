@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,9 +13,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring.nls;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -27,35 +31,23 @@ import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
-public class NlsRefactoringCheckInitialConditionsTest extends TestCase {
-
-	private static final Class<NlsRefactoringCheckInitialConditionsTest> THIS= NlsRefactoringCheckInitialConditionsTest.class;
+public class NlsRefactoringCheckInitialConditionsTest {
+	@Rule
+	public ProjectTestSetup pts= new ProjectTestSetup();
 
 	private NlsRefactoringTestHelper fHelper;
 	private IJavaProject javaProject;
 
-	public NlsRefactoringCheckInitialConditionsTest(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
-	}
-
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		javaProject= ProjectTestSetup.getProject();
 		fHelper= new NlsRefactoringTestHelper(javaProject);
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.clear(javaProject, ProjectTestSetup.getDefaultClasspath());
 	}
 
@@ -63,7 +55,8 @@ public class NlsRefactoringCheckInitialConditionsTest extends TestCase {
 		return "nls/"; //$NON-NLS-1$
 	}
 
-	public void testActivationWithoutStrings() throws Exception {
+	@Test
+	public void activationWithoutStrings() throws Exception {
 		ICompilationUnit cu= fHelper.getCu("/TestSetupProject/src1/p/WithoutStrings.java"); //$NON-NLS-1$
 		Refactoring refac= NLSRefactoring.create(cu);
 
@@ -71,7 +64,8 @@ public class NlsRefactoringCheckInitialConditionsTest extends TestCase {
 		assertFalse("no nls needed", res.isOK()); //$NON-NLS-1$
 	}
 
-	public void testActivationWithStrings() throws Exception {
+	@Test
+	public void activationWithStrings() throws Exception {
 		ICompilationUnit cu= fHelper.getCu("/TestSetupProject/src1/p/WithStrings.java"); //$NON-NLS-1$
 		Refactoring refac= NLSRefactoring.create(cu);
 

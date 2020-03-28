@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,9 +13,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring.nls;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import static org.junit.Assert.assertEquals;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -29,11 +32,11 @@ import org.eclipse.jdt.internal.corext.refactoring.nls.NLSHint;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSSubstitution;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ASTCreator;
 
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
-public class NLSHolderTest extends TestCase {
-
-	private static final Class<NLSHolderTest> THIS= NLSHolderTest.class;
+public class NLSHolderTest {
+	@Rule
+	public ProjectTestSetup pts= new ProjectTestSetup();
 
 	private IJavaProject javaProject;
 
@@ -41,30 +44,19 @@ public class NLSHolderTest extends TestCase {
 
 	private final static String ACCESSOR_KLAZZ= "package test;\n" + "public class TestMessages {\n" + "	private static final String BUNDLE_NAME = \"test.test\";//$NON-NLS-1$\n" + "	public static String getString(String s) {" + "		return \"\";\n" + "	}\n" + "}\n";
 
-	public NLSHolderTest(String arg) {
-		super(arg);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
-	}
-
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		javaProject= ProjectTestSetup.getProject();
 		fSourceFolder= JavaProjectHelper.addSourceContainer(javaProject, "src");
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.clear(javaProject, ProjectTestSetup.getDefaultClasspath());
 	}
 
-	public void testSubstitutionWithAccessor() throws Exception {
+	@Test
+	public void substitutionWithAccessor() throws Exception {
 		String klazz= "package test;\n" + "public class Test {" + "	private String str=TestMessages.getString(\"Key.5\");//$NON-NLS-1$\n" + "}\n";
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
 		ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
@@ -73,7 +65,7 @@ public class NLSHolderTest extends TestCase {
 		CompilationUnit astRoot= ASTCreator.createAST(cu, null);
 		NLSHint hint= new NLSHint(cu, astRoot);
 		NLSSubstitution[] substitution= hint.getSubstitutions();
-		assertEquals(substitution.length, 1);
-		assertEquals(substitution[0].getKey(), "Key.5");
+		assertEquals(1, substitution.length);
+		assertEquals("Key.5", substitution[0].getKey());
 	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,8 +14,19 @@
 
 package org.eclipse.jdt.ui.tests.refactoring.nls;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.File;
 import java.util.Properties;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
@@ -52,38 +63,31 @@ import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 import org.eclipse.jdt.internal.corext.refactoring.nls.AccessorClassReference;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSHintHelper;
 
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
-
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 /**
  * Tests the NLSHintHelper.
  *
  * @since 3.1
  */
-public class NLSHintHelperTest extends TestCase {
-
+public class NLSHintHelperTest {
 	private IJavaProject fJProject;
 	private IPackageFragmentRoot fLibrary;
 
+	@Rule
+	public ProjectTestSetup pts= new ProjectTestSetup();
 
-	public static Test suite() {
-		return new ProjectTestSetup(new TestSuite(NLSHintHelperTest.class));
-	}
-
-
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		fJProject= ProjectTestSetup.getProject();
 		File lib= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.NLS_LIB);
-		assertTrue("lib does not exist",  lib != null && lib.exists());
+		assertNotNull("lib does not exist", lib);
+		assertTrue("lib does not exist", lib.exists());
 		fLibrary= JavaProjectHelper.addLibrary(fJProject, Path.fromOSString(lib.getPath())); // add library to project
 	}
 
-	public void testFindInJAR() {
+	@Test
+	public void findInJAR() {
 		try {
 			assertNotNull(NLSHintHelper.getResourceBundle(fLibrary, "pkg", "Messages.properties"));
 		} catch (JavaModelException e) {
@@ -103,10 +107,10 @@ public class NLSHintHelperTest extends TestCase {
 		} catch (JavaModelException e1) {
 			fail();
 		}
-
 	}
 
-	public void testDoNotFindInJAR() {
+	@Test
+	public void doNotFindInJAR() {
 		try {
 			assertNull(NLSHintHelper.getResourceBundle(fJProject, "pkg", "Messages.properties"));
 		} catch (JavaModelException e) {
@@ -114,7 +118,8 @@ public class NLSHintHelperTest extends TestCase {
 		}
 	}
 
-	public void testFindInDirtyBuffer() {
+	@Test
+	public void findInDirtyBuffer() {
 		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
 		assertNotNull(manager);
 
@@ -142,7 +147,8 @@ public class NLSHintHelperTest extends TestCase {
 		}
 	}
 
-	public void testDoNotFindDirtyBuffer() {
+	@Test
+	public void doNotFindDirtyBuffer() {
 		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
 		assertNotNull(manager);
 
@@ -160,7 +166,7 @@ public class NLSHintHelperTest extends TestCase {
 
 			Properties properties= NLSHintHelper.getProperties(nonExistentFile);
 			String newValue= properties.getProperty("nonExistingValue");
-			assertEquals(newValue, null);
+			assertNull(newValue);
 		} finally {
 			try {
 				manager.disconnect(nonExistentPath, LocationKind.NORMALIZE, null);
@@ -170,7 +176,8 @@ public class NLSHintHelperTest extends TestCase {
 		}
 	}
 
-	public void testFindInFile() {
+	@Test
+	public void findInFile() {
 		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
 		assertNotNull(manager);
 
@@ -207,7 +214,8 @@ public class NLSHintHelperTest extends TestCase {
 		}
 	}
 
-	public void testDoNotFindInFile() {
+	@Test
+	public void doNotFindInFile() {
 		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
 		assertNotNull(manager);
 
@@ -231,7 +239,7 @@ public class NLSHintHelperTest extends TestCase {
 
 			Properties properties= NLSHintHelper.getProperties(existentFile);
 			String newValue= properties.getProperty("nonExistingValue");
-			assertEquals(newValue, null);
+			assertNull(newValue);
 		} catch (CoreException ex) {
 			fail();
 		} finally {
@@ -243,7 +251,8 @@ public class NLSHintHelperTest extends TestCase {
 		}
 	}
 
-	public void testFindResourceBundleName1f() throws Exception {
+	@Test
+	public void findResourceBundleName1f() throws Exception {
 	    String source=
 			"package test;\n" +
 			"public class TestMessages {\n" +
@@ -257,7 +266,8 @@ public class NLSHintHelperTest extends TestCase {
 	    assertEquals("test.test", getResourceBundleName(source, "TestMessages", "test"));
 	}
 
-	public void testFindResourceBundleName1s() throws Exception {
+	@Test
+	public void findResourceBundleName1s() throws Exception {
 	    String source=
 			"package test;\n" +
 			"public class TestMessages {\n" +
@@ -274,7 +284,8 @@ public class NLSHintHelperTest extends TestCase {
 	    assertEquals("test.test", getResourceBundleName(source, "TestMessages", "test"));
 	}
 
-	public void testFindResourceBundleName2f() throws Exception {
+	@Test
+	public void findResourceBundleName2f() throws Exception {
 	    String source=
 			"package test;\n" +
 			"public class TestMessages {\n" +
@@ -287,7 +298,8 @@ public class NLSHintHelperTest extends TestCase {
 	    assertEquals("test.TestMessages", getResourceBundleName(source, "TestMessages", "test"));
 	}
 
-	public void testFindResourceBundleName2s() throws Exception {
+	@Test
+	public void findResourceBundleName2s() throws Exception {
 	    String source=
 			"package test;\n" +
 			"public class TestMessages {\n" +
@@ -303,7 +315,8 @@ public class NLSHintHelperTest extends TestCase {
 	    assertEquals("test.TestMessages", getResourceBundleName(source, "TestMessages", "test"));
 	}
 
-	public void testFindResourceBundleName3f() throws Exception {
+	@Test
+	public void findResourceBundleName3f() throws Exception {
 	    String source=
 			"package test;\n" +
 			"import java.util.ResourceBundle;\n" +
@@ -317,7 +330,8 @@ public class NLSHintHelperTest extends TestCase {
 	    assertEquals("test.TestMessages", getResourceBundleName(source, "TestMessages", "test"));
 	}
 
-	public void testFindResourceBundleName3s() throws Exception {
+	@Test
+	public void findResourceBundleName3s() throws Exception {
 	    String source=
 			"package test;\n" +
 			"import java.util.ResourceBundle;\n" +
@@ -334,7 +348,8 @@ public class NLSHintHelperTest extends TestCase {
 	    assertEquals("test.TestMessages", getResourceBundleName(source, "TestMessages", "test"));
 	}
 
-	public void testFindResourceBundleName4f() throws Exception {
+	@Test
+	public void findResourceBundleName4f() throws Exception {
 	    String source=
 			"package test;\n" +
 			"import java.util.ResourceBundle;\n" +
@@ -348,7 +363,8 @@ public class NLSHintHelperTest extends TestCase {
 	    assertEquals("test.test", getResourceBundleName(source, "TestMessages", "test"));
 	}
 
-	public void testFindResourceBundleName4s() throws Exception {
+	@Test
+	public void findResourceBundleName4s() throws Exception {
 	    String source=
 			"package test;\n" +
 			"import java.util.ResourceBundle;\n" +
@@ -365,7 +381,8 @@ public class NLSHintHelperTest extends TestCase {
 	    assertEquals("test.test", getResourceBundleName(source, "TestMessages", "test"));
 	}
 
-	public void testFindResourceBundleName5f() throws Exception {
+	@Test
+	public void findResourceBundleName5f() throws Exception {
 	    String source=
 			"package test;\n" +
 			"import java.util.ResourceBundle;\n" +
@@ -380,7 +397,8 @@ public class NLSHintHelperTest extends TestCase {
 	    assertEquals("test.TestMessages", getResourceBundleName(source, "TestMessages", "test"));
 	}
 
-	public void testFindResourceBundleName5s() throws Exception {
+	@Test
+	public void findResourceBundleName5s() throws Exception {
 	    String source=
 			"package test;\n" +
 			"import java.util.ResourceBundle;\n" +
@@ -398,7 +416,8 @@ public class NLSHintHelperTest extends TestCase {
 	    assertEquals("test.TestMessages", getResourceBundleName(source, "TestMessages", "test"));
 	}
 
-	public void testFindResourceBundleName6() throws Exception {
+	@Test
+	public void findResourceBundleName6() throws Exception {
 	    String source=
 			"package test;\n" +
 			"import java.util.ResourceBundle;\n" +
@@ -427,8 +446,8 @@ public class NLSHintHelperTest extends TestCase {
         return  NLSHintHelper.getResourceBundleName(typeBinding);
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject, ProjectTestSetup.getDefaultClasspath());
 	}
 }
