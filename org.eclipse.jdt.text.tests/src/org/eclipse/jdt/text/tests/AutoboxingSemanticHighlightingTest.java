@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,8 +13,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.jface.text.Position;
 
@@ -22,13 +22,11 @@ import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings;
 
 public class AutoboxingSemanticHighlightingTest extends AbstractSemanticHighlightingTest {
 
-	private static final Class<AutoboxingSemanticHighlightingTest> THIS= AutoboxingSemanticHighlightingTest.class;
+	@Rule
+	public SemanticHighlightingTestSetup shts=new SemanticHighlightingTestSetup("/SHTest/src/Autoboxing.java");
 
-	public static Test suite() {
-		return new SemanticHighlightingTestSetup(new TestSuite(THIS), "/SHTest/src/Autoboxing.java");
-	}
-
-	public void testAutoboxingHighlighting() throws Exception {
+	@Test
+	public void autoboxingHighlighting() throws Exception {
 		setUpSemanticHighlighting(SemanticHighlightings.AUTOBOXING);
 		Position[] expected= new Position[] {
 			createPosition(3, 15, 5),

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,10 +13,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
-import junit.extensions.TestSetup;
-import junit.framework.Test;
+import static org.junit.Assert.assertNotNull;
+
+import org.junit.rules.ExternalResource;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.IJavaProject;
 
@@ -31,7 +34,7 @@ import org.eclipse.jdt.core.IJavaProject;
  *
  * @since 3.1
  */
-public class JUnitProjectTestSetup extends TestSetup {
+public class JUnitProjectTestSetup extends ExternalResource {
 
 	private static IJavaProject fgProject;
 
@@ -40,28 +43,20 @@ public class JUnitProjectTestSetup extends TestSetup {
 		return fgProject;
 	}
 
-	public JUnitProjectTestSetup(Test test) {
-		super(test);
-	}
-
-	/*
-	 * @see junit.framework.TestCase#setUp()
-	 * @since 3.1
-	 */
 	@Override
-	protected void setUp() throws Exception {
+	public void before() throws Exception {
 		String projectName= "JUnit_" + System.currentTimeMillis();
 		fgProject= JavaProjectHelper.createJavaProjectWithJUnitSource(projectName, "src", "bin");
 	}
 
-	/*
-	 * @see junit.framework.TestCase#tearDown()
-	 * @since 3.1
-	 */
 	@Override
-	protected void tearDown() throws Exception {
+	public void after() {
 		if (fgProject != null) {
-			JavaProjectHelper.delete(fgProject);
+			try {
+				JavaProjectHelper.delete(fgProject);
+			} catch (CoreException e) {
+				e.printStackTrace();
+			}
 			fgProject= null;
 		}
 	}

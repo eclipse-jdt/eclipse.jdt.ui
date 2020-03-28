@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2019 IBM Corporation and others.
+ * Copyright (c) 2014, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -16,6 +16,9 @@
 package org.eclipse.jdt.text.tests;
 
 import java.util.Hashtable;
+
+import org.junit.After;
+import org.junit.Before;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -39,12 +42,10 @@ import org.eclipse.jdt.internal.corext.template.java.TemplateUtils;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-import junit.framework.TestCase;
-
 /**
  * This class provides general functions to test the for loop template based completion.
  */
-public abstract class AbstractForLoopJavaContextTest extends TestCase {
+public abstract class AbstractForLoopJavaContextTest {
 
 	private static final String PROJECT= "NewForLoopJavaContextTest";
 
@@ -69,16 +70,8 @@ public abstract class AbstractForLoopJavaContextTest extends TestCase {
 
 	private ICompilationUnit fCU;
 
-	public AbstractForLoopJavaContextTest() {
-		super();
-	}
-
-	public AbstractForLoopJavaContextTest(String name) {
-		super(name);
-	}
-
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		if (JavaCore.getPlugin() != null) {
 			Hashtable<String, String> options= JavaCore.getDefaultOptions();
 			options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.TAB);
@@ -100,8 +93,8 @@ public abstract class AbstractForLoopJavaContextTest extends TestCase {
 		fCU.becomeWorkingCopy(null);
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		fCU.discardWorkingCopy();
 		JavaProjectHelper.delete(fProject);
 		if (JavaCore.getPlugin() != null) {

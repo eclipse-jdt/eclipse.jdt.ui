@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,8 +14,18 @@
 
 package org.eclipse.jdt.text.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.util.ArrayList;
 import java.util.Iterator;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.jdt.text.tests.performance.EditorTestHelper;
 
@@ -37,17 +47,15 @@ import org.eclipse.ui.PartInitException;
 
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
-
 /**
  * Tests the Java Editor's override indicator feature.
  *
  * @since 3.1
  */
-public class OverrideIndicatorTest extends TestCase {
+public class OverrideIndicatorTest {
+
+	@Rule
+	public JUnitProjectTestSetup jpts=new JUnitProjectTestSetup();
 
 	private static final String OVERRIDE_INDICATOR_ANNOTATION= "org.eclipse.jdt.ui.overrideIndicator";
 
@@ -57,18 +65,8 @@ public class OverrideIndicatorTest extends TestCase {
 	private StyledText fTextWidget;
 	private Annotation[] fOverrideAnnotations;
 
-
-	public static Test setUpTest(Test someTest) {
-		return new JUnitProjectTestSetup(someTest);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(OverrideIndicatorTest.class));
-	}
-
-
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		fEditor= openJavaEditor(new Path("/" + JUnitProjectTestSetup.getProject().getElementName() + "/src/junit/framework/TestCase.java"));
 		assertNotNull(fEditor);
 		fTextWidget= fEditor.getViewer().getTextWidget();
@@ -82,8 +80,8 @@ public class OverrideIndicatorTest extends TestCase {
 	 * @see junit.framework.TestCase#tearDown()
 	 * @since 3.1
 	 */
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		EditorTestHelper.closeAllEditors();
 	}
 
@@ -98,7 +96,8 @@ public class OverrideIndicatorTest extends TestCase {
 		}
 	}
 
-	public void testCountOverrideIndicators() {
+	@Test
+	public void countOverrideIndicators() {
 		int count= 0;
 		long timeOut= System.currentTimeMillis() + 60000;
 		while (true) {
@@ -119,8 +118,9 @@ public class OverrideIndicatorTest extends TestCase {
 		assertEquals(3, count);
 	}
 
-	public void testOverrideIndicatorState() {
-		testCountOverrideIndicators();
+	@Test
+	public void overrideIndicatorState() {
+		countOverrideIndicators();
 		int count= 0;
 		for (Annotation overrideAnnotation : fOverrideAnnotations) {
 			Accessor indicator= new Accessor(overrideAnnotation, "org.eclipse.jdt.internal.ui.javaeditor.OverrideIndicatorManager$OverrideIndicator", getClass().getClassLoader());
@@ -130,8 +130,9 @@ public class OverrideIndicatorTest extends TestCase {
 		assertEquals(2, count);
 	}
 
-	public void testOverrideIndicatorText() {
-		testCountOverrideIndicators();
+	@Test
+	public void overrideIndicatorText() {
+		countOverrideIndicators();
 		for (Annotation overrideAnnotation : fOverrideAnnotations) {
 			String text= overrideAnnotation.getText();
 			assertTrue(text != null

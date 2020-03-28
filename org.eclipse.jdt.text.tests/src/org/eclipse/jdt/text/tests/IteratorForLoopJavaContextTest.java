@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Yatta Solutions GmbH, IBM Corporation and others.
+ * Copyright (c) 2014, 2020 Yatta Solutions GmbH, IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,11 +14,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.Collection;
 import java.util.Iterator;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.Test;
 
 import org.eclipse.jface.text.templates.Template;
 
@@ -41,10 +42,6 @@ public class IteratorForLoopJavaContextTest extends AbstractForLoopJavaContextTe
 			"	}\n" +
 			"	\n";
 
-	public static Test suite() {
-		return new TestSuite(IteratorForLoopJavaContextTest.class);
-	}
-
 	@Override
 	protected String getInnerClasses() {
 		return INNER_CLASS_DECLARATIONS;
@@ -55,7 +52,8 @@ public class IteratorForLoopJavaContextTest extends AbstractForLoopJavaContextTe
 		return getTemplate("org.eclipse.jdt.ui.templates.for_collection");
 	}
 
-	public void testCollection() throws Exception {
+	@Test
+	public void collection() throws Exception {
 		String template= evaluateTemplateInMethod("void method(Collection<Number> numbers)");
 		assertEquals(
 				"	for (java.util.Iterator iterator = numbers.iterator(); iterator.hasNext();) {\n" +
@@ -64,7 +62,8 @@ public class IteratorForLoopJavaContextTest extends AbstractForLoopJavaContextTe
 						"	}", template);
 	}
 
-	public void testInnerParameterized() throws Exception {
+	@Test
+	public void innerParameterized() throws Exception {
 		String template= evaluateTemplateInMethod("void method(InnerCollection<Number> numbers)");
 		assertEquals(
 				"	for (java.util.Iterator iterator = numbers.iterator(); iterator.hasNext();) {\n" +
@@ -73,7 +72,8 @@ public class IteratorForLoopJavaContextTest extends AbstractForLoopJavaContextTe
 						"	}", template);
 	}
 
-	public void testInnerFixTypedInterface() throws Exception {
+	@Test
+	public void innerFixTypedInterface() throws Exception {
 		String template= evaluateTemplateInMethod("void method(InnerCollection2 numbers)");
 		assertEquals(
 				"	for (java.util.Iterator iterator = numbers.iterator(); iterator.hasNext();) {\n" +
@@ -82,7 +82,8 @@ public class IteratorForLoopJavaContextTest extends AbstractForLoopJavaContextTe
 						"	}", template);
 	}
 
-	public void testInnerWithMixedTypes() throws Exception {
+	@Test
+	public void innerWithMixedTypes() throws Exception {
 		String template= evaluateTemplateInMethod("void method(InnerCollection3<Number> numbers)");
 		assertEquals(
 				"	for (java.util.Iterator iterator = numbers.iterator(); iterator.hasNext();) {\n" +
@@ -91,7 +92,8 @@ public class IteratorForLoopJavaContextTest extends AbstractForLoopJavaContextTe
 						"	}", template);
 	}
 
-	public void testSimpleTransitive() throws Exception {
+	@Test
+	public void simpleTransitive() throws Exception {
 		String template= evaluateTemplateInMethod("void method(TransiCollection<List<Number>> lists)");
 		assertEquals(
 				"	for (java.util.Iterator iterator = lists.iterator(); iterator.hasNext();) {\n" +
@@ -100,7 +102,8 @@ public class IteratorForLoopJavaContextTest extends AbstractForLoopJavaContextTe
 						"	}", template);
 	}
 
-	public void testWildcard() throws Exception {
+	@Test
+	public void wildcard() throws Exception {
 		String template= evaluateTemplateInMethod("void method(Collection<?> objects)");
 		assertEquals(
 				"	for (java.util.Iterator iterator = objects.iterator(); iterator.hasNext();) {\n" +
@@ -109,7 +112,8 @@ public class IteratorForLoopJavaContextTest extends AbstractForLoopJavaContextTe
 						"	}", template);
 	}
 
-	public void testUpperboundWildcard() throws Exception {
+	@Test
+	public void upperboundWildcard() throws Exception {
 		String template= evaluateTemplateInMethod("void method(Collection<? extends Number> numbers)");
 		assertEquals(
 				"	for (java.util.Iterator iterator = numbers.iterator(); iterator.hasNext();) {\n" +
@@ -118,7 +122,8 @@ public class IteratorForLoopJavaContextTest extends AbstractForLoopJavaContextTe
 						"	}", template);
 	}
 
-	public void testLowerboundWildcard() throws Exception {
+	@Test
+	public void lowerboundWildcard() throws Exception {
 		String template= evaluateTemplateInMethod("void method(Collection<? super Number> objects)");
 		assertEquals(
 				"	for (java.util.Iterator iterator = objects.iterator(); iterator.hasNext();) {\n" +
@@ -127,7 +132,8 @@ public class IteratorForLoopJavaContextTest extends AbstractForLoopJavaContextTe
 						"	}", template);
 	}
 
-	public void testGeneric() throws Exception {
+	@Test
+	public void generic() throws Exception {
 		String template= evaluateTemplateInMethod("void <T> method(Collection<T> objects)");
 		assertEquals(
 				"	for (java.util.Iterator iterator = objects.iterator(); iterator.hasNext();) {\n" +
@@ -136,7 +142,8 @@ public class IteratorForLoopJavaContextTest extends AbstractForLoopJavaContextTe
 						"	}", template);
 	}
 
-	public void testUppderboundGeneric() throws Exception {
+	@Test
+	public void uppderboundGeneric() throws Exception {
 		String template= evaluateTemplateInMethod("void <T extends Number> method(Collection<T> numbers)");
 		assertEquals(
 				"	for (java.util.Iterator iterator = numbers.iterator(); iterator.hasNext();) {\n" +
@@ -145,7 +152,8 @@ public class IteratorForLoopJavaContextTest extends AbstractForLoopJavaContextTe
 						"	}", template);
 	}
 
-	public void testLowerboundGeneric() throws Exception {
+	@Test
+	public void lowerboundGeneric() throws Exception {
 		String template= evaluateTemplateInMethod("void <T super Number> method(Collection<T> objects)");
 		assertEquals(
 				"	for (java.util.Iterator iterator = objects.iterator(); iterator.hasNext();) {\n" +
@@ -154,7 +162,8 @@ public class IteratorForLoopJavaContextTest extends AbstractForLoopJavaContextTe
 						"	}", template);
 	}
 
-	public void testProposalsWithField() throws Exception {
+	@Test
+	public void proposalsWithField() throws Exception {
 		String template= evaluateTemplateInMethodWithField("void method()", "Collection<Number> numbers");
 		assertEquals(
 				"	for (java.util.Iterator iterator = numbers.iterator(); iterator.hasNext();) {\n" +
@@ -163,7 +172,8 @@ public class IteratorForLoopJavaContextTest extends AbstractForLoopJavaContextTe
 						"	}", template);
 	}
 
-	public void testProposalsWithFieldAndParam() throws Exception {
+	@Test
+	public void proposalsWithFieldAndParam() throws Exception {
 		String template= evaluateTemplateInMethodWithField("void method(Collection<String> strings)", "Collection<Number> numbers");
 		assertEquals(
 				"	for (java.util.Iterator iterator = strings.iterator(); iterator.hasNext();) {\n" +

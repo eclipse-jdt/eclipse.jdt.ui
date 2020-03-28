@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,8 +14,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import static org.junit.Assert.assertEquals;
+
+import org.junit.Test;
 
 import org.eclipse.jface.text.templates.Template;
 
@@ -26,7 +27,6 @@ import org.eclipse.jface.text.templates.Template;
  * @since 3.1
  */
 public class NewForLoopJavaContextTest extends AbstractForLoopJavaContextTest {
-
 	public static final String INNER_CLASS_DECLARATIONS= "	private static class Inner {\n" +
 			"	}\n" +
 			"	\n" +
@@ -46,10 +46,6 @@ public class NewForLoopJavaContextTest extends AbstractForLoopJavaContextTest {
 			"	}\n" +
 			"	\n";
 
-	public static Test suite() {
-		return new TestSuite(NewForLoopJavaContextTest.class);
-	}
-
 	@Override
 	protected String getInnerClasses() {
 		return INNER_CLASS_DECLARATIONS;
@@ -60,7 +56,8 @@ public class NewForLoopJavaContextTest extends AbstractForLoopJavaContextTest {
 		return getTemplate("org.eclipse.jdt.ui.templates.for_iterable");
 	}
 
-	public void testArray() throws Exception {
+	@Test
+	public void array() throws Exception {
 		String template= evaluateTemplateInMethod("void method(Number[] array)");
 		assertEquals(
 				"	for (Number number : array) {\n" +
@@ -68,7 +65,8 @@ public class NewForLoopJavaContextTest extends AbstractForLoopJavaContextTest {
 				"	}", template);
 	}
 
-	public void testInnerArray() throws Exception {
+	@Test
+	public void innerArray() throws Exception {
 		String template= evaluateTemplateInMethod("void array(Inner[] array)");
 		assertEquals(
 				"	for (Inner inner : array) {\n" +
@@ -77,7 +75,8 @@ public class NewForLoopJavaContextTest extends AbstractForLoopJavaContextTest {
 	}
 
 
-	public void testSuperList() throws Exception {
+	@Test
+	public void superList() throws Exception {
 		String template= evaluateTemplateInMethod("void method(List<? super Number> list)");
 		assertEquals(
 				"	for (Object object : list) {\n" +
@@ -85,7 +84,8 @@ public class NewForLoopJavaContextTest extends AbstractForLoopJavaContextTest {
 				"	}", template);
 	}
 
-	public void testSuperArrayList() throws Exception {
+	@Test
+	public void superArrayList() throws Exception {
 		String template= evaluateTemplateInMethod("void method(List<? super Number[]> list)");
 		assertEquals(
 				"	for (Object object : list) {\n" +
@@ -93,7 +93,8 @@ public class NewForLoopJavaContextTest extends AbstractForLoopJavaContextTest {
 				"	}", template);
 	}
 
-	public void testMultiList() throws Exception {
+	@Test
+	public void multiList() throws Exception {
 		String template= evaluateTemplateInMethod("<T extends Comparable<T> & Iterable<? extends Number>> void method(List<T> list)");
 		assertEquals(
 				"	for (T t : list) {\n" +
@@ -101,7 +102,8 @@ public class NewForLoopJavaContextTest extends AbstractForLoopJavaContextTest {
 				"	}", template);
 	}
 
-	public void testInnerIterable() throws Exception {
+	@Test
+	public void innerIterable() throws Exception {
 		String template= evaluateTemplateInMethod("void method(Inner2<Number> inner)");
 		assertEquals(
 				"	for (Number number : inner) {\n" +
@@ -109,7 +111,8 @@ public class NewForLoopJavaContextTest extends AbstractForLoopJavaContextTest {
 				"	}", template);
 	}
 
-	public void testInnerIterable2() throws Exception {
+	@Test
+	public void innerIterable2() throws Exception {
 		String template= evaluateTemplateInMethod("void method(Inner3 inner)");
 		assertEquals(
 				"	for (Serializable serializable : inner) {\n" +
@@ -117,7 +120,8 @@ public class NewForLoopJavaContextTest extends AbstractForLoopJavaContextTest {
 				"	}", template);
 	}
 
-	public void testInnerMixedParameters() throws Exception {
+	@Test
+	public void innerMixedParameters() throws Exception {
 		String template= evaluateTemplateInMethod("void method(Inner4<Number> inner)");
 		assertEquals(
 				"	for (String string : inner) {\n" +
@@ -125,7 +129,8 @@ public class NewForLoopJavaContextTest extends AbstractForLoopJavaContextTest {
 				"	}", template);
 	}
 
-	public void testGenericList() throws Exception {
+	@Test
+	public void genericList() throws Exception {
 		String template= evaluateTemplateInMethod("void method(List<E> list)");
 		assertEquals(
 				"	for (E e : list) {\n" +
@@ -133,7 +138,8 @@ public class NewForLoopJavaContextTest extends AbstractForLoopJavaContextTest {
 				"	}", template);
 	}
 
-	public void testWildcardList() throws Exception {
+	@Test
+	public void wildcardList() throws Exception {
 		String template= evaluateTemplateInMethod("void method(Transi1<?> transi)");
 		assertEquals(
 				"	for (Collection collection : transi) {\n" +
@@ -141,7 +147,8 @@ public class NewForLoopJavaContextTest extends AbstractForLoopJavaContextTest {
 				"	}", template);
 	}
 
-	public void testConcreteList() throws Exception {
+	@Test
+	public void concreteList() throws Exception {
 		String template= evaluateTemplateInMethod("void method(List<String> list)");
 		assertEquals(
 				"	for (String string : list) {\n" +
@@ -149,7 +156,8 @@ public class NewForLoopJavaContextTest extends AbstractForLoopJavaContextTest {
 				"	}", template);
 	}
 
-	public void testUpperboundList() throws Exception {
+	@Test
+	public void upperboundList() throws Exception {
 		String template= evaluateTemplateInMethod("void method(List<? extends Number> list)");
 		assertEquals(
 				"	for (Number number : list) {\n" +
@@ -157,7 +165,8 @@ public class NewForLoopJavaContextTest extends AbstractForLoopJavaContextTest {
 				"	}", template);
 	}
 
-	public void testProposeField() throws Exception {
+	@Test
+	public void proposeField() throws Exception {
 		String template= evaluateTemplateInMethodWithField("void method()", "Collection<String> strings");
 		assertEquals(
 				"	for (String string : strings) {\n" +
@@ -165,7 +174,8 @@ public class NewForLoopJavaContextTest extends AbstractForLoopJavaContextTest {
 				"	}", template);
 	}
 
-	public void testProposeParamWithField() throws Exception {
+	@Test
+	public void proposeParamWithField() throws Exception {
 		String template= evaluateTemplateInMethodWithField("void method(List<Number> numbers)", "Collection<String> strings");
 		assertEquals(
 				"	for (Number number : numbers) {\n" +

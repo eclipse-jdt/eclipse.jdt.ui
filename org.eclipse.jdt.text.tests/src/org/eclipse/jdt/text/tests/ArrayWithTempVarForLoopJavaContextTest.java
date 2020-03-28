@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Yatta Solutions GmbH, IBM Corporation and others.
+ * Copyright (c) 2014, 2020 Yatta Solutions GmbH, IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,8 +14,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import static org.junit.Assert.assertEquals;
+
+import org.junit.Test;
 
 import org.eclipse.jface.text.templates.Template;
 
@@ -24,10 +25,6 @@ import org.eclipse.jface.text.templates.Template;
  * temporary variable inside the for loop's body.
  */
 public class ArrayWithTempVarForLoopJavaContextTest extends AbstractForLoopJavaContextTest {
-
-	public static Test suite() {
-		return new TestSuite(ArrayWithTempVarForLoopJavaContextTest.class);
-	}
 
 	@Override
 	protected String getInnerClasses() {
@@ -39,7 +36,8 @@ public class ArrayWithTempVarForLoopJavaContextTest extends AbstractForLoopJavaC
 		return getTemplate("org.eclipse.jdt.ui.templates.for_temp");
 	}
 
-	public void testSimpleArray() throws Exception {
+	@Test
+	public void simpleArray() throws Exception {
 		String template= evaluateTemplateInMethod("void method(Number[] numbers)");
 		assertEquals(
 				"	for (int i = 0; i < numbers.length; i++) {\n" +
@@ -48,7 +46,8 @@ public class ArrayWithTempVarForLoopJavaContextTest extends AbstractForLoopJavaC
 						"	}", template);
 	}
 
-	public void testInnerClassArray() throws Exception {
+	@Test
+	public void innerClassArray() throws Exception {
 		String template= evaluateTemplateInMethod("void method(Inner[] inners)");
 		assertEquals(
 				"	for (int i = 0; i < inners.length; i++) {\n" +
@@ -57,7 +56,8 @@ public class ArrayWithTempVarForLoopJavaContextTest extends AbstractForLoopJavaC
 						"	}", template);
 	}
 
-	public void testInnerClassParameterized() throws Exception {
+	@Test
+	public void innerClassParameterized() throws Exception {
 		String template= evaluateTemplateInMethod("void method(Inner2<Number>[] inners)");
 		assertEquals(
 				"	for (int i = 0; i < inners.length; i++) {\n" +
@@ -66,7 +66,8 @@ public class ArrayWithTempVarForLoopJavaContextTest extends AbstractForLoopJavaC
 						"	}", template);
 	}
 
-	public void testGeneric() throws Exception {
+	@Test
+	public void generic() throws Exception {
 		String template= evaluateTemplateInMethod("void <T> method(T[] generics)");
 		assertEquals(
 				"	for (int i = 0; i < generics.length; i++) {\n" +
@@ -75,7 +76,8 @@ public class ArrayWithTempVarForLoopJavaContextTest extends AbstractForLoopJavaC
 						"	}", template);
 	}
 
-	public void testUppderboundGeneric() throws Exception {
+	@Test
+	public void uppderboundGeneric() throws Exception {
 		String template= evaluateTemplateInMethod("void <T extends Number> method(T[] numbers)");
 		assertEquals(
 				"	for (int i = 0; i < numbers.length; i++) {\n" +
@@ -84,7 +86,8 @@ public class ArrayWithTempVarForLoopJavaContextTest extends AbstractForLoopJavaC
 						"	}", template);
 	}
 
-	public void testLowerboundGeneric() throws Exception {
+	@Test
+	public void lowerboundGeneric() throws Exception {
 		String template= evaluateTemplateInMethod("void <T super Number> method(T[] objects)");
 		assertEquals(
 				"	for (int i = 0; i < objects.length; i++) {\n" +
@@ -93,7 +96,8 @@ public class ArrayWithTempVarForLoopJavaContextTest extends AbstractForLoopJavaC
 						"	}", template);
 	}
 
-	public void testProposalsWithField() throws Exception {
+	@Test
+	public void proposalsWithField() throws Exception {
 		String template= evaluateTemplateInMethodWithField("void method()", "Number[] numbers");
 		assertEquals(
 				"	for (int i = 0; i < numbers.length; i++) {\n" +
@@ -102,7 +106,8 @@ public class ArrayWithTempVarForLoopJavaContextTest extends AbstractForLoopJavaC
 						"	}", template);
 	}
 
-	public void testProposalsWithFieldAndParam() throws Exception {
+	@Test
+	public void proposalsWithFieldAndParam() throws Exception {
 		String template= evaluateTemplateInMethodWithField("void method(String[] strings)", "Number[] numbers");
 		assertEquals(
 				"	for (int i = 0; i < strings.length; i++) {\n" +

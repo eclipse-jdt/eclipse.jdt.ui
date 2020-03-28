@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,15 +14,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
-import org.eclipse.jdt.text.tests.codemining.ParameterNamesCodeMiningTest;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+
 import org.eclipse.jdt.text.tests.codemining.CodeMiningTriggerTest;
+import org.eclipse.jdt.text.tests.codemining.ParameterNamesCodeMiningTest;
 import org.eclipse.jdt.text.tests.contentassist.ContentAssistTestSuite;
 import org.eclipse.jdt.text.tests.spelling.SpellCheckEngineTestCase;
 import org.eclipse.jdt.text.tests.templates.TemplatesTestSuite;
-
-import junit.framework.JUnit4TestAdapter;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 
 /**
@@ -30,53 +29,48 @@ import junit.framework.TestSuite;
  *
  * @since 3.0
  */
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+	CompilationUnitDocumentProviderTest.class,
+	JavaHeuristicScannerTest.class,
+	JavaAutoIndentStrategyTest.class,
+	JavaBreakIteratorTest.class,
+	JavaParameterListValidatorTest.class,
+	JavaDoc2HTMLTextReaderTester.class,
+	JavaPairMatcherTest.class,
+	JavaPartitionerExtensionTest.class,
+	JavaColoringTest.class,
+	SmartSemicolonAutoEditStrategyTest.class,
+	JavaPartitionerTest.class,
+	PropertiesFilePartitionerTest.class,
+	PropertiesFileAutoEditStrategyTest.class,
+//	PartitionTokenScannerTest.class,
+	MarkOccurrenceTest.class,
+	MarkOccurrenceTest17.class,
+	MarkOccurrenceTest18.class,
+	PluginsNotLoadedTest.class,
+//	PluginsNotLoadedTest.addLoadedPlugIns(
+//			new String[] {
+//					"org.eclipse.core.filebuffers.tests",
+//					"org.eclipse.core.variables",
+//					"org.eclipse.team.cvs.core",
+//					"org.eclipse.test.performance"
+//			});
+	BracketInserterTest.class,
+	SpellCheckEngineTestCase.class,
+	SemanticHighlightingTest.class,
+	AutoboxingSemanticHighlightingTest.class,
+	NewForLoopJavaContextTest.class,
+	IteratorForLoopJavaContextTest.class,
+	ArrayWithTempVarForLoopJavaContextTest.class,
+	JavaDoubleClickSelectorTest.class,
+	BreakContinueTargetFinderTest.class,
+	ContentAssistTestSuite.class,
+	IndentActionTest.class,
+	TemplatesTestSuite.class,
+	JavaElementPrefixPatternMatcherTest.class,
+	CodeMiningTriggerTest.class,
+	ParameterNamesCodeMiningTest.class,
+})
 public class JdtTextTestSuite {
-
-	public static Test suite() {
-		TestSuite suite = new TestSuite(JdtTextTestSuite.class.getName());
-		//$JUnit-BEGIN$
-		suite.addTestSuite(CompilationUnitDocumentProviderTest.class);
-		suite.addTest(JavaHeuristicScannerTest.suite());
-		suite.addTest(JavaAutoIndentStrategyTest.suite());
-		suite.addTestSuite(JavaBreakIteratorTest.class);
-		suite.addTest(JavaParameterListValidatorTest.suite());
-		suite.addTest(JavaDoc2HTMLTextReaderTester.suite());
-		suite.addTest(new JUnit4TestAdapter(JavaPairMatcherTest.class));
-		suite.addTest(JavaPartitionerExtensionTest.suite());
-		suite.addTest(JavaColoringTest.suite());
-		suite.addTest(SmartSemicolonAutoEditStrategyTest.suite());
-		suite.addTest(JavaPartitionerTest.suite());
-		suite.addTest(PropertiesFilePartitionerTest.suite());
-		suite.addTest(PropertiesFileAutoEditStrategyTest.suite());
-//		suite.addTest(PartitionTokenScannerTest.suite());
-		suite.addTest(MarkOccurrenceTest.suite());
-		suite.addTest(MarkOccurrenceTest17.suite());
-		suite.addTest(MarkOccurrenceTest18.suite());
-		suite.addTest(PluginsNotLoadedTest.suite());
-		PluginsNotLoadedTest.addLoadedPlugIns(
-				new String[] {
-						"org.eclipse.core.filebuffers.tests",
-						"org.eclipse.core.variables",
-						"org.eclipse.team.cvs.core",
-						"org.eclipse.test.performance"
-				});
-		suite.addTest(BracketInserterTest.suite());
-		suite.addTest(new JUnit4TestAdapter(SpellCheckEngineTestCase.class));
-		suite.addTest(SemanticHighlightingTest.suite());
-		suite.addTest(AutoboxingSemanticHighlightingTest.suite());
-		suite.addTest(NewForLoopJavaContextTest.suite());
-		suite.addTest(IteratorForLoopJavaContextTest.suite());
-		suite.addTest(ArrayWithTempVarForLoopJavaContextTest.suite());
-		suite.addTest(JavaDoubleClickSelectorTest.suite());
-		suite.addTest(BreakContinueTargetFinderTest.suite());
-		suite.addTest(ContentAssistTestSuite.suite());
-		suite.addTest(IndentActionTest.suite());
-		suite.addTest(TemplatesTestSuite.suite());
-		suite.addTest(JavaElementPrefixPatternMatcherTest.suite());
-		suite.addTest(CodeMiningTriggerTest.suite());
-		suite.addTest(ParameterNamesCodeMiningTest.suite());
-		//$JUnit-END$
-
-		return suite;
-	}
 }

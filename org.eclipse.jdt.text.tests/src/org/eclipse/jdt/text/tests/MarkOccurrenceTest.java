@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,7 +14,17 @@
 
 package org.eclipse.jdt.text.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.util.Iterator;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.jdt.text.tests.performance.DisplayHelper;
 import org.eclipse.jdt.text.tests.performance.EditorTestHelper;
@@ -60,17 +70,12 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.viewsupport.ISelectionListenerWithAST;
 import org.eclipse.jdt.internal.ui.viewsupport.SelectionListenerWithASTManager;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
-
 /**
  * Tests the Java Editor's occurrence marking feature.
  *
  * @since 3.1
  */
-public class MarkOccurrenceTest extends TestCase {
+public class MarkOccurrenceTest {
 
 	private static final String OCCURRENCE_ANNOTATION= "org.eclipse.jdt.ui.occurrences";
 	private static final String OCCURRENCE_WRITE_ANNOTATION= "org.eclipse.jdt.ui.occurrences.write";
@@ -85,19 +90,11 @@ public class MarkOccurrenceTest extends TestCase {
 	private IRegion fMatch;
 	private StyledText fTextWidget;
 
+	@Rule
+	public JUnitProjectTestSetup jpts=new JUnitProjectTestSetup();
 
-
-	public static Test setUpTest(Test someTest) {
-		return new JUnitProjectTestSetup(someTest);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(MarkOccurrenceTest.class));
-	}
-
-
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		assertNotNull(fgHighlightRGB);
 		JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.EDITOR_MARK_OCCURRENCES, true);
 		JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.EDITOR_MARK_IMPLEMENTORS, true);
@@ -149,8 +146,8 @@ public class MarkOccurrenceTest extends TestCase {
 	 * @see junit.framework.TestCase#tearDown()
 	 * @since 3.1
 	 */
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		SelectionListenerWithASTManager.getDefault().removeListener(fEditor, fSelWASTListener);
 		EditorTestHelper.closeAllEditors();
 		fEditor= null;
@@ -172,7 +169,8 @@ public class MarkOccurrenceTest extends TestCase {
 		}
 	}
 
-	public void testMarkTypeOccurrences() {
+	@Test
+	public void markTypeOccurrences() {
 		try {
 			fMatch= fFindReplaceDocumentAdapter.find(0, "TestResult", true, true, true, false);
 		} catch (BadLocationException e) {
@@ -186,7 +184,8 @@ public class MarkOccurrenceTest extends TestCase {
 		assertOccurrencesInWidget();
 	}
 
-	public void testMarkOccurrencesAfterEditorReuse() {
+	@Test
+	public void markOccurrencesAfterEditorReuse() {
 		IPreferenceStore store= getPlatformUIStore();
 		store.setValue("REUSE_OPEN_EDITORS_BOOLEAN", true);
 
@@ -234,7 +233,8 @@ public class MarkOccurrenceTest extends TestCase {
 		return store;
 	}
 
-	public void testMarkMethodOccurrences() {
+	@Test
+	public void markMethodOccurrences() {
 		try {
 			fMatch= fFindReplaceDocumentAdapter.find(0, "getClass", true, true, true, false);
 		} catch (BadLocationException e) {
@@ -247,7 +247,8 @@ public class MarkOccurrenceTest extends TestCase {
 		assertOccurrences(2);
 		assertOccurrencesInWidget();
 	}
-	public void testMarkFieldOccurrences() {
+	@Test
+	public void markFieldOccurrences() {
 		try {
 			fMatch= fFindReplaceDocumentAdapter.find(0, "fName", true, true, true, false);
 		} catch (BadLocationException e) {
@@ -261,7 +262,8 @@ public class MarkOccurrenceTest extends TestCase {
 		assertOccurrencesInWidget();
 	}
 
-	public void testMarkLocalOccurrences() {
+	@Test
+	public void markLocalOccurrences() {
 		try {
 			fMatch= fFindReplaceDocumentAdapter.find(0, "runMethod", true, true, true, false);
 		} catch (BadLocationException e) {
@@ -275,7 +277,8 @@ public class MarkOccurrenceTest extends TestCase {
 		assertOccurrencesInWidget();
 	}
 
-	public void testMarkMethodExitOccurrences() {
+	@Test
+	public void markMethodExitOccurrences() {
 		try {
 			fMatch= fFindReplaceDocumentAdapter.find(0, "void runTest() throws", true, true, false, false);
 		} catch (BadLocationException e) {
@@ -290,7 +293,8 @@ public class MarkOccurrenceTest extends TestCase {
 		assertOccurrencesInWidget();
 	}
 
-	public void testMarkMethodExceptionOccurrences() {
+	@Test
+	public void markMethodExceptionOccurrences() {
 		try {
 			fMatch= fFindReplaceDocumentAdapter.find(0, "NoSuchMethodException", true, true, true, false);
 		} catch (BadLocationException e) {
@@ -304,7 +308,8 @@ public class MarkOccurrenceTest extends TestCase {
 		assertOccurrencesInWidget();
 	}
 
-	public void testMarkImplementOccurrences1() {
+	@Test
+	public void markImplementOccurrences1() {
 		try {
 			fMatch= fFindReplaceDocumentAdapter.find(0, "Test {", true, true, false, false);
 		} catch (BadLocationException e) {
@@ -318,7 +323,9 @@ public class MarkOccurrenceTest extends TestCase {
 		assertOccurrences(3);
 		assertOccurrencesInWidget();
 	}
-	public void testMarkImplementOccurrences2() {
+
+	@Test
+	public void markImplementOccurrences2() {
 		JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.EDITOR_MARK_IMPLEMENTORS, false);
 
 		try {
@@ -335,7 +342,8 @@ public class MarkOccurrenceTest extends TestCase {
 		assertOccurrencesInWidget();
 	}
 
-	public void testMarkImplementOccurrences3() {
+	@Test
+	public void markImplementOccurrences3() {
 		try {
 			fMatch= fFindReplaceDocumentAdapter.find(0, "Assert", true, true, false, false);
 		} catch (BadLocationException e) {
@@ -349,7 +357,8 @@ public class MarkOccurrenceTest extends TestCase {
 		assertOccurrencesInWidget();
 	}
 
-	public void testNoOccurrencesIfDisabled() {
+	@Test
+	public void noOccurrencesIfDisabled() {
 		JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.EDITOR_MARK_OCCURRENCES, false);
 		try {
 			fMatch= fFindReplaceDocumentAdapter.find(0, "TestResult", true, true, true, false);
@@ -384,8 +393,8 @@ public class MarkOccurrenceTest extends TestCase {
 			}
 		}
 		fail();
-
 	}
+
 	/**
 	 * Returns the occurrence annotation color.
 	 *
@@ -399,7 +408,6 @@ public class MarkOccurrenceTest extends TestCase {
 
 		return null;
 	}
-
 
 	private void assertOccurrences(final int expected) {
 		DisplayHelper helper= new DisplayHelper() {
@@ -416,5 +424,4 @@ public class MarkOccurrenceTest extends TestCase {
 		};
 		assertTrue(helper.waitForCondition(EditorTestHelper.getActiveDisplay(), 80000));
 	}
-
 }

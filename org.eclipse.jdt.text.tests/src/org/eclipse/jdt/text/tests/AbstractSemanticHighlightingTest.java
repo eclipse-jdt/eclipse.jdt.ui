@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,9 +13,17 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Before;
+import org.junit.rules.ExternalResource;
+
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.text.tests.performance.EditorTestHelper;
 import org.eclipse.jdt.text.tests.performance.ResourceTestHelper;
+
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.text.tests.Accessor;
 
@@ -38,26 +46,19 @@ import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingManager;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingPresenter;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings;
 
-import junit.extensions.TestSetup;
-import junit.framework.Test;
-import junit.framework.TestCase;
+public class AbstractSemanticHighlightingTest {
 
-
-public class AbstractSemanticHighlightingTest extends TestCase {
-
-	protected static class SemanticHighlightingTestSetup extends TestSetup {
+	protected static class SemanticHighlightingTestSetup extends ExternalResource {
 
 		private IJavaProject fJavaProject;
 		private final String fTestFilename;
 
-		public SemanticHighlightingTestSetup(Test test, String testFilename) {
-			super(test);
+		public SemanticHighlightingTestSetup(String testFilename) {
 			fTestFilename= testFilename;
 		}
 
 		@Override
-		protected void setUp() throws Exception {
-			super.setUp();
+		public void before() throws Exception {
 			fJavaProject= EditorTestHelper.createJavaProject(PROJECT, LINKED_FOLDER);
 
 			disableAllSemanticHighlightings();
@@ -72,7 +73,7 @@ public class AbstractSemanticHighlightingTest extends TestCase {
 		}
 
 		@Override
-		protected void tearDown () throws Exception {
+		public void after() {
 			EditorTestHelper.closeEditor(fEditor);
 			fEditor= null;
 			fSourceViewer= null;
@@ -87,9 +88,11 @@ public class AbstractSemanticHighlightingTest extends TestCase {
 			}
 
 			if (fJavaProject != null)
-				JavaProjectHelper.delete(fJavaProject);
-
-			super.tearDown();
+				try {
+					JavaProjectHelper.delete(fJavaProject);
+				} catch (CoreException e) {
+					e.printStackTrace();
+				}
 		}
 	}
 
@@ -101,9 +104,8 @@ public class AbstractSemanticHighlightingTest extends TestCase {
 
 	private static SourceViewer fSourceViewer;
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
+	@Before
+	public void before() throws Exception {
 		disableAllSemanticHighlightings();
 	}
 
