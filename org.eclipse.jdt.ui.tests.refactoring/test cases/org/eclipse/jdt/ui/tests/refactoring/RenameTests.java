@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,36 +13,29 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+	RefactoringScannerTests.class,
+	RenamingNameSuggestorTests.class,
 
+	RenameVirtualMethodInClassTests.class,
+	RenameMethodInInterfaceTests.class,
+	RenamePrivateMethodTests.class,
+	RenameStaticMethodTests.class,
+	RenameParametersTests.class,
+	RenameTypeTests.class,
+	RenamePackageTests.class,
+	RenamePrivateFieldTests.class,
+	RenameTypeParameterTests.class,
+	RenameNonPrivateFieldTests.class,
+	RenameJavaProjectTests.class,
+	RenameTests18.class
+
+	//XXX: NOT part of AllRefactoringTests. Also add suites there!
+})
 public class RenameTests {
-
-	private static final Class<RenameTests> clazz= RenameTests.class;
-
-	public static Test suite() {
-		TestSuite suite= new TestSuite(clazz.getName());
-
-		suite.addTest(RefactoringScannerTests.suite());
-		suite.addTest(RenamingNameSuggestorTests.suite());
-
-		suite.addTest(RenameVirtualMethodInClassTests.suite());
-		suite.addTest(RenameMethodInInterfaceTests.suite());
-		suite.addTest(RenamePrivateMethodTests.suite());
-		suite.addTest(RenameStaticMethodTests.suite());
-		suite.addTest(RenameParametersTests.suite());
-		suite.addTest(RenameTypeTests.suite());
-		suite.addTest(RenamePackageTests.suite());
-		suite.addTest(RenamePrivateFieldTests.suite());
-		suite.addTest(RenameTypeParameterTests.suite());
-		suite.addTest(RenameNonPrivateFieldTests.suite());
-		suite.addTest(RenameJavaProjectTests.suite());
-		suite.addTest(RenameTests18.suite());
-
-		//XXX: NOT part of AllRefactoringTests. Also add suites there!
-
-		return suite;
-	}
 }
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,24 +13,19 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+	AllRefactoringTests.class,
+	AllChangeTests.class,
+	UndoManagerTests.class,
+	PathTransformationTests.class,
+	RefactoringScannerTests.class,
+	SurroundWithTests.class,
+	SurroundWithTests17.class,
+	SurroundWithTests18.class,
+})
 public class AllTests {
-
-	private static final Class<AllTests> clazz= AllTests.class;
-
-	public static Test suite() {
-		TestSuite suite= new TestSuite(clazz.getName());
-		suite.addTest(AllRefactoringTests.suite());
-		suite.addTest(AllChangeTests.suite());
-		suite.addTest(UndoManagerTests.suite());
-		suite.addTest(PathTransformationTests.suite());
-		suite.addTest(RefactoringScannerTests.suite());
-		suite.addTest(SurroundWithTests.suite());
-		suite.addTest(SurroundWithTests17.suite());
-		suite.addTest(SurroundWithTests18.suite());
-		return suite;
-	}
 }
-

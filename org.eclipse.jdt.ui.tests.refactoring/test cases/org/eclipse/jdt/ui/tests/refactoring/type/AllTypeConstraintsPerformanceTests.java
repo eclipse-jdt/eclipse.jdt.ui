@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,14 +13,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring.type;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+	ExtractInterfacePerfAcceptanceTests.class
+})
 public class AllTypeConstraintsPerformanceTests {
-
-	public static Test suite() {
-		TestSuite suite= new TestSuite(AllTypeConstraintsPerformanceTests.class.getName());
-		suite.addTest(ExtractInterfacePerfAcceptanceTests.suite());
-		return suite;
-	}
 }

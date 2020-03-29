@@ -13,107 +13,101 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+	RenameTests18.class,
+	InlineTempTests18.class,
+	InlineConstantTests18.class,
 
+	//--code
+	ExtractMethodTests.class,
+	ExtractMethodTests17.class,
+	ExtractMethodTests18.class,
+	InlineMethodTests.class,
+	InlineMethodTests18.class,
+	ReplaceInvocationsTests.class,
+	SefTests.class,
+	InlineTempTests.class,
+	InlineTempTests17.class,
+	ExtractTempTests.class,
+	ExtractTempTests17.class,
+	ExtractTempTests18.class,
+	RenameTempTests.class,
+	ExtractConstantTests.class,
+	PromoteTempToFieldTests.class,
+	PromoteTempToFieldTests18.class,
+	ConvertAnonymousToNestedTests.class,
+	ConvertAnonymousToNestedTests18.class,
+	InlineConstantTests.class,
+	InlineConstantTests17.class,
+	IntroduceParameterTests.class,
+	IntroduceParameterTests17.class,
+	IntroduceFactoryTests.class,
+
+	//-- structure
+	ChangeSignatureTests.class,
+	ChangeSignatureTests18.class,
+	IntroduceParameterObjectTests.class,
+	PullUpTests.class,
+	PullUpTests18.class,
+	PushDownTests.class,
+	MoveMembersTests.class,
+	MoveMembersTests18.class,
+	ExtractInterfaceTests.class,
+	ExtractInterfaceTests18.class,
+	ExtractSupertypeTests.class,
+	MoveInnerToTopLevelTests.class,
+	UseSupertypeWherePossibleTests.class,
+	ExtractClassTests.class,
+
+	//-- generics
+	InferTypeArgumentsTests.class,
+
+	//--methods
+	RenameVirtualMethodInClassTests.class,
+	RenameMethodInInterfaceTests.class,
+	RenamePrivateMethodTests.class,
+	RenameStaticMethodTests.class,
+	RenameParametersTests.class,
+	MoveInstanceMethodTests.class,
+	MoveInstanceMethodTests18.class,
+	IntroduceIndirectionTests.class,
+	IntroduceIndirectionTests17.class,
+	IntroduceIndirectionTests18.class,
+
+	//--types
+	RenameTypeTests.class,
+	RenameTypeParameterTests.class,
+	ChangeTypeRefactoringTests.class,
+	ChangeTypeRefactoringTests17.class,
+
+	//--packages
+	RenamePackageTests.class,
+
+	//--fields
+	RenamePrivateFieldTests.class,
+	RenameNonPrivateFieldTests.class,
+	RenameRecordElementsTests.class,
+
+	//--initializers
+	MoveInitializerTests.class,
+
+	//--projects
+	RenameJavaProjectTests.class,
+
+	//--binaries
+	BinaryReferencesTests.class,
+
+	// validate edit
+//	ValidateEditTests.class,
+
+	//--helpers
+	RenamingNameSuggestorTests.class,
+	DelegateCreatorTests.class
+})
 public class AllRefactoringTests {
-
-	private static final Class<AllRefactoringTests> clazz= AllRefactoringTests.class;
-
-	public static Test suite() {
-		TestSuite suite= new TestSuite(clazz.getName());
-
-		suite.addTest(RenameTests18.suite());
-		suite.addTest(InlineTempTests18.suite());
-		suite.addTest(InlineConstantTests18.suite());
-
-		//--code
-		suite.addTest(ExtractMethodTests.suite());
-		suite.addTest(ExtractMethodTests17.suite());
-		suite.addTest(ExtractMethodTests18.suite());
-		suite.addTest(InlineMethodTests.suite());
-		suite.addTest(InlineMethodTests18.suite());
-		suite.addTest(ReplaceInvocationsTests.suite());
-		suite.addTest(SefTests.suite());
-		suite.addTest(InlineTempTests.suite());
-		suite.addTest(InlineTempTests17.suite());
-		suite.addTest(ExtractTempTests.suite());
-		suite.addTest(ExtractTempTests17.suite());
-		suite.addTest(ExtractTempTests18.suite());
-		suite.addTest(RenameTempTests.suite());
-		suite.addTest(ExtractConstantTests.suite());
-		suite.addTest(PromoteTempToFieldTests.suite());
-		suite.addTest(PromoteTempToFieldTests18.suite());
-		suite.addTest(ConvertAnonymousToNestedTests.suite());
-		suite.addTest(ConvertAnonymousToNestedTests18.suite());
-		suite.addTest(InlineConstantTests.suite());
-		suite.addTest(InlineConstantTests17.suite());
-		suite.addTest(IntroduceParameterTests.suite());
-		suite.addTest(IntroduceParameterTests17.suite());
-		suite.addTest(IntroduceFactoryTests.suite());
-
-		//-- structure
-		suite.addTest(ChangeSignatureTests.suite());
-		suite.addTest(ChangeSignatureTests18.suite());
-		suite.addTest(IntroduceParameterObjectTests.suite());
-		suite.addTest(PullUpTests.suite());
-		suite.addTest(PullUpTests18.suite());
-		suite.addTest(PushDownTests.suite());
-		suite.addTest(MoveMembersTests.suite());
-		suite.addTest(MoveMembersTests18.suite());
-		suite.addTest(ExtractInterfaceTests.suite());
-		suite.addTest(ExtractInterfaceTests18.suite());
-		suite.addTest(ExtractSupertypeTests.suite());
-		suite.addTest(MoveInnerToTopLevelTests.suite());
-		suite.addTest(UseSupertypeWherePossibleTests.suite());
-		suite.addTest(ExtractClassTests.suite());
-
-		//-- generics
-		suite.addTest(InferTypeArgumentsTests.suite());
-
-		//--methods
-		suite.addTest(RenameVirtualMethodInClassTests.suite());
-		suite.addTest(RenameMethodInInterfaceTests.suite());
-		suite.addTest(RenamePrivateMethodTests.suite());
-		suite.addTest(RenameStaticMethodTests.suite());
-		suite.addTest(RenameParametersTests.suite());
-		suite.addTest(MoveInstanceMethodTests.suite());
-		suite.addTest(MoveInstanceMethodTests18.suite());
-		suite.addTest(IntroduceIndirectionTests.suite());
-		suite.addTest(IntroduceIndirectionTests17.suite());
-		suite.addTest(IntroduceIndirectionTests18.suite());
-
-		//--types
-		suite.addTest(RenameTypeTests.suite());
-		suite.addTest(RenameTypeParameterTests.suite());
-		suite.addTest(ChangeTypeRefactoringTests.suite());
-		suite.addTest(ChangeTypeRefactoringTests17.suite());
-
-		//--packages
-		suite.addTest(RenamePackageTests.suite());
-
-		//--fields
-		suite.addTest(RenamePrivateFieldTests.suite());
-		suite.addTest(RenameNonPrivateFieldTests.suite());
-		suite.addTest(RenameRecordElementsTests.suite());
-
-		//--initializers
-		suite.addTest(MoveInitializerTests.suite());
-
-		//--projects
-		suite.addTest(RenameJavaProjectTests.suite());
-
-		//--binaries
-		suite.addTest(BinaryReferencesTests.suite());
-
-		// validate edit
-//		suite.addTest(ValidateEditTests.suite());
-
-		//--helpers
-		suite.addTest(RenamingNameSuggestorTests.suite());
-		suite.addTest(DelegateCreatorTests.suite());
-		return suite;
-	}
 }
 

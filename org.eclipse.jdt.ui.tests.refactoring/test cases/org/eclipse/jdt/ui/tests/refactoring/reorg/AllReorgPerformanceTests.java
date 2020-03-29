@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,32 +13,29 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring.reorg;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+	RenamePackagePerfTests1.class,
+	RenamePackagePerfTests2.class,
+
+	RenameTypePerfAcceptanceTests.class,
+	RenameTypePerfTests1.class,
+	RenameTypePerfTests2.class,
+
+	RenameMethodPerfTests1.class,
+	RenameMethodPerfTests2.class,
+	RenameMethodWithOverloadPerfTests.class,
+
+	MoveCompilationUnitPerfTests1.class,
+	MoveCompilationUnitPerfTests2.class,
+
+	MoveStaticMembersPerfTests1.class,
+	MoveStaticMembersPerfTests2.class,
+
+	IntroduceIndirectionPerfAcceptanceTests.class
+})
 public class AllReorgPerformanceTests {
-
-	public static Test suite() {
-		TestSuite suite= new TestSuite(AllReorgPerformanceTests.class.getName());
-		suite.addTest(RenamePackagePerfTests1.suite());
-		suite.addTest(RenamePackagePerfTests2.suite());
-
-		suite.addTest(RenameTypePerfAcceptanceTests.suite());
-		suite.addTest(RenameTypePerfTests1.suite());
-		suite.addTest(RenameTypePerfTests2.suite());
-
-		suite.addTest(RenameMethodPerfTests1.suite());
-		suite.addTest(RenameMethodPerfTests2.suite());
-		suite.addTest(RenameMethodWithOverloadPerfTests.suite());
-
-		suite.addTest(MoveCompilationUnitPerfTests1.suite());
-		suite.addTest(MoveCompilationUnitPerfTests2.suite());
-
-		suite.addTest(MoveStaticMembersPerfTests1.suite());
-		suite.addTest(MoveStaticMembersPerfTests2.suite());
-
-		suite.addTest(IntroduceIndirectionPerfAcceptanceTests.suite());
-
-		return suite;
-	}
 }

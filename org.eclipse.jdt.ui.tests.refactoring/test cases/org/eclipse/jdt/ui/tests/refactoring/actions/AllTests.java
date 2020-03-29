@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,19 +13,15 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring.actions;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+	StructureSelectionActionTests.class,
+	GoToNextPreviousMemberActionTests.class
+})
 public class AllTests {
-
-	public static Test suite ( ) {
-		TestSuite suite= new TestSuite(AllTests.class.getName());
-
-		suite.addTest(StructureSelectionActionTests.suite());
-		suite.addTest(GoToNextPreviousMemberActionTests.suite());
-		return suite;
-	}
-
 }
 
 

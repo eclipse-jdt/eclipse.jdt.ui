@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,17 +13,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+	RenameNonPrivateFieldTests.class,
+	RenamePrivateFieldTests.class
+})
 public class RenameFieldTests {
-
-	private static final Class<RenameFieldTests> clazz= RenameFieldTests.class;
-
-	public static Test suite() {
-		TestSuite suite= new TestSuite(clazz.getName());
-		suite.addTest(RenameNonPrivateFieldTests.suite());
-		suite.addTest(RenamePrivateFieldTests.suite());
-		return suite;
-	}
 }
