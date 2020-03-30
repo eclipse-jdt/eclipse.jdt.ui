@@ -56,6 +56,7 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.NodeFinder;
@@ -544,8 +545,10 @@ public class ChangeTypeRefactoring extends Refactoring {
 		MultiTextEdit root= new MultiTextEdit();
 		unitChange.setEdit(root); // Adam sez don't need this, but then unitChange.addGroupDescription() fails an assertion!
 
+		ImportRemover remover= new ImportRemover(fCu.getJavaProject(), unit);
 		String typeName= updateImports(unit, root);
-		updateCu(unit, vars, unitChange, unitRewriter, typeName);
+		updateCu(unit, vars, unitChange, unitRewriter, typeName, remover);
+		removeUnusedImport(remover,unit, root);
 		root.addChild(unitRewriter.rewriteAST());
 	}
 
@@ -557,7 +560,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	}
 
 	private void updateCu(CompilationUnit unit, Set<ConstraintVariable> vars, CompilationUnitChange unitChange,
-		ASTRewrite unitRewriter, String typeName) throws JavaModelException {
+		ASTRewrite unitRewriter, String typeName, ImportRemover remover) throws JavaModelException {
 
         // use custom SourceRangeComputer to avoid losing comments
 		unitRewriter.setTargetSourceRangeComputer(new SourceRangeComputer());
@@ -566,17 +569,17 @@ public class ChangeTypeRefactoring extends Refactoring {
 			ASTNode decl= findDeclaration(unit, cv);
 			if ((decl instanceof SimpleName || decl instanceof QualifiedName) && cv instanceof ExpressionVariable) {
 				ASTNode gp= decl.getParent().getParent();
-				updateType(unit, getType(gp), unitChange, unitRewriter, typeName);   // local variable or parameter
+				updateType(unit, getType(gp), unitChange, unitRewriter, typeName, remover);   // local variable or parameter
 			} else if (decl instanceof MethodDeclaration || decl instanceof FieldDeclaration) {
-				updateType(unit, getType(decl), unitChange, unitRewriter, typeName); // method return or field type
+				updateType(unit, getType(decl), unitChange, unitRewriter, typeName, remover); // method return or field type
 			} else if (decl instanceof ParameterizedType){
-				updateType(unit, getType(decl), unitChange, unitRewriter, typeName);
+				updateType(unit, getType(decl), unitChange, unitRewriter, typeName, remover);
 			}
 		}
 	}
 
 	private void updateType(CompilationUnit cu, Type oldType, CompilationUnitChange unitChange,
-							ASTRewrite unitRewriter, String typeName) {
+							ASTRewrite unitRewriter, String typeName, ImportRemover remover) {
 
 		String oldName= fSelectionTypeBinding.getName();
 		String[] keys= { BasicElementLabels.getJavaElementName(oldName), BasicElementLabels.getJavaElementName(typeName)};
@@ -602,6 +605,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 		}
 
 		unitRewriter.replace(nodeToReplace, newType, gd);
+		remover.registerRemovedNode(nodeToReplace);
 		unitChange.addTextEditGroup(gd);
 	}
 
@@ -1358,6 +1362,36 @@ public class ChangeTypeRefactoring extends Refactoring {
 		String typeName= rewrite.addImport(fSelectedType.getQualifiedName(), context);
 		rootEdit.addChild(rewrite.rewriteImports(null));
 		return typeName;
+	}
+
+	private void removeUnusedImport(ImportRemover remover, CompilationUnit astRoot, MultiTextEdit rootEdit) throws CoreException{
+		List<ImportDeclaration> declList= astRoot.imports();
+		ImportDeclaration oldImport= null;
+		String importStr= getImport(fSelectionTypeBinding.getQualifiedName());
+		for (ImportDeclaration decl: declList) {
+			if (decl.getName().getFullyQualifiedName().equals(importStr)) {
+				oldImport= decl;
+				break;
+			}
+		}
+		if (oldImport != null) {
+			ImportRewrite rewrite= StubUtility.createImportRewrite(astRoot, true);
+			remover.applyRemoves(rewrite);
+			rootEdit.addChild(rewrite.rewriteImports(null));
+		}
+	}
+
+	private String getImport(String qualifiedTypeName) {
+		String finalStr= qualifiedTypeName;
+		int angleBracketOffset= qualifiedTypeName.indexOf('<');
+		if (angleBracketOffset != -1) {
+			finalStr= qualifiedTypeName.substring(0, angleBracketOffset);
+		}
+		int bracketOffset= qualifiedTypeName.indexOf('[');
+		if (bracketOffset != -1) {
+			finalStr= qualifiedTypeName.substring(0, bracketOffset);
+		}
+		return finalStr;
 	}
 
 	//	------------------------------------------------------------------------------------------------- //

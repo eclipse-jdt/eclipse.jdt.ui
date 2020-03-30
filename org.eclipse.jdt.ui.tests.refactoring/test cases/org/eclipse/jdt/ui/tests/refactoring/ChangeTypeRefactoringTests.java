@@ -341,6 +341,15 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 				"java.lang.Iterable<java.lang.String>"  };
 		StringAsserts.assertEqualStringsIgnoreOrder(actual, expected);
 	}
+	public void testParametricTypeWithParametricSuperType2() throws Exception {
+		Collection<String> types= helper1(5, 22, 5, 22, "java.util.Collection<java.lang.String>").getValidTypeNames();
+		String[] actual= types.toArray(new String[types.size()]);
+		String[] expected= {
+				"java.util.Collection<java.lang.String>",
+				"java.lang.Object",
+				"java.lang.Iterable<java.lang.String>"  };
+		StringAsserts.assertEqualStringsIgnoreOrder(actual, expected);
+	}
 	public void testParametricTypeWithNonParametricSuperType() throws Exception {
 		Collection<String> types= helper1(5, 22, 5, 22, "java.lang.Object").getValidTypeNames();
 		String[] actual= types.toArray(new String[types.size()]);
