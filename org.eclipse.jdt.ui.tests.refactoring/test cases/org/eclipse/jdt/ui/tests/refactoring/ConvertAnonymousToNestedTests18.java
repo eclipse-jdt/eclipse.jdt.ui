@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Till Brychcy and others.
+ * Copyright (c) 2016, 2020 Till Brychcy and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,35 +13,32 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 import org.eclipse.jdt.core.dom.Modifier;
 
-import junit.framework.Test;
+import org.eclipse.jdt.ui.tests.CustomBaseRunner;
+import org.eclipse.jdt.ui.tests.IgnoreInheritedTests;
+import org.eclipse.jdt.ui.tests.refactoring.rules.Java18Setup;
 
+@IgnoreInheritedTests
+@RunWith(CustomBaseRunner.class)
 public class ConvertAnonymousToNestedTests18 extends ConvertAnonymousToNestedTests {
-
-	private static final Class<ConvertAnonymousToNestedTests18> clazz= ConvertAnonymousToNestedTests18.class;
 	private static final String REFACTORING_PATH= "ConvertAnonymousToNested18/";
 
-	public ConvertAnonymousToNestedTests18(String name) {
-		super(name);
-	}
+	@Rule
+	public Java18Setup js= new Java18Setup();
 
 	@Override
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
 
-	public static Test suite() {
-		return new Java18Setup(new NoSuperTestsSuite(clazz));
-	}
-
-	public static Test setUpTest(Test someTest) {
-		return new Java18Setup(someTest);
-	}
-
-
 	//--- TESTS
 
+	@Test
 	public void testEffectivelyFinal1() throws Exception{
 		helper1(5, 15, 5, 17, true, "Inner", Modifier.PRIVATE);
 	}

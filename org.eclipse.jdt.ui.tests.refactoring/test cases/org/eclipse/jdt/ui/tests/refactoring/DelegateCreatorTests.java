@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,8 +15,8 @@ package org.eclipse.jdt.ui.tests.refactoring;
 
 import java.io.IOException;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateCreator;
 import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateFieldCreator;
 import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateMethodCreator;
@@ -40,29 +41,17 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 
-import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
+import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
-
-public class DelegateCreatorTests extends RefactoringTest {
-
-	private static final Class<DelegateCreatorTests> clazz= DelegateCreatorTests.class;
+public class DelegateCreatorTests extends GenericRefactoringTest {
 	private static final String REFACTORING_PATH= "DelegateCreator/";
 
-	public DelegateCreatorTests(String name) {
-		super(name);
-	}
+	@Rule
+	public RefactoringTestSetup rts= new RefactoringTestSetup();
 
 	@Override
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
-	}
-
-	public static Test suite() {
-		return new RefactoringTestSetup(new TestSuite(clazz));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new RefactoringTestSetup(test);
 	}
 
 	private void methodHelper(String methodName, String[] args, boolean copy, String newName, String newTypeName) throws Exception {
@@ -118,41 +107,49 @@ public class DelegateCreatorTests extends RefactoringTest {
 		assertEqualLines("invalid delegate created", getFileContents(getOutputTestFileName("A")), cu.getSource());
 	}
 
+	@Test
 	public void testm01() throws Exception {
 		// just create a delegate without extras
 		methodHelper("foo", new String[0], true, null, null);
 	}
 
+	@Test
 	public void testm02() throws Exception {
 		// copy existing javadoc
 		methodHelper("foo", new String[0], true, null, null);
 	}
 
+	@Test
 	public void testm03() throws Exception {
 		// existing annotations
 		methodHelper("foo", new String[0], true, null, null);
 	}
 
+	@Test
 	public void testm04() throws Exception {
 		// a new name
 		methodHelper("foo", new String[0], true, "bar", null);
 	}
 
+	@Test
 	public void testm05() throws Exception {
 		// a new type
 		methodHelper("foo", new String[0], true, null, "B");
 	}
 
+	@Test
 	public void testm06() throws Exception {
 		// a new name and new type
 		methodHelper("foo", new String[0], true, "bar", "B");
 	}
 
+	@Test
 	public void testm07() throws Exception {
 		// ensure comments inside parameters et al. are copied as well.
 		methodHelper("foo", new String[] { "QString;", "QString;" }, true, "bar", null);
 	}
 
+	@Test
 	public void testm08() throws Exception {
 		// import
 		IPackageFragment e= getRoot().createPackageFragment("e", true, null);
@@ -165,16 +162,19 @@ public class DelegateCreatorTests extends RefactoringTest {
 		helper("foo", new String[0], null, true, null, destination);
 	}
 
+	@Test
 	public void testm09() throws Exception {
 		// abstract method: ensure no body is created
 		methodHelper("foo", new String[0], true, null, null);
 	}
 
+	@Test
 	public void testm10() throws Exception {
 		// interface method: ensure no body is created
 		methodHelper("foo", new String[0], true, null, null);
 	}
 
+	@Test
 	public void testm11() throws Exception {
 		// constructor
 		methodHelper("A", new String[0], true, null, null);
@@ -182,41 +182,49 @@ public class DelegateCreatorTests extends RefactoringTest {
 
 	// FIELDS
 
+	@Test
 	public void testf01() throws Exception {
 		// just create a delegate without extras
 		fieldHelper("foo", true, null, null);
 	}
 
+	@Test
 	public void testf02() throws Exception {
 		// copy existing javadoc
 		fieldHelper("foo", true, null, null);
 	}
 
+	@Test
 	public void testf03() throws Exception {
 		// existing annotations
 		fieldHelper("foo", true, null, null);
 	}
 
+	@Test
 	public void testf04() throws Exception {
 		// a new name
 		fieldHelper("foo", true, "bar", null);
 	}
 
+	@Test
 	public void testf05() throws Exception {
 		// a new type
 		fieldHelper("foo", true, null, "B");
 	}
 
+	@Test
 	public void testf06() throws Exception {
 		// a new name and new type
 		fieldHelper("foo", true, "bar", "B");
 	}
 
+	@Test
 	public void testf07() throws Exception {
 		// ensure comments inside parameters et al. are copied as well.
 		fieldHelper("foo", true, null, null);
 	}
 
+	@Test
 	public void testf08() throws Exception {
 		// import
 		IPackageFragment e= getRoot().createPackageFragment("e", true, null);
@@ -229,9 +237,9 @@ public class DelegateCreatorTests extends RefactoringTest {
 		helper(null, null, "foo", true, null, destination);
 	}
 
+	@Test
 	public void testf09() throws Exception {
 		// initializer removed?
 		fieldHelper("foo", true, null, null);
 	}
-
 }

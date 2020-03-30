@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,11 +13,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Arrays;
 import java.util.List;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
@@ -39,6 +42,8 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractSupertypeProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 
+import org.eclipse.jdt.ui.tests.refactoring.rules.Java15Setup;
+
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 /**
@@ -46,9 +51,9 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
  *
  * Note: Extract Supertype heavily relies on PullUpRefactoring and its tests
  */
-public final class ExtractSupertypeTests extends RefactoringTest {
-
-	private static final Class<ExtractSupertypeTests> clazz= ExtractSupertypeTests.class;
+public final class ExtractSupertypeTests extends GenericRefactoringTest {
+	@Rule
+	public Java15Setup js= new Java15Setup();
 
 	private static final String REFACTORING_PATH= "ExtractSupertype/";
 
@@ -69,18 +74,6 @@ public final class ExtractSupertypeTests extends RefactoringTest {
 	private static IMethod[] getMethods(IMember[] members) {
 		List<IJavaElement> l= Arrays.asList(JavaElementUtil.getElementsOfType(members, IJavaElement.METHOD));
 		return l.toArray(new IMethod[l.size()]);
-	}
-
-	public static Test setUpTest(Test someTest) {
-		return new Java15Setup(someTest);
-	}
-
-	public static Test suite() {
-		return new Java15Setup(new TestSuite(clazz));
-	}
-
-	public ExtractSupertypeTests(String name) {
-		super(name);
 	}
 
 	@Override
@@ -110,7 +103,7 @@ public final class ExtractSupertypeTests extends RefactoringTest {
 			processor.setDeletedMethods(getMethods(processor.getMatchingElements(new NullProgressMonitor(), false)));
 
 		RefactoringStatus status= refactoring.checkFinalConditions(new NullProgressMonitor());
-		assertTrue("precondition was supposed to pass", !status.hasError());
+		assertFalse("precondition was supposed to pass", status.hasError());
 		performChange(refactoring, false);
 
 		String expected= getFileContents(getOutputTestFileName("A"));
@@ -119,37 +112,43 @@ public final class ExtractSupertypeTests extends RefactoringTest {
 
 		expected= getFileContents(getOutputTestFileName("Z"));
 		ICompilationUnit unit= getPackageP().getCompilationUnit("Z.java");
-		if (!unit.exists())
-			assertTrue("extracted compilation unit does not exist", false);
+		assertTrue("extracted compilation unit does not exist", unit.exists());
 		actual= unit.getBuffer().getContents();
 		assertEqualLines(expected, actual);
 
 	}
 
+	@Test
 	public void test0() throws Exception {
 		helper1(new String[] { "m"}, new String[][] { new String[0]}, true, false, true);
 	}
 
+	@Test
 	public void test1() throws Exception {
 		helper1(new String[] { "m"}, new String[][] { new String[0]}, true, false, true);
 	}
 
+	@Test
 	public void test2() throws Exception {
 		helper1(new String[] { "m", "n"}, new String[][] { new String[0], new String[0]}, true, false, true);
 	}
 
+	@Test
 	public void test3() throws Exception {
 		helper1(new String[] { "m", "n"}, new String[][] { new String[0], new String[0]}, true, false, true);
 	}
 
+	@Test
 	public void test4() throws Exception {
 		helper1(new String[] { "m"}, new String[][] { new String[0]}, true, false, true);
 	}
 
+	@Test
 	public void testBug151683() throws Exception {
 		helper1(new String[] { "m" }, new String[][] { new String[0] }, true, false, false);
 	}
 
+	@Test
 	public void testBug240353() throws Exception {
 		helper1(new String[] { "foo" }, new String[][] { new String[] { Signature.createTypeSignature("T", false) } }, true, false, false);
 	}

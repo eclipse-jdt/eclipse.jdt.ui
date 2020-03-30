@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2015 IBM Corporation and others.
+ * Copyright (c) 2011, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,25 +15,21 @@ package org.eclipse.jdt.ui.tests.refactoring;
 
 import java.util.Collection;
 
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 import org.eclipse.jdt.testplugin.StringAsserts;
 
-import junit.framework.Test;
+import org.eclipse.jdt.ui.tests.CustomBaseRunner;
+import org.eclipse.jdt.ui.tests.IgnoreInheritedTests;
+import org.eclipse.jdt.ui.tests.refactoring.rules.Java17Setup;
 
+@IgnoreInheritedTests
+@RunWith(CustomBaseRunner.class)
 public class ChangeTypeRefactoringTests17 extends ChangeTypeRefactoringTests {
-
-	private static final Class<ChangeTypeRefactoringTests17> clazz= ChangeTypeRefactoringTests17.class;
-
-	public ChangeTypeRefactoringTests17(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return new Java17Setup(new NoSuperTestsSuite(clazz));
-	}
-
-	public static Test setUpTest(Test someTest) {
-		return new Java17Setup(someTest);
-	}
+	@Rule
+	public Java17Setup js= new Java17Setup();
 
 	@Override
 	protected String getTestFileName(boolean positive, boolean input) {
@@ -45,6 +41,7 @@ public class ChangeTypeRefactoringTests17 extends ChangeTypeRefactoringTests {
 	}
 
 	//--- TESTS
+	@Test
 	public void testTryWithResources() throws Exception {
 		Collection<String> types= helper1(7, 25, 7, 31, "java.io.InputStreamReader").getValidTypeNames();
 		String[] actual= types.toArray(new String[types.size()]);
@@ -54,6 +51,7 @@ public class ChangeTypeRefactoringTests17 extends ChangeTypeRefactoringTests {
 
 	// tests that are supposed to fail
 
+	@Test
 	public void testUnionType() throws Exception {
 		failHelper1(12, 65, 12, 67, 4, "java.lang.Object");
 	}

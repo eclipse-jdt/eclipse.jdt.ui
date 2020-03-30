@@ -11,18 +11,14 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.ui.tests.refactoring;
+package org.eclipse.jdt.ui.tests.refactoring.rules;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-	RenameResourceChangeTests.class,
-	MoveRenameResourceChangeTests.class,
-	RenameSourceFolderChangeTests.class,
-	CopyPackageChangeTest.class,
-	DocumentChangeTest.class
-})
-public class AllChangeTests {
+/**
+ * TODO: replace by RefactoringTestSetup
+ */
+public class Java15Setup extends RefactoringTestSetup {
+	@Override
+	public void before() throws Exception {
+		super.before();
+	}
 }
