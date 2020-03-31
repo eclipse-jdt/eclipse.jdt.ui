@@ -751,263 +751,270 @@ public class SaveParticipantTest extends CleanUpTestCase {
 
 	@Test
 	public void testFormatChangeBug488229_1() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    /**\n");
-		buf.append("     * Method foo\n");
-		buf.append("     * @param a - integer input\n");
-		buf.append("     * @return integer\n");
-		buf.append("     */\n");
-		buf.append("    public int foo( int a ) {\n");
-		buf.append("        return 0;\n");
-		buf.append("    }\n");
-		buf.append("}");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 
-		enable(CleanUpConstants.FORMAT_SOURCE_CODE);
-		enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES);
-		enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_ALL);
-		Hashtable<String, String> coreOptions= JavaCore.getOptions();
-		coreOptions.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_EMPTY_LINE_BEFORE_ROOT_TAGS, JavaCore.INSERT);
-		coreOptions.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_JAVADOC_COMMENT, DefaultCodeFormatterConstants.TRUE);
-		JavaCore.setOptions(coreOptions);
+		Hashtable<String, String> oldOptions= JavaCore.getOptions();
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    /**\n");
-		buf.append("     * Method foo  \n");
-		buf.append("     * @param a - integer input  \n");
-		buf.append("     * @return integer  \n");
-		buf.append("     */\n");
-		buf.append("    public int foo( int a ) {\n");
-		buf.append("        return 0;\n");
-		buf.append("    }\n");
-		buf.append("}");
+		try {
+			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+			StringBuffer buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public class E1 {\n");
+			buf.append("    /**\n");
+			buf.append("     * Method foo\n");
+			buf.append("     * @param a - integer input\n");
+			buf.append("     * @return integer\n");
+			buf.append("     */\n");
+			buf.append("    public int foo( int a ) {\n");
+			buf.append("        return 0;\n");
+			buf.append("    }\n");
+			buf.append("}");
+			ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 
-		editCUInEditor(cu1, buf.toString());
+			enable(CleanUpConstants.FORMAT_SOURCE_CODE);
+			enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES);
+			enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_ALL);
+			Hashtable<String, String> coreOptions= new Hashtable<>();
+			coreOptions.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_EMPTY_LINE_BEFORE_ROOT_TAGS, JavaCore.INSERT);
+			coreOptions.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_JAVADOC_COMMENT, DefaultCodeFormatterConstants.TRUE);
+			JavaCore.setOptions(coreOptions);
 
-		coreOptions.remove(DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_EMPTY_LINE_BEFORE_ROOT_TAGS);
-		coreOptions.remove(DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_EMPTY_LINE_BETWEEN_DIFFERENT_TAGS);
-		JavaCore.setOptions(coreOptions);
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public class E1 {\n");
+			buf.append("    /**\n");
+			buf.append("     * Method foo  \n");
+			buf.append("     * @param a - integer input  \n");
+			buf.append("     * @return integer  \n");
+			buf.append("     */\n");
+			buf.append("    public int foo( int a ) {\n");
+			buf.append("        return 0;\n");
+			buf.append("    }\n");
+			buf.append("}");
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    /**\n");
-		buf.append("     * Method foo\n");
-		buf.append("     *\n");
-		buf.append("     * @param a - integer input\n");
-		buf.append("     * @return integer\n");
-		buf.append("     */\n");
-		buf.append("    public int foo(int a) {\n");
-		buf.append("        return 0;\n");
-		buf.append("    }\n");
-		buf.append("}");
-		String expected1= buf.toString();
+			editCUInEditor(cu1, buf.toString());
 
-		assertEquals(expected1, cu1.getBuffer().getContents());
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public class E1 {\n");
+			buf.append("	/**\n");
+			buf.append("	 * Method foo\n");
+			buf.append("	 *\n");
+			buf.append("	 * @param a\n");
+			buf.append("	 *            - integer input\n");
+			buf.append("	 * @return integer\n");
+			buf.append("	 */\n");
+			buf.append("	public int foo(int a) {\n");
+			buf.append("		return 0;\n");
+			buf.append("	}\n");
+			buf.append("}");
+			String expected1= buf.toString();
+
+			assertEquals(expected1, cu1.getBuffer().getContents());
+		} finally {
+			JavaCore.setOptions(oldOptions);
+		}
 	}
 
 	@Test
 	public void testFormatChangeBug488229_2() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    /**\n");
-		buf.append("     * Method foo\n");
-		buf.append("     * @param a - integer input\n");
-		buf.append("     * @return integer\n");
-		buf.append("     */\n");
-		buf.append("    public int foo( int a ) {\n");
-		buf.append("        return 0;\n");
-		buf.append("    }\n");
-		buf.append("}");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		Hashtable<String,String> oldOptions= JavaCore.getOptions();
 
-		enable(CleanUpConstants.FORMAT_SOURCE_CODE);
-		enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES);
-		enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_ALL);
-		Hashtable<String, String> coreOptions= JavaCore.getOptions();
-		coreOptions.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_EMPTY_LINE_BEFORE_ROOT_TAGS, JavaCore.INSERT);
-		coreOptions.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_EMPTY_LINE_BETWEEN_DIFFERENT_TAGS, JavaCore.INSERT);
-		coreOptions.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_JAVADOC_COMMENT, DefaultCodeFormatterConstants.TRUE);
-		JavaCore.setOptions(coreOptions);
+		try {
+			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+			StringBuffer buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public class E1 {\n");
+			buf.append("    /**\n");
+			buf.append("     * Method foo\n");
+			buf.append("     * @param a - integer input\n");
+			buf.append("     * @return integer\n");
+			buf.append("     */\n");
+			buf.append("    public int foo( int a ) {\n");
+			buf.append("        return 0;\n");
+			buf.append("    }\n");
+			buf.append("}");
+			ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    /**\n");
-		buf.append("     * Method foo  \n");
-		buf.append("     * @param a - integer input  \n");
-		buf.append("     * @return integer  \n");
-		buf.append("     */\n");
-		buf.append("    public int foo( int a ) {\n");
-		buf.append("        return 0;\n");
-		buf.append("    }\n");
-		buf.append("}");
+			enable(CleanUpConstants.FORMAT_SOURCE_CODE);
+			enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES);
+			enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_ALL);
+			Hashtable<String, String> coreOptions= new Hashtable<>();
+			coreOptions.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_EMPTY_LINE_BEFORE_ROOT_TAGS, JavaCore.INSERT);
+			coreOptions.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_EMPTY_LINE_BETWEEN_DIFFERENT_TAGS, JavaCore.INSERT);
+			coreOptions.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_JAVADOC_COMMENT, DefaultCodeFormatterConstants.TRUE);
+			JavaCore.setOptions(coreOptions);
 
-		editCUInEditor(cu1, buf.toString());
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public class E1 {\n");
+			buf.append("    /**\n");
+			buf.append("     * Method foo  \n");
+			buf.append("     * @param a - integer input  \n");
+			buf.append("     * @return integer  \n");
+			buf.append("     */\n");
+			buf.append("    public int foo( int a ) {\n");
+			buf.append("        return 0;\n");
+			buf.append("    }\n");
+			buf.append("}");
 
-		coreOptions.remove(DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_EMPTY_LINE_BEFORE_ROOT_TAGS);
-		coreOptions.remove(DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_EMPTY_LINE_BETWEEN_DIFFERENT_TAGS);
-		coreOptions.remove(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_JAVADOC_COMMENT);
-		JavaCore.setOptions(coreOptions);
+			editCUInEditor(cu1, buf.toString());
 
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public class E1 {\n");
+			buf.append("	/**\n");
+			buf.append("	 * Method foo\n");
+			buf.append("	 *\n");
+			buf.append("	 * @param a\n");
+			buf.append("	 *            - integer input\n");
+			buf.append("	 *\n");
+			buf.append("	 * @return integer\n");
+			buf.append("	 */\n");
+			buf.append("	public int foo(int a) {\n");
+			buf.append("		return 0;\n");
+			buf.append("	}\n");
+			buf.append("}");
+			String expected1= buf.toString();
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    /**\n");
-		buf.append("     * Method foo\n");
-		buf.append("     *\n");
-		buf.append("     * @param a - integer input\n");
-		buf.append("     *\n");
-		buf.append("     * @return integer\n");
-		buf.append("     */\n");
-		buf.append("    public int foo(int a) {\n");
-		buf.append("        return 0;\n");
-		buf.append("    }\n");
-		buf.append("}");
-		String expected1= buf.toString();
-
-		assertEquals(expected1, cu1.getBuffer().getContents());
+			assertEquals(expected1, cu1.getBuffer().getContents());
+		} finally {
+			JavaCore.setOptions(oldOptions);
+		}
 	}
 
 	@Test
 	public void testFormatChangeBug488229_3() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    /**\n");
-		buf.append("     * Method foo\n");
-		buf.append("     *\t          @param a - integer input\n");
-		buf.append("     * @return integer\n");
-		buf.append("     */\n");
-		buf.append("    public int foo( int a ) {\n");
-		buf.append("        return 0;\n");
-		buf.append("    }\n");
-		buf.append("}");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		Hashtable<String,String> oldOptions= JavaCore.getOptions();
 
-		enable(CleanUpConstants.FORMAT_SOURCE_CODE);
-		enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES);
-		enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_ALL);
-		Hashtable<String, String> coreOptions= JavaCore.getOptions();
-		coreOptions.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_EMPTY_LINE_BEFORE_ROOT_TAGS, JavaCore.INSERT);
-		coreOptions.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_EMPTY_LINE_BETWEEN_DIFFERENT_TAGS, JavaCore.INSERT);
-		coreOptions.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_JAVADOC_COMMENT, DefaultCodeFormatterConstants.TRUE);
-		JavaCore.setOptions(coreOptions);
+		try {
+			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+			StringBuffer buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public class E1 {\n");
+			buf.append("    /**\n");
+			buf.append("     * Method foo\n");
+			buf.append("     *\t          @param a - integer input\n");
+			buf.append("     * @return integer\n");
+			buf.append("     */\n");
+			buf.append("    public int foo( int a ) {\n");
+			buf.append("        return 0;\n");
+			buf.append("    }\n");
+			buf.append("}");
+			ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    /**\n");
-		buf.append("     * Method foo  \n");
-		buf.append("     *\t          @param a - integer input  \n");
-		buf.append("     * @return integer  \n");
-		buf.append("     */\n");
-		buf.append("    public int foo( int a ) {\n");
-		buf.append("        return 0;\n");
-		buf.append("    }\n");
-		buf.append("}");
+			enable(CleanUpConstants.FORMAT_SOURCE_CODE);
+			enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES);
+			enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_ALL);
+			Hashtable<String, String> coreOptions= new Hashtable<>();
+			coreOptions.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_EMPTY_LINE_BEFORE_ROOT_TAGS, JavaCore.INSERT);
+			coreOptions.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_EMPTY_LINE_BETWEEN_DIFFERENT_TAGS, JavaCore.INSERT);
+			coreOptions.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_JAVADOC_COMMENT, DefaultCodeFormatterConstants.TRUE);
+			JavaCore.setOptions(coreOptions);
 
-		editCUInEditor(cu1, buf.toString());
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public class E1 {\n");
+			buf.append("    /**\n");
+			buf.append("     * Method foo  \n");
+			buf.append("     *\t          @param a - integer input  \n");
+			buf.append("     * @return integer  \n");
+			buf.append("     */\n");
+			buf.append("    public int foo( int a ) {\n");
+			buf.append("        return 0;\n");
+			buf.append("    }\n");
+			buf.append("}");
 
-		coreOptions.remove(DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_EMPTY_LINE_BEFORE_ROOT_TAGS);
-		coreOptions.remove(DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_EMPTY_LINE_BETWEEN_DIFFERENT_TAGS);
-		coreOptions.remove(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_JAVADOC_COMMENT);
-		JavaCore.setOptions(coreOptions);
+			editCUInEditor(cu1, buf.toString());
 
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public class E1 {\n");
+			buf.append("	/**\n");
+			buf.append("	 * Method foo\n");
+			buf.append("	 *\n");
+			buf.append("	 * @param a\n");
+			buf.append("	 *            - integer input\n");
+			buf.append("	 *\n");
+			buf.append("	 * @return integer\n");
+			buf.append("	 */\n");
+			buf.append("	public int foo(int a) {\n");
+			buf.append("		return 0;\n");
+			buf.append("	}\n");
+			buf.append("}");
+			String expected1= buf.toString();
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    /**\n");
-		buf.append("     * Method foo\n");
-		buf.append("     *\n");
-		buf.append("     * @param a - integer input\n");
-		buf.append("     *\n");
-		buf.append("     * @return integer\n");
-		buf.append("     */\n");
-		buf.append("    public int foo(int a) {\n");
-		buf.append("        return 0;\n");
-		buf.append("    }\n");
-		buf.append("}");
-		String expected1= buf.toString();
-
-		assertEquals(expected1, cu1.getBuffer().getContents());
+			assertEquals(expected1, cu1.getBuffer().getContents());
+		} finally {
+			JavaCore.setOptions(oldOptions);
+		}
 	}
 
 	@Test
 	public void testFormatChangeBug561164() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    /**\n");
-		buf.append("     * Method foo with a really long description that will wrap lines on save operation\n");
-		buf.append("     *\t          @param a - integer input\n");
-		buf.append("     * @return integer\n");
-		buf.append("     */\n");
-		buf.append("    public int foo( int a ) {\n");
-		buf.append("        return 0;\n");
-		buf.append("    }\n");
-		buf.append("}");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		Hashtable<String, String> oldOptions= JavaCore.getOptions();
 
-		enable(CleanUpConstants.FORMAT_SOURCE_CODE);
-		enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES);
-		enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_ALL);
-		Hashtable<String, String> coreOptions= JavaCore.getOptions();
-		coreOptions.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_EMPTY_LINE_BEFORE_ROOT_TAGS, JavaCore.INSERT);
-		coreOptions.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_EMPTY_LINE_BETWEEN_DIFFERENT_TAGS, JavaCore.INSERT);
-		coreOptions.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_JAVADOC_COMMENT, DefaultCodeFormatterConstants.TRUE);
-		JavaCore.setOptions(coreOptions);
+		try {
+			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+			StringBuffer buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public class E1 {\n");
+			buf.append("    /**\n");
+			buf.append("     * Method foo with a really long description that will wrap lines on save operation\n");
+			buf.append("     *\t          @param a - integer input\n");
+			buf.append("     * @return integer\n");
+			buf.append("     */\n");
+			buf.append("    public int foo( int a ) {\n");
+			buf.append("        return 0;\n");
+			buf.append("    }\n");
+			buf.append("}");
+			ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    /**\n");
-		buf.append("     * Method foo with a really long description that will wrap lines on save operation  \n");
-		buf.append("     *\t          @param a - integer input  \n");
-		buf.append("     * @return integer  \n");
-		buf.append("     */\n");
-		buf.append("    public int foo( int a ) {\n");
-		buf.append("        return 0;\n");
-		buf.append("    }\n");
-		buf.append("}");
+			enable(CleanUpConstants.FORMAT_SOURCE_CODE);
+			enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES);
+			enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_ALL);
+			Hashtable<String, String> coreOptions= new Hashtable<>();
+			coreOptions.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_EMPTY_LINE_BEFORE_ROOT_TAGS, JavaCore.INSERT);
+			coreOptions.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_EMPTY_LINE_BETWEEN_DIFFERENT_TAGS, JavaCore.INSERT);
+			coreOptions.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_JAVADOC_COMMENT, DefaultCodeFormatterConstants.TRUE);
+			JavaCore.setOptions(coreOptions);
 
-		editCUInEditor(cu1, buf.toString());
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public class E1 {\n");
+			buf.append("    /**\n");
+			buf.append("     * Method foo with a really long description that will wrap lines on save operation  \n");
+			buf.append("     *\t          @param a - integer input  \n");
+			buf.append("     * @return integer  \n");
+			buf.append("     */\n");
+			buf.append("    public int foo( int a ) {\n");
+			buf.append("        return 0;\n");
+			buf.append("    }\n");
+			buf.append("}");
 
-		coreOptions.remove(DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_EMPTY_LINE_BEFORE_ROOT_TAGS);
-		coreOptions.remove(DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_EMPTY_LINE_BETWEEN_DIFFERENT_TAGS);
-		coreOptions.remove(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_JAVADOC_COMMENT);
-		JavaCore.setOptions(coreOptions);
+			editCUInEditor(cu1, buf.toString());
 
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public class E1 {\n");
+			buf.append("	/**\n");
+			buf.append("	 * Method foo with a really long description that will wrap lines on save\n");
+			buf.append("	 * operation\n");
+			buf.append("	 *\n");
+			buf.append("	 * @param a\n");
+			buf.append("	 *            - integer input\n");
+			buf.append("	 *\n");
+			buf.append("	 * @return integer\n");
+			buf.append("	 */\n");
+			buf.append("	public int foo(int a) {\n");
+			buf.append("		return 0;\n");
+			buf.append("	}\n");
+			buf.append("}");
+			String expected1= buf.toString();
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    /**\n");
-		buf.append("     * Method foo with a really long description that will wrap lines on save\n");
-		buf.append("     * operation\n");
-		buf.append("     *\n");
-		buf.append("     * @param a - integer input\n");
-		buf.append("     *\n");
-		buf.append("     * @return integer\n");
-		buf.append("     */\n");
-		buf.append("    public int foo(int a) {\n");
-		buf.append("        return 0;\n");
-		buf.append("    }\n");
-		buf.append("}");
-		String expected1= buf.toString();
-
-		assertEquals(expected1, cu1.getBuffer().getContents());
+			assertEquals(expected1, cu1.getBuffer().getContents());
+		} finally {
+			JavaCore.setOptions(oldOptions);
+		}
 	}
 
 	@Test
