@@ -194,7 +194,7 @@ public class JavaCodeReader extends SingleCharReader {
 		while (0 < fOffset) {
 			char current= fDocument.getChar(fOffset);
 			if (current == delimiter) {
-				if ( !(0 <= fOffset && fDocument.getChar(fOffset -1) == '\\'))
+				if ((0 > fOffset) || (fDocument.getChar(fOffset -1) != '\\'))
 					return;
 			}
 			-- fOffset;

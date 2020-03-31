@@ -1362,7 +1362,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 		super.okPressed();
 	}
 
-    @Override
+	@Override
 	protected void buttonPressed(int buttonId) {
 		if (buttonId == APPLAY_BUTTON_ID) {
 			applyPressed();
@@ -1372,7 +1372,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 		} else {
 			super.buttonPressed(buttonId);
 		}
-    }
+	}
 
 	private void applyPressed() {
 		if (!fProfile.getName().equals(fProfileNameField.getText())) {
@@ -1419,9 +1419,9 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 		}
 	}
 
-    @Override
+	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
-	    fApplyButton= createButton(parent, APPLAY_BUTTON_ID, FormatterMessages.ModifyDialog_apply_button, false);
+		fApplyButton= createButton(parent, APPLAY_BUTTON_ID, FormatterMessages.ModifyDialog_apply_button, false);
 		fApplyButton.setEnabled(false);
 
 		GridLayout layout= (GridLayout) parent.getLayout();
@@ -1443,27 +1443,27 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 
 	@Override
 	protected void updateButtonsEnableState(IStatus status) {
-	    super.updateButtonsEnableState(status);
-	    if (fApplyButton != null && !fApplyButton.isDisposed()) {
-	    	fApplyButton.setEnabled(hasChanges() && !status.matches(IStatus.ERROR));
+		super.updateButtonsEnableState(status);
+		if (fApplyButton != null && !fApplyButton.isDisposed()) {
+			fApplyButton.setEnabled(hasChanges() && !status.matches(IStatus.ERROR));
 		}
-	    if (fSaveButton != null && !fSaveButton.isDisposed()) {
-	    	fSaveButton.setEnabled(!validateProfileName().matches(IStatus.ERROR));
-	    }
+		if (fSaveButton != null && !fSaveButton.isDisposed()) {
+			fSaveButton.setEnabled(!validateProfileName().matches(IStatus.ERROR));
+		}
 	}
 
-    private void doValidate() {
-    	String name= fProfileNameField.getText().trim();
+	private void doValidate() {
+		String name= fProfileNameField.getText().trim();
 		if (name.equals(fProfile.getName()) && fProfile.hasEqualSettings(fWorkingValues, fWorkingValues.keySet())) {
 			updateStatus(StatusInfo.OK_STATUS);
 			return;
 		}
 
-    	IStatus status= validateProfileName();
-    	if (status.matches(IStatus.ERROR)) {
-    		updateStatus(status);
-    		return;
-    	}
+		IStatus status= validateProfileName();
+		if (status.matches(IStatus.ERROR)) {
+			updateStatus(status);
+			return;
+		}
 
 		if (!name.equals(fProfile.getName()) && fProfileManager.containsName(name)) {
 			updateStatus(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, FormatterMessages.ModifyDialog_Duplicate_Status));
@@ -1475,30 +1475,30 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 			return;
 		}
 
-	    updateStatus(StatusInfo.OK_STATUS);
-    }
+		updateStatus(StatusInfo.OK_STATUS);
+	}
 
-    private IStatus validateProfileName() {
-    	final String name= fProfileNameField.getText().trim();
+	private IStatus validateProfileName() {
+		final String name= fProfileNameField.getText().trim();
 
-	    if (fProfile.isBuiltInProfile()) {
+		if (fProfile.isBuiltInProfile()) {
 			if (fProfile.getName().equals(name)) {
 				return new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, FormatterMessages.ModifyDialog_BuiltIn_Status);
 			}
-    	}
+		}
 
-    	if (fProfile.isSharedProfile()) {
+		if (fProfile.isSharedProfile()) {
 			if (fProfile.getName().equals(name)) {
 				return new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, FormatterMessages.ModifyDialog_Shared_Status);
 			}
-    	}
+		}
 
 		if (name.length() == 0) {
 			return new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, FormatterMessages.ModifyDialog_EmptyName_Status);
 		}
 
 		return StatusInfo.OK_STATUS;
-    }
+	}
 
 	private boolean hasChanges() {
 		if (!fProfileNameField.getText().trim().equals(fProfile.getName()))
@@ -1581,7 +1581,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 	}
 
 	private String doGetPreviewCode(PreferenceTreeNode<?> node) {
-		if (!(node instanceof Section || node instanceof Preference))
+		if (!(node instanceof Section) && !(node instanceof Preference))
 			return null;
 		String key= node instanceof Section ? ((Section) node).getKey() : ((Preference<?>) node).getKey();
 		final String START_PREFIX= "//--PREVIEW--START--"; //$NON-NLS-1$

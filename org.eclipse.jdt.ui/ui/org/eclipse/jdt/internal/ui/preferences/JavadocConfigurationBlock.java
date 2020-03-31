@@ -250,7 +250,7 @@ public class JavadocConfigurationBlock {
 			LayoutUtil.setHorizontalIndent(fArchivePathField.getLabelControl(null));
 			LayoutUtil.setHorizontalIndent(fURLField.getLabelControl(null));
 			fURLRadioButton.attachDialogFields(new DialogField[] {fURLField,  fBrowseFolder, fValidateURLButton });
-			fValidateURLButton.setEnabled(!(fURLField.getText() == null || fURLField.getText().isEmpty()));
+			fValidateURLButton.setEnabled((fURLField.getText() != null) && !fURLField.getText().isEmpty());
 			fArchiveRadioButton.attachDialogFields(new DialogField[] {fArchiveField,  fBrowseArchive, fExternalRadio, fWorkspaceRadio, fArchivePathField, fBrowseArchivePath, fValidateArchiveButton });
 		}
 
@@ -466,7 +466,7 @@ public class JavadocConfigurationBlock {
 			fURLStatus= updateURLStatus();
 			statusChanged();
 			if (fValidateURLButton != null) {
-				fValidateURLButton.setEnabled(!(fURLField.getText() == null || fURLField.getText().isEmpty()));
+				fValidateURLButton.setEnabled(((fURLField.getText() != null) && !fURLField.getText().isEmpty()));
 			}
 		} else if (field == fArchiveField) {
 			fArchiveStatus= updateArchiveStatus();

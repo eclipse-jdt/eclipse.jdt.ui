@@ -229,8 +229,8 @@ public class NLSHintHelper {
 					return true;
 
 				String name= method.getDeclaringClass().getQualifiedName();
-				if (!("java.util.ResourceBundle".equals(name) && "getBundle".equals(method.getName()) && node.arguments().size() > 0) && //old school //$NON-NLS-1$ //$NON-NLS-2$
-						!("org.eclipse.osgi.util.NLS".equals(name) && "initializeMessages".equals(method.getName()) && node.arguments().size() == 2)) //Eclipse style //$NON-NLS-1$ //$NON-NLS-2$
+				if ((!"java.util.ResourceBundle".equals(name) || !"getBundle".equals(method.getName()) || (node.arguments().size() <= 0)) && //old school //$NON-NLS-1$ //$NON-NLS-2$
+						(!"org.eclipse.osgi.util.NLS".equals(name) || !"initializeMessages".equals(method.getName()) || (node.arguments().size() != 2))) //Eclipse style //$NON-NLS-1$ //$NON-NLS-2$
 					return true;
 
 				Expression argument= (Expression)node.arguments().get(0);

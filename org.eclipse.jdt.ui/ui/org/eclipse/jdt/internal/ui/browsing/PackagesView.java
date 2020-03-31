@@ -626,7 +626,9 @@ public class PackagesView extends JavaBrowsingPart{
 	 */
 	@Override
 	boolean isInputResetBy(Object newInput, Object input, IWorkbenchPart part) {
-		return (!(part instanceof ProjectsView || part instanceof PackageExplorerPart)) && super.isInputResetBy(newInput, input, part);
+		return !(part instanceof ProjectsView)
+				&& !(part instanceof PackageExplorerPart)
+				&& super.isInputResetBy(newInput, input, part);
 	}
 
 }

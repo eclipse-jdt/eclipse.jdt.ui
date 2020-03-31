@@ -142,7 +142,7 @@ public class ParameterGuesser {
 		}
 
 		// add 'this'
-		if (currentType != null && !(fEnclosingElement instanceof IMethod && Flags.isStatic(((IMethod) fEnclosingElement).getFlags()))) {
+		if (currentType != null && (!(fEnclosingElement instanceof IMethod) || !Flags.isStatic(((IMethod) fEnclosingElement).getFlags()))) {
 			String fullyQualifiedName= currentType.getFullyQualifiedName('.');
 			if (fullyQualifiedName.equals(expectedType)) {
 				ImageDescriptor desc= new JavaElementImageDescriptor(JavaPluginImages.DESC_FIELD_PUBLIC, JavaElementImageDescriptor.FINAL | JavaElementImageDescriptor.STATIC, JavaElementImageProvider.SMALL_SIZE);

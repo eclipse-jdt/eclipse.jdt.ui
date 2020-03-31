@@ -335,9 +335,9 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 			 final Collection<IType> remove= new ArrayList<>();
 			 final List<IType> list= new ArrayList<>(Arrays.asList(hierarchy.getSubtypes(type)));
 			 for (IType element : list) {
-	            if (element.isInterface())
-	            	remove.add(element);
-            }
+				if (element.isInterface())
+					remove.add(element);
+			}
 			 list.removeAll(remove);
 			 types= list.toArray(new IType[list.size()]);
 		 } else
@@ -474,7 +474,8 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 				for (IMethod requiredMethod : requiredMethods) {
 					if (isStatic && !JdtFlags.isStatic(requiredMethod))
 						continue;
-					if (isRequiredPullableMember(queue, requiredMethod) && !(MethodChecks.isVirtual(requiredMethod) && isAvailableInDestination(requiredMethod, new SubProgressMonitor(sub, 1))))
+					if (isRequiredPullableMember(queue, requiredMethod)
+							&& (!MethodChecks.isVirtual(requiredMethod) || !isAvailableInDestination(requiredMethod, new SubProgressMonitor(sub, 1))))
 						queue.add(requiredMethod);
 				}
 			} finally {
@@ -1120,7 +1121,10 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 			try {
 				sub.beginTask(RefactoringCoreMessages.PullUpRefactoring_checking, units.length * 11);
 				for (ICompilationUnit unit : units) {
-					if (!(source.equals(unit) || target.equals(unit) || deleteMap.containsKey(unit) || affectedMap.containsKey(unit))) {
+					if (!source.equals(unit)
+							&& !target.equals(unit)
+							&& !deleteMap.containsKey(unit)
+							&& !affectedMap.containsKey(unit)) {
 						sub.worked(10);
 						continue;
 					}
@@ -1326,7 +1330,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 	}
 
 	private Map<ICompilationUnit, ArrayList<IType>> createAffectedTypesMap(final IProgressMonitor monitor) throws JavaModelException {
-		if (!(fCreateMethodStubs && getAbstractMethods().length > 0))
+		if (!fCreateMethodStubs || (getAbstractMethods().length <= 0))
 			return new HashMap<>(0);
 		final Set<IType> affected= getAffectedSubTypes(getDestinationTypeHierarchy(monitor), getDestinationType());
 		final Map<ICompilationUnit, ArrayList<IType>> result= new HashMap<>();

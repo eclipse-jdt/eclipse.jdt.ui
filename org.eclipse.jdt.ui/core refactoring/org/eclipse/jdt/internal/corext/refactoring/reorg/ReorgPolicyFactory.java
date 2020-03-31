@@ -2904,7 +2904,7 @@ public final class ReorgPolicyFactory {
 			if (!super.canEnable() || fPackageFragmentRoots.length == 0)
 				return false;
 			for (IPackageFragmentRoot root : fPackageFragmentRoots) {
-				if (!(ReorgUtils.isSourceFolder(root) || root.isArchive() && !root.isExternal()))
+				if (!ReorgUtils.isSourceFolder(root) && (!root.isArchive() || root.isExternal()))
 					return false;
 			}
 			if (ReorgUtils.containsLinkedResources(fPackageFragmentRoots))

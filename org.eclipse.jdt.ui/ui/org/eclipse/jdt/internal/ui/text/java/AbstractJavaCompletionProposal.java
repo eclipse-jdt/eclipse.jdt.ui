@@ -424,7 +424,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 			// PR 47097
 			if (isSmartTrigger) {
 				// avoid inserting redundant semicolon when smart insert is enabled.
-				if (!(trigger == ';' && (replacement.endsWith(";") || document.getChar(referenceOffset) == ';'))) { //$NON-NLS-1$
+				if ((trigger != ';') || (!replacement.endsWith(";") && (document.getChar(referenceOffset) != ';'))) { //$NON-NLS-1$
 					handleSmartTrigger(document, trigger, referenceOffset);
 				}
 			}
@@ -621,7 +621,8 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 
 	private void addConstantOrDefaultValue(StringBuilder buffer, IJavaElement element) throws JavaModelException {
 		int elementType= element.getElementType();
-		if (!(elementType == IJavaElement.FIELD || elementType == IJavaElement.METHOD)) {
+		if ((elementType != IJavaElement.FIELD)
+				&& (elementType != IJavaElement.METHOD)) {
 			return;
 		}
 		ITypeRoot typeRoot= null;
@@ -1327,7 +1328,8 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 			return false;
 
 		ProposalInfo proposalInfo= getProposalInfo();
-		if (!(proposalInfo instanceof MemberProposalInfo || proposalInfo instanceof AnonymousTypeProposalInfo))
+		if (!(proposalInfo instanceof MemberProposalInfo)
+				&& !(proposalInfo instanceof AnonymousTypeProposalInfo))
 			return false;
 
 		CompletionProposal proposal= ((MemberProposalInfo)proposalInfo).fProposal;

@@ -113,6 +113,8 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
+import org.eclipse.jdt.internal.core.manipulation.StubUtility;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.Corext;
 import org.eclipse.jdt.internal.corext.SourceRangeFactory;
@@ -120,6 +122,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRe
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
@@ -164,9 +167,6 @@ import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
-import org.eclipse.jdt.internal.core.manipulation.StubUtility;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 
 public class ChangeSignatureProcessor extends RefactoringProcessor implements IDelegateUpdating {
@@ -306,9 +306,9 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 	 */
 	public void setVisibility(int visibility){
 		Assert.isTrue(	visibility == Modifier.PUBLIC ||
-		            	visibility == Modifier.PROTECTED ||
-		            	visibility == Modifier.NONE ||
-		            	visibility == Modifier.PRIVATE);
+						visibility == Modifier.PROTECTED ||
+						visibility == Modifier.NONE ||
+						visibility == Modifier.PRIVATE);
 		fVisibility= visibility;
 	}
 
@@ -877,11 +877,11 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 	private RefactoringStatus checkVisibilityChanges() throws JavaModelException {
 		if (isVisibilitySameAsInitial())
 			return null;
-	    if (fRippleMethods.length == 1)
-	    	return null;
-	    Assert.isTrue(JdtFlags.getVisibilityCode(fMethod) != Modifier.PRIVATE);
-	    if (fVisibility == Modifier.PRIVATE)
-	    	return RefactoringStatus.createWarningStatus(RefactoringCoreMessages.ChangeSignatureRefactoring_non_virtual);
+		if (fRippleMethods.length == 1)
+			return null;
+		Assert.isTrue(JdtFlags.getVisibilityCode(fMethod) != Modifier.PRIVATE);
+		if (fVisibility == Modifier.PRIVATE)
+			return RefactoringStatus.createWarningStatus(RefactoringCoreMessages.ChangeSignatureRefactoring_non_virtual);
 		return null;
 	}
 
@@ -2346,13 +2346,15 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 				}
 			}
 
-			if (! (areNamesSameAsInitial() && isOrderSameAsInitial())) {
+			if (!areNamesSameAsInitial() || !isOrderSameAsInitial()) {
 				ArrayList<TagElement> paramTags= new ArrayList<>(); // <TagElement>, only not deleted tags with simpleName
 				// delete & rename:
 				for (TagElement tag : tags) {
 					String tagName= tag.getTagName();
 					List<? extends ASTNode> fragments= tag.fragments();
-					if (! (TagElement.TAG_PARAM.equals(tagName) && fragments.size() > 0 && fragments.get(0) instanceof SimpleName))
+					if (!TagElement.TAG_PARAM.equals(tagName)
+							|| fragments.isEmpty()
+							|| !(fragments.get(0) instanceof SimpleName))
 						continue;
 					SimpleName simpleName= (SimpleName) fragments.get(0);
 					String identifier= simpleName.getIdentifier();
@@ -2427,7 +2429,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 				for (TagElement tag : tags) {
 					if (! TagElement.TAG_THROWS.equals(tag.getTagName()) && ! TagElement.TAG_EXCEPTION.equals(tag.getTagName()))
 						continue;
-					if (! (tag.fragments().size() > 0 && tag.fragments().get(0) instanceof Name))
+					if (tag.fragments().isEmpty() || !(tag.fragments().get(0) instanceof Name))
 						continue;
 					boolean tagDeleted= false;
 					Name name= (Name) tag.fragments().get(0);

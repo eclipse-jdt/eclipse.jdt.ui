@@ -219,7 +219,7 @@ public class LocalCorrectionsSubProcessor {
 			return;
 		}
 		while (selectedNode != null && !(selectedNode instanceof Statement) && !(selectedNode instanceof VariableDeclarationExpression)
-				&& !(selectedNode.getLocationInParent() == LambdaExpression.BODY_PROPERTY) && !(selectedNode instanceof MethodReference)) {
+				&& (selectedNode.getLocationInParent() != LambdaExpression.BODY_PROPERTY) && !(selectedNode instanceof MethodReference)) {
 			selectedNode= selectedNode.getParent();
 		}
 		if (selectedNode == null) {
@@ -2296,7 +2296,8 @@ public class LocalCorrectionsSubProcessor {
 		ITypeBinding targetBinding= name.resolveTypeBinding();
 
 		if (targetBinding != null &&
-				!(targetBinding.isInterface() || Modifier.isAbstract(targetBinding.getModifiers()))) {
+				!targetBinding.isInterface()
+				&& !Modifier.isAbstract(targetBinding.getModifiers())) {
 			ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(context.getCompilationUnit(), context.getASTRoot(), targetBinding);
 			IJavaProject proj= targetCU.getJavaProject();
 

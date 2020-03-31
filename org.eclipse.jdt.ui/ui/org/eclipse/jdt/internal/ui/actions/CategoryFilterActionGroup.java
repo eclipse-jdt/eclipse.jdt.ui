@@ -394,7 +394,7 @@ public class CategoryFilterActionGroup extends ActionGroup {
 		final HashSet<String> categories= new HashSet<>();
 		final HashSet<String> foundLRUCategories= new HashSet<>();
 		final boolean hasUncategorizedMember[]= new boolean[] {false};
-		for (int i= 0; i < fInputElement.length && !(hasUncategorizedMember[0] && foundLRUCategories.size() >= MAX_NUMBER_OF_CATEGORIES_IN_MENU); i++) {
+		for (int i= 0; i < fInputElement.length && (!hasUncategorizedMember[0] || (foundLRUCategories.size() < MAX_NUMBER_OF_CATEGORIES_IN_MENU)); i++) {
 			collectCategories(fInputElement[i], new IResultCollector() {
 				@Override
 				public boolean accept(String[] cats) {

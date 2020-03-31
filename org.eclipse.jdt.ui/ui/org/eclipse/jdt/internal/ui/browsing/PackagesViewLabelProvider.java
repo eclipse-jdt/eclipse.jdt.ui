@@ -151,7 +151,7 @@ class PackagesViewLabelProvider extends AppearanceAwareLabelProvider {
 			return super.getText(fragment);
 		}
 		IResource res= fragment.getResource();
-		if(res != null && !(res.getType() == IResource.FILE))
+		if(res != null && (res.getType() != IResource.FILE))
 			return decorateText(res.getName(), fragment);
 		else
 			return decorateText(calculateName(fragment), fragment);

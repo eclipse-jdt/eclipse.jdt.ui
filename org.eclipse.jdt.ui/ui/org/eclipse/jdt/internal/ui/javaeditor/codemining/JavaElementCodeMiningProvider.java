@@ -137,7 +137,7 @@ public class JavaElementCodeMiningProvider extends AbstractCodeMiningProvider {
 		}
 
 		// Don't worth to loop if none of mining types are requested
-		if (!(showReferences || showImplementations)) {
+		if (!showReferences && !showImplementations) {
 			return;
 		}
 
@@ -147,7 +147,8 @@ public class JavaElementCodeMiningProvider extends AbstractCodeMiningProvider {
 			}
 			if (element.getElementType() == IJavaElement.TYPE) {
 				collectMinings(unit, textEditor, ((IType) element).getChildren(), minings, viewer, monitor);
-			} else if (!(element.getElementType() == IJavaElement.METHOD || element.getElementType() == IJavaElement.FIELD)) {
+			} else if ((element.getElementType() != IJavaElement.METHOD)
+					&& (element.getElementType() != IJavaElement.FIELD)) {
 				continue;
 			}
 			if (showReferences) {

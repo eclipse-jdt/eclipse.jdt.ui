@@ -251,7 +251,8 @@ public class VariableBlock {
 			entry= newEntry;
 			fHasChanges= true;
 		} else {
-			boolean hasChanges= !(entry.getName().equals(newEntry.getName()) && entry.getPath().equals(newEntry.getPath()));
+			boolean hasChanges= !entry.getName().equals(newEntry.getName())
+					|| !entry.getPath().equals(newEntry.getPath());
 			if (hasChanges) {
 				fHasChanges= true;
 				entry.setName(newEntry.getName());

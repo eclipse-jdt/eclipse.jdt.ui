@@ -290,8 +290,11 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 			return;
 		if (expressionCv instanceof ImmutableTypeVariable2)
 			return;
-		if (! (expressionCv instanceof TypeVariable2 || expressionCv instanceof IndependentTypeVariable2 || expressionCv instanceof CollectionElementVariable2)
-				&& fTCModel.getElementVariables(expressionCv).isEmpty() && fTCModel.getArrayElementVariable(expressionCv) == null)
+		if (!(expressionCv instanceof TypeVariable2)
+				&& !(expressionCv instanceof IndependentTypeVariable2)
+				&& !(expressionCv instanceof CollectionElementVariable2)
+				&& fTCModel.getElementVariables(expressionCv).isEmpty()
+				&& fTCModel.getArrayElementVariable(expressionCv) == null)
 			return;
 
 		fTCModel.createAssignmentElementConstraints(typeCv, expressionCv);

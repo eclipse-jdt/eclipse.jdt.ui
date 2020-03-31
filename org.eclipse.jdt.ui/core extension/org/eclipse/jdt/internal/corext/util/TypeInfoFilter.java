@@ -152,13 +152,16 @@ public class TypeInfoFilter {
 	}
 
 	public boolean matchesCachedResult(TypeNameMatch type) {
-		if (!(matchesPackage(type) && matchesFilterExtension(type)))
+		if (!matchesPackage(type) || !matchesFilterExtension(type))
 			return false;
 		return matchesName(type);
 	}
 
 	public boolean matchesHistoryElement(TypeNameMatch type) {
-		if (!(matchesPackage(type) && matchesModifiers(type) && matchesScope(type) && matchesFilterExtension(type)))
+		if (!matchesPackage(type)
+				|| !matchesModifiers(type)
+				|| !matchesScope(type)
+				|| !matchesFilterExtension(type))
 			return false;
 		return matchesName(type);
 	}

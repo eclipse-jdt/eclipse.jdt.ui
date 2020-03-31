@@ -259,11 +259,11 @@ public class ExtractMethodRefactoring extends Refactoring {
 		fVisibility= -1;
 	}
 
-    public ExtractMethodRefactoring(JavaRefactoringArguments arguments, RefactoringStatus status) {
+	public ExtractMethodRefactoring(JavaRefactoringArguments arguments, RefactoringStatus status) {
    		this((ICompilationUnit) null, 0, 0);
    		RefactoringStatus initializeStatus= initialize(arguments);
    		status.merge(initializeStatus);
-    }
+	}
 
 	/**
 	 * Creates a new extract method refactoring
@@ -1095,9 +1095,10 @@ public class ExtractMethodRefactoring extends Refactoring {
 		int modifiers= fVisibility;
 		BodyDeclaration enclosingBodyDeclaration= fAnalyzer.getEnclosingBodyDeclaration();
 		boolean isDestinationInterface= isDestinationInterface();
-		if (isDestinationInterface && !(enclosingBodyDeclaration instanceof MethodDeclaration &&
-				enclosingBodyDeclaration.getParent() == fDestination &&
-				Modifier.isPublic(enclosingBodyDeclaration.getModifiers()))) {
+		if (isDestinationInterface
+				&& ((!(enclosingBodyDeclaration instanceof MethodDeclaration)
+						|| (enclosingBodyDeclaration.getParent() != fDestination))
+						|| !Modifier.isPublic(enclosingBodyDeclaration.getModifiers()))) {
 			modifiers= Modifier.NONE;
 		}
 

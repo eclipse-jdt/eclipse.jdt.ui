@@ -205,10 +205,10 @@ public class CompilationUnitChangeNode extends TextEditChangeNode {
 			int rLength= edit.getLength();
 			int rEnd= rOffset + rLength - 1;
 			if (rLength == 0) {
-				if (!(sOffset < rOffset && rOffset <= sEnd))
+				if ((sOffset >= rOffset) || (rOffset > sEnd))
 					return false;
 			} else {
-				if (!(sOffset <= rOffset && rEnd <= sEnd))
+				if ((sOffset > rOffset) || (rEnd > sEnd))
 					return false;
 			}
 		}

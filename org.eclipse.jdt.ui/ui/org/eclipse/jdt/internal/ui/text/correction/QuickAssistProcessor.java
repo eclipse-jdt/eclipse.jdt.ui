@@ -873,7 +873,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				}
 			} else {
 				Expression expr= ((ExpressionMethodReference) methodReference).getExpression();
-				if (!(expr instanceof ThisExpression && methodReference.typeArguments().size() == 0)) {
+				if (!(expr instanceof ThisExpression) || (methodReference.typeArguments().size() != 0)) {
 					methodInvocation.setExpression((Expression) rewrite.createCopyTarget(expr));
 				}
 			}
@@ -1131,8 +1131,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (exprBody == null || !isValidLambdaReferenceToMethod(exprBody))
 			return false;
 
-		if (!(ASTNodes.isParent(exprBody, coveringNode)
-				|| representsDefiningNode(coveringNode, exprBody))) {
+		if (!ASTNodes.isParent(exprBody, coveringNode)
+				&& !representsDefiningNode(coveringNode, exprBody)) {
 			return false;
 		}
 
@@ -1187,9 +1187,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				if (lambdaMethodBinding == null)
 					return false;
 				ITypeBinding firstParamType= lambdaMethodBinding.getParameterTypes()[0];
-				if (!((Bindings.equals(invocationTypeBinding, firstParamType) || Bindings.isSuperType(invocationTypeBinding, firstParamType))
-						&& JdtASTMatcher.doNodesMatch(lambdaParameters.get(0), invocationExpr)
-						&& matches(lambdaParameters.subList(1, lambdaParameters.size()), methodInvocation.arguments())))
+				if ((!Bindings.equals(invocationTypeBinding, firstParamType) && !Bindings.isSuperType(invocationTypeBinding, firstParamType))
+						|| !JdtASTMatcher.doNodesMatch(lambdaParameters.get(0), invocationExpr)
+						|| !matches(lambdaParameters.subList(1, lambdaParameters.size()), methodInvocation.arguments()))
 					return false;
 			} else if (!matches(lambdaParameters, methodInvocation.arguments())) {
 				return false;
@@ -2120,7 +2120,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	private static boolean getConvertStringConcatenationProposals(IInvocationContext context, Collection<ICommandAccess> resultingCollections) {
 		ASTNode node= context.getCoveringNode();
 		BodyDeclaration parentDecl= ASTResolving.findParentBodyDeclaration(node);
-		if (!(parentDecl instanceof MethodDeclaration || parentDecl instanceof Initializer))
+		if (!(parentDecl instanceof MethodDeclaration) && !(parentDecl instanceof Initializer))
 			return false;
 
 		AST ast= node.getAST();
@@ -2694,7 +2694,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					UnionType unionType= (UnionType) type;
 					List<Type> types= unionType.types();
 					for (Type elementType : types) {
-						if (!(elementType instanceof SimpleType || elementType instanceof NameQualifiedType))
+						if (!(elementType instanceof SimpleType)
+								&& !(elementType instanceof NameQualifiedType))
 							return false;
 						addExceptionToThrows(ast, methodDeclaration, rewrite, elementType);
 					}
@@ -3751,7 +3752,10 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		}
 		Expression right= arguments.get(0);
 		ITypeBinding binding = right.resolveTypeBinding();
-		if (binding != null && !(binding.isClass() || binding.isInterface() || binding.isEnum())) { //overloaded equals w/ non-class/interface argument or null
+		if (binding != null
+				&& !binding.isClass()
+				&& !binding.isInterface()
+				&& !binding.isEnum()) { //overloaded equals w/ non-class/interface argument or null
 			return false;
 		}
 		if (resultingCollections == null) {
@@ -4801,7 +4805,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		AST ast= coveringNode.getAST();
 		// Only continue if AST has preview enabled and selected node, or its parent is a SwitchCase
 		if (!ASTHelper.isSwitchCaseExpressionsSupportedInAST(ast) ||
-				!(coveringNode instanceof SwitchCase || coveringNode.getParent() instanceof SwitchCase)) {
+				(!(coveringNode instanceof SwitchCase) && !(coveringNode.getParent() instanceof SwitchCase))) {
 			return false;
 		}
 

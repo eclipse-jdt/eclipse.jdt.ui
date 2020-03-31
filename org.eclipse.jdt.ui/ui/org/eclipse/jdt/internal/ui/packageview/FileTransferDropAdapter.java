@@ -83,7 +83,7 @@ public class FileTransferDropAdapter extends JdtViewerDropAdapter implements Tra
 		boolean isPackageFragmentRoot= target instanceof IPackageFragmentRoot;
 		boolean isContainer= target instanceof IContainer;
 
-		if (!(isPackageFragment || isJavaProject || isPackageFragmentRoot || isContainer))
+		if (!isPackageFragment && !isJavaProject && !isPackageFragmentRoot && !isContainer)
 			return DND.DROP_NONE;
 
 		if (isContainer) {

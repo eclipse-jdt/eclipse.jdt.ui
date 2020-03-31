@@ -2168,7 +2168,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * @param checkIfOutlinePageActive <code>true</code> if check for active outline page needs to be done
 	 */
 	protected void synchronizeOutlinePage(ISourceReference element, boolean checkIfOutlinePageActive) {
-		if (fOutlinePage != null && element != null && !(checkIfOutlinePageActive && isJavaOutlinePageActive())) {
+		if (fOutlinePage != null && element != null && (!checkIfOutlinePageActive || !isJavaOutlinePageActive())) {
 			fOutlinePage.select(element);
 		}
 	}
@@ -3223,7 +3223,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 		private boolean isCanceled(IProgressMonitor progressMonitor) {
 			return fCanceled || progressMonitor.isCanceled()
-				||  fPostSelectionValidator != null && !(fPostSelectionValidator.isValid(fSelection) || fForcedMarkOccurrencesSelection == fSelection)
+				||  fPostSelectionValidator != null && (!fPostSelectionValidator.isValid(fSelection) && (fForcedMarkOccurrencesSelection != fSelection))
 				|| LinkedModeModel.hasInstalledModel(fDocument);
 		}
 

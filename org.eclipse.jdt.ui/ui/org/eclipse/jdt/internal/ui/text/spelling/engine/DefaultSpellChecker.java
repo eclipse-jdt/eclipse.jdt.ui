@@ -239,15 +239,15 @@ public class DefaultSpellChecker implements ISpellChecker {
 					starts= iterator.startsSentence();
 					if (!isCorrect(word)) {
 
-					    boolean isMixed=  isMixedCase(word, true);
-					    boolean isUpper= isUpperCase(word);
-					    boolean isDigits= isDigits(word);
-					    boolean isURL= isUrl(word);
+						boolean isMixed=  isMixedCase(word, true);
+						boolean isUpper= isUpperCase(word);
+						boolean isDigits= isDigits(word);
+						boolean isURL= isUrl(word);
 
-					    if ( !ignoreMixed && isMixed || !ignoreUpper && isUpper || !ignoreDigits && isDigits || !ignoreURLS && isURL || !(isMixed || isUpper || isDigits || isURL)) {
-					        listener.handle(new SpellEvent(this, word, iterator.getBegin(), iterator.getEnd(), starts, false));
-					        problemCount++;
-					    }
+						if ( !ignoreMixed && isMixed || !ignoreUpper && isUpper || !ignoreDigits && isDigits || !ignoreURLS && isURL || (!isMixed && !isUpper && !isDigits && !isURL)) {
+							listener.handle(new SpellEvent(this, word, iterator.getBegin(), iterator.getEnd(), starts, false));
+							problemCount++;
+						}
 
 					} else {
 

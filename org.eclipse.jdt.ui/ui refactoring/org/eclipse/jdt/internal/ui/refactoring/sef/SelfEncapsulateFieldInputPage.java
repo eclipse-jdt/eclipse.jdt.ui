@@ -265,7 +265,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 	}
 
 	private void updateEnablements() {
-		boolean enable=!(fRefactoring.isUsingLocalSetter()&&fRefactoring.isUsingLocalGetter());
+		boolean enable= !fRefactoring.isUsingLocalSetter() || !fRefactoring.isUsingLocalGetter();
 		for (Control control : fEnablements) {
 			control.setEnabled(enable);
 		}

@@ -333,7 +333,8 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 					ASTNode rawReference= node.getParent();
 					if (isRawTypeReference(rawReference)) {
 						ASTNode parent= rawReference.getParent();
-						if (!(parent instanceof ArrayType || parent instanceof ParameterizedType))
+						if (!(parent instanceof ArrayType)
+								&& !(parent instanceof ParameterizedType))
 							result.add((SimpleType) rawReference);
 					}
 				} else if (node instanceof MethodInvocation) {

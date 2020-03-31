@@ -123,7 +123,8 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 					return createMessageContent(composite, Messages.format(PreferencesMessages.SourceAttachmentPropertyPage_read_only, containerName), fRoot);
 				}
 				IStatus attributeStatus= initializer.getAttributeStatus(containerPath, jproject, IClasspathAttribute.SOURCE_ATTACHMENT_ENCODING);
-				canEditEncoding= !(attributeStatus.getCode() == ClasspathContainerInitializer.ATTRIBUTE_NOT_SUPPORTED || attributeStatus.getCode() == ClasspathContainerInitializer.ATTRIBUTE_READ_ONLY);
+				canEditEncoding= (attributeStatus.getCode() != ClasspathContainerInitializer.ATTRIBUTE_NOT_SUPPORTED)
+						&& (attributeStatus.getCode() != ClasspathContainerInitializer.ATTRIBUTE_READ_ONLY);
 
 				entry= JavaModelUtil.findEntryInContainer(container, fRoot.getPath());
 			}

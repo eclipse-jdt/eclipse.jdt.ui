@@ -781,7 +781,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		boolean canEditEncoding= false;
 		for (CPListElementAttribute attribute : selElement.getAllAttributes()) {
 			if (CPListElement.SOURCE_ATTACHMENT_ENCODING.equals(attribute.getKey())) {
-				canEditEncoding= !(attribute.isNonModifiable() || attribute.isNotSupported());
+				canEditEncoding= !attribute.isNonModifiable() && !attribute.isNotSupported();
 			}
 		}
 		if (key.equals(CPListElement.SOURCEATTACHMENT)) {
@@ -1410,10 +1410,10 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		}
 	}
 
-    @Override
+	@Override
 	public void setFocus() {
-    	fLibrariesList.setFocus();
-    }
+		fLibrariesList.setFocus();
+	}
 
 	public void selectRootNode(boolean modulePath) {
 		selectRootNode(fLibrariesList, modulePath);

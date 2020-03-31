@@ -95,7 +95,7 @@ public class ParametricStructureComputer {
 	private void dumpContainerStructure() {
 		System.out.println("\n*** Container Structure: ***\n"); //$NON-NLS-1$
 		for (ConstraintVariable2 v : fAllConstraintVariables) {
-			if (elemStructure(v) != null && !(elemStructure(v) == ParametricStructure.NONE))
+			if (elemStructure(v) != null && (elemStructure(v) != ParametricStructure.NONE))
 				System.out.println("elemStructure(" + v.toString() + ") = " + elemStructure(v)); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		System.out.println();
@@ -287,8 +287,8 @@ public class ParametricStructureComputer {
 			return true;
 		}
 
-		boolean paramStructured= !(param1 == ParametricStructure.NONE);
-		boolean otherStructured= !(otherStructure == ParametricStructure.NONE);
+		boolean paramStructured= param1 != ParametricStructure.NONE;
+		boolean otherStructured= otherStructure != ParametricStructure.NONE;
 
 		if (paramStructured && otherStructured) { // both parametric
 			// rmf 12/15/2004 - handle cases where different parametric types (e.g.
@@ -349,7 +349,7 @@ public class ParametricStructureComputer {
 			return; //TODO: ParametricStructure should use type variable keys instead of index
 
 		if (elemContainerStructure == v1Structure || containsSubStructure(v1Structure, elemContainerStructure)) { // avoid creating cyclic structure
-			if (!(elemStructure(elemVar) == ParametricStructure.NONE))
+			if (elemStructure(elemVar) != ParametricStructure.NONE)
 				setStructureAndPush(elemVar, ParametricStructure.NONE);
 			if (elemContainerStructure.getParameters()[parmIdx] == null) {
 				elemContainerStructure.getParameters()[parmIdx]= ParametricStructure.NONE;

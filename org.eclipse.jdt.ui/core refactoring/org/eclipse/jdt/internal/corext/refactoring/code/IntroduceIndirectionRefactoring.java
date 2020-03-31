@@ -264,11 +264,11 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 		initialize(0, 0);
 	}
 
-    public IntroduceIndirectionRefactoring(JavaRefactoringArguments arguments, RefactoringStatus status) {
+	public IntroduceIndirectionRefactoring(JavaRefactoringArguments arguments, RefactoringStatus status) {
    		this((ICompilationUnit) null, 0, 0);
    		RefactoringStatus initializeStatus= initialize(arguments);
    		status.merge(initializeStatus);
-    }
+	}
 
 	private void initialize(int offset, int length) {
 		fSelectionStart= offset;
@@ -351,7 +351,8 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 				return RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.IntroduceIndirectionRefactoring_type_does_not_exist_error, BasicElementLabels.getJavaElementName(fullyQualifiedTypeName)));
 			if (target.isAnnotation())
 				return RefactoringStatus.createErrorStatus(RefactoringCoreMessages.IntroduceIndirectionRefactoring_cannot_create_in_annotation);
-			if (target.isInterface() && !(JavaModelUtil.is18OrHigher(target.getJavaProject()) && JavaModelUtil.is18OrHigher(getProject())))
+			if (target.isInterface()
+					&& (!JavaModelUtil.is18OrHigher(target.getJavaProject()) || !JavaModelUtil.is18OrHigher(getProject())))
 				return RefactoringStatus.createErrorStatus(RefactoringCoreMessages.IntroduceIndirectionRefactoring_cannot_create_on_interface);
 		} catch (JavaModelException e) {
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceIndirectionRefactoring_unable_determine_declaring_type);

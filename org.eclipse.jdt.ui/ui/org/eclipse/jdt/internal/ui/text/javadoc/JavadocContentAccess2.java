@@ -522,7 +522,9 @@ public class JavadocContentAccess2 {
 		if (element instanceof IPackageDeclaration) {
 			return getHTMLContent((IPackageDeclaration) element);
 		}
-		if (!(element instanceof IMember || element instanceof ITypeParameter || (element instanceof ILocalVariable && (((ILocalVariable) element).isParameter())))) {
+		if (!(element instanceof IMember)
+				&& !(element instanceof ITypeParameter)
+				&& (!(element instanceof ILocalVariable) || !(((ILocalVariable) element).isParameter()))) {
 			return null;
 		}
 		String sourceJavadoc= getHTMLContentFromSource(element);
@@ -1967,7 +1969,7 @@ public class JavadocContentAccess2 {
 					JavaPlugin.log(e);
 				}
 				fBuf.append("'>"); //$NON-NLS-1$
-				if (fs > 1 && !(fs == 2 && isWhitespaceTextElement(fragments.get(1)))) {
+				if (fs > 1 && ((fs != 2) || !isWhitespaceTextElement(fragments.get(1)))) {
 					handleContentElements(fragments.subList(1, fs), true);
 				} else {
 					fBuf.append(refTypeName);

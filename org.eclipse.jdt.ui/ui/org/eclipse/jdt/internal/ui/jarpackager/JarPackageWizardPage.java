@@ -406,13 +406,13 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 		SWTUtil.setAccessibilityText(fInputGroup.getTable(), JarPackagerMessages.JarPackageWizardPage_table_accessibility_message);
 
 		ICheckStateListener listener = new ICheckStateListener() {
-            @Override
+			@Override
 			public void checkStateChanged(CheckStateChangedEvent event) {
-                update();
-            }
-        };
+				update();
+			}
+		};
 
-        fInputGroup.addCheckStateListener(listener);
+		fInputGroup.addCheckStateListener(listener);
 	}
 
 	/**
@@ -571,7 +571,7 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 	 */
 	@Override
 	protected boolean validateSourceGroup() {
-		if (!(fExportClassFilesCheckbox.getSelection() || fExportOutputFoldersCheckbox.getSelection() || fExportJavaFilesCheckbox.getSelection())) {
+		if (!fExportClassFilesCheckbox.getSelection() && !fExportOutputFoldersCheckbox.getSelection() && !fExportJavaFilesCheckbox.getSelection()) {
 			setErrorMessage(JarPackagerMessages.JarPackageWizardPage_error_noExportTypeChecked);
 			return false;
 		}
@@ -764,7 +764,7 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 				int type= je.getElementType();
 				if (type == IJavaElement.JAVA_PROJECT || type == IJavaElement.PACKAGE_FRAGMENT || type == IJavaElement.PACKAGE_FRAGMENT_ROOT) {
 					// exclude default package since it is covered by the root
-					if (!(type == IJavaElement.PACKAGE_FRAGMENT && ((IPackageFragment)element).isDefaultPackage())) {
+					if ((type != IJavaElement.PACKAGE_FRAGMENT) || !((IPackageFragment)element).isDefaultPackage()) {
 						Object resource;
 						try {
 							resource= je.getCorrespondingResource();

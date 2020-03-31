@@ -62,7 +62,9 @@ public class JavadocContentAccess {
 	 */
 	public static Reader getContentReader(IMember member, boolean allowInherited) throws JavaModelException {
 		Reader contentReader= internalGetContentReader(member);
-		if (contentReader != null || !(allowInherited && (member.getElementType() == IJavaElement.METHOD)))
+		if (contentReader != null
+				|| !allowInherited
+				|| (member.getElementType() != IJavaElement.METHOD))
 			return contentReader;
 		return findDocInHierarchy((IMethod) member, false, false);
 	}

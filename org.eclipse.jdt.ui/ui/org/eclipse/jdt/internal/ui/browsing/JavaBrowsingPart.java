@@ -1060,9 +1060,9 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, IView
 		return (newInput == null || !newInput.equals(oldInput))
 			&& (elementToSelect == null
 				|| oldInput == null
-				|| (!((elementToSelect instanceof IPackageDeclaration)
-					&& (elementToSelect.getParent().equals(oldInput.getParent()))
-					&& (!isAncestorOf(getViewPartInput(), elementToSelect)))));
+				|| !(elementToSelect instanceof IPackageDeclaration)
+				|| !(elementToSelect.getParent().equals(oldInput.getParent()))
+				|| isAncestorOf(getViewPartInput(), elementToSelect));
 	}
 
 	/**

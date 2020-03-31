@@ -69,7 +69,8 @@ public class CutAction extends SelectionDispatchAction{
 	private static boolean containsOnlyElementsInsideCompilationUnits(IStructuredSelection selection) {
 		for (Iterator<?> iter = selection.iterator(); iter.hasNext();) {
 			Object object= iter.next();
-			if (! (object instanceof IJavaElement && ReorgUtils.isInsideCompilationUnit((IJavaElement)object)))
+			if (!(object instanceof IJavaElement)
+					|| !ReorgUtils.isInsideCompilationUnit((IJavaElement)object))
 				return false;
 		}
 		return true;

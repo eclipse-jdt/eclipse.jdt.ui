@@ -77,7 +77,7 @@ public class AddFolderToBuildpathAction extends BuildpathModifierAction {
 
 	public AddFolderToBuildpathAction(IRunnableContext context, ISetSelectionTarget selectionTarget) {
 		this(null, selectionTarget, context);
-    }
+	}
 
 	private AddFolderToBuildpathAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, IRunnableContext context) {
 		super(site, selectionTarget, BuildpathModifierAction.ADD_SEL_SF_TO_BP);
@@ -135,7 +135,7 @@ public class AddFolderToBuildpathAction extends BuildpathModifierAction {
 			final IPath newDefaultOutputLocation;
 			final boolean removeOldClassFiles;
 			IPath projPath= project.getProject().getFullPath();
-			if (!(getSelectedElements().size() == 1 && getSelectedElements().get(0) instanceof IJavaProject) && //if only the project should be added, then the query does not need to be executed
+			if (((getSelectedElements().size() != 1) || !(getSelectedElements().get(0) instanceof IJavaProject)) && //if only the project should be added, then the query does not need to be executed
 					(outputLocation.equals(projPath) || defaultOutputLocation.segmentCount() == 1)) {
 
 
@@ -215,7 +215,7 @@ public class AddFolderToBuildpathAction extends BuildpathModifierAction {
 				}
 			}
 
-        	BuildpathDelta delta= new BuildpathDelta(getToolTipText());
+			BuildpathDelta delta= new BuildpathDelta(getToolTipText());
 
 			if (!project.getOutputLocation().equals(outputLocation)) {
 				project.setOutputLocation(outputLocation, new SubProgressMonitor(monitor, 1));
@@ -248,8 +248,8 @@ public class AddFolderToBuildpathAction extends BuildpathModifierAction {
 
 			ClasspathModifier.commitClassPath(existingEntries, project, new SubProgressMonitor(monitor, 1));
 
-        	delta.setNewEntries(existingEntries.toArray(new CPListElement[existingEntries.size()]));
-        	informListeners(delta);
+			delta.setNewEntries(existingEntries.toArray(new CPListElement[existingEntries.size()]));
+			informListeners(delta);
 
 			List<IJavaElement> result= new ArrayList<>();
 			for (CPListElement newEntrie : newEntries) {
@@ -282,10 +282,10 @@ public class AddFolderToBuildpathAction extends BuildpathModifierAction {
 				} else if (element instanceof IPackageFragment) {
 					IPackageFragment fragment= (IPackageFragment)element;
 					if (ClasspathModifier.isDefaultFragment(fragment))
-	                    return false;
+						return false;
 
 					if (ClasspathModifier.isInExternalOrArchive(fragment))
-	                    return false;
+						return false;
 					IResource res;
 					if ((res= fragment.getResource()) != null && res.isVirtual())
 						return false;

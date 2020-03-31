@@ -187,7 +187,7 @@ public class ModuleSelectionDialog extends TrayDialog {
 		}
 		// also search for automatic modules:
 		for (IProject project : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
-			if (!(project.isOpen() && project.hasNature(JavaCore.NATURE_ID))) continue;
+			if (!project.isOpen() || !project.hasNature(JavaCore.NATURE_ID)) continue;
 			IJavaProject jPrj= JavaCore.create(project);
 			if (jPrj.getModuleDescription() == null) {
 				checkAddModule(result, JavaCore.getAutomaticModuleDescription(jPrj));

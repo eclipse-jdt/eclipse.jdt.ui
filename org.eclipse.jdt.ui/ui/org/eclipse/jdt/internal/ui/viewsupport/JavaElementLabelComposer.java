@@ -374,8 +374,10 @@ public class JavaElementLabelComposer extends JavaElementLabelComposerCore {
 				if (pkgName.startsWith(abbrPrefix)) {
 					int abbrPrefixLength= abbrPrefix.length();
 					int pkgLength= pkgName.length();
-					if (!(pkgLength == abbrPrefixLength || pkgName.charAt(abbrPrefixLength) == '.'))
+					if ((pkgLength != abbrPrefixLength)
+							&& (pkgName.charAt(abbrPrefixLength) != '.')) {
 						continue;
+					}
 
 					fBuffer.append(abbr.getAbbreviation());
 

@@ -161,7 +161,7 @@ public class BestMatchHover extends AbstractJavaEditorTextHover {
 
 			if (hover instanceof ITextHoverExtension2) {
 				Object info= ((ITextHoverExtension2) hover).getHoverInfo2(textViewer, hoverRegion);
-				if (info != null && !(forInformationProvider && getInformationPresenterControlCreator(hover) == null)) {
+				if (info != null && (!forInformationProvider || (getInformationPresenterControlCreator(hover) != null))) {
 					fBestHover= hover;
 					return info;
 				}

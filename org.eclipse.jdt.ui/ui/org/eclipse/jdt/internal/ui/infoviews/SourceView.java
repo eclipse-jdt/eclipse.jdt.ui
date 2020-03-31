@@ -333,7 +333,7 @@ public class SourceView extends AbstractInfoView {
 	 */
 	private IStructuredSelection convertToJavaElementSelection(ISelection selection) {
 
-		if (!(selection instanceof ITextSelection && fCurrentViewInput instanceof ISourceReference))
+		if (!(selection instanceof ITextSelection) || !(fCurrentViewInput instanceof ISourceReference))
 			return StructuredSelection.EMPTY;
 
 		ITextSelection textSelection= (ITextSelection)selection;

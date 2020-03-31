@@ -305,7 +305,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 	private static boolean isLastStatementInEnclosingMethodOrLambda(Statement statement) {
 		ASTNode currentStructure= statement;
 		ASTNode currentParent= statement.getParent();
-		while (!(currentParent instanceof MethodDeclaration || currentParent instanceof LambdaExpression)) {
+		while (!(currentParent instanceof MethodDeclaration) && !(currentParent instanceof LambdaExpression)) {
 			// should not be in a loop
 			if (currentParent instanceof ForStatement || currentParent instanceof EnhancedForStatement
 					|| currentParent instanceof WhileStatement || currentParent instanceof DoStatement) {
@@ -1636,7 +1636,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			return false;
 
 		PrefixExpression prefix= (PrefixExpression) parenthesis.getParent();
-		if (!(prefix.getOperator() == PrefixExpression.Operator.NOT))
+		if (prefix.getOperator() != PrefixExpression.Operator.NOT)
 			return false;
 
 		return true;
@@ -1659,14 +1659,14 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 
 
 		// only + is valid for combining strings
-		if (!(infixExpression.getOperator().equals(InfixExpression.Operator.PLUS))) {
+		if (!infixExpression.getOperator().equals(InfixExpression.Operator.PLUS)) {
 			return false;
 		}
 
 		// all expressions must be strings
 		Expression leftOperand= infixExpression.getLeftOperand();
 		Expression rightOperand= infixExpression.getRightOperand();
-		if (!(leftOperand instanceof StringLiteral && rightOperand instanceof StringLiteral)) {
+		if (!(leftOperand instanceof StringLiteral) || !(rightOperand instanceof StringLiteral)) {
 			return false;
 		}
 
@@ -2716,7 +2716,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 					} else if (currentExpression instanceof InfixExpression) {
 						InfixExpression infixExpression= (InfixExpression) currentExpression;
 						Operator operator= infixExpression.getOperator();
-						if (!(operator.equals(InfixExpression.Operator.CONDITIONAL_OR) || operator.equals(InfixExpression.Operator.EQUALS)))
+						if (!operator.equals(InfixExpression.Operator.CONDITIONAL_OR)
+								&& !operator.equals(InfixExpression.Operator.EQUALS))
 							return false;
 
 						leftOperand= infixExpression.getLeftOperand();

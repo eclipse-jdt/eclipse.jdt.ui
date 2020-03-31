@@ -255,7 +255,7 @@ public class StubCreator {
 					for (IMethod superMethod : superMethods) {
 						if (superMethod.isConstructor()
 							&& !Flags.isPrivate(superMethod.getFlags())
-							&& !(Flags.isPackageDefault(superMethod.getFlags()) && !declaringType.getPackageFragment().equals(superclass.getPackageFragment()))
+							&& (!Flags.isPackageDefault(superMethod.getFlags()) || declaringType.getPackageFragment().equals(superclass.getPackageFragment()))
 							) {
 							int paramCount= superMethod.getNumberOfParameters();
 							if (paramCount == 0) {

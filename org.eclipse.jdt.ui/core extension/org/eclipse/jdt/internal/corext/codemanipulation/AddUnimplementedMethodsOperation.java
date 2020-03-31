@@ -108,7 +108,8 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 			throw new IllegalArgumentException("The type must not be null"); //$NON-NLS-1$
 		}
 		ASTNode node= astRoot.findDeclaringNode(type);
-		if (!(node instanceof AnonymousClassDeclaration || node instanceof AbstractTypeDeclaration)) {
+		if (!(node instanceof AnonymousClassDeclaration)
+				&& !(node instanceof AbstractTypeDeclaration)) {
 			throw new IllegalArgumentException("type has to map to a type declaration in the AST"); //$NON-NLS-1$
 		}
 

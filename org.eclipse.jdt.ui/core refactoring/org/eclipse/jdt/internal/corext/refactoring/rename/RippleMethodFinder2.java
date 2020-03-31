@@ -414,7 +414,7 @@ public class RippleMethodFinder2 {
 
 				if (isVisible) {
 					boolean isBinary= method.isBinary();
-					if (fBinaryRefs != null || ! (fExcludeBinaries && isBinary)) {
+					if (fBinaryRefs != null || !fExcludeBinaries || !isBinary) {
 						fDeclarations.add(method);
 					}
 					if (isBinary && fBinaryRefs != null) {

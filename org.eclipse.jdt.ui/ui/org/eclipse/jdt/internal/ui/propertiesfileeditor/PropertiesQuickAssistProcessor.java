@@ -121,7 +121,8 @@ public class PropertiesQuickAssistProcessor {
 				return false;
 
 			String type= partition.getType();
-			if (!(type.equals(IPropertiesFilePartitions.PROPERTY_VALUE) || type.equals(IDocument.DEFAULT_CONTENT_TYPE))) {
+			if (!type.equals(IPropertiesFilePartitions.PROPERTY_VALUE)
+					&& !type.equals(IDocument.DEFAULT_CONTENT_TYPE)) {
 				return false;
 			}
 			proposalOffset= partition.getOffset();

@@ -213,7 +213,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 	boolean isValidDestination(ASTNode node) {
 		boolean isInterface= node instanceof TypeDeclaration && ((TypeDeclaration) node).isInterface();
 		return !(node instanceof AnnotationTypeDeclaration) &&
-				!(isInterface && !JavaModelUtil.is18OrHigher(fCUnit.getJavaProject()));
+				(!isInterface || JavaModelUtil.is18OrHigher(fCUnit.getJavaProject()));
 	}
 
 	public RefactoringStatus checkInitialConditions(ImportRewrite rewriter) {
@@ -922,7 +922,8 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 		int nodeStart= body.getStartPosition();
 		int nodeExclusiveEnd= nodeStart + body.getLength();
 		// if selection node inside of the method body ignore method
-		if (!(nodeStart < selection.getOffset() && selection.getExclusiveEnd() < nodeExclusiveEnd))
+		if ((nodeStart >= selection.getOffset())
+				|| (selection.getExclusiveEnd() >= nodeExclusiveEnd))
 			return false;
 		return super.visit(node);
 	}

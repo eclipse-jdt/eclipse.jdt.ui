@@ -60,7 +60,9 @@ public abstract class RefactoringModifications {
 	}
 
 	protected void createIncludingParents(IContainer container) {
-		while (container != null && !(container.exists() || getResourceModifications().willExist(container))) {
+		while (container != null
+				&& !container.exists()
+				&& !getResourceModifications().willExist(container)) {
 			getResourceModifications().addCreate(container);
 			container= container.getParent();
 		}

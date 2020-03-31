@@ -547,7 +547,7 @@ public class TypeContextChecker {
 					continue;
 				int bodyStart= bodyDeclaration.getStartPosition();
 				int bodyEnd= bodyDeclaration.getStartPosition() + bodyDeclaration.getLength();
-				if (! (bodyStart < focalPosition && focalPosition < bodyEnd))
+				if ((bodyStart >= focalPosition) || (focalPosition >= bodyEnd))
 					continue;
 				MethodDeclaration methodDeclaration= (MethodDeclaration) bodyDeclaration;
 				buf= bufBefore;
@@ -570,7 +570,7 @@ public class TypeContextChecker {
 							return true; // could be in CIC parameter list
 						int anonStart= anonDecl.getStartPosition();
 						int anonEnd= anonDecl.getStartPosition() + anonDecl.getLength();
-						if (! (anonStart < focalPosition && focalPosition < anonEnd))
+						if ((anonStart >= focalPosition) || (focalPosition >= anonEnd))
 							return false;
 						bufBefore.append(" new "); //$NON-NLS-1$
 						bufBefore.append(node.getType().toString());

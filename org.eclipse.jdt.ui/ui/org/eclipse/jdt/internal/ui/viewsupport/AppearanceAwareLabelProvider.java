@@ -67,8 +67,8 @@ public class AppearanceAwareLabelProvider extends JavaUILabelProvider implements
 		if (!store.getBoolean(PreferenceConstants.APPEARANCE_METHOD_TYPEPARAMETERS)) {
 			fTextFlagMask ^= JavaElementLabels.M_APP_TYPE_PARAMETERS;
 		}
-		if (!(store.getBoolean(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES)
-				|| store.getBoolean(PreferenceConstants.APPEARANCE_ABBREVIATE_PACKAGE_NAMES))) {
+		if (!store.getBoolean(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES)
+				&& !store.getBoolean(PreferenceConstants.APPEARANCE_ABBREVIATE_PACKAGE_NAMES)) {
 			fTextFlagMask ^= JavaElementLabels.P_COMPRESSED;
 		}
 		if (!store.getBoolean(PreferenceConstants.APPEARANCE_CATEGORY)) {

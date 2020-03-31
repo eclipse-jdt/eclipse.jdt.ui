@@ -990,7 +990,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		boolean canEditEncoding= false;
 		for (CPListElementAttribute allAttribute : selElement.getAllAttributes()) {
 			if (CPListElement.SOURCE_ATTACHMENT_ENCODING.equals(allAttribute.getKey())) {
-				canEditEncoding= !(allAttribute.isNonModifiable() || allAttribute.isNotSupported());
+				canEditEncoding= !allAttribute.isNonModifiable() && !allAttribute.isNotSupported();
 			}
 		}
 		if (key.equals(CPListElement.SOURCEATTACHMENT)) {

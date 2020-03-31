@@ -272,7 +272,9 @@ public class IntroduceParameterObjectProcessor extends ChangeSignatureProcessor 
 				}
 			} else {
 				ASTNode parent= node.getParent();
-				if (!(parent instanceof QualifiedName || parent instanceof FieldAccess || parent instanceof SuperFieldAccess)) {
+				if (!(parent instanceof QualifiedName)
+						&& !(parent instanceof FieldAccess)
+						&& !(parent instanceof SuperFieldAccess)) {
 					if (node.getIdentifier().equals(getNameInScope(pi, enclosingParameters))) {
 						rewriter.replace(node, replacementNode, null);
 					}

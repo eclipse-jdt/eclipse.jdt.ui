@@ -73,7 +73,7 @@ public abstract class StructureSelectionAction extends Action {
 	@Override
 	public final  void run() {
 		IJavaElement inputElement= EditorUtility.getEditorInputJavaElement(fEditor, false);
-		if (!(inputElement instanceof ITypeRoot && inputElement.exists()))
+		if (!(inputElement instanceof ITypeRoot) || !inputElement.exists())
 			return;
 
 		ITypeRoot typeRoot= (ITypeRoot) inputElement;

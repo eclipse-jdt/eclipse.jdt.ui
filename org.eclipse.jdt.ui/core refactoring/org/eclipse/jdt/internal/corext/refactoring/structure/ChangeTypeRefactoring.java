@@ -277,11 +277,11 @@ public class ChangeTypeRefactoring extends Refactoring {
 		fValidTypes= new HashSet<>();
 	}
 
-    public ChangeTypeRefactoring(JavaRefactoringArguments arguments, RefactoringStatus status) {
+	public ChangeTypeRefactoring(JavaRefactoringArguments arguments, RefactoringStatus status) {
    		this(null, 0, 0, null);
    		RefactoringStatus initializeStatus= initialize(arguments);
    		status.merge(initializeStatus);
-    }
+	}
 
 	// ------------------------------------------------------------------------------------------------- //
 
@@ -562,7 +562,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	private void updateCu(CompilationUnit unit, Set<ConstraintVariable> vars, CompilationUnitChange unitChange,
 		ASTRewrite unitRewriter, String typeName, ImportRemover remover) throws JavaModelException {
 
-        // use custom SourceRangeComputer to avoid losing comments
+		// use custom SourceRangeComputer to avoid losing comments
 		unitRewriter.setTargetSourceRangeComputer(new SourceRangeComputer());
 
 		for (ConstraintVariable cv : vars) {
@@ -594,7 +594,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 			}
 		}
 
-	    //TODO handle types other than simple & parameterized (e.g., arrays)
+		//TODO handle types other than simple & parameterized (e.g., arrays)
 		Assert.isTrue(fSelectedType.isClass() || fSelectedType.isInterface());
 
 		Type newType= null;
@@ -961,11 +961,11 @@ public class ChangeTypeRefactoring extends Refactoring {
 	}
 
 	// ------------------------------------------------------------------------------------------------- //
-    // Methods for examining & solving type constraints. This includes:
-    //  (1) locating the ConstraintVariable corresponding to the selected ASTNode
-    //  (2) finding all ConstraintVariables "related" to (1) via overriding, method calls, field access
-    //  (3) find all ITypeConstraints of interest that mention ConstraintVariables in (2)
-    //  (4) determining all ITypes for which the ITypeConstraints in (3) are satisfied
+	// Methods for examining & solving type constraints. This includes:
+	//  (1) locating the ConstraintVariable corresponding to the selected ASTNode
+	//  (2) finding all ConstraintVariables "related" to (1) via overriding, method calls, field access
+	//  (3) find all ITypeConstraints of interest that mention ConstraintVariables in (2)
+	//  (4) determining all ITypes for which the ITypeConstraints in (3) are satisfied
 
 	/**
 	 * Find a ConstraintVariable that corresponds to the selected ASTNode.
@@ -1204,8 +1204,8 @@ public class ChangeTypeRefactoring extends Refactoring {
 	 * @throws JavaModelException
 	 */
 	private boolean isValid(ITypeBinding type,
-						    Collection<ConstraintVariable> relevantVars,
-						    Collection<ITypeConstraint> constraints,
+							Collection<ConstraintVariable> relevantVars,
+							Collection<ITypeConstraint> constraints,
 							IProgressMonitor pm) throws JavaModelException {
 		pm.beginTask(RefactoringCoreMessages.ChangeTypeRefactoring_analyzingMessage, constraints.size());
 
@@ -1282,7 +1282,8 @@ public class ChangeTypeRefactoring extends Refactoring {
 					if (memberBinding instanceof IMethodBinding) {
 						IMethodBinding methodBinding= Bindings.findMethodInHierarchy(superType, memberBinding.getName(), (ITypeBinding[]) null);
 						if (methodBinding == null) {
-							if (!(superType.isInterface() && isMethodFromObject)) {
+							if (!superType.isInterface()
+									|| !isMethodFromObject) {
 								return false;
 							}
 						}
@@ -1595,11 +1596,11 @@ public class ChangeTypeRefactoring extends Refactoring {
 		return result.toArray(new ICompilationUnit[result.size()]);
 	}
 
-    /**
+	/**
 	 * This always includes the type itself. It will include type
 	 * Object for any type other than Object
-     * @param type
-     * @return the super types
+	 * @param type
+	 * @return the super types
 	 */
 	public Set<ITypeBinding> getAllSuperTypes(ITypeBinding type){
 		Set<ITypeBinding> result= new HashSet<>();
@@ -1616,15 +1617,15 @@ public class ChangeTypeRefactoring extends Refactoring {
 		return result;
 	}
 
-    private ITypeBinding findSuperTypeByName(ITypeBinding type, String superTypeName){
-    	Set<ITypeBinding> superTypes= getAllSuperTypes(type);
-    	for (ITypeBinding sup : superTypes) {
-    		if (sup.getQualifiedName().equals(superTypeName)){
-    			return sup;
-    		}
-    	}
-    	return null;
-    }
+	private ITypeBinding findSuperTypeByName(ITypeBinding type, String superTypeName){
+		Set<ITypeBinding> superTypes= getAllSuperTypes(type);
+		for (ITypeBinding sup : superTypes) {
+			if (sup.getQualifiedName().equals(superTypeName)){
+				return sup;
+			}
+		}
+		return null;
+	}
 
 	public boolean isSubTypeOf(ITypeBinding type1, ITypeBinding type2){
 

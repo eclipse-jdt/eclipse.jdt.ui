@@ -739,7 +739,8 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 				Annotation a= e.next();
 
 				AnnotationPreference preference= getAnnotationPreference(a);
-				if (preference == null || !(preference.getTextPreferenceKey() != null && fStore.getBoolean(preference.getTextPreferenceKey()) || (preference.getHighlightPreferenceKey() != null && fStore.getBoolean(preference.getHighlightPreferenceKey()))))
+				if (preference == null
+						|| (((preference.getTextPreferenceKey() == null) || !fStore.getBoolean(preference.getTextPreferenceKey())) && ((preference.getHighlightPreferenceKey() == null) || !fStore.getBoolean(preference.getHighlightPreferenceKey()))))
 					continue;
 
 				Position p= model.getPosition(a);

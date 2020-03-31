@@ -647,7 +647,7 @@ public class EditTemplateDialog extends StatusDialog {
 	private boolean isValidPattern(String pattern) {
 		for (int i= 0; i < pattern.length(); i++) {
 			char ch= pattern.charAt(i);
-			if (!(ch == 9 || ch == 10 || ch == 13 || ch >= 32))
+			if ((ch != 9) && (ch != 10) && (ch != 13) && (ch < 32))
 				return false;
 		}
 		return true;

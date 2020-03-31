@@ -494,7 +494,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 						break;
 
 					case '<':
-						if (!(fCloseAngularBrackets && fCloseBrackets)
+						if (!fCloseAngularBrackets || !fCloseBrackets
 								|| nextToken == Symbols.TokenLESSTHAN
 								|| nextToken == Symbols.TokenQUESTIONMARK
 								|| nextToken == Symbols.TokenIDENT && isTypeArgumentStart(next)
