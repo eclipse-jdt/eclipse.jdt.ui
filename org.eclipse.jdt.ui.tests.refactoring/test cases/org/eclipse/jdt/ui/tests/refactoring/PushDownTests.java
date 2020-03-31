@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -831,6 +831,24 @@ public class PushDownTests extends RefactoringTest {
 //			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract,
 //			   new String[]{"B", "C"}, new String[]{"p", "p"});
 	}
+
+	public void test35() throws Exception{
+		String[] selectedMethodNames= {"foo"};
+		String[][] selectedMethodSignatures= {new String[0]};
+		String[] selectedFieldNames= {};
+		String[] namesOfMethodsToPushDown= {};
+		String[][] signaturesOfMethodsToPushDown= {};
+		String[] namesOfFieldsToPushDown= {};
+		String[] namesOfMethodsToDeclareAbstract= {};
+		String[][] signaturesOfMethodsToDeclareAbstract= {};
+
+		helper(selectedMethodNames, selectedMethodSignatures,
+				selectedFieldNames,
+				namesOfMethodsToPushDown, signaturesOfMethodsToPushDown,
+				namesOfFieldsToPushDown,
+				namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
+	}
+
 
 	public void testFail0() throws Exception {
 		String[] selectedMethodNames= {"f"};

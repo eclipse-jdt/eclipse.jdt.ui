@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2018 IBM Corporation and others.
+ * Copyright (c) 2006, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -55,6 +55,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTRequestor;
+import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -64,6 +65,7 @@ import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
@@ -77,6 +79,9 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
+import org.eclipse.jdt.internal.core.manipulation.StubUtility;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
+import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
@@ -100,15 +105,11 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
-import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-
-import org.eclipse.jdt.internal.core.manipulation.StubUtility;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 
 /**
@@ -568,6 +569,35 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 		}
 	}
 
+	/**
+	 * AST node visitor which performs This check and removes qualifier if needed
+	 */
+	public static class ThisVisitor extends ASTVisitor {
+
+		private final IType fDeclaringType;
+		private final ASTRewrite fRewrite;
+
+		public ThisVisitor(final ASTRewrite rewrite, final IType declaringType) {
+			Assert.isNotNull(rewrite);
+			Assert.isNotNull(declaringType);
+			fRewrite= rewrite;
+			fDeclaringType= declaringType;
+		}
+
+		@Override
+		public final boolean visit(ThisExpression node) {
+			Name q= node.getQualifier();
+			if (q == null) {
+				return false;
+			}
+			String qName= q.getFullyQualifiedName();
+			if (qName.equals(fDeclaringType.getElementName()) || qName.equals(fDeclaringType.getFullyQualifiedName())) {
+				fRewrite.set(node, ThisExpression.QUALIFIER_PROPERTY, null, null);
+			}
+			return false;
+		}
+	}
+
 	private void copyBodyOfPushedDownMethod(ASTRewrite targetRewrite, IMethod method, MethodDeclaration oldMethod, MethodDeclaration newMethod, TypeVariableMaplet[] mapping) throws JavaModelException {
 		Block body= oldMethod.getBody();
 		if (body == null) {
@@ -579,6 +609,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 			final ASTRewrite rewriter= ASTRewrite.create(body.getAST());
 			final ITrackedNodePosition position= rewriter.track(body);
 			body.accept(new TypeVariableMapper(rewriter, mapping));
+			body.accept(new ThisVisitor(rewriter, fCachedDeclaringType));
 			rewriter.rewriteAST(document, getDeclaringType().getCompilationUnit().getJavaProject().getOptions(true)).apply(document, TextEdit.NONE);
 			String content= document.get(position.getStartPosition(), position.getLength());
 			String[] lines= Strings.convertIntoLines(content);
