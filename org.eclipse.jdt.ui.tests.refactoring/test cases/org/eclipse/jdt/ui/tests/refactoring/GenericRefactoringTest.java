@@ -82,7 +82,7 @@ import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
 public abstract class GenericRefactoringTest {
 	@Rule
-	public TestName tn=new TestName();
+	public TestName tn= new TestName();
 
 	/**
 	 * If <code>true</code> a descriptor is created from the change.

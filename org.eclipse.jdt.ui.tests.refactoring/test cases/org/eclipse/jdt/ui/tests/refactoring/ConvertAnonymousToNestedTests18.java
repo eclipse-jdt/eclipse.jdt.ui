@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.ui.tests.CustomBaseRunner;
 import org.eclipse.jdt.ui.tests.IgnoreInheritedTests;
 import org.eclipse.jdt.ui.tests.refactoring.rules.Java18Setup;
+import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
 @IgnoreInheritedTests
 @RunWith(CustomBaseRunner.class)
@@ -29,7 +30,7 @@ public class ConvertAnonymousToNestedTests18 extends ConvertAnonymousToNestedTes
 	private static final String REFACTORING_PATH= "ConvertAnonymousToNested18/";
 
 	@Rule
-	public Java18Setup js= new Java18Setup();
+	public RefactoringTestSetup js= new Java18Setup();
 
 	@Override
 	protected String getRefactoringPath() {

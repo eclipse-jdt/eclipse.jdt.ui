@@ -48,6 +48,7 @@ import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.refactoring.code.ConvertAnonymousToNestedRefactoring;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
+import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 import org.eclipse.jdt.ui.tests.refactoring.rules.Java15Setup;
 
 public class ConvertAnonymousToNestedTests extends GenericRefactoringTest {
@@ -61,7 +62,7 @@ public class ConvertAnonymousToNestedTests extends GenericRefactoringTest {
 	}
 
 	@Rule
-	public Java15Setup js=new Java15Setup();
+	public RefactoringTestSetup js= new Java15Setup();
 
 	private String getSimpleTestFileName(boolean canInline, boolean input){
 		String fileName = "A_" + getName();

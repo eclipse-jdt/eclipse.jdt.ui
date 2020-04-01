@@ -24,12 +24,13 @@ import org.eclipse.jdt.testplugin.StringAsserts;
 import org.eclipse.jdt.ui.tests.CustomBaseRunner;
 import org.eclipse.jdt.ui.tests.IgnoreInheritedTests;
 import org.eclipse.jdt.ui.tests.refactoring.rules.Java17Setup;
+import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
 @IgnoreInheritedTests
 @RunWith(CustomBaseRunner.class)
 public class ChangeTypeRefactoringTests17 extends ChangeTypeRefactoringTests {
 	@Rule
-	public Java17Setup js= new Java17Setup();
+	public RefactoringTestSetup js= new Java17Setup();
 
 	@Override
 	protected String getTestFileName(boolean positive, boolean input) {

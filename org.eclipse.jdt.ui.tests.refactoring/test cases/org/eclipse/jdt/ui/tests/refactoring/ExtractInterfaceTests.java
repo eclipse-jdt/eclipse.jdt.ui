@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,7 +13,16 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
 import java.util.Hashtable;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -34,38 +43,25 @@ import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceProcessor;
 
+import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
+
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
-public class ExtractInterfaceTests extends RefactoringTest {
-
-	private static final Class<ExtractInterfaceTests> clazz= ExtractInterfaceTests.class;
+public class ExtractInterfaceTests extends GenericRefactoringTest {
 	private static final String REFACTORING_PATH= "ExtractInterface/";
     private Hashtable<String, String> fOldOptions;
     protected boolean fGenerateAnnotations= false;
 
-	public ExtractInterfaceTests(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return new RefactoringTestSetup(new TestSuite(clazz));
-	}
-
-	public static Test setUpTest(Test someTest) {
-		return new RefactoringTestSetup(someTest);
-	}
+    @Rule
+	public RefactoringTestSetup rts= new RefactoringTestSetup();
 
 	@Override
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
+	@Before
+	public void setup() throws Exception {
 		StubUtility.setCodeTemplate(CodeTemplateContextType.NEWTYPE_ID,
 			"${package_declaration}" +
 				System.getProperty("line.separator", "\n") +
@@ -85,9 +81,8 @@ public class ExtractInterfaceTests extends RefactoringTest {
 	    JavaCore.setOptions(options);
 	}
 
-    @Override
-	protected void tearDown() throws Exception {
-    	super.tearDown();
+    @After
+	public void after() throws Exception {
     	JavaCore.setOptions(fOldOptions);
     	fOldOptions= null;
     }
@@ -124,7 +119,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		IMethod[] extractedMethods= getMethods(clas, extractedMethodNames, extractedSignatures);
 	    IField[] extractedFields= getFields(clas, extractedFieldNames);
 		processor.setExtractedMembers(merge(extractedMethods, extractedFields));
-		assertEquals("was supposed to pass", null, performRefactoring(ref));
+		assertNull("was supposed to pass", performRefactoring(ref));
 
 		for (int i= 0; i < cus.length; i++) {
 			String expected= getFileContents(getOutputTestFileName(cuNames[i]));
@@ -151,7 +146,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 			processor.setExtractedMembers(processor.getExtractableMembers());
 		processor.setReplace(replaceOccurrences);
 		processor.setAnnotations(fGenerateAnnotations);
-		assertEquals("was supposed to pass", null, performRefactoring(ref));
+		assertNull("was supposed to pass", performRefactoring(ref));
 		assertEqualLines("incorrect changes in " + className,
 			getFileContents(getOutputTestFileName(className)),
 			cu.getSource());
@@ -169,7 +164,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		processor.setTypeName(newInterfaceName);
 		if (extractAll)
 			processor.setExtractedMembers(processor.getExtractableMembers());
-		assertTrue("was not supposed to pass", performRefactoring(ref) != null);
+		assertNotNull("was not supposed to pass", performRefactoring(ref));
 		assertEquals("was not supposed to fail with different severity", expectedSeverity, performRefactoring(ref).getSeverity());
 	}
 
@@ -180,275 +175,340 @@ public class ExtractInterfaceTests extends RefactoringTest {
 	}
 	//---------------tests ----------------------
 
+	@Test
 	public void test0() throws Exception{
 		validatePassingTest("A", "I", true, false);
 	}
 
+	@Test
 	public void test1() throws Exception{
 		validatePassingTest("A", "I", true, false);
 	}
 
+	@Test
 	public void test2() throws Exception{
 		validatePassingTest("A", "I", true, false);
 	}
 
+	@Test
 	public void test3() throws Exception{
 		validatePassingTest("A", "I", true, false);
 	}
 
+	@Test
 	public void test4() throws Exception{
 		validatePassingTest("A", "I", true, false);
 	}
 
+	@Test
 	public void test5() throws Exception{
 		validatePassingTest("A", "I", true, false);
 	}
 
+	@Test
 	public void test6() throws Exception{
 		validatePassingTest("A", "I", true, false);
 	}
 
+	@Test
 	public void test7() throws Exception{
 		validatePassingTest("A", "I", true, false);
 	}
 
+	@Test
 	public void test8() throws Exception{
 		validatePassingTest("A", "I", true, false);
 	}
 
+	@Test
 	public void test9() throws Exception{
 		validatePassingTest("A", "I", true, false);
 	}
 
+	@Test
 	public void test10() throws Exception{
 		validatePassingTest("A", "I", true, false);
 	}
 
+	@Test
 	public void test11() throws Exception{
 		validatePassingTest("A", "I", true, false);
 	}
 
+	@Test
 	public void test12() throws Exception{
 		validatePassingTest("A", "I", true, true);
 	}
 
+	@Test
 	public void test13() throws Exception{
 		validatePassingTest("A", "I", true, true);
 	}
 
+	@Test
 	public void test14() throws Exception{
 		standardPassingTest();
 	}
 
+	@Test
 	public void test15() throws Exception{
 		String[] names= new String[]{"m", "m1"};
 		String[][] signatures= new String[][]{new String[0], new String[0]};
 		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, null);
 	}
 
+	@Test
 	public void test16() throws Exception{
 		standardPassingTest();
 	}
 
+	@Test
 	public void test17() throws Exception{
 		standardPassingTest();
 	}
 
+	@Test
 	public void test18() throws Exception{
 		standardPassingTest();
 	}
 
+	@Test
 	public void test19() throws Exception{
 		standardPassingTest();
 	}
 
+	@Test
 	public void test20() throws Exception{
 		String[] names= new String[]{"m", "m1"};
 		String[][] signatures= new String[][]{new String[0], new String[0]};
 		validatePassingTest("A", new String[]{"A"},"I", true, names, signatures, null);
 	}
 
+	@Test
 	public void test21() throws Exception{
 		validatePassingTest("A", "I", true, true);
 	}
 
+	@Test
 	public void test22() throws Exception{
 		validatePassingTest("A", "I", true, true);
 	}
 
+	@Test
 	public void test23() throws Exception{
 		validatePassingTest("A", "I", true, true);
 	}
 
+	@Test
 	public void test24() throws Exception{
 		standardPassingTest();
 	}
 
+	@Test
 	public void test25() throws Exception{
 		validatePassingTest("A", "I", true, true);
 	}
 
+	@Test
 	public void test26() throws Exception{
 		standardPassingTest();
 	}
 
+	@Test
 	public void test27() throws Exception{
 		standardPassingTest();
 	}
 
+	@Test
 	public void test28() throws Exception{
 		standardPassingTest();
 	}
 
+	@Test
 	public void test29() throws Exception{
 		standardPassingTest();
 	}
 
+	@Test
 	public void test30() throws Exception{
 		standardPassingTest();
 	}
 
+	@Test
 	public void test31() throws Exception{
 		standardPassingTest();
 	}
 
+	@Test
 	public void test32() throws Exception{
 		standardPassingTest();
 	}
 
+	@Test
 	public void test33() throws Exception{
 		standardPassingTest();
 	}
 
+	@Test
 	public void test34() throws Exception{
 		standardPassingTest();
 	}
 
+	@Test
 	public void test35() throws Exception{
 		standardPassingTest();
 	}
 
+	@Test
 	public void test36() throws Exception{
 		standardPassingTest();
 	}
 
+	@Test
 	public void test37() throws Exception{
 		standardPassingTest();
 	}
 
+	@Test
 	public void test38() throws Exception{
 		standardPassingTest();
 	}
 
+	@Test
 	public void test39() throws Exception{
 		standardPassingTest();
 	}
 
+	@Test
 	public void test40() throws Exception{
 		standardPassingTest();
 	}
 
+	@Test
 	public void test41() throws Exception{
 		standardPassingTest();
 	}
 
+	@Test
 	public void test42() throws Exception{
 		standardPassingTest();
 	}
 
+	@Test
 	public void test43() throws Exception{
 		standardPassingTest();
 	}
 
+	@Test
 	public void test44() throws Exception{
 		standardPassingTest();
 	}
 
+	@Test
 	public void test45() throws Exception{
 		standardPassingTest();
 	}
 
+	@Test
 	public void test46() throws Exception{
 		standardPassingTest();
 	}
 
+	@Test
 	public void test47() throws Exception{
 		standardPassingTest();
 	}
 
+	@Test
 	public void test48() throws Exception{
 		standardPassingTest();
 	}
 
+	@Test
 	public void test49() throws Exception{
 		standardPassingTest();
 	}
 
+	@Test
 	public void test50() throws Exception{
 		standardPassingTest();
 	}
 
+	@Test
 	public void test51() throws Exception{
 		standardPassingTest();
 	}
 
+	@Test
 	public void test52() throws Exception{
 		standardPassingTest();
 	}
 
+	@Test
 	public void test53() throws Exception{
 		standardPassingTest();
 	}
 
+	@Test
 	public void test54() throws Exception{
 		String[] names= new String[]{"m"};
 		String[][] signatures= new String[][]{new String[0]};
 		validatePassingTest("A", new String[]{"A", "A1"}, "I", true, names, signatures, null);
 	}
 
+	@Test
 	public void test55() throws Exception{
 		String[] names= new String[]{"m"};
 		String[][] signatures= new String[][]{new String[0]};
 		validatePassingTest("A", new String[]{"A", "A1"}, "I", true, names, signatures, null);
 	}
 
+	@Test
 	public void test56() throws Exception{
 		String[] names= new String[]{"m"};
 		String[][] signatures= new String[][]{new String[0]};
 		validatePassingTest("A", new String[]{"A", "A1"}, "I", true, names, signatures, null);
 	}
 
+	@Test
 	public void test57() throws Exception{
 		String[] names= new String[]{"m"};
 		String[][] signatures= new String[][]{new String[0]};
 		validatePassingTest("A", new String[]{"A", "A1"}, "I", true, names, signatures, null);
 	}
 
+	@Test
 	public void test58() throws Exception{
 		standardPassingTest();
 	}
 
+	@Test
 	public void test59() throws Exception{
 //		printTestDisabledMessage("bug 22946 ");
 		standardPassingTest();
 	}
 
+	@Test
 	public void test60() throws Exception{
 		standardPassingTest();
 	}
 
+	@Test
 	public void test61() throws Exception{
 		standardPassingTest();
 	}
 
+	@Test
 	public void test62() throws Exception{
 		standardPassingTest();
 	}
 
+	@Test
 	public void test63() throws Exception{
 		standardPassingTest();
 	}
 
+	@Test
 	public void test64() throws Exception{
 //		printTestDisabledMessage("test for 23105");
 		String[] names= new String[]{"m"};
@@ -456,15 +516,18 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A", "Inter"}, "I", true, names, signatures, null);
 	}
 
+	@Test
 	public void test65() throws Exception{
 //		printTestDisabledMessage("test for 23105");
 		standardPassingTest();
 	}
 
+	@Test
 	public void test66() throws Exception{
 		standardPassingTest();
 	}
 
+	@Test
 	public void test67() throws Exception{
 //		printTestDisabledMessage("test for 23105");
 		String[] names= new String[]{"m"};
@@ -472,28 +535,33 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A", "Outer", "Inter"}, "I", true, names, signatures, null);
 	}
 
+	@Test
 	public void test68() throws Exception{
 		String[] names= new String[]{"m"};
 		String[][] signatures= new String[][]{new String[0]};
 		validatePassingTest("A", new String[]{"A", "As"}, "I", true, names, signatures, null);
 	}
 
+	@Test
 	public void test69() throws Exception{
 		String[] names= new String[]{"m"};
 		String[][] signatures= new String[][]{new String[0]};
 		validatePassingTest("A", new String[]{"A", "As"}, "I", true, names, signatures, null);
 	}
 
+	@Test
 	public void test70() throws Exception{
 		standardPassingTest();
 	}
 
+	@Test
 	public void test71() throws Exception{
 		String[] names= new String[]{"m"};
 		String[][] signatures= new String[][]{new String[0]};
 		validatePassingTest("A", new String[]{"A", "As"}, "I", true, names, signatures, null);
 	}
 
+	@Test
 	public void test72() throws Exception{
 //		printTestDisabledMessage("bug 23705");
 		String[] names= new String[]{"m"};
@@ -501,6 +569,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A", "As"}, "I", true, names, signatures, null);
 	}
 
+	@Test
 	public void test73() throws Exception{
 //		printTestDisabledMessage("bug 23953");
 		String[] names= new String[]{"amount"};
@@ -508,6 +577,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A", "B", "OldInterface"}, "I", true, names, signatures, null);
 	}
 
+	@Test
 	public void test74() throws Exception{
 //		printTestDisabledMessage("bug 23953");
 		String[] names= new String[]{"amount"};
@@ -515,6 +585,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A", "B", "OldInterface"}, "I", true, names, signatures, null);
 	}
 
+	@Test
 	public void test75() throws Exception{
 //		printTestDisabledMessage("bug 23953");
 		String[] names= new String[]{"amount"};
@@ -522,6 +593,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A", "B", "C"}, "I", true, names, signatures, null);
 	}
 
+	@Test
 	public void test76() throws Exception{
 //		printTestDisabledMessage("bug 23953");
 		String[] names= new String[]{"amount"};
@@ -529,6 +601,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A", "B", "C"}, "I", true, names, signatures, null);
 	}
 
+	@Test
 	public void test77() throws Exception{
 //		printTestDisabledMessage("Waiting for new type constraints infrastructure");
 		String[] names= new String[]{"amount"};
@@ -536,6 +609,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A.Inner", new String[]{"A", "B"}, "I", true, names, signatures, null);
 	}
 
+	@Test
 	public void test78() throws Exception{
 //		printTestDisabledMessage("bug 23705");
 		String[] names= new String[]{"m"};
@@ -543,13 +617,16 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, null);
 	}
 
-    public void test79() throws Exception{
+
+	@Test
+	public void test79() throws Exception{
 //		printTestDisabledMessage("bug 23697");
         String[] names= new String[]{"getFoo", "foo"};
         String[][] signatures= new String[][]{new String[0], new String[]{"QA;"}};
         validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, null);
     }
 
+	@Test
 	public void test80() throws Exception{
 //		printTestDisabledMessage("bug 33223");
 		String[] names= new String[]{"f", "fz", "f1", "f1z", "f11", "f2"};
@@ -558,6 +635,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
 	}
 
+	@Test
 	public void test81() throws Exception{
 //		printTestDisabledMessage("bug 33878 extract interface: incorrect handling of arrays ");
 		String[] names= {};
@@ -566,6 +644,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
 	}
 
+	@Test
 	public void test82() throws Exception{
 //		printTestDisabledMessage("bug 33878 extract interface: incorrect handling of arrays ");
 		String[] names= {};
@@ -574,6 +653,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
 	}
 
+	@Test
 	public void test83() throws Exception{
 //		printTestDisabledMessage("bug 33878 extract interface: incorrect handling of arrays ");
 		String[] names= {};
@@ -582,6 +662,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
 	}
 
+	@Test
 	public void test84() throws Exception{
 //		printTestDisabledMessage("bug 34931 Extract Interface does not update all references ");
 		String[] names= {};
@@ -590,6 +671,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
 	}
 
+	@Test
 	public void test85() throws Exception{
 //		printTestDisabledMessage("bug 34931 Extract Interface does not update all references ");
 		String[] names= {};
@@ -598,6 +680,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
 	}
 
+	@Test
 	public void test86() throws Exception{
 //		printTestDisabledMessage("bug 34931 Extract Interface does not update all references ");
 		String[] names= {};
@@ -606,6 +689,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
 	}
 
+	@Test
 	public void test87() throws Exception{
 //		printTestDisabledMessage("bug 34931 Extract Interface does not update all references ");
 		String[] names= {};
@@ -614,6 +698,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
 	}
 
+	@Test
 	public void test88() throws Exception{
 //		printTestDisabledMessage("bug 34931 Extract Interface does not update all references ");
 		String[] names= {};
@@ -622,6 +707,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
 	}
 
+	@Test
 	public void test89() throws Exception{
 //		printTestDisabledMessage("bug 34931 Extract Interface does not update all references ");
 		String[] names= {};
@@ -630,6 +716,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
 	}
 
+	@Test
 	public void test90() throws Exception{
 //		printTestDisabledMessage("bug 34931 Extract Interface does not update all references ");
 		String[] names= {};
@@ -638,6 +725,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
 	}
 
+	@Test
 	public void test91() throws Exception{
 //		printTestDisabledMessage("bug 34931 Extract Interface does not update all references ");
 		String[] names= {};
@@ -646,6 +734,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
 	}
 
+	@Test
 	public void test92() throws Exception{
 //		printTestDisabledMessage("bug 34931 Extract Interface does not update all references ");
 		String[] names= {};
@@ -654,6 +743,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
 	}
 
+	@Test
 	public void test93() throws Exception{
 //		printTestDisabledMessage("bug 34931 Extract Interface does not update all references ");
 		String[] names= {};
@@ -662,6 +752,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
 	}
 
+	@Test
 	public void test94() throws Exception{
 //		printTestDisabledMessage("bug 34931 Extract Interface does not update all references ");
 		String[] names= {};
@@ -670,6 +761,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
 	}
 
+	@Test
 	public void test95() throws Exception{
 		String[] names= {};
 		String[][] signatures= {{}};
@@ -677,6 +769,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
 	}
 
+	@Test
 	public void test96() throws Exception{
 		String[] names= {};
 		String[][] signatures= {{}};
@@ -684,6 +777,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
 	}
 
+	@Test
 	public void test97() throws Exception{
 		//printTestDisabledMessage("bug 40373");
 		String[] names= {"foo"};
@@ -692,6 +786,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
 	}
 
+	@Test
 	public void test98() throws Exception{
 		//test for 41464
 		String[] names= new String[]{"foo"};
@@ -699,23 +794,27 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("Foo", new String[]{"Foo", "Bar"}, "IFoo", true, names, signatures, null);
 	}
 
+	@Test
 	public void test99() throws Exception{
 		String[] names= new String[]{};
 		String[][] signatures= new String[][]{};
 		validatePassingTest("C", new String[]{"A", "B", "C"}, "I", true, names, signatures, null);
 	}
 
+	@Test
 	public void test100() throws Exception{
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=47785
 		validatePassingTest("A", "I", true, false);
 	}
 
+	@Test
 	public void test101() throws Exception{
 		String[] names= new String[]{};
 		String[][] signatures= new String[][]{};
 		validatePassingTest("C", new String[]{"A", "B", "C"}, "I", true, names, signatures, null);
 	}
 
+	@Test
 	public void test102() throws Exception{
 		String[] names= new String[]{};
 		String[][] signatures= new String[][]{};
@@ -723,6 +822,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("C", new String[]{"A", "B", "C"}, "I", true, names, signatures, null);
 	}
 
+	@Test
 	public void test103() throws Exception{
 		String[] names= new String[]{};
 		String[][] signatures= new String[][]{};
@@ -730,6 +830,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("C", new String[]{"A", "B", "C"}, "I", true, names, signatures, null);
 	}
 
+	@Test
 	public void test104() throws Exception {
 		// bug 195817
 		String[] names= new String[]{ "m1" };
@@ -738,6 +839,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A", "B"}, "I", true, names, signatures, null);
 	}
 
+	@Test
 	public void test105() throws Exception{
 		// bug 195817
 		String[] names= new String[]{ "m2" };
@@ -746,6 +848,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A", "B"}, "I", true, names, signatures, null);
 	}
 
+	@Test
 	public void test106() throws Exception {
 		// bug 195817
 		String[] names= new String[]{ "m1" };
@@ -754,6 +857,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A", "B"}, "I", true, names, signatures, null);
 	}
 
+	@Test
 	public void test107() throws Exception{
 		// bug 195817
 		String[] names= new String[]{ "m2" };
@@ -762,31 +866,35 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A", "B"}, "I", true, names, signatures, null);
 	}
 
+	@Test
 	public void test108() throws Exception{
 		// bug 195817
 		fGenerateAnnotations= true; // should not generate because project is 1.5
 		standardPassingTest();
 	}
 
+	@Test
 	public void test109() throws Exception{
 		// Generate @Override in 1.6 project
 		fGenerateAnnotations= true;
-		RefactoringTestSetup refactoringTestSetup= new RefactoringTestSetup(null);
+		RefactoringTestSetup refactoringTestSetup= new RefactoringTestSetup();
 		try {
 			JavaProjectHelper.addRTJar16(getRoot().getJavaProject());
 
 			standardPassingTest();
 
-			refactoringTestSetup.tearDown();
+			refactoringTestSetup.after();
 		} finally {
-			refactoringTestSetup.setUp();
+			refactoringTestSetup.before();
 		}
 	}
 
+	@Test
 	public void test110() throws Exception{
 		validatePassingTest("A", "I", true, true);
 	}
 
+	@Test
 	public void testPaperExample0() throws Exception{
 		String[] names= new String[]{"add", "addAll", "iterator"};
 		String[][] signatures= new String[][]{new String[]{"QComparable;"}, new String[]{"QA;"}, new String[0]};
@@ -794,6 +902,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A"}, "Bag", true, names, signatures, fieldNames);
 	}
 
+	@Test
 	public void testPaperExample1() throws Exception{
 		String[] names= new String[]{"add", "addAll", "iterator"};
 		String[][] signatures= new String[][]{new String[]{"QComparable;"}, new String[]{"QA;"}, new String[0]};
@@ -801,6 +910,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A"}, "Bag", true, names, signatures, fieldNames);
 	}
 
+	@Test
 	public void testPaperExampleSimplified0() throws Exception{
 		String[] names= new String[]{};
 		String[][] signatures= {{}};
@@ -809,6 +919,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 	}
 
 
+	@Test
 	public void testConditional1() throws Exception {
 		String[] names= new String[]{};
 		String[][] signatures= {{}};
@@ -816,6 +927,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("X", new String[]{"A", "X"}, "I", true, names, signatures, fieldNames);
 	}
 
+	@Test
 	public void testConditional2() throws Exception {
 		String[] names= new String[]{ "dot" };
 		String[][] signatures= {new String[]{"QX;"}};
@@ -823,34 +935,43 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("X", new String[]{"A", "X"}, "I", true, names, signatures, fieldNames);
 	}
 
-    public void testConstant80() throws Exception{
+
+	@Test
+	public void testConstant80() throws Exception{
         String[] names= null;
         String[][] signatures= null;
         String[] fieldNames= {"X"};
         validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
     }
 
-    public void testConstant81() throws Exception{
+
+	@Test
+	public void testConstant81() throws Exception{
         String[] names= null;
         String[][] signatures= null;
         String[] fieldNames= {"X"};
         validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
     }
 
-    public void testConstant82() throws Exception{
+
+	@Test
+	public void testConstant82() throws Exception{
         String[] names= null;
         String[][] signatures= null;
         String[] fieldNames= {"X"};
         validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
     }
 
-    public void testConstant83() throws Exception{
+
+	@Test
+	public void testConstant83() throws Exception{
         String[] names= null;
         String[][] signatures= null;
         String[] fieldNames= {"X"};
         validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
     }
 
+	@Test
 	public void testConstant84() throws Exception{
 		String[] names= null;
 		String[][] signatures= null;
@@ -858,6 +979,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
 	}
 
+	@Test
 	public void testConstant85() throws Exception{
 		String[] names= null;
 		String[][] signatures= null;
@@ -865,6 +987,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
 	}
 
+	@Test
 	public void testConstant86() throws Exception{
 		String[] names= null;
 		String[][] signatures= null;
@@ -872,6 +995,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
 	}
 
+	@Test
 	public void testConstant87() throws Exception{
 		String[] names= null;
 		String[][] signatures= null;
@@ -879,6 +1003,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
 	}
 
+	@Test
 	public void testConstant88() throws Exception{
 		String[] names= null;
 		String[][] signatures= null;
@@ -886,6 +1011,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
 	}
 
+	@Test
 	public void testInterface0() throws Exception{
 		String[] names= {"m"};
 		String[][] signatures= {new String[0]};
@@ -893,6 +1019,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
 	}
 
+	@Test
 	public void testInterface1() throws Exception{
 		String[] names= {"m"};
 		String[][] signatures= {new String[0]};
@@ -900,6 +1027,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
 	}
 
+	@Test
 	public void testInterface2() throws Exception{
 		String[] names= {"m"};
 		String[][] signatures= {new String[0]};
@@ -907,6 +1035,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A"}, "I", true, names, signatures, fieldNames);
 	}
 
+	@Test
 	public void testInterface3() throws Exception{
 		String[] methodNames= {"m", "m1", "m2", "m4", "m5"};
 		String[][] signatures= {new String[0], new String[0], new String[0], new String[0], new String[0]};
@@ -914,6 +1043,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A"}, "I", true, methodNames, signatures, fieldNames);
 	}
 
+	@Test
 	public void testInterface4() throws Exception{
 //		printTestDisabledMessage("cannot yet update references (in methods) to itself if it's an interface");
 		String[] methodNames= {"a"};
@@ -922,6 +1052,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A"}, "I", true, methodNames, signatures, fieldNames);
 	}
 
+	@Test
 	public void testInterface5() throws Exception{
 		String[] methodNames= {"a"};
 		String[][] signatures= {new String[0]};
@@ -929,6 +1060,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A"}, "I", true, methodNames, signatures, fieldNames);
 	}
 
+	@Test
 	public void testInterface6() throws Exception{
 		String[] methodNames= {"foo0", "foo1", "foo2", "foo3"};
 		String[][] signatures= {new String[0], new String[0], new String[0], new String[0]};
@@ -936,6 +1068,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A"}, "I", true, methodNames, signatures, fieldNames);
 	}
 
+	@Test
 	public void testFail1() throws Exception{
 		validateFailingTest("A", "I", true, RefactoringStatus.FATAL);
 	}

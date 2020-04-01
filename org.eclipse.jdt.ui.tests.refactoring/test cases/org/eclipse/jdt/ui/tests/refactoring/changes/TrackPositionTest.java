@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,9 +13,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring.changes;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import static org.junit.Assert.assertFalse;
+
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
@@ -30,35 +33,26 @@ import org.eclipse.ltk.core.refactoring.DocumentChange;
 
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 
-public class TrackPositionTest extends TestCase {
-
-	private static final Class<TrackPositionTest> THIS= TrackPositionTest.class;
+public class TrackPositionTest {
 	private static final String NN= "N.N";
 
 	private IDocument fDocument;
 	private DocumentChange fChange;
 
-	public TrackPositionTest(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return new TestSuite(THIS);
-	}
-
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		fDocument= new Document("0123456789");
 		fChange= new DocumentChange(NN, fDocument);
 		fChange.setKeepPreviewEdits(true);
 		fChange.initializeValidationData(new NullProgressMonitor());
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		fChange= null;
 	}
 
+	@Test
 	public void test1() throws Exception {
 		TextEdit edit= new ReplaceEdit(2, 2, "xyz");
 		TextChangeCompatibility.addTextEdit(fChange, NN, edit);
@@ -66,18 +60,19 @@ public class TrackPositionTest extends TestCase {
 		assertEquals(edit.getRegion(), 2, 3);
 	}
 
+	@Test
 	public void test2() throws Exception {
 		TextEdit edit= new ReplaceEdit(5, 3, "xy");
 		TextChangeCompatibility.addTextEdit(fChange, NN, edit);
 		IDocument preview= fChange.getPreviewDocument(new NullProgressMonitor());
-		assertEquals(fDocument.get(), "0123456789");
-		assertEquals(preview.get(), "01234xy89");
+		Assert.assertEquals("0123456789", fDocument.get());
+		Assert.assertEquals("01234xy89", preview.get());
 		assertEquals(fChange.getPreviewEdit(edit).getRegion(), 5, 2);
 	}
 
 	private void executeChange() throws Exception {
 		try {
-			assertTrue(!fChange.isValid(new NullProgressMonitor()).hasFatalError());
+			assertFalse(fChange.isValid(new NullProgressMonitor()).hasFatalError());
 			fChange.perform(new NullProgressMonitor());
 		} finally {
 			fChange.dispose();
@@ -85,7 +80,7 @@ public class TrackPositionTest extends TestCase {
 	}
 
 	private static void assertEquals(IRegion r, int offset, int length) {
-		assertEquals("Offset", offset, r.getOffset());
-		assertEquals("Length", length, r.getLength());
+		Assert.assertEquals("Offset", offset, r.getOffset());
+		Assert.assertEquals("Length", length, r.getLength());
 	}
 }

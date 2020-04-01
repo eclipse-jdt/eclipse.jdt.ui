@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2016 IBM Corporation and others.
+ * Copyright (c) 2014, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,10 +13,16 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.Test;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -31,37 +37,32 @@ import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceProcessor;
 
-import org.eclipse.jdt.ui.tests.core.NoSuperTestsSuite;
+import org.eclipse.jdt.ui.tests.CustomBaseRunner;
+import org.eclipse.jdt.ui.tests.IgnoreInheritedTests;
+import org.eclipse.jdt.ui.tests.refactoring.rules.Java18Setup;
+import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
+@IgnoreInheritedTests
+@RunWith(CustomBaseRunner.class)
 public class ExtractInterfaceTests18 extends ExtractInterfaceTests {
-
-	private static final Class<ExtractInterfaceTests18> clazz= ExtractInterfaceTests18.class;
-
 	private static final String REFACTORING_PATH= "ExtractInterface18/";
 
-	public ExtractInterfaceTests18(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return new Java18Setup(new NoSuperTestsSuite(clazz));
-	}
-
-	public static Test setUpTest(Test someTest) {
-		return new Java18Setup(someTest);
-	}
+	@Rule
+	public RefactoringTestSetup js= new Java18Setup();
 
 	@Override
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
 
+	@Test
 	public void testExtractInterfaceFromInterface1() throws Exception {
 		validatePassingTest("A", "B", true, true);
 	}
 
+	@Test
 	public void testExtractInterfaceFromInterface2() throws Exception {
 		String className= "A";
 		String extendingInterfaceName= "I1";
@@ -96,7 +97,7 @@ public class ExtractInterfaceTests18 extends ExtractInterfaceTests {
 		processor.setReplace(true);
 		processor.setAnnotations(false);
 		RefactoringStatus performRefactoring= performRefactoring(ref);
-		assertEquals("was supposed to pass", null, performRefactoring);
+		assertNull("was supposed to pass", performRefactoring);
 		assertEqualLines("incorrect changes in " + className,
 				getFileContents(getOutputTestFileName(className)),
 				cu.getSource());
@@ -108,11 +109,13 @@ public class ExtractInterfaceTests18 extends ExtractInterfaceTests {
 
 	}
 
+	@Test
 	public void testExtractInterfaceFromClass() throws Exception {
 		validatePassingTest("A", "B", true, true);
 	}
 
 	// bug 394551
+	@Test
 	public void testExtractInterfaceFromClass2() throws Exception {
 		fGenerateAnnotations= true;
 		String[] names= new String[] { "m" };
@@ -120,10 +123,12 @@ public class ExtractInterfaceTests18 extends ExtractInterfaceTests {
 		validatePassingTest("A", new String[] { "A" }, "I", true, names, signatures, null);
 	}
 
+	@Test
 	public void testExtractInterfaceFromAbstractClass() throws Exception {
 		validatePassingTest("A", "B", true, true);
 	}
 
+	@Test
 	public void testLambda1() throws Exception {
 		// bug 488420
 		String[] names= new String[] { "m1" };
@@ -131,6 +136,7 @@ public class ExtractInterfaceTests18 extends ExtractInterfaceTests {
 		validatePassingTest("X", new String[] { "X", "Util" }, "I", true, names, signatures, null);
 	}
 
+	@Test
 	public void testLambda2() throws Exception {
 		// bug 488420
 		String[] names= new String[] { "m1" };
@@ -138,6 +144,7 @@ public class ExtractInterfaceTests18 extends ExtractInterfaceTests {
 		validatePassingTest("X", new String[] { "X", "Util" }, "I", true, names, signatures, null);
 	}
 
+	@Test
 	public void testMethodRef1() throws Exception {
 		// bug 489170
 		String[] names= new String[] { "methodN" };
@@ -145,6 +152,7 @@ public class ExtractInterfaceTests18 extends ExtractInterfaceTests {
 		validatePassingTest("X", new String[] { "X", "Util" }, "I", true, names, signatures, null);
 	}
 
+	@Test
 	public void testMethodRef2() throws Exception {
 		// bug 489170
 		String[] names= new String[] { "m1" };
@@ -152,6 +160,7 @@ public class ExtractInterfaceTests18 extends ExtractInterfaceTests {
 		validatePassingTest("X", new String[] { "X", "Util" }, "I", true, names, signatures, null);
 	}
 
+	@Test
 	public void testMethodRef3() throws Exception {
 		// bug 489170
 		String[] names= new String[] { "m1" };

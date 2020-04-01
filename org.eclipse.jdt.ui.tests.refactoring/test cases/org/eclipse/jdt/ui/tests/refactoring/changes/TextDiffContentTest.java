@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,9 +15,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring.changes;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import static org.junit.Assert.assertEquals;
+
+import org.junit.Before;
+import org.junit.Test;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -38,8 +39,7 @@ import org.eclipse.ltk.core.refactoring.TextEditChangeGroup;
  * empty.  Otherwise, the current content and preview content
  * have differing affected ranges and spurious changes appear.
  */
-public class TextDiffContentTest extends TestCase {
-
+public class TextDiffContentTest {
 	private static final String MODIFIED_SOURCE_CONTENTS =
 		"// my file\n"+
 		"\n"+
@@ -53,10 +53,6 @@ public class TextDiffContentTest extends TestCase {
 		"\t}\n"+
 		"\n"+
 		"// other stuff\n";
-
-	public static Test suite() {
-		return new TestSuite(TextDiffContentTest.class);
-	}
 
 	private DocumentChange fDocumentChange;
 
@@ -74,9 +70,8 @@ public class TextDiffContentTest extends TestCase {
 
 	private TextEditChangeGroup fChange3;
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
+	@Before
+	public void setUp() throws Exception {
 		fDocument = new Document(MODIFIED_SOURCE_CONTENTS);
 		fDocumentChange = new DocumentChange("Changes to document", fDocument);
 
@@ -134,6 +129,7 @@ public class TextDiffContentTest extends TestCase {
 				group.getRegion(), true, context, new NullProgressMonitor());
 	}
 
+	@Test
 	public void testEmptySourceRangeNoContext() throws Exception {
 		String src = getSource(fEdit1.getRegion(), 0);
 		String preview = getPreview(fChange1, 0);
@@ -141,6 +137,7 @@ public class TextDiffContentTest extends TestCase {
 		assertEquals("\tFinalCall();", preview);
 
 	}
+	@Test
 	public void testEmptySourceRangeNoContext2() throws Exception {
 		String src = getSource(fEdit2.getRegion(), 0);
 		String preview = getPreview(fChange2, 0);
@@ -148,6 +145,7 @@ public class TextDiffContentTest extends TestCase {
 		assertEquals("// add comment", preview);
 
 	}
+	@Test
 	public void testEmptySourceRangeContext() throws Exception {
 		String src = getSource(fEdit1.getRegion(), 2);
 		String preview = getPreview(fChange1, 2);
@@ -161,6 +159,7 @@ public class TextDiffContentTest extends TestCase {
 				"	}\n",
 			preview);
 	}
+	@Test
 	public void testEmptySourceRangeContext2() throws Exception {
 		String src = getSource(fEdit2.getRegion(), 2);
 		String preview = getPreview(fChange2, 2);
@@ -171,6 +170,7 @@ public class TextDiffContentTest extends TestCase {
 			preview);
 	}
 
+	@Test
 	public void testEmptyTargetRangeNoContext() throws Exception {
 		String src = getSource(fEdit3.getRegion(), 0);
 		String preview = getPreview(fChange3, 0);
@@ -178,6 +178,7 @@ public class TextDiffContentTest extends TestCase {
 		assertEquals("", preview);
 
 	}
+	@Test
 	public void testEmptyTargetRangeContext() throws Exception {
 		String src = getSource(fEdit3.getRegion(), 2);
 		String preview = getPreview(fChange3, 2);

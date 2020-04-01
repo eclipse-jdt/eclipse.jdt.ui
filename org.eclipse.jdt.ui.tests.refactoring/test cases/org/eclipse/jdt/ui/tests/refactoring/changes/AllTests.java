@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,19 +13,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring.changes;
 
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
-
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+	TrackPositionTest.class,
+	TextDiffContentTest.class
+})
 public class AllTests {
-
-	public static Test suite ( ) {
-		TestSuite suite= new TestSuite(AllTests.class.getName());
-		suite.addTest(TrackPositionTest.suite());
-		suite.addTest(TextDiffContentTest.suite());
-	    return suite;
-	}
 }
-
-
