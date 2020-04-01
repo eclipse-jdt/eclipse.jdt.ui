@@ -37,9 +37,8 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.BooleanLiteral;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
-import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.NodeFinder;
@@ -48,6 +47,7 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.StringLiteral;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
@@ -218,16 +218,33 @@ public class PostfixCompletionProposalComputer extends AbstractTemplateCompletio
 
 				@Override
 				public boolean visit(MethodInvocation node) {
-					IMethodBinding methodBinding= node.resolveMethodBinding();
-					if (methodBinding != null) {
-						ITypeBinding retBinding= methodBinding.getReturnType();
-						if (!"void".equals(retBinding.getName())) { //$NON-NLS-1$
-							int start= node.getStartPosition();
-							int end= start + node.getLength() - 1;
-							if (invOffset > start && invOffset == end + 1) {
-								bestNode[0]= node;
-								return false;
-							}
+					return visit((Expression)node);
+				}
+
+				@Override
+				public boolean visit(SuperMethodInvocation node) {
+					return visit((Expression)node);
+				}
+
+				/**
+				 * Does NOT override {@link ASTVisitor}
+				 * Handle {@link MethodInvocation} and {@link SuperMethodInvocation}
+				 */
+				public boolean visit(Expression node) {
+					/*
+					 * Do not consider a method invocation node as the best node
+					 * if it is RECOVERED. A recovered node may in fact be open
+					 * 'System.out.println(...' and the best node may be within
+					 * the invocation.
+					 *
+					 * See PostFixCompletionTest#testConcatenatedShorthandIfStatement()
+					 */
+					if ((node.getFlags() & ASTNode.RECOVERED) == 0) {
+						int start= node.getStartPosition();
+						int end= start + node.getLength() - 1;
+						if (invOffset > start && invOffset == end + 1) {
+							bestNode[0]= node;
+							return false;
 						}
 					}
 					return true;

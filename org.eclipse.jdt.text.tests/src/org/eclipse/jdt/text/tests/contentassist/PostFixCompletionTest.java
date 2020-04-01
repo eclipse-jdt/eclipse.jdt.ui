@@ -450,6 +450,69 @@ public class PostFixCompletionTest extends TestCase {
 		assertEquals(expected.toString(), viewer.getDocument().get());
 	}
 
+	public void testVarForMethodInvocation3() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n" +
+				"public class VarForMethodInvocation3 {\n" +
+				"  public <T> T getAdapter(Class<T> required) {\n" +
+				"    return null;\n" +
+				"  } \n" +
+				"  public class Child extends VarForMethodInvocation3 {\n" +
+				"    public void test() {\n" +
+				"      super.getAdapter(VarForMethodInvocation3.class).var$\n" +
+				"    }\n" +
+				"  } \n" +
+				"}");
+
+		int completionIndex= getCompletionIndex(buf);
+		ICompilationUnit cu= getCompilationUnit(pkg, buf, "VarForMethodInvocation3.java");
+		List<ICompletionProposal> proposals= computeCompletionProposals(cu, completionIndex);
+
+		assertProposalsExist(Arrays.asList("var - Creates a new variable"), proposals);
+
+		ITextViewer viewer= initializeViewer(cu);
+		applyProposal(viewer, proposals, "var", completionIndex);
+
+		StringBuffer expected= new StringBuffer();
+		expected.append("package test;\n" +
+				"public class VarForMethodInvocation3 {\n" +
+				"  public <T> T getAdapter(Class<T> required) {\n" +
+				"    return null;\n" +
+				"  } \n" +
+				"  public class Child extends VarForMethodInvocation3 {\n" +
+				"    public void test() {\n" +
+				"      VarForMethodInvocation3 name = super.getAdapter(VarForMethodInvocation3.class);\n" +
+				"    }\n" +
+				"  } \n" +
+				"}");
+
+		assertEquals(expected.toString(), viewer.getDocument().get());
+	}
+
+	public void testBegForVoidMethodInvocation() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n" +
+				"public class BegForVoidMethodInvocation {\n" +
+				"  public void test() {\n" +
+				"    getFoo(String.class).beg$\n" +
+				"  } \n" +
+				"  public <T> void getFoo (Class <T> foo) {\n" +
+				"  } \n" +
+				"}");
+
+		int completionIndex= getCompletionIndex(buf);
+		ICompilationUnit cu= getCompilationUnit(pkg, buf, "BegForVoidMethodInvocation.java");
+		List<ICompletionProposal> proposals= computeCompletionProposals(cu, completionIndex);
+
+		assertProposalsExist(Arrays.asList("beg - Sets the cursor to the begin of the expression"), proposals);
+
+		ITextViewer viewer= initializeViewer(cu);
+		applyProposal(viewer, proposals, "beg", completionIndex);
+
+		int expectedBeg = buf.toString().indexOf("getFoo(String.class)");
+		assertEquals(expectedBeg, viewer.getSelectedRange().x);
+	}
+
 	public void testVarForAnonymousClass() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test;\n" +
