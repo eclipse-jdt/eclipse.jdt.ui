@@ -130,7 +130,7 @@ public class BinaryReferencesTests {
 	}
 
 	@Test
-	public void renameType01() throws Exception {
+	public void testRenameType01() throws Exception {
 		RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_TYPE);
 		descriptor.setJavaElement(findType("source.BaseClass"));
 		descriptor.setNewName("RenamedBaseClass");
@@ -145,7 +145,7 @@ public class BinaryReferencesTests {
 	}
 
 	@Test
-	public void renameType02() throws Exception {
+	public void testRenameType02() throws Exception {
 		RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_TYPE);
 		descriptor.setJavaElement(findType("source.Color"));
 		descriptor.setNewName("Colour");
@@ -189,7 +189,7 @@ public class BinaryReferencesTests {
 	}
 
 	@Test
-	public void renameVirtualMethod01() throws Exception {
+	public void testRenameVirtualMethod01() throws Exception {
 		List<SearchMatch> matches= doRenameMethod("source.BaseClass", "baseMethod");
 		assertContainsMatches(matches, new String[] {
 				"=BinaryReference/binary<ref(SubClass.class[SubClass~baseMethod"
@@ -197,7 +197,7 @@ public class BinaryReferencesTests {
 	}
 
 	@Test
-	public void renameVirtualMethod02() throws Exception {
+	public void testRenameVirtualMethod02() throws Exception {
 		List<SearchMatch> matches= doRenameMethod("source.BaseClass", "compareTo");
 		assertContainsMatches(matches, new String[] {
 				"=BinaryReference/binary<ref(SubClass.class[SubClass~compareTo~Lsource.BaseClass;"
@@ -205,7 +205,7 @@ public class BinaryReferencesTests {
 	}
 
 	@Test
-	public void renameVirtualMethod03() throws Exception {
+	public void testRenameVirtualMethod03() throws Exception {
 		List<SearchMatch> matches= doRenameMethod("source.BaseClass", "referencedVirtualMethod");
 		assertContainsMatches(matches, new String[] {
 				"=BinaryReference/binary<ref(ReferenceClass.class[ReferenceClass~main~\\[Ljava.lang.String;",
@@ -215,7 +215,7 @@ public class BinaryReferencesTests {
 	}
 
 	@Test
-	public void renameNonVirtualMethod01() throws Exception {
+	public void testRenameNonVirtualMethod01() throws Exception {
 		List<SearchMatch> matches= doRenameMethod("source.BaseClass", "referencedMethod");
 		assertContainsMatches(matches, new String[] {
 				"=BinaryReference/binary<ref(ReferenceClass.class[ReferenceClass~main~\\[Ljava.lang.String;"
@@ -223,7 +223,7 @@ public class BinaryReferencesTests {
 	}
 
 	@Test
-	public void renameNonVirtualMethod02() throws Exception {
+	public void testRenameNonVirtualMethod02() throws Exception {
 		List<SearchMatch> matches= doRenameMethod("source.BaseClass", "referencedStaticMethod");
 		assertContainsMatches(matches, new String[] {
 				"=BinaryReference/binary<ref(ReferenceClass.class[ReferenceClass~main~\\[Ljava.lang.String;"
@@ -242,7 +242,7 @@ public class BinaryReferencesTests {
 	}
 
 	@Test
-	public void renameField01() throws Exception {
+	public void testRenameField01() throws Exception {
 		List<SearchMatch> matches= doRenameField("source.BaseClass", "fProtected");
 		assertContainsMatches(matches, new String[] {
 				"=BinaryReference/binary<ref(SubClass.class[SubClass~SubClass~I"
@@ -250,7 +250,7 @@ public class BinaryReferencesTests {
 	}
 
 	@Test
-	public void renameField02() throws Exception {
+	public void testRenameField02() throws Exception {
 		List<SearchMatch> matches= doRenameField("source.BaseClass", "fPublic");
 		assertContainsMatches(matches, new String[] {
 				"=BinaryReference/binary<ref(ReferenceClass.class[ReferenceClass~main~\\[Ljava.lang.String;"
@@ -258,7 +258,7 @@ public class BinaryReferencesTests {
 	}
 
 	@Test
-	public void renameField03() throws Exception {
+	public void testRenameField03() throws Exception {
 		List<SearchMatch> matches= doRenameField("source.Color", "RED");
 		assertContainsMatches(matches, new String[] {
 				"=BinaryReference/binary<ref(ReferenceClass.class[ReferenceClass~main~\\[Ljava.lang.String;"
@@ -266,7 +266,7 @@ public class BinaryReferencesTests {
 	}
 
 	@Test
-	public void renameField04() throws Exception {
+	public void testRenameField04() throws Exception {
 		if (BUG_226660) // https://bugs.eclipse.org/bugs/show_bug.cgi?id=226660
 			return;
 		List<SearchMatch> matches= doRenameField("source.Color", "GREEN");
@@ -276,7 +276,7 @@ public class BinaryReferencesTests {
 	}
 
 	@Test
-	public void renamePackage01() throws Exception {
+	public void testRenamePackage01() throws Exception {
 		RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_PACKAGE);
 		IPackageFragment pack= findType("source.BaseClass").getPackageFragment();
 		descriptor.setJavaElement(pack);
@@ -295,7 +295,7 @@ public class BinaryReferencesTests {
 	}
 
 	@Test
-	public void renamePackage02() throws Exception {
+	public void testRenamePackage02() throws Exception {
 		RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_PACKAGE);
 		IPackageFragment pack= findType("source.BaseClass").getPackageFragment();
 		descriptor.setJavaElement(pack);
@@ -348,7 +348,7 @@ public class BinaryReferencesTests {
 	}
 
 	@Test
-	public void changeSignature01() throws Exception {
+	public void testChangeSignature01() throws Exception {
 		List<SearchMatch> matches= doChangeSignature("source.BaseClass", "baseMethod");
 		assertContainsMatches(matches, new String[] {
 				"=BinaryReference/binary<ref(SubClass.class[SubClass~baseMethod",
@@ -357,7 +357,7 @@ public class BinaryReferencesTests {
 	}
 
 	@Test
-	public void changeSignature02() throws Exception {
+	public void testChangeSignature02() throws Exception {
 		List<SearchMatch> matches= doChangeSignature("source.BaseClass", "compareTo");
 		assertContainsMatches(matches, new String[] {
 				"=BinaryReference/binary<ref(SubClass.class[SubClass~compareTo~Lsource.BaseClass;"
@@ -365,7 +365,7 @@ public class BinaryReferencesTests {
 	}
 
 	@Test
-	public void changeSignature03() throws Exception {
+	public void testChangeSignature03() throws Exception {
 		List<SearchMatch> matches= doChangeSignature("source.BaseClass", "referencedMethod");
 		assertContainsMatches(matches, new String[] {
 				"=BinaryReference/binary<ref(ReferenceClass.class[ReferenceClass~main~\\[Ljava.lang.String;"
@@ -373,7 +373,7 @@ public class BinaryReferencesTests {
 	}
 
 	@Test
-	public void changeConstructorSignature01() throws Exception {
+	public void testChangeConstructorSignature01() throws Exception {
 		List<SearchMatch> matches= doChangeSignature("source.BaseClass", "BaseClass");
 		assertContainsMatches(matches, new String[] {
 				"=BinaryReference/binary<ref(SubClass.class[SubClass~SubClass~I",
@@ -391,7 +391,7 @@ public class BinaryReferencesTests {
 	}
 
 	@Test
-	public void inlineMethod01() throws Exception {
+	public void testInlineMethod01() throws Exception {
 		List<SearchMatch> matches= doInlineMethod("source.BaseClass", "referencedMethod");
 		assertContainsMatches(matches, new String[] {
 				"=BinaryReference/binary<ref(ReferenceClass.class[ReferenceClass~main~\\[Ljava.lang.String;"
@@ -399,7 +399,7 @@ public class BinaryReferencesTests {
 	}
 
 	@Test
-	public void inlineMethod02() throws Exception {
+	public void testInlineMethod02() throws Exception {
 		// no error if inlining only selected reference from source
 		IMethod baseMethod= findMethod(findType("source.BaseClass"), "baseMethod");
 		ICompilationUnit cu= baseMethod.getCompilationUnit();
@@ -428,7 +428,7 @@ public class BinaryReferencesTests {
 	}
 
 	@Test
-	public void moveType01() throws Exception {
+	public void testMoveType01() throws Exception {
 		List<SearchMatch> matches= doMoveType("source.BaseClass", "source.sub");
 		assertContainsMatches(matches, new String[] {
 				"=BinaryReference/binary<ref(SubClass.class[SubClass",
@@ -451,7 +451,7 @@ public class BinaryReferencesTests {
 	}
 
 	@Test
-	public void moveStaticMember01() throws Exception {
+	public void testMoveStaticMember01() throws Exception {
 		IType type= findType("source.BaseClass");
 		IMethod method= findMethod(type, "referencedStaticMethod");
 		IField field= type.getField("CONST");
@@ -463,7 +463,7 @@ public class BinaryReferencesTests {
 	}
 
 	@Test
-	public void moveMethod01() throws Exception {
+	public void testMoveMethod01() throws Exception {
 		IType type= findType("source.BaseClass");
 		IMethod method= findMethod(type, "referencedMethod");
 
