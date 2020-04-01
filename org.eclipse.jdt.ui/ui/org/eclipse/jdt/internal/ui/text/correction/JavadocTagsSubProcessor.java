@@ -62,6 +62,7 @@ import org.eclipse.jdt.core.dom.ModuleDirective;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.ProvidesDirective;
+import org.eclipse.jdt.core.dom.RecordDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
@@ -663,17 +664,30 @@ public class JavadocTagsSubProcessor {
 	 			}
 	 		} else if (declaration instanceof AbstractTypeDeclaration) {
 	 			String typeQualifiedName= Bindings.getTypeQualifiedName(binding);
-	 			String[] typeParamNames;
+	 			String[] typeParamNames, params;
 	 			if (declaration instanceof TypeDeclaration) {
 	 				List<TypeParameter> typeParams= ((TypeDeclaration) declaration).typeParameters();
 	 				typeParamNames= new String[typeParams.size()];
 	 				for (int i= 0; i < typeParamNames.length; i++) {
 	 					typeParamNames[i]= (typeParams.get(i)).getName().getIdentifier();
 	 				}
+	 				params= new String[0];
+	 			} else if (declaration instanceof RecordDeclaration) {
+	 				List<SingleVariableDeclaration> recComps= ((RecordDeclaration)declaration).recordComponents();
+	 				params= new String[recComps.size()];
+	 				for (int i= 0; i < params.length; i++) {
+	 					params[i]= (recComps.get(i)).getName().getIdentifier();
+	 				}
+	 				List<TypeParameter> typeParams= ((RecordDeclaration) declaration).typeParameters();
+	 				typeParamNames= new String[typeParams.size()];
+	 				for (int i= 0; i < typeParamNames.length; i++) {
+	 					typeParamNames[i]= (typeParams.get(i)).getName().getIdentifier();
+	 				}
 	 			} else {
 	 				typeParamNames= new String[0];
+	 				params= new String[0];
 	 			}
-	 			String string= CodeGeneration.getTypeComment(cu, typeQualifiedName, typeParamNames, String.valueOf('\n'));
+	 			String string= CodeGeneration.getTypeComment(cu, typeQualifiedName, typeParamNames, params, String.valueOf('\n'));
 	 			if (string != null) {
 	 				String label= CorrectionMessages.JavadocTagsSubProcessor_addjavadoc_type_description;
 	 				proposals.add(new AddJavadocCommentProposal(label, cu, IProposalRelevance.ADD_JAVADOC_TYPE, declaration.getStartPosition(), string));

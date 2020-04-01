@@ -134,7 +134,7 @@ public class CodeGeneration {
 	 * @throws CoreException Thrown when the evaluation of the code template fails.
 	 */
 	public static String getTypeComment(ICompilationUnit cu, String typeQualifiedName, String lineDelimiter) throws CoreException {
-		return StubUtility.getTypeComment(cu, typeQualifiedName, EMPTY, lineDelimiter);
+		return StubUtility.getTypeComment(cu, typeQualifiedName, EMPTY, EMPTY, lineDelimiter);
 	}
 
 	/**
@@ -149,7 +149,23 @@ public class CodeGeneration {
 	 * @since 3.1
 	 */
 	public static String getTypeComment(ICompilationUnit cu, String typeQualifiedName, String[] typeParameterNames, String lineDelimiter) throws CoreException {
-		return StubUtility.getTypeComment(cu, typeQualifiedName, typeParameterNames, lineDelimiter);
+		return StubUtility.getTypeComment(cu, typeQualifiedName, typeParameterNames, EMPTY, lineDelimiter);
+	}
+
+	/**
+	 * Returns the content for a new type comment using the 'type comment' code template. The returned content is unformatted and is not indented.
+	 * @param cu The compilation unit where the type is contained. The compilation unit does not need to exist.
+	 * @param typeQualifiedName The name of the type to which the comment is added. For inner types the name must be qualified and include the outer
+	 * types names (dot separated). See {@link org.eclipse.jdt.core.IType#getTypeQualifiedName(char)}.
+	 * @param typeParameterNames The type parameter names
+	 * @param params The parameter names - currently useful only for records
+	 * @param lineDelimiter The line delimiter to be used.
+	 * @return Returns the new content or <code>null</code> if the code template is undefined or empty. The returned content is unformatted and is not indented.
+	 * @throws CoreException Thrown when the evaluation of the code template fails.
+	 * @since 1.14
+	 */
+	public static String getTypeComment(ICompilationUnit cu, String typeQualifiedName, String[] typeParameterNames, String[] params, String lineDelimiter) throws CoreException {
+		return StubUtility.getTypeComment(cu, typeQualifiedName, typeParameterNames, params ,lineDelimiter);
 	}
 
 	/**

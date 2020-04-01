@@ -62,7 +62,7 @@ public class Java14ProjectTestSetup extends ProjectTestSetup {
 	protected IJavaProject createAndInitializeProject() throws CoreException {
 		IJavaProject javaProject= JavaProjectHelper.createJavaProject(PROJECT_NAME14, "bin");
 		javaProject.setRawClasspath(getDefaultClasspath(), null);
-		JavaProjectHelper.set12CompilerOptions(javaProject, enable_preview_feature);
+		JavaProjectHelper.set14CompilerOptions(javaProject, enable_preview_feature);
 		return javaProject;
 	}
 
