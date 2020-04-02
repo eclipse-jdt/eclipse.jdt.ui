@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -29,8 +29,8 @@ import org.eclipse.jface.text.templates.TemplateTranslator;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -88,7 +88,7 @@ public class JavaDocContext extends CompilationUnitContext {
 		String key= getKey().toLowerCase();
 		if (template.matches(key, getContextType().getId()) && key.length() != 0) {
 			String templateName= template.getName().toLowerCase();
-			return JavaCore.ENABLED.equals(JavaCore.getOption(JavaCore.CODEASSIST_SUBSTRING_MATCH))
+			return JavaManipulationPlugin.CODEASSIST_SUBSTRING_MATCH_ENABLED
 					? templateName.contains(key)
 					: templateName.startsWith(key);
 		}

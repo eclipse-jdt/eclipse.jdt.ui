@@ -830,7 +830,6 @@ public final class PreferencesMessages extends NLS {
 	public static String JavaBasePreferencePage_do_not_hide_dialog_title;
 	public static String JavaBasePreferencePage_do_not_hide_dialog_message;
 	public static String CodeAssistConfigurationBlock_matchCamelCase_label;
-	public static String CodeAssistConfigurationBlock_matchSubstring_label;
 	public static String CodeAssistConfigurationBlock_matchSubword_label;
 	public static String ComplianceConfigurationBlock_version16;
 	public static String ComplianceConfigurationBlock_version17;

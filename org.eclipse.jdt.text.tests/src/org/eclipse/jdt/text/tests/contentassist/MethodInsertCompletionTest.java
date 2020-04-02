@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2016 IBM Corporation and others.
+ * Copyright (c) 2005, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -108,7 +108,6 @@ public class MethodInsertCompletionTest extends AbstractCompletionTest {
 	public void test1() throws Exception {
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_PREFIX_COMPLETION, true);
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_AUTOINSERT, true);
-		setCoreOption(JavaCore.CODEASSIST_SUBSTRING_MATCH, JavaCore.ENABLED);
 		addLocalVariables("String s;");
 		assertMethodBodyIncrementalCompletion("s.ind|", "s.indexOf|");
 	}
@@ -116,7 +115,6 @@ public class MethodInsertCompletionTest extends AbstractCompletionTest {
 	public void test2() throws Exception {
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_PREFIX_COMPLETION, true);
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_AUTOINSERT, true);
-		setCoreOption(JavaCore.CODEASSIST_SUBSTRING_MATCH, JavaCore.ENABLED);
 		addLocalVariables("String s;");
 		assertMethodBodyIncrementalCompletion("s.su|", "s.sub|");
 	}
@@ -124,7 +122,6 @@ public class MethodInsertCompletionTest extends AbstractCompletionTest {
 	public void test3() throws Exception {
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_PREFIX_COMPLETION, true);
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_AUTOINSERT, true);
-		setCoreOption(JavaCore.CODEASSIST_SUBSTRING_MATCH, JavaCore.ENABLED);
 		addLocalVariables("String s;");
 		assertMethodBodyIncrementalCompletion("s.tar|", "s.tartsWith|");
 	}
@@ -132,7 +129,6 @@ public class MethodInsertCompletionTest extends AbstractCompletionTest {
 	public void test4() throws Exception {
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_PREFIX_COMPLETION, true);
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_AUTOINSERT, true);
-		setCoreOption(JavaCore.CODEASSIST_SUBSTRING_MATCH, JavaCore.ENABLED);
 		addLocalVariables("String s;");
 		assertMethodBodyIncrementalCompletion("s.Po|", "s.Point|");
 	}
@@ -140,7 +136,6 @@ public class MethodInsertCompletionTest extends AbstractCompletionTest {
 	public void test5() throws Exception {
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_PREFIX_COMPLETION, true);
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_AUTOINSERT, true);
-		setCoreOption(JavaCore.CODEASSIST_SUBSTRING_MATCH, JavaCore.ENABLED);
 		addLocalVariables("String s;");
 		assertMethodBodyIncrementalCompletion("s.ubs|", "s.ubs|");
 	}
@@ -148,7 +143,6 @@ public class MethodInsertCompletionTest extends AbstractCompletionTest {
 	public void test6() throws Exception {
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_PREFIX_COMPLETION, true);
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_AUTOINSERT, true);
-		setCoreOption(JavaCore.CODEASSIST_SUBSTRING_MATCH, JavaCore.ENABLED);
 		addLocalVariables("String s;");
 		assertMethodBodyIncrementalCompletion("s.Su|", "s.sub|");
 	}

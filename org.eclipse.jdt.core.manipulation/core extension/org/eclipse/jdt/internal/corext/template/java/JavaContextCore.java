@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 IBM Corporation and others.
+ * Copyright (c) 2019, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -51,7 +51,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.Signature;
@@ -183,7 +182,7 @@ public class JavaContextCore extends CompilationUnitContext implements IJavaCont
 		String key= getKey().toLowerCase();
 		if (key.length() > 0 || !isAfterDot()) {
 			String templateName= template.getName().toLowerCase();
-			return JavaCore.ENABLED.equals(JavaCore.getOption(JavaCore.CODEASSIST_SUBSTRING_MATCH))
+			return JavaManipulationPlugin.CODEASSIST_SUBSTRING_MATCH_ENABLED
 					? templateName.contains(key)
 					: templateName.startsWith(key);
 		}
