@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 IBM Corporation and others.
+ * Copyright (c) 2019, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,24 +13,19 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
-import junit.framework.Test;
+import org.junit.ClassRule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
+import org.eclipse.jdt.ui.tests.CustomBaseRunner;
+import org.eclipse.jdt.ui.tests.IgnoreInheritedTests;
+
+@IgnoreInheritedTests
+@RunWith(CustomBaseRunner.class)
 public class ExtractMethodTests13 extends ExtractMethodTests {
-	private static ExtractMethodTestSetup13 fgTestSetup;
 
-	public ExtractMethodTests13(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		fgTestSetup= new ExtractMethodTestSetup13(new NoSuperTestsSuite(ExtractMethodTests13.class));
-		return fgTestSetup;
-	}
-
-	public static Test setUpTest(Test test) {
-		fgTestSetup= new ExtractMethodTestSetup13(test);
-		return fgTestSetup;
-	}
+	@ClassRule
+	public static ExtractMethodTestSetup13 fgTestSetup= new ExtractMethodTestSetup13();
 
 	@Override
 	protected void invalidSelectionTest() throws Exception {
@@ -41,10 +36,12 @@ public class ExtractMethodTests13 extends ExtractMethodTests {
 		performTest(fgTestSetup.getTry13Package(), "A", COMPARE_WITH_OUTPUT, "try13_out");
 	}
 
+	@Test
 	public void testSwitchExpr1() throws Exception {
 		try13Test();
 	}
 
+	@Test
 	public void testSwitchExpr2() throws Exception {
 		invalidSelectionTest();
 	}

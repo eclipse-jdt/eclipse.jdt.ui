@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 IBM Corporation and others.
+ * Copyright (c) 2019, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -18,20 +18,16 @@ import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
-import junit.framework.Test;
+import org.eclipse.jdt.ui.tests.refactoring.rules.Java13Setup;
 
 public class ExtractMethodTestSetup13 extends Java13Setup {
 
 	private IPackageFragment fTry13Package;
 	private IPackageFragment fInvalidSelectionPackage;
 
-	public ExtractMethodTestSetup13(Test test) {
-		super(test);
-	}
-
 	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
+	public void before() throws Exception {
+		super.before();
 
 		RefactoringCore.getUndoManager().flush();
 

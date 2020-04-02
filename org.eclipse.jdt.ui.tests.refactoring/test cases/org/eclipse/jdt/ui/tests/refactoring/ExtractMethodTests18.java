@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2014 IBM Corporation and others.
+ * Copyright (c) 2013, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,26 +13,21 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
-import junit.framework.Test;
+import org.junit.ClassRule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import org.eclipse.jdt.core.dom.Modifier;
 
+import org.eclipse.jdt.ui.tests.CustomBaseRunner;
+import org.eclipse.jdt.ui.tests.IgnoreInheritedTests;
+
+@IgnoreInheritedTests
+@RunWith(CustomBaseRunner.class)
 public class ExtractMethodTests18 extends ExtractMethodTests {
-	private static ExtractMethodTestSetup18 fgTestSetup;
 
-	public ExtractMethodTests18(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		fgTestSetup= new ExtractMethodTestSetup18(new NoSuperTestsSuite(ExtractMethodTests18.class));
-		return fgTestSetup;
-	}
-
-	public static Test setUpTest(Test test) {
-		fgTestSetup= new ExtractMethodTestSetup18(test);
-		return fgTestSetup;
-	}
+	@ClassRule
+	public static ExtractMethodTestSetup18 fgTestSetup= new ExtractMethodTestSetup18();
 
 	protected void defaultMethodsTest(int destination, int visibility) throws Exception {
 		performTest(fgTestSetup.getDefaultMethodsPackage(), "A", COMPARE_WITH_OUTPUT, "defaultMethods18_out", null, null, destination, visibility);
@@ -55,41 +50,50 @@ public class ExtractMethodTests18 extends ExtractMethodTests {
 	//====================================================================================
 
 	@Override
+	@Test
 	public void test1() throws Exception {
 		defaultMethodsTest(0, Modifier.PUBLIC);
 	}
 
+	@Test
 	public void test1a() throws Exception {
 		defaultMethodsTest(0, Modifier.PUBLIC);
 	}
 
 	@Override
+	@Test
 	public void test2() throws Exception {
 		defaultMethodsTest(1, Modifier.PROTECTED);
 	}
 
+	@Test
 	public void test2a() throws Exception {
 		defaultMethodsTest(1, Modifier.PROTECTED);
 	}
 
 	@Override
+	@Test
 	public void test3() throws Exception {
 		defaultMethodsTest(1, Modifier.PUBLIC);
 	}
 
+	@Test
 	public void test3a() throws Exception {
 		defaultMethodsTest(1, Modifier.PUBLIC);
 	}
 
 	@Override
+	@Test
 	public void test4() throws Exception {
 		defaultMethodsTest(1, Modifier.PUBLIC);
 	}
 
+	@Test
 	public void test5() throws Exception {
 		defaultMethodsTest(0, Modifier.PUBLIC);
 	}
 
+	@Test
 	public void test6() throws Exception {
 		defaultMethodsTest(0, Modifier.PUBLIC);
 	}
@@ -99,36 +103,43 @@ public class ExtractMethodTests18 extends ExtractMethodTests {
 	//====================================================================================
 
 	@Override
+	@Test
 	public void test101() throws Exception {
 		staticMethodsTest(1, Modifier.PUBLIC);
 	}
 
 	@Override
+	@Test
 	public void test102() throws Exception {
 		staticMethodsTest(1, Modifier.PUBLIC);
 	}
 
 	@Override
+	@Test
 	public void test103() throws Exception {
 		staticMethodsTest(0, Modifier.PUBLIC);
 	}
 
 	@Override
+	@Test
 	public void test104() throws Exception {
 		staticMethodsTest(1, Modifier.PUBLIC);
 	}
 
 	@Override
+	@Test
 	public void test105() throws Exception {
 		staticMethodsTest(2, Modifier.PUBLIC);
 	}
 
 	@Override
+	@Test
 	public void test106() throws Exception {
 		staticMethodsTest(1, Modifier.PUBLIC);
 	}
 
 	@Override
+	@Test
 	public void test107() throws Exception {
 		staticMethodsTest(1, Modifier.PUBLIC);
 	}
@@ -138,20 +149,24 @@ public class ExtractMethodTests18 extends ExtractMethodTests {
 	//====================================================================================
 
 	@Override
+	@Test
 	public void test201() throws Exception {
 		destinationTest(0, Modifier.PUBLIC);
 	}
 
 	@Override
+	@Test
 	public void test202() throws Exception {
 		destinationTest(0, Modifier.PUBLIC);
 	}
 
 	@Override
+	@Test
 	public void test203() throws Exception {
 		destinationTest(1, Modifier.PROTECTED);
 	}
 
+	@Test
 	public void test204() throws Exception {
 		destinationTest(1, Modifier.PROTECTED);
 	}
@@ -161,115 +176,141 @@ public class ExtractMethodTests18 extends ExtractMethodTests {
 	//====================================================================================
 
 	@Override
+	@Test
 	public void test301() throws Exception {
 		lambdaExpressionTest(0, Modifier.PRIVATE);
 	}
 
 	@Override
+	@Test
 	public void test302() throws Exception {
 		lambdaExpressionTest(1, Modifier.PRIVATE);
 	}
 
+	@Test
 	public void test303() throws Exception {
 		lambdaExpressionTest(0, Modifier.PRIVATE);
 	}
 
 	@Override
+	@Test
 	public void test304() throws Exception {
 		lambdaExpressionTest(0, Modifier.PRIVATE);
 	}
 
 	@Override
+	@Test
 	public void test305() throws Exception {
 		lambdaExpressionTest(0, Modifier.PUBLIC);
 	}
 
 	@Override
+	@Test
 	public void test306() throws Exception {
 		lambdaExpressionTest(0, Modifier.PUBLIC);
 	}
 
 	@Override
+	@Test
 	public void test307() throws Exception {
 		lambdaExpressionTest(0, Modifier.PRIVATE);
 	}
 
 	@Override
+	@Test
 	public void test308() throws Exception {
 		lambdaExpressionTest(0, Modifier.PRIVATE);
 	}
 
 	@Override
+	@Test
 	public void test309() throws Exception {
 		lambdaExpressionTest(0, Modifier.PRIVATE);
 	}
 
 	@Override
+	@Test
 	public void test310() throws Exception {
 		lambdaExpressionTest(0, Modifier.PRIVATE);
 	}
 
 	@Override
+	@Test
 	public void test311() throws Exception {
 		lambdaExpressionTest(0, Modifier.PRIVATE);
 	}
 
+	@Test
 	public void test312() throws Exception {
 		performTest(fgTestSetup.getLambdaExpressionPackage(), "A", INVALID_SELECTION, null);
 	}
 
+	@Test
 	public void test313() throws Exception {
 		lambdaExpressionTest(0, Modifier.PRIVATE);
 	}
 
+	@Test
 	public void test314() throws Exception {
 		lambdaExpressionTest(0, Modifier.PRIVATE);
 	}
 
+	@Test
 	public void test315() throws Exception {
 		lambdaExpressionTest(0, Modifier.PRIVATE);
 	}
 
+	@Test
 	public void test316() throws Exception {
 		lambdaExpressionTest(0, Modifier.PUBLIC);
 	}
 
+	@Test
 	public void test317() throws Exception {
 		lambdaExpressionTest(0, Modifier.PUBLIC);
 	}
 
+	@Test
 	public void test318() throws Exception {
 		performTest(fgTestSetup.getLambdaExpressionPackage(), "A", INVALID_SELECTION, null);
 	}
 
+	@Test
 	public void test319() throws Exception {
 		lambdaExpressionTest(0, Modifier.PUBLIC);
 	}
 
+	@Test
 	public void test320() throws Exception {
 		performTest(fgTestSetup.getLambdaExpressionPackage(), "A", INVALID_SELECTION, null);
 	}
 
+	@Test
 	public void test321() throws Exception {
 		performTest(fgTestSetup.getLambdaExpressionPackage(), "A", INVALID_SELECTION, null);
 	}
 
+	@Test
 	public void test322() throws Exception {
 		performTest(fgTestSetup.getLambdaExpressionPackage(), "A", INVALID_SELECTION, null);
 	}
 
+	@Test
 	public void test323() throws Exception {
 		lambdaExpressionTest(0, Modifier.PUBLIC);
 	}
 
+	@Test
 	public void test324() throws Exception {
 		performTest(fgTestSetup.getLambdaExpressionPackage(), "A", VALID_SELECTION, null);
 	}
 
+	@Test
 	public void test325() throws Exception {
 		lambdaExpressionTest(0, Modifier.PRIVATE);
 	}
 
+	@Test
 	public void test326() throws Exception {
 		lambdaExpressionTest(0, Modifier.PUBLIC);
 	}

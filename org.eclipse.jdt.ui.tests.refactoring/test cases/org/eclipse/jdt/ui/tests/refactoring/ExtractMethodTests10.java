@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 IBM Corporation and others.
+ * Copyright (c) 2018, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,24 +13,19 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
-import junit.framework.Test;
+import org.junit.ClassRule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
+import org.eclipse.jdt.ui.tests.CustomBaseRunner;
+import org.eclipse.jdt.ui.tests.IgnoreInheritedTests;
+
+@IgnoreInheritedTests
+@RunWith(CustomBaseRunner.class)
 public class ExtractMethodTests10 extends ExtractMethodTests {
-	private static ExtractMethodTestSetup10 fgTestSetup;
 
-	public ExtractMethodTests10(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		fgTestSetup= new ExtractMethodTestSetup10(new NoSuperTestsSuite(ExtractMethodTests10.class));
-		return fgTestSetup;
-	}
-
-	public static Test setUpTest(Test test) {
-		fgTestSetup= new ExtractMethodTestSetup10(test);
-		return fgTestSetup;
-	}
+	@ClassRule
+	public static ExtractMethodTestSetup10 fgTestSetup= new ExtractMethodTestSetup10();
 
 	protected void try10Test() throws Exception {
 		performTest(fgTestSetup.getTry10Package(), "A", COMPARE_WITH_OUTPUT, "try10_out");
@@ -40,6 +35,7 @@ public class ExtractMethodTests10 extends ExtractMethodTests {
 	// Testing var type
 	//====================================================================================
 
+	@Test
 	public void testVar1() throws Exception {
 		try10Test();
 	}

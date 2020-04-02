@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 IBM Corporation and others.
+ * Copyright (c) 2011, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,25 +13,21 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
-import junit.framework.Test;
-
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+
+import org.eclipse.jdt.ui.tests.refactoring.rules.Java17Setup;
 
 public class ExtractMethodTestSetup17 extends Java17Setup {
 
 	private IPackageFragment fTry17Package;
 	private IPackageFragment fInvalidSelectionPackage;
 
-	public ExtractMethodTestSetup17(Test test) {
-		super(test);
-	}
-
 	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
+	public void before() throws Exception {
+		super.before();
 
 		RefactoringCore.getUndoManager().flush();
 
