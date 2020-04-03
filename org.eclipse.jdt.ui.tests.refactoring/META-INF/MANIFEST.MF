@@ -9,6 +9,7 @@ Bundle-ActivationPolicy: lazy
 Bundle-Vendor: %Plugin.providerName
 Bundle-Localization: plugin
 Export-Package: 
+ org.eclipse.jdt.ui.tests;x-internal:=true,
  org.eclipse.jdt.ui.tests.refactoring;x-internal:=true,
  org.eclipse.jdt.ui.tests.refactoring.actions;x-internal:=true,
  org.eclipse.jdt.ui.tests.refactoring.all;x-internal:=true,
@@ -18,6 +19,7 @@ Export-Package:
  org.eclipse.jdt.ui.tests.refactoring.infra;x-internal:=true,
  org.eclipse.jdt.ui.tests.refactoring.nls;x-internal:=true,
  org.eclipse.jdt.ui.tests.refactoring.reorg;x-internal:=true,
+ org.eclipse.jdt.ui.tests.refactoring.rules;x-internal:=true,
  org.eclipse.jdt.ui.tests.refactoring.type;x-internal:=true,
  org.eclipse.jdt.ui.tests.refactoring.typeconstraints;x-internal:=true
 Require-Bundle: 
