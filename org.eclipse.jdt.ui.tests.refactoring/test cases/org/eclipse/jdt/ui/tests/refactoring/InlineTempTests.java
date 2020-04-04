@@ -16,6 +16,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Rule;
+import org.junit.Test;
+
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -26,31 +33,18 @@ import org.eclipse.jdt.core.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
+import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
-public class InlineTempTests extends RefactoringTest {
-
-	private static final Class<InlineTempTests> clazz= InlineTempTests.class;
+public class InlineTempTests extends GenericRefactoringTest {
 	private static final String REFACTORING_PATH= "InlineTemp/";
-
-	public InlineTempTests(String name) {
-		super(name);
-	}
 
 	@Override
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
 
-	public static Test suite() {
-		return new RefactoringTestSetup(new TestSuite(clazz));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new RefactoringTestSetup(test);
-	}
+	@Rule
+	public RefactoringTestSetup rts= new RefactoringTestSetup();
 
 	protected String getSimpleTestFileName(boolean canInline, boolean input){
 		String fileName = "A_" + getName();
@@ -81,7 +75,7 @@ public class InlineTempTests extends RefactoringTest {
 		if (ref.checkIfTempSelected().hasFatalError())
 			ref= null;
 		RefactoringStatus result= performRefactoring(ref);
-		assertEquals("precondition was supposed to pass", null, result);
+		assertNull("precondition was supposed to pass", result);
 
 		IPackageFragment pack= (IPackageFragment)cu.getParent();
 		String newCuName= getSimpleTestFileName(true, true);
@@ -120,248 +114,301 @@ public class InlineTempTests extends RefactoringTest {
 
 	//--- tests
 
+	@Test
 	public void test0() throws Exception{
 		helper1(4, 9, 4, 18);
 	}
 
+	@Test
 	public void test1() throws Exception{
 		helper1(4, 9, 4, 18);
 	}
 
+	@Test
 	public void test2() throws Exception{
 		helper1(4, 9, 4, 18);
 	}
 
+	@Test
 	public void test3() throws Exception{
 		helper1(4, 9, 4, 22);
 	}
 
+	@Test
 	public void test4() throws Exception{
 		helper1(4, 9, 4, 22);
 	}
 
+	@Test
 	public void test5() throws Exception{
 		helper1(4, 9, 4, 22);
 	}
 
+	@Test
 	public void test6() throws Exception{
 		//printTestDisabledMessage("bug#6429 declaration source start incorrect on local variable");
 		helper1(9, 13, 9, 14);
 	}
 
+	@Test
 	public void test7() throws Exception{
 		helper1(9, 9, 9, 18);
 	}
 
+	@Test
 	public void test8() throws Exception{
 		//printTestDisabledMessage("bug#6429 declaration source start incorrect on local variable");
 		helper1(5, 13, 5, 14);
 	}
 
+	@Test
 	public void test9() throws Exception{
 		helper1(5, 9, 5, 21);
 	}
 
+	@Test
 	public void test10() throws Exception{
 //		printTestDisabledMessage("regression test for bug#9001");
 		helper1(4, 21, 4, 25);
 	}
 
+	@Test
 	public void test11() throws Exception{
 		helper1(5, 21, 5, 25);
 	}
 
+	@Test
 	public void test12() throws Exception{
 		helper1(5, 15, 5, 19);
 	}
 
+	@Test
 	public void test13() throws Exception{
 		helper1(5, 17, 5, 18);
 	}
 
+	@Test
 	public void test14() throws Exception{
 //		printTestDisabledMessage("regression for bug 11664");
 		helper1(4, 13, 4, 14);
 	}
 
+	@Test
 	public void test15() throws Exception{
 //		printTestDisabledMessage("regression for bug 11664");
 		helper1(4, 19, 4, 20);
 	}
 
+	@Test
 	public void test16() throws Exception{
 //		printTestDisabledMessage("regression test for 10751");
 		helper1(5, 17, 5, 24);
 	}
 
+	@Test
 	public void test17() throws Exception{
 //		printTestDisabledMessage("regression test for 12200");
 		helper1(8, 18, 8, 21);
 	}
 
+	@Test
 	public void test18() throws Exception{
 //		printTestDisabledMessage("regression test for 12200");
 		helper1(6, 18, 6, 21);
 	}
 
+	@Test
 	public void test19() throws Exception{
 //		printTestDisabledMessage("regression test for 12212");
 		helper1(6, 19, 6, 19);
 	}
 
+	@Test
 	public void test20() throws Exception{
 //		printTestDisabledMessage("regression test for 16054");
 		helper1(4, 17, 4, 18);
 	}
 
+	@Test
 	public void test21() throws Exception{
 //		printTestDisabledMessage("regression test for 17479");
 		helper1(6, 20, 6, 25);
 	}
 
+	@Test
 	public void test22() throws Exception{
 //		printTestDisabledMessage("regression test for 18284");
 		helper1(5, 13, 5, 17);
 	}
 
+	@Test
 	public void test23() throws Exception{
 //		printTestDisabledMessage("regression test for 22938");
 		helper1(5, 16, 5, 20);
 	}
 
+	@Test
 	public void test24() throws Exception{
 //		printTestDisabledMessage("regression test for 26242");
 		helper1(5, 19, 5, 24);
 	}
 
+	@Test
 	public void test25() throws Exception{
 //		printTestDisabledMessage("regression test for 26242");
 		helper1(5, 19, 5, 24);
 	}
 
+	@Test
 	public void test26() throws Exception{
 		helper1(5, 17, 5, 24);
 	}
 
+	@Test
 	public void test27() throws Exception{
 		helper1(5, 22, 5, 29);
 	}
 
+	@Test
 	public void test28() throws Exception{
 		helper1(11, 14, 11, 21);
 	}
 
+	@Test
 	public void test29() throws Exception{
 		helper1(4, 8, 4, 11);
 	}
 
+	@Test
 	public void test30() throws Exception{
 		helper1(4, 8, 4, 11);
 	}
 
+	@Test
 	public void test31() throws Exception{
 		helper1(8, 30, 8, 30);
 	}
 
+	@Test
 	public void test32() throws Exception{
 		helper1(10, 27, 10, 27);
 	}
 
+	@Test
 	public void test33() throws Exception{
 		// add explicit cast for primitive types: https://bugs.eclipse.org/bugs/show_bug.cgi?id=46216
 		helper1(5, 14, 5, 15);
 	}
 
+	@Test
 	public void test34() throws Exception{
 		// add explicit cast for boxing: https://bugs.eclipse.org/bugs/show_bug.cgi?id=201434#c4
 		helper1(5, 17, 5, 17);
 	}
 
+	@Test
 	public void test35() throws Exception{
 		// add explicit cast for unchecked conversion: https://bugs.eclipse.org/bugs/show_bug.cgi?id=201434#c0
 		helper1(7, 32, 7, 36);
 	}
 
+	@Test
 	public void test36() throws Exception{
 		// parenthesize complex cast expression
 		helper1(6, 21, 6, 24);
 	}
 
+	@Test
 	public void test37() throws Exception{
 		// parameterized method invocation needs class expression: https://bugs.eclipse.org/bugs/show_bug.cgi?id=277968
 		helper1(5, 16, 5, 17);
 	}
 
+	@Test
 	public void test38() throws Exception{
 		// parameterized method invocation needs this expression: https://bugs.eclipse.org/bugs/show_bug.cgi?id=277968
 		helper1(5, 16, 5, 17);
 	}
 
+	@Test
 	public void test39() throws Exception{
 		// parameterized method invocation needs to keep super expression: https://bugs.eclipse.org/bugs/show_bug.cgi?id=277968
 		helper1(5, 16, 5, 17);
 	}
 
+	@Test
 	public void test40() throws Exception{
 		// better cast for unboxing: https://bugs.eclipse.org/bugs/show_bug.cgi?id=297868
 		helper1(5, 43, 5, 46);
 	}
 
+	@Test
 	public void test41() throws Exception {
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=335173
 		helper1(5, 13, 5, 14);
 	}
 
+	@Test
 	public void test42() throws Exception {
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=335173
 		helper1(5, 13, 5, 14);
 	}
 
+	@Test
 	public void test43() throws Exception {
 		// parenthesize complex cast expression https://bugs.eclipse.org/bugs/show_bug.cgi?id=335173
 		helper1(6, 21, 6, 24);
 	}
 
+	@Test
 	public void test44() throws Exception {
 		// don't add unnecessary cast to wildcard-parameterized type https://bugs.eclipse.org/bugs/show_bug.cgi?id=338271
 		helper1(7, 35, 7, 41);
 	}
 
+	@Test
 	public void test45() throws Exception {
 		// don't delete comment right before the local variable declaration (bug 295200)
 		helper1(5, 18, 5, 22);
 	}
 
+	@Test
 	public void test46() throws Exception {
 		// don't delete comment right after the local variable declaration (bug 318471)
 		helper1(5, 16, 5, 17);
 	}
 
+	@Test
 	public void test47() throws Exception {
 		// don't delete comment right before and after the local variable declaration (bug 295200)
 		helper1(5, 18, 5, 22);
 	}
 
+	@Test
 	public void test48() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=388078
 		helper1(6, 16, 6, 18);
 	}
 
+	@Test
 	public void test49() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=394721
 		helper1(5, 15, 5, 16);
 	}
 
+	@Test
 	public void test50() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=93850
 		helper1(4, 17, 4, 18);
 	}
 
+	@Test
 	public void test51() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=434747
 		helper1(4, 16, 4, 17);
 	}
 
+	@Test
 	public void test52() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=434747
 		helper1(4, 14, 4, 15);
@@ -369,59 +416,72 @@ public class InlineTempTests extends RefactoringTest {
 
 	//------
 
+	@Test
 	public void testFail0() throws Exception{
 		printTestDisabledMessage("compile errors are ok now");
 //		helper2();
 	}
 
+	@Test
 	public void testFail1() throws Exception{
 		printTestDisabledMessage("compile errors are ok now");
 //		helper2();
 	}
 
+	@Test
 	public void testFail2() throws Exception{
 		helper2();
 	}
 
+	@Test
 	public void testFail3() throws Exception{
 		helper2();
 	}
 
+	@Test
 	public void testFail4() throws Exception{
 		helper2();
 	}
 
+	@Test
 	public void testFail5() throws Exception{
 		helper2();
 	}
 
+	@Test
 	public void testFail6() throws Exception{
 		helper2();
 	}
 
+	@Test
 	public void testFail7() throws Exception{
 		helper2();
 	}
 
+	@Test
 	public void testFail8() throws Exception{
 		helper2();
 	}
 
+	@Test
 	public void testFail9() throws Exception{
 		//test for 16737
 		helper2(3, 9, 3, 13);
 	}
 
+	@Test
 	public void testFail10() throws Exception{
 		//test for 16737
 		helper2(3, 5, 3, 17);
 	}
 
+	@Test
 	public void testFail11() throws Exception{
 		//test for 17253
 		helper2(8, 14, 8, 18);
 	}
 
+	@Test
 	public void testFail12() throws Exception{
 		printTestDisabledMessage("compile errors are ok now");
 		//test for 19851
@@ -429,11 +489,13 @@ public class InlineTempTests extends RefactoringTest {
 	}
 
 
+	@Test
 	public void testFail13() throws Exception{
 //		printTestDisabledMessage("12106");
 		helper2(4, 18, 4, 19);
 	}
 
+	@Test
 	public void testFail14() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=93850
 		helper2(5, 17, 5, 18);

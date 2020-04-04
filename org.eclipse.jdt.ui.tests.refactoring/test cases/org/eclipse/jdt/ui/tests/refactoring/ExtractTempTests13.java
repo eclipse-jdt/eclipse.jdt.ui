@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 IBM Corporation and others.
+ * Copyright (c) 2014, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,23 +13,19 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
-import junit.framework.Test;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
+import org.eclipse.jdt.ui.tests.CustomBaseRunner;
+import org.eclipse.jdt.ui.tests.IgnoreInheritedTests;
+import org.eclipse.jdt.ui.tests.refactoring.rules.Java13Setup;
+
+@IgnoreInheritedTests
+@RunWith(CustomBaseRunner.class)
 public class ExtractTempTests13 extends ExtractTempTests {
-
-	private static final Class<ExtractTempTests13> clazz= ExtractTempTests13.class;
-
-	public ExtractTempTests13(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return new Java13Setup(new NoSuperTestsSuite(clazz));
-	}
-
-	public static Test setUpTest(Test someTest) {
-		return new Java13Setup(someTest);
-	}
+	@Rule
+	public Java13Setup js= new Java13Setup();
 
 	@Override
 	protected String getTestFileName(boolean canExtract, boolean input) {
@@ -40,6 +36,7 @@ public class ExtractTempTests13 extends ExtractTempTests {
 
 	//--- TESTS
 
+	@Test
 	public void test120() throws Exception {
 		helper1(6, 19, 9, 22, true, false, "string", "string");
 	}

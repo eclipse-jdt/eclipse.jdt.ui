@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 IBM Corporation and others.
+ * Copyright (c) 2011, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,23 +13,20 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
-import junit.framework.Test;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
+import org.eclipse.jdt.ui.tests.CustomBaseRunner;
+import org.eclipse.jdt.ui.tests.IgnoreInheritedTests;
+import org.eclipse.jdt.ui.tests.refactoring.rules.Java17Setup;
+import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
+
+@IgnoreInheritedTests
+@RunWith(CustomBaseRunner.class)
 public class InlineTempTests17 extends InlineTempTests {
-
-	private static final Class<InlineTempTests17> clazz= InlineTempTests17.class;
-
-	public InlineTempTests17(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return new Java17Setup(new NoSuperTestsSuite(clazz));
-	}
-
-	public static Test setUpTest(Test someTest) {
-		return new Java17Setup(someTest);
-	}
+	@Rule
+	public RefactoringTestSetup js= new Java17Setup();
 
 	@Override
 	protected String getTestFileName(boolean canInline, boolean input){
@@ -41,6 +38,7 @@ public class InlineTempTests17 extends InlineTempTests {
 	//--- tests
 
 	@Override
+	@Test
 	public void test0() throws Exception{
 		helper1(8, 19, 8, 23);
 	}

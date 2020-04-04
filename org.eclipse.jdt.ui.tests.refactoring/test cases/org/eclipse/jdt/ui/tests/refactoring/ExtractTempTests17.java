@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 IBM Corporation and others.
+ * Copyright (c) 2011, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,25 +13,22 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
-import junit.framework.Test;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
+import org.eclipse.jdt.ui.tests.CustomBaseRunner;
+import org.eclipse.jdt.ui.tests.IgnoreInheritedTests;
+import org.eclipse.jdt.ui.tests.refactoring.rules.Java17Setup;
+import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
+
+@IgnoreInheritedTests
+@RunWith(CustomBaseRunner.class)
 public class ExtractTempTests17 extends ExtractTempTests {
-
-	private static final Class<ExtractTempTests17> clazz= ExtractTempTests17.class;
-
-	public ExtractTempTests17(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return new Java17Setup(new NoSuperTestsSuite(clazz));
-	}
-
-	public static Test setUpTest(Test someTest) {
-		return new Java17Setup(someTest);
-	}
+	@Rule
+	public RefactoringTestSetup js= new Java17Setup();
 
 	@Override
 	protected String getTestFileName(boolean canExtract, boolean input){
@@ -43,31 +40,37 @@ public class ExtractTempTests17 extends ExtractTempTests {
 	//--- TESTS
 
 	@Override
+	@Test
 	public void test110() throws Exception {
 		helper1(14, 13, 14, 15, true, false, "temp", "ex2");
 	}
 
 	@Override
+	@Test
 	public void test111() throws Exception {
 		helper1(8, 16, 8, 33, true, false, "arrayList", "arrayList");
 	}
 
+	@Test
 	public void test112() throws Exception {
 		helper1(8, 20, 8, 37, true, false, "arrayList", "arrayList");
 	}
 
 	@Override
+	@Test
 	public void test113() throws Exception {
 		helper1(12, 16, 12, 33, true, false, "arrayList2", "arrayList2");
 	}
 
 	@Override
+	@Test
 	public void test114() throws Exception {
 		helper1(9, 34, 9, 56, true, false, "fileReader", "fileReader");
 	}
 
 	// -- testing failing preconditions
 	@Override
+	@Test
 	public void testFail1() throws Exception {
 		failHelper1(9, 14, 9, 56, false, false, "temp", RefactoringStatus.FATAL);
 	}
