@@ -80,7 +80,7 @@ public class TestRunListenerTest4 extends AbstractTestRunListenerTest {
 		String[] actual= runSequenceTest(aTestCase);
 		assertEqualLog(expectedSequence, actual);
 	}
-
+	@Test
 	public void testTreeOK() throws Exception {
 		String source=
 				"package pack;\n"+

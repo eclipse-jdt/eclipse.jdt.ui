@@ -125,7 +125,7 @@ public class PackageJavadocTests extends CoreTests {
 
 		Assert.assertTrue(actualHtmlContent, actualHtmlContent.contains("Test package documentation in package.html"));
 	}
-
+	@Test
 	public void testGetDocFromPackageInfoJava_archive() throws Exception {
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(new Path("testresources/PackageJavadocTests/JavadocHover_src.zip"));
 		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());

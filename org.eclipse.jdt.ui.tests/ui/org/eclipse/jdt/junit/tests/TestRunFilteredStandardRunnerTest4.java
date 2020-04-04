@@ -74,7 +74,7 @@ public class TestRunFilteredStandardRunnerTest4 extends AbstractTestRunListenerT
 		String[] actual= runTreeTest(fATestCase, "test1Succeed", 4);
 		assertEqualLog(expectedSequence, actual);
 	}
-
+	@Test
 	public void testFilterToTest2Fail() throws Exception {
 		String[] expectedSequence= new String[] {
 				TestRunListeners.sessionAsString("ATestCase test2Fail", ProgressState.COMPLETED, Result.FAILURE, 0),
@@ -83,7 +83,7 @@ public class TestRunFilteredStandardRunnerTest4 extends AbstractTestRunListenerT
 		String[] actual= runTreeTest(fATestCase, "test2Fail", 4);
 		assertEqualLog(expectedSequence, actual);
 	}
-
+	@Test
 	public void testFilterToNoTestsRemain() throws Exception {
 		String[] expectedSequence= new String[] {
 				TestRunListeners.sessionAsString("ATestCase thisdoesnotexist", ProgressState.COMPLETED, Result.ERROR, 0),

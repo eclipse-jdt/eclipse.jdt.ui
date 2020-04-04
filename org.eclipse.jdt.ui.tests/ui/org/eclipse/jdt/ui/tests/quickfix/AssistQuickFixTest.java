@@ -1175,6 +1175,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			assertExpectedExistInProposals(proposals, new String[] { expected1, expected2 });
 	}
 
+	@Test
 	public void testAssignToLocal18() throws Exception { // https://bugs.eclipse.org/bugs/show_bug.cgi?id=287377
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -3411,6 +3412,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { ex1, ex2, ex3, ex4 });
 	}
 
+	@Test
 	public void testJoinDeclaration6() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -3459,6 +3461,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { ex1, ex2 });
 	}
 
+	@Test
 	public void testJoinDeclaration7() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -3494,6 +3497,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { ex1 });
 	}
 
+	@Test
 	public void testJoinDeclaration8() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -3544,6 +3548,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { ex1, ex2 });
 	}
 
+	@Test
 	public void testJoinDeclaration9() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -3587,6 +3592,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { ex1 });
 	}
 
+	@Test
 	public void testJoinDeclaration10() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -3687,6 +3693,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         assertEqualString(preview, buf.toString());
     }
 
+	@Test
     public void testInvertEquals2() throws Exception {
         IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
         StringBuffer buf= new StringBuffer();
@@ -3817,6 +3824,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { ex1, ex2, ex3, ex4, ex5 });
     }
 
+	@Test
     public void testInvertEquals3() throws Exception {
         IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
         StringBuffer buf= new StringBuffer();
@@ -3873,6 +3881,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         assertEqualString(preview, buf.toString());
     }
 
+	@Test
     public void testInvertEquals4() throws Exception {
         IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
         StringBuffer buf= new StringBuffer();
@@ -3935,6 +3944,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         assertEqualString(preview, buf.toString());
     }
 
+	@Test
     public void testInvertEquals5() throws Exception {
         IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
         StringBuffer buf= new StringBuffer();
@@ -3994,6 +4004,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         assertEqualString(preview, buf.toString());
     }
 
+	@Test
     public void testInvertEquals6() throws Exception {
         IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
         StringBuffer buf= new StringBuffer();
@@ -4060,6 +4071,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         assertEqualString(preview, buf.toString());
     }
 
+	@Test
     public void testInvertEquals7() throws Exception {
         IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
         StringBuffer buf= new StringBuffer();
@@ -4110,6 +4122,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         assertEqualString(preview, buf.toString());
     }
 
+	@Test
     public void testInvertEquals8() throws Exception {
         IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
         StringBuffer buf= new StringBuffer();
@@ -4202,6 +4215,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertEqualString(preview, buf.toString());
     }
 
+	@Test
     public void testInvertEquals9() throws Exception {
         IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
         StringBuffer buf= new StringBuffer();
@@ -4252,6 +4266,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         assertEqualString(preview, buf.toString());
     }
 
+	@Test
     public void testInvertEquals10() throws Exception {
         IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
         StringBuilder buf= new StringBuilder();
@@ -4271,6 +4286,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         assertCorrectLabels(proposals);
     }
 
+	@Test
     public void testInvertEquals11() throws Exception {
         IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
         StringBuilder buf= new StringBuilder();
@@ -4299,6 +4315,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         assertCorrectLabels(proposals);
     }
 
+	@Test
     public void testInvertEquals12() throws Exception {
         IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
         StringBuilder buf= new StringBuilder();
@@ -4327,6 +4344,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         assertCorrectLabels(proposals);
     }
 
+	@Test
     public void testInvertEquals13() throws Exception {
         IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
         StringBuilder buf= new StringBuilder();
@@ -4355,6 +4373,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         assertCorrectLabels(proposals);
     }
 
+	@Test
     public void testInvertEquals14() throws Exception {
         IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
         StringBuilder buf= new StringBuilder();
@@ -4386,6 +4405,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         assertCorrectLabels(proposals);
     }
 
+	@Test
     public void testInvertEquals15() throws Exception {
         IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
         StringBuilder buf= new StringBuilder();
@@ -4414,6 +4434,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         assertCorrectLabels(proposals);
     }
 
+	@Test
     public void testInvertEquals16() throws Exception {
         IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
         StringBuilder buf= new StringBuilder();
@@ -4443,6 +4464,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         assertCorrectLabels(proposals);
     }
 
+	@Test
     public void testInvertEquals17() throws Exception {
         IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
         StringBuilder buf= new StringBuilder();
@@ -4462,6 +4484,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         assertCorrectLabels(proposals);
     }
 
+	@Test
     public void testInvertEquals18() throws Exception {
         IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
         StringBuilder buf= new StringBuilder();
@@ -4487,6 +4510,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         assertCorrectLabels(proposals);
     }
 
+	@Test
     public void testInvertEquals19() throws Exception {
         IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
         StringBuffer buf= new StringBuffer();
@@ -4540,6 +4564,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         assertEqualString(preview, buf.toString());
     }
 
+	@Test
     public void testInvertEquals20() throws Exception {
         IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
         StringBuffer buf= new StringBuffer();
@@ -4593,6 +4618,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         assertEqualString(preview, buf.toString());
     }
 
+	@Test
     public void testInvertEquals21() throws Exception {
         IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
         StringBuffer buf= new StringBuffer();
@@ -4643,6 +4669,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         assertEqualString(preview, buf.toString());
     }
 
+	@Test
     public void testInvertEquals22() throws Exception {
         IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
         StringBuffer buf= new StringBuffer();
@@ -4693,6 +4720,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         assertEqualString(preview, buf.toString());
     }
 
+	@Test
     public void testInvertEquals23() throws Exception {
         IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
         StringBuffer buf= new StringBuffer();

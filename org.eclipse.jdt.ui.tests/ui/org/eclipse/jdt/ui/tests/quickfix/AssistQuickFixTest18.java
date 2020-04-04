@@ -5639,7 +5639,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 	}
-
+	@Test
 	public void testWrapInOptional_01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -5674,7 +5674,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("}\n");
 		assertExpectedExistInProposals(proposals, new String[] { buf.toString() });
 	}
-
+	@Test
 	public void testWrapInOptional_02() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -5737,7 +5737,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("}\n");
 		assertExpectedExistInProposals(proposals, new String[] { buf.toString() });
 	}
-
+	@Test
 	public void testWrapInOptional_03() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		StringBuffer buf= new StringBuffer();

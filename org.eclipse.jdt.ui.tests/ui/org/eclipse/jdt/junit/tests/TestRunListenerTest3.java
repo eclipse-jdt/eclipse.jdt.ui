@@ -14,6 +14,8 @@
 
 package org.eclipse.jdt.junit.tests;
 
+import org.junit.Test;
+
 import org.eclipse.jdt.junit.JUnitCore;
 import org.eclipse.jdt.junit.TestRunListener;
 import org.eclipse.jdt.junit.model.ITestElement.FailureTrace;
@@ -51,7 +53,7 @@ public class TestRunListenerTest3 extends AbstractTestRunListenerTest {
 			JUnitCore.removeTestRunListener(testRunListener);
 		}
 	}
-
+	@Test
 	public void testOK() throws Exception {
 		String source=
 				"package pack;\n" +
@@ -70,7 +72,7 @@ public class TestRunListenerTest3 extends AbstractTestRunListenerTest {
 		String[] actual= runSequenceTest(aTestCase);
 		assertEqualLog(expectedSequence, actual);
 	}
-
+	@Test
 	public void testFail() throws Exception {
 		String source=
 			"package pack;\n" +
@@ -89,7 +91,7 @@ public class TestRunListenerTest3 extends AbstractTestRunListenerTest {
 		String[] actual= runSequenceTest(aTestCase);
 		assertEqualLog(expectedSequence, actual);
 	}
-
+	@Test
 	public void testSimpleTest() throws Exception {
 		String source=
 			"package pack;\n" +
@@ -150,7 +152,7 @@ public class TestRunListenerTest3 extends AbstractTestRunListenerTest {
 		assertEqualLog(expectedSequence, actual);
 	}
 
-
+	@Test
 	public void testTreeOnSessionStarted() throws Exception {
 		String source=
 				"package pack;\n" +
@@ -168,7 +170,7 @@ public class TestRunListenerTest3 extends AbstractTestRunListenerTest {
 		String[] actual= runTreeTest(aTestCase, 1);
 		assertEqualLog(expectedTree, actual);
 	}
-
+	@Test
 	public void testTreeOnSessionEnded() throws Exception {
 		String source=
 				"package pack;\n" +
@@ -186,7 +188,7 @@ public class TestRunListenerTest3 extends AbstractTestRunListenerTest {
 		String[] actual= runTreeTest(aTestCase, 4);
 		assertEqualLog(expectedTree, actual);
 	}
-
+	@Test
 	public void testTreeOnSecondTestStarted() throws Exception {
 		String source=
 				"package pack;\n" +
@@ -216,7 +218,7 @@ public class TestRunListenerTest3 extends AbstractTestRunListenerTest {
 		String[] actual= runTreeTest(aTestCase, 4);
 		assertEqualLog(expectedTree, actual);
 	}
-
+	@Test
 	public void testTreeOnSecondTestStarted2() throws Exception {
 		String source=
 				"package pack;\n" +
@@ -246,7 +248,7 @@ public class TestRunListenerTest3 extends AbstractTestRunListenerTest {
 		String[] actual= runTreeTest(aTestCase, 4);
 		assertEqualLog(expectedTree, actual);
 	}
-
+	@Test
 	public void testTreeUnrootedEnded() throws Exception {
 		// regression test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=153807
 		String source=
@@ -291,7 +293,7 @@ public class TestRunListenerTest3 extends AbstractTestRunListenerTest {
 		String[] actual= runTreeTest(aTestCase, 6);
 		assertEqualLog(expectedTree, actual);
 	}
-
+	@Test
 	public void testTreeJUnit4TestAdapter() throws Exception {
 		// regression test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=397747
 		IClasspathEntry cpe= JavaCore.newContainerEntry(JUnitCore.JUNIT4_CONTAINER_PATH);

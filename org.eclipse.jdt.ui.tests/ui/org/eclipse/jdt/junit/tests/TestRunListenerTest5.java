@@ -81,7 +81,7 @@ public class TestRunListenerTest5 extends AbstractTestRunListenerTest {
 		String[] actual= runSequenceTest(aTestCase);
 		assertEqualLog(expectedSequence, actual);
 	}
-
+	@Test
 	public void testFail() throws Exception {
 		String source=
 			"package pack;\n" +

@@ -7129,6 +7129,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 
+	@Test
 	public void testNumberSuffix() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -7194,6 +7195,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	@Test
 	public void testRemoveQualifier02() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -9314,6 +9316,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 	}
 
+	@Test
 	public void testDoNotTouchCleanedModifiers() throws Exception {
 		// Given
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -9349,6 +9352,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		assertNull("ICleanInterface should not be cleaned up", fix);
 	}
 
+	@Test
 	public void testRemoveRedundantSemicolons () throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();

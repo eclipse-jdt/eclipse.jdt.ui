@@ -3072,7 +3072,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
-
+	@Test
 	public void testReplaceConditionalWithIf9() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -3107,7 +3107,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
-
+	@Test
 	public void testReplaceConditionalWithIf10() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -3217,7 +3217,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
-
+	@Test
 	public void testReplaceReturnIfWithCondition() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();

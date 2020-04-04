@@ -14,6 +14,8 @@
 
 package org.eclipse.jdt.junit.tests;
 
+import org.junit.Test;
+
 import org.eclipse.jdt.junit.ITestRunListener;
 import org.eclipse.jdt.junit.JUnitCore;
 
@@ -38,7 +40,7 @@ public class LegacyTestRunListenerTest extends AbstractTestRunListenerTest {
 			JUnitCore.removeTestRunListener(testRunListener);
 		}
 	}
-
+	@Test
 	public void testOK() throws Exception {
 		String source=
 				"package pack;\n" +
@@ -55,7 +57,7 @@ public class LegacyTestRunListenerTest extends AbstractTestRunListenerTest {
 		String[] actual= runTest(source);
 		assertEqualLog(expectedSequence, actual);
 	}
-
+	@Test
 	public void testFail() throws Exception {
 		String source=
 			"package pack;\n" +
@@ -73,7 +75,7 @@ public class LegacyTestRunListenerTest extends AbstractTestRunListenerTest {
 		String[] actual= runTest(source);
 		assertEqualLog(expectedSequence, actual);
 	}
-
+	@Test
 	public void testSimpleTest() throws Exception {
 		String source=
 			"package pack;\n" +
