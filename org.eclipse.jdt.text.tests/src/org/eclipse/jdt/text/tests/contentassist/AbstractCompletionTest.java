@@ -23,6 +23,7 @@ import org.eclipse.jdt.text.tests.performance.EditorTestHelper;
 import org.eclipse.swt.custom.VerifyKeyListener;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 
 import org.eclipse.core.runtime.CoreException;
@@ -45,6 +46,7 @@ import org.eclipse.jface.text.contentassist.ICompletionProposalExtension;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.jface.text.tests.util.DisplayHelper;
 
 import org.eclipse.ui.texteditor.ITextEditor;
 
@@ -367,6 +369,7 @@ public class AbstractCompletionTest extends TestCase {
 			e.doit= true;
 
 			verifyKeyListeners.verifyKey(e);
+			DisplayHelper.driveEventQueue(Display.getCurrent());
 
 			if (!e.doit)
 				continue;

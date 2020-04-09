@@ -89,6 +89,11 @@ public class MethodParamsCompletionTest extends AbstractCompletionTest {
 		typeAndVerify(",\")\"", "fList.add(arg0, \")\"|);");
 	}
 
+	public void testDontExitFromStringLiteral_semicolon() throws Exception {
+		assertMethodBodyProposal("String.|", "format(String", "String.format(|arg0|, arg1)");
+		typeAndVerify("\";\",", "String.format(\";\", |arg1|)");
+	}
+
 	public void testCommaSkipsToNextArg() throws Exception {
 		assertMethodBodyProposal("fList.|", "add(int", "fList.add(|arg0|, arg1);");
 		typeAndVerify(",", "fList.add(arg0, |arg1|);");
