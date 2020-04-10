@@ -83,6 +83,10 @@ public class CleanUpMessages extends NLS {
 	public static String CodeStyleTabPage_RadioName_UseAnonymous;
 	public static String CodeStyleTabPage_CheckboxName_SimplifyLambdaExpressionAndMethodRefSyntax;
 
+	public static String CodeStyleTabPage_GroupName_Optimization;
+
+	public static String CodeStyleTabPage_CheckboxName_PrecompileRegEx;
+
 	public static String ContributedCleanUpTabPage_ErrorPage_message;
 
 	public static String MemberAccessesTabPage_CheckboxName_ChangeAccessesThroughInstances;

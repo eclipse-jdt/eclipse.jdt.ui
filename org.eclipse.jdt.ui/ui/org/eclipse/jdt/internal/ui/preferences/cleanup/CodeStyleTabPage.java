@@ -29,6 +29,7 @@ import org.eclipse.jdt.internal.ui.fix.LambdaExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.LazyLogicalCleanUp;
 import org.eclipse.jdt.internal.ui.fix.NumberSuffixCleanUp;
 import org.eclipse.jdt.internal.ui.fix.VarCleanUp;
+import org.eclipse.jdt.internal.ui.fix.PatternCleanUp;
 import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
 
 public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
@@ -37,21 +38,22 @@ public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
 	@Override
 	protected AbstractCleanUp[] createPreviewCleanUps(Map<String, String> values) {
 		return new AbstractCleanUp[] {
-        		new ControlStatementsCleanUp(values),
-        		new ConvertLoopCleanUp(values),
-        		new ExpressionsCleanUp(values),
+				new ControlStatementsCleanUp(values),
+				new ConvertLoopCleanUp(values),
+				new ExpressionsCleanUp(values),
 				new NumberSuffixCleanUp(values),
 				new LazyLogicalCleanUp(values),
 				new VariableDeclarationCleanUp(values),
 				new VarCleanUp(values),
 				new LambdaExpressionsCleanUp(values),
-				new LambdaExpressionAndMethodRefCleanUp(values)
-        };
-    }
+				new LambdaExpressionAndMethodRefCleanUp(values),
+				new PatternCleanUp(values)
+		};
+	}
 
 	@Override
 	protected void doCreatePreferences(Composite composite, int numColumns) {
-    	Group controlGroup= createGroup(numColumns, composite, CleanUpMessages.CodeStyleTabPage_GroupName_ControlStatments);
+		Group controlGroup= createGroup(numColumns, composite, CleanUpMessages.CodeStyleTabPage_GroupName_ControlStatments);
 
 		final CheckboxPreference useBlockPref= createCheckboxPref(controlGroup, numColumns, CleanUpMessages.CodeStyleTabPage_CheckboxName_UseBlocks, CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS, CleanUpModifyDialog.FALSE_TRUE);
 		intent(controlGroup);
@@ -107,5 +109,11 @@ public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
 
 		CheckboxPreference simplifyLambdaExpressionAndMethodRef= createCheckboxPref(functionalInterfacesGroup, numColumns, CleanUpMessages.CodeStyleTabPage_CheckboxName_SimplifyLambdaExpressionAndMethodRefSyntax, CleanUpConstants.SIMPLIFY_LAMBDA_EXPRESSION_AND_METHOD_REF, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(simplifyLambdaExpressionAndMethodRef);
+
+		Group optimizationGroup= createGroup(numColumns, composite, CleanUpMessages.CodeStyleTabPage_GroupName_Optimization);
+
+		final CheckboxPreference precompileRegExPref= createCheckboxPref(optimizationGroup, numColumns, CleanUpMessages.CodeStyleTabPage_CheckboxName_PrecompileRegEx, CleanUpConstants.PRECOMPILE_REGEX,
+				CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(precompileRegExPref);
 	}
 }

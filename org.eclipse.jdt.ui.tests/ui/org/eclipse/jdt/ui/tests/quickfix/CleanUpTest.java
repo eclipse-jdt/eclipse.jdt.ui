@@ -72,7 +72,7 @@ import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 public class CleanUpTest extends CleanUpTestCase {
 
 	@Rule
-    public ProjectTestSetup projectsetup = new ProjectTestSetup();
+	public ProjectTestSetup projectsetup = new ProjectTestSetup();
 
 	private class NoChangeRedundantModifiersCleanUp extends RedundantModifiersCleanUp {
 		private NoChangeRedundantModifiersCleanUp(Map<String, String> options) {
@@ -7534,6 +7534,281 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        float localFloat = 11f;\n" //
 				+ "        double localDouble = 11d;\n" //
 				+ "        return l + 101L + f + 11F + d + 11D + localFloat + 11f + localDouble + 11d;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
+	@Test
+	public void testRegExPrecompilation() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Arrays;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    private String dateValidation= \".*\";\n" //
+				+ "\n" //
+				+ "   public boolean usePattern(String date1, String date2) {\n" //
+				+ "       // Keep this comment\n" //
+				+ "       String dateValidation= \"\\\\d{4}\\\\-\\\\d{2}\\\\-\\\\d{2}\";\n" //
+				+ "\n" //
+				+ "       // Keep this comment too\n" //
+				+ "       return date1.matches(dateValidation) && date2.matches(dateValidation);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "   public boolean usePatternAmongStatements(String date1, String date2) {\n" //
+				+ "       // Keep this comment\n" //
+				+ "       String dateValidation= \"\\\\d{4}\\\\-\\\\d{2}\\\\-\\\\d{2}\";\n" //
+				+ "       System.out.println(\"Do other things\");\n" //
+				+ "\n" //
+				+ "       // Keep this comment too\n" //
+				+ "       return date1.matches(dateValidation) && date2.matches(dateValidation);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String usePatternForReplace(String date1, String date2) {\n" //
+				+ "       // Keep this comment\n" //
+				+ "       String dateValidation= \"\\\\d{4}\\\\-\\\\d{2}\\\\-\\\\d{2}\";\n" //
+				+ "\n" //
+				+ "       // Keep this comment too\n" //
+				+ "       String dateText1= date1.replaceFirst(dateValidation, \"0000-00-00\");\n" //
+				+ "       // Keep this comment also\n" //
+				+ "       String dateText2= date2.replaceAll(dateValidation, \"0000-00-00\");\n" //
+				+ "\n" //
+				+ "       return dateText1 + dateText2;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String usePatternForSplit(String speech1, String speech2) {\n" //
+				+ "       // Keep this comment\n" //
+				+ "       String line= \"\\\\r?\\\\n\";\n" //
+				+ "\n" //
+				+ "       // Keep this comment too\n" //
+				+ "       String[] phrases1= speech1.split(line);\n" //
+				+ "       // Keep this comment also\n" //
+				+ "       String[] phrases2= speech2.split(line, 123);\n" //
+				+ "\n" //
+				+ "       return Arrays.toString(phrases1) + Arrays.toString(phrases2);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String usePatternForLocalVariableOnly(String date1, String date2, String date3) {\n" //
+				+ "       String dateText1= date1.replaceFirst(dateValidation, \"0000-00-00\");\n" //
+				+ "       // Keep this comment\n" //
+				+ "       String dateValidation= \"\\\\d{4}\\\\-\\\\d{2}\\\\-\\\\d{2}\";\n" //
+				+ "\n" //
+				+ "       // Keep this comment too\n" //
+				+ "       String dateText2= date2.replaceFirst(dateValidation, \"0000-00-00\");\n" //
+				+ "       // Keep this comment also\n" //
+				+ "       String dateText3= date3.replaceAll(dateValidation, \"0000-00-00\");\n" //
+				+ "\n" //
+				+ "       return dateText1 + dateText2 + dateText3;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "   public boolean usePatternFromVariable(String regex, String date1, String date2) {\n" //
+				+ "       // Keep this comment\n" //
+				+ "       String dateValidation= regex;\n" //
+				+ "\n" //
+				+ "       // Keep this comment too\n" //
+				+ "       return date1.matches(dateValidation) && \"\".equals(date2.replaceFirst(dateValidation, \"\"));\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.PRECOMPILE_REGEX);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Arrays;\n" //
+				+ "import java.util.regex.Pattern;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    private String dateValidation= \".*\";\n" //
+				+ "\n" //
+				+ "   public boolean usePattern(String date1, String date2) {\n" //
+				+ "       // Keep this comment\n" //
+				+ "       Pattern dateValidation= Pattern.compile(\"\\\\d{4}\\\\-\\\\d{2}\\\\-\\\\d{2}\");\n" //
+				+ "\n" //
+				+ "       // Keep this comment too\n" //
+				+ "       return dateValidation.matcher(date1).matches() && dateValidation.matcher(date2).matches();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "   public boolean usePatternAmongStatements(String date1, String date2) {\n" //
+				+ "       // Keep this comment\n" //
+				+ "       Pattern dateValidation= Pattern.compile(\"\\\\d{4}\\\\-\\\\d{2}\\\\-\\\\d{2}\");\n" //
+				+ "       System.out.println(\"Do other things\");\n" //
+				+ "\n" //
+				+ "       // Keep this comment too\n" //
+				+ "       return dateValidation.matcher(date1).matches() && dateValidation.matcher(date2).matches();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String usePatternForReplace(String date1, String date2) {\n" //
+				+ "       // Keep this comment\n" //
+				+ "       Pattern dateValidation= Pattern.compile(\"\\\\d{4}\\\\-\\\\d{2}\\\\-\\\\d{2}\");\n" //
+				+ "\n" //
+				+ "       // Keep this comment too\n" //
+				+ "       String dateText1= dateValidation.matcher(date1).replaceFirst(\"0000-00-00\");\n" //
+				+ "       // Keep this comment also\n" //
+				+ "       String dateText2= dateValidation.matcher(date2).replaceAll(\"0000-00-00\");\n" //
+				+ "\n" //
+				+ "       return dateText1 + dateText2;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String usePatternForSplit(String speech1, String speech2) {\n" //
+				+ "       // Keep this comment\n" //
+				+ "       Pattern line= Pattern.compile(\"\\\\r?\\\\n\");\n" //
+				+ "\n" //
+				+ "       // Keep this comment too\n" //
+				+ "       String[] phrases1= line.split(speech1);\n" //
+				+ "       // Keep this comment also\n" //
+				+ "       String[] phrases2= line.split(speech2, 123);\n" //
+				+ "\n" //
+				+ "       return Arrays.toString(phrases1) + Arrays.toString(phrases2);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String usePatternForLocalVariableOnly(String date1, String date2, String date3) {\n" //
+				+ "       String dateText1= date1.replaceFirst(dateValidation, \"0000-00-00\");\n" //
+				+ "       // Keep this comment\n" //
+				+ "       Pattern dateValidation= Pattern.compile(\"\\\\d{4}\\\\-\\\\d{2}\\\\-\\\\d{2}\");\n" //
+				+ "\n" //
+				+ "       // Keep this comment too\n" //
+				+ "       String dateText2= dateValidation.matcher(date2).replaceFirst(\"0000-00-00\");\n" //
+				+ "       // Keep this comment also\n" //
+				+ "       String dateText3= dateValidation.matcher(date3).replaceAll(\"0000-00-00\");\n" //
+				+ "\n" //
+				+ "       return dateText1 + dateText2 + dateText3;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "   public boolean usePatternFromVariable(String regex, String date1, String date2) {\n" //
+				+ "       // Keep this comment\n" //
+				+ "       Pattern dateValidation= Pattern.compile(regex);\n" //
+				+ "\n" //
+				+ "       // Keep this comment too\n" //
+				+ "       return dateValidation.matcher(date1).matches() && \"\".equals(dateValidation.matcher(date2).replaceFirst(\"\"));\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
+	@Test
+	public void testDoNotRefactorRegExWithPrecompilation() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Arrays;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public boolean doNotUsePatternForOneUse(String date) {\n" //
+				+ "       String dateValidation= \"\\\\d{4}\\\\-\\\\d{2}\\\\-\\\\d{2}\";\n" //
+				+ "\n" //
+				+ "       return date.matches(dateValidation);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean doNotUsePatternWithOtherUse(String date1, String date2) {\n" //
+				+ "       String dateValidation= \"\\\\d{4}\\\\-\\\\d{2}\\\\-\\\\d{2}\";\n" //
+				+ "       System.out.println(\"The pattern is: \" + dateValidation);\n" //
+				+ "\n" //
+				+ "       return date1.matches(dateValidation) && date2.matches(dateValidation);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean doNotUsePatternWithOtherMethod(String date1, String date2) {\n" //
+				+ "       String dateValidation= \"\\\\d{4}\\\\-\\\\d{2}\\\\-\\\\d{2}\";\n" //
+				+ "\n" //
+				+ "       return date1.matches(dateValidation) && \"\".equals(date2.replace(dateValidation, \"\"));\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean doNotUsePatternInMultiDeclaration(String date1, String date2) {\n" //
+				+ "       String dateValidation= \"\\\\d{4}\\\\-\\\\d{2}\\\\-\\\\d{2}\", foo= \"bar\";\n" //
+				+ "\n" //
+				+ "       return date1.matches(dateValidation) && date2.matches(dateValidation);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public boolean doNotUsePatternOnMisplacedUse(String date1, String date2) {\n" //
+				+ "       String dateValidation= \"\\\\d{4}\\\\-\\\\d{2}\\\\-\\\\d{2}\";\n" //
+				+ "\n" //
+				+ "       return dateValidation.matches(date1) && dateValidation.matches(date2);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String doNotUsePatternOnMisplacedParameter(String date1, String date2) {\n" //
+				+ "       String dateValidation= \"\\\\d{4}\\\\-\\\\d{2}\\\\-\\\\d{2}\";\n" //
+				+ "\n" //
+				+ "       String dateText1= date1.replaceFirst(\"0000-00-00\", dateValidation);\n" //
+				+ "       String dateText2= date2.replaceAll(\"0000-00-00\", dateValidation);\n" //
+				+ "\n" //
+				+ "       return dateText1 + dateText2;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.PRECOMPILE_REGEX);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
+	public void testRegExPrecompilationWithExistingImport() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import javax.validation.constraints.Pattern;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    private String code;\n" //
+				+ "    private String dateValidation= \".*\";\n" //
+				+ "\n" //
+				+ "   public boolean usePattern(String date1, String date2) {\n" //
+				+ "       // Keep this comment\n" //
+				+ "       String dateValidation= \"\\\\d{4}\\\\-\\\\d{2}\\\\-\\\\d{2}\";\n" //
+				+ "\n" //
+				+ "       // Keep this comment too\n" //
+				+ "       return date1.matches(dateValidation) && date2.matches(dateValidation);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    @Pattern(regexp=\"\\\\d{4}\",\n" //
+				+ "        message=\"The code should contain exactly four numbers.\")\n" //
+				+ "    public String getCode() {\n" //
+				+ "        return code;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void setCode(String code) {\n" //
+				+ "        this.code= code;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.PRECOMPILE_REGEX);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import javax.validation.constraints.Pattern;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    private String code;\n" //
+				+ "    private String dateValidation= \".*\";\n" //
+				+ "\n" //
+				+ "   public boolean usePattern(String date1, String date2) {\n" //
+				+ "       // Keep this comment\n" //
+				+ "       java.util.regex.Pattern dateValidation= java.util.regex.Pattern.compile(\"\\\\d{4}\\\\-\\\\d{2}\\\\-\\\\d{2}\");\n" //
+				+ "\n" //
+				+ "       // Keep this comment too\n" //
+				+ "       return dateValidation.matcher(date1).matches() && dateValidation.matcher(date2).matches();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    @Pattern(regexp=\"\\\\d{4}\",\n" //
+				+ "        message=\"The code should contain exactly four numbers.\")\n" //
+				+ "    public String getCode() {\n" //
+				+ "        return code;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void setCode(String code) {\n" //
+				+ "        this.code= code;\n" //
 				+ "    }\n" //
 				+ "}\n";
 		String expected1= sample;

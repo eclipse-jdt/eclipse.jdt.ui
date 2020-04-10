@@ -738,6 +738,18 @@ public class CleanUpConstants {
 	public static final String SIMPLIFY_LAMBDA_EXPRESSION_AND_METHOD_REF= "cleanup.simplify_lambda_expression_and_method_ref"; //$NON-NLS-1$
 
 	/**
+	 * Precompiles the regular expressions.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.17
+	 */
+	public static final String PRECOMPILE_REGEX= "cleanup.precompile_regex"; //$NON-NLS-1$
+
+	/**
 	 * Adds type parameters to raw type references.
 	 * <p>
 	 * Example:
