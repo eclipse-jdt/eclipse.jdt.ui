@@ -14,6 +14,11 @@
 
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.StringTokenizer;
@@ -31,7 +36,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.ui.tests.refactoring.infra.AbstractCUTestCase;
+import org.eclipse.jdt.ui.tests.refactoring.infra.AbstractJunit4CUTestCase;
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestPlugin;
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
@@ -40,12 +45,7 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
  * - testSimple_A() -> package 'simple', file 'A.java'; result in package 'simple.out'<br>
  * - testSuch_ALongName17() -> package 'such', file 'ALongName17.java'
  */
-public abstract class LineColumnSelectionTestCase extends AbstractCUTestCase {
-
-	public LineColumnSelectionTestCase(String name) {
-		super(name);
-	}
-
+public abstract class LineColumnSelectionTestCase extends AbstractJunit4CUTestCase {
 	@Override
 	protected InputStream getFileInputStream(String fileName) throws IOException {
 		return RefactoringTestPlugin.getDefault().getTestResourceStream(fileName);
@@ -58,7 +58,7 @@ public abstract class LineColumnSelectionTestCase extends AbstractCUTestCase {
 	@Override
 	protected String adaptName(String name) {
 		int separator= name.indexOf('_');
-		assertTrue(separator != -1);
+		assertNotEquals(-1, separator);
 		assertTrue(separator >= 5);
 		return name.substring(separator + 1) + ".java";
 	}
@@ -69,7 +69,7 @@ public abstract class LineColumnSelectionTestCase extends AbstractCUTestCase {
 	 */
 	protected String adaptPackage(String name) {
 		int separator= name.indexOf('_');
-		assertTrue(separator != -1);
+		assertNotEquals(-1, separator);
 		assertTrue(separator >= 5);
 		return Character.toLowerCase(name.charAt(4))
 				+ name.substring(5, separator);
@@ -83,7 +83,7 @@ public abstract class LineColumnSelectionTestCase extends AbstractCUTestCase {
 		String source= cu.getSource();
 		String selection= "//selection:";
 		int selStart= source.indexOf(selection);
-		assertTrue(selStart != -1);
+		assertNotEquals(-1, selStart);
 
 		int dataStart= selStart + selection.length();
 		StringTokenizer tokenizer= new StringTokenizer(source.substring(dataStart), " ,\t\r\n");
@@ -103,13 +103,13 @@ public abstract class LineColumnSelectionTestCase extends AbstractCUTestCase {
 				final Change change= refactoring.createChange(monitor);
 				assertNotNull(change);
 				change.initializeValidationData(new NullProgressMonitor());
-				assertTrue(!change.isValid(new NullProgressMonitor()).hasFatalError());
+				assertFalse(change.isValid(new NullProgressMonitor()).hasFatalError());
 				Change undo= change.perform(monitor);
 				change.dispose();
 				assertNotNull(undo);
 				compareSource(unit.getSource(), out);
 				undo.initializeValidationData(new NullProgressMonitor());
-				assertTrue(!undo.isValid(new NullProgressMonitor()).hasFatalError());
+				assertFalse(undo.isValid(new NullProgressMonitor()).hasFatalError());
 				undo.perform(monitor);
 				undo.dispose();
 				compareSource(unit.getSource(), original);

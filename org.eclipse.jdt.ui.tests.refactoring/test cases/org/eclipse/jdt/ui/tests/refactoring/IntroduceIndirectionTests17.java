@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 IBM Corporation and others.
+ * Copyright (c) 2011, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,38 +14,38 @@
 
 package org.eclipse.jdt.ui.tests.refactoring;
 
-import junit.framework.Test;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
-public class IntroduceIndirectionTests17 extends IntroduceIndirectionTests{
-	private static final Class<IntroduceIndirectionTests17> clazz= IntroduceIndirectionTests17.class;
+import org.eclipse.jdt.ui.tests.CustomBaseRunner;
+import org.eclipse.jdt.ui.tests.IgnoreInheritedTests;
+import org.eclipse.jdt.ui.tests.refactoring.rules.Java17Setup;
+import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
-	public IntroduceIndirectionTests17(String name) {
-		super(name);
-	}
-
-	public static Test setUpTest(Test test) {
-		return new Java17Setup(test);
-	}
-
-	public static Test suite() {
-		return setUpTest(new NoSuperTestsSuite(clazz));
-	}
+@IgnoreInheritedTests
+@RunWith(CustomBaseRunner.class)
+public class IntroduceIndirectionTests17 extends IntroduceIndirectionTests {
+	@Rule
+	public RefactoringTestSetup rts= new Java17Setup();
 
 // ---
 
+	@Test
 	public void test17_32() throws Exception {
 		// test for bug 349405
 		helperPass(new String[] { "p.Foo" }, "foo", "p.Foo", 10, 17, 10, 20);
 	}
 
+	@Test
 	public void test17_33() throws Exception {
 		// test for bug 349405
 		helperPass(new String[] { "p.Foo" }, "getX", "p.Foo", 14, 17, 14, 21);
 	}
 
+	@Test
 	public void test17_34() throws Exception {
 		// test for bug
 		helperFail(new String[] { "p.Foo" }, "m2", "p.Foo", 7, 18, 7, 18);
 	}
-
 }

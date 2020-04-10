@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Till Brychcy and others.
+ * Copyright (c) 2017, 2020 Till Brychcy and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -16,6 +16,10 @@ package org.eclipse.jdt.ui.tests.refactoring;
 import java.util.Hashtable;
 import java.util.Map;
 
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.core.runtime.Path;
@@ -23,27 +27,19 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.ui.tests.CustomBaseRunner;
+import org.eclipse.jdt.ui.tests.IgnoreInheritedTests;
 import org.eclipse.jdt.ui.tests.core.Java18ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.refactoring.rules.Java18Setup;
+import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
-import junit.framework.Test;
-
+@IgnoreInheritedTests
+@RunWith(CustomBaseRunner.class)
 public class IntroduceParameterObjectTests18 extends IntroduceParameterObjectTests {
-
-	private static final Class<IntroduceParameterObjectTests18> CLAZZ= IntroduceParameterObjectTests18.class;
 	private static final String REFACTORING_PATH= "IntroduceParameterObject18/";
 
-	public static Test setUpTest(Test someTest) {
-		return new Java18Setup(someTest);
-	}
-
-	public static Test suite() {
-		return new Java18Setup(new NoSuperTestsSuite(CLAZZ));
-	}
-
-	public IntroduceParameterObjectTests18(String name) {
-		super(name);
-	}
-
+	@Rule
+	public RefactoringTestSetup rts= new Java18Setup();
 
 	@Override
 	protected String getRefactoringPath() {
@@ -51,6 +47,7 @@ public class IntroduceParameterObjectTests18 extends IntroduceParameterObjectTes
 	}
 
 	/* Test that @NonNull annotations ARE created if no @NonNullByDefault is in effect for the target location */
+	@Test
 	public void testNoRedundantNonNull1() throws Exception {
 		IJavaProject javaProject= getRoot().getJavaProject();
 		Map<String, String> originalOptions= javaProject.getOptions(false);
@@ -70,6 +67,7 @@ public class IntroduceParameterObjectTests18 extends IntroduceParameterObjectTes
 		}
 	}
 	/* Test that @NonNull annotations ARE NOT created if @NonNullByDefault is in effect for the target location */
+	@Test
 	public void testNoRedundantNonNull2() throws Exception {
 		IJavaProject javaProject= getRoot().getJavaProject();
 		Map<String, String> originalOptions= javaProject.getOptions(false);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,7 +14,12 @@
 
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.StringTokenizer;
+
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
@@ -26,25 +31,13 @@ import org.eclipse.jdt.core.ISourceRange;
 
 import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceParameterRefactoring;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
 public class IntroduceParameterTests extends LineColumnSelectionTestCase {
-
-	private static final Class<IntroduceParameterTests> clazz= IntroduceParameterTests.class;
-
 	private static final String SLASH_OUT= "/out";
-	public IntroduceParameterTests(String name) {
-		super(name);
-	}
 
-	public static Test setUpTest(Test test) {
-		return new RefactoringTestSetup(test);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(clazz));
-	}
+	@Rule
+	public RefactoringTestSetup rts= new RefactoringTestSetup();
 
 	@Override
 	protected String getResourceLocation() {
@@ -112,106 +105,132 @@ public class IntroduceParameterTests extends LineColumnSelectionTestCase {
 
 // ---
 
+	@Test
 	public void testInvalid_NotInMethod1() throws Exception {
 		performInvalidSelection();
 	}
+	@Test
 	public void testInvalid_NotInMethod2() throws Exception {
 		performInvalidSelection();
 	}
+	@Test
 	public void testInvalid_NotInMethod3() throws Exception {
 		performInvalidSelection();
 	}
 
+	@Test
 	public void testInvalid_PartName1() throws Exception {
 		performInvalidSelection();
 	}
 
+	@Test
 	public void testInvalid_PartString() throws Exception {
 		performInvalidSelection();
 	}
 
+	@Test
 	public void testInvalid_NoMethodBinding() throws Exception {
 		performInvalidSelection();
 	}
 
+	@Test
 	public void testInvalid_NoExpression1() throws Exception {
 		performInvalidSelection();
 	}
 
 	//	---
 
+	@Test
 	public void testSimple_Capture() throws Exception {
 		performOK();
 	}
 
+	@Test
 	public void testSimple_ConstantExpression1() throws Exception {
 		performOK();
 	}
 
+	@Test
 	public void testSimple_ConstantExpression2() throws Exception {
 		performOK();
 	}
 
+	@Test
 	public void testSimple_Expression1() throws Exception {
 		performOK();
 	}
 
+	@Test
 	public void testSimple_Expression2() throws Exception {
 		performOK();
 	}
 
+	@Test
 	public void testSimple_Expression3() throws Exception {
 		performOK();
 	}
 
+	@Test
 	public void testSimple_Expression4() throws Exception {
 		performOK();
 	}
 
+	@Test
 	public void testSimple_Expression5() throws Exception {
 		performOK();
 	}
 
+	@Test
 	public void testSimple_NewInstance1() throws Exception {
 		performOK();
 	}
 
+	@Test
 	public void testSimple_NewInstanceImport() throws Exception {
 		performOK();
 	}
 
+	@Test
 	public void testSimple_StaticGetter1() throws Exception {
 		performOK();
 	}
 
+	@Test
 	public void testSimple_Formatting1() throws Exception {
 		performOK();
 	}
 
+	@Test
 	public void testSimple_Javadoc1() throws Exception {
 		performOK();
 	}
 
+	@Test
 	public void testSimple_Javadoc2() throws Exception {
 		performOK();
 	}
 
+	@Test
 	public void testSimple_Constructor1() throws Exception {
 		performOK();
 	}
 
+	@Test
 	public void testSimple_Vararg1() throws Exception {
 		performOK();
 	}
 
+	@Test
 	public void testSimple_Wildcard1() throws Exception {
 		performOK();
 	}
 
+	@Test
 	public void testSimple_Wildcard2() throws Exception {
 		performOK();
 	}
 
+	@Test
 	public void testSimple_Enum1() throws Exception {
 		performOK();
 	}
