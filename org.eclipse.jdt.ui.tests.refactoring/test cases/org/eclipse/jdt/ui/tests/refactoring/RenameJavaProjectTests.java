@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,8 +13,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -34,24 +39,19 @@ import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 
-public class RenameJavaProjectTests extends RefactoringTest {
+import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
-	private static final Class<RenameJavaProjectTests> clazz= RenameJavaProjectTests.class;
-
-	public RenameJavaProjectTests(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return new RefactoringTestSetup(new TestSuite(clazz));
-	}
+public class RenameJavaProjectTests extends GenericRefactoringTest {
+	@Rule
+	public RefactoringTestSetup fts= new RefactoringTestSetup();
 
 	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
+	public void genericbefore() throws Exception {
+		super.genericbefore();
 		fIsPreDeltaTest= true;
 	}
 
+	@Test
 	public void test0() throws Exception {
 		IJavaProject p1= null;
 		IJavaProject referencing1= null;
@@ -86,8 +86,8 @@ public class RenameJavaProjectTests extends RefactoringTest {
 
 			RefactoringStatus result= performRefactoring(ref);
 
-			assertEquals("not expected to fail", null, result);
-			assertTrue("p1 is gone", !p1.exists());
+			assertNull("not expected to fail", result);
+			assertFalse("p1 is gone", p1.exists());
 
 			ParticipantTesting.testRename(handles,
 				new RenameArguments[] {
@@ -136,6 +136,7 @@ public class RenameJavaProjectTests extends RefactoringTest {
 		}
 	}
 
+	@Test
 	public void test1() throws Exception {
 		IJavaProject p1= null;
 		IJavaProject referencing1= null;
@@ -178,8 +179,8 @@ public class RenameJavaProjectTests extends RefactoringTest {
 
 			RefactoringStatus result= performRefactoring(ref);
 
-			assertEquals("not expected to fail", null, result);
-			assertTrue("p1 is gone", !p1.exists());
+			assertNull("not expected to fail", result);
+			assertFalse("p1 is gone", p1.exists());
 
 			ParticipantTesting.testRename(handles,
 				new RenameArguments[] {
@@ -195,8 +196,8 @@ public class RenameJavaProjectTests extends RefactoringTest {
 			IClasspathEntry iClassPathEntry= entries[1];
 			assertEquals("expected entry name", p1.getProject().getFullPath(), iClassPathEntry.getPath());
 			assertEquals("expected entry kind", IClasspathEntry.CPE_PROJECT, iClassPathEntry.getEntryKind());
-			assertEquals("expected entry isExported", true, iClassPathEntry.isExported());
-			assertEquals("expected entry combineAccessRules", true, iClassPathEntry.combineAccessRules());
+			assertTrue("expected entry isExported", iClassPathEntry.isExported());
+			assertTrue("expected entry combineAccessRules", iClassPathEntry.combineAccessRules());
 			assertEquals("expected entry accessRules count", 0, iClassPathEntry.getAccessRules().length);
 			assertEquals("expected entry accessRules getExtraAttributes", 0, iClassPathEntry.getExtraAttributes().length);
 
@@ -206,8 +207,8 @@ public class RenameJavaProjectTests extends RefactoringTest {
 			iClassPathEntry= entries[1];
 			assertEquals("expected entry name", p1.getProject().getFullPath(), iClassPathEntry.getPath());
 			assertEquals("expected entry kind", IClasspathEntry.CPE_PROJECT, iClassPathEntry.getEntryKind());
-			assertEquals("expected entry isExported", false, iClassPathEntry.isExported());
-			assertEquals("expected entry combineAccessRules", true, iClassPathEntry.combineAccessRules());
+			assertFalse("expected entry isExported", iClassPathEntry.isExported());
+			assertTrue("expected entry combineAccessRules", iClassPathEntry.combineAccessRules());
 			assertEquals("expected entry accessRules count", accessRules2.length, iClassPathEntry.getAccessRules().length);
 			assertEquals("expected entry accessRules getExtraAttributes", extraAttributes2.length, iClassPathEntry.getExtraAttributes().length);
 
@@ -222,5 +223,4 @@ public class RenameJavaProjectTests extends RefactoringTest {
 				JavaProjectHelper.delete(referencing2);
 		}
 	}
-
 }

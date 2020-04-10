@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,8 +13,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -31,30 +36,20 @@ import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
+import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
-public class RenameTempTests extends RefactoringTest{
+public class RenameTempTests extends GenericRefactoringTest{
 	private static final boolean BUG_checkDeclInNestedClass= true;
 	private static final boolean BUG_checkShadowing= true;
 
-	private static final Class<RenameTempTests> clazz= RenameTempTests.class;
 	private static final String REFACTORING_PATH= "RenameTemp/";
 
-
-	public RenameTempTests(String name){
-		super(name);
-	}
+	@Rule
+	public RefactoringTestSetup fts= new RefactoringTestSetup();
 
 	@Override
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
-	}
-
-	public static Test suite() {
-		return new RefactoringTestSetup(new TestSuite(clazz));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new RefactoringTestSetup(test);
 	}
 
 	private String getSimpleTestFileName(boolean canRename, boolean input){
@@ -99,7 +94,7 @@ public class RenameTempTests extends RefactoringTest{
 		assertNotNull("refactoring should not be null", refactoring);
 
 		RefactoringStatus result= performRefactoring(refactoring);
-		assertEquals("precondition was supposed to pass", null, result);
+		assertNull("precondition was supposed to pass", result);
 
 		IPackageFragment pack= (IPackageFragment) cu.getParent();
 		String newCuName= getSimpleTestFileName(true, true);
@@ -159,10 +154,12 @@ public class RenameTempTests extends RefactoringTest{
 		helper2(newName, true);
 	}
 
+	@Test
 	public void test0() throws Exception{
 		helper1("j");
 	}
 
+	@Test
 	public void test1() throws Exception{
 		helper1("j");
 	}
@@ -174,22 +171,27 @@ public class RenameTempTests extends RefactoringTest{
 //		helper1(renaming, new String[0]);
 //	}
 
+	@Test
 	public void test3() throws Exception{
 		helper1("j1");
 	}
 
+	@Test
 	public void test4() throws Exception{
 		helper1("k");
 	}
 
+	@Test
 	public void test5() throws Exception{
 		helper1("k");
 	}
 
+	@Test
 	public void test6() throws Exception{
 		helper1("k");
 	}
 
+	@Test
 	public void test7() throws Exception{
 		helper1("k");
 	}
@@ -197,18 +199,22 @@ public class RenameTempTests extends RefactoringTest{
 //	//8, 9, 10 removed
 //
 //
+	@Test
 	public void test11() throws Exception{
 		helper1("j");
 	}
 
+	@Test
 	public void test12() throws Exception{
 		helper1("j");
 	}
 
+	@Test
 	public void test13() throws Exception{
 		helper1("j");
 	}
 
+	@Test
 	public void test14() throws Exception{
 		helper1("j");
 	}
@@ -221,6 +227,7 @@ public class RenameTempTests extends RefactoringTest{
 //		helper1(renaming, new String[0]);
 //	}
 //
+	@Test
 	public void test16() throws Exception{
 		helper1("j");
 	}
@@ -233,22 +240,27 @@ public class RenameTempTests extends RefactoringTest{
 //		helper1(renaming, new String[0]);
 //	}
 //
+	@Test
 	public void test18() throws Exception{
 		helper1("j");
 	}
 
+	@Test
 	public void test19() throws Exception{
 		helper1("j");
 	}
 
+	@Test
 	public void test20() throws Exception{
 		helper1("j");
 	}
 
+	@Test
 	public void test21() throws Exception{
 		helper1("j");
 	}
 
+	@Test
 	public void test22() throws Exception{
 		helper1("j");
 	}
@@ -261,14 +273,17 @@ public class RenameTempTests extends RefactoringTest{
 //		helper1(renaming, new String[0]);
 //	}
 
+	@Test
 	public void test24() throws Exception{
 		helper1("j");
 	}
 
+	@Test
 	public void test25() throws Exception{
 		helper1("j");
 	}
 
+	@Test
 	public void test26() throws Exception{
 		helper1("j");
 	}
@@ -278,176 +293,214 @@ public class RenameTempTests extends RefactoringTest{
 //		helper1("j");
 //	}
 
+	@Test
 	public void test28() throws Exception{
 		helper1("j");
 	}
 
+	@Test
 	public void test29() throws Exception{
 		helper1("b");
 	}
 
+	@Test
 	public void test30() throws Exception{
 		helper1("k");
 	}
 
+	@Test
 	public void test31() throws Exception{
 		helper1("kk");
 	}
 
+	@Test
 	public void test32() throws Exception{
 		helper1("j");
 	}
 
+	@Test
 	public void test33() throws Exception{
 		helper1("b", false);
 	}
 
+	@Test
 	public void test34() throws Exception{
 		helper1("j");
 	}
 
+	@Test
 	public void test35() throws Exception{
 //		printTestDisabledMessage("regression test for bug#9001");
 		helper1("test2");
 	}
 
+	@Test
 	public void test36() throws Exception{
 //		printTestDisabledMessage("regression test for bug#7630");
 		helper1("j", true, 5, 13, 5, 14);
 	}
 
+	@Test
 	public void test37() throws Exception{
 //		printTestDisabledMessage("regression test for bug#7630");
 		helper1("j", true, 5, 16, 5, 17);
 	}
 
+	@Test
 	public void test38() throws Exception{
 //		printTestDisabledMessage("regression test for Bug#11453");
 		helper1("i", true, 7, 12, 7, 13);
 	}
 
+	@Test
 	public void test39() throws Exception{
 //		printTestDisabledMessage("regression test for Bug#11440");
 		helper1("j", true, 7, 16, 7, 18);
 	}
 
+	@Test
 	public void test40() throws Exception{
 //		printTestDisabledMessage("regression test for Bug#10660");
 		helper1("j", true, 4, 16, 4, 17);
 	}
 
+	@Test
 	public void test41() throws Exception{
 //		printTestDisabledMessage("regression test for Bug#10660");
 		helper1("j", true, 3, 17, 3, 18);
 	}
 
+	@Test
 	public void test42() throws Exception{
 //		printTestDisabledMessage("regression test for Bug#10660");
 		helper1("j", true, 3, 25, 3, 26);
 	}
 
+	@Test
 	public void test43() throws Exception{
 //		printTestDisabledMessage("regression test for Bug#10660");
 		helper1("j", true, 4, 23, 4, 24);
 	}
 
+	@Test
 	public void test44() throws Exception{
 //		printTestDisabledMessage("regression test for Bug#12200");
 		helper1("j", true, 6, 11, 6, 14);
 	}
 
+	@Test
 	public void test45() throws Exception{
 //		printTestDisabledMessage("regression test for Bug#12210");
 		helper1("j", true, 4, 14, 4, 14);
 	}
 
+	@Test
 	public void test46() throws Exception{
 //		printTestDisabledMessage("regression test for Bug#12210");
 		helper1("j", true, 5, 18, 5, 18);
 	}
 
+	@Test
 	public void test47() throws Exception{
 //		printTestDisabledMessage("regression test for Bug#17922");
 		helper1("newname", true, 7, 13, 7, 17);
 	}
 
+	@Test
 	public void test48() throws Exception{
 //		printTestDisabledMessage("regression test for Bug#22938");
 		helper1("newname", true, 4, 16, 4, 20);
 	}
 
+	@Test
 	public void test49() throws Exception{
 //		printTestDisabledMessage("regression test for Bug#30923 ");
 		helper1("newname", true, 4, 16, 4, 20);
 	}
 
+	@Test
 	public void test50() throws Exception{
 //		printTestDisabledMessage("regression test for Bug#30923 ");
 		helper1("newname", true, 4, 16, 4, 20);
 	}
 
+	@Test
 	public void test51() throws Exception {
 //		printTestDisabledMessage("regression test for Bug#47822");
 		helper1("qwerty", true, 5, 19, 5, 20);
 	}
 
+	@Test
 	public void test52() throws Exception{
 		helper1("j");
 	}
 
+	@Test
 	public void test53() throws Exception{
 //		printTestDisabledMessage("bug#19851");
 		helper1("locker");
 	}
 
+	@Test
 	public void test54() throws Exception{
 		helper1("obj");
 	}
 
+	@Test
 	public void test55() throws Exception{
 		helper1("t");
 	}
 
+	@Test
 	public void test56() throws Exception{
 		helper1("param");
 	}
 
+	@Test
 	public void test57() throws Exception{
 		helper1("param");
 	}
 
+	@Test
 	public void test58() throws Exception{
 		helper1("param");
 	}
 
+	@Test
 	public void test59() throws Exception{
 		helper1("thing");
 	}
 
+	@Test
 	public void test60() throws Exception{
 		helper1("param");
 	}
 
+	@Test
 	public void test61() throws Exception{
 		helper1("x");
 	}
 
+	@Test
 	public void test62() throws Exception {
 //		printTestDisabledMessage("bug#47822");
 		helper1("xxx");
 	}
 
+	@Test
 	public void test63() throws Exception {
 		// regression test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=144426
 		helper1("xxx");
 	}
 
+	@Test
 	public void test64() throws Exception {
 		// regression test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=144426
 		helper1("xxx");
 	}
 
 // -----
+	@Test
 	public void testFail0() throws Exception{
 		if (BUG_checkDeclInNestedClass) {
 			printTestDisabledMessage("fails - must revisit");
@@ -456,26 +509,32 @@ public class RenameTempTests extends RefactoringTest{
 		helper2("j");
 	}
 
+	@Test
 	public void testFail1() throws Exception{
 		failHelperNoElement();
 	}
 
+	@Test
 	public void testFail2() throws Exception{
 		helper2("i");
 	}
 
+	@Test
 	public void testFail3() throws Exception{
 		helper2("9");
 	}
 
+	@Test
 	public void testFail4() throws Exception{
 		helper2("j");
 	}
 
+	@Test
 	public void testFail5() throws Exception{
 		helper2("j");
 	}
 
+	@Test
 	public void testFail6() throws Exception{
 		if (BUG_checkDeclInNestedClass) {
 			printTestDisabledMessage("fails - must revisit");
@@ -484,18 +543,22 @@ public class RenameTempTests extends RefactoringTest{
 		helper2("j");
 	}
 
+	@Test
 	public void testFail7() throws Exception{
 		helper2("j");
 	}
 
+	@Test
 	public void testFail8() throws Exception{
 		helper2("j");
 	}
 
+	@Test
 	public void testFail9() throws Exception{
 		helper2("j");
 	}
 
+	@Test
 	public void testFail10() throws Exception{
 		failHelperNoElement();
 	}
@@ -505,39 +568,48 @@ public class RenameTempTests extends RefactoringTest{
 //		helper2("uu");
 //	}
 
+	@Test
 	public void testFail12() throws Exception{
 //		printTestDisabledMessage("http://dev.eclipse.org/bugs/show_bug.cgi?id=11638");
 		helper2("j");
 	}
 
+	@Test
 	public void testFail13() throws Exception{
 		helper2("j");
 	}
 
+	@Test
 	public void testFail14() throws Exception{
 		helper2("j");
 	}
 
+	@Test
 	public void testFail15() throws Exception{
 		helper2("j");
 	}
 
+	@Test
 	public void testFail16() throws Exception{
 		helper2("j");
 	}
 
+	@Test
 	public void testFail17() throws Exception{
 		helper2("j");
 	}
 
+	@Test
 	public void testFail18() throws Exception{
 		helper2("j");
 	}
 
+	@Test
 	public void testFail19() throws Exception{
 		helper2("j");
 	}
 
+	@Test
 	public void testFail20() throws Exception{
 		helper2("j");
 	}
@@ -547,6 +619,7 @@ public class RenameTempTests extends RefactoringTest{
 //		helper2("j");
 //	}
 
+	@Test
 	public void testFail22() throws Exception{
 		failHelperNoElement();
 	}
@@ -556,15 +629,18 @@ public class RenameTempTests extends RefactoringTest{
 //		helper2("j");
 //	}
 
+	@Test
 	public void testFail24() throws Exception{
 		//printTestDisabledMessage("compile errors are ok now");
 		helper2("t"); //name collision
 	}
 
+	@Test
 	public void testFail25() throws Exception{
 		helper2("j");
 	}
 
+	@Test
 	public void testFail26() throws Exception{
 		if (BUG_checkShadowing) {
 			printTestDisabledMessage("Test disabled until it is clear how 1.4 treats this");
@@ -573,10 +649,12 @@ public class RenameTempTests extends RefactoringTest{
 		helper2("j");
 	}
 
+	@Test
 	public void testFail27() throws Exception{
 		helper2("j");
 	}
 
+	@Test
 	public void testFail28() throws Exception{
 		helper2("j");
 	}

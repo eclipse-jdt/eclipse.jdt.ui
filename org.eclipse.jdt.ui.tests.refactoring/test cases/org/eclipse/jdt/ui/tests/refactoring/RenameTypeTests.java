@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,11 +13,21 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
@@ -54,27 +64,15 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenamingNameSuggestor;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.DebugUtils;
+import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
-public class RenameTypeTests extends RefactoringTest {
+public class RenameTypeTests extends GenericRefactoringTest {
 
 	private static final boolean BUG_54948= false;
-	private static final Class<RenameTypeTests> clazz= RenameTypeTests.class;
 	private static final String REFACTORING_PATH= "RenameType/";
 
-	public RenameTypeTests(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return new RefactoringTestSetup(new TestSuite(clazz));
-	}
-
-	public static Test setUpTest(Test someTest) {
-		return new RefactoringTestSetup(someTest);
-	}
+	@Rule
+	public RefactoringTestSetup fts= new RefactoringTestSetup();
 
 	@Override
 	protected String getRefactoringPath() {
@@ -121,7 +119,7 @@ public class RenameTypeTests extends RefactoringTest {
 		descriptor.setUpdateReferences(updateReferences);
 		descriptor.setUpdateTextualOccurrences(updateTextualMatches);
 		Refactoring refactoring= createRefactoring(descriptor);
-		assertEquals("was supposed to pass", null, performRefactoring(refactoring));
+		assertNull("was supposed to pass", performRefactoring(refactoring));
 		ICompilationUnit newcu= pack.getCompilationUnit(newCUName + ".java");
 		assertTrue("cu " + newcu.getElementName()+ " does not exist", newcu.exists());
 		assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName(newCUName)), newcu.getSource());
@@ -150,8 +148,8 @@ public class RenameTypeTests extends RefactoringTest {
 	// <--------------------- Similarly named elements ---------------------------->
 
 	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
+	public void genericbefore() throws Exception {
+		super.genericbefore();
 		setSomeFieldOptions(getPackageP().getJavaProject(), "f", "Suf1", false);
 		setSomeFieldOptions(getPackageP().getJavaProject(), "fs", "_suffix", true);
 		setSomeLocalOptions(getPackageP().getJavaProject(), "lv", "_lv");
@@ -254,51 +252,63 @@ public class RenameTypeTests extends RefactoringTest {
 
 	// </------------------------------------ Similarly named elements --------------------------------->
 
+	@Test
 	public void testIllegalInnerClass() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testIllegalTypeName1() throws Exception {
 		helper1_0("A", "X ");
 	}
 
+	@Test
 	public void testIllegalTypeName2() throws Exception {
 		helper1_0("A", " X");
 	}
 
+	@Test
 	public void testIllegalTypeName3() throws Exception {
 		helper1_0("A", "34");
 	}
 
+	@Test
 	public void testIllegalTypeName4() throws Exception {
 		helper1_0("A", "this");
 	}
 
+	@Test
 	public void testIllegalTypeName5() throws Exception {
 		helper1_0("A", "fred");
 	}
 
+	@Test
 	public void testIllegalTypeName6() throws Exception {
 		helper1_0("A", "class");
 	}
 
+	@Test
 	public void testIllegalTypeName7() throws Exception {
 		helper1_0("A", "A.B");
 	}
 
+	@Test
 	public void testIllegalTypeName8() throws Exception {
 		helper1_0("A", "A$B");
 	}
 
+	@Test
 	public void testIllegalTypeName9() throws Exception {
 		if (Platform.getOS().equals(Platform.OS_WIN32))
 			helper1_0("A", "aux");
 	}
 
+	@Test
 	public void testNoOp() throws Exception {
 		helper1_0("A", "A");
 	}
 
+	@Test
 	public void testWrongArg1() throws Exception {
 		IllegalArgumentException result= null;
 		try {
@@ -309,22 +319,27 @@ public class RenameTypeTests extends RefactoringTest {
         assertNotNull("empty name was supposed to trigger IAE", result);
 	}
 
+	@Test
 	public void testFail0() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail1() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail2() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail3() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail4() throws Exception {
 		IType classA= getClassFromTestFile(getPackageP(), "A");
 		getClassFromTestFile(getPackageP(), "B");
@@ -332,6 +347,7 @@ public class RenameTypeTests extends RefactoringTest {
 		assertNotNull("precondition was supposed to fail", result);
 	}
 
+	@Test
 	public void testFail5() throws Exception {
 		IType classA= getClassFromTestFile(getPackageP(), "A");
 		getClassFromTestFile(getPackageP(), "B");
@@ -341,6 +357,7 @@ public class RenameTypeTests extends RefactoringTest {
 		assertNotNull("precondition was supposed to fail", result);
 	}
 
+	@Test
 	public void testFail6() throws Exception {
 		IType classA= getClassFromTestFile(getPackageP(), "A");
 		getClassFromTestFile(getPackageP(), "B");
@@ -350,10 +367,12 @@ public class RenameTypeTests extends RefactoringTest {
 		assertNotNull("precondition was supposed to fail", result);
 	}
 
+	@Test
 	public void testFail7() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail8() throws Exception {
 		IType classA= getClassFromTestFile(getPackageP(), "A");
 		getClassFromTestFile(getPackageP(), "B");
@@ -362,38 +381,47 @@ public class RenameTypeTests extends RefactoringTest {
 		assertNotNull("precondition was supposed to fail", result);
 	}
 
+	@Test
 	public void testFail9() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail10() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail11() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail12() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail16() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail17() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail18() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail19() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail20() throws Exception {
 		IPackageFragment packageP1= getRoot().createPackageFragment("p1", true, null);
 		IPackageFragment packageP2= getRoot().createPackageFragment("p2", true, null);
@@ -405,6 +433,7 @@ public class RenameTypeTests extends RefactoringTest {
 		assertNotNull("precondition was supposed to fail", result);
 	}
 
+	@Test
 	public void testFail22() throws Exception {
 		IType classA= getClassFromTestFile(getPackageP(), "A");
 		getClassFromTestFile(getPackageP(), "B");
@@ -413,6 +442,7 @@ public class RenameTypeTests extends RefactoringTest {
 		assertNotNull("precondition was supposed to fail", result);
 	}
 
+	@Test
 	public void testFail23() throws Exception {
 		IPackageFragment packageP1= getRoot().createPackageFragment("p1", true, null);
 		IPackageFragment packageP2= getRoot().createPackageFragment("p2", true, null);
@@ -426,6 +456,7 @@ public class RenameTypeTests extends RefactoringTest {
 		assertNotNull("precondition was supposed to fail", result);
 	}
 
+	@Test
 	public void testFail24() throws Exception {
 		IPackageFragment packageP1= getRoot().createPackageFragment("p1", true, null);
 		IPackageFragment packageP2= getRoot().createPackageFragment("p2", true, null);
@@ -437,6 +468,7 @@ public class RenameTypeTests extends RefactoringTest {
 		assertNotNull("precondition was supposed to fail", result);
 	}
 
+	@Test
 	public void testFail25() throws Exception {
 		IPackageFragment packageP1= getRoot().createPackageFragment("p1", true, null);
 		IPackageFragment packageP2= getRoot().createPackageFragment("p2", true, null);
@@ -448,6 +480,7 @@ public class RenameTypeTests extends RefactoringTest {
 		assertNotNull("precondition was supposed to fail", result);
 	}
 
+	@Test
 	public void testFail26() throws Exception {
 		IPackageFragment packageP1= getRoot().createPackageFragment("p1", true, null);
 		IPackageFragment packageP2= getRoot().createPackageFragment("p2", true, null);
@@ -459,6 +492,7 @@ public class RenameTypeTests extends RefactoringTest {
 		assertNotNull("precondition was supposed to fail", result);
 	}
 
+	@Test
 	public void testFail27() throws Exception {
 		IPackageFragment packageP1= getRoot().createPackageFragment("p1", true, null);
 		IPackageFragment packageP2= getRoot().createPackageFragment("p2", true, null);
@@ -470,21 +504,25 @@ public class RenameTypeTests extends RefactoringTest {
 		assertNotNull("precondition was supposed to fail", result);
 	}
 
+	@Test
 	public void testFail28() throws Exception {
 		printTestDisabledMessage("obscuring");
 //		helper1();
 	}
 
+	@Test
 	public void testFail29() throws Exception {
 		printTestDisabledMessage("obscuring");
 //		helper1();
 	}
 
+	@Test
 	public void testFail30() throws Exception {
 		printTestDisabledMessage("obscuring");
 //		helper1();
 	}
 
+	@Test
 	public void testFail31() throws Exception {
 		IPackageFragment packageP1= getRoot().createPackageFragment("p1", true, null);
 		IPackageFragment packageP2= getRoot().createPackageFragment("p2", true, null);
@@ -498,6 +536,7 @@ public class RenameTypeTests extends RefactoringTest {
 		assertNotNull("precondition was supposed to fail", result);
 	}
 
+	@Test
 	public void testFail32() throws Exception {
 		IType classA= getClassFromTestFile(getPackageP(), "A");
 		IPackageFragment packageP1= getRoot().createPackageFragment("p1", true, null);
@@ -507,25 +546,30 @@ public class RenameTypeTests extends RefactoringTest {
 		assertNotNull("precondition was supposed to fail", result);
 	}
 
+	@Test
 	public void testFail33() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail34() throws Exception {
 		printTestDisabledMessage("obscuring");
 //		helper1();
 	}
 
+	@Test
 	public void testFail35() throws Exception {
 		printTestDisabledMessage("obscuring");
 //		helper1();
 	}
 
+	@Test
 	public void testFail36() throws Exception {
 		printTestDisabledMessage("obscuring");
 //		helper1();
 	}
 
+	@Test
 	public void testFail37() throws Exception {
 		IType classA= getClassFromTestFile(getPackageP(), "A");
 		getClassFromTestFile(getPackageP(), "B");
@@ -534,249 +578,308 @@ public class RenameTypeTests extends RefactoringTest {
 		assertNotNull("precondition was supposed to fail", result);
 	}
 
+	@Test
 	public void testFail38() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail39() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail40() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail41() throws Exception {
 		printTestDisabledMessage("obscuring");
 //		helper1();
 	}
 
+	@Test
 	public void testFail42() throws Exception {
 		printTestDisabledMessage("obscuring");
 //		helper1();
 	}
 
+	@Test
 	public void testFail43() throws Exception {
 		printTestDisabledMessage("obscuring");
 //		helper1();
 	}
 
+	@Test
 	public void testFail44() throws Exception {
 		printTestDisabledMessage("obscuring");
 //		helper1();
 	}
 
+	@Test
 	public void testFail45() throws Exception {
 		printTestDisabledMessage("obscuring");
 //		helper1();
 	}
 
+	@Test
 	public void testFail46() throws Exception {
 		printTestDisabledMessage("obscuring");
 //		helper1();
 	}
 
+	@Test
 	public void testFail47() throws Exception {
 		printTestDisabledMessage("obscuring");
 //		helper1();
 	}
 
+	@Test
 	public void testFail48() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail49() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail50() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail51() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail52() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail53() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail54() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail55() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail56() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail57() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail58() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail59() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail60() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail61() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail62() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail63() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail64() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail65() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail66() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail67() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail68() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail69() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail70() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail71() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail72() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail73() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail74() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail75() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail76() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail77() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail78() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail79() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail80() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail81() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail82() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail83() throws Exception {
 		helper1_0("A", "Cloneable");
 	}
 
+	@Test
 	public void testFail84() throws Exception {
 		helper1_0("A", "List");
 	}
 
+	@Test
 	public void testFail85() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail86() throws Exception {
 		printTestDisabledMessage("native method with A as parameter (same CU)");
 //		helper1();
 	}
 
+	@Test
 	public void testFail87() throws Exception {
 		printTestDisabledMessage("native method with A as parameter (same CU)");
 //		helper1();
 	}
 
+	@Test
 	public void testFail88() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail89() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail90() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail91() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail92() throws Exception {
 //		printTestDisabledMessage("needs fixing - double nested local type named B");
 		helper1();
 	}
 
+	@Test
 	public void testFail93() throws Exception {
 //		printTestDisabledMessage("needs fixing - double nested local type named B");
 		helper1();
 	}
 
+	@Test
 	public void testFail94() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail95() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail96() throws Exception {
 		// https://bugs.eclipse.org/356677
 		IPackageFragment packageP1= getRoot().createPackageFragment("p1", true, null);
@@ -790,26 +893,32 @@ public class RenameTypeTests extends RefactoringTest {
 		assertNotNull("precondition was supposed to fail", result);
 	}
 
+	@Test
 	public void testFail00() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail01() throws Exception {
 		helper1_0("A", "B");
 	}
 
+	@Test
 	public void testFail02() throws Exception {
 		helper1();
 	}
 
+	@Test
 	public void testFail03() throws Exception {
 		helper1_0("A", "C");
 	}
 
+	@Test
 	public void testFail04() throws Exception {
 		helper1_0("A", "A");
 	}
 
+	@Test
 	public void testFailRegression1GCRKMQ() throws Exception {
 		IPackageFragment myPackage= getRoot().createPackageFragment("", true, new NullProgressMonitor());
 		IType myClass= getClassFromTestFile(myPackage, "Blinky");
@@ -818,6 +927,7 @@ public class RenameTypeTests extends RefactoringTest {
 		assertNotNull("precondition was supposed to fail", result);
 	}
 
+	@Test
 	public void test0() throws Exception {
 		ParticipantTesting.reset();
 		String newName= "B";
@@ -830,50 +940,62 @@ public class RenameTypeTests extends RefactoringTest {
 				new RenameArguments(newName + ".java", true)});
 	}
 
+	@Test
 	public void test1() throws Exception {
 		helper2("A", "B");
 	}
 
+	@Test
 	public void test10() throws Exception {
 		helper2("A", "B");
 	}
 
+	@Test
 	public void test12() throws Exception {
 		helper2("A", "B");
 	}
 
+	@Test
 	public void test13() throws Exception {
 		helper2("A", "B");
 	}
 
+	@Test
 	public void test14() throws Exception {
 		helper2("A", "B");
 	}
 
+	@Test
 	public void test15() throws Exception {
 		helper2("A", "B");
 	}
 
+	@Test
 	public void test16() throws Exception {
 		helper2("A", "B");
 	}
 
+	@Test
 	public void test17() throws Exception {
 		helper2("A", "B");
 	}
 
+	@Test
 	public void test18() throws Exception {
 		helper2("A", "B");
 	}
 
+	@Test
 	public void test19() throws Exception {
 		helper2("A", "B");
 	}
 
+	@Test
 	public void test2() throws Exception {
 		helper2("A", "B");
 	}
 
+	@Test
 	public void test20() throws Exception {
 		//printTestDisabledMessage("failb because of bug#9479");
 		//if (true)
@@ -883,44 +1005,53 @@ public class RenameTypeTests extends RefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(packageA, "A");
 		IType classA= getType(cu, "A");
 
-		assertEquals("was supposed to pass", null, performRefactoring(createRefactoringDescriptor(classA, "B")));
+		assertNull("was supposed to pass", performRefactoring(createRefactoringDescriptor(classA, "B")));
 
 		ICompilationUnit newcu= packageA.getCompilationUnit("B.java");
 		assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("B")), newcu.getSource());
 	}
 
+	@Test
 	public void test21() throws Exception {
 		helper2("A", "B");
 	}
 
+	@Test
 	public void test22() throws Exception {
 		helper2("A", "B");
 	}
 
+	@Test
 	public void test23() throws Exception {
 		helper2("A", "B");
 	}
 
+	@Test
 	public void test24() throws Exception {
 		helper2("A", "B");
 	}
 
+	@Test
 	public void test25() throws Exception {
 		helper2("A", "B");
 	}
 
+	@Test
 	public void test26() throws Exception {
 		helper2("A", "B");
 	}
 
+	@Test
 	public void test27() throws Exception {
 		helper2("A", "B");
 	}
 
+	@Test
 	public void test28() throws Exception {
 		helper2("A", "B");
 	}
 
+	@Test
 	public void test29() throws Exception {
 		IPackageFragment packageP1= getRoot().createPackageFragment("p1", true, null);
 		createCUfromTestFile(packageP1, "C");
@@ -928,7 +1059,7 @@ public class RenameTypeTests extends RefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
 
-		assertEquals("was supposed to pass", null, performRefactoring(createRefactoringDescriptor(classA, "B")));
+		assertNull("was supposed to pass", performRefactoring(createRefactoringDescriptor(classA, "B")));
 
 		ICompilationUnit newcu= getPackageP().getCompilationUnit("B.java");
 		ICompilationUnit newcuC= packageP1.getCompilationUnit("C.java");
@@ -937,97 +1068,116 @@ public class RenameTypeTests extends RefactoringTest {
 
 	}
 
+	@Test
 	public void test3() throws Exception {
 		helper2("A", "B");
 	}
 
+	@Test
 	public void test30() throws Exception {
 		createCUfromTestFile(getPackageP(), "AA");
 
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
 
-		assertEquals("was supposed to pass", null, performRefactoring(createRefactoringDescriptor(classA, "B")));
+		assertNull("was supposed to pass", performRefactoring(createRefactoringDescriptor(classA, "B")));
 
 		ICompilationUnit newcu= getPackageP().getCompilationUnit("B.java");
 		ICompilationUnit newcuAA= getPackageP().getCompilationUnit("AA.java");
 		assertEqualLines("invalid renaming A", getFileContents(getOutputTestFileName("B")), newcu.getSource());
 		assertEqualLines("invalid renaming AA", getFileContents(getOutputTestFileName("AA")), newcuAA.getSource());
 	}
+	@Test
 	public void test31() throws Exception {
 		createCUfromTestFile(getPackageP(), "AA");
 
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
 
-		assertEquals("was supposed to pass", null, performRefactoring(createRefactoringDescriptor(classA, "B")));
+		assertNull("was supposed to pass", performRefactoring(createRefactoringDescriptor(classA, "B")));
 
 		ICompilationUnit newcu= getPackageP().getCompilationUnit("B.java");
 		ICompilationUnit newcuAA= getPackageP().getCompilationUnit("AA.java");
 		assertEqualLines("invalid renaming A", getFileContents(getOutputTestFileName("B")), newcu.getSource());
 		assertEqualLines("invalid renaming AA", getFileContents(getOutputTestFileName("AA")), newcuAA.getSource());
 	}
+	@Test
 	public void test32() throws Exception {
 		helper2("A", "B");
 	}
 
+	@Test
 	public void test33() throws Exception {
 		helper2("A", "B");
 	}
 
+	@Test
 	public void test34() throws Exception {
 		helper2("A", "B");
 	}
 
+	@Test
 	public void test35() throws Exception {
 		helper2("A", "B");
 	}
 
+	@Test
 	public void test36() throws Exception {
 		helper2("A", "B");
 	}
 
+	@Test
 	public void test37() throws Exception {
 		helper2("A", "B");
 	}
 
+	@Test
 	public void test38() throws Exception {
 		helper2("A", "B");
 	}
 
+	@Test
 	public void test39() throws Exception {
 		helper2("A", "B");
 	}
 
+	@Test
 	public void test4() throws Exception {
 		helper2("A", "B");
 	}
 
+	@Test
 	public void test40() throws Exception {
 		//printTestDisabledMessage("search engine bug");
 		helper2("A", "B");
 	}
 
+	@Test
 	public void test41() throws Exception {
 		helper2("A", "B");
 	}
 
+	@Test
 	public void test42() throws Exception {
 		helper2("A", "B");
 	}
 
+	@Test
 	public void test43() throws Exception {
 		helper2("A", "B");
 	}
 
+	@Test
 	public void test44() throws Exception {
 		helper2("A", "B");
 	}
 
+	@Test
 	public void test45() throws Exception {
 		helper2("A", "B");
 	}
 
+	@Test
 	public void test46() throws Exception {
 		IPackageFragment packageP1= getRoot().createPackageFragment("p1", true, null);
 		createCUfromTestFile(packageP1, "C");
@@ -1035,7 +1185,7 @@ public class RenameTypeTests extends RefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
 
-		assertEquals("was supposed to pass", null, performRefactoring(createRefactoringDescriptor(classA, "B")));
+		assertNull("was supposed to pass", performRefactoring(createRefactoringDescriptor(classA, "B")));
 
 		ICompilationUnit newcu= getPackageP().getCompilationUnit("B.java");
 		ICompilationUnit newcuC= packageP1.getCompilationUnit("C.java");
@@ -1043,24 +1193,29 @@ public class RenameTypeTests extends RefactoringTest {
 		assertEqualLines("invalid renaming C", getFileContents(getOutputTestFileName("C")), newcuC.getSource());
 	}
 
+	@Test
 	public void test47() throws Exception {
 		helper2("A", "B");
 	}
 
+	@Test
 	public void test48() throws Exception {
 		helper2("A", "B");
 	}
 
+	@Test
 	public void test49() throws Exception {
 		helper2("A", "B");
 	}
 
+	@Test
 	public void test50() throws Exception {
 		printTestDisabledMessage("https://bugs.eclipse.org/bugs/show_bug.cgi?id=54948");
 		if (BUG_54948)
 			helper2("A", "B");
 	}
 
+	@Test
 	public void test51() throws Exception {
 		IPackageFragment packageP1= getRoot().createPackageFragment("p1", true, null);
 		createCUfromTestFile(packageP1, "C");
@@ -1068,7 +1223,7 @@ public class RenameTypeTests extends RefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
 
-		assertEquals("was supposed to pass", null, performRefactoring(createRefactoringDescriptor(classA, "B")));
+		assertNull("was supposed to pass", performRefactoring(createRefactoringDescriptor(classA, "B")));
 
 		ICompilationUnit newcu= getPackageP().getCompilationUnit("B.java");
 		ICompilationUnit newcuC= packageP1.getCompilationUnit("C.java");
@@ -1076,44 +1231,53 @@ public class RenameTypeTests extends RefactoringTest {
 		assertEqualLines("invalid renaming C", getFileContents(getOutputTestFileName("C")), newcuC.getSource());
 	}
 
+	@Test
 	public void test52() throws Exception {
 		//printTestDisabledMessage("1GJY2XN: ITPJUI:WIN2000 - rename type: error when with reference");
 		helper2("A", "B");
 	}
 
+	@Test
 	public void test53() throws Exception {
 		helper2("A", "B", false);
 	}
 
+	@Test
 	public void test54() throws Exception {
 		//printTestDisabledMessage("waiting for: 1GKAQJS: ITPJCORE:WIN2000 - search: incorrect results for nested types");
 		helperWithTextual("A", "X", "XYZ", "A", true, false);
 	}
 
+	@Test
 	public void test55() throws Exception {
 		//printTestDisabledMessage("waiting for: 1GKAQJS: ITPJCORE:WIN2000 - search: incorrect results for nested types");
 		helperWithTextual("A", "X", "XYZ", "A", false, false);
 	}
 
+	@Test
 	public void test57() throws Exception {
 		helperWithTextual("A", "A", "B", "B", true, true);
 	}
 
+	@Test
 	public void test58() throws Exception {
 		//printTestDisabledMessage("bug#16751");
 		helper2("A", "B");
 	}
 
+	@Test
 	public void test59() throws Exception {
 //		printTestDisabledMessage("bug#22938");
 		helper2("A", "B");
 	}
 
+	@Test
 	public void test60() throws Exception {
 //		printTestDisabledMessage("test for bug 24740");
 		helperWithTextual("A", "A", "B", "B", true, true);
 	}
 
+	@Test
 	public void test61() throws Exception {
 		ParticipantTesting.reset();
 		String[] renameHandles= helperWithTextual("A" , "Inner", "InnerB", "A", true, false);
@@ -1123,11 +1287,13 @@ public class RenameTypeTests extends RefactoringTest {
 			});
 	}
 
+	@Test
 	public void test62() throws Exception {
 //		printTestDisabledMessage("test for bug 66250");
 		helperWithTextual("A", "A", "B", "B", false, true);
 	}
 
+	@Test
 	public void test63() throws Exception {
 //		printTestDisabledMessage("test for bug 79131");
 		IPackageFragment anotherP= getRoot().createPackageFragment("another.p", true, null);
@@ -1140,6 +1306,7 @@ public class RenameTypeTests extends RefactoringTest {
 		assertEqualLines("invalid renaming in another.p.A", getFileContents(getOutputTestFileName(type, folder)), cu.getSource());
 	}
 
+	@Test
 	public void test64() throws Exception {
 //		printTestDisabledMessage("test for bug 79131");
 		IPackageFragment p2= getRoot().createPackageFragment("p2", true, null);
@@ -1152,6 +1319,7 @@ public class RenameTypeTests extends RefactoringTest {
 		assertEqualLines("invalid renaming in p2.A", getFileContents(getOutputTestFileName(type, folder)), cu.getSource());
 	}
 
+	@Test
 	public void test65() throws Exception {
 		// https://bugs.eclipse.org/356677
 		IPackageFragment packageP1= getRoot().createPackageFragment("p1", true, null);
@@ -1162,47 +1330,56 @@ public class RenameTypeTests extends RefactoringTest {
 		IType classC= getClassFromTestFile(packageP2, "C");
 
 		RefactoringStatus result= performRefactoring(createRefactoringDescriptor(classA, "C"));
-		assertEquals("was supposed to pass", null, result);
+		assertNull("was supposed to pass", result);
 
 		assertEqualLines("invalid renaming A", getFileContents(getOutputTestFileName("NewC")), packageP1.getCompilationUnit("C.java").getSource());
 		assertEqualLines("invalid renaming in B", getFileContents(getOutputTestFileName("B")), classB.getCompilationUnit().getSource());
 		assertEqualLines("invalid renaming in C", getFileContents(getOutputTestFileName("C")), classC.getCompilationUnit().getSource());
 	}
 
+	@Test
 	public void test66() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=365380
 		helperWithTextual("B", "A", "B", "B", true, true);
 	}
 
+	@Test
 	public void test5() throws Exception {
 		helper2("A", "B");
 	}
 
+	@Test
 	public void test6() throws Exception {
 		helper2("A", "B");
 	}
 
+	@Test
 	public void test7() throws Exception {
 		helper2("A", "B");
 	}
 
+	@Test
 	public void test8() throws Exception {
 		helper2("A", "B");
 	}
 
+	@Test
 	public void test9() throws Exception {
 		helper2("A", "B");
 	}
 
+	@Test
 	public void testUnicode01() throws Exception {
 		helper2("B", "C");
 		//TODO: test undo!
 	}
 
+	@Test
 	public void testQualifiedName1() throws Exception {
 		helperQualifiedName("A", "B", "build.xml", "*.xml");
 	}
 
+	@Test
 	public void testQualifiedName2() throws Exception {
 		helperQualifiedName("Transient", "TransientEquipment", "mapping.hbm.xml", "*.xml");
 	}
@@ -1220,7 +1397,7 @@ public class RenameTypeTests extends RefactoringTest {
 		descriptor.setUpdateQualifiedNames(true);
 		descriptor.setFileNamePatterns(filePatterns);
 
-		assertEquals("was supposed to pass", null, performRefactoring(descriptor));
+		assertNull("was supposed to pass", performRefactoring(descriptor));
 
 		ICompilationUnit newcu= getPackageP().getCompilationUnit(newName + ".java");
 		assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName(newName)), newcu.getSource());
@@ -1237,22 +1414,27 @@ public class RenameTypeTests extends RefactoringTest {
 		assertEqualLines("invalid updating", definedContent, newContent.toString());
 	}
 
+	@Test
 	public void testGenerics1() throws Exception {
 		helper2("A", "B");
 	}
 
+	@Test
 	public void testGenerics2() throws Exception {
 		helper2("A", "B");
 	}
 
+	@Test
 	public void testGenerics3() throws Exception {
 		helper2("A", "B");
 	}
 
+	@Test
 	public void testGenerics4() throws Exception {
 		helper2("A", "B");
 	}
 
+	@Test
 	public void testEnum1() throws Exception {
 		IPackageFragment p2= getRoot().createPackageFragment("p2", true, null);
 		String folder= "p2/";
@@ -1264,57 +1446,69 @@ public class RenameTypeTests extends RefactoringTest {
 		assertEqualLines("invalid renaming in p2.A", getFileContents(getOutputTestFileName(type, folder)), cu.getSource());
 	}
 
+	@Test
 	public void testEnum2() throws Exception {
 		helper2("A", "B");
 	}
 
+	@Test
 	public void testEnum3() throws Exception {
 		ICompilationUnit enumbered= createCUfromTestFile(getPackageP(), "Enumbered");
 		helper2("A", "B");
 		assertEqualLines("invalid renaming in Enumbered", getFileContents(getOutputTestFileName("Enumbered")), enumbered.getSource());
 	}
 
+	@Test
 	public void testEnum4() throws Exception {
 		helperWithTextual("A" , "A", "B", "A", true, false);
 	}
 
+	@Test
 	public void testEnum5() throws Exception {
 		helper2("A", "B");
 	}
 
+	@Test
 	public void testAnnotation1() throws Exception {
 		helper2("A", "B");
 	}
 
+	@Test
 	public void testAnnotation2() throws Exception {
 		helper2("A", "B");
 	}
 
+	@Test
 	public void testAnnotation3() throws Exception {
 		helperWithTextual("A" , "A", "B", "A", true, true);
 	}
 
 	// --------------- Similarly named elements -----------------
 
+	@Test
 	public void testSimilarElements00() throws Exception {
 		// Very basic test, one field, two methods
 		helper3("SomeClass", "SomeClass2", true, false, true);
 	}
 
+	@Test
 	public void testSimilarElements01() throws Exception {
 		// Already existing field with new name, shadow-error from field refac
 		helper3_fail("SomeClass", "SomeClass2", true, false, true);
 	}
 
+	@Test
 	public void testSimilarElements02() throws Exception {
 		// Already existing method
 		helper3_fail("SomeClass", "SomeDifferentClass", true, false, true);
 	}
 
+	@Test
 	public void testSimilarElements03() throws Exception {
 		// more methods
 		helper3("SomeClass", "SomeClass2", true, false, true);
 	}
+	@Test
 	public void testSimilarElements04() throws Exception {
 		//Additional field with exactly the same name and getters and setters in another class
 		getClassFromTestFile(getPackageP(), "SomeOtherClass");
@@ -1322,6 +1516,7 @@ public class RenameTypeTests extends RefactoringTest {
 		checkResultInClass("SomeOtherClass");
 	}
 
+	@Test
 	public void testSimilarElements05() throws Exception {
 		//qualified name updating
 		//includes textual updating
@@ -1346,6 +1541,7 @@ public class RenameTypeTests extends RefactoringTest {
 
 	}
 
+	@Test
 	public void testSimilarElements06() throws Exception {
 		//Additional field with exactly the same name and getters and setters in another class
 		//includes textual updating
@@ -1355,17 +1551,20 @@ public class RenameTypeTests extends RefactoringTest {
 		checkResultInClass("SomeNearlyIdenticalClass");
 	}
 
+	@Test
 	public void testSimilarElements07() throws Exception {
 		//Test 4 fields in one file, different suffixes/prefixes, incl. 2x setters/getters
 		//includes textual updating
 		helper3("SomeClass", "SomeDiffClass", true, true, true);
 	}
 
+	@Test
 	public void testSimilarElements08() throws Exception {
 		//Interface renaming fun, this time without textual
 		helper3("ISomeIf", "ISomeIf2", true, false, true);
 	}
 
+	@Test
 	public void testSimilarElements09() throws Exception {
 		//Some inner types
 		//includes textual updating
@@ -1374,6 +1573,7 @@ public class RenameTypeTests extends RefactoringTest {
 		checkResultInClass("SomeOtherClass");
 	}
 
+	@Test
 	public void testSimilarElements10() throws Exception {
 		//Two static fields
 		getClassFromTestFile(getPackageP(), "SomeOtherClass");
@@ -1381,6 +1581,7 @@ public class RenameTypeTests extends RefactoringTest {
 		checkResultInClass("SomeOtherClass");
 	}
 
+	@Test
 	public void testSimilarElements11() throws Exception {
 		//Assure participants get notified of normal stuff (type rename
 		//and resource changes) AND similarly named elements.
@@ -1456,47 +1657,56 @@ public class RenameTypeTests extends RefactoringTest {
 		ParticipantTesting.testSimilarElements(similarOldHandleList, similarNewNameList, similarNewHandleList);
 	}
 
+	@Test
 	public void testSimilarElements12() throws Exception {
 		// Test updating of references
 		helper3("SomeFieldClass", "SomeOtherFieldClass", true, false, true);
 	}
 
+	@Test
 	public void testSimilarElements13() throws Exception {
 		// Test various locals and parameters with and without prefixes.
 		// tests not renaming parameters with local prefixes and locals with parameter prefixes
 		helper3("SomeClass", "SomeOtherClass", true, false, true);
 	}
 
+	@Test
 	public void testSimilarElements14() throws Exception {
 		// Test for loop variables
 		helper3("SomeClass2", "SomeOtherClass2", true, false, true);
 	}
 
+	@Test
 	public void testSimilarElements15() throws Exception {
 		// Test catch block variables (exceptions)
 		helper3("SomeClass3", "SomeOtherClass3", true, false, true);
 	}
 
+	@Test
 	public void testSimilarElements16() throws Exception {
 		// Test updating of references
 		helper3("SomeClass4", "SomeOtherClass4", true, false,  true);
 	}
 
+	@Test
 	public void testSimilarElements17() throws Exception {
 		// Local with this name already exists - do not pass.
 		helper3_fail("SomeClass6", "SomeOtherClass6", true, false, true);
 	}
 
+	@Test
 	public void testSimilarElements18() throws Exception {
 		// factory method
 		helper3("SomeClass", "SomeOtherClass", true, false, true);
 	}
 
+	@Test
 	public void testSimilarElements19() throws Exception {
 		// Test detection of same target
 		helper3_fail("ThreeHunkClass", "TwoHunk", true, false, true, RenamingNameSuggestor.STRATEGY_SUFFIX);
 	}
 
+	@Test
 	public void testSimilarElements20() throws Exception {
 		// Overridden method, check both are renamed
 		getClassFromTestFile(getPackageP(), "OtherClass");
@@ -1504,6 +1714,7 @@ public class RenameTypeTests extends RefactoringTest {
 		checkResultInClass("OtherClass");
 	}
 
+	@Test
 	public void testSimilarElements21() throws Exception {
 		// Constructors may not be renamed
 		getClassFromTestFile(getPackageP(), "SomeClassSecond");
@@ -1511,6 +1722,7 @@ public class RenameTypeTests extends RefactoringTest {
 		checkResultInClass("SomeClassSecond");
 	}
 
+	@Test
 	public void testSimilarElements22() throws Exception {
 		// Test transplanter for fields in types inside of initializers
 
@@ -1556,6 +1768,7 @@ public class RenameTypeTests extends RefactoringTest {
 
 	}
 
+	@Test
 	public void testSimilarElements23() throws Exception {
 		// Test transplanter for elements inside types inside fields
 
@@ -1606,6 +1819,7 @@ public class RenameTypeTests extends RefactoringTest {
 		ParticipantTesting.testSimilarElements(similarOldHandleList, similarNewNameList, similarNewHandleList);
 	}
 
+	@Test
 	public void testSimilarElements24() throws Exception {
 		// Test transplanter for ICompilationUnit and IFile
 
@@ -1630,11 +1844,11 @@ public class RenameTypeTests extends RefactoringTest {
 
 		ICompilationUnit newUnit= (ICompilationUnit)rtp.getRefactoredJavaElement(type.getCompilationUnit());
 		assertTrue(newUnit.exists());
-		assertTrue(newUnit.getElementName().equals(newCUName));
+		assertEquals(newUnit.getElementName(), newCUName);
 
 		IFile newFile= (IFile)rtp.getRefactoredResource(type.getResource());
 		assertTrue(newFile.exists());
-		assertTrue(newFile.getName().equals(newCUName));
+		assertEquals(newFile.getName(), newCUName);
 
 		if ((type.getParent().getElementType() == IJavaElement.COMPILATION_UNIT)
 				&& type.getCompilationUnit().getElementName().equals(type.getElementName() + ".java")) {
@@ -1653,58 +1867,68 @@ public class RenameTypeTests extends RefactoringTest {
 				continue; // constructor
 			assertTrue(refactoredMember.exists());
 			assertEquals(member.getElementName(), refactoredMember.getElementName());
-			assertFalse(refactoredMember.equals(member));
+			assertNotEquals(refactoredMember, member);
 		}
 	}
 
+	@Test
 	public void testSimilarElements25() throws Exception {
 		// Test renaming of several-in-one field declarations
 		helper3("ScrewUp", "ScrewDown", true, false, true);
 	}
 
+	@Test
 	public void testSimilarElements26() throws Exception {
 		// Test renaming of several-in-one local variable declarations
 		helper3("ScrewUp", "ScrewDown", true, false, true);
 	}
 
+	@Test
 	public void testSimilarElements27() throws Exception {
 		// Test methods are not renamed if the match is
 		// not either a parameter or a return type
 		helper3("ScrewUp", "ScrewDown", true, false, true);
 	}
 
+	@Test
 	public void testSimilarElements28() throws Exception {
 		// Test local variables are not renamed if the match is
 		// not the type of the local variable itself
 		helper3("ScrewUp", "ScrewDown", true, false, true);
 	}
 
+	@Test
 	public void testSimilarElements29() throws Exception {
 		// Test fields are not renamed if the match is
 		// not the type of the field itself
 		helper3("ScrewUp", "ScrewDown", true, false, true);
 	}
 
+	@Test
 	public void testSimilarElements30() throws Exception {
 		// Test local variables in initializers
 		helper3("SomeClass", "SomeNewClass", true, false, true);
 	}
 
+	@Test
 	public void testSimilarElements31() throws Exception {
 		// Test references and textual references to local elements
 		helper3("SomeClass", "SomeDiffClass", true, true, true);
 	}
 
+	@Test
 	public void testSimilarElements32() throws Exception {
 		// Test whether local variable problem reporting still works
 		helper3_fail("SomeClass", "SomeDifferentClass", true, false, true);
 	}
 
+	@Test
 	public void testSimilarElements33() throws Exception {
 		// Test two local variables inside anonymous types do not generate warnings
 		helper3("Why", "WhyNot", true, false, true);
 	}
 
+	@Test
 	public void testSimilarElements34() throws Exception {
 		// Test references in annotations and type parameters
 		helper3("Try", "Bla", true, false, true);

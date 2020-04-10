@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,8 +13,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -29,23 +33,13 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameSourceFolderChange;
 
+import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
-public class RenameSourceFolderChangeTests extends RefactoringTest {
+public class RenameSourceFolderChangeTests extends GenericRefactoringTest {
+	@Rule
+	public RefactoringTestSetup fts= new RefactoringTestSetup();
 
-	private static final Class<RenameSourceFolderChangeTests> clazz= RenameSourceFolderChangeTests.class;
-
-	public RenameSourceFolderChangeTests(String name){
-		super(name);
-	}
-
-	public static Test suite() {
-		return new RefactoringTestSetup(new TestSuite(clazz));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new RefactoringTestSetup(test);
-	}
-
+	@Test
 	public void test0() throws Exception {
 		String oldName= "oldName";
 		String newName= "newName";
@@ -60,7 +54,7 @@ public class RenameSourceFolderChangeTests extends RefactoringTest {
 			change.initializeValidationData(new NullProgressMonitor());
 			performChange(change);
 
-			assertTrue("old folder should not exist", ! oldRoot.exists());
+			assertFalse("old folder should not exist", oldRoot.exists());
 			assertEquals("expected 3 pfr's", 3, testProject.getPackageFragmentRoots().length);
 			IPackageFragmentRoot[] newRoots= testProject.getPackageFragmentRoots();
 			for (int i= 0; i < newRoots.length; i++){
@@ -71,6 +65,7 @@ public class RenameSourceFolderChangeTests extends RefactoringTest {
 		}
 	}
 
+	@Test
 	public void test1() throws Exception {
 		String oldName1= "oldName1";
 		String oldName2= "oldName2";
@@ -89,7 +84,7 @@ public class RenameSourceFolderChangeTests extends RefactoringTest {
 			change.initializeValidationData(new NullProgressMonitor());
 			performChange(change);
 
-			assertTrue("old folder should not exist", ! oldRoot1.exists());
+			assertFalse("old folder should not exist", oldRoot1.exists());
 			assertEquals("expected 4 pfr's", 4, testProject.getPackageFragmentRoots().length);
 			IPackageFragmentRoot[] newRoots= testProject.getPackageFragmentRoots();
 			for (int i= 0; i < newRoots.length; i++){
@@ -104,6 +99,7 @@ public class RenameSourceFolderChangeTests extends RefactoringTest {
 		}
 	}
 
+	@Test
 	public void testBug129991() throws Exception {
 		IJavaProject project= JavaProjectHelper.createJavaProject("RenameSourceFolder", "bin");
 
@@ -118,7 +114,7 @@ public class RenameSourceFolderChangeTests extends RefactoringTest {
 			change.initializeValidationData(new NullProgressMonitor());
 			performChange(change);
 
-			assertTrue("src should not exist", ! src.exists());
+			assertFalse("src should not exist", src.exists());
 			assertEquals("expected 2 pfr's", 2, project.getPackageFragmentRoots().length);
 
 			IClasspathEntry[] rawClasspath= project.getRawClasspath();
@@ -130,6 +126,4 @@ public class RenameSourceFolderChangeTests extends RefactoringTest {
 			JavaProjectHelper.delete(project.getProject());
 		}
 	}
-
 }
-

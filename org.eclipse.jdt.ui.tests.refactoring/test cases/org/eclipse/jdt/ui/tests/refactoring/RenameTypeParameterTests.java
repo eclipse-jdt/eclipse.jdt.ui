@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,8 +13,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
@@ -29,23 +34,15 @@ import org.eclipse.jdt.core.ITypeParameter;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeParameterProcessor;
 
-public class RenameTypeParameterTests extends RefactoringTest {
+import org.eclipse.jdt.ui.tests.refactoring.rules.Java15Setup;
+import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
-	private static final Class<RenameTypeParameterTests> clazz= RenameTypeParameterTests.class;
+public class RenameTypeParameterTests extends GenericRefactoringTest {
 
 	private static final String REFACTORING_PATH= "RenameTypeParameter/";
 
-	public static Test setUpTest(Test someTest) {
-		return new Java15Setup(someTest);
-	}
-
-	public static Test suite() {
-		return new Java15Setup(new TestSuite(clazz));
-	}
-
-	public RenameTypeParameterTests(String name) {
-		super(name);
-	}
+	@Rule
+	public RefactoringTestSetup fts= new Java15Setup();
 
 	@Override
 	protected String getRefactoringPath() {
@@ -84,16 +81,16 @@ public class RenameTypeParameterTests extends RefactoringTest {
 		processor.setUpdateReferences(references);
 
 		RefactoringStatus result= performRefactoring(refactoring);
-		assertEquals("was supposed to pass", null, result);
+		assertNull("was supposed to pass", result);
 		assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
 
 		assertTrue("anythingToUndo", RefactoringCore.getUndoManager().anythingToUndo());
-		assertTrue("! anythingToRedo", !RefactoringCore.getUndoManager().anythingToRedo());
+		assertFalse("! anythingToRedo", RefactoringCore.getUndoManager().anythingToRedo());
 
 		RefactoringCore.getUndoManager().performUndo(null, new NullProgressMonitor());
 		assertEqualLines("invalid undo", getFileContents(getInputTestFileName("A")), cu.getSource());
 
-		assertTrue("! anythingToUndo", !RefactoringCore.getUndoManager().anythingToUndo());
+		assertFalse("! anythingToUndo", RefactoringCore.getUndoManager().anythingToUndo());
 		assertTrue("anythingToRedo", RefactoringCore.getUndoManager().anythingToRedo());
 
 		RefactoringCore.getUndoManager().performRedo(null, new NullProgressMonitor());
@@ -112,108 +109,130 @@ public class RenameTypeParameterTests extends RefactoringTest {
 		processor.setUpdateReferences(references);
 
 		RefactoringStatus result= performRefactoring(refactoring);
-		assertEquals("was supposed to pass", null, result);
+		assertNull("was supposed to pass", result);
 		assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
 
 		assertTrue("anythingToUndo", RefactoringCore.getUndoManager().anythingToUndo());
-		assertTrue("! anythingToRedo", !RefactoringCore.getUndoManager().anythingToRedo());
+		assertFalse("! anythingToRedo", RefactoringCore.getUndoManager().anythingToRedo());
 
 		RefactoringCore.getUndoManager().performUndo(null, new NullProgressMonitor());
 		assertEqualLines("invalid undo", getFileContents(getInputTestFileName("A")), cu.getSource());
 
-		assertTrue("! anythingToUndo", !RefactoringCore.getUndoManager().anythingToUndo());
+		assertFalse("! anythingToUndo", RefactoringCore.getUndoManager().anythingToUndo());
 		assertTrue("anythingToRedo", RefactoringCore.getUndoManager().anythingToRedo());
 
 		RefactoringCore.getUndoManager().performRedo(null, new NullProgressMonitor());
 		assertEqualLines("invalid redo", getFileContents(getOutputTestFileName("A")), cu.getSource());
 	}
 
+	@Test
 	public void test0() throws Exception {
 		helper2("T", "S", "A", true);
 	}
 
+	@Test
 	public void test1() throws Exception {
 		helper2("T", "S", "A", true);
 	}
 
+	@Test
 	public void test2() throws Exception {
 		helper2("T", "S", "A", false);
 	}
 
+	@Test
 	public void test3() throws Exception {
 		helper2("T", "S", "A", true);
 	}
 
+	@Test
 	public void test4() throws Exception {
 		helper2("T", "S", "A", false);
 	}
 
+	@Test
 	public void test5() throws Exception {
 		helper2("T", "S", "A", true);
 	}
 
+	@Test
 	public void test6() throws Exception {
 		helper2("S", "T", "A", true);
 	}
 
+	@Test
 	public void test7() throws Exception {
 		helper2("T", "S", "A", false);
 	}
 
+	@Test
 	public void test8() throws Exception {
 		helper2("S", "T", "A", false);
 	}
 
+	@Test
 	public void test9() throws Exception {
 		helper2("T", "S", "A", "f", new String[] { "QT;"}, true);
 	}
 
+	@Test
 	public void test10() throws Exception {
 		helper2("T", "S", "B", "f", new String[] { "QT;"}, true);
 	}
 
+	@Test
 	public void test11() throws Exception {
 		helper2("T", "S", "A", "f", new String[] { "QT;"}, false);
 	}
 
+	@Test
 	public void test12() throws Exception {
 		helper2("T", "S", "B", "f", new String[] { "QT;"}, false);
 	}
 
+	@Test
 	public void test13() throws Exception {
 		helper2("T", "S", "A", true);
 	}
 
+	@Test
 	public void test14() throws Exception {
 		helper2("ELEMENT", "E", "A", true);
 	}
 
+	@Test
 	public void test15() throws Exception {
 		helper2("T", "S", "A", true);
 	}
 
 // ------------------------------------------------
 
+	@Test
 	public void testFail0() throws Exception {
 		helper1("T", "S", "A", true);
 	}
 
+	@Test
 	public void testFail1() throws Exception {
 		helper1("T", "S", "A", true);
 	}
 
+	@Test
 	public void testFail2() throws Exception {
 		helper1("T", "S", "A", true);
 	}
 
+	@Test
 	public void testFail3() throws Exception {
 		helper1("T", "S", "A", true);
 	}
 
+	@Test
 	public void testFail4() throws Exception {
 		helper1("T", "S", "A", true);
 	}
 
+	@Test
 	public void testFail5() throws Exception {
 		helper1("T", "S", "B", "f", new String[] { "QT;"}, true);
 	}

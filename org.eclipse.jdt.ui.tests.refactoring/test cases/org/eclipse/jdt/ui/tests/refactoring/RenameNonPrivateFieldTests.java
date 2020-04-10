@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,11 +13,19 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -43,12 +51,9 @@ import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatur
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
-public class RenameNonPrivateFieldTests extends RefactoringTest {
-
-	private static final Class<RenameNonPrivateFieldTests> clazz= RenameNonPrivateFieldTests.class;
+public class RenameNonPrivateFieldTests extends GenericRefactoringTest {
 	private static final String REFACTORING_PATH= "RenameNonPrivateField/";
 
 	private static final boolean BUG_79990_CORE_SEARCH_METHOD_DECL= true;
@@ -61,18 +66,8 @@ public class RenameNonPrivateFieldTests extends RefactoringTest {
 	private boolean fRenameGetter= false;
 	private boolean fRenameSetter= false;
 
-
-	public RenameNonPrivateFieldTests(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return new RefactoringTestSetup(new TestSuite(clazz));
-	}
-
-	public static Test setUpTest(Test someTest) {
-		return new RefactoringTestSetup(someTest);
-	}
+	@Rule
+	public RefactoringTestSetup fts= new RefactoringTestSetup();
 
 	@Override
 	protected String getRefactoringPath() {
@@ -80,8 +75,8 @@ public class RenameNonPrivateFieldTests extends RefactoringTest {
 	}
 
 	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
+	public void genericbefore() throws Exception {
+		super.genericbefore();
 		Hashtable<String, String> options= JavaCore.getOptions();
 		fPrefixPref= options.get(JavaCore.CODEASSIST_FIELD_PREFIXES);
 		options.put(JavaCore.CODEASSIST_FIELD_PREFIXES, getPrefixes());
@@ -90,8 +85,8 @@ public class RenameNonPrivateFieldTests extends RefactoringTest {
 	}
 
 	@Override
-	protected void tearDown() throws Exception {
-		super.tearDown();
+	public void genericafter() throws Exception {
+		super.genericafter();
 		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.CODEASSIST_FIELD_PREFIXES, fPrefixPref);
 		JavaCore.setOptions(options);
@@ -162,7 +157,7 @@ public class RenameNonPrivateFieldTests extends RefactoringTest {
 		String[] renameHandles= ParticipantTesting.createHandles(elements.toArray());
 
 		RefactoringStatus result= performRefactoring(refactoring);
-		assertEquals("was supposed to pass", null, result);
+		assertNull("was supposed to pass", result);
 		assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
 
 		ParticipantTesting.testRename(
@@ -170,12 +165,12 @@ public class RenameNonPrivateFieldTests extends RefactoringTest {
 				args.toArray(new RenameArguments[args.size()]));
 
 		assertTrue("anythingToUndo", RefactoringCore.getUndoManager().anythingToUndo());
-		assertTrue("! anythingToRedo", !RefactoringCore.getUndoManager().anythingToRedo());
+		assertFalse("! anythingToRedo", RefactoringCore.getUndoManager().anythingToRedo());
 
 		RefactoringCore.getUndoManager().performUndo(null, new NullProgressMonitor());
 		assertEqualLines("invalid undo", getFileContents(getInputTestFileName("A")), cu.getSource());
 
-		assertTrue("! anythingToUndo", !RefactoringCore.getUndoManager().anythingToUndo());
+		assertFalse("! anythingToUndo", RefactoringCore.getUndoManager().anythingToUndo());
 		assertTrue("anythingToRedo", RefactoringCore.getUndoManager().anythingToRedo());
 
 		RefactoringCore.getUndoManager().performRedo(null, new NullProgressMonitor());
@@ -187,147 +182,180 @@ public class RenameNonPrivateFieldTests extends RefactoringTest {
 	}
 
 	//--------- tests ----------
+	@Test
 	public void testFail0() throws Exception{
 		helper1();
 	}
 
+	@Test
 	public void testFail1() throws Exception{
 		helper1();
 	}
 
+	@Test
 	public void testFail2() throws Exception{
 		helper1();
 	}
 
+	@Test
 	public void testFail3() throws Exception{
 		helper1();
 	}
 
+	@Test
 	public void testFail4() throws Exception{
 		helper1();
 	}
 
+	@Test
 	public void testFail5() throws Exception{
 		helper1();
 	}
 
+	@Test
 	public void testFail6() throws Exception{
 		helper1();
 	}
 
+	@Test
 	public void testFail7() throws Exception{
 		helper1();
 	}
 
+	@Test
 	public void testFail8() throws Exception{
 		helper1();
 	}
 
+	@Test
 	public void testFail9() throws Exception{
 		helper1();
 	}
 
+	@Test
 	public void testFail10() throws Exception{
 		helper1();
 	}
 
+	@Test
 	public void testFail11() throws Exception{
 		helper1();
 	}
 
+	@Test
 	public void testFail12() throws Exception{
 		helper1();
 	}
 
+	@Test
 	public void testFail13() throws Exception{
 		//printTestDisabledMessage("1GKZ8J6: ITPJCORE:WIN2000 - search: missing field occurrecnces");
 		helper1();
 	}
 
+	@Test
 	public void testFail14() throws Exception{
 		//printTestDisabledMessage("1GKZ8J6: ITPJCORE:WIN2000 - search: missing field occurrecnces");
 		helper1();
 	}
 
 	// ------
+	@Test
 	public void test0() throws Exception{
 		helper2();
 	}
 
+	@Test
 	public void test1() throws Exception{
 		helper2();
 	}
 
+	@Test
 	public void test2() throws Exception{
 		helper2();
 	}
 
+	@Test
 	public void test3() throws Exception{
 		helper2();
 	}
 
+	@Test
 	public void test4() throws Exception{
 		helper2();
 		//printTestDisabledMessage("1GKZ8J6: ITPJCORE:WIN2000 - search: missing field occurrecnces");
 	}
 
+	@Test
 	public void test5() throws Exception{
 		helper2();
 	}
 
+	@Test
 	public void test6() throws Exception{
 		//printTestDisabledMessage("1GKB9YH: ITPJCORE:WIN2000 - search for field refs - incorrect results");
 		helper2();
 	}
 
+	@Test
 	public void test7() throws Exception{
 		helper2();
 	}
 
+	@Test
 	public void test8() throws Exception{
 		//printTestDisabledMessage("1GD79XM: ITPJCORE:WINNT - Search - search for field references - not all found");
 		helper2();
 	}
 
+	@Test
 	public void test9() throws Exception{
 		helper2();
 	}
 
+	@Test
 	public void test10() throws Exception{
 		helper2();
 	}
 
+	@Test
 	public void test11() throws Exception{
 		helper2();
 	}
 
+	@Test
 	public void test12() throws Exception{
 		//System.out.println("\nRenameNonPrivateField::" + name() + " disabled (1GIHUQP: ITPJCORE:WINNT - search for static field should be more accurate)");
 		helper2();
 	}
 
+	@Test
 	public void test13() throws Exception{
 		//System.out.println("\nRenameNonPrivateField::" + name() + " disabled (1GIHUQP: ITPJCORE:WINNT - search for static field should be more accurate)");
 		helper2();
 	}
 
+	@Test
 	public void test14() throws Exception{
 		fUpdateReferences= false;
 		fUpdateTextualMatches= false;
 		helper2();
 	}
 
+	@Test
 	public void test15() throws Exception{
 		fUpdateReferences= false;
 		fUpdateTextualMatches= false;
 		helper2();
 	}
 
+	@Test
 	public void test16() throws Exception{
 //		printTestDisabledMessage("text for bug 20693");
 		helper2();
 	}
 
+	@Test
 	public void test17() throws Exception{
 //		printTestDisabledMessage("test for bug 66250, 79131 (corner case: reference "A.f" to p.A#f)");
 		fUpdateReferences= false;
@@ -335,6 +363,7 @@ public class RenameNonPrivateFieldTests extends RefactoringTest {
 		helper2("f", "g");
 	}
 
+	@Test
 	public void test18() throws Exception{
 //		printTestDisabledMessage("test for 79131 (corner case: reference "A.f" to p.A#f)");
 		fUpdateReferences= false;
@@ -343,26 +372,31 @@ public class RenameNonPrivateFieldTests extends RefactoringTest {
 	}
 
 //--- test 1.5 features: ---
+	@Test
 	public void test19() throws Exception{
 		fRenameGetter= true;
 		fRenameSetter= true;
 		helper2("list", "items");
 	}
 
+	@Test
 	public void test20() throws Exception{
 		helper2("list", "items");
 	}
 
+	@Test
 	public void test21() throws Exception{
 		helper2("fValue", "fOrdinal");
 	}
 
+	@Test
 	public void test22() throws Exception{
 		fRenameGetter= true;
 		fRenameSetter= true;
 		helper2("tee", "thing");
 	}
 
+	@Test
 	public void test23() throws Exception{
 		fRenameGetter= true;
 		fRenameSetter= true;
@@ -371,10 +405,12 @@ public class RenameNonPrivateFieldTests extends RefactoringTest {
 
 //--- end test 1.5 features. ---
 
+	@Test
 	public void testBug5821() throws Exception{
 		helper2("test", "test1");
 	}
 
+	@Test
 	public void testStaticImport() throws Exception{
 		//bug 77622
 		IPackageFragment test1= getRoot().createPackageFragment("test1", true, null);
@@ -388,6 +424,7 @@ public class RenameNonPrivateFieldTests extends RefactoringTest {
 		assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("C")), cuC.getSource());
 	}
 
+	@Test
 	public void testEnumConst() throws Exception {
 		//bug 77619
 		IPackageFragment test1= getRoot().createPackageFragment("test1", true, null);
@@ -401,16 +438,19 @@ public class RenameNonPrivateFieldTests extends RefactoringTest {
 		assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("C")), cuC.getSource());
 	}
 
+	@Test
 	public void testGenerics1() throws Exception {
 		helper2();
 	}
 
+	@Test
 	public void testGenerics2() throws Exception {
 		fRenameSetter= true;
 		fRenameGetter= true;
 		helper2();
 	}
 
+	@Test
 	public void testGenerics3() throws Exception {
 		if (BUG_79990_CORE_SEARCH_METHOD_DECL) {
 			printTestDisabledMessage("BUG_79990_CORE_SEARCH_METHOD_DECL");
@@ -421,31 +461,37 @@ public class RenameNonPrivateFieldTests extends RefactoringTest {
 		helper2();
 	}
 
+	@Test
 	public void testGenerics4() throws Exception {
 		fRenameSetter= true;
 		fRenameGetter= true;
 		helper2("count", "number");
 	}
 
+	@Test
 	public void testEnumField() throws Exception {
 		fRenameSetter= true;
 		fRenameGetter= true;
 		helper2("buddy", "other");
 	}
 
+	@Test
 	public void testAnnotation1() throws Exception {
 		helper2("ZERO", "ZORRO");
 	}
 
+	@Test
 	public void testAnnotation2() throws Exception {
 		helper2("ZERO", "ZORRO");
 	}
 
+	@Test
 	public void testDelegate01() throws Exception {
 		// a simple delegate
 		helper2("f", "g", true);
 	}
 
+	@Test
 	public void testDelegate02() throws Exception {
 		// nonstatic field, getter and setter
 		fRenameSetter= true;
@@ -453,12 +499,14 @@ public class RenameNonPrivateFieldTests extends RefactoringTest {
 		helper2("f", "g", true);
 	}
 
+	@Test
 	public void testDelegate03() throws Exception {
 		// create delegates for the field and a getter
 		fRenameGetter= true;
 		helper2("f", "g", true);
 	}
 
+	@Test
 	public void testRenameNLSAccessor01() throws Exception {
 		IFile file= createPropertiesFromTestFile("messages");
 

@@ -13,9 +13,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
@@ -37,26 +46,15 @@ import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.eclipse.jdt.ui.tests.refactoring.rules.Java14Setup;
+import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
-public class RenameRecordElementsTests extends RefactoringTest {
-
-	private static final Class<RenameRecordElementsTests> clazz= RenameRecordElementsTests.class;
+public class RenameRecordElementsTests extends GenericRefactoringTest {
 	private static final String REFACTORING_PATH= "RenameRecordElements/";
 
 	private String fPrefixPref;
-	public RenameRecordElementsTests(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return new Java14Setup( new TestSuite(clazz));
-	}
-
-	public static Test setUpTest(Test someTest) {
-		return new Java14Setup(someTest);
-	}
+	@Rule
+	public RefactoringTestSetup fts= new Java14Setup();
 
 	@Override
 	protected String getRefactoringPath() {
@@ -64,8 +62,8 @@ public class RenameRecordElementsTests extends RefactoringTest {
 	}
 
 	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
+	public void genericbefore() throws Exception {
+		super.genericbefore();
 		Hashtable<String, String> options= JavaCore.getOptions();
 		fPrefixPref= options.get(JavaCore.CODEASSIST_FIELD_PREFIXES);
 		options.put(JavaCore.CODEASSIST_FIELD_PREFIXES, getPrefixes());
@@ -74,8 +72,8 @@ public class RenameRecordElementsTests extends RefactoringTest {
 	}
 
 	@Override
-	protected void tearDown() throws Exception {
-		super.tearDown();
+	public void genericafter() throws Exception {
+		super.genericafter();
 		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.CODEASSIST_FIELD_PREFIXES, fPrefixPref);
 		JavaCore.setOptions(options);
@@ -121,7 +119,7 @@ public class RenameRecordElementsTests extends RefactoringTest {
 		if (fail) {
 			assertNotNull("was supposed to fail", result);
 		} else {
-			assertEquals("was supposed to pass", null, result);
+			assertNull("was supposed to pass", result);
 			assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
 			assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("B")), cu2.getSource());
 
@@ -130,13 +128,13 @@ public class RenameRecordElementsTests extends RefactoringTest {
 				args.toArray(new RenameArguments[args.size()]));
 
 			assertTrue("anythingToUndo", RefactoringCore.getUndoManager().anythingToUndo());
-			assertTrue("! anythingToRedo", !RefactoringCore.getUndoManager().anythingToRedo());
+			assertFalse("! anythingToRedo", RefactoringCore.getUndoManager().anythingToRedo());
 
 			RefactoringCore.getUndoManager().performUndo(null, new NullProgressMonitor());
 			assertEqualLines("invalid undo", getFileContents(getInputTestFileName("A")), cu.getSource());
 			assertEqualLines("invalid undo", getFileContents(getInputTestFileName("B")), cu2.getSource());
 
-			assertTrue("! anythingToUndo", !RefactoringCore.getUndoManager().anythingToUndo());
+			assertFalse("! anythingToUndo", RefactoringCore.getUndoManager().anythingToUndo());
 			assertTrue("anythingToRedo", RefactoringCore.getUndoManager().anythingToRedo());
 
 			RefactoringCore.getUndoManager().performRedo(null, new NullProgressMonitor());
@@ -178,7 +176,7 @@ public class RenameRecordElementsTests extends RefactoringTest {
 		if (fail) {
 			assertNotNull("was supposed to fail", result);
 		} else {
-			assertEquals("was supposed to pass", null, result);
+			assertNull("was supposed to pass", result);
 			assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
 			assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("B")), cu2.getSource());
 
@@ -187,13 +185,13 @@ public class RenameRecordElementsTests extends RefactoringTest {
 				args.toArray(new RenameArguments[args.size()]));
 
 			assertTrue("anythingToUndo", RefactoringCore.getUndoManager().anythingToUndo());
-			assertTrue("! anythingToRedo", !RefactoringCore.getUndoManager().anythingToRedo());
+			assertFalse("! anythingToRedo", RefactoringCore.getUndoManager().anythingToRedo());
 
 			RefactoringCore.getUndoManager().performUndo(null, new NullProgressMonitor());
 			assertEqualLines("invalid undo", getFileContents(getInputTestFileName("A")), cu.getSource());
 			assertEqualLines("invalid undo", getFileContents(getInputTestFileName("B")), cu2.getSource());
 
-			assertTrue("! anythingToUndo", !RefactoringCore.getUndoManager().anythingToUndo());
+			assertFalse("! anythingToUndo", RefactoringCore.getUndoManager().anythingToUndo());
 			assertTrue("anythingToRedo", RefactoringCore.getUndoManager().anythingToRedo());
 
 			RefactoringCore.getUndoManager().performRedo(null, new NullProgressMonitor());
@@ -218,19 +216,19 @@ public class RenameRecordElementsTests extends RefactoringTest {
 		RenameRefactoring refactoring= (RenameRefactoring) createRefactoring(descriptor);
 
 		RefactoringStatus result= performRefactoring(refactoring);
-		assertEquals("was supposed to pass", null, result);
+		assertNull("was supposed to pass", result);
 		ICompilationUnit newcu= pack.getCompilationUnit(newRecordName +".java");
 		assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName(newRecordName)), newcu.getSource());
 		assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("B")), cu2.getSource());
 
 		assertTrue("anythingToUndo", RefactoringCore.getUndoManager().anythingToUndo());
-		assertTrue("! anythingToRedo", !RefactoringCore.getUndoManager().anythingToRedo());
+		assertFalse("! anythingToRedo", RefactoringCore.getUndoManager().anythingToRedo());
 
 		RefactoringCore.getUndoManager().performUndo(null, new NullProgressMonitor());
 		assertEqualLines("invalid undo", getFileContents(getInputTestFileName(recordName)), cu.getSource());
 		assertEqualLines("invalid undo", getFileContents(getInputTestFileName("B")), cu2.getSource());
 
-		assertTrue("! anythingToUndo", !RefactoringCore.getUndoManager().anythingToUndo());
+		assertFalse("! anythingToUndo", RefactoringCore.getUndoManager().anythingToUndo());
 		assertTrue("anythingToRedo", RefactoringCore.getUndoManager().anythingToRedo());
 
 		RefactoringCore.getUndoManager().performRedo(null, new NullProgressMonitor());
@@ -240,36 +238,43 @@ public class RenameRecordElementsTests extends RefactoringTest {
 
 	//--------- tests ----------
 
+	@Test
 	public void testRenameRecordCompactConstructorImplicitAccessor() throws Exception{
 		renameRecordCompactConstructor("f", "g", true, false);
 	}
 
+	@Test
 	public void testRenameRecordCompactConstructorExplicitAccessor() throws Exception{
 		renameRecordCompactConstructor("f", "g", true, false);
 	}
 
+	@Test
 	public void testRenameRecordExplicitAccessor() throws Exception{
 		renameRecordExplicitAccessor("f", "g", true, false);
 	}
 
+	@Test
 	public void testRenameRecord() throws Exception{
 		renameRecord("A", "C", true, false);
 	}
 
+	@Test
 	public void testRenameRecordExplicitAccessorFailMethodConflict() throws Exception{
 		renameRecordExplicitAccessor("f", "g", true, true);
 	}
 
+	@Test
 	public void testRenameRecordExplicitAccessorFailFieldConflict() throws Exception{
 		renameRecordExplicitAccessor("f", "g", true, true);
 	}
 
+	@Test
 	public void testRenameRecordCompactConstructorFailFieldConflict() throws Exception{
 		renameRecordCompactConstructor("f", "g", true, true);
 	}
 
+	@Test
 	public void testRenameRecordCompactConstructorFailMethodConflict() throws Exception{
 		renameRecordCompactConstructor("f", "g", true, true);
 	}
-
 }

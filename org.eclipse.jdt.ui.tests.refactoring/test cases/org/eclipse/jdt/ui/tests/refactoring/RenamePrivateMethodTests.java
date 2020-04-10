@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,8 +13,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
@@ -30,22 +35,13 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameMethodProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameNonVirtualMethodProcessor;
 
-public class RenamePrivateMethodTests extends RefactoringTest {
+import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
-	private static final Class<RenamePrivateMethodTests> clazz= RenamePrivateMethodTests.class;
+public class RenamePrivateMethodTests extends GenericRefactoringTest {
 	private static final String REFACTORING_PATH= "RenamePrivateMethod/";
 
-	public RenamePrivateMethodTests(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return new RefactoringTestSetup(new TestSuite(clazz));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new RefactoringTestSetup(test);
-	}
+	@Rule
+	public RefactoringTestSetup fts= new RefactoringTestSetup();
 
 	@Override
 	protected String getRefactoringPath() {
@@ -76,7 +72,7 @@ public class RenamePrivateMethodTests extends RefactoringTest {
 		processor.setUpdateReferences(updateReferences);
 		processor.setNewElementName(newMethodName);
 		processor.setDelegateUpdating(createDelegate);
-		assertEquals("was supposed to pass", null, performRefactoring(refactoring));
+		assertNull("was supposed to pass", performRefactoring(refactoring));
 		assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
 
 		ParticipantTesting.testRename(
@@ -85,13 +81,13 @@ public class RenamePrivateMethodTests extends RefactoringTest {
 				new RenameArguments(newMethodName, updateReferences)});
 
 		assertTrue("anythingToUndo", RefactoringCore.getUndoManager().anythingToUndo());
-		assertTrue("! anythingToRedo", !RefactoringCore.getUndoManager().anythingToRedo());
+		assertFalse("! anythingToRedo", RefactoringCore.getUndoManager().anythingToRedo());
 		//assertEquals("1 to undo", 1, Refactoring.getUndoManager().getRefactoringLog().size());
 
 		RefactoringCore.getUndoManager().performUndo(null, new NullProgressMonitor());
 		assertEqualLines("invalid undo", getFileContents(getInputTestFileName("A")), cu.getSource());
 
-		assertTrue("! anythingToUndo", !RefactoringCore.getUndoManager().anythingToUndo());
+		assertFalse("! anythingToUndo", RefactoringCore.getUndoManager().anythingToUndo());
 		assertTrue("anythingToRedo", RefactoringCore.getUndoManager().anythingToRedo());
 		//assertEquals("1 to redo", 1, Refactoring.getUndoManager().getRedoStack().size());
 
@@ -115,58 +111,72 @@ public class RenamePrivateMethodTests extends RefactoringTest {
 		helper2_0("m", "k", new String[0], true, true);
 	}
 
+	@Test
 	public void testFail0() throws Exception{
 		helper1();
 	}
 
+	@Test
 	public void testFail1() throws Exception{
 		helper1();
 	}
 
+	@Test
 	public void testFail2() throws Exception{
 		helper1();
 	}
 
+	@Test
 	public void testFail5() throws Exception{
 		helper1();
 	}
 
+	@Test
 	public void test0() throws Exception{
 		helper2();
 	}
 
+	@Test
 	public void test10() throws Exception{
 		helper2();
 	}
 
+	@Test
 	public void test11() throws Exception{
 		helper2();
 	}
 
+	@Test
 	public void test12() throws Exception{
 		helper2();
 	}
 
+	@Test
 	public void test13() throws Exception{
 		helper2();
 	}
 
+	@Test
 	public void test14() throws Exception{
 		helper2();
 	}
 
+	@Test
 	public void test15() throws Exception{
 		helper2_0("m", "k", new String[]{"I"});
 	}
 
+	@Test
 	public void test16() throws Exception{
 		helper2_0("m", "fred", new String[]{"I"});
 	}
 
+	@Test
 	public void test17() throws Exception{
 		helper2_0("m", "kk", new String[]{"I"});
 	}
 
+	@Test
 	public void test18() throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		ICompilationUnit cuC= createCUfromTestFile(getPackageP(), "C");
@@ -176,44 +186,53 @@ public class RenamePrivateMethodTests extends RefactoringTest {
 		RenameRefactoring refactoring= new RenameRefactoring(processor);
 		processor.setNewElementName("kk");
 
-		assertEquals("was supposed to pass", null, performRefactoring(refactoring));
+		assertNull("was supposed to pass", performRefactoring(refactoring));
 		assertEqualLines("invalid renaming A", getFileContents(getOutputTestFileName("A")), cu.getSource());
 		assertEqualLines("invalid renaming C", getFileContents(getOutputTestFileName("C")), cuC.getSource());
 
 	}
 
+	@Test
 	public void test2() throws Exception{
 		helper2_0("m", "fred", new String[0]);
 	}
 
+	@Test
 	public void test20() throws Exception{
 		helper2_0("m", "fred", new String[]{"I"});
 	}
 
+	@Test
 	public void test23() throws Exception{
 		helper2_0("m", "k", new String[0]);
 	}
 
+	@Test
 	public void test24() throws Exception{
 		helper2_0("m", "k", new String[]{"QString;"});
 	}
 
+	@Test
 	public void test25() throws Exception{
 		helper2_0("m", "k", new String[]{"[QString;"});
 	}
 
+	@Test
 	public void test26() throws Exception{
 		helper2_0("m", "k", new String[0]);
 	}
 
+	@Test
 	public void test27() throws Exception{
 		helper2_0("m", "k", new String[0], false, false);
 	}
 
+	@Test
 	public void testAnon0() throws Exception{
 		helper2();
 	}
 
+	@Test
 	public void testDelegate01() throws Exception  {
 		// simple static delegate
 		helperDelegate();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,8 +13,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
@@ -33,23 +39,14 @@ import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameVirtualMethodProcessor;
 
-public class RenameMethodInInterfaceTests extends RefactoringTest {
+import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
-	private static final Class<RenameMethodInInterfaceTests> clazz= RenameMethodInInterfaceTests.class;
+public class RenameMethodInInterfaceTests extends GenericRefactoringTest {
 	private static final String REFACTORING_PATH= "RenameMethodInInterface/";
 	private static final String[] NO_ARGUMENTS= new String[0];
 
-	public RenameMethodInInterfaceTests(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return new RefactoringTestSetup(new TestSuite(clazz));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new RefactoringTestSetup(test);
-	}
+	@Rule
+	public RefactoringTestSetup fts= new RefactoringTestSetup();
 
 	@Override
 	protected String getRefactoringPath() {
@@ -62,7 +59,7 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 
 		RenameProcessor processor= new RenameVirtualMethodProcessor(interfaceI.getMethod(methodName, signatures));
 		RenameRefactoring ref= new RenameRefactoring(processor);
-		assertTrue(! ref.isApplicable());
+		assertFalse(ref.isApplicable());
 	}
 	private void helper1_0(String methodName, String newMethodName, String[] signatures) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
@@ -94,21 +91,21 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 		descriptor.setKeepOriginal(createDelegate);
 		descriptor.setDeprecateDelegate(true);
 
-		assertEquals("was supposed to pass", null, performRefactoring(descriptor));
+		assertNull("was supposed to pass", performRefactoring(descriptor));
 		if (!shouldPass){
-			assertTrue("incorrect renaming because of a java model bug", ! getFileContents(getOutputTestFileName("A")).equals(cu.getSource()));
+			assertNotEquals("incorrect renaming because of a java model bug", getFileContents(getOutputTestFileName("A")), cu.getSource());
 			return;
 		}
 		assertEqualLines("incorrect renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
 
 		assertTrue("anythingToUndo", RefactoringCore.getUndoManager().anythingToUndo());
-		assertTrue("! anythingToRedo", !RefactoringCore.getUndoManager().anythingToRedo());
+		assertFalse("! anythingToRedo", RefactoringCore.getUndoManager().anythingToRedo());
 		//assertEquals("1 to undo", 1, Refactoring.getUndoManager().getRefactoringLog().size());
 
 		RefactoringCore.getUndoManager().performUndo(null, new NullProgressMonitor());
 		assertEqualLines("invalid undo", getFileContents(getInputTestFileName("A")), cu.getSource());
 
-		assertTrue("! anythingToUndo", !RefactoringCore.getUndoManager().anythingToUndo());
+		assertFalse("! anythingToUndo", RefactoringCore.getUndoManager().anythingToUndo());
 		assertTrue("anythingToRedo", RefactoringCore.getUndoManager().anythingToRedo());
 		//assertEquals("1 to redo", 1, Refactoring.getUndoManager().getRedoStack().size());
 
@@ -130,206 +127,266 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 
 // --------------------------------------------------------------------------
 
+	@Test
 	public void testAnnotation0() throws Exception{
 		helper2_0("name", "ident", NO_ARGUMENTS, true, true, false);
 	}
 
+	@Test
 	public void testAnnotation1() throws Exception{
 		helper2_0("value", "number", NO_ARGUMENTS, true, true, false);
 	}
 
+	@Test
 	public void testAnnotation2() throws Exception{
 		helper2_0("thing", "value", NO_ARGUMENTS, true, true, false);
 	}
 
+	@Test
 	public void testAnnotation3() throws Exception{
 		helper2_0("value", "num", NO_ARGUMENTS, true, true, false);
 	}
 
+	@Test
 	public void testAnnotation4() throws Exception{
 		// see also bug 83064
 		helper2_0("value", "num", NO_ARGUMENTS, true, true, false);
 	}
 
+	@Test
 	public void testGenerics01() throws Exception {
 		helper2_0("getXYZ", "zYXteg", new String[] {"QList<QSet<QRunnable;>;>;"}, true, true, false);
 	}
 
+	@Test
 	public void testFail0() throws Exception{
 		helper1();
 	}
+	@Test
 	public void testFail1() throws Exception{
 		helper1();
 	}
+	@Test
 	public void testFail3() throws Exception{
 		helper1();
 	}
+	@Test
 	public void testFail4() throws Exception{
 		helper1();
 	}
+	@Test
 	public void testFail5() throws Exception{
 		helper1();
 	}
+	@Test
 	public void testFail6() throws Exception{
 		helper1();
 	}
+	@Test
 	public void testFail7() throws Exception{
 		helper1();
 	}
+	@Test
 	public void testFail8() throws Exception{
 		helper1_0("m", "k", new String[]{Signature.SIG_INT});
 	}
+	@Test
 	public void testFail9() throws Exception{
 		helper1();
 	}
+	@Test
 	public void testFail10() throws Exception{
 		helper1();
 	}
+	@Test
 	public void testFail11() throws Exception{
 		helper1();
 	}
+	@Test
 	public void testFail12() throws Exception{
 		helper1();
 	}
+	@Test
 	public void testFail13() throws Exception{
 		helper1();
 	}
+	@Test
 	public void testFail14() throws Exception{
 		helper1();
 	}
+	@Test
 	public void testFail15() throws Exception{
 		helper1();
 	}
+	@Test
 	public void testFail16() throws Exception{
 		helper1();
 	}
+	@Test
 	public void testFail17() throws Exception{
 		helper1();
 	}
+	@Test
 	public void testFail18() throws Exception{
 		helper1();
 	}
+	@Test
 	public void testFail19() throws Exception{
 		helper1();
 	}
+	@Test
 	public void testFail20() throws Exception{
 		helper1();
 	}
+	@Test
 	public void testFail21() throws Exception{
 		helper1_0("m", "k", new String[]{"QString;"});
 	}
+	@Test
 	public void testFail22() throws Exception{
 		helper1_0("m", "k", new String[]{"QObject;"});
 	}
+	@Test
 	public void testFail23() throws Exception{
 		helper1_not_available("toString", NO_ARGUMENTS);
 	}
+	@Test
 	public void testFail24() throws Exception{
 		helper1();
 	}
+	@Test
 	public void testFail25() throws Exception{
 		helper1();
 	}
+	@Test
 	public void testFail26() throws Exception{
 		helper1();
 	}
+	@Test
 	public void testFail27() throws Exception{
 		helper1();
 	}
+	@Test
 	public void testFail28() throws Exception{
 		helper1();
 	}
+	@Test
 	public void testFail29() throws Exception{
 		helper1();
 	}
 
+	@Test
 	public void testFail30() throws Exception{
 		helper1_not_available("toString", NO_ARGUMENTS);
 	}
 
+	@Test
 	public void testFail31() throws Exception{
 		helper1_not_available("toString", NO_ARGUMENTS);
 	}
 
+	@Test
 	public void testFail32() throws Exception{
 		helper1_0("m", "toString", NO_ARGUMENTS);
 	}
 
+	@Test
 	public void testFail33() throws Exception{
 		helper1_0("m", "toString", NO_ARGUMENTS);
 	}
 
+	@Test
 	public void testFail34() throws Exception{
 		helper1_0("m", "equals", new String[]{"QObject;"});
 	}
 
+	@Test
 	public void testFail35() throws Exception{
 		helper1_0("m", "equals", new String[]{"Qjava.lang.Object;"});
 	}
 
+	@Test
 	public void testFail36() throws Exception{
 		helper1_0("m", "getClass", NO_ARGUMENTS);
 	}
 
+	@Test
 	public void testFail37() throws Exception{
 		helper1_0("m", "hashCode", NO_ARGUMENTS);
 	}
 
+	@Test
 	public void testFail38() throws Exception{
 		helper1_0("m", "notify", NO_ARGUMENTS);
 	}
 
+	@Test
 	public void testFail39() throws Exception{
 		helper1_0("m", "notifyAll", NO_ARGUMENTS);
 	}
 
+	@Test
 	public void testFail40() throws Exception{
 		helper1_0("m", "wait", new String[]{Signature.SIG_LONG, Signature.SIG_INT});
 	}
 
+	@Test
 	public void testFail41() throws Exception{
 		helper1_0("m", "wait", new String[]{Signature.SIG_LONG});
 	}
 
+	@Test
 	public void testFail42() throws Exception{
 		helper1_0("m", "wait", NO_ARGUMENTS);
 	}
 
+	@Test
 	public void testFail43() throws Exception{
 		helper1_0("m", "wait", NO_ARGUMENTS);
 	}
 
 
+	@Test
 	public void test0() throws Exception{
 		helper2();
 	}
+	@Test
 	public void test1() throws Exception{
 		helper2();
 	}
+	@Test
 	public void test2() throws Exception{
 		helper2();
 	}
+	@Test
 	public void test3() throws Exception{
 		helper2();
 	}
+	@Test
 	public void test4() throws Exception{
 		helper2();
 	}
+	@Test
 	public void test5() throws Exception{
 		helper2();
 	}
+	@Test
 	public void test6() throws Exception{
 		helper2();
 	}
+	@Test
 	public void test7() throws Exception{
 		helper2();
 	}
+	@Test
 	public void test10() throws Exception{
 		helper2();
 	}
+	@Test
 	public void test11() throws Exception{
 		helper2();
 	}
+	@Test
 	public void test12() throws Exception{
 		helper2();
 	}
@@ -338,32 +395,41 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 	//public void test13() throws Exception{
 	//	helper2();
 	//}
+	@Test
 	public void test14() throws Exception{
 		helper2();
 	}
+	@Test
 	public void test15() throws Exception{
 		helper2();
 	}
+	@Test
 	public void test16() throws Exception{
 		helper2();
 	}
+	@Test
 	public void test17() throws Exception{
 		helper2();
 	}
+	@Test
 	public void test18() throws Exception{
 		helper2();
 	}
+	@Test
 	public void test19() throws Exception{
 		helper2();
 	}
+	@Test
 	public void test20() throws Exception{
 		helper2();
 	}
 	//anonymous inner class
+	@Test
 	public void test21() throws Exception{
 		printTestDisabledMessage("must fix - incorrect warnings");
 		//helper2_fail();
 	}
+	@Test
 	public void test22() throws Exception{
 		helper2();
 	}
@@ -373,85 +439,111 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 	//	helper2();
 	//}
 
+	@Test
 	public void test24() throws Exception{
 		helper2();
 	}
+	@Test
 	public void test25() throws Exception{
 		helper2();
 	}
+	@Test
 	public void test26() throws Exception{
 		helper2();
 	}
+	@Test
 	public void test27() throws Exception{
 		helper2();
 	}
+	@Test
 	public void test28() throws Exception{
 		helper2();
 	}
+	@Test
 	public void test29() throws Exception{
 		helper2();
 	}
+	@Test
 	public void test30() throws Exception{
 		helper2();
 	}
 	//anonymous inner class
+	@Test
 	public void test31() throws Exception{
 		helper2();
 	}
 	//anonymous inner class
+	@Test
 	public void test32() throws Exception{
 		helper2();
 	}
+	@Test
 	public void test33() throws Exception{
 		helper2();
 	}
+	@Test
 	public void test34() throws Exception{
 		helper2();
 	}
+	@Test
 	public void test35() throws Exception{
 		helper2();
 	}
+	@Test
 	public void test36() throws Exception{
 		helper2();
 	}
+	@Test
 	public void test37() throws Exception{
 		helper2();
 	}
+	@Test
 	public void test38() throws Exception{
 		helper2();
 	}
+	@Test
 	public void test39() throws Exception{
 		helper2();
 	}
+	@Test
 	public void test40() throws Exception{
 		helper2();
 	}
+	@Test
 	public void test41() throws Exception{
 		helper2();
 	}
+	@Test
 	public void test42() throws Exception{
 		helper2();
 	}
+	@Test
 	public void test43() throws Exception{
 		helper2();
 	}
+	@Test
 	public void test44() throws Exception{
 		helper2();
 	}
+	@Test
 	public void test45() throws Exception{
 		helper2();
 	}
+	@Test
 	public void test46() throws Exception{
 		helper2(false);
 	}
+	@Test
 	public void test47() throws Exception{
 		helper2();
 	}
 
+	@Test
 	public void testDelegate01() throws Exception {
 		// simple delegate
 		helperDelegate();
 	}
+	@Test
 	public void testDelegate02() throws Exception {
 		// "overridden" delegate
 		helperDelegate();

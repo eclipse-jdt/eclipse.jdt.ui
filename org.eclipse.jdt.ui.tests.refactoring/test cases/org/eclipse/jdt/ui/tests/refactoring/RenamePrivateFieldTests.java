@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,9 +13,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
@@ -35,29 +44,17 @@ import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
-public class RenamePrivateFieldTests extends RefactoringTest {
-
-	private static final Class<RenamePrivateFieldTests> clazz= RenamePrivateFieldTests.class;
+public class RenamePrivateFieldTests extends GenericRefactoringTest {
 	private static final String REFACTORING_PATH= "RenamePrivateField/";
 
 	private static final boolean BUG_75642_GENERIC_METHOD_SEARCH= true;
 	private static final boolean BUG_81084= true;
 
 	private String fPrefixPref;
-	public RenamePrivateFieldTests(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return new RefactoringTestSetup( new TestSuite(clazz));
-	}
-
-	public static Test setUpTest(Test someTest) {
-		return new RefactoringTestSetup(someTest);
-	}
+	@Rule
+	public RefactoringTestSetup fts= new RefactoringTestSetup();
 
 	@Override
 	protected String getRefactoringPath() {
@@ -65,8 +62,8 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 	}
 
 	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
+	public void genericbefore() throws Exception {
+		super.genericbefore();
 		Hashtable<String, String> options= JavaCore.getOptions();
 		fPrefixPref= options.get(JavaCore.CODEASSIST_FIELD_PREFIXES);
 		options.put(JavaCore.CODEASSIST_FIELD_PREFIXES, getPrefixes());
@@ -75,8 +72,8 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 	}
 
 	@Override
-	protected void tearDown() throws Exception {
-		super.tearDown();
+	public void genericafter() throws Exception {
+		super.genericafter();
 		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.CODEASSIST_FIELD_PREFIXES, fPrefixPref);
 		JavaCore.setOptions(options);
@@ -145,7 +142,7 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 		String[] renameHandles= ParticipantTesting.createHandles(elements.toArray());
 
 		RefactoringStatus result= performRefactoring(refactoring);
-		assertEquals("was supposed to pass", null, result);
+		assertNull("was supposed to pass", result);
 		assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
 
 		ParticipantTesting.testRename(
@@ -153,12 +150,12 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 			args.toArray(new RenameArguments[args.size()]));
 
 		assertTrue("anythingToUndo", RefactoringCore.getUndoManager().anythingToUndo());
-		assertTrue("! anythingToRedo", !RefactoringCore.getUndoManager().anythingToRedo());
+		assertFalse("! anythingToRedo", RefactoringCore.getUndoManager().anythingToRedo());
 
 		RefactoringCore.getUndoManager().performUndo(null, new NullProgressMonitor());
 		assertEqualLines("invalid undo", getFileContents(getInputTestFileName("A")), cu.getSource());
 
-		assertTrue("! anythingToUndo", !RefactoringCore.getUndoManager().anythingToUndo());
+		assertFalse("! anythingToUndo", RefactoringCore.getUndoManager().anythingToUndo());
 		assertTrue("anythingToRedo", RefactoringCore.getUndoManager().anythingToRedo());
 
 		RefactoringCore.getUndoManager().performRedo(null, new NullProgressMonitor());
@@ -174,96 +171,118 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 	}
 
 	//--------- tests ----------
+	@Test
 	public void testFail0() throws Exception{
 		helper1();
 	}
 
+	@Test
 	public void testFail1() throws Exception{
 		helper1();
 	}
 
+	@Test
 	public void testFail2() throws Exception{
 		helper1();
 	}
 
+	@Test
 	public void testFail3() throws Exception{
 		helper1();
 	}
 
+	@Test
 	public void testFail4() throws Exception{
 		helper1();
 	}
 
+	@Test
 	public void testFail5() throws Exception{
 		helper1();
 	}
 
+	@Test
 	public void testFail6() throws Exception{
 		helper1();
 	}
 
+	@Test
 	public void testFail7() throws Exception{
 		helper1();
 	}
 
+	@Test
 	public void testFail8() throws Exception{
 		helper1_0("gg", "f", "A", false, false);
 	}
 
+	@Test
 	public void testFail9() throws Exception{
 		helper1_0("y", "e", "getE", true, true);
 	}
 
+	@Test
 	public void testFail10() throws Exception{
 		helper1_0("y", "e", "setE", true, true);
 	}
 
 	// ------
+	@Test
 	public void test0() throws Exception{
 		helper2();
 	}
 
+	@Test
 	public void test1() throws Exception{
 		helper2();
 	}
 
+	@Test
 	public void test2() throws Exception{
 		helper2(false);
 	}
 
+	@Test
 	public void test3() throws Exception{
 		helper2("f", "gg", true, true, false, false, false, false);
 	}
 
+	@Test
 	public void test4() throws Exception{
 		helper2("fMe", "fYou", true, false, true, true, true, true);
 	}
 
+	@Test
 	public void test5() throws Exception{
 		//regression test for 9895
 		helper2("fMe", "fYou", true, false, true, false, true, false);
 	}
 
+	@Test
 	public void test6() throws Exception{
 		//regression test for 9895 - opposite case
 		helper2("fMe", "fYou", true, false, false, true, false, true);
 	}
 
+	@Test
 	public void test7() throws Exception{
 		//regression test for 21292
 		helper2("fBig", "fSmall", true, false, true, true, true, true);
 	}
 
+	@Test
 	public void test8() throws Exception{
 		//regression test for 26769
 		helper2("f", "g", true, false, true, false, true, false);
 	}
 
+	@Test
 	public void test9() throws Exception{
 		//regression test for 30906
 		helper2("fBig", "fSmall", true, false, true, true, true, true);
 	}
 
+	@Test
 	public void test10() throws Exception{
 		//regression test for 81084
 		if (BUG_81084) {
@@ -273,6 +292,7 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 		helper2("fList", "fElements", true, false, false, false, false, false);
 	}
 
+	@Test
 	public void test11() throws Exception{
 		if (BUG_75642_GENERIC_METHOD_SEARCH) {
 			printTestDisabledMessage("BUG_75642_GENERIC_METHOD_SEARCH");
@@ -281,6 +301,7 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 		helper2("fList", "fElements", true, false, true, true, true, true);
 	}
 
+	@Test
 	public void testUnicode01() throws Exception{
 		//regression test for 180331
 		helper2("field", "feel", true, false, true, true, true, true);
