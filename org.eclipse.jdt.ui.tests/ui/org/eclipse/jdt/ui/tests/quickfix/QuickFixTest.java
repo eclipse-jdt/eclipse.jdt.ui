@@ -125,7 +125,7 @@ import org.eclipse.jdt.internal.ui.text.template.contentassist.SurroundWithTempl
 	NullAnnotationsQuickFixTest.class,
 	NullAnnotationsQuickFixTest18.class,
 	NullAnnotationsQuickFixTest18Mix.class,
-	AnnotateAssistTest15.class,
+	AnnotateAssistTest1d5.class,
 	AnnotateAssistTest18.class,
 	TypeAnnotationQuickFixTest.class
 })

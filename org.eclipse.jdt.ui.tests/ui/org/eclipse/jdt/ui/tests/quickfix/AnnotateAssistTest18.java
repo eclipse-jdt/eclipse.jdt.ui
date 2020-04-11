@@ -242,7 +242,7 @@ public class AnnotateAssistTest18 extends AbstractAnnotateAssistTests {
 	 * A single line entry using this selector exists and will be amended.
 	 * Apply the second proposal and check the effect.
 	 *
-	 * Cf. {@link AnnotateAssistTest15#testAnnotateParameter_Array1()}
+	 * Cf. {@link AnnotateAssistTest1d5#testAnnotateParameter_Array1()}
 	 * @throws Exception multiple causes
 	 */
 	@Test
@@ -315,7 +315,7 @@ public class AnnotateAssistTest18 extends AbstractAnnotateAssistTests {
 	 * An entry with annotation on the outer array already exists and will be amended.
 	 * Apply the second proposal and check the effect.
 	 *
-	 * Cf. {@link AnnotateAssistTest15#testAnnotateParameter_Array1()}
+	 * Cf. {@link AnnotateAssistTest1d5#testAnnotateParameter_Array1()}
 	 * @throws Exception multiple causes
 	 */
 	@Test
