@@ -356,7 +356,7 @@ public class BuildpathProblemMarkerResolutionGenerator implements IMarkerResolut
 
 		@Override
 		public String getLabel() {
-			String projects = closedProjects.stream().map(p -> p.getName()).collect(Collectors.joining("', '")); //$NON-NLS-1$
+			String projects = closedProjects.stream().map(IProject::getName).collect(Collectors.joining("', '")); //$NON-NLS-1$
 			if(closedProjects.size() > 1) {
 				return Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_open_required_projects_description, projects);
 			}

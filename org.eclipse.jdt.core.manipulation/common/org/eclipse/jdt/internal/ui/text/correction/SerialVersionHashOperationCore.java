@@ -185,7 +185,7 @@ public final class SerialVersionHashOperationCore extends AbstractSerialVersionO
 
 	private static char[][] getSortedInterfacesNames(IClassFileReader cfReader) {
 		char[][] interfaceNames= cfReader.getInterfaceNames();
-		Arrays.sort(interfaceNames, (o1, o2) -> CharOperation.compareTo(o1, o2));
+		Arrays.sort(interfaceNames, CharOperation::compareTo);
 		return interfaceNames;
 	}
 

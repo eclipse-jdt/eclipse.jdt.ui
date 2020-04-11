@@ -482,7 +482,7 @@ public class QuickFixTest {
 
 	protected static String[] getAllDisplayStrings(ArrayList<IJavaCompletionProposal> proposals) {
 		return proposals.stream()
-				.map(proposal -> proposal.getDisplayString())
+				.map(IJavaCompletionProposal::getDisplayString)
 				.filter(displayString -> displayString != null && !displayString.isEmpty())
 				.toArray(String[]::new);
 	}
