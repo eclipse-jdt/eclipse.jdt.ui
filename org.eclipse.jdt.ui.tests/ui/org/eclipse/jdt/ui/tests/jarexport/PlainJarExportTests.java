@@ -117,12 +117,7 @@ public class PlainJarExportTests {
 		try (ZipFile jar= createArchive(data)) {
 			entries= getSortedEntries(jar);
 		}
-		List<String> expected= Arrays.asList(new String[] {
-				"META-INF/MANIFEST.MF\n",
-				"org/eclipse/jdt/ui/test/Main$1.class\n",
-				"org/eclipse/jdt/ui/test/Main$MainInner.class\n",
-				"org/eclipse/jdt/ui/test/Main.class\n",
-		});
+		List<String> expected= Arrays.asList("META-INF/MANIFEST.MF\n", "org/eclipse/jdt/ui/test/Main$1.class\n", "org/eclipse/jdt/ui/test/Main$MainInner.class\n", "org/eclipse/jdt/ui/test/Main.class\n");
 		assertEquals(expected.toString(), entries.toString());
 	}
 
@@ -137,9 +132,7 @@ public class PlainJarExportTests {
 		try (ZipFile jar= createArchive(data)) {
 			entries= getSortedEntries(jar);
 		}
-		List<String> expected= Arrays.asList(new String[] { "META-INF/MANIFEST.MF\n", "org/eclipse/jdt/ui/test/Main$1.class\n",
-				"org/eclipse/jdt/ui/test/Main$MainInner.class\n",
-				"org/eclipse/jdt/ui/test/Main.class\n", });
+		List<String> expected= Arrays.asList("META-INF/MANIFEST.MF\n", "org/eclipse/jdt/ui/test/Main$1.class\n", "org/eclipse/jdt/ui/test/Main$MainInner.class\n", "org/eclipse/jdt/ui/test/Main.class\n");
 
 		assertEquals(expected.toString(), entries.toString());
 	}
@@ -161,11 +154,7 @@ public class PlainJarExportTests {
 		try (ZipFile jar= createArchive(data)) {
 			entries= getSortedEntries(jar);
 		}
-		List<String> expected= Arrays.asList(new String[] {
-				"META-INF/MANIFEST.MF\n",
-				"org/eclipse/jdt/ui/test/Main$1.class\n",
-				"org/eclipse/jdt/ui/test/Main$MainInner.class\n",
-				"org/eclipse/jdt/ui/test/Main.class\n", });
+		List<String> expected= Arrays.asList("META-INF/MANIFEST.MF\n", "org/eclipse/jdt/ui/test/Main$1.class\n", "org/eclipse/jdt/ui/test/Main$MainInner.class\n", "org/eclipse/jdt/ui/test/Main.class\n");
 		assertEquals(expected.toString(), entries.toString());
 	}
 

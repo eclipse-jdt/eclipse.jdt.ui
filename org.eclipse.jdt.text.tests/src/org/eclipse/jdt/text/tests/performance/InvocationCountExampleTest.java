@@ -33,8 +33,8 @@ public class InvocationCountExampleTest extends TestCase {
 
 	public void test() throws Exception {
 		InvocationCountPerformanceMeter performanceMeter= new InvocationCountPerformanceMeter(Performance.getDefault().getDefaultScenarioId(this), new Method[] {
-			Double.class.getDeclaredMethod("hashCode", new Class[] { }),
-			Double.class.getDeclaredMethod("equals", new Class[] { Object.class }),
+			Double.class.getDeclaredMethod("hashCode"),
+			Double.class.getDeclaredMethod("equals", Object.class),
 		});
 		try {
 			Set<Double> set= new HashSet<>();

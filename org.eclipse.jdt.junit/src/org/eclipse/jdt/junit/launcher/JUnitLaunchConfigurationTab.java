@@ -886,7 +886,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 
 		IJavaProject javaProject = getJavaProject();
 		if (javaProject != null) {
-			dialog.setInitialSelections(new Object[] { javaProject });
+			dialog.setInitialSelections(javaProject);
 		}
 		if (dialog.open() == Window.OK) {
 			return (IJavaProject) dialog.getFirstResult();

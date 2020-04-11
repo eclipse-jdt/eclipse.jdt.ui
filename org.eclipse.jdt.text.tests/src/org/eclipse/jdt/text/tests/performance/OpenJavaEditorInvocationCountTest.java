@@ -53,7 +53,7 @@ public class OpenJavaEditorInvocationCountTest extends OpenEditorTest {
 
 	public void test() throws Exception {
 		InvocationCountPerformanceMeter performanceMeter= createInvocationCountPerformanceMeter(new Method[] {
-			PresentationReconciler.class.getDeclaredMethod("createPresentation", new Class[] { IRegion.class, IDocument.class }),
+			PresentationReconciler.class.getDeclaredMethod("createPresentation", IRegion.class, IDocument.class),
 //			AnnotationRulerColumn.class.getDeclaredMethod("doPaint1", new Class[] { GC.class }),
 //			AbstractDocument.class.getDeclaredMethod("get", new Class[] { }),
 		});

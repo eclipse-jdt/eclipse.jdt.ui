@@ -203,13 +203,7 @@ public class PluginsNotLoadedTest {
 				if (Platform.getBundle("org.eclipse.egit.ui") != null) {
 					addLoadedPlugIns("org.eclipse.compare");
 				}
-				addLoadedPlugIns(
-						new String[] {
-								"org.eclipse.core.filebuffers.tests",
-								"org.eclipse.core.variables",
-								"org.eclipse.team.cvs.core",
-								"org.eclipse.test.performance"
-						});
+				addLoadedPlugIns("org.eclipse.core.filebuffers.tests", "org.eclipse.core.variables", "org.eclipse.team.cvs.core", "org.eclipse.test.performance");
 			}
 		};
 

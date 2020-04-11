@@ -122,11 +122,7 @@ public class JUnitContainerWizardPage extends NewElementWizardPage implements IC
 		label.setText(JUnitMessages.JUnitContainerWizardPage_combo_label);
 
 		fVersionCombo= new Combo(composite, SWT.READ_ONLY);
-		fVersionCombo.setItems(new String[] {
-				JUnitMessages.JUnitContainerWizardPage_option_junit3,
-				JUnitMessages.JUnitContainerWizardPage_option_junit4,
-				JUnitMessages.JUnitContainerWizardPage_option_junit5
-		});
+		fVersionCombo.setItems(JUnitMessages.JUnitContainerWizardPage_option_junit3, JUnitMessages.JUnitContainerWizardPage_option_junit4, JUnitMessages.JUnitContainerWizardPage_option_junit5);
 		fVersionCombo.setFont(composite.getFont());
 
 		GridData data= new GridData(GridData.BEGINNING, GridData.CENTER, false, false, 1, 1);

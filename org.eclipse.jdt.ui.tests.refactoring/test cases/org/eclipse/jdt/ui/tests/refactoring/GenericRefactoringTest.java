@@ -105,8 +105,7 @@ public abstract class GenericRefactoringTest {
 	protected static final String TEST_OUTPUT_INFIX= "/out/";
 	protected static final String CONTAINER= "src";
 
-	protected static final List<String> PROJECT_RESOURCE_CHILDREN= Arrays.asList(new String[] {
-			".project", ".classpath", ".settings" });
+	protected static final List<String> PROJECT_RESOURCE_CHILDREN= Arrays.asList(".project", ".classpath", ".settings");
 
 	@Before
 	public void genericbefore() throws Exception {

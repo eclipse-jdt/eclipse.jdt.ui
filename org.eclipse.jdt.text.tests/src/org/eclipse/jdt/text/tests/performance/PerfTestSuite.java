@@ -113,7 +113,7 @@ public class PerfTestSuite extends TestSuite {
 				if (test instanceof TestCase)
 					((TestCase) test).setName(name);
 			} else {
-				test= constructor.newInstance(new Object[]{name});
+				test= constructor.newInstance(name);
 			}
 		} catch (InstantiationException e) {
 			return(warning("Cannot instantiate test case: "+name+" ("+exceptionToString(e)+")")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
