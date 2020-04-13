@@ -61,11 +61,8 @@ public class ModuleAttributeConfiguration extends ClasspathAttributeConfiguratio
 
 	@Override
 	public IClasspathAttribute performEdit(Shell shell, ClasspathAttributeAccess attribute) {
-		throw new UnsupportedOperationException("should be handled specifically");
-//
-//		String initialValue= attribute.getClasspathAttribute().getValue();
-//		String newValue= TRUE.equals(initialValue) ? null : TRUE;
-//		return JavaCore.newClasspathAttribute(CPListElement.MODULE, newValue);
+		// we should not get here, because this attribute is 'builtin' for which specific handling is implemented
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
