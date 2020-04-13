@@ -595,6 +595,20 @@ public class ASTNodes {
 	}
 
 	/**
+	 * Return true if the node changes nothing.
+	 *
+	 * @param node The node to visit.
+	 *
+	 * @return True if the node changes nothing.
+	 */
+	public static boolean isPassive(final ASTNode node) {
+		ExprActivityVisitor visitor= new ExprActivityVisitor();
+		visitor.traverseNodeInterruptibly(node);
+		return ExprActivity.PASSIVE_WITHOUT_FALLING_THROUGH.equals(visitor.getActivityLevel())
+				|| ExprActivity.PASSIVE.equals(visitor.getActivityLevel());
+	}
+
+	/**
 	 * True if the method is static, false if it is not or null if it is unknown.
 	 *
 	 * @param method The method
@@ -831,6 +845,78 @@ public class ASTNodes {
 		}
 
 		return Arrays.asList(statement);
+	}
+
+	/**
+	 * Return the items of an infix expression in the order it is specified. It reverses the operator if needed.
+	 *
+	 * @param <F>          the required expression type
+	 * @param <S>          the required expression type
+	 * @param node         the supposed infix expression
+	 * @param firstClass   the class representing the required expression type
+	 * @param secondClass  the class representing the required expression type
+	 * @return the items of an infix expression in the order it is specified. It reverses the operator if needed.
+	 */
+	public static <F extends Expression, S extends Expression> OrderedInfixExpression<F, S> orderedInfix(final Expression node, final Class<F> firstClass, final Class<S> secondClass) {
+		InfixExpression expression= as(node, InfixExpression.class);
+
+		if (expression == null || expression.hasExtendedOperands()) {
+			return null;
+		}
+
+		if (firstClass != null && firstClass.equals(secondClass)) {
+			F first= as(expression.getLeftOperand(), firstClass);
+			S second= as(expression.getRightOperand(), secondClass);
+
+			if (first != null && second != null) {
+				return new OrderedInfixExpression<>(first, expression.getOperator(), second);
+			}
+		} else {
+			F leftFirst= as(expression.getLeftOperand(), firstClass);
+			S rightSecond= as(expression.getRightOperand(), secondClass);
+
+			if (leftFirst != null && rightSecond != null) {
+				return new OrderedInfixExpression<>(leftFirst, expression.getOperator(), rightSecond);
+			}
+
+			InfixExpression.Operator mirroredOperator= mirrorOperator(expression);
+
+			if (mirroredOperator != null) {
+				F rightFirst= as(expression.getRightOperand(), firstClass);
+				S leftSecond= as(expression.getLeftOperand(), secondClass);
+
+				if (rightFirst != null && leftSecond != null) {
+					return new OrderedInfixExpression<>(rightFirst, mirroredOperator, leftSecond);
+				}
+			}
+		}
+
+		return null;
+	}
+
+	private static InfixExpression.Operator mirrorOperator(final InfixExpression expression) {
+		if (Arrays.asList(
+				InfixExpression.Operator.AND,
+				InfixExpression.Operator.CONDITIONAL_AND,
+				InfixExpression.Operator.CONDITIONAL_OR,
+				InfixExpression.Operator.EQUALS,
+				InfixExpression.Operator.NOT_EQUALS,
+				InfixExpression.Operator.OR,
+				InfixExpression.Operator.PLUS,
+				InfixExpression.Operator.TIMES,
+				InfixExpression.Operator.XOR).contains(expression.getOperator())) {
+			return expression.getOperator();
+		} else if (InfixExpression.Operator.GREATER.equals(expression.getOperator())) {
+			return InfixExpression.Operator.LESS;
+		} else if (InfixExpression.Operator.GREATER_EQUALS.equals(expression.getOperator())) {
+			return InfixExpression.Operator.LESS_EQUALS;
+		} else if (InfixExpression.Operator.LESS.equals(expression.getOperator())) {
+			return InfixExpression.Operator.GREATER;
+		} else if (InfixExpression.Operator.LESS_EQUALS.equals(expression.getOperator())) {
+			return InfixExpression.Operator.GREATER_EQUALS;
+		}
+
+		return null;
 	}
 
 	/**

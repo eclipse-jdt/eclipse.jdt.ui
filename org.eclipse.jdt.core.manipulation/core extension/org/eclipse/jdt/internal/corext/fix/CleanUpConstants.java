@@ -1008,6 +1008,18 @@ public class CleanUpConstants {
 	public static final String REMOVE_UNNECESSARY_ARRAY_CREATION= "cleanup.remove_unnecessary_array_creation"; //$NON-NLS-1$
 
 	/**
+	 * Reduces the code of the equals method implementation by using Objects.equals().
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.17
+	 */
+	public static final String USE_OBJECTS_EQUALS= "cleanup.objects_equals"; //$NON-NLS-1$
+
+	/**
 	 * Controls whether missing annotations should be added to the code. For detailed settings use:<br>
 	 * {@link #ADD_MISSING_ANNOTATIONS_DEPRECATED}<br> {@value #ADD_MISSING_ANNOTATIONS_OVERRIDE} <br>
 	 * <br>

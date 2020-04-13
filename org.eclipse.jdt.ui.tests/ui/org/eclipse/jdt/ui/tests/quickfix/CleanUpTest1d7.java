@@ -32,9 +32,8 @@ import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 @RunWith(JUnit4.class)
 public class CleanUpTest1d7 extends CleanUpTestCase {
-
 	@Rule
-    public ProjectTestSetup projectsetup = new Java1d7ProjectTestSetup();
+    public ProjectTestSetup projectsetup= new Java1d7ProjectTestSetup();
 
 	@Override
 	protected IJavaProject getProject() {
@@ -84,4 +83,232 @@ public class CleanUpTest1d7 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
+	@Test
+	public void testObjectsEquals() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Map;\n" //
+				+ "import java.util.Observable;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    private Map<Integer, String> textById;\n" //
+				+ "    private Observable anObservable;\n" //
+				+ "    private String aText;\n" //
+				+ "\n" //
+				+ "    /* (non-Javadoc)\n" //
+				+ "     * @see java.lang.Object#equals(java.lang.Object)\n" //
+				+ "     */\n" //
+				+ "    @Override\n" //
+				+ "    public boolean equals(Object obj) {\n" //
+				+ "        if (this == obj)\n" //
+				+ "            return true;\n" //
+				+ "        if (obj == null)\n" //
+				+ "            return false;\n" //
+				+ "        if (getClass() != obj.getClass())\n" //
+				+ "            return false;\n" //
+				+ "        E1 other = (E1) obj;\n" //
+				+ "        if (aText == null) {\n" //
+				+ "            if (other.aText != null)\n" //
+				+ "                return false;\n" //
+				+ "        } else if (!aText.equals(other.aText))\n" //
+				+ "            return false;\n" //
+				+ "        if (null == anObservable) {\n" //
+				+ "            if (null != other.anObservable)\n" //
+				+ "                return false;\n" //
+				+ "        } else if (!anObservable.equals(other.anObservable))\n" //
+				+ "            return false;\n" //
+				+ "        if (this.textById == null) {\n" //
+				+ "            if (other.textById != null)\n" //
+				+ "                return false;\n" //
+				+ "        } else if (!this.textById.equals(other.textById)) {\n" //
+				+ "            return false;\n" //
+				+ "        }\n" //
+				+ "        return true;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.USE_OBJECTS_EQUALS);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Map;\n" //
+				+ "import java.util.Objects;\n" //
+				+ "import java.util.Observable;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    private Map<Integer, String> textById;\n" //
+				+ "    private Observable anObservable;\n" //
+				+ "    private String aText;\n" //
+				+ "\n" //
+				+ "    /* (non-Javadoc)\n" //
+				+ "     * @see java.lang.Object#equals(java.lang.Object)\n" //
+				+ "     */\n" //
+				+ "    @Override\n" //
+				+ "    public boolean equals(Object obj) {\n" //
+				+ "        if (this == obj)\n" //
+				+ "            return true;\n" //
+				+ "        if (obj == null)\n" //
+				+ "            return false;\n" //
+				+ "        if (getClass() != obj.getClass())\n" //
+				+ "            return false;\n" //
+				+ "        E1 other = (E1) obj;\n" //
+				+ "        if (!Objects.equals(aText, other.aText)) {\n" //
+				+ "            return false;\n" //
+				+ "        }\n" //
+				+ "        if (!Objects.equals(anObservable, other.anObservable)) {\n" //
+				+ "            return false;\n" //
+				+ "        }\n" //
+				+ "        if (!Objects.equals(this.textById, other.textById)) {\n" //
+				+ "            return false;\n" //
+				+ "        }\n" //
+				+ "        return true;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
+	@Test
+	public void testDoNotRefactorObjectsEquals() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Map;\n" //
+				+ "import java.util.Observable;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    private Map<Integer, String> textById;\n" //
+				+ "    private Observable anObservable;\n" //
+				+ "    private String aText;\n" //
+				+ "\n" //
+				+ "    /* (non-Javadoc)\n" //
+				+ "     * @see java.lang.Object#equals(java.lang.Object)\n" //
+				+ "     */\n" //
+				+ "    @Override\n" //
+				+ "    public boolean equals(Object obj) {\n" //
+				+ "        if (this == obj)\n" //
+				+ "            return true;\n" //
+				+ "        if (obj == null)\n" //
+				+ "            return false;\n" //
+				+ "        if (getClass() != obj.getClass())\n" //
+				+ "            return false;\n" //
+				+ "        E1 other = (E1) obj;\n" //
+				+ "        if (aText == null) {\n" //
+				+ "            if (other.aText != null)\n" //
+				+ "                return true;\n" //
+				+ "        } else if (!aText.equals(other.aText))\n" //
+				+ "            return false;\n" //
+				+ "        if (null == anObservable) {\n" //
+				+ "            if (null != other.anObservable)\n" //
+				+ "                return false;\n" //
+				+ "        } else if (!anObservable.equals(other.anObservable))\n" //
+				+ "            return true;\n" //
+				+ "        if (this.textById == null) {\n" //
+				+ "            if (other.textById != null)\n" //
+				+ "                return false;\n" //
+				+ "        } else if (this.textById.equals(other.textById))\n" //
+				+ "            return false;\n" //
+				+ "        return true;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.USE_OBJECTS_EQUALS);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
+	public void testObjectsEqualsWithImportConflict() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Map;\n" //
+				+ "import java.util.Observable;\n" //
+				+ "\n" //
+				+ "public class Objects {\n" //
+				+ "    private Map<Integer, String> textById;\n" //
+				+ "    private Observable anObservable;\n" //
+				+ "    private String aText;\n" //
+				+ "\n" //
+				+ "    /* (non-Javadoc)\n" //
+				+ "     * @see java.lang.Object#equals(java.lang.Object)\n" //
+				+ "     */\n" //
+				+ "    @Override\n" //
+				+ "    public boolean equals(Object obj) {\n" //
+				+ "        if (this == obj)\n" //
+				+ "            return true;\n" //
+				+ "        if (obj == null)\n" //
+				+ "            return false;\n" //
+				+ "        if (getClass() != obj.getClass())\n" //
+				+ "            return false;\n" //
+				+ "        Objects other = (Objects) obj;\n" //
+				+ "        if (aText == null) {\n" //
+				+ "            if (other.aText != null)\n" //
+				+ "                return false;\n" //
+				+ "        } else if (!aText.equals(other.aText))\n" //
+				+ "            return false;\n" //
+				+ "        if (null == anObservable) {\n" //
+				+ "            if (null != other.anObservable)\n" //
+				+ "                return false;\n" //
+				+ "        } else if (!anObservable.equals(other.anObservable))\n" //
+				+ "            return false;\n" //
+				+ "        if (this.textById == null) {\n" //
+				+ "            if (other.textById != null)\n" //
+				+ "                return false;\n" //
+				+ "        } else if (!this.textById.equals(other.textById))\n" //
+				+ "            return false;\n" //
+				+ "        return true;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("Objects.java", sample, false, null);
+
+		enable(CleanUpConstants.USE_OBJECTS_EQUALS);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Map;\n" //
+				+ "import java.util.Observable;\n" //
+				+ "\n" //
+				+ "public class Objects {\n" //
+				+ "    private Map<Integer, String> textById;\n" //
+				+ "    private Observable anObservable;\n" //
+				+ "    private String aText;\n" //
+				+ "\n" //
+				+ "    /* (non-Javadoc)\n" //
+				+ "     * @see java.lang.Object#equals(java.lang.Object)\n" //
+				+ "     */\n" //
+				+ "    @Override\n" //
+				+ "    public boolean equals(Object obj) {\n" //
+				+ "        if (this == obj)\n" //
+				+ "            return true;\n" //
+				+ "        if (obj == null)\n" //
+				+ "            return false;\n" //
+				+ "        if (getClass() != obj.getClass())\n" //
+				+ "            return false;\n" //
+				+ "        Objects other = (Objects) obj;\n" //
+				+ "        if (!java.util.Objects.equals(aText, other.aText)) {\n" //
+				+ "            return false;\n" //
+				+ "        }\n" //
+				+ "        if (!java.util.Objects.equals(anObservable, other.anObservable)) {\n" //
+				+ "            return false;\n" //
+				+ "        }\n" //
+				+ "        if (!java.util.Objects.equals(this.textById, other.textById)) {\n" //
+				+ "            return false;\n" //
+				+ "        }\n" //
+				+ "        return true;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
 }
