@@ -25,17 +25,17 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
 public class UnnecessaryArrayCreationFix extends CompilationUnitRewriteOperationsFix {
-
 	public final static class UnnecessaryArrayCreationFinder extends GenericVisitor {
-
 		private final List<CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation> fResult;
 		private final boolean fRemoveUnnecessaryArrayCreation;
 
@@ -44,38 +44,48 @@ public class UnnecessaryArrayCreationFix extends CompilationUnitRewriteOperation
 			fResult= resultingCollection;
 		}
 
-		@SuppressWarnings("rawtypes")
 		@Override
 		public boolean visit(ArrayCreation node) {
-			if (fRemoveUnnecessaryArrayCreation) {
+			ArrayInitializer initializer= node.getInitializer();
+
+			if (fRemoveUnnecessaryArrayCreation
+					&& node.getType().getDimensions() == 1
+					&& initializer != null
+					&& initializer.expressions() != null) {
+				if (initializer.expressions().size() == 1) {
+					NullLiteral nullLiteral= ASTNodes.as((Expression) initializer.expressions().get(0), NullLiteral.class);
+
+					if (nullLiteral != null) {
+						return true;
+					}
+				}
+
 				ASTNode parent= node.getParent();
+
 				if (parent instanceof MethodInvocation) {
-					MethodInvocation m= (MethodInvocation)parent;
-					List arguments= m.arguments();
-					ArrayInitializer initializer= node.getInitializer();
-					if (arguments.size() > 0 && arguments.get(arguments.size() - 1) == node
-							&& node.getType().getDimensions() == 1
-							&& initializer != null && initializer.expressions() != null) {
-						IMethodBinding binding= m.resolveMethodBinding();
-						if (binding != null && binding.isVarargs() && binding.getParameterTypes().length == arguments.size()) {
-							fResult.add(new UnwrapNewArrayOperation(node, m));
-						}
+					MethodInvocation m= (MethodInvocation) parent;
+
+					if (isUselessArrayCreation(node, m.arguments(), m.resolveMethodBinding())) {
+						fResult.add(new UnwrapNewArrayOperation(node, m));
 					}
 				} else if (parent instanceof SuperMethodInvocation) {
-					SuperMethodInvocation m= (SuperMethodInvocation)parent;
-					List arguments= m.arguments();
-					ArrayInitializer initializer= node.getInitializer();
-					if (arguments.size() > 0 && arguments.get(arguments.size() - 1) == node
-							&& node.getType().getDimensions() == 1
-							&& initializer != null && initializer.expressions() != null) {
-						IMethodBinding binding= m.resolveMethodBinding();
-						if (binding != null && binding.isVarargs() && binding.getParameterTypes().length == arguments.size()) {
-							fResult.add(new UnwrapNewArrayOperation(node, m));
-						}
+					SuperMethodInvocation m= (SuperMethodInvocation) parent;
+
+					if (isUselessArrayCreation(node, m.arguments(), m.resolveMethodBinding())) {
+						fResult.add(new UnwrapNewArrayOperation(node, m));
 					}
 				}
 			}
+
 			return true;
+		}
+
+		private boolean isUselessArrayCreation(ArrayCreation node, List<?> arguments, IMethodBinding binding) {
+			return arguments.size() > 0
+					&& arguments.get(arguments.size() - 1) == node
+					&& binding != null
+					&& binding.isVarargs()
+					&& binding.getParameterTypes().length == arguments.size();
 		}
 
 	}

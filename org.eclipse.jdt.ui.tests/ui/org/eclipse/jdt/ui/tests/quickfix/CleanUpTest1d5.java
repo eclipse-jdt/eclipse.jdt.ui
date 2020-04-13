@@ -2367,4 +2367,25 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		enable(CleanUpConstants.REMOVE_UNNECESSARY_ARRAY_CREATION);
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1, cu2 }, new String[] { expected1, expected2 });
 	}
+
+	@Test
+	public void testUnnecessaryArrayBug562091() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.lang.reflect.Method;\n" //
+				+ "\n" //
+				+ "public class A {\n" //
+				+ "  public void foo() throws Throwable {\n" //
+				+ "    Method method= A.class.getMethod(\"bah\", A.class);\n" //
+				+ "    method.invoke(this, new Object[] {null});\n" //
+				+ "  }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", sample, false, null);
+
+		enable(CleanUpConstants.REMOVE_UNNECESSARY_ARRAY_CREATION);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
 }
