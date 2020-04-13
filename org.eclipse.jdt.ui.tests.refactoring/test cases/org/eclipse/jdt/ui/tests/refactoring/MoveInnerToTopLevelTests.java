@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,8 +14,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 import java.util.Hashtable;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.ClassRule;
+import org.junit.Test;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -35,44 +45,31 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInnerToTopRefactoring;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
+import org.eclipse.jdt.ui.tests.refactoring.rules.Java15Setup;
+import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
-public class MoveInnerToTopLevelTests extends RefactoringTest {
-
+public class MoveInnerToTopLevelTests extends GenericRefactoringTest {
 	private static final boolean BUG_304827= true; // too many imports, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=304827
 
 	private static final String FIELD_COMMENT= "/** Comment */";
-	private static final Class<MoveInnerToTopLevelTests> clazz= MoveInnerToTopLevelTests.class;
 	private static final String REFACTORING_PATH= "MoveInnerToTopLevel/";
 
 	private static final int NOT_AVAILABLE= 1001;
 
 	private String fCompactPref;
 
-	public MoveInnerToTopLevelTests(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return new Java15Setup(new TestSuite(clazz));
-	}
-
-	public static Test setUpTest(Test someTest) {
-	    return new Java15Setup(someTest);
-	}
+	@ClassRule
+	public static RefactoringTestSetup fts= new Java15Setup();
 
 	@Override
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
+	@Before
+	public void before() throws Exception {
 		StubUtility.setCodeTemplate(CodeTemplateContextType.FIELDCOMMENT_ID, FIELD_COMMENT, null);
 		StubUtility.setCodeTemplate(CodeTemplateContextType.NEWTYPE_ID,
 			"${package_declaration}" +
@@ -87,9 +84,8 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		JavaCore.setOptions(options);
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
-		super.tearDown();
+	@After
+	public void after() throws Exception {
 		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATOR, fCompactPref);
 		JavaCore.setOptions(options);
@@ -143,7 +139,7 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		}
 
 		RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
-		assertTrue("precondition was supposed to pass", !checkInputResult.hasError());
+		assertFalse("precondition was supposed to pass", checkInputResult.hasError());
 		performChange(ref, false);
 
 		for (int i= 0; i < cus.length; i++) {
@@ -204,120 +200,149 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 
 	//-- tests
 
+	@Test
 	public void test0() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, null, false, false);
 	}
 
+	@Test
 	public void test1() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, null, false, false);
 	}
 
+	@Test
 	public void test2() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, null, false, false);
 	}
 
+	@Test
 	public void test3() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, null, false, false);
 	}
 
+	@Test
 	public void test4() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, null, false, false);
 	}
 
+	@Test
 	public void test5() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, null, false, false);
 	}
 
+	@Test
 	public void test6() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, null, false, false);
 	}
+	@Test
 	public void test7() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, null, false, false);
 	}
 
+	@Test
 	public void test8() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, null, false, false);
 	}
+	@Test
 	public void test9() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, null, false, false);
 	}
 
+	@Test
 	public void test10() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, null, false, false);
 	}
+	@Test
 	public void test11() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, null, false, false);
 	}
 
+	@Test
 	public void test12() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, null, false, false);
 	}
+	@Test
 	public void test13() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, null, false, false);
 	}
 
+	@Test
 	public void test14() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, null, false, false);
 	}
 
+	@Test
 	public void test15() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A", "A1"}, new String[]{"p", "p1"}, null, false, false);
 	}
 
+	@Test
 	public void test16() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A", "A1"}, new String[]{"p", "p1"}, null, false, false);
 	}
 
+	@Test
 	public void test17() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, null, false, false);
 	}
 
+	@Test
 	public void test18() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A", "A1"}, new String[]{"p", "p1"}, null, false, false);
 	}
 
+	@Test
 	public void test19() throws Exception{
 		printTestDisabledMessage("bug 23078");
 //		validatePassingTest("A", "Inner", new String[]{"A", "A1"}, new String[]{"p", "p1"}, null, false, false);
 	}
 
+	@Test
 	public void test20() throws Exception{
 //		printTestDisabledMessage("bug 23077 ");
 		validatePassingTest("A", "Inner", new String[]{"A", "A1"}, new String[]{"p", "p1"}, null, false, false);
 	}
 
+	@Test
 	public void test21() throws Exception{
 //		printTestDisabledMessage("bug 23627");
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, null, false, false);
 	}
+	@Test
 	public void test22() throws Exception{
 //		printTestDisabledMessage("bug 23627");
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, null, false, false);
 	}
 
+	@Test
 	public void test23() throws Exception{
 //		printTestDisabledMessage("bug 24576 ");
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, null, false, false);
 	}
 
+	@Test
 	public void test24() throws Exception{
 //		printTestDisabledMessage("bug 28816 ");
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, null, false, false);
 	}
 
+	@Test
 	public void test25() throws Exception{
 //		printTestDisabledMessage("bug 39716");
 		validatePassingTest("A", "Inner", "", new String[]{"A"}, new String[]{""}, null, false, false, false, true);
 	}
 
+	@Test
 	public void test26() throws Exception{
 		validatePassingTest("A", "Inner", "", new String[]{"A"}, new String[]{""}, null, false, true, true, true);
 	}
 
+	@Test
 	public void test30() throws Exception{
 		validatePassingTest("A", "Inner", "", new String[]{"A"}, new String[]{""}, null, false, true, true, true);
 	}
 
+	@Test
 	public void test31() throws Exception{
 		printTestDisabledMessage("disabled due to missing support for statically imported methods");
 		// validatePassingTest("A", "Inner", "", new String[]{"A"}, new String[]{""}, null, false, true, true, true);
@@ -326,11 +351,13 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 	// ---- Visibility issues with the moved member itself and its parents
 
 	// Move inner class; enclosing class must remain private if not  used
+	@Test
 	public void test32() throws Exception{
 		validatePassingTest("A", "Inner", "MoreInner", "p1", new String[]{"A"}, new String[]{"p1"}, null, false, false, false, false);
 	}
 
 	// Move inner class which has access to enclosing private class, enclosing class must be increased in visibility
+	@Test
 	public void test33() throws Exception{
 		validatePassingTest("A", "Inner", "MoreInner", "p2", new String[]{"A"}, new String[]{"p2"}, null, false, false, false, false);
 	}
@@ -338,17 +365,20 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 	// --- Visibility issues with members of moved members
 
 	// Move inner class which has private members, which are accessed from enclosing types.
+	@Test
 	public void test34() throws Exception {
 		validatePassingTest("A", "SomeClass", "p", new String[] { "A"}, new String[] { "p"}, null, false, true, false, false);
 	}
 
 	// Move inner class which has private members, but they are unused (and must remain private)
+	@Test
 	public void test35() throws Exception {
 		validatePassingTest("A", "Inner", "p", new String[] { "A"}, new String[] { "p"}, null, false, true, false, false);
 	}
 
 	// Move inner class which has access private members, and accessing private members of
 	// enclosing class (4 visibility increments)
+	@Test
 	public void test36() throws Exception {
 		validatePassingTest("A", "SomeInner", "Inner", "p", new String[] { "A"}, new String[] { "p"}, null, false, false, false, false);
 	}
@@ -356,233 +386,291 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 	// Move inner class with some private used and some private non-used members.
 	// used members go default, non-used stay private
 	// bug 97411 + 117465 (comment #1)
+	@Test
 	public void test37() throws Exception {
 		validatePassingTest("A", "SomeInner", "p", new String[] { "A"}, new String[] { "p"}, null, false, false, false, false);
 	}
 
+	@Test
 	public void test38() throws Exception {
 		validatePassingTest("A", "B", "p", new String[] { "A"}, new String[] { "p"}, null, false, false, false, false);
 	}
 
 	// change visibility: https://bugs.eclipse.org/319069
+	@Test
 	public void test39() throws Exception {
 		validatePassingTest("A", "B", "p", new String[] { "A"}, new String[] { "p"}, null, false, true, false, false);
 	}
 
 	// change visibility: https://bugs.eclipse.org/319069
+	@Test
 	public void test40() throws Exception {
 		validatePassingTest("A", "B", "p", new String[] { "A"}, new String[] { "p"}, null, false, true, false, false);
 	}
 
 	// change visibility: https://bugs.eclipse.org/319069
+	@Test
 	public void test41() throws Exception {
 		validatePassingTest("A", "B", "p", new String[] { "A"}, new String[] { "p"}, null, false, true, false, false);
 	}
 
 	// change visibility: https://bugs.eclipse.org/319069
+	@Test
 	public void test42() throws Exception {
 		validatePassingTest("A", "B", "p", new String[] { "A"}, new String[] { "p"}, null, false, true, false, false);
 	}
 
+	@Test
 	public void test43() throws Exception {
 		validatePassingTest("A", "B", "p", new String[] { "A"}, new String[] { "p"}, "", false, true, false, false);
 	}
 
+	@Test
 	public void test44() throws Exception {
 		validatePassingTest("A", "B", "p", new String[] { "A"}, new String[] { "p"}, "a", true, true, true, true);
 	}
 
 	// static context: https://bugs.eclipse.org/bugs/show_bug.cgi?id=385237
+	@Test
 	public void test_static_context_0() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, null, false, false);
 	}
 
 	// --- Non static
 
+	@Test
 	public void test_nonstatic_0() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, false);
 	}
 
+	@Test
 	public void test_nonstatic_1() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, false);
 	}
+	@Test
 	public void test_nonstatic_2() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, false);
 	}
+	@Test
 	public void test_nonstatic_3() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, false);
 	}
+	@Test
 	public void test_nonstatic_4() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, false);
 	}
+	@Test
 	public void test_nonstatic_5() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, false);
 	}
+	@Test
 	public void test_nonstatic_6() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, false);
 	}
+	@Test
 	public void test_nonstatic_7() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, false);
 	}
+	@Test
 	public void test_nonstatic_8() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, false);
 	}
+	@Test
 	public void test_nonstatic_9() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, false);
 	}
+	@Test
 	public void test_nonstatic_10() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, false);
 	}
+	@Test
 	public void test_nonstatic_11() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, false);
 	}
+	@Test
 	public void test_nonstatic_12() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, true);
 	}
+	@Test
 	public void test_nonstatic_13() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, true);
 	}
+	@Test
 	public void test_nonstatic_14() throws Exception{
 //		printTestDisabledMessage("bug 23488");
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, false);
 	}
+	@Test
 	public void test_nonstatic_15() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, false);
 	}
+	@Test
 	public void test_nonstatic_16() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, false);
 	}
+	@Test
 	public void test_nonstatic_17() throws Exception{
 //		printTestDisabledMessage("bug 23488");
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, false);
 	}
+	@Test
 	public void test_nonstatic_18() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, false);
 	}
+	@Test
 	public void test_nonstatic_19() throws Exception{
 //		printTestDisabledMessage("bug 23464 ");
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, false);
 	}
+	@Test
 	public void test_nonstatic_20() throws Exception{
 //		printTestDisabledMessage("bug 23464 ");
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, false);
 	}
+	@Test
 	public void test_nonstatic_21() throws Exception{
 //		printTestDisabledMessage("must fix - consequence of fix for 23464");
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, false);
 	}
+	@Test
 	public void test_nonstatic_22() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, false);
 	}
+	@Test
 	public void test_nonstatic_23() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, false);
 	}
+	@Test
 	public void test_nonstatic_24() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, false);
 	}
+	@Test
 	public void test_nonstatic_25() throws Exception{
 //		printTestDisabledMessage("bug 23464 ");
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, false);
 	}
+	@Test
 	public void test_nonstatic_26() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, false);
 	}
+	@Test
 	public void test_nonstatic_27() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, false);
 	}
+	@Test
 	public void test_nonstatic_28() throws Exception{
 //		printTestDisabledMessage("test for bug 23725");
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, false);
 	}
+	@Test
 	public void test_nonstatic_29() throws Exception{
 		printTestDisabledMessage("test for bug 23724");
 //		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, false);
 	}
+	@Test
 	public void test_nonstatic_30() throws Exception{
 //		printTestDisabledMessage("test for bug 23715");
 		validatePassingTest("A", "Inner", "p", new String[]{"A"}, new String[]{"p"}, "a", true, true, false, true);
 	}
 
+	@Test
 	public void test_nonstatic_31() throws Exception{
 //		printTestDisabledMessage("test for bug 25537");
 		validatePassingTest("A", "Inner", "p", new String[]{"A"}, new String[]{"p"}, "a", true, true, true, true);
 	}
 
+	@Test
 	public void test_nonstatic_32() throws Exception{
 //		printTestDisabledMessage("test for bug 25537");
 		validatePassingTest("A", "Inner", "p", new String[]{"A"}, new String[]{"p"}, "a", true, true, true, true);
 	}
 
+	@Test
     public void test_nonstatic_33() throws Exception{
 //		printTestDisabledMessage("test for bug 26252");
         validatePassingTest("A", "I", "p", new String[]{"A"}, new String[]{"p"}, "a", true, true, false, true);
     }
 
+	@Test
 	public void test_nonstatic_34() throws Exception{
 //		printTestDisabledMessage("test for bug 31861");
 		validatePassingTest("A", "Inner", "p", new String[]{"A"}, new String[]{"p"}, "a", true, true, true, true);
 	}
 
+	@Test
 	public void test_nonstatic_35() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, false);
 	}
 
+	@Test
 	public void test_nonstatic_36() throws Exception{
 //		printTestDisabledMessage("test for bug 34591");
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, true);
 	}
 
+	@Test
 	public void test_nonstatic_37() throws Exception{
 //		printTestDisabledMessage("test for bug 38114");
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, true);
 	}
 
+	@Test
 	public void test_nonstatic_38() throws Exception{
 //		printTestDisabledMessage("test for bug 37540");
 		validatePassingTest("A", "Inner", "p", new String[]{"A"}, new String[]{"p"}, "a", false, true, false, false);
 	}
 
+	@Test
 	public void test_nonstatic_39() throws Exception{
 //		printTestDisabledMessage("test for bug 37540");
 		validatePassingTest("A", "Inner", "p", new String[]{"A"}, new String[]{"p"}, "a", false, true, false, false);
 	}
 
+	@Test
 	public void test_nonstatic_40() throws Exception{
 //		printTestDisabledMessage("test for bug 77083");
 		validatePassingTest("A", "Inner", "p", new String[]{"A"}, new String[]{"p"}, "a", false, true, false, false);
 	}
 
+	@Test
 	public void test_nonstatic_41() throws Exception{
 		validatePassingTest("A", "Inner", "p", new String[]{"A"}, new String[]{"p"}, "a", false, true, false, false);
 	}
 
+	@Test
 	public void test_nonstatic_42() throws Exception{
 		printTestDisabledMessage("disabled due to missing support for statically imported methods");
 //		validatePassingTest("A", "Inner", "p", new String[]{"A"}, new String[]{"p"}, "a", false, true, false, false);
 	}
 
 	// Using member of enclosing type, non-static edition
+	@Test
 	public void test_nonstatic_43() throws Exception{
 		validatePassingTest("A", "Inner", "MoreInner", "p5", new String[]{"A"}, new String[]{"p5"}, "inner", true, true, true, true);
 	}
 
 	// Move inner class and create field; enclosing class must be changed to use default visibility.
+	@Test
 	public void test_nonstatic_44() throws Exception{
 		validatePassingTest("A", "Inner", "MoreInner", "p2", new String[]{"A"}, new String[]{"p2"}, "p", true, true, false, true);
 	}
 
+	@Test
 	public void test_nonstatic_45() throws Exception {
 		validatePassingTest("A", "B", "p", new String[] { "A" }, new String[] { "p" }, null, false, true, false, false);
 	}
 
+	@Test
 	public void test_nonstatic_46() throws Exception {
 		validatePassingTest("A", "B", "p", new String[] { "A" }, new String[] { "p" }, null, false, true, false, false);
 	}
 
+	@Test
 	public void test_nonstatic_47() throws Exception {
 		validatePassingTest("A", "B", "p", new String[] { "A" }, new String[] { "p" }, null, false, true, false, false);
 	}
 
+	@Test
 	public void test_nonstatic_48() throws Exception {
 		String fileCommentTemplate= "/** Copy right or wrong. */";
 		StubUtility.setCodeTemplate(CodeTemplateContextType.FILECOMMENT_ID, fileCommentTemplate, null);
@@ -597,20 +685,25 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		}
 	}
 
+	@Test
 	public void test_nonstatic_49() throws Exception {
 		validatePassingTest("A", "B", "p", new String[] { "A" }, new String[] { "p" }, "a", false, true, true, true);
 	}
 
+	@Test
 	public void testFail_nonstatic_0() throws Exception{
 		validateFailingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", RefactoringStatus.ERROR);
 	}
+	@Test
 	public void testFail_nonstatic_1() throws Exception{
 		validateFailingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", RefactoringStatus.ERROR);
 	}
+	@Test
 	public void testFail_nonstatic_2() throws Exception{
 		validateFailingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", RefactoringStatus.ERROR);
 	}
 
+	@Test
 	public void testFail_nonstatic_3() throws Exception{
 		IType parentClas= getClassFromTestFile(getPackageP(), "A");
 		int offset= TextRangeUtil.getOffset(parentClas.getCompilationUnit(), 5, 25);
@@ -621,62 +714,75 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 	}
 
 	// --- Secondary classes
+	@Test
 	public void test_secondary_0() throws Exception {
 		validatePassingTestSecondaryType("A", "Secondary", "p", new String[] { "A" }, new String[] { "p" }, null, false, false, false, false);
 	}
 
+	@Test
 	public void test_secondary_1() throws Exception {
 		validatePassingTestSecondaryType("A", "Secondary", "p", new String[] { "A" }, new String[] { "p" }, null, false, false, false, false);
 	}
 
+	@Test
 	public void test_secondary_2() throws Exception {
 		if (BUG_304827)
 			return;
 		validatePassingTestSecondaryType("A", "Secondary", "p", new String[] { "A" }, new String[] { "p" }, null, false, false, false, false);
 	}
 
+	@Test
 	public void test_secondary_3() throws Exception {
 		validatePassingTestSecondaryType("A", "Secondary", "p", new String[] { "A", "S" }, new String[] { "p", "q" }, null, false, false, false, false);
 	}
 
+	@Test
 	public void test_secondary_4() throws Exception {
 		if (BUG_304827)
 			return;
 		validatePassingTestSecondaryType("A", "Secondary", "p", new String[] { "A" }, new String[] { "p" }, null, false, false, false, false);
 	}
 
+	@Test
 	public void test_secondary_5() throws Exception {
 		if (BUG_304827)
 			return;
 		validatePassingTestSecondaryType("A", "Secondary", "p", new String[] { "A" }, new String[] { "p" }, null, false, false, false, false);
 	}
 
+	@Test
 	public void test_secondary_6() throws Exception {
 		if (BUG_304827)
 			return;
 		validatePassingTestSecondaryType("A", "Secondary", "p", new String[] { "A" }, new String[] { "p" }, null, false, false, false, false);
 	}
 
+	@Test
 	public void test_secondary_7() throws Exception {
 		validatePassingTestSecondaryType("A", "Secondary", "p", new String[] { "A", "S", "T" }, new String[] { "p", "q", "q" }, null, false, false, false, false);
 	}
 
+	@Test
 	public void test_secondary_8() throws Exception {
 		validatePassingTestSecondaryType("A", "Secondary", "p", new String[] { "A", "S", "T" }, new String[] { "p", "q", "q" }, null, false, false, false, false);
 	}
 
+	@Test
 	public void test_secondary_9() throws Exception {
 		validatePassingTestSecondaryType("A", "Secondary", "p", new String[] { "A" }, new String[] { "p" }, null, false, false, false, false);
 	}
 
+	@Test
 	public void test_secondary_10() throws Exception {
 		validatePassingTestSecondaryType("A", "Secondary", "p", new String[] { "A" }, new String[] { "p" }, null, false, false, false, false);
 	}
 
+	@Test
 	public void test_secondary_11() throws Exception {
 		validatePassingTestSecondaryType("A", "Secondary", "p", new String[] { "A" }, new String[] { "p" }, null, false, false, false, false);
 	}
 
+	@Test
 	public void test_secondary_12() throws Exception {
 		validatePassingTestSecondaryType("A", "Secondary", "p", new String[] { "A" }, new String[] { "p" }, null, false, false, false, false);
 	}

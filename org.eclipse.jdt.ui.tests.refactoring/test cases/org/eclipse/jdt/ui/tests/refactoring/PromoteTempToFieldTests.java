@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,7 +13,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Hashtable;
+
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
@@ -29,37 +36,24 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.internal.corext.refactoring.code.PromoteTempToFieldRefactoring;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
+import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
-public class PromoteTempToFieldTests extends RefactoringTest{
-
+public class PromoteTempToFieldTests extends GenericRefactoringTest{
 	private static final boolean BUG_39363= true;
-	private static final Class<PromoteTempToFieldTests> clazz= PromoteTempToFieldTests.class;
 	private static final String REFACTORING_PATH= "PromoteTempToField/";
     private String fCompactPref;
 
-	public PromoteTempToFieldTests(String name){
-		super(name);
-	}
+    @Rule
+	public RefactoringTestSetup fts= new RefactoringTestSetup();
 
 	@Override
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
 
-	public static Test suite() {
-		return new RefactoringTestSetup(new TestSuite(clazz));
-	}
-
-	public static Test setUpTest(Test someTest) {
-		return new RefactoringTestSetup(someTest);
-	}
-
 	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
+	public void genericbefore() throws Exception {
+		super.genericbefore();
 		Hashtable<String, String> options= JavaCore.getOptions();
 
 		String setting= DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATOR;
@@ -69,14 +63,12 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 	}
 
 	@Override
-	protected void tearDown() throws Exception {
-		super.tearDown();
+	public void genericafter() throws Exception {
+		super.genericafter();
 		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATOR, fCompactPref);
 		JavaCore.setOptions(options);
 	}
-
-
 
 	private String getSimpleTestFileName(boolean canRename, boolean input){
 		String fileName = "A_" + getName();
@@ -209,6 +201,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 
 	///---------------------- tests -------------------------//
 
+	@Test
 	public void testEnablement0() throws Exception{
         boolean expectedCanEnableInitInConstructors	= true;
         boolean expectedCanEnableInitInMethod			= true;
@@ -226,6 +219,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 					expectedCanEnableSettingFinal, expectedCanEnableSettingStatic, expectedCanEnableInitInField, expectedCanEnableInitInMethod, expectedCanEnableInitInConstructors);
 	}
 
+	@Test
 	public void testEnablement1() throws Exception{
         boolean expectedCanEnableInitInConstructors	= false;
         boolean expectedCanEnableInitInMethod			= false;
@@ -235,6 +229,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		enablementHelper1(5, 13, 5, 14, expectedCanEnableSettingFinal, expectedCanEnableSettingStatic, expectedCanEnableInitInField, expectedCanEnableInitInMethod, expectedCanEnableInitInConstructors);
 	}
 
+	@Test
 	public void testEnablement2() throws Exception{
         boolean expectedCanEnableInitInConstructors	= false;
         boolean expectedCanEnableInitInMethod			= false;
@@ -244,6 +239,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		enablementHelper1(5, 13, 5, 14, expectedCanEnableSettingFinal, expectedCanEnableSettingStatic, expectedCanEnableInitInField, expectedCanEnableInitInMethod, expectedCanEnableInitInConstructors);
 	}
 
+	@Test
 	public void testEnablement3() throws Exception{
         boolean expectedCanEnableInitInConstructors	= true;
         boolean expectedCanEnableInitInMethod			= true;
@@ -253,6 +249,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		enablementHelper1(5, 13, 5, 14, expectedCanEnableSettingFinal, expectedCanEnableSettingStatic, expectedCanEnableInitInField, expectedCanEnableInitInMethod, expectedCanEnableInitInConstructors);
 	}
 
+	@Test
 	public void testEnablement4() throws Exception{
         boolean expectedCanEnableInitInConstructors	= false;
         boolean expectedCanEnableInitInMethod			= true;
@@ -270,6 +267,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 					expectedCanEnableSettingFinal, expectedCanEnableSettingStatic, expectedCanEnableInitInField, expectedCanEnableInitInMethod, expectedCanEnableInitInConstructors);
 	}
 
+	@Test
 	public void testEnablement5() throws Exception{
         boolean expectedCanEnableInitInConstructors	= false;
         boolean expectedCanEnableInitInMethod			= true;
@@ -287,6 +285,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 					expectedCanEnableSettingFinal, expectedCanEnableSettingStatic, expectedCanEnableInitInField, expectedCanEnableInitInMethod, expectedCanEnableInitInConstructors);
 	}
 
+	@Test
 	public void testEnablement6() throws Exception{
         boolean expectedCanEnableInitInConstructors	= false;
         boolean expectedCanEnableInitInMethod			= false;
@@ -296,6 +295,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		enablementHelper1(7, 21, 7, 22, expectedCanEnableSettingFinal, expectedCanEnableSettingStatic, expectedCanEnableInitInField, expectedCanEnableInitInMethod, expectedCanEnableInitInConstructors);
 	}
 
+	@Test
 	public void testEnablement7() throws Exception{
         boolean expectedCanEnableInitInConstructors	= false;
         boolean expectedCanEnableInitInMethod			= true;
@@ -305,6 +305,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		enablementHelper1(5, 13, 5, 14, expectedCanEnableSettingFinal, expectedCanEnableSettingStatic, expectedCanEnableInitInField, expectedCanEnableInitInMethod, expectedCanEnableInitInConstructors);
 	}
 
+	@Test
 	public void testEnablement8() throws Exception{
         boolean expectedCanEnableInitInConstructors	= true;
         boolean expectedCanEnableInitInMethod			= true;
@@ -322,6 +323,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 					expectedCanEnableSettingFinal, expectedCanEnableSettingStatic, expectedCanEnableInitInField, expectedCanEnableInitInMethod, expectedCanEnableInitInConstructors);
 	}
 
+	@Test
 	public void testEnablement9() throws Exception{
         boolean expectedCanEnableInitInConstructors	= false;
         boolean expectedCanEnableInitInMethod			= true;
@@ -339,6 +341,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 					expectedCanEnableSettingFinal, expectedCanEnableSettingStatic, expectedCanEnableInitInField, expectedCanEnableInitInMethod, expectedCanEnableInitInConstructors);
 	}
 
+	@Test
 	public void testEnablement10() throws Exception{
         boolean expectedCanEnableInitInConstructors	= false;
         boolean expectedCanEnableInitInMethod			= true;
@@ -356,6 +359,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 					expectedCanEnableSettingFinal, expectedCanEnableSettingStatic, expectedCanEnableInitInField, expectedCanEnableInitInMethod, expectedCanEnableInitInConstructors);
 	}
 
+	@Test
 	public void testEnablement11() throws Exception{
         boolean expectedCanEnableInitInConstructors	= false;
         boolean expectedCanEnableInitInMethod			= true;
@@ -373,6 +377,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 					expectedCanEnableSettingFinal, expectedCanEnableSettingStatic, expectedCanEnableInitInField, expectedCanEnableInitInMethod, expectedCanEnableInitInConstructors);
 	}
 
+	@Test
 	public void testEnablement12() throws Exception{
         boolean expectedCanEnableInitInConstructors	= false;
         boolean expectedCanEnableInitInMethod			= true;
@@ -390,6 +395,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 					expectedCanEnableSettingFinal, expectedCanEnableSettingStatic, expectedCanEnableInitInField, expectedCanEnableInitInMethod, expectedCanEnableInitInConstructors);
 	}
 
+	@Test
 	public void testEnablement13() throws Exception{
         boolean expectedCanEnableInitInConstructors	= false;
         boolean expectedCanEnableInitInMethod			= true;
@@ -410,32 +416,39 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 
 	///---- test failing preconditions --------------
 
+	@Test
 	public void testFail0() throws Exception{
 		failHelper(3, 16, 3, 17, "i", false, false, PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD, Modifier.PRIVATE, RefactoringStatus.FATAL);
 	}
 
+	@Test
 	public void testFail1() throws Exception{
 		failHelper(5, 28, 5, 29, "i", false, false, PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD, Modifier.PRIVATE, RefactoringStatus.FATAL);
 	}
 
+	@Test
 	public void testFail2() throws Exception{
 		failHelper(5, 15, 5, 16, "i", false, false, PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD, Modifier.PRIVATE, RefactoringStatus.FATAL);
 	}
 
+	@Test
 	public void testFail4() throws Exception{
 		failHelper(7, 13, 7, 14, "i", false, false, PromoteTempToFieldRefactoring.INITIALIZE_IN_CONSTRUCTOR, Modifier.PRIVATE, RefactoringStatus.FATAL);
 	}
 
+	@Test
 	public void testFail5() throws Exception{
 		failHelper(6, 13, 6, 14, "i", false, false, PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD, Modifier.PRIVATE, RefactoringStatus.FATAL);
 	}
 
+	@Test
 	public void testFailGenerics1() throws Exception{
 		failHelper(6, 12, 6, 12, "fYou", false, false, PromoteTempToFieldRefactoring.INITIALIZE_IN_CONSTRUCTOR, Modifier.PRIVATE, RefactoringStatus.FATAL);
 	}
 
 	///----------- tests of transformation ------------
 
+	@Test
 	public void test0() throws Exception{
         int accessModifier= Modifier.PRIVATE;
         int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD;
@@ -444,6 +457,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		passHelper(5, 13, 5, 14, "i", declareStatic, declareFinal, initializeIn, accessModifier);
 	}
 
+	@Test
 	public void test1() throws Exception{
         int accessModifier= Modifier.PRIVATE;
         int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_FIELD;
@@ -452,6 +466,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		passHelper(5, 13, 5, 14, "i", declareStatic, declareFinal, initializeIn, accessModifier);
 	}
 
+	@Test
 	public void test2() throws Exception{
         int accessModifier= Modifier.PRIVATE;
         int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_CONSTRUCTOR;
@@ -460,6 +475,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		passHelper(7, 13, 7, 14, "i", declareStatic, declareFinal, initializeIn, accessModifier);
 	}
 
+	@Test
 	public void test3() throws Exception{
         int accessModifier= Modifier.PRIVATE;
         int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_CONSTRUCTOR;
@@ -468,6 +484,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		passHelper(9, 13, 9, 14, "i", declareStatic, declareFinal, initializeIn, accessModifier);
 	}
 
+	@Test
 	public void test4() throws Exception{
         int accessModifier= Modifier.PRIVATE;
         int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_CONSTRUCTOR;
@@ -476,6 +493,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		passHelper(5, 13, 5, 14, "i", declareStatic, declareFinal, initializeIn, accessModifier);
 	}
 
+	@Test
 	public void test5() throws Exception{
         int accessModifier= Modifier.PRIVATE;
         int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD;
@@ -484,6 +502,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		passHelper(6, 21, 6, 22, "i", declareStatic, declareFinal, initializeIn, accessModifier);
 	}
 
+	@Test
 	public void test6() throws Exception{
         int accessModifier= Modifier.PRIVATE;
         int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_FIELD;
@@ -492,6 +511,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		passHelper(6, 21, 6, 22, "i", declareStatic, declareFinal, initializeIn, accessModifier);
 	}
 
+	@Test
 	public void test7() throws Exception{
         int accessModifier= Modifier.PRIVATE;
         int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_FIELD;
@@ -500,6 +520,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		passHelper(4, 13, 4, 14, "i", declareStatic, declareFinal, initializeIn, accessModifier);
 	}
 
+	@Test
 	public void test8() throws Exception{
         int accessModifier= Modifier.PRIVATE;
         int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD;
@@ -508,6 +529,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		passHelper(4, 13, 4, 14, "i", declareStatic, declareFinal, initializeIn, accessModifier);
 	}
 
+	@Test
 	public void test9() throws Exception{
         int accessModifier= Modifier.PRIVATE;
         int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD;
@@ -516,6 +538,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		passHelper(5, 13, 5, 14, "field", declareStatic, declareFinal, initializeIn, accessModifier);
 	}
 
+	@Test
 	public void test10() throws Exception{
         int accessModifier= Modifier.PRIVATE;
         int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_CONSTRUCTOR;
@@ -524,6 +547,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		passHelper(7, 13, 7, 14, "i", declareStatic, declareFinal, initializeIn, accessModifier);
 	}
 
+	@Test
 	public void test11() throws Exception{
         int accessModifier= Modifier.PUBLIC;
         int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD;
@@ -532,6 +556,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		passHelper(7, 13, 7, 14, "i", declareStatic, declareFinal, initializeIn, accessModifier);
 	}
 
+	@Test
 	public void test12() throws Exception{
         int accessModifier= Modifier.PRIVATE;
         int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD;
@@ -540,6 +565,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		passHelper(5, 13, 5, 14, "i", declareStatic, declareFinal, initializeIn, accessModifier);
 	}
 
+	@Test
 	public void test13() throws Exception{
         int accessModifier= Modifier.PRIVATE;
         int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD;
@@ -548,6 +574,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		passHelper(5, 13, 5, 14, "i", declareStatic, declareFinal, initializeIn, accessModifier);
 	}
 
+	@Test
 	public void test14() throws Exception{
         int accessModifier= Modifier.PRIVATE;
         int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD;
@@ -556,6 +583,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		passHelper(5, 19, 5, 20, "i", declareStatic, declareFinal, initializeIn, accessModifier);
 	}
 
+	@Test
 	public void test15() throws Exception{
         int accessModifier= Modifier.PRIVATE;
         int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD;
@@ -564,6 +592,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		passHelper(5, 19, 5, 20, "i", declareStatic, declareFinal, initializeIn, accessModifier);
 	}
 
+	@Test
 	public void test16() throws Exception{
         int accessModifier= Modifier.PRIVATE;
         int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_CONSTRUCTOR;
@@ -572,6 +601,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		passHelper(10, 13, 10, 14, "i", declareStatic, declareFinal, initializeIn, accessModifier);
 	}
 
+	@Test
 	public void test17() throws Exception{
         int accessModifier= Modifier.PRIVATE;
         int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD;
@@ -580,6 +610,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		passHelper(4, 13, 4, 14, "i", declareStatic, declareFinal, initializeIn, accessModifier);
 	}
 
+	@Test
 	public void test18() throws Exception{
 		//printTestDisabledMessage("regression test for bug 39363");
 		if (BUG_39363)
@@ -591,6 +622,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		passHelper(5, 13, 5, 14, "i", declareStatic, declareFinal, initializeIn, accessModifier);
 	}
 
+	@Test
 	public void test19() throws Exception{ //test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=49840
         int accessModifier= Modifier.PRIVATE;
         int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD;
@@ -599,6 +631,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		passHelper(4, 13, 4, 22, "fSomeArray", declareStatic, declareFinal, initializeIn, accessModifier);
 	}
 
+	@Test
 	public void test20() throws Exception{ //test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=49840
         int accessModifier= Modifier.PRIVATE;
         int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD;
@@ -607,6 +640,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		passHelper(4, 24, 4, 24, "fDoubleDim", declareStatic, declareFinal, initializeIn, accessModifier);
 	}
 
+	@Test
 	public void test21() throws Exception{ //test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=47798
         int accessModifier= Modifier.PRIVATE;
         int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_FIELD;
@@ -615,6 +649,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		passHelper(4, 17, 4, 18, "fgX", declareStatic, declareFinal, initializeIn, accessModifier);
 	}
 
+	@Test
 	public void test22() throws Exception{ //test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=54444
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
 		ISourceRange selection= TextRangeUtil.getSelection(cu, 4, 34, 4, 37);
@@ -623,6 +658,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
         assertEquals("fSortByDefiningTypeAction", ref.guessFieldNames()[0]);
 	}
 
+	@Test
 	public void test23() throws Exception{ //syntax error
 		int accessModifier= Modifier.PRIVATE;
 		int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_FIELD;
@@ -631,6 +667,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		passHelper(5, 31, 5, 31, "fCount", declareStatic, declareFinal, initializeIn, accessModifier);
 	}
 
+	@Test
 	public void test24() throws Exception{ //syntax error
 		int accessModifier= Modifier.PRIVATE;
 		int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD;
@@ -639,6 +676,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		passHelper(4, 33, 4, 33, "fFinisheds", declareStatic, declareFinal, initializeIn, accessModifier);
 	}
 
+	@Test
 	public void test25() throws Exception{ //test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=136911
 		int accessModifier= Modifier.PRIVATE;
 		int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD;
@@ -647,6 +685,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		passHelper(7, 22, 7, 22, "i", declareStatic, declareFinal, initializeIn, accessModifier);
 	}
 
+	@Test
 	public void testGenerics01() throws Exception {
         int accessModifier= Modifier.PRIVATE;
         int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_FIELD;
@@ -655,6 +694,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		passHelper(9, 9, 9, 11, "fVt", declareStatic, declareFinal, initializeIn, accessModifier);
 	}
 
+	@Test
 	public void testGenerics02() throws Exception {
         int accessModifier= Modifier.PRIVATE;
         int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD;
@@ -663,6 +703,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		passHelper(6, 12, 6, 12, "fMyT", declareStatic, declareFinal, initializeIn, accessModifier);
 	}
 
+	@Test
 	public void testEnum1() throws Exception {
         int accessModifier= Modifier.PRIVATE;
         int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_CONSTRUCTOR;
@@ -671,6 +712,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		passHelper(6, 13, 6, 16, "fVar", declareStatic, declareFinal, initializeIn, accessModifier);
 	}
 
+	@Test
 	public void testEnum2() throws Exception {
         int accessModifier= Modifier.PUBLIC;
         int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_FIELD;
@@ -679,6 +721,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		passHelper(10, 21, 10, 21, "fM", declareStatic, declareFinal, initializeIn, accessModifier);
 	}
 
+	@Test
 	public void testMultiVariableDeclFragment01() throws Exception {
         int accessModifier= Modifier.PRIVATE;
         int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD;
@@ -687,6 +730,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		passHelper(6, 29, 6, 29, "fA", declareStatic, declareFinal, initializeIn, accessModifier);
 	}
 
+	@Test
 	public void testMultiVariableDeclFragment02() throws Exception {
         int accessModifier= Modifier.PRIVATE;
         int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD;
@@ -695,6 +739,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		passHelper(5, 29, 5, 29, "fB", declareStatic, declareFinal, initializeIn, accessModifier);
 	}
 
+	@Test
 	public void testMultiVariableDeclFragment03() throws Exception {
         int accessModifier= Modifier.PRIVATE;
         int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD;
@@ -703,6 +748,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		passHelper(5, 72, 5, 72, "fC", declareStatic, declareFinal, initializeIn, accessModifier);
 	}
 
+	@Test
 	public void testMultiVariableDeclFragment04() throws Exception {
 		int accessModifier= Modifier.PRIVATE;
 		int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD;
@@ -711,6 +757,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		passHelper(5, 41, 5, 41, "fD", declareStatic, declareFinal, initializeIn, accessModifier);
 	}
 
+	@Test
 	public void testDeclaringMethodBindingUnavailable01() throws Exception {
 		int accessModifier= Modifier.PRIVATE;
 		int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD;
@@ -718,5 +765,4 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		boolean declareStatic= false;
 		passHelper(9, 14, 9, 18, "fDate", declareStatic, declareFinal, initializeIn, accessModifier);
 	}
-
 }

@@ -13,24 +13,20 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
-import junit.framework.Test;
+import org.eclipse.jdt.ui.tests.CustomBaseRunner;
+import org.eclipse.jdt.ui.tests.IgnoreInheritedTests;
+import org.eclipse.jdt.ui.tests.refactoring.rules.Java17Setup;
+import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
+@IgnoreInheritedTests
+@RunWith(CustomBaseRunner.class)
 public class ExtractConstantTests17 extends ExtractConstantTests {
-
-	private static final Class<ExtractConstantTests17> clazz = ExtractConstantTests17.class;
-
-	public ExtractConstantTests17(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return new Java17Setup(new NoSuperTestsSuite(clazz));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new Java17Setup(test);
-	}
+	@Rule
+	public RefactoringTestSetup rts= new Java17Setup();
 
 	@Override
 	protected String getTestFileName(boolean canExtract, boolean input) {
@@ -43,8 +39,8 @@ public class ExtractConstantTests17 extends ExtractConstantTests {
 
 	// -- testing failing preconditions
 	@Override
+	@Test
 	public void testFail0() throws Exception{
 		failHelper1(10, 14, 10, 56, true, true, "CONSTANT");
 	}
 }
-

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,9 +14,16 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -42,30 +49,18 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoringProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 
+import org.eclipse.jdt.ui.tests.refactoring.rules.Java15Setup;
+import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
+
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
-public class PullUpTests extends RefactoringTest {
-
+public class PullUpTests extends GenericRefactoringTest {
 	private static final boolean BUG_91542= true;
-
-	private static final Class<PullUpTests> clazz= PullUpTests.class;
 
 	private static final String REFACTORING_PATH= "PullUp/";
 
-	public PullUpTests(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return new Java15Setup(new TestSuite(clazz));
-	}
-
-	public static Test setUpTest(Test someTest) {
-		return new Java15Setup(someTest);
-	}
+	@Rule
+	public RefactoringTestSetup fts= new Java15Setup();
 
 	@Override
 	protected String getRefactoringPath() {
@@ -104,7 +99,7 @@ public class PullUpTests extends RefactoringTest {
 			processor.setDeletedMethods(getMethods(processor.getMatchingElements(new NullProgressMonitor(), false)));
 
 		RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
-		assertTrue("precondition was supposed to pass", !checkInputResult.hasError());
+		assertFalse("precondition was supposed to pass", checkInputResult.hasError());
 		performChange(ref, false);
 
 		String expected= getFileContents(getOutputTestFileName("A"));
@@ -137,7 +132,7 @@ public class PullUpTests extends RefactoringTest {
 		}
 
 		RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
-		assertTrue("precondition was supposed to pass", !checkInputResult.hasError());
+		assertFalse("precondition was supposed to pass", checkInputResult.hasError());
 		performChange(ref, false);
 
 		String expected= getFileContents(getOutputTestFileName("A", "p/"));
@@ -205,7 +200,7 @@ public class PullUpTests extends RefactoringTest {
 		setTargetClass(processor, targetClassIndex);
 
 		RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
-		assertTrue("precondition was supposed to pass", !checkInputResult.hasError());
+		assertFalse("precondition was supposed to pass", checkInputResult.hasError());
 		performChange(ref, false);
 
 		String expected= getFileContents(getOutputTestFileName("A"));
@@ -225,7 +220,7 @@ public class PullUpTests extends RefactoringTest {
 		setTargetClass(processor, targetClassIndex);
 
 		RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
-		assertTrue("precondition was supposed to pass", !checkInputResult.hasError());
+		assertFalse("precondition was supposed to pass", checkInputResult.hasError());
 		performChange(ref, false);
 
 		String expected= getFileContents(getOutputTestFileName("A"));
@@ -245,7 +240,7 @@ public class PullUpTests extends RefactoringTest {
 		setTargetClass(processor, targetClassIndex);
 
 		RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
-		assertTrue("precondition was supposed to fail", !checkInputResult.isOK());
+		assertFalse("precondition was supposed to fail", checkInputResult.isOK());
 	}
 
 	protected static IMethod[] getMethods(IMember[] members){
@@ -302,7 +297,7 @@ public class PullUpTests extends RefactoringTest {
 				deleteAllMatchingMethods, targetClassIndex, cu);
 
 		RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
-		assertTrue("precondition was supposed to fail", !checkInputResult.isOK());
+		assertFalse("precondition was supposed to fail", checkInputResult.isOK());
 	}
 
 	protected void declareAbstractHelper(String[] selectedMethodNames, String[][] selectedMethodSignatures,
@@ -318,7 +313,7 @@ public class PullUpTests extends RefactoringTest {
 				deleteAllMatchingMethods, targetClassIndex, cu);
 
 		RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
-		assertTrue("precondition was supposed to pass", !checkInputResult.hasError());
+		assertFalse("precondition was supposed to pass", checkInputResult.hasError());
 		performChange(ref, false);
 
 		String expected= getFileContents(getOutputTestFileName("A"));
@@ -344,7 +339,7 @@ public class PullUpTests extends RefactoringTest {
 			processor.setDeletedMethods(getMethods(processor.getMatchingElements(new NullProgressMonitor(), false)));
 
 		RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
-		assertTrue("precondition was supposed to pass", !checkInputResult.hasError());
+		assertFalse("precondition was supposed to pass", checkInputResult.hasError());
 		performChange(ref, false);
 
 		String expected= getFileContents(getOutputTestFileName("A"));
@@ -369,7 +364,7 @@ public class PullUpTests extends RefactoringTest {
 			processor.setDeletedMethods(getMethods(processor.getMatchingElements(new NullProgressMonitor(), false)));
 
 		RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
-		assertTrue("precondition was supposed to fail", !checkInputResult.isOK());
+		assertFalse("precondition was supposed to fail", checkInputResult.isOK());
 	}
 
 	private void helper3(String[] methodNames, String[][] signatures, boolean deleteAllInSourceType, boolean deleteAllMatchingMethods, int targetClassIndex, boolean shouldActivationCheckPass) throws Exception {
@@ -392,27 +387,32 @@ public class PullUpTests extends RefactoringTest {
 			processor.setDeletedMethods(getMethods(processor.getMatchingElements(new NullProgressMonitor(), false)));
 
 		RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
-		assertTrue("precondition was supposed to fail", !checkInputResult.isOK());
+		assertFalse("precondition was supposed to fail", checkInputResult.isOK());
 	}
 
 	//------------------ tests -------------
 
+	@Test
 	public void test0() throws Exception {
 		helper1(new String[] { "m" }, new String[][] { new String[0] }, true, false, 0);
 	}
 
+	@Test
 	public void test1() throws Exception {
 		helper1(new String[] { "m" }, new String[][] { new String[0] }, true, false, 0);
 	}
 
+	@Test
 	public void test2() throws Exception {
 		helper1(new String[] { "mmm", "n" }, new String[][] { new String[0], new String[0] }, true, false, 0);
 	}
 
+	@Test
 	public void test3() throws Exception {
 		helper1(new String[] { "mmm", "n" }, new String[][] { new String[0], new String[0] }, true, true, 0);
 	}
 
+	@Test
 	public void test4() throws Exception {
 		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
 		ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");
@@ -438,6 +438,7 @@ public class PullUpTests extends RefactoringTest {
 		assertEqualLines("B", cuB.getSource(), getFileContents(getOutputTestFileName("B")));
 	}
 
+	@Test
 	public void test5() throws Exception {
 		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
 		ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");
@@ -463,30 +464,37 @@ public class PullUpTests extends RefactoringTest {
 		assertEqualLines("B", cuB.getSource(), getFileContents(getOutputTestFileName("B")));
 	}
 
+	@Test
 	public void test6() throws Exception {
 		helper1(new String[] { "m" }, new String[][] { new String[0] }, true, false, 0);
 	}
 
+	@Test
 	public void test7() throws Exception {
 		helper1(new String[] { "m" }, new String[][] { new String[0] }, true, false, 0);
 	}
 
+	@Test
 	public void test8() throws Exception {
 		helper1(new String[] { "m" }, new String[][] { new String[0] }, true, false, 0);
 	}
 
+	@Test
 	public void test9() throws Exception {
 		helper1(new String[] { "m" }, new String[][] { new String[0] }, true, false, 0);
 	}
 
+	@Test
 	public void test10() throws Exception {
 		helper1(new String[] { "m" }, new String[][] { new String[0] }, true, false, 0);
 	}
 
+	@Test
 	public void test11() throws Exception {
 		helper1(new String[] { "m" }, new String[][] { new String[0] }, true, false, 0);
 	}
 
+	@Test
 	public void test12() throws Exception {
 		//printTestDisabledMessage("bug#6779 searchDeclarationsOfReferencedTyped - missing exception  types");
 		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
@@ -513,65 +521,79 @@ public class PullUpTests extends RefactoringTest {
 		assertEqualLines("B", cuB.getSource(), getFileContents(getOutputTestFileName("B")));
 	}
 
+	@Test
 	public void test13() throws Exception {
 		helper1(new String[] { "m" }, new String[][] { new String[0] }, true, false, 0);
 	}
 
+	@Test
 	public void test14() throws Exception {
 		helper1(new String[] { "m" }, new String[][] { new String[0] }, true, false, 0);
 	}
 
+	@Test
 	public void test15() throws Exception {
 		printTestDisabledMessage("must fix - incorrect error");
 //		helper1(new String[]{"m"}, new String[][]{new String[0]}, true, false);
 	}
 
+	@Test
 	public void test16() throws Exception {
 		printTestDisabledMessage("must fix - incorrect error");
 //		helper1(new String[]{"m"}, new String[][]{new String[0]}, true, false);
 	}
 
+	@Test
 	public void test17() throws Exception {
 		printTestDisabledMessage("must fix - incorrect error with static method access");
 //		helper1(new String[]{"m"}, new String[][]{new String[0]}, true, false);
 	}
 
+	@Test
 	public void test18() throws Exception {
 		printTestDisabledMessage("must fix - incorrect error with static field access");
 //		helper1(new String[]{"m"}, new String[][]{new String[0]}, true, false);
 	}
 
+	@Test
 	public void test19() throws Exception {
 //		printTestDisabledMessage("bug 18438");
 //		printTestDisabledMessage("bug 23324 ");
 		helper1(new String[] { "m" }, new String[][] { new String[0] }, true, false, 0);
 	}
 
+	@Test
 	public void test20() throws Exception {
 		helper1(new String[] { "m" }, new String[][] { new String[0] }, true, false, 1);
 	}
 
+	@Test
 	public void test21() throws Exception {
 		helper1(new String[] { "m" }, new String[][] { new String[0] }, true, false, 1);
 	}
 
+	@Test
 	public void test22() throws Exception {
 		helper1(new String[] { "m" }, new String[][] { new String[0] }, true, false, 0);
 	}
 
+	@Test
 	public void test23() throws Exception {
 		helper1(new String[] { "m" }, new String[][] { new String[0] }, true, false, 0);
 	}
 
+	@Test
 	public void test24() throws Exception {
 		helper1(new String[] { "m" }, new String[][] { new String[0] }, true, false, 0);
 	}
 
+	@Test
 	public void test25() throws Exception {
 //		printTestDisabledMessage("bug in ASTRewrite - extra dimensions 29553");
 		helper1(new String[] { "m" }, new String[][] { new String[0] }, true, false, 0);
 	}
 
+	@Test
 	public void test26() throws Exception {
 		String[] selectedMethodNames= { "m" };
 		String[][] selectedMethodSignatures= { new String[0] };
@@ -590,6 +612,7 @@ public class PullUpTests extends RefactoringTest {
 				signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
 	}
 
+	@Test
 	public void test27() throws Exception {
 		String[] selectedMethodNames= { "m" };
 		String[][] selectedMethodSignatures= { new String[0] };
@@ -608,6 +631,7 @@ public class PullUpTests extends RefactoringTest {
 				signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
 	}
 
+	@Test
 	public void test28() throws Exception {
 //		printTestDisabledMessage("unimplemented (increase method visibility if declare abstract in superclass)");
 		String[] selectedMethodNames= { "m" };
@@ -627,6 +651,7 @@ public class PullUpTests extends RefactoringTest {
 				signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
 	}
 
+	@Test
 	public void test29() throws Exception {
 		String[] selectedMethodNames= { "m" };
 		String[][] selectedMethodSignatures= { new String[] { "[I" } };
@@ -645,6 +670,7 @@ public class PullUpTests extends RefactoringTest {
 				signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
 	}
 
+	@Test
 	public void test30() throws Exception {
 		String[] selectedMethodNames= { "m" };
 		String[][] selectedMethodSignatures= { new String[] { "[I" } };
@@ -663,6 +689,7 @@ public class PullUpTests extends RefactoringTest {
 				signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
 	}
 
+	@Test
 	public void test31() throws Exception {
 		String[] selectedMethodNames= { "m" };
 		String[][] selectedMethodSignatures= { new String[] { "[I" } };
@@ -681,6 +708,7 @@ public class PullUpTests extends RefactoringTest {
 				signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
 	}
 
+	@Test
 	public void test32() throws Exception {
 		String[] selectedMethodNames= { "m" };
 		String[][] selectedMethodSignatures= { new String[0] };
@@ -699,6 +727,7 @@ public class PullUpTests extends RefactoringTest {
 				signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
 	}
 
+	@Test
 	public void test33() throws Exception {
 		String[] selectedMethodNames= { "m" };
 		String[][] selectedMethodSignatures= { new String[0] };
@@ -717,6 +746,7 @@ public class PullUpTests extends RefactoringTest {
 				signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
 	}
 
+	@Test
 	public void test34() throws Exception {
 		String[] selectedMethodNames= { "m" };
 		String[][] selectedMethodSignatures= { new String[0] };
@@ -735,6 +765,7 @@ public class PullUpTests extends RefactoringTest {
 				signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
 	}
 
+	@Test
 	public void test35() throws Exception {
 		String[] selectedMethodNames= { "m" };
 		String[][] selectedMethodSignatures= { new String[0] };
@@ -753,6 +784,7 @@ public class PullUpTests extends RefactoringTest {
 				signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
 	}
 
+	@Test
 	public void test36() throws Exception {
 		String[] selectedMethodNames= { "m" };
 		String[][] selectedMethodSignatures= { new String[0] };
@@ -771,6 +803,7 @@ public class PullUpTests extends RefactoringTest {
 				signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
 	}
 
+	@Test
 	public void test37() throws Exception {
 		String[] selectedMethodNames= { "m", "f" };
 		String[][] selectedMethodSignatures= { new String[0], new String[0] };
@@ -789,6 +822,7 @@ public class PullUpTests extends RefactoringTest {
 				signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
 	}
 
+	@Test
 	public void test38() throws Exception {
 		String[] selectedMethodNames= { "m" };
 		String[][] selectedMethodSignatures= { new String[0] };
@@ -807,6 +841,7 @@ public class PullUpTests extends RefactoringTest {
 				signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
 	}
 
+	@Test
 	public void test39() throws Exception {
 		String[] selectedMethodNames= { "m" };
 		String[][] selectedMethodSignatures= { new String[0] };
@@ -827,6 +862,7 @@ public class PullUpTests extends RefactoringTest {
 				signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, true, 0);
 	}
 
+	@Test
 	public void test40() throws Exception {
 		String[] selectedMethodNames= { "m" };
 		String[][] selectedMethodSignatures= { new String[0] };
@@ -847,6 +883,7 @@ public class PullUpTests extends RefactoringTest {
 				signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, true, 0);
 	}
 
+	@Test
 	public void test41() throws Exception {
 		String[] selectedMethodNames= {};
 		String[][] selectedMethodSignatures= {};
@@ -867,6 +904,7 @@ public class PullUpTests extends RefactoringTest {
 				signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, true, 0);
 	}
 
+	@Test
 	public void test42() throws Exception {
 		String[] selectedMethodNames= {};
 		String[][] selectedMethodSignatures= {};
@@ -887,6 +925,7 @@ public class PullUpTests extends RefactoringTest {
 				signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, true, 0);
 	}
 
+	@Test
 	public void test43() throws Exception {
 //		printTestDisabledMessage("bug 35562 Method pull up wrongly indents javadoc comment [refactoring]");
 
@@ -909,6 +948,7 @@ public class PullUpTests extends RefactoringTest {
 				signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, true, 0);
 	}
 
+	@Test
 	public void test44() throws Exception {
 		String[] selectedMethodNames= { "m" };
 		String[][] selectedMethodSignatures= { new String[0] };
@@ -929,6 +969,7 @@ public class PullUpTests extends RefactoringTest {
 				signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, true, 0);
 	}
 
+	@Test
 	public void test45() throws Exception {
 		String[] selectedMethodNames= { "m" };
 		String[][] selectedMethodSignatures= { new String[0] };
@@ -949,6 +990,7 @@ public class PullUpTests extends RefactoringTest {
 				signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, true, 0);
 	}
 
+	@Test
 	public void test46() throws Exception {
 		// for bug 196635
 
@@ -971,6 +1013,7 @@ public class PullUpTests extends RefactoringTest {
 				signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, true, 0);
 	}
 
+	@Test
 	public void test47() throws Exception {
 		// for bug 211491
 
@@ -993,6 +1036,7 @@ public class PullUpTests extends RefactoringTest {
 				signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, true, 0);
 	}
 
+	@Test
 	public void test48() throws Exception {
 		// for bug 211491, but with a super class
 
@@ -1015,6 +1059,7 @@ public class PullUpTests extends RefactoringTest {
 				signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, false, false, 0);
 	}
 
+	@Test
 	public void test49() throws Exception {
 		// for bug 228950
 
@@ -1037,6 +1082,7 @@ public class PullUpTests extends RefactoringTest {
 				signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, false, 0);
 	}
 
+	@Test
 	public void test50() throws Exception {
 		// for bug 125326
 
@@ -1066,6 +1112,7 @@ public class PullUpTests extends RefactoringTest {
 
 	}
 
+	@Test
 	public void test51() throws Exception {
 		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
 		ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");
@@ -1089,6 +1136,7 @@ public class PullUpTests extends RefactoringTest {
 		assertEqualLines("A", cuA.getSource(), getFileContents(getOutputTestFileName("A")));
 	}
 
+	@Test
 	public void test52() throws Exception {
 		String[] selectedMethodNames= new String[] { "baz1", "baz2", "baz3", "baz4" };
 		String[][] selectedMethodSignatures= new String[][] { new String[0], new String[0], new String[0], new String[0] };
@@ -1102,6 +1150,7 @@ public class PullUpTests extends RefactoringTest {
 	}
 
 	// bug 396524
+	@Test
 	public void test53() throws Exception {
 		String[] selectedMethodNames= { "m" };
 		String[][] selectedMethodSignatures= { new String[0] };
@@ -1120,6 +1169,7 @@ public class PullUpTests extends RefactoringTest {
 				signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
 	}
 
+	@Test
 	public void test55() throws Exception {
 		// test for bug 355327
 		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
@@ -1148,31 +1198,37 @@ public class PullUpTests extends RefactoringTest {
 		assertEqualLines("C", getFileContents(getOutputTestFileName("C")), cuC.getSource());
 	}
 
+	@Test
 	public void testFail0() throws Exception {
 //		printTestDisabledMessage("6538: searchDeclarationsOf* incorrect");
 		helper2(new String[] { "m" }, new String[][] { new String[0] }, true, false, 0);
 	}
 
+	@Test
 	public void testFail1() throws Exception {
 		printTestDisabledMessage("overloading - current limitation");
 //		helper2(new String[]{"m"}, new String[][]{new String[0]}, true, false);
 	}
 
+	@Test
 	public void testFail2() throws Exception {
 //		printTestDisabledMessage("6538: searchDeclarationsOf* incorrect");
 		helper2(new String[] { "m" }, new String[][] { new String[0] }, true, false, 0);
 	}
 
+	@Test
 	public void testFail3() throws Exception {
 //		printTestDisabledMessage("6538: searchDeclarationsOf* incorrect");
 		helper2(new String[] { "m" }, new String[][] { new String[0] }, true, false, 0);
 	}
 
+	@Test
 	public void testFail4() throws Exception {
 //		printTestDisabledMessage("6538: searchDeclarationsOf* incorrect");
 		helper2(new String[] { "m" }, new String[][] { new String[0] }, true, false, 0);
 	}
 
+	@Test
 	public void testFail6() throws Exception {
 		String[] methodNames= new String[] { "m" };
 		String[][] signatures= new String[][] { new String[0] };
@@ -1182,6 +1238,7 @@ public class PullUpTests extends RefactoringTest {
 		helper3(methodNames, signatures, deleteAllInSourceType, deleteAllMatchingMethods, 0, true);
 	}
 
+	@Test
 	public void testFail7() throws Exception {
 		String[] methodNames= new String[] { "m" };
 		String[][] signatures= new String[][] { new String[0] };
@@ -1190,6 +1247,7 @@ public class PullUpTests extends RefactoringTest {
 		helper3(methodNames, signatures, deleteAllInSourceType, deleteAllMatchingMethods, 0, false);
 	}
 
+	@Test
 	public void testFail8() throws Exception {
 		String[] methodNames= new String[] { "m" };
 		String[][] signatures= new String[][] { new String[0] };
@@ -1198,6 +1256,7 @@ public class PullUpTests extends RefactoringTest {
 		helper3(methodNames, signatures, deleteAllInSourceType, deleteAllMatchingMethods, 0, true);
 	}
 
+	@Test
 	public void testFail9() throws Exception {
 		String[] methodNames= new String[] { "m" };
 		String[][] signatures= new String[][] { new String[0] };
@@ -1206,6 +1265,7 @@ public class PullUpTests extends RefactoringTest {
 		helper3(methodNames, signatures, deleteAllInSourceType, deleteAllMatchingMethods, 0, true);
 	}
 
+	@Test
 	public void testFail10() throws Exception {
 		String[] methodNames= new String[] { "m" };
 		String[][] signatures= new String[][] { new String[0] };
@@ -1214,6 +1274,7 @@ public class PullUpTests extends RefactoringTest {
 		helper3(methodNames, signatures, deleteAllInSourceType, deleteAllMatchingMethods, 0, false);
 	}
 
+	@Test
 	public void testFail11() throws Exception {
 		String[] methodNames= new String[] { "m" };
 		String[][] signatures= new String[][] { new String[0] };
@@ -1222,6 +1283,7 @@ public class PullUpTests extends RefactoringTest {
 		helper3(methodNames, signatures, deleteAllInSourceType, deleteAllMatchingMethods, 0, true);
 	}
 
+	@Test
 	public void testFail12() throws Exception {
 		printTestDisabledMessage("overloading - current limitation");
 //		String[] methodNames= new String[]{"m"};
@@ -1231,6 +1293,7 @@ public class PullUpTests extends RefactoringTest {
 //		helper3(methodNames, signatures, deleteAllInSourceType, deleteAllMatchingMethods);
 	}
 
+	@Test
 	public void testFail13() throws Exception {
 		String[] methodNames= new String[] { "m" };
 		String[][] signatures= new String[][] { new String[0] };
@@ -1239,10 +1302,12 @@ public class PullUpTests extends RefactoringTest {
 		helper2(methodNames, signatures, deleteAllInSourceType, deleteAllMatchingMethods, 0);
 	}
 
+	@Test
 	public void testFail14() throws Exception {
 		//removed - this (pulling up classes) is allowed now
 	}
 
+	@Test
 	public void testFail15() throws Exception {
 		String[] methodNames= new String[] { "m" };
 		String[][] signatures= new String[][] { new String[0] };
@@ -1251,6 +1316,7 @@ public class PullUpTests extends RefactoringTest {
 		helper2(methodNames, signatures, deleteAllInSourceType, deleteAllMatchingMethods, 1);
 	}
 
+	@Test
 	public void testFail16() throws Exception {
 		String[] methodNames= new String[] { "m" };
 		String[][] signatures= new String[][] { new String[0] };
@@ -1259,6 +1325,7 @@ public class PullUpTests extends RefactoringTest {
 		helper2(methodNames, signatures, deleteAllInSourceType, deleteAllMatchingMethods, 1);
 	}
 
+	@Test
 	public void testFail17() throws Exception {
 		printTestDisabledMessage("unimplemented test - see bug 29522");
 //		String[] methodNames= new String[]{"m"};
@@ -1268,6 +1335,7 @@ public class PullUpTests extends RefactoringTest {
 //		helper2(methodNames, signatures, deleteAllInSourceType, deleteAllMatchingMethods, 1);
 	}
 
+	@Test
 	public void testFail18() throws Exception {
 		printTestDisabledMessage("unimplemented test - see bug 29522");
 //		String[] methodNames= new String[]{"m"};
@@ -1277,6 +1345,7 @@ public class PullUpTests extends RefactoringTest {
 //		helper2(methodNames, signatures, deleteAllInSourceType, deleteAllMatchingMethods, 0);
 	}
 
+	@Test
 	public void testFail19() throws Exception {
 		String[] methodNames= new String[] { "m" };
 		String[][] signatures= new String[][] { new String[0] };
@@ -1285,6 +1354,7 @@ public class PullUpTests extends RefactoringTest {
 		helper2(methodNames, signatures, deleteAllInSourceType, deleteAllMatchingMethods, 1);
 	}
 
+	@Test
 	public void testFail20() throws Exception {
 		String[] selectedMethodNames= { "m" };
 		String[][] selectedMethodSignatures= { new String[0] };
@@ -1303,6 +1373,7 @@ public class PullUpTests extends RefactoringTest {
 				signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
 	}
 
+	@Test
 	public void testFail21() throws Exception {
 		String[] selectedMethodNames= { "m" };
 		String[][] selectedMethodSignatures= { new String[0] };
@@ -1321,6 +1392,7 @@ public class PullUpTests extends RefactoringTest {
 				signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
 	}
 
+	@Test
 	public void testFail22() throws Exception {
 		String[] selectedMethodNames= { "m" };
 		String[][] selectedMethodSignatures= { new String[0] };
@@ -1339,6 +1411,7 @@ public class PullUpTests extends RefactoringTest {
 				signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
 	}
 
+	@Test
 	public void testFail23() throws Exception {
 		String[] selectedMethodNames= { "m" };
 		String[][] selectedMethodSignatures= { new String[0] };
@@ -1357,6 +1430,7 @@ public class PullUpTests extends RefactoringTest {
 				signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
 	}
 
+	@Test
 	public void testFail24() throws Exception {
 		String[] selectedMethodNames= { "m" };
 		String[][] selectedMethodSignatures= { new String[0] };
@@ -1375,6 +1449,7 @@ public class PullUpTests extends RefactoringTest {
 				signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
 	}
 
+	@Test
 	public void testFail25() throws Exception {
 		String[] selectedMethodNames= {};
 		String[][] selectedMethodSignatures= {};
@@ -1395,6 +1470,7 @@ public class PullUpTests extends RefactoringTest {
 				signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, true, 0);
 	}
 
+	@Test
 	public void testFail26() throws Exception {
 		String[] selectedMethodNames= {};
 		String[][] selectedMethodSignatures= {};
@@ -1415,6 +1491,7 @@ public class PullUpTests extends RefactoringTest {
 				signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, true, 0);
 	}
 
+	@Test
 	public void testFail27() throws Exception {
 		String[] selectedMethodNames= {};
 		String[][] selectedMethodSignatures= {};
@@ -1435,6 +1512,7 @@ public class PullUpTests extends RefactoringTest {
 				signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, true, 0);
 	}
 
+	@Test
 	public void testFail28() throws Exception {
 		String[] selectedMethodNames= {};
 		String[][] selectedMethodSignatures= {};
@@ -1455,51 +1533,62 @@ public class PullUpTests extends RefactoringTest {
 				signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, true, 0);
 	}
 
+	@Test
 	public void testFail29() throws Exception {
 		helper2(new String[] { "stop" }, new String[][] { new String[0] }, true, false, 0);
 	}
 
 	//----------------------------------------------------------
+	@Test
 	public void testField0() throws Exception {
 		fieldHelper1(new String[] { "i" }, 0);
 	}
 
+	@Test
 	public void testField1() throws Exception {
 		fieldHelper1b(new String[] { "x" }, 1);
 	}
 
+	@Test
 	public void testFieldFail0() throws Exception {
 		fieldHelper2(new String[] { "x" }, 0);
 	}
 
+	@Test
 	public void testFieldFail2() throws Exception {
 		fieldHelper2(new String[] { "f" }, 1);
 	}
 
 	//---------------------------------------------------------
+	@Test
 	public void testFieldMethod0() throws Exception {
 //		printTestDisabledMessage("bug 23324 ");
 		fieldMethodHelper1(new String[] { "f" }, new String[] { "m" }, new String[][] { new String[0] }, true, false);
 	}
 
 	//---------------------------------------------------------
+	@Test
 	public void testFieldMethod1() throws Exception {
 		fieldMethodHelper2(new String[] { "c" }, new String[] {}, new String[][] { new String[0] }, true, false);
 	}
 
+	@Test
 	public void testFieldMethod2() throws Exception {
 		fieldMethodHelper2(new String[] { "c" }, new String[] {}, new String[][] { new String[0] }, true, false);
 	}
 
+	@Test
 	public void testFieldMethod3() throws Exception {
 		fieldMethodHelper2(new String[] { "c" }, new String[] {}, new String[][] { new String[0] }, true, false);
 	}
 
+	@Test
 	public void testFieldMethod4() throws Exception {
 		fieldMethodHelper2(new String[] { "c" }, new String[] {}, new String[][] { new String[0] }, true, false);
 	}
 
 	//----
+	@Test
 	public void testAddingRequiredMembers0() throws Exception {
 		String[] fieldNames= {};
 		String[] methodNames= { "m" };
@@ -1511,6 +1600,7 @@ public class PullUpTests extends RefactoringTest {
 		addRequiredMembersHelper(fieldNames, methodNames, methodSignatures, expectedFieldNames, expectedMethodNames, expectedMethodSignatures);
 	}
 
+	@Test
 	public void testAddingRequiredMembers1() throws Exception {
 		String[] fieldNames= {};
 		String[] methodNames= { "m" };
@@ -1522,6 +1612,7 @@ public class PullUpTests extends RefactoringTest {
 		addRequiredMembersHelper(fieldNames, methodNames, methodSignatures, expectedFieldNames, expectedMethodNames, expectedMethodSignatures);
 	}
 
+	@Test
 	public void testAddingRequiredMembers2() throws Exception {
 		String[] fieldNames= {};
 		String[] methodNames= { "m" };
@@ -1533,6 +1624,7 @@ public class PullUpTests extends RefactoringTest {
 		addRequiredMembersHelper(fieldNames, methodNames, methodSignatures, expectedFieldNames, expectedMethodNames, expectedMethodSignatures);
 	}
 
+	@Test
 	public void testAddingRequiredMembers3() throws Exception {
 		String[] fieldNames= {};
 		String[] methodNames= { "m" };
@@ -1544,6 +1636,7 @@ public class PullUpTests extends RefactoringTest {
 		addRequiredMembersHelper(fieldNames, methodNames, methodSignatures, expectedFieldNames, expectedMethodNames, expectedMethodSignatures);
 	}
 
+	@Test
 	public void testAddingRequiredMembers4() throws Exception {
 		String[] fieldNames= {};
 		String[] methodNames= { "m" };
@@ -1555,6 +1648,7 @@ public class PullUpTests extends RefactoringTest {
 		addRequiredMembersHelper(fieldNames, methodNames, methodSignatures, expectedFieldNames, expectedMethodNames, expectedMethodSignatures);
 	}
 
+	@Test
 	public void testAddingRequiredMembers5() throws Exception {
 		String[] fieldNames= { "y" };
 		String[] methodNames= {};
@@ -1566,6 +1660,7 @@ public class PullUpTests extends RefactoringTest {
 		addRequiredMembersHelper(fieldNames, methodNames, methodSignatures, expectedFieldNames, expectedMethodNames, expectedMethodSignatures);
 	}
 
+	@Test
 	public void testAddingRequiredMembers6() throws Exception {
 		String[] fieldNames= {};
 		String[] methodNames= { "m" };
@@ -1577,6 +1672,7 @@ public class PullUpTests extends RefactoringTest {
 		addRequiredMembersHelper(fieldNames, methodNames, methodSignatures, expectedFieldNames, expectedMethodNames, expectedMethodSignatures);
 	}
 
+	@Test
 	public void testAddingRequiredMembers7() throws Exception {
 		String[] fieldNames= {};
 		String[] methodNames= { "m" };
@@ -1588,6 +1684,7 @@ public class PullUpTests extends RefactoringTest {
 		addRequiredMembersHelper(fieldNames, methodNames, methodSignatures, expectedFieldNames, expectedMethodNames, expectedMethodSignatures);
 	}
 
+	@Test
 	public void testAddingRequiredMembers8() throws Exception {
 		String[] fieldNames= {};
 		String[] methodNames= { "m" };
@@ -1599,6 +1696,7 @@ public class PullUpTests extends RefactoringTest {
 		addRequiredMembersHelper(fieldNames, methodNames, methodSignatures, expectedFieldNames, expectedMethodNames, expectedMethodSignatures);
 	}
 
+	@Test
 	public void testAddingRequiredMembers9() throws Exception {
 		String[] fieldNames= { "m" };
 		String[] methodNames= {};
@@ -1610,6 +1708,7 @@ public class PullUpTests extends RefactoringTest {
 		addRequiredMembersHelper(fieldNames, methodNames, methodSignatures, expectedFieldNames, expectedMethodNames, expectedMethodSignatures);
 	}
 
+	@Test
 	public void testAddingRequiredMembers10() throws Exception {
 		String[] fieldNames= { "m" };
 		String[] methodNames= {};
@@ -1621,6 +1720,7 @@ public class PullUpTests extends RefactoringTest {
 		addRequiredMembersHelper(fieldNames, methodNames, methodSignatures, expectedFieldNames, expectedMethodNames, expectedMethodSignatures);
 	}
 
+	@Test
 	public void testAddingRequiredMembers11() throws Exception {
 		String[] fieldNames= { "m" };
 		String[] methodNames= {};
@@ -1632,6 +1732,7 @@ public class PullUpTests extends RefactoringTest {
 		addRequiredMembersHelper(fieldNames, methodNames, methodSignatures, expectedFieldNames, expectedMethodNames, expectedMethodSignatures);
 	}
 
+	@Test
 	public void testAddingRequiredMembers12() throws Exception {
 		String[] fieldNames= {};
 		String[] methodNames= { "m" };
@@ -1643,6 +1744,7 @@ public class PullUpTests extends RefactoringTest {
 		addRequiredMembersHelper(fieldNames, methodNames, methodSignatures, expectedFieldNames, expectedMethodNames, expectedMethodSignatures);
 	}
 
+	@Test
 	public void testEnablement0() throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType typeB= cu.getType("B");
@@ -1650,123 +1752,140 @@ public class PullUpTests extends RefactoringTest {
 		assertTrue("should be enabled", RefactoringAvailabilityTester.isPullUpAvailable(members));
 	}
 
+	@Test
 	public void testEnablement1() throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType typeB= cu.getType("B");
 		IType typeD= cu.getType("D");
 		IMember[] members= { typeB, typeD };
-		assertTrue("should be disabled", !RefactoringAvailabilityTester.isPullUpAvailable(members));
+		assertFalse("should be disabled", RefactoringAvailabilityTester.isPullUpAvailable(members));
 	}
 
+	@Test
 	public void testEnablement2() throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType typeB= cu.getType("Outer").getType("B");
 		IMember[] members= { typeB };
-		assertTrue("should be disabled", !RefactoringAvailabilityTester.isPullUpAvailable(members));
+		assertFalse("should be disabled", RefactoringAvailabilityTester.isPullUpAvailable(members));
 	}
 
+	@Test
 	public void testEnablement3() throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType typeB= cu.getType("B");
 		IMember[] members= { typeB };
-		assertTrue("should be disabled", !RefactoringAvailabilityTester.isPullUpAvailable(members));
+		assertFalse("should be disabled", RefactoringAvailabilityTester.isPullUpAvailable(members));
 	}
 
+	@Test
 	public void testEnablement4() throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType typeB= cu.getType("B");
 		IMember[] members= { typeB };
-		assertTrue("should be disabled", !RefactoringAvailabilityTester.isPullUpAvailable(members));
+		assertFalse("should be disabled", RefactoringAvailabilityTester.isPullUpAvailable(members));
 	}
 
+	@Test
 	public void testEnablement5() throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType typeB= cu.getType("B");
 		IMember[] members= { typeB };
-		assertTrue("should be disabled", !RefactoringAvailabilityTester.isPullUpAvailable(members));
+		assertFalse("should be disabled", RefactoringAvailabilityTester.isPullUpAvailable(members));
 	}
 
+	@Test
 	public void testEnablement6() throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType typeB= cu.getType("B");
 		IMember[] members= { typeB };
-		assertTrue("should be disabled", !RefactoringAvailabilityTester.isPullUpAvailable(members));
+		assertFalse("should be disabled", RefactoringAvailabilityTester.isPullUpAvailable(members));
 	}
 
+	@Test
 	public void testEnablement7() throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType typeB= cu.getType("B");
 		IMember[] members= { typeB };
-		assertTrue("should be disabled", !RefactoringAvailabilityTester.isPullUpAvailable(members));
+		assertFalse("should be disabled", RefactoringAvailabilityTester.isPullUpAvailable(members));
 	}
 
+	@Test
 	public void testEnablement8() throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType typeB= cu.getType("Outer").getType("B");
 		IMember[] members= { typeB };
-		assertTrue("should be disabled", !RefactoringAvailabilityTester.isPullUpAvailable(members));
+		assertFalse("should be disabled", RefactoringAvailabilityTester.isPullUpAvailable(members));
 	}
 
+	@Test
 	public void testEnablement9() throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType typeB= cu.getType("Outer").getType("B");
 		IMember[] members= { typeB };
-		assertTrue("should be disabled", !RefactoringAvailabilityTester.isPullUpAvailable(members));
+		assertFalse("should be disabled", RefactoringAvailabilityTester.isPullUpAvailable(members));
 	}
 
+	@Test
 	public void testEnablement10() throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType typeB= cu.getType("Outer").getType("B");
 		IMember[] members= { typeB };
-		assertTrue("should be disabled", !RefactoringAvailabilityTester.isPullUpAvailable(members));
+		assertFalse("should be disabled", RefactoringAvailabilityTester.isPullUpAvailable(members));
 	}
 
+	@Test
 	public void testEnablement11() throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType typeB= cu.getType("Outer").getType("B");
 		IMember[] members= { typeB };
-		assertTrue("should be disabled", !RefactoringAvailabilityTester.isPullUpAvailable(members));
+		assertFalse("should be disabled", RefactoringAvailabilityTester.isPullUpAvailable(members));
 	}
 
+	@Test
 	public void testEnablement12() throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType typeB= cu.getType("Outer").getType("B");
 		IMember[] members= { typeB };
-		assertTrue("should be disabled", !RefactoringAvailabilityTester.isPullUpAvailable(members));
+		assertFalse("should be disabled", RefactoringAvailabilityTester.isPullUpAvailable(members));
 	}
 
+	@Test
 	public void testEnablement13() throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType typeB= cu.getType("B");
 		IType typeD= cu.getType("D");
 		IMember[] members= { typeB, typeD };
-		assertTrue("should be disabled", !RefactoringAvailabilityTester.isPullUpAvailable(members));
+		assertFalse("should be disabled", RefactoringAvailabilityTester.isPullUpAvailable(members));
 	}
 
+	@Test
 	public void testEnablement14() throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType typeB= cu.getType("B");
 		IType typeD= cu.getType("D");
 		IMember[] members= { typeB, typeD };
-		assertTrue("should be disabled", !RefactoringAvailabilityTester.isPullUpAvailable(members));
+		assertFalse("should be disabled", RefactoringAvailabilityTester.isPullUpAvailable(members));
 	}
 
+	@Test
 	public void testEnablement15() throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType typeB= cu.getType("B");
 		IType typeD= cu.getType("D");
 		IMember[] members= { typeB, typeD };
-		assertTrue("should be disabled", !RefactoringAvailabilityTester.isPullUpAvailable(members));
+		assertFalse("should be disabled", RefactoringAvailabilityTester.isPullUpAvailable(members));
 	}
 
+	@Test
 	public void testEnablement16() throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType typeB= cu.getType("B");
 		IType typeD= cu.getType("D");
 		IMember[] members= { typeB, typeD };
-		assertTrue("should be disabled", !RefactoringAvailabilityTester.isPullUpAvailable(members));
+		assertFalse("should be disabled", RefactoringAvailabilityTester.isPullUpAvailable(members));
 	}
 
+	@Test
 	public void testEnablement17() throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType typeB= cu.getType("B");
@@ -1774,6 +1893,7 @@ public class PullUpTests extends RefactoringTest {
 		assertTrue("should be enabled", RefactoringAvailabilityTester.isPullUpAvailable(members));
 	}
 
+	@Test
 	public void testEnablement18() throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType typeB= cu.getType("B");
@@ -1781,6 +1901,7 @@ public class PullUpTests extends RefactoringTest {
 		assertTrue("should be enabled", RefactoringAvailabilityTester.isPullUpAvailable(members));
 	}
 
+	@Test
 	public void testEnablement19() throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType typeB= cu.getType("B");
@@ -1788,6 +1909,7 @@ public class PullUpTests extends RefactoringTest {
 		assertTrue("should be enabled", RefactoringAvailabilityTester.isPullUpAvailable(members));
 	}
 
+	@Test
 	public void testEnablement20() throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType typeB= cu.getType("B");
@@ -1795,6 +1917,7 @@ public class PullUpTests extends RefactoringTest {
 		assertTrue("should be enabled", RefactoringAvailabilityTester.isPullUpAvailable(members));
 	}
 
+	@Test
 	public void testEnablement21() throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType typeB= cu.getType("B");
@@ -1802,6 +1925,7 @@ public class PullUpTests extends RefactoringTest {
 		assertTrue("should be enabled", RefactoringAvailabilityTester.isPullUpAvailable(members));
 	}
 
+	@Test
 	public void testEnablement22() throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType typeB= cu.getType("B");
@@ -1809,6 +1933,7 @@ public class PullUpTests extends RefactoringTest {
 		assertTrue("should be enabled", RefactoringAvailabilityTester.isPullUpAvailable(members));
 	}
 
+	@Test
 	public void testEnablement23() throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType typeB= cu.getType("B");
@@ -1816,6 +1941,7 @@ public class PullUpTests extends RefactoringTest {
 		assertTrue("should be enabled", RefactoringAvailabilityTester.isPullUpAvailable(members));
 	}
 
+	@Test
 	public void testEnablement24() throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType typeB= cu.getType("B");
@@ -1825,6 +1951,7 @@ public class PullUpTests extends RefactoringTest {
 
 	//------------------ tests -------------
 
+	@Test
 	public void testStaticImports0() throws Exception {
 		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
 		ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");
@@ -1850,6 +1977,7 @@ public class PullUpTests extends RefactoringTest {
 		assertEqualLines("B", cuB.getSource(), getFileContents(getOutputTestFileName("B")));
 	}
 
+	@Test
 	public void testStaticImports1() throws Exception {
 		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
 		ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");
@@ -1875,22 +2003,27 @@ public class PullUpTests extends RefactoringTest {
 		assertEqualLines("B", cuB.getSource(), getFileContents(getOutputTestFileName("B")));
 	}
 
+	@Test
 	public void testGenerics0() throws Exception {
 		helper1(new String[] { "m" }, new String[][] { new String[0] }, true, false, 0);
 	}
 
+	@Test
 	public void testGenerics1() throws Exception {
 		helper1(new String[] { "m" }, new String[][] { new String[0] }, true, false, 0);
 	}
 
+	@Test
 	public void testGenerics2() throws Exception {
 		helper1(new String[] { "mmm", "n" }, new String[][] { new String[] { "QT;" }, new String[0] }, true, false, 0);
 	}
 
+	@Test
 	public void testGenerics3() throws Exception {
 		helper1(new String[] { "mmm", "n" }, new String[][] { new String[] { "QT;" }, new String[0] }, true, true, 0);
 	}
 
+	@Test
 	public void testGenerics4() throws Exception {
 		printTestDisabledMessage("see bug 75642");
 
@@ -1915,6 +2048,7 @@ public class PullUpTests extends RefactoringTest {
 //		assertEqualLines("B", cuB.getSource(), getFileContents(getOutputTestFileName("B")));
 	}
 
+	@Test
 	public void testGenerics5() throws Exception {
 		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
 		ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");
@@ -1940,10 +2074,12 @@ public class PullUpTests extends RefactoringTest {
 		assertEqualLines("B", cuB.getSource(), getFileContents(getOutputTestFileName("B")));
 	}
 
+	@Test
 	public void testGenerics6() throws Exception {
 		helper1(new String[] { "m" }, new String[][] { new String[0] }, true, false, 0);
 	}
 
+	@Test
 	public void testGenerics7() throws Exception {
 		printTestDisabledMessage("Disabled because of bug ");
 
@@ -1951,10 +2087,12 @@ public class PullUpTests extends RefactoringTest {
 			helper1(new String[] { "m" }, new String[][] { new String[0] }, true, false, 0);
 	}
 
+	@Test
 	public void testGenerics8() throws Exception {
 		helper1(new String[] { "m" }, new String[][] { new String[0] }, true, false, 0);
 	}
 
+	@Test
 	public void testGenerics9() throws Exception {
 		printTestDisabledMessage("Disabled because of bug ");
 
@@ -1962,14 +2100,17 @@ public class PullUpTests extends RefactoringTest {
 			helper1(new String[] { "m" }, new String[][] { new String[0] }, true, false, 0);
 	}
 
+	@Test
 	public void testGenerics10() throws Exception {
 		helper1(new String[] { "m" }, new String[][] { new String[0] }, true, false, 0);
 	}
 
+	@Test
 	public void testGenerics11() throws Exception {
 		helper1(new String[] { "m" }, new String[][] { new String[0] }, true, false, 0);
 	}
 
+	@Test
 	public void testGenerics12() throws Exception {
 		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
 		ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");
@@ -1995,26 +2136,32 @@ public class PullUpTests extends RefactoringTest {
 		assertEqualLines("B", cuB.getSource(), getFileContents(getOutputTestFileName("B")));
 	}
 
+	@Test
 	public void testGenerics13() throws Exception {
 		helper1(new String[] { "m" }, new String[][] { new String[0] }, true, false, 0);
 	}
 
+	@Test
 	public void testGenerics14() throws Exception {
 		helper1(new String[] { "m" }, new String[][] { new String[0] }, true, false, 0);
 	}
 
+	@Test
 	public void testGenerics15() throws Exception {
 		helper1(new String[] { "m" }, new String[][] { new String[0] }, true, false, 0);
 	}
 
+	@Test
 	public void testGenericsFail0() throws Exception {
 		helper2(new String[] { "m" }, new String[][] { new String[] { "QT;" } }, true, false, 0);
 	}
 
+	@Test
 	public void testGenericsFail1() throws Exception {
 		helper2(new String[] { "m" }, new String[][] { new String[] { "QS;" } }, true, false, 0);
 	}
 
+	@Test
 	public void testGenericsFail2() throws Exception {
 		helper2(new String[] { "m" }, new String[][] { new String[] { "QT;" } }, true, false, 0);
 	}

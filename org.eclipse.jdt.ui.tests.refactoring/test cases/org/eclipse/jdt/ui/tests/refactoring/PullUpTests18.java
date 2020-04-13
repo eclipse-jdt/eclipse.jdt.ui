@@ -13,7 +13,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.util.Hashtable;
+
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -35,30 +42,23 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoringProcessor;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.tests.CustomBaseRunner;
+import org.eclipse.jdt.ui.tests.IgnoreInheritedTests;
 import org.eclipse.jdt.ui.tests.core.Java18ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.refactoring.rules.Java18Setup;
+import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-import junit.framework.Test;
-
+@IgnoreInheritedTests
+@RunWith(CustomBaseRunner.class)
 public class PullUpTests18 extends PullUpTests {
+	@SuppressWarnings("hiding")
+	@Rule
+	public RefactoringTestSetup fts= new Java18Setup();
 
-	private static final Class<PullUpTests18> clazz= PullUpTests18.class;
-
-	public PullUpTests18(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return setUpTest(new NoSuperTestsSuite(clazz));
-	}
-
-	public static Test setUpTest(Test someTest) {
-		return new Java18Setup(someTest);
-	}
-
+	@Test
 	public void test18_1() throws Exception {
-
 		String[] methodNames= new String[] { "getArea" };
 		String[][] signatures= new String[][] { new String[] { "QInteger;" } };
 		JavaProjectHelper.addLibrary((IJavaProject) getPackageP().getAncestor(IJavaElement.JAVA_PROJECT), new Path(Java18ProjectTestSetup.getJdtAnnotations20Path()));
@@ -81,10 +81,10 @@ public class PullUpTests18 extends PullUpTests {
 
 		assertEqualLines("A", getFileContents(getOutputTestFileName("A")), cuA.getSource());
 		assertEqualLines("B", getFileContents(getOutputTestFileName("B")), cuB.getSource());
-
 	}
 
 	// bug 394551 comment 2
+	@Test
 	public void test18_2() throws Exception {
 		String[] selectedMethodNames= { "m" };
 		String[][] selectedMethodSignatures= { new String[0] };
@@ -104,6 +104,7 @@ public class PullUpTests18 extends PullUpTests {
 	}
 
 	// bug 394551 expect @java.lang.Override
+	@Test
 	public void test18_3() throws Exception {
 		String[] selectedMethodNames= { "m" };
 		String[][] selectedMethodSignatures= { new String[0] };
@@ -123,6 +124,7 @@ public class PullUpTests18 extends PullUpTests {
 	}
 
 	// bug 394551: no override annotation expected
+	@Test
 	public void test18_4() throws Exception {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		boolean previousValue= store.getBoolean(PreferenceConstants.CODEGEN_USE_OVERRIDE_ANNOTATION);
@@ -149,6 +151,7 @@ public class PullUpTests18 extends PullUpTests {
 	}
 
 	// bug 394551: no override annotation expected
+	@Test
 	public void test18_5() throws Exception {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		boolean previousValue= store.getBoolean(PreferenceConstants.CODEGEN_USE_OVERRIDE_ANNOTATION);
@@ -181,6 +184,7 @@ public class PullUpTests18 extends PullUpTests {
 	}
 
 	// bug 394551: override annotation expected
+	@Test
 	public void test18_6() throws Exception {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		boolean previousValue= store.getBoolean(PreferenceConstants.CODEGEN_USE_OVERRIDE_ANNOTATION);
@@ -212,6 +216,7 @@ public class PullUpTests18 extends PullUpTests {
 	}
 
 	// bug 497368
+	@Test
 	public void test54() throws Exception {
 		ICompilationUnit cuFoo= createCUfromTestFile(getPackageP(), "Foo");
 		ICompilationUnit cuIFoo= createCUfromTestFile(getPackageP(), "IFoo");
@@ -238,6 +243,7 @@ public class PullUpTests18 extends PullUpTests {
 	}
 
 	// bug 552377
+	@Test
 	public void testGenerics16() throws Exception {
 		ICompilationUnit cuIGeneric= createCUfromTestFile(getPackageP(), "IGeneric");
 		ICompilationUnit cuMainImpl= createCUfromTestFile(getPackageP(), "MainImpl");

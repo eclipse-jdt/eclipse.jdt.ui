@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 IBM Corporation and others.
+ * Copyright (c) 2014, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,7 +13,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
-import junit.framework.Test;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
@@ -21,27 +23,25 @@ import org.eclipse.jdt.core.dom.Modifier;
 
 import org.eclipse.jdt.internal.corext.refactoring.code.PromoteTempToFieldRefactoring;
 
+import org.eclipse.jdt.ui.tests.CustomBaseRunner;
+import org.eclipse.jdt.ui.tests.IgnoreInheritedTests;
+import org.eclipse.jdt.ui.tests.refactoring.rules.Java18Setup;
+import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
+
+@IgnoreInheritedTests
+@RunWith(CustomBaseRunner.class)
 public class PromoteTempToFieldTests18 extends PromoteTempToFieldTests {
-	private static final Class<PromoteTempToFieldTests18> clazz= PromoteTempToFieldTests18.class;
+	@SuppressWarnings("hiding")
+	@Rule
+	public RefactoringTestSetup fts= new Java18Setup();
 
-	public PromoteTempToFieldTests18(String name) {
-		super(name);
-	}
-
-	public static Test setUpTest(Test test) {
-		return new Java18Setup(test);
-	}
-
-	public static Test suite() {
-		return setUpTest(new NoSuperTestsSuite(clazz));
-	}
-
+	@Test
 	public void testFailInterfaceMethods1() throws Exception {
 		failHelper(6, 13, 6, 14, "i", false, false, PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD, Modifier.PRIVATE, RefactoringStatus.FATAL);
 	}
 
+	@Test
 	public void testFailInterfaceMethods2() throws Exception {
 		failHelper(6, 13, 6, 14, "i", false, false, PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD, Modifier.PRIVATE, RefactoringStatus.FATAL);
 	}
-
 }

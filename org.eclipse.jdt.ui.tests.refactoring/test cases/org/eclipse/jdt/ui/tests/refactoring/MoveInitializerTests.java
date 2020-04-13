@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 IBM Corporation and others.
+ * Copyright (c) 2019, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,6 +13,12 @@
  *     Red Hat Inc. - created based on MoveMembersTests
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.core.resources.IResource;
 
@@ -31,31 +37,17 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgDestinationFactory
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
 
 import org.eclipse.jdt.ui.tests.refactoring.ccp.MockReorgQueries;
+import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
-
-public class MoveInitializerTests extends RefactoringTest {
-
-	private static final Class<MoveInitializerTests> clazz= MoveInitializerTests.class;
+public class MoveInitializerTests extends GenericRefactoringTest {
 	private static final String REFACTORING_PATH= "MoveInitializer/";
 
-	public MoveInitializerTests(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return new RefactoringTestSetup(new TestSuite(clazz));
-	}
-
-	public static Test setUpTest(Test someTest) {
-		return new RefactoringTestSetup(someTest);
-	}
+	@Rule
+	public RefactoringTestSetup fts= new RefactoringTestSetup();
 
 	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
+	public void genericbefore() throws Exception {
+		super.genericbefore();
 		fIsPreDeltaTest= true;
 	}
 
@@ -76,6 +68,7 @@ public class MoveInitializerTests extends RefactoringTest {
 	// Move static initializer in same package and ensure imports are brought along
 	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=108147
 	@SuppressWarnings("null")
+	@Test
 	public void test0() throws Exception{
 		ParticipantTesting.reset();
 		final String p1Name= "p1";
@@ -99,7 +92,7 @@ public class MoveInitializerTests extends RefactoringTest {
 		RefactoringStatus status= performRefactoring(processor, true);
 
 		//-- checks
-		assertEquals("status should be ok here", null, status);
+		assertNull("status should be ok here", status);
 
 		assertEquals("p1 files", 2, packP1.getChildren().length);
 
@@ -113,6 +106,7 @@ public class MoveInitializerTests extends RefactoringTest {
 	// Move static initializer in different package and ensure imports are brought along
 	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=108147
 	@SuppressWarnings("null")
+	@Test
 	public void test1() throws Exception{
 		ParticipantTesting.reset();
 		final String p1Name= "p1";
@@ -138,7 +132,7 @@ public class MoveInitializerTests extends RefactoringTest {
 		RefactoringStatus status= performRefactoring(processor, true);
 
 		//-- checks
-		assertEquals("status should be ok here", null, status);
+		assertNull("status should be ok here", status);
 
 		assertEquals("p1 files", 1, packP1.getChildren().length);
 		assertEquals("p2 files", 1, packP2.getChildren().length);
