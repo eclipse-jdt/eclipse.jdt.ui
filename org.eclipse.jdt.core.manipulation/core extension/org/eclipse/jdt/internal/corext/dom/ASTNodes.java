@@ -603,7 +603,11 @@ public class ASTNodes {
 
 		if (method.resolveMethodBinding() != null) {
 			return (method.resolveMethodBinding().getModifiers() & Modifier.STATIC) != 0;
-		} else if ((calledType instanceof Name) && ((Name) calledType).resolveBinding().getKind() == IBinding.TYPE) {
+		}
+
+		if ((calledType instanceof Name)
+				&& ((Name) calledType).resolveBinding() != null
+				&& ((Name) calledType).resolveBinding().getKind() == IBinding.TYPE) {
 			return Boolean.TRUE;
 		}
 
