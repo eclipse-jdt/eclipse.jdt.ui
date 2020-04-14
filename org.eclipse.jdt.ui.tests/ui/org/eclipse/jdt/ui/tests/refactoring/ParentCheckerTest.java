@@ -21,8 +21,6 @@ import java.util.LinkedHashSet;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -39,7 +37,6 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ParentChecker;
 
-@RunWith(JUnit4.class)
 public class ParentCheckerTest {
 
 	private IJavaProject testProject;

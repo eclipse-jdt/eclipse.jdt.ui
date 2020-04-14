@@ -20,8 +20,6 @@ import static org.junit.Assert.assertTrue;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 import org.eclipse.core.runtime.IPath;
 
@@ -42,7 +40,6 @@ import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPage;
 
-@RunWith(JUnit4.class)
 public class NewJavaProjectWizardTest {
 
 	private class TestNewJavaProjectWizardPage extends NewJavaProjectWizardPage {

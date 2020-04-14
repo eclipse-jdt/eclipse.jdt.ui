@@ -20,8 +20,6 @@ import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
@@ -43,7 +41,6 @@ import org.eclipse.jdt.ui.tests.core.rules.LeakTestSetup;
  *
  * @since 3.1
  */
-@RunWith(JUnit4.class)
 public class UndoManagerLeakTest extends LeakTestCase {
 
 	@Rule

@@ -17,13 +17,10 @@ import java.util.ArrayList;
 
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 import org.eclipse.jdt.ui.leaktest.LeakTestCase;
 import org.eclipse.jdt.ui.tests.core.rules.LeakTestSetup;
 
-@RunWith(JUnit4.class)
 public class LeakTestExample extends LeakTestCase {
 
 	@Rule

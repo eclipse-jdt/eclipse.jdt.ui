@@ -26,8 +26,6 @@ import java.util.zip.ZipFile;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -46,7 +44,6 @@ import org.eclipse.ui.wizards.datatransfer.ProjectConfigurator;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
-@RunWith(JUnit4.class)
 public class ImporterTest{
 
 	@Test
