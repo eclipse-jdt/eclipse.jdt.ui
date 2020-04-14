@@ -31,7 +31,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -52,8 +52,8 @@ public class ExtractMethodTests extends AbstractJunit4SelectionTestCase {
 
 	private static final boolean BUG_405778= true; //XXX: [1.8][dom ast] method body recovery broken (empty body)
 
-	@ClassRule
-	public static ExtractMethodTestSetup fgTestSetup= new ExtractMethodTestSetup();
+	@Rule
+	public ExtractMethodTestSetup fgTestSetup= new ExtractMethodTestSetup();
 
 	@Override
 	public void setUp() throws Exception {

@@ -15,7 +15,7 @@ package org.eclipse.jdt.ui.tests.refactoring;
 
 import static org.eclipse.jdt.ui.tests.refactoring.AbstractJunit4SelectionTestCase.TestMode.COMPARE_WITH_OUTPUT;
 
-import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -26,8 +26,9 @@ import org.eclipse.jdt.ui.tests.IgnoreInheritedTests;
 @RunWith(CustomBaseRunner.class)
 public class ExtractMethodTests10 extends ExtractMethodTests {
 
-	@ClassRule
-	public static ExtractMethodTestSetup10 fgTestSetup= new ExtractMethodTestSetup10();
+	@SuppressWarnings("hiding")
+	@Rule
+	public ExtractMethodTestSetup10 fgTestSetup= new ExtractMethodTestSetup10();
 
 	protected void try10Test() throws Exception {
 		performTest(fgTestSetup.getTry10Package(), "A", COMPARE_WITH_OUTPUT, "try10_out");

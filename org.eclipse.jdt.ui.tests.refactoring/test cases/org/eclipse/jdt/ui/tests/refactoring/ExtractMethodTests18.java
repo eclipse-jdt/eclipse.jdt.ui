@@ -17,7 +17,7 @@ import static org.eclipse.jdt.ui.tests.refactoring.AbstractJunit4SelectionTestCa
 import static org.eclipse.jdt.ui.tests.refactoring.AbstractJunit4SelectionTestCase.TestMode.INVALID_SELECTION;
 import static org.eclipse.jdt.ui.tests.refactoring.AbstractJunit4SelectionTestCase.TestMode.VALID_SELECTION;
 
-import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -30,8 +30,8 @@ import org.eclipse.jdt.ui.tests.IgnoreInheritedTests;
 @RunWith(CustomBaseRunner.class)
 public class ExtractMethodTests18 extends ExtractMethodTests {
 
-	@ClassRule
-	public static ExtractMethodTestSetup18 fgTestSetup= new ExtractMethodTestSetup18();
+	@Rule
+	public ExtractMethodTestSetup18 fgTestSetup= new ExtractMethodTestSetup18();
 
 	protected void defaultMethodsTest(int destination, int visibility) throws Exception {
 		performTest(fgTestSetup.getDefaultMethodsPackage(), "A", COMPARE_WITH_OUTPUT, "defaultMethods18_out", null, null, destination, visibility);
