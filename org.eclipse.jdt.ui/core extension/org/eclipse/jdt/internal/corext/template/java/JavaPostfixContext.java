@@ -35,6 +35,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.BooleanLiteral;
@@ -681,6 +682,12 @@ public class JavaPostfixContext extends JavaContext {
 
 			@Override
 			public boolean visit(ClassInstanceCreation n) {
+				res[0]= n.resolveTypeBinding();
+				return false;
+			}
+
+			@Override
+			public boolean visit(ArrayAccess n) {
 				res[0]= n.resolveTypeBinding();
 				return false;
 			}

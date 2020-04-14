@@ -318,6 +318,37 @@ public class PostFixCompletionTest extends TestCase {
 		assertEquals(expected.toString(), viewer.getDocument().get());
 	}
 
+	public void testArrayAccessVar() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n" +
+				"public class ArrayAccessVar {\n" +
+				"  public void test () {\n" +
+				"    String [] args = new String [] { \"one\", \"two\" };\n" +
+				"    args[0].var$\n" +
+				"  }\n" +
+				"}");
+
+		int completionIndex= getCompletionIndex(buf);
+		ICompilationUnit cu= getCompilationUnit(pkg, buf, "ArrayAccessVar.java");
+		List<ICompletionProposal> proposals= computeCompletionProposals(cu, completionIndex);
+
+		assertProposalsExist(Arrays.asList("var - Creates a new variable"), proposals);
+
+		ITextViewer viewer= initializeViewer(cu);
+		applyProposal(viewer, proposals, "var", completionIndex);
+
+		StringBuffer expected= new StringBuffer();
+		expected.append("package test;\n" +
+				"public class ArrayAccessVar {\n" +
+				"  public void test () {\n" +
+				"    String [] args = new String [] { \"one\", \"two\" };\n" +
+				"    String name = args[0];\n" +
+				"  }\n" +
+				"}");
+
+		assertEquals(expected.toString(), viewer.getDocument().get());
+	}
+
 	public void testBoundedExtendsTypeParameterVar() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test;\n" +
