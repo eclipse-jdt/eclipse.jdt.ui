@@ -80,38 +80,37 @@ public class RedundantModifiersCleanUp extends AbstractMultiFix {
 		return new String[0];
 	}
 
-	@SuppressWarnings("nls")
 	@Override
 	public String getPreview() {
 		StringBuilder buf= new StringBuilder();
-		buf.append("\n");
+		buf.append("\n"); //$NON-NLS-1$
 		if (isEnabled(CleanUpConstants.REMOVE_REDUNDANT_MODIFIERS)) {
-			buf.append("public interface IFoo {\n");
-			buf.append("  int MAGIC_NUMBER = 646;\n");
-			buf.append("  int foo ();\n");
-			buf.append("  int bar (int bazz);\n");
+			buf.append("public interface IFoo {\n"); //$NON-NLS-1$
+			buf.append("  int MAGIC_NUMBER = 646;\n"); //$NON-NLS-1$
+			buf.append("  int foo ();\n"); //$NON-NLS-1$
+			buf.append("  int bar (int bazz);\n"); //$NON-NLS-1$
 		} else {
-			buf.append("public abstract interface IFoo {\n");
-			buf.append("  public static final int MAGIC_NUMBER = 646;\n");
-			buf.append("  public abstract int foo ();\n");
-			buf.append("  public int bar (int bazz);\n");
+			buf.append("public abstract interface IFoo {\n"); //$NON-NLS-1$
+			buf.append("  public static final int MAGIC_NUMBER = 646;\n"); //$NON-NLS-1$
+			buf.append("  public abstract int foo ();\n"); //$NON-NLS-1$
+			buf.append("  public int bar (int bazz);\n"); //$NON-NLS-1$
 		}
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("public final class Sealed {\n");
+		buf.append("}\n"); //$NON-NLS-1$
+		buf.append("\n"); //$NON-NLS-1$
+		buf.append("public final class Sealed {\n"); //$NON-NLS-1$
 		if (isEnabled(CleanUpConstants.REMOVE_REDUNDANT_MODIFIERS)) {
-			buf.append("  public void foo () {};\n");
-			buf.append("  \n");
-			buf.append("  interface INested {\n");
-			buf.append("  }\n");
+			buf.append("  public void foo () {};\n"); //$NON-NLS-1$
+			buf.append("  \n"); //$NON-NLS-1$
+			buf.append("  interface INested {\n"); //$NON-NLS-1$
+			buf.append("  }\n"); //$NON-NLS-1$
 
 		} else {
-			buf.append("  public final void foo () {};\n");
-			buf.append("  \n");
-			buf.append("  abstract static interface INested {\n");
-			buf.append("  }\n");
+			buf.append("  public final void foo () {};\n"); //$NON-NLS-1$
+			buf.append("  \n"); //$NON-NLS-1$
+			buf.append("  abstract static interface INested {\n"); //$NON-NLS-1$
+			buf.append("  }\n"); //$NON-NLS-1$
 		}
-		buf.append("}\n");
+		buf.append("}\n"); //$NON-NLS-1$
 
 
 		return buf.toString();

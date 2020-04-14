@@ -80,20 +80,19 @@ public class UnboxingCleanUp extends AbstractMultiFix {
 		return new String[0];
 	}
 
-	@SuppressWarnings("nls")
 	@Override
 	public String getPreview() {
 		StringBuilder bld= new StringBuilder();
-		bld.append("\n");
-		bld.append("Integer integerObject = Integer.MAX_VALUE;\n");
-		bld.append("Character cObject = Character.MAX_VALUE;\n");
-		bld.append("\n");
+		bld.append("\n"); //$NON-NLS-1$
+		bld.append("Integer integerObject = Integer.MAX_VALUE;\n"); //$NON-NLS-1$
+		bld.append("Character cObject = Character.MAX_VALUE;\n"); //$NON-NLS-1$
+		bld.append("\n"); //$NON-NLS-1$
 		if (isEnabled(CleanUpConstants.USE_UNBOXING)) {
-			bld.append("int i = integerObject;\n");
-			bld.append("char c = cObject;\n");
+			bld.append("int i = integerObject;\n"); //$NON-NLS-1$
+			bld.append("char c = cObject;\n"); //$NON-NLS-1$
 		} else {
-			bld.append("int i = integerObject.intValue();\n");
-			bld.append("char c = cObject.charValue();\n");
+			bld.append("int i = integerObject.intValue();\n"); //$NON-NLS-1$
+			bld.append("char c = cObject.charValue();\n"); //$NON-NLS-1$
 		}
 
 		return bld.toString();

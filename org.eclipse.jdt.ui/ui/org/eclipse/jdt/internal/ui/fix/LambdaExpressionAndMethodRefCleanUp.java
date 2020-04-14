@@ -100,24 +100,23 @@ public class LambdaExpressionAndMethodRefCleanUp extends AbstractMultiFix {
 		return new String[0];
 	}
 
-	@SuppressWarnings("nls")
 	@Override
 	public String getPreview() {
 		StringBuilder bld= new StringBuilder();
-		bld.append("\n");
+		bld.append("\n"); //$NON-NLS-1$
 
 		if (isEnabled(CleanUpConstants.SIMPLIFY_LAMBDA_EXPRESSION_AND_METHOD_REF)) {
-			bld.append("someString -> someString.trim().toLowerCase();\n");
-			bld.append("someString -> someString.trim().toLowerCase();\n");
-			bld.append("someString -> (someString.trim().toLowerCase() + \"bar\");\n");
-			bld.append("ArrayList::new;\n");
-			bld.append("Date::getTime;\n");
+			bld.append("someString -> someString.trim().toLowerCase();\n"); //$NON-NLS-1$
+			bld.append("someString -> someString.trim().toLowerCase();\n"); //$NON-NLS-1$
+			bld.append("someString -> (someString.trim().toLowerCase() + \"bar\");\n"); //$NON-NLS-1$
+			bld.append("ArrayList::new;\n"); //$NON-NLS-1$
+			bld.append("Date::getTime;\n"); //$NON-NLS-1$
 		} else {
-			bld.append("(someString) -> someString.trim().toLowerCase();\n");
-			bld.append("someString -> {return someString.trim().toLowerCase();};\n");
-			bld.append("someString -> {return someString.trim().toLowerCase() + \"bar\";};\n");
-			bld.append("() -> new ArrayList<>();\n");
-			bld.append("date -> date.getTime();\n");
+			bld.append("(someString) -> someString.trim().toLowerCase();\n"); //$NON-NLS-1$
+			bld.append("someString -> {return someString.trim().toLowerCase();};\n"); //$NON-NLS-1$
+			bld.append("someString -> {return someString.trim().toLowerCase() + \"bar\";};\n"); //$NON-NLS-1$
+			bld.append("() -> new ArrayList<>();\n"); //$NON-NLS-1$
+			bld.append("date -> date.getTime();\n"); //$NON-NLS-1$
 		}
 
 		return bld.toString();

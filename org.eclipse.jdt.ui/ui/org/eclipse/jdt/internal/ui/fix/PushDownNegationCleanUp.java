@@ -78,17 +78,16 @@ public class PushDownNegationCleanUp extends AbstractMultiFix {
 		return new String[0];
 	}
 
-	@SuppressWarnings("nls")
 	@Override
 	public String getPreview() {
 		StringBuilder bld= new StringBuilder();
-		bld.append("\n");
+		bld.append("\n"); //$NON-NLS-1$
 		if (isEnabled(CleanUpConstants.PUSH_DOWN_NEGATION)) {
-			bld.append("boolean b = (myInt <= 0);\n");
-			bld.append("boolean b2 = (!isEnabled && !isValid);\n");
+			bld.append("boolean b = (myInt <= 0);\n"); //$NON-NLS-1$
+			bld.append("boolean b2 = (!isEnabled && !isValid);\n"); //$NON-NLS-1$
 		} else {
-			bld.append("boolean b = !(myInt > 0);\n");
-			bld.append("boolean b2 = !(isEnabled || isValid);\n");
+			bld.append("boolean b = !(myInt > 0);\n"); //$NON-NLS-1$
+			bld.append("boolean b2 = !(isEnabled || isValid);\n"); //$NON-NLS-1$
 		}
 
 		return bld.toString();

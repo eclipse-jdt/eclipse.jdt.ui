@@ -83,19 +83,18 @@ public class VarCleanUp extends AbstractMultiFix {
 		return new String[0];
 	}
 
-	@SuppressWarnings("nls")
 	@Override
 	public String getPreview() {
 		StringBuilder bld= new StringBuilder();
-		bld.append("\n");
+		bld.append("\n"); //$NON-NLS-1$
 		if (isEnabled(CleanUpConstants.USE_VAR)) {
-			bld.append("var number = 0;\n");
-			bld.append("var list = new ArrayList<String>();\n");
-			bld.append("var map = new HashMap<Integer, String>();\n");
+			bld.append("var number = 0;\n"); //$NON-NLS-1$
+			bld.append("var list = new ArrayList<String>();\n"); //$NON-NLS-1$
+			bld.append("var map = new HashMap<Integer, String>();\n"); //$NON-NLS-1$
 		} else {
-			bld.append("int number = 0;\n");
-			bld.append("ArrayList<String> list = new ArrayList<String>();\n");
-			bld.append("HashMap<Integer, String> map = new HashMap<>();\n");
+			bld.append("int number = 0;\n"); //$NON-NLS-1$
+			bld.append("ArrayList<String> list = new ArrayList<String>();\n"); //$NON-NLS-1$
+			bld.append("HashMap<Integer, String> map = new HashMap<>();\n"); //$NON-NLS-1$
 		}
 
 		return bld.toString();

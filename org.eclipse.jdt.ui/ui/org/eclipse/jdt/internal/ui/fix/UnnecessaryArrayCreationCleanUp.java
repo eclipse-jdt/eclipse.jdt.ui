@@ -61,20 +61,19 @@ public class UnnecessaryArrayCreationCleanUp extends AbstractMultiFix {
 		return new String[0];
 	}
 
-	@SuppressWarnings("nls")
 	@Override
 	public String getPreview() {
 		StringBuilder bld= new StringBuilder();
-		bld.append("\n");
-		bld.append("public class Foo {\n");
-		bld.append("    public static void bar() {\n");
+		bld.append("\n"); //$NON-NLS-1$
+		bld.append("public class Foo {\n"); //$NON-NLS-1$
+		bld.append("    public static void bar() {\n"); //$NON-NLS-1$
 		if (isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_ARRAY_CREATION)) {
-			bld.append("        List k= ArrayList.asList(\"a\", \"b\", \"c\");\n");
+			bld.append("        List k= ArrayList.asList(\"a\", \"b\", \"c\");\n"); //$NON-NLS-1$
 		} else {
-			bld.append("        List k= ArrayList.asList(new String[] {\"a\", \"b\", \"c\"});\n");
+			bld.append("        List k= ArrayList.asList(new String[] {\"a\", \"b\", \"c\"});\n"); //$NON-NLS-1$
 		}
-		bld.append("    }\n");
-		bld.append("}\n");
+		bld.append("    }\n"); //$NON-NLS-1$
+		bld.append("}\n"); //$NON-NLS-1$
 
 		return bld.toString();
 	}

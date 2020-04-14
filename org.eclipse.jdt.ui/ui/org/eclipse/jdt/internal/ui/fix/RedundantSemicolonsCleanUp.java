@@ -85,27 +85,26 @@ public class RedundantSemicolonsCleanUp extends AbstractMultiFix implements ICle
 		return new String[0];
 	}
 
-	@SuppressWarnings("nls")
 	@Override
 	public String getPreview() {
 		StringBuilder buf= new StringBuilder();
-		buf.append("\n");
-		buf.append("enum color {\n");
-		buf.append("  red, yellow, green\n");
+		buf.append("\n"); //$NON-NLS-1$
+		buf.append("enum color {\n"); //$NON-NLS-1$
+		buf.append("  red, yellow, green\n"); //$NON-NLS-1$
 		if (isEnabled(CleanUpConstants.REMOVE_REDUNDANT_SEMICOLONS)) {
-			buf.append("}\n");
+			buf.append("}\n"); //$NON-NLS-1$
 		} else {
-			buf.append("};\n");
+			buf.append("};\n"); //$NON-NLS-1$
 		}
-		buf.append("\npublic class IFoo {\n");
+		buf.append("\npublic class IFoo {\n"); //$NON-NLS-1$
 		if (isEnabled(CleanUpConstants.REMOVE_REDUNDANT_SEMICOLONS)) {
-			buf.append("  int a= 3;\n");
-			buf.append("  public void foo() {}\n");
-			buf.append("}\n");
+			buf.append("  int a= 3;\n"); //$NON-NLS-1$
+			buf.append("  public void foo() {}\n"); //$NON-NLS-1$
+			buf.append("}\n"); //$NON-NLS-1$
 		} else {
-			buf.append("  int a= 3;;\n");
-			buf.append("  public void foo() {;};\n");
-			buf.append("};\n");
+			buf.append("  int a= 3;;\n"); //$NON-NLS-1$
+			buf.append("  public void foo() {;};\n"); //$NON-NLS-1$
+			buf.append("};\n"); //$NON-NLS-1$
 		}
 
 		return buf.toString();

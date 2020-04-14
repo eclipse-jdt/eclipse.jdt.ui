@@ -70,17 +70,16 @@ public class LazyLogicalCleanUp extends AbstractMultiFix {
 		return new String[0];
 	}
 
-	@SuppressWarnings("nls")
 	@Override
 	public String getPreview() {
 		StringBuilder bld= new StringBuilder();
-		bld.append("\n");
+		bld.append("\n"); //$NON-NLS-1$
 		if (isEnabled(CleanUpConstants.USE_LAZY_LOGICAL_OPERATOR)) {
-			bld.append("boolean b = isEnabled || isValid;\n");
-			bld.append("boolean b2 = isEnabled && isValid;\n");
+			bld.append("boolean b = isEnabled || isValid;\n"); //$NON-NLS-1$
+			bld.append("boolean b2 = isEnabled && isValid;\n"); //$NON-NLS-1$
 		} else {
-			bld.append("boolean b = isEnabled | isValid;\n");
-			bld.append("boolean b2 = isEnabled & isValid;\n");
+			bld.append("boolean b = isEnabled | isValid;\n"); //$NON-NLS-1$
+			bld.append("boolean b2 = isEnabled & isValid;\n"); //$NON-NLS-1$
 		}
 
 		return bld.toString();

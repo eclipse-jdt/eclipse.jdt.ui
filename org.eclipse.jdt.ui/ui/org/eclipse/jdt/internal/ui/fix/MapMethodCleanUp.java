@@ -74,30 +74,29 @@ public class MapMethodCleanUp extends AbstractMultiFix {
 		return new String[0];
 	}
 
-	@SuppressWarnings("nls")
 	@Override
 	public String getPreview() {
 		StringBuilder bld= new StringBuilder();
-		bld.append("\n");
+		bld.append("\n"); //$NON-NLS-1$
 		if (isEnabled(CleanUpConstants.USE_DIRECTLY_MAP_METHOD)) {
-			bld.append("int x = map.size();\n");
-			bld.append("if (map.containsKey(\"hello\")) {\n");
-			bld.append("    map.remove(\"hello\");\n");
-			bld.append("}\n");
-			bld.append("map.clear();\n");
-			bld.append("map.clear();\n");
-			bld.append("if (map.isEmpty()) {\n");
+			bld.append("int x = map.size();\n"); //$NON-NLS-1$
+			bld.append("if (map.containsKey(\"hello\")) {\n"); //$NON-NLS-1$
+			bld.append("    map.remove(\"hello\");\n"); //$NON-NLS-1$
+			bld.append("}\n"); //$NON-NLS-1$
+			bld.append("map.clear();\n"); //$NON-NLS-1$
+			bld.append("map.clear();\n"); //$NON-NLS-1$
+			bld.append("if (map.isEmpty()) {\n"); //$NON-NLS-1$
 		} else {
-			bld.append("int x = map.keySet().size();\n");
-			bld.append("if (map.keySet().contains(\"hello\")) {\n");
-			bld.append("    map.keySet().remove(\"hello\");\n");
-			bld.append("}\n");
-			bld.append("map.keySet().clear();\n");
-			bld.append("map.values().clear();\n");
-			bld.append("if (map.keySet().isEmpty()) {\n");
+			bld.append("int x = map.keySet().size();\n"); //$NON-NLS-1$
+			bld.append("if (map.keySet().contains(\"hello\")) {\n"); //$NON-NLS-1$
+			bld.append("    map.keySet().remove(\"hello\");\n"); //$NON-NLS-1$
+			bld.append("}\n"); //$NON-NLS-1$
+			bld.append("map.keySet().clear();\n"); //$NON-NLS-1$
+			bld.append("map.values().clear();\n"); //$NON-NLS-1$
+			bld.append("if (map.keySet().isEmpty()) {\n"); //$NON-NLS-1$
 		}
-		bld.append("    x++;\n");
-		bld.append("}\n");
+		bld.append("    x++;\n"); //$NON-NLS-1$
+		bld.append("}\n"); //$NON-NLS-1$
 
 		return bld.toString();
 	}
