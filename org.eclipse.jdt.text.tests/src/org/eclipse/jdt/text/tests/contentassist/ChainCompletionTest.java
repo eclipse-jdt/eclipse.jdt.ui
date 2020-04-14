@@ -20,9 +20,11 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.swt.SWT;
 
 import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.TextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 
 import org.eclipse.ui.IEditorPart;
 
@@ -606,6 +608,46 @@ public class ChainCompletionTest extends TestCase {
 		assertTrue(proposals.size() > 0);
 	}
 
+	public void testNoTriggerCompletionInvocation() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n" +
+				"\n" +
+				"import java.util.Iterator;\n" +
+				"import java.util.List;\n" +
+				"\n" +
+				"public class NoTriggerCompletionInvocation {\n" +
+				"  public void method(){\n" +
+				"    List longVariableName, longVariableName2;\n" +
+				"    Iterator it = longVariableName$\n" +
+				"    String foo = null;\n" +
+				"  }\n" +
+				"}");
+
+		int completionIndex= getCompletionIndex(buf);
+		ICompilationUnit cu= getCompilationUnit(pkg, buf, "NoTriggerCompletionInvocation.java");
+
+		List<ICompletionProposal> proposals= computeCompletionProposals(cu, completionIndex);
+		String expectedProposal= "longVariableName.iterator() - 2 elements";
+		assertProposalsExist(Arrays.asList(expectedProposal), proposals);
+
+		ICompletionProposal proposal= proposals.stream().filter(p -> p.getDisplayString().equals(expectedProposal)).findFirst().get();
+		IDocument doc= new Document(buf.toString().replace("$", ""));
+		applyProposal(proposal, doc, cu, completionIndex);
+		String expectedContent = "package test;\n" +
+				"\n" +
+				"import java.util.Iterator;\n" +
+				"import java.util.List;\n" +
+				"\n" +
+				"public class NoTriggerCompletionInvocation {\n" +
+				"  public void method(){\n" +
+				"    List longVariableName, longVariableName2;\n" +
+				"    Iterator it = longVariableName.iterator()\n" +
+				"    String foo = null;\n" +
+				"  }\n" +
+				"}";
+		assertEquals(expectedContent,doc.get());
+	}
+
 	private ICompilationUnit getCompilationUnit(IPackageFragment pack, StringBuffer buf, String name) throws JavaModelException {
 		return pack.createCompilationUnit(name, buf.toString().replace("$", ""), false, null);
 	}
@@ -623,6 +665,15 @@ public class ChainCompletionTest extends TestCase {
 		JavaContentAssistInvocationContext ctx= new JavaContentAssistInvocationContext(viewer, completionIndex, editor);
 
 		return comp.computeCompletionProposals(ctx, null);
+	}
+
+	private void applyProposal (ICompletionProposal prop, IDocument doc, ICompilationUnit cu, int completionIndex) throws Exception {
+		IEditorPart editor= EditorUtility.openInEditor(cu);
+		ITextViewer viewer= new TextViewer(editor.getSite().getShell(), SWT.NONE);
+		viewer.setDocument(doc);
+		if (prop instanceof ICompletionProposalExtension2) {
+			((ICompletionProposalExtension2)prop).apply(viewer, '\0', 0, completionIndex);
+		}
 	}
 
 	private void assertProposalsExist(List<String> expected, List<ICompletionProposal> proposals) {

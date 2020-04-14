@@ -25,6 +25,7 @@ import org.eclipse.jface.text.templates.DocumentTemplateContext;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateContextType;
 
+import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.Signature;
 
@@ -155,8 +156,9 @@ public final class ChainCompletionTemplateBuilder {
 	private static JavaContext createJavaContext(final JavaContentAssistInvocationContext contentAssistContext) {
 		final ContextTypeRegistry templateContextRegistry= JavaPlugin.getDefault().getTemplateContextRegistry();
 		final TemplateContextType templateContextType= templateContextRegistry.getContextType(JavaContextType.ID_ALL);
+		final CompletionContext ctx= contentAssistContext.getCoreContext();
 		final JavaContext javaTemplateContext= new JavaContext(templateContextType, contentAssistContext.getDocument(),
-				contentAssistContext.getInvocationOffset(), contentAssistContext.getCoreContext().getToken().length,
+				ctx.getTokenStart(), ctx.getToken().length,
 				contentAssistContext.getCompilationUnit());
 		javaTemplateContext.setForceEvaluation(true);
 		return javaTemplateContext;
