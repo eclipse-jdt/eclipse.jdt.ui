@@ -2541,7 +2541,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		 *         <code>tagName</code>, or <code>null</code>.
 		 */
 		private TagElement findTagElementToInsertAfter(List<TagElement> tags, String tagName) {
-			List<String> tagOrder= Arrays.asList(new String[] {
+			List<String> tagOrder= Arrays.asList(
 					TagElement.TAG_AUTHOR,
 					TagElement.TAG_VERSION,
 					TagElement.TAG_PARAM,
@@ -2555,7 +2555,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 					TagElement.TAG_SERIALDATA,
 					TagElement.TAG_DEPRECATED,
 					TagElement.TAG_VALUE
-			});
+			);
 			int goalOrdinal= tagOrder.indexOf(tagName);
 			if (goalOrdinal == -1) // unknown tag -> to end
 				return (tags.isEmpty()) ? null : (TagElement) tags.get(tags.size());

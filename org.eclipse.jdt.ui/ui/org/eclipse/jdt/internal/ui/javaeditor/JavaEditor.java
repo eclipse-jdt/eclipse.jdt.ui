@@ -2810,14 +2810,14 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	protected void setActionsActivated(boolean state) {
 		Method method= null;
 		try {
-			method= AbstractTextEditor.class.getDeclaredMethod("setActionActivation", new Class[] { boolean.class }); //$NON-NLS-1$
+			method= AbstractTextEditor.class.getDeclaredMethod("setActionActivation", boolean.class); //$NON-NLS-1$
 		} catch (SecurityException | NoSuchMethodException ex) {
 			JavaPlugin.log(ex);
 		}
 		Assert.isNotNull(method);
 		method.setAccessible(true);
 		try {
-			method.invoke(this, new Object[] { Boolean.valueOf(state) });
+			method.invoke(this, Boolean.valueOf(state));
 		} catch (IllegalArgumentException | InvocationTargetException | IllegalAccessException ex) {
 			JavaPlugin.log(ex);
 		}

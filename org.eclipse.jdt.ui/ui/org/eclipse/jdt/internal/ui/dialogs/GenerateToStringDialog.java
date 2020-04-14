@@ -810,8 +810,7 @@ public class GenerateToStringDialog extends SourceActionDialog {
 				IType type= findType(builderSettings.className);
 
 				if (type == null || !type.exists()) {
-					return new StatusInfo(IStatus.ERROR, MessageFormat.format(JavaUIMessages.GenerateToStringDialog_customBuilderConfig_invalidClassError,
-							new Object[] { builderSettings.className }));
+					return new StatusInfo(IStatus.ERROR, MessageFormat.format(JavaUIMessages.GenerateToStringDialog_customBuilderConfig_invalidClassError, builderSettings.className));
 				}
 
 				IStatus typeValidation= validateBuilderType(type);
@@ -819,16 +818,13 @@ public class GenerateToStringDialog extends SourceActionDialog {
 					return typeValidation;
 
 				if (!getAppendMethodSuggestions(type).contains(builderSettings.appendMethod))
-					return new StatusInfo(IStatus.ERROR, MessageFormat.format(JavaUIMessages.GenerateToStringDialog_customBuilderConfig_invalidAppendMethodError,
-							new Object[] { builderSettings.appendMethod }));
+					return new StatusInfo(IStatus.ERROR, MessageFormat.format(JavaUIMessages.GenerateToStringDialog_customBuilderConfig_invalidAppendMethodError, builderSettings.appendMethod));
 
 				if (!getResultMethodSuggestions(type).contains(builderSettings.resultMethod))
-					return new StatusInfo(IStatus.ERROR, MessageFormat.format(JavaUIMessages.GenerateToStringDialog_customBuilderConfig_invalidResultMethodError,
-							new Object[] { builderSettings.resultMethod }));
+					return new StatusInfo(IStatus.ERROR, MessageFormat.format(JavaUIMessages.GenerateToStringDialog_customBuilderConfig_invalidResultMethodError, builderSettings.resultMethod));
 
 				if (!isValidJavaIdentifier(builderSettings.variableName))
-					return new StatusInfo(IStatus.ERROR, MessageFormat.format(JavaUIMessages.GenerateToStringDialog_customBuilderConfig_invalidVariableNameError,
-							new Object[] { builderSettings.variableName }));
+					return new StatusInfo(IStatus.ERROR, MessageFormat.format(JavaUIMessages.GenerateToStringDialog_customBuilderConfig_invalidVariableNameError, builderSettings.variableName));
 
 			} catch (JavaModelException e) {
 				return new StatusInfo(IStatus.WARNING, JavaUIMessages.GenerateToStringDialog_customBuilderConfig_dataValidationError);

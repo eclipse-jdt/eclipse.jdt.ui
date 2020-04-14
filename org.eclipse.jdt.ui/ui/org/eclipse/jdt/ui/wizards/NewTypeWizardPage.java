@@ -2081,7 +2081,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 
 		IPackageFragment pack= getPackageFragment();
 		if (pack != null) {
-			dialog.setInitialSelections(new Object[] { pack });
+			dialog.setInitialSelections(pack);
 		}
 
 		if (dialog.open() == Window.OK) {

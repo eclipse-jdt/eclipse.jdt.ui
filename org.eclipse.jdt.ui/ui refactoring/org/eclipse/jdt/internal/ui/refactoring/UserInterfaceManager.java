@@ -50,8 +50,8 @@ public class UserInterfaceManager {
 		try {
 			UserInterfaceStarter starter= tuple.starter.newInstance();
 			Class<? extends RefactoringWizard> wizardClass= tuple.wizard;
-			Constructor<? extends RefactoringWizard> constructor= wizardClass.getConstructor(new Class[] {Refactoring.class});
-			RefactoringWizard wizard= constructor.newInstance(new Object[] {refactoring});
+			Constructor<? extends RefactoringWizard> constructor= wizardClass.getConstructor(Refactoring.class);
+			RefactoringWizard wizard= constructor.newInstance(refactoring);
 			starter.initialize(wizard);
 			return starter;
 		} catch (NoSuchMethodException | IllegalAccessException | InstantiationException | IllegalArgumentException | InvocationTargetException e) {

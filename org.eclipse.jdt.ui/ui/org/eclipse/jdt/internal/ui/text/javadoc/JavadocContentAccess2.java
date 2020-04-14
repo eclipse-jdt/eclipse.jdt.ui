@@ -615,7 +615,7 @@ public class JavadocContentAccess2 {
 	private static String createMethodInTypeLinks(IMethod overridden) {
 		CharSequence methodLink= createSimpleMemberLink(overridden);
 		CharSequence typeLink= createSimpleMemberLink(overridden.getDeclaringType());
-		String methodInType= MessageFormat.format(JavaDocMessages.JavaDoc2HTMLTextReader_method_in_type, new Object[] { methodLink, typeLink });
+		String methodInType= MessageFormat.format(JavaDocMessages.JavaDoc2HTMLTextReader_method_in_type, methodLink, typeLink);
 		return methodInType;
 	}
 

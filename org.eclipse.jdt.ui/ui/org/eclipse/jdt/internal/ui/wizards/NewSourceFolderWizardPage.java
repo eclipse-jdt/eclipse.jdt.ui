@@ -572,7 +572,7 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 		dialog.setTitle(NewWizardMessages.NewSourceFolderWizardPage_ChooseProjectDialog_title);
 		dialog.setMessage(NewWizardMessages.NewSourceFolderWizardPage_ChooseProjectDialog_description);
 		dialog.setElements(projects);
-		dialog.setInitialSelections(new Object[] { fCurrJProject });
+		dialog.setInitialSelections(fCurrJProject);
 		dialog.setHelpAvailable(false);
 		if (dialog.open() == Window.OK) {
 			return (IJavaProject) dialog.getFirstResult();

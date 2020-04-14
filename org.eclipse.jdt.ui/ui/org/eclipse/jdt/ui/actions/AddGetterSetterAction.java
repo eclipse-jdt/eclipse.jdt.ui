@@ -1039,8 +1039,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			label.setLayoutData(gd);
 
 			final Combo combo= new Combo(composite, SWT.READ_ONLY);
-			combo.setItems(new String[] { ActionMessages.GetterSetterTreeSelectionDialog_alpha_pair_sort,
-					ActionMessages.GetterSetterTreeSelectionDialog_alpha_method_sort});
+			combo.setItems(ActionMessages.GetterSetterTreeSelectionDialog_alpha_pair_sort, ActionMessages.GetterSetterTreeSelectionDialog_alpha_method_sort);
 			final int methodIndex= 1; // Hard-coded. Change this if the
 			// list gets more complicated.
 			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=38400

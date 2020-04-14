@@ -496,7 +496,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 		dialog.setTitle(JarPackagerMessages.JarManifestWizardPage_mainTypeSelectionDialog_title);
 		dialog.setMessage(JarPackagerMessages.JarManifestWizardPage_mainTypeSelectionDialog_message);
 		if (fJarPackage.getManifestMainClass() != null)
-			dialog.setInitialSelections(new Object[] {fJarPackage.getManifestMainClass()});
+			dialog.setInitialSelections(fJarPackage.getManifestMainClass());
 
 		if (dialog.open() == Window.OK) {
 			fJarPackage.setManifestMainClass((IType)dialog.getResult()[0]);

@@ -1148,7 +1148,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		}
 
 		private String getFormattedLabel(String name) {
-			return MessageFormat.format(JavaUIMessages.FilteredTypesSelectionDialog_library_name_format, new Object[] { name });
+			return MessageFormat.format(JavaUIMessages.FilteredTypesSelectionDialog_library_name_format, name);
 		}
 
 		@Override
