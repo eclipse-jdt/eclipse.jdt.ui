@@ -16,6 +16,7 @@ package org.eclipse.jdt.ui.tests.quickfix;
 import java.util.ArrayList;
 
 import org.junit.After;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -91,6 +92,7 @@ public class QuickFixTest14 extends QuickFixTest {
 		assertProposalExists(proposals, label2);
 	}
 
+	@Ignore("See bug 562103 comment 4")
 	@Test
 	public void testGetNeedHigherComplianceProposalsAndEnablePreviewsProposal() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
