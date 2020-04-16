@@ -155,6 +155,75 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="ui/org/eclipse/jdt/internal/ui/text/correction/JavadocTagsSubProcessor.java" type="org.eclipse.jdt.internal.ui.text.correction.JavadocTagsSubProcessor">
+        <filter comment="For Java 14 Enable Preview feature" id="623939596">
+            <message_arguments>
+                <message_argument value="RecordDeclaration"/>
+                <message_argument value="JavadocTagsSubProcessor"/>
+                <message_argument value="RECORD_COMPONENTS_PROPERTY"/>
+            </message_arguments>
+        </filter>
+        <filter comment="For Java 14 Enable Preview feature" id="623939596">
+            <message_arguments>
+                <message_argument value="RecordDeclaration"/>
+                <message_argument value="JavadocTagsSubProcessor"/>
+                <message_argument value="TYPE_PARAMETERS_PROPERTY"/>
+            </message_arguments>
+        </filter>
+        <filter comment="For Java 14 Enable Preview feature" id="640712815">
+            <message_arguments>
+                <message_argument value="RecordDeclaration"/>
+                <message_argument value="JavadocTagsSubProcessor"/>
+                <message_argument value="recordComponents()"/>
+            </message_arguments>
+        </filter>
+        <filter comment="For Java 14 Enable Preview feature" id="640712815">
+            <message_arguments>
+                <message_argument value="RecordDeclaration"/>
+                <message_argument value="JavadocTagsSubProcessor"/>
+                <message_argument value="typeParameters()"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="ui/org/eclipse/jdt/internal/ui/text/correction/JavadocTagsSubProcessor.java" type="org.eclipse.jdt.internal.ui.text.correction.JavadocTagsSubProcessor$AddAllMissingJavadocTagsProposal">
+        <filter comment="For Java 14 Enable Preview feature" id="640712815">
+            <message_arguments>
+                <message_argument value="ASTNode"/>
+                <message_argument value="AddAllMissingJavadocTagsProposal"/>
+                <message_argument value="getAST()"/>
+            </message_arguments>
+        </filter>
+        <filter comment="For Java 14 Enable Preview feature" id="640712815">
+            <message_arguments>
+                <message_argument value="BodyDeclaration"/>
+                <message_argument value="AddAllMissingJavadocTagsProposal"/>
+                <message_argument value="getJavadoc()"/>
+            </message_arguments>
+        </filter>
+        <filter comment="For Java 14 Enable Preview feature" id="640712815">
+            <message_arguments>
+                <message_argument value="RecordDeclaration"/>
+                <message_argument value="AddAllMissingJavadocTagsProposal"/>
+                <message_argument value="recordComponents()"/>
+            </message_arguments>
+        </filter>
+        <filter comment="For Java 14 Enable Preview feature" id="640712815">
+            <message_arguments>
+                <message_argument value="RecordDeclaration"/>
+                <message_argument value="AddAllMissingJavadocTagsProposal"/>
+                <message_argument value="typeParameters()"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="ui/org/eclipse/jdt/internal/ui/text/correction/JavadocTagsSubProcessor.java" type="org.eclipse.jdt.internal.ui.text.correction.JavadocTagsSubProcessor$AddMissingJavadocTagProposal">
+        <filter comment="For Java 14 Enable Preview feature" id="640712815">
+            <message_arguments>
+                <message_argument value="RecordDeclaration"/>
+                <message_argument value="AddMissingJavadocTagProposal"/>
+                <message_argument value="typeParameters()"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="ui/org/eclipse/jdt/internal/ui/text/correction/LocalCorrectionsSubProcessor.java" type="org.eclipse.jdt.internal.ui.text.correction.LocalCorrectionsSubProcessor">
         <filter comment="For Java 13 Enable Preview feature" id="623939596">
             <message_arguments>

@@ -119,4 +119,154 @@ public class JavadocQuickFixTest14 extends QuickFixTest {
 		String expected= buf.toString();
 		assertEqualString(preview1, expected);
 	}
+
+	@Test
+	public void testMissingRecordCommentWithTypeParam() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test;\n\n");
+		buf.append("public record Rec1<N>(int a, int b) {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack.createCompilationUnit("Rec1.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuilder();
+		buf.append("package test;\n\n");
+		buf.append("/**\n");
+		buf.append(" * A record comment.\n");
+		buf.append(" *\n");
+		buf.append(" * @param <N>\n");
+		buf.append(" * @param a\n");
+		buf.append(" * @param b\n");
+		buf.append(" */\n");
+		buf.append("public record Rec1<N>(int a, int b) {\n");
+		buf.append("}\n");
+
+		String expected= buf.toString();
+		assertEqualString(preview1, expected);
+	}
+
+	@Test
+	public void testMissingRecordCommentTag() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test;\n\n");
+		buf.append("/**\n");
+		buf.append(" * A record comment.\n");
+		buf.append(" *\n");
+		buf.append(" * @param a\n");
+		buf.append(" */\n");
+		buf.append("public record Rec1(int a, int b) {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack.createCompilationUnit("Rec1.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuilder();
+		buf.append("package test;\n\n");
+		buf.append("/**\n");
+		buf.append(" * A record comment.\n");
+		buf.append(" *\n");
+		buf.append(" * @param a\n");
+		buf.append(" * @param b \n");
+		buf.append(" */\n");
+		buf.append("public record Rec1(int a, int b) {\n");
+		buf.append("}\n");
+
+		String expected= buf.toString();
+		assertEqualString(preview1, expected);
+	}
+
+
+	@Test
+	public void testMissingAllRecordCommentTags() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test;\n\n");
+		buf.append("/**\n");
+		buf.append(" * A record comment.\n");
+		buf.append(" *\n");
+		buf.append(" */\n");
+		buf.append("public record Rec1(int a, int b) {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack.createCompilationUnit("Rec1.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
+
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuilder();
+		buf.append("package test;\n\n");
+		buf.append("/**\n");
+		buf.append(" * A record comment.\n");
+		buf.append(" * @param a \n");
+		buf.append(" * @param b \n");
+		buf.append(" *\n");
+		buf.append(" */\n");
+		buf.append("public record Rec1(int a, int b) {\n");
+		buf.append("}\n");
+
+		String expected= buf.toString();
+		assertEqualString(preview1, expected);
+	}
+
+	@Test
+	public void testMissingTypeParamTag() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test;\n\n");
+		buf.append("/**\n");
+		buf.append(" * A record comment.\n");
+		buf.append(" * @param a \n");
+		buf.append(" * @param b \n");
+		buf.append(" *\n");
+		buf.append(" */\n");
+		buf.append("public record Rec1<N>(int a, int b) {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack.createCompilationUnit("Rec1.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuilder();
+		buf.append("package test;\n\n");
+		buf.append("/**\n");
+		buf.append(" * A record comment.\n");
+		buf.append(" * @param <N> \n");
+		buf.append(" * @param a \n");
+		buf.append(" * @param b \n");
+		buf.append(" *\n");
+		buf.append(" */\n");
+		buf.append("public record Rec1<N>(int a, int b) {\n");
+		buf.append("}\n");
+
+		String expected= buf.toString();
+		assertEqualString(preview1, expected);
+	}
 }

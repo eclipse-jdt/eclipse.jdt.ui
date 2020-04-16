@@ -339,17 +339,31 @@ public class JavadocTagsSubProcessor {
 				newTag.setTagName(TagElement.TAG_PARAM);
 				newTag.fragments().add(ast.newSimpleName(name));
 
-				MethodDeclaration methodDeclaration= (MethodDeclaration) bodyDecl;
-				List<SingleVariableDeclaration> params= methodDeclaration.parameters();
+				if (bodyDecl instanceof MethodDeclaration) {
+					MethodDeclaration methodDeclaration= (MethodDeclaration) bodyDecl;
+					List<SingleVariableDeclaration> params= methodDeclaration.parameters();
 
-				Set<String> sameKindLeadingNames= getPreviousParamNames(params, decl);
+					Set<String> sameKindLeadingNames= getPreviousParamNames(params, decl);
 
-				List<TypeParameter> typeParams= methodDeclaration.typeParameters();
-				for (TypeParameter typeParam : typeParams) {
-					String curr= '<' + typeParam.getName().getIdentifier() + '>';
-					sameKindLeadingNames.add(curr);
+					List<TypeParameter> typeParams= methodDeclaration.typeParameters();
+					for (TypeParameter typeParam : typeParams) {
+						String curr= '<' + typeParam.getName().getIdentifier() + '>';
+						sameKindLeadingNames.add(curr);
+					}
+					insertTag(tagsRewriter, newTag, sameKindLeadingNames);
+				} else if (bodyDecl instanceof RecordDeclaration) {
+					RecordDeclaration recordDeclaration= (RecordDeclaration) bodyDecl;
+					List<SingleVariableDeclaration> params= recordDeclaration.recordComponents();
+
+					Set<String> sameKindLeadingNames= getPreviousParamNames(params, decl);
+
+					List<TypeParameter> typeParams= recordDeclaration.typeParameters();
+					for (TypeParameter typeParam : typeParams) {
+						String curr= '<' + typeParam.getName().getIdentifier() + '>';
+						sameKindLeadingNames.add(curr);
+					}
+					insertTag(tagsRewriter, newTag, sameKindLeadingNames);
 				}
-				insertTag(tagsRewriter, newTag, sameKindLeadingNames);
 		 	} else if (location == TypeParameter.NAME_PROPERTY) {
 		 		// type parameter
 		 		TypeParameter typeParam= (TypeParameter) missingNode.getParent();
@@ -363,6 +377,8 @@ public class JavadocTagsSubProcessor {
 				List<TypeParameter> params;
 				if (bodyDecl instanceof TypeDeclaration) {
 					params= ((TypeDeclaration) bodyDecl).typeParameters();
+				} else if (bodyDecl instanceof RecordDeclaration) {
+					params= ((RecordDeclaration) bodyDecl).typeParameters();
 				} else {
 					params= ((MethodDeclaration) bodyDecl).typeParameters();
 				}
@@ -411,6 +427,8 @@ public class JavadocTagsSubProcessor {
 			ASTRewrite rewrite= ASTRewrite.create(fDecl.getAST());
 			if (fDecl instanceof MethodDeclaration) {
 				insertAllMissingMethodTags(rewrite, (MethodDeclaration) fDecl);
+			} else if (fDecl instanceof RecordDeclaration) {
+				insertAllMissingRecordTypeTags(rewrite, (RecordDeclaration) fDecl);
 			} else {
 				insertAllMissingTypeTags(rewrite, (TypeDeclaration) fDecl);
 			}
@@ -503,6 +521,42 @@ public class JavadocTagsSubProcessor {
 			}
 		}
 
+		private void insertAllMissingRecordTypeTags(ASTRewrite rewriter, RecordDeclaration recDecl) {
+			AST ast= recDecl.getAST();
+			Javadoc javadoc= recDecl.getJavadoc();
+			ListRewrite tagsRewriter= rewriter.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY);
+
+			List<SingleVariableDeclaration> recComps= recDecl.recordComponents();
+			for (int i= recComps.size() - 1; i >= 0; i--) {
+				SingleVariableDeclaration decl= recComps.get(i);
+				String name= decl.getName().getIdentifier();
+				if (findTag(javadoc, TagElement.TAG_PARAM, name) == null) {
+					TagElement newTag= ast.newTagElement();
+					newTag.setTagName(TagElement.TAG_PARAM);
+					TextElement text= ast.newTextElement();
+					text.setText(name);
+					newTag.fragments().add(text);
+					insertTabStop(rewriter, newTag.fragments(), "recComps" + i); //$NON-NLS-1$
+					insertTag(tagsRewriter, newTag, getPreviousParamNames(recComps, decl));
+				}
+			}
+
+			List<TypeParameter> typeParams= recDecl.typeParameters();
+			for (int i= typeParams.size() - 1; i >= 0; i--) {
+				TypeParameter decl= typeParams.get(i);
+				String name= '<' + decl.getName().getIdentifier() + '>';
+				if (findTag(javadoc, TagElement.TAG_PARAM, name) == null) {
+					TagElement newTag= ast.newTagElement();
+					newTag.setTagName(TagElement.TAG_PARAM);
+					TextElement text= ast.newTextElement();
+					text.setText(name);
+					newTag.fragments().add(text);
+					insertTabStop(rewriter, newTag.fragments(), "typeParam" + i); //$NON-NLS-1$
+					insertTag(tagsRewriter, newTag, getPreviousTypeParamNames(typeParams, decl));
+				}
+			}
+		}
+
 		private void insertTabStop(ASTRewrite rewriter, List<ASTNode> fragments, String linkedName) {
 			TextElement textElement= rewriter.getAST().newTextElement();
 			textElement.setText(""); //$NON-NLS-1$
@@ -549,13 +603,17 @@ public class JavadocTagsSubProcessor {
 
 	 		if (location == SingleVariableDeclaration.NAME_PROPERTY) {
 	 			label= CorrectionMessages.JavadocTagsSubProcessor_addjavadoc_paramtag_description;
-	 			if (node.getParent().getLocationInParent() != MethodDeclaration.PARAMETERS_PROPERTY) {
+	 			StructuralPropertyDescriptor propDesc= node.getParent().getLocationInParent();
+	 			if (propDesc != MethodDeclaration.PARAMETERS_PROPERTY
+	 					&& propDesc != RecordDeclaration.RECORD_COMPONENTS_PROPERTY) {
 	 				return; // paranoia checks
 	 			}
 	 		} else if (location == TypeParameter.NAME_PROPERTY) {
 	 			label= CorrectionMessages.JavadocTagsSubProcessor_addjavadoc_paramtag_description;
 	 			StructuralPropertyDescriptor parentLocation= node.getParent().getLocationInParent();
-	 			if (parentLocation != MethodDeclaration.TYPE_PARAMETERS_PROPERTY && parentLocation != TypeDeclaration.TYPE_PARAMETERS_PROPERTY) {
+	 			if (parentLocation != MethodDeclaration.TYPE_PARAMETERS_PROPERTY
+	 					&& parentLocation != TypeDeclaration.TYPE_PARAMETERS_PROPERTY
+	 					&& parentLocation != RecordDeclaration.TYPE_PARAMETERS_PROPERTY) {
 	 				return; // paranoia checks
 	 			}
 	 		} else if (location == MethodDeclaration.RETURN_TYPE2_PROPERTY) {
