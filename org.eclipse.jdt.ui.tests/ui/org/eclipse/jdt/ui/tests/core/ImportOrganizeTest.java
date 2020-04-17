@@ -79,10 +79,10 @@ public class ImportOrganizeTest extends CoreTests {
 		return new IChooseImportQuery() {
 			@Override
 			public TypeNameMatch[] chooseImports(TypeNameMatch[][] openChoices, ISourceRange[] ranges) {
-				assertTrue(name + "-query-nchoices1", choices.length == openChoices.length);
-				assertTrue(name + "-query-nchoices2", nEntries.length == openChoices.length);
+				assertEquals(name + "-query-nchoices1", choices.length, openChoices.length);
+				assertEquals(name + "-query-nchoices2", nEntries.length, openChoices.length);
 				for (int i= 0; i < nEntries.length; i++) {
-					assertTrue(name + "-query-cnt" + i, openChoices[i].length == nEntries[i]);
+					assertEquals(name + "-query-cnt" + i, openChoices[i].length, nEntries[i]);
 				}
 				TypeNameMatch[] res= new TypeNameMatch[openChoices.length];
 				for (int i= 0; i < openChoices.length; i++) {
@@ -114,7 +114,8 @@ public class ImportOrganizeTest extends CoreTests {
 	@Test
 	public void test1() throws Exception {
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
-		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
+		assertNotNull("junit src not found", junitSrcArchive);
+		assertTrue("junit src not found", junitSrcArchive.exists());
 
 		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
 
@@ -159,7 +160,8 @@ public class ImportOrganizeTest extends CoreTests {
 	@Test
 	public void test1WithOrder() throws Exception {
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
-		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
+		assertNotNull("junit src not found", junitSrcArchive);
+		assertTrue("junit src not found", junitSrcArchive.exists());
 
 		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
 
@@ -205,7 +207,8 @@ public class ImportOrganizeTest extends CoreTests {
 	@Test
 	public void test2() throws Exception {
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
-		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
+		assertNotNull("junit src not found", junitSrcArchive);
+		assertTrue("junit src not found", junitSrcArchive.exists());
 
 		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
 
@@ -229,7 +232,8 @@ public class ImportOrganizeTest extends CoreTests {
 	@Test
 	public void test3() throws Exception {
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
-		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
+		assertNotNull("junit src not found", junitSrcArchive);
+		assertTrue("junit src not found", junitSrcArchive.exists());
 
 		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
 
@@ -254,7 +258,8 @@ public class ImportOrganizeTest extends CoreTests {
 	@Test
 	public void test4() throws Exception {
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
-		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
+		assertNotNull("junit src not found", junitSrcArchive);
+		assertTrue("junit src not found", junitSrcArchive.exists());
 
 		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
 
@@ -982,7 +987,7 @@ public class ImportOrganizeTest extends CoreTests {
 		// unrelated project, to fill the all types cache
 		IJavaProject project2 = JavaProjectHelper.createJavaProject("TestProject2", "bin");
 		try {
-			assertTrue("rt not found", JavaProjectHelper.addRTJar(project2) != null);
+			assertNotNull("rt not found", JavaProjectHelper.addRTJar(project2));
 			IPackageFragmentRoot sourceFolder2= JavaProjectHelper.addSourceContainer(project2, "src");
 
 			IPackageFragment pack22= sourceFolder2.createPackageFragment("packx", false, null);

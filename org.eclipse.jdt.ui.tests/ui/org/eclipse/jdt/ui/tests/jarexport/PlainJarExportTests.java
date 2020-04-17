@@ -14,6 +14,7 @@
 package org.eclipse.jdt.ui.tests.jarexport;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -143,7 +144,8 @@ public class PlainJarExportTests {
 		JarPackageData data= createJarPackageData();
 
 		File classFolder= JavaTestPlugin.getDefault().getFileInPlugin(new Path("testresources/externalClassFolder/"));//$NON-NLS-1$
-		assertTrue("class folder not found", classFolder != null && classFolder.exists());//$NON-NLS-1$
+		assertNotNull("class folder not found", classFolder);//$NON-NLS-1$
+		assertTrue("class folder not found", classFolder.exists());//$NON-NLS-1$
 
 		IPackageFragmentRoot externalRoot= JavaProjectHelper.addLibrary(fProject, Path.fromOSString(classFolder.getPath()), null, null);
 

@@ -80,7 +80,8 @@ public class JavaElementPropertyTesterTest {
 		fCU= fPack.createCompilationUnit("A.java", "package org.test; class A { }", true, null);
 
 		File file= JavaTestPlugin.getDefault().getFileInPlugin(LIB);
-		assertTrue("lib not found", file != null && file.exists());
+		assertNotNull("lib not found", file);
+		assertTrue("lib not found", file.exists());
 
 		fLocalArchive= JavaProjectHelper.addLibraryWithImport(fJProject1, Path.fromOSString(file.getPath()), null, null);
 

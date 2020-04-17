@@ -14,8 +14,11 @@
 package org.eclipse.jdt.ui.tests.packageview;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 
@@ -162,28 +165,28 @@ public class ContentProviderTests3{
 	@Test
 	public void testGetParentArchive() throws Exception{
 		Object parent= fProvider.getParent(fArchiveFragmentRoot);
-		assertTrue("Wrong parent found for PackageFragmentRoot Archive with folding", parent==fJProject1);//$NON-NLS-1$
+		assertSame("Wrong parent found for PackageFragmentRoot Archive with folding", parent, fJProject1);//$NON-NLS-1$
 	}
 
 	@Test
 	public void testGetParentTopLevelFragmentInArchive() throws Exception{
 		Object expectedParent= fPackJunit;
 		Object parent= fProvider.getParent(fPackJunitSamples);
-		assertTrue("Wrong parent found for a top level PackageFragment in an Archive with folding", expectedParent.equals(parent));	//$NON-NLS-1$
+		assertEquals("Wrong parent found for a top level PackageFragment in an Archive with folding", expectedParent, parent);	//$NON-NLS-1$
 	}
 
 	@Test
 	public void testGetParentTopLevelFragment() throws Exception{
 		Object expectedParent= fRoot1;
 		Object parent= fProvider.getParent(fPack3);
-		assertTrue("Wrong parent found for a top level PackageFragment with folding", expectedParent.equals(parent)); //$NON-NLS-1$
+		assertEquals("Wrong parent found for a top level PackageFragment with folding", expectedParent, parent); //$NON-NLS-1$
 	}
 
 	@Test
 	public void testGetParentFoldedBottomFragment() throws Exception{
 		Object expectedParent= fRoot1;
 		Object parent= fProvider.getParent(fPack3);
-		assertTrue("Wrong parent found for a top level PackageFragment with folding", expectedParent.equals(parent));//$NON-NLS-1$
+		assertEquals("Wrong parent found for a top level PackageFragment with folding", expectedParent, parent);//$NON-NLS-1$
 
 	}
 
@@ -191,7 +194,7 @@ public class ContentProviderTests3{
 	public void testGetParentMidLevelFragment() throws Exception{
 		Object expectedParent= fPack3;
 		Object parent= fProvider.getParent(fPack4);
-		assertTrue("Wrong parent found for a NON top level PackageFragment with folding", expectedParent.equals(parent));//$NON-NLS-1$
+		assertEquals("Wrong parent found for a NON top level PackageFragment with folding", expectedParent, parent);//$NON-NLS-1$
 	}
 
 	@Test
@@ -207,7 +210,7 @@ public class ContentProviderTests3{
 
 		assertTrue("Refresh happened", fMyPart.hasRefreshHappened()); //$NON-NLS-1$
 		assertTrue("Correct Refresh", fMyPart.wasObjectRefreshed(fRoot1)); //$NON-NLS-1$
-		assertTrue("Single refresh", fMyPart.getRefreshedObject().size() == 1); //$NON-NLS-1$
+		assertEquals("Single refresh", 1, fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
 	}
 
 	@Test
@@ -223,10 +226,10 @@ public class ContentProviderTests3{
 		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch()) {
 		}
 
-		assertTrue("No add happened", !fMyPart.hasAddHappened()); //$NON-NLS-1$
+		assertFalse("No add happened", fMyPart.hasAddHappened()); //$NON-NLS-1$
 		assertTrue("Refresh happened", fMyPart.hasRefreshHappened()); //$NON-NLS-1$
 		assertTrue("Correct Refresh", fMyPart.wasObjectRefreshed(fRoot1)); //$NON-NLS-1$
-		assertTrue("Single refresh", fMyPart.getRefreshedObject().size() == 1); //$NON-NLS-1$
+		assertEquals("Single refresh", 1, fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
 	}
 
 	@Test
@@ -324,11 +327,12 @@ public class ContentProviderTests3{
 
 		//set up project #1 : External Jar and zip file
 		jdk= JavaProjectHelper.addVariableRTJar(fJProject1, "JRE_LIB_TEST", null, null);//$NON-NLS-1$
-		assertTrue("jdk not found", jdk != null);//$NON-NLS-1$
+		assertNotNull("jdk not found", jdk);//$NON-NLS-1$
 
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
 
-		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());//$NON-NLS-1$
+		assertNotNull("junit src not found", junitSrcArchive);//$NON-NLS-1$
+		assertTrue("junit src not found", junitSrcArchive.exists());//$NON-NLS-1$
 
 		fArchiveFragmentRoot= JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);//$NON-NLS-1$
 
@@ -358,7 +362,8 @@ public class ContentProviderTests3{
 		fCUMoneyTest= fPackJunitSamplesMoney.getCompilationUnit("MoneyTest.java");//$NON-NLS-1$
 
 		File mylibJar= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.MYLIB);
-		assertTrue("lib not found", mylibJar != null && mylibJar.exists());//$NON-NLS-1$
+		assertNotNull("lib not found", mylibJar);//$NON-NLS-1$
+		assertTrue("lib not found", mylibJar.exists());//$NON-NLS-1$
 		JavaProjectHelper.addLibraryWithImport(fJProject1, Path.fromOSString(mylibJar.getPath()), null, null);
 
 		//set up project #2: file system structure with in a source folder
@@ -407,7 +412,7 @@ public class ContentProviderTests3{
 			fMyPart.clear();
 			fProvider= (ITreeContentProvider)fMyPart.getTreeViewer().getContentProvider();
 
-		}else assertTrue("Unable to get view",false);//$NON-NLS-1$
+		}else fail("Unable to get view");//$NON-NLS-1$
 
 		assertNotNull(fProvider);
 	}

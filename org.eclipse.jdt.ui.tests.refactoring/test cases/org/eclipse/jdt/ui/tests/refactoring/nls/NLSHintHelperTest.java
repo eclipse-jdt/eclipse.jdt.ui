@@ -198,7 +198,7 @@ public class NLSHintHelperTest {
 			fJProject.getProject().refreshLocal(IResource.DEPTH_ONE, null);
 
 			IFile existentFile= ResourcesPlugin.getWorkspace().getRoot().getFile(nonExistentPath);
-			assertEquals(true, existentFile.exists());
+			assertTrue(existentFile.exists());
 
 			Properties properties= NLSHintHelper.getProperties(existentFile);
 			String newValue= properties.getProperty("newKey");
@@ -235,7 +235,7 @@ public class NLSHintHelperTest {
 			fJProject.getProject().refreshLocal(IResource.DEPTH_ONE, null);
 
 			IFile existentFile= ResourcesPlugin.getWorkspace().getRoot().getFile(nonExistentPath);
-			assertEquals(true, existentFile.exists());
+			assertTrue(existentFile.exists());
 
 			Properties properties= NLSHintHelper.getProperties(existentFile);
 			String newValue= properties.getProperty("nonExistingValue");

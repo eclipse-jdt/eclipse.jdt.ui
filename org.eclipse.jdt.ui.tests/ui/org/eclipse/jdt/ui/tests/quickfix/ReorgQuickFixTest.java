@@ -14,6 +14,7 @@
 package org.eclipse.jdt.ui.tests.quickfix;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -981,7 +982,8 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		IJavaProject otherProject= JavaProjectHelper.createJavaProject("other", "bin");
 		try {
 			File lib= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.MYLIB);
-			assertTrue("lib does not exist",  lib != null && lib.exists());
+			assertNotNull("lib does not exist", lib);
+			assertTrue("lib does not exist", lib.exists());
 			IPackageFragmentRoot otherRoot= JavaProjectHelper.addLibraryWithImport(otherProject, Path.fromOSString(lib.getPath()), null, null);
 
 			MultiStatus status= new MultiStatus(JavaUI.ID_PLUGIN, IStatus.OK, "", null);
@@ -1018,7 +1020,8 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		IJavaProject otherProject= JavaProjectHelper.createJavaProject("other", "bin");
 		try {
 			File lib= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.MYLIB);
-			assertTrue("lib does not exist",  lib != null && lib.exists());
+			assertNotNull("lib does not exist", lib);
+			assertTrue("lib does not exist", lib.exists());
 
 			IPath path= Path.fromOSString(lib.getPath());
 
@@ -1053,7 +1056,8 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		IJavaProject otherProject= JavaProjectHelper.createJavaProject("other", "bin");
 		try {
 			File lib= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.MYLIB);
-			assertTrue("lib does not exist",  lib != null && lib.exists());
+			assertNotNull("lib does not exist", lib);
+			assertTrue("lib does not exist", lib.exists());
 			IPath path= Path.fromOSString(lib.getPath());
 			final IClasspathEntry[] entries= { JavaCore.newLibraryEntry(path, null, null) };
 			final IPath containerPath= new Path(JavaCore.USER_LIBRARY_CONTAINER_ID).append("MyUserLibrary");

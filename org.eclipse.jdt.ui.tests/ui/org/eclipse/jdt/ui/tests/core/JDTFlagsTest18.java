@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -249,7 +250,8 @@ public class JDTFlagsTest18 {
 	@Test
 	public void testIsStaticInBinaryFile() throws Exception {
 		File clsJarPath= JavaTestPlugin.getDefault().getFileInPlugin(new Path("/testresources/JDTFlagsTest18.zip"));
-		assertTrue("lib not found", clsJarPath != null && clsJarPath.exists());//$NON-NLS-1$
+		assertNotNull("lib not found", clsJarPath);//$NON-NLS-1$
+		assertTrue("lib not found", clsJarPath.exists());
 		IPackageFragmentRoot jarRoot= JavaProjectHelper.addLibraryWithImport(fJProject1, new Path(clsJarPath.getAbsolutePath()), null, null);
 		fJProject1.open(null);
 		fJProject1.getProject().refreshLocal(IResource.DEPTH_INFINITE, null);
@@ -297,7 +299,8 @@ public class JDTFlagsTest18 {
 	@Test
 	public void testIsDefaultInBinaryFile() throws Exception {
 		File clsJarPath= JavaTestPlugin.getDefault().getFileInPlugin(new Path("/testresources/JDTFlagsTest18.zip"));
-		assertTrue("lib not found", clsJarPath != null && clsJarPath.exists());//$NON-NLS-1$
+		assertNotNull("lib not found", clsJarPath);//$NON-NLS-1$
+		assertTrue("lib not found", clsJarPath.exists());//$NON-NLS-1$
 		IPackageFragmentRoot jarRoot= JavaProjectHelper.addLibraryWithImport(fJProject1, new Path(clsJarPath.getAbsolutePath()), null, null);
 		fJProject1.open(null);
 		fJProject1.getProject().refreshLocal(IResource.DEPTH_INFINITE, null);
@@ -423,7 +426,8 @@ public class JDTFlagsTest18 {
 	@Test
 	public void testExplicitAbstractInBinaryFile() throws Exception {
 		File clsJarPath= JavaTestPlugin.getDefault().getFileInPlugin(new Path("/testresources/JDTFlagsTest18.zip"));
-		assertTrue("lib not found", clsJarPath != null && clsJarPath.exists());//$NON-NLS-1$
+		assertNotNull("lib not found", clsJarPath);//$NON-NLS-1$
+		assertTrue("lib not found", clsJarPath.exists());//$NON-NLS-1$
 		IPackageFragmentRoot jarRoot= JavaProjectHelper.addLibraryWithImport(fJProject1, new Path(clsJarPath.getAbsolutePath()), null, null);
 		fJProject1.open(null);
 		fJProject1.getProject().refreshLocal(IResource.DEPTH_INFINITE, null);
@@ -441,7 +445,8 @@ public class JDTFlagsTest18 {
 	@Test
 	public void testImplicitAbstractInBinaryFile() throws Exception {
 		File clsJarPath= JavaTestPlugin.getDefault().getFileInPlugin(new Path("/testresources/JDTFlagsTest18.zip"));
-		assertTrue("lib not found", clsJarPath != null && clsJarPath.exists());//$NON-NLS-1$
+		assertNotNull("lib not found", clsJarPath);//$NON-NLS-1$
+		assertTrue("lib not found", clsJarPath.exists());//$NON-NLS-1$
 		IPackageFragmentRoot jarRoot= JavaProjectHelper.addLibraryWithImport(fJProject1, new Path(clsJarPath.getAbsolutePath()), null, null);
 		fJProject1.open(null);
 		fJProject1.getProject().refreshLocal(IResource.DEPTH_INFINITE, null);

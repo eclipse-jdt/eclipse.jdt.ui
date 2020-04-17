@@ -13,7 +13,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -100,8 +99,8 @@ public class RenameRecordElementsTests extends GenericRefactoringTest {
 
 		RenameRefactoring refactoring= (RenameRefactoring) createRefactoring(descriptor);
 		RenameFieldProcessor processor= (RenameFieldProcessor) refactoring.getProcessor();
-		assertEquals("getter rename enabled", false, processor.canEnableGetterRenaming() == null);
-		assertEquals("setter rename enabled", false, processor.canEnableSetterRenaming() == null);
+		assertNotNull("Getter rename should be enabled", processor.canEnableGetterRenaming());
+		assertNotNull("Setter rename should be enabled", processor.canEnableSetterRenaming());
 
 		List<IAnnotatable> elements= new ArrayList<>();
 		elements.add(field);
@@ -162,8 +161,8 @@ public class RenameRecordElementsTests extends GenericRefactoringTest {
 
 		RenameRefactoring refactoring= (RenameRefactoring) createRefactoring(descriptor);
 		RenameFieldProcessor processor= (RenameFieldProcessor) refactoring.getProcessor();
-		assertEquals("getter rename enabled", false, processor.canEnableGetterRenaming() == null);
-		assertEquals("setter rename enabled", false, processor.canEnableSetterRenaming() == null);
+		assertNotNull("getter rename enabled", processor.canEnableGetterRenaming());
+		assertNotNull("setter rename enabled", processor.canEnableSetterRenaming());
 
 		List<IAnnotatable> elements= new ArrayList<>();
 		elements.add(field);

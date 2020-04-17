@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -1023,7 +1024,8 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 
 		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(sample, unit);
 
-		assertTrue(fConvertLoopProposal.getFixStatus() != null && fConvertLoopProposal.getFixStatus().getCode() == IStatus.WARNING);
+		assertNotNull(fConvertLoopProposal.getFixStatus());
+		assertEquals(IStatus.WARNING, fConvertLoopProposal.getFixStatus().getCode());
 
 		assertCorrectLabels(proposals);
 
@@ -1083,7 +1085,8 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 
 		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(sample, unit);
 
-		assertTrue(fConvertLoopProposal.getFixStatus() != null && fConvertLoopProposal.getFixStatus().getCode() == IStatus.WARNING);
+		assertNotNull(fConvertLoopProposal.getFixStatus());
+		assertEquals(IStatus.WARNING, fConvertLoopProposal.getFixStatus().getCode());
 
 		assertCorrectLabels(proposals);
 
@@ -1144,7 +1147,8 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 
 		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(sample, unit);
 
-		assertTrue(fConvertLoopProposal.getFixStatus() != null && fConvertLoopProposal.getFixStatus().isOK());
+		assertNotNull(fConvertLoopProposal.getFixStatus());
+		assertTrue(fConvertLoopProposal.getFixStatus().isOK());
 
 		assertCorrectLabels(proposals);
 
@@ -1196,7 +1200,8 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 
 		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(sample, unit);
 
-		assertTrue(fConvertLoopProposal.getFixStatus() != null && fConvertLoopProposal.getFixStatus().isOK());
+		assertNotNull(fConvertLoopProposal.getFixStatus());
+		assertTrue(fConvertLoopProposal.getFixStatus().isOK());
 
 		assertCorrectLabels(proposals);
 
