@@ -59,9 +59,7 @@ public abstract class AbstractJunit4SelectionTestCase extends AbstractJunit4CUTe
 	public static final String SQUARE_BRACKET_CLOSE=   "/*]*/";
 	public static final int    SQUARE_BRACKET_CLOSE_LENGTH= SQUARE_BRACKET_CLOSE.length();
 
-	protected static final int VALID_SELECTION=     1;
-	protected static final int INVALID_SELECTION=   2;
-	protected static final int COMPARE_WITH_OUTPUT= 3;
+	enum TestMode { VALID_SELECTION, INVALID_SELECTION, COMPARE_WITH_OUTPUT }
 
 	private boolean fIgnoreSelectionMarker;
 	private int[] fSelection;
@@ -105,7 +103,7 @@ public abstract class AbstractJunit4SelectionTestCase extends AbstractJunit4CUTe
 		return result;
 	}
 
-	protected void performTest(final ICompilationUnit unit, final Refactoring refactoring, int mode, final String out, boolean doUndo) throws Exception {
+	protected void performTest(final ICompilationUnit unit, final Refactoring refactoring, TestMode mode, final String out, boolean doUndo) throws Exception {
 		IProgressMonitor pm= new NullProgressMonitor();
 		switch (mode) {
 			case VALID_SELECTION:
