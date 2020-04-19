@@ -619,9 +619,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 				Runner runner= new Runner();
 				try {
 					PlatformUI.getWorkbench().getProgressService().busyCursorWhile(runner);
-				} catch (InvocationTargetException e) {
-					JEViewPlugin.log(e);
-				} catch (InterruptedException e) {
+				} catch (InvocationTargetException | InterruptedException e) {
 					JEViewPlugin.log(e);
 				}
 				JavaElement element= new JavaElement(fInput, fullyQualifiedName, runner.type);
@@ -709,9 +707,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 				Runner runner= new Runner();
 				try {
 					PlatformUI.getWorkbench().getProgressService().busyCursorWhile(runner);
-				} catch (InvocationTargetException e) {
-					JEViewPlugin.log(e);
-				} catch (InterruptedException e) {
+				} catch (InvocationTargetException | InterruptedException e) {
 					JEViewPlugin.log(e);
 				}
 				JavaElement element= new JavaElement(fInput, bindingKey, runner.element);

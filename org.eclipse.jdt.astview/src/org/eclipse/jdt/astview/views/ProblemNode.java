@@ -118,8 +118,7 @@ public class ProblemNode extends ASTAttribute {
 				if (f.getType() == int.class && f.getInt(f) == id) {
 					return "IProblem." + f.getName();
 				}
-			} catch (IllegalArgumentException e) {
-			} catch (IllegalAccessException e) {
+			} catch (IllegalArgumentException | IllegalAccessException e) {
 			}
 		}
 		return "<UNKNOWN CONSTANT>";

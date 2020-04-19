@@ -384,16 +384,10 @@ public class HierarchicalASTVisitorTest {
 			try {
 				Method method= TestHierarchicalASTVisitor.class.getMethod(isLeaf ? getVisitMethodName(isEndVisit) : "superVisit", new Class[] { clazz });
 				method.invoke(this, new Object[] { null });
-			} catch (NoSuchMethodException e) {
-				/* This should have already been discovered by
+			} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+				/* NoSuchMethodException should have already been discovered by
 				 * hasRequiredMethodsForNonLeaf(..)
 				 */
-				e.printStackTrace();
-				Assert.isTrue(false);
-			} catch (IllegalAccessException e) {
-				e.printStackTrace();
-				Assert.isTrue(false);
-			} catch (InvocationTargetException e) {
 				e.printStackTrace();
 				Assert.isTrue(false);
 			}

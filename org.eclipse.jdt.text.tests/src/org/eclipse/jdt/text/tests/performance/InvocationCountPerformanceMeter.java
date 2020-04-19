@@ -392,9 +392,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 
 			fEventReader= new EventReader(fVM.eventQueue());
 			fEventReader.start();
-		} catch (IOException x) {
-			x.printStackTrace();
-		} catch (IllegalConnectorArgumentsException x) {
+		} catch (IOException | IllegalConnectorArgumentsException x) {
 			x.printStackTrace();
 		} finally {
 			Assert.assertNotNull("Could not start performance meter, hints:\n1) check the command line arguments (see InvocationCountPerformanceMeter for details)\n2) use a different port number", fEventReader);

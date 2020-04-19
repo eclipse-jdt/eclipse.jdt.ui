@@ -71,9 +71,7 @@ public class JavaElementPrefixPatternMatcherTest extends TestCase {
 			if (String.class.equals(field.getType()))
 				try {
 					strings.add((String) field.get(null));
-				} catch (IllegalArgumentException e) {
-					e.printStackTrace();
-				} catch (IllegalAccessException e) {
+				} catch (IllegalArgumentException | IllegalAccessException e) {
 					e.printStackTrace();
 				}
 		}

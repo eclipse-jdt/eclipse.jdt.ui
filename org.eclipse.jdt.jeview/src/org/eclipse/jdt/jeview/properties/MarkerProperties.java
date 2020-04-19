@@ -207,9 +207,7 @@ public class MarkerProperties implements IPropertySource {
 					if (f.getType() == int.class && f.getInt(f) == id) {
 						return "IProblem." + f.getName();
 					}
-				} catch (IllegalArgumentException e) {
-					// does not happen
-				} catch (IllegalAccessException e) {
+				} catch (IllegalArgumentException | IllegalAccessException e) {
 					// does not happen
 				}
 			}

@@ -95,9 +95,7 @@ public class MemberValuePairProperties implements IPropertySource {
 					name= "IMemberValuePair." + f.getName();
 					break;
 				}
-			} catch (IllegalArgumentException e) {
-				// continue
-			} catch (IllegalAccessException e) {
+			} catch (IllegalArgumentException | IllegalAccessException e) {
 				// continue
 			}
 		}
