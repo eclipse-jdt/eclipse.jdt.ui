@@ -249,14 +249,17 @@ public class FatJarExportTests {
 			// get loader entry
 			ZipEntry loaderClassEntry= generatedArchive.getEntry("org/eclipse/jdt/internal/jarinjarloader/JarRsrcLoader.class"); //$NON-NLS-1$
 			assertNotNull(loaderClassEntry);
-			// check version of class file JarRsrcLoader (jdk 1.6 = version 50.0)
-			InputStream in = generatedArchive.getInputStream(loaderClassEntry);
-			int magic = 0;
-			for (int i= 0; i < 4; i++)
-				magic = (magic << 8) + in.read();
-			int minorVersion = ((in.read() << 8) + in.read());
-			int majorVersion = ((in.read() << 8) + in.read());
-			in.close();
+			int magic;
+			int minorVersion;
+			int majorVersion;
+			try ( // check version of class file JarRsrcLoader (jdk 1.6 = version 50.0)
+					InputStream in = generatedArchive.getInputStream(loaderClassEntry)) {
+				magic = 0;
+				for (int i= 0; i < 4; i++)
+					magic = (magic << 8) + in.read();
+				minorVersion = ((in.read() << 8) + in.read());
+				majorVersion = ((in.read() << 8) + in.read());
+			}
 			assertEquals("loader is a class file", 0xCAFEBABE, magic); //$NON-NLS-1$
 			assertEquals("loader compiled with JDK 1.6", "50.0", majorVersion + "." + minorVersion); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
