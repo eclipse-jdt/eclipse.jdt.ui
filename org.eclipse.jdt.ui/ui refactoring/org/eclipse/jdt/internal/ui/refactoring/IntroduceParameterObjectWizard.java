@@ -715,7 +715,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 		protected boolean getBooleanSetting(String key, boolean defaultValue) {
 			String update= getRefactoringSettings().get(key);
 			if (update != null)
-				return Boolean.valueOf(update).booleanValue();
+				return Boolean.parseBoolean(update);
 			else
 				return defaultValue;
 		}

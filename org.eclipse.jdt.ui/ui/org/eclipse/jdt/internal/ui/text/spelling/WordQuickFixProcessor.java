@@ -88,8 +88,8 @@ public class WordQuickFixProcessor implements IQuickFixProcessor {
 					arguments= location.getProblemArguments();
 					if (arguments != null && arguments.length > 4) {
 
-						sentence= Boolean.valueOf(arguments[3]).booleanValue();
-						match= Boolean.valueOf(arguments[4]).booleanValue();
+						sentence= Boolean.parseBoolean(arguments[3]);
+						match= Boolean.parseBoolean(arguments[4]);
 						fixed= arguments[0].charAt(0) == IHtmlTagConstants.HTML_TAG_PREFIX || arguments[0].charAt(0) == IJavaDocTagConstants.JAVADOC_TAG_PREFIX;
 
 						if ((sentence && match) && !fixed)

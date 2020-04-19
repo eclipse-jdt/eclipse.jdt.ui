@@ -1353,9 +1353,9 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			int length= -1;
 			final StringTokenizer tokenizer= new StringTokenizer(selection);
 			if (tokenizer.hasMoreTokens())
-				offset= Integer.valueOf(tokenizer.nextToken()).intValue();
+				offset= Integer.parseInt(tokenizer.nextToken());
 			if (tokenizer.hasMoreTokens())
-				length= Integer.valueOf(tokenizer.nextToken()).intValue();
+				length= Integer.parseInt(tokenizer.nextToken());
 			if (offset >= 0 && length >= 0) {
 				fSelectionStart= offset;
 				fSelectionLength= length;
@@ -1392,7 +1392,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME));
 		final String protect= arguments.getAttribute(ATTRIBUTE_PROTECT);
 		if (protect != null) {
-			fProtectConstructor= Boolean.valueOf(protect).booleanValue();
+			fProtectConstructor= Boolean.parseBoolean(protect);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_PROTECT));
 		return new RefactoringStatus();

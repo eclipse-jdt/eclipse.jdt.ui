@@ -310,7 +310,7 @@ public class ExtractConstantWizard extends RefactoringWizard {
 		private boolean getBooleanSetting(String key, boolean defaultValue) {
 			String update= getRefactoringSettings().get(key);
 			if (update != null)
-				return Boolean.valueOf(update).booleanValue();
+				return Boolean.parseBoolean(update);
 			else
 				return defaultValue;
 		}

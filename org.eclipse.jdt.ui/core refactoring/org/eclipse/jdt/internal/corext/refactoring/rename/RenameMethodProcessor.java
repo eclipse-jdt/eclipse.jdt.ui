@@ -906,17 +906,17 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME));
 		final String references= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES);
 		if (references != null) {
-			fUpdateReferences= Boolean.valueOf(references).booleanValue();
+			fUpdateReferences= Boolean.parseBoolean(references);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES));
 		final String delegate= extended.getAttribute(ATTRIBUTE_DELEGATE);
 		if (delegate != null) {
-			fDelegateUpdating= Boolean.valueOf(delegate).booleanValue();
+			fDelegateUpdating= Boolean.parseBoolean(delegate);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DELEGATE));
 		final String deprecate= extended.getAttribute(ATTRIBUTE_DEPRECATE);
 		if (deprecate != null) {
-			fDelegateDeprecation= Boolean.valueOf(deprecate).booleanValue();
+			fDelegateDeprecation= Boolean.parseBoolean(deprecate);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DEPRECATE));
 		return new RefactoringStatus();

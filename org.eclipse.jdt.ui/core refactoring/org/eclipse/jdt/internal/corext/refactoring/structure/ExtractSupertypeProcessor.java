@@ -967,17 +967,17 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
 		final String stubs= extended.getAttribute(ATTRIBUTE_STUBS);
 		if (stubs != null) {
-			fCreateMethodStubs= Boolean.valueOf(stubs).booleanValue();
+			fCreateMethodStubs= Boolean.parseBoolean(stubs);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_STUBS));
 		final String instance= extended.getAttribute(ATTRIBUTE_INSTANCEOF);
 		if (instance != null) {
-			fInstanceOf= Boolean.valueOf(instance).booleanValue();
+			fInstanceOf= Boolean.parseBoolean(instance);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_INSTANCEOF));
 		final String replace= extended.getAttribute(ATTRIBUTE_REPLACE);
 		if (replace != null) {
-			fReplace= Boolean.valueOf(replace).booleanValue();
+			fReplace= Boolean.parseBoolean(replace);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_REPLACE));
 		int extractCount= 0;

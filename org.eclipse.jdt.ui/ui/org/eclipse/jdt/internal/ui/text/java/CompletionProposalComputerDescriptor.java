@@ -194,10 +194,10 @@ final class CompletionProposalComputerDescriptor {
 		}
 
 		String activateAttribute= element.getAttribute(ACTIVATE);
-		fActivate= Boolean.valueOf(activateAttribute).booleanValue();
+		fActivate= Boolean.parseBoolean(activateAttribute);
 
 		String needsSortingAfterFilteringAttribute= element.getAttribute(NEEDS_SORTING_AFTER_FILTERING);
-		fNeedsSortingAfterFiltering= Boolean.valueOf(needsSortingAfterFilteringAttribute).booleanValue();
+		fNeedsSortingAfterFiltering= Boolean.parseBoolean(needsSortingAfterFilteringAttribute);
 
 		fClass= element.getAttribute(CLASS);
 		checkNotNull(fClass, CLASS);

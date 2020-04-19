@@ -431,9 +431,9 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 				int length= -1;
 				final StringTokenizer tokenizer= new StringTokenizer(selection);
 				if (tokenizer.hasMoreTokens())
-					offset= Integer.valueOf(tokenizer.nextToken()).intValue();
+					offset= Integer.parseInt(tokenizer.nextToken());
 				if (tokenizer.hasMoreTokens())
-					length= Integer.valueOf(tokenizer.nextToken()).intValue();
+					length= Integer.parseInt(tokenizer.nextToken());
 				if (offset >= 0 && length >= 0) {
 					try {
 						final IJavaElement[] elements= fCu.codeSelect(offset, length);
@@ -457,7 +457,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 		}
 		final String references= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES);
 		if (references != null) {
-			fUpdateReferences= Boolean.valueOf(references).booleanValue();
+			fUpdateReferences= Boolean.parseBoolean(references);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES));
 		return new RefactoringStatus();

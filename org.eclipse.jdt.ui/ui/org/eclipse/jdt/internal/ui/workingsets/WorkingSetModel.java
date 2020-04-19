@@ -548,7 +548,7 @@ public class WorkingSetModel {
 		if (configured == null)
 			return false;
 
-		fConfigured= Boolean.valueOf(configured).booleanValue();
+		fConfigured= Boolean.parseBoolean(configured);
 		fLocalWorkingSetManager.restoreState(memento.getChild(TAG_LOCAL_WORKING_SET_MANAGER));
 		for (IWorkingSet ws : fLocalWorkingSetManager.getAllWorkingSets()) {
 			if (IWorkingSetIDs.OTHERS.equals(ws.getId())) {
@@ -564,7 +564,7 @@ public class WorkingSetModel {
 		if (isSortingEnabled == null) {
 			fIsSortingEnabled= false;
 		} else {
-			fIsSortingEnabled= Boolean.valueOf(isSortingEnabled).booleanValue();
+			fIsSortingEnabled= Boolean.parseBoolean(isSortingEnabled);
 		}
 
 		for (IMemento active : memento.getChildren(TAG_ACTIVE_WORKING_SET)) {

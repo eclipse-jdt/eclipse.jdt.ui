@@ -695,7 +695,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 		if (userDefinedPatternsEnabled == null)
 			return;
 
-		fUserDefinedPatternsEnabled= Boolean.valueOf(userDefinedPatternsEnabled).booleanValue();
+		fUserDefinedPatternsEnabled= Boolean.parseBoolean(userDefinedPatternsEnabled);
 		restoreUserDefinedPatterns(customFilters);
 		restoreXmlDefinedFilters(customFilters);
 		restoreLRUFilters(customFilters);

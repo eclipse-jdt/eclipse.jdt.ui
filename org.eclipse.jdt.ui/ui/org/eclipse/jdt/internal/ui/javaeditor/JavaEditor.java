@@ -2870,7 +2870,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			boolean newBooleanValue= false;
 			Object newValue= event.getNewValue();
 			if (newValue != null)
-				newBooleanValue= Boolean.valueOf(newValue.toString()).booleanValue();
+				newBooleanValue= Boolean.parseBoolean(newValue.toString());
 
 			if (PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE.equals(property)) {
 				if (newBooleanValue)
@@ -3016,7 +3016,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			Object newValue= event.getNewValue();
 			ISourceViewer viewer= getSourceViewer();
 			if (newValue != null && viewer != null) {
-				if (Boolean.valueOf(newValue.toString()).booleanValue()) {
+				if (Boolean.parseBoolean(newValue.toString())) {
 					// adjust the highlightrange in order to get the magnet right after changing the selection
 					Point selection= viewer.getSelectedRange();
 					adjustHighlightRange(selection.x, selection.y);

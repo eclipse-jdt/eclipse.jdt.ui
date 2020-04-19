@@ -796,12 +796,12 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_SETTER));
 		final String encapsulate= arguments.getAttribute(ATTRIBUTE_DECLARING);
 		if (encapsulate != null) {
-			fEncapsulateDeclaringClass= Boolean.valueOf(encapsulate).booleanValue();
+			fEncapsulateDeclaringClass= Boolean.parseBoolean(encapsulate);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DECLARING));
 		final String matches= arguments.getAttribute(ATTRIBUTE_COMMENTS);
 		if (matches != null) {
-			fGenerateJavadoc= Boolean.valueOf(matches).booleanValue();
+			fGenerateJavadoc= Boolean.parseBoolean(matches);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_COMMENTS));
 		final String visibility= arguments.getAttribute(ATTRIBUTE_VISIBILITY);

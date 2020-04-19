@@ -73,7 +73,7 @@ public class UnimplementedCodeCleanUp extends AbstractMultiFix {
 			buf.append("public class Face implements IFace {\n"); //$NON-NLS-1$
 		}
 		if (isEnabled(CleanUpConstants.ADD_MISSING_METHODES)) {
-			boolean createComments= Boolean.valueOf(PreferenceConstants.getPreference(PreferenceConstants.CODEGEN_ADD_COMMENTS, null)).booleanValue();
+			boolean createComments= Boolean.parseBoolean(PreferenceConstants.getPreference(PreferenceConstants.CODEGEN_ADD_COMMENTS, null));
 			if (createComments)
 				buf.append(indent(getOverridingMethodComment(), "    ")); //$NON-NLS-1$
 

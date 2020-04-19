@@ -246,7 +246,7 @@ public class FilterDescriptor implements Comparable<FilterDescriptor>, IPluginCo
 		if (strVal == null)
 			// backward compatibility
 			strVal= fElement.getAttribute(SELECTED_ATTRIBUTE);
-		return strVal == null || Boolean.valueOf(strVal).booleanValue();
+		return strVal == null || Boolean.parseBoolean(strVal);
 	}
 
 	@Override

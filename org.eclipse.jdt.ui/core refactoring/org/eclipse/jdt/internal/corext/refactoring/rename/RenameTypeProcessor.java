@@ -1237,28 +1237,28 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			fFilePatterns= patterns;
 		final String references= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES);
 		if (references != null) {
-			fUpdateReferences= Boolean.valueOf(references).booleanValue();
+			fUpdateReferences= Boolean.parseBoolean(references);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES));
 		final String matches= extended.getAttribute(ATTRIBUTE_TEXTUAL_MATCHES);
 		if (matches != null) {
-			fUpdateTextualMatches= Boolean.valueOf(matches).booleanValue();
+			fUpdateTextualMatches= Boolean.parseBoolean(matches);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_TEXTUAL_MATCHES));
 		final String qualified= extended.getAttribute(ATTRIBUTE_QUALIFIED);
 		if (qualified != null) {
-			fUpdateQualifiedNames= Boolean.valueOf(qualified).booleanValue();
+			fUpdateQualifiedNames= Boolean.parseBoolean(qualified);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_QUALIFIED));
 		final String similarDeclarations= extended.getAttribute(ATTRIBUTE_SIMILAR_DECLARATIONS);
 		if (similarDeclarations != null)
-			fUpdateSimilarElements= Boolean.valueOf(similarDeclarations).booleanValue();
+			fUpdateSimilarElements= Boolean.parseBoolean(similarDeclarations);
 		else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_SIMILAR_DECLARATIONS));
 		final String similarDeclarationsMatchingStrategy= extended.getAttribute(ATTRIBUTE_MATCHING_STRATEGY);
 		if (similarDeclarationsMatchingStrategy != null) {
 			try {
-				fRenamingStrategy= Integer.valueOf(similarDeclarationsMatchingStrategy).intValue();
+				fRenamingStrategy= Integer.parseInt(similarDeclarationsMatchingStrategy);
 			} catch (NumberFormatException e) {
 				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new String[] { similarDeclarationsMatchingStrategy,
 						ATTRIBUTE_QUALIFIED }));

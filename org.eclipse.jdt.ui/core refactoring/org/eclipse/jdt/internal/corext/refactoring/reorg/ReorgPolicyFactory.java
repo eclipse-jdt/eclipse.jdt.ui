@@ -1639,12 +1639,12 @@ public final class ReorgPolicyFactory {
 				fFilePatterns= ""; //$NON-NLS-1$
 			final String references= arguments.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES);
 			if (references != null) {
-				fUpdateReferences= Boolean.valueOf(references).booleanValue();
+				fUpdateReferences= Boolean.parseBoolean(references);
 			} else
 				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES));
 			final String qualified= arguments.getAttribute(ATTRIBUTE_QUALIFIED);
 			if (qualified != null) {
-				fUpdateQualifiedNames= Boolean.valueOf(qualified).booleanValue();
+				fUpdateQualifiedNames= Boolean.parseBoolean(qualified);
 			} else
 				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_QUALIFIED));
 			return super.initialize(arguments);
@@ -4380,14 +4380,14 @@ public final class ReorgPolicyFactory {
 			if (element == null)
 				element= JavaRefactoringDescriptorUtil.handleToResource(arguments.getProject(), value);
 			if (tokenizer.hasMoreTokens()) {
-				final boolean processed= Boolean.valueOf(tokenizer.nextToken()).booleanValue();
+				final boolean processed= Boolean.parseBoolean(tokenizer.nextToken());
 				if (processed) {
 					log.markAsProcessed(element);
 					if (element instanceof IJavaElement)
 						log.markAsProcessed(JavaElementResourceMapping.create((IJavaElement) element));
 				}
 				if (tokenizer.hasMoreTokens()) {
-					final boolean renamed= Boolean.valueOf(tokenizer.nextToken()).booleanValue();
+					final boolean renamed= Boolean.parseBoolean(tokenizer.nextToken());
 					if (renamed && tokenizer.hasMoreTokens()) {
 						final String name= tokenizer.nextToken();
 						log.setNewName(element, name);

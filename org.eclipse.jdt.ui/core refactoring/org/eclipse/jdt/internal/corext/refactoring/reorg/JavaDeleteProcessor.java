@@ -827,12 +827,12 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 		final RefactoringStatus status= new RefactoringStatus();
 		final String subPackages= extended.getAttribute(ATTRIBUTE_DELETE_SUBPACKAGES);
 		if (subPackages != null) {
-			fDeleteSubPackages= Boolean.valueOf(subPackages).booleanValue();
+			fDeleteSubPackages= Boolean.parseBoolean(subPackages);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DELETE_SUBPACKAGES));
 		final String suggest= extended.getAttribute(ATTRIBUTE_SUGGEST_ACCESSORS);
 		if (suggest != null) {
-			fSuggestGetterSetterDeletion= Boolean.valueOf(suggest).booleanValue();
+			fSuggestGetterSetterDeletion= Boolean.parseBoolean(suggest);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_SUGGEST_ACCESSORS));
 		int resourceCount= 0;

@@ -165,12 +165,12 @@ public final class RenameEnumConstProcessor extends RenameFieldProcessor {
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME));
 		final String references= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES);
 		if (references != null) {
-			setUpdateReferences(Boolean.valueOf(references).booleanValue());
+			setUpdateReferences(Boolean.parseBoolean(references));
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES));
 		final String matches= extended.getAttribute(ATTRIBUTE_TEXTUAL_MATCHES);
 		if (matches != null) {
-			setUpdateTextualMatches(Boolean.valueOf(matches).booleanValue());
+			setUpdateTextualMatches(Boolean.parseBoolean(matches));
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_TEXTUAL_MATCHES));
 		return new RefactoringStatus();

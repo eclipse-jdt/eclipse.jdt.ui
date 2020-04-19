@@ -2818,7 +2818,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 					info= new ParameterInfo(oldTypeName, oldName, index);
 					info.setNewTypeName(newTypeName);
 					info.setNewName(newName);
-					if (Boolean.valueOf(deleted).booleanValue())
+					if (Boolean.parseBoolean(deleted))
 						info.markAsDeleted();
 				}
 				fParameterInfos.add(info);
@@ -2840,7 +2840,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 					return JavaRefactoringDescriptorUtil.createInputFatalStatus(element, getProcessorName(), IJavaRefactorings.CHANGE_METHOD_SIGNATURE);
 				else {
 					try {
-						info= new ExceptionInfo(element, Integer.valueOf(kind).intValue(), null);
+						info= new ExceptionInfo(element, Integer.parseInt(kind), null);
 					} catch (NumberFormatException exception) {
 						return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { kind, ATTRIBUTE_KIND }));
 					}
@@ -2853,12 +2853,12 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		}
 		final String deprecate= arguments.getAttribute(ATTRIBUTE_DEPRECATE);
 		if (deprecate != null) {
-			fDelegateDeprecation= Boolean.valueOf(deprecate).booleanValue();
+			fDelegateDeprecation= Boolean.parseBoolean(deprecate);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DEPRECATE));
 		final String delegate= arguments.getAttribute(ATTRIBUTE_DELEGATE);
 		if (delegate != null) {
-			fDelegateUpdating= Boolean.valueOf(delegate).booleanValue();
+			fDelegateUpdating= Boolean.parseBoolean(delegate);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DELEGATE));
 		return new RefactoringStatus();

@@ -1306,9 +1306,9 @@ public class ExtractMethodRefactoring extends Refactoring {
 		int length= -1;
 		final StringTokenizer tokenizer= new StringTokenizer(selection);
 		if (tokenizer.hasMoreTokens())
-			offset= Integer.valueOf(tokenizer.nextToken()).intValue();
+			offset= Integer.parseInt(tokenizer.nextToken());
 		if (tokenizer.hasMoreTokens())
-			length= Integer.valueOf(tokenizer.nextToken()).intValue();
+			length= Integer.parseInt(tokenizer.nextToken());
 		if (offset < 0 || length < 0)
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION}));
 
@@ -1354,19 +1354,19 @@ public class ExtractMethodRefactoring extends Refactoring {
 		if (replace == null)
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_REPLACE));
 
-		fReplaceDuplicates= Boolean.valueOf(replace).booleanValue();
+		fReplaceDuplicates= Boolean.parseBoolean(replace);
 
 		final String comments= arguments.getAttribute(ATTRIBUTE_COMMENTS);
 		if (comments == null)
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_COMMENTS));
 
-		fGenerateJavadoc= Boolean.valueOf(comments).booleanValue();
+		fGenerateJavadoc= Boolean.parseBoolean(comments);
 
 		final String exceptions= arguments.getAttribute(ATTRIBUTE_EXCEPTIONS);
 		if (exceptions == null)
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_EXCEPTIONS));
 
-		fThrowRuntimeExceptions= Boolean.valueOf(exceptions).booleanValue();
+		fThrowRuntimeExceptions= Boolean.parseBoolean(exceptions);
 
 		return new RefactoringStatus();
 	}

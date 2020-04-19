@@ -873,17 +873,17 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME));
 		final String comment= extended.getAttribute(ATTRIBUTE_COMMENTS);
 		if (comment != null) {
-			fComments= Boolean.valueOf(comment).booleanValue();
+			fComments= Boolean.parseBoolean(comment);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_COMMENTS));
 		final String instance= extended.getAttribute(ATTRIBUTE_INSTANCEOF);
 		if (instance != null) {
-			fInstanceOf= Boolean.valueOf(instance).booleanValue();
+			fInstanceOf= Boolean.parseBoolean(instance);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_INSTANCEOF));
 		final String replace= extended.getAttribute(ATTRIBUTE_REPLACE);
 		if (replace != null) {
-			fReplace= Boolean.valueOf(replace).booleanValue();
+			fReplace= Boolean.parseBoolean(replace);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_REPLACE));
 		int count= 1;

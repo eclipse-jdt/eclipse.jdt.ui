@@ -150,7 +150,7 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 				IPath path= decodePath(tok.nextToken());
 				IPath attachPath= decodePath(tok.nextToken());
 				IPath attachRoot= decodePath(tok.nextToken());
-				boolean isExported= Boolean.valueOf(tok.nextToken()).booleanValue();
+				boolean isExported= Boolean.parseBoolean(tok.nextToken());
 				switch (kind) {
 					case IClasspathEntry.CPE_SOURCE:
 						res.add(JavaCore.newSourceEntry(path));
