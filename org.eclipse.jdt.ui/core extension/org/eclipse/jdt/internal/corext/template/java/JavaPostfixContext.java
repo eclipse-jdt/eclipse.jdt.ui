@@ -26,6 +26,19 @@ import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.text.edits.MalformedTreeException;
+import org.eclipse.text.edits.TextEdit;
+
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.templates.Template;
+import org.eclipse.jface.text.templates.TemplateBuffer;
+import org.eclipse.jface.text.templates.TemplateContextType;
+import org.eclipse.jface.text.templates.TemplateException;
+import org.eclipse.jface.text.templates.TemplateVariable;
+
 import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -65,32 +78,16 @@ import org.eclipse.jdt.core.dom.WildcardType;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
+import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
-import org.eclipse.jdt.internal.corext.template.java.JavaContext;
-
-import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
-
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.Position;
-import org.eclipse.jface.text.Region;
-import org.eclipse.jface.text.templates.Template;
-import org.eclipse.jface.text.templates.TemplateBuffer;
-import org.eclipse.jface.text.templates.TemplateContextType;
-import org.eclipse.jface.text.templates.TemplateException;
-import org.eclipse.jface.text.templates.TemplateVariable;
-
-import org.eclipse.text.edits.MalformedTreeException;
-import org.eclipse.text.edits.TextEdit;
 
 /**
  * This class is an extension to the existing {@link JavaContext} and includes/provides additional
  * information on the current node which the code completion was invoked on.
  */
 public class JavaPostfixContext extends JavaContext {
-
 	private static final Object CONTEXT_TYPE_ID= "postfix"; //$NON-NLS-1$
 
 	private static final String OBJECT_SIGNATURE= "java.lang.Object"; //$NON-NLS-1$
@@ -420,11 +417,8 @@ public class JavaPostfixContext extends JavaContext {
 			int[] outOfRangeOffsets= variableOutOfRangeOffsets.get(tv);
 			if (outOfRangeOffsets != null && outOfRangeOffsets.length > 0) {
 				int[] offsets= tv.getOffsets();
-				int[] newOffsets= new int[outOfRangeOffsets.length + offsets.length];
-				System.arraycopy(offsets, 0, newOffsets, 0, offsets.length);
-				for (int i= 0; i < outOfRangeOffsets.length; i++) {
-					newOffsets[i + offsets.length]= outOfRangeOffsets[i];
-				}
+				int[] newOffsets= Arrays.copyOf(offsets, offsets.length + outOfRangeOffsets.length);
+				System.arraycopy(outOfRangeOffsets, 0, newOffsets, offsets.length, outOfRangeOffsets.length);
 				tv.setOffsets(newOffsets);
 			}
 		}
