@@ -2424,9 +2424,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		arguments.add(formatStringArgument);
 
 		if (is50OrHigher) {
-			for (Expression expression : formatArguments) {
-				arguments.add(expression);
-			}
+			arguments.addAll(formatArguments);
 		} else {
 			ArrayCreation objectArrayCreation= ast.newArrayCreation();
 
@@ -2437,9 +2435,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			ArrayInitializer arrayInitializer= ast.newArrayInitializer();
 
 			List<Expression> initializerExpressions= arrayInitializer.expressions();
-			for (Expression expression : formatArguments) {
-				initializerExpressions.add(expression);
-			}
+			initializerExpressions.addAll(formatArguments);
 			objectArrayCreation.setInitializer(arrayInitializer);
 
 			arguments.add(objectArrayCreation);

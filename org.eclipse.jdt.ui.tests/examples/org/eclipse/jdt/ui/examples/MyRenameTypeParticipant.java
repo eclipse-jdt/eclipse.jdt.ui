@@ -14,7 +14,6 @@
 package org.eclipse.jdt.ui.examples;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.CoreException;
@@ -128,8 +127,8 @@ public class MyRenameTypeParticipant extends RenameParticipant {
 			return null;
 
 		CompositeChange result= new CompositeChange("My special file updates"); //$NON-NLS-1$
-		for (Iterator<TextFileChange> iter= changes.values().iterator(); iter.hasNext();) {
-			result.add(iter.next());
+		for (TextFileChange textFileChange : changes.values()) {
+			result.add(textFileChange);
 		}
 		return result;
 	}

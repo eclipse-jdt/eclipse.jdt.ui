@@ -14,8 +14,8 @@
 package org.eclipse.jdt.internal.corext.refactoring.surround;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -76,8 +76,8 @@ public class SurroundWithTryWithResourcesAnalyzer extends SurroundWithAnalyzer {
 		List<ITypeBinding> exceptions= new ArrayList<>();
 		if (fEnclosingNode.getNodeType() == ASTNode.METHOD_DECLARATION) {
 			List<Type> thrownExceptions= ((MethodDeclaration) fEnclosingNode).thrownExceptionTypes();
-			for (Iterator<Type> thrown= thrownExceptions.iterator(); thrown.hasNext();) {
-				ITypeBinding thrownException= thrown.next().resolveBinding();
+			for (Type type : thrownExceptions) {
+				ITypeBinding thrownException= type.resolveBinding();
 				if (thrownException != null) {
 					exceptions.add(thrownException);
 				}
@@ -92,9 +92,7 @@ public class SurroundWithTryWithResourcesAnalyzer extends SurroundWithAnalyzer {
 			if (typeBinding != null) {
 				IMethodBinding methodBinding= typeBinding.getFunctionalInterfaceMethod();
 				if (methodBinding != null) {
-					for (ITypeBinding thrownException : methodBinding.getExceptionTypes()) {
-						exceptions.add(thrownException);
-					}
+					Collections.addAll(exceptions, methodBinding.getExceptionTypes());
 				}
 			}
 		}

@@ -155,8 +155,7 @@ public class JavadocTagsSubProcessor {
 				CompilationUnit cu= (CompilationUnit)fDecl.getParent();
 				Name name= fDecl.getName();
 				List<Comment> comments= cu.getCommentList();
-				for (int i= 0; i < comments.size(); ++i) {
-					Comment comment= comments.get(i);
+				for (Comment comment : comments) {
 					if (comment instanceof Javadoc
 							&& comment.getStartPosition() + comment.getLength() < name.getStartPosition()) {
 						javadoc= (Javadoc)comment;
@@ -248,8 +247,7 @@ public class JavadocTagsSubProcessor {
 				CompilationUnit cu= (CompilationUnit)fDecl.getParent();
 				Name moduleName= fDecl.getName();
 				List<Comment> comments= cu.getCommentList();
-				for (int i= 0; i < comments.size(); ++i) {
-					Comment comment= comments.get(i);
+				for (Comment comment : comments) {
 					if (comment instanceof Javadoc
 							&& comment.getStartPosition() + comment.getLength() < moduleName.getStartPosition()) {
 							javadoc= (Javadoc)comment;
@@ -1017,21 +1015,20 @@ public class JavadocTagsSubProcessor {
 		}
 	}
 
-	@SuppressWarnings("rawtypes")
 	private static ASTNode findModuleJavadocTag(ModuleDeclaration decl, IProblemLocation problem) {
 		ASTNode result= null;
 		CompilationUnit cu= (CompilationUnit)decl.getParent();
 		int problemLocationStart= problem.getOffset();
 		Name moduleName= decl.getName();
-		List comments= cu.getCommentList();
-		for (int i= 0; i < comments.size(); ++i) {
-			Comment comment= (Comment)comments.get(i);
+		List<Comment> comments= cu.getCommentList();
+
+		for (Comment comment : comments) {
 			if (comment instanceof Javadoc
 					&& comment.getStartPosition() + comment.getLength() < moduleName.getStartPosition()) {
 				Javadoc javadoc= (Javadoc)comment;
-				List tags= javadoc.tags();
-				for (Object element : tags) {
-					TagElement tag= (TagElement)element;
+				List<TagElement> tags= javadoc.tags();
+
+				for (TagElement tag : tags) {
 					if (problemLocationStart  > tag.getStartPosition()
 							&& problemLocationStart < tag.getStartPosition() + tag.getLength()) {
 						result= tag;

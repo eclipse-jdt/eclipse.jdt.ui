@@ -94,13 +94,15 @@ public class CheckBoxExample {
 				case 0:
 					list.addElement("element-" + (fgRandom.nextInt() % 1000));
 					break;
+
 				case 2:
 					System.out.println("---- printing all");
 					List<String> checked= list.getCheckedElements();
-					for (int i= 0; i < checked.size(); i++) {
-						System.out.println(checked.get(i).toString());
+					for (String checkedElement : checked) {
+						System.out.println(checkedElement);
 					}
 					break;
+
 				default:
 					list.setChecked(list.getElement(0), true);
 					break;
