@@ -158,7 +158,8 @@ public class ParameterGuessingProposal extends JavaMethodCompletionProposal {
 					@Override
 					public ExitFlags doExit(LinkedModeModel model2, VerifyEvent event, int offset2, int length) {
 						try {
-							if (event.character == ',') {
+							switch (event.character) {
+							case ',':
 								for (int i= 0; i < fPositions.length - 1; i++) { // not for the last one
 									Position position= fPositions[i];
 									if (position.offset <= offset2 && offset2 + length <= position.offset + position.length) {
@@ -171,7 +172,9 @@ public class ParameterGuessingProposal extends JavaMethodCompletionProposal {
 										}
 									}
 								}
-							} else if (event.character == ')') {
+								break;
+
+							case ')':
 								if (!canExitLinkedMode(ui, document, offset2, length)) {
 									return null;
 								}
@@ -182,11 +185,17 @@ public class ParameterGuessingProposal extends JavaMethodCompletionProposal {
 										return new ExitFlags(ILinkedModeListener.UPDATE_CARET, false);
 									}
 								}
-							} else if (event.character == ';') {
+								break;
+
+							case ';':
 								ITypedRegion partition= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, offset2 + length, false);
 								if (!IDocument.DEFAULT_CONTENT_TYPE.equals(partition.getType())) {
 									return null;
 								}
+								break;
+
+							default:
+								break;
 							}
 						} catch (BadLocationException e) {
 							// continue; not serious enough to log

@@ -32,14 +32,14 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.text.correction.PreviewFeaturesSubProcessor;
-
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
 
 /**
  * This scanner recognizes the JavaDoc comments, Java multi line comments, Java single line comments,
@@ -696,26 +696,22 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaPa
 		if (contentType == null)
 			return JAVA;
 
-		else if (contentType.equals(JAVA_SINGLE_LINE_COMMENT))
+		switch (contentType) {
+		case JAVA_SINGLE_LINE_COMMENT:
 			return SINGLE_LINE_COMMENT;
-
-		else if (contentType.equals(JAVA_MULTI_LINE_COMMENT))
+		case JAVA_MULTI_LINE_COMMENT:
 			return MULTI_LINE_COMMENT;
-
-		else if (contentType.equals(JAVA_DOC))
+		case JAVA_DOC:
 			return JAVADOC;
-
-		else if (contentType.equals(JAVA_STRING))
+		case JAVA_STRING:
 			return STRING;
-
-		else if (contentType.equals(JAVA_CHARACTER))
+		case JAVA_CHARACTER:
 			return CHARACTER;
-
-		else if (contentType.equals(JAVA_MULTI_LINE_STRING))
+		case JAVA_MULTI_LINE_STRING:
 			return MULTI_LINE_STRING;
-
-		else
+		default:
 			return JAVA;
+		}
 	}
 
 	/*
