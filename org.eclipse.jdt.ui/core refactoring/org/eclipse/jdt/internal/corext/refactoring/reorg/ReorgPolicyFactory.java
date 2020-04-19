@@ -941,13 +941,13 @@ public final class ReorgPolicyFactory {
 			int flags= JavaRefactoringDescriptor.JAR_MIGRATION | JavaRefactoringDescriptor.JAR_REFACTORING | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
 			final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
 			arguments.put(ATTRIBUTE_POLICY, getPolicyId());
-			arguments.put(ATTRIBUTE_FILES, Integer.valueOf(fFiles.length).toString());
+			arguments.put(ATTRIBUTE_FILES, Integer.toString(fFiles.length));
 			for (int offset= 0; offset < fFiles.length; offset++)
 				arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (offset + 1), JavaRefactoringDescriptorUtil.resourceToHandle(project, fFiles[offset]));
-			arguments.put(ATTRIBUTE_FOLDERS, Integer.valueOf(fFolders.length).toString());
+			arguments.put(ATTRIBUTE_FOLDERS, Integer.toString(fFolders.length));
 			for (int offset= 0; offset < fFolders.length; offset++)
 				arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (offset + fFiles.length + 1), JavaRefactoringDescriptorUtil.resourceToHandle(project, fFolders[offset]));
-			arguments.put(ATTRIBUTE_UNITS, Integer.valueOf(fCus.length).toString());
+			arguments.put(ATTRIBUTE_UNITS, Integer.toString(fCus.length));
 			for (int offset= 0; offset < fCus.length; offset++)
 				arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (offset + fFolders.length + fFiles.length + 1), JavaRefactoringDescriptorUtil.elementToHandle(project, fCus[offset]));
 			arguments.putAll(getRefactoringArguments(project));
@@ -1595,8 +1595,8 @@ public final class ReorgPolicyFactory {
 			arguments.putAll(super.getRefactoringArguments(project));
 			if (fFilePatterns != null && !"".equals(fFilePatterns)) //$NON-NLS-1$
 				arguments.put(ATTRIBUTE_PATTERNS, fFilePatterns);
-			arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
-			arguments.put(ATTRIBUTE_QUALIFIED, Boolean.valueOf(fUpdateQualifiedNames).toString());
+			arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES, Boolean.toString(fUpdateReferences));
+			arguments.put(ATTRIBUTE_QUALIFIED, Boolean.toString(fUpdateQualifiedNames));
 			return arguments;
 		}
 
@@ -2945,7 +2945,7 @@ public final class ReorgPolicyFactory {
 			int flags= RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
 			final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
 			arguments.put(ATTRIBUTE_POLICY, getPolicyId());
-			arguments.put(ATTRIBUTE_ROOTS, Integer.valueOf(fPackageFragmentRoots.length).toString());
+			arguments.put(ATTRIBUTE_ROOTS, Integer.toString(fPackageFragmentRoots.length));
 			for (int offset= 0; offset < fPackageFragmentRoots.length; offset++)
 				arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (offset + 1), JavaRefactoringDescriptorUtil.elementToHandle(project, fPackageFragmentRoots[offset]));
 			arguments.putAll(getRefactoringArguments(project));
@@ -3178,7 +3178,7 @@ public final class ReorgPolicyFactory {
 			int flags= JavaRefactoringDescriptor.JAR_REFACTORING | JavaRefactoringDescriptor.JAR_MIGRATION | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
 			final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
 			arguments.put(ATTRIBUTE_POLICY, getPolicyId());
-			arguments.put(ATTRIBUTE_FRAGMENTS, Integer.valueOf(fPackageFragments.length).toString());
+			arguments.put(ATTRIBUTE_FRAGMENTS, Integer.toString(fPackageFragments.length));
 			for (int offset= 0; offset < fPackageFragments.length; offset++)
 				arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (offset + 1), JavaRefactoringDescriptorUtil.elementToHandle(project, fPackageFragments[offset]));
 			arguments.putAll(getRefactoringArguments(project));
@@ -3923,7 +3923,7 @@ public final class ReorgPolicyFactory {
 			int flags= JavaRefactoringDescriptor.JAR_REFACTORING | JavaRefactoringDescriptor.JAR_MIGRATION | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
 			final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
 			arguments.put(ATTRIBUTE_POLICY, getPolicyId());
-			arguments.put(ATTRIBUTE_MEMBERS, Integer.valueOf(fJavaElements.length).toString());
+			arguments.put(ATTRIBUTE_MEMBERS, Integer.toString(fJavaElements.length));
 			for (int offset= 0; offset < fJavaElements.length; offset++)
 				arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (offset + 1), JavaRefactoringDescriptorUtil.elementToHandle(project, fJavaElements[offset]));
 			arguments.putAll(getRefactoringArguments(project));

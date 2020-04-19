@@ -553,8 +553,8 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 					final InferTypeArgumentsDescriptor descriptor= RefactoringSignatureDescriptorFactory.createInferTypeArgumentsDescriptor(name, description, comment.asString(), arguments, RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
 					for (int index= 0; index < fElements.length; index++)
 						arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (index + 1), JavaRefactoringDescriptorUtil.elementToHandle(name, fElements[index]));
-					arguments.put(ATTRIBUTE_CLONE, Boolean.valueOf(fAssumeCloneReturnsSameType).toString());
-					arguments.put(ATTRIBUTE_LEAVE, Boolean.valueOf(fLeaveUnconstrainedRaw).toString());
+					arguments.put(ATTRIBUTE_CLONE, Boolean.toString(fAssumeCloneReturnsSameType));
+					arguments.put(ATTRIBUTE_LEAVE, Boolean.toString(fLeaveUnconstrainedRaw));
 					return new RefactoringChangeDescriptor(descriptor);
 				}
 			};

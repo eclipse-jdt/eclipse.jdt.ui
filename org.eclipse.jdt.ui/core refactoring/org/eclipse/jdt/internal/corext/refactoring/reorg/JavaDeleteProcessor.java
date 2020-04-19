@@ -642,12 +642,12 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 		 	if (fAccessorsDeleted)
 				comment.addSetting(RefactoringCoreMessages.JavaDeleteProcessor_delete_accessors);
 			final DeleteDescriptor descriptor= RefactoringSignatureDescriptorFactory.createDeleteDescriptor(project, description, comment.asString(), arguments, flags);
-			arguments.put(ATTRIBUTE_DELETE_SUBPACKAGES, Boolean.valueOf(fDeleteSubPackages).toString());
-			arguments.put(ATTRIBUTE_SUGGEST_ACCESSORS, Boolean.valueOf(fSuggestGetterSetterDeletion).toString());
-			arguments.put(ATTRIBUTE_RESOURCES, Integer.valueOf(fResources.length).toString());
+			arguments.put(ATTRIBUTE_DELETE_SUBPACKAGES, Boolean.toString(fDeleteSubPackages));
+			arguments.put(ATTRIBUTE_SUGGEST_ACCESSORS, Boolean.toString(fSuggestGetterSetterDeletion));
+			arguments.put(ATTRIBUTE_RESOURCES, Integer.toString(fResources.length));
 			for (int offset= 0; offset < fResources.length; offset++)
 				arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (offset + 1), JavaRefactoringDescriptorUtil.resourceToHandle(project, fResources[offset]));
-			arguments.put(ATTRIBUTE_ELEMENTS, Integer.valueOf(fJavaElements.length).toString());
+			arguments.put(ATTRIBUTE_ELEMENTS, Integer.toString(fJavaElements.length));
 			for (int offset= 0; offset < fJavaElements.length; offset++)
 				arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (offset + fResources.length + 1), JavaRefactoringDescriptorUtil.elementToHandle(project, fJavaElements[offset]));
 			return new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.DeleteRefactoring_7, new Change[] { fDeleteChange});

@@ -112,7 +112,7 @@ public class MoveMembersWizard extends RefactoringWizard {
 				String label= JavaElementLabels.getElementLabel(getMoveProcessor().getDeclaringType(), JavaElementLabels.ALL_FULLY_QUALIFIED);
 				String message= membersToMoveCount == 1 ? Messages.format(RefactoringMessages.MoveMembersInputPage_descriptionKey_singular, new String[] {
 						JavaElementLabels.getTextLabel(membersToMove[0], JavaElementLabels.ALL_FULLY_QUALIFIED), label }) : Messages.format(
-						RefactoringMessages.MoveMembersInputPage_descriptionKey_plural, new String[] { Integer.valueOf(membersToMoveCount).toString(), label });
+						RefactoringMessages.MoveMembersInputPage_descriptionKey_plural, new String[] { Integer.toString(membersToMoveCount), label });
 				setDescription(message);
 			}
 			super.setVisible(visible);

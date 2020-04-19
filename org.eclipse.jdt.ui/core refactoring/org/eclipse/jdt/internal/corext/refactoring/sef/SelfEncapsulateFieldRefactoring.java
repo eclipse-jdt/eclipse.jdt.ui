@@ -471,16 +471,16 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			comment.addSetting(RefactoringCoreMessages.SelfEncapsulateField_generate_comments);
 		final EncapsulateFieldDescriptor descriptor= RefactoringSignatureDescriptorFactory.createEncapsulateFieldDescriptor(project, description, comment.asString(), arguments, flags);
 		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT, JavaRefactoringDescriptorUtil.elementToHandle(project, fField));
-		arguments.put(ATTRIBUTE_VISIBILITY, Integer.valueOf(fVisibility).toString());
-		arguments.put(ATTRIBUTE_INSERTION, Integer.valueOf(fInsertionIndex).toString());
+		arguments.put(ATTRIBUTE_VISIBILITY, Integer.toString(fVisibility));
+		arguments.put(ATTRIBUTE_INSERTION, Integer.toString(fInsertionIndex));
 		if (fCreateSetter) {
 			arguments.put(ATTRIBUTE_SETTER, fSetterName);
 		}
 		if (fCreateGetter) {
 			arguments.put(ATTRIBUTE_GETTER, fGetterName);
 		}
-		arguments.put(ATTRIBUTE_COMMENTS, Boolean.valueOf(fGenerateJavadoc).toString());
-		arguments.put(ATTRIBUTE_DECLARING, Boolean.valueOf(fEncapsulateDeclaringClass).toString());
+		arguments.put(ATTRIBUTE_COMMENTS, Boolean.toString(fGenerateJavadoc));
+		arguments.put(ATTRIBUTE_DECLARING, Boolean.toString(fEncapsulateDeclaringClass));
 		final DynamicValidationRefactoringChange result= new DynamicValidationRefactoringChange(descriptor, getName());
 		TextChange[] changes= fChangeManager.getAllChanges();
 		pm.beginTask(NO_NAME, changes.length);

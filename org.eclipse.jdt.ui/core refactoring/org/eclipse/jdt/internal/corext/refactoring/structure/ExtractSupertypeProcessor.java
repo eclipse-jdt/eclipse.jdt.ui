@@ -307,19 +307,19 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 			final ExtractSuperclassDescriptor descriptor= RefactoringSignatureDescriptorFactory.createExtractSuperclassDescriptor(project, description, comment.asString(), arguments, flags);
 			arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME, fTypeName);
 			arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT, JavaRefactoringDescriptorUtil.elementToHandle(project, getDeclaringType()));
-			arguments.put(ATTRIBUTE_REPLACE, Boolean.valueOf(fReplace).toString());
-			arguments.put(ATTRIBUTE_INSTANCEOF, Boolean.valueOf(fInstanceOf).toString());
-			arguments.put(ATTRIBUTE_STUBS, Boolean.valueOf(fCreateMethodStubs).toString());
-			arguments.put(ATTRIBUTE_EXTRACT, Integer.valueOf(fMembersToMove.length).toString());
+			arguments.put(ATTRIBUTE_REPLACE, Boolean.toString(fReplace));
+			arguments.put(ATTRIBUTE_INSTANCEOF, Boolean.toString(fInstanceOf));
+			arguments.put(ATTRIBUTE_STUBS, Boolean.toString(fCreateMethodStubs));
+			arguments.put(ATTRIBUTE_EXTRACT, Integer.toString(fMembersToMove.length));
 			for (int offset= 0; offset < fMembersToMove.length; offset++)
 				arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (offset + 1), JavaRefactoringDescriptorUtil.elementToHandle(project, fMembersToMove[offset]));
-			arguments.put(ATTRIBUTE_DELETE, Integer.valueOf(fDeletedMethods.length).toString());
+			arguments.put(ATTRIBUTE_DELETE, Integer.toString(fDeletedMethods.length));
 			for (int offset= 0; offset < fDeletedMethods.length; offset++)
 				arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (offset + fMembersToMove.length + 1), JavaRefactoringDescriptorUtil.elementToHandle(project, fDeletedMethods[offset]));
-			arguments.put(ATTRIBUTE_ABSTRACT, Integer.valueOf(fAbstractMethods.length).toString());
+			arguments.put(ATTRIBUTE_ABSTRACT, Integer.toString(fAbstractMethods.length));
 			for (int offset= 0; offset < fAbstractMethods.length; offset++)
 				arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (offset + fMembersToMove.length + fDeletedMethods.length + 1), JavaRefactoringDescriptorUtil.elementToHandle(project, fAbstractMethods[offset]));
-			arguments.put(ATTRIBUTE_TYPES, Integer.valueOf(fTypesToExtract.length).toString());
+			arguments.put(ATTRIBUTE_TYPES, Integer.toString(fTypesToExtract.length));
 			for (int offset= 0; offset < fTypesToExtract.length; offset++)
 				arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (offset + fMembersToMove.length + fDeletedMethods.length + fAbstractMethods.length + 1), JavaRefactoringDescriptorUtil.elementToHandle(project, fTypesToExtract[offset]));
 			final DynamicValidationRefactoringChange change= new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.ExtractSupertypeProcessor_extract_supertype, fChangeManager.getAllChanges());

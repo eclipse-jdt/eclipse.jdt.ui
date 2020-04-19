@@ -1254,13 +1254,13 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			descriptor= RefactoringSignatureDescriptorFactory.createChangeMethodSignatureDescriptor(project, description, comment.asString(), arguments, getDescriptorFlags());
 			arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT, JavaRefactoringDescriptorUtil.elementToHandle(project,fMethod));
 			arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME, fMethodName);
-			arguments.put(ATTRIBUTE_DELEGATE, Boolean.valueOf(fDelegateUpdating).toString());
-			arguments.put(ATTRIBUTE_DEPRECATE, Boolean.valueOf(fDelegateDeprecation).toString());
+			arguments.put(ATTRIBUTE_DELEGATE, Boolean.toString(fDelegateUpdating));
+			arguments.put(ATTRIBUTE_DEPRECATE, Boolean.toString(fDelegateDeprecation));
 			if (fReturnTypeInfo.isTypeNameChanged())
 				arguments.put(ATTRIBUTE_RETURN, fReturnTypeInfo.getNewTypeName());
 			try {
 				if (!isVisibilitySameAsInitial())
-					arguments.put(ATTRIBUTE_VISIBILITY, Integer.valueOf(fVisibility).toString());
+					arguments.put(ATTRIBUTE_VISIBILITY, Integer.toString(fVisibility));
 			} catch (JavaModelException exception) {
 				JavaPlugin.log(exception);
 			}
@@ -1299,7 +1299,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			count= 1;
 			for (ExceptionInfo info : fExceptionInfos) {
 				arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + count, JavaRefactoringDescriptorUtil.elementToHandle(project,info.getElement()));
-				arguments.put(ATTRIBUTE_KIND + count, Integer.valueOf(info.getKind()).toString());
+				arguments.put(ATTRIBUTE_KIND + count, Integer.toString(info.getKind()));
 				count++;
 			}
 		} catch (JavaModelException exception) {
