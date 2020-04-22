@@ -188,7 +188,7 @@ public class JavadocTagsSubProcessor {
 			}
 		}
 
-		public static int findInsertPosition(Javadoc javadoc, @SuppressWarnings("unused") ASTNode node, IDocument document, String lineDelimiter) throws BadLocationException {
+		public static int findInsertPosition(Javadoc javadoc, ASTNode node, IDocument document, String lineDelimiter) throws BadLocationException {
 			int position= -1;
 			List<TagElement> tags= javadoc.tags();
 			TagElement lastTag= null;

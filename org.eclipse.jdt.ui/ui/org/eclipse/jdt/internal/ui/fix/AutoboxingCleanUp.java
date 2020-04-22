@@ -78,17 +78,16 @@ public class AutoboxingCleanUp extends AbstractMultiFix {
 		return new String[0];
 	}
 
-	@SuppressWarnings("nls")
 	@Override
 	public String getPreview() {
 		StringBuilder bld= new StringBuilder();
-		bld.append("\n");
+		bld.append("\n"); //$NON-NLS-1$
 		if (isEnabled(CleanUpConstants.USE_AUTOBOXING)) {
-			bld.append("Integer i = 0;\n");
-			bld.append("Character c = '*';\n");
+			bld.append("Integer i = 0;\n"); //$NON-NLS-1$
+			bld.append("Character c = '*';\n"); //$NON-NLS-1$
 		} else {
-			bld.append("Integer i = Integer.valueOf(0);\n");
-			bld.append("Character c = Character.valueOf('*');\n");
+			bld.append("Integer i = Integer.valueOf(0);\n"); //$NON-NLS-1$
+			bld.append("Character c = Character.valueOf('*');\n"); //$NON-NLS-1$
 		}
 
 		return bld.toString();
