@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -582,7 +582,7 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 							return true;
 
 						if (current instanceof PrefixExpression
-								&& !(((PrefixExpression) current).getOperand() instanceof MethodInvocation && ((PrefixExpression) current).getOperator().equals(PrefixExpression.Operator.NOT)))
+								&& !((PrefixExpression) current).getOperator().equals(PrefixExpression.Operator.NOT))
 							return true;
 
 						if (current instanceof PostfixExpression)

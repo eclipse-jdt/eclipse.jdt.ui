@@ -63,7 +63,7 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionPropos
 public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 	@Rule
-    public ProjectTestSetup projectsetup = new ProjectTestSetup();
+	public ProjectTestSetup projectsetup= new ProjectTestSetup();
 
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
@@ -2940,6 +2940,91 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertEqualString(preview2, expected);
 	}
 
+	@Test
+	public void testBug562291_1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append(
+				"package test1;\n" +
+				"import java.io.Serializable;\n" +
+				"public class A {\n" +
+				"	public void test() {\n" +
+				"		Object[] foo= new Object[5];\n" +
+				"		for (int i= 0; i < foo.length; i++) {\n" +
+				"			if (!(foo[i] instanceof Serializable)) {\n" +
+				"			}\n" +
+				"		}\n" +
+				"	}\n" +
+				"}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(buf, cu);
+
+		assertNotNull(fConvertLoopProposal);
+
+		assertCorrectLabels(proposals);
+
+		String preview1= getPreviewContent(fConvertLoopProposal);
+
+		buf= new StringBuilder();
+		buf.append(
+				"package test1;\n" +
+				"import java.io.Serializable;\n" +
+				"public class A {\n" +
+				"	public void test() {\n" +
+				"		Object[] foo= new Object[5];\n" +
+				"		for (Object element : foo) {\n" +
+				"			if (!(element instanceof Serializable)) {\n" +
+				"			}\n" +
+				"		}\n" +
+				"	}\n" +
+				"}\n");
+		String expected= buf.toString();
+		assertEqualString(preview1, expected);
+	}
+
+	@Test
+	public void testBug562291_2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append(
+				"package test1;\n" +
+				"import java.io.Serializable;\n" +
+				"public class A {\n" +
+				"	public void test() {\n" +
+				"		boolean[] foo= new boolean[5];\n" +
+				"		for (int i= 0; i < foo.length; i++) {\n" +
+				"			if (!foo[i]) {\n" +
+				"			}\n" +
+				"		}\n" +
+				"	}\n" +
+				"}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(buf, cu);
+
+		assertNotNull(fConvertLoopProposal);
+
+		assertCorrectLabels(proposals);
+
+		String preview1= getPreviewContent(fConvertLoopProposal);
+
+		buf= new StringBuilder();
+		buf.append(
+				"package test1;\n" +
+				"import java.io.Serializable;\n" +
+				"public class A {\n" +
+				"	public void test() {\n" +
+				"		boolean[] foo= new boolean[5];\n" +
+				"		for (boolean element : foo) {\n" +
+				"			if (!element) {\n" +
+				"			}\n" +
+				"		}\n" +
+				"	}\n" +
+				"}\n");
+		String expected= buf.toString();
+		assertEqualString(preview1, expected);
+	}
 	private boolean satisfiesPrecondition(ICompilationUnit cu) {
 		ForStatement statement= getForStatement(cu);
 		ConvertLoopOperation op= new ConvertForLoopOperation(statement);
