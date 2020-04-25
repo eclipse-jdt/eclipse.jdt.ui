@@ -41,9 +41,8 @@ public class RelevanceComputer {
 			case CompletionProposal.METHOD_NAME_REFERENCE:
 			case CompletionProposal.METHOD_DECLARATION:
 			case CompletionProposal.ANNOTATION_ATTRIBUTE_REF:
-				return baseRelevance + 4;
 			case CompletionProposal.POTENTIAL_METHOD_DECLARATION:
-				return baseRelevance + 4 /* + 99 */;
+				return baseRelevance + 4;
 			case CompletionProposal.FIELD_REF:
 				return baseRelevance + 5;
 			case CompletionProposal.LOCAL_VARIABLE_REF:

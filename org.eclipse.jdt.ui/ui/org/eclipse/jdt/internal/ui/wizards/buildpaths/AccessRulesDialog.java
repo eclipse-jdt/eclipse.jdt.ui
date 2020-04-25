@@ -47,6 +47,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -54,7 +55,6 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.ProblemSeveritiesPreferencePage;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -241,15 +241,20 @@ public class AccessRulesDialog extends StatusDialog {
 	}
 
 	private String getLocalizedString(String severity) {
-		if (JavaCore.ERROR.equals(severity)) {
-			return NewWizardMessages.AccessRulesDialog_severity_error;
-		} else if (JavaCore.WARNING.equals(severity)) {
-			return NewWizardMessages.AccessRulesDialog_severity_warning;
-		} else if (JavaCore.INFO.equals(severity)) {
-			return NewWizardMessages.AccessRulesDialog_severity_info;
-		} else {
-			return NewWizardMessages.AccessRulesDialog_severity_ignore;
+		if (severity != null) {
+			switch (severity) {
+			case JavaCore.ERROR:
+				return NewWizardMessages.AccessRulesDialog_severity_error;
+			case JavaCore.WARNING:
+				return NewWizardMessages.AccessRulesDialog_severity_warning;
+			case JavaCore.INFO:
+				return NewWizardMessages.AccessRulesDialog_severity_info;
+			default:
+				break;
+			}
 		}
+
+		return NewWizardMessages.AccessRulesDialog_severity_ignore;
 	}
 
 	private String getDescriptionString() {

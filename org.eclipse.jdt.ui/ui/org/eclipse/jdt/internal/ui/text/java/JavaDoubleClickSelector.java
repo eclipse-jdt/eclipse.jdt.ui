@@ -129,8 +129,6 @@ public class JavaDoubleClickSelector extends DefaultTextDoubleClickStrategy impl
 		private boolean backward(char c, int offset) {
 			checkDirection(BACKWARD);
 			switch (fState) {
-				case AT:
-					return false;
 				case IDS:
 					if (isAt(c)) {
 						fStart= offset;
@@ -182,6 +180,7 @@ public class JavaDoubleClickSelector extends DefaultTextDoubleClickStrategy impl
 						return true;
 					}
 					return false;
+				case AT:
 				default:
 					return false;
 			}

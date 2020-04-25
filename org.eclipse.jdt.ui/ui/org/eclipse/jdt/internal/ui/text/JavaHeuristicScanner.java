@@ -466,67 +466,52 @@ public final class JavaHeuristicScanner implements Symbols {
 	private int getToken(String s) {
 		Assert.isNotNull(s);
 
-		switch (s.length()) {
-			case 2:
-				if ("if".equals(s)) //$NON-NLS-1$
-					return TokenIF;
-				if ("do".equals(s)) //$NON-NLS-1$
-					return TokenDO;
-				break;
-			case 3:
-				if ("for".equals(s)) //$NON-NLS-1$
-					return TokenFOR;
-				if ("try".equals(s)) //$NON-NLS-1$
-					return TokenTRY;
-				if ("new".equals(s)) //$NON-NLS-1$
-					return TokenNEW;
-				break;
-			case 4:
-				if ("case".equals(s)) //$NON-NLS-1$
-					return TokenCASE;
-				if ("else".equals(s)) //$NON-NLS-1$
-					return TokenELSE;
-				if ("enum".equals(s)) //$NON-NLS-1$
-					return TokenENUM;
-				if ("goto".equals(s)) //$NON-NLS-1$
-					return TokenGOTO;
-				break;
-			case 5:
-				if ("break".equals(s)) //$NON-NLS-1$
-					return TokenBREAK;
-				if ("catch".equals(s)) //$NON-NLS-1$
-					return TokenCATCH;
-				if ("class".equals(s)) //$NON-NLS-1$
-					return TokenCLASS;
-				if ("while".equals(s)) //$NON-NLS-1$
-					return TokenWHILE;
-				break;
-			case 6:
-				if ("return".equals(s)) //$NON-NLS-1$
-					return TokenRETURN;
-				if ("static".equals(s)) //$NON-NLS-1$
-					return TokenSTATIC;
-				if ("switch".equals(s)) //$NON-NLS-1$
-					return TokenSWITCH;
-				if ("throws".equals(s)) //$NON-NLS-1$
-					return TokenTHROWS;
-				break;
-			case 7:
-				if ("default".equals(s)) //$NON-NLS-1$
-					return TokenDEFAULT;
-				if ("finally".equals(s)) //$NON-NLS-1$
-					return TokenFINALLY;
-				break;
-			case 9:
-				if ("interface".equals(s)) //$NON-NLS-1$
-					return TokenINTERFACE;
-				break;
-			case 12:
-				if ("synchronized".equals(s)) //$NON-NLS-1$
-					return TokenSYNCHRONIZED;
-				break;
+		switch (s) {
+			case "if": //$NON-NLS-1$
+				return TokenIF;
+			case "do": //$NON-NLS-1$
+				return TokenDO;
+			case "for": //$NON-NLS-1$
+				return TokenFOR;
+			case "try": //$NON-NLS-1$
+				return TokenTRY;
+			case "new": //$NON-NLS-1$
+				return TokenNEW;
+			case "case": //$NON-NLS-1$
+				return TokenCASE;
+			case "else": //$NON-NLS-1$
+				return TokenELSE;
+			case "enum": //$NON-NLS-1$
+				return TokenENUM;
+			case "goto": //$NON-NLS-1$
+				return TokenGOTO;
+			case "break": //$NON-NLS-1$
+				return TokenBREAK;
+			case "catch": //$NON-NLS-1$
+				return TokenCATCH;
+			case "class": //$NON-NLS-1$
+				return TokenCLASS;
+			case "while": //$NON-NLS-1$
+				return TokenWHILE;
+			case "return": //$NON-NLS-1$
+				return TokenRETURN;
+			case "static": //$NON-NLS-1$
+				return TokenSTATIC;
+			case "switch": //$NON-NLS-1$
+				return TokenSWITCH;
+			case "throws": //$NON-NLS-1$
+				return TokenTHROWS;
+			case "default": //$NON-NLS-1$
+				return TokenDEFAULT;
+			case "finally": //$NON-NLS-1$
+				return TokenFINALLY;
+			case "interface": //$NON-NLS-1$
+				return TokenINTERFACE;
+			case "synchronized": //$NON-NLS-1$
+				return TokenSYNCHRONIZED;
+			default:
+				return TokenIDENT;
 		}
-		return TokenIDENT;
 	}
 
 	/**

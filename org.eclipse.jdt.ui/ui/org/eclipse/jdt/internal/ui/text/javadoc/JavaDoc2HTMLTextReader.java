@@ -231,25 +231,37 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 	}
 
 	private void handleTag(String tag, String tagContent) {
-
 		tagContent= tagContent.trim();
 
-		if (TagElement.TAG_PARAM.equals(tag))
-			fParameters.add(tagContent);
-		else if (TagElement.TAG_RETURN.equals(tag))
-			fReturn= tagContent;
-		else if (TagElement.TAG_EXCEPTION.equals(tag))
-			fExceptions.add(tagContent);
-		else if (TagElement.TAG_THROWS.equals(tag))
-			fExceptions.add(tagContent);
-		else if (TagElement.TAG_AUTHOR.equals(tag))
-			fAuthors.add(substituteQualification(tagContent));
-		else if (TagElement.TAG_SEE.equals(tag))
-			fSees.add(substituteQualification(tagContent));
-		else if (TagElement.TAG_SINCE.equals(tag))
-			fSince.add(substituteQualification(tagContent));
-		else if (tagContent != null)
+		if (tag != null) {
+			switch (tag) {
+				case TagElement.TAG_PARAM:
+					fParameters.add(tagContent);
+					return;
+				case TagElement.TAG_RETURN:
+					fReturn= tagContent;
+					return;
+				case TagElement.TAG_EXCEPTION:
+				case TagElement.TAG_THROWS:
+					fExceptions.add(tagContent);
+					return;
+				case TagElement.TAG_AUTHOR:
+					fAuthors.add(substituteQualification(tagContent));
+					return;
+				case TagElement.TAG_SEE:
+					fSees.add(substituteQualification(tagContent));
+					return;
+				case TagElement.TAG_SINCE:
+					fSince.add(substituteQualification(tagContent));
+					return;
+				default:
+					break;
+			}
+		}
+
+		if (tagContent != null) {
 			fRest.add(new Pair(tag, tagContent));
+		}
 	}
 
 	/*
@@ -286,47 +298,49 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 
 	private String printBlockTag(String tag, String tagContent) {
 
-		if (TagElement.TAG_LINK.equals(tag) || TagElement.TAG_LINKPLAIN.equals(tag)) {
+		if (tag != null) {
+			switch (tag) {
+				case TagElement.TAG_LINK:
+				case TagElement.TAG_LINKPLAIN:
+					char[] contentChars= tagContent.toCharArray();
+					boolean inParentheses= false;
+					int labelStart= 0;
+					for (int i= 0; i < contentChars.length; i++) {
+						char nextChar= contentChars[i];
 
-			char[] contentChars= tagContent.toCharArray();
-			boolean inParentheses= false;
-			int labelStart= 0;
+						// tagContent always has a leading space
+						if (i == 0 && Character.isWhitespace(nextChar)) {
+							labelStart= 1;
+							continue;
+						}
 
-			for (int i= 0; i < contentChars.length; i++) {
-				char nextChar= contentChars[i];
+						if (nextChar == '(') {
+							inParentheses= true;
+							continue;
+						}
 
-				// tagContent always has a leading space
-				if (i == 0 && Character.isWhitespace(nextChar)) {
-					labelStart= 1;
-					continue;
-				}
+						if (nextChar == ')') {
+							inParentheses= false;
+							continue;
+						}
 
-				if (nextChar == '(') {
-					inParentheses= true;
-					continue;
-				}
-
-				if (nextChar == ')') {
-					inParentheses= false;
-					continue;
-				}
-
-				// Stop at first whitespace that is not in parentheses
-				if (!inParentheses && Character.isWhitespace(nextChar)) {
-					labelStart= i+1;
+						// Stop at first whitespace that is not in parentheses
+						if (!inParentheses && Character.isWhitespace(nextChar)) {
+							labelStart= i+1;
+							break;
+						}
+					}
+					if (TagElement.TAG_LINK.equals(tag))
+						return "<code>" + substituteQualification(tagContent.substring(labelStart)) + "</code>";  //$NON-NLS-1$//$NON-NLS-2$
+					else
+						return substituteQualification(tagContent.substring(labelStart));
+				case TagElement.TAG_LITERAL:
+					return printLiteral(tagContent);
+				case TagElement.TAG_CODE:
+					return "<code>" + printLiteral(tagContent) + "</code>"; //$NON-NLS-1$//$NON-NLS-2$
+				default:
 					break;
-				}
 			}
-			if (TagElement.TAG_LINK.equals(tag))
-				return "<code>" + substituteQualification(tagContent.substring(labelStart)) + "</code>";  //$NON-NLS-1$//$NON-NLS-2$
-			else
-				return substituteQualification(tagContent.substring(labelStart));
-
-		} else if (TagElement.TAG_LITERAL.equals(tag)) {
-			return printLiteral(tagContent);
-
-		} else if (TagElement.TAG_CODE.equals(tag)) {
-			return "<code>" + printLiteral(tagContent) + "</code>"; //$NON-NLS-1$//$NON-NLS-2$
 		}
 
 		// If something went wrong at least replace the {} with the content

@@ -2898,45 +2898,39 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				}
 				return;
 			}
-			if (PreferenceConstants.EDITOR_MARK_TYPE_OCCURRENCES.equals(property)) {
-				fMarkTypeOccurrences= newBooleanValue;
-				return;
-			}
-			if (PreferenceConstants.EDITOR_MARK_METHOD_OCCURRENCES.equals(property)) {
-				fMarkMethodOccurrences= newBooleanValue;
-				return;
-			}
-			if (PreferenceConstants.EDITOR_MARK_CONSTANT_OCCURRENCES.equals(property)) {
-				fMarkConstantOccurrences= newBooleanValue;
-				return;
-			}
-			if (PreferenceConstants.EDITOR_MARK_FIELD_OCCURRENCES.equals(property)) {
-				fMarkFieldOccurrences= newBooleanValue;
-				return;
-			}
-			if (PreferenceConstants.EDITOR_MARK_LOCAL_VARIABLE_OCCURRENCES.equals(property)) {
-				fMarkLocalVariableypeOccurrences= newBooleanValue;
-				return;
-			}
-			if (PreferenceConstants.EDITOR_MARK_EXCEPTION_OCCURRENCES.equals(property)) {
-				fMarkExceptions= newBooleanValue;
-				return;
-			}
-			if (PreferenceConstants.EDITOR_MARK_METHOD_EXIT_POINTS.equals(property)) {
-				fMarkMethodExitPoints= newBooleanValue;
-				return;
-			}
-			if (PreferenceConstants.EDITOR_MARK_BREAK_CONTINUE_TARGETS.equals(property)) {
-				fMarkBreakContinueTargets= newBooleanValue;
-				return;
-			}
-			if (PreferenceConstants.EDITOR_MARK_IMPLEMENTORS.equals(property)) {
-				fMarkImplementors= newBooleanValue;
-				return;
-			}
-			if (PreferenceConstants.EDITOR_STICKY_OCCURRENCES.equals(property)) {
-				fStickyOccurrenceAnnotations= newBooleanValue;
-				return;
+			switch (property) {
+				case PreferenceConstants.EDITOR_MARK_TYPE_OCCURRENCES:
+					fMarkTypeOccurrences= newBooleanValue;
+					return;
+				case PreferenceConstants.EDITOR_MARK_METHOD_OCCURRENCES:
+					fMarkMethodOccurrences= newBooleanValue;
+					return;
+				case PreferenceConstants.EDITOR_MARK_CONSTANT_OCCURRENCES:
+					fMarkConstantOccurrences= newBooleanValue;
+					return;
+				case PreferenceConstants.EDITOR_MARK_FIELD_OCCURRENCES:
+					fMarkFieldOccurrences= newBooleanValue;
+					return;
+				case PreferenceConstants.EDITOR_MARK_LOCAL_VARIABLE_OCCURRENCES:
+					fMarkLocalVariableypeOccurrences= newBooleanValue;
+					return;
+				case PreferenceConstants.EDITOR_MARK_EXCEPTION_OCCURRENCES:
+					fMarkExceptions= newBooleanValue;
+					return;
+				case PreferenceConstants.EDITOR_MARK_METHOD_EXIT_POINTS:
+					fMarkMethodExitPoints= newBooleanValue;
+					return;
+				case PreferenceConstants.EDITOR_MARK_BREAK_CONTINUE_TARGETS:
+					fMarkBreakContinueTargets= newBooleanValue;
+					return;
+				case PreferenceConstants.EDITOR_MARK_IMPLEMENTORS:
+					fMarkImplementors= newBooleanValue;
+					return;
+				case PreferenceConstants.EDITOR_STICKY_OCCURRENCES:
+					fStickyOccurrenceAnnotations= newBooleanValue;
+					return;
+				default:
+					break;
 			}
 			if (SemanticHighlightings.affectsEnablement(getPreferenceStore(), event)) {
 				if (isSemanticHighlightingEnabled())
@@ -2976,35 +2970,34 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				return;
 			}
 
-			if (PreferenceConstants.EDITOR_FOLDING_PROVIDER.equals(property)) {
-				if (sourceViewer instanceof ProjectionViewer) {
-					ProjectionViewer projectionViewer= (ProjectionViewer) sourceViewer;
-					if (fProjectionModelUpdater != null)
-						fProjectionModelUpdater.uninstall();
-					// either freshly enabled or provider changed
-					fProjectionModelUpdater= JavaPlugin.getDefault().getFoldingStructureProviderRegistry().getCurrentFoldingProvider();
-					if (fProjectionModelUpdater != null) {
-						fProjectionModelUpdater.install(this, projectionViewer);
+			switch (property) {
+				case PreferenceConstants.EDITOR_FOLDING_PROVIDER:
+					if (sourceViewer instanceof ProjectionViewer) {
+						ProjectionViewer projectionViewer= (ProjectionViewer) sourceViewer;
+						if (fProjectionModelUpdater != null)
+							fProjectionModelUpdater.uninstall();
+						// either freshly enabled or provider changed
+						fProjectionModelUpdater= JavaPlugin.getDefault().getFoldingStructureProviderRegistry().getCurrentFoldingProvider();
+						if (fProjectionModelUpdater != null) {
+							fProjectionModelUpdater.install(this, projectionViewer);
+						}
 					}
-				}
-				return;
-			}
-
-			if (DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE.equals(property)
-					|| DefaultCodeFormatterConstants.FORMATTER_INDENTATION_SIZE.equals(property)
-					|| DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR.equals(property)) {
-				StyledText textWidget= sourceViewer.getTextWidget();
-				int tabWidth= getSourceViewerConfiguration().getTabWidth(sourceViewer);
-				if (textWidget.getTabs() != tabWidth)
-					textWidget.setTabs(tabWidth);
-				return;
-			}
-
-			if (PreferenceConstants.EDITOR_FOLDING_ENABLED.equals(property)) {
-				if (sourceViewer instanceof ProjectionViewer) {
-					new ToggleFoldingRunner().runWhenNextVisible();
-				}
-				return;
+					return;
+				case DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE:
+				case DefaultCodeFormatterConstants.FORMATTER_INDENTATION_SIZE:
+				case DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR:
+					StyledText textWidget= sourceViewer.getTextWidget();
+					int tabWidth= getSourceViewerConfiguration().getTabWidth(sourceViewer);
+					if (textWidget.getTabs() != tabWidth)
+						textWidget.setTabs(tabWidth);
+					return;
+				case PreferenceConstants.EDITOR_FOLDING_ENABLED:
+					if (sourceViewer instanceof ProjectionViewer) {
+						new ToggleFoldingRunner().runWhenNextVisible();
+					}
+					return;
+				default:
+					break;
 			}
 
 		} finally {

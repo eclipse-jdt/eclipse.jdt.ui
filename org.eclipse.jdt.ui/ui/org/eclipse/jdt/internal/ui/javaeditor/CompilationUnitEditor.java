@@ -1581,8 +1581,6 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 				return '[';
 
 			case '"':
-				return character;
-
 			case '\'':
 				return character;
 
@@ -1604,34 +1602,33 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 
 				String p= event.getProperty();
 
-				if (CLOSE_BRACKETS.equals(p)) {
-					fBracketInserter.setCloseBracketsEnabled(getPreferenceStore().getBoolean(p));
-					return;
-				}
-
-				if (CLOSE_STRINGS.equals(p)) {
-					fBracketInserter.setCloseStringsEnabled(getPreferenceStore().getBoolean(p));
-					return;
-				}
-
-				if (JavaCore.COMPILER_SOURCE.equals(p)) {
-					boolean closeAngularBrackets= JavaCore.compareJavaVersions(JavaCore.VERSION_1_5, getPreferenceStore().getString(p)) <= 0;
-					fBracketInserter.setCloseAngularBracketsEnabled(closeAngularBrackets);
-				}
-
-				if (SPACES_FOR_TABS.equals(p)) {
-					if (isTabsToSpacesConversionEnabled())
-						installTabsToSpacesConverter();
-					else
-						uninstallTabsToSpacesConverter();
-					return;
-				}
-
-				if (PreferenceConstants.EDITOR_SMART_TAB.equals(p)) {
-					if (getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_TAB)) {
-						setActionActivationCode("IndentOnTab", '\t', -1, SWT.NONE); //$NON-NLS-1$
-					} else {
-						removeActionActivationCode("IndentOnTab"); //$NON-NLS-1$
+				if (p != null) {
+					switch (p) {
+						case CLOSE_BRACKETS:
+							fBracketInserter.setCloseBracketsEnabled(getPreferenceStore().getBoolean(p));
+							return;
+						case CLOSE_STRINGS:
+							fBracketInserter.setCloseStringsEnabled(getPreferenceStore().getBoolean(p));
+							return;
+						case SPACES_FOR_TABS:
+							if (isTabsToSpacesConversionEnabled())
+								installTabsToSpacesConverter();
+							else
+								uninstallTabsToSpacesConverter();
+							return;
+						case JavaCore.COMPILER_SOURCE:
+							boolean closeAngularBrackets= JavaCore.compareJavaVersions(JavaCore.VERSION_1_5, getPreferenceStore().getString(p)) <= 0;
+							fBracketInserter.setCloseAngularBracketsEnabled(closeAngularBrackets);
+							break;
+						case PreferenceConstants.EDITOR_SMART_TAB:
+							if (getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_TAB)) {
+								setActionActivationCode("IndentOnTab", '\t', -1, SWT.NONE); //$NON-NLS-1$
+							} else {
+								removeActionActivationCode("IndentOnTab"); //$NON-NLS-1$
+							}
+							break;
+						default:
+							break;
 					}
 				}
 

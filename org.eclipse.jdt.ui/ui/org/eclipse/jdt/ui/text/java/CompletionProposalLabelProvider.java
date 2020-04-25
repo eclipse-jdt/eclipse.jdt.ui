@@ -85,15 +85,13 @@ public class CompletionProposalLabelProvider {
 		switch (kind) {
 			case CompletionProposal.METHOD_REF:
 			case CompletionProposal.CONSTRUCTOR_INVOCATION:
+			case CompletionProposal.ANONYMOUS_CLASS_DECLARATION:
+			case CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION:
 				paramList= appendUnboundedParameterList(new StyledString(), proposal).getString();
 				return org.eclipse.jdt.internal.core.manipulation.util.Strings.markJavaElementLabelLTR(paramList);
 			case CompletionProposal.TYPE_REF:
 			case CompletionProposal.JAVADOC_TYPE_REF:
 				paramList= appendTypeParameterList(new StyledString(), proposal).getString();
-				return org.eclipse.jdt.internal.core.manipulation.util.Strings.markJavaElementLabelLTR(paramList);
-			case CompletionProposal.ANONYMOUS_CLASS_DECLARATION:
-			case CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION:
-				paramList= appendUnboundedParameterList(new StyledString(), proposal).getString();
 				return org.eclipse.jdt.internal.core.manipulation.util.Strings.markJavaElementLabelLTR(paramList);
 			default:
 				Assert.isLegal(false);

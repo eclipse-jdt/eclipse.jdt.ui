@@ -461,6 +461,7 @@ public class ModifierCorrectionSubProcessor {
 					excludedModifiers= ~(Modifier.ABSTRACT | Modifier.FINAL | Modifier.STRICTFP);
 					break;
 				case IProblem.IllegalModifierForArgument:
+				case IProblem.IllegalModifierForVariable:
 					excludedModifiers= ~Modifier.FINAL;
 					break;
 				case IProblem.IllegalModifierForField:
@@ -471,9 +472,6 @@ public class ModifierCorrectionSubProcessor {
 					break;
 				case IProblem.IllegalModifierForConstructor:
 					excludedModifiers= ~(Modifier.PUBLIC | Modifier.PROTECTED | Modifier.PRIVATE);
-					break;
-				case IProblem.IllegalModifierForVariable:
-					excludedModifiers= ~Modifier.FINAL;
 					break;
 				case IProblem.IllegalModifierForEnum:
 					excludedModifiers= ~(Modifier.PUBLIC | Modifier.STRICTFP);

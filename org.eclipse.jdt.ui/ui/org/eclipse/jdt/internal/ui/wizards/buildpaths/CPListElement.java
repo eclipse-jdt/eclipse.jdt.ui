@@ -884,32 +884,44 @@ public class CPListElement {
 				CPListElementAttribute elem= (CPListElementAttribute) curr;
 				if (elem.isBuiltIn()) {
 					String key= elem.getKey();
-					if (OUTPUT.equals(key) || SOURCEATTACHMENT.equals(key)) {
-						appendEncodePath((IPath) elem.getValue(), buf).append(';');
-					} else if (EXCLUSION.equals(key) || INCLUSION.equals(key)) {
-						appendEncodedFilter((IPath[]) elem.getValue(), buf).append(';');
-					} else if (ACCESSRULES.equals(key)) {
-						appendEncodedAccessRules((IAccessRule[]) elem.getValue(), buf).append(';');
-					} else if (COMBINE_ACCESSRULES.equals(key)) {
-						buf.append(((Boolean) elem.getValue()).booleanValue()).append(';');
-					} else if (MODULE.equals(key)) {
-						Object value= elem.getValue();
-						if (value instanceof ModuleEncapsulationDetail[]) {
-							buf.append(MODULE+"=true;"); //$NON-NLS-1$
-							for (ModuleEncapsulationDetail detail : ((ModuleEncapsulationDetail[]) value)) {
-								if (detail instanceof ModulePatch)
-									buf.append(IClasspathAttribute.PATCH_MODULE+':'+detail.toString()).append(';');
-								if (detail instanceof ModuleAddExport)
-									buf.append(IClasspathAttribute.ADD_EXPORTS+':'+detail.toString()).append(';');
-								if (detail instanceof ModuleAddOpens)
-									buf.append(IClasspathAttribute.ADD_OPENS+':'+detail.toString()).append(';');
-								if (detail instanceof ModuleAddReads)
-									buf.append(IClasspathAttribute.ADD_READS+':'+detail.toString()).append(';');
-								if (detail instanceof LimitModules)
-									buf.append(IClasspathAttribute.LIMIT_MODULES+':'+detail.toString()).append(';');
-							}
-						} else {
-							buf.append(MODULE+"=false;"); //$NON-NLS-1$
+					if (key != null) {
+						switch (key) {
+							case OUTPUT:
+							case SOURCEATTACHMENT:
+								appendEncodePath((IPath) elem.getValue(), buf).append(';');
+								break;
+							case EXCLUSION:
+							case INCLUSION:
+								appendEncodedFilter((IPath[]) elem.getValue(), buf).append(';');
+								break;
+							case ACCESSRULES:
+								appendEncodedAccessRules((IAccessRule[]) elem.getValue(), buf).append(';');
+								break;
+							case COMBINE_ACCESSRULES:
+								buf.append(((Boolean) elem.getValue()).booleanValue()).append(';');
+								break;
+							case MODULE:
+								Object value= elem.getValue();
+								if (value instanceof ModuleEncapsulationDetail[]) {
+									buf.append(MODULE+"=true;"); //$NON-NLS-1$
+									for (ModuleEncapsulationDetail detail : ((ModuleEncapsulationDetail[]) value)) {
+										if (detail instanceof ModulePatch)
+											buf.append(IClasspathAttribute.PATCH_MODULE+':'+detail.toString()).append(';');
+										if (detail instanceof ModuleAddExport)
+											buf.append(IClasspathAttribute.ADD_EXPORTS+':'+detail.toString()).append(';');
+										if (detail instanceof ModuleAddOpens)
+											buf.append(IClasspathAttribute.ADD_OPENS+':'+detail.toString()).append(';');
+										if (detail instanceof ModuleAddReads)
+											buf.append(IClasspathAttribute.ADD_READS+':'+detail.toString()).append(';');
+										if (detail instanceof LimitModules)
+											buf.append(IClasspathAttribute.LIMIT_MODULES+':'+detail.toString()).append(';');
+									}
+								} else {
+									buf.append(MODULE+"=false;"); //$NON-NLS-1$
+								}
+								break;
+							default:
+								break;
 						}
 					}
 				} else {

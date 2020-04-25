@@ -305,6 +305,7 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 					descriptor= new JavaElementImageDescriptor(descriptor, JavaElementImageDescriptor.CONSTRUCTOR, JavaElementImageProvider.SMALL_SIZE);
 					break;
 				case METHODS:
+				case INIT:
 					descriptor= JavaElementImageProvider.getMethodImageDescriptor(false, visibility);
 					break;
 				case STATIC_FIELDS:
@@ -312,14 +313,7 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 					//add a static fields adornment to the image descriptor
 					descriptor= new JavaElementImageDescriptor(descriptor, JavaElementImageDescriptor.STATIC, JavaElementImageProvider.SMALL_SIZE);
 					break;
-				case STATIC_METHODS:
-					descriptor= JavaElementImageProvider.getMethodImageDescriptor(false, visibility);
-					//add a static methods adornment to the image descriptor
-					descriptor= new JavaElementImageDescriptor(descriptor, JavaElementImageDescriptor.STATIC, JavaElementImageProvider.SMALL_SIZE);
-					break;
-				case INIT:
-					descriptor= JavaElementImageProvider.getMethodImageDescriptor(false, visibility);
-					break;
+				case STATIC_METHODS://add a static methods adornment to the image descriptor
 				case STATIC_INIT:
 					descriptor= JavaElementImageProvider.getMethodImageDescriptor(false, visibility);
 					descriptor= new JavaElementImageDescriptor(descriptor, JavaElementImageDescriptor.STATIC, JavaElementImageProvider.SMALL_SIZE);

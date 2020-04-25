@@ -207,6 +207,7 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 								}
 								return false;
 							case IJavaElement.COMPILATION_UNIT:
+							case IJavaElement.JAVA_PROJECT:
 								return true;
 							case IJavaElement.IMPORT_CONTAINER:
 								return false;
@@ -214,8 +215,6 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 							case IJavaElement.PACKAGE_FRAGMENT_ROOT:
 								IPackageFragmentRoot root= (IPackageFragmentRoot) elem.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 								return (root.getKind() == IPackageFragmentRoot.K_SOURCE);
-							case IJavaElement.JAVA_PROJECT:
-								return true;
 						}
 					}
 				} else if (s instanceof LogicalPackage) {

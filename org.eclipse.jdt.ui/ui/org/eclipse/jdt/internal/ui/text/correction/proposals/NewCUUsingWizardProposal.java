@@ -409,9 +409,8 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
 				break;
 			case ASTNode.VARIABLE_DECLARATION_STATEMENT:
 			case ASTNode.FIELD_DECLARATION:
+			case ASTNode.PARAMETERIZED_TYPE: // Inheritance doesn't help: A<X> z= new A<String>(); ->
 				return null; // no guessing for LHS types, cannot be a supertype of a known type
-			case ASTNode.PARAMETERIZED_TYPE:
-				return null; // Inheritance doesn't help: A<X> z= new A<String>(); ->
 			case ASTNode.PROVIDES_DIRECTIVE:
 				if (node.getLocationInParent() == ProvidesDirective.IMPLEMENTATIONS_PROPERTY) {
 					Name serviceName= ((ProvidesDirective) parent).getName();

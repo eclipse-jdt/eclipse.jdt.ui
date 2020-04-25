@@ -77,9 +77,6 @@ public class JavaDocLocations {
 	private static IClasspathEntry getConvertedEntry(IClasspathEntry entry, IJavaProject project, Map<IPath, String> oldLocationMap) {
 		IPath path= null;
 		switch (entry.getEntryKind()) {
-			case IClasspathEntry.CPE_SOURCE:
-			case IClasspathEntry.CPE_PROJECT:
-				return null;
 			case IClasspathEntry.CPE_CONTAINER:
 				convertContainer(entry, project, oldLocationMap);
 				return null;
@@ -89,6 +86,8 @@ public class JavaDocLocations {
 			case IClasspathEntry.CPE_VARIABLE:
 				path= JavaCore.getResolvedVariablePath(entry.getPath());
 				break;
+			case IClasspathEntry.CPE_SOURCE:
+			case IClasspathEntry.CPE_PROJECT:
 			default:
 				return null;
 		}

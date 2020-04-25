@@ -650,7 +650,6 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaPa
 			return 2;
 
 		case SLASH_STAR_STAR:
-			return 3;
 		case TRIPLE_QUOTE:
 			return 3;
 		}

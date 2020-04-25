@@ -203,18 +203,23 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	 */
 	@Override
 	protected void buttonPressed(int buttonId) {
-		if (buttonId == IDialogConstants.SKIP_ID) {
-			boolean isLastPage= fCurrentPage == fNumberOfPages - 1 ? true : false;
-			turnPage(true, true);
-			if (isLastPage) {
-				buttonPressed(IDialogConstants.OK_ID);
-			}
-		} else if (buttonId == IDialogConstants.BACK_ID) {
-			turnPage(false, false);
-		} else if (buttonId == IDialogConstants.NEXT_ID) {
-			turnPage(true, false);
-		} else {
-			super.buttonPressed(buttonId);
+		switch (buttonId) {
+			case IDialogConstants.SKIP_ID:
+				boolean isLastPage= fCurrentPage == fNumberOfPages - 1 ? true : false;
+				turnPage(true, true);
+				if (isLastPage) {
+					buttonPressed(IDialogConstants.OK_ID);
+				}
+				break;
+			case IDialogConstants.BACK_ID:
+				turnPage(false, false);
+				break;
+			case IDialogConstants.NEXT_ID:
+				turnPage(true, false);
+				break;
+			default:
+				super.buttonPressed(buttonId);
+				break;
 		}
 	}
 

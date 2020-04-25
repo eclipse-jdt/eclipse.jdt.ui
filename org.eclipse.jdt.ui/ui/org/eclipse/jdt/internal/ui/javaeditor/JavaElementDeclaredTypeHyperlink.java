@@ -128,26 +128,32 @@ public class JavaElementDeclaredTypeHyperlink implements IHyperlink {
 			}
 		}
 		int kind= Signature.getTypeSignatureKind(typeSignature);
-		if (kind == Signature.ARRAY_TYPE_SIGNATURE) {
-			typeSignature= Signature.getElementType(typeSignature);
-		} else if (kind == Signature.CLASS_TYPE_SIGNATURE) {
-			typeSignature= Signature.getTypeErasure(typeSignature);
-		} else if (kind == Signature.UNION_TYPE_SIGNATURE) {
-			ArrayList<IType> types= new ArrayList<>();
-			for (String typeBound : Signature.getUnionTypeBounds(typeSignature)) {
-				String typeErasure= Signature.getTypeErasure(typeBound);
-				IType type= getType(typeErasure);
-				if (type != null) {
-					types.add(type);
+		switch (kind) {
+			case Signature.ARRAY_TYPE_SIGNATURE:
+				typeSignature= Signature.getElementType(typeSignature);
+				break;
+			case Signature.CLASS_TYPE_SIGNATURE:
+				typeSignature= Signature.getTypeErasure(typeSignature);
+				break;
+			case Signature.UNION_TYPE_SIGNATURE:
+				ArrayList<IType> types= new ArrayList<>();
+				for (String typeBound : Signature.getUnionTypeBounds(typeSignature)) {
+					String typeErasure= Signature.getTypeErasure(typeBound);
+					IType type= getType(typeErasure);
+					if (type != null) {
+						types.add(type);
+					}
 				}
-			}
-			if (types.size() > 0) {
-				IJavaElement element= SelectionConverter.selectJavaElement(types.toArray(new IType[types.size()]), fOpenAction.getShell(), ActionMessages.OpenAction_error_title, ActionMessages.OpenAction_select_element);
-				if (element != null) {
-					fOpenAction.run(new StructuredSelection(element));
+				if (types.size() > 0) {
+					IJavaElement element= SelectionConverter.selectJavaElement(types.toArray(new IType[types.size()]), fOpenAction.getShell(), ActionMessages.OpenAction_error_title, ActionMessages.OpenAction_select_element);
+					if (element != null) {
+						fOpenAction.run(new StructuredSelection(element));
+					}
+					return;
 				}
-				return;
-			}
+				break;
+			default:
+				break;
 		}
 
 		IType type= getType(typeSignature);

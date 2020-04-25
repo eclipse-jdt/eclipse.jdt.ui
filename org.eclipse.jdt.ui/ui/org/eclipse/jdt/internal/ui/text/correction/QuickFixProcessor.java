@@ -735,8 +735,6 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				SuppressWarningsSubProcessor.addUnknownSuppressWarningProposals(context, problem, proposals);
 				break;
 			case IProblem.ProblemNotAnalysed:
-				SuppressWarningsSubProcessor.addRemoveUnusedSuppressWarningProposals(context, problem, proposals);
-				break;
 			case IProblem.UnusedWarningToken:
 				SuppressWarningsSubProcessor.addRemoveUnusedSuppressWarningProposals(context, problem, proposals);
 				break;

@@ -948,85 +948,97 @@ public class JavadocContentAccess2 {
 			if (tagName == null) {
 				start= tag;
 
-			} else if (TagElement.TAG_PARAM.equals(tagName)) {
-				List<? extends ASTNode> fragments= tag.fragments();
-				int size= fragments.size();
-				if (size > 0) {
-					Object first= fragments.get(0);
-					if (first instanceof SimpleName) {
-						String name= ((SimpleName) first).getIdentifier();
-						int paramIndex= parameterNames.indexOf(name);
-						if (paramIndex != -1) {
-							parameterNames.set(paramIndex, null);
-						}
-						parameters.add(tag);
-					} else if (size > 2 && first instanceof TextElement) {
-						String firstText= ((TextElement) first).getText();
-						if ("<".equals(firstText)) { //$NON-NLS-1$
-							Object second= fragments.get(1);
-							Object third= fragments.get(2);
-							if (second instanceof SimpleName && third instanceof TextElement) {
-								String name= ((SimpleName) second).getIdentifier();
-								String thirdText= ((TextElement) third).getText();
-								if (">".equals(thirdText)) { //$NON-NLS-1$
-									int paramIndex= typeParameterNames.indexOf(name);
-									if (paramIndex != -1) {
-										typeParameterNames.set(paramIndex, null);
+			} else {
+				switch (tagName) {
+					case TagElement.TAG_PARAM:
+						List<? extends ASTNode> fragments= tag.fragments();
+						int size= fragments.size();
+						if (size > 0) {
+							Object first= fragments.get(0);
+							if (first instanceof SimpleName) {
+								String name= ((SimpleName) first).getIdentifier();
+								int paramIndex= parameterNames.indexOf(name);
+								if (paramIndex != -1) {
+									parameterNames.set(paramIndex, null);
+								}
+								parameters.add(tag);
+							} else if (size > 2 && first instanceof TextElement) {
+								String firstText= ((TextElement) first).getText();
+								if ("<".equals(firstText)) { //$NON-NLS-1$
+									Object second= fragments.get(1);
+									Object third= fragments.get(2);
+									if (second instanceof SimpleName && third instanceof TextElement) {
+										String name= ((SimpleName) second).getIdentifier();
+										String thirdText= ((TextElement) third).getText();
+										if (">".equals(thirdText)) { //$NON-NLS-1$
+											int paramIndex= typeParameterNames.indexOf(name);
+											if (paramIndex != -1) {
+												typeParameterNames.set(paramIndex, null);
+											}
+											typeParameters.add(tag);
+										}
 									}
-									typeParameters.add(tag);
 								}
 							}
 						}
-					}
-				}
-
-			} else if (TagElement.TAG_RETURN.equals(tagName)) {
-				if (returnTag == null)
-					returnTag= tag; // the Javadoc tool only shows the first return tag
-
-			} else if (TagElement.TAG_EXCEPTION.equals(tagName) || TagElement.TAG_THROWS.equals(tagName)) {
-				exceptions.add(tag);
-				List<? extends ASTNode> fragments= tag.fragments();
-				if (fragments.size() > 0) {
-					Object first= fragments.get(0);
-					if (first instanceof Name) {
-						String name= ASTNodes.getSimpleNameIdentifier((Name) first);
-						int exceptionIndex= exceptionNames.indexOf(name);
-						if (exceptionIndex != -1) {
-							exceptionNames.set(exceptionIndex, null);
+						break;
+					case TagElement.TAG_RETURN:
+						if (returnTag == null)
+							returnTag= tag; // the Javadoc tool only shows the first return tag
+						break;
+					case TagElement.TAG_EXCEPTION:
+					case TagElement.TAG_THROWS:
+						exceptions.add(tag);
+						List<? extends ASTNode> fragments2= tag.fragments();
+						if (fragments2.size() > 0) {
+							Object first= fragments2.get(0);
+							if (first instanceof Name) {
+								String name= ASTNodes.getSimpleNameIdentifier((Name) first);
+								int exceptionIndex= exceptionNames.indexOf(name);
+								if (exceptionIndex != -1) {
+									exceptionNames.set(exceptionIndex, null);
+								}
+							}
 						}
-					}
+						break;
+					case TagElement.TAG_PROVIDES:
+						provides.add(tag);
+						break;
+					case TagElement.TAG_USES:
+						uses.add(tag);
+						break;
+					case TagElement.TAG_SINCE:
+						since.add(tag);
+						break;
+					case TagElement.TAG_VERSION:
+						versions.add(tag);
+						break;
+					case TagElement.TAG_AUTHOR:
+						authors.add(tag);
+						break;
+					case TagElement.TAG_SEE:
+						sees.add(tag);
+						break;
+					case TagElement.TAG_DEPRECATED:
+						if (deprecatedTag == null)
+							deprecatedTag= tag; // the Javadoc tool only shows the first deprecated tag
+						break;
+					case TagElement.TAG_API_NOTE:
+						apinote.add(tag);
+						break;
+					case TagElement.TAG_IMPL_SPEC:
+						implspec.add(tag);
+						break;
+					case TagElement.TAG_IMPL_NOTE:
+						implnote.add(tag);
+						break;
+					case TagElement.TAG_HIDDEN:
+						hidden.add(tag);
+						break;
+					default:
+						rest.add(tag);
+						break;
 				}
-
-			} else if (TagElement.TAG_PROVIDES.equals(tagName)) {
-				provides.add(tag);
-			} else if (TagElement.TAG_USES.equals(tagName)) {
-				uses.add(tag);
-			} else if (TagElement.TAG_SINCE.equals(tagName)) {
-				since.add(tag);
-			} else if (TagElement.TAG_VERSION.equals(tagName)) {
-				versions.add(tag);
-			} else if (TagElement.TAG_AUTHOR.equals(tagName)) {
-				authors.add(tag);
-			} else if (TagElement.TAG_SEE.equals(tagName)) {
-				sees.add(tag);
-			} else if (TagElement.TAG_DEPRECATED.equals(tagName)) {
-				if (deprecatedTag == null)
-					deprecatedTag= tag; // the Javadoc tool only shows the first deprecated tag
-			} else if (TagElement.TAG_API_NOTE.equals(tagName)) {
-				apinote.add(tag);
-			} else if (TagElement.TAG_IMPL_SPEC.equals(tagName)) {
-				implspec.add(tag);
-			} else if (TagElement.TAG_IMPL_NOTE.equals(tagName)) {
-				implnote.add(tag);
-			} else if (TagElement.TAG_USES.equals(tagName)) {
-				uses.add(tag);
-			} else if (TagElement.TAG_PROVIDES.equals(tagName)) {
-				provides.add(tag);
-			} else if (TagElement.TAG_HIDDEN.equals(tagName)) {
-				hidden.add(tag);
-			} else {
-				rest.add(tag);
 			}
 		}
 

@@ -310,14 +310,16 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 				}
 			}
 		}
-		if (severity == IMarker.SEVERITY_ERROR) {
+		switch (severity) {
+		case IMarker.SEVERITY_ERROR:
 			return ERRORTICK_ERROR;
-		} else if (severity == IMarker.SEVERITY_WARNING) {
+		case IMarker.SEVERITY_WARNING:
 			return ERRORTICK_WARNING;
-		} else if (severity == IMarker.SEVERITY_INFO) {
+		case IMarker.SEVERITY_INFO:
 			return ERRORTICK_INFO;
+		default:
+			return 0;
 		}
-		return 0;
 	}
 
 	private int getPackageErrorTicksFromMarkers(IPackageFragment pack) throws CoreException {
@@ -398,12 +400,18 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 			IMarker marker= isAnnotationInRange(model, annot, sourceElement);
 			if (marker != null) {
 				priority= Math.max(priority, marker.getAttribute(IMarker.SEVERITY, -1));
-				if (priority == IMarker.SEVERITY_INFO) {
+				switch (priority) {
+				case IMarker.SEVERITY_INFO:
 					info= ERRORTICK_INFO;
-				} else if (priority == IMarker.SEVERITY_WARNING) {
+					break;
+				case IMarker.SEVERITY_WARNING:
 					info= ERRORTICK_WARNING;
-				} else if (priority == IMarker.SEVERITY_ERROR) {
+					break;
+				case IMarker.SEVERITY_ERROR:
 					info= ERRORTICK_ERROR;
+					break;
+				default:
+					break;
 				}
 			}
 		}

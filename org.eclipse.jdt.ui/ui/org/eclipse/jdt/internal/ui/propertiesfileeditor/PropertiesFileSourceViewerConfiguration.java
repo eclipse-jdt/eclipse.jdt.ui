@@ -207,12 +207,18 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 	 */
 	@Override
 	public ITextDoubleClickStrategy getDoubleClickStrategy(ISourceViewer sourceViewer, String contentType) {
-		if (IDocument.DEFAULT_CONTENT_TYPE.equals(contentType))
-			return new PartitionDoubleClickSelector(getConfiguredDocumentPartitioning(sourceViewer), 0, 0, 0);
-		if (IPropertiesFilePartitions.COMMENT.equals(contentType))
-			return new PartitionDoubleClickSelector(getConfiguredDocumentPartitioning(sourceViewer), 0, 0);
-		if (IPropertiesFilePartitions.PROPERTY_VALUE.equals(contentType))
-			return new PartitionDoubleClickSelector(getConfiguredDocumentPartitioning(sourceViewer), 1, -1);
+		if (contentType != null) {
+			switch (contentType) {
+				case IDocument.DEFAULT_CONTENT_TYPE:
+					return new PartitionDoubleClickSelector(getConfiguredDocumentPartitioning(sourceViewer), 0, 0, 0);
+				case IPropertiesFilePartitions.COMMENT:
+					return new PartitionDoubleClickSelector(getConfiguredDocumentPartitioning(sourceViewer), 0, 0);
+				case IPropertiesFilePartitions.PROPERTY_VALUE:
+					return new PartitionDoubleClickSelector(getConfiguredDocumentPartitioning(sourceViewer), 1, -1);
+				default:
+					break;
+			}
+		}
 
 		return super.getDoubleClickStrategy(sourceViewer, contentType);
 	}

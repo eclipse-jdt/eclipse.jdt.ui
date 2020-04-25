@@ -41,6 +41,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -53,7 +54,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.workingsets.IWorkingSetIDs;
 
 public abstract class CleanUpAction extends SelectionDispatchAction {
@@ -139,16 +139,13 @@ public abstract class CleanUpAction extends SelectionDispatchAction {
 							case IJavaElement.TYPE:
 								return elem.getParent().getElementType() == IJavaElement.COMPILATION_UNIT; // for browsing perspective
 							case IJavaElement.COMPILATION_UNIT:
-								return true;
 							case IJavaElement.IMPORT_CONTAINER:
+							case IJavaElement.JAVA_PROJECT: // https://bugs.eclipse.org/bugs/show_bug.cgi?id=65638
 								return true;
 							case IJavaElement.PACKAGE_FRAGMENT:
 							case IJavaElement.PACKAGE_FRAGMENT_ROOT:
 								IPackageFragmentRoot root= (IPackageFragmentRoot)elem.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 								return (root.getKind() == IPackageFragmentRoot.K_SOURCE);
-							case IJavaElement.JAVA_PROJECT:
-								// https://bugs.eclipse.org/bugs/show_bug.cgi?id=65638
-								return true;
 						}
 					}
 				} else if (s instanceof LogicalPackage) {

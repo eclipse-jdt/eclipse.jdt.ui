@@ -242,7 +242,6 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 				case STATIC_FINAL:
 					return registry.get(new JavaElementImageDescriptor(JavaPluginImages.DESC_FIELD_PUBLIC, JavaElementImageDescriptor.STATIC | JavaElementImageDescriptor.FINAL, JavaElementImageProvider.SMALL_SIZE));
 				case ARGUMENT:
-					return registry.get(JavaPluginImages.DESC_OBJS_LOCAL_VARIABLE);
 				default:
 					return registry.get(JavaPluginImages.DESC_OBJS_LOCAL_VARIABLE);
 			}

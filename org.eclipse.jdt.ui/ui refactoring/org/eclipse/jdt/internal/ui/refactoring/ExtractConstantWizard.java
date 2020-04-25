@@ -188,15 +188,21 @@ public class ExtractConstantWizard extends RefactoringWizard {
 			if (fContentAssistProcessor == null)
 				return;
 
-			int flags;
-			if (fAccessModifier == JdtFlags.VISIBILITY_STRING_PRIVATE) {
-				flags= Flags.AccPrivate;
-			} else if (fAccessModifier == JdtFlags.VISIBILITY_STRING_PROTECTED) {
-				flags= Flags.AccProtected;
-			} else if (fAccessModifier == JdtFlags.VISIBILITY_STRING_PUBLIC) {
-				flags= Flags.AccPublic;
-			} else {
-				flags= Flags.AccDefault;
+			int flags= Flags.AccDefault;
+			if (fAccessModifier != null) {
+				switch (fAccessModifier) {
+				case JdtFlags.VISIBILITY_STRING_PRIVATE:
+					flags= Flags.AccPrivate;
+					break;
+				case JdtFlags.VISIBILITY_STRING_PROTECTED:
+					flags= Flags.AccProtected;
+					break;
+				case JdtFlags.VISIBILITY_STRING_PUBLIC:
+					flags= Flags.AccPublic;
+					break;
+				default:
+					break;
+				}
 			}
 			ImageDescriptor imageDesc= JavaElementImageProvider.getFieldImageDescriptor(false, flags);
 			imageDesc= new JavaElementImageDescriptor(imageDesc, JavaElementImageDescriptor.STATIC | JavaElementImageDescriptor.FINAL, JavaElementImageProvider.BIG_SIZE);

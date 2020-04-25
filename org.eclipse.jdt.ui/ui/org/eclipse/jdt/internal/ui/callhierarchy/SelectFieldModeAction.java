@@ -29,19 +29,24 @@ public class SelectFieldModeAction extends Action {
     private int fMode;
 
     public SelectFieldModeAction(CallHierarchyViewPart v, int mode) {
-        super(null, AS_RADIO_BUTTON);
-        if (mode == IJavaSearchConstants.REFERENCES) {
-            setText(CallHierarchyMessages.SelectFieldModeAction_all_references_label);
-            setDescription(CallHierarchyMessages.SelectFieldModeAction_all_references_description);
-        } else if (mode == IJavaSearchConstants.READ_ACCESSES) {
-            setText(CallHierarchyMessages.SelectFieldModeAction_read_accesses_label);
-            setDescription(CallHierarchyMessages.SelectFieldModeAction_read_accesses_description);
-        } else if (mode == IJavaSearchConstants.WRITE_ACCESSES) {
-            setText(CallHierarchyMessages.SelectFieldModeAction_write_accesses_label);
-            setDescription(CallHierarchyMessages.SelectFieldModeAction_write_accesses_description);
-        } else {
-            Assert.isTrue(false);
-        }
+		super(null, AS_RADIO_BUTTON);
+		switch (mode) {
+			case IJavaSearchConstants.REFERENCES:
+				setText(CallHierarchyMessages.SelectFieldModeAction_all_references_label);
+				setDescription(CallHierarchyMessages.SelectFieldModeAction_all_references_description);
+				break;
+			case IJavaSearchConstants.READ_ACCESSES:
+				setText(CallHierarchyMessages.SelectFieldModeAction_read_accesses_label);
+				setDescription(CallHierarchyMessages.SelectFieldModeAction_read_accesses_description);
+				break;
+			case IJavaSearchConstants.WRITE_ACCESSES:
+				setText(CallHierarchyMessages.SelectFieldModeAction_write_accesses_label);
+				setDescription(CallHierarchyMessages.SelectFieldModeAction_write_accesses_description);
+				break;
+			default:
+				Assert.isTrue(false);
+				break;
+		}
         fView= v;
         fMode= mode;
         // FIXME(stephan) adjust/create new help context
