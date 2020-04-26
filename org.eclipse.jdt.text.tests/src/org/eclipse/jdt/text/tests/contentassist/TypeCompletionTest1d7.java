@@ -13,9 +13,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.contentassist;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.IPackageFragment;
@@ -23,16 +20,20 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
+ * Those tests should run on Java Dolphin 1.7 .
+ *
  * @since 3.7
  */
-public class TypeCompletionTest17 extends TypeCompletionTest {
+public class TypeCompletionTest1d7 extends TypeCompletionTest {
 
-	private static final Class<TypeCompletionTest17> THIS= TypeCompletionTest17.class;
+	private static final Class<TypeCompletionTest1d7> THIS= TypeCompletionTest1d7.class;
 
 	public static Test setUpTest(Test test) {
-		return new Java17CompletionTestSetup(test);
+		return new Java1d7CompletionTestSetup(test);
 	}
 
 	public static Test suite() {
@@ -51,7 +52,7 @@ public class TypeCompletionTest17 extends TypeCompletionTest {
 
 	@Override
 	protected IPackageFragment getAnonymousTestPackage() throws CoreException {
-		return Java17CompletionTestSetup.getAnonymousTestPackage();
+		return Java1d7CompletionTestSetup.getAnonymousTestPackage();
 	}
 
 	@Override
@@ -88,7 +89,7 @@ public class TypeCompletionTest17 extends TypeCompletionTest {
 
 	@Override
 	public void testBug182468() throws Exception {
-		IPackageFragmentRoot src= (IPackageFragmentRoot)Java17CompletionTestSetup.getTestPackage().getParent();
+		IPackageFragmentRoot src= (IPackageFragmentRoot)Java1d7CompletionTestSetup.getTestPackage().getParent();
 
 		IPackageFragment package1= src.createPackageFragment("package1", true, null);
 		package1.createCompilationUnit("AClass.java", "package " + package1.getElementName() + "; public class AClass {}", true, null);

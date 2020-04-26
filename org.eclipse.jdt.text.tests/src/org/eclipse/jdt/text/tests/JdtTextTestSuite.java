@@ -46,7 +46,7 @@ import org.eclipse.jdt.text.tests.templates.TemplatesTestSuite;
 	PropertiesFileAutoEditStrategyTest.class,
 //	PartitionTokenScannerTest.class,
 	MarkOccurrenceTest.class,
-	MarkOccurrenceTest17.class,
+	MarkOccurrenceTest1d7.class,
 	MarkOccurrenceTest18.class,
 	PluginsNotLoadedTest.class,
 //	PluginsNotLoadedTest.addLoadedPlugIns(

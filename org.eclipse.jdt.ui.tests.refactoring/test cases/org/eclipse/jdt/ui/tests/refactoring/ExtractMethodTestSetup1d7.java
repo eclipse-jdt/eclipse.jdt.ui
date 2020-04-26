@@ -18,9 +18,12 @@ import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
-import org.eclipse.jdt.ui.tests.refactoring.rules.Java17Setup;
+import org.eclipse.jdt.ui.tests.refactoring.rules.Java1d7Setup;
 
-public class ExtractMethodTestSetup17 extends Java17Setup {
+/**
+ * This class is used to run tests on Java Dolphin 1.7 .
+ */
+public class ExtractMethodTestSetup1d7 extends Java1d7Setup {
 
 	private IPackageFragment fTry17Package;
 	private IPackageFragment fInvalidSelectionPackage;

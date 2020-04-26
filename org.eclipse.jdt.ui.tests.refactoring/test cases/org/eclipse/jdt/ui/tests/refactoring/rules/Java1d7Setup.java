@@ -20,7 +20,10 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
-public class Java17Setup extends RefactoringTestSetup {
+/**
+ * This class is used to run tests on Java Dolphin 1.7 .
+ */
+public class Java1d7Setup extends RefactoringTestSetup {
 	/*
 	 * @see org.eclipse.jdt.ui.tests.refactoring.RefactoringTestSetup#addRTJar(org.eclipse.jdt.core.IJavaProject)
 	 */

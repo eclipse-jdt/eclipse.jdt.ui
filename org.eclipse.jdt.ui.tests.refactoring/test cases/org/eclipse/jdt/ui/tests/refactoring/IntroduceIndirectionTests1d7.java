@@ -20,14 +20,17 @@ import org.junit.runner.RunWith;
 
 import org.eclipse.jdt.ui.tests.CustomBaseRunner;
 import org.eclipse.jdt.ui.tests.IgnoreInheritedTests;
-import org.eclipse.jdt.ui.tests.refactoring.rules.Java17Setup;
+import org.eclipse.jdt.ui.tests.refactoring.rules.Java1d7Setup;
 import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
+/**
+ * Those tests should run on Java Dolphin 1.7 .
+ */
 @IgnoreInheritedTests
 @RunWith(CustomBaseRunner.class)
-public class IntroduceIndirectionTests17 extends IntroduceIndirectionTests {
+public class IntroduceIndirectionTests1d7 extends IntroduceIndirectionTests {
 	@Rule
-	public RefactoringTestSetup rts= new Java17Setup();
+	public RefactoringTestSetup rts= new Java1d7Setup();
 
 // ---
 

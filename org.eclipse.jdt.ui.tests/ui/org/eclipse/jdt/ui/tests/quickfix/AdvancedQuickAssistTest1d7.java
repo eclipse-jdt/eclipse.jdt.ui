@@ -49,8 +49,11 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 
+/**
+ * Those tests should run on Java Dolphin 1.7 .
+ */
 @RunWith(JUnit4.class)
-public class AdvancedQuickAssistTest17 extends QuickFixTest {
+public class AdvancedQuickAssistTest1d7 extends QuickFixTest {
 
 	@Rule
     public ProjectTestSetup projectsetup = new Java1d7ProjectTestSetup();

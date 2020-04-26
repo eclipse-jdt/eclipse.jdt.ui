@@ -37,7 +37,7 @@ public class ContentAssistTestSuite {
 		suite.addTest(MethodParamsCompletionTest.suite());
 		suite.addTest(MethodParameterGuessingCompletionTest.suite());
 		suite.addTest(TypeCompletionTest.suite());
-		suite.addTest(TypeCompletionTest17.suite());
+		suite.addTest(TypeCompletionTest1d7.suite());
 		suite.addTest(SpecialMethodsCompletionTest.suite());
 		suite.addTest(CodeCompletionTest.suite());
 		suite.addTest(CodeCompletionTest18.suite());

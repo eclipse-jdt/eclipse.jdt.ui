@@ -13,8 +13,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.contentassist;
 
-import junit.framework.Test;
-
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.core.runtime.CoreException;
@@ -25,8 +23,12 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.ui.tests.core.Java1d7ProjectTestSetup;
 
+import junit.framework.Test;
 
-class Java17CompletionTestSetup extends Java1d7ProjectTestSetup {
+/**
+ * This class is used to run tests on Java Dolphin 1.7 .
+ */
+class Java1d7CompletionTestSetup extends Java1d7ProjectTestSetup {
 
 	public static IPackageFragment getTestPackage() throws CoreException {
 		IJavaProject project= getProject();
@@ -56,7 +58,7 @@ class Java17CompletionTestSetup extends Java1d7ProjectTestSetup {
 		return fragment;
 	}
 
-	public Java17CompletionTestSetup(Test test) {
+	public Java1d7CompletionTestSetup(Test test) {
 		super(test);
 	}
 }

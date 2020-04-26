@@ -14,23 +14,26 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
-import junit.framework.Test;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryCatchRefactoring;
 
-public class SurroundWithTests17 extends SurroundWithTests {
+import junit.framework.Test;
+
+/**
+ * Those tests should run on Java Dolphin 1.7 .
+ */
+public class SurroundWithTests1d7 extends SurroundWithTests {
 
 	private static SurroundWithTestSetup17 fgTestSetup;
 
-	public SurroundWithTests17(String name) {
+	public SurroundWithTests1d7(String name) {
 		super(name);
 	}
 
 	public static Test suite() {
-		fgTestSetup= new SurroundWithTestSetup17(new NoSuperTestsSuite(SurroundWithTests17.class));
+		fgTestSetup= new SurroundWithTestSetup17(new NoSuperTestsSuite(SurroundWithTests1d7.class));
 		return fgTestSetup;
 	}
 

@@ -25,10 +25,10 @@ import org.eclipse.jdt.ui.tests.IgnoreInheritedTests;
 
 @IgnoreInheritedTests
 @RunWith(CustomBaseRunner.class)
-public class ExtractMethodTests17 extends ExtractMethodTests {
+public class ExtractMethodTests1d7 extends ExtractMethodTests {
 
 	@Rule
-	public ExtractMethodTestSetup17 fgTestSetup= new ExtractMethodTestSetup17();
+	public ExtractMethodTestSetup1d7 fgTestSetup= new ExtractMethodTestSetup1d7();
 
 	protected void try17Test() throws Exception {
 		performTest(fgTestSetup.getTry17Package(), "A", COMPARE_WITH_OUTPUT, "try17_out");

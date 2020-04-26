@@ -15,10 +15,13 @@ package org.eclipse.jdt.ui.tests.refactoring;
 
 import junit.framework.Test;
 
-public class InlineConstantTests17 extends InlineConstantTests {
-	private static final Class<InlineConstantTests17> clazz = InlineConstantTests17.class;
+/**
+ * Those tests should run on Java Dolphin 1.7 .
+ */
+public class InlineConstantTests1d7 extends InlineConstantTests {
+	private static final Class<InlineConstantTests1d7> clazz = InlineConstantTests1d7.class;
 
-	public InlineConstantTests17(String name) {
+	public InlineConstantTests1d7(String name) {
 		super(name);
 	}
 
@@ -28,11 +31,11 @@ public class InlineConstantTests17 extends InlineConstantTests {
 	}
 
 	public static Test suite() {
-		return new Java17Setup(new NoSuperTestsSuite(clazz));
+		return new Java1d7Setup(new NoSuperTestsSuite(clazz));
 	}
 
 	public static Test setUpTest(Test someTest) {
-		return new Java17Setup(someTest);
+		return new Java1d7Setup(someTest);
 	}
 
 

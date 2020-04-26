@@ -24,16 +24,16 @@ import org.junit.runners.Suite;
 
 	//--code
 	ExtractMethodTests.class,
-	ExtractMethodTests17.class,
+	ExtractMethodTests1d7.class,
 	ExtractMethodTests18.class,
 	InlineMethodTests.class,
 	InlineMethodTests18.class,
 	ReplaceInvocationsTests.class,
 	SefTests.class,
 	InlineTempTests.class,
-	InlineTempTests17.class,
+	InlineTempTests1d7.class,
 	ExtractTempTests.class,
-	ExtractTempTests17.class,
+	ExtractTempTests1d7.class,
 	ExtractTempTests18.class,
 	RenameTempTests.class,
 	ExtractConstantTests.class,
@@ -42,9 +42,9 @@ import org.junit.runners.Suite;
 	ConvertAnonymousToNestedTests.class,
 	ConvertAnonymousToNestedTests18.class,
 	InlineConstantTests.class,
-	InlineConstantTests17.class,
+	InlineConstantTests1d7.class,
 	IntroduceParameterTests.class,
-	IntroduceParameterTests17.class,
+	IntroduceParameterTests1d7.class,
 	IntroduceFactoryTests.class,
 
 	//-- structure
@@ -75,14 +75,14 @@ import org.junit.runners.Suite;
 	MoveInstanceMethodTests.class,
 	MoveInstanceMethodTests18.class,
 	IntroduceIndirectionTests.class,
-	IntroduceIndirectionTests17.class,
+	IntroduceIndirectionTests1d7.class,
 	IntroduceIndirectionTests18.class,
 
 	//--types
 	RenameTypeTests.class,
 	RenameTypeParameterTests.class,
 	ChangeTypeRefactoringTests.class,
-	ChangeTypeRefactoringTests17.class,
+	ChangeTypeRefactoringTests1d7.class,
 
 	//--packages
 	RenamePackageTests.class,

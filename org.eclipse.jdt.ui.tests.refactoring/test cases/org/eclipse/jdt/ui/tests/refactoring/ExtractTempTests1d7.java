@@ -21,14 +21,17 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.ui.tests.CustomBaseRunner;
 import org.eclipse.jdt.ui.tests.IgnoreInheritedTests;
-import org.eclipse.jdt.ui.tests.refactoring.rules.Java17Setup;
+import org.eclipse.jdt.ui.tests.refactoring.rules.Java1d7Setup;
 import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
+/**
+ * Those tests should run on Java Dolphin 1.7 .
+ */
 @IgnoreInheritedTests
 @RunWith(CustomBaseRunner.class)
-public class ExtractTempTests17 extends ExtractTempTests {
+public class ExtractTempTests1d7 extends ExtractTempTests {
 	@Rule
-	public RefactoringTestSetup js= new Java17Setup();
+	public RefactoringTestSetup js= new Java1d7Setup();
 
 	@Override
 	protected String getTestFileName(boolean canExtract, boolean input){

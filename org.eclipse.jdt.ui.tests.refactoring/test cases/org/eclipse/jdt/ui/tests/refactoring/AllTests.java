@@ -24,7 +24,7 @@ import org.junit.runners.Suite;
 	PathTransformationTests.class,
 	RefactoringScannerTests.class,
 	SurroundWithTests.class,
-	SurroundWithTests17.class,
+	SurroundWithTests1d7.class,
 	SurroundWithTests18.class,
 })
 public class AllTests {

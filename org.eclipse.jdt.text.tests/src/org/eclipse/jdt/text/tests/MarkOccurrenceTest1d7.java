@@ -26,14 +26,15 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import org.eclipse.jdt.internal.core.manipulation.search.IOccurrencesFinder;
+import org.eclipse.jdt.internal.core.manipulation.search.IOccurrencesFinder.OccurrenceLocation;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
+
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.Java1d7ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.ui.search.ExceptionOccurrencesFinder;
-import org.eclipse.jdt.internal.core.manipulation.search.IOccurrencesFinder;
-import org.eclipse.jdt.internal.core.manipulation.search.IOccurrencesFinder.OccurrenceLocation;
 import org.eclipse.jdt.internal.ui.search.MethodExitsFinder;
 
 import junit.framework.Test;
@@ -42,9 +43,10 @@ import junit.framework.TestSuite;
 
 /**
  * Tests the Java Editor's occurrence marking feature.
+ * Those tests should run on Java Dolphin 1.7 .
  */
-public class MarkOccurrenceTest17 extends TestCase {
-	private static final Class<MarkOccurrenceTest17> THIS= MarkOccurrenceTest17.class;
+public class MarkOccurrenceTest1d7 extends TestCase {
+	private static final Class<MarkOccurrenceTest1d7> THIS= MarkOccurrenceTest1d7.class;
 
 	public static Test suite() {
 		return new Java1d7ProjectTestSetup(new TestSuite(THIS));
