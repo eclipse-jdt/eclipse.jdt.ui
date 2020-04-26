@@ -2496,10 +2496,6 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 
-		proposals= collectCorrections(cu, problems[1], null);
-		assertNumberOfProposals(proposals, 1);
-		assertCorrectLabels(proposals);
-
 		assertEqualStringsIgnoreOrder(
 				new String[] { preview1 },
 				new String[] { expected1 });
@@ -2550,13 +2546,303 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 
-		proposals= collectCorrections(cu, problems[0], null);
-		assertNumberOfProposals(proposals, 1);
-		assertCorrectLabels(proposals);
-
 		assertEqualStringsIgnoreOrder(
 				new String[] { preview1 },
 				new String[] { expected1 });
+	}
+
+	@Test
+	public void testUninitializedField_4() throws Exception {
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=37872
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public final int foo;\n");
+		buf.append("    public E(String bar) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOfProblems(1, problems);
+
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, problems[0], null);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public final int foo;\n");
+		buf.append("    public E(String bar, int foo) {\n");
+		buf.append("        this.foo = foo;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	@Test
+	public void testUninitializedField_5() throws Exception {
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=37872
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public final Object foo;\n");
+		buf.append("    public E(String foo) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOfProblems(1, problems);
+
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, problems[0], null);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public final Object foo;\n");
+		buf.append("    public E(String foo, Object foo2) {\n");
+		buf.append("        this.foo = foo2;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	@Test
+	public void testUninitializedField_6() throws Exception {
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=37872
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public final int foo1;\n");
+		buf.append("    public final int foo2;\n");
+		buf.append("    public E(String bar) {\n");
+		buf.append("        String a;\n");
+		buf.append("        this.foo1 = 0;\n");
+		buf.append("        String b;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOfProblems(1, problems);
+
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, problems[0], null);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public final int foo1;\n");
+		buf.append("    public final int foo2;\n");
+		buf.append("    public E(String bar) {\n");
+		buf.append("        String a;\n");
+		buf.append("        this.foo1 = 0;\n");
+		buf.append("        this.foo2 = 0;\n");
+		buf.append("        String b;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	@Test
+	public void testUninitializedField_7() throws Exception {
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=37872
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public final int foo1;\n");
+		buf.append("    public E() {\n");
+		buf.append("    }\n");
+		buf.append("    public E(String bar) {\n");
+		buf.append("        foo1 = 0;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOfProblems(1, problems);
+
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, problems[0], null);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public final int foo1;\n");
+		buf.append("    public E() {\n");
+		buf.append("        this.foo1 = 0;\n");
+		buf.append("    }\n");
+		buf.append("    public E(String bar) {\n");
+		buf.append("        foo1 = 0;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	@Test
+	public void testUninitializedField_8() throws Exception {
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=37872
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public final int foo1;\n");
+		buf.append("    public E() {\n");
+		buf.append("        int a = 0;\n");
+		buf.append("        int b = foo1;\n");
+		buf.append("    }\n");
+		buf.append("    public E(String bar) {\n");
+		buf.append("        foo1 = 0;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOfProblems(2, problems);
+
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, problems[0], null);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public final int foo1;\n");
+		buf.append("    public E() {\n");
+		buf.append("        this.foo1 = 0;\n");
+		buf.append("        int a = 0;\n");
+		buf.append("        int b = foo1;\n");
+		buf.append("    }\n");
+		buf.append("    public E(String bar) {\n");
+		buf.append("        foo1 = 0;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	@Test
+	public void testUninitializedField_9() throws Exception {
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=37872
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public final int a;\n");
+		buf.append("    public final int b;\n");
+		buf.append("    public E(int a) {\n");
+		buf.append("        a = b;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOfProblems(3, problems);
+
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, problems[0], null);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public final int a;\n");
+		buf.append("    public final int b;\n");
+		buf.append("    public E(int a) {\n");
+		buf.append("        this.a = 0;\n");
+		buf.append("        a = b;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public final int a;\n");
+		buf.append("    public final int b;\n");
+		buf.append("    public E(int a, int a2) {\n");
+		buf.append("        this.a = a2;\n");
+		buf.append("        a = b;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2 });
+	}
+
+	@Test
+	public void testUninitializedField_10() throws Exception {
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=37872
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public final int b;\n");
+		buf.append("    public E(int a) {\n");
+		buf.append("        int b = 0;\n");
+		buf.append("        a = b;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOfProblems(1, problems);
+
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, problems[0], null);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public final int b;\n");
+		buf.append("    public E(int a) {\n");
+		buf.append("        this.b = 0;\n");
+		buf.append("        int b = 0;\n");
+		buf.append("        a = b;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public final int b;\n");
+		buf.append("    public E(int a, int b2) {\n");
+		buf.append("        this.b = b2;\n");
+		buf.append("        int b = 0;\n");
+		buf.append("        a = b;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2 });
 	}
 
 	@Test

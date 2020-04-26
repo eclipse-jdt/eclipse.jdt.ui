@@ -184,6 +184,7 @@ public final class CorrectionMessages extends NLS {
 
 	public static String InitializeFieldAtDeclarationCorrectionProposal_description;
 	public static String InitializeFieldInConstructorCorrectionProposal_description;
+	public static String InitializeFieldWithConstructorParameterCorrectionProposal_description;
 
 	public static String UnimplementedMethodsCorrectionProposal_description;
 	public static String UnimplementedMethodsCorrectionProposal_enum_info;
