@@ -481,7 +481,7 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 					if (declarationClass instanceof TypeDeclaration) {
 						TypeDeclaration typeDeclaration= (TypeDeclaration) declarationClass;
 
-						final List<FieldDeclaration> nextFields= new ArrayList<>();
+						final List<FieldDeclaration> nextFields= new ArrayList<>(typeDeclaration.getFields().length);
 						boolean isBefore= true;
 
 						for (FieldDeclaration oneField : typeDeclaration.getFields()) {
@@ -497,26 +497,30 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 						ASTVisitor visitor= new ASTVisitor() {
 							@Override
 							public boolean visit(final SimpleName node) {
-								ASTNode declaration= ASTNodes.findDeclaration(node.resolveBinding(), declarationClass);
+								if ((!(node.getParent() instanceof QualifiedName) || node.getLocationInParent() != QualifiedName.NAME_PROPERTY)
+										&& (!(node.getParent() instanceof FieldAccess) || node.getLocationInParent() != FieldAccess.NAME_PROPERTY)
+										&& (!(node.getParent() instanceof SuperFieldAccess) || node.getLocationInParent() != SuperFieldAccess.NAME_PROPERTY)) {
+									ASTNode declaration= ASTNodes.findDeclaration(node.resolveBinding(), declarationClass);
 
-								if (declaration != null
-										&& declaration instanceof VariableDeclarationFragment
-										&& declaration.getParent() instanceof FieldDeclaration) {
-									FieldDeclaration currentField= (FieldDeclaration) declaration.getParent();
+									if (declaration != null
+											&& declaration instanceof VariableDeclarationFragment
+											&& declaration.getParent() instanceof FieldDeclaration) {
+										FieldDeclaration currentField= (FieldDeclaration) declaration.getParent();
 
-									if (nextFields.contains(currentField)) {
-										if ((currentField.getModifiers() & Modifier.STATIC) != 0) {
-											SimpleName copyOfClassName= (SimpleName) rewrite.createCopyTarget(typeDeclaration.getName());
-											QualifiedName replacement= ast.newQualifiedName(copyOfClassName, (SimpleName) rewrite.createMoveTarget(node));
-											rewrite.replace(node, replacement, group);
-										} else {
-											FieldAccess newFieldAccess= ast.newFieldAccess();
-											newFieldAccess.setExpression(ast.newThisExpression());
-											newFieldAccess.setName((SimpleName) rewrite.createMoveTarget(node));
-											rewrite.replace(node, newFieldAccess, group);
+										if (nextFields.contains(currentField)) {
+											if ((currentField.getModifiers() & Modifier.STATIC) != 0) {
+												SimpleName copyOfClassName= (SimpleName) rewrite.createCopyTarget(typeDeclaration.getName());
+												QualifiedName replacement= ast.newQualifiedName(copyOfClassName, (SimpleName) rewrite.createMoveTarget(node));
+												rewrite.replace(node, replacement, group);
+											} else {
+												FieldAccess newFieldAccess= ast.newFieldAccess();
+												newFieldAccess.setExpression(ast.newThisExpression());
+												newFieldAccess.setName((SimpleName) rewrite.createMoveTarget(node));
+												rewrite.replace(node, newFieldAccess, group);
+											}
+
+											return false;
 										}
-
-										return false;
 									}
 								}
 
