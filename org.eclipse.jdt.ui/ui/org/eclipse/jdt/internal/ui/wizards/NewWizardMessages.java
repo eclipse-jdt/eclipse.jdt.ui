@@ -195,6 +195,8 @@ public final class NewWizardMessages extends NLS {
 	public static String NewRecordCreationWizard_title;
 	public static String NewRecordWizardPage_title;
 	public static String NewRecordWizardPage_description;
+	public static String NewRecordWizardPage_methods_label;
+	public static String NewRecordWizardPage_methods_inherited;
 
 	public static String NewInterfaceCreationWizard_title;
 	public static String NewInterfaceWizardPage_title;

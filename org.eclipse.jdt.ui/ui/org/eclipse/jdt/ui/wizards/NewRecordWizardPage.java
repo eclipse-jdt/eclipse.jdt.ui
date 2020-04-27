@@ -16,18 +16,27 @@ package org.eclipse.jdt.ui.wizards;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFieldGroup;
 
 /**
  * Wizard page to  create a new record.
@@ -44,6 +53,9 @@ public class NewRecordWizardPage extends NewTypeWizardPage {
 
 	private final static String PAGE_NAME= "NewRecordWizardPage"; //$NON-NLS-1$
     private final static int TYPE = NewTypeWizardPage.RECORD_TYPE;
+    private final static String SETTINGS_CREATEUNIMPLEMENTED= "create_unimplemented"; //$NON-NLS-1$
+
+    private SelectionButtonDialogFieldGroup fMethodStubsButtons;
 
 	/**
 	 * Creates a new <code>NewRecordWizardPage</code>
@@ -53,6 +65,12 @@ public class NewRecordWizardPage extends NewTypeWizardPage {
 
 		setTitle(NewWizardMessages.NewRecordWizardPage_title);
 		setDescription(NewWizardMessages.NewRecordWizardPage_description);
+
+		String[] buttonNames= new String[] {
+				NewWizardMessages.NewRecordWizardPage_methods_inherited
+		};
+		fMethodStubsButtons= new SelectionButtonDialogFieldGroup(SWT.CHECK, buttonNames, 1);
+		fMethodStubsButtons.setLabelText(NewWizardMessages.NewRecordWizardPage_methods_label);
 	}
 
 	// -------- Initialization ---------
@@ -69,6 +87,17 @@ public class NewRecordWizardPage extends NewTypeWizardPage {
 		initContainerPage(jelem);
 		initTypePage(jelem);
 		doStatusUpdate();
+
+		boolean createUnimplemented= true;
+		IDialogSettings dialogSettings= getDialogSettings();
+		if (dialogSettings != null) {
+			IDialogSettings section= dialogSettings.getSection(PAGE_NAME);
+			if (section != null) {
+				createUnimplemented= section.getBoolean(SETTINGS_CREATEUNIMPLEMENTED);
+			}
+		}
+
+		setMethodStubSelection(createUnimplemented, true);
 	}
 
 	// ------ validation --------
@@ -128,6 +157,8 @@ public class NewRecordWizardPage extends NewTypeWizardPage {
 
 		createSuperInterfacesControls(composite, nColumns);
 
+		createMethodStubSelectionControls(composite, nColumns);
+
 		createCommentControls(composite, nColumns);
 		enableCommentControl(true);
 
@@ -135,6 +166,16 @@ public class NewRecordWizardPage extends NewTypeWizardPage {
 
 		Dialog.applyDialogFont(composite);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJavaHelpContextIds.NEW_RECORD_WIZARD_PAGE);
+	}
+
+	private void createMethodStubSelectionControls(Composite composite, int nColumns) {
+		Control labelControl= fMethodStubsButtons.getLabelControl(composite);
+		LayoutUtil.setHorizontalSpan(labelControl, nColumns);
+
+		DialogField.createEmptySpace(composite);
+
+		Control buttonGroup= fMethodStubsButtons.getSelectionButtonsGroup(composite);
+		LayoutUtil.setHorizontalSpan(buttonGroup, nColumns - 1);
 	}
 
 	/*
@@ -148,4 +189,50 @@ public class NewRecordWizardPage extends NewTypeWizardPage {
 		}
 	}
 
+	/**
+	 * Sets the selection state of the method stub checkboxes.
+	 *
+	 * @param createInherited initial selection state of the 'Create inherited abstract methods' checkbox.
+	 * @param canBeModified if <code>true</code> the method stub checkboxes can be changed by
+	 * the user. If <code>false</code> the buttons are "read-only"
+	 */
+	public void setMethodStubSelection(boolean createInherited, boolean canBeModified) {
+		fMethodStubsButtons.setSelection(0, createInherited);
+
+		fMethodStubsButtons.setEnabled(canBeModified);
+	}
+
+	/**
+	 * Returns the current selection state of the 'Create inherited abstract methods'
+	 * checkbox.
+	 *
+	 * @return the selection state of the 'Create inherited abstract methods' checkbox
+	 */
+	public boolean isCreateInherited() {
+		return fMethodStubsButtons.isSelected(0);
+	}
+
+	// ---- creation ----------------
+
+		/*
+		 * @see NewTypeWizardPage#createTypeMembers
+		 */
+		@Override
+		protected void createTypeMembers(IType type, ImportsManager imports, IProgressMonitor monitor) throws CoreException {
+			boolean doInherited= isCreateInherited();
+			createInheritedMethods(type, false, doInherited, imports, SubMonitor.convert(monitor, 1));
+
+			IDialogSettings dialogSettings= getDialogSettings();
+			if (dialogSettings != null) {
+				IDialogSettings section= dialogSettings.getSection(PAGE_NAME);
+				if (section == null) {
+					section= dialogSettings.addNewSection(PAGE_NAME);
+				}
+				section.put(SETTINGS_CREATEUNIMPLEMENTED, doInherited);
+			}
+
+			if (monitor != null) {
+				monitor.done();
+			}
+		}
 }
