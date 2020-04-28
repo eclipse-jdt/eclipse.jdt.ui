@@ -2336,13 +2336,17 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "package test;\n" //
 				+ "\n" //
 				+ "import java.util.Arrays;\n" //
+				+ "\n" //
 				+ "public final class X2 {\n" //
 				+ "  public static class Y {\n" //
 				+ "      public int foo(String x, String ...y) { return y.length + 1; }\n" //
 				+ "  }\n" //
 				+ "  public static class Z extends Y {\n" //
 				+ "      public int foo2() {\n" //
-				+ "          List<String> list= Arrays.asList(new String[] {\"one\", \"two\", \"three\"});\n" //
+				+ "          List<String> list= Arrays.asList(new String[] {\"one\"/* 1 */\n" //
+				+ "              + \"one\", \"two\"/* 2 */\n" //
+				+ "              + \"two\", \"three\"/* 3 */\n" //
+				+ "              + \"three\"});\n" //
 				+ "          return super.foo(\"x\", new String[] {\"y\", \"z\"});\n" //
 				+ "      }\n" //
 				+ "}\n";
@@ -2352,13 +2356,17 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "package test;\n" //
 				+ "\n" //
 				+ "import java.util.Arrays;\n" //
+				+ "\n" //
 				+ "public final class X2 {\n" //
 				+ "  public static class Y {\n" //
 				+ "      public int foo(String x, String ...y) { return y.length + 1; }\n" //
 				+ "  }\n" //
 				+ "  public static class Z extends Y {\n" //
 				+ "      public int foo2() {\n" //
-				+ "          List<String> list= Arrays.asList(\"one\", \"two\", \"three\");\n" //
+				+ "          List<String> list= Arrays.asList(\"one\"/* 1 */\n" //
+				+ "              + \"one\", \"two\"/* 2 */\n" //
+				+ "          + \"two\", \"three\"/* 3 */\n" //
+				+ "          + \"three\");\n" //
 				+ "          return super.foo(\"x\", \"y\", \"z\");\n" //
 				+ "      }\n" //
 				+ "}\n";

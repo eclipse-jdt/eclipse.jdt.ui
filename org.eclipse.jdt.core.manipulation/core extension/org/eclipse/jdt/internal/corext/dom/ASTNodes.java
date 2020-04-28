@@ -26,6 +26,7 @@ package org.eclipse.jdt.internal.corext.dom;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -2333,6 +2334,30 @@ public class ASTNodes {
 			return rewrittenNode;
 		}
 		return rewrite.createCopyTarget(node);
+	}
+
+	/**
+	 * Type-safe variant of {@link ASTRewrite#createMoveTarget(ASTNode)}.
+	 *
+	 * @param rewrite ASTRewrite for the given node
+	 * @param nodes the nodes to create a move placeholder for
+	 * @return the new placeholder nodes
+	 * @throws IllegalArgumentException if the node is null, or if the node
+	 * is not part of the rewrite's AST
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T extends ASTNode> List<T> createMoveTarget(final ASTRewrite rewrite, final Collection<T> nodes) {
+		if (nodes != null) {
+			List<T> newNodes= new ArrayList<>(nodes.size());
+
+			for (T node : nodes) {
+				newNodes.add((T) rewrite.createMoveTarget(node));
+			}
+
+			return newNodes;
+		}
+
+		return null;
 	}
 
 	/**
