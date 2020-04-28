@@ -14,7 +14,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
-import com.ibm.icu.text.MessageFormat;
+import java.text.MessageFormat;
 
 /**
  * Helper class to format message strings.

@@ -35,7 +35,6 @@ Require-Bundle:
  org.eclipse.core.filebuffers.tests,
  org.eclipse.jdt.ui.tests,
  org.eclipse.test.performance,
- com.ibm.icu,
  org.eclipse.jdt.core.manipulation,
  org.eclipse.core.expressions
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8

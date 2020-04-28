@@ -60,5 +60,4 @@ Export-Package: org.eclipse.jdt.core.manipulation,
  org.eclipse.jdt.internal.ui.text.correction.proposals;x-friends:="org.eclipse.jdt.ui",
  org.eclipse.jdt.internal.ui.text.template.contentassist;x-friends:="org.eclipse.jdt.ui",
  org.eclipse.jdt.internal.ui.util;x-friends:="org.eclipse.jdt.ui"
-Import-Package: com.ibm.icu.text;version="60.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
