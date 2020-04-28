@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -66,7 +67,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	public ProjectTestSetup projectsetup= new ProjectTestSetup();
 
 	private IJavaProject fJProject1;
-	private IPackageFragmentRoot fSourceFolder;
+	IPackageFragmentRoot fSourceFolder;
 	private FixCorrectionProposal fConvertLoopProposal;
 
 	@Before
@@ -3025,6 +3026,63 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		String expected= buf.toString();
 		assertEqualString(preview1, expected);
 	}
+
+	/**
+	 * In this case the refactoring is applied although the resulting code generates a warning at build time
+	 * A refactoring should not be applied and at the same time silently introduce build warnings
+	 *
+	 * @throws Exception
+	 */
+	@Ignore("Bug 560431")
+	@Test
+	public void testBug560431() throws Exception {
+		Hashtable<String, String> options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.ERROR);
+		JavaCore.setOptions(options);
+		String className= "test1";
+		String filename= "A.java";
+		IPackageFragment pack1= fSourceFolder.createPackageFragment(className, false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append(
+				"package test1;\n"+
+				"import java.util.ArrayList;\n" +
+				"public class A {\n" +
+				"	public void endVisit(ArrayList<Integer> node) {\n" +
+				"		StringBuilder buffer=new StringBuilder();\n" +
+				"		for (int i= 0; i < node.size(); i++) {\n" +
+				"			buffer.append(\"[]\"); //$NON-NLS-1$\n" +
+				"		}\n" +
+				"	}\n" +
+				"}\n");
+
+		ICompilationUnit cu= pack1.createCompilationUnit(filename, buf.toString(), false, null);
+
+		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(buf, cu);
+
+		assertNotNull(fConvertLoopProposal);
+
+		assertCorrectLabels(proposals);
+
+		String preview1= getPreviewContent(fConvertLoopProposal);
+
+		buf= new StringBuilder();
+		buf.append(
+				"package test1;\n"+
+				"import java.util.ArrayList;\n" +
+				"public class A {\n" +
+				"	public void endVisit(ArrayList<Integer> node) {\n" +
+				"		StringBuilder buffer=new StringBuilder();\n" +
+				"		for (Integer element : node) {\n" +
+				"			buffer.append(\"[]\"); //$NON-NLS-1$\n" +
+				"		}\n" +
+				"	}\n" +
+				"}\n");
+		String expected= buf.toString();
+		assertEqualString(preview1, expected);
+
+		assertNoAdditionalProblems(pack1, preview1, className, filename, fSourceFolder);
+	}
+
 	private boolean satisfiesPrecondition(ICompilationUnit cu) {
 		ForStatement statement= getForStatement(cu);
 		ConvertLoopOperation op= new ConvertForLoopOperation(statement);

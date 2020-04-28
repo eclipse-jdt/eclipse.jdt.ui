@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -47,8 +48,12 @@ import org.eclipse.ltk.core.refactoring.TextFileChange;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IProblemRequestor;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -659,5 +664,34 @@ public class QuickFixTest {
 		for (int i=0; i<expectedChoices.length; i++) {
 			assertEquals("Unexpected choice", expectedChoices[i], sortedChoices.get(i));
 		}
+	}
+/**
+ * Computes the number of warnings the java file "filename" has.
+ * Then check if the "preview" source code has the same number of warnings.
+ * Throw error if the number changes.
+ *
+ * @param pack
+ * @param preview
+ * @param className
+ * @param filename
+ * @param fSourceFolder
+ * @throws JavaModelException
+ */
+	protected void assertNoAdditionalProblems(IPackageFragment pack, String preview, String className, String filename, IPackageFragmentRoot fSourceFolder) throws JavaModelException {
+		Hashtable<String, String> options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.ERROR);
+		JavaCore.setOptions(options);
+
+		ICompilationUnit cu= pack.getCompilationUnit(filename);
+		CompilationUnit astRoot= getASTRoot(cu);
+		IProblem[] problems= astRoot.getProblems();
+		int nrofproblems= problems.length;
+
+		pack.delete(true, null);
+		pack= fSourceFolder.createPackageFragment(className, false, null);
+		cu= pack.createCompilationUnit(filename, preview, false, null);
+		astRoot= getASTRoot(cu);
+		problems= astRoot.getProblems();
+		assertNumberOfProblems(nrofproblems, problems);
 	}
 }
