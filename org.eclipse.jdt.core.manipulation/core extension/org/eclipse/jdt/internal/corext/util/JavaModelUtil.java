@@ -82,7 +82,7 @@ public final class JavaModelUtil {
 	 */
 	public static final String VERSION_LATEST;
 	static {
-		VERSION_LATEST= JavaCore.VERSION_14; // make sure it is not inlined
+		VERSION_LATEST= JavaCore.VERSION_15; // make sure it is not inlined
 	}
 
 	public static final int VALIDATE_EDIT_CHANGED_CONTENT= 10003;
@@ -983,6 +983,8 @@ public final class JavaModelUtil {
 		String version= vMInstall.getJavaVersion();
 		if (version == null) {
 			return defaultCompliance;
+		} else if (version.startsWith(JavaCore.VERSION_15)) {
+			return JavaCore.VERSION_15;
 		} else if (version.startsWith(JavaCore.VERSION_14)) {
 			return JavaCore.VERSION_14;
 		} else if (version.startsWith(JavaCore.VERSION_13)) {
@@ -1025,7 +1027,9 @@ public final class JavaModelUtil {
 
 		// fallback:
 		String desc= executionEnvironment.getId();
-		if (desc.indexOf(JavaCore.VERSION_14) != -1) {
+		if (desc.indexOf(JavaCore.VERSION_15) != -1) {
+			return JavaCore.VERSION_15;
+		} else if (desc.indexOf(JavaCore.VERSION_14) != -1) {
 			return JavaCore.VERSION_14;
 		} else if (desc.indexOf(JavaCore.VERSION_13) != -1) {
 			return JavaCore.VERSION_13;
