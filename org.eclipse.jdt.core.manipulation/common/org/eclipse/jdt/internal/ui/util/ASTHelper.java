@@ -8,6 +8,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -25,6 +29,7 @@ public class ASTHelper {
 			case ASTNode.YIELD_STATEMENT:
 				return ast.apiLevel() >= AST.JLS14;
 			case ASTNode.TEXT_BLOCK:
+				return ast.apiLevel() >= AST.JLS15;
 			case ASTNode.RECORD_DECLARATION:
 				return ast.isPreviewEnabled();
 		}
