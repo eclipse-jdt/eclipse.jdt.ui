@@ -7154,9 +7154,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.unboxing">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.MergeConditionalBlocksCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.merge_conditional_blocks"
+            runAfter="org.eclipse.jdt.ui.cleanup.push_down_negation">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.MapMethodCleanUp"
             id="org.eclipse.jdt.ui.cleanup.use_directly_map_method"
-            runAfter="org.eclipse.jdt.ui.cleanup.push_down_negation">
+            runAfter="org.eclipse.jdt.ui.cleanup.merge_conditional_blocks">
       </cleanUp>
    </extension>
 

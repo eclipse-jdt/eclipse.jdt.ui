@@ -156,6 +156,7 @@ public class ASTNodes {
 	public static final int ERROR=					1 << 1;
 	public static final int INFO=					1 << 2;
 	public static final int PROBLEMS=				WARNING | ERROR | INFO;
+	public static final int EXCESSIVE_OPERAND_NUMBER= 5;
 
 	private static final Message[] EMPTY_MESSAGES= new Message[0];
 	private static final IProblem[] EMPTY_PROBLEMS= new IProblem[0];
@@ -760,6 +761,33 @@ public class ASTNodes {
 	}
 
 	/**
+	 * Casts the provided statement to an object of the provided type if type
+	 * matches.
+	 *
+	 * @param <T>       the required statement type
+	 * @param statement the statement to cast
+	 * @param stmtClass the class representing the required statement type
+	 * @return the provided statement as an object of the provided type if type matches, null otherwise
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T extends Statement> T as(final Statement statement, final Class<T> stmtClass) {
+		if (statement == null) {
+			return null;
+		}
+
+		List<Statement> statements= asList(statement);
+		if (statements.size() == 1) {
+			Statement oneStatement= statements.get(0);
+
+			if (stmtClass.isAssignableFrom(oneStatement.getClass())) {
+				return (T) oneStatement;
+			}
+		}
+
+		return null;
+	}
+
+	/**
 	 * Casts the provided expression to an object of the provided type if type matches.
 	 *
 	 * @param <T> the required expression type
@@ -817,6 +845,31 @@ public class ASTNodes {
 		results.addAll(extOps);
 
 		return results;
+	}
+
+	/**
+	 * Returns the number of logical operands in the expression.
+	 *
+	 * @param node The expression
+	 * @return the number of logical operands in the expression
+	 */
+	public static int getNbOperands(final Expression node) {
+		InfixExpression infixExpression= as(node, InfixExpression.class);
+
+		if (infixExpression == null
+				|| !hasOperator(infixExpression, InfixExpression.Operator.CONDITIONAL_AND, InfixExpression.Operator.CONDITIONAL_OR)
+				&& (!hasOperator(infixExpression, InfixExpression.Operator.AND, InfixExpression.Operator.OR, InfixExpression.Operator.XOR)
+						|| !hasType(infixExpression.getLeftOperand(), boolean.class.getCanonicalName(), Boolean.class.getCanonicalName()))) {
+			return 1;
+		}
+
+		int nbOperands= 0;
+
+		for (Expression operand : allOperands(infixExpression)) {
+			nbOperands+= getNbOperands(operand);
+		}
+
+		return nbOperands;
 	}
 
 	/**

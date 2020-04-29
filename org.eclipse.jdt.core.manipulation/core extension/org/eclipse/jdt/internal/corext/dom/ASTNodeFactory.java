@@ -40,6 +40,7 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
+import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
@@ -48,6 +49,7 @@ import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.UnionType;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
@@ -98,15 +100,40 @@ public class ASTNodeFactory {
 	 */
 	public static Expression parenthesizeIfNeeded(AST ast, Expression expression) {
 		switch (expression.getNodeType()) {
-			case ASTNode.ASSIGNMENT:
-			case ASTNode.CAST_EXPRESSION:
-			case ASTNode.CONDITIONAL_EXPRESSION:
-			case ASTNode.INFIX_EXPRESSION:
-			case ASTNode.INSTANCEOF_EXPRESSION:
-				return parenthesize(ast, expression);
+		case ASTNode.ANNOTATION_TYPE_DECLARATION:
+		case ASTNode.ANNOTATION_TYPE_MEMBER_DECLARATION:
+		case ASTNode.ANONYMOUS_CLASS_DECLARATION:
+		case ASTNode.ARRAY_ACCESS:
+		case ASTNode.ARRAY_CREATION:
+		case ASTNode.ARRAY_INITIALIZER:
+		case ASTNode.BOOLEAN_LITERAL:
+		case ASTNode.CHARACTER_LITERAL:
+		case ASTNode.CLASS_INSTANCE_CREATION:
+		case ASTNode.CREATION_REFERENCE:
+		case ASTNode.EXPRESSION_METHOD_REFERENCE:
+		case ASTNode.FIELD_ACCESS:
+		case ASTNode.MEMBER_REF:
+		case ASTNode.METHOD_INVOCATION:
+		case ASTNode.METHOD_REF:
+		case ASTNode.NULL_LITERAL:
+		case ASTNode.NUMBER_LITERAL:
+		case ASTNode.PARENTHESIZED_EXPRESSION:
+		case ASTNode.POSTFIX_EXPRESSION:
+		case ASTNode.PREFIX_EXPRESSION:
+		case ASTNode.QUALIFIED_NAME:
+		case ASTNode.SIMPLE_NAME:
+		case ASTNode.STRING_LITERAL:
+		case ASTNode.SUPER_FIELD_ACCESS:
+		case ASTNode.SUPER_METHOD_INVOCATION:
+		case ASTNode.SUPER_METHOD_REFERENCE:
+		case ASTNode.THIS_EXPRESSION:
+		case ASTNode.TYPE_LITERAL:
+		case ASTNode.TYPE_METHOD_REFERENCE:
+		case ASTNode.VARIABLE_DECLARATION_EXPRESSION:
+			return expression;
 
-			default:
-				return expression;
+		default:
+			return parenthesize(ast, expression);
 		}
 	}
 
@@ -121,6 +148,52 @@ public class ASTNodeFactory {
 		final ParenthesizedExpression pe= ast.newParenthesizedExpression();
 		pe.setExpression(expression);
 		return pe;
+	}
+
+	/**
+	 * Builds a new {@link PrefixExpression} instance using the not operator ('!').
+	 *
+	 * @param ast The AST to create the resulting node with.
+	 * @param expression the expression to negate
+	 * @return a new prefix expression
+	 */
+	public static Expression not(final AST ast, final Expression expression) {
+		final PrefixExpression prefixExpression= ast.newPrefixExpression();
+		prefixExpression.setOperator(PrefixExpression.Operator.NOT);
+		prefixExpression.setOperand(parenthesizeIfNeeded(ast, expression));
+		return prefixExpression;
+	}
+
+	/**
+	 * Negates the provided expression and applies the provided copy operation on
+	 * the returned expression.
+	 *
+	 * @param ast The AST to create the resulting node with.
+	 * @param rewrite the rewrite
+	 * @param expression the expression to negate
+	 * @param isMove the copy operation to perform
+	 * @return the negated expression, copied according to the copy operation
+	 */
+	public static Expression negate(final AST ast, final ASTRewrite rewrite, final Expression expression, final boolean isMove) {
+		Expression exprNoParen= ASTNodes.getUnparenthesedExpression(expression);
+
+		if (exprNoParen.getNodeType() == ASTNode.PREFIX_EXPRESSION) {
+			PrefixExpression prefixExpression= (PrefixExpression) exprNoParen;
+
+			if (ASTNodes.hasOperator(prefixExpression, PrefixExpression.Operator.NOT)) {
+				if (isMove) {
+					return (Expression) rewrite.createMoveTarget(prefixExpression.getOperand());
+				} else {
+					return (Expression) rewrite.createCopyTarget(prefixExpression.getOperand());
+				}
+			}
+		}
+
+		if (isMove) {
+			return not(ast, (Expression) rewrite.createMoveTarget(expression));
+		} else {
+			return not(ast, (Expression) rewrite.createCopyTarget(expression));
+		}
 	}
 
 	public static ASTNode newStatement(AST ast, String content) {

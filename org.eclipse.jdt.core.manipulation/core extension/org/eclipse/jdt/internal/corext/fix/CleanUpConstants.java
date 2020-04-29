@@ -935,6 +935,18 @@ public class CleanUpConstants {
 	 */
 	public static final String PUSH_DOWN_NEGATION= "cleanup.push_down_negation"; //$NON-NLS-1$
 
+	/**
+	 * Merge conditions of if/else if/else that have the same blocks.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.16
+	 */
+	public static final String MERGE_CONDITIONAL_BLOCKS= "cleanup.merge_conditional_blocks"; //$NON-NLS-1$
+
 
 	/**
 	 * Use directly map method.<br>
