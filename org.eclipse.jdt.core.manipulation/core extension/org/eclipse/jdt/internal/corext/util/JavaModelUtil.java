@@ -6,6 +6,11 @@
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
+
  * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
@@ -826,6 +831,10 @@ public final class JavaModelUtil {
 		return !isVersionLessThan(compliance, JavaCore.VERSION_14);
 	}
 
+	public static boolean is15OrHigher(String compliance) {
+		return !isVersionLessThan(compliance, JavaCore.VERSION_15);
+	}
+
 	/**
 	 * Checks if the given project or workspace has source compliance 1.5 or greater.
 	 *
@@ -911,6 +920,17 @@ public final class JavaModelUtil {
 	 */
 	public static boolean is14OrHigher(IJavaProject project) {
 		return is14OrHigher(getSourceCompliance(project));
+	}
+
+	/**
+	 * Checks if the given project or workspace has source compliance 14 or greater.
+	 *
+	 * @param project the project to test or <code>null</code> to test the workspace settings
+	 * @return <code>true</code> if the given project or workspace has source compliance 15 or
+	 *         greater.
+	 */
+	public static boolean is15OrHigher(IJavaProject project) {
+		return is15OrHigher(getSourceCompliance(project));
 	}
 
 	private static String getSourceCompliance(IJavaProject project) {

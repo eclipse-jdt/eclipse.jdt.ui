@@ -1,11 +1,16 @@
 /*******************************************************************************
- * Copyright (c) 2019 IBM Corporation and others.
+ * Copyright (c) 2019, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
  * https://www.eclipse.org/legal/epl-2.0/
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
+
  * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
@@ -26,10 +31,11 @@ import org.eclipse.jface.text.TextUtilities;
 
 import org.eclipse.jdt.core.IJavaProject;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.actions.IndentAction;
-import org.eclipse.jdt.internal.ui.text.correction.PreviewFeaturesSubProcessor;
 
 public class JavaMultiLineStringAutoIndentStrategy extends JavaStringAutoIndentStrategy {
 
@@ -55,8 +61,8 @@ public class JavaMultiLineStringAutoIndentStrategy extends JavaStringAutoIndentS
 			fullStr= document.get(line.getOffset(),line.getLength()).trim();
 		}
 		String fullTextBlockText= document.get(offset, length).trim();
-		boolean hasTextBlockEnded= PreviewFeaturesSubProcessor.isPreviewFeatureEnabled(fProject) && fullTextBlockText.endsWith(IndentAction.TEXT_BLOCK_STR);
-		boolean isTextBlock= PreviewFeaturesSubProcessor.isPreviewFeatureEnabled(fProject) && fullStr.endsWith(IndentAction.TEXT_BLOCK_STR);
+		boolean hasTextBlockEnded= JavaModelUtil.is15OrHigher(fProject) && fullTextBlockText.endsWith(IndentAction.TEXT_BLOCK_STR);
+		boolean isTextBlock= JavaModelUtil.is15OrHigher(fProject) && fullStr.endsWith(IndentAction.TEXT_BLOCK_STR);
 		boolean isLineDelimiter= isLineDelimiter(document, command.text);
 		if (isEditorWrapStrings() && isLineDelimiter && isTextBlock) {
 			if (isTextBlock) {

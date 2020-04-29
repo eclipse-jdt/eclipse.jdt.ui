@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -8,6 +8,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
+
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Kelly Campbell <kellyc@google.com> - [typing] String literal splitting should use formatter preferences - http://bugs.eclipse.org/48433
@@ -38,12 +43,12 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.IndentAction;
-import org.eclipse.jdt.internal.ui.text.correction.PreviewFeaturesSubProcessor;
 
 
 /**
@@ -194,7 +199,7 @@ public class JavaStringAutoIndentStrategy extends DefaultIndentLineAutoEditStrat
 		IRegion line= document.getLineInformationOfOffset(offset);
 		String string= document.get(line.getOffset(), offset - line.getOffset()).trim();
 		boolean isLineDelimiter= isLineDelimiter(document, command.text);
-		boolean isTextBlock= PreviewFeaturesSubProcessor.isPreviewFeatureEnabled(fProject) && string.endsWith(IndentAction.POTENTIAL_TEXT_BLOCK_STR) && isLineDelimiter;
+		boolean isTextBlock= JavaModelUtil.is15OrHigher(fProject) && string.endsWith(IndentAction.POTENTIAL_TEXT_BLOCK_STR) && isLineDelimiter;
 		if (isTextBlock) {
 			JavaMultiLineStringAutoIndentStrategy mlsStrategy= getMultiLineStringAutoIndentStrategy();
 			mlsStrategy.customizeDocumentCommand(document, command);

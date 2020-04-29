@@ -32,11 +32,12 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jdt.internal.ui.text.correction.PreviewFeaturesSubProcessor;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -465,7 +466,7 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaPa
 		 					}
 		 					if (docPartitioner instanceof FastJavaPartitioner) {
 		 						FastJavaPartitioner fjPartitioner= (FastJavaPartitioner) docPartitioner;
-		 						if (!fjPartitioner.hasPreviewEnabledValueChanged()) {
+		 						if (!fjPartitioner.hasTextBlockSupportedValueChanged()) {
 				 					ITypedRegion originalPartition= TextUtilities.getPartition(fCurrentDocument, IJavaPartitions.JAVA_PARTITIONING, fTokenOffset, false);
 									ITypedRegion startingPartition= TextUtilities.getPartition(fCurrentDocument, IJavaPartitions.JAVA_PARTITIONING, fTokenOffset+ fTokenLength+2, false);
 									fjPartitioner.resetPositionCache();
@@ -545,7 +546,7 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaPa
 	}
 
 	private boolean scanForTextBlockBeginning() {
-		if (!isEnablePreviewsAllowed()) {
+		if (!isTextBlockSupported()) {
 			return false;
 		}
 		int count= 0;
@@ -809,11 +810,11 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaPa
 		}
 	}
 
-	public boolean isEnablePreviewsAllowed() {
+	public boolean isTextBlockSupported() {
 		boolean isAllowed= false;
 		setJavaProject();
 		if (fJavaProject != null) {
-			isAllowed= PreviewFeaturesSubProcessor.isPreviewFeatureEnabled(fJavaProject);
+			isAllowed= JavaModelUtil.is15OrHigher(fJavaProject);
 		}
 		return isAllowed;
 	}
