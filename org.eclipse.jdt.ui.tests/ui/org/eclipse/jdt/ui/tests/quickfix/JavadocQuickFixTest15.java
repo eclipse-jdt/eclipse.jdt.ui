@@ -44,7 +44,7 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
 @RunWith(JUnit4.class)
-public class JavadocQuickFixTest14 extends QuickFixTest {
+public class JavadocQuickFixTest15 extends QuickFixTest {
 
 	@Rule
     public ProjectTestSetup projectsetup = new Java14ProjectTestSetup(true);
@@ -76,7 +76,7 @@ public class JavadocQuickFixTest14 extends QuickFixTest {
 		StubUtility.setCodeTemplate(CodeTemplateContextType.TYPECOMMENT_ID, res, null);
 
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		JavaProjectHelper.set14CompilerOptions(fJProject1, true);
+		JavaProjectHelper.set15CompilerOptions(fJProject1, true);
 		JavaProjectHelper.addRequiredModularProject(fJProject1, Java14ProjectTestSetup.getProject());
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
