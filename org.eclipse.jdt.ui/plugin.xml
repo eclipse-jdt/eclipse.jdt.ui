@@ -7317,6 +7317,36 @@
       	</action>
       </objectContribution>
   </extension>
+  <extension
+        point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            objectClass="org.eclipse.core.resources.IProject"
+            adaptable="true"
+            id="org.eclipse.jdt.ui.enable.preview.features">
+       	 <visibility>
+        	<and>
+            <objectState
+	            name="projectNature"
+	            value="org.eclipse.jdt.core.javanature"/>
+	        <objectState
+	        	name="open"
+	        	value="true"/>
+            <not>
+            <objectState
+	            name="projectNature"
+	            value="org.eclipse.pde.PluginNature"/>
+            </not>
+            </and>
+       	 </visibility>
+         <action
+            label="%enable.preview.features.label"
+            class="org.eclipse.jdt.internal.ui.actions.EnablePreviewFeaturesAction"
+            menubarPath="org.eclipse.ui.projectConfigure/additions"
+            enablesFor="1"
+            id="org.eclipse.jdt.ui.enable.preview.features.action">
+      	</action>
+      </objectContribution>
+  </extension>
 
   <extension
         point="org.eclipse.core.expressions.propertyTesters">
