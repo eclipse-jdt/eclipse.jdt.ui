@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2020 IBM Corporation and others.
+ * Copyright (c) 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -7,6 +7,10 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -30,6 +34,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.tests.core.rules.Java14ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
@@ -119,6 +125,43 @@ public class QuickFixTest15 extends QuickFixTest {
 //		String label= Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_combine_two_quickfixes, new String[] {label1, label2});
 //		assertProposalExists(proposals, label);
 //	}
+
+	@Test
+	public void testTextBlockGetNeedHigherComplianceProposal() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(Java14ProjectTestSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
+
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+
+		StringBuffer buf= new StringBuffer();
+		buf.append("module test {\n");
+		buf.append("}\n");
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class Cls1 {\n");
+		buf.append("	public static void main(String[] args) {\n");
+		buf.append("		String str= \"\"\"\n");
+		buf.append("					Hello\n");
+		buf.append("					World\n");
+		buf.append("					\"\"\";\n");
+		buf.append("		System.out.println(str);\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack.createCompilationUnit("Cls1.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1, null);
+
+		assertNumberOfProposals(proposals, 1);
+		String label= Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_change_project_compliance_description, "15");
+		assertProposalExists(proposals, label);
+	}
 
 	@Test
 	public void testNoEnablePreviewProposal() throws Exception {
