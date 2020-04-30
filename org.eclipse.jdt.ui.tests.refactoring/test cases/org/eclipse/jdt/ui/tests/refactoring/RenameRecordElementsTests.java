@@ -143,6 +143,74 @@ public class RenameRecordElementsTests extends GenericRefactoringTest {
 		}
 	}
 
+	private void renameRecordCompactConstructor2(String fieldName, String newFieldName, boolean updateReferences, boolean fail) throws Exception{
+		ParticipantTesting.reset();
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		ICompilationUnit cu2= createCUfromTestFile(getPackageP(), "B");
+		ICompilationUnit cu3= createCUfromTestFile(getPackageP(), "C");
+		ICompilationUnit cu4= createCUfromTestFile(getPackageP(), "D");
+		IType recordA= getType(cu, "A");
+		IField field= recordA.getField(fieldName);
+		IMethod method= recordA.getMethod(fieldName, new String[] {});
+		RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_FIELD);
+		descriptor.setJavaElement(field);
+		descriptor.setNewName(newFieldName);
+		descriptor.setUpdateReferences(updateReferences);
+		descriptor.setUpdateTextualOccurrences(false);
+		descriptor.setRenameGetters(false);
+		descriptor.setRenameSetters(false);
+
+		RenameRefactoring refactoring= (RenameRefactoring) createRefactoring(descriptor);
+		RenameFieldProcessor processor= (RenameFieldProcessor) refactoring.getProcessor();
+		assertEquals("getter rename enabled", false, processor.canEnableGetterRenaming() == null);
+		assertEquals("setter rename enabled", false, processor.canEnableSetterRenaming() == null);
+
+		List<IAnnotatable> elements= new ArrayList<>();
+		elements.add(field);
+		List<RenameArguments> args= new ArrayList<>();
+		args.add(new RenameArguments(newFieldName, updateReferences));
+		if (method != null && method.exists()) {
+			elements.add(method);
+			args.add(new RenameArguments(newFieldName, updateReferences));
+		}
+
+
+		String[] renameHandles= ParticipantTesting.createHandles(elements.toArray());
+
+		RefactoringStatus result= performRefactoring(refactoring);
+		if (fail) {
+			assertNotNull("was supposed to fail", result);
+		} else {
+			assertNull("was supposed to pass", result);
+			assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
+			assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("B")), cu2.getSource());
+			assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("C")), cu3.getSource());
+			assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("D")), cu4.getSource());
+
+			ParticipantTesting.testRename(
+				renameHandles,
+				args.toArray(new RenameArguments[args.size()]));
+
+			assertTrue("anythingToUndo", RefactoringCore.getUndoManager().anythingToUndo());
+			assertFalse("! anythingToRedo", RefactoringCore.getUndoManager().anythingToRedo());
+
+			RefactoringCore.getUndoManager().performUndo(null, new NullProgressMonitor());
+			assertEqualLines("invalid undo", getFileContents(getInputTestFileName("A")), cu.getSource());
+			assertEqualLines("invalid undo", getFileContents(getInputTestFileName("B")), cu2.getSource());
+			assertEqualLines("invalid undo", getFileContents(getInputTestFileName("C")), cu3.getSource());
+			assertEqualLines("invalid undo", getFileContents(getInputTestFileName("D")), cu4.getSource());
+
+			assertFalse("! anythingToUndo", RefactoringCore.getUndoManager().anythingToUndo());
+			assertTrue("anythingToRedo", RefactoringCore.getUndoManager().anythingToRedo());
+
+			RefactoringCore.getUndoManager().performRedo(null, new NullProgressMonitor());
+			assertEqualLines("invalid redo", getFileContents(getOutputTestFileName("A")), cu.getSource());
+			assertEqualLines("invalid redo", getFileContents(getOutputTestFileName("B")), cu2.getSource());
+			assertEqualLines("invalid redo", getFileContents(getOutputTestFileName("C")), cu3.getSource());
+			assertEqualLines("invalid redo", getFileContents(getOutputTestFileName("D")), cu4.getSource());
+		}
+	}
+
 	private void renameRecordExplicitAccessor(String methodName, String newMethodName, boolean updateReferences, boolean fail) throws Exception{
 		ParticipantTesting.reset();
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
@@ -241,6 +309,11 @@ public class RenameRecordElementsTests extends GenericRefactoringTest {
 	@Test
 	public void testRenameRecordCompactConstructorImplicitAccessor() throws Exception{
 		renameRecordCompactConstructor("f", "g", true, false);
+	}
+
+	@Test
+	public void testRenameRecordCompactConstructorImplicitAccessor2() throws Exception{
+		renameRecordCompactConstructor2("f", "g", true, false);
 	}
 
 	@Test

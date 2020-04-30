@@ -871,7 +871,8 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		Assert.isTrue(fField.exists());
 
 		IJavaSearchScope scope= RefactoringScopeFactory.create(fField.getDeclaringType());
-		SearchPattern pattern= SearchPattern.createPattern(fField.getElementName(), IJavaSearchConstants.METHOD,
+		String patternStr= getCurrentElementQualifier() + '.' + fField.getElementName();
+		SearchPattern pattern= SearchPattern.createPattern(patternStr, IJavaSearchConstants.METHOD,
 				IJavaSearchConstants.REFERENCES, SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE | SearchPattern.R_ERASURE_MATCH);
 		SearchResultGroup[] groupedResults= RefactoringSearchEngine.search(
 				pattern, scope, new MethodOccurenceCollector(fField.getElementName()), pm, status);
