@@ -86,7 +86,6 @@ public class VarCleanUp extends AbstractMultiFix {
 	@Override
 	public String getPreview() {
 		StringBuilder bld= new StringBuilder();
-		bld.append("\n"); //$NON-NLS-1$
 		if (isEnabled(CleanUpConstants.USE_VAR)) {
 			bld.append("var number = 0;\n"); //$NON-NLS-1$
 			bld.append("var list = new ArrayList<String>();\n"); //$NON-NLS-1$

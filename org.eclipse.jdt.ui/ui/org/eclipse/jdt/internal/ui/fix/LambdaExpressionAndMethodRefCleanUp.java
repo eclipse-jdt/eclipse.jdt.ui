@@ -103,7 +103,6 @@ public class LambdaExpressionAndMethodRefCleanUp extends AbstractMultiFix {
 	@Override
 	public String getPreview() {
 		StringBuilder bld= new StringBuilder();
-		bld.append("\n"); //$NON-NLS-1$
 
 		if (isEnabled(CleanUpConstants.SIMPLIFY_LAMBDA_EXPRESSION_AND_METHOD_REF)) {
 			bld.append("someString -> someString.trim().toLowerCase();\n"); //$NON-NLS-1$

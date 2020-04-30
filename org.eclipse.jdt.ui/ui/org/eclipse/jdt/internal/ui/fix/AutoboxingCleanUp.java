@@ -81,7 +81,6 @@ public class AutoboxingCleanUp extends AbstractMultiFix {
 	@Override
 	public String getPreview() {
 		StringBuilder bld= new StringBuilder();
-		bld.append("\n"); //$NON-NLS-1$
 		if (isEnabled(CleanUpConstants.USE_AUTOBOXING)) {
 			bld.append("Integer i = 0;\n"); //$NON-NLS-1$
 			bld.append("Character c = '*';\n"); //$NON-NLS-1$
