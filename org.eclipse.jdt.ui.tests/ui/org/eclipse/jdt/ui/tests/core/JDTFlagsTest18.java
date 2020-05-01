@@ -58,26 +58,28 @@ import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
-import org.eclipse.jdt.ui.tests.core.rules.Java18ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.Java1d8ProjectTestSetup;
 
+/**
+ * Those tests are made to run on Java Spider 1.8 .
+ */
 public class JDTFlagsTest18 {
-
 	private IJavaProject fJProject1;
 
 	private IPackageFragmentRoot fSourceFolder;
 
 	@Rule
-	public Java18ProjectTestSetup j18p= new Java18ProjectTestSetup();
+	public Java1d8ProjectTestSetup j18p= new Java1d8ProjectTestSetup();
 
 	@Before
 	public void setUp() throws Exception {
-		fJProject1= Java18ProjectTestSetup.getProject();
+		fJProject1= Java1d8ProjectTestSetup.getProject();
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}
 
 	@After
 	public void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJProject1, Java18ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject1, Java1d8ProjectTestSetup.getDefaultClasspath());
 	}
 
 	protected CompilationUnit getCompilationUnitNode(String source) {

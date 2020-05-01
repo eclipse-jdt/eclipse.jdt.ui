@@ -48,19 +48,19 @@ import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.tests.core.rules.Java18ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.Java1d8ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
 
 public class BindingLabels18Test extends AbstractBindingLabelsTest {
 
 	@Rule
-	public Java18ProjectTestSetup j18p= new Java18ProjectTestSetup();
+	public Java1d8ProjectTestSetup j18p= new Java1d8ProjectTestSetup();
 
 	@Override
 	@Before
 	public void setUp() throws Exception {
-		fJProject1= Java18ProjectTestSetup.getProject();
+		fJProject1= Java1d8ProjectTestSetup.getProject();
 		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
 		store.setValue(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES, false);
 	}
@@ -68,7 +68,7 @@ public class BindingLabels18Test extends AbstractBindingLabelsTest {
 	@Override
 	@After
 	public void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJProject1, Java18ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject1, Java1d8ProjectTestSetup.getDefaultClasspath());
 	}
 
 	@Test
@@ -250,7 +250,7 @@ public class BindingLabels18Test extends AbstractBindingLabelsTest {
 
 		IJavaElement lambdaType= lambdaMethod.getParent();
 		lab= getBindingLabel(lambdaType, JavaElementLabels.T_POST_QUALIFIED);
-// Bindings don't have the split identity of a lambda as expected from JavaElementLabelsTest18
+// Bindings don't have the split identity of a lambda as expected from JavaElementLabelsTest1d8
 		assertLinkMatch(lab, "accept(...) - {{org.test.C}}.{{org.test.C|c}}.() -> {...} {{java.util.function|IntConsumer}}");
 //		assertLinkMatch(lab, "() -> {...} IntConsumer - org.test.C.c");
 	}

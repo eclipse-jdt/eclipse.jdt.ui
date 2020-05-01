@@ -53,15 +53,17 @@ import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 
-import org.eclipse.jdt.ui.tests.refactoring.rules.Java18Setup;
+import org.eclipse.jdt.ui.tests.refactoring.rules.Java1d8Setup;
 import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
+/**
+ * Those tests are made to run on Java Spider 1.8 .
+ */
 public class RenameTests18 extends GenericRefactoringTest {
-
 	private static final String REFACTORING_PATH= "RenameTests18/";
 
 	@Rule
-	public RefactoringTestSetup fts= new Java18Setup() {
+	public RefactoringTestSetup fts= new Java1d8Setup() {
 		@Override
 		public void before() throws Exception {
 			JavaProjectHelper.PERFORM_DUMMY_SEARCH++;

@@ -30,13 +30,13 @@ import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
-import org.eclipse.jdt.ui.tests.core.rules.Java18ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.Java1d8ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 @RunWith(JUnit4.class)
 public class CleanUpTest1d8 extends CleanUpTestCase {
 	@Rule
-    public ProjectTestSetup projectsetup= new Java18ProjectTestSetup();
+    public ProjectTestSetup projectsetup= new Java1d8ProjectTestSetup();
 
 	@Override
 	@Before
@@ -47,12 +47,12 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 
 	@Override
 	protected IJavaProject getProject() {
-		return Java18ProjectTestSetup.getProject();
+		return Java1d8ProjectTestSetup.getProject();
 	}
 
 	@Override
 	protected IClasspathEntry[] getDefaultClasspath() throws CoreException {
-		return Java18ProjectTestSetup.getDefaultClasspath();
+		return Java1d8ProjectTestSetup.getDefaultClasspath();
 	}
 
 	@Test

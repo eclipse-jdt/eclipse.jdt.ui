@@ -87,7 +87,7 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileStore;
 	CleanUpAnnotationTest.class,
 	SaveParticipantTest.class,
 	CleanUpActionTest.class,
-	NullAnnotationsCleanUpTest18.class
+	NullAnnotationsCleanUpTest1d8.class
 })
 public class CleanUpTestCase extends QuickFixTest {
 

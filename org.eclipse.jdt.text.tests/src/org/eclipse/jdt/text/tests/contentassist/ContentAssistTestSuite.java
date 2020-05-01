@@ -40,7 +40,7 @@ public class ContentAssistTestSuite {
 		suite.addTest(TypeCompletionTest1d7.suite());
 		suite.addTest(SpecialMethodsCompletionTest.suite());
 		suite.addTest(CodeCompletionTest.suite());
-		suite.addTest(CodeCompletionTest18.suite());
+		suite.addTest(CodeCompletionTest1d8.suite());
 		suite.addTest(ContinuousTypingCompletionTest.suite());
 		suite.addTest(ChainCompletionTest.suite());
 		suite.addTest(PostFixCompletionTest.suite());

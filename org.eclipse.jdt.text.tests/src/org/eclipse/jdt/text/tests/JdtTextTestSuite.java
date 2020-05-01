@@ -47,7 +47,7 @@ import org.eclipse.jdt.text.tests.templates.TemplatesTestSuite;
 //	PartitionTokenScannerTest.class,
 	MarkOccurrenceTest.class,
 	MarkOccurrenceTest1d7.class,
-	MarkOccurrenceTest18.class,
+	MarkOccurrenceTest1d8.class,
 	PluginsNotLoadedTest.class,
 //	PluginsNotLoadedTest.addLoadedPlugIns(
 //			new String[] {
