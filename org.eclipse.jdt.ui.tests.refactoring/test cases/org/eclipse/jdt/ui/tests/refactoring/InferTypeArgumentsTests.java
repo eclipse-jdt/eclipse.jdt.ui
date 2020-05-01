@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,15 +14,18 @@
 
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.zip.ZipInputStream;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
-import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
@@ -46,29 +49,20 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester
 import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsRefactoring;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.ZipTools;
+import org.eclipse.jdt.ui.tests.refactoring.rules.Java16Setup;
+import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
-public class InferTypeArgumentsTests extends RefactoringTest {
-
+public class InferTypeArgumentsTests extends GenericRefactoringTest {
 	private static final boolean DETERMINE_ELEMENT_TYPE_FROM_CAST= false;
 	private static final boolean BUG_map_entrySet_iterator= true;
 
-	private static final Class<InferTypeArgumentsTests> clazz= InferTypeArgumentsTests.class;
 	private static final String REFACTORING_PATH= "InferTypeArguments/";
 
 	private boolean fAssumeCloneReturnsSameType= true;
 	private boolean fLeaveUnconstrainedRaw= true;
 
-	public static Test suite() {
-		return setUpTest(new TestSuite(clazz));
-	}
-
-	public static Test setUpTest(Test someTest) {
-		return new Java16Setup(someTest);
-	}
-
-	public InferTypeArgumentsTests(String name) {
-		super(name);
-	}
+	@Rule
+	public Java16Setup fgTestSetup= new Java16Setup();
 
 	@Override
 	protected String getRefactoringPath() {
@@ -118,7 +112,7 @@ public class InferTypeArgumentsTests extends RefactoringTest {
 		if (finalStatus.getSeverity() == RefactoringStatus.FATAL)
 			return false;
 
-		assertTrue("Validation check failed: " + op.getValidationStatus(), !op.getValidationStatus().hasFatalError());
+		assertFalse("Validation check failed: " + op.getValidationStatus(), op.getValidationStatus().hasFatalError());
 		assertNotNull("No Undo", op.getUndoChange());
 		return true;
 	}
@@ -133,26 +127,32 @@ public class InferTypeArgumentsTests extends RefactoringTest {
 		ZipTools.compareWithZipped(src, zis, JavaProjectHelper.JUNIT_SRC_ENCODING);
 	}
 
+	@Test
 	public void testCuQualifiedName() throws Exception {
 		performCuOK();
 	}
 
+	@Test
 	public void testCuAnonymous01() throws Exception {
 		performCuOK();
 	}
 
+	@Test
 	public void testCuTypeParams9() throws Exception {
 		performCuOK();
 	}
 
+	@Test
 	public void testCuExistingParameterized01() throws Exception {
 		performCuOK();
 	}
 
+	@Test
 	public void testCuGetClass() throws Exception {
 		performCuOK();
 	}
 
+	@Test
 	public void testCuGetClass2() throws Exception {
 		// Test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=211037
 		// In 1.6, Object#getClass() declares return type Class<?>, but in 1.5, it's Class<? extends Object>.
@@ -177,76 +177,92 @@ public class InferTypeArgumentsTests extends RefactoringTest {
 		}
 	}
 
+	@Test
 	public void testCuGetSuperclass() throws Exception {
 		performCuOK();
 	}
 
+	@Test
 	public void testCuTypeLiteral() throws Exception {
 		performCuOK();
 	}
 
+	@Test
 	public void testCuMethodTypeParam() throws Exception {
 		performCuOK();
 	}
 
+	@Test
 	public void testCuGetTakeClassStayRaw() throws Exception {
 		performCuOK();
 	}
 
+	@Test
 	public void testCuGetClassNewInstance() throws Exception {
 		performCuOK();
 	}
 
+	@Test
 	public void testCuSynchronizedList() throws Exception {
 		fLeaveUnconstrainedRaw= false;
 		performCuOK();
 	}
 
+	@Test
 	public void testCuAddAll() throws Exception {
 		performCuOK();
 	}
 
+	@Test
 	public void testCuNestedCells1() throws Exception {
 		createCUfromTestFile(getPackageP(), "Cell");
 		fLeaveUnconstrainedRaw= false;
 		performCuOK();
 	}
 
+	@Test
 	public void testCuNestedVectors0() throws Exception {
 		fLeaveUnconstrainedRaw= false;
 		performCuOK();
 	}
 
+	@Test
 	public void testCuNestedVectors1() throws Exception {
 		performCuOK();
 	}
 
+	@Test
 	public void testCuInferTypeVariable01() throws Exception {
 		performCuOK();
 	}
 
+	@Test
 	public void testCuBoxing01() throws Exception {
 		performCuOK();
 	}
 
+	@Test
 	public void testCuBoxing02() throws Exception {
 		performCuOK();
 	}
 
+	@Test
 	public void testCuConstructor01() throws Exception {
 		performCuOK();
 	}
 
+	@Test
 	public void testJUnit() throws Exception {
 		fAssumeCloneReturnsSameType= false;
 		fLeaveUnconstrainedRaw= true;
 		IJavaProject javaProject= JavaProjectHelper.createJavaProject("InferTypeArguments", "bin");
 		try {
 			IPackageFragmentRoot jdk= JavaProjectHelper.addRTJar(javaProject);
-			Assert.assertNotNull(jdk);
+			assertNotNull(jdk);
 
 			File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
-			Assert.assertTrue(junitSrcArchive != null && junitSrcArchive.exists());
+			assertNotNull(junitSrcArchive);
+            assertTrue(junitSrcArchive.exists());
 
 			IPackageFragmentRoot src= JavaProjectHelper.addSourceContainerWithImport(javaProject, "src", junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
 
@@ -261,6 +277,7 @@ public class InferTypeArgumentsTests extends RefactoringTest {
 
 	}
 
+	@Test
 	public void testJUnitWithCloneNotRaw() throws Exception {
 		fAssumeCloneReturnsSameType= true;
 		fLeaveUnconstrainedRaw= false;
@@ -268,10 +285,11 @@ public class InferTypeArgumentsTests extends RefactoringTest {
 		IJavaProject javaProject= JavaProjectHelper.createJavaProject("InferTypeArguments", "bin");
 		try {
 			IPackageFragmentRoot jdk= JavaProjectHelper.addRTJar(javaProject);
-			Assert.assertNotNull(jdk);
+			assertNotNull(jdk);
 
 			File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
-			Assert.assertTrue(junitSrcArchive != null && junitSrcArchive.exists());
+			assertNotNull(junitSrcArchive);
+            assertTrue(junitSrcArchive.exists());
 
 			IPackageFragmentRoot src= JavaProjectHelper.addSourceContainerWithImport(javaProject, "src", junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
 
@@ -286,22 +304,27 @@ public class InferTypeArgumentsTests extends RefactoringTest {
 
 	}
 
+	@Test
 	public void testCuTwoVectorElements() throws Exception {
 		performCuOK();
 	}
 
+	@Test
 	public void testCuHalfPair() throws Exception {
 		performCuOK();
 	}
 
+	@Test
 	public void testCuMethodAndTypeGeneric01() throws Exception {
 		performCuOK();
 	}
 
+	@Test
 	public void testCuMethodAndTypeGeneric02() throws Exception {
 		performCuOK();
 	}
 
+	@Test
 	public void testPairDance() throws Exception {
 		createCUfromTestFile(getPackageP(), "Pair");
 		createCUfromTestFile(getPackageP(), "InvertedPair");
@@ -309,106 +332,131 @@ public class InferTypeArgumentsTests extends RefactoringTest {
 		// deleted in tearDown
 	}
 
+	@Test
 	public void testCuAddString() throws Exception {
 		performCuOK();
 	}
 
+	@Test
 	public void testCuAddString2() throws Exception {
 		performCuOK();
 	}
 
+	@Test
 	public void testCuIntermediateLocal() throws Exception {
 		performCuOK();
 	}
 
+	@Test
 	public void testCuSuperAndSub() throws Exception {
 		performCuOK();
 	}
 
+	@Test
 	public void testCuCommonSuper() throws Exception {
 		performCuOK();
 	}
 
+	@Test
 	public void testCuAddGetString() throws Exception {
 		performCuOK();
 	}
 
+	@Test
 	public void testCuAddIntegerGetNumber() throws Exception {
 		performCuOK();
 	}
 
+	@Test
 	public void testCuAddGetIterator() throws Exception {
 		performCuOK();
 	}
 
+	@Test
 	public void testCuContains() throws Exception {
 		performCuOK();
 	}
 
+	@Test
 	public void testCuMethodParam() throws Exception {
 		performCuOK();
 	}
 
+	@Test
 	public void testCuMethodReturns() throws Exception {
 		performCuOK();
 	}
 
+	@Test
 	public void testCuCollectionsMin() throws Exception {
 		performCuOK();
 	}
 
+	@Test
 	public void testCuAddStringInteger() throws Exception {
 		printTestDisabledMessage("currently, we don't follow flow through variables of type Object");
 //		performCuOK(); //TODO
 	}
 
+	@Test
 	public void testCuAddStringIntegerA() throws Exception {
 		performCuOK();
 	}
 
+	@Test
 	public void testCuInferFromCast() throws Exception {
 		printTestDisabledMessage("not implemented yet");
 //		performCuOK(); //TODO
 	}
 
+	@Test
 	public void testCuRippleMethods() throws Exception {
 		performCuOK();
 	}
 
+	@Test
 	public void testCuRippleMethods2() throws Exception {
 		performCuOK();
 	}
 
+	@Test
 	public void testCuCannotStringDouble() throws Exception {
 		printTestDisabledMessage("not implemented yet");
 //		performCuOK();
 	}
 
+	@Test
 	public void testCuRippleMethods3() throws Exception {
 		printTestDisabledMessage("not implemented yet");
 //		performCuOK();
 	}
 
+	@Test
 	public void testCuVarargs01() throws Exception {
 		performCuOK();
 	}
 
+	@Test
 	public void testCuArrays01() throws Exception {
 		performCuOK();
 	}
 
+	@Test
 	public void testCuArrays02() throws Exception {
 		performCuOK();
 	}
 
+	@Test
 	public void testCuArrays03() throws Exception {
 		performCuOK();
 	}
 
+	@Test
 	public void testCuArrays04() throws Exception {
 		performCuOK();
 	}
 
+	@Test
 	public void testCuArrays05() throws Exception {
 		if (! DETERMINE_ELEMENT_TYPE_FROM_CAST) {
 			printTestDisabledMessage("DETERMINE_ELEMENT_TYPE_FROM_CAST");
@@ -417,22 +465,27 @@ public class InferTypeArgumentsTests extends RefactoringTest {
 		performCuOK();
 	}
 
+	@Test
 	public void testCuArrays06() throws Exception {
 		performCuOK();
 	}
 
+	@Test
 	public void testCuArrays07() throws Exception {
 		performCuOK();
 	}
 
+	@Test
 	public void testCuToArray01() throws Exception {
 		performCuOK();
 	}
 
+	@Test
 	public void testCuToArray02() throws Exception {
 		performCuOK();
 	}
 
+	@Test
 	public void testCuMapEntry01() throws Exception {
 		if (BUG_map_entrySet_iterator) {
 			printTestDisabledMessage("BUG_map_entrySet_iterator");
@@ -441,24 +494,29 @@ public class InferTypeArgumentsTests extends RefactoringTest {
 		performCuOK();
 	}
 
+	@Test
 	public void testCuFieldAccess01() throws Exception {
 		performCuOK();
 	}
 
+	@Test
 	public void testCuFieldAccess02() throws Exception {
 		performCuOK();
 	}
 
+	@Test
 	public void testCuMemberOfRaw() throws Exception {
 		// regression test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=110594
 		performCuOK();
 	}
 
+	@Test
 	public void testCuParameterizedTypes1() throws Exception {
 		// regression test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=176742
 		performCuOK();
 	}
 
+	@Test
 	public void testCuParameterizedTypes2() throws Exception {
 		// regression test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=216627
 		performCuOK();

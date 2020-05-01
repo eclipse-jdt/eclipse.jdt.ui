@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 IBM Corporation and others.
+ * Copyright (c) 2011, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,11 +15,12 @@ package org.eclipse.jdt.ui.tests.refactoring;
 
 import java.util.Hashtable;
 
-import junit.extensions.TestSetup;
-import junit.framework.Test;
+import org.junit.rules.ExternalResource;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
+
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 
@@ -35,26 +36,19 @@ import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 
-
-public class SurroundWithTestSetup17 extends TestSetup {
-
+public class SurroundWithTestSetup17 extends ExternalResource {
 	private IJavaProject fJavaProject;
 	private IPackageFragmentRoot fRoot;
 	private static final String CONTAINER= "src";
 
 	private IPackageFragment fTryCatchPackage;
 
-	public SurroundWithTestSetup17(Test test) {
-		super(test);
-	}
-
 	public IPackageFragmentRoot getRoot() {
 		return fRoot;
 	}
 
 	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
+	public void before() throws Exception {
 
 		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.TAB);
@@ -76,13 +70,15 @@ public class SurroundWithTestSetup17 extends TestSetup {
 	}
 
 	@Override
-	protected void tearDown() throws Exception {
-		super.tearDown();
-		JavaProjectHelper.delete(fJavaProject);
+	public void after() {
+		try {
+			JavaProjectHelper.delete(fJavaProject);
+		} catch (CoreException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public IPackageFragment getTryCatchPackage() {
 		return fTryCatchPackage;
 	}
 }
-

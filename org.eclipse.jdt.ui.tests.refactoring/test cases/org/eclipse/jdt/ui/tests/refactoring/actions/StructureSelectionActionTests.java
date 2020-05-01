@@ -26,7 +26,7 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.SourceRange;
 
-import org.eclipse.jdt.ui.tests.refactoring.AbstractSelectionTestCase;
+import org.eclipse.jdt.ui.tests.refactoring.AbstractJunit4SelectionTestCase;
 import org.eclipse.jdt.ui.tests.refactoring.GenericRefactoringTest;
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
@@ -68,8 +68,8 @@ public class StructureSelectionActionTests extends GenericRefactoringTest {
 
 	private ISourceRange getSelection(ICompilationUnit cu) throws Exception {
 		String source= cu.getSource();
-		int offset= source.indexOf(AbstractSelectionTestCase.SQUARE_BRACKET_OPEN);
-		int end= source.indexOf(AbstractSelectionTestCase.SQUARE_BRACKET_CLOSE);
+		int offset= source.indexOf(AbstractJunit4SelectionTestCase.SQUARE_BRACKET_OPEN);
+		int end= source.indexOf(AbstractJunit4SelectionTestCase.SQUARE_BRACKET_CLOSE);
 		return new SourceRange(offset, end - offset);
 	}
 

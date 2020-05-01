@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -17,7 +17,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import static org.eclipse.jdt.ui.tests.refactoring.AbstractJunit4SelectionTestCase.TestMode.COMPARE_WITH_OUTPUT;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Hashtable;
+
+import org.junit.ClassRule;
+import org.junit.Test;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
@@ -34,29 +41,13 @@ import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefactoring;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+public class SefTests extends AbstractJunit4SelectionTestCase {
 
-public class SefTests extends AbstractSelectionTestCase {
-
-	private static SefTestSetup fgTestSetup;
-
-	public SefTests(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		fgTestSetup= new SefTestSetup(new TestSuite(SefTests.class));
-		return fgTestSetup;
-	}
-
-	public static Test setUpTest(Test test) {
-		fgTestSetup= new SefTestSetup(test);
-		return fgTestSetup;
-	}
+	@ClassRule
+	public static SefTestSetup fgTestSetup= new SefTestSetup();
 
 	@Override
-	protected void setUp() throws Exception {
+	public void setUp() throws Exception {
 		super.setUp();
 		fIsPreDeltaTest= true;
 	}
@@ -134,14 +125,17 @@ public class SefTests extends AbstractSelectionTestCase {
 	// Invalid
 	//=====================================================================================
 
+	@Test
 	public void testPostfixExpression() throws Exception {
 		invalidTest("field");
 	}
 
+	@Test
 	public void testInvalidOverwrite() throws Exception {
 		invalidTest("field");
 	}
 
+	@Test
 	public void testAnnotation() throws Exception {
 		invalidTest("field");
 	}
@@ -150,30 +144,37 @@ public class SefTests extends AbstractSelectionTestCase {
 	// Primitiv Data Test
 	//=====================================================================================
 
+	@Test
 	public void testPrefixInt() throws Exception {
 		baseTest("field");
 	}
 
+	@Test
 	public void testPrefixBoolean() throws Exception {
 		baseTest("field");
 	}
 
+	@Test
 	public void testPostfixInt() throws Exception {
 		baseTest("field");
 	}
 
+	@Test
 	public void testThisExpression() throws Exception {
 		baseTest("field");
 	}
 
+	@Test
 	public void testThisExpressionInner() throws Exception {
 		baseTest("field");
 	}
 
+	@Test
 	public void testFinal() throws Exception {
 		baseTest("field");
 	}
 
+	@Test
 	public void testTwoFragments() throws Exception {
 		baseTest("field");
 	}
@@ -182,34 +183,42 @@ public class SefTests extends AbstractSelectionTestCase {
 	// Basic Object Test
 	//=====================================================================================
 
+	@Test
 	public void testSimpleRead() throws Exception {
 		objectTest("field");
 	}
 
+	@Test
 	public void testSimpleWrite() throws Exception {
 		objectTest("field");
 	}
 
+	@Test
 	public void testSimpleParenthesizedWrite() throws Exception {
 		objectTest("field");
 	}
 
+	@Test
 	public void testSimpleReadWrite() throws Exception {
 		objectTest("field");
 	}
 
+	@Test
 	public void testEnumRead() throws Exception {
 		objectTest("field");
 	}
 
+	@Test
 	public void testEnumReadWrite() throws Exception {
 		objectTest("field");
 	}
 
+	@Test
 	public void testNestedRead() throws Exception {
 		objectTest("field");
 	}
 
+	@Test
 	public void testArrayRead() throws Exception {
 		objectTest("field");
 	}
@@ -219,58 +228,72 @@ public class SefTests extends AbstractSelectionTestCase {
     }
 
 
+	@Test
 	public void testSetterInAssignment() throws Exception {
 		objectTest("field");
 	}
 
+	@Test
 	public void testSetterInExpression() throws Exception {
 		objectTest("field");
 	}
 
+	@Test
 	public void testSetterInInitialization() throws Exception {
 		objectTest("field");
 	}
 
+	@Test
 	public void testSetterAsReceiver() throws Exception {
 		objectTest("field");
 	}
 
+	@Test
 	public void testCompoundParenthesizedWrite() throws Exception {
 		objectTest("field");
 	}
 
+	@Test
 	public void testCompoundWrite() throws Exception {
 		objectTest("field");
 	}
 
+	@Test
 	public void testCompoundWrite2() throws Exception {
 		objectTest("field");
 	}
 
+	@Test
 	public void testCompoundWrite3() throws Exception {
 		objectTest("field");
 	}
 
+	@Test
 	public void testCompoundWrite4() throws Exception {
 		objectTest("field");
 	}
 
+	@Test
 	public void testFinalField() throws Exception {
 		objectTest("field");
 	}
 
+	@Test
 	public void testGenericRead() throws Exception {
 		objectTest("field");
 	}
 
+	@Test
 	public void testGenericRead2() throws Exception {
 		objectTest("field");
 	}
 
+	@Test
 	public void testGenericReadWrite() throws Exception {
 		objectTest("field");
 	}
 
+	@Test
 	public void testArrayAnnotations() throws Exception {
 		objectTest("field");
 	}
@@ -295,18 +318,22 @@ public class SefTests extends AbstractSelectionTestCase {
 		compareSource(reference.getSource(), refContentOut);
 	}
 
+	@Test
 	public void testStaticImportRead() throws Exception {
 		performStaticImportTest("StaticImportReadReference");
 	}
 
+	@Test
 	public void testStaticImportWrite() throws Exception {
 		performStaticImportTest("StaticImportWriteReference");
 	}
 
+	@Test
 	public void testStaticImportReadWrite() throws Exception {
 		performStaticImportTest("StaticImportReadWriteReference");
 	}
 
+	@Test
 	public void testStaticImportNone() throws Exception {
 		performStaticImportTest("StaticImportNoReference");
 	}
@@ -315,14 +342,17 @@ public class SefTests extends AbstractSelectionTestCase {
 	// existing getter/setter
 	//=====================================================================================
 
+	@Test
 	public void testThisExpressionInnerWithSetter() throws Exception {
 		existingTest("field");
 	}
 
+	@Test
 	public void testThisExpressionWithGetterSetter() throws Exception {
 		existingTest("field");
 	}
 
+	@Test
 	public void testTwoFragmentsWithSetter() throws Exception {
 		existingTest("field");
 	}

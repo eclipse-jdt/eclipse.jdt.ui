@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2016 IBM Corporation and others.
+ * Copyright (c) 2006, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,41 +13,35 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import static org.eclipse.jdt.ui.tests.refactoring.AbstractJunit4SelectionTestCase.TestMode.COMPARE_WITH_OUTPUT;
+import static org.junit.Assert.assertTrue;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.refactoring.code.ReplaceInvocationsRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 
-import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
+public class ReplaceInvocationsTests extends AbstractJunit4SelectionTestCase {
 
-public class ReplaceInvocationsTests extends AbstractSelectionTestCase {
-	private static RewriteMethodInvocationsTestSetup fgTestSetup;
+	@Rule
+	public RewriteMethodInvocationsTestSetup fgTestSetup= new RewriteMethodInvocationsTestSetup();
 
-	public ReplaceInvocationsTests(String name) {
-		super(name, true);
-	}
-
-	public static Test suite() {
-		fgTestSetup= new RewriteMethodInvocationsTestSetup(new TestSuite(ReplaceInvocationsTests.class));
-		return fgTestSetup;
-	}
-
-	public static Test setUpTest(Test someTest) {
-		fgTestSetup= new RewriteMethodInvocationsTestSetup(someTest);
-		return fgTestSetup;
+	public ReplaceInvocationsTests() {
+		super(true);
 	}
 
 	@Override
-	protected void setUp() throws Exception {
+	public void setUp() throws Exception {
 		super.setUp();
 		fIsPreDeltaTest= true;
 	}
@@ -62,7 +56,7 @@ public class ReplaceInvocationsTests extends AbstractSelectionTestCase {
 		return Character.toUpperCase(name.charAt(0)) + name.substring(1) + ".java";
 	}
 
-	private void performTestRewriteInvocations(IPackageFragment packageFragment, String id, int mode, String outputFolder) throws Exception {
+	private void performTestRewriteInvocations(IPackageFragment packageFragment, String id, TestMode mode, String outputFolder) throws Exception {
 		ICompilationUnit unit= createCU(packageFragment, id);
 		int[] selection= getSelection();
 
@@ -91,14 +85,17 @@ public class ReplaceInvocationsTests extends AbstractSelectionTestCase {
 		performTestRewriteInvocations(fgTestSetup.getRewritePackage(), getName(), COMPARE_WITH_OUTPUT, "rewrite_out");
 	}
 
+	@Test
 	public void testSwitchParameters() throws Exception {
 		performRewriteTest();
 	}
 
+	@Test
 	public void testClassFile() throws Exception {
 		performRewriteTest();
 	}
 
+	@Test
 	public void testMultiple() throws Exception {
 		performRewriteTest();
 	}

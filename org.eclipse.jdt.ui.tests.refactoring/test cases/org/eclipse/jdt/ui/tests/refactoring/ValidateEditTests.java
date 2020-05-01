@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,11 +13,16 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.io.ByteArrayInputStream;
 import java.util.Collection;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.team.core.RepositoryProvider;
 
@@ -40,45 +45,34 @@ import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.ICopyPolicy;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaCopyProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgDestinationFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.ICopyPolicy;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
 
 import org.eclipse.jdt.ui.tests.refactoring.ccp.MockReorgQueries;
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestRepositoryProvider;
+import org.eclipse.jdt.ui.tests.refactoring.rules.Java15Setup;
 
 
-public class ValidateEditTests extends RefactoringTest {
+public class ValidateEditTests extends GenericRefactoringTest {
 
-	private static final Class<ValidateEditTests> clazz= ValidateEditTests.class;
+	@Rule
+	public Java15Setup fgTestSetup= new Java15Setup();
 
-	public ValidateEditTests(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return new Java15Setup(new TestSuite(clazz));
-	}
-
-	public static Test setUpTest(Test someTest) {
-		return new Java15Setup(someTest);
-	}
-
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
+	@Before
+	public void setUp() throws Exception {
 		RepositoryProvider.map(getRoot().getJavaProject().getProject(), RefactoringTestRepositoryProvider.PROVIDER_ID);
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		RepositoryProvider.unmap(getRoot().getJavaProject().getProject());
-		super.tearDown();
 	}
 
+	@Test
 	public void testPackageRename1() throws Exception {
 		IPackageFragment fragment= getRoot().createPackageFragment("org.test", true, null);
 
@@ -110,6 +104,7 @@ public class ValidateEditTests extends RefactoringTest {
 		assertTrue(validatedEditPaths.contains(cu2.getPath()));
 	}
 
+	@Test
 	public void testPackageRename2() throws Exception {
 		// A readonly and moved, B moved, C changes
 
@@ -152,6 +147,7 @@ public class ValidateEditTests extends RefactoringTest {
 		assertTrue(validatedEditPaths.contains(cu3.getPath()));
 	}
 
+	@Test
 	public void testPackageRenameWithResource() throws Exception {
 		// MyClass readonly and moved, x.properties readonly moved
 
@@ -183,6 +179,7 @@ public class ValidateEditTests extends RefactoringTest {
 	}
 
 
+	@Test
 	public void testPackageRenameWithResource2() throws Exception {
 		// MyClass readonly and moved, x.properties readonly moved
 
@@ -217,6 +214,7 @@ public class ValidateEditTests extends RefactoringTest {
 		assertTrue(validatedEditPaths.contains(file.getFullPath()));
 	}
 
+	@Test
 	public void testCURename() throws Exception {
 
 		IPackageFragment fragment= getRoot().createPackageFragment("org.test", true, null);
@@ -249,6 +247,7 @@ public class ValidateEditTests extends RefactoringTest {
 		assertTrue(validatedEditPaths.contains(cu2.getPath()));
 	}
 
+	@Test
 	public void testTypeRename() throws Exception {
 
 		IPackageFragment fragment= getRoot().createPackageFragment("org.test", true, null);
@@ -281,6 +280,7 @@ public class ValidateEditTests extends RefactoringTest {
 		assertTrue(validatedEditPaths.contains(cu2.getPath()));
 	}
 
+	@Test
 	public void testMoveCU2() throws Exception {
 		// Move CU and file: Only CU be validated as file doesn't change
 
@@ -322,6 +322,7 @@ public class ValidateEditTests extends RefactoringTest {
 		assertTrue(validatedEditPaths.contains(cu2.getPath())); // changed
 	}
 
+	@Test
 	public void testMoveFileWithReplace() throws Exception {
 		// Move file to a existing location
 
@@ -353,6 +354,7 @@ public class ValidateEditTests extends RefactoringTest {
 		assertTrue(validatedEditPaths.contains(file2.getFullPath())); // replaced
 	}
 
+	@Test
 	public void testMoveCuWithReplace() throws Exception {
 		// Move CU to an existing location
 
@@ -391,6 +393,7 @@ public class ValidateEditTests extends RefactoringTest {
 		assertTrue(validatedEditPaths.contains(cu2.getPath())); // replaced
 	}
 
+	@Test
 	public void testCopyCuWithReplace() throws Exception {
 		// Copy CU to a existing location
 

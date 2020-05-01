@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2013 IBM Corporation and others.
+ * Copyright (c) 2011, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,33 +14,29 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import static org.eclipse.jdt.ui.tests.refactoring.AbstractJunit4SelectionTestCase.TestMode.COMPARE_WITH_OUTPUT;
+import static org.eclipse.jdt.ui.tests.refactoring.AbstractJunit4SelectionTestCase.TestMode.INVALID_SELECTION;
+
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryCatchRefactoring;
 
-import junit.framework.Test;
+import org.eclipse.jdt.ui.tests.CustomBaseRunner;
+import org.eclipse.jdt.ui.tests.IgnoreInheritedTests;
 
 /**
  * Those tests should run on Java Dolphin 1.7 .
  */
+@IgnoreInheritedTests
+@RunWith(CustomBaseRunner.class)
 public class SurroundWithTests1d7 extends SurroundWithTests {
-
-	private static SurroundWithTestSetup17 fgTestSetup;
-
-	public SurroundWithTests1d7(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		fgTestSetup= new SurroundWithTestSetup17(new NoSuperTestsSuite(SurroundWithTests1d7.class));
-		return fgTestSetup;
-	}
-
-	public static Test setUpTest(Test someTest) {
-		fgTestSetup= new SurroundWithTestSetup17(someTest);
-		return fgTestSetup;
-	}
+	@Rule
+	public SurroundWithTestSetup17 fgTestSetup= new SurroundWithTestSetup17();
 
 	@Override
 	protected IPackageFragmentRoot getRoot() {
@@ -62,16 +58,18 @@ public class SurroundWithTests1d7 extends SurroundWithTests {
 		performTest(fgTestSetup.getTryCatchPackage(), getName(), "trycatch17_out", COMPARE_WITH_OUTPUT);
 	}
 
+	@Test
 	public void testSimple1() throws Exception {
 		tryCatchTest();
 	}
 
+	@Test
 	public void testSimple2() throws Exception {
 		tryCatchTest();
 	}
 
+	@Test
 	public void testMultiTryCatch() throws Exception {
 		tryCatchTest();
 	}
-
 }

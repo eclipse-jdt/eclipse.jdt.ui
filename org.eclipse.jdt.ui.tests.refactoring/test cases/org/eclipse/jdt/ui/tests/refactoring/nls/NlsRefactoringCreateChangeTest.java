@@ -45,7 +45,7 @@ import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSSubstitution;
 
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
-import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
+import org.eclipse.jdt.ui.tests.refactoring.GenericRefactoringTest;
 
 public class NlsRefactoringCreateChangeTest {
 	@Rule
@@ -78,7 +78,7 @@ public class NlsRefactoringCreateChangeTest {
 		buf.append("class Test {\n");
 		buf.append("	String hello=\"helloworld\";\n");
 		buf.append("}");
-		ICompilationUnit cu= RefactoringTest.createCU(fHelper.getPackageFragment("/TestSetupProject/src1/p"), "Test.java", //$NON-NLS-1$//$NON-NLS-2$
+		ICompilationUnit cu= GenericRefactoringTest.createCU(fHelper.getPackageFragment("/TestSetupProject/src1/p"), "Test.java", //$NON-NLS-1$//$NON-NLS-2$
 				buf.toString());
 
 		NLSRefactoring nls= createDefaultNls(cu);
@@ -109,7 +109,7 @@ public class NlsRefactoringCreateChangeTest {
 		buf.append("class Test {");
 		buf.append("	String hello=\"helloworld\";\r\n");
 		buf.append("}");
-		ICompilationUnit cu= RefactoringTest.createCU(fHelper.getPackageFragment("/TestSetupProject/src1/p"), "Test.java", buf.toString()); //$NON-NLS-1$ //$NON-NLS-2$
+		ICompilationUnit cu= GenericRefactoringTest.createCU(fHelper.getPackageFragment("/TestSetupProject/src1/p"), "Test.java", buf.toString()); //$NON-NLS-1$ //$NON-NLS-2$
 
 		NLSRefactoring nls= createDefaultNls(cu);
 
@@ -141,7 +141,7 @@ public class NlsRefactoringCreateChangeTest {
 		buf.append("		 		 return \"\";\n");
 		buf.append("		 }\n");
 		buf.append("}\n");
-		RefactoringTest.createCU(fHelper.getPackageFragment("/TestSetupProject/src1/p"), "Accessor.java", buf.toString());
+		GenericRefactoringTest.createCU(fHelper.getPackageFragment("/TestSetupProject/src1/p"), "Accessor.java", buf.toString());
 
 		//class to NLS
 		buf= new StringBuffer();
@@ -151,7 +151,7 @@ public class NlsRefactoringCreateChangeTest {
 		buf.append("  String world=\"world\";\n");
 		buf.append("}\n");
 		fHelper.createPackageFragment("test", "/TestSetupProject/src1");
-		ICompilationUnit testClass= RefactoringTest.createCU(fHelper.getPackageFragment("/TestSetupProject/src1/test"), "AClass.java", buf.toString());
+		ICompilationUnit testClass= GenericRefactoringTest.createCU(fHelper.getPackageFragment("/TestSetupProject/src1/test"), "AClass.java", buf.toString());
 
 		NLSRefactoring nls= NLSRefactoring.create(testClass);
 
@@ -193,7 +193,7 @@ public class NlsRefactoringCreateChangeTest {
 		buf.append("		 		 return \"\";\n");
 		buf.append("		 }\n");
 		buf.append("}\n");
-		RefactoringTest.createCU(fHelper.getPackageFragment("/TestSetupProject/src1/p"), "Accessor.java", buf.toString());
+		GenericRefactoringTest.createCU(fHelper.getPackageFragment("/TestSetupProject/src1/p"), "Accessor.java", buf.toString());
 
 		//class to NLS
 		buf= new StringBuffer();
@@ -202,7 +202,7 @@ public class NlsRefactoringCreateChangeTest {
 		buf.append("  String hello=\"helloworld\";\n");
 		buf.append("}\n");
 		fHelper.createPackageFragment("test", "/TestSetupProject/src1");
-		ICompilationUnit testClass= RefactoringTest.createCU(fHelper.getPackageFragment("/TestSetupProject/src1/test"), "AClass.java", buf.toString());
+		ICompilationUnit testClass= GenericRefactoringTest.createCU(fHelper.getPackageFragment("/TestSetupProject/src1/test"), "AClass.java", buf.toString());
 
 		NLSRefactoring nls= NLSRefactoring.create(testClass);
 
@@ -234,7 +234,7 @@ public class NlsRefactoringCreateChangeTest {
 		buf.append("class Test {\n");
 		buf.append("	String hello=\"helloworld\";\n");
 		buf.append("}");
-		ICompilationUnit cu= RefactoringTest.createCU(fHelper.getPackageFragment("/TestSetupProject/src1/p"), "Test.java", //$NON-NLS-1$ //$NON-NLS-2$
+		ICompilationUnit cu= GenericRefactoringTest.createCU(fHelper.getPackageFragment("/TestSetupProject/src1/p"), "Test.java", //$NON-NLS-1$ //$NON-NLS-2$
 				buf.toString());
 		NLSRefactoring nls= createDefaultNls(cu);
 
@@ -775,13 +775,13 @@ public class NlsRefactoringCreateChangeTest {
 	}
 
 	private void checkContentOfCu(String message, ICompilationUnit cu, String content) throws Exception {
-		RefactoringTest.assertEqualLines(message, content, cu.getBuffer().getContents());
+		GenericRefactoringTest.assertEqualLines(message, content, cu.getBuffer().getContents());
 	}
 
 	private void checkContentOfFile(String message, IFile file, String content) throws Exception {
 		try (InputStream in= file.getContents()) {
 			String realContent= copyToString(in);
-			RefactoringTest.assertEqualLines(message, content, realContent);
+			GenericRefactoringTest.assertEqualLines(message, content, realContent);
 		}
 	}
 

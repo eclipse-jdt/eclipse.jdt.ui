@@ -13,31 +13,28 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import static org.eclipse.jdt.ui.tests.refactoring.AbstractJunit4SelectionTestCase.TestMode.COMPARE_WITH_OUTPUT;
+import static org.eclipse.jdt.ui.tests.refactoring.AbstractJunit4SelectionTestCase.TestMode.INVALID_SELECTION;
+
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryWithResourcesRefactoring;
 
-import junit.framework.Test;
+import org.eclipse.jdt.ui.tests.CustomBaseRunner;
+import org.eclipse.jdt.ui.tests.IgnoreInheritedTests;
 
-public class SurroundWithResourcesTests18 extends AbstractSelectionTestCase {
+@IgnoreInheritedTests
+@RunWith(CustomBaseRunner.class)
+public class SurroundWithResourcesTests18 extends AbstractJunit4SelectionTestCase {
 
-	private static SurroundWithResourcesTestSetup18 fgTestSetup;
-
-	public SurroundWithResourcesTests18(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		fgTestSetup= new SurroundWithResourcesTestSetup18(new NoSuperTestsSuite(SurroundWithResourcesTests18.class));
-		return fgTestSetup;
-	}
-
-	public static Test setUpTest(Test someTest) {
-		fgTestSetup= new SurroundWithResourcesTestSetup18(someTest);
-		return fgTestSetup;
-	}
+	@Rule
+	public SurroundWithResourcesTestSetup18 fgTestSetup=new SurroundWithResourcesTestSetup18();
 
 	protected IPackageFragmentRoot getRoot() {
 		return fgTestSetup.getRoot();
@@ -53,7 +50,7 @@ public class SurroundWithResourcesTests18 extends AbstractSelectionTestCase {
 		return Character.toUpperCase(name.charAt(0)) + name.substring(1) + ".java";
 	}
 
-	protected void performTest(IPackageFragment packageFragment, String name, String outputFolder, int mode) throws Exception {
+	protected void performTest(IPackageFragment packageFragment, String name, String outputFolder, TestMode mode) throws Exception {
 		ICompilationUnit unit= createCU(packageFragment, name);
 		SurroundWithTryWithResourcesRefactoring refactoring= createRefactoring(unit);
 		String out= null;
@@ -74,82 +71,102 @@ public class SurroundWithResourcesTests18 extends AbstractSelectionTestCase {
 		performTest(fgTestSetup.getTryCatchPackage(), getName(), "tryresources18_out", COMPARE_WITH_OUTPUT);
 	}
 
+	@Test
 	public void testSimple1() throws Exception {
 		tryResourcesTest();
 	}
 
+	@Test
 	public void testSimple2() throws Exception {
 		tryResourcesTest();
 	}
 
+	@Test
 	public void testSimple3() throws Exception {
 		tryResourcesTest();
 	}
 
+	@Test
 	public void testSimple4() throws Exception {
 		tryResourcesTest();
 	}
 
+	@Test
 	public void testNonClosableInserted1() throws Exception {
 		tryResourcesTest();
 	}
 
+	@Test
 	public void testWithException1() throws Exception {
 		tryResourcesTest();
 	}
 
+	@Test
 	public void testWithException2() throws Exception {
 		tryResourcesTest();
 	}
 
+	@Test
 	public void testWithThrows1() throws Exception {
 		tryResourcesTest();
 	}
 
+	@Test
 	public void testInvalidStatement1() throws Exception {
 		tryResourcesInvalidTest();
 	}
 
+	@Test
 	public void testInvalidParent1() throws Exception {
 		tryResourcesInvalidTest();
 	}
 
+	@Test
 	public void testInvalidParent2() throws Exception {
 		tryResourcesInvalidTest();
 	}
 
+	@Test
 	public void testMethodThrowsException1() throws Exception {
 		tryResourcesTest();
 	}
 
+	@Test
 	public void testMethodThrowsException2() throws Exception {
 		tryResourcesTest();
 	}
 
+	@Test
 	public void testInvalidTryResources1() throws Exception {
 		tryResourcesInvalidTest();
 	}
 
+	@Test
 	public void testExceptionFilter1() throws Exception {
 		tryResourcesTest();
 	}
 
+	@Test
 	public void testLambda1() throws Exception {
 		tryResourcesTest();
 	}
 
+	@Test
 	public void testLambda2() throws Exception {
 		tryResourcesInvalidTest();
 	}
 
+	@Test
 	public void testLambda3() throws Exception {
 		tryResourcesTest();
 	}
 
+	@Test
 	public void testLambda4() throws Exception {
 		tryResourcesInvalidTest();
 	}
 
+	@Test
 	public void testMethodReference1() throws Exception {
 		tryResourcesInvalidTest();
 	}

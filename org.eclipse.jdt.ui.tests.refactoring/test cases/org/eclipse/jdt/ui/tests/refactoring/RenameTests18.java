@@ -97,9 +97,9 @@ public class RenameTests18 extends GenericRefactoringTest {
 	private ISourceRange getSelection(ICompilationUnit cu) throws Exception {
 		String source= cu.getSource();
 		//Warning: this *includes* the SQUARE_BRACKET_OPEN!
-		int offset= source.indexOf(AbstractSelectionTestCase.SQUARE_BRACKET_OPEN);
-		int end= source.indexOf(AbstractSelectionTestCase.SQUARE_BRACKET_CLOSE);
-		return new SourceRange(offset + AbstractSelectionTestCase.SQUARE_BRACKET_OPEN.length(), end - offset);
+		int offset= source.indexOf(AbstractJunit4SelectionTestCase.SQUARE_BRACKET_OPEN);
+		int end= source.indexOf(AbstractJunit4SelectionTestCase.SQUARE_BRACKET_CLOSE);
+		return new SourceRange(offset + AbstractJunit4SelectionTestCase.SQUARE_BRACKET_OPEN.length(), end - offset);
 	}
 
 	private void renameLocalVariable(String newFieldName, boolean updateReferences) throws Exception {
