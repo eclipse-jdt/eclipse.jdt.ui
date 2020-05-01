@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 IBM Corporation and others.
+ * Copyright (c) 2011, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,35 +13,34 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
-import junit.framework.Test;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import org.eclipse.jdt.ui.tests.CustomBaseRunner;
+import org.eclipse.jdt.ui.tests.IgnoreInheritedTests;
+import org.eclipse.jdt.ui.tests.refactoring.rules.Java1d7Setup;
+import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
 /**
  * Those tests should run on Java Dolphin 1.7 .
  */
+@IgnoreInheritedTests
+@RunWith(CustomBaseRunner.class)
 public class InlineConstantTests1d7 extends InlineConstantTests {
-	private static final Class<InlineConstantTests1d7> clazz = InlineConstantTests1d7.class;
 
-	public InlineConstantTests1d7(String name) {
-		super(name);
-	}
+	@Rule
+	public RefactoringTestSetup rts= new Java1d7Setup();
 
 	@Override
 	protected String successPath() {
 		return toSucceed ? "/canInline17/" : "/cannotInline17/";
 	}
 
-	public static Test suite() {
-		return new Java1d7Setup(new NoSuperTestsSuite(clazz));
-	}
-
-	public static Test setUpTest(Test someTest) {
-		return new Java1d7Setup(someTest);
-	}
-
-
 	//--- TESTS
 
 	@Override
+	@Test
 	public void test0() throws Exception {
 		helper1("p.C", 5, 28, 5, 33, true, false);
 	}

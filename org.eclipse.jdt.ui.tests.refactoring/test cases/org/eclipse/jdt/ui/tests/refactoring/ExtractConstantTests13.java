@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 IBM Corporation and others.
+ * Copyright (c) 2019, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,6 +14,7 @@
 package org.eclipse.jdt.ui.tests.refactoring;
 
 import org.junit.Rule;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.eclipse.jdt.ui.tests.CustomBaseRunner;
@@ -37,6 +38,7 @@ public class ExtractConstantTests13 extends ExtractConstantTests {
 	//--- TESTS
 
 	@Override
+	@Test
 	public void test0() throws Exception {
 		helper1(6, 19, 9, 22, true, false, "CONSTANT", "STRING");
 	}

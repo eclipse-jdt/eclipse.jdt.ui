@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 IBM Corporation and others.
+ * Copyright (c) 2014, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,24 +13,21 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
-import junit.framework.Test;
+import static org.eclipse.jdt.ui.tests.refactoring.AbstractJunit4SelectionTestCase.TestMode.COMPARE_WITH_OUTPUT;
 
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import org.eclipse.jdt.ui.tests.CustomBaseRunner;
+import org.eclipse.jdt.ui.tests.IgnoreInheritedTests;
+
+@IgnoreInheritedTests
+@RunWith(CustomBaseRunner.class)
 public class InlineMethodTests18 extends InlineMethodTests {
-	private static InlineMethodTestSetup18 fgTestSetup;
 
-	public InlineMethodTests18(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		fgTestSetup= new InlineMethodTestSetup18(new NoSuperTestsSuite(InlineMethodTests18.class));
-		return fgTestSetup;
-	}
-
-	public static Test setUpTest(Test someTest) {
-		fgTestSetup= new InlineMethodTestSetup18(someTest);
-		return fgTestSetup;
-	}
+	@Rule
+	public InlineMethodTestSetup18 fgTestSetup= new InlineMethodTestSetup18();
 
 	protected void performSimpleTest() throws Exception {
 		performTestInlineCall(fgTestSetup.getSimplePackage(), getName(), COMPARE_WITH_OUTPUT, "simple18_out");
@@ -38,6 +35,7 @@ public class InlineMethodTests18 extends InlineMethodTests {
 
 	//--- TESTS
 
+	@Test
 	public void testLambda1() throws Exception {
 		performSimpleTest();
 	}
