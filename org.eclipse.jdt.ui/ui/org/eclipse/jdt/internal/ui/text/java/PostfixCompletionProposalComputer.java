@@ -226,9 +226,15 @@ public class PostfixCompletionProposalComputer extends AbstractTemplateCompletio
 					return visit((Expression)node);
 				}
 
+				@Override
+				public boolean visit(ClassInstanceCreation node) {
+					return visit((Expression)node);
+				}
+
 				/**
 				 * Does NOT override {@link ASTVisitor}
-				 * Handle {@link MethodInvocation} and {@link SuperMethodInvocation}
+				 * Handle {@link MethodInvocation}, {@link SuperMethodInvocation}
+				 * and {@link ClassInstanceCreation}
 				 */
 				public boolean visit(Expression node) {
 					/*

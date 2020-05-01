@@ -520,6 +520,37 @@ public class PostFixCompletionTest extends TestCase {
 		assertEquals(expected.toString(), viewer.getDocument().get());
 	}
 
+	public void testVarForClassCreation() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n" +
+				"public class VarForClassCreation {\n" +
+				"  public static final int STYLE = 7;\n" +
+				"  public void test () {\n" +
+				"    new Integer(VarForClassCreation.STYLE).var$\n" +
+				"  }\n" +
+				"}");
+
+		int completionIndex= getCompletionIndex(buf);
+		ICompilationUnit cu= getCompilationUnit(pkg, buf, "VarForClassCreation.java");
+		List<ICompletionProposal> proposals= computeCompletionProposals(cu, completionIndex);
+
+		assertProposalsExist(Arrays.asList("var - Creates a new variable"), proposals);
+
+		ITextViewer viewer= initializeViewer(cu);
+		applyProposal(viewer, proposals, "var", completionIndex);
+
+		StringBuffer expected= new StringBuffer();
+		expected.append("package test;\n" +
+				"public class VarForClassCreation {\n" +
+				"  public static final int STYLE = 7;\n" +
+				"  public void test () {\n" +
+				"    Integer name = new Integer(VarForClassCreation.STYLE);\n" +
+				"  }\n" +
+				"}");
+
+		assertEquals(expected.toString(), viewer.getDocument().get());
+	}
+
 	public void testBegForVoidMethodInvocation() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test;\n" +
