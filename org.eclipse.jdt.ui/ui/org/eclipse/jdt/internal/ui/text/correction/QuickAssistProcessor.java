@@ -25,11 +25,14 @@ package org.eclipse.jdt.internal.ui.text.correction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.eclipse.swt.graphics.Image;
 
@@ -903,34 +906,38 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	private static String[] getUniqueParameterNames(MethodReference methodReference, IMethodBinding functionalMethod) throws JavaModelException {
-		String[] parameterNames= ((IMethod) functionalMethod.getJavaElement()).getParameterNames();
-		List<String> oldNames= new ArrayList<>(Arrays.asList(parameterNames));
-		String[] newNames= new String[oldNames.size()];
-		List<String> excludedNames= new ArrayList<>(ASTNodes.getVisibleLocalVariablesInScope(methodReference));
+		String[] originalParameterNames= ((IMethod) functionalMethod.getJavaElement()).getParameterNames();
+		String[] newNames= new String[originalParameterNames.length];
+		Set<String> excludedNames= new HashSet<>(ASTNodes.getVisibleLocalVariablesInScope(methodReference));
 
-		for (int i= 0; i < oldNames.size(); i++) {
-			String paramName= oldNames.get(i);
-			List<String> allNamesToExclude= new ArrayList<>(excludedNames);
-			allNamesToExclude.addAll(oldNames.subList(0, i));
-			allNamesToExclude.addAll(oldNames.subList(i + 1, oldNames.size()));
-			if (allNamesToExclude.contains(paramName)) {
+		for (int i= 0; i < originalParameterNames.length; i++) {
+			String paramName= originalParameterNames[i];
+
+			if (excludedNames.contains(paramName)) {
+				Set<String> allNamesToExclude= new HashSet<>(excludedNames);
+				Collections.addAll(allNamesToExclude, originalParameterNames);
+
 				String newParamName= createName(paramName, allNamesToExclude);
+
 				excludedNames.add(newParamName);
 				newNames[i]= newParamName;
 			} else {
 				newNames[i]= paramName;
 			}
 		}
+
 		return newNames;
 	}
 
-	private static String createName(String candidate, List<String> excludedNames) {
+	private static String createName(final String nameRoot, final Set<String> excludedNames) {
 		int i= 1;
-		String result= candidate;
-		while (excludedNames.contains(result)) {
-			result= candidate + i++;
-		}
-		return result;
+		String candidate;
+
+		do {
+			candidate= nameRoot + i++;
+		} while (excludedNames.remove(candidate));
+
+		return candidate;
 	}
 
 	private static boolean isTypeReferenceToInstanceMethod(MethodReference methodReference) {
