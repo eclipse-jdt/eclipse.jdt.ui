@@ -84,4 +84,6 @@
 
 	<template autoinsert="true" id="org.eclipse.jdt.postfixcompletion.constpub" context="postfix" deleted="false" description="%PostfixTemplates.constpub" enabled="true" name="constpub">${n:newField(i, true, true, true, true)}${i:inner_expression(novalue)}${cursor}</template>
 
+	<template autoinsert="true" id="org.eclipse.jdt.postfixcompletion.stream" context="postfix" deleted="false" description="%PostfixTemplates.stream" enabled="true" name="stream">Stream.of(${i:inner_expression(array)})${cursor}</template>
+
 </templates>
