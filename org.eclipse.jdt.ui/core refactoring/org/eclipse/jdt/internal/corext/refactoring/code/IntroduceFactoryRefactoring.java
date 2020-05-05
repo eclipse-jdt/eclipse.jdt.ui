@@ -297,9 +297,8 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 		// we have some sub node. Make sure its the right child of the parent
 		StructuralPropertyDescriptor location= node.getLocationInParent();
 		ASTNode parent= node.getParent();
-		if (location == ClassInstanceCreation.TYPE_PROPERTY) {
-			return parent;
-		} else if (location == MethodDeclaration.NAME_PROPERTY && ((MethodDeclaration)parent).isConstructor()) {
+		if ((location == ClassInstanceCreation.TYPE_PROPERTY)
+				|| (location == MethodDeclaration.NAME_PROPERTY && ((MethodDeclaration)parent).isConstructor())) {
 			return parent;
 		}
 		return null;

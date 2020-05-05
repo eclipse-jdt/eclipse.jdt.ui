@@ -234,9 +234,8 @@ public class ExtractToNullCheckedLocalProposal extends LinkedCorrectionProposal 
 
 		Expression toReplace;
 		ASTNode directParent= this.fieldReference.getParent();
-		if (directParent instanceof FieldAccess) {
-			toReplace= (Expression) directParent;
-		} else if (directParent instanceof QualifiedName && this.fieldReference.getLocationInParent() == QualifiedName.NAME_PROPERTY) {
+		if (directParent instanceof FieldAccess
+				|| (directParent instanceof QualifiedName && this.fieldReference.getLocationInParent() == QualifiedName.NAME_PROPERTY)) {
 			toReplace= (Expression) directParent;
 		} else {
 			toReplace= this.fieldReference;

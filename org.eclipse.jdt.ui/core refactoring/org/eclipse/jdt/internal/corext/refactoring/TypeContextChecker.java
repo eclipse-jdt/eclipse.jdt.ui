@@ -78,20 +78,19 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.TypeNameMatch;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.dom.ASTFlattener;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
+import org.eclipse.jdt.internal.corext.dom.Selection;
+import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
-import org.eclipse.jdt.internal.corext.dom.Selection;
-import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
-
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 public class TypeContextChecker {
 	private static class MethodTypesChecker {
@@ -464,12 +463,15 @@ public class TypeContextChecker {
 	}
 
 	private static ITypeBinding handleBug84585(ITypeBinding typeBinding) {
-		if (typeBinding == null)
+		if (typeBinding != null
+				&& typeBinding.isGenericType()
+				&& ! typeBinding.isRawType()
+				&& ! typeBinding.isParameterizedType() //see bug 84585
+				) {
 			return null;
-		else if (typeBinding.isGenericType() && ! typeBinding.isRawType() && ! typeBinding.isParameterizedType())
-			return null; //see bug 84585
-		else
+		} else {
 			return typeBinding;
+		}
 	}
 
 	public static RefactoringStatus[] checkAndResolveMethodTypes(IMethod method, StubTypeContext stubTypeContext, List<ParameterInfo> parameterInfos, ReturnTypeInfo returnTypeInfo) throws CoreException {

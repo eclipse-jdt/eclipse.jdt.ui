@@ -103,16 +103,12 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 	}
 
 	private void addJavaElement(List<Object> selectedElements, IJavaElement je) {
-		if (je.getElementType() == IJavaElement.COMPILATION_UNIT)
+		if ((je.getElementType() == IJavaElement.COMPILATION_UNIT)
+				|| (je.getElementType() == IJavaElement.CLASS_FILE)
+				|| (je.getElementType() == IJavaElement.JAVA_PROJECT))
 			selectedElements.add(je);
-		else if (je.getElementType() == IJavaElement.CLASS_FILE)
-			selectedElements.add(je);
-		else if (je.getElementType() == IJavaElement.JAVA_PROJECT)
-			selectedElements.add(je);
-		else if (je.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
-			if (!isInArchiveOrExternal(je))
-				selectedElements.add(je);
-		} else if (je.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT) {
+		else if (je.getElementType() == IJavaElement.PACKAGE_FRAGMENT
+				|| je.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT) {
 			if (!isInArchiveOrExternal(je))
 				selectedElements.add(je);
 		} else {

@@ -54,9 +54,9 @@ class LocationLabelProvider extends LabelProvider implements ITableLabelProvider
                 withinString = !withinString;
             }
 
-            if (withinString) {
+            if (withinString || !Character.isWhitespace(ch)) {
                 buf.append(ch);
-            } else if (Character.isWhitespace(ch)) {
+            } else {
                 if ((buf.length() == 0) ||
                             !Character.isWhitespace(buf.charAt(buf.length() - 1))) {
                     if (ch != ' ') {
@@ -65,8 +65,6 @@ class LocationLabelProvider extends LabelProvider implements ITableLabelProvider
 
                     buf.append(ch);
                 }
-            } else {
-                buf.append(ch);
             }
         }
 

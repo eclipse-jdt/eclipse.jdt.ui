@@ -444,9 +444,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		}
 		// check that 'if' statement is statement in block that is body of loop
 		Block loopBlock= null;
-		if (ifStatement.getParent() instanceof Block && ifStatement.getParent().getParent() instanceof ForStatement) {
-			loopBlock= (Block) ifStatement.getParent();
-		} else if (ifStatement.getParent() instanceof Block && ifStatement.getParent().getParent() instanceof WhileStatement) {
+		if (ifStatement.getParent() instanceof Block
+				&& (ifStatement.getParent().getParent() instanceof ForStatement || ifStatement.getParent().getParent() instanceof WhileStatement)) {
 			loopBlock= (Block) ifStatement.getParent();
 		} else {
 			return false;

@@ -651,19 +651,18 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 				for (IPackageFragmentRoot root : project.getPackageFragmentRoots()) {
 					IClasspathEntry classpathEntry= JavaModelUtil.getClasspathEntry(root);
 					int entryKind= classpathEntry.getEntryKind();
-					if (entryKind == IClasspathEntry.CPE_CONTAINER) {
-						// all ClassPathContainers are added later
-					} else if (SHOW_LIBRARIES_NODE && (entryKind == IClasspathEntry.CPE_LIBRARY || entryKind == IClasspathEntry.CPE_VARIABLE)) {
-						// skip: will add the referenced library node later
+					if (entryKind == IClasspathEntry.CPE_CONTAINER // all ClassPathContainers are added later
+							|| (SHOW_LIBRARIES_NODE && (entryKind == IClasspathEntry.CPE_LIBRARY
+							|| entryKind == IClasspathEntry.CPE_VARIABLE)) // skip: will add the referenced library node later
+							) {
+						// Nothing
+					} else if (isProjectPackageFragmentRoot(root)) {
+						// filter out package fragments that correspond to projects and
+						// replace them with the package fragments directly
+						Object[] fragments= getPackageFragmentRootContent(root);
+						result.addAll(Arrays.asList(fragments));
 					} else {
-						if (isProjectPackageFragmentRoot(root)) {
-							// filter out package fragments that correspond to projects and
-							// replace them with the package fragments directly
-							Object[] fragments= getPackageFragmentRootContent(root);
-							result.addAll(Arrays.asList(fragments));
-						} else {
-							result.add(root);
-						}
+						result.add(root);
 					}
 				}
 

@@ -93,9 +93,7 @@ public class TypingRunDetector {
 			if (fType.equals(change.fType)) {
 				if (fType == TypingRun.DELETE)
 					return fNextOffset == change.fNextOffset - 1;
-				else if (fType == TypingRun.INSERT)
-					return fNextOffset == change.fNextOffset + 1;
-				else if (fType == TypingRun.OVERTYPE)
+				else if ((fType == TypingRun.INSERT) || (fType == TypingRun.OVERTYPE))
 					return fNextOffset == change.fNextOffset + 1;
 				else if (fType == TypingRun.SELECTION)
 					return true;

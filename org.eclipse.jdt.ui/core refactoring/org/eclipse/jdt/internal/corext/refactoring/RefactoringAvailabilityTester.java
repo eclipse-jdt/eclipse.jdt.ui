@@ -529,12 +529,9 @@ public final class RefactoringAvailabilityTester {
 			return ((IPackageFragmentRoot) element).getKind() == IPackageFragmentRoot.K_SOURCE;
 		} else if (element instanceof IPackageFragment) {
 			return ((IPackageFragment) element).getKind() == IPackageFragmentRoot.K_SOURCE;
-		} else if (element instanceof ICompilationUnit) {
-			return true;
-		} else if (element.getAncestor(IJavaElement.COMPILATION_UNIT) != null) {
-			return true;
 		} else {
-			return false;
+			return (element instanceof ICompilationUnit)
+					|| (element.getAncestor(IJavaElement.COMPILATION_UNIT) != null);
 		}
 	}
 

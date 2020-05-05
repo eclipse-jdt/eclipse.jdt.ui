@@ -1289,9 +1289,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 						// use this::
 					} else if (Modifier.isDefault(methodBinding.getModifiers())) {
 						boolean nestedInterfaceClass= isNestedInterfaceClass(ast, lambdaMethodDeclaringClass, lambdaMethodInvokingClass);
-						if (isNestedClass) {
-							// use this::
-						} else if (nestedInterfaceClass && !isNestedClass && !isSuperClass) {
+						if (isNestedClass
+								|| (nestedInterfaceClass && !isSuperClass)) {
 							// use this::
 						} else if (!nestedInterfaceClass || (nestedRootClass != lambdaMethodInvokingClass)) {
 							newThisExpression.setQualifier(ast.newName(nestedRootClass.getName()));
@@ -1485,11 +1484,10 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		ASTNode parent= covering.getParent();
 		if (covering instanceof LambdaExpression) {
 			lambda= (LambdaExpression) covering;
-		} else if (covering.getLocationInParent() == VariableDeclarationFragment.NAME_PROPERTY &&
-				((VariableDeclarationFragment) covering.getParent()).getLocationInParent() == LambdaExpression.PARAMETERS_PROPERTY) {
-			lambda= (LambdaExpression) covering.getParent().getParent();
-		} else if (covering.getLocationInParent() == SingleVariableDeclaration.NAME_PROPERTY &&
-				((SingleVariableDeclaration) parent).getLocationInParent() == LambdaExpression.PARAMETERS_PROPERTY) {
+		} else if ((covering.getLocationInParent() == VariableDeclarationFragment.NAME_PROPERTY &&
+				((VariableDeclarationFragment) covering.getParent()).getLocationInParent() == LambdaExpression.PARAMETERS_PROPERTY)
+				|| (covering.getLocationInParent() == SingleVariableDeclaration.NAME_PROPERTY &&
+				((SingleVariableDeclaration) parent).getLocationInParent() == LambdaExpression.PARAMETERS_PROPERTY)) {
 			lambda= (LambdaExpression) covering.getParent().getParent();
 		}
 
@@ -1573,11 +1571,10 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		boolean isLambdaParamExplicitType= false;
 		if (covering instanceof LambdaExpression) {
 			lambda= (LambdaExpression) covering;
-		} else if (covering.getLocationInParent() == VariableDeclarationFragment.NAME_PROPERTY &&
-				((VariableDeclarationFragment) parent).getLocationInParent() == LambdaExpression.PARAMETERS_PROPERTY) {
-			lambda= (LambdaExpression) covering.getParent().getParent();
-		} else if (covering.getLocationInParent() == SingleVariableDeclaration.NAME_PROPERTY &&
-				((SingleVariableDeclaration) parent).getLocationInParent() == LambdaExpression.PARAMETERS_PROPERTY) {
+		} else if ((covering.getLocationInParent() == VariableDeclarationFragment.NAME_PROPERTY &&
+				((VariableDeclarationFragment) parent).getLocationInParent() == LambdaExpression.PARAMETERS_PROPERTY)
+				|| (covering.getLocationInParent() == SingleVariableDeclaration.NAME_PROPERTY &&
+				((SingleVariableDeclaration) parent).getLocationInParent() == LambdaExpression.PARAMETERS_PROPERTY)) {
 			lambda= (LambdaExpression) covering.getParent().getParent();
 		}
 

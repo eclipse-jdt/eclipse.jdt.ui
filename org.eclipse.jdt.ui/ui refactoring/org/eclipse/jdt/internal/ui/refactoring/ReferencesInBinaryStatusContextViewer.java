@@ -98,9 +98,7 @@ public class ReferencesInBinaryStatusContextViewer implements IStatusContextView
 		public void add(Object element) {
 			Object parent= getParent(element);
 			while (parent != null) {
-				if (parent instanceof IJavaModel) {
-					fRoots.add(element);
-				} else if (parent instanceof IWorkspaceRoot) {
+				if ((parent instanceof IJavaModel) || (parent instanceof IWorkspaceRoot)) {
 					fRoots.add(element);
 				} else {
 					Object oldChildren= fChildren.get(parent);

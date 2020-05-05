@@ -168,9 +168,7 @@ public class MoveInnerToTopWizard extends RefactoringWizard {
 		protected RefactoringStatus validateTextField(String text) {
 			final MoveInnerToTopRefactoring refactoring= getMoveRefactoring();
 			refactoring.setEnclosingInstanceName(text);
-			if (refactoring.isCreatingInstanceFieldMandatory())
-				return refactoring.checkEnclosingInstanceName(text);
-			else if (!text.isEmpty())
+			if (refactoring.isCreatingInstanceFieldMandatory() || !text.isEmpty())
 				return refactoring.checkEnclosingInstanceName(text);
 			else
 				return new RefactoringStatus();

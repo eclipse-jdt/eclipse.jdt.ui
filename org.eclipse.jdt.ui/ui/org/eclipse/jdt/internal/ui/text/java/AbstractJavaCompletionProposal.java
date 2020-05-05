@@ -354,17 +354,9 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 					LazyJavaCompletionProposal proposal= createRequiredTypeCompletionProposal(requiredProposals[i], fInvocationContext);
 					proposal.apply(document);
 					setReplacementOffset(getReplacementOffset() + document.getLength() - oldLen);
-				} else if (requiredProposals[i].getKind() == CompletionProposal.TYPE_IMPORT) {
-					ImportCompletionProposal proposal= new ImportCompletionProposal(requiredProposals[i], fInvocationContext, coreProposal.getKind());
-					proposal.setReplacementOffset(getReplacementOffset());
-					proposal.apply(document);
-					setReplacementOffset(getReplacementOffset() + document.getLength() - oldLen - proposal.getLengthOfImportsAddedBehindReplacementOffset());
-				} else if (requiredProposals[i].getKind() == CompletionProposal.METHOD_IMPORT) {
-					ImportCompletionProposal proposal= new ImportCompletionProposal(requiredProposals[i], fInvocationContext, coreProposal.getKind());
-					proposal.setReplacementOffset(getReplacementOffset());
-					proposal.apply(document);
-					setReplacementOffset(getReplacementOffset() + document.getLength() - oldLen - proposal.getLengthOfImportsAddedBehindReplacementOffset());
-				} else if (requiredProposals[i].getKind() == CompletionProposal.FIELD_IMPORT) {
+				} else if ((requiredProposals[i].getKind() == CompletionProposal.TYPE_IMPORT)
+						|| (requiredProposals[i].getKind() == CompletionProposal.METHOD_IMPORT)
+						|| (requiredProposals[i].getKind() == CompletionProposal.FIELD_IMPORT)) {
 					ImportCompletionProposal proposal= new ImportCompletionProposal(requiredProposals[i], fInvocationContext, coreProposal.getKind());
 					proposal.setReplacementOffset(getReplacementOffset());
 					proposal.apply(document);

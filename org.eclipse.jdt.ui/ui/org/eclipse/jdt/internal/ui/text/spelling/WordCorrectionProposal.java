@@ -175,13 +175,12 @@ public class WordCorrectionProposal implements IJavaCompletionProposal {
 		int length= fContext.getLength();
 
 		final int delta= fWord.length() - fLength;
-		if (offset <= fOffset && offset + length >= fOffset)
-			length += delta;
-		else if (offset > fOffset && offset + length > fOffset + fLength) {
+		if (offset > fOffset && offset + length > fOffset + fLength) {
 			offset += delta;
 			length -= delta;
-		} else
+		} else {
 			length += delta;
+		}
 
 		return new Point(offset, length);
 	}

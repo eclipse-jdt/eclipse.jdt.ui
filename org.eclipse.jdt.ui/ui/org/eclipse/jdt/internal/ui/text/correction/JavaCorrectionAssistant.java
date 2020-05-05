@@ -314,10 +314,10 @@ public class JavaCorrectionAssistant extends QuickAssistAssistant {
 	 */
 	private static int computeBestOffset(int newOffset, int invocationLocation, int bestOffset) {
 		if (newOffset <= invocationLocation) {
-			if (bestOffset > invocationLocation) {
-				return newOffset; // closest was on the right, prefer on the left
-			} else if (bestOffset <= newOffset) {
-				return newOffset; // we are closer or equal
+			if ((bestOffset > invocationLocation) // closest was on the right, prefer on the left
+					|| (bestOffset <= newOffset) // we are closer or equal
+					) {
+				return newOffset;
 			}
 			return -1; // further away
 		}

@@ -259,10 +259,10 @@ public class EditorUtility {
 		// Support for non-Java editor
 		try {
 			ISourceRange range= null;
-			if (element instanceof ICompilationUnit)
+			if (element instanceof ICompilationUnit
+					|| element instanceof IClassFile) {
 				return;
-			else if (element instanceof IClassFile)
-				return;
+			}
 
 			if (element instanceof ISourceReference)
 				range= ((ISourceReference)element).getNameRange();

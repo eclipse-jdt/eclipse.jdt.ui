@@ -231,14 +231,8 @@ public class NLSPropertyFileModifier {
 		if (oldKeyToSubstMap.get(substitution.getInitialKey()) != substitution) {
 			return false; // not the owner of this key
 		}
-		if (substitution.hasStateChanged()) {
-			return true; // was externalized, but not anymore
-		} else {
-			if (substitution.hasPropertyFileChange() && newKeyToSubstMap.get(substitution.getKey()) != substitution) {
-				return true; // has been changed to an already existing
-			}
-		}
-		return false;
+		return substitution.hasStateChanged() // was externalized, but not anymore
+				|| (substitution.hasPropertyFileChange() && newKeyToSubstMap.get(substitution.getKey()) != substitution); // has been changed to an already existing;
 	}
 
 	private static void addRemoveEdits(TextChange textChange, NLSSubstitution[] substitutions, Map<String, NLSSubstitution> newKeyToSubstMap, Map<String, NLSSubstitution> oldKeyToSubstMap, PropertyFileDocumentModel model) {

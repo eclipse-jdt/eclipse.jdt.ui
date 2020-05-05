@@ -1174,9 +1174,8 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 
 	private ASTNode getEnclosingTypeDeclaration(ASTNode node) {
 		while (node != null) {
-			if (node instanceof AbstractTypeDeclaration) {
-				return node;
-			} else if (node instanceof AnonymousClassDeclaration) {
+			if (node instanceof AbstractTypeDeclaration
+					|| node instanceof AnonymousClassDeclaration) {
 				return node;
 			}
 			node= node.getParent();

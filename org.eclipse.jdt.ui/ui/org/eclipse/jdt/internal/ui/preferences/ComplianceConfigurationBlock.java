@@ -861,11 +861,9 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 					fCompilerReleaseCheck.setSelection(false);
 					setValue(PREF_RELEASE, JavaCore.DISABLED);
 				} else {
-					if (fProject == null) {
-						fCompilerReleaseCheck.setEnabled(true);
-					} else if (isJREUnsupportedAndGreater && JavaModelUtil.is16OrHigher(compliance)) {
-						fCompilerReleaseCheck.setEnabled(true);
-					} else if (JavaModelUtil.is9OrHigher(compliance)) {
+					if ((fProject == null)
+							|| (isJREUnsupportedAndGreater && JavaModelUtil.is16OrHigher(compliance))
+							|| JavaModelUtil.is9OrHigher(compliance)) {
 						fCompilerReleaseCheck.setEnabled(true);
 					}
 					updateComplianceEnableSourceTargetState();
