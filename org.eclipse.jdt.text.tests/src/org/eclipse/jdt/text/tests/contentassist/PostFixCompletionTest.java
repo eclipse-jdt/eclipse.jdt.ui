@@ -101,7 +101,7 @@ public class PostFixCompletionTest {
 		expected.append("package test;\n" +
 				"public class StringVar {\n" +
 				"  public void test () {\n" +
-				"    String name = \"Some String Value\";\n" +
+				"    String string = \"Some String Value\";\n" +
 				"  }\n" +
 				"}");
 
@@ -134,7 +134,7 @@ public class PostFixCompletionTest {
 				"\n" +
 				"public class StringVar2 {\n" +
 				"  public void test () {\n" +
-				"    String name = \"foo\";\n" +
+				"    String string = \"foo\";\n" +
 				"    if (true);\n" +
 				"  }\n" +
 				"}");
@@ -165,7 +165,7 @@ public class PostFixCompletionTest {
 		expected.append("package test;\n" +
 				"public class IntegerVar {\n" +
 				"  public void test () {\n" +
-				"    Integer name = new Integer(0);\n" +
+				"    Integer integer = new Integer(0);\n" +
 				"  }\n" +
 				"}");
 
@@ -195,7 +195,7 @@ public class PostFixCompletionTest {
 		expected.append("package test;\n" +
 				"public class BooleanVar {\n" +
 				"  public void test () {\n" +
-				"    boolean false1 = false;\n" +
+				"    boolean b = false;\n" +
 				"  }\n" +
 				"}");
 
@@ -255,7 +255,7 @@ public class PostFixCompletionTest {
 		expected.append("package test;\n" +
 				"public class StringConcatVar {\n" +
 				"  public void test () {\n" +
-				"    String name = (\"two\" + 2);\n" +
+				"    String string = (\"two\" + 2);\n" +
 				"  }\n" +
 				"}");
 
@@ -285,7 +285,7 @@ public class PostFixCompletionTest {
 		expected.append("package test;\n" +
 				"public class testStringConcatVar2 {\n" +
 				"  public void test () {\n" +
-				"    String name = ((((\"two\" + 2))));\n" +
+				"    String string = ((((\"two\" + 2))));\n" +
 				"  }\n" +
 				"}");
 
@@ -347,7 +347,7 @@ public class PostFixCompletionTest {
 				"public class ArrayAccessVar {\n" +
 				"  public void test () {\n" +
 				"    String [] args = new String [] { \"one\", \"two\" };\n" +
-				"    String name = args[0];\n" +
+				"    String string = args[0];\n" +
 				"  }\n" +
 				"}");
 
@@ -381,7 +381,7 @@ public class PostFixCompletionTest {
 				"public class BoundedExtendsTypeParameterVar {\n" +
 				"  public void test () {\n" +
 				"    List<? extends Number> x = null;\n" +
-				"    Number name = x.get(0);\n" +
+				"    Number number = x.get(0);\n" +
 				"  }\n" +
 				"}");
 
@@ -415,7 +415,7 @@ public class PostFixCompletionTest {
 				"public class testBoundedSuperTypeParameterVar {\n" +
 				"  public void test () {\n" +
 				"    List<? super Number> x = null;\n" +
-				"    Object name = x.get(0);\n" +
+				"    Object number = x.get(0);\n" +
 				"  }\n" +
 				"}");
 
@@ -451,7 +451,7 @@ public class PostFixCompletionTest {
 				"public class VarForMethodInvocation {\n" +
 				"  public void test () {\n" +
 				"    List<String> res = Arrays.asList(\"a\", \"b\");\n" +
-				"    boolean name = res.get(0).isEmpty();\n" +
+				"    boolean empty = res.get(0).isEmpty();\n" +
 				"  }\n" +
 				"}");
 
@@ -483,7 +483,7 @@ public class PostFixCompletionTest {
 				"public class VarForMethodInvocation2 {\n" +
 				"  public void test () {\n" +
 				"    String s = \"5\";\n" +
-				"    Integer name = Integer.valueOf(s);\n" +
+				"    Integer valueOf = Integer.valueOf(s);\n" +
 				"  }\n" +
 				"}");
 
@@ -522,7 +522,7 @@ public class PostFixCompletionTest {
 				"  } \n" +
 				"  public class Child extends VarForMethodInvocation3 {\n" +
 				"    public void test() {\n" +
-				"      VarForMethodInvocation3 name = super.getAdapter(VarForMethodInvocation3.class);\n" +
+				"      VarForMethodInvocation3 adapter = super.getAdapter(VarForMethodInvocation3.class);\n" +
 				"    }\n" +
 				"  } \n" +
 				"}");
@@ -555,7 +555,7 @@ public class PostFixCompletionTest {
 				"public class VarForClassCreation {\n" +
 				"  public static final int STYLE = 7;\n" +
 				"  public void test () {\n" +
-				"    Integer name = new Integer(VarForClassCreation.STYLE);\n" +
+				"    Integer integer = new Integer(VarForClassCreation.STYLE);\n" +
 				"  }\n" +
 				"}");
 
@@ -619,7 +619,7 @@ public class PostFixCompletionTest {
 				"import java.io.FileFilter;\n" +
 				"public class Test {\n" +
 				"  public void test() {\n" +
-				"    File[] name = new File(\"\").listFiles(new FileFilter() {\n" +
+				"    File[] listFiles = new File(\"\").listFiles(new FileFilter() {\n" +
 				"      @Override\n" +
 				"      public boolean accept(File pathname) {\n" +
 				"        return false;\n" +
@@ -664,7 +664,7 @@ public class PostFixCompletionTest {
 				"public Foo foo; \n" +
 				"public void foo () {\n" +
 				"  Foo foo = new Foo ();\n" +
-				"  String name = foo.bar.res;\n" +
+				"  String res = foo.bar.res;\n" +
 				"}\n" +
 				"public class Foo {\n" +
 				"  public Bar bar;\n" +
@@ -705,7 +705,7 @@ public class PostFixCompletionTest {
 				"  public class Foo {\n" +
 				"    public String res;\n" +
 				"    public void foo () {\n" +
-				"      String name = this.res;\n" +
+				"      String res = this.res;\n" +
 				"    }\n" +
 				"  }" +
 				"}");

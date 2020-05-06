@@ -771,4 +771,17 @@ public class JavaPostfixContext extends JavaContext {
 		// If the dom is not initialized yet (template preview) we return a dummy name
 		return new String[] { "newField" }; //$NON-NLS-1$
 	}
+
+	@Override
+	public String[] suggestVariableNames(String type) throws IllegalArgumentException {
+		List<String> res= new ArrayList<>();
+		if (selectedNode instanceof Expression) {
+			ITypeBinding tb= resolveNodeToBinding(selectedNode);
+			List<String> excludes= Arrays.asList(computeExcludes());
+			String[] names= StubUtility.getVariableNameSuggestions(NamingConventions.VK_LOCAL, getJavaProject(), tb, (Expression)selectedNode, excludes);
+			res.addAll(Arrays.asList(names));
+		}
+		res.addAll(Arrays.asList(super.suggestVariableNames(type)));
+		return res.toArray(new String [0]);
+	}
 }
