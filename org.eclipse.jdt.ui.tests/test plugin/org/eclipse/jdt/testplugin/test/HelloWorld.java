@@ -13,6 +13,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.testplugin.test;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.core.runtime.Path;
@@ -22,46 +29,29 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IOrdinaryClassFile;
 import org.eclipse.jdt.core.IType;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
-
-public class HelloWorld extends TestCase {
-
+public class HelloWorld {
 	private IJavaProject fJProject;
 
-
-	public static Test suite() {
-		TestSuite suite= new TestSuite();
-		suite.addTest(new HelloWorld("test1"));
-		return suite;
-	}
-
-	public HelloWorld(String name) {
-		super(name);
-	}
-
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 			fJProject= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 	}
 
-
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJProject);
 	}
 
+	@Test
 	public void test1() throws Exception {
 		if (JavaProjectHelper.addRTJar(fJProject) == null) {
-			assertTrue("jdk not found", false);
+			fail("jdk not found");
 			return;
 		}
 
 		String name= "java/util/Vector.java";
 		IOrdinaryClassFile classfile= (IOrdinaryClassFile) fJProject.findElement(new Path(name));
-		assertTrue("classfile not found", classfile != null);
+		assertNotNull("classfile not found", classfile);
 
 		IType type= classfile.getType();
 		System.out.println("methods of Vector");
@@ -69,5 +59,4 @@ public class HelloWorld extends TestCase {
 			System.out.println(method.getElementName());
 		}
 	}
-
 }

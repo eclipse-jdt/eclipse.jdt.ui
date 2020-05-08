@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,9 +13,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.testplugin.test;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -28,28 +31,16 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 
-
-public class JavaTestCase extends TestCase {
-
+public class JavaTestCase  {
 	private IJavaProject fJavaProject;
-
-	public JavaTestCase(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		TestSuite suite= new TestSuite();
-		suite.addTest(new JavaTestCase("doTest1"));
-		return suite;
-	}
 
 	/**
 	 * Creates a new test Java project.
 	 *
 	 * @throws Exception in case of any problem
 	 */
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		fJavaProject= JavaProjectHelper.createJavaProject("HelloWorldProject", "bin");
 
 		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(fJavaProject, "src");
@@ -66,29 +57,27 @@ public class JavaTestCase extends TestCase {
 	 *
 	 * @throws Exception in case of any problem
 	 */
-	@Override
-	protected void tearDown () throws Exception {
+	@After
+	public void tearDown () throws Exception {
 		JavaProjectHelper.delete(fJavaProject);
 	}
 
 	/*
 	 * Basic test: Checks for created methods.
 	 */
+	@Test
 	public void doTest1() throws Exception {
-
 		String name= "ibm/util/A.java";
 		ICompilationUnit cu= (ICompilationUnit) fJavaProject.findElement(new Path(name));
-		assertTrue("A.java must exist", cu != null);
+		assertNotNull("A.java must exist", cu);
 		IType type= cu.getType("A");
-		assertTrue("Type A must exist", type != null);
+		assertNotNull("Type A must exist", type);
 
 		System.out.println("methods of A");
 		IMethod[] methods= type.getMethods();
 		for (IMethod method : methods) {
 			System.out.println(method.getElementName());
 		}
-		assertTrue("Should contain 2 methods", methods.length == 2);
+		assertEquals("Should contain 2 methods", 2, methods.length);
 	}
-
-
 }
