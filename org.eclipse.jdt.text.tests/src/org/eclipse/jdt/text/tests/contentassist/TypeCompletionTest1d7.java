@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 IBM Corporation and others.
+ * Copyright (c) 2011, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,6 +13,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.contentassist;
 
+import org.junit.Rule;
+import org.junit.Test;
+
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.IPackageFragment;
@@ -20,31 +23,20 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 /**
  * Those tests should run on Java Dolphin 1.7 .
  *
  * @since 3.7
  */
 public class TypeCompletionTest1d7 extends TypeCompletionTest {
-
-	private static final Class<TypeCompletionTest1d7> THIS= TypeCompletionTest1d7.class;
-
-	public static Test setUpTest(Test test) {
-		return new Java1d7CompletionTestSetup(test);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS, suiteName(THIS)));
-	}
+	@Rule
+	public Java1d7CompletionTestSetup cts= new Java1d7CompletionTestSetup();
 
 	/*
 	 * @see org.eclipse.jdt.text.tests.contentassist.AbstractCompletionTest#setUp()
 	 */
 	@Override
-	protected void setUp() throws Exception {
+	public void setUp() throws Exception {
 		super.setUp();
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES, true);
 		getJDTUIPrefs().setValue(PreferenceConstants.EDITOR_CLOSE_BRACKETS, true);
@@ -56,6 +48,7 @@ public class TypeCompletionTest1d7 extends TypeCompletionTest {
 	}
 
 	@Override
+	@Test
 	public void testGenericParameterGuessingUnambiguos() throws Exception {
 		addImport("java.util.List");
 		expectImport("java.util.ArrayList");
@@ -64,6 +57,7 @@ public class TypeCompletionTest1d7 extends TypeCompletionTest {
 	}
 
 	@Override
+	@Test
 	public void testGenericParameterGuessingExtends() throws Exception {
 		addImport("java.util.List");
 		expectImport("java.util.ArrayList");
@@ -72,6 +66,7 @@ public class TypeCompletionTest1d7 extends TypeCompletionTest {
 	}
 
 	@Override
+	@Test
 	public void testGenericParameterGuessingSuper() throws Exception {
 		addImport("java.util.List");
 		expectImport("java.util.ArrayList");
@@ -80,6 +75,7 @@ public class TypeCompletionTest1d7 extends TypeCompletionTest {
 	}
 
 	@Override
+	@Test
 	public void testGenericParameterGuessingMixed() throws Exception {
 		addImport("java.util.Map");
 		expectImport("java.util.HashMap");
@@ -88,6 +84,7 @@ public class TypeCompletionTest1d7 extends TypeCompletionTest {
 	}
 
 	@Override
+	@Test
 	public void testBug182468() throws Exception {
 		IPackageFragmentRoot src= (IPackageFragmentRoot)Java1d7CompletionTestSetup.getTestPackage().getParent();
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,9 +13,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import org.eclipse.jface.preference.PreferenceStore;
 
@@ -30,20 +35,13 @@ import org.eclipse.jface.text.TypedRegion;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
-
-public class JavaPartitionerTest extends TestCase {
-
+public class JavaPartitionerTest {
 	private JavaTextTools fTextTools;
 	private Document fDocument;
 	protected boolean fDocumentPartitioningChanged;
 
-
-	public JavaPartitionerTest(String name) {
-		super(name);
-	}
-
-	@Override
-	protected void setUp() {
+	@Before
+	public void setUp() {
 
 		fTextTools= new JavaTextTools(new PreferenceStore());
 
@@ -62,12 +60,8 @@ public class JavaPartitionerTest extends TestCase {
 		});
 	}
 
-	public static Test suite() {
-		return new TestSuite(JavaPartitionerTest.class);
-	}
-
-	@Override
-	protected void tearDown () {
+	@After
+	public void tearDown () {
 		fTextTools.dispose();
 		fTextTools= null;
 
@@ -87,11 +81,12 @@ public class JavaPartitionerTest extends TestCase {
 		for (int i= 0; i < expectation.length; i++) {
 			ITypedRegion e= expectation[i];
 			ITypedRegion r= result[i];
-			assertTrue(print(r) + " != " + print(e), r.equals(e));
+			assertEquals(print(r) + " != " + print(e), r, e);
 		}
 
 	}
 
+	@Test
 	public void testInitialPartitioning() {
 		try {
 
@@ -112,17 +107,18 @@ public class JavaPartitionerTest extends TestCase {
 
 			checkPartitioning(expectation, result);
 		} catch (BadLocationException x) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
+	@Test
 	public void testIntraPartitionChange() {
 		try {
 
 			fDocument.replace(34, 3, "y");
 			//	"xxx\n/*xxx*/\nxxx\n/**xxx*/\nxxx\n/**/\ny\n/***/\nxxx");
 
-			assertTrue(!fDocumentPartitioningChanged);
+			assertFalse(fDocumentPartitioningChanged);
 
 			ITypedRegion[] result= fDocument.computePartitioning(0, fDocument.getLength());
 			TypedRegion[] expectation= {
@@ -139,10 +135,11 @@ public class JavaPartitionerTest extends TestCase {
 
 			checkPartitioning(expectation, result);
 		} catch (BadLocationException x) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
+	@Test
 	public void testIntraPartitionChange2() {
 		try {
 
@@ -166,9 +163,10 @@ public class JavaPartitionerTest extends TestCase {
 
 			checkPartitioning(expectation, result);
 		} catch (BadLocationException x) {
-			assertTrue(false);
+			fail();
 		}
 	}
+	@Test
 	public void testInsertNewPartition() {
 		try {
 
@@ -194,10 +192,11 @@ public class JavaPartitionerTest extends TestCase {
 
 			checkPartitioning(expectation, result);
 		} catch (BadLocationException x) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
+	@Test
 	public void testRemovePartition1() {
 		try {
 
@@ -220,10 +219,11 @@ public class JavaPartitionerTest extends TestCase {
 
 			checkPartitioning(expectation, result);
 		} catch (BadLocationException x) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
+	@Test
 	public void testRemovePartition2() {
 
 		testJoinPartition3();
@@ -249,11 +249,12 @@ public class JavaPartitionerTest extends TestCase {
 
 			checkPartitioning(expectation, result);
 		} catch (BadLocationException x) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
 
+	@Test
 	public void testJoinPartitions1() {
 		try {
 
@@ -275,10 +276,11 @@ public class JavaPartitionerTest extends TestCase {
 
 			checkPartitioning(expectation, result);
 		} catch (BadLocationException x) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
+	@Test
 	public void testJoinPartitions2() {
 		try {
 
@@ -300,10 +302,11 @@ public class JavaPartitionerTest extends TestCase {
 
 			checkPartitioning(expectation, result);
 		} catch (BadLocationException x) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
+	@Test
 	public void testJoinPartition3() {
 		try {
 
@@ -325,11 +328,12 @@ public class JavaPartitionerTest extends TestCase {
 
 			checkPartitioning(expectation, result);
 		} catch (BadLocationException x) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
 
+	@Test
 	public void testSplitPartition1() {
 
 		testJoinPartitions1();
@@ -346,12 +350,13 @@ public class JavaPartitionerTest extends TestCase {
 
 
 		} catch (BadLocationException x) {
-			assertTrue(false);
+			fail();
 		}
 
 		testInitialPartitioning();
 	}
 
+	@Test
 	public void testSplitPartition2() {
 
 		testJoinPartitions2();
@@ -366,12 +371,13 @@ public class JavaPartitionerTest extends TestCase {
 			assertTrue(fDocumentPartitioningChanged);
 
 		} catch (BadLocationException x) {
-			assertTrue(false);
+			fail();
 		}
 
 		testInitialPartitioning();
 	}
 
+	@Test
 	public void testSplitPartition3() {
 
 		fDocumentPartitioningChanged= false;
@@ -397,10 +403,11 @@ public class JavaPartitionerTest extends TestCase {
 
 			checkPartitioning(expectation, result);
 		} catch (BadLocationException x) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
+	@Test
 	public void testCorruptPartitioning1() {
 		try {
 
@@ -428,10 +435,11 @@ public class JavaPartitionerTest extends TestCase {
 			};
 
 		} catch (BadLocationException x) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
+	@Test
 	public void testCorruptPartitioning2() {
 		try {
 
@@ -463,10 +471,11 @@ public class JavaPartitionerTest extends TestCase {
 			};
 
 		} catch (BadLocationException x) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
+	@Test
 	public void testCorruptPartitioning3() {
 		try {
 
@@ -496,10 +505,11 @@ public class JavaPartitionerTest extends TestCase {
 			};
 
 		} catch (BadLocationException x) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
+	@Test
 	public void testOpenPartition1() {
 		try {
 
@@ -523,10 +533,11 @@ public class JavaPartitionerTest extends TestCase {
 
 			checkPartitioning(expectation, result);
 		} catch (BadLocationException x) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
+	@Test
 	public void testOpenPartition2() {
 		try {
 
@@ -552,11 +563,12 @@ public class JavaPartitionerTest extends TestCase {
 
 			checkPartitioning(expectation, result);
 		} catch (BadLocationException x) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
 
+	@Test
 	public void testChangeContentTypeOfPartition() {
 		try {
 
@@ -581,25 +593,27 @@ public class JavaPartitionerTest extends TestCase {
 
 			checkPartitioning(expectation, result);
 		} catch (BadLocationException x) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
+	@Test
 	public void testPartitionFinder() {
 		try {
 
 			for (ITypedRegion expected : fDocument.computePartitioning(0, fDocument.getLength())) {
 				for (int j= 0; j < expected.getLength(); j++) {
 					ITypedRegion result= fDocument.getPartition(expected.getOffset() + j);
-					assertTrue(expected.equals(result));
+					assertEquals(expected, result);
 				}
 			}
 
 		} catch (BadLocationException x) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
+	@Test
 	public void testExtendPartition() {
 		try {
 
@@ -621,10 +635,11 @@ public class JavaPartitionerTest extends TestCase {
 			checkPartitioning(expectation, result);
 
 		} catch (BadLocationException x) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
+	@Test
 	public void testTransformPartition() {
 		try {
 
@@ -646,10 +661,11 @@ public class JavaPartitionerTest extends TestCase {
 			checkPartitioning(expectation, result);
 
 		} catch (BadLocationException x) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
+	@Test
 	public void testTogglePartition() {
 		try {
 
@@ -677,10 +693,11 @@ public class JavaPartitionerTest extends TestCase {
 			checkPartitioning(expectation2, result);
 
 		} catch (BadLocationException x) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
+	@Test
 	public void testEditing1() {
 		try {
 
@@ -714,10 +731,11 @@ public class JavaPartitionerTest extends TestCase {
 
 
 		} catch (BadLocationException x) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
+	@Test
 	public void testEditing2() {
 		try {
 
@@ -759,10 +777,11 @@ public class JavaPartitionerTest extends TestCase {
 			checkPartitioning(expectation, result);
 
 		} catch (BadLocationException x) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
+	@Test
 	public void testEditing3() {
 		try {
 
@@ -796,7 +815,7 @@ public class JavaPartitionerTest extends TestCase {
 			checkPartitioning(expectation, result);
 
 		} catch (BadLocationException x) {
-			assertTrue(false);
+			fail();
 		}
 	}
 }

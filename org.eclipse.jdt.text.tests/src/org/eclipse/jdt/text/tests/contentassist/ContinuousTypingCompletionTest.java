@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Red Hat Inc. and others
+ * Copyright (c) 2017, 2020 Red Hat Inc. and others
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,7 +13,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.contentassist;
 
-import org.junit.After;
+import static org.junit.Assert.assertEquals;
+
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.util.DisplayHelper;
 
@@ -35,11 +38,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 public class ContinuousTypingCompletionTest extends AbstractCompletionTest {
-
 	private final class CompletionSelectionTracker implements ICompletionListener {
 		private ICompletionProposal fSelectedProposal;
 
@@ -63,21 +62,15 @@ public class ContinuousTypingCompletionTest extends AbstractCompletionTest {
 		}
 	}
 
-	private static final Class<ContinuousTypingCompletionTest> THIS= ContinuousTypingCompletionTest.class;
-
 	private JavaEditor fEditor;
 
-	public static Test setUpTest(Test test) {
-		return new CompletionTestSetup(test);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS, suiteName(THIS)));
-	}
+	@Rule
+	public CompletionTestSetup cts= new CompletionTestSetup();
 
 	/*
 	 * This tests https://bugs.eclipse.org/bugs/show_bug.cgi?id=511542
 	 */
+	@Test
 	public void testContinousTypingSelectsTopProposal() throws Exception {
 		String contents= "public class " + getName() + " {\n" +
 				"	int ab, ba;\n" +
@@ -101,7 +94,6 @@ public class ContinuousTypingCompletionTest extends AbstractCompletionTest {
 		assertEquals("ba", selectionTracker.getSelectedProposal().getJavaElement().getElementName());
 	}
 
-	@After
 	@Override
 	public void tearDown() throws Exception {
 		if (fEditor != null) {
@@ -110,5 +102,4 @@ public class ContinuousTypingCompletionTest extends AbstractCompletionTest {
 		}
 		super.tearDown();
 	}
-
 }

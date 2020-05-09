@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2018 GK Software AG, IBM Corporation and others.
+ * Copyright (c) 2014, 2020 GK Software AG, IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,7 +14,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.contentassist;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
 import java.util.Hashtable;
+
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.NullTestUtils;
@@ -51,7 +58,7 @@ import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.tests.core.Java1d8ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.Java1d8ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
@@ -59,28 +66,17 @@ import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 /**
  * Those tests are made to run on Java Spider 1.8 .
  */
 public class CodeCompletionTest1d8 extends AbstractCompletionTest {
-	private static final Class<CodeCompletionTest1d8> THIS= CodeCompletionTest1d8.class;
-
-	public static Test suite() {
-		return new Java1d8ProjectTestSetup(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new Java1d8ProjectTestSetup(test);
-	}
+	@Rule
+	public Java1d8ProjectTestSetup j18s= new Java1d8ProjectTestSetup();
 
 	private IJavaProject fJProject1;
 
-
 	@Override
-	protected void setUp() throws Exception {
+	public void setUp() throws Exception {
 		fJProject1= Java1d8ProjectTestSetup.getProject();
 
 		Hashtable<String, String> options= TestOptions.getDefaultOptions();
@@ -106,7 +102,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 	}
 
 	@Override
-	protected void tearDown() throws Exception {
+	public void tearDown() throws Exception {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setToDefault(PreferenceConstants.CODEGEN_ADD_COMMENTS);
 		store.setToDefault(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS);
@@ -148,6 +144,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		cu.codeComplete(offset, collector, new NullProgressMonitor());
 	}
 
+	@Test
 	public void testBug425183_comment8() throws CoreException {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -195,6 +192,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		assertEquals(expectedContents, doc.get());
 	}
 
+	@Test
 	public void testOverride1() throws CoreException {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
@@ -247,6 +245,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		assertEquals(buf.toString(), doc.get());
 	}
 
+	@Test
 	public void testOverride2() throws CoreException {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
@@ -299,6 +298,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		assertEquals(buf.toString(), doc.get());
 	}
 
+	@Test
 	public void testOverride3() throws CoreException {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
@@ -347,6 +347,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		assertEquals(buf.toString(), doc.get());
 	}
 
+	@Test
 	public void testOverride4() throws CoreException {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
@@ -388,6 +389,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		assertEquals(buf.toString(), doc.get());
 	}
 
+	@Test
 	public void testOverride5() throws CoreException {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
@@ -425,6 +427,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		assertEquals(buf.toString(), doc.get());
 	}
 
+	@Test
 	public void testOverride6() throws CoreException {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
@@ -462,6 +465,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		assertEquals(buf.toString(), doc.get());
 	}
 
+	@Test
 	public void testOverride7() throws CoreException {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
@@ -499,6 +503,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		assertEquals(buf.toString(), doc.get());
 	}
 
+	@Test
 	public void testOverride8() throws CoreException {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
@@ -535,6 +540,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		assertEquals(buf.toString(), doc.get());
 	}
 
+	@Test
 	public void testOverride9() throws CoreException {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
@@ -571,6 +577,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		assertEquals(buf.toString(), doc.get());
 	}
 
+	@Test
 	public void testOverride10() throws CoreException {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
@@ -619,6 +626,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		assertEquals(buf.toString(), doc.get());
 	}
 
+	@Test
 	public void testOverride11() throws CoreException {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pp", false, null);
@@ -667,6 +675,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		assertEquals(buf.toString(), doc.get());
 	}
 
+	@Test
 	public void testOverride12() throws CoreException {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pp", false, null);
@@ -715,6 +724,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		assertEquals(buf.toString(), doc.get());
 	}
 
+	@Test
 	public void testOverride13() throws CoreException {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pp", false, null);
@@ -771,9 +781,10 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		assertEquals(buf.toString(), doc.get());
 	}
 	private static void assertNumberOf(String name, int is, int expected) {
-		assertTrue("Wrong number of " + name + ", is: " + is + ", expected: " + expected, is == expected);
+		assertEquals("Wrong number of " + name + ", is: " + is + ", expected: " + expected, expected, is);
 	}
 
+	@Test
 	public void testBug528871() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		NullTestUtils.prepareNullTypeAnnotations(sourceFolder);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 IBM Corporation and others.
+ * Copyright (c) 2011, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,8 +13,16 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
 import java.util.Arrays;
 import java.util.Comparator;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -31,28 +39,17 @@ import org.eclipse.jdt.internal.core.manipulation.search.IOccurrencesFinder.Occu
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.tests.core.Java1d8ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.Java1d8ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.search.ExceptionOccurrencesFinder;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
 /**
  * Those tests are made to run on Java Spider 1.8 .
  */
-public class MarkOccurrenceTest1d8 extends TestCase {
-	private static final Class<MarkOccurrenceTest1d8> THIS= MarkOccurrenceTest1d8.class;
-
-	public static Test suite() {
-		return new Java1d8ProjectTestSetup(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new Java1d8ProjectTestSetup(test);
-	}
+public class MarkOccurrenceTest1d8 {
+	@Rule
+	public Java1d8ProjectTestSetup f18p= new Java1d8ProjectTestSetup();
 
 	private ASTParser fParser;
 
@@ -65,8 +62,8 @@ public class MarkOccurrenceTest1d8 extends TestCase {
 	/*
 	 * @see junit.framework.TestCase#setUp()
 	 */
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		fParser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 
 		fJProject1= Java1d8ProjectTestSetup.getProject();
@@ -74,8 +71,8 @@ public class MarkOccurrenceTest1d8 extends TestCase {
 		JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.EDITOR_MARK_OCCURRENCES, true);
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, Java1d8ProjectTestSetup.getDefaultClasspath());
 	}
 
@@ -132,6 +129,7 @@ public class MarkOccurrenceTest1d8 extends TestCase {
 		return find(s, pattern, ithOccurrence - 1, idx + 1);
 	}
 
+	@Test
 	public void testThrowingAnnotatedException1() throws Exception {
 		StringBuffer s= new StringBuffer();
 		s.append("package test1;\n");
@@ -212,6 +210,7 @@ public class MarkOccurrenceTest1d8 extends TestCase {
 		checkSelection(s, offset, length, ranges);
 	}
 
+	@Test
 	public void testThrownExceptionInLambda() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -240,6 +239,7 @@ public class MarkOccurrenceTest1d8 extends TestCase {
 		checkSelection(buf, offset, length, ranges);
 	}
 
+	@Test
 	public void testTryCatchInLambda() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -262,5 +262,4 @@ public class MarkOccurrenceTest1d8 extends TestCase {
 		OccurrenceLocation[] ranges= { find(buf, "FileInputStream", 2), find(buf, "FileNotFoundException", 2) };
 		checkSelection(buf, offset, length, ranges);
 	}
-
 }

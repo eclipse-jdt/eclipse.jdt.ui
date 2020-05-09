@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2015 IBM Corporation and others.
+ * Copyright (c) 2005, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,8 +13,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.contentassist;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -22,62 +22,60 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
-
 /**
  * @since 3.2
  */
 public class TypeCompletionTest extends AbstractCompletionTest {
-
-	private static final Class<TypeCompletionTest> THIS= TypeCompletionTest.class;
-
-	public static Test setUpTest(Test test) {
-		return new CompletionTestSetup(test);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS, suiteName(THIS)));
-	}
+	@Rule
+	public CompletionTestSetup cts= new CompletionTestSetup();
 
 	/*
 	 * @see org.eclipse.jdt.text.tests.contentassist.AbstractCompletionTest#setUp()
 	 */
 	@Override
-	protected void setUp() throws Exception {
+	public void setUp() throws Exception {
 		super.setUp();
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES, true);
 		getJDTUIPrefs().setValue(PreferenceConstants.EDITOR_CLOSE_BRACKETS, true);
 	}
 
+	@Test
 	public void testJavaLang() throws Exception {
 		assertMethodBodyProposal("S|", "String ", "String|");
 	}
 
+	@Test
 	public void testImported() throws Exception {
 		addImport("java.util.Random");
 		expectImport("java.util.Random");
 		assertMethodBodyProposal("R|", "Random ", "Random|");
 	}
 
+	@Test
 	public void testAutoImport() throws Exception {
 		expectImport("java.util.Random");
 		assertMethodBodyProposal("R|", "Random ", "Random|");
 	}
 
+	@Test
 	public void testNoAutoImportForQualifiedPrefix() throws Exception {
 		assertMethodBodyProposal("java.util.R|", "Random ", "java.util.Random|");
 	}
 
+	@Test
 	public void testNoQualifierRemovalForQualifiedPrefix() throws Exception {
 		addImport("java.util.Random");
 		expectImport("java.util.Random");
 		assertMethodBodyProposal("java.util.R|", "Random ", "java.util.Random|");
 	}
 
+	@Test
 	public void testAutoQualify() throws Exception {
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_ADDIMPORT, false);
 		assertMethodBodyProposal("R|", "Random ", "java.util.Random|");
 	}
 
+	@Test
 	public void testNoAutoQualifyWithImport() throws Exception {
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_ADDIMPORT, false);
 		addImport("java.util.Random");
@@ -85,6 +83,7 @@ public class TypeCompletionTest extends AbstractCompletionTest {
 		assertMethodBodyProposal("R|", "Random ", "Random|");
 	}
 
+	@Test
 	public void testNoQualifierRemovalWithImport() throws Exception {
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_ADDIMPORT, false);
 		addImport("java.util.Random");
@@ -92,6 +91,7 @@ public class TypeCompletionTest extends AbstractCompletionTest {
 		assertMethodBodyProposal("java.util.R|", "Random ", "java.util.Random|");
 	}
 
+	@Test
 	public void testAutoImportZeroPrefix() throws Exception {
 		addImport("java.util.Random");
 		expectImport("java.util.Random");
@@ -100,6 +100,7 @@ public class TypeCompletionTest extends AbstractCompletionTest {
 		assertMethodBodyProposal("Random r= new |", "Random ", "Random r= new Random|"); // tests RHS cache
 	}
 
+	@Test
 	public void testInnerImportedType() throws Exception {
 		waitBeforeCompleting(true);
 		addImport("java.security.KeyStore");
@@ -108,29 +109,34 @@ public class TypeCompletionTest extends AbstractCompletionTest {
 		assertMethodBodyProposal("Entry|", "Entry - java.security.KeyStore", "Entry|");
     }
 
+	@Test
 	public void testInnerTypeOuterImported() throws Exception {
 		addImport("java.security.KeyStore");
 		expectImport("java.security.KeyStore");
 		assertMethodBodyProposal("KeyStore.E|", "Entry", "KeyStore.Entry|");
 	}
 
+	@Test
 	public void testGenericInnerTypeOuterImported() throws Exception {
 		addImport("java.util.Map");
 		expectImport("java.util.Map");
 		assertMethodBodyProposal("Map.E|", "Entry", "Map.Entry<|K|, V>");
 	}
 
+	@Test
 	public void testInnerTypeOfGenericOuter() throws Exception {
 		addMembers("static class Outer<E> { class Inner {} }");
 		assertMethodBodyProposal("Outer<String>.I|", "Outer<java.lang.String>.Inner", "Outer<String>.Inner|");
 	}
 
+	@Test
 	public void testInnerTypeOfGenericOuter2() throws Exception {
 		addMembers("static class Outer<E> { class Inner {} }");
 		expectImport("test1.Completion_" + getName() + ".Outer.Inner");
 		assertMethodBodyProposal("Inner|", "Outer<E>.Inner", "Inner|");
 	}
 
+	@Test
 	public void testInnerTypeOfGenericOuterImported() throws Exception {
 		addMembers("static class Outer<E> { class Inner {} }");
 		addImport("test1.Completion_" + getName() + ".Outer");
@@ -138,6 +144,7 @@ public class TypeCompletionTest extends AbstractCompletionTest {
 		assertMethodBodyProposal("Outer<String>.I|", "Outer<java.lang.String>.Inner", "Outer<String>.Inner|");
 	}
 
+	@Test
 	public void testInnerTypeOfGenericOuterImported2() throws Exception {
 		addMembers("static class Outer<E> { class Inner {} }");
 		addImport("test1.Completion_" + getName() + ".Outer.Inner");
@@ -145,17 +152,20 @@ public class TypeCompletionTest extends AbstractCompletionTest {
 		assertMethodBodyProposal("Inner|", "Outer<E>.Inner", "Inner|");
 	}
 
+	@Test
 	public void testGeneric() throws Exception {
 		addImport("java.util.List");
 		expectImport("java.util.List");
 		assertMethodBodyProposal("L|", "List ", "List<|E|>");
 	}
 
+	@Test
 	public void testAutoImportGeneric() throws Exception {
 		expectImport("java.util.ArrayList");
 		assertMethodBodyProposal("A|", "ArrayList ", "ArrayList<|E|>");
 	}
 
+	@Test
 	public void testGenericParameterGuessingUnambiguos() throws Exception {
 		addImport("java.util.List");
 		expectImport("java.util.ArrayList");
@@ -163,6 +173,7 @@ public class TypeCompletionTest extends AbstractCompletionTest {
 		assertMethodBodyProposal("List<String> list= new A|", "ArrayList()", "List<String> list= new ArrayList<String>()|");
 	}
 
+	@Test
 	public void testGenericParameterGuessingExtends() throws Exception {
 		addImport("java.util.List");
 		expectImport("java.util.ArrayList");
@@ -170,6 +181,7 @@ public class TypeCompletionTest extends AbstractCompletionTest {
 		assertMethodBodyProposal("List<? extends Number> list= new A|", "ArrayList()", "List<? extends Number> list= new ArrayList<Number>()|");
 	}
 
+	@Test
 	public void testGenericParameterGuessingSuper() throws Exception {
 		addImport("java.util.List");
 		expectImport("java.util.ArrayList");
@@ -177,6 +189,7 @@ public class TypeCompletionTest extends AbstractCompletionTest {
 		assertMethodBodyProposal("List<? super Number> list= new A|", "ArrayList()", "List<? super Number> list= new ArrayList<E>()|");
 	}
 
+	@Test
 	public void testGenericParameterGuessingMixed() throws Exception {
 		addImport("java.util.Map");
 		expectImport("java.util.HashMap");
@@ -184,10 +197,12 @@ public class TypeCompletionTest extends AbstractCompletionTest {
 		assertMethodBodyProposal("Map<String, ? extends Number> list= new H|", "HashMap()", "Map<String, ? extends Number> list= new HashMap<String, Number>()|");
 	}
 
+	@Test
 	public void testNoCamelCase() throws Exception {
 		assertNoMethodBodyProposals("SB|", "StringBuffer ");
 	}
 
+	@Test
 	public void testCamelCase() throws Exception {
 		setCoreOption(JavaCore.CODEASSIST_CAMEL_CASE_MATCH, JavaCore.ENABLED);
 
@@ -197,11 +212,13 @@ public class TypeCompletionTest extends AbstractCompletionTest {
 		assertMethodBodyProposal("SB|", "StringBuffer ", "StringBuffer|");
 	}
 
+	@Test
 	public void testConstructorParentheses() throws Exception {
 		setTrigger('(');
 		assertMethodBodyProposal("StringBuf|", "StringBuffer ", "StringBuffer(|)");
 	}
 
+	@Test
 	public void testIncrementalInsertion() throws Exception {
 	    getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_PREFIX_COMPLETION, true);
 	    getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_AUTOINSERT, true);
@@ -209,6 +226,7 @@ public class TypeCompletionTest extends AbstractCompletionTest {
 	    assertMethodBodyIncrementalCompletion("Inval|", "Invalid|");
     }
 
+	@Test
 	public void testNoIncrementalInsertion() throws Exception {
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_PREFIX_COMPLETION, true);
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_AUTOINSERT, true);
@@ -216,6 +234,7 @@ public class TypeCompletionTest extends AbstractCompletionTest {
 		assertMethodBodyIncrementalCompletion("String|", "String|");
 	}
 
+	@Test
 	public void testIncrementalInsertionPrefixCorrection() throws Exception {
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_PREFIX_COMPLETION, true);
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_AUTOINSERT, true);
@@ -223,6 +242,7 @@ public class TypeCompletionTest extends AbstractCompletionTest {
 		assertMethodBodyIncrementalCompletion("InVa|", "Invalid|");
 	}
 
+	@Test
 	public void testNoIncrementalInsertionPrefixCorrection() throws Exception {
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_PREFIX_COMPLETION, true);
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_AUTOINSERT, true);
@@ -230,6 +250,7 @@ public class TypeCompletionTest extends AbstractCompletionTest {
 		assertMethodBodyIncrementalCompletion("InVaLiD|", "Invalid|");
 	}
 
+	@Test
 	public void testNoIncrementalInsertionCamelCase() throws Exception {
 		setCoreOption(JavaCore.CODEASSIST_CAMEL_CASE_MATCH, JavaCore.ENABLED);
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_PREFIX_COMPLETION, true);
@@ -239,6 +260,7 @@ public class TypeCompletionTest extends AbstractCompletionTest {
 		assertMethodBodyIncrementalCompletion("IO|", "IO|");
 	}
 
+	@Test
 	public void testIncrementalInsertionCamelCase() throws Exception {
 		setCoreOption(JavaCore.CODEASSIST_CAMEL_CASE_MATCH, JavaCore.ENABLED);
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_PREFIX_COMPLETION, true);
@@ -248,6 +270,7 @@ public class TypeCompletionTest extends AbstractCompletionTest {
 		assertMethodBodyIncrementalCompletion("JaEn|", "JarEntry|");
 	}
 
+	@Test
 	public void testNoIncrementalInsertionCamelCase2() throws Exception {
 		setCoreOption(JavaCore.CODEASSIST_CAMEL_CASE_MATCH, JavaCore.ENABLED);
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_PREFIX_COMPLETION, true);
@@ -258,6 +281,7 @@ public class TypeCompletionTest extends AbstractCompletionTest {
 		assertMethodBodyIncrementalCompletion("JaE|", "JaE|");
 	}
 
+	@Test
 	public void testIncrementalInsertionCamelCase2() throws Exception {
 		setCoreOption(JavaCore.CODEASSIST_CAMEL_CASE_MATCH, JavaCore.ENABLED);
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_PREFIX_COMPLETION, true);
@@ -267,6 +291,7 @@ public class TypeCompletionTest extends AbstractCompletionTest {
 		assertMethodBodyIncrementalCompletion("IOExce|", "IOException|");
 	}
 
+	@Test
 	public void testBug182468() throws Exception {
 		IPackageFragmentRoot src= (IPackageFragmentRoot)CompletionTestSetup.getTestPackage().getParent();
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Pivotal, Inc.
+ * Copyright (c) 2018, 2020 Pivotal, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,8 @@
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.codemining;
+
+import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -20,6 +22,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.text.tests.performance.DisplayHelper;
@@ -59,17 +62,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
 @SuppressWarnings("unchecked")
-public class CodeMiningTriggerTest extends TestCase {
-
-	public static Test suite() {
-		return new TestSuite(CodeMiningTriggerTest.class);
-	}
-
+public class CodeMiningTriggerTest {
 	private IPreferenceStore fPreferenceStore;
 	private boolean wasCodeMiningEnabled;
 
@@ -115,7 +109,6 @@ public class CodeMiningTriggerTest extends TestCase {
 		}
 	}
 
-	@Override
 	@Before
 	public void setUp() throws CoreException {
 		fPreferenceStore= JavaPlugin.getDefault().getPreferenceStore();
@@ -129,13 +122,13 @@ public class CodeMiningTriggerTest extends TestCase {
 		TestCodeMiningProvider.isOn = true;
 	}
 
-	@Override
 	@After
 	public void tearDown() {
 		TestCodeMiningProvider.isOn = false;
 		this.fPreferenceStore.setValue(PreferenceConstants.EDITOR_CODEMINING_ENABLED, wasCodeMiningEnabled);
 	}
 
+	@Test
 	public void testPullCodeMining() throws Exception {
 		String contents= "public class Foo {\n" +
 				"	int ab, ba;\n" +
@@ -199,5 +192,4 @@ public class CodeMiningTriggerTest extends TestCase {
 				}
 		}.waitForCondition(Display.getDefault(), timeout));
 	}
-
 }

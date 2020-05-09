@@ -13,8 +13,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.contentassist;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
+
 import java.lang.reflect.Field;
 import java.util.Hashtable;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.rules.TestName;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -69,9 +79,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.java.ContentAssistProcessor;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProcessor;
 
-import junit.framework.TestCase;
-
-public class AbstractCompletionTest extends TestCase {
+public class AbstractCompletionTest {
 	protected static String suiteName(Class<?> fqn) {
 		String name= fqn.toString();
 		name= name.substring(name.lastIndexOf('.') + 1);
@@ -90,8 +98,8 @@ public class AbstractCompletionTest extends TestCase {
 	private char fTrigger;
 	private boolean fWaitBeforeCompleting;
 
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		configureCoreOptions(options);
 		JavaCore.setOptions(options);
@@ -149,8 +157,8 @@ public class AbstractCompletionTest extends TestCase {
 		return cu;
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		IPreferenceStore store= getJDTUIPrefs();
 		store.setToDefault(PreferenceConstants.CODEGEN_ADD_COMMENTS);
 		store.setToDefault(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS);
@@ -529,6 +537,13 @@ public class AbstractCompletionTest extends TestCase {
 		}
 		buffer.append(prefix + lineBuffer + postfix);
 		return new Region(firstPipe + prefix.length(), secondPipe - firstPipe);
+	}
+
+	@Rule
+	public TestName tn= new TestName();
+
+	protected String getName() {
+		return tn.getMethodName();
 	}
 
 	private ICompletionProposal findNonNullProposal(String prefix, IRegion selection) {

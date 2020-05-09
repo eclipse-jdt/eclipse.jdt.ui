@@ -12,8 +12,17 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.contentassist;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Arrays;
 import java.util.List;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -34,47 +43,36 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.text.java.ChainCompletionProposalComputer;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
-public class ChainCompletionTest extends TestCase {
-
-	private static final Class<ChainCompletionTest> THIS= ChainCompletionTest.class;
-
+public class ChainCompletionTest {
 	private IJavaProject fJProject;
 
 	private IPackageFragmentRoot javaSrc;
 
 	private IPackageFragment pkg;
 
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS));
-	}
+	@Rule
+	public ProjectTestSetup pts= new ProjectTestSetup();
 
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
-	}
-
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		fJProject= JavaProjectHelper.createJavaProject("TestProject", "bin");
 		JavaProjectHelper.addRTJar18(fJProject);
 		javaSrc= JavaProjectHelper.addSourceContainer(fJProject, "src");
 		pkg= javaSrc.createPackageFragment("test", false, null);
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJProject);
 	}
 
+	@Test
 	public void testNullExpectedType() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("$package test;\n" +
@@ -89,6 +87,7 @@ public class ChainCompletionTest extends TestCase {
 		assertEquals(0, proposals.size());
 	}
 
+	@Test
 	public void testBasic() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test;\n" +
@@ -122,6 +121,7 @@ public class ChainCompletionTest extends TestCase {
 		assertEquals("getBar().getBaz() - 2 elements", proposals.get(0).getDisplayString());
 	}
 
+	@Test
 	public void testPrimitiveCompletion() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test;\n" +
@@ -137,7 +137,7 @@ public class ChainCompletionTest extends TestCase {
 
 		List<ICompletionProposal> proposals= computeCompletionProposals(cu, completionIndex);
 
-		assertTrue(!proposals.isEmpty());
+		assertFalse(proposals.isEmpty());
 		List<String> expected= Arrays.asList(
 				"s.length() - 2 elements",
 				"s.hashCode() - 2 elements",
@@ -147,6 +147,7 @@ public class ChainCompletionTest extends TestCase {
 		assertProposalsExist(expected, proposals);
 	}
 
+	@Test
 	public void testAccessMethodParameters() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test;\n" +
@@ -175,6 +176,7 @@ public class ChainCompletionTest extends TestCase {
 		assertProposalsExist(expected, proposals);
 	}
 
+	@Test
 	public void testAvoidRecursiveCallToMember() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test;\n" +
@@ -201,6 +203,7 @@ public class ChainCompletionTest extends TestCase {
 		assertEquals("getSubElement().findMe - 2 elements", proposals.get(0).getDisplayString());
 	}
 
+	@Test
 	public void testCompletionOnArrayMemberAccessInMethod1() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test;\n" +
@@ -227,6 +230,7 @@ public class ChainCompletionTest extends TestCase {
 		assertProposalsExist(expected, proposals);
 	}
 
+	@Test
 	public void testCompletionOnArrayWithCastsSupertype1() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test;\n" +
@@ -253,6 +257,7 @@ public class ChainCompletionTest extends TestCase {
 		assertEquals("obj.findme[][][] - 2 elements", proposals.get(0).getDisplayString());
 	}
 
+	@Test
 	public void testCompletionOnGenericTypeInMethod1() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test;\n" +
@@ -278,6 +283,7 @@ public class ChainCompletionTest extends TestCase {
 		assertEquals("variable.findMe - 2 elements", proposals.get(0).getDisplayString());
 	}
 
+	@Test
 	public void testCompletionOnMemberCallChainDepth1() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test;\n" +
@@ -310,6 +316,7 @@ public class ChainCompletionTest extends TestCase {
 		assertProposalsExist(expected, proposals);
 	}
 
+	@Test
 	public void testCompletionOnMemberInMethodWithPrefix() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test;\n" +
@@ -339,6 +346,7 @@ public class ChainCompletionTest extends TestCase {
 		assertEquals("getSubElement().findMe - 2 elements", proposals.get(0).getDisplayString());
 	}
 
+	@Test
 	public void testCompletionOnMethodReturn() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test;\n" +
@@ -373,6 +381,7 @@ public class ChainCompletionTest extends TestCase {
 		assertProposalsExist(expected, proposals);
 	}
 
+	@Test
 	public void testCompletionOnNonPublicMemberInMethod1() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test;\n" +
@@ -397,6 +406,7 @@ public class ChainCompletionTest extends TestCase {
 		assertProposalsExist(expected, proposals);
 	}
 
+	@Test
 	public void testCompletionOnSuperTypeInMethod1() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test;\n" +
@@ -422,6 +432,7 @@ public class ChainCompletionTest extends TestCase {
 		assertEquals("useMe.findMe - 2 elements", proposals.get(0).getDisplayString());
 	}
 
+	@Test
 	public void testCompletionOnSuperTypeMemberInMethod1() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test;\n" +
@@ -448,6 +459,7 @@ public class ChainCompletionTest extends TestCase {
 		assertProposalsExist(expected, proposals);
 	}
 
+	@Test
 	public void testCompletionOnSuperTypeMemberInMethod2() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test;\n" +
@@ -476,6 +488,7 @@ public class ChainCompletionTest extends TestCase {
 		assertProposalsExist(expected, proposals);
 	}
 
+	@Test
 	public void testCompletionOnThisAndLocal() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("import java.util.Collection;\n" +
@@ -504,6 +517,7 @@ public class ChainCompletionTest extends TestCase {
 		assertProposalsExist(expected, proposals);
 	}
 
+	@Test
 	public void testCompletionOnType() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test;\n" +
@@ -537,6 +551,7 @@ public class ChainCompletionTest extends TestCase {
 		assertProposalsExist(expected, proposals);
 	}
 
+	@Test
 	public void testBug552849 () throws Exception {
 		IPackageFragment pkg2= javaSrc.createPackageFragment("test2", false, null);
 		IPackageFragment pkg3= javaSrc.createPackageFragment("test3", false, null);
@@ -583,6 +598,7 @@ public class ChainCompletionTest extends TestCase {
 		assertProposalsExist(expected, proposals);
 	}
 
+	@Test
 	public void testBug559385 () throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test;\n" +
@@ -608,6 +624,7 @@ public class ChainCompletionTest extends TestCase {
 		assertTrue(proposals.size() > 0);
 	}
 
+	@Test
 	public void testNoTriggerCompletionInvocation() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test;\n" +
@@ -681,5 +698,4 @@ public class ChainCompletionTest extends TestCase {
 			assertTrue(proposals.stream().anyMatch(p -> propDisplay.equals(p.getDisplayString())));
 		}
 	}
-
 }

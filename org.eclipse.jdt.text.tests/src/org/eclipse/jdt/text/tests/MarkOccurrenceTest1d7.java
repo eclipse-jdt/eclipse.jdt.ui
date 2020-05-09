@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 IBM Corporation and others.
+ * Copyright (c) 2011, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,8 +13,16 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
 import java.util.Arrays;
 import java.util.Comparator;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -31,30 +39,19 @@ import org.eclipse.jdt.internal.core.manipulation.search.IOccurrencesFinder.Occu
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.tests.core.Java1d7ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.Java1d7ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.search.ExceptionOccurrencesFinder;
 import org.eclipse.jdt.internal.ui.search.MethodExitsFinder;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
 /**
  * Tests the Java Editor's occurrence marking feature.
  * Those tests should run on Java Dolphin 1.7 .
  */
-public class MarkOccurrenceTest1d7 extends TestCase {
-	private static final Class<MarkOccurrenceTest1d7> THIS= MarkOccurrenceTest1d7.class;
-
-	public static Test suite() {
-		return new Java1d7ProjectTestSetup(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new Java1d7ProjectTestSetup(test);
-	}
+public class MarkOccurrenceTest1d7 {
+	@Rule
+	public Java1d7ProjectTestSetup j7s= new Java1d7ProjectTestSetup();
 
 	private ASTParser fParser;
 
@@ -67,8 +64,8 @@ public class MarkOccurrenceTest1d7 extends TestCase {
 	/*
 	 * @see junit.framework.TestCase#setUp()
 	 */
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		fParser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 
 		fJProject1= Java1d7ProjectTestSetup.getProject();
@@ -77,8 +74,8 @@ public class MarkOccurrenceTest1d7 extends TestCase {
 		JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.EDITOR_MARK_IMPLEMENTORS, true);
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, Java1d7ProjectTestSetup.getDefaultClasspath());
 	}
 
@@ -135,6 +132,7 @@ public class MarkOccurrenceTest1d7 extends TestCase {
 		return find(s, pattern, ithOccurrence - 1, idx + 1);
 	}
 
+	@Test
 	public void testMarkMethodExits1() throws Exception {
 		fFinder= new MethodExitsFinder();
 		StringBuffer s= new StringBuffer();
@@ -161,6 +159,7 @@ public class MarkOccurrenceTest1d7 extends TestCase {
 		checkSelection(s, offset, length, ranges);
 	}
 
+	@Test
 	public void testMarkMethodExits2() throws Exception {
 		fFinder= new MethodExitsFinder();
 		StringBuffer s= new StringBuffer();
@@ -185,6 +184,7 @@ public class MarkOccurrenceTest1d7 extends TestCase {
 		checkSelection(s, offset, length, ranges);
 	}
 
+	@Test
 	public void testMarkMethodExits3() throws Exception {
 		fFinder= new MethodExitsFinder();
 		StringBuffer s= new StringBuffer();
@@ -209,6 +209,7 @@ public class MarkOccurrenceTest1d7 extends TestCase {
 		checkSelection(s, offset, length, ranges);
 	}
 
+	@Test
 	public void testMarkMethodExits4() throws Exception {
 		fFinder= new MethodExitsFinder();
 		StringBuffer s= new StringBuffer();
@@ -236,6 +237,7 @@ public class MarkOccurrenceTest1d7 extends TestCase {
 		checkSelection(s, offset, length, ranges);
 	}
 
+	@Test
 	public void testMarkMethodExits5() throws Exception {
 		fFinder= new MethodExitsFinder();
 		StringBuffer s= new StringBuffer();
@@ -263,6 +265,7 @@ public class MarkOccurrenceTest1d7 extends TestCase {
 		checkSelection(s, offset, length, ranges);
 	}
 
+	@Test
 	public void testMarkMethodExits6() throws Exception {
 		fFinder= new MethodExitsFinder();
 		StringBuffer s= new StringBuffer();
@@ -290,6 +293,7 @@ public class MarkOccurrenceTest1d7 extends TestCase {
 		checkSelection(s, offset, length, ranges);
 	}
 
+	@Test
 	public void testMarkMethodExits7() throws Exception {
 		fFinder= new MethodExitsFinder();
 		StringBuffer s= new StringBuffer();
@@ -315,6 +319,7 @@ public class MarkOccurrenceTest1d7 extends TestCase {
 		checkSelection(s, offset, length, ranges);
 	}
 
+	@Test
 	public void testThrowingException1() throws Exception {
 		fFinder= new ExceptionOccurrencesFinder();
 		StringBuffer s= new StringBuffer();
@@ -341,6 +346,7 @@ public class MarkOccurrenceTest1d7 extends TestCase {
 		checkSelection(s, offset, length, ranges);
 	}
 
+	@Test
 	public void testThrowingException2() throws Exception {
 		fFinder= new ExceptionOccurrencesFinder();
 		StringBuffer s= new StringBuffer();
@@ -365,6 +371,7 @@ public class MarkOccurrenceTest1d7 extends TestCase {
 		checkSelection(s, offset, length, ranges);
 	}
 
+	@Test
 	public void testThrowingException3() throws Exception {
 		fFinder= new ExceptionOccurrencesFinder();
 		StringBuffer s= new StringBuffer();
@@ -392,6 +399,7 @@ public class MarkOccurrenceTest1d7 extends TestCase {
 		checkSelection(s, offset, length, ranges);
 	}
 
+	@Test
 	public void testThrowingException4() throws Exception {
 		fFinder= new ExceptionOccurrencesFinder();
 		StringBuffer s= new StringBuffer();
@@ -419,6 +427,7 @@ public class MarkOccurrenceTest1d7 extends TestCase {
 		checkSelection(s, offset, length, ranges);
 	}
 
+	@Test
 	public void testThrowingException5() throws Exception {
 		fFinder= new ExceptionOccurrencesFinder();
 		StringBuffer s= new StringBuffer();
@@ -446,6 +455,7 @@ public class MarkOccurrenceTest1d7 extends TestCase {
 		checkSelection(s, offset, length, ranges);
 	}
 
+	@Test
 	public void testThrowingException6() throws Exception {
 		fFinder= new ExceptionOccurrencesFinder();
 		StringBuffer s= new StringBuffer();
@@ -473,6 +483,7 @@ public class MarkOccurrenceTest1d7 extends TestCase {
 		checkSelection(s, offset, length, ranges);
 	}
 
+	@Test
 	public void testThrowingException7() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=68305
 		fFinder= new ExceptionOccurrencesFinder();
@@ -500,6 +511,7 @@ public class MarkOccurrenceTest1d7 extends TestCase {
 		checkSelection(s, offset, length, ranges);
 	}
 
+	@Test
 	public void testThrowingException8() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=68305
 		fFinder= new ExceptionOccurrencesFinder();
