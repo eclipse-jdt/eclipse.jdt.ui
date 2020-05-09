@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2016 IBM Corporation and others.
+ * Copyright (c) 2005, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,8 +13,16 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
 import java.util.Arrays;
 import java.util.Comparator;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -26,31 +34,21 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
-
-import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
-import org.eclipse.jdt.internal.ui.search.BreakContinueTargetFinder;
 import org.eclipse.jdt.internal.core.manipulation.search.IOccurrencesFinder.OccurrenceLocation;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
+
+import org.eclipse.jdt.internal.ui.search.BreakContinueTargetFinder;
 
 /**
  * Tests for the BreakContinueTargerFinder class.
  *
  * @since 3.2
  */
-public class BreakContinueTargetFinderTest extends TestCase{
-	private static final Class<BreakContinueTargetFinderTest> THIS= BreakContinueTargetFinderTest.class;
-
-	public static Test suite() {
-		return new ProjectTestSetup(new TestSuite(THIS));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
-	}
+public class BreakContinueTargetFinderTest {
+	@Rule
+	public ProjectTestSetup pts= new ProjectTestSetup();
 
 	private ASTParser fParser;
 	private BreakContinueTargetFinder fFinder;
@@ -60,8 +58,8 @@ public class BreakContinueTargetFinderTest extends TestCase{
 	/*
 	 * @see junit.framework.TestCase#setUp()
 	 */
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		fParser = ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 		fFinder= new BreakContinueTargetFinder();
 
@@ -69,8 +67,8 @@ public class BreakContinueTargetFinderTest extends TestCase{
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
 
@@ -126,6 +124,7 @@ public class BreakContinueTargetFinderTest extends TestCase{
 	    return find(s, pattern, ithOccurrence-1, idx+1);
 	}
 
+	@Test
 	public void testBreakFor() throws Exception {
 		StringBuffer s= new StringBuffer();
 		s.append("class A{\n");
@@ -141,6 +140,7 @@ public class BreakContinueTargetFinderTest extends TestCase{
 		checkSelection(s, offset, length, ranges);
 	}
 
+	@Test
 	public void testBreakForeach() throws Exception {
 		StringBuffer s= new StringBuffer();
 		s.append("class A{\n");
@@ -156,6 +156,7 @@ public class BreakContinueTargetFinderTest extends TestCase{
 		checkSelection(s, offset, length, ranges);
 	}
 
+	@Test
 	public void testBreakWhile() throws Exception {
 		StringBuffer s= new StringBuffer();
 		s.append("class A{\n");
@@ -172,6 +173,7 @@ public class BreakContinueTargetFinderTest extends TestCase{
 		checkSelection(s, offset, length, ranges);
 	}
 
+	@Test
 	public void testBreakDo() throws Exception {
 		StringBuffer s= new StringBuffer();
 		s.append("class A{\n");
@@ -188,6 +190,7 @@ public class BreakContinueTargetFinderTest extends TestCase{
 		checkSelection(s, offset, length, ranges);
 	}
 
+	@Test
 	public void testBreakSwitch() throws Exception {
 		StringBuffer s= new StringBuffer();
 		s.append("class A{\n");
@@ -204,6 +207,7 @@ public class BreakContinueTargetFinderTest extends TestCase{
 		checkSelection(s, offset, length, ranges);
 	}
 
+	@Test
 	public void testLabeledBreakFor() throws Exception {
 		StringBuffer s= new StringBuffer();
 		s.append("class A{\n");
@@ -221,6 +225,7 @@ public class BreakContinueTargetFinderTest extends TestCase{
 		checkSelection(s, offset, length, ranges);
 	}
 
+	@Test
 	public void testLabeledBreakFor1() throws Exception {
 		StringBuffer s= new StringBuffer();
 		s.append("class A{\n");
@@ -238,6 +243,7 @@ public class BreakContinueTargetFinderTest extends TestCase{
 		checkSelection(s, offset, length, ranges);
 	}
 
+	@Test
 	public void testBreakFor2() throws Exception {
 		StringBuffer s= new StringBuffer();
 		s.append("class A{\n");
@@ -255,6 +261,7 @@ public class BreakContinueTargetFinderTest extends TestCase{
 		checkSelection(s, offset, length, ranges);
 	}
 
+	@Test
 	public void testLabeledBreakIf() throws Exception {
 		StringBuffer s= new StringBuffer();
 		s.append("class A{\n");
@@ -277,6 +284,7 @@ public class BreakContinueTargetFinderTest extends TestCase{
 		checkSelection(s, offset, length, ranges);
 	}
 
+	@Test
 	public void testContinueFor() throws Exception {
 		StringBuffer s= new StringBuffer();
 		s.append("class A{\n");
@@ -292,6 +300,7 @@ public class BreakContinueTargetFinderTest extends TestCase{
 		checkSelection(s, offset, length, ranges);
 	}
 
+	@Test
 	public void testContinueForeach() throws Exception {
 		StringBuffer s= new StringBuffer();
 		s.append("class A{\n");
@@ -307,6 +316,7 @@ public class BreakContinueTargetFinderTest extends TestCase{
 		checkSelection(s, offset, length, ranges);
 	}
 
+	@Test
 	public void testContinueWhile() throws Exception {
 		StringBuffer s= new StringBuffer();
 		s.append("class A{\n");
@@ -323,6 +333,7 @@ public class BreakContinueTargetFinderTest extends TestCase{
 		checkSelection(s, offset, length, ranges);
 	}
 
+	@Test
 	public void testContinueDo() throws Exception {
 		StringBuffer s= new StringBuffer();
 		s.append("class A{\n");
@@ -340,6 +351,7 @@ public class BreakContinueTargetFinderTest extends TestCase{
 	}
 
 	//continue skips over switches
+	@Test
 	public void testContinueSwitch() throws Exception {
 		StringBuffer s= new StringBuffer();
 		s.append("class A{\n");
@@ -358,6 +370,7 @@ public class BreakContinueTargetFinderTest extends TestCase{
 		checkSelection(s, offset, length, ranges);
 	}
 
+	@Test
 	public void testLabeledContinueFor() throws Exception {
 		StringBuffer s= new StringBuffer();
 		s.append("class A{\n");
@@ -375,6 +388,7 @@ public class BreakContinueTargetFinderTest extends TestCase{
 		checkSelection(s, offset, length, ranges);
 	}
 
+	@Test
 	public void testLabeledContinueFor1() throws Exception {
 		StringBuffer s= new StringBuffer();
 		s.append("class A{\n");
@@ -392,6 +406,7 @@ public class BreakContinueTargetFinderTest extends TestCase{
 		checkSelection(s, offset, length, ranges);
 	}
 
+	@Test
 	public void testLabeledContinueFor2() throws Exception {
 		StringBuffer s= new StringBuffer();
 		s.append("class A{\n");
@@ -409,6 +424,7 @@ public class BreakContinueTargetFinderTest extends TestCase{
 		checkSelection(s, offset, length, ranges);
 	}
 
+	@Test
 	public void testContinueFor2() throws Exception {
 		StringBuffer s= new StringBuffer();
 		s.append("class A{\n");

@@ -13,9 +13,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TestName;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.text.tests.performance.DisplayHelper;
@@ -57,14 +66,15 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
-
 /**
  * Tests the automatic bracket insertion feature of the CUEditor. Also tests
  * linked mode along the way.
  *
  * @since 3.1
  */
-public class BracketInserterTest extends TestCase {
+public class BracketInserterTest {
+	@Rule
+	public TestName tn= new TestName();
 
 	private static final String SRC= "src";
 	private static final String SEP= "/";
@@ -97,36 +107,28 @@ public class BracketInserterTest extends TestCase {
 	private static final int FOO_VOID_OFFSET= 207;
 	private static final int FIELD_OFFSET= 264;
 
-	public static Test suite() {
-		TestSuite suite= new TestSuite(BracketInserterTest.class);
-//		BracketInserterTest loop= new BracketInserterTest();
-//		loop.setName("testLoop");
-		return suite;
-//		return loop;
-	}
-
 	private JavaEditor fEditor;
 	private StyledText fTextWidget;
 	private IDocument fDocument;
 	private Accessor fAccessor;
 	private IJavaProject fProject;
 
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setValue(PreferenceConstants.EDITOR_CLOSE_BRACKETS, true);
 	}
 
 	private void setUpProject(String sourceLevel) throws CoreException, JavaModelException {
-		fProject= JavaProjectHelper.createJavaProject(getName(), "bin");
+		fProject= JavaProjectHelper.createJavaProject(tn.getMethodName(), "bin");
 		fProject.setOption(JavaCore.COMPILER_SOURCE, sourceLevel);
 		JavaProjectHelper.addSourceContainer(fProject, SRC);
-		IPackageFragment fragment= fProject.findPackageFragment(new Path(SEP + getName() + SEP + SRC));
+		IPackageFragment fragment= fProject.findPackageFragment(new Path(SEP + tn.getMethodName() + SEP + SRC));
 		fragment.createCompilationUnit(CU_NAME, CU_CONTENTS, true, new NullProgressMonitor());
 	}
 
 	private void setUpEditor() {
-		fEditor= openJavaEditor(new Path(SEP + getName() + SEP + SRC + SEP + CU_NAME));
+		fEditor= openJavaEditor(new Path(SEP + tn.getMethodName() + SEP + SRC + SEP + CU_NAME));
 		assertNotNull(fEditor);
 		fTextWidget= fEditor.getViewer().getTextWidget();
 		assertNotNull(fTextWidget);
@@ -138,7 +140,8 @@ public class BracketInserterTest extends TestCase {
 
 	private JavaEditor openJavaEditor(IPath path) {
 		IFile file= ResourcesPlugin.getWorkspace().getRoot().getFile(path);
-		assertTrue(file != null && file.exists());
+		assertNotNull(file);
+		assertTrue(file.exists());
 		try {
 			return (JavaEditor)EditorTestHelper.openInEditor(file, true);
 		} catch (PartInitException e) {
@@ -147,8 +150,8 @@ public class BracketInserterTest extends TestCase {
 		}
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		EditorTestHelper.closeEditor(fEditor);
 		fEditor= null;
 		if (fProject != null) {
@@ -161,6 +164,7 @@ public class BracketInserterTest extends TestCase {
 		store.setValue(PreferenceConstants.EDITOR_CLOSE_BRACKETS, true);
 	}
 
+	@Test
 	public void testInsertClosingParenthesis() throws BadLocationException, JavaModelException, CoreException, JavaModelException, CoreException {
 		use14();
 		setCaret(BODY_OFFSET);
@@ -170,6 +174,7 @@ public class BracketInserterTest extends TestCase {
 		assertSingleLinkedPosition(BODY_OFFSET + 1);
 	}
 
+	@Test
 	public void testDeletingParenthesis() throws JavaModelException, CoreException {
 		use14();
 		setCaret(BODY_OFFSET);
@@ -180,6 +185,7 @@ public class BracketInserterTest extends TestCase {
 		assertFalse(LinkedModeModel.hasInstalledModel(fDocument));
 	}
 
+	@Test
 	public void testMultipleParenthesisInsertion() throws BadLocationException, JavaModelException, CoreException {
 		use14();
 		setCaret(BODY_OFFSET);
@@ -191,6 +197,7 @@ public class BracketInserterTest extends TestCase {
 		assertModel(true);
 	}
 
+	@Test
 	public void testDeletingMultipleParenthesisInertion() throws BadLocationException, JavaModelException, CoreException {
 		use14();
 		setCaret(BODY_OFFSET);
@@ -217,6 +224,7 @@ public class BracketInserterTest extends TestCase {
 		assertFalse(LinkedModeModel.hasInstalledModel(fDocument));
 	}
 
+	@Test
 	public void testNoInsertInsideText() throws BadLocationException, JavaModelException, CoreException {
 		use14();
 		setCaret(ARGS_OFFSET);
@@ -227,6 +235,7 @@ public class BracketInserterTest extends TestCase {
 		assertFalse(LinkedModeModel.hasInstalledModel(fDocument));
 	}
 
+	@Test
 	public void testInsertInsideBrackets() throws BadLocationException, JavaModelException, CoreException {
 		use14();
 		setCaret(BRACKETS_OFFSET);
@@ -236,6 +245,7 @@ public class BracketInserterTest extends TestCase {
 		assertSingleLinkedPosition(BRACKETS_OFFSET + 1);
 	}
 
+	@Test
 	public void testPeerEntry() throws BadLocationException, JavaModelException, CoreException {
 		use14();
 		setCaret(BODY_OFFSET);
@@ -255,6 +265,7 @@ public class BracketInserterTest extends TestCase {
 //		}
 //	}
 //
+	@Test
 	public void testMultiplePeerEntry() throws BadLocationException, JavaModelException, CoreException {
 		use14();
 		setCaret(BODY_OFFSET);
@@ -279,6 +290,7 @@ public class BracketInserterTest extends TestCase {
 		assertFalse(LinkedModeModel.hasInstalledModel(fDocument));
 	}
 
+	@Test
 	public void testExitOnTab() throws BadLocationException, JavaModelException, CoreException {
 		use14();
 		setCaret(BODY_OFFSET);
@@ -302,6 +314,7 @@ public class BracketInserterTest extends TestCase {
 		assertFalse(LinkedModeModel.hasInstalledModel(fDocument));
 	}
 
+	@Test
 	public void testExitOnReturn() throws BadLocationException, JavaModelException, CoreException {
 		use14();
 		setCaret(BODY_OFFSET);
@@ -314,6 +327,7 @@ public class BracketInserterTest extends TestCase {
 		assertFalse(LinkedModeModel.hasInstalledModel(fDocument));
 	}
 
+	@Test
 	public void testExitOnEsc() throws BadLocationException, JavaModelException, CoreException {
 		use14();
 		setCaret(BODY_OFFSET);
@@ -326,6 +340,7 @@ public class BracketInserterTest extends TestCase {
 		assertFalse(LinkedModeModel.hasInstalledModel(fDocument));
 	}
 
+	@Test
 	public void testInsertClosingQuote() throws BadLocationException, JavaModelException, CoreException {
 		use14();
 		setCaret(BODY_OFFSET);
@@ -336,6 +351,7 @@ public class BracketInserterTest extends TestCase {
 		assertSingleLinkedPosition(BODY_OFFSET + 1);
 	}
 
+	@Test
 	public void testPreferences() throws BadLocationException, JavaModelException, CoreException {
 		use14();
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
@@ -350,30 +366,33 @@ public class BracketInserterTest extends TestCase {
 		assertFalse(LinkedModeModel.hasInstalledModel(fDocument));
 	}
 
+	@Test
 	public void testAngleBracketsAsOperator() throws Exception {
 		use15();
 		setCaret(BODY_OFFSET);
 		type("test<");
 
 		assertEquals("test<", fDocument.get(BODY_OFFSET, 5));
-		assertFalse(">".equals(fDocument.get(BODY_OFFSET + 5, 1)));
+		assertNotEquals(">", fDocument.get(BODY_OFFSET + 5, 1));
 		assertEquals(BODY_OFFSET + 5, getCaret());
 
 		assertFalse(LinkedModeModel.hasInstalledModel(fDocument));
 	}
 
+	@Test
 	public void testAngleBracketsIn14Project() throws BadLocationException, JavaModelException, CoreException {
 		use14();
 		setCaret(BODY_OFFSET);
 		type("Test<");
 
 		assertEquals("Test<", fDocument.get(BODY_OFFSET, 5));
-		assertFalse(">".equals(fDocument.get(BODY_OFFSET + 5, 1)));
+		assertNotEquals(">", fDocument.get(BODY_OFFSET + 5, 1));
 		assertEquals(BODY_OFFSET + 5, getCaret());
 
 		assertFalse(LinkedModeModel.hasInstalledModel(fDocument));
 	}
 
+	@Test
 	public void testAngleBracketsIn15Project() throws Exception {
 		use15();
 
@@ -384,6 +403,7 @@ public class BracketInserterTest extends TestCase {
 		assertSingleLinkedPosition(BODY_OFFSET + 5);
 	}
 
+	@Test
 	public void testAngleBracketsInFieldDecl15() throws Exception {
 		use15();
 
@@ -394,6 +414,7 @@ public class BracketInserterTest extends TestCase {
 		assertSingleLinkedPosition(FIELD_OFFSET + 1);
 	}
 
+	@Test
 	public void testAngleBracketsInsideMethodDecl15() throws Exception {
 		use15();
 
@@ -404,6 +425,7 @@ public class BracketInserterTest extends TestCase {
 		assertSingleLinkedPosition(MAIN_VOID_OFFSET + 1);
 	}
 
+	@Test
 	public void testAngleBracketsBeforeMethodDecl15() throws Exception {
 		use15();
 
@@ -415,6 +437,7 @@ public class BracketInserterTest extends TestCase {
 		assertSingleLinkedPosition(FOO_VOID_OFFSET + 1);
 	}
 
+	@Test
 	public void testAngleBracketsBeforeTypeArgument15() throws Exception {
 		use15();
 
@@ -430,6 +453,7 @@ public class BracketInserterTest extends TestCase {
 		assertFalse(LinkedModeModel.hasInstalledModel(fDocument));
 	}
 
+	@Test
 	public void testAngleBracketsBeforeWildcard15() throws Exception {
 		use15();
 
@@ -445,6 +469,7 @@ public class BracketInserterTest extends TestCase {
 		assertFalse(LinkedModeModel.hasInstalledModel(fDocument));
 	}
 
+	@Test
 	public void testAngleBracketsAfterIdentifierOnFirstColumn1_15() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=347734
 		use15();
@@ -460,6 +485,7 @@ public class BracketInserterTest extends TestCase {
 		assertFalse(LinkedModeModel.hasInstalledModel(fDocument));
 	}
 
+	@Test
 	public void testAngleBracketsAfterIdentifierOnFirstColumn2_15() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=347734
 		use15();

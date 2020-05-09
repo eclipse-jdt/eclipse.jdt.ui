@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2016 IBM Corporation and others.
+ * Copyright (c) 2005, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,10 +13,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.examples;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.HashMap;
 import java.util.Map;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -44,12 +46,13 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
-import org.eclipse.jdt.launching.JavaRuntime;
-
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 
-public class ASTRewriteSnippet extends TestCase {
+import org.eclipse.jdt.launching.JavaRuntime;
 
+public class ASTRewriteSnippet {
+
+	@Test
 	public void testASTRewriteExample() throws Exception {
 		// create a new project
 		IProject project= ResourcesPlugin.getWorkspace().getRoot().getProject("Test");

@@ -13,7 +13,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
+import static org.junit.Assert.fail;
+
 import java.util.Iterator;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import org.eclipse.swt.custom.StyleRange;
 
@@ -36,25 +42,13 @@ import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
-
-
-public class JavaColoringTest extends TestCase {
-
+public class JavaColoringTest {
 	protected TestTextViewer fTextViewer;
 	protected IDocument fDocument;
 	protected JavaTextTools fTextTools;
 
-	public JavaColoringTest(String name) {
-		super(name);
-	}
-
-	@Override
-	protected void setUp() {
-
+	@Before
+	public void setUp() {
 		IPreferenceStore store= new PreferenceStore();
 		fTextTools= new JavaTextTools(store);
 
@@ -73,16 +67,10 @@ public class JavaColoringTest extends TestCase {
 		reconciler.install(fTextViewer);
 
 		System.out.print("------ next ---------\n");
-
 	}
 
-	public static Test suite() {
-		return new TestSuite(JavaColoringTest.class);
-	}
-
-	@Override
-	protected void tearDown () {
-
+	@After
+	public void tearDown () {
 		fTextTools.dispose();
 		fTextTools= null;
 
@@ -112,12 +100,14 @@ public class JavaColoringTest extends TestCase {
 		return buf.toString();
 	}
 
+	@Test
 	public void testSimple() {
 		fDocument.set("xx //");
 		fTextViewer.setDocument(fDocument);
 		System.out.print(print(fTextViewer.getTextPresentation()));
 	}
 
+	@Test
 	public void testTypingWithPartitionChange() {
 		try {
 			fTextViewer.setDocument(fDocument);
@@ -126,10 +116,11 @@ public class JavaColoringTest extends TestCase {
 			fDocument.replace(2,0, "/");
 			System.out.print(print(fTextViewer.getTextPresentation()));
 		} catch (BadLocationException x) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
+	@Test
 	public void testTogglingPartitions() {
 		try {
 			fTextViewer.setDocument(fDocument);
@@ -138,7 +129,7 @@ public class JavaColoringTest extends TestCase {
 			fDocument.replace(0,0, "//");
 			System.out.print(print(fTextViewer.getTextPresentation()));
 		} catch (BadLocationException x) {
-			assertTrue(false);
+			fail();
 		}
 	}
 }
