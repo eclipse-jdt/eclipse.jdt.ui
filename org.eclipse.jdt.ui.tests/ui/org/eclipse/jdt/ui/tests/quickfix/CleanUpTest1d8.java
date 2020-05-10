@@ -442,4 +442,97 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
+
+	@Test
+	public void testConvertToLambdaWithRecursion() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= ""
+				+ "import java.util.function.Function;\n" //
+				+ "public class C1 {\n" //
+				+ "\n" //
+				+ "    public interface I1 {\n" //
+				+ "        public int add(int a);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    I1 k = new I1() {\n" //
+				+ "        @Override\n" //
+				+ "        public int add(int a) {\n" //
+				+ "            if (a == 2) {\n" //
+				+ "                return add(3);\n" //
+				+ "            }\n" //
+				+ "            return a + 7;\n" //
+				+ "        }\n" //
+				+ "    };\n" //
+				+ "\n" //
+				+ "    public static I1 j = new I1() {\n" //
+				+ "        @Override\n" //
+				+ "        public int add(int a) {\n" //
+				+ "            if (a == 2) {\n" //
+				+ "                return add(4);\n" //
+				+ "            }\n" //
+				+ "            return a + 8;\n" //
+				+ "        }\n" //
+				+ "    };\n" //
+				+ "}\n"; //
+		ICompilationUnit cu= pack1.createCompilationUnit("C1.java", sample, false, null);
+
+		enable(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES);
+		enable(CleanUpConstants.USE_LAMBDA);
+
+		String expected= ""
+				+ "import java.util.function.Function;\n" //
+				+ "public class C1 {\n" //
+				+ "\n" //
+				+ "    public interface I1 {\n" //
+				+ "        public int add(int a);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    I1 k = a -> {\n" //
+				+ "        if (a == 2) {\n" //
+				+ "            return this.k.add(3);\n" //
+				+ "        }\n" //
+				+ "        return a + 7;\n" //
+				+ "    };\n" //
+				+ "\n" //
+				+ "    public static I1 j = a -> {\n" //
+				+ "        if (a == 2) {\n" //
+				+ "            return C1.j.add(4);\n" //
+				+ "        }\n" //
+				+ "        return a + 8;\n" //
+				+ "    };\n" //
+				+ "}\n"; //
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
+	}
+
+	@Test
+	public void testDoNotConvertLocalRecursiveClass() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "import java.util.function.Function;\n" //
+				+ "\n" //
+				+ "public class C2 {\n" //
+				+ "\n" //
+				+ "    public interface I1 {\n" //
+				+ "        public int add(int a);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public int foo() {\n" //
+				+ "        I1 doNotConvert = new I1() {\n" //
+				+ "            @Override\n" //
+				+ "            public int add(int a) {\n" //
+				+ "                if (a == 2) {\n" //
+				+ "                    return add(5);\n" //
+				+ "                }\n" //
+				+ "                return a + 9;\n" //
+				+ "            }\n" //
+				+ "        };\n" //
+				+ "        return n.add(9);\n" //
+				+ "    }\n" //
+				+ "}\n"; //
+		ICompilationUnit cu= pack1.createCompilationUnit("C2.java", sample, false, null);
+
+		enable(CleanUpConstants.SIMPLIFY_LAMBDA_EXPRESSION_AND_METHOD_REF);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
 }

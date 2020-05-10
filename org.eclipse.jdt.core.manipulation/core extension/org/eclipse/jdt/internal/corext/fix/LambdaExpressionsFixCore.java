@@ -391,6 +391,62 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 		}
 	}
 
+	private static final class MethodRecursionFinder extends HierarchicalASTVisitor {
+		private MethodDeclaration fMethodDeclaration;
+		private IMethodBinding fMethodBinding;
+		private ASTNode fFieldDeclaration;
+
+		private static boolean isRecursiveLocal(MethodDeclaration node) {
+			try {
+				MethodRecursionFinder finder= new MethodRecursionFinder();
+				ClassInstanceCreation cic= (ClassInstanceCreation) node.getParent().getParent();
+				cic.getType().resolveBinding();
+				finder.fMethodDeclaration= node;
+				finder.fFieldDeclaration= finder.findFieldDeclaration(node);
+				if (finder.fFieldDeclaration != null) {
+					return false;
+				}
+				finder.fMethodBinding= finder.fMethodDeclaration.resolveBinding();
+				if (finder.fMethodBinding == null) {
+					return false;
+				}
+				node.accept(finder);
+			} catch (AbortSearchException e) {
+				return true;
+			}
+
+			return false;
+		}
+
+		private ASTNode findFieldDeclaration(ASTNode node) {
+			ASTNode originalNode= node;
+			while (node != null) {
+				if (node instanceof FieldDeclaration) {
+					return node;
+				}
+				if (node instanceof AbstractTypeDeclaration) {
+					return null;
+				}
+				if (node instanceof MethodDeclaration && node != originalNode) {
+					return null;
+				}
+				node= node.getParent();
+			}
+			return null;
+		}
+
+		@Override
+		public boolean visit(MethodInvocation node) {
+			if (node.getExpression() == null) {
+				IMethodBinding binding= node.resolveMethodBinding();
+				if (binding != null && binding.isEqualTo(fMethodBinding)) {
+					throw new AbortSearchException();
+				}
+			}
+			return true;
+		}
+	}
+
 	public static class CreateLambdaOperation extends CompilationUnitRewriteOperation {
 
 		private final List<ClassInstanceCreation> fExpressions;
@@ -418,7 +474,7 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 				if (!(object instanceof MethodDeclaration)) {
 					continue;
 				}
-				MethodDeclaration methodDeclaration= (MethodDeclaration) object;
+				final MethodDeclaration methodDeclaration= (MethodDeclaration) object;
 				HashSet<String> excludedNames= new HashSet<>();
 				if (i != 0) {
 					for (ClassInstanceCreation convertedCic : fExpressions.subList(0, i)) {
@@ -470,64 +526,94 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 				}
 
 				@SuppressWarnings("unchecked")
-				final ASTNode field= ASTNodes.getFirstAncestorOrNull(classInstanceCreation, FieldDeclaration.class, BodyDeclaration.class);
+				ASTNode fragment= ASTNodes.getFirstAncestorOrNull(classInstanceCreation, VariableDeclarationFragment.class, BodyDeclaration.class);
 
-				if (field instanceof FieldDeclaration) {
-					FieldDeclaration fieldDeclaration= (FieldDeclaration) field;
+				if (fragment instanceof VariableDeclarationFragment) {
+					final VariableDeclarationFragment actualFragment= (VariableDeclarationFragment) fragment;
 
-					@SuppressWarnings("unchecked")
-					ASTNode declarationClass= ASTNodes.getFirstAncestorOrNull(fieldDeclaration, TypeDeclaration.class);
+					if (actualFragment.getParent() instanceof FieldDeclaration) {
+						FieldDeclaration fieldDeclaration= (FieldDeclaration) actualFragment.getParent();
 
-					if (declarationClass instanceof TypeDeclaration) {
-						TypeDeclaration typeDeclaration= (TypeDeclaration) declarationClass;
+						@SuppressWarnings("unchecked")
+						ASTNode declarationClass= ASTNodes.getFirstAncestorOrNull(fieldDeclaration, TypeDeclaration.class);
 
-						final List<FieldDeclaration> nextFields= new ArrayList<>(typeDeclaration.getFields().length);
-						boolean isBefore= true;
+						if (declarationClass instanceof TypeDeclaration) {
+							TypeDeclaration typeDeclaration= (TypeDeclaration) declarationClass;
 
-						for (FieldDeclaration oneField : typeDeclaration.getFields()) {
-							if (oneField == fieldDeclaration) {
-								isBefore= false;
-							}
+							final List<FieldDeclaration> nextFields= new ArrayList<>(typeDeclaration.getFields().length);
+							boolean isBefore= true;
 
-							if (!isBefore) {
-								nextFields.add(oneField);
-							}
-						}
-
-						ASTVisitor visitor= new ASTVisitor() {
-							@Override
-							public boolean visit(final SimpleName node) {
-								if ((!(node.getParent() instanceof QualifiedName) || node.getLocationInParent() != QualifiedName.NAME_PROPERTY)
-										&& (!(node.getParent() instanceof FieldAccess) || node.getLocationInParent() != FieldAccess.NAME_PROPERTY)
-										&& (!(node.getParent() instanceof SuperFieldAccess) || node.getLocationInParent() != SuperFieldAccess.NAME_PROPERTY)) {
-									ASTNode declaration= ASTNodes.findDeclaration(node.resolveBinding(), declarationClass);
-
-									if (declaration != null
-											&& declaration instanceof VariableDeclarationFragment
-											&& declaration.getParent() instanceof FieldDeclaration) {
-										FieldDeclaration currentField= (FieldDeclaration) declaration.getParent();
-
-										if (nextFields.contains(currentField)) {
-											if ((currentField.getModifiers() & Modifier.STATIC) != 0) {
-												SimpleName copyOfClassName= (SimpleName) rewrite.createCopyTarget(typeDeclaration.getName());
-												QualifiedName replacement= ast.newQualifiedName(copyOfClassName, (SimpleName) rewrite.createMoveTarget(node));
-												rewrite.replace(node, replacement, group);
-											} else {
-												FieldAccess newFieldAccess= ast.newFieldAccess();
-												newFieldAccess.setExpression(ast.newThisExpression());
-												newFieldAccess.setName((SimpleName) rewrite.createMoveTarget(node));
-												rewrite.replace(node, newFieldAccess, group);
-											}
-
-											return false;
-										}
-									}
+							for (FieldDeclaration oneField : typeDeclaration.getFields()) {
+								if (oneField == fieldDeclaration) {
+									isBefore= false;
 								}
 
-								return true;
+								if (!isBefore) {
+									nextFields.add(oneField);
+								}
 							}
-						};
-						lambdaBody.accept(visitor);
+
+							ASTVisitor visitor= new ASTVisitor() {
+								@Override
+								public boolean visit(final MethodInvocation node) {
+									ITypeBinding fieldType= fieldDeclaration.getType().resolveBinding();
+									ASTNode declaration= ASTNodes.findDeclaration(node.resolveMethodBinding(), declarationClass);
+
+									if (node.getExpression() == null && fieldType != null && methodDeclaration == declaration) {
+										ASTNode replacement;
+
+										if ((fieldDeclaration.getModifiers() & Modifier.STATIC) != 0) {
+											SimpleName copyOfClassName= (SimpleName) rewrite.createCopyTarget(typeDeclaration.getName());
+											replacement= ast.newQualifiedName(copyOfClassName, (SimpleName) rewrite.createCopyTarget(actualFragment.getName()));
+										} else {
+											FieldAccess newFieldAccess= ast.newFieldAccess();
+											newFieldAccess.setExpression(ast.newThisExpression());
+											newFieldAccess.setName((SimpleName) rewrite.createCopyTarget(actualFragment.getName()));
+											replacement= newFieldAccess;
+										}
+
+										rewrite.set(node, MethodInvocation.EXPRESSION_PROPERTY, replacement, group);
+
+										return false;
+									}
+
+									return true;
+								}
+
+								@Override
+								public boolean visit(final SimpleName node) {
+									if ((!(node.getParent() instanceof QualifiedName) || node.getLocationInParent() != QualifiedName.NAME_PROPERTY)
+											&& (!(node.getParent() instanceof FieldAccess) || node.getLocationInParent() != FieldAccess.NAME_PROPERTY)
+											&& (!(node.getParent() instanceof SuperFieldAccess) || node.getLocationInParent() != SuperFieldAccess.NAME_PROPERTY)) {
+										ASTNode declaration= ASTNodes.findDeclaration(node.resolveBinding(), declarationClass);
+
+										if (declaration != null
+												&& declaration instanceof VariableDeclarationFragment
+												&& declaration.getParent() instanceof FieldDeclaration) {
+											FieldDeclaration currentField= (FieldDeclaration) declaration.getParent();
+
+											if (nextFields.contains(currentField)) {
+												if ((currentField.getModifiers() & Modifier.STATIC) != 0) {
+													SimpleName copyOfClassName= (SimpleName) rewrite.createCopyTarget(typeDeclaration.getName());
+													QualifiedName replacement= ast.newQualifiedName(copyOfClassName, ASTNodes.createMoveTarget(rewrite, node));
+													rewrite.replace(node, replacement, group);
+												} else {
+													FieldAccess newFieldAccess= ast.newFieldAccess();
+													newFieldAccess.setExpression(ast.newThisExpression());
+													newFieldAccess.setName(ASTNodes.createMoveTarget(rewrite, node));
+													rewrite.replace(node, newFieldAccess, group);
+												}
+
+												return false;
+											}
+										}
+									}
+
+									return true;
+								}
+							};
+							lambdaBody.accept(visitor);
+						}
 					}
 				}
 
@@ -876,6 +962,11 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 		}
 
 		if (ASTNodes.getTargetType(node) == null) {
+			return false;
+		}
+
+		// Cannot handle recursive calls in a locally declared anonymous class
+		if (MethodRecursionFinder.isRecursiveLocal(methodDecl)) {
 			return false;
 		}
 
