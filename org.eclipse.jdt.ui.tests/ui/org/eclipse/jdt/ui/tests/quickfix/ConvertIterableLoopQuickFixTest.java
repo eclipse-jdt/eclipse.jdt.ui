@@ -171,7 +171,47 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 	}
 
-	@Ignore
+	@Test
+	public void testChildren() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "import java.util.Collection;\n" //
+				+ "import java.util.Iterator;\n" //
+				+ "public class A {\n" //
+				+ "	Collection<String> children;\n" //
+				+ "	public A() {\n" //
+				+ "		for (Iterator<String> iterator= children.iterator(); iterator.hasNext();) {\n" //
+				+ "			System.out.println(iterator.next());\n" //
+				+ "		}\n" //
+				+ "	}\n" //
+				+ "}";
+		ICompilationUnit unit= pack.createCompilationUnit("A.java", sample, false, null);
+
+		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(sample, unit);
+
+		assertNotNull(fConvertLoopProposal);
+
+		assertCorrectLabels(proposals);
+
+		String preview= getPreviewContent(fConvertLoopProposal);
+
+		sample= "" //
+				+ "package test;\n" //
+				+ "import java.util.Collection;\n" //
+				+ "public class A {\n" //
+				+ "	Collection<String> children;\n" //
+				+ "	public A() {\n" //
+				+ "		for (String child : children) {\n" //
+				+ "			System.out.println(child);\n" //
+				+ "		}\n" //
+				+ "	}\n" //
+				+ "}";
+		String expected= sample;
+		assertEqualString(preview, expected);
+	}
+
+	@Ignore("Bug 553634")
 	@Test
 	public void testKeepComment() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
