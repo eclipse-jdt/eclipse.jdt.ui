@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2013 IBM Corporation and others.
+ * Copyright (c) 2007, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -37,7 +37,8 @@ public class JavaConventionsUtil {
 	 * @param context an {@link IJavaElement} or <code>null</code>
 	 * @return a <code>String[]</code> whose <code>[0]</code> is the
 	 *         {@link JavaCore#COMPILER_SOURCE} and whose <code>[1]</code> is
-	 *         the {@link JavaCore#COMPILER_COMPLIANCE} level at the given
+	 *         the {@link JavaCore#COMPILER_COMPLIANCE} and whose <code>[2]</code> is
+	 *         the {@link JavaCore#COMPILER_PB_ENABLE_PREVIEW_FEATURES} value at the given
 	 *         <code>context</code>.
 	 */
 	public static String[] getSourceComplianceLevels(IJavaElement context) {
@@ -46,13 +47,15 @@ public class JavaConventionsUtil {
 			if (javaProject != null) {
 				return new String[] {
 						javaProject.getOption(JavaCore.COMPILER_SOURCE, true),
-						javaProject.getOption(JavaCore.COMPILER_COMPLIANCE, true)
+						javaProject.getOption(JavaCore.COMPILER_COMPLIANCE, true),
+						javaProject.getOption(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES, true)
 				};
 			}
 		}
 		return new String[] {
 				JavaCore.getOption(JavaCore.COMPILER_SOURCE),
-				JavaCore.getOption(JavaCore.COMPILER_COMPLIANCE)
+				JavaCore.getOption(JavaCore.COMPILER_COMPLIANCE),
+				JavaCore.getOption(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES)
 		};
 	}
 
@@ -125,7 +128,7 @@ public class JavaConventionsUtil {
 	 */
 	public static IStatus validateJavaTypeName(String name, IJavaElement context) {
 		String[] sourceComplianceLevels= getSourceComplianceLevels(context);
-		return JavaConventions.validateJavaTypeName(name, sourceComplianceLevels[0], sourceComplianceLevels[1]);
+		return JavaConventions.validateJavaTypeName(name, sourceComplianceLevels[0], sourceComplianceLevels[1], sourceComplianceLevels[2]);
 	}
 
 	/**
