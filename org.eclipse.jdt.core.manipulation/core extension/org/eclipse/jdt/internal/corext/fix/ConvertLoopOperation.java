@@ -156,7 +156,7 @@ public abstract class ConvertLoopOperation extends CompilationUnitRewriteOperati
 		return results.toArray(new String[results.size()]);
 	}
 
-	protected String modifybasename(String suggestedName) {
+	public static String modifybasename(String suggestedName) {
 		String name= suggestedName;
 		for(String prefix : CUT_PREFIX) {
 			if(prefix.length() >= suggestedName.length()) {

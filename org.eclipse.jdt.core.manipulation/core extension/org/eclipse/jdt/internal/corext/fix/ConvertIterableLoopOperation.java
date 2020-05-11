@@ -44,6 +44,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NullLiteral;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
@@ -155,7 +156,15 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 
 	private String[] getVariableNameProposals() {
 		String[] variableNames= getUsedVariableNames();
-		String[] elementSuggestions= StubUtility.getLocalNameSuggestions(getJavaProject(), FOR_LOOP_ELEMENT_IDENTIFIER, 0, variableNames);
+		String baseName= FOR_LOOP_ELEMENT_IDENTIFIER;
+		if (fExpression != null) {
+			if  (fExpression instanceof SimpleName) {
+				baseName= ConvertLoopOperation.modifybasename(((SimpleName)fExpression).getFullyQualifiedName());
+			} else if (fExpression instanceof QualifiedName) {
+				baseName= ConvertLoopOperation.modifybasename(((QualifiedName)fExpression).getName().getFullyQualifiedName());
+			}
+		}
+		String[] elementSuggestions= StubUtility.getLocalNameSuggestions(getJavaProject(), baseName, 0, variableNames);
 
 		ITypeBinding binding= fIteratorVariable.getType();
 		if (binding != null && binding.isParameterizedType()) {
@@ -163,8 +172,14 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 			String[] typeSuggestions= StubUtility.getLocalNameSuggestions(getJavaProject(), type, 0, variableNames);
 
 			String[] result= new String[elementSuggestions.length + typeSuggestions.length];
-			System.arraycopy(typeSuggestions, 0, result, 0, typeSuggestions.length);
-			System.arraycopy(elementSuggestions, 0, result, typeSuggestions.length, elementSuggestions.length);
+			String[] first= typeSuggestions;
+			String[] second= elementSuggestions;
+			if (!FOR_LOOP_ELEMENT_IDENTIFIER.equals(baseName)) {
+				first= elementSuggestions;
+				second= typeSuggestions;
+			}
+			System.arraycopy(first, 0, result, 0, first.length);
+			System.arraycopy(second, 0, result, first.length, second.length);
 			return result;
 		}
 		return elementSuggestions;

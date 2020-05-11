@@ -810,8 +810,8 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "    public void bar(List<Object> objs) {\n" //
 				+ "        if (objs != null) {\n" //
-				+ "            for (Object object : objs) {\n" //
-				+ "                System.out.println(object);\n" //
+				+ "            for (Object obj : objs) {\n" //
+				+ "                System.out.println(obj);\n" //
 				+ "            }\n" //
 				+ "        }\n" //
 				+ "    }\n" //
