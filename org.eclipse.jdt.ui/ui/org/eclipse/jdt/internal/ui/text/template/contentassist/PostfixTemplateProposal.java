@@ -13,7 +13,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.template.contentassist;
 
-import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateProposal;
+import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentEvent;
@@ -23,8 +23,6 @@ import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateContext;
 
 import org.eclipse.jdt.internal.corext.template.java.JavaPostfixContext;
-
-import org.eclipse.swt.graphics.Image;
 
 /**
  * This is an extension to the existing {@link TemplateProposal} class. <br/>
