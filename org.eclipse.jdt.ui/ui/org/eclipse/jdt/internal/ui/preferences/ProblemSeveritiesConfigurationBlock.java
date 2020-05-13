@@ -1422,7 +1422,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		StatusInfo status= new StatusInfo();
 		if (value.isEmpty() && !isTypeMandatory)
 			return status;
-		if (JavaConventions.validateJavaTypeName(value, JavaCore.VERSION_1_5, JavaCore.VERSION_1_5).matches(IStatus.ERROR)
+		if (JavaConventions.validateJavaTypeName(value, JavaCore.VERSION_1_5, JavaCore.VERSION_1_5, null).matches(IStatus.ERROR)
 				|| value.indexOf('.') == -1) {
 			status.setError(errorMessage);
 		} else if (fProject != null) {

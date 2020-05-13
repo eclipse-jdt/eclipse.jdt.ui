@@ -247,7 +247,7 @@ public class ExpandWithConstructorsConfigurationBlock extends OptionsConfigurati
 			if (newText.length() == 0) {
 				status.setError(""); //$NON-NLS-1$
 			} else {
-				IStatus val= JavaConventions.validateJavaTypeName(newText, JavaCore.VERSION_1_3, JavaCore.VERSION_1_3);
+				IStatus val= JavaConventions.validateJavaTypeName(newText, JavaCore.VERSION_1_3, JavaCore.VERSION_1_3, null);
 				if (val.matches(IStatus.ERROR)) {
 					if (fIsEditingMember)
 						status.setError(CallHierarchyMessages.CallHierarchyTypesOrMembersDialog_error_invalidMemberName);

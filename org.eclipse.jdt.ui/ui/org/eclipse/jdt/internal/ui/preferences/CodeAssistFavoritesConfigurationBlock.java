@@ -208,7 +208,7 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 			if (newText.length() == 0) {
 				status.setError(""); //$NON-NLS-1$
 			} else {
-				IStatus val= JavaConventions.validateJavaTypeName(newText, JavaCore.VERSION_1_3, JavaCore.VERSION_1_3);
+				IStatus val= JavaConventions.validateJavaTypeName(newText, JavaCore.VERSION_1_3, JavaCore.VERSION_1_3, null);
 				if (val.matches(IStatus.ERROR)) {
 					if (fIsEditingMember)
 						status.setError(PreferencesMessages.FavoriteStaticMemberInputDialog_error_invalidMemberName);

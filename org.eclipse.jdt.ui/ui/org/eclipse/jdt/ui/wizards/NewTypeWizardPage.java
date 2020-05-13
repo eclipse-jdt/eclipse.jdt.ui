@@ -746,7 +746,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 
 	private static IStatus validateJavaTypeName(String text, IJavaProject project) {
 		if (project == null || !project.exists()) {
-			return JavaConventions.validateJavaTypeName(text, JavaCore.VERSION_1_3, JavaCore.VERSION_1_3);
+			return JavaConventions.validateJavaTypeName(text, JavaCore.VERSION_1_3, JavaCore.VERSION_1_3, null);
 		}
 		return JavaConventionsUtil.validateJavaTypeName(text, project);
 	}
