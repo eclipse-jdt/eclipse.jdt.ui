@@ -116,10 +116,10 @@ public class PushDownNegationCleanUp extends AbstractMultiFix {
 				return pushDown(node, node.getOperand());
 			}
 
-			private boolean pushDown(PrefixExpression node, final Expression operand) {
-				if (operand instanceof ParenthesizedExpression) {
-					return pushDown(node, ((ParenthesizedExpression) operand).getExpression());
-				} else if (operand instanceof PrefixExpression) {
+			private boolean pushDown(final PrefixExpression node, Expression operand) {
+				operand= ASTNodes.getUnparenthesedExpression(operand);
+
+				if (operand instanceof PrefixExpression) {
 					final PrefixExpression pe= (PrefixExpression) operand;
 
 					if (ASTNodes.hasOperator(pe, PrefixExpression.Operator.NOT)) {

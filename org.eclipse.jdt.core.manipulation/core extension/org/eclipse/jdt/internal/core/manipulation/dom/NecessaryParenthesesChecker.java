@@ -43,6 +43,8 @@ import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+
 /**
  * Helper class to check if an expression requires parentheses.
  *
@@ -50,19 +52,6 @@ import org.eclipse.jdt.core.dom.WhileStatement;
  * @since 3.7
  */
 public class NecessaryParenthesesChecker {
-
-	/*
-	 * Get the expression wrapped by the parentheses
-	 * i.e. ((((expression)))) -> expression
-	 */
-	private static Expression getExpression(ParenthesizedExpression node) {
-		Expression expression= node.getExpression();
-		while (expression instanceof ParenthesizedExpression) {
-			expression= ((ParenthesizedExpression)expression).getExpression();
-		}
-		return expression;
-	}
-
 	private static boolean expressionTypeNeedsParentheses(Expression expression) {
 		int type= expression.getNodeType();
 		return type == ASTNode.INFIX_EXPRESSION
@@ -286,7 +275,7 @@ public class NecessaryParenthesesChecker {
 		if (!(expression instanceof ParenthesizedExpression)) {
 			return false;
 		}
-		return !needsParentheses(getExpression((ParenthesizedExpression)expression), parent, locationInParent);
+		return !needsParentheses(ASTNodes.getUnparenthesedExpression(expression), parent, locationInParent);
 	}
 
 	/**

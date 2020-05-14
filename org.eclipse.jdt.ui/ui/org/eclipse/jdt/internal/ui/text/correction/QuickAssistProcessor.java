@@ -1132,9 +1132,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		} else {
 			exprBody= (Expression) lambdaBody;
 		}
-		while (exprBody instanceof ParenthesizedExpression) {
-			exprBody= ((ParenthesizedExpression) exprBody).getExpression();
-		}
+		exprBody= ASTNodes.getUnparenthesedExpression(exprBody);
 		if (exprBody == null || !isValidLambdaReferenceToMethod(exprBody))
 			return false;
 

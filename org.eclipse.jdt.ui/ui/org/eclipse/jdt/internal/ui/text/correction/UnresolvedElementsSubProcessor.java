@@ -191,9 +191,7 @@ public class UnresolvedElementsSubProcessor {
 		boolean suggestVariableProposals= true;
 		int typeKind= 0;
 
-		while (selectedNode instanceof ParenthesizedExpression) {
-			selectedNode= ((ParenthesizedExpression) selectedNode).getExpression();
-		}
+		selectedNode= ASTNodes.getUnparenthesedExpression(selectedNode);
 
 
 		Name node= null;
@@ -1420,10 +1418,7 @@ public class UnresolvedElementsSubProcessor {
 		if (!hasCastProposal) {
 			// x.getName() -> ((TestCase) x).getName
 
-			Expression target= sender;
-			while (target instanceof ParenthesizedExpression) {
-				target= ((ParenthesizedExpression) target).getExpression();
-			}
+			Expression target= ASTNodes.getUnparenthesedExpression(sender);
 
 			String label;
 			if (target.getNodeType() != ASTNode.CAST_EXPRESSION) {

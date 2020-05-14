@@ -673,10 +673,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		}
 		if (expression instanceof ParenthesizedExpression) {
 			ParenthesizedExpression parenthesizedExpression= (ParenthesizedExpression) expression;
-			Expression innerExpression= parenthesizedExpression.getExpression();
-			while (innerExpression instanceof ParenthesizedExpression) {
-				innerExpression= ((ParenthesizedExpression) innerExpression).getExpression();
-			}
+			Expression innerExpression= ASTNodes.getUnparenthesedExpression(parenthesizedExpression.getExpression());
 			if (innerExpression instanceof InstanceofExpression) {
 				return getInversedExpression(rewrite, innerExpression, provider);
 			}
@@ -1461,9 +1458,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 
 	private static Expression combineOperands(ASTRewrite rewrite, Expression existing, Expression originalNode, boolean removeParentheses, Operator operator) {
 		if (existing == null && removeParentheses) {
-			while (originalNode instanceof ParenthesizedExpression) {
-				originalNode= ((ParenthesizedExpression)originalNode).getExpression();
-			}
+			originalNode= ASTNodes.getUnparenthesedExpression(originalNode);
 		}
 		Expression newRight= (Expression)rewrite.createMoveTarget(originalNode);
 		if (originalNode instanceof InfixExpression) {
@@ -1943,9 +1938,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		AST ast= rewrite.getAST();
 		ReturnStatement thenReturn= ast.newReturnStatement();
 		Expression cleanExpression= expression;
-		while (cleanExpression instanceof ParenthesizedExpression) {
-			cleanExpression= ((ParenthesizedExpression) cleanExpression).getExpression();
-		}
+		cleanExpression= ASTNodes.getUnparenthesedExpression(cleanExpression);
 		thenReturn.setExpression((Expression) rewrite.createCopyTarget(cleanExpression));
 		return thenReturn;
 	}
@@ -1954,14 +1947,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		AST ast= rewrite.getAST();
 		Assignment elseAssignment= ast.newAssignment();
 		elseAssignment.setOperator(assignmentOperator);
-		Expression left= origAssignee;
-		while (left instanceof ParenthesizedExpression) {
-			left= ((ParenthesizedExpression) left).getExpression();
-		}
-		Expression right= origAssigned;
-		while (right instanceof ParenthesizedExpression) {
-			right= ((ParenthesizedExpression) right).getExpression();
-		}
+		Expression left= ASTNodes.getUnparenthesedExpression(origAssignee);
+		Expression right= ASTNodes.getUnparenthesedExpression(origAssigned);
 		elseAssignment.setLeftHandSide((Expression) rewrite.createCopyTarget(left));
 		elseAssignment.setRightHandSide((Expression) rewrite.createCopyTarget(right));
 		ExpressionStatement statement= ast.newExpressionStatement(elseAssignment);
@@ -2025,10 +2012,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		AST ast= node.getAST();
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 		// prepare new 'if' statement
-		Expression expression= conditional.getExpression();
-		while (expression instanceof ParenthesizedExpression) {
-			expression= ((ParenthesizedExpression) expression).getExpression();
-		}
+		Expression expression= ASTNodes.getUnparenthesedExpression(conditional.getExpression());
 		IfStatement ifStatement= ast.newIfStatement();
 		ifStatement.setExpression((Expression) rewrite.createCopyTarget(expression));
 

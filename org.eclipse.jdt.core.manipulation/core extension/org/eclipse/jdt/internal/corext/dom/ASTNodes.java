@@ -802,7 +802,9 @@ public class ASTNodes {
 			if (exprClass.isAssignableFrom(expression.getClass())) {
 				return (T) expression;
 			} else if (expression instanceof ParenthesizedExpression) {
-				return as(((ParenthesizedExpression) expression).getExpression(), exprClass);
+				expression= ASTNodes.getUnparenthesedExpression(expression);
+
+				return as(expression, exprClass);
 			}
 		}
 		return null;
@@ -1732,8 +1734,8 @@ public class ASTNodes {
      *         returned
      */
     public static Expression getUnparenthesedExpression(Expression expression) {
-		if (expression != null && expression.getNodeType() == ASTNode.PARENTHESIZED_EXPRESSION) {
-            return getUnparenthesedExpression(((ParenthesizedExpression) expression).getExpression());
+		while (expression != null && expression.getNodeType() == ASTNode.PARENTHESIZED_EXPRESSION) {
+			expression= ((ParenthesizedExpression) expression).getExpression();
         }
         return expression;
     }

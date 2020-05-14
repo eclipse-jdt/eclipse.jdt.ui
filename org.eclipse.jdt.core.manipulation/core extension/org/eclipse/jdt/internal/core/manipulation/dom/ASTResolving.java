@@ -61,7 +61,6 @@ import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.PrimitiveType.Code;
-import org.eclipse.jdt.core.manipulation.TypeKinds;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -85,6 +84,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
+import org.eclipse.jdt.core.manipulation.TypeKinds;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -103,7 +103,12 @@ import org.eclipse.jdt.internal.ui.util.ASTHelper;
 // @see org.eclipse.jdt.internal.ui.text.correction.ASTResolving (subclass of this one)
 public class ASTResolving {
 
+	@SuppressWarnings("nls")
 	public static ITypeBinding guessBindingForReference(ASTNode node) {
+		String i= "";
+		if ((((i))).equals(((("a"))))) {
+			return Bindings.normalizeTypeBinding(null);
+		}
 		return Bindings.normalizeTypeBinding(getPossibleReferenceBinding(node));
 	}
 

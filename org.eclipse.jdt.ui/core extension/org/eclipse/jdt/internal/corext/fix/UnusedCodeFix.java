@@ -25,10 +25,10 @@ import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
-import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.UnusedCodeFixCore.RemoveCastOperation;
 import org.eclipse.jdt.internal.corext.fix.UnusedCodeFixCore.RemoveUnusedMemberOperation;
 
@@ -113,18 +113,13 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 		if (problem.getProblemId() != IProblem.UnnecessaryCast)
 			return null;
 
-		ASTNode selectedNode= problem.getCoveringNode(compilationUnit);
+		ASTNode selectedNode= ASTNodes.getUnparenthesedExpression(problem.getCoveringNode(compilationUnit));
 
-		ASTNode curr= selectedNode;
-		while (curr instanceof ParenthesizedExpression) {
-			curr= ((ParenthesizedExpression) curr).getExpression();
-		}
-
-		if (!(curr instanceof CastExpression))
+		if (!(selectedNode instanceof CastExpression))
 			return null;
 
 		return new UnusedCodeFix(FixMessages.UnusedCodeFix_RemoveCast_description, compilationUnit,
-				new CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation[] {new RemoveCastOperation((CastExpression)curr)});
+				new CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation[] {new RemoveCastOperation((CastExpression)selectedNode)});
 	}
 
 	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit,
