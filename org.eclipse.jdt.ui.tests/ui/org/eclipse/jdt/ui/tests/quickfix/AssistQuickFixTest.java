@@ -68,7 +68,6 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.RenameRefactoringPr
 
 @RunWith(JUnit4.class)
 public class AssistQuickFixTest extends QuickFixTest {
-
 	@Rule
     public ProjectTestSetup projectsetup = new ProjectTestSetup();
 
@@ -4867,7 +4866,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         buf.append("package test1;\n");
         buf.append("public class E {\n");
         buf.append("    public void foo() {\n");
-        buf.append("        \"a\".equals((\"a\"));\n");
+        buf.append("        \"a\".equals(((\"a\")));\n");
         buf.append("    }\n");
         buf.append("}\n");
         ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
@@ -4886,7 +4885,7 @@ public class AssistQuickFixTest extends QuickFixTest {
         buf.append("package test1;\n");
         buf.append("public class E {\n");
         buf.append("    public void foo() {\n");
-        buf.append("        (\"a\").equals(\"a\");\n");
+        buf.append("        ((\"a\")).equals(\"a\");\n");
         buf.append("    }\n");
         buf.append("}\n");
         assertEqualString(preview, buf.toString());

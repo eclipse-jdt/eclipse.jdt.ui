@@ -3820,10 +3820,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			replacement.arguments().add(rewrite.createCopyTarget(left));
 			rewrite.replace(method, replacement, null);
 		} else {
-			ASTNode leftExpression= left;
-			while (leftExpression instanceof ParenthesizedExpression) {
-				leftExpression= ((ParenthesizedExpression) left).getExpression();
-			}
+			ASTNode leftExpression= ASTNodes.getUnparenthesedExpression(left);
 			rewrite.replace(right, rewrite.createCopyTarget(leftExpression), null);
 
 			if (right instanceof CastExpression
