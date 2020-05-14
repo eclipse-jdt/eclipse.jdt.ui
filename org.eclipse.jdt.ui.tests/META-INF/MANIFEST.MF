@@ -69,7 +69,8 @@ Require-Bundle:
  org.eclipse.ui.views,
  org.eclipse.ui.workbench.texteditor,
  org.eclipse.text.tests,
- org.junit;bundle-version="4.12.0"
+ org.junit
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Eclipse-BundleShape: dir
 Bundle-ActivationPolicy: lazy
+Import-Package: org.junit.jupiter.api
