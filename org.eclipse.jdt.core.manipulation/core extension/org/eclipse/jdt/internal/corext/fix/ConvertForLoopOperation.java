@@ -93,13 +93,16 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 	private IMethodBinding fSizeMethodBinding;
 	private IMethodBinding fGetMethodBinding;
 	private MethodInvocation fSizeMethodAccess;
+	private boolean fCheckLoopVarUsed;
+	private boolean fLoopVarReferenced;
 	public ConvertForLoopOperation(ForStatement forStatement) {
-		this(forStatement, new String[0], false);
+		this(forStatement, new String[0], false, false);
 	}
 
-	public ConvertForLoopOperation(ForStatement forStatement, String[] usedNames, boolean makeFinal) {
+	public ConvertForLoopOperation(ForStatement forStatement, String[] usedNames, boolean makeFinal, boolean checkLoopVarUsed) {
 		super(forStatement, usedNames);
 		fMakeFinal= makeFinal;
+		fCheckLoopVarUsed= checkLoopVarUsed;
 	}
 
 	@Override
@@ -124,6 +127,9 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 			return ERROR_STATUS;
 
 		if (!validateBody(statement))
+			return ERROR_STATUS;
+
+		if (fCheckLoopVarUsed && !fLoopVarReferenced)
 			return ERROR_STATUS;
 
 		return Status.OK_STATUS;
@@ -479,6 +485,7 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 							throw new InvalidBodyError();
 
 						if (nameBinding.equals(fIndexBinding)) {
+							fLoopVarReferenced= true;
 							if (node.getLocationInParent() == ArrayAccess.INDEX_PROPERTY) {
 								if (fIsCollection)
 									throw new InvalidBodyError();

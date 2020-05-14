@@ -64,6 +64,9 @@ public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
 
 		CheckboxPreference convertLoop= createCheckboxPref(controlGroup, numColumns, CleanUpMessages.CodeStyleTabPage_CheckboxName_ConvertForLoopToEnhanced, CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(convertLoop);
+		intent(controlGroup);
+		final CheckboxPreference convertLoopOnlyIfLoopVariableUsed= createCheckboxPref(controlGroup, 1, CleanUpMessages.CodeStyleTabPage_CheckboxName_ConvertLoopOnlyIfLoopVarUsed, CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED, CleanUpModifyDialog.FALSE_TRUE);
+		registerSlavePreference(convertLoop, new CheckboxPreference[] {convertLoopOnlyIfLoopVariableUsed});
 
 		Group expressionsGroup= createGroup(numColumns, composite, CleanUpMessages.CodeStyleTabPage_GroupName_Expressions);
 

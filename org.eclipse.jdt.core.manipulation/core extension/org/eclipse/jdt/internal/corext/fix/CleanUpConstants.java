@@ -488,7 +488,8 @@ public class CleanUpConstants {
 	public static final String CONTROL_STATMENTS_USE_BLOCKS_NEVER= "cleanup.never_use_blocks"; //$NON-NLS-1$
 
 	/**
-	 * Convert for loops to enhanced for loops.
+	 * Convert for loops to enhanced for loops.  For detailed setting use<br>
+	 * {@link #CONTROL_STATMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED}<br>
 	 * <p>
 	 * Example:
 	 *
@@ -505,6 +506,27 @@ public class CleanUpConstants {
 	 * @since 3.3
 	 */
 	public static final String CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED= "cleanup.convert_to_enhanced_for_loop"; //$NON-NLS-1$
+
+	/**
+	 * Convert a for loop to enhanced for loop only if the loop variable will be used.
+	 * <p>
+	 * Example:
+	 *
+	 * <pre>
+	 *                   for (int i = 0; i &lt; array.length; i++) {}; -&gt; will not be converted
+	 * </pre>
+	 * <br>
+	 * Only has an effect if {@link #CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED} is TRUE <br>
+	 * <br>
+	 * Possible values: {TRUE, FALSE}<br>
+	 *
+	 * <br>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.16
+	 */
+	public static String CONTROL_STATMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED= "cleanup.convert_to_enhanced_for_loop_if_loop_var_used"; //$NON-NLS-1$
 
 	/**
 	 * Controls the usage of parentheses in expressions. For detailed settings use<br>
@@ -1304,5 +1326,6 @@ public class CleanUpConstants {
 	 * @since 3.3
 	 */
 	public final static String DEFAULT_SAVE_PARTICIPANT_PROFILE= SAVE_PARTICIPANT_PROFILE;
+
 
 }

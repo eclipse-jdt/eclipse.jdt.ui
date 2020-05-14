@@ -627,6 +627,55 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testJava50ForBug560431_1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "import java.util.ArrayList;\n" //
+				+ "import java.util.Iterator;\n" //
+				+ "import java.util.List;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo() {\n" //
+				+ "        List<E1> list= new ArrayList<E1>();\n" //
+				+ "        for (Iterator<E1> iter = list.iterator(); iter.hasNext();) {\n" //
+				+ "            E1 e = iter.next();\n" //
+				+ "            System.out.println(\"here\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
+	public void testJava50ForBug560431_2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo() {\n" //
+				+ "        int[] array={1,2,3,4};\n" //
+				+ "        for (int i=0;i<array.length;i++) {\n" //
+				+ "            String[] strs={\"1\",\"2\"};\n" //
+				+ "            for (int j = 0; j < strs.length; j++) {\n" //
+				+ "                System.out.println(\"here\");\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
 	public void testBug550726() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //

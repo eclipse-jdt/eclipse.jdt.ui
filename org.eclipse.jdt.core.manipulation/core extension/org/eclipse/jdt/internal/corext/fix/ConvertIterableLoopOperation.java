@@ -47,6 +47,7 @@ import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -130,13 +131,18 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 
 	private boolean fMakeFinal;
 
+	private boolean fCheckIfVarUsed;
+
+	private boolean fElementVariableReferenced;
+
 	public ConvertIterableLoopOperation(ForStatement statement) {
-		this(statement, new String[0], false);
+		this(statement, new String[0], false, false);
 	}
 
-	public ConvertIterableLoopOperation(ForStatement statement, String[] usedNames, boolean makeFinal) {
+	public ConvertIterableLoopOperation(ForStatement statement, String[] usedNames, boolean makeFinal, boolean checkIfVarUsed) {
 		super(statement, usedNames);
 		fMakeFinal= makeFinal;
+		fCheckIfVarUsed= checkIfVarUsed;
 	}
 
 	@Override
@@ -528,6 +534,18 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 
 							return true;
 						}
+
+						@Override
+						public final boolean visit(final SimpleName node) {
+							IBinding binding= node.resolveBinding();
+							if (binding != null && binding.equals(fElementVariable)) {
+								StructuralPropertyDescriptor location= node.getLocationInParent();
+								if (location != VariableDeclarationFragment.NAME_PROPERTY) {
+									fElementVariableReferenced= true;
+								}
+							}
+							return true;
+						}
 					});
 				}
 			}
@@ -550,7 +568,7 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 				});
 			}
 		}
-		if ((fExpression != null || fThis) && fIterable != null && fIteratorVariable != null && !fAssigned) {
+		if ((fExpression != null || fThis) && fIterable != null && fIteratorVariable != null && !fAssigned && (fElementVariableReferenced || !fCheckIfVarUsed)) {
 			return resultStatus;
 		}
 		return ERROR_STATUS;
