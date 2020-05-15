@@ -579,4 +579,66 @@ public class QuickFixTest14 extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}
 
+	@Test
+	public void testReplaceIncorrectReturnInSwitchExpressionWithYieldStatement() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(Java14ProjectTestSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		StringBuffer buf= new StringBuffer();
+		buf.append("module test {\n");
+		buf.append("}\n");
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class Cls {\n");
+		buf.append("	public static int process(int i) {\n");
+		buf.append("		var t = switch (i) {\n");
+		buf.append("			case 0 -> {\n");
+		buf.append("				return 99;\n");
+		buf.append("			}\n");
+		buf.append("			default ->100;\n");
+		buf.append("		};\n");
+		buf.append("		return t;\n");
+		buf.append("	}\n\n");
+		buf.append("	public static void main(String[] args) {\n");
+		buf.append("		System.out.println(process(1));\n");
+		buf.append("		System.out.println(process(0));\n");
+		buf.append("	}\n");
+		buf.append("}");
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class Cls {\n");
+		buf.append("	public static int process(int i) {\n");
+		buf.append("		var t = switch (i) {\n");
+		buf.append("			case 0 -> {\n");
+		buf.append("				yield 99;\n");
+		buf.append("			}\n");
+		buf.append("			default ->100;\n");
+		buf.append("		};\n");
+		buf.append("		return t;\n");
+		buf.append("	}\n\n");
+		buf.append("	public static void main(String[] args) {\n");
+		buf.append("		System.out.println(process(1));\n");
+		buf.append("		System.out.println(process(0));\n");
+		buf.append("	}\n");
+		buf.append("}");
+		String expected= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
+	}
 }
