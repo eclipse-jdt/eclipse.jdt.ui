@@ -1288,7 +1288,7 @@ public class UnresolvedElementsSubProcessor {
 			AST ast= root.getAST();
 
 			String name= node.getIdentifier();
-			for (String curr : SimilarElementsRequestor.getStaticImportFavorites(context.getCompilationUnit(), name, isMethod, favourites)) {
+			for (String curr : JavaModelUtil.getStaticImportFavorites(context.getCompilationUnit(), name, isMethod, favourites)) {
 				ImportRewrite importRewrite= StubUtility.createImportRewrite(root, true);
 				ASTRewrite astRewrite= ASTRewrite.create(ast);
 

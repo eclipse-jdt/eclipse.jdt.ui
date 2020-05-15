@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubMonitor;
 
@@ -36,6 +37,8 @@ import org.eclipse.text.edits.TextEdit;
 import org.eclipse.ltk.core.refactoring.resource.Resources;
 
 import org.eclipse.jdt.core.ClasspathContainerInitializer;
+import org.eclipse.jdt.core.CompletionProposal;
+import org.eclipse.jdt.core.CompletionRequestor;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -1163,5 +1166,58 @@ public final class JavaModelUtil {
 	}
 
 	private JavaModelUtil() {
+	}
+
+	public static String[] getStaticImportFavorites(ICompilationUnit cu, final String elementName, boolean isMethod, String[] favorites) throws JavaModelException {
+		StringBuilder dummyCU= new StringBuilder();
+		String packName= cu.getParent().getElementName();
+		IType type= cu.findPrimaryType();
+		if (type == null)
+			return new String[0];
+
+		if (packName.length() > 0) {
+			dummyCU.append("package ").append(packName).append(';'); //$NON-NLS-1$
+		}
+		dummyCU.append("public class ").append(type.getElementName()).append("{\n static {\n").append(elementName); // static initializer  //$NON-NLS-1$//$NON-NLS-2$
+		int offset= dummyCU.length();
+		dummyCU.append("\n}\n }"); //$NON-NLS-1$
+
+		ICompilationUnit newCU= null;
+		try {
+			newCU= cu.getWorkingCopy(null);
+			newCU.getBuffer().setContents(dummyCU.toString());
+
+			final HashSet<String> result= new HashSet<>();
+
+			CompletionRequestor requestor= new CompletionRequestor(true) {
+				@Override
+				public void accept(CompletionProposal proposal) {
+					if (elementName.equals(new String(proposal.getName()))) {
+						for (CompletionProposal curr : proposal.getRequiredProposals()) {
+							if (curr.getKind() == CompletionProposal.METHOD_IMPORT || curr.getKind() == CompletionProposal.FIELD_IMPORT) {
+								result.add(concatenateName(Signature.toCharArray(curr.getDeclarationSignature()), curr.getName()));
+							}
+						}
+					}
+				}
+			};
+
+			if (isMethod) {
+				requestor.setIgnored(CompletionProposal.METHOD_REF, false);
+				requestor.setAllowsRequiredProposals(CompletionProposal.METHOD_REF, CompletionProposal.METHOD_IMPORT, true);
+			} else {
+				requestor.setIgnored(CompletionProposal.FIELD_REF, false);
+				requestor.setAllowsRequiredProposals(CompletionProposal.FIELD_REF, CompletionProposal.FIELD_IMPORT, true);
+			}
+			requestor.setFavoriteReferences(favorites);
+
+			newCU.codeComplete(offset, requestor, new NullProgressMonitor());
+
+			return result.toArray(new String[result.size()]);
+		} finally {
+			if (newCU != null) {
+				newCU.discardWorkingCopy();
+			}
+		}
 	}
 }

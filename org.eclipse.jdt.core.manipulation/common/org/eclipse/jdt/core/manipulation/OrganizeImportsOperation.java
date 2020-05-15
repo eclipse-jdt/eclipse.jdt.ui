@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -44,6 +44,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.SourceRange;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -52,6 +53,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -64,6 +66,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.TypeNameMatch;
 
 import org.eclipse.jdt.internal.core.manipulation.JavaManipulationMessages;
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.manipulation.Messages;
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
@@ -668,6 +671,24 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 						// Whether name refers to a field or to a method is unknown.
 						boolean isField= false;
 						importRewrite.addStaticImport(declaringTypeName, simpleName, isField, UNRESOLVABLE_IMPORT_CONTEXT);
+					}
+				}
+				if (unresolvableImports.isEmpty()) {
+					String pref= JavaManipulation.getPreference(JavaManipulationPlugin.CODEASSIST_FAVORITE_STATIC_MEMBERS, importRewrite.getCompilationUnit().getJavaProject());
+					String[] favourites= pref.split(";"); //$NON-NLS-1$
+					if (favourites.length == 0) {
+						return;
+					}
+					try {
+						// check favourite static imports
+						boolean isMethod= name.getParent() instanceof MethodInvocation;
+						String[] staticFavourites= JavaModelUtil.getStaticImportFavorites(importRewrite.getCompilationUnit(), identifier, isMethod, favourites);
+						if (staticFavourites.length > 0) {
+							String qualifiedTypeName= Signature.getQualifier(staticFavourites[0]);
+							importRewrite.addStaticImport(qualifiedTypeName, identifier, !isMethod);
+						}
+					} catch (JavaModelException e) {
+						return;
 					}
 				}
 			}

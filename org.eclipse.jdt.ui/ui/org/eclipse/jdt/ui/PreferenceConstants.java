@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -45,6 +45,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.manipulation.CodeStyleConfiguration;
 import org.eclipse.jdt.core.manipulation.JavaManipulation;
 
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.manipulation.MembersOrderPreferenceCacheCommon;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettingsConstants;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstantsOptions;
@@ -3178,7 +3179,7 @@ public class PreferenceConstants {
 	 * @see org.eclipse.jface.preference.PreferenceConverter
 	 * @since 3.3
 	 */
-	public final static String CODEASSIST_FAVORITE_STATIC_MEMBERS= "content_assist_favorite_static_members"; //$NON-NLS-1$
+	public final static String CODEASSIST_FAVORITE_STATIC_MEMBERS= JavaManipulationPlugin.CODEASSIST_FAVORITE_STATIC_MEMBERS;
 
 
 	/**
