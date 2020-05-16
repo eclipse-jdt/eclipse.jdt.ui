@@ -522,6 +522,7 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 					return ERROR_STATUS;
 
 				if (fElementVariable != null) {
+					final String elementVarName= fElementVariable.getName();
 					statement.accept(new ASTVisitor() {
 						@Override
 						public final boolean visit(final VariableDeclarationFragment node) {
@@ -537,11 +538,13 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 
 						@Override
 						public final boolean visit(final SimpleName node) {
-							IBinding binding= node.resolveBinding();
-							if (binding != null && binding.equals(fElementVariable)) {
-								StructuralPropertyDescriptor location= node.getLocationInParent();
-								if (location != VariableDeclarationFragment.NAME_PROPERTY) {
-									fElementVariableReferenced= true;
+							if (fCheckIfVarUsed && !fElementVariableReferenced && node.getFullyQualifiedName().equals(elementVarName)) {
+								IBinding binding= node.resolveBinding();
+								if (binding != null && binding.equals(fElementVariable)) {
+									StructuralPropertyDescriptor location= node.getLocationInParent();
+									if (location != VariableDeclarationFragment.NAME_PROPERTY) {
+										fElementVariableReferenced= true;
+									}
 								}
 							}
 							return true;
