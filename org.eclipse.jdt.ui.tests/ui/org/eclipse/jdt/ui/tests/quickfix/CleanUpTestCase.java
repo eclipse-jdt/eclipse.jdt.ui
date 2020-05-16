@@ -23,8 +23,6 @@ import java.util.regex.Pattern;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -74,19 +72,6 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomPr
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileStore;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-	CleanUpStressTest.class,
-	CleanUpTest.class,
-	CleanUpTest1d5.class,
-	CleanUpTest1d7.class,
-	CleanUpTest1d8.class,
-	CleanUpTest1d10.class,
-	CleanUpAnnotationTest.class,
-	SaveParticipantTest.class,
-	CleanUpActionTest.class,
-	NullAnnotationsCleanUpTest1d8.class
-})
 public class CleanUpTestCase extends QuickFixTest {
 	protected static final String FIELD_COMMENT= "/* Test */";
 
