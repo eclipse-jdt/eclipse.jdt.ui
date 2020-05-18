@@ -21,11 +21,11 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
  */
 public class InterruptibleVisitor extends ASTVisitor {
     /**
-     * Visit the node.
+     * Traverse the node, silently swallowing {@link AbortSearchException}.
      *
      * @param node The visited node.
      */
-    public void visitNode(ASTNode node) {
+    public void traverseNodeInterruptibly(ASTNode node) {
         try {
             node.accept(this);
         } catch (AbortSearchException e) {

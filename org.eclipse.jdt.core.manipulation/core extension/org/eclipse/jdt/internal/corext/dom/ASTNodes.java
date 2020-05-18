@@ -586,7 +586,7 @@ public class ASTNodes {
 	 */
 	public static boolean isPassiveWithoutFallingThrough(final ASTNode node) {
 		final ExprActivityVisitor visitor= new ExprActivityVisitor();
-		visitor.visitNode(node);
+		visitor.traverseNodeInterruptibly(node);
 		return ExprActivity.PASSIVE_WITHOUT_FALLING_THROUGH.equals(visitor.getActivityLevel());
 	}
 
