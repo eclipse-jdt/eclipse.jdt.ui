@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,7 +13,6 @@
  *     David Saff (saff@mit.edu) - bug 102632: [JUnit] Support for JUnit 4.
  *     Robert Konigsberg <konigsberg@google.com> - [JUnit] Improve discoverability of the ability to run a single method under JUnit Tests - https://bugs.eclipse.org/bugs/show_bug.cgi?id=285637
  *     Andrej Zachar <andrej@chocolatejar.eu> - [JUnit] Add a filter for ignored tests - https://bugs.eclipse.org/bugs/show_bug.cgi?id=298603
- *     Gautier de Saint Martin Lacaze - [JUnit] Please add icon for "skipped" tests. https://bugs.eclipse.org/bugs/show_bug.cgi?id=509659
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.ui;
 
@@ -43,7 +42,6 @@ public final class JUnitMessages extends NLS {
 	public static String CounterPanel_label_errors;
 	public static String CounterPanel_label_failures;
 	public static String CounterPanel_label_runs;
-	public static String CounterPanel_label_skipped;
 	public static String CounterPanel_runcount;
 	public static String CounterPanel_runcount_assumptionsFailed;
 	public static String CounterPanel_runcount_ignored;

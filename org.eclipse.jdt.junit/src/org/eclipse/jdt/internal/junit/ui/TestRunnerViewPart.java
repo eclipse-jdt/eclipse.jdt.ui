@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -20,7 +20,6 @@
  *     Thirumala Reddy Mutchukota <thirumala@google.com> - [JUnit] Avoid rerun test launch on UI thread - https://bugs.eclipse.org/bugs/show_bug.cgi?id=411841
  *     Andrew Eisenberg <andrew@eisenberg.as> - [JUnit] Add a monospace font option for the junit results view - https://bugs.eclipse.org/bugs/show_bug.cgi?id=411794
  *     Andrej Zachar <andrej@chocolatejar.eu> - [JUnit] Add a filter for ignored tests - https://bugs.eclipse.org/bugs/show_bug.cgi?id=298603
- *     Gautier de Saint Martin Lacaze - [JUnit] Please add icon for "skipped" tests. https://bugs.eclipse.org/bugs/show_bug.cgi?id=509659
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.ui;
 
@@ -1710,8 +1709,7 @@ action enablement
 		}
 
 		fCounterPanel.setTotal(totalCount);
-		fCounterPanel.setRunValue(startedCount, assumptionFailureCount);
-		fCounterPanel.setSkippedValue(ignoredCount);
+		fCounterPanel.setRunValue(startedCount, ignoredCount, assumptionFailureCount);
 		fCounterPanel.setErrorValue(errorCount);
 		fCounterPanel.setFailureValue(failureCount);
 
