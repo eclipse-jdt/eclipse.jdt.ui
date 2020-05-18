@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
@@ -43,7 +44,6 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.WildcardType;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
@@ -250,7 +250,7 @@ public class InitializeFinalFieldProposal extends LinkedCorrectionProposal {
 			return null;
 		}
 		// find all constructors (methods with same name as the type name)
-		ConstructorVisitor cv= new ConstructorVisitor(((TypeDeclaration) field.getParent()).getName().toString());
+		ConstructorVisitor cv= new ConstructorVisitor(((AbstractTypeDeclaration) field.getParent()).getName().toString());
 		fAstNode.getRoot().accept(cv);
 		if (cv.getNodes().size() != 1) { // we only handle the simple case of one constructor
 			return null;
@@ -286,7 +286,7 @@ public class InitializeFinalFieldProposal extends LinkedCorrectionProposal {
 		Block body= methodDeclaration.getBody();
 		// check if we call this(), then we can't add initialization here
 		if (!hasThisCall(body)) {
-			List<ASTNode> decls= ((TypeDeclaration) methodDeclaration.getParent()).bodyDeclarations();
+			List<ASTNode> decls= ((AbstractTypeDeclaration) methodDeclaration.getParent()).bodyDeclarations();
 			List<String> finalFieldList= getFinalFieldList(decls);
 			int insertIndex= 0;
 			if (finalFieldList.size() > 1) {
@@ -353,7 +353,7 @@ public class InitializeFinalFieldProposal extends LinkedCorrectionProposal {
 
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 		// find all constructors (methods with same name as the type name)
-		ConstructorVisitor cv= new ConstructorVisitor(((TypeDeclaration) field.getParent()).getName().toString());
+		ConstructorVisitor cv= new ConstructorVisitor(((AbstractTypeDeclaration) field.getParent()).getName().toString());
 		fAstNode.getRoot().accept(cv);
 
 		for (MethodDeclaration md : cv.getNodes()) {
@@ -363,7 +363,7 @@ public class InitializeFinalFieldProposal extends LinkedCorrectionProposal {
 				if (hasFieldInitialization(body, variableName)) {
 					continue;
 				}
-				List<ASTNode> decls= ((TypeDeclaration) md.getParent()).bodyDeclarations();
+				List<ASTNode> decls= ((AbstractTypeDeclaration) md.getParent()).bodyDeclarations();
 				List<String> finalFieldList= getFinalFieldList(decls);
 				int insertIndex= 0;
 				if (finalFieldList.size() > 1) {

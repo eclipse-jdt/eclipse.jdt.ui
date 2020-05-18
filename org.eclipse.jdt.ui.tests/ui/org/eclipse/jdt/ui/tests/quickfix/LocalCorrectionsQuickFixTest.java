@@ -2846,6 +2846,52 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	@Test
+	public void testUninitializedField_11() throws Exception {
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=563285
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public enum E {\n");
+		buf.append("    a, b, c;\n");
+		buf.append("    private final int foo1;\n");
+		buf.append("    private final int foo2;\n");
+		buf.append("    private E(int i1, int i2) {\n");
+		buf.append("        this.foo1 = i1;\n");
+		buf.append("        this.foo2 = i2;\n");
+		buf.append("    }\n");
+		buf.append("    E() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOfProblems(2, problems);
+
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, problems[0], null);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public enum E {\n");
+		buf.append("    a, b, c;\n");
+		buf.append("    private final int foo1;\n");
+		buf.append("    private final int foo2;\n");
+		buf.append("    private E(int i1, int i2) {\n");
+		buf.append("        this.foo1 = i1;\n");
+		buf.append("        this.foo2 = i2;\n");
+		buf.append("    }\n");
+		buf.append("    E() {\n");
+		buf.append("        this.foo1 = 0;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	@Test
 	public void testUnimplementedMethods() throws Exception {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
 		StringBuffer buf= new StringBuffer();
