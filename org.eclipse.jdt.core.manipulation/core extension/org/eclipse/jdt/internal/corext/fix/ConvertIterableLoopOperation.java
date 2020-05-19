@@ -399,61 +399,51 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 						return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
 					}
 					VariableDeclarationFragment fragment= fragments.get(0);
-					fragment.accept(new ASTVisitor() {
+					IVariableBinding binding= fragment.resolveBinding();
+					if (binding != null) {
+						ITypeBinding type= binding.getType();
+						if (type != null) {
+							ITypeBinding iterator= getSuperType(type, Iterator.class.getCanonicalName());
 
-						@Override
-						public final boolean visit(final MethodInvocation node) {
-							IMethodBinding binding= node.resolveMethodBinding();
-							if (binding != null) {
-								ITypeBinding type= binding.getReturnType();
-								if (type != null) {
-									String qualified= type.getQualifiedName();
-									if (qualified.startsWith("java.util.Enumeration<") || qualified.startsWith("java.util.Iterator<")) { //$NON-NLS-1$ //$NON-NLS-2$
-										Expression qualifier= node.getExpression();
-										if (qualifier != null) {
-											ITypeBinding resolved= qualifier.resolveTypeBinding();
-											if (resolved != null) {
-												ITypeBinding iterable= getSuperType(resolved, Iterable.class.getCanonicalName());
-												if (iterable != null) {
-													fExpression= qualifier;
-													fIterable= resolved;
-												}
-											}
-										} else {
-											ITypeBinding declaring= binding.getDeclaringClass();
-											if (declaring != null) {
-												ITypeBinding superBinding= getSuperType(declaring, Iterable.class.getCanonicalName());
-												if (superBinding != null) {
-													fIterable= superBinding;
-													fThis= true;
-												}
-											}
+							if (iterator == null) {
+								iterator= getSuperType(type, Enumeration.class.getCanonicalName());
+							}
+
+							if (iterator != null) {
+								fIteratorVariable= binding;
+							}
+						}
+					}
+					MethodInvocation method= ASTNodes.as(fragment.getInitializer(), MethodInvocation.class);
+					if (method != null && method.resolveMethodBinding() != null) {
+						IMethodBinding methodBinding= method.resolveMethodBinding();
+						ITypeBinding type= methodBinding.getReturnType();
+						if (type != null) {
+							String qualified= type.getQualifiedName();
+							if (qualified.startsWith("java.util.Enumeration<") || qualified.startsWith("java.util.Iterator<")) { //$NON-NLS-1$ //$NON-NLS-2$
+								Expression qualifier= method.getExpression();
+								if (qualifier != null) {
+									ITypeBinding resolved= qualifier.resolveTypeBinding();
+									if (resolved != null) {
+										ITypeBinding iterable= getSuperType(resolved, Iterable.class.getCanonicalName());
+										if (iterable != null) {
+											fExpression= qualifier;
+											fIterable= resolved;
+										}
+									}
+								} else {
+									ITypeBinding declaring= methodBinding.getDeclaringClass();
+									if (declaring != null) {
+										ITypeBinding superBinding= getSuperType(declaring, Iterable.class.getCanonicalName());
+										if (superBinding != null) {
+											fIterable= superBinding;
+											fThis= true;
 										}
 									}
 								}
 							}
-							return true;
 						}
-
-						@Override
-						public final boolean visit(final VariableDeclarationFragment node) {
-							IVariableBinding binding= node.resolveBinding();
-							if (binding != null) {
-								ITypeBinding type= binding.getType();
-								if (type != null) {
-									ITypeBinding iterator= getSuperType(type, Iterator.class.getCanonicalName());
-									if (iterator != null)
-										fIteratorVariable= binding;
-									else {
-										iterator= getSuperType(type, Enumeration.class.getCanonicalName());
-										if (iterator != null)
-											fIteratorVariable= binding;
-									}
-								}
-							}
-							return true;
-						}
-					});
+					}
 				}
 			}
 			Statement statement= getForStatement().getBody();
