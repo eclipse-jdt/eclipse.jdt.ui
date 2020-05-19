@@ -62,12 +62,12 @@ public class ConvertLoopCleanUp extends AbstractCleanUp {
 	public String[] getStepDescriptions() {
 		List<String> result= new ArrayList<>();
 
-		if (isEnabled(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED))
+		if (isEnabled(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED)) {
 			result.add(MultiFixMessages.Java50CleanUp_ConvertToEnhancedForLoop_description);
-
-		if (isEnabled(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED))
-			result.add(MultiFixMessages.Java50CleanUp_ConvertLoopOnlyIfLoopVarUsed_description);
-
+			if (isEnabled(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED)) {
+				result.add(MultiFixMessages.Java50CleanUp_ConvertLoopOnlyIfLoopVarUsed_description);
+			}
+		}
 		return result.toArray(new String[result.size()]);
 	}
 
