@@ -33,6 +33,7 @@ import org.junit.runners.Suite;
 			MethodOverwriteCompletionTest.class,
 			MethodParamsCompletionTest.class,
 			MethodParameterGuessingCompletionTest.class,
+			MissingTypeCompletionTest.class,
 			TypeCompletionTest.class,
 			TypeCompletionTest1d7.class,
 			SpecialMethodsCompletionTest.class,
