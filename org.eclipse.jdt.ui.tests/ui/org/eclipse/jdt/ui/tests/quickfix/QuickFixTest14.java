@@ -14,6 +14,7 @@
 package org.eclipse.jdt.ui.tests.quickfix;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 import org.junit.After;
 import org.junit.Ignore;
@@ -30,6 +31,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -90,6 +92,53 @@ public class QuickFixTest14 extends QuickFixTest {
 		assertProposalExists(proposals, label1);
 		String label2= CorrectionMessages.PreviewFeaturesSubProcessor_open_compliance_properties_page_enable_preview_features;
 		assertProposalExists(proposals, label2);
+	}
+
+	@Test
+	public void testRecordSuppressWarningsProposals() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(Java14ProjectTestSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set14CompilerOptions(fJProject1, true);
+
+		Map<String, String> options= fJProject1.getOptions(false);
+		options.put(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.WARNING);
+		fJProject1.setOptions(options);
+
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+
+		StringBuffer buf= new StringBuffer();
+		buf.append("module test {\n");
+		buf.append("}\n");
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public record Rec1() {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack.createCompilationUnit("Rec1.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1, null);
+
+		assertNumberOfProposals(proposals, 2);
+		String label= Messages.format(CorrectionMessages.SuppressWarningsSubProcessor_suppress_warnings_label, new String[] { "preview", "Rec1" });
+		assertProposalExists(proposals, label);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("@SuppressWarnings(\"preview\")\n");
+		buf.append("public record Rec1() {\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}
 
 	@Ignore("See bug 562103 comment 4")
