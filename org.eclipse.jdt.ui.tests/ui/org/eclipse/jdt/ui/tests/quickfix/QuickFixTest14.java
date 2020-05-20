@@ -55,6 +55,10 @@ public class QuickFixTest14 extends QuickFixTest {
 
     private IPackageFragmentRoot fSourceFolder;
 
+	private static String MODULE_INFO_FILE_CONTENT = ""
+										+ "module test {\n"
+										+ "}\n";
+
 	@After
 	public void tearDown() throws Exception {
 		if (fJProject1 != null) {
@@ -70,19 +74,15 @@ public class QuickFixTest14 extends QuickFixTest {
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-
-		StringBuffer buf= new StringBuffer();
-		buf.append("module test {\n");
-		buf.append("}\n");
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", MODULE_INFO_FILE_CONTENT, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public record Rec1() {\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Rec1.java", buf.toString(), false, null);
+		String test= ""
+					+ "package test;\n"
+					+ "public record Rec1() {\n"
+					+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("Rec1.java", test, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1, null);
@@ -107,18 +107,15 @@ public class QuickFixTest14 extends QuickFixTest {
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 
-		StringBuffer buf= new StringBuffer();
-		buf.append("module test {\n");
-		buf.append("}\n");
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", MODULE_INFO_FILE_CONTENT, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public record Rec1() {\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Rec1.java", buf.toString(), false, null);
+		String test= ""
+					+ "package test;\n"
+					+ "public record Rec1() {\n"
+					+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("Rec1.java", test, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1, null);
@@ -130,13 +127,11 @@ public class QuickFixTest14 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("@SuppressWarnings(\"preview\")\n");
-		buf.append("public record Rec1() {\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= ""
+						+ "package test;\n"
+						+ "@SuppressWarnings(\"preview\")\n"
+						+ "public record Rec1() {\n"
+						+ "}\n";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}
@@ -151,18 +146,15 @@ public class QuickFixTest14 extends QuickFixTest {
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 
-		StringBuffer buf= new StringBuffer();
-		buf.append("module test {\n");
-		buf.append("}\n");
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", MODULE_INFO_FILE_CONTENT, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public record Rec1() {\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Rec1.java", buf.toString(), false, null);
+		String test= ""
+					+ "package test;\n"
+					+ "public record Rec1() {\n"
+					+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("Rec1.java", test, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1, null);
@@ -183,18 +175,15 @@ public class QuickFixTest14 extends QuickFixTest {
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 
-		StringBuffer buf= new StringBuffer();
-		buf.append("module test {\n");
-		buf.append("}\n");
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", MODULE_INFO_FILE_CONTENT, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public record Rec() {\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Rec.java", buf.toString(), false, null);
+		String test= ""
+					+ "package test;\n"
+					+ "public record Rec() {\n"
+					+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("Rec.java", test, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<ICompletionProposal> proposals= collectAllCorrections(cu, astRoot, 0);
@@ -209,28 +198,25 @@ public class QuickFixTest14 extends QuickFixTest {
 		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuffer buf= new StringBuffer();
-		buf.append("module test {\n");
-		buf.append("}\n");
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", MODULE_INFO_FILE_CONTENT, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public static void foo(Day day) {\n");
-		buf.append("        switch (day) {\n");
-		buf.append("        case SATURDAY, SUNDAY -> System.out.println(\"Weekend\");\n");
-		buf.append("        case MONDAY, TUESDAY, WEDNESDAY -> System.out.println(\"Weekday\");\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("enum Day {\n");
-		buf.append("    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		String test= ""
+					+ "package test;\n"
+					+ "public class Cls {\n"
+					+ "    public static void foo(Day day) {\n"
+					+ "        switch (day) {\n"
+					+ "        case SATURDAY, SUNDAY -> System.out.println(\"Weekend\");\n"
+					+ "        case MONDAY, TUESDAY, WEDNESDAY -> System.out.println(\"Weekday\");\n"
+					+ "        }\n"
+					+ "    }\n"
+					+ "}\n"
+					+ "\n"
+					+ "enum Day {\n"
+					+ "    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;\n"
+					+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", test, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
@@ -240,22 +226,21 @@ public class QuickFixTest14 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public static void foo(Day day) {\n");
-		buf.append("        switch (day) {\n");
-		buf.append("        case SATURDAY, SUNDAY -> System.out.println(\"Weekend\");\n");
-		buf.append("        case MONDAY, TUESDAY, WEDNESDAY -> System.out.println(\"Weekday\");\n");
-		buf.append("			default -> throw new IllegalArgumentException(\"Unexpected value: \" + day);\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("enum Day {\n");
-		buf.append("    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= ""
+						+ "package test;\n"
+						+ "public class Cls {\n"
+						+ "    public static void foo(Day day) {\n"
+						+ "        switch (day) {\n"
+						+ "        case SATURDAY, SUNDAY -> System.out.println(\"Weekend\");\n"
+						+ "        case MONDAY, TUESDAY, WEDNESDAY -> System.out.println(\"Weekday\");\n"
+						+ "			default -> throw new IllegalArgumentException(\"Unexpected value: \" + day);\n"
+						+ "        }\n"
+						+ "    }\n"
+						+ "}\n"
+						+ "\n"
+						+ "enum Day {\n"
+						+ "    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;\n"
+						+ "}\n";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}
@@ -267,28 +252,25 @@ public class QuickFixTest14 extends QuickFixTest {
 		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuffer buf= new StringBuffer();
-		buf.append("module test {\n");
-		buf.append("}\n");
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", MODULE_INFO_FILE_CONTENT, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public static void foo(Day day) {\n");
-		buf.append("        switch (day) {\n");
-		buf.append("        case SATURDAY, SUNDAY: System.out.println(\"Weekend\");\n");
-		buf.append("        case MONDAY, TUESDAY, WEDNESDAY: System.out.println(\"Weekday\");\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("enum Day {\n");
-		buf.append("    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		String test= ""
+					+ "package test;\n"
+					+ "public class Cls {\n"
+					+ "    public static void foo(Day day) {\n"
+					+ "        switch (day) {\n"
+					+ "        case SATURDAY, SUNDAY: System.out.println(\"Weekend\");\n"
+					+ "        case MONDAY, TUESDAY, WEDNESDAY: System.out.println(\"Weekday\");\n"
+					+ "        }\n"
+					+ "    }\n"
+					+ "}\n"
+					+ "\n"
+					+ "enum Day {\n"
+					+ "    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;\n"
+					+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", test, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
@@ -298,23 +280,22 @@ public class QuickFixTest14 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public static void foo(Day day) {\n");
-		buf.append("        switch (day) {\n");
-		buf.append("        case SATURDAY, SUNDAY: System.out.println(\"Weekend\");\n");
-		buf.append("        case MONDAY, TUESDAY, WEDNESDAY: System.out.println(\"Weekday\");\n");
-		buf.append("			default :\n");
-		buf.append("				break;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("enum Day {\n");
-		buf.append("    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= ""
+						+ "package test;\n"
+						+ "public class Cls {\n"
+						+ "    public static void foo(Day day) {\n"
+						+ "        switch (day) {\n"
+						+ "        case SATURDAY, SUNDAY: System.out.println(\"Weekend\");\n"
+						+ "        case MONDAY, TUESDAY, WEDNESDAY: System.out.println(\"Weekday\");\n"
+						+ "			default :\n"
+						+ "				break;\n"
+						+ "        }\n"
+						+ "    }\n"
+						+ "}\n"
+						+ "\n"
+						+ "enum Day {\n"
+						+ "    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;\n"
+						+ "}\n";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}
@@ -326,26 +307,23 @@ public class QuickFixTest14 extends QuickFixTest {
 		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuffer buf= new StringBuffer();
-		buf.append("module test {\n");
-		buf.append("}\n");
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", MODULE_INFO_FILE_CONTENT, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public static void foo(Day day) {\n");
-		buf.append("        switch (day) {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("enum Day {\n");
-		buf.append("    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		String test= ""
+					+ "package test;\n"
+					+ "public class Cls {\n"
+					+ "    public static void foo(Day day) {\n"
+					+ "        switch (day) {\n"
+					+ "        }\n"
+					+ "    }\n"
+					+ "}\n"
+					+ "\n"
+					+ "enum Day {\n"
+					+ "    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;\n"
+					+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", test, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 7);
@@ -355,21 +333,20 @@ public class QuickFixTest14 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public static void foo(Day day) {\n");
-		buf.append("        switch (day) {\n");
-		buf.append("			default :\n");
-		buf.append("				break;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("enum Day {\n");
-		buf.append("    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= ""
+						+ "package test;\n"
+						+ "public class Cls {\n"
+						+ "    public static void foo(Day day) {\n"
+						+ "        switch (day) {\n"
+						+ "			default :\n"
+						+ "				break;\n"
+						+ "        }\n"
+						+ "    }\n"
+						+ "}\n"
+						+ "\n"
+						+ "enum Day {\n"
+						+ "    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;\n"
+						+ "}\n";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}
@@ -381,28 +358,25 @@ public class QuickFixTest14 extends QuickFixTest {
 		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuffer buf= new StringBuffer();
-		buf.append("module test {\n");
-		buf.append("}\n");
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", MODULE_INFO_FILE_CONTENT, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void bar1(Day day) {\n");
-		buf.append("        switch (day) {\n");
-		buf.append("            case MONDAY, FRIDAY -> System.out.println(Day.SUNDAY);\n");
-		buf.append("            case TUESDAY                -> System.out.println(7);\n");
-		buf.append("            case THURSDAY, SATURDAY     -> System.out.println(8);\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("enum Day {\n");
-		buf.append("    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		String test= ""
+					+ "package test;\n"
+					+ "public class Cls {\n"
+					+ "    public void bar1(Day day) {\n"
+					+ "        switch (day) {\n"
+					+ "            case MONDAY, FRIDAY -> System.out.println(Day.SUNDAY);\n"
+					+ "            case TUESDAY                -> System.out.println(7);\n"
+					+ "            case THURSDAY, SATURDAY     -> System.out.println(8);\n"
+					+ "        }\n"
+					+ "    }\n"
+					+ "}\n"
+					+ "enum Day {\n"
+					+ "    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;\n"
+					+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", test, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
@@ -412,24 +386,23 @@ public class QuickFixTest14 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void bar1(Day day) {\n");
-		buf.append("        switch (day) {\n");
-		buf.append("            case MONDAY, FRIDAY -> System.out.println(Day.SUNDAY);\n");
-		buf.append("            case TUESDAY                -> System.out.println(7);\n");
-		buf.append("            case THURSDAY, SATURDAY     -> System.out.println(8);\n");
-		buf.append("			case SUNDAY -> throw new UnsupportedOperationException(\"Unimplemented case: \" + day);\n");
-		buf.append("			case WEDNESDAY -> throw new UnsupportedOperationException(\"Unimplemented case: \" + day);\n");
-		buf.append("			default -> throw new IllegalArgumentException(\"Unexpected value: \" + day);\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("enum Day {\n");
-		buf.append("    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= ""
+						+ "package test;\n"
+						+ "public class Cls {\n"
+						+ "    public void bar1(Day day) {\n"
+						+ "        switch (day) {\n"
+						+ "            case MONDAY, FRIDAY -> System.out.println(Day.SUNDAY);\n"
+						+ "            case TUESDAY                -> System.out.println(7);\n"
+						+ "            case THURSDAY, SATURDAY     -> System.out.println(8);\n"
+						+ "			case SUNDAY -> throw new UnsupportedOperationException(\"Unimplemented case: \" + day);\n"
+						+ "			case WEDNESDAY -> throw new UnsupportedOperationException(\"Unimplemented case: \" + day);\n"
+						+ "			default -> throw new IllegalArgumentException(\"Unexpected value: \" + day);\n"
+						+ "        }\n"
+						+ "    }\n"
+						+ "}\n"
+						+ "enum Day {\n"
+						+ "    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;\n"
+						+ "}\n";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}
@@ -441,28 +414,25 @@ public class QuickFixTest14 extends QuickFixTest {
 		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuffer buf= new StringBuffer();
-		buf.append("module test {\n");
-		buf.append("}\n");
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", MODULE_INFO_FILE_CONTENT, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public static void bar3(int input) {\n");
-		buf.append("        int num = switch (input) {\n");
-		buf.append("        case 60, 600 -> 6;\n");
-		buf.append("        case 70 -> 7;\n");
-		buf.append("        case 80 -> 8;\n");
-		buf.append("        case 90, 900 -> {\n");
-		buf.append("            yield 9;\n");
-		buf.append("        }\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		String test= ""
+					+ "package test;\n"
+					+ "public class Cls {\n"
+					+ "    public static void bar3(int input) {\n"
+					+ "        int num = switch (input) {\n"
+					+ "        case 60, 600 -> 6;\n"
+					+ "        case 70 -> 7;\n"
+					+ "        case 80 -> 8;\n"
+					+ "        case 90, 900 -> {\n"
+					+ "            yield 9;\n"
+					+ "        }\n"
+					+ "        };\n"
+					+ "    }\n"
+					+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", test, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
@@ -472,22 +442,21 @@ public class QuickFixTest14 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public static void bar3(int input) {\n");
-		buf.append("        int num = switch (input) {\n");
-		buf.append("        case 60, 600 -> 6;\n");
-		buf.append("        case 70 -> 7;\n");
-		buf.append("        case 80 -> 8;\n");
-		buf.append("        case 90, 900 -> {\n");
-		buf.append("            yield 9;\n");
-		buf.append("        }\n");
-		buf.append("			default -> throw new IllegalArgumentException(\"Unexpected value: \" + input);\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= ""
+						+ "package test;\n"
+						+ "public class Cls {\n"
+						+ "    public static void bar3(int input) {\n"
+						+ "        int num = switch (input) {\n"
+						+ "        case 60, 600 -> 6;\n"
+						+ "        case 70 -> 7;\n"
+						+ "        case 80 -> 8;\n"
+						+ "        case 90, 900 -> {\n"
+						+ "            yield 9;\n"
+						+ "        }\n"
+						+ "			default -> throw new IllegalArgumentException(\"Unexpected value: \" + input);\n"
+						+ "        };\n"
+						+ "    }\n"
+						+ "}\n";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}
@@ -499,30 +468,27 @@ public class QuickFixTest14 extends QuickFixTest {
 		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuffer buf= new StringBuffer();
-		buf.append("module test {\n");
-		buf.append("}\n");
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", MODULE_INFO_FILE_CONTENT, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public static void bar4(int input) {\n");
-		buf.append("        int num = switch (input) {\n");
-		buf.append("        case 60, 600:\n");
-		buf.append("            yield 6;\n");
-		buf.append("        case 70:\n");
-		buf.append("            yield 7;\n");
-		buf.append("        case 80:\n");
-		buf.append("            yield 8;\n");
-		buf.append("        case 90, 900:\n");
-		buf.append("            yield 9;\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		String test= ""
+					+ "package test;\n"
+					+ "public class Cls {\n"
+					+ "    public static void bar4(int input) {\n"
+					+ "        int num = switch (input) {\n"
+					+ "        case 60, 600:\n"
+					+ "            yield 6;\n"
+					+ "        case 70:\n"
+					+ "            yield 7;\n"
+					+ "        case 80:\n"
+					+ "            yield 8;\n"
+					+ "        case 90, 900:\n"
+					+ "            yield 9;\n"
+					+ "        };\n"
+					+ "    }\n"
+					+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", test, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
@@ -532,26 +498,25 @@ public class QuickFixTest14 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public static void bar4(int input) {\n");
-		buf.append("        int num = switch (input) {\n");
-		buf.append("        case 60, 600:\n");
-		buf.append("            yield 6;\n");
-		buf.append("        case 70:\n");
-		buf.append("            yield 7;\n");
-		buf.append("        case 80:\n");
-		buf.append("            yield 8;\n");
-		buf.append("        case 90, 900:\n");
-		buf.append("            yield 9;\n");
-		buf.append("			default :\n");
-		buf.append("				throw new IllegalArgumentException(\n");
-		buf.append("						\"Unexpected value: \" + input);\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= ""
+						+ "package test;\n"
+						+ "public class Cls {\n"
+						+ "    public static void bar4(int input) {\n"
+						+ "        int num = switch (input) {\n"
+						+ "        case 60, 600:\n"
+						+ "            yield 6;\n"
+						+ "        case 70:\n"
+						+ "            yield 7;\n"
+						+ "        case 80:\n"
+						+ "            yield 8;\n"
+						+ "        case 90, 900:\n"
+						+ "            yield 9;\n"
+						+ "			default :\n"
+						+ "				throw new IllegalArgumentException(\n"
+						+ "						\"Unexpected value: \" + input);\n"
+						+ "        };\n"
+						+ "    }\n"
+						+ "}\n";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}
@@ -563,31 +528,28 @@ public class QuickFixTest14 extends QuickFixTest {
 		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuffer buf= new StringBuffer();
-		buf.append("module test {\n");
-		buf.append("}\n");
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", MODULE_INFO_FILE_CONTENT, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void bar1(Day day) {\n");
-		buf.append("        int len = switch (day) {\n");
-		buf.append("        case MONDAY, FRIDAY:\n");
-		buf.append("            yield 6;\n");
-		buf.append("        case TUESDAY:\n");
-		buf.append("            yield 7;\n");
-		buf.append("        case THURSDAY, SATURDAY:\n");
-		buf.append("            yield 8;\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("enum Day {\n");
-		buf.append("    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		String test= ""
+					+ "package test;\n"
+					+ "public class Cls {\n"
+					+ "    public void bar1(Day day) {\n"
+					+ "        int len = switch (day) {\n"
+					+ "        case MONDAY, FRIDAY:\n"
+					+ "            yield 6;\n"
+					+ "        case TUESDAY:\n"
+					+ "            yield 7;\n"
+					+ "        case THURSDAY, SATURDAY:\n"
+					+ "            yield 8;\n"
+					+ "        };\n"
+					+ "    }\n"
+					+ "}\n"
+					+ "enum Day {\n"
+					+ "    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;\n"
+					+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", test, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
@@ -597,33 +559,32 @@ public class QuickFixTest14 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void bar1(Day day) {\n");
-		buf.append("        int len = switch (day) {\n");
-		buf.append("        case MONDAY, FRIDAY:\n");
-		buf.append("            yield 6;\n");
-		buf.append("        case TUESDAY:\n");
-		buf.append("            yield 7;\n");
-		buf.append("        case THURSDAY, SATURDAY:\n");
-		buf.append("            yield 8;\n");
-		buf.append("			case SUNDAY :\n");
-		buf.append("				throw new UnsupportedOperationException(\n");
-		buf.append("						\"Unimplemented case: \" + day);\n");
-		buf.append("			case WEDNESDAY :\n");
-		buf.append("				throw new UnsupportedOperationException(\n");
-		buf.append("						\"Unimplemented case: \" + day);\n");
-		buf.append("			default :\n");
-		buf.append("				throw new IllegalArgumentException(\n");
-		buf.append("						\"Unexpected value: \" + day);\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("enum Day {\n");
-		buf.append("    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= ""
+						+ "package test;\n"
+						+ "public class Cls {\n"
+						+ "    public void bar1(Day day) {\n"
+						+ "        int len = switch (day) {\n"
+						+ "        case MONDAY, FRIDAY:\n"
+						+ "            yield 6;\n"
+						+ "        case TUESDAY:\n"
+						+ "            yield 7;\n"
+						+ "        case THURSDAY, SATURDAY:\n"
+						+ "            yield 8;\n"
+						+ "			case SUNDAY :\n"
+						+ "				throw new UnsupportedOperationException(\n"
+						+ "						\"Unimplemented case: \" + day);\n"
+						+ "			case WEDNESDAY :\n"
+						+ "				throw new UnsupportedOperationException(\n"
+						+ "						\"Unimplemented case: \" + day);\n"
+						+ "			default :\n"
+						+ "				throw new IllegalArgumentException(\n"
+						+ "						\"Unexpected value: \" + day);\n"
+						+ "        };\n"
+						+ "    }\n"
+						+ "}\n"
+						+ "enum Day {\n"
+						+ "    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;\n"
+						+ "}\n";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}
@@ -635,31 +596,28 @@ public class QuickFixTest14 extends QuickFixTest {
 		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuffer buf= new StringBuffer();
-		buf.append("module test {\n");
-		buf.append("}\n");
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", MODULE_INFO_FILE_CONTENT, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("	public static int process(int i) {\n");
-		buf.append("		var t = switch (i) {\n");
-		buf.append("			case 0 -> {\n");
-		buf.append("				return 99;\n");
-		buf.append("			}\n");
-		buf.append("			default ->100;\n");
-		buf.append("		};\n");
-		buf.append("		return t;\n");
-		buf.append("	}\n\n");
-		buf.append("	public static void main(String[] args) {\n");
-		buf.append("		System.out.println(process(1));\n");
-		buf.append("		System.out.println(process(0));\n");
-		buf.append("	}\n");
-		buf.append("}");
-		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		String test= ""
+					+ "package test;\n"
+					+ "public class Cls {\n"
+					+ "	public static int process(int i) {\n"
+					+ "		var t = switch (i) {\n"
+					+ "			case 0 -> {\n"
+					+ "				return 99;\n"
+					+ "			}\n"
+					+ "			default ->100;\n"
+					+ "		};\n"
+					+ "		return t;\n"
+					+ "	}\n\n"
+					+ "	public static void main(String[] args) {\n"
+					+ "		System.out.println(process(1));\n"
+					+ "		System.out.println(process(0));\n"
+					+ "	}\n"
+					+ "}";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", test, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -669,24 +627,23 @@ public class QuickFixTest14 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("	public static int process(int i) {\n");
-		buf.append("		var t = switch (i) {\n");
-		buf.append("			case 0 -> {\n");
-		buf.append("				yield 99;\n");
-		buf.append("			}\n");
-		buf.append("			default ->100;\n");
-		buf.append("		};\n");
-		buf.append("		return t;\n");
-		buf.append("	}\n\n");
-		buf.append("	public static void main(String[] args) {\n");
-		buf.append("		System.out.println(process(1));\n");
-		buf.append("		System.out.println(process(0));\n");
-		buf.append("	}\n");
-		buf.append("}");
-		String expected= buf.toString();
+		String expected= ""
+						+ "package test;\n"
+						+ "public class Cls {\n"
+						+ "	public static int process(int i) {\n"
+						+ "		var t = switch (i) {\n"
+						+ "			case 0 -> {\n"
+						+ "				yield 99;\n"
+						+ "			}\n"
+						+ "			default ->100;\n"
+						+ "		};\n"
+						+ "		return t;\n"
+						+ "	}\n\n"
+						+ "	public static void main(String[] args) {\n"
+						+ "		System.out.println(process(1));\n"
+						+ "		System.out.println(process(0));\n"
+						+ "	}\n"
+						+ "}";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}
