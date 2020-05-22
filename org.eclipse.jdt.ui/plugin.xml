@@ -4405,6 +4405,13 @@
 	        categoryId="org.eclipse.jdt.ui.category.source"
 	        id="org.eclipse.jdt.ui.edit.text.java.annotate.classFile">
 	  </command>
+      <command
+            name="%ActionDefinition.toggleCodeMining.name"
+            description="%ActionDefinition.toggleCodeMining.description"
+            categoryId="org.eclipse.search.ui.category.search"
+            defaultHandler="org.eclipse.jdt.internal.ui.javaeditor.ToggleCodeMiningHandler"
+            id="org.eclipse.jdt.ui.edit.text.java.toggle.codemining">
+      </command>
    </extension>
 
    <extension
