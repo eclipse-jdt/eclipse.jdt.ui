@@ -17,7 +17,6 @@
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.swt.widgets.Shell;
@@ -322,8 +321,7 @@ public class CallHierarchyUI {
         if (selection instanceof IStructuredSelection) {
             IStructuredSelection structuredSelection= (IStructuredSelection) selection;
             List<IMember> javaElements= new ArrayList<>();
-            for (Iterator<?> iter= structuredSelection.iterator(); iter.hasNext();) {
-                Object element= iter.next();
+            for (Object element : structuredSelection) {
                 if (element instanceof MethodWrapper) {
                     IMember member= ((MethodWrapper)element).getMember();
                     if (member != null) {

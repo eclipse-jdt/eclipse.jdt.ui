@@ -15,7 +15,6 @@ package org.eclipse.jdt.internal.ui.refactoring.actions;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -128,8 +127,8 @@ public class MoveStaticMembersAction extends SelectionDispatchAction{
 		if (selection.isEmpty())
 			return null;
 
-		for  (final Iterator<?> iterator= selection.iterator(); iterator.hasNext(); ) {
-			if (! (iterator.next() instanceof IMember))
+		for (Object name : selection) {
+			if (! (name instanceof IMember))
 				return null;
 		}
 		Set<IMember> memberSet= new HashSet<>();

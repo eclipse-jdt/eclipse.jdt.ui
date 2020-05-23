@@ -16,7 +16,6 @@ package org.eclipse.jdt.internal.ui.actions;
 import java.io.CharConversionException;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -89,8 +88,8 @@ public class ExtractSuperClassAction extends SelectionDispatchAction {
 				JavaPlugin.log(exception);
 			}
 		}
-		for (final Iterator<?> iterator= selection.iterator(); iterator.hasNext();) {
-			if (!(iterator.next() instanceof IMember))
+		for (Object name : selection) {
+			if (!(name instanceof IMember))
 				return null;
 		}
 		final Set<IMember> set= new HashSet<>();

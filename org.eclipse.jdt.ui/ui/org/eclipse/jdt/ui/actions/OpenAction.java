@@ -15,7 +15,6 @@ package org.eclipse.jdt.ui.actions;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -126,8 +125,7 @@ public class OpenAction extends SelectionDispatchAction {
 	private boolean checkEnabled(IStructuredSelection selection) {
 		if (selection.isEmpty())
 			return false;
-		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
-			Object element= iter.next();
+		for (Object element : selection) {
 			if (element instanceof ISourceReference)
 				continue;
 			if (element instanceof IFile)

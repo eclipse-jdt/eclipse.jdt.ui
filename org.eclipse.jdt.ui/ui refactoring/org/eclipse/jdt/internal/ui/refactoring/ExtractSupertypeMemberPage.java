@@ -337,8 +337,7 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 				final IStructuredSelection selection= (IStructuredSelection) fTableViewer.getSelection();
 				if (!selection.isEmpty()) {
 					final IType declaring= getDeclaringType();
-					for (final Iterator<?> iterator= selection.iterator(); iterator.hasNext();) {
-						final Object element= iterator.next();
+					for (Object element : selection) {
 						if (!declaring.equals(element))
 							fTypesToExtract.remove(element);
 					}

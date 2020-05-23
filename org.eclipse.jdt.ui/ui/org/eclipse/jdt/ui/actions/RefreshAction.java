@@ -17,7 +17,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -150,8 +149,7 @@ public class RefreshAction extends SelectionDispatchAction {
 			return true;
 
 		boolean okToRefresh= false;
-		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
-			Object element= iter.next();
+		for (Object element : selection) {
 			if ((element instanceof IWorkingSet) // don't inspect working sets any deeper.
 					|| (element instanceof IPackageFragmentRoot) // on internal folders/JARs we do a normal refresh, and Java archive refresh on external
 					|| (element instanceof PackageFragmentRootContainer) // too expensive to look at children. assume we can refresh

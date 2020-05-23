@@ -67,8 +67,8 @@ class ExpandWithConstructorsAction extends Action {
 		fCallHierarchyViewer.cancelJobs();
 
 		IStructuredSelection selection= (IStructuredSelection)getSelection();
-		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
-			CallerMethodWrapper member= (CallerMethodWrapper)iter.next();
+		for (Object name : selection) {
+			CallerMethodWrapper member= (CallerMethodWrapper)name;
 			member.setExpandWithConstructors(isChecked);
 			if (!isChecked) { // must collapse before refresh
 				fCallHierarchyViewer.setExpandedState(member, false);

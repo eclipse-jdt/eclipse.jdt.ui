@@ -14,7 +14,6 @@
 package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Iterator;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
 
@@ -67,8 +66,7 @@ public class CutAction extends SelectionDispatchAction{
 	}
 
 	private static boolean containsOnlyElementsInsideCompilationUnits(IStructuredSelection selection) {
-		for (Iterator<?> iter = selection.iterator(); iter.hasNext();) {
-			Object object= iter.next();
+		for (Object object : selection) {
 			if (!(object instanceof IJavaElement)
 					|| !ReorgUtils.isInsideCompilationUnit((IJavaElement)object))
 				return false;
@@ -77,8 +75,7 @@ public class CutAction extends SelectionDispatchAction{
 	}
 
 	private static boolean containsTopLevelTypes(IStructuredSelection selection) {
-		for (Iterator<?> iter = selection.iterator(); iter.hasNext();) {
-			Object each= iter.next();
+		for (Object each : selection) {
 			if (each instanceof IType && ((IType)each).getDeclaringType() == null)
 				return true;
 		}

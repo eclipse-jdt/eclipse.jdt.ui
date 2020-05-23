@@ -14,8 +14,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
-import java.util.Iterator;
-
 import org.eclipse.jface.util.OpenStrategy;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -53,9 +51,7 @@ class OpenLocationAction extends SelectionDispatchAction {
             return false;
         }
 
-        for (Iterator<?> iter = selection.iterator(); iter.hasNext();) {
-            Object element = iter.next();
-
+        for (Object element : selection) {
             if ((element instanceof MethodWrapper) || (element instanceof CallLocation)) {
                 continue;
             }
@@ -76,8 +72,8 @@ class OpenLocationAction extends SelectionDispatchAction {
         if (!checkEnabled(selection))
             return;
 
-        for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
-	        boolean noError= CallHierarchyUI.openInEditor(iter.next(), getShell(), OpenStrategy.activateOnOpen());
+        for (Object name : selection) {
+	        boolean noError= CallHierarchyUI.openInEditor(name, getShell(), OpenStrategy.activateOnOpen());
 	        if (! noError)
 	        	return;
 		}
