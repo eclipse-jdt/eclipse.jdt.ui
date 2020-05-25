@@ -19,6 +19,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.help.IContextProvider;
@@ -324,7 +325,8 @@ public class PackageExplorerPart extends ViewPart
 				ns= new ArrayList<>();
 			}
 			boolean changed= false;
-			for (Object element : is) {
+			for (Iterator<?> iter= is.iterator(); iter.hasNext();) {
+				Object element= iter.next();
 				if (element instanceof IJavaProject) {
 					IProject project= ((IJavaProject)element).getProject();
 					if (!project.isOpen() && project.exists()) {

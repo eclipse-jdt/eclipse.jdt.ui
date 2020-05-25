@@ -16,6 +16,7 @@ package org.eclipse.jdt.ui.actions;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
@@ -123,7 +124,8 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 	private boolean computeEnablementState(IStructuredSelection selection) throws JavaModelException {
 		if (selection.isEmpty())
 			return false;
-		for (Object element : selection) {
+		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
+			Object element= iter.next();
 			if (!(element instanceof IJavaElement))
 				return false;
 			IJavaElement javaElement= (IJavaElement)element;

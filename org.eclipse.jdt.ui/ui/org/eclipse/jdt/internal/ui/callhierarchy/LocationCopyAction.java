@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
+import java.util.Iterator;
+
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.DND;
@@ -60,8 +62,8 @@ class LocationCopyAction extends Action {
 	public void run() {
 		IStructuredSelection selection= (IStructuredSelection) fLocationViewer.getSelection();
 		StringBuilder buf= new StringBuilder();
-		for (Object name : selection) {
-			CallLocation location= (CallLocation) name;
+		for (Iterator<?> iterator= selection.iterator(); iterator.hasNext();) {
+			CallLocation location= (CallLocation) iterator.next();
 			buf.append(location.getLineNumber()).append('\t').append(location.getCallText());
 			buf.append('\n');
 		}

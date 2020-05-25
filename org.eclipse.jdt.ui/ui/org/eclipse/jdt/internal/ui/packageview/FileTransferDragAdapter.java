@@ -83,7 +83,8 @@ public class FileTransferDragAdapter extends DragSourceAdapter implements Transf
 		if (!(s instanceof IStructuredSelection))
 			return false;
 		IStructuredSelection selection= (IStructuredSelection)s;
-		for (Object element : selection) {
+		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
+			Object element= iter.next();
 			if (element instanceof IJavaElement) {
 				IJavaElement jElement= (IJavaElement)element;
 				int type= jElement.getElementType();
@@ -222,7 +223,8 @@ public class FileTransferDragAdapter extends DragSourceAdapter implements Transf
 
 	private List<IResource> convertIntoResources(IStructuredSelection selection) {
 		List<IResource> result= new ArrayList<>(selection.size());
-		for (Object o : selection) {
+		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
+			Object o= iter.next();
 			IResource r= null;
 			if (o instanceof IResource) {
 				r= (IResource)o;

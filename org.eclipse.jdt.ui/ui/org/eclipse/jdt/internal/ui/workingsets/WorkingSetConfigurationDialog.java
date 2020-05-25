@@ -544,8 +544,8 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 
 	private boolean areAllGlobalWorkingSets(IStructuredSelection selection) {
 		Set<IWorkingSet> globals= new HashSet<>(Arrays.asList(PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSets()));
-		for (Object name : selection) {
-			if (!globals.contains(name))
+		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
+			if (!globals.contains(iter.next()))
 				return false;
 		}
 		return true;

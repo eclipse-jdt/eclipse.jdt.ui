@@ -170,7 +170,8 @@ public class ResetAction extends BuildpathModifierAction {
 	@Override
 	protected boolean canHandle(IStructuredSelection elements) {
 		try {
-	        for (Object element : elements) {
+	        for (Iterator<?> iterator= elements.iterator(); iterator.hasNext();) {
+	            Object element= iterator.next();
 	            if (element instanceof IJavaProject) {
 	            	IJavaProject project= (IJavaProject)element;
 	            	if (!project.isOnClasspath(project))

@@ -14,6 +14,7 @@
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import com.ibm.icu.text.MessageFormat;
@@ -216,7 +217,8 @@ public class ModulePatchSourceSelectionDialog extends TrayDialog {
 	void selectionChanged(SelectionChangedEvent event) {
 		IStructuredSelection selection= event.getStructuredSelection();
 		fResult= new ArrayList<>();
-		for (Object object : selection) {
+		for (Iterator<Object> iterator= selection.iterator(); iterator.hasNext(); ) {
+			Object object= iterator.next();
 			if (object instanceof IPackageFragmentRoot) {
 				fResult.add((IPackageFragmentRoot) object);
 			} else if (object instanceof IJavaProject) {

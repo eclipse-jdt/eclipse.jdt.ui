@@ -15,6 +15,7 @@ package org.eclipse.jdt.ui.actions;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -78,8 +79,8 @@ public class RemoveFromClasspathAction extends SelectionDispatchAction {
 	private static boolean checkEnabled(IStructuredSelection selection) {
 		if (selection.isEmpty())
 			return false;
-		for (Object name : selection) {
-			if (! canRemove(name))
+		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
+			if (! canRemove(iter.next()))
 				return false;
 		}
 		return true;
@@ -114,7 +115,8 @@ public class RemoveFromClasspathAction extends SelectionDispatchAction {
 
 	private static IPackageFragmentRoot[] getRootsToRemove(IStructuredSelection selection){
 		List<Object> result= new ArrayList<>(selection.size());
-		for (Object element : selection) {
+		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
+			Object element= iter.next();
 			if (canRemove(element))
 				result.add(element);
 		}

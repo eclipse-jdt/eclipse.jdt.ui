@@ -15,6 +15,7 @@ package org.eclipse.jdt.ui.actions;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -188,8 +189,8 @@ public class MoveAction extends SelectionDispatchAction{
 		if (selection.isEmpty())
 			return null;
 
-		for (Object name : selection) {
-			if (! (name instanceof IMember))
+		for  (Iterator<?> iter= selection.iterator(); iter.hasNext(); ) {
+			if (! (iter.next() instanceof IMember))
 				return null;
 		}
 		return convertToMemberArray(selection.toArray());

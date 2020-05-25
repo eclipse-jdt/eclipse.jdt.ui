@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -525,7 +526,8 @@ public class ModuleDialog extends StatusDialog {
 			}
 			List<String> sourceList= fModuleLists[sourceIdx].fNames;
 			List<String> targetList= fModuleLists[targetIdx].fNames;
-			for (Object selected : ((IStructuredSelection) selection)) {
+			for (Iterator<?> iter= ((IStructuredSelection) selection).iterator(); iter.hasNext();) {
+				Object selected= iter.next();
 				if (selected instanceof String) {
 					sourceList.remove(selected);
 					targetList.add((String) selected);

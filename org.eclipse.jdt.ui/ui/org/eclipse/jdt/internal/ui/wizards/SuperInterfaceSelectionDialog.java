@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards;
 
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.swt.widgets.Button;
@@ -135,7 +136,8 @@ public class SuperInterfaceSelectionDialog extends OpenTypeSelectionDialog {
 		StructuredSelection selection= getSelectedItems();
 		if (selection == null)
 			return;
-		for (Object obj : selection) {
+		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
+			Object obj= iter.next();
 			if (obj instanceof TypeNameMatch) {
 				accessedHistoryItem(obj);
 				TypeNameMatch type= (TypeNameMatch) obj;
