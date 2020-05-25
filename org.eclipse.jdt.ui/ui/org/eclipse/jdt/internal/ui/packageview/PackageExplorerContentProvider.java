@@ -690,13 +690,15 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 				Object grandparent= internalGetParent(parent);
 				// 1GE8SI6: ITPJUI:WIN98 - Rename is not shown in Packages View
 				// avoid posting a refresh to an invisible parent
-				if (parent.equals(fInput)
-						|| fViewer.testFindItem(parent) != null
-						) {
+				if (parent.equals(fInput)) {
 					postRefresh(parent, PARENT, element, runnables);
 				} else {
 					// refresh from grandparent if parent isn't visible yet
-					postRefresh(grandparent, GRANT_PARENT, element, runnables);
+					if (fViewer.testFindItem(parent) == null)
+						postRefresh(grandparent, GRANT_PARENT, element, runnables);
+					else {
+						postRefresh(parent, PARENT, element, runnables);
+					}
 				}
 				return true;
 			} else {

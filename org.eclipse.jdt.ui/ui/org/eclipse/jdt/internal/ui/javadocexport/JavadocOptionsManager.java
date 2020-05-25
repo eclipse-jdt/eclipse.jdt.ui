@@ -651,7 +651,15 @@ public class JavadocOptionsManager {
 	}
 
 	private boolean loadBoolean(String value) {
-		return "true".equals(value); //$NON-NLS-1$
+
+		if (value == null || value.length() == 0)
+			return false;
+		else {
+			if (value.equals("true")) //$NON-NLS-1$
+				return true;
+			else
+				return false;
+		}
 	}
 
 	private String flatPathList(IPath[] paths) {

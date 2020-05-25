@@ -65,9 +65,11 @@ public class SourceReferenceUtil {
 		Set<ISourceReference> set= new HashSet<>(Arrays.asList(elems));
 		List<ISourceReference> result= new ArrayList<>(elems.length);
 		for (ISourceReference elem : elems) {
-			if (! (elem instanceof IJavaElement)
-					|| ! hasParentInSet(((IJavaElement)elem), set)) {
+			if (! (elem instanceof IJavaElement))
 				result.add(elem);
+			else{
+				if (! hasParentInSet(((IJavaElement)elem), set))
+					result.add(elem);
 			}
 		}
 		return result.toArray(new ISourceReference[result.size()]);

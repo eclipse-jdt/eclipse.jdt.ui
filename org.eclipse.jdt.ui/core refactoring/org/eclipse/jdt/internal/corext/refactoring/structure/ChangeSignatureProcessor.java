@@ -991,9 +991,14 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 	}
 
 	private boolean mustAnalyzeAstOfDeclaringCu() throws JavaModelException{
-		return !JdtFlags.isAbstract(getMethod())
-				&& !JdtFlags.isNative(getMethod())
-				&& !getMethod().getDeclaringType().isInterface();
+		if (JdtFlags.isAbstract(getMethod()))
+			return false;
+		else if (JdtFlags.isNative(getMethod()))
+			return false;
+		else if (getMethod().getDeclaringType().isInterface())
+			return false;
+		else
+			return true;
 	}
 
 	private RefactoringStatus checkCompilationofDeclaringCu() throws CoreException {
@@ -2434,8 +2439,9 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 							final ITypeBinding nameBinding= name.resolveTypeBinding();
 							if (nameBinding != null) {
 								final ITypeBinding infoBinding= info.getTypeBinding();
-								if ((infoBinding != null && Bindings.equals(infoBinding, nameBinding))
-										|| info.getElement().getElementName().equals(nameBinding.getName()))
+								if (infoBinding != null && Bindings.equals(infoBinding, nameBinding))
+									remove= true;
+								else if (info.getElement().getElementName().equals(nameBinding.getName()))
 									remove= true;
 								if (remove) {
 									getASTRewrite().remove(tag, fDescription);
@@ -2467,10 +2473,10 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 							if (nameBinding != null) {
 								boolean process= false;
 								final ITypeBinding infoBinding= info.getTypeBinding();
-								if ((infoBinding != null && Bindings.equals(infoBinding, nameBinding))
-										|| info.getElement().getElementName().equals(nameBinding.getName())) {
+								if (infoBinding != null && Bindings.equals(infoBinding, nameBinding))
 									process= true;
-								}
+								else if (info.getElement().getElementName().equals(nameBinding.getName()))
+									process= true;
 								if (process) {
 									tagIter.remove();
 									TagElement movedTag= (TagElement) getASTRewrite().createMoveTarget(tag);

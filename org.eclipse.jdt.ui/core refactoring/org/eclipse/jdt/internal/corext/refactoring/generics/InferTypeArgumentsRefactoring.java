@@ -477,9 +477,14 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 		while (parent instanceof Type)
 			parent= parent.getParent();
 
-		return !(parent instanceof ClassInstanceCreation)
-				&& !(parent instanceof AbstractTypeDeclaration)
-				&& !(parent instanceof TypeLiteral);
+		if (parent instanceof ClassInstanceCreation) {
+			return false;
+		} else if (parent instanceof AbstractTypeDeclaration) {
+			return false;
+		} else if (parent instanceof TypeLiteral) {
+			return false;
+		}
+		return true;
 	}
 
 	private static ASTNode rewriteCastVariable(CastVariable2 castCv, CompilationUnitRewrite rewrite, InferTypeArgumentsTCModel tCModel) {//, List positionGroups) {
@@ -489,9 +494,11 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 		ConstraintVariable2 methodReceiverCv= tCModel.getMethodReceiverCv(expressionVariable);
 		if (methodReceiverCv != null) {
 			TType chosenReceiverType= InferTypeArgumentsConstraintsSolver.getChosenType(methodReceiverCv);
-			if ((chosenReceiverType == null)
-					|| ! InferTypeArgumentsTCModel.isAGenericType(chosenReceiverType)
-					|| hasUnboundElement(methodReceiverCv, tCModel))
+			if (chosenReceiverType == null)
+				return null;
+			else if (! InferTypeArgumentsTCModel.isAGenericType(chosenReceiverType))
+				return null;
+			else if (hasUnboundElement(methodReceiverCv, tCModel))
 				return null;
 		}
 

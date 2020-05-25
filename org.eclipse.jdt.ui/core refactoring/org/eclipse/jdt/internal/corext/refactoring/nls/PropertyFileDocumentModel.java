@@ -86,8 +86,9 @@ public class PropertyFileDocumentModel {
 			String key= keyValuePair.fKey;
 			int distBefore= NLSUtil.invertDistance(key, beforeKey);
 			int distAfter= NLSUtil.invertDistance(key, afterKey);
-			if ((distBefore > distAfter)
-					|| (distBefore == distAfter && Collator.getInstance().compare(beforeKey, afterKey) < 0)) {
+			if (distBefore > distAfter) {
+				offset-= insertHere.fLeadingWhiteSpaces;
+			} else if (distBefore == distAfter && Collator.getInstance().compare(beforeKey, afterKey) < 0) {
 				offset-= insertHere.fLeadingWhiteSpaces;
 			} else {
 				//insert it before afterKey -> move the leading white spaces to the inserted pair

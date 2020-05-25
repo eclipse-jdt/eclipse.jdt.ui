@@ -58,7 +58,9 @@ public class CPListElementSorter extends ViewerComparator {
 			case IClasspathEntry.CPE_CONTAINER:
 				return CONTAINER;
 			}
-		} else if ((obj instanceof CPListElementAttribute) || (obj instanceof IAccessRule)) {
+		} else if (obj instanceof CPListElementAttribute) {
+			return ATTRIBUTE;
+		} else if (obj instanceof IAccessRule) {
 			return ATTRIBUTE;
 		}
 		return OTHER;

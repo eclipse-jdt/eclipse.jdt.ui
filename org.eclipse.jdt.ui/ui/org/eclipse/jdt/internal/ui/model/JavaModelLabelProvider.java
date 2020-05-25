@@ -102,10 +102,10 @@ public final class JavaModelLabelProvider extends AppearanceAwareLabelProvider {
 		}
 		Image image= super.getImage(element);
 		if (image == null) {
-			if ((element instanceof RefactoringHistory)
-					|| (element instanceof RefactoringDescriptorProxy)) {
+			if (element instanceof RefactoringHistory)
 				image= fHistoryLabelProvider.getImage(element);
-			}
+			else if (element instanceof RefactoringDescriptorProxy)
+				image= fHistoryLabelProvider.getImage(element);
 			return decorateImage(image, element);
 		}
 		return image;

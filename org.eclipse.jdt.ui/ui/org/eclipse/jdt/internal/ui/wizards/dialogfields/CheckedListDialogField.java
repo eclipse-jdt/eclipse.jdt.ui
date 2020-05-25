@@ -281,8 +281,9 @@ public class CheckedListDialogField<E> extends ListDialogField<E> {
 	 */
 	@Override
 	protected boolean getManagedButtonState(ISelection sel, int index) {
-		if (index == fCheckAllButtonIndex
-				|| index == fUncheckAllButtonIndex) {
+		if (index == fCheckAllButtonIndex) {
+			return !fElements.isEmpty();
+		} else if (index == fUncheckAllButtonIndex) {
 			return !fElements.isEmpty();
 		}
 		return super.getManagedButtonState(sel, index);

@@ -587,8 +587,9 @@ public abstract class ProfileManager extends Observable {
 			uiPrefs.putInt(fProfileVersionKey, fProfileVersioner.getCurrentVersion());
 		}
 
-		if (context.getName() == InstanceScope.SCOPE
-				|| (context.getName() == ProjectScope.SCOPE && !profile.isSharedProfile())) {
+		if (context.getName() == InstanceScope.SCOPE) {
+			uiPrefs.put(fProfileKey, profile.getID());
+		} else if (context.getName() == ProjectScope.SCOPE && !profile.isSharedProfile()) {
 			uiPrefs.put(fProfileKey, profile.getID());
 		}
 	}

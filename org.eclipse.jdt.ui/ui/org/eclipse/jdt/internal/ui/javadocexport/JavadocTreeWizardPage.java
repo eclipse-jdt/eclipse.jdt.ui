@@ -430,8 +430,9 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		for (IJavaElement curr : sourceElements) {
 			if (curr instanceof ICompilationUnit) {
 				fInputGroup.initialCheckListItem(curr);
-			} else if ((curr instanceof IPackageFragment)
-			        || (curr instanceof IJavaProject)) {
+			} else if (curr instanceof IPackageFragment) {
+				fInputGroup.initialCheckTreeItem(curr);
+			} else if (curr instanceof IJavaProject) {
 				fInputGroup.initialCheckTreeItem(curr);
 			} else if (curr instanceof IPackageFragmentRoot) {
 				IPackageFragmentRoot root= (IPackageFragmentRoot) curr;

@@ -453,10 +453,10 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaPa
 						}
 						break;
 				case '\"':
-					if ((fLast == BACKSLASH) || !scanForTextBlockClose()) {
+					if (fLast == BACKSLASH) {
 	 					consume();
 	 					break;
-		 			} else {
+		 			} else if (scanForTextBlockClose()) {
 		 				boolean considerEndQuotes= true;
 		 				try {
 		 					IDocumentPartitioner docPartitioner= fCurrentDocument.getDocumentPartitioner();
@@ -491,6 +491,9 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaPa
 		 					fTokenLength= fTokenLength - 1;
 		 				}
 						return postFix(MULTI_LINE_STRING);
+					} else {
+						consume();
+						break;
 					}
 				default:
 					consume();

@@ -570,10 +570,9 @@ public class ChangeTypeRefactoring extends Refactoring {
 			if ((decl instanceof SimpleName || decl instanceof QualifiedName) && cv instanceof ExpressionVariable) {
 				ASTNode gp= decl.getParent().getParent();
 				updateType(unit, getType(gp), unitChange, unitRewriter, typeName, remover);   // local variable or parameter
-			} else if (decl instanceof MethodDeclaration
-					|| decl instanceof FieldDeclaration
-					|| decl instanceof ParameterizedType // method return or field type
-					) {
+			} else if (decl instanceof MethodDeclaration || decl instanceof FieldDeclaration) {
+				updateType(unit, getType(decl), unitChange, unitRewriter, typeName, remover); // method return or field type
+			} else if (decl instanceof ParameterizedType){
 				updateType(unit, getType(decl), unitChange, unitRewriter, typeName, remover);
 			}
 		}

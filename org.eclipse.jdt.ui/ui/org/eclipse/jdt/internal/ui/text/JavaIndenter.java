@@ -673,8 +673,10 @@ public final class JavaIndenter {
 		if (JavaCore.SPACE.equals(fPrefs.prefTabChar)) {
 			tabs= 0;
 			spaces= missing;
-		} else if (JavaCore.TAB.equals(fPrefs.prefTabChar)
-				|| DefaultCodeFormatterConstants.MIXED.equals(fPrefs.prefTabChar)) {
+		} else if (JavaCore.TAB.equals(fPrefs.prefTabChar)) {
+			tabs= tabSize > 0 ? missing / tabSize : 0;
+			spaces= tabSize > 0 ? missing % tabSize : missing;
+		} else if (DefaultCodeFormatterConstants.MIXED.equals(fPrefs.prefTabChar)) {
 			tabs= tabSize > 0 ? missing / tabSize : 0;
 			spaces= tabSize > 0 ? missing % tabSize : missing;
 		} else {

@@ -1512,7 +1512,9 @@ public class JavadocContentAccess2 {
 			handleIndex(node.fragments());
 		else if (isCode || isLiteral)
 			handleContentElements(node.fragments(), true);
-		else if (handleInheritDoc(node) || handleDocRoot(node)) {
+		else if (handleInheritDoc(node)) {
+			// handled
+		} else if (handleDocRoot(node)) {
 			// handled
 		} else {
 			//print uninterpreted source {@tagname ...} for unknown tags

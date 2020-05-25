@@ -180,8 +180,10 @@ public class JavaTextSelection extends TextSelection {
 		} else {
 			while (node != null) {
 				int nodeType= node.getNodeType();
-				if (node instanceof AbstractTypeDeclaration
-						|| nodeType == ASTNode.ANONYMOUS_CLASS_DECLARATION) {
+				if (node instanceof AbstractTypeDeclaration) {
+					fInClassInitializer= false;
+					break;
+				} else if (nodeType == ASTNode.ANONYMOUS_CLASS_DECLARATION) {
 					fInClassInitializer= false;
 					break;
 				} else if (nodeType == ASTNode.INITIALIZER) {
@@ -203,18 +205,22 @@ public class JavaTextSelection extends TextSelection {
 		ASTNode last= null;
 		while (node != null) {
 			int nodeType= node.getNodeType();
-			if ((node instanceof AbstractTypeDeclaration)
-					|| (nodeType == ASTNode.ANONYMOUS_CLASS_DECLARATION)) {
+			if (node instanceof AbstractTypeDeclaration) {
 				fInVariableInitializer= false;
 				break;
-			} else if ((nodeType == ASTNode.VARIABLE_DECLARATION_FRAGMENT &&
-					((VariableDeclarationFragment)node).getInitializer() == last)
-					|| (nodeType == ASTNode.SINGLE_VARIABLE_DECLARATION &&
-					((SingleVariableDeclaration)node).getInitializer() == last)) {
+			} else if (nodeType == ASTNode.ANONYMOUS_CLASS_DECLARATION) {
+				fInVariableInitializer= false;
+				break;
+			} else if (nodeType == ASTNode.VARIABLE_DECLARATION_FRAGMENT &&
+					   ((VariableDeclarationFragment)node).getInitializer() == last) {
+				fInVariableInitializer= true;
+				break;
+			} else if (nodeType == ASTNode.SINGLE_VARIABLE_DECLARATION &&
+				       ((SingleVariableDeclaration)node).getInitializer() == last) {
 				fInVariableInitializer= true;
 				break;
 			} else if (nodeType == ASTNode.ANNOTATION_TYPE_MEMBER_DECLARATION &&
-					((AnnotationTypeMemberDeclaration)node).getDefault() == last) {
+				       ((AnnotationTypeMemberDeclaration)node).getDefault() == last) {
 				fInVariableInitializer= true;
 				break;
 			}

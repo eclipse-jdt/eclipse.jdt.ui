@@ -1330,8 +1330,9 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 						return false;
 					}
 				}
-			} else if (elem instanceof CPListElement
-					|| elem instanceof CPUserLibraryElement) {
+			} else if (elem instanceof CPListElement) {
+				// ok to remove
+			} else if (elem instanceof CPUserLibraryElement) {
 				// ok to remove
 			} else { // unknown element
 				return false;
