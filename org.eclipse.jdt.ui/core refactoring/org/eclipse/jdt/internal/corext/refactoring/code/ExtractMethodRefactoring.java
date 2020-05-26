@@ -1043,8 +1043,9 @@ public class ExtractMethodRefactoring extends Refactoring {
 					ASTNode[] callNodes= createCallNodes(duplicate, modifiers);
 					ASTNode[] duplicateNodes= duplicate.getNodes();
 					for (int i= 0; i < duplicateNodes.length; i++) {
-						while (duplicateNodes[i].getParent() instanceof ParenthesizedExpression) {
-							duplicateNodes[i]= duplicateNodes[i].getParent();
+						ASTNode parent= duplicateNodes[i].getParent();
+						if (parent instanceof ParenthesizedExpression) {
+							duplicateNodes[i]= parent;
 						}
 					}
 					new StatementRewrite(fRewriter, duplicateNodes).replace(callNodes, description);
@@ -1233,11 +1234,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 				ExpressionStatement st= fAST.newExpressionStatement((Expression)fRewriter.createMoveTarget(selectedNodes[0]));
 				statements.insertLast(st, null);
 			}
-			ASTNode parenthesizedNode= selectedNodes[0];
-			while (parenthesizedNode.getParent() instanceof ParenthesizedExpression) {
-				parenthesizedNode= parenthesizedNode.getParent();
-			}
-			fRewriter.replace(parenthesizedNode, replacementNode, substitute);
+			fRewriter.replace(selectedNodes[0].getParent() instanceof ParenthesizedExpression ? selectedNodes[0].getParent() : selectedNodes[0], replacementNode, substitute);
 		} else {
 			boolean isReturnVoid= selectedNodes[selectedNodes.length - 1] instanceof ReturnStatement &&
 					fAnalyzer.getReturnTypeBinding().equals(fAST.resolveWellKnownType("void")); //$NON-NLS-1$
