@@ -143,6 +143,7 @@ final class FormatterMessages extends NLS {
 	public static String FormatterModifyDialog_lineWrap_pref_annotations_arguments;
 	public static String FormatterModifyDialog_lineWrap_pref_arguments;
 	public static String FormatterModifyDialog_lineWrap_pref_array_init;
+	public static String FormatterModifyDialog_lineWrap_pref_assertion_message;
 	public static String FormatterModifyDialog_lineWrap_pref_assignments;
 	public static String FormatterModifyDialog_lineWrap_pref_bitwise_operators;
 	public static String FormatterModifyDialog_lineWrap_pref_catch;

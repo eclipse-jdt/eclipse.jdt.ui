@@ -1040,6 +1040,14 @@ module example.module0 {
 
 //--PREVIEW--END--org.eclipse.jdt.core.formatter.alignment_for_module_statements
 
+//--PREVIEW--START--org.eclipse.jdt.core.formatter.alignment_for_assertion_message
+class Example {
+	void foo() {
+		assert this.field : "field does not have expected value - please investigate";
+	}
+}
+//--PREVIEW--END--org.eclipse.jdt.core.formatter.alignment_for_assertion_message
+
 }
 
 class COMMENTS {
