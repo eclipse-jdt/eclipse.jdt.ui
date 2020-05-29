@@ -284,9 +284,7 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 					fBracketHoverStatus= Messages.format(JavaHoverMessages.JavaSourceHover_skippedLines, Integer.valueOf(skippedLines));
 				}
 			} else {
-				noOfSourceLines= line2 - line1;
-				endLine= document.getLineInformation(line2);
-				fUpwardShiftInLines= line2 - line1;
+				return null;
 			}
 			if (fUpwardShiftInLines == 0)
 				return null;
