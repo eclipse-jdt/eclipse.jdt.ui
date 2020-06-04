@@ -35,6 +35,6 @@ public class TypeTuple {
 
 	@Override
 	public int hashCode() {
-		return fFirst.hashCode() << 16 + fSecond.hashCode();
+		return (fFirst.hashCode() << 16) + fSecond.hashCode();
 	}
 }
