@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,6 +15,8 @@
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.junit.launcher;
+
+import java.util.Objects;
 
 public class JUnitRuntimeClasspathEntry {
 	private final String fPluginId;
@@ -48,14 +50,13 @@ public class JUnitRuntimeClasspathEntry {
 		if (!(obj instanceof JUnitRuntimeClasspathEntry))
 			return false;
 		JUnitRuntimeClasspathEntry other = (JUnitRuntimeClasspathEntry) obj;
-		return fPluginId.equals(other.getPluginId())
-				&& ( (fPluginRelativePath == null && other.getPluginRelativePath() == null)
-						|| fPluginRelativePath.equals(other.getPluginRelativePath()) );
+		if (!fPluginId.equals(other.getPluginId()))
+			return false;
+		return Objects.equals(fPluginRelativePath,other.getPluginRelativePath());
 	}
 
 	@Override
 	public int hashCode() {
-		// TODO Auto-generated method stub
-		return super.hashCode();
+		return Objects.hash(fPluginId,fPluginRelativePath);
 	}
 }
