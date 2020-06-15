@@ -18,6 +18,6 @@
   </parent>
   <groupId>org.eclipse.jdt.feature</groupId>
   <artifactId>org.eclipse.jdt.jeview.feature</artifactId>
-  <version>1.0.10-SNAPSHOT</version>
+  <version>1.0.11-SNAPSHOT</version>
   <packaging>eclipse-feature</packaging>
 </project>

@@ -2,13 +2,13 @@
 <feature
       id="org.eclipse.jdt.astview.feature"
       label="AST View"
-      version="1.1.11.qualifier"
+      version="1.1.12.qualifier"
       provider-name="Eclipse.org"
       license-feature="org.eclipse.license"
       license-feature-version="0.0.0">
 
    <description>
-      AST View for Eclipse 2019-12 and later (jdt.core 3.20)
+      AST View for Eclipse 2020-06 and later (jdt.core 3.22)
    </description>
 
    <license url="%licenseURL">
