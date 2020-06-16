@@ -97,4 +97,7 @@ public class OpenBrowserUtil {
 		open(url, display);
 	}
 
+	private OpenBrowserUtil() {
+	}
+
 }

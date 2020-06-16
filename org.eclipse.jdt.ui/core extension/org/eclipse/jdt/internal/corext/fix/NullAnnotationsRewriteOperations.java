@@ -841,4 +841,7 @@ public class NullAnnotationsRewriteOperations {
 			return null;
 		}
 	}
+
+	private NullAnnotationsRewriteOperations() {
+	}
 }

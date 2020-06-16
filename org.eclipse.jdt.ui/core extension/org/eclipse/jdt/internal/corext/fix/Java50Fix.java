@@ -372,20 +372,18 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 				}
 				CategorizedProblem categorizedProblem= (CategorizedProblem) problem;
 				int categoryID= categorizedProblem.getCategoryID();
-				if (categoryID == CategorizedProblem.CAT_BUILDPATH)
-					return true;
-				if (categoryID == CategorizedProblem.CAT_SYNTAX)
-					return true;
-				if (categoryID == CategorizedProblem.CAT_IMPORT)
-					return true;
-				if (categoryID == CategorizedProblem.CAT_TYPE)
-					return true;
-				if (categoryID == CategorizedProblem.CAT_MEMBER)
-					return true;
-				if (categoryID == CategorizedProblem.CAT_INTERNAL)
-					return true;
-				if (categoryID == CategorizedProblem.CAT_MODULE)
-					return true;
+				switch (categoryID) {
+					case CategorizedProblem.CAT_BUILDPATH:
+					case CategorizedProblem.CAT_SYNTAX:
+					case CategorizedProblem.CAT_IMPORT:
+					case CategorizedProblem.CAT_TYPE:
+					case CategorizedProblem.CAT_MEMBER:
+					case CategorizedProblem.CAT_INTERNAL:
+					case CategorizedProblem.CAT_MODULE:
+						return true;
+					default:
+						break;
+				}
 			}
 		}
 

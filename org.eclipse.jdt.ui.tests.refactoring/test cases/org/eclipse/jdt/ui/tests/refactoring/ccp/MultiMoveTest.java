@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,8 +13,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring.ccp;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -41,31 +44,19 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgDestinationFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
 
+import org.eclipse.jdt.ui.tests.refactoring.GenericRefactoringTest;
 import org.eclipse.jdt.ui.tests.refactoring.ParticipantTesting;
-import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
-import org.eclipse.jdt.ui.tests.refactoring.RefactoringTestSetup;
+import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
-
-public class MultiMoveTest extends RefactoringTest {
-
-	private static final Class<MultiMoveTest> clazz= MultiMoveTest.class;
+public class MultiMoveTest extends GenericRefactoringTest {
 	private static final String REFACTORING_PATH= "MultiMove/";
 
-	public MultiMoveTest(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return new RefactoringTestSetup(new TestSuite(clazz));
-	}
-
-	public static Test setUpTest(Test someTest) {
-		return new RefactoringTestSetup(someTest);
-	}
+	@Rule
+	public RefactoringTestSetup fts= new RefactoringTestSetup();
 
 	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
+	public void genericbefore() throws Exception {
+		super.genericbefore();
 		fIsPreDeltaTest= true;
 	}
 
@@ -75,16 +66,17 @@ public class MultiMoveTest extends RefactoringTest {
 	}
 
 	//---
-	private IPackageFragment createPackage(String name) throws Exception{
+	private IPackageFragment createPackage(String name) throws Exception {
 		return getRoot().createPackageFragment(name, true, null);
 	}
 
-	private ICompilationUnit createCu(IPackageFragment pack, String cuPath, String cuName) throws Exception{
+	private ICompilationUnit createCu(IPackageFragment pack, String cuPath, String cuName) throws Exception {
 		return createCU(pack, cuName, getFileContents(getRefactoringPath() + cuPath));
 	}
 
 	//--------
-	public void test0() throws Exception{
+	@Test
+	public void test0() throws Exception {
 		ParticipantTesting.reset();
 		final String p1Name= "p1";
 		final String inDir= "/in/";
@@ -114,7 +106,7 @@ public class MultiMoveTest extends RefactoringTest {
 		RefactoringStatus status= performRefactoring(processor, true);
 
 		//-- checks
-		assertEquals("status should be ok here", null, status);
+		assertNull("status should be ok here", status);
 
 		assertEquals("p1 files", 0, packP1.getChildren().length);
 		assertEquals("p2 files", 3, packP2.getChildren().length);
@@ -141,7 +133,8 @@ public class MultiMoveTest extends RefactoringTest {
 	}
 
 
-	public void test1() throws Exception{
+	@Test
+	public void test1() throws Exception {
 		ParticipantTesting.reset();
 		final String p1Name= "p1";
 		final String inDir= "/in/";
@@ -171,7 +164,7 @@ public class MultiMoveTest extends RefactoringTest {
 		RefactoringStatus status= performRefactoring(processor, true);
 
 		//-- checks
-		assertEquals("status should be ok here", null, status);
+		assertNull("status should be ok here", status);
 
 		assertEquals("p1 files", 0, packP1.getChildren().length);
 		assertEquals("p2 files", 3, packP2.getChildren().length);
@@ -196,7 +189,8 @@ public class MultiMoveTest extends RefactoringTest {
 				});
 	}
 
-	public void test2() throws Exception{
+	@Test
+	public void test2() throws Exception {
 		ParticipantTesting.reset();
 		final String p1Name= "p1";
 		final String inDir= "/in/";
@@ -225,7 +219,7 @@ public class MultiMoveTest extends RefactoringTest {
 		RefactoringStatus status= performRefactoring(processor, true);
 
 		//-- checks
-		assertEquals("status should be ok here", null, status);
+		assertNull("status should be ok here", status);
 
 		assertEquals("p1 files", 1, packP1.getChildren().length);
 		assertEquals("p2 files", 2, packP2.getChildren().length);
@@ -248,7 +242,8 @@ public class MultiMoveTest extends RefactoringTest {
 				});
 	}
 
-	public void test3() throws Exception{
+	@Test
+	public void test3() throws Exception {
 		ParticipantTesting.reset();
 		final String p1Name= "p1";
 		final String p3Name= "p3";
@@ -278,7 +273,7 @@ public class MultiMoveTest extends RefactoringTest {
 		RefactoringStatus status= performRefactoring(processor, true);
 
 		//-- checks
-		assertEquals("status should be ok here", null, status);
+		assertNull("status should be ok here", status);
 
 		assertEquals("p1 files", 0, packP1.getChildren().length);
 		assertEquals("p2 files", 1, packP2.getChildren().length);
@@ -299,6 +294,7 @@ public class MultiMoveTest extends RefactoringTest {
 
 	}
 
+	@Test
 	public void testPackageMoveParticipants() throws Exception {
 		ParticipantTesting.reset();
 		IPackageFragmentRoot r1= JavaProjectHelper.addSourceContainer(RefactoringTestSetup.getProject(), "src1");
@@ -319,7 +315,7 @@ public class MultiMoveTest extends RefactoringTest {
 		RefactoringStatus status= performRefactoring(processor, false);
 
 		//-- checks
-		assertEquals("status should be ok here", null, status);
+		assertNull("status should be ok here", status);
 
 		ParticipantTesting.testMove(
 				moveHandes,
@@ -329,6 +325,7 @@ public class MultiMoveTest extends RefactoringTest {
 				});
 	}
 
+	@Test
 	public void testPackageMoveParticipants2() throws Exception {
 		fIsPreDeltaTest= false;
 		ParticipantTesting.reset();
@@ -353,7 +350,7 @@ public class MultiMoveTest extends RefactoringTest {
 		RefactoringStatus status= performRefactoring(processor, false);
 
 		//-- checks
-		assertEquals("status should be ok here", null, status);
+		assertNull("status should be ok here", status);
 
 		IPath path= r2.getResource().getFullPath();
 		path= path.append(p1.getElementName().replace('.', '/'));
@@ -371,6 +368,7 @@ public class MultiMoveTest extends RefactoringTest {
 				});
 	}
 
+	@Test
 	public void testPackageMoveParticipants3() throws Exception {
 		ParticipantTesting.reset();
 		IPackageFragmentRoot r1= JavaProjectHelper.addSourceContainer(RefactoringTestSetup.getProject(), "src1");
@@ -393,7 +391,7 @@ public class MultiMoveTest extends RefactoringTest {
 		RefactoringStatus status= performRefactoring(processor, false);
 
 		//-- checks
-		assertEquals("status should be ok here", null, status);
+		assertNull("status should be ok here", status);
 
 		IPath path= r2.getResource().getFullPath();
 		path= path.append(p1.getElementName().replace('.', '/'));

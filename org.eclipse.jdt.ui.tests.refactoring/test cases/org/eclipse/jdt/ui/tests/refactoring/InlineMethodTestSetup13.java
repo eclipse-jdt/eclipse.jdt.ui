@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 IBM Corporation and others.
+ * Copyright (c) 2019, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,22 +13,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
-import junit.framework.Test;
-
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+
+import org.eclipse.jdt.ui.tests.refactoring.rules.Java13Setup;
 
 public class InlineMethodTestSetup13 extends Java13Setup {
 
 	private IPackageFragment fSimple13;
 
-	public InlineMethodTestSetup13(Test test) {
-		super(test);
-	}
-
 	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
+	public void before() throws Exception {
+		super.before();
 
 		IPackageFragmentRoot root= getDefaultSourceFolder();
 		fSimple13= root.createPackageFragment("simple13_in", true, null);

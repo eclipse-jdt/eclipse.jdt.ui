@@ -100,12 +100,17 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 				}
 				return name;
 			} else {
-				if (PRIORITY_HIGH.equals(task.priority)) {
-					return PreferencesMessages.TodoTaskConfigurationBlock_markers_tasks_high_priority;
-				} else if (PRIORITY_NORMAL.equals(task.priority)) {
-					return PreferencesMessages.TodoTaskConfigurationBlock_markers_tasks_normal_priority;
-				} else if (PRIORITY_LOW.equals(task.priority)) {
-					return PreferencesMessages.TodoTaskConfigurationBlock_markers_tasks_low_priority;
+				if (task.priority != null) {
+					switch (task.priority) {
+						case PRIORITY_HIGH:
+							return PreferencesMessages.TodoTaskConfigurationBlock_markers_tasks_high_priority;
+						case PRIORITY_NORMAL:
+							return PreferencesMessages.TodoTaskConfigurationBlock_markers_tasks_normal_priority;
+						case PRIORITY_LOW:
+							return PreferencesMessages.TodoTaskConfigurationBlock_markers_tasks_low_priority;
+						default:
+							break;
+					}
 				}
 				return ""; //$NON-NLS-1$
 			}

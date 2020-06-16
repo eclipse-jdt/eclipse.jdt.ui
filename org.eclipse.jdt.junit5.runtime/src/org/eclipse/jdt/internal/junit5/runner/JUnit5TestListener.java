@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2018 IBM Corporation and others.
+ * Copyright (c) 2016, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -113,25 +113,7 @@ public class JUnit5TestListener implements TestExecutionListener {
 		}
 
 		if (exception instanceof MultipleFailuresError) {
-			String expectedStr= ""; //$NON-NLS-1$
-			String actualStr= ""; //$NON-NLS-1$
-			String delimiter= "\n\n"; //$NON-NLS-1$
-			List<Throwable> failures= ((MultipleFailuresError) exception).getFailures();
-			for (Throwable assertionError : failures) {
-				if (assertionError instanceof AssertionFailedError) {
-					AssertionFailedError assertionFailedError= (AssertionFailedError) assertionError;
-					ValueWrapper expected= assertionFailedError.getExpected();
-					ValueWrapper actual= assertionFailedError.getActual();
-					if (expected == null || actual == null) {
-						return null;
-					}
-					expectedStr+= expected.getStringRepresentation() + delimiter;
-					actualStr+= actual.getStringRepresentation() + delimiter;
-				} else {
-					return null;
-				}
-			}
-			return new FailedComparison(expectedStr, actualStr);
+			return getComparisonForMultipleFailures(exception);
 		}
 
 		// Avoid reference to ComparisonFailure initially to avoid NoClassDefFoundError for ComparisonFailure when junit.jar is not on the build path
@@ -146,6 +128,37 @@ public class JUnit5TestListener implements TestExecutionListener {
 		}
 
 		return null;
+	}
+
+	protected FailedComparison getComparisonForMultipleFailures(Throwable exception) {
+		String expectedStr= ""; //$NON-NLS-1$
+		String actualStr= ""; //$NON-NLS-1$
+		String delimiter= "\n\n"; //$NON-NLS-1$
+		List<Throwable> failures= ((MultipleFailuresError) exception).getFailures();
+		for (Throwable assertionError : failures) {
+			if (assertionError instanceof MultipleFailuresError) {
+				FailedComparison failedComparison= getComparisonForMultipleFailures(assertionError);
+				String expected= failedComparison.getExpected();
+				String actual= failedComparison.getActual();
+				if (expected == null || actual == null) {
+					return null;
+				}
+				expectedStr+= expected;
+				actualStr+= actual;
+			} else if (assertionError instanceof AssertionFailedError) {
+				AssertionFailedError assertionFailedError= (AssertionFailedError) assertionError;
+				ValueWrapper expected= assertionFailedError.getExpected();
+				ValueWrapper actual= assertionFailedError.getActual();
+				if (expected == null || actual == null) {
+					return null;
+				}
+				expectedStr+= expected.getStringRepresentation() + delimiter;
+				actualStr+= actual.getStringRepresentation() + delimiter;
+			} else {
+				return null;
+			}
+		}
+		return new FailedComparison(expectedStr, actualStr);
 	}
 
 	@Override

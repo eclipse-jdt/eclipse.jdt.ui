@@ -113,4 +113,7 @@ public class JavaWordFinder {
 
 		return null;
 	}
+
+	private JavaWordFinder() {
+	}
 }

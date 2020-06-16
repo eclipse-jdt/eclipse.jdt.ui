@@ -15,10 +15,10 @@ package org.eclipse.jdt.internal.corext.template.java;
 
 import java.util.List;
 
-import org.eclipse.jdt.internal.corext.template.java.TypeResolver;
-import org.eclipse.jdt.internal.ui.text.template.contentassist.MultiVariable;
 import org.eclipse.jface.text.templates.TemplateContext;
 import org.eclipse.jface.text.templates.TemplateVariable;
+
+import org.eclipse.jdt.internal.ui.text.template.contentassist.MultiVariable;
 
 /**
  * This class is responsible for resolving a given type or the type of another variable to its

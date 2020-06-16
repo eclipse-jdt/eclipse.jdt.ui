@@ -162,4 +162,7 @@ public class LayoutUtil {
 		return LayoutConstants.getIndent();
 	}
 
+	private LayoutUtil() {
+	}
+
 }

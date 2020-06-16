@@ -224,7 +224,7 @@ public class ImportOrganizeInputDialog extends StatusDialog {
 					status.setError(PreferencesMessages.ImportOrganizeInputDialog_error_entryExists);
 				}
 			} else {
-				IStatus val= JavaConventions.validateJavaTypeName(newText, JavaCore.VERSION_1_3, JavaCore.VERSION_1_3);
+				IStatus val= JavaConventions.validateJavaTypeName(newText, JavaCore.VERSION_1_3, JavaCore.VERSION_1_3, null);
 				if (val.matches(IStatus.ERROR)) {
 					status.setError(PreferencesMessages.ImportOrganizeInputDialog_error_invalidName);
 				} else {

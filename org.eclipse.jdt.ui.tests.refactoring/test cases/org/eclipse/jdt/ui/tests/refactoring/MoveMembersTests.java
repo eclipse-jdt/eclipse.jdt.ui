@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,8 +13,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.MoveArguments;
@@ -34,26 +38,15 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersPr
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegateUpdating;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.DebugUtils;
+import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
-public class MoveMembersTests extends RefactoringTest {
-
-	private static final Class<MoveMembersTests> clazz= MoveMembersTests.class;
-
+public class MoveMembersTests extends GenericRefactoringTest {
 	private static final String REFACTORING_PATH= "MoveMembers/";
 
-	public MoveMembersTests(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return new RefactoringTestSetup(new TestSuite(clazz));
-	}
-
-	public static Test setUpTest(Test someTest) {
-		return new RefactoringTestSetup(someTest);
-	}
+	@Rule
+	public RefactoringTestSetup fts= new RefactoringTestSetup();
 
 	@Override
 	protected String getRefactoringPath() {
@@ -77,10 +70,10 @@ public class MoveMembersTests extends RefactoringTest {
 	}
 
 	@Override
-	protected void setUp() throws Exception {
+	public void genericbefore() throws Exception {
 		if (fIsVerbose)
 			DebugUtils.dump("--------- " + getName() + " ---------------");
-		super.setUp();
+		super.genericbefore();
 		fIsPreDeltaTest= true;
 	}
 
@@ -171,7 +164,7 @@ public class MoveMembersTests extends RefactoringTest {
 
 		MoveRefactoring ref= createRefactoring(merge(methods, fields, types), destinationTypeName);
 		if (ref == null){
-			assertEquals(errorLevel, RefactoringStatus.FATAL);
+			assertEquals(RefactoringStatus.FATAL, errorLevel);
 			return;
 		}
 
@@ -196,224 +189,273 @@ public class MoveMembersTests extends RefactoringTest {
 
 	//---
 
+	@Test
 	public void test0() throws Exception{
 		methodHelper_passing(new String[]{"m"}, new String[][]{new String[0]});
 	}
 
+	@Test
 	public void test1() throws Exception{
 		methodHelper_passing(new String[]{"m"}, new String[][]{new String[0]});
 	}
 
+	@Test
 	public void test2() throws Exception{
 		methodHelper_passing(new String[]{"m"}, new String[][]{new String[0]});
 	}
 
+	@Test
 	public void test3() throws Exception{
 		methodHelper_passing(new String[]{"m"}, new String[][]{new String[0]});
 	}
 
+	@Test
 	public void test4() throws Exception{
 		methodHelper_passing(new String[]{"m"}, new String[][]{new String[0]});
 	}
 
+	@Test
 	public void test5() throws Exception{
 		fieldHelper_passing(new String[]{"f"});
 	}
 
+	@Test
 	public void test6() throws Exception{
 		fieldHelper_passing(new String[]{"f"});
 	}
 
+	@Test
 	public void test7() throws Exception{
 		fieldHelper_passing(new String[]{"f"});
 	}
 
+	@Test
 	public void test8() throws Exception{
 //		printTestDisabledMessage("36835");
 		IPackageFragment packageForB= getRoot().createPackageFragment("r", false, null);
 		fieldMethodTypePackageHelper_passing(new String[]{"f"}, new String[0], new String[0][0], new String[0], getPackageP(), packageForB, false);
 	}
 
+	@Test
 	public void test9() throws Exception{
 		methodHelper_passing(new String[]{"m"}, new String[][]{new String[0]});
 	}
 
+	@Test
 	public void test10() throws Exception{
 		methodHelper_passing(new String[]{"m"}, new String[][]{new String[0]});
 	}
 
+	@Test
 	public void test11() throws Exception{
 		methodHelper_passing(new String[]{"m"}, new String[][]{new String[0]});
 	}
 
+	@Test
 	public void test12() throws Exception{
 		methodHelper_passing(new String[]{"m"}, new String[][]{new String[0]});
 	}
 
+	@Test
 	public void test13() throws Exception{
 		methodHelper_passing(new String[]{"m"}, new String[][]{new String[0]});
 	}
 
+	@Test
 	public void test14() throws Exception{
 		methodHelper_passing(new String[]{"m"}, new String[][]{new String[0]});
 	}
 
+	@Test
 	public void test15() throws Exception{
 		methodHelper_passing(new String[]{"m"}, new String[][]{new String[0]});
 	}
 
+	@Test
 	public void test16() throws Exception{
 		methodHelper_passing(new String[]{"m"}, new String[][]{new String[0]});
 	}
 
+	@Test
 	public void test17() throws Exception{
 		methodHelper_passing(new String[]{"m"}, new String[][]{new String[0]});
 	}
 
+	@Test
 	public void test18() throws Exception{
 		methodHelper_passing(new String[]{"m"}, new String[][]{new String[0]});
 	}
 
+	@Test
 	public void test19() throws Exception{
 		methodHelper_passing(new String[]{"m"}, new String[][]{new String[0]});
 	}
 
+	@Test
 	public void test20() throws Exception{
 		methodHelper_passing(new String[]{"m"}, new String[][]{new String[0]});
 	}
 
+	@Test
 	public void test21() throws Exception{
 		printTestDisabledMessage("not currently handling visibility issues induced by moving more than one static member");
 		//fieldHelper_passing(new String[]{"F", "i"});
 	}
 
+	@Test
 	public void test22() throws Exception{
 		fieldHelper_passing(new String[]{"i"});
 	}
 
+	@Test
 	public void test23() throws Exception{
 		fieldHelper_passing(new String[]{"FRED"});
 	}
 
+	@Test
 	public void test24() throws Exception{
 		fieldHelper_passing(new String[]{"FRED"});
 	}
 
+	@Test
 	public void test25() throws Exception{
 		//printTestDisabledMessage("test for 27098");
 		fieldHelper_passing(new String[]{"FRED"});
 	}
 
+	@Test
 	public void test26() throws Exception{
 		IPackageFragment packageForB= getRoot().createPackageFragment("r", false, null);
 		fieldMethodTypePackageHelper_passing(new String[0], new String[]{"n"}, new String[][]{new String[0]}, new String[0], getPackageP(), packageForB, false);
 	}
 
+	@Test
 	public void test27() throws Exception{
 		IPackageFragment packageForB= getRoot().createPackageFragment("r", false, null);
 		fieldMethodTypePackageHelper_passing(new String[0], new String[]{"n"}, new String[][]{new String[0]}, new String[0], getPackageP(), packageForB, false);
 	}
 
+	@Test
 	public void test28() throws Exception{
 		methodHelper_passing(new String[]{"m", "n"}, new String[][]{new String[0], new String[0]});
 	}
 
+	@Test
 	public void test29() throws Exception{ //test for bug 41691
 		methodHelper_passing(new String[]{"m"}, new String[][]{new String[0]});
 	}
 
+	@Test
 	public void test30() throws Exception{ //test for bug 41691
 		fieldHelper_passing(new String[]{"id"});
 	}
 
+	@Test
 	public void test31() throws Exception{ //test for bug 41691
 		fieldHelper_passing(new String[]{"odd"});
 	}
 
+	@Test
 	public void test32() throws Exception{ //test for bug 41734, 41691
 		printTestDisabledMessage("test for 41734");
 		//methodHelper_passing(new String[]{"m"}, new String[][]{new String[0]});
 	}
 
+	@Test
 	public void test33() throws Exception{ //test for bug 28022
 		fieldHelper_passing(new String[]{"i"});
 	}
 
+	@Test
 	public void test34() throws Exception{ //test for bug 28022
 		fieldHelper_passing(new String[]{"i"});
 	}
 
+	@Test
 	public void test35() throws Exception{ //test for bug 28022
 		fieldHelper_passing(new String[]{"i"});
 	}
 
 	//-- move types:
 
+	@Test
 	public void test36() throws Exception {
 		typeHelper_passing(new String[]{"I"});
 	}
 
+	@Test
 	public void test37() throws Exception {
 		printTestDisabledMessage("qualified access to source");
 //		typeHelper_passing(new String[] {"Inner"});
 	}
 
+	@Test
 	public void test38() throws Exception {
 		fieldMethodTypeABHelper_passing(new String[0], new String[0], new String[0][0], new String[]{"Inner"});
 	}
 
+	@Test
 	public void test39() throws Exception {
 		printTestDisabledMessage("complex imports - need more work");
 //		fieldMethodType3CUsHelper_passing(new String[0], new String[0], new String[0][0],
 //							new String[]{"Inner"});
 	}
 
+	@Test
 	public void test40() throws Exception{
 		fieldMethodTypeHelper_passing(new String[] {"f"}, new String[]{"m"}, new String[][]{new String[0]}, new String[0], false);
 	}
 
+	@Test
 	public void test41() throws Exception{
 		methodHelper_passing(new String[] {"m"}, new String[][]{new String[0]});
 	}
 
 	//-- Visibility issues in the moved member:
 
+	@Test
 	public void test42() throws Exception{
 		//former testFail9
 		//Tests move of public static method m, which references private method f, into same package.
 		methodHelper_passing(new String[] {"m"}, new String[][]{new String[0]});
 	}
 
+	@Test
 	public void test43() throws Exception{
 		//former testFail10
 		//Tests move of public static method m, which references private field F, into same package
 		methodHelper_passing(new String[]{"m"}, new String[][]{new String[0]});
 	}
 
+	@Test
 	public void test44() throws Exception{
 		//former testFail11
 		//Tests move of public static field i, which references private field F, into same package
 		fieldHelper_passing(new String[]{"i"});
 	}
 
+	@Test
 	public void test45() throws Exception{
 		//former testFail12
 		//Tests move of public static field i, which references private method m, into same package
 		fieldHelper_passing(new String[]{"i"});
 	}
 
+	@Test
 	public void test46() throws Exception{
 		//former testFail13
 		//Tests move of public static method m, which gets referenced by a field, into same package
 		methodHelper_passing(new String[]{"m"}, new String[][]{new String[0]});
 	}
 
+	@Test
 	public void test47() throws Exception{
 		//former testFail14
 		//Tests move of public static field i, which gets referenced by a field, into same package
 		fieldHelper_passing(new String[]{"i"});
 	}
 
+	@Test
 	public void test48() throws Exception{
 		//Move private unused method which calls another private method into another package
 		IPackageFragment packageForB= getRoot().createPackageFragment("r", false, null);
@@ -422,38 +464,45 @@ public class MoveMembersTests extends RefactoringTest {
 
 	// --- Visibility issues of the moved member itself
 
+	@Test
 	public void test49() throws Exception{
 		//Move protected used field into another package
 		IPackageFragment packageForB= getRoot().createPackageFragment("r", false, null);
 		fieldMethodTypePackageHelper_passing(new String[]{"someVar"}, new String[0], new String[][]{new String[0]}, new String[0], getPackageP(), packageForB, false);
 	}
 
+	@Test
 	public void test50() throws Exception{
 		//Move private used method into subtype.
 		methodHelper_passing(new String[]{"foo"}, new String[][]{new String[0]});
 	}
 
+	@Test
 	public void test51() throws Exception {
 		//Move private static inner class with private field (but used in outer class)
 		//assure both class and field get their visibility increased
 		typeHelper_passing(new String[] { "Inner" });
 	}
 
+	@Test
 	public void test52() throws Exception {
 		// assure moved unused field keeps its visibility
 		fieldHelper_passing(new String[] { "a" });
 	}
 
+	@Test
 	public void test53() throws Exception {
 		// assure moved unusued class keeps its visibility
 		typeHelper_passing(new String[] { "C" });
 	}
 
+	@Test
 	public void test54() throws Exception {
 		// moved used method is changed in visibility
 		methodHelper_passing(new String[] { "b" }, new String[][]{new String[0]});
 	}
 
+	@Test
 	public void test55() throws Exception {
 		// moved used method is changed in visibility
 		typeHelper_passing(new String[] { "C" });
@@ -461,11 +510,13 @@ public class MoveMembersTests extends RefactoringTest {
 
 	// --- Visibility of members of the moved type
 
+	@Test
 	public void test56() throws Exception {
 		// Move an inner class with two USED members
 		typeHelper_passing(new String[] { "Inner" });
 	}
 
+	@Test
 	public void test57() throws Exception {
 		// Move an inner class with two UNUSED members
 		typeHelper_passing(new String[] { "Inner" });
@@ -473,18 +524,21 @@ public class MoveMembersTests extends RefactoringTest {
 
 	// --- Visibility of used outer members
 
+	@Test
 	public void test58() throws Exception {
 		// Move a type which references a field in an enclosing type
 		// and a field in a sibling
 		typeHelper_passing(new String[] { "Inner" });
 	}
 
+	@Test
 	public void test59() throws Exception {
 		// Move a type which references a field in an enclosing type,
 		// and the enclosing type is private
 		typeHelper_passing(new String[] { "SomeInner.Inner" });
 	}
 
+	@Test
 	public void test60() throws Exception{
 		// Move a static private "getter" of a static field into another class
 		// only the field should be changed to public (bug 122490)
@@ -492,6 +546,7 @@ public class MoveMembersTests extends RefactoringTest {
 		fieldMethodTypePackageHelper_passing(new String[0], new String[] { "getNAME" }, new String[][]{new String[0]}, new String[0], getPackageP(), packageForB, false);
 	}
 
+	@Test
 	public void test61() throws Exception{
 		// Move some method which references a field with a getter and a setter
 		// only the field should be changed to public (bug 122490)
@@ -502,6 +557,7 @@ public class MoveMembersTests extends RefactoringTest {
 	// parameterized type references
 
 
+	@Test
 	public void test62() throws Exception {
 		// Move a type which references a field in an enclosing type
 		// and a field in a sibling
@@ -509,6 +565,7 @@ public class MoveMembersTests extends RefactoringTest {
 	}
 
 	//---
+	@Test
 	public void testFail0() throws Exception{
 		fieldMethodTypeHelper_failing(new String[0],
 				new String[]{"m"}, new String[][]{new String[0]},
@@ -517,6 +574,7 @@ public class MoveMembersTests extends RefactoringTest {
 	}
 
 
+	@Test
 	public void testFail1() throws Exception{
 		fieldMethodTypeHelper_failing(new String[0],
 				new String[]{"m"}, new String[][]{new String[0]},
@@ -524,6 +582,7 @@ public class MoveMembersTests extends RefactoringTest {
 				RefactoringStatus.ERROR, "p.B.X");
 	}
 
+	@Test
 	public void testFail2() throws Exception{
 		fieldMethodTypeHelper_failing(new String[0],
 				new String[]{"m"}, new String[][]{new String[0]},
@@ -531,6 +590,7 @@ public class MoveMembersTests extends RefactoringTest {
 				RefactoringStatus.ERROR, "p.B");
 	}
 
+	@Test
 	public void testFail3() throws Exception{
 		fieldMethodTypeHelper_failing(new String[0],
 				new String[]{"m"}, new String[][]{new String[]{"I", "I"}},
@@ -538,6 +598,7 @@ public class MoveMembersTests extends RefactoringTest {
 				RefactoringStatus.ERROR, "p.B");
 	}
 
+	@Test
 	public void testFail4() throws Exception{
 		fieldMethodTypeHelper_failing(new String[0],
 				new String[]{"m"}, new String[][]{new String[]{"I", "I"}},
@@ -545,6 +606,7 @@ public class MoveMembersTests extends RefactoringTest {
 				RefactoringStatus.WARNING, "p.B");
 	}
 
+	@Test
 	public void testFail5() throws Exception{
 		fieldMethodTypeHelper_failing(new String[0],
 				new String[]{"m"}, new String[][]{new String[]{"I", "I"}},
@@ -552,27 +614,32 @@ public class MoveMembersTests extends RefactoringTest {
 				RefactoringStatus.WARNING, "p.B");
 	}
 
+	@Test
 	public void testFail6() throws Exception{
 		fieldMethodTypeHelper_failing(new String[]{"i"}, new String[0], new String[0][0], new String[0],
 				RefactoringStatus.ERROR, "p.B");
 	}
 
+	@Test
 	public void testFail7() throws Exception{
 		fieldMethodTypeHelper_failing(new String[]{"i"}, new String[0], new String[0][0], new String[0],
 				RefactoringStatus.ERROR, "p.B");
 	}
 
+	@Test
 	public void testFail8() throws Exception{
 		fieldMethodTypeHelper_failing(new String[]{"i"}, new String[0], new String[0][0], new String[0],
 				RefactoringStatus.ERROR, "p.B");
 	}
 
+	@Test
 	public void testFail15() throws Exception{
 		fieldMethodTypeHelper_failing(new String[0],
 				new String[]{"m"}, new String[][]{new String[0]}, new String[0],
 				RefactoringStatus.WARNING, "p.B");
 	}
 
+	@Test
 	public void testFail16() throws Exception{
 		IPackageFragment packageForB= getRoot().createPackageFragment("r", false, null);
 		fieldMethodTypePackageHelper_failing(new String[]{"f"}, new String[0], new String[0][0], new String[0],
@@ -580,42 +647,50 @@ public class MoveMembersTests extends RefactoringTest {
 				getPackageP(), packageForB);
 	}
 
+	@Test
 	public void testFail17() throws Exception{
 		fieldMethodTypeHelper_failing(new String[0],
 				new String[]{"m"}, new String[][]{new String[0]}, new String[0],
 				RefactoringStatus.FATAL, "java.lang.Object");
 	}
 
+	@Test
 	public void testFail18() throws Exception{
 		fieldMethodTypeHelper_failing(new String[0],
 				new String[]{"m"}, new String[][]{new String[0]}, new String[0],
 				RefactoringStatus.FATAL, "p.DontExist");
 	}
 
+	@Test
 	public void testFail19() throws Exception{
 		fieldMethodTypeHelper_failing(new String[0],
 				new String[]{"m"}, new String[][]{new String[0]}, new String[0],
 				RefactoringStatus.ERROR, "p.B");
 	}
 
+	@Test
 	public void testFail20() throws Exception{
 		// was same as test19
 	}
 
+	@Test
 	public void testFail21() throws Exception{
 		fieldMethodTypeHelper_failing(new String[0],
 				new String[]{"m"}, new String[][]{new String[0]}, new String[0],
 				RefactoringStatus.FATAL, "p.B");
 	}
 
+	@Test
 	public void testFail22() throws Exception{
 		//free slot
 	}
 
+	@Test
 	public void testFail23() throws Exception{
 		//free slot
 	}
 
+	@Test
 	public void testFail24() throws Exception{
 		fieldMethodTypeHelper_failing(new String[0],
 				new String[]{"m"}, new String[][]{new String[0]}, new String[0],
@@ -624,42 +699,50 @@ public class MoveMembersTests extends RefactoringTest {
 
 	// Delegate creation
 
+	@Test
 	public void testDelegate01() throws Exception {
 		// simple delegate method
 		methodHelperDelegate_passing(new String[] { "foo" }, new String[][]{new String[0]});
 	}
 
+	@Test
 	public void testDelegate02() throws Exception {
 		// increase visibility
 		methodHelperDelegate_passing(new String[] { "foo" }, new String[][]{new String[0]});
 	}
 
+	@Test
 	public void testDelegate03() throws Exception {
 		// ensure imports are removed correctly
 		methodHelperDelegate_passing(new String[] { "foo" }, new String[][]{new String[0]});
 	}
 
+	@Test
 	public void testDelegate04() throws Exception{
 		// add import when moving to another package
 		IPackageFragment packageForB= getRoot().createPackageFragment("r", false, null);
 		fieldMethodTypePackageHelper_passing(new String[0], new String[] { "foo" }, new String[][]{new String[0]}, new String[0], getPackageP(), packageForB, true);
 	}
 
+	@Test
 	public void testDelegate05() throws Exception {
 		// simple delegate field
 		fieldHelperDelegate_passing(new String[] { "FOO" });
 	}
 
+	@Test
 	public void testDelegate06() throws Exception {
 		// increase visibility
 		fieldHelperDelegate_passing(new String[] { "FOO" });
 	}
 
+	@Test
 	public void testDelegate07() throws Exception {
 		// remove imports correctly
 		fieldHelperDelegate_passing(new String[] { "FOO" });
 	}
 
+	@Test
 	public void testDelegate08() throws Exception{
 		// add import when moving to another package
 		IPackageFragment packageForB= getRoot().createPackageFragment("r", false, null);

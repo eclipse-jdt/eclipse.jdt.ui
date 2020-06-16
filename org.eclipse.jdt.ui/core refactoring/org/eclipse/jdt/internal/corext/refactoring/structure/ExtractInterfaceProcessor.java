@@ -363,9 +363,9 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 			arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME, fSuperName);
 			for (int index= 0; index < fMembers.length; index++)
 				arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (index + 1), JavaRefactoringDescriptorUtil.elementToHandle(project, fMembers[index]));
-			arguments.put(ATTRIBUTE_COMMENTS, Boolean.valueOf(fComments).toString());
-			arguments.put(ATTRIBUTE_REPLACE, Boolean.valueOf(fReplace).toString());
-			arguments.put(ATTRIBUTE_INSTANCEOF, Boolean.valueOf(fInstanceOf).toString());
+			arguments.put(ATTRIBUTE_COMMENTS, Boolean.toString(fComments));
+			arguments.put(ATTRIBUTE_REPLACE, Boolean.toString(fReplace));
+			arguments.put(ATTRIBUTE_INSTANCEOF, Boolean.toString(fInstanceOf));
 			final DynamicValidationRefactoringChange change= new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.ExtractInterfaceRefactoring_name, fChangeManager.getAllChanges());
 			final IFile file= ResourceUtil.getFile(fSubType.getCompilationUnit());
 			if (fSuperSource != null && fSuperSource.length() > 0)
@@ -873,17 +873,17 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME));
 		final String comment= extended.getAttribute(ATTRIBUTE_COMMENTS);
 		if (comment != null) {
-			fComments= Boolean.valueOf(comment).booleanValue();
+			fComments= Boolean.parseBoolean(comment);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_COMMENTS));
 		final String instance= extended.getAttribute(ATTRIBUTE_INSTANCEOF);
 		if (instance != null) {
-			fInstanceOf= Boolean.valueOf(instance).booleanValue();
+			fInstanceOf= Boolean.parseBoolean(instance);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_INSTANCEOF));
 		final String replace= extended.getAttribute(ATTRIBUTE_REPLACE);
 		if (replace != null) {
-			fReplace= Boolean.valueOf(replace).booleanValue();
+			fReplace= Boolean.parseBoolean(replace);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_REPLACE));
 		int count= 1;

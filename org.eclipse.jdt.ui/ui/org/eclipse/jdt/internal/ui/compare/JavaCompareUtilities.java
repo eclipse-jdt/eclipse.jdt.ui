@@ -475,4 +475,7 @@ public class JavaCompareUtilities {
 	public static boolean isCompareEditorInput(IEditorInput input) {
 		return input instanceof CompareEditorInput;
 	}
+
+	private JavaCompareUtilities() {
+	}
 }

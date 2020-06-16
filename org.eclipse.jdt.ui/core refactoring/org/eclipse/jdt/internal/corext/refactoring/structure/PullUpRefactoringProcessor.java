@@ -1082,16 +1082,16 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 			addSuperTypeSettings(comment, true);
 			final PullUpDescriptor descriptor= RefactoringSignatureDescriptorFactory.createPullUpDescriptor(project, description, comment.asString(), arguments, flags);
 			arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT, JavaRefactoringDescriptorUtil.elementToHandle(project, fDestinationType));
-			arguments.put(ATTRIBUTE_REPLACE, Boolean.valueOf(fReplace).toString());
-			arguments.put(ATTRIBUTE_INSTANCEOF, Boolean.valueOf(fInstanceOf).toString());
-			arguments.put(ATTRIBUTE_STUBS, Boolean.valueOf(fCreateMethodStubs).toString());
-			arguments.put(ATTRIBUTE_PULL, Integer.valueOf(fMembersToMove.length).toString());
+			arguments.put(ATTRIBUTE_REPLACE, Boolean.toString(fReplace));
+			arguments.put(ATTRIBUTE_INSTANCEOF, Boolean.toString(fInstanceOf));
+			arguments.put(ATTRIBUTE_STUBS, Boolean.toString(fCreateMethodStubs));
+			arguments.put(ATTRIBUTE_PULL, Integer.toString(fMembersToMove.length));
 			for (int offset= 0; offset < fMembersToMove.length; offset++)
 				arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (offset + 1), JavaRefactoringDescriptorUtil.elementToHandle(project, fMembersToMove[offset]));
-			arguments.put(ATTRIBUTE_DELETE, Integer.valueOf(fDeletedMethods.length).toString());
+			arguments.put(ATTRIBUTE_DELETE, Integer.toString(fDeletedMethods.length));
 			for (int offset= 0; offset < fDeletedMethods.length; offset++)
 				arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (offset + fMembersToMove.length + 1), JavaRefactoringDescriptorUtil.elementToHandle(project, fDeletedMethods[offset]));
-			arguments.put(ATTRIBUTE_ABSTRACT, Integer.valueOf(fAbstractMethods.length).toString());
+			arguments.put(ATTRIBUTE_ABSTRACT, Integer.toString(fAbstractMethods.length));
 			for (int offset= 0; offset < fAbstractMethods.length; offset++)
 				arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (offset + fMembersToMove.length + fDeletedMethods.length + 1), JavaRefactoringDescriptorUtil.elementToHandle(project, fAbstractMethods[offset]));
 			return new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.PullUpRefactoring_Pull_Up, fChangeManager.getAllChanges());
@@ -1748,17 +1748,17 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
 		final String stubs= extended.getAttribute(ATTRIBUTE_STUBS);
 		if (stubs != null) {
-			fCreateMethodStubs= Boolean.valueOf(stubs).booleanValue();
+			fCreateMethodStubs= Boolean.parseBoolean(stubs);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_STUBS));
 		final String instance= extended.getAttribute(ATTRIBUTE_INSTANCEOF);
 		if (instance != null) {
-			fInstanceOf= Boolean.valueOf(instance).booleanValue();
+			fInstanceOf= Boolean.parseBoolean(instance);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_INSTANCEOF));
 		final String replace= extended.getAttribute(ATTRIBUTE_REPLACE);
 		if (replace != null) {
-			fReplace= Boolean.valueOf(replace).booleanValue();
+			fReplace= Boolean.parseBoolean(replace);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_REPLACE));
 		int pullCount= 0;

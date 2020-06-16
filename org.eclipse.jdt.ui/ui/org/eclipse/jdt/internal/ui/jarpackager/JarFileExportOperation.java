@@ -75,6 +75,7 @@ import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.util.IClassFileReader;
 import org.eclipse.jdt.core.util.ISourceAttribute;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Resources;
@@ -91,7 +92,6 @@ import org.eclipse.jdt.ui.refactoring.RefactoringSaveHelper;
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 /**
  * Operation for exporting a resource and its children to a new  JAR file.
@@ -934,6 +934,8 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 		String message= null;
 		switch (fStatus.getSeverity()) {
 			case IStatus.OK:
+			default:
+				// defensive code in case new severity is defined
 				message= ""; //$NON-NLS-1$
 				break;
 			case IStatus.INFO:
@@ -947,10 +949,6 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 					message= JarPackagerMessages.JarFileExportOperation_creationOfSomeJARsFailed;
 				else
 					message= JarPackagerMessages.JarFileExportOperation_jarCreationFailed;
-				break;
-			default:
-				// defensive code in case new severity is defined
-				message= ""; //$NON-NLS-1$
 				break;
 		}
 		fStatus.setMessage(message);

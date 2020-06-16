@@ -169,4 +169,7 @@ public class LayoutUtil {
 			((GridData) ld).heightHint= heightHint;
 		}
 	}
+
+	private LayoutUtil() {
+	}
 }

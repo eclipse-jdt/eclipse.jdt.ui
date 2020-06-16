@@ -1185,4 +1185,7 @@ public final class JavaModelUtil {
 			cu.save(subMonitor.split(1), true);
 		}
 	}
+
+	private JavaModelUtil() {
+	}
 }

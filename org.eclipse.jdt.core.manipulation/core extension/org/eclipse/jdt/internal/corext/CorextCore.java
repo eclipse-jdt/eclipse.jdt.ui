@@ -24,4 +24,7 @@ public class CorextCore {
 	public static String getPluginId() {
 		return JavaManipulationPlugin.getPluginId();
 	}
+
+	private CorextCore() {
+	}
 }

@@ -1121,22 +1121,22 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 			fFilePatterns= ""; //$NON-NLS-1$
 		final String references= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES);
 		if (references != null) {
-			fUpdateReferences= Boolean.valueOf(references).booleanValue();
+			fUpdateReferences= Boolean.parseBoolean(references);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES));
 		final String matches= extended.getAttribute(ATTRIBUTE_TEXTUAL_MATCHES);
 		if (matches != null) {
-			fUpdateTextualMatches= Boolean.valueOf(matches).booleanValue();
+			fUpdateTextualMatches= Boolean.parseBoolean(matches);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_TEXTUAL_MATCHES));
 		final String qualified= extended.getAttribute(ATTRIBUTE_QUALIFIED);
 		if (qualified != null) {
-			fUpdateQualifiedNames= Boolean.valueOf(qualified).booleanValue();
+			fUpdateQualifiedNames= Boolean.parseBoolean(qualified);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_QUALIFIED));
 		final String hierarchical= extended.getAttribute(ATTRIBUTE_HIERARCHICAL);
 		if (hierarchical != null) {
-			fRenameSubpackages= Boolean.valueOf(hierarchical).booleanValue();
+			fRenameSubpackages= Boolean.parseBoolean(hierarchical);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_HIERARCHICAL));
 		return new RefactoringStatus();

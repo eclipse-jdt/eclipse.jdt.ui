@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,22 +13,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
-import junit.framework.Test;
-
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+
+import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
 public class RewriteMethodInvocationsTestSetup extends RefactoringTestSetup {
 
 	private IPackageFragment fRewrite;
 
-	public RewriteMethodInvocationsTestSetup(Test test) {
-		super(test);
-	}
-
 	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
+	public void before() throws Exception {
+		super.before();
 
 		IPackageFragmentRoot root= getDefaultSourceFolder();
 		fRewrite= root.createPackageFragment("rewrite_in", true, null);

@@ -99,4 +99,7 @@ public class DimensionRewrite {
 		}
 	}
 
+	private DimensionRewrite() {
+	}
+
 }

@@ -295,22 +295,27 @@ public final class RefactoringAvailabilityTester {
 				IJavaElement javaElement= (IJavaElement)element;
 				if (javaElement.exists() && !javaElement.isReadOnly()) {
 					int elementType= javaElement.getElementType();
-					if (elementType == IJavaElement.PACKAGE_FRAGMENT) {
-						return true;
-					} else if (elementType == IJavaElement.PACKAGE_FRAGMENT_ROOT) {
-						IPackageFragmentRoot root= (IPackageFragmentRoot)javaElement;
-						if (!root.isExternal() && !ReorgUtils.isClassFolder(root))
+					switch (elementType) {
+						case IJavaElement.PACKAGE_FRAGMENT:
+						case IJavaElement.JAVA_PROJECT:
 							return true;
-					} else if (elementType == IJavaElement.JAVA_PROJECT) {
-						return true;
-					} else if (elementType == IJavaElement.COMPILATION_UNIT) {
-						ICompilationUnit cu= (ICompilationUnit)javaElement;
-						if (cu.exists())
-							return true;
-					} else if (elementType == IJavaElement.TYPE) {
-						IJavaElement parent= ((IType) element).getParent();
-						if (parent instanceof ICompilationUnit && parent.exists())
-							return true;
+						case IJavaElement.PACKAGE_FRAGMENT_ROOT:
+							IPackageFragmentRoot root= (IPackageFragmentRoot)javaElement;
+							if (!root.isExternal() && !ReorgUtils.isClassFolder(root))
+								return true;
+							break;
+						case IJavaElement.COMPILATION_UNIT:
+							ICompilationUnit cu= (ICompilationUnit)javaElement;
+							if (cu.exists())
+								return true;
+							break;
+						case IJavaElement.TYPE:
+							IJavaElement parent= ((IType) element).getParent();
+							if (parent instanceof ICompilationUnit && parent.exists())
+								return true;
+							break;
+						default:
+							break;
 					}
 				}
 			} else if (element instanceof IWorkingSet) {

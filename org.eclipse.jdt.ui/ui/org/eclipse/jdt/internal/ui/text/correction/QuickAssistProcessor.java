@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -25,11 +25,14 @@ package org.eclipse.jdt.internal.ui.text.correction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.eclipse.swt.graphics.Image;
 
@@ -903,34 +906,38 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	private static String[] getUniqueParameterNames(MethodReference methodReference, IMethodBinding functionalMethod) throws JavaModelException {
-		String[] parameterNames= ((IMethod) functionalMethod.getJavaElement()).getParameterNames();
-		List<String> oldNames= new ArrayList<>(Arrays.asList(parameterNames));
-		String[] newNames= new String[oldNames.size()];
-		List<String> excludedNames= new ArrayList<>(ASTNodes.getVisibleLocalVariablesInScope(methodReference));
+		String[] originalParameterNames= ((IMethod) functionalMethod.getJavaElement()).getParameterNames();
+		String[] newNames= new String[originalParameterNames.length];
+		Set<String> excludedNames= new HashSet<>(ASTNodes.getVisibleLocalVariablesInScope(methodReference));
 
-		for (int i= 0; i < oldNames.size(); i++) {
-			String paramName= oldNames.get(i);
-			List<String> allNamesToExclude= new ArrayList<>(excludedNames);
-			allNamesToExclude.addAll(oldNames.subList(0, i));
-			allNamesToExclude.addAll(oldNames.subList(i + 1, oldNames.size()));
-			if (allNamesToExclude.contains(paramName)) {
+		for (int i= 0; i < originalParameterNames.length; i++) {
+			String paramName= originalParameterNames[i];
+
+			if (excludedNames.contains(paramName)) {
+				Set<String> allNamesToExclude= new HashSet<>(excludedNames);
+				Collections.addAll(allNamesToExclude, originalParameterNames);
+
 				String newParamName= createName(paramName, allNamesToExclude);
+
 				excludedNames.add(newParamName);
 				newNames[i]= newParamName;
 			} else {
 				newNames[i]= paramName;
 			}
 		}
+
 		return newNames;
 	}
 
-	private static String createName(String candidate, List<String> excludedNames) {
+	private static String createName(final String nameRoot, final Set<String> excludedNames) {
 		int i= 1;
-		String result= candidate;
-		while (excludedNames.contains(result)) {
-			result= candidate + i++;
-		}
-		return result;
+		String candidate;
+
+		do {
+			candidate= nameRoot + i++;
+		} while (excludedNames.remove(candidate));
+
+		return candidate;
 	}
 
 	private static boolean isTypeReferenceToInstanceMethod(MethodReference methodReference) {
@@ -1125,9 +1132,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		} else {
 			exprBody= (Expression) lambdaBody;
 		}
-		while (exprBody instanceof ParenthesizedExpression) {
-			exprBody= ((ParenthesizedExpression) exprBody).getExpression();
-		}
+		exprBody= ASTNodes.getUnparenthesedExpression(exprBody);
 		if (exprBody == null || !isValidLambdaReferenceToMethod(exprBody))
 			return false;
 
@@ -2014,7 +2019,10 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return statement;
 	}
 
-	private static boolean getSplitVariableProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
+	private static boolean getSplitVariableProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) throws JavaModelException {
+		if (resultingCollections == null) {
+			return true;
+		}
 		VariableDeclarationFragment fragment;
 		if (node instanceof VariableDeclarationFragment) {
 			fragment= (VariableDeclarationFragment) node;
@@ -2041,7 +2049,6 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return false;
 		}
 		// statement is ForStatement or VariableDeclarationStatement
-
 		ASTNode statementParent= statement.getParent();
 		StructuralPropertyDescriptor property= statement.getLocationInParent();
 		if (!property.isChildListProperty()) {
@@ -2049,10 +2056,6 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		}
 
 		List<? extends ASTNode> list= ASTNodes.getChildListProperty(statementParent, (ChildListPropertyDescriptor) property);
-
-		if (resultingCollections == null) {
-			return true;
-		}
 
 		AST ast= statement.getAST();
 		ASTRewrite rewrite= ASTRewrite.create(ast);
@@ -2063,7 +2066,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		boolean commandConflict= false;
 		for (ICommandAccess completionProposal : resultingCollections) {
 			if (completionProposal instanceof ChangeCorrectionProposal) {
-				if (SPLIT_JOIN_VARIABLE_DECLARATION_ID.equals(((ChangeCorrectionProposal)completionProposal).getCommandId())) {
+				if (SPLIT_JOIN_VARIABLE_DECLARATION_ID.equals(((ChangeCorrectionProposal) completionProposal).getCommandId())) {
 					commandConflict= true;
 				}
 			}
@@ -2072,47 +2075,91 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			proposal.setCommandId(SPLIT_JOIN_VARIABLE_DECLARATION_ID);
 		}
 
-		Statement newStatement;
-		int insertIndex= list.indexOf(statement);
+		// for multiple declarations; all must be moved outside, leave none behind
+		if (statement instanceof ForStatement) {
+			IBuffer buffer= context.getCompilationUnit().getBuffer();
+			ForStatement forStatement= (ForStatement) statement;
+			VariableDeclarationExpression oldVarDecl= (VariableDeclarationExpression) fragParent;
+			Type type= oldVarDecl.getType();
+			List<VariableDeclarationFragment> oldFragments= oldVarDecl.fragments();
+			CompilationUnit cup= (CompilationUnit) oldVarDecl.getRoot();
+			ListRewrite forListRewrite= rewrite.getListRewrite(forStatement, ForStatement.INITIALIZERS_PROPERTY);
+			// create the new initializers
+			for (VariableDeclarationFragment oldFragment : oldFragments) {
+				int extendedStartPositionFragment= cup.getExtendedStartPosition(oldFragment);
+				int extendedLengthFragment= cup.getExtendedLength(oldFragment);
+				String codeFragment= buffer.getText(extendedStartPositionFragment, extendedLengthFragment);
+				if (oldFragment.getInitializer() == null) {
+					ITypeBinding typeBinding= type.resolveBinding();
+					if ("Z".equals(typeBinding.getBinaryName())) { //$NON-NLS-1$
+						codeFragment+= " = false"; //$NON-NLS-1$
+					} else if (type.isPrimitiveType()) {
+						codeFragment+= " = 0"; //$NON-NLS-1$
+					} else {
+						codeFragment+= " = null"; //$NON-NLS-1$
+					}
+				}
+				Assignment newAssignmentFragment= (Assignment) rewrite.createStringPlaceholder(codeFragment, ASTNode.ASSIGNMENT);
+				forListRewrite.insertLast(newAssignmentFragment, null);
+			}
 
-		Expression placeholder= (Expression) rewrite.createMoveTarget(fragment.getInitializer());
+			// create the new declarations
+			int extendedStartPositionDeclaration= cup.getExtendedStartPosition(oldVarDecl);
+			int firstFragmentStart= ((ASTNode) oldVarDecl.fragments().get(0)).getStartPosition();
+			String codeDeclaration= buffer.getText(extendedStartPositionDeclaration, firstFragmentStart - extendedStartPositionDeclaration);
+			Type nType= (Type) rewrite.createStringPlaceholder(codeDeclaration.trim(), type.getNodeType());
+
+			VariableDeclarationFragment newFrag= ast.newVariableDeclarationFragment();
+			VariableDeclarationStatement newVarDec= ast.newVariableDeclarationStatement(newFrag);
+			newVarDec.setType(nType);
+			newFrag.setName(ast.newSimpleName(oldFragments.get(0).getName().getIdentifier()));
+			newFrag.extraDimensions().addAll(DimensionRewrite.copyDimensions(oldFragments.get(0).extraDimensions(), rewrite));
+
+			for (int i= 1; i < oldFragments.size(); i++) {
+				VariableDeclarationFragment oldFragment= oldFragments.get(i);
+				newFrag= ast.newVariableDeclarationFragment();
+				newFrag.setName(ast.newSimpleName(oldFragment.getName().getIdentifier()));
+				newFrag.extraDimensions().addAll(DimensionRewrite.copyDimensions(oldFragment.extraDimensions(), rewrite));
+				newVarDec.fragments().add(newFrag);
+			}
+			newVarDec.modifiers().addAll(ASTNodeFactory.newModifiers(ast, oldVarDecl.getModifiers()));
+
+			ListRewrite listRewriter= rewrite.getListRewrite(statementParent, (ChildListPropertyDescriptor) property);
+			listRewriter.insertBefore(newVarDec, statement, null);
+
+			rewrite.remove(oldVarDecl, null);
+
+			resultingCollections.add(proposal);
+			return true;
+		}
+
+		Statement newStatement= null;
+		int insertIndex= list.indexOf(statement);
 		ITypeBinding binding= fragment.getInitializer().resolveTypeBinding();
+		Expression placeholder= (Expression) rewrite.createMoveTarget(fragment.getInitializer());
 		if (placeholder instanceof ArrayInitializer && binding != null && binding.isArray()) {
 			ArrayCreation creation= ast.newArrayCreation();
 			creation.setInitializer((ArrayInitializer) placeholder);
 			final ITypeBinding componentType= binding.getElementType();
 			Type type= null;
-			if (componentType.isPrimitive())
+			if (componentType.isPrimitive()) {
 				type= ast.newPrimitiveType(PrimitiveType.toCode(componentType.getName()));
-			else
+			} else {
 				type= ast.newSimpleType(ast.newSimpleName(componentType.getName()));
+			}
 			creation.setType(ast.newArrayType(type, binding.getDimensions()));
 			placeholder= creation;
 		}
-		Assignment assignment= ast.newAssignment();
-		assignment.setRightHandSide(placeholder);
-		assignment.setLeftHandSide(ast.newSimpleName(fragment.getName().getIdentifier()));
-
 		if (statement instanceof VariableDeclarationStatement) {
+			Assignment assignment= ast.newAssignment();
+			assignment.setRightHandSide(placeholder);
+			assignment.setLeftHandSide(ast.newSimpleName(fragment.getName().getIdentifier()));
+
 			newStatement= ast.newExpressionStatement(assignment);
 			insertIndex+= 1; // add after declaration
-		} else {
-			rewrite.replace(fragment.getParent(), assignment, null);
-			VariableDeclarationFragment newFrag= ast.newVariableDeclarationFragment();
-			newFrag.setName(ast.newSimpleName(fragment.getName().getIdentifier()));
-			newFrag.extraDimensions().addAll(DimensionRewrite.copyDimensions(fragment.extraDimensions(), rewrite));
-
-			VariableDeclarationExpression oldVarDecl= (VariableDeclarationExpression) fragParent;
-
-			VariableDeclarationStatement newVarDec= ast.newVariableDeclarationStatement(newFrag);
-			newVarDec.setType((Type) rewrite.createCopyTarget(oldVarDecl.getType()));
-			newVarDec.modifiers().addAll(ASTNodeFactory.newModifiers(ast, oldVarDecl.getModifiers()));
-			newStatement= newVarDec;
 		}
-
 		ListRewrite listRewriter= rewrite.getListRewrite(statementParent, (ChildListPropertyDescriptor) property);
 		listRewriter.insertAt(newStatement, insertIndex, null);
-
 		resultingCollections.add(proposal);
 		return true;
 	}
@@ -2424,9 +2471,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		arguments.add(formatStringArgument);
 
 		if (is50OrHigher) {
-			for (Expression expression : formatArguments) {
-				arguments.add(expression);
-			}
+			arguments.addAll(formatArguments);
 		} else {
 			ArrayCreation objectArrayCreation= ast.newArrayCreation();
 
@@ -2437,9 +2482,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			ArrayInitializer arrayInitializer= ast.newArrayInitializer();
 
 			List<Expression> initializerExpressions= arrayInitializer.expressions();
-			for (Expression expression : formatArguments) {
-				initializerExpressions.add(expression);
-			}
+			initializerExpressions.addAll(formatArguments);
 			objectArrayCreation.setInitializer(arrayInitializer);
 
 			arguments.add(objectArrayCreation);
@@ -3778,10 +3821,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			replacement.arguments().add(rewrite.createCopyTarget(left));
 			rewrite.replace(method, replacement, null);
 		} else {
-			ASTNode leftExpression= left;
-			while (leftExpression instanceof ParenthesizedExpression) {
-				leftExpression= ((ParenthesizedExpression) left).getExpression();
-			}
+			ASTNode leftExpression= ASTNodes.getUnparenthesedExpression(left);
 			rewrite.replace(right, rewrite.createCopyTarget(leftExpression), null);
 
 			if (right instanceof CastExpression

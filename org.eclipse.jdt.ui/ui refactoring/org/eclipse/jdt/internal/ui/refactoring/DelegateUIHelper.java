@@ -112,7 +112,7 @@ public class DelegateUIHelper {
 	private static boolean getBooleanSetting(String key, boolean defaultValue) {
 		String update= JavaPlugin.getDefault().getDialogSettings().get(key);
 		if (update != null)
-			return Boolean.valueOf(update).booleanValue();
+			return Boolean.parseBoolean(update);
 		else
 			return defaultValue;
 	}

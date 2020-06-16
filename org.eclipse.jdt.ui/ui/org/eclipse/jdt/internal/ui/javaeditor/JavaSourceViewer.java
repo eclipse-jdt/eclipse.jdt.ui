@@ -204,14 +204,16 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 	 */
 	@Override
 	public boolean canDoOperation(int operation) {
-		if (operation == SHOW_OUTLINE)
-			return fOutlinePresenter != null;
-		if (operation == OPEN_STRUCTURE)
-			return fStructurePresenter != null;
-		if (operation == SHOW_HIERARCHY)
-			return fHierarchyPresenter != null;
-
-		return super.canDoOperation(operation);
+		switch (operation) {
+			case SHOW_OUTLINE:
+				return fOutlinePresenter != null;
+			case OPEN_STRUCTURE:
+				return fStructurePresenter != null;
+			case SHOW_HIERARCHY:
+				return fHierarchyPresenter != null;
+			default:
+				return super.canDoOperation(operation);
+		}
 	}
 
 	/*

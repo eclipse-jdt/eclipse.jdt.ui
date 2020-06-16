@@ -159,25 +159,27 @@ public class PackagesViewFlatContentProvider extends LogicalPackagesProvider imp
 		if (element instanceof IPackageFragment) {
 			final IPackageFragment frag= (IPackageFragment) element;
 
-			if (kind == IJavaElementDelta.REMOVED) {
-				removeElement(frag);
-
-			} else if (kind == IJavaElementDelta.ADDED) {
-				addElement(frag);
-
-			} else if (kind == IJavaElementDelta.CHANGED) {
-				//just refresh
-				Object toBeRefreshed= element;
-
-				IPackageFragment pkgFragment= (IPackageFragment) element;
-				LogicalPackage logicalPkg= findLogicalPackage(pkgFragment);
-				//deal with packages that have been filtered and are now visible
-				if (logicalPkg != null)
-					toBeRefreshed= findElementToRefresh(logicalPkg);
-				else
-					toBeRefreshed= findElementToRefresh(pkgFragment);
-
-				postRefresh(toBeRefreshed);
+			switch (kind) {
+				case IJavaElementDelta.REMOVED:
+					removeElement(frag);
+					break;
+				case IJavaElementDelta.ADDED:
+					addElement(frag);
+					break;
+				case IJavaElementDelta.CHANGED:
+					//just refresh
+					Object toBeRefreshed= element;
+					IPackageFragment pkgFragment= (IPackageFragment) element;
+					LogicalPackage logicalPkg= findLogicalPackage(pkgFragment);
+					//deal with packages that have been filtered and are now visible
+					if (logicalPkg != null)
+						toBeRefreshed= findElementToRefresh(logicalPkg);
+					else
+						toBeRefreshed= findElementToRefresh(pkgFragment);
+					postRefresh(toBeRefreshed);
+					break;
+				default:
+					break;
 			}
 			//in this view there will be no children of PackageFragment to refresh
 			return;

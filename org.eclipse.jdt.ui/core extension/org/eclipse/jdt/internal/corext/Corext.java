@@ -23,4 +23,7 @@ public class Corext {
 	public static String getPluginId() {
 		return JavaPlugin.getPluginId();
 	}
+
+	private Corext() {
+	}
 }

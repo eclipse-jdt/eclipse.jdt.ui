@@ -236,4 +236,7 @@ public class VariableDeclarationRewrite {
 			lastFragment= currentFragment;
 		}
 	}
+
+	private VariableDeclarationRewrite() {
+	}
 }

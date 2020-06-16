@@ -352,4 +352,7 @@ public class TextEditUtil {
 		}
 	}
 
+	private TextEditUtil() {
+	}
+
 }

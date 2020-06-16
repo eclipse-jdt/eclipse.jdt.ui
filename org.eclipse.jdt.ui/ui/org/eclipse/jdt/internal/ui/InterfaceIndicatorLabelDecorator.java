@@ -253,9 +253,6 @@ public class InterfaceIndicatorLabelDecorator extends AbstractJavaElementLabelDe
 					return;
 				processChildrenDelta(delta, result);
 				return;
-			case IJavaElement.TYPE:
-			case IJavaElement.CLASS_FILE:
-				return;
 			case IJavaElement.JAVA_MODEL:
 				processChildrenDelta(delta, result);
 				return;
@@ -272,8 +269,9 @@ public class InterfaceIndicatorLabelDecorator extends AbstractJavaElementLabelDe
 					result.add(elem);
 				}
 				return;
-			default:
-				// fields, methods, imports ect
+			case IJavaElement.TYPE:
+			case IJavaElement.CLASS_FILE:
+			default:// fields, methods, imports ect
 				return;
 		}
 	}

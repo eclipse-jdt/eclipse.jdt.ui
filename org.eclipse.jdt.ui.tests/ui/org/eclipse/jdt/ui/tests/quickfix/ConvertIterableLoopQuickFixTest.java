@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -140,6 +141,36 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		assertEqualString(preview, expected);
 	}
 
+	@Test
+	public void testWrongInitializer() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "\n" //
+				+ "import java.util.Collection;\n" //
+				+ "import java.util.Iterator;\n" //
+				+ "\n" //
+				+ "public class A {\n" //
+				+ "	Iterator<String> otherIterator;\n" //
+				+ "	Iterator<String> anotherIterator;\n" //
+				+ "	Collection<String> c;\n" //
+				+ "\n" //
+				+ "	public A() {\n" //
+				+ "		for (final Iterator<String> iterator= (c.iterator() == null) ? otherIterator : anotherIterator; iterator.hasNext();) {\n" //
+				+ "			String test= iterator.next();\n" //
+				+ "			System.out.println(test);\n" //
+				+ "		}\n" //
+				+ "	}\n" //
+				+ "}";
+		ICompilationUnit unit= pack.createCompilationUnit("A.java", sample, false, null);
+
+		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(sample, unit);
+
+		assertNull(fConvertLoopProposal);
+
+		assertCorrectLabels(proposals);
+	}
+
 	@Ignore
 	@Test
 	public void testKeepComment() throws Exception {
@@ -187,7 +218,7 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 	/**
 	 * quickfix creates strange indentation because of the return in the start statement
 	 * see https://bugs.eclipse.org/bugs/show_bug.cgi?id=553635
-	 * @throws Exception
+	 * @throws Exception Any exception
 	 */
 	@Ignore("Bug 553635")
 	@Test
@@ -1023,7 +1054,8 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 
 		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(sample, unit);
 
-		assertTrue(fConvertLoopProposal.getFixStatus() != null && fConvertLoopProposal.getFixStatus().getCode() == IStatus.WARNING);
+		assertNotNull(fConvertLoopProposal.getFixStatus());
+		assertEquals(IStatus.WARNING, fConvertLoopProposal.getFixStatus().getCode());
 
 		assertCorrectLabels(proposals);
 
@@ -1083,7 +1115,8 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 
 		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(sample, unit);
 
-		assertTrue(fConvertLoopProposal.getFixStatus() != null && fConvertLoopProposal.getFixStatus().getCode() == IStatus.WARNING);
+		assertNotNull(fConvertLoopProposal.getFixStatus());
+		assertEquals(IStatus.WARNING, fConvertLoopProposal.getFixStatus().getCode());
 
 		assertCorrectLabels(proposals);
 
@@ -1144,7 +1177,8 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 
 		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(sample, unit);
 
-		assertTrue(fConvertLoopProposal.getFixStatus() != null && fConvertLoopProposal.getFixStatus().isOK());
+		assertNotNull(fConvertLoopProposal.getFixStatus());
+		assertTrue(fConvertLoopProposal.getFixStatus().isOK());
 
 		assertCorrectLabels(proposals);
 
@@ -1196,7 +1230,8 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 
 		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(sample, unit);
 
-		assertTrue(fConvertLoopProposal.getFixStatus() != null && fConvertLoopProposal.getFixStatus().isOK());
+		assertNotNull(fConvertLoopProposal.getFixStatus());
+		assertTrue(fConvertLoopProposal.getFixStatus().isOK());
 
 		assertCorrectLabels(proposals);
 

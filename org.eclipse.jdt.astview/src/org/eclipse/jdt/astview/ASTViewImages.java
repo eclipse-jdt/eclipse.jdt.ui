@@ -69,4 +69,7 @@ public class ASTViewImages {
 		}
 		return null;
 	}
+
+	private ASTViewImages() {
+	}
 }

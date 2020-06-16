@@ -444,10 +444,9 @@ public class CompletionProposalCollector extends CompletionRequestor {
 			case CompletionProposal.PACKAGE_REF:
 				return createPackageProposal(proposal);
 			case CompletionProposal.MODULE_REF:
-				return createModuleProposal(proposal);
-			case CompletionProposal.MODULE_DECLARATION:
-				return createModuleProposal(proposal);
-			case CompletionProposal.TYPE_REF:
+		case CompletionProposal.MODULE_DECLARATION:
+			return createModuleProposal(proposal);
+		case CompletionProposal.TYPE_REF:
 				return createTypeProposal(proposal);
 			case CompletionProposal.JAVADOC_TYPE_REF:
 				return createJavadocLinkTypeProposal(proposal);

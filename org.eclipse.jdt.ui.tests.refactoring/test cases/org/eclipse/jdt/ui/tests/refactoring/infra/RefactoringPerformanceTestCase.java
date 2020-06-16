@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring.infra;
 
+import org.junit.Assert;
+
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.ltk.core.refactoring.CheckConditionsOperation;
@@ -53,10 +55,10 @@ public abstract class RefactoringPerformanceTestCase extends JdtPerformanceTestC
 		ResourcesPlugin.getWorkspace().run(operation, null);
 		if (measure)
 			finishMeasurements();
-		assertEquals(true, operation.getConditionStatus().getSeverity() <= maxSeverity);
-		assertEquals(true, operation.getValidationStatus().isOK());
+		Assert.assertTrue(operation.getConditionStatus().getSeverity() <= maxSeverity);
+		Assert.assertTrue(operation.getValidationStatus().isOK());
 		if (checkUndo) {
-			assertNotNull(operation.getUndoChange());
+			Assert.assertNotNull(operation.getUndoChange());
 		}
 		RefactoringCore.getUndoManager().flush();
 		System.gc();

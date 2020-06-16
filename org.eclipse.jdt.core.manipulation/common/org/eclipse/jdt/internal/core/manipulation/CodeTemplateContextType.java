@@ -183,89 +183,108 @@ public class CodeTemplateContextType extends TemplateContextType {
 		addResolver(new GlobalTemplateVariables.User());
 		addResolver(new Todo());
 
-		if (CATCHBLOCK_CONTEXTTYPE.equals(contextName)) {
+		if (contextName == null) {
+			return;
+		}
+
+		switch (contextName) {
+		case CATCHBLOCK_CONTEXTTYPE:
 			addResolver(new CodeTemplateVariableResolver(ENCLOSING_TYPE,  JavaManipulationMessages.CodeTemplateContextType_variable_description_enclosingtype));
 			addResolver(new CodeTemplateVariableResolver(ENCLOSING_METHOD,  JavaManipulationMessages.CodeTemplateContextType_variable_description_enclosingmethod));
-
 			addResolver(new CodeTemplateVariableResolver(EXCEPTION_TYPE,  JavaManipulationMessages.CodeTemplateContextType_variable_description_exceptiontype));
 			addResolver(new CodeTemplateVariableResolver(EXCEPTION_VAR,  JavaManipulationMessages.CodeTemplateContextType_variable_description_exceptionvar));
-		} else if (METHODBODY_CONTEXTTYPE.equals(contextName)) {
+			break;
+		case METHODBODY_CONTEXTTYPE:
 			addResolver(new CodeTemplateVariableResolver(ENCLOSING_TYPE,  JavaManipulationMessages.CodeTemplateContextType_variable_description_enclosingtype));
 			addResolver(new CodeTemplateVariableResolver(ENCLOSING_METHOD,  JavaManipulationMessages.CodeTemplateContextType_variable_description_enclosingmethod));
 			addResolver(new CodeTemplateVariableResolver(BODY_STATEMENT,  JavaManipulationMessages.CodeTemplateContextType_variable_description_bodystatement));
-		} else if (CONSTRUCTORBODY_CONTEXTTYPE.equals(contextName)) {
+			break;
+		case CONSTRUCTORBODY_CONTEXTTYPE:
 			addResolver(new CodeTemplateVariableResolver(ENCLOSING_TYPE,  JavaManipulationMessages.CodeTemplateContextType_variable_description_enclosingtype));
 			addResolver(new CodeTemplateVariableResolver(BODY_STATEMENT,  JavaManipulationMessages.CodeTemplateContextType_variable_description_bodystatement));
-		} else if (GETTERBODY_CONTEXTTYPE.equals(contextName)) {
+			break;
+		case GETTERBODY_CONTEXTTYPE:
 			addResolver(new CodeTemplateVariableResolver(ENCLOSING_TYPE,  JavaManipulationMessages.CodeTemplateContextType_variable_description_enclosingtype));
 			addResolver(new CodeTemplateVariableResolver(ENCLOSING_METHOD,  JavaManipulationMessages.CodeTemplateContextType_variable_description_enclosingmethod));
 			addResolver(new CodeTemplateVariableResolver(FIELD, JavaManipulationMessages.CodeTemplateContextType_variable_description_getterfieldname));
-		} else if (SETTERBODY_CONTEXTTYPE.equals(contextName)) {
+			break;
+		case SETTERBODY_CONTEXTTYPE:
 			addResolver(new CodeTemplateVariableResolver(ENCLOSING_TYPE,  JavaManipulationMessages.CodeTemplateContextType_variable_description_enclosingtype));
 			addResolver(new CodeTemplateVariableResolver(ENCLOSING_METHOD,  JavaManipulationMessages.CodeTemplateContextType_variable_description_enclosingmethod));
 			addResolver(new CodeTemplateVariableResolver(FIELD, JavaManipulationMessages.CodeTemplateContextType_variable_description_getterfieldname));
 			addResolver(new CodeTemplateVariableResolver(PARAM, JavaManipulationMessages.CodeTemplateContextType_variable_description_param));
-		} else if (NEWTYPE_CONTEXTTYPE.equals(contextName)) {
+			break;
+		case NEWTYPE_CONTEXTTYPE:
 			addResolver(new CodeTemplateVariableResolver(TYPENAME,  JavaManipulationMessages.CodeTemplateContextType_variable_description_typename));
 			addResolver(new CodeTemplateVariableResolver(PACKAGE_DECLARATION,  JavaManipulationMessages.CodeTemplateContextType_variable_description_packdeclaration));
 			addResolver(new CodeTemplateVariableResolver(TYPE_DECLARATION,  JavaManipulationMessages.CodeTemplateContextType_variable_description_typedeclaration));
 			addResolver(new CodeTemplateVariableResolver(TYPE_COMMENT,  JavaManipulationMessages.CodeTemplateContextType_variable_description_typecomment));
 			addResolver(new CodeTemplateVariableResolver(FILE_COMMENT,  JavaManipulationMessages.CodeTemplateContextType_variable_description_filecomment));
 			addCompilationUnitVariables();
-		} else if (CLASSBODY_CONTEXTTYPE.equals(contextName) ||
-				INTERFACEBODY_CONTEXTTYPE.equals(contextName) ||
-				ENUMBODY_CONTEXTTYPE.equals(contextName) ||
-				ANNOTATIONBODY_CONTEXTTYPE.equals(contextName) ||
-				RECORDBODY_CONTEXTTYPE.equals(contextName)) {
+			break;
+		case CLASSBODY_CONTEXTTYPE:
+		case INTERFACEBODY_CONTEXTTYPE:
+		case ENUMBODY_CONTEXTTYPE:
+		case ANNOTATIONBODY_CONTEXTTYPE:
+		case RECORDBODY_CONTEXTTYPE:
 			addResolver(new CodeTemplateVariableResolver(TYPENAME,  JavaManipulationMessages.CodeTemplateContextType_variable_description_typename));
 			addCompilationUnitVariables();
-		} else if (TYPECOMMENT_CONTEXTTYPE.equals(contextName)) {
+			break;
+		case TYPECOMMENT_CONTEXTTYPE:
 			addResolver(new CodeTemplateVariableResolver(TYPENAME,  JavaManipulationMessages.CodeTemplateContextType_variable_description_typename));
 			addResolver(new CodeTemplateVariableResolver(ENCLOSING_TYPE,  JavaManipulationMessages.CodeTemplateContextType_variable_description_enclosingtype));
 			addResolver(new TagsVariableResolver());
 			addCompilationUnitVariables();
 			fIsComment= true;
-		} else if (FILECOMMENT_CONTEXTTYPE.equals(contextName)) {
+			break;
+		case FILECOMMENT_CONTEXTTYPE:
 			addResolver(new CodeTemplateVariableResolver(TYPENAME,  JavaManipulationMessages.CodeTemplateContextType_variable_description_typename));
 			addCompilationUnitVariables();
 			fIsComment= true;
-		} else if (FIELDCOMMENT_CONTEXTTYPE.equals(contextName)) {
+			break;
+		case FIELDCOMMENT_CONTEXTTYPE:
 			addResolver(new CodeTemplateVariableResolver(FIELD_TYPE, JavaManipulationMessages.CodeTemplateContextType_variable_description_fieldtype));
 			addResolver(new CodeTemplateVariableResolver(FIELD, JavaManipulationMessages.CodeTemplateContextType_variable_description_fieldname));
 			addCompilationUnitVariables();
 			fIsComment= true;
-		} else if (METHODCOMMENT_CONTEXTTYPE.equals(contextName)) {
+			break;
+		case METHODCOMMENT_CONTEXTTYPE:
 			addResolver(new CodeTemplateVariableResolver(ENCLOSING_TYPE,  JavaManipulationMessages.CodeTemplateContextType_variable_description_enclosingtype));
 			addResolver(new CodeTemplateVariableResolver(ENCLOSING_METHOD,  JavaManipulationMessages.CodeTemplateContextType_variable_description_enclosingmethod));
 			addResolver(new CodeTemplateVariableResolver(RETURN_TYPE,  JavaManipulationMessages.CodeTemplateContextType_variable_description_returntype));
 			addResolver(new TagsVariableResolver());
 			addCompilationUnitVariables();
 			fIsComment= true;
-		} else if (MODULECOMMENT_CONTEXTTYPE.equals(contextName)) {
+			break;
+		case MODULECOMMENT_CONTEXTTYPE:
 			addResolver(new CodeTemplateVariableResolver(ENCLOSING_MODULE, JavaManipulationMessages.CodeTemplateContextType_variable_description_enclosingmodule));
 			addResolver(new TagsVariableResolver());
 			addCompilationUnitVariables();
 			fIsComment= true;
-		} else if (OVERRIDECOMMENT_CONTEXTTYPE.equals(contextName)) {
+			break;
+		case OVERRIDECOMMENT_CONTEXTTYPE:
 			addResolver(new CodeTemplateVariableResolver(ENCLOSING_TYPE,  JavaManipulationMessages.CodeTemplateContextType_variable_description_enclosingtype));
 			addResolver(new CodeTemplateVariableResolver(ENCLOSING_METHOD,  JavaManipulationMessages.CodeTemplateContextType_variable_description_enclosingmethod));
 			addResolver(new CodeTemplateVariableResolver(SEE_TO_OVERRIDDEN_TAG,  JavaManipulationMessages.CodeTemplateContextType_variable_description_see_overridden_tag));
 			addResolver(new TagsVariableResolver());
 			addCompilationUnitVariables();
 			fIsComment= true;
-		} else if (DELEGATECOMMENT_CONTEXTTYPE.equals(contextName)) {
+			break;
+		case DELEGATECOMMENT_CONTEXTTYPE:
 			addResolver(new CodeTemplateVariableResolver(ENCLOSING_TYPE,  JavaManipulationMessages.CodeTemplateContextType_variable_description_enclosingtype));
 			addResolver(new CodeTemplateVariableResolver(ENCLOSING_METHOD,  JavaManipulationMessages.CodeTemplateContextType_variable_description_enclosingmethod));
 			addResolver(new CodeTemplateVariableResolver(SEE_TO_TARGET_TAG,  JavaManipulationMessages.CodeTemplateContextType_variable_description_see_target_tag));
 			addResolver(new TagsVariableResolver());
 			addCompilationUnitVariables();
 			fIsComment= true;
-		} else if (CONSTRUCTORCOMMENT_CONTEXTTYPE.equals(contextName)) {
+			break;
+		case CONSTRUCTORCOMMENT_CONTEXTTYPE:
 			addResolver(new CodeTemplateVariableResolver(ENCLOSING_TYPE,  JavaManipulationMessages.CodeTemplateContextType_variable_description_enclosingtype));
 			addResolver(new TagsVariableResolver());
 			addCompilationUnitVariables();
 			fIsComment= true;
-		} else if (GETTERCOMMENT_CONTEXTTYPE.equals(contextName)) {
+			break;
+		case GETTERCOMMENT_CONTEXTTYPE:
 			addResolver(new CodeTemplateVariableResolver(ENCLOSING_TYPE,  JavaManipulationMessages.CodeTemplateContextType_variable_description_enclosingtype));
 			addResolver(new CodeTemplateVariableResolver(FIELD_TYPE,  JavaManipulationMessages.CodeTemplateContextType_variable_description_getterfieldtype));
 			addResolver(new CodeTemplateVariableResolver(FIELD, JavaManipulationMessages.CodeTemplateContextType_variable_description_getterfieldname));
@@ -273,7 +292,8 @@ public class CodeTemplateContextType extends TemplateContextType {
 			addResolver(new CodeTemplateVariableResolver(BARE_FIELD_NAME, JavaManipulationMessages.CodeTemplateContextType_variable_description_barefieldname));
 			addCompilationUnitVariables();
 			fIsComment= true;
-		} else if (SETTERCOMMENT_CONTEXTTYPE.equals(contextName)) {
+			break;
+		case SETTERCOMMENT_CONTEXTTYPE:
 			addResolver(new CodeTemplateVariableResolver(ENCLOSING_TYPE,  JavaManipulationMessages.CodeTemplateContextType_variable_description_enclosingtype));
 			addResolver(new CodeTemplateVariableResolver(FIELD_TYPE,  JavaManipulationMessages.CodeTemplateContextType_variable_description_getterfieldtype));
 			addResolver(new CodeTemplateVariableResolver(FIELD, JavaManipulationMessages.CodeTemplateContextType_variable_description_getterfieldname));
@@ -282,6 +302,9 @@ public class CodeTemplateContextType extends TemplateContextType {
 			addResolver(new CodeTemplateVariableResolver(BARE_FIELD_NAME, JavaManipulationMessages.CodeTemplateContextType_variable_description_barefieldname));
 			addCompilationUnitVariables();
 			fIsComment= true;
+			break;
+		default:
+			break;
 		}
 	}
 

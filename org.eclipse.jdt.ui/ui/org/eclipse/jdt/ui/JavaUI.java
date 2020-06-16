@@ -631,13 +631,11 @@ public final class JavaUI {
 			elementKinds= IJavaSearchConstants.ENUM;
 			break;
 		case IJavaElementSearchConstants.CONSIDER_CLASSES_AND_INTERFACES:
+		case DEPRECATED_CONSIDER_TYPES:
 			elementKinds= IJavaSearchConstants.CLASS_AND_INTERFACE;
 			break;
 		case IJavaElementSearchConstants.CONSIDER_CLASSES_AND_ENUMS:
 			elementKinds= IJavaSearchConstants.CLASS_AND_ENUM;
-			break;
-		case DEPRECATED_CONSIDER_TYPES:
-			elementKinds= IJavaSearchConstants.CLASS_AND_INTERFACE;
 			break;
 		case IJavaElementSearchConstants.CONSIDER_INTERFACES_AND_ANNOTATIONS:
 			elementKinds= IJavaSearchConstants.INTERFACE_AND_ANNOTATION;

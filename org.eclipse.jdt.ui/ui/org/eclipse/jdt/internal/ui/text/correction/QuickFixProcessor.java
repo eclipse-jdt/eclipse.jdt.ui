@@ -315,6 +315,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.PreviewFeaturesNotAllowed:
 			case IProblem.UninitializedBlankFinalField:
 			case IProblem.FeatureNotSupported:
+			case IProblem.SwitchExpressionsReturnWithinSwitchExpression:
 				return true;
 			default:
 				return SuppressWarningsSubProcessor.hasSuppressWarningsProposal(cu.getJavaProject(), problemId)
@@ -877,6 +878,9 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				break;
 			case IProblem.FeatureNotSupported:
 				ReorgCorrectionsSubProcessor.getNeedHigherComplianceProposals(context, problem, proposals);
+			case IProblem.SwitchExpressionsReturnWithinSwitchExpression:
+				ReturnTypeSubProcessor.replaceReturnWithYieldStatementProposals(context, problem, proposals);
+				break;
 			default:
 		}
 		if (JavaModelUtil.is50OrHigher(context.getCompilationUnit().getJavaProject())) {

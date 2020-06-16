@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2013 IBM Corporation and others.
+ * Copyright (c) 2005, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,8 +15,8 @@ package org.eclipse.jdt.text.tests.contentassist;
 
 import java.util.Hashtable;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.jdt.core.JavaCore;
 
@@ -25,15 +25,8 @@ import org.eclipse.jdt.core.JavaCore;
  * @since 3.2
  */
 public class CamelCaseCompletionTest extends AbstractCompletionTest {
-	private static final Class<CamelCaseCompletionTest> THIS= CamelCaseCompletionTest.class;
-
-	public static Test setUpTest(Test test) {
-		return new CompletionTestSetup(test);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS, suiteName(THIS)));
-	}
+	@Rule
+	public CompletionTestSetup cts= new CompletionTestSetup();
 
 	/*
 	 * @see org.eclipse.jdt.text.tests.contentassist.AbstractCompletionTest#configureCoreOptions(java.util.Hashtable)
@@ -44,19 +37,21 @@ public class CamelCaseCompletionTest extends AbstractCompletionTest {
 		options.put(JavaCore.CODEASSIST_CAMEL_CASE_MATCH, JavaCore.ENABLED);
 	}
 
+	@Test
 	public void testMethod() throws Exception {
 		addMembers("void methodCallWithParams(int par) {}");
 		assertMethodBodyProposal("this.mCW|", "methodCallWith", "this.methodCallWithParams(|);");
 	}
 
+	@Test
 	public void testMethodWithTrailing() throws Exception {
 		addMembers("void methodCallWithParams(int par) {}");
 		assertMethodBodyProposal("this.mCWith|", "methodCallWith", "this.methodCallWithParams(|);");
 	}
 
+	@Test
 	public void testField() throws Exception {
 		addMembers("int multiCamelCaseField;");
 		assertMethodBodyProposal("this.mCC|", "multiCamel", "this.multiCamelCaseField|");
 	}
-
 }

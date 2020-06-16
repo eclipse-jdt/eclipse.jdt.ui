@@ -1155,7 +1155,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 		if (suggestedNames.length > 0)
 			return suggestedNames[0];
 		String name= enclosingType.getElementName();
-		if (name.equals("")) //$NON-NLS-1$
+		if (name.isEmpty())
 			return ""; //$NON-NLS-1$
 		return Character.toLowerCase(name.charAt(0)) + name.substring(1);
 	}

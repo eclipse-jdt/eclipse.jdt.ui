@@ -895,6 +895,16 @@ public class ExtractInterfaceTests extends GenericRefactoringTest {
 	}
 
 	@Test
+	public void test111() throws Exception{
+		validatePassingTest("A", "I", true, true);
+	}
+
+	@Test
+	public void test112() throws Exception{
+		validatePassingTest("A", "I", true, true);
+	}
+
+	@Test
 	public void testPaperExample0() throws Exception{
 		String[] names= new String[]{"add", "addAll", "iterator"};
 		String[][] signatures= new String[][]{new String[]{"QComparable;"}, new String[]{"QA;"}, new String[0]};

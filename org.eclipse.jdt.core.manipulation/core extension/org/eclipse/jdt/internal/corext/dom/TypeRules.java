@@ -138,4 +138,7 @@ public class TypeRules {
 		}
 	}
 
+	private TypeRules() {
+	}
+
 }

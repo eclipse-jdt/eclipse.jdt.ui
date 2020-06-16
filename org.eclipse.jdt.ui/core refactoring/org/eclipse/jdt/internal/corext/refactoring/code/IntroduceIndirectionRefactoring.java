@@ -764,7 +764,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT, JavaRefactoringDescriptorUtil.elementToHandle(project, fTargetMethod));
 		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME, fIntermediaryMethodName);
 		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + 1, JavaRefactoringDescriptorUtil.elementToHandle(project, fIntermediaryType));
-		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
+		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES, Boolean.toString(fUpdateReferences));
 		return new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.IntroduceIndirectionRefactoring_introduce_indirection, fTextChangeManager.getAllChanges());
 	}
 
@@ -1392,7 +1392,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + 1));
 		final String references= arguments.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES);
 		if (references != null) {
-			fUpdateReferences= Boolean.valueOf(references).booleanValue();
+			fUpdateReferences= Boolean.parseBoolean(references);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES));
 		final String name= arguments.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME);

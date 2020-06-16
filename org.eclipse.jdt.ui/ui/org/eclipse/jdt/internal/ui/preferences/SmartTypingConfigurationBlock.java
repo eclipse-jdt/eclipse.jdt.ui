@@ -283,14 +283,18 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 	private String getIndentMode() {
 		String indentMode= JavaPlugin.getDefault().getCombinedPreferenceStore().getString(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR);
 
-		if (JavaCore.SPACE.equals(indentMode))
-			return PreferencesMessages.SmartTypingConfigurationBlock_tabs_message_spaces;
-
-		if (JavaCore.TAB.equals(indentMode))
-			return PreferencesMessages.SmartTypingConfigurationBlock_tabs_message_tabs;
-
-		if (DefaultCodeFormatterConstants.MIXED.equals(indentMode))
-			return PreferencesMessages.SmartTypingConfigurationBlock_tabs_message_tabsAndSpaces;
+		if (indentMode != null) {
+			switch (indentMode) {
+				case JavaCore.SPACE:
+					return PreferencesMessages.SmartTypingConfigurationBlock_tabs_message_spaces;
+				case JavaCore.TAB:
+					return PreferencesMessages.SmartTypingConfigurationBlock_tabs_message_tabs;
+				case DefaultCodeFormatterConstants.MIXED:
+					return PreferencesMessages.SmartTypingConfigurationBlock_tabs_message_tabsAndSpaces;
+				default:
+					break;
+			}
+		}
 
 		Assert.isTrue(false, "Illegal indent mode - must not happen"); //$NON-NLS-1$
 		return null;

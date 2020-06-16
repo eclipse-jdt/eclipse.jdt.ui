@@ -319,10 +319,8 @@ public abstract class FindAction extends SelectionDispatchAction {
 			performNewSearch(new JavaSearchQuery(queryList));
 		} catch (JavaModelException ex) {
 			ExceptionHandler.handle(ex, getShell(), SearchMessages.Search_Error_search_notsuccessful_title, SearchMessages.Search_Error_search_notsuccessful_message);
-		} catch (InterruptedException e) {
-			// cancelled
-		} catch (IllegalArgumentException e) {
-			// no element
+		} catch (InterruptedException | IllegalArgumentException e) {
+			// cancelled or no element
 		}
 	}
 

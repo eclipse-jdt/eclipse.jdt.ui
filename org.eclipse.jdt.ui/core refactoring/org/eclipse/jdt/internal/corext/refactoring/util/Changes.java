@@ -45,4 +45,7 @@ public class Changes {
 			}
 		}
 	}
+
+	private Changes() {
+	}
 }

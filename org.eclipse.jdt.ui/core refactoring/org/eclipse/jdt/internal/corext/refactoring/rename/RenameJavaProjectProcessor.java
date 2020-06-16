@@ -248,7 +248,7 @@ public final class RenameJavaProjectProcessor extends JavaRenameProcessor implem
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME));
 		final String references= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES);
 		if (references != null) {
-			fUpdateReferences= Boolean.valueOf(references).booleanValue();
+			fUpdateReferences= Boolean.parseBoolean(references);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES));
 		return new RefactoringStatus();

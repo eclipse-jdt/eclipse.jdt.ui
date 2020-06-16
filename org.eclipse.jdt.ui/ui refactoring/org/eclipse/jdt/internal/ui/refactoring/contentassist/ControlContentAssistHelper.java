@@ -70,4 +70,7 @@ public class ControlContentAssistHelper {
 		return contentAssistant;
 	}
 
+	private ControlContentAssistHelper() {
+	}
+
 }

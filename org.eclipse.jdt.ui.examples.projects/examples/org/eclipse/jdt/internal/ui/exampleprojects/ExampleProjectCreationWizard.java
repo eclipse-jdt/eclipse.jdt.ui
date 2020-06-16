@@ -166,7 +166,7 @@ public class ExampleProjectCreationWizard extends Wizard implements INewWizard, 
 			final int[] result= { IDialogConstants.CANCEL_ID };
 			getShell().getDisplay().syncExec(() -> {
 				String title= ExampleProjectMessages.ExampleProjectCreationWizard_overwritequery_title;
-				String msg= MessageFormat.format(ExampleProjectMessages.ExampleProjectCreationWizard_overwritequery_message, new Object[] {file});
+				String msg= MessageFormat.format(ExampleProjectMessages.ExampleProjectCreationWizard_overwritequery_message, file);
 				String[] options= {IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.YES_TO_ALL_LABEL, IDialogConstants.CANCEL_LABEL};
 				MessageDialog dialog= new MessageDialog(getShell(), title, null, msg, MessageDialog.QUESTION, options, 0);
 				result[0]= dialog.open();

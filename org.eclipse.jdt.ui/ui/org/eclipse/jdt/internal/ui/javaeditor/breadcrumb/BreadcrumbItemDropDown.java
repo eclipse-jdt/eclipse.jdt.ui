@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2014 IBM Corporation and others.
+ * Copyright (c) 2008, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -124,13 +124,23 @@ class BreadcrumbItemDropDown {
 				image.dispose();
 				int zoomedArrowSize= ARROW_SIZE * zoom / 100;
 				for (int y1= 0; y1 < zoomedArrowSize; y1++) {
+					// set opaque pixels for top half of the breadcrumb arrow
 					for (int x1= 0; x1 <= y1; x1++) {
 						imageData.setAlpha(fLTR ? x1 : zoomedArrowSize - x1 - 1, y1, 255);
 					}
+					// set transparent pixels for top half of the breadcrumbe arrow
+					for (int x1= y1+1; x1 < zoomedArrowSize; x1++) {
+						imageData.setAlpha(fLTR ? x1 : zoomedArrowSize - x1 - 1, y1, 0);
+					}
 				}
 				for (int y2= 0; y2 < zoomedArrowSize; y2++) {
+					// set opaque pixels for bottom half of the breadcrumb arrow
 					for (int x2= 0; x2 <= y2; x2++) {
 						imageData.setAlpha(fLTR ? x2 : zoomedArrowSize - x2 - 1, zoomedArrowSize * 2 - y2 - 1, 255);
+					}
+					// set transparent pixels for bottom half of the breadcrumbe arrow
+					for (int x2= y2+1; x2 < zoomedArrowSize; x2++) {
+						imageData.setAlpha(fLTR ? x2 : zoomedArrowSize - x2 - 1, zoomedArrowSize * 2 - y2 - 1, 0);
 					}
 				}
 				return imageData;

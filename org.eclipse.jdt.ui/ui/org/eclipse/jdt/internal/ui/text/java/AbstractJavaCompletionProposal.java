@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2019 IBM Corporation and others.
+ * Copyright (c) 2005, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -104,6 +104,7 @@ import org.eclipse.jdt.core.SourceRange;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.search.SearchPattern;
 
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
@@ -1006,8 +1007,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	 * @since 3.12
 	 */
 	protected boolean isSubstringMatching() {
-		String value= JavaCore.getOption(JavaCore.CODEASSIST_SUBSTRING_MATCH);
-		return JavaCore.ENABLED.equals(value);
+		return JavaManipulationPlugin.CODEASSIST_SUBSTRING_MATCH_ENABLED;
 	}
 
 	private boolean isSubwordMatching() {

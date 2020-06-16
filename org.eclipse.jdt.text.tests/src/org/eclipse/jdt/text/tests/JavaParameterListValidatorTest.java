@@ -13,10 +13,17 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
@@ -30,79 +37,74 @@ import org.eclipse.jface.text.tests.TestTextViewer;
 
 import org.eclipse.jdt.internal.ui.text.java.JavaParameterListValidator;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
-
-public class JavaParameterListValidatorTest extends TestCase {
-
+public class JavaParameterListValidatorTest {
 	protected TestTextViewer fTextViewer;
 	protected IDocument fDocument;
 	protected JavaParameterListValidator fValidator;
 
-	public JavaParameterListValidatorTest(String name) {
-		super(name);
-	}
-
-	@Override
-	protected void setUp() {
+	@Before
+	public void setUp() {
 		fTextViewer= new TestTextViewer();
 		fDocument= new Document();
 		fValidator= new JavaParameterListValidator();
 	}
 
-	public static Test suite() {
-		return new TestSuite(JavaParameterListValidatorTest.class);
-	}
-
-	@Override
-	protected void tearDown () {
+	@After
+	public void tearDown () {
 		fTextViewer= null;
 		fDocument= null;
 		fValidator= null;
 	}
 
+	@Test
 	public void testParameterStyling() {
 		final String code= "a, b, c, d, e";
 		assertParameterInfoStyles(code, "int a, int b, int c, int d, int e", computeCommaPositions(code));
     }
 
+	@Test
 	public void testParameterStylingWithString() {
 		final String code= "a, b, \"foo, bar, and such\", d, e";
 		assertParameterInfoStyles(code, "int a, int b, String c, int d, int e", computeCommaPositions(code));
 	}
 
+	@Test
 	public void testParameterStylingWithEscapedString() {
 		final String code= "a, b, \"foo, b\\\"ar, and such\\\\\", d, e";
 		assertParameterInfoStyles(code, "int a, int b, String c, int d, int e", computeCommaPositions(code));
 	}
 
+	@Test
 	public void testParameterStylingWithComment() {
 		final String code= "a, b, c /* the ( argument */, d, e";
 		assertParameterInfoStyles(code, "int a, int b, String c, int d, int e", computeCommaPositions(code));
 	}
 
+	@Test
 	public void testParameterStylingWithGenerics() {
 		final String code= "new HashMap <String, HashMap<String,Integer[]>>(), p1, p2";
 		assertParameterInfoStyles(code, "Map<String, Map> m, int p1, int p2", computeCommaPositions(code));
 	}
 
+	@Test
 	public void testParameterStylingWithGenericsAndComments() {
 		final String code= "new HashMap <String, /* comment > */HashMap<String,Integer[]>>(), p1, p2";
 		assertParameterInfoStyles(code, "Map<String, Map> m, int p1, int p2", new int[] {64, 68});
 	}
 
+	@Test
 	public void testParameterStylingWithConstants() {
 		final String code= "MAX < MIN, MAX > MIN";
 		assertParameterInfoStyles(code, "boolean b1, boolean b2", new int[] {9});
 	}
 
+	@Test
 	public void testParameterStylingWithGenericsThatLookLikeConstants() {
 		final String code= "new MAX < MIN, MAX >";
 		assertParameterInfoStyles(code, "MAX<?,?>", new int[0]);
 	}
 
+	@Test
 	public void testParameterStylingWithNestedGenerics() {
 		final String code= "null, null";
 		assertParameterInfoStyles(code, "ICallback<List<ETypedElement>, T2, D> callback, Shell shell", computeCommaPositions(code));
@@ -231,14 +233,14 @@ public class JavaParameterListValidatorTest extends TestCase {
 
 	private static void assertEquals(TextPresentation expected, TextPresentation actual) {
 		// check lengths
-		assertTrue(expected.getDenumerableRanges() == actual.getDenumerableRanges());
+		Assert.assertEquals(expected.getDenumerableRanges(), actual.getDenumerableRanges());
 		// check default range
-		assertEquals(expected.getDefaultStyleRange(), actual.getDefaultStyleRange());
+		Assert.assertEquals(expected.getDefaultStyleRange(), actual.getDefaultStyleRange());
 		// check rest
 		Iterator<StyleRange> e1= expected.getAllStyleRangeIterator();
 		Iterator<StyleRange> e2= actual.getAllStyleRangeIterator();
 		while (e1.hasNext())
-			assertEquals(e1.next(), e2.next());
+			Assert.assertEquals(e1.next(), e2.next());
 	}
 
 	protected String print(TextPresentation presentation) {
@@ -259,26 +261,32 @@ public class JavaParameterListValidatorTest extends TestCase {
 		}
 		return buf.toString();
 	}
+	@Test
 	public void testValidPositions() {
 		assertValidPositions("(a, b, c)");
 	}
 
+	@Test
 	public void testValidPositionsWithComment() {
 		assertValidPositions("(a, b /* the ( argument */, c)");
 	}
 
+	@Test
 	public void testValidPositionsWithString() {
 		assertValidPositions("(a, \"foo, bar, and such\", c)");
 	}
 
+	@Test
 	public void testValidGenericPositions() throws Exception {
 	    assertValidPositions("(new A<T>(), new B<T>())");
     }
 
+	@Test
 	public void testValidAllPositions() throws Exception {
 		assertValidPositions("(new HashMap<String, HashMap<String,Integer[]>>(), p1, p2)");
 	}
 
+	@Test
 	public void testValidArrayPositions() throws Exception {
 		assertValidPositions("(foo[], bar[13])");
 	}
@@ -297,7 +305,7 @@ public class JavaParameterListValidatorTest extends TestCase {
 		IContextInformation info= new ContextInformation("context", "info");
 		fValidator.install(info, fTextViewer, 1);
 
-		assertTrue(!fValidator.isContextInformationValid(0));
+		assertFalse(fValidator.isContextInformationValid(0));
 		final int length= code.length();
 		final int firstInnerPosition= 1;
 		final int lastInnerPosition= length - 1;
@@ -305,11 +313,11 @@ public class JavaParameterListValidatorTest extends TestCase {
 		// forward
 		for (int pos= firstInnerPosition; pos <= lastInnerPosition; pos++)
 			assertTrue(fValidator.isContextInformationValid(pos));
-		assertTrue(!fValidator.isContextInformationValid(length));
+		assertFalse(fValidator.isContextInformationValid(length));
 
 		// backward
 		for (int pos= lastInnerPosition; pos >= firstInnerPosition; pos--)
 			assertTrue(fValidator.isContextInformationValid(pos));
-		assertTrue(!fValidator.isContextInformationValid(0));
+		assertFalse(fValidator.isContextInformationValid(0));
     }
 }

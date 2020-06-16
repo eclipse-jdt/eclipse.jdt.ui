@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -60,14 +60,14 @@ import org.eclipse.jdt.core.dom.ASTRequestor;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
-import org.eclipse.jdt.internal.corext.dom.Bindings;
-import org.eclipse.jdt.internal.corext.template.java.SignatureUtil;
 import org.eclipse.jdt.internal.core.manipulation.util.Strings;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
+import org.eclipse.jdt.internal.corext.template.java.SignatureUtil;
 
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorHighlightingSynchronizer;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
@@ -672,7 +672,10 @@ public class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposal {
 		if (completion.length == 0)
 			return false;
 
-		/* No argument list if there already is a generic signature behind the name. */
+		/*
+		 * No argument list if there already is a generic signature behind the name or a period to
+		 * qualify an inner type.
+		 * */
 		try {
 			IRegion region= document.getLineInformationOfOffset(offset);
 			String line= document.get(region.getOffset(), region.getLength());
@@ -685,7 +688,7 @@ public class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposal {
 				return true;
 
 			char ch= line.charAt(index);
-			return ch != '<';
+			return ch != '<' && ch != '.';
 
 		} catch (BadLocationException e) {
 			return true;

@@ -67,7 +67,12 @@ public class UnInitializedFinalFieldSubProcessor {
 			ITypeBinding targetDecl= targetBinding.getDeclaringClass();
 			ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, targetDecl);
 
-			proposals.add(new InitializeFinalFieldProposal(problem, targetCU, node, IProposalRelevance.CREATE_CONSTRUCTOR, true));
+			proposals.add(new InitializeFinalFieldProposal(problem, targetCU, node, IProposalRelevance.CREATE_CONSTRUCTOR, InitializeFinalFieldProposal.UPDATE_AT_CONSTRUCTOR));
+
+			InitializeFinalFieldProposal initializeFinalFieldProposal= new InitializeFinalFieldProposal(problem, targetCU, node, IProposalRelevance.CREATE_CONSTRUCTOR, InitializeFinalFieldProposal.UPDATE_CONSTRUCTOR_NEW_PARAMETER);
+			if(initializeFinalFieldProposal.hasProposal()) {
+				proposals.add(initializeFinalFieldProposal);
+			}
 
 		} else if (type == ASTNode.SIMPLE_NAME) {
 			// propose add initialization at declaration
@@ -84,5 +89,8 @@ public class UnInitializedFinalFieldSubProcessor {
 
 			proposals.add(new InitializeFinalFieldProposal(problem, targetCU, node, targetBinding, IProposalRelevance.CREATE_CONSTRUCTOR));
 		}
+	}
+
+	private UnInitializedFinalFieldSubProcessor() {
 	}
 }

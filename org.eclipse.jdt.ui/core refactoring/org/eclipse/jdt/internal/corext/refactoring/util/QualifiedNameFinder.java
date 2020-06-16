@@ -122,7 +122,7 @@ public class QualifiedNameFinder {
 		}
 	}
 
-	public QualifiedNameFinder() {
+	private QualifiedNameFinder() {
 	}
 
 	public static void process(QualifiedNameSearchResult result, String pattern, String newValue, String filePatterns, IProject root, IProgressMonitor monitor) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,6 +15,7 @@ package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.eclipse.swt.graphics.Image;
 
@@ -37,15 +38,19 @@ import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.ReturnStatement;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.TextElement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.YieldStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 
+import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -61,9 +66,6 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionPro
 import org.eclipse.jdt.internal.ui.text.correction.proposals.MissingReturnTypeCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.MissingReturnTypeInLambdaCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ReplaceCorrectionProposal;
-
-import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 
@@ -331,6 +333,41 @@ public class ReturnTypeSubProcessor {
 		}
 	}
 
+	public static void replaceReturnWithYieldStatementProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
+		ICompilationUnit cu= context.getCompilationUnit();
+		CompilationUnit astRoot= context.getASTRoot();
+		ASTNode selectedNode= problem.getCoveringNode(astRoot);
+		if (!(selectedNode instanceof ReturnStatement)) {
+			return;
+		}
+		ReturnStatement returnStatement= (ReturnStatement) selectedNode;
+		Expression expression= returnStatement.getExpression();
+		if (expression == null) {
+			return;
+		}
+		ASTNode parent= returnStatement.getParent();
+		if (parent instanceof Block) {
+			Block block= (Block) parent;
+			List<Statement> stmts= block.statements();
+			int index= stmts.indexOf(returnStatement);
+			if (index < 0) {
+				return;
+			}
+
+			AST ast= astRoot.getAST();
+			ASTRewrite rewrite= ASTRewrite.create(ast);
+
+			YieldStatement yieldStatement= ast.newYieldStatement();
+			yieldStatement.setExpression((Expression) rewrite.createMoveTarget(expression));
+			rewrite.replace(returnStatement, yieldStatement, null);
+
+			String label= CorrectionMessages.ReturnTypeSubProcessor_changeReturnToYield_description;
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, IProposalRelevance.REMOVE_ABSTRACT_MODIFIER, image);
+			proposals.add(proposal);
+		}
+	}
+
 	public static void addMethodRetunsVoidProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws JavaModelException {
 		CompilationUnit astRoot= context.getASTRoot();
 		ASTNode selectedNode= problem.getCoveringNode(astRoot);
@@ -351,5 +388,8 @@ public class ReturnTypeSubProcessor {
 			}
 			TypeMismatchSubProcessor.addChangeSenderTypeProposals(context, expression, retType.resolveBinding(), false, IProposalRelevance.METHOD_RETURNS_VOID, proposals);
 		}
+	}
+
+	private ReturnTypeSubProcessor() {
 	}
 }

@@ -436,7 +436,7 @@ public class RippleMethodFinder2 {
 	}
 
 	private void createHierarchyOfDeclarations(IProgressMonitor pm, WorkingCopyOwner owner) throws JavaModelException {
-		Stream<IType> types= fDeclarations.stream().map(method -> method.getDeclaringType());
+		Stream<IType> types= fDeclarations.stream().map(IMethod::getDeclaringType);
 		fHierarchy= createHierarchyOfTypes(pm, owner, types);
 	}
 

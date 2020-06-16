@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,18 +13,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
+import org.junit.Test;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenamingNameSuggestor;
 
-public class RenamingNameSuggestorTests extends TestCase {
-
-	public static Test suite() {
-		return new TestSuite(RenamingNameSuggestorTests.class);
-	}
-
+public class RenamingNameSuggestorTests {
 	String[] fPrefixes;
 	String[] fSuffixes;
 	RenamingNameSuggestor fSuggestor;
@@ -42,7 +38,7 @@ public class RenamingNameSuggestorTests extends TestCase {
 	}
 
 	public void mhf(String orig, String oldT, String newT) {
-		assertEquals(null, mHelper(orig, oldT, newT));
+		assertNull(mHelper(orig, oldT, newT));
 	}
 
 	public void fh(String orig, String changed, String oldT, String newT) {
@@ -50,15 +46,15 @@ public class RenamingNameSuggestorTests extends TestCase {
 	}
 
 	public void fhf(String orig, String oldT, String newT) {
-		assertEquals(null, fHelper(orig, oldT, newT));
+		assertNull(fHelper(orig, oldT, newT));
 	}
 
 	public void setStrategy(int strategy) {
 		fSuggestor= new RenamingNameSuggestor(strategy);
 	}
 
+	@Test
 	public void testOnlyPrefix() {
-
 		fPrefixes= new String[] { "f", "q" };
 		fSuffixes= new String[0];
 		setStrategy(RenamingNameSuggestor.STRATEGY_EXACT);
@@ -74,11 +70,10 @@ public class RenamingNameSuggestorTests extends TestCase {
 
 		// Unrelated stuff
 		assertNull(fHelper("fSomeClass", "Unrelated", "Unrelated2"));
-
 	}
 
+	@Test
 	public void testPrefixAndSuffix() {
-
 		fPrefixes= new String[] { "f", "q" };
 		fSuffixes= new String[] { "Suf1" };
 		setStrategy(RenamingNameSuggestor.STRATEGY_EXACT);
@@ -94,8 +89,8 @@ public class RenamingNameSuggestorTests extends TestCase {
 		assertEquals("newJavaElement", fHelper("javaElement", "IJavaElement", "INewJavaElement"));
 	}
 
+	@Test
 	public void testOnlySuffix() {
-
 		fPrefixes= new String[0];
 		fSuffixes= new String[] { "Suf1" };
 		setStrategy(RenamingNameSuggestor.STRATEGY_EXACT);
@@ -107,11 +102,10 @@ public class RenamingNameSuggestorTests extends TestCase {
 		//Interface names
 		assertEquals("newJavaElementSuf1", fHelper("javaElementSuf1", "IJavaElement", "INewJavaElement"));
 		assertEquals("newJavaElement", fHelper("javaElement", "IJavaElement", "INewJavaElement"));
-
 	}
 
+	@Test
 	public void testVeryShortNames() {
-
 		fPrefixes= new String[] { "f", "q" };
 		fSuffixes= new String[] { "_" };
 		setStrategy(RenamingNameSuggestor.STRATEGY_SUFFIX);
@@ -123,11 +117,10 @@ public class RenamingNameSuggestorTests extends TestCase {
 		assertEquals("b_", fHelper("a_", "A", "B"));
 
 		fh("mAHahAHa", "mBHahAHa", "A", "B"); // match first occurrence
-
 	}
 
+	@Test
 	public void testEmbeddedMatching() {
-
 		fPrefixes= new String[0];
 		fSuffixes= new String[0];
 		setStrategy(RenamingNameSuggestor.STRATEGY_EMBEDDED);
@@ -150,8 +143,8 @@ public class RenamingNameSuggestorTests extends TestCase {
 		fhf("createelementsecondelementnomore", "Element", "Member");
 	}
 
+	@Test
 	public void testCamelCaseMatching() {
-
 		fPrefixes= new String[0];
 		fSuffixes= new String[0];
 		setStrategy(RenamingNameSuggestor.STRATEGY_SUFFIX);
@@ -207,11 +200,10 @@ public class RenamingNameSuggestorTests extends TestCase {
 		// avoid "silly" name suggestions
 
 		fhf("fElement", "SomeLongElement", "AnotherDifferentElement"); //-> don't suggest renaming fElement to fElement!
-
 	}
 
+	@Test
 	public void testUpperCaseCamelCaseMatching() {
-
 		fPrefixes= new String[] { "f" };
 		fSuffixes= new String[0];
 
@@ -269,7 +261,6 @@ public class RenamingNameSuggestorTests extends TestCase {
 		mh("createAST", "createAbstractSyntaxTree", "AST", "AbstractSyntaxTree");
 
 		// match new hunks
-
 		fh("fASTNode", "fMyASTNode", "ASTNode", "MyASTNode");
 		fh("fAstNode", "fMyAstNode", "ASTNode", "MyASTNode");
 		fh("fDifferentAstNode", "fDifferentMyAstNode", "ASTNode", "MyASTNode");
@@ -277,11 +268,10 @@ public class RenamingNameSuggestorTests extends TestCase {
 
 		// propagating lowercased front
 		fh("astNode", "myAstNode", "ASTNode", "MyASTNode");
-
 	}
 
+	@Test
 	public void testPluralS() {
-
 		 fPrefixes= new String[0];
 		 fSuffixes= new String[0];
 		 setStrategy(RenamingNameSuggestor.STRATEGY_EXACT);
@@ -302,5 +292,4 @@ public class RenamingNameSuggestorTests extends TestCase {
 		 fh("someHandiesOnLoan", "someMobilePhonesOnLoan", "Handy", "MobilePhone");
 		 fh("somePhonesOnLoan", "someHandiesOnLoan", "MobilePhone", "Handy");
 	}
-
 }

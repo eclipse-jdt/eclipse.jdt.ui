@@ -176,9 +176,6 @@ class DeleteChangeCreator {
 				return createDeleteChange(((IClassFile)javaElement).getResource());
 
 			case IJavaElement.JAVA_MODEL: //cannot be done
-				Assert.isTrue(false);
-				return null;
-
 			case IJavaElement.JAVA_PROJECT: //handled differently
 				Assert.isTrue(false);
 				return null;
@@ -190,10 +187,8 @@ class DeleteChangeCreator {
 			case IJavaElement.PACKAGE_DECLARATION:
 			case IJavaElement.IMPORT_CONTAINER:
 			case IJavaElement.IMPORT_DECLARATION:
+			default://there's no more kinds
 				Assert.isTrue(false);//not done here
-				return new NullChange();
-			default:
-				Assert.isTrue(false);//there's no more kinds
 				return new NullChange();
 		}
 	}

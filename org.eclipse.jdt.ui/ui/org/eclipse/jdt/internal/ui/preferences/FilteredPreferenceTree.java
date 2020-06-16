@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -523,13 +524,14 @@ public class FilteredPreferenceTree {
 		fScrolledPageContent.setRedraw(false);
 		fScrolledPageContent.setReflow(false);
 
-		ArrayList<PreferenceTreeNode<?>> bfsNodes= new ArrayList<>();
+		ArrayDeque<PreferenceTreeNode<?>> bfsNodes= new ArrayDeque<>();
 		if (start != null) {
 			bfsNodes.add(start);
 		} else {
 			bfsNodes.addAll(fRoot.getChildren());
 		}
-		for (PreferenceTreeNode<?> node : bfsNodes) {
+		while (!bfsNodes.isEmpty()) {
+			PreferenceTreeNode<?> node= bfsNodes.remove();
 			bfsNodes.addAll(node.getChildren());
 			if (node.getControl() instanceof ExpandableComposite)
 				((ExpandableComposite) node.getControl()).setExpanded(expanded);

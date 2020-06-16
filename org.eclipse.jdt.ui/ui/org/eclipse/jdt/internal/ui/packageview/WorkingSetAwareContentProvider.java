@@ -213,12 +213,18 @@ public class WorkingSetAwareContentProvider extends PackageExplorerContentProvid
 		String property= event.getProperty();
 		Object newValue= event.getNewValue();
 		List<Object> toRefresh= new ArrayList<>(1);
-		if (WorkingSetModel.CHANGE_WORKING_SET_MODEL_CONTENT.equals(property)) {
-			toRefresh.add(fWorkingSetModel);
-		} else if (IWorkingSetManager.CHANGE_WORKING_SET_CONTENT_CHANGE.equals(property)) {
-			toRefresh.add(newValue);
-		} else if (IWorkingSetManager.CHANGE_WORKING_SET_LABEL_CHANGE.equals(property)) {
-			toRefresh.add(newValue);
+		if (property != null) {
+			switch (property) {
+				case WorkingSetModel.CHANGE_WORKING_SET_MODEL_CONTENT:
+					toRefresh.add(fWorkingSetModel);
+					break;
+				case IWorkingSetManager.CHANGE_WORKING_SET_CONTENT_CHANGE:
+				case IWorkingSetManager.CHANGE_WORKING_SET_LABEL_CHANGE:
+					toRefresh.add(newValue);
+					break;
+				default:
+					break;
+			}
 		}
 		ArrayList<Runnable> runnables= new ArrayList<>();
 		postRefresh(toRefresh, true, runnables);

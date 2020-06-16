@@ -14,6 +14,7 @@
 package org.eclipse.jdt.ui.tests.jarexport;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -117,12 +118,7 @@ public class PlainJarExportTests {
 		try (ZipFile jar= createArchive(data)) {
 			entries= getSortedEntries(jar);
 		}
-		List<String> expected= Arrays.asList(new String[] {
-				"META-INF/MANIFEST.MF\n",
-				"org/eclipse/jdt/ui/test/Main$1.class\n",
-				"org/eclipse/jdt/ui/test/Main$MainInner.class\n",
-				"org/eclipse/jdt/ui/test/Main.class\n",
-		});
+		List<String> expected= Arrays.asList("META-INF/MANIFEST.MF\n", "org/eclipse/jdt/ui/test/Main$1.class\n", "org/eclipse/jdt/ui/test/Main$MainInner.class\n", "org/eclipse/jdt/ui/test/Main.class\n");
 		assertEquals(expected.toString(), entries.toString());
 	}
 
@@ -137,9 +133,7 @@ public class PlainJarExportTests {
 		try (ZipFile jar= createArchive(data)) {
 			entries= getSortedEntries(jar);
 		}
-		List<String> expected= Arrays.asList(new String[] { "META-INF/MANIFEST.MF\n", "org/eclipse/jdt/ui/test/Main$1.class\n",
-				"org/eclipse/jdt/ui/test/Main$MainInner.class\n",
-				"org/eclipse/jdt/ui/test/Main.class\n", });
+		List<String> expected= Arrays.asList("META-INF/MANIFEST.MF\n", "org/eclipse/jdt/ui/test/Main$1.class\n", "org/eclipse/jdt/ui/test/Main$MainInner.class\n", "org/eclipse/jdt/ui/test/Main.class\n");
 
 		assertEquals(expected.toString(), entries.toString());
 	}
@@ -150,7 +144,8 @@ public class PlainJarExportTests {
 		JarPackageData data= createJarPackageData();
 
 		File classFolder= JavaTestPlugin.getDefault().getFileInPlugin(new Path("testresources/externalClassFolder/"));//$NON-NLS-1$
-		assertTrue("class folder not found", classFolder != null && classFolder.exists());//$NON-NLS-1$
+		assertNotNull("class folder not found", classFolder);//$NON-NLS-1$
+		assertTrue("class folder not found", classFolder.exists());//$NON-NLS-1$
 
 		IPackageFragmentRoot externalRoot= JavaProjectHelper.addLibrary(fProject, Path.fromOSString(classFolder.getPath()), null, null);
 
@@ -161,11 +156,7 @@ public class PlainJarExportTests {
 		try (ZipFile jar= createArchive(data)) {
 			entries= getSortedEntries(jar);
 		}
-		List<String> expected= Arrays.asList(new String[] {
-				"META-INF/MANIFEST.MF\n",
-				"org/eclipse/jdt/ui/test/Main$1.class\n",
-				"org/eclipse/jdt/ui/test/Main$MainInner.class\n",
-				"org/eclipse/jdt/ui/test/Main.class\n", });
+		List<String> expected= Arrays.asList("META-INF/MANIFEST.MF\n", "org/eclipse/jdt/ui/test/Main$1.class\n", "org/eclipse/jdt/ui/test/Main$MainInner.class\n", "org/eclipse/jdt/ui/test/Main.class\n");
 		assertEquals(expected.toString(), entries.toString());
 	}
 

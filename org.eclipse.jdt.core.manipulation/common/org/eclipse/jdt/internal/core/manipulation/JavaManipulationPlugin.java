@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -30,6 +30,9 @@ import org.eclipse.jdt.core.manipulation.JavaManipulation;
  */
 public class JavaManipulationPlugin extends Plugin implements DebugOptionsListener {
 
+	public static final boolean CODEASSIST_SUBSTRING_MATCH_ENABLED= //
+			Boolean.parseBoolean(System.getProperty("jdt.codeCompleteSubstringMatch", "true")); //$NON-NLS-1$//$NON-NLS-2$
+
 	public static boolean DEBUG_AST_PROVIDER;
 
 	//The shared instance.
@@ -41,7 +44,7 @@ public class JavaManipulationPlugin extends Plugin implements DebugOptionsListen
 	 * The constructor.
 	 */
 	public JavaManipulationPlugin() {
-		fgDefault = this;
+		fgDefault= this;
 	}
 
 	@Override
@@ -52,7 +55,7 @@ public class JavaManipulationPlugin extends Plugin implements DebugOptionsListen
 	@Override
 	public void stop(BundleContext context) throws Exception {
 		super.stop(context);
-		fgDefault = null;
+		fgDefault= null;
 	}
 
 	/**

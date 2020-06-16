@@ -197,4 +197,7 @@ public class Invocations {
 				throw new IllegalArgumentException(invocation.toString());
 		}
 	}
+
+	private Invocations() {
+	}
 }

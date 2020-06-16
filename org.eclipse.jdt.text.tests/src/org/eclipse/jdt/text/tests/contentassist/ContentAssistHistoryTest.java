@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2015 IBM Corporation and others.
+ * Copyright (c) 2005, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,31 +13,32 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.contentassist;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.core.runtime.Preferences;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.text.java.ContentAssistHistory;
 import org.eclipse.jdt.internal.ui.text.java.ContentAssistHistory.RHSHistory;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
 /**
  * @since 3.2
  */
-public class ContentAssistHistoryTest extends TestCase {
-	private static final Class<ContentAssistHistoryTest> THIS= ContentAssistHistoryTest.class;
-
+public class ContentAssistHistoryTest {
 	private static final String LINKED_LIST= "java.util.LinkedList";
 	private static final String ARRAY_LIST= "java.util.ArrayList";
 	private static final String ITERABLE= "java.lang.Iterable";
@@ -55,23 +56,14 @@ public class ContentAssistHistoryTest extends TestCase {
 	private static IType fgArrayListT;
 	private static IType fgLinkedListT;
 
-
-	public ContentAssistHistoryTest(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS, "ContentAssistHistoryTest"));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test) {
+	@Rule
+	public ProjectTestSetup pts= new ProjectTestSetup() {
 			/*
 			 * @see org.eclipse.jdt.ui.tests.core.ProjectTestSetup#setUp()
 			 */
 			@Override
-			protected void setUp() throws Exception {
-				super.setUp();
+			protected void before() throws Throwable {
+				super.before();
 
 				IJavaProject project= ProjectTestSetup.getProject();
 				fgStringT= project.findType(STRING);
@@ -83,8 +75,8 @@ public class ContentAssistHistoryTest extends TestCase {
 				fgLinkedListT= project.findType(LINKED_LIST);
 			}
 		};
-	}
 
+	@Test
 	public void testContentAssistHistoryIntInt() {
 		try {
 			new ContentAssistHistory(-1, 1);
@@ -103,6 +95,7 @@ public class ContentAssistHistoryTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testContentAssistHistory() {
 		try {
 			new ContentAssistHistory();
@@ -111,6 +104,7 @@ public class ContentAssistHistoryTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testRememberArgumentChecking() throws Exception {
 		ContentAssistHistory history= new ContentAssistHistory();
 		try {
@@ -135,6 +129,7 @@ public class ContentAssistHistoryTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testGetHistory() {
 		ContentAssistHistory history= new ContentAssistHistory();
 		assertTrue(history.getHistory(STRING).getTypes().isEmpty());
@@ -155,6 +150,7 @@ public class ContentAssistHistoryTest extends TestCase {
 		assertEquals("order not correct", list(STRING_BUFFER, STRING), history.getHistory(CHAR_SEQUENCE).getTypes());
 	}
 
+	@Test
 	public void testHistoryCapSize() {
 		ContentAssistHistory history= new ContentAssistHistory(1, 1);
 
@@ -177,6 +173,7 @@ public class ContentAssistHistoryTest extends TestCase {
 		assertEqualMap(map(COLLECTION, list(ARRAY_LIST)), history.getEntireHistory());
 	}
 
+	@Test
 	public void testGetHistoryForHierarchy() {
 		ContentAssistHistory history= new ContentAssistHistory();
 
@@ -184,6 +181,7 @@ public class ContentAssistHistoryTest extends TestCase {
 		assertEqualMap(map(LIST, list(ARRAY_LIST), COLLECTION, list(ARRAY_LIST), ITERABLE, list(ARRAY_LIST)), history.getEntireHistory());
 	}
 
+	@Test
 	public void testGetEntireHistory() {
 		ContentAssistHistory history= new ContentAssistHistory();
 
@@ -193,6 +191,7 @@ public class ContentAssistHistoryTest extends TestCase {
 		assertEqualMap(map(LIST, list(ARRAY_LIST), COLLECTION, list(ARRAY_LIST, LINKED_LIST), ITERABLE, list(ARRAY_LIST, LINKED_LIST)), history.getEntireHistory());
 	}
 
+	@Test
 	public void testReadOnlyEntireHistory() {
 		ContentAssistHistory history= new ContentAssistHistory();
 
@@ -213,6 +212,7 @@ public class ContentAssistHistoryTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testReadOnlyHistory() {
 		ContentAssistHistory history= new ContentAssistHistory();
 
@@ -227,6 +227,7 @@ public class ContentAssistHistoryTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testLoadStore() throws Exception {
 		ContentAssistHistory history= new ContentAssistHistory();
 

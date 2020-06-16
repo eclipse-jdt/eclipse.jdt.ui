@@ -141,4 +141,7 @@ public class ClasspathVMUtil {
 		}
 		return updated;
 	}
+
+	private ClasspathVMUtil() {
+	}
 }

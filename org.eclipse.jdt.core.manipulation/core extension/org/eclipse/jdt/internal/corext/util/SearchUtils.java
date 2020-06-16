@@ -76,4 +76,7 @@ public class SearchUtils {
 	public static boolean isCamelCasePattern(String pattern) {
 		return SearchPattern.validateMatchRule(pattern, SearchPattern.R_CAMELCASE_MATCH) == SearchPattern.R_CAMELCASE_MATCH;
 	}
+
+	private SearchUtils() {
+	}
 }

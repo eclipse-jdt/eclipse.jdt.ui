@@ -83,7 +83,6 @@ public class UnboxingCleanUp extends AbstractMultiFix {
 	@Override
 	public String getPreview() {
 		StringBuilder bld= new StringBuilder();
-		bld.append("\n"); //$NON-NLS-1$
 		bld.append("Integer integerObject = Integer.MAX_VALUE;\n"); //$NON-NLS-1$
 		bld.append("Character cObject = Character.MAX_VALUE;\n"); //$NON-NLS-1$
 		bld.append("\n"); //$NON-NLS-1$

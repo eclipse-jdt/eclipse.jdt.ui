@@ -13,9 +13,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text;
 
+import java.text.BreakIterator;
 import java.text.CharacterIterator;
-
-import com.ibm.icu.text.BreakIterator;
 
 import org.eclipse.core.runtime.Assert;
 
@@ -212,7 +211,6 @@ public class JavaWordIterator extends BreakIterator {
 	 * Sets the text as <code>CharSequence</code>.
 	 * @param newText the new text
 	 */
-	@Override
 	public void setText(CharSequence newText) {
 		fIterator.setText(newText);
 		first();

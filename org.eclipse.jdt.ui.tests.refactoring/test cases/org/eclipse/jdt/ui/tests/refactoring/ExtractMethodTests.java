@@ -21,6 +21,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import static org.eclipse.jdt.ui.tests.refactoring.AbstractJunit4SelectionTestCase.TestMode.COMPARE_WITH_OUTPUT;
+import static org.eclipse.jdt.ui.tests.refactoring.AbstractJunit4SelectionTestCase.TestMode.INVALID_SELECTION;
+import static org.eclipse.jdt.ui.tests.refactoring.AbstractJunit4SelectionTestCase.TestMode.VALID_SELECTION;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -28,7 +31,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -49,8 +52,8 @@ public class ExtractMethodTests extends AbstractJunit4SelectionTestCase {
 
 	private static final boolean BUG_405778= true; //XXX: [1.8][dom ast] method body recovery broken (empty body)
 
-	@ClassRule
-	public static ExtractMethodTestSetup fgTestSetup= new ExtractMethodTestSetup();
+	@Rule
+	public ExtractMethodTestSetup fgTestSetup= new ExtractMethodTestSetup();
 
 	@Override
 	public void setUp() throws Exception {
@@ -80,15 +83,15 @@ public class ExtractMethodTests extends AbstractJunit4SelectionTestCase {
 		return fgTestSetup.getSelectionPackage();
  	}
 
-	protected void performTest(IPackageFragment packageFragment, String id, int mode, String outputFolder) throws Exception {
+	protected void performTest(IPackageFragment packageFragment, String id, TestMode mode, String outputFolder) throws Exception {
 		performTest(packageFragment, id, mode, outputFolder, null, null, 0);
 	}
 
-	protected void performTest(IPackageFragment packageFragment, String id, int mode, String outputFolder, String[] newNames, int[] newOrder, int destination) throws Exception {
+	protected void performTest(IPackageFragment packageFragment, String id, TestMode mode, String outputFolder, String[] newNames, int[] newOrder, int destination) throws Exception {
 		performTest(packageFragment, id, mode, outputFolder, newNames, newOrder, destination, Modifier.PROTECTED);
 	}
 
-	protected void performTest(IPackageFragment packageFragment, String id, int mode, String outputFolder, String[] newNames, int[] newOrder, int destination, int visibility) throws Exception {
+	protected void performTest(IPackageFragment packageFragment, String id, TestMode mode, String outputFolder, String[] newNames, int[] newOrder, int destination, int visibility) throws Exception {
 		ICompilationUnit unit= createCU(packageFragment, id);
 		int[] selection= getSelection();
 		ExtractMethodRefactoring refactoring= new ExtractMethodRefactoring(unit, selection[0], selection[1]);
@@ -104,6 +107,7 @@ public class ExtractMethodTests extends AbstractJunit4SelectionTestCase {
 				if (!status.isOK())
 					return;
 				break;
+			case COMPARE_WITH_OUTPUT:
 			default:
 				break;
 		}

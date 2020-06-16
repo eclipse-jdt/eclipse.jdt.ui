@@ -59,38 +59,33 @@ public abstract class ConvertLoopOperation extends CompilationUnitRewriteOperati
 			.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
 	private static final Set<String> NO_BASE_TYPES	= Stream.of(
-			new String[] {
-					/* note: ints left out intentionally */
-					"integers", //$NON-NLS-1$
-					"floats", //$NON-NLS-1$
-					"doubles", //$NON-NLS-1$
-					"booleans", //$NON-NLS-1$
-					"bytes", //$NON-NLS-1$
-					"chars", //$NON-NLS-1$
-					"shorts", //$NON-NLS-1$
-					"longs"}) //$NON-NLS-1$
+			"integers", //$NON-NLS-1$
+			"floats", //$NON-NLS-1$
+			"doubles", //$NON-NLS-1$
+			"booleans", //$NON-NLS-1$
+			"bytes", //$NON-NLS-1$
+			"chars", //$NON-NLS-1$
+			"shorts", //$NON-NLS-1$
+			"longs") //$NON-NLS-1$
 			.collect(Collectors.toSet());
 
-	private static final Set<String> CUT_PREFIX= Stream.of(
-			new String[] {
-					"all"}) //$NON-NLS-1$
+	private static final Set<String> CUT_PREFIX= Stream.of("all") //$NON-NLS-1$
 			.collect(Collectors.toSet());
 
 	private static final Set<String> IRREG_ENDINGS= Stream.of(
-			new String[] {
-					"xes", //$NON-NLS-1$
-					"ies", //$NON-NLS-1$
-					"oes", //$NON-NLS-1$
-					"ses", //$NON-NLS-1$
-					"hes", //$NON-NLS-1$
-					"zes", //$NON-NLS-1$
-					"ves", //$NON-NLS-1$
-					"ces", //$NON-NLS-1$
-					"ss",  //$NON-NLS-1$
-					"is",  //$NON-NLS-1$
-					"us",  //$NON-NLS-1$
-					"os",  //$NON-NLS-1$
-					"as"}) //$NON-NLS-1$
+			"xes", //$NON-NLS-1$
+			"ies", //$NON-NLS-1$
+			"oes", //$NON-NLS-1$
+			"ses", //$NON-NLS-1$
+			"hes", //$NON-NLS-1$
+			"zes", //$NON-NLS-1$
+			"ves", //$NON-NLS-1$
+			"ces", //$NON-NLS-1$
+			"ss", //$NON-NLS-1$
+			"is", //$NON-NLS-1$
+			"us", //$NON-NLS-1$
+			"os", //$NON-NLS-1$
+			"as") //$NON-NLS-1$
 			.collect(Collectors.toSet());
 
 	private final ForStatement fStatement;

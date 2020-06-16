@@ -89,4 +89,7 @@ public class ReorgDestinationFactory {
 		return null;
 	}
 
+	private ReorgDestinationFactory() {
+	}
+
 }

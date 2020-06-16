@@ -252,4 +252,7 @@ public class NLSPropertyFileModifier {
 		}
 	}
 
+	private NLSPropertyFileModifier() {
+	}
+
 }

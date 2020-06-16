@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 2018, 2019 Angelo ZERR.
+ *  Copyright (c) 2018, 2020 Angelo ZERR.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -130,8 +130,6 @@ public class JavaEditorCodeMiningConfigurationBlock extends OptionsConfiguration
 		codeMiningEnabledCheckBox.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				atLeastOneCheckBox.setEnabled(codeMiningEnabledCheckBox.getSelection());
-				fFilteredPrefTree.setEnabled(codeMiningEnabledCheckBox.getSelection());
 				updateEnableStates();
 			}
 		});
@@ -207,6 +205,9 @@ public class JavaEditorCodeMiningConfigurationBlock extends OptionsConfiguration
 		boolean enabledCodeMining= getCheckBox(PREF_CODEMINING_ENABLED).getSelection();
 		if (enabledCodeMining) {
 			// Show references checkboxes
+			atLeastOneCheckBox.setEnabled(true);
+			fFilteredPrefTree.setEnabled(true);
+
 			boolean showReferences= getCheckBox(PREF_SHOW_REFERENCES).getSelection();
 			getCheckBox(PREF_SHOW_REFERENCES_ON_TYPES).setEnabled(showReferences);
 			getCheckBox(PREF_SHOW_REFERENCES_ON_FIELDS).setEnabled(showReferences);
@@ -234,7 +235,7 @@ public class JavaEditorCodeMiningConfigurationBlock extends OptionsConfiguration
 			return;
 		}
 		if (changedKey != null) {
-			if (PREF_SHOW_REFERENCES.equals(changedKey) || PREF_SHOW_IMPLEMENTATIONS.equals(changedKey)) {
+			if (PREF_CODEMINING_ENABLED.equals(changedKey) || PREF_SHOW_REFERENCES.equals(changedKey) || PREF_SHOW_IMPLEMENTATIONS.equals(changedKey)) {
 				updateEnableStates();
 			}
 		} else {

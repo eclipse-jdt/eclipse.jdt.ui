@@ -232,4 +232,7 @@ public class SuperTypeHierarchyCache {
 	public static int getCacheMisses() {
 		return fgCacheMisses;
 	}
+
+	private SuperTypeHierarchyCache() {
+	}
 }

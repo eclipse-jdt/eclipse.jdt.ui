@@ -53,7 +53,6 @@ import org.eclipse.swt.dnd.DropTarget;
 import org.eclipse.swt.dnd.DropTargetAdapter;
 import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.TextTransfer;
-import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.dnd.URLTransfer;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
@@ -1629,7 +1628,7 @@ action enablement
 
 		String testRunLabel= BasicElementLabels.getJavaElementName(fTestRunSession.getTestRunName());
 		if (testKindDisplayStr != null)
-			setTitleToolTip(MessageFormat.format(JUnitMessages.TestRunnerViewPart_titleToolTip, new Object[] {testRunLabel, testKindDisplayStr}));
+			setTitleToolTip(MessageFormat.format(JUnitMessages.TestRunnerViewPart_titleToolTip, testRunLabel, testKindDisplayStr));
 		else
 			setTitleToolTip(testRunLabel);
 	}
@@ -1871,7 +1870,7 @@ action enablement
 
 	private void addDropAdapter(Composite parent) {
 		DropTarget dropTarget = new DropTarget(parent, DND.DROP_MOVE | DND.DROP_COPY | DND.DROP_LINK | DND.DROP_DEFAULT);
-		dropTarget.setTransfer(new Transfer[] { TextTransfer.getInstance() });
+		dropTarget.setTransfer(TextTransfer.getInstance());
 		class DropAdapter extends DropTargetAdapter {
 		    @Override
 			public void dragEnter(DropTargetEvent event) {

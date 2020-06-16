@@ -4,7 +4,7 @@
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
- * https://www.eclipse.org/legal/epl-2.0/
+ * https:// Www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
  *
@@ -15,7 +15,9 @@ package org.eclipse.jdt.ui.tests.packageview;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import org.junit.After;
 import org.junit.Before;
@@ -55,16 +57,13 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 
-
 /**
  * Tests for the PackageExplorerContentProvider.
  *
  * @since 2.1
  */
 @RunWith(JUnit4.class)
-public class ContentProviderTests1{
-
-
+public class ContentProviderTests1 {
 	private IJavaProject fJProject1;
 	private IJavaProject fJProject2;
 
@@ -104,99 +103,97 @@ public class ContentProviderTests1{
 
 	//---------Test for getChildren-------------------
 	@Test
-	public void testGetChildrenProjectWithSourceFolders() throws Exception{
+	public void testGetChildrenProjectWithSourceFolders() throws Exception {
 		Object[] expectedChildren= new Object[]{fRoot1, fDotClasspathFile, fDotProjectFile};
-		Object[] children= fProvider.getChildren(fJProject2);
-		assertTrue("Wrong children found for project", compareArrays(children, expectedChildren));//$NON-NLS-1$
+		Object[] actualChildren= fProvider.getChildren(fJProject2);
+		assertTrue("Wrong children found for project", compareArrays(actualChildren, expectedChildren));//$NON-NLS-1$
 	}
 
 	@Test
-	public void testGetChildrentMidLevelFragment() throws Exception{
+	public void testGetChildrentMidLevelFragment() throws Exception {
 		Object[] expectedChildren= new Object[]{fPack4, fPack5};
-		Object[] children= fProvider.getChildren(fPack3);
-		assertTrue("Wrong children found for PackageFragment",compareArrays(children, expectedChildren));//$NON-NLS-1$
+		Object[] actualChildren= fProvider.getChildren(fPack3);
+		assertTrue("Wrong children found for PackageFragment", compareArrays(actualChildren, expectedChildren));//$NON-NLS-1$
 	}
 
 	@Test
-	public void testGetChildrenBottomLevelFragment() throws Exception{
+	public void testGetChildrenBottomLevelFragment() throws Exception {
 		Object[] expectedChildren= new Object[]{fCU1};
-		Object[] children= fProvider.getChildren(fPack2);
-		assertTrue("Wrong children found for PackageFragment",compareArrays(children, expectedChildren));//$NON-NLS-1$
+		Object[] actualChildren= fProvider.getChildren(fPack2);
+		assertTrue("Wrong children found for PackageFragment", compareArrays(actualChildren, expectedChildren));//$NON-NLS-1$
 	}
 
 	@Test
-	public void testGetChildrenMidLevelFragmentInArchive() throws Exception{
+	public void testGetChildrenMidLevelFragmentInArchive() throws Exception {
 		Object[] expectedChildren= new Object[]{fPackJunitSamplesMoney, fCUAllTests, fCUSimpleTest, fCUVectorTest };
-		Object[] children= fProvider.getChildren(fPackJunitSamples);
-		assertTrue("wrong chidren found for mid level PackageFragment in Archive", compareArrays(children, expectedChildren));//$NON-NLS-1$
+		Object[] actualChildren= fProvider.getChildren(fPackJunitSamples);
+		assertTrue("wrong chidren found for mid level PackageFragment in Archive", compareArrays(actualChildren, expectedChildren));//$NON-NLS-1$
 	}
 
 	@Test
-	public void testGetChildrenBottomLevelFragmentInArchive() throws Exception{
+	public void testGetChildrenBottomLevelFragmentInArchive() throws Exception {
 		Object[] expectedChildren= new Object[]{fCUIMoney, fCUMoney, fCUMoneyBag, fCUMoneyTest};
-		Object[] children= fProvider.getChildren(fPackJunitSamplesMoney);
-		assertTrue("wrong children found for a bottom PackageFragment in PackageFragmentRoot Archive", compareArrays(children, expectedChildren));	//$NON-NLS-1$
+		Object[] actualChildren= fProvider.getChildren(fPackJunitSamplesMoney);
+		assertTrue("wrong children found for a bottom PackageFragment in PackageFragmentRoot Archive", compareArrays(actualChildren, expectedChildren));	//$NON-NLS-1$
 	}
 
 	@Test
 	public void testGetChildrenSourceFolder() throws Exception {
 		Object[] expectedChildren = new Object[] { fPack1, fPack2, fPack3, fRoot1.getPackageFragment("")};//$NON-NLS-1$
-		Object[] children = fProvider.getChildren(fRoot1);
-		assertTrue("Wrong children found for PackageFragmentRoot", compareArrays(children, expectedChildren));//$NON-NLS-1$
+		Object[] actualChildren = fProvider.getChildren(fRoot1);
+		assertTrue("Wrong children found for PackageFragmentRoot", compareArrays(actualChildren, expectedChildren));//$NON-NLS-1$
 	}
 
 	@Test
 	public void testGetChildrenArchive(){	Object[] expectedChildren= new Object[]{fPackJunit, fArchiveFragmentRoot.getPackageFragment("")};//$NON-NLS-1$
-		Object[] children= fProvider.getChildren(fArchiveFragmentRoot);
-		assertTrue("Wrong child found for PackageFragmentRoot Archive", compareArrays(children,expectedChildren));//$NON-NLS-1$
+		Object[] actualChildren= fProvider.getChildren(fArchiveFragmentRoot);
+		assertTrue("Wrong child found for PackageFragmentRoot Archive", compareArrays(actualChildren, expectedChildren));//$NON-NLS-1$
 	}
 
 	//---------------Get Parent Tests-----------------------------
 
 	@Test
-	public void testGetParentArchive() throws Exception{
+	public void testGetParentArchive() throws Exception {
 		Object parent= fProvider.getParent(fArchiveFragmentRoot);
-		assertTrue("Wrong parent found for PackageFragmentRoot Archive", parent==fJProject1);//$NON-NLS-1$
+		assertSame("Wrong parent found for PackageFragmentRoot Archive", parent, fJProject1);//$NON-NLS-1$
 	}
 
 	@Test
-	public void testGetParentMidLevelFragmentInArchive() throws Exception{
+	public void testGetParentMidLevelFragmentInArchive() throws Exception {
 		Object expectedParent= fPackJunitSamples;
-		Object parent= fProvider.getParent(fPackJunitSamplesMoney);
-		assertTrue("Wrong parent found for a NON top level PackageFragment in an Archive", expectedParent.equals(parent));//$NON-NLS-1$
+		Object actualParent= fProvider.getParent(fPackJunitSamplesMoney);
+		assertEquals("Wrong parent found for a NON top level PackageFragment in an Archive", expectedParent, actualParent);//$NON-NLS-1$
 	}
 
 	@Test
-	public void testGetParentTopLevelFragmentInArchive() throws Exception{
+	public void testGetParentTopLevelFragmentInArchive() throws Exception {
 		Object expectedParent= fPackJunit;
-		Object parent= fProvider.getParent(fPackJunitSamples);
-		assertTrue("Wrong parent found for a top level PackageFragment in an Archive", expectedParent.equals(parent));	//$NON-NLS-1$
+		Object actualParent= fProvider.getParent(fPackJunitSamples);
+		assertEquals("Wrong parent found for a top level PackageFragment in an Archive", expectedParent, actualParent);	//$NON-NLS-1$
 	}
 
 	@Test
-	public void testGetParentTopLevelFragment() throws Exception{
+	public void testGetParentTopLevelFragment() throws Exception {
 		Object expectedParent= fRoot1;
-		Object parent= fProvider.getParent(fPack3);
-		assertTrue("Wrong parent found for a top level PackageFragment", expectedParent.equals(parent));//$NON-NLS-1$
+		Object actualParent= fProvider.getParent(fPack3);
+		assertEquals("Wrong parent found for a top level PackageFragment", expectedParent, actualParent);//$NON-NLS-1$
 	}
 
 	@Test
-	public void testGetParentMidLevelFragment() throws Exception{
+	public void testGetParentMidLevelFragment() throws Exception {
 		Object expectedParent= fPack3;
-		Object parent= fProvider.getParent(fPack4);
-		assertTrue("Wrong parent found for a NON top level PackageFragment", expectedParent.equals(parent));//$NON-NLS-1$
+		Object actualParent= fProvider.getParent(fPack4);
+		assertEquals("Wrong parent found for a NON top level PackageFragment", expectedParent, actualParent);//$NON-NLS-1$
 	}
 
-
 	@Test
-	public void testDeleteBottomLevelFragment() throws Exception{
-
-		//send a delta indicating fragment deleted
+	public void testDeleteBottomLevelFragment() throws Exception {
+		// Send a delta indicating fragment deleted
 		IElementChangedListener listener= (IElementChangedListener)fProvider;
 		IJavaElementDelta delta= TestDelta.createDelta(fPack2, IJavaElementDelta.REMOVED);
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
 
-		//force events from dispaly
+		// Force events from dispaly
 		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch()) {}
 
 		assertTrue("Remove happened", fMyPart.hasRemoveHappened());//$NON-NLS-1$
@@ -208,55 +205,54 @@ public class ContentProviderTests1{
 	public void testAddBottomLevelFragment() throws Exception {
 		IPackageFragment test= fRoot1.createPackageFragment("test", true, null);//$NON-NLS-1$
 
-		//send a delta indicating fragment deleted
+		// Send a delta indicating fragment deleted
 		IElementChangedListener listener= (IElementChangedListener) fProvider;
 		IJavaElementDelta delta= TestDelta.createDelta(test, IJavaElementDelta.ADDED);
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
 
-		//force events from dispaly
+		// Force events from dispaly
 		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch()) {}
 
 		assertTrue("Add happened", fMyPart.hasAddHappened()); //$NON-NLS-1$
-		assertTrue("Correct Add", test.equals(fMyPart.getAddedObject())); //$NON-NLS-1$
+		assertEquals("Correct Add", test, fMyPart.getAddedObject()); //$NON-NLS-1$
 		assertEquals("No refreshes", 0, fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
 	}
 
 	@Test
 	public void testChangedTopLevelPackageFragment() throws Exception {
-		//send a delta indicating fragment deleted
+		// Send a delta indicating fragment deleted
 		IElementChangedListener listener= (IElementChangedListener) fProvider;
 		IJavaElementDelta delta= TestDelta.createDelta(fPack3, IJavaElementDelta.CHANGED);
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
 
-		//force events from display
+		// Force events from display
 		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch()) {}
 
 		assertEquals("No refresh happened", 0, fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
 	}
 
 	@Test
-	public void testChangeBottomLevelPackageFragment() throws Exception{
-		//send a delta indicating fragment deleted
+	public void testChangeBottomLevelPackageFragment() throws Exception {
+		// Send a delta indicating fragment deleted
 		fMyPart.clear();
 		IElementChangedListener listener= (IElementChangedListener) fProvider;
 		IJavaElementDelta delta= TestDelta.createDelta(fPack6, IJavaElementDelta.CHANGED);
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
 
-		//force events from display
+		// Force events from display
 		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch()) {}
 
 		assertEquals("No refresh happened", 0, fMyPart.getRefreshedObject().size());//$NON-NLS-1$
 	}
 
 	@Test
-	public void testRemoveCUsFromPackageFragment() throws Exception{
-
-		//send a delta indicating fragment deleted
+	public void testRemoveCUsFromPackageFragment() throws Exception {
+		// Send a delta indicating fragment deleted
 		IElementChangedListener listener= (IElementChangedListener) fProvider;
 		IJavaElementDelta delta= TestDelta.createCUDelta(new ICompilationUnit[] { fCU2, fCU3 }, fPack6, IJavaElementDelta.REMOVED);
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
 
-		//force events from display
+		// Force events from display
 		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch()) {}
 
 		// removing more than one CU now results in a refresh.
@@ -265,13 +261,12 @@ public class ContentProviderTests1{
 
 	@Test
 	public void testRemoveCUFromPackageFragment() throws Exception {
-
-		//send a delta indicating fragment deleted
+		// Send a delta indicating fragment deleted
 		IElementChangedListener listener= (IElementChangedListener) fProvider;
 		IJavaElementDelta delta= TestDelta.createCUDelta(new ICompilationUnit[]{fCU2}, fPack6, IJavaElementDelta.REMOVED);
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
 
-		//force events from display
+		// Force events from display
 		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch()) {}
 
 		assertTrue("Remove happened", fMyPart.hasRemoveHappened()); //$NON-NLS-1$
@@ -296,7 +291,7 @@ public class ContentProviderTests1{
 	}
 
 //	public void testAddWorkingCopyCU() throws Exception {
-//		//test for bug 106452: Paste of source into container doesn't refresh package explorer
+//		// Test for bug 106452: Paste of source into container doesn't refresh package explorer
 //		ICompilationUnit cu= fPack6.createCompilationUnit("New.java","class New {}", true, null);//$NON-NLS-1$//$NON-NLS-2$
 //		cu.becomeWorkingCopy(null, null);
 //
@@ -305,7 +300,7 @@ public class ContentProviderTests1{
 //			fMyPart.getTreeViewer().reveal(fCU2);
 //			((PackageExplorerContentProvider) fMyPart.getTreeViewer().getContentProvider()).setProvideMembers(false);
 //
-//			//force events from display
+//			// Force events from display
 //			while (fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch()) {
 //			}
 //
@@ -313,7 +308,7 @@ public class ContentProviderTests1{
 //			IJavaElementDelta delta= TestDelta.createCUDelta(new ICompilationUnit[] { cu }, fPack6, IJavaElementDelta.ADDED);
 //			listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
 //
-//			//force events from display
+//			// Force events from display
 //			while (fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch()) {
 //			}
 //
@@ -331,7 +326,6 @@ public class ContentProviderTests1{
 
 	@Before
 	public void setUp() throws Exception {
-
 		fWorkspace= ResourcesPlugin.getWorkspace();
 		assertNotNull(fWorkspace);
 		IWorkspaceDescription workspaceDesc= fWorkspace.getDescription();
@@ -361,12 +355,13 @@ public class ContentProviderTests1{
 		assertNotNull(fDotClasspathFile);
 		assertNotNull(fDotProjectFile);
 
-		//set up project #1 : External Jar and zip file
+		// Set up project #1 : External Jar and zip file
 		IPackageFragmentRoot jdk= JavaProjectHelper.addVariableRTJar(fJProject1, "JRE_LIB_TEST", null, null);//$NON-NLS-1$
-		assertTrue("jdk not found", jdk != null);//$NON-NLS-1$
+		assertNotNull("jdk not found", jdk);//$NON-NLS-1$
 
 		java.io.File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
-		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());//$NON-NLS-1$
+		assertNotNull("junit src not found", junitSrcArchive);//$NON-NLS-1$
+		assertTrue("junit src not found", junitSrcArchive.exists());//$NON-NLS-1$
 
 		fArchiveFragmentRoot= JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);//$NON-NLS-1$
 		assertTrue("Unable to create zipfile archive",fArchiveFragmentRoot.exists());//$NON-NLS-1$
@@ -387,7 +382,7 @@ public class ContentProviderTests1{
 		fCUAllTests= fPackJunitSamples.getCompilationUnit("AllTests.java");//$NON-NLS-1$
 		fCUVectorTest= fPackJunitSamples.getCompilationUnit("VectorTest.java");//$NON-NLS-1$
 		fCUSimpleTest= fPackJunitSamples.getCompilationUnit("SimpleTest.java");//$NON-NLS-1$
-		//set up project #2: file system structure with in a source folder
+		// Set up project #2: file system structure with in a source folder
 
 	//	JavaProjectHelper.addVariableEntry(fJProject2, new Path("JRE_LIB_TEST"), null, null);
 
@@ -403,19 +398,18 @@ public class ContentProviderTests1{
 		fCU2= fPack6.createCompilationUnit("Object.java","", true, null);//$NON-NLS-1$//$NON-NLS-2$
 		fCU3= fPack6.createCompilationUnit("Jen.java","", true,null);//$NON-NLS-1$//$NON-NLS-2$
 
-		//set up the mock view
+		// Set up the mock view
 		setUpMockView();
 	}
 
-	public void setUpMockView() throws Exception{
-
+	public void setUpMockView() throws Exception {
 		fWorkbench= PlatformUI.getWorkbench();
 		assertNotNull(fWorkbench);
 
 		page= fWorkbench.getActiveWorkbenchWindow().getActivePage();
 		assertNotNull(page);
 
-		//just testing to make sure my part can be created
+		// Just testing to make sure my part can be created
 		IViewPart myPart= new MockPluginView();
 		assertNotNull(myPart);
 
@@ -424,10 +418,10 @@ public class ContentProviderTests1{
 			fMyPart= (MockPluginView) myPart;
 			fMyPart.setFolding(false);
 			fMyPart.setFlatLayout(false);
-			// above call might cause a property change event being sent
+			// Above call might cause a property change event being sent
 			fMyPart.clear();
 			fProvider= (ITreeContentProvider)fMyPart.getTreeViewer().getContentProvider();
-		}else assertTrue("Unable to get view",false);//$NON-NLS-1$
+		}else fail("Unable to get view");//$NON-NLS-1$
 
 		assertNotNull(fProvider);
 	}
@@ -442,7 +436,6 @@ public class ContentProviderTests1{
 
 		if (fEnableAutoBuildAfterTesting)
 			CoreUtility.setAutoBuilding(true);
-
 	}
 
 	/**
@@ -466,8 +459,10 @@ public class ContentProviderTests1{
 				}
 			}
 		}
+
 		return true;
 	}
+
 	/**
 	 * Method contains.
 	 * @param res
@@ -482,6 +477,7 @@ public class ContentProviderTests1{
 					return true;
 			}
 		}
+
 		return false;
 	}
 
@@ -499,7 +495,7 @@ public class ContentProviderTests1{
 					return true;
 			}
 		}
+
 		return false;
 	}
-
 }

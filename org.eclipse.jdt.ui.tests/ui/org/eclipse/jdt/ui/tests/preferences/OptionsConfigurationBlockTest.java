@@ -85,7 +85,7 @@ public class OptionsConfigurationBlockTest {
 	 */
 	@Deprecated
 	private void removeUnusedOptions(HashMap<String, String> coreFieldLookup) {
-		coreFieldLookup.keySet().removeAll(Arrays.asList(new String[] {
+		coreFieldLookup.keySet().removeAll(Arrays.asList(
 				JavaCore.COMPILER_PB_INCONSISTENT_NULL_CHECK,
 				JavaCore.COMPILER_PB_INVALID_IMPORT,
 				JavaCore.COMPILER_PB_UNREACHABLE_CODE,
@@ -105,8 +105,7 @@ public class OptionsConfigurationBlockTest {
 				JavaCore.COMPILER_PB_DEAD_CODE_IN_TRIVIAL_IF_STATEMENT, // default is good (don't flag trivial 'if (DEBUG)')
 
 				JavaCore.CODEASSIST_DISCOURAGED_REFERENCE_CHECK, // is on the Type Filters page now, see https://bugs.eclipse.org/218487
-				JavaCore.CODEASSIST_FORBIDDEN_REFERENCE_CHECK,   // is on the Type Filters page now, see https://bugs.eclipse.org/218487
-		}));
+				JavaCore.CODEASSIST_FORBIDDEN_REFERENCE_CHECK));   // is on the Type Filters page now, see https://bugs.eclipse.org/218487
 	}
 
 	private void checkConfigurationBlock(Class<?> configurationBlock, HashMap<String, String> coreFieldLookup) throws Exception {

@@ -87,4 +87,7 @@ public class ConfigureProblemSeveritySubProcessor {
 
 		proposals.add(proposal);
 	}
+
+	private ConfigureProblemSeveritySubProcessor() {
+	}
 }

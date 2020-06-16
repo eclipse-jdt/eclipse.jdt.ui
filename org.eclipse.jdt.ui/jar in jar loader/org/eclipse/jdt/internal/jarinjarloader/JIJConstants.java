@@ -36,4 +36,7 @@ final class JIJConstants {
 	static final String CURRENT_DIR                          = "./";  //$NON-NLS-1$
 	static final String UTF8_ENCODING                        = "UTF-8";  //$NON-NLS-1$
 	static final String RUNTIME                              = "#runtime";  //$NON-NLS-1$
+
+	private JIJConstants() {
+	}
 }

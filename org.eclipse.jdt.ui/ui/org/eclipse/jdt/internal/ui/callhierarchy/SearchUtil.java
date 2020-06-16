@@ -141,4 +141,7 @@ public class SearchUtil {
 		}
 		return result;
 	}
+
+	private SearchUtil() {
+	}
 }

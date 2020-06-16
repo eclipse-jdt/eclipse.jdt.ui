@@ -65,8 +65,8 @@ public class InlineTempTests extends GenericRefactoringTest {
 
 	private ISourceRange getSelection(ICompilationUnit cu) throws Exception{
 		String source= cu.getSource();
-		int offset= source.indexOf(AbstractSelectionTestCase.SQUARE_BRACKET_OPEN);
-		int end= source.indexOf(AbstractSelectionTestCase.SQUARE_BRACKET_CLOSE);
+		int offset= source.indexOf(AbstractJunit4SelectionTestCase.SQUARE_BRACKET_OPEN);
+		int end= source.indexOf(AbstractJunit4SelectionTestCase.SQUARE_BRACKET_CLOSE);
 		return new SourceRange(offset, end - offset);
 	}
 

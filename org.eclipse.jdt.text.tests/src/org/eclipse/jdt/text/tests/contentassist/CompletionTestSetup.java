@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,8 +13,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.contentassist;
 
-import junit.framework.Test;
-
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.core.runtime.CoreException;
@@ -23,10 +21,9 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 class CompletionTestSetup extends ProjectTestSetup {
-
 	public static IPackageFragment getTestPackage() throws CoreException {
 		IJavaProject project= getProject();
 		IPackageFragmentRoot root= project.getPackageFragmentRoot("src");
@@ -53,9 +50,5 @@ class CompletionTestSetup extends ProjectTestSetup {
 			fragment= root.createPackageFragment("test1", false, null);
 
 		return fragment;
-	}
-
-	public CompletionTestSetup(Test test) {
-		super(test);
 	}
 }

@@ -585,9 +585,9 @@ public class ExtractConstantRefactoring extends Refactoring {
 			comment.addSetting(RefactoringCoreMessages.ExtractConstantRefactoring_qualify_references);
 		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT, JavaRefactoringDescriptorUtil.elementToHandle(project, fCu));
 		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME, fConstantName);
-		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION, Integer.valueOf(fSelectionStart).toString() + " " + Integer.valueOf(fSelectionLength).toString()); //$NON-NLS-1$
-		arguments.put(ATTRIBUTE_REPLACE, Boolean.valueOf(fReplaceAllOccurrences).toString());
-		arguments.put(ATTRIBUTE_QUALIFY, Boolean.valueOf(fQualifyReferencesWithDeclaringClassName).toString());
+		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION, Integer.toString(fSelectionStart) + " " + Integer.toString(fSelectionLength)); //$NON-NLS-1$
+		arguments.put(ATTRIBUTE_REPLACE, Boolean.toString(fReplaceAllOccurrences));
+		arguments.put(ATTRIBUTE_QUALIFY, Boolean.toString(fQualifyReferencesWithDeclaringClassName));
 		arguments.put(ATTRIBUTE_VISIBILITY, Integer.valueOf(JdtFlags.getVisibilityCode(fVisibility)).toString());
 
 		ExtractConstantDescriptor descriptor= RefactoringSignatureDescriptorFactory.createExtractConstantDescriptor(project, description, comment.asString(), arguments, flags);
@@ -850,9 +850,9 @@ public class ExtractConstantRefactoring extends Refactoring {
 			int length= -1;
 			final StringTokenizer tokenizer= new StringTokenizer(selection);
 			if (tokenizer.hasMoreTokens())
-				offset= Integer.valueOf(tokenizer.nextToken()).intValue();
+				offset= Integer.parseInt(tokenizer.nextToken());
 			if (tokenizer.hasMoreTokens())
-				length= Integer.valueOf(tokenizer.nextToken()).intValue();
+				length= Integer.parseInt(tokenizer.nextToken());
 			if (offset >= 0 && length >= 0) {
 				fSelectionStart= offset;
 				fSelectionLength= length;
@@ -886,12 +886,12 @@ public class ExtractConstantRefactoring extends Refactoring {
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME));
 		final String replace= arguments.getAttribute(ATTRIBUTE_REPLACE);
 		if (replace != null) {
-			fReplaceAllOccurrences= Boolean.valueOf(replace).booleanValue();
+			fReplaceAllOccurrences= Boolean.parseBoolean(replace);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_REPLACE));
 		final String declareFinal= arguments.getAttribute(ATTRIBUTE_QUALIFY);
 		if (declareFinal != null) {
-			fQualifyReferencesWithDeclaringClassName= Boolean.valueOf(declareFinal).booleanValue();
+			fQualifyReferencesWithDeclaringClassName= Boolean.parseBoolean(declareFinal);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_QUALIFY));
 		return new RefactoringStatus();

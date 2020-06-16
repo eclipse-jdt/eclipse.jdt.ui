@@ -83,7 +83,6 @@ public class RedundantModifiersCleanUp extends AbstractMultiFix {
 	@Override
 	public String getPreview() {
 		StringBuilder buf= new StringBuilder();
-		buf.append("\n"); //$NON-NLS-1$
 		if (isEnabled(CleanUpConstants.REMOVE_REDUNDANT_MODIFIERS)) {
 			buf.append("public interface IFoo {\n"); //$NON-NLS-1$
 			buf.append("  int MAGIC_NUMBER = 646;\n"); //$NON-NLS-1$

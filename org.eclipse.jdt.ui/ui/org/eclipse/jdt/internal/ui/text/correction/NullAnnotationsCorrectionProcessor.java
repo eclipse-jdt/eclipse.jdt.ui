@@ -222,4 +222,7 @@ public class NullAnnotationsCorrectionProcessor {
 			proposals.add(new MakeLocalVariableNonNullProposal(cu, variableBinding, astRoot, IProposalRelevance.CHANGE_NULLNESS_ANNOTATION, nonNullAnnotationName));
 		}
 	}
+
+	private NullAnnotationsCorrectionProcessor() {
+	}
 }

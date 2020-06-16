@@ -743,4 +743,7 @@ private static void zip(File dir, ZipOutputStream zip, int rootPathLength) throw
         }
     }
 }
+
+	private JarUtil() {
+	}
 }

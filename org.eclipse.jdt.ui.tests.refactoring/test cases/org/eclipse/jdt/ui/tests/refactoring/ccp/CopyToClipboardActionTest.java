@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,9 +13,17 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring.ccp;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.FileTransfer;
@@ -38,29 +46,25 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 
+import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 import org.eclipse.jdt.internal.corext.refactoring.TypedSource;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaElementTransfer;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
-import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
-import org.eclipse.jdt.ui.tests.refactoring.RefactoringTestSetup;
+import org.eclipse.jdt.ui.tests.refactoring.GenericRefactoringTest;
 import org.eclipse.jdt.ui.tests.refactoring.infra.MockClipboard;
 import org.eclipse.jdt.ui.tests.refactoring.infra.MockWorkbenchSite;
+import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
 import org.eclipse.jdt.internal.ui.refactoring.reorg.CopyToClipboardAction;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.TypedSourceTransfer;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
-
-public class CopyToClipboardActionTest extends RefactoringTest{
+public class CopyToClipboardActionTest extends GenericRefactoringTest {
+	private static final String CU_A_NAME= "A";
+	private static final String CU_B_NAME= "B";
 
 	private ILabelProvider fLabelProvider;
-
-	private static final Class<CopyToClipboardActionTest> clazz= CopyToClipboardActionTest.class;
 
 	private Clipboard fClipboard;
 
@@ -69,22 +73,15 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 	private IPackageFragment fPackageQ;
 	private IPackageFragment fPackageQ_R;
 	private IPackageFragment fDefaultPackage;
-	private static final String CU_A_NAME= "A";
-	private static final String CU_B_NAME= "B";
 	private IFile faTxt;
 	private IFolder fOlder;
 
-	public CopyToClipboardActionTest(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return new RefactoringTestSetup(new TestSuite(clazz));
-	}
+	@Rule
+	public RefactoringTestSetup fts= new RefactoringTestSetup();
 
 	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
+	public void genericbefore() throws Exception {
+		super.genericbefore();
 		fClipboard= new MockClipboard(Display.getDefault());
 		fDefaultPackage= RefactoringTestSetup.getDefaultSourceFolder().createPackageFragment("", true, null);
 
@@ -125,8 +122,8 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 	}
 
 	@Override
-	protected void tearDown() throws Exception {
-		super.tearDown();
+	public void genericafter() throws Exception {
+		super.genericafter();
 		performDummySearch();
 		fClipboard.dispose();
 		fLabelProvider.dispose();
@@ -148,10 +145,10 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 		CopyToClipboardAction copyAction= new CopyToClipboardAction(new MockWorkbenchSite(elements), fClipboard);
 		copyAction.setAutoRepeatOnFailure(true);
 		copyAction.update(copyAction.getSelection());
-		assertTrue("action should be disabled", ! copyAction.isEnabled());
+		assertFalse("action should be disabled", copyAction.isEnabled());
 	}
 
-	private void checkEnabled(Object[] elements) throws Exception{
+	private void checkEnabled(Object[] elements) throws Exception {
 		CopyToClipboardAction copyAction= new CopyToClipboardAction(new MockWorkbenchSite(elements), fClipboard);
 		copyAction.setAutoRepeatOnFailure(true);
 		copyAction.update(copyAction.getSelection());
@@ -214,7 +211,7 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 		for (int i= 0; i < retreivedFromClipboard.length; i++) {
 			Object retreived= retreivedFromClipboard[i];
 			assertTrue("element does not exist", exists(retreived));
-			assertTrue("different copied " + getName(copied[i]) + " retreived: " + getName(retreived) , copied[i].equals(retreivedFromClipboard[i]));
+			assertEquals("different copied " + getName(copied[i]) + " retreived: " + getName(retreived), copied[i], retreivedFromClipboard[i]);
 		}
 	}
 
@@ -223,7 +220,7 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 			return ((IJavaElement)element).exists();
 		if (element instanceof IResource)
 			return ((IResource)element).exists();
-		assertTrue(false);
+		fail();
 		return false;
 	}
 
@@ -326,70 +323,86 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 
 	///---------tests
 
+	@Test
 	public void testDisabled0() {
 		Object[] elements= {};
 		checkDisabled(elements);
 	}
 
+	@Test
 	public void testDisabled1() throws Exception {
 		Object[] elements= {null};
 		checkDisabled(elements);
 	}
 
+	@Test
 	public void testDisabled2() throws Exception {
 		Object[] elements= {this};
 		checkDisabled(elements);
 	}
 
+	@Test
 	public void testDisabled3() throws Exception {
 		Object[] elements= {RefactoringTestSetup.getProject(), getPackageP()};
 		checkDisabled(elements);
 	}
 
-	public void testDisabled4() throws Exception{
+	@Test
+	public void testDisabled4() throws Exception {
 		checkDisabled(new Object[]{getPackageP(), fCuA});
 	}
 
-	public void testDisabled5() throws Exception{
+	@Test
+	public void testDisabled5() throws Exception {
 		checkDisabled(new Object[]{getRoot(), fCuA});
 	}
 
-	public void testDisabled6() throws Exception{
+	@Test
+	public void testDisabled6() throws Exception {
 		checkDisabled(new Object[]{getRoot(), fPackageQ});
 	}
 
-	public void testDisabled7() throws Exception{
+	@Test
+	public void testDisabled7() throws Exception {
 		checkDisabled(new Object[]{getRoot(), faTxt});
 	}
 
-	public void testDisabled8() throws Exception{
+	@Test
+	public void testDisabled8() throws Exception {
 		checkDisabled(new Object[]{getRoot(), getRoot().getJavaProject()});
 	}
 
-	public void testDisabled9() throws Exception{
+	@Test
+	public void testDisabled9() throws Exception {
 		checkDisabled(new Object[]{RefactoringTestSetup.getProject().getPackageFragmentRoots()});
 	}
 
-	public void testDisabled10() throws Exception{
+	@Test
+	public void testDisabled10() throws Exception {
 		checkDisabled(new Object[]{fCuA, fCuB});
 	}
 
-	public void testDisabled11() throws Exception{
+	@Test
+	public void testDisabled11() throws Exception {
 		checkDisabled(new Object[]{fDefaultPackage});
 	}
 
-	public void testDisabled12() throws Exception{
+	@Test
+	public void testDisabled12() throws Exception {
 		checkDisabled(new Object[]{getRoot().getJavaProject(), fCuA});
 	}
 
-	public void testDisabled13() throws Exception{
+	@Test
+	public void testDisabled13() throws Exception {
 		checkDisabled(new Object[]{getRoot().getJavaProject(), fPackageQ});
 	}
 
-	public void testDisabled14() throws Exception{
+	@Test
+	public void testDisabled14() throws Exception {
 		checkDisabled(new Object[]{getRoot().getJavaProject(), faTxt});
 	}
 
+	@Test
 	public void testDisabled15() throws Exception {
 		Object fieldF= fCuA.getType("A").getField("f");
 		Object classA= fCuA.getType("A");
@@ -397,42 +410,49 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 		checkDisabled(elements);
 	}
 
+	@Test
 	public void testDisabled16() throws Exception {
 		Object fieldF= fCuA.getType("A").getField("f");
 		Object[] elements= {fieldF, fCuA};
 		checkDisabled(elements);
 	}
 
+	@Test
 	public void testDisabled17() throws Exception {
 		Object fieldF= fCuA.getType("A").getField("f");
 		Object[] elements= {fieldF, fDefaultPackage};
 		checkDisabled(elements);
 	}
 
+	@Test
 	public void testDisabled18() throws Exception {
 		Object fieldF= fCuA.getType("A").getField("f");
 		Object[] elements= {fieldF, fPackageQ};
 		checkDisabled(elements);
 	}
 
+	@Test
 	public void testDisabled19() throws Exception {
 		Object fieldF= fCuA.getType("A").getField("f");
 		Object[] elements= {fieldF, faTxt};
 		checkDisabled(elements);
 	}
 
+	@Test
 	public void testDisabled20() throws Exception {
 		Object fieldF= fCuA.getType("A").getField("f");
 		Object[] elements= {fieldF, getRoot()};
 		checkDisabled(elements);
 	}
 
+	@Test
 	public void testDisabled21() throws Exception {
 		Object fieldF= fCuA.getType("A").getField("f");
 		Object[] elements= {fieldF, RefactoringTestSetup.getProject()};
 		checkDisabled(elements);
 	}
 
+	@Test
 	public void testDisabled22() throws Exception {
 		Object typeA= fCuA.getType("A");
 		Object typeB= fCuB.getType("B");
@@ -440,67 +460,81 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 		checkDisabled(elements);
 	}
 
-	public void testDisabled23() throws Exception{
+	@Test
+	public void testDisabled23() throws Exception {
 		checkDisabled(new Object[]{faTxt, fCuB});
 	}
 
+	@Test
 	public void testEnabled0() throws Exception {
 		Object[] elements= {RefactoringTestSetup.getProject()};
 		checkEnabled(elements);
 	}
 
+	@Test
 	public void testEnabled1() throws Exception {
 		Object[] elements= {getPackageP()};
 		checkEnabled(elements);
 	}
 
+	@Test
 	public void testEnabled2() throws Exception {
 		Object[] elements= {getRoot()};
 		checkEnabled(elements);
 	}
 
+	@Test
 	public void testEnabled3() throws Exception {
 		Object[] elements= {RefactoringTestSetup.getDefaultSourceFolder()};
 		checkEnabled(elements);
 	}
 
-	public void testEnabled4() throws Exception{
+	@Test
+	public void testEnabled4() throws Exception {
 		checkEnabled(new Object[]{faTxt});
 	}
 
-	public void testEnabled5() throws Exception{
+	@Test
+	public void testEnabled5() throws Exception {
 		checkEnabled(new Object[]{getRoot()});
 	}
 
-	public void testEnabled6() throws Exception{
+	@Test
+	public void testEnabled6() throws Exception {
 		checkEnabled(new Object[]{fCuA});
 	}
 
-	public void testEnabled7() throws Exception{
+	@Test
+	public void testEnabled7() throws Exception {
 		checkEnabled(new Object[]{getRoot().getJavaProject()});
 	}
 
-	public void testEnabled8() throws Exception{
+	@Test
+	public void testEnabled8() throws Exception {
 		checkEnabled(new Object[]{getPackageP()});
 	}
 
-	public void testEnabled9() throws Exception{
+	@Test
+	public void testEnabled9() throws Exception {
 		checkEnabled(new Object[]{getPackageP(), fPackageQ, fPackageQ_R});
 	}
 
-	public void testEnabled10() throws Exception{
+	@Test
+	public void testEnabled10() throws Exception {
 		Object packDecl= fCuA.getPackageDeclarations()[0];
 		Object[] elements= {packDecl};
 		checkEnabled(elements);
 	}
 
-	public void testEnabled11() throws Exception{
+	@Test
+	public void testEnabled11() throws Exception {
 		Object importD= fCuA.getImports()[0];
 		Object[] elements= {importD};
 		checkEnabled(elements);
 	}
 
-	public void testEnabled12() throws Exception{
+	@Test
+	public void testEnabled12() throws Exception {
 //		printTestDisabledMessage("disabled due to bug 37750");
 //		if (true)
 //			return;
@@ -509,37 +543,43 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 		checkEnabled(elements);
 	}
 
-	public void testEnabled13() throws Exception{
+	@Test
+	public void testEnabled13() throws Exception {
 		Object classA= fCuA.getType("A");
 		Object[] elements= {classA};
 		checkEnabled(elements);
 	}
 
-	public void testEnabled14() throws Exception{
+	@Test
+	public void testEnabled14() throws Exception {
 		Object methodFoo= fCuA.getType("A").getMethod("foo", new String[0]);
 		Object[] elements= {methodFoo};
 		checkEnabled(elements);
 	}
 
-	public void testEnabled15() throws Exception{
+	@Test
+	public void testEnabled15() throws Exception {
 		Object fieldF= fCuA.getType("A").getField("f");
 		Object[] elements= {fieldF};
 		checkEnabled(elements);
 	}
 
-	public void testEnabled16() throws Exception{
+	@Test
+	public void testEnabled16() throws Exception {
 		Object initializer= fCuA.getType("A").getInitializer(1);
 		Object[] elements= {initializer};
 		checkEnabled(elements);
 	}
 
-	public void testEnabled17() throws Exception{
+	@Test
+	public void testEnabled17() throws Exception {
 		Object innerClass= fCuA.getType("A").getType("Inner");
 		Object[] elements= {innerClass};
 		checkEnabled(elements);
 	}
 
-	public void testEnabled18() throws Exception{
+	@Test
+	public void testEnabled18() throws Exception {
 		Object fieldF= fCuA.getType("A").getField("f");
 		Object methodFoo= fCuA.getType("A").getMethod("foo", new String[0]);
 		Object innerClass= fCuA.getType("A").getType("Inner");
@@ -548,7 +588,8 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 		checkEnabled(elements);
 	}
 
-	public void testEnabled19() throws Exception{
+	@Test
+	public void testEnabled19() throws Exception {
 //		printTestDisabledMessage("disabled due to bug 37750");
 //		if (true)
 //			return;
@@ -560,15 +601,18 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 		checkEnabled(elements);
 	}
 
-	public void testEnabled20() throws Exception{
+	@Test
+	public void testEnabled20() throws Exception {
 		checkEnabled(new Object[]{faTxt, fCuA});
 	}
 
-	public void testEnabled21() throws Exception{
+	@Test
+	public void testEnabled21() throws Exception {
 		checkEnabled(new Object[]{fOlder});
 	}
 
-	public void testEnabled22() throws Exception{
+	@Test
+	public void testEnabled22() throws Exception {
 //		printTestDisabledMessage("bug 39410");
 		Object classA= fCuA.getType("A");
 		Object packDecl= fCuA.getPackageDeclarations()[0];

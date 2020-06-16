@@ -675,12 +675,12 @@ public class ExtractMethodRefactoring extends Refactoring {
 		final ExtractMethodDescriptor descriptor= RefactoringSignatureDescriptorFactory.createExtractMethodDescriptor(project, description, comment.asString(), arguments, flags);
 		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT, JavaRefactoringDescriptorUtil.elementToHandle(project, fCUnit));
 		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME, fMethodName);
-		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION, Integer.valueOf(fSelectionStart).toString() + " " + Integer.valueOf(fSelectionLength).toString()); //$NON-NLS-1$
-		arguments.put(ATTRIBUTE_VISIBILITY, Integer.valueOf(fVisibility).toString());
-		arguments.put(ATTRIBUTE_DESTINATION, Integer.valueOf(fDestinationIndex).toString());
-		arguments.put(ATTRIBUTE_EXCEPTIONS, Boolean.valueOf(fThrowRuntimeExceptions).toString());
-		arguments.put(ATTRIBUTE_COMMENTS, Boolean.valueOf(fGenerateJavadoc).toString());
-		arguments.put(ATTRIBUTE_REPLACE, Boolean.valueOf(fReplaceDuplicates).toString());
+		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION, Integer.toString(fSelectionStart) + " " + Integer.toString(fSelectionLength)); //$NON-NLS-1$
+		arguments.put(ATTRIBUTE_VISIBILITY, Integer.toString(fVisibility));
+		arguments.put(ATTRIBUTE_DESTINATION, Integer.toString(fDestinationIndex));
+		arguments.put(ATTRIBUTE_EXCEPTIONS, Boolean.toString(fThrowRuntimeExceptions));
+		arguments.put(ATTRIBUTE_COMMENTS, Boolean.toString(fGenerateJavadoc));
+		arguments.put(ATTRIBUTE_REPLACE, Boolean.toString(fReplaceDuplicates));
 		return descriptor;
 	}
 
@@ -1043,9 +1043,8 @@ public class ExtractMethodRefactoring extends Refactoring {
 					ASTNode[] callNodes= createCallNodes(duplicate, modifiers);
 					ASTNode[] duplicateNodes= duplicate.getNodes();
 					for (int i= 0; i < duplicateNodes.length; i++) {
-						ASTNode parent= duplicateNodes[i].getParent();
-						if (parent instanceof ParenthesizedExpression) {
-							duplicateNodes[i]= parent;
+						while (duplicateNodes[i].getParent() instanceof ParenthesizedExpression) {
+							duplicateNodes[i]= duplicateNodes[i].getParent();
 						}
 					}
 					new StatementRewrite(fRewriter, duplicateNodes).replace(callNodes, description);
@@ -1228,15 +1227,17 @@ public class ExtractMethodRefactoring extends Refactoring {
 			ITypeBinding binding= fAnalyzer.getExpressionBinding();
 			if (binding != null && (!binding.isPrimitive() || !"void".equals(binding.getName()))) { //$NON-NLS-1$
 				ReturnStatement rs= fAST.newReturnStatement();
-				rs.setExpression((Expression)fRewriter.createMoveTarget(selectedNodes[0] instanceof ParenthesizedExpression
-						? ((ParenthesizedExpression)selectedNodes[0]).getExpression()
-						: selectedNodes[0]));
+				rs.setExpression((Expression)fRewriter.createMoveTarget(ASTNodes.getUnparenthesedExpression(selectedNodes[0])));
 				statements.insertLast(rs, null);
 			} else {
 				ExpressionStatement st= fAST.newExpressionStatement((Expression)fRewriter.createMoveTarget(selectedNodes[0]));
 				statements.insertLast(st, null);
 			}
-			fRewriter.replace(selectedNodes[0].getParent() instanceof ParenthesizedExpression ? selectedNodes[0].getParent() : selectedNodes[0], replacementNode, substitute);
+			ASTNode parenthesizedNode= selectedNodes[0];
+			while (parenthesizedNode.getParent() instanceof ParenthesizedExpression) {
+				parenthesizedNode= parenthesizedNode.getParent();
+			}
+			fRewriter.replace(parenthesizedNode, replacementNode, substitute);
 		} else {
 			boolean isReturnVoid= selectedNodes[selectedNodes.length - 1] instanceof ReturnStatement &&
 					fAnalyzer.getReturnTypeBinding().equals(fAST.resolveWellKnownType("void")); //$NON-NLS-1$
@@ -1306,9 +1307,9 @@ public class ExtractMethodRefactoring extends Refactoring {
 		int length= -1;
 		final StringTokenizer tokenizer= new StringTokenizer(selection);
 		if (tokenizer.hasMoreTokens())
-			offset= Integer.valueOf(tokenizer.nextToken()).intValue();
+			offset= Integer.parseInt(tokenizer.nextToken());
 		if (tokenizer.hasMoreTokens())
-			length= Integer.valueOf(tokenizer.nextToken()).intValue();
+			length= Integer.parseInt(tokenizer.nextToken());
 		if (offset < 0 || length < 0)
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION}));
 
@@ -1354,19 +1355,19 @@ public class ExtractMethodRefactoring extends Refactoring {
 		if (replace == null)
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_REPLACE));
 
-		fReplaceDuplicates= Boolean.valueOf(replace).booleanValue();
+		fReplaceDuplicates= Boolean.parseBoolean(replace);
 
 		final String comments= arguments.getAttribute(ATTRIBUTE_COMMENTS);
 		if (comments == null)
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_COMMENTS));
 
-		fGenerateJavadoc= Boolean.valueOf(comments).booleanValue();
+		fGenerateJavadoc= Boolean.parseBoolean(comments);
 
 		final String exceptions= arguments.getAttribute(ATTRIBUTE_EXCEPTIONS);
 		if (exceptions == null)
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_EXCEPTIONS));
 
-		fThrowRuntimeExceptions= Boolean.valueOf(exceptions).booleanValue();
+		fThrowRuntimeExceptions= Boolean.parseBoolean(exceptions);
 
 		return new RefactoringStatus();
 	}

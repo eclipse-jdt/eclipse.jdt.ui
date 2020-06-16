@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,13 +13,16 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring.ccp;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.dnd.Clipboard;
@@ -48,30 +51,22 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.TypedSource;
 
-import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
-import org.eclipse.jdt.ui.tests.refactoring.RefactoringTestSetup;
+import org.eclipse.jdt.ui.tests.refactoring.GenericRefactoringTest;
 import org.eclipse.jdt.ui.tests.refactoring.infra.MockClipboard;
 import org.eclipse.jdt.ui.tests.refactoring.infra.MockWorkbenchSite;
+import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
 import org.eclipse.jdt.internal.ui.refactoring.reorg.CopyToClipboardAction;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.PasteAction;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.TypedSourceTransfer;
 
-
-public class PasteActionTest extends RefactoringTest{
-
+public class PasteActionTest extends GenericRefactoringTest {
 	private static final boolean BUG_NOT_IMPLEMENTED_YET= true;
 	private Clipboard fClipboard;
-	private static final Class<PasteActionTest> clazz= PasteActionTest.class;
 	private static final String REFACTORING_PATH= "Paste/";
 
-	public PasteActionTest(String name) {
-		super(name);
-	}
-
-	public static Test suite() {
-		return new RefactoringTestSetup(new TestSuite(clazz));
-	}
+	@Rule
+	public RefactoringTestSetup fts= new RefactoringTestSetup();
 
 	@Override
 	protected String getRefactoringPath() {
@@ -79,13 +74,14 @@ public class PasteActionTest extends RefactoringTest{
 	}
 
 	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
+	public void genericbefore() throws Exception {
+		super.genericbefore();
 		fClipboard= new MockClipboard(Display.getDefault());
 	}
+
 	@Override
-	protected void tearDown() throws Exception {
-		super.tearDown();
+	public void genericafter() throws Exception {
+		super.genericafter();
 		fClipboard.dispose();
 	}
 
@@ -122,18 +118,21 @@ public class PasteActionTest extends RefactoringTest{
 		return pasteAction;
 	}
 
+	@Test
 	public void testEnabled_javaProject() throws Exception {
 		IJavaElement[] javaElements= {RefactoringTestSetup.getProject()};
 		IResource[] resources= {};
 		verifyEnabled(resources, javaElements, new IResource[0], new IJavaElement[0]);
 	}
 
+	@Test
 	public void testEnabled_project() throws Exception {
 		IJavaElement[] javaElements= {};
 		IResource[] resources= {RefactoringTestSetup.getProject().getProject()};
 		verifyEnabled(resources, javaElements, new IResource[0], new IJavaElement[0]);
 	}
 
+	@Test
 	public void testEnabled_workingSet() throws Exception {
 		IWorkingSet ws= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet("Test", new IAdaptable[] {});
 		try {
@@ -147,7 +146,8 @@ public class PasteActionTest extends RefactoringTest{
 		assertEqualLines(cuName, getFileContents(getOutputTestFileName(cuName)), getPackageP().getCompilationUnit(cuName + ".java").getSource());
 	}
 
-	public void test0() throws Exception{
+	@Test
+	public void test0() throws Exception {
 		if (BUG_NOT_IMPLEMENTED_YET) {
 			printTestDisabledMessage("not implemented yet");
 			return;
@@ -172,7 +172,8 @@ public class PasteActionTest extends RefactoringTest{
 		compareContents("B");
 	}
 
-	public void test2() throws Exception{
+	@Test
+	public void test2() throws Exception {
 		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
 		ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");
 
@@ -192,7 +193,8 @@ public class PasteActionTest extends RefactoringTest{
 		compareContents("B");
 	}
 
-	public void test3() throws Exception{
+	@Test
+	public void test3() throws Exception {
 //		printTestDisabledMessage("test for bug#19007");
 		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
 		ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");
@@ -213,7 +215,8 @@ public class PasteActionTest extends RefactoringTest{
 		compareContents("B");
 	}
 
-	public void test4() throws Exception{
+	@Test
+	public void test4() throws Exception {
 //		printTestDisabledMessage("test for bug 20151");
 		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
 		IJavaElement elem0= cuA.getType("A").getMethod("f", new String[0]);
@@ -231,6 +234,7 @@ public class PasteActionTest extends RefactoringTest{
 		compareContents("A");
 	}
 
+	@Test
 	public void testPastingJavaElementIntoWorkingSet() throws Exception {
 		IWorkingSet ws= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet("Test", new IAdaptable[] {});
 		try {
@@ -245,6 +249,7 @@ public class PasteActionTest extends RefactoringTest{
 		}
 	}
 
+	@Test
 	public void testPastingResourceIntoWorkingSet() throws Exception {
 		IWorkingSet ws= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet("Test", new IAdaptable[] {});
 		IFolder folder= RefactoringTestSetup.getProject().getProject().getFolder("folder");
@@ -261,6 +266,7 @@ public class PasteActionTest extends RefactoringTest{
 		}
 	}
 
+	@Test
 	public void testPastingJavaElementAsResourceIntoWorkingSet() throws Exception {
 		IWorkingSet ws= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet("Test", new IAdaptable[] {});
 		try {
@@ -275,6 +281,7 @@ public class PasteActionTest extends RefactoringTest{
 		}
 	}
 
+	@Test
 	public void testPastingExistingElementIntoWorkingSet() throws Exception {
 		IWorkingSet ws= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet("Test",
 				new IAdaptable[] {RefactoringTestSetup.getProject()});
@@ -290,6 +297,7 @@ public class PasteActionTest extends RefactoringTest{
 		}
 	}
 
+	@Test
 	public void testPastingChildJavaElementIntoWorkingSet() throws Exception {
 		IWorkingSet ws= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet("Test",
 				new IAdaptable[] {RefactoringTestSetup.getProject()});
@@ -305,6 +313,7 @@ public class PasteActionTest extends RefactoringTest{
 		}
 	}
 
+	@Test
 	public void testPastingChildResourceIntoWorkingSet() throws Exception {
 		IFolder folder= RefactoringTestSetup.getProject().getProject().getFolder("folder");
 		folder.create(true, true, null);
@@ -324,6 +333,7 @@ public class PasteActionTest extends RefactoringTest{
 		}
 	}
 
+	@Test
 	public void testPastingChildResourceIntoWorkingSetContainingParent() throws Exception {
 		IWorkingSet ws= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet("Test",
 				new IAdaptable[] {RefactoringTestSetup.getProject()});
@@ -361,6 +371,7 @@ public class PasteActionTest extends RefactoringTest{
 			pasteAction.run((IStructuredSelection)pasteAction.getSelection());
 	}
 
+	@Test
 	public void testPastingTypedResources0() throws Exception {
 		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
 		IJavaElement methodM= cuA.getType("A").getMethod("m", new String[0]);
@@ -371,6 +382,7 @@ public class PasteActionTest extends RefactoringTest{
 		compareContents("A");
 	}
 
+	@Test
 	public void testPastingTypedResources1() throws Exception {
 		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
 		IType typeA= cuA.getType("A");
@@ -382,6 +394,7 @@ public class PasteActionTest extends RefactoringTest{
 		compareContents("A");
 	}
 
+	@Test
 	public void testPastingTypedResources2() throws Exception {
 		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
 		IType typeA= cuA.getType("A");
@@ -393,6 +406,7 @@ public class PasteActionTest extends RefactoringTest{
 		compareContents("A");
 	}
 
+	@Test
 	public void testPastingTypedResources3() throws Exception {
 		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
 		IType typeA= cuA.getType("A");

@@ -16,6 +16,7 @@ package org.eclipse.jdt.internal.corext.dom;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -50,7 +51,6 @@ public class LinkedNodeFinder  {
 
 	public static SimpleName getAssociatedRecordComponentNode(SimpleName simpleName) {
 		SimpleName rcName= null;
-		ASTNode parent= simpleName;
 		if (simpleName == null) {
 			return null;
 		}
@@ -58,6 +58,7 @@ public class LinkedNodeFinder  {
 			return null;
 		}
 		IBinding binding= simpleName.resolveBinding();
+		IVariableBinding rcBinding= null;
 		if (binding instanceof IVariableBinding) {
 			IVariableBinding vbinding= (IVariableBinding) binding;
 			IVariableBinding bBinding= vbinding.getVariableDeclaration();
@@ -68,6 +69,11 @@ public class LinkedNodeFinder  {
 			if (!typeBinding.isRecord()) {
 				return null;
 			}
+			int modifiers= bBinding.getModifiers();
+			if (Flags.isFinal(modifiers)
+					&& !Flags.isStatic(modifiers)) {
+				rcBinding= bBinding;
+			}
 		} else if (binding instanceof IMethodBinding) {
 			IMethodBinding mBinding = (IMethodBinding)binding;
 			ITypeBinding typeBinding= mBinding.getDeclaringClass().getTypeDeclaration();
@@ -75,16 +81,37 @@ public class LinkedNodeFinder  {
 			if (bBinding.getParameterTypes().length != 0 || !typeBinding.isRecord()) {
 				return null;
 			}
+			if (typeBinding.isRecord()) {
+				IVariableBinding varBindings[]= typeBinding.getDeclaredFields();
+				for (IVariableBinding varBinding : varBindings) {
+					String name= varBinding.getName();
+					if (simpleName.getIdentifier().equals(name)) {
+						int modifiers= varBinding.getModifiers();
+						if (bBinding.getReturnType().isEqualTo(varBinding.getType())
+								&& Flags.isFinal(modifiers)
+								&& !Flags.isStatic(modifiers)) {
+							rcBinding= varBinding;
+							break;
+						}
+					}
+				}
+			}
 
 		} else {
 			return null;
 		}
 		RecordDeclaration recordDeclaration= null;
-		while(parent != null) {
-			parent= parent.getParent();
-			if (parent instanceof RecordDeclaration) {
-				recordDeclaration= (RecordDeclaration) parent;
-				break;
+		if (rcBinding != null) {
+			ITypeBinding typeBinding= rcBinding.getDeclaringClass().getTypeDeclaration();
+			if (typeBinding != null) {
+				ASTNode root= simpleName.getRoot();
+				if (root instanceof CompilationUnit) {
+					CompilationUnit astRoot= (CompilationUnit) root;
+					ASTNode foundNode= astRoot.findDeclaringNode(typeBinding);
+					if (foundNode instanceof RecordDeclaration) {
+						recordDeclaration= (RecordDeclaration) foundNode;
+					}
+				}
 			}
 		}
 		if (recordDeclaration != null) {

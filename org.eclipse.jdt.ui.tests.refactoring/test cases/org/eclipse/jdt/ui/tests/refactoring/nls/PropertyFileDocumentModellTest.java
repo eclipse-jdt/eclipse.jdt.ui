@@ -31,7 +31,7 @@ import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.jdt.internal.corext.refactoring.nls.KeyValuePair;
 import org.eclipse.jdt.internal.corext.refactoring.nls.PropertyFileDocumentModel;
 
-import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
+import org.eclipse.jdt.ui.tests.refactoring.GenericRefactoringTest;
 
 public class PropertyFileDocumentModellTest {
 	private static void insert(IDocument document, String key, String value) throws CoreException {
@@ -57,7 +57,7 @@ public class PropertyFileDocumentModellTest {
 
 		insert(props, "key", "value");
 
-		RefactoringTest.assertEqualLines(
+		GenericRefactoringTest.assertEqualLines(
 				"key=value\n", props.get());
 	}
 
@@ -332,7 +332,7 @@ public class PropertyFileDocumentModellTest {
 
 		insert(props, "key", "value!please escape");
 
-		RefactoringTest.assertEqualLines(
+		GenericRefactoringTest.assertEqualLines(
 				"key=value\\!please escape\n", props.get());
 	}
 
@@ -342,7 +342,7 @@ public class PropertyFileDocumentModellTest {
 
 		insert(props, "key", "value1\nvalue2\r");
 
-		RefactoringTest.assertEqualLines(
+		GenericRefactoringTest.assertEqualLines(
 				"key=value1\\nvalue2\\r\n", props.get());
 	}
 
@@ -352,7 +352,7 @@ public class PropertyFileDocumentModellTest {
 
 		insert(props, "key", "value1\tvalue2");
 
-		RefactoringTest.assertEqualLines(
+		GenericRefactoringTest.assertEqualLines(
 				"key=value1\\tvalue2\n", props.get());
 	}
 
@@ -362,7 +362,7 @@ public class PropertyFileDocumentModellTest {
 
 		insert(props, "key", "value1\fvalue2");
 
-		RefactoringTest.assertEqualLines(
+		GenericRefactoringTest.assertEqualLines(
 				"key=value1\\fvalue2\n", props.get());
 	}
 
@@ -372,7 +372,7 @@ public class PropertyFileDocumentModellTest {
 
 		insert(props, "key", "value1\bvalue2");
 
-		RefactoringTest.assertEqualLines(
+		GenericRefactoringTest.assertEqualLines(
 				"key=value1\\u0008value2\n", props.get());
 	}
 
@@ -382,7 +382,7 @@ public class PropertyFileDocumentModellTest {
 
 		insert(props, "key", "c:\\demo\\demo.java");
 
-		RefactoringTest.assertEqualLines(
+		GenericRefactoringTest.assertEqualLines(
 				"key=c:\\\\demo\\\\demo.java\n", props.get());
 	}
 
@@ -392,7 +392,7 @@ public class PropertyFileDocumentModellTest {
 
 		insert(props, "key", "\u00e4");
 
-		RefactoringTest.assertEqualLines("key=ä\n", props.get());
+		GenericRefactoringTest.assertEqualLines("key=ä\n", props.get());
 	}
 
 	@Test
@@ -401,7 +401,7 @@ public class PropertyFileDocumentModellTest {
 
 		insert(props, "key", "\u0926");
 
-		RefactoringTest.assertEqualLines("key=\\u0926\n", props.get());
+		GenericRefactoringTest.assertEqualLines("key=\\u0926\n", props.get());
 	}
 
 	@Test
@@ -410,6 +410,6 @@ public class PropertyFileDocumentModellTest {
 
 		insert(props, "key", "  test");
 
-		RefactoringTest.assertEqualLines("key=\\ \\ test\n", props.get());
+		GenericRefactoringTest.assertEqualLines("key=\\ \\ test\n", props.get());
 	}
 }

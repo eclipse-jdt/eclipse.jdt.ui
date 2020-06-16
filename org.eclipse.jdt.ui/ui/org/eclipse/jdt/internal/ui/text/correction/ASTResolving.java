@@ -70,10 +70,6 @@ public class ASTResolving extends org.eclipse.jdt.internal.core.manipulation.dom
 		while (parent != null) {
 			switch (parent.getNodeType()) {
 				case ASTNode.VARIABLE_DECLARATION_FRAGMENT:
-					if (((VariableDeclarationFragment) parent).getInitializer() == node) {
-						return ASTNodeFactory.newType(ast, (VariableDeclaration) parent);
-					}
-					return null;
 				case ASTNode.SINGLE_VARIABLE_DECLARATION:
 					if (((VariableDeclarationFragment) parent).getInitializer() == node) {
 						return ASTNodeFactory.newType(ast, (VariableDeclaration) parent);

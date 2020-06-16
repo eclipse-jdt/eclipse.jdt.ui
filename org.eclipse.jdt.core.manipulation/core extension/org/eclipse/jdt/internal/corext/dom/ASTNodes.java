@@ -26,6 +26,7 @@ package org.eclipse.jdt.internal.corext.dom;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -155,6 +156,7 @@ public class ASTNodes {
 	public static final int ERROR=					1 << 1;
 	public static final int INFO=					1 << 2;
 	public static final int PROBLEMS=				WARNING | ERROR | INFO;
+	public static final int EXCESSIVE_OPERAND_NUMBER= 5;
 
 	private static final Message[] EMPTY_MESSAGES= new Message[0];
 	private static final IProblem[] EMPTY_PROBLEMS= new IProblem[0];
@@ -584,7 +586,7 @@ public class ASTNodes {
 	 */
 	public static boolean isPassiveWithoutFallingThrough(final ASTNode node) {
 		final ExprActivityVisitor visitor= new ExprActivityVisitor();
-		visitor.visitNode(node);
+		visitor.traverseNodeInterruptibly(node);
 		return ExprActivity.PASSIVE_WITHOUT_FALLING_THROUGH.equals(visitor.getActivityLevel());
 	}
 
@@ -603,7 +605,11 @@ public class ASTNodes {
 
 		if (method.resolveMethodBinding() != null) {
 			return (method.resolveMethodBinding().getModifiers() & Modifier.STATIC) != 0;
-		} else if ((calledType instanceof Name) && ((Name) calledType).resolveBinding().getKind() == IBinding.TYPE) {
+		}
+
+		if ((calledType instanceof Name)
+				&& ((Name) calledType).resolveBinding() != null
+				&& ((Name) calledType).resolveBinding().getKind() == IBinding.TYPE) {
 			return Boolean.TRUE;
 		}
 
@@ -755,6 +761,33 @@ public class ASTNodes {
 	}
 
 	/**
+	 * Casts the provided statement to an object of the provided type if type
+	 * matches.
+	 *
+	 * @param <T>       the required statement type
+	 * @param statement the statement to cast
+	 * @param stmtClass the class representing the required statement type
+	 * @return the provided statement as an object of the provided type if type matches, null otherwise
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T extends Statement> T as(final Statement statement, final Class<T> stmtClass) {
+		if (statement == null) {
+			return null;
+		}
+
+		List<Statement> statements= asList(statement);
+		if (statements.size() == 1) {
+			Statement oneStatement= statements.get(0);
+
+			if (stmtClass.isAssignableFrom(oneStatement.getClass())) {
+				return (T) oneStatement;
+			}
+		}
+
+		return null;
+	}
+
+	/**
 	 * Casts the provided expression to an object of the provided type if type matches.
 	 *
 	 * @param <T> the required expression type
@@ -769,7 +802,9 @@ public class ASTNodes {
 			if (exprClass.isAssignableFrom(expression.getClass())) {
 				return (T) expression;
 			} else if (expression instanceof ParenthesizedExpression) {
-				return as(((ParenthesizedExpression) expression).getExpression(), exprClass);
+				expression= ASTNodes.getUnparenthesedExpression(expression);
+
+				return as(expression, exprClass);
 			}
 		}
 		return null;
@@ -812,6 +847,31 @@ public class ASTNodes {
 		results.addAll(extOps);
 
 		return results;
+	}
+
+	/**
+	 * Returns the number of logical operands in the expression.
+	 *
+	 * @param node The expression
+	 * @return the number of logical operands in the expression
+	 */
+	public static int getNbOperands(final Expression node) {
+		InfixExpression infixExpression= as(node, InfixExpression.class);
+
+		if (infixExpression == null
+				|| !hasOperator(infixExpression, InfixExpression.Operator.CONDITIONAL_AND, InfixExpression.Operator.CONDITIONAL_OR)
+				&& (!hasOperator(infixExpression, InfixExpression.Operator.AND, InfixExpression.Operator.OR, InfixExpression.Operator.XOR)
+						|| !hasType(infixExpression.getLeftOperand(), boolean.class.getCanonicalName(), Boolean.class.getCanonicalName()))) {
+			return 1;
+		}
+
+		int nbOperands= 0;
+
+		for (Expression operand : allOperands(infixExpression)) {
+			nbOperands+= getNbOperands(operand);
+		}
+
+		return nbOperands;
 	}
 
 	/**
@@ -1674,8 +1734,8 @@ public class ASTNodes {
      *         returned
      */
     public static Expression getUnparenthesedExpression(Expression expression) {
-		if (expression != null && expression.getNodeType() == ASTNode.PARENTHESIZED_EXPRESSION) {
-            return getUnparenthesedExpression(((ParenthesizedExpression) expression).getExpression());
+		while (expression != null && expression.getNodeType() == ASTNode.PARENTHESIZED_EXPRESSION) {
+			expression= ((ParenthesizedExpression) expression).getExpression();
         }
         return expression;
     }
@@ -2329,6 +2389,30 @@ public class ASTNodes {
 			return rewrittenNode;
 		}
 		return rewrite.createCopyTarget(node);
+	}
+
+	/**
+	 * Type-safe variant of {@link ASTRewrite#createMoveTarget(ASTNode)}.
+	 *
+	 * @param rewrite ASTRewrite for the given node
+	 * @param nodes the nodes to create a move placeholder for
+	 * @return the new placeholder nodes
+	 * @throws IllegalArgumentException if the node is null, or if the node
+	 * is not part of the rewrite's AST
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T extends ASTNode> List<T> createMoveTarget(final ASTRewrite rewrite, final Collection<T> nodes) {
+		if (nodes != null) {
+			List<T> newNodes= new ArrayList<>(nodes.size());
+
+			for (T node : nodes) {
+				newNodes.add((T) rewrite.createMoveTarget(node));
+			}
+
+			return newNodes;
+		}
+
+		return null;
 	}
 
 	/**

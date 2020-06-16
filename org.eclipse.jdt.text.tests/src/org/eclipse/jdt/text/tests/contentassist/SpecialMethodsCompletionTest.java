@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 IBM Corporation and others.
+ * Copyright (c) 2005, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,29 +15,22 @@ package org.eclipse.jdt.text.tests.contentassist;
 
 import java.util.Hashtable;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.Rule;
+import org.junit.Test;
 
 /**
  *
  * @since 3.2
  */
 public class SpecialMethodsCompletionTest extends AbstractCompletionTest {
-	private static final Class<SpecialMethodsCompletionTest> THIS= SpecialMethodsCompletionTest.class;
-
-	public static Test setUpTest(Test test) {
-		return new CompletionTestSetup(test);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS, suiteName(THIS)));
-	}
+	@Rule
+	public CompletionTestSetup cts= new CompletionTestSetup();
 
 	/*
 	 * @see org.eclipse.jdt.text.tests.contentassist.AbstractCompletionTest#setUp()
 	 */
 	@Override
-	protected void setUp() throws Exception {
+	public void setUp() throws Exception {
 		super.setUp();
 	}
 
@@ -49,6 +42,7 @@ public class SpecialMethodsCompletionTest extends AbstractCompletionTest {
 		super.configureCoreOptions(options);
 	}
 
+	@Test
 	public void testInheritedMethod() throws Exception {
 		assertTypeBodyProposal("toS|", "toString(", "/* (non-Javadoc)\n" +
 				"     * @see java.lang.Object#toString()\n" +
@@ -60,6 +54,7 @@ public class SpecialMethodsCompletionTest extends AbstractCompletionTest {
 				"    }|");
 	}
 
+	@Test
 	public void testMethodCreation() throws Exception {
 		assertTypeBodyProposal("foobar|", "foobar(", "/**\n" +
 				"     * Method.\n" +
@@ -70,6 +65,7 @@ public class SpecialMethodsCompletionTest extends AbstractCompletionTest {
 				"    }|");
 	}
 
+	@Test
 	public void testGetterCreation() throws Exception {
 		addMembers("String test;");
 		assertTypeBodyProposal("get|", "getTest(", "/**\n" +
@@ -80,6 +76,7 @@ public class SpecialMethodsCompletionTest extends AbstractCompletionTest {
 				"    }|");
 	}
 
+	@Test
 	public void testConstGetterCreation() throws Exception {
 		addMembers("static final String TEST;");
 		assertTypeBodyProposal("get|", "getTest(", "/**\n" +
@@ -91,6 +88,7 @@ public class SpecialMethodsCompletionTest extends AbstractCompletionTest {
 	}
 
 
+	@Test
 	public void testDuplicateGetterCreation() throws Exception {
 		addMembers("static final String TEST;");
 		addMembers("String test;");
@@ -102,6 +100,7 @@ public class SpecialMethodsCompletionTest extends AbstractCompletionTest {
 				"    }|");
 	}
 
+	@Test
 	public void testSetterCreation() throws Exception {
 		addMembers("String test;");
 		assertTypeBodyProposal("set|", "setTest(", "/**\n" +
@@ -112,6 +111,7 @@ public class SpecialMethodsCompletionTest extends AbstractCompletionTest {
 				"    }|");
 	}
 
+	@Test
 	public void testNoFinalSetterCreation() throws Exception {
 		addMembers("final String test;");
 		assertNoTypeBodyProposal("set|", "setTest(");

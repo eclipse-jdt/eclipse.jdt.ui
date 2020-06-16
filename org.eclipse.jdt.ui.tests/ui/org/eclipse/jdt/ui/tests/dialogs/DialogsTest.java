@@ -185,7 +185,7 @@ public class DialogsTest extends TestCase {
 		dialog.setMessage("Message");
 		dialog.setEmptyListMessage("empty messgae");
 		dialog.setElements(elements);
-		dialog.setInitialSelections(new Object[] {Integer.valueOf(7)});
+		dialog.setInitialSelections(Integer.valueOf(7));
 
 		DialogCheck.assertDialog(dialog);
 

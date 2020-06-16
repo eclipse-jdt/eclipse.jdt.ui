@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.core.runtime.CoreException;
@@ -73,8 +73,8 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 public class BinaryReferencesTests {
 	private static final boolean BUG_226660= true;
 
-	@ClassRule
-	public static BinaryReferencesTestSetup fgTestSetup= new BinaryReferencesTestSetup();
+	@Rule
+	public BinaryReferencesTestSetup fgTestSetup= new BinaryReferencesTestSetup();
 
 	private static void assertContainsMatches(List<SearchMatch> matches, String[] expectedHandleIdentifiers) {
 		int matchCount= matches.size();
@@ -92,7 +92,7 @@ public class BinaryReferencesTests {
 			assertEquals("not all expected matches", expected.toString(), actual.toString());
 	}
 
-	private static IType findType(String typeName) throws JavaModelException {
+	private IType findType(String typeName) throws JavaModelException {
 		return fgTestSetup.getSourceProject().findType(typeName);
 	}
 
@@ -178,7 +178,7 @@ public class BinaryReferencesTests {
 		});
 	}
 
-	private static List<SearchMatch> doRenameMethod(String typeName, String methodName) throws CoreException {
+	private List<SearchMatch> doRenameMethod(String typeName, String methodName) throws CoreException {
 		RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_METHOD);
 		IMethod method= findMethod(findType(typeName), methodName);
 		descriptor.setJavaElement(method);
@@ -230,7 +230,7 @@ public class BinaryReferencesTests {
 		});
 	}
 
-	private static List<SearchMatch> doRenameField(String typeName, String fieldName) throws CoreException {
+	private List<SearchMatch> doRenameField(String typeName, String fieldName) throws CoreException {
 		IField field= findType(typeName).getField(fieldName);
 		String refactoringID= field.isEnumConstant() ? IJavaRefactorings.RENAME_ENUM_CONSTANT : IJavaRefactorings.RENAME_FIELD;
 		RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(refactoringID);
@@ -331,7 +331,7 @@ public class BinaryReferencesTests {
 		});
 	}
 
-	private static List<SearchMatch> doChangeSignature(String typeName, String methodName) throws JavaModelException, Exception, CoreException {
+	private List<SearchMatch> doChangeSignature(String typeName, String methodName) throws JavaModelException, Exception, CoreException {
 		IMethod method= findMethod(findType(typeName), methodName);
 		ChangeSignatureProcessor processor= new ChangeSignatureProcessor(method);
 
@@ -381,7 +381,7 @@ public class BinaryReferencesTests {
 		});
 	}
 
-	private static List<SearchMatch> doInlineMethod(String typeName, String methodName) throws JavaModelException, Exception, CoreException {
+	private List<SearchMatch> doInlineMethod(String typeName, String methodName) throws JavaModelException, Exception, CoreException {
 		IMethod method= findMethod(findType(typeName), methodName);
 		ICompilationUnit cu= method.getCompilationUnit();
 		CompilationUnit node= new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL).parse(cu, true);
@@ -415,7 +415,7 @@ public class BinaryReferencesTests {
 		assertFalse(validationStatus.hasError());
 	}
 
-	private static List<SearchMatch> doMoveType(String typeName, String newPackageName) throws CoreException {
+	private List<SearchMatch> doMoveType(String typeName, String newPackageName) throws CoreException {
 		IType type= findType(typeName);
 		IPackageFragmentRoot root= JavaModelUtil.getPackageFragmentRoot(type);
 
@@ -440,7 +440,7 @@ public class BinaryReferencesTests {
 		});
 	}
 
-	private static List<SearchMatch> doMoveStaticMembers(IMember[] members, String targetTypeName) throws CoreException {
+	private List<SearchMatch> doMoveStaticMembers(IMember[] members, String targetTypeName) throws CoreException {
 		IType targetType= findType(targetTypeName);
 
 		MoveStaticMembersDescriptor descriptor= (MoveStaticMembersDescriptor) RefactoringCore.getRefactoringContribution(IJavaRefactorings.MOVE_STATIC_MEMBERS).createDescriptor();

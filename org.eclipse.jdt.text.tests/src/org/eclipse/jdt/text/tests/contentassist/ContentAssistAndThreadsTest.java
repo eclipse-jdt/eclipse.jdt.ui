@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Red Hat Inc., and others.
+ * Copyright (c) 2019, 2020 Red Hat Inc., and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -9,6 +9,10 @@
  * SPDX-License-Identifier: EPL-2.0
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.contentassist;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,7 +56,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProcessor;
 
 public class ContentAssistAndThreadsTest extends AbstractCompletionTest {
-
 	@After
 	public void resetPreference() {
 		JavaPlugin.getDefault().getPreferenceStore().setToDefault(PreferenceConstants.CODEASSIST_NONUITHREAD_COMPUTATION);

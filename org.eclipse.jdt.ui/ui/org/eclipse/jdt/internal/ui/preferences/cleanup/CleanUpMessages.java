@@ -51,6 +51,7 @@ public class CleanUpMessages extends NLS {
 	public static String CodeFormatingTabPage_SortMembersSemanticChange_warning;
 
 	public static String CodeStyleTabPage_CheckboxName_ConvertForLoopToEnhanced;
+	public static String CodeStyleTabPage_CheckboxName_ConvertLoopOnlyIfLoopVarUsed;
 	public static String CodeStyleTabPage_CheckboxName_UseBlocks;
 	public static String CodeStyleTabPage_CheckboxName_UseFinal;
 	public static String CodeStyleTabPage_CheckboxName_UseFinalForFields;
@@ -119,6 +120,7 @@ public class CleanUpMessages extends NLS {
 	public static String UnnecessaryCodeTabPage_CheckboxName_Autoboxing;
 	public static String UnnecessaryCodeTabPage_CheckboxName_Unboxing;
 	public static String UnnecessaryCodeTabPage_CheckboxName_PushDownNegation;
+	public static String UnnecessaryCodeTabPage_CheckboxName_MergeConditionalBlocks;
 
 	public static String UnnecessaryCodeTabPage_CheckboxName_UseDirectlyMapMethod;
 	public static String UnnecessaryCodeTabPage_CheckboxName_RedundantModifiers;

@@ -1578,4 +1578,7 @@ public class StubUtility {
 		return rewrite;
 	}
 
+	private StubUtility() {
+	}
+
 }

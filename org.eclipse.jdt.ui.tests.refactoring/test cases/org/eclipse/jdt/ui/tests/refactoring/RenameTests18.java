@@ -53,15 +53,17 @@ import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 
-import org.eclipse.jdt.ui.tests.refactoring.rules.Java18Setup;
+import org.eclipse.jdt.ui.tests.refactoring.rules.Java1d8Setup;
 import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
+/**
+ * Those tests are made to run on Java Spider 1.8 .
+ */
 public class RenameTests18 extends GenericRefactoringTest {
-
 	private static final String REFACTORING_PATH= "RenameTests18/";
 
 	@Rule
-	public RefactoringTestSetup fts= new Java18Setup() {
+	public RefactoringTestSetup fts= new Java1d8Setup() {
 		@Override
 		public void before() throws Exception {
 			JavaProjectHelper.PERFORM_DUMMY_SEARCH++;
@@ -97,9 +99,9 @@ public class RenameTests18 extends GenericRefactoringTest {
 	private ISourceRange getSelection(ICompilationUnit cu) throws Exception {
 		String source= cu.getSource();
 		//Warning: this *includes* the SQUARE_BRACKET_OPEN!
-		int offset= source.indexOf(AbstractSelectionTestCase.SQUARE_BRACKET_OPEN);
-		int end= source.indexOf(AbstractSelectionTestCase.SQUARE_BRACKET_CLOSE);
-		return new SourceRange(offset + AbstractSelectionTestCase.SQUARE_BRACKET_OPEN.length(), end - offset);
+		int offset= source.indexOf(AbstractJunit4SelectionTestCase.SQUARE_BRACKET_OPEN);
+		int end= source.indexOf(AbstractJunit4SelectionTestCase.SQUARE_BRACKET_CLOSE);
+		return new SourceRange(offset + AbstractJunit4SelectionTestCase.SQUARE_BRACKET_OPEN.length(), end - offset);
 	}
 
 	private void renameLocalVariable(String newFieldName, boolean updateReferences) throws Exception {

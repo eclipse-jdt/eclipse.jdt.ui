@@ -40,12 +40,15 @@ public class ConvertLoopFixCore extends CompilationUnitRewriteOperationsFixCore 
 		private final boolean fFindForLoopsToConvert;
 		private final boolean fConvertIterableForLoops;
 		private final boolean fMakeFinal;
+		private final boolean fCheckIfLoopVarUsed;
 		private ConvertLoopOperation fParentOperation;
 
-		public ControlStatementFinder(boolean findForLoopsToConvert, boolean convertIterableForLoops, boolean makeFinal, List<ConvertLoopOperation> resultingCollection) {
+		public ControlStatementFinder(boolean findForLoopsToConvert, boolean convertIterableForLoops, boolean makeFinal,
+				boolean checkIfLoopVarUsed, List<ConvertLoopOperation> resultingCollection) {
 			fFindForLoopsToConvert= findForLoopsToConvert;
 			fConvertIterableForLoops= convertIterableForLoops;
 			fMakeFinal= makeFinal;
+			fCheckIfLoopVarUsed= checkIfLoopVarUsed;
 			fResult= resultingCollection;
 			fUsedNames= new Hashtable<>();
 			fParentOperation= null;
@@ -89,14 +92,14 @@ public class ConvertLoopFixCore extends CompilationUnitRewriteOperationsFixCore 
 
 			Collection<String> usedNamesCollection= fUsedNames.values();
 			String[] usedNames= usedNamesCollection.toArray(new String[usedNamesCollection.size()]);
-			ConvertLoopOperation convertForLoopOperation= new ConvertForLoopOperation(node, usedNames, fMakeFinal);
+			ConvertLoopOperation convertForLoopOperation= new ConvertForLoopOperation(node, usedNames, fMakeFinal, fCheckIfLoopVarUsed);
 			if (convertForLoopOperation.satisfiesPreconditions().isOK()) {
 				if (fFindForLoopsToConvert) {
 					fUsedNames.put(node, convertForLoopOperation.getIntroducedVariableName());
 					return convertForLoopOperation;
 				}
 			} else if (fConvertIterableForLoops) {
-				ConvertLoopOperation iterableConverter= new ConvertIterableLoopOperation(node, usedNames, fMakeFinal);
+				ConvertLoopOperation iterableConverter= new ConvertIterableLoopOperation(node, usedNames, fMakeFinal, fCheckIfLoopVarUsed);
 				if (iterableConverter.satisfiesPreconditions().isOK()) {
 					fUsedNames.put(node, iterableConverter.getIntroducedVariableName());
 					return iterableConverter;
@@ -116,7 +119,8 @@ public class ConvertLoopFixCore extends CompilationUnitRewriteOperationsFixCore 
 
 	}
 
-	public static ICleanUpFixCore createCleanUp(CompilationUnit compilationUnit, boolean convertForLoops, boolean convertIterableForLoops, boolean makeFinal) {
+	public static ICleanUpFixCore createCleanUp(CompilationUnit compilationUnit, boolean convertForLoops, boolean convertIterableForLoops,
+			boolean makeFinal, boolean checkIfLoopVarUsed) {
 		if (!JavaModelUtil.is50OrHigher(compilationUnit.getJavaElement().getJavaProject()))
 			return null;
 
@@ -124,7 +128,7 @@ public class ConvertLoopFixCore extends CompilationUnitRewriteOperationsFixCore 
 			return null;
 
 		List<ConvertLoopOperation> operations= new ArrayList<>();
-		ControlStatementFinder finder= new ControlStatementFinder(convertForLoops, convertIterableForLoops, makeFinal, operations);
+		ControlStatementFinder finder= new ControlStatementFinder(convertForLoops, convertIterableForLoops, makeFinal, checkIfLoopVarUsed, operations);
 		compilationUnit.accept(finder);
 
 		if (operations.isEmpty())

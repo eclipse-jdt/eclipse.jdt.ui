@@ -52,4 +52,7 @@ public class ResourceProcessors {
 			computeNatures(result, visitedProjects, element);
 		}
 	}
+
+	private ResourceProcessors() {
+	}
 }

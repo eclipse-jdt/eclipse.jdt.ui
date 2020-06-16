@@ -97,4 +97,7 @@ public final class SerialVersionSubProcessor {
 			proposals.add(new SerialVersionProposal(fixes[1], IProposalRelevance.MISSING_SERIAL_VERSION, context, false));
 		}
 	}
+
+	private SerialVersionSubProcessor() {
+	}
 }

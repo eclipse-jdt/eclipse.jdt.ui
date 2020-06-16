@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -50,19 +50,24 @@ public class ConvertLoopCleanUp extends AbstractCleanUp {
 			return null;
 
 		boolean convertForLoops= isEnabled(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		boolean checkIfLoopVarUsed= isEnabled(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED);
 
 		return ConvertLoopFix.createCleanUp(compilationUnit,
 				convertForLoops, convertForLoops,
-				isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL) && isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES));
+				isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL) && isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES),
+				checkIfLoopVarUsed);
 	}
 
 	@Override
 	public String[] getStepDescriptions() {
 		List<String> result= new ArrayList<>();
 
-		if (isEnabled(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED))
+		if (isEnabled(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED)) {
 			result.add(MultiFixMessages.Java50CleanUp_ConvertToEnhancedForLoop_description);
-
+			if (isEnabled(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED)) {
+				result.add(MultiFixMessages.Java50CleanUp_ConvertLoopOnlyIfLoopVarUsed_description);
+			}
+		}
 		return result.toArray(new String[result.size()]);
 	}
 
@@ -71,14 +76,24 @@ public class ConvertLoopCleanUp extends AbstractCleanUp {
 		StringBuilder buf= new StringBuilder();
 
 		if (isEnabled(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED)) {
-			buf.append("for (int element : ids) {\n"); //$NON-NLS-1$
-			buf.append("    double value= element / 2; \n"); //$NON-NLS-1$
+			buf.append("for (int id : ids) {\n"); //$NON-NLS-1$
+			buf.append("    double value= id / 2; \n"); //$NON-NLS-1$
 			buf.append("    System.out.println(value);\n"); //$NON-NLS-1$
-			buf.append("}\n"); //$NON-NLS-1$
+			buf.append("}\n\n"); //$NON-NLS-1$
 		} else {
 			buf.append("for (int i = 0; i < ids.length; i++) {\n"); //$NON-NLS-1$
 			buf.append("    double value= ids[i] / 2; \n"); //$NON-NLS-1$
 			buf.append("    System.out.println(value);\n"); //$NON-NLS-1$
+			buf.append("}\n\n"); //$NON-NLS-1$
+		}
+		if (isEnabled(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED) &&
+				!isEnabled(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED)) {
+			buf.append("for (int id : ids) {\n"); //$NON-NLS-1$
+			buf.append("    System.out.println(\"here\");\n"); //$NON-NLS-1$
+			buf.append("}\n"); //$NON-NLS-1$
+		} else {
+			buf.append("for (int i = 0; i < ids.length; i++) {\n"); //$NON-NLS-1$
+			buf.append("    System.out.println(\"here\");\n"); //$NON-NLS-1$
 			buf.append("}\n"); //$NON-NLS-1$
 		}
 

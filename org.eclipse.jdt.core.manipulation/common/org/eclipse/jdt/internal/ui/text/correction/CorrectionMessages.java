@@ -178,12 +178,14 @@ public final class CorrectionMessages extends NLS {
 	public static String ReturnTypeSubProcessor_missingreturntype_description;
 	public static String ReturnTypeSubProcessor_wrongconstructorname_description;
 	public static String ReturnTypeSubProcessor_changetovoid_description;
+	public static String ReturnTypeSubProcessor_changeReturnToYield_description;
 	public static String MissingReturnTypeCorrectionProposal_addreturnstatement_description;
 	public static String MissingReturnTypeCorrectionProposal_changereturnstatement_description;
 	public static String TypeArgumentMismatchSubProcessor_removeTypeArguments;
 
 	public static String InitializeFieldAtDeclarationCorrectionProposal_description;
 	public static String InitializeFieldInConstructorCorrectionProposal_description;
+	public static String InitializeFieldWithConstructorParameterCorrectionProposal_description;
 
 	public static String UnimplementedMethodsCorrectionProposal_description;
 	public static String UnimplementedMethodsCorrectionProposal_enum_info;

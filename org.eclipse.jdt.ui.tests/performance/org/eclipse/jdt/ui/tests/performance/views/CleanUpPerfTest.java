@@ -19,6 +19,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.Assert;
+
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
 import org.eclipse.test.OrderedTestSuite;
@@ -87,7 +89,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		@Override
 		protected void setUp() throws Exception {
 			fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-			assertTrue("rt not found", JavaProjectHelper.addRTJar(fJProject1) != null);
+			Assert.assertNotNull("rt not found", JavaProjectHelper.addRTJar(fJProject1));
 			File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
 			JavaProjectHelper.addSourceContainerWithImport(fJProject1, SRC_CONTAINER, junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
 		}
@@ -470,10 +472,10 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		ResourcesPlugin.getWorkspace().run(operation, null);
 		if (measure)
 			stopMeasuring();
-		assertEquals(true, operation.getConditionStatus().getSeverity() <= maxSeverity);
-		assertEquals(true, operation.getValidationStatus().isOK());
+		Assert.assertTrue(operation.getConditionStatus().getSeverity() <= maxSeverity);
+		Assert.assertTrue(operation.getValidationStatus().isOK());
 		if (checkUndo) {
-			assertNotNull(operation.getUndoChange());
+			Assert.assertNotNull(operation.getUndoChange());
 		}
 		//undo the change, to have same code for each run
 		RefactoringCore.getUndoManager().performUndo(null, null);

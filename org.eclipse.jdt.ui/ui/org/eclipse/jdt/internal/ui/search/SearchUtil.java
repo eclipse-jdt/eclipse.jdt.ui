@@ -254,4 +254,7 @@ public class SearchUtil {
 			|| ((first == Signature.C_RESOLVED || first == Signature.C_UNRESOLVED) && fieldType.substring(1, fieldType.length() - 1).equals(String.class.getName())
 			|| (first == Signature.C_UNRESOLVED && fieldType.substring(1, fieldType.length() - 1).equals("String"))); //$NON-NLS-1$
 	}
+
+	private SearchUtil() {
+	}
 }

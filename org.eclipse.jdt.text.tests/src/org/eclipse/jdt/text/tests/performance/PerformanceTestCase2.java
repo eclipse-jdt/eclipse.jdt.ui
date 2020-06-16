@@ -62,7 +62,7 @@ public class PerformanceTestCase2 extends TestCase {
 			// methods. getDeclaredMethods returns all
 			// methods of this class but excludes the
 			// inherited ones.
-			runMethod= getClass().getMethod(getName(), new Class[] {PerformanceMeter.class});
+			runMethod= getClass().getMethod(getName(), PerformanceMeter.class);
 		} catch (NoSuchMethodException e) {
 			fail("Method \""+getName()+"\" not found");  //$NON-NLS-1$//$NON-NLS-2$
 		}

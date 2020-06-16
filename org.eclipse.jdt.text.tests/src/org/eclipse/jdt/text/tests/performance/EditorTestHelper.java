@@ -519,4 +519,7 @@ public class EditorTestHelper {
 			addJavaFiles(subDir, collection);
 		}
 	}
+
+	private EditorTestHelper() {
+	}
 }

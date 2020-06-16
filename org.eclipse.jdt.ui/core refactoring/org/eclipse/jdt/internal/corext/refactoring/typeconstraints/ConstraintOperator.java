@@ -34,7 +34,7 @@ public final class ConstraintOperator {
 	private static final String STRING_EQUALS= "==";//$NON-NLS-1$
 	private static final String STRING_DEFINES= "=^=";//$NON-NLS-1$
 	private static final String STRING_STRICT_SUBTYPE= "<";//$NON-NLS-1$
-	private static final Collection<String> fgOperatorStrings= new HashSet<>(Arrays.asList(new String[] {STRING_SUBTYPE, STRING_EQUALS, STRING_DEFINES, STRING_STRICT_SUBTYPE}));
+	private static final Collection<String> fgOperatorStrings= new HashSet<>(Arrays.asList(STRING_SUBTYPE, STRING_EQUALS, STRING_DEFINES, STRING_STRICT_SUBTYPE));
 
 	private static final ConstraintOperator fgSubtype= new ConstraintOperator(STRING_SUBTYPE, CODE_SUBTYPE);
 	private static final ConstraintOperator fgEquals= new ConstraintOperator(STRING_EQUALS, CODE_EQUALS);

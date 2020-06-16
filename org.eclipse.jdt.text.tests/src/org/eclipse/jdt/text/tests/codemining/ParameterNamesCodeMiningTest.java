@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Red Hat Inc. and others.
+ * Copyright (c) 2019, 2020 Red Hat Inc. and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,14 +13,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.codemining;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.LongSupplier;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -61,25 +65,14 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.javaeditor.codemining.JavaMethodParameterCodeMiningProvider;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
-public class ParameterNamesCodeMiningTest extends TestCase {
-
+public class ParameterNamesCodeMiningTest {
 	private IJavaProject fProject;
 	private IPackageFragment fPackage;
 	private JavaMethodParameterCodeMiningProvider fParameterNameCodeMiningProvider;
 	private boolean wasCodeMiningEnabled;
 
-	public static Test suite() {
-		return new TestSuite(ParameterNamesCodeMiningTest.class);
-	}
-
-	@Override
 	@Before
-	protected void setUp() throws Exception {
-		super.setUp();
+	public void setUp() throws Exception {
 		if(!welcomeClosed) {
 			closeIntro(PlatformUI.getWorkbench());
 		}
@@ -92,10 +85,8 @@ public class ParameterNamesCodeMiningTest extends TestCase {
 		PreferenceConstants.getPreferenceStore().setValue(PreferenceConstants.EDITOR_CODEMINING_ENABLED, true);
 	}
 
-	@Override
 	@After
-	protected void tearDown() throws Exception {
-		super.tearDown();
+	public void tearDown() throws Exception {
 		PreferenceConstants.getPreferenceStore().setValue(PreferenceConstants.EDITOR_CODEMINING_ENABLED, wasCodeMiningEnabled);
 		IWorkbenchPage workbenchPage= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
 		for (IEditorReference ref : workbenchPage.getEditorReferences()) {
@@ -112,6 +103,7 @@ public class ParameterNamesCodeMiningTest extends TestCase {
 		}.waitForCondition(viewer.getTextWidget().getDisplay(), 2000));
 	}
 
+	@Test
 	public void testParameterNamesOK() throws Exception {
 		String contents= "public class Foo {\n" +
 				"	int n= Math.max(1, 2);\n" +
@@ -125,6 +117,7 @@ public class ParameterNamesCodeMiningTest extends TestCase {
 		assertEquals(2, fParameterNameCodeMiningProvider.provideCodeMinings(viewer, new NullProgressMonitor()).get().size());
 	}
 
+	@Test
 	public void testVarargs() throws Exception {
 		String contents= "public class Foo {\n" +
 				"	String s= String.format(\"%d %d\", 1, 2);\n" +
@@ -137,6 +130,7 @@ public class ParameterNamesCodeMiningTest extends TestCase {
 		assertEquals(2, fParameterNameCodeMiningProvider.provideCodeMinings(viewer, new NullProgressMonitor()).get().size());
 	}
 
+	@Test
 	public void testMultiLines() throws Exception {
 		String contents =
 				"class Foo {\n" +
@@ -167,6 +161,7 @@ public class ParameterNamesCodeMiningTest extends TestCase {
 		assertEquals(2, drawnCodeMiningsCount.getAsLong());
 	}
 
+	@Test
 	public void testUnresolvedMethodBinding() throws Exception {
 		String contents= "public class Foo {\n" +
 		"	public void mehod() {\n" +
@@ -183,6 +178,7 @@ public class ParameterNamesCodeMiningTest extends TestCase {
 		assertEquals(2, fParameterNameCodeMiningProvider.provideCodeMinings(viewer, new NullProgressMonitor()).get().size());
 	}
 
+	@Test
 	public void testCollapsedFolding() throws Exception {
 		String contents= "/**\n" +
 				" * aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n" +
@@ -217,12 +213,13 @@ public class ParameterNamesCodeMiningTest extends TestCase {
 		try {
 			log.addLogListener(logListener);
 			DisplayHelper.sleep(editor.getViewer().getTextWidget().getDisplay(), 1000);
-			Assert.assertNull(errorInLog.get());
+			assertNull(errorInLog.get());
 		} finally {
 			log.removeLogListener(logListener);
 		}
 	}
 
+	@Test
 	public void testCollapsedFoldingAndToggleHighlight() throws Exception {
 		String contents= "/**\n" +
 				" *\n" +
@@ -291,6 +288,7 @@ public class ParameterNamesCodeMiningTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testBug547232() throws Exception {
 		String contents= "public class Test {\n" +
 				"    public final Object object;\n" +
@@ -315,6 +313,7 @@ public class ParameterNamesCodeMiningTest extends TestCase {
 		assertEquals(2, fParameterNameCodeMiningProvider.provideCodeMinings(viewer, new NullProgressMonitor()).get().size());
 	}
 
+	@Test
 	public void testBug549023() throws Exception {
 		String contents= "class Base {\n" +
 				"    public final Object object;\n" +
@@ -341,6 +340,7 @@ public class ParameterNamesCodeMiningTest extends TestCase {
 		assertEquals(2, fParameterNameCodeMiningProvider.provideCodeMinings(viewer, new NullProgressMonitor()).get().size());
 	}
 
+	@Test
 	public void testBug549126() throws Exception {
 		String contents= "public enum TestEnum {\n" +
 				"    A(\"bla\", null);\n" +

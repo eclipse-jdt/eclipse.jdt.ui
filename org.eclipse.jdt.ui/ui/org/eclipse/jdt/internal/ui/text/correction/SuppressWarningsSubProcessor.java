@@ -45,6 +45,7 @@ import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
+import org.eclipse.jdt.core.dom.RecordDeclaration;
 import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StringLiteral;
@@ -280,6 +281,10 @@ public class SuppressWarningsSubProcessor {
 				property= TypeDeclaration.MODIFIERS2_PROPERTY;
 				name= ((TypeDeclaration) node).getName().getIdentifier();
 				break;
+			case ASTNode.RECORD_DECLARATION:
+				property= RecordDeclaration.MODIFIERS2_PROPERTY;
+				name= ((RecordDeclaration) node).getName().getIdentifier();
+				break;
 			case ASTNode.ANNOTATION_TYPE_DECLARATION:
 				property= AnnotationTypeDeclaration.MODIFIERS2_PROPERTY;
 				name= ((AnnotationTypeDeclaration) node).getName().getIdentifier();
@@ -380,6 +385,9 @@ public class SuppressWarningsSubProcessor {
 		Image image= PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.REMOVE_ANNOTATION, image);
 		proposals.add(proposal);
+	}
+
+	private SuppressWarningsSubProcessor() {
 	}
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -33,8 +33,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestPlugin;
-
-import junit.framework.Test;
+import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
 public class InlineMethodTestSetup extends RefactoringTestSetup {
 
@@ -54,13 +53,9 @@ public class InlineMethodTestSetup extends RefactoringTestSetup {
 	private IPackageFragment fBinary;
 	private IPackageFragment fOperator;
 
-	public InlineMethodTestSetup(Test test) {
-		super(test);
-	}
-
 	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
+	public void before() throws Exception {
+		super.before();
 
 		IPackageFragmentRoot root= getDefaultSourceFolder();
 		fInvalid= root.createPackageFragment("invalid", true, null);

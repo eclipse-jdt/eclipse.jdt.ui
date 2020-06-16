@@ -796,8 +796,7 @@ public class ExternalNullAnnotationChangeProposals {
 
 		@Override
 		public boolean visit(ArrayType array) {
-			@SuppressWarnings("rawtypes")
-			List dimensions= array.dimensions();
+			List<?> dimensions= array.dimensions();
 			boolean annotated= false;
 			for (Object dimension2 : dimensions) {
 				fBuffer.append('[');
@@ -871,5 +870,8 @@ public class ExternalNullAnnotationChangeProposals {
 		String binaryName(ITypeBinding type) {
 			return type.getBinaryName().replace('.', '/');
 		}
+	}
+
+	private ExternalNullAnnotationChangeProposals() {
 	}
 }

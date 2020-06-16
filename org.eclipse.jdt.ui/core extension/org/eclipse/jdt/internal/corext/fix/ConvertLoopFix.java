@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2019 IBM Corporation and others.
+ * Copyright (c) 2005, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -31,7 +31,8 @@ import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
 public class ConvertLoopFix extends CompilationUnitRewriteOperationsFix {
 
-	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit, boolean convertForLoops, boolean convertIterableForLoops, boolean makeFinal) {
+	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit, boolean convertForLoops, boolean convertIterableForLoops,
+			boolean makeFinal, boolean checkLoopVarUsed) {
 		if (!JavaModelUtil.is50OrHigher(compilationUnit.getJavaElement().getJavaProject()))
 			return null;
 
@@ -39,7 +40,8 @@ public class ConvertLoopFix extends CompilationUnitRewriteOperationsFix {
 			return null;
 
 		List<ConvertLoopOperation> operations= new ArrayList<>();
-		ConvertLoopFixCore.ControlStatementFinder finder= new ConvertLoopFixCore.ControlStatementFinder(convertForLoops, convertIterableForLoops, makeFinal, operations);
+		ConvertLoopFixCore.ControlStatementFinder finder= new ConvertLoopFixCore.ControlStatementFinder(convertForLoops, convertIterableForLoops, makeFinal,
+				checkLoopVarUsed, operations);
 		compilationUnit.accept(finder);
 
 		if (operations.isEmpty())

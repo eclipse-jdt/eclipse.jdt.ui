@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -47,8 +48,12 @@ import org.eclipse.ltk.core.refactoring.TextFileChange;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IProblemRequestor;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -85,7 +90,7 @@ import org.eclipse.jdt.internal.ui.text.template.contentassist.SurroundWithTempl
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
 	QuickFixTest9.class,
-	QuickFixTest18.class,
+	QuickFixTest1d8.class,
 	QuickFixTest14.class,
 	QuickFixTest15.class,
 	SerialVersionQuickFixTest.class,
@@ -93,20 +98,20 @@ import org.eclipse.jdt.internal.ui.text.template.contentassist.SurroundWithTempl
 	UnresolvedTypesQuickFixTest.class,
 	UnresolvedVariablesQuickFixTest.class,
 	UnresolvedMethodsQuickFixTest.class,
-	UnresolvedMethodsQuickFixTest18.class,
+	UnresolvedMethodsQuickFixTest1d8.class,
 	ReturnTypeQuickFixTest.class,
 	LocalCorrectionsQuickFixTest.class,
-	LocalCorrectionsQuickFixTest17.class,
-	LocalCorrectionsQuickFixTest18.class,
+	LocalCorrectionsQuickFixTest1d7.class,
+	LocalCorrectionsQuickFixTest1d8.class,
 	TypeMismatchQuickFixTests.class,
 	ReorgQuickFixTest.class,
 	ModifierCorrectionsQuickFixTest.class,
-	ModifierCorrectionsQuickFixTest17.class,
+	ModifierCorrectionsQuickFixTest1d7.class,
 	ModifierCorrectionsQuickFixTest9.class,
 	GetterSetterQuickFixTest.class,
 	AssistQuickFixTest.class,
-	AssistQuickFixTest17.class,
-	AssistQuickFixTest18.class,
+	AssistQuickFixTest1d7.class,
+	AssistQuickFixTest1d8.class,
 	AssistQuickFixTest12.class,
 	ChangeNonStaticToStaticTest.class,
 	MarkerResolutionTest.class,
@@ -116,18 +121,18 @@ import org.eclipse.jdt.internal.ui.text.template.contentassist.SurroundWithTempl
 	ConvertForLoopQuickFixTest.class,
 	ConvertIterableLoopQuickFixTest.class,
 	AdvancedQuickAssistTest.class,
-	AdvancedQuickAssistTest17.class,
-	AdvancedQuickAssistTest18.class,
+	AdvancedQuickAssistTest1d7.class,
+	AdvancedQuickAssistTest1d8.class,
 	CleanUpTestCase.class,
 	QuickFixEnablementTest.class,
 	SurroundWithTemplateTest.class,
 	TypeParameterMismatchTest.class,
 	PropertiesFileQuickAssistTest.class,
 	NullAnnotationsQuickFixTest.class,
-	NullAnnotationsQuickFixTest18.class,
-	NullAnnotationsQuickFixTest18Mix.class,
+	NullAnnotationsQuickFixTest1d8.class,
+	NullAnnotationsQuickFixTest1d8Mix.class,
 	AnnotateAssistTest1d5.class,
-	AnnotateAssistTest18.class,
+	AnnotateAssistTest1d8.class,
 	TypeAnnotationQuickFixTest.class
 })
 
@@ -483,7 +488,7 @@ public class QuickFixTest {
 
 	protected static String[] getAllDisplayStrings(ArrayList<IJavaCompletionProposal> proposals) {
 		return proposals.stream()
-				.map(proposal -> proposal.getDisplayString())
+				.map(IJavaCompletionProposal::getDisplayString)
 				.filter(displayString -> displayString != null && !displayString.isEmpty())
 				.toArray(String[]::new);
 	}
@@ -660,5 +665,34 @@ public class QuickFixTest {
 		for (int i=0; i<expectedChoices.length; i++) {
 			assertEquals("Unexpected choice", expectedChoices[i], sortedChoices.get(i));
 		}
+	}
+/**
+ * Computes the number of warnings the java file "filename" has.
+ * Then check if the "preview" source code has the same number of warnings.
+ * Throw error if the number changes.
+ *
+ * @param pack
+ * @param preview
+ * @param className
+ * @param filename
+ * @param fSourceFolder
+ * @throws JavaModelException
+ */
+	protected void assertNoAdditionalProblems(IPackageFragment pack, String preview, String className, String filename, IPackageFragmentRoot fSourceFolder) throws JavaModelException {
+		Hashtable<String, String> options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.ERROR);
+		JavaCore.setOptions(options);
+
+		ICompilationUnit cu= pack.getCompilationUnit(filename);
+		CompilationUnit astRoot= getASTRoot(cu);
+		IProblem[] problems= astRoot.getProblems();
+		int nrofproblems= problems.length;
+
+		pack.delete(true, null);
+		pack= fSourceFolder.createPackageFragment(className, false, null);
+		cu= pack.createCompilationUnit(filename, preview, false, null);
+		astRoot= getASTRoot(cu);
+		problems= astRoot.getProblems();
+		assertNumberOfProblems(nrofproblems, problems);
 	}
 }

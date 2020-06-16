@@ -205,34 +205,39 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 		}
 
 		int nameParentType= parent.getNodeType();
-		if (nameParentType == ASTNode.ASSIGNMENT) {
-			Assignment assignment= (Assignment) parent;
-			Expression rightHand= assignment.getRightHandSide();
-
-			ASTNode assignParent= assignment.getParent();
-			if (assignParent.getNodeType() == ASTNode.EXPRESSION_STATEMENT && rightHand.getNodeType() != ASTNode.ASSIGNMENT) {
-				removeVariableWithInitializer(rewrite, rightHand, assignParent);
-			}	else {
-				rewrite.replace(assignment, rewrite.createCopyTarget(rightHand), null);
-			}
-		} else if (nameParentType == ASTNode.SINGLE_VARIABLE_DECLARATION) {
-			rewrite.remove(parent, null);
-		} else if (nameParentType == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
-			VariableDeclarationFragment frag= (VariableDeclarationFragment) parent;
-			ASTNode varDecl= frag.getParent();
-			List<VariableDeclarationFragment> fragments;
-			if (varDecl instanceof VariableDeclarationExpression) {
-				fragments= ((VariableDeclarationExpression) varDecl).fragments();
-			} else if (varDecl instanceof FieldDeclaration) {
-				fragments= ((FieldDeclaration) varDecl).fragments();
-			} else {
-				fragments= ((VariableDeclarationStatement) varDecl).fragments();
-			}
-			if (fragments.size() == 1) {
-				rewrite.remove(varDecl, null);
-			} else {
-				rewrite.remove(frag, null); // don't try to preserve
-			}
+		switch (nameParentType) {
+			case ASTNode.ASSIGNMENT:
+				Assignment assignment= (Assignment) parent;
+				Expression rightHand= assignment.getRightHandSide();
+				ASTNode assignParent= assignment.getParent();
+				if (assignParent.getNodeType() == ASTNode.EXPRESSION_STATEMENT && rightHand.getNodeType() != ASTNode.ASSIGNMENT) {
+					removeVariableWithInitializer(rewrite, rightHand, assignParent);
+				}	else {
+					rewrite.replace(assignment, rewrite.createCopyTarget(rightHand), null);
+				}
+				break;
+			case ASTNode.SINGLE_VARIABLE_DECLARATION:
+				rewrite.remove(parent, null);
+				break;
+			case ASTNode.VARIABLE_DECLARATION_FRAGMENT:
+				VariableDeclarationFragment frag= (VariableDeclarationFragment) parent;
+				ASTNode varDecl= frag.getParent();
+				List<VariableDeclarationFragment> fragments;
+				if (varDecl instanceof VariableDeclarationExpression) {
+					fragments= ((VariableDeclarationExpression) varDecl).fragments();
+				} else if (varDecl instanceof FieldDeclaration) {
+					fragments= ((FieldDeclaration) varDecl).fragments();
+				} else {
+					fragments= ((VariableDeclarationStatement) varDecl).fragments();
+				}
+				if (fragments.size() == 1) {
+					rewrite.remove(varDecl, null);
+				} else {
+					rewrite.remove(frag, null); // don't try to preserve
+				}
+				break;
+			default:
+				break;
 		}
 	}
 

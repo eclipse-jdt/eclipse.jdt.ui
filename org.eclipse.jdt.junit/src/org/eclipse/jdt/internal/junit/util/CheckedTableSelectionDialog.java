@@ -90,7 +90,7 @@ public class CheckedTableSelectionDialog extends SelectionStatusDialog {
 	 * @param selection the initial selection.
 	 */
 	public void setInitialSelection(Object selection) {
-		setInitialSelections(new Object[] {selection});
+		setInitialSelections(selection);
 	}
 
 	/**

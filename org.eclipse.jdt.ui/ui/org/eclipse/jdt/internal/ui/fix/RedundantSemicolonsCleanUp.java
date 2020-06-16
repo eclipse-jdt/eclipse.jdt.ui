@@ -88,7 +88,6 @@ public class RedundantSemicolonsCleanUp extends AbstractMultiFix implements ICle
 	@Override
 	public String getPreview() {
 		StringBuilder buf= new StringBuilder();
-		buf.append("\n"); //$NON-NLS-1$
 		buf.append("enum color {\n"); //$NON-NLS-1$
 		buf.append("  red, yellow, green\n"); //$NON-NLS-1$
 		if (isEnabled(CleanUpConstants.REMOVE_REDUNDANT_SEMICOLONS)) {

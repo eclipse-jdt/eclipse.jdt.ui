@@ -209,4 +209,7 @@ public class CleanUpPreferenceUtil {
     	return result;
     }
 
+	private CleanUpPreferenceUtil() {
+	}
+
 }

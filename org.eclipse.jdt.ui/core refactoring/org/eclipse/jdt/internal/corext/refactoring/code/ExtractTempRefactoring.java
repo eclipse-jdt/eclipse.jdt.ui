@@ -549,10 +549,10 @@ public class ExtractTempRefactoring extends Refactoring {
 		final ExtractLocalDescriptor descriptor= RefactoringSignatureDescriptorFactory.createExtractLocalDescriptor(project, description, comment.asString(), arguments, RefactoringDescriptor.NONE);
 		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT, JavaRefactoringDescriptorUtil.elementToHandle(project, fCu));
 		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME, fTempName);
-		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION, Integer.valueOf(fSelectionStart).toString() + " " + Integer.valueOf(fSelectionLength).toString()); //$NON-NLS-1$
-		arguments.put(ATTRIBUTE_REPLACE, Boolean.valueOf(fReplaceAllOccurrences).toString());
-		arguments.put(ATTRIBUTE_FINAL, Boolean.valueOf(fDeclareFinal).toString());
-		arguments.put(ATTRIBUTE_TYPE_VAR, Boolean.valueOf(fDeclareVarType).toString());
+		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION, Integer.toString(fSelectionStart) + " " + Integer.toString(fSelectionLength)); //$NON-NLS-1$
+		arguments.put(ATTRIBUTE_REPLACE, Boolean.toString(fReplaceAllOccurrences));
+		arguments.put(ATTRIBUTE_FINAL, Boolean.toString(fDeclareFinal));
+		arguments.put(ATTRIBUTE_TYPE_VAR, Boolean.toString(fDeclareVarType));
 		return descriptor;
 	}
 
@@ -1066,9 +1066,9 @@ public class ExtractTempRefactoring extends Refactoring {
 			int length= -1;
 			final StringTokenizer tokenizer= new StringTokenizer(selection);
 			if (tokenizer.hasMoreTokens())
-				offset= Integer.valueOf(tokenizer.nextToken()).intValue();
+				offset= Integer.parseInt(tokenizer.nextToken());
 			if (tokenizer.hasMoreTokens())
-				length= Integer.valueOf(tokenizer.nextToken()).intValue();
+				length= Integer.parseInt(tokenizer.nextToken());
 			if (offset >= 0 && length >= 0) {
 				fSelectionStart= offset;
 				fSelectionLength= length;
@@ -1092,17 +1092,17 @@ public class ExtractTempRefactoring extends Refactoring {
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME));
 		final String replace= arguments.getAttribute(ATTRIBUTE_REPLACE);
 		if (replace != null) {
-			fReplaceAllOccurrences= Boolean.valueOf(replace).booleanValue();
+			fReplaceAllOccurrences= Boolean.parseBoolean(replace);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_REPLACE));
 		final String declareFinal= arguments.getAttribute(ATTRIBUTE_FINAL);
 		if (declareFinal != null) {
-			fDeclareFinal= Boolean.valueOf(declareFinal).booleanValue();
+			fDeclareFinal= Boolean.parseBoolean(declareFinal);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_FINAL));
 		final String declareVarType= arguments.getAttribute(ATTRIBUTE_TYPE_VAR);
 		if (declareVarType != null) {
-			fDeclareVarType= Boolean.valueOf(declareVarType).booleanValue();
+			fDeclareVarType= Boolean.parseBoolean(declareVarType);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_TYPE_VAR));
 		return new RefactoringStatus();

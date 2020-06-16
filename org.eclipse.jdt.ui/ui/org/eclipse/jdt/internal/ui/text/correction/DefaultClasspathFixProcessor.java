@@ -169,10 +169,10 @@ public class DefaultClasspathFixProcessor extends ClasspathFixProcessor {
 								typeNameMatchToModuleName.put(curr, moduleName);
 							}
 						} else {
-							Object typeNameMatch= classPathEntryToTypeNameMatch.get(entry);
+							TypeNameMatch typeNameMatch= classPathEntryToTypeNameMatch.get(entry);
 							if (typeNameMatch != null) {
 								if (moduleName != null) {
-									Object modName= typeNameMatchToModuleName.get(typeNameMatch);
+									String modName= typeNameMatchToModuleName.get(typeNameMatch);
 									if (!moduleName.equals(modName)) {
 										// remove classpath module if there are multiple type matches
 										// which belong to the same class path but different modules

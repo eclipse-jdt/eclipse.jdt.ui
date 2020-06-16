@@ -124,4 +124,7 @@ public class TypeAnnotationRewrite {
 		}
 		return typeUseSeen && !otherSeen;
 	}
+
+	private TypeAnnotationRewrite() {
+	}
 }

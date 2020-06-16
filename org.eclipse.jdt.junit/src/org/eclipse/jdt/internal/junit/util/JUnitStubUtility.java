@@ -409,5 +409,8 @@ public class JUnitStubUtility {
 		return result;
 	}
 
+	private JUnitStubUtility() {
+	}
+
 
 }

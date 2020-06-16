@@ -89,7 +89,7 @@ public class SortMembersCleanUp extends AbstractCleanUp {
     	            if (containsRelevantMarkers(file)) {
     	            	String fileLocation= BasicElementLabels.getPathLabel(file.getProjectRelativePath(), false);
     	            	String projectName= file.getProject().getName();
-						result.addWarning(MessageFormat.format(MultiFixMessages.SortMembersCleanUp_RemoveMarkersWarning0, new Object[] {fileLocation, projectName}));
+						result.addWarning(MessageFormat.format(MultiFixMessages.SortMembersCleanUp_RemoveMarkersWarning0, fileLocation, projectName));
     	            }
 
     	            monitor.worked(1);

@@ -458,6 +458,10 @@ public final class ActionMessages extends NLS {
 	public static String CreateModuleInfoAction_dialog_finish_button_label;
 	public static String CreateModuleInfoAction_dialog_cancel_button_label;
 
+	public static String EnablePreviewFeaturesAction_convert_message_compliance;
+	public static String EnablePreviewFeaturesAction_error_message_compliance;
+	public static String EnablePreviewFeaturesAction_error_title;
+
 	public static String GenerateToStringAction_label;
 	public static String GenerateToStringAction_description;
 	public static String GenerateToStringAction_tooltip;

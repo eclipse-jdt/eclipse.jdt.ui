@@ -1140,5 +1140,8 @@ public class JavaProjectHelper {
 			while (display.readAndDispatch()) { /*loop*/ }
 		}
 	}
+
+	private JavaProjectHelper() {
+	}
 }
 

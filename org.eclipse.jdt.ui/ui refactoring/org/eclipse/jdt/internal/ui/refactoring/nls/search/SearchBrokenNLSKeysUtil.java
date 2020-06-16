@@ -28,4 +28,7 @@ public class SearchBrokenNLSKeysUtil {
 		NewSearchUI.runQueryInBackground(query);
 	}
 
+	private SearchBrokenNLSKeysUtil() {
+	}
+
 }

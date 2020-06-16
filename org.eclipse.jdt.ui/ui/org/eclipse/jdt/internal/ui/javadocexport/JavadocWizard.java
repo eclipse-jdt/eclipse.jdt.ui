@@ -71,6 +71,7 @@ import org.eclipse.debug.core.ILaunchesListener2;
 import org.eclipse.debug.core.Launch;
 import org.eclipse.debug.core.model.IProcess;
 
+import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugUIConstants;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -320,6 +321,19 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 				}
 
 				try {
+					// Usually the output from Javadoc command is shown in Console View. The console is automatically created from the
+					// debug framework but only if org.eclipse.debug.ui plug-in is loaded. It is unlikely but possible that this plug-in
+					// is not loaded at this point which does not interfere the command execution but its output will be lost.
+					// Hence the Console View is not part of org.eclipse.debug.ui plug-in but in a separate plug-in it is even possible
+					// that Console View is open but the output of Javadoc command does not appear. For a user it is incomprehensible
+					// why the Javadoc command output does not appear in this uncommon situation.
+					// The easy fix for this is to simply 'touch' a class from org.eclipse.debug.ui plug-in to be sure it is loaded before
+					// starting the Javadoc command. See https://bugs.eclipse.org/bugs/show_bug.cgi?id=239217
+					// Note: you might notice the use of IDebugUIConstants below and feel the urge to remove this workaround because it
+					// seem unnecessary. It is not! IDebugUIConstants.ATTR_PRIVATE is resolved at compile time and will not access the
+					// constants class and will not trigger plug-in activation.
+					DebugUITools.class.getClass();
+
 					ILaunchManager launchManager= DebugPlugin.getDefault().getLaunchManager();
 					ILaunchConfigurationType lcType= launchManager.getLaunchConfigurationType(IJavaLaunchConfigurationConstants.ID_JAVA_APPLICATION);
 

@@ -334,6 +334,7 @@ public class ModuleCorrectionsSubProcessor {
 		String[] args= null;
 		switch (entry.getEntryKind()) {
 			case IClasspathEntry.CPE_LIBRARY:
+			case IClasspathEntry.CPE_VARIABLE:
 				args= new String[] { JavaElementLabels.getElementLabel(root, JavaElementLabels.REFERENCED_ROOT_POST_QUALIFIED) };
 				break;
 			case IClasspathEntry.CPE_PROJECT:
@@ -355,9 +356,6 @@ public class ModuleCorrectionsSubProcessor {
 				if (args == null) {
 					args= new String[] { root.getElementName() };
 				}
-				break;
-			case IClasspathEntry.CPE_VARIABLE:
-				args= new String[] { JavaElementLabels.getElementLabel(root, JavaElementLabels.REFERENCED_ROOT_POST_QUALIFIED) };
 				break;
 			default:
 				break;
@@ -394,6 +392,9 @@ public class ModuleCorrectionsSubProcessor {
 			JavaPlugin.log(e);
 		}
 		return projectModule;
+	}
+
+	private ModuleCorrectionsSubProcessor() {
 	}
 
 }

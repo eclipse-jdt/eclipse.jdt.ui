@@ -1,6 +1,6 @@
 package expression_out;
 
-public class A_test627 {
+public class A_test629 {
 
 	public void foo() {
 		int i= 1 - extracted();
@@ -8,6 +8,6 @@ public class A_test627 {
 	}
 
 	protected int extracted() {
-		return (2 + 3);
-	}	
+		return 2 + 3;
+	}
 }

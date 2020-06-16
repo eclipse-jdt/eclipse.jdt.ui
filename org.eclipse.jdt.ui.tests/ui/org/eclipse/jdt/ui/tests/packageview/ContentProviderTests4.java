@@ -13,8 +13,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.packageview;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 
@@ -162,42 +165,42 @@ public class ContentProviderTests4{
 	@Test
 	public void testGetParentArchive() throws Exception{
 		Object parent= fProvider.getParent(fInternalRoot1);
-		assertTrue("Wrong parent found for PackageFragmentRoot Archive with folding", parent==fJProject3);//$NON-NLS-1$
+		assertSame("Wrong parent found for PackageFragmentRoot Archive with folding", parent, fJProject3);//$NON-NLS-1$
 	}
 
 	@Test
 	public void testGetParentMidLevelFragmentInArchive() throws Exception{
 		Object expectedParent= fA;
 		Object parent= fProvider.getParent(fC);
-		assertTrue("Wrong parent found for a NON top level PackageFragment in an Archive with folding", expectedParent.equals(parent));//$NON-NLS-1$
+		assertEquals("Wrong parent found for a NON top level PackageFragment in an Archive with folding", expectedParent, parent);//$NON-NLS-1$
 	}
 
 	@Test
 	public void testGetParentTopLevelFragmentInArchive() throws Exception{
 		Object expectedParent= fInternalRoot1;
 		Object parent= fProvider.getParent(fA);
-		assertTrue("Wrong parent found for a top level PackageFragment in an Archive with folding", expectedParent.equals(parent));	//$NON-NLS-1$
+		assertEquals("Wrong parent found for a top level PackageFragment in an Archive with folding", expectedParent, parent);	//$NON-NLS-1$
 	}
 
 	@Test
 	public void testGetParentTopLevelFragment() throws Exception{
 		Object expectedParent= fJProject3;
 		Object parent= fProvider.getParent(fPack3);
-		assertTrue("Wrong parent found for a top level PackageFragment with folding", expectedParent.equals(parent));//$NON-NLS-1$
+		assertEquals("Wrong parent found for a top level PackageFragment with folding", expectedParent, parent);//$NON-NLS-1$
 	}
 
 	@Test
 	public void testGetParentMidLevelFragment() throws Exception{
 		Object expectedParent= fPack3;
 		Object parent= fProvider.getParent(fPack6);
-		assertTrue("Wrong parent found for a NON top level PackageFragment with folding", expectedParent.equals(parent));//$NON-NLS-1$
+		assertEquals("Wrong parent found for a NON top level PackageFragment with folding", expectedParent, parent);//$NON-NLS-1$
 	}
 
 	@Test
 	public void testGetParentMidLevelFragment2() throws Exception{
 		Object expectedParent= fPack3;
 		Object parent= fProvider.getParent(fPack5);
-		assertTrue("Wrong parent found for a NON top level PackageFragment with folding", expectedParent.equals(parent));//$NON-NLS-1$
+		assertEquals("Wrong parent found for a NON top level PackageFragment with folding", expectedParent, parent);//$NON-NLS-1$
 	}
 
 
@@ -229,7 +232,7 @@ public class ContentProviderTests4{
 
 		//add rt.jar
 		jdk= JavaProjectHelper.addVariableRTJar(fJProject3, "JRE_LIB_TEST", null, null);//$NON-NLS-1$
-		assertTrue("jdk not found", jdk != null);//$NON-NLS-1$
+		assertNotNull("jdk not found", jdk);//$NON-NLS-1$
 
 		//create the PackageFragmentRoot that represents the project as source folder
 		fRoot1= JavaProjectHelper.addSourceContainer(fJProject3, "");//$NON-NLS-1$
@@ -241,7 +244,8 @@ public class ContentProviderTests4{
 		//set up project #3: file system structure with project as source folder
 		//add an internal jar
 		myInternalLibJar = JavaTestPlugin.getDefault().getFileInPlugin(new Path("testresources/myinternallib.jar"));//$NON-NLS-1$
-		assertTrue("lib not found", myInternalLibJar != null && myInternalLibJar.exists()); //$NON-NLS-1$
+		assertNotNull("lib not found", myInternalLibJar); //$NON-NLS-1$
+		assertTrue("lib not found", myInternalLibJar.exists()); //$NON-NLS-1$
 		fInternalRoot1= JavaProjectHelper.addLibraryWithImport(fJProject3, Path.fromOSString(myInternalLibJar.getPath()), null, null);
 
 		//create internal PackageFragments
@@ -293,7 +297,7 @@ public class ContentProviderTests4{
 			fMyPart.clear();
 			fProvider = (ITreeContentProvider) fMyPart.getTreeViewer().getContentProvider();
 		} else
-			assertTrue("Unable to get view", false);//$NON-NLS-1$
+			fail("Unable to get view");//$NON-NLS-1$
 
 		assertNotNull(fProvider);
 	}

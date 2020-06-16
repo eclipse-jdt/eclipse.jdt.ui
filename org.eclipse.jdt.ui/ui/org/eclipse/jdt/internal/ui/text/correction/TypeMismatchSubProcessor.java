@@ -110,34 +110,40 @@ public class TypeMismatchSubProcessor {
 		ITypeBinding castTypeBinding= null;
 
 		int parentNodeType= selectedNode.getParent().getNodeType();
-		if (parentNodeType == ASTNode.ASSIGNMENT) {
-			Assignment assign= (Assignment) selectedNode.getParent();
-			Expression leftHandSide= assign.getLeftHandSide();
-			if (selectedNode.equals(leftHandSide)) {
-				nodeToCast= assign.getRightHandSide();
-			}
-			castTypeBinding= assign.getLeftHandSide().resolveTypeBinding();
-			if (leftHandSide instanceof Name) {
-				receiverNode= (Name) leftHandSide;
-			} else if (leftHandSide instanceof FieldAccess) {
-				receiverNode= ((FieldAccess) leftHandSide).getName();
-			}
-		} else if (parentNodeType == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
-			VariableDeclarationFragment frag= (VariableDeclarationFragment) selectedNode.getParent();
-			if (selectedNode.equals(frag.getName()) || selectedNode.equals(frag.getInitializer())) {
-				nodeToCast= frag.getInitializer();
-				castTypeBinding= ASTNodes.getType(frag).resolveBinding();
-				receiverNode= frag.getName();
-			}
-		} else if (parentNodeType == ASTNode.MEMBER_VALUE_PAIR) {
-			receiverNode= ((MemberValuePair) selectedNode.getParent()).getName();
-			castTypeBinding= ASTResolving.guessBindingForReference(nodeToCast);
-		} else if (parentNodeType == ASTNode.SINGLE_MEMBER_ANNOTATION) {
-			receiverNode= ((SingleMemberAnnotation) selectedNode.getParent()).getTypeName(); // use the type name
-			castTypeBinding= ASTResolving.guessBindingForReference(nodeToCast);
-		} else {
-			// try to find the binding corresponding to 'castTypeName'
-			castTypeBinding= ASTResolving.guessBindingForReference(nodeToCast);
+		switch (parentNodeType) {
+			case ASTNode.ASSIGNMENT:
+				Assignment assign= (Assignment) selectedNode.getParent();
+				Expression leftHandSide= assign.getLeftHandSide();
+				if (selectedNode.equals(leftHandSide)) {
+					nodeToCast= assign.getRightHandSide();
+				}
+				castTypeBinding= assign.getLeftHandSide().resolveTypeBinding();
+				if (leftHandSide instanceof Name) {
+					receiverNode= (Name) leftHandSide;
+				} else if (leftHandSide instanceof FieldAccess) {
+					receiverNode= ((FieldAccess) leftHandSide).getName();
+				}
+				break;
+			case ASTNode.VARIABLE_DECLARATION_FRAGMENT:
+				VariableDeclarationFragment frag= (VariableDeclarationFragment) selectedNode.getParent();
+				if (selectedNode.equals(frag.getName()) || selectedNode.equals(frag.getInitializer())) {
+					nodeToCast= frag.getInitializer();
+					castTypeBinding= ASTNodes.getType(frag).resolveBinding();
+					receiverNode= frag.getName();
+				}
+				break;
+			case ASTNode.MEMBER_VALUE_PAIR:
+				receiverNode= ((MemberValuePair) selectedNode.getParent()).getName();
+				castTypeBinding= ASTResolving.guessBindingForReference(nodeToCast);
+				break;
+			case ASTNode.SINGLE_MEMBER_ANNOTATION:
+				receiverNode= ((SingleMemberAnnotation) selectedNode.getParent()).getTypeName(); // use the type name
+				castTypeBinding= ASTResolving.guessBindingForReference(nodeToCast);
+				break;
+			default:
+				// try to find the binding corresponding to 'castTypeName'
+				castTypeBinding= ASTResolving.guessBindingForReference(nodeToCast);
+				break;
 		}
 		if (castTypeBinding == null) {
 			return;

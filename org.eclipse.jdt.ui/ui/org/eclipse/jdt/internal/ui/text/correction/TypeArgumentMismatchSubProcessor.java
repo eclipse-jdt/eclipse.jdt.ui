@@ -80,4 +80,7 @@ public class TypeArgumentMismatchSubProcessor {
 		QuickAssistProcessor.getInferDiamondArgumentsProposal(context, selectedNode, null, proposals);
 	}
 
+	private TypeArgumentMismatchSubProcessor() {
+	}
+
 }

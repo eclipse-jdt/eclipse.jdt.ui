@@ -454,25 +454,25 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 
 			//if fragment was in LogicalPackage refresh,
 			//otherwise just remove
-			if (kind == IJavaElementDelta.REMOVED) {
-				removeElement(frag);
-				return;
-
-			} else if (kind == IJavaElementDelta.ADDED) {
-
-				Object parent= getParent(frag);
-				addElement(frag, parent);
-				return;
-
-			} else if (kind == IJavaElementDelta.CHANGED) {
-				//just refresh
-				LogicalPackage logicalPkg= findLogicalPackage(frag);
-				//in case changed object is filtered out
-				if (logicalPkg != null)
-					postRefresh(findElementToRefresh(logicalPkg));
-				else
-					postRefresh(findElementToRefresh(frag));
-				return;
+			switch (kind) {
+				case IJavaElementDelta.REMOVED:
+					removeElement(frag);
+					return;
+				case IJavaElementDelta.ADDED:
+					Object parent= getParent(frag);
+					addElement(frag, parent);
+					return;
+				case IJavaElementDelta.CHANGED:
+					//just refresh
+					LogicalPackage logicalPkg= findLogicalPackage(frag);
+					//in case changed object is filtered out
+					if (logicalPkg != null)
+						postRefresh(findElementToRefresh(logicalPkg));
+					else
+						postRefresh(findElementToRefresh(frag));
+					return;
+				default:
+					break;
 			}
 		}
 

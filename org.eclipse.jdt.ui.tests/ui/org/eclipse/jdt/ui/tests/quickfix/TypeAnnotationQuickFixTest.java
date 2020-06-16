@@ -42,7 +42,7 @@ import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.tests.core.rules.Java18ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.Java1d8ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
@@ -53,7 +53,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public class TypeAnnotationQuickFixTest extends QuickFixTest {
 
 	@Rule
-    public ProjectTestSetup projectsetup = new Java18ProjectTestSetup();
+    public ProjectTestSetup projectsetup = new Java1d8ProjectTestSetup();
 
 	private IJavaProject fJProject1;
 
@@ -72,7 +72,7 @@ public class TypeAnnotationQuickFixTest extends QuickFixTest {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setValue(PreferenceConstants.CODEGEN_ADD_COMMENTS, false);
 
-		fJProject1= Java18ProjectTestSetup.getProject();
+		fJProject1= Java1d8ProjectTestSetup.getProject();
 
 		StubUtility.setCodeTemplate(CodeTemplateContextType.METHODSTUB_ID, "", null);
 		StubUtility.setCodeTemplate(CodeTemplateContextType.CONSTRUCTORSTUB_ID, "", null);
@@ -83,7 +83,7 @@ public class TypeAnnotationQuickFixTest extends QuickFixTest {
 
 	@After
 	public void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJProject1, Java18ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject1, Java1d8ProjectTestSetup.getDefaultClasspath());
 	}
 
 	public void runQuickFixTest(String testCaseSpecificInput, String... testCaseSpecificOutputs) throws Exception {
@@ -98,7 +98,7 @@ public class TypeAnnotationQuickFixTest extends QuickFixTest {
 		options.put(JavaCore.COMPILER_PB_NULL_UNCHECKED_CONVERSION, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 
-		JavaProjectHelper.addLibrary(fJProject1, new Path(Java18ProjectTestSetup.getJdtAnnotations20Path()));
+		JavaProjectHelper.addLibrary(fJProject1, new Path(Java1d8ProjectTestSetup.getJdtAnnotations20Path()));
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 
 		String prefix= "package test;\n" +

@@ -14,7 +14,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
-import com.ibm.icu.text.MessageFormat;
+import java.text.MessageFormat;
 
 /**
  * Helper class to format message strings.
@@ -24,7 +24,7 @@ import com.ibm.icu.text.MessageFormat;
 public class Messages {
 
 	public static String format(String message, Object object) {
-		return MessageFormat.format(message, new Object[] { object});
+		return MessageFormat.format(message, object);
 	}
 
 	public static String format(String message, Object[] objects) {

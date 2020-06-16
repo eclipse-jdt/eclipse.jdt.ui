@@ -116,9 +116,9 @@ public class DeleteAction extends SelectionDispatchAction {
 			final String workingSetID= workingSet.getId();
 			String dialogMessage;
 			if (isDefaultWorkingSet(workingSetID))
-				dialogMessage= MessageFormat.format(ReorgMessages.DeleteWorkingSet_hideworkingset_single, new Object[] { workingSet.getLabel() });
+				dialogMessage= MessageFormat.format(ReorgMessages.DeleteWorkingSet_hideworkingset_single, workingSet.getLabel());
 			else
-				dialogMessage= MessageFormat.format(ReorgMessages.DeleteWorkingSet_removeorhideworkingset_single, new Object[] { workingSet.getLabel() });
+				dialogMessage= MessageFormat.format(ReorgMessages.DeleteWorkingSet_removeorhideworkingset_single, workingSet.getLabel());
 
 			dialog= new MessageDialog(getShell(), ReorgMessages.DeleteWorkingSet_single, null, dialogMessage, MessageDialog.QUESTION, new String[] { ReorgMessages.DeleteWorkingSet_Hide,
 					ReorgMessages.DeleteWorkingSet_Remove,
@@ -136,8 +136,7 @@ public class DeleteAction extends SelectionDispatchAction {
 				}
 			};
 		} else {
-			dialog= new MessageDialog(getShell(), ReorgMessages.DeleteWorkingSet_multiple, null, MessageFormat.format(ReorgMessages.DeleteWorkingSet_removeorhideworkingset_multiple,
-					new Object[] { Integer.valueOf(selection.size()) }),
+			dialog= new MessageDialog(getShell(), ReorgMessages.DeleteWorkingSet_multiple, null, MessageFormat.format(ReorgMessages.DeleteWorkingSet_removeorhideworkingset_multiple, Integer.valueOf(selection.size())),
 					MessageDialog.QUESTION, new String[] { ReorgMessages.DeleteWorkingSet_Hide, ReorgMessages.DeleteWorkingSet_Remove,
 							IDialogConstants.CANCEL_LABEL }, 0);
 		}

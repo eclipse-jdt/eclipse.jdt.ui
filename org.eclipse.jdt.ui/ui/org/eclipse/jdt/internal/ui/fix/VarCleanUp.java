@@ -14,6 +14,7 @@
 package org.eclipse.jdt.internal.ui.fix;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -86,7 +87,6 @@ public class VarCleanUp extends AbstractMultiFix {
 	@Override
 	public String getPreview() {
 		StringBuilder bld= new StringBuilder();
-		bld.append("\n"); //$NON-NLS-1$
 		if (isEnabled(CleanUpConstants.USE_VAR)) {
 			bld.append("var number = 0;\n"); //$NON-NLS-1$
 			bld.append("var list = new ArrayList<String>();\n"); //$NON-NLS-1$
@@ -158,17 +158,17 @@ public class VarCleanUp extends AbstractMultiFix {
 								|| (classInstanceCreation != null
 										&& classInstanceCreation.getType().isParameterizedType()
 										&& classInstanceCreation.getType().resolveBinding() != null
-										&& Objects.equals(variableType.getTypeArguments(), classInstanceCreation.getType().resolveBinding().getTypeArguments())
+										&& Arrays.equals(variableType.getTypeArguments(), classInstanceCreation.getType().resolveBinding().getTypeArguments())
 										&& !((ParameterizedType) classInstanceCreation.getType()).typeArguments().isEmpty())
 								|| (castExpression != null
 										&& castExpression.getType().isParameterizedType()
 										&& castExpression.getType().resolveBinding() != null
 										&& variableType.getTypeArguments().length == ((ParameterizedType) castExpression.getType()).typeArguments().size()
-										&& Objects.equals(variableType.getTypeArguments(), castExpression.getType().resolveBinding().getTypeArguments()))
+										&& Arrays.equals(variableType.getTypeArguments(), castExpression.getType().resolveBinding().getTypeArguments()))
 								|| (methodInvocation != null
 										&& methodInvocation.resolveMethodBinding() != null
 										&& methodInvocation.resolveMethodBinding().getReturnType().isParameterizedType()
-										&& Objects.equals(variableType.getTypeArguments(), methodInvocation.resolveMethodBinding().getReturnType().getTypeArguments()))
+										&& Arrays.equals(variableType.getTypeArguments(), methodInvocation.resolveMethodBinding().getReturnType().getTypeArguments()))
 								|| (classInstanceCreation == null
 										&& castExpression == null
 										&& methodInvocation == null
@@ -176,7 +176,7 @@ public class VarCleanUp extends AbstractMultiFix {
 										&& expression != null
 										&& expression.resolveTypeBinding() != null
 										&& expression.resolveTypeBinding().isParameterizedType()
-										&& Objects.equals(variableType.getTypeArguments(), expression.resolveTypeBinding().getTypeArguments()))) {
+										&& Arrays.equals(variableType.getTypeArguments(), expression.resolveTypeBinding().getTypeArguments()))) {
 							rewriteOperations.add(new VarOperation(type));
 							return false;
 						} else if (variableType.isParameterizedType()

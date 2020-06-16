@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2013 IBM Corporation and others.
+ * Copyright (c) 2005, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,8 +15,8 @@ package org.eclipse.jdt.text.tests.contentassist;
 
 import java.util.Hashtable;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
@@ -29,15 +29,9 @@ import org.eclipse.jdt.ui.PreferenceConstants;
  */
 public class MethodInsertionFormattedCompletionTest extends AbstractCompletionTest {
 	private static final boolean BUG_DISABLED_DUE_TO_FORMATTER_CONTEXT_INFO_INTERATION= true;
-	private static final Class<MethodInsertionFormattedCompletionTest> THIS= MethodInsertionFormattedCompletionTest.class;
 
-	public static Test setUpTest(Test test) {
-		return new CompletionTestSetup(test);
-	}
-
-	public static Test suite() {
-		return setUpTest(new TestSuite(THIS, suiteName(THIS)));
-	}
+	@Rule
+	public CompletionTestSetup cts= new CompletionTestSetup();
 
 	/*
 	 * @see org.eclipse.jdt.text.tests.contentassist.AbstractCompletionTest#configureCoreOptions(java.util.Hashtable)
@@ -53,14 +47,17 @@ public class MethodInsertionFormattedCompletionTest extends AbstractCompletionTe
 		options.put(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_PARENS_IN_METHOD_INVOCATION, JavaCore.INSERT);
 	}
 
+	@Test
 	public void testThisMethod() throws Exception {
 		assertMethodBodyProposal("this.|", "hashCode(", "this.hashCode ( )|");
 	}
 
+	@Test
 	public void testMethod() throws Exception {
 		assertMethodBodyProposal("h", "hashCode(", "hashCode ( )");
 	}
 
+	@Test
 	public void testMethodWithParam() throws Exception {
 		if (BUG_DISABLED_DUE_TO_FORMATTER_CONTEXT_INFO_INTERATION) {
 			// FIXME
@@ -73,14 +70,17 @@ public class MethodInsertionFormattedCompletionTest extends AbstractCompletionTe
 
 	/* inserting */
 
+	@Test
 	public void testInsertThisMethod() throws Exception {
 		assertMethodBodyProposal("this.|class", "hashCode(", "this.hashCode ( )|class");
 	}
 
+	@Test
 	public void testInsertMethod() throws Exception {
 		assertMethodBodyProposal("h|foobar", "hashCode(", "hashCode ( )|foobar");
 	}
 
+	@Test
 	public void testInsertMethodWithParam() throws Exception {
 		if (BUG_DISABLED_DUE_TO_FORMATTER_CONTEXT_INFO_INTERATION) {
 			// FIXME
@@ -91,18 +91,21 @@ public class MethodInsertionFormattedCompletionTest extends AbstractCompletionTe
 		assertMethodBodyProposal("e|foobar", "equals(", "equals ( |)foobar");
 	}
 
+	@Test
 	public void testFormattedMethodWithParameterFilling1() throws Exception {
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES, true);
 		addMembers("private java.util.List fList;");
 		assertMethodBodyProposal("fList.", "add(O", "fList.add ( |arg0| )");
 	}
 
+	@Test
 	public void testFormattedMethodWithParameterFilling2() throws Exception {
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES, true);
 		addMembers("private java.util.List fList;");
 		assertMethodBodyProposal("fList.", "add(int", "fList.add ( |arg0|, arg1 );");
 	}
 
+	@Test
 	public void testFormattedMethodWithParameterGuessing1() throws Exception {
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES, true);
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS, true);
@@ -112,6 +115,7 @@ public class MethodInsertionFormattedCompletionTest extends AbstractCompletionTe
 		assertMethodBodyProposal("fList.", "add(O", "fList.add ( |obj| )");
 	}
 
+	@Test
 	public void testFormattedMethodWithParameterGuessing2() throws Exception {
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES, true);
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS, true);
@@ -120,5 +124,4 @@ public class MethodInsertionFormattedCompletionTest extends AbstractCompletionTe
 
 		assertMethodBodyProposal("fList.", "add(int", "fList.add ( |foo|, obj );");
 	}
-
 }

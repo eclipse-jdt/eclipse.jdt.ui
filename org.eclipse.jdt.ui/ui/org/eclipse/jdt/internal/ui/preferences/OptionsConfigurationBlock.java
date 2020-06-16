@@ -910,7 +910,7 @@ public abstract class OptionsConfigurationBlock {
 
 
 	protected boolean getBooleanValue(Key key) {
-		return Boolean.valueOf(getValue(key)).booleanValue();
+		return Boolean.parseBoolean(getValue(key));
 	}
 
 	/**

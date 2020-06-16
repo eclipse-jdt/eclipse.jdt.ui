@@ -142,4 +142,7 @@ class P2Utils {
 		}
 	}
 
+	private P2Utils() {
+	}
+
 }

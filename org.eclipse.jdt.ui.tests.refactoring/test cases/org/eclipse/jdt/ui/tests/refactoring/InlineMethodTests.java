@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -27,8 +27,15 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import static org.eclipse.jdt.ui.tests.refactoring.AbstractJunit4SelectionTestCase.TestMode.COMPARE_WITH_OUTPUT;
+import static org.eclipse.jdt.ui.tests.refactoring.AbstractJunit4SelectionTestCase.TestMode.INVALID_SELECTION;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -41,31 +48,23 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 
-import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.core.manipulation.dom.OperatorPrecedence;
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
+import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 
-public class InlineMethodTests extends AbstractSelectionTestCase {
-	private static InlineMethodTestSetup fgTestSetup;
+public class InlineMethodTests extends AbstractJunit4SelectionTestCase {
 	private static final boolean BUG_82166= true;
 
-	public InlineMethodTests(String name) {
-		super(name, true);
+	public InlineMethodTests() {
+		super(true);
 	}
 
-	public static Test suite() {
-		fgTestSetup= new InlineMethodTestSetup(new TestSuite(InlineMethodTests.class));
-		return fgTestSetup;
-	}
-
-	public static Test setUpTest(Test someTest) {
-		fgTestSetup= new InlineMethodTestSetup(someTest);
-		return fgTestSetup;
-	}
+	@Rule
+	public InlineMethodTestSetup fgTestSetup= new InlineMethodTestSetup();
 
 	@Override
-	protected void setUp() throws Exception {
+	public void setUp() throws Exception {
 		super.setUp();
 		fIsPreDeltaTest= true;
 	}
@@ -80,7 +79,7 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		return Character.toUpperCase(name.charAt(0)) + name.substring(1) + ".java";
 	}
 
-	protected void performTestInlineCall(IPackageFragment packageFragment, String id, int mode, String outputFolder) throws Exception {
+	protected void performTestInlineCall(IPackageFragment packageFragment, String id, TestMode mode, String outputFolder) throws Exception {
 		ICompilationUnit unit= createCU(packageFragment, id);
 		int[] selection= getSelection();
 		InlineMethodRefactoring refactoring= InlineMethodRefactoring.create(unit, new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL).parse(unit, true), selection[0], selection[1]);
@@ -92,7 +91,7 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performTest(unit, refactoring, mode, out, true);
 	}
 
-	private void performTestInlineMethod(IPackageFragment packageFragment, String id, int mode, String outputFolder) throws Exception {
+	private void performTestInlineMethod(IPackageFragment packageFragment, String id, TestMode mode, String outputFolder) throws Exception {
 		ICompilationUnit unit= createCU(packageFragment, id);
 		IType type= unit.getTypes()[0];
 		IMethod method= getMethodToInline(type);
@@ -114,7 +113,7 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		return null;
 	}
 
-	private void performTestInlineFirstConstructor(IPackageFragment packageFragment, String id, int mode, String outputFolder) throws Exception {
+	private void performTestInlineFirstConstructor(IPackageFragment packageFragment, String id, TestMode mode, String outputFolder) throws Exception {
 		ICompilationUnit unit= createCU(packageFragment, id);
 		IType type= unit.getTypes()[0];
 		IMethod method= getFirstConstructor(type);
@@ -146,62 +145,77 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performTestInlineMethod(fgTestSetup.getInvalidPackage(), getName(), INVALID_SELECTION, null);
 	}
 
+	@Test
 	public void testRecursion() throws Exception {
 		performInvalidTest();
 	}
 
+	@Test
 	public void testInvalidFieldInitializer1() throws Exception {
 		performInvalidTest();
 	}
 
+	@Test
 	public void testInvalidFieldInitializer2() throws Exception {
 		performInvalidTest();
 	}
 
+	@Test
 	public void testInvalidFieldInitializer3() throws Exception {
 		performInvalidTest();
 	}
 
+	@Test
 	public void testLocalInitializer() throws Exception {
 		performInvalidTest();
 	}
 
+	@Test
 	public void testInterruptedStatement() throws Exception {
 		performInvalidTest();
 	}
 
+	@Test
 	public void testInterruptedExecutionFlow() throws Exception {
 		performInvalidTest();
 	}
 
+	@Test
 	public void testMultiLocal() throws Exception {
 		performInvalidTest();
 	}
 
+	@Test
 	public void testComplexBody() throws Exception {
 		performInvalidTest();
 	}
 
+	@Test
 	public void testCompileError1() throws Exception {
 		performInvalidTest();
 	}
 
+	@Test
 	public void testCompileError2() throws Exception {
 		performInvalidTest();
 	}
 
+	@Test
 	public void testCompileError3() throws Exception {
 		performInvalidTest();
 	}
 
+	@Test
 	public void testMultipleMethods() throws Exception {
 		performInvalidTestInlineMethod();
 	}
 
+	@Test
 	public void testSuperInThis() throws Exception {
 		performInvalidTestInlineMethod();
 	}
 
+	@Test
 	public void testNotMethodName() throws Exception {
 		ICompilationUnit unit= createCU(fgTestSetup.getInvalidPackage(), getName());
 		int[] selection= getSelection();
@@ -209,6 +223,7 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		assertNull(refactoring);
 	}
 
+	@Test
 	public void test_314407() throws Exception {
 		performInvalidTest();
 	}
@@ -227,78 +242,97 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performTestInlineFirstConstructor(fgTestSetup.getSimplePackage(), getName(), COMPARE_WITH_OUTPUT, "simple_out");
 	}
 
+	@Test
 	public void testBasic1() throws Exception {
 		performSimpleTest();
 	}
 
+	@Test
 	public void testBasic2() throws Exception {
 		performSimpleTest();
 	}
 
+	@Test
 	public void testEmptyBody() throws Exception {
 		performSimpleTest();
 	}
 
+	@Test
 	public void testPrimitiveArray() throws Exception {
 		performSimpleTest();
 	}
 
+	@Test
 	public void testTypeArray() throws Exception {
 		performSimpleTest();
 	}
 
+	@Test
 	public void testInitializer() throws Exception {
 		performSimpleTest();
 	}
 
+	@Test
 	public void testSuper() throws Exception {
 		performSimpleTest();
 	}
 
+	@Test
 	public void testFieldInitializer1() throws Exception {
 		performSimpleTest();
 	}
 
+	@Test
 	public void testFieldInitializer2() throws Exception {
 		performSimpleTest();
 	}
 
+	@Test
 	public void testFieldInitializerAnonymous() throws Exception {
 		performSimpleTest();
 	}
 
+	@Test
 	public void testLabeledStatement() throws Exception {
 		performSimpleTest();
 	}
 
+	@Test
 	public void testConstructor1() throws Exception {
 		performSimpleTest();
 	}
 
+	@Test
 	public void testConstructor2() throws Exception {
 		performSimpleTestInlineConstrcutor();
 	}
 
+	@Test
 	public void testCatchClause() throws Exception {
 		performSimpleTest();
 	}
 
+	@Test
 	public void testTwoCalls() throws Exception {
 		performSimpleTestInlineMethod();
 	}
 
+	@Test
 	public void testNestedCalls() throws Exception {
 		performSimpleTestInlineMethod();
 	}
 
+	@Test
 	public void testSurroundingCallers() throws Exception {
 		performSimpleTestInlineMethod();
 	}
 
+	@Test
 	public void testComment1() throws Exception {
 		performSimpleTestInlineMethod();
 	}
 
+	@Test
 	public void testComment2() throws Exception {
 		performSimpleTestInlineMethod();
 	}
@@ -313,62 +347,77 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performTestInlineMethod(fgTestSetup.getBugsPackage(), getName(), COMPARE_WITH_OUTPUT, "bugs_out");
 	}
 
+	@Test
 	public void test_72836() throws Exception {
 		performBugTest();
 	}
 
+	@Test
 	public void test_76241() throws Exception {
 		performBugTestInlineMethod();
 	}
 
+	@Test
 	public void test_94426() throws Exception {
 		performBugTestInlineMethod();
 	}
 
+	@Test
 	public void test_95128() throws Exception {
 		performBugTestInlineMethod();
 	}
 
+	@Test
 	public void test_117053() throws Exception {
 		performBugTest();
 	}
 
+	@Test
 	public void test_123356() throws Exception {
 		performBugTest();
 	}
 
+	@Test
 	public void test_44419() throws Exception {
 		performBugTest();
 	}
 
+	@Test
 	public void test_44419_2() throws Exception {
 		performBugTest();
 	}
 
+	@Test
 	public void test_98856() throws Exception {
 		performBugTest();
 	}
 
+	@Test
 	public void test_50139() throws Exception {
 		performBugTest();
 	}
 
+	@Test
 	public void test_287378() throws Exception {
 		performBugTest();
 	}
 
+	@Test
 	public void test_267386() throws Exception {
 		performBugTest();
 	}
 
+	@Test
 	public void test_267386_2() throws Exception {
 		performBugTest();
 	}
 
+	@Test
 	public void test_314407_1() throws Exception {
 		performBugTest();
 	}
 
+	@Test
 	public void test_314407_2() throws Exception {
 		performBugTest();
 	}
@@ -379,145 +428,180 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performTestInlineCall(fgTestSetup.getArgumentPackage(), getName(), COMPARE_WITH_OUTPUT, "argument_out");
 	}
 
+	@Test
 	public void testFieldReference() throws Exception {
 		performArgumentTest();
 	}
 
+	@Test
 	public void testLocalReferenceUnused() throws Exception {
 		performArgumentTest();
 	}
 
+	@Test
 	public void testLocalReferenceRead() throws Exception {
 		performArgumentTest();
 	}
 
+	@Test
 	public void testLocalReferenceRead2() throws Exception {
 		performArgumentTest();
 	}
 
+	@Test
 	public void testLocalReferenceWrite() throws Exception {
 		performArgumentTest();
 	}
 
+	@Test
 	public void testLocalReferenceLoop() throws Exception {
 		performArgumentTest();
 	}
 
+	@Test
 	public void testLocalReferenceLoop1() throws Exception {
 		performArgumentTest();
 	}
 
+	@Test
 	public void testLocalReferenceLoop2() throws Exception {
 		performArgumentTest();
 	}
 
+	@Test
 	public void testLocalReferenceLoop3() throws Exception {
 		performArgumentTest();
 	}
 
+	@Test
 	public void testLocalReferenceLoop4() throws Exception {
 		performArgumentTest();
 	}
 
+	@Test
 	public void testLocalReferenceLoop5() throws Exception {
 		performArgumentTest();
 	}
 
+	@Test
 	public void testLocalReferencePrefix() throws Exception {
 		performArgumentTest();
 	}
 
+	@Test
 	public void testLiteralReferenceRead() throws Exception {
 		performArgumentTest();
 	}
 
+	@Test
 	public void testLiteralReferenceWrite() throws Exception {
 		performArgumentTest();
 	}
 
+	@Test
 	public void testParameterNameUsed1() throws Exception {
 		performArgumentTest();
 	}
 
+	@Test
 	public void testParameterNameUsed2() throws Exception {
 		performArgumentTest();
 	}
 
+	@Test
 	public void testParameterNameUsed3() throws Exception {
 		performArgumentTest();
 	}
 
+	@Test
 	public void testParameterNameUsed4() throws Exception {
 		performArgumentTest();
 	}
 
+	@Test
 	public void testParameterNameUnused1() throws Exception {
 		performArgumentTest();
 	}
 
+	@Test
 	public void testParameterNameUnused2() throws Exception {
 		performArgumentTest();
 	}
 
+	@Test
 	public void testParameterNameUnused3() throws Exception {
 		performArgumentTest();
 	}
 
+	@Test
 	public void testOneRead() throws Exception {
 		performArgumentTest();
 	}
 
+	@Test
 	public void testTwoReads() throws Exception {
 		performArgumentTest();
 	}
 
+	@Test
 	public void testWrite() throws Exception {
 		performArgumentTest();
 	}
 
+	@Test
 	public void testArray() throws Exception {
 		performArgumentTest();
 	}
 
+	@Test
 	public void testVarargs() throws Exception {
 		performArgumentTest();
 	}
 
+	@Test
 	public void testVarargs2() throws Exception {
 		performArgumentTest();
 	}
 
+	@Test
 	public void testVarargs3() throws Exception {
 		performArgumentTest();
 	}
 
+	@Test
 	public void testVarargs4() throws Exception {
 		performArgumentTest();
 	}
 
+	@Test
 	public void testVarargs5() throws Exception {
 		performArgumentTest();
 	}
 
+	@Test
 	public void testVarargs6() throws Exception {
 		performArgumentTest();
 	}
 
+	@Test
 	public void test91470() throws Exception {
 		performArgumentTest();
 	}
 
 	//see bug 269401
+	@Test
 	public void testFinalParameter1() throws Exception {
 		performArgumentTest();
 	}
 
 	//see bug 269401
+	@Test
 	public void testFinalParameter2() throws Exception {
 		performArgumentTest();
 	}
 
 	//see bug 269401
+	@Test
 	public void testFinalParameter3() throws Exception {
 		performArgumentTest();
 	}
@@ -528,34 +612,42 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performTestInlineCall(fgTestSetup.getNameConflictPackage(), getName(), COMPARE_WITH_OUTPUT, "nameconflict_out");
 	}
 
+	@Test
 	public void testSameLocal() throws Exception {
 		performNameConflictTest();
 	}
 
+	@Test
 	public void testSameType() throws Exception {
 		performNameConflictTest();
 	}
 
+	@Test
 	public void testSameTypeAfter() throws Exception {
 		performNameConflictTest();
 	}
 
+	@Test
 	public void testSameTypeInSibling() throws Exception {
 		performNameConflictTest();
 	}
 
+	@Test
 	public void testLocalInType() throws Exception {
 		performNameConflictTest();
 	}
 
+	@Test
 	public void testFieldInType() throws Exception {
 		performNameConflictTest();
 	}
 
+	@Test
 	public void testSwitchStatement() throws Exception {
 		performNameConflictTest();
 	}
 
+	@Test
 	public void testBlocks() throws Exception {
 		performNameConflictTest();
 	}
@@ -566,22 +658,27 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performTestInlineCall(fgTestSetup.getCallPackage(), getName(), COMPARE_WITH_OUTPUT, "call_out");
 	}
 
+	@Test
 	public void testExpressionStatement() throws Exception {
 		performCallTest();
 	}
 
+	@Test
 	public void testExpressionStatementWithReturn() throws Exception {
 		performCallTest();
 	}
 
+	@Test
 	public void testStatementWithFunction1() throws Exception {
 		performCallTest();
 	}
 
+	@Test
 	public void testStatementWithFunction2() throws Exception {
 		performCallTest();
 	}
 
+	@Test
 	public void testParenthesis() throws Exception {
 		performCallTest();
 	}
@@ -592,26 +689,32 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performTestInlineCall(fgTestSetup.getExpressionPackage(), getName(), COMPARE_WITH_OUTPUT, "expression_out");
 	}
 
+	@Test
 	public void testSimpleExpression() throws Exception {
 		performExpressionTest();
 	}
 
+	@Test
 	public void testSimpleExpressionWithStatements() throws Exception {
 		performExpressionTest();
 	}
 
+	@Test
 	public void testSimpleBody() throws Exception {
 		performExpressionTest();
 	}
 
+	@Test
 	public void testAssignment() throws Exception {
 		performExpressionTest();
 	}
 
+	@Test
 	public void testReturnStatement() throws Exception {
 		performExpressionTest();
 	}
 
+	@Test
 	public void testConditionalExpression() throws Exception {
 		performExpressionTest();
 	}
@@ -622,62 +725,77 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performTestInlineCall(fgTestSetup.getControlStatementPackage(), getName(), COMPARE_WITH_OUTPUT, "controlStatement_out");
 	}
 
+	@Test
 	public void testForEmpty() throws Exception {
 		performControlStatementTest();
 	}
 
+	@Test
 	public void testForOne() throws Exception {
 		performControlStatementTest();
 	}
 
+	@Test
 	public void testForTwo() throws Exception {
 		performControlStatementTest();
 	}
 
+	@Test
 	public void testEnhancedForOne() throws Exception {
 		performControlStatementTest();
 	}
 
+	@Test
 	public void testEnhancedForTwo() throws Exception {
 		performControlStatementTest();
 	}
 
+	@Test
 	public void testIfThenTwo() throws Exception {
 		performControlStatementTest();
 	}
 
+	@Test
 	public void testIfElseTwo() throws Exception {
 		performControlStatementTest();
 	}
 
+	@Test
 	public void testForAssignmentOne() throws Exception {
 		performControlStatementTest();
 	}
 
+	@Test
 	public void testForAssignmentTwo() throws Exception {
 		performControlStatementTest();
 	}
 
+	@Test
 	public void testLabelOne() throws Exception {
 		performControlStatementTest();
 	}
 
+	@Test
 	public void testLabelTwo() throws Exception {
 		performControlStatementTest();
 	}
 
+	@Test
 	public void testDanglingIf() throws Exception {
 		performControlStatementTest();
 	}
 
+	@Test
 	public void testIfWithVariable() throws Exception {
 		performControlStatementTest();
 	}
 
+	@Test
 	public void testDanglingIfBug229734() throws Exception {
 		performControlStatementTest();
 	}
 
+	@Test
 	public void testDanglingIfBug229734_2() throws Exception {
 		performControlStatementTest();
 	}
@@ -692,74 +810,92 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performTestInlineMethod(fgTestSetup.getReceiverPackage(), getName(), COMPARE_WITH_OUTPUT, "receiver_out");
 	}
 
+	@Test
 	public void testNoImplicitReceiver() throws Exception {
 		performReceiverTest();
 	}
 
+	@Test
 	public void testNameThisReceiver() throws Exception {
 		performReceiverTest();
 	}
 
+	@Test
 	public void testNameImplicitReceiver() throws Exception {
 		performReceiverTest();
 	}
 
+	@Test
 	public void testExpressionZeroImplicitReceiver() throws Exception {
 		performReceiverTest();
 	}
 
+	@Test
 	public void testExpressionOneImplicitReceiver() throws Exception {
 		performReceiverTest();
 	}
 
+	@Test
 	public void testExpressionTwoImplicitReceiver() throws Exception {
 		performReceiverTest();
 	}
 
+	@Test
 	public void testStaticReceiver() throws Exception {
 		performReceiverTest();
 	}
 
+	@Test
 	public void testReceiverWithStatic() throws Exception {
 		performReceiverTest();
 	}
 
+	@Test
 	public void testThisExpression() throws Exception {
 		performReceiverTest();
 	}
 
+	@Test
 	public void testFieldReceiver() throws Exception {
 		performReceiverTest();
 	}
 
+	@Test
 	public void testExplicitStaticThisFieldReceiver() throws Exception {
 		performReceiverTest();
 	}
 
+	@Test
 	public void testExplicitThisFieldReceiver() throws Exception {
 		performReceiverTest();
 	}
 
+	@Test
 	public void testExplicitStaticThisMethodReceiver() throws Exception {
 		performReceiverTest();
 	}
 
+	@Test
 	public void testExplicitThisMethodReceiver() throws Exception {
 		performReceiverTest();
 	}
 
+	@Test
 	public void testThisReceiver() throws Exception {
 		performReceiverTestInlineMethod();
 	}
 
+	@Test
 	public void testImplicitReceiverMethod() throws Exception {
 		performReceiverTest();
 	}
 
+	@Test
 	public void testImplicitReceiverField() throws Exception {
 		performReceiverTest();
 	}
 
+	@Test
 	public void testRemoteFieldReceiver() throws Exception {
 		performReceiverTest();
 	}
@@ -770,42 +906,52 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performTestInlineCall(fgTestSetup.getImportPackage(), getName(), COMPARE_WITH_OUTPUT, "import_out");
 	}
 
+	@Test
 	public void testUseArray() throws Exception {
 		performImportTest();
 	}
 
+	@Test
 	public void testUseInArgument() throws Exception {
 		performImportTest();
 	}
 
+	@Test
 	public void testUseInClassLiteral() throws Exception {
 		performImportTest();
 	}
 
+	@Test
 	public void testUseInDecl() throws Exception {
 		performImportTest();
 	}
 
+	@Test
 	public void testUseInDecl2() throws Exception {
 		performImportTest();
 	}
 
+	@Test
 	public void testUseInDecl3() throws Exception {
 		performImportTest();
 	}
 
+	@Test
 	public void testUseInDeclClash() throws Exception {
 		performImportTest();
 	}
 
+	@Test
 	public void testUseInLocalClass() throws Exception {
 		performImportTest();
 	}
 
+	@Test
 	public void testStaticImport() throws Exception {
 		performImportTest();
 	}
 
+	@Test
 	public void testStaticImport2() throws Exception {
 		if (BUG_82166) {
 			System.out.println("Disabled static import test 2 due to bug 82166");
@@ -820,70 +966,87 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performTestInlineCall(fgTestSetup.getCastPackage(), getName(), COMPARE_WITH_OUTPUT, "cast_out");
 	}
 
+	@Test
 	public void testNotOverloaded() throws Exception {
 		performCastTest();
 	}
 
+	@Test
 	public void testOverloadedPrimitives() throws Exception {
 		performCastTest();
 	}
 
+	@Test
 	public void testNotCastableOverloaded() throws Exception {
 		performCastTest();
 	}
 
+	@Test
 	public void testOverloaded() throws Exception {
 		performCastTest();
 	}
 
+	@Test
 	public void testHierarchyOverloadedPrimitives() throws Exception {
 		performCastTest();
 	}
 
+	@Test
 	public void testHierarchyOverloaded() throws Exception {
 		performCastTest();
 	}
 
+	@Test
 	public void testHierarchyOverloadedMultiLevel() throws Exception {
 		performCastTest();
 	}
 
+	@Test
 	public void testHierarchyOverloadedPrivate() throws Exception {
 		performCastTest();
 	}
 
+	@Test
 	public void testReceiverCast() throws Exception {
 		performCastTest();
 	}
 
+	@Test
 	public void testNoCast() throws Exception {
 		performCastTest();
 	}
 
+	@Test
 	public void testInfixExpression1() throws Exception {
 		performCastTest();
 	}
 
+	@Test
 	public void testInfixExpression2() throws Exception {
 		performCastTest();
 	}
 
+	@Test
 	public void testReturnValue1() throws Exception {
 		performCastTest();
 	}
 
+	@Test
 	public void testReturnValue2() throws Exception {
 		performCastTest();
 	}
 
+	@Test
 	public void testReturnValue3() throws Exception {
 		performCastTest();
 	}
 
+	@Test
 	public void testReturnValue4() throws Exception {
 		performCastTest();
 	}
 
+	@Test
 	public void testReturnValue5() throws Exception {
 		performCastTest();
 	}
@@ -894,14 +1057,17 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performTestInlineCall(fgTestSetup.getEnumPackage(), getName(), COMPARE_WITH_OUTPUT, "enum_out");
 	}
 
+	@Test
 	public void testBasic() throws Exception {
 		performEnumTest();
 	}
 
+	@Test
 	public void testAnonymousEnum() throws Exception {
 		performEnumTest();
 	}
 
+	@Test
 	public void test_416198() throws Exception {
 		performEnumTest();
 	}
@@ -916,68 +1082,84 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performTestInlineMethod(fgTestSetup.getGenericPackage(), getName(), COMPARE_WITH_OUTPUT, "generic_out");
 	}
 
+	@Test
 	public void testClassInstance() throws Exception {
 		performGenericTest();
 	}
 
+	@Test
 	public void testClassInstance2() throws Exception {
 		performGenericTestInlineMethod();
 	}
 
+	@Test
 	public void testSubClass1() throws Exception {
 		performGenericTest();
 	}
 
+	@Test
 	public void testSubClass2() throws Exception {
 		performGenericTest();
 	}
 
+	@Test
 	public void testMethodInstance1() throws Exception {
 		performGenericTest();
 	}
 
+	@Test
 	public void testMethodInstance2() throws Exception {
 		performGenericTest();
 	}
 
+	@Test
 	public void testMethodInstance3() throws Exception {
 		performGenericTestInlineMethod();
 	}
 
+	@Test
 	public void testParameterizedType1() throws Exception {
 		performGenericTest();
 	}
 
+	@Test
 	public void testParameterizedType2() throws Exception {
 		performGenericTest();
 	}
 
+	@Test
 	public void testParameterizedType3() throws Exception {
 		performGenericTest();
 	}
 
+	@Test
 	public void testParameterizedType4() throws Exception {
 		performGenericTest();
 	}
 
+	@Test
 	public void testParameterizedType5() throws Exception {
 		performGenericTest();
 	}
 
+	@Test
 	public void testParameterizedType6() throws Exception {
 		performGenericTest();
 	}
 
+	@Test
 	public void testParameterizedMethod() throws Exception {
 		performGenericTest();
 	}
 
 	/* *********************** Binary Tests ******************************* */
 
+	@Test
 	public void testBinaryInlineSingle() throws Exception { // uses classes.Target#
 		performTestInlineCall(fgTestSetup.getBinaryPackage(), getName(), COMPARE_WITH_OUTPUT, "binary_out");
 	}
 
+	@Test
 	public void testBinaryInlineAll() throws Exception { // inlines all classes.Target2#logMessage(..)
 		String id= getName();
 		ICompilationUnit unit= createCU(fgTestSetup.getBinaryPackage(), id);
@@ -996,10 +1178,12 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performTest(unit, refactoring, COMPARE_WITH_OUTPUT, getProofedContent("binary_out", id), true);
 	}
 
+	@Test
 	public void testBinaryNoSource() throws Exception {
 		performTestInlineCall(fgTestSetup.getBinaryPackage(), getName(), INVALID_SELECTION, null);
 	}
 
+	@Test
 	public void test_133575() throws Exception { // uses classes.BinEnum
 		performTestInlineCall(fgTestSetup.getBinaryPackage(), getName(), COMPARE_WITH_OUTPUT, "binary_out");
 	}
@@ -1010,62 +1194,77 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performTestInlineCall(fgTestSetup.getOperatorPackage(), getName(), COMPARE_WITH_OUTPUT, "operator_out");
 	}
 
+	@Test
 	public void testPlusPlus() throws Exception {
 		performOperatorTest();
 	}
 
+	@Test
 	public void testPlusPlus_1() throws Exception {
 		performOperatorTest();
 	}
 
+	@Test
 	public void testPlusDiff() throws Exception {
 		performOperatorTest();
 	}
 
+	@Test
 	public void testDiffDiff() throws Exception {
 		performOperatorTest();
 	}
 
+	@Test
 	public void testDiffPlus() throws Exception {
 		performOperatorTest();
 	}
 
+	@Test
 	public void testTimesPlus() throws Exception {
 		performOperatorTest();
 	}
 
+	@Test
 	public void testPrefixPlus() throws Exception {
 		performOperatorTest();
 	}
 
+	@Test
 	public void testPostfixPlus() throws Exception {
 		performOperatorTest();
 	}
 
+	@Test
 	public void testPlusTimes() throws Exception {
 		performOperatorTest();
 	}
 
+	@Test
 	public void testPlusPrefix() throws Exception {
 		performOperatorTest();
 	}
 
+	@Test
 	public void testPlusPostfix() throws Exception {
 		performOperatorTest();
 	}
 
+	@Test
 	public void testTimesTimes() throws Exception {
 		performOperatorTest();
 	}
 
+	@Test
 	public void testTimesDivide() throws Exception {
 		performOperatorTest();
 	}
 
+	@Test
 	public void testDivideDivide() throws Exception {
 		performOperatorTest();
 	}
 
+	@Test
 	public void testOperatorPredence() throws Exception {
 		AST ast= AST.newAST(IASTSharedValues.SHARED_AST_LEVEL, false);
 
@@ -1106,7 +1305,7 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		exp= ast.newInfixExpression();
 		exp.setOperator(Operator.NOT_EQUALS);
 		int notEquals= OperatorPrecedence.getExpressionPrecedence(exp);
-		assertTrue(equals == notEquals);
+		assertEquals(equals, notEquals);
 
 		exp= ast.newInfixExpression();
 		exp.setOperator(Operator.LESS);
@@ -1116,20 +1315,20 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		exp= ast.newInfixExpression();
 		exp.setOperator(Operator.LESS_EQUALS);
 		int lessEquals= OperatorPrecedence.getExpressionPrecedence(exp);
-		assertTrue(less == lessEquals);
+		assertEquals(less, lessEquals);
 
 		exp= ast.newInfixExpression();
 		exp.setOperator(Operator.GREATER);
 		int greater= OperatorPrecedence.getExpressionPrecedence(exp);
-		assertTrue(lessEquals == greater);
+		assertEquals(lessEquals, greater);
 
 		exp= ast.newInfixExpression();
 		exp.setOperator(Operator.GREATER_EQUALS);
 		int greaterEquals= OperatorPrecedence.getExpressionPrecedence(exp);
-		assertTrue(greater == greaterEquals);
+		assertEquals(greater, greaterEquals);
 
 		int instance= OperatorPrecedence.getExpressionPrecedence(ast.newInstanceofExpression());
-		assertTrue(greaterEquals == instance);
+		assertEquals(greaterEquals, instance);
 
 		exp= ast.newInfixExpression();
 		exp.setOperator(Operator.LEFT_SHIFT);
@@ -1139,12 +1338,12 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		exp= ast.newInfixExpression();
 		exp.setOperator(Operator.RIGHT_SHIFT_SIGNED);
 		int rightShiftSigned= OperatorPrecedence.getExpressionPrecedence(exp);
-		assertTrue(leftShift == rightShiftSigned);
+		assertEquals(leftShift, rightShiftSigned);
 
 		exp= ast.newInfixExpression();
 		exp.setOperator(Operator.RIGHT_SHIFT_UNSIGNED);
 		int rightShiftUnSigned= OperatorPrecedence.getExpressionPrecedence(exp);
-		assertTrue(rightShiftSigned == rightShiftUnSigned);
+		assertEquals(rightShiftSigned, rightShiftUnSigned);
 
 		exp= ast.newInfixExpression();
 		exp.setOperator(Operator.PLUS);
@@ -1154,7 +1353,7 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		exp= ast.newInfixExpression();
 		exp.setOperator(Operator.MINUS);
 		int minus= OperatorPrecedence.getExpressionPrecedence(exp);
-		assertTrue(plus == minus);
+		assertEquals(plus, minus);
 
 		exp= ast.newInfixExpression();
 		exp.setOperator(Operator.TIMES);
@@ -1164,12 +1363,12 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		exp= ast.newInfixExpression();
 		exp.setOperator(Operator.DIVIDE);
 		int divide= OperatorPrecedence.getExpressionPrecedence(exp);
-		assertTrue(times == divide);
+		assertEquals(times, divide);
 
 		exp= ast.newInfixExpression();
 		exp.setOperator(Operator.REMAINDER);
 		int remainder= OperatorPrecedence.getExpressionPrecedence(exp);
-		assertTrue(divide == remainder);
+		assertEquals(divide, remainder);
 
 		int cast= OperatorPrecedence.getExpressionPrecedence(ast.newCastExpression());
 		assertTrue(times < cast);
@@ -1181,6 +1380,6 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		assertTrue(prefix < postfix);
 
 		int newClass= OperatorPrecedence.getExpressionPrecedence(ast.newClassInstanceCreation());
-		assertTrue(postfix == newClass);
+		assertEquals(postfix, newClass);
 	}
 }

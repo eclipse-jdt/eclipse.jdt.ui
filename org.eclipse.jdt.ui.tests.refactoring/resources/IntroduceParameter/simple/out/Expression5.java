@@ -7,6 +7,6 @@ public class Expression5 {
 		int a= 1 - first;
 	}
 	public void use() {
-		m((2 + 3));
+		m(2 + 3);
 	}
 }

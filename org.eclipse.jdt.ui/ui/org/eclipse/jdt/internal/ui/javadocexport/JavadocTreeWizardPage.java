@@ -624,7 +624,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 					if (doclet.length() == 0) {
 						fDocletStatus.setError(JavadocExportMessages.JavadocTreeWizardPage_nodocletname_error);
 
-					} else if (JavaConventions.validateJavaTypeName(doclet, JavaCore.VERSION_1_3, JavaCore.VERSION_1_3).matches(IStatus.ERROR)) {
+					} else if (JavaConventions.validateJavaTypeName(doclet, JavaCore.VERSION_1_3, JavaCore.VERSION_1_3, null).matches(IStatus.ERROR)) {
 						fDocletStatus.setError(JavadocExportMessages.JavadocTreeWizardPage_invaliddocletname_error);
 					} else if ((docletPath.length() == 0) || !validDocletPath(docletPath)) {
 						fDocletStatus.setError(JavadocExportMessages.JavadocTreeWizardPage_invaliddocletpath_error);

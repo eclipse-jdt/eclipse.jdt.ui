@@ -402,7 +402,7 @@ public class RenameTypeParameterProcessor extends JavaRenameProcessor implements
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME));
 		String references= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES);
 		if (references != null) {
-			fUpdateReferences= Boolean.valueOf(references).booleanValue();
+			fUpdateReferences= Boolean.parseBoolean(references);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES));
 		return new RefactoringStatus();

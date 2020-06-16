@@ -637,7 +637,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 						affectedLocals.append('\n');
 					}
 				}
-				String message= MessageFormat.format(RefactoringCoreMessages.ExtractMethodAnalyzer_assignments_to_local, new Object[] { affectedLocals.toString() });
+				String message= MessageFormat.format(RefactoringCoreMessages.ExtractMethodAnalyzer_assignments_to_local, affectedLocals.toString());
 				status.addFatalError(message, JavaStatusContext.create(fCUnit, getSelection()));
 				return;
 		}

@@ -71,6 +71,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.NodeFinder;
+import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -859,8 +860,22 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 				}
 			} else if (node instanceof ArrayType) {
 				final ASTNode type= node;
-				while (node != null && !(node instanceof MethodDeclaration) && !(node instanceof VariableDeclarationFragment))
+				FieldDeclaration fieldDeclaration= ASTNodes.getParent(node, FieldDeclaration.class);
+				if (fieldDeclaration != null) {
+					binding= ((VariableDeclaration) fieldDeclaration.fragments().get(0)).resolveBinding();
+					node= target.findDeclaringNode(binding.getKey());
+					fieldDeclaration= ASTNodes.getParent(node, FieldDeclaration.class);
+					Type elementType= ((ArrayType) fieldDeclaration.getType()).getElementType();
+					ASTNode changeNode= NodeFinder.perform(target, elementType.getStartPosition(), elementType.getLength());
+					if (changeNode instanceof SimpleName || changeNode instanceof ParameterizedType) {
+						rewriteTypeOccurrence(estimate, rewrite, changeNode, group);
+					}
+					return;
+				}
+
+				while (node != null && !(node instanceof MethodDeclaration) && !(node instanceof VariableDeclarationFragment)) {
 					node= node.getParent();
+				}
 				if (node != null) {
 					final int delta= node.getStartPosition() + node.getLength() - type.getStartPosition();
 					if (node instanceof MethodDeclaration)

@@ -79,6 +79,7 @@ public class MultiFixMessages extends NLS {
 	public static String Java50MultiFix_AddMissingDeprecated_description;
 	public static String Java50MultiFix_AddMissingOverride_description;
 	public static String Java50MultiFix_AddMissingOverride_description2;
+	public static String Java50CleanUp_ConvertLoopOnlyIfLoopVarUsed_description;
 	public static String Java50CleanUp_ConvertToEnhancedForLoop_description;
 	public static String Java50CleanUp_AddTypeParameters_description;
 
@@ -121,6 +122,7 @@ public class MultiFixMessages extends NLS {
 	public static String AutoboxingCleanup_description;
 	public static String UnboxingCleanup_description;
 	public static String PushDownNegationCleanup_description;
+	public static String MergeConditionalBlocksCleanup_description;
 
 	public static String UseDirectlyMapMethodCleanup_description;
 	public static String RedundantSemicolonsCleanup_description;

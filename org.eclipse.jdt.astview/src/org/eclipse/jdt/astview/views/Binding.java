@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -96,6 +96,7 @@ public class Binding extends ASTAttribute {
 					res.add(new BindingProperty(this, "IS FIELD", variableBinding.isField(), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "IS ENUM CONSTANT", variableBinding.isEnumConstant(), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "IS PARAMETER", variableBinding.isParameter(), true)); //$NON-NLS-1$
+					res.add(new BindingProperty(this, "IS RECORD COMPONENT", variableBinding.isRecordComponent(), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "VARIABLE ID", variableBinding.getVariableId(), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "MODIFIERS", getModifiersString(fBinding.getModifiers(), false), true)); //$NON-NLS-1$
 					res.add(new Binding(this, "TYPE", variableBinding.getType(), true)); //$NON-NLS-1$

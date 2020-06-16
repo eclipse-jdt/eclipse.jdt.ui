@@ -513,16 +513,25 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	@Override
 	public IAutoEditStrategy[] getAutoEditStrategies(ISourceViewer sourceViewer, String contentType) {
 		String partitioning= getConfiguredDocumentPartitioning(sourceViewer);
-		if (IJavaPartitions.JAVA_DOC.equals(contentType) || IJavaPartitions.JAVA_MULTI_LINE_COMMENT.equals(contentType))
-			return new IAutoEditStrategy[] { new JavaDocAutoIndentStrategy(partitioning) };
-		else if (IJavaPartitions.JAVA_STRING.equals(contentType))
-			return new IAutoEditStrategy[] { new SmartSemicolonAutoEditStrategy(partitioning), new JavaStringAutoIndentStrategy(partitioning, EditorUtility.getJavaProject(fTextEditor)) };
-		else if (IJavaPartitions.JAVA_CHARACTER.equals(contentType) || IDocument.DEFAULT_CONTENT_TYPE.equals(contentType))
-			return new IAutoEditStrategy[] { new SmartSemicolonAutoEditStrategy(partitioning), new JavaAutoIndentStrategy(partitioning, EditorUtility.getJavaProject(fTextEditor), sourceViewer) };
-		else if (IJavaPartitions.JAVA_MULTI_LINE_STRING.equals(contentType))
-			return new IAutoEditStrategy[] { new JavaMultiLineStringAutoIndentStrategy(partitioning, EditorUtility.getJavaProject(fTextEditor)) };
-		else
-			return new IAutoEditStrategy[] { new JavaAutoIndentStrategy(partitioning, EditorUtility.getJavaProject(fTextEditor), sourceViewer) };
+
+		if (contentType != null) {
+			switch (contentType) {
+				case IJavaPartitions.JAVA_DOC:
+				case IJavaPartitions.JAVA_MULTI_LINE_COMMENT:
+					return new IAutoEditStrategy[] { new JavaDocAutoIndentStrategy(partitioning) };
+				case IJavaPartitions.JAVA_STRING:
+					return new IAutoEditStrategy[] { new SmartSemicolonAutoEditStrategy(partitioning), new JavaStringAutoIndentStrategy(partitioning, EditorUtility.getJavaProject(fTextEditor)) };
+				case IJavaPartitions.JAVA_CHARACTER:
+				case IDocument.DEFAULT_CONTENT_TYPE:
+					return new IAutoEditStrategy[] { new SmartSemicolonAutoEditStrategy(partitioning), new JavaAutoIndentStrategy(partitioning, EditorUtility.getJavaProject(fTextEditor), sourceViewer) };
+				case IJavaPartitions.JAVA_MULTI_LINE_STRING:
+					return new IAutoEditStrategy[] { new JavaMultiLineStringAutoIndentStrategy(partitioning, EditorUtility.getJavaProject(fTextEditor)) };
+				default:
+					break;
+			}
+		}
+
+		return new IAutoEditStrategy[] { new JavaAutoIndentStrategy(partitioning, EditorUtility.getJavaProject(fTextEditor), sourceViewer) };
 	}
 
 	/*
@@ -530,16 +539,22 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	 */
 	@Override
 	public ITextDoubleClickStrategy getDoubleClickStrategy(ISourceViewer sourceViewer, String contentType) {
-		if (IJavaPartitions.JAVA_DOC.equals(contentType))
-			return new JavadocDoubleClickStrategy(getConfiguredDocumentPartitioning(sourceViewer));
-		if (IJavaPartitions.JAVA_SINGLE_LINE_COMMENT.equals(contentType))
-			return new PartitionDoubleClickSelector(getConfiguredDocumentPartitioning(sourceViewer), 0, 0);
-		if (IJavaPartitions.JAVA_MULTI_LINE_COMMENT.equals(contentType))
-			return new PartitionDoubleClickSelector(getConfiguredDocumentPartitioning(sourceViewer), 0, 0);
-		else if (IJavaPartitions.JAVA_STRING.equals(contentType) || IJavaPartitions.JAVA_CHARACTER.equals(contentType))
-			return new PartitionDoubleClickSelector(getConfiguredDocumentPartitioning(sourceViewer), 1, 1);
-		else if (IJavaPartitions.JAVA_MULTI_LINE_STRING.equals(contentType))
-			return new PartitionDoubleClickSelector(getConfiguredDocumentPartitioning(sourceViewer), 3, 3, 3);
+		if (contentType != null) {
+			switch (contentType) {
+				case IJavaPartitions.JAVA_DOC:
+					return new JavadocDoubleClickStrategy(getConfiguredDocumentPartitioning(sourceViewer));
+				case IJavaPartitions.JAVA_SINGLE_LINE_COMMENT:
+				case IJavaPartitions.JAVA_MULTI_LINE_COMMENT:
+					return new PartitionDoubleClickSelector(getConfiguredDocumentPartitioning(sourceViewer), 0, 0);
+				case IJavaPartitions.JAVA_STRING:
+				case IJavaPartitions.JAVA_CHARACTER:
+					return new PartitionDoubleClickSelector(getConfiguredDocumentPartitioning(sourceViewer), 1, 1);
+				case IJavaPartitions.JAVA_MULTI_LINE_STRING:
+					return new PartitionDoubleClickSelector(getConfiguredDocumentPartitioning(sourceViewer), 3, 3, 3);
+				default:
+					break;
+			}
+		}
 		if (fJavaDoubleClickSelector == null) {
 			fJavaDoubleClickSelector= new JavaDoubleClickSelector();
 			fJavaDoubleClickSelector.setSourceVersion(fPreferenceStore.getString(JavaCore.COMPILER_SOURCE));

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -191,9 +191,7 @@ public class UnresolvedElementsSubProcessor {
 		boolean suggestVariableProposals= true;
 		int typeKind= 0;
 
-		while (selectedNode instanceof ParenthesizedExpression) {
-			selectedNode= ((ParenthesizedExpression) selectedNode).getExpression();
-		}
+		selectedNode= ASTNodes.getUnparenthesedExpression(selectedNode);
 
 
 		Name node= null;
@@ -1420,10 +1418,7 @@ public class UnresolvedElementsSubProcessor {
 		if (!hasCastProposal) {
 			// x.getName() -> ((TestCase) x).getName
 
-			Expression target= sender;
-			while (target instanceof ParenthesizedExpression) {
-				target= ((ParenthesizedExpression) target).getExpression();
-			}
+			Expression target= ASTNodes.getUnparenthesedExpression(sender);
 
 			String label;
 			if (target.getNodeType() != ASTNode.CAST_EXPRESSION) {
@@ -2003,6 +1998,7 @@ public class UnresolvedElementsSubProcessor {
 			if (typeBinding != null && !typeBinding.isAnonymous()) {
 				targetBinding= typeBinding;
 				arguments= enumNode.arguments();
+				selectedNode= enumNode;
 			}
 		}
 
@@ -2125,6 +2121,9 @@ public class UnresolvedElementsSubProcessor {
 				proposals.add(new NewAnnotationMemberProposal(label, targetCU, selectedNode, annotBinding, IProposalRelevance.CREATE_ATTRIBUTE, image));
 			}
 		}
+	}
+
+	private UnresolvedElementsSubProcessor() {
 	}
 
 

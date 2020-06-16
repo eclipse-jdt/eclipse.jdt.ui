@@ -1088,6 +1088,7 @@ public final class JavaIndenter {
 				return skipToStatementStart(danglingElse, false);
 
 			case Symbols.TokenRBRACKET:
+			case Symbols.TokenRETURN:
 				fIndent= fPrefs.prefContinuationIndent;
 				return fPosition;
 
@@ -1127,10 +1128,7 @@ public final class JavaIndenter {
 				fTokenPos = tokenPos;
 
 				return skipToPreviousListItemOrListStart();
-			case Symbols.TokenRETURN:
-				fIndent= fPrefs.prefContinuationIndent;
-				return fPosition;
-			case Symbols.TokenPLUS:
+		case Symbols.TokenPLUS:
 				if (isStringContinuation(fPosition)) {
 					try {
 						if (isSecondLineOfStringContinuation(offset)) {
@@ -1199,9 +1197,8 @@ public final class JavaIndenter {
 					fPosition= storedPos;
 					break;
 				case Symbols.TokenEOF:
-					return false;
-				default:
-					return false;
+			default:
+				return false;
 			}
 			nextToken();
 		}
@@ -1247,16 +1244,14 @@ public final class JavaIndenter {
 				case Symbols.TokenFOR:
 					return true;
 				case Symbols.TokenLBRACE:
+				case Symbols.TokenCOLON:
+				case Symbols.TokenEOF:
 					return false;
 				case Symbols.TokenSEMICOLON:
 					semiColonCount++;
 					if (semiColonCount > 2)
 						return false;
 					break;
-				case Symbols.TokenCOLON:
-					return false;
-				case Symbols.TokenEOF:
-					return false;
 			}
 		}
 	}
@@ -1274,7 +1269,6 @@ public final class JavaIndenter {
 				case Symbols.TokenTRY:
 					return true;
 				case Symbols.TokenLBRACE:
-					return false;
 				case Symbols.TokenEOF:
 					return false;
 			}
@@ -1817,7 +1811,6 @@ public final class JavaIndenter {
 					skipScope();
 					break;
 				case Symbols.TokenEOF:
-					return false;
 				default:
 					return false;
 			}
@@ -1847,7 +1840,6 @@ public final class JavaIndenter {
 					skipScope();
 					break;
 				case Symbols.TokenEOF:
-					return false;
 				default:
 					return false;
 			}

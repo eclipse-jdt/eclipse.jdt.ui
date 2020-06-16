@@ -13,7 +13,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
-import org.junit.ClassRule;
+import static org.eclipse.jdt.ui.tests.refactoring.AbstractJunit4SelectionTestCase.TestMode.COMPARE_WITH_OUTPUT;
+import static org.eclipse.jdt.ui.tests.refactoring.AbstractJunit4SelectionTestCase.TestMode.INVALID_SELECTION;
+
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -24,8 +27,9 @@ import org.eclipse.jdt.ui.tests.IgnoreInheritedTests;
 @RunWith(CustomBaseRunner.class)
 public class ExtractMethodTests13 extends ExtractMethodTests {
 
-	@ClassRule
-	public static ExtractMethodTestSetup13 fgTestSetup= new ExtractMethodTestSetup13();
+	@SuppressWarnings("hiding")
+	@Rule
+	public ExtractMethodTestSetup13 fgTestSetup= new ExtractMethodTestSetup13();
 
 	@Override
 	protected void invalidSelectionTest() throws Exception {

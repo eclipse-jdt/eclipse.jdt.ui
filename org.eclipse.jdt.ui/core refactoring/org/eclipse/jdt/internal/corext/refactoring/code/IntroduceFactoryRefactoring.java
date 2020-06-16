@@ -1162,8 +1162,8 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT, JavaRefactoringDescriptorUtil.elementToHandle(project, fCUHandle));
 			arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME, fNewMethodName);
 			arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + 1, JavaRefactoringDescriptorUtil.elementToHandle(project, binding.getJavaElement()));
-			arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION, Integer.valueOf(fSelectionStart).toString() + " " + Integer.valueOf(fSelectionLength).toString()); //$NON-NLS-1$
-			arguments.put(ATTRIBUTE_PROTECT, Boolean.valueOf(fProtectConstructor).toString());
+			arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION, Integer.toString(fSelectionStart) + " " + Integer.toString(fSelectionLength)); //$NON-NLS-1$
+			arguments.put(ATTRIBUTE_PROTECT, Boolean.toString(fProtectConstructor));
 			final DynamicValidationStateChange result= new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.IntroduceFactory_name);
 			boolean hitInFactoryClass= false;
 			boolean hitInCtorClass= false;
@@ -1353,9 +1353,9 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			int length= -1;
 			final StringTokenizer tokenizer= new StringTokenizer(selection);
 			if (tokenizer.hasMoreTokens())
-				offset= Integer.valueOf(tokenizer.nextToken()).intValue();
+				offset= Integer.parseInt(tokenizer.nextToken());
 			if (tokenizer.hasMoreTokens())
-				length= Integer.valueOf(tokenizer.nextToken()).intValue();
+				length= Integer.parseInt(tokenizer.nextToken());
 			if (offset >= 0 && length >= 0) {
 				fSelectionStart= offset;
 				fSelectionLength= length;
@@ -1392,7 +1392,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME));
 		final String protect= arguments.getAttribute(ATTRIBUTE_PROTECT);
 		if (protect != null) {
-			fProtectConstructor= Boolean.valueOf(protect).booleanValue();
+			fProtectConstructor= Boolean.parseBoolean(protect);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_PROTECT));
 		return new RefactoringStatus();

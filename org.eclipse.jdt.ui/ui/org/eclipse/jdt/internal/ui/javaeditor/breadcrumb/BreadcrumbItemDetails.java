@@ -324,12 +324,6 @@ class BreadcrumbItemDetails {
 						}
 						break;
 					case SWT.ARROW_DOWN:
-						if (!fSelected) {
-							viewer.selectItem(fParent);
-						}
-						openDropDown();
-						e.doit= false;
-						break;
 					case SWT.KEYPAD_ADD:
 						if (!fSelected) {
 							viewer.selectItem(fParent);

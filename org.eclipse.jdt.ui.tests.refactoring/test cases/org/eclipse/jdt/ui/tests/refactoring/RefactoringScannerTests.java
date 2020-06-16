@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,19 +13,21 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.ArrayList;
 import java.util.Collections;
+
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScanner;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScanner.TextMatch;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
+import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
-public class RefactoringScannerTests extends RefactoringTest{
-
+public class RefactoringScannerTests extends GenericRefactoringTest {
 	private static class Position {
 		private final int fLine;
 		private final int fColumn;
@@ -36,31 +38,25 @@ public class RefactoringScannerTests extends RefactoringTest{
 	}
 
 
-	public RefactoringScannerTests(String name){
-		super(name);
-	}
+	@Rule
+	public RefactoringTestSetup fts= new RefactoringTestSetup();
 
 	private RefactoringScanner fScanner;
-	private static Class<RefactoringScannerTests> clazz= RefactoringScannerTests.class;
 
 	@Override
 	protected String getRefactoringPath() {
 		return "RefactoringScanner/";
 	}
 
-	public static Test suite() {
-		return new RefactoringTestSetup(new TestSuite(clazz));
-	}
-
 	@Override
-	protected void setUp() throws Exception {
-		//no need to call super.setUp();
+	public void genericbefore() throws Exception {
+		//no need to call super.genericbefore();
 		fScanner= new RefactoringScanner("TestPattern", "org.eclipse");
 	}
 
 	@Override
-	protected void tearDown() throws Exception {
-		//no need to call super.tearDown();
+	public void genericafter() throws Exception {
+		//no need to call super.genericafter();
 	}
 
 	private void helper(String fileName, int expectedMatchCount)	throws Exception{
@@ -86,20 +82,24 @@ public class RefactoringScannerTests extends RefactoringTest{
 	}
 
 	//-- tests
+	@Test
 	public void test0() throws Exception{
 		String text= "";
 		fScanner.scan(text);
 		assertEquals("results.length", 0, fScanner.getMatches().size());
 	}
 
+	@Test
 	public void test1() throws Exception{
 		helper("A.java", 8);
 	}
 
+	@Test
 	public void testWord1() throws Exception{
 		helper("B.java", 6);
 	}
 
+	@Test
 	public void testQualifier() throws Exception{
 		helper2("C.java", new Position[] {
 				new Position(4, 21),
@@ -115,4 +115,3 @@ public class RefactoringScannerTests extends RefactoringTest{
 		});
 	}
 }
-

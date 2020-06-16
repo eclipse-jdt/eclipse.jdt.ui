@@ -871,7 +871,8 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		Assert.isTrue(fField.exists());
 
 		IJavaSearchScope scope= RefactoringScopeFactory.create(fField.getDeclaringType());
-		SearchPattern pattern= SearchPattern.createPattern(fField.getElementName(), IJavaSearchConstants.METHOD,
+		String patternStr= getCurrentElementQualifier() + '.' + fField.getElementName();
+		SearchPattern pattern= SearchPattern.createPattern(patternStr, IJavaSearchConstants.METHOD,
 				IJavaSearchConstants.REFERENCES, SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE | SearchPattern.R_ERASURE_MATCH);
 		SearchResultGroup[] groupedResults= RefactoringSearchEngine.search(
 				pattern, scope, new MethodOccurenceCollector(fField.getElementName()), pm, status);
@@ -999,32 +1000,32 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME));
 		final String references= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES);
 		if (references != null) {
-			fUpdateReferences= Boolean.valueOf(references).booleanValue();
+			fUpdateReferences= Boolean.parseBoolean(references);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES));
 		final String matches= extended.getAttribute(ATTRIBUTE_TEXTUAL_MATCHES);
 		if (matches != null) {
-			fUpdateTextualMatches= Boolean.valueOf(matches).booleanValue();
+			fUpdateTextualMatches= Boolean.parseBoolean(matches);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_TEXTUAL_MATCHES));
 		final String getters= extended.getAttribute(ATTRIBUTE_RENAME_GETTER);
 		if (getters != null)
-			fRenameGetter= Boolean.valueOf(getters).booleanValue();
+			fRenameGetter= Boolean.parseBoolean(getters);
 		else
 			fRenameGetter= false;
 		final String setters= extended.getAttribute(ATTRIBUTE_RENAME_SETTER);
 		if (setters != null)
-			fRenameSetter= Boolean.valueOf(setters).booleanValue();
+			fRenameSetter= Boolean.parseBoolean(setters);
 		else
 			fRenameSetter= false;
 		final String delegate= extended.getAttribute(ATTRIBUTE_DELEGATE);
 		if (delegate != null) {
-			fDelegateUpdating= Boolean.valueOf(delegate).booleanValue();
+			fDelegateUpdating= Boolean.parseBoolean(delegate);
 		} else
 			fDelegateUpdating= false;
 		final String deprecate= extended.getAttribute(ATTRIBUTE_DEPRECATE);
 		if (deprecate != null) {
-			fDelegateDeprecation= Boolean.valueOf(deprecate).booleanValue();
+			fDelegateDeprecation= Boolean.parseBoolean(deprecate);
 		} else
 			fDelegateDeprecation= false;
 		return new RefactoringStatus();

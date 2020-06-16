@@ -5127,6 +5127,352 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testMergeConditionalBlocks() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "\n" //
+				+ "    /** Duplicate if and else if code, merge it */\n" //
+				+ "    public void duplicateIfAndElseIf(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (i == 0) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "        } else if (i == 1) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "        } else {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            System.out.println(\"Different\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    /** Duplicate if and else if code, merge it */\n" //
+				+ "    public void mergeTwoStructures(int a, int b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (a == 0) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "        } else if (a == 1) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "        } else {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            System.out.println(\"Different\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (b == 0) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "        } else if (b == 1) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "        } else {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            System.out.println(\"Different\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    /** Duplicate if and else code, merge it */\n" //
+				+ "    public void duplicateIfAndElse(int j) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (j == 0) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "        } else if (j == 1) {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            System.out.println(\"Different\");\n" //
+				+ "        } else {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    /** Duplicate if and else if code, merge it */\n" //
+				+ "    public void duplicateIfAndElseIfWithoutElse(int k) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (k == 0) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "        } else if (k == 1) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    /** Duplicate else if codes, merge it */\n" //
+				+ "    public void duplicateIfAndElseIfAmongOther(int m) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (m == 0) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            System.out.println(\"A given code\");\n" //
+				+ "        } if (m == 1) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "        } else if (m == 2) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "        } else {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            System.out.println(\"Different\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    /** Duplicate if and else if code, merge it */\n" //
+				+ "    public void duplicateSingleStatement(int n) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (n == 0)\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "        else if (n == 1)\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "        else\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            System.out.println(\"Different\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    /** Duplicate if and else if code, merge it */\n" //
+				+ "    public void numerousDuplicateIfAndElseIf(int o) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (o == 0) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "        } else if (o == 1) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "        } else if (o == 2)\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "        else if (o == 3) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "        } else {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            System.out.println(\"Different\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    /** Duplicate if and else if code, merge it */\n" //
+				+ "    public void complexIfAndElseIf(int p) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (p == 0) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            System.out.println(\"Duplicate \");\n" //
+				+ "        } else if (p == 1 || p == 2) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            System.out.println(\"Duplicate \");\n" //
+				+ "        } else if (p > 10) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            System.out.println(\"Duplicate \");\n" //
+				+ "        } else {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            System.out.println(\"Different\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    /** Duplicate if and else if code, merge it */\n" //
+				+ "    public void longIfAndElseIf(int q) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (q == 0) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "            System.out.println(\"code\");\n" //
+				+ "        } else if (q == 1) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "            System.out.println(\"code\");\n" //
+				+ "        } else {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            System.out.println(\"Different\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.MERGE_CONDITIONAL_BLOCKS);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "\n" //
+				+ "    /** Duplicate if and else if code, merge it */\n" //
+				+ "    public void duplicateIfAndElseIf(int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if ((i == 0) || (i == 1)) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "        } else {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            System.out.println(\"Different\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    /** Duplicate if and else if code, merge it */\n" //
+				+ "    public void mergeTwoStructures(int a, int b) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if ((a == 0) || (a == 1)) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "        } else {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            System.out.println(\"Different\");\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if ((b == 0) || (b == 1)) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "        } else {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            System.out.println(\"Different\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    /** Duplicate if and else code, merge it */\n" //
+				+ "    public void duplicateIfAndElse(int j) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if ((j == 0) || !(j == 1)) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "        } else {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            System.out.println(\"Different\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    /** Duplicate if and else if code, merge it */\n" //
+				+ "    public void duplicateIfAndElseIfWithoutElse(int k) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if ((k == 0) || (k == 1)) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    /** Duplicate else if codes, merge it */\n" //
+				+ "    public void duplicateIfAndElseIfAmongOther(int m) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (m == 0) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            System.out.println(\"A given code\");\n" //
+				+ "        } if ((m == 1) || (m == 2)) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "        } else {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            System.out.println(\"Different\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    /** Duplicate if and else if code, merge it */\n" //
+				+ "    public void duplicateSingleStatement(int n) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if ((n == 0) || (n == 1))\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "        else\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            System.out.println(\"Different\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    /** Duplicate if and else if code, merge it */\n" //
+				+ "    public void numerousDuplicateIfAndElseIf(int o) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if ((o == 0) || (o == 1) || (o == 2)\n" //
+				+ "                || (o == 3)) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "        } else {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            System.out.println(\"Different\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    /** Duplicate if and else if code, merge it */\n" //
+				+ "    public void complexIfAndElseIf(int p) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if ((p == 0) || (p == 1 || p == 2) || (p > 10)) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            System.out.println(\"Duplicate \");\n" //
+				+ "        } else {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            System.out.println(\"Different\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    /** Duplicate if and else if code, merge it */\n" //
+				+ "    public void longIfAndElseIf(int q) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if ((q == 0) || (q == 1)) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "            System.out.println(\"code\");\n" //
+				+ "        } else {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            System.out.println(\"Different\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+	}
+
+	@Test
+	public void testDoNotMergeConditionalBlocks() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    /** 5 operands, not easily readable */\n" //
+				+ "    public void doNotMergeMoreThanFourOperands(int i) {\n" //
+				+ "        if ((i == 0) || (i == 1 || i == 2)) {\n" //
+				+ "            System.out.println(\"Duplicate \");\n" //
+				+ "        } else if (i > 10 && i < 100) {\n" //
+				+ "            System.out.println(\"Duplicate \");\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Different\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    /** Different if and else if code, leave it */\n" //
+				+ "    public void doNotMergeAdditionalCode(int i) {\n" //
+				+ "        if (i == 0) {\n" //
+				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "        } else if (i == 1) {\n" //
+				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "            System.out.println(\"but not only\");\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Different\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    /** Different code in the middle, leave it */\n" //
+				+ "    public void doNotMergeIntruderCode(int i) {\n" //
+				+ "        if (i == 0) {\n" //
+				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "        } else if (i == 1) {\n" //
+				+ "            System.out.println(\"Intruder\");\n" //
+				+ "        } else if (i == 2) {\n" //
+				+ "            System.out.println(\"Duplicate\");\n" //
+				+ "        } else {\n" //
+				+ "            System.out.println(\"Different\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.MERGE_CONDITIONAL_BLOCKS);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
 	public void testMapMethodRatherThanKeySetMethod() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //

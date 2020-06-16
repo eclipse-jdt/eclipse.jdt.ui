@@ -33,4 +33,7 @@ public class RefactoringSavePreferences {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setValue(PREF_SAVE_ALL_EDITORS, save);
 	}
+
+	private RefactoringSavePreferences() {
+	}
 }

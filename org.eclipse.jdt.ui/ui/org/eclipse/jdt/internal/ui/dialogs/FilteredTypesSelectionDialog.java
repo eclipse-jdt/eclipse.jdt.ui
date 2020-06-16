@@ -90,6 +90,7 @@ import org.eclipse.jdt.core.search.TypeNameMatch;
 import org.eclipse.jdt.core.search.TypeNameMatchRequestor;
 import org.eclipse.jdt.core.search.TypeNameRequestor;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.util.CollectionsUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.OpenTypeHistory;
@@ -117,7 +118,6 @@ import org.eclipse.jdt.internal.ui.preferences.TypeFilterPreferencePage;
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.TypeNameMatchLabelProvider;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
 
 
@@ -436,7 +436,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 					String text= ((ITextSelection) selection).getText();
 					if (text != null) {
 						text= text.trim();
-						if (text.length() > 0 && JavaConventions.validateJavaTypeName(text, JavaCore.VERSION_1_3, JavaCore.VERSION_1_3).isOK()) {
+						if (text.length() > 0 && JavaConventions.validateJavaTypeName(text, JavaCore.VERSION_1_3, JavaCore.VERSION_1_3, null).isOK()) {
 							setInitialPattern(text, FULL_SELECTION);
 						}
 					}
@@ -1148,7 +1148,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		}
 
 		private String getFormattedLabel(String name) {
-			return MessageFormat.format(JavaUIMessages.FilteredTypesSelectionDialog_library_name_format, new Object[] { name });
+			return MessageFormat.format(JavaUIMessages.FilteredTypesSelectionDialog_library_name_format, name);
 		}
 
 		@Override

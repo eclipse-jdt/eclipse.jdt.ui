@@ -673,7 +673,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 				}
 				Element libElement= (Element) lib;
 				String name= libElement.getAttribute(TAG_NAME);
-				boolean isSystem= Boolean.valueOf(libElement.getAttribute(TAG_SYSTEMLIBRARY)).booleanValue();
+				boolean isSystem= Boolean.parseBoolean(libElement.getAttribute(TAG_SYSTEMLIBRARY));
 
 				CPUserLibraryElement newLibrary= new CPUserLibraryElement(name, isSystem, null);
 				result.add(newLibrary);

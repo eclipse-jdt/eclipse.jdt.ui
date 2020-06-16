@@ -184,7 +184,6 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatu
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposal.ChangeDescription;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposal.InsertDescription;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposal.RemoveDescription;
-import org.eclipse.jdt.internal.ui.util.ASTHelper;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ConstructorFromSuperclassProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposal;
@@ -196,6 +195,7 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.NewProviderMethodDe
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewVariableCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.RefactoringCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ReplaceCorrectionProposal;
+import org.eclipse.jdt.internal.ui.util.ASTHelper;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 /**
@@ -785,10 +785,7 @@ public class LocalCorrectionsSubProcessor {
 	public static void addUnnecessaryInstanceofProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
 
-		ASTNode curr= selectedNode;
-		while (curr instanceof ParenthesizedExpression) {
-			curr= ((ParenthesizedExpression) curr).getExpression();
-		}
+		ASTNode curr= ASTNodes.getUnparenthesedExpression(selectedNode);
 
 		if (curr instanceof InstanceofExpression) {
 			AST ast= curr.getAST();
@@ -815,10 +812,7 @@ public class LocalCorrectionsSubProcessor {
 	public static void addIllegalQualifiedEnumConstantLabelProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		ASTNode coveringNode= problem.getCoveringNode(context.getASTRoot());
 
-		ASTNode curr= coveringNode;
-		while (curr instanceof ParenthesizedExpression) {
-			curr= ((ParenthesizedExpression) curr).getExpression();
-		}
+		ASTNode curr= ASTNodes.getUnparenthesedExpression(coveringNode);
 
 		if (!(curr instanceof QualifiedName)) {
 			return;
@@ -925,11 +919,7 @@ public class LocalCorrectionsSubProcessor {
 		CompilationUnit root= context.getASTRoot();
 		AST ast= root.getAST();
 
-		ASTNode selectedNode= problem.getCoveringNode(root);
-
-		while (selectedNode instanceof ParenthesizedExpression) {
-			selectedNode= ((ParenthesizedExpression) selectedNode).getExpression();
-		}
+		ASTNode selectedNode= ASTNodes.getUnparenthesedExpression(problem.getCoveringNode(root));
 
 		if (selectedNode instanceof PrefixExpression) {
 			// !x instanceof X -> !(x instanceof X)
@@ -1165,10 +1155,7 @@ public class LocalCorrectionsSubProcessor {
 
 			ASTRewrite rewrite= ASTRewrite.create(parent.getAST());
 
-			Expression replacement= leftOperand;
-			while (replacement instanceof ParenthesizedExpression) {
-				replacement= ((ParenthesizedExpression) replacement).getExpression();
-			}
+			Expression replacement= ASTNodes.getUnparenthesedExpression(leftOperand);
 
 			Expression toReplace= infixExpression;
 			while (toReplace.getLocationInParent() == ParenthesizedExpression.EXPRESSION_PROPERTY) {
@@ -2349,5 +2336,8 @@ public class LocalCorrectionsSubProcessor {
 				proposals.add(new NewMethodCorrectionProposal(label, targetCU, targetRoot, new ArrayList<> (), targetBinding, IProposalRelevance.CREATE_CONSTRUCTOR, image));
 			}
 		}
+	}
+
+	private LocalCorrectionsSubProcessor() {
 	}
 }

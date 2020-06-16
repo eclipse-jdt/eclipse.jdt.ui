@@ -38,5 +38,8 @@ public class IOCloser {
 			return;
 		}
 	}
+
+	private IOCloser() {
+	}
 }
 

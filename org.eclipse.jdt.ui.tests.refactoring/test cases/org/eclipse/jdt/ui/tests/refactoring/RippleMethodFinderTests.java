@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,13 +13,16 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
@@ -30,32 +33,22 @@ import org.eclipse.jdt.core.IPackageFragment;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.RippleMethodFinder2;
 
-import org.eclipse.jdt.ui.tests.refactoring.infra.AbstractCUTestCase;
+import org.eclipse.jdt.ui.tests.refactoring.infra.AbstractJunit4CUTestCase;
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestPlugin;
+import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
+public class RippleMethodFinderTests extends AbstractJunit4CUTestCase {
 
-public class RippleMethodFinderTests extends AbstractCUTestCase {
-
-	private static final Class<RippleMethodFinderTests> clazz= RippleMethodFinderTests.class;
 	private static final String REFACTORING_PATH= "RippleMethodFinder/";
 	private static final String TARGET= "/*target*/";
 	private static final String RIPPLE= "/*ripple*/";
 
-	public RippleMethodFinderTests(String name) {
-		super(name);
-	}
+	@Rule
+	public RefactoringTestSetup rts= new RefactoringTestSetup();
 
 	@Override
 	protected String getResourceLocation() {
 		return REFACTORING_PATH;
-	}
-
-	public static Test suite() {
-		return new RefactoringTestSetup(new TestSuite(clazz));
-	}
-
-	public static Test setUpTest(Test someTest) {
-		return new RefactoringTestSetup(someTest);
 	}
 
 	@Override
@@ -94,39 +87,51 @@ public class RippleMethodFinderTests extends AbstractCUTestCase {
 		assertEquals("found wrong ripple methods: " + rippleMethods, 0, rippleMethods.size());
 	}
 
+	@Test
 	public void test1() throws Exception {
 		perform();
 	}
+	@Test
 	public void test2() throws Exception {
 		perform();
 	}
+	@Test
 	public void test3() throws Exception {
 		perform();
 	}
+	@Test
 	public void test4() throws Exception {
 		perform();
 	}
+	@Test
 	public void test5() throws Exception {
 		perform();
 	}
+	@Test
 	public void test6() throws Exception {
 		perform();
 	}
+	@Test
 	public void test7() throws Exception {
 		perform();
 	}
+	@Test
 	public void test8() throws Exception {
 		perform();
 	}
+	@Test
 	public void test9() throws Exception {
 		perform();
 	}
+	@Test
 	public void test10() throws Exception {
 		perform();
 	}
+	@Test
 	public void test11() throws Exception {
 		perform();
 	}
+	@Test
 	public void test12() throws Exception {
 		perform();
 	}

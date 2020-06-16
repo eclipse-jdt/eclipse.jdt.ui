@@ -225,20 +225,25 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		super(bundle, prefix, editor);
 		fOperationCode= operationCode;
 
-		if (operationCode == ITextOperationTarget.CUT) {
-			setHelpContextId(IAbstractTextEditorHelpContextIds.CUT_ACTION);
-			setActionDefinitionId(IWorkbenchCommandConstants.EDIT_CUT);
-			updateImages(IWorkbenchCommandConstants.EDIT_CUT);
-		} else if (operationCode == ITextOperationTarget.COPY) {
-			setHelpContextId(IAbstractTextEditorHelpContextIds.COPY_ACTION);
-			setActionDefinitionId(IWorkbenchCommandConstants.EDIT_COPY);
-			updateImages(IWorkbenchCommandConstants.EDIT_COPY);
-		} else if (operationCode == ITextOperationTarget.PASTE) {
-			setHelpContextId(IAbstractTextEditorHelpContextIds.PASTE_ACTION);
-			setActionDefinitionId(IWorkbenchCommandConstants.EDIT_PASTE);
-			updateImages(IWorkbenchCommandConstants.EDIT_PASTE);
-		} else {
-			Assert.isTrue(false, "Invalid operation code"); //$NON-NLS-1$
+		switch (operationCode) {
+			case ITextOperationTarget.CUT:
+				setHelpContextId(IAbstractTextEditorHelpContextIds.CUT_ACTION);
+				setActionDefinitionId(IWorkbenchCommandConstants.EDIT_CUT);
+				updateImages(IWorkbenchCommandConstants.EDIT_CUT);
+				break;
+			case ITextOperationTarget.COPY:
+				setHelpContextId(IAbstractTextEditorHelpContextIds.COPY_ACTION);
+				setActionDefinitionId(IWorkbenchCommandConstants.EDIT_COPY);
+				updateImages(IWorkbenchCommandConstants.EDIT_COPY);
+				break;
+			case ITextOperationTarget.PASTE:
+				setHelpContextId(IAbstractTextEditorHelpContextIds.PASTE_ACTION);
+				setActionDefinitionId(IWorkbenchCommandConstants.EDIT_PASTE);
+				updateImages(IWorkbenchCommandConstants.EDIT_PASTE);
+				break;
+			default:
+				Assert.isTrue(false, "Invalid operation code"); //$NON-NLS-1$
+				break;
 		}
 		update();
 	}

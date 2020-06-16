@@ -285,4 +285,7 @@ public class RefactoringSignatureDescriptorFactory {
 		return new UseSupertypeDescriptor(project, description, comment, arguments, flags);
 	}
 
+	private RefactoringSignatureDescriptorFactory() {
+	}
+
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,9 +13,16 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import org.eclipse.jface.preference.PreferenceStore;
 
@@ -30,13 +37,7 @@ import org.eclipse.jface.text.ITypedRegion;
 
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
-
-
-
-
-public class JavaPartitionerExtensionTest extends TestCase {
-
-
+public class JavaPartitionerExtensionTest {
 	class PartitioningListener implements IDocumentPartitioningListener, IDocumentPartitioningListenerExtension {
 		/*
 		 * @see IDocumentPartitioningListener#documentPartitioningChanged(IDocument)
@@ -61,13 +62,8 @@ public class JavaPartitionerExtensionTest extends TestCase {
 	protected boolean fDocumentPartitioningChanged;
 	protected IRegion fChangedDocumentPartitioning;
 
-
-	public JavaPartitionerExtensionTest(String name) {
-		super(name);
-	}
-
-	@Override
-	protected void setUp() {
+	@Before
+	public void setUp() {
 
 		fTextTools= new JavaTextTools(new PreferenceStore());
 
@@ -81,12 +77,8 @@ public class JavaPartitionerExtensionTest extends TestCase {
 		fDocument.addDocumentPartitioningListener(new PartitioningListener());
 	}
 
-	public static Test suite() {
-		return new TestSuite(JavaPartitionerExtensionTest.class);
-	}
-
-	@Override
-	protected void tearDown () {
+	@After
+	public void tearDown () {
 		fTextTools.dispose();
 		fTextTools= null;
 
@@ -107,18 +99,19 @@ public class JavaPartitionerExtensionTest extends TestCase {
 	protected void check(int offset, int length) {
 		assertTrue(fDocumentPartitioningChanged);
 		assertNotNull(fChangedDocumentPartitioning);
-		assertTrue(fChangedDocumentPartitioning.getOffset() == offset);
-		assertTrue(fChangedDocumentPartitioning.getLength() == length);
+		assertEquals(fChangedDocumentPartitioning.getOffset(), offset);
+		assertEquals(fChangedDocumentPartitioning.getLength(), length);
 
 		fDocumentPartitioningChanged= false;
 		fChangedDocumentPartitioning= null;
 	}
 
 	protected void check() {
-		assertTrue(!fDocumentPartitioningChanged);
-		assertTrue(fChangedDocumentPartitioning == null);
+		assertFalse(fDocumentPartitioningChanged);
+		assertNull(fChangedDocumentPartitioning);
 	}
 
+	@Test
 	public void testConvertPartition() {
 
 		try {
@@ -127,10 +120,11 @@ public class JavaPartitionerExtensionTest extends TestCase {
 			fDocument.replace(0,0,"//");
 			check(0, 9);
 		} catch (BadLocationException x) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
+	@Test
 	public void testTransformPartition() {
 
 		try {
@@ -139,10 +133,11 @@ public class JavaPartitionerExtensionTest extends TestCase {
 			fDocument.replace(0,0,"//");
 			check(0, 13);
 		} catch (BadLocationException x) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
+	@Test
 	public void testToggleMultiPartition() {
 
 		try {
@@ -151,10 +146,11 @@ public class JavaPartitionerExtensionTest extends TestCase {
 			fDocument.replace(0,0,"//");
 			check(0, 43);
 		} catch (BadLocationException x) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
+	@Test
 	public void testSplitPartition() {
 		try {
 			fDocument.set("class X {}");
@@ -162,10 +158,11 @@ public class JavaPartitionerExtensionTest extends TestCase {
 			fDocument.replace(9, 0, "/**/");
 			check(9, 4);
 		} catch (BadLocationException x) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
+	@Test
 	public void testShortenDocument() {
 		try {
 			fDocument.set("class x {\n/***/\n}");
@@ -173,10 +170,11 @@ public class JavaPartitionerExtensionTest extends TestCase {
 			fDocument.replace(0, fDocument.getLength(), "/**/");
 			check(0, 4);
 		} catch (BadLocationException x) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
+	@Test
 	public void testDeletePartition() {
 		try {
 			fDocument.set("class x {\n/***/\n}");
@@ -184,10 +182,11 @@ public class JavaPartitionerExtensionTest extends TestCase {
 			fDocument.replace(10, 5,  "");
 			check(10, 0);
 		} catch (BadLocationException x) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
+	@Test
 	public void testDeletePartition2() {
 		try {
 			fDocument.set("class x {\n/***/\n}");
@@ -195,7 +194,7 @@ public class JavaPartitionerExtensionTest extends TestCase {
 			fDocument.replace(10, 7,  "");
 			check(10, 0);
 		} catch (BadLocationException x) {
-			assertTrue(false);
+			fail();
 		}
 	}
 }

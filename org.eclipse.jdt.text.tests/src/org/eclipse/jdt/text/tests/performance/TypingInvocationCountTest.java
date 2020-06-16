@@ -238,7 +238,7 @@ public abstract class TypingInvocationCountTest extends TextPerformanceTestCase 
 
 	private void measure(int line, int column, char ch,  boolean sendKeyCode) throws Exception {
 		InvocationCountPerformanceMeter performanceMeter= createInvocationCountPerformanceMeter(new Method[] {
-				AnnotationPainter.class.getMethod("paintControl", new Class[] { PaintEvent.class }),
+				AnnotationPainter.class.getMethod("paintControl", PaintEvent.class),
 		});
 		performanceMeter.setTimeout(30000);
 		int offset= EditorTestHelper.getDocument(fEditor).getLineOffset(line) + column;

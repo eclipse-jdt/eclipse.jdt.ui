@@ -332,4 +332,7 @@ public class BindingLabelProviderCore {
 
 
 	public static final long DEFAULT_TEXTFLAGS= JavaElementLabelsCore.ALL_DEFAULT;
+
+	private BindingLabelProviderCore() {
+	}
 }

@@ -140,12 +140,14 @@ public class ClassPathDetectorTest {
 		// source folder & internal JAR
 
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
-		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
+		assertNotNull("junit src not found", junitSrcArchive);
+		assertTrue("junit src not found", junitSrcArchive.exists());
 
 		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
 
 		File mylibJar= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.MYLIB);
-		assertTrue("lib not found", junitSrcArchive != null && junitSrcArchive.exists());
+		assertNotNull("lib not found", junitSrcArchive);
+		assertTrue("lib not found", junitSrcArchive.exists());
 
 		JavaProjectHelper.addLibraryWithImport(fJProject1, Path.fromOSString(mylibJar.getPath()), null, null);
 
@@ -176,7 +178,8 @@ public class ClassPathDetectorTest {
 		// 2 source folders
 
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
-		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
+		assertNotNull("junit src not found", junitSrcArchive);
+		assertTrue("junit src not found", junitSrcArchive.exists());
 
 		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src1", junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
 
@@ -218,7 +221,8 @@ public class ClassPathDetectorTest {
 		// 2 nested source folders
 
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
-		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
+		assertNotNull("junit src not found", junitSrcArchive);
+		assertTrue("junit src not found", junitSrcArchive.exists());
 
 		IPath[] exclusionFilter= new IPath[] { new Path("src2/") };
 		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src1", junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING, exclusionFilter);
@@ -262,7 +266,8 @@ public class ClassPathDetectorTest {
 		// source folder & internal JAR
 
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
-		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
+		assertNotNull("junit src not found", junitSrcArchive);
+		assertTrue("junit src not found", junitSrcArchive.exists());
 		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "", junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
 
 		for (IClasspathEntry jreEntry : PreferenceConstants.getDefaultJRELibrary()) {
@@ -303,7 +308,8 @@ public class ClassPathDetectorTest {
 		pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		File lib= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.MYLIB);
-		assertTrue("lib not found", lib != null && lib.exists());
+		assertNotNull("lib not found", lib);
+		assertTrue("lib not found", lib.exists());
 
 		IPackageFragmentRoot cfroot= JavaProjectHelper.addClassFolderWithImport(fJProject1, "cf", null, null, lib);
 

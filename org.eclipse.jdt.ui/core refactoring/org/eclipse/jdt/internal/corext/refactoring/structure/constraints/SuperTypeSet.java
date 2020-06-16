@@ -311,4 +311,7 @@ public abstract class SuperTypeSet implements ITypeSet {
 	public static ITypeSet getUniverse() {
 		return fgUniverse;
 	}
+
+	private SuperTypeSet() {
+	}
 }

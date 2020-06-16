@@ -83,7 +83,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
  */
 public class CustomBuilderGenerator extends AbstractToStringGenerator {
 
-	private final List<String> primitiveTypes= Arrays.asList(new String[] { "byte", "short", "char", "int", "long", "float", "double", "boolean" }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
+	private final List<String> primitiveTypes= Arrays.asList("byte", "short", "char", "int", "long", "float", "double", "boolean"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
 
 	private final String[] wrapperTypes= new String[] { "java.lang.Byte", "java.lang.Short", "java.lang.Character", "java.lang.Integer", "java.lang.Long", "java.lang.Float", "java.lang.Double", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$
 			"java.lang.Boolean" }; //$NON-NLS-1$

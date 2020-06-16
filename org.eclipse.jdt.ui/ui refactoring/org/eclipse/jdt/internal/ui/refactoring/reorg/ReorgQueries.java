@@ -376,19 +376,18 @@ public class ReorgQueries implements IReorgQueries {
 		}
 
 		private boolean getResult(int[] result) throws OperationCanceledException {
-			switch(result[0]){
-				// skip button
-				case 0:
-					return false;
-				// skip all button
+			switch(result[0]) {
 				case 1:
 					fSkipAll= true;
 					return false;
-				// Cancel button
+					// Cancel button
 				case 2:
 					throw new OperationCanceledException();
+					// skip button
+				case 0:
 				default:
 					return false;
+					// skip all button
 			}
 		}
 	}

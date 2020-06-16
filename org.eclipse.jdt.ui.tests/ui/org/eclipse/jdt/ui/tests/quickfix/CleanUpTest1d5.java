@@ -627,6 +627,55 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testJava50ForBug560431_1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "import java.util.ArrayList;\n" //
+				+ "import java.util.Iterator;\n" //
+				+ "import java.util.List;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo() {\n" //
+				+ "        List<E1> list= new ArrayList<E1>();\n" //
+				+ "        for (Iterator<E1> iter = list.iterator(); iter.hasNext();) {\n" //
+				+ "            E1 e = iter.next();\n" //
+				+ "            System.out.println(\"here\");\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
+	public void testJava50ForBug560431_2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo() {\n" //
+				+ "        int[] array={1,2,3,4};\n" //
+				+ "        for (int i=0;i<array.length;i++) {\n" //
+				+ "            String[] strs={\"1\",\"2\"};\n" //
+				+ "            for (int j = 0; j < strs.length; j++) {\n" //
+				+ "                System.out.println(\"here\");\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
 	public void testBug550726() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
@@ -2336,13 +2385,17 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "package test;\n" //
 				+ "\n" //
 				+ "import java.util.Arrays;\n" //
+				+ "\n" //
 				+ "public final class X2 {\n" //
 				+ "  public static class Y {\n" //
 				+ "      public int foo(String x, String ...y) { return y.length + 1; }\n" //
 				+ "  }\n" //
 				+ "  public static class Z extends Y {\n" //
 				+ "      public int foo2() {\n" //
-				+ "          List<String> list= Arrays.asList(new String[] {\"one\", \"two\", \"three\"});\n" //
+				+ "          List<String> list= Arrays.asList(new String[] {\"one\"/* 1 */\n" //
+				+ "              + \"one\", \"two\"/* 2 */\n" //
+				+ "              + \"two\", \"three\"/* 3 */\n" //
+				+ "              + \"three\"});\n" //
 				+ "          return super.foo(\"x\", new String[] {\"y\", \"z\"});\n" //
 				+ "      }\n" //
 				+ "}\n";
@@ -2352,13 +2405,17 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "package test;\n" //
 				+ "\n" //
 				+ "import java.util.Arrays;\n" //
+				+ "\n" //
 				+ "public final class X2 {\n" //
 				+ "  public static class Y {\n" //
 				+ "      public int foo(String x, String ...y) { return y.length + 1; }\n" //
 				+ "  }\n" //
 				+ "  public static class Z extends Y {\n" //
 				+ "      public int foo2() {\n" //
-				+ "          List<String> list= Arrays.asList(\"one\", \"two\", \"three\");\n" //
+				+ "          List<String> list= Arrays.asList(\"one\"/* 1 */\n" //
+				+ "              + \"one\", \"two\"/* 2 */\n" //
+				+ "          + \"two\", \"three\"/* 3 */\n" //
+				+ "          + \"three\");\n" //
 				+ "          return super.foo(\"x\", \"y\", \"z\");\n" //
 				+ "      }\n" //
 				+ "}\n";
@@ -2366,5 +2423,26 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 
 		enable(CleanUpConstants.REMOVE_UNNECESSARY_ARRAY_CREATION);
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1, cu2 }, new String[] { expected1, expected2 });
+	}
+
+	@Test
+	public void testUnnecessaryArrayBug562091() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.lang.reflect.Method;\n" //
+				+ "\n" //
+				+ "public class A {\n" //
+				+ "  public void foo() throws Throwable {\n" //
+				+ "    Method method= A.class.getMethod(\"bah\", A.class);\n" //
+				+ "    method.invoke(this, new Object[] {null});\n" //
+				+ "  }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", sample, false, null);
+
+		enable(CleanUpConstants.REMOVE_UNNECESSARY_ARRAY_CREATION);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
 	}
 }

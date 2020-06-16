@@ -73,7 +73,7 @@ public class TomcatLaunchDelegate extends JavaLaunchDelegate {
 				if (file.exists() && file.isDirectory()) {
 					return home;
 				} else {
-					err = new Status(IStatus.ERROR, JspUIPlugin.getDefault().getBundle().getSymbolicName(), 0, MessageFormat.format(LaunchingMessages.TomcatLaunchDelegate_7, new String[]{home}), null);
+					err = new Status(IStatus.ERROR, JspUIPlugin.getDefault().getBundle().getSymbolicName(), 0, MessageFormat.format(LaunchingMessages.TomcatLaunchDelegate_7, home), null);
 				}
 			} else {
 				err = new Status(IStatus.ERROR, JspUIPlugin.getDefault().getBundle().getSymbolicName(), 0, LaunchingMessages.TomcatLaunchDelegate_8, null);

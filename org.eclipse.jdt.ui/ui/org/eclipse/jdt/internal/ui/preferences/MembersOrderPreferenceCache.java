@@ -50,12 +50,20 @@ public class MembersOrderPreferenceCache extends MembersOrderPreferenceCacheComm
 	public void propertyChange(PropertyChangeEvent event) {
 		String property= event.getProperty();
 
-		if (PreferenceConstants.APPEARANCE_MEMBER_SORT_ORDER.equals(property)) {
-			fCategoryOffsets= null;
-		} else if (PreferenceConstants.APPEARANCE_VISIBILITY_SORT_ORDER.equals(property)) {
-			fVisibilityOffsets= null;
-		} else if (PreferenceConstants.APPEARANCE_ENABLE_VISIBILITY_SORT_ORDER.equals(property)) {
-			fSortByVisibility= fPreferenceStore.getBoolean(PreferenceConstants.APPEARANCE_ENABLE_VISIBILITY_SORT_ORDER);
+		if (property != null) {
+			switch (property) {
+				case PreferenceConstants.APPEARANCE_MEMBER_SORT_ORDER:
+					fCategoryOffsets= null;
+					break;
+				case PreferenceConstants.APPEARANCE_VISIBILITY_SORT_ORDER:
+					fVisibilityOffsets= null;
+					break;
+				case PreferenceConstants.APPEARANCE_ENABLE_VISIBILITY_SORT_ORDER:
+					fSortByVisibility= fPreferenceStore.getBoolean(PreferenceConstants.APPEARANCE_ENABLE_VISIBILITY_SORT_ORDER);
+					break;
+				default:
+					break;
+			}
 		}
 	}
 

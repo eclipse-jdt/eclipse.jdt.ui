@@ -101,14 +101,17 @@ public class ConfigureProblemSeverityAction extends Action {
 					CONFIGURE_PROBLEM_SEVERITY_DIALOG_ID, shell, JavaHoverMessages.ProblemHover_chooseSettingsTypeDialog_title, null, message, MessageDialog.QUESTION, buttons, 0,
 					JavaHoverMessages.ProblemHover_chooseSettingsTypeDialog_checkBox_dontShowAgain);
 
-			if (result == OptionalMessageDialog.NOT_SHOWN) {
-				showPropertyPage= false;
-			} else if (result == 2 || result == SWT.DEFAULT) {
-				return;
-			} else if (result == 0) {
-				showPropertyPage= true;
-			} else {
-				showPropertyPage= false;
+			switch (result) {
+				case OptionalMessageDialog.NOT_SHOWN:
+				default:
+					showPropertyPage= false;
+					break;
+				case 0:
+					showPropertyPage= true;
+					break;
+				case 2:
+				case SWT.DEFAULT:
+					return;
 			}
 		} else {
 			showPropertyPage= true;

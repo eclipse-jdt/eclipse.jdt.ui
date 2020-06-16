@@ -250,6 +250,8 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 			IJavaProject project= fProcessor.getMethod().getJavaProject();
 			String sourceLevel= project.getOption(JavaCore.COMPILER_SOURCE, true);
 			String compliance= project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
+			String previewEnabled= project.getOption(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES, true);
+
 			for (ParameterInfo pi : fProcessor.getParameterInfos()) {
 				if (names.contains(pi.getNewName())) {
 					setErrorMessage(Messages.format(RefactoringMessages.IntroduceParameterObjectWizard_parametername_check_notunique, BasicElementLabels.getJavaElementName(pi.getNewName())));
@@ -268,7 +270,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 				setPageComplete(false);
 				return;
 			}
-			IStatus validateJavaTypeName= JavaConventions.validateJavaTypeName(fProcessor.getClassName(), sourceLevel, compliance);
+			IStatus validateJavaTypeName= JavaConventions.validateJavaTypeName(fProcessor.getClassName(), sourceLevel, compliance, previewEnabled);
 			if (isErrorMessage(validateJavaTypeName))
 				return;
 			if (fProcessor.getClassName().indexOf('.') != -1) {
@@ -715,7 +717,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 		protected boolean getBooleanSetting(String key, boolean defaultValue) {
 			String update= getRefactoringSettings().get(key);
 			if (update != null)
-				return Boolean.valueOf(update).booleanValue();
+				return Boolean.parseBoolean(update);
 			else
 				return defaultValue;
 		}

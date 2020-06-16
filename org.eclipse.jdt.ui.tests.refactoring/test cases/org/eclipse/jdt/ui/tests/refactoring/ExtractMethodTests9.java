@@ -13,7 +13,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
-import org.junit.ClassRule;
+import static org.eclipse.jdt.ui.tests.refactoring.AbstractJunit4SelectionTestCase.TestMode.COMPARE_WITH_OUTPUT;
+import static org.eclipse.jdt.ui.tests.refactoring.AbstractJunit4SelectionTestCase.TestMode.INVALID_SELECTION;
+
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -24,8 +27,8 @@ import org.eclipse.jdt.ui.tests.IgnoreInheritedTests;
 @RunWith(CustomBaseRunner.class)
 public class ExtractMethodTests9 extends ExtractMethodTests {
 
-	@ClassRule
-	public static ExtractMethodTestSetup9 fgTestSetup= new ExtractMethodTestSetup9();
+	@Rule
+	public ExtractMethodTestSetup9 fgTestSetup= new ExtractMethodTestSetup9();
 
 	protected void try9Test() throws Exception {
 		performTest(fgTestSetup.getTry9Package(), "A", COMPARE_WITH_OUTPUT, "try9_out");

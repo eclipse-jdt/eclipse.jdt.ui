@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.browsing;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -176,11 +178,12 @@ public class PackagesViewContentProviderTests2 {
 		fMyPart.pushDisplay();
 
 		//assert remove happened (delta worked)
-		assertTrue("Refresh happened", fMyPart.hasRemoveHappened() && fMyPart.hasAddHappened()); //$NON-NLS-1$
+		assertTrue("Refresh happened", fMyPart.hasRemoveHappened()); //$NON-NLS-1$
+		assertTrue("Refresh happened", fMyPart.hasAddHappened()); //$NON-NLS-1$
 		Object addedObject= fMyPart.getAddedObject().get(0);
 		Object removedObject= fMyPart.getRemovedObject().get(0);
 		assertTrue("Correct guy removed", canFindEqualCompoundElement(cp10, new Object[] { removedObject })); //$NON-NLS-1$
-		assertTrue("Correct guy added", fInternalPack10.equals(addedObject)); //$NON-NLS-1$
+		assertEquals("Correct guy added", fInternalPack10, addedObject); //$NON-NLS-1$
 	}
 
 	@Test
@@ -200,7 +203,7 @@ public class PackagesViewContentProviderTests2 {
 		fMyPart.pushDisplay();
 
 		//assert remove happened (delta worked)
-		assertTrue("Refresh did not happened", !fMyPart.hasRefreshHappened()); //$NON-NLS-1$
+		assertFalse("Refresh did not happened", fMyPart.hasRefreshHappened()); //$NON-NLS-1$
 	}
 
 	@Test
@@ -226,10 +229,8 @@ public class PackagesViewContentProviderTests2 {
 
 	private void assertPack81RefreshedOnce() {
 		assertTrue("Refresh happened", fMyPart.hasRefreshHappened()); //$NON-NLS-1$
-		if (! fMyPart.getRefreshedObject().contains(fPack81))
-			fail("fPack81 not refreshed:\n" + fMyPart.getRefreshedObject());
-		if (fMyPart.getRefreshedObject().size() != 1)
-			fail("Too many refreshes (" + fMyPart.getRefreshedObject().size() + "):\n" + fMyPart.getRefreshedObject());
+		assertTrue("fPack81 not refreshed:\n" + fMyPart.getRefreshedObject(), fMyPart.getRefreshedObject().contains(fPack81));
+		assertEquals("Too many refreshes (" + fMyPart.getRefreshedObject().size() + "):\n" + fMyPart.getRefreshedObject(), 1, fMyPart.getRefreshedObject().size());
 	}
 
 	@Test
@@ -251,10 +252,8 @@ public class PackagesViewContentProviderTests2 {
 
 		assertPack81RefreshedOnce();
 		assertTrue("Refresh happened", fMyPart.hasRefreshHappened()); //$NON-NLS-1$
-		if (! fMyPart.getRefreshedObject().contains(fPack81))
-			fail("fPack81 not refreshed:\n" + fMyPart.getRefreshedObject());
-		if (fMyPart.getRefreshedObject().size() != 1)
-			fail("Too many refreshes (" + fMyPart.getRefreshedObject().size() + "):\n" + fMyPart.getRefreshedObject());
+		assertTrue("fPack81 not refreshed:\n" + fMyPart.getRefreshedObject(), fMyPart.getRefreshedObject().contains(fPack81));
+		assertEquals("Too many refreshes (" + fMyPart.getRefreshedObject().size() + "):\n" + fMyPart.getRefreshedObject(), 1, fMyPart.getRefreshedObject().size());
 	}
 
 	@Test
@@ -277,7 +276,7 @@ public class PackagesViewContentProviderTests2 {
 		fMyPart.pushDisplay();
 
 		//make sure no refresh happened
-		assertTrue("Refresh did not happened", !fMyPart.hasRefreshHappened()); //$NON-NLS-1$
+		assertFalse("Refresh did not happened", fMyPart.hasRefreshHappened()); //$NON-NLS-1$
 	}
 
 	@Test
@@ -323,11 +322,12 @@ public class PackagesViewContentProviderTests2 {
 		fMyPart.pushDisplay();
 
 		//assert remove and add happened (delta worked)
-		assertTrue("Remove and add happened", fMyPart.hasRemoveHappened() && fMyPart.hasAddHappened()); //$NON-NLS-1$
+		assertTrue("Remove and add happened", fMyPart.hasRemoveHappened()); //$NON-NLS-1$
+		assertTrue("Remove and add happened", fMyPart.hasAddHappened()); //$NON-NLS-1$
 		Object addedObject= fMyPart.getAddedObject().get(0);
 		Object removedObject= fMyPart.getRemovedObject().get(0);
-		assertTrue("Correct guy removed", fPack12.equals(removedObject)); //$NON-NLS-1$
-		assertTrue("Correct guy added", lp1.equals(addedObject) ); //$NON-NLS-1$
+		assertEquals("Correct guy removed", fPack12, removedObject); //$NON-NLS-1$
+		assertEquals("Correct guy added", lp1, addedObject); //$NON-NLS-1$
 	}
 
 
@@ -355,14 +355,15 @@ public class PackagesViewContentProviderTests2 {
 		//------------set up project #1 : External Jar and zip file-------
 
 		IPackageFragmentRoot jdk= JavaProjectHelper.addVariableRTJar(fJProject1, "JRE_LIB_TEST", null, null);//$NON-NLS-1$
-		assertTrue("jdk not found", jdk != null);//$NON-NLS-1$
+		assertNotNull("jdk not found", jdk);//$NON-NLS-1$
 
 
 		//---Create zip file-------------------
 
 		java.io.File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
 
-		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());//$NON-NLS-1$
+		assertNotNull("junit src not found", junitSrcArchive);//$NON-NLS-1$
+		assertTrue("junit src not found", junitSrcArchive.exists());//$NON-NLS-1$
 
 		fArchiveFragmentRoot= JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);//$NON-NLS-1$
 
@@ -385,7 +386,8 @@ public class PackagesViewContentProviderTests2 {
 
 		//----------------Set up internal jar----------------------------
 		File myInternalJar= JavaTestPlugin.getDefault().getFileInPlugin(new Path("testresources/compoundtest.jar"));//$NON-NLS-1$
-		assertTrue("lib not found", myInternalJar != null && myInternalJar.exists());//$NON-NLS-1$
+		assertNotNull("lib not found", myInternalJar);//$NON-NLS-1$
+		assertTrue("lib not found", myInternalJar.exists());//$NON-NLS-1$
 
 		fInternalJarRoot= JavaProjectHelper.addLibraryWithImport(fJProject2, Path.fromOSString(myInternalJar.getPath()), null, null);
 
@@ -453,7 +455,7 @@ public class PackagesViewContentProviderTests2 {
 			fProvider.inputChanged(null,null,fJProject2);
 			JavaCore.removeElementChangedListener((IElementChangedListener) fProvider);
 		} else {
-			assertTrue("Unable to get view",false);//$NON-NLS-1$
+			fail("Unable to get view");//$NON-NLS-1$
 		}
 
 		assertNotNull(fProvider);

@@ -170,4 +170,7 @@ public class VarargsWarningsSubProcessor {
 		proposals.add(proposal);
 	}
 
+	private VarargsWarningsSubProcessor() {
+	}
+
 }

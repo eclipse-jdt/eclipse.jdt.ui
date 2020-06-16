@@ -1254,13 +1254,13 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			descriptor= RefactoringSignatureDescriptorFactory.createChangeMethodSignatureDescriptor(project, description, comment.asString(), arguments, getDescriptorFlags());
 			arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT, JavaRefactoringDescriptorUtil.elementToHandle(project,fMethod));
 			arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME, fMethodName);
-			arguments.put(ATTRIBUTE_DELEGATE, Boolean.valueOf(fDelegateUpdating).toString());
-			arguments.put(ATTRIBUTE_DEPRECATE, Boolean.valueOf(fDelegateDeprecation).toString());
+			arguments.put(ATTRIBUTE_DELEGATE, Boolean.toString(fDelegateUpdating));
+			arguments.put(ATTRIBUTE_DEPRECATE, Boolean.toString(fDelegateDeprecation));
 			if (fReturnTypeInfo.isTypeNameChanged())
 				arguments.put(ATTRIBUTE_RETURN, fReturnTypeInfo.getNewTypeName());
 			try {
 				if (!isVisibilitySameAsInitial())
-					arguments.put(ATTRIBUTE_VISIBILITY, Integer.valueOf(fVisibility).toString());
+					arguments.put(ATTRIBUTE_VISIBILITY, Integer.toString(fVisibility));
 			} catch (JavaModelException exception) {
 				JavaPlugin.log(exception);
 			}
@@ -1299,7 +1299,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			count= 1;
 			for (ExceptionInfo info : fExceptionInfos) {
 				arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + count, JavaRefactoringDescriptorUtil.elementToHandle(project,info.getElement()));
-				arguments.put(ATTRIBUTE_KIND + count, Integer.valueOf(info.getKind()).toString());
+				arguments.put(ATTRIBUTE_KIND + count, Integer.toString(info.getKind()));
 				count++;
 			}
 		} catch (JavaModelException exception) {
@@ -2541,7 +2541,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		 *         <code>tagName</code>, or <code>null</code>.
 		 */
 		private TagElement findTagElementToInsertAfter(List<TagElement> tags, String tagName) {
-			List<String> tagOrder= Arrays.asList(new String[] {
+			List<String> tagOrder= Arrays.asList(
 					TagElement.TAG_AUTHOR,
 					TagElement.TAG_VERSION,
 					TagElement.TAG_PARAM,
@@ -2555,7 +2555,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 					TagElement.TAG_SERIALDATA,
 					TagElement.TAG_DEPRECATED,
 					TagElement.TAG_VALUE
-			});
+			);
 			int goalOrdinal= tagOrder.indexOf(tagName);
 			if (goalOrdinal == -1) // unknown tag -> to end
 				return (tags.isEmpty()) ? null : (TagElement) tags.get(tags.size());
@@ -2818,7 +2818,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 					info= new ParameterInfo(oldTypeName, oldName, index);
 					info.setNewTypeName(newTypeName);
 					info.setNewName(newName);
-					if (Boolean.valueOf(deleted).booleanValue())
+					if (Boolean.parseBoolean(deleted))
 						info.markAsDeleted();
 				}
 				fParameterInfos.add(info);
@@ -2840,7 +2840,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 					return JavaRefactoringDescriptorUtil.createInputFatalStatus(element, getProcessorName(), IJavaRefactorings.CHANGE_METHOD_SIGNATURE);
 				else {
 					try {
-						info= new ExceptionInfo(element, Integer.valueOf(kind).intValue(), null);
+						info= new ExceptionInfo(element, Integer.parseInt(kind), null);
 					} catch (NumberFormatException exception) {
 						return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { kind, ATTRIBUTE_KIND }));
 					}
@@ -2853,12 +2853,12 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		}
 		final String deprecate= arguments.getAttribute(ATTRIBUTE_DEPRECATE);
 		if (deprecate != null) {
-			fDelegateDeprecation= Boolean.valueOf(deprecate).booleanValue();
+			fDelegateDeprecation= Boolean.parseBoolean(deprecate);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DEPRECATE));
 		final String delegate= arguments.getAttribute(ATTRIBUTE_DELEGATE);
 		if (delegate != null) {
-			fDelegateUpdating= Boolean.valueOf(delegate).booleanValue();
+			fDelegateUpdating= Boolean.parseBoolean(delegate);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DELEGATE));
 		return new RefactoringStatus();

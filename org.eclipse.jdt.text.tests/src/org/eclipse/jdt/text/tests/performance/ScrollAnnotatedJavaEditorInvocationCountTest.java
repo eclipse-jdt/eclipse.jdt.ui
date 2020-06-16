@@ -95,7 +95,7 @@ public class ScrollAnnotatedJavaEditorInvocationCountTest extends AbstractScroll
 
 	private InvocationCountPerformanceMeter createInvocationCountPerformanceMeter() throws NoSuchMethodException {
 		return createInvocationCountPerformanceMeter(new Method[] {
-			AnnotationPainter.class.getMethod("paintControl", new Class[] { PaintEvent.class }),
+			AnnotationPainter.class.getMethod("paintControl", PaintEvent.class),
 		});
 	}
 }

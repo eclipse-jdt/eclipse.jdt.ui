@@ -199,4 +199,7 @@ public class ConstantChecks {
 	public static boolean isLoadTimeConstant(IExpressionFragment ex) {
 		return new LoadTimeConstantChecker(ex).check();
 	}
+
+	private ConstantChecks() {
+	}
 }

@@ -60,7 +60,8 @@ public abstract class AbstractCleanUpTabPage extends CleanUpTabPage {
 		StringBuilder buf= new StringBuilder();
 		for (AbstractCleanUp fPreviewCleanUp : fPreviewCleanUps) {
 			buf.append(fPreviewCleanUp.getPreview());
-			buf.append("\n"); //$NON-NLS-1$
+			buf.append("\n"); //$NON-NLS-1$ One free line between each code sample,
+			// in most cases the preview variants should always have the same number of lines
 		}
 		return buf.toString();
 	}

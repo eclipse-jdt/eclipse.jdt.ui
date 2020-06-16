@@ -77,7 +77,6 @@ public class MapMethodCleanUp extends AbstractMultiFix {
 	@Override
 	public String getPreview() {
 		StringBuilder bld= new StringBuilder();
-		bld.append("\n"); //$NON-NLS-1$
 		if (isEnabled(CleanUpConstants.USE_DIRECTLY_MAP_METHOD)) {
 			bld.append("int x = map.size();\n"); //$NON-NLS-1$
 			bld.append("if (map.containsKey(\"hello\")) {\n"); //$NON-NLS-1$

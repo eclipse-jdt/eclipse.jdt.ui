@@ -119,15 +119,6 @@ public class DefaultModulepathFixProcessor extends DefaultClasspathFixProcessor 
 					if (classpaths.add(entry) && moduleName != null) {
 						classPathEntryToModuleMap.put(entry, curr);
 						typesWithModule.add(moduleName);
-					} else {
-						Object typeNameMatch= classPathEntryToModuleMap.get(entry);
-						if (typeNameMatch != null) {
-							if (moduleName != null) {
-								if (typesWithModule.contains(moduleName)) {
-									typesWithModule.remove(typeNameMatch);
-								}
-							}
-						}
 					}
 				} catch (JavaModelException e) {
 					// ignore

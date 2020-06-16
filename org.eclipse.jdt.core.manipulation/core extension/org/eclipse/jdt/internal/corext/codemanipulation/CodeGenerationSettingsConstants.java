@@ -51,5 +51,8 @@ public class CodeGenerationSettingsConstants {
 	 */
 	public static final String ORGIMPORTS_IGNORELOWERCASE= "org.eclipse.jdt.ui.ignorelowercasenames"; //$NON-NLS-1$
 
+	private CodeGenerationSettingsConstants() {
+	}
+
 
 }

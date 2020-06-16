@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,8 +13,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.After;
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
@@ -22,20 +26,12 @@ import org.eclipse.ltk.core.refactoring.IUndoManager;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.internal.core.refactoring.UndoManager2;
 
-public class UndoManagerTests extends RefactoringTest {
+import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
-	private static final Class<UndoManagerTests> clazz= UndoManagerTests.class;
-	public UndoManagerTests(String name) {
-		super(name);
-	}
+public class UndoManagerTests extends GenericRefactoringTest {
 
-	public static Test suite() {
-		return new RefactoringTestSetup(new TestSuite(clazz));
-	}
-
-	public static Test setUpTest(Test test) {
-		return new RefactoringTestSetup(test);
-	}
+	@Rule
+	public RefactoringTestSetup rts= new RefactoringTestSetup();
 
 	private void checkState(boolean undo, boolean redo, int undoCount, int redoCount){
 		checkState(0, undo, redo, undoCount, redoCount);
@@ -46,15 +42,14 @@ public class UndoManagerTests extends RefactoringTest {
 		return RefactoringCore.getUndoManager();
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
-		super.tearDown();
+	@After
+	public void after() throws Exception {
 		RefactoringCore.getUndoManager().flush();
 	}
 
 	private void checkState(int iterationCount, boolean undo, boolean redo, int undoCount, int redoCount){
-		assertTrue(iterationCount + " undo", undo == RefactoringCore.getUndoManager().anythingToUndo());
-		assertTrue(iterationCount + " redo", redo == RefactoringCore.getUndoManager().anythingToRedo());
+		assertEquals(iterationCount + " undo", undo, RefactoringCore.getUndoManager().anythingToUndo());
+		assertEquals(iterationCount + " redo", redo, RefactoringCore.getUndoManager().anythingToRedo());
 		testCounts(iterationCount, undoCount, redoCount);
 	}
 
@@ -75,21 +70,25 @@ public class UndoManagerTests extends RefactoringTest {
 		RefactoringCore.getUndoManager().performRedo(null, new NullProgressMonitor());
 	}
 
+	@Test
 	public void test0() throws Exception{
 		checkState(false, false, 0, 0);
 	}
 
+	@Test
 	public void test1() throws Exception{
 		performRefactoring(new NullRefactoring());
 		checkState(true, false, 1, 0);
 	}
 
+	@Test
 	public void test2() throws Exception{
 		performRefactoring(new NullRefactoring());
 		performUndo();
 		checkState(false, true, 0, 1);
 	}
 
+	@Test
 	public void test3() throws Exception{
 		performRefactoring(new NullRefactoring());
 		performUndo();
@@ -97,6 +96,7 @@ public class UndoManagerTests extends RefactoringTest {
 		checkState(true, false, 1, 0);
 	}
 
+	@Test
 	public void test4() throws Exception{
 		performRefactoring(new NullRefactoring());
 		performUndo();
@@ -105,6 +105,7 @@ public class UndoManagerTests extends RefactoringTest {
 		checkState(false, true, 0, 1);
 	}
 
+	@Test
 	public void test5() throws Exception{
 		performRefactoring(new NullRefactoring());
 		performUndo();
@@ -113,6 +114,7 @@ public class UndoManagerTests extends RefactoringTest {
 		checkState(true, false, 2, 0);
 	}
 
+	@Test
 	public void test6() throws Exception{
 		performRefactoring(new NullRefactoring());
 		performUndo();
@@ -123,6 +125,7 @@ public class UndoManagerTests extends RefactoringTest {
 		checkState(false, true, 0, 2);
 	}
 
+	@Test
 	public void test7() throws Exception{
 		performRefactoring(new NullRefactoring());
 		performUndo();
@@ -132,6 +135,7 @@ public class UndoManagerTests extends RefactoringTest {
 		checkState(true, true, 1, 1);
 	}
 
+	@Test
 	public void test8() throws Exception{
 		// limit is 5 since the stack is limited to 5 entries
 		int limit= 5;
@@ -151,6 +155,7 @@ public class UndoManagerTests extends RefactoringTest {
 	}
 
 
+	@Test
 	public void test9() throws Exception{
 		performRefactoring(new NullRefactoring());
 		performUndo();

@@ -794,4 +794,7 @@ public class JavaPluginImages {
 		}
 		return null;
 	}
+
+	private JavaPluginImages() {
+	}
 }
