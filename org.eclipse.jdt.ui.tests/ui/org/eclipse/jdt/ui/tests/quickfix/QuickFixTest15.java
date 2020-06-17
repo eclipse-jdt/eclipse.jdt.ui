@@ -209,7 +209,7 @@ public class QuickFixTest15 extends QuickFixTest {
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1, null);
 
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		String label= Messages.format(CorrectionMessages.SuppressWarningsSubProcessor_suppress_warnings_label, new String[] { "preview", "Rec1" });
 		assertProposalExists(proposals, label);
 

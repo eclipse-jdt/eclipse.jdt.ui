@@ -31,6 +31,7 @@ public class ASTHelper {
 			case ASTNode.TEXT_BLOCK:
 				return ast.apiLevel() >= AST.JLS15;
 			case ASTNode.RECORD_DECLARATION:
+			case ASTNode.INSTANCEOF_EXPRESSION:
 				return ast.isPreviewEnabled();
 		}
 		return true;
