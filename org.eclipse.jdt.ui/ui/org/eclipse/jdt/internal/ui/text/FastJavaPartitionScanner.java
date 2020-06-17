@@ -655,7 +655,6 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaPa
 			return 2;
 
 		case SLASH_STAR_STAR:
-			return 3;
 		case TRIPLE_QUOTE:
 			return 3;
 		}
@@ -701,26 +700,22 @@ public class FastJavaPartitionScanner implements IPartitionTokenScanner, IJavaPa
 		if (contentType == null)
 			return JAVA;
 
-		else if (contentType.equals(JAVA_SINGLE_LINE_COMMENT))
+		switch (contentType) {
+		case JAVA_SINGLE_LINE_COMMENT:
 			return SINGLE_LINE_COMMENT;
-
-		else if (contentType.equals(JAVA_MULTI_LINE_COMMENT))
+		case JAVA_MULTI_LINE_COMMENT:
 			return MULTI_LINE_COMMENT;
-
-		else if (contentType.equals(JAVA_DOC))
+		case JAVA_DOC:
 			return JAVADOC;
-
-		else if (contentType.equals(JAVA_STRING))
+		case JAVA_STRING:
 			return STRING;
-
-		else if (contentType.equals(JAVA_CHARACTER))
+		case JAVA_CHARACTER:
 			return CHARACTER;
-
-		else if (contentType.equals(JAVA_MULTI_LINE_STRING))
+		case JAVA_MULTI_LINE_STRING:
 			return MULTI_LINE_STRING;
-
-		else
+		default:
 			return JAVA;
+		}
 	}
 
 	/*
