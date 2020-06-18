@@ -58,7 +58,7 @@ public abstract class AbstractBindingLabelsTest extends CoreTests {
 	}
 
 	protected String getBindingLabel(IJavaElement elem, long flags) {
-		ASTParser parser= ASTParser.newParser(AST.JLS14);
+		ASTParser parser= ASTParser.newParser(AST.JLS15);
 		parser.setResolveBindings(true);
 		parser.setProject(fJProject1);
 		IBinding binding= parser.createBindings(new IJavaElement[]{elem}, null)[0];

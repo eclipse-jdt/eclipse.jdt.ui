@@ -8,6 +8,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *   IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -256,7 +260,7 @@ public class JUnit5TestFinder implements ITestFinder {
 			if (CoreTestSearchEngine.hasSuiteMethod(type)) { // since JUnit 4.3.1
 				return true;
 			}
-			ASTParser parser= ASTParser.newParser(AST.JLS14);
+			ASTParser parser= ASTParser.newParser(AST.JLS15);
 			if (type.getCompilationUnit() != null) {
 				parser.setSource(type.getCompilationUnit());
 			} else if (!isAvailable(type.getSourceRange())) { // class file with no source

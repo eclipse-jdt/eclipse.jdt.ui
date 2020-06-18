@@ -8,6 +8,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *   David Saff (saff@mit.edu) - initial API and implementation
  *             (bug 102632: [JUnit] Support for JUnit 4.)
@@ -205,7 +209,7 @@ public class JUnit4TestFinder implements ITestFinder {
 			if (CoreTestSearchEngine.hasSuiteMethod(type)) { // since JUnit 4.3.1
 				return true;
 			}
-			ASTParser parser= ASTParser.newParser(AST.JLS14);
+			ASTParser parser= ASTParser.newParser(AST.JLS15);
 			/* TODO: When bug 156352 is fixed:
 			parser.setProject(type.getJavaProject());
 			IBinding[] bindings= parser.createBindings(new IJavaElement[] { type }, monitor);
