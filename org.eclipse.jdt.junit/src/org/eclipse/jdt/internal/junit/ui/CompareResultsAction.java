@@ -14,9 +14,6 @@
 package org.eclipse.jdt.internal.junit.ui;
 
 
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
-
 import org.eclipse.jface.action.Action;
 
 import org.eclipse.jdt.internal.junit.model.TestElement;
@@ -54,12 +51,7 @@ public class CompareResultsAction extends Action {
 		} else {
 			fOpenDialog= new CompareResultDialog(fView.getShell(), failedTest);
 			fOpenDialog.create();
-			fOpenDialog.getShell().addDisposeListener(new DisposeListener() {
-				@Override
-				public void widgetDisposed(DisposeEvent e) {
-					fOpenDialog= null;
-				}
-			});
+			fOpenDialog.getShell().addDisposeListener(e -> fOpenDialog= null);
 			fOpenDialog.setBlockOnOpen(false);
 			fOpenDialog.open();
 		}

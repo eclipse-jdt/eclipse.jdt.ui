@@ -22,11 +22,9 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -128,14 +126,11 @@ public final class JUnitAddLibraryProposal implements IJavaCompletionProposal {
 		final IClasspathEntry[] newCPEntries= newEntries.toArray(new IClasspathEntry[newEntries.size()]);
 		// fix for 64974 OCE in New JUnit Test Case wizard while workspace is locked [JUnit]
 		try {
-			context.run(true, false, new IRunnableWithProgress() {
-				@Override
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					try {
-						project.setRawClasspath(newCPEntries, monitor);
-					} catch (JavaModelException e) {
-						throw new InvocationTargetException(e);
-					}
+			context.run(true, false, monitor -> {
+				try {
+					project.setRawClasspath(newCPEntries, monitor);
+				} catch (JavaModelException e) {
+					throw new InvocationTargetException(e);
 				}
 			});
 			return true;

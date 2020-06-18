@@ -98,7 +98,6 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.ImageDescriptor;
 
 import org.eclipse.ui.IActionBars;
@@ -676,45 +675,39 @@ public class TestRunnerViewPart extends ViewPart {
 	private class TestRunSessionListener implements ITestRunSessionListener {
 		@Override
 		public void sessionAdded(final TestRunSession testRunSession) {
-			getDisplay().asyncExec(new Runnable() {
-				@Override
-				public void run() {
-					if (JUnitUIPreferencesConstants.getShowInAllViews() ||
-							getSite().getWorkbenchWindow() == JUnitPlugin.getActiveWorkbenchWindow()) {
-						if (fInfoMessage == null) {
-							String testRunLabel= BasicElementLabels.getJavaElementName(testRunSession.getTestRunName());
-							String msg;
-							if (testRunSession.getLaunch() != null) {
-								msg= Messages.format(JUnitMessages.TestRunnerViewPart_Launching, new Object[]{ testRunLabel });
-							} else {
-								msg= testRunLabel;
-							}
-							registerInfoMessage(msg);
+			getDisplay().asyncExec(() -> {
+				if (JUnitUIPreferencesConstants.getShowInAllViews() ||
+						getSite().getWorkbenchWindow() == JUnitPlugin.getActiveWorkbenchWindow()) {
+					if (fInfoMessage == null) {
+						String testRunLabel= BasicElementLabels.getJavaElementName(testRunSession.getTestRunName());
+						String msg;
+						if (testRunSession.getLaunch() != null) {
+							msg= Messages.format(JUnitMessages.TestRunnerViewPart_Launching, new Object[]{ testRunLabel });
+						} else {
+							msg= testRunLabel;
 						}
-
-						TestRunSession deactivatedSession= setActiveTestRunSession(testRunSession);
-						if (deactivatedSession != null)
-							deactivatedSession.swapOut();
+						registerInfoMessage(msg);
 					}
+
+					TestRunSession deactivatedSession= setActiveTestRunSession(testRunSession);
+					if (deactivatedSession != null)
+						deactivatedSession.swapOut();
 				}
 			});
 		}
 		@Override
 		public void sessionRemoved(final TestRunSession testRunSession) {
-			getDisplay().asyncExec(new Runnable() {
-				@Override
-				public void run() {
-					if (testRunSession.equals(fTestRunSession)) {
-						List<TestRunSession> testRunSessions= JUnitCorePlugin.getModel().getTestRunSessions();
-						TestRunSession deactivatedSession;
-						if (! testRunSessions.isEmpty()) {
-							deactivatedSession= setActiveTestRunSession(testRunSessions.get(0));
-						} else {
-							deactivatedSession= setActiveTestRunSession(null);
-						}
-						if (deactivatedSession != null)
-							deactivatedSession.swapOut();
+			getDisplay().asyncExec(() -> {
+				if (testRunSession.equals(fTestRunSession)) {
+					List<TestRunSession> testRunSessions= JUnitCorePlugin.getModel().getTestRunSessions();
+					TestRunSession deactivatedSession;
+					if (! testRunSessions.isEmpty()) {
+						deactivatedSession= setActiveTestRunSession(testRunSessions.get(0));
+					} else {
+						deactivatedSession= setActiveTestRunSession(null);
 					}
+					if (deactivatedSession != null)
+						deactivatedSession.swapOut();
 				}
 			});
 		}
@@ -742,23 +735,20 @@ public class TestRunnerViewPart extends ViewPart {
 			String msg= Messages.format(JUnitMessages.TestRunnerViewPart_message_finish, keys);
 			registerInfoMessage(msg);
 
-			postSyncRunnable(new Runnable() {
-				@Override
-				public void run() {
-					if (isDisposed())
-						return;
-					fStopAction.setEnabled(lastLaunchIsKeptAlive());
-					updateRerunFailedFirstAction();
-					processChangesInUI();
-					if (hasErrorsOrFailures()) {
-						selectFirstFailure();
-					}
-					if (fDirtyListener == null) {
-						fDirtyListener= new DirtyListener();
-						JavaCore.addElementChangedListener(fDirtyListener);
-					}
-					warnOfContentChange();
+			postSyncRunnable(() -> {
+				if (isDisposed())
+					return;
+				fStopAction.setEnabled(lastLaunchIsKeptAlive());
+				updateRerunFailedFirstAction();
+				processChangesInUI();
+				if (hasErrorsOrFailures()) {
+					selectFirstFailure();
 				}
+				if (fDirtyListener == null) {
+					fDirtyListener= new DirtyListener();
+					JavaCore.addElementChangedListener(fDirtyListener);
+				}
+				warnOfContentChange();
 			});
 			stopUpdateJobs();
 			showMessageIfNoTests();
@@ -1450,15 +1440,12 @@ public class TestRunnerViewPart extends ViewPart {
 	}
 
 	private void handleStopped() {
-		postSyncRunnable(new Runnable() {
-			@Override
-			public void run() {
-				if (isDisposed())
-					return;
-				resetViewIcon();
-				fStopAction.setEnabled(false);
-				updateRerunFailedFirstAction();
-			}
+		postSyncRunnable(() -> {
+			if (isDisposed())
+				return;
+			resetViewIcon();
+			fStopAction.setEnabled(false);
+			updateRerunFailedFirstAction();
 		});
 		stopUpdateJobs();
 		showMessageIfNoTests();
@@ -1466,12 +1453,9 @@ public class TestRunnerViewPart extends ViewPart {
 
 	private void showMessageIfNoTests() {
 		if (fTestRunSession != null && TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(fTestRunSession.getTestRunnerKind().getId()) && fTestRunSession.getTotalCount() == 0) {
-			Display.getDefault().asyncExec(new Runnable() {
-				@Override
-				public void run() {
-					String msg= Messages.format(JUnitMessages.TestRunnerViewPart_error_notests_kind, fTestRunSession.getTestRunnerKind().getDisplayName());
-					MessageDialog.openInformation(JUnitPlugin.getActiveWorkbenchShell(), JUnitMessages.TestRunnerViewPart__error_cannotrun, msg);
-				}
+			Display.getDefault().asyncExec(() -> {
+				String msg= Messages.format(JUnitMessages.TestRunnerViewPart_error_notests_kind, fTestRunSession.getTestRunnerKind().getDisplayName());
+				MessageDialog.openInformation(JUnitPlugin.getActiveWorkbenchShell(), JUnitMessages.TestRunnerViewPart__error_cannotrun, msg);
 			});
 		}
 	}
@@ -1725,13 +1709,10 @@ action enablement
 	}
 
 	protected void postShowTestResultsView() {
-		postSyncRunnable(new Runnable() {
-			@Override
-			public void run() {
-				if (isDisposed())
-					return;
-				showTestResultsView();
-			}
+		postSyncRunnable(() -> {
+			if (isDisposed())
+				return;
+			showTestResultsView();
 		});
 	}
 
@@ -2045,12 +2026,7 @@ action enablement
 
 		fActivateOnErrorAction= new ActivateOnErrorAction();
 		viewMenu.add(fActivateOnErrorAction);
-		fViewMenuListener= new IMenuListener() {
-			@Override
-			public void menuAboutToShow(IMenuManager manager) {
-				fActivateOnErrorAction.update();
-			}
-		};
+		fViewMenuListener= manager -> fActivateOnErrorAction.update();
 
 		viewMenu.addMenuListener(fViewMenuListener);
 
@@ -2101,12 +2077,9 @@ action enablement
 	}
 
 	private void showFailure(final TestElement test) {
-		postSyncRunnable(new Runnable() {
-			@Override
-			public void run() {
-				if (!isDisposed())
-					fFailureTrace.showFailure(test);
-			}
+		postSyncRunnable(() -> {
+			if (!isDisposed())
+				fFailureTrace.showFailure(test);
 		});
 	}
 
@@ -2148,13 +2121,10 @@ action enablement
 		else if (fViewImage == fTestRunFailIcon)
 			fViewImage= fTestRunFailDirtyIcon;
 
-		Runnable r= new Runnable() {
-			@Override
-			public void run() {
-				if (isDisposed())
-					return;
-				firePropertyChange(IWorkbenchPart.PROP_TITLE);
-			}
+		Runnable r= () -> {
+			if (isDisposed())
+				return;
+			firePropertyChange(IWorkbenchPart.PROP_TITLE);
 		};
 		if (!isDisposed())
 			getDisplay().asyncExec(r);
@@ -2250,12 +2220,7 @@ action enablement
 
 	static void importTestRunSession(final String url) {
 		try {
-			PlatformUI.getWorkbench().getProgressService().busyCursorWhile(new IRunnableWithProgress() {
-				@Override
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					JUnitModel.importTestRunSession(url, monitor);
-				}
-			});
+			PlatformUI.getWorkbench().getProgressService().busyCursorWhile(monitor -> JUnitModel.importTestRunSession(url, monitor));
 		} catch (InterruptedException e) {
 			// cancelled
 		} catch (InvocationTargetException e) {

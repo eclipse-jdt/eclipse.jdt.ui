@@ -17,6 +17,7 @@ package org.eclipse.jdt.internal.junit.ui;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.swt.widgets.Shell;
 
@@ -167,20 +168,17 @@ public class TestMethodSelectionDialog extends ElementListSelectionDialog {
 	}
 
 	public Object[] searchTestMethods(final IJavaElement element, final IType testType) throws InvocationTargetException, InterruptedException  {
-		final TestReferenceCollector[] col= new TestReferenceCollector[1];
+		final AtomicReference<TestReferenceCollector> col= new AtomicReference<>();
 
-		IRunnableWithProgress runnable= new IRunnableWithProgress() {
-			@Override
-			public void run(IProgressMonitor pm) throws InvocationTargetException {
-				try {
-					col[0]= doSearchTestMethods(element, testType, pm);
-				} catch (CoreException e) {
-					throw new InvocationTargetException(e);
-				}
+		IRunnableWithProgress runnable= progressMonitor -> {
+			try {
+				col.set(doSearchTestMethods(element, testType, progressMonitor));
+			} catch (CoreException e) {
+				throw new InvocationTargetException(e);
 			}
 		};
 		PlatformUI.getWorkbench().getProgressService().busyCursorWhile(runnable);
-		return col[0].getResult();
+		return col.get().getResult();
 	}
 
 	private TestReferenceCollector doSearchTestMethods(IJavaElement element, IType testType, IProgressMonitor pm) throws CoreException{

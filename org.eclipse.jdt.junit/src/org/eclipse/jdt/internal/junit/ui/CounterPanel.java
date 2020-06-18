@@ -15,8 +15,6 @@ package org.eclipse.jdt.internal.junit.ui;
 
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -54,12 +52,7 @@ public class CounterPanel extends Composite {
 		fNumberOfErrors= createLabel(JUnitMessages.CounterPanel_label_errors, fErrorIcon, " 0 "); //$NON-NLS-1$
 		fNumberOfFailures= createLabel(JUnitMessages.CounterPanel_label_failures, fFailureIcon, " 0 "); //$NON-NLS-1$
 
-		addDisposeListener(new DisposeListener() {
-			@Override
-			public void widgetDisposed(DisposeEvent e) {
-				disposeIcons();
-			}
-		});
+		addDisposeListener(e -> disposeIcons());
 	}
 
 	private void disposeIcons() {

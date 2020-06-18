@@ -33,9 +33,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
@@ -49,19 +47,15 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ContentViewer;
-import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.window.Window;
@@ -432,19 +426,13 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		fFilterViewer.setContentProvider(fStackFilterContentProvider);
 		// input just needs to be non-null
 		fFilterViewer.setInput(this);
-		fFilterViewer.addCheckStateListener(new ICheckStateListener() {
-			@Override
-			public void checkStateChanged(CheckStateChangedEvent event) {
-				Filter filter= (Filter) event.getElement();
-				fStackFilterContentProvider.toggleFilter(filter);
-			}
+		fFilterViewer.addCheckStateListener(event -> {
+			Filter filter= (Filter) event.getElement();
+			fStackFilterContentProvider.toggleFilter(filter);
 		});
-		fFilterViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				ISelection selection= event.getSelection();
-				fRemoveFilterButton.setEnabled(!selection.isEmpty());
-			}
+		fFilterViewer.addSelectionChangedListener(event -> {
+			ISelection selection= event.getSelection();
+			fRemoveFilterButton.setEnabled(!selection.isEmpty());
 		});
 	}
 
@@ -463,48 +451,28 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		gd= new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
 		fAddFilterButton.setLayoutData(gd);
 		LayoutUtil.setButtonDimensionHint(fAddFilterButton);
-		fAddFilterButton.addListener(SWT.Selection, new Listener() {
-			@Override
-			public void handleEvent(Event e) {
-				editFilter();
-			}
-		});
+		fAddFilterButton.addListener(SWT.Selection, event -> editFilter());
 
 		fAddTypeButton= new Button(buttonContainer, SWT.PUSH);
 		fAddTypeButton.setText(JUnitMessages.JUnitPreferencePage_addtypebutton_label);
 		gd= getButtonGridData(fAddTypeButton);
 		fAddTypeButton.setLayoutData(gd);
 		LayoutUtil.setButtonDimensionHint(fAddTypeButton);
-		fAddTypeButton.addListener(SWT.Selection, new Listener() {
-			@Override
-			public void handleEvent(Event e) {
-				addType();
-			}
-		});
+		fAddTypeButton.addListener(SWT.Selection, event -> addType());
 
 		fAddPackageButton= new Button(buttonContainer, SWT.PUSH);
 		fAddPackageButton.setText(JUnitMessages.JUnitPreferencePage_addpackagebutton_label);
 		gd= getButtonGridData(fAddPackageButton);
 		fAddPackageButton.setLayoutData(gd);
 		SWTUtil.setButtonDimensionHint(fAddPackageButton);
-		fAddPackageButton.addListener(SWT.Selection, new Listener() {
-			@Override
-			public void handleEvent(Event e) {
-				addPackage();
-			}
-		});
+		fAddPackageButton.addListener(SWT.Selection, event -> addPackage());
 
 		fRemoveFilterButton= new Button(buttonContainer, SWT.PUSH);
 		fRemoveFilterButton.setText(JUnitMessages.JUnitPreferencePage_removefilterbutton_label);
 		gd= getButtonGridData(fRemoveFilterButton);
 		fRemoveFilterButton.setLayoutData(gd);
 		SWTUtil.setButtonDimensionHint(fRemoveFilterButton);
-		fRemoveFilterButton.addListener(SWT.Selection, new Listener() {
-			@Override
-			public void handleEvent(Event e) {
-				removeFilters();
-			}
-		});
+		fRemoveFilterButton.addListener(SWT.Selection, event -> removeFilters());
 		fRemoveFilterButton.setEnabled(false);
 
 		fEnableAllButton= new Button(buttonContainer, SWT.PUSH);
@@ -512,24 +480,14 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		gd= getButtonGridData(fEnableAllButton);
 		fEnableAllButton.setLayoutData(gd);
 		SWTUtil.setButtonDimensionHint(fEnableAllButton);
-		fEnableAllButton.addListener(SWT.Selection, new Listener() {
-			@Override
-			public void handleEvent(Event e) {
-				checkAllFilters(true);
-			}
-		});
+		fEnableAllButton.addListener(SWT.Selection, event -> checkAllFilters(true));
 
 		fDisableAllButton= new Button(buttonContainer, SWT.PUSH);
 		fDisableAllButton.setText(JUnitMessages.JUnitPreferencePage_disableallbutton_label);
 		gd= getButtonGridData(fDisableAllButton);
 		fDisableAllButton.setLayoutData(gd);
 		SWTUtil.setButtonDimensionHint(fDisableAllButton);
-		fDisableAllButton.addListener(SWT.Selection, new Listener() {
-			@Override
-			public void handleEvent(Event e) {
-				checkAllFilters(false);
-			}
-		});
+		fDisableAllButton.addListener(SWT.Selection, event -> checkAllFilters(false));
 
 	}
 
@@ -613,12 +571,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		// Consume traversal events from the text widget so that CR doesn't
 		// traverse away to dialog's default button.  Without this, hitting
 		// CR in the text field closes the entire dialog.
-		text.addListener(SWT.Traverse, new Listener() {
-			@Override
-			public void handleEvent(Event event) {
-				event.doit= false;
-			}
-		});
+		text.addListener(SWT.Traverse, event -> event.doit= false);
 	}
 
 	private void validateChangeAndCleanup() {

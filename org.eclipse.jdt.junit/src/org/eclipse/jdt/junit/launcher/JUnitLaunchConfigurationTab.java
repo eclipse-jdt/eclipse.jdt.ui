@@ -23,8 +23,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -52,7 +50,6 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -119,7 +116,6 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 import org.eclipse.jdt.ui.dialogs.ITypeInfoFilterExtension;
-import org.eclipse.jdt.ui.dialogs.ITypeInfoRequestor;
 import org.eclipse.jdt.ui.dialogs.TypeSelectionExtension;
 
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
@@ -252,13 +248,10 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 			}
 		});
 		fTestLoaderViewer.setInput(items);
-		fTestLoaderViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				setEnableTagsGroup(event);
-				validatePage();
-				updateLaunchConfigurationDialog();
-			}
+		fTestLoaderViewer.addSelectionChangedListener(event -> {
+			setEnableTagsGroup(event);
+			validatePage();
+			updateLaunchConfigurationDialog();
 		});
 	}
 
@@ -305,13 +298,10 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 
 		fProjText= new Text(comp, SWT.SINGLE | SWT.BORDER);
 		fProjText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		fProjText.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent evt) {
-				validatePage();
-				updateLaunchConfigurationDialog();
-				fSearchButton.setEnabled(fTestRadioButton.getSelection() && fProjText.getText().length() > 0);
-			}
+		fProjText.addModifyListener(evt -> {
+			validatePage();
+			updateLaunchConfigurationDialog();
+			fSearchButton.setEnabled(fTestRadioButton.getSelection() && fProjText.getText().length() > 0);
 		});
 
 		fProjButton = new Button(comp, SWT.PUSH);
@@ -333,13 +323,10 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 
 		fTestText = new Text(comp, SWT.SINGLE | SWT.BORDER);
 		fTestText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		fTestText.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent evt) {
-				fTestMethodSearchButton.setEnabled(fTestText.getText().length() > 0);
-				validatePage();
-				updateLaunchConfigurationDialog();
-			}
+		fTestText.addModifyListener(evt -> {
+			fTestMethodSearchButton.setEnabled(fTestText.getText().length() > 0);
+			validatePage();
+			updateLaunchConfigurationDialog();
 		});
 
 		fSearchButton = new Button(comp, SWT.PUSH);
@@ -364,12 +351,9 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		fTestMethodText.setLayoutData(gd);
 
-		fTestMethodText.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent evt) {
-				validatePage();
-				updateLaunchConfigurationDialog();
-			}
+		fTestMethodText.addModifyListener(evt -> {
+			validatePage();
+			updateLaunchConfigurationDialog();
 		});
 		fTestMethodText.setMessage(JUnitMessages.JUnitLaunchConfigurationTab_all_methods_text);
 
@@ -410,12 +394,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		gd.horizontalIndent= 25;
 		gd.horizontalSpan = 2;
 		fContainerText.setLayoutData(gd);
-		fContainerText.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent evt) {
-				updateLaunchConfigurationDialog();
-			}
-		});
+		fContainerText.addModifyListener(evt -> updateLaunchConfigurationDialog());
 
 		fContainerSearchButton = new Button(comp, SWT.PUSH);
 		fContainerSearchButton.setText(JUnitMessages.JUnitLaunchConfigurationTab_label_search);
@@ -648,17 +627,14 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 					new TypeSelectionExtension() {
 						@Override
 						public ITypeInfoFilterExtension getFilterExtension() {
-							return new ITypeInfoFilterExtension() {
-								@Override
-								public boolean select(ITypeInfoRequestor requestor) {
-									StringBuilder buf= new StringBuilder();
-									buf.append(requestor.getPackageName()).append('/');
-									String enclosingName= requestor.getEnclosingName();
-									if (enclosingName.length() > 0)
-										buf.append(enclosingName).append('.');
-									buf.append(requestor.getTypeName());
-									return typeLookup.contains(buf.toString());
-								}
+							return requestor -> {
+								StringBuilder buf= new StringBuilder();
+								buf.append(requestor.getPackageName()).append('/');
+								String enclosingName= requestor.getEnclosingName();
+								if (enclosingName.length() > 0)
+									buf.append(enclosingName).append('.');
+								buf.append(requestor.getTypeName());
+								return typeLookup.contains(buf.toString());
 							};
 						}
 					});

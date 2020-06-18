@@ -19,8 +19,6 @@ import java.nio.charset.StandardCharsets;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -267,12 +265,7 @@ public class CompareResultDialog extends TrayDialog {
 	    setCompareViewerInput();
 
 	    Control control= fViewer.getControl();
-	    control.addDisposeListener(new DisposeListener() {
-	        @Override
-			public void widgetDisposed(DisposeEvent e) {
-                compareConfiguration.dispose();
-	        }
-	    });
+	    control.addDisposeListener(e -> compareConfiguration.dispose());
 	    return control;
 	}
 

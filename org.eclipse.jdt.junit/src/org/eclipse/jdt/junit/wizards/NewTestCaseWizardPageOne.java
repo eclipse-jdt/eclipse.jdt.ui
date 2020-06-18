@@ -26,8 +26,6 @@ import java.util.Map;
 import com.ibm.icu.text.UTF16;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -519,12 +517,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		fClassUnderTestControl.setEnabled(true);
 		fClassUnderTestControl.setFont(composite.getFont());
 		fClassUnderTestControl.setText(fClassUnderTestText);
-		fClassUnderTestControl.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				internalSetClassUnderText(((Text) e.widget).getText());
-			}
-		});
+		fClassUnderTestControl.addModifyListener(modifyEvent -> internalSetClassUnderText(((Text) modifyEvent.widget).getText()));
 		GridData gd= new GridData();
 		gd.horizontalAlignment= GridData.FILL;
 		gd.grabExcessHorizontalSpace= true;

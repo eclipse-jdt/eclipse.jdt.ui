@@ -22,7 +22,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 
@@ -30,8 +29,6 @@ import org.eclipse.core.resources.IFile;
 
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
-
-import org.eclipse.jface.operation.IRunnableWithProgress;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -268,21 +265,18 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 		@Override
 		public void apply(IDocument document) {
 			try {
-				PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(false, true, new IRunnableWithProgress() {
-					@Override
-					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-						try {
-							Change change= createChange();
-							change.initializeValidationData(new NullProgressMonitor());
-							PerformChangeOperation op= new PerformChangeOperation(change);
-							op.setUndoManager(RefactoringCore.getUndoManager(), getDisplayString());
-							op.setSchedulingRule(fJavaProject.getProject().getWorkspace().getRoot());
-							op.run(monitor);
-						} catch (CoreException e) {
-							throw new InvocationTargetException(e);
-						} catch (OperationCanceledException e) {
-							throw new InterruptedException();
-						}
+				PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(false, true, monitor -> {
+					try {
+						Change change= createChange();
+						change.initializeValidationData(new NullProgressMonitor());
+						PerformChangeOperation op= new PerformChangeOperation(change);
+						op.setUndoManager(RefactoringCore.getUndoManager(), getDisplayString());
+						op.setSchedulingRule(fJavaProject.getProject().getWorkspace().getRoot());
+						op.run(monitor);
+					} catch (CoreException e1) {
+						throw new InvocationTargetException(e1);
+					} catch (OperationCanceledException e1) {
+						throw new InterruptedException();
 					}
 				});
 			} catch (InvocationTargetException e) {

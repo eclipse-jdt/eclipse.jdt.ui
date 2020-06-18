@@ -16,8 +16,6 @@ package org.eclipse.jdt.internal.junit.buildpath;
 import org.eclipse.jdt.junit.JUnitCore;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
@@ -136,12 +134,7 @@ public class JUnitContainerWizardPage extends NewElementWizardPage implements IC
 		} else {
 			fVersionCombo.select(2);
 		}
-		fVersionCombo.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				doSelectionChanged();
-			}
-		});
+		fVersionCombo.addModifyListener(e -> doSelectionChanged());
 
 		label= new Label(composite, SWT.NONE);
 		label.setFont(composite.getFont());
