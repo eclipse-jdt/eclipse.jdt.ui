@@ -62,11 +62,15 @@ public class LinkedNodeFinder  {
 		if (binding instanceof IVariableBinding) {
 			IVariableBinding vbinding= (IVariableBinding) binding;
 			IVariableBinding bBinding= vbinding.getVariableDeclaration();
-			if (!bBinding.isField()) {
+			if (bBinding == null || !bBinding.isField()) {
 				return null;
 			}
-			ITypeBinding typeBinding= vbinding.getDeclaringClass().getTypeDeclaration();
-			if (!typeBinding.isRecord()) {
+			ITypeBinding cBinding= vbinding.getDeclaringClass();
+			if (cBinding == null) {
+				return null;
+			}
+			ITypeBinding typeBinding= cBinding.getTypeDeclaration();
+			if (typeBinding== null || !typeBinding.isRecord()) {
 				return null;
 			}
 			int modifiers= bBinding.getModifiers();
@@ -76,22 +80,31 @@ public class LinkedNodeFinder  {
 			}
 		} else if (binding instanceof IMethodBinding) {
 			IMethodBinding mBinding = (IMethodBinding)binding;
-			ITypeBinding typeBinding= mBinding.getDeclaringClass().getTypeDeclaration();
+			ITypeBinding cBinding= mBinding.getDeclaringClass();
+			if (cBinding == null) {
+				return null;
+			}
+			ITypeBinding typeBinding= cBinding.getTypeDeclaration();
 			IMethodBinding bBinding= mBinding.getMethodDeclaration();
-			if (bBinding.getParameterTypes().length != 0 || !typeBinding.isRecord()) {
+			if (bBinding == null ||
+					typeBinding == null ||
+					bBinding.getParameterTypes().length != 0 ||
+					!typeBinding.isRecord()) {
 				return null;
 			}
 			if (typeBinding.isRecord()) {
 				IVariableBinding varBindings[]= typeBinding.getDeclaredFields();
-				for (IVariableBinding varBinding : varBindings) {
-					String name= varBinding.getName();
-					if (simpleName.getIdentifier().equals(name)) {
-						int modifiers= varBinding.getModifiers();
-						if (bBinding.getReturnType().isEqualTo(varBinding.getType())
-								&& Flags.isFinal(modifiers)
-								&& !Flags.isStatic(modifiers)) {
-							rcBinding= varBinding;
-							break;
+				if (varBindings != null) {
+					for (IVariableBinding varBinding : varBindings) {
+						String name= varBinding.getName();
+						if (simpleName.getIdentifier().equals(name)) {
+							int modifiers= varBinding.getModifiers();
+							if (bBinding.getReturnType().isEqualTo(varBinding.getType())
+									&& Flags.isFinal(modifiers)
+									&& !Flags.isStatic(modifiers)) {
+								rcBinding= varBinding;
+								break;
+							}
 						}
 					}
 				}
@@ -102,26 +115,31 @@ public class LinkedNodeFinder  {
 		}
 		RecordDeclaration recordDeclaration= null;
 		if (rcBinding != null) {
-			ITypeBinding typeBinding= rcBinding.getDeclaringClass().getTypeDeclaration();
-			if (typeBinding != null) {
-				ASTNode root= simpleName.getRoot();
-				if (root instanceof CompilationUnit) {
-					CompilationUnit astRoot= (CompilationUnit) root;
-					ASTNode foundNode= astRoot.findDeclaringNode(typeBinding);
-					if (foundNode instanceof RecordDeclaration) {
-						recordDeclaration= (RecordDeclaration) foundNode;
+			ITypeBinding cBinding= rcBinding.getDeclaringClass();
+			if (cBinding != null) {
+				ITypeBinding typeBinding= cBinding.getTypeDeclaration();
+				if (typeBinding != null) {
+					ASTNode root= simpleName.getRoot();
+					if (root instanceof CompilationUnit) {
+						CompilationUnit astRoot= (CompilationUnit) root;
+						ASTNode foundNode= astRoot.findDeclaringNode(typeBinding);
+						if (foundNode instanceof RecordDeclaration) {
+							recordDeclaration= (RecordDeclaration) foundNode;
+						}
 					}
 				}
 			}
 		}
 		if (recordDeclaration != null) {
 			List<ASTNode> ff=recordDeclaration.recordComponents();
-			for (ASTNode nd : ff) {
-				if (nd instanceof SingleVariableDeclaration) {
-					SimpleName name= ((SingleVariableDeclaration) nd).getName();
-					if (simpleName.getIdentifier().equals(name.getIdentifier())) {
-						rcName= name;
-						break;
+			if (ff != null) {
+				for (ASTNode nd : ff) {
+					if (nd instanceof SingleVariableDeclaration) {
+						SimpleName name= ((SingleVariableDeclaration) nd).getName();
+						if (simpleName.getIdentifier().equals(name.getIdentifier())) {
+							rcName= name;
+							break;
+						}
 					}
 				}
 			}
