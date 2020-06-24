@@ -14,6 +14,7 @@
 package org.eclipse.jdt.ui.tests.refactoring.typeconstraints;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
@@ -35,6 +36,8 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ConstraintVar
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.FullConstraintCreator;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ITypeConstraint;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.TypeConstraintFactory;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeEnvironment;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeTuple;
 
 import org.eclipse.jdt.ui.tests.refactoring.GenericRefactoringTest;
 import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
@@ -274,5 +277,13 @@ public class TypeConstraintTests extends GenericRefactoringTest {
 		//test for bug 41271 NullPointerException dumping set of ITypeConstraints to System.out
 		String[] strings= {"[args.length] =^= int", "[0] <= [i]", "[i] =^= int", "[args] <= Decl((array type):length)", "[args] =^= String[]", "[Parameter(0,Test1:main(String[]))] =^= [args]", "Decl(Test1:main(String[])) =^= p.Test1"};
 		testConstraints(strings);
+	}
+
+	@Test
+	public void testTypeTuplesuniqueHashcode() {
+		TypeEnvironment te=new TypeEnvironment();
+		assertNotEquals("HashCode of two different TypeTuples should be different",
+				new TypeTuple(te.INT, te.BOOLEAN).hashCode(),
+				new TypeTuple(te.INT, te.DOUBLE).hashCode());
 	}
 }
