@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Red Hat Inc. and others.
+ * Copyright (c) 2019, 2020 Red Hat Inc. and others.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,8 +12,16 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.templates;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.util.Arrays;
 import java.util.List;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -38,9 +46,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.text.java.TemplateCompletionProposalComputer;
 import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateProposal;
 
-import junit.framework.TestCase;
-
-public class TemplateCompletionTests extends TestCase {
+public class TemplateCompletionTests {
 
 	private IJavaProject fJProject;
 
@@ -48,19 +54,20 @@ public class TemplateCompletionTests extends TestCase {
 
 	private IPackageFragment pkg;
 
-	@Override
-	protected void setUp() throws Exception {
+	@BeforeEach
+	public void setUp() throws Exception {
 		fJProject= JavaProjectHelper.createJavaProject("TestProject", "bin");
 		JavaProjectHelper.addRTJar18(fJProject);
 		javaSrc= JavaProjectHelper.addSourceContainer(fJProject, "src");
 		pkg= javaSrc.createPackageFragment("test", false, null);
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+	@AfterEach
+	public void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJProject);
 	}
 
+	@Test
 	public void testEmptyFile() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		buf.append("   $");
@@ -84,6 +91,7 @@ public class TemplateCompletionTests extends TestCase {
 		assertEquals(expected.toString(), viewer.getDocument().get());
 	}
 
+	@Test
 	public void testExepectNoProposals() throws Exception {
 		String propDisplay= "new_class - create new class";
 		StringBuffer buf= new StringBuffer();
