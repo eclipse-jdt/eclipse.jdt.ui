@@ -24,7 +24,7 @@ Require-Bundle:
  org.eclipse.ui.workbench.texteditor,
  org.eclipse.ui.editors,
  org.eclipse.jdt.ui,
- org.junit;bundle-version="4.8.1",
+ org.junit,
  org.eclipse.ui,
  org.eclipse.jdt.core,
  org.eclipse.ui.ide,
@@ -36,6 +36,9 @@ Require-Bundle:
  org.eclipse.jdt.ui.tests,
  org.eclipse.test.performance,
  org.eclipse.jdt.core.manipulation,
- org.eclipse.core.expressions
+ org.eclipse.core.expressions,
+ org.junit.platform.runner,
+ org.junit.platform.suite.api
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Eclipse-BundleShape: dir
+Import-Package: org.junit.jupiter.api
