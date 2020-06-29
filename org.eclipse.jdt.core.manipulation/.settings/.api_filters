@@ -179,6 +179,13 @@
         </filter>
     </resource>
     <resource path="core extension/org/eclipse/jdt/internal/corext/dom/LinkedNodeFinder.java" type="org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder">
+        <filter comment="This is a Java 14 preview feature" id="640712815">
+            <message_arguments>
+                <message_argument value="IMethodBinding"/>
+                <message_argument value="LinkedNodeFinder"/>
+                <message_argument value="isCompactConstructor()"/>
+            </message_arguments>
+        </filter>
         <filter id="640712815">
             <message_arguments>
                 <message_argument value="ITypeBinding"/>
