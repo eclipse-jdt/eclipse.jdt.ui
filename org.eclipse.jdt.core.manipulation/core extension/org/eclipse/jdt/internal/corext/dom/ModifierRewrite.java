@@ -30,6 +30,7 @@ import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.RecordDeclaration;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
@@ -77,6 +78,8 @@ public class ModifierRewrite {
 				return rewrite.getListRewrite(declNode, SingleVariableDeclaration.MODIFIERS2_PROPERTY);
 			case ASTNode.TYPE_DECLARATION:
 				return rewrite.getListRewrite(declNode, TypeDeclaration.MODIFIERS2_PROPERTY);
+			case ASTNode.RECORD_DECLARATION:
+				return rewrite.getListRewrite(declNode, RecordDeclaration.MODIFIERS2_PROPERTY);
 			case ASTNode.ENUM_DECLARATION:
 				return rewrite.getListRewrite(declNode, EnumDeclaration.MODIFIERS2_PROPERTY);
 			case ASTNode.ANNOTATION_TYPE_DECLARATION:

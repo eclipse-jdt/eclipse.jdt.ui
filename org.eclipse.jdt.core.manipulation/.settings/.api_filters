@@ -201,6 +201,15 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="core extension/org/eclipse/jdt/internal/corext/dom/ModifierRewrite.java" type="org.eclipse.jdt.internal.corext.dom.ModifierRewrite">
+        <filter comment="This is a Java 14 preview feature" id="623939596">
+            <message_arguments>
+                <message_argument value="RecordDeclaration"/>
+                <message_argument value="ModifierRewrite"/>
+                <message_argument value="MODIFIERS2_PROPERTY"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="core extension/org/eclipse/jdt/internal/corext/dom/ScopeAnalyzer.java" type="org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer">
         <filter comment="For Java 13 Enable Preview feature" id="640712815">
             <message_arguments>
