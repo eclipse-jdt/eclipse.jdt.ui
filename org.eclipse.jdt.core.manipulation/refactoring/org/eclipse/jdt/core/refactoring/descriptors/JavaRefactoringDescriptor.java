@@ -19,6 +19,7 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.resources.IResource;
@@ -31,8 +32,8 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.WorkingCopyOwner;
+import org.eclipse.jdt.core.manipulation.JavaManipulation;
 
-import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.DescriptorMessages;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.JavaRefactoringDescriptorUtil;
 
@@ -302,7 +303,7 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 				JavaRefactoringContribution javaContribution= (JavaRefactoringContribution) contribution;
 				refactoring= javaContribution.createRefactoring(this, status);
 			} else
-				JavaManipulationPlugin.log(new Status(IStatus.ERROR, JavaManipulationPlugin.getPluginId(), 0, MessageFormat.format(DescriptorMessages.JavaRefactoringDescriptor_no_resulting_descriptor, id), null));
+				Platform.getLog(this.getClass()).log(new Status(IStatus.ERROR, JavaManipulation.ID_PLUGIN, 0, MessageFormat.format(DescriptorMessages.JavaRefactoringDescriptor_no_resulting_descriptor, id), null));
 		}
 		return refactoring;
 	}

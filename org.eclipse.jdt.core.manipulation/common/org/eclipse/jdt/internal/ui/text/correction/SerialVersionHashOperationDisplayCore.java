@@ -13,7 +13,7 @@
   *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
-import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
+import org.eclipse.core.runtime.Platform;
 
 public class SerialVersionHashOperationDisplayCore {
 
@@ -24,7 +24,7 @@ public class SerialVersionHashOperationDisplayCore {
 	 *            The message to display
 	 */
 	public void displayErrorMessage(final String message) {
-		JavaManipulationPlugin.logErrorMessage(message);
+		Platform.getLog(this.getClass()).error(message);
 	}
 
 	/**

@@ -33,9 +33,9 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
+import org.eclipse.jdt.core.manipulation.JavaManipulation;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
-import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
@@ -100,7 +100,7 @@ public class CompilationUnitRewriteOperationsFixCore extends AbstractFix {
 
 		CompilationUnitChange result= cuRewrite.createChange(getDisplayString(), true, null);
 		if (result == null)
-			throw new CoreException(new Status(IStatus.ERROR, JavaManipulationPlugin.getPluginId(), Messages.format(FixMessages.CompilationUnitRewriteOperationsFix_nullChangeError, getDisplayString())));
+			throw new CoreException(new Status(IStatus.ERROR, JavaManipulation.ID_PLUGIN, Messages.format(FixMessages.CompilationUnitRewriteOperationsFix_nullChangeError, getDisplayString())));
 
 		return result;
 	}

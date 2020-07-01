@@ -38,8 +38,8 @@ import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.manipulation.JavaManipulation;
 
-import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation;
@@ -49,7 +49,7 @@ public abstract class ConvertLoopOperation extends CompilationUnitRewriteOperati
 
 	protected static final String FOR_LOOP_ELEMENT_IDENTIFIER= "element"; //$NON-NLS-1$
 
-	protected static final IStatus ERROR_STATUS= new Status(IStatus.ERROR, JavaManipulationPlugin.getPluginId(), ""); //$NON-NLS-1$
+	protected static final IStatus ERROR_STATUS= new Status(IStatus.ERROR, JavaManipulation.ID_PLUGIN, ""); //$NON-NLS-1$
 
 	private static final Map<String, String> IRREG_NOUNS= Stream.of(
 			new AbstractMap.SimpleImmutableEntry<>("Children", "Child"), //$NON-NLS-1$ //$NON-NLS-2$
