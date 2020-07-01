@@ -8,6 +8,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -1827,6 +1831,17 @@ public class ASTFlattener extends GenericVisitor {
 				}
 				this.fBuffer.append(" ");//$NON-NLS-1$
 			}
+		}
+		if (ASTHelper.isSealedTypeSupportedInAST(node.getAST()) && !node.permittedTypes().isEmpty()) {
+			this.fBuffer.append("permits ");//$NON-NLS-1$
+			for (Iterator<Type> it = node.permittedTypes().iterator(); it.hasNext(); ) {
+				Type t = it.next();
+				t.accept(this);
+				if (it.hasNext()) {
+					this.fBuffer.append(", ");//$NON-NLS-1$
+				}
+			}
+			this.fBuffer.append(" ");//$NON-NLS-1$
 		}
 		this.fBuffer.append("{");//$NON-NLS-1$
 		BodyDeclaration prev= null;

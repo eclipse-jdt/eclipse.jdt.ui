@@ -96,13 +96,6 @@
                 <message_argument value="typeParameters()"/>
             </message_arguments>
         </filter>
-        <filter comment="For Java 13 Enable Preview support" id="640712815">
-            <message_arguments>
-                <message_argument value="TextBlock"/>
-                <message_argument value="ASTFlattener"/>
-                <message_argument value="getEscapedValue()"/>
-            </message_arguments>
-        </filter>
     </resource>
     <resource path="core extension/org/eclipse/jdt/internal/corext/dom/GenericVisitor.java" type="org.eclipse.jdt.internal.corext.dom.GenericVisitor">
         <filter comment="For Java 13 Enable Preview support" id="642777099">
