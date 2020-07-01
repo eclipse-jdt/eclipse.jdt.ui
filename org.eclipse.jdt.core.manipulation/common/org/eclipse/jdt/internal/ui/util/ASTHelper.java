@@ -19,6 +19,7 @@ package org.eclipse.jdt.internal.ui.util;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Modifier;
 
 public class ASTHelper {
 
@@ -33,6 +34,19 @@ public class ASTHelper {
 			case ASTNode.RECORD_DECLARATION:
 			case ASTNode.INSTANCEOF_EXPRESSION:
 				return ast.isPreviewEnabled();
+			default:
+				break;
+		}
+		return true;
+	}
+
+	private static boolean isModifierSupportedInAST(AST ast, int modifier) {
+		switch (modifier) {
+			case Modifier.SEALED:
+			case Modifier.NON_SEALED:
+				return ast.isPreviewEnabled();
+			default:
+				break;
 		}
 		return true;
 	}
@@ -56,4 +70,9 @@ public class ASTHelper {
 	public static boolean isRecordDeclarationNodeSupportedInAST(AST ast) {
 		return isNodeTypeSupportedInAST(ast, ASTNode.RECORD_DECLARATION);
 	}
+
+	public static boolean isSealedTypeSupportedInAST(AST ast) {
+		return isModifierSupportedInAST(ast, Modifier.SEALED);
+	}
+
 }
