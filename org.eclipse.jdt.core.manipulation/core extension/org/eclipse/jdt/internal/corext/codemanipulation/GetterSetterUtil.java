@@ -64,6 +64,10 @@ public class GetterSetterUtil {
 		if (excludedNames == null) {
 			excludedNames= EMPTY;
 		}
+		IType type= field.getDeclaringType();
+		if (type != null && type.isRecord() && !Flags.isStatic(field.getFlags())) {
+			return field.getElementName();
+		}
 		return getGetterName(field.getJavaProject(), field.getElementName(), field.getFlags(), useIsForBoolGetters && JavaModelUtil.isBoolean(field), excludedNames);
 	}
 

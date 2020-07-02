@@ -82,7 +82,7 @@ public class RenameRecordElementsTests extends GenericRefactoringTest {
 		return "f";
 	}
 
-	private void renameRecordCompactConstructor(String fieldName, String newFieldName, boolean updateReferences, boolean fail) throws Exception{
+	private void renameRecordCompactConstructor(String fieldName, String newFieldName, boolean updateReferences, boolean fail, boolean isGetterPresent) throws Exception{
 		ParticipantTesting.reset();
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		ICompilationUnit cu2= createCUfromTestFile(getPackageP(), "B");
@@ -99,8 +99,11 @@ public class RenameRecordElementsTests extends GenericRefactoringTest {
 
 		RenameRefactoring refactoring= (RenameRefactoring) createRefactoring(descriptor);
 		RenameFieldProcessor processor= (RenameFieldProcessor) refactoring.getProcessor();
-		assertNotNull("Getter rename should be enabled", processor.canEnableGetterRenaming());
-		assertNotNull("Setter rename should be enabled", processor.canEnableSetterRenaming());
+		if (isGetterPresent) {
+			assertNull("Getter rename should be enabled", processor.canEnableGetterRenaming());
+		} else {
+			assertTrue("Getter rename should not be enabled", "".equals(processor.canEnableGetterRenaming()));
+		}
 
 		List<IAnnotatable> elements= new ArrayList<>();
 		elements.add(field);
@@ -142,7 +145,7 @@ public class RenameRecordElementsTests extends GenericRefactoringTest {
 		}
 	}
 
-	private void renameRecordCompactConstructor2(String fieldName, String newFieldName, boolean updateReferences, boolean fail) throws Exception{
+	private void renameRecordCompactConstructor2(String fieldName, String newFieldName, boolean updateReferences, boolean fail, boolean isGetterPresent) throws Exception{
 		ParticipantTesting.reset();
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		ICompilationUnit cu2= createCUfromTestFile(getPackageP(), "B");
@@ -161,8 +164,11 @@ public class RenameRecordElementsTests extends GenericRefactoringTest {
 
 		RenameRefactoring refactoring= (RenameRefactoring) createRefactoring(descriptor);
 		RenameFieldProcessor processor= (RenameFieldProcessor) refactoring.getProcessor();
-		assertNotNull("getter rename enabled", processor.canEnableGetterRenaming());
-		assertNotNull("setter rename enabled", processor.canEnableSetterRenaming());
+		if (isGetterPresent) {
+			assertNull("Getter rename should be enabled", processor.canEnableGetterRenaming());
+		} else {
+			assertTrue("Getter rename should not be enabled", "".equals(processor.canEnableGetterRenaming()));
+		}
 
 		List<IAnnotatable> elements= new ArrayList<>();
 		elements.add(field);
@@ -267,7 +273,7 @@ public class RenameRecordElementsTests extends GenericRefactoringTest {
 		}
 	}
 
-	private void renameRecord(String recordName, String newRecordName, boolean updateReferences, boolean fail) throws Exception{
+	private void renameRecord(String recordName, String newRecordName, boolean updateReferences) throws Exception{
 		ParticipantTesting.reset();
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), recordName);
 		ICompilationUnit cu2= createCUfromTestFile(getPackageP(), "B");
@@ -307,17 +313,17 @@ public class RenameRecordElementsTests extends GenericRefactoringTest {
 
 	@Test
 	public void testRenameRecordCompactConstructorImplicitAccessor() throws Exception{
-		renameRecordCompactConstructor("f", "g", true, false);
+		renameRecordCompactConstructor("f", "g", true, false, false);
 	}
 
 	@Test
 	public void testRenameRecordCompactConstructorImplicitAccessor2() throws Exception{
-		renameRecordCompactConstructor2("f", "g", true, false);
+		renameRecordCompactConstructor2("f", "g", true, false, false);
 	}
 
 	@Test
 	public void testRenameRecordCompactConstructorExplicitAccessor() throws Exception{
-		renameRecordCompactConstructor("f", "g", true, false);
+		renameRecordCompactConstructor("f", "g", true, false, true);
 	}
 
 	@Test
@@ -327,7 +333,7 @@ public class RenameRecordElementsTests extends GenericRefactoringTest {
 
 	@Test
 	public void testRenameRecord() throws Exception{
-		renameRecord("A", "C", true, false);
+		renameRecord("A", "C", true);
 	}
 
 	@Test
@@ -342,11 +348,11 @@ public class RenameRecordElementsTests extends GenericRefactoringTest {
 
 	@Test
 	public void testRenameRecordCompactConstructorFailFieldConflict() throws Exception{
-		renameRecordCompactConstructor("f", "g", true, true);
+		renameRecordCompactConstructor("f", "g", true, true, true);
 	}
 
 	@Test
 	public void testRenameRecordCompactConstructorFailMethodConflict() throws Exception{
-		renameRecordCompactConstructor("f", "g", true, true);
+		renameRecordCompactConstructor("f", "g", true, true, true);
 	}
 }
