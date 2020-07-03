@@ -125,6 +125,20 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 	 */
 	public final static int INFO= 0x40000;
 
+	/** Flag to render the sealed adornment.
+	 *
+	 * @noreference This field is not intended to be referenced by clients.
+	 * @since 3.21
+	 */
+	public final static int SEALED=	0x10000000;
+
+	/** Flag to render the sealed adornment.
+	 *
+	 * @noreference This field is not intended to be referenced by clients.
+	 * @since 3.21
+	 */
+	public final static int NON_SEALED=	0x4000000;
+
 	private ImageDescriptor fBaseImage;
 	private int fFlags;
 	private Point fSize;
@@ -280,6 +294,12 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 		}
 		if ((fFlags & ANNOTATION_DEFAULT) != 0) {
 			addTopRightImage(JavaPluginImages.DESC_OVR_ANNOTATION_DEFAULT_METHOD, pos);
+		}
+		if ((fFlags & SEALED) != 0) {
+			addTopRightImage(JavaPluginImages.DESC_OVR_SEALED, pos);
+		}
+		if ((fFlags & NON_SEALED) != 0) {
+			addTopRightImage(JavaPluginImages.DESC_OVR_NON_SEALED, pos);
 		}
 	}
 

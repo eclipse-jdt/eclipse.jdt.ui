@@ -363,6 +363,29 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="ui/org/eclipse/jdt/internal/ui/viewsupport/JavaElementImageProvider.java" type="org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider">
+        <filter comment="This is a Java 15 preview feature" id="640712815">
+            <message_arguments>
+                <message_argument value="Flags"/>
+                <message_argument value="JavaElementImageProvider"/>
+                <message_argument value="isNonSealed(int)"/>
+            </message_arguments>
+        </filter>
+        <filter comment="This is a Java 15 preview feature" id="640712815">
+            <message_arguments>
+                <message_argument value="Flags"/>
+                <message_argument value="JavaElementImageProvider"/>
+                <message_argument value="isRecord(int)"/>
+            </message_arguments>
+        </filter>
+        <filter comment="This is a Java 15 preview feature" id="640712815">
+            <message_arguments>
+                <message_argument value="Flags"/>
+                <message_argument value="JavaElementImageProvider"/>
+                <message_argument value="isSealed(int)"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="ui/org/eclipse/jdt/internal/ui/viewsupport/ProblemTableViewer.java" type="org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer">
         <filter id="571473929">
             <message_arguments>

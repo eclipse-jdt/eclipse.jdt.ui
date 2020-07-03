@@ -403,6 +403,14 @@ public class JavaElementImageProvider {
 					if (JdtFlags.isStatic(member))
 						flags|= JavaElementImageDescriptor.STATIC;
 
+					if (isInterfaceOrClassType(member)) {
+						if (Flags.isSealed(modifiers)) {
+							flags|= JavaElementImageDescriptor.SEALED;
+						}
+						if (Flags.isNonSealed(modifiers)) {
+							flags|= JavaElementImageDescriptor.NON_SEALED;
+						}
+					}
 					if (Flags.isDeprecated(modifiers))
 						flags|= JavaElementImageDescriptor.DEPRECATED;
 
@@ -451,6 +459,17 @@ public class JavaElementImageProvider {
 		return true;
 	}
 
+	private static boolean isInterfaceOrClassType(IMember element) throws JavaModelException {
+		//check if the type is interface or class
+		boolean val= false;
+		if (element instanceof IType) {
+			IType type= (IType) element;
+			if (type.isInterface() || type.isClass()) {
+				val= true;
+			}
+		}
+		return val;
+	}
 	private static boolean isInterfaceOrAnnotationField(IMember element) throws JavaModelException {
 		// always show the final symbol on interface fields
 		if (element.getElementType() == IJavaElement.FIELD) {
