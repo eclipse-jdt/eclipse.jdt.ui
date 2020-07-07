@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <component id="org.eclipse.jdt.ui" version="2">
     <resource path="META-INF/MANIFEST.MF">
+        <filter comment="This is a Java 15 preview feature" id="924844039">
+            <message_arguments>
+                <message_argument value="3.21.200"/>
+                <message_argument value="3.21.100"/>
+            </message_arguments>
+        </filter>
         <filter comment="This is for Java14 work" id="924844039">
             <message_arguments>
                 <message_argument value="3.21.50"/>
