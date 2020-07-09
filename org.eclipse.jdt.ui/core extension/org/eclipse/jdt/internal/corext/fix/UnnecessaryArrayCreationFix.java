@@ -24,7 +24,9 @@ import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 
@@ -65,13 +67,15 @@ public class UnnecessaryArrayCreationFix extends CompilationUnitRewriteOperation
 				if (parent instanceof MethodInvocation) {
 					MethodInvocation m= (MethodInvocation) parent;
 
-					if (isUselessArrayCreation(node, m.arguments(), m.resolveMethodBinding())) {
+					if (isUselessArrayCreation(node, m.arguments(), m.resolveMethodBinding()) &&
+							!hasEquivalentMethod(node, m.arguments(), m.resolveMethodBinding())) {
 						fResult.add(new UnwrapNewArrayOperation(node, m));
 					}
 				} else if (parent instanceof SuperMethodInvocation) {
 					SuperMethodInvocation m= (SuperMethodInvocation) parent;
 
-					if (isUselessArrayCreation(node, m.arguments(), m.resolveMethodBinding())) {
+					if (isUselessArrayCreation(node, m.arguments(), m.resolveMethodBinding()) &&
+							!hasEquivalentMethod(node, m.arguments(), m.resolveMethodBinding())) {
 						fResult.add(new UnwrapNewArrayOperation(node, m));
 					}
 				}
@@ -88,6 +92,53 @@ public class UnnecessaryArrayCreationFix extends CompilationUnitRewriteOperation
 					&& binding.getParameterTypes().length == arguments.size();
 		}
 
+		private boolean hasEquivalentMethod(ArrayCreation node, List<?> arguments, IMethodBinding binding) {
+			ITypeBinding type= binding.getDeclaringClass();
+			while (type != null) {
+				if (hasEquivalentMethodForType(node, arguments, binding, type)) {
+					return true;
+				}
+				type= type.getSuperclass();
+			}
+			return false;
+		}
+
+		private boolean hasEquivalentMethodForType(ArrayCreation node, List<?> arguments, IMethodBinding binding, ITypeBinding type) {
+			IMethodBinding[] methods= type.getDeclaredMethods();
+			for (IMethodBinding method : methods) {
+				if (!binding.isEqualTo(method) && binding.getName().equals(method.getName()) &&
+						(method.getModifiers() & (Modifier.PUBLIC | Modifier.PROTECTED)) != 0) {
+					ITypeBinding[] typeArguments= method.getParameterTypes();
+					if (node.getInitializer().expressions().size() + arguments.size() - 1 == typeArguments.length) {
+						boolean match= true;
+						for (int i= 0; i < arguments.size() - 1; ++i) {
+							ITypeBinding argBinding= ((Expression)arguments.get(i)).resolveTypeBinding();
+							if (argBinding == null) {
+								return true;
+							}
+							if (!argBinding.isAssignmentCompatible(typeArguments[i])) {
+								match= false;
+								break;
+							}
+						}
+						if (match) {
+							for (int i= arguments.size() - 1, j= 0; i < typeArguments.length; ++i, ++j) {
+								Expression exp= (Expression) node.getInitializer().expressions().get(j);
+								ITypeBinding expBinding= exp.resolveTypeBinding();
+								if (expBinding != null && !expBinding.isAssignmentCompatible(typeArguments[i])) {
+									match= false;
+									break;
+								}
+							}
+						}
+						if (match) {
+							return true;
+						}
+					}
+				}
+			}
+			return false;
+		}
 	}
 
 	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit, boolean removeUnnecessaryArrayCreation) {
