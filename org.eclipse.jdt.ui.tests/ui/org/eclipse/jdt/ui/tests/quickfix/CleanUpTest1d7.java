@@ -15,8 +15,6 @@ package org.eclipse.jdt.ui.tests.quickfix;
 
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -30,7 +28,6 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.ui.tests.core.rules.Java1d7ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
-@RunWith(JUnit4.class)
 public class CleanUpTest1d7 extends CleanUpTestCase {
 	@Rule
     public ProjectTestSetup projectsetup= new Java1d7ProjectTestSetup();
@@ -311,4 +308,30 @@ public class CleanUpTest1d7 extends CleanUpTestCase {
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
+
+	@Test
+	public void testJava50ForLoop563267() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=563267
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "import java.util.Iterator;\n" //
+				+ "import java.util.List;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo(List<String> list) {\n" //
+				+ "        List<InputStream> toClose = new ArrayList<>();\n" //
+				+ "        for (Iterator<InputStream> it = toClose.iterator(); it.hasNext();) {\n" //
+				+ "            try (InputStream r = it.next()) {\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "        toClose.clear();\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
 }
