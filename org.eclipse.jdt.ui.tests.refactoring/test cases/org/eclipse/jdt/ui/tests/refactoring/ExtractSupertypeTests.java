@@ -42,7 +42,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractSupertypeProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 
-import org.eclipse.jdt.ui.tests.refactoring.rules.Java15Setup;
+import org.eclipse.jdt.ui.tests.refactoring.rules.Java1d5Setup;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
@@ -53,7 +53,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
  */
 public final class ExtractSupertypeTests extends GenericRefactoringTest {
 	@Rule
-	public Java15Setup js= new Java15Setup();
+	public Java1d5Setup js= new Java1d5Setup();
 
 	private static final String REFACTORING_PATH= "ExtractSupertype/";
 

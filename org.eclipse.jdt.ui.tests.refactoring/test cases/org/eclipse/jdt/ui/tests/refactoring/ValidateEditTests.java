@@ -54,13 +54,13 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
 
 import org.eclipse.jdt.ui.tests.refactoring.ccp.MockReorgQueries;
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestRepositoryProvider;
-import org.eclipse.jdt.ui.tests.refactoring.rules.Java15Setup;
+import org.eclipse.jdt.ui.tests.refactoring.rules.Java1d5Setup;
 
 
 public class ValidateEditTests extends GenericRefactoringTest {
 
 	@Rule
-	public Java15Setup fgTestSetup= new Java15Setup();
+	public Java1d5Setup fgTestSetup= new Java1d5Setup();
 
 	@Before
 	public void setUp() throws Exception {
