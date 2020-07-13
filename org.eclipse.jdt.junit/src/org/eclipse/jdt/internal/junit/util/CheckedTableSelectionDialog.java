@@ -34,9 +34,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
-import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.ViewerFilter;
@@ -159,12 +157,7 @@ public class CheckedTableSelectionDialog extends SelectionStatusDialog {
 	@Override
 	public int open() {
 		fIsEmpty= evaluateIfTableEmpty(fInput);
-		BusyIndicator.showWhile(null, new Runnable() {
-			@Override
-			public void run() {
-				access$superOpen();
-			}
-		});
+		BusyIndicator.showWhile(null, () -> access$superOpen());
 		return getReturnCode();
 	}
 
@@ -234,12 +227,7 @@ public class CheckedTableSelectionDialog extends SelectionStatusDialog {
 
 		fViewer.setContentProvider(fContentProvider);
 		fViewer.setLabelProvider(fLabelProvider);
-		fViewer.addCheckStateListener(new ICheckStateListener() {
-			@Override
-			public void checkStateChanged(CheckStateChangedEvent event) {
-				updateOKStatus();
-			}
-		});
+		fViewer.addCheckStateListener(event -> updateOKStatus());
 
 		if (fFilters != null) {
 			for (ViewerFilter filter : fFilters)

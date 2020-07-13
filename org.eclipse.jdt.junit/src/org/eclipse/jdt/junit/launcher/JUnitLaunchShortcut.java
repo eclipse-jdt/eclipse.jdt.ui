@@ -17,6 +17,7 @@ package org.eclipse.jdt.junit.launcher;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -526,15 +527,10 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 		if (element != null) {
 			IMember selectedMember = null;
 			if (Display.getCurrent() == null) {
-				final IMember[] temp = new IMember[1];
-				Runnable runnable= new Runnable() {
-					@Override
-					public void run() {
-						temp[0]= resolveSelectedMemberName(editor, element);
-					}
-				};
+				final AtomicReference<IMember> temp = new AtomicReference<>();
+				Runnable runnable= () -> temp.set(resolveSelectedMemberName(editor, element));
 				Display.getDefault().syncExec(runnable);
-				selectedMember = temp[0];
+				selectedMember = temp.get();
 			} else {
 				selectedMember= resolveSelectedMemberName(editor, element);
 			}

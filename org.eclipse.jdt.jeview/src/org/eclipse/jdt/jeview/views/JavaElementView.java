@@ -60,7 +60,6 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
@@ -70,8 +69,6 @@ import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -111,8 +108,6 @@ import org.eclipse.ui.part.IShowInTarget;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.views.properties.IPropertySheetPage;
-import org.eclipse.ui.views.properties.IPropertySource;
-import org.eclipse.ui.views.properties.IPropertySourceProvider;
 import org.eclipse.ui.views.properties.PropertySheetPage;
 
 import org.eclipse.ui.texteditor.ITextEditor;
@@ -182,12 +177,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 
 		public JEViewSelectionProvider(TreeViewer viewer) {
 			fViewer= viewer;
-			fViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-				@Override
-				public void selectionChanged(SelectionChangedEvent event) {
-					fireSelectionChanged();
-				}
-			});
+			fViewer.addSelectionChangedListener(event -> fireSelectionChanged());
 		}
 
 		void fireSelectionChanged() {
@@ -290,12 +280,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		hookContextMenu();
 		hookDoubleClickAction();
 		getSite().setSelectionProvider(new JEViewSelectionProvider(fViewer));
-		fViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				fCopyAction.setEnabled(! event.getSelection().isEmpty());
-			}
-		});
+		fViewer.addSelectionChangedListener(event -> fCopyAction.setEnabled(! event.getSelection().isEmpty()));
 		contributeToActionBars();
 	}
 
@@ -332,12 +317,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 	private void hookContextMenu() {
 		MenuManager menuMgr = new MenuManager("#PopupMenu");
 		menuMgr.setRemoveAllWhenShown(true);
-		menuMgr.addMenuListener(new IMenuListener() {
-			@Override
-			public void menuAboutToShow(IMenuManager manager) {
-				JavaElementView.this.fillContextMenu(manager);
-			}
-		});
+		menuMgr.addMenuListener(manager -> fillContextMenu(manager));
 		Menu menu = menuMgr.createContextMenu(fViewer.getControl());
 		fViewer.getControl().setMenu(menu);
 		getSite().registerContextMenu(menuMgr, fViewer);
@@ -725,12 +705,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 
 		fRefreshAction= new Action("Re&fresh", JEPluginImages.IMG_REFRESH) {
 			@Override public void run() {
-				BusyIndicator.showWhile(getSite().getShell().getDisplay(), new Runnable() {
-					@Override
-					public void run() {
-						fViewer.refresh();
-					}
-				});
+				BusyIndicator.showWhile(getSite().getShell().getDisplay(), () -> fViewer.refresh());
 			}
 		};
 		fRefreshAction.setToolTipText("Refresh");
@@ -935,12 +910,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 	}
 
 	private void hookDoubleClickAction() {
-		fViewer.addDoubleClickListener(new IDoubleClickListener() {
-			@Override
-			public void doubleClick(DoubleClickEvent event) {
-				fDoubleClickAction.run();
-			}
-		});
+		fViewer.addDoubleClickListener(event -> fDoubleClickAction.run());
 	}
 
 	void showAndLogError(String message, CoreException e) {
@@ -1042,24 +1012,21 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 	private PropertySheetPage getPropertySheetPage() {
 		if (fPropertySheetPage == null) {
 			final PropertySheetPage propertySheetPage= new PropertySheetPage();
-			propertySheetPage.setPropertySourceProvider(new IPropertySourceProvider() {
-				@Override
-				public IPropertySource getPropertySource(Object object) {
-					if (object instanceof IJavaElement)
-						return new JavaElementProperties((IJavaElement) object);
-					else if (object instanceof IResource)
-						return new ResourceProperties((IResource) object);
-					else if (object instanceof IMarker)
-						return new MarkerProperties((IMarker) object);
-					else if (object instanceof IJarEntryResource)
-						return new JarEntryResourceProperties((IJarEntryResource) object);
-					else if (object instanceof IMemberValuePair)
-						return new MemberValuePairProperties((IMemberValuePair) object);
-					else if (object instanceof IClasspathEntry)
-						return new ClasspathEntryProperties((IClasspathEntry) object);
-					else
-						return null;
-				}
+			propertySheetPage.setPropertySourceProvider(object -> {
+				if (object instanceof IJavaElement)
+					return new JavaElementProperties((IJavaElement) object);
+				else if (object instanceof IResource)
+					return new ResourceProperties((IResource) object);
+				else if (object instanceof IMarker)
+					return new MarkerProperties((IMarker) object);
+				else if (object instanceof IJarEntryResource)
+					return new JarEntryResourceProperties((IJarEntryResource) object);
+				else if (object instanceof IMemberValuePair)
+					return new MemberValuePairProperties((IMemberValuePair) object);
+				else if (object instanceof IClasspathEntry)
+					return new ClasspathEntryProperties((IClasspathEntry) object);
+				else
+					return null;
 			});
 			fPropertySheetPage= propertySheetPage;
 		}

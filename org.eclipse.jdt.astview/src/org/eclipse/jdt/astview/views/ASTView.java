@@ -52,7 +52,6 @@ import org.eclipse.core.filebuffers.ITextFileBuffer;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
@@ -846,34 +845,23 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 		final TrayLabelProvider trayLabelProvider= new TrayLabelProvider();
 		fTray.setLabelProvider(trayLabelProvider);
 		fTray.setAutoExpandLevel(AbstractTreeViewer.ALL_LEVELS);
-		fTrayUpdater= new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				IStructuredSelection viewerSelection= (IStructuredSelection) fViewer.getSelection();
-				if (viewerSelection.size() == 1) {
-					Object first= viewerSelection.getFirstElement();
-					if (unwrapAttribute(first) != null) {
-						trayLabelProvider.setViewerElement(first);
-						return;
-					}
+		fTrayUpdater= event -> {
+			IStructuredSelection viewerSelection= (IStructuredSelection) fViewer.getSelection();
+			if (viewerSelection.size() == 1) {
+				Object first= viewerSelection.getFirstElement();
+				if (unwrapAttribute(first) != null) {
+					trayLabelProvider.setViewerElement(first);
+					return;
 				}
-				trayLabelProvider.setViewerElement(null);
 			}
+			trayLabelProvider.setViewerElement(null);
 		};
 		fTray.addPostSelectionChangedListener(fTrayUpdater);
 		fViewer.addPostSelectionChangedListener(fTrayUpdater);
-		fTray.addDoubleClickListener(new IDoubleClickListener() {
-			@Override
-			public void doubleClick(DoubleClickEvent event) {
-				performTrayDoubleClick();
-			}
-		});
-		fTray.addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				IStructuredSelection selection= (IStructuredSelection) event.getSelection();
-				fDeleteAction.setEnabled(selection.size() >= 1 && fTray.getTree().isFocusControl());
-			}
+		fTray.addDoubleClickListener(event -> performTrayDoubleClick());
+		fTray.addSelectionChangedListener(event -> {
+			IStructuredSelection selection= (IStructuredSelection) event.getSelection();
+			fDeleteAction.setEnabled(selection.size() >= 1 && fTray.getTree().isFocusControl());
 		});
 		fTray.getTree().addFocusListener(new FocusAdapter() {
 			@Override
@@ -912,12 +900,7 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 	private void hookContextMenu() {
 		MenuManager menuMgr = new MenuManager("#PopupMenu"); //$NON-NLS-1$
 		menuMgr.setRemoveAllWhenShown(true);
-		menuMgr.addMenuListener(new IMenuListener() {
-			@Override
-			public void menuAboutToShow(IMenuManager manager) {
-				ASTView.this.fillContextMenu(manager);
-			}
-		});
+		menuMgr.addMenuListener(manager -> fillContextMenu(manager));
 		Menu menu = menuMgr.createContextMenu(fViewer.getControl());
 		fViewer.getControl().setMenu(menu);
 		getSite().registerContextMenu(menuMgr, fViewer);
@@ -926,14 +909,11 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 	private void hookTrayContextMenu() {
 		MenuManager menuMgr = new MenuManager("#TrayPopupMenu"); //$NON-NLS-1$
 		menuMgr.setRemoveAllWhenShown(true);
-		menuMgr.addMenuListener(new IMenuListener() {
-			@Override
-			public void menuAboutToShow(IMenuManager manager) {
-				manager.add(fCopyAction);
-				manager.add(fDeleteAction);
-				manager.add(new Separator());
-				manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
-			}
+		menuMgr.addMenuListener(manager -> {
+			manager.add(fCopyAction);
+			manager.add(fDeleteAction);
+			manager.add(new Separator());
+			manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 		});
 		Menu menu = menuMgr.createContextMenu(fTray.getControl());
 		fTray.getControl().setMenu(menu);

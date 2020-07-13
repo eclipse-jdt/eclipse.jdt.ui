@@ -531,7 +531,7 @@ public abstract class OptionsConfigurationBlock {
 		final Button checkBox= new Button(composite, SWT.CHECK);
 		checkBox.setFont(JFaceResources.getDialogFont());
 		gd= new GridData(GridData.FILL, GridData.CENTER, false, false);
-		int offset= Util.isMac() ? -4 : Util.isLinux() ? -2 : /* Windows et al. */ 3;
+		int offset= Util.isMac() ? -4 : Util.isLinux() ? 4 : /* Windows et al. */ 3;
 		gd.widthHint= checkBox.computeSize(SWT.DEFAULT, SWT.DEFAULT).x + offset;
 		checkBox.setLayoutData(gd);
 		checkBox.setData(data);

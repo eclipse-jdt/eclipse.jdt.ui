@@ -13,12 +13,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.testplugin.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -39,7 +39,7 @@ public class JavaTestCase  {
 	 *
 	 * @throws Exception in case of any problem
 	 */
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		fJavaProject= JavaProjectHelper.createJavaProject("HelloWorldProject", "bin");
 
@@ -57,7 +57,7 @@ public class JavaTestCase  {
 	 *
 	 * @throws Exception in case of any problem
 	 */
-	@After
+	@AfterEach
 	public void tearDown () throws Exception {
 		JavaProjectHelper.delete(fJavaProject);
 	}
@@ -69,15 +69,15 @@ public class JavaTestCase  {
 	public void doTest1() throws Exception {
 		String name= "ibm/util/A.java";
 		ICompilationUnit cu= (ICompilationUnit) fJavaProject.findElement(new Path(name));
-		assertNotNull("A.java must exist", cu);
+		assertNotNull(cu, "A.java must exist");
 		IType type= cu.getType("A");
-		assertNotNull("Type A must exist", type);
+		assertNotNull(type, "Type A must exist");
 
 		System.out.println("methods of A");
 		IMethod[] methods= type.getMethods();
 		for (IMethod method : methods) {
 			System.out.println(method.getElementName());
 		}
-		assertEquals("Should contain 2 methods", 2, methods.length);
+		assertEquals(2, methods.length, "Should contain 2 methods");
 	}
 }

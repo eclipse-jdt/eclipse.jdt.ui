@@ -13,11 +13,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.wizards;
 
-import java.lang.reflect.InvocationTargetException;
-
 import org.eclipse.jdt.junit.wizards.NewTestSuiteWizardPage;
 
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.core.resources.IResource;
@@ -144,14 +141,11 @@ public class NewTestSuiteCreationWizard extends JUnitWizard {
 	}
 
 	public IRunnableWithProgress getRunnableSave(final IEditorPart cu_ep) {
-		return new IRunnableWithProgress() {
-			@Override
-			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					if (monitor == null) {
-						monitor= new NullProgressMonitor();
-					}
-					cu_ep.doSave(monitor);
-			}
+		return monitor -> {
+				if (monitor == null) {
+					monitor= new NullProgressMonitor();
+				}
+				cu_ep.doSave(monitor);
 		};
 	}
 }

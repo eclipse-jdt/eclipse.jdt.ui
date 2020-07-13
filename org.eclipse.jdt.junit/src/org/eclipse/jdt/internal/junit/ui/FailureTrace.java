@@ -18,7 +18,6 @@ package org.eclipse.jdt.internal.junit.ui;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.Clipboard;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
@@ -34,7 +33,6 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.util.IOpenEventListener;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.OpenStrategy;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -100,17 +98,14 @@ public class FailureTrace implements IMenuListener {
 		fClipboard= clipboard;
 
 		OpenStrategy handler = new OpenStrategy(fTable);
-		handler.addOpenListener(new IOpenEventListener() {
-			@Override
-			public void handleOpen(SelectionEvent e) {
-				if (fTable.getSelectionIndex() == 0 && fFailure.isComparisonFailure()) {
-					fCompareAction.run();
-				}
-				if (fTable.getSelection().length != 0) {
-					Action a = createOpenEditorAction(getSelectedText());
-					if (a != null)
-						a.run();
-				}
+		handler.addOpenListener(e -> {
+			if (fTable.getSelectionIndex() == 0 && fFailure.isComparisonFailure()) {
+				fCompareAction.run();
+			}
+			if (fTable.getSelection().length != 0) {
+				Action a = createOpenEditorAction(getSelectedText());
+				if (a != null)
+					a.run();
 			}
 		});
 

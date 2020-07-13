@@ -19,18 +19,33 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import org.eclipse.jdt.core.IPackageFragment;
+
 import org.eclipse.jdt.ui.tests.CustomBaseRunner;
 import org.eclipse.jdt.ui.tests.IgnoreInheritedTests;
 
 @IgnoreInheritedTests
 @RunWith(CustomBaseRunner.class)
-public class InlineMethodTests13 extends InlineMethodTests {
+public class InlineMethodTests14 extends InlineMethodTests {
 
 	@Rule
-	public InlineMethodTestSetup13 fgTestSetup= new InlineMethodTestSetup13();
+	public InlineMethodTestSetup14 fgTestSetup= new InlineMethodTestSetup14();
 
 	protected void performSimpleTest() throws Exception {
-		performTestInlineCall(fgTestSetup.getSimplePackage(), getName(), COMPARE_WITH_OUTPUT, "simple13_out");
+		performTestInlineCall(fgTestSetup.getSimplePackage(), getName(), COMPARE_WITH_OUTPUT, fgTestSetup.getSimplePkgOutName());
+	}
+
+	protected void performDefaultTest() throws Exception {
+		performTestInlineCall(fgTestSetup.getDefaultPackage(), getName(), COMPARE_WITH_OUTPUT, fgTestSetup.getSimplePkgOutName());
+	}
+
+	@Override
+	protected String getFilePath(IPackageFragment pack, String name) {
+		IPackageFragment packToUse = pack;
+		if (pack == fgTestSetup.getDefaultPackage()) {
+			packToUse= fgTestSetup.getSimplePackage();
+		}
+		return super.getFilePath(packToUse, name);
 	}
 
 	//--- TESTS
@@ -38,5 +53,15 @@ public class InlineMethodTests13 extends InlineMethodTests {
 	@Test
 	public void testTextBlock1() throws Exception {
 		performSimpleTest();
+	}
+
+	@Test
+	public void testInlineProblem1() throws Exception {
+		performDefaultTest();
+	}
+
+	@Test
+	public void testInlineProblem2() throws Exception {
+		performDefaultTest();
 	}
 }

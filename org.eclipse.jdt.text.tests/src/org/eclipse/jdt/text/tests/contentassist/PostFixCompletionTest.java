@@ -860,6 +860,37 @@ public class PostFixCompletionTest {
 		computeCompletionProposals(cu, completionIndex);
 	}
 
+	@Test
+	public void testStreamOf() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n" +
+				"public class StreamOf {\n" +
+				"  public void test (String[] args) {\n" +
+				"    args.stream$\n" +
+				"  }\n" +
+				"}");
+
+		int completionIndex= getCompletionIndex(buf);
+		ICompilationUnit cu= getCompilationUnit(pkg, buf, "StreamOf.java");
+		List<ICompletionProposal> proposals= computeCompletionProposals(cu, completionIndex);
+
+		assertProposalsExist(Arrays.asList("stream - Creates a new stream using Stream.of"), proposals);
+
+		ITextViewer viewer= initializeViewer(cu);
+		applyProposal(viewer, proposals, "stream", completionIndex);
+
+		StringBuffer expected= new StringBuffer();
+		expected.append("package test;\n" +
+				"public class StreamOf {\n" +
+				"  public void test (String[] args) {\n" +
+				"    Stream.of(args)\n" +
+				"  }\n" +
+				"}");
+
+		assertEquals(expected.toString(), viewer.getDocument().get());
+	}
+
+
 	private ITextViewer initializeViewer(ICompilationUnit cu) throws Exception {
 		IEditorPart editor= EditorUtility.openInEditor(cu);
 		ITextViewer viewer= new TextViewer(editor.getSite().getShell(), SWT.NONE);

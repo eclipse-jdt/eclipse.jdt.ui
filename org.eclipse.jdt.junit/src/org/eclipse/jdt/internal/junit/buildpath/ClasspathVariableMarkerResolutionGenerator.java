@@ -19,13 +19,11 @@ import java.lang.reflect.InvocationTargetException;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IMarker;
 
 import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 
 import org.eclipse.ui.IMarkerResolution;
 import org.eclipse.ui.IMarkerResolution2;
@@ -137,14 +135,11 @@ public class ClasspathVariableMarkerResolutionGenerator implements IMarkerResolu
 		 * @see org.eclipse.jdt.internal.junit.ui.JUnitAddLibraryProposal#addToClasspath()
 		 */
 		try {
-			context.run(true, false, new IRunnableWithProgress() {
-				@Override
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					try {
-						project.setRawClasspath(entries, monitor);
-					} catch (JavaModelException e) {
-						throw new InvocationTargetException(e);
-					}
+			context.run(true, false, monitor -> {
+				try {
+					project.setRawClasspath(entries, monitor);
+				} catch (JavaModelException e) {
+					throw new InvocationTargetException(e);
 				}
 			});
 		} catch (InvocationTargetException e) {

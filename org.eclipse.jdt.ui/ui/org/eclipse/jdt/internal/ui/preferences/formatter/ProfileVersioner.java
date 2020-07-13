@@ -47,8 +47,9 @@ public class ProfileVersioner implements IProfileVersioner {
 	private static final int VERSION_17= 17; // https://bugs.eclipse.org/214283
 	private static final int VERSION_18= 18; // https://bugs.eclipse.org/552919
 	private static final int VERSION_19= 19; // https://bugs.eclipse.org/553155
+	private static final int VERSION_20= 20; // https://bugs.eclipse.org/118641
 
-	private static final int CURRENT_VERSION= VERSION_19;
+	private static final int CURRENT_VERSION= VERSION_20;
 
 	@Override
 	public int getFirstVersion() {
@@ -127,6 +128,9 @@ public class ProfileVersioner implements IProfileVersioner {
 			//$FALL-THROUGH$
 		case VERSION_18:
 			version18to19(oldSettings);
+			//$FALL-THROUGH$
+		case VERSION_19:
+			version19to20(oldSettings);
 			//$FALL-THROUGH$
 		default:
 				for (String key : oldSettings.keySet()) {
@@ -751,6 +755,11 @@ public class ProfileVersioner implements IProfileVersioner {
 				DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_RECORD_COMPONENTS);
 		checkAndReplace(oldSettings, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_SUPERINTERFACES_IN_TYPE_DECLARATION,
 				DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_SUPERINTERFACES_IN_RECORD_DECLARATION);
+	}
+
+	private static void version19to20(Map<String, String> oldSettings) {
+		oldSettings.put(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ASSERTION_MESSAGE,
+				DefaultCodeFormatterConstants.createAlignmentValue(false, DefaultCodeFormatterConstants.WRAP_NO_SPLIT, DefaultCodeFormatterConstants.INDENT_DEFAULT));
 	}
 
 	/* old format constant values */

@@ -86,14 +86,11 @@ public abstract class JUnitWizard extends Wizard implements INewWizard {
 			if (activePage != null) {
 				final Display display= Display.getDefault();
 				if (display != null) {
-					display.asyncExec(new Runnable() {
-						@Override
-						public void run() {
-							try {
-								IDE.openEditor(activePage, (IFile)resource, true);
-							} catch (PartInitException e) {
-								JUnitPlugin.log(e);
-							}
+					display.asyncExec(() -> {
+						try {
+							IDE.openEditor(activePage, (IFile)resource, true);
+						} catch (PartInitException e) {
+							JUnitPlugin.log(e);
 						}
 					});
 				}

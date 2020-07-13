@@ -28,6 +28,7 @@ import org.junit.runners.Suite;
 	ExtractMethodTests1d8.class,
 	InlineMethodTests.class,
 	InlineMethodTests1d8.class,
+	InlineMethodTests14.class,
 	ReplaceInvocationsTests.class,
 	SefTests.class,
 	InlineTempTests.class,
@@ -60,6 +61,7 @@ import org.junit.runners.Suite;
 	ExtractInterfaceTests1d8.class,
 	ExtractSupertypeTests.class,
 	MoveInnerToTopLevelTests.class,
+	MoveInnerToNewTests14.class,
 	UseSupertypeWherePossibleTests.class,
 	ExtractClassTests.class,
 

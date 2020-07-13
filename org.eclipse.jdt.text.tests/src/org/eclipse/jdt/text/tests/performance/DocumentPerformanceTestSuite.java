@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,22 +13,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.performance;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 
 /**
  * @since 3.3
  */
-public class DocumentPerformanceTestSuite extends TestSuite {
-
-	public static Test suite() {
-		return new PerformanceTestSetup(new DocumentPerformanceTestSuite());
-	}
-
-	public DocumentPerformanceTestSuite() {
-		addTest(DocumentPerformanceTest.suite());
-		addTest(GapTextStorePerformanceTest.suite());
-		addTest(LineTrackerPerformanceTest.suite());
-	}
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+	DocumentPerformanceTest.class,
+	GapTextStorePerformanceTest.class,
+	LineTrackerPerformanceTest.class
+})
+public class DocumentPerformanceTestSuite {
 }

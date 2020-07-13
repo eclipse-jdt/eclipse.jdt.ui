@@ -35,6 +35,8 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 
 import org.eclipse.core.resources.ProjectScope;
 
+import org.eclipse.jface.preference.IPreferenceStore;
+
 import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
@@ -2404,6 +2406,42 @@ public class ImportOrganizeTest extends CoreTests {
 		buf.append("        public void test() {\n");
 		buf.append("            TEST.concat(\"access\");\n");
 		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+
+	@Test
+	public void testStaticImports_bug562641() throws Exception {
+		IPreferenceStore preferenceStore= PreferenceConstants.getPreferenceStore();
+		preferenceStore.setValue(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS, "java.lang.Math.max");
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    private int foo() {\n");
+		buf.append("        return max(1, 2);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+
+		String[] order= new String[] {};
+		IChooseImportQuery query= createQuery("Test", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import static java.lang.Math.max;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    private int foo() {\n");
+		buf.append("        return max(1, 2);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		assertEqualString(cu.getSource(), buf.toString());

@@ -17,8 +17,6 @@
 package org.eclipse.jdt.internal.junit.ui;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
@@ -32,12 +30,7 @@ public class FailureTableDisplay implements ITraceDisplay {
 
 	public FailureTableDisplay(Table table) {
 		fTable = table;
-		fTable.getParent().addDisposeListener(new DisposeListener() {
-			@Override
-			public void widgetDisposed(DisposeEvent e) {
-				disposeIcons();
-			}
-		});
+		fTable.getParent().addDisposeListener(e -> disposeIcons());
 	}
 
 	@Override

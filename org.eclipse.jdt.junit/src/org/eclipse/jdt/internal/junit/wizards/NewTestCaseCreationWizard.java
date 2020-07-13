@@ -32,7 +32,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -161,26 +160,22 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 
 		final ClasspathFixProposal fix= dialog.getSelectedClasspathFix();
 		if (fix != null) {
-			return new IRunnableWithProgress() {
+			return monitor -> {
+				if (monitor == null) {
+					monitor= new NullProgressMonitor();
+				}
+				monitor.beginTask(WizardMessages.NewTestCaseCreationWizard_create_progress, 4);
+				try {
+					Change change= fix.createChange(new SubProgressMonitor(monitor, 1));
+					new PerformChangeOperation(change).run(new SubProgressMonitor(monitor, 1));
 
-				@Override
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					if (monitor == null) {
-						monitor= new NullProgressMonitor();
-					}
-					monitor.beginTask(WizardMessages.NewTestCaseCreationWizard_create_progress, 4);
-					try {
-						Change change= fix.createChange(new SubProgressMonitor(monitor, 1));
-						new PerformChangeOperation(change).run(new SubProgressMonitor(monitor, 1));
-
-						runnable.run(new SubProgressMonitor(monitor, 2));
-					} catch (OperationCanceledException e) {
-						throw new InterruptedException();
-					} catch (CoreException e) {
-						throw new InvocationTargetException(e);
-					} finally {
-						monitor.done();
-					}
+					runnable.run(new SubProgressMonitor(monitor, 2));
+				} catch (OperationCanceledException e) {
+					throw new InterruptedException();
+				} catch (CoreException e) {
+					throw new InvocationTargetException(e);
+				} finally {
+					monitor.done();
 				}
 			};
 		}

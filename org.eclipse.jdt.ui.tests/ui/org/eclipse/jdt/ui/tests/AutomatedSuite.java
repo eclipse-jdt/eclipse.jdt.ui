@@ -35,7 +35,7 @@ import org.eclipse.jdt.ui.tests.hover.PackageJavadocTests;
 import org.eclipse.jdt.ui.tests.jarexport.JarExportTests;
 import org.eclipse.jdt.ui.tests.model.ContentProviderTests;
 import org.eclipse.jdt.ui.tests.packageview.PackageExplorerTests;
-import org.eclipse.jdt.ui.tests.quickfix.QuickFixTest;
+import org.eclipse.jdt.ui.tests.quickfix.QuickFixTestSuite;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTests;
 import org.eclipse.jdt.ui.tests.search.SearchTest;
 import org.eclipse.jdt.ui.tests.wizardapi.ImporterTest;
@@ -44,7 +44,6 @@ import org.eclipse.jdt.ui.tests.wizardapi.NewTypeWizardTest;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-
 /**
  * Test all areas of JDT UI.
  */
@@ -52,7 +51,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 @Suite.SuiteClasses({
 	CoreTests.class,
 	CoreTestSuite.class,
-	QuickFixTest.class,
+	QuickFixTestSuite.class,
 
 	NewJavaProjectWizardTest.class,
 	NewTypeWizardTest.class,

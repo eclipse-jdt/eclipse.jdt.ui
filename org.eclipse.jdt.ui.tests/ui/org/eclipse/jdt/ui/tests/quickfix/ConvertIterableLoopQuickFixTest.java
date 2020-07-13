@@ -142,6 +142,51 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 	}
 
 	@Test
+	public void testRawIterator() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "\n" //
+				+ "import java.util.Collection;\n" //
+				+ "import java.util.Iterator;\n" //
+				+ "\n" //
+				+ "public class B {\n" //
+				+ "  Collection c;\n" //
+				+ "  public void useForeach() {\n" //
+				+ "    for (final Iterator<?> iterator= c.iterator(); iterator.hasNext();) {\n" //
+				+ "      Object test= iterator.next();\n" //
+				+ "      System.out.println(test);\n" //
+				+ "    }\n" //
+				+ "  }\n" //
+				+ "}\n";
+		ICompilationUnit unit= pack.createCompilationUnit("B.java", sample, false, null);
+
+		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(sample, unit);
+
+		assertNotNull("A quickfix should be proposed", fConvertLoopProposal);
+
+		assertCorrectLabels(proposals);
+
+		String preview= getPreviewContent(fConvertLoopProposal);
+
+		sample= "" //
+				+ "package test;\n" //
+				+ "\n" //
+				+ "import java.util.Collection;\n" //
+				+ "\n" //
+				+ "public class B {\n" //
+				+ "  Collection c;\n" //
+				+ "  public void useForeach() {\n" //
+				+ "    for (Object test : c) {\n" //
+				+ "      System.out.println(test);\n" //
+				+ "    }\n" //
+				+ "  }\n" //
+				+ "}\n";
+		String expected= sample;
+		assertEqualString(preview, expected);
+	}
+
+	@Test
 	public void testWrongInitializer() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
 		String sample= "" //
@@ -171,9 +216,48 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 	}
 
-	@Ignore
 	@Test
-	public void testKeepComment() throws Exception {
+	public void testChildren() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "import java.util.Collection;\n" //
+				+ "import java.util.Iterator;\n" //
+				+ "public class A {\n" //
+				+ "	Collection<String> children;\n" //
+				+ "	public A() {\n" //
+				+ "		for (Iterator<String> iterator= children.iterator(); iterator.hasNext();) {\n" //
+				+ "			System.out.println(iterator.next());\n" //
+				+ "		}\n" //
+				+ "	}\n" //
+				+ "}";
+		ICompilationUnit unit= pack.createCompilationUnit("A.java", sample, false, null);
+
+		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(sample, unit);
+
+		assertNotNull(fConvertLoopProposal);
+
+		assertCorrectLabels(proposals);
+
+		String preview= getPreviewContent(fConvertLoopProposal);
+
+		sample= "" //
+				+ "package test;\n" //
+				+ "import java.util.Collection;\n" //
+				+ "public class A {\n" //
+				+ "	Collection<String> children;\n" //
+				+ "	public A() {\n" //
+				+ "		for (String child : children) {\n" //
+				+ "			System.out.println(child);\n" //
+				+ "		}\n" //
+				+ "	}\n" //
+				+ "}";
+		String expected= sample;
+		assertEqualString(preview, expected);
+	}
+
+	@Test
+	public void testBug553634() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
 		String sample= "" //
 				+ "package test;\r\n" //
@@ -183,9 +267,9 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 				+ "	Collection<String> c;\r\n" //
 				+ "	public A() {\r\n" //
 				+ "		for (final Iterator<String> iterator= c.iterator(); iterator.hasNext();) {\r\n" //
-				+ "			// Comment line\r\n" //
-				+ "			String test= iterator.next();\r\n" //
-				+ "			System.out.println(test);\r\n" //
+				+ "			// Comment line 1\r\n" //
+				+ "			String test= iterator.next(); // Comment 2\r\n" //
+				+ "			System.out.println(test); /* Comment 3 */\r\n" //
 				+ "		}\r\n" //
 				+ "	}\r\n" //
 				+ "}";
@@ -206,8 +290,8 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 				+ "	Collection<String> c;\r\n" //
 				+ "	public A() {\r\n" //
 				+ "		for (String test : c) {\r\n" //
-				+ "			// Comment line\r\n" //
-				+ "			System.out.println(test);\r\n" //
+				+ "			// Comment line 1\r\n" //
+				+ "			System.out.println(test); /* Comment 3 */\r\n" //
 				+ "		}\r\n" //
 				+ "	}\r\n" //
 				+ "}";

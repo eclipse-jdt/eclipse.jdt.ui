@@ -204,18 +204,8 @@ public class JavaElement extends JEAttribute {
 		result.add(new JavaElement(this, "JAVA MODEL", javaElement.getJavaModel()));
 		result.add(new JavaElement(this, "JAVA PROJECT", javaElement.getJavaProject()));
 		result.add(JEResource.create(this, "RESOURCE", javaElement.getResource()));
-		result.add(JEResource.compute(this, "CORRESPONDING RESOURCE", new Callable<IResource>() {
-			@Override
-			public IResource call() throws JavaModelException {
-				return javaElement.getCorrespondingResource();
-			}
-		}));
-		result.add(JEResource.compute(this, "UNDERLYING RESOURCE", new Callable<IResource>() {
-			@Override
-			public IResource call() throws JavaModelException {
-				return javaElement.getUnderlyingResource();
-			}
-		}));
+		result.add(JEResource.compute(this, "CORRESPONDING RESOURCE", () -> javaElement.getCorrespondingResource()));
+		result.add(JEResource.compute(this, "UNDERLYING RESOURCE", () -> javaElement.getUnderlyingResource()));
 	}
 
 	private void addJavaModelChildren(ArrayList<JEAttribute> result, final IJavaModel javaModel) {
@@ -304,18 +294,8 @@ public class JavaElement extends JEAttribute {
 				return createResources(this, packageFragmentRoot.getNonJavaResources());
 			}
 		});
-		result.add(JEClasspathEntry.compute(this, "RAW CLASSPATH ENTRY", new Callable<IClasspathEntry>() {
-			@Override
-			public IClasspathEntry call() throws JavaModelException {
-				return packageFragmentRoot.getRawClasspathEntry();
-			}
-		}));
-		result.add(JEClasspathEntry.compute(this, "RESOLVED CLASSPATH ENTRY", new Callable<IClasspathEntry>() {
-			@Override
-			public IClasspathEntry call() throws JavaModelException {
-				return packageFragmentRoot.getResolvedClasspathEntry();
-			}
-		}));
+		result.add(JEClasspathEntry.compute(this, "RAW CLASSPATH ENTRY", () -> packageFragmentRoot.getRawClasspathEntry()));
+		result.add(JEClasspathEntry.compute(this, "RESOLVED CLASSPATH ENTRY", () -> packageFragmentRoot.getResolvedClasspathEntry()));
 	}
 
 	private void addPackageFragmentChildren(ArrayList<JEAttribute> result, final IPackageFragment packageFragment) {
@@ -340,30 +320,15 @@ public class JavaElement extends JEAttribute {
 	}
 
 	private void addTypeRootChildren(ArrayList<JEAttribute> result, final ITypeRoot typeRoot) {
-		result.add(JavaElement.compute(this, "FIND PRIMARY TYPE", new Callable<IJavaElement>() {
-			@Override
-			public IJavaElement call() {
-				return typeRoot.findPrimaryType();
-			}
-		}));
+		result.add(JavaElement.compute(this, "FIND PRIMARY TYPE", () -> typeRoot.findPrimaryType()));
 	}
 
 	private void addClassFileChildren(ArrayList<JEAttribute> result, final IOrdinaryClassFile classFile) {
-		result.add(JavaElement.compute(this, "TYPE", new Callable<IJavaElement>() {
-			@Override
-			public IJavaElement call() throws JavaModelException {
-				return classFile.getType();
-			}
-		}));
+		result.add(JavaElement.compute(this, "TYPE", () -> classFile.getType()));
 	}
 
 	private void addModularClassFileChildren(ArrayList<JEAttribute> result, final IModularClassFile classFile) {
-		result.add(JavaElement.compute(this, "MODULE", new Callable<IJavaElement>() {
-			@Override
-			public IJavaElement call() throws JavaModelException {
-				return classFile.getModule();
-			}
-		}));
+		result.add(JavaElement.compute(this, "MODULE", () -> classFile.getModule()));
 	}
 
 	private void addCompilationUnitChildren(ArrayList<JEAttribute> result, final ICompilationUnit compilationUnit) {
@@ -614,12 +579,7 @@ public class JavaElement extends JEAttribute {
 
 	static JEAttribute[] createOptions(JEAttribute parent, Map<String, String> options) {
 		ArrayList<Entry<String, String>> entries= new ArrayList<>(options.entrySet());
-		Collections.sort(entries, new Comparator<Entry<String, String>>() {
-			@Override
-			public int compare(Entry<String, String> o1, Entry<String, String> o2) {
-				return o1.getKey().compareTo(o2.getKey());
-			}
-		});
+		Collections.sort(entries, Comparator.comparing(Entry<String, String>::getKey));
 
 		JEAttribute[] children= new JEAttribute[entries.size()];
 		for (int i= 0; i < entries.size(); i++) {

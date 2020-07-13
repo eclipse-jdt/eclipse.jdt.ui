@@ -85,7 +85,7 @@ public abstract class AbstractJunit4CUTestCase {
 		return getResourceLocation() + path + "/" + name;
 	}
 
-	private String getFilePath(IPackageFragment pack, String name) {
+	protected String getFilePath(IPackageFragment pack, String name) {
 		return getFilePath(pack.getElementName(), name);
 	}
 

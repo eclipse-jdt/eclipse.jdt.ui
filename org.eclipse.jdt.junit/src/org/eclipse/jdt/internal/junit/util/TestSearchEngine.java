@@ -18,7 +18,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -38,14 +37,11 @@ public class TestSearchEngine extends CoreTestSearchEngine {
 	public static IType[] findTests(IRunnableContext context, final IJavaElement element, final ITestKind testKind) throws InvocationTargetException, InterruptedException {
 		final Set<IType> result= new HashSet<>();
 
-		IRunnableWithProgress runnable= new IRunnableWithProgress() {
-			@Override
-			public void run(IProgressMonitor pm) throws InterruptedException, InvocationTargetException {
-				try {
-					testKind.getFinder().findTestsInContainer(element, result, pm);
-				} catch (CoreException e) {
-					throw new InvocationTargetException(e);
-				}
+		IRunnableWithProgress runnable= progressMonitor -> {
+			try {
+				testKind.getFinder().findTestsInContainer(element, result, progressMonitor);
+			} catch (CoreException e) {
+				throw new InvocationTargetException(e);
 			}
 		};
 		context.run(true, true, runnable);

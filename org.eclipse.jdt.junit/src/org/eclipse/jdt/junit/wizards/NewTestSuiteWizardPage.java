@@ -34,9 +34,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
-import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.jface.text.BadLocationException;
@@ -298,12 +296,7 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 			fClassesInSuiteTable.getTable().setLayoutData(gd);
 			fClassesInSuiteTable.setContentProvider(new SuiteClassesContentProvider(isJUnit4()));
 			fClassesInSuiteTable.setLabelProvider(new JavaElementLabelProvider());
-			fClassesInSuiteTable.addCheckStateListener(new ICheckStateListener() {
-				@Override
-				public void checkStateChanged(CheckStateChangedEvent event) {
-					handleFieldChanged(CLASSES_IN_SUITE);
-				}
-			});
+			fClassesInSuiteTable.addCheckStateListener(event -> handleFieldChanged(CLASSES_IN_SUITE));
 
 			Composite buttonContainer= new Composite(parent, SWT.NONE);
 			gd= new GridData(GridData.FILL_VERTICAL);

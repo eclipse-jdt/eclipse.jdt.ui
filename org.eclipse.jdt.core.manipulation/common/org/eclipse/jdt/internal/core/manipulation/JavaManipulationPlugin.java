@@ -33,6 +33,14 @@ public class JavaManipulationPlugin extends Plugin implements DebugOptionsListen
 	public static final boolean CODEASSIST_SUBSTRING_MATCH_ENABLED= //
 			Boolean.parseBoolean(System.getProperty("jdt.codeCompleteSubstringMatch", "true")); //$NON-NLS-1$//$NON-NLS-2$
 
+	/**
+	 * A named preference that holds the favorite static members.
+	 * <p>
+	 * Value is of type <code>String</code>: semicolon separated list of favorites.
+	 * </p>
+	 */
+	public final static String CODEASSIST_FAVORITE_STATIC_MEMBERS= "content_assist_favorite_static_members"; //$NON-NLS-1$
+
 	public static boolean DEBUG_AST_PROVIDER;
 
 	//The shared instance.

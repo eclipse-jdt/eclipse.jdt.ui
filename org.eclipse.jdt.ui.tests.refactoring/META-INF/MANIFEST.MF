@@ -3,7 +3,7 @@ Automatic-Module-Name: org.eclipse.jdt.ui.tests.refactoring
 Bundle-ManifestVersion: 2
 Bundle-Name: %Plugin.name
 Bundle-SymbolicName: org.eclipse.jdt.ui.tests.refactoring; singleton:=true
-Bundle-Version: 3.13.1000.qualifier
+Bundle-Version: 3.13.1100.qualifier
 Bundle-Activator: org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestPlugin
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: %Plugin.providerName
@@ -39,6 +39,7 @@ Require-Bundle:
  org.eclipse.ui,
  org.eclipse.ui.ide,
  org.eclipse.ui.workbench.texteditor,
- org.junit;bundle-version="4.8.2"
+ org.junit
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Eclipse-BundleShape: dir
+Import-Package: org.junit.jupiter.api

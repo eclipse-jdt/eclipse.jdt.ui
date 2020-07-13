@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 IBM Corporation and others.
+ * Copyright (c) 2010, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,20 +13,15 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.performance;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 /**
  * @since 3.6
  */
-public class WordRulePerformanceTestSuite extends TestSuite {
-
-	public static Test suite() {
-		return new PerformanceTestSetup(new WordRulePerformanceTestSuite());
-	}
-
-	public WordRulePerformanceTestSuite() {
-		addTest(WordRulePerformanceTest.suite());
-	}
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+	WordRulePerformanceTest.class
+})
+public class WordRulePerformanceTestSuite {
 }

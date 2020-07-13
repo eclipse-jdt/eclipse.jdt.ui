@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2013 IBM Corporation and others.
+ * Copyright (c) 2007, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -12,23 +12,15 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.templates;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
-
+import org.junit.platform.runner.JUnitPlatform;
+import org.junit.platform.suite.api.SelectClasses;
+import org.junit.runner.RunWith;
 /**
  * Template test suite.
  *
  * @since 3.4
  */
+@RunWith(JUnitPlatform.class)
+@SelectClasses( TemplateContributionTest.class )
 public class TemplatesTestSuite {
-
-	public static Test suite() {
-		TestSuite suite = new TestSuite(TemplatesTestSuite.class.getName());
-		//$JUnit-BEGIN$
-		suite.addTest(TemplateContributionTest.suite());
-		//$JUnit-END$
-		return suite;
-	}
 }

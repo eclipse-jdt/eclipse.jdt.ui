@@ -14,6 +14,7 @@
  *         - https://bugs.eclipse.org/bugs/show_bug.cgi?id=102236: [JUnit] display execution time next to each test
  *     Xavier Coulon <xcoulon@redhat.com> - https://bugs.eclipse.org/bugs/show_bug.cgi?id=102512 - [JUnit] test method name cut off before (
  *     Andrej Zachar <andrej@chocolatejar.eu> - [JUnit] Add a filter for ignored tests - https://bugs.eclipse.org/bugs/show_bug.cgi?id=298603
+ *     Gautier de Saint Martin Lacaze <gautier.desaintmartinlacaze@gmail.com> - [JUnit] need 'collapse all' feature in JUnit view - https://bugs.eclipse.org/bugs/show_bug.cgi?id=277806
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.junit.ui;
@@ -42,7 +43,6 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
@@ -178,6 +178,18 @@ public class TestViewer {
 		}
 	}
 
+	private class CollapseAllAction extends Action {
+		public CollapseAllAction() {
+			setText(JUnitMessages.CollapseAllAction_text);
+			setToolTipText(JUnitMessages.CollapseAllAction_tooltip);
+		}
+
+		@Override
+		public void run(){
+			fTreeViewer.collapseAll();
+		}
+	}
+
 	private final FailuresOnlyFilter fFailuresOnlyFilter= new FailuresOnlyFilter();
 	private final IgnoredOnlyFilter fIgnoredOnlyFilter= new IgnoredOnlyFilter();
 
@@ -252,12 +264,7 @@ public class TestViewer {
 	private void initContextMenu() {
 		MenuManager menuMgr= new MenuManager("#PopupMenu"); //$NON-NLS-1$
 		menuMgr.setRemoveAllWhenShown(true);
-		menuMgr.addMenuListener(new IMenuListener() {
-			@Override
-			public void menuAboutToShow(IMenuManager manager) {
-				handleMenuAboutToShow(manager);
-			}
-		});
+		menuMgr.addMenuListener(manager -> handleMenuAboutToShow(manager));
 		fTestRunnerPart.getSite().registerContextMenu(menuMgr, fSelectionProvider);
 		Menu menu= menuMgr.createContextMenu(fViewerbook);
 		fTreeViewer.getTree().setMenu(menu);
@@ -286,6 +293,7 @@ public class TestViewer {
 			if (fLayoutMode == TestRunnerViewPart.LAYOUT_HIERARCHICAL) {
 				manager.add(new Separator());
 				manager.add(new ExpandAllAction());
+				manager.add(new CollapseAllAction());
 			}
 
 		}

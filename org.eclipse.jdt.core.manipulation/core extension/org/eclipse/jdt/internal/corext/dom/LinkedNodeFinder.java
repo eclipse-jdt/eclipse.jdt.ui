@@ -59,35 +59,81 @@ public class LinkedNodeFinder  {
 		}
 		IBinding binding= simpleName.resolveBinding();
 		IVariableBinding rcBinding= null;
+		ITypeBinding recordTypeBinding= null;
+		ITypeBinding tBinding= null;
+		String recCompName= null;
 		if (binding instanceof IVariableBinding) {
 			IVariableBinding vbinding= (IVariableBinding) binding;
 			IVariableBinding bBinding= vbinding.getVariableDeclaration();
+			if (bBinding == null) {
+				return null;
+			}
 			if (!bBinding.isField()) {
-				return null;
+				if (bBinding.isParameter()) {
+					IMethodBinding mBinding= bBinding.getDeclaringMethod();
+					if (mBinding != null
+							&& mBinding.isCompactConstructor()) {
+						ITypeBinding typeBinding= mBinding.getDeclaringClass();
+						if (typeBinding != null
+								&& typeBinding.isRecord()) {
+							recordTypeBinding= typeBinding;
+							recCompName= bBinding.getName();
+							tBinding= bBinding.getType();
+						}
+					}
+				}
+				if (recordTypeBinding == null) {
+					return null;
+				}
 			}
-			ITypeBinding typeBinding= vbinding.getDeclaringClass().getTypeDeclaration();
-			if (!typeBinding.isRecord()) {
-				return null;
-			}
-			int modifiers= bBinding.getModifiers();
-			if (Flags.isFinal(modifiers)
-					&& !Flags.isStatic(modifiers)) {
-				rcBinding= bBinding;
+			if (recordTypeBinding == null) {
+				ITypeBinding cBinding= vbinding.getDeclaringClass();
+				if (cBinding == null) {
+					return null;
+				}
+				ITypeBinding typeBinding= cBinding.getTypeDeclaration();
+				if (typeBinding== null || !typeBinding.isRecord()) {
+					return null;
+				}
+				int modifiers= bBinding.getModifiers();
+				if (Flags.isFinal(modifiers)
+						&& !Flags.isStatic(modifiers)) {
+					rcBinding= bBinding;
+				}
 			}
 		} else if (binding instanceof IMethodBinding) {
 			IMethodBinding mBinding = (IMethodBinding)binding;
-			ITypeBinding typeBinding= mBinding.getDeclaringClass().getTypeDeclaration();
+			ITypeBinding cBinding= mBinding.getDeclaringClass();
+			if (cBinding == null) {
+				return null;
+			}
+			ITypeBinding typeBinding= cBinding.getTypeDeclaration();
 			IMethodBinding bBinding= mBinding.getMethodDeclaration();
-			if (bBinding.getParameterTypes().length != 0 || !typeBinding.isRecord()) {
+			if (bBinding == null ||
+					typeBinding == null ||
+					bBinding.getParameterTypes().length != 0 ||
+					!typeBinding.isRecord()) {
 				return null;
 			}
 			if (typeBinding.isRecord()) {
-				IVariableBinding varBindings[]= typeBinding.getDeclaredFields();
+				recordTypeBinding= typeBinding;
+				recCompName= simpleName.getIdentifier();
+				tBinding= bBinding.getReturnType();
+			}
+
+		} else {
+			return null;
+		}
+		if (recCompName != null
+				&& recordTypeBinding != null
+				&& tBinding != null) {
+			IVariableBinding varBindings[]= recordTypeBinding.getDeclaredFields();
+			if (varBindings != null) {
 				for (IVariableBinding varBinding : varBindings) {
 					String name= varBinding.getName();
 					if (simpleName.getIdentifier().equals(name)) {
 						int modifiers= varBinding.getModifiers();
-						if (bBinding.getReturnType().isEqualTo(varBinding.getType())
+						if (tBinding.isEqualTo(varBinding.getType())
 								&& Flags.isFinal(modifiers)
 								&& !Flags.isStatic(modifiers)) {
 							rcBinding= varBinding;
@@ -96,32 +142,34 @@ public class LinkedNodeFinder  {
 					}
 				}
 			}
-
-		} else {
-			return null;
 		}
 		RecordDeclaration recordDeclaration= null;
 		if (rcBinding != null) {
-			ITypeBinding typeBinding= rcBinding.getDeclaringClass().getTypeDeclaration();
-			if (typeBinding != null) {
-				ASTNode root= simpleName.getRoot();
-				if (root instanceof CompilationUnit) {
-					CompilationUnit astRoot= (CompilationUnit) root;
-					ASTNode foundNode= astRoot.findDeclaringNode(typeBinding);
-					if (foundNode instanceof RecordDeclaration) {
-						recordDeclaration= (RecordDeclaration) foundNode;
+			ITypeBinding cBinding= rcBinding.getDeclaringClass();
+			if (cBinding != null) {
+				ITypeBinding typeBinding= cBinding.getTypeDeclaration();
+				if (typeBinding != null) {
+					ASTNode root= simpleName.getRoot();
+					if (root instanceof CompilationUnit) {
+						CompilationUnit astRoot= (CompilationUnit) root;
+						ASTNode foundNode= astRoot.findDeclaringNode(typeBinding);
+						if (foundNode instanceof RecordDeclaration) {
+							recordDeclaration= (RecordDeclaration) foundNode;
+						}
 					}
 				}
 			}
 		}
 		if (recordDeclaration != null) {
 			List<ASTNode> ff=recordDeclaration.recordComponents();
-			for (ASTNode nd : ff) {
-				if (nd instanceof SingleVariableDeclaration) {
-					SimpleName name= ((SingleVariableDeclaration) nd).getName();
-					if (simpleName.getIdentifier().equals(name.getIdentifier())) {
-						rcName= name;
-						break;
+			if (ff != null) {
+				for (ASTNode nd : ff) {
+					if (nd instanceof SingleVariableDeclaration) {
+						SimpleName name= ((SingleVariableDeclaration) nd).getName();
+						if (simpleName.getIdentifier().equals(name.getIdentifier())) {
+							rcName= name;
+							break;
+						}
 					}
 				}
 			}
@@ -250,9 +298,8 @@ public class LinkedNodeFinder  {
 				if ((nameNodeKind & currKind) != 0) {
 					ASTNode node= NodeFinder.perform(parent, probStart, (probEnd - probStart));
 					if (node instanceof SimpleName && name.equals(((SimpleName) node).getIdentifier())) {
-						if (node instanceof SimpleName && name.equals(((SimpleName) node).getIdentifier())) {
-							if (node.getAST().apiLevel() < AST.JLS10 || !((SimpleName) node).isVar())
-								res.add((SimpleName) node);
+						if (node.getAST().apiLevel() < AST.JLS10 || !((SimpleName) node).isVar()) {
+							res.add((SimpleName) node);
 						}
 					}
 				}

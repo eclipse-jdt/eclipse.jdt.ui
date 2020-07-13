@@ -16,7 +16,9 @@ package org.eclipse.jdt.ui.tests.quickfix;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -137,33 +139,28 @@ import org.eclipse.jdt.internal.ui.text.template.contentassist.SurroundWithTempl
 })
 
 public class QuickFixTest {
-
 	public static void assertCorrectLabels(List<? extends ICompletionProposal> proposals) {
 		for (int i= 0; i < proposals.size(); i++) {
 			ICompletionProposal proposal= proposals.get(i);
 			String name= proposal.getDisplayString();
 			if (name == null || name.length() == 0 || name.charAt(0) == '!' || name.contains("{0}") || name.contains("{1}")) {
-				assertTrue("wrong proposal label: " + name, false);
+				fail("wrong proposal label: " + name);
 			}
-			if (proposal.getImage() == null) {
-				assertTrue("wrong proposal image", false);
-			}
+			assertNotNull("wrong proposal image", proposal.getImage());
 		}
 	}
 
 	public static void assertCorrectContext(IInvocationContext context, ProblemLocation problem) {
 		if (problem.getProblemId() != 0) {
 			if (!JavaCorrectionProcessor.hasCorrections(context.getCompilationUnit(), problem.getProblemId(), problem.getMarkerType())) {
-				assertTrue("Problem type not marked with light bulb: " + problem, false);
+				fail("Problem type not marked with light bulb: " + problem);
 			}
 		}
 	}
 
-
 	public static void assertNumberOf(String name, int nProblems, int nProblemsExpected) {
-		assertTrue("Wrong number of " + name + ", is: " + nProblems + ", expected: " + nProblemsExpected, nProblems == nProblemsExpected);
+		assertEquals("Wrong number of " + name + ", is: " + nProblems + ", expected: " + nProblemsExpected, nProblems, nProblemsExpected);
 	}
-
 
 	public static void assertEqualString(String actual, String expected) {
 		StringAsserts.assertEqualString(actual, expected);
@@ -194,15 +191,15 @@ public class QuickFixTest {
 	}
 
 	public static void assertCommandIdDoesNotExist(List<? extends ICompletionProposal> actualProposals, String commandId) {
-		assertTrue(findProposalByCommandId(commandId, actualProposals) == null);
+		assertNull(findProposalByCommandId(commandId, actualProposals));
 	}
 
 	public static void assertProposalDoesNotExist(List<? extends ICompletionProposal> actualProposals, String proposalName) {
-		assertTrue(findProposalByName(proposalName, actualProposals) == null);
+		assertNull(findProposalByName(proposalName, actualProposals));
 	}
 
 	public static void assertProposalExists(List<? extends ICompletionProposal> actualProposals, String proposalName) {
-		assertTrue(findProposalByName(proposalName, actualProposals) != null);
+		assertNotNull(findProposalByName(proposalName, actualProposals));
 	}
 
 	public static TypeDeclaration findTypeDeclaration(CompilationUnit astRoot, String simpleTypeName) {
@@ -294,7 +291,6 @@ public class QuickFixTest {
 		return corrections;
 	}
 
-
 	protected static void assertNumberOfProblems(int nProblems, IProblem[] problems) {
 		if (problems.length != nProblems) {
 			StringBuilder buf= new StringBuilder("Wrong number of problems, is: ");
@@ -304,7 +300,7 @@ public class QuickFixTest {
 				buf.append('[').append(problem.getSourceStart()).append(" ,").append(problem.getSourceEnd()).append(']');
 				buf.append('\n');
 			}
-			assertTrue(buf.toString(), false);
+			fail(buf.toString());
 		}
 	}
 
@@ -387,7 +383,6 @@ public class QuickFixTest {
 		}
 	}
 
-
 	protected static final ArrayList<IJavaCompletionProposal> collectAssists(IInvocationContext context, Class<?>[] filteredTypes) throws CoreException {
 		ArrayList<IJavaCompletionProposal> proposals= new ArrayList<>();
 		IStatus status= JavaCorrectionProcessor.collectAssists(context, new IProblemLocation[0], proposals);
@@ -396,7 +391,6 @@ public class QuickFixTest {
 		if (!proposals.isEmpty()) {
 			assertTrue("should be marked as 'has assist'", JavaCorrectionProcessor.hasAssists(context));
 		}
-
 
 		if (filteredTypes != null && filteredTypes.length > 0) {
 			for (Iterator<IJavaCompletionProposal> iter= proposals.iterator(); iter.hasNext(); ) {
@@ -432,7 +426,6 @@ public class QuickFixTest {
 		expecteds.add(expected.toString());
 	}
 
-
 	protected static String[] getPreviewContents(List<IJavaCompletionProposal> proposals) throws CoreException, BadLocationException {
 		String[] res= new String[proposals.size()];
 		for (int i= 0; i < proposals.size(); i++) {
@@ -440,7 +433,6 @@ public class QuickFixTest {
 		}
 		return res;
 	}
-
 
 	private static String getProposalPreviewContent(ICompletionProposal curr) throws CoreException, BadLocationException {
 		String previewContent = null;
@@ -466,7 +458,6 @@ public class QuickFixTest {
 		}
 		return "";
 	}
-
 
 	private static String getTemplatePreviewContent(SurroundWithTemplateProposal proposal) {
 		return proposal.getPreviewContent();
@@ -531,7 +522,7 @@ public class QuickFixTest {
 					appendSource(((CUCorrectionProposal) curr), buf);
 				}
 			}
-			assertTrue(buf.toString(), false);
+			fail(buf.toString());
 		}
 	}
 
@@ -568,7 +559,7 @@ public class QuickFixTest {
 	protected static void assertNoErrors(IInvocationContext context) {
 		for (IProblem problem : context.getASTRoot().getProblems()) {
 			if (problem.isError()) {
-				assertTrue("source has error: " + problem.getMessage(), false);
+				fail("source has error: " + problem.getMessage());
 			}
 		}
 	}
@@ -581,7 +572,6 @@ public class QuickFixTest {
 		}
 		return getPreviewsInBufAppend(cu, proposals);
 	}
-
 
 	protected static String getPreviewsInBufAppend(ICompilationUnit cu, List<IJavaCompletionProposal> proposals) throws CoreException, BadLocationException {
 		StringBuffer buf= new StringBuffer();
@@ -614,7 +604,6 @@ public class QuickFixTest {
 		buf.append("}\n");
 		return buf.toString();
 	}
-
 
 	private static void wrapInBufAppend(String curr, StringBuffer buf) {
 		buf.append("buf.append(\"");
@@ -666,18 +655,19 @@ public class QuickFixTest {
 			assertEquals("Unexpected choice", expectedChoices[i], sortedChoices.get(i));
 		}
 	}
-/**
- * Computes the number of warnings the java file "filename" has.
- * Then check if the "preview" source code has the same number of warnings.
- * Throw error if the number changes.
- *
- * @param pack
- * @param preview
- * @param className
- * @param filename
- * @param fSourceFolder
- * @throws JavaModelException
- */
+
+	/**
+	 * Computes the number of warnings the java file "filename" has.
+	 * Then check if the "preview" source code has the same number of warnings.
+	 * Throw error if the number changes.
+	 *
+	 * @param pack
+	 * @param preview
+	 * @param className
+	 * @param filename
+	 * @param fSourceFolder
+	 * @throws JavaModelException
+	 */
 	protected void assertNoAdditionalProblems(IPackageFragment pack, String preview, String className, String filename, IPackageFragmentRoot fSourceFolder) throws JavaModelException {
 		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.ERROR);

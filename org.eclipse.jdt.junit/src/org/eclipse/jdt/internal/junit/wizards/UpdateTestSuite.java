@@ -14,7 +14,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.wizards;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Set;
 
 import org.eclipse.jdt.junit.wizards.NewTestSuiteWizardPage;
@@ -361,22 +360,19 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 	}
 
 	public IRunnableWithProgress getRunnable() {
-		return new IRunnableWithProgress() {
-			@Override
-			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-				if (monitor == null) {
-					monitor= new NullProgressMonitor();
-				}
-				if (! checkValidateEditStatus(fTestSuite, fShell))
-					return;
-				try {
-					if (fIsJunit4)
-						updateTestCasesInJunit4Suite(monitor, fTestSuite, fSuiteClasses, fSelectedTestCases);
-					else
-						updateTestCasesInSuite(monitor, fTestSuite, fSuiteMethod, fSelectedTestCases);
-				} catch (JavaModelException e) {
-					ExceptionHandler.handle(e, fShell, WizardMessages.UpdateTestSuite_update, WizardMessages.UpdateTestSuite_error);
-				}
+		return monitor -> {
+			if (monitor == null) {
+				monitor= new NullProgressMonitor();
+			}
+			if (! checkValidateEditStatus(fTestSuite, fShell))
+				return;
+			try {
+				if (fIsJunit4)
+					updateTestCasesInJunit4Suite(monitor, fTestSuite, fSuiteClasses, fSelectedTestCases);
+				else
+					updateTestCasesInSuite(monitor, fTestSuite, fSuiteMethod, fSelectedTestCases);
+			} catch (JavaModelException e) {
+				ExceptionHandler.handle(e, fShell, WizardMessages.UpdateTestSuite_update, WizardMessages.UpdateTestSuite_error);
 			}
 		};
 	}

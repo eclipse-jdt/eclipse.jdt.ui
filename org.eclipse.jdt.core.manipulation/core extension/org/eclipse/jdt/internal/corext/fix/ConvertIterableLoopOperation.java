@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
@@ -44,6 +45,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NullLiteral;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
@@ -155,7 +157,15 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 
 	private String[] getVariableNameProposals() {
 		String[] variableNames= getUsedVariableNames();
-		String[] elementSuggestions= StubUtility.getLocalNameSuggestions(getJavaProject(), FOR_LOOP_ELEMENT_IDENTIFIER, 0, variableNames);
+		String baseName= FOR_LOOP_ELEMENT_IDENTIFIER;
+		if (fExpression != null) {
+			if  (fExpression instanceof SimpleName) {
+				baseName= ConvertLoopOperation.modifybasename(((SimpleName)fExpression).getFullyQualifiedName());
+			} else if (fExpression instanceof QualifiedName) {
+				baseName= ConvertLoopOperation.modifybasename(((QualifiedName)fExpression).getName().getFullyQualifiedName());
+			}
+		}
+		String[] elementSuggestions= StubUtility.getLocalNameSuggestions(getJavaProject(), baseName, 0, variableNames);
 
 		ITypeBinding binding= fIteratorVariable.getType();
 		if (binding != null && binding.isParameterizedType()) {
@@ -163,8 +173,14 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 			String[] typeSuggestions= StubUtility.getLocalNameSuggestions(getJavaProject(), type, 0, variableNames);
 
 			String[] result= new String[elementSuggestions.length + typeSuggestions.length];
-			System.arraycopy(typeSuggestions, 0, result, 0, typeSuggestions.length);
-			System.arraycopy(elementSuggestions, 0, result, typeSuggestions.length, elementSuggestions.length);
+			String[] first= typeSuggestions;
+			String[] second= elementSuggestions;
+			if (!FOR_LOOP_ELEMENT_IDENTIFIER.equals(baseName)) {
+				first= elementSuggestions;
+				second= typeSuggestions;
+			}
+			System.arraycopy(first, 0, result, 0, first.length);
+			System.arraycopy(second, 0, result, first.length, second.length);
 			return result;
 		}
 		return elementSuggestions;
@@ -237,6 +253,7 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 	protected Statement convert(CompilationUnitRewrite cuRewrite, final TextEditGroup group, final LinkedProposalModelCore positionGroups) throws CoreException {
 		AST ast= cuRewrite.getAST();
 		ASTRewrite astRewrite= cuRewrite.getASTRewrite();
+
 		ImportRewrite importRewrite= cuRewrite.getImportRewrite();
 		ImportRemover remover= cuRewrite.getImportRemover();
 
@@ -257,6 +274,7 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 		}
 
 		Statement body= getForStatement().getBody();
+		List<Comment> commentList= getRoot().getCommentList();
 		if (body != null) {
 			ListRewrite list;
 			if (body instanceof Block) {
@@ -264,7 +282,27 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 				for (Expression expression : fOccurrences) {
 					Statement parent= ASTNodes.getParent(expression, Statement.class);
 					if (parent != null && list.getRewrittenList().contains(parent)) {
-						list.remove(parent, null);
+						List<ASTNode> newComments= new ArrayList<>();
+						for (Comment comment : commentList) {
+							CompilationUnit cu= (CompilationUnit)parent.getRoot();
+							if (comment.getStartPosition() >= cu.getExtendedStartPosition(parent)
+									&& comment.getStartPosition() + comment.getLength() < parent.getStartPosition()) {
+								String commentString= cuRewrite.getCu().getBuffer().getText(comment.getStartPosition(), comment.getLength());
+								ASTNode newComment= astRewrite.createStringPlaceholder(commentString, comment.isBlockComment() ? ASTNode.BLOCK_COMMENT : ASTNode.LINE_COMMENT);
+								newComments.add(newComment);
+							}
+						}
+						if (!newComments.isEmpty()) {
+							ASTNode lastComment= newComments.get(0);
+							list.replace(parent, lastComment, null);
+							for (int i= 1; i < newComments.size(); ++i) {
+								ASTNode nextComment= newComments.get(i);
+								list.insertAfter(nextComment, lastComment, null);
+								lastComment= nextComment;
+							}
+						} else {
+							list.remove(parent, null);
+						}
 						remover.registerRemovedNode(parent);
 					}
 				}
@@ -391,9 +429,8 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 			}
 
 			for (final Object outer : getForStatement().initializers()) {
-				Expression initializer= (Expression) outer;
-				if (initializer instanceof VariableDeclarationExpression) {
-					VariableDeclarationExpression declaration= (VariableDeclarationExpression)initializer;
+				if (outer instanceof VariableDeclarationExpression) {
+					VariableDeclarationExpression declaration= (VariableDeclarationExpression) outer;
 					List<VariableDeclarationFragment> fragments= declaration.fragments();
 					if (fragments.size() != 1) {
 						return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
@@ -411,33 +448,40 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 
 							if (iterator != null) {
 								fIteratorVariable= binding;
-							}
-						}
-					}
-					MethodInvocation method= ASTNodes.as(fragment.getInitializer(), MethodInvocation.class);
-					if (method != null && method.resolveMethodBinding() != null) {
-						IMethodBinding methodBinding= method.resolveMethodBinding();
-						ITypeBinding type= methodBinding.getReturnType();
-						if (type != null) {
-							String qualified= type.getQualifiedName();
-							if (qualified.startsWith("java.util.Enumeration<") || qualified.startsWith("java.util.Iterator<")) { //$NON-NLS-1$ //$NON-NLS-2$
-								Expression qualifier= method.getExpression();
-								if (qualifier != null) {
-									ITypeBinding resolved= qualifier.resolveTypeBinding();
-									if (resolved != null) {
-										ITypeBinding iterable= getSuperType(resolved, Iterable.class.getCanonicalName());
-										if (iterable != null) {
-											fExpression= qualifier;
-											fIterable= resolved;
-										}
-									}
-								} else {
-									ITypeBinding declaring= methodBinding.getDeclaringClass();
-									if (declaring != null) {
-										ITypeBinding superBinding= getSuperType(declaring, Iterable.class.getCanonicalName());
-										if (superBinding != null) {
-											fIterable= superBinding;
-											fThis= true;
+
+								MethodInvocation method= ASTNodes.as(fragment.getInitializer(), MethodInvocation.class);
+								if (method != null && method.resolveMethodBinding() != null) {
+									IMethodBinding methodBinding= method.resolveMethodBinding();
+									ITypeBinding returnType= methodBinding.getReturnType();
+									if (returnType != null) {
+										String qualified= returnType.getErasure().getQualifiedName();
+										ITypeBinding returnElementType= getElementType(returnType);
+										ITypeBinding variableElementType= getElementType(fIteratorVariable.getType());
+
+										if (returnElementType != null
+												&& variableElementType != null
+												&& returnElementType.isAssignmentCompatible(variableElementType)
+												&& ("java.util.Iterator".equals(qualified) || "java.util.Enumeration".equals(qualified))) { //$NON-NLS-1$ //$NON-NLS-2$
+											Expression qualifier= method.getExpression();
+											if (qualifier != null) {
+												ITypeBinding resolved= qualifier.resolveTypeBinding();
+												if (resolved != null) {
+													ITypeBinding iterable= getSuperType(resolved, Iterable.class.getCanonicalName());
+													if (iterable != null) {
+														fExpression= qualifier;
+														fIterable= resolved;
+													}
+												}
+											} else {
+												ITypeBinding declaring= methodBinding.getDeclaringClass();
+												if (declaring != null) {
+													ITypeBinding superBinding= getSuperType(declaring, Iterable.class.getCanonicalName());
+													if (superBinding != null) {
+														fIterable= superBinding;
+														fThis= true;
+													}
+												}
+											}
 										}
 									}
 								}

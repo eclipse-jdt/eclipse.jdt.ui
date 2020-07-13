@@ -26,7 +26,6 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
@@ -113,35 +112,32 @@ public abstract class OpenEditorAction extends Action {
 		final IType[] result= { null };
 		final String dottedName= className.replace('$', '.'); // for nested classes...
 		try {
-			PlatformUI.getWorkbench().getProgressService().busyCursorWhile(new IRunnableWithProgress() {
-				@Override
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					try {
-						if (project != null) {
-							result[0]= internalFindType(project, dottedName, new HashSet<IJavaProject>(), monitor);
-						}
-						if (result[0] == null) {
-							int lastDot= dottedName.lastIndexOf('.');
-							TypeNameMatchRequestor nameMatchRequestor= new TypeNameMatchRequestor() {
-								@Override
-								public void acceptTypeNameMatch(TypeNameMatch match) {
-									result[0]= match.getType();
-								}
-							};
-							new SearchEngine().searchAllTypeNames(
-									lastDot >= 0 ? dottedName.substring(0, lastDot).toCharArray() : null,
-									SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE,
-									(lastDot >= 0 ? dottedName.substring(lastDot + 1) : dottedName).toCharArray(),
-									SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE,
-									IJavaSearchConstants.TYPE,
-									SearchEngine.createWorkspaceScope(),
-									nameMatchRequestor,
-									IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
-									monitor);
-						}
-					} catch (JavaModelException e) {
-						throw new InvocationTargetException(e);
+			PlatformUI.getWorkbench().getProgressService().busyCursorWhile(monitor -> {
+				try {
+					if (project != null) {
+						result[0]= internalFindType(project, dottedName, new HashSet<IJavaProject>(), monitor);
 					}
+					if (result[0] == null) {
+						int lastDot= dottedName.lastIndexOf('.');
+						TypeNameMatchRequestor nameMatchRequestor= new TypeNameMatchRequestor() {
+							@Override
+							public void acceptTypeNameMatch(TypeNameMatch match) {
+								result[0]= match.getType();
+							}
+						};
+						new SearchEngine().searchAllTypeNames(
+								lastDot >= 0 ? dottedName.substring(0, lastDot).toCharArray() : null,
+								SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE,
+								(lastDot >= 0 ? dottedName.substring(lastDot + 1) : dottedName).toCharArray(),
+								SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE,
+								IJavaSearchConstants.TYPE,
+								SearchEngine.createWorkspaceScope(),
+								nameMatchRequestor,
+								IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
+								monitor);
+					}
+				} catch (JavaModelException e) {
+					throw new InvocationTargetException(e);
 				}
 			});
 		} catch (InvocationTargetException e) {

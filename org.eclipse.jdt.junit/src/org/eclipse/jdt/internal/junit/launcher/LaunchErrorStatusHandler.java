@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.launcher;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
@@ -30,22 +32,19 @@ public class LaunchErrorStatusHandler implements IStatusHandler {
 
 	@Override
 	public Object handleStatus(final IStatus status, Object source) throws CoreException {
-		final Boolean[] success= new Boolean[] { Boolean.FALSE };
+		final AtomicBoolean success= new AtomicBoolean(false);
 		getDisplay().syncExec(
-				new Runnable() {
-					@Override
-					public void run() {
-						Shell shell= JUnitPlugin.getActiveWorkbenchShell();
-						if (shell == null)
-							shell= getDisplay().getActiveShell();
-						if (shell != null) {
-							MessageDialog.openInformation(shell, JUnitMessages.JUnitLaunchConfigurationDelegate_dialog_title, status.getMessage());
-							success[0]= Boolean.TRUE;
-						}
+				() -> {
+					Shell shell= JUnitPlugin.getActiveWorkbenchShell();
+					if (shell == null)
+						shell= getDisplay().getActiveShell();
+					if (shell != null) {
+						MessageDialog.openInformation(shell, JUnitMessages.JUnitLaunchConfigurationDelegate_dialog_title, status.getMessage());
+						success.set(true);
 					}
 				}
 		);
-		if (success[0] == Boolean.TRUE) {
+		if (success.get()) {
 			return null;
 		}
 		throw new CoreException(status);

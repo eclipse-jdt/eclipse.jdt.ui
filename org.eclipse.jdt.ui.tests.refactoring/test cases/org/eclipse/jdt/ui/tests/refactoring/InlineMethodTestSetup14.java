@@ -16,21 +16,36 @@ package org.eclipse.jdt.ui.tests.refactoring;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
-import org.eclipse.jdt.ui.tests.refactoring.rules.Java13Setup;
+import org.eclipse.jdt.ui.tests.refactoring.rules.Java14Setup;
 
-public class InlineMethodTestSetup13 extends Java13Setup {
+public class InlineMethodTestSetup14 extends Java14Setup {
 
-	private IPackageFragment fSimple13;
+	private IPackageFragment fSimple14;
+
+	private IPackageFragment fDefault;
+
+	private String simplePkgInName= "simple14_in";
+
+	private String simplePkgOutName= "simple14_out";
 
 	@Override
 	public void before() throws Exception {
 		super.before();
 
 		IPackageFragmentRoot root= getDefaultSourceFolder();
-		fSimple13= root.createPackageFragment("simple13_in", true, null);
+		fSimple14= root.createPackageFragment(simplePkgInName, true, null);
+		fDefault= root.getPackageFragment("");
 	}
 
 	public IPackageFragment getSimplePackage() {
-		return fSimple13;
+		return fSimple14;
+	}
+
+	public IPackageFragment getDefaultPackage() {
+		return fDefault;
+	}
+
+	public String getSimplePkgOutName() {
+		return simplePkgOutName;
 	}
 }

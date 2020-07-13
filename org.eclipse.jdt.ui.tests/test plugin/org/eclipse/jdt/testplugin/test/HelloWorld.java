@@ -13,12 +13,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.testplugin.test;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -32,12 +32,12 @@ import org.eclipse.jdt.core.IType;
 public class HelloWorld {
 	private IJavaProject fJProject;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 			fJProject= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJProject);
 	}
@@ -51,7 +51,7 @@ public class HelloWorld {
 
 		String name= "java/util/Vector.java";
 		IOrdinaryClassFile classfile= (IOrdinaryClassFile) fJProject.findElement(new Path(name));
-		assertNotNull("classfile not found", classfile);
+		assertNotNull(classfile, "classfile not found");
 
 		IType type= classfile.getType();
 		System.out.println("methods of Vector");

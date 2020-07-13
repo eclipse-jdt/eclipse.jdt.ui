@@ -30,8 +30,6 @@ import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.viewers.CheckStateChangedEvent;
-import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
@@ -170,12 +168,7 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 
 		fMethodsTree.setLabelProvider(new JavaElementLabelProvider());
 		fMethodsTree.setAutoExpandLevel(2);
-		fMethodsTree.addCheckStateListener(new ICheckStateListener() {
-			@Override
-			public void checkStateChanged(CheckStateChangedEvent event) {
-				doCheckedStateChanged();
-			}
-		});
+		fMethodsTree.addCheckStateListener(event -> doCheckedStateChanged());
 		fMethodsTree.addFilter(new ViewerFilter() {
 			@Override
 			public boolean select(Viewer viewer, Object parentElement, Object element) {

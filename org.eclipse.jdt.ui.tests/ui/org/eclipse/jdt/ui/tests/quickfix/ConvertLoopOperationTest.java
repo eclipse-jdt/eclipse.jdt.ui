@@ -24,6 +24,7 @@ import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
 import org.eclipse.jdt.internal.corext.fix.ConvertForLoopOperation;
+import org.eclipse.jdt.internal.corext.fix.ConvertLoopOperation;
 
 @RunWith(Parameterized.class)
 public class ConvertLoopOperationTest extends ConvertForLoopOperation {
@@ -77,7 +78,7 @@ public class ConvertLoopOperationTest extends ConvertForLoopOperation {
 
 	@Test
 	public void testModifybasename() {
-		Assert.assertEquals(expectedResult, this.modifybasename(name));
+		Assert.assertEquals(expectedResult, ConvertLoopOperation.modifybasename(name));
 	}
 
 }
