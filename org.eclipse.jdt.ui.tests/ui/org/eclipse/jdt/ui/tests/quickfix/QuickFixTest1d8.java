@@ -502,6 +502,207 @@ public class QuickFixTest1d8 extends QuickFixTest {
 	}
 
 	@Test
+	public void testUnimplementedMethodReference1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("class E {\n");
+		buf.append("    void foo(Runnable r) {\n");
+		buf.append("    }\n");
+		buf.append("    void bar() {\n");
+		buf.append("        foo(this::action);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		AssistContext context= new AssistContext(cu, buf.toString().indexOf("::"), 0);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 4);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("class E {\n");
+		buf.append("    void foo(Runnable r) {\n");
+		buf.append("    }\n");
+		buf.append("    void bar() {\n");
+		buf.append("        foo(this::action);\n");
+		buf.append("    }\n");
+		buf.append("    private void action() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	@Test
+	public void testUnimplementedMethodReference2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Comparator;\n");
+		buf.append("class E {\n");
+		buf.append("    void foo(Comparator<String> c) {\n");
+		buf.append("    }\n");
+		buf.append("    void bar() {\n");
+		buf.append("        foo(this::action);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		AssistContext context= new AssistContext(cu, buf.toString().indexOf("::"), 0);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 4);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Comparator;\n");
+		buf.append("class E {\n");
+		buf.append("    void foo(Comparator<String> c) {\n");
+		buf.append("    }\n");
+		buf.append("    void bar() {\n");
+		buf.append("        foo(this::action);\n");
+		buf.append("    }\n");
+		buf.append("    private int action(String string1, String string2) {\n");
+		buf.append("        return 0;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	@Test
+	public void testUnimplementedMethodReference3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.function.Function;\n");
+		buf.append("class E {\n");
+		buf.append("    void foo(Function<Float, String> f) {\n");
+		buf.append("    }\n");
+		buf.append("    void bar() {\n");
+		buf.append("        foo(this::action);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		AssistContext context= new AssistContext(cu, buf.toString().indexOf("::"), 0);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 4);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.function.Function;\n");
+		buf.append("class E {\n");
+		buf.append("    void foo(Function<Float, String> f) {\n");
+		buf.append("    }\n");
+		buf.append("    void bar() {\n");
+		buf.append("        foo(this::action);\n");
+		buf.append("    }\n");
+		buf.append("    private String action(Float float1) {\n");
+		buf.append("        return \"\";\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	@Test
+	public void testUnimplementedMethodReference4() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public interface F<T>\n");
+		buf.append("    T baz();\n");
+		buf.append("}\n");
+		buf.append("class E {\n");
+		buf.append("    <T> void foo(F<T> f) {\n");
+		buf.append("    }\n");
+		buf.append("    void bar() {\n");
+		buf.append("        foo(this::action);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		AssistContext context= new AssistContext(cu, buf.toString().indexOf("::"), 0);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 4);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public interface F<T>\n");
+		buf.append("    T baz();\n");
+		buf.append("}\n");
+		buf.append("class E {\n");
+		buf.append("    <T> void foo(F<T> f) {\n");
+		buf.append("    }\n");
+		buf.append("    void bar() {\n");
+		buf.append("        foo(this::action);\n");
+		buf.append("    }\n");
+		buf.append("    private <T> T action() {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	@Test
+	public void testUnimplementedMethodReference5() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.function.BiFunction;\n");
+		buf.append("class E {\n");
+		buf.append("    <A extends Object, B extends Object> void foo(BiFunction<A, B, Float> bf) {\n");
+		buf.append("    }\n");
+		buf.append("    void bar() {\n");
+		buf.append("        foo(this::action);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		AssistContext context= new AssistContext(cu, buf.toString().indexOf("::"), 0);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 4);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.function.BiFunction;\n");
+		buf.append("class E {\n");
+		buf.append("    <A extends Object, B extends Object> void foo(BiFunction<A, B, Float> bf) {\n");
+		buf.append("    }\n");
+		buf.append("    void bar() {\n");
+		buf.append("        foo(this::action);\n");
+		buf.append("    }\n");
+		buf.append("    private <A extends Object, B extends Object> Float action(A a1, B b2) {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	@Test
 	public void testLambdaReturnType1() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);

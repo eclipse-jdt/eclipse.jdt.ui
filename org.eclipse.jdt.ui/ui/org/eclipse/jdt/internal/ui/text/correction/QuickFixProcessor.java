@@ -311,6 +311,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.PreviewFeaturesNotAllowed:
 			case IProblem.UninitializedBlankFinalField:
 			case IProblem.SwitchExpressionsReturnWithinSwitchExpression:
+			case IProblem.DanglingReference:
 				return true;
 			default:
 				return SuppressWarningsSubProcessor.hasSuppressWarningsProposal(cu.getJavaProject(), problemId)

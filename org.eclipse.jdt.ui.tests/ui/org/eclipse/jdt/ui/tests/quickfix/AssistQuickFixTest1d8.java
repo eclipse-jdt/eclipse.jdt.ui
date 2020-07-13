@@ -3577,7 +3577,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
 		StringBuffer buf= new StringBuffer();
@@ -3630,7 +3630,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		proposals= collectAssists(context, false);
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -3683,7 +3683,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		proposals= collectAssists(context, false);
-		assertNumberOfProposals(proposals, 4);
+		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -3736,7 +3736,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		proposals= collectAssists(context, false);
-		assertNumberOfProposals(proposals, 4);
+		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -3789,7 +3789,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		proposals= collectAssists(context, false);
-		assertNumberOfProposals(proposals, 4);
+		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -3842,7 +3842,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		proposals= collectAssists(context, false);
-		assertNumberOfProposals(proposals, 4);
+		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -3895,7 +3895,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		proposals= collectAssists(context, false);
-		assertNumberOfProposals(proposals, 4);
+		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
