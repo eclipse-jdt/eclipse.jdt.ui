@@ -169,7 +169,6 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 			fComposite.addDisposeListener(e -> {
 				JFaceResources.getFontRegistry().removeListener(SourceAttachmentForm.this);
 				fComposite= null;
-				fSeparatorColor.dispose();
 				fSeparatorColor= null;
 				fBannerLabels.clear();
 				fHeaderLabels.clear();

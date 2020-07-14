@@ -173,7 +173,6 @@ public abstract class SearchLabelProvider extends AppearanceAwareLabelProvider {
 	@Override
 	public void dispose() {
 		if (fPotentialMatchFgColor != null) {
-			fPotentialMatchFgColor.dispose();
 			fPotentialMatchFgColor= null;
 		}
 		fSearchPreferences.removePropertyChangeListener(fSearchPropertyListener);

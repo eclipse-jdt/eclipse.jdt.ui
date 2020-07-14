@@ -108,12 +108,7 @@ public class SourceViewerInformationControl
 	 * @since 3.0
 	 */
 	private Font fStatusTextFont;
-	/**
-	 * The color of the optional status text label or <code>null</code> if none.
-	 *
-	 * @since 3.6
-	 */
-	private Color fStatusTextForegroundColor;
+
 	/**
 	 * The width size constraint.
 	 * @since 3.2
@@ -131,7 +126,6 @@ public class SourceViewerInformationControl
 	private final int fOrientation;
 
 	private Color fBackgroundColor;
-	private boolean fIsSystemBackgroundColor= true;
 
 	private JavaSourceViewerConfiguration fViewerConfiguration;
 	private Map<String, JavaSourceViewerConfiguration> fKindToViewerConfiguration= new HashMap<>();
@@ -232,8 +226,8 @@ public class SourceViewerInformationControl
 			fStatusField.setLayoutData(gd2);
 
 			RGB javaDefaultColor= JavaUI.getColorManager().getColor(IJavaColorConstants.JAVA_DEFAULT).getRGB();
-			fStatusTextForegroundColor= new Color(fStatusField.getDisplay(), blend(fBackgroundColor.getRGB(), javaDefaultColor, 0.56f));
-			fStatusField.setForeground(fStatusTextForegroundColor);
+			Color statusTextForegroundColor= new Color(fStatusField.getDisplay(), blend(fBackgroundColor.getRGB(), javaDefaultColor, 0.56f));
+			fStatusField.setForeground(statusTextForegroundColor);
 			fStatusField.setBackground(fBackgroundColor);
 		}
 
@@ -276,10 +270,8 @@ public class SourceViewerInformationControl
 		}
 		if (bgRGB != null) {
 			fBackgroundColor= new Color(fShell.getDisplay(), bgRGB);
-			fIsSystemBackgroundColor= false;
 		} else {
 			fBackgroundColor= fShell.getDisplay().getSystemColor(SWT.COLOR_INFO_BACKGROUND);
-			fIsSystemBackgroundColor= true;
 		}
 	}
 
@@ -394,10 +386,6 @@ public class SourceViewerInformationControl
 			fStatusTextFont.dispose();
 		fStatusTextFont= null;
 
-		if (fStatusTextForegroundColor != null && !fStatusTextForegroundColor.isDisposed())
-			fStatusTextForegroundColor.dispose();
-		fStatusTextForegroundColor= null;
-
 		fTextFont= null;
 		fShell= null;
 		fText= null;
@@ -405,8 +393,6 @@ public class SourceViewerInformationControl
 
 	@Override
 	public final void dispose() {
-		if (!fIsSystemBackgroundColor)
-			fBackgroundColor.dispose();
 		if (fShell != null && !fShell.isDisposed())
 			fShell.dispose();
 		else
