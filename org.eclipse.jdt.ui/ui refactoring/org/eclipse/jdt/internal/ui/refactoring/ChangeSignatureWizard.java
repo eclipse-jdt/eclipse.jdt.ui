@@ -14,8 +14,6 @@
 package org.eclipse.jdt.internal.ui.refactoring;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -223,12 +221,9 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 			TextFieldNavigationHandler.install(text);
 
 			if (getChangeMethodSignatureProcessor().canChangeNameAndReturnType()) {
-				text.addModifyListener(new ModifyListener(){
-					@Override
-					public void modifyText(ModifyEvent e) {
-						getChangeMethodSignatureProcessor().setNewReturnTypeName(text.getText());
-						update(true);
-					}
+				text.addModifyListener(e -> {
+					getChangeMethodSignatureProcessor().setNewReturnTypeName(text.getText());
+					update(true);
 				});
 			} else {
 				text.setEnabled(false);
@@ -257,12 +252,9 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 			TextFieldNavigationHandler.install(text);
 
 			if (getChangeMethodSignatureProcessor().canChangeNameAndReturnType()) {
-				text.addModifyListener(new ModifyListener(){
-					@Override
-					public void modifyText(ModifyEvent e) {
-						getChangeMethodSignatureProcessor().setNewMethodName(text.getText());
-						update(true);
-					}
+				text.addModifyListener(e -> {
+					getChangeMethodSignatureProcessor().setNewMethodName(text.getText());
+					update(true);
 				});
 			} else {
 				text.setEnabled(false);
@@ -317,12 +309,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 			Composite border= new Composite(parent, SWT.NONE);
 			border.setLayout(new GridLayout());
 
-			ChangeExceptionsControl cp= new ChangeExceptionsControl(border, SWT.NONE, new IExceptionListChangeListener() {
-				@Override
-				public void exceptionListChanged() {
-					update(true);
-				}
-			}, getChangeMethodSignatureProcessor().getMethod().getJavaProject());
+			ChangeExceptionsControl cp= new ChangeExceptionsControl(border, SWT.NONE, () -> update(true), getChangeMethodSignatureProcessor().getMethod().getJavaProject());
 			cp.setLayoutData(new GridData(GridData.FILL_BOTH));
 			cp.setInput(getChangeMethodSignatureProcessor().getExceptionInfos());
 			return border;

@@ -30,7 +30,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jface.dialogs.Dialog;
@@ -39,7 +38,6 @@ import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.wizard.IWizardPage;
 
@@ -193,19 +191,16 @@ public class ChangeTypeWizard extends RefactoringWizard {
 			private Collection<ITypeBinding> fValidTypes;
 			@Override
 			public void run() {
-				IRunnableWithProgress runnable= new IRunnableWithProgress() {
-					@Override
-					public void run(IProgressMonitor pm) {
-						pm.beginTask(RefactoringMessages.ChangeTypeWizard_analyzing, 1000);
-						ChangeTypeRefactoring ct= (ChangeTypeRefactoring)ChangeTypeWizard.this.getRefactoring();
-						fInvalidTypes = new HashSet<>();
-						fInvalidTypes.addAll(fCT.getAllSuperTypes(ct.getOriginalType()));
-						fValidTypes= ct.computeValidTypes(new SubProgressMonitor(pm, 950));
-						fInvalidTypes.add(ct.getOriginalType());
-						fInvalidTypes.removeAll(fValidTypes);
-						pm.worked(50);
-						pm.done();
-					}
+				IRunnableWithProgress runnable= pm -> {
+					pm.beginTask(RefactoringMessages.ChangeTypeWizard_analyzing, 1000);
+					ChangeTypeRefactoring ct= (ChangeTypeRefactoring)ChangeTypeWizard.this.getRefactoring();
+					fInvalidTypes = new HashSet<>();
+					fInvalidTypes.addAll(fCT.getAllSuperTypes(ct.getOriginalType()));
+					fValidTypes= ct.computeValidTypes(new SubProgressMonitor(pm, 950));
+					fInvalidTypes.add(ct.getOriginalType());
+					fInvalidTypes.removeAll(fValidTypes);
+					pm.worked(50);
+					pm.done();
 				};
 				boolean internalError= false;
 				try {
@@ -298,12 +293,9 @@ public class ChangeTypeWizard extends RefactoringWizard {
 			fTreeViewer.setContentProvider(new ChangeTypeContentProvider(((ChangeTypeRefactoring)getRefactoring())));
 			fLabelProvider= new ChangeTypeLabelProvider();
 			fTreeViewer.setLabelProvider(fLabelProvider);
-			ISelectionChangedListener listener= new ISelectionChangedListener(){
-				@Override
-				public void selectionChanged(SelectionChangedEvent event) {
-					IStructuredSelection selection= (IStructuredSelection)event.getSelection();
-					typeSelected((ITypeBinding)selection.getFirstElement());
-				}
+			ISelectionChangedListener listener= event -> {
+				IStructuredSelection selection= (IStructuredSelection)event.getSelection();
+				typeSelected((ITypeBinding)selection.getFirstElement());
 			};
 			fTreeViewer.addSelectionChangedListener(listener);
 			fTreeViewer.setInput(new ChangeTypeContentProvider.RootType(getGeneralizeTypeRefactoring().getOriginalType()));

@@ -13,8 +13,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.nls;
 
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Text;
@@ -54,12 +52,7 @@ class PackageFragmentSelection extends StringButtonStatusDialogField implements 
 		Control[] res= super.doFillIntoGrid(parent, nColumns);
 
 		final Text text= getTextControl(null);
-		text.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				updateListener();
-			}
-		});
+		text.addModifyListener(e -> updateListener());
 		LayoutUtil.setWidthHint(text, textWidth);
 		LayoutUtil.setHorizontalGrabbing(text);
 		ControlContentAssistHelper.createTextContentAssistant(text, fCurrPackageCompletionProcessor);

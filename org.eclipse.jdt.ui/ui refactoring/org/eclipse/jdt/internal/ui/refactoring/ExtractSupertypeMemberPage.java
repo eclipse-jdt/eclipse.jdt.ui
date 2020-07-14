@@ -21,8 +21,6 @@ import java.util.LinkedList;
 import java.util.Set;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
@@ -36,19 +34,13 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -116,18 +108,10 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 			fViewer.setLabelProvider(createLabelProvider());
 			fViewer.setContentProvider(ArrayContentProvider.getInstance());
 			fViewer.setComparator(new SupertypeSelectionViewerSorter());
-			fViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-				@Override
-				public void selectionChanged(final SelectionChangedEvent event) {
-					performSelectionChanged(((IStructuredSelection) fViewer.getSelection()).toArray());
-				}
-			});
-			fViewer.addDoubleClickListener(new IDoubleClickListener() {
-				@Override
-				public void doubleClick(final DoubleClickEvent event) {
-					performSelectionChanged(((IStructuredSelection) fViewer.getSelection()).toArray());
-					close();
-				}
+			fViewer.addSelectionChangedListener(event -> performSelectionChanged(((IStructuredSelection) fViewer.getSelection()).toArray()));
+			fViewer.addDoubleClickListener(event -> {
+				performSelectionChanged(((IStructuredSelection) fViewer.getSelection()).toArray());
+				close();
 			});
 			final GridData data= new GridData(GridData.FILL_BOTH);
 			data.heightHint= convertHeightInCharsToPixels(15);
@@ -252,15 +236,11 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 		if (fCandidateTypes != null && fCandidateTypes.length > 0)
 			return;
 		try {
-			getWizard().getContainer().run(true, true, new IRunnableWithProgress() {
-
-				@Override
-				public void run(final IProgressMonitor monitor) throws InvocationTargetException {
-					try {
-						fCandidateTypes= getProcessor().getCandidateTypes(new RefactoringStatus(), monitor);
-					} finally {
-						monitor.done();
-					}
+			getWizard().getContainer().run(true, true, monitor -> {
+				try {
+					fCandidateTypes= getProcessor().getCandidateTypes(new RefactoringStatus(), monitor);
+				} finally {
+					monitor.done();
 				}
 			});
 		} catch (InvocationTargetException exception) {
@@ -347,23 +327,19 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 				}
 			}
 		});
-		fTableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-
-			@Override
-			public void selectionChanged(final SelectionChangedEvent event) {
-				final IStructuredSelection selection= (IStructuredSelection) fTableViewer.getSelection();
-				if (selection.isEmpty()) {
+		fTableViewer.addSelectionChangedListener(event -> {
+			final IStructuredSelection selection= (IStructuredSelection) fTableViewer.getSelection();
+			if (selection.isEmpty()) {
+				removeButton.setEnabled(false);
+				return;
+			} else {
+				final Object[] elements= selection.toArray();
+				if (elements.length == 1 && elements[0].equals(getDeclaringType())) {
 					removeButton.setEnabled(false);
 					return;
-				} else {
-					final Object[] elements= selection.toArray();
-					if (elements.length == 1 && elements[0].equals(getDeclaringType())) {
-						removeButton.setEnabled(false);
-						return;
-					}
 				}
-				removeButton.setEnabled(true);
 			}
+			removeButton.setEnabled(true);
 		});
 	}
 
@@ -412,13 +388,7 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 		label.setLayoutData(new GridData());
 
 		fNameField= new Text(parent, SWT.BORDER);
-		fNameField.addModifyListener(new ModifyListener() {
-
-			@Override
-			public void modifyText(ModifyEvent e) {
-				handleNameChanged(fNameField.getText());
-			}
-		});
+		fNameField.addModifyListener(e -> handleNameChanged(fNameField.getText()));
 		fNameField.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, true, false));
 		TextFieldNavigationHandler.install(fNameField);
 	}

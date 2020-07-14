@@ -44,21 +44,15 @@ import org.eclipse.jface.layout.PixelConverter;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
-import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ComboBoxCellEditor;
-import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.ICellModifier;
-import org.eclipse.jface.viewers.ICheckStateListener;
-import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.window.Window;
@@ -570,33 +564,17 @@ public class PullUpMemberPage extends UserInputWizardPage {
 		fTableViewer.setUseHashlookup(true);
 		fTableViewer.setContentProvider(ArrayContentProvider.getInstance());
 		fTableViewer.setLabelProvider(new MemberActionInfoLabelProvider());
-		fTableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-
-			@Override
-			public void selectionChanged(final SelectionChangedEvent event) {
-				updateButtonEnablement(event.getSelection());
-			}
+		fTableViewer.addSelectionChangedListener(event -> updateButtonEnablement(event.getSelection()));
+		fTableViewer.addCheckStateListener(event -> {
+			final boolean checked= event.getChecked();
+			final MemberActionInfo info= (MemberActionInfo) event.getElement();
+			if (checked)
+				info.setAction(PULL_UP_ACTION);
+			else
+				info.setAction(MemberActionInfo.NO_ACTION);
+			updateWizardPage(null, true);
 		});
-		fTableViewer.addCheckStateListener(new ICheckStateListener() {
-
-			@Override
-			public void checkStateChanged(final CheckStateChangedEvent event) {
-				final boolean checked= event.getChecked();
-				final MemberActionInfo info= (MemberActionInfo) event.getElement();
-				if (checked)
-					info.setAction(PULL_UP_ACTION);
-				else
-					info.setAction(MemberActionInfo.NO_ACTION);
-				updateWizardPage(null, true);
-			}
-		});
-		fTableViewer.addDoubleClickListener(new IDoubleClickListener() {
-
-			@Override
-			public void doubleClick(final DoubleClickEvent event) {
-				editSelectedMembers();
-			}
-		});
+		fTableViewer.addDoubleClickListener(event -> editSelectedMembers());
 
 		setTableInput();
 		checkPullUp(fProcessor.getMembersToMove(), false);
@@ -689,16 +667,13 @@ public class PullUpMemberPage extends UserInputWizardPage {
 
 	protected void createSuperTypeControl(final Composite parent) {
 		try {
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(true, false, new IRunnableWithProgress() {
-				@Override
-				public void run(final IProgressMonitor monitor) throws InvocationTargetException {
-					try {
-						fCandidateTypes= fProcessor.getCandidateTypes(new RefactoringStatus(), monitor);
-					} catch (JavaModelException exception) {
-						throw new InvocationTargetException(exception);
-					} finally {
-						monitor.done();
-					}
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(true, false, monitor -> {
+				try {
+					fCandidateTypes= fProcessor.getCandidateTypes(new RefactoringStatus(), monitor);
+				} catch (JavaModelException exception) {
+					throw new InvocationTargetException(exception);
+				} finally {
+					monitor.done();
 				}
 			});
 			createSuperTypeCombo(parent);
@@ -959,22 +934,18 @@ public class PullUpMemberPage extends UserInputWizardPage {
 		final ComboBoxCellEditor editor= new ComboBoxCellEditor();
 		editor.setStyle(SWT.READ_ONLY);
 		fTableViewer.setCellEditors(new CellEditor[] { null, editor});
-		fTableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-
-			@Override
-			public void selectionChanged(final SelectionChangedEvent event) {
-				if (editor.getControl() == null && !table.isDisposed())
-					editor.create(table);
-				final ISelection sel= event.getSelection();
-				if (!(sel instanceof IStructuredSelection))
-					return;
-				final IStructuredSelection structured= (IStructuredSelection) sel;
-				if (structured.size() != 1)
-					return;
-				final MemberActionInfo info= (MemberActionInfo) structured.getFirstElement();
-				editor.setItems(info.getAllowedLabels());
-				editor.setValue(Integer.valueOf(info.getAction()));
-			}
+		fTableViewer.addSelectionChangedListener(event -> {
+			if (editor.getControl() == null && !table.isDisposed())
+				editor.create(table);
+			final ISelection sel= event.getSelection();
+			if (!(sel instanceof IStructuredSelection))
+				return;
+			final IStructuredSelection structured= (IStructuredSelection) sel;
+			if (structured.size() != 1)
+				return;
+			final MemberActionInfo info= (MemberActionInfo) structured.getFirstElement();
+			editor.setItems(info.getAllowedLabels());
+			editor.setValue(Integer.valueOf(info.getAction()));
 		});
 
 		final ICellModifier cellModifier= new MemberActionCellModifier();

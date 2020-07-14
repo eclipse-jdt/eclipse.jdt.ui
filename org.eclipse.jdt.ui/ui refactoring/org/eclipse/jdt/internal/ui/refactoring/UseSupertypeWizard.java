@@ -33,10 +33,8 @@ import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.IMessageProvider;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
@@ -237,19 +235,16 @@ public class UseSupertypeWizard extends RefactoringWizard{
 					return getComparator().compare(type1.getElementName(), type2.getElementName());
 				}
 			});
-			fTreeViewer.addSelectionChangedListener(new ISelectionChangedListener(){
-				@Override
-				public void selectionChanged(SelectionChangedEvent event) {
-					IStructuredSelection ss= (IStructuredSelection)event.getSelection();
-					if (Integer.valueOf(0).equals(fFileCount.get(ss.getFirstElement()))){
-						setMessage(RefactoringMessages.UseSupertypeInputPage_No_updates, IMessageProvider.INFORMATION);
-						setPageComplete(false);
-					} else {
-						setMessage(MESSAGE);
-						setPageComplete(true);
-					}
-					fTreeViewer.refresh();
+			fTreeViewer.addSelectionChangedListener(event -> {
+				IStructuredSelection ss= (IStructuredSelection)event.getSelection();
+				if (Integer.valueOf(0).equals(fFileCount.get(ss.getFirstElement()))){
+					setMessage(RefactoringMessages.UseSupertypeInputPage_No_updates, IMessageProvider.INFORMATION);
+					setPageComplete(false);
+				} else {
+					setMessage(MESSAGE);
+					setPageComplete(true);
 				}
+				fTreeViewer.refresh();
 			});
 			try {
 				fTreeViewer.setInput(SuperTypeHierarchyCache.getTypeHierarchy(getUseSupertypeProcessor().getSubType()));

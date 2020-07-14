@@ -78,22 +78,19 @@ public class ExternalizeWizard extends RefactoringWizard {
 			return;
 		}
 		Display display= shell != null ? shell.getDisplay() : Display.getCurrent();
-		BusyIndicator.showWhile(display, new Runnable() {
-			@Override
-			public void run() {
-				NLSRefactoring refactoring= null;
-				try {
-					refactoring= NLSRefactoring.create(unit);
-				} catch (IllegalArgumentException e) {
-					// Loading a properties file can throw an IAE due to malformed Unicode escape sequence, see Properties#load for details.
-					IStatus status= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), e.getLocalizedMessage());
-					ExceptionHandler.handle(status,
-							NLSUIMessages.ExternalizeWizard_name,
-							NLSUIMessages.ExternalizeWizard_error_message);
-				}
-				if (refactoring != null)
-					new RefactoringStarter().activate(new ExternalizeWizard(refactoring), shell, ActionMessages.ExternalizeStringsAction_dialog_title, RefactoringSaveHelper.SAVE_REFACTORING);
+		BusyIndicator.showWhile(display, () -> {
+			NLSRefactoring refactoring= null;
+			try {
+				refactoring= NLSRefactoring.create(unit);
+			} catch (IllegalArgumentException e) {
+				// Loading a properties file can throw an IAE due to malformed Unicode escape sequence, see Properties#load for details.
+				IStatus status= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), e.getLocalizedMessage());
+				ExceptionHandler.handle(status,
+						NLSUIMessages.ExternalizeWizard_name,
+						NLSUIMessages.ExternalizeWizard_error_message);
 			}
+			if (refactoring != null)
+				new RefactoringStarter().activate(new ExternalizeWizard(refactoring), shell, ActionMessages.ExternalizeStringsAction_dialog_title, RefactoringSaveHelper.SAVE_REFACTORING);
 		});
 	}
 }

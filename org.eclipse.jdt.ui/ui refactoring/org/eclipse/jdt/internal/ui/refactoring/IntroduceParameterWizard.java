@@ -145,12 +145,7 @@ public class IntroduceParameterWizard extends RefactoringWizard {
 			 * The asyncExec is a workaround for bug 450286:
 			 * Only set/reveal the table selection after the shell has been opened and laid out.
 			 */
-			composite.getDisplay().asyncExec(new Runnable() {
-				@Override
-				public void run() {
-					cp.editParameter(getIntroduceParameterRefactoring().getAddedParameterInfo());
-				}
-			});
+			composite.getDisplay().asyncExec(() -> cp.editParameter(getIntroduceParameterRefactoring().getAddedParameterInfo()));
 			return cp;
 		}
 

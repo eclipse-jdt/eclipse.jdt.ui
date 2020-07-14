@@ -23,8 +23,6 @@ import java.util.Properties;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -70,7 +68,6 @@ import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.IFontProvider;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -767,12 +764,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		fTableViewer.setLabelProvider(new NLSSubstitutionLabelProvider());
 		fTableViewer.setInput(fSubstitutions);
 
-		fTableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				ExternalizeWizardPage.this.selectionChanged(event);
-			}
-		});
+		fTableViewer.addSelectionChangedListener(event -> ExternalizeWizardPage.this.selectionChanged(event));
 	}
 
 	private void createDefaultExternalization(NLSSubstitution[] substitutions) {
@@ -848,12 +840,9 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		fPrefixField.setText(fNLSRefactoring.getPrefix());
 		fPrefixField.selectAll();
 
-		fPrefixField.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				fNLSRefactoring.setPrefix(fPrefixField.getText());
-				validateKeys(true);
-			}
+		fPrefixField.addModifyListener(e -> {
+			fNLSRefactoring.setPrefix(fPrefixField.getText());
+			validateKeys(true);
 		});
 	}
 

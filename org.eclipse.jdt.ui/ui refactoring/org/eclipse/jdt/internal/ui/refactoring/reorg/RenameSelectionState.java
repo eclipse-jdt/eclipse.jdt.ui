@@ -122,12 +122,7 @@ public class RenameSelectionState {
 				}
 			}
 			if (changed) {
-				fDisplay.asyncExec(new Runnable() {
-					@Override
-					public void run() {
-						target.selectReveal(newSelection[0]);
-					}
-				});
+				fDisplay.asyncExec(() -> target.selectReveal(newSelection[0]));
 			}
 		}
 	}

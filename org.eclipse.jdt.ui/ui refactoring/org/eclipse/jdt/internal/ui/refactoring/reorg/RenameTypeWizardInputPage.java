@@ -26,10 +26,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizardPage;
 
@@ -165,20 +163,16 @@ class RenameTypeWizardInputPage extends RenameInputWizardPage {
 		if (wizard.isRenameType()) {
 			final RenameTypeProcessor renameTypeProcessor= wizard.getRenameTypeProcessor();
 			try {
-				getContainer().run(true, true, new IRunnableWithProgress() {
-
-					@Override
-					public void run(IProgressMonitor pm) throws InterruptedException {
-						try {
-							renameTypeProcessor.initializeReferences(pm);
-						} catch (OperationCanceledException e) {
-							throw new InterruptedException();
-						} catch (CoreException e) {
-							ExceptionHandler.handle(e, RefactoringMessages.RenameTypeWizard_defaultPageTitle,
-									RefactoringMessages.RenameTypeWizard_unexpected_exception);
-						} finally {
-							pm.done();
-						}
+				getContainer().run(true, true, pm -> {
+					try {
+						renameTypeProcessor.initializeReferences(pm);
+					} catch (OperationCanceledException e1) {
+						throw new InterruptedException();
+					} catch (CoreException e2) {
+						ExceptionHandler.handle(e2, RefactoringMessages.RenameTypeWizard_defaultPageTitle,
+								RefactoringMessages.RenameTypeWizard_unexpected_exception);
+					} finally {
+						pm.done();
 					}
 				});
 			} catch (InvocationTargetException e) {

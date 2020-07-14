@@ -23,8 +23,6 @@ import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.TraverseEvent;
-import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
@@ -44,13 +42,11 @@ import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableFontProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -322,20 +318,12 @@ public class ChangeParametersControl extends Composite {
 		fTableViewer.setUseHashlookup(true);
 		fTableViewer.setContentProvider(new ParameterInfoContentProvider());
 		fTableViewer.setLabelProvider(new ParameterInfoLabelProvider());
-		fTableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				updateButtonsEnabledState();
-			}
-		});
+		fTableViewer.addSelectionChangedListener(event -> updateButtonsEnabledState());
 
-		table.addTraverseListener(new TraverseListener() {
-			@Override
-			public void keyTraversed(TraverseEvent e) {
-				if (e.detail == SWT.TRAVERSE_RETURN && e.stateMask == SWT.NONE) {
-					editColumnOrNextPossible(0);
-					e.detail= SWT.TRAVERSE_NONE;
-				}
+		table.addTraverseListener(e -> {
+			if (e.detail == SWT.TRAVERSE_RETURN && e.stateMask == SWT.NONE) {
+				editColumnOrNextPossible(0);
+				e.detail= SWT.TRAVERSE_NONE;
 			}
 		});
 		table.addKeyListener(new KeyAdapter() {
@@ -612,35 +600,29 @@ public class ChangeParametersControl extends Composite {
 			final int editorColumn= i;
 			final TableTextCellEditor editor = editors[i];
 			// support tabbing between columns while editing:
-			editor.getText().addTraverseListener(new TraverseListener() {
-				@Override
-				public void keyTraversed(TraverseEvent e) {
-					switch (e.detail) {
-						case SWT.TRAVERSE_TAB_NEXT :
-							editColumnOrNextPossible(nextColumn(editorColumn));
-							e.detail= SWT.TRAVERSE_NONE;
-							break;
+			editor.getText().addTraverseListener(e -> {
+				switch (e.detail) {
+					case SWT.TRAVERSE_TAB_NEXT :
+						editColumnOrNextPossible(nextColumn(editorColumn));
+						e.detail= SWT.TRAVERSE_NONE;
+						break;
 
-						case SWT.TRAVERSE_TAB_PREVIOUS :
-							editColumnOrPrevPossible(prevColumn(editorColumn));
-							e.detail= SWT.TRAVERSE_NONE;
-							break;
+					case SWT.TRAVERSE_TAB_PREVIOUS :
+						editColumnOrPrevPossible(prevColumn(editorColumn));
+						e.detail= SWT.TRAVERSE_NONE;
+						break;
 
-						default :
-							break;
-					}
+					default :
+						break;
 				}
 			});
 			TextFieldNavigationHandler.install(editor.getText());
 		}
 
-		editors[NEWNAME_PROP].setActivationListener(new TableTextCellEditor.IActivationListener(){
-			@Override
-			public void activate() {
-				ParameterInfo[] selected= getSelectedElements();
-				if (selected.length == 1 && fNameContentAssistHandler != null) {
-					fNameContentAssistHandler.setEnabled(selected[0].isAdded());
-				}
+		editors[NEWNAME_PROP].setActivationListener(() -> {
+			ParameterInfo[] selected= getSelectedElements();
+			if (selected.length == 1 && fNameContentAssistHandler != null) {
+				fNameContentAssistHandler.setEnabled(selected[0].isAdded());
 			}
 		});
 

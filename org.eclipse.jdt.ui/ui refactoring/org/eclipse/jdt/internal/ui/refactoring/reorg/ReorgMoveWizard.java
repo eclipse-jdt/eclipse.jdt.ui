@@ -16,8 +16,6 @@ package org.eclipse.jdt.internal.ui.refactoring.reorg;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.TraverseEvent;
-import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -257,13 +255,10 @@ public class ReorgMoveWizard extends RefactoringWizard {
 				firstLine.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 				Control label= super.addLabel(firstLine);
-				label.addTraverseListener(new TraverseListener() {
-					@Override
-					public void keyTraversed(TraverseEvent e) {
-						if (e.detail == SWT.TRAVERSE_MNEMONIC && e.doit) {
-							e.detail= SWT.TRAVERSE_NONE;
-							getTreeViewer().getTree().setFocus();
-						}
+				label.addTraverseListener(e -> {
+					if (e.detail == SWT.TRAVERSE_MNEMONIC && e.doit) {
+						e.detail= SWT.TRAVERSE_NONE;
+						getTreeViewer().getTree().setFocus();
 					}
 				});
 

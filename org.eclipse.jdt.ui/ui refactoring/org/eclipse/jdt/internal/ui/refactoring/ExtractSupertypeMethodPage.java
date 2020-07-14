@@ -17,10 +17,6 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.swt.widgets.Composite;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-
-import org.eclipse.jface.operation.IRunnableWithProgress;
-
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractSupertypeProcessor;
@@ -61,13 +57,7 @@ public class ExtractSupertypeMethodPage extends PullUpMethodPage {
 			final ExtractSupertypeProcessor processor= getProcessor();
 			processor.resetChanges();
 			try {
-				getWizard().getContainer().run(false, false, new IRunnableWithProgress() {
-
-					@Override
-					public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-						processor.createWorkingCopyLayer(monitor);
-					}
-				});
+				getWizard().getContainer().run(false, false, monitor -> processor.createWorkingCopyLayer(monitor));
 			} catch (InvocationTargetException exception) {
 				JavaPlugin.log(exception);
 			} catch (InterruptedException exception) {

@@ -174,21 +174,18 @@ public class ReorgQueries implements IReorgQueries {
 		}
 
 		private Runnable createQueryRunnable(final String question, final Object[] elements, final int[] result) {
-			return new Runnable() {
-				@Override
-				public void run() {
-					ListDialog dialog= new YesNoListDialog(fShell, true);
-					dialog.setAddCancelButton(false);
-					dialog.setBlockOnOpen(true);
-					dialog.setContentProvider(ArrayContentProvider.getInstance());
-					dialog.setLabelProvider(new JavaElementLabelProvider());
-					dialog.setTitle(fDialogTitle);
-					dialog.setMessage(question);
-					dialog.setInput(elements);
+			return () -> {
+				ListDialog dialog= new YesNoListDialog(fShell, true);
+				dialog.setAddCancelButton(false);
+				dialog.setBlockOnOpen(true);
+				dialog.setContentProvider(ArrayContentProvider.getInstance());
+				dialog.setLabelProvider(new JavaElementLabelProvider());
+				dialog.setTitle(fDialogTitle);
+				dialog.setMessage(question);
+				dialog.setInput(elements);
 
-					dialog.open();
-					result[0]= dialog.getReturnCode();
-				}
+				dialog.open();
+				result[0]= dialog.getReturnCode();
 			};
 		}
 
@@ -286,21 +283,18 @@ public class ReorgQueries implements IReorgQueries {
 		}
 
 		private Runnable createQueryRunnable(final String question, final Object[] elements, final int[] result) {
-			return new Runnable() {
-				@Override
-				public void run() {
-					ListDialog dialog= new YesNoListDialog(fShell, false);
-					dialog.setAddCancelButton(false);
-					dialog.setBlockOnOpen(true);
-					dialog.setContentProvider(ArrayContentProvider.getInstance());
-					dialog.setLabelProvider(new JavaElementLabelProvider());
-					dialog.setTitle(fDialogTitle);
-					dialog.setMessage(question);
-					dialog.setInput(elements);
+			return () -> {
+				ListDialog dialog= new YesNoListDialog(fShell, false);
+				dialog.setAddCancelButton(false);
+				dialog.setBlockOnOpen(true);
+				dialog.setContentProvider(ArrayContentProvider.getInstance());
+				dialog.setLabelProvider(new JavaElementLabelProvider());
+				dialog.setTitle(fDialogTitle);
+				dialog.setMessage(question);
+				dialog.setInput(elements);
 
-					dialog.open();
-					result[0]= dialog.getReturnCode();
-				}
+				dialog.open();
+				result[0]= dialog.getReturnCode();
 			};
 		}
 

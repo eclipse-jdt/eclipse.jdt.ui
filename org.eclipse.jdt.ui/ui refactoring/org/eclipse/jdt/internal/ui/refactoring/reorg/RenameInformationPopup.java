@@ -20,15 +20,11 @@ import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
-import org.eclipse.swt.events.PaintEvent;
-import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.ShellAdapter;
@@ -114,28 +110,25 @@ public class RenameInformationPopup implements IWidgetTokenKeeper, IWidgetTokenK
 			fEditor.getSite().getShell().addControlListener(this);
 			viewer.addTextListener(this);
 			viewer.addViewportListener(this);
-			fPopup.addDisposeListener(new DisposeListener() {
-				@Override
-				public void widgetDisposed(DisposeEvent e) {
-					fEditor.getSite().getWorkbenchWindow().getPartService().removePartListener(PopupVisibilityManager.this);
-					if (! textWidget.isDisposed()) {
-						textWidget.removeControlListener(PopupVisibilityManager.this);
-						textWidget.removeMouseListener(PopupVisibilityManager.this);
-						textWidget.removeKeyListener(PopupVisibilityManager.this);
-					}
-					fEditor.getSite().getShell().removeControlListener(PopupVisibilityManager.this);
-					viewer.removeTextListener(PopupVisibilityManager.this);
-					viewer.removeViewportListener(PopupVisibilityManager.this);
-					if (fMenuImage != null) {
-						fMenuImage.dispose();
-						fMenuImage= null;
-					}
-					if (fMenuManager != null) {
-						fMenuManager.dispose();
-						fMenuManager= null;
-					}
-					fRenameLinkedMode.cancel();
+			fPopup.addDisposeListener(e -> {
+				fEditor.getSite().getWorkbenchWindow().getPartService().removePartListener(PopupVisibilityManager.this);
+				if (! textWidget.isDisposed()) {
+					textWidget.removeControlListener(PopupVisibilityManager.this);
+					textWidget.removeMouseListener(PopupVisibilityManager.this);
+					textWidget.removeKeyListener(PopupVisibilityManager.this);
 				}
+				fEditor.getSite().getShell().removeControlListener(PopupVisibilityManager.this);
+				viewer.removeTextListener(PopupVisibilityManager.this);
+				viewer.removeViewportListener(PopupVisibilityManager.this);
+				if (fMenuImage != null) {
+					fMenuImage.dispose();
+					fMenuImage= null;
+				}
+				if (fMenuManager != null) {
+					fMenuManager.dispose();
+					fMenuManager= null;
+				}
+				fRenameLinkedMode.cancel();
 			});
 		}
 
@@ -347,26 +340,17 @@ public class RenameInformationPopup implements IWidgetTokenKeeper, IWidgetTokenK
 					return;
 
 				final Shell editorShell= fEditor.getSite().getShell();
-				display.asyncExec(new Runnable() {
-					// post to UI thread since editor shell only gets activated after popup has lost focus
-					@Override
-					public void run() {
-						Shell activeShell= display.getActiveShell();
-						if (activeShell != editorShell) {
-							fRenameLinkedMode.cancel();
-						}
+				display.asyncExec(() -> {
+					Shell activeShell= display.getActiveShell();
+					if (activeShell != editorShell) {
+						fRenameLinkedMode.cancel();
 					}
 				});
 			}
 		});
 
 		if (! MAC) { // carbon and cocoa draw their own border...
-			fPopup.addPaintListener(new PaintListener() {
-				@Override
-				public void paintControl(PaintEvent pe) {
-					pe.gc.drawPolygon(getPolygon(true));
-				}
-			});
+			fPopup.addPaintListener(pe -> pe.gc.drawPolygon(getPolygon(true)));
 		}
 
 //		fPopup.moveBelow(null); // make sure hovers are on top of the info popup

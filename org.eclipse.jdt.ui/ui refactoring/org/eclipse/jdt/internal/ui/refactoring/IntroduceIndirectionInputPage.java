@@ -17,8 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -145,12 +143,7 @@ public class IntroduceIndirectionInputPage extends UserInputWizardPage {
 		fIntermediaryMethodName.setText(getIntroduceIndirectionRefactoring().getIntermediaryMethodName());
 		fIntermediaryTypeName.setText(getIntroduceIndirectionRefactoring().getIntermediaryTypeName());
 
-		fIntermediaryMethodName.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				validateInput();
-			}
-		});
+		fIntermediaryMethodName.addModifyListener(e -> validateInput());
 
 		enableReferencesCheckBox.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -159,12 +152,7 @@ public class IntroduceIndirectionInputPage extends UserInputWizardPage {
 			}
 		});
 
-		fIntermediaryTypeName.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				validateInput();
-			}
-		});
+		fIntermediaryTypeName.addModifyListener(e -> validateInput());
 
 		browseTypes.addSelectionListener(new SelectionAdapter() {
 			@Override
