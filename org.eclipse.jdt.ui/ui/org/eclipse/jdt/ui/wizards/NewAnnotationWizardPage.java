@@ -50,7 +50,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFieldGroup;
 
@@ -219,12 +218,7 @@ public class NewAnnotationWizardPage extends NewTypeWizardPage {
 
 			fEnumButtons= new SelectionButtonDialogFieldGroup(style, enumLabels, nColumns);
 
-			fEnableButton.setDialogFieldListener(new IDialogFieldListener() {
-				@Override
-				public void dialogFieldChanged(DialogField field) {
-					fEnumButtons.setEnabled(fEnableButton.isSelected());
-				}
-			});
+			fEnableButton.setDialogFieldListener(field -> fEnumButtons.setEnabled(fEnableButton.isSelected()));
 		}
 
 		private String[] toStringArray(Class<E> enumClass) {

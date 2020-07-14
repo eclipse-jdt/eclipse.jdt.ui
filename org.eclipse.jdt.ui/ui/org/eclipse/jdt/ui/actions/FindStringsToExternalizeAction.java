@@ -41,10 +41,8 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 
 import org.eclipse.jface.text.BadLocationException;
 
@@ -162,14 +160,11 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 	}
 
 	private IRunnableWithProgress createRunnable(final IStructuredSelection selection) {
-		return new IRunnableWithProgress() {
-			@Override
-			public void run(IProgressMonitor pm) throws InvocationTargetException {
-				try {
-					fElements= doRun(selection, pm);
-				} catch (CoreException e) {
-					throw new InvocationTargetException(e);
-				}
+		return pm -> {
+			try {
+				fElements= doRun(selection, pm);
+			} catch (CoreException e) {
+				throw new InvocationTargetException(e);
 			}
 		};
 	}
@@ -376,12 +371,9 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 		@Override
 		protected Control createDialogArea(Composite parent) {
 			Composite result= (Composite)super.createDialogArea(parent);
-			getTableViewer().addSelectionChangedListener(new ISelectionChangedListener(){
-				@Override
-				public void selectionChanged(SelectionChangedEvent event){
-					if (fOpenButton != null){
-						fOpenButton.setEnabled(! getTableViewer().getSelection().isEmpty());
-					}
+			getTableViewer().addSelectionChangedListener(event -> {
+				if (fOpenButton != null){
+					fOpenButton.setEnabled(! getTableViewer().getSelection().isEmpty());
 				}
 			});
 			getTableViewer().getTable().addSelectionListener(new SelectionAdapter(){

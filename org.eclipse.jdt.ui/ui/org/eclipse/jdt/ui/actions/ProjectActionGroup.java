@@ -28,7 +28,6 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.ui.IActionBars;
@@ -110,13 +109,10 @@ public class ProjectActionGroup extends ActionGroup {
 			fCloseUnrelatedAction.selectionChanged(s);
 		}
 
-		fSelectionChangedListener= new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				ISelection s= event.getSelection();
-				if (s instanceof IStructuredSelection) {
-					performSelectionChanged((IStructuredSelection) s);
-				}
+		fSelectionChangedListener= event -> {
+			ISelection s= event.getSelection();
+			if (s instanceof IStructuredSelection) {
+				performSelectionChanged((IStructuredSelection) s);
 			}
 		};
 		selectionProvider.addSelectionChangedListener(fSelectionChangedListener);

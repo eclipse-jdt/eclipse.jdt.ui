@@ -450,12 +450,9 @@ public class CustomFiltersActionGroup extends ActionGroup {
 		viewMenu.add(new ShowFilterDialogAction());
 
 		fMenuManager= viewMenu;
-		fMenuListener= new IMenuListener() {
-			@Override
-			public void menuAboutToShow(IMenuManager manager) {
-				removePreviousLRUFilterActions(manager);
-				addLRUFilterActions(manager);
-			}
+		fMenuListener= manager -> {
+			removePreviousLRUFilterActions(manager);
+			addLRUFilterActions(manager);
 		};
 		fMenuManager.addMenuListener(fMenuListener);
 	}

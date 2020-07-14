@@ -324,12 +324,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 	}
 
 	private IChooseImportQuery createChooseImportQuery(final JavaEditor editor) {
-		return new IChooseImportQuery() {
-			@Override
-			public TypeNameMatch[] chooseImports(TypeNameMatch[][] openChoices, ISourceRange[] ranges) {
-				return doChooseImports(openChoices, ranges, editor);
-			}
-		};
+		return (openChoices, ranges) -> doChooseImports(openChoices, ranges, editor);
 	}
 
 	private TypeNameMatch[] doChooseImports(TypeNameMatch[][] openChoices, final ISourceRange[] ranges, final JavaEditor editor) {

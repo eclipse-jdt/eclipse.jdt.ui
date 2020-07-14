@@ -1411,12 +1411,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 			}
 		}
 
-		Comparator<Tuple> comparator= new Comparator<Tuple>() {
-			@Override
-			public int compare(Tuple o1, Tuple o2) {
-				return o1.position.getOffset() - o2.position.getOffset();
-			}
-		};
+		Comparator<Tuple> comparator= (o1, o2) -> o1.position.getOffset() - o2.position.getOffset();
 		for (List<Tuple> list : map.values()) {
 			Collections.sort(list, comparator);
 		}

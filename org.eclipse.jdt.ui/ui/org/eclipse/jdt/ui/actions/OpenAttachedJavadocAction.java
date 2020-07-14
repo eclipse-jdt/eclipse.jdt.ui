@@ -203,14 +203,11 @@ public class OpenAttachedJavadocAction extends SelectionDispatchAction {
 	}
 
 	private static void showMessage(final Shell shell, final String message, final boolean isError) {
-		Display.getDefault().asyncExec(new Runnable() {
-			@Override
-			public void run() {
-				if (isError) {
-					MessageDialog.openError(shell, getTitle(), message);
-				} else {
-					MessageDialog.openInformation(shell, getTitle(), message);
-				}
+		Display.getDefault().asyncExec(() -> {
+			if (isError) {
+				MessageDialog.openError(shell, getTitle(), message);
+			} else {
+				MessageDialog.openInformation(shell, getTitle(), message);
 			}
 		});
 	}

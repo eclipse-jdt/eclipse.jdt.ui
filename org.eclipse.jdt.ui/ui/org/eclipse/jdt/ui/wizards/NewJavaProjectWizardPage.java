@@ -26,7 +26,6 @@ import org.eclipse.core.filesystem.URIUtil;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -303,33 +302,30 @@ public class NewJavaProjectWizardPage extends NewElementWizardPage {
 	 * @return the runnable
 	 */
 	public IRunnableWithProgress getRunnable() {
-		return new IRunnableWithProgress() {
-			@Override
-			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-				if (monitor == null) {
-					monitor= new NullProgressMonitor();
-				}
-				monitor.beginTask(NewWizardMessages.NewJavaProjectWizardPage_op_desc, 10);
-				// initialize if needed
-				if (fProjectModified || isNewProjectHandle()) {
-					initBuildPaths();
-				}
+		return monitor -> {
+			if (monitor == null) {
+				monitor= new NullProgressMonitor();
+			}
+			monitor.beginTask(NewWizardMessages.NewJavaProjectWizardPage_op_desc, 10);
+			// initialize if needed
+			if (fProjectModified || isNewProjectHandle()) {
+				initBuildPaths();
+			}
 
-				// create the project
-				try {
-					IPath locationPath= getLocationPath();
-					BuildPathsBlock.createProject(getProjectHandle(),
-						locationPath != null ? URIUtil.toURI(locationPath) : null,
-						new SubProgressMonitor(monitor, 2));
-					BuildPathsBlock.addJavaNature(getProjectHandle(), new SubProgressMonitor(monitor, 2));
-					fBuildPathsBlock.configureJavaProject(new SubProgressMonitor(monitor, 6));
-				} catch (CoreException e) {
-					throw new InvocationTargetException(e);
-				} catch (OperationCanceledException e) {
-					throw new InterruptedException();
-				} finally {
-					monitor.done();
-				}
+			// create the project
+			try {
+				IPath locationPath= getLocationPath();
+				BuildPathsBlock.createProject(getProjectHandle(),
+					locationPath != null ? URIUtil.toURI(locationPath) : null,
+					new SubProgressMonitor(monitor, 2));
+				BuildPathsBlock.addJavaNature(getProjectHandle(), new SubProgressMonitor(monitor, 2));
+				fBuildPathsBlock.configureJavaProject(new SubProgressMonitor(monitor, 6));
+			} catch (CoreException e1) {
+				throw new InvocationTargetException(e1);
+			} catch (OperationCanceledException e2) {
+				throw new InterruptedException();
+			} finally {
+				monitor.done();
 			}
 		};
 	}

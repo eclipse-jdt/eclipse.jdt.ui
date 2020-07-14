@@ -234,14 +234,11 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 	 * Updates the package icon
 	 */
 	 private void updatePackageIcon(final IJavaElement element) {
-	 	postRunnable(new Runnable() {
-			@Override
-			public void run() {
-				// 1GF87WR: ITPUI:ALL - SWTEx + NPE closing a workbench window.
-				Control ctrl= fViewer.getControl();
-				if (ctrl != null && !ctrl.isDisposed())
-					fViewer.update(element, new String[]{IBasicPropertyConstants.P_IMAGE});
-			}
+	 	postRunnable(() -> {
+			// 1GF87WR: ITPUI:ALL - SWTEx + NPE closing a workbench window.
+			Control ctrl= fViewer.getControl();
+			if (ctrl != null && !ctrl.isDisposed())
+				fViewer.update(element, new String[]{IBasicPropertyConstants.P_IMAGE});
 		});
 	 }
 
@@ -284,38 +281,29 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 	}
 
 	private void postRefresh(final Object root) {
-		postRunnable(new Runnable() {
-			@Override
-			public void run() {
-				// 1GF87WR: ITPUI:ALL - SWTEx + NPE closing a workbench window.
-				Control ctrl= fViewer.getControl();
-				if (ctrl != null && !ctrl.isDisposed())
-					fViewer.refresh(root);
-			}
+		postRunnable(() -> {
+			// 1GF87WR: ITPUI:ALL - SWTEx + NPE closing a workbench window.
+			Control ctrl= fViewer.getControl();
+			if (ctrl != null && !ctrl.isDisposed())
+				fViewer.refresh(root);
 		});
 	}
 
 	private void postAdd(final Object parent, final Object element) {
-		postRunnable(new Runnable() {
-			@Override
-			public void run() {
-				// 1GF87WR: ITPUI:ALL - SWTEx + NPE closing a workbench window.
-				Control ctrl= fViewer.getControl();
-				if (ctrl != null && !ctrl.isDisposed())
-					fViewer.add(parent, element);
-			}
+		postRunnable(() -> {
+			// 1GF87WR: ITPUI:ALL - SWTEx + NPE closing a workbench window.
+			Control ctrl= fViewer.getControl();
+			if (ctrl != null && !ctrl.isDisposed())
+				fViewer.add(parent, element);
 		});
 	}
 
 	private void postRemove(final Object element) {
-		postRunnable(new Runnable() {
-			@Override
-			public void run() {
-				// 1GF87WR: ITPUI:ALL - SWTEx + NPE closing a workbench window.
-				Control ctrl= fViewer.getControl();
-				if (ctrl != null && !ctrl.isDisposed())
-					fViewer.remove(element);
-			}
+		postRunnable(() -> {
+			// 1GF87WR: ITPUI:ALL - SWTEx + NPE closing a workbench window.
+			Control ctrl= fViewer.getControl();
+			if (ctrl != null && !ctrl.isDisposed())
+				fViewer.remove(element);
 		});
 	}
 

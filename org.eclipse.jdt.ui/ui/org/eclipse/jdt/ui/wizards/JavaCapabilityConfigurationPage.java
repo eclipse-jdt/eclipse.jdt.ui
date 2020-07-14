@@ -204,14 +204,11 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 	 */
 	public IRunnableWithProgress getRunnable() {
 		if (getJavaProject() != null) {
-			return new IRunnableWithProgress() {
-				@Override
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					try {
-						configureJavaProject(monitor);
-					} catch (CoreException e) {
-						throw new InvocationTargetException(e);
-					}
+			return monitor -> {
+				try {
+					configureJavaProject(monitor);
+				} catch (CoreException e) {
+					throw new InvocationTargetException(e);
 				}
 			};
 		}

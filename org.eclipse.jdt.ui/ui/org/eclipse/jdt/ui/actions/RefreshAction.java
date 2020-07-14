@@ -173,12 +173,7 @@ public class RefreshAction extends SelectionDispatchAction {
 
 	@Override
 	public void run(final IStructuredSelection selection) {
-		IWorkspaceRunnable operation= new IWorkspaceRunnable() {
-			@Override
-			public void run(IProgressMonitor monitor) throws CoreException {
-				performRefresh(selection, monitor);
-			}
-		};
+		IWorkspaceRunnable operation= monitor -> performRefresh(selection, monitor);
 		new WorkbenchRunnableAdapter(operation).runAsUserJob(ActionMessages.RefreshAction_refresh_operation_label, null);
 	}
 
