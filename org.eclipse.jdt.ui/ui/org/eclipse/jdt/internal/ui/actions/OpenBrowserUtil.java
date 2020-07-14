@@ -36,12 +36,7 @@ public class OpenBrowserUtil {
 	 * @since 3.6
 	 */
 	public static void open(final URL url, Display display) {
-		display.syncExec(new Runnable() {
-			@Override
-			public void run() {
-				internalOpen(url, false);
-			}
-		});
+		display.syncExec(() -> internalOpen(url, false));
 	}
 
 	/**
@@ -52,34 +47,26 @@ public class OpenBrowserUtil {
 	 * @since 3.6
 	 */
 	public static void openExternal(final URL url, Display display) {
-		display.syncExec(new Runnable() {
-			@Override
-			public void run() {
-				internalOpen(url, true);
-			}
-		});
+		display.syncExec(() -> internalOpen(url, true));
 	}
 
 	private static void internalOpen(final URL url, final boolean useExternalBrowser) {
-		BusyIndicator.showWhile(null, new Runnable() {
-			@Override
-			public void run() {
-				URL helpSystemUrl= PlatformUI.getWorkbench().getHelpSystem().resolve(url.toExternalForm(), true);
-				if (helpSystemUrl == null) { // can happen if org.eclipse.help.ui is not available
-					return; // the resolve() method already wrote "Unable to instantiate help UI" to the log
-				}
-				try {
-					IWorkbenchBrowserSupport browserSupport= PlatformUI.getWorkbench().getBrowserSupport();
-					IWebBrowser browser;
-					if (useExternalBrowser)
-						browser= browserSupport.getExternalBrowser();
-					else
-						browser= browserSupport.createBrowser(null);
-					browser.openURL(helpSystemUrl);
-				} catch (PartInitException ex) {
-					// XXX: show dialog?
-					JavaPlugin.logErrorStatus("Opening Javadoc failed", ex.getStatus()); //$NON-NLS-1$
-				}
+		BusyIndicator.showWhile(null, () -> {
+			URL helpSystemUrl= PlatformUI.getWorkbench().getHelpSystem().resolve(url.toExternalForm(), true);
+			if (helpSystemUrl == null) { // can happen if org.eclipse.help.ui is not available
+				return; // the resolve() method already wrote "Unable to instantiate help UI" to the log
+			}
+			try {
+				IWorkbenchBrowserSupport browserSupport= PlatformUI.getWorkbench().getBrowserSupport();
+				IWebBrowser browser;
+				if (useExternalBrowser)
+					browser= browserSupport.getExternalBrowser();
+				else
+					browser= browserSupport.createBrowser(null);
+				browser.openURL(helpSystemUrl);
+			} catch (PartInitException ex) {
+				// XXX: show dialog?
+				JavaPlugin.logErrorStatus("Opening Javadoc failed", ex.getStatus()); //$NON-NLS-1$
 			}
 		});
 	}

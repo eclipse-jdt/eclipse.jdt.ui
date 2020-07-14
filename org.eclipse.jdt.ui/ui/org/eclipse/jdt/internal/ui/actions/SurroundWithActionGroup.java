@@ -14,7 +14,6 @@
 package org.eclipse.jdt.internal.ui.actions;
 
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.ISelection;
@@ -81,13 +80,10 @@ public class SurroundWithActionGroup extends ActionGroup {
 		subMenu.setActionDefinitionId(SurroundWithTemplateMenuAction.SURROUND_WITH_QUICK_MENU_ACTION_ID);
 		menu.appendToGroup(fGroup, subMenu);
 		subMenu.add(new Action() {});
-		subMenu.addMenuListener(new IMenuListener() {
-			@Override
-			public void menuAboutToShow(IMenuManager manager) {
-				manager.removeAll();
-				SurroundWithTemplateMenuAction.fillMenu(manager, fEditor, fSurroundWithTryCatchAction,
-						fSurroundWithTryMultiCatchAction, fSurroundWithTryWithResourcesAction);
-			}
+		subMenu.addMenuListener(manager -> {
+			manager.removeAll();
+			SurroundWithTemplateMenuAction.fillMenu(manager, fEditor, fSurroundWithTryCatchAction,
+					fSurroundWithTryMultiCatchAction, fSurroundWithTryWithResourcesAction);
 		});
 	}
 

@@ -342,14 +342,11 @@ public class CategoryFilterActionGroup extends ActionGroup {
 	public void contributeToViewMenu(IMenuManager menuManager) {
 		menuManager.add(new Separator(CATEGORY_MENU_GROUP_NAME));
 		menuManager.appendToGroup(CATEGORY_MENU_GROUP_NAME, fMenuAction);
-		fMenuListener= new IMenuListener() {
-					@Override
-					public void menuAboutToShow(IMenuManager manager) {
-						if (!manager.isVisible())
-							return;
-						updateMenu(manager);
-					}
-				};
+		fMenuListener= manager -> {
+			if (!manager.isVisible())
+				return;
+			updateMenu(manager);
+		};
 		menuManager.addMenuListener(fMenuListener);
 		fMenuManager= menuManager;
 	}
@@ -395,21 +392,18 @@ public class CategoryFilterActionGroup extends ActionGroup {
 		final HashSet<String> foundLRUCategories= new HashSet<>();
 		final boolean hasUncategorizedMember[]= new boolean[] {false};
 		for (int i= 0; i < fInputElement.length && (!hasUncategorizedMember[0] || (foundLRUCategories.size() < MAX_NUMBER_OF_CATEGORIES_IN_MENU)); i++) {
-			collectCategories(fInputElement[i], new IResultCollector() {
-				@Override
-				public boolean accept(String[] cats) {
-					if (cats.length > 0) {
-						for (String category : cats) {
-							categories.add(category);
-							if (fLRUList.containsKey(category)) {
-								foundLRUCategories.add(category);
-							}
+			collectCategories(fInputElement[i], cats -> {
+				if (cats.length > 0) {
+					for (String category : cats) {
+						categories.add(category);
+						if (fLRUList.containsKey(category)) {
+							foundLRUCategories.add(category);
 						}
-					} else {
-						hasUncategorizedMember[0]= true;
 					}
-					return hasUncategorizedMember[0] && foundLRUCategories.size() >= MAX_NUMBER_OF_CATEGORIES_IN_MENU;
+				} else {
+					hasUncategorizedMember[0]= true;
 				}
+				return hasUncategorizedMember[0] && foundLRUCategories.size() >= MAX_NUMBER_OF_CATEGORIES_IN_MENU;
 			});
 		}
 		int count= 0;
@@ -468,12 +462,7 @@ public class CategoryFilterActionGroup extends ActionGroup {
 
 	private void fireSelectionChange() {
 		fViewer.getControl().setRedraw(false);
-		BusyIndicator.showWhile(fViewer.getControl().getDisplay(), new Runnable() {
-			@Override
-			public void run() {
-				fViewer.refresh();
-			}
-		});
+		BusyIndicator.showWhile(fViewer.getControl().getDisplay(), () -> fViewer.refresh());
 		fViewer.getControl().setRedraw(true);
 	}
 
@@ -484,12 +473,9 @@ public class CategoryFilterActionGroup extends ActionGroup {
 	private void showCategorySelectionDialog(IJavaElement[] input) {
 		final HashSet<String> categories= new HashSet<>();
 		for (IJavaElement i : input) {
-			collectCategories(i, new IResultCollector() {
-				@Override
-				public boolean accept(String[] cats) {
-					categories.addAll(Arrays.asList(cats));
-					return false;
-				}
+			collectCategories(i, cats -> {
+				categories.addAll(Arrays.asList(cats));
+				return false;
 			});
 		}
 		CategoryFilterSelectionDialog dialog= new CategoryFilterSelectionDialog(fViewer.getControl().getShell(), new ArrayList<>(categories), new ArrayList<>(fFilteredCategories));
