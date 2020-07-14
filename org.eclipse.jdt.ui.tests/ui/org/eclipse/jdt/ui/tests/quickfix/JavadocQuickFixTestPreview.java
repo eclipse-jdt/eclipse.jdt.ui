@@ -44,7 +44,7 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
 @RunWith(JUnit4.class)
-public class JavadocQuickFixTest15 extends QuickFixTest {
+public class JavadocQuickFixTestPreview extends QuickFixTest {
 
 	@Rule
     public ProjectTestSetup projectsetup = new Java15ProjectTestSetup(true);

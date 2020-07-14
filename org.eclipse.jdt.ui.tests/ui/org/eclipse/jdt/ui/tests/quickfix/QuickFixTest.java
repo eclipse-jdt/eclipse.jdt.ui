@@ -119,7 +119,7 @@ import org.eclipse.jdt.internal.ui.text.template.contentassist.SurroundWithTempl
 	MarkerResolutionTest.class,
 	JavadocQuickFixTest.class,
 	JavadocQuickFixTest9.class,
-	JavadocQuickFixTest15.class,
+	JavadocQuickFixTestPreview.class,
 	ConvertForLoopQuickFixTest.class,
 	ConvertIterableLoopQuickFixTest.class,
 	AdvancedQuickAssistTest.class,

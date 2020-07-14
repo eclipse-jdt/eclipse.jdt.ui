@@ -16,9 +16,9 @@ package org.eclipse.jdt.ui.tests.refactoring;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
-import org.eclipse.jdt.ui.tests.refactoring.rules.Java14Setup;
+import org.eclipse.jdt.ui.tests.refactoring.rules.JavaPreviewSetup;
 
-public class InlineMethodTestSetup14 extends Java14Setup {
+public class InlineMethodTestSetup14 extends JavaPreviewSetup {
 
 	private IPackageFragment fSimple14;
 
