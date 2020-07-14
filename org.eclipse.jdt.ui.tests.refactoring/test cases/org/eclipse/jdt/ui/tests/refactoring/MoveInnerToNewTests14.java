@@ -32,7 +32,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInnerToTopRefactoring;
 
-import org.eclipse.jdt.ui.tests.refactoring.rules.Java14Setup;
+import org.eclipse.jdt.ui.tests.refactoring.rules.JavaPreviewSetup;
 import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -41,7 +41,7 @@ public class MoveInnerToNewTests14 extends GenericRefactoringTest {
 	private static final String REFACTORING_PATH= "MoveInnerToNew14/";
 
 	@Rule
-	public RefactoringTestSetup fts= new Java14Setup();
+	public RefactoringTestSetup fts= new JavaPreviewSetup();
 
 	@Override
 	public void genericbefore() throws Exception {
