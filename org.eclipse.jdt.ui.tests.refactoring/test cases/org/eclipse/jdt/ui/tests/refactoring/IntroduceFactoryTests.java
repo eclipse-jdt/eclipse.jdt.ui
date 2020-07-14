@@ -45,7 +45,7 @@ import org.eclipse.jdt.core.SourceRange;
 
 import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceFactoryRefactoring;
 
-import org.eclipse.jdt.ui.tests.refactoring.rules.Java16Setup;
+import org.eclipse.jdt.ui.tests.refactoring.rules.Java1d6Setup;
 import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
 /**
@@ -55,7 +55,7 @@ public class IntroduceFactoryTests extends GenericRefactoringTest {
 	private static final String REFACTORING_PATH= "IntroduceFactory/";
 
 	@Rule
-	public RefactoringTestSetup rts= new Java16Setup();
+	public RefactoringTestSetup rts= new Java1d6Setup();
 
 	@Override
 	protected String getRefactoringPath() {

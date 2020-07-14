@@ -49,7 +49,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoringProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 
-import org.eclipse.jdt.ui.tests.refactoring.rules.Java15Setup;
+import org.eclipse.jdt.ui.tests.refactoring.rules.Java1d5Setup;
 import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -60,7 +60,7 @@ public class PullUpTests extends GenericRefactoringTest {
 	private static final String REFACTORING_PATH= "PullUp/";
 
 	@Rule
-	public RefactoringTestSetup fts= new Java15Setup();
+	public RefactoringTestSetup fts= new Java1d5Setup();
 
 	@Override
 	protected String getRefactoringPath() {

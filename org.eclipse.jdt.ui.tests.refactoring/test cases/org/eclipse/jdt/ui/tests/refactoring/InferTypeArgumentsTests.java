@@ -49,7 +49,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester
 import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsRefactoring;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.ZipTools;
-import org.eclipse.jdt.ui.tests.refactoring.rules.Java16Setup;
+import org.eclipse.jdt.ui.tests.refactoring.rules.Java1d6Setup;
 import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
 public class InferTypeArgumentsTests extends GenericRefactoringTest {
@@ -62,7 +62,7 @@ public class InferTypeArgumentsTests extends GenericRefactoringTest {
 	private boolean fLeaveUnconstrainedRaw= true;
 
 	@Rule
-	public Java16Setup fgTestSetup= new Java16Setup();
+	public Java1d6Setup fgTestSetup= new Java1d6Setup();
 
 	@Override
 	protected String getRefactoringPath() {

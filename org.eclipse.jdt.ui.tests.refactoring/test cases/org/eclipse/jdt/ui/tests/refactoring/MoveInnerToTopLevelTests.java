@@ -45,7 +45,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInnerToTopRefactoring;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
-import org.eclipse.jdt.ui.tests.refactoring.rules.Java15Setup;
+import org.eclipse.jdt.ui.tests.refactoring.rules.Java1d5Setup;
 import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -61,7 +61,7 @@ public class MoveInnerToTopLevelTests extends GenericRefactoringTest {
 	private String fCompactPref;
 
 	@ClassRule
-	public static RefactoringTestSetup fts= new Java15Setup();
+	public static RefactoringTestSetup fts= new Java1d5Setup();
 
 	@Override
 	protected String getRefactoringPath() {

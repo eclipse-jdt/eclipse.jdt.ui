@@ -42,14 +42,14 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester
 import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoringProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoringProcessor.MemberActionInfo;
 
-import org.eclipse.jdt.ui.tests.refactoring.rules.Java15Setup;
+import org.eclipse.jdt.ui.tests.refactoring.rules.Java1d5Setup;
 import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
 public class PushDownTests extends GenericRefactoringTest {
 	private static final String REFACTORING_PATH= "PushDown/";
 
 	@Rule
-	public RefactoringTestSetup fts= new Java15Setup();
+	public RefactoringTestSetup fts= new Java1d5Setup();
 
 	@Override
 	protected String getRefactoringPath() {

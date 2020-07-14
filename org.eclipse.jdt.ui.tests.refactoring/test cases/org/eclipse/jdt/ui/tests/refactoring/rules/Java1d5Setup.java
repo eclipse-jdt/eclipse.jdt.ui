@@ -13,19 +13,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring.rules;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-
-import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-
-public class Java16Setup extends RefactoringTestSetup {
-	/*
-	 * @see org.eclipse.jdt.ui.tests.refactoring.RefactoringTestSetup#addRTJar(org.eclipse.jdt.core.IJavaProject)
-	 */
+/**
+ * TODO: replace by RefactoringTestSetup
+ */
+public class Java1d5Setup extends RefactoringTestSetup {
 	@Override
-	protected IPackageFragmentRoot addRTJar(IJavaProject project) throws CoreException {
-		return JavaProjectHelper.addRTJar16(project);
+	public void before() throws Exception {
+		super.before();
 	}
 }

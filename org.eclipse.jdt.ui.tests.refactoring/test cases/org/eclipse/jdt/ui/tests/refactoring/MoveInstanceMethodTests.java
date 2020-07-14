@@ -41,7 +41,7 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodProcessor;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
-import org.eclipse.jdt.ui.tests.refactoring.rules.Java15Setup;
+import org.eclipse.jdt.ui.tests.refactoring.rules.Java1d5Setup;
 import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -73,7 +73,7 @@ public class MoveInstanceMethodTests extends GenericRefactoringTest {
 	}
 
 	@Rule
-	public RefactoringTestSetup fts= new Java15Setup();
+	public RefactoringTestSetup fts= new Java1d5Setup();
 
 	private static boolean typeMatches(int newTargetType, IVariableBinding newTarget) {
 		return newTargetType == PARAMETER && !newTarget.isField() || newTargetType == FIELD && newTarget.isField();
