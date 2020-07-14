@@ -26,8 +26,6 @@ import java.util.Set;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.MenuAdapter;
@@ -42,7 +40,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Table;
@@ -73,9 +70,9 @@ import org.eclipse.jdt.core.search.TypeNameMatch;
 import org.eclipse.jdt.core.search.TypeNameMatchRequestor;
 import org.eclipse.jdt.core.search.TypeNameRequestor;
 
+import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.OpenTypeHistory;
-import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 import org.eclipse.jdt.internal.corext.util.TypeFilter;
 import org.eclipse.jdt.internal.corext.util.TypeInfoFilter;
 import org.eclipse.jdt.internal.corext.util.TypeInfoRequestorAdapter;
@@ -936,28 +933,22 @@ public class TypeInfoViewer {
 				}
 			}
 		});
-		fTable.addDisposeListener(new DisposeListener() {
-			@Override
-			public void widgetDisposed(DisposeEvent e) {
-				stop(true, true);
-				fDashLineColor.dispose();
-				fSeparatorIcon.dispose();
-				fImageManager.dispose();
-				if (fProgressUpdateJob != null) {
-					fProgressUpdateJob.stop();
-					fProgressUpdateJob= null;
-				}
+		fTable.addDisposeListener(event -> {
+			stop(true, true);
+			fDashLineColor.dispose();
+			fSeparatorIcon.dispose();
+			fImageManager.dispose();
+			if (fProgressUpdateJob != null) {
+				fProgressUpdateJob.stop();
+				fProgressUpdateJob= null;
 			}
 		});
 		if (VIRTUAL) {
 			fHistoryMatches= EMTPY_TYPE_INFO_ARRAY;
 			fSearchMatches= EMTPY_TYPE_INFO_ARRAY;
-			fTable.addListener(SWT.SetData, new Listener() {
-				@Override
-				public void handleEvent(Event event) {
-					TableItem item= (TableItem)event.item;
-					setData(item);
-				}
+			fTable.addListener(SWT.SetData, event -> {
+				TableItem item= (TableItem)event.item;
+				setData(item);
 			});
 		}
 
@@ -1222,26 +1213,20 @@ public class TypeInfoViewer {
 	//-- Search result updating ----------------------------------------------------
 
 	private void clear(int ticket) {
-		syncExec(ticket, new Runnable() {
-			@Override
-			public void run() {
-				fNextElement= 0;
-				fDashLineIndex= -1;
-				fLastSelection= null;
-				fLastLabels= null;
-				fExpectedItemCount= 0;
-			}
+		syncExec(ticket, () -> {
+			fNextElement= 0;
+			fDashLineIndex= -1;
+			fLastSelection= null;
+			fLastLabels= null;
+			fExpectedItemCount= 0;
 		});
 	}
 
 	private void rememberResult(int ticket, final TypeNameMatch[] result) {
-		syncExec(ticket, new Runnable() {
-			@Override
-			public void run() {
-				if (fLastCompletedResult == null) {
-					fLastCompletedFilter= fTypeInfoFilter;
-					fLastCompletedResult= result;
-				}
+		syncExec(ticket, () -> {
+			if (fLastCompletedResult == null) {
+				fLastCompletedFilter= fTypeInfoFilter;
+				fLastCompletedResult= result;
 			}
 		});
 	}
@@ -1251,39 +1236,33 @@ public class TypeInfoViewer {
 	}
 
 	private void addAll(int ticket, final List elements, final List imageDescriptors, final List labels) {
-		syncExec(ticket, new Runnable() {
-			@Override
-			public void run() {
-				int size= elements.size();
-				for(int i= 0; i < size; i++) {
-					addSingleElement(elements.get(i),
-						(ImageDescriptor)imageDescriptors.get(i),
-						(String)labels.get(i));
-				}
+		syncExec(ticket, () -> {
+			int size= elements.size();
+			for(int i= 0; i < size; i++) {
+				addSingleElement(elements.get(i),
+					(ImageDescriptor)imageDescriptors.get(i),
+					(String)labels.get(i));
 			}
 		});
 	}
 
 	private void addDashLineAndUpdateLastHistoryEntry(int ticket, final TypeNameMatch next) {
-		syncExec(ticket, new Runnable() {
-			@Override
-			public void run() {
-				if (fNextElement > 0) {
-					TableItem item= fTable.getItem(fNextElement - 1);
-					String label= item.getText();
-					String newLabel= fLabelProvider.getText(null, (TypeNameMatch)item.getData(), next);
-					if (newLabel.length() != label.length())
-						item.setText(newLabel);
-					if (fLastSelection != null && fLastSelection.length > 0) {
-						TableItem last= fLastSelection[fLastSelection.length - 1];
-						if (last == item) {
-							fLastLabels[fLastLabels.length - 1]= newLabel;
-						}
+		syncExec(ticket, () -> {
+			if (fNextElement > 0) {
+				TableItem item= fTable.getItem(fNextElement - 1);
+				String label= item.getText();
+				String newLabel= fLabelProvider.getText(null, (TypeNameMatch)item.getData(), next);
+				if (newLabel.length() != label.length())
+					item.setText(newLabel);
+				if (fLastSelection != null && fLastSelection.length > 0) {
+					TableItem last= fLastSelection[fLastSelection.length - 1];
+					if (last == item) {
+						fLastLabels[fLastLabels.length - 1]= newLabel;
 					}
 				}
-				fDashLineIndex= fNextElement;
-				addDashLine();
 			}
+			fDashLineIndex= fNextElement;
+			addDashLine();
 		});
 	}
 
@@ -1355,26 +1334,20 @@ public class TypeInfoViewer {
 	}
 
 	private void searchJobDone(int ticket) {
-		syncExec(ticket, new Runnable() {
-			@Override
-			public void run() {
-				shortenTable();
-				checkEmptyList();
-				fSearchJob= null;
-			}
+		syncExec(ticket, () -> {
+			shortenTable();
+			checkEmptyList();
+			fSearchJob= null;
 		});
 	}
 
 	private void searchJobCanceled(int ticket, final boolean removePendingItems) {
-		syncExec(ticket, new Runnable() {
-			@Override
-			public void run() {
-				if (removePendingItems) {
-					shortenTable();
-					checkEmptyList();
-				}
-				fSearchJob= null;
+		syncExec(ticket, () -> {
+			if (removePendingItems) {
+				shortenTable();
+				checkEmptyList();
 			}
+			fSearchJob= null;
 		});
 	}
 
@@ -1386,47 +1359,41 @@ public class TypeInfoViewer {
 	//-- virtual table support -------------------------------------------------------
 
 	private void setHistoryResult(int ticket, final TypeNameMatch[] types) {
-		syncExec(ticket, new Runnable() {
-			@Override
-			public void run() {
-				fExpectedItemCount= types.length;
-				int lastHistoryLength= fHistoryMatches.length;
-				fHistoryMatches= types;
-				int length= fHistoryMatches.length + fSearchMatches.length;
-				int dash= (fHistoryMatches.length > 0 && fSearchMatches.length > 0) ? 1 : 0;
-				fTable.setItemCount(length + dash);
-				if (length == 0) {
-					// bug under windows.
-					fTable.redraw();
-					return;
-				}
-				int update= Math.max(lastHistoryLength, fHistoryMatches.length);
-				if (update > 0) {
-					fTable.clear(0, update + dash - 1);
-				}
+		syncExec(ticket, () -> {
+			fExpectedItemCount= types.length;
+			int lastHistoryLength= fHistoryMatches.length;
+			fHistoryMatches= types;
+			int length= fHistoryMatches.length + fSearchMatches.length;
+			int dash= (fHistoryMatches.length > 0 && fSearchMatches.length > 0) ? 1 : 0;
+			fTable.setItemCount(length + dash);
+			if (length == 0) {
+				// bug under windows.
+				fTable.redraw();
+				return;
+			}
+			int update= Math.max(lastHistoryLength, fHistoryMatches.length);
+			if (update > 0) {
+				fTable.clear(0, update + dash - 1);
 			}
 		});
 	}
 
 	private void setSearchResult(int ticket, final TypeNameMatch[] types) {
-		syncExec(ticket, new Runnable() {
-			@Override
-			public void run() {
-				fExpectedItemCount+= types.length;
-				fSearchMatches= types;
-				int length= fHistoryMatches.length + fSearchMatches.length;
-				int dash= (fHistoryMatches.length > 0 && fSearchMatches.length > 0) ? 1 : 0;
-				fTable.setItemCount(length + dash);
-				if (length == 0) {
-					// bug under windows.
-					fTable.redraw();
-					return;
-				}
-				if (fHistoryMatches.length == 0) {
-					fTable.clear(0, length + dash - 1);
-				} else {
-					fTable.clear(fHistoryMatches.length - 1, length + dash - 1);
-				}
+		syncExec(ticket, () -> {
+			fExpectedItemCount+= types.length;
+			fSearchMatches= types;
+			int length= fHistoryMatches.length + fSearchMatches.length;
+			int dash= (fHistoryMatches.length > 0 && fSearchMatches.length > 0) ? 1 : 0;
+			fTable.setItemCount(length + dash);
+			if (length == 0) {
+				// bug under windows.
+				fTable.redraw();
+				return;
+			}
+			if (fHistoryMatches.length == 0) {
+				fTable.clear(0, length + dash - 1);
+			} else {
+				fTable.clear(fHistoryMatches.length - 1, length + dash - 1);
 			}
 		});
 	}
@@ -1472,13 +1439,10 @@ public class TypeInfoViewer {
 	}
 
 	private void syncJobDone() {
-		syncExec(new Runnable() {
-			@Override
-			public void run() {
-				fSyncJob= null;
-				if (fTypeInfoFilter != null) {
-					scheduleSearchJob(FULL);
-				}
+		syncExec(() -> {
+			fSyncJob= null;
+			if (fTypeInfoFilter != null) {
+				scheduleSearchJob(FULL);
 			}
 		});
 	}
@@ -1490,29 +1454,23 @@ public class TypeInfoViewer {
 	//-- progress monitor updates -----------------------------------------------------
 
 	private void scheduleProgressUpdateJob() {
-		syncExec(new Runnable() {
-			@Override
-			public void run() {
-				if (fProgressCounter == 0) {
-					clearProgressMessage();
-					fProgressUpdateJob= new ProgressUpdateJob(fDisplay, TypeInfoViewer.this);
-					fProgressUpdateJob.schedule(300);
-				}
-				fProgressCounter++;
+		syncExec(() -> {
+			if (fProgressCounter == 0) {
+				clearProgressMessage();
+				fProgressUpdateJob= new ProgressUpdateJob(fDisplay, this);
+				fProgressUpdateJob.schedule(300);
 			}
+			fProgressCounter++;
 		});
 	}
 
 	private void stopProgressUpdateJob() {
-		syncExec(new Runnable() {
-			@Override
-			public void run() {
-				fProgressCounter--;
-				if (fProgressCounter == 0 && fProgressUpdateJob != null) {
-					fProgressUpdateJob.stop();
-					fProgressUpdateJob= null;
-					clearProgressMessage();
-				}
+		syncExec(() -> {
+			fProgressCounter--;
+			if (fProgressCounter == 0 && fProgressUpdateJob != null) {
+				fProgressUpdateJob.stop();
+				fProgressUpdateJob= null;
+				clearProgressMessage();
 			}
 		});
 	}
@@ -1535,26 +1493,20 @@ public class TypeInfoViewer {
 	private void syncExec(final Runnable runnable) {
 		if (fDisplay.isDisposed())
 			return;
-		fDisplay.syncExec(new Runnable() {
-			@Override
-			public void run() {
-				if (fTable.isDisposed())
-					return;
-				runnable.run();
-			}
+		fDisplay.syncExec(() -> {
+			if (fTable.isDisposed())
+				return;
+			runnable.run();
 		});
 	}
 
 	private void syncExec(final int ticket, final Runnable runnable) {
 		if (fDisplay.isDisposed())
 			return;
-		fDisplay.syncExec(new Runnable() {
-			@Override
-			public void run() {
-				if (fTable.isDisposed() || ticket != fSearchJobTicket)
-					return;
-				runnable.run();
-			}
+		fDisplay.syncExec(() -> {
+			if (fTable.isDisposed() || ticket != fSearchJobTicket)
+				return;
+			runnable.run();
 		});
 	}
 

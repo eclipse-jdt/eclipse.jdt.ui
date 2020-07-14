@@ -27,7 +27,6 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IWorkspace;
@@ -149,19 +148,16 @@ public class RefactoringSaveHelper {
 					if (!JavaPlugin.getActiveWorkbenchWindow().getWorkbench().saveAllEditors(false))
 						return false;
 				} else {
-					IRunnableWithProgress runnable= new IRunnableWithProgress() {
-						@Override
-						public void run(IProgressMonitor pm) throws InterruptedException {
-							int count= dirtyEditors.length;
-							pm.beginTask("", count); //$NON-NLS-1$
-							for (int i= 0; i < count; i++) {
-								IEditorPart editor= dirtyEditors[i];
-								editor.doSave(new SubProgressMonitor(pm, 1));
-								if (pm.isCanceled())
-									throw new InterruptedException();
-							}
-							pm.done();
+					IRunnableWithProgress runnable= pm -> {
+						int count= dirtyEditors.length;
+						pm.beginTask("", count); //$NON-NLS-1$
+						for (int i= 0; i < count; i++) {
+							IEditorPart editor= dirtyEditors[i];
+							editor.doSave(new SubProgressMonitor(pm, 1));
+							if (pm.isCanceled())
+								throw new InterruptedException();
 						}
+						pm.done();
 					};
 					try {
 						PlatformUI.getWorkbench().getProgressService().runInUI(JavaPlugin.getActiveWorkbenchWindow(), runnable, null);
