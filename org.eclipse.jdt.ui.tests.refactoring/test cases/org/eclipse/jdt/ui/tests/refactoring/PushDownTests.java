@@ -880,6 +880,23 @@ public class PushDownTests extends GenericRefactoringTest {
 				namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
 	}
 
+	@Test
+	public void test36() throws Exception {
+		String[] selectedMethodNames= { "m" };
+		String[][] selectedMethodSignatures= { new String[0] };
+		String[] selectedFieldNames= {};
+		String[] namesOfMethodsToPushDown= selectedMethodNames;
+		String[][] signaturesOfMethodsToPushDown= selectedMethodSignatures;
+		String[] namesOfFieldsToPushDown= {};
+		String[] namesOfMethodsToDeclareAbstract= {};
+		String[][] signaturesOfMethodsToDeclareAbstract= {};
+
+		helper(selectedMethodNames, selectedMethodSignatures,
+				selectedFieldNames,
+				namesOfMethodsToPushDown, signaturesOfMethodsToPushDown,
+				namesOfFieldsToPushDown,
+				namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
+	}
 
 	@Test
 	public void testFail0() throws Exception {
