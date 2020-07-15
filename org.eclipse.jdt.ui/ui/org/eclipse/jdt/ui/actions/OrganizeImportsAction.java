@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,12 +13,20 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
-import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 
 import com.ibm.icu.text.Collator;
 
+import org.eclipse.swt.widgets.Display;
+
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IStatusLineManager;
@@ -66,13 +74,11 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.MultiOrganizeImportAction;
-import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.dialogs.MultiElementListSelectionDialog;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.TypeNameMatchLabelProvider;
 
 /**
@@ -242,9 +248,9 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 	 */
 	public void run(ICompilationUnit cu) {
 
-		JavaEditor editor= null;
+		JavaEditor[] editor= new JavaEditor[1];
 		if (fEditor != null) {
-			editor= fEditor;
+			editor[0]= fEditor;
 
 			//organize imports from within editor -> editor has focus
 			if (!ElementValidator.check(cu, getShell(), ActionMessages.OrganizeImportsAction_error_title, true))
@@ -256,22 +262,22 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 				return;
 			}
 
-			editor= (JavaEditor) openEditor;
+			editor[0]= (JavaEditor) openEditor;
 			//organize imports from package explorer -> editor does not have focus
 			if (!ElementValidator.check(cu, getShell(), ActionMessages.OrganizeImportsAction_error_title, false))
 				return;
 		}
 
-		Assert.isNotNull(editor);
-		if (!ActionUtil.isEditable(editor, getShell(), cu))
+		Assert.isNotNull(editor[0]);
+		if (!ActionUtil.isEditable(editor[0], getShell(), cu))
 			return;
 
 		CompilationUnit astRoot= SharedASTProviderCore.getAST(cu, SharedASTProviderCore.WAIT_ACTIVE_ONLY, null);
 
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject());
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, astRoot, settings.importIgnoreLowercase, !cu.isWorkingCopy(), true, createChooseImportQuery(editor));
+		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, astRoot, settings.importIgnoreLowercase, !cu.isWorkingCopy(), true, createChooseImportQuery(editor[0]));
 
-		IRewriteTarget target= editor.getAdapter(IRewriteTarget.class);
+		IRewriteTarget target= editor[0].getAdapter(IRewriteTarget.class);
 		if (target != null) {
 			target.beginCompoundChange();
 		}
@@ -283,23 +289,34 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 		}
 		IEditingSupport helper= createViewerHelper();
 		try {
-			registerHelper(helper, editor);
-			progressService.runInUI(context, new WorkbenchRunnableAdapter(op, op.getScheduleRule()), op.getScheduleRule());
-			IProblem parseError= op.getParseError();
-			if (parseError != null) {
-				String message= Messages.format(ActionMessages.OrganizeImportsAction_single_error_parse, parseError.getMessage());
-				MessageDialog.openInformation(getShell(), ActionMessages.OrganizeImportsAction_error_title, message);
-				if (parseError.getSourceStart() != -1) {
-					editor.selectAndReveal(parseError.getSourceStart(), parseError.getSourceEnd() - parseError.getSourceStart() + 1);
+			registerHelper(helper, editor[0]);
+			Job organizeJob= new Job(ActionMessages.OrganizeImportsAction_selectiondialog_title) {
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					try {
+						op.run(monitor);
+						IProblem parseError= op.getParseError();
+						if (parseError != null) {
+							String message= Messages.format(ActionMessages.OrganizeImportsAction_single_error_parse, parseError.getMessage());
+							MessageDialog.openInformation(getShell(), ActionMessages.OrganizeImportsAction_error_title, message);
+							if (parseError.getSourceStart() != -1) {
+								editor[0].selectAndReveal(parseError.getSourceStart(), parseError.getSourceEnd() - parseError.getSourceStart() + 1);
+							}
+						} else {
+							setStatusBarMessage(getOrganizeInfo(op), editor[0]);
+						}
+					} catch (CoreException e) {
+						IStatus st= e.getStatus();
+						return new Status(st.getSeverity(), st.getPlugin(), st.getCode(), st.getMessage(), e);
+					}
+					return Status.OK_STATUS;
 				}
-			} else {
-				setStatusBarMessage(getOrganizeInfo(op), editor);
-			}
-		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, getShell(), ActionMessages.OrganizeImportsAction_error_title, ActionMessages.OrganizeImportsAction_error_message);
-		} catch (InterruptedException e) {
+			};
+			organizeJob.setRule(op.getScheduleRule());
+			organizeJob.setPriority(Job.SHORT);
+			organizeJob.schedule();
 		} finally {
-			deregisterHelper(helper, editor);
+			deregisterHelper(helper, editor[0]);
 			if (target != null) {
 				target.endCompoundChange();
 			}
@@ -328,42 +345,43 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 	}
 
 	private TypeNameMatch[] doChooseImports(TypeNameMatch[][] openChoices, final ISourceRange[] ranges, final JavaEditor editor) {
-		// remember selection
-		ISelection sel= editor.getSelectionProvider().getSelection();
-		TypeNameMatch[] result= null;
-		ILabelProvider labelProvider= new TypeNameMatchLabelProvider(TypeNameMatchLabelProvider.SHOW_FULLYQUALIFIED);
+		List<TypeNameMatch> result= new ArrayList<>();
+		Display.getDefault().syncExec(() -> {
+			// remember selection
+			ISelection sel= editor.getSelectionProvider().getSelection();
+			ILabelProvider labelProvider= new TypeNameMatchLabelProvider(TypeNameMatchLabelProvider.SHOW_FULLYQUALIFIED);
 
-		MultiElementListSelectionDialog dialog= new MultiElementListSelectionDialog(getShell(), labelProvider) {
-			@Override
-			protected void handleSelectionChanged() {
-				super.handleSelectionChanged();
-				// show choices in editor
-				doListSelectionChanged(getCurrentPage(), ranges, editor);
-			}
-		};
-		fIsQueryShowing= true;
-		dialog.setTitle(ActionMessages.OrganizeImportsAction_selectiondialog_title);
-		dialog.setMessage(ActionMessages.OrganizeImportsAction_selectiondialog_message);
-		dialog.setElements(openChoices);
-		dialog.setComparator(ORGANIZE_IMPORT_COMPARATOR);
-		if (dialog.open() == Window.OK) {
-			Object[] res= dialog.getResult();
-			result= new TypeNameMatch[res.length];
-			for (int i= 0; i < res.length; i++) {
-				Object[] array= (Object[]) res[i];
-				if (array.length > 0) {
-					result[i]= (TypeNameMatch) array[0];
-					QualifiedTypeNameHistory.remember(result[i].getFullyQualifiedName());
+			MultiElementListSelectionDialog dialog= new MultiElementListSelectionDialog(getShell(), labelProvider) {
+				@Override
+				protected void handleSelectionChanged() {
+					super.handleSelectionChanged();
+					// show choices in editor
+					doListSelectionChanged(getCurrentPage(), ranges, editor);
+				}
+			};
+			fIsQueryShowing= true;
+			dialog.setTitle(ActionMessages.OrganizeImportsAction_selectiondialog_title);
+			dialog.setMessage(ActionMessages.OrganizeImportsAction_selectiondialog_message);
+			dialog.setElements(openChoices);
+			dialog.setComparator(ORGANIZE_IMPORT_COMPARATOR);
+			if (dialog.open() == Window.OK) {
+				Object[] res= dialog.getResult();
+				for (int i= 0; i < res.length; i++) {
+					Object[] array= (Object[]) res[i];
+					if (array.length > 0) {
+						result.add((TypeNameMatch) array[0]);
+						QualifiedTypeNameHistory.remember(result.get(i).getFullyQualifiedName());
+					}
 				}
 			}
-		}
-		// restore selection
-		if (sel instanceof ITextSelection) {
-			ITextSelection textSelection= (ITextSelection) sel;
-			editor.selectAndReveal(textSelection.getOffset(), textSelection.getLength());
-		}
-		fIsQueryShowing= false;
-		return result;
+			// restore selection
+			if (sel instanceof ITextSelection) {
+				ITextSelection textSelection= (ITextSelection) sel;
+				editor.selectAndReveal(textSelection.getOffset(), textSelection.getLength());
+			}
+			fIsQueryShowing= false;
+		});
+		return result.toArray(new TypeNameMatch[0]);
 	}
 
 	private void doListSelectionChanged(int page, ISourceRange[] ranges, JavaEditor editor) {
