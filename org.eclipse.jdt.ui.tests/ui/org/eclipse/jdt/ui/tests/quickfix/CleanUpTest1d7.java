@@ -312,26 +312,42 @@ public class CleanUpTest1d7 extends CleanUpTestCase {
 	@Test
 	public void testJava50ForLoop563267() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=563267
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=565282
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
 				+ "package test1;\n" //
+				+ "import java.io.IOException;\n" //
+				+ "import java.io.InputStream;\n" //
 				+ "import java.util.Iterator;\n" //
 				+ "import java.util.List;\n" //
 				+ "public class E1 {\n" //
-				+ "    public void foo(List<String> list) {\n" //
-				+ "        List<InputStream> toClose = new ArrayList<>();\n" //
+				+ "    public void foo(List<InputStream> toClose) throws IOException {\n" //
 				+ "        for (Iterator<InputStream> it = toClose.iterator(); it.hasNext();) {\n" //
 				+ "            try (InputStream r = it.next()) {\n" //
 				+ "            }\n" //
 				+ "        }\n" //
-				+ "        toClose.clear();\n" //
 				+ "    }\n" //
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
-		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+		sample= "" //
+				+ "package test1;\n" //
+				+ "import java.io.IOException;\n" //
+				+ "import java.io.InputStream;\n" //
+				+ "import java.util.List;\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo(List<InputStream> toClose) throws IOException {\n" //
+				+ "        for (InputStream inputStream : toClose) {\n" //
+				+ "            try (InputStream r = inputStream) {\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
 }

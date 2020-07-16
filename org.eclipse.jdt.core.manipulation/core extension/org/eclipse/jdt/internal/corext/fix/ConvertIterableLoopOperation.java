@@ -520,7 +520,7 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 										if (fragment.getParent() instanceof VariableDeclarationExpression) {
 											VariableDeclarationExpression varexp= (VariableDeclarationExpression)fragment.getParent();
 											if (varexp.getLocationInParent() == TryStatement.RESOURCES2_PROPERTY) {
-												otherInvocationThenNext[0]= true;
+												fElementVariableReferenced= true;
 												return true;
 											}
 										}
