@@ -17,7 +17,6 @@ package org.eclipse.jdt.internal.corext.refactoring;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -289,8 +288,7 @@ public final class RefactoringAvailabilityTester {
 	}
 
 	public static boolean isExternalizeStringsAvailable(final IStructuredSelection selection) throws JavaModelException {
-		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
-			Object element= iter.next();
+		for (Object element : selection) {
 			if (element instanceof IJavaElement) {
 				IJavaElement javaElement= (IJavaElement)element;
 				if (javaElement.exists() && !javaElement.isReadOnly()) {
@@ -434,8 +432,8 @@ public final class RefactoringAvailabilityTester {
 				if (type != null)
 					return Checks.isAvailable(type) && isExtractSupertypeAvailable(new IType[] { type});
 			}
-			for (final Iterator<?> iterator= selection.iterator(); iterator.hasNext();) {
-				if (!(iterator.next() instanceof IMember))
+			for (Object member : selection) {
+				if (!(member instanceof IMember))
 					return false;
 			}
 			final Set<IMember> members= new HashSet<>();
@@ -553,8 +551,7 @@ public final class RefactoringAvailabilityTester {
 		if (selection.isEmpty())
 			return false;
 
-		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
-			Object element= iter.next();
+		for (Object element : selection) {
 			if (!(element instanceof IJavaElement))
 				return false;
 			if (element instanceof ICompilationUnit) {
@@ -883,8 +880,8 @@ public final class RefactoringAvailabilityTester {
 				if (type != null)
 					return Checks.isAvailable(type) && isPullUpAvailable(new IType[] { type});
 			}
-			for (final Iterator<?> iterator= selection.iterator(); iterator.hasNext();) {
-				if (!(iterator.next() instanceof IMember))
+			for (Object member : selection) {
+				if (!(member instanceof IMember))
 					return false;
 			}
 			final Set<IMember> members= new HashSet<>();
@@ -954,8 +951,8 @@ public final class RefactoringAvailabilityTester {
 				if (type != null)
 					return isPushDownAvailable(new IType[] { type});
 			}
-			for (final Iterator<?> iterator= selection.iterator(); iterator.hasNext();) {
-				if (!(iterator.next() instanceof IMember))
+			for (Object member : selection) {
+				if (!(member instanceof IMember))
 					return false;
 			}
 			final Set<IMember> members= new HashSet<>();

@@ -232,9 +232,9 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		List<MoveParticipant> result= new ArrayList<>();
 		MoveArguments args= new MoveArguments(fDestinationType, true);
 		String[] natures= JavaProcessors.computeAffectedNaturs(fMembersToMove);
-		for (IMember member : fMembersToMove) {
+		for (IMember memberToMove : fMembersToMove) {
 			result.addAll(Arrays.asList(ParticipantManager.loadMoveParticipants(
-				status, this, member, args, natures, sharedParticipants)));
+				status, this, memberToMove, args, natures, sharedParticipants)));
 		}
 		return result.toArray(new RefactoringParticipant[result.size()]);
 	}
@@ -244,8 +244,8 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 	@Override
 	public boolean canEnableDelegateUpdating() {
 		try {
-			for (IMember element : fMembersToMove) {
-				if (isDelegateCreationAvailable(element))
+			for (IMember memberToMove : fMembersToMove) {
+				if (isDelegateCreationAvailable(memberToMove))
 					return true;
 			}
 		} catch (JavaModelException e) {
@@ -410,8 +410,8 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		Set<IResource> result= new HashSet<>();
 		IResource resource= fDestinationType.getCompilationUnit().getResource();
 		result.add(resource);
-		for (IMember element : fMembersToMove) {
-			resource= element.getCompilationUnit().getResource();
+		for (IMember memberToMove : fMembersToMove) {
+			resource= memberToMove.getCompilationUnit().getResource();
 			if (resource != null)
 				result.add(resource);
 		}
@@ -465,10 +465,10 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 
 	private RefactoringStatus checkDestinationInsideTypeToMove() throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
-		for (int i= 0; i < fMembersToMove.length; i++) {
-			if (! (fMembersToMove[i] instanceof IType))
+		for (IMember memberToMove : fMembersToMove) {
+			if (! (memberToMove instanceof IType))
 				continue;
-			IType type= (IType) fMembersToMove[i];
+			IType type= (IType) memberToMove;
 			if (fDestinationType.equals(type) || JavaElementUtil.isAncestorOf(type, fDestinationType)) {
 				String message= Messages.format(RefactoringCoreMessages.MoveMembersRefactoring_inside,
 						new String[] { getQualifiedTypeLabel(type), getQualifiedTypeLabel(fDestinationType)});
@@ -488,13 +488,13 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		if (declaringIsInterface && is18OrHigher)
 			return result;
 		String moveMembersMsg= is18OrHigher ? RefactoringCoreMessages.MoveMembersRefactoring_only_public_static_18 : RefactoringCoreMessages.MoveMembersRefactoring_only_public_static;
-		for (int i= 0; i < fMembersToMove.length; i++) {
-			if (declaringIsInterface && !(fMembersToMove[i] instanceof IMethod) && !is18OrHigher) {
+		for (IMember memberToMove : fMembersToMove) {
+			if (declaringIsInterface && !(memberToMove instanceof IMethod) && !is18OrHigher) {
 				// moving from interface to interface is OK, unless method is moved to pre-18
-			} else if (!canMoveToInterface(fMembersToMove[i], is18OrHigher)) {
-				result.addError(moveMembersMsg, JavaStatusContext.create(fMembersToMove[i]));
-			} else if (!Flags.isPublic(fMembersToMove[i].getFlags()) && !declaringIsInterface) {
-				result.addWarning(RefactoringCoreMessages.MoveMembersRefactoring_member_will_be_public, JavaStatusContext.create(fMembersToMove[i]));
+			} else if (!canMoveToInterface(memberToMove, is18OrHigher)) {
+				result.addError(moveMembersMsg, JavaStatusContext.create(memberToMove));
+			} else if (!Flags.isPublic(memberToMove.getFlags()) && !declaringIsInterface) {
+				result.addWarning(RefactoringCoreMessages.MoveMembersRefactoring_member_will_be_public, JavaStatusContext.create(memberToMove));
 			}
 		}
 		return result;
@@ -683,8 +683,8 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		if (! referenceCU.equals(fSource.getCu()))
 			return false;
 		int referenceStart= result.getOffset();
-		for (IMember element : fMembersToMove) {
-			ISourceRange range= element.getSourceRange();
+		for (IMember memberToMove : fMembersToMove) {
+			ISourceRange range= memberToMove.getSourceRange();
 			if (range.getOffset() <= referenceStart && range.getOffset() + range.getLength() >= referenceStart)
 				return true;
 		}
@@ -694,14 +694,14 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 	private RefactoringStatus checkNativeMovedMethods(IProgressMonitor pm) throws JavaModelException{
 		pm.beginTask(RefactoringCoreMessages.MoveMembersRefactoring_checking, fMembersToMove.length);
 		RefactoringStatus result= new RefactoringStatus();
-		for (IMember element : fMembersToMove) {
-			if (element.getElementType() != IJavaElement.METHOD)
+		for (IMember memberToMove : fMembersToMove) {
+			if (memberToMove.getElementType() != IJavaElement.METHOD)
 				continue;
-			if (! JdtFlags.isNative(element))
+			if (! JdtFlags.isNative(memberToMove))
 				continue;
 			String message= Messages.format(RefactoringCoreMessages.MoveMembersRefactoring_native,
-				JavaElementUtil.createMethodSignature((IMethod)element));
-			result.addWarning(message, JavaStatusContext.create(element));
+				JavaElementUtil.createMethodSignature((IMethod) memberToMove));
+			result.addWarning(message, JavaStatusContext.create(memberToMove));
 			pm.worked(1);
 		}
 		pm.done();

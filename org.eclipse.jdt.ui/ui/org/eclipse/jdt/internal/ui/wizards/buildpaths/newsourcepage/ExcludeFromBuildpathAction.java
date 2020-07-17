@@ -15,7 +15,6 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -161,8 +160,7 @@ public class ExcludeFromBuildpathAction extends BuildpathModifierAction {
         if (elements.size() == 0)
             return false;
 
-        for (Iterator<?> iter= elements.iterator(); iter.hasNext();) {
-			Object element= iter.next();
+        for (Object element : elements) {
 			if (element instanceof IPackageFragment) {
 				IPackageFragment fragment= (IPackageFragment)element;
 				if (ClasspathModifier.isDefaultFragment(fragment))

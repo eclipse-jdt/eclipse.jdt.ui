@@ -17,7 +17,6 @@ package org.eclipse.jdt.internal.ui.refactoring.nls;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
@@ -1218,8 +1217,8 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	}
 
 	private boolean containsElementsWithChange(IStructuredSelection selection) {
-		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
-			NLSSubstitution substitution= (NLSSubstitution) iter.next();
+		for (Object name : selection) {
+			NLSSubstitution substitution= (NLSSubstitution) name;
 			if (substitution.hasPropertyFileChange() || substitution.hasSourceChange()) {
 				return true;
 			}
@@ -1229,8 +1228,8 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 
 	private List<NLSSubstitution> getExternalizedElements(IStructuredSelection selection) {
 		ArrayList<NLSSubstitution> res= new ArrayList<>();
-		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
-			NLSSubstitution substitution= (NLSSubstitution) iter.next();
+		for (Object name : selection) {
+			NLSSubstitution substitution= (NLSSubstitution) name;
 			if (substitution.getState() == NLSSubstitution.EXTERNALIZED && !substitution.hasStateChanged()) {
 				res.add(substitution);
 			}
@@ -1239,8 +1238,8 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	}
 
 	private boolean containsOnlyElementsOfSameState(int state, IStructuredSelection selection) {
-		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
-			NLSSubstitution substitution= (NLSSubstitution) iter.next();
+		for (Object name : selection) {
+			NLSSubstitution substitution= (NLSSubstitution) name;
 			if (substitution.getState() != state) {
 				return false;
 			}

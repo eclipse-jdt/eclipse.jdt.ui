@@ -304,8 +304,8 @@ public class InitializeFinalFieldProposal extends LinkedCorrectionProposal {
 	private String[] collectParameterNames(MethodDeclaration methodDeclaration) {
 		final List<String> names= new ArrayList<>();
 
-		for (int i= 0; i < methodDeclaration.parameters().size(); i++) {
-			SingleVariableDeclaration svd= (SingleVariableDeclaration) methodDeclaration.parameters().get(i);
+		for (Object element : methodDeclaration.parameters()) {
+			SingleVariableDeclaration svd= (SingleVariableDeclaration) element;
 			names.add(svd.getName().getIdentifier());
 		}
 		ASTVisitor v = new ASTVisitor() {

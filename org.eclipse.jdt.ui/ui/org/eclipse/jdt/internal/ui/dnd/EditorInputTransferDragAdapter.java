@@ -14,7 +14,6 @@
 package org.eclipse.jdt.internal.ui.dnd;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DragSourceAdapter;
@@ -67,8 +66,7 @@ public class EditorInputTransferDragAdapter extends DragSourceAdapter implements
 		ISelection selection= fProvider.getSelection();
 		if (selection instanceof IStructuredSelection) {
 			IStructuredSelection structuredSelection= (IStructuredSelection) selection;
-			for (Iterator<?> iter= structuredSelection.iterator(); iter.hasNext();) {
-				Object element= iter.next();
+			for (Object element : structuredSelection) {
 				IEditorInput editorInput= EditorUtility.getEditorInput(element);
 				if (editorInput != null && editorInput.getPersistable() != null) {
 					try {

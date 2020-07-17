@@ -15,7 +15,6 @@ package org.eclipse.jdt.ui.actions;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
@@ -91,8 +90,8 @@ public class AddToClasspathAction extends SelectionDispatchAction {
 	private static boolean checkEnabled(IStructuredSelection selection) throws JavaModelException {
 		if (selection.isEmpty())
 			return false;
-		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
-			if (! canBeAddedToBuildPath(iter.next()))
+		for (Object name : selection) {
+			if (! canBeAddedToBuildPath(name))
 				return false;
 		}
 		return true;
@@ -157,8 +156,7 @@ public class AddToClasspathAction extends SelectionDispatchAction {
 
 	private static IFile[] getJARFiles(IStructuredSelection selection) throws JavaModelException {
 		ArrayList<IFile> list= new ArrayList<>();
-		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
-			Object element= iter.next();
+		for (Object element : selection) {
 			if (element instanceof IAdaptable) {
 				IFile file= getCandidate((IAdaptable) element);
 				if (file != null) {

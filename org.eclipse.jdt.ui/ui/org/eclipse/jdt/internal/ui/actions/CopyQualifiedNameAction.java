@@ -14,7 +14,6 @@
 package org.eclipse.jdt.internal.ui.actions;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.osgi.util.TextProcessor;
@@ -277,8 +276,7 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 			return null;
 
 		List<Object> result= new ArrayList<>();
-		for (Iterator<?> iter= ((IStructuredSelection)selection).iterator(); iter.hasNext();) {
-			Object element= iter.next();
+		for (Object element : ((IStructuredSelection) selection)) {
 			if (isValidElement(element))
 				result.add(element);
 		}
