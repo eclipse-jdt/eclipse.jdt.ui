@@ -129,6 +129,10 @@ class ConvertStringConcatenationProposals {
 		ASTRewriteCorrectionProposal messageFormatProposal= getConvertToMessageFormatProposal();
 		if (messageFormatProposal != null)
 			resultingCollections.add(messageFormatProposal);
+
+		ASTRewriteCorrectionProposal stringFormatProposal= getConvertToStringFormatProposal();
+		if (stringFormatProposal != null)
+			resultingCollections.add(stringFormatProposal);
 	}
 
 	private ASTRewriteCorrectionProposal getConvertToStringBufferProposal() {
@@ -356,6 +360,78 @@ class ConvertStringConcatenationProposals {
 		rewrite.replace(fOldInfixExpression, formatInvocation, null);
 
 		return proposal;
+	}
+
+	private ASTRewriteCorrectionProposal getConvertToStringFormatProposal() {
+
+		ICompilationUnit cu= fContext.getCompilationUnit();
+		if (!JavaModelUtil.is50OrHigher(cu.getJavaProject()))
+			return null;
+
+		ASTRewrite rewrite= ASTRewrite.create(fAst);
+
+		// collect operands
+		List<Expression> operands= new ArrayList<>();
+		collectInfixPlusOperands(fOldInfixExpression, operands);
+
+		List<Expression> formatArguments= new ArrayList<>();
+		String formatString= ""; //$NON-NLS-1$
+		for (Expression operand : operands) {
+			if (operand instanceof StringLiteral) {
+				String value= ((StringLiteral) operand).getEscapedValue();
+				value= value.substring(1, value.length() - 1);
+				formatString+= value;
+			} else {
+				ITypeBinding binding= operand.resolveTypeBinding();
+				if (binding == null)
+					return null;
+
+				formatString += "%" + stringFormatConversion(binding); //$NON-NLS-1$
+				formatArguments.add((Expression) rewrite.createCopyTarget(operand));
+			}
+		}
+
+		if (formatArguments.isEmpty())
+			return null;
+
+		String label= CorrectionMessages.QuickAssistProcessor_convert_to_string_format;
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, IProposalRelevance.CONVERT_TO_MESSAGE_FORMAT, image);
+		proposal.setCommandId(QuickAssistProcessor.CONVERT_TO_STRING_FORMAT_ID);
+
+		MethodInvocation formatInvocation= fAst.newMethodInvocation();
+		formatInvocation.setExpression(fAst.newName("String")); //$NON-NLS-1$
+		formatInvocation.setName(fAst.newSimpleName("format")); //$NON-NLS-1$
+
+		List<Expression> arguments= formatInvocation.arguments();
+
+		StringLiteral formatStringArgument= fAst.newStringLiteral();
+		formatStringArgument.setEscapedValue("\"" + formatString + "\""); //$NON-NLS-1$ //$NON-NLS-2$
+		arguments.add(formatStringArgument);
+
+		arguments.addAll(formatArguments);
+
+		rewrite.replace(fOldInfixExpression, formatInvocation, null);
+
+		return proposal;
+	}
+
+	private static char stringFormatConversion(ITypeBinding type) {
+		switch (type.getName()) {
+			case "byte": //$NON-NLS-1$
+			case "short": //$NON-NLS-1$
+			case "int": //$NON-NLS-1$
+			case "long": //$NON-NLS-1$
+				return 'd';
+			case "float": //$NON-NLS-1$
+			case "double": //$NON-NLS-1$
+				return 'f';
+			case "char": //$NON-NLS-1$
+				return 'c';
+			default:
+				return 's';
+		}
 	}
 
 	/**

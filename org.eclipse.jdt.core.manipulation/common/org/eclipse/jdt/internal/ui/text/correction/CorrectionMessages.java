@@ -62,6 +62,7 @@ public final class CorrectionMessages extends NLS {
 	public static String QuickAssistProcessor_convert_to_method_reference;
 	public static String QuickAssistProcessor_convert_to_multiple_singletype_catch_blocks;
 	public static String QuickAssistProcessor_convert_to_single_multicatch_block;
+	public static String QuickAssistProcessor_convert_to_string_format;
 	public static String QuickAssistProcessor_convert_to_try_with_resource;
 	public static String QuickAssistProcessor_convert_to_string_buffer_description;
 	public static String QuickAssistProcessor_exceptiontothrows_description;

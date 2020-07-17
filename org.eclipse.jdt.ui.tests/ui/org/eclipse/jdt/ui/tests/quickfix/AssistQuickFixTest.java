@@ -7715,6 +7715,151 @@ public class AssistQuickFixTest extends QuickFixTest {
 	}
 
 	@Test
+	public void testConvertToStringFormat14() throws Exception {
+
+		Map<String, String> oldOptions= fJProject1.getOptions(false);
+		Map<String, String> newOptions= new HashMap<>(oldOptions);
+		JavaCore.setComplianceOptions(JavaCore.VERSION_1_4, newOptions);
+		fJProject1.setOptions(newOptions);
+
+		try {
+			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+			StringBuffer buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public class A {\n");
+			buf.append("    public void foo(Object o1, Object o2) {\n");
+			buf.append("        System.out.println(\"foo\" + o1 + \" \\\"bar\\\" \" + o2);\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+			AssistContext context= getCorrectionContext(cu, buf.toString().indexOf('+'), 0);
+			List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+			assertCorrectLabels(proposals);
+
+			assertCommandIdDoesNotExist(proposals, QuickAssistProcessor.CONVERT_TO_STRING_FORMAT_ID);
+		} finally {
+			fJProject1.setOptions(oldOptions);
+		}
+	}
+
+	@Test
+	public void testConvertToStringFormatStringConcat() throws Exception {
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo(Object o1, Object o2) {\n");
+		buf.append("        System.out.println(\"foo\" + \"\" + \" \\\"bar\\\" \");\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf('+'), 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		assertCommandIdDoesNotExist(proposals, QuickAssistProcessor.CONVERT_TO_STRING_FORMAT_ID);
+	}
+
+	@Test
+	public void testConvertToStringFormat() throws Exception {
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo(Object o1, Object o2) {\n");
+		buf.append("        System.out.println(\"foo\" + o1 + \" \\\"bar\\\" \" + o2);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf('+'), 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo(Object o1, Object o2) {\n");
+		buf.append("        System.out.println(String.format(\"foo%s \\\"bar\\\" %s\", o1, o2));\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		assertProposalPreviewEquals(buf.toString(), CorrectionMessages.QuickAssistProcessor_convert_to_string_format, proposals);
+	}
+
+	@Test
+	public void testConvertToStringFormatExtendedOperands() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        String s2= \"a\" + \"b\" + 3L + \"c\" + (4-2) + \"d\" + \"e\" + \"f\";\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf('+'), 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        String s2= String.format(\"ab%dc%ddef\", 3L, (4-2));\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		assertProposalPreviewEquals(buf.toString(), CorrectionMessages.QuickAssistProcessor_convert_to_string_format, proposals);
+	}
+
+	@Test
+	public void testConvertToStringFormatPrimitives() throws Exception {
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public String foo(byte b, short s, int i, long l, float f, double d, boolean bb, char c) {\n");
+		buf.append("        return \"abc\" + b + s + i + l + f + d + bb + c;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		Map<String, String> saveOptions= fJProject1.getOptions(false);
+		Map<String, String> newOptions= new HashMap<>(saveOptions);
+		newOptions.put(DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT, String.valueOf(200));
+		try {
+			fJProject1.setOptions(newOptions);
+			AssistContext context= getCorrectionContext(cu, buf.toString().indexOf('+'), 0);
+			List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+			assertCorrectLabels(proposals);
+
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public class A {\n");
+			buf.append("    public String foo(byte b, short s, int i, long l, float f, double d, boolean bb, char c) {\n");
+			buf.append("        return String.format(\"abc%d%d%d%d%f%f%s%c\", b, s, i, l, f, d, bb, c);\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+
+			assertProposalPreviewEquals(buf.toString(), CorrectionMessages.QuickAssistProcessor_convert_to_string_format, proposals);
+		} finally {
+			fJProject1.setOptions(saveOptions);
+		}
+	}
+
+	@Test
 	public void testMissingEnumConstantsInCase1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		StringBuffer buf= new StringBuffer();
