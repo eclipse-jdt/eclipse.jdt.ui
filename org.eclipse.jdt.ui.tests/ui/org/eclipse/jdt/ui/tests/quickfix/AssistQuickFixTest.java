@@ -7204,7 +7204,6 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("strX ="), 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -7220,58 +7219,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("        String strX = stringBuilder.toString();\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		String expected1= buf.toString();
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String foo = \"foo\";\n");
-		buf.append("        String fuu = \"fuu\";\n");
-		buf.append("        String strX;\n");
-		buf.append("        strX = foo+\"bar\"+fuu;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String foo = \"foo\";\n");
-		buf.append("        String fuu = \"fuu\";\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected3= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    private String strX;\n");
-		buf.append("\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String foo = \"foo\";\n");
-		buf.append("        String fuu = \"fuu\";\n");
-		buf.append("        strX = foo+\"bar\"+fuu;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected4= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("import java.text.MessageFormat;\n");
-		buf.append("\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String foo = \"foo\";\n");
-		buf.append("        String fuu = \"fuu\";\n");
-		buf.append("        String strX = MessageFormat.format(\"{0}bar{1}\", foo, fuu);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected5= buf.toString();
-
-		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2, expected3, expected4, expected5 });
+		assertProposalPreviewEquals(buf.toString(), Messages.format(CorrectionMessages.QuickAssistProcessor_convert_to_string_buffer_description, "StringBuilder"), proposals);
 	}
 
 	@Test
@@ -7289,40 +7238,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("strX ="), 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 3);
 		assertCommandIdDoesNotExist(proposals, QuickAssistProcessor.CONVERT_TO_STRING_BUFFER_ID);
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        int strX;\n");
-		buf.append("        strX = 5+1;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    private int strX;\n");
-		buf.append("\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        strX = 5+1;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected3= buf.toString();
-
-		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2, expected3 });
-
 	}
 
 	@Test
@@ -7341,52 +7257,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("strX ="), 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 4);
 		assertCommandIdDoesNotExist(proposals, QuickAssistProcessor.CONVERT_TO_STRING_BUFFER_ID);
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        int strX = 5+1;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        int strX;\n");
-		buf.append("        int strX2 = strX;\n");
-		buf.append("        strX = 5+1;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        int strX;\n");
-		buf.append("        int strX2 = strX;\n");
-		buf.append("        strX = 5+1;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected3= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    private int strX;\n");
-		buf.append("\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        strX = 5+1;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected4= buf.toString();
-
-		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2, expected3, expected4 });
 	}
 
 	@Test
@@ -7404,25 +7275,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("strX ="), 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 1);
 		assertCommandIdDoesNotExist(proposals, QuickAssistProcessor.CONVERT_TO_STRING_BUFFER_ID);
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    private String strX = \"foo\"+\"bar\"\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("    public String getStrX() {\n");
-		buf.append("        return strX;\n");
-		buf.append("    }\n");
-		buf.append("    public void setStrX(String strX) {\n");
-		buf.append("        this.strX = strX;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
-
-		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
 	@Test
@@ -7443,46 +7296,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("strX ="), 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        int stringBuilder = 5;\n");
-		buf.append("        String stringBuilder2;\n");
-		buf.append("        StringBuilder stringBuilder3 = null;\n");
-		buf.append("        String strX;\n");
-		buf.append("        strX = \"foo\"+\"bar\";\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        int stringBuilder = 5;\n");
-		buf.append("        String stringBuilder2;\n");
-		buf.append("        StringBuilder stringBuilder3 = null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    private String strX;\n");
-		buf.append("\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        int stringBuilder = 5;\n");
-		buf.append("        String stringBuilder2;\n");
-		buf.append("        StringBuilder stringBuilder3 = null;\n");
-		buf.append("        strX = \"foo\"+\"bar\";\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected3= buf.toString();
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -7497,9 +7311,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("        String strX = stringBuilder4.toString();\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		String expected4= buf.toString();
 
-		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2, expected3, expected4 });
+		assertProposalPreviewEquals(buf.toString(), Messages.format(CorrectionMessages.QuickAssistProcessor_convert_to_string_buffer_description, "StringBuilder"), proposals);
 	}
 
 	@Test
@@ -7518,7 +7331,6 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("\"+\""), 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 7);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -7534,77 +7346,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		String expected1= buf.toString();
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String strX;\n");
-		buf.append("        if(true) {\n");
-		buf.append("            String string = \"foo\";\n");
-		buf.append("            strX = string+\"bar\";\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    private static final String FOO = \"foo\";\n");
-		buf.append("\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String strX;\n");
-		buf.append("        if(true) strX = FOO+\"bar\";\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected3= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String strX;\n");
-		buf.append("        if(true) {\n");
-		buf.append("            String string = \"foo\";\n");
-		buf.append("            strX = string+\"bar\";\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected4= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String strX;\n");
-		buf.append("        if(true) strX = (\"foo\"+\"bar\");\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected5= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String strX;\n");
-		buf.append("        if(true) strX = \"foobar\";\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected6= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String strX;\n");
-		buf.append("        if(true) strX = \"FOO\"+\"bar\";\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected7= buf.toString();
-
-		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2, expected3, expected4, expected5, expected6, expected7 });
+		assertProposalPreviewEquals(buf.toString(), Messages.format(CorrectionMessages.QuickAssistProcessor_convert_to_string_buffer_description, "StringBuilder"), proposals);
 	}
 
 	@Test
@@ -7622,7 +7365,6 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("\"+\""), 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 7);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -7635,67 +7377,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("        System.out.println(stringBuilder.toString());\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		String expected1= buf.toString();
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String string = \"foo\";\n");
-		buf.append("        System.out.println(string+\"bar\");\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String string = \"foo\";\n");
-		buf.append("        System.out.println(string+\"bar\");\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected3= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    private static final String FOO = \"foo\";\n");
-		buf.append("\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        System.out.println(FOO+\"bar\");\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected4= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        System.out.println((\"foo\"+\"bar\"));\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected5= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        System.out.println(\"foobar\");\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected6= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        System.out.println(\"FOO\"+\"bar\");\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected7= buf.toString();
-
-		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2, expected3, expected4, expected5, expected6, expected7 });
+		assertProposalPreviewEquals(buf.toString(), Messages.format(CorrectionMessages.QuickAssistProcessor_convert_to_string_buffer_description, "StringBuilder"), proposals);
 	}
 
 	@Test
@@ -7720,7 +7403,6 @@ public class AssistQuickFixTest extends QuickFixTest {
 			AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("\"+\""), 0);
 			List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
-			assertNumberOfProposals(proposals, 7);
 			assertCorrectLabels(proposals);
 
 			buf= new StringBuffer();
@@ -7733,67 +7415,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 			buf.append("        System.out.println(stringBuffer.toString());\n");
 			buf.append("    }\n");
 			buf.append("}\n");
-			String expected1= buf.toString();
 
-			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("public class A {\n");
-			buf.append("    public void foo() {\n");
-			buf.append("        String string = \"foo\";\n");
-			buf.append("        System.out.println(string+\"bar\");\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			String expected2= buf.toString();
-
-			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("public class A {\n");
-			buf.append("    public void foo() {\n");
-			buf.append("        String string = \"foo\";\n");
-			buf.append("        System.out.println(string+\"bar\");\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			String expected3= buf.toString();
-
-			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("public class A {\n");
-			buf.append("    private static final String FOO = \"foo\";\n");
-			buf.append("\n");
-			buf.append("    public void foo() {\n");
-			buf.append("        System.out.println(FOO+\"bar\");\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			String expected4= buf.toString();
-
-			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("public class A {\n");
-			buf.append("    public void foo() {\n");
-			buf.append("        System.out.println((\"foo\"+\"bar\"));\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			String expected5= buf.toString();
-
-			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("public class A {\n");
-			buf.append("    public void foo() {\n");
-			buf.append("        System.out.println(\"foobar\");\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			String expected6= buf.toString();
-
-			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("public class A {\n");
-			buf.append("    public void foo() {\n");
-			buf.append("        System.out.println(\"FOO\"+\"bar\");\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			String expected7= buf.toString();
-
-			assertExpectedExistInProposals(proposals, new String[] { expected1, expected2, expected3, expected4, expected5, expected6, expected7 });
+			assertProposalPreviewEquals(buf.toString(), Messages.format(CorrectionMessages.QuickAssistProcessor_convert_to_string_buffer_description, "StringBuffer"), proposals);
 		} finally {
 			fJProject1.setOptions(oldOptions);
 		}
@@ -7815,7 +7438,6 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("\" + 5"), 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 9);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -7827,98 +7449,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("        buf.append(5);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		String expected1= buf.toString();
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        StringBuffer buf= new StringBuffer();\n");
-		buf.append("        StringBuffer append = buf.append(\"high\" + 5);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    private StringBuffer append;\n");
-		buf.append("\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        StringBuffer buf= new StringBuffer();\n");
-		buf.append("        append = buf.append(\"high\" + 5);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected3= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        StringBuffer buf= new StringBuffer();\n");
-		buf.append("        String string = \"high\";\n");
-		buf.append("        buf.append(string + 5);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected4= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        StringBuffer buf= new StringBuffer();\n");
-		buf.append("        String string = \"high\";\n");
-		buf.append("        buf.append(string + 5);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected5= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    private static final String HIGH = \"high\";\n");
-		buf.append("\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        StringBuffer buf= new StringBuffer();\n");
-		buf.append("        buf.append(HIGH + 5);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected6= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("import java.text.MessageFormat;\n");
-		buf.append("\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        StringBuffer buf= new StringBuffer();\n");
-		buf.append("        buf.append(MessageFormat.format(\"high{0}\", 5));\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected7= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        StringBuffer buf= new StringBuffer();\n");
-		buf.append("        buf.append((\"high\" + 5));\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected8= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        StringBuffer buf= new StringBuffer();\n");
-		buf.append("        buf.append(\"HIGH\" + 5);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected9= buf.toString();
-
-		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2, expected3, expected4, expected5, expected6, expected7, expected8, expected9 });
+		assertProposalPreviewEquals(buf.toString(), Messages.format(CorrectionMessages.QuickAssistProcessor_convert_to_string_buffer_description, "buf"), proposals);
 	}
 
 	@Test
@@ -7937,7 +7469,6 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("\" + 5"), 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 9);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -7950,98 +7481,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("        sb.append(\" ho\");\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		String expected1= buf.toString();
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        StringBuilder sb= new StringBuilder();\n");
-		buf.append("        StringBuilder append = sb.append(\"high\" + 5 + \" ho\");\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    private StringBuilder append;\n");
-		buf.append("\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        StringBuilder sb= new StringBuilder();\n");
-		buf.append("        append = sb.append(\"high\" + 5 + \" ho\");\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected3= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        StringBuilder sb= new StringBuilder();\n");
-		buf.append("        String string = \"high\";\n");
-		buf.append("        sb.append(string + 5 + \" ho\");\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected4= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        StringBuilder sb= new StringBuilder();\n");
-		buf.append("        String string = \"high\";\n");
-		buf.append("        sb.append(string + 5 + \" ho\");\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected5= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    private static final String HIGH = \"high\";\n");
-		buf.append("\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        StringBuilder sb= new StringBuilder();\n");
-		buf.append("        sb.append(HIGH + 5 + \" ho\");\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected6= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("import java.text.MessageFormat;\n");
-		buf.append("\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        StringBuilder sb= new StringBuilder();\n");
-		buf.append("        sb.append(MessageFormat.format(\"high{0} ho\", 5));\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected7= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        StringBuilder sb= new StringBuilder();\n");
-		buf.append("        sb.append((\"high\" + 5 + \" ho\"));\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected8= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        StringBuilder sb= new StringBuilder();\n");
-		buf.append("        sb.append(\"HIGH\" + 5 + \" ho\");\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected9= buf.toString();
-
-		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2, expected3, expected4, expected5, expected6, expected7, expected8, expected9 });
+		assertProposalPreviewEquals(buf.toString(), Messages.format(CorrectionMessages.QuickAssistProcessor_convert_to_string_buffer_description, "sb"), proposals);
 	}
 
 	@Test
@@ -8066,7 +7507,6 @@ public class AssistQuickFixTest extends QuickFixTest {
 			AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("\" + o1 + \""), 0);
 			List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
-			assertNumberOfProposals(proposals, 7);
 			assertCorrectLabels(proposals);
 
 			buf= new StringBuffer();
@@ -8080,72 +7520,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 			buf.append("                new Object[]{o1, o2}));\n");
 			buf.append("    }\n");
 			buf.append("}\n");
-			String expected1= buf.toString();
 
-			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("public class A {\n");
-			buf.append("    public void foo(Object o1, Object o2) {\n");
-			buf.append("        String string = \"foo\";\n");
-			buf.append("        System.out.println(string + o1 + \" \\\"bar\\\" \" + o2);\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			String expected2= buf.toString();
-
-			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("public class A {\n");
-			buf.append("    public void foo(Object o1, Object o2) {\n");
-			buf.append("        String string = \"foo\";\n");
-			buf.append("        System.out.println(string + o1 + \" \\\"bar\\\" \" + o2);\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			String expected3= buf.toString();
-
-			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("public class A {\n");
-			buf.append("    private static final String FOO = \"foo\";\n");
-			buf.append("\n");
-			buf.append("    public void foo(Object o1, Object o2) {\n");
-			buf.append("        System.out.println(FOO + o1 + \" \\\"bar\\\" \" + o2);\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			String expected4= buf.toString();
-
-			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("public class A {\n");
-			buf.append("    public void foo(Object o1, Object o2) {\n");
-			buf.append("        StringBuffer stringBuffer = new StringBuffer();\n");
-			buf.append("        stringBuffer.append(\"foo\");\n");
-			buf.append("        stringBuffer.append(o1);\n");
-			buf.append("        stringBuffer.append(\" \\\"bar\\\" \");\n");
-			buf.append("        stringBuffer.append(o2);\n");
-			buf.append("        System.out.println(stringBuffer.toString());\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			String expected5= buf.toString();
-
-			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("public class A {\n");
-			buf.append("    public void foo(Object o1, Object o2) {\n");
-			buf.append("        System.out.println((\"foo\" + o1 + \" \\\"bar\\\" \" + o2));\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			String expected6= buf.toString();
-
-			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("public class A {\n");
-			buf.append("    public void foo(Object o1, Object o2) {\n");
-			buf.append("        System.out.println(\"FOO\" + o1 + \" \\\"bar\\\" \" + o2);\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			String expected7= buf.toString();
-
-			assertExpectedExistInProposals(proposals, new String[] { expected1, expected2, expected3, expected4, expected5, expected6, expected7 });
+			assertProposalPreviewEquals(buf.toString(), CorrectionMessages.QuickAssistProcessor_convert_to_message_format, proposals);
 		} finally {
 			fJProject1.setOptions(oldOptions);
 		}
@@ -8167,83 +7543,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("\" + \"\" + \""), 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 7);
 		assertCorrectLabels(proposals);
 
 		assertCommandIdDoesNotExist(proposals, QuickAssistProcessor.CONVERT_TO_MESSAGE_FORMAT_ID);
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo(Object o1, Object o2) {\n");
-		buf.append("        String string = \"foo\";\n");
-		buf.append("        System.out.println(string + \"\" + \" \\\"bar\\\" \");\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo(Object o1, Object o2) {\n");
-		buf.append("        String string = \"foo\";\n");
-		buf.append("        System.out.println(string + \"\" + \" \\\"bar\\\" \");\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    private static final String FOO = \"foo\";\n");
-		buf.append("\n");
-		buf.append("    public void foo(Object o1, Object o2) {\n");
-		buf.append("        System.out.println(FOO + \"\" + \" \\\"bar\\\" \");\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected3= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo(Object o1, Object o2) {\n");
-		buf.append("        StringBuilder stringBuilder = new StringBuilder();\n");
-		buf.append("        stringBuilder.append(\"foo\");\n");
-		buf.append("        stringBuilder.append(\"\");\n");
-		buf.append("        stringBuilder.append(\" \\\"bar\\\" \");\n");
-		buf.append("        System.out.println(stringBuilder.toString());\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected4= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo(Object o1, Object o2) {\n");
-		buf.append("        System.out.println((\"foo\" + \"\" + \" \\\"bar\\\" \"));\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected5= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo(Object o1, Object o2) {\n");
-		buf.append("        System.out.println(\"foo \\\"bar\\\" \");\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected6= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo(Object o1, Object o2) {\n");
-		buf.append("        System.out.println(\"FOO\" + \"\" + \" \\\"bar\\\" \");\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected7= buf.toString();
-
-		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2, expected3, expected4, expected5, expected6, expected7 });
 	}
 
 	@Test
@@ -8267,7 +7569,6 @@ public class AssistQuickFixTest extends QuickFixTest {
 			AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("1 + \""), 0);
 			List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
-			assertNumberOfProposals(proposals, 6);
 			assertCorrectLabels(proposals);
 
 			buf= new StringBuffer();
@@ -8280,62 +7581,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 			buf.append("        System.out.println(MessageFormat.format(\"foo{0} \\\"bar\\\" \", new Object[]{new Integer(1)}));\n");
 			buf.append("    }\n");
 			buf.append("}\n");
-			String expected1= buf.toString();
 
-			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("public class A {\n");
-			buf.append("    public void foo(Object o1, Object o2) {\n");
-			buf.append("        int i = 1;\n");
-			buf.append("        System.out.println(\"foo\" + i + \" \\\"bar\\\" \");\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			String expected2= buf.toString();
-
-			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("public class A {\n");
-			buf.append("    public void foo(Object o1, Object o2) {\n");
-			buf.append("        int i = 1;\n");
-			buf.append("        System.out.println(\"foo\" + i + \" \\\"bar\\\" \");\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			String expected3= buf.toString();
-
-			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("public class A {\n");
-			buf.append("    private static final int _1 = 1;\n");
-			buf.append("\n");
-			buf.append("    public void foo(Object o1, Object o2) {\n");
-			buf.append("        System.out.println(\"foo\" + _1 + \" \\\"bar\\\" \");\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			String expected4= buf.toString();
-
-			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("public class A {\n");
-			buf.append("    public void foo(Object o1, Object o2) {\n");
-			buf.append("        StringBuffer stringBuffer = new StringBuffer();\n");
-			buf.append("        stringBuffer.append(\"foo\");\n");
-			buf.append("        stringBuffer.append(1);\n");
-			buf.append("        stringBuffer.append(\" \\\"bar\\\" \");\n");
-			buf.append("        System.out.println(stringBuffer.toString());\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			String expected5= buf.toString();
-
-			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("public class A {\n");
-			buf.append("    public void foo(Object o1, Object o2) {\n");
-			buf.append("        System.out.println((\"foo\" + 1 + \" \\\"bar\\\" \"));\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			String expected6= buf.toString();
-
-			assertExpectedExistInProposals(proposals, new String[] { expected1, expected2, expected3, expected4, expected5, expected6 });
+			assertProposalPreviewEquals(buf.toString(), CorrectionMessages.QuickAssistProcessor_convert_to_message_format, proposals);
 		} finally {
 			fJProject1.setOptions(oldOptions);
 		}
@@ -8356,7 +7603,6 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("\" + 1 + \""), 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 7);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -8369,71 +7615,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("        System.out.println(MessageFormat.format(\"foo{0} \\\"bar\\\" \", 1));\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		String expected1= buf.toString();
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo(Object o1, Object o2) {\n");
-		buf.append("        String string = \"foo\";\n");
-		buf.append("        System.out.println(string + 1 + \" \\\"bar\\\" \");\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo(Object o1, Object o2) {\n");
-		buf.append("        String string = \"foo\";\n");
-		buf.append("        System.out.println(string + 1 + \" \\\"bar\\\" \");\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected3= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    private static final String FOO = \"foo\";\n");
-		buf.append("\n");
-		buf.append("    public void foo(Object o1, Object o2) {\n");
-		buf.append("        System.out.println(FOO + 1 + \" \\\"bar\\\" \");\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected4= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo(Object o1, Object o2) {\n");
-		buf.append("        StringBuilder stringBuilder = new StringBuilder();\n");
-		buf.append("        stringBuilder.append(\"foo\");\n");
-		buf.append("        stringBuilder.append(1);\n");
-		buf.append("        stringBuilder.append(\" \\\"bar\\\" \");\n");
-		buf.append("        System.out.println(stringBuilder.toString());\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected5= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo(Object o1, Object o2) {\n");
-		buf.append("        System.out.println((\"foo\" + 1 + \" \\\"bar\\\" \"));\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected6= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo(Object o1, Object o2) {\n");
-		buf.append("        System.out.println(\"FOO\" + 1 + \" \\\"bar\\\" \");\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected7= buf.toString();
-
-		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2, expected3, expected4, expected5, expected6, expected7 });
+		assertProposalPreviewEquals(buf.toString(), CorrectionMessages.QuickAssistProcessor_convert_to_message_format, proposals);
 	}
 
 	@Test
@@ -8452,7 +7635,6 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("\" + o1 + \""), 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 7);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -8465,72 +7647,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("        System.out.println(MessageFormat.format(\"foo{0} \\\"bar\\\" {1}\", o1, o2));\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		String expected1= buf.toString();
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo(Object o1, Object o2) {\n");
-		buf.append("        String string = \"foo\";\n");
-		buf.append("        System.out.println(string + o1 + \" \\\"bar\\\" \" + o2);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo(Object o1, Object o2) {\n");
-		buf.append("        String string = \"foo\";\n");
-		buf.append("        System.out.println(string + o1 + \" \\\"bar\\\" \" + o2);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected3= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    private static final String FOO = \"foo\";\n");
-		buf.append("\n");
-		buf.append("    public void foo(Object o1, Object o2) {\n");
-		buf.append("        System.out.println(FOO + o1 + \" \\\"bar\\\" \" + o2);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected4= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo(Object o1, Object o2) {\n");
-		buf.append("        StringBuilder stringBuilder = new StringBuilder();\n");
-		buf.append("        stringBuilder.append(\"foo\");\n");
-		buf.append("        stringBuilder.append(o1);\n");
-		buf.append("        stringBuilder.append(\" \\\"bar\\\" \");\n");
-		buf.append("        stringBuilder.append(o2);\n");
-		buf.append("        System.out.println(stringBuilder.toString());\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected5= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo(Object o1, Object o2) {\n");
-		buf.append("        System.out.println((\"foo\" + o1 + \" \\\"bar\\\" \" + o2));\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected6= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo(Object o1, Object o2) {\n");
-		buf.append("        System.out.println(\"FOO\" + o1 + \" \\\"bar\\\" \" + o2);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected7= buf.toString();
-
-		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2, expected3, expected4, expected5, expected6, expected7 });
+		assertProposalPreviewEquals(buf.toString(), CorrectionMessages.QuickAssistProcessor_convert_to_message_format, proposals);
 	}
 
 	@Test
@@ -8549,7 +7667,6 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("\" + o1 + \""), 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 7);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -8562,72 +7679,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("        System.out.println(MessageFormat.format(\"foo''{0}'' \\\"bar\\\" {1}\", o1, o2));\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		String expected1= buf.toString();
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo(Object o1, Object o2) {\n");
-		buf.append("        String string = \"foo'\";\n");
-		buf.append("        System.out.println(string + o1 + \"' \\\"bar\\\" \" + o2);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo(Object o1, Object o2) {\n");
-		buf.append("        String string = \"foo'\";\n");
-		buf.append("        System.out.println(string + o1 + \"' \\\"bar\\\" \" + o2);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected3= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    private static final String FOO = \"foo'\";\n");
-		buf.append("\n");
-		buf.append("    public void foo(Object o1, Object o2) {\n");
-		buf.append("        System.out.println(FOO + o1 + \"' \\\"bar\\\" \" + o2);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected4= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo(Object o1, Object o2) {\n");
-		buf.append("        StringBuilder stringBuilder = new StringBuilder();\n");
-		buf.append("        stringBuilder.append(\"foo'\");\n");
-		buf.append("        stringBuilder.append(o1);\n");
-		buf.append("        stringBuilder.append(\"' \\\"bar\\\" \");\n");
-		buf.append("        stringBuilder.append(o2);\n");
-		buf.append("        System.out.println(stringBuilder.toString());\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected5= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo(Object o1, Object o2) {\n");
-		buf.append("        System.out.println((\"foo'\" + o1 + \"' \\\"bar\\\" \" + o2));\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected6= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo(Object o1, Object o2) {\n");
-		buf.append("        System.out.println(\"FOO'\" + o1 + \"' \\\"bar\\\" \" + o2);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected7= buf.toString();
-
-		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2, expected3, expected4, expected5, expected6, expected7 });
+		assertProposalPreviewEquals(buf.toString(), CorrectionMessages.QuickAssistProcessor_convert_to_message_format, proposals);
 	}
 
 	@Test
@@ -8645,7 +7698,6 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(" + "), 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 8);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -8658,85 +7710,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("        String s2= MessageFormat.format(\"ab{0}c{1}def\", 3L, (4-2));\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		String expected1= buf.toString();
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        StringBuilder stringBuilder = new StringBuilder();\n");
-		buf.append("        stringBuilder.append(\"a\");\n");
-		buf.append("        stringBuilder.append(\"b\");\n");
-		buf.append("        stringBuilder.append(3L);\n");
-		buf.append("        stringBuilder.append(\"c\");\n");
-		buf.append("        stringBuilder.append((4-2));\n");
-		buf.append("        stringBuilder.append(\"d\");\n");
-		buf.append("        stringBuilder.append(\"e\");\n");
-		buf.append("        stringBuilder.append(\"f\");\n");
-		buf.append("        String s2= stringBuilder.toString();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String string = \"a\";\n");
-		buf.append("        String s2= string + \"b\" + 3L + \"c\" + (4-2) + \"d\" + \"e\" + \"f\";\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected3= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    private static final String A = \"a\";\n");
-		buf.append("\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String s2= A + \"b\" + 3L + \"c\" + (4-2) + \"d\" + \"e\" + \"f\";\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected4= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String s2= (\"a\" + \"b\") + 3L + \"c\" + (4-2) + \"d\" + \"e\" + \"f\";\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected5= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String s2= \"ab\" + 3L + \"c\" + (4-2) + \"d\" + \"e\" + \"f\";\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected6= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String string = \"a\";\n");
-		buf.append("        String s2= string + \"b\" + 3L + \"c\" + (4-2) + \"d\" + \"e\" + \"f\";\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected7= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String s2= \"A\" + \"b\" + 3L + \"c\" + (4-2) + \"d\" + \"e\" + \"f\";\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected8= buf.toString();
-
-		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2, expected3, expected4, expected5, expected6, expected7, expected8 });
+		assertProposalPreviewEquals(buf.toString(), CorrectionMessages.QuickAssistProcessor_convert_to_message_format, proposals);
 	}
 
 	@Test
@@ -11383,5 +10358,4 @@ public class AssistQuickFixTest extends QuickFixTest {
 			fJProject1.setOptions(saveOptions);
 		}
 	}
-
 }
