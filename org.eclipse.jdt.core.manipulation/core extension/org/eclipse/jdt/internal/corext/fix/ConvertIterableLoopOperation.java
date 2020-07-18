@@ -66,7 +66,6 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRemover;
-import org.eclipse.jdt.internal.corext.refactoring.util.TightSourceRangeComputer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
@@ -229,25 +228,6 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 			}
 		}
 		return getRoot().getAST().resolveWellKnownType(Object.class.getCanonicalName());
-	}
-
-	@Override
-	public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModelCore positionGroups) throws CoreException {
-		TextEditGroup group= createTextEditGroup(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description, cuRewrite);
-
-		ASTRewrite astRewrite= cuRewrite.getASTRewrite();
-
-		TightSourceRangeComputer rangeComputer;
-		if (astRewrite.getExtendedSourceRangeComputer() instanceof TightSourceRangeComputer) {
-			rangeComputer= (TightSourceRangeComputer)astRewrite.getExtendedSourceRangeComputer();
-		} else {
-			rangeComputer= new TightSourceRangeComputer();
-		}
-		rangeComputer.addTightSourceNode(getForStatement());
-		astRewrite.setTargetSourceRangeComputer(rangeComputer);
-
-		Statement statement= convert(cuRewrite, group, positionGroups);
-		astRewrite.replace(getForStatement(), statement, group);
 	}
 
 	@Override
