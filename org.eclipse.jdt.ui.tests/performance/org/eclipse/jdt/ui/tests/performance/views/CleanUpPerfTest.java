@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -20,10 +20,14 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Assert;
+import org.junit.FixMethodOrder;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExternalResource;
+import org.junit.runners.MethodSorters;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
-import org.eclipse.test.OrderedTestSuite;
 import org.eclipse.test.performance.Dimension;
 
 import org.eclipse.core.runtime.CoreException;
@@ -51,7 +55,7 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUp;
-import org.eclipse.jdt.ui.tests.performance.JdtPerformanceTestCase;
+import org.eclipse.jdt.ui.tests.performance.JdtPerformanceTestCaseCommon;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
@@ -72,22 +76,16 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileStore;
 
-import junit.extensions.TestSetup;
-import junit.framework.Test;
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 
-public class CleanUpPerfTest extends JdtPerformanceTestCase {
-
-	private static class MyTestSetup extends TestSetup {
+	private static class MyTestSetup extends ExternalResource {
 		public static final String SRC_CONTAINER= "src";
 
 		public static IJavaProject fJProject1;
 
-		public MyTestSetup(Test test) {
-			super(test);
-		}
-
 		@Override
-		protected void setUp() throws Exception {
+		public void before() throws Throwable {
 			fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 			Assert.assertNotNull("rt not found", JavaProjectHelper.addRTJar(fJProject1));
 			File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
@@ -95,34 +93,18 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		}
 
 		@Override
-		protected void tearDown() throws Exception {
-			if (fJProject1 != null && fJProject1.exists())
-				JavaProjectHelper.delete(fJProject1);
+		public void after() {
+			try {
+				if (fJProject1 != null && fJProject1.exists())
+					JavaProjectHelper.delete(fJProject1);
+			} catch (CoreException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
-	public static Test suite() {
-		return new MyTestSetup(new OrderedTestSuite(CleanUpPerfTest.class, new String[] {
-			"testNullCleanUp",
-			"testAllCleanUps",
-			"testCodeStyleCleanUp",
-			"testControlStatementsCleanUp",
-			"testConvertLoopCleanUp",
-			"testExpressionsCleanUp",
-			"testJava50CleanUp",
-			"testStringCleanUp",
-			"testSortMembersCleanUp",
-			"testUnnecessaryCodeCleanUp",
-			"testUnusedCodeCleanUp",
-			"testVariableDeclarationCleanUp",
-			"testCodeFormatCleanUp",
-			"testOrganizeImports",
-		}));
-	}
-
-	public static Test setUpTest(Test someTest) {
-		return new MyTestSetup(someTest);
-	}
+	@Rule
+	public MyTestSetup stup= new MyTestSetup();
 
 	private void addAllCUs(CleanUpRefactoring cleanUp, IJavaElement[] children) throws JavaModelException {
 		for (IJavaElement element : children) {
@@ -160,6 +142,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		profileStore.writeProfiles(profiles, InstanceScope.INSTANCE);
 	}
 
+	@Test
 	public void testNullCleanUp() throws Exception {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
@@ -177,6 +160,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		doCleanUp(cleanUpRefactoring);
 	}
 
+	@Test
 	public void testAllCleanUps() throws Exception {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
@@ -238,6 +222,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		doCleanUp(cleanUpRefactoring);
 	}
 
+	@Test
 	public void testCodeStyleCleanUp() throws Exception {
 		tagAsSummary("Clean Up - Code Style", Dimension.ELAPSED_PROCESS);
 
@@ -263,6 +248,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		doCleanUp(cleanUpRefactoring);
 	}
 
+	@Test
 	public void testControlStatementsCleanUp() throws Exception {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
@@ -280,6 +266,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		doCleanUp(cleanUpRefactoring);
 	}
 
+	@Test
 	public void testConvertLoopCleanUp() throws Exception {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
@@ -296,6 +283,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		doCleanUp(cleanUpRefactoring);
 	}
 
+	@Test
 	public void testExpressionsCleanUp() throws Exception {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
@@ -312,6 +300,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		doCleanUp(cleanUpRefactoring);
 	}
 
+	@Test
 	public void testJava50CleanUp() throws Exception {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
@@ -329,6 +318,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		doCleanUp(cleanUpRefactoring);
 	}
 
+	@Test
 	public void testStringCleanUp() throws Exception {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
@@ -344,6 +334,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		doCleanUp(cleanUpRefactoring);
 	}
 
+	@Test
 	public void testSortMembersCleanUp() throws Exception {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
@@ -360,6 +351,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		doCleanUp(cleanUpRefactoring);
 	}
 
+	@Test
 	public void testUnnecessaryCodeCleanUp() throws Exception {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
@@ -373,6 +365,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		doCleanUp(cleanUpRefactoring);
 	}
 
+	@Test
 	public void testUnusedCodeCleanUp() throws Exception {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
@@ -394,6 +387,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		doCleanUp(cleanUpRefactoring);
 	}
 
+	@Test
 	public void testVariableDeclarationCleanUp() throws Exception {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
@@ -412,6 +406,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		doCleanUp(cleanUpRefactoring);
 	}
 
+	@Test
 	public void testCodeFormatCleanUp() throws Exception {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
@@ -427,6 +422,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		doCleanUp(cleanUpRefactoring);
 	}
 
+	@Test
 	public void testOrganizeImports() throws Exception {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
