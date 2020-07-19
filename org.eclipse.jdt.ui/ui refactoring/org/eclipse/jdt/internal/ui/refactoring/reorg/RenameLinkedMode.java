@@ -373,11 +373,9 @@ public class RenameLinkedMode {
 				restoreFullSelection();
 			}
 			JavaModelUtil.reconcile(getCompilationUnit());
-		} catch (CoreException ex) {
-			JavaPlugin.log(ex);
 		} catch (InterruptedException ex) {
 			// canceling is OK -> redo text changes in that case?
-		} catch (InvocationTargetException | BadLocationException e) {
+		} catch (CoreException |InvocationTargetException | BadLocationException e) {
 			JavaPlugin.log(e);
 		} finally {
 			if (label != null)

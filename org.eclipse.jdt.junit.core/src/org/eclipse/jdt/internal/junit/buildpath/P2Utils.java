@@ -133,10 +133,7 @@ class P2Utils {
 			URL localFileURL= FileLocator.toFileURL(URIUtil.toURL(bundleLocation));
 			URI localFileURI= new URI(localFileURL.toExternalForm());
 			return new Path(localFileURI.getPath());
-		} catch (IOException e) {
-			JUnitCorePlugin.log(e);
-			return null;
-		} catch (URISyntaxException e) {
+		} catch (IOException | URISyntaxException e) {
 			JUnitCorePlugin.log(e);
 			return null;
 		}

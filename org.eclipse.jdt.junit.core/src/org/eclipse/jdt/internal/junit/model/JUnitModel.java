@@ -393,9 +393,7 @@ public final class JUnitModel {
 			TestRunSession session= handler.getTestRunSession();
 			JUnitCorePlugin.getModel().addTestRunSession(session);
 			return session;
-		} catch (ParserConfigurationException e) {
-			throwImportError(file, e);
-		} catch (SAXException e) {
+		} catch (ParserConfigurationException | SAXException e) {
 			throwImportError(file, e);
 		} catch (IOException e) {
 			throwImportError(file, e);
@@ -435,9 +433,7 @@ public final class JUnitModel {
 					session[0]= handler.getTestRunSession();
 				} catch (OperationCanceledException e) {
 					// canceled
-				} catch (ParserConfigurationException e) {
-					storeImportError(e);
-				} catch (SAXException e) {
+				} catch (ParserConfigurationException | SAXException e) {
 					storeImportError(e);
 				} catch (IOException e) {
 					storeImportError(e);
@@ -481,9 +477,7 @@ public final class JUnitModel {
 			SAXParser parser= parserFactory.newSAXParser();
 			TestRunHandler handler= new TestRunHandler(testRunSession);
 			parser.parse(swapFile, handler);
-		} catch (ParserConfigurationException e) {
-			throwImportError(swapFile, e);
-		} catch (SAXException e) {
+		} catch (ParserConfigurationException | SAXException e) {
 			throwImportError(swapFile, e);
 		} catch (IOException e) {
 			throwImportError(swapFile, e);
@@ -506,9 +500,7 @@ public final class JUnitModel {
 			out= new FileOutputStream(file);
             exportTestRunSession(testRunSession, out);
 
-		} catch (IOException e) {
-			throwExportError(file, e);
-		} catch (TransformerConfigurationException e) {
+		} catch (IOException | TransformerConfigurationException e) {
 			throwExportError(file, e);
 		} catch (TransformerException e) {
 			throwExportError(file, e);
