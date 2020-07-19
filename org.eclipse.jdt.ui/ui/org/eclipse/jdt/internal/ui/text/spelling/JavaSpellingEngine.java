@@ -59,9 +59,7 @@ public class JavaSpellingEngine extends SpellingEngine {
 						checker.execute(listener, new SpellCheckIterator(document, partition, checker.getLocale()));
 				}
 			}
-		} catch (BadLocationException x) {
-			// ignore: the document has been changed in another thread and will be checked again
-		} catch (AssertionFailedException x) {
+		} catch (BadLocationException | AssertionFailedException x) {
 			// ignore: the document has been changed in another thread and will be checked again
 		}
 	}

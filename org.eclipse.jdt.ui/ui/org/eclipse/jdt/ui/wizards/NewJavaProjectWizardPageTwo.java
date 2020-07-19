@@ -373,8 +373,7 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 						foldersToKeep.add(canonicalFileStore);
 					}
 				}
-			} catch (IOException e) {
-			} catch (CoreException e) {
+			} catch (IOException | CoreException e) {
 			}
 		}
 

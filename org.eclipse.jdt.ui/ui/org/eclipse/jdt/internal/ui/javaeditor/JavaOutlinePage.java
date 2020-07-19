@@ -641,11 +641,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 					TextEdit edit= CodeFormatterUtil.reformat(kind, content, regions, 0, lineDelimiter, formatterSettings);
 					edit.apply(javaSourceViewer.getDocument());
 
-				} catch (CoreException e) {
-					JavaPlugin.log(e);
-				} catch (MalformedTreeException e) {
-					JavaPlugin.log(e);
-				} catch (BadLocationException e) {
+				} catch (CoreException | MalformedTreeException | BadLocationException e) {
 					JavaPlugin.log(e);
 				} finally {
 					javaSourceViewer.setRedraw(true);
@@ -712,9 +708,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 					return new Region(document.getLineOffset(lineAtSourceOffset), sourceLength);
 				else
 					return new Region(beginningOfWSOffset, sourceLength);
-			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
-			} catch (BadLocationException e) {
+			} catch (JavaModelException | BadLocationException e) {
 				JavaPlugin.log(e);
 			}
 			return null;

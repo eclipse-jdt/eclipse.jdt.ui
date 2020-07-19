@@ -187,8 +187,7 @@ public class NLSSourceModifier {
 					String editText= ' ' + NLSElement.createTagText(indexInElementList + 1); //tags are 1-based
 					TextChangeCompatibility.addTextEdit(change, label, new InsertEdit(lineEnd, editText));
 
-				} catch (InvalidInputException e) {
-				} catch (BadLocationException e) {
+				} catch (InvalidInputException | BadLocationException e) {
 				}
 			}
 		}

@@ -76,11 +76,7 @@ public class JavadocConsoleLineTracker implements IConsoleLineTracker {
 						return;
 					}
 				}
-			} catch (BadLocationException e) {
-				JavaPlugin.log(e);
-			} catch (PartInitException e) {
-				JavaPlugin.log(e);
-			} catch (JavaModelException e) {
+			} catch (BadLocationException | PartInitException | JavaModelException e) {
 				JavaPlugin.log(e);
 			}
 		}

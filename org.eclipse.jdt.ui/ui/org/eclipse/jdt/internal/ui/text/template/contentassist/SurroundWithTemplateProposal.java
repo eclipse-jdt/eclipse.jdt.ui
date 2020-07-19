@@ -186,13 +186,7 @@ public class SurroundWithTemplateProposal extends TemplateProposal {
 
 			return document.get();
 
-		} catch (MalformedTreeException e) {
-			JavaPlugin.log(e);
-		} catch (IllegalArgumentException e) {
-			JavaPlugin.log(e);
-		} catch (BadLocationException e) {
-			JavaPlugin.log(e);
-		} catch (CoreException e) {
+		} catch (MalformedTreeException | IllegalArgumentException | BadLocationException | CoreException e) {
 			JavaPlugin.log(e);
 		}
 		return null;
@@ -215,13 +209,7 @@ public class SurroundWithTemplateProposal extends TemplateProposal {
 			//Evaluate the template within the new context
 			fProposal= new TemplateProposal(fTemplate, context, region, null);
 			fProposal.apply(viewer, trigger, stateMask, context.getCompletionOffset());
-		} catch (MalformedTreeException e) {
-			handleException(viewer, e, fRegion);
-		} catch (IllegalArgumentException e) {
-			handleException(viewer, e, fRegion);
-		} catch (BadLocationException e) {
-			handleException(viewer, e, fRegion);
-		} catch (CoreException e) {
+		} catch (MalformedTreeException | IllegalArgumentException | BadLocationException | CoreException e) {
 			handleException(viewer, e, fRegion);
 		} finally {
 			setRedraw(viewer, true);

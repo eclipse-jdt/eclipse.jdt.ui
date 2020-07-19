@@ -457,9 +457,7 @@ public class InlineTempRefactoring extends Refactoring {
 			IRegion region= document.getLineInformation(document.getLineOfOffset(marker.getOffset()));
 			int oldIndent= Strings.computeIndentUnits(document.get(region.getOffset(), region.getLength()), project);
 			return Strings.changeIndent(rewrittenInitializer, oldIndent, project, "", TextUtilities.getDefaultLineDelimiter(document)); //$NON-NLS-1$
-		} catch (MalformedTreeException e) {
-			JavaManipulationPlugin.log(e);
-		} catch (BadLocationException e) {
+		} catch (MalformedTreeException | BadLocationException e) {
 			JavaManipulationPlugin.log(e);
 		}
 		//fallback:

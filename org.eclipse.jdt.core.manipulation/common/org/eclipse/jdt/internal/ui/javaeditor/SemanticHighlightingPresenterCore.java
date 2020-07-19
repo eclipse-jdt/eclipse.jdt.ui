@@ -383,10 +383,7 @@ public class SemanticHighlightingPresenterCore {
 				}
 				fPositions= newPositions;
 			}
-		} catch (BadPositionCategoryException e) {
-			// Should not happen
-			JavaManipulationPlugin.log(e);
-		} catch (BadLocationException e) {
+		} catch (BadPositionCategoryException | BadLocationException e) {
 			// Should not happen
 			JavaManipulationPlugin.log(e);
 		}

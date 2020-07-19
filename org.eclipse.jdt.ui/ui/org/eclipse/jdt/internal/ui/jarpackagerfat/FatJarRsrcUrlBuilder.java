@@ -19,7 +19,6 @@ package org.eclipse.jdt.internal.ui.jarpackagerfat;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashSet;
@@ -118,8 +117,6 @@ public class FatJarRsrcUrlBuilder extends FatJarBuilder {
 			if (!fJarPackage.isCompressed())
 				JarPackagerUtil.calculateCrcAndSize(newEntry, new FileInputStream(jarPathFile), readBuffer);
 			getJarWriter().addZipEntryStream(newEntry, new FileInputStream(jarPathFile), jarName);
-		} catch (FileNotFoundException e) {
-			throw new RuntimeException(e);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

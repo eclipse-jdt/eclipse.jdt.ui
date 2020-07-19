@@ -1189,9 +1189,7 @@ public class JavadocView extends AbstractInfoView {
 				int offset= ((ITextSelection)selection).getOffset();
 				String partition= ((IDocumentExtension3)document).getContentType(IJavaPartitions.JAVA_PARTITIONING, offset, false);
 				return !IJavaPartitions.JAVA_DOC.equals(partition);
-			} catch (BadPartitioningException ex) {
-				return false;
-			} catch (BadLocationException ex) {
+			} catch (BadPartitioningException | BadLocationException ex) {
 				return false;
 			}
 
@@ -1252,9 +1250,7 @@ public class JavadocView extends AbstractInfoView {
 				}
 			}
 
-		} catch (JavaModelException e) {
-			return null;
-		} catch (BadLocationException e) {
+		} catch (JavaModelException | BadLocationException e) {
 			return null;
 		}
 		return element;
@@ -1429,9 +1425,7 @@ public class JavadocView extends AbstractInfoView {
 			public void handleDeclarationLink(IJavaElement target) {
 				try {
 					JavadocHover.openDeclaration(target);
-				} catch (PartInitException e) {
-					JavaPlugin.log(e);
-				} catch (JavaModelException e) {
+				} catch (PartInitException | JavaModelException e) {
 					JavaPlugin.log(e);
 				}
 			}

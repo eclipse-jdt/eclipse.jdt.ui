@@ -479,9 +479,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 			try {
 				rewrite.rewriteAST(document, unit.getJavaProject().getOptions(true)).apply(document, TextEdit.UPDATE_REGIONS);
 				targetRewrite.getListRewrite(targetDeclaration, targetDeclaration.getBodyDeclarationsProperty()).insertFirst(targetRewrite.createStringPlaceholder(normalizeText(document.get(position.getStartPosition(), position.getLength())), ASTNode.FIELD_DECLARATION), null);
-			} catch (MalformedTreeException exception) {
-				JavaPlugin.log(exception);
-			} catch (BadLocationException exception) {
+			} catch (MalformedTreeException | BadLocationException exception) {
 				JavaPlugin.log(exception);
 			}
 		} finally {
@@ -688,9 +686,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 			try {
 				rewrite.rewriteAST(document, unit.getJavaProject().getOptions(true)).apply(document, TextEdit.UPDATE_REGIONS);
 				targetRewrite.getListRewrite(targetDeclaration, targetDeclaration.getBodyDeclarationsProperty()).insertFirst(targetRewrite.createStringPlaceholder(normalizeText(document.get(position.getStartPosition(), position.getLength())), ASTNode.METHOD_DECLARATION), null);
-			} catch (MalformedTreeException exception) {
-				JavaPlugin.log(exception);
-			} catch (BadLocationException exception) {
+			} catch (MalformedTreeException | BadLocationException exception) {
 				JavaPlugin.log(exception);
 			}
 		} finally {
@@ -1042,9 +1038,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 				final IDocument document= new Document(buffer.getDocument().get());
 				try {
 					rewrite.rewriteAST(document, fSubType.getJavaProject().getOptions(true)).apply(document, TextEdit.UPDATE_REGIONS);
-				} catch (MalformedTreeException exception) {
-					JavaPlugin.log(exception);
-				} catch (BadLocationException exception) {
+				} catch (MalformedTreeException | BadLocationException exception) {
 					JavaPlugin.log(exception);
 				}
 				subUnit.getBuffer().setContents(document.get());
@@ -1088,10 +1082,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 													final IDocument document= new Document(superUnit.getBuffer().getContents());
 													try {
 														edit.apply(document, TextEdit.UPDATE_REGIONS);
-													} catch (MalformedTreeException exception) {
-														JavaPlugin.log(exception);
-														status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractInterfaceProcessor_internal_error));
-													} catch (BadLocationException exception) {
+													} catch (MalformedTreeException | BadLocationException exception) {
 														JavaPlugin.log(exception);
 														status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractInterfaceProcessor_internal_error));
 													}

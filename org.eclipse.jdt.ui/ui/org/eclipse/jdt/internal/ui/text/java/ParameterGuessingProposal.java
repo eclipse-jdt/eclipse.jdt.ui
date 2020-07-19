@@ -212,11 +212,7 @@ public class ParameterGuessingProposal extends JavaMethodCompletionProposal {
 				fSelectedRegion= new Region(baseOffset + replacement.length(), 0);
 			}
 
-		} catch (BadLocationException e) {
-			ensurePositionCategoryRemoved(document);
-			JavaPlugin.log(e);
-			openErrorDialog(e);
-		} catch (BadPositionCategoryException e) {
+		} catch (BadLocationException | BadPositionCategoryException e) {
 			ensurePositionCategoryRemoved(document);
 			JavaPlugin.log(e);
 			openErrorDialog(e);

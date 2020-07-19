@@ -1398,9 +1398,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 			int tokenLength= fgScanner.getCurrentTokenEndPosition() + 1 - tokenOffset; // inclusive end
 			return new Region(tokenOffset + scanRegion.getOffset(), tokenLength);
 
-		} catch (InvalidInputException x) {
-			return null;
-		} catch (BadLocationException x) {
+		} catch (InvalidInputException | BadLocationException x) {
 			return null;
 		}
 	}

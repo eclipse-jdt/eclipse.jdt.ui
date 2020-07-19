@@ -197,9 +197,7 @@ public class NLSKeyHyperlink implements IHyperlink {
 							offset= region.getOffset();
 					}
 				}
-			} catch (BadLocationException ex) {
-				found= false;
-			} catch (BadPartitioningException e1) {
+			} catch (BadLocationException | BadPartitioningException e1) {
 				found= false;
 			}
 		}

@@ -85,9 +85,7 @@ public class PropertiesFileSpellingEngine extends SpellingEngine {
 					checker.execute(listener, new PropertiesFileSpellCheckIterator(document, partition, locale));
 				}
 			}
-		} catch (BadLocationException x) {
-			// ignore: the document has been changed in another thread and will be checked again
-		} catch (AssertionFailedException x) {
+		} catch (BadLocationException | AssertionFailedException x) {
 			// ignore: the document has been changed in another thread and will be checked again
 		}
 	}

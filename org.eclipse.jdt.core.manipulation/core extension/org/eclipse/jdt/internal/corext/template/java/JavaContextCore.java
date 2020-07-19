@@ -613,9 +613,7 @@ public class JavaContextCore extends CompilationUnitContext implements IJavaCont
 				document.removePositionUpdater(updater);
 				document.removePositionCategory(category);
 			}
-		} catch (BadLocationException e) {
-			handleException(e);
-		} catch (BadPositionCategoryException e) {
+		} catch (BadLocationException | BadPositionCategoryException e) {
 			handleException(e);
 		}
 	}

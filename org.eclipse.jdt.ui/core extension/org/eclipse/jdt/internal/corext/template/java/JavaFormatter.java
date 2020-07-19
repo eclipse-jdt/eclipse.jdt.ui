@@ -286,9 +286,7 @@ public class JavaFormatter {
 			try {
 				format(document, (CompilationUnitContext) context);
 				return;
-			} catch (BadLocationException e) {
-				// ignore and indent
-			} catch (MalformedTreeException e) {
+			} catch (BadLocationException | MalformedTreeException e) {
 				// ignore and indent
 			}
 		}

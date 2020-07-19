@@ -311,11 +311,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 				result += countNonExternalizedStrings(line);
 			}
 			return result;
-		} catch (InvalidInputException e) {
-			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR,
-				Messages.format(ActionMessages.FindStringsToExternalizeAction_error_cannotBeParsed, BasicElementLabels.getFileName(cu)),
-				e));
-		} catch (BadLocationException e) {
+		} catch (InvalidInputException | BadLocationException e) {
 			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR, Messages.format(ActionMessages.FindStringsToExternalizeAction_error_cannotBeParsed,
 					BasicElementLabels.getFileName(cu)), e));
 		}

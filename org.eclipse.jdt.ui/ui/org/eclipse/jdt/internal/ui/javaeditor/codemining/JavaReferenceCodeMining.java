@@ -99,8 +99,6 @@ public class JavaReferenceCodeMining extends AbstractJavaElementLineHeaderCodeMi
 									textEditor.selectAndReveal(match.getOffset(), match.getLength());
 								}
 							}
-						} catch (JavaModelException e1) {
-							// Should never occur
 						} catch (CoreException e1) {
 							// Should never occur
 						}

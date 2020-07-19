@@ -292,9 +292,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			try {
 				//FIXME: add hover location to editor navigation history?
 				openDeclaration(infoInput.getElement());
-			} catch (PartInitException e) {
-				JavaPlugin.log(e);
-			} catch (JavaModelException e) {
+			} catch (PartInitException | JavaModelException e) {
 				JavaPlugin.log(e);
 			}
 		}
@@ -620,9 +618,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				try {
 					//FIXME: add hover location to editor navigation history?
 					openDeclaration(linkTarget);
-				} catch (PartInitException e) {
-					JavaPlugin.log(e);
-				} catch (JavaModelException e) {
+				} catch (PartInitException | JavaModelException e) {
 					JavaPlugin.log(e);
 				}
 			}
@@ -1159,10 +1155,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 					}
 				}
 			}
-		} catch (JavaModelException e) {
-			// no annotations this time...
-			buf.append("<br>"); //$NON-NLS-1$
-		} catch (URISyntaxException e) {
+		} catch (JavaModelException | URISyntaxException e) {
 			// no annotations this time...
 			buf.append("<br>"); //$NON-NLS-1$
 		}

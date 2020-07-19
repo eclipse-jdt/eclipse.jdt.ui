@@ -104,10 +104,7 @@ public class JavaTypeCompletionProposalComputer extends JavaCompletionProposalCo
 					}
 				}
 			}
-		} catch (BadLocationException x) {
-			// log & ignore
-			JavaPlugin.log(x);
-		} catch (JavaModelException x) {
+		} catch (BadLocationException | JavaModelException x) {
 			// log & ignore
 			JavaPlugin.log(x);
 		}

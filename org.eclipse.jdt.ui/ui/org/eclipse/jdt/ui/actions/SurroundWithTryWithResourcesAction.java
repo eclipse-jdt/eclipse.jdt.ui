@@ -128,10 +128,7 @@ public class SurroundWithTryWithResourcesAction extends SelectionDispatchAction 
 			ExceptionHandler.handle(e, getDialogTitle(), RefactoringMessages.SurroundWithTryResourcesAction_exception);
 		} catch (InvocationTargetException e) {
 			ExceptionHandler.handle(e, getDialogTitle(), RefactoringMessages.SurroundWithTryResourcesAction_exception);
-		} catch (InterruptedException e) {
-			// not cancelable
-		} catch (BadLocationException e) {
-			// ignore
+		} catch (/* not cancelable */ InterruptedException | /* ignore */ BadLocationException e) {
 		}
 	}
 

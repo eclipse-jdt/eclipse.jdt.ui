@@ -177,10 +177,7 @@ public class UnimplementedCodeCleanUp extends AbstractMultiFix {
 		TemplateBuffer buffer;
 		try {
 			buffer= context.evaluate(template);
-		} catch (BadLocationException e) {
-			JavaPlugin.log(e);
-			return ""; //$NON-NLS-1$
-		} catch (TemplateException e) {
+		} catch (BadLocationException | TemplateException e) {
 			JavaPlugin.log(e);
 			return ""; //$NON-NLS-1$
 		}

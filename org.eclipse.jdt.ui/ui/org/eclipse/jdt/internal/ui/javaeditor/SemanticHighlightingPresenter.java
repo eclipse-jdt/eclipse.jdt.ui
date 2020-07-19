@@ -235,10 +235,7 @@ public class SemanticHighlightingPresenter extends SemanticHighlightingPresenter
 				}
 				fPositions= newPositions;
 			}
-		} catch (BadPositionCategoryException e) {
-			// Should not happen
-			JavaPlugin.log(e);
-		} catch (BadLocationException e) {
+		} catch (BadPositionCategoryException | BadLocationException e) {
 			// Should not happen
 			JavaPlugin.log(e);
 		}
@@ -475,10 +472,7 @@ public class SemanticHighlightingPresenter extends SemanticHighlightingPresenter
 		String positionCategory= getPositionCategory();
 		try {
 			document.addPosition(positionCategory, position);
-		} catch (BadLocationException e) {
-			// Should not happen
-			JavaPlugin.log(e);
-		} catch (BadPositionCategoryException e) {
+		} catch (BadLocationException | BadPositionCategoryException e) {
 			// Should not happen
 			JavaPlugin.log(e);
 		}

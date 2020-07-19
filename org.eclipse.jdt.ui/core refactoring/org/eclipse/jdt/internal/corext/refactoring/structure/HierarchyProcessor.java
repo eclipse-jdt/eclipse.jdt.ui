@@ -322,9 +322,7 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 			expression.accept(new TypeVariableMapper(rewriter, mapping));
 			rewriter.rewriteAST(document, declaringCu.getJavaProject().getOptions(true)).apply(document, TextEdit.NONE);
 			result= (Expression) rewrite.createStringPlaceholder(document.get(position.getStartPosition(), position.getLength()), ASTNode.METHOD_INVOCATION);
-		} catch (MalformedTreeException exception) {
-			JavaPlugin.log(exception);
-		} catch (BadLocationException exception) {
+		} catch (MalformedTreeException | BadLocationException exception) {
 			JavaPlugin.log(exception);
 		}
 		return result;
@@ -373,9 +371,7 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 			});
 			rewriter.rewriteAST(document, declaringCu.getJavaProject().getOptions(true)).apply(document, TextEdit.NONE);
 			result= (BodyDeclaration) rewrite.createStringPlaceholder(document.get(position.getStartPosition(), position.getLength()), ASTNode.TYPE_DECLARATION);
-		} catch (MalformedTreeException exception) {
-			JavaPlugin.log(exception);
-		} catch (BadLocationException exception) {
+		} catch (MalformedTreeException | BadLocationException exception) {
 			JavaPlugin.log(exception);
 		}
 		return result;
@@ -394,9 +390,7 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 			declaration.accept(new TypeVariableMapper(rewriter, mapping));
 			rewriter.rewriteAST(document, declaringCu.getJavaProject().getOptions(true)).apply(document, TextEdit.NONE);
 			result= (SingleVariableDeclaration) rewrite.createStringPlaceholder(document.get(position.getStartPosition(), position.getLength()), ASTNode.SINGLE_VARIABLE_DECLARATION);
-		} catch (MalformedTreeException exception) {
-			JavaPlugin.log(exception);
-		} catch (BadLocationException exception) {
+		} catch (MalformedTreeException | BadLocationException exception) {
 			JavaPlugin.log(exception);
 		}
 		return result;
@@ -415,9 +409,7 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 			type.accept(new TypeVariableMapper(rewriter, mapping));
 			rewriter.rewriteAST(document, declaringCu.getJavaProject().getOptions(true)).apply(document, TextEdit.NONE);
 			result= (Type) rewrite.createStringPlaceholder(document.get(position.getStartPosition(), position.getLength()), ASTNode.SIMPLE_TYPE);
-		} catch (MalformedTreeException exception) {
-			JavaPlugin.log(exception);
-		} catch (BadLocationException exception) {
+		} catch (MalformedTreeException | BadLocationException exception) {
 			JavaPlugin.log(exception);
 		}
 		return result;
@@ -436,9 +428,7 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 			bodyDeclaration.accept(new TypeVariableMapper(rewriter, mapping));
 			rewriter.rewriteAST(document, declaringCu.getJavaProject().getOptions(true)).apply(document, TextEdit.NONE);
 			result= (BodyDeclaration) rewrite.createStringPlaceholder(document.get(position.getStartPosition(), position.getLength()), ASTNode.TYPE_DECLARATION);
-		} catch (MalformedTreeException exception) {
-			JavaPlugin.log(exception);
-		} catch (BadLocationException exception) {
+		} catch (MalformedTreeException | BadLocationException exception) {
 			JavaPlugin.log(exception);
 		}
 		return result;

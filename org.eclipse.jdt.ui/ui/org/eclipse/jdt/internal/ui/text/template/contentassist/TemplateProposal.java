@@ -306,11 +306,7 @@ public class TemplateProposal
 				fSelectedRegion= new Region(getCaretOffset(templateBuffer) + start, 0);
 			}
 
-		} catch (BadLocationException e) {
-			JavaPlugin.log(e);
-			openErrorDialog(viewer.getTextWidget().getShell(), e);
-			fSelectedRegion= fRegion;
-		} catch (BadPositionCategoryException e) {
+		} catch (BadLocationException | BadPositionCategoryException e) {
 			JavaPlugin.log(e);
 			openErrorDialog(viewer.getTextWidget().getShell(), e);
 			fSelectedRegion= fRegion;

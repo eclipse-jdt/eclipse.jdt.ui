@@ -88,10 +88,7 @@ public class PropertiesCorrectionProcessor implements org.eclipse.jface.text.qui
 					proposals.addAll(Arrays.asList(assists));
 				}
 				res= proposals.toArray(new ICompletionProposal[proposals.size()]);
-			} catch (BadLocationException e) {
-				fErrorMessage= PropertiesFileEditorMessages.PropertiesCorrectionProcessor_error_quickassist_message;
-				JavaPlugin.log(e);
-			} catch (BadPartitioningException e) {
+			} catch (BadLocationException | BadPartitioningException e) {
 				fErrorMessage= PropertiesFileEditorMessages.PropertiesCorrectionProcessor_error_quickassist_message;
 				JavaPlugin.log(e);
 			}

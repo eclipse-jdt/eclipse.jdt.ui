@@ -1019,9 +1019,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 			Strings.trimIndentation(lines, method.getJavaProject(), false);
 			content= Strings.concatenate(lines, StubUtility.getLineDelimiterUsed(method));
 			newMethod.setBody((Block) targetRewrite.getASTRewrite().createStringPlaceholder(content, ASTNode.BLOCK));
-		} catch (MalformedTreeException exception) {
-			JavaPlugin.log(exception);
-		} catch (BadLocationException exception) {
+		} catch (MalformedTreeException | BadLocationException exception) {
 			JavaPlugin.log(exception);
 		}
 	}
@@ -1425,11 +1423,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 			copy.getBuffer().setContents(document.get());
 			JavaModelUtil.reconcile(copy);
 			return copy;
-		} catch (JavaModelException exception) {
-			status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractInterfaceProcessor_internal_error));
-		} catch (MalformedTreeException exception) {
-			status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractInterfaceProcessor_internal_error));
-		} catch (BadLocationException exception) {
+		} catch (JavaModelException | MalformedTreeException | BadLocationException exception) {
 			status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractInterfaceProcessor_internal_error));
 		} finally {
 			monitor.done();

@@ -149,9 +149,7 @@ public class ImportCompletionProposal extends AbstractJavaCompletionProposal {
 					fLengthOfImportsAddedBehindReplacementOffset= 0;
 				setReplacementOffset(getReplacementOffset() + document.getLength() - oldLen);
 			}
-		} catch (CoreException e) {
-			JavaPlugin.log(e);
-		} catch (BadLocationException e) {
+		} catch (CoreException | BadLocationException e) {
 			JavaPlugin.log(e);
 		}
 	}

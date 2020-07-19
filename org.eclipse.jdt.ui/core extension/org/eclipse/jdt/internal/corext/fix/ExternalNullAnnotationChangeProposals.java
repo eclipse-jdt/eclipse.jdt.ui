@@ -187,9 +187,7 @@ public class ExternalNullAnnotationChangeProposals {
 		public void apply(IDocument document) {
 			try {
 				doAnnotateMember(new NullProgressMonitor());
-			} catch (CoreException e) {
-				JavaPlugin.log(e);
-			} catch (IOException e) {
+			} catch (CoreException | IOException e) {
 				JavaPlugin.log(e);
 			}
 		}

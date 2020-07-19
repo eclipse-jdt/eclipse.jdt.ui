@@ -111,9 +111,7 @@ public class CallHierarchyUI {
         if (element != null) {
             try {
                 JavaUI.openInEditor(element, true, true);
-            } catch (JavaModelException e) {
-                JavaPlugin.log(e);
-            } catch (PartInitException e) {
+            } catch (JavaModelException | PartInitException e) {
                 JavaPlugin.log(e);
             }
         }
@@ -127,9 +125,7 @@ public class CallHierarchyUI {
                 editor.selectAndReveal(callLocation.getStart(),
                     (callLocation.getEnd() - callLocation.getStart()));
             }
-        } catch (JavaModelException e) {
-            JavaPlugin.log(e);
-        } catch (PartInitException e) {
+        } catch (JavaModelException | PartInitException e) {
             JavaPlugin.log(e);
         }
     }

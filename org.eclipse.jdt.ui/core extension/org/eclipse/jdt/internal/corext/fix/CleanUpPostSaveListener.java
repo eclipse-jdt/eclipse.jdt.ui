@@ -171,11 +171,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 							synchronized (this) {
 								try {
 									performEdit(document, oldFileValue, undoEditCollector, oldDocValue, setContentStampSuccess);
-								} catch (BadLocationException e) {
-									fException= e;
-								} catch (MalformedTreeException e) {
-									fException= e;
-								} catch (CoreException e) {
+								} catch (BadLocationException | MalformedTreeException | CoreException e) {
 									fException= e;
 								} finally {
 									fDone= true;

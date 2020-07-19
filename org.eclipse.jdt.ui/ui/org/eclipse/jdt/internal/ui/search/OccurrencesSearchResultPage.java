@@ -243,9 +243,7 @@ public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
 			// activating at the end avoids an outdated selection event from JavaUI.openInEditor(..):
 			if (editor != null && activate)
 				editor.getEditorSite().getPage().activate(editor);
-		} catch (PartInitException e1) {
-			return;
-		} catch (JavaModelException e1) {
+		} catch (PartInitException | JavaModelException e1) {
 			return;
 		}
 

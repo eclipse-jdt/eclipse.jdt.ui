@@ -262,9 +262,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 				int bodyStart= trackedDeclaration.getStartPosition() + dummyClassContent.indexOf('{');
 				int bodyEnd= trackedDeclaration.getStartPosition() + trackedDeclaration.getLength();
 				return document.get(bodyStart, bodyEnd - bodyStart);
-			} catch (MalformedTreeException exception) {
-				JavaPlugin.log(exception);
-			} catch (BadLocationException exception) {
+			} catch (MalformedTreeException | BadLocationException exception) {
 				JavaPlugin.log(exception);
 			}
 			return null;

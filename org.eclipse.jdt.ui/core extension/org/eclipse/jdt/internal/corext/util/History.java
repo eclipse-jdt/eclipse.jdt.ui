@@ -172,9 +172,7 @@ public abstract class History<K, V> {
 	        try {
 				reader = new InputStreamReader(new FileInputStream(file), "utf-8");//$NON-NLS-1$
 				load(new InputSource(reader));
-			} catch (IOException e) {
-				JavaPlugin.log(e);
-			} catch (CoreException e) {
+			} catch (IOException | CoreException e) {
 				JavaPlugin.log(e);
 			} finally {
 				try {
@@ -194,11 +192,7 @@ public abstract class History<K, V> {
 		try {
 			out= new FileOutputStream(file);
 			save(out);
-		} catch (IOException e) {
-			JavaPlugin.log(e);
-		} catch (CoreException e) {
-			JavaPlugin.log(e);
-		} catch (TransformerFactoryConfigurationError e) {
+		} catch (IOException | CoreException | TransformerFactoryConfigurationError e) {
 			// The XML library can be misconficgured (e.g. via
 			// -Djava.endorsed.dirs=C:\notExisting\xerces-2_7_1)
 			JavaPlugin.log(e);
@@ -260,11 +254,7 @@ public abstract class History<K, V> {
 			DocumentBuilder parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 			parser.setErrorHandler(new DefaultHandler());
 			root = parser.parse(inputSource).getDocumentElement();
-		} catch (SAXException e) {
-			throw createException(e, Messages.format(CorextMessages.History_error_read, BasicElementLabels.getResourceName(fFileName)));
-		} catch (ParserConfigurationException e) {
-			throw createException(e, Messages.format(CorextMessages.History_error_read, BasicElementLabels.getResourceName(fFileName)));
-		} catch (IOException e) {
+		} catch (SAXException | ParserConfigurationException | IOException e) {
 			throw createException(e, Messages.format(CorextMessages.History_error_read, BasicElementLabels.getResourceName(fFileName)));
 		}
 
@@ -314,9 +304,7 @@ public abstract class History<K, V> {
 			StreamResult result = new StreamResult(stream);
 
 			transformer.transform(source, result);
-		} catch (TransformerException e) {
-			throw createException(e, Messages.format(CorextMessages.History_error_serialize, BasicElementLabels.getResourceName(fFileName)));
-		} catch (ParserConfigurationException e) {
+		} catch (TransformerException | ParserConfigurationException e) {
 			throw createException(e, Messages.format(CorextMessages.History_error_serialize, BasicElementLabels.getResourceName(fFileName)));
 		}
 	}

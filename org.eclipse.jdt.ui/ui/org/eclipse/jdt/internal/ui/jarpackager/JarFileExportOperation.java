@@ -1085,9 +1085,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 		if (fJarPackage.areGeneratedFilesExported() && fJarPackage.isManifestGenerated() && fJarPackage.isManifestSaved()) {
 			try {
 				saveManifest();
-			} catch (CoreException ex) {
-				addError(JarPackagerMessages.JarFileExportOperation_errorSavingManifest, ex);
-			} catch (IOException ex) {
+			} catch (CoreException | IOException ex) {
 				addError(JarPackagerMessages.JarFileExportOperation_errorSavingManifest, ex);
 			}
 		}
@@ -1096,9 +1094,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 		if (fJarPackage.isDescriptionSaved()) {
 			try {
 				saveDescription();
-			} catch (CoreException ex) {
-				addError(JarPackagerMessages.JarFileExportOperation_errorSavingDescription, ex);
-			} catch (IOException ex) {
+			} catch (CoreException | IOException ex) {
 				addError(JarPackagerMessages.JarFileExportOperation_errorSavingDescription, ex);
 			}
 		}

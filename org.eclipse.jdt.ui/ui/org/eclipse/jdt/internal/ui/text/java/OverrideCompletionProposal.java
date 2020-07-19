@@ -182,9 +182,7 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal imple
 						setReplacementLength(replacementLength + 1);
 					}
 
-				} catch (MalformedTreeException exception) {
-					JavaPlugin.log(exception);
-				} catch (BadLocationException exception) {
+				} catch (MalformedTreeException | BadLocationException exception) {
 					JavaPlugin.log(exception);
 				}
 			}

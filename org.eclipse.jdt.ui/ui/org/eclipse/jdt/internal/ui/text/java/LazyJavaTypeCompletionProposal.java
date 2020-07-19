@@ -215,9 +215,7 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 				setUpLinkedMode(document, ')');
 
 			rememberSelection();
-		} catch (CoreException e) {
-			JavaPlugin.log(e);
-		} catch (BadLocationException e) {
+		} catch (CoreException | BadLocationException e) {
 			JavaPlugin.log(e);
 		}
 	}
