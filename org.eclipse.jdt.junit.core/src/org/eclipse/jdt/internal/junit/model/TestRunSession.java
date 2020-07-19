@@ -379,9 +379,7 @@ public class TestRunSession implements ITestRunSession {
 			fFactoryTestSuites= null;
 			fUnrootedSuite= null;
 
-		} catch (IllegalStateException e) {
-			JUnitCorePlugin.log(e);
-		} catch (CoreException e) {
+		} catch (IllegalStateException | CoreException e) {
 			JUnitCorePlugin.log(e);
 		}
 	}
@@ -411,11 +409,7 @@ public class TestRunSession implements ITestRunSession {
 
 		try {
 			JUnitModel.importIntoTestRunSession(getSwapFile(), this);
-		} catch (IllegalStateException e) {
-			JUnitCorePlugin.log(e);
-			fTestRoot= new TestRoot(this);
-			fTestResult= null;
-		} catch (CoreException e) {
+		} catch (IllegalStateException | CoreException e) {
 			JUnitCorePlugin.log(e);
 			fTestRoot= new TestRoot(this);
 			fTestResult= null;
