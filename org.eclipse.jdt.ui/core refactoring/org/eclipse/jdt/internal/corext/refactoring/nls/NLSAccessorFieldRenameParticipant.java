@@ -128,9 +128,6 @@ public class NLSAccessorFieldRenameParticipant extends RenameParticipant {
 			} finally {
 				manager.disconnect(propertyFilePath, LocationKind.IFILE, new SubProgressMonitor(pm, 25));
 			}
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
-			return RefactoringStatus.createErrorStatus(NLSMessages.NLSAccessorFieldRenameParticipant_error_description);
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
 			return RefactoringStatus.createErrorStatus(NLSMessages.NLSAccessorFieldRenameParticipant_error_description);

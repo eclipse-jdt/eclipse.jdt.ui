@@ -176,8 +176,6 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 				return children.toArray();
 			}
 
-		} catch (JavaModelException e) {
-			return NO_CHILDREN;
 		} catch (CoreException e) {
 			return NO_CHILDREN;
 		}

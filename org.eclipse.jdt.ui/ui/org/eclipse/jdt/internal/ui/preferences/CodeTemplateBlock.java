@@ -18,7 +18,6 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -527,8 +526,6 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 			fCodeTemplateTree.refresh();
 			updateSourceViewerInput(fCodeTemplateTree.getSelectedElements());
 
-		} catch (FileNotFoundException e) {
-			openReadErrorDialog(e);
 		} catch (IOException e) {
 			openReadErrorDialog(e);
 		}

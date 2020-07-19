@@ -486,8 +486,6 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
 				}
 			}
 	        fJavaProject.setOutputLocation(path, null);
-        } catch (JavaModelException e) {
-	     	JavaPlugin.log(e);
         } catch (CoreException e) {
 	        JavaPlugin.log(e);
         }

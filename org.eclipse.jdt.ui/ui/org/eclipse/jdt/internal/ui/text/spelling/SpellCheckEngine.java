@@ -16,7 +16,6 @@ package org.eclipse.jdt.internal.ui.text.spelling;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -437,8 +436,6 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 						stream.close();
 					}
 				}
-			} catch (MalformedURLException exception) {
-				// Do nothing
 			} catch (IOException exception) {
 				// Do nothing
 			}

@@ -66,7 +66,6 @@ import org.eclipse.debug.core.ILaunchManager;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.junit.launcher.ITestFinder;
 import org.eclipse.jdt.internal.junit.model.TestCaseElement;
@@ -395,8 +394,6 @@ public class TestViewer {
 						return null;
 					}
 				}
-			} catch (JavaModelException e) {
-				// fall through
 			} catch (CoreException e) {
 				// fall through
 			}

@@ -25,7 +25,6 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.PartInitException;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
@@ -197,8 +196,6 @@ public class JavaElementDeclaredTypeHyperlink implements IHyperlink {
 			if (editor instanceof JavaEditor)
 				((JavaEditor)editor).setStatusLineErrorMessage(JavaEditorMessages.JavaElementDeclaredTypeHyperlink_error_msg);
 
-		} catch (PartInitException e) {
-			JavaPlugin.log(e);
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
 		}

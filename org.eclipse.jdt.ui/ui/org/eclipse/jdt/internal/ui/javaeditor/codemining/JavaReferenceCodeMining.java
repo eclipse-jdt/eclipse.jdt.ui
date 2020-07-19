@@ -114,8 +114,6 @@ public class JavaReferenceCodeMining extends AbstractJavaElementLineHeaderCodeMi
 				} else {
 					super.setLabel(MessageFormat.format(JavaCodeMiningMessages.JavaReferenceCodeMining_label, refCount));
 				}
-			} catch (JavaModelException e) {
-				// Should never occur
 			} catch (CoreException e) {
 				// Should never occur
 			}
