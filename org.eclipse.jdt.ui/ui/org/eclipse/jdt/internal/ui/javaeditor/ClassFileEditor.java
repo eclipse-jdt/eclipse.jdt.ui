@@ -21,8 +21,6 @@ import java.util.List;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
@@ -168,19 +166,16 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 
 			fComposite= createComposite(parent);
 			fComposite.setLayout(new GridLayout());
-			fComposite.addDisposeListener(new DisposeListener() {
-				@Override
-				public void widgetDisposed(DisposeEvent e) {
-					JFaceResources.getFontRegistry().removeListener(SourceAttachmentForm.this);
-					fComposite= null;
-					fSeparatorColor.dispose();
-					fSeparatorColor= null;
-					fBannerLabels.clear();
-					fHeaderLabels.clear();
-					if (fFont != null) {
-						fFont.dispose();
-						fFont= null;
-					}
+			fComposite.addDisposeListener(e -> {
+				JFaceResources.getFontRegistry().removeListener(SourceAttachmentForm.this);
+				fComposite= null;
+				fSeparatorColor.dispose();
+				fSeparatorColor= null;
+				fBannerLabels.clear();
+				fHeaderLabels.clear();
+				if (fFont != null) {
+					fFont.dispose();
+					fFont= null;
 				}
 			});
 

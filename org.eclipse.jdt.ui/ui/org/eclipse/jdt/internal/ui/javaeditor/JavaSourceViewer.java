@@ -20,8 +20,6 @@ import java.util.Map;
 import com.ibm.icu.text.Bidi;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.BidiSegmentEvent;
-import org.eclipse.swt.custom.BidiSegmentListener;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Color;
@@ -477,15 +475,12 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 		fBackspaceManager.install(this);
 
 		StyledText text= getTextWidget();
-		text.addBidiSegmentListener(new BidiSegmentListener() {
-			@Override
-			public void lineGetSegments(BidiSegmentEvent event) {
-				if (redraws()) {
-					try {
-						event.segments= getBidiLineSegments(getDocument(), baseLevel, widgetOffset2ModelOffset(event.lineOffset), event.lineText);
-					} catch (BadLocationException e) {
-						// don't touch the segments
-					}
+		text.addBidiSegmentListener(event -> {
+			if (redraws()) {
+				try {
+					event.segments= getBidiLineSegments(getDocument(), baseLevel, widgetOffset2ModelOffset(event.lineOffset), event.lineText);
+				} catch (BadLocationException e) {
+					// don't touch the segments
 				}
 			}
 		});

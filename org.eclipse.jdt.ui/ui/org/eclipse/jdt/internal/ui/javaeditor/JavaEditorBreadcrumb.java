@@ -32,11 +32,9 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -470,19 +468,16 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 			if (changedElement == null)
 				return;
 
-			fRunnable= new Runnable() {
-				@Override
-				public void run() {
-					if (fViewer == null)
-						return;
+			fRunnable= () -> {
+				if (fViewer == null)
+					return;
 
-					Object newInput= getCurrentInput();
-					if (newInput instanceof IJavaElement)
-						newInput= getInput((IJavaElement) newInput);
+				Object newInput= getCurrentInput();
+				if (newInput instanceof IJavaElement)
+					newInput= getInput((IJavaElement) newInput);
 
-					fViewer.setInput(newInput);
-					fRunnable= null;
-				}
+				fViewer.setInput(newInput);
+				fRunnable= null;
 			};
 			fViewer.getControl().getDisplay().asyncExec(fRunnable);
 		}
@@ -599,12 +594,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		fViewer.setToolTipLabelProvider(createToolTipLabelProvider());
 
 		fViewer.setContentProvider(createContentProvider());
-		fViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				fBreadcrumbActionGroup.setContext(new ActionContext(fViewer.getSelection()));
-			}
-		});
+		fViewer.addSelectionChangedListener(event -> fBreadcrumbActionGroup.setContext(new ActionContext(fViewer.getSelection())));
 
 		fBreadcrumbActionGroup= new JavaEditorBreadcrumbActionGroup(getJavaEditor(), fViewer);
 

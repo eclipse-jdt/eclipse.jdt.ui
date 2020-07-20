@@ -36,8 +36,6 @@ import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferencePage;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 
@@ -156,12 +154,9 @@ public class SortMembersMessageDialog extends OptionalMessageDialog {
 		label.setLayoutData(gridData);
 		label.setFont(warningComposite.getFont());
 
-		fNotSortAllRadio.setDialogFieldListener(new IDialogFieldListener() {
-			@Override
-			public void dialogFieldChanged(DialogField field) {
-				imageLabel1.setEnabled(!fNotSortAllRadio.isSelected());
-				label.setEnabled(!fNotSortAllRadio.isSelected());
-			}
+		fNotSortAllRadio.setDialogFieldListener(field -> {
+			imageLabel1.setEnabled(!fNotSortAllRadio.isSelected());
+			label.setEnabled(!fNotSortAllRadio.isSelected());
 		});
 		imageLabel1.setEnabled(!fNotSortAllRadio.isSelected());
 		label.setEnabled(!fNotSortAllRadio.isSelected());

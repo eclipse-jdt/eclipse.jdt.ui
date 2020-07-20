@@ -457,12 +457,7 @@ public class JavaMergeViewer extends TextMergeViewer {
 		}
 		fPreferenceStore= ps;
 		if (fPreferenceStore != null) {
-			fPreferenceChangeListener= new IPropertyChangeListener() {
-				@Override
-				public void propertyChange(PropertyChangeEvent event) {
-					handlePropertyChange(event);
-				}
-			};
+			fPreferenceChangeListener= this::handlePropertyChange;
 			fPreferenceStore.addPropertyChangeListener(fPreferenceChangeListener);
 		}
 	}

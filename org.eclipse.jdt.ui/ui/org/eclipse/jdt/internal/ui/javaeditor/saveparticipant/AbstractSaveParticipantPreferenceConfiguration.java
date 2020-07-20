@@ -31,8 +31,6 @@ import org.eclipse.jface.preference.IPreferencePageContainer;
 
 import org.eclipse.jdt.ui.JavaUI;
 
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 
 public abstract class AbstractSaveParticipantPreferenceConfiguration implements ISaveParticipantPreferenceConfiguration {
@@ -96,13 +94,9 @@ public abstract class AbstractSaveParticipantPreferenceConfiguration implements 
 		boolean enabled= isEnabled(context);
 		fEnableField.setSelection(enabled);
 
-		fEnableField.setDialogFieldListener(new IDialogFieldListener() {
-			@Override
-			public void dialogFieldChanged(DialogField field) {
-				fContext.getNode(JavaUI.ID_PLUGIN).putBoolean(getPreferenceKey(), fEnableField.isSelected());
-				enabled(fEnableField.isSelected());
-			}
-
+		fEnableField.setDialogFieldListener(field -> {
+			fContext.getNode(JavaUI.ID_PLUGIN).putBoolean(getPreferenceKey(), fEnableField.isSelected());
+			enabled(fEnableField.isSelected());
 		});
 
 		fContext= context;

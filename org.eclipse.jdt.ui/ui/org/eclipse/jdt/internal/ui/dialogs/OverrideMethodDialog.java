@@ -18,8 +18,6 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -444,37 +442,34 @@ public class OverrideMethodDialog extends SourceActionDialog {
 	@Override
 	protected void addMethodSearchFilter(Text filterText, CheckboxTreeViewer treeViewer) {
 
-		filterText.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				final String searchText = filterText.getText();
+		filterText.addModifyListener(e -> {
+			final String searchText = filterText.getText();
 
-				PatternMatcher matcher = new PatternMatcher(searchText);
-				ViewerFilter vf = null;
-				if(!searchText.trim().isEmpty()) {
-					vf = new ViewerFilter() {
+			PatternMatcher matcher = new PatternMatcher(searchText);
+			ViewerFilter vf = null;
+			if(!searchText.trim().isEmpty()) {
+				vf = new ViewerFilter() {
 
-						@Override
-						public boolean select(Viewer viewer, Object parentElement, Object element) {
-							IBaseLabelProvider lblProvider= getTreeViewer().getLabelProvider();
-							if(element instanceof ITypeBinding) {
-								return true;
-							}
-
-							String filterableName = null;
-							if(lblProvider instanceof LabelProvider) {
-								filterableName = ((LabelProvider)lblProvider).getText(element);
-								return matcher.matches(filterableName);
-							}
-
-							return false;
+					@Override
+					public boolean select(Viewer viewer, Object parentElement, Object element) {
+						IBaseLabelProvider lblProvider= getTreeViewer().getLabelProvider();
+						if(element instanceof ITypeBinding) {
+							return true;
 						}
-					};
-					treeViewer.setFilters(vf);
-					treeViewer.expandAll();
-				} else {
-					treeViewer.resetFilters();
-				}
+
+						String filterableName = null;
+						if(lblProvider instanceof LabelProvider) {
+							filterableName = ((LabelProvider)lblProvider).getText(element);
+							return matcher.matches(filterableName);
+						}
+
+						return false;
+					}
+				};
+				treeViewer.setFilters(vf);
+				treeViewer.expandAll();
+			} else {
+				treeViewer.resetFilters();
 			}
 		});
 	}

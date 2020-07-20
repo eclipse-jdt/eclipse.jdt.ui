@@ -24,8 +24,6 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.TraverseEvent;
-import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Text;
@@ -146,12 +144,7 @@ public class TableTextCellEditor extends CellEditor {
 
 	private ModifyListener getModifyListener() {
 	    if (fModifyListener == null) {
-	        fModifyListener = new ModifyListener() {
-	            @Override
-				public void modifyText(ModifyEvent e) {
-	                editOccured(e);
-	            }
-	        };
+	        fModifyListener = this::editOccured;
 	    }
 	    return fModifyListener;
 	}
@@ -227,15 +220,12 @@ public class TableTextCellEditor extends CellEditor {
                 checkSelectable();
             }
         });
-        text.addTraverseListener(new TraverseListener() {
-            @Override
-			public void keyTraversed(TraverseEvent e) {
-                if (e.detail == SWT.TRAVERSE_ESCAPE
-                        || e.detail == SWT.TRAVERSE_RETURN) {
-                    e.doit = false;
-                }
-            }
-        });
+        text.addTraverseListener(e -> {
+		    if (e.detail == SWT.TRAVERSE_ESCAPE
+		            || e.detail == SWT.TRAVERSE_RETURN) {
+		        e.doit = false;
+		    }
+		});
         // We really want a selection listener but it is not supported so we
         // use a key listener and a mouse listener to know when selection changes
         // may have occurred
@@ -250,14 +240,11 @@ public class TableTextCellEditor extends CellEditor {
         text.addFocusListener(new FocusAdapter() {
             @Override
 			public void focusLost(FocusEvent e) {
-            	e.display.asyncExec(new Runnable() {
-					@Override
-					public void run() {
-						if (text.isDisposed())
-							return;
-						// without the asyncExec, focus has not had a chance to go to the content assist proposals
-						TableTextCellEditor.this.focusLost();
-					}
+            	e.display.asyncExec(() -> {
+					if (text.isDisposed())
+						return;
+					// without the asyncExec, focus has not had a chance to go to the content assist proposals
+					TableTextCellEditor.this.focusLost();
 				});
             }
         });

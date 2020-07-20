@@ -20,8 +20,6 @@ import com.ibm.icu.text.BreakIterator;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.KeyAdapter;
@@ -294,12 +292,7 @@ public class TextFieldNavigationHandler {
 			control.addFocusListener(this);
 			if (control.isFocusControl())
 				activate();
-			control.addDisposeListener(new DisposeListener() {
-				@Override
-				public void widgetDisposed(DisposeEvent e) {
-					deactivate();
-				}
-			});
+			control.addDisposeListener(e -> deactivate());
 		}
 
 		@Override

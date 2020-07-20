@@ -105,12 +105,7 @@ public final class ToggleCommentAction extends TextEditorAction {
 		if (shell != null && !shell.isDisposed())
 			display= shell.getDisplay();
 
-		BusyIndicator.showWhile(display, new Runnable() {
-			@Override
-			public void run() {
-				fOperationTarget.doOperation(operationCode);
-			}
-		});
+		BusyIndicator.showWhile(display, () -> fOperationTarget.doOperation(operationCode));
 	}
 
 	/**

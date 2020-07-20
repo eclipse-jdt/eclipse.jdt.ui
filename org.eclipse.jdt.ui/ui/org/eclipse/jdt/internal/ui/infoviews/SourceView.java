@@ -448,12 +448,7 @@ public class SourceView extends AbstractInfoView {
 				if (!shell.isDisposed()) {
 					Display display= shell.getDisplay();
 					if (!display.isDisposed()) {
-						display.asyncExec(new Runnable() {
-							@Override
-							public void run() {
-								updateViewerConfiguration((IJavaElement) input);
-							}
-						});
+						display.asyncExec(() -> updateViewerConfiguration((IJavaElement) input));
 					}
 				}
 			}

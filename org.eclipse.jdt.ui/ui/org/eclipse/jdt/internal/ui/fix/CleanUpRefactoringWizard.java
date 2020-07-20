@@ -85,8 +85,6 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomPr
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileStore;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
@@ -373,12 +371,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 
 			updateEnableState(isCustom, settingsField, configure, bulletListBlock);
 
-			fUseCustomField.setDialogFieldListener(new IDialogFieldListener() {
-				@Override
-				public void dialogFieldChanged(DialogField field) {
-					updateEnableState(fUseCustomField.isSelected(), settingsField, configure, bulletListBlock);
-                }
-			});
+			fUseCustomField.setDialogFieldListener(field -> updateEnableState(fUseCustomField.isSelected(), settingsField, configure, bulletListBlock));
 
 			Link preferencePageLink= new Link(composite, SWT.WRAP);
 			preferencePageLink.setText(MultiFixMessages.CleanUpRefactoringWizard_HideWizard_Link);

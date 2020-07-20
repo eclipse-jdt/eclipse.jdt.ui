@@ -63,7 +63,6 @@ import org.eclipse.core.filebuffers.IAnnotationModelFactory;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultLineTracker;
@@ -963,12 +962,9 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 		setParentDocumentProvider(provider);
 
 		fGlobalAnnotationModelListener= new GlobalAnnotationModelListener();
-		fPropertyListener= new IPropertyChangeListener() {
-			@Override
-			public void propertyChange(PropertyChangeEvent event) {
-				if (HANDLE_TEMPORARY_PROBLEMS.equals(event.getProperty()))
-					enableHandlingTemporaryProblems();
-			}
+		fPropertyListener= event -> {
+			if (HANDLE_TEMPORARY_PROBLEMS.equals(event.getProperty()))
+				enableHandlingTemporaryProblems();
 		};
 		JavaPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(fPropertyListener);
 	}

@@ -43,7 +43,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.commands.operations.IOperationApprover;
 import org.eclipse.core.commands.operations.IUndoContext;
@@ -87,8 +86,6 @@ import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension4;
 import org.eclipse.jface.text.IDocumentListener;
-import org.eclipse.jface.text.IInformationControl;
-import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ISelectionValidator;
 import org.eclipse.jface.text.ISynchronizable;
@@ -127,7 +124,6 @@ import org.eclipse.jface.text.source.projection.ProjectionSupport;
 import org.eclipse.jface.text.source.projection.ProjectionViewer;
 
 import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IPartService;
@@ -335,12 +331,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			@Override
 			public void preferenceChange(final IEclipsePreferences.PreferenceChangeEvent event) {
 				if (Display.getCurrent() == null) {
-					Display.getDefault().asyncExec(new Runnable() {
-						@Override
-						public void run() {
-							firePropertyChangeEvent(event.getKey(), event.getOldValue(), event.getNewValue());
-						}
-					});
+					Display.getDefault().asyncExec(() -> firePropertyChangeEvent(event.getKey(), event.getOldValue(), event.getNewValue()));
 				} else {
 					firePropertyChangeEvent(event.getKey(), event.getOldValue(), event.getNewValue());
 				}
@@ -1892,18 +1883,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				fProjectionSupport.addSummarizableAnnotationType("org.eclipse.ui.workbench.texteditor.error"); //$NON-NLS-1$
 				fProjectionSupport.addSummarizableAnnotationType("org.eclipse.ui.workbench.texteditor.warning"); //$NON-NLS-1$
 			}
-			fProjectionSupport.setHoverControlCreator(new IInformationControlCreator() {
-				@Override
-				public IInformationControl createInformationControl(Shell shell) {
-					return new SourceViewerInformationControl(shell, false, getOrientation(), EditorsUI.getTooltipAffordanceString());
-				}
-			});
-			fProjectionSupport.setInformationPresenterControlCreator(new IInformationControlCreator() {
-				@Override
-				public IInformationControl createInformationControl(Shell shell) {
-					return new SourceViewerInformationControl(shell, true, getOrientation(), null);
-				}
-			});
+			fProjectionSupport.setHoverControlCreator(shell -> new SourceViewerInformationControl(shell, false, getOrientation(), EditorsUI.getTooltipAffordanceString()));
+			fProjectionSupport.setInformationPresenterControlCreator(shell -> new SourceViewerInformationControl(shell, true, getOrientation(), null));
 			fProjectionSupport.install();
 
 			fProjectionModelUpdater= JavaPlugin.getDefault().getFoldingStructureProviderRegistry().getCurrentFoldingProvider();
@@ -2195,13 +2176,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			return (T) fEncodingSupport;
 
 		if (required == IShowInTargetList.class) {
-			return (T) new IShowInTargetList() {
-				@Override
-				public String[] getShowInTargetIds() {
-					return new String[] { JavaUI.ID_PACKAGES, IPageLayout.ID_OUTLINE };
-				}
-
-			};
+			return (T) (IShowInTargetList) () -> new String[] { JavaUI.ID_PACKAGES, IPageLayout.ID_OUTLINE };
 		}
 
 		if (required == IShowInSource.class) {
@@ -2209,41 +2184,36 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			if (inputJE instanceof ICompilationUnit && !JavaModelUtil.isPrimary((ICompilationUnit) inputJE))
 				return null;
 
-			return (T) new IShowInSource() {
+			return (T) (IShowInSource) () -> new ShowInContext(null, null) {
+				/*
+				 * @see org.eclipse.ui.part.ShowInContext#getInput()
+				 * @since 3.4
+				 */
 				@Override
-				public ShowInContext getShowInContext() {
-					return new ShowInContext(null, null) {
-						/*
-						 * @see org.eclipse.ui.part.ShowInContext#getInput()
-						 * @since 3.4
-						 */
-						@Override
-						public Object getInput() {
-							if (isBreadcrumbActive())
-								return null;
+				public Object getInput() {
+					if (isBreadcrumbActive())
+						return null;
 
-							return getEditorInput();
-						}
+					return getEditorInput();
+				}
 
-						/*
-						 * @see org.eclipse.ui.part.ShowInContext#getSelection()
-						 * @since 3.3
-						 */
-						@Override
-						public ISelection getSelection() {
-							if (isBreadcrumbActive())
-								return getBreadcrumb().getSelectionProvider().getSelection();
+				/*
+				 * @see org.eclipse.ui.part.ShowInContext#getSelection()
+				 * @since 3.3
+				 */
+				@Override
+				public ISelection getSelection() {
+					if (isBreadcrumbActive())
+						return getBreadcrumb().getSelectionProvider().getSelection();
 
-							try {
-								IJavaElement je= SelectionConverter.getElementAtOffset(JavaEditor.this);
-								if (je != null)
-									return new StructuredSelection(je);
-								return null;
-							} catch (JavaModelException ex) {
-								return null;
-							}
-						}
-					};
+					try {
+						IJavaElement je= SelectionConverter.getElementAtOffset(JavaEditor.this);
+						if (je != null)
+							return new StructuredSelection(je);
+						return null;
+					} catch (JavaModelException ex) {
+						return null;
+					}
 				}
 			};
 		}
@@ -3377,12 +3347,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	protected void installOccurrencesFinder(boolean forceUpdate) {
 		fMarkOccurrenceAnnotations= true;
 
-		fPostSelectionListenerWithAST= new ISelectionListenerWithAST() {
-			@Override
-			public void selectionChanged(IEditorPart part, ITextSelection selection, CompilationUnit astRoot) {
-				updateOccurrenceAnnotations(selection, astRoot);
-			}
-		};
+		fPostSelectionListenerWithAST= (part, selection, astRoot) -> updateOccurrenceAnnotations(selection, astRoot);
 		SelectionListenerWithASTManager.getDefault().addListener(this, fPostSelectionListenerWithAST);
 		if (forceUpdate && getSelectionProvider() != null) {
 			fForcedMarkOccurrencesSelection= getSelectionProvider().getSelection();

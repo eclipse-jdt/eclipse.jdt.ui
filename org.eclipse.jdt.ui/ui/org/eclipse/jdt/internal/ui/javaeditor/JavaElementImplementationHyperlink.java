@@ -208,84 +208,76 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 				openQuickHierarchy(editor);
 				return;
 			}
-			runnable= new IRunnableWithProgress() {
-
-				@Override
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					if (monitor == null) {
-						monitor= new NullProgressMonitor();
-					}
-					try {
-						String methodLabel= JavaElementLabels.getElementLabel(method, JavaElementLabels.DEFAULT_QUALIFIED);
-						monitor.beginTask(Messages.format(JavaEditorMessages.JavaElementImplementationHyperlink_search_method_implementors, methodLabel), 10);
-						SearchRequestor requestor= new SearchRequestor() {
-							@Override
-							public void acceptSearchMatch(SearchMatch match) throws CoreException {
-								if (match.getAccuracy() == SearchMatch.A_ACCURATE) {
-									Object element= match.getElement();
-									if (element instanceof IMethod) {
-										IMethod methodFound= (IMethod) element;
-										if (!JdtFlags.isAbstract(methodFound)) {
-											links.add(methodFound);
-											if (links.size() > 1) {
-												throw new OperationCanceledException(dummyString);
-											}
+			runnable= monitor -> {
+				if (monitor == null) {
+					monitor= new NullProgressMonitor();
+				}
+				try {
+					String methodLabel= JavaElementLabels.getElementLabel(method, JavaElementLabels.DEFAULT_QUALIFIED);
+					monitor.beginTask(Messages.format(JavaEditorMessages.JavaElementImplementationHyperlink_search_method_implementors, methodLabel), 10);
+					SearchRequestor requestor= new SearchRequestor() {
+						@Override
+						public void acceptSearchMatch(SearchMatch match) throws CoreException {
+							if (match.getAccuracy() == SearchMatch.A_ACCURATE) {
+								Object element= match.getElement();
+								if (element instanceof IMethod) {
+									IMethod methodFound= (IMethod) element;
+									if (!JdtFlags.isAbstract(methodFound)) {
+										links.add(methodFound);
+										if (links.size() > 1) {
+											throw new OperationCanceledException(dummyString);
 										}
 									}
 								}
 							}
-						};
-
-						IJavaSearchScope hierarchyScope;
-						if (receiverType.isInterface()) {
-							hierarchyScope= SearchEngine.createHierarchyScope(method.getDeclaringType());
-						} else {
-							if (isFullHierarchyNeeded(new SubProgressMonitor(monitor, 3), method, receiverType))
-								hierarchyScope= SearchEngine.createHierarchyScope(receiverType);
-							else {
-								isMethodAbstract[0]= JdtFlags.isAbstract(method);
-								hierarchyScope= SearchEngine.createStrictHierarchyScope(null, receiverType, true, !isMethodAbstract[0], null);
-							}
 						}
+					};
 
-						int limitTo= IJavaSearchConstants.DECLARATIONS | IJavaSearchConstants.IGNORE_DECLARING_TYPE | IJavaSearchConstants.IGNORE_RETURN_TYPE;
-						SearchPattern pattern= SearchPattern.createPattern(method, limitTo);
-						Assert.isNotNull(pattern);
-						SearchParticipant[] participants= new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() };
-						SearchEngine engine= new SearchEngine();
-						engine.search(pattern, participants, hierarchyScope, requestor, new SubProgressMonitor(monitor, 7));
-						if (monitor.isCanceled()) {
-							throw new OperationCanceledException();
+					IJavaSearchScope hierarchyScope;
+					if (receiverType.isInterface()) {
+						hierarchyScope= SearchEngine.createHierarchyScope(method.getDeclaringType());
+					} else {
+						if (isFullHierarchyNeeded(new SubProgressMonitor(monitor, 3), method, receiverType))
+							hierarchyScope= SearchEngine.createHierarchyScope(receiverType);
+						else {
+							isMethodAbstract[0]= JdtFlags.isAbstract(method);
+							hierarchyScope= SearchEngine.createStrictHierarchyScope(null, receiverType, true, !isMethodAbstract[0], null);
 						}
-					} catch (CoreException e) {
-						throw new InvocationTargetException(e);
-					} finally {
-						monitor.done();
 					}
+
+					int limitTo= IJavaSearchConstants.DECLARATIONS | IJavaSearchConstants.IGNORE_DECLARING_TYPE | IJavaSearchConstants.IGNORE_RETURN_TYPE;
+					SearchPattern pattern= SearchPattern.createPattern(method, limitTo);
+					Assert.isNotNull(pattern);
+					SearchParticipant[] participants= new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() };
+					SearchEngine engine= new SearchEngine();
+					engine.search(pattern, participants, hierarchyScope, requestor, new SubProgressMonitor(monitor, 7));
+					if (monitor.isCanceled()) {
+						throw new OperationCanceledException();
+					}
+				} catch (CoreException e) {
+					throw new InvocationTargetException(e);
+				} finally {
+					monitor.done();
 				}
 			};
 
 		} else if (javaElement instanceof IType) {
 			IType type= (IType) javaElement;
-			runnable= new IRunnableWithProgress() {
-
-				@Override
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					if (monitor == null) {
-						monitor= new NullProgressMonitor();
+			runnable= monitor -> {
+				if (monitor == null) {
+					monitor= new NullProgressMonitor();
+				}
+				try {
+					String typeLabel= JavaElementLabels.getElementLabel(type, JavaElementLabels.DEFAULT_QUALIFIED);
+					monitor.beginTask(Messages.format(JavaEditorMessages.JavaElementImplementationHyperlink_search_method_implementors, typeLabel), 10);
+					links.addAll(Arrays.asList(type.newTypeHierarchy(monitor).getAllSubtypes(type)));
+					if (monitor.isCanceled()) {
+						throw new OperationCanceledException();
 					}
-					try {
-						String typeLabel= JavaElementLabels.getElementLabel(type, JavaElementLabels.DEFAULT_QUALIFIED);
-						monitor.beginTask(Messages.format(JavaEditorMessages.JavaElementImplementationHyperlink_search_method_implementors, typeLabel), 10);
-						links.addAll(Arrays.asList(type.newTypeHierarchy(monitor).getAllSubtypes(type)));
-						if (monitor.isCanceled()) {
-							throw new OperationCanceledException();
-						}
-					} catch (CoreException e) {
-						throw new InvocationTargetException(e);
-					} finally {
-						monitor.done();
-					}
+				} catch (CoreException e) {
+					throw new InvocationTargetException(e);
+				} finally {
+					monitor.done();
 				}
 			};
 
