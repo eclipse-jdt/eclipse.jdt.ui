@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Red Hat Inc. and others.
+ * Copyright (c) 2019, 2020 Red Hat Inc. and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -16,6 +16,8 @@ package org.eclipse.jdt.internal.corext.fix;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -53,6 +55,7 @@ public class UnwrapNewArrayOperation extends CompilationUnitRewriteOperation {
 	public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModelCore linkedModel) throws CoreException {
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
 		AST ast= cuRewrite.getRoot().getAST();
+		TextEditGroup group= createTextEditGroup(FixMessages.UnusedCodeFix_RemoveUnnecessaryArrayCreation_description, cuRewrite);
 
 		if (call instanceof MethodInvocation) {
 			MethodInvocation method= (MethodInvocation)call;
@@ -74,7 +77,7 @@ public class UnwrapNewArrayOperation extends CompilationUnitRewriteOperation {
 					newMethod.arguments().add(ASTNodes.createMoveTarget(rewrite, (Expression) exp));
 				}
 			}
-			rewrite.replace(method, newMethod, null);
+			rewrite.replace(method, newMethod, group);
 		} else if (call instanceof SuperMethodInvocation) {
 			SuperMethodInvocation method= (SuperMethodInvocation)call;
 			SuperMethodInvocation newSuperMethod= ast.newSuperMethodInvocation();
@@ -94,8 +97,7 @@ public class UnwrapNewArrayOperation extends CompilationUnitRewriteOperation {
 					newSuperMethod.arguments().add(ASTNodes.createMoveTarget(rewrite, (Expression) exp));
 				}
 			}
-			rewrite.replace(method, newSuperMethod, null);
-
+			rewrite.replace(method, newSuperMethod, group);
 		}
 	}
 }

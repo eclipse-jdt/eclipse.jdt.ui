@@ -2503,6 +2503,37 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testUnnecessaryArrayBug565374() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class A {\n" //
+				+ "    public class B {\n" //
+				+ "        public void foo(Object elementsOrTreePaths, Integer obj, Integer obj2) {\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "    public class C extends B {\n" //
+				+ "        public void foo(Object... elementsOrTreePaths) {\n" //
+				+ "            return;\n" //
+				+ "        }\n" //
+				+ "        public void foo(Object elementsOrTreePaths, Integer obj) {\n" //
+				+ "            foo(new Object[] {elementsOrTreePaths, obj});\n" //
+				+ "            foo(new Object[] {elementsOrTreePaths, elementsOrTreePaths});\n" //
+				+ "            foo(new Object[] {elementsOrTreePaths, obj, obj});\n" //
+				+ "            foo(new Object[] {elementsOrTreePaths, obj, elementsOrTreePaths});\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", sample, false, null);
+
+		enable(CleanUpConstants.REMOVE_UNNECESSARY_ARRAY_CREATION);
+
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] { "Remove unnecessary array creation" });
+	}
+
+	@Test
 	public void testUnnecessaryArrayBug562091() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
