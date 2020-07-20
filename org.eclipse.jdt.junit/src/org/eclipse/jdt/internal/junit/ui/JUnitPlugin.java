@@ -345,7 +345,7 @@ public class JUnitPlugin extends AbstractUIPlugin {
 	}
 
 	public static void asyncShowTestRunnerViewPart() {
-		getDisplay().asyncExec(() -> showTestRunnerViewPartInActivePage());
+		getDisplay().asyncExec(JUnitPlugin::showTestRunnerViewPartInActivePage);
 	}
 
 	public static TestRunnerViewPart showTestRunnerViewPartInActivePage() {

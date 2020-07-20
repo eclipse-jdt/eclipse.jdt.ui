@@ -157,7 +157,7 @@ public class CheckedTableSelectionDialog extends SelectionStatusDialog {
 	@Override
 	public int open() {
 		fIsEmpty= evaluateIfTableEmpty(fInput);
-		BusyIndicator.showWhile(null, () -> access$superOpen());
+		BusyIndicator.showWhile(null, this::access$superOpen);
 		return getReturnCode();
 	}
 

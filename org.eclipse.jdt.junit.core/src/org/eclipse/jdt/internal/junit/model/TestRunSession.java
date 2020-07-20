@@ -572,7 +572,7 @@ public class TestRunSession implements ITestRunSession {
 	public TestElement createTestElement(TestSuiteElement parent, String id, String testName, boolean isSuite, int testCount, boolean isDynamicTest, String displayName, String[] parameterTypes, String uniqueId) {
 		TestElement testElement;
 		if (parameterTypes != null && parameterTypes.length > 1) {
-			parameterTypes= Arrays.stream(parameterTypes).map(t -> t.trim()).toArray(String[]::new);
+			parameterTypes= Arrays.stream(parameterTypes).map(String::trim).toArray(String[]::new);
 		}
 		if (isSuite) {
 			TestSuiteElement testSuiteElement= new TestSuiteElement(parent, id, testName, testCount, displayName, parameterTypes, uniqueId);

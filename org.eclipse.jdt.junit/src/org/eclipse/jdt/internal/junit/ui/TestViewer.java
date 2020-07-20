@@ -264,7 +264,7 @@ public class TestViewer {
 	private void initContextMenu() {
 		MenuManager menuMgr= new MenuManager("#PopupMenu"); //$NON-NLS-1$
 		menuMgr.setRemoveAllWhenShown(true);
-		menuMgr.addMenuListener(manager -> handleMenuAboutToShow(manager));
+		menuMgr.addMenuListener(this::handleMenuAboutToShow);
 		fTestRunnerPart.getSite().registerContextMenu(menuMgr, fSelectionProvider);
 		Menu menu= menuMgr.createContextMenu(fViewerbook);
 		fTreeViewer.getTree().setMenu(menu);
