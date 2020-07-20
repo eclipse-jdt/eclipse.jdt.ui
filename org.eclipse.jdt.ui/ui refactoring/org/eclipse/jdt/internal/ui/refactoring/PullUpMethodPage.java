@@ -398,7 +398,7 @@ public class PullUpMethodPage extends UserInputWizardPage {
 		fTreeViewer.setLabelProvider(new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT | JavaElementLabelProvider.SHOW_SMALL_ICONS));
 		fTreeViewer.setUseHashlookup(true);
 		fTreeViewer.setComparator(new JavaElementComparator());
-		fTreeViewer.addSelectionChangedListener(event -> treeViewerSelectionChanged(event));
+		fTreeViewer.addSelectionChangedListener(this::treeViewerSelectionChanged);
 		fTreeViewer.addCheckStateListener(event -> updateSelectionLabel());
 	}
 

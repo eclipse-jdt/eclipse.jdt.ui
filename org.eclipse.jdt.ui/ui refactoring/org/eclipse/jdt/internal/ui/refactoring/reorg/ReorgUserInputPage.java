@@ -73,7 +73,7 @@ abstract class ReorgUserInputPage extends UserInputWizardPage{
 
 		fViewer= createViewer(result);
 		fViewer.setSelection(new StructuredSelection(initialSelection), true);
-		fViewer.addSelectionChangedListener(event -> ReorgUserInputPage.this.viewerSelectionChanged(event));
+		fViewer.addSelectionChangedListener(ReorgUserInputPage.this::viewerSelectionChanged);
 		fViewer.addDoubleClickListener(new TreeViewerDoubleClickListener());
 		Dialog.applyDialogFont(result);
 	}

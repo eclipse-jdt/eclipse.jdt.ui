@@ -764,7 +764,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		fTableViewer.setLabelProvider(new NLSSubstitutionLabelProvider());
 		fTableViewer.setInput(fSubstitutions);
 
-		fTableViewer.addSelectionChangedListener(event -> ExternalizeWizardPage.this.selectionChanged(event));
+		fTableViewer.addSelectionChangedListener(ExternalizeWizardPage.this::selectionChanged);
 	}
 
 	private void createDefaultExternalization(NLSSubstitution[] substitutions) {
