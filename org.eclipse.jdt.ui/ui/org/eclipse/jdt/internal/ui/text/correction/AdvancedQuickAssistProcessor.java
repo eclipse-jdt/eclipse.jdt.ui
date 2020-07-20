@@ -2150,15 +2150,12 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 					}
 				}
 				// prepare inverted expression
-				SimpleNameRenameProvider provider= new SimpleNameRenameProvider() {
-					@Override
-					public SimpleName getRenamed(SimpleName simpleName) {
-						if (simpleName.resolveBinding() == variableBinding) {
-							renamedNames.add(simpleName);
-							return ast.newSimpleName(newIdentifier);
-						}
-						return null;
+				SimpleNameRenameProvider provider= simpleName -> {
+					if (simpleName.resolveBinding() == variableBinding) {
+						renamedNames.add(simpleName);
+						return ast.newSimpleName(newIdentifier);
 					}
+					return null;
 				};
 				Expression inversedExpression= getInversedExpression(rewrite, expression, provider);
 				// if any name was not renamed during expression inverting, we can not already rename it, so fail to create assist

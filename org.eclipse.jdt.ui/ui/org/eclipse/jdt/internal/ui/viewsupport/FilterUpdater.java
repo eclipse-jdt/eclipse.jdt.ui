@@ -50,12 +50,9 @@ public class FilterUpdater implements IResourceChangeListener {
 					final Control ctrl= fViewer.getControl();
 					if (ctrl != null && !ctrl.isDisposed()) {
 						// async is needed due to bug 33783
-						ctrl.getDisplay().asyncExec(new Runnable() {
-							@Override
-							public void run() {
-								if (!ctrl.isDisposed())
-									fViewer.refresh(false);
-							}
+						ctrl.getDisplay().asyncExec(() -> {
+							if (!ctrl.isDisposed())
+								fViewer.refresh(false);
 						});
 					}
 					return; // one refresh is good enough

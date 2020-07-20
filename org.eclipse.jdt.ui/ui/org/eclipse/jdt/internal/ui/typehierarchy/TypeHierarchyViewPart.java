@@ -52,7 +52,6 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 
-import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.IToolBarManager;
@@ -272,12 +271,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		fTypeHierarchyLifeCycleListener= this::doTypeHierarchyChanged;
 		fHierarchyLifeCycle.addChangedListener(fTypeHierarchyLifeCycleListener);
 
-		fPropertyChangeListener= new IPropertyChangeListener() {
-			@Override
-			public void propertyChange(PropertyChangeEvent event) {
-				doPropertyChange(event);
-			}
-		};
+		fPropertyChangeListener= this::doPropertyChange;
 		PreferenceConstants.getPreferenceStore().addPropertyChangeListener(fPropertyChangeListener);
 
 		fIsEnableMemberFilter= false;
@@ -356,12 +350,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			public void partOpened(IWorkbenchPartReference ref) {}
 		};
 
-		fSelectionChangedListener= new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				doSelectionChanged(event);
-			}
-		};
+		fSelectionChangedListener= this::doSelectionChanged;
 	}
 
 	protected void doPropertyChange(PropertyChangeEvent event) {
@@ -726,13 +715,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			return (T) getShowInSource();
 		}
 		if (key == IShowInTargetList.class) {
-			return (T) new IShowInTargetList() {
-				@Override
-				public String[] getShowInTargetIds() {
-					return new String[] { JavaUI.ID_PACKAGES};
-				}
-
-			};
+			return (T) (IShowInTargetList) () -> new String[] { JavaUI.ID_PACKAGES};
 		}
 		if (key == IContextProvider.class) {
 			return (T) JavaUIHelp.getHelpContextProvider(this, IJavaHelpContextIds.TYPE_HIERARCHY_VIEW);
@@ -806,12 +789,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	private void initializeTypesViewer(final TypeHierarchyViewer typesViewer, KeyListener keyListener, String cotextHelpId) {
 		typesViewer.getControl().setVisible(false);
 		typesViewer.getControl().addKeyListener(keyListener);
-		typesViewer.initContextMenu(new IMenuListener() {
-			@Override
-			public void menuAboutToShow(IMenuManager menu) {
-				fillTypesViewerContextMenu(typesViewer, menu);
-			}
-		}, cotextHelpId,	getSite());
+		typesViewer.initContextMenu(menu -> fillTypesViewerContextMenu(typesViewer, menu), cotextHelpId,	getSite());
 		typesViewer.addPostSelectionChangedListener(fSelectionChangedListener);
 		typesViewer.setQualifiedTypeName(isQualifiedTypeNamesEnabled());
 		typesViewer.setWorkingSetFilter(fWorkingSetActionGroup.getWorkingSetFilter());
@@ -819,12 +797,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 
 	private Control createMethodViewerControl(Composite parent) {
 		fMethodsViewer= new MethodsViewer(parent, fHierarchyLifeCycle);
-		fMethodsViewer.initContextMenu(new IMenuListener() {
-			@Override
-			public void menuAboutToShow(IMenuManager menu) {
-				fillMethodsViewerContextMenu(menu);
-			}
-		}, IContextMenuConstants.TARGET_ID_MEMBERS_VIEW, getSite());
+		fMethodsViewer.initContextMenu(this::fillMethodsViewerContextMenu, IContextMenuConstants.TARGET_ID_MEMBERS_VIEW, getSite());
 		fMethodsViewer.addPostSelectionChangedListener(fSelectionChangedListener);
 
 		new OpenAndLinkWithEditorHelper(fMethodsViewer) {
@@ -1236,12 +1209,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			fPagebook.showPage(fNoHierarchyShownLabel);
 		} else {
 			if (getCurrentViewer().containsElements() != null) {
-				Runnable runnable= new Runnable() {
-					@Override
-					public void run() {
-						getCurrentViewer().updateContent(doExpand); // refresh
-					}
-				};
+				Runnable runnable= () -> getCurrentViewer().updateContent(doExpand);
 				BusyIndicator.showWhile(getDisplay(), runnable);
 				if (!isChildVisible(fViewerbook, getCurrentViewer().getControl())) {
 					setViewerVisibility(true);
@@ -1257,12 +1225,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		if (!fIsEnableMemberFilter && fCurrentLayout != VIEW_LAYOUT_SINGLE) {
 			if (input == fMethodsViewer.getInput()) {
 				if (input != null) {
-					Runnable runnable= new Runnable() {
-						@Override
-						public void run() {
-							fMethodsViewer.refresh(); // refresh
-						}
-					};
+					Runnable runnable= () -> fMethodsViewer.refresh();
 					BusyIndicator.showWhile(getDisplay(), runnable);
 				}
 			} else {
@@ -1273,12 +1236,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 					fMethodViewerPaneLabel.setText(""); //$NON-NLS-1$
 					fMethodViewerPaneLabel.setImage(null);
 				}
-				Runnable runnable= new Runnable() {
-					@Override
-					public void run() {
-						fMethodsViewer.setInput(input); // refresh
-					}
-				};
+				Runnable runnable= () -> fMethodsViewer.setInput(input);
 				BusyIndicator.showWhile(getDisplay(), runnable);
 			}
 		}
@@ -1573,16 +1531,13 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		Display display= getDisplay();
 		if (display != null) {
 			fIsRefreshRunnablePosted= true;
-			display.asyncExec(new Runnable() {
-				@Override
-				public void run() {
-					try {
-						if (fPagebook != null && !fPagebook.isDisposed()) {
-							doTypeHierarchyChangedOnViewers(changedTypes);
-						}
-					} finally {
-						fIsRefreshRunnablePosted= false;
+			display.asyncExec(() -> {
+				try {
+					if (fPagebook != null && !fPagebook.isDisposed()) {
+						doTypeHierarchyChangedOnViewers(changedTypes);
 					}
+				} finally {
+					fIsRefreshRunnablePosted= false;
 				}
 			});
 		}
@@ -1727,13 +1682,10 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		fHierarchyLifeCycle.doHierarchyRefresh(hierarchyInput, monitor);
 		final boolean doRestore= !monitor.isCanceled();
 		if (doRestore) {
-			Display.getDefault().asyncExec(new Runnable() {
-				@Override
-				public void run() {
-					// running async: check first if view still exists
-					if (fPagebook != null && !fPagebook.isDisposed()) {
-						doRestoreState(memento, hierarchyInput);
-					}
+			Display.getDefault().asyncExec(() -> {
+				// running async: check first if view still exists
+				if (fPagebook != null && !fPagebook.isDisposed()) {
+					doRestoreState(memento, hierarchyInput);
 				}
 			});
 		}
@@ -1849,14 +1801,9 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	 * @return Returns the <code>IShowInSource</code> for this view.
 	 */
 	protected IShowInSource getShowInSource() {
-		return new IShowInSource() {
-			@Override
-			public ShowInContext getShowInContext() {
-				return new ShowInContext(
-					null,
-				getSite().getSelectionProvider().getSelection());
-			}
-		};
+		return () -> new ShowInContext(
+			null,
+		getSite().getSelectionProvider().getSelection());
 	}
 
 	@Override
@@ -1891,15 +1838,12 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	 * @since 3.6
 	 */
 	public void showEmptyViewer() {
-		Display.getDefault().asyncExec(new Runnable() {
-			@Override
-			public void run() {
-				if (isDisposed())
-					return;
+		Display.getDefault().asyncExec(() -> {
+			if (isDisposed())
+				return;
 
-				clearInput();
-				setKeepShowingEmptyViewers(true);
-			}
+			clearInput();
+			setKeepShowingEmptyViewers(true);
 		});
 	}
 

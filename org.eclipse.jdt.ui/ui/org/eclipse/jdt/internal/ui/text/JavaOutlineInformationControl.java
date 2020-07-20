@@ -494,12 +494,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 
 		private void valueChanged(final boolean on, boolean store) {
 			setChecked(on);
-			BusyIndicator.showWhile(fOutlineViewer.getControl().getDisplay(), new Runnable() {
-				@Override
-				public void run() {
-					fOutlineViewer.refresh(false);
-				}
-			});
+			BusyIndicator.showWhile(fOutlineViewer.getControl().getDisplay(), () -> fOutlineViewer.refresh(false));
 
 			if (store)
 				getDialogSettings().put(STORE_LEXICAL_SORTING_CHECKED, on);
@@ -539,20 +534,17 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		 */
 		@Override
 		public void run() {
-			BusyIndicator.showWhile(fOutlineViewer.getControl().getDisplay(), new Runnable() {
-				@Override
-				public void run() {
-					fInnerLabelProvider.setShowDefiningType(isChecked());
-					getDialogSettings().put(STORE_SORT_BY_DEFINING_TYPE_CHECKED, isChecked());
+			BusyIndicator.showWhile(fOutlineViewer.getControl().getDisplay(), () -> {
+				fInnerLabelProvider.setShowDefiningType(isChecked());
+				getDialogSettings().put(STORE_SORT_BY_DEFINING_TYPE_CHECKED, isChecked());
 
-					setMatcherString(fPattern, false);
-					fOutlineViewer.refresh(true);
+				setMatcherString(fPattern, false);
+				fOutlineViewer.refresh(true);
 
-					// reveal selection
-					Object selectedElement= getSelectedElement();
-					if (selectedElement != null)
-						fOutlineViewer.reveal(selectedElement);
-				}
+				// reveal selection
+				Object selectedElement= getSelectedElement();
+				if (selectedElement != null)
+					fOutlineViewer.reveal(selectedElement);
 			});
 		}
 	}

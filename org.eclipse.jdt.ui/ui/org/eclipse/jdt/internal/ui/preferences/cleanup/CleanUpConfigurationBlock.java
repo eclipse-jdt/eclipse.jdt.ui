@@ -17,8 +17,6 @@ package org.eclipse.jdt.internal.ui.preferences.cleanup;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.Observable;
-import java.util.Observer;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -51,8 +49,6 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomProfile;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileStore;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 
 
@@ -117,21 +113,16 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 		cleanUpListBlock.setLayoutData(gridData);
 		cleanUpListBlock.setText(getSelectedCleanUpsInfo(cleanUps));
 
-		profileManager.addObserver(new Observer() {
-
-			@Override
-			public void update(Observable o, Object arg) {
-				final int value= ((Integer)arg).intValue();
-				switch (value) {
-				case ProfileManager.PROFILE_CREATED_EVENT:
-				case ProfileManager.PROFILE_DELETED_EVENT:
-				case ProfileManager.SELECTION_CHANGED_EVENT:
-				case ProfileManager.SETTINGS_CHANGED_EVENT:
-					fill(profileManager.getSelected().getSettings(), sharedSettings);
-					cleanUpListBlock.setText(getSelectedCleanUpsInfo(cleanUps));
-				}
-            }
-
+		profileManager.addObserver((o, arg) -> {
+			final int value= ((Integer)arg).intValue();
+			switch (value) {
+			case ProfileManager.PROFILE_CREATED_EVENT:
+			case ProfileManager.PROFILE_DELETED_EVENT:
+			case ProfileManager.SELECTION_CHANGED_EVENT:
+			case ProfileManager.SETTINGS_CHANGED_EVENT:
+				fill(profileManager.getSelected().getSettings(), sharedSettings);
+				cleanUpListBlock.setText(getSelectedCleanUpsInfo(cleanUps));
+			}
 		});
     }
 
@@ -190,12 +181,7 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 		if (showWizard)
 			fShowCleanUpWizardDialogField.setSelection(true);
 
-	    fShowCleanUpWizardDialogField.setDialogFieldListener(new IDialogFieldListener() {
-			@Override
-			public void dialogFieldChanged(DialogField field) {
-				doShowCleanUpWizard(fShowCleanUpWizardDialogField.isSelected());
-            }
-	    });
+	    fShowCleanUpWizardDialogField.setDialogFieldListener(field -> doShowCleanUpWizard(fShowCleanUpWizardDialogField.isSelected()));
 
 		return composite;
 	}
@@ -219,12 +205,7 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 		boolean showWizard= DefaultScope.INSTANCE.getNode(JavaUI.ID_PLUGIN).getBoolean(CleanUpConstants.SHOW_CLEAN_UP_WIZARD, true);
 		fShowCleanUpWizardDialogField.setDialogFieldListener(null);
 		fShowCleanUpWizardDialogField.setSelection(showWizard);
-		fShowCleanUpWizardDialogField.setDialogFieldListener(new IDialogFieldListener() {
-			@Override
-			public void dialogFieldChanged(DialogField field) {
-				doShowCleanUpWizard(fShowCleanUpWizardDialogField.isSelected());
-            }
-	    });
+		fShowCleanUpWizardDialogField.setDialogFieldListener(field -> doShowCleanUpWizard(fShowCleanUpWizardDialogField.isSelected()));
 	}
 
 	@Override

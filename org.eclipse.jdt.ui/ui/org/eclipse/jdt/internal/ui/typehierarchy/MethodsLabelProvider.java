@@ -17,7 +17,6 @@ import org.eclipse.swt.graphics.Color;
 
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 import org.eclipse.jface.viewers.StyledString;
 
@@ -50,12 +49,9 @@ public class MethodsLabelProvider extends AppearanceAwareLabelProvider {
 		fHierarchy= lifeCycle;
 		fShowDefiningType= false;
 		fMethodsViewer= methodsViewer;
-		fColorRegistryListener= new IPropertyChangeListener() {
-			@Override
-			public void propertyChange(PropertyChangeEvent event) {
-				if (event.getProperty().equals(ColoredViewersManager.INHERITED_COLOR_NAME)) {
-					fireLabelProviderChanged(new LabelProviderChangedEvent(MethodsLabelProvider.this, null));
-				}
+		fColorRegistryListener= event -> {
+			if (event.getProperty().equals(ColoredViewersManager.INHERITED_COLOR_NAME)) {
+				fireLabelProviderChanged(new LabelProviderChangedEvent(MethodsLabelProvider.this, null));
 			}
 		};
 		JFaceResources.getColorRegistry().addListener(fColorRegistryListener);

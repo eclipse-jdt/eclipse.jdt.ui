@@ -174,14 +174,11 @@ public class GetterSetterCorrectionSubProcessor {
 							JavaPlugin.log(e);
 						}
 					} else {
-						Display.getDefault().syncExec(new Runnable() {
-							@Override
-							public void run() {
-								try {
-									helper.perform(false, false);
-								} catch (InterruptedException | InvocationTargetException e) {
-									JavaPlugin.log(e);
-								}
+						Display.getDefault().syncExec(() -> {
+							try {
+								helper.perform(false, false);
+							} catch (InterruptedException | InvocationTargetException e) {
+								JavaPlugin.log(e);
 							}
 						});
 					}

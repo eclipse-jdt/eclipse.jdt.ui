@@ -16,7 +16,6 @@ package org.eclipse.jdt.internal.ui.text.correction;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -163,12 +162,7 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 	}
 
 	private void sort(ArrayList<IJavaCompletionProposal> proposals) {
-		Collections.sort(proposals, new Comparator<IJavaCompletionProposal>() {
-			@Override
-			public int compare(IJavaCompletionProposal p1, IJavaCompletionProposal p2) {
-				return Collator.getInstance().compare(p1.getDisplayString(), p2.getDisplayString());
-			}
-		});
+		Collections.sort(proposals, (p1, p2) -> Collator.getInstance().compare(p1.getDisplayString(), p2.getDisplayString()));
 	}
 
 	private IDocument getDocument(ICompilationUnit cu) throws JavaModelException {

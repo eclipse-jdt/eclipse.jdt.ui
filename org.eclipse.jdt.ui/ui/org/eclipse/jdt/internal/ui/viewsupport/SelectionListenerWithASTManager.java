@@ -28,12 +28,10 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 
 import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.ISelectionListener;
-import org.eclipse.ui.IWorkbenchPart;
 
 import org.eclipse.ui.texteditor.ITextEditor;
 
@@ -80,22 +78,16 @@ public class SelectionListenerWithASTManager {
 			fCurrentJob= null;
 			fAstListeners= new ListenerList<>(ListenerList.IDENTITY);
 
-			fSelectionListener= new ISelectionChangedListener() {
-				@Override
-				public void selectionChanged(SelectionChangedEvent event) {
-					ISelection selection= event.getSelection();
-					if (selection instanceof ITextSelection) {
-						fireSelectionChanged((ITextSelection) selection);
-					}
+			fSelectionListener= event -> {
+				ISelection selection= event.getSelection();
+				if (selection instanceof ITextSelection) {
+					fireSelectionChanged((ITextSelection) selection);
 				}
 			};
 
-			fPostSelectionListener= new ISelectionListener() {
-				@Override
-				public void selectionChanged(IWorkbenchPart part, ISelection selection) {
-					if (part == fPart && selection instanceof ITextSelection)
-						firePostSelectionChanged((ITextSelection) selection);
-				}
+			fPostSelectionListener= (part, selection) -> {
+				if (part == fPart && selection instanceof ITextSelection)
+					firePostSelectionChanged((ITextSelection) selection);
 			};
 		}
 
