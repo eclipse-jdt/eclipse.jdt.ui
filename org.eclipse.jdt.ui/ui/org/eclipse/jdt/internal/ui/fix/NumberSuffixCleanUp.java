@@ -20,6 +20,8 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.text.edits.TextEditGroup;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -135,11 +137,12 @@ public class NumberSuffixCleanUp extends AbstractMultiFix {
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel linkedModel) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			AST ast= cuRewrite.getRoot().getAST();
+			TextEditGroup group= createTextEditGroup(MultiFixMessages.CodeStyleCleanUp_numberSuffix_description, cuRewrite);
 
 			final String newToken= token.substring(0, token.length() - 1) + token.substring(token.length() - 1).toUpperCase();
 			final NumberLiteral replacement= ast.newNumberLiteral(newToken);
 
-			rewrite.replace(node, replacement, null);
+			rewrite.replace(node, replacement, group);
 		}
 	}
 }

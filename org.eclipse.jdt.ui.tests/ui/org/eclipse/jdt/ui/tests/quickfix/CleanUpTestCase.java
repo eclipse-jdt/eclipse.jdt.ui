@@ -209,7 +209,7 @@ public class CleanUpTestCase extends QuickFixTest {
 					found= true;
 				}
 			}
-			assertTrue("expected group category: " + expectedGroupCategory + " not found", found);
+			assertTrue("should have group category: " + expectedGroupCategory + ", found instead: "+set.stream().map(e -> e.getName()).reduce("", String::concat), found);
 		}
 	}
 

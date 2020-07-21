@@ -21,6 +21,8 @@ import java.util.Objects;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.text.edits.TextEditGroup;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -174,6 +176,7 @@ public class AutoboxingCleanUp extends AbstractMultiFix {
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel linkedModel) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			AST ast= cuRewrite.getRoot().getAST();
+			TextEditGroup group= createTextEditGroup(MultiFixMessages.AutoboxingCleanup_description, cuRewrite);
 			Expression arg0= (Expression) rewrite.createCopyTarget((Expression) ((MethodInvocation) node).arguments().get(0));
 
 			if (primitiveType != null && !primitiveType.equals(actualParameterType)
@@ -183,9 +186,9 @@ public class AutoboxingCleanUp extends AbstractMultiFix {
 				newCastExpression.setType(ast.newPrimitiveType(PrimitiveType.toCode(primitiveType.getName())));
 				newCastExpression.setExpression(arg0);
 
-				rewrite.replace(node, newCastExpression, null);
+				rewrite.replace(node, newCastExpression, group);
 			} else {
-				rewrite.replace(node, arg0, null);
+				rewrite.replace(node, arg0, group);
 			}
 		}
 	}

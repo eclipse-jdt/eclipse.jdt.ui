@@ -22,6 +22,8 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.text.edits.TextEditGroup;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -194,6 +196,7 @@ public class MapMethodCleanUp extends AbstractMultiFix {
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel linkedModel) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			AST ast= cuRewrite.getRoot().getAST();
+			TextEditGroup group= createTextEditGroup(MultiFixMessages.UseDirectlyMapMethodCleanup_description, cuRewrite);
 
 			MethodInvocation newMethodInvocation= ast.newMethodInvocation();
 			newMethodInvocation.setName(ast.newSimpleName(methodName));
@@ -206,7 +209,7 @@ public class MapMethodCleanUp extends AbstractMultiFix {
 				newMethodInvocation.arguments().add(rewrite.createMoveTarget((Expression) expression));
 			}
 
-			rewrite.replace(this.globalMi, newMethodInvocation, null);
+			rewrite.replace(this.globalMi, newMethodInvocation, group);
 		}
 	}
 }

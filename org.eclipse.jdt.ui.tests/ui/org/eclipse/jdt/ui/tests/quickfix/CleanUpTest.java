@@ -55,7 +55,9 @@ import org.eclipse.jdt.core.manipulation.CleanUpOptionsCore;
 
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
+import org.eclipse.jdt.internal.corext.fix.FixMessages;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
@@ -64,6 +66,7 @@ import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
+import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
 import org.eclipse.jdt.internal.ui.fix.RedundantModifiersCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUp;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
@@ -4591,7 +4594,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        boolean newBoolean2 = b1 | new SideEffect() instanceof SideEffect;\n" //
 				+ "    }\n" //
 				+ "}\n";
-
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] { MultiFixMessages.CodeStyleCleanUp_LazyLogical_description });
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
 	}
 
@@ -4664,6 +4667,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] { MultiFixMessages.PushDownNegationCleanup_description });
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
 	}
 
@@ -5418,7 +5422,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "}\n";
-
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] { MultiFixMessages.MergeConditionalBlocksCleanup_description });
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
 	}
 
@@ -5609,6 +5613,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] { MultiFixMessages.UseDirectlyMapMethodCleanup_description });
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
 	}
 
@@ -7842,6 +7847,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("}\n");
 		String expected1= buf.toString();
 
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] { FixMessages.CodeStyleFix_removeThis_groupDescription });
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 
@@ -8162,6 +8168,9 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("}\n");
 		String expected1= buf.toString();
 
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] {
+				FixMessages.VariableDeclarationFix_changeModifierOfUnknownToFinal_description
+				});
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 
@@ -10067,6 +10076,9 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		String expected1= buf.toString();
 
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] {
+				Messages.format(FixMessages.CodeStyleFix_QualifyWithThis_description, new Object[] {"field", "this"})
+		});
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 }

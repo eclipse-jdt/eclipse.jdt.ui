@@ -21,6 +21,8 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.text.edits.TextEditGroup;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -210,7 +212,8 @@ public class RedundantModifiersCleanUp extends AbstractMultiFix {
 		@Override
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel linkedModel) throws CoreException {
 			ModifierRewrite rewrite= ModifierRewrite.create(cuRewrite.getASTRewrite(), node);
-			rewrite.setModifiers(Modifier.NONE, excludedModifiers, null);
+			TextEditGroup group= createTextEditGroup(MultiFixMessages.RedundantModifiersCleanup_description, cuRewrite);
+			rewrite.setModifiers(Modifier.NONE, excludedModifiers, group);
 		}
 	}
 }

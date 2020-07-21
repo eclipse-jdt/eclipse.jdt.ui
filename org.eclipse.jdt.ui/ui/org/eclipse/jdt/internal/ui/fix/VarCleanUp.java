@@ -22,6 +22,8 @@ import java.util.Objects;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.text.edits.TextEditGroup;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -259,14 +261,15 @@ public class VarCleanUp extends AbstractMultiFix {
 		public void rewriteAST(final CompilationUnitRewrite cuRewrite, final LinkedProposalModel linkedModel) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			AST ast= cuRewrite.getRoot().getAST();
+			TextEditGroup group= createTextEditGroup(MultiFixMessages.VarCleanUp_description, cuRewrite);
 
 			if (classInstanceCreation != null) {
-				rewrite.replace(classInstanceCreation.getType(), rewrite.createCopyTarget(node), null);
+				rewrite.replace(classInstanceCreation.getType(), rewrite.createCopyTarget(node), group);
 			} else if (literal != null) {
-				rewrite.replace(literal, ast.newNumberLiteral(literal.getToken() + postfix), null);
+				rewrite.replace(literal, ast.newNumberLiteral(literal.getToken() + postfix), group);
 			}
 
-			rewrite.replace(node, ast.newSimpleType(ast.newSimpleName("var")), null); //$NON-NLS-1$
+			rewrite.replace(node, ast.newSimpleType(ast.newSimpleName("var")), group); //$NON-NLS-1$
 		}
 	}
 }

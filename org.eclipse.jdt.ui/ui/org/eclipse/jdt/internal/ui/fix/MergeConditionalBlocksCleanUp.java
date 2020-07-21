@@ -21,6 +21,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.text.edits.TextEditGroup;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTMatcher;
@@ -202,6 +204,7 @@ public class MergeConditionalBlocksCleanUp extends AbstractMultiFix {
 		public void rewriteAST(final CompilationUnitRewrite cuRewrite, final LinkedProposalModel linkedModel) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			AST ast= cuRewrite.getRoot().getAST();
+			TextEditGroup group= createTextEditGroup(MultiFixMessages.MergeConditionalBlocksCleanup_description, cuRewrite);
 
 			List<Expression> newConditions= new ArrayList<>(duplicateIfBlocks.size());
 
@@ -221,12 +224,12 @@ public class MergeConditionalBlocksCleanUp extends AbstractMultiFix {
 			newCondition.setRightOperand(newConditions.remove(0));
 			newCondition.extendedOperands().addAll(newConditions);
 
-			rewrite.replace(duplicateIfBlocks.get(0).getExpression(), newCondition, null);
+			rewrite.replace(duplicateIfBlocks.get(0).getExpression(), newCondition, group);
 
 			if (remainingStatement != null) {
-				rewrite.replace(duplicateIfBlocks.get(0).getElseStatement(), ASTNodes.createMoveTarget(rewrite, remainingStatement), null);
+				rewrite.replace(duplicateIfBlocks.get(0).getElseStatement(), ASTNodes.createMoveTarget(rewrite, remainingStatement), group);
 			} else if (duplicateIfBlocks.get(0).getElseStatement() != null) {
-				rewrite.remove(duplicateIfBlocks.get(0).getElseStatement(), null);
+				rewrite.remove(duplicateIfBlocks.get(0).getElseStatement(), group);
 			}
 		}
 	}

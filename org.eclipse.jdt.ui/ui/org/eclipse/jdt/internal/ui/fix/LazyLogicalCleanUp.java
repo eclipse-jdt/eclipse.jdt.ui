@@ -20,6 +20,8 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.text.edits.TextEditGroup;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -148,6 +150,7 @@ public class LazyLogicalCleanUp extends AbstractMultiFix {
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel linkedModel) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			AST ast= cuRewrite.getRoot().getAST();
+			TextEditGroup group= createTextEditGroup(MultiFixMessages.CodeStyleCleanUp_LazyLogical_description, cuRewrite);
 			List<Expression> allOperands= ASTNodes.allOperands(node);
 			List<Expression> copyOfOperands= new ArrayList<>(allOperands.size());
 
@@ -161,7 +164,7 @@ public class LazyLogicalCleanUp extends AbstractMultiFix {
 			newIe.setRightOperand(copyOfOperands.remove(0));
 			newIe.extendedOperands().addAll(copyOfOperands);
 
-			rewrite.replace(this.node, newIe, null);
+			rewrite.replace(this.node, newIe, group);
 		}
 	}
 }

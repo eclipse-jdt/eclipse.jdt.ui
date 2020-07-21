@@ -22,6 +22,8 @@ import java.util.Objects;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.eclipse.text.edits.TextEditGroup;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTMatcher;
@@ -250,6 +252,7 @@ public class ObjectsEqualsCleanUp extends AbstractMultiFix implements ICleanUpFi
 		public void rewriteAST(final CompilationUnitRewrite cuRewrite, final LinkedProposalModel linkedModel) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			AST ast= cuRewrite.getRoot().getAST();
+			TextEditGroup group= createTextEditGroup(MultiFixMessages.ObjectsEqualsCleanup_description, cuRewrite);
 			ImportRewrite importRewrite= cuRewrite.getImportRewrite();
 
 			String objectNameText= importRewrite.addImport(Objects.class.getCanonicalName());
@@ -266,16 +269,16 @@ public class ObjectsEqualsCleanUp extends AbstractMultiFix implements ICleanUpFi
 
 			ReturnStatement copyOfReturnStatement= ASTNodes.createMoveTarget(rewrite, returnStatement);
 
-			rewrite.replace(node.getExpression(), notExpression, null);
+			rewrite.replace(node.getExpression(), notExpression, group);
 
 			if (node.getThenStatement() instanceof Block) {
-				rewrite.replace((ASTNode) ((Block) node.getThenStatement()).statements().get(0), copyOfReturnStatement, null);
+				rewrite.replace((ASTNode) ((Block) node.getThenStatement()).statements().get(0), copyOfReturnStatement, group);
 			} else {
-				rewrite.replace(node.getThenStatement(), copyOfReturnStatement, null);
+				rewrite.replace(node.getThenStatement(), copyOfReturnStatement, group);
 			}
 
 			if (node.getElseStatement() != null) {
-				rewrite.remove(node.getElseStatement(), null);
+				rewrite.remove(node.getElseStatement(), group);
 			}
 		}
 

@@ -20,6 +20,8 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.text.edits.TextEditGroup;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -345,13 +347,14 @@ public class LambdaExpressionAndMethodRefCleanUp extends AbstractMultiFix {
 		public void rewriteAST(final CompilationUnitRewrite cuRewrite, final LinkedProposalModel linkedModel) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			AST ast= cuRewrite.getRoot().getAST();
+			TextEditGroup group= createTextEditGroup(MultiFixMessages.LambdaExpressionAndMethodRefCleanUp_description, cuRewrite);
 
 			LambdaExpression copyOfLambdaExpression= ast.newLambdaExpression();
 			ASTNode copyOfParameter= rewrite.createCopyTarget((ASTNode) node.parameters().get(0));
 			copyOfLambdaExpression.parameters().add(copyOfParameter);
 			copyOfLambdaExpression.setBody(rewrite.createCopyTarget(node.getBody()));
 			copyOfLambdaExpression.setParentheses(false);
-			rewrite.replace(node, copyOfLambdaExpression, null);
+			rewrite.replace(node, copyOfLambdaExpression, group);
 		}
 	}
 
@@ -369,10 +372,11 @@ public class LambdaExpressionAndMethodRefCleanUp extends AbstractMultiFix {
 		public void rewriteAST(final CompilationUnitRewrite cuRewrite, final LinkedProposalModel linkedModel) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			AST ast= cuRewrite.getRoot().getAST();
+			TextEditGroup group= createTextEditGroup(MultiFixMessages.LambdaExpressionAndMethodRefCleanUp_description, cuRewrite);
 
 			ReturnStatement returnStatement= (ReturnStatement) statements.get(0);
 			Expression copyOfExpression= (Expression) rewrite.createCopyTarget(returnStatement.getExpression());
-			rewrite.replace(node.getBody(), ASTNodeFactory.parenthesizeIfNeeded(ast, copyOfExpression), null);
+			rewrite.replace(node.getBody(), ASTNodeFactory.parenthesizeIfNeeded(ast, copyOfExpression), group);
 		}
 	}
 
@@ -390,10 +394,11 @@ public class LambdaExpressionAndMethodRefCleanUp extends AbstractMultiFix {
 		public void rewriteAST(final CompilationUnitRewrite cuRewrite, final LinkedProposalModel linkedModel) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			AST ast= cuRewrite.getRoot().getAST();
+			TextEditGroup group= createTextEditGroup(MultiFixMessages.LambdaExpressionAndMethodRefCleanUp_description, cuRewrite);
 
 			CreationReference creationRef= ast.newCreationReference();
 			creationRef.setType(copyType(cuRewrite, ast, classInstanceCreation, classInstanceCreation.resolveTypeBinding()));
-			rewrite.replace(node, creationRef, null);
+			rewrite.replace(node, creationRef, group);
 		}
 	}
 
@@ -411,10 +416,11 @@ public class LambdaExpressionAndMethodRefCleanUp extends AbstractMultiFix {
 		public void rewriteAST(final CompilationUnitRewrite cuRewrite, final LinkedProposalModel linkedModel) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			AST ast= cuRewrite.getRoot().getAST();
+			TextEditGroup group= createTextEditGroup(MultiFixMessages.LambdaExpressionAndMethodRefCleanUp_description, cuRewrite);
 
 			SuperMethodReference creationRef= ast.newSuperMethodReference();
 			creationRef.setName((SimpleName) rewrite.createCopyTarget(superMethodInvocation.getName()));
-			rewrite.replace(node, creationRef, null);
+			rewrite.replace(node, creationRef, group);
 		}
 	}
 
@@ -434,12 +440,13 @@ public class LambdaExpressionAndMethodRefCleanUp extends AbstractMultiFix {
 		public void rewriteAST(final CompilationUnitRewrite cuRewrite, final LinkedProposalModel linkedModel) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			AST ast= cuRewrite.getRoot().getAST();
+			TextEditGroup group= createTextEditGroup(MultiFixMessages.LambdaExpressionAndMethodRefCleanUp_description, cuRewrite);
 
 			TypeMethodReference typeMethodRef= ast.newTypeMethodReference();
 
 			typeMethodRef.setType(copyType(cuRewrite, ast, methodInvocation, type));
 			typeMethodRef.setName((SimpleName) rewrite.createCopyTarget(methodInvocation.getName()));
-			rewrite.replace(node, typeMethodRef, null);
+			rewrite.replace(node, typeMethodRef, group);
 		}
 	}
 
@@ -457,6 +464,7 @@ public class LambdaExpressionAndMethodRefCleanUp extends AbstractMultiFix {
 		public void rewriteAST(final CompilationUnitRewrite cuRewrite, final LinkedProposalModel linkedModel) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			AST ast= cuRewrite.getRoot().getAST();
+			TextEditGroup group= createTextEditGroup(MultiFixMessages.LambdaExpressionAndMethodRefCleanUp_description, cuRewrite);
 			ExpressionMethodReference typeMethodRef= ast.newExpressionMethodReference();
 
 			if (methodInvocation.getExpression() != null) {
@@ -466,7 +474,7 @@ public class LambdaExpressionAndMethodRefCleanUp extends AbstractMultiFix {
 			}
 
 			typeMethodRef.setName((SimpleName) rewrite.createCopyTarget(methodInvocation.getName()));
-			rewrite.replace(node, typeMethodRef, null);
+			rewrite.replace(node, typeMethodRef, group);
 		}
 	}
 
