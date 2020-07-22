@@ -39,6 +39,6 @@ Require-Bundle:
  org.eclipse.core.expressions,
  org.junit.platform.runner,
  org.junit.platform.suite.api
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Eclipse-BundleShape: dir
 Import-Package: org.junit.jupiter.api
