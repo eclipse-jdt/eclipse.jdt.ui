@@ -103,11 +103,15 @@ public final class ReferenceTracker {
 	}
 
 	private static boolean setAccessible(Field fld, boolean enable) {
-		boolean isAccessible= fld.isAccessible();
-		if (isAccessible != enable) {
-			fld.setAccessible(enable);
+		try {
+			boolean isAccessible= fld.isAccessible();
+			if (isAccessible != enable) {
+				fld.setAccessible(enable);
+			}
+			return isAccessible;
+		} catch (RuntimeException ex) {
+			throw new RuntimeException("JVM settings `--add-modules ALL-SYSTEM --add-opens java.base/jdk.internal.loader=ALL-UNNAMED --add-opens jdk.localedata/sun.util.resources.cldr.provider=ALL-UNNAMED --add-opens jdk.localedata/sun.util.resources.provider=ALL-UNNAMED --add-opens java.base/jdk.internal.module=ALL-UNNAMED --add-opens java.base/java.lang.module=ALL-UNNAMED --add-opens java.base/jdk.internal.reflect=ALL-UNNAMED --add-opens java.base/jdk.internal.ref=ALL-UNNAMED --add-opens java.base/jdk.internal.math=ALL-UNNAMED --add-opens java.base/jdk.internal.misc=ALL-UNNAMED` are probably missing.", ex);
 		}
-		return isAccessible;
 	}
 
 	private void visit(ReferencedObject ref) {

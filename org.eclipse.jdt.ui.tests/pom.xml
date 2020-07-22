@@ -24,6 +24,8 @@
   <packaging>eclipse-test-plugin</packaging>
   <properties>
     <defaultSigning-excludeInnerJars>true</defaultSigning-excludeInnerJars>
+    <!-- Necessary for leakTests to succeed without raising module/classloader issues on Java 9+ -->
+    <leakTestsArgLine>--add-modules ALL-SYSTEM --add-opens java.base/jdk.internal.loader=ALL-UNNAMED --add-opens jdk.localedata/sun.util.resources.cldr.provider=ALL-UNNAMED --add-opens jdk.localedata/sun.util.resources.provider=ALL-UNNAMED --add-opens java.base/jdk.internal.module=ALL-UNNAMED --add-opens java.base/java.lang.module=ALL-UNNAMED --add-opens java.base/jdk.internal.reflect=ALL-UNNAMED --add-opens java.base/jdk.internal.ref=ALL-UNNAMED --add-opens java.base/jdk.internal.math=ALL-UNNAMED --add-opens java.base/jdk.internal.misc=ALL-UNNAMED</leakTestsArgLine>
   </properties>
 
   <build>
@@ -46,6 +48,7 @@
               <version>0.0.0</version>
             </dependency>
           </dependencies>
+          <argLine>${leakTestsArgLine}</argLine>
         </configuration>
       </plugin>
     </plugins>
@@ -53,22 +56,13 @@
 
   <profiles>
     <profile>
+      <id>pre-java-11</id>
       <activation>
-        <property>
-          <name>AtLeastJava9</name>
-        </property>
+        <jdk>[1.8,9)</jdk>
       </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.eclipse.tycho</groupId>
-            <artifactId>tycho-surefire-plugin</artifactId>
-            <configuration>
-                <argLine>--add-modules ALL-SYSTEM --add-opens java.base/jdk.internal.loader=ALL-UNNAMED --add-opens jdk.localedata/sun.util.resources.cldr.provider=ALL-UNNAMED --add-opens jdk.localedata/sun.util.resources.provider=ALL-UNNAMED --add-opens java.base/jdk.internal.module=ALL-UNNAMED --add-opens java.base/java.lang.module=ALL-UNNAMED --add-opens java.base/jdk.internal.reflect=ALL-UNNAMED --add-opens java.base/jdk.internal.ref=ALL-UNNAMED --add-opens java.base/jdk.internal.math=ALL-UNNAMED --add-opens java.base/jdk.internal.misc=ALL-UNNAMED</argLine>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
+      <properties>
+        <leakTestsArgLine></leakTestsArgLine>
+      </properties>
     </profile>
   </profiles>
 
