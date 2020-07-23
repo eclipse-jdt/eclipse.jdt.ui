@@ -1161,16 +1161,17 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			if (result != 0)
 				return result;
 
-			result= compareTypeContainerName(leftInfo.getTypeContainerName(), rightInfo.getTypeContainerName());
-			if (result != 0)
-				return result;
-
 			int leftCategory= getElementTypeCategory(leftInfo);
 			int rightCategory= getElementTypeCategory(rightInfo);
 			if (leftCategory < rightCategory)
 				return -1;
 			if (leftCategory > rightCategory)
 				return +1;
+
+			result= compareTypeContainerName(leftInfo.getTypeContainerName(), rightInfo.getTypeContainerName());
+			if (result != 0)
+				return result;
+
 			return compareContainerName(leftInfo, rightInfo);
 		}
 
