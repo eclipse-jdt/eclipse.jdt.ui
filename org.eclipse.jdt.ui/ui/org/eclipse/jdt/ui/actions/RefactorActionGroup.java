@@ -565,7 +565,7 @@ public class RefactorActionGroup extends ActionGroup {
 		if (fEditor != null) {
 			final ITypeRoot element= getEditorInput();
 			if (element != null && ActionUtil.isOnBuildPath(element)) {
-				refactorSubmenu.addMenuListener(manager -> refactorMenuShown(manager));
+				refactorSubmenu.addMenuListener(this::refactorMenuShown);
 				refactorSubmenu.add(fNoActionAvailable);
 				menu.appendToGroup(fGroupName, refactorSubmenu);
 			}

@@ -57,7 +57,6 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.jface.text.templates.ContextTypeRegistry;
 import org.eclipse.jface.text.templates.TemplateContextType;
@@ -420,12 +419,9 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 			// Initialize AST provider
 			getASTProvider();
 
-			fThemeListener= new IPropertyChangeListener() {
-				@Override
-				public void propertyChange(PropertyChangeEvent event) {
-					if (IThemeManager.CHANGE_CURRENT_THEME.equals(event.getProperty()))
-						JavaUIPreferenceInitializer.setThemeBasedPreferences(PreferenceConstants.getPreferenceStore(), true);
-				}
+			fThemeListener= event -> {
+				if (IThemeManager.CHANGE_CURRENT_THEME.equals(event.getProperty()))
+					JavaUIPreferenceInitializer.setThemeBasedPreferences(PreferenceConstants.getPreferenceStore(), true);
 			};
 			PlatformUI.getWorkbench().getThemeManager().addPropertyChangeListener(fThemeListener);
 

@@ -529,7 +529,7 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 			return;
 		}
 
-		IRunnableWithProgress op= monitor -> doRemoveProject(monitor);
+		IRunnableWithProgress op= this::doRemoveProject;
 
 		try {
 			getContainer().run(true, true, new WorkspaceModifyDelegatingOperation(op));
