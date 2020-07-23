@@ -20,8 +20,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.accessibility.ACC;
 import org.eclipse.swt.accessibility.AccessibleAdapter;
 import org.eclipse.swt.accessibility.AccessibleEvent;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -615,13 +613,10 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 				updateOKStatus();
 			}
 		});
-		fPattern.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				doPatternModified();
-				updateOKStatus();
+		fPattern.addModifyListener(e -> {
+			doPatternModified();
+			updateOKStatus();
 
-			}
 		});
 		TextFieldNavigationHandler.install(fPattern);
 		GridData data= new GridData(GridData.FILL, GridData.FILL, true, false, 1, 1);
