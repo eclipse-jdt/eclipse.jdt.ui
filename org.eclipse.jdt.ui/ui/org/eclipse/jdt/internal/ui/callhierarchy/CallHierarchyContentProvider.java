@@ -303,12 +303,7 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
         } catch (InterruptedException e) {
         	final CallerMethodWrapper element= (CallerMethodWrapper)methodWrapper;
         	if (!isExpandWithConstructors(element)) {
-        		Display.getDefault().asyncExec(new Runnable() {
-        			@Override
-					public void run() {
-    					collapseAndRefresh(element);
-        			}
-        		});
+        		Display.getDefault().asyncExec(() -> collapseAndRefresh(element));
         	}
         }
 

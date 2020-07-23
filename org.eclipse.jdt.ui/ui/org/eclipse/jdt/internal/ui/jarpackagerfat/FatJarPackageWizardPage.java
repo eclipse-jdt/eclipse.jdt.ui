@@ -32,10 +32,8 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.Assert;
@@ -465,34 +463,25 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 		fExtractJarsRadioButton= new Button(fLibraryHandlingGroup, SWT.RADIO | SWT.LEFT);
 		fExtractJarsRadioButton.setText(FatJarPackagerMessages.FatJarPackageWizardPage_extractJars_text);
 		fExtractJarsRadioButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		fExtractJarsRadioButton.addListener(SWT.Selection, new Listener() {
-			@Override
-			public void handleEvent(Event event) {
-				if (((Button)event.widget).getSelection())
-					fLibraryHandler= new ExtractLibraryHandler();
-			}
+		fExtractJarsRadioButton.addListener(SWT.Selection, event -> {
+			if (((Button)event.widget).getSelection())
+				fLibraryHandler= new ExtractLibraryHandler();
 		});
 
 		fPackageJarsRadioButton= new Button(fLibraryHandlingGroup, SWT.RADIO | SWT.LEFT);
 		fPackageJarsRadioButton.setText(FatJarPackagerMessages.FatJarPackageWizardPage_packageJars_text);
 		fPackageJarsRadioButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		fPackageJarsRadioButton.addListener(SWT.Selection, new Listener() {
-			@Override
-			public void handleEvent(Event event) {
-				if (((Button)event.widget).getSelection())
-					fLibraryHandler= new PackageLibraryHandler();
-			}
+		fPackageJarsRadioButton.addListener(SWT.Selection, event -> {
+			if (((Button)event.widget).getSelection())
+				fLibraryHandler= new PackageLibraryHandler();
 		});
 
 		fCopyJarFilesRadioButton= new Button(fLibraryHandlingGroup, SWT.RADIO | SWT.LEFT);
 		fCopyJarFilesRadioButton.setText(FatJarPackagerMessages.FatJarPackageWizardPage_copyJarFiles_text);
 		fCopyJarFilesRadioButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		fCopyJarFilesRadioButton.addListener(SWT.Selection, new Listener() {
-			@Override
-			public void handleEvent(Event event) {
-				if (((Button)event.widget).getSelection())
-					fLibraryHandler= new CopyLibraryHandler();
-			}
+		fCopyJarFilesRadioButton.addListener(SWT.Selection, event -> {
+			if (((Button)event.widget).getSelection())
+				fLibraryHandler= new CopyLibraryHandler();
 		});
 
 		// set default for first selection (no previous widget settings to restore)

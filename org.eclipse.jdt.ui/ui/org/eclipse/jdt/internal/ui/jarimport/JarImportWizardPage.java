@@ -23,8 +23,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -44,9 +42,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.wizard.WizardPage;
@@ -231,13 +227,7 @@ public final class JarImportWizardPage extends WizardPage {
 			fTreeViewer.setSelection(new StructuredSelection(new Object[] { root}), true);
 			fTreeViewer.expandToLevel(root, 1);
 		}
-		fTreeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-
-			@Override
-			public void selectionChanged(final SelectionChangedEvent event) {
-				handleInputChanged();
-			}
-		});
+		fTreeViewer.addSelectionChangedListener(event -> handleInputChanged());
 		if (contentProvider.getChildren(JavaCore.create(ResourcesPlugin.getWorkspace().getRoot())).length == 0) {
 			fTreeViewer.getControl().setEnabled(false);
 			label.setEnabled(false);
@@ -262,13 +252,7 @@ public final class JarImportWizardPage extends WizardPage {
 		fLocationControl= new RefactoringLocationControl(fWizard, composite, SETTING_HISTORY);
 		fLocationControl.setLayoutData(createGridData(GridData.FILL_HORIZONTAL, 1, 0));
 		fLocationControl.loadHistory();
-		fLocationControl.getControl().addModifyListener(new ModifyListener() {
-
-			@Override
-			public final void modifyText(final ModifyEvent event) {
-				handleInputChanged();
-			}
-		});
+		fLocationControl.getControl().addModifyListener(event -> handleInputChanged());
 		fLocationControl.getControl().addSelectionListener(new SelectionAdapter() {
 
 			@Override

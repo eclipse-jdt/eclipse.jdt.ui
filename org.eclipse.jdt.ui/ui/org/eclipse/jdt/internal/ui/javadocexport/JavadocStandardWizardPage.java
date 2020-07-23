@@ -23,8 +23,6 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -38,7 +36,6 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.core.resources.IProject;
@@ -221,12 +218,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 			}
 		});
 
-		fStyleSheetText.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				doValidation(STYLESHEETSTATUS);
-			}
-		});
+		fStyleSheetText.addModifyListener(e -> doValidation(STYLESHEETSTATUS));
 
 		fStyleSheetBrowseButton.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -553,12 +545,9 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		@Override
 		protected void okPressed() {
 			try {
-				IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
-					@Override
-					public void run(IProgressMonitor monitor) throws CoreException {
-						URL javadocLocation= fJavadocConfigurationBlock.getJavadocLocation();
-						fElement.setURL(javadocLocation, monitor);
-					}
+				IWorkspaceRunnable runnable= monitor -> {
+					URL javadocLocation= fJavadocConfigurationBlock.getJavadocLocation();
+					fElement.setURL(javadocLocation, monitor);
 				};
 				PlatformUI.getWorkbench().getProgressService().run(true, true, new WorkbenchRunnableAdapter(runnable));
 

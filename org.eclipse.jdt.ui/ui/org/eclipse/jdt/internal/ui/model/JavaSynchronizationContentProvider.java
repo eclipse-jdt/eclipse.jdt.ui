@@ -25,7 +25,6 @@ import org.eclipse.team.core.diff.FastDiffFilter;
 import org.eclipse.team.core.diff.IDiff;
 import org.eclipse.team.core.diff.IDiffChangeEvent;
 import org.eclipse.team.core.diff.IDiffTree;
-import org.eclipse.team.core.diff.IDiffVisitor;
 import org.eclipse.team.core.mapping.IResourceDiffTree;
 import org.eclipse.team.core.mapping.ISynchronizationContext;
 import org.eclipse.team.core.mapping.ISynchronizationScope;
@@ -220,13 +219,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 
 	@Override
 	public void diffsChanged(final IDiffChangeEvent event, final IProgressMonitor monitor) {
-		syncExec(new Runnable() {
-
-			@Override
-			public void run() {
-				handleChange(event);
-			}
-		}, getViewer().getControl());
+		syncExec(() -> handleChange(event), getViewer().getControl());
 	}
 
 	/**
@@ -428,17 +421,15 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 		if (!child.exists())
 			return true;
 		final boolean[] found = new boolean[] { false };
-		tree.accept(child.getFullPath(), new IDiffVisitor() {
-			@Override
-			public boolean visit(IDiff delta){
-				IResource treeResource = ResourceDiffTree.getResourceFor(delta);
-				if (treeResource.getType()==IResource.FILE && !treeResource.getParent().exists()){
-					found[0] = true;
-					return false;
-				}
+		tree.accept(child.getFullPath(), delta -> {
+			IResource treeResource = ResourceDiffTree.getResourceFor(delta);
+			if (treeResource.getType()==IResource.FILE && !treeResource.getParent().exists()){
+				found[0] = true;
+				return false;
+			}
 
-				return true;
-			}}, IResource.DEPTH_INFINITE);
+			return true;
+		}, IResource.DEPTH_INFINITE);
 		return found[0];
 	}
 
@@ -541,27 +532,23 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 				if (type == IResource.FOLDER) {
 					// If the folder contains java elements, add it
 					final IFolder folder= (IFolder) member;
-					tree.accept(folder.getFullPath(), new IDiffVisitor() {
-
-						@Override
-						public final boolean visit(final IDiff diff) {
-							if (isVisible(diff)) {
-								final IResource current= tree.getResource(diff);
-								if (current != null) {
-									final int kind= current.getType();
-									if (kind == IResource.FILE) {
-										final IJavaElement element= JavaCore.create(current.getParent());
-										if (element != null)
-											set.add(element);
-									} else {
-										final IJavaElement element= JavaCore.create(current);
-										if (element != null)
-											set.add(element);
-									}
+					tree.accept(folder.getFullPath(), diff -> {
+						if (isVisible(diff)) {
+							final IResource current= tree.getResource(diff);
+							if (current != null) {
+								final int kind= current.getType();
+								if (kind == IResource.FILE) {
+									final IJavaElement element1= JavaCore.create(current.getParent());
+									if (element1 != null)
+										set.add(element1);
+								} else {
+									final IJavaElement element2= JavaCore.create(current);
+									if (element2 != null)
+										set.add(element2);
 								}
 							}
-							return true;
 						}
+						return true;
 					}, IResource.DEPTH_INFINITE);
 				}
 			}
@@ -802,13 +789,9 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 	 */
 	private void syncExec(final Runnable runnable, final Control control) {
 		if (control != null && !control.isDisposed())
-			control.getDisplay().syncExec(new Runnable() {
-
-				@Override
-				public void run() {
-					if (!control.isDisposed())
-						BusyIndicator.showWhile(control.getDisplay(), runnable);
-				}
+			control.getDisplay().syncExec(() -> {
+				if (!control.isDisposed())
+					BusyIndicator.showWhile(control.getDisplay(), runnable);
 			});
 	}
 }

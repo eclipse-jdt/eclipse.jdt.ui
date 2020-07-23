@@ -80,14 +80,11 @@ public class DeferredMethodWrapper extends MethodWrapperWorkbenchAdapter impleme
         } catch (OperationCanceledException e) {
         	final MethodWrapper methodWrapper= deferredMethodWrapper.getMethodWrapper();
 			if (!CallHierarchyContentProvider.isExpandWithConstructors(methodWrapper)) {
-	        	Display.getDefault().asyncExec(new Runnable(){
-	        		@Override
-					public void run(){
-						CallHierarchyViewPart viewPart= fProvider.getViewPart();
-						if (viewPart != null && !viewPart.getViewer().getControl().isDisposed())
-							fProvider.collapseAndRefresh(methodWrapper);
-	        		}
-	        	});
+	        	Display.getDefault().asyncExec(() -> {
+					CallHierarchyViewPart viewPart= fProvider.getViewPart();
+					if (viewPart != null && !viewPart.getViewer().getControl().isDisposed())
+						fProvider.collapseAndRefresh(methodWrapper);
+				});
         	}
         } catch (Exception e) {
             JavaPlugin.log(e);

@@ -499,37 +499,28 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 	}
 
 	private void postAdd(final Object child, final Object parent) {
-		postRunnable(new Runnable() {
-			@Override
-			public void run() {
-				Control ctrl = fViewer.getControl();
-				if (ctrl != null && !ctrl.isDisposed()) {
-					((TreeViewer)fViewer).add(parent, child);
-				}
+		postRunnable(() -> {
+			Control ctrl = fViewer.getControl();
+			if (ctrl != null && !ctrl.isDisposed()) {
+				((TreeViewer)fViewer).add(parent, child);
 			}
 		});
 	}
 
 	private void postRemove(final Object object) {
-		postRunnable(new Runnable() {
-			@Override
-			public void run() {
-				Control ctrl = fViewer.getControl();
-				if (ctrl != null && !ctrl.isDisposed()) {
-					((TreeViewer)fViewer).remove(object);
-				}
+		postRunnable(() -> {
+			Control ctrl = fViewer.getControl();
+			if (ctrl != null && !ctrl.isDisposed()) {
+				((TreeViewer)fViewer).remove(object);
 			}
 		});
 	}
 
 	private void postRefresh(final Object object) {
-		postRunnable(new Runnable() {
-			@Override
-			public void run() {
-				Control ctrl= fViewer.getControl();
-				if (ctrl != null && !ctrl.isDisposed()) {
-					((TreeViewer) fViewer).refresh(object);
-				}
+		postRunnable(() -> {
+			Control ctrl= fViewer.getControl();
+			if (ctrl != null && !ctrl.isDisposed()) {
+				((TreeViewer) fViewer).refresh(object);
 			}
 		});
 	}

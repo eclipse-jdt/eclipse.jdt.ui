@@ -410,14 +410,9 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, IView
 	 * @return returns the <code>IShowInSource</code>
 	 */
 	protected IShowInSource getShowInSource() {
-		return new IShowInSource() {
-			@Override
-			public ShowInContext getShowInContext() {
-				return new ShowInContext(
-					null,
-				getSite().getSelectionProvider().getSelection());
-			}
-		};
+		return () -> new ShowInContext(
+			null,
+		getSite().getSelectionProvider().getSelection());
 	}
 
 	protected DecoratingJavaLabelProvider createDecoratingLabelProvider(JavaUILabelProvider provider) {
@@ -579,12 +574,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, IView
 		if (fHasWorkingSetFilter) {
 			String viewId= getConfigurationElement().getAttribute("id"); //$NON-NLS-1$
 			Assert.isNotNull(viewId);
-			IPropertyChangeListener workingSetListener= new IPropertyChangeListener() {
-				@Override
-				public void propertyChange(PropertyChangeEvent event) {
-					doWorkingSetChanged(event);
-				}
-			};
+			IPropertyChangeListener workingSetListener= event -> doWorkingSetChanged(event);
 			fWorkingSetFilterActionGroup= new WorkingSetFilterActionGroup(getSite(), workingSetListener);
 			fViewer.addFilter(fWorkingSetFilterActionGroup.getWorkingSetFilter());
 		}

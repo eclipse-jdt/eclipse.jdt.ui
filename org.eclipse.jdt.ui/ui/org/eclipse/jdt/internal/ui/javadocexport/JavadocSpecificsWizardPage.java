@@ -19,8 +19,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -167,12 +165,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 			}
 		});
 
-		fOverViewText.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				doValidation(OVERVIEWSTATUS);
-			}
-		});
+		fOverViewText.addModifyListener(e -> doValidation(OVERVIEWSTATUS));
 
 		fOverViewBrowseButton.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -212,12 +205,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 			}
 		});
 
-		fAntText.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				doValidation(ANTSTATUS);
-			}
-		});
+		fAntText.addModifyListener(e -> doValidation(ANTSTATUS));
 
 		fAntBrowseButton.addSelectionListener(new SelectionAdapter() {
 			@Override
