@@ -15,7 +15,6 @@ package org.eclipse.jdt.internal.ui.preferences;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 
 import com.ibm.icu.text.Collator;
 
@@ -80,12 +79,7 @@ class SaveParticipantConfigurationBlock implements IPreferenceAndPropertyConfigu
 		if (descriptors.length == 0)
 			return composite;
 
-		Arrays.sort(descriptors, new Comparator<SaveParticipantDescriptor>() {
-			@Override
-			public int compare(SaveParticipantDescriptor d1, SaveParticipantDescriptor d2) {
-				return Collator.getInstance().compare(d1.getPostSaveListener().getName(), d2.getPostSaveListener().getName());
-			}
-		});
+		Arrays.sort(descriptors, (d1, d2) -> Collator.getInstance().compare(d1.getPostSaveListener().getName(), d2.getPostSaveListener().getName()));
 
 		IPreferencePageContainer container= fPreferencePage.getContainer();
 		for (SaveParticipantDescriptor descriptor : descriptors) {
@@ -110,15 +104,12 @@ class SaveParticipantConfigurationBlock implements IPreferenceAndPropertyConfigu
 	 */
 	@Override
 	public void initialize() {
-		delegateToPreferenceConfiguration(new IDelegateOperation() {
-			@Override
-			public void run(ISaveParticipantPreferenceConfiguration block) {
-				IAdaptable element= null;
-				if (fPreferencePage instanceof PropertyAndPreferencePage) {
-					element= ((PropertyAndPreferencePage)fPreferencePage).getElement();
-				}
-				block.initialize(fContext, element);
+		delegateToPreferenceConfiguration(block -> {
+			IAdaptable element= null;
+			if (fPreferencePage instanceof PropertyAndPreferencePage) {
+				element= ((PropertyAndPreferencePage)fPreferencePage).getElement();
 			}
+			block.initialize(fContext, element);
 		});
 	}
 

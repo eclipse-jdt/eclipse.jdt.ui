@@ -21,8 +21,6 @@ import java.util.List;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -310,12 +308,7 @@ public class FilteredPreferenceTree {
 
 		fRefreshJob= doCreateRefreshJob();
 		fRefreshJob.setSystem(true);
-		fParentComposite.addDisposeListener(new DisposeListener() {
-			@Override
-			public void widgetDisposed(DisposeEvent e) {
-				fRefreshJob.cancel();
-			}
-		});
+		fParentComposite.addDisposeListener(e -> fRefreshJob.cancel());
 	}
 
 	private void createDescription(String label) {
@@ -378,12 +371,9 @@ public class FilteredPreferenceTree {
 				setAllExpanded(null, expand);
 			}
 		});
-		item.addDisposeListener(new DisposeListener() {
-			@Override
-			public void widgetDisposed(DisposeEvent e) {
-				createdImage.dispose();
-				createdDisabledImage.dispose();
-			}
+		item.addDisposeListener(e -> {
+			createdImage.dispose();
+			createdDisabledImage.dispose();
 		});
 		return item;
 	}

@@ -25,11 +25,8 @@ import com.ibm.icu.text.Collator;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
-import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -51,7 +48,6 @@ import org.eclipse.core.expressions.Expression;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
@@ -62,17 +58,13 @@ import org.eclipse.jface.dialogs.StatusDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.BidiUtils;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.ITextListener;
 import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.ITextViewer;
-import org.eclipse.jface.text.TextEvent;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.text.templates.ContextTypeRegistry;
@@ -263,12 +255,7 @@ public class EditTemplateDialog extends StatusDialog {
 		parent.setLayout(layout);
 		parent.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-		ModifyListener listener= new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				doTextWidgetChanged(e.widget);
-			}
-		};
+		ModifyListener listener= e -> doTextWidgetChanged(e.widget);
 
 		if (fIsNameModifiable) {
 			createLabel(parent, PreferencesMessages.EditTemplateDialog_name);
@@ -466,20 +453,12 @@ public class EditTemplateDialog extends StatusDialog {
 		data.heightHint= convertHeightInCharsToPixels(nLines);
 		control.setLayoutData(data);
 
-		viewer.addTextListener(new ITextListener() {
-			@Override
-			public void textChanged(TextEvent event) {
-				if (event .getDocumentEvent() != null)
-					doSourceChanged(event.getDocumentEvent().getDocument());
-			}
+		viewer.addTextListener(event -> {
+			if (event .getDocumentEvent() != null)
+				doSourceChanged(event.getDocumentEvent().getDocument());
 		});
 
-		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				updateSelectionDependentActions();
-			}
-		});
+		viewer.addSelectionChangedListener(event -> updateSelectionDependentActions());
 
 		return viewer;
 	}
@@ -498,12 +477,7 @@ public class EditTemplateDialog extends StatusDialog {
 		final IHandlerService handlerService= PlatformUI.getWorkbench().getAdapter(IHandlerService.class);
 		final Expression expression= new ActiveShellExpression(fPatternEditor.getControl().getShell());
 
-		getShell().addDisposeListener(new DisposeListener() {
-			@Override
-			public void widgetDisposed(DisposeEvent e) {
-				handlerService.deactivateHandlers(handlerActivations);
-				}
-						});
+		getShell().addDisposeListener(e -> handlerService.deactivateHandlers(handlerActivations));
 
 		fPatternEditor.getTextWidget().addFocusListener(new FocusListener() {
 			@Override
@@ -557,12 +531,7 @@ public class EditTemplateDialog extends StatusDialog {
 		// create context menu
 		MenuManager manager= new MenuManager(null, null);
 		manager.setRemoveAllWhenShown(true);
-		manager.addMenuListener(new IMenuListener() {
-			@Override
-			public void menuAboutToShow(IMenuManager mgr) {
-				fillContextMenu(mgr);
-			}
-		});
+		manager.addMenuListener(mgr -> fillContextMenu(mgr));
 
 		StyledText text= fPatternEditor.getTextWidget();
 		Menu menu= manager.createContextMenu(text);

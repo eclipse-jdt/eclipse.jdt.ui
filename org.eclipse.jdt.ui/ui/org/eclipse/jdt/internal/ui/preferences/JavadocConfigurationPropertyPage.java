@@ -29,7 +29,6 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.core.resources.IFile;
@@ -271,24 +270,21 @@ public class JavadocConfigurationPropertyPage extends PropertyPage implements IS
 
 
 	private static IRunnableWithProgress getRunnable(final Shell shell, final IJavaElement elem, final URL javadocLocation, final IClasspathEntry entry, final IPath containerPath) {
-		return new IRunnableWithProgress() {
-			@Override
-			public void run(IProgressMonitor monitor) throws InvocationTargetException {
-				try {
-					IJavaProject project= elem.getJavaProject();
-					if (elem instanceof IPackageFragmentRoot) {
-						CPListElement cpElem= CPListElement.createFromExisting(entry, project);
-						String loc= javadocLocation != null ? javadocLocation.toExternalForm() : null;
-						cpElem.setAttribute(CPListElement.JAVADOC, loc);
-						IClasspathEntry newEntry= cpElem.getClasspathEntry();
-						String[] changedAttributes= { CPListElement.JAVADOC };
-						BuildPathSupport.modifyClasspathEntry(shell, newEntry, changedAttributes, project, containerPath, entry.getReferencingEntry() != null, monitor);
-					} else {
-						JavaUI.setProjectJavadocLocation(project, javadocLocation);
-					}
-				} catch (CoreException e) {
-					throw new InvocationTargetException(e);
+		return monitor -> {
+			try {
+				IJavaProject project= elem.getJavaProject();
+				if (elem instanceof IPackageFragmentRoot) {
+					CPListElement cpElem= CPListElement.createFromExisting(entry, project);
+					String loc= javadocLocation != null ? javadocLocation.toExternalForm() : null;
+					cpElem.setAttribute(CPListElement.JAVADOC, loc);
+					IClasspathEntry newEntry= cpElem.getClasspathEntry();
+					String[] changedAttributes= { CPListElement.JAVADOC };
+					BuildPathSupport.modifyClasspathEntry(shell, newEntry, changedAttributes, project, containerPath, entry.getReferencingEntry() != null, monitor);
+				} else {
+					JavaUI.setProjectJavadocLocation(project, javadocLocation);
 				}
+			} catch (CoreException e) {
+				throw new InvocationTargetException(e);
 			}
 		};
 	}

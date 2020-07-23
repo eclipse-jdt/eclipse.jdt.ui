@@ -19,8 +19,6 @@ import java.util.Map.Entry;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.graphics.RGB;
@@ -85,12 +83,7 @@ public class JavaPreview {
 
 		    fPreferenceStore.addPropertyChangeListener(propertyListener);
 
-			fSourceViewer.getTextWidget().addDisposeListener(new DisposeListener() {
-				@Override
-				public void widgetDisposed(DisposeEvent e) {
-					fPreferenceStore.removePropertyChangeListener(propertyListener);
-				}
-			});
+			fSourceViewer.getTextWidget().addDisposeListener(e -> fPreferenceStore.removePropertyChangeListener(propertyListener));
 		}
 	}
 

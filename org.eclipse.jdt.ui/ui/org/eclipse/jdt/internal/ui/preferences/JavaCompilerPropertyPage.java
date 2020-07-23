@@ -19,9 +19,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
 
@@ -121,12 +119,9 @@ public class JavaCompilerPropertyPage extends PropertyPage {
 	}
 
 	private static IWorkspaceRunnable getRunnable(final Shell shell, final IJavaProject project, final IClasspathEntry entry) {
-		return new IWorkspaceRunnable() {
-			@Override
-			public void run(IProgressMonitor monitor) throws CoreException {
-				String[] changedAttributes= { CPListElement.IGNORE_OPTIONAL_PROBLEMS };
-				BuildPathSupport.modifyClasspathEntry(shell, entry, changedAttributes, project, null, entry.getReferencingEntry() != null, monitor);
-			}
+		return monitor -> {
+			String[] changedAttributes= { CPListElement.IGNORE_OPTIONAL_PROBLEMS };
+			BuildPathSupport.modifyClasspathEntry(shell, entry, changedAttributes, project, null, entry.getReferencingEntry() != null, monitor);
 		};
 	}
 

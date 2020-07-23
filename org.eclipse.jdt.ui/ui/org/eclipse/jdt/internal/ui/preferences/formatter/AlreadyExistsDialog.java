@@ -15,8 +15,6 @@
 package org.eclipse.jdt.internal.ui.preferences.formatter;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
@@ -92,12 +90,7 @@ public class AlreadyExistsDialog extends StatusDialog {
 		fNameText.setSelection(0, fProfile.getName().length());
 		fNameText.setFocus();
 
-		fNameText.addModifyListener( new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				doValidation();
-			}
-		});
+		fNameText.addModifyListener( e -> doValidation());
 
 		fRenameRadio.addSelectionListener(new SelectionListener() {
 			@Override

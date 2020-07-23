@@ -13,12 +13,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.propertiesfileeditor;
 
-import org.eclipse.swt.widgets.Shell;
-
 import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.text.DefaultInformationControl;
-import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.quickassist.QuickAssistAssistant;
 
@@ -51,12 +48,7 @@ public class PropertiesCorrectionAssistant extends QuickAssistAssistant {
 	}
 
 	private IInformationControlCreator getInformationControlCreator() {
-		return new IInformationControlCreator() {
-			@Override
-			public IInformationControl createInformationControl(Shell parent) {
-				return new DefaultInformationControl(parent, JavaPlugin.getAdditionalInfoAffordanceString());
-			}
-		};
+		return parent -> new DefaultInformationControl(parent, JavaPlugin.getAdditionalInfoAffordanceString());
 	}
 
 	public IEditorPart getEditor() {

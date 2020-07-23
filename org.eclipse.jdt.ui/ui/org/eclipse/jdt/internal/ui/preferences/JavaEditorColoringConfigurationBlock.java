@@ -51,13 +51,9 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -707,12 +703,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		gd.widthHint= convertWidthInCharsToPixels(20);
 		previewer.setLayoutData(gd);
 
-		fTreeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				handleSyntaxColorListSelection();
-			}
-		});
+		fTreeViewer.addSelectionChangedListener(event -> handleSyntaxColorListSelection());
 
 		foregroundColorButton.addSelectionListener(new SelectionListener() {
 			@Override
@@ -854,17 +845,11 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 	 * @since 3.4
 	 */
 	private void installDoubleClickListener() {
-		fTreeViewer.addDoubleClickListener(new IDoubleClickListener() {
-			/*
-			 * @see org.eclipse.jface.viewers.IDoubleClickListener#doubleClick(org.eclipse.jface.viewers.DoubleClickEvent)
-			 */
-			@Override
-			public void doubleClick(DoubleClickEvent event) {
-				IStructuredSelection s= (IStructuredSelection) event.getSelection();
-				Object element= s.getFirstElement();
-				if (fTreeViewer.isExpandable(element))
-					fTreeViewer.setExpandedState(element, !fTreeViewer.getExpandedState(element));
-			}
+		fTreeViewer.addDoubleClickListener(event -> {
+			IStructuredSelection s= (IStructuredSelection) event.getSelection();
+			Object element= s.getFirstElement();
+			if (fTreeViewer.isExpandable(element))
+				fTreeViewer.setExpandedState(element, !fTreeViewer.getExpandedState(element));
 		});
 	}
 

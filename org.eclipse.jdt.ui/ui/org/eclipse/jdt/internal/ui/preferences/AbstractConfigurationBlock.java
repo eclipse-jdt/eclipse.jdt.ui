@@ -22,7 +22,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -230,21 +229,13 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 
 
 	private Map<Text, String> fTextFields= new HashMap<>();
-	private ModifyListener fTextFieldListener= new ModifyListener() {
-		@Override
-		public void modifyText(ModifyEvent e) {
-			Text text= (Text) e.widget;
-			fStore.setValue(fTextFields.get(text), text.getText());
-		}
+	private ModifyListener fTextFieldListener= e -> {
+		Text text= (Text) e.widget;
+		fStore.setValue(fTextFields.get(text), text.getText());
 	};
 
 	private ArrayList<Text> fNumberFields= new ArrayList<>();
-	private ModifyListener fNumberFieldListener= new ModifyListener() {
-		@Override
-		public void modifyText(ModifyEvent e) {
-			numberFieldChanged((Text) e.widget);
-		}
-	};
+	private ModifyListener fNumberFieldListener= e -> numberFieldChanged((Text) e.widget);
 
 	/**
 	 * List of master/slave listeners when there's a dependency.

@@ -33,7 +33,6 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.ui.IMemento;
@@ -79,20 +78,17 @@ public class JavaNavigatorContentProvider extends
 
 		fStateModel = stateModel;
 		restoreState(memento);
-		fLayoutPropertyListener = new IPropertyChangeListener() {
-			@Override
-			public void propertyChange(PropertyChangeEvent event) {
-				if (Values.IS_LAYOUT_FLAT.equals(event.getProperty())) {
-					if (event.getNewValue() != null) {
-						boolean newValue = ((Boolean) event.getNewValue())
-								.booleanValue() ? true : false;
-						setIsFlatLayout(newValue);
-					}
-				} else if (Values.IS_LIBRARIES_NODE_SHOWN.equals(event.getProperty())) {
-					if (event.getNewValue() != null) {
-						boolean newValue = ((Boolean) event.getNewValue()).booleanValue();
-						setShowLibrariesNode(newValue);
-					}
+		fLayoutPropertyListener = event -> {
+			if (Values.IS_LAYOUT_FLAT.equals(event.getProperty())) {
+				if (event.getNewValue() != null) {
+					boolean newValue1 = ((Boolean) event.getNewValue())
+							.booleanValue() ? true : false;
+					setIsFlatLayout(newValue1);
+				}
+			} else if (Values.IS_LIBRARIES_NODE_SHOWN.equals(event.getProperty())) {
+				if (event.getNewValue() != null) {
+					boolean newValue2 = ((Boolean) event.getNewValue()).booleanValue();
+					setShowLibrariesNode(newValue2);
 				}
 			}
 		};

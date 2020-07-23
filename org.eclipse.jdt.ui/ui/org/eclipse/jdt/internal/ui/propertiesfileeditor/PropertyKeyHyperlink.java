@@ -17,7 +17,6 @@ package org.eclipse.jdt.internal.ui.propertiesfileeditor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -28,7 +27,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.PlatformObject;
@@ -44,7 +42,6 @@ import org.eclipse.core.filebuffers.ITextFileBufferManager;
 import org.eclipse.core.filebuffers.LocationKind;
 
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.window.Window;
@@ -346,12 +343,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 
 		TwoPaneElementSelector dialog= new TwoPaneElementSelector(fShell, labelProvider, new WorkbenchLabelProvider());
 		dialog.setLowerListLabel(PropertiesFileEditorMessages.OpenAction_SelectionDialog_details);
-		dialog.setLowerListComparator(new Comparator<Object>() {
-			@Override
-			public int compare(Object o1, Object o2) {
-				return 0; // don't sort
-			}
-		});
+		dialog.setLowerListComparator((o1, o2) -> 0);
 		dialog.setTitle(PropertiesFileEditorMessages.OpenAction_SelectionDialog_title);
 		dialog.setMessage(PropertiesFileEditorMessages.OpenAction_SelectionDialog_message);
 		dialog.setElements(keyReferences);
@@ -403,15 +395,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 		fShell.getDisplay().beep();
 		final IEditorStatusLine statusLine= fEditor.getAdapter(IEditorStatusLine.class);
 		if (statusLine != null) {
-			fShell.getDisplay().asyncExec(new Runnable() {
-				/*
-				 * @see java.lang.Runnable#run()
-				 */
-				@Override
-				public void run() {
-					statusLine.setMessage(true, message, null);
-				}
-			});
+			fShell.getDisplay().asyncExec(() -> statusLine.setMessage(true, message, null));
 		}
 	}
 
@@ -445,63 +429,60 @@ public class PropertyKeyHyperlink implements IHyperlink {
 		final List<KeyReference> result= new ArrayList<>(5);
 		try {
 			fEditor.getEditorSite().getWorkbenchWindow().getWorkbench().getProgressService().busyCursorWhile(
-				new IRunnableWithProgress() {
-						@Override
-						public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-							if (monitor == null)
-								monitor= new NullProgressMonitor();
+				monitor -> {
+					if (monitor == null)
+						monitor= new NullProgressMonitor();
 
-							monitor.beginTask("", 5); //$NON-NLS-1$
+					monitor.beginTask("", 5); //$NON-NLS-1$
+					try {
+						// XXX: This is a hack to improve the accuracy of matches, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=81140
+						boolean useDoubleQuotedKey= useDoubleQuotedKey();
+						if (useDoubleQuotedKey) {
+							SearchPattern pattern= SearchPattern.createPattern(key, IJavaSearchConstants.FIELD, IJavaSearchConstants.REFERENCES, SearchPattern.R_PATTERN_MATCH
+									| SearchPattern.R_CASE_SENSITIVE);
+							if (pattern == null)
+								return;
 							try {
-								// XXX: This is a hack to improve the accuracy of matches, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=81140
-								boolean useDoubleQuotedKey= useDoubleQuotedKey();
-								if (useDoubleQuotedKey) {
-									SearchPattern pattern= SearchPattern.createPattern(key, IJavaSearchConstants.FIELD, IJavaSearchConstants.REFERENCES, SearchPattern.R_PATTERN_MATCH
-											| SearchPattern.R_CASE_SENSITIVE);
-									if (pattern == null)
-										return;
-									try {
-										new SearchEngine().search(pattern, SearchUtils.getDefaultSearchParticipants(), SearchEngine.createWorkspaceScope(), new SearchRequestor() {
-											@Override
-											public void acceptSearchMatch(SearchMatch match) throws CoreException {
-												IResource resource= match.getResource();
-												if (resource != null)
-													result.add(new KeyReference(resource, (IJavaElement) match.getElement(), match.getOffset(), match.getLength(), fIsFileEditorInput));
-											}
-										}, new SubProgressMonitor(monitor, 1));
-									} catch (CoreException e) {
-										throw new InvocationTargetException(e);
+								new SearchEngine().search(pattern, SearchUtils.getDefaultSearchParticipants(), SearchEngine.createWorkspaceScope(), new SearchRequestor() {
+									@Override
+									public void acceptSearchMatch(SearchMatch match) throws CoreException {
+										IResource resource= match.getResource();
+										if (resource != null)
+											result.add(new KeyReference(resource, (IJavaElement) match.getElement(), match.getOffset(), match.getLength(), fIsFileEditorInput));
 									}
-								}
-								if (result.isEmpty()) {
-									//maybe not an eclipse style NLS string
-									String searchString;
-									if (useDoubleQuotedKey) {
-										StringBuilder buf= new StringBuilder("\""); //$NON-NLS-1$
-										buf.append(key);
-										buf.append('"');
-										searchString= buf.toString();
-									} else
-										searchString= key;
-									ResultCollector collector= new ResultCollector(result, useDoubleQuotedKey);
-									TextSearchEngine engine= TextSearchEngine.create();
-									Pattern searchPattern= PatternConstructor.createPattern(searchString, true, false);
-
-									/* <p>
-									 * XXX: This does not work for properties files coming from a JAR.
-									 * For details see https://bugs.eclipse.org/bugs/show_bug.cgi?id=23341
-									 * </p>
-									*/
-									if (fStorage instanceof IResource) {
-										engine.search(createScope(((IResource)fStorage).getProject()), collector, searchPattern, new SubProgressMonitor(monitor, 4));
-									}
-								} else {
-									monitor.worked(1);
-								}
-							} finally {
-								monitor.done();
+								}, new SubProgressMonitor(monitor, 1));
+							} catch (CoreException e) {
+								throw new InvocationTargetException(e);
 							}
 						}
+						if (result.isEmpty()) {
+							//maybe not an eclipse style NLS string
+							String searchString;
+							if (useDoubleQuotedKey) {
+								StringBuilder buf= new StringBuilder("\""); //$NON-NLS-1$
+								buf.append(key);
+								buf.append('"');
+								searchString= buf.toString();
+							} else
+								searchString= key;
+							ResultCollector collector= new ResultCollector(result, useDoubleQuotedKey);
+							TextSearchEngine engine= TextSearchEngine.create();
+							Pattern searchPattern= PatternConstructor.createPattern(searchString, true, false);
+
+							/* <p>
+							 * XXX: This does not work for properties files coming from a JAR.
+							 * For details see https://bugs.eclipse.org/bugs/show_bug.cgi?id=23341
+							 * </p>
+							*/
+							if (fStorage instanceof IResource) {
+								engine.search(createScope(((IResource)fStorage).getProject()), collector, searchPattern, new SubProgressMonitor(monitor, 4));
+							}
+						} else {
+							monitor.worked(1);
+						}
+					} finally {
+						monitor.done();
+					}
 				}
 			);
 		} catch (InvocationTargetException ex) {

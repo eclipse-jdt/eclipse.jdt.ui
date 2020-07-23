@@ -18,11 +18,9 @@ import java.lang.reflect.InvocationTargetException;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.IWizard;
 
 import org.eclipse.ui.PlatformUI;
@@ -108,21 +106,18 @@ public class ClasspathContainerPreferencePage extends WizardPropertyPage {
 
 			IRunnableContext context= new ProgressMonitorDialog(getShell());
 			context= PlatformUI.getWorkbench().getProgressService();
-			context.run(true, true, new IRunnableWithProgress() {
-				@Override
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					try {
-						if (result.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
-							IPath path= result.getPath();
-							String eeID= JavaRuntime.getExecutionEnvironmentId(path);
-							if (eeID != null) {
-								BuildPathSupport.setEEComplianceOptions(fJavaProject, eeID, null);
-							}
+			context.run(true, true, monitor -> {
+				try {
+					if (result.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
+						IPath path= result.getPath();
+						String eeID= JavaRuntime.getExecutionEnvironmentId(path);
+						if (eeID != null) {
+							BuildPathSupport.setEEComplianceOptions(fJavaProject, eeID, null);
 						}
-						fJavaProject.setRawClasspath(newEntries, fJavaProject.getOutputLocation(), monitor);
-					} catch (CoreException e) {
-						throw new InvocationTargetException(e);
 					}
+					fJavaProject.setRawClasspath(newEntries, fJavaProject.getOutputLocation(), monitor);
+				} catch (CoreException e) {
+					throw new InvocationTargetException(e);
 				}
 			});
 

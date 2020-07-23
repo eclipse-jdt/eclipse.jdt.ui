@@ -108,12 +108,9 @@ public class PropertiesFileEditor extends TextEditor {
 		setInsertMode(INSERT);
 
 		// Need to listen on Editors UI preference store because JDT disables this functionality in its preferences.
-		fPropertyChangeListener= new IPropertyChangeListener() {
-			@Override
-			public void propertyChange(PropertyChangeEvent event) {
-				if (AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SPACES_FOR_TABS.equals(event.getProperty()))
-					handlePreferenceStoreChanged(event);
-			}
+		fPropertyChangeListener= event -> {
+			if (AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SPACES_FOR_TABS.equals(event.getProperty()))
+				handlePreferenceStoreChanged(event);
 		};
 		EditorsUI.getPreferenceStore().addPropertyChangeListener(fPropertyChangeListener);
 	}
@@ -219,13 +216,7 @@ public class PropertiesFileEditor extends TextEditor {
 	@Override
 	public <T> T getAdapter(Class<T> adapter) {
 		if (adapter == IShowInTargetList.class) {
-			return (T) new IShowInTargetList() {
-				@Override
-				public String[] getShowInTargetIds() {
-					return new String[] { JavaUI.ID_PACKAGES };
-				}
-
-			};
+			return (T) (IShowInTargetList) () -> new String[] { JavaUI.ID_PACKAGES };
 		}
 		return super.getAdapter(adapter);
 	}

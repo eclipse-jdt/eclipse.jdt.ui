@@ -842,13 +842,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 	 * @param runnables the resulting view changes as runnables (type {@link Runnable})
 	 */
 	 private void postUpdateIcon(final IJavaElement element, Collection<Runnable> runnables) {
-		 runnables.add(new Runnable() {
-			@Override
-			public void run() {
-				// 1GF87WR: ITPUI:ALL - SWTEx + NPE closing a workbench window.
-				fViewer.update(element, new String[]{IBasicPropertyConstants.P_IMAGE});
-			}
-		});
+		 runnables.add(() -> fViewer.update(element, new String[]{IBasicPropertyConstants.P_IMAGE}));
 	 }
 
 	/**
@@ -960,55 +954,43 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 	}
 
 	protected void postRefresh(final List<Object> toRefresh, final boolean updateLabels, Collection<Runnable> runnables) {
-		runnables.add(new Runnable() {
-			@Override
-			public void run() {
-				for (Object element : toRefresh.toArray()) {
-					if (element == null || fViewer.testFindItems(element).length > 0) {
-						fViewer.refresh(element, updateLabels);
-					}
+		runnables.add(() -> {
+			for (Object element : toRefresh.toArray()) {
+				if (element == null || fViewer.testFindItems(element).length > 0) {
+					fViewer.refresh(element, updateLabels);
 				}
 			}
 		});
 	}
 
 	protected void postAdd(final Object parent, final Object element, Collection<Runnable> runnables) {
-		runnables.add(new Runnable() {
-			@Override
-			public void run() {
-				for (Widget item : fViewer.testFindItems(element)) {
-					if (item instanceof TreeItem && !item.isDisposed()) {
-						TreeItem parentItem= ((TreeItem) item).getParentItem();
-						if (parentItem != null && !parentItem.isDisposed() && parent.equals(parentItem.getData())) {
-							return; // no add, element already added (most likely by a refresh)
-						}
+		runnables.add(() -> {
+			for (Widget item : fViewer.testFindItems(element)) {
+				if (item instanceof TreeItem && !item.isDisposed()) {
+					TreeItem parentItem= ((TreeItem) item).getParentItem();
+					if (parentItem != null && !parentItem.isDisposed() && parent.equals(parentItem.getData())) {
+						return; // no add, element already added (most likely by a refresh)
 					}
 				}
-				fViewer.add(parent, element);
 			}
+			fViewer.add(parent, element);
 		});
 	}
 
 	protected void postRemove(final Object element, Collection<Runnable> runnables) {
-		runnables.add(new Runnable() {
-			@Override
-			public void run() {
-				if (fViewer.testFindItems(element).length > 0) {
-					fViewer.remove(element);
-				}
+		runnables.add(() -> {
+			if (fViewer.testFindItems(element).length > 0) {
+				fViewer.remove(element);
 			}
 		});
 	}
 
 	protected void postProjectStateChanged(final Object root, Collection<Runnable> runnables) {
-		runnables.add(new Runnable() {
-			@Override
-			public void run() {
-				fViewer.refresh(root, true);
-				// trigger a synthetic selection change so that action refresh their
-				// enable state.
-				fViewer.setSelection(fViewer.getSelection());
-			}
+		runnables.add(() -> {
+			fViewer.refresh(root, true);
+			// trigger a synthetic selection change so that action refresh their
+			// enable state.
+			fViewer.setSelection(fViewer.getSelection());
 		});
 	}
 

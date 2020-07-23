@@ -44,8 +44,6 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 
@@ -179,12 +177,7 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 		createListDialogField(sortComposite, fSortOrderList);
 
 		fUseVisibilitySortField= new SelectionButtonDialogField(SWT.CHECK);
-		fUseVisibilitySortField.setDialogFieldListener(new IDialogFieldListener() {
-			@Override
-			public void dialogFieldChanged(DialogField field) {
-				fVisibilityOrderList.setEnabled(fUseVisibilitySortField.isSelected());
-			}
-		});
+		fUseVisibilitySortField.setDialogFieldListener(field -> fVisibilityOrderList.setEnabled(fUseVisibilitySortField.isSelected()));
 		fUseVisibilitySortField.setLabelText(PreferencesMessages.MembersOrderPreferencePage_usevisibilitysort_label);
 		fUseVisibilitySortField.doFillIntoGrid(sortComposite, 2);
 		fUseVisibilitySortField.setSelection(fUseVisibilitySort);

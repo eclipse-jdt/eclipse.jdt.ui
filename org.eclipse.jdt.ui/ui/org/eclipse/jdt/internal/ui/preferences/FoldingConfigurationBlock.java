@@ -40,10 +40,8 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.PixelConverter;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -260,15 +258,11 @@ class FoldingConfigurationBlock implements IPreferenceConfigurationBlock {
 				return ((JavaFoldingStructureProviderDescriptor) element).getName();
 			}
 		});
-		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
-
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				IStructuredSelection sel= (IStructuredSelection) event.getSelection();
-				if (!sel.isEmpty()) {
-					fStore.setValue(PreferenceConstants.EDITOR_FOLDING_PROVIDER, ((JavaFoldingStructureProviderDescriptor) sel.getFirstElement()).getId());
-					updateListDependencies();
-				}
+		viewer.addSelectionChangedListener(event -> {
+			IStructuredSelection sel= (IStructuredSelection) event.getSelection();
+			if (!sel.isEmpty()) {
+				fStore.setValue(PreferenceConstants.EDITOR_FOLDING_PROVIDER, ((JavaFoldingStructureProviderDescriptor) sel.getFirstElement()).getId());
+				updateListDependencies();
 			}
 		});
 		viewer.setInput(fProviderDescriptors.values());

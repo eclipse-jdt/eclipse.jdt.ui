@@ -114,12 +114,9 @@ public class FileTransferDropAdapter extends JdtViewerDropAdapter implements Tra
 			// Run the import operation asynchronously.
 			// Otherwise the drag source (e.g., Windows Explorer) will be blocked
 			// while the operation executes. Fixes bug 35796.
-			Display.getCurrent().asyncExec(new Runnable() {
-				@Override
-				public void run() {
-					getShell().forceActive();
-					new CopyFilesAndFoldersOperation(getShell()).copyOrLinkFiles((String[])data, target, currentOperation);
-				}
+			Display.getCurrent().asyncExec(() -> {
+				getShell().forceActive();
+				new CopyFilesAndFoldersOperation(getShell()).copyOrLinkFiles((String[])data, target, currentOperation);
 			});
 
 			return true;

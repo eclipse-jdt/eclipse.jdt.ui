@@ -176,15 +176,7 @@ public class PropertyKeyHyperlinkDetector extends AbstractHyperlinkDetector {
 		display.beep();
 		final IEditorStatusLine statusLine= textEditor.getAdapter(IEditorStatusLine.class);
 		if (statusLine != null) {
-			display.asyncExec(new Runnable() {
-				/*
-				 * @see java.lang.Runnable#run()
-				 */
-				@Override
-				public void run() {
-					statusLine.setMessage(true, message, null);
-				}
-			});
+			display.asyncExec(() -> statusLine.setMessage(true, message, null));
 		}
 	}
 }

@@ -365,12 +365,9 @@ public abstract class ProfileConfigurationBlock {
 		new StoreUpdater();
 
 		fPreferenceListenerEnabled= true;
-		fPreferenceListener= new IPreferenceChangeListener() {
-			@Override
-			public void preferenceChange(PreferenceChangeEvent event) {
-				if (fPreferenceListenerEnabled) {
-					preferenceChanged(event);
-				}
+		fPreferenceListener= event -> {
+			if (fPreferenceListenerEnabled) {
+				preferenceChanged(event);
 			}
 		};
 		access.getInstanceScope().getNode(JavaUI.ID_PLUGIN).addPreferenceChangeListener(fPreferenceListener);

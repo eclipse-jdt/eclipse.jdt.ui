@@ -25,15 +25,12 @@ import org.osgi.service.prefs.BackingStoreException;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.accessibility.AccessibleAdapter;
 import org.eclipse.swt.accessibility.AccessibleEvent;
-import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.events.TraverseEvent;
-import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -578,16 +575,13 @@ public abstract class OptionsConfigurationBlock {
 				}
 			}
 		});
-		link.addTraverseListener(new TraverseListener() {
-			@Override
-			public void keyTraversed(TraverseEvent e) {
-				if (e.detail == SWT.TRAVERSE_MNEMONIC && e.doit == true) {
-					e.detail= SWT.TRAVERSE_NONE;
-					checkBox.setSelection(!checkBox.getSelection());
-					checkBox.setFocus();
-					linkSelected[0]= false;
-					controlChanged(checkBox);
-				}
+		link.addTraverseListener(e -> {
+			if (e.detail == SWT.TRAVERSE_MNEMONIC && e.doit == true) {
+				e.detail= SWT.TRAVERSE_NONE;
+				checkBox.setSelection(!checkBox.getSelection());
+				checkBox.setFocus();
+				linkSelected[0]= false;
+				controlChanged(checkBox);
 			}
 		});
 
@@ -853,12 +847,7 @@ public abstract class OptionsConfigurationBlock {
 
 	protected ModifyListener getTextModifyListener() {
 		if (fTextModifyListener == null) {
-			fTextModifyListener= new ModifyListener() {
-				@Override
-				public void modifyText(ModifyEvent e) {
-					textChanged((Text) e.widget);
-				}
-			};
+			fTextModifyListener= e -> textChanged((Text) e.widget);
 		}
 		return fTextModifyListener;
 	}
