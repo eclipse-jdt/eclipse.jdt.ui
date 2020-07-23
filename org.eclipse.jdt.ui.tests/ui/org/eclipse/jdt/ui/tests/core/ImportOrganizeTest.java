@@ -43,7 +43,6 @@ import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
@@ -78,30 +77,27 @@ public class ImportOrganizeTest extends CoreTests {
 	}
 
 	protected IChooseImportQuery createQuery(final String name, final String[] choices, final int[] nEntries) {
-		return new IChooseImportQuery() {
-			@Override
-			public TypeNameMatch[] chooseImports(TypeNameMatch[][] openChoices, ISourceRange[] ranges) {
-				assertEquals(name + "-query-nchoices1", choices.length, openChoices.length);
-				assertEquals(name + "-query-nchoices2", nEntries.length, openChoices.length);
-				for (int i= 0; i < nEntries.length; i++) {
-					assertEquals(name + "-query-cnt" + i, openChoices[i].length, nEntries[i]);
-				}
-				TypeNameMatch[] res= new TypeNameMatch[openChoices.length];
-				for (int i= 0; i < openChoices.length; i++) {
-					TypeNameMatch[] selection= openChoices[i];
-					assertNotNull(name + "-query-setset" + i, selection);
-					assertTrue(name + "-query-setlen" + i, selection.length > 0);
-					TypeNameMatch found= null;
-					for (TypeNameMatch s : selection) {
-						if (s.getFullyQualifiedName().equals(choices[i])) {
-							found= s;
-						}
-					}
-					assertNotNull(name + "-query-notfound" + i, found);
-					res[i]= found;
-				}
-				return res;
+		return (openChoices, ranges) -> {
+			assertEquals(name + "-query-nchoices1", choices.length, openChoices.length);
+			assertEquals(name + "-query-nchoices2", nEntries.length, openChoices.length);
+			for (int i1= 0; i1 < nEntries.length; i1++) {
+				assertEquals(name + "-query-cnt" + i1, openChoices[i1].length, nEntries[i1]);
 			}
+			TypeNameMatch[] res= new TypeNameMatch[openChoices.length];
+			for (int i2= 0; i2 < openChoices.length; i2++) {
+				TypeNameMatch[] selection= openChoices[i2];
+				assertNotNull(name + "-query-setset" + i2, selection);
+				assertTrue(name + "-query-setlen" + i2, selection.length > 0);
+				TypeNameMatch found= null;
+				for (TypeNameMatch s : selection) {
+					if (s.getFullyQualifiedName().equals(choices[i2])) {
+						found= s;
+					}
+				}
+				assertNotNull(name + "-query-notfound" + i2, found);
+				res[i2]= found;
+			}
+			return res;
 		};
 	}
 

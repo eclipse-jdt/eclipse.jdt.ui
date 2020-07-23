@@ -29,7 +29,6 @@ import org.eclipse.jface.text.BadPartitioningException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
-import org.eclipse.jface.text.IDocumentPartitioningListener;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.TypedRegion;
 
@@ -54,12 +53,7 @@ public class PropertiesFilePartitionerTest {
 		//             01234567890 1234567890 1234567890 123456789
 
 		fDocumentPartitioningChanged= false;
-		fDocument.addDocumentPartitioningListener(new IDocumentPartitioningListener() {
-			@Override
-			public void documentPartitioningChanged(IDocument document) {
-				fDocumentPartitioningChanged= true;
-			}
-		});
+		fDocument.addDocumentPartitioningListener(document -> fDocumentPartitioningChanged= true);
 	}
 
 	@After

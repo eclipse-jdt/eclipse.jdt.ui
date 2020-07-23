@@ -28,7 +28,6 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
-import org.eclipse.jface.text.IDocumentPartitioningListener;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.TypedRegion;
 
@@ -52,12 +51,7 @@ public class JavaPartitionerTest {
 		fDocument.set("xxx\n/*xxx*/\nxxx\n/**xxx*/\nxxx\n/**/\nxxx\n/***/\nxxx");
 
 		fDocumentPartitioningChanged= false;
-		fDocument.addDocumentPartitioningListener(new IDocumentPartitioningListener() {
-			@Override
-			public void documentPartitioningChanged(IDocument document) {
-				fDocumentPartitioningChanged= true;
-			}
-		});
+		fDocument.addDocumentPartitioningListener(document -> fDocumentPartitioningChanged= true);
 	}
 
 	@After

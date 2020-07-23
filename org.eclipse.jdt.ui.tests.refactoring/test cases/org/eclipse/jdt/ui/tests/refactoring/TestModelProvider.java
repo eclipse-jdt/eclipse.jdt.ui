@@ -27,7 +27,6 @@ import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
-import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.mapping.ModelProvider;
 
 public class TestModelProvider extends ModelProvider {
@@ -270,12 +269,9 @@ public class TestModelProvider extends ModelProvider {
 
 	private static void assertCopySource(IResourceDelta delta) {
 		try {
-			delta.accept(new IResourceDeltaVisitor() {
-				@Override
-				public boolean visit(IResourceDelta d) throws CoreException {
-					Assert.assertTrue("Not a copy delta", (d.getKind() & ~IResourceDelta.CHANGED) == 0);
-					return true;
-				}
+			delta.accept(d -> {
+				Assert.assertTrue("Not a copy delta", (d.getKind() & ~IResourceDelta.CHANGED) == 0);
+				return true;
 			});
 		} catch (CoreException e) {
 			Assert.assertTrue("Shouldn't happen", false);

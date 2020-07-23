@@ -25,7 +25,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
-import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -121,12 +120,7 @@ public abstract class AbstractJunit4SelectionTestCase extends AbstractJunit4CUTe
 					refactoring, getCheckingStyle());
 				if (fIsPreDeltaTest) {
 					IWorkspace workspace= ResourcesPlugin.getWorkspace();
-					IResourceChangeListener listener= new IResourceChangeListener() {
-						@Override
-						public void resourceChanged(IResourceChangeEvent event) {
-							TestModelProvider.assertTrue(event.getDelta());
-						}
-					};
+					IResourceChangeListener listener= event -> TestModelProvider.assertTrue(event.getDelta());
 					try {
 						clearPreDelta();
 						workspace.checkpoint(false);

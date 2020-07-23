@@ -19,7 +19,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -60,12 +59,7 @@ public class MyJavadocExportWizardPage extends JavadocExportWizardPage {
 
 	@Override
 	public Control createContents(Composite parent) {
-		ModifyListener modifyListener= new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				validateInputs();
-			}
-		};
+		ModifyListener modifyListener= e -> validateInputs();
 
 		Composite composite= new Composite(parent, SWT.NONE);
 		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));

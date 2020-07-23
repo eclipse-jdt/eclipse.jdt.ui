@@ -83,13 +83,7 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 	 */
 	private void runOperation(IType type, IField[] getters, IField[] setters, IField[] gettersAndSetters, boolean sort, int visibility, IJavaElement sibling) throws CoreException {
 
-		IRequestQuery allYes= new IRequestQuery() {
-
-			@Override
-			public int doQuery(IMember member) {
-				return IRequestQuery.YES_ALL;
-			}
-		};
+		IRequestQuery allYes= member -> IRequestQuery.YES_ALL;
 
 		RefactoringASTParser parser= new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL);
 		CompilationUnit unit= parser.parse(type.getCompilationUnit(), true);

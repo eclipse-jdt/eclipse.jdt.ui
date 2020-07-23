@@ -115,10 +115,7 @@ public class BuildpathModifierActionEnablementTest {
     }
 
     private BuildpathModifierAction[] createActions() {
-    	ISetSelectionTarget nullSelectionTarget= new ISetSelectionTarget() {
-    		@Override
-			public void selectReveal(ISelection selection) {}
-        };
+    	ISetSelectionTarget nullSelectionTarget= selection -> {};
 
         IRunnableContext context= PlatformUI.getWorkbench().getProgressService();
 
@@ -632,12 +629,7 @@ public class BuildpathModifierActionEnablementTest {
         assertAllDisabled();
 
         final IPackageFragmentRoot[] addedZipArchive= {null};
-        AddSelectedLibraryToBuildpathAction add= new AddSelectedLibraryToBuildpathAction(PlatformUI.getWorkbench().getProgressService(), new ISetSelectionTarget() {
-			@Override
-			public void selectReveal(ISelection selection) {
-				addedZipArchive[0]= (IPackageFragmentRoot)((StructuredSelection)selection).getFirstElement();
-            }
-        });
+        AddSelectedLibraryToBuildpathAction add= new AddSelectedLibraryToBuildpathAction(PlatformUI.getWorkbench().getProgressService(), selection -> addedZipArchive[0]= (IPackageFragmentRoot)((StructuredSelection)selection).getFirstElement());
         add.selectionChanged(new SelectionChangedEvent(new ISelectionProvider() {
 			@Override
 			public void addSelectionChangedListener(ISelectionChangedListener listener) {}
@@ -698,17 +690,12 @@ public class BuildpathModifierActionEnablementTest {
         final IResource excludedElements[]= {null, null};
         final IPackageFragment pack2= root.createPackageFragment("pack1.pack2", true, null);
         final ICompilationUnit cuB= createICompilationUnit("B", pack1);
-        ExcludeFromBuildpathAction exclude= new ExcludeFromBuildpathAction(PlatformUI.getWorkbench().getProgressService(), new ISetSelectionTarget() {
-
-			@Override
-			public void selectReveal(ISelection selection) {
-				StructuredSelection ss= (StructuredSelection)selection;
-				List<?> list= ss.toList();
-				excludedElements[0]= (IResource)list.get(0);
-				excludedElements[1]= (IResource)list.get(1);
-            }
-
-        });
+        ExcludeFromBuildpathAction exclude= new ExcludeFromBuildpathAction(PlatformUI.getWorkbench().getProgressService(), selection -> {
+			StructuredSelection ss= (StructuredSelection)selection;
+			List<?> list= ss.toList();
+			excludedElements[0]= (IResource)list.get(0);
+			excludedElements[1]= (IResource)list.get(1);
+		});
         exclude.selectionChanged(new SelectionChangedEvent(new ISelectionProvider() {
 			@Override
 			public void addSelectionChangedListener(ISelectionChangedListener listener) {}
@@ -725,14 +712,7 @@ public class BuildpathModifierActionEnablementTest {
         file.create(null, false, null);
 
         final IFile[] removedZipFile= {null};
-        RemoveFromBuildpathAction remove= new RemoveFromBuildpathAction(PlatformUI.getWorkbench().getProgressService(), new ISetSelectionTarget() {
-
-			@Override
-			public void selectReveal(ISelection selection) {
-				removedZipFile[0]= (IFile)((StructuredSelection)selection).getFirstElement();
-            }
-
-        });
+        RemoveFromBuildpathAction remove= new RemoveFromBuildpathAction(PlatformUI.getWorkbench().getProgressService(), selection -> removedZipFile[0]= (IFile)((StructuredSelection)selection).getFirstElement());
         remove.selectionChanged(new SelectionChangedEvent(new ISelectionProvider() {
 			@Override
 			public void addSelectionChangedListener(ISelectionChangedListener listener) {}

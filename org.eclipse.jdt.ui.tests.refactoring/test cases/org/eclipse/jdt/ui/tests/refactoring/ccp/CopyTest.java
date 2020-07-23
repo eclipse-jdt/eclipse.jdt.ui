@@ -204,12 +204,7 @@ public class CopyTest extends GenericRefactoringTest {
 
 		@Override
 		public INewNameQuery createStaticQuery(final String newName) {
-			return new INewNameQuery(){
-				@Override
-				public String getNewName() {
-					return newName;
-				}
-			};
+			return () -> newName;
 		}
 
 		@Override
@@ -249,11 +244,8 @@ public class CopyTest extends GenericRefactoringTest {
 		}
 		@Override
 		public INewNameQuery createNullQuery() {
-			return new INewNameQuery() {
-				@Override
-				public String getNewName() {
-					throw new OperationCanceledException();
-				}
+			return () -> {
+				throw new OperationCanceledException();
 			};
 		}
 		@Override

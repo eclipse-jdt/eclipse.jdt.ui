@@ -33,7 +33,6 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
-import org.eclipse.jdt.core.ITypeHierarchyChangedListener;
 import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -104,12 +103,7 @@ public class TypeHierarchyTest {
 		final int[] updateCount= new int[] {0};
 
 		ITypeHierarchy hierarchy= type2.newSupertypeHierarchy(null);
-		hierarchy.addTypeHierarchyChangedListener(new ITypeHierarchyChangedListener() {
-			@Override
-			public void typeHierarchyChanged(ITypeHierarchy typeHierarchy) {
-				updateCount[0]++;
-			}
-		});
+		hierarchy.addTypeHierarchyChangedListener(typeHierarchy -> updateCount[0]++);
 
 		IType[] allTypes= hierarchy.getAllTypes();
 
@@ -174,12 +168,7 @@ public class TypeHierarchyTest {
 
 		// create on type in working copy
 		ITypeHierarchy hierarchy= type2.newSupertypeHierarchy(null);
-		hierarchy.addTypeHierarchyChangedListener(new ITypeHierarchyChangedListener() {
-			@Override
-			public void typeHierarchyChanged(ITypeHierarchy typeHierarchy) {
-				updateCount[0]++;
-			}
-		});
+		hierarchy.addTypeHierarchyChangedListener(typeHierarchy -> updateCount[0]++);
 
 		IType[] allTypes= hierarchy.getAllTypes();
 
@@ -244,12 +233,7 @@ public class TypeHierarchyTest {
 
 		// create on type in primary working copy
 		ITypeHierarchy hierarchy= type2.newSupertypeHierarchy(null);
-		hierarchy.addTypeHierarchyChangedListener(new ITypeHierarchyChangedListener() {
-			@Override
-			public void typeHierarchyChanged(ITypeHierarchy typeHierarchy) {
-				updateCount[0]++;
-			}
-		});
+		hierarchy.addTypeHierarchyChangedListener(typeHierarchy -> updateCount[0]++);
 
 		IType[] allTypes= hierarchy.getAllTypes();
 

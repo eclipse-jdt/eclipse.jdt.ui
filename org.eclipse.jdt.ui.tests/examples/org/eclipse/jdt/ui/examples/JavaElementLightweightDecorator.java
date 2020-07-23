@@ -107,12 +107,9 @@ public class JavaElementLightweightDecorator extends LabelProvider implements IL
 
 	public JavaElementLightweightDecorator() {
 		final FontRegistry fontRegistry= PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getFontRegistry();
-		Display.getDefault().syncExec(new Runnable() {
-			@Override
-			public void run() {
-				fColor= new Color(Display.getDefault(), 100, 100, 100);
-				fBold= fontRegistry.getBold(JFaceResources.DEFAULT_FONT);
-			}
+		Display.getDefault().syncExec(() -> {
+			fColor= new Color(Display.getDefault(), 100, 100, 100);
+			fBold= fontRegistry.getBold(JFaceResources.DEFAULT_FONT);
 		});
 		fListener= new FileBufferListener();
 		FileBuffers.getTextFileBufferManager().addFileBufferListener(fListener);

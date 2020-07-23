@@ -108,12 +108,7 @@ public abstract class MouseScrollEditorTest extends TextPerformanceTestCase {
 	private Runnable fThreadRunnable= new Runnable() {
 		private volatile int fTopPixel;
 		private int fOldTopPixel;
-		private Runnable fRunnable= new Runnable() {
-			@Override
-			public void run() {
-				fTopPixel= fText.getTopPixel();
-			}
-		};
+		private Runnable fRunnable= () -> fTopPixel= fText.getTopPixel();
 		private Condition fCondition= new Condition() {
 			@Override
 			public boolean isTrue() {

@@ -25,7 +25,6 @@ import org.eclipse.core.resources.IFolder;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
@@ -73,14 +72,11 @@ public class TestMoveDescriptorAction extends Action implements IActionDelegate 
 	public void run(IAction action) {
 		try {
 			if (fCU != null) {
-				PlatformUI.getWorkbench().getProgressService().run(true, true, new IRunnableWithProgress() {
-					@Override
-					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-						try {
-							performAction(monitor);
-						} catch (CoreException e) {
-							throw new InvocationTargetException(e);
-						}
+				PlatformUI.getWorkbench().getProgressService().run(true, true, monitor -> {
+					try {
+						performAction(monitor);
+					} catch (CoreException e) {
+						throw new InvocationTargetException(e);
 					}
 				});
 			}

@@ -17,7 +17,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 import java.util.Arrays;
-import java.util.Comparator;
 
 import org.junit.After;
 import org.junit.Before;
@@ -98,12 +97,7 @@ public class BreakContinueTargetFinderTest {
 	}
 
 	private void sortByStartIndex(OccurrenceLocation[] OccurrenceLocations) {
-		Arrays.sort(OccurrenceLocations, new Comparator<OccurrenceLocation>() {
-			@Override
-			public int compare(OccurrenceLocation node0, OccurrenceLocation node1) {
-				return node0.getOffset() - node1.getOffset();
-			}
-		});
+		Arrays.sort(OccurrenceLocations, (node0, node1) -> node0.getOffset() - node1.getOffset());
 	}
 
 	//pattern must be found - otherwise it's assumed to be an error

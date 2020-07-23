@@ -54,7 +54,6 @@ import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IWidgetTokenKeeper;
-import org.eclipse.jface.text.IWidgetTokenOwner;
 import org.eclipse.jface.text.reconciler.AbstractReconciler;
 import org.eclipse.jface.text.source.SourceViewer;
 
@@ -420,12 +419,7 @@ public class EditorTestHelper {
 	}
 
 	public static void closeAllPopUps(SourceViewer sourceViewer) {
-		IWidgetTokenKeeper tokenKeeper= new IWidgetTokenKeeper() {
-			@Override
-			public boolean requestWidgetToken(IWidgetTokenOwner owner) {
-				return true;
-			}
-		};
+		IWidgetTokenKeeper tokenKeeper= owner -> true;
 		sourceViewer.requestWidgetToken(tokenKeeper, Integer.MAX_VALUE);
 		sourceViewer.releaseWidgetToken(tokenKeeper);
 	}
