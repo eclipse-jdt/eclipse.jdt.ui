@@ -193,37 +193,34 @@ public class JavaWorkingSetPage extends AbstractWorkingSetWizardPage {
 
 	private Object[] getInitialTreeSelection() {
 		final Object[][] result= new Object[1][];
-		BusyIndicator.showWhile(getShell().getDisplay(), new Runnable() {
-			@Override
-			public void run() {
-				IStructuredSelection selection= fInitialSelection;
-				if (selection == null) {
+		BusyIndicator.showWhile(getShell().getDisplay(), () -> {
+			IStructuredSelection selection= fInitialSelection;
+			if (selection == null) {
 
-					IWorkbenchPage page= JavaPlugin.getActivePage();
-					if (page == null)
-						return;
+				IWorkbenchPage page= JavaPlugin.getActivePage();
+				if (page == null)
+					return;
 
-					IWorkbenchPart part= page.getActivePart();
-					if (part == null)
-						return;
+				IWorkbenchPart part= page.getActivePart();
+				if (part == null)
+					return;
 
-					try {
-						selection= SelectionConverter.getStructuredSelection(part);
-					} catch (JavaModelException e) {
-						return;
-					}
+				try {
+					selection= SelectionConverter.getStructuredSelection(part);
+				} catch (JavaModelException e) {
+					return;
 				}
-
-				Object[] elements= selection.toArray();
-				for (int i= 0; i < elements.length; i++) {
-					if (elements[i] instanceof IResource) {
-						IJavaElement je= ((IResource)elements[i]).getAdapter(IJavaElement.class);
-						if (je != null && je.exists() &&  je.getJavaProject().isOnClasspath((IResource)elements[i]))
-							elements[i]= je;
-					}
-				}
-				result[0]= elements;
 			}
+
+			Object[] elements= selection.toArray();
+			for (int i= 0; i < elements.length; i++) {
+				if (elements[i] instanceof IResource) {
+					IJavaElement je= ((IResource)elements[i]).getAdapter(IJavaElement.class);
+					if (je != null && je.exists() &&  je.getJavaProject().isOnClasspath((IResource)elements[i]))
+						elements[i]= je;
+				}
+			}
+			result[0]= elements;
 		});
 
 		if (result[0] == null)

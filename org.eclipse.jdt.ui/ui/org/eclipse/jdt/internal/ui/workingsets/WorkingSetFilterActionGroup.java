@@ -82,12 +82,7 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 		fSelectWorkingSetAction= new SelectWorkingSetAction(this, site);
 		fEditWorkingSetAction= new EditWorkingSetAction(this, site);
 
-		fWorkingSetListener= new IPropertyChangeListener() {
-			@Override
-			public void propertyChange(PropertyChangeEvent event) {
-				doPropertyChange(event);
-			}
-		};
+		fWorkingSetListener= event -> doPropertyChange(event);
 		fWorkingSetFilter= new WorkingSetFilter();
 
 		IWorkingSetManager manager= PlatformUI.getWorkbench().getWorkingSetManager();
@@ -109,12 +104,7 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 		fSelectWorkingSetAction= new SelectWorkingSetAction(this, shell);
 		fEditWorkingSetAction= new EditWorkingSetAction(this, shell);
 
-		fWorkingSetListener= new IPropertyChangeListener() {
-			@Override
-			public void propertyChange(PropertyChangeEvent event) {
-				doPropertyChange(event);
-			}
-		};
+		fWorkingSetListener= event -> doPropertyChange(event);
 
 		fWorkingSetFilter= new WorkingSetFilter();
 
@@ -232,12 +222,9 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 		add(mm, new Separator(LRU_GROUP));
 
 		fMenuManager= mm;
-		fMenuListener= new IMenuListener() {
-			@Override
-			public void menuAboutToShow(IMenuManager manager) {
-				removePreviousLRUWorkingSetActions(manager);
-				addLRUWorkingSetActions(manager);
-			}
+		fMenuListener= manager -> {
+			removePreviousLRUWorkingSetActions(manager);
+			addLRUWorkingSetActions(manager);
 		};
 		fMenuManager.addMenuListener(fMenuListener);
 	}

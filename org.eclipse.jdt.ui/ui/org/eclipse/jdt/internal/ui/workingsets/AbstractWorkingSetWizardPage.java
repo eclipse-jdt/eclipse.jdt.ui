@@ -17,8 +17,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -38,12 +36,8 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -170,12 +164,7 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 		fWorkingSetName= new Text(composite, SWT.SINGLE | SWT.BORDER);
 		fWorkingSetName.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
 		fWorkingSetName.addModifyListener(
-			new ModifyListener() {
-				@Override
-				public void modifyText(ModifyEvent e) {
-					validateInput();
-				}
-			}
+			e -> validateInput()
 		);
 
 		Composite leftCenterRightComposite= new Composite(composite, SWT.NONE);
@@ -274,12 +263,7 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 		removeAllButton.setText(WorkingSetMessages.JavaWorkingSetPage_removeAll_button);
 		removeAllButton.setEnabled(!fSelectedElements.isEmpty());
 
-		fTree.addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				addButton.setEnabled(!event.getSelection().isEmpty());
-			}
-		});
+		fTree.addSelectionChangedListener(event -> addButton.setEnabled(!event.getSelection().isEmpty()));
 
 		addButton.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -291,22 +275,14 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 			}
 		});
 
-		fTree.addDoubleClickListener(new IDoubleClickListener() {
-			@Override
-			public void doubleClick(DoubleClickEvent event) {
-				addTreeSelection();
+		fTree.addDoubleClickListener(event -> {
+			addTreeSelection();
 
-				removeAllButton.setEnabled(true);
-				addAllButton.setEnabled(fTree.getTree().getItems().length > 0);
-			}
+			removeAllButton.setEnabled(true);
+			addAllButton.setEnabled(fTree.getTree().getItems().length > 0);
 		});
 
-		fTable.addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				removeButton.setEnabled(!event.getSelection().isEmpty());
-			}
-		});
+		fTable.addSelectionChangedListener(event -> removeButton.setEnabled(!event.getSelection().isEmpty()));
 
 		removeButton.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -318,14 +294,11 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 			}
 		});
 
-		fTable.addDoubleClickListener(new IDoubleClickListener() {
-			@Override
-			public void doubleClick(DoubleClickEvent event) {
-				removeTableSelection();
+		fTable.addDoubleClickListener(event -> {
+			removeTableSelection();
 
-				addAllButton.setEnabled(true);
-				removeAllButton.setEnabled(!fSelectedElements.isEmpty());
-			}
+			addAllButton.setEnabled(true);
+			removeAllButton.setEnabled(!fSelectedElements.isEmpty());
 		});
 
 		addAllButton.addSelectionListener(new SelectionAdapter() {
