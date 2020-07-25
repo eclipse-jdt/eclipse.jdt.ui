@@ -75,6 +75,7 @@ import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NullLiteral;
@@ -92,6 +93,8 @@ import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
@@ -826,15 +829,38 @@ public class ExtractTempRefactoring extends Refactoring {
 		return null;
 	}
 
+	private static boolean excludeVariableName(ASTNode enclosingNode, int modifiers, IBinding binding) {
+		if (Modifier.isStatic(modifiers) && !Modifier.isStatic(binding.getModifiers())) {
+			VariableDeclaration bindingDeclaration= ASTNodes.findVariableDeclaration((IVariableBinding) binding, enclosingNode.getRoot());
+			if (bindingDeclaration != null) {
+				ASTNode bindingMethodDeclarationparent= ASTNodes.getParent(bindingDeclaration, ASTNode.METHOD_DECLARATION);
+				if (enclosingNode == bindingMethodDeclarationparent) {
+					// if variables live in same methods then we exclude the name
+					return true;
+				}
+			}
+			return false;
+		}
+		return true;
+	}
+
 	private String[] getExcludedVariableNames() {
 		if (fExcludedVariableNames == null) {
 			try {
-				IBinding[] bindings= new ScopeAnalyzer(fCompilationUnitNode).getDeclarationsInScope(getSelectedExpression().getStartPosition(), ScopeAnalyzer.VARIABLES
-						| ScopeAnalyzer.CHECK_VISIBILITY);
-				fExcludedVariableNames= new String[bindings.length];
-				for (int i= 0; i < bindings.length; i++) {
-					fExcludedVariableNames[i]= bindings[i].getName();
+				IBinding[] bindings= new ScopeAnalyzer(fCompilationUnitNode)
+						.getDeclarationsInScope(getSelectedExpression().getStartPosition(), ScopeAnalyzer.VARIABLES | ScopeAnalyzer.CHECK_VISIBILITY);
+				ASTNode enclosingNode= getEnclosingBodyNode().getParent();
+				List<String> excludedVariableNames= new ArrayList<>();
+				for (IBinding binding : bindings) {
+					BodyDeclaration bodyDeclaration= ASTNodes.getParent(getEnclosingBodyNode(), BodyDeclaration.class);
+					int modifiers= bodyDeclaration.getModifiers();
+					modifiers= bodyDeclaration instanceof TypeDeclaration ? modifiers&= ~Modifier.STATIC : modifiers;
+					// Bug 100430 - Work around ScopeAnalyzer#getDeclarationsInScope(..) returning out-of-scope elements
+					if (excludeVariableName(enclosingNode, modifiers, binding)) {
+						excludedVariableNames.add(binding.getName());
+					}
 				}
+				fExcludedVariableNames= excludedVariableNames.toArray(new String[0]);
 			} catch (JavaModelException e) {
 				fExcludedVariableNames= new String[0];
 			}
