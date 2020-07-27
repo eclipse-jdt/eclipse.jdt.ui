@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -332,6 +332,18 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 					if (accessors.contains(field)) {
 						generateGetterMethod(field, listRewriter);
 						generateSetterMethod(field, astRewrite, listRewriter);
+						monitor.worked(1);
+						if (monitor.isCanceled()) {
+							throw new OperationCanceledException();
+						}
+					}
+				}
+			}
+			if (fType.isRecord()) {
+				IField[] recComps= fType.getRecordComponents();
+				for (IField field : recComps) {
+					if (getters.contains(field)) {
+						generateGetterMethod(field, listRewriter);
 						monitor.worked(1);
 						if (monitor.isCanceled()) {
 							throw new OperationCanceledException();

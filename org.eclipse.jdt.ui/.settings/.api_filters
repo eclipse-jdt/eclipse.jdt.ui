@@ -14,6 +14,22 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="core extension/org/eclipse/jdt/internal/corext/codemanipulation/AddGetterSetterOperation.java" type="org.eclipse.jdt.internal.corext.codemanipulation.AddGetterSetterOperation">
+        <filter comment="This is a Java 15 preview feature" id="640712815">
+            <message_arguments>
+                <message_argument value="IType"/>
+                <message_argument value="AddGetterSetterOperation"/>
+                <message_argument value="getRecordComponents()"/>
+            </message_arguments>
+        </filter>
+        <filter comment="This is a Java 15 preview feature" id="640712815">
+            <message_arguments>
+                <message_argument value="IType"/>
+                <message_argument value="AddGetterSetterOperation"/>
+                <message_argument value="isRecord()"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="core refactoring/org/eclipse/jdt/internal/corext/refactoring/code/ReplaceInvocationsRefactoring.java" type="org.eclipse.jdt.internal.corext.refactoring.code.ReplaceInvocationsRefactoring">
         <filter id="571519004">
             <message_arguments>
@@ -413,6 +429,22 @@
             <message_arguments>
                 <message_argument value="IWorkingCopyProvider"/>
                 <message_argument value="StandardJavaElementContentProvider"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="ui/org/eclipse/jdt/ui/actions/AddGetterSetterAction.java" type="org.eclipse.jdt.ui.actions.AddGetterSetterAction">
+        <filter comment="This is a Java 15 preview feature" id="640712815">
+            <message_arguments>
+                <message_argument value="IType"/>
+                <message_argument value="AddGetterSetterAction"/>
+                <message_argument value="getRecordComponents()"/>
+            </message_arguments>
+        </filter>
+        <filter comment="This is a Java 15 preview feature" id="640712815">
+            <message_arguments>
+                <message_argument value="IType"/>
+                <message_argument value="AddGetterSetterAction"/>
+                <message_argument value="isRecord()"/>
             </message_arguments>
         </filter>
     </resource>
