@@ -1167,20 +1167,22 @@ public class ChangeTypeRefactoring extends Refactoring {
 	 * @throws JavaModelException
 	 */
 	private Collection<ITypeBinding> computeValidTypes(ITypeBinding originalType,
-													Collection<ConstraintVariable> relevantVars,
-													Collection<ITypeConstraint> relevantConstraints,
-													IProgressMonitor pm) throws JavaModelException {
+			Collection<ConstraintVariable> relevantVars,
+			Collection<ITypeConstraint> relevantConstraints,
+			IProgressMonitor pm) throws JavaModelException {
 
 		Collection<ITypeBinding> result= new HashSet<>();
 
-		Collection<ITypeBinding> allTypes = new HashSet<>();
+		Collection<ITypeBinding> allTypes= new HashSet<>();
 		allTypes.addAll(getAllSuperTypes(originalType));
 
 		pm.beginTask(RefactoringCoreMessages.ChangeTypeRefactoring_analyzingMessage, allTypes.size());
 
 		for (ITypeBinding type : allTypes) {
 			if (isValid(type, relevantVars, relevantConstraints, new SubProgressMonitor(pm, 1))) {
-				result.add(type);
+				if (checkTypeParameterConflict(relevantVars, type)) {
+					result.add(type);
+				}
 			}
 		}
 		// "changing" to the original type is a no-op
@@ -1192,6 +1194,51 @@ public class ChangeTypeRefactoring extends Refactoring {
 		pm.done();
 
 		return result;
+	}
+
+	/*
+	 * check if replacement type is conflicting with existing type usage for classes with overridden
+	 * method.
+	 *
+	 * @return TRUE if no conflict found
+	 */
+	private boolean checkTypeParameterConflict(Collection<ConstraintVariable> relevantVars, ITypeBinding replaceTypeTo) {
+		for (ConstraintVariable constraintVariable : relevantVars) {
+			if (constraintVariable instanceof ParameterTypeVariable) {
+				ParameterTypeVariable parameterTypeVariable= (ParameterTypeVariable) constraintVariable;
+				ITypeBinding declaringClass= parameterTypeVariable.getMethodBinding().getDeclaringClass();
+				ITypeBinding[] parameterTypeVariableTypes= parameterTypeVariable.getMethodBinding().getParameterTypes();
+				List<IMethodBinding> possibleConflictMethods= new ArrayList<>();
+				for (IMethodBinding declaredMethod : declaringClass.getDeclaredMethods()) {
+					if (declaredMethod.getName().equals(parameterTypeVariable.getMethodBinding().getName()) &&
+							declaredMethod.getParameterTypes().length == parameterTypeVariableTypes.length) {
+						// if method name and number of parameters match it might be a conflict
+						possibleConflictMethods.add(declaredMethod);
+					}
+				}
+				if (possibleConflictMethods.size() < 2) {
+					continue; // no conflicting methods
+				}
+				mLoop: for (IMethodBinding declaredMethod : possibleConflictMethods) {
+					ITypeBinding[] parameterTypes= declaredMethod.getParameterTypes();
+					/* check if other parameter Types are equal, if not this method is ok */
+					for (int i= 0; i < parameterTypes.length; i++) {
+						if (i == fParamIndex) {
+							continue;
+						}
+						if (!Bindings.equals(parameterTypes[i], parameterTypeVariableTypes[i])) {
+							continue mLoop;
+						}
+					}
+					// if all method parameter Types are equal then we have a conflict with the Type we want to replace to
+					// so we return false to remove it from allowed types
+					if (Bindings.equals(parameterTypes[fParamIndex], replaceTypeTo)) {
+						return false;
+					}
+				}
+			}
+		}
+		return true;
 	}
 
 	/**
