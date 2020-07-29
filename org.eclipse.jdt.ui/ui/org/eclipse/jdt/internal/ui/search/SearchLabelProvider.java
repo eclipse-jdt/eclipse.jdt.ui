@@ -78,7 +78,7 @@ public abstract class SearchLabelProvider extends AppearanceAwareLabelProvider {
 		fLabelProviderMap= new HashMap<>(5);
 
 		fSearchPreferences= new ScopedPreferenceStore(InstanceScope.INSTANCE, NewSearchUI.PLUGIN_ID);
-		fSearchPropertyListener= event -> doSearchPropertyChange(event);
+		fSearchPropertyListener= this::doSearchPropertyChange;
 		fSearchPreferences.addPropertyChangeListener(fSearchPropertyListener);
 	}
 

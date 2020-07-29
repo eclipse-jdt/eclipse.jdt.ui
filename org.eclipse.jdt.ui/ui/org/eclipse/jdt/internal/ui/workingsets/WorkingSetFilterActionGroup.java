@@ -82,7 +82,7 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 		fSelectWorkingSetAction= new SelectWorkingSetAction(this, site);
 		fEditWorkingSetAction= new EditWorkingSetAction(this, site);
 
-		fWorkingSetListener= event -> doPropertyChange(event);
+		fWorkingSetListener= this::doPropertyChange;
 		fWorkingSetFilter= new WorkingSetFilter();
 
 		IWorkingSetManager manager= PlatformUI.getWorkbench().getWorkingSetManager();
@@ -104,7 +104,7 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 		fSelectWorkingSetAction= new SelectWorkingSetAction(this, shell);
 		fEditWorkingSetAction= new EditWorkingSetAction(this, shell);
 
-		fWorkingSetListener= event -> doPropertyChange(event);
+		fWorkingSetListener= this::doPropertyChange;
 
 		fWorkingSetFilter= new WorkingSetFilter();
 
