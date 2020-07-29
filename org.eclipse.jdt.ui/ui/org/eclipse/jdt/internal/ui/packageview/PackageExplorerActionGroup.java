@@ -127,7 +127,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 		fFrameActionsShown= false;
 		TreeViewer viewer= part.getTreeViewer();
 
-		IPropertyChangeListener workingSetListener= event -> doWorkingSetChanged(event);
+		IPropertyChangeListener workingSetListener= this::doWorkingSetChanged;
 
 		IWorkbenchPartSite site = fPart.getSite();
 		setGroups(new ActionGroup[] {

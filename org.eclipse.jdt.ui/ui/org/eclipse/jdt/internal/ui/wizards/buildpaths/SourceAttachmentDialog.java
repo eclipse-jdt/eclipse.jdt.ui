@@ -18,8 +18,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.core.runtime.IStatus;
-
 import org.eclipse.jface.dialogs.StatusDialog;
 
 import org.eclipse.ui.PlatformUI;
@@ -61,12 +59,7 @@ public class SourceAttachmentDialog extends StatusDialog {
 	public SourceAttachmentDialog(Shell parent, IClasspathEntry entry, boolean canEditEncoding) {
 		super(parent);
 
-		IStatusChangeListener listener= new IStatusChangeListener() {
-			@Override
-			public void statusChanged(IStatus status) {
-				updateStatus(status);
-			}
-		};
+		IStatusChangeListener listener= status -> updateStatus(status);
 		fSourceAttachmentBlock= new SourceAttachmentBlock(listener, entry, canEditEncoding);
 
 		setTitle(NewWizardMessages.SourceAttachmentDialog_title);

@@ -267,12 +267,7 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 		if (Display.getCurrent() != null) {
 			scanModules();
 		} else {
-			Display.getDefault().asyncExec(new Runnable() {
-				@Override
-				public void run() {
-					scanModules();
-				}
-			});
+			Display.getDefault().asyncExec(() -> scanModules());
 		}
 	}
 

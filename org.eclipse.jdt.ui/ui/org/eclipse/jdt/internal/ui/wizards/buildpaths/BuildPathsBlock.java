@@ -380,14 +380,11 @@ public class BuildPathsBlock {
 		if (Display.getCurrent() != null) {
 			doUpdateUI();
 		} else {
-			Display.getDefault().asyncExec(new Runnable() {
-				@Override
-				public void run() {
-					if (fSWTWidget == null || fSWTWidget.isDisposed()) {
-						return;
-					}
-					doUpdateUI();
+			Display.getDefault().asyncExec(() -> {
+				if (fSWTWidget == null || fSWTWidget.isDisposed()) {
+					return;
 				}
+				doUpdateUI();
 			});
 		}
 	}
@@ -973,33 +970,27 @@ public class BuildPathsBlock {
 	}
 
 	public static IRemoveOldBinariesQuery getRemoveOldBinariesQuery(final Shell shell) {
-		return new IRemoveOldBinariesQuery() {
-			@Override
-			public boolean doQuery(final boolean removeFolder, final IPath oldOutputLocation) throws OperationCanceledException {
-				final int[] res= new int[] { 1 };
-				Display.getDefault().syncExec(new Runnable() {
-					@Override
-					public void run() {
-						Shell sh= shell != null ? shell : JavaPlugin.getActiveWorkbenchShell();
-						String title= NewWizardMessages.BuildPathsBlock_RemoveBinariesDialog_title;
-						String message;
-						String pathLabel= BasicElementLabels.getPathLabel(oldOutputLocation, false);
-						if (removeFolder) {
-							message= Messages.format(NewWizardMessages.BuildPathsBlock_RemoveOldOutputFolder_description, pathLabel);
-						} else {
-							message= Messages.format(NewWizardMessages.BuildPathsBlock_RemoveBinariesDialog_description, pathLabel);
-						}
-						MessageDialog dialog= new MessageDialog(sh, title, null, message, MessageDialog.QUESTION, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL }, 0);
-						res[0]= dialog.open();
-					}
-				});
-				if (res[0] == 0) {
-					return true;
-				} else if (res[0] == 1) {
-					return false;
+		return (removeFolder, oldOutputLocation) -> {
+			final int[] res= new int[] { 1 };
+			Display.getDefault().syncExec(() -> {
+				Shell sh= shell != null ? shell : JavaPlugin.getActiveWorkbenchShell();
+				String title= NewWizardMessages.BuildPathsBlock_RemoveBinariesDialog_title;
+				String message;
+				String pathLabel= BasicElementLabels.getPathLabel(oldOutputLocation, false);
+				if (removeFolder) {
+					message= Messages.format(NewWizardMessages.BuildPathsBlock_RemoveOldOutputFolder_description, pathLabel);
+				} else {
+					message= Messages.format(NewWizardMessages.BuildPathsBlock_RemoveBinariesDialog_description, pathLabel);
 				}
-				throw new OperationCanceledException();
+				MessageDialog dialog= new MessageDialog(sh, title, null, message, MessageDialog.QUESTION, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL }, 0);
+				res[0]= dialog.open();
+			});
+			if (res[0] == 0) {
+				return true;
+			} else if (res[0] == 1) {
+				return false;
 			}
+			throw new OperationCanceledException();
 		};
 	}
 

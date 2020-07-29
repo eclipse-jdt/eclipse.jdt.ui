@@ -23,14 +23,12 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 
 import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 
 import org.eclipse.ui.IMarkerResolution;
 import org.eclipse.ui.IMarkerResolution2;
@@ -185,14 +183,11 @@ public class BuildpathProblemMarkerResolutionGenerator implements IMarkerResolut
 			if (context == null) {
 				context= PlatformUI.getWorkbench().getProgressService();
 			}
-			context.run(true, true, new IRunnableWithProgress() {
-				@Override
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					try {
-						project.setRawClasspath(newEntries, project.getOutputLocation(), monitor);
-					} catch (CoreException e) {
-						throw new InvocationTargetException(e);
-					}
+			context.run(true, true, monitor -> {
+				try {
+					project.setRawClasspath(newEntries, project.getOutputLocation(), monitor);
+				} catch (CoreException e) {
+					throw new InvocationTargetException(e);
 				}
 			});
 		} catch (JavaModelException e) {

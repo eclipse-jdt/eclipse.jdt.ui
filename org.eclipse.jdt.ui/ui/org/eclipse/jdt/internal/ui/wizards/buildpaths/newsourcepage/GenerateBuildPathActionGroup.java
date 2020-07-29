@@ -18,7 +18,6 @@ import java.util.List;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
@@ -225,12 +224,7 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
         	return;
         String menuText= ActionMessages.BuildPath_label;
         IMenuManager subMenu= new MenuManager(menuText, MENU_ID);
-        subMenu.addMenuListener(new IMenuListener() {
-        	@Override
-			public void menuAboutToShow(IMenuManager manager) {
-        		fillViewSubMenu(manager);
-        	}
-        });
+        subMenu.addMenuListener(manager -> fillViewSubMenu(manager));
         subMenu.setRemoveAllWhenShown(true);
         subMenu.add(new ConfigureBuildPathAction(fSite));
         menu.appendToGroup(fGroupName, subMenu);

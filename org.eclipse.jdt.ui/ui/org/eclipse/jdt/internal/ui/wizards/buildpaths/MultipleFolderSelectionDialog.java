@@ -36,7 +36,6 @@ import org.eclipse.core.resources.IContainer;
 
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
-import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -151,23 +150,20 @@ public class MultipleFolderSelectionDialog extends SelectionStatusDialog impleme
 	@Override
 	public void create() {
 
-		BusyIndicator.showWhile(null, new Runnable() {
-			@Override
-			public void run() {
-				access$superCreate();
+		BusyIndicator.showWhile(null, () -> {
+			access$superCreate();
 
-				fViewer.setCheckedElements(
-					getInitialElementSelections().toArray());
+			fViewer.setCheckedElements(
+				getInitialElementSelections().toArray());
 
-				fViewer.expandToLevel(2);
-				if (fExisting != null) {
-					for (Object object : fExisting) {
-						fViewer.reveal(object);
-					}
+			fViewer.expandToLevel(2);
+			if (fExisting != null) {
+				for (Object object : fExisting) {
+					fViewer.reveal(object);
 				}
-
-				updateOKStatus();
 			}
+
+			updateOKStatus();
 		});
 
 	}
@@ -183,12 +179,7 @@ public class MultipleFolderSelectionDialog extends SelectionStatusDialog impleme
 
 		fViewer.setContentProvider(fContentProvider);
 		fViewer.setLabelProvider(fLabelProvider);
-		fViewer.addCheckStateListener(new ICheckStateListener() {
-			@Override
-			public void checkStateChanged(CheckStateChangedEvent event) {
-				updateOKStatus();
-			}
-		});
+		fViewer.addCheckStateListener(event -> updateOKStatus());
 
 		fViewer.setComparator(new ResourceComparator(ResourceComparator.NAME));
 		if (fFilters != null) {
@@ -251,12 +242,7 @@ public class MultipleFolderSelectionDialog extends SelectionStatusDialog impleme
 		if (fFocusElement != null) {
 			treeViewer.setSelection(new StructuredSelection(fFocusElement), true);
 		}
-		treeViewer.addCheckStateListener(new ICheckStateListener() {
-			@Override
-			public void checkStateChanged(CheckStateChangedEvent event) {
-				forceExistingChecked(event);
-			}
-		});
+		treeViewer.addCheckStateListener(event -> forceExistingChecked(event));
 
 		applyDialogFont(composite);
 		return composite;

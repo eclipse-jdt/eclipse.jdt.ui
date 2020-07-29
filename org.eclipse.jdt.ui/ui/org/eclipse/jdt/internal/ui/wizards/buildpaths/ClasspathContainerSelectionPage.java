@@ -21,13 +21,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.ListViewer;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.wizard.WizardPage;
 
@@ -87,18 +83,8 @@ public class ClasspathContainerSelectionPage extends WizardPage {
 		fListViewer.setContentProvider(ArrayContentProvider.getInstance());
 		fListViewer.setComparator(new ViewerComparator());
 		fListViewer.setInput(Arrays.asList(fContainers));
-		fListViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				validatePage();
-			}
-		});
-		fListViewer.addDoubleClickListener(new IDoubleClickListener() {
-			@Override
-			public void doubleClick(DoubleClickEvent event) {
-				doDoubleClick();
-			}
-		});
+		fListViewer.addSelectionChangedListener(event -> validatePage());
+		fListViewer.addDoubleClickListener(event -> doDoubleClick());
 
 		int selectionIndex= fDialogSettings.getInt(DIALOGSTORE_CONTAINER_IDX);
 		if (selectionIndex >= fContainers.length) {

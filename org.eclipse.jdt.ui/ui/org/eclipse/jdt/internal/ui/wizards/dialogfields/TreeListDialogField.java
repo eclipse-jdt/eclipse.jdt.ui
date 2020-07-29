@@ -712,12 +712,9 @@ public class TreeListDialogField<E> extends DialogField {
 	public void postSetSelection(final ISelection selection) {
 		if (isOkToUse(fTreeControl)) {
 			Display d= fTreeControl.getDisplay();
-			d.asyncExec(new Runnable() {
-				@Override
-				public void run() {
-					if (isOkToUse(fTreeControl)) {
-						selectElements(selection);
-					}
+			d.asyncExec(() -> {
+				if (isOkToUse(fTreeControl)) {
+					selectElements(selection);
 				}
 			});
 		}

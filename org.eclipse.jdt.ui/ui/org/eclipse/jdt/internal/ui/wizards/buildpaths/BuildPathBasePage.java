@@ -26,9 +26,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
 
@@ -126,15 +124,12 @@ public abstract class BuildPathBasePage {
 		IJavaElement[] selectedJavaElements;
 		IJavaProject javaProject= element.getJavaProject();
 		IClasspathEntry newEntry= element.getClasspathEntry();
-		IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
-			@Override
-			public void run(IProgressMonitor monitor) throws CoreException {
-				IClasspathEntry[] oldClasspath= javaProject.getRawClasspath();
-				int nEntries= oldClasspath.length;
-				IClasspathEntry[] newEntries= Arrays.copyOf(oldClasspath, nEntries+1);
-				newEntries[nEntries]= newEntry;
-				javaProject.setRawClasspath(newEntries, monitor);
-			}
+		IWorkspaceRunnable runnable= monitor -> {
+			IClasspathEntry[] oldClasspath= javaProject.getRawClasspath();
+			int nEntries= oldClasspath.length;
+			IClasspathEntry[] newEntries= Arrays.copyOf(oldClasspath, nEntries+1);
+			newEntries[nEntries]= newEntry;
+			javaProject.setRawClasspath(newEntries, monitor);
 		};
 		PlatformUI.getWorkbench().getProgressService().run(true, true, new WorkbenchRunnableAdapter(runnable));
 		selectedJavaElements= ModuleEncapsulationDetail.getTargetJavaElements(element.getJavaProject(), element.getPath());

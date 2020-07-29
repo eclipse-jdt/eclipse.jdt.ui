@@ -33,7 +33,6 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
@@ -53,7 +52,6 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 
@@ -418,16 +416,13 @@ public class ExternalAnnotationsAttachmentBlock {
 		dialog.setMessage(NewWizardMessages.AnnotationsAttachmentBlock_intjardialog_message);
 		dialog.setInput(fWorkspaceRoot);
 		dialog.setInitialSelection(initSel);
-		dialog.setValidator(new ISelectionStatusValidator() {
-			@Override
-			public IStatus validate(Object[] selection) {
-				if (selection != null && selection.length == 1) {
-					Object selectedObject= selection[0];
-					if (selectedObject instanceof IResource && ((IResource) selectedObject).isVirtual())
-						return new StatusInfo(IStatus.ERROR, NewWizardMessages.AnnotationsAttachmentBlock_filename_error_virtual);
-				}
-				return new Status(IStatus.OK, PlatformUI.PLUGIN_ID, IStatus.OK, "", null); //$NON-NLS-1$
+		dialog.setValidator(selection -> {
+			if (selection != null && selection.length == 1) {
+				Object selectedObject= selection[0];
+				if (selectedObject instanceof IResource && ((IResource) selectedObject).isVirtual())
+					return new StatusInfo(IStatus.ERROR, NewWizardMessages.AnnotationsAttachmentBlock_filename_error_virtual);
 			}
+			return new Status(IStatus.OK, PlatformUI.PLUGIN_ID, IStatus.OK, "", null); //$NON-NLS-1$
 		});
 		if (dialog.open() == Window.OK) {
 			IResource res= (IResource) dialog.getFirstResult();
@@ -453,15 +448,12 @@ public class ExternalAnnotationsAttachmentBlock {
 	 * @return return the runnable
 	 */
 	public static IRunnableWithProgress getRunnable(final Shell shell, final IClasspathEntry newEntry, final IJavaProject jproject, final IPath containerPath, final boolean isReferencedEntry) {
-		return new IRunnableWithProgress() {
-			@Override
-			public void run(IProgressMonitor monitor) throws InvocationTargetException {
-				try {
-					String[] changedAttributes= { IClasspathAttribute.EXTERNAL_ANNOTATION_PATH };
-					BuildPathSupport.modifyClasspathEntry(shell, newEntry, changedAttributes, jproject, containerPath, isReferencedEntry, monitor);
-				} catch (CoreException e) {
-					throw new InvocationTargetException(e);
-				}
+		return monitor -> {
+			try {
+				String[] changedAttributes= { IClasspathAttribute.EXTERNAL_ANNOTATION_PATH };
+				BuildPathSupport.modifyClasspathEntry(shell, newEntry, changedAttributes, jproject, containerPath, isReferencedEntry, monitor);
+			} catch (CoreException e) {
+				throw new InvocationTargetException(e);
 			}
 		};
 	}
