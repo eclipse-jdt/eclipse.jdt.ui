@@ -353,7 +353,7 @@ public class MatchLocations {
 	public static int getTotalNumberOfSettings(int searchFor) {
 		switch (searchFor) {
 			case IJavaSearchConstants.TYPE:
-				return 15;
+				return 16;
 			case IJavaSearchConstants.CONSTRUCTOR:
 				return 1;
 			case IJavaSearchConstants.METHOD:
