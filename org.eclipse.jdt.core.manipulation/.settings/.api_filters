@@ -22,6 +22,13 @@
                 <message_argument value="getAST()"/>
             </message_arguments>
         </filter>
+        <filter comment="This is a Java15 preview feature" id="640712815">
+            <message_arguments>
+                <message_argument value="ModuleQualifiedName"/>
+                <message_argument value="ImportReferencesCollector"/>
+                <message_argument value="getName()"/>
+            </message_arguments>
+        </filter>
         <filter comment="For Java 13 Enable Preview support" id="640712815">
             <message_arguments>
                 <message_argument value="YieldStatement"/>

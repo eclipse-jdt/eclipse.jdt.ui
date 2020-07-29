@@ -8,6 +8,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -33,6 +37,7 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.ModuleQualifiedName;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NameQualifiedType;
 import org.eclipse.jdt.core.dom.NodeFinder;
@@ -158,6 +163,12 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 			}
 		}
 		return !addUsage(node, binding);
+	}
+
+	@Override
+	public boolean visit(ModuleQualifiedName node) {
+		node.resolveBinding();
+		return true;
 	}
 
 	private static boolean isStaticImport(ASTNode node) {

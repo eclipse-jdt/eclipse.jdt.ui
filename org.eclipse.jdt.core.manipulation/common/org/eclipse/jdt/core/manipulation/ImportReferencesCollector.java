@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -7,6 +7,10 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -43,6 +47,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.MethodRef;
 import org.eclipse.jdt.core.dom.MethodRefParameter;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.ModuleQualifiedName;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NameQualifiedType;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
@@ -148,6 +153,14 @@ public class ImportReferencesCollector extends GenericVisitor {
 
 	private void typeRefFound(Name node) {
 		if (node != null) {
+			if (node instanceof ModuleQualifiedName) {
+				ModuleQualifiedName mName = (ModuleQualifiedName)node;
+				if (mName.getName() != null) {
+					node= mName.getName();
+				} else {
+					return;
+				}
+			}
 			while (node.isQualifiedName()) {
 				node= ((QualifiedName) node).getQualifier();
 			}
@@ -156,6 +169,14 @@ public class ImportReferencesCollector extends GenericVisitor {
 	}
 
 	private void possibleTypeRefFound(Name node) {
+		if (node instanceof ModuleQualifiedName) {
+			ModuleQualifiedName mName= (ModuleQualifiedName) node;
+			Name name= mName.getName();
+			if (name != null) {
+				possibleTypeRefFound(name);
+			}
+			return;
+		}
 		while (node.isQualifiedName()) {
 			node= ((QualifiedName) node).getQualifier();
 		}
@@ -264,6 +285,20 @@ public class ImportReferencesCollector extends GenericVisitor {
 		if (node.getAST().apiLevel() >= AST.JLS8) {
 			doVisitChildren(node.annotations());
 		}
+	}
+
+	/*
+	 * @see ASTVisitor#visit(QualifiedName)
+	 * @since 1.14
+	 */
+	@Override
+	public boolean visit(ModuleQualifiedName node) {
+		Name name = node.getName();
+		if (name != null) {
+			possibleTypeRefFound(node); // possible ref
+			possibleStaticImportFound(node);
+		}
+		return false;
 	}
 
 	/*
@@ -538,7 +573,15 @@ public class ImportReferencesCollector extends GenericVisitor {
 					typeRefFound((Name) first);
 				} else if ("@see".equals(tagName) || "@link".equals(tagName) || "@linkplain".equals(tagName)) {  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 					Name name= (Name) first;
-					possibleTypeRefFound(name);
+					if (name instanceof ModuleQualifiedName) {
+						ModuleQualifiedName mqName = (ModuleQualifiedName)name;
+						Name iname = mqName.getName();
+						if (iname != null) {
+							possibleTypeRefFound(iname);
+						}
+					} else {
+						possibleTypeRefFound(name);
+					}
 				}
 				idx++;
 			}
