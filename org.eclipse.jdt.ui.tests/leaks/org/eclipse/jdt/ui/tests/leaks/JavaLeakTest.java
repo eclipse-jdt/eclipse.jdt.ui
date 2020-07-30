@@ -453,12 +453,7 @@ public class JavaLeakTest extends LeakTestCase {
 
         menu.setVisible(true);
 
-		display.asyncExec(new Runnable() {
-            @Override
-			public void run() {
-                menu.setVisible(false);
-            }
-        });
+		display.asyncExec(() -> menu.setVisible(false));
 
         while (!menu.isDisposed() && display.readAndDispatch()) {
         	//loop, don't sleep

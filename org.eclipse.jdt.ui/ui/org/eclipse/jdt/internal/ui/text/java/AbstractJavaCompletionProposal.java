@@ -67,7 +67,6 @@ import org.eclipse.jface.text.ITextViewerExtension4;
 import org.eclipse.jface.text.ITextViewerExtension5;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
-import org.eclipse.jface.text.TextPresentation;
 import org.eclipse.jface.text.contentassist.BoldStylerProvider;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
@@ -1137,13 +1136,10 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 
 			if (viewer instanceof ITextViewerExtension4) {
 				if (fTextPresentationListener == null) {
-					fTextPresentationListener= new ITextPresentationListener() {
-						@Override
-						public void applyTextPresentation(TextPresentation textPresentation) {
-							fRememberedStyleRange= createStyleRange(viewer);
-							if (fRememberedStyleRange != null)
-								textPresentation.mergeStyleRange(fRememberedStyleRange);
-						}
+					fTextPresentationListener= textPresentation -> {
+						fRememberedStyleRange= createStyleRange(viewer);
+						if (fRememberedStyleRange != null)
+							textPresentation.mergeStyleRange(fRememberedStyleRange);
 					};
 					((ITextViewerExtension4)viewer).addTextPresentationListener(fTextPresentationListener);
 				}

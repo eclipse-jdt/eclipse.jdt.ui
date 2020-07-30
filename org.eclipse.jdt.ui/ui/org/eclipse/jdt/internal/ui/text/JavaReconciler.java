@@ -32,7 +32,6 @@ import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IWorkspace;
 
 import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
@@ -340,12 +339,9 @@ public class JavaReconciler extends MonoReconciler {
 		IWorkspace workspace= JavaPlugin.getWorkspace();
 		workspace.addResourceChangeListener(fResourceChangeListener);
 
-		fPropertyChangeListener= new IPropertyChangeListener() {
-			@Override
-			public void propertyChange(PropertyChangeEvent event) {
-				if (SpellingService.PREFERENCE_SPELLING_ENABLED.equals(event.getProperty()) || SpellingService.PREFERENCE_SPELLING_ENGINE.equals(event.getProperty()))
-					forceReconciling();
-			}
+		fPropertyChangeListener= event -> {
+			if (SpellingService.PREFERENCE_SPELLING_ENABLED.equals(event.getProperty()) || SpellingService.PREFERENCE_SPELLING_ENGINE.equals(event.getProperty()))
+				forceReconciling();
 		};
 		JavaPlugin.getDefault().getCombinedPreferenceStore().addPropertyChangeListener(fPropertyChangeListener);
 

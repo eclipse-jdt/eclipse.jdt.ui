@@ -50,6 +50,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
+import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -515,7 +516,15 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 									if (invocation.getLocationInParent() == Assignment.RIGHT_HAND_SIDE_PROPERTY) {
 										left= ((Assignment) invocation.getParent()).getLeftHandSide();
 									} else if (invocation.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
-										left= ((VariableDeclarationFragment) invocation.getParent()).getName();
+										VariableDeclarationFragment fragment= (VariableDeclarationFragment)invocation.getParent();
+										if (fragment.getParent() instanceof VariableDeclarationExpression) {
+											VariableDeclarationExpression varexp= (VariableDeclarationExpression)fragment.getParent();
+											if (varexp.getLocationInParent() == TryStatement.RESOURCES2_PROPERTY) {
+												fElementVariableReferenced= true;
+												return true;
+											}
+										}
+										left= fragment.getName();
 									}
 
 									return visitElementVariable(left);

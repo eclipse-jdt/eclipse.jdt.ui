@@ -14,9 +14,7 @@
 package org.eclipse.jsp;
 
 import org.eclipse.core.indexsearch.IIndexQuery;
-import org.eclipse.core.indexsearch.ISearchResultCollector;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.search.IJavaSearchResultCollector;
 
@@ -29,12 +27,9 @@ public class JspSearchEngine {
 
 		JspUIPlugin.getDefault().search(
 			query,
-			new ISearchResultCollector() {
-				@Override
-				public void accept(IResource resource, int start, int length) throws CoreException {
-					System.out.println("  accept: " + resource); //$NON-NLS-1$
-					collector.accept(resource, start, start+length, null, 999);
-				}
+			(resource, start, length) -> {
+				System.out.println("  accept: " + resource); //$NON-NLS-1$
+				collector.accept(resource, start, start+length, null, 999);
 			},
 			pm
 		);

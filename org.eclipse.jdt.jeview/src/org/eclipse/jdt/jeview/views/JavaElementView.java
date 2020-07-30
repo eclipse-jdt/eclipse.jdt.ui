@@ -317,7 +317,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 	private void hookContextMenu() {
 		MenuManager menuMgr = new MenuManager("#PopupMenu");
 		menuMgr.setRemoveAllWhenShown(true);
-		menuMgr.addMenuListener(manager -> fillContextMenu(manager));
+		menuMgr.addMenuListener(this::fillContextMenu);
 		Menu menu = menuMgr.createContextMenu(fViewer.getControl());
 		fViewer.getControl().setMenu(menu);
 		getSite().registerContextMenu(menuMgr, fViewer);

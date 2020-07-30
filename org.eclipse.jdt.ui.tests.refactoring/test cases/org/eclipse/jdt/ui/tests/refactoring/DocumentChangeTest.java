@@ -27,7 +27,6 @@ import org.eclipse.jdt.testplugin.JavaTestPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILogListener;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -140,22 +139,14 @@ public class DocumentChangeTest extends GenericRefactoringTest {
 
 		final MultiStatus statusCollector= new MultiStatus(JavaTestPlugin.getPluginId(), 0, "", null);
 
-		ILogListener logListener= new ILogListener() {
-			@Override
-			public void logging(IStatus status, String plugin) {
-				statusCollector.add(status);
-			}
-		};
+		ILogListener logListener= (status, plugin) -> statusCollector.add(status);
 		Platform.addLogListener(logListener);
 		try {
-			IRunnableWithProgress runnable= new IRunnableWithProgress() {
-				@Override
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					try {
-						performRefactoring(ref);
-					} catch (Exception e) {
-						throw new InvocationTargetException(e);
-					}
+			IRunnableWithProgress runnable= monitor -> {
+				try {
+					performRefactoring(ref);
+				} catch (Exception e) {
+					throw new InvocationTargetException(e);
 				}
 			};
 			JavaPlugin.getActiveWorkbenchWindow().run(true, true, runnable);
@@ -167,14 +158,11 @@ public class DocumentChangeTest extends GenericRefactoringTest {
 
 			// undo:
 
-			runnable= new IRunnableWithProgress() {
-				@Override
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					try {
-						RefactoringCore.getUndoManager().performUndo(null, new NullProgressMonitor());
-					} catch (Exception e) {
-						throw new InvocationTargetException(e);
-					}
+			runnable= monitor -> {
+				try {
+					RefactoringCore.getUndoManager().performUndo(null, new NullProgressMonitor());
+				} catch (Exception e) {
+					throw new InvocationTargetException(e);
 				}
 			};
 			JavaPlugin.getActiveWorkbenchWindow().run(true, true, runnable);
@@ -189,14 +177,11 @@ public class DocumentChangeTest extends GenericRefactoringTest {
 
 			JavaPlugin.getActivePage().closeEditor(editor, true);
 
-			runnable= new IRunnableWithProgress() {
-				@Override
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					try {
-						RefactoringCore.getUndoManager().performRedo(null, new NullProgressMonitor());
-					} catch (Exception e) {
-						throw new InvocationTargetException(e);
-					}
+			runnable= monitor -> {
+				try {
+					RefactoringCore.getUndoManager().performRedo(null, new NullProgressMonitor());
+				} catch (Exception e) {
+					throw new InvocationTargetException(e);
 				}
 			};
 			JavaPlugin.getActiveWorkbenchWindow().run(true, true, runnable);

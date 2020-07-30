@@ -70,9 +70,7 @@ public class JUnit5Identifier implements ITestIdentifier {
 
 	@Override
 	public String getParameterTypes() {
-		Function<TestSource, String> getParameterTypes= (TestSource source) -> {
-			return source instanceof MethodSource ? ((MethodSource) source).getMethodParameterTypes() : null;
-		};
+		Function<TestSource, String> getParameterTypes= (TestSource source) -> (source instanceof MethodSource ? ((MethodSource) source).getMethodParameterTypes() : null);
 		return fTestIdentifier.getSource().map(getParameterTypes).orElse(""); //$NON-NLS-1$
 	}
 

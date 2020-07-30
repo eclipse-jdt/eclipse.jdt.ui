@@ -17,7 +17,6 @@ package org.eclipse.jdt.internal.ui.viewsupport;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.jar.Attributes.Name;
 
 import org.eclipse.core.runtime.IPath;
@@ -564,12 +563,7 @@ public class JavaElementLabelComposer extends JavaElementLabelComposerCore {
 			result.add(pkgAbbr);
 		}
 
-		Collections.sort(result, new Comparator<PackageNameAbbreviation>() {
-			@Override
-			public int compare(PackageNameAbbreviation a1, PackageNameAbbreviation a2) {
-				return a2.getPackagePrefix().length() - a1.getPackagePrefix().length();
-			}
-		});
+		Collections.sort(result, (a1, a2) -> a2.getPackagePrefix().length() - a1.getPackagePrefix().length());
 
 		return result.toArray(new PackageNameAbbreviation[0]);
 	}

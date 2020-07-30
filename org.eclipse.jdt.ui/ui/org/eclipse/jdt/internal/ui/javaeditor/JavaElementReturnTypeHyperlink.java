@@ -23,7 +23,6 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.PartInitException;
 
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -133,8 +132,6 @@ public class JavaElementReturnTypeHyperlink implements IHyperlink {
 			if (editor instanceof JavaEditor)
 				((JavaEditor)editor).setStatusLineErrorMessage(JavaEditorMessages.JavaElementReturnTypeHyperlink_error_msg);
 
-		} catch (PartInitException e) {
-			JavaPlugin.log(e);
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
 		}

@@ -26,12 +26,10 @@ import org.eclipse.jdt.testplugin.JavaTestPlugin;
 import org.eclipse.test.OrderedTestSuite;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 
@@ -139,12 +137,7 @@ public class PackageExplorerPerfTest extends JdtPerformanceTestCase {
 			}
 		}
 
-		javaProject.getProject().getWorkspace().run(new IWorkspaceRunnable() {
-			@Override
-			public void run(IProgressMonitor monitor) throws CoreException {
-				javaProject.getProject().refreshLocal(IResource.DEPTH_INFINITE, null);
-			}
-		}, null);
+		javaProject.getProject().getWorkspace().run((IWorkspaceRunnable) monitor -> javaProject.getProject().refreshLocal(IResource.DEPTH_INFINITE, null), null);
 		getViewer().expandToLevel(classFolder, 1);
 
 		PackageExplorerPart view= getView();
@@ -162,15 +155,12 @@ public class PackageExplorerPerfTest extends JdtPerformanceTestCase {
 
 	private void touchAllFilesOnDisk(IFolder folder) throws CoreException {
 		final long now= System.currentTimeMillis();
-		folder.accept(new IResourceVisitor() {
-			@Override
-			public boolean visit(IResource resource) throws CoreException {
-				if (resource instanceof IFile) {
-					IFile file= (IFile) resource;
-					file.getRawLocation().toFile().setLastModified(now);
-				}
-				return true;
+		folder.accept(resource -> {
+			if (resource instanceof IFile) {
+				IFile file= (IFile) resource;
+				file.getRawLocation().toFile().setLastModified(now);
 			}
+			return true;
 		});
 	}
 

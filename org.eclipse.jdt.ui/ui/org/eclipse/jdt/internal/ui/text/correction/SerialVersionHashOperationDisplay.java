@@ -35,15 +35,11 @@ public class SerialVersionHashOperationDisplay extends SerialVersionHashOperatio
 	public void displayErrorMessage(final String message) {
 		final Display display= PlatformUI.getWorkbench().getDisplay();
 		if (display != null && !display.isDisposed()) {
-			display.asyncExec(new Runnable() {
-
-				@Override
-				public final void run() {
-					if (!display.isDisposed()) {
-						final Shell shell= display.getActiveShell();
-						if (shell != null && !shell.isDisposed())
-							MessageDialog.openError(shell, CorrectionMessages.SerialVersionHashOperation_dialog_error_caption, Messages.format(CorrectionMessages.SerialVersionHashOperation_dialog_error_message, message));
-					}
+			display.asyncExec(() -> {
+				if (!display.isDisposed()) {
+					final Shell shell= display.getActiveShell();
+					if (shell != null && !shell.isDisposed())
+						MessageDialog.openError(shell, CorrectionMessages.SerialVersionHashOperation_dialog_error_caption, Messages.format(CorrectionMessages.SerialVersionHashOperation_dialog_error_message, message));
 				}
 			});
 		}
@@ -63,15 +59,11 @@ public class SerialVersionHashOperationDisplay extends SerialVersionHashOperatio
 		final boolean[] result= { true};
 		final Display display= PlatformUI.getWorkbench().getDisplay();
 		if (display != null && !display.isDisposed()) {
-			display.syncExec(new Runnable() {
-
-				@Override
-				public final void run() {
-					if (!display.isDisposed()) {
-						final Shell shell= display.getActiveShell();
-						if (shell != null && !shell.isDisposed())
-							result[0]= MessageDialog.openQuestion(shell, title, message);
-					}
+			display.syncExec(() -> {
+				if (!display.isDisposed()) {
+					final Shell shell= display.getActiveShell();
+					if (shell != null && !shell.isDisposed())
+						result[0]= MessageDialog.openQuestion(shell, title, message);
 				}
 			});
 		}

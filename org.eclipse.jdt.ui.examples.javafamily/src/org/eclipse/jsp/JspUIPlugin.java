@@ -31,8 +31,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
-import org.eclipse.core.resources.IResourceDeltaVisitor;
-import org.eclipse.core.resources.IResourceProxy;
 import org.eclipse.core.resources.IResourceProxyVisitor;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -79,22 +77,19 @@ public class JspUIPlugin extends AbstractUIPlugin implements IResourceChangeList
 			if (enable) {
 
 				IResourceProxyVisitor visitor=
-					new IResourceProxyVisitor() {
-						@Override
-						public boolean visit(IResourceProxy proxy) throws CoreException {
-							String name= proxy.getName();
-							int pos= name.lastIndexOf('.');
-							if (pos >= 0) {
-								String extension= name.substring(pos+1);
-								if (JSP_TYPE.equalsIgnoreCase(extension)) {
-									IResource r= proxy.requestResource();
-									if (r instanceof IFile)
-										jspAdded((IFile)r);
-								}
-							}
-							return true;
+					proxy -> {
+					String name= proxy.getName();
+					int pos= name.lastIndexOf('.');
+					if (pos >= 0) {
+						String extension= name.substring(pos+1);
+						if (JSP_TYPE.equalsIgnoreCase(extension)) {
+							IResource r= proxy.requestResource();
+							if (r instanceof IFile)
+								jspAdded((IFile)r);
 						}
-					};
+					}
+					return true;
+				};
 				try {
 					workspace.getRoot().accept(visitor, 0);
 				} catch (CoreException e) {
@@ -127,33 +122,30 @@ public class JspUIPlugin extends AbstractUIPlugin implements IResourceChangeList
 			return;
 		try {
 			d.accept(
-				new IResourceDeltaVisitor() {
-					@Override
-					public boolean visit(IResourceDelta delta) {
-						if (delta != null) {
-							IResource r= delta.getResource();
-							if (r instanceof IFile) {
-								IFile file= (IFile) r;
-								String type= file.getFileExtension();
-								if (JSP_TYPE.equalsIgnoreCase(type)) {
-									switch (delta.getKind()) {
-									case IResourceDelta.ADDED:
+				delta -> {
+					if (delta != null) {
+						IResource r= delta.getResource();
+						if (r instanceof IFile) {
+							IFile file= (IFile) r;
+							String type= file.getFileExtension();
+							if (JSP_TYPE.equalsIgnoreCase(type)) {
+								switch (delta.getKind()) {
+								case IResourceDelta.ADDED:
+									jspAdded(file);
+									break;
+								case IResourceDelta.REMOVED:
+									jspRemoved(file);
+									break;
+								case IResourceDelta.CHANGED:
+									// no need to index if the content has not changed
+									if ((delta.getFlags() & IResourceDelta.CONTENT) != 0)
 										jspAdded(file);
-										break;
-									case IResourceDelta.REMOVED:
-										jspRemoved(file);
-										break;
-									case IResourceDelta.CHANGED:
-										// no need to index if the content has not changed
-										if ((delta.getFlags() & IResourceDelta.CONTENT) != 0)
-											jspAdded(file);
-										break;
-									}
+									break;
 								}
 							}
 						}
-						return true;
 					}
+					return true;
 				}
 			);
 		} catch (CoreException e) {

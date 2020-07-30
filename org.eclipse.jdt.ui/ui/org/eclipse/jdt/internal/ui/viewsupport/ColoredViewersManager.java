@@ -76,12 +76,7 @@ public class ColoredViewersManager implements IPropertyChangeListener {
 				|| property.equals(INHERITED_COLOR_NAME)
 				|| property.equals(IWorkbenchPreferenceConstants.USE_COLORED_LABELS)
 		) {
-			Display.getDefault().asyncExec(new Runnable() {
-				@Override
-				public void run() {
-					updateAllViewers();
-				}
-			});
+			Display.getDefault().asyncExec(this::updateAllViewers);
 		}
 	}
 

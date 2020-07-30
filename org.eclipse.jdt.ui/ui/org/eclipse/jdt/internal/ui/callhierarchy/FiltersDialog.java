@@ -15,8 +15,6 @@
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -89,12 +87,7 @@ class FiltersDialog extends StatusDialog {
         fMaxCallDepth = new Text(composite, SWT.SINGLE | SWT.BORDER);
         fMaxCallDepth.setFont(composite.getFont());
         fMaxCallDepth.setTextLimit(6);
-        fMaxCallDepth.addModifyListener(new ModifyListener() {
-                @Override
-				public void modifyText(ModifyEvent e) {
-                    validateInput();
-                }
-            });
+        fMaxCallDepth.addModifyListener(e -> validateInput());
 
         GridData gridData = new GridData();
         gridData.widthHint = convertWidthInCharsToPixels(10);
@@ -107,12 +100,7 @@ class FiltersDialog extends StatusDialog {
 
         fNames= new Text(parent, SWT.SINGLE | SWT.BORDER);
         fNames.setFont(parent.getFont());
-        fNames.addModifyListener(new ModifyListener() {
-                @Override
-				public void modifyText(ModifyEvent e) {
-                    validateInput();
-                }
-            });
+        fNames.addModifyListener(e -> validateInput());
 
         GridData gridData = new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL);
         gridData.widthHint = convertWidthInCharsToPixels(60);

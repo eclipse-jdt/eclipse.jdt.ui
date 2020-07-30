@@ -14,7 +14,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext;
 
-import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
+import org.eclipse.jdt.core.manipulation.JavaManipulation;
+
 
 /**
  * Facade for JavaManipulationPlugin to not contaminate corext classes.
@@ -22,7 +23,7 @@ import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 public class CorextCore {
 
 	public static String getPluginId() {
-		return JavaManipulationPlugin.getPluginId();
+		return JavaManipulation.ID_PLUGIN;
 	}
 
 	private CorextCore() {

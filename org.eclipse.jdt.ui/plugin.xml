@@ -4405,6 +4405,13 @@
 	        categoryId="org.eclipse.jdt.ui.category.source"
 	        id="org.eclipse.jdt.ui.edit.text.java.annotate.classFile">
 	  </command>
+      <command
+            name="%ActionDefinition.toggleCodeMining.name"
+            description="%ActionDefinition.toggleCodeMining.description"
+            categoryId="org.eclipse.search.ui.category.search"
+            defaultHandler="org.eclipse.jdt.internal.ui.javaeditor.ToggleCodeMiningHandler"
+            id="org.eclipse.jdt.ui.edit.text.java.toggle.codemining">
+      </command>
    </extension>
 
    <extension
@@ -7069,9 +7076,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.lambda_and_method_ref">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.PatternCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.precompile_regex"
+            runAfter="org.eclipse.jdt.ui.cleanup.lazy_logical">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.NumberSuffixCleanUp"
             id="org.eclipse.jdt.ui.cleanup.number_suffix"
-            runAfter="org.eclipse.jdt.ui.cleanup.lazy_logical">
+            runAfter="org.eclipse.jdt.ui.cleanup.precompile_regex">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp"
@@ -7109,9 +7121,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.unnecessary_semicolons">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.ObjectsEqualsCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.precompile_regex"
+            runAfter="org.eclipse.jdt.ui.cleanup.unnecessary_array_creation">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.StringCleanUp"
             id="org.eclipse.jdt.ui.cleanup.strings"
-            runAfter="org.eclipse.jdt.ui.cleanup.unnecessary_array_creation">
+            runAfter="org.eclipse.jdt.ui.cleanup.precompile_regex">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUp"

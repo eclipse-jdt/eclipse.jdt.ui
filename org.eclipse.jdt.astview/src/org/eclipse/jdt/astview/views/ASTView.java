@@ -900,7 +900,7 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 	private void hookContextMenu() {
 		MenuManager menuMgr = new MenuManager("#PopupMenu"); //$NON-NLS-1$
 		menuMgr.setRemoveAllWhenShown(true);
-		menuMgr.addMenuListener(manager -> fillContextMenu(manager));
+		menuMgr.addMenuListener(this::fillContextMenu);
 		Menu menu = menuMgr.createContextMenu(fViewer.getControl());
 		fViewer.getControl().setMenu(menu);
 		getSite().registerContextMenu(menuMgr, fViewer);

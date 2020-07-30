@@ -18,9 +18,7 @@ import java.util.Iterator;
 
 import org.eclipse.jface.util.OpenStrategy;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 
 import org.eclipse.ui.IWorkbenchSite;
 
@@ -40,12 +38,7 @@ class OpenLocationAction extends SelectionDispatchAction {
         setToolTipText(CallHierarchyMessages.OpenLocationAction_tooltip);
 		setEnabled(!fPart.getSelection().isEmpty());
 
-		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				setEnabled(!event.getSelection().isEmpty());
-			}
-		});
+		viewer.addSelectionChangedListener(event -> setEnabled(!event.getSelection().isEmpty()));
 	}
 
     private boolean checkEnabled(IStructuredSelection selection) {

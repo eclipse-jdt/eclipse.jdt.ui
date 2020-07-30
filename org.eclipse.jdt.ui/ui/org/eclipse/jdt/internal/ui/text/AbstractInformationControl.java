@@ -23,8 +23,6 @@ import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseMoveListener;
@@ -420,12 +418,9 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	private void installFilter() {
 		fFilterText.setText(""); //$NON-NLS-1$
 
-		fFilterText.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				String text= ((Text) e.widget).getText();
-				setMatcherString(text, true);
-			}
+		fFilterText.addModifyListener(e -> {
+			String text= ((Text) e.widget).getText();
+			setMatcherString(text, true);
 		});
 	}
 

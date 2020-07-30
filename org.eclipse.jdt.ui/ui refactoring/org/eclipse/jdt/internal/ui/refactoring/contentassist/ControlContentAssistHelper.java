@@ -14,15 +14,12 @@
 package org.eclipse.jdt.internal.ui.refactoring.contentassist;
 
 import org.eclipse.swt.widgets.Combo;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.contentassist.SubjectControlContentAssistant;
 
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IInformationControl;
-import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 
@@ -60,12 +57,7 @@ public class ControlContentAssistHelper {
 
 		ContentAssistPreference.configure(contentAssistant, JavaPlugin.getDefault().getPreferenceStore());
 		contentAssistant.setContextInformationPopupOrientation(IContentAssistant.CONTEXT_INFO_ABOVE);
-		contentAssistant.setInformationControlCreator(new IInformationControlCreator() {
-			@Override
-			public IInformationControl createInformationControl(Shell parent) {
-				return new DefaultInformationControl(parent, JavaPlugin.getAdditionalInfoAffordanceString());
-			}
-		});
+		contentAssistant.setInformationControlCreator(parent -> new DefaultInformationControl(parent, JavaPlugin.getAdditionalInfoAffordanceString()));
 
 		return contentAssistant;
 	}

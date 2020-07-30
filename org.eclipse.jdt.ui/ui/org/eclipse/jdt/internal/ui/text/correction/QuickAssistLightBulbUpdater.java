@@ -24,11 +24,9 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Canvas;
 
 import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
@@ -36,8 +34,6 @@ import org.eclipse.jface.text.source.IAnnotationAccessExtension;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationPresentation;
 import org.eclipse.jface.text.source.ImageUtilities;
-
-import org.eclipse.ui.IEditorPart;
 
 import org.eclipse.ui.texteditor.AnnotationPreference;
 import org.eclipse.ui.texteditor.ITextEditor;
@@ -125,12 +121,7 @@ public class QuickAssistLightBulbUpdater {
 	}
 
 	private void installSelectionListener() {
-		fListener= new ISelectionListenerWithAST() {
-			@Override
-			public void selectionChanged(IEditorPart part, ITextSelection selection, CompilationUnit astRoot) {
-				doSelectionChanged(selection.getOffset(), selection.getLength(), astRoot);
-			}
-		};
+		fListener= (part, selection, astRoot) -> doSelectionChanged(selection.getOffset(), selection.getLength(), astRoot);
 		SelectionListenerWithASTManager.getDefault().addListener(fEditor, fListener);
 	}
 
@@ -150,12 +141,7 @@ public class QuickAssistLightBulbUpdater {
 			installSelectionListener();
 		}
 		if (fPropertyChangeListener == null) {
-			fPropertyChangeListener= new IPropertyChangeListener() {
-				@Override
-				public void propertyChange(PropertyChangeEvent event) {
-					doPropertyChanged(event.getProperty());
-				}
-			};
+			fPropertyChangeListener= event -> doPropertyChanged(event.getProperty());
 			PreferenceConstants.getPreferenceStore().addPropertyChangeListener(fPropertyChangeListener);
 		}
 	}

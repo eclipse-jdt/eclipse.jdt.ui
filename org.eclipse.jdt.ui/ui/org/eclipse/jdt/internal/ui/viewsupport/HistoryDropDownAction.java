@@ -126,14 +126,11 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 			fMenu.addMenuListener(new MenuAdapter() {
 				@Override
 				public void menuHidden(final MenuEvent e) {
-					display.asyncExec(new Runnable() {
-						@Override
-						public void run() {
-							manager.removeAll();
-							if (fMenu != null) {
-								fMenu.dispose();
-								fMenu= null;
-							}
+					display.asyncExec(() -> {
+						manager.removeAll();
+						if (fMenu != null) {
+							fMenu.dispose();
+							fMenu= null;
 						}
 					});
 				}

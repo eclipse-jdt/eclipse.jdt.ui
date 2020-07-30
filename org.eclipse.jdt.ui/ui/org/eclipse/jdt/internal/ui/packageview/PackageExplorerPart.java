@@ -56,8 +56,6 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IElementComparer;
 import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.ISelection;
@@ -524,12 +522,7 @@ public class PackageExplorerPart extends ViewPart
 		initFrameActions();
 		initKeyListener();
 
-		fViewer.addDoubleClickListener(new IDoubleClickListener() {
-			@Override
-			public void doubleClick(DoubleClickEvent event) {
-				fActionSet.handleDoubleClick(event);
-			}
-		});
+		fViewer.addDoubleClickListener(event -> fActionSet.handleDoubleClick(event));
 
 		fOpenAndLinkWithEditorHelper= new OpenAndLinkWithEditorHelper(fViewer) {
 			@Override
@@ -1126,13 +1119,10 @@ public class PackageExplorerPart extends ViewPart
 				final IType type2= type;
 				Control ctrl= fViewer.getControl();
 				if (ctrl != null && !ctrl.isDisposed()) {
-					ctrl.getDisplay().asyncExec(new Runnable() {
-						@Override
-						public void run() {
-							Control ctrl2= fViewer.getControl();
-							if (ctrl2 != null && !ctrl2.isDisposed())
-								fViewer.expandToLevel(type2, 1);
-						}
+					ctrl.getDisplay().asyncExec(() -> {
+						Control ctrl2= fViewer.getControl();
+						if (ctrl2 != null && !ctrl2.isDisposed())
+							fViewer.expandToLevel(type2, 1);
 					});
 				}
 			}
@@ -1269,14 +1259,9 @@ public class PackageExplorerPart extends ViewPart
 	 * @return the <code>IShowInSource</code>
 	 */
 	protected IShowInSource getShowInSource() {
-		return new IShowInSource() {
-			@Override
-			public ShowInContext getShowInContext() {
-				return new ShowInContext(
-					getTreeViewer().getInput(),
-					getTreeViewer().getSelection());
-			}
-		};
+		return () -> new ShowInContext(
+			getTreeViewer().getInput(),
+			getTreeViewer().getSelection());
 	}
 
 	@Override

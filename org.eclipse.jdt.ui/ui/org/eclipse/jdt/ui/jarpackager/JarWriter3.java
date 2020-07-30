@@ -27,7 +27,6 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -303,17 +302,13 @@ public class JarWriter3 {
 		Assert.isNotNull(path);
 		Assert.isNotNull(monitor);
 		final RefactoringDescriptorProxy[] proxies= data.getRefactoringDescriptors();
-		Arrays.sort(proxies, new Comparator<RefactoringDescriptorProxy>() {
-
-			@Override
-			public final int compare(final RefactoringDescriptorProxy first, final RefactoringDescriptorProxy second) {
-				final long delta= first.getTimeStamp() - second.getTimeStamp();
-				if (delta > 0)
-					return 1;
-				else if (delta < 0)
-					return -1;
-				return 0;
-			}
+		Arrays.sort(proxies, (first, second) -> {
+			final long delta= first.getTimeStamp() - second.getTimeStamp();
+			if (delta > 0)
+				return 1;
+			else if (delta < 0)
+				return -1;
+			return 0;
 		});
 		File file= null;
 		OutputStream output= null;

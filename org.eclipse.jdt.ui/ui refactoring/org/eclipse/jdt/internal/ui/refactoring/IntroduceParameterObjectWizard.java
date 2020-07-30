@@ -20,8 +20,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -37,7 +35,6 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
@@ -50,10 +47,8 @@ import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TextCellEditor;
@@ -228,15 +223,10 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 			l.setText(RefactoringMessages.IntroduceParameterObjectWizard_parameterfield_label);
 			final Text text= new Text(group, SWT.BORDER);
 			text.setText(fProcessor.getParameterName());
-			text.addModifyListener(new ModifyListener() {
-
-				@Override
-				public void modifyText(ModifyEvent e) {
-					fProcessor.setParameterName(text.getText());
-					updateSignaturePreview();
-					validateRefactoring();
-				}
-
+			text.addModifyListener(e -> {
+				fProcessor.setParameterName(text.getText());
+				updateSignaturePreview();
+				validateRefactoring();
 			});
 			text.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		}
@@ -484,16 +474,11 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 						ParameterInfo selected= (ParameterInfo) ss.getFirstElement();
 						String message= RefactoringMessages.IntroduceParameterObjectWizard_fieldname_message;
 						String title= RefactoringMessages.IntroduceParameterObjectWizard_fieldname_title;
-						InputDialog inputDialog= new InputDialog(getShell(), title, message, selected.getNewName(), new IInputValidator() {
-
-							@Override
-							public String isValid(String newText) {
-								IStatus status= JavaConventionsUtil.validateIdentifier(newText, fProcessor.getCompilationUnit());
-								if (!status.isOK())
-									return status.getMessage();
-								return null;
-							}
-
+						InputDialog inputDialog= new InputDialog(getShell(), title, message, selected.getNewName(), newText -> {
+							IStatus status= JavaConventionsUtil.validateIdentifier(newText, fProcessor.getCompilationUnit());
+							if (!status.isOK())
+								return status.getMessage();
+							return null;
 						});
 						if (inputDialog.open() == Window.OK) {
 							selected.setNewName(inputDialog.getValue());
@@ -556,12 +541,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 				}
 
 			});
-			tv.addSelectionChangedListener(new ISelectionChangedListener() {
-				@Override
-				public void selectionChanged(SelectionChangedEvent event) {
-					updateButtons(tv, upButton, downButton, editButton);
-				}
-			});
+			tv.addSelectionChangedListener(event -> updateButtons(tv, upButton, downButton, editButton));
 		}
 
 		private void addSpacer(Composite parent) {
@@ -663,15 +643,10 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 			text.setText(fProcessor.getClassName());
 			text.selectAll();
 			text.setFocus();
-			text.addModifyListener(new ModifyListener() {
-
-				@Override
-				public void modifyText(ModifyEvent e) {
-					fProcessor.setClassName(text.getText());
-					updateSignaturePreview();
-					validateRefactoring();
-				}
-
+			text.addModifyListener(e -> {
+				fProcessor.setClassName(text.getText());
+				updateSignaturePreview();
+				validateRefactoring();
 			});
 			text.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		}

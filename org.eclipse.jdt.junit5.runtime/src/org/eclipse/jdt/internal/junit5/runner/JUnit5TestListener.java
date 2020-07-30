@@ -164,7 +164,7 @@ public class JUnit5TestListener implements TestExecutionListener {
 	@Override
 	public void executionSkipped(TestIdentifier testIdentifier, String reason) {
 		if (testIdentifier.isContainer() && fTestPlan != null) {
-			fTestPlan.getDescendants(testIdentifier).stream().filter(t -> t.isTest()).forEachOrdered(t -> notifySkipped(t));
+			fTestPlan.getDescendants(testIdentifier).stream().filter(TestIdentifier::isTest).forEachOrdered(this::notifySkipped);
 		} else {
 			notifySkipped(testIdentifier);
 		}

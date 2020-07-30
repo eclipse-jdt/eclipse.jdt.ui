@@ -121,86 +121,72 @@ public class NewNameQueries implements INewNameQueries {
 
 	@Override
 	public INewNameQuery createStaticQuery(final String newName){
-		return new INewNameQuery(){
-			@Override
-			public String getNewName() {
-				return newName;
-			}
-		};
+		return () -> newName;
 	}
 
 	private static INewNameQuery createStaticQuery(final IInputValidator validator, final String message, final String initial, final boolean isFile, final Shell shell) {
-		return new INewNameQuery(){
-			@Override
-			public String getNewName() throws OperationCanceledException {
-				InputDialog dialog= new InputDialog(shell, ReorgMessages.ReorgQueries_nameConflictMessage, message, initial, validator) {
-					@Override
-					protected Control createDialogArea(Composite parent) {
-						Control area= super.createDialogArea(parent);
-						TextFieldNavigationHandler.install(getText());
-						return area;
-					}
+		return () -> {
+			InputDialog dialog= new InputDialog(shell, ReorgMessages.ReorgQueries_nameConflictMessage, message, initial, validator) {
+				@Override
+				protected Control createDialogArea(Composite parent) {
+					Control area= super.createDialogArea(parent);
+					TextFieldNavigationHandler.install(getText());
+					return area;
+				}
 
-					@Override
-					protected Control createContents(Composite parent) {
-						Control contents= super.createContents(parent);
-						int lastIndexOfDot= initial.lastIndexOf('.');
-						if (isFile && lastIndexOfDot > 0) {
-							getText().setSelection(0, lastIndexOfDot);
-						}
-						return contents;
+				@Override
+				protected Control createContents(Composite parent) {
+					Control contents= super.createContents(parent);
+					int lastIndexOfDot= initial.lastIndexOf('.');
+					if (isFile && lastIndexOfDot > 0) {
+						getText().setSelection(0, lastIndexOfDot);
 					}
-				};
-				if (dialog.open() == Window.CANCEL)
-					throw new OperationCanceledException();
-				return dialog.getValue();
-			}
+					return contents;
+				}
+			};
+			if (dialog.open() == Window.CANCEL)
+				throw new OperationCanceledException();
+			return dialog.getValue();
 		};
 	}
 
 	private static IInputValidator createResourceNameValidator(final IResource res){
-		IInputValidator validator= new IInputValidator(){
-			@Override
-			public String isValid(String newText) {
-				if (newText == null || "".equals(newText) || res.getParent() == null) //$NON-NLS-1$
-					return INVALID_NAME_NO_MESSAGE;
-				if (res.getParent().findMember(newText) != null)
-					return ReorgMessages.ReorgQueries_resourceWithThisNameAlreadyExists;
-				if (! res.getParent().getFullPath().isValidSegment(newText))
-					return ReorgMessages.ReorgQueries_invalidNameMessage;
-				IStatus status= res.getParent().getWorkspace().validateName(newText, res.getType());
-				if (status.getSeverity() == IStatus.ERROR)
-					return status.getMessage();
+		IInputValidator validator= newText -> {
+			if (newText == null || "".equals(newText) || res.getParent() == null) //$NON-NLS-1$
+				return INVALID_NAME_NO_MESSAGE;
+			if (res.getParent().findMember(newText) != null)
+				return ReorgMessages.ReorgQueries_resourceWithThisNameAlreadyExists;
+			if (! res.getParent().getFullPath().isValidSegment(newText))
+				return ReorgMessages.ReorgQueries_invalidNameMessage;
+			IStatus status= res.getParent().getWorkspace().validateName(newText, res.getType());
+			if (status.getSeverity() == IStatus.ERROR)
+				return status.getMessage();
 
-				if (res.getName().equalsIgnoreCase(newText))
-					return ReorgMessages.ReorgQueries_resourceExistsWithDifferentCaseMassage;
+			if (res.getName().equalsIgnoreCase(newText))
+				return ReorgMessages.ReorgQueries_resourceExistsWithDifferentCaseMassage;
 
-				return null;
-			}
+			return null;
 		};
 		return validator;
 	}
 
 	private static IInputValidator createCompilationUnitNameValidator(final ICompilationUnit cu) {
-		IInputValidator validator= new IInputValidator(){
-			@Override
-			public String isValid(String newText) {
-				if (newText == null || "".equals(newText)) //$NON-NLS-1$
-					return INVALID_NAME_NO_MESSAGE;
-				String newCuName= JavaModelUtil.getRenamedCUName(cu, newText);
-				IStatus status= JavaConventionsUtil.validateCompilationUnitName(newCuName, cu);
-				if (status.getSeverity() == IStatus.ERROR)
-					return status.getMessage();
-				RefactoringStatus refStatus;
-				refStatus= Checks.checkCompilationUnitNewName(cu, newText);
-				if (refStatus.hasFatalError())
-					return refStatus.getMessageMatchingSeverity(RefactoringStatus.FATAL);
+		IInputValidator validator= newText -> {
+			if (newText == null || "".equals(newText)) //$NON-NLS-1$
+				return INVALID_NAME_NO_MESSAGE;
+			String newCuName= JavaModelUtil.getRenamedCUName(cu, newText);
+			IStatus status= JavaConventionsUtil.validateCompilationUnitName(newCuName, cu);
+			if (status.getSeverity() == IStatus.ERROR)
+				return status.getMessage();
+			RefactoringStatus refStatus;
+			refStatus= Checks.checkCompilationUnitNewName(cu, newText);
+			if (refStatus.hasFatalError())
+				return refStatus.getMessageMatchingSeverity(RefactoringStatus.FATAL);
 
-				if (cu.getElementName().equalsIgnoreCase(newCuName))
-					return ReorgMessages.ReorgQueries_resourceExistsWithDifferentCaseMassage;
+			if (cu.getElementName().equalsIgnoreCase(newCuName))
+				return ReorgMessages.ReorgQueries_resourceExistsWithDifferentCaseMassage;
 
-				return null;
-			}
+			return null;
 		};
 		return validator;
 	}
@@ -217,29 +203,26 @@ public class NewNameQueries implements INewNameQueries {
 	}
 
 	private static IInputValidator createPackageNameValidator(final IPackageFragment pack) {
-		IInputValidator validator= new IInputValidator(){
-			@Override
-			public String isValid(String newText) {
-				if (newText == null || "".equals(newText)) //$NON-NLS-1$
-					return INVALID_NAME_NO_MESSAGE;
-				IStatus status= JavaConventionsUtil.validatePackageName(newText, pack);
-				if (status.getSeverity() == IStatus.ERROR)
-					return status.getMessage();
+		IInputValidator validator= newText -> {
+			if (newText == null || "".equals(newText)) //$NON-NLS-1$
+				return INVALID_NAME_NO_MESSAGE;
+			IStatus status= JavaConventionsUtil.validatePackageName(newText, pack);
+			if (status.getSeverity() == IStatus.ERROR)
+				return status.getMessage();
 
-				IJavaElement parent= pack.getParent();
-				try {
-					if (parent instanceof IPackageFragmentRoot){
-						if (! RenamePackageProcessor.isPackageNameOkInRoot(newText, (IPackageFragmentRoot)parent))
-							return ReorgMessages.ReorgQueries_packagewithThatNameexistsMassage;
-					}
-				} catch (CoreException e) {
-					return INVALID_NAME_NO_MESSAGE;
+			IJavaElement parent= pack.getParent();
+			try {
+				if (parent instanceof IPackageFragmentRoot){
+					if (! RenamePackageProcessor.isPackageNameOkInRoot(newText, (IPackageFragmentRoot)parent))
+						return ReorgMessages.ReorgQueries_packagewithThatNameexistsMassage;
 				}
-				if (pack.getElementName().equalsIgnoreCase(newText))
-					return ReorgMessages.ReorgQueries_resourceExistsWithDifferentCaseMassage;
-
-				return null;
+			} catch (CoreException e) {
+				return INVALID_NAME_NO_MESSAGE;
 			}
+			if (pack.getElementName().equalsIgnoreCase(newText))
+				return ReorgMessages.ReorgQueries_resourceExistsWithDifferentCaseMassage;
+
+			return null;
 		};
 		return validator;
 	}

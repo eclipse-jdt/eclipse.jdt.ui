@@ -138,12 +138,9 @@ public class RenameFieldWizard extends RenameRefactoringWizard {
 		}
 
 		private void getGetterSetterRenamingEnablement() {
-			BusyIndicator.showWhile(getShell().getDisplay(), new Runnable(){
-				@Override
-				public void run() {
-					checkGetterRenamingEnablement();
-					checkSetterRenamingEnablement();
-				}
+			BusyIndicator.showWhile(getShell().getDisplay(), () -> {
+				checkGetterRenamingEnablement();
+				checkSetterRenamingEnablement();
 			});
 		}
 

@@ -57,10 +57,12 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTRequestor;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -71,6 +73,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.PushDownDescriptor;
@@ -762,13 +765,17 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 					}
 					final IMember[] members= getAbstractMembers(getAbstractDestinations(new SubProgressMonitor(monitor, 1)));
 					final IType[] classes= new IType[members.length];
-					for (int offset= 0; offset < members.length; offset++)
+					for (int offset= 0; offset < members.length; offset++) {
 						classes[offset]= (IType) members[offset];
+					}
 					copyMembers(adjustors, adjustments, rewrites, status, getAbstractMemberInfos(), classes, sourceRewriter, rewrite, sub);
 					copyMembers(adjustors, adjustments, rewrites, status, getAffectedMemberInfos(), getAbstractDestinations(new SubProgressMonitor(monitor, 1)), sourceRewriter, rewrite, sub);
-					if (monitor.isCanceled())
+					if (monitor.isCanceled()) {
 						throw new OperationCanceledException();
+					}
 				}
+				removeOverrideAnnotation(rewrites);
+
 			} finally {
 				sub.done();
 			}
@@ -786,6 +793,39 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 			return manager;
 		} finally {
 			monitor.done();
+		}
+	}
+
+	/*
+	 * Check if target method in subclass has '@Override' annotation, and if so removes it.
+	 */
+	private void removeOverrideAnnotation(Map<ICompilationUnit, CompilationUnitRewrite> rewrites) throws JavaModelException {
+		IType[] subclasses= fCachedClassHierarchy.getSubclasses(fCachedDeclaringType);
+
+		for (IMember memberActionInfo : fMembersToMove) {
+			if (memberActionInfo.getElementType() != IJavaElement.METHOD) {
+				continue;
+			}
+			IMethod method= (IMethod) memberActionInfo;
+			nextClass: for (IType iType : subclasses) {
+				for (IMethod iMethod : iType.getMethods()) {
+					if (iMethod.isSimilar(method)) {
+						CompilationUnitRewrite rewrite= getCompilationUnitRewrite(rewrites, iType.getCompilationUnit());
+						MethodDeclaration methodDeclarationNode= ASTNodeSearchUtil.getMethodDeclarationNode(iMethod, rewrite.getRoot());
+						if (methodDeclarationNode == null) {
+							continue;
+						}
+						ListRewrite listRewrite= rewrite.getASTRewrite().getListRewrite(methodDeclarationNode, MethodDeclaration.MODIFIERS2_PROPERTY);
+						for (IExtendedModifier iExtendedModifier : (List<IExtendedModifier>) methodDeclarationNode.modifiers()) {
+							if (iExtendedModifier.isAnnotation() &&
+									"Override".equals(((Annotation) iExtendedModifier).getTypeName().getFullyQualifiedName())) { //$NON-NLS-1$
+								listRewrite.remove((Annotation) iExtendedModifier, null);
+								continue nextClass; // resume checking with next target class
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 

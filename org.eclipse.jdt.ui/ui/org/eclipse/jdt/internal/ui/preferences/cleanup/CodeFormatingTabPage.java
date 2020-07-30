@@ -15,8 +15,6 @@
 package org.eclipse.jdt.internal.ui.preferences.cleanup;
 
 import java.util.Map;
-import java.util.Observable;
-import java.util.Observer;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -80,12 +78,9 @@ public final class CodeFormatingTabPage extends AbstractCleanUpTabPage {
 		if (!isSaveAction()) {
 			final CheckboxPreference format= createCheckboxPref(group, numColumns, CleanUpMessages.CodeFormatingTabPage_CheckboxName_FormatSourceCode, CleanUpConstants.FORMAT_SOURCE_CODE, CleanUpModifyDialog.FALSE_TRUE);
 			registerPreference(format);
-			format.addObserver(new Observer() {
-				@Override
-				public void update(Observable o, Object arg) {
-					fPreview.setFormat(format.getChecked());
-					fPreview.update();
-				}
+			format.addObserver((o, arg) -> {
+				fPreview.setFormat(format.getChecked());
+				fPreview.update();
 			});
 		}
 
@@ -97,12 +92,9 @@ public final class CodeFormatingTabPage extends AbstractCleanUpTabPage {
 
 		final CheckboxPreference correctIndentation= createCheckboxPref(group, numColumns, CleanUpMessages.CodeFormatingTabPage_correctIndentation_checkbox_text, CleanUpConstants.FORMAT_CORRECT_INDENTATION, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(correctIndentation);
-		correctIndentation.addObserver(new Observer() {
-			@Override
-			public void update(Observable o, Object arg) {
-				fPreview.setCorrectIndentation(correctIndentation.getChecked());
-				fPreview.update();
-			}
+		correctIndentation.addObserver((o, arg) -> {
+			fPreview.setCorrectIndentation(correctIndentation.getChecked());
+			fPreview.update();
 		});
 
 		if (!isSaveAction()) {
@@ -134,23 +126,17 @@ public final class CodeFormatingTabPage extends AbstractCleanUpTabPage {
 		final Label warningLabel= createLabel(numColumns - 2, sortMembersGroup, CleanUpMessages.CodeFormatingTabPage_SortMembersSemanticChange_warning);
 
 		registerSlavePreference(sortMembersPref, new RadioPreference[] {sortAllPref});
-		sortMembersPref.addObserver(new Observer() {
-			@Override
-			public void update(Observable o, Object arg) {
-				nullRadio.setEnabled(sortMembersPref.getChecked());
+		sortMembersPref.addObserver((o, arg) -> {
+			nullRadio.setEnabled(sortMembersPref.getChecked());
 
-				boolean warningEnabled= sortMembersPref.getChecked() && sortAllPref.getChecked();
-				warningImage.setEnabled(warningEnabled);
-				warningLabel.setEnabled(warningEnabled);
-			}
+			boolean warningEnabled= sortMembersPref.getChecked() && sortAllPref.getChecked();
+			warningImage.setEnabled(warningEnabled);
+			warningLabel.setEnabled(warningEnabled);
 		});
-		sortAllPref.addObserver(new Observer() {
-			@Override
-			public void update(Observable o, Object arg) {
-				boolean warningEnabled= sortMembersPref.getChecked() && sortAllPref.getChecked();
-				warningImage.setEnabled(warningEnabled);
-				warningLabel.setEnabled(warningEnabled);
-			}
+		sortAllPref.addObserver((o, arg) -> {
+			boolean warningEnabled= sortMembersPref.getChecked() && sortAllPref.getChecked();
+			warningImage.setEnabled(warningEnabled);
+			warningLabel.setEnabled(warningEnabled);
 		});
 		nullRadio.setEnabled(sortMembersPref.getChecked());
 		nullRadio.setSelection(CleanUpOptions.FALSE.equals(fValues.get(CleanUpConstants.SORT_MEMBERS_ALL)));

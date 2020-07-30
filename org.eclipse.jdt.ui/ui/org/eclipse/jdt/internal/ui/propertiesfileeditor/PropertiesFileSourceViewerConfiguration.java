@@ -19,8 +19,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.swt.widgets.Shell;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.Platform;
@@ -32,7 +30,6 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.IAutoEditStrategy;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.ITextDoubleClickStrategy;
 import org.eclipse.jface.text.ITextHover;
@@ -317,12 +314,7 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 	 */
 	@Override
 	public IInformationControlCreator getInformationControlCreator(ISourceViewer sourceViewer) {
-		return new IInformationControlCreator() {
-			@Override
-			public IInformationControl createInformationControl(Shell parent) {
-				return new DefaultInformationControl(parent, JavaPlugin.getAdditionalInfoAffordanceString());
-			}
-		};
+		return parent -> new DefaultInformationControl(parent, JavaPlugin.getAdditionalInfoAffordanceString());
 	}
 
 	/*

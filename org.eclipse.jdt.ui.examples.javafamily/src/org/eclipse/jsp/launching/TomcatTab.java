@@ -19,8 +19,6 @@ import java.io.File;
 import org.eclipse.jsp.JspPluginImages;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
@@ -111,12 +109,7 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 		gd.horizontalSpan = 2;
 		fTomcatDir.setLayoutData(gd);
 		fTomcatDir.setFont(font);
-		fTomcatDir.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent evt) {
-				updateLaunchConfigurationDialog();
-			}
-		});
+		fTomcatDir.addModifyListener(evt -> updateLaunchConfigurationDialog());
 
 		fBrowseButton = createPushButton(composite, LaunchingMessages.TomcatTab_21, null);
 		fBrowseButton.addSelectionListener(new SelectionAdapter() {
@@ -140,12 +133,7 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 		gd.horizontalSpan = 2;
 		fProjectText.setLayoutData(gd);
 		fProjectText.setFont(font);
-		fProjectText.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent evt) {
-				updateLaunchConfigurationDialog();
-			}
-		});
+		fProjectText.addModifyListener(evt -> updateLaunchConfigurationDialog());
 
 		fProjectButton = createPushButton(composite, LaunchingMessages.TomcatTab_23, null);
 		fProjectButton.addSelectionListener(new SelectionAdapter() {

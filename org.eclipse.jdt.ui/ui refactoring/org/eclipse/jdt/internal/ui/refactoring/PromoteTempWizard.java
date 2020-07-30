@@ -14,8 +14,6 @@
 package org.eclipse.jdt.internal.ui.refactoring;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -115,12 +113,9 @@ public class PromoteTempWizard extends RefactoringWizard {
 			getPromoteTempRefactoring().setFieldName(firstGuessedFieldName);
 			fNameField.selectAll();
 			fNameField.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			fNameField.addModifyListener(new ModifyListener(){
-				@Override
-				public void modifyText(ModifyEvent e) {
-					PromoteTempInputPage.this.getPromoteTempRefactoring().setFieldName(fNameField.getText());
-					PromoteTempInputPage.this.updateStatus();
-				}
+			fNameField.addModifyListener(e -> {
+				PromoteTempInputPage.this.getPromoteTempRefactoring().setFieldName(fNameField.getText());
+				PromoteTempInputPage.this.updateStatus();
 			});
 			IContentAssistProcessor processor= new FieldNameProcessor(guessedFieldNames, getPromoteTempRefactoring());
 			ControlContentAssistHelper.createTextContentAssistant(fNameField, processor);

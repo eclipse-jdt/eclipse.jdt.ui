@@ -15,8 +15,6 @@
 package org.eclipse.jdt.internal.ui.refactoring;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Text;
 
@@ -136,12 +134,7 @@ public abstract class TextInputWizardPage extends UserInputWizardPage{
 
 	protected Text createTextInputField(Composite parent, int style) {
 		fTextField= new Text(parent, style);
-		fTextField.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				textModified(getText());
-			}
-		});
+		fTextField.addModifyListener(e -> textModified(getText()));
 		fTextField.setText(fInitialValue);
 		TextFieldNavigationHandler.install(fTextField);
 		return fTextField;

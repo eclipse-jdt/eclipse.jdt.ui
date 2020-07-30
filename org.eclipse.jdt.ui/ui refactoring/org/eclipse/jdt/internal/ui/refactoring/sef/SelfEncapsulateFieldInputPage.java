@@ -19,8 +19,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -135,12 +133,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.widthHint= convertWidthInCharsToPixels(25);
 		fGetterName.setLayoutData(gd);
-		fGetterName.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				doGetterModified();
-			}
-		});
+		fGetterName.addModifyListener(e -> doGetterModified());
 		TextFieldNavigationHandler.install(fGetterName);
 
 
@@ -178,12 +171,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.widthHint= convertWidthInCharsToPixels(25);
 		fSetterName.setLayoutData(gd);
-		fSetterName.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				doSetterModified();
-			}
-		});
+		fSetterName.addModifyListener(e -> doSetterModified());
 		TextFieldNavigationHandler.install(fSetterName);
 
 		fSetterInfo= new Label(nameComposite, SWT.LEAD);

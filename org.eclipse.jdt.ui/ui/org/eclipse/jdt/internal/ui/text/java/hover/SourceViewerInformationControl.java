@@ -333,15 +333,12 @@ public class SourceViewerInformationControl
 		if (fShell != null && !fShell.isDisposed()) {
 			Display display= fShell.getDisplay();
 			if (!display.isDisposed()) {
-				display.asyncExec(new Runnable() {
-					@Override
-					public void run() {
-						IJavaElement javaElement= null;
-						if (input instanceof JavaSourceInformationInput) {
-							javaElement= ((JavaSourceInformationInput) input).getJavaElement();
-						}
-						updateViewerConfiguration(javaElement);
+				display.asyncExec(() -> {
+					IJavaElement javaElement= null;
+					if (input instanceof JavaSourceInformationInput) {
+						javaElement= ((JavaSourceInformationInput) input).getJavaElement();
 					}
+					updateViewerConfiguration(javaElement);
 				});
 			}
 		}
@@ -604,12 +601,7 @@ public class SourceViewerInformationControl
 	 */
 	@Override
 	public IInformationControlCreator getInformationPresenterControlCreator() {
-		return new IInformationControlCreator() {
-			@Override
-			public IInformationControl createInformationControl(Shell parent) {
-				return new SourceViewerInformationControl(parent, true, fOrientation, null);
-			}
-		};
+		return parent -> new SourceViewerInformationControl(parent, true, fOrientation, null);
 	}
 
 	/*

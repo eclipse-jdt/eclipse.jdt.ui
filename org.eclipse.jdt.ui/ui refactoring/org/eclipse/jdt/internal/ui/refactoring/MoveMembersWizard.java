@@ -37,7 +37,6 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizardPage;
 
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
@@ -284,18 +283,15 @@ public class MoveMembersWizard extends RefactoringWizard {
 				getWizard().getContainer(), scope, elementKinds);
 			dialog.setTitle(RefactoringMessages.MoveMembersInputPage_choose_Type);
 			dialog.setMessage(RefactoringMessages.MoveMembersInputPage_dialogMessage);
-			dialog.setValidator(new ISelectionStatusValidator(){
-				@Override
-				public IStatus validate(Object[] selection) {
-					Assert.isTrue(selection.length <= 1);
-					if (selection.length == 0)
-						return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, RefactoringMessages.MoveMembersInputPage_Invalid_selection, null);
-					Object element= selection[0];
-					if (! (element instanceof IType))
-						return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, RefactoringMessages.MoveMembersInputPage_Invalid_selection, null);
-					IType type= (IType)element;
-					return validateDestinationType(type, type.getElementName());
-				}
+			dialog.setValidator(selection -> {
+				Assert.isTrue(selection.length <= 1);
+				if (selection.length == 0)
+					return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, RefactoringMessages.MoveMembersInputPage_Invalid_selection, null);
+				Object element= selection[0];
+				if (! (element instanceof IType))
+					return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, RefactoringMessages.MoveMembersInputPage_Invalid_selection, null);
+				IType type= (IType)element;
+				return validateDestinationType(type, type.getElementName());
 			});
 			dialog.setInitialPattern(createInitialFilter());
 			if (dialog.open() == Window.CANCEL)

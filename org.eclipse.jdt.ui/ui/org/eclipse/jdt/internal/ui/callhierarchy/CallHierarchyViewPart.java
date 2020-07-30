@@ -45,7 +45,6 @@ import org.eclipse.swt.widgets.TreeItem;
 
 import org.eclipse.core.runtime.Assert;
 
-import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.IToolBarManager;
@@ -486,12 +485,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         getSite().setSelectionProvider(fSelectionProviderMediator);
 
         fCallHierarchyViewer.initContextMenu(
-        		new IMenuListener() {
-		            @Override
-					public void menuAboutToShow(IMenuManager menu) {
-		                fillCallHierarchyViewerContextMenu(menu);
-		            }
-		        }, getSite(), fSelectionProviderMediator);
+        		menu -> fillCallHierarchyViewerContextMenu(menu), getSite(), fSelectionProviderMediator);
 
 
         fClipboard= new Clipboard(parent.getDisplay());
@@ -868,12 +862,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 			return (T) JavaUIHelp.getHelpContextProvider(this, IJavaHelpContextIds.CALL_HIERARCHY_VIEW);
     	}
 		if (adapter == IShowInTargetList.class) {
-			return (T) new IShowInTargetList() {
-				@Override
-				public String[] getShowInTargetIds() {
-					return new String[] { JavaUI.ID_PACKAGES };
-				}
-			};
+			return (T) (IShowInTargetList) () -> new String[] { JavaUI.ID_PACKAGES };
 		}
     	return super.getAdapter(adapter);
     }
@@ -882,12 +871,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 	 * @return the <code>IShowInSource</code> for this view.
 	 */
 	private IShowInSource getShowInSource() {
-		return new IShowInSource() {
-			@Override
-			public ShowInContext getShowInContext() {
-				return new ShowInContext(null, fSelectionProviderMediator.getSelection());
-			}
-		};
+		return () -> new ShowInContext(null, fSelectionProviderMediator.getSelection());
 	}
 
     /**
@@ -991,12 +975,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         fLocationViewer= new LocationViewer(parent);
 
 
-        fLocationViewer.initContextMenu(new IMenuListener() {
-                @Override
-				public void menuAboutToShow(IMenuManager menu) {
-                    fillLocationViewerContextMenu(menu);
-                }
-            }, ID_CALL_HIERARCHY, getSite());
+        fLocationViewer.initContextMenu(menu -> fillLocationViewerContextMenu(menu), ID_CALL_HIERARCHY, getSite());
     }
 
     private void createHierarchyLocationSplitter(Composite parent) {

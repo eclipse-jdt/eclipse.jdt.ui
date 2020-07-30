@@ -17,7 +17,6 @@ package org.eclipse.jdt.internal.junit.launcher;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
@@ -73,15 +72,12 @@ public class TestKindRegistry {
 			items.add(new TestKind(configurationElement));
 		}
 
-		Collections.sort(items, new Comparator<TestKind>() {
-			@Override
-			public int compare(TestKind kind0, TestKind kind1) {
-				if (kind0.precedes(kind1))
-					return -1;
-				if (kind1.precedes(kind0))
-					return 1;
-				return 0;
-			}
+		Collections.sort(items, (kind0, kind1) -> {
+			if (kind0.precedes(kind1))
+				return -1;
+			if (kind1.precedes(kind0))
+				return 1;
+			return 0;
 		});
 		fTestKinds= items;
 	}

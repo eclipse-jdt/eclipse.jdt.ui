@@ -87,8 +87,6 @@ public class JavaImplementationCodeMining extends AbstractJavaElementLineHeaderC
 							try {
 								IType javaElement= getTypeImplementation((IType)element, monitor);
 								showJavaElementInEditor(javaElement);
-							} catch (JavaModelException e1) {
-								// Should never occur
 							} catch (CoreException e1) {
 								// Should never occur
 							}
@@ -111,8 +109,6 @@ public class JavaImplementationCodeMining extends AbstractJavaElementLineHeaderC
 							try {
 								IMethod javaElement= getMethodImplementation((IMethod)element, monitor);
 								showJavaElementInEditor(javaElement);
-							} catch (JavaModelException e1) {
-								// Should never occur
 							} catch (CoreException e1) {
 								// Should never occur
 							}

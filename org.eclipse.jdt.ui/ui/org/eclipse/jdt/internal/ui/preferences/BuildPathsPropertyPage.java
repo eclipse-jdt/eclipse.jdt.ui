@@ -23,9 +23,7 @@ import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRunnable;
@@ -219,12 +217,7 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 		if (fBuildPathsBlock != null) {
 			getSettings().put(INDEX, fBuildPathsBlock.getPageIndex());
 			if (fBuildPathsBlock.hasChangesInDialog() || fBuildPathsBlock.isClassfileMissing()) {
-				IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
-					@Override
-					public void run(IProgressMonitor monitor)	throws CoreException, OperationCanceledException {
-						fBuildPathsBlock.configureJavaProject(monitor);
-					}
-				};
+				IWorkspaceRunnable runnable= monitor -> fBuildPathsBlock.configureJavaProject(monitor);
 				WorkbenchRunnableAdapter op= new WorkbenchRunnableAdapter(runnable);
 				if (fBlockOnApply) {
 					try {

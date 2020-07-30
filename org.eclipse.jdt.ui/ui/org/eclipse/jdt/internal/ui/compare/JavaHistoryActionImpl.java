@@ -19,7 +19,6 @@ import java.util.Map;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
@@ -215,14 +214,11 @@ abstract class JavaHistoryActionImpl /* extends Action implements IActionDelegat
 			JavaPlugin.log(e);
 		}
 
-		IRunnableWithProgress r= new IRunnableWithProgress() {
-			@Override
-			public void run(IProgressMonitor pm) throws InvocationTargetException {
-				try {
-					textFileBuffer.commit(pm, false);
-				} catch (CoreException ex) {
-					throw new InvocationTargetException(ex);
-				}
+		IRunnableWithProgress r= pm -> {
+			try {
+				textFileBuffer.commit(pm, false);
+			} catch (CoreException ex) {
+				throw new InvocationTargetException(ex);
 			}
 		};
 

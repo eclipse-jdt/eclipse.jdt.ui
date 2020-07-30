@@ -21,7 +21,6 @@ import org.eclipse.team.core.RepositoryProvider;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
@@ -90,15 +89,12 @@ public class RefactoringTestRepositoryProvider extends RepositoryProvider {
 		private IStatus makeWritable(final IFile[] resources) {
 			try {
 				ResourcesPlugin.getWorkspace().run(
-					new IWorkspaceRunnable() {
-						@Override
-						public void run(IProgressMonitor monitor) throws CoreException	{
-							for (IFile resource : resources) {
-								ResourceAttributes resourceAttributes = resource.getResourceAttributes();
-								if (resourceAttributes != null) {
-									resourceAttributes.setReadOnly(false);
-									resource.setResourceAttributes(resourceAttributes);
-								}
+					(IWorkspaceRunnable) monitor -> {
+						for (IFile resource : resources) {
+							ResourceAttributes resourceAttributes = resource.getResourceAttributes();
+							if (resourceAttributes != null) {
+								resourceAttributes.setReadOnly(false);
+								resource.setResourceAttributes(resourceAttributes);
 							}
 						}
 					},

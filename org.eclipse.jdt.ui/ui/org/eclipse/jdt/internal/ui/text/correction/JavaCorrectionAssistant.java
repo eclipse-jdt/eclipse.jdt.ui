@@ -18,14 +18,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
@@ -112,12 +110,7 @@ public class JavaCorrectionAssistant extends QuickAssistAssistant {
 
 
 	private IInformationControlCreator getInformationControlCreator() {
-		return new IInformationControlCreator() {
-			@Override
-			public IInformationControl createInformationControl(Shell parent) {
-				return new DefaultInformationControl(parent, JavaPlugin.getAdditionalInfoAffordanceString());
-			}
-		};
+		return parent -> new DefaultInformationControl(parent, JavaPlugin.getAdditionalInfoAffordanceString());
 	}
 
 	@Override

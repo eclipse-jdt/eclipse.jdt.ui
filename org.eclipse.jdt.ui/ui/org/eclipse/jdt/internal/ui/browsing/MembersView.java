@@ -19,8 +19,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -74,13 +72,7 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 	@Override
 	public <T> T getAdapter(Class<T> key) {
 		if (key == IShowInTargetList.class) {
-			return (T) new IShowInTargetList() {
-				@Override
-				public String[] getShowInTargetIds() {
-					return new String[] { JavaUI.ID_PACKAGES };
-				}
-
-			};
+			return (T) (IShowInTargetList) () -> new String[] { JavaUI.ID_PACKAGES };
 		}
 		return super.getAdapter(key);
 	}
@@ -305,14 +297,11 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 	@Override
 	protected void hookViewerListeners() {
 		super.hookViewerListeners();
-		getViewer().addDoubleClickListener(new IDoubleClickListener() {
-			@Override
-			public void doubleClick(DoubleClickEvent event) {
-				TreeViewer viewer= (TreeViewer)getViewer();
-				Object element= ((IStructuredSelection)event.getSelection()).getFirstElement();
-				if (viewer.isExpandable(element))
-					viewer.setExpandedState(element, !viewer.getExpandedState(element));
-			}
+		getViewer().addDoubleClickListener(event -> {
+			TreeViewer viewer= (TreeViewer)getViewer();
+			Object element= ((IStructuredSelection)event.getSelection()).getFirstElement();
+			if (viewer.isExpandable(element))
+				viewer.setExpandedState(element, !viewer.getExpandedState(element));
 		});
 	}
 

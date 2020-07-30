@@ -146,12 +146,7 @@ public class SemanticHighlightingPresenter extends SemanticHighlightingPresenter
 		if (isCanceled())
 			return null;
 
-		Runnable runnable= new Runnable() {
-			@Override
-			public void run() {
-				updatePresentation(textPresentation, added, removed);
-			}
-		};
+		Runnable runnable= () -> updatePresentation(textPresentation, added, removed);
 		return runnable;
 	}
 

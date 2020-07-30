@@ -28,7 +28,6 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IInformationControlExtension2;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.CompositeRuler;
@@ -159,14 +158,7 @@ public class JavaExpandHover extends AnnotationExpandHover {
 		input.fRulerInfo= fCompositeRuler;
 		input.fAnnotationListener= fgListener;
 		input.fDoubleClickListener= fDblClickListener;
-		input.redoAction= new AnnotationExpansionControl.ICallback() {
-
-			@Override
-			public void run(IInformationControlExtension2 control) {
-				control.setInput(getHoverInfoForLine(viewer, line));
-			}
-
-		};
+		input.redoAction= control -> control.setInput(getHoverInfoForLine(viewer, line));
 		input.model= model;
 
 		return input;

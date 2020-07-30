@@ -22,8 +22,6 @@ import java.util.StringTokenizer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
@@ -46,10 +44,8 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.PixelConverter;
 import org.eclipse.jface.preference.PreferencePage;
-import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnWeightData;
-import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
@@ -284,30 +280,24 @@ class JavaEditorHoverConfigurationBlock implements IPreferenceConfigurationBlock
 		fHoverTableViewer.setContentProvider(new JavaEditorTextHoverDescriptorContentProvider());
 		fHoverTableViewer.setLabelProvider(new JavaEditorTextHoverDescriptorLabelProvider());
 
-		((CheckboxTableViewer)fHoverTableViewer).addCheckStateListener(new ICheckStateListener() {
-			/*
-			 * @see org.eclipse.jface.viewers.ICheckStateListener#checkStateChanged(org.eclipse.jface.viewers.CheckStateChangedEvent)
-			 */
-			@Override
-			public void checkStateChanged(CheckStateChangedEvent event) {
-				String id= ((JavaEditorTextHoverDescriptor)event.getElement()).getId();
-				if (id == null)
-					return;
-				JavaEditorTextHoverDescriptor[] descriptors= getContributedHovers();
-				HoverConfig hoverConfig= null;
-				int i= 0, length= fHoverConfigs.length;
-				while (i < length) {
-					if (id.equals(descriptors[i].getId())) {
-						hoverConfig= fHoverConfigs[i];
-						hoverConfig.fIsEnabled= event.getChecked();
-						fModifierEditor.setEnabled(event.getChecked());
-						fHoverTableViewer.setSelection(new StructuredSelection(descriptors[i]));
-					}
-					i++;
+		((CheckboxTableViewer)fHoverTableViewer).addCheckStateListener(event -> {
+			String id= ((JavaEditorTextHoverDescriptor)event.getElement()).getId();
+			if (id == null)
+				return;
+			JavaEditorTextHoverDescriptor[] descriptors= getContributedHovers();
+			HoverConfig hoverConfig= null;
+			int i= 0, length= fHoverConfigs.length;
+			while (i < length) {
+				if (id.equals(descriptors[i].getId())) {
+					hoverConfig= fHoverConfigs[i];
+					hoverConfig.fIsEnabled= event.getChecked();
+					fModifierEditor.setEnabled(event.getChecked());
+					fHoverTableViewer.setSelection(new StructuredSelection(descriptors[i]));
 				}
-				handleHoverListSelection();
-				updateStatus(hoverConfig);
+				i++;
 			}
+			handleHoverListSelection();
+			updateStatus(hoverConfig);
 		});
 
 		// Text field for modifier string
@@ -358,12 +348,7 @@ class JavaEditorHoverConfigurationBlock implements IPreferenceConfigurationBlock
 			}
 		});
 
-		fModifierEditor.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				handleModifierModified();
-			}
-		});
+		fModifierEditor.addModifyListener(e -> handleModifierModified());
 
 		// Description
 		Label descriptionLabel= new Label(hoverComposite, SWT.LEFT);

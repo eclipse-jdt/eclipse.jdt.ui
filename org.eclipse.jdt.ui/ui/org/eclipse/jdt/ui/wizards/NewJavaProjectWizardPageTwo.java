@@ -529,12 +529,7 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 			return;
 		}
 
-		IRunnableWithProgress op= new IRunnableWithProgress() {
-			@Override
-			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-				doRemoveProject(monitor);
-			}
-		};
+		IRunnableWithProgress op= this::doRemoveProject;
 
 		try {
 			getContainer().run(true, true, new WorkspaceModifyDelegatingOperation(op));
@@ -609,13 +604,10 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 		if (compilerCompliance!= null && JavaModelUtil.is9OrHigher(compilerCompliance)) {
 			boolean createModuleInfoFile= isCreateModuleInfoFile();
 			if (createModuleInfoFile) {
-				Display.getDefault().asyncExec(new Runnable() {
-					@Override
-					public void run() {
-						CreateModuleInfoAction action= new CreateModuleInfoAction();
-						action.selectionChanged(null, new StructuredSelection(getJavaProject()));
-						action.run(null);
-					}
+				Display.getDefault().asyncExec(() -> {
+					CreateModuleInfoAction action= new CreateModuleInfoAction();
+					action.selectionChanged(null, new StructuredSelection(getJavaProject()));
+					action.run(null);
 				});
 
 			}

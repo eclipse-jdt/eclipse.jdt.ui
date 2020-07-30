@@ -21,7 +21,6 @@ import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -260,12 +259,7 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 			}
 		};
 
-		fModifyListener= new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				controlModified(e.widget);
-			}
-		};
+		fModifyListener= e -> controlModified(e.widget);
 
 	}
 

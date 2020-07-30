@@ -14,8 +14,6 @@
 
 package org.eclipse.jdt.internal.ui.preferences;
 
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Font;
 
 import org.eclipse.core.runtime.Assert;
@@ -23,7 +21,6 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.jface.text.source.SourceViewer;
 
@@ -48,39 +45,21 @@ public class JavaSourcePreviewerUpdater {
 		Assert.isNotNull(viewer);
 		Assert.isNotNull(configuration);
 		Assert.isNotNull(preferenceStore);
-		final IPropertyChangeListener fontChangeListener= new IPropertyChangeListener() {
-			/*
-			 * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
-			 */
-			@Override
-			public void propertyChange(PropertyChangeEvent event) {
-				if (event.getProperty().equals(PreferenceConstants.EDITOR_TEXT_FONT)) {
-					Font font= JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT);
-					viewer.getTextWidget().setFont(font);
-				}
+		final IPropertyChangeListener fontChangeListener= event -> {
+			if (event.getProperty().equals(PreferenceConstants.EDITOR_TEXT_FONT)) {
+				Font font= JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT);
+				viewer.getTextWidget().setFont(font);
 			}
 		};
-		final IPropertyChangeListener propertyChangeListener= new IPropertyChangeListener() {
-			/*
-			 * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
-			 */
-			@Override
-			public void propertyChange(PropertyChangeEvent event) {
-				if (configuration.affectsTextPresentation(event)) {
-					configuration.handlePropertyChangeEvent(event);
-					viewer.invalidateTextPresentation();
-				}
+		final IPropertyChangeListener propertyChangeListener= event -> {
+			if (configuration.affectsTextPresentation(event)) {
+				configuration.handlePropertyChangeEvent(event);
+				viewer.invalidateTextPresentation();
 			}
 		};
-		viewer.getTextWidget().addDisposeListener(new DisposeListener() {
-			/*
-			 * @see org.eclipse.swt.events.DisposeListener#widgetDisposed(org.eclipse.swt.events.DisposeEvent)
-			 */
-			@Override
-			public void widgetDisposed(DisposeEvent e) {
-				preferenceStore.removePropertyChangeListener(propertyChangeListener);
-				JFaceResources.getFontRegistry().removeListener(fontChangeListener);
-			}
+		viewer.getTextWidget().addDisposeListener(e -> {
+			preferenceStore.removePropertyChangeListener(propertyChangeListener);
+			JFaceResources.getFontRegistry().removeListener(fontChangeListener);
 		});
 		JFaceResources.getFontRegistry().addListener(fontChangeListener);
 		preferenceStore.addPropertyChangeListener(propertyChangeListener);

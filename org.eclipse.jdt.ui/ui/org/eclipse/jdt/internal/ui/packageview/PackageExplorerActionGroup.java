@@ -33,10 +33,8 @@ import org.eclipse.jface.util.OpenStrategy;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 
@@ -129,12 +127,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 		fFrameActionsShown= false;
 		TreeViewer viewer= part.getTreeViewer();
 
-		IPropertyChangeListener workingSetListener= new IPropertyChangeListener() {
-			@Override
-			public void propertyChange(PropertyChangeEvent event) {
-				doWorkingSetChanged(event);
-			}
-		};
+		IPropertyChangeListener workingSetListener= event -> doWorkingSetChanged(event);
 
 		IWorkbenchPartSite site = fPart.getSite();
 		setGroups(new ActionGroup[] {
@@ -160,22 +153,14 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 		fFrameList= new FrameList(frameSource);
 		frameSource.connectTo(fFrameList);
 		fZoomInAction= new GoIntoAction(fFrameList);
-		fPart.getSite().getSelectionProvider().addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				fZoomInAction.update();
-				}
-		});
+		fPart.getSite().getSelectionProvider().addSelectionChangedListener(event -> fZoomInAction.update());
 
 		fBackAction= new BackAction(fFrameList);
 		fForwardAction= new ForwardAction(fFrameList);
 		fUpAction= new UpAction(fFrameList);
-		fFrameList.addPropertyChangeListener(new IPropertyChangeListener() { // connect after the actions (order of property listener)
-			@Override
-			public void propertyChange(PropertyChangeEvent event) {
-				fPart.updateTitle();
-				fPart.updateToolbar();
-			}
+		fFrameList.addPropertyChangeListener(event -> {
+			fPart.updateTitle();
+			fPart.updateToolbar();
 		});
 
 		fGotoTypeAction= new GotoTypeAction(fPart);

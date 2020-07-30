@@ -14,7 +14,6 @@
 package org.eclipse.jdt.internal.ui.refactoring;
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -42,13 +41,10 @@ class ChangeTypeContentProvider implements ITreeContentProvider {
 			return ((RootType)element).getChildren();
 		}
 		ITypeBinding[] superTypes = CollectionsUtil.toArray(getDirectSuperTypes((ITypeBinding)element), ITypeBinding.class);
-		Arrays.sort(superTypes, new Comparator<ITypeBinding>(){
-			@Override
-			public int compare(ITypeBinding o1, ITypeBinding o2) {
-				String name1 = o1.getQualifiedName();
-				String name2 = o2.getQualifiedName();
-				return name1.compareTo(name2);
-			}
+		Arrays.sort(superTypes, (o1, o2) -> {
+			String name1 = o1.getQualifiedName();
+			String name2 = o2.getQualifiedName();
+			return name1.compareTo(name2);
 		});
 		return superTypes;
 	}

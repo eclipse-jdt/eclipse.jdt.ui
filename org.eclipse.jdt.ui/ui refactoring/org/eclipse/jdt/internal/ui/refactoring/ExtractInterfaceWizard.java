@@ -30,9 +30,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
-import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.wizard.IWizardPage;
 
@@ -209,12 +207,7 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 				ExceptionHandler.handle(e, RefactoringMessages.ExtractInterfaceInputPage_Extract_Interface, RefactoringMessages.ExtractInterfaceInputPage_Internal_Error);
 				fTableViewer.setInput(new IMember[0]);
 			}
-			fTableViewer.addCheckStateListener(new ICheckStateListener(){
-				@Override
-				public void checkStateChanged(CheckStateChangedEvent event) {
-					ExtractInterfaceInputPage.this.updateUIElementEnablement();
-				}
-			});
+			fTableViewer.addCheckStateListener(event -> ExtractInterfaceInputPage.this.updateUIElementEnablement());
 			fTableViewer.setComparator(new JavaElementComparator());
 			fTableViewer.getControl().setEnabled(anyMembersToExtract());
 

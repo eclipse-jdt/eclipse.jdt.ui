@@ -468,16 +468,13 @@ public class JavaProjectHelper {
 		if (ASSERT_NO_MIXED_LINE_DELIMIERS)
 			MixedLineDelimiterDetector.assertNoMixedLineDelimiters(elem);
 
-		IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
-			@Override
-			public void run(IProgressMonitor monitor) throws CoreException {
-				performDummySearch();
-				if (elem instanceof IJavaProject) {
-					IJavaProject jproject= (IJavaProject) elem;
-					jproject.setRawClasspath(new IClasspathEntry[0], jproject.getProject().getFullPath(), null);
-				}
-				delete(elem.getResource());
+		IWorkspaceRunnable runnable= monitor -> {
+			performDummySearch();
+			if (elem instanceof IJavaProject) {
+				IJavaProject jproject= (IJavaProject) elem;
+				jproject.setRawClasspath(new IClasspathEntry[0], jproject.getProject().getFullPath(), null);
 			}
+			delete(elem.getResource());
 		};
 		ResourcesPlugin.getWorkspace().run(runnable, null);
 		emptyDisplayLoop();
@@ -543,15 +540,12 @@ public class JavaProjectHelper {
 	 */
 	public static void clear(final IJavaProject jproject, final IClasspathEntry[] entries) throws Exception {
 		performDummySearch();
-		IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
-			@Override
-			public void run(IProgressMonitor monitor) throws CoreException {
-				jproject.setRawClasspath(entries, null);
+		IWorkspaceRunnable runnable= monitor -> {
+			jproject.setRawClasspath(entries, null);
 
-				for (IResource resource : jproject.getProject().members()) {
-					if (!resource.getName().startsWith(".")) {
-						delete(resource);
-					}
+			for (IResource resource : jproject.getProject().members()) {
+				if (!resource.getName().startsWith(".")) {
+					delete(resource);
 				}
 			}
 		};

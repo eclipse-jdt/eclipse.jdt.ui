@@ -38,11 +38,9 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelection;
 
 import org.eclipse.jface.text.IRewriteTarget;
@@ -275,12 +273,7 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		if (!isReadOnlyOperation() && !validateEditorInputState())
 			return;
 
-		BusyIndicator.showWhile(getDisplay(), new Runnable() {
-			@Override
-			public void run() {
-				internalDoOperation();
-			}
-		});
+		BusyIndicator.showWhile(getDisplay(), this::internalDoOperation);
 	}
 
 	private Shell getShell() {
@@ -561,14 +554,11 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		}
 
 		try {
-			getProgressService().busyCursorWhile(new IRunnableWithProgress() {
-				@Override
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					try {
-						JavaModelUtil.applyEdit(unit, rewrite.rewriteImports(monitor), false, null);
-					} catch (CoreException e) {
-						throw new InvocationTargetException(e);
-					}
+			getProgressService().busyCursorWhile(monitor -> {
+				try {
+					JavaModelUtil.applyEdit(unit, rewrite.rewriteImports(monitor), false, null);
+				} catch (CoreException e) {
+					throw new InvocationTargetException(e);
 				}
 			});
 		} catch (InvocationTargetException e) {

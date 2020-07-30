@@ -15,7 +15,6 @@
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -382,12 +381,7 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 			return new SimpleName[] { fOriginalNode };
 		}
 		if (names.length > 1) {
-			Arrays.sort(names, new Comparator<SimpleName>() {
-				@Override
-				public int compare(SimpleName s1, SimpleName s2) {
-					return s1.getStartPosition() - s2.getStartPosition();
-				}
-			});
+			Arrays.sort(names, (s1, s2) -> s1.getStartPosition() - s2.getStartPosition());
 		}
 		return names;
 	}

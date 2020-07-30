@@ -104,8 +104,6 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomPr
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
@@ -1301,12 +1299,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 		fProfileNameField.setText(fProfile.getName());
 		fProfileNameField.getLabelControl(nameComposite).setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 		fProfileNameField.getTextControl(nameComposite).setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		fProfileNameField.setDialogFieldListener(new IDialogFieldListener() {
-			@Override
-			public void dialogFieldChanged(DialogField field) {
-				doValidate();
-			}
-		});
+		fProfileNameField.setDialogFieldListener(field -> doValidate());
 
 		fSaveButton= createButton(nameComposite, SAVE_BUTTON_ID, FormatterMessages.ModifyDialog_Export_Button, false);
 	}

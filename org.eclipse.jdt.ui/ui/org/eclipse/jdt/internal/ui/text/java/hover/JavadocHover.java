@@ -353,21 +353,18 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 					tbm.add(openAttachedJavadocAction);
 				}
 
-				IInputChangedListener inputChangeListener= new IInputChangedListener() {
-					@Override
-					public void inputChanged(Object newInput) {
-						backAction.update();
-						forwardAction.update();
-						if (newInput == null) {
-							selectionProvider.setSelection(new StructuredSelection());
-						} else if (newInput instanceof BrowserInformationControlInput) {
-							BrowserInformationControlInput input= (BrowserInformationControlInput) newInput;
-							Object inputElement= input.getInputElement();
-							selectionProvider.setSelection(new StructuredSelection(inputElement));
-							boolean isJavaElementInput= inputElement instanceof IJavaElement;
-							showInJavadocViewAction.setEnabled(isJavaElementInput);
-							openDeclarationAction.setEnabled(isJavaElementInput);
-						}
+				IInputChangedListener inputChangeListener= newInput -> {
+					backAction.update();
+					forwardAction.update();
+					if (newInput == null) {
+						selectionProvider.setSelection(new StructuredSelection());
+					} else if (newInput instanceof BrowserInformationControlInput) {
+						BrowserInformationControlInput input= (BrowserInformationControlInput) newInput;
+						Object inputElement= input.getInputElement();
+						selectionProvider.setSelection(new StructuredSelection(inputElement));
+						boolean isJavaElementInput= inputElement instanceof IJavaElement;
+						showInJavadocViewAction.setEnabled(isJavaElementInput);
+						openDeclarationAction.setEnabled(isJavaElementInput);
 					}
 				};
 				iControl.addInputChangeListener(inputChangeListener);
@@ -446,12 +443,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				return new DefaultInformationControl(parent, tooltipAffordanceString) {
 					@Override
 					public IInformationControlCreator getInformationPresenterControlCreator() {
-						return new IInformationControlCreator() {
-							@Override
-							public IInformationControl createInformationControl(Shell parentShell) {
-								return new DefaultInformationControl(parentShell, (ToolBarManager) null, new FallbackInformationPresenter());
-							}
-						};
+						return parentShell -> new DefaultInformationControl(parentShell, (ToolBarManager) null, new FallbackInformationPresenter());
 					}
 				};
 			}

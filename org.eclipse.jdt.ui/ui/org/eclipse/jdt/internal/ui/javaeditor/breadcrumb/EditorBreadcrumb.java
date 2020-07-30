@@ -14,8 +14,6 @@
 package org.eclipse.jdt.internal.ui.javaeditor.breadcrumb;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.MenuDetectEvent;
-import org.eclipse.swt.events.MenuDetectListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -33,14 +31,9 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.jface.text.ITextViewer;
@@ -212,30 +205,27 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 		gridLayout.horizontalSpacing= 0;
 		fComposite.setLayout(gridLayout);
 
-		fDisplayFocusListener= new Listener() {
-			@Override
-			public void handleEvent(Event event) {
-				if (isBreadcrumbEvent(event)) {
-					if (fHasFocus)
-						return;
+		fDisplayFocusListener= event -> {
+			if (isBreadcrumbEvent(event)) {
+				if (fHasFocus)
+					return;
 
-					fIsActive= true;
+				fIsActive= true;
 
-					focusGained();
-				} else {
-					if (!fIsActive)
-						return;
+				focusGained();
+			} else {
+				if (!fIsActive)
+					return;
 
-					boolean hasTextFocus= fTextViewer.getTextWidget().isFocusControl();
-					if (hasTextFocus) {
-						fIsActive= false;
-					}
-
-					if (!fHasFocus)
-						return;
-
-					focusLost();
+				boolean hasTextFocus= fTextViewer.getTextWidget().isFocusControl();
+				if (hasTextFocus) {
+					fIsActive= false;
 				}
+
+				if (!fHasFocus)
+					return;
+
+				focusLost();
 			}
 		};
 		Display.getCurrent().addFilter(SWT.FocusIn, fDisplayFocusListener);
@@ -243,80 +233,66 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 		fBreadcrumbViewer= createViewer(fComposite);
 		fBreadcrumbViewer.getControl().setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 
-		fBreadcrumbViewer.addDoubleClickListener(new IDoubleClickListener() {
-			@Override
-			public void doubleClick(DoubleClickEvent event) {
-				Object element= ((IStructuredSelection) event.getSelection()).getFirstElement();
-				if (element == null)
-					return;
+		fBreadcrumbViewer.addDoubleClickListener(event -> {
+			Object element= ((IStructuredSelection) event.getSelection()).getFirstElement();
+			if (element == null)
+				return;
 
-				BreadcrumbItem item= (BreadcrumbItem) fBreadcrumbViewer.doFindItem(element);
-				if (item == null)
-					return;
+			BreadcrumbItem item= (BreadcrumbItem) fBreadcrumbViewer.doFindItem(element);
+			if (item == null)
+				return;
 
-				int index= fBreadcrumbViewer.getIndexOfItem(item);
-				BreadcrumbItem parentItem= fBreadcrumbViewer.getItem(index - 1);
-				parentItem.openDropDownMenu();
-			}
+			int index= fBreadcrumbViewer.getIndexOfItem(item);
+			BreadcrumbItem parentItem= fBreadcrumbViewer.getItem(index - 1);
+			parentItem.openDropDownMenu();
 		});
 
-		fBreadcrumbViewer.addOpenListener(new IOpenListener() {
-			@Override
-			public void open(OpenEvent event) {
-				doRevealOrOpen(event.getSelection());
-			}
-		});
+		fBreadcrumbViewer.addOpenListener(event -> doRevealOrOpen(event.getSelection()));
 
-		fBreadcrumbViewer.addMenuDetectListener(new MenuDetectListener() {
-			@Override
-			public void menuDetected(MenuDetectEvent event) {
-				ISelectionProvider selectionProvider;
-				if (fBreadcrumbViewer.isDropDownOpen()) {
-					selectionProvider= fBreadcrumbViewer.getDropDownSelectionProvider();
-				} else {
-					selectionProvider= fBreadcrumbViewer;
+		fBreadcrumbViewer.addMenuDetectListener(event -> {
+			ISelectionProvider selectionProvider;
+			if (fBreadcrumbViewer.isDropDownOpen()) {
+				selectionProvider= fBreadcrumbViewer.getDropDownSelectionProvider();
+			} else {
+				selectionProvider= fBreadcrumbViewer;
+			}
+
+			ActionGroup actionGroup= createContextMenuActionGroup(selectionProvider);
+			if (actionGroup == null)
+				return;
+			Menu menu= null;
+			try {
+				MenuManager manager= new MenuManager();
+				actionGroup.setContext(new ActionContext(selectionProvider.getSelection()));
+				actionGroup.fillContextMenu(manager);
+
+				getTextEditor().getEditorSite().registerContextMenu(manager, selectionProvider, false);
+
+				if (manager.isEmpty())
+					return;
+
+				menu= manager.createContextMenu(fBreadcrumbViewer.getControl());
+				menu.setLocation(event.x + 10, event.y + 10);
+				menu.setVisible(true);
+				while (!menu.isDisposed() && menu.isVisible()) {
+					if (!menu.getDisplay().readAndDispatch())
+						menu.getDisplay().sleep();
 				}
-
-				ActionGroup actionGroup= createContextMenuActionGroup(selectionProvider);
-				if (actionGroup == null)
-					return;
-				Menu menu= null;
-				try {
-					MenuManager manager= new MenuManager();
-					actionGroup.setContext(new ActionContext(selectionProvider.getSelection()));
-					actionGroup.fillContextMenu(manager);
-
-					getTextEditor().getEditorSite().registerContextMenu(manager, selectionProvider, false);
-
-					if (manager.isEmpty())
-						return;
-
-					menu= manager.createContextMenu(fBreadcrumbViewer.getControl());
-					menu.setLocation(event.x + 10, event.y + 10);
-					menu.setVisible(true);
-					while (!menu.isDisposed() && menu.isVisible()) {
-						if (!menu.getDisplay().readAndDispatch())
-							menu.getDisplay().sleep();
-					}
-				} finally {
-					if (menu != null
-							&& !menu.isDisposed()
-							&& menu.getDisplay() != null
-							&& Platform.OS_WIN32.equals(Platform.getOS())) {
-						menu.getDisplay().readAndDispatch();
-					}
-					actionGroup.dispose();
+			} finally {
+				if (menu != null
+						&& !menu.isDisposed()
+						&& menu.getDisplay() != null
+						&& Platform.OS_WIN32.equals(Platform.getOS())) {
+					menu.getDisplay().readAndDispatch();
 				}
+				actionGroup.dispose();
 			}
 		});
 
-		fPropertyChangeListener= new IPropertyChangeListener() {
-			@Override
-			public void propertyChange(PropertyChangeEvent event) {
-				if (ACTIVE_TAB_BG_END.equals(event.getProperty())) {
-					if (fComposite.isFocusControl()) {
-						fComposite.setBackground(JFaceResources.getColorRegistry().get(ACTIVE_TAB_BG_END));
-					}
+		fPropertyChangeListener= event -> {
+			if (ACTIVE_TAB_BG_END.equals(event.getProperty())) {
+				if (fComposite.isFocusControl()) {
+					fComposite.setBackground(JFaceResources.getColorRegistry().get(ACTIVE_TAB_BG_END));
 				}
 			}
 		};
@@ -440,17 +416,14 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 		//Sanity check
 		deinstallDisplayListeners();
 
-		fDisplayKeyListener= new Listener() {
-			@Override
-			public void handleEvent(Event event) {
-				if (event.keyCode != SWT.ESC)
-					return;
+		fDisplayKeyListener= event -> {
+			if (event.keyCode != SWT.ESC)
+				return;
 
-				if (!isBreadcrumbEvent(event))
-					return;
+			if (!isBreadcrumbEvent(event))
+				return;
 
-				fTextViewer.getTextWidget().setFocus();
-			}
+			fTextViewer.getTextWidget().setFocus();
 		};
 		Display.getDefault().addFilter(SWT.KeyDown, fDisplayKeyListener);
 	}

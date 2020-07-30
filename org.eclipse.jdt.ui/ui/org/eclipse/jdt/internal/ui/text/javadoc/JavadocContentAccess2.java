@@ -322,12 +322,7 @@ public class JavadocContentAccess2 {
 		 *         <code>null</code> if none could be found
 		 */
 		public CharSequence getInheritedTypeParamDescription(IMethod method, final int typeParamIndex) {
-			return getInheritedDescription(method, new DescriptionGetter() {
-				@Override
-				public CharSequence getDescription(JavadocContentAccess2 contentAccess) throws JavaModelException {
-					return contentAccess.getInheritedTypeParamDescription(typeParamIndex);
-				}
-			});
+			return getInheritedDescription(method, contentAccess -> contentAccess.getInheritedTypeParamDescription(typeParamIndex));
 		}
 
 		/**
@@ -340,12 +335,7 @@ public class JavadocContentAccess2 {
 		 * 		or <code>null</code> if none could be found
 		 */
 		public CharSequence getInheritedParamDescription(IMethod method, final int paramIndex) {
-			return getInheritedDescription(method, new DescriptionGetter() {
-				@Override
-				public CharSequence getDescription(JavadocContentAccess2 contentAccess) throws JavaModelException {
-					return contentAccess.getInheritedParamDescription(paramIndex);
-				}
-			});
+			return getInheritedDescription(method, contentAccess -> contentAccess.getInheritedParamDescription(paramIndex));
 		}
 
 		/**
@@ -369,12 +359,7 @@ public class JavadocContentAccess2 {
 		 * 		or <code>null</code> if none could be found
 		 */
 		public CharSequence getInheritedExceptionDescription(IMethod method, final String simpleName) {
-			return getInheritedDescription(method, new DescriptionGetter() {
-				@Override
-				public CharSequence getDescription(JavadocContentAccess2 contentAccess) {
-					return contentAccess.getExceptionDescription(simpleName);
-				}
-			});
+			return getInheritedDescription(method, contentAccess -> contentAccess.getExceptionDescription(simpleName));
 		}
 
 		private CharSequence getInheritedDescription(final IMethod method, final DescriptionGetter descriptionGetter) {

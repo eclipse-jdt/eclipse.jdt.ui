@@ -117,6 +117,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.manipulation.JavaManipulation;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.MoveMethodDescriptor;
@@ -2844,7 +2845,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			if (binding != null)
 				fTargetType= (IType) binding.getJavaElement();
 			else
-				throw new JavaModelException(new CoreException(new Status(IStatus.ERROR, JavaManipulationPlugin.getPluginId(), 0, RefactoringCoreMessages.MoveInstanceMethodProcessor_cannot_be_moved, null)));
+				throw new JavaModelException(new CoreException(new Status(IStatus.ERROR, JavaManipulation.ID_PLUGIN, 0, RefactoringCoreMessages.MoveInstanceMethodProcessor_cannot_be_moved, null)));
 		}
 		return fTargetType;
 	}

@@ -53,8 +53,6 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.resource.LocalResourceManager;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.ISelection;
@@ -345,20 +343,17 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		super.fillViewMenu(menuManager);
 
 		if (fAllowScopeSwitching) {
-			fFilterActionGroup= new WorkingSetFilterActionGroup(getShell(), JavaPlugin.getActivePage(), new IPropertyChangeListener() {
-				@Override
-				public void propertyChange(PropertyChangeEvent event) {
-					IWorkingSet ws= (IWorkingSet) event.getNewValue();
-					if (ws == null || (ws.isAggregateWorkingSet() && ws.isEmpty())) {
-						setSearchScope(SearchEngine.createWorkspaceScope());
-						setSubtitle(null);
-					} else {
-						setSearchScope(JavaSearchScopeFactory.getInstance().createJavaSearchScope(ws, true));
-						setSubtitle(ws.getLabel());
-					}
-
-					applyFilter();
+			fFilterActionGroup= new WorkingSetFilterActionGroup(getShell(), JavaPlugin.getActivePage(), event -> {
+				IWorkingSet ws= (IWorkingSet) event.getNewValue();
+				if (ws == null || (ws.isAggregateWorkingSet() && ws.isEmpty())) {
+					setSearchScope(SearchEngine.createWorkspaceScope());
+					setSubtitle(null);
+				} else {
+					setSearchScope(JavaSearchScopeFactory.getInstance().createJavaSearchScope(ws, true));
+					setSubtitle(ws.getLabel());
 				}
+
+				applyFilter();
 			});
 			fFilterActionGroup.fillViewMenu(menuManager);
 		}
@@ -1161,16 +1156,17 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			if (result != 0)
 				return result;
 
-			result= compareTypeContainerName(leftInfo.getTypeContainerName(), rightInfo.getTypeContainerName());
-			if (result != 0)
-				return result;
-
 			int leftCategory= getElementTypeCategory(leftInfo);
 			int rightCategory= getElementTypeCategory(rightInfo);
 			if (leftCategory < rightCategory)
 				return -1;
 			if (leftCategory > rightCategory)
 				return +1;
+
+			result= compareTypeContainerName(leftInfo.getTypeContainerName(), rightInfo.getTypeContainerName());
+			if (result != 0)
+				return result;
+
 			return compareContainerName(leftInfo, rightInfo);
 		}
 

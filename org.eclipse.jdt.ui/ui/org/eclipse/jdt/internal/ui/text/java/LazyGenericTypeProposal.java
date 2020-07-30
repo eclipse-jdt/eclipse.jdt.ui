@@ -32,7 +32,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension;
-import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
@@ -784,16 +783,13 @@ public class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposal {
 						try {
 							if (getTextViewer().getSelectedRange().y > 1 || flags != ILinkedModeListener.EXTERNAL_MODIFICATION)
 								return;
-							((IDocumentExtension) document).registerPostNotificationReplace(null, new IDocumentExtension.IReplace() {
-								@Override
-								public void perform(IDocument d, IDocumentListener owner) {
-									try {
-										if ((firstBracketPosition.length == 0 || firstBracketPosition.isDeleted) && !secondBracketPosition.isDeleted) {
-											d.replace(firstBracketPosition.offset, secondBracketPosition.offset - firstBracketPosition.offset, ""); //$NON-NLS-1$
-										}
-									} catch (BadLocationException e) {
-										JavaPlugin.log(e);
+							((IDocumentExtension) document).registerPostNotificationReplace(null, (d, owner) -> {
+								try {
+									if ((firstBracketPosition.length == 0 || firstBracketPosition.isDeleted) && !secondBracketPosition.isDeleted) {
+										d.replace(firstBracketPosition.offset, secondBracketPosition.offset - firstBracketPosition.offset, ""); //$NON-NLS-1$
 									}
+								} catch (BadLocationException e) {
+									JavaPlugin.log(e);
 								}
 							});
 						} finally {

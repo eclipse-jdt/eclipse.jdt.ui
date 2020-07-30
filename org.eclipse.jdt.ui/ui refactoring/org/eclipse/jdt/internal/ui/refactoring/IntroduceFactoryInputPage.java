@@ -14,8 +14,6 @@
 package org.eclipse.jdt.internal.ui.refactoring;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -120,24 +118,21 @@ public class IntroduceFactoryInputPage extends UserInputWizardPage {
 		gd.horizontalSpan= 2;
 		protectCtorCB.setLayoutData(gd);
 
-		fMethodName.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				fMethodNameStatus = getUseFactoryRefactoring().setNewMethodName(fMethodName.getText());
-				validateInput(true);
-				/*
-				boolean				nameOk= status.isOK();
+		fMethodName.addModifyListener(e -> {
+			fMethodNameStatus = getUseFactoryRefactoring().setNewMethodName(fMethodName.getText());
+			validateInput(true);
+			/*
+			boolean				nameOk= status.isOK();
 
-				if (status.hasFatalError()) {
-					IntroduceFactoryInputPage.this.setPageComplete(false);
+			if (status.hasFatalError()) {
+				IntroduceFactoryInputPage.this.setPageComplete(false);
 
-				}
-				IntroduceFactoryInputPage.this.setPageComplete(!status.hasFatalError());
-				IntroduceFactoryInputPage.this.setErrorMessage(nameOk ?
-					"" : //$NON-NLS-1$
-					status.getMessageMatchingSeverity(RefactoringStatus.ERROR));
-					*/
 			}
+			IntroduceFactoryInputPage.this.setPageComplete(!status.hasFatalError());
+			IntroduceFactoryInputPage.this.setErrorMessage(nameOk ?
+				"" : //$NON-NLS-1$
+				status.getMessageMatchingSeverity(RefactoringStatus.ERROR));
+				*/
 		});
 		protectCtorCB.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -148,19 +143,16 @@ public class IntroduceFactoryInputPage extends UserInputWizardPage {
 			}
 		});
 
-		factoryTypeName.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				fDestinationStatus= getUseFactoryRefactoring().setFactoryClass(factoryTypeName.getText());
-				validateInput(false);
-				/*
-				boolean	nameOk= status.isOK();
+		factoryTypeName.addModifyListener(e -> {
+			fDestinationStatus= getUseFactoryRefactoring().setFactoryClass(factoryTypeName.getText());
+			validateInput(false);
+			/*
+			boolean	nameOk= status.isOK();
 
-				IntroduceFactoryInputPage.this.setPageComplete(nameOk);
-				IntroduceFactoryInputPage.this.setErrorMessage(nameOk ? "" : //$NON-NLS-1$
-															   status.getMessageMatchingSeverity(RefactoringStatus.ERROR));
-															   */
-			}
+			IntroduceFactoryInputPage.this.setPageComplete(nameOk);
+			IntroduceFactoryInputPage.this.setErrorMessage(nameOk ? "" : //$NON-NLS-1$
+														   status.getMessageMatchingSeverity(RefactoringStatus.ERROR));
+														   */
 		});
 		browseTypes.addSelectionListener(new SelectionAdapter() {
 			@Override

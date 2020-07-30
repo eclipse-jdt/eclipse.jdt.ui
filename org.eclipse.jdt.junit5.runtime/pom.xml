@@ -18,6 +18,6 @@
   </parent>
   <groupId>org.eclipse.jdt</groupId>
   <artifactId>org.eclipse.jdt.junit5.runtime</artifactId>
-  <version>1.0.900-SNAPSHOT</version>
+  <version>1.0.1000-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
 </project>

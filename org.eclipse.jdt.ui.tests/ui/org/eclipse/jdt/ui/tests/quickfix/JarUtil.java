@@ -174,12 +174,7 @@ private static class Requestor implements ICompilerRequestor {
 			this.classFileFilter = classFileFilter;
 		} else {
 			// default: all without errors
-			this.classFileFilter = new ClassFileFilter() {
-				@Override
-				public boolean include(CompilationResult unitResult) {
-					return (unitResult != null) && !unitResult.hasErrors();
-				}
-			};
+			this.classFileFilter = unitResult -> (unitResult != null) && !unitResult.hasErrors();
 		}
 	}
 
@@ -385,12 +380,7 @@ public static String[] getJavaClassLibs() {
 		String[] jarsNames = null;
 		ArrayList<String> paths = new ArrayList<>();
 		if ("DRLVM".equals(vmName)) {
-			FilenameFilter jarFilter = new FilenameFilter() {
-				@Override
-				public boolean accept(File dir, String name) {
-					return name.endsWith(".jar") & !name.endsWith("-src.jar");
-				}
-			};
+			FilenameFilter jarFilter = (dir, name) -> name.endsWith(".jar") & !name.endsWith("-src.jar");
 			jarsNames = new File(jreDir + "/lib/boot/").list(jarFilter);
 			addJarEntries(jreDir + "/lib/boot/", jarsNames, paths);
 		} else {

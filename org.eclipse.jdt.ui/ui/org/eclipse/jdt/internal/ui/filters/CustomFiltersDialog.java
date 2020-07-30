@@ -40,15 +40,11 @@ import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
-import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.SelectionDialog;
@@ -203,31 +199,23 @@ public class CustomFiltersDialog extends SelectionDialog {
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.heightHint= convertHeightInCharsToPixels(3);
 		description.setLayoutData(data);
-		fCheckBoxList.addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				ISelection selection= event.getSelection();
-				if (selection instanceof IStructuredSelection) {
-					Object selectedElement= ((IStructuredSelection)selection).getFirstElement();
-					if (selectedElement instanceof FilterDescriptor)
-						description.setText(((FilterDescriptor)selectedElement).getDescription());
-				}
+		fCheckBoxList.addSelectionChangedListener(event -> {
+			ISelection selection= event.getSelection();
+			if (selection instanceof IStructuredSelection) {
+				Object selectedElement= ((IStructuredSelection)selection).getFirstElement();
+				if (selectedElement instanceof FilterDescriptor)
+					description.setText(((FilterDescriptor)selectedElement).getDescription());
 			}
 		});
-		fCheckBoxList.addCheckStateListener(new ICheckStateListener() {
-			/*
-			 * @see org.eclipse.jface.viewers.ICheckStateListener#checkStateChanged(org.eclipse.jface.viewers.CheckStateChangedEvent)
-			 */
-			@Override
-			public void checkStateChanged(CheckStateChangedEvent event) {
-				Object element= event.getElement();
-				if (element instanceof FilterDescriptor) {
-					// renew if already touched
-					if (fFilterDescriptorChangeHistory.contains(element))
-						fFilterDescriptorChangeHistory.remove(element);
-					fFilterDescriptorChangeHistory.push((FilterDescriptor) element);
-				}
-			}});
+		fCheckBoxList.addCheckStateListener(event -> {
+			Object element= event.getElement();
+			if (element instanceof FilterDescriptor) {
+				// renew if already touched
+				if (fFilterDescriptorChangeHistory.contains(element))
+					fFilterDescriptorChangeHistory.remove(element);
+				fFilterDescriptorChangeHistory.push((FilterDescriptor) element);
+			}
+		});
 
 		addSelectionButtons(parent);
 	}

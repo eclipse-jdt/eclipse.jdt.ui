@@ -190,16 +190,13 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	public void checkStateChanged(final CheckStateChangedEvent event) {
 
 		//Potentially long operation - show a busy cursor
-		BusyIndicator.showWhile(fTreeViewer.getControl().getDisplay(), new Runnable() {
-			@Override
-			public void run() {
-				if (event.getCheckable().equals(fTreeViewer))
-					treeItemChecked(event.getElement(), event.getChecked());
-				else
-					listItemChecked(event.getElement(), event.getChecked(), true);
+		BusyIndicator.showWhile(fTreeViewer.getControl().getDisplay(), () -> {
+			if (event.getCheckable().equals(fTreeViewer))
+				treeItemChecked(event.getElement(), event.getChecked());
+			else
+				listItemChecked(event.getElement(), event.getChecked(), true);
 
-				notifyCheckStateChangeListeners(event);
-			}
+			notifyCheckStateChangeListeners(event);
 		});
 	}
 	/**
@@ -531,18 +528,15 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	 */
 	@Override
 	public void selectionChanged(final SelectionChangedEvent event) {
-		BusyIndicator.showWhile(getTable().getShell().getDisplay(), new Runnable() {
-			@Override
-			public void run() {
-				IStructuredSelection selection= (IStructuredSelection) event.getSelection();
-				Object selectedElement= selection.getFirstElement();
-				if (selectedElement == null) {
-					fCurrentTreeSelection= null;
-					fListViewer.setInput(fCurrentTreeSelection);
-					return;
-				}
-				populateListViewer(selectedElement);
+		BusyIndicator.showWhile(getTable().getShell().getDisplay(), () -> {
+			IStructuredSelection selection= (IStructuredSelection) event.getSelection();
+			Object selectedElement= selection.getFirstElement();
+			if (selectedElement == null) {
+				fCurrentTreeSelection= null;
+				fListViewer.setInput(fCurrentTreeSelection);
+				return;
 			}
+			populateListViewer(selectedElement);
 		});
 	}
 
@@ -554,12 +548,9 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	public void setAllSelections(final boolean selection) {
 
 		//Potentially long operation - show a busy cursor
-		BusyIndicator.showWhile(fTreeViewer.getControl().getDisplay(), new Runnable() {
-			@Override
-			public void run() {
-				setTreeChecked(fRoot, selection);
-				fListViewer.setAllChecked(selection);
-			}
+		BusyIndicator.showWhile(fTreeViewer.getControl().getDisplay(), () -> {
+			setTreeChecked(fRoot, selection);
+			fListViewer.setAllChecked(selection);
 		});
 	}
 
@@ -748,12 +739,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	public void updateSelections(final Map<Object, List<Object>> items) {
 
 		//Potentially long operation - show a busy cursor
-		BusyIndicator.showWhile(fTreeViewer.getControl().getDisplay(), new Runnable() {
-			@Override
-			public void run() {
-				handleUpdateSelection(items);
-			}
-		});
+		BusyIndicator.showWhile(fTreeViewer.getControl().getDisplay(), () -> handleUpdateSelection(items));
 	}
 	/**
 	 * Returns the result of running the given elements through the filters.

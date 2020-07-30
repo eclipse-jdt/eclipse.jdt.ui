@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 
@@ -159,17 +158,14 @@ public final class ClasspathFixProcessorDescriptor {
 				}
 			}
 			fgContributedClasspathFixProcessors= res.toArray(new ClasspathFixProcessorDescriptor[res.size()]);
-			Arrays.sort(fgContributedClasspathFixProcessors, new Comparator<ClasspathFixProcessorDescriptor>() {
-				@Override
-				public int compare(ClasspathFixProcessorDescriptor d1, ClasspathFixProcessorDescriptor d2) {
-					if (d1.getOverridenIds().contains(d2.getID())) {
-						return -1;
-					}
-					if (d2.getOverridenIds().contains(d1.getID())) {
-						return 1;
-					}
-					return 0;
+			Arrays.sort(fgContributedClasspathFixProcessors, (d1, d2) -> {
+				if (d1.getOverridenIds().contains(d2.getID())) {
+					return -1;
 				}
+				if (d2.getOverridenIds().contains(d1.getID())) {
+					return 1;
+				}
+				return 0;
 			});
 		}
 		return fgContributedClasspathFixProcessors;

@@ -22,8 +22,6 @@ import java.util.StringTokenizer;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -47,8 +45,6 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.viewers.CheckStateChangedEvent;
-import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 
@@ -170,12 +166,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		createLabel(group, SWT.NONE, JavadocExportMessages.JavadocTreeWizardPage_javadoccommand_label, createGridData(GridData.HORIZONTAL_ALIGN_BEGINNING, numColumns, 0));
 		fJavadocCommandText= createCombo(group, SWT.NONE, null, createGridData(GridData.FILL_HORIZONTAL, numColumns - 1, 0));
 
-		fJavadocCommandText.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				doValidation(JAVADOCSTATUS);
-			}
-		});
+		fJavadocCommandText.addModifyListener(e -> doValidation(JAVADOCSTATUS));
 
 		final Button javadocCommandBrowserButton= createButton(group, SWT.PUSH, JavadocExportMessages.JavadocTreeWizardPage_javadoccommand_button_label, createGridData(GridData.HORIZONTAL_ALIGN_FILL, 1, 0));
 		SWTUtil.setButtonDimensionHint(javadocCommandBrowserButton);
@@ -207,12 +198,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		ITreeContentProvider listContentProvider= new JavadocMemberContentProvider();
 		fInputGroup= new CheckboxTreeAndListGroup(c, this, treeContentProvider, new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT), listContentProvider, new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT), SWT.NONE, convertWidthInCharsToPixels(60), convertHeightInCharsToPixels(7));
 
-		fInputGroup.addCheckStateListener(new ICheckStateListener() {
-			@Override
-			public void checkStateChanged(CheckStateChangedEvent e) {
-				doValidation(TREESTATUS);
-			}
-		});
+		fInputGroup.addCheckStateListener(e -> doValidation(TREESTATUS));
 		fInputGroup.setTreeComparator(new JavaElementComparator());
 
 		SWTUtil.setAccessibilityText(fInputGroup.getTree(), JavadocExportMessages.JavadocTreeWizardPage_tree_accessibility_message);
@@ -323,12 +309,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 				createGridData(GridData.HORIZONTAL_ALIGN_FILL, 1, LayoutUtil.getIndent()));
 		fDestinationText= createText(group, SWT.SINGLE | SWT.BORDER, null, createGridData(GridData.FILL_HORIZONTAL, numColumns - 2, 0));
 		((GridData) fDestinationText.getLayoutData()).widthHint= 0;
-		fDestinationText.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				doValidation(STANDARDSTATUS);
-			}
-		});
+		fDestinationText.addModifyListener(e -> doValidation(STANDARDSTATUS));
 
 		fDestinationBrowserButton= createButton(group, SWT.PUSH, JavadocExportMessages.JavadocTreeWizardPage_destinationbrowse_label, createGridData(GridData.HORIZONTAL_ALIGN_END, 1, 0));
 		SWTUtil.setButtonDimensionHint(fDestinationBrowserButton);
@@ -343,24 +324,13 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		((GridData) fDocletTypeText.getLayoutData()).widthHint= 0;
 
 
-		fDocletTypeText.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				doValidation(CUSTOMSTATUS);
-			}
-		});
+		fDocletTypeText.addModifyListener(e -> doValidation(CUSTOMSTATUS));
 
 		fDocletLabel= createLabel(group, SWT.NONE, JavadocExportMessages.JavadocTreeWizardPage_docletpathfield_label, createGridData(GridData.HORIZONTAL_ALIGN_BEGINNING, 1, LayoutUtil.getIndent()));
 		fDocletText= createText(group, SWT.SINGLE | SWT.BORDER, null, createGridData(GridData.HORIZONTAL_ALIGN_FILL, numColumns - 1, 0));
 		((GridData) fDocletText.getLayoutData()).widthHint= 0;
 
-		fDocletText.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				doValidation(CUSTOMSTATUS);
-			}
-
-		});
+		fDocletText.addModifyListener(e -> doValidation(CUSTOMSTATUS));
 
 		//Add Listeners
 		fCustomButton.addSelectionListener(new EnableSelectionAdapter(new Control[] { fDocletLabel, fDocletText, fDocletTypeLabel, fDocletTypeText }, new Control[] { fDestinationLabel, fDestinationText, fDestinationBrowserButton }));

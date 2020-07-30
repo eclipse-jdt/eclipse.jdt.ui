@@ -17,7 +17,6 @@ import java.util.Iterator;
 
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
@@ -25,8 +24,6 @@ import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IInformationControl;
-import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.ITextViewer;
@@ -127,12 +124,7 @@ public class CodeTemplateSourceViewerConfiguration extends SimpleJavaSourceViewe
 		assistant.setAutoActivationDelay(store.getInt(PreferenceConstants.CODEASSIST_AUTOACTIVATION_DELAY));
 		assistant.setProposalPopupOrientation(IContentAssistant.PROPOSAL_OVERLAY);
 		assistant.setContextInformationPopupOrientation(IContentAssistant.CONTEXT_INFO_ABOVE);
-		assistant.setInformationControlCreator(new IInformationControlCreator() {
-			@Override
-			public IInformationControl createInformationControl(Shell parent) {
-				return new DefaultInformationControl(parent, JavaPlugin.getAdditionalInfoAffordanceString());
-			}
-		});
+		assistant.setInformationControlCreator(parent -> new DefaultInformationControl(parent, JavaPlugin.getAdditionalInfoAffordanceString()));
 
 		Color background= getColor(store, PreferenceConstants.CODEASSIST_PARAMETERS_BACKGROUND, manager);
 		assistant.setContextInformationPopupBackground(background);

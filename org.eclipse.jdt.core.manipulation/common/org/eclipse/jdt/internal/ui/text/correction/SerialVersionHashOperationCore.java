@@ -55,6 +55,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.manipulation.JavaManipulation;
 import org.eclipse.jdt.core.util.IClassFileReader;
 import org.eclipse.jdt.core.util.IFieldInfo;
 import org.eclipse.jdt.core.util.IInnerClassesAttribute;
@@ -238,7 +239,7 @@ public final class SerialVersionHashOperationCore extends AbstractSerialVersionO
 				name= name.substring(packStart + 1);
 			}
 		} else {
-			throw new CoreException(new Status(IStatus.ERROR, JavaManipulationPlugin.getPluginId(), CorrectionMessages.SerialVersionHashOperation_error_classnotfound));
+			throw new CoreException(new Status(IStatus.ERROR, JavaManipulation.ID_PLUGIN, CorrectionMessages.SerialVersionHashOperation_error_classnotfound));
 		}
 
 		name += ".class"; //$NON-NLS-1$
@@ -248,7 +249,7 @@ public final class SerialVersionHashOperationCore extends AbstractSerialVersionO
 				return (IFile) resource;
 			}
 		}
-		throw new CoreException(new Status(IStatus.ERROR, JavaManipulationPlugin.getPluginId(), CorrectionMessages.SerialVersionHashOperation_error_classnotfound));
+		throw new CoreException(new Status(IStatus.ERROR, JavaManipulation.ID_PLUGIN, CorrectionMessages.SerialVersionHashOperation_error_classnotfound));
 	}
 
 	/**

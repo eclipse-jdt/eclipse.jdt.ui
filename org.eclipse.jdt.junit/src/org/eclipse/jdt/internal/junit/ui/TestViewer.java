@@ -66,7 +66,6 @@ import org.eclipse.debug.core.ILaunchManager;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.junit.launcher.ITestFinder;
 import org.eclipse.jdt.internal.junit.model.TestCaseElement;
@@ -264,7 +263,7 @@ public class TestViewer {
 	private void initContextMenu() {
 		MenuManager menuMgr= new MenuManager("#PopupMenu"); //$NON-NLS-1$
 		menuMgr.setRemoveAllWhenShown(true);
-		menuMgr.addMenuListener(manager -> handleMenuAboutToShow(manager));
+		menuMgr.addMenuListener(this::handleMenuAboutToShow);
 		fTestRunnerPart.getSite().registerContextMenu(menuMgr, fSelectionProvider);
 		Menu menu= menuMgr.createContextMenu(fViewerbook);
 		fTreeViewer.getTree().setMenu(menu);
@@ -395,8 +394,6 @@ public class TestViewer {
 						return null;
 					}
 				}
-			} catch (JavaModelException e) {
-				// fall through
 			} catch (CoreException e) {
 				// fall through
 			}

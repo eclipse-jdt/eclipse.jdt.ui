@@ -19,7 +19,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 
 import org.junit.Rule;
@@ -233,12 +232,7 @@ public class CopyToClipboardActionTest extends GenericRefactoringTest {
 	}
 
 	private static void sortByName(Object[] copied) {
-		Arrays.sort(copied, new Comparator<Object>(){
-			@Override
-			public int compare(Object arg0, Object arg1) {
-				return getName(arg0).compareTo(getName(arg1));
-			}
-		});
+		Arrays.sort(copied, (arg0, arg1) -> getName(arg0).compareTo(getName(arg1)));
 	}
 
 	private void checkNames(IResource[] resourcesCopied, IJavaElement[] javaElementsCopied, String clipboardText){

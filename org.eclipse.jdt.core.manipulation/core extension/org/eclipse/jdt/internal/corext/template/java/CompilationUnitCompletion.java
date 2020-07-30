@@ -37,8 +37,8 @@ import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.core.manipulation.JavaManipulation;
 
-import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 
 /**
  * A completion requester to collect informations on local variables.
@@ -414,7 +414,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 			IJavaProject project= fUnit.getJavaProject();
 			IType type= project.findType(superType);
 			if (type == null)
-				throw new JavaModelException(new CoreException(new Status(IStatus.ERROR, JavaManipulationPlugin.getPluginId(), IStatus.OK, "No such type", null))); //$NON-NLS-1$
+				throw new JavaModelException(new CoreException(new Status(IStatus.ERROR, JavaManipulation.ID_PLUGIN, IStatus.OK, "No such type", null))); //$NON-NLS-1$
 			return computeBinding(type, index);
 		}
 
@@ -582,7 +582,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 				}
 			}
 
-			throw new JavaModelException(new CoreException(new Status(IStatus.ERROR, JavaManipulationPlugin.getPluginId(), IStatus.OK, "Illegal hierarchy", null))); //$NON-NLS-1$
+			throw new JavaModelException(new CoreException(new Status(IStatus.ERROR, JavaManipulation.ID_PLUGIN, IStatus.OK, "Illegal hierarchy", null))); //$NON-NLS-1$
 		}
 
 		/**

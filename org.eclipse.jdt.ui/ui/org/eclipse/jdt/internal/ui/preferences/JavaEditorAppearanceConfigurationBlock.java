@@ -469,13 +469,10 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 			fAppearanceColorList.add(c[0]);
 		}
 
-		fAppearanceColorList.getDisplay().asyncExec(new Runnable() {
-			@Override
-			public void run() {
-				if (fAppearanceColorList != null && !fAppearanceColorList.isDisposed()) {
-					fAppearanceColorList.select(0);
-					handleAppearanceColorListSelection();
-				}
+		fAppearanceColorList.getDisplay().asyncExec(() -> {
+			if (fAppearanceColorList != null && !fAppearanceColorList.isDisposed()) {
+				fAppearanceColorList.select(0);
+				handleAppearanceColorListSelection();
 			}
 		});
 

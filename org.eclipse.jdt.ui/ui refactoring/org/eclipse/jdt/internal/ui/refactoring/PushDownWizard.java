@@ -34,28 +34,20 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.layout.PixelConverter;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
-import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ComboBoxCellEditor;
-import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.ICellModifier;
-import org.eclipse.jface.viewers.ICheckStateListener;
-import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.window.Window;
@@ -365,33 +357,17 @@ public final class PushDownWizard extends RefactoringWizard {
 			fTableViewer.setUseHashlookup(true);
 			fTableViewer.setContentProvider(ArrayContentProvider.getInstance());
 			fTableViewer.setLabelProvider(new MemberActionInfoLabelProvider());
-			fTableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-
-				@Override
-				public void selectionChanged(final SelectionChangedEvent event) {
-					PushDownInputPage.this.updateButtonEnablementState((IStructuredSelection) event.getSelection());
-				}
+			fTableViewer.addSelectionChangedListener(event -> PushDownInputPage.this.updateButtonEnablementState((IStructuredSelection) event.getSelection()));
+			fTableViewer.addCheckStateListener(event -> {
+				final boolean checked= event.getChecked();
+				final MemberActionInfo info= (MemberActionInfo) event.getElement();
+				if (checked)
+					info.setAction(MemberActionInfo.PUSH_DOWN_ACTION);
+				else
+					info.setAction(MemberActionInfo.NO_ACTION);
+				updateWizardPage(null, true);
 			});
-			fTableViewer.addCheckStateListener(new ICheckStateListener() {
-
-				@Override
-				public void checkStateChanged(final CheckStateChangedEvent event) {
-					final boolean checked= event.getChecked();
-					final MemberActionInfo info= (MemberActionInfo) event.getElement();
-					if (checked)
-						info.setAction(MemberActionInfo.PUSH_DOWN_ACTION);
-					else
-						info.setAction(MemberActionInfo.NO_ACTION);
-					updateWizardPage(null, true);
-				}
-			});
-			fTableViewer.addDoubleClickListener(new IDoubleClickListener() {
-
-				@Override
-				public void doubleClick(final DoubleClickEvent event) {
-					PushDownInputPage.this.editSelectedMembers();
-				}
-			});
+			fTableViewer.addDoubleClickListener(event -> PushDownInputPage.this.editSelectedMembers());
 
 			fTableViewer.setInput(fProcessor.getMemberActionInfos());
 			updateWizardPage(null, false);
@@ -524,18 +500,14 @@ public final class PushDownWizard extends RefactoringWizard {
 
 		public void markAdditionalRequiredMembersAsMembersToPushDown() {
 			try {
-				PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(false, false, new IRunnableWithProgress() {
-
-					@Override
-					public void run(final IProgressMonitor pm) throws InvocationTargetException {
-						try {
-							fProcessor.computeAdditionalRequiredMembersToPushDown(pm);
-							updateWizardPage(null, true);
-						} catch (final JavaModelException e) {
-							throw new InvocationTargetException(e);
-						} finally {
-							pm.done();
-						}
+				PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(false, false, pm -> {
+					try {
+						fProcessor.computeAdditionalRequiredMembersToPushDown(pm);
+						updateWizardPage(null, true);
+					} catch (final JavaModelException e) {
+						throw new InvocationTargetException(e);
+					} finally {
+						pm.done();
 					}
 				});
 			} catch (final InvocationTargetException e) {
@@ -560,20 +532,16 @@ public final class PushDownWizard extends RefactoringWizard {
 			final ComboBoxCellEditor comboBoxCellEditor= new ComboBoxCellEditor();
 			comboBoxCellEditor.setStyle(SWT.READ_ONLY);
 			fTableViewer.setCellEditors(new CellEditor[] { null, comboBoxCellEditor});
-			fTableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-
-				@Override
-				public void selectionChanged(final SelectionChangedEvent event) {
-					if (comboBoxCellEditor.getControl() == null && !table.isDisposed())
-						comboBoxCellEditor.create(table);
-					Assert.isTrue(event.getSelection() instanceof IStructuredSelection);
-					final IStructuredSelection ss= (IStructuredSelection) event.getSelection();
-					if (ss.size() != 1)
-						return;
-					final MemberActionInfo mac= (MemberActionInfo) ss.getFirstElement();
-					comboBoxCellEditor.setItems(MemberActionInfoLabelProvider.getAvailableActionLabels(mac));
-					comboBoxCellEditor.setValue(Integer.valueOf(mac.getAction()));
-				}
+			fTableViewer.addSelectionChangedListener(event -> {
+				if (comboBoxCellEditor.getControl() == null && !table.isDisposed())
+					comboBoxCellEditor.create(table);
+				Assert.isTrue(event.getSelection() instanceof IStructuredSelection);
+				final IStructuredSelection ss= (IStructuredSelection) event.getSelection();
+				if (ss.size() != 1)
+					return;
+				final MemberActionInfo mac= (MemberActionInfo) ss.getFirstElement();
+				comboBoxCellEditor.setItems(MemberActionInfoLabelProvider.getAvailableActionLabels(mac));
+				comboBoxCellEditor.setValue(Integer.valueOf(mac.getAction()));
 			});
 
 			final ICellModifier cellModifier= new PushDownCellModifier();

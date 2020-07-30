@@ -18,12 +18,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspaceRunnable;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
 
@@ -89,21 +86,18 @@ public class RemoveFromClasspathAction extends SelectionDispatchAction {
 	@Override
 	public void run(final IStructuredSelection selection) {
 		try {
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(true, true, new WorkbenchRunnableAdapter(new IWorkspaceRunnable() {
-				@Override
-				public void run(IProgressMonitor pm) throws CoreException {
-					try{
-						IPackageFragmentRoot[] roots= getRootsToRemove(selection);
-						pm.beginTask(ActionMessages.RemoveFromClasspathAction_Removing, roots.length);
-						for (IPackageFragmentRoot root : roots) {
-							int jCoreFlags= IPackageFragmentRoot.NO_RESOURCE_MODIFICATION | IPackageFragmentRoot.ORIGINATING_PROJECT_CLASSPATH;
-							root.delete(IResource.NONE, jCoreFlags, new SubProgressMonitor(pm, 1));
-						}
-					} finally {
-						pm.done();
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(true, true, new WorkbenchRunnableAdapter(pm -> {
+				try{
+					IPackageFragmentRoot[] roots= getRootsToRemove(selection);
+					pm.beginTask(ActionMessages.RemoveFromClasspathAction_Removing, roots.length);
+					for (IPackageFragmentRoot root : roots) {
+						int jCoreFlags= IPackageFragmentRoot.NO_RESOURCE_MODIFICATION | IPackageFragmentRoot.ORIGINATING_PROJECT_CLASSPATH;
+						root.delete(IResource.NONE, jCoreFlags, new SubProgressMonitor(pm, 1));
 					}
+				} finally {
+					pm.done();
 				}
-		}));
+			}));
 		} catch (InvocationTargetException e) {
 			ExceptionHandler.handle(e, getShell(),
 					ActionMessages.RemoveFromClasspathAction_exception_dialog_title,

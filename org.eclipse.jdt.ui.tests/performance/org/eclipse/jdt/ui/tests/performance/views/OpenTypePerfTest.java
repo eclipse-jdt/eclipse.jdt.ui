@@ -25,7 +25,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
@@ -193,12 +192,9 @@ public class OpenTypePerfTest extends JdtPerformanceTestCase {
 				new TypeSelectionExtension() {
 					@Override
 					public ISelectionStatusValidator getSelectionValidator() {
-						return new ISelectionStatusValidator() {
-							@Override
-							public IStatus validate(Object[] selection) {
-								finish(openFirst);
-								return Status.OK_STATUS;
-							}
+						return selection -> {
+							finish(openFirst);
+							return Status.OK_STATUS;
 						};
 					}
 				});
@@ -227,20 +223,12 @@ public class OpenTypePerfTest extends JdtPerformanceTestCase {
 
 		if (! openFirst) {
 			stopMeasuring();
-			fShell.getDisplay().asyncExec(new Runnable() {
-				@Override
-				public void run() {
-					openTypeDialog.close();
-				}
-			});
+			fShell.getDisplay().asyncExec(() -> openTypeDialog.close());
 
 		} else {
-			fShell.getDisplay().asyncExec(new Runnable() {
-				@Override
-				public void run() {
-					openTypeDialog.getOkButton().notifyListeners(SWT.Selection, new Event());
-					stopMeasuring();
-				}
+			fShell.getDisplay().asyncExec(() -> {
+				openTypeDialog.getOkButton().notifyListeners(SWT.Selection, new Event());
+				stopMeasuring();
 			});
 		}
 	}

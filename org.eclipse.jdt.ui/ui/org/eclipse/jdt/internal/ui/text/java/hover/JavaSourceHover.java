@@ -21,14 +21,12 @@ import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
@@ -249,12 +247,7 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 					throw ex;
 			}
 
-			display.syncExec(new Runnable() {
-				@Override
-				public void run() {
-					topIndex[0]= textViewer.getTopIndex();
-				}
-			});
+			display.syncExec(() -> topIndex[0]= textViewer.getTopIndex());
 
 			int topLine= topIndex[0];
 			if (topLine == -1)
@@ -497,68 +490,65 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 	 * @since 3.8
 	 */
 	private IInformationControlCreator createInformationControlCreator(final boolean isResizable, final String statusFieldText, final boolean doShiftUp) {
-		return new IInformationControlCreator() {
-			@Override
-			public IInformationControl createInformationControl(final Shell parent) {
-				final IEditorPart editor= getEditor();
-				int orientation= SWT.NONE;
-				if (editor instanceof IWorkbenchPartOrientation)
-					orientation= ((IWorkbenchPartOrientation) editor).getOrientation();
+		return parent -> {
+			final IEditorPart editor= getEditor();
+			int orientation= SWT.NONE;
+			if (editor instanceof IWorkbenchPartOrientation)
+				orientation= ((IWorkbenchPartOrientation) editor).getOrientation();
 
-				return new SourceViewerInformationControl(parent, isResizable, orientation, statusFieldText) {
-					@Override
-					public void setLocation(Point location) {
-						Point loc= location;
-						if (doShiftUp && fUpwardShiftInLines > 0) {
-							Point size= super.computeSizeConstraints(0, fUpwardShiftInLines + 1);
-							//bracket hover is rendered above '}'
-							int y= location.y - size.y - 5; //AbstractInformationControlManager.fMarginY = 5
-							Rectangle trim= computeTrim();
-							loc= new Point(location.x + trim.x - getViewer().getTextWidget().getLeftMargin(), y - trim.height - trim.y);
-						}
-						super.setLocation(loc);
+			return new SourceViewerInformationControl(parent, isResizable, orientation, statusFieldText) {
+				@Override
+				public void setLocation(Point location) {
+					Point loc= location;
+					if (doShiftUp && fUpwardShiftInLines > 0) {
+						Point size= super.computeSizeConstraints(0, fUpwardShiftInLines + 1);
+						//bracket hover is rendered above '}'
+						int y= location.y - size.y - 5; //AbstractInformationControlManager.fMarginY = 5
+						Rectangle trim= computeTrim();
+						loc= new Point(location.x + trim.x - getViewer().getTextWidget().getLeftMargin(), y - trim.height - trim.y);
 					}
+					super.setLocation(loc);
+				}
 
-					@Override
-					public Point computeSizeConstraints(int widthInChars, int heightInChars) {
-						if (doShiftUp && fUpwardShiftInLines > 0) {
-							Point sizeConstraints= super.computeSizeConstraints(widthInChars, heightInChars);
-							return new Point(sizeConstraints.x, 0); //set height as 0 to ensure selection of bottom anchor in AbstractInformationControlManager.computeInformationControlLocation(...)
-						} else {
-							return super.computeSizeConstraints(widthInChars, heightInChars);
-						}
+				@Override
+				public Point computeSizeConstraints(int widthInChars, int heightInChars) {
+					if (doShiftUp && fUpwardShiftInLines > 0) {
+						Point sizeConstraints= super.computeSizeConstraints(widthInChars, heightInChars);
+						return new Point(sizeConstraints.x, 0); //set height as 0 to ensure selection of bottom anchor in AbstractInformationControlManager.computeInformationControlLocation(...)
+					} else {
+						return super.computeSizeConstraints(widthInChars, heightInChars);
 					}
+				}
 
-					@Override
-					public void setSize(int width, int height) {
-						if (doShiftUp && fUpwardShiftInLines != 0) {
-							//compute the correct height of hover, this was set to 0 in computeSizeConstraints(..)
-							Point size= super.computeSizeConstraints(0, fUpwardShiftInLines);
-							Rectangle trim= computeTrim();
-							super.setSize(width, size.y + trim.height - trim.y);
-						} else {
-							super.setSize(width, height);
-						}
+				@Override
+				public void setSize(int width, int height) {
+					if (doShiftUp && fUpwardShiftInLines != 0) {
+						//compute the correct height of hover, this was set to 0 in computeSizeConstraints(..)
+						Point size= super.computeSizeConstraints(0, fUpwardShiftInLines);
+						Rectangle trim= computeTrim();
+						super.setSize(width, size.y + trim.height - trim.y);
+					} else {
+						super.setSize(width, height);
 					}
+				}
 
-					@Override
-					public IInformationControlCreator getInformationPresenterControlCreator() {
-						if (doShiftUp && fUpwardShiftInLines > 0) {
-							// Hack: We don't wan't to have auto-enrichment when the mouse moves into the hover,
-							// but we do want F2 to persist the hover. The framework has no way to distinguish the
-							// two requests, so we have to implement this aspect.
-							for (StackTraceElement element : Thread.currentThread().getStackTrace()) {
-								if ("canMoveIntoInformationControl".equals(element.getMethodName()) //$NON-NLS-1$
-										&& "org.eclipse.jface.text.AbstractHoverInformationControlManager".equals(element.getClassName())) //$NON-NLS-1$
-									return null; //do not enrich bracket hover
-							}
-							return JavaSourceHover.this.createInformationControlCreator(isResizable && !isResizable, statusFieldText, false);
-						} else {
-							return super.getInformationPresenterControlCreator();
+				@Override
+				public IInformationControlCreator getInformationPresenterControlCreator() {
+					if (doShiftUp && fUpwardShiftInLines > 0) {
+						// Hack: We don't wan't to have auto-enrichment when the mouse moves into the hover,
+						// but we do want F2 to persist the hover. The framework has no way to distinguish the
+						// two requests, so we have to implement this aspect.
+						for (StackTraceElement element : Thread.currentThread().getStackTrace()) {
+							if ("canMoveIntoInformationControl".equals(element.getMethodName()) //$NON-NLS-1$
+									&& "org.eclipse.jface.text.AbstractHoverInformationControlManager".equals(element.getClassName())) //$NON-NLS-1$
+								return null; //do not enrich bracket hover
 						}
+						return JavaSourceHover.this.createInformationControlCreator(isResizable && !isResizable, statusFieldText, false);
+					} else {
+						return super.getInformationPresenterControlCreator();
 					}
-				};
-			}
+				}
+			};
 		};
 	}
 }

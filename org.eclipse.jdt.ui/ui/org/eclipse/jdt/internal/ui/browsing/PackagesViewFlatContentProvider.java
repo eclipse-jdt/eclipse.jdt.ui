@@ -216,26 +216,20 @@ public class PackagesViewFlatContentProvider extends LogicalPackagesProvider imp
 	}
 
 	private void postAdd(final Object child) {
-		postRunnable(new Runnable() {
-			@Override
-			public void run() {
-				Control ctrl = fViewer.getControl();
-				if (ctrl != null && !ctrl.isDisposed()) {
-					((TableViewer)fViewer).add(child);
-				}
+		postRunnable(() -> {
+			Control ctrl = fViewer.getControl();
+			if (ctrl != null && !ctrl.isDisposed()) {
+				((TableViewer)fViewer).add(child);
 			}
 		});
 	}
 
 
 	private void postRemove(final Object object) {
-		postRunnable(new Runnable() {
-			@Override
-			public void run() {
-				Control ctrl = fViewer.getControl();
-				if (ctrl != null && !ctrl.isDisposed()) {
-					((TableViewer)fViewer).remove(object);
-				}
+		postRunnable(() -> {
+			Control ctrl = fViewer.getControl();
+			if (ctrl != null && !ctrl.isDisposed()) {
+				((TableViewer)fViewer).remove(object);
 			}
 		});
 	}
@@ -284,13 +278,10 @@ public class PackagesViewFlatContentProvider extends LogicalPackagesProvider imp
 			new Exception("postRefresh: " + element).printStackTrace(System.out); //$NON-NLS-1$
 		}
 
-		postRunnable(new Runnable() {
-			@Override
-			public void run() {
-				Control ctrl= fViewer.getControl();
-				if (ctrl != null && !ctrl.isDisposed()) {
-					fViewer.refresh(element);
-				}
+		postRunnable(() -> {
+			Control ctrl= fViewer.getControl();
+			if (ctrl != null && !ctrl.isDisposed()) {
+				fViewer.refresh(element);
 			}
 		});
 	}

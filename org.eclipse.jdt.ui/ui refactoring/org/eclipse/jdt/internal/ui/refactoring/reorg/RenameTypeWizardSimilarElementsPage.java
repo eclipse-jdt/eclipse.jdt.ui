@@ -47,10 +47,7 @@ import org.eclipse.jface.dialogs.StatusDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -484,20 +481,8 @@ class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 		fTreeViewer.setContentProvider(new SimilarElementTreeContentProvider());
 		fTreeViewerLabelProvider= new SimilarLabelProvider();
 		fTreeViewer.setLabelProvider(fTreeViewerLabelProvider);
-		fTreeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				RenameTypeWizardSimilarElementsPage.this.treeViewerSelectionChanged(event);
-			}
-		});
-		fTreeViewer.addDoubleClickListener(new IDoubleClickListener() {
-
-			@Override
-			public void doubleClick(DoubleClickEvent event) {
-				RenameTypeWizardSimilarElementsPage.this.editCurrentElement();
-			}
-		});
+		fTreeViewer.addSelectionChangedListener(RenameTypeWizardSimilarElementsPage.this::treeViewerSelectionChanged);
+		fTreeViewer.addDoubleClickListener(event -> RenameTypeWizardSimilarElementsPage.this.editCurrentElement());
 	}
 
 	private void createSourceViewerComposite(Composite parent) {

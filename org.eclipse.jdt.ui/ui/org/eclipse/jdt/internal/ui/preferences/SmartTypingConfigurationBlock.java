@@ -14,7 +14,6 @@
 package org.eclipse.jdt.internal.ui.preferences;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
@@ -272,12 +271,7 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 			}
 		};
 		combinedStore.addPropertyChangeListener(propertyChangeListener);
-		link.addDisposeListener(new DisposeListener() {
-				@Override
-				public void widgetDisposed(org.eclipse.swt.events.DisposeEvent e) {
-					combinedStore.removePropertyChangeListener(propertyChangeListener);
-				}
-		});
+		link.addDisposeListener(e -> combinedStore.removePropertyChangeListener(propertyChangeListener));
 	}
 
 	private String getIndentMode() {

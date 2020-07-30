@@ -19,7 +19,6 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -187,25 +186,22 @@ public class OpenProjectAction extends SelectionDispatchAction implements IResou
 	}
 
 	private IWorkspaceRunnable createRunnable(final Object[] projects) {
-		return new IWorkspaceRunnable() {
-			@Override
-			public void run(IProgressMonitor monitor) throws CoreException {
-				monitor.beginTask("", projects.length); //$NON-NLS-1$
-				MultiStatus errorStatus= null;
-				for (Object p : projects) {
-					IProject project= (IProject) p;
-					try {
-						project.open(IResource.BACKGROUND_REFRESH, new SubProgressMonitor(monitor, 1));
-					} catch (CoreException e) {
-						if (errorStatus == null)
-							errorStatus = new MultiStatus(JavaPlugin.getPluginId(), IStatus.ERROR, ActionMessages.OpenProjectAction_error_message, null);
-						errorStatus.add(e.getStatus());
-					}
+		return monitor -> {
+			monitor.beginTask("", projects.length); //$NON-NLS-1$
+			MultiStatus errorStatus= null;
+			for (Object p : projects) {
+				IProject project= (IProject) p;
+				try {
+					project.open(IResource.BACKGROUND_REFRESH, new SubProgressMonitor(monitor, 1));
+				} catch (CoreException e) {
+					if (errorStatus == null)
+						errorStatus = new MultiStatus(JavaPlugin.getPluginId(), IStatus.ERROR, ActionMessages.OpenProjectAction_error_message, null);
+					errorStatus.add(e.getStatus());
 				}
-				monitor.done();
-				if (errorStatus != null)
-					throw new CoreException(errorStatus);
 			}
+			monitor.done();
+			if (errorStatus != null)
+				throw new CoreException(errorStatus);
 		};
 	}
 

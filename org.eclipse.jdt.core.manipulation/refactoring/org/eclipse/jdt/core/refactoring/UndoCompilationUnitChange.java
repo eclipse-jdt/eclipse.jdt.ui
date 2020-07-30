@@ -30,9 +30,9 @@ import org.eclipse.ltk.core.refactoring.ContentStamp;
 import org.eclipse.ltk.core.refactoring.UndoTextFileChange;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.manipulation.JavaManipulation;
 
 import org.eclipse.jdt.internal.core.manipulation.JavaManipulationMessages;
-import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.manipulation.Messages;
 
 /* package */ class UndoCompilationUnitChange extends UndoTextFileChange {
@@ -48,7 +48,7 @@ import org.eclipse.jdt.internal.core.manipulation.Messages;
 		IFile file= (IFile)cunit.getResource();
 		if (file == null) {
 			String message= Messages.format(JavaManipulationMessages.UndoCompilationUnitChange_no_file, TextProcessor.process(cunit.getElementName()));
-			throw new CoreException(new Status(IStatus.ERROR, JavaManipulationPlugin.getPluginId(), message));
+			throw new CoreException(new Status(IStatus.ERROR, JavaManipulation.ID_PLUGIN, message));
 		}
 		return file;
 	}

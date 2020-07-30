@@ -15,8 +15,6 @@
 package org.eclipse.jdt.internal.ui.refactoring;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
@@ -32,7 +30,6 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
@@ -40,16 +37,12 @@ import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.CellLabelProvider;
-import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.EditingSupport;
-import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.viewers.ViewerCell;
@@ -179,14 +172,9 @@ public class ExtractClassWizard extends RefactoringWizard {
 			text.setText(fDescriptor.getClassName());
 			text.selectAll();
 			text.setFocus();
-			text.addModifyListener(new ModifyListener() {
-
-				@Override
-				public void modifyText(ModifyEvent e) {
-					fDescriptor.setClassName(text.getText());
-					validateRefactoring();
-				}
-
+			text.addModifyListener(e -> {
+				fDescriptor.setClassName(text.getText());
+				validateRefactoring();
 			});
 			GridData gridData= new GridData(GridData.FILL_HORIZONTAL);
 			gridData.horizontalIndent= FieldDecorationRegistry.getDefault().getMaximumDecorationWidth();
@@ -226,14 +214,9 @@ public class ExtractClassWizard extends RefactoringWizard {
 			final Text text= new Text(group, SWT.BORDER);
 			fParameterNameDecoration= new ControlDecoration(text, SWT.TOP | SWT.LEAD);
 			text.setText(fDescriptor.getFieldName());
-			text.addModifyListener(new ModifyListener() {
-
-				@Override
-				public void modifyText(ModifyEvent e) {
-					fDescriptor.setFieldName(text.getText());
-					validateRefactoring();
-				}
-
+			text.addModifyListener(e -> {
+				fDescriptor.setFieldName(text.getText());
+				validateRefactoring();
 			});
 			GridData gridData= new GridData(GridData.FILL_HORIZONTAL);
 			gridData.horizontalIndent= FieldDecorationRegistry.getDefault().getMaximumDecorationWidth();
@@ -303,16 +286,11 @@ public class ExtractClassWizard extends RefactoringWizard {
 						Field selected= (Field) ss.getFirstElement();
 						String message= RefactoringMessages.ExtractClassWizard_dialog_message;
 						String title= RefactoringMessages.ExtractClassWizard_dialog_title;
-						InputDialog inputDialog= new InputDialog(getShell(), title, message, selected.getNewFieldName(), new IInputValidator() {
-
-							@Override
-							public String isValid(String newText) {
-								IStatus status= JavaConventionsUtil.validateIdentifier(newText, fDescriptor.getType());
-								if (!status.isOK())
-									return status.getMessage();
-								return null;
-							}
-
+						InputDialog inputDialog= new InputDialog(getShell(), title, message, selected.getNewFieldName(), newText -> {
+							IStatus status= JavaConventionsUtil.validateIdentifier(newText, fDescriptor.getType());
+							if (!status.isOK())
+								return status.getMessage();
+							return null;
 						});
 						if (inputDialog.open() == Window.OK) {
 							selected.setNewFieldName(inputDialog.getValue());
@@ -322,26 +300,19 @@ public class ExtractClassWizard extends RefactoringWizard {
 					}
 				}
 			});
-			tv.addCheckStateListener(new ICheckStateListener() {
-				@Override
-				public void checkStateChanged(CheckStateChangedEvent event) {
-					Field element= (Field) event.getElement();
-					element.setCreateField(event.getChecked());
-					validateRefactoring();
-					tv.refresh(element, true);
-				}
-
+			tv.addCheckStateListener(event -> {
+				Field element= (Field) event.getElement();
+				element.setCreateField(event.getChecked());
+				validateRefactoring();
+				tv.refresh(element, true);
 			});
-			tv.addSelectionChangedListener(new ISelectionChangedListener() {
-				@Override
-				public void selectionChanged(SelectionChangedEvent event) {
-					IStructuredSelection selection= (IStructuredSelection) tv.getSelection();
-					Field field= (Field) selection.getFirstElement();
-					if (selection.isEmpty()) {
-						editButton.setEnabled(false);
-					} else {
-						editButton.setEnabled(tv.getChecked(field));
-					}
+			tv.addSelectionChangedListener(event -> {
+				IStructuredSelection selection= (IStructuredSelection) tv.getSelection();
+				Field field= (Field) selection.getFirstElement();
+				if (selection.isEmpty()) {
+					editButton.setEnabled(false);
+				} else {
+					editButton.setEnabled(tv.getChecked(field));
 				}
 			});
 		}

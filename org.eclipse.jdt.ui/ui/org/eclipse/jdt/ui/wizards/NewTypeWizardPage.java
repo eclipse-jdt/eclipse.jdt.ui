@@ -32,8 +32,6 @@ import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.events.VerifyEvent;
-import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -897,22 +895,19 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		LayoutUtil.setWidthHint(text, getMaxFieldWidth());
 		TextFieldNavigationHandler.install(text);
 
-		text.addVerifyListener(new VerifyListener() {
-			@Override
-			public void verifyText(VerifyEvent e) {
-				if (fCanModifyPackage && ! fEnclosingTypeSelection.isSelected() && e.start == 0 && e.end == ((Text) e.widget).getCharCount()) {
-					String typeNameWithoutParameters= getTypeNameWithoutParameters(getTypeNameWithoutExtension(e.text));
-					int lastDot= typeNameWithoutParameters.lastIndexOf('.');
-					if (lastDot == -1 || lastDot == typeNameWithoutParameters.length() - 1)
-						return;
+		text.addVerifyListener(e -> {
+			if (fCanModifyPackage && ! fEnclosingTypeSelection.isSelected() && e.start == 0 && e.end == ((Text) e.widget).getCharCount()) {
+				String typeNameWithoutParameters= getTypeNameWithoutParameters(getTypeNameWithoutExtension(e.text));
+				int lastDot= typeNameWithoutParameters.lastIndexOf('.');
+				if (lastDot == -1 || lastDot == typeNameWithoutParameters.length() - 1)
+					return;
 
-					String pack= typeNameWithoutParameters.substring(0, lastDot);
-					if (validatePackageName(pack, null).getSeverity() == IStatus.ERROR)
-						return;
+				String pack= typeNameWithoutParameters.substring(0, lastDot);
+				if (validatePackageName(pack, null).getSeverity() == IStatus.ERROR)
+					return;
 
-					fPackageDialogField.setText(pack);
-					e.text= e.text.substring(lastDot + 1);
-				}
+				fPackageDialogField.setText(pack);
+				e.text= e.text.substring(lastDot + 1);
 			}
 		});
 	}
@@ -2829,17 +2824,14 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * @return the runnable to create the new type
 	 */
 	public IRunnableWithProgress getRunnable() {
-		return new IRunnableWithProgress() {
-			@Override
-			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-				try {
-					if (monitor == null) {
-						monitor= new NullProgressMonitor();
-					}
-					createType(monitor);
-				} catch (CoreException e) {
-					throw new InvocationTargetException(e);
+		return monitor -> {
+			try {
+				if (monitor == null) {
+					monitor= new NullProgressMonitor();
 				}
+				createType(monitor);
+			} catch (CoreException e) {
+				throw new InvocationTargetException(e);
 			}
 		};
 	}

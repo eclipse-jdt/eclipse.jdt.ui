@@ -83,13 +83,7 @@ public class SourceRange implements ISourceRange { // see https://bugs.eclipse.o
 	 * @return the sorted ranges, which are identical to the parameter ranges
 	 */
 	public static ISourceRange[] reverseSortByOffset(ISourceRange[] ranges){
-		Comparator<ISourceRange> comparator= new Comparator<ISourceRange>(){
-			@Override
-			public int compare(ISourceRange o1, ISourceRange o2){
-				return o2.getOffset() - o1.getOffset();
-			}
-		};
-		Arrays.sort(ranges, comparator);
+		Arrays.sort(ranges, Comparator.comparing(ISourceRange::getOffset).reversed());
 		return ranges;
 	}
 

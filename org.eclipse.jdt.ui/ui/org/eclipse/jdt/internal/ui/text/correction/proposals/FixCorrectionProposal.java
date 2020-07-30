@@ -27,7 +27,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.ImageDescriptor;
 
 import org.eclipse.jface.text.DocumentEvent;
@@ -204,12 +203,7 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 
 		refactoring.addCleanUp(fCleanUp);
 
-		IRunnableContext context= new IRunnableContext() {
-			@Override
-			public void run(boolean fork, boolean cancelable, IRunnableWithProgress runnable) throws InvocationTargetException, InterruptedException {
-				runnable.run(monitor == null ? new NullProgressMonitor() : monitor);
-			}
-		};
+		IRunnableContext context= (fork, cancelable, runnable) -> runnable.run(monitor == null ? new NullProgressMonitor() : monitor);
 
 		Shell shell= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 		RefactoringExecutionHelper helper= new RefactoringExecutionHelper(refactoring, IStatus.INFO, RefactoringSaveHelper.SAVE_REFACTORING, shell, context);

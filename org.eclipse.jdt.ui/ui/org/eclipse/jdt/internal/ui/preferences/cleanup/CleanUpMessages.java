@@ -83,6 +83,10 @@ public class CleanUpMessages extends NLS {
 	public static String CodeStyleTabPage_RadioName_UseAnonymous;
 	public static String CodeStyleTabPage_CheckboxName_SimplifyLambdaExpressionAndMethodRefSyntax;
 
+	public static String CodeStyleTabPage_GroupName_Optimization;
+
+	public static String CodeStyleTabPage_CheckboxName_PrecompileRegEx;
+
 	public static String ContributedCleanUpTabPage_ErrorPage_message;
 
 	public static String MemberAccessesTabPage_CheckboxName_ChangeAccessesThroughInstances;
@@ -128,6 +132,7 @@ public class CleanUpMessages extends NLS {
 	public static String UnnecessaryCodeTabPage_CheckboxName_RedundantSemicolons;
 	public static String UnnecessaryCodeTabPage_CheckboxName_RedundantSemicolons_description;
 	public static String UnnecessaryCodeTabPage_CheckboxName_RedundantArrayCreation_description;
+	public static String UnnecessaryCodeTabPage_CheckboxName_ObjectsEquals;
 	public static String UnnecessaryCodeTabPage_CheckboxName_UnnecessaryVarargsArrayCreation;
 	public static String UnnecessaryCodeTabPage_CheckboxName_UnusedConstructors;
 	public static String UnnecessaryCodeTabPage_CheckboxName_UnusedFields;

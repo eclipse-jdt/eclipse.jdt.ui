@@ -30,8 +30,6 @@ import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
@@ -71,12 +69,9 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 	 * classes. It is added by the respective factory methods and
 	 * updates the page's preview on each change.
 	 */
-	protected final Observer fUpdater= new Observer() {
-		@Override
-		public void update(Observable o, Object arg) {
-			doUpdatePreview();
-			notifyValuesModified();
-		}
+	protected final Observer fUpdater= (o, arg) -> {
+		doUpdatePreview();
+		notifyValuesModified();
 	};
 
 
@@ -379,12 +374,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 				}
 			});
 
-			fNumberText.addModifyListener(new ModifyListener() {
-				@Override
-				public void modifyText(ModifyEvent e) {
-					fieldModified();
-				}
-			});
+			fNumberText.addModifyListener(e -> fieldModified());
 		}
 
 		private IStatus createErrorStatus() {
@@ -549,12 +539,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 				}
 			});
 
-			fText.addModifyListener(new ModifyListener() {
-				@Override
-				public void modifyText(ModifyEvent e) {
-					fieldModified();
-				}
-			});
+			fText.addModifyListener(e -> fieldModified());
 		}
 
 		private IStatus createErrorStatus(String errorText) {

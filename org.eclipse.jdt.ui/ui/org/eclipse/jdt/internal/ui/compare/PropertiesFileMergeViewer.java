@@ -23,7 +23,6 @@ import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.TextViewer;
@@ -74,14 +73,11 @@ public class PropertiesFileMergeViewer extends TextMergeViewer {
 		if (fPreferenceStore == null) {
 			fSourceViewerConfigurations= new ArrayList<>(3);
 			fPreferenceStore= JavaPlugin.getDefault().getCombinedPreferenceStore();
-			fPreferenceChangeListener= new IPropertyChangeListener() {
-				@Override
-				public void propertyChange(PropertyChangeEvent event) {
-					Iterator<SourceViewerConfiguration> iter= fSourceViewerConfigurations.iterator();
-					while (iter.hasNext())
-						((PropertiesFileSourceViewerConfiguration)iter.next()).handlePropertyChangeEvent(event);
-					invalidateTextPresentation();
-				}
+			fPreferenceChangeListener= event -> {
+				Iterator<SourceViewerConfiguration> iter= fSourceViewerConfigurations.iterator();
+				while (iter.hasNext())
+					((PropertiesFileSourceViewerConfiguration)iter.next()).handlePropertyChangeEvent(event);
+				invalidateTextPresentation();
 			};
 			fPreferenceStore.addPropertyChangeListener(fPreferenceChangeListener);
 		}

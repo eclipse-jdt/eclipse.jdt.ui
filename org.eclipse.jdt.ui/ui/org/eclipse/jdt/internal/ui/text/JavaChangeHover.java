@@ -15,13 +15,11 @@ package org.eclipse.jdt.internal.ui.text;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.TextUtilities;
@@ -79,13 +77,10 @@ public class JavaChangeHover extends LineChangeHover  {
 	 */
 	@Override
 	public IInformationControlCreator getHoverControlCreator() {
-		return new IInformationControlCreator() {
-			@Override
-			public IInformationControl createInformationControl(Shell parent) {
-				fInformationControl= new ChangeHoverInformationControl(parent, false, fOrientation, fPartition, EditorsUI.getTooltipAffordanceString());
-				fInformationControl.setHorizontalScrollPixel(fLastScrollIndex);
-				return fInformationControl;
-			}
+		return parent -> {
+			fInformationControl= new ChangeHoverInformationControl(parent, false, fOrientation, fPartition, EditorsUI.getTooltipAffordanceString());
+			fInformationControl.setHorizontalScrollPixel(fLastScrollIndex);
+			return fInformationControl;
 		};
 	}
 
@@ -95,13 +90,10 @@ public class JavaChangeHover extends LineChangeHover  {
 	 */
 	@Override
 	public IInformationControlCreator getInformationPresenterControlCreator() {
-		return new IInformationControlCreator() {
-			@Override
-			public IInformationControl createInformationControl(Shell parent) {
-				fInformationControl= new ChangeHoverInformationControl(parent, true, fOrientation, fPartition, null);
-				fInformationControl.setHorizontalScrollPixel(fLastScrollIndex);
-				return fInformationControl;
-			}
+		return parent -> {
+			fInformationControl= new ChangeHoverInformationControl(parent, true, fOrientation, fPartition, null);
+			fInformationControl.setHorizontalScrollPixel(fLastScrollIndex);
+			return fInformationControl;
 		};
 	}
 

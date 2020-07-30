@@ -23,11 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.StringTokenizer;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-
-import org.eclipse.core.resources.IWorkspaceRunnable;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
@@ -96,24 +92,21 @@ public abstract class LineColumnSelectionTestCase extends AbstractJunit4CUTestCa
 
 	/* @require refactoring.checkActivation().isOK() */
 	protected void performTest(final ICompilationUnit unit, final Refactoring refactoring, final String out) throws Exception {
-		JavaCore.run(new IWorkspaceRunnable() {
-			@Override
-			public void run(IProgressMonitor monitor) throws CoreException {
-				String original= unit.getSource();
-				final Change change= refactoring.createChange(monitor);
-				assertNotNull(change);
-				change.initializeValidationData(new NullProgressMonitor());
-				assertFalse(change.isValid(new NullProgressMonitor()).hasFatalError());
-				Change undo= change.perform(monitor);
-				change.dispose();
-				assertNotNull(undo);
-				compareSource(unit.getSource(), out);
-				undo.initializeValidationData(new NullProgressMonitor());
-				assertFalse(undo.isValid(new NullProgressMonitor()).hasFatalError());
-				undo.perform(monitor);
-				undo.dispose();
-				compareSource(unit.getSource(), original);
-			}
+		JavaCore.run(monitor -> {
+			String original= unit.getSource();
+			final Change change= refactoring.createChange(monitor);
+			assertNotNull(change);
+			change.initializeValidationData(new NullProgressMonitor());
+			assertFalse(change.isValid(new NullProgressMonitor()).hasFatalError());
+			Change undo= change.perform(monitor);
+			change.dispose();
+			assertNotNull(undo);
+			compareSource(unit.getSource(), out);
+			undo.initializeValidationData(new NullProgressMonitor());
+			assertFalse(undo.isValid(new NullProgressMonitor()).hasFatalError());
+			undo.perform(monitor);
+			undo.dispose();
+			compareSource(unit.getSource(), original);
 		}, new NullProgressMonitor());
 	}
 }

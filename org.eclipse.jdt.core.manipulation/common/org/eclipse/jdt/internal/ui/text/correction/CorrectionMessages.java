@@ -62,6 +62,7 @@ public final class CorrectionMessages extends NLS {
 	public static String QuickAssistProcessor_convert_to_method_reference;
 	public static String QuickAssistProcessor_convert_to_multiple_singletype_catch_blocks;
 	public static String QuickAssistProcessor_convert_to_single_multicatch_block;
+	public static String QuickAssistProcessor_convert_to_string_format;
 	public static String QuickAssistProcessor_convert_to_try_with_resource;
 	public static String QuickAssistProcessor_convert_to_string_buffer_description;
 	public static String QuickAssistProcessor_exceptiontothrows_description;
@@ -351,6 +352,7 @@ public final class CorrectionMessages extends NLS {
 	public static String TypeChangeCompletionProposal_method_name;
 	public static String ImplementInterfaceProposal_name;
 	public static String AddUnimplementedMethodsOperation_AddMissingMethod_group;
+	public static String AddUnimplementedMethodReferenceOperation_AddMissingMethod_group;
 	public static String AdvancedQuickAssistProcessor_convertToIfReturn;
 	public static String AdvancedQuickAssistProcessor_combineSelectedStrings;
 	public static String AdvancedQuickAssistProcessor_convertToIfElse_description;

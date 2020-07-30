@@ -375,24 +375,18 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 	 * Updates the package icon
 	 */
 	 private void postUpdateIcon(final IJavaElement element) {
-	 	postRunnable(new Runnable() {
-			@Override
-			public void run() {
-				Control ctrl= fViewer.getControl();
-				if (ctrl != null && !ctrl.isDisposed())
-					fViewer.update(element, new String[]{IBasicPropertyConstants.P_IMAGE});
-			}
+	 	postRunnable(() -> {
+			Control ctrl= fViewer.getControl();
+			if (ctrl != null && !ctrl.isDisposed())
+				fViewer.update(element, new String[]{IBasicPropertyConstants.P_IMAGE});
 		});
 	 }
 
 	private void postRefresh(final Object root, final boolean updateLabels) {
-		postRunnable(new Runnable() {
-			@Override
-			public void run() {
-				Control ctrl= fViewer.getControl();
-				if (ctrl != null && !ctrl.isDisposed())
-					fViewer.refresh(root, updateLabels);
-			}
+		postRunnable(() -> {
+			Control ctrl= fViewer.getControl();
+			if (ctrl != null && !ctrl.isDisposed())
+				fViewer.refresh(root, updateLabels);
 		});
 	}
 
@@ -408,28 +402,25 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 		if (elements == null || elements.length <= 0)
 			return;
 
-		postRunnable(new Runnable() {
-			@Override
-			public void run() {
-				Control ctrl= fViewer.getControl();
-				if (ctrl != null && !ctrl.isDisposed()) {
-					Object[] newElements= getNewElements(elements);
-					if (fViewer instanceof AbstractTreeViewer) {
-						if (fViewer.testFindItem(parent) == null) {
-							Object root= ((AbstractTreeViewer)fViewer).getInput();
-							if (root != null)
-								((AbstractTreeViewer)fViewer).add(root, newElements);
-						}
-						else
-							((AbstractTreeViewer)fViewer).add(parent, newElements);
+		postRunnable(() -> {
+			Control ctrl= fViewer.getControl();
+			if (ctrl != null && !ctrl.isDisposed()) {
+				Object[] newElements= getNewElements(elements);
+				if (fViewer instanceof AbstractTreeViewer) {
+					if (fViewer.testFindItem(parent) == null) {
+						Object root= ((AbstractTreeViewer)fViewer).getInput();
+						if (root != null)
+							((AbstractTreeViewer)fViewer).add(root, newElements);
 					}
-					else if (fViewer instanceof ListViewer)
-						((ListViewer)fViewer).add(newElements);
-					else if (fViewer instanceof TableViewer)
-						((TableViewer)fViewer).add(newElements);
-					if (fViewer.testFindItem(elements[0]) != null)
-						fBrowsingPart.adjustInputAndSetSelection(elements[0]);
+					else
+						((AbstractTreeViewer)fViewer).add(parent, newElements);
 				}
+				else if (fViewer instanceof ListViewer)
+					((ListViewer)fViewer).add(newElements);
+				else if (fViewer instanceof TableViewer)
+					((TableViewer)fViewer).add(newElements);
+				if (fViewer.testFindItem(elements[0]) != null)
+					fBrowsingPart.adjustInputAndSetSelection(elements[0]);
 			}
 		});
 	}
@@ -453,32 +444,26 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 		if (elements.length <= 0)
 			return;
 
-		postRunnable(new Runnable() {
-			@Override
-			public void run() {
-				Control ctrl= fViewer.getControl();
-				if (ctrl != null && !ctrl.isDisposed()) {
-					if (fViewer instanceof AbstractTreeViewer)
-						((AbstractTreeViewer)fViewer).remove(elements);
-					else if (fViewer instanceof ListViewer)
-						((ListViewer)fViewer).remove(elements);
-					else if (fViewer instanceof TableViewer)
-						((TableViewer)fViewer).remove(elements);
-				}
+		postRunnable(() -> {
+			Control ctrl= fViewer.getControl();
+			if (ctrl != null && !ctrl.isDisposed()) {
+				if (fViewer instanceof AbstractTreeViewer)
+					((AbstractTreeViewer)fViewer).remove(elements);
+				else if (fViewer instanceof ListViewer)
+					((ListViewer)fViewer).remove(elements);
+				else if (fViewer instanceof TableViewer)
+					((TableViewer)fViewer).remove(elements);
 			}
 		});
 	}
 
 	private void postAdjustInputAndSetSelection(final Object element) {
-		postRunnable(new Runnable() {
-			@Override
-			public void run() {
-				Control ctrl= fViewer.getControl();
-				if (ctrl != null && !ctrl.isDisposed()) {
-					ctrl.setRedraw(false);
-					fBrowsingPart.adjustInputAndSetSelection(element);
-					ctrl.setRedraw(true);
-				}
+		postRunnable(() -> {
+			Control ctrl= fViewer.getControl();
+			if (ctrl != null && !ctrl.isDisposed()) {
+				ctrl.setRedraw(false);
+				fBrowsingPart.adjustInputAndSetSelection(element);
+				ctrl.setRedraw(true);
 			}
 		});
 	}

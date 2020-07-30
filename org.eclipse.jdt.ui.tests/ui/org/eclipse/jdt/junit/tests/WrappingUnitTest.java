@@ -26,7 +26,6 @@ import org.eclipse.ui.PartInitException;
 
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.junit.ui.ITraceDisplay;
 import org.eclipse.jdt.internal.junit.ui.TextualTrace;
 
 /**
@@ -37,12 +36,7 @@ public class WrappingUnitTest {
 	public void test00wrapSecondLine() throws Exception {
 		TextualTrace trace = new TextualTrace("12345\n1234512345",
 				new String[0]);
-		trace.display(new ITraceDisplay() {
-			@Override
-			public void addTraceLine(int lineType, String label) {
-				assertEquals("12345", label);
-			}
-		}, 5);
+		trace.display((lineType, label) -> assertEquals("12345", label), 5);
 	}
 
 	@Test
@@ -106,18 +100,15 @@ public class WrappingUnitTest {
 
 		final boolean[] done = { false };
 
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				synchronized (done) {
-					try {
-						test.waitForTableToFill(17, 50, false);
-						fail();
+		new Thread(() -> {
+			synchronized (done) {
+				try {
+					test.waitForTableToFill(17, 50, false);
+					fail();
 //					} catch (AssertionFailedError e) {
 //						done[0] = true;
-					} catch (PartInitException e) {
-						fail();// bah.
-					}
+				} catch (PartInitException e) {
+					fail();// bah.
 				}
 			}
 		}).start();

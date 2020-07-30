@@ -19,7 +19,6 @@ import java.util.List;
 import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 
 import org.eclipse.jdt.core.ISourceRange;
 
@@ -37,12 +36,9 @@ public class SelectionHistory {
 		Assert.isNotNull(editor);
 		fEditor= editor;
 		fHistory= new ArrayList<>(3);
-		fSelectionListener= new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				if (fSelectionChangeListenerCounter == 0)
-					flush();
-			}
+		fSelectionListener= event -> {
+			if (fSelectionChangeListenerCounter == 0)
+				flush();
 		};
 		fEditor.getSelectionProvider().addSelectionChangedListener(fSelectionListener);
 	}

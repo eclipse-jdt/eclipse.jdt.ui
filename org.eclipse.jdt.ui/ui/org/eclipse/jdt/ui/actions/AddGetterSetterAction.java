@@ -624,19 +624,15 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	}
 
 	private IRequestQuery skipReplaceQuery() {
-		return new IRequestQuery() {
-
-			@Override
-			public int doQuery(IMember method) {
-				int[] returnCodes= { IRequestQuery.YES, IRequestQuery.NO, IRequestQuery.YES_ALL, IRequestQuery.CANCEL};
-				String skipLabel= ActionMessages.AddGetterSetterAction_SkipExistingDialog_skip_label;
-				String replaceLabel= ActionMessages.AddGetterSetterAction_SkipExistingDialog_replace_label;
-				String skipAllLabel= ActionMessages.AddGetterSetterAction_SkipExistingDialog_skipAll_label;
-				String[] options= { skipLabel, replaceLabel, skipAllLabel, IDialogConstants.CANCEL_LABEL};
-				String methodName= JavaElementLabels.getElementLabel(method, JavaElementLabels.M_PARAMETER_TYPES);
-				String formattedMessage= Messages.format(ActionMessages.AddGetterSetterAction_SkipExistingDialog_message, BasicElementLabels.getJavaElementName(methodName));
-				return showQueryDialog(formattedMessage, options, returnCodes);
-			}
+		return method -> {
+			int[] returnCodes= { IRequestQuery.YES, IRequestQuery.NO, IRequestQuery.YES_ALL, IRequestQuery.CANCEL};
+			String skipLabel= ActionMessages.AddGetterSetterAction_SkipExistingDialog_skip_label;
+			String replaceLabel= ActionMessages.AddGetterSetterAction_SkipExistingDialog_replace_label;
+			String skipAllLabel= ActionMessages.AddGetterSetterAction_SkipExistingDialog_skipAll_label;
+			String[] options= { skipLabel, replaceLabel, skipAllLabel, IDialogConstants.CANCEL_LABEL};
+			String methodName= JavaElementLabels.getElementLabel(method, JavaElementLabels.M_PARAMETER_TYPES);
+			String formattedMessage= Messages.format(ActionMessages.AddGetterSetterAction_SkipExistingDialog_message, BasicElementLabels.getJavaElementName(methodName));
+			return showQueryDialog(formattedMessage, options, returnCodes);
 		};
 	}
 
@@ -647,14 +643,10 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			return IRequestQuery.CANCEL;
 		}
 		final int[] result= { Window.CANCEL};
-		shell.getDisplay().syncExec(new Runnable() {
-
-			@Override
-			public void run() {
-				String title= ActionMessages.AddGetterSetterAction_QueryDialog_title;
-				MessageDialog dialog= new MessageDialog(shell, title, null, message, MessageDialog.QUESTION, buttonLabels, 0);
-				result[0]= dialog.open();
-			}
+		shell.getDisplay().syncExec(() -> {
+			String title= ActionMessages.AddGetterSetterAction_QueryDialog_title;
+			MessageDialog dialog= new MessageDialog(shell, title, null, message, MessageDialog.QUESTION, buttonLabels, 0);
+			result[0]= dialog.open();
 		});
 		int returnVal= result[0];
 		return returnVal < 0 ? IRequestQuery.CANCEL : returnCodes[returnVal];

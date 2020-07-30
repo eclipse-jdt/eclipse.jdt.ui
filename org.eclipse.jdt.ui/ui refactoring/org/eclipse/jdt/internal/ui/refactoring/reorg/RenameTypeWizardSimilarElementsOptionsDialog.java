@@ -29,8 +29,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenamingNameSuggestor;
 
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 
@@ -125,31 +123,19 @@ public class RenameTypeWizardSimilarElementsOptionsDialog extends MessageDialog 
 		fWarningLabel.setLayoutData(gridData);
 		fWarningLabel.setFont(warningComposite.getFont());
 
-		fExactStrategyRadio.setDialogFieldListener(new IDialogFieldListener() {
-
-			@Override
-			public void dialogFieldChanged(DialogField field) {
-				updateLabel();
-				fSelectedStrategy= RenamingNameSuggestor.STRATEGY_EXACT;
-			}
+		fExactStrategyRadio.setDialogFieldListener(field -> {
+			updateLabel();
+			fSelectedStrategy= RenamingNameSuggestor.STRATEGY_EXACT;
 		});
 
-		fEmbeddedStrategyRadio.setDialogFieldListener(new IDialogFieldListener() {
-
-			@Override
-			public void dialogFieldChanged(DialogField field) {
-				updateLabel();
-				fSelectedStrategy= RenamingNameSuggestor.STRATEGY_EMBEDDED;
-			}
+		fEmbeddedStrategyRadio.setDialogFieldListener(field -> {
+			updateLabel();
+			fSelectedStrategy= RenamingNameSuggestor.STRATEGY_EMBEDDED;
 		});
 
-		fSuffixStrategyRadio.setDialogFieldListener(new IDialogFieldListener() {
-
-			@Override
-			public void dialogFieldChanged(DialogField field) {
-				updateLabel();
-				fSelectedStrategy= RenamingNameSuggestor.STRATEGY_SUFFIX;
-			}
+		fSuffixStrategyRadio.setDialogFieldListener(field -> {
+			updateLabel();
+			fSelectedStrategy= RenamingNameSuggestor.STRATEGY_SUFFIX;
 		});
 
 		updateLabel();

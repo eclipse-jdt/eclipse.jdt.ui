@@ -406,12 +406,7 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 		 *
 		 */
 		public HoverManager() {
-			super(new IInformationControlCreator() {
-				@Override
-				public IInformationControl createInformationControl(Shell parent) {
-					return new DefaultInformationControl(parent);
-				}
-			});
+			super(DefaultInformationControl::new);
 
 			setMargins(5, 10);
 			setAnchor(ANCHOR_BOTTOM);
@@ -476,14 +471,7 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 		fMouseListener= new MyMouseListener();
 		fMenuDetectListener= new MyMenuDetectListener();
 		fDisposeListener= new MyDisposeListener();
-		fViewportListener= new IViewportListener() {
-
-			@Override
-			public void viewportChanged(int verticalOffset) {
-				dispose();
-			}
-
-		};
+		fViewportListener= verticalOffset -> dispose();
 		fLayouter= new LinearLayouter();
 
 		if (access instanceof IAnnotationAccessExtension)

@@ -794,6 +794,10 @@ public final class JavaModelUtil {
 	}
 
 
+	public static boolean is40OrHigher(String compliance) {
+		return !isVersionLessThan(compliance, JavaCore.VERSION_1_4);
+	}
+
 	public static boolean is50OrHigher(String compliance) {
 		return !isVersionLessThan(compliance, JavaCore.VERSION_1_5);
 	}
@@ -836,6 +840,16 @@ public final class JavaModelUtil {
 
 	public static boolean is15OrHigher(String compliance) {
 		return !isVersionLessThan(compliance, JavaCore.VERSION_15);
+	}
+
+	/**
+	 * Checks if the given project or workspace has source compliance 1.4 or greater.
+	 *
+	 * @param project the project to test or <code>null</code> to test the workspace settings
+	 * @return <code>true</code> if the given project or workspace has source compliance 1.4 or greater.
+	 */
+	public static boolean is1d4OrHigher(IJavaProject project) {
+		return is40OrHigher(getSourceCompliance(project));
 	}
 
 	/**

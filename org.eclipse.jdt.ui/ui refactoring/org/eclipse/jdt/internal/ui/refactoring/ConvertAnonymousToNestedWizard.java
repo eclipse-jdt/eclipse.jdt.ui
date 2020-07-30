@@ -14,8 +14,6 @@
 package org.eclipse.jdt.internal.ui.refactoring;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -143,12 +141,9 @@ public class ConvertAnonymousToNestedWizard extends RefactoringWizard {
 
 			final Text classNameField= new Text(result, SWT.BORDER | SWT.SINGLE);
 			classNameField.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			classNameField.addModifyListener(new ModifyListener(){
-				@Override
-				public void modifyText(ModifyEvent e) {
-					ConvertAnonymousToNestedInputPage.this.getConvertRefactoring().setClassName(classNameField.getText());
-					ConvertAnonymousToNestedInputPage.this.updateStatus();
-				}
+			classNameField.addModifyListener(e -> {
+				ConvertAnonymousToNestedInputPage.this.getConvertRefactoring().setClassName(classNameField.getText());
+				ConvertAnonymousToNestedInputPage.this.updateStatus();
 			});
 			TextFieldNavigationHandler.install(classNameField);
 			return classNameField;

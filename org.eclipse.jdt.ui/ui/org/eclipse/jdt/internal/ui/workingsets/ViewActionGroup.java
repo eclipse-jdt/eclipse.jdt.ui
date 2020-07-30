@@ -58,10 +58,7 @@ public class ViewActionGroup extends ActionGroup {
 		fChangeListener= changeListener;
 		fSite= site;
 		if (fChangeListener == null) {
-			fChangeListener = new IPropertyChangeListener() {
-				@Override
-				public void propertyChange(PropertyChangeEvent event) {}
-			};
+			fChangeListener = event -> {};
 		}
 		fFilterActionGroup= new WorkingSetFilterActionGroup(site, fChangeListener);
 		fShowActionGroup= new WorkingSetShowActionGroup(site);

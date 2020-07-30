@@ -14,8 +14,6 @@
 package org.eclipse.jdt.internal.ui.refactoring;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -107,12 +105,7 @@ public class ParameterEditDialog extends StatusDialog {
 			fType.setLayoutData(gd);
 			fType.setText(fParameter.getNewTypeName());
 			fType.addModifyListener(
-				new ModifyListener() {
-					@Override
-					public void modifyText(ModifyEvent e) {
-						validate((Text)e.widget);
-					}
-				});
+				e -> validate((Text)e.widget));
 			TextFieldNavigationHandler.install(fType);
 			JavaTypeCompletionProcessor processor= new JavaTypeCompletionProcessor(true, false);
 			processor.setCompletionContext(fContext.getCuHandle(), fContext.getBeforeString(), fContext.getAfterString());
@@ -128,12 +121,7 @@ public class ParameterEditDialog extends StatusDialog {
 		fName.setLayoutData(gd);
 		fName.setText(newName);
 		fName.addModifyListener(
-			new ModifyListener() {
-				@Override
-				public void modifyText(ModifyEvent e) {
-					validate((Text)e.widget);
-				}
-			});
+			e -> validate((Text)e.widget));
 		TextFieldNavigationHandler.install(fName);
 
 		if (fEditDefault && fParameter.isAdded()) {
@@ -144,12 +132,7 @@ public class ParameterEditDialog extends StatusDialog {
 			fDefaultValue.setLayoutData(gd);
 			fDefaultValue.setText(fParameter.getDefaultValue());
 			fDefaultValue.addModifyListener(
-				new ModifyListener() {
-					@Override
-					public void modifyText(ModifyEvent e) {
-						validate((Text)e.widget);
-					}
-				});
+				e -> validate((Text)e.widget));
 			TextFieldNavigationHandler.install(fDefaultValue);
 		}
 		applyDialogFont(result);

@@ -80,18 +80,15 @@ public class JavaNavigatorLabelProvider implements ICommonLabelProvider, IStyled
 
 		delegeteLabelProvider.setIsFlatLayout(fStateModel
 				.getBooleanProperty(Values.IS_LAYOUT_FLAT));
-		fLayoutPropertyListener = new IPropertyChangeListener() {
-			@Override
-			public void propertyChange(PropertyChangeEvent event) {
-				if (Values.IS_LAYOUT_FLAT.equals(event.getProperty())) {
-					if (event.getNewValue() != null) {
-						boolean newValue = ((Boolean) event.getNewValue())
-								.booleanValue() ? true : false;
-						delegeteLabelProvider.setIsFlatLayout(newValue);
-					}
+		fLayoutPropertyListener = event -> {
+			if (Values.IS_LAYOUT_FLAT.equals(event.getProperty())) {
+				if (event.getNewValue() != null) {
+					boolean newValue = ((Boolean) event.getNewValue())
+							.booleanValue() ? true : false;
+					delegeteLabelProvider.setIsFlatLayout(newValue);
 				}
-
 			}
+
 		};
 		fStateModel.addPropertyChangeListener(fLayoutPropertyListener);
 	}

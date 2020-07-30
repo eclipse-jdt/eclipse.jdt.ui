@@ -31,19 +31,16 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -152,12 +149,7 @@ public class ChangeExceptionsControl extends Composite {
 		fTableViewer.setUseHashlookup(true);
 		fTableViewer.setContentProvider(new ExceptionInfoContentProvider());
 		fTableViewer.setLabelProvider(new ExceptionInfoLabelProvider());
-		fTableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				updateButtonsEnabledState();
-			}
-		});
+		fTableViewer.addSelectionChangedListener(event -> updateButtonsEnabledState());
 	}
 
 	private ExceptionInfo[] getSelectedItems() {
@@ -256,17 +248,14 @@ public class ChangeExceptionsControl extends Composite {
 		dialog.setTitle(RefactoringMessages.ChangeExceptionsControl_choose_title);
 		dialog.setMessage(RefactoringMessages.ChangeExceptionsControl_choose_message);
 		dialog.setInitialPattern("*Exception*"); //$NON-NLS-1$
-		dialog.setValidator(new ISelectionStatusValidator() {
-			@Override
-			public IStatus validate(Object[] selection) {
-				if (selection.length == 0)
-					return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
-				try {
-					return checkException((IType)selection[0]);
-				} catch (JavaModelException e) {
-					JavaPlugin.log(e);
-					return StatusInfo.OK_STATUS;
-				}
+		dialog.setValidator(selection -> {
+			if (selection.length == 0)
+				return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
+			try {
+				return checkException((IType)selection[0]);
+			} catch (JavaModelException e) {
+				JavaPlugin.log(e);
+				return StatusInfo.OK_STATUS;
 			}
 		});
 

@@ -38,13 +38,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.viewers.CheckStateChangedEvent;
-import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -402,20 +398,8 @@ public class PullUpMethodPage extends UserInputWizardPage {
 		fTreeViewer.setLabelProvider(new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT | JavaElementLabelProvider.SHOW_SMALL_ICONS));
 		fTreeViewer.setUseHashlookup(true);
 		fTreeViewer.setComparator(new JavaElementComparator());
-		fTreeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-
-			@Override
-			public void selectionChanged(final SelectionChangedEvent event) {
-				treeViewerSelectionChanged(event);
-			}
-		});
-		fTreeViewer.addCheckStateListener(new ICheckStateListener() {
-
-			@Override
-			public void checkStateChanged(final CheckStateChangedEvent event) {
-				updateSelectionLabel();
-			}
-		});
+		fTreeViewer.addSelectionChangedListener(this::treeViewerSelectionChanged);
+		fTreeViewer.addCheckStateListener(event -> updateSelectionLabel());
 	}
 
 	private void createTypeHierarchyLabel(final Composite composite) {
@@ -472,15 +456,11 @@ public class PullUpMethodPage extends UserInputWizardPage {
 
 	private void initializeTreeViewer() {
 		try {
-			getContainer().run(false, false, new IRunnableWithProgress() {
-
-				@Override
-				public void run(final IProgressMonitor pm) {
-					try {
-						initializeTreeViewer(pm);
-					} finally {
-						pm.done();
-					}
+			getContainer().run(false, false, pm -> {
+				try {
+					initializeTreeViewer(pm);
+				} finally {
+					pm.done();
 				}
 			});
 		} catch (InvocationTargetException e) {

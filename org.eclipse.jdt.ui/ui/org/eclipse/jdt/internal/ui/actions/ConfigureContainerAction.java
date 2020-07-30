@@ -18,11 +18,9 @@ import java.lang.reflect.InvocationTargetException;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
@@ -94,14 +92,11 @@ public class ConfigureContainerAction implements IObjectActionDelegate {
 			if (context == null) {
 				context= PlatformUI.getWorkbench().getProgressService();
 			}
-			context.run(true, true, new IRunnableWithProgress() {
-				@Override
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					try {
-						project.setRawClasspath(newEntries, project.getOutputLocation(), monitor);
-					} catch (CoreException e) {
-						throw new InvocationTargetException(e);
-					}
+			context.run(true, true, monitor -> {
+				try {
+					project.setRawClasspath(newEntries, project.getOutputLocation(), monitor);
+				} catch (CoreException e) {
+					throw new InvocationTargetException(e);
 				}
 			});
 		} catch (JavaModelException e) {

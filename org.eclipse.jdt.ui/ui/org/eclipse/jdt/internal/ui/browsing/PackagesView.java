@@ -218,12 +218,7 @@ public class PackagesView extends JavaBrowsingPart{
 	@Override
 	public <T> T getAdapter(Class<T> key) {
 		if (key == IShowInTargetList.class) {
-			return (T) new IShowInTargetList() {
-				@Override
-				public String[] getShowInTargetIds() {
-					return new String[] { JavaUI.ID_PACKAGES };
-				}
-			};
+			return (T) (IShowInTargetList) () -> new String[] { JavaUI.ID_PACKAGES };
 		}
 		return super.getAdapter(key);
 	}

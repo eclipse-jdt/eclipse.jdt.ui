@@ -26,8 +26,6 @@ import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
-import org.eclipse.swt.events.PaintEvent;
-import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
@@ -336,12 +334,9 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			gridData.widthHint= 17;
 			gridData.heightHint= 16;
 			canvas.setLayoutData(gridData);
-			canvas.addPaintListener(new PaintListener() {
-				@Override
-				public void paintControl(PaintEvent e) {
-					e.gc.setFont(null);
-					fMarkerAnnotationAccess.paint(annotation, e.gc, canvas, new Rectangle(0, 0, 16, 16));
-				}
+			canvas.addPaintListener(e -> {
+				e.gc.setFont(null);
+				fMarkerAnnotationAccess.paint(annotation, e.gc, canvas, new Rectangle(0, 0, 16, 16));
 			});
 
 			StyledText text= new StyledText(composite, SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI | SWT.WRAP | SWT.READ_ONLY);

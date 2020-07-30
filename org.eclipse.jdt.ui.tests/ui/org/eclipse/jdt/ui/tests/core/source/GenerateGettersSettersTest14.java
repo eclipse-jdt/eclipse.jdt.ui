@@ -21,7 +21,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -61,13 +60,7 @@ public class GenerateGettersSettersTest14 extends SourceTestCase14 {
 	 */
 	private void runOperation(IType type, IField[] getters, IField[] setters, IField[] gettersAndSetters, boolean sort, int visibility, IJavaElement sibling) throws CoreException {
 
-		IRequestQuery allYes= new IRequestQuery() {
-
-			@Override
-			public int doQuery(IMember member) {
-				return IRequestQuery.YES_ALL;
-			}
-		};
+		IRequestQuery allYes= member -> IRequestQuery.YES_ALL;
 
 		RefactoringASTParser parser= new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL);
 		CompilationUnit unit= parser.parse(type.getCompilationUnit(), true);

@@ -17,7 +17,7 @@ package org.eclipse.jdt.internal.ui.dialogs;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IStatus;
 
-import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
+import org.eclipse.jdt.core.manipulation.JavaManipulation;
 
 /**
  * A settable IStatus.
@@ -154,7 +154,7 @@ public class StatusInfo implements IStatus {
 	 */
 	@Override
 	public String getPlugin() {
-		return JavaManipulationPlugin.getPluginId();
+		return JavaManipulation.ID_PLUGIN;
 	}
 
 	/**

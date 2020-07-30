@@ -16,8 +16,6 @@
 package org.eclipse.jdt.internal.ui.refactoring.code;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -300,12 +298,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 
 	private Text createTextInputField(Composite parent, int style) {
 		Text result= new Text(parent, style);
-		result.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				textModified(getText());
-			}
-		});
+		result.addModifyListener(e -> textModified(getText()));
 		TextFieldNavigationHandler.install(result);
 		return result;
 	}

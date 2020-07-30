@@ -199,16 +199,13 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 
 		if (hierachyCreationNeeded || fHierarchyRefreshNeeded) {
 			if (fTypeHierarchyViewPart == null) {
-				IRunnableWithProgress op= new IRunnableWithProgress() {
-					@Override
-					public void run(IProgressMonitor pm) throws InvocationTargetException, InterruptedException {
-						try {
-							doHierarchyRefresh(elements, pm);
-						} catch (JavaModelException e) {
-							throw new InvocationTargetException(e);
-						} catch (OperationCanceledException e) {
-							throw new InterruptedException();
-						}
+				IRunnableWithProgress op= pm -> {
+					try {
+						doHierarchyRefresh(elements, pm);
+					} catch (JavaModelException e1) {
+						throw new InvocationTargetException(e1);
+					} catch (OperationCanceledException e2) {
+						throw new InterruptedException();
 					}
 				};
 				fHierarchyRefreshNeeded= true;
@@ -274,23 +271,17 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 	protected void doHierarchyRefreshBackground(final IJavaElement[] elements, final IProgressMonitor pm) throws JavaModelException {
 		doHierarchyRefresh(elements, pm);
 		if (!pm.isCanceled()) {
-			Display.getDefault().asyncExec(new Runnable() {
-				/*
-				 * @see java.lang.Runnable#run()
-				 */
-				@Override
-				public void run() {
-					synchronized (TypeHierarchyLifeCycle.this) {
-						if (fRefreshHierarchyJob == null) {
-							return;
-						}
-						fRefreshHierarchyJob= null;
-					}
-					if (pm.isCanceled())
+			Display.getDefault().asyncExec(() -> {
+				synchronized (TypeHierarchyLifeCycle.this) {
+					if (fRefreshHierarchyJob == null) {
 						return;
-					fTypeHierarchyViewPart.setViewersInput();
-					fTypeHierarchyViewPart.updateViewers();
+					}
+					fRefreshHierarchyJob= null;
 				}
+				if (pm.isCanceled())
+					return;
+				fTypeHierarchyViewPart.setViewersInput();
+				fTypeHierarchyViewPart.updateViewers();
 			});
 		}
 	}

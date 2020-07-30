@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -463,18 +462,15 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			fDefaultJVMLabel= getDefaultJVMLabel();
 
 			fInstalledJVMs= getWorkspaceJREs();
-			Arrays.sort(fInstalledJVMs, new Comparator<IVMInstall>() {
-				@Override
-				public int compare(IVMInstall i0, IVMInstall i1) {
-					if (i1 instanceof IVMInstall2 && i0 instanceof IVMInstall2) {
-						String cc0= JavaModelUtil.getCompilerCompliance((IVMInstall2) i0, JavaCore.VERSION_1_4);
-						String cc1= JavaModelUtil.getCompilerCompliance((IVMInstall2) i1, JavaCore.VERSION_1_4);
-						int result= JavaCore.compareJavaVersions(cc1, cc0);
-						if (result != 0)
-							return result;
-					}
-					return Policy.getComparator().compare(i0.getName(), i1.getName());
+			Arrays.sort(fInstalledJVMs, (i0, i1) -> {
+				if (i1 instanceof IVMInstall2 && i0 instanceof IVMInstall2) {
+					String cc0= JavaModelUtil.getCompilerCompliance((IVMInstall2) i0, JavaCore.VERSION_1_4);
+					String cc1= JavaModelUtil.getCompilerCompliance((IVMInstall2) i1, JavaCore.VERSION_1_4);
+					int result= JavaCore.compareJavaVersions(cc1, cc0);
+					if (result != 0)
+						return result;
 				}
+				return Policy.getComparator().compare(i0.getName(), i1.getName());
 			});
 
 			fInstalledEEs= JavaRuntime.getExecutionEnvironmentsManager().getExecutionEnvironments();

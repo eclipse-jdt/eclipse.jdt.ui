@@ -61,16 +61,13 @@ public class LexicalSortingAction extends Action {
 
 	private void valueChanged(final boolean on, boolean store) {
 		setChecked(on);
-		BusyIndicator.showWhile(fViewer.getControl().getDisplay(), new Runnable() {
-			@Override
-			public void run() {
-				if (on) {
-					fViewer.setComparator(fComparator);
-					fDropSupport.setFeedbackEnabled(false);
-				} else {
-					fViewer.setComparator(fSourcePositonComparator);
-					fDropSupport.setFeedbackEnabled(true);
-				}
+		BusyIndicator.showWhile(fViewer.getControl().getDisplay(), () -> {
+			if (on) {
+				fViewer.setComparator(fComparator);
+				fDropSupport.setFeedbackEnabled(false);
+			} else {
+				fViewer.setComparator(fSourcePositonComparator);
+				fDropSupport.setFeedbackEnabled(true);
 			}
 		});
 

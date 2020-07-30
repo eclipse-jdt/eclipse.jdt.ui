@@ -23,9 +23,7 @@ import org.eclipse.swt.dnd.Transfer;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchCommandConstants;
@@ -50,12 +48,7 @@ class LocationCopyAction extends Action {
 		setActionDefinitionId(IWorkbenchCommandConstants.EDIT_COPY);
 		setEnabled(!fLocationViewer.getSelection().isEmpty());
 
-		locationViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				setEnabled(! event.getSelection().isEmpty());
-			}
-		});
+		locationViewer.addSelectionChangedListener(event -> setEnabled(! event.getSelection().isEmpty()));
 	}
 
 	@Override

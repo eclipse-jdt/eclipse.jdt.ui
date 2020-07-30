@@ -29,7 +29,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
@@ -566,12 +565,7 @@ public class RefactorActionGroup extends ActionGroup {
 		if (fEditor != null) {
 			final ITypeRoot element= getEditorInput();
 			if (element != null && ActionUtil.isOnBuildPath(element)) {
-				refactorSubmenu.addMenuListener(new IMenuListener() {
-					@Override
-					public void menuAboutToShow(IMenuManager manager) {
-						refactorMenuShown(manager);
-					}
-				});
+				refactorSubmenu.addMenuListener(this::refactorMenuShown);
 				refactorSubmenu.add(fNoActionAvailable);
 				menu.appendToGroup(fGroupName, refactorSubmenu);
 			}

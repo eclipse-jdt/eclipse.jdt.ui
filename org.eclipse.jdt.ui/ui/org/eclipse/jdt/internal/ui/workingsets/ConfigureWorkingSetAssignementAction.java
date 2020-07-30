@@ -45,9 +45,7 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
-import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -456,18 +454,15 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 		protected CheckboxTableViewer createTableViewer(Composite parent) {
 
 			final CheckboxTableViewer result= CheckboxTableViewer.newCheckList(parent, SWT.BORDER | SWT.MULTI);
-			result.addCheckStateListener(new ICheckStateListener() {
-				@Override
-				public void checkStateChanged(CheckStateChangedEvent event) {
-					GrayedCheckedModelElement element= (GrayedCheckedModelElement)event.getElement();
-					result.setGrayed(element, false);
-					if (event.getChecked()) {
-						element.select();
-					} else {
-						element.deselect();
-					}
-					result.update(element, null);
+			result.addCheckStateListener(event -> {
+				GrayedCheckedModelElement element= (GrayedCheckedModelElement)event.getElement();
+				result.setGrayed(element, false);
+				if (event.getChecked()) {
+					element.select();
+				} else {
+					element.deselect();
 				}
+				result.update(element, null);
 			});
 			GridData data= new GridData(GridData.FILL_BOTH);
 			data.heightHint= convertHeightInCharsToPixels(20);

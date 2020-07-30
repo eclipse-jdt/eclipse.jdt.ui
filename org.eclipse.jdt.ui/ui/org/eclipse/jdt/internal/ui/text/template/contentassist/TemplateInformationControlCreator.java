@@ -14,8 +14,6 @@
 package org.eclipse.jdt.internal.ui.text.template.contentassist;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.Assert;
@@ -53,12 +51,7 @@ public final class TemplateInformationControlCreator implements IInformationCont
 	@Override
 	public IInformationControl createInformationControl(Shell parent) {
 		fControl= new SourceViewerInformationControl(parent, false, fOrientation, JavaPlugin.getAdditionalInfoAffordanceString());
-		fControl.addDisposeListener(new DisposeListener() {
-			@Override
-			public void widgetDisposed(DisposeEvent e) {
-				fControl= null;
-			}
-		});
+		fControl.addDisposeListener(e -> fControl= null);
 		return fControl;
 	}
 

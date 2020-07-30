@@ -22,17 +22,11 @@ import org.eclipse.swt.accessibility.AccessibleAdapter;
 import org.eclipse.swt.accessibility.AccessibleEvent;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.ViewForm;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.events.TraverseEvent;
-import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
@@ -53,8 +47,6 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IWorkingSet;
@@ -211,12 +203,7 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan= 2;
 		fFilter.setLayoutData(gd);
-		fFilter.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				patternChanged((Text)e.widget);
-			}
-		});
+		fFilter.addModifyListener(event -> patternChanged((Text)event.widget));
 		fFilter.addKeyListener(new KeyListener() {
 			@Override
 			public void keyReleased(KeyEvent e) {
@@ -239,13 +226,10 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 		Label label= new Label(this, SWT.NONE);
 		label.setFont(font);
 		label.setText(JavaUIMessages.TypeSelectionComponent_label);
-		label.addTraverseListener(new TraverseListener() {
-			@Override
-			public void keyTraversed(TraverseEvent e) {
-				if (e.detail == SWT.TRAVERSE_MNEMONIC && e.doit) {
-					e.detail= SWT.TRAVERSE_NONE;
-					fViewer.setFocus();
-				}
+		label.addTraverseListener(event -> {
+			if (event.detail == SWT.TRAVERSE_MNEMONIC && event.doit) {
+				event.detail= SWT.TRAVERSE_NONE;
+				fViewer.setFocus();
 			}
 		});
 		label= new Label(this, SWT.RIGHT);
@@ -307,12 +291,7 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 				}
 			});
 		}
-		addDisposeListener(new DisposeListener() {
-			@Override
-			public void widgetDisposed(DisposeEvent event) {
-				disposeComponent();
-			}
-		});
+		addDisposeListener(event -> disposeComponent());
 		if (fTypeSelectionExtension != null) {
 			fTypeSelectionExtension.initialize(this);
 		}
@@ -351,13 +330,10 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 		Label label= new Label(header, SWT.NONE);
 		label.setText(message);
 		label.setFont(font);
-		label.addTraverseListener(new TraverseListener() {
-			@Override
-			public void keyTraversed(TraverseEvent e) {
-				if (e.detail == SWT.TRAVERSE_MNEMONIC && e.doit) {
-					e.detail= SWT.TRAVERSE_NONE;
-					fFilter.setFocus();
-				}
+		label.addTraverseListener(event -> {
+			if (event.detail == SWT.TRAVERSE_MNEMONIC && event.doit) {
+				event.detail= SWT.TRAVERSE_NONE;
+				fFilter.setFocus();
 			}
 		});
 		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
@@ -413,19 +389,16 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 		if (fScope == null) {
 			fFilterActionGroup= new WorkingSetFilterActionGroup(getShell(),
 				JavaPlugin.getActivePage(),
-				new IPropertyChangeListener() {
-					@Override
-					public void propertyChange(PropertyChangeEvent event) {
-						IWorkingSet ws= (IWorkingSet)event.getNewValue();
-						if (ws == null || (ws.isAggregateWorkingSet() && ws.isEmpty())) {
-							fScope= SearchEngine.createWorkspaceScope();
-							fTitleLabel.setText(null);
-						} else {
-							fScope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(ws, true);
-							fTitleLabel.setText(ws.getLabel());
-						}
-						fViewer.setSearchScope(fScope, true);
+				event -> {
+					IWorkingSet ws= (IWorkingSet)event.getNewValue();
+					if (ws == null || (ws.isAggregateWorkingSet() && ws.isEmpty())) {
+						fScope= SearchEngine.createWorkspaceScope();
+						fTitleLabel.setText(null);
+					} else {
+						fScope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(ws, true);
+						fTitleLabel.setText(ws.getLabel());
 					}
+					fViewer.setSearchScope(fScope, true);
 				});
 			String setting= fSettings.get(WORKINGS_SET_SETTINGS);
 			if (setting != null) {

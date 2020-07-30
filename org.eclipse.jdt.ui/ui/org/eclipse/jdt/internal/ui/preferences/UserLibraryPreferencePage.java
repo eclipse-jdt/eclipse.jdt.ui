@@ -80,7 +80,6 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.StatusDialog;
 import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.StringConverter;
 import org.eclipse.jface.util.BidiUtils;
@@ -470,14 +469,11 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 					final String charset= encoding;
 					IRunnableContext context= PlatformUI.getWorkbench().getProgressService();
 					try {
-						context.run(true, true, new IRunnableWithProgress() {
-							@Override
-							public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-								try {
-									saveLibraries(elements, file, charset, monitor);
-								} catch (IOException e) {
-									throw new InvocationTargetException(e);
-								}
+						context.run(true, true, monitor -> {
+							try {
+								saveLibraries(elements, file, charset, monitor);
+							} catch (IOException e) {
+								throw new InvocationTargetException(e);
 							}
 						});
 						fSettings.put(PREF_LASTPATH, file.getPath());
@@ -896,20 +892,17 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 	@Override
 	public boolean performOk() {
 		try {
-			PlatformUI.getWorkbench().getProgressService().run(true, true, new IRunnableWithProgress() {
-				@Override
-				public void run(IProgressMonitor monitor) throws InvocationTargetException {
-					try {
-						if (monitor != null) {
-							monitor= new NullProgressMonitor();
-						}
-
-						updateUserLibararies(monitor);
-					} catch (CoreException e) {
-						throw new InvocationTargetException(e);
-					} finally {
-						monitor.done();
+			PlatformUI.getWorkbench().getProgressService().run(true, true, monitor -> {
+				try {
+					if (monitor != null) {
+						monitor= new NullProgressMonitor();
 					}
+
+					updateUserLibararies(monitor);
+				} catch (CoreException e) {
+					throw new InvocationTargetException(e);
+				} finally {
+					monitor.done();
 				}
 			});
 		} catch (InterruptedException e) {

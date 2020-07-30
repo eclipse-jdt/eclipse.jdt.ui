@@ -16,9 +16,11 @@ package org.eclipse.jdt.ui.tests.quickfix;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.junit.After;
@@ -39,11 +41,15 @@ import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CheckConditionsOperation;
+import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.CreateChangeOperation;
+import org.eclipse.ltk.core.refactoring.GroupCategory;
 import org.eclipse.ltk.core.refactoring.IUndoManager;
 import org.eclipse.ltk.core.refactoring.PerformChangeOperation;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.TextEditBasedChange;
+import org.eclipse.ltk.core.refactoring.TextEditBasedChangeGroup;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -159,6 +165,52 @@ public class CleanUpTestCase extends QuickFixTest {
 		profileStore.writeProfiles(profiles, InstanceScope.INSTANCE);
 
 		CleanUpPreferenceUtil.saveSaveParticipantOptions(InstanceScope.INSTANCE, fProfile.getSettings());
+	}
+
+	private void collectGroupCategories(Set<GroupCategory> result, Change change) {
+		if (change instanceof TextEditBasedChange) {
+			for (TextEditBasedChangeGroup group : ((TextEditBasedChange)change).getChangeGroups()) {
+				result.addAll(group.getGroupCategorySet().asList());
+			}
+		} else if (change instanceof CompositeChange) {
+			for (Change child : ((CompositeChange)change).getChildren()) {
+				collectGroupCategories(result, child);
+			}
+		}
+	}
+
+	protected void assertGroupCategoryUsed(ICompilationUnit[] cus, String[] expectedGroupCategories) throws CoreException {
+		final CleanUpRefactoring ref= new CleanUpRefactoring();
+		ref.setUseOptionsFromProfile(true);
+		ICleanUp[] cleanUps= JavaPlugin.getDefault().getCleanUpRegistry().createCleanUps();
+
+		for (ICompilationUnit cu : cus) {
+			ref.addCompilationUnit(cu);
+		}
+		for (ICleanUp cleanUp : cleanUps) {
+			ref.addCleanUp(cleanUp);
+		}
+
+		final CreateChangeOperation create= new CreateChangeOperation(
+			new CheckConditionsOperation(ref, CheckConditionsOperation.ALL_CONDITIONS),
+			RefactoringStatus.FATAL);
+
+		create.run(new NullProgressMonitor());
+		Change change= create.getChange();
+
+		Set<GroupCategory> set= new HashSet<>();
+
+		collectGroupCategories(set, change);
+
+		for (String expectedGroupCategory : expectedGroupCategories) {
+			boolean found= false;
+			for (GroupCategory category : set) {
+				if (category.getName().equals(expectedGroupCategory)) {
+					found= true;
+				}
+			}
+			assertTrue("expected group category: " + expectedGroupCategory + " not found", found);
+		}
 	}
 
 	protected RefactoringStatus assertRefactoringResultAsExpected(ICompilationUnit[] cus, String[] expected) throws CoreException {

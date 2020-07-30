@@ -781,22 +781,16 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 				if (display.isDisposed())
 					return;
 
-				display.asyncExec(new Runnable() {
-					/*
-					 * @see java.lang.Runnable#run()
-					 */
-					@Override
-					public void run() {
+				display.asyncExec(() -> {
 
-						if (fComputeCount != currentCount || getViewSite().getShell().isDisposed())
-							return;
+					if (fComputeCount != currentCount || getViewSite().getShell().isDisposed())
+						return;
 
-						fCurrentViewInput= je;
-						doSetInput(input, description);
-						fToggleLinkAction.updateLinkImage(false);
+					fCurrentViewInput= je;
+					doSetInput(input, description);
+					fToggleLinkAction.updateLinkImage(false);
 
-						fComputeProgressMonitor= null;
-					}
+					fComputeProgressMonitor= null;
 				});
 			}
 
@@ -809,15 +803,7 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 				if (display.isDisposed())
 					return;
 
-				display.asyncExec(new Runnable() {
-					/*
-					 * @see java.lang.Runnable#run()
-					 */
-					@Override
-					public void run() {
-						fToggleLinkAction.updateLinkImage(isBroken);
-					}
-				});
+				display.asyncExec(() -> fToggleLinkAction.updateLinkImage(isBroken));
 			}
 		};
 

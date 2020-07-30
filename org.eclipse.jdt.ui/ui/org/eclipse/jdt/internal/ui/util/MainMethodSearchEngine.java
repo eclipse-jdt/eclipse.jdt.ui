@@ -127,14 +127,11 @@ public class MainMethodSearchEngine{
 
 		final IType[][] res= new IType[1][];
 
-		IRunnableWithProgress runnable= new IRunnableWithProgress() {
-			@Override
-			public void run(IProgressMonitor pm) throws InvocationTargetException {
-				try {
-					res[0]= searchMainMethods(pm, scope, style);
-				} catch (CoreException e) {
-					throw new InvocationTargetException(e);
-				}
+		IRunnableWithProgress runnable= pm -> {
+			try {
+				res[0]= searchMainMethods(pm, scope, style);
+			} catch (CoreException e) {
+				throw new InvocationTargetException(e);
 			}
 		};
 		context.run(true, true, runnable);

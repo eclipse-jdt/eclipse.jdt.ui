@@ -136,8 +136,6 @@ public class ResetAllAction extends BuildpathModifierAction {
 	                    informListeners(delta);
 
 	            		selectAndReveal(new StructuredSelection(fJavaProject));
-	                } catch (JavaModelException e) {
-	                    showExceptionDialog(e, NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_ClearAll_tooltip);
 	                } catch (CoreException e) {
 	                    showExceptionDialog(e, NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_ClearAll_tooltip);
                     } finally {

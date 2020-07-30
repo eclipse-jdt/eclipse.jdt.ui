@@ -42,7 +42,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -319,12 +318,9 @@ public abstract class GenericRefactoringTest {
 		perform.setUndoManager(undoManager, ref.getName());
 		IWorkspace workspace= ResourcesPlugin.getWorkspace();
 		if (fIsPreDeltaTest) {
-			IResourceChangeListener listener= new IResourceChangeListener() {
-				@Override
-				public void resourceChanged(IResourceChangeEvent event) {
-					if (create.getConditionCheckingStatus().isOK() &&  perform.changeExecuted()) {
-						TestModelProvider.assertTrue(event.getDelta());
-					}
+			IResourceChangeListener listener= event -> {
+				if (create.getConditionCheckingStatus().isOK() &&  perform.changeExecuted()) {
+					TestModelProvider.assertTrue(event.getDelta());
 				}
 			};
 			try {

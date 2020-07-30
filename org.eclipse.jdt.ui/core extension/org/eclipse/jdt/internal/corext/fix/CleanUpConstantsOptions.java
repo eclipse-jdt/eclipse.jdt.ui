@@ -72,6 +72,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(USE_LAMBDA, CleanUpOptions.TRUE);
 		options.setOption(USE_ANONYMOUS_CLASS_CREATION, CleanUpOptions.FALSE);
 		options.setOption(SIMPLIFY_LAMBDA_EXPRESSION_AND_METHOD_REF, CleanUpOptions.FALSE);
+		options.setOption(PRECOMPILE_REGEX, CleanUpOptions.FALSE);
 
 		//Unused Code
 		options.setOption(REMOVE_UNUSED_CODE_IMPORTS, CleanUpOptions.TRUE);
@@ -95,6 +96,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(REMOVE_REDUNDANT_MODIFIERS, CleanUpOptions.FALSE);
 		options.setOption(REMOVE_REDUNDANT_SEMICOLONS, CleanUpOptions.FALSE);
 		options.setOption(REMOVE_UNNECESSARY_ARRAY_CREATION, CleanUpOptions.FALSE);
+		options.setOption(USE_OBJECTS_EQUALS, CleanUpOptions.FALSE);
 
 		//Missing Code
 		options.setOption(ADD_MISSING_ANNOTATIONS, CleanUpOptions.TRUE);
@@ -173,6 +175,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(USE_LAMBDA, CleanUpOptions.TRUE);
 		options.setOption(USE_ANONYMOUS_CLASS_CREATION, CleanUpOptions.FALSE);
 		options.setOption(SIMPLIFY_LAMBDA_EXPRESSION_AND_METHOD_REF, CleanUpOptions.FALSE);
+		options.setOption(PRECOMPILE_REGEX, CleanUpOptions.FALSE);
 
 		//Unused Code
 		options.setOption(REMOVE_UNUSED_CODE_IMPORTS, CleanUpOptions.FALSE);
@@ -196,6 +199,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(REMOVE_REDUNDANT_MODIFIERS, CleanUpOptions.FALSE);
 		options.setOption(REMOVE_REDUNDANT_SEMICOLONS, CleanUpOptions.FALSE);
 		options.setOption(REMOVE_UNNECESSARY_ARRAY_CREATION, CleanUpOptions.FALSE);
+		options.setOption(USE_OBJECTS_EQUALS, CleanUpOptions.FALSE);
 
 		//Missing Code
 		options.setOption(ADD_MISSING_ANNOTATIONS, CleanUpOptions.TRUE);

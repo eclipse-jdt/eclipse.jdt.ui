@@ -19,7 +19,6 @@ import java.lang.reflect.InvocationTargetException;
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 
 import org.eclipse.ui.IWorkbenchSite;
@@ -90,12 +89,9 @@ public class AllCleanUpsAction extends CleanUpAction {
 	}
 
 	private void installPreferenceListener() {
-	    fPreferenceChangeListener= new IPreferenceChangeListener() {
-			@Override
-			public void preferenceChange(PreferenceChangeEvent event) {
-				if (event.getKey().equals(CleanUpConstants.SHOW_CLEAN_UP_WIZARD)) {
-					updateActionLabel();
-				}
+	    fPreferenceChangeListener= event -> {
+			if (event.getKey().equals(CleanUpConstants.SHOW_CLEAN_UP_WIZARD)) {
+				updateActionLabel();
 			}
 		};
 		InstanceScope.INSTANCE.getNode(JavaUI.ID_PLUGIN).addPreferenceChangeListener(fPreferenceChangeListener);

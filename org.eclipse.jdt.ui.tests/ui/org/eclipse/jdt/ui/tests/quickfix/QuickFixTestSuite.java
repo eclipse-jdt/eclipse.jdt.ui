@@ -50,6 +50,7 @@ import org.junit.runners.Suite;
 	JavadocQuickFixTestPreview.class,
 	ConvertForLoopQuickFixTest.class,
 	ConvertIterableLoopQuickFixTest.class,
+	ConvertIterableLoopQuickFixTest1d7.class,
 	AdvancedQuickAssistTest.class,
 	AdvancedQuickAssistTest1d7.class,
 	AdvancedQuickAssistTest1d8.class,

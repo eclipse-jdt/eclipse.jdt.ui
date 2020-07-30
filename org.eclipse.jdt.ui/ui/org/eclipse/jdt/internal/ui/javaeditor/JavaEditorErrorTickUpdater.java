@@ -90,12 +90,7 @@ public class JavaEditorErrorTickUpdater implements IProblemChangedListener {
 	private void postImageChange(final Image newImage) {
 		Shell shell= fJavaEditor.getEditorSite().getShell();
 		if (shell != null && !shell.isDisposed()) {
-			shell.getDisplay().syncExec(new Runnable() {
-				@Override
-				public void run() {
-					fJavaEditor.updatedTitleImage(newImage);
-				}
-			});
+			shell.getDisplay().syncExec(() -> fJavaEditor.updatedTitleImage(newImage));
 		}
 	}
 

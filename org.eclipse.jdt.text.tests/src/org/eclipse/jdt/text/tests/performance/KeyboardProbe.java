@@ -17,7 +17,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
@@ -245,25 +244,9 @@ public class KeyboardProbe {
 	}
 
 	private void addListeners(Text control) {
-		control.addListener(SWT.KeyDown, new Listener() {
-			@Override
-			public void handleEvent(Event event) {
-				onKeyDown(event);
-			}
-		});
-		control.addListener(SWT.KeyUp, new Listener() {
-			@Override
-			public void handleEvent(Event event) {
-				onKeyUp(event);
-			}
-		});
-		control.addListener(SWT.Modify, new Listener() {
-
-			@Override
-			public void handleEvent(Event event) {
-				onModify();
-			}
-		});
+		control.addListener(SWT.KeyDown, event -> onKeyDown(event));
+		control.addListener(SWT.KeyUp, event -> onKeyUp(event));
+		control.addListener(SWT.Modify, event -> onModify());
 	}
 
 	private Text createControl(Display display) {

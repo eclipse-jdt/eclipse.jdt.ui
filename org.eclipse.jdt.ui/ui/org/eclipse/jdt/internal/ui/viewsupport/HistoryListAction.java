@@ -39,7 +39,6 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
@@ -111,22 +110,19 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 		private void createMaxEntriesField() {
 			fMaxEntriesField= new StringDialogField();
 			fMaxEntriesField.setLabelText(fHistory.getMaxEntriesMessage());
-			fMaxEntriesField.setDialogFieldListener(new IDialogFieldListener() {
-				@Override
-				public void dialogFieldChanged(DialogField field) {
-					String maxString= fMaxEntriesField.getText();
-					boolean valid;
-					try {
-						fMaxEntries= Integer.parseInt(maxString);
-						valid= fMaxEntries > 0 && fMaxEntries < MAX_MAX_ENTRIES;
-					} catch (NumberFormatException e) {
-						valid= false;
-					}
-					if (valid)
-						updateStatus(StatusInfo.OK_STATUS);
-					else
-						updateStatus(new StatusInfo(IStatus.ERROR, Messages.format(JavaUIMessages.HistoryListAction_max_entries_constraint, Integer.toString(MAX_MAX_ENTRIES))));
+			fMaxEntriesField.setDialogFieldListener(field -> {
+				String maxString= fMaxEntriesField.getText();
+				boolean valid;
+				try {
+					fMaxEntries= Integer.parseInt(maxString);
+					valid= fMaxEntries > 0 && fMaxEntries < MAX_MAX_ENTRIES;
+				} catch (NumberFormatException e) {
+					valid= false;
 				}
+				if (valid)
+					updateStatus(StatusInfo.OK_STATUS);
+				else
+					updateStatus(new StatusInfo(IStatus.ERROR, Messages.format(JavaUIMessages.HistoryListAction_max_entries_constraint, Integer.toString(MAX_MAX_ENTRIES))));
 			});
 			fMaxEntriesField.setText(Integer.toString(fHistory.getMaxEntries()));
 		}

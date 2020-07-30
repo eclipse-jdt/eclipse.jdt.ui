@@ -57,7 +57,6 @@ import org.eclipse.jface.wizard.WizardPage;
 
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
-import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.dialogs.SaveAsDialog;
 import org.eclipse.ui.dialogs.SelectionDialog;
 
@@ -937,19 +936,16 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 		dialog.addFilter(new EmptyInnerPackageFilter());
 		dialog.addFilter(new LibraryFilter());
 		dialog.addFilter(new SealPackagesFilter(packages));
-		dialog.setValidator(new ISelectionStatusValidator() {
-			@Override
-			public IStatus validate(Object[] selection) {
-				StatusInfo res= new StatusInfo();
-				for (Object s : selection) {
-					if (!(s instanceof IPackageFragment)) {
-						res.setError(JarPackagerMessages.JarManifestWizardPage_error_mustContainPackages);
-						return res;
-					}
+		dialog.setValidator(selection -> {
+			StatusInfo res= new StatusInfo();
+			for (Object s : selection) {
+				if (!(s instanceof IPackageFragment)) {
+					res.setError(JarPackagerMessages.JarManifestWizardPage_error_mustContainPackages);
+					return res;
 				}
-				res.setOK();
-				return res;
 			}
+			res.setOK();
+			return res;
 		});
 		return dialog;
 	}
@@ -980,17 +976,14 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), provider, new StandardJavaElementContentProvider());
 		dialog.setComparator(new JavaElementComparator());
 		dialog.setAllowMultiple(false);
-		dialog.setValidator(new ISelectionStatusValidator() {
-			@Override
-			public IStatus validate(Object[] selection) {
-				StatusInfo res= new StatusInfo();
-				// only single selection
-				if (selection.length == 1 && (selection[0] instanceof IFile))
-					res.setOK();
-				else
-					res.setError(""); //$NON-NLS-1$
-				return res;
-			}
+		dialog.setValidator(selection -> {
+			StatusInfo res= new StatusInfo();
+			// only single selection
+			if (selection.length == 1 && (selection[0] instanceof IFile))
+				res.setOK();
+			else
+				res.setError(""); //$NON-NLS-1$
+			return res;
 		});
 		dialog.addFilter(new EmptyInnerPackageFilter());
 		dialog.addFilter(new LibraryFilter());

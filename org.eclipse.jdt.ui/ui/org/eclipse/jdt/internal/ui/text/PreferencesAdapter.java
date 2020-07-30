@@ -102,12 +102,7 @@ public class PreferencesAdapter implements IPreferenceStore {
 		if (!fSilent) {
 			final PropertyChangeEvent event= new PropertyChangeEvent(this, name, oldValue, newValue);
 			for (final IPropertyChangeListener listener : fListeners) {
-				Runnable runnable= new Runnable() {
-					@Override
-					public void run() {
-						listener.propertyChange(event);
-					}
-				};
+				Runnable runnable= () -> listener.propertyChange(event);
 
 				if (Display.getCurrent() != null)
 					runnable.run();

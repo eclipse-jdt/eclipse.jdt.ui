@@ -50,7 +50,7 @@ public class JUnitLaunchIncludeExcludeTagsDialog extends StatusDialog {
 
 	private static final String EMPTY_STRING= ""; //$NON-NLS-1$
 
-	IDialogFieldListener fListener= field -> doDialogFieldChanged(field);
+	IDialogFieldListener fListener= this::doDialogFieldChanged;
 
 	public JUnitLaunchIncludeExcludeTagsDialog(Shell parent, ILaunchConfiguration config) {
 		super(parent);

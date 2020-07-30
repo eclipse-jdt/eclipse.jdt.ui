@@ -18,8 +18,6 @@ import java.util.Map;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.RGB;
@@ -76,12 +74,7 @@ public final class CreateTextFileChangePreviewViewer implements IChangePreviewVi
 
 		public CreateTextFilePreviewer(Composite parent, int style) {
 			super(parent, style);
-			addDisposeListener(new DisposeListener() {
-				@Override
-				public void widgetDisposed(DisposeEvent e) {
-					disposeImage();
-				}
-			});
+			addDisposeListener(e -> disposeImage());
 		}
 
 		/*package*/ void disposeImage() {

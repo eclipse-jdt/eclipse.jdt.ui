@@ -502,8 +502,6 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 				run(shell, type, true);
 			else
 				MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.AddUnimplementedConstructorsAction_not_applicable);
-		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, getShell(), getDialogTitle(), null);
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, getShell(), getDialogTitle(), null);
 		}
