@@ -1820,7 +1820,20 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (methodReferenceNode == null) {
 			return false;
 		}
+		boolean addStaticModifier= false;
 		TypeDeclaration typeDeclaration= ASTNodes.getParent(methodReferenceNode, TypeDeclaration.class);
+
+		if (isTypeReferenceToInstanceMethod(methodReferenceNode)) {
+			String methodReferenceQualifiedName= ((Name) methodReferenceNode.getExpression()).getFullyQualifiedName();
+			String typeDeclarationName= astRoot.getPackage().getName().getFullyQualifiedName() + '.' + typeDeclaration.getName().getFullyQualifiedName();
+			if (!(methodReferenceQualifiedName.equals(typeDeclarationName)
+					|| methodReferenceQualifiedName.equals(typeDeclaration.getName().getFullyQualifiedName()))) {
+				// only propose for references in same class
+				return false;
+			}
+			addStaticModifier= true;
+		}
+
 		AST ast= astRoot.getAST();
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 		ListRewrite listRewrite= rewrite.getListRewrite(typeDeclaration, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
@@ -1840,13 +1853,11 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			/*
 			 * variable declaration
 			 */
-			int modifiers = 0;
 			Type type= null;
 			ReturnType returnType= null;
-			if(variableDeclarationStatement != null) {
+			if (variableDeclarationStatement != null) {
 				type= variableDeclarationStatement.getType();
 				returnType= getReturnType(ast, importRewrite, type);
-				modifiers= variableDeclarationStatement.getModifiers();
 			} else {
 				Expression leftHandSide= variableAssignment.getLeftHandSide();
 				ITypeBinding assignmentTypeBinding= leftHandSide.resolveTypeBinding();
@@ -1857,7 +1868,6 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				returnType= new ReturnType();
 				returnType.type= type;
 				returnType.binding= assignmentTypeBinding;
-				modifiers= Bindings.getAssignedVariable(variableAssignment).getModifiers();
 			}
 			if (returnType.binding == null) {
 				return false;
@@ -1865,7 +1875,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			MethodDeclaration newMethodDeclaration= ast.newMethodDeclaration();
 			newMethodDeclaration.setName((SimpleName) rewrite.createCopyTarget(methodReferenceNode.getName()));
 			newMethodDeclaration.modifiers().add(ast.newModifier(ModifierKeyword.PRIVATE_KEYWORD));
-			if (Modifier.isStatic(modifiers)) {
+			if (addStaticModifier) {
 				newMethodDeclaration.modifiers().add(ast.newModifier(ModifierKeyword.STATIC_KEYWORD));
 			}
 
@@ -1914,42 +1924,31 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		ITypeBinding[] typeArguments= methodBinding.getTypeArguments();
 		ITypeBinding[] parameterTypesFunctionalInterface= parameterTypes[index].getFunctionalInterfaceMethod().getParameterTypes();
 		ITypeBinding returnTypeBindingFunctionalInterface= parameterTypes[index].getFunctionalInterfaceMethod().getReturnType();
-		Type returnTypeFunctionalInterface= importRewrite.addImport(returnTypeBindingFunctionalInterface, ast);
 		MethodDeclaration newMethodDeclaration= ast.newMethodDeclaration();
+		newMethodDeclaration.modifiers().add(ast.newModifier(ModifierKeyword.PRIVATE_KEYWORD));
+		if (addStaticModifier) {
+			newMethodDeclaration.modifiers().add(ast.newModifier(ModifierKeyword.STATIC_KEYWORD));
+		}
 		Type newReturnType= null;
-		/* if we have a VariableDeclarationStatement we can try to extract the return Type more accurate */
-		if (variableDeclarationStatement != null) {
-			ReturnType returnType= getReturnType(ast, importRewrite, variableDeclarationStatement.getType());
-			newReturnType= returnType.type;
-			if (returnType.binding == null || returnType.binding.isTypeVariable() ||
-					returnTypeBindingFunctionalInterface.isClass() || returnTypeBindingFunctionalInterface.isPrimitive()) {
-				newReturnType= returnTypeFunctionalInterface;
-			}
+		if (returnTypeBindingFunctionalInterface.isPrimitive()) {
+			newReturnType= ast.newPrimitiveType(PrimitiveType.toCode(returnTypeBindingFunctionalInterface.getName()));
 		} else {
-			if (returnTypeBindingFunctionalInterface.isPrimitive()) {
-				newReturnType= ast.newPrimitiveType(PrimitiveType.toCode(returnTypeBindingFunctionalInterface.getName()));
-			} else {
-				newReturnType= importRewrite.addImport(returnTypeBindingFunctionalInterface, ast);
-				ITypeBinding[] typeParameters= typeDeclaration.resolveBinding().getTypeParameters();
-				bIf: if (returnTypeBindingFunctionalInterface.isTypeVariable() || returnTypeBindingFunctionalInterface.isParameterizedType()) {
-					for (ITypeBinding typeParameter : typeParameters) {
-						// check if parameter type is a Type parameter of the class
-						if (Bindings.equals(typeParameter, returnTypeBindingFunctionalInterface)) {
-							break bIf;
-						}
+			newReturnType= importRewrite.addImport(returnTypeBindingFunctionalInterface, ast);
+			ITypeBinding[] typeParameters= typeDeclaration.resolveBinding().getTypeParameters();
+			bIf: if (returnTypeBindingFunctionalInterface.isTypeVariable() || returnTypeBindingFunctionalInterface.isParameterizedType()) {
+				for (ITypeBinding typeParameter : typeParameters) {
+					// check if parameter type is a Type parameter of the class
+					if (Bindings.equals(typeParameter, returnTypeBindingFunctionalInterface)) {
+						break bIf;
 					}
-					TypeParameter newTypeParameter= ast.newTypeParameter();
-					newTypeParameter.setName(ast.newSimpleName(returnTypeBindingFunctionalInterface.getName()));
-					addIfMissing(newMethodDeclaration, newTypeParameter);
 				}
+				TypeParameter newTypeParameter= ast.newTypeParameter();
+				newTypeParameter.setName(ast.newSimpleName(returnTypeBindingFunctionalInterface.getName()));
+				addIfMissing(newMethodDeclaration, newTypeParameter);
 			}
 		}
 		newMethodDeclaration.setName((SimpleName) rewrite.createCopyTarget(methodReferenceNode.getName()));
 		newMethodDeclaration.setReturnType2(newReturnType);
-		newMethodDeclaration.modifiers().add(ast.newModifier(ModifierKeyword.PRIVATE_KEYWORD));
-		if (Modifier.isStatic(methodBinding.getModifiers())) {
-			newMethodDeclaration.modifiers().add(ast.newModifier(ModifierKeyword.STATIC_KEYWORD));
-		}
 		pLoop: for (int i= 0; i < parameterTypesFunctionalInterface.length; i++) {
 			ITypeBinding parameterType2= parameterTypesFunctionalInterface[i];
 			SingleVariableDeclaration newSingleVariableDeclaration= ast.newSingleVariableDeclaration();
