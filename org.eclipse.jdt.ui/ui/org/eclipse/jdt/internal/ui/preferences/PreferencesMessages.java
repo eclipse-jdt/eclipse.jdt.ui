@@ -154,6 +154,7 @@ public final class PreferencesMessages extends NLS {
 	public static String JavaEditorPreferencePage_varKeyword;
 	public static String JavaEditorPreferencePage_yieldKeyword;
 	public static String JavaEditorPreferencePage_recordKeyword;
+	public static String JavaEditorPreferencePage_sealedKeywords;
 	public static String JavaEditorPreferencePage_strings;
 	public static String JavaEditorPreferencePage_others;
 	public static String JavaEditorPreferencePage_operators;

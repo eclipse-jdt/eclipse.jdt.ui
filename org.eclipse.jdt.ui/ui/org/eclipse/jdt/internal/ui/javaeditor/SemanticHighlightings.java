@@ -7,6 +7,10 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
+ * 
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -216,6 +220,11 @@ public class SemanticHighlightings {
 	 * A named preference part that controls the highlighting of 'record' keywords.
 	 */
 	public static final String RECORD_KEYWORD= SemanticHighlightingsCore.RECORD_KEYWORD;
+
+	/**
+	 * A named preference part that controls the highlighting of 'sealed' and 'non-sealed' keywords.
+	 */
+	public static final String SEALED_KEYWORDS= SemanticHighlightingsCore.SEALED_KEYWORDS;
 
 	/**
 	 * Semantic highlightings
@@ -2060,6 +2069,47 @@ public class SemanticHighlightings {
 	}
 
 	/**
+	 * Semantic highlighting for 'sealed' and 'non-sealed' keywords.
+	 */
+	static final class SealedKeywordsHighlighting extends SemanticHighlighting {
+
+		@Override
+		public String getPreferenceKey() {
+			return SEALED_KEYWORDS;
+		}
+
+		@Override
+		public RGB getDefaultDefaultTextColor() {
+			return new RGB(127, 0, 85);
+		}
+
+		@Override
+		public boolean isBoldByDefault() {
+			return true;
+		}
+
+		@Override
+		public boolean isItalicByDefault() {
+			return false;
+		}
+
+		@Override
+		public boolean isEnabledByDefault() {
+			return true;
+		}
+
+		@Override
+		public String getDisplayName() {
+			return PreferencesMessages.JavaEditorPreferencePage_sealedKeywords;
+		}
+
+		@Override
+		public boolean consumes(SemanticToken token) {
+			return false;
+		}
+	}
+
+	/**
 	 * A named preference that controls the given semantic highlighting's color.
 	 *
 	 * @param semanticHighlighting the semantic highlighting
@@ -2152,7 +2202,8 @@ public class SemanticHighlightings {
 				new NumberHighlighting(),
 				new VarKeywordHighlighting(),
 				new YieldKeywordHighlighting(),
-				new RecordKeywordHighlighting()
+				new RecordKeywordHighlighting(),
+				new SealedKeywordsHighlighting()
 			};
 		return fgSemanticHighlightings;
 	}

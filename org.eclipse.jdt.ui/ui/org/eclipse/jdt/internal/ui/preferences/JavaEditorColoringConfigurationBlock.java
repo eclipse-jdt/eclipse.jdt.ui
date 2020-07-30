@@ -7,6 +7,10 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
+ * 
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -270,6 +274,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 					for (HighlightingColorListItem listItem : subList) {
 						if (!listItem.getDisplayName().equals(PreferencesMessages.JavaEditorPreferencePage_varKeyword) &&
 								!listItem.getDisplayName().equals(PreferencesMessages.JavaEditorPreferencePage_yieldKeyword) &&
+								!listItem.getDisplayName().equals(PreferencesMessages.JavaEditorPreferencePage_sealedKeywords) &&
 								!listItem.getDisplayName().equals(PreferencesMessages.JavaEditorPreferencePage_recordKeyword)) {
 							visibleChildren.add(listItem);
 						}
@@ -727,6 +732,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 					for (HighlightingColorListItem listItem : fListModel) {
 						if (listItem.getDisplayName().equals(PreferencesMessages.JavaEditorPreferencePage_varKeyword) ||
 								listItem.getDisplayName().equals(PreferencesMessages.JavaEditorPreferencePage_yieldKeyword) ||
+								listItem.getDisplayName().equals(PreferencesMessages.JavaEditorPreferencePage_sealedKeywords) ||
 								listItem.getDisplayName().equals(PreferencesMessages.JavaEditorPreferencePage_recordKeyword)) {
 							PreferenceConverter.setValue(getPreferenceStore(), listItem.getColorKey(), fSyntaxForegroundColorEditor.getColorValue());
 						}
@@ -748,6 +754,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 					for (HighlightingColorListItem listItem : fListModel) {
 						if (listItem.getDisplayName().equals(PreferencesMessages.JavaEditorPreferencePage_varKeyword) ||
 								listItem.getDisplayName().equals(PreferencesMessages.JavaEditorPreferencePage_yieldKeyword) ||
+								listItem.getDisplayName().equals(PreferencesMessages.JavaEditorPreferencePage_sealedKeywords) ||
 								listItem.getDisplayName().equals(PreferencesMessages.JavaEditorPreferencePage_recordKeyword)) {
 							getPreferenceStore().setValue(listItem.getBoldKey(), fBoldCheckBox.getSelection());
 						}
@@ -769,6 +776,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 					for (HighlightingColorListItem listItem : fListModel) {
 						if (listItem.getDisplayName().equals(PreferencesMessages.JavaEditorPreferencePage_varKeyword) ||
 								listItem.getDisplayName().equals(PreferencesMessages.JavaEditorPreferencePage_yieldKeyword) ||
+								listItem.getDisplayName().equals(PreferencesMessages.JavaEditorPreferencePage_sealedKeywords) ||
 								listItem.getDisplayName().equals(PreferencesMessages.JavaEditorPreferencePage_recordKeyword)) {
 							getPreferenceStore().setValue(listItem.getItalicKey(), fItalicCheckBox.getSelection());
 						}
@@ -789,6 +797,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 					for (HighlightingColorListItem listItem : fListModel) {
 						if (listItem.getDisplayName().equals(PreferencesMessages.JavaEditorPreferencePage_varKeyword) ||
 								listItem.getDisplayName().equals(PreferencesMessages.JavaEditorPreferencePage_yieldKeyword) ||
+								listItem.getDisplayName().equals(PreferencesMessages.JavaEditorPreferencePage_sealedKeywords) ||
 								listItem.getDisplayName().equals(PreferencesMessages.JavaEditorPreferencePage_recordKeyword)) {
 							getPreferenceStore().setValue(listItem.getStrikethroughKey(), fStrikethroughCheckBox.getSelection());
 						}
@@ -810,6 +819,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 					for (HighlightingColorListItem listItem : fListModel) {
 						if (listItem.getDisplayName().equals(PreferencesMessages.JavaEditorPreferencePage_varKeyword) ||
 								listItem.getDisplayName().equals(PreferencesMessages.JavaEditorPreferencePage_yieldKeyword) ||
+								listItem.getDisplayName().equals(PreferencesMessages.JavaEditorPreferencePage_sealedKeywords) ||
 								listItem.getDisplayName().equals(PreferencesMessages.JavaEditorPreferencePage_recordKeyword)) {
 							getPreferenceStore().setValue(listItem.getUnderlineKey(), fUnderlineCheckBox.getSelection());
 						}
