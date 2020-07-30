@@ -286,11 +286,13 @@ public class FilteredPreferenceTree {
 	 */
 	private Label fDescription;
 
+	/**
+	 * The filter text control.
+	 */
+	private FilterTextControl fFilterTextControl;
 
 	private ToolItem fExpandAllItem;
 	private ToolItem fCollapseAllItem;
-
-	private Text fFilterBox;
 
 
 	public FilteredPreferenceTree(Composite parentComposite, String label, String hint) {
@@ -331,16 +333,18 @@ public class FilteredPreferenceTree {
 		composite.setLayout(layout);
 		composite.setFont(fParentComposite.getFont());
 
-		fFilterBox = new Text(composite, SWT.SINGLE | SWT.BORDER | SWT.SEARCH | SWT.ICON_CANCEL);
+		//TODO: Directly use the hint flags once Bug 293230 is fixed
+		fFilterTextControl= new FilterTextControl(composite);
 
-		fFilterBox.setMessage(hint);
+		Text filterBox= fFilterTextControl.getFilterControl();
+		filterBox.setMessage(hint);
 
-		fFilterBox.addModifyListener(new ModifyListener() {
+		filterBox.addModifyListener(new ModifyListener() {
 			private String fPrevFilterText;
 
 			@Override
 			public void modifyText(ModifyEvent e) {
-				String input= fFilterBox.getText();
+				String input= filterBox.getText();
 				fExpandAllItem.setEnabled(input.isEmpty());
 				fCollapseAllItem.setEnabled(input.isEmpty());
 				if (!input.equalsIgnoreCase(fPrevFilterText)) {
@@ -543,7 +547,7 @@ public class FilteredPreferenceTree {
 		if (fDescription != null) {
 			fDescription.setEnabled(enabled);
 		}
-		fFilterBox.setEnabled(enabled);
+		fFilterTextControl.setEnabled(enabled);
 		fCollapseAllItem.setEnabled(enabled);
 		fExpandAllItem.setEnabled(enabled);
 		fRoot.getChildren().forEach(node -> node.setEnabled(enabled));
