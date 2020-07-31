@@ -68,6 +68,7 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -211,7 +212,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		if (isUsedInForInitializerOrUpdater((Expression) node))
 			return false;
 		if (parent instanceof SwitchCase)
-			return false;
+			return true;
 		if (node instanceof SimpleName && node.getLocationInParent() != null) {
 			return !node.getLocationInParent().getId().equals("name"); //$NON-NLS-1$
 		}
@@ -430,11 +431,14 @@ public class ExtractTempRefactoring extends Refactoring {
 
 	private void addReplaceExpressionWithTemp() throws JavaModelException {
 		IASTFragment[] fragmentsToReplace= retainOnlyReplacableMatches(getMatchingFragments());
+		if (fragmentsToReplace.length == 0) {
+			return;
+		}
 		//TODO: should not have to prune duplicates here...
 		ASTRewrite rewrite= fCURewrite.getASTRewrite();
 		HashSet<IASTFragment> seen= new HashSet<>();
 		for (IASTFragment fragment : fragmentsToReplace) {
-			if (! seen.add(fragment))
+			if (!seen.add(fragment))
 				continue;
 			SimpleName tempName= fCURewrite.getAST().newSimpleName(fTempName);
 			TextEditGroup description= fCURewrite.createGroupDescription(RefactoringCoreMessages.ExtractTempRefactoring_replace);
@@ -667,6 +671,15 @@ public class ExtractTempRefactoring extends Refactoring {
 		return status;
 	}
 
+	private boolean hasFinalModifer(List<IExtendedModifier> modifiers) {
+		for (IExtendedModifier modifier : modifiers) {
+			if (modifier.isModifier() && Modifier.isFinal(((Modifier) modifier).getKeyword().toFlagValue())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	private void createAndInsertTempDeclaration() throws CoreException {
 		Expression initializer= getSelectedExpression().createCopyTarget(fCURewrite.getASTRewrite(), true);
 		VariableDeclarationStatement vds= createTempDeclaration(initializer);
@@ -679,9 +692,24 @@ public class ExtractTempRefactoring extends Refactoring {
 			insertAtSelection= replacableMatches.length == 0
 					|| replacableMatches.length == 1 && replacableMatches[0].getAssociatedNode().equals(getSelectedExpression().getAssociatedExpression());
 		}
-		if (insertAtSelection) {
-			insertAt(getSelectedExpression().getAssociatedNode(), vds);
+		ASTNode node= ASTResolving.findParentStatement(getSelectedExpression().getAssociatedNode());
+		if (node instanceof SwitchCase) {
+			/* VariableDeclarationStatement must be final for switch/case */
+			if (!hasFinalModifer(vds.modifiers())) {
+				vds.modifiers().add(vds.getAST().newModifier(ModifierKeyword.FINAL_KEYWORD));
+			}
+			node= ASTNodes.getParent(node, SwitchStatement.class);
+			fDeclareFinal= true;
+		}
+		if (node instanceof SwitchStatement) {
+			/* must insert above switch statement */
+			insertAt(node, vds);
 			return;
+		} else {
+			if (insertAtSelection) {
+				insertAt(getSelectedExpression().getAssociatedNode(), vds);
+				return;
+			}
 		}
 
 		ASTNode[] firstReplaceNodeParents= getParents(getFirstReplacedExpression().getAssociatedNode());
@@ -704,7 +732,9 @@ public class ExtractTempRefactoring extends Refactoring {
 
 		VariableDeclarationStatement vds= ast.newVariableDeclarationStatement(vdf);
 		if (fDeclareFinal) {
-			vds.modifiers().add(ast.newModifier(ModifierKeyword.FINAL_KEYWORD));
+			if (!hasFinalModifer(vds.modifiers())) {
+				vds.modifiers().add(ast.newModifier(ModifierKeyword.FINAL_KEYWORD));
+			}
 		}
 		vds.setType(createTempType());
 
