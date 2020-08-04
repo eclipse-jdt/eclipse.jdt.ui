@@ -58,7 +58,7 @@ public class JarRsrcLoader {
 		Thread.currentThread().setContextClassLoader(jceClassLoader);
 		Class c = Class.forName(mi.rsrcMainClass, true, jceClassLoader);
 		Method main = c.getMethod(JIJConstants.MAIN_METHOD_NAME, args.getClass());
-		main.invoke((Object) null, args);
+		main.invoke((Object) null, new Object[] {args});
 	}
 
 	private static ClassLoader getParentClassLoader() throws InvocationTargetException, IllegalAccessException {
