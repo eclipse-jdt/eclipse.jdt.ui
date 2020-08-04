@@ -72,6 +72,7 @@ import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.text.AbstractJavaScanner;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.HTMLAnnotationHover;
@@ -84,7 +85,6 @@ import org.eclipse.jdt.internal.ui.text.JavaReconciler;
 import org.eclipse.jdt.internal.ui.text.PreferencesAdapter;
 import org.eclipse.jdt.internal.ui.text.SingleTokenJavaScanner;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionAssistant;
-import org.eclipse.jdt.internal.ui.text.java.CompletionProposalComputerRegistry;
 import org.eclipse.jdt.internal.ui.text.java.ContentAssistProcessor;
 import org.eclipse.jdt.internal.ui.text.java.JavaAutoIndentStrategy;
 import org.eclipse.jdt.internal.ui.text.java.JavaCodeScanner;
@@ -433,7 +433,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
 
 		if (getEditor() != null) {
-			ContentAssistant assistant= new ContentAssistant(fPreferenceStore.getBoolean(PreferenceConstants.CODEASSIST_NONUITHREAD_COMPUTATION) && !CompletionProposalComputerRegistry.getDefault().computingCompletionRequiresUIThread());
+			ContentAssistant assistant= new ContentAssistant((sourceViewer instanceof JavaSourceViewer) && ((JavaSourceViewer) sourceViewer).isAsyncCompletionActive());
 			assistant.setDocumentPartitioning(getConfiguredDocumentPartitioning(sourceViewer));
 
 			assistant.setRestoreCompletionProposalSize(getSettings("completion_proposal_size")); //$NON-NLS-1$

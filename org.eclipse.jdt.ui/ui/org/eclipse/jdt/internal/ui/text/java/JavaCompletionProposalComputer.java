@@ -25,6 +25,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
@@ -53,6 +54,7 @@ import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
+import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.text.CompletionTimeoutProgressMonitor;
 import org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner;
 import org.eclipse.jdt.internal.ui.text.Symbols;
@@ -133,10 +135,7 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 
 	private String fErrorMessage;
 
-	private final IProgressMonitor fTimeoutProgressMonitor;
-
 	public JavaCompletionProposalComputer() {
-		fTimeoutProgressMonitor= new CompletionTimeoutProgressMonitor();
 	}
 
 	protected int guessContextInformationPosition(ContentAssistInvocationContext context) {
@@ -254,7 +253,7 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 			if (selection != null && selection.getLength() > 0) {
 				collector.setReplacementLength(selection.getLength());
 			}
-			unit.codeComplete(offset, collector, fTimeoutProgressMonitor);
+			unit.codeComplete(offset, collector, createProgressMonitor(context));
 		} catch (OperationCanceledException x) {
 			IBindingService bindingSvc= PlatformUI.getWorkbench().getAdapter(IBindingService.class);
 			String keyBinding= bindingSvc.getBestActiveBindingFormattedFor(IWorkbenchCommandConstants.EDIT_CONTENT_ASSIST);
@@ -348,5 +347,12 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 	@Override
 	public void sessionEnded() {
 		fErrorMessage= null;
+	}
+
+	private IProgressMonitor createProgressMonitor(JavaContentAssistInvocationContext context) {
+		if (context.getViewer() instanceof JavaSourceViewer && ((JavaSourceViewer) context.getViewer()).isAsyncCompletionActive()) {
+			return new NullProgressMonitor();
+		}
+		return new CompletionTimeoutProgressMonitor();
 	}
 }

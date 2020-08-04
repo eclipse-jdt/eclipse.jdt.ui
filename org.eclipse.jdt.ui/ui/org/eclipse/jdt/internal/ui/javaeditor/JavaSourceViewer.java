@@ -58,11 +58,13 @@ import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IJavaColorConstants;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 
 import org.eclipse.jdt.internal.ui.text.SmartBackspaceManager;
+import org.eclipse.jdt.internal.ui.text.java.CompletionProposalComputerRegistry;
 import org.eclipse.jdt.internal.ui.text.java.JavaFormattingContext;
 
 
@@ -668,5 +670,14 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 	 */
 	void resetCodeMinings() {
 		super.setCodeMiningProviders(null);
+	}
+
+	/**
+	 * Check if async completion is supported for this source viewer or not.
+	 *
+	 * @return <code>true</code> if async completion is supported, otherwise <code>false</code>.
+	 */
+	public final boolean isAsyncCompletionActive() {
+		return fPreferenceStore.getBoolean(PreferenceConstants.CODEASSIST_NONUITHREAD_COMPUTATION) && !CompletionProposalComputerRegistry.getDefault().computingCompletionRequiresUIThread();
 	}
 }
