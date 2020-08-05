@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -78,23 +78,17 @@ public class JavaStringAutoIndentStrategy extends DefaultIndentLineAutoEditStrat
 					token = tokenizer.nextToken();
 					if (token.equals("\n")) { //$NON-NLS-1$
 						buffer.append("\\n"); //$NON-NLS-1$
-						buffer.append("\" + " + delimiter); //$NON-NLS-1$
-						buffer.append(indentation);
-						buffer.append("\""); //$NON-NLS-1$
+						appendToBuffer(buffer, indentation, delimiter);
 						continue;
 					} else {
-						buffer.append("\" + " + delimiter); //$NON-NLS-1$
-						buffer.append(indentation);
-						buffer.append("\""); //$NON-NLS-1$
+						appendToBuffer(buffer, indentation, delimiter);
 					}
 				} else {
 					continue;
 				}
 			} else if (token.equals("\n")) { //$NON-NLS-1$
 				buffer.append("\\n"); //$NON-NLS-1$
-				buffer.append("\" + " + delimiter); //$NON-NLS-1$
-				buffer.append(indentation);
-				buffer.append("\""); //$NON-NLS-1$
+				appendToBuffer(buffer, indentation, delimiter);
 				continue;
 			}
 
@@ -143,7 +137,20 @@ public class JavaStringAutoIndentStrategy extends DefaultIndentLineAutoEditStrat
 		return buffer.toString();
 	}
 
-	/**
+	private void appendToBuffer(StringBuilder buffer, String indentation, String delimiter) {
+		if (buffer != null) {
+			if (isWrappingBeforeBinaryOperator()) {
+				buffer.append("\"" + delimiter); //$NON-NLS-1$
+				buffer.append(indentation + "+ \""); //$NON-NLS-1$
+			} else {
+				buffer.append("\" + " + delimiter); //$NON-NLS-1$
+				buffer.append(indentation);
+				buffer.append("\""); //$NON-NLS-1$
+			}
+		}
+	}
+
+ 	/**
 	 * Creates a new Java string auto indent strategy for the given document partitioning.
 	 *
 	 * @param partitioning the document partitioning
