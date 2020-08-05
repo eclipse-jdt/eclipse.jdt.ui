@@ -7122,13 +7122,13 @@
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.ObjectsEqualsCleanUp"
-            id="org.eclipse.jdt.ui.cleanup.precompile_regex"
+            id="org.eclipse.jdt.ui.cleanup.objects_equals"
             runAfter="org.eclipse.jdt.ui.cleanup.unnecessary_array_creation">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.StringCleanUp"
             id="org.eclipse.jdt.ui.cleanup.strings"
-            runAfter="org.eclipse.jdt.ui.cleanup.precompile_regex">
+            runAfter="org.eclipse.jdt.ui.cleanup.objects_equals">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUp"
