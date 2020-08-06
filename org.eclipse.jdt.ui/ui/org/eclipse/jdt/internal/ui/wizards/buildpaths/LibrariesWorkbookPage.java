@@ -157,7 +157,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		if (Display.getCurrent() != null) {
 			updateLibrariesList();
 		} else {
-			Display.getDefault().asyncExec(() -> updateLibrariesList());
+			Display.getDefault().asyncExec(this::updateLibrariesList);
 		}
 	}
 

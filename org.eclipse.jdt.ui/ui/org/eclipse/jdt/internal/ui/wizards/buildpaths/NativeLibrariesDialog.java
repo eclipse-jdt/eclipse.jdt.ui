@@ -36,7 +36,7 @@ public class NativeLibrariesDialog extends StatusDialog {
 		super(parent);
 		setTitle(NewWizardMessages.NativeLibrariesDialog_title);
 
-		IStatusChangeListener listener= status -> updateStatus(status);
+		IStatusChangeListener listener= this::updateStatus;
 
 		fConfigurationBlock= new NativeLibrariesConfigurationBlock(listener, parent, nativeLibPath, parentEntry);
 		setHelpAvailable(false);

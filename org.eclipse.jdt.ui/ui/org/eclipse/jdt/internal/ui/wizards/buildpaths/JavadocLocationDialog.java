@@ -49,7 +49,7 @@ public class JavadocLocationDialog extends StatusDialog {
 	public JavadocLocationDialog(Shell parent, String libraryName, URL initialURL) {
 		super(parent);
 
-		IStatusChangeListener listener= status -> updateStatus(status);
+		IStatusChangeListener listener= this::updateStatus;
 
 		setTitle(Messages.format(NewWizardMessages.LibrariesWorkbookPage_JavadocPropertyDialog_title, libraryName));
 		fJavadocConfigurationBlock= new JavadocConfigurationBlock(parent, listener, initialURL, false);

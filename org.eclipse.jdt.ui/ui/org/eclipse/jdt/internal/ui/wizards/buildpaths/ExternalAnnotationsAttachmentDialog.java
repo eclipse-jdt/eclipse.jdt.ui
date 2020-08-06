@@ -47,7 +47,7 @@ public class ExternalAnnotationsAttachmentDialog extends StatusDialog {
 	public ExternalAnnotationsAttachmentDialog(Shell parent, IPath entry) {
 		super(parent);
 
-		IStatusChangeListener listener= status -> updateStatus(status);
+		IStatusChangeListener listener= this::updateStatus;
 		fAnnotationsAttachmentBlock= new ExternalAnnotationsAttachmentBlock(listener, entry);
 
 		setTitle(NewWizardMessages.ExternalAnnotationsDialog_title);

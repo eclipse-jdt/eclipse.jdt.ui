@@ -242,7 +242,7 @@ public class MultipleFolderSelectionDialog extends SelectionStatusDialog impleme
 		if (fFocusElement != null) {
 			treeViewer.setSelection(new StructuredSelection(fFocusElement), true);
 		}
-		treeViewer.addCheckStateListener(event -> forceExistingChecked(event));
+		treeViewer.addCheckStateListener(this::forceExistingChecked);
 
 		applyDialogFont(composite);
 		return composite;

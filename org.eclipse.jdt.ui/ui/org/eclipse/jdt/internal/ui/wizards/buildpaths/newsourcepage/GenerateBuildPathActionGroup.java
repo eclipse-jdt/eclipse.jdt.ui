@@ -224,7 +224,7 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
         	return;
         String menuText= ActionMessages.BuildPath_label;
         IMenuManager subMenu= new MenuManager(menuText, MENU_ID);
-        subMenu.addMenuListener(manager -> fillViewSubMenu(manager));
+        subMenu.addMenuListener(this::fillViewSubMenu);
         subMenu.setRemoveAllWhenShown(true);
         subMenu.add(new ConfigureBuildPathAction(fSite));
         menu.appendToGroup(fGroupName, subMenu);

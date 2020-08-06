@@ -52,7 +52,7 @@ public class ModuleAddReadsDialog extends StatusDialog {
 	public ModuleAddReadsDialog(Shell parent, IJavaElement[] sourceJavaElements, ModuleAddReads value) {
 		super(parent);
 
-		IStatusChangeListener listener= status -> updateStatus(status);
+		IStatusChangeListener listener= this::updateStatus;
 		fAddReadsBlock= new ModuleAddReadsBlock(listener, sourceJavaElements, value);
 
 		setTitle(NewWizardMessages.AddReadsDialog_title);

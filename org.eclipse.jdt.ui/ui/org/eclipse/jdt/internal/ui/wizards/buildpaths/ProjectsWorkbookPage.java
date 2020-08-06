@@ -111,7 +111,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		if (Display.getCurrent() != null) {
 			updateProjectsList();
 		} else {
-			Display.getDefault().asyncExec(() -> updateProjectsList());
+			Display.getDefault().asyncExec(this::updateProjectsList);
 		}
 	}
 

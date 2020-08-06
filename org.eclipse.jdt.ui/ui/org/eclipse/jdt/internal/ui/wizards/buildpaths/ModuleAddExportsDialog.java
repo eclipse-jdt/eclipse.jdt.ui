@@ -55,7 +55,7 @@ public class ModuleAddExportsDialog extends StatusDialog {
 	public ModuleAddExportsDialog(Shell parent, IJavaElement[] sourceJavaElements, Collection<String> possibleTargetModules, ModuleAddExpose value) {
 		super(parent);
 
-		IStatusChangeListener listener= status -> updateStatus(status);
+		IStatusChangeListener listener= this::updateStatus;
 		fAddExportsBlock= new ModuleAddExportsBlock(listener, sourceJavaElements, possibleTargetModules, value);
 
 		setTitle(NewWizardMessages.AddExportsDialog_title);

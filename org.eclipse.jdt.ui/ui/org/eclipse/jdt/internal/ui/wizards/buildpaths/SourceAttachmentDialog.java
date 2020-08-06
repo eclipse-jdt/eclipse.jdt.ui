@@ -59,7 +59,7 @@ public class SourceAttachmentDialog extends StatusDialog {
 	public SourceAttachmentDialog(Shell parent, IClasspathEntry entry, boolean canEditEncoding) {
 		super(parent);
 
-		IStatusChangeListener listener= status -> updateStatus(status);
+		IStatusChangeListener listener= this::updateStatus;
 		fSourceAttachmentBlock= new SourceAttachmentBlock(listener, entry, canEditEncoding);
 
 		setTitle(NewWizardMessages.SourceAttachmentDialog_title);

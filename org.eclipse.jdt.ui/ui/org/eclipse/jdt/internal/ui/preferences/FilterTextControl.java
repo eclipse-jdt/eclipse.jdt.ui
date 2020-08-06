@@ -22,10 +22,6 @@ import org.eclipse.swt.accessibility.AccessibleAdapter;
 import org.eclipse.swt.accessibility.AccessibleControlAdapter;
 import org.eclipse.swt.accessibility.AccessibleControlEvent;
 import org.eclipse.swt.accessibility.AccessibleEvent;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseMoveListener;
@@ -144,12 +140,7 @@ public class FilterTextControl {
 			gridData.horizontalSpan= 2;
 		fTextControl.setLayoutData(gridData);
 
-		fTextControl.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				updateClearButtonVisibility(!(fTextControl.getText().length() == 0));
-			}
-		});
+		fTextControl.addModifyListener(e -> updateClearButtonVisibility(!(fTextControl.getText().length() == 0)));
 	}
 
 	/**
@@ -224,18 +215,15 @@ public class FilterTextControl {
 				public void mouseHover(MouseEvent e) {
 				}
 			});
-			clearButton.addDisposeListener(new DisposeListener() {
-				@Override
-				public void widgetDisposed(DisposeEvent e) {
-					if (inactiveImage != null) {
-						inactiveImage.dispose();
-					}
-					if (activeImage != null) {
-						activeImage.dispose();
-					}
-					if (pressedImage != null) {
-						pressedImage.dispose();
-					}
+			clearButton.addDisposeListener(e -> {
+				if (inactiveImage != null) {
+					inactiveImage.dispose();
+				}
+				if (activeImage != null) {
+					activeImage.dispose();
+				}
+				if (pressedImage != null) {
+					pressedImage.dispose();
 				}
 			});
 			clearButton.getAccessible().addAccessibleListener(

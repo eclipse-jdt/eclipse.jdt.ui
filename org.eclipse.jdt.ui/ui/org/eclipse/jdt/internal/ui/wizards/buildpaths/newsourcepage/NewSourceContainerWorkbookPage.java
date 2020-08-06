@@ -139,7 +139,7 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
 		if (Display.getCurrent() != null) {
 			doUpdateUI();
 		} else {
-			Display.getDefault().asyncExec(() -> doUpdateUI());
+			Display.getDefault().asyncExec(this::doUpdateUI);
 		}
     }
 
