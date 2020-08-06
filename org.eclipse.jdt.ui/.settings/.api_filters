@@ -168,6 +168,13 @@
                 <message_argument value="getRestrictedIdentifierStartPosition()"/>
             </message_arguments>
         </filter>
+        <filter comment="This is a Java 15 preview feature" id="640712815">
+            <message_arguments>
+                <message_argument value="TypeDeclaration"/>
+                <message_argument value="PositionCollector"/>
+                <message_argument value="getRestrictedIdentifierStartPosition()"/>
+            </message_arguments>
+        </filter>
     </resource>
     <resource path="ui/org/eclipse/jdt/internal/ui/text/JavaOutlineInformationControl.java" type="org.eclipse.jdt.internal.ui.text.JavaOutlineInformationControl$OutlineTreeViewer">
         <filter id="571473929">

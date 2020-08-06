@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * This is an implementation of an early-draft specification developed under the Java
  * Community Process (JCP) and is made available for testing and evaluation purposes
  * only. The code is not compatible with any specification of the JCP.
@@ -2028,6 +2028,47 @@ public class SemanticHighlightings {
 	}
 
 	/**
+	 * Semantic highlighting for 'permits' keyword.
+	 */
+	static final class PermitsKeywordHighlighting extends SemanticHighlighting {
+
+		@Override
+		public String getPreferenceKey() {
+			return RECORD_KEYWORD;
+		}
+
+		@Override
+		public RGB getDefaultDefaultTextColor() {
+			return new RGB(127, 0, 85);
+		}
+
+		@Override
+		public boolean isBoldByDefault() {
+			return true;
+		}
+
+		@Override
+		public boolean isItalicByDefault() {
+			return false;
+		}
+
+		@Override
+		public boolean isEnabledByDefault() {
+			return true;
+		}
+
+		@Override
+		public String getDisplayName() {
+			return PreferencesMessages.JavaEditorPreferencePage_recordKeyword;
+		}
+
+		@Override
+		public boolean consumes(SemanticToken token) {
+			return false;
+		}
+	}
+
+	/**
 	 * Semantic highlighting for 'yield' keyword.
 	 */
 	static final class YieldKeywordHighlighting extends SemanticHighlighting {
@@ -2203,7 +2244,8 @@ public class SemanticHighlightings {
 				new VarKeywordHighlighting(),
 				new YieldKeywordHighlighting(),
 				new RecordKeywordHighlighting(),
-				new SealedKeywordsHighlighting()
+				new SealedKeywordsHighlighting(),
+				new PermitsKeywordHighlighting()
 			};
 		return fgSemanticHighlightings;
 	}
