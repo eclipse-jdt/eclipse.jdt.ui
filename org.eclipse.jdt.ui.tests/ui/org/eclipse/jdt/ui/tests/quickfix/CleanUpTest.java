@@ -7597,9 +7597,33 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "       return dateText1 + dateText2;\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public String usePatternForSplit(String speech1, String speech2) {\n" //
+				+ "    public String usePatternForSplit1(String speech1, String speech2) {\n" //
 				+ "       // Keep this comment\n" //
 				+ "       String line= \"\\\\r?\\\\n\";\n" //
+				+ "\n" //
+				+ "       // Keep this comment too\n" //
+				+ "       String[] phrases1= speech1.split(line);\n" //
+				+ "       // Keep this comment also\n" //
+				+ "       String[] phrases2= speech2.split(line, 123);\n" //
+				+ "\n" //
+				+ "       return Arrays.toString(phrases1) + Arrays.toString(phrases2);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String usePatternForSplit2(String speech1, String speech2) {\n" //
+				+ "       // Keep this comment\n" //
+				+ "       String line= \".\";\n" //
+				+ "\n" //
+				+ "       // Keep this comment too\n" //
+				+ "       String[] phrases1= speech1.split(line);\n" //
+				+ "       // Keep this comment also\n" //
+				+ "       String[] phrases2= speech2.split(line, 123);\n" //
+				+ "\n" //
+				+ "       return Arrays.toString(phrases1) + Arrays.toString(phrases2);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String usePatternForSplit3(String speech1, String speech2) {\n" //
+				+ "       // Keep this comment\n" //
+				+ "       String line= \"\\\\a\";\n" //
 				+ "\n" //
 				+ "       // Keep this comment too\n" //
 				+ "       String[] phrases1= speech1.split(line);\n" //
@@ -7672,9 +7696,33 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "       return dateText1 + dateText2;\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public String usePatternForSplit(String speech1, String speech2) {\n" //
+				+ "    public String usePatternForSplit1(String speech1, String speech2) {\n" //
 				+ "       // Keep this comment\n" //
 				+ "       Pattern line= Pattern.compile(\"\\\\r?\\\\n\");\n" //
+				+ "\n" //
+				+ "       // Keep this comment too\n" //
+				+ "       String[] phrases1= line.split(speech1);\n" //
+				+ "       // Keep this comment also\n" //
+				+ "       String[] phrases2= line.split(speech2, 123);\n" //
+				+ "\n" //
+				+ "       return Arrays.toString(phrases1) + Arrays.toString(phrases2);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String usePatternForSplit2(String speech1, String speech2) {\n" //
+				+ "       // Keep this comment\n" //
+				+ "       Pattern line= Pattern.compile(\".\");\n" //
+				+ "\n" //
+				+ "       // Keep this comment too\n" //
+				+ "       String[] phrases1= line.split(speech1);\n" //
+				+ "       // Keep this comment also\n" //
+				+ "       String[] phrases2= line.split(speech2, 123);\n" //
+				+ "\n" //
+				+ "       return Arrays.toString(phrases1) + Arrays.toString(phrases2);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String usePatternForSplit3(String speech1, String speech2) {\n" //
+				+ "       // Keep this comment\n" //
+				+ "       Pattern line= Pattern.compile(\"\\\\a\");\n" //
 				+ "\n" //
 				+ "       // Keep this comment too\n" //
 				+ "       String[] phrases1= line.split(speech1);\n" //
@@ -7757,6 +7805,20 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "       String dateText2= date2.replaceAll(\"0000-00-00\", dateValidation);\n" //
 				+ "\n" //
 				+ "       return dateText1 + dateText2;\n" //
+				+ "    }\n" //
+				+ "    public String doNotUsePatternOnSimpleSplit1(String speech1, String speech2) {\n" //
+				+ "       String line= \"a\";\n" //
+				+ "\n" //
+				+ "       String[] phrases1= speech1.split(line);\n" //
+				+ "       String[] phrases2= speech2.split(line, 1);\n" //
+				+ "       return phrases1[0] + phrases2[0];\n" //
+				+ "    }\n" //
+				+ "    public String doNotUsePatternOnSimpleSplit2(String speech1, String speech2) {\n" //
+				+ "       String line= \"\\\\;\";\n" //
+				+ "\n" //
+				+ "       String[] phrases1= speech1.split(line1);\n" //
+				+ "       String[] phrases2= speech2.split(line1, 1);\n" //
+				+ "       return phrases1[0] + phrases2[0];\n" //
 				+ "    }\n" //
 				+ "}\n";
 		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", sample, false, null);
