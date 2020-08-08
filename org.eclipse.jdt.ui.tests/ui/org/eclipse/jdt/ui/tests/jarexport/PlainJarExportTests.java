@@ -78,7 +78,7 @@ public class PlainJarExportTests {
 
 	@Before
 	public void setUp() throws Exception {
-		fProject= ProjectTestSetup.getProject();
+		fProject= pts.getProject();
 
 		Map<String, String> options= fProject.getOptions(false);
 		String compliance= JavaCore.VERSION_1_4;
@@ -104,7 +104,7 @@ public class PlainJarExportTests {
 
 	@After
 	public void tearDown() throws Exception {
-		JavaProjectHelper.clear(fProject, ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fProject, pts.getDefaultClasspath());
 	}
 
 	@Test

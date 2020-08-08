@@ -20,8 +20,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -45,11 +43,10 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-@RunWith(JUnit4.class)
 public class GetterSetterQuickFixTest extends QuickFixTest {
 
 	@Rule
-    public ProjectTestSetup projectsetup = new ProjectTestSetup();
+    public ProjectTestSetup projectSetup= new ProjectTestSetup();
 
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
@@ -66,7 +63,7 @@ public class GetterSetterQuickFixTest extends QuickFixTest {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setValue(PreferenceConstants.CODEGEN_ADD_COMMENTS, false);
 
-		fJProject1= ProjectTestSetup.getProject();
+		fJProject1= projectSetup.getProject();
 
 		StubUtility.setCodeTemplate(CodeTemplateContextType.METHODSTUB_ID, "", null);
 
@@ -76,7 +73,7 @@ public class GetterSetterQuickFixTest extends QuickFixTest {
 
 	@After
 	public void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject1, projectSetup.getDefaultClasspath());
 	}
 
 	@Test

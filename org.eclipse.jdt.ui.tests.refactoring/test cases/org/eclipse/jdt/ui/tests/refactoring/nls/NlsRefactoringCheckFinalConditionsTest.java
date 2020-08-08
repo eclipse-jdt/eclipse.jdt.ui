@@ -60,13 +60,13 @@ public class NlsRefactoringCheckFinalConditionsTest {
 
 	@Before
 	public void setUp() throws Exception {
-		javaProject= ProjectTestSetup.getProject();
+		javaProject= pts.getProject();
 		fHelper= new NlsRefactoringTestHelper(javaProject);
 	}
 
 	@After
 	public void tearDown() throws Exception {
-		JavaProjectHelper.clear(javaProject, ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(javaProject, pts.getDefaultClasspath());
 	}
 
 	@Test

@@ -21,8 +21,6 @@ import java.util.Hashtable;
 
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -37,7 +35,9 @@ import org.eclipse.debug.core.model.IBreakpoint;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -48,11 +48,20 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 
-@RunWith(JUnit4.class)
 public class CleanUpAnnotationTest extends CleanUpTestCase {
 
 	@Rule
-    public ProjectTestSetup projectsetup = new ProjectTestSetup();
+    public ProjectTestSetup projectSetup = new ProjectTestSetup();
+
+	@Override
+	protected IJavaProject getProject() {
+		return projectSetup.getProject();
+	}
+
+	@Override
+	protected IClasspathEntry[] getDefaultClasspath() throws CoreException {
+		return projectSetup.getDefaultClasspath();
+	}
 
 	private void assertMarker(long markerId, ICompilationUnit unit, int expectedLineNumber, int expectedCharStart, int expectedCharEnd) throws CoreException {
 		IFile file= (IFile)unit.getResource();

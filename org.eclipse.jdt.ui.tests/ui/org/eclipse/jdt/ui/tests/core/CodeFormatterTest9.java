@@ -40,7 +40,7 @@ public class CodeFormatterTest9 extends CodeFormatterTest {
 	@Before
 	public void setUp() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		JavaProjectHelper.addRequiredProject(fJProject1, Java9ProjectTestSetup.getProject());
+		JavaProjectHelper.addRequiredProject(fJProject1, j9p.getProject());
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 

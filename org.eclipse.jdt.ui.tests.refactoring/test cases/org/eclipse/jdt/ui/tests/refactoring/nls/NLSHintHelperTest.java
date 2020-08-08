@@ -79,7 +79,7 @@ public class NLSHintHelperTest {
 
 	@Before
 	public void setUp() throws Exception {
-		fJProject= ProjectTestSetup.getProject();
+		fJProject= pts.getProject();
 		File lib= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.NLS_LIB);
 		assertNotNull("lib does not exist", lib);
 		assertTrue("lib does not exist", lib.exists());
@@ -448,6 +448,6 @@ public class NLSHintHelperTest {
 
 	@After
 	public void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJProject, ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject, pts.getDefaultClasspath());
 	}
 }

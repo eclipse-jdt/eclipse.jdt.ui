@@ -49,7 +49,7 @@ public class JavaElementLabelsTest1d8 extends CoreTests {
 
 	@Before
 	public void setUp() throws Exception {
-		fJProject1= Java1d8ProjectTestSetup.getProject();
+		fJProject1= j18p.getProject();
 
 		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
 		store.setValue(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES, false);
@@ -57,7 +57,7 @@ public class JavaElementLabelsTest1d8 extends CoreTests {
 
 	@After
 	public void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJProject1, Java1d8ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject1, j18p.getDefaultClasspath());
 	}
 
 	@Test

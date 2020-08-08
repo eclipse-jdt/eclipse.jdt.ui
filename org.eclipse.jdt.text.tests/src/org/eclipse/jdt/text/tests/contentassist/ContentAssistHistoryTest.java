@@ -65,7 +65,7 @@ public class ContentAssistHistoryTest {
 			protected void before() throws Throwable {
 				super.before();
 
-				IJavaProject project= ProjectTestSetup.getProject();
+				IJavaProject project= getProject();
 				fgStringT= project.findType(STRING);
 				fgCharSequenceT= project.findType(CHAR_SEQUENCE);
 				fgStringBufferT= project.findType(STRING_BUFFER);

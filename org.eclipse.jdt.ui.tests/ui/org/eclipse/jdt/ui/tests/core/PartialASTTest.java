@@ -76,14 +76,14 @@ public class PartialASTTest extends CoreTests {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setValue(PreferenceConstants.CODEGEN_ADD_COMMENTS, false);
 
-		fJProject1= ProjectTestSetup.getProject();
+		fJProject1= pts.getProject();
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}
 
 	@After
 	public void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject1, pts.getDefaultClasspath());
 	}
 
 	@Test
@@ -146,24 +146,24 @@ public class PartialASTTest extends CoreTests {
 		List<AbstractTypeDeclaration> list= astRoot.types();
 		for (AbstractTypeDeclaration element : list) {
 			TypeDeclaration decl= (TypeDeclaration) element;
-			assertTrue(decl.resolveBinding() != null);
+			assertNotNull(decl.resolveBinding());
 
 			if (!decl.isInterface() && decl.getSuperclassType() != null) {
-				assertTrue(decl.getSuperclassType().resolveBinding() != null);
+				assertNotNull(decl.getSuperclassType().resolveBinding());
 			}
 			List<Type> interfaces= decl.superInterfaceTypes();
 			for (Type interface1 : interfaces) {
-				assertTrue(interface1.resolveBinding() != null);
+				assertNotNull(interface1.resolveBinding());
 			}
 
 			for (MethodDeclaration meth : decl.getMethods()) {
-				assertTrue(meth.resolveBinding() != null);
+				assertNotNull(meth.resolveBinding());
 				List<SingleVariableDeclaration> params= meth.parameters();
 				for (SingleVariableDeclaration arg : params) {
-					assertTrue(arg.resolveBinding() != null);
+					assertNotNull(arg.resolveBinding());
 				}
 				if (!meth.isConstructor()) {
-					assertTrue(meth.getReturnType2().resolveBinding() != null);
+					assertNotNull(meth.getReturnType2().resolveBinding());
 				}
 			}
 		}

@@ -13,8 +13,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 import java.util.Hashtable;
 import java.util.List;
@@ -63,13 +63,13 @@ public class TypeRulesTest extends CoreTests {
 		options.put(JavaCore.COMPILER_PB_UNCHECKED_TYPE_OPERATION, JavaCore.IGNORE);
 		JavaCore.setOptions(options);
 
-		fJProject1= ProjectTestSetup.getProject();
+		fJProject1= pts.getProject();
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}
 
 	@After
 	public void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject1, pts.getDefaultClasspath());
 	}
 
 	private VariableDeclarationFragment[] createVariables() throws JavaModelException {
@@ -197,7 +197,7 @@ public class TypeRulesTest extends CoreTests {
 				}
 			}
 		}
-		assertTrue(errors.toString(), errors.length() == 0);
+		assertEquals(errors.toString(), 0, errors.length());
 	}
 
 	@Test
@@ -238,7 +238,7 @@ public class TypeRulesTest extends CoreTests {
 				}
 			}
 		}
-		assertTrue(errors.toString(), errors.length() == 0);
+		assertEquals(errors.toString(), 0, errors.length());
 	}
 
 	@Test
@@ -279,7 +279,7 @@ public class TypeRulesTest extends CoreTests {
 				}
 			}
 		}
-		assertTrue(errors.toString(), errors.length() == 0);
+		assertEquals(errors.toString(), 0, errors.length());
 	}
 
 	@Test
@@ -332,7 +332,7 @@ public class TypeRulesTest extends CoreTests {
 				}
 			}
 		}
-		assertTrue(errors.toString(), errors.length() == 0);
+		assertEquals(errors.toString(), 0, errors.length());
 	}
 
 }

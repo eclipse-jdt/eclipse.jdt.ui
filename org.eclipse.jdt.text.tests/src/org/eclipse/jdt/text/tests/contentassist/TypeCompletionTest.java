@@ -13,7 +13,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.contentassist;
 
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.jdt.core.IPackageFragment;
@@ -26,8 +25,6 @@ import org.eclipse.jdt.ui.PreferenceConstants;
  * @since 3.2
  */
 public class TypeCompletionTest extends AbstractCompletionTest {
-	@Rule
-	public CompletionTestSetup cts= new CompletionTestSetup();
 
 	/*
 	 * @see org.eclipse.jdt.text.tests.contentassist.AbstractCompletionTest#setUp()
@@ -293,7 +290,7 @@ public class TypeCompletionTest extends AbstractCompletionTest {
 
 	@Test
 	public void testBug182468() throws Exception {
-		IPackageFragmentRoot src= (IPackageFragmentRoot)CompletionTestSetup.getTestPackage().getParent();
+		IPackageFragmentRoot src= (IPackageFragmentRoot)cts.getTestPackage().getParent();
 
 		IPackageFragment package1= src.createPackageFragment("package1", true, null);
 		package1.createCompilationUnit("AClass.java", "package " + package1.getElementName() + "; public class AClass {}", true, null);

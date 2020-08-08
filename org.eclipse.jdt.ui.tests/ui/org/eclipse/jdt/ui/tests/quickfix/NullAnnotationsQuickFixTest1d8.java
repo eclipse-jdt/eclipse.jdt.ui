@@ -67,7 +67,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 
 	@Rule
-    public ProjectTestSetup projectsetup = new Java1d8ProjectTestSetup();
+    public ProjectTestSetup projectSetup = new Java1d8ProjectTestSetup();
 
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
@@ -100,7 +100,7 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 		StubUtility.setCodeTemplate(CodeTemplateContextType.CONSTRUCTORSTUB_ID, "", null);
 		StubUtility.setCodeTemplate(CodeTemplateContextType.METHODSTUB_ID, "", null);
 
-		fJProject1= Java1d8ProjectTestSetup.getProject();
+		fJProject1= projectSetup.getProject();
 		if (this.ANNOTATION_JAR_PATH == null) {
 			String version= "[2.0.0,3.0.0)"; // tests run at 1.8, need the "new" null annotations
 			Bundle[] bundles= Platform.getBundles("org.eclipse.jdt.annotation", version);
@@ -117,7 +117,7 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 
 	@After
 	public void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJProject1, Java1d8ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject1, projectSetup.getDefaultClasspath());
 	}
 
 	/*

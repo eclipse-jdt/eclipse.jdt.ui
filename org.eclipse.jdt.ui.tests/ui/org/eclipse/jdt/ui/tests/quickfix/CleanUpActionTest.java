@@ -21,15 +21,17 @@ import java.util.Map;
 
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
@@ -42,11 +44,20 @@ import org.eclipse.jdt.internal.ui.actions.MultiSortMembersAction;
 /**
  * @since 3.4
  */
-@RunWith(JUnit4.class)
 public class CleanUpActionTest extends CleanUpTestCase {
 
 	@Rule
-    public ProjectTestSetup projectsetup = new ProjectTestSetup();
+    public ProjectTestSetup projectSetup = new ProjectTestSetup();
+
+	@Override
+	protected IJavaProject getProject() {
+		return projectSetup.getProject();
+	}
+
+	@Override
+	protected IClasspathEntry[] getDefaultClasspath() throws CoreException {
+		return projectSetup.getDefaultClasspath();
+	}
 
 	//205600 [clean up] 'Sort members' action uses workspace/project clean up options
 	@Test

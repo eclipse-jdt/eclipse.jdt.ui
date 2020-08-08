@@ -69,7 +69,7 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.RenameRefactoringPr
 @RunWith(JUnit4.class)
 public class AssistQuickFixTest extends QuickFixTest {
 	@Rule
-    public ProjectTestSetup projectsetup = new ProjectTestSetup();
+    public ProjectTestSetup projectSetup = new ProjectTestSetup();
 
 	private static final String CHANGE_MODIFIER_TO_FINAL= FixMessages.VariableDeclarationFix_changeModifierOfUnknownToFinal_description;
 
@@ -96,7 +96,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		corePrefs.setValue(JavaCore.CODEASSIST_FIELD_SUFFIXES, "");
 		corePrefs.setValue(JavaCore.CODEASSIST_STATIC_FIELD_SUFFIXES, "");
 
-		fJProject1= ProjectTestSetup.getProject();
+		fJProject1= projectSetup.getProject();
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}
@@ -104,7 +104,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 	@After
 	public void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject1, projectSetup.getDefaultClasspath());
 	}
 
 	@Test

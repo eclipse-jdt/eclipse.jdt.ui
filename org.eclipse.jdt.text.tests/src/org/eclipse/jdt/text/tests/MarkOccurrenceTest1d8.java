@@ -66,14 +66,14 @@ public class MarkOccurrenceTest1d8 {
 	public void setUp() throws Exception {
 		fParser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 
-		fJProject1= Java1d8ProjectTestSetup.getProject();
+		fJProject1= f18p.getProject();
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.EDITOR_MARK_OCCURRENCES, true);
 	}
 
 	@After
 	public void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJProject1, Java1d8ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject1, f18p.getDefaultClasspath());
 	}
 
 	private OccurrenceLocation[] getHighlights(String source, int offset, int length) throws Exception {

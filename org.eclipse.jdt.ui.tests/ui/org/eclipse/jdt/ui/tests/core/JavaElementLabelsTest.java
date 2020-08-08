@@ -47,14 +47,14 @@ public class JavaElementLabelsTest extends CoreTests {
 
 	@Before
 	public void setUp() throws Exception {
-		fJProject1= ProjectTestSetup.getProject();
+		fJProject1= pts.getProject();
 		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
 		store.setValue(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES, false);
 	}
 
 	@After
 	public void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject1, pts.getDefaultClasspath());
 	}
 
 	private static void assertExpectedLabel(IJavaElement element, String expectedLabel, long flags) {

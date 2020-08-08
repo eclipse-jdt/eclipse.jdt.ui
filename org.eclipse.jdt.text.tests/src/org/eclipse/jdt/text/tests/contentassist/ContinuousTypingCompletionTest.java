@@ -15,7 +15,6 @@ package org.eclipse.jdt.text.tests.contentassist;
 
 import static org.junit.Assert.assertEquals;
 
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.util.DisplayHelper;
@@ -64,8 +63,7 @@ public class ContinuousTypingCompletionTest extends AbstractCompletionTest {
 
 	private JavaEditor fEditor;
 
-	@Rule
-	public CompletionTestSetup cts= new CompletionTestSetup();
+
 
 	/*
 	 * This tests https://bugs.eclipse.org/bugs/show_bug.cgi?id=511542
@@ -78,7 +76,7 @@ public class ContinuousTypingCompletionTest extends AbstractCompletionTest {
 				"		/*COMPLETE_HERE*/\n" +
 				"	}\n" +
 				"}\n";
-		ICompilationUnit compilationUnit= CompletionTestSetup.getAnonymousTestPackage().createCompilationUnit(getName() + ".java", contents, true, new NullProgressMonitor());
+		ICompilationUnit compilationUnit= cts.getAnonymousTestPackage().createCompilationUnit(getName() + ".java", contents, true, new NullProgressMonitor());
 		fEditor= (JavaEditor) EditorUtility.openInEditor(compilationUnit);
 		int completionOffset= contents.indexOf("/*COMPLETE_HERE*/");
 		fEditor.getViewer().setSelectedRange(completionOffset, 0);

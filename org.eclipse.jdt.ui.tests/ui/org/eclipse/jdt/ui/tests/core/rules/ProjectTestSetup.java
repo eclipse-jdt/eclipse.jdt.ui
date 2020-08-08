@@ -44,12 +44,12 @@ public class ProjectTestSetup extends ExternalResource {
 
 	public static final String PROJECT_NAME= "TestSetupProject";
 
-	public static IJavaProject getProject() {
+	public IJavaProject getProject() {
 		IProject project= ResourcesPlugin.getWorkspace().getRoot().getProject(PROJECT_NAME);
 		return JavaCore.create(project);
 	}
 
-	public static IClasspathEntry[] getDefaultClasspath() throws CoreException {
+	public IClasspathEntry[] getDefaultClasspath() throws CoreException {
 		IPath[] rtJarPath= JavaProjectHelper.findRtJar(JavaProjectHelper.RT_STUBS_15);
 		return new IClasspathEntry[] {  JavaCore.newLibraryEntry(rtJarPath[0], rtJarPath[1], rtJarPath[2], true) };
 	}

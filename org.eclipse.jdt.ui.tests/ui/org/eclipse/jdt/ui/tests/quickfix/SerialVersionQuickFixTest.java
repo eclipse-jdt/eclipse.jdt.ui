@@ -56,7 +56,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public class SerialVersionQuickFixTest extends QuickFixTest {
 
 	@Rule
-    public ProjectTestSetup projectsetup = new ProjectTestSetup();
+    public ProjectTestSetup projectSetup = new ProjectTestSetup();
 
 	private static final String DEFAULT_VALUE= "1L";
 
@@ -81,7 +81,7 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 	@Before
 	public void setUp() throws Exception {
 		JavaRuntime.getDefaultVMInstall();
-		fProject= ProjectTestSetup.getProject();
+		fProject= projectSetup.getProject();
 
 		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 
@@ -107,7 +107,7 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 
 	@After
 	public void tearDown() throws Exception {
-		JavaProjectHelper.clear(fProject, ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fProject, projectSetup.getDefaultClasspath());
 	}
 
 	@Test

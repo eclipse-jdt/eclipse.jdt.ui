@@ -64,7 +64,7 @@ public class PackageExplorerShowInTests {
 
 	@Before
 	public void setUp() throws Exception {
-		fJProject= ProjectTestSetup.getProject();
+		fJProject= pts.getProject();
 		fPage= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
 		fPackageExplorer= (PackageExplorerPart) fPage.showView(JavaUI.ID_PACKAGES);
 		fPackageExplorer.selectAndReveal(new StructuredSelection());
@@ -72,7 +72,7 @@ public class PackageExplorerShowInTests {
 
 	@After
 	public void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJProject, ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject, pts.getDefaultClasspath());
 		fPage.hideView(fPackageExplorer);
 		fPage= null;
 		fPackageExplorer= null;
@@ -195,7 +195,4 @@ public class PackageExplorerShowInTests {
 			editor.getSite().getPage().closeEditor(editor, false);
 		}
 	}
-
-
-
 }

@@ -74,7 +74,7 @@ import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesQuickAssistPro
 public class PropertiesFileQuickAssistTest {
 
 	@Rule
-    public ProjectTestSetup projectsetup = new ProjectTestSetup();
+    public ProjectTestSetup projectSetup = new ProjectTestSetup();
 
 	private IJavaProject fJProject;
 	private IPackageFragmentRoot fSourceFolder;
@@ -92,7 +92,7 @@ public class PropertiesFileQuickAssistTest {
 
 		setPreferences();
 
-		fJProject= ProjectTestSetup.getProject();
+		fJProject= projectSetup.getProject();
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject, "src");
 
@@ -112,7 +112,7 @@ public class PropertiesFileQuickAssistTest {
 
 	@After
 	public void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJProject, ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject, projectSetup.getDefaultClasspath());
 	}
 
 	private static IFile createPropertyFile(IPackageFragment pack, String name, String content) throws UnsupportedEncodingException, CoreException {

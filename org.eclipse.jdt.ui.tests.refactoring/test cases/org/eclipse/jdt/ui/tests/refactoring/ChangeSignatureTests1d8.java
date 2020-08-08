@@ -48,12 +48,12 @@ public class ChangeSignatureTests1d8 extends ChangeSignatureTests {
 
 	@Override
 	public void genericafter() throws Exception {
-		JavaProjectHelper.clear(fJProject1, Java1d8ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject1, jps.getDefaultClasspath());
 	}
 
 	@Override
 	public void genericbefore() throws Exception {
-		fJProject1= Java1d8ProjectTestSetup.getProject();
+		fJProject1= jps.getProject();
 		fRoot= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		fPackageP= fRoot.createPackageFragment("p", true, null);
 		fIsPreDeltaTest= false;

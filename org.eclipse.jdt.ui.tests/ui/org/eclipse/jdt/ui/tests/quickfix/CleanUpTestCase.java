@@ -68,7 +68,6 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
 import org.eclipse.jdt.ui.cleanup.ICleanUp;
-import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
@@ -78,11 +77,10 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomPr
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileStore;
 
-public class CleanUpTestCase extends QuickFixTest {
+public abstract class CleanUpTestCase extends QuickFixTest {
 	protected static final String FIELD_COMMENT= "/* Test */";
 
 	protected IPackageFragmentRoot fSourceFolder;
-	protected IJavaProject fJProject1;
 
 	private CustomProfile fProfile;
 
@@ -108,9 +106,7 @@ public class CleanUpTestCase extends QuickFixTest {
 		corePrefs.setValue(JavaCore.CODEASSIST_FIELD_SUFFIXES, "");
 		corePrefs.setValue(JavaCore.CODEASSIST_STATIC_FIELD_SUFFIXES, "");
 
-		fJProject1= getProject();
-
-		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		fSourceFolder= JavaProjectHelper.addSourceContainer(getProject(), "src");
 
 		Map<String, String> settings= new Hashtable<>();
 		fProfile= new ProfileManager.CustomProfile("testProfile", settings, CleanUpProfileVersioner.CURRENT_VERSION, CleanUpProfileVersioner.PROFILE_KIND);
@@ -122,20 +118,15 @@ public class CleanUpTestCase extends QuickFixTest {
 
 	@After
 	public void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJProject1, getDefaultClasspath());
+		JavaProjectHelper.clear(getProject(), getDefaultClasspath());
 		disableAll();
-		fJProject1= null;
 		fSourceFolder= null;
 		fProfile= null;
 	}
 
-	protected IJavaProject getProject() {
-		return ProjectTestSetup.getProject();
-	}
+	protected abstract IJavaProject getProject();
 
-	protected IClasspathEntry[] getDefaultClasspath() throws CoreException {
-		return ProjectTestSetup.getDefaultClasspath();
-	}
+	protected abstract IClasspathEntry[] getDefaultClasspath() throws CoreException;
 
 	private void disableAll() throws CoreException {
 		Map<String, String> settings= fProfile.getSettings();

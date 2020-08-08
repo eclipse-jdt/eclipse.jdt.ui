@@ -62,13 +62,13 @@ public class BreakContinueTargetFinderTest {
 		fParser = ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 		fFinder= new BreakContinueTargetFinder();
 
-		fJProject1= ProjectTestSetup.getProject();
+		fJProject1= pts.getProject();
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}
 
 	@After
 	public void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject1, pts.getDefaultClasspath());
 	}
 
 	private OccurrenceLocation[] getHighlights(StringBuffer source, int offset, int length) throws Exception {

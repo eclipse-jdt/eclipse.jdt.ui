@@ -47,7 +47,7 @@ import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 public class JavadocQuickFixTestPreview extends QuickFixTest {
 
 	@Rule
-    public ProjectTestSetup projectsetup = new Java14ProjectTestSetup(true);
+    public ProjectTestSetup projectSetup = new Java14ProjectTestSetup(true);
 
 	private IJavaProject fJProject1;
 
@@ -77,14 +77,14 @@ public class JavadocQuickFixTestPreview extends QuickFixTest {
 
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		JavaProjectHelper.set14CompilerOptions(fJProject1, true);
-		JavaProjectHelper.addRequiredModularProject(fJProject1, Java14ProjectTestSetup.getProject());
+		JavaProjectHelper.addRequiredModularProject(fJProject1, projectSetup.getProject());
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}
 
 	@After
 	public void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject1, projectSetup.getDefaultClasspath());
 	}
 
 	@Test

@@ -20,8 +20,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -52,11 +50,9 @@ import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 /**
  * Those tests should run on Java Dolphin 1.7 .
  */
-@RunWith(JUnit4.class)
 public class AdvancedQuickAssistTest1d7 extends QuickFixTest {
-
 	@Rule
-    public ProjectTestSetup projectsetup = new Java1d7ProjectTestSetup();
+    public ProjectTestSetup projectSetup= new Java1d7ProjectTestSetup();
 
 	private IJavaProject fJProject1;
 
@@ -82,7 +78,7 @@ public class AdvancedQuickAssistTest1d7 extends QuickFixTest {
 		corePrefs.setValue(JavaCore.CODEASSIST_FIELD_SUFFIXES, "");
 		corePrefs.setValue(JavaCore.CODEASSIST_STATIC_FIELD_SUFFIXES, "");
 
-		fJProject1= Java1d7ProjectTestSetup.getProject();
+		fJProject1= projectSetup.getProject();
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}
@@ -90,7 +86,7 @@ public class AdvancedQuickAssistTest1d7 extends QuickFixTest {
 
 	@After
 	public void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJProject1, Java1d7ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject1, projectSetup.getDefaultClasspath());
 	}
 
 	@Test

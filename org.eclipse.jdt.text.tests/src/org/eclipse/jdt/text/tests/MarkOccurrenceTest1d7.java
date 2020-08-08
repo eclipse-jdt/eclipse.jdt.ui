@@ -67,7 +67,7 @@ public class MarkOccurrenceTest1d7 {
 	public void setUp() throws Exception {
 		fParser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 
-		fJProject1= Java1d7ProjectTestSetup.getProject();
+		fJProject1= j7s.getProject();
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.EDITOR_MARK_OCCURRENCES, true);
 		JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.EDITOR_MARK_IMPLEMENTORS, true);
@@ -75,7 +75,7 @@ public class MarkOccurrenceTest1d7 {
 
 	@After
 	public void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJProject1, Java1d7ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject1, j7s.getDefaultClasspath());
 	}
 
 	private OccurrenceLocation[] getHighlights(StringBuffer source, int offset, int length) throws Exception {

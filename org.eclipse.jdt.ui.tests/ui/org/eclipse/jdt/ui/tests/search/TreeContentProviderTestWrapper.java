@@ -36,7 +36,7 @@ public class TreeContentProviderTestWrapper {
 	TreeContentProviderTest fTest;
 
 	@Rule
-	public JUnitSourceSetup projectsetup = new JUnitSourceSetup();
+	public JUnitSourceSetup projectSetup = new JUnitSourceSetup();
 
 	@Before
 	public void setUp() throws Exception {

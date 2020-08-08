@@ -63,7 +63,7 @@ import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 @RunWith(JUnit4.class)
 public class AssistQuickFixTest1d8 extends QuickFixTest {
 	@Rule
-    public ProjectTestSetup projectsetup = new Java1d8ProjectTestSetup();
+    public ProjectTestSetup projectSetup = new Java1d8ProjectTestSetup();
 
 	private IJavaProject fJProject1;
 
@@ -96,13 +96,13 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 
 		StubUtility.setCodeTemplate(CodeTemplateContextType.METHODSTUB_ID, "//TODO\n${body_statement}", null);
 
-		fJProject1= Java1d8ProjectTestSetup.getProject();
+		fJProject1= projectSetup.getProject();
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}
 
 	@After
 	public void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJProject1, Java1d8ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject1, projectSetup.getDefaultClasspath());
 	}
 
 	@Test

@@ -57,7 +57,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 
 	@Rule
-    public ProjectTestSetup projectsetup = new ProjectTestSetup();
+    public ProjectTestSetup projectSetup = new ProjectTestSetup();
 
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
@@ -73,7 +73,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setValue(PreferenceConstants.CODEGEN_ADD_COMMENTS, false);
 
-		fJProject1= ProjectTestSetup.getProject();
+		fJProject1= projectSetup.getProject();
 
 		String newFileTemplate= "${package_declaration}\n\n${type_declaration}";
 		StubUtility.setCodeTemplate(CodeTemplateContextType.NEWTYPE_ID, newFileTemplate, null);
@@ -83,10 +83,9 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}
 
-
 	@After
 	public void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject1, projectSetup.getDefaultClasspath());
 	}
 
 	@Test

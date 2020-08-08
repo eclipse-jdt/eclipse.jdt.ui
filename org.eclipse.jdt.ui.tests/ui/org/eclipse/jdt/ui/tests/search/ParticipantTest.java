@@ -46,7 +46,7 @@ import org.eclipse.jdt.internal.ui.search.SearchParticipantsExtensionPoint;
 public class ParticipantTest {
 
 	@Rule
-	public JUnitSourceSetup projectsetup = new JUnitSourceSetup(new TestExtensionPoint());
+	public JUnitSourceSetup projectSetup = new JUnitSourceSetup(new TestExtensionPoint());
 
 	static class TestExtensionPoint extends SearchParticipantsExtensionPoint {
 		@Override

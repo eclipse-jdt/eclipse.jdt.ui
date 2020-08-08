@@ -56,13 +56,13 @@ public class JavadocHoverTests extends CoreTests {
 
 	@Before
 	public void setUp() throws Exception {
-		fJProject1= ProjectTestSetup.getProject();
+		fJProject1= pts.getProject();
 		JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}
 
 	@After
 	public void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject1, pts.getDefaultClasspath());
 	}
 
 	protected ICompilationUnit getWorkingCopy(String path, String source, WorkingCopyOwner owner) throws JavaModelException {

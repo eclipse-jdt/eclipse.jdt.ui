@@ -22,40 +22,17 @@ import java.net.URISyntaxException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.junit.After;
-import org.junit.Before;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-
-import org.eclipse.jface.preference.IPreferenceStore;
-
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.IBinding;
 
-import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
-
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
 
 public abstract class AbstractBindingLabelsTest extends CoreTests {
 	protected IJavaProject fJProject1;
 	protected boolean fHaveSource= true;
-
-	@Before
-	public void setUp() throws Exception {
-		fJProject1= ProjectTestSetup.getProject();
-
-		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
-		store.setValue(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES, false);
-	}
-
-	@After
-	public void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
-	}
 
 	protected String getBindingLabel(IJavaElement elem, long flags) {
 		ASTParser parser= ASTParser.newParser(AST.JLS14);

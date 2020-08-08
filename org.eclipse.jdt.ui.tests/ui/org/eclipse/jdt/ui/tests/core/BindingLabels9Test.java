@@ -13,7 +13,6 @@ package org.eclipse.jdt.ui.tests.core;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -36,19 +35,16 @@ public class BindingLabels9Test extends AbstractBindingLabelsTest {
 	@Rule
 	public Java9ProjectTestSetup j9p= new Java9ProjectTestSetup();
 
-	@Override
-	@Before
 	public void setUp() throws Exception {
-		fJProject1= Java9ProjectTestSetup.getProject();
+		fJProject1= j9p.getProject();
 
 		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
 		store.setValue(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES, false);
 	}
 
-	@Override
 	@After
 	public void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJProject1, Java9ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject1, j9p.getDefaultClasspath());
 	}
 
 	@Test

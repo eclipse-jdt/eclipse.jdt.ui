@@ -15,7 +15,6 @@ package org.eclipse.jdt.text.tests.contentassist;
 
 import java.util.Hashtable;
 
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.jdt.core.JavaCore;
@@ -29,9 +28,6 @@ import org.eclipse.jdt.ui.PreferenceConstants;
  */
 public class MethodInsertionFormattedCompletionTest extends AbstractCompletionTest {
 	private static final boolean BUG_DISABLED_DUE_TO_FORMATTER_CONTEXT_INFO_INTERATION= true;
-
-	@Rule
-	public CompletionTestSetup cts= new CompletionTestSetup();
 
 	/*
 	 * @see org.eclipse.jdt.text.tests.contentassist.AbstractCompletionTest#configureCoreOptions(java.util.Hashtable)

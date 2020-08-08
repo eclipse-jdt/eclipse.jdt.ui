@@ -15,7 +15,6 @@ package org.eclipse.jdt.text.tests.contentassist;
 
 import java.util.Hashtable;
 
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.jdt.core.JavaCore;
@@ -25,9 +24,6 @@ import org.eclipse.jdt.core.JavaCore;
  * @since 3.2
  */
 public class CamelCaseCompletionTest extends AbstractCompletionTest {
-	@Rule
-	public CompletionTestSetup cts= new CompletionTestSetup();
-
 	/*
 	 * @see org.eclipse.jdt.text.tests.contentassist.AbstractCompletionTest#configureCoreOptions(java.util.Hashtable)
 	 */

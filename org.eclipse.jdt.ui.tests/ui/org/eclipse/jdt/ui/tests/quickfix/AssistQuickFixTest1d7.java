@@ -57,7 +57,7 @@ import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 public class AssistQuickFixTest1d7 extends QuickFixTest {
 
 	@Rule
-    public ProjectTestSetup projectsetup = new Java1d7ProjectTestSetup();
+    public ProjectTestSetup projectSetup = new Java1d7ProjectTestSetup();
 
 	private static final String REMOVE_CATCH_CLAUSE= CorrectionMessages.QuickAssistProcessor_removecatchclause_description;
 	private static final String REPLACE_CATCH_CLAUSE_WITH_THROWS= CorrectionMessages.QuickAssistProcessor_catchclausetothrows_description;
@@ -89,14 +89,14 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 		corePrefs.setValue(JavaCore.CODEASSIST_FIELD_SUFFIXES, "");
 		corePrefs.setValue(JavaCore.CODEASSIST_STATIC_FIELD_SUFFIXES, "");
 
-		fJProject1= Java1d7ProjectTestSetup.getProject();
+		fJProject1= projectSetup.getProject();
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}
 
 	@After
 	public void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJProject1, Java1d7ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject1, projectSetup.getDefaultClasspath());
 	}
 
 	@Test

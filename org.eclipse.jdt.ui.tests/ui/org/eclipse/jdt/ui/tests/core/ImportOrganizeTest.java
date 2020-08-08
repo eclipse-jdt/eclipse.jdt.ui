@@ -63,7 +63,7 @@ public class ImportOrganizeTest extends CoreTests {
 
 	@Before
 	public void setUp() throws Exception {
-		fJProject1= ProjectTestSetup.getProject();
+		fJProject1= pts.getProject();
 
 		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE, String.valueOf(99));
@@ -73,7 +73,7 @@ public class ImportOrganizeTest extends CoreTests {
 	@After
 	public void tearDown() throws Exception {
 		setOrganizeImportSettings(null, 99, 99, fJProject1);
-		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject1, pts.getDefaultClasspath());
 	}
 
 	protected IChooseImportQuery createQuery(final String name, final String[] choices, final int[] nEntries) {

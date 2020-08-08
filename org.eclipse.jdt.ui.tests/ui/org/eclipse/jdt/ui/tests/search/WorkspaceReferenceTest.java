@@ -28,7 +28,7 @@ import org.eclipse.jdt.ui.tests.core.rules.JUnitSourceSetup;
 public class WorkspaceReferenceTest {
 
 	@Rule
-	public JUnitSourceSetup projectsetup = new JUnitSourceSetup();
+	public JUnitSourceSetup projectSetup = new JUnitSourceSetup();
 
 	@Test
 	public void testSimpleMethodRef() throws Exception {

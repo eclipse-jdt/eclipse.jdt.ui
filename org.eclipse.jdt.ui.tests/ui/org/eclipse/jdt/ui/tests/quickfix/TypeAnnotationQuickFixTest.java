@@ -53,7 +53,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public class TypeAnnotationQuickFixTest extends QuickFixTest {
 
 	@Rule
-    public ProjectTestSetup projectsetup = new Java1d8ProjectTestSetup();
+    public ProjectTestSetup projectSetup = new Java1d8ProjectTestSetup();
 
 	private IJavaProject fJProject1;
 
@@ -72,7 +72,7 @@ public class TypeAnnotationQuickFixTest extends QuickFixTest {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setValue(PreferenceConstants.CODEGEN_ADD_COMMENTS, false);
 
-		fJProject1= Java1d8ProjectTestSetup.getProject();
+		fJProject1= projectSetup.getProject();
 
 		StubUtility.setCodeTemplate(CodeTemplateContextType.METHODSTUB_ID, "", null);
 		StubUtility.setCodeTemplate(CodeTemplateContextType.CONSTRUCTORSTUB_ID, "", null);
@@ -83,7 +83,7 @@ public class TypeAnnotationQuickFixTest extends QuickFixTest {
 
 	@After
 	public void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJProject1, Java1d8ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject1, projectSetup.getDefaultClasspath());
 	}
 
 	public void runQuickFixTest(String testCaseSpecificInput, String... testCaseSpecificOutputs) throws Exception {

@@ -57,14 +57,14 @@ public class NlsRefactoringCreateChangeTest {
 
 	@Before
 	public void setUp() throws Exception {
-		fJavaProject= ProjectTestSetup.getProject();
+		fJavaProject= pts.getProject();
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJavaProject, "src");
 		fHelper= new NlsRefactoringTestHelper(fJavaProject);
 	}
 
 	@After
 	public void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJavaProject, ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJavaProject, pts.getDefaultClasspath());
 	}
 
 	@Test

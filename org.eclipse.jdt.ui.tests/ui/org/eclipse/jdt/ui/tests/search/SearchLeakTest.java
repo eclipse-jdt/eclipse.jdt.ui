@@ -48,7 +48,7 @@ import org.eclipse.jdt.internal.ui.search.JavaSearchResult;
 public class SearchLeakTest extends LeakTestCase {
 
 	@Rule
-	public LeakTestSetup projectsetup = new LeakTestSetup();
+	public LeakTestSetup projectSetup = new LeakTestSetup();
 
 	@Test
 	public void testRemoveSearchQueries() throws Exception {

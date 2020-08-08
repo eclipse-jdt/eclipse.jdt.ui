@@ -49,7 +49,7 @@ import org.eclipse.jdt.ui.tests.core.rules.LeakTestSetup;
 public class TextViewerUndoManagerLeakTest extends LeakTestCase {
 
 	@Rule
-	public LeakTestSetup projectsetup = new LeakTestSetup();
+	public LeakTestSetup projectSetup = new LeakTestSetup();
 
 	/** The maximum undo level. */
 	private static final int MAX_UNDO_LEVEL= 256;

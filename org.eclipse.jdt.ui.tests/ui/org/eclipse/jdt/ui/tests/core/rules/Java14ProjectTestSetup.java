@@ -38,12 +38,14 @@ public class Java14ProjectTestSetup extends ProjectTestSetup {
 
 	private boolean enable_preview_feature;
 
-	public static IJavaProject getProject() {
+	@Override
+	public IJavaProject getProject() {
 		IProject project= ResourcesPlugin.getWorkspace().getRoot().getProject(PROJECT_NAME14);
 		return JavaCore.create(project);
 	}
 
-	public static IClasspathEntry[] getDefaultClasspath() throws CoreException {
+	@Override
+	public IClasspathEntry[] getDefaultClasspath() throws CoreException {
 		IPath[] rtJarPath= JavaProjectHelper.findRtJar(JavaProjectHelper.RT_STUBS14);
 		IClasspathAttribute[] extraAttributes= { JavaCore.newClasspathAttribute(IClasspathAttribute.MODULE, Boolean.TRUE.toString()) };
 		return new IClasspathEntry[] { JavaCore.newLibraryEntry(rtJarPath[0], rtJarPath[1], rtJarPath[2], ClasspathEntry.NO_ACCESS_RULES, extraAttributes, true) };

@@ -17,6 +17,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -26,8 +27,6 @@ import java.util.Map;
 
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -40,6 +39,7 @@ import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -71,11 +71,22 @@ import org.eclipse.jdt.internal.ui.fix.RedundantModifiersCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUp;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 
-@RunWith(JUnit4.class)
 public class CleanUpTest extends CleanUpTestCase {
 
 	@Rule
-	public ProjectTestSetup projectsetup = new ProjectTestSetup();
+	public ProjectTestSetup projectSetup = new ProjectTestSetup();
+
+	@Override
+	protected IJavaProject getProject() {
+		return projectSetup.getProject();
+	}
+
+	@Override
+	protected IClasspathEntry[] getDefaultClasspath() throws CoreException {
+		return projectSetup.getDefaultClasspath();
+	}
+
+	IJavaProject fJProject1= getProject();
 
 	private class NoChangeRedundantModifiersCleanUp extends RedundantModifiersCleanUp {
 		private NoChangeRedundantModifiersCleanUp(Map<String, String> options) {
@@ -1460,9 +1471,9 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 		parser.setResolveBindings(true);
-		parser.setProject(fJProject1);
+		parser.setProject(getProject());
 
-		Map<String, String> options= RefactoringASTParser.getCompilerOptions(fJProject1);
+		Map<String, String> options= RefactoringASTParser.getCompilerOptions(getProject());
 		options.putAll(cleanUp.getRequirements().getCompilerOptions());
 		parser.setCompilerOptions(options);
 
@@ -1475,7 +1486,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		}, null);
 
 		IProblem[] problems= roots[0].getProblems();
-		assertTrue(problems.length == 2);
+		assertEquals(2, problems.length);
 		for (IProblem problem : problems) {
 			ProblemLocation location= new ProblemLocation(problem);
 			assertTrue(cleanUp.canFix(cu1, location));
@@ -4208,7 +4219,7 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testSerialVersion01() throws Exception {
 
-		JavaProjectHelper.set14CompilerOptions(fJProject1);
+		JavaProjectHelper.set14CompilerOptions(getProject());
 
 		try {
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -4218,7 +4229,7 @@ public class CleanUpTest extends CleanUpTestCase {
 			buf.append("public class E1 implements Serializable {\n");
 			buf.append("}\n");
 			ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
-			fJProject1.getProject().build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
+			getProject().getProject().build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
 
 			enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
 			enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED);
@@ -4279,14 +4290,14 @@ public class CleanUpTest extends CleanUpTestCase {
 			String expected1= buf.toString();
 			assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu1}, new String[] {expected1});
 		} finally {
-			JavaProjectHelper.set15CompilerOptions(fJProject1);
+			JavaProjectHelper.set15CompilerOptions(getProject());
 		}
 	}
 
 	@Test
 	public void testSerialVersion03() throws Exception {
 
-		JavaProjectHelper.set14CompilerOptions(fJProject1);
+		JavaProjectHelper.set14CompilerOptions(getProject());
 
 		try {
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -4324,14 +4335,14 @@ public class CleanUpTest extends CleanUpTestCase {
 
 			assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu1, cu2}, new String[] {expected1, expected2});
 		} finally {
-			JavaProjectHelper.set15CompilerOptions(fJProject1);
+			JavaProjectHelper.set15CompilerOptions(getProject());
 		}
 	}
 
 	@Test
 	public void testSerialVersion04() throws Exception {
 
-		JavaProjectHelper.set14CompilerOptions(fJProject1);
+		JavaProjectHelper.set14CompilerOptions(getProject());
 
 		try {
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -4367,14 +4378,14 @@ public class CleanUpTest extends CleanUpTestCase {
 			String expected1= buf.toString();
 			assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu1}, new String[] {expected1});
 		} finally {
-			JavaProjectHelper.set15CompilerOptions(fJProject1);
+			JavaProjectHelper.set15CompilerOptions(getProject());
 		}
 	}
 
 	@Test
 	public void testSerialVersion05() throws Exception {
 
-		JavaProjectHelper.set14CompilerOptions(fJProject1);
+		JavaProjectHelper.set14CompilerOptions(getProject());
 
 		try {
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -4409,7 +4420,7 @@ public class CleanUpTest extends CleanUpTestCase {
 			String expected1= buf.toString();
 			assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu1}, new String[] {expected1});
 		} finally {
-			JavaProjectHelper.set15CompilerOptions(fJProject1);
+			JavaProjectHelper.set15CompilerOptions(getProject());
 		}
 	}
 
@@ -5664,7 +5675,7 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testSerialVersionBug139381() throws Exception {
 
-		JavaProjectHelper.set14CompilerOptions(fJProject1);
+		JavaProjectHelper.set14CompilerOptions(getProject());
 
 		try {
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -9498,7 +9509,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		RefactoringStatus status= assertRefactoringHasNoChange(new ICompilationUnit[] {cu1});
 		RefactoringStatusEntry[] entries= status.getEntries();
-		assertTrue(entries.length == 1);
+		assertEquals(1, entries.length);
 		String message= entries[0].getMessage();
 		assertTrue(message, entries[0].isInfo());
 		assertTrue(message, message.contains("ambiguous"));
@@ -9518,7 +9529,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		RefactoringStatus status= assertRefactoringHasNoChange(new ICompilationUnit[] {cu1});
 		RefactoringStatusEntry[] entries= status.getEntries();
-		assertTrue(entries.length == 1);
+		assertEquals(1, entries.length);
 		String message= entries[0].getMessage();
 		assertTrue(message, entries[0].isInfo());
 		assertTrue(message, message.contains("parse"));
@@ -9683,7 +9694,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 	@Test
 	public void testCorrectIndetationBug202145_2() throws Exception {
-		IJavaProject project= ProjectTestSetup.getProject();
+		IJavaProject project= getProject();
 		project.setOption(DefaultCodeFormatterConstants.FORMATTER_NEVER_INDENT_LINE_COMMENTS_ON_FIRST_COLUMN, DefaultCodeFormatterConstants.TRUE);
 		try {
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);

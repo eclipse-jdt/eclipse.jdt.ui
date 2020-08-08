@@ -53,7 +53,7 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.TypeChangeCorrectio
 public class AssistQuickFixTest10 extends QuickFixTest {
 
 	@Rule
-    public ProjectTestSetup projectsetup = new Java10ProjectTestSetup();
+    public ProjectTestSetup projectSetup= new Java10ProjectTestSetup();
 
 	private static final Class<?>[] TYPE_CHANGE_PROPOSAL_TYPE= { TypeChangeCorrectionProposal.class };
 
@@ -89,13 +89,13 @@ public class AssistQuickFixTest10 extends QuickFixTest {
 
 		StubUtility.setCodeTemplate(CodeTemplateContextType.METHODSTUB_ID, "//TODO\n${body_statement}", null);
 
-		fJProject1= Java10ProjectTestSetup.getProject();
+		fJProject1= projectSetup.getProject();
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}
 
 	@After
 	public void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJProject1, Java10ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject1, projectSetup.getDefaultClasspath());
 	}
 
 	@Test

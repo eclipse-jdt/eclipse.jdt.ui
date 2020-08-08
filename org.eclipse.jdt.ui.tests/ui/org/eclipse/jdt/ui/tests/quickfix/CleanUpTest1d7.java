@@ -31,16 +31,16 @@ import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 public class CleanUpTest1d7 extends CleanUpTestCase {
 	@Rule
-    public ProjectTestSetup projectsetup= new Java1d7ProjectTestSetup();
+    public ProjectTestSetup projectSetup= new Java1d7ProjectTestSetup();
 
 	@Override
 	protected IJavaProject getProject() {
-		return Java1d7ProjectTestSetup.getProject();
+		return projectSetup.getProject();
 	}
 
 	@Override
 	protected IClasspathEntry[] getDefaultClasspath() throws CoreException {
-		return Java1d7ProjectTestSetup.getDefaultClasspath();
+		return projectSetup.getDefaultClasspath();
 	}
 
 	@Test

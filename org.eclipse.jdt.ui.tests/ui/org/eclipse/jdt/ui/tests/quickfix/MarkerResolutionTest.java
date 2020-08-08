@@ -63,7 +63,7 @@ import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 public class MarkerResolutionTest extends QuickFixTest {
 
 	@Rule
-    public ProjectTestSetup projectsetup = new ProjectTestSetup();
+    public ProjectTestSetup projectSetup = new ProjectTestSetup();
 
 	private static final class TextViewerContext implements IQuickAssistInvocationContext {
 
@@ -116,17 +116,15 @@ public class MarkerResolutionTest extends QuickFixTest {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setValue(PreferenceConstants.CODEGEN_ADD_COMMENTS, false);
 
-		fJProject1= ProjectTestSetup.getProject();
+		fJProject1= projectSetup.getProject();
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}
 
-
 	@After
 	public void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject1, projectSetup.getDefaultClasspath());
 	}
-
 
 	private IMarker createMarker(ICompilationUnit cu, int line, int offset, int len) throws CoreException {
 		IFile file= (IFile) cu.getResource();

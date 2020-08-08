@@ -21,6 +21,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.util.List;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -57,17 +58,20 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 @RunWith(JUnit4.class)
 public class AnnotateAssistTest1d5 extends AbstractAnnotateAssistTests {
 	@Rule
-	public ProjectTestSetup projectsetup= new ProjectTestSetup();
+	public ProjectTestSetup projectSetup= new ProjectTestSetup();
 
 	protected static final String ANNOTATION_PATH= "annots";
 
-	protected static final Class<?> THIS= AnnotateAssistTest1d5.class;
-
 	@Before
 	public void setUp() throws Exception {
-		fJProject1= ProjectTestSetup.getProject();
+		fJProject1= projectSetup.getProject();
 		fJProject1.getProject().getFolder(ANNOTATION_PATH).create(true, true, null);
 		fJProject1.setOption(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
+	}
+
+	@After
+	public void tearDown() throws Exception {
+		JavaProjectHelper.clear(fJProject1, projectSetup.getDefaultClasspath());
 	}
 
 	// === Tests ===

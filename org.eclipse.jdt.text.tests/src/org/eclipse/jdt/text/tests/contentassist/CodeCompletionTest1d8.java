@@ -77,7 +77,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 
 	@Override
 	public void setUp() throws Exception {
-		fJProject1= Java1d8ProjectTestSetup.getProject();
+		fJProject1= j18s.getProject();
 
 		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE, "1");
@@ -108,7 +108,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		store.setToDefault(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS);
 		store.setToDefault(PreferenceConstants.CODEASSIST_SHOW_VISIBLE_PROPOSALS);
 		closeAllEditors();
-		JavaProjectHelper.clear(fJProject1, Java1d8ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject1, j18s.getDefaultClasspath());
 	}
 
 	public static void closeEditor(IEditorPart editor) {

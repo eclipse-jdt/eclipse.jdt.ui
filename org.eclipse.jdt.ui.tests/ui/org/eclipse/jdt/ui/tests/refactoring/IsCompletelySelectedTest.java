@@ -73,7 +73,7 @@ public class IsCompletelySelectedTest  {
 	private IPackageFragment package_a_b_e;
 
 	@Rule
-    public ProjectTestSetup projectsetup = new ProjectTestSetup();
+    public ProjectTestSetup projectSetup = new ProjectTestSetup();
 
 	@Before
 	public void setUp() throws Exception {

@@ -34,12 +34,14 @@ public class Java9ProjectTestSetup extends ProjectTestSetup {
 
 	public static final String PROJECT_NAME9= "TestSetupProject9";
 
-	public static IJavaProject getProject() {
+	@Override
+	public IJavaProject getProject() {
 		IProject project= ResourcesPlugin.getWorkspace().getRoot().getProject(PROJECT_NAME9);
 		return JavaCore.create(project);
 	}
 
-	public static IClasspathEntry[] getDefaultClasspath() throws CoreException {
+	@Override
+	public IClasspathEntry[] getDefaultClasspath() throws CoreException {
 		IPath[] rtJarPath= JavaProjectHelper.findRtJar(JavaProjectHelper.RT_STUBS_9);
 		return new IClasspathEntry[] { JavaCore.newLibraryEntry(rtJarPath[0], rtJarPath[1], rtJarPath[2],
 						null,

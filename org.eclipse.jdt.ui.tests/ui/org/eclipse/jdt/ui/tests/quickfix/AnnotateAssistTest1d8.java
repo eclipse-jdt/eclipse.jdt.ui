@@ -19,11 +19,12 @@ import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.util.List;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.core.runtime.Path;
 
@@ -45,21 +46,23 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 /**
  * Those tests are made to run on Java Spider 1.8 .
  */
-@RunWith(JUnit4.class)
 public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 
 	@Rule
-    public ProjectTestSetup projectsetup = new Java1d8ProjectTestSetup();
+    public ProjectTestSetup projectSetup = new Java1d8ProjectTestSetup();
 
 	protected static final String ANNOTATION_PATH= "annots";
 
-	protected static final Class<?> THIS= AnnotateAssistTest1d8.class;
-
 	@Before
 	public void setUp() throws Exception {
-		fJProject1= Java1d8ProjectTestSetup.getProject();
+		fJProject1= projectSetup.getProject();
 		fJProject1.getProject().getFolder(ANNOTATION_PATH).create(true, true, null);
 		fJProject1.setOption(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
+	}
+
+	@After
+	public void tearDown() throws Exception {
+		JavaProjectHelper.clear(fJProject1, projectSetup.getDefaultClasspath());
 	}
 
 	/**

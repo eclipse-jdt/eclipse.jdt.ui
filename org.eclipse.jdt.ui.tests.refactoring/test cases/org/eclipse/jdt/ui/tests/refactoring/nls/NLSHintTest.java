@@ -65,13 +65,13 @@ public class NLSHintTest {
 
     @Before
 	public void setUp() throws Exception {
-        javaProject = ProjectTestSetup.getProject();
+        javaProject = pts.getProject();
         fSourceFolder = JavaProjectHelper.addSourceContainer(javaProject, "src");
     }
 
     @After
 	public void tearDown() throws Exception {
-        JavaProjectHelper.clear(javaProject, ProjectTestSetup.getDefaultClasspath());
+        JavaProjectHelper.clear(javaProject, pts.getDefaultClasspath());
     }
 
     /*

@@ -16,7 +16,8 @@
 package org.eclipse.jdt.ui.tests.quickfix;
 
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -67,7 +68,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 	@Rule
-    public ProjectTestSetup projectsetup = new ProjectTestSetup();
+    public ProjectTestSetup projectSetup = new ProjectTestSetup();
 
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
@@ -90,17 +91,15 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		StubUtility.setCodeTemplate(CodeTemplateContextType.CONSTRUCTORSTUB_ID, "", null);
 		StubUtility.setCodeTemplate(CodeTemplateContextType.METHODSTUB_ID, "", null);
 
-		fJProject1= ProjectTestSetup.getProject();
+		fJProject1= projectSetup.getProject();
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}
 
-
 	@After
 	public void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJProject1,ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject1,projectSetup.getDefaultClasspath());
 	}
-
 
 	@Test
 	public void testTypeMismatchInVarDecl() throws Exception {
@@ -2448,7 +2447,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		assertNumberOfProposals(proposals, 3);
 
 		ICompletionProposal proposal= proposals.get(0);
-		assertTrue(proposal.getDisplayString().indexOf("Integer") != -1);
+		assertNotEquals(-1, proposal.getDisplayString().indexOf("Integer"));
 
 		String[] expected= new String[3];
 		buf= new StringBuffer();
@@ -2511,13 +2510,13 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		assertNumberOfProposals(proposals, 3);
 
 		ICompletionProposal proposal= proposals.get(0);
-		assertTrue(proposal.getDisplayString().indexOf("Integer") == -1);
+		assertEquals(-1, proposal.getDisplayString().indexOf("Integer"));
 
 		ICompletionProposal proposal2= proposals.get(1);
-		assertTrue(proposal2.getDisplayString().indexOf("Integer") == -1);
+		assertEquals(-1, proposal2.getDisplayString().indexOf("Integer"));
 
 		ICompletionProposal proposal3= proposals.get(2);
-		assertTrue(proposal3.getDisplayString().indexOf("Integer") == -1);
+		assertEquals(-1, proposal3.getDisplayString().indexOf("Integer"));
 
 		String[] expected= new String[3];
 		buf= new StringBuffer();

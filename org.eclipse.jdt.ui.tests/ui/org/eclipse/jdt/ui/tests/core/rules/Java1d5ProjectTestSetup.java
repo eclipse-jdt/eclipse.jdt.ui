@@ -35,12 +35,14 @@ import org.eclipse.jdt.core.JavaCore;
 public class Java1d5ProjectTestSetup extends ProjectTestSetup {
 	public static final String PROJECT_NAME1d5= "TestSetupProject1d5";
 
-	public static IJavaProject getProject() {
+	@Override
+	public IJavaProject getProject() {
 		IProject project= ResourcesPlugin.getWorkspace().getRoot().getProject(PROJECT_NAME1d5);
 		return JavaCore.create(project);
 	}
 
-	public static IClasspathEntry[] getDefaultClasspath() throws CoreException {
+	@Override
+	public IClasspathEntry[] getDefaultClasspath() throws CoreException {
 		IPath[] rtJarPath= JavaProjectHelper.findRtJar(JavaProjectHelper.RT_STUBS_15);
 		return new IClasspathEntry[] { JavaCore.newLibraryEntry(rtJarPath[0], rtJarPath[1], rtJarPath[2], true) };
 	}

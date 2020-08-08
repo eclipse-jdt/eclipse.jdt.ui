@@ -60,7 +60,7 @@ public class ASTNodesInsertTest extends CoreTests {
 	@Before
 	public void setUp() throws Exception {
 
-		fJProject1= ProjectTestSetup.getProject();
+		fJProject1= pts.getProject();
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		Hashtable<String, String> options= TestOptions.getDefaultOptions();
@@ -69,7 +69,7 @@ public class ASTNodesInsertTest extends CoreTests {
 
 	@After
 	public void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject1, pts.getDefaultClasspath());
 	}
 
 	@Test

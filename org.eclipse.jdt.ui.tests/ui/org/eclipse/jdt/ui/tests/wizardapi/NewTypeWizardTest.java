@@ -70,7 +70,7 @@ public class NewTypeWizardTest {
 	private IPackageFragmentRoot fSourceFolder;
 
 	@Rule
-	public ProjectTestSetup projectsetup = new ProjectTestSetup();
+	public ProjectTestSetup projectSetup = new ProjectTestSetup();
 
 	@Before
 	public void setUp() throws Exception {
@@ -98,14 +98,14 @@ public class NewTypeWizardTest {
 		StubUtility.setCodeTemplate(CodeTemplateContextType.ANNOTATIONBODY_ID, "/* annotation body */\n", null);
 
 
-		fJProject1= ProjectTestSetup.getProject();
+		fJProject1= projectSetup.getProject();
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}
 
 
 	@After
 	public void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject1, projectSetup.getDefaultClasspath());
 	}
 
 	@Test

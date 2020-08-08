@@ -50,7 +50,7 @@ public class MethodOverrideTest1d8 extends MethodOverrideTest {
 
 	@Before
 	public void before() throws Exception {
-		fJProject1= Java1d8ProjectTestSetup.getProject();
+		fJProject1= j18p.getProject();
 		fSrc= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		Hashtable<String, String> options= TestOptions.getDefaultOptions();
@@ -59,7 +59,7 @@ public class MethodOverrideTest1d8 extends MethodOverrideTest {
 
 	@After
 	public void after() throws Exception {
-		JavaProjectHelper.clear(fJProject1, Java1d8ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject1, j18p.getDefaultClasspath());
 	}
 
 	@Test

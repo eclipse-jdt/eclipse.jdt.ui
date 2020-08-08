@@ -13,12 +13,16 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -34,6 +38,7 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
@@ -45,6 +50,19 @@ public class BindingLabelsTest extends AbstractBindingLabelsTest {
 
 	@Rule
 	public ProjectTestSetup pts= new ProjectTestSetup();
+
+	@Before
+	public void setUp() throws Exception {
+		fJProject1= pts.getProject();
+
+		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
+		store.setValue(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES, false);
+	}
+
+	@After
+	public void tearDown() throws Exception {
+		JavaProjectHelper.clear(fJProject1, pts.getDefaultClasspath());
+	}
 
 	@Test
 	public void testTypeLabelOuter() throws Exception {

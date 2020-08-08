@@ -124,7 +124,7 @@ public class FatJarExportTests {
 
 	@Before
 	public void setUp() throws Exception {
-		fProject= ProjectTestSetup.getProject();
+		fProject= pts.getProject();
 
 		Map<String, String> options= fProject.getOptions(false);
 		String compliance= JavaCore.VERSION_1_4;
@@ -149,7 +149,7 @@ public class FatJarExportTests {
 
 	@After
 	public void tearDown() throws Exception {
-		JavaProjectHelper.clear(fProject, ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fProject, pts.getDefaultClasspath());
 	}
 
 	private static String getFooContent() {
@@ -778,7 +778,7 @@ public class FatJarExportTests {
 	public void exportOtherProject() throws Exception {
 		IJavaProject otherProject= JavaProjectHelper.createJavaProject("OtherProject", "bin"); //$NON-NLS-1$  //$NON-NLS-2$
 		try {
-			otherProject.setRawClasspath(ProjectTestSetup.getDefaultClasspath(), null);
+			otherProject.setRawClasspath(pts.getDefaultClasspath(), null);
 
 			IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(otherProject, "other"); //$NON-NLS-1$
 			IPackageFragment pack= root.createPackageFragment("mylib", true, null); //$NON-NLS-1$
@@ -989,7 +989,8 @@ public class FatJarExportTests {
 	@Test
 	public void externalClassFolder() throws Exception {
 		File classFolder= JavaTestPlugin.getDefault().getFileInPlugin(new Path("testresources/externalClassFolder/"));//$NON-NLS-1$
-		assertTrue("class folder not found", classFolder != null && classFolder.exists());//$NON-NLS-1$
+		assertNotNull("class folder not found", classFolder);//$NON-NLS-1$
+		assertTrue("class folder not found", classFolder.exists());
 		IPackageFragmentRoot externalRoot= JavaProjectHelper.addLibrary(fProject, Path.fromOSString(classFolder.getPath()), null, null);
 
 		try {

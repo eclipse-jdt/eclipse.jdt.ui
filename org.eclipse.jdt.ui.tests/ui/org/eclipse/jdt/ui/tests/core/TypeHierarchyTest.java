@@ -51,13 +51,13 @@ public class TypeHierarchyTest {
 
 	@Before
 	public void setUp() throws Exception {
-		fJavaProject1= ProjectTestSetup.getProject();
+		fJavaProject1= pts.getProject();
 		fJavaProject2= JavaProjectHelper.createJavaProject("TestProject2", "bin");
 	}
 
 	@After
 	public void tearDown () throws Exception {
-		JavaProjectHelper.clear(fJavaProject1, ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJavaProject1, pts.getDefaultClasspath());
 		JavaProjectHelper.delete(fJavaProject2);
 	}
 

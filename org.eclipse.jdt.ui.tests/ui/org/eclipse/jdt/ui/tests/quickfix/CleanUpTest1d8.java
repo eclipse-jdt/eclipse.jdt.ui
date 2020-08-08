@@ -13,11 +13,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -34,13 +31,11 @@ import org.eclipse.jdt.internal.corext.fix.FixMessages;
 import org.eclipse.jdt.ui.tests.core.rules.Java1d8ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
-@RunWith(JUnit4.class)
 public class CleanUpTest1d8 extends CleanUpTestCase {
 	@Rule
-    public ProjectTestSetup projectsetup= new Java1d8ProjectTestSetup();
+    public ProjectTestSetup projectSetup= new Java1d8ProjectTestSetup();
 
 	@Override
-	@Before
 	public void setUp() throws Exception {
 		super.setUp();
 		StubUtility.setCodeTemplate(CodeTemplateContextType.OVERRIDECOMMENT_ID, "", null);
@@ -48,12 +43,12 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 
 	@Override
 	protected IJavaProject getProject() {
-		return Java1d8ProjectTestSetup.getProject();
+		return projectSetup.getProject();
 	}
 
 	@Override
 	protected IClasspathEntry[] getDefaultClasspath() throws CoreException {
-		return Java1d8ProjectTestSetup.getDefaultClasspath();
+		return projectSetup.getDefaultClasspath();
 	}
 
 	@Test

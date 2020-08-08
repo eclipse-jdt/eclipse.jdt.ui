@@ -67,7 +67,7 @@ public class CodeFormatterTest extends CoreTests {
 	@Before
 	public void setUp() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		JavaProjectHelper.addRequiredProject(fJProject1, ProjectTestSetup.getProject());
+		JavaProjectHelper.addRequiredProject(fJProject1, pts.getProject());
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 

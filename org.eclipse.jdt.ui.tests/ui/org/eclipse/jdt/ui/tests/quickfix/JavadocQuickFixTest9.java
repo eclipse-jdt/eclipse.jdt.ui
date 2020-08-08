@@ -21,8 +21,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -43,11 +41,10 @@ import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
-@RunWith(JUnit4.class)
 public class JavadocQuickFixTest9 extends QuickFixTest {
 
 	@Rule
-    public ProjectTestSetup projectsetup = new Java9ProjectTestSetup();
+    public ProjectTestSetup projectSetup = new Java9ProjectTestSetup();
 
 	private IJavaProject fJProject1;
 
@@ -105,14 +102,14 @@ public class JavadocQuickFixTest9 extends QuickFixTest {
 
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		JavaProjectHelper.set9CompilerOptions(fJProject1);
-		JavaProjectHelper.addRequiredModularProject(fJProject1, Java9ProjectTestSetup.getProject());
+		JavaProjectHelper.addRequiredModularProject(fJProject1, projectSetup.getProject());
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}
 
 	@After
 	public void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject1, projectSetup.getDefaultClasspath());
 	}
 
 	@Test
