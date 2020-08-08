@@ -9223,6 +9223,149 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testEmbeddedIf() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "\n" //
+				+ "    public void collapseIfStatements(boolean isActive, boolean isValid) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isActive) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            if (isValid) {\n" //
+				+ "                // Keep this comment also\n" //
+				+ "                int i = 0;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseWithFourOperands(int i1, int i2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (0 < i1 && i1 < 10) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            if (0 < i2 && i2 < 10) {\n" //
+				+ "                // Keep this comment also\n" //
+				+ "                int i = 0;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseIfStatementsAddParenthesesIfDifferentConditionalOperator(boolean isActive, boolean isValid, boolean isEditMode) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isActive) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            if (isValid || isEditMode) {\n" //
+				+ "                // Keep this comment also\n" //
+				+ "                int i = 0;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseIfWithOROperator(boolean isActive, boolean isValid, boolean isEditMode) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        if (isActive) {\n" //
+				+ "            // Keep this comment too\n" //
+				+ "            if (isValid | isEditMode) {\n" //
+				+ "                // Keep this comment also\n" //
+				+ "                int i = 0;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.RAISE_EMBEDDED_IF);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "\n" //
+				+ "    public void collapseIfStatements(boolean isActive, boolean isValid) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        if (isActive && isValid) {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseWithFourOperands(int i1, int i2) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        if ((0 < i1 && i1 < 10) && (0 < i2 && i2 < 10)) {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseIfStatementsAddParenthesesIfDifferentConditionalOperator(boolean isActive, boolean isValid, boolean isEditMode) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        if (isActive && (isValid || isEditMode)) {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void collapseIfWithOROperator(boolean isActive, boolean isValid, boolean isEditMode) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        // Keep this comment too\n" //
+				+ "        if (isActive && (isValid | isEditMode)) {\n" //
+				+ "            // Keep this comment also\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] { MultiFixMessages.EmbeddedIfCleanup_description });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+	}
+
+	@Test
+	public void testDoNotRaiseEmbeddedIf() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public void doNotCollapseWithFiveOperands(int i1, int i2) {\n" //
+				+ "        if (0 < i1 && i1 < 10) {\n" //
+				+ "            if (100 < i2 && i2 < 200 || i2 < 0) {\n" //
+				+ "                int i = 0;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotCollapseOuterIfWithElseStatement(boolean isActive, boolean isValid) {\n" //
+				+ "        if (isActive) {\n" //
+				+ "            if (isValid) {\n" //
+				+ "                int i = 0;\n" //
+				+ "            }\n" //
+				+ "        } else {\n" //
+				+ "            int i = 0;\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotCollapseIfWithElseStatement2(boolean isActive, boolean isValid) {\n" //
+				+ "        if (isActive) {\n" //
+				+ "            if (isValid) {\n" //
+				+ "                int i = 0;\n" //
+				+ "            } else {\n" //
+				+ "                int i = 0;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.RAISE_EMBEDDED_IF);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
 	public void testRemoveQualifier02() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();

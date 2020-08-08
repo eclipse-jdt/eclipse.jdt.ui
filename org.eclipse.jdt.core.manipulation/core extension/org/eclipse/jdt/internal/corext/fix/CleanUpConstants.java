@@ -989,6 +989,18 @@ public class CleanUpConstants {
 	public static final String ARRAYS_FILL= "cleanup.arrays_fill"; //$NON-NLS-1$
 
 	/**
+	 * Raises embedded if into parent if.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.18
+	 */
+	public static final String RAISE_EMBEDDED_IF= "cleanup.embedded_if"; //$NON-NLS-1$
+
+	/**
 	 * Uses Autoboxing.<br>
 	 * <br>
 	 * Possible values: {TRUE, FALSE}<br>
