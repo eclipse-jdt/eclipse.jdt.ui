@@ -419,6 +419,8 @@ public final class CorrectionMessages extends NLS {
 	public static String QuickAssistProcessor_move_exceptions_to_separate_catch_block;
 	public static String QuickAssistProcessor_create_new_junit_test_case;
 	public static String QuickAssistProcessor_create_new_junit_test_case_desc;
+	public static String QuickAssistProcessor_create_new_impl;
+	public static String QuickAssistProcessor_create_new_impl_desc;
 	public static String SuppressWarningsSubProcessor_suppress_warnings_label;
 	public static String ReorgCorrectionsSubProcessor_accessrules_description;
 	public static String ReorgCorrectionsSubProcessor_project_seup_fix_description;

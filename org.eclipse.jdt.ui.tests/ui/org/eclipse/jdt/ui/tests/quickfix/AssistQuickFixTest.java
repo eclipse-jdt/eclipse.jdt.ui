@@ -10500,4 +10500,22 @@ public class AssistQuickFixTest extends QuickFixTest {
 			fJProject1.setOptions(saveOptions);
 		}
 	}
+
+	@Test
+	public void testCreateNewImplementation() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public interface E {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		String string= "E";
+		int offset= buf.toString().indexOf(string);
+		AssistContext context= getCorrectionContext(cu, offset, string.length());
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 2);
+		assertProposalExists(proposals, Messages.format(CorrectionMessages.QuickAssistProcessor_create_new_impl, "E.java"));
+	}
 }

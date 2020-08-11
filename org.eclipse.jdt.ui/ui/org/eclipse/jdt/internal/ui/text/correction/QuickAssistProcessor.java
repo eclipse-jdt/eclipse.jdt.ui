@@ -309,6 +309,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					|| ConvertStringConcatenationProposals.getProposals(context, null)
 					|| getInferDiamondArgumentsProposal(context, coveringNode, null, null)
 					|| getJUnitTestCaseProposal(context, coveringNode, null)
+					|| getNewImplementationProposal(context, coveringNode, null)
 					|| getAddStaticImportProposals(context, coveringNode, null)
 					|| getSplitSwitchLabelProposal(context, coveringNode, null);
 		}
@@ -332,6 +333,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			getInferDiamondArgumentsProposal(context, coveringNode, locations, resultingCollections);
 			getGenerateForLoopProposals(context, coveringNode, locations, resultingCollections);
 			getJUnitTestCaseProposal(context, coveringNode, resultingCollections);
+			getNewImplementationProposal(context, coveringNode, resultingCollections);
 			getSplitSwitchLabelProposal(context, coveringNode, resultingCollections);
 			getAddMethodDeclaration(context, coveringNode, resultingCollections);
 
@@ -4775,6 +4777,33 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					String label= Messages.format(CorrectionMessages.QuickAssistProcessor_create_new_junit_test_case, unitName);
 					Change change= new NullChange(CorrectionMessages.QuickAssistProcessor_create_new_junit_test_case_desc);
 					NewJUnitTestCaseProposal proposal= new NewJUnitTestCaseProposal(label, change, IProposalRelevance.CREATE_JUNIT_TEST_CASE, image, context.getASTRoot());
+					resultingCollections.add(proposal);
+				}
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private boolean getNewImplementationProposal(IInvocationContext context, ASTNode coveringNode, ArrayList<ICommandAccess> resultingCollections) {
+		if (coveringNode instanceof SimpleName && coveringNode.getParent() instanceof TypeDeclaration) {
+			TypeDeclaration typeDecl= ((TypeDeclaration)coveringNode.getParent());
+			boolean isInterface= typeDecl.isInterface();
+			boolean isAbstract= Modifier.isAbstract(typeDecl.getModifiers());
+
+			if (!isInterface && !isAbstract) {
+				return false;
+			}
+
+			SimpleName name= (SimpleName) coveringNode;
+			String idName= name.getIdentifier() + JavaModelUtil.DEFAULT_CU_SUFFIX;
+			String unitName= context.getCompilationUnit().getElementName();
+			if (unitName.equals(idName)) {
+				if (resultingCollections != null) {
+					Image image= JavaPlugin.getImageDescriptorRegistry().get(JavaPluginImages.DESC_TOOL_NEWCLASS);
+					String label= Messages.format(CorrectionMessages.QuickAssistProcessor_create_new_impl, unitName);
+					Change change= new NullChange(CorrectionMessages.QuickAssistProcessor_create_new_impl_desc);
+					NewImplementationProposal proposal= new NewImplementationProposal(label, change, IProposalRelevance.CREATE_IMPLEMENTATION_FROM_INTERFACE, image, context.getCompilationUnit());
 					resultingCollections.add(proposal);
 				}
 				return true;
