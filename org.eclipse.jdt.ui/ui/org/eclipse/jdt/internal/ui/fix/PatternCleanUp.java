@@ -15,8 +15,11 @@ package org.eclipse.jdt.internal.ui.fix;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.CoreException;
@@ -27,24 +30,34 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.Initializer;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.RecordDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
@@ -122,29 +135,21 @@ public class PatternCleanUp extends AbstractMultiFix {
 		}
 
 		final List<CompilationUnitRewriteOperation> rewriteOperations= new ArrayList<>();
+		final Map<ASTNode, Set<String>> addedPatternFields= new HashMap<>();
 
 		unit.accept(new ASTVisitor() {
 			@Override
 			public boolean visit(final Block node) {
 				RegExAndUsesVisitor regExAndUsesVisitor= new RegExAndUsesVisitor(node);
 				node.accept(regExAndUsesVisitor);
-				return regExAndUsesVisitor.getResult();
+				return true;
 			}
 
 			final class RegExAndUsesVisitor extends ASTVisitor {
 				private final Block startNode;
 
-				private boolean result= true;
-
 				public RegExAndUsesVisitor(final Block startNode) {
 					this.startNode= startNode;
-				}
-
-				/**
-				 * @return The result
-				 */
-				public boolean getResult() {
-					return result;
 				}
 
 				@Override
@@ -178,7 +183,7 @@ public class PatternCleanUp extends AbstractMultiFix {
 				}
 
 				private boolean visitVariable(final Type type, final IVariableBinding variableBinding, final int extraDimensions, final Expression initializer) {
-					if (getResult() && ASTNodes.hasType(type.resolveBinding(), STRING_CLASS_NAME)
+					if (ASTNodes.hasType(type.resolveBinding(), STRING_CLASS_NAME)
 							&& extraDimensions == 0
 							&& initializer != null) {
 						VarDefinitionsUsesVisitor varOccurrencesVisitor= new VarDefinitionsUsesVisitor(variableBinding,
@@ -193,9 +198,9 @@ public class PatternCleanUp extends AbstractMultiFix {
 									return true;
 								}
 							}
-							rewriteOperations.add(new PatternOperation(type, initializer, reads));
+							String varName= variableBinding.getName();
+							rewriteOperations.add(new PatternOperation(type, initializer, reads, varName, addedPatternFields));
 
-							result= false;
 							return false;
 						}
 					}
@@ -286,11 +291,16 @@ public class PatternCleanUp extends AbstractMultiFix {
 		private final Type type;
 		private final Expression initializer;
 		private final List<SimpleName> regExUses;
+		private final String varName;
+		private final Map<ASTNode, Set<String>> addedPatternFields;
 
-		public PatternOperation(final Type type, final Expression initializer, final List<SimpleName> regExUses) {
+		public PatternOperation(final Type type, final Expression initializer, final List<SimpleName> regExUses,
+				final String varName, final Map<ASTNode, Set<String>> addedPatternFields) {
 			this.type= type;
 			this.initializer= initializer;
 			this.regExUses= regExUses;
+			this.varName= varName;
+			this.addedPatternFields= addedPatternFields;
 		}
 
 		@Override
@@ -303,11 +313,44 @@ public class PatternCleanUp extends AbstractMultiFix {
 			String patternNameText= importRewrite.addImport(Pattern.class.getCanonicalName());
 			rewrite.replace(type, ast.newSimpleType(newTypeName(ast, patternNameText)), group);
 
+			Expression unparanthesedInitializer= ASTNodes.getUnparenthesedExpression(initializer);
 			MethodInvocation newCompileMethod= ast.newMethodInvocation();
 			newCompileMethod.setExpression(newTypeName(ast, patternNameText));
 			newCompileMethod.setName(ast.newSimpleName(COMPILE_METHOD));
-			newCompileMethod.arguments().add(ASTNodes.createMoveTarget(rewrite, ASTNodes.getUnparenthesedExpression(initializer)));
-			rewrite.replace(initializer, newCompileMethod, group);
+			newCompileMethod.arguments().add(ASTNodes.createMoveTarget(rewrite, unparanthesedInitializer));
+
+			@SuppressWarnings("unchecked")
+			boolean isInStaticInitializer= ASTNodes.getFirstAncestorOrNull(initializer, Initializer.class) != null;
+			@SuppressWarnings("unchecked")
+			ASTNode typeDecl= ASTNodes.getFirstAncestorOrNull(initializer, TypeDeclaration.class, RecordDeclaration.class);
+			boolean isInInterface= typeDecl instanceof TypeDeclaration && ((TypeDeclaration)typeDecl).isInterface();
+			boolean isInLocalType= typeDecl instanceof AbstractTypeDeclaration && ((AbstractTypeDeclaration)typeDecl).isLocalTypeDeclaration();
+			boolean isInNonStaticInnerClass= typeDecl instanceof AbstractTypeDeclaration && ((AbstractTypeDeclaration)typeDecl).isMemberTypeDeclaration()
+					&& (((AbstractTypeDeclaration)typeDecl).getModifiers() & Modifier.STATIC) != Modifier.STATIC;
+
+			if (unparanthesedInitializer instanceof StringLiteral && typeDecl instanceof AbstractTypeDeclaration
+					&& !isInStaticInitializer && !isInInterface && !isInLocalType && !isInNonStaticInnerClass) {
+				VariableDeclarationFragment newFragment= ast.newVariableDeclarationFragment();
+				Set<String> addedFields= addedPatternFields.get(typeDecl);
+				if (addedFields == null) {
+					addedFields= new HashSet<>();
+					addedPatternFields.put(typeDecl, addedFields);
+				}
+				String newFieldName= getUniqueFieldName(addedFields);
+				newFragment.setName(ast.newSimpleName(newFieldName));
+				newFragment.setInitializer(newCompileMethod);
+				FieldDeclaration newFieldDeclaration= ast.newFieldDeclaration(newFragment);
+				newFieldDeclaration.setType(ast.newSimpleType(newTypeName(ast, patternNameText)));
+				newFieldDeclaration.modifiers().addAll(ASTNodeFactory.newModifiers(ast, Modifier.STATIC | Modifier.PRIVATE | Modifier.FINAL));
+				int insertionIndex= findInsertionIndex((AbstractTypeDeclaration)typeDecl);
+				int addedFieldCount= addedFields.size();
+				rewrite.getListRewrite(typeDecl,
+						ASTNodes.getBodyDeclarationsProperty(typeDecl)).insertAt(newFieldDeclaration, insertionIndex + addedFieldCount, group);
+				addedFields.add(newFieldName);
+				rewrite.replace(initializer, ast.newSimpleName(newFieldName), group);
+			} else {
+				rewrite.replace(initializer, newCompileMethod, group);
+			}
 
 			for (SimpleName oldRegExUse : regExUses) {
 				MethodInvocation oldMethodInvocation= (MethodInvocation) oldRegExUse.getParent();
@@ -345,6 +388,32 @@ public class PatternCleanUp extends AbstractMultiFix {
 			}
 		}
 
+		private String getUniqueFieldName(Set<String> usedPatternNames) {
+			List<String> usedNames= getVisibleVariablesInScope(initializer);
+			String newPatternName= varName + "_pattern"; //$NON-NLS-1$
+			String newName= newPatternName;
+			int i= 2;
+			boolean finished= false;
+			while (!finished) {
+				finished= true;
+				for (String usedName : usedNames) {
+					if (usedName.equals(newName)) {
+						newName= newPatternName + i++;
+						finished= false;
+						break;
+					}
+				}
+				for (String patternName : usedPatternNames) {
+					if (patternName.equals(newName)) {
+						newName= newPatternName + i++;
+						finished= false;
+						break;
+					}
+				}
+			}
+			return newName;
+		}
+
 		private Name newTypeName(AST ast, String patternNameText) {
 			Name qualifiedName= null;
 
@@ -358,5 +427,36 @@ public class PatternCleanUp extends AbstractMultiFix {
 
 			return qualifiedName;
 		}
+
+		private List<String> getVisibleVariablesInScope(ASTNode node) {
+			List<String> variableNames= new ArrayList<>();
+			CompilationUnit root= (CompilationUnit) node.getRoot();
+			IBinding[] bindings= new ScopeAnalyzer(root).
+					getDeclarationsInScope(node.getStartPosition(), ScopeAnalyzer.VARIABLES | ScopeAnalyzer.CHECK_VISIBILITY);
+			for (IBinding binding : bindings) {
+				variableNames.add(binding.getName());
+			}
+			return variableNames;
+		}
+
+		@SuppressWarnings("unchecked")
+		private int findInsertionIndex(AbstractTypeDeclaration typeDecl) {
+			List<BodyDeclaration> decls= typeDecl.bodyDeclarations();
+			boolean finished= false;
+			BodyDeclaration bodyDecl= (BodyDeclaration)ASTNodes.getFirstAncestorOrNull(initializer, MethodDeclaration.class, FieldDeclaration.class);
+			while (!finished) {
+				for (int i= 0; i < decls.size(); ++i) {
+					if (decls.get(i).equals(bodyDecl)) {
+						return i;
+					}
+				}
+				bodyDecl= (BodyDeclaration)ASTNodes.getFirstAncestorOrNull(bodyDecl, MethodDeclaration.class, FieldDeclaration.class);
+				if (bodyDecl == null) {
+					finished= true;
+				}
+			}
+			return 0; // default to insert at 0
+		}
+
 	}
 }
