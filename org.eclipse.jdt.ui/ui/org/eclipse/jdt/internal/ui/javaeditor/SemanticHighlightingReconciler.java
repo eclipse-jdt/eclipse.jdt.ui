@@ -198,7 +198,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 			try {
 				if (node.permittedTypes().size() > 0) {
 					int offset= node.getRestrictedIdentifierStartPosition();
-					int length= 7; // length of 'record'
+					int length= 7; // length of 'permits'
 					if (offset > -1) {
 						for (int i= 0; i < fJobSemanticHighlightings.length; i++) {
 							SemanticHighlighting semanticHighlighting= fJobSemanticHighlightings[i];
