@@ -16,29 +16,30 @@
 package org.eclipse.jdt.ui.tests.quickfix;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
+
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
@@ -48,23 +49,31 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
-@RunWith(JUnit4.class)
 public class CleanUpStressTest extends CleanUpTestCase {
 
 	@Rule
-    public ProjectTestSetup projectsetup = new ProjectTestSetup();
+    public ProjectTestSetup projectSetup = new ProjectTestSetup();
+
+	@Override
+	protected IJavaProject getProject() {
+		return projectSetup.getProject();
+	}
+
+	@Override
+	protected IClasspathEntry[] getDefaultClasspath() throws CoreException {
+		return projectSetup.getDefaultClasspath();
+	}
 
 	private static final String SRC_CONTAINER= "src";
 
 	protected static IPackageFragmentRoot fJunitSrcRoot;
 
 	@Override
-	@Before
 	public void setUp() throws Exception {
 		super.setUp();
 
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
-		fJunitSrcRoot= JavaProjectHelper.addSourceContainerWithImport(fJProject1, SRC_CONTAINER, junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
+		fJunitSrcRoot= JavaProjectHelper.addSourceContainerWithImport(getProject(), SRC_CONTAINER, junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
 	}
 
 	private void addAllCUs(IJavaElement[] children, List<IJavaElement> result) throws JavaModelException {
@@ -5233,7 +5242,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 	@Test
 	public void testAllCleanUps() throws Exception {
 		List<IJavaElement> cus= new ArrayList<>();
-		addAllCUs(fJProject1.getChildren(), cus);
+		addAllCUs(getProject().getChildren(), cus);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
@@ -5299,7 +5308,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 
 			String expected= fExpectedChangesAllTests.get(compilationUnitName);
 
-			assertTrue("No expected value in table for " + compilationUnitName, expected != null);
+			assertNotNull("No expected value in table for " + compilationUnitName, expected);
 			assertEquals("Content not as expected for " + compilationUnitName, expected, previewContent);
 		}
 	}

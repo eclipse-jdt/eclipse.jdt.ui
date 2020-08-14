@@ -295,14 +295,14 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 						}
 						if (!newComments.isEmpty()) {
 							ASTNode lastComment= newComments.get(0);
-							list.replace(parent, lastComment, null);
+							list.replace(parent, lastComment, group);
 							for (int i= 1; i < newComments.size(); ++i) {
 								ASTNode nextComment= newComments.get(i);
-								list.insertAfter(nextComment, lastComment, null);
+								list.insertAfter(nextComment, lastComment, group);
 								lastComment= nextComment;
 							}
 						} else {
-							list.remove(parent, null);
+							list.remove(parent, group);
 						}
 						remover.registerRemovedNode(parent);
 					}

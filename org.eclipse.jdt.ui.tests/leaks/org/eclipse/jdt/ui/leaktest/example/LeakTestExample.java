@@ -27,7 +27,7 @@ import org.eclipse.jdt.ui.tests.core.rules.LeakTestSetup;
 public class LeakTestExample extends LeakTestCase {
 
 	@Rule
-	public LeakTestSetup projectsetup = new LeakTestSetup();
+	public LeakTestSetup projectSetup = new LeakTestSetup();
 
 	private static class MyClass {
 	}

@@ -99,18 +99,15 @@ public class AddArchiveToBuildpathAction extends BuildpathModifierAction {
             	MessageDialog.openWarning(getShell(), NewWizardMessages.AddArchiveToBuildpathAction_InfoTitle, status.getMessage());
             }
 
-        	final IRunnableWithProgress runnable= new IRunnableWithProgress() {
-        		@Override
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-        			try {
-        				List<IJavaElement> result= addExternalJars(selected, javaProject, monitor);
-        				if (result.size() > 0)
-        					selectAndReveal(new StructuredSelection(result));
-        			} catch (CoreException e) {
-        				throw new InvocationTargetException(e);
-        			}
-        		}
-        	};
+        	final IRunnableWithProgress runnable= monitor -> {
+				try {
+					List<IJavaElement> result= addExternalJars(selected, javaProject, monitor);
+					if (result.size() > 0)
+						selectAndReveal(new StructuredSelection(result));
+				} catch (CoreException e) {
+					throw new InvocationTargetException(e);
+				}
+			};
         	fContext.run(false, false, runnable);
 		} catch (final InvocationTargetException e) {
 			if (e.getCause() instanceof CoreException) {

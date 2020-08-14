@@ -18,8 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
@@ -28,7 +26,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
@@ -41,8 +38,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IPostSelectionProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -347,34 +342,26 @@ public class DialogPackageExplorer implements IMenuListener, IPostSelectionProvi
         fPackageViewer.setComparer(WorkingSetModel.COMPARER);
         fPackageViewer.addFilter(new PackageFilter());
         fPackageViewer.setComparator(new ExtendedJavaElementSorter());
-        fPackageViewer.addDoubleClickListener(new IDoubleClickListener() {
-            @Override
-			public void doubleClick(DoubleClickEvent event) {
-                Object element= ((IStructuredSelection)event.getSelection()).getFirstElement();
-                if (fPackageViewer.isExpandable(element)) {
-                    fPackageViewer.setExpandedState(element, !fPackageViewer.getExpandedState(element));
-                } else {
-                	if (element instanceof CPListElementAttribute) {
-						CPListElementAttribute attribute= (CPListElementAttribute)element;
-                		if (attribute.getKey().equals(CPListElement.OUTPUT)) {
-                			fActionGroup.getEditOutputFolderAction().run();
-                		}
-                	}
-                }
-            }
-        });
+        fPackageViewer.addDoubleClickListener(event -> {
+		    Object element= ((IStructuredSelection)event.getSelection()).getFirstElement();
+		    if (fPackageViewer.isExpandable(element)) {
+		        fPackageViewer.setExpandedState(element, !fPackageViewer.getExpandedState(element));
+		    } else {
+		    	if (element instanceof CPListElementAttribute) {
+					CPListElementAttribute attribute= (CPListElementAttribute)element;
+		    		if (attribute.getKey().equals(CPListElement.OUTPUT)) {
+		    			fActionGroup.getEditOutputFolderAction().run();
+		    		}
+		    	}
+		    }
+		});
 
         MenuManager menuMgr= new MenuManager("#PopupMenu"); //$NON-NLS-1$
         menuMgr.setRemoveAllWhenShown(true);
         menuMgr.addMenuListener(this);
         fContextMenu= menuMgr.createContextMenu(fPackageViewer.getTree());
         fPackageViewer.getTree().setMenu(fContextMenu);
-        parent.addDisposeListener(new DisposeListener() {
-            @Override
-			public void widgetDisposed(DisposeEvent e) {
-                fContextMenu.dispose();
-            }
-        });
+        parent.addDisposeListener(e -> fContextMenu.dispose());
 
         return fPackageViewer.getControl();
     }
@@ -461,18 +448,15 @@ public class DialogPackageExplorer implements IMenuListener, IPostSelectionProvi
         if (elements == null || elements.isEmpty())
             return;
 		try {
-	        ResourcesPlugin.getWorkspace().run(new IWorkspaceRunnable() {
-	        	@Override
-				public void run(IProgressMonitor monitor) throws CoreException {
-	        		fPackageViewer.refresh();
-	                IStructuredSelection selection= new StructuredSelection(elements);
-	                fPackageViewer.setSelection(selection, true);
-	                fPackageViewer.getTree().setFocus();
+	        ResourcesPlugin.getWorkspace().run((IWorkspaceRunnable) monitor -> {
+				fPackageViewer.refresh();
+			    IStructuredSelection selection= new StructuredSelection(elements);
+			    fPackageViewer.setSelection(selection, true);
+			    fPackageViewer.getTree().setFocus();
 
-	                if (elements.size() == 1 && elements.get(0) instanceof IJavaProject)
-	                    fPackageViewer.expandToLevel(elements.get(0), 1);
-	            }
-	        }, ResourcesPlugin.getWorkspace().getRoot(), IWorkspace.AVOID_UPDATE, new NullProgressMonitor());
+			    if (elements.size() == 1 && elements.get(0) instanceof IJavaProject)
+			        fPackageViewer.expandToLevel(elements.get(0), 1);
+			}, ResourcesPlugin.getWorkspace().getRoot(), IWorkspace.AVOID_UPDATE, new NullProgressMonitor());
         } catch (CoreException e) {
 	        JavaPlugin.log(e);
         }

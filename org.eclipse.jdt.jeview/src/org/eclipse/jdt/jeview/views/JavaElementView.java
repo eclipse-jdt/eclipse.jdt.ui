@@ -756,13 +756,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 								try {
 									Object context= getSite().getService(IHandlerService.class).getCurrentState();
 									showInCommand.executeWithChecks(new ExecutionEvent(null, params, null, context));
-								} catch (ExecutionException e1) {
-									showAndLogError("Could not show element", e1);
-								} catch (NotDefinedException e1) {
-									showAndLogError("Could not show element", e1);
-								} catch (NotEnabledException e1) {
-									showAndLogError("Could not show element", e1);
-								} catch (NotHandledException e1) {
+								} catch (ExecutionException | NotDefinedException | NotEnabledException | NotHandledException e1) {
 									showAndLogError("Could not show element", e1);
 								}
 								break;
@@ -778,9 +772,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 											JavaUI.revealInEditor(editorPart, javaElement);
 										}
 									}
-								} catch (PartInitException e) {
-									showAndLogError("Could not open editor.", e); //$NON-NLS-1$
-								} catch (JavaModelException e) {
+								} catch (PartInitException | JavaModelException e) {
 									showAndLogError("Could not open editor.", e); //$NON-NLS-1$
 								}
 						}

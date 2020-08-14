@@ -50,7 +50,7 @@ public class WorkingSetAwareContentProvider extends PackageExplorerContentProvid
 	public WorkingSetAwareContentProvider(boolean provideMembers, WorkingSetModel model) {
 		super(provideMembers);
 		fWorkingSetModel= model;
-		fListener= event -> workingSetModelChanged(event);
+		fListener= this::workingSetModelChanged;
 		fWorkingSetModel.addPropertyChangeListener(fListener);
 	}
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,16 +14,19 @@
 
 package org.eclipse.jdt.ui.tests.performance.views;
 
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.util.zip.ZipFile;
 
-import junit.extensions.TestSetup;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.FixMethodOrder;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExternalResource;
+import org.junit.runners.MethodSorters;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
-import org.eclipse.test.OrderedTestSuite;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -44,22 +47,20 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.tests.performance.JdtPerformanceTestCase;
+import org.eclipse.jdt.ui.tests.performance.JdtPerformanceTestCaseCommon;
 
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 
-public class PackageExplorerPerfTest extends JdtPerformanceTestCase {
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+public class PackageExplorerPerfTest extends JdtPerformanceTestCaseCommon {
 
-	private static class MyTestSetup extends TestSetup {
+	private static class MyTestSetup extends ExternalResource {
 		public static final String SRC_CONTAINER= "src";
 
 		public static IJavaProject fJProject1;
 
-		public MyTestSetup(Test test) {
-			super(test);
-		}
 		@Override
-		protected void setUp() throws Exception {
+		public void before() throws Throwable {
 			fJProject1= JavaProjectHelper.createJavaProject("Testing", "bin");
 			// we must make sure that the performance test are compatible to 2.1.3 & 3.0 so use rt13
 			assertTrue("rt not found", JavaProjectHelper.addRTJar13(fJProject1) != null);
@@ -67,29 +68,21 @@ public class PackageExplorerPerfTest extends JdtPerformanceTestCase {
 			JavaProjectHelper.addSourceContainerWithImport(fJProject1, SRC_CONTAINER, junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
 		}
 		@Override
-		protected void tearDown() throws Exception {
-			if (fJProject1 != null && fJProject1.exists())
-				JavaProjectHelper.delete(fJProject1);
+		public void after() {
+			try {
+				if (fJProject1 != null && fJProject1.exists())
+					JavaProjectHelper.delete(fJProject1);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
-	public static Test suite() {
-		TestSuite suite= new OrderedTestSuite(PackageExplorerPerfTest.class, new String[] {
-			"testOpen", "testSelect", "testExpand",
-			"testRefreshClassFolder"
-		});
-		return new MyTestSetup(suite);
-	}
+	@Rule
+	public MyTestSetup stup= new MyTestSetup();
 
-	public static Test setUpTest(Test someTest) {
-		return new MyTestSetup(someTest);
-	}
-
-	public PackageExplorerPerfTest(String name) {
-		super(name);
-	}
-
-	public void testOpen() throws Exception {
+	@Test
+	public void testAOpen() throws Exception {
 		IWorkbenchWindow activeWorkbenchWindow= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 		IWorkbenchPage page= activeWorkbenchWindow.getActivePage();
 		page.close();
@@ -100,7 +93,8 @@ public class PackageExplorerPerfTest extends JdtPerformanceTestCase {
 		finishMeasurements();
 	}
 
-	public void testSelect() throws Exception {
+	@Test
+	public void testBSelect() throws Exception {
 		joinBackgroudActivities();
 		TreeViewer viewer= getViewer();
 		StructuredSelection selection= new StructuredSelection(MyTestSetup.fJProject1);
@@ -109,7 +103,8 @@ public class PackageExplorerPerfTest extends JdtPerformanceTestCase {
 		finishMeasurements();
 	}
 
-	public void testExpand() throws Exception {
+	@Test
+	public void testCExpand() throws Exception {
 		joinBackgroudActivities();
 		TreeViewer viewer= getViewer();
 		startMeasuring();
@@ -118,7 +113,8 @@ public class PackageExplorerPerfTest extends JdtPerformanceTestCase {
 	}
 
 	// test for Bug 311212: [package explorer] Performance problem with refreshing external class folders
-	public void testRefreshClassFolder() throws Throwable {
+	@Test
+	public void testDRefreshClassFolder() throws Throwable {
 		// Import rtstubs a few times. Caveat: Only import class files, but not META-INF.
 		// PackageExplorerContentProvider#processResourceDelta(..) refreshes the parent if a resource changes.
 		// This is not what we want to test.

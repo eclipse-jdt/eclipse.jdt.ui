@@ -13,11 +13,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -29,17 +26,16 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
+import org.eclipse.jdt.internal.corext.fix.FixMessages;
 
 import org.eclipse.jdt.ui.tests.core.rules.Java1d8ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
-@RunWith(JUnit4.class)
 public class CleanUpTest1d8 extends CleanUpTestCase {
 	@Rule
-    public ProjectTestSetup projectsetup= new Java1d8ProjectTestSetup();
+    public ProjectTestSetup projectSetup= new Java1d8ProjectTestSetup();
 
 	@Override
-	@Before
 	public void setUp() throws Exception {
 		super.setUp();
 		StubUtility.setCodeTemplate(CodeTemplateContextType.OVERRIDECOMMENT_ID, "", null);
@@ -47,12 +43,12 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 
 	@Override
 	protected IJavaProject getProject() {
-		return Java1d8ProjectTestSetup.getProject();
+		return projectSetup.getProject();
 	}
 
 	@Override
 	protected IClasspathEntry[] getDefaultClasspath() throws CoreException {
-		return Java1d8ProjectTestSetup.getDefaultClasspath();
+		return projectSetup.getDefaultClasspath();
 	}
 
 	@Test
@@ -90,6 +86,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		disable(CleanUpConstants.USE_LAMBDA);
 		enable(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
 
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] { FixMessages.LambdaExpressionsFix_convert_to_anonymous_class_creation });
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
 	}
 
@@ -134,11 +131,13 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] { FixMessages.LambdaExpressionsFix_convert_to_lambda_expression });
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 
 		disable(CleanUpConstants.USE_LAMBDA);
 		enable(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
 
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] { FixMessages.LambdaExpressionsFix_convert_to_anonymous_class_creation });
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
 	}
 

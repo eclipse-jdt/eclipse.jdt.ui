@@ -278,7 +278,7 @@ public class WorkingSetModel {
 
 	private void addListenersToWorkingSetManagers() {
 		fListeners= new ListenerList<>(ListenerList.IDENTITY);
-		fWorkingSetManagerListener= event -> workingSetManagerChanged(event);
+		fWorkingSetManagerListener= this::workingSetManagerChanged;
 		PlatformUI.getWorkbench().getWorkingSetManager().addPropertyChangeListener(fWorkingSetManagerListener);
 		fLocalWorkingSetManager.addPropertyChangeListener(fWorkingSetManagerListener);
 	}

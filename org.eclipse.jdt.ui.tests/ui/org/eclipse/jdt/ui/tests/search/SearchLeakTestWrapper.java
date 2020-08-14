@@ -34,7 +34,7 @@ import org.eclipse.jdt.ui.tests.core.rules.LeakTestSetup;
 public class SearchLeakTestWrapper {
 
 	@Rule
-	public LeakTestSetup projectsetup = new LeakTestSetup();
+	public LeakTestSetup projectSetup = new LeakTestSetup();
 
 	SearchLeakTest fTest;
 

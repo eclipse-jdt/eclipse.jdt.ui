@@ -77,8 +77,8 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.refactoring.descriptors.ExtractClassDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.ExtractClassDescriptor.Field;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
@@ -86,6 +86,9 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
+import org.eclipse.jdt.internal.core.manipulation.StubUtility;
+import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -105,10 +108,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
-import org.eclipse.jdt.internal.core.manipulation.StubUtility;
-import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 public class ExtractClassRefactoring extends Refactoring {
 
@@ -764,12 +763,12 @@ public class ExtractClassRefactoring extends Refactoring {
 				}
 			}
 		}
-		FieldDeclaration fieldDeclaration= createParameterObjectField(pof, typeNode, modifier);
+		FieldDeclaration fieldDeclaration= createParameterObjectField(pof, typeNode, modifier, removeFieldGroup);
 		ListRewrite bodyDeclList= rewrite.getListRewrite(typeNode, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
 		if (lastField != null)
-			bodyDeclList.insertAfter(fieldDeclaration, lastField, null);
+			bodyDeclList.insertAfter(fieldDeclaration, lastField, removeFieldGroup);
 		else
-			bodyDeclList.insertFirst(fieldDeclaration, null);
+			bodyDeclList.insertFirst(fieldDeclaration, removeFieldGroup);
 		return fieldDeclaration;
 	}
 
@@ -792,7 +791,7 @@ public class ExtractClassRefactoring extends Refactoring {
 		baseCURewrite.getImportRemover().registerRemovedNode(parent);
 	}
 
-	private FieldDeclaration createParameterObjectField(ParameterObjectFactory pof, TypeDeclaration typeNode, int modifier) {
+	private FieldDeclaration createParameterObjectField(ParameterObjectFactory pof, TypeDeclaration typeNode, int modifier, TextEditGroup removeFieldGroup) {
 		AST ast= fBaseCURewrite.getAST();
 		ClassInstanceCreation creation= ast.newClassInstanceCreation();
 		creation.setType(pof.createType(fDescriptor.isCreateTopLevel(), fBaseCURewrite, typeNode.getStartPosition()));
@@ -811,9 +810,9 @@ public class ExtractClassRefactoring extends Refactoring {
 						ArrayCreation arrayCreation= ast.newArrayCreation();
 						arrayCreation.setType((ArrayType) addImport);
 						arrayCreation.setInitializer((ArrayInitializer) createMoveTarget);
-						listRewrite.insertLast(arrayCreation, null);
+						listRewrite.insertLast(arrayCreation, removeFieldGroup);
 					} else {
-						listRewrite.insertLast(createMoveTarget, null);
+						listRewrite.insertLast(createMoveTarget, removeFieldGroup);
 					}
 				}
 			}

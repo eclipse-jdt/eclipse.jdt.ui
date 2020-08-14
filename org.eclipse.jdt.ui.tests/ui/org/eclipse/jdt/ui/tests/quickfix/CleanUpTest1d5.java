@@ -15,8 +15,6 @@ package org.eclipse.jdt.ui.tests.quickfix;
 
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -26,28 +24,30 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
+import org.eclipse.jdt.internal.corext.fix.FixMessages;
 
 import org.eclipse.jdt.ui.tests.core.rules.Java1d5ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
+
+import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
 
 
 /**
  * Tests the cleanup features related to Java 5.
  */
-@RunWith(JUnit4.class)
 public class CleanUpTest1d5 extends CleanUpTestCase {
 
 	@Rule
-    public ProjectTestSetup projectsetup = new Java1d5ProjectTestSetup();
+    public ProjectTestSetup projectSetup = new Java1d5ProjectTestSetup();
 
 	@Override
 	protected IJavaProject getProject() {
-		return Java1d5ProjectTestSetup.getProject();
+		return projectSetup.getProject();
 	}
 
 	@Override
 	protected IClasspathEntry[] getDefaultClasspath() throws CoreException {
-		return Java1d5ProjectTestSetup.getDefaultClasspath();
+		return projectSetup.getDefaultClasspath();
 	}
 
 	@Test
@@ -1468,6 +1468,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "}\n";
 		String expected1= sample;
 
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] { MultiFixMessages.AutoboxingCleanup_description });
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
@@ -2530,7 +2531,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 
 		enable(CleanUpConstants.REMOVE_UNNECESSARY_ARRAY_CREATION);
 
-		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] { "Remove unnecessary array creation" });
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] { FixMessages.UnusedCodeFix_RemoveUnnecessaryArrayCreation_description });
 	}
 
 	@Test

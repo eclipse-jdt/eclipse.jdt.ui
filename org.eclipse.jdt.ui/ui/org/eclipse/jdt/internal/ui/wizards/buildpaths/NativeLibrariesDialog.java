@@ -19,8 +19,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.core.runtime.IStatus;
-
 import org.eclipse.jface.dialogs.StatusDialog;
 
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -38,12 +36,7 @@ public class NativeLibrariesDialog extends StatusDialog {
 		super(parent);
 		setTitle(NewWizardMessages.NativeLibrariesDialog_title);
 
-		IStatusChangeListener listener= new IStatusChangeListener() {
-			@Override
-			public void statusChanged(IStatus status) {
-				updateStatus(status);
-			}
-		};
+		IStatusChangeListener listener= this::updateStatus;
 
 		fConfigurationBlock= new NativeLibrariesConfigurationBlock(listener, parent, nativeLibPath, parentEntry);
 		setHelpAvailable(false);

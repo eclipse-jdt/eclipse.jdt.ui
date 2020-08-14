@@ -106,15 +106,12 @@ public class ExcludeFromBuildpathAction extends BuildpathModifierAction {
         }
 
         try {
-			final IRunnableWithProgress runnable= new IRunnableWithProgress() {
-				@Override
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					try {
-				        List<IResource> result= exclude(getSelectedElements(), project, monitor);
-				        selectAndReveal(new StructuredSelection(result));
-					} catch (CoreException e) {
-						throw new InvocationTargetException(e);
-					}
+			final IRunnableWithProgress runnable= monitor -> {
+				try {
+			        List<IResource> result= exclude(getSelectedElements(), project, monitor);
+			        selectAndReveal(new StructuredSelection(result));
+				} catch (CoreException e) {
+					throw new InvocationTargetException(e);
 				}
 			};
 			fContext.run(false, false, runnable);

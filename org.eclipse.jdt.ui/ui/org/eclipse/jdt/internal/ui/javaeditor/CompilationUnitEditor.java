@@ -578,9 +578,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 
 				event.doit= false;
 
-			} catch (BadLocationException e) {
-				JavaPlugin.log(e);
-			} catch (BadPositionCategoryException e) {
+			} catch (BadLocationException | BadPositionCategoryException e) {
 				JavaPlugin.log(e);
 			}
 		}

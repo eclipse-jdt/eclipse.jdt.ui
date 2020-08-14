@@ -37,7 +37,7 @@ import org.eclipse.jdt.internal.ui.search.JavaSearchResult;
 public class FileAdapterTest {
 
 	@Rule
-	public JUnitSourceSetup projectsetup = new JUnitSourceSetup();
+	public JUnitSourceSetup projectSetup = new JUnitSourceSetup();
 
 	@Test
 	public void testGetFile() throws Exception {

@@ -36,9 +36,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -159,12 +157,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		if (Display.getCurrent() != null) {
 			updateLibrariesList();
 		} else {
-			Display.getDefault().asyncExec(new Runnable() {
-				@Override
-				public void run() {
-					updateLibrariesList();
-				}
-			});
+			Display.getDefault().asyncExec(this::updateLibrariesList);
 		}
 	}
 
@@ -864,12 +857,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 
 	private void updateContainerEntry(final IClasspathEntry newEntry, final String[] changedAttributes, final IJavaProject jproject, final IPath containerPath) {
 		try {
-			IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
-				@Override
-				public void run(IProgressMonitor monitor) throws CoreException {
-					BuildPathSupport.modifyClasspathEntry(null, newEntry, changedAttributes, jproject, containerPath, false, monitor);
-				}
-			};
+			IWorkspaceRunnable runnable= monitor -> BuildPathSupport.modifyClasspathEntry(null, newEntry, changedAttributes, jproject, containerPath, false, monitor);
 			PlatformUI.getWorkbench().getProgressService().run(true, true, new WorkbenchRunnableAdapter(runnable));
 
 		} catch (InvocationTargetException e) {

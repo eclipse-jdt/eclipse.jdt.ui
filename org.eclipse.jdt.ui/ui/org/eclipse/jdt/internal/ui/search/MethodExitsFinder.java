@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
@@ -174,6 +175,12 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 	@Override
 	public boolean visit(EnumDeclaration node) {
 		// Don't dive into a local type.
+		return false;
+	}
+
+	@Override
+	public boolean visit(LambdaExpression node) {
+		// Don't dive into a Lambda Expression.
 		return false;
 	}
 

@@ -95,25 +95,22 @@ public class ResetAction extends BuildpathModifierAction {
 
 	@Override
 	public void run() {
-		final IRunnableWithProgress runnable= new IRunnableWithProgress() {
-			@Override
-			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-				try {
-					Object firstElement= getSelectedElements().get(0);
-					IJavaProject project= null;
-					if (firstElement instanceof IJavaProject) {
-						project= (IJavaProject)firstElement;
-					} else if (firstElement instanceof IPackageFragmentRoot) {
-						project= ((IPackageFragmentRoot)firstElement).getJavaProject();
-					} else {
-						project= ((CPListElementAttribute)firstElement).getParent().getJavaProject();
-					}
-
-					List<Object> result= reset(getSelectedElements(), project, monitor);
-					selectAndReveal(new StructuredSelection(result));
-				} catch (CoreException e) {
-					throw new InvocationTargetException(e);
+		final IRunnableWithProgress runnable= monitor -> {
+			try {
+				Object firstElement= getSelectedElements().get(0);
+				IJavaProject project= null;
+				if (firstElement instanceof IJavaProject) {
+					project= (IJavaProject)firstElement;
+				} else if (firstElement instanceof IPackageFragmentRoot) {
+					project= ((IPackageFragmentRoot)firstElement).getJavaProject();
+				} else {
+					project= ((CPListElementAttribute)firstElement).getParent().getJavaProject();
 				}
+
+				List<Object> result= reset(getSelectedElements(), project, monitor);
+				selectAndReveal(new StructuredSelection(result));
+			} catch (CoreException e) {
+				throw new InvocationTargetException(e);
 			}
 		};
 		try {

@@ -153,9 +153,7 @@ public class PropertiesFileHover implements ITextHover, ITextHoverExtension, ITe
 			}
 			if (escapedString.equals(unescapedString))
 				return null;
-		} catch (BadLocationException e) {
-			JavaPlugin.log(e);
-		} catch (BadPartitioningException e) {
+		} catch (BadLocationException | BadPartitioningException e) {
 			JavaPlugin.log(e);
 		}
 		return unescapedString;

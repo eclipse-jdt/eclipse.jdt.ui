@@ -255,9 +255,7 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 			Document document= new Document(methodCu.getBuffer().getContents());
 			try {
 				textEdit.apply(document);
-			} catch (MalformedTreeException e) {
-				JavaPlugin.log(e);
-			} catch (BadLocationException e) {
+			} catch (MalformedTreeException | BadLocationException e) {
 				JavaPlugin.log(e);
 			}
 			source= document;

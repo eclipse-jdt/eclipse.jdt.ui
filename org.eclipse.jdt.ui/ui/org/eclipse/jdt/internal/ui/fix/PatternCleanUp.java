@@ -25,15 +25,18 @@ import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -186,7 +189,7 @@ public class PatternCleanUp extends AbstractMultiFix {
 
 						if (writes.size() == 1 && reads.size() > 1) {
 							for (SimpleName simpleName : reads) {
-								if (!isRegExUse(simpleName)) {
+								if (!isRegExUse(simpleName, initializer)) {
 									return true;
 								}
 							}
@@ -200,7 +203,7 @@ public class PatternCleanUp extends AbstractMultiFix {
 					return true;
 				}
 
-				private boolean isRegExUse(final SimpleName simpleName) {
+				private boolean isRegExUse(final SimpleName simpleName, final Expression initializer) {
 					if (simpleName.getParent() instanceof MethodInvocation) {
 						MethodInvocation methodInvocation= (MethodInvocation) simpleName.getParent();
 
@@ -209,9 +212,48 @@ public class PatternCleanUp extends AbstractMultiFix {
 								&& simpleName.equals(methodInvocation.arguments().get(0))) {
 							if (ASTNodes.usesGivenSignature(methodInvocation, STRING_CLASS_NAME, MATCHES_METHOD, STRING_CLASS_NAME)
 									|| ASTNodes.usesGivenSignature(methodInvocation, STRING_CLASS_NAME, REPLACE_ALL_METHOD, STRING_CLASS_NAME, STRING_CLASS_NAME)
-									|| ASTNodes.usesGivenSignature(methodInvocation, STRING_CLASS_NAME, REPLACE_FIRST_METHOD, STRING_CLASS_NAME, STRING_CLASS_NAME)
-									|| ASTNodes.usesGivenSignature(methodInvocation, STRING_CLASS_NAME, SPLIT_METHOD, STRING_CLASS_NAME)
+									|| ASTNodes.usesGivenSignature(methodInvocation, STRING_CLASS_NAME, REPLACE_FIRST_METHOD, STRING_CLASS_NAME, STRING_CLASS_NAME)) {
+								return true;
+							} else if (ASTNodes.usesGivenSignature(methodInvocation, STRING_CLASS_NAME, SPLIT_METHOD, STRING_CLASS_NAME)
 									|| ASTNodes.usesGivenSignature(methodInvocation, STRING_CLASS_NAME, SPLIT_METHOD, STRING_CLASS_NAME, int.class.getCanonicalName())) {
+								String value= null;
+								Expression expression= ASTNodes.getUnparenthesedExpression(initializer);
+
+								if (expression instanceof StringLiteral) {
+									StringLiteral literal= (StringLiteral) expression;
+									value= literal.getLiteralValue();
+								} else if (expression instanceof Name) {
+									Name name= (Name) expression;
+									IBinding binding= name.resolveBinding();
+
+									if (binding instanceof IVariableBinding) {
+										ASTNode aSTNode= ASTNodes.findDeclaration(binding, startNode);
+
+										if (aSTNode instanceof VariableDeclarationFragment) {
+											Expression exp= ((VariableDeclarationFragment) aSTNode).getInitializer();
+
+											if (exp != null) {
+												exp= ASTNodes.getUnparenthesedExpression(exp);
+
+												if (exp instanceof StringLiteral) {
+													value= ((StringLiteral) exp).getLiteralValue();
+												}
+											}
+										}
+									}
+								}
+
+								if (value != null) {
+									// Don't compile pattern for single character that doesn't use regex meta-chars
+									// and don't compile pattern for double character where first char is back-slash
+									// and second character isn't alpha-numeric
+									if (value.length() == 1) {
+										return ".$|()[{^?*+\\".contains(value); //$NON-NLS-1$
+									} else if (value.length() == 2 && value.charAt(0) == '\\') {
+										return Character.isLetterOrDigit(value.charAt(1));
+									}
+								}
+
 								return true;
 							}
 						}

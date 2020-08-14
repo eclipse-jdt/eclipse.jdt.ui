@@ -44,7 +44,7 @@ public class TypeCompletionTest1d7 extends TypeCompletionTest {
 
 	@Override
 	protected IPackageFragment getAnonymousTestPackage() throws CoreException {
-		return Java1d7CompletionTestSetup.getAnonymousTestPackage();
+		return cts.getAnonymousTestPackage();
 	}
 
 	@Override
@@ -86,7 +86,7 @@ public class TypeCompletionTest1d7 extends TypeCompletionTest {
 	@Override
 	@Test
 	public void testBug182468() throws Exception {
-		IPackageFragmentRoot src= (IPackageFragmentRoot)Java1d7CompletionTestSetup.getTestPackage().getParent();
+		IPackageFragmentRoot src= (IPackageFragmentRoot)cts.getTestPackage().getParent();
 
 		IPackageFragment package1= src.createPackageFragment("package1", true, null);
 		package1.createCompilationUnit("AClass.java", "package " + package1.getElementName() + "; public class AClass {}", true, null);

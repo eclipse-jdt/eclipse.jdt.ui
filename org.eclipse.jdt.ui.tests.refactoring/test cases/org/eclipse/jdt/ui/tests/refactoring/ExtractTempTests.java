@@ -824,6 +824,18 @@ public class ExtractTempTests extends GenericRefactoringTest {
 	}
 
 	@Test
+	public void test116() throws Exception {
+		//test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=100430
+		helper1(7, 16, 7, 28, true, false, "bar", "object");
+	}
+
+	@Test
+	public void test117() throws Exception {
+		//test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=377288
+		helper1(8, 18, 8, 19, true, false, "temp", "j");
+	}
+
+	@Test
 	public void testZeroLengthSelection0() throws Exception {
 //		printTestDisabledMessage("test for bug 30146");
 		helper1(4, 18, 4, 18, true, false, "temp", "j");
@@ -1051,5 +1063,17 @@ public class ExtractTempTests extends GenericRefactoringTest {
 	@Test
 	public void testFail38() throws Exception {
 		failHelper1(4, 45, 4, 50, true, false, "temp", RefactoringStatus.FATAL);
+	}
+
+	@Test
+	public void testFail39() throws Exception {
+		//test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=100430
+		failHelper1(7, 16, 7, 28, false, false, "bar", RefactoringStatus.WARNING);
+	}
+
+	@Test
+	public void testFail40() throws Exception {
+		//test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=100430
+		failHelper1(7, 16, 7, 28, false, false, "bar", RefactoringStatus.WARNING);
 	}
 }

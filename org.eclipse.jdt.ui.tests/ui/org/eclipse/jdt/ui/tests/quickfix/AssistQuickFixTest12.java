@@ -39,7 +39,7 @@ import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 public class AssistQuickFixTest12 extends QuickFixTest {
 
 	@Rule
-    public ProjectTestSetup projectsetup = new Java12ProjectTestSetup(true);
+    public ProjectTestSetup projectSetup = new Java12ProjectTestSetup(true);
 
 	private IJavaProject fJProject1;
 
@@ -60,7 +60,7 @@ public class AssistQuickFixTest12 extends QuickFixTest {
 	@Test
 	public void testSplitSwitchCaseStatement() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		fJProject1.setRawClasspath(Java12ProjectTestSetup.getDefaultClasspath(), null);
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
 		JavaProjectHelper.set12CompilerOptions(fJProject1, true);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -126,7 +126,7 @@ public class AssistQuickFixTest12 extends QuickFixTest {
 	@Test
 	public void testSplitSwitchCaseLabelRuleStatement() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		fJProject1.setRawClasspath(Java12ProjectTestSetup.getDefaultClasspath(), null);
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
 		JavaProjectHelper.set12CompilerOptions(fJProject1, true);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 

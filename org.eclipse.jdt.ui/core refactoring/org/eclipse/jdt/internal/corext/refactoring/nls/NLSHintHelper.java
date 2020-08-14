@@ -457,10 +457,7 @@ public class NLSHintHelper {
 
 			props.load(is);
 
-		} catch (IOException e) {
-			// sorry no properties
-			return null;
-		} catch (CoreException e) {
+		} catch (IOException | CoreException e) {
 			// sorry no properties
 			return null;
 		} finally {

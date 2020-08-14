@@ -23,12 +23,6 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 
@@ -50,7 +44,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.core.ClasspathEntry;
 import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 
-import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.quickfix.JarUtil.ClassFileFilter;
 
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
@@ -58,15 +51,9 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.text.correction.ExternalNullAnnotationQuickAssistProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionAssistant;
 
-@RunWith(JUnit4.class)
 public abstract class AbstractAnnotateAssistTests extends QuickFixTest {
 
 	protected IJavaProject fJProject1;
-
-	@After
-	public void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
-	}
 
 	protected void ensureExists(IContainer parent) throws CoreException {
 		if (parent.exists()) return;

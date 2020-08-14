@@ -6976,6 +6976,11 @@
             cleanUpKind="cleanUp">
       </cleanUpConfigurationUI>
       <cleanUpConfigurationUI
+            class="org.eclipse.jdt.internal.ui.preferences.cleanup.OptimizationTabPage"
+            name="%CleanUpTabPage.Optimization.name"
+            cleanUpKind="cleanUp">
+      </cleanUpConfigurationUI>
+      <cleanUpConfigurationUI
             class="org.eclipse.jdt.internal.ui.preferences.cleanup.MemberAccessesTabPage"
             name="%CleanUpTabPage.MemberAccesses.name"
             cleanUpKind="cleanUp">
@@ -6999,6 +7004,11 @@
       <cleanUpConfigurationUI
             class="org.eclipse.jdt.internal.ui.preferences.cleanup.CodeStyleTabPage"
             name="%CleanUpTabPage.CodeStyle.name"
+            cleanUpKind="saveAction">
+      </cleanUpConfigurationUI>
+      <cleanUpConfigurationUI
+            class="org.eclipse.jdt.internal.ui.preferences.cleanup.OptimizationTabPage"
+            name="%CleanUpTabPage.Optimization.name"
             cleanUpKind="saveAction">
       </cleanUpConfigurationUI>
       <cleanUpConfigurationUI
@@ -7071,9 +7081,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.expressions">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.NumberSuffixCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.number_suffix"
+            runAfter="org.eclipse.jdt.ui.cleanup.lambda_and_method_ref">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.LazyLogicalCleanUp"
             id="org.eclipse.jdt.ui.cleanup.lazy_logical"
-            runAfter="org.eclipse.jdt.ui.cleanup.lambda_and_method_ref">
+            runAfter="org.eclipse.jdt.ui.cleanup.number_suffix">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.PatternCleanUp"
@@ -7081,14 +7096,9 @@
             runAfter="org.eclipse.jdt.ui.cleanup.lazy_logical">
       </cleanUp>
       <cleanUp
-            class="org.eclipse.jdt.internal.ui.fix.NumberSuffixCleanUp"
-            id="org.eclipse.jdt.ui.cleanup.number_suffix"
-            runAfter="org.eclipse.jdt.ui.cleanup.precompile_regex">
-      </cleanUp>
-      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp"
             id="org.eclipse.jdt.ui.cleanup.unused_code"
-            runAfter="org.eclipse.jdt.ui.cleanup.number_suffix">
+            runAfter="org.eclipse.jdt.ui.cleanup.precompile_regex">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.Java50CleanUp"
@@ -7122,13 +7132,13 @@
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.ObjectsEqualsCleanUp"
-            id="org.eclipse.jdt.ui.cleanup.precompile_regex"
+            id="org.eclipse.jdt.ui.cleanup.objects_equals"
             runAfter="org.eclipse.jdt.ui.cleanup.unnecessary_array_creation">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.StringCleanUp"
             id="org.eclipse.jdt.ui.cleanup.strings"
-            runAfter="org.eclipse.jdt.ui.cleanup.precompile_regex">
+            runAfter="org.eclipse.jdt.ui.cleanup.objects_equals">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUp"

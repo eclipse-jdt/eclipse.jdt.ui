@@ -935,7 +935,6 @@ public class TypeInfoViewer {
 		});
 		fTable.addDisposeListener(event -> {
 			stop(true, true);
-			fDashLineColor.dispose();
 			fSeparatorIcon.dispose();
 			fImageManager.dispose();
 			if (fProgressUpdateJob != null) {

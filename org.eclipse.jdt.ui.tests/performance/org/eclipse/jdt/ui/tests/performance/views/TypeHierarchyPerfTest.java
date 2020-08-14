@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,16 +13,22 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.performance.views;
 
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 
-import junit.extensions.TestSetup;
-import junit.framework.Test;
+import org.junit.FixMethodOrder;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExternalResource;
+import org.junit.runners.MethodSorters;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
-import org.eclipse.test.OrderedTestSuite;
 import org.eclipse.test.performance.Dimension;
 import org.eclipse.test.performance.Performance;
+
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 
@@ -35,26 +41,23 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.tests.performance.JdtPerformanceTestCase;
+import org.eclipse.jdt.ui.tests.performance.JdtPerformanceTestCaseCommon;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyViewPart;
 import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
 
-public class TypeHierarchyPerfTest extends JdtPerformanceTestCase {
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+public class TypeHierarchyPerfTest extends JdtPerformanceTestCaseCommon {
 
-	private static class MyTestSetup extends TestSetup {
+	private static class MyTestSetup extends ExternalResource {
 		public static final String SRC_CONTAINER= "src";
 
 		public static IJavaProject fJProject1;
 		public static IPackageFragmentRoot fJunitSrcRoot;
 
-		public MyTestSetup(Test test) {
-			super(test);
-		}
-
 		@Override
-		protected void setUp() throws Exception {
+		public void before() throws Throwable {
 			fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 			// we must make sure that the performance test are compatible to 2.1.3 & 3.0 so use rt13
 			assertTrue("rt not found", JavaProjectHelper.addRTJar13(fJProject1) != null);
@@ -63,32 +66,21 @@ public class TypeHierarchyPerfTest extends JdtPerformanceTestCase {
 		}
 
 		@Override
-		protected void tearDown() throws Exception {
-			if (fJProject1 != null && fJProject1.exists())
-				JavaProjectHelper.delete(fJProject1);
+		public void after() {
+			try {
+				if (fJProject1 != null && fJProject1.exists())
+					JavaProjectHelper.delete(fJProject1);
+			} catch (CoreException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
-	public static Test suite() {
-		OrderedTestSuite testSuite= new OrderedTestSuite(
-				TypeHierarchyPerfTest.class,
-				new String[] {
-					"testOpenObjectHierarchy",
-					"testOpenCollHierarchy",
-					"testOpenObjectHierarchy2",
-				});
-		return new MyTestSetup(testSuite);
-	}
+	@Rule
+	public MyTestSetup stup= new MyTestSetup();
 
-	public static Test setUpTest(Test someTest) {
-		return new MyTestSetup(someTest);
-	}
-
-	public TypeHierarchyPerfTest(String name) {
-		super(name);
-	}
-
-	public void testOpenObjectHierarchy() throws Exception {
+	@Test
+	public void testAOpenObjectHierarchy() throws Exception {
 		//cold
 
 		// make sure stuff like the Intro view gets closed and we start with a clean Java perspective:
@@ -101,13 +93,15 @@ public class TypeHierarchyPerfTest extends JdtPerformanceTestCase {
 		Performance.getDefault().assertPerformanceInAbsoluteBand(fPerformanceMeter, Dimension.ELAPSED_PROCESS, 0, 2000);
 	}
 
-	public void testOpenCollHierarchy() throws Exception {
+	@Test
+	public void testBOpenCollHierarchy() throws Exception {
 		//junit source folder
 		measureOpenHierarchy(MyTestSetup.fJunitSrcRoot);
 		Performance.getDefault().assertPerformanceInAbsoluteBand(fPerformanceMeter, Dimension.ELAPSED_PROCESS, 0, 1000);
 	}
 
-	public void testOpenObjectHierarchy2() throws Exception {
+	@Test
+	public void testCOpenObjectHierarchy2() throws Exception {
 		//warm
 		tagAsSummary("Open type hierarchy on Object", Dimension.ELAPSED_PROCESS);
 

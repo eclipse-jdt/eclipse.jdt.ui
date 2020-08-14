@@ -15,6 +15,7 @@
 package org.eclipse.jdt.ui.tests.quickfix;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -77,7 +78,7 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.CreatePackageInfoWi
 public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 	@Rule
-    public ProjectTestSetup projectsetup = new ProjectTestSetup();
+    public ProjectTestSetup projectSetup = new ProjectTestSetup();
 
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
@@ -110,7 +111,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		StubUtility.setCodeTemplate(CodeTemplateContextType.CONSTRUCTORSTUB_ID, "", null);
 		StubUtility.setCodeTemplate(CodeTemplateContextType.METHODSTUB_ID, "", null);
 
-		fJProject1= ProjectTestSetup.getProject();
+		fJProject1= projectSetup.getProject();
 
 		if (ANNOTATION_JAR_PATH == null) {
 			String version= "[1.1.0,2.0.0)"; // tests run at 1.5, need the "old" null annotations
@@ -128,7 +129,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 	@After
 	public void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject1, projectSetup.getDefaultClasspath());
 	}
 
 	// ==== Problem:	dereferencing a @Nullable field
@@ -2201,7 +2202,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 			ICompilationUnit packageInfoCU= pack1.getCompilationUnit("package-info.java");
 			ICompilationUnit packageInfoCU2= pack2.getCompilationUnit("package-info.java");
 			assertTrue("a package-info.java should have been created in src", packageInfoCU.exists());
-			assertTrue("no package-info.java should have been created in src-tests", !packageInfoCU2.exists());
+			assertFalse("no package-info.java should have been created in src-tests", packageInfoCU2.exists());
 
 			StringBuilder expected= new StringBuilder();
 			expected.append("/**\n");
@@ -2232,7 +2233,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 			StubUtility.setCodeTemplate(CodeTemplateContextType.FILECOMMENT_ID, "/**\n * File\n */", null);
 
 			proj2= JavaProjectHelper.createJavaProject("OtherProject", "bin");
-			proj2.setRawClasspath(ProjectTestSetup.getDefaultClasspath(), null);
+			proj2.setRawClasspath(projectSetup.getDefaultClasspath(), null);
 			TestOptions.initializeProjectOptions(proj2);
 			JavaProjectHelper.addLibrary(proj2, new Path(ANNOTATION_JAR_PATH));
 			JavaProjectHelper.addRequiredProject(proj2, fJProject1);
@@ -2295,7 +2296,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 			ICompilationUnit packageInfoCU= pack1.getCompilationUnit("package-info.java");
 			ICompilationUnit packageInfoCU2= pack2.getCompilationUnit("package-info.java");
 			assertTrue("a package-info.java should have been created in fJProject1", packageInfoCU.exists());
-			assertTrue("no package-info.java should have been created in proj2", !packageInfoCU2.exists());
+			assertFalse("no package-info.java should have been created in proj2", packageInfoCU2.exists());
 
 			StringBuilder expected= new StringBuilder();
 			expected.append("/**\n");
@@ -2329,7 +2330,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 			StubUtility.setCodeTemplate(CodeTemplateContextType.FILECOMMENT_ID, "/**\n * File\n */", null);
 
 			proj2= JavaProjectHelper.createJavaProject("OtherProject", "bin");
-			proj2.setRawClasspath(ProjectTestSetup.getDefaultClasspath(), null);
+			proj2.setRawClasspath(projectSetup.getDefaultClasspath(), null);
 			TestOptions.initializeProjectOptions(proj2);
 			JavaProjectHelper.addLibrary(proj2, new Path(ANNOTATION_JAR_PATH));
 			IPackageFragmentRoot sourceFolder2= JavaProjectHelper.addSourceContainer(proj2, "src");

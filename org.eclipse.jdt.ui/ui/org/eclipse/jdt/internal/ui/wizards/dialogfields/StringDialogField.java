@@ -15,7 +15,6 @@
 package org.eclipse.jdt.internal.ui.wizards.dialogfields;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
@@ -128,12 +127,7 @@ public class StringDialogField extends DialogField {
 	public Text getTextControl(Composite parent) {
 		if (fTextControl == null) {
 			assertCompositeNotNull(parent);
-			fModifyListener= new ModifyListener() {
-				@Override
-				public void modifyText(ModifyEvent e) {
-					doModifyText();
-				}
-			};
+			fModifyListener= e -> doModifyText();
 
 			fTextControl= createTextControl(parent);
 			// moved up due to 1GEUNW2

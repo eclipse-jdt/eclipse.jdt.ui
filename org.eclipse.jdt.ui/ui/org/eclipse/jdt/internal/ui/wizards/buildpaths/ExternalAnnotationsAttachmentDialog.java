@@ -19,7 +19,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.dialogs.StatusDialog;
 
@@ -48,12 +47,7 @@ public class ExternalAnnotationsAttachmentDialog extends StatusDialog {
 	public ExternalAnnotationsAttachmentDialog(Shell parent, IPath entry) {
 		super(parent);
 
-		IStatusChangeListener listener= new IStatusChangeListener() {
-			@Override
-			public void statusChanged(IStatus status) {
-				updateStatus(status);
-			}
-		};
+		IStatusChangeListener listener= this::updateStatus;
 		fAnnotationsAttachmentBlock= new ExternalAnnotationsAttachmentBlock(listener, entry);
 
 		setTitle(NewWizardMessages.ExternalAnnotationsDialog_title);

@@ -1429,11 +1429,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 					// convert JavaModelException to CoreException
 					throw new CoreException(new Status(IStatus.WARNING, JavaUI.ID_PLUGIN, IResourceStatus.OUT_OF_SYNC_LOCAL, JavaEditorMessages.CompilationUnitDocumentProvider_error_outOfSync, null));
 				throw x;
-			} catch (CoreException x) {
-				// inform about the failure
-				fireElementStateChangeFailed(element);
-				throw x;
-			} catch (RuntimeException x) {
+			} catch (CoreException | RuntimeException x) {
 				// inform about the failure
 				fireElementStateChangeFailed(element);
 				throw x;

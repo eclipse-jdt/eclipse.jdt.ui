@@ -76,14 +76,14 @@ public class JavadocQuickFixTestPreview extends QuickFixTest {
 
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		JavaProjectHelper.set15CompilerOptions(fJProject1, true);
-		JavaProjectHelper.addRequiredModularProject(fJProject1, Java15ProjectTestSetup.getProject());
+		JavaProjectHelper.addRequiredModularProject(fJProject1, projectsetup.getProject());
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}
 
 	@After
 	public void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject1, projectsetup.getDefaultClasspath());
 	}
 
 	@Test

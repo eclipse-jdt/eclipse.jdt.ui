@@ -1123,9 +1123,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 				name= types[0].getFullyQualifiedName('.');
 
 			}
-		} catch (InterruptedException ie) {
-
-		} catch (InvocationTargetException ite) {
+		} catch (InterruptedException | InvocationTargetException ite) {
 		}
 		config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, name);
 		if (testKindId != null)

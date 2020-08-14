@@ -141,9 +141,7 @@ public class NLSUtil {
 					}
 				}
 			}
-		} catch (InvalidInputException e) {
-			return null;
-		} catch (BadLocationException e) {
+		} catch (InvalidInputException | BadLocationException e) {
 			return null;
 		}
 		if (result.isEmpty())
@@ -160,9 +158,7 @@ public class NLSUtil {
 					return line;
 			}
 			return null;
-		} catch (InvalidInputException e) {
-			return null;
-		} catch (BadLocationException e) {
+		} catch (InvalidInputException | BadLocationException e) {
 			return null;
 		}
 	}

@@ -21,8 +21,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -89,17 +87,14 @@ public final class HintTextGroup implements ISelectionChangedListener {
         fTopComposite.setLayout(gridLayout);
         fTopComposite.setLayoutData(gridData);
         fTopComposite.setData(null);
-        fTopComposite.addDisposeListener(new DisposeListener() {
-            @Override
-			public void widgetDisposed(DisposeEvent e) {
-                Collection<Image> collection= fImageMap.values();
-                Iterator<Image> iterator= collection.iterator();
-                while(iterator.hasNext()) {
-                    Image image= iterator.next();
-                    image.dispose();
-                }
-            }
-        });
+        fTopComposite.addDisposeListener(e -> {
+		    Collection<Image> collection= fImageMap.values();
+		    Iterator<Image> iterator= collection.iterator();
+		    while(iterator.hasNext()) {
+		        Image image= iterator.next();
+		        image.dispose();
+		    }
+		});
         return fTopComposite;
     }
 

@@ -180,9 +180,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 			command.text= insertion;
 			command.doit= true;
 			command.owner= null;
-		} catch (MalformedTreeException e) {
-			JavaPlugin.log(e);
-		} catch (BadLocationException e) {
+		} catch (MalformedTreeException | BadLocationException e) {
 			JavaPlugin.log(e);
 		}
 

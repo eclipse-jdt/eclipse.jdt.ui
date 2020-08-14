@@ -83,7 +83,7 @@ import org.eclipse.jdt.internal.ui.wizards.NewInterfaceCreationWizard;
 public class JavaLeakTest extends LeakTestCase {
 
 	@Rule
-	public LeakTestSetup projectsetup = new LeakTestSetup();
+	public LeakTestSetup projectSetup = new LeakTestSetup();
 
 	private IJavaProject fJProject;
 

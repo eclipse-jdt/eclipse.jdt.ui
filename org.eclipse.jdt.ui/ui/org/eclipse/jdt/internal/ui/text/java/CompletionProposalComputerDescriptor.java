@@ -44,6 +44,7 @@ import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 
 /**
  * The description of an extension to the
@@ -153,6 +154,8 @@ final class CompletionProposalComputerDescriptor {
 	 * @since 3.16
 	 */
 	private final boolean fRequiresUIThread;
+
+
 
 
 	/**
@@ -350,7 +353,8 @@ final class CompletionProposalComputerDescriptor {
 					return proposals;
 				}
 			} finally {
-				fIsReportingDelay= true;
+				// If computers are using non-ui thread, don't report delays.
+				fIsReportingDelay= !((context.getViewer() instanceof JavaSourceViewer) && ((JavaSourceViewer) context.getViewer()).isAsyncCompletionActive());
 			}
 			status= createAPIViolationStatus(COMPUTE_COMPLETION_PROPOSALS);
 		} catch (InvalidRegistryObjectException x) {
@@ -424,6 +428,7 @@ final class CompletionProposalComputerDescriptor {
 	public void sessionStarted() {
 		if (!isEnabled())
 			return;
+
 
 		IStatus status;
 		try {

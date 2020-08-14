@@ -109,12 +109,7 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 
 			fVariables= new SelectionButtonDialogField(SWT.PUSH);
 			fVariables.setLabelText(NewWizardMessages.LinkFolderDialog_dependenciesGroup_variables_desc);
-			fVariables.setDialogFieldListener(new IDialogFieldListener() {
-				@Override
-				public void dialogFieldChanged(DialogField field) {
-					handleVariablesButtonPressed();
-				}
-			});
+			fVariables.setDialogFieldListener(field -> handleVariablesButtonPressed());
 		}
 
 		public void setDialogFieldListener(RootFieldAdapter adapter) {

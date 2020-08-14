@@ -440,11 +440,9 @@ public class JavadocConfigurationBlock {
 					// just read
 				}
 			}
-		} catch (IllegalArgumentException e) {
-			return false; // workaround for bug 91072
-		} catch (NullPointerException e) {
-			return false; // workaround for http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6536522
-		} catch (IOException e) {
+		} catch (IllegalArgumentException | NullPointerException | IOException e) {
+			// workaround for bug 91072
+			// workaround for http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6536522
 			return false;
 		}
 		return res < 400;

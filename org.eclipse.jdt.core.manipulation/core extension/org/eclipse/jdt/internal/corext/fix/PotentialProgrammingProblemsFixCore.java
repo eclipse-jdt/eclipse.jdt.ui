@@ -129,9 +129,7 @@ public class PotentialProgrammingProblemsFixCore extends CompilationUnitRewriteO
 							} else {
 							   	result.addWarning(Messages.format(FixMessages.PotentialProgrammingProblemsFix_calculatingUIDFailed_unknown, BasicElementLabels.getJavaElementName(typeBinding.getName())));
 							}
-						} catch (IOException e) {
-						   	result.addWarning(Messages.format(FixMessages.PotentialProgrammingProblemsFix_calculatingUIDFailed_exception, new String[] { BasicElementLabels.getJavaElementName(typeBinding.getName()), e.getLocalizedMessage()}), JavaStatusContext.create(types[i]));
-				        } catch (CoreException e) {
+						} catch (IOException | CoreException e) {
 						   	result.addWarning(Messages.format(FixMessages.PotentialProgrammingProblemsFix_calculatingUIDFailed_exception, new String[] { BasicElementLabels.getJavaElementName(typeBinding.getName()), e.getLocalizedMessage()}), JavaStatusContext.create(types[i]));
 				        }
 					}

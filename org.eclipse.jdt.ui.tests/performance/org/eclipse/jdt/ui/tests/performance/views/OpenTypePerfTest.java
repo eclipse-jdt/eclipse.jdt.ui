@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,11 +13,15 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.performance.views;
 
-import junit.extensions.TestSetup;
-import junit.framework.Test;
+import static org.junit.Assert.fail;
+
+import org.junit.FixMethodOrder;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExternalResource;
+import org.junit.runners.MethodSorters;
 
 import org.eclipse.jdt.testplugin.util.DisplayHelper;
-import org.eclipse.test.OrderedTestSuite;
 import org.eclipse.test.performance.Dimension;
 import org.eclipse.test.performance.Performance;
 
@@ -35,71 +39,57 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.dialogs.TypeSelectionExtension;
-import org.eclipse.jdt.ui.tests.performance.JdtPerformanceTestCase;
+import org.eclipse.jdt.ui.tests.performance.JdtPerformanceTestCaseCommon;
 import org.eclipse.jdt.ui.tests.performance.SWTTestProject;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 
-public class OpenTypePerfTest extends JdtPerformanceTestCase {
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+public class OpenTypePerfTest extends JdtPerformanceTestCaseCommon {
 
 	private SelectionDialog fOpenTypeDialog;
 	private Shell fShell;
 
-	private static class MyTestSetup extends TestSetup {
+	private static class MyTestSetup extends ExternalResource {
 		private SWTTestProject fTestProject;
 		private boolean fAutoBuilding;
 
-		public MyTestSetup(Test test) {
-			super(test);
-		}
-
 		@Override
-		protected void setUp() throws Exception {
-			super.setUp();
+		public void before() throws Throwable {
 			fAutoBuilding= CoreUtility.setAutoBuilding(false);
 			fTestProject= new SWTTestProject();
 		}
 
 		@Override
-		protected void tearDown() throws Exception {
-			fTestProject.delete();
-			CoreUtility.setAutoBuilding(fAutoBuilding);
-			super.tearDown();
+		public void after() {
+			try {
+				fTestProject.delete();
+				CoreUtility.setAutoBuilding(fAutoBuilding);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
-	public static Test suite() throws Exception {
-		OrderedTestSuite testSuite= new OrderedTestSuite(
-				OpenTypePerfTest.class,
-				new String[] {
-					"testColdException",
-					"testWarmException",
-					"testWarmException10",
-					"testWarmS10",
-					"testWarmOpenSWT",
-					"testWarmOpenSWTHistory10",
-				});
-		return new MyTestSetup(testSuite);
-	}
+	@Rule
+	public MyTestSetup stup= new MyTestSetup();
 
-	public static Test setUpTest(Test someTest) {
-		return new MyTestSetup(someTest);
-	}
-
-	public  OpenTypePerfTest(String name) {
-		super(name);
+	@Override
+	public void setUp() throws Exception {
+		System.out.println("starting " + OpenTypePerfTest.class.getName() + "#" + tn.getMethodName());
+		super.setUp();
 	}
 
 	@Override
-	protected void setUp() throws Exception {
-		System.out.println("starting " + OpenTypePerfTest.class.getName() + "#" + getName());
-		super.setUp();
+	public void tearDown() throws Exception {
+		super.tearDown();
 	}
 
 	//---
 
-	public void testColdException() throws Exception {
+	@Test
+	public void testAColdException() throws Exception {
 		//cold
 		joinBackgroudActivities();
 		try {
@@ -110,7 +100,8 @@ public class OpenTypePerfTest extends JdtPerformanceTestCase {
 		}
 	}
 
-	public void testWarmException() throws Exception {
+	@Test
+	public void testBWarmException() throws Exception {
 		//warm
 		joinBackgroudActivities();
 		try {
@@ -121,7 +112,8 @@ public class OpenTypePerfTest extends JdtPerformanceTestCase {
 		}
 	}
 
-	public void testWarmException10() throws Exception {
+	@Test
+	public void testCWarmException10() throws Exception {
 		//warm, repeated
 		joinBackgroudActivities();
 		try {
@@ -134,7 +126,8 @@ public class OpenTypePerfTest extends JdtPerformanceTestCase {
 		}
 	}
 
-	public void testWarmS10() throws Exception {
+	@Test
+	public void testDWarmS10() throws Exception {
 		//warm, repeated, many matches
 		joinBackgroudActivities();
 		try {
@@ -147,7 +140,8 @@ public class OpenTypePerfTest extends JdtPerformanceTestCase {
 		}
 	}
 
-	public void testWarmOpenSWT() throws Exception {
+	@Test
+	public void testEWarmOpenSWT() throws Exception {
 		//warm, add SWT to history
 		joinBackgroudActivities();
 		try {
@@ -158,7 +152,8 @@ public class OpenTypePerfTest extends JdtPerformanceTestCase {
 		}
 	}
 
-	public void testWarmOpenSWTHistory10() throws Exception {
+	@Test
+	public void testFWarmOpenSWTHistory10() throws Exception {
 		//warm, repeated, open SWT from history
 		joinBackgroudActivities();
 		try {

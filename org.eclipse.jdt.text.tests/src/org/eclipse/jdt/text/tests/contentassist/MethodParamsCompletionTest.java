@@ -13,7 +13,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.contentassist;
 
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -23,8 +22,6 @@ import org.eclipse.jdt.ui.PreferenceConstants;
  * @since 3.2
  */
 public class MethodParamsCompletionTest extends AbstractCompletionTest {
-	@Rule
-	public CompletionTestSetup cts= new CompletionTestSetup();
 
 	/*
 	 * @see org.eclipse.jdt.text.tests.contentassist.AbstractCompletionTest#setUp()

@@ -37,8 +37,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TrayDialog;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
@@ -170,15 +168,12 @@ public class CreateMultipleSourceFoldersDialog extends TrayDialog {
 						return wizard;
 					}
 				};
-				action.addPropertyChangeListener(new IPropertyChangeListener() {
-					@Override
-					public void propertyChange(PropertyChangeEvent event) {
-						if (event.getProperty().equals(IAction.RESULT)) {
-							if (event.getNewValue().equals(Boolean.TRUE)) {
-								result[0]= addFakeFolder(fJavaProject.getProject(), newElement);
-							} else {
-								wizard.cancel();
-							}
+				action.addPropertyChangeListener(event -> {
+					if (event.getProperty().equals(IAction.RESULT)) {
+						if (event.getNewValue().equals(Boolean.TRUE)) {
+							result[0]= addFakeFolder(fJavaProject.getProject(), newElement);
+						} else {
+							wizard.cancel();
 						}
 					}
 				});

@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core.source;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -62,14 +63,14 @@ public class AddUnimplementedMethodsTest1d8 {
 
 	@Before
 	public void setUp() throws Exception {
-		fJavaProject= Java1d8ProjectTestSetup.getProject();
+		fJavaProject= j18p.getProject();
 		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(fJavaProject, "src");
 		fPackage= root.createPackageFragment("ibm.util", true, null);
 	}
 
 	@After
 	public void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJavaProject, Java1d8ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJavaProject, j18p.getDefaultClasspath());
 		fJavaProject= null;
 		fPackage= null;
 	}
@@ -107,7 +108,7 @@ public class AddUnimplementedMethodsTest1d8 {
 	private void checkMethods(String[] expected, IMethod[] methods) {
 		int nMethods= methods.length;
 		int nExpected= expected.length;
-		assertTrue("" + nExpected + " methods expected, is " + nMethods, nMethods == nExpected);
+		assertEquals("" + nExpected + " methods expected, is " + nMethods, nExpected, nMethods);
 		for (int i= 0; i < nExpected; i++) {
 			String methName= expected[i];
 			assertTrue("method " + methName + " expected", nameContained(methName, methods));

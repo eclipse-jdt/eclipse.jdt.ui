@@ -27,7 +27,7 @@ import org.eclipse.jdt.ui.tests.core.rules.Java1d7ProjectTestSetup;
  * This class is used to run tests on Java Dolphin 1.7 .
  */
 class Java1d7CompletionTestSetup extends Java1d7ProjectTestSetup {
-	public static IPackageFragment getTestPackage() throws CoreException {
+	public IPackageFragment getTestPackage() throws CoreException {
 		IJavaProject project= getProject();
 		IPackageFragmentRoot root= project.getPackageFragmentRoot("src");
 		if (!root.exists())
@@ -41,7 +41,7 @@ class Java1d7CompletionTestSetup extends Java1d7ProjectTestSetup {
 	}
 
 	private static int fAnonymousSoureFolderCounter= 0;
-	public static IPackageFragment getAnonymousTestPackage() throws CoreException {
+	public IPackageFragment getAnonymousTestPackage() throws CoreException {
 		IJavaProject project= getProject();
 		String sourceFolder= "src" + fAnonymousSoureFolderCounter++;
 		IPackageFragmentRoot root= project.getPackageFragmentRoot(sourceFolder);

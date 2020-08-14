@@ -619,9 +619,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 			Strings.trimIndentation(lines, method.getJavaProject(), false);
 			content= Strings.concatenate(lines, StubUtility.getLineDelimiterUsed(method));
 			newMethod.setBody((Block) targetRewrite.createStringPlaceholder(content, ASTNode.BLOCK));
-		} catch (MalformedTreeException exception) {
-			JavaPlugin.log(exception);
-		} catch (BadLocationException exception) {
+		} catch (MalformedTreeException | BadLocationException exception) {
 			JavaPlugin.log(exception);
 		}
 	}

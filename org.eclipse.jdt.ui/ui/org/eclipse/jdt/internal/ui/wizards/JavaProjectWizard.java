@@ -93,14 +93,11 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
 			BasicNewProjectResourceWizard.updatePerspective(fConfigElement);
 			selectAndReveal(fSecondPage.getJavaProject().getProject());
 
-			Display.getDefault().asyncExec(new Runnable() {
-				@Override
-				public void run() {
-					IWorkbenchPart activePart= getActivePart();
-					if (activePart instanceof IPackagesViewPart) {
-						PackageExplorerPart view= PackageExplorerPart.openInActivePerspective();
-						view.tryToReveal(newElement);
-					}
+			Display.getDefault().asyncExec(() -> {
+				IWorkbenchPart activePart= getActivePart();
+				if (activePart instanceof IPackagesViewPart) {
+					PackageExplorerPart view= PackageExplorerPart.openInActivePerspective();
+					view.tryToReveal(newElement);
 				}
 			});
 		}

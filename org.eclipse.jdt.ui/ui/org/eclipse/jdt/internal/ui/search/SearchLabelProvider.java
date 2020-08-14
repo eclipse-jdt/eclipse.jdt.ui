@@ -78,7 +78,7 @@ public abstract class SearchLabelProvider extends AppearanceAwareLabelProvider {
 		fLabelProviderMap= new HashMap<>(5);
 
 		fSearchPreferences= new ScopedPreferenceStore(InstanceScope.INSTANCE, NewSearchUI.PLUGIN_ID);
-		fSearchPropertyListener= event -> doSearchPropertyChange(event);
+		fSearchPropertyListener= this::doSearchPropertyChange;
 		fSearchPreferences.addPropertyChangeListener(fSearchPropertyListener);
 	}
 
@@ -173,7 +173,6 @@ public abstract class SearchLabelProvider extends AppearanceAwareLabelProvider {
 	@Override
 	public void dispose() {
 		if (fPotentialMatchFgColor != null) {
-			fPotentialMatchFgColor.dispose();
 			fPotentialMatchFgColor= null;
 		}
 		fSearchPreferences.removePropertyChangeListener(fSearchPropertyListener);

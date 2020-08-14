@@ -13,8 +13,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.Hashtable;
 
@@ -54,7 +53,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 	@Before
 	public void setUp() throws Exception {
 
-		fJProject1= ProjectTestSetup.getProject();
+		fJProject1= pts.getProject();
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		Hashtable<String, String> options= TestOptions.getDefaultOptions();
@@ -66,7 +65,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 
 	@After
 	public void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject1, pts.getDefaultClasspath());
 	}
 
 	@Test
@@ -917,7 +916,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 					return;
 				}
 			}
-			assertFalse("getDefaultValue not found", true);
+			fail("getDefaultValue not found");
 		}
 
 	}
@@ -937,7 +936,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 			for (IProblem problem : problems) {
 				buf.append(problem.getMessage()).append('\n');
 			}
-			assertTrue(buf.toString(), false);
+			fail(buf.toString());
 		}
 	}
 

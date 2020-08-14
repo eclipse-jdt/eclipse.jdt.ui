@@ -264,11 +264,7 @@ public class NLSHint {
 	private static NLSLine[] createRawLines(ICompilationUnit cu) {
 		try {
 			return NLSScanner.scan(cu);
-		} catch (JavaModelException x) {
-			return new NLSLine[0];
-		} catch (InvalidInputException x) {
-			return new NLSLine[0];
-		} catch (BadLocationException x) {
+		} catch (JavaModelException | InvalidInputException | BadLocationException x) {
 			return new NLSLine[0];
 		}
 	}

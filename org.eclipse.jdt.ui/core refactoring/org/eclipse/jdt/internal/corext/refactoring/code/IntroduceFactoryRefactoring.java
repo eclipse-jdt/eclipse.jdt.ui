@@ -864,7 +864,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			if (ASTNodes.isExistingNode(actualCtorArg)) {
 				movedArg= unitRewriter.createMoveTarget(actualCtorArg);
 			} else {
-				unitRewriter.remove(actualCtorArg, null);
+				unitRewriter.remove(actualCtorArg, gd);
 				movedArg= actualCtorArg;
 			}
 

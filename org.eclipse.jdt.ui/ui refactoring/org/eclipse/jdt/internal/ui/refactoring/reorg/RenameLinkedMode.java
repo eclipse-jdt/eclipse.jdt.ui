@@ -377,9 +377,7 @@ public class RenameLinkedMode {
 			JavaPlugin.log(ex);
 		} catch (InterruptedException ex) {
 			// canceling is OK -> redo text changes in that case?
-		} catch (InvocationTargetException ex) {
-			JavaPlugin.log(ex);
-		} catch (BadLocationException e) {
+		} catch (InvocationTargetException | BadLocationException e) {
 			JavaPlugin.log(e);
 		} finally {
 			if (label != null)
@@ -462,9 +460,7 @@ public class RenameLinkedMode {
 			RenameSupport renameSupport= undoAndCreateRenameSupport(newName);
 			if (renameSupport != null)
 				renameSupport.openDialog(fEditor.getSite().getShell());
-		} catch (CoreException e) {
-			JavaPlugin.log(e);
-		} catch (BadLocationException e) {
+		} catch (CoreException | BadLocationException e) {
 			JavaPlugin.log(e);
 		}
 	}

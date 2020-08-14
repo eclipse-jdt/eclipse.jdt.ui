@@ -48,7 +48,7 @@ import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 public class NullAnnotationsQuickFixTest9 extends QuickFixTest {
 
 	@Rule
-    public ProjectTestSetup projectsetup = new Java9ProjectTestSetup();
+    public ProjectTestSetup projectSetup = new Java9ProjectTestSetup();
 
 	private IJavaProject fJProject1;
 

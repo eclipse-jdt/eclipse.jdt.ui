@@ -17,6 +17,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -26,8 +27,6 @@ import java.util.Map;
 
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -40,6 +39,7 @@ import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -55,7 +55,9 @@ import org.eclipse.jdt.core.manipulation.CleanUpOptionsCore;
 
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
+import org.eclipse.jdt.internal.corext.fix.FixMessages;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
@@ -64,15 +66,27 @@ import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
+import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
 import org.eclipse.jdt.internal.ui.fix.RedundantModifiersCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUp;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 
-@RunWith(JUnit4.class)
 public class CleanUpTest extends CleanUpTestCase {
 
 	@Rule
-	public ProjectTestSetup projectsetup = new ProjectTestSetup();
+	public ProjectTestSetup projectSetup = new ProjectTestSetup();
+
+	@Override
+	protected IJavaProject getProject() {
+		return projectSetup.getProject();
+	}
+
+	@Override
+	protected IClasspathEntry[] getDefaultClasspath() throws CoreException {
+		return projectSetup.getDefaultClasspath();
+	}
+
+	IJavaProject fJProject1= getProject();
 
 	private class NoChangeRedundantModifiersCleanUp extends RedundantModifiersCleanUp {
 		private NoChangeRedundantModifiersCleanUp(Map<String, String> options) {
@@ -1457,9 +1471,9 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 		parser.setResolveBindings(true);
-		parser.setProject(fJProject1);
+		parser.setProject(getProject());
 
-		Map<String, String> options= RefactoringASTParser.getCompilerOptions(fJProject1);
+		Map<String, String> options= RefactoringASTParser.getCompilerOptions(getProject());
 		options.putAll(cleanUp.getRequirements().getCompilerOptions());
 		parser.setCompilerOptions(options);
 
@@ -1472,7 +1486,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		}, null);
 
 		IProblem[] problems= roots[0].getProblems();
-		assertTrue(problems.length == 2);
+		assertEquals(2, problems.length);
 		for (IProblem problem : problems) {
 			ProblemLocation location= new ProblemLocation(problem);
 			assertTrue(cleanUp.canFix(cu1, location));
@@ -4205,7 +4219,7 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testSerialVersion01() throws Exception {
 
-		JavaProjectHelper.set14CompilerOptions(fJProject1);
+		JavaProjectHelper.set14CompilerOptions(getProject());
 
 		try {
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -4215,7 +4229,7 @@ public class CleanUpTest extends CleanUpTestCase {
 			buf.append("public class E1 implements Serializable {\n");
 			buf.append("}\n");
 			ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
-			fJProject1.getProject().build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
+			getProject().getProject().build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
 
 			enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
 			enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED);
@@ -4276,14 +4290,14 @@ public class CleanUpTest extends CleanUpTestCase {
 			String expected1= buf.toString();
 			assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu1}, new String[] {expected1});
 		} finally {
-			JavaProjectHelper.set15CompilerOptions(fJProject1);
+			JavaProjectHelper.set15CompilerOptions(getProject());
 		}
 	}
 
 	@Test
 	public void testSerialVersion03() throws Exception {
 
-		JavaProjectHelper.set14CompilerOptions(fJProject1);
+		JavaProjectHelper.set14CompilerOptions(getProject());
 
 		try {
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -4321,14 +4335,14 @@ public class CleanUpTest extends CleanUpTestCase {
 
 			assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu1, cu2}, new String[] {expected1, expected2});
 		} finally {
-			JavaProjectHelper.set15CompilerOptions(fJProject1);
+			JavaProjectHelper.set15CompilerOptions(getProject());
 		}
 	}
 
 	@Test
 	public void testSerialVersion04() throws Exception {
 
-		JavaProjectHelper.set14CompilerOptions(fJProject1);
+		JavaProjectHelper.set14CompilerOptions(getProject());
 
 		try {
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -4364,14 +4378,14 @@ public class CleanUpTest extends CleanUpTestCase {
 			String expected1= buf.toString();
 			assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu1}, new String[] {expected1});
 		} finally {
-			JavaProjectHelper.set15CompilerOptions(fJProject1);
+			JavaProjectHelper.set15CompilerOptions(getProject());
 		}
 	}
 
 	@Test
 	public void testSerialVersion05() throws Exception {
 
-		JavaProjectHelper.set14CompilerOptions(fJProject1);
+		JavaProjectHelper.set14CompilerOptions(getProject());
 
 		try {
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -4406,7 +4420,7 @@ public class CleanUpTest extends CleanUpTestCase {
 			String expected1= buf.toString();
 			assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu1}, new String[] {expected1});
 		} finally {
-			JavaProjectHelper.set15CompilerOptions(fJProject1);
+			JavaProjectHelper.set15CompilerOptions(getProject());
 		}
 	}
 
@@ -4591,7 +4605,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        boolean newBoolean2 = b1 | new SideEffect() instanceof SideEffect;\n" //
 				+ "    }\n" //
 				+ "}\n";
-
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] { MultiFixMessages.CodeStyleCleanUp_LazyLogical_description });
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
 	}
 
@@ -4664,6 +4678,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] { MultiFixMessages.PushDownNegationCleanup_description });
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
 	}
 
@@ -5418,7 +5433,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        }\n" //
 				+ "    }\n" //
 				+ "}\n";
-
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] { MultiFixMessages.MergeConditionalBlocksCleanup_description });
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
 	}
 
@@ -5609,6 +5624,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] { MultiFixMessages.UseDirectlyMapMethodCleanup_description });
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
 	}
 
@@ -5659,7 +5675,7 @@ public class CleanUpTest extends CleanUpTestCase {
 	@Test
 	public void testSerialVersionBug139381() throws Exception {
 
-		JavaProjectHelper.set14CompilerOptions(fJProject1);
+		JavaProjectHelper.set14CompilerOptions(getProject());
 
 		try {
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -7581,9 +7597,33 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "       return dateText1 + dateText2;\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public String usePatternForSplit(String speech1, String speech2) {\n" //
+				+ "    public String usePatternForSplit1(String speech1, String speech2) {\n" //
 				+ "       // Keep this comment\n" //
 				+ "       String line= \"\\\\r?\\\\n\";\n" //
+				+ "\n" //
+				+ "       // Keep this comment too\n" //
+				+ "       String[] phrases1= speech1.split(line);\n" //
+				+ "       // Keep this comment also\n" //
+				+ "       String[] phrases2= speech2.split(line, 123);\n" //
+				+ "\n" //
+				+ "       return Arrays.toString(phrases1) + Arrays.toString(phrases2);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String usePatternForSplit2(String speech1, String speech2) {\n" //
+				+ "       // Keep this comment\n" //
+				+ "       String line= \".\";\n" //
+				+ "\n" //
+				+ "       // Keep this comment too\n" //
+				+ "       String[] phrases1= speech1.split(line);\n" //
+				+ "       // Keep this comment also\n" //
+				+ "       String[] phrases2= speech2.split(line, 123);\n" //
+				+ "\n" //
+				+ "       return Arrays.toString(phrases1) + Arrays.toString(phrases2);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String usePatternForSplit3(String speech1, String speech2) {\n" //
+				+ "       // Keep this comment\n" //
+				+ "       String line= \"\\\\a\";\n" //
 				+ "\n" //
 				+ "       // Keep this comment too\n" //
 				+ "       String[] phrases1= speech1.split(line);\n" //
@@ -7656,9 +7696,33 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "       return dateText1 + dateText2;\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public String usePatternForSplit(String speech1, String speech2) {\n" //
+				+ "    public String usePatternForSplit1(String speech1, String speech2) {\n" //
 				+ "       // Keep this comment\n" //
 				+ "       Pattern line= Pattern.compile(\"\\\\r?\\\\n\");\n" //
+				+ "\n" //
+				+ "       // Keep this comment too\n" //
+				+ "       String[] phrases1= line.split(speech1);\n" //
+				+ "       // Keep this comment also\n" //
+				+ "       String[] phrases2= line.split(speech2, 123);\n" //
+				+ "\n" //
+				+ "       return Arrays.toString(phrases1) + Arrays.toString(phrases2);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String usePatternForSplit2(String speech1, String speech2) {\n" //
+				+ "       // Keep this comment\n" //
+				+ "       Pattern line= Pattern.compile(\".\");\n" //
+				+ "\n" //
+				+ "       // Keep this comment too\n" //
+				+ "       String[] phrases1= line.split(speech1);\n" //
+				+ "       // Keep this comment also\n" //
+				+ "       String[] phrases2= line.split(speech2, 123);\n" //
+				+ "\n" //
+				+ "       return Arrays.toString(phrases1) + Arrays.toString(phrases2);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String usePatternForSplit3(String speech1, String speech2) {\n" //
+				+ "       // Keep this comment\n" //
+				+ "       Pattern line= Pattern.compile(\"\\\\a\");\n" //
 				+ "\n" //
 				+ "       // Keep this comment too\n" //
 				+ "       String[] phrases1= line.split(speech1);\n" //
@@ -7741,6 +7805,20 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "       String dateText2= date2.replaceAll(\"0000-00-00\", dateValidation);\n" //
 				+ "\n" //
 				+ "       return dateText1 + dateText2;\n" //
+				+ "    }\n" //
+				+ "    public String doNotUsePatternOnSimpleSplit1(String speech1, String speech2) {\n" //
+				+ "       String line= \"a\";\n" //
+				+ "\n" //
+				+ "       String[] phrases1= speech1.split(line);\n" //
+				+ "       String[] phrases2= speech2.split(line, 1);\n" //
+				+ "       return phrases1[0] + phrases2[0];\n" //
+				+ "    }\n" //
+				+ "    public String doNotUsePatternOnSimpleSplit2(String speech1, String speech2) {\n" //
+				+ "       String line= \"\\\\;\";\n" //
+				+ "\n" //
+				+ "       String[] phrases1= speech1.split(line1);\n" //
+				+ "       String[] phrases2= speech2.split(line1, 1);\n" //
+				+ "       return phrases1[0] + phrases2[0];\n" //
 				+ "    }\n" //
 				+ "}\n";
 		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", sample, false, null);
@@ -7842,6 +7920,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("}\n");
 		String expected1= buf.toString();
 
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] { FixMessages.CodeStyleFix_removeThis_groupDescription });
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 
@@ -8162,6 +8241,9 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("}\n");
 		String expected1= buf.toString();
 
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] {
+				FixMessages.VariableDeclarationFix_changeModifierOfUnknownToFinal_description
+				});
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 
@@ -9489,7 +9571,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		RefactoringStatus status= assertRefactoringHasNoChange(new ICompilationUnit[] {cu1});
 		RefactoringStatusEntry[] entries= status.getEntries();
-		assertTrue(entries.length == 1);
+		assertEquals(1, entries.length);
 		String message= entries[0].getMessage();
 		assertTrue(message, entries[0].isInfo());
 		assertTrue(message, message.contains("ambiguous"));
@@ -9509,7 +9591,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		RefactoringStatus status= assertRefactoringHasNoChange(new ICompilationUnit[] {cu1});
 		RefactoringStatusEntry[] entries= status.getEntries();
-		assertTrue(entries.length == 1);
+		assertEquals(1, entries.length);
 		String message= entries[0].getMessage();
 		assertTrue(message, entries[0].isInfo());
 		assertTrue(message, message.contains("parse"));
@@ -9674,7 +9756,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 	@Test
 	public void testCorrectIndetationBug202145_2() throws Exception {
-		IJavaProject project= ProjectTestSetup.getProject();
+		IJavaProject project= getProject();
 		project.setOption(DefaultCodeFormatterConstants.FORMATTER_NEVER_INDENT_LINE_COMMENTS_ON_FIRST_COLUMN, DefaultCodeFormatterConstants.TRUE);
 		try {
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -10067,6 +10149,9 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		String expected1= buf.toString();
 
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] {
+				Messages.format(FixMessages.CodeStyleFix_QualifyWithThis_description, new Object[] {"field", "this"})
+		});
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 }

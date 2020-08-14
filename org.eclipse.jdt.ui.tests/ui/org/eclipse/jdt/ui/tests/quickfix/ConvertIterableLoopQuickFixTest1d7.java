@@ -48,7 +48,7 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionPropos
 public final class ConvertIterableLoopQuickFixTest1d7 extends QuickFixTest {
 
 	@Rule
-	public ProjectTestSetup projectsetup = new Java1d7ProjectTestSetup();
+	public ProjectTestSetup projectSetup = new Java1d7ProjectTestSetup();
 
 	private FixCorrectionProposal fConvertLoopProposal;
 
@@ -78,7 +78,7 @@ public final class ConvertIterableLoopQuickFixTest1d7 extends QuickFixTest {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setValue(PreferenceConstants.CODEGEN_ADD_COMMENTS, false);
 
-		fProject= Java1d7ProjectTestSetup.getProject();
+		fProject= projectSetup.getProject();
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fProject, "src");
 		fConvertLoopProposal= null;
@@ -86,7 +86,7 @@ public final class ConvertIterableLoopQuickFixTest1d7 extends QuickFixTest {
 
 	@After
 	public void tearDown() throws Exception {
-		JavaProjectHelper.clear(fProject, ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fProject, projectSetup.getDefaultClasspath());
 	}
 
 	@Test

@@ -215,9 +215,7 @@ public class ModuleCorrectionsSubProcessor {
 		SearchParticipant[] participants= new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() };
 		try {
 			new SearchEngine().search(searchPattern, participants, scope, requestor, null);
-		} catch (CoreException e) {
-			//do nothing
-		} catch (OperationCanceledException e) {
+		} catch (CoreException | OperationCanceledException e) {
 			//do nothing
 		}
 
@@ -386,9 +384,7 @@ public class ModuleCorrectionsSubProcessor {
 			if (projectModule == null) {
 				projectModule= JavaModelAccess.getAutomaticModuleDescription(element);
 			}
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
-		} catch (IllegalArgumentException e) {
+		} catch (JavaModelException | IllegalArgumentException e) {
 			JavaPlugin.log(e);
 		}
 		return projectModule;

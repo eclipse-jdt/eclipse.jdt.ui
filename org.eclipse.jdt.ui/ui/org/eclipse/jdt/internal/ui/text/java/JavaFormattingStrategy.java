@@ -80,9 +80,7 @@ public class JavaFormattingStrategy extends ContextBasedFormattingStrategy {
 					edit.apply(document);
 				}
 
-			} catch (MalformedTreeException exception) {
-				JavaPlugin.log(exception);
-			} catch (BadLocationException exception) {
+			} catch (MalformedTreeException | BadLocationException exception) {
 				// Can only happen on concurrent document modification - log and bail out
 				JavaPlugin.log(exception);
 			} finally {

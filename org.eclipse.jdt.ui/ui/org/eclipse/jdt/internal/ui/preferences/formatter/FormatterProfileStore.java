@@ -88,9 +88,7 @@ public class FormatterProfileStore extends ProfileStore {
 				file.delete(); // remove after successful write
 				return res;
 			}
-		} catch (CoreException e) {
-			JavaPlugin.log(e); // log but ignore
-		} catch (IOException e) {
+		} catch (CoreException | IOException e) {
 			JavaPlugin.log(e); // log but ignore
 		}
 		return null;
@@ -118,9 +116,7 @@ public class FormatterProfileStore extends ProfileStore {
 			}
 			uiPreferences.putInt(PREF_FORMATTER_PROFILES + VERSION_KEY_SUFFIX, profileVersioner.getCurrentVersion());
 			savePreferences(instanceScope);
-		} catch (CoreException e) {
-			JavaPlugin.log(e);
-		} catch (BackingStoreException e) {
+		} catch (CoreException | BackingStoreException e) {
 			JavaPlugin.log(e);
 		}
 	}

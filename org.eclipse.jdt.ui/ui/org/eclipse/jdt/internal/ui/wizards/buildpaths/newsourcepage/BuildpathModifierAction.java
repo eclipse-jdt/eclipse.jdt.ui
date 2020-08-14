@@ -188,12 +188,7 @@ public abstract class BuildpathModifierAction extends Action implements ISelecti
 			if (target != null) {
 				// select and reveal resource
 				final ISetSelectionTarget finalTarget= target;
-				page.getWorkbenchWindow().getShell().getDisplay().asyncExec(new Runnable() {
-					@Override
-					public void run() {
-						finalTarget.selectReveal(selection);
-					}
-				});
+				page.getWorkbenchWindow().getShell().getDisplay().asyncExec(() -> finalTarget.selectReveal(selection));
 			}
 		}
 	}

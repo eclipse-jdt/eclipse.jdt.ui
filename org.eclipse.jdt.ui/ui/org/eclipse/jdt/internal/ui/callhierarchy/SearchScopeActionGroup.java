@@ -182,7 +182,7 @@ class SearchScopeActionGroup extends ActionGroup {
 				IContextMenuConstants.GROUP_SEARCH);
 		javaSearchMM.setRemoveAllWhenShown(true);
 
-		javaSearchMM.addMenuListener(manager -> fillSearchActions(manager));
+		javaSearchMM.addMenuListener(this::fillSearchActions);
 
 		fillSearchActions(javaSearchMM);
 		menu.appendToGroup(IContextMenuConstants.GROUP_SEARCH, javaSearchMM);

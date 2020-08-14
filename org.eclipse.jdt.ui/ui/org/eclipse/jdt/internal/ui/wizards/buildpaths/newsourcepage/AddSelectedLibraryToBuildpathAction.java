@@ -103,16 +103,13 @@ public class AddSelectedLibraryToBuildpathAction extends BuildpathModifierAction
 		try {
 			final IFile[] files= getSelectedElements().toArray(new IFile[getSelectedElements().size()]);
 
-			final IRunnableWithProgress runnable= new IRunnableWithProgress() {
-				@Override
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					try {
-				        IJavaProject project= JavaCore.create(files[0].getProject());
-				        List<IJavaElement> result= addLibraryEntries(files, project, monitor);
-						selectAndReveal(new StructuredSelection(result));
-					} catch (CoreException e) {
-						throw new InvocationTargetException(e);
-					}
+			final IRunnableWithProgress runnable= monitor -> {
+				try {
+			        IJavaProject project= JavaCore.create(files[0].getProject());
+			        List<IJavaElement> result= addLibraryEntries(files, project, monitor);
+					selectAndReveal(new StructuredSelection(result));
+				} catch (CoreException e) {
+					throw new InvocationTargetException(e);
 				}
 			};
 			fContext.run(false, false, runnable);

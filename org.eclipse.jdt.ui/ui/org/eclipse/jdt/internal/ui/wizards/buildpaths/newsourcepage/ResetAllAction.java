@@ -18,7 +18,6 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.resources.IResource;
 
@@ -109,40 +108,37 @@ public class ResetAllAction extends BuildpathModifierAction {
 	public void run() {
 
 		try {
-	        final IRunnableWithProgress runnable= new IRunnableWithProgress() {
-	        	@Override
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+	        final IRunnableWithProgress runnable= monitor -> {
 
-        			monitor.beginTask("", 3); //$NON-NLS-1$
-	        		try {
-	        			if (!hasChange(fJavaProject))
-	        				return;
+				monitor.beginTask("", 3); //$NON-NLS-1$
+				try {
+					if (!hasChange(fJavaProject))
+						return;
 
-	        			BuildpathDelta delta= new BuildpathDelta(getToolTipText());
+					BuildpathDelta delta= new BuildpathDelta(getToolTipText());
 
-	        			ClasspathModifier.commitClassPath(fEntries, fJavaProject, monitor);
-        				delta.setNewEntries(fEntries.toArray(new CPListElement[fEntries.size()]));
+					ClasspathModifier.commitClassPath(fEntries, fJavaProject, monitor);
+					delta.setNewEntries(fEntries.toArray(new CPListElement[fEntries.size()]));
 
-	        			fJavaProject.setOutputLocation(fOutputLocation, monitor);
-	        			delta.setDefaultOutputLocation(fOutputLocation);
+					fJavaProject.setOutputLocation(fOutputLocation, monitor);
+					delta.setDefaultOutputLocation(fOutputLocation);
 
-						for (IResource resource : fProvider.getCreatedResources()) {
-							resource.delete(false, null);
-							delta.addDeletedResource(resource);
-						}
+					for (IResource resource : fProvider.getCreatedResources()) {
+						resource.delete(false, null);
+						delta.addDeletedResource(resource);
+					}
 
-	        			fProvider.resetCreatedResources();
+					fProvider.resetCreatedResources();
 
-	                    informListeners(delta);
+			        informListeners(delta);
 
-	            		selectAndReveal(new StructuredSelection(fJavaProject));
-	                } catch (CoreException e) {
-	                    showExceptionDialog(e, NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_ClearAll_tooltip);
-                    } finally {
-	                	monitor.done();
-	                }
-	        	}
-	        };
+					selectAndReveal(new StructuredSelection(fJavaProject));
+			    } catch (CoreException e) {
+			        showExceptionDialog(e, NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_ClearAll_tooltip);
+			    } finally {
+			    	monitor.done();
+			    }
+			};
 	        fContext.run(false, false, runnable);
         } catch (InvocationTargetException e) {
 			if (e.getCause() instanceof CoreException) {

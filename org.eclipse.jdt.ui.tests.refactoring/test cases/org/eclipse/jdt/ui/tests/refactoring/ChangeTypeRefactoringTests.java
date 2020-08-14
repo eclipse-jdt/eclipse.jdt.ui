@@ -266,6 +266,16 @@ public class ChangeTypeRefactoringTests extends GenericRefactoringTest {
 		Assert.assertTrue(types.contains("java.util.List"));
 		Assert.assertTrue(types.contains("java.util.Collection"));
 	}
+
+	@Test
+	public void testParameterTypeWithOverrideMethod() throws Exception {
+		Collection<String> types= helper1(3, 36, 3, 41, "java.lang.Number").getValidTypeNames();
+		Assert.assertEquals(3, types.size());
+		Assert.assertTrue(types.contains("java.io.Serializable"));
+		Assert.assertTrue(types.contains("java.lang.Comparable<java.lang.Float>"));
+		Assert.assertTrue(types.contains("java.lang.Number"));
+		Assert.assertFalse(types.contains("java.lang.Object"));
+	}
 	@Test
 	public void testParameterDeclWithOverride() throws Exception {
 		Collection<String> types= helper1(10, 25, 10, 39, "java.util.AbstractCollection").getValidTypeNames();

@@ -53,11 +53,6 @@ public class JUnitProgressBar extends Canvas {
 			}
 		});
 		addPaintListener(this::paint);
-		addDisposeListener(event -> {
-			fFailureColor.dispose();
-			fOKColor.dispose();
-			fStoppedColor.dispose();
-		});
 		Display display= parent.getDisplay();
 		fFailureColor= new Color(display, 159, 63, 63);
 		fOKColor= new Color(display, 95, 191, 95);

@@ -240,8 +240,6 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 	@Override
 	public void dispose() {
 		super.dispose();
-		fSelectedElemBGColor.dispose();
-		fLightRed.dispose();
 		fAllocatedBoldItalic.dispose();
 	}
 

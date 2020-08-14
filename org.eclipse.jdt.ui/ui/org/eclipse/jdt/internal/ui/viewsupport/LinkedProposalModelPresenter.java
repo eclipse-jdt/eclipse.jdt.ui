@@ -150,9 +150,7 @@ public class LinkedProposalModelPresenter {
 						if (edit != null) {
 							edit.apply(position.getDocument(), 0);
 						}
-					} catch (MalformedTreeException e) {
-						throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, "Unexpected exception applying edit", e)); //$NON-NLS-1$
-					} catch (BadLocationException e) {
+					} catch (MalformedTreeException | BadLocationException e) {
 						throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, "Unexpected exception applying edit", e)); //$NON-NLS-1$
 					}
 				} catch (CoreException e) {

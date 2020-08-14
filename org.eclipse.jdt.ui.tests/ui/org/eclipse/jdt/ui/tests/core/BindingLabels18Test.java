@@ -57,18 +57,16 @@ public class BindingLabels18Test extends AbstractBindingLabelsTest {
 	@Rule
 	public Java1d8ProjectTestSetup j18p= new Java1d8ProjectTestSetup();
 
-	@Override
 	@Before
 	public void setUp() throws Exception {
-		fJProject1= Java1d8ProjectTestSetup.getProject();
+		fJProject1= j18p.getProject();
 		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
 		store.setValue(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES, false);
 	}
 
-	@Override
 	@After
 	public void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJProject1, Java1d8ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject1, j18p.getDefaultClasspath());
 	}
 
 	@Test

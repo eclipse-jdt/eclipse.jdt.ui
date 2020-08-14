@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2012 IBM Corporation and others.
+ * Copyright (c) 2005, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,9 +13,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.performance.views;
 
-import junit.framework.Test;
+import org.junit.Test;
 
-import org.eclipse.test.OrderedTestSuite;
 import org.eclipse.test.performance.Dimension;
 import org.eclipse.test.performance.Performance;
 
@@ -26,20 +25,11 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.tests.performance.JdtPerformanceTestCase;
+import org.eclipse.jdt.ui.tests.performance.JdtPerformanceTestCaseCommon;
 
-public class PackageExplorerWarmPerfTest extends JdtPerformanceTestCase {
+public class PackageExplorerWarmPerfTest extends JdtPerformanceTestCaseCommon {
 
-	public static Test suite() {
-		return new OrderedTestSuite(PackageExplorerWarmPerfTest.class, new String[] {
-			"testOpen"
-		});
-	}
-
-	public PackageExplorerWarmPerfTest(String name) {
-		super(name);
-	}
-
+	@Test
 	public void testOpen() throws Exception {
 		IWorkbenchWindow activeWorkbenchWindow= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 		IWorkbenchPage page= activeWorkbenchWindow.getActivePage();

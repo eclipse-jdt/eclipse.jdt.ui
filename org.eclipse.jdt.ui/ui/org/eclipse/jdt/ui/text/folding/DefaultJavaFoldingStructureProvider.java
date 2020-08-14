@@ -1154,8 +1154,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 				IRegion[] result= new IRegion[regions.size()];
 				regions.toArray(result);
 				return result;
-		} catch (JavaModelException e) {
-		} catch (InvalidInputException e) {
+		} catch (JavaModelException | InvalidInputException e) {
 		}
 
 		return new IRegion[0];

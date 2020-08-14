@@ -485,9 +485,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 
 				try {
 					edit.apply(document, TextEdit.UPDATE_REGIONS);
-				} catch (MalformedTreeException e) {
-					JavaPlugin.log(e);
-				} catch (BadLocationException e) {
+				} catch (MalformedTreeException | BadLocationException e) {
 					JavaPlugin.log(e);
 				}
 			}

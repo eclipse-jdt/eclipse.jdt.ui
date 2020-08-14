@@ -42,6 +42,7 @@ import org.eclipse.jdt.ui.tests.core.rules.Java1d8ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.search.ExceptionOccurrencesFinder;
+import org.eclipse.jdt.internal.ui.search.MethodExitsFinder;
 
 /**
  * Those tests are made to run on Java Spider 1.8 .
@@ -65,32 +66,32 @@ public class MarkOccurrenceTest1d8 {
 	public void setUp() throws Exception {
 		fParser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 
-		fJProject1= Java1d8ProjectTestSetup.getProject();
+		fJProject1= f18p.getProject();
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.EDITOR_MARK_OCCURRENCES, true);
 	}
 
 	@After
 	public void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJProject1, Java1d8ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject1, f18p.getDefaultClasspath());
 	}
 
-	private OccurrenceLocation[] getHighlights(StringBuffer source, int offset, int length) throws Exception {
+	private OccurrenceLocation[] getHighlights(String source, int offset, int length) throws Exception {
 		CompilationUnit root= createCompilationUnit(source);
 		String errorString= fFinder.initialize(root, offset, length);
 		assertNull(errorString, errorString);
 		return fFinder.getOccurrences();
 	}
 
-	private CompilationUnit createCompilationUnit(StringBuffer source) throws JavaModelException {
+	private CompilationUnit createCompilationUnit(String source) throws JavaModelException {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", source.toString(), true, null);
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", source, true, null);
 		fParser.setSource(cu);
 		fParser.setResolveBindings(true);
 		return (CompilationUnit)fParser.createAST(null);
 	}
 
-	private void checkSelection(StringBuffer s, int offset, int length, OccurrenceLocation[] expected) throws Exception {
+	private void checkSelection(String s, int offset, int length, OccurrenceLocation[] expected) throws Exception {
 		OccurrenceLocation[] selectedNodes= getHighlights(s, offset, length);
 		assertEquals("number of selections", expected.length, selectedNodes.length);
 		sortByStartIndex(selectedNodes);
@@ -106,13 +107,13 @@ public class MarkOccurrenceTest1d8 {
 	}
 
 	//pattern must be found - otherwise it's assumed to be an error
-	private OccurrenceLocation find(StringBuffer s, String pattern, int ithOccurrence) {
+	private OccurrenceLocation find(String s, String pattern, int ithOccurrence) {
 		if (ithOccurrence < 1)
 			throw new IllegalStateException("ithOccurrence = " + ithOccurrence);
 		return find(s, pattern, ithOccurrence, 0);
 	}
 
-	private OccurrenceLocation find(StringBuffer s, String pattern, int ithOccurrence, int startIdx) {
+	private OccurrenceLocation find(String s, String pattern, int ithOccurrence, int startIdx) {
 		if (startIdx < 0 || startIdx > s.length())
 			throw new IllegalStateException("startIdx = " + startIdx);
 		int idx= s.indexOf(pattern, startIdx);
@@ -125,48 +126,48 @@ public class MarkOccurrenceTest1d8 {
 
 	@Test
 	public void testThrowingAnnotatedException1() throws Exception {
-		StringBuffer s= new StringBuffer();
-		s.append("package test1;\n");
-		s.append("import java.lang.annotation.Documented;\n");
-		s.append("import java.lang.annotation.ElementType;\n");
-		s.append("import java.lang.annotation.Retention;\n");
-		s.append("import java.lang.annotation.RetentionPolicy;\n");
-		s.append("import java.lang.annotation.Target;\n");
-		s.append("\n");
-		s.append("public class E {\n");
-		s.append("    @Target(ElementType.TYPE_USE)\n");
-		s.append("    @Retention(RetentionPolicy.RUNTIME)\n");
-		s.append("    @Documented\n");
-		s.append("    static @interface Critical {\n");
-		s.append("        String msg() default \"We're all going to die!\";\n");
-		s.append("    }\n");
-		s.append("\n");
-		s.append("    class InnerException extends Exception {\n");
-		s.append("        private static final long serialVersionUID = 1L;\n");
-		s.append("    }\n");
-		s.append("\n");
-		s.append("    /**\n");
-		s.append("     * @throws E.InnerException\n");
-		s.append("     */\n");
-		s.append("    void foo() throws @Critical() E.@Critical() InnerException, IllegalArgumentException {\n");
-		s.append("        if (Boolean.TRUE)\n");
-		s.append("            throw new @Critical() InnerException();\n");
-		s.append("        else\n");
-		s.append("            throw new @Critical() E.@Critical() InnerException();\n");
-		s.append("    }\n");
-		s.append("\n");
-		s.append("    void tryCatch() {\n");
-		s.append("        try {\n");
-		s.append("            foo();\n");
-		s.append("        } catch (@Critical() E.@Critical() InnerException e) {\n");
-		s.append("        } catch (RuntimeException e) {\n");
-		s.append("        }\n");
-		s.append("        try {\n");
-		s.append("            foo();\n");
-		s.append("        } catch (RuntimeException | @Critical(msg=\"He\"+\"llo\") E.@Critical() InnerException e) {\n");
-		s.append("        }\n");
-		s.append("    }\n");
-		s.append("}\n");
+		String s= "" +
+				"package test1;\n" +
+				"import java.lang.annotation.Documented;\n" +
+				"import java.lang.annotation.ElementType;\n" +
+				"import java.lang.annotation.Retention;\n" +
+				"import java.lang.annotation.RetentionPolicy;\n" +
+				"import java.lang.annotation.Target;\n" +
+				"\n" +
+				"public class E {\n" +
+				"    @Target(ElementType.TYPE_USE)\n" +
+				"    @Retention(RetentionPolicy.RUNTIME)\n" +
+				"    @Documented\n" +
+				"    static @interface Critical {\n" +
+				"        String msg() default \"We're all going to die!\";\n" +
+				"    }\n" +
+				"\n" +
+				"    class InnerException extends Exception {\n" +
+				"        private static final long serialVersionUID = 1L;\n" +
+				"    }\n" +
+				"\n" +
+				"    /**\n" +
+				"     * @throws E.InnerException\n" +
+				"     */\n" +
+				"    void foo() throws @Critical() E.@Critical() InnerException, IllegalArgumentException {\n" +
+				"        if (Boolean.TRUE)\n" +
+				"            throw new @Critical() InnerException();\n" +
+				"        else\n" +
+				"            throw new @Critical() E.@Critical() InnerException();\n" +
+				"    }\n" +
+				"\n" +
+				"    void tryCatch() {\n" +
+				"        try {\n" +
+				"            foo();\n" +
+				"        } catch (@Critical() E.@Critical() InnerException e) {\n" +
+				"        } catch (RuntimeException e) {\n" +
+				"        }\n" +
+				"        try {\n" +
+				"            foo();\n" +
+				"        } catch (RuntimeException | @Critical(msg=\"He\"+\"llo\") E.@Critical() InnerException e) {\n" +
+				"        }\n" +
+				"    }\n" +
+				"}\n";
 
 		fFinder= new ExceptionOccurrencesFinder();
 		int offset= 8 + s.indexOf("@throws E.InnerException"); // in Javadoc
@@ -206,54 +207,74 @@ public class MarkOccurrenceTest1d8 {
 
 	@Test
 	public void testThrownExceptionInLambda() throws Exception {
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("\n");
-		buf.append("public class E {\n");
-		buf.append("    void test(int i) throws IOException {\n");
-		buf.append("        if (i == 0) {\n");
-		buf.append("            throw new IOException();\n");
-		buf.append("        } else {\n");
-		buf.append("            FI fi = () -> { throw new IOException(); };\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("@FunctionalInterface\n");
-		buf.append("interface FI {\n");
-		buf.append("    void foo() throws IOException;\n");
-		buf.append("}\n");
+		String s= "" +
+				"package test1;\n" +
+				"\n" +
+				"import java.io.IOException;\n" +
+				"\n" +
+				"public class E {\n" +
+				"    void test(int i) throws IOException {\n" +
+				"        if (i == 0) {\n" +
+				"            throw new IOException();\n" +
+				"        } else {\n" +
+				"            FI fi = () -> { throw new IOException(); };\n" +
+				"        }\n" +
+				"    }\n" +
+				"}\n" +
+				"\n" +
+				"@FunctionalInterface\n" +
+				"interface FI {\n" +
+				"    void foo() throws IOException;\n" +
+				"}\n";
 
 		fFinder= new ExceptionOccurrencesFinder();
-		int offset= buf.indexOf("IOException {");
+		int offset= s.indexOf("IOException {");
 		int length= 0;
-		OccurrenceLocation[] ranges= { find(buf, "IOException", 2), find(buf, "throw", 2) };
-		checkSelection(buf, offset, length, ranges);
+		OccurrenceLocation[] ranges= { find(s, "IOException", 2), find(s, "throw", 2) };
+		checkSelection(s, offset, length, ranges);
 	}
 
 	@Test
 	public void testTryCatchInLambda() throws Exception {
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("import java.io.FileInputStream;\n");
-		buf.append("import java.io.FileNotFoundException;\n");
-		buf.append("\n");
-		buf.append("public class E {\n");
-		buf.append("    Runnable lambda = () -> {\n");
-		buf.append("        try {\n");
-		buf.append("            new FileInputStream(\"dummy\");\n");
-		buf.append("        } catch (FileNotFoundException e) {\n");
-		buf.append("        }\n");
-		buf.append("    };\n");
-		buf.append("}\n");
+		String s= "" +
+				"package test1;\n" +
+				"\n" +
+				"import java.io.FileInputStream;\n" +
+				"import java.io.FileNotFoundException;\n" +
+				"\n" +
+				"public class E {\n" +
+				"    Runnable lambda = () -> {\n" +
+				"        try {\n" +
+				"            new FileInputStream(\"dummy\");\n" +
+				"        } catch (FileNotFoundException e) {\n" +
+				"        }\n" +
+				"    };\n" +
+				"}\n";
 
 		fFinder= new ExceptionOccurrencesFinder();
-		int offset= buf.indexOf("FileNotFoundException e");
+		int offset= s.indexOf("FileNotFoundException e");
 		int length= 0;
-		OccurrenceLocation[] ranges= { find(buf, "FileInputStream", 2), find(buf, "FileNotFoundException", 2) };
-		checkSelection(buf, offset, length, ranges);
+		OccurrenceLocation[] ranges= { find(s, "FileInputStream", 2), find(s, "FileNotFoundException", 2) };
+		checkSelection(s, offset, length, ranges);
+	}
+
+	@Test
+	public void testMarkMethodExitsBug565387() throws Exception {
+		fFinder= new MethodExitsFinder();
+		String s= "" +
+				"import java.util.function.Function;\n\n" +
+				"public class TestClass {\n" +
+				"	String foo() {\n" +
+				"		Function<Object,Object> f = o -> {\n" +
+				"			return o;\n" +
+			    "		};\n" +
+				"		return null;\n" +
+			    "	}\n" +
+				"}\n";
+
+		int offset= 1 + s.indexOf("String");//middle of word
+		int length= 0;
+		OccurrenceLocation[] ranges= { find(s, "String", 1), find(s, "return null;", 1) };
+		checkSelection(s, offset, length, ranges);
 	}
 }

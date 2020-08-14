@@ -298,9 +298,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 			final TextEdit edit= targetRewrite.rewriteAST(document, subType.getJavaProject().getOptions(true));
 			try {
 				edit.apply(document, TextEdit.UPDATE_REGIONS);
-			} catch (MalformedTreeException exception) {
-				JavaPlugin.log(exception);
-			} catch (BadLocationException exception) {
+			} catch (MalformedTreeException | BadLocationException exception) {
 				JavaPlugin.log(exception);
 			}
 			buffer.setLength(0);
@@ -342,11 +340,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 			final IDocument document= new Document();
 			try {
 				rewrite.rewriteImports(new SubProgressMonitor(monitor, 100)).apply(document);
-			} catch (MalformedTreeException exception) {
-				JavaPlugin.log(exception);
-			} catch (BadLocationException exception) {
-				JavaPlugin.log(exception);
-			} catch (CoreException exception) {
+			} catch (MalformedTreeException | BadLocationException | CoreException exception) {
 				JavaPlugin.log(exception);
 			}
 			fTypeBindings.clear();
@@ -443,10 +437,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 			if (edit != null) {
 				try {
 					edit.apply(document, TextEdit.UPDATE_REGIONS);
-				} catch (MalformedTreeException exception) {
-					JavaPlugin.log(exception);
-					status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractInterfaceProcessor_internal_error));
-				} catch (BadLocationException exception) {
+				} catch (MalformedTreeException | BadLocationException exception) {
 					JavaPlugin.log(exception);
 					status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractInterfaceProcessor_internal_error));
 				}

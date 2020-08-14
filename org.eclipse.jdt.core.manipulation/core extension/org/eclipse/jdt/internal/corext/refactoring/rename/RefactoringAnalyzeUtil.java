@@ -110,8 +110,7 @@ public class RefactoringAnalyzeUtil {
 		IProblem[] newProblems= getIntroducedCompileProblems(newCuNode, oldCuNode);
 		for (IProblem problem : newProblems) {
 			if (problem.isError())
-				result.addEntry(new RefactoringStatusEntry((problem.isError() ? RefactoringStatus.ERROR : RefactoringStatus.WARNING), problem.getMessage(),
-						new JavaStringStatusContext(newCuSource, SourceRangeFactory.create(problem))));
+				result.addEntry(new RefactoringStatusEntry(RefactoringStatus.ERROR, problem.getMessage(), new JavaStringStatusContext(newCuSource, SourceRangeFactory.create(problem))));
 		}
 		return result;
 	}

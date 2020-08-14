@@ -125,10 +125,7 @@ public class SmartBackspaceManager {
 						fViewer.setSelectedRange(spec.selection.getOffset(), spec.selection.getLength());
 						if (spec.child != null)
 							register(spec.child);
-					} catch (MalformedTreeException e) {
-						// fall back to standard bs
-						return;
-					} catch (BadLocationException e) {
+					} catch (MalformedTreeException | BadLocationException e) {
 						// fall back to standard bs
 						return;
 					} finally {

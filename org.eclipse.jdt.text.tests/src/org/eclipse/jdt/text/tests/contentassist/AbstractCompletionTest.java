@@ -79,7 +79,11 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.java.ContentAssistProcessor;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProcessor;
 
-public class AbstractCompletionTest {
+public abstract class AbstractCompletionTest {
+
+	@Rule
+	public CompletionTestSetup cts= new CompletionTestSetup();
+
 	protected static String suiteName(Class<?> fqn) {
 		String name= fqn.toString();
 		name= name.substring(name.lastIndexOf('.') + 1);
@@ -126,7 +130,7 @@ public class AbstractCompletionTest {
 	}
 
 	protected IPackageFragment getAnonymousTestPackage() throws CoreException {
-		return CompletionTestSetup.getAnonymousTestPackage();
+		return cts.getAnonymousTestPackage();
 	}
 
 	protected void configureCoreOptions(Hashtable<String, String> options) {

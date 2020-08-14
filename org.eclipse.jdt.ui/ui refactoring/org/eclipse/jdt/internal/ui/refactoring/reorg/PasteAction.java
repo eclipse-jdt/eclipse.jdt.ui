@@ -950,9 +950,7 @@ public class PasteAction extends SelectionDispatchAction{
 					try {
 						edit.apply(document, TextEdit.UPDATE_REGIONS);
 						return textPosition;
-					} catch (MalformedTreeException e) {
-						JavaPlugin.log(e);
-					} catch (BadLocationException e) {
+					} catch (MalformedTreeException | BadLocationException e) {
 						JavaPlugin.log(e);
 					} finally {
 						if (rewriteSession != null)
@@ -1034,10 +1032,7 @@ public class PasteAction extends SelectionDispatchAction{
 		private IEditorPart openCu(ICompilationUnit cu) {
 			try {
 				return JavaUI.openInEditor(cu, true, true);
-			} catch (PartInitException e) {
-				JavaPlugin.log(e);
-				return null;
-			} catch (JavaModelException e) {
+			} catch (PartInitException | JavaModelException e) {
 				JavaPlugin.log(e);
 				return null;
 			}

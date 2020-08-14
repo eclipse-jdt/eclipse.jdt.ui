@@ -90,9 +90,7 @@ public class DefaultModulepathFixProcessor extends DefaultClasspathFixProcessor 
 		SearchParticipant[] participants= new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() };
 		try {
 			new SearchEngine().search(searchPattern, participants, scope, requestor, null);
-		} catch (CoreException e) {
-			//do nothing
-		} catch (OperationCanceledException e) {
+		} catch (CoreException | OperationCanceledException e) {
 			//do nothing
 		}
 

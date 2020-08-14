@@ -325,8 +325,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 						TypeParameterResolver util= new TypeParameterResolver(this);
 						String[] result= util.computeBinding(supertype.getFullyQualifiedName(), index);
 						all.addAll(Arrays.asList(result));
-					} catch (JavaModelException e) {
-					} catch (IndexOutOfBoundsException e) {
+					} catch (JavaModelException | IndexOutOfBoundsException e) {
 					}
 				}
 			}

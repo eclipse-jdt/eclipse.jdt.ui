@@ -15,7 +15,6 @@ package org.eclipse.jdt.text.tests.contentassist;
 
 import java.util.Hashtable;
 
-import org.junit.Rule;
 import org.junit.Test;
 
 /**
@@ -23,8 +22,6 @@ import org.junit.Test;
  * @since 3.2
  */
 public class SpecialMethodsCompletionTest extends AbstractCompletionTest {
-	@Rule
-	public CompletionTestSetup cts= new CompletionTestSetup();
 
 	/*
 	 * @see org.eclipse.jdt.text.tests.contentassist.AbstractCompletionTest#setUp()

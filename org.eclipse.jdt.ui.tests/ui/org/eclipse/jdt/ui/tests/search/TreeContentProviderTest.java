@@ -54,7 +54,7 @@ import org.eclipse.jdt.internal.ui.search.LevelTreeContentProvider;
 public class TreeContentProviderTest {
 
 	@Rule
-	public JUnitSourceSetup projectsetup = new JUnitSourceSetup();
+	public JUnitSourceSetup projectSetup = new JUnitSourceSetup();
 
 	private LevelTreeContentProvider fProvider;
 	private JavaSearchResult fResult;

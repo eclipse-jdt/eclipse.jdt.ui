@@ -166,9 +166,7 @@ public class CompilationUnitChangeNode extends TextEditChangeNode {
 					break;
 				result= result.getParent();
 			}
-		} catch(JavaModelException e) {
-			// Do nothing, use old value.
-		} catch(ClassCastException e) {
+		} catch(JavaModelException | ClassCastException e) {
 			// Do nothing, use old value.
 		}
 		return result;

@@ -68,6 +68,7 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -75,6 +76,7 @@ import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NullLiteral;
@@ -92,6 +94,8 @@ import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
@@ -208,7 +212,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		if (isUsedInForInitializerOrUpdater((Expression) node))
 			return false;
 		if (parent instanceof SwitchCase)
-			return false;
+			return true;
 		if (node instanceof SimpleName && node.getLocationInParent() != null) {
 			return !node.getLocationInParent().getId().equals("name"); //$NON-NLS-1$
 		}
@@ -427,11 +431,14 @@ public class ExtractTempRefactoring extends Refactoring {
 
 	private void addReplaceExpressionWithTemp() throws JavaModelException {
 		IASTFragment[] fragmentsToReplace= retainOnlyReplacableMatches(getMatchingFragments());
+		if (fragmentsToReplace.length == 0) {
+			return;
+		}
 		//TODO: should not have to prune duplicates here...
 		ASTRewrite rewrite= fCURewrite.getASTRewrite();
 		HashSet<IASTFragment> seen= new HashSet<>();
 		for (IASTFragment fragment : fragmentsToReplace) {
-			if (! seen.add(fragment))
+			if (!seen.add(fragment))
 				continue;
 			SimpleName tempName= fCURewrite.getAST().newSimpleName(fTempName);
 			TextEditGroup description= fCURewrite.createGroupDescription(RefactoringCoreMessages.ExtractTempRefactoring_replace);
@@ -664,6 +671,15 @@ public class ExtractTempRefactoring extends Refactoring {
 		return status;
 	}
 
+	private boolean hasFinalModifer(List<IExtendedModifier> modifiers) {
+		for (IExtendedModifier modifier : modifiers) {
+			if (modifier.isModifier() && Modifier.isFinal(((Modifier) modifier).getKeyword().toFlagValue())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	private void createAndInsertTempDeclaration() throws CoreException {
 		Expression initializer= getSelectedExpression().createCopyTarget(fCURewrite.getASTRewrite(), true);
 		VariableDeclarationStatement vds= createTempDeclaration(initializer);
@@ -676,9 +692,24 @@ public class ExtractTempRefactoring extends Refactoring {
 			insertAtSelection= replacableMatches.length == 0
 					|| replacableMatches.length == 1 && replacableMatches[0].getAssociatedNode().equals(getSelectedExpression().getAssociatedExpression());
 		}
-		if (insertAtSelection) {
-			insertAt(getSelectedExpression().getAssociatedNode(), vds);
+		ASTNode node= ASTResolving.findParentStatement(getSelectedExpression().getAssociatedNode());
+		if (node instanceof SwitchCase) {
+			/* VariableDeclarationStatement must be final for switch/case */
+			if (!hasFinalModifer(vds.modifiers())) {
+				vds.modifiers().add(vds.getAST().newModifier(ModifierKeyword.FINAL_KEYWORD));
+			}
+			node= ASTNodes.getParent(node, SwitchStatement.class);
+			fDeclareFinal= true;
+		}
+		if (node instanceof SwitchStatement) {
+			/* must insert above switch statement */
+			insertAt(node, vds);
 			return;
+		} else {
+			if (insertAtSelection) {
+				insertAt(getSelectedExpression().getAssociatedNode(), vds);
+				return;
+			}
 		}
 
 		ASTNode[] firstReplaceNodeParents= getParents(getFirstReplacedExpression().getAssociatedNode());
@@ -701,7 +732,9 @@ public class ExtractTempRefactoring extends Refactoring {
 
 		VariableDeclarationStatement vds= ast.newVariableDeclarationStatement(vdf);
 		if (fDeclareFinal) {
-			vds.modifiers().add(ast.newModifier(ModifierKeyword.FINAL_KEYWORD));
+			if (!hasFinalModifer(vds.modifiers())) {
+				vds.modifiers().add(ast.newModifier(ModifierKeyword.FINAL_KEYWORD));
+			}
 		}
 		vds.setType(createTempType());
 
@@ -826,15 +859,38 @@ public class ExtractTempRefactoring extends Refactoring {
 		return null;
 	}
 
+	private static boolean excludeVariableName(ASTNode enclosingNode, int modifiers, IBinding binding) {
+		if (Modifier.isStatic(modifiers) && !Modifier.isStatic(binding.getModifiers())) {
+			VariableDeclaration bindingDeclaration= ASTNodes.findVariableDeclaration((IVariableBinding) binding, enclosingNode.getRoot());
+			if (bindingDeclaration != null) {
+				ASTNode bindingMethodDeclarationparent= ASTNodes.getParent(bindingDeclaration, ASTNode.METHOD_DECLARATION);
+				if (enclosingNode == bindingMethodDeclarationparent) {
+					// if variables live in same methods then we exclude the name
+					return true;
+				}
+			}
+			return false;
+		}
+		return true;
+	}
+
 	private String[] getExcludedVariableNames() {
 		if (fExcludedVariableNames == null) {
 			try {
-				IBinding[] bindings= new ScopeAnalyzer(fCompilationUnitNode).getDeclarationsInScope(getSelectedExpression().getStartPosition(), ScopeAnalyzer.VARIABLES
-						| ScopeAnalyzer.CHECK_VISIBILITY);
-				fExcludedVariableNames= new String[bindings.length];
-				for (int i= 0; i < bindings.length; i++) {
-					fExcludedVariableNames[i]= bindings[i].getName();
+				IBinding[] bindings= new ScopeAnalyzer(fCompilationUnitNode)
+						.getDeclarationsInScope(getSelectedExpression().getStartPosition(), ScopeAnalyzer.VARIABLES | ScopeAnalyzer.CHECK_VISIBILITY);
+				ASTNode enclosingNode= getEnclosingBodyNode().getParent();
+				List<String> excludedVariableNames= new ArrayList<>();
+				for (IBinding binding : bindings) {
+					BodyDeclaration bodyDeclaration= ASTNodes.getParent(getEnclosingBodyNode(), BodyDeclaration.class);
+					int modifiers= bodyDeclaration.getModifiers();
+					modifiers= bodyDeclaration instanceof TypeDeclaration ? modifiers&= ~Modifier.STATIC : modifiers;
+					// Bug 100430 - Work around ScopeAnalyzer#getDeclarationsInScope(..) returning out-of-scope elements
+					if (excludeVariableName(enclosingNode, modifiers, binding)) {
+						excludedVariableNames.add(binding.getName());
+					}
 				}
+				fExcludedVariableNames= excludedVariableNames.toArray(new String[0]);
 			} catch (JavaModelException e) {
 				fExcludedVariableNames= new String[0];
 			}

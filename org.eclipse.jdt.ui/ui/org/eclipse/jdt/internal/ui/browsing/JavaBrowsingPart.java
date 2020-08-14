@@ -574,7 +574,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, IView
 		if (fHasWorkingSetFilter) {
 			String viewId= getConfigurationElement().getAttribute("id"); //$NON-NLS-1$
 			Assert.isNotNull(viewId);
-			IPropertyChangeListener workingSetListener= event -> doWorkingSetChanged(event);
+			IPropertyChangeListener workingSetListener= this::doWorkingSetChanged;
 			fWorkingSetFilterActionGroup= new WorkingSetFilterActionGroup(getSite(), workingSetListener);
 			fViewer.addFilter(fWorkingSetFilterActionGroup.getWorkingSetFilter());
 		}

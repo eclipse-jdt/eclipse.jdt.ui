@@ -284,13 +284,10 @@ public class BuildPathSupport {
 		}
 
 		final boolean[] result= new boolean[1];
-		shell.getDisplay().syncExec(new Runnable() {
-			@Override
-			public void run() {
-				String title= NewWizardMessages.BuildPathSupport_putoncpdialog_title;
-				String message= NewWizardMessages.BuildPathSupport_putoncpdialog_message;
-				result[0]= MessageDialog.openQuestion(shell, title, message);
-			}
+		shell.getDisplay().syncExec(() -> {
+			String title= NewWizardMessages.BuildPathSupport_putoncpdialog_title;
+			String message= NewWizardMessages.BuildPathSupport_putoncpdialog_message;
+			result[0]= MessageDialog.openQuestion(shell, title, message);
 		});
 		return result[0];
 	}

@@ -77,7 +77,7 @@ public class PropertiesFileAutoEditStrategyTest {
 	@Before
 	public void setUp() throws Exception {
 		try {
-			fJProject1= ProjectTestSetup.getProject();
+			fJProject1= pts.getProject();
 			fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 			IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
 			fPropertiesFileISO_8859_1= write((IFolder)pack.getCorrespondingResource(), "", "Messages_ISO_8859_1.properties");
@@ -98,7 +98,7 @@ public class PropertiesFileAutoEditStrategyTest {
 
 	@After
 	public void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject1, pts.getDefaultClasspath());
 	}
 
 	//utility methods

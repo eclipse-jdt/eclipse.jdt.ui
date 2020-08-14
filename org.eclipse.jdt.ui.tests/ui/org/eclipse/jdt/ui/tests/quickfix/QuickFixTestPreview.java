@@ -69,7 +69,7 @@ public class QuickFixTestPreview extends QuickFixTest {
 	@Test
 	public void testEnablePreviewsAndOpenCompilerPropertiesProposals() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		fJProject1.setRawClasspath(Java15ProjectTestSetup.getDefaultClasspath(), null);
+		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
 		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -97,7 +97,7 @@ public class QuickFixTestPreview extends QuickFixTest {
 	@Test
 	public void testRecordSuppressWarningsProposals() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		fJProject1.setRawClasspath(Java15ProjectTestSetup.getDefaultClasspath(), null);
+		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
 		JavaProjectHelper.set15CompilerOptions(fJProject1, true);
 
 		Map<String, String> options= fJProject1.getOptions(false);
@@ -140,7 +140,7 @@ public class QuickFixTestPreview extends QuickFixTest {
 	@Test
 	public void testGetNeedHigherComplianceProposalsAndEnablePreviewsProposal() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		fJProject1.setRawClasspath(Java15ProjectTestSetup.getDefaultClasspath(), null);
+		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
 		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -169,7 +169,7 @@ public class QuickFixTestPreview extends QuickFixTest {
 	@Test
 	public void testNoEnablePreviewProposal() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		fJProject1.setRawClasspath(Java15ProjectTestSetup.getDefaultClasspath(), null);
+		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
 		JavaProjectHelper.set15CompilerOptions(fJProject1, true);
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");

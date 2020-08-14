@@ -2324,8 +2324,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 					markInNavigationHistory();
 				}
 
-			} catch (JavaModelException x) {
-			} catch (IllegalArgumentException x) {
+			} catch (JavaModelException | IllegalArgumentException x) {
 			}
 
 		} else if (moveCursor) {

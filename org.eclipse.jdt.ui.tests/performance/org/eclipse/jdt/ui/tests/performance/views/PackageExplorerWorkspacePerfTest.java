@@ -14,10 +14,7 @@
 
 package org.eclipse.jdt.ui.tests.performance.views;
 
-import junit.extensions.TestSetup;
-import junit.framework.Test;
-
-import org.eclipse.test.OrderedTestSuite;
+import org.junit.Test;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 
@@ -26,18 +23,18 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.tests.performance.JdtPerformanceTestCase;
+import org.eclipse.jdt.ui.tests.performance.JdtPerformanceTestCaseCommon;
 
-public class PackageExplorerWorkspacePerfTest extends JdtPerformanceTestCase {
+public class PackageExplorerWorkspacePerfTest extends JdtPerformanceTestCaseCommon {
 
-	private static class MyTestSetup extends TestSetup {
-
-		public MyTestSetup(Test test) {
-			super(test);
-		}
-
-		@Override
-		protected void setUp() throws Exception {
+//	private static class MyTestSetup extends TestSetup {
+//
+//		public MyTestSetup(Test test) {
+//			super(test);
+//		}
+//
+//		@Override
+//		protected void setUp() throws Exception {
 //			IJavaModel model= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
 //			if (model.getJavaProjects().length == 0) {
 //				ExternalModelManager manager= PDECore.getDefault().getExternalModelManager();
@@ -50,28 +47,14 @@ public class PackageExplorerWorkspacePerfTest extends JdtPerformanceTestCase {
 //				});
 //				ResourcesPlugin.getWorkspace().run(op, new NullProgressMonitor());
 //			}
-		}
+//		}
+//
+//		@Override
+//		protected void tearDown() throws Exception {
+//		}
+//	}
 
-		@Override
-		protected void tearDown() throws Exception {
-		}
-	}
-
-	public static Test suite() {
-		OrderedTestSuite suite= new OrderedTestSuite(PackageExplorerWorkspacePerfTest.class, new String[] {
-			"testOpen"
-		});
-		return new MyTestSetup(suite);
-	}
-
-	public static Test setUpTest(Test someTest) {
-		return new MyTestSetup(someTest);
-	}
-
-	public PackageExplorerWorkspacePerfTest(String name) {
-		super(name);
-	}
-
+	@Test
 	public void testOpen() throws Exception {
 		IWorkbenchWindow activeWorkbenchWindow= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 		IWorkbenchPage page= activeWorkbenchWindow.getActivePage();

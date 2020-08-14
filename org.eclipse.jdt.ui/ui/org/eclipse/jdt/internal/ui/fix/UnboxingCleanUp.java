@@ -20,6 +20,8 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.text.edits.TextEditGroup;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -159,8 +161,9 @@ public class UnboxingCleanUp extends AbstractMultiFix {
 		@Override
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel linkedModel) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
+			TextEditGroup group= createTextEditGroup(MultiFixMessages.UnboxingCleanup_description, cuRewrite);
 			Expression copyOfWrapper= (Expression) rewrite.createCopyTarget(node.getExpression());
-			rewrite.replace(node, copyOfWrapper, null);
+			rewrite.replace(node, copyOfWrapper, group);
 		}
 	}
 }

@@ -15,7 +15,7 @@ package org.eclipse.jdt.ui.tests.core;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.Hashtable;
 import java.util.List;
@@ -79,14 +79,14 @@ public class MethodOverrideTest extends CoreTests {
 
 	@Before
 	public void setUp() throws Exception {
-		fJProject1= ProjectTestSetup.getProject();
+		fJProject1= pts.getProject();
 		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		JavaCore.setOptions(options);
 	}
 
 	@After
 	public void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject1, pts.getDefaultClasspath());
 	}
 
 	@Test
@@ -471,7 +471,7 @@ public class MethodOverrideTest extends CoreTests {
 			for (IProblem prob : problems) {
 				buf.append(prob.getMessage()).append('\n');
 			}
-			assertTrue(buf.toString(), false);
+			fail(buf.toString());
 		}
 
 

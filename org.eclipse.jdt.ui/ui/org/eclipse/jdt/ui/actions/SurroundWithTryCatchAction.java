@@ -116,10 +116,7 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 			ExceptionHandler.handle(e, getDialogTitle(), RefactoringMessages.SurroundWithTryCatchAction_exception);
 		} catch (InvocationTargetException e) {
 			ExceptionHandler.handle(e, getDialogTitle(), RefactoringMessages.SurroundWithTryCatchAction_exception);
-		} catch (InterruptedException e) {
-			// not cancelable
-		} catch (BadLocationException e) {
-			// ignore
+		} catch (/* not cancelable */ InterruptedException | /* ignore */ BadLocationException e) {
 		}
 	}
 

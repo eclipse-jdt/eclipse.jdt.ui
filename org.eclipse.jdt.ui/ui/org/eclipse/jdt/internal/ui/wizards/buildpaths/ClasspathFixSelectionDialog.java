@@ -30,7 +30,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -40,7 +39,6 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.StatusDialog;
 import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -80,14 +78,11 @@ public class ClasspathFixSelectionDialog extends StatusDialog {
 	public static boolean openClasspathFixSelectionDialog(Shell parent, final IJavaProject project, final String missingType, IRunnableContext context) {
 		final ClasspathFixProposal[][] classPathFixProposals= { null };
 		try {
-			context.run(true, true, new IRunnableWithProgress() {
-				@Override
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					MultiStatus status= new MultiStatus(JavaUI.ID_PLUGIN, IStatus.OK, NewWizardMessages.ClasspathFixSelectionDialog_eval_proposals_error_message, null);
-					classPathFixProposals[0]= ClasspathFixProcessorDescriptor.getProposals(project, missingType, status);
-					if (!status.isOK()) {
-						JavaPlugin.log(status);
-					}
+			context.run(true, true, monitor -> {
+				MultiStatus status= new MultiStatus(JavaUI.ID_PLUGIN, IStatus.OK, NewWizardMessages.ClasspathFixSelectionDialog_eval_proposals_error_message, null);
+				classPathFixProposals[0]= ClasspathFixProcessorDescriptor.getProposals(project, missingType, status);
+				if (!status.isOK()) {
+					JavaPlugin.log(status);
 				}
 			});
 		} catch (InvocationTargetException e) {
@@ -98,27 +93,24 @@ public class ClasspathFixSelectionDialog extends StatusDialog {
 		final ClasspathFixSelectionDialog dialog= new ClasspathFixSelectionDialog(parent, project, missingType, classPathFixProposals[0]);
 		if (dialog.open() == Window.OK) {
 			try {
-				context.run(false, true, new IRunnableWithProgress() { // don't fork, because change execution must be in UI thread
-					@Override
-					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-						if (monitor == null) {
-							monitor= new NullProgressMonitor();
-						}
-						monitor.beginTask(NewWizardMessages.ClasspathFixSelectionDialog_process_fix_description, 4);
-						try {
-							ClasspathFixProposal fix= dialog.getSelectedClasspathFix();
-							Change change= fix.createChange(new SubProgressMonitor(monitor, 1));
+				context.run(false, true, monitor -> {
+					if (monitor == null) {
+						monitor= new NullProgressMonitor();
+					}
+					monitor.beginTask(NewWizardMessages.ClasspathFixSelectionDialog_process_fix_description, 4);
+					try {
+						ClasspathFixProposal fix= dialog.getSelectedClasspathFix();
+						Change change= fix.createChange(new SubProgressMonitor(monitor, 1));
 
-							PerformChangeOperation op= new PerformChangeOperation(change);
-							op.setUndoManager(RefactoringCore.getUndoManager(), change.getName());
-							op.run(new SubProgressMonitor(monitor, 1));
-						} catch (OperationCanceledException e) {
-							throw new InterruptedException();
-						} catch (CoreException e) {
-							throw new InvocationTargetException(e);
-						} finally {
-							monitor.done();
-						}
+						PerformChangeOperation op= new PerformChangeOperation(change);
+						op.setUndoManager(RefactoringCore.getUndoManager(), change.getName());
+						op.run(new SubProgressMonitor(monitor, 1));
+					} catch (OperationCanceledException e1) {
+						throw new InterruptedException();
+					} catch (CoreException e2) {
+						throw new InvocationTargetException(e2);
+					} finally {
+						monitor.done();
 					}
 				});
 				return true;

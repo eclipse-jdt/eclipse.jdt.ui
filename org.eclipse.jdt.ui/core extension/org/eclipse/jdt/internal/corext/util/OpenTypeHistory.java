@@ -227,10 +227,7 @@ public class OpenTypeHistory extends History<TypeNameMatch, TypeNameMatch> {
 		if (fUpdateJob.getState() == Job.RUNNING) {
 			try {
 				Job.getJobManager().join(UpdateJob.FAMILY, monitor);
-			} catch (OperationCanceledException e) {
-				// Ignore and do the consistency check without
-				// waiting for the update job.
-			} catch (InterruptedException e) {
+			} catch (OperationCanceledException | InterruptedException e) {
 				// Ignore and do the consistency check without
 				// waiting for the update job.
 			}

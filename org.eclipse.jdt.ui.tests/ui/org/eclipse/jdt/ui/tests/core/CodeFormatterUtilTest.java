@@ -63,7 +63,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 	@Before
 	public void setUp() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		JavaProjectHelper.addRequiredProject(fJProject1, ProjectTestSetup.getProject());
+		JavaProjectHelper.addRequiredProject(fJProject1, pts.getProject());
 
 		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);

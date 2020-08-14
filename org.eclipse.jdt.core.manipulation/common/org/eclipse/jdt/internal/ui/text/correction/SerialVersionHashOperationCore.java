@@ -349,9 +349,7 @@ public final class SerialVersionHashOperationCore extends AbstractSerialVersionO
 				if (id != null)
 					serialVersionID= id.longValue();
 			}
-		} catch (CoreException exception) {
-			displayErrorMessage(exception);
-		} catch (IOException exception) {
+		} catch (CoreException | IOException exception) {
 			displayErrorMessage(exception);
 		} finally {
 			monitor.done();

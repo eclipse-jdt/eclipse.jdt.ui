@@ -90,14 +90,11 @@ public class AddLibraryToBuildpathAction extends BuildpathModifierAction {
 			@Override
 			public boolean performFinish() {
 				if (super.performFinish()) {
-					IWorkspaceRunnable op= new IWorkspaceRunnable() {
-						@Override
-						public void run(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
-							try {
-								finishPage(monitor);
-							} catch (InterruptedException e) {
-								throw new OperationCanceledException(e.getMessage());
-							}
+					IWorkspaceRunnable op= monitor -> {
+						try {
+							finishPage(monitor);
+						} catch (InterruptedException e) {
+							throw new OperationCanceledException(e.getMessage());
 						}
 					};
 					try {

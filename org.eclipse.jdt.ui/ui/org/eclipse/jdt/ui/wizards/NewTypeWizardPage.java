@@ -2742,11 +2742,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			if (template != null) {
 				return TemplateUtils.evaluateTemplate(template, parentCU, pos);
 			}
-		} catch (CoreException e) {
-			JavaPlugin.log(e);
-		} catch (BadLocationException e) {
-			JavaPlugin.log(e);
-		} catch (TemplateException e) {
+		} catch (CoreException | BadLocationException | TemplateException e) {
 			JavaPlugin.log(e);
 		}
 		return null;

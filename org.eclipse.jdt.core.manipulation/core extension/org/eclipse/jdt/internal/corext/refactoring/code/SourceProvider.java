@@ -407,9 +407,7 @@ public class SourceProvider {
 			processor= new TextEditProcessor(fDocument, undo, TextEdit.UPDATE_REGIONS);
 			processor.performEdits();
 			return result;
-		} catch (MalformedTreeException exception) {
-			JavaManipulationPlugin.log(exception);
-		} catch (BadLocationException exception) {
+		} catch (MalformedTreeException | BadLocationException exception) {
 			JavaManipulationPlugin.log(exception);
 		}
 		return new String[] {};

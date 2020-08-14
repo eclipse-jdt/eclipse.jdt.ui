@@ -15,8 +15,6 @@ package org.eclipse.jdt.ui.tests.quickfix;
 
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -33,20 +31,19 @@ import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 /**
  * Tests the cleanup features related to Java 10.
  */
-@RunWith(JUnit4.class)
 public class CleanUpTest1d10 extends CleanUpTestCase {
 
 	@Rule
-    public ProjectTestSetup projectsetup = new Java10ProjectTestSetup();
+    public ProjectTestSetup projectSetup = new Java10ProjectTestSetup();
 
 	@Override
 	protected IJavaProject getProject() {
-		return Java10ProjectTestSetup.getProject();
+		return projectSetup.getProject();
 	}
 
 	@Override
 	protected IClasspathEntry[] getDefaultClasspath() throws CoreException {
-		return Java10ProjectTestSetup.getDefaultClasspath();
+		return projectSetup.getDefaultClasspath();
 	}
 
 	@Test

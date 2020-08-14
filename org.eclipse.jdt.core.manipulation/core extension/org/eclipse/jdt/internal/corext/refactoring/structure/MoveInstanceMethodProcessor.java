@@ -2928,9 +2928,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 							setTarget(bindings[index]);
 					}
 				}
-			} catch (NumberFormatException exception) {
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new String[] { value, ATTRIBUTE_TARGET_INDEX }));
-			} catch (JavaModelException exception) {
+			} catch (NumberFormatException | JavaModelException exception) {
 				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new String[] { value, ATTRIBUTE_TARGET_INDEX }));
 			}
 		} else

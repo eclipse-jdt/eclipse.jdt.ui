@@ -42,9 +42,7 @@ public class OpenElementInEditorHandler extends AbstractHandler {
 		try {
 			IEditorPart editorPart= JavaUI.openInEditor(javaElement);
 			JavaUI.revealInEditor(editorPart, javaElement);
-		} catch (JavaModelException ex) {
-			throw new ExecutionException("Error opening java element in editor", ex); //$NON-NLS-1$
-		} catch (PartInitException ex) {
+		} catch (JavaModelException | PartInitException ex) {
 			throw new ExecutionException("Error opening java element in editor", ex); //$NON-NLS-1$
 		}
 

@@ -45,7 +45,7 @@ public class ImportOrganizeTest1d8 extends ImportOrganizeTest {
 
 	@Before
 	public void before() throws Exception {
-		fJProject1= Java1d8ProjectTestSetup.getProject();
+		fJProject1= j18p.getProject();
 
 		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE, String.valueOf(99));
@@ -56,7 +56,7 @@ public class ImportOrganizeTest1d8 extends ImportOrganizeTest {
 	@After
 	public void after() throws Exception {
 		setOrganizeImportSettings(null, 99, 99, fJProject1);
-		JavaProjectHelper.clear(fJProject1, Java1d8ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject1, j18p.getDefaultClasspath());
 	}
 
 	@Test

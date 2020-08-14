@@ -84,13 +84,13 @@ public class NLSSourceModifierTest {
 
 		StubUtility.setCodeTemplate(CodeTemplateContextType.METHODSTUB_ID, "//TODO\n${body_statement}", null);
 
-        javaProject = ProjectTestSetup.getProject();
+        javaProject = pts.getProject();
         fSourceFolder = JavaProjectHelper.addSourceContainer(javaProject, "src");
     }
 
     @After
 	public void tearDown() throws Exception {
-        JavaProjectHelper.clear(javaProject, ProjectTestSetup.getDefaultClasspath());
+        JavaProjectHelper.clear(javaProject, pts.getDefaultClasspath());
     }
 
 	@Test

@@ -70,14 +70,11 @@ public class ResetAllOutputFoldersAction extends BuildpathModifierAction {
 
 	@Override
 	public void run() {
-		final IRunnableWithProgress runnable= new IRunnableWithProgress() {
-			@Override
-			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-				try {
-					resetOutputFolders(fJavaProject, monitor);
-				} catch (CoreException e) {
-					throw new InvocationTargetException(e);
-				}
+		final IRunnableWithProgress runnable= monitor -> {
+			try {
+				resetOutputFolders(fJavaProject, monitor);
+			} catch (CoreException e) {
+				throw new InvocationTargetException(e);
 			}
 		};
 		try {

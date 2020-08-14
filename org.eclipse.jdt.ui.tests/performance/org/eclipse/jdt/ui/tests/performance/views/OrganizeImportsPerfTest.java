@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,19 +13,22 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.performance.views;
 
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.extensions.TestSetup;
-import junit.framework.Test;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExternalResource;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
-import org.eclipse.test.OrderedTestSuite;
 import org.eclipse.test.performance.Performance;
 import org.eclipse.test.performance.PerformanceMeter;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -38,21 +41,17 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.manipulation.OrganizeImportsOperation;
 import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
-import org.eclipse.jdt.ui.tests.performance.JdtPerformanceTestCase;
+import org.eclipse.jdt.ui.tests.performance.JdtPerformanceTestCaseCommon;
 
-public class OrganizeImportsPerfTest extends JdtPerformanceTestCase {
+public class OrganizeImportsPerfTest extends JdtPerformanceTestCaseCommon {
 
-	private static class MyTestSetup extends TestSetup {
+	private static class MyTestSetup extends ExternalResource {
 		public static final String SRC_CONTAINER= "src";
 
 		public static IJavaProject fJProject1;
 
-		public MyTestSetup(Test test) {
-			super(test);
-		}
-
 		@Override
-		protected void setUp() throws Exception {
+		public void before() throws Throwable {
 			fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 			assertTrue("rt not found", JavaProjectHelper.addRTJar(fJProject1) != null);
 			File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
@@ -60,21 +59,19 @@ public class OrganizeImportsPerfTest extends JdtPerformanceTestCase {
 		}
 
 		@Override
-		protected void tearDown() throws Exception {
-			if (fJProject1 != null && fJProject1.exists())
-				JavaProjectHelper.delete(fJProject1);
+		public void after() {
+			try {
+				if (fJProject1 != null && fJProject1.exists()) {
+					JavaProjectHelper.delete(fJProject1);
+				}
+			} catch (CoreException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
-	public static Test suite() {
-		return new MyTestSetup(new OrderedTestSuite(OrganizeImportsPerfTest.class, new String[] {
-			"testOrganizeImport"
-		}));
-	}
-
-	public static Test setUpTest(Test someTest) {
-		return new MyTestSetup(someTest);
-	}
+	@Rule
+	public MyTestSetup stup= new MyTestSetup();
 
 	private void addAllCUs(IJavaElement[] children, List<IJavaElement> result) throws JavaModelException {
 		for (IJavaElement element : children) {
@@ -98,6 +95,7 @@ public class OrganizeImportsPerfTest extends JdtPerformanceTestCase {
 		return result;
 	}
 
+	@Test
 	public void testOrganizeImport() throws Exception {
 		measure(Performance.getDefault().getNullPerformanceMeter(), 10);
 		measure(fPerformanceMeter, 10);

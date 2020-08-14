@@ -531,7 +531,7 @@ public class EditTemplateDialog extends StatusDialog {
 		// create context menu
 		MenuManager manager= new MenuManager(null, null);
 		manager.setRemoveAllWhenShown(true);
-		manager.addMenuListener(mgr -> fillContextMenu(mgr));
+		manager.addMenuListener(this::fillContextMenu);
 
 		StyledText text= fPatternEditor.getTextWidget();
 		Menu menu= manager.createContextMenu(text);

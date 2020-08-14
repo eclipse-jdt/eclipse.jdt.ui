@@ -21,6 +21,8 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.text.edits.TextEditGroup;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTMatcher;
@@ -205,13 +207,14 @@ public class PushDownNegationCleanUp extends AbstractMultiFix {
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel linkedModel) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			Expression copyOfReplacement= (Expression) rewrite.createCopyTarget(this.replacement);
+			TextEditGroup group= createTextEditGroup(MultiFixMessages.PushDownNegationCleanup_description, cuRewrite);
 
 			// if next operation has been replaced above by a copy, update the target node to change
 			if (nextOperation != null) {
 				nextOperation.setNode(copyOfReplacement);
 			}
 
-			rewrite.replace(this.getNode(), copyOfReplacement, null);
+			rewrite.replace(this.getNode(), copyOfReplacement, group);
 		}
 
 		public void setNextOperation(ReplacementOperation nextOperation) {
@@ -235,9 +238,10 @@ public class PushDownNegationCleanUp extends AbstractMultiFix {
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel linkedModel) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			AST ast= cuRewrite.getRoot().getAST();
+			TextEditGroup group= createTextEditGroup(MultiFixMessages.PushDownNegationCleanup_description, cuRewrite);
 			Expression copyOfReplacement= ast.newBooleanLiteral(this.replacement);
 
-			rewrite.replace(this.getNode(), copyOfReplacement, null);
+			rewrite.replace(this.getNode(), copyOfReplacement, group);
 		}
 	}
 
@@ -256,9 +260,10 @@ public class PushDownNegationCleanUp extends AbstractMultiFix {
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel linkedModel) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			AST ast= cuRewrite.getRoot().getAST();
+			TextEditGroup group= createTextEditGroup(MultiFixMessages.PushDownNegationCleanup_description, cuRewrite);
 			ParenthesizedExpression parenthesizedExpression= doRewriteAST(rewrite, ast, infixExpression, reverseOp);
 
-			rewrite.replace(this.getNode(), parenthesizedExpression, null);
+			rewrite.replace(this.getNode(), parenthesizedExpression, group);
 		}
 
 		private ParenthesizedExpression doRewriteAST(ASTRewrite rewrite, AST ast, InfixExpression pInfixExpression, Operator pReverseOp) {

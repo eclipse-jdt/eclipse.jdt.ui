@@ -184,12 +184,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		if (Display.getCurrent() != null) {
 			updateFoldersList();
 		} else {
-			Display.getDefault().asyncExec(new Runnable() {
-				@Override
-				public void run() {
-					updateFoldersList();
-				}
-			});
+			Display.getDefault().asyncExec(this::updateFoldersList);
 		}
 	}
 

@@ -40,7 +40,6 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.tests.core.rules.Java14ProjectTestSetup;
-import org.eclipse.jdt.ui.tests.core.rules.Java15ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
@@ -69,7 +68,7 @@ public class QuickFixTest15 extends QuickFixTest {
 	@Test
 	public void testEnablePreviewsAndOpenCompilerPropertiesProposals() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		fJProject1.setRawClasspath(Java15ProjectTestSetup.getDefaultClasspath(), null);
+		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
 		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -127,7 +126,7 @@ public class QuickFixTest15 extends QuickFixTest {
 	@Test
 	public void testTextBlockGetNeedHigherComplianceProposal() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		fJProject1.setRawClasspath(Java15ProjectTestSetup.getDefaultClasspath(), null);
+		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
 		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -161,7 +160,7 @@ public class QuickFixTest15 extends QuickFixTest {
 	@Test
 	public void testNoEnablePreviewProposal() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		fJProject1.setRawClasspath(Java15ProjectTestSetup.getDefaultClasspath(), null);
+		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
 		JavaProjectHelper.set15CompilerOptions(fJProject1, true);
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -186,7 +185,7 @@ public class QuickFixTest15 extends QuickFixTest {
 	@Test
 	public void testRecordSuppressWarningsProposals() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		fJProject1.setRawClasspath(Java15ProjectTestSetup.getDefaultClasspath(), null);
+		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
 		JavaProjectHelper.set15CompilerOptions(fJProject1, true);
 
 		Map<String, String> options= fJProject1.getOptions(false);

@@ -75,9 +75,7 @@ public class PropertiesQuickAssistProcessor {
 					getCreateFieldsInAccessorClassProposals(invocationContext, null) ||
 					getRemovePropertiesProposals(invocationContext, null) ||
 					getRenameKeysProposals(invocationContext, null);
-		} catch (BadLocationException e) {
-			JavaPlugin.log(e);
-		} catch (BadPartitioningException e) {
+		} catch (BadLocationException | BadPartitioningException e) {
 			JavaPlugin.log(e);
 		}
 		return false;

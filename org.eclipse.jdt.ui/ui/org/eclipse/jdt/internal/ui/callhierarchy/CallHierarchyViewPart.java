@@ -485,7 +485,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         getSite().setSelectionProvider(fSelectionProviderMediator);
 
         fCallHierarchyViewer.initContextMenu(
-        		menu -> fillCallHierarchyViewerContextMenu(menu), getSite(), fSelectionProviderMediator);
+        		this::fillCallHierarchyViewerContextMenu, getSite(), fSelectionProviderMediator);
 
 
         fClipboard= new Clipboard(parent.getDisplay());
@@ -975,7 +975,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         fLocationViewer= new LocationViewer(parent);
 
 
-        fLocationViewer.initContextMenu(menu -> fillLocationViewerContextMenu(menu), ID_CALL_HIERARCHY, getSite());
+        fLocationViewer.initContextMenu(this::fillLocationViewerContextMenu, ID_CALL_HIERARCHY, getSite());
     }
 
     private void createHierarchyLocationSplitter(Composite parent) {

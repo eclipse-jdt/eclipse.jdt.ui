@@ -337,21 +337,14 @@ public class SurroundWithTryWithResourcesRefactoring extends Refactoring {
 		}
 
 		ASTNode node= fSelectedNodes[0];
-		ASTNode parentStatement= ASTResolving.findAncestor(node, ASTNode.VARIABLE_DECLARATION_STATEMENT);
 		List<ASTNode> coveredStatements= new ArrayList<>();
-		if (fSelectedNodes == null || fSelectedNodes.length == 0 && parentStatement != null
-				&& (parentStatement instanceof VariableDeclarationStatement)
-				&& (parentStatement instanceof ExpressionStatement)) {
-			coveredStatements.add(parentStatement);
-		} else {
-			for (ASTNode coveredNode : fSelectedNodes) {
-				Statement statement= ASTResolving.findParentStatement(coveredNode);
-				if (statement == null) {
-					continue;
-				}
-				if (!coveredStatements.contains(statement)) {
-					coveredStatements.add(statement);
-				}
+		for (ASTNode coveredNode : fSelectedNodes) {
+			Statement statement= ASTResolving.findParentStatement(coveredNode);
+			if (statement == null) {
+				continue;
+			}
+			if (!coveredStatements.contains(statement)) {
+				coveredStatements.add(statement);
 			}
 		}
 

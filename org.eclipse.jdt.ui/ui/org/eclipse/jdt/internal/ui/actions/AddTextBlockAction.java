@@ -143,9 +143,7 @@ public class AddTextBlockAction extends SelectionDispatchAction {
 			}
 			DocumentCommand command= getDocumentCommand(document, javaProject, selection, indentStr);
 			addTextBlock(document, command, setCaratPosition);
-		} catch (BadLocationException e) {
-			//do nothing
-		} catch (BadPartitioningException e) {
+		} catch (BadLocationException | BadPartitioningException e) {
 			//do nothing
 		}
 	}

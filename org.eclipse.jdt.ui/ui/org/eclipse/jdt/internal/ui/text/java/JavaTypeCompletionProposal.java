@@ -116,9 +116,7 @@ public class JavaTypeCompletionProposal extends JavaCompletionProposal {
 				impRewrite.rewriteImports(new NullProgressMonitor()).apply(document, TextEdit.UPDATE_REGIONS);
 				setReplacementOffset(getReplacementOffset() + document.getLength() - oldLen);
 			}
-		} catch (CoreException e) {
-			JavaPlugin.log(e);
-		} catch (BadLocationException e) {
+		} catch (CoreException | BadLocationException e) {
 			JavaPlugin.log(e);
 		}
 	}

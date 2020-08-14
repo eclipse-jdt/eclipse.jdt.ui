@@ -741,9 +741,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 			IProgressMonitor monitor = getProgressMonitor();
 			try {
 				th= SuperTypeHierarchyCache.getTypeHierarchy(type, monitor);
-			} catch (JavaModelException e) {
-				return null;
-			} catch (OperationCanceledException e) {
+			} catch (JavaModelException | OperationCanceledException e) {
 				return null;
 			} finally {
 				monitor.done();

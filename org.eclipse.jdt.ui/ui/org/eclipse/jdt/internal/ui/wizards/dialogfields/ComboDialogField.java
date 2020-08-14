@@ -101,12 +101,7 @@ public class ComboDialogField extends DialogField {
 	public Combo getComboControl(Composite parent) {
 		if (fComboControl == null) {
 			assertCompositeNotNull(parent);
-			fModifyListener= new ModifyListener() {
-				@Override
-				public void modifyText(ModifyEvent e) {
-					doModifyText(e);
-				}
-			};
+			fModifyListener= this::doModifyText;
 			SelectionListener selectionListener= new SelectionListener() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {

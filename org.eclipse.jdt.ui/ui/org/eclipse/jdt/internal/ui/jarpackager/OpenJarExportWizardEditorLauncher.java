@@ -67,10 +67,7 @@ public class OpenJarExportWizardEditorLauncher implements IEditorLauncher {
 				if (reader != null)
 					reader.close();
 			}
-		} catch (IOException ex) {
-			openErrorDialog(ex.getLocalizedMessage());
-			return;
-		} catch (CoreException ex) {
+		} catch (IOException | CoreException ex) {
 			openErrorDialog(ex.getLocalizedMessage());
 			return;
 		}

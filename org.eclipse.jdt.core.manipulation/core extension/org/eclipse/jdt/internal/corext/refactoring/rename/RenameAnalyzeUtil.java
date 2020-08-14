@@ -453,7 +453,7 @@ public class RenameAnalyzeUtil {
 		RefactoringStatus result= new RefactoringStatus();
 		for (IProblem problem : RefactoringAnalyzeUtil.getIntroducedCompileProblems(newCUNode, oldCUNode)) {
 			if (problem.isError())
-				result.addEntry(new RefactoringStatusEntry((problem.isError() ? RefactoringStatus.ERROR : RefactoringStatus.WARNING), problem.getMessage(), new JavaStringStatusContext(newCuSource,
+				result.addEntry(new RefactoringStatusEntry(RefactoringStatus.ERROR, problem.getMessage(), new JavaStringStatusContext(newCuSource,
 						SourceRangeFactory.create(problem))));
 		}
 		return result;

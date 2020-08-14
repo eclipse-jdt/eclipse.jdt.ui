@@ -407,13 +407,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 			final ICompilationUnit copy= getSharedWorkingCopy(unit, new NullProgressMonitor());
 			copy.getBuffer().setContents(document.get());
 			JavaModelUtil.reconcile(copy);
-		} catch (CoreException exception) {
-			JavaPlugin.log(exception);
-			status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractSupertypeProcessor_unexpected_exception_on_layer));
-		} catch (MalformedTreeException exception) {
-			JavaPlugin.log(exception);
-			status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractSupertypeProcessor_unexpected_exception_on_layer));
-		} catch (BadLocationException exception) {
+		} catch (CoreException | MalformedTreeException | BadLocationException exception) {
 			JavaPlugin.log(exception);
 			status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractSupertypeProcessor_unexpected_exception_on_layer));
 		}
@@ -537,10 +531,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 			if (edit != null) {
 				try {
 					edit.apply(document, TextEdit.UPDATE_REGIONS);
-				} catch (MalformedTreeException exception) {
-					JavaPlugin.log(exception);
-					status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractSupertypeProcessor_unexpected_exception_on_layer));
-				} catch (BadLocationException exception) {
+				} catch (MalformedTreeException | BadLocationException exception) {
 					JavaPlugin.log(exception);
 					status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractSupertypeProcessor_unexpected_exception_on_layer));
 				}
@@ -620,10 +611,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 			final TextEdit edit= targetRewrite.createChange(true).getEdit();
 			try {
 				edit.apply(document, TextEdit.UPDATE_REGIONS);
-			} catch (MalformedTreeException exception) {
-				JavaPlugin.log(exception);
-				status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractSupertypeProcessor_unexpected_exception_on_layer));
-			} catch (BadLocationException exception) {
+			} catch (MalformedTreeException | BadLocationException exception) {
 				JavaPlugin.log(exception);
 				status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractSupertypeProcessor_unexpected_exception_on_layer));
 			}
@@ -1105,9 +1093,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 								final IDocument document= new Document(fSuperSource);
 								try {
 									edit.apply(document, TextEdit.UPDATE_REGIONS);
-								} catch (MalformedTreeException exception) {
-									JavaPlugin.log(exception);
-								} catch (BadLocationException exception) {
+								} catch (MalformedTreeException | BadLocationException exception) {
 									JavaPlugin.log(exception);
 								}
 								fSuperSource= document.get();
