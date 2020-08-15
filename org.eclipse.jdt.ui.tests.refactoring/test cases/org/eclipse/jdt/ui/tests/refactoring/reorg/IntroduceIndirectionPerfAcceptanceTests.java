@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,11 +13,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring.reorg;
 
-import junit.framework.Test;
-
 import org.junit.Assert;
-
-import org.eclipse.test.OrderedTestSuite;
+import org.junit.Rule;
+import org.junit.Test;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 
@@ -29,31 +27,19 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceIndirectionRefactoring;
 
 import org.eclipse.jdt.ui.tests.performance.SWTTestProject;
-import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestCase;
-import org.eclipse.jdt.ui.tests.refactoring.infra.SWTProjectTestSetup;
+import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestCaseCommon;
+import org.eclipse.jdt.ui.tests.refactoring.rules.SWTProjectTestSetup;
 
-public class IntroduceIndirectionPerfAcceptanceTests extends RefactoringPerformanceTestCase {
+public class IntroduceIndirectionPerfAcceptanceTests extends RefactoringPerformanceTestCaseCommon {
 
 	private IJavaProject fProject;
 	private IntroduceIndirectionRefactoring fRefactoring;
 
-	public static Test suite() {
-		OrderedTestSuite suite= new OrderedTestSuite(IntroduceIndirectionPerfAcceptanceTests.class, new String[] {
-			"testIntroduceIndirection",
-		});
-        return new SWTProjectTestSetup(suite);
-	}
-
-	public static Test setUpTest(Test someTest) {
-		return new SWTProjectTestSetup(someTest);
-	}
-
-	public IntroduceIndirectionPerfAcceptanceTests(String test) {
-		super(test);
-	}
+	@Rule
+	public SWTProjectTestSetup spts= new SWTProjectTestSetup();
 
 	@Override
-	protected void setUp() throws Exception {
+	public void setUp() throws Exception {
 		super.setUp();
 		fProject= (IJavaProject)JavaCore.create(
 			ResourcesPlugin.getWorkspace().getRoot().findMember(SWTTestProject.PROJECT));
@@ -67,6 +53,7 @@ public class IntroduceIndirectionPerfAcceptanceTests extends RefactoringPerforma
 		fRefactoring.setIntermediaryMethodName("bar");
 	}
 
+	@Test
 	public void testIntroduceIndirection() throws Exception {
 		executeRefactoring(fRefactoring, true);
 	}

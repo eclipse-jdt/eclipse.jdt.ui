@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -33,8 +33,9 @@ public class TestProject {
 
 	public TestProject(String name) throws Exception {
 		fTestProject= JavaProjectHelper.createJavaProject(name, "bin");
-		// we must make sure that the performance test are compatible to 2.1.3 & 3.0 so use rt13
-		Assert.assertTrue("rt not found", JavaProjectHelper.addRTJar13(fTestProject) != null);
+		// was: we must make sure that the performance test are compatible to 2.1.3 & 3.0 so use rt13
+		// rt13 is deprecated, use rt15
+		Assert.assertTrue("rt not found", JavaProjectHelper.addRTJar15(fTestProject) != null);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fTestProject, "src");
 	}
 
