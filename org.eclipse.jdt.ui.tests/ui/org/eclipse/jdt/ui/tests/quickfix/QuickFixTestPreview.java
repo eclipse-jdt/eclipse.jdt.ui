@@ -43,14 +43,12 @@ import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 
 public class QuickFixTestPreview extends QuickFixTest {
 
-//	private static final Class<QuickFixTest14> THIS= QuickFixTest14.class;
+	@Rule
+	public ProjectTestSetup projectsetup= new Java15ProjectTestSetup(true);
 
-    @Rule
-    public ProjectTestSetup projectsetup = new Java15ProjectTestSetup(true);
+	private IJavaProject fJProject1;
 
-    private IJavaProject fJProject1;
-
-    private IPackageFragmentRoot fSourceFolder;
+	private IPackageFragmentRoot fSourceFolder;
 
 	private static String MODULE_INFO_FILE_CONTENT = ""
 										+ "module test {\n"
