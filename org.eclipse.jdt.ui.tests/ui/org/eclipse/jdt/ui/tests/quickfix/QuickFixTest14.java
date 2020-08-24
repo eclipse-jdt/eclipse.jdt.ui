@@ -382,6 +382,50 @@ public class QuickFixTest14 extends QuickFixTest {
 	}
 
 	@Test
+	public void testAddDefaultCaseSwitchExpression3() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", MODULE_INFO_FILE_CONTENT, false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String test= ""
+					+ "package test;\n"
+					+ "public class Cls {\n"
+					+ "    public static void bar4(int input) {\n"
+					+ "        int num = switch (input) {\n"
+					+ "        };\n"
+					+ "    }\n"
+					+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", test, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2, 1, null);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		String expected= ""
+						+ "package test;\n"
+						+ "public class Cls {\n"
+						+ "    public static void bar4(int input) {\n"
+						+ "        int num = switch (input) {\n"
+						+ "			default :\n"
+						+ "				throw new IllegalArgumentException(\n"
+						+ "						\"Unexpected value: \" + input);\n"
+						+ "        };\n"
+						+ "    }\n"
+						+ "}\n";
+
+		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
+	}
+
+	@Test
 	public void testAddMissingCaseSwitchExpression() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
