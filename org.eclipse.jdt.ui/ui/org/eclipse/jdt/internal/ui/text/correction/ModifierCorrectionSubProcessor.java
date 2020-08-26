@@ -8,6 +8,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Benjamin Muskalla <bmuskalla@innoopract.com> - [quick fix] 'Remove invalid modifiers' does not appear for enums and annotations - https://bugs.eclipse.org/bugs/show_bug.cgi?id=110589
@@ -942,6 +946,41 @@ public class ModifierCorrectionSubProcessor {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			proposals.add(new ModifierChangeCorrectionProposal(label, cu, binding, selectedNode, modifier, 0, IProposalRelevance.ADD_METHOD_MODIFIER, image));
 		}
+	}
+
+	public static void addSealedMissingClassModifierProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
+		if (proposals == null) {
+			return;
+		}
+		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
+		if (!(selectedNode instanceof SimpleName)) {
+			return;
+		}
+		if (!(((SimpleName) selectedNode).getParent() instanceof TypeDeclaration)) {
+			return;
+		}
+		TypeDeclaration typeDecl= (TypeDeclaration) ((SimpleName) selectedNode).getParent();
+		if (typeDecl.isInterface()) {
+			return;
+		}
+
+		ICompilationUnit cu= context.getCompilationUnit();
+		ITypeBinding typeDeclBinding= typeDecl.resolveBinding();
+		int relevance= IProposalRelevance.CHANGE_MODIFIER_TO_FINAL;
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+
+		// Add final modifier
+		String label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemodifierto_final_description, typeDecl.getName());
+		proposals.add(new ModifierChangeCorrectionProposal(label, cu, typeDeclBinding, typeDecl, Modifier.FINAL, 0, relevance, image));
+
+		// Add sealed modifier
+		label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemodifierto_sealed_description, typeDecl.getName());
+		proposals.add(new ModifierChangeCorrectionProposal(label, cu, typeDeclBinding, typeDecl, Modifier.SEALED, 0, relevance, image));
+
+		// Add non-sealed modifier
+		label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemodifierto_nonsealed_description, typeDecl.getName());
+		proposals.add(new ModifierChangeCorrectionProposal(label, cu, typeDeclBinding, typeDecl, Modifier.NON_SEALED, 0, relevance, image));
+
 	}
 
 	private ModifierCorrectionSubProcessor() {

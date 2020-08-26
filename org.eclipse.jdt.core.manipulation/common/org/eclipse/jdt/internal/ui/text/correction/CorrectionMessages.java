@@ -8,6 +8,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Benjamin Muskalla <b.muskalla@gmx.net> - [quick fix] Quick fix for missing synchronized modifier - https://bugs.eclipse.org/bugs/show_bug.cgi?id=245250
@@ -156,6 +160,9 @@ public final class CorrectionMessages extends NLS {
 	public static String RenameRefactoringProposal_additionalInfo;
 	public static String RenameRefactoringProposal_name;
 
+	public static String ModifierCorrectionSubProcessor_changemodifierto_final_description;
+	public static String ModifierCorrectionSubProcessor_changemodifierto_sealed_description;
+	public static String ModifierCorrectionSubProcessor_changemodifierto_nonsealed_description;
 	public static String ModifierCorrectionSubProcessor_changemodifiertoabstract_description;
 	public static String ModifierCorrectionSubProcessor_changemodifiertostatic_description;
 	public static String ModifierCorrectionSubProcessor_changemodifiertononstatic_description;
