@@ -909,6 +909,16 @@ public class JavaHeuristicScannerTest {
     }
 
 	@Test
+	public void testTernaryAfterConditional() throws Exception {
+		fDocument.set(
+		"		if (true)\n" +
+		"			ret = true ? \"\".substring(0) : \"\";\n");
+
+		String indent= fScanner.computeIndentation(fDocument.getLength() - 1).toString();
+		assertEquals("		", indent);
+	}
+
+	@Test
 	public void testContinuationIndentationOfForStatement() throws Exception {
 		fDocument.set("\tfor (int i = (2 * 2); i < array.length; i++) {\n" +
 				"\tint i= 25;\n" +
