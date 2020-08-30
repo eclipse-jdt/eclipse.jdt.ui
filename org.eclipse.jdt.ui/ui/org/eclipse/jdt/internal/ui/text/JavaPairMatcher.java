@@ -212,7 +212,6 @@ public final class JavaPairMatcher extends DefaultCharacterPairMatcher implement
 				&& (Character.isUpperCase(identifier.charAt(0))
 						|| identifier.startsWith("final") //$NON-NLS-1$
 						|| identifier.startsWith("public") //$NON-NLS-1$
-						|| identifier.startsWith("public") //$NON-NLS-1$
 						|| identifier.startsWith("protected") //$NON-NLS-1$
 						|| identifier.startsWith("private")); //$NON-NLS-1$
 	}
