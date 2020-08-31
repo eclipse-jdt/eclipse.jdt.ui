@@ -253,8 +253,8 @@ class ModuleDependenciesAdapter implements IDialogFieldListener, ITreeListAdapte
 									filteredDetails.add(new PatchModule(JavaCore.create(project), this));
 								} else {
 									IFolder folder= ResourcesPlugin.getWorkspace().getRoot().getFolder(iPath);
-									IJavaElement elem= JavaCore.create(folder.getProject()).getPackageFragmentRoot(folder);
-									if (elem instanceof IPackageFragmentRoot) {
+									IPackageFragmentRoot elem= JavaCore.create(folder.getProject()).getPackageFragmentRoot(folder);
+									if (elem != null) {
 										filteredDetails.add(new PatchModule(elem, this));
 									}
 								}

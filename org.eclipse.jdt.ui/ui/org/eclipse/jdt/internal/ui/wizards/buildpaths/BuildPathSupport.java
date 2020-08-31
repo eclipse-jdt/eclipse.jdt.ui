@@ -417,13 +417,13 @@ public class BuildPathSupport {
 		if (eeOptions == null)
 			return null;
 
-		Object complianceOption= eeOptions.get(JavaCore.COMPILER_COMPLIANCE);
-		if (!(complianceOption instanceof String))
+		String complianceOption= eeOptions.get(JavaCore.COMPILER_COMPLIANCE);
+		if (complianceOption == null)
 			return null;
 
 		// eeOptions can miss some options, make sure they are complete:
 		HashMap<String, String> options= new HashMap<>();
-		JavaModelUtil.setComplianceOptions(options, (String)complianceOption);
+		JavaModelUtil.setComplianceOptions(options, complianceOption);
 		options.putAll(eeOptions);
 		return options;
 	}

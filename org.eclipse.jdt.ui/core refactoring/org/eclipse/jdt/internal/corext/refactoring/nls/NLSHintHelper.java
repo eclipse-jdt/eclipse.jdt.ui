@@ -163,11 +163,10 @@ public class NLSHintHelper {
 				if (decl.getInitializer() != null)
 					return null;
 
-				IBinding binding= decl.resolveBinding();
-				if (!(binding instanceof IVariableBinding))
+				IVariableBinding variableBinding= decl.resolveBinding();
+				if (variableBinding == null)
 					return null;
 
-				IVariableBinding variableBinding= (IVariableBinding)binding;
 				if (!Modifier.isStatic(variableBinding.getModifiers()))
 					return null;
 

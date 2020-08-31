@@ -226,9 +226,9 @@ public class JavaMergeViewer extends TextMergeViewer {
 	protected void setEditable(ISourceViewer sourceViewer, boolean state) {
 		super.setEditable(sourceViewer, state);
 		if (fEditor != null) {
-			Object editor= fEditor.get(sourceViewer);
-			if (editor instanceof CompilationUnitEditorAdapter)
-				((CompilationUnitEditorAdapter)editor).setEditable(state);
+			CompilationUnitEditorAdapter editor= fEditor.get(sourceViewer);
+			if (editor != null)
+				editor.setEditable(state);
 		}
 	}
 
@@ -492,12 +492,11 @@ public class JavaMergeViewer extends TextMergeViewer {
 	@Override
 	protected void setActionsActivated(SourceViewer sourceViewer, boolean state) {
 		if (fEditor != null) {
-			Object editor= fEditor.get(sourceViewer);
-			if (editor instanceof CompilationUnitEditorAdapter) {
-				CompilationUnitEditorAdapter cuea= (CompilationUnitEditorAdapter)editor;
-				cuea.setActionsActivated(state);
+			CompilationUnitEditorAdapter editor= fEditor.get(sourceViewer);
+			if (editor != null) {
+				editor.setActionsActivated(state);
 
-				IAction saveAction= cuea.getAction(ITextEditorActionConstants.SAVE);
+				IAction saveAction= editor.getAction(ITextEditorActionConstants.SAVE);
 				if (saveAction instanceof IPageListener) {
 					PartEventAction partEventAction= (PartEventAction) saveAction;
 					IWorkbenchPart compareEditorPart= getCompareConfiguration().getContainer().getWorkbenchPart();

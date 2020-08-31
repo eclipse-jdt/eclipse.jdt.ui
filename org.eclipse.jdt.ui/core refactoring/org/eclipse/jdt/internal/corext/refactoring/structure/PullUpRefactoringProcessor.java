@@ -132,7 +132,6 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.MemberVisibilityAdj
 import org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeConstraintsSolver;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ISourceConstraintVariable;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstraintVariable;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaStatusContext;
@@ -1903,12 +1902,10 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 					subMonitor.beginTask("", collection.size() * 10); //$NON-NLS-1$
 					subMonitor.setTaskName(RefactoringCoreMessages.ExtractInterfaceProcessor_creating);
 					for (ITypeConstraintVariable iTypeConstraintVariable : collection) {
-						ISourceConstraintVariable variable= iTypeConstraintVariable;
-						if (variable instanceof ITypeConstraintVariable) {
-							ITypeConstraintVariable constraint= (ITypeConstraintVariable) variable;
-							TType estimate= (TType) constraint.getData(SuperTypeConstraintsSolver.DATA_TYPE_ESTIMATE);
+						if (iTypeConstraintVariable != null) {
+							TType estimate= (TType) iTypeConstraintVariable.getData(SuperTypeConstraintsSolver.DATA_TYPE_ESTIMATE);
 							if (estimate != null) {
-								final CompilationUnitRange range= constraint.getRange();
+								final CompilationUnitRange range= iTypeConstraintVariable.getRange();
 								if (isTouched)
 									rewriteTypeOccurrence(range, estimate, requestor, currentRewrite, node, replacements, currentRewrite.createCategorizedGroupDescription(RefactoringCoreMessages.SuperTypeRefactoringProcessor_update_type_occurrence, SET_SUPER_TYPE));
 								else {

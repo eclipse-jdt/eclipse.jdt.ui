@@ -35,7 +35,6 @@ import org.eclipse.ui.ISelectionListener;
 
 import org.eclipse.ui.texteditor.ITextEditor;
 
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
@@ -135,11 +134,11 @@ public class SelectionListenerWithASTManager {
 			if (fCurrentJob != null) {
 				fCurrentJob.cancel();
 			}
-			IJavaElement input= EditorUtility.getEditorInputJavaElement(fPart, false);
-			if (!(input instanceof ITypeRoot)) {
+			ITypeRoot input= EditorUtility.getEditorInputJavaElement(fPart, false);
+			if (input == null) {
 				return;
 			}
-			final ITypeRoot typeRoot= (ITypeRoot) input;
+			final ITypeRoot typeRoot= input;
 
 
 			fCurrentJob= new Job(JavaUIMessages.SelectionListenerWithASTManager_job_title) {

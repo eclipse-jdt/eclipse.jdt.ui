@@ -230,9 +230,9 @@ public class JarPackageWriter extends Object implements IJarDescriptionWriter {
 	private void xmlWriteSelectedProjects(JarPackageData jarPackage, Document document, Element xmlJarDesc) throws DOMException {
 		Element selectedElements= document.createElement("selectedProjects"); //$NON-NLS-1$
 		xmlJarDesc.appendChild(selectedElements);
-		for (Object element : jarPackage.getRefactoringProjects()) {
-			if (element instanceof IResource)
-				add((IResource)element, selectedElements, document);
+		for (IProject element : jarPackage.getRefactoringProjects()) {
+			if (element != null)
+				add(element, selectedElements, document);
 		}
 	}
 

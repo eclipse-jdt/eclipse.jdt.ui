@@ -58,9 +58,9 @@ public class UnInitializedFinalFieldSubProcessor {
 			if (!node.isConstructor()) {
 				return;
 			}
-			IBinding binding= node.resolveBinding();
-			if (binding instanceof IMethodBinding) {
-				targetBinding= (IMethodBinding) binding;
+			IMethodBinding binding= node.resolveBinding();
+			if (binding != null) {
+				targetBinding= binding;
 			} else {
 				return;
 			}

@@ -272,14 +272,14 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 			@Override
 			public void mouseMove(MouseEvent e) {
 				if (tree.equals(e.getSource())) {
-					Object o= tree.getItem(new Point(e.x, e.y));
+					TreeItem o= tree.getItem(new Point(e.x, e.y));
 					if (fLastItem == null ^ o == null) {
 						tree.setCursor(o == null ? null : tree.getDisplay().getSystemCursor(SWT.CURSOR_HAND));
 					}
-					if (o instanceof TreeItem) {
+					if (o != null) {
 						Rectangle clientArea = tree.getClientArea();
 						if (!o.equals(fLastItem)) {
-							fLastItem= (TreeItem)o;
+							fLastItem= o;
 							tree.setSelection(new TreeItem[] { fLastItem });
 						} else if (e.y - clientArea.y < tree.getItemHeight() / 4) {
 							// Scroll up

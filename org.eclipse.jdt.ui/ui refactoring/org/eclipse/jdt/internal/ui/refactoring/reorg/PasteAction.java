@@ -1413,9 +1413,9 @@ public class PasteAction extends SelectionDispatchAction{
 			if (selectedResources.length != 0 || selectedWorkingSets.length != 0)
 				return false;
 			TypedSource[] typedSources= getClipboardTypedSources(fAvailableTypes);
-			Object destination= getTarget(selectedJavaElements, selectedResources);
-			if (destination instanceof IJavaElement)
-				return ReorgTypedSourcePasteStarter.create(typedSources, (IJavaElement)destination) != null;
+			IJavaElement destination= getTarget(selectedJavaElements, selectedResources);
+			if (destination != null)
+				return ReorgTypedSourcePasteStarter.create(typedSources, destination) != null;
 			return false;
 		}
 

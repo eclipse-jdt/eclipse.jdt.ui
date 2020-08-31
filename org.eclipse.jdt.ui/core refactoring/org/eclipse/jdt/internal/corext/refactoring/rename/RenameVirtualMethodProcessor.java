@@ -289,14 +289,13 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 		fIsRecordAccessor= false;
 		fRecordComponent= null;
 		if (sMethod != null) {
-			IJavaElement parent= sMethod.getDeclaringType();
+			IType parent= sMethod.getDeclaringType();
 			try {
 				if (sMethod.getParameters().length == 0
-						&& parent instanceof IType
-						&& ((IType)parent).isRecord()
+						&& parent != null
+						&& parent.isRecord()
 						&& !Flags.isStatic(sMethod.getFlags())) {
-					IType record= (IType) parent;
-					IField[] fields= record.getRecordComponents();
+					IField[] fields= parent.getRecordComponents();
 					for (IField field: fields) {
 						if (!Flags.isStatic(field.getFlags()) && sMethod.getElementName().equals(field.getElementName())) {
 							fRecordComponent= field;

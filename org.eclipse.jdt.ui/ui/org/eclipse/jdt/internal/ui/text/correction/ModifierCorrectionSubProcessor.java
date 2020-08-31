@@ -936,9 +936,9 @@ public class ModifierCorrectionSubProcessor {
 			return;
 		}
 
-		IBinding binding= ((MethodDeclaration) selectedNode).resolveBinding();
-		if (binding instanceof IMethodBinding) {
-			binding= ((IMethodBinding) binding).getMethodDeclaration();
+		IMethodBinding binding= ((MethodDeclaration) selectedNode).resolveBinding();
+		if (binding != null) {
+			binding= binding.getMethodDeclaration();
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			proposals.add(new ModifierChangeCorrectionProposal(label, cu, binding, selectedNode, modifier, 0, IProposalRelevance.ADD_METHOD_MODIFIER, image));
 		}

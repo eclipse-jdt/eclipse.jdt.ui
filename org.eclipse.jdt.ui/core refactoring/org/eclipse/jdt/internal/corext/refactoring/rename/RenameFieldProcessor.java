@@ -896,9 +896,9 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		fField= field;
 		fIsRecordComponent= false;
 		if (fField != null) {
-			IJavaElement parent= fField.getDeclaringType();
+			IType parent= fField.getDeclaringType();
 			try {
-				if (parent instanceof IType && ((IType) parent).isRecord() && !Flags.isStatic(fField.getFlags())) {
+				if (parent != null && parent.isRecord() && !Flags.isStatic(fField.getFlags())) {
 					fIsRecordComponent= true;
 				}
 			} catch (JavaModelException e) {

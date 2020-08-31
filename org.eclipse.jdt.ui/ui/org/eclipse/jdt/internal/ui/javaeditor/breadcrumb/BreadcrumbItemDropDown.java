@@ -379,11 +379,11 @@ class BreadcrumbItemDropDown {
 			@Override
 			public void mouseMove(MouseEvent e) {
 				if (tree.equals(e.getSource())) {
-					Object o= tree.getItem(new Point(e.x, e.y));
+					TreeItem o= tree.getItem(new Point(e.x, e.y));
 					if ((o != null && !o.equals(fLastItem)) || (fLastItem != null && o == null)) {
 						boolean showHandPointer= false;
-						if (o instanceof TreeItem) {
-							Object itemData= ((TreeItem)o).getData();
+						if (o != null) {
+							Object itemData= o.getData();
 							if (itemData instanceof IJavaElement) {
 								int elementType= ((IJavaElement)itemData).getElementType();
 								if (elementType != IJavaElement.JAVA_PROJECT && elementType != IJavaElement.PACKAGE_FRAGMENT && elementType != IJavaElement.PACKAGE_FRAGMENT_ROOT) {
@@ -397,16 +397,16 @@ class BreadcrumbItemDropDown {
 						}
 						tree.setCursor(showHandPointer ? tree.getDisplay().getSystemCursor(SWT.CURSOR_HAND) : null);
 					}
-					if (o instanceof TreeItem) {
+					if (o != null) {
 						Rectangle clientArea = tree.getClientArea();
-						TreeItem currentItem= (TreeItem) o;
+						TreeItem currentItem= o;
 						if (!o.equals(fLastItem)) {
-							fLastItem= (TreeItem) o;
+							fLastItem= o;
 							tree.setSelection(new TreeItem[] { fLastItem });
 						} else if (e.y - clientArea.y < tree.getItemHeight() / 4) {
 							// Scroll up
 							if (currentItem.getParentItem() == null) {
-								int index= tree.indexOf((TreeItem) o);
+								int index= tree.indexOf(o);
 								if (index < 1)
 									return;
 
@@ -423,7 +423,7 @@ class BreadcrumbItemDropDown {
 						} else if (clientArea.y + clientArea.height - e.y < tree.getItemHeight() / 4) {
 							// Scroll down
 							if (currentItem.getParentItem() == null) {
-								int index= tree.indexOf((TreeItem) o);
+								int index= tree.indexOf(o);
 								if (index >= tree.getItemCount() - 1)
 									return;
 
