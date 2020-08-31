@@ -63,7 +63,6 @@ public class HTMLTagCompletionProposalComputer implements IJavaCompletionProposa
 	private IDocument fDocument;
 	private int fCurrentPos;
 	private int fCurrentLength;
-	private String fErrorMessage;
 	private List<ICompletionProposal> fResult;
 
 	private boolean fRestrictToMatchingCase;
@@ -233,7 +232,7 @@ public class HTMLTagCompletionProposalComputer implements IJavaCompletionProposa
 	 */
 	@Override
 	public String getErrorMessage() {
-		return fErrorMessage;
+		return null;
 	}
 
 	/*
@@ -242,7 +241,6 @@ public class HTMLTagCompletionProposalComputer implements IJavaCompletionProposa
      */
     @Override
 	public void sessionEnded() {
-    	fErrorMessage= null;
     }
 
 	/*
@@ -251,6 +249,5 @@ public class HTMLTagCompletionProposalComputer implements IJavaCompletionProposa
      */
     @Override
 	public void sessionStarted() {
-    	fErrorMessage= null;
-    }
+   }
 }
