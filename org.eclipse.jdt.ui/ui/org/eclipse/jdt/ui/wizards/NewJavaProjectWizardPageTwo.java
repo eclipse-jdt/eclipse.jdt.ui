@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,14 +14,14 @@
 package org.eclipse.jdt.ui.wizards;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -76,8 +76,8 @@ import org.eclipse.jdt.internal.ui.util.CoreUtility;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.wizards.ClassPathDetector;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathBasePage;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.NewSourceContainerWorkbookPage;
 
 /**
@@ -448,33 +448,14 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 	}
 
 	private void copyFile(IFileStore source, File target) throws IOException, CoreException {
-		InputStream is= source.openInputStream(EFS.NONE, null);
-		FileOutputStream os= new FileOutputStream(target);
-		copyFile(is, os);
+		try(InputStream is= source.openInputStream(EFS.NONE, null)) {
+			Files.copy(is, target.toPath(), StandardCopyOption.REPLACE_EXISTING);
+		}
 	}
 
 	private void copyFile(File source, IFileStore target, IProgressMonitor monitor) throws IOException, CoreException {
-		FileInputStream is= new FileInputStream(source);
-		OutputStream os= target.openOutputStream(EFS.NONE, monitor);
-		copyFile(is, os);
-	}
-
-	private void copyFile(InputStream is, OutputStream os) throws IOException {
-		try {
-			byte[] buffer = new byte[8192];
-			while (true) {
-				int bytesRead= is.read(buffer);
-				if (bytesRead == -1)
-					break;
-
-				os.write(buffer, 0, bytesRead);
-			}
-		} finally {
-			try {
-				is.close();
-			} finally {
-				os.close();
-			}
+		try(OutputStream os= target.openOutputStream(EFS.NONE, monitor)){
+			Files.copy(source.toPath(), os);
 		}
 	}
 
