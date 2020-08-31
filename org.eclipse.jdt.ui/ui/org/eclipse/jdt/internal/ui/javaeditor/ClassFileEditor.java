@@ -24,7 +24,6 @@ import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -104,18 +103,14 @@ import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.SourceAttachmentBlock;
 
-
 /**
  * Java specific text editor.
  */
 public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProvider.InputChangeListener {
-
-
 	/**
 	 * A form to attach source to a class file.
 	 */
 	private class SourceAttachmentForm implements IPropertyChangeListener {
-
 		private final IClassFile fFile;
 		private Composite fComposite;
 		private Color fBackgroundColor;
@@ -123,7 +118,6 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		private Color fSeparatorColor;
 		private List<Label> fBannerLabels= new ArrayList<>();
 		private List<Label> fHeaderLabels= new ArrayList<>();
-		private Font fFont;
 
 		/**
 		 * Creates a source attachment form for a class file.
@@ -141,10 +135,10 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		 * @return the package fragment root of the given class file
 		 */
 		private IPackageFragmentRoot getPackageFragmentRoot(IClassFile file) {
-
 			IJavaElement element= file.getParent();
-			while (element != null && element.getElementType() != IJavaElement.PACKAGE_FRAGMENT_ROOT)
+			while (element != null && element.getElementType() != IJavaElement.PACKAGE_FRAGMENT_ROOT) {
 				element= element.getParent();
+			}
 
 			return (IPackageFragmentRoot) element;
 		}
@@ -156,7 +150,6 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		 * @return the creates source attachment form
 		 */
 		public Control createControl(Composite parent) {
-
 			Display display= parent.getDisplay();
 			fBackgroundColor= display.getSystemColor(SWT.COLOR_LIST_BACKGROUND);
 			fForegroundColor= display.getSystemColor(SWT.COLOR_LIST_FOREGROUND);
@@ -166,16 +159,12 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 
 			fComposite= createComposite(parent);
 			fComposite.setLayout(new GridLayout());
-			fComposite.addDisposeListener(e -> {
+			fComposite.addDisposeListener(event -> {
 				JFaceResources.getFontRegistry().removeListener(SourceAttachmentForm.this);
 				fComposite= null;
 				fSeparatorColor= null;
 				fBannerLabels.clear();
 				fHeaderLabels.clear();
-				if (fFont != null) {
-					fFont.dispose();
-					fFont= null;
-				}
 			});
 
 			createTitleLabel(fComposite, JavaEditorMessages.SourceAttachmentForm_title);
@@ -219,10 +208,10 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 			try {
 				entry= JavaModelUtil.getClasspathEntry(root);
 			} catch (JavaModelException ex) {
-				if (ex.isDoesNotExist())
-					entry= null;
-				else
+				if (!ex.isDoesNotExist()) {
 					throw ex;
+				}
+				entry= null;
 			}
 			IPath containerPath= null;
 
@@ -252,11 +241,10 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 					return;
 				}
 				IStatus attributeStatus= initializer.getAttributeStatus(containerPath, jproject, IClasspathAttribute.SOURCE_ATTACHMENT_ENCODING);
-				canEditEncoding= (attributeStatus.getCode() != ClasspathContainerInitializer.ATTRIBUTE_NOT_SUPPORTED) && (attributeStatus.getCode() != ClasspathContainerInitializer.ATTRIBUTE_READ_ONLY);
+				canEditEncoding= attributeStatus.getCode() != ClasspathContainerInitializer.ATTRIBUTE_NOT_SUPPORTED && attributeStatus.getCode() != ClasspathContainerInitializer.ATTRIBUTE_READ_ONLY;
 				entry= JavaModelUtil.findEntryInContainer(container, root.getPath());
 				Assert.isNotNull(entry);
 			}
-
 
 			Button button;
 
@@ -268,7 +256,6 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 				createLabel(composite, null);
 
 				button= createButton(composite, JavaEditorMessages.SourceAttachmentForm_button_attachSource);
-
 			} else {
 				createLabel(composite, Messages.format(JavaEditorMessages.SourceAttachmentForm_message_noSourceInAttachment, BasicElementLabels.getFileName(fFile)));
 				createLabel(composite, JavaEditorMessages.SourceAttachmentForm_message_pressButtonToChange);
@@ -307,12 +294,10 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 			try {
 				IRunnableWithProgress runnable= SourceAttachmentBlock.getRunnable(shell, newEntry, project, containerPath, isReferencedEntry);
 				PlatformUI.getWorkbench().getProgressService().run(true, true, runnable);
-
 			} catch (InvocationTargetException e) {
 				String title= JavaEditorMessages.SourceAttachmentForm_attach_error_title;
 				String message= JavaEditorMessages.SourceAttachmentForm_attach_error_message;
 				ExceptionHandler.handle(e, shell, title, message);
-
 			} catch (InterruptedException e) {
 				// cancelled
 			}
@@ -323,7 +308,6 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		 */
 		@Override
 		public void propertyChange(PropertyChangeEvent event) {
-
 			for (Label label : fBannerLabels) {
 				label.setFont(JFaceResources.getBannerFont());
 			}
@@ -366,8 +350,9 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 
 		private Label createLabel(Composite parent, String text) {
 			Label label= new Label(parent, SWT.WRAP);
-			if (text != null)
+			if (text != null) {
 				label.setText(text);
+			}
 			label.setBackground(fBackgroundColor);
 			label.setForeground(fForegroundColor);
 			GridData gd= new GridData(SWT.FILL, SWT.FILL, true, false);
@@ -377,8 +362,9 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 
 		private Label createTitleLabel(Composite parent, String text) {
 			Label label = new Label(parent, SWT.NONE);
-			if (text != null)
+			if (text != null) {
 				label.setText(text);
+			}
 			label.setBackground(fBackgroundColor);
 			label.setForeground(fForegroundColor);
 			label.setFont(JFaceResources.getHeaderFont());
@@ -388,8 +374,9 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 
 		private Label createHeadingLabel(Composite parent, String text) {
 			Label label = new Label(parent, SWT.NONE);
-			if (text != null)
+			if (text != null) {
 				label.setText(text);
+			}
 			label.setBackground(fBackgroundColor);
 			label.setForeground(fForegroundColor);
 			label.setFont(JFaceResources.getBannerFont());
@@ -401,8 +388,9 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 			Button button = new Button(parent, SWT.FLAT);
 			button.setBackground(fBackgroundColor);
 			button.setForeground(fForegroundColor);
-			if (text != null)
+			if (text != null) {
 				button.setText(text);
+			}
 			return button;
 		}
 
@@ -424,32 +412,26 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	 *  Updater that takes care of minimizing changes of the editor input.
 	 */
 	private class InputUpdater implements Runnable {
-
 		/** Has the runnable already been posted? */
-		private boolean fPosted= false;
+		private boolean fPosted;
+
 		/** Editor input */
 		private IClassFileEditorInput fClassFileEditorInput;
-
-
-		public InputUpdater() {
-		}
 
 		/*
 		 * @see Runnable#run()
 		 */
 		@Override
 		public void run() {
-
 			IClassFileEditorInput input;
 			synchronized (this) {
 				input= fClassFileEditorInput;
 			}
 
 			try {
-
-				if (getSourceViewer() != null)
+				if (getSourceViewer() != null) {
 					setInput(input);
-
+				}
 			} finally {
 				synchronized (this) {
 					fPosted= false;
@@ -463,11 +445,11 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		 * @param input the input to be set when executed
 		 */
 		public void post(IClassFileEditorInput input) {
-
 			synchronized(this) {
 				if (fPosted) {
-					if (isEqualInput(input, fClassFileEditorInput))
+					if (isEqualInput(input, fClassFileEditorInput)) {
 						fClassFileEditorInput= input;
+					}
 					return;
 				}
 			}
@@ -491,7 +473,6 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 			return input1 != null && input1.equals(input2);
 		}
 	}
-
 
 	private StackLayout fStackLayout;
 	private Composite fParent;
@@ -521,7 +502,6 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	 * @since 3.3
 	 */
 	private StyledText fNoSourceTextWidget;
-
 
 	/**
 	 * Default constructor.
@@ -616,8 +596,9 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		if (getEditorInput() instanceof IClassFileEditorInput) {
 			IClassFileEditorInput input= (IClassFileEditorInput) getEditorInput();
 			IJavaElement parent= element.getAncestor(IJavaElement.CLASS_FILE);
-			if (input.getClassFile().equals(parent))
+			if (input.getClassFile().equals(parent)) {
 				return element;
+			}
 		}
 		return null;
 	}
@@ -652,12 +633,12 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	 * @return the transformed editor input
 	 */
 	protected IEditorInput transformEditorInput(IEditorInput input) {
-
 		if (input instanceof IFileEditorInput) {
 			IFile file= ((IFileEditorInput) input).getFile();
 			IClassFileEditorInput classFileInput= new ExternalClassFileEditorInput(file);
-			if (classFileInput.getClassFile() != null)
+			if (classFileInput.getClassFile() != null) {
 				input= classFileInput;
+			}
 		}
 
 		return input;
@@ -690,28 +671,29 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 						IJavaModelStatusConstants.INVALID_RESOURCE,
 						JavaEditorMessages.ClassFileEditor_error_classfile_not_on_classpath,
 						null));
-			} else {
-				throw e;
 			}
+			throw e;
 		}
 
 		IDocumentProvider documentProvider= getDocumentProvider();
-		if (documentProvider instanceof ClassFileDocumentProvider)
+		if (documentProvider instanceof ClassFileDocumentProvider) {
 			((ClassFileDocumentProvider) documentProvider).removeInputChangeListener(this);
+		}
 
 		super.doSetInput(input);
 
 		documentProvider= getDocumentProvider();
-		if (documentProvider instanceof ClassFileDocumentProvider)
+		if (documentProvider instanceof ClassFileDocumentProvider) {
 			((ClassFileDocumentProvider) documentProvider).addInputChangeListener(this);
+		}
 
 		verifyInput(getEditorInput());
 
 		JavaPlugin.getDefault().getASTProvider().activeJavaEditorChanged(this);
 
-		if (fSemanticManager != null)
+		if (fSemanticManager != null) {
 			installSemanticHighlighting();
-
+		}
 	}
 
 	/*
@@ -729,15 +711,18 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				CompilationUnit ast= SharedASTProviderCore.getAST(getInputJavaElement(), SharedASTProviderCore.WAIT_YES, null);
-				if (fOverrideIndicatorManager != null)
+				if (fOverrideIndicatorManager != null) {
 					fOverrideIndicatorManager.reconciled(ast, true, monitor);
+				}
 				if (fSemanticManager != null) {
 					SemanticHighlightingReconciler reconciler= fSemanticManager.getReconciler();
-					if (reconciler != null)
+					if (reconciler != null) {
 						reconciler.reconciled(ast, false, monitor);
+					}
 				}
-				if (isMarkingOccurrences())
+				if (isMarkingOccurrences()) {
 					installOccurrencesFinder(false);
+				}
 				return Status.OK_STATUS;
 			}
 		};
@@ -751,7 +736,6 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	 */
 	@Override
 	public void createPartControl(Composite parent) {
-
 		fParent= new Composite(parent, SWT.NONE);
 		fStackLayout= new StackLayout();
 		fParent.setLayout(fStackLayout);
@@ -774,8 +758,9 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	}
 
 	private JavaModelException probeInputForSource(IEditorInput input) {
-		if (input == null)
+		if (input == null) {
 			return null;
+		}
 
 		IClassFileEditorInput classFileEditorInput= (IClassFileEditorInput) input;
 		IClassFile file= classFileEditorInput.getClassFile();
@@ -796,9 +781,9 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	 * @throws JavaModelException if an exception occurs while accessing its corresponding resource
 	 */
 	private void verifyInput(IEditorInput input) throws JavaModelException {
-
-		if (fParent == null || input == null)
+		if (fParent == null || input == null) {
 			return;
+		}
 
 		IClassFileEditorInput classFileEditorInput= (IClassFileEditorInput) input;
 		IClassFile file= classFileEditorInput.getClassFile();
@@ -810,10 +795,10 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 
 		// show source attachment form if no source found
 		if (file.getSourceRange() == null) {
-
 			// dispose old source attachment form
-			if (fSourceAttachmentForm != null)
+			if (fSourceAttachmentForm != null) {
 				fSourceAttachmentForm.dispose();
+			}
 
 			SourceAttachmentForm form= new SourceAttachmentForm(file);
 			fSourceAttachmentForm= form.createControl(fParent);
@@ -831,11 +816,11 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 				};
 				copyAction.setActionDefinitionId(IWorkbenchCommandConstants.EDIT_COPY);
 				setAction(ITextEditorActionConstants.COPY, copyAction);
-				copyAction.setEnabled(fNoSourceTextWidget.getSelectionText().length() > 0);
+				copyAction.setEnabled(!fNoSourceTextWidget.getSelectionText().isEmpty());
 				fNoSourceTextWidget.addSelectionListener(new SelectionListener() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
-						copyAction.setEnabled(fNoSourceTextWidget.getSelectionText().length() > 0);
+						copyAction.setEnabled(!fNoSourceTextWidget.getSelectionText().isEmpty());
 					}
 					@Override
 					public void widgetDefaultSelected(SelectionEvent e) {
@@ -852,14 +837,11 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 				};
 				selectAllAction.setActionDefinitionId(IWorkbenchCommandConstants.EDIT_SELECT_ALL);
 				setAction(ITextEditorActionConstants.SELECT_ALL, selectAllAction);
-				copyAction.setEnabled(fNoSourceTextWidget.getSelectionText().length() > 0);
+				copyAction.setEnabled(!fNoSourceTextWidget.getSelectionText().isEmpty());
 				copyQualifiedName.setEnabled(false);
-
-
 			}
 
 			annotateAction.setEnabled(false);
-
 		} else { // show source viewer
 
 			if (fSourceAttachmentForm != null) {
@@ -876,10 +858,9 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 
 			IJavaProject javaProject= file.getJavaProject();
 			boolean useExternalAnnotations= javaProject != null
-					&& javaProject.getOption(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, true).equals(JavaCore.ENABLED)
+					&& JavaCore.ENABLED.equals(javaProject.getOption(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, true))
 					&& ExternalNullAnnotationChangeProposals.hasAnnotationPathInWorkspace(javaProject, file);
 			annotateAction.setEnabled(useExternalAnnotations);
-
 		}
 
 		IAction currentCopyAction= getAction(ITextEditorActionConstants.COPY);
@@ -900,7 +881,6 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 			actionBars.setGlobalActionHandler(ITextEditorActionConstants.SELECT_ALL, getAction(ITextEditorActionConstants.SELECT_ALL));
 			actionBars.updateActionBars();
 		}
-
 	}
 
 	/*
@@ -917,26 +897,19 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	@Override
 	protected ISourceViewer createJavaSourceViewer(Composite parent, IVerticalRuler ruler, IOverviewRuler overviewRuler, boolean isOverviewRulerVisible, int styles, IPreferenceStore store) {
 		return new JavaSourceViewer(parent, ruler, overviewRuler, isOverviewRulerVisible, styles, store) {
-
 			@Override
 			public boolean requestWidgetToken(IWidgetTokenKeeper requester) {
-				if (PlatformUI.getWorkbench().getHelpSystem().isContextHelpDisplayed())
-					return false;
-				return super.requestWidgetToken(requester);
+				return !PlatformUI.getWorkbench().getHelpSystem().isContextHelpDisplayed() && super.requestWidgetToken(requester);
 			}
 
 			@Override
 			public boolean requestWidgetToken(IWidgetTokenKeeper requester, int priority) {
-				if (PlatformUI.getWorkbench().getHelpSystem().isContextHelpDisplayed())
-					return false;
-				return super.requestWidgetToken(requester, priority);
+				return !PlatformUI.getWorkbench().getHelpSystem().isContextHelpDisplayed() && super.requestWidgetToken(requester, priority);
 			}
 
 			@Override
 			public boolean canDoOperation(int operation) {
-				if (operation == JavaSourceViewer.ANNOTATE_CLASS_FILE)
-					return true;
-				return super.canDoOperation(operation);
+				return operation == JavaSourceViewer.ANNOTATE_CLASS_FILE || super.canDoOperation(operation);
 			}
 
 			@Override
@@ -960,8 +933,9 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	public void dispose() {
 		// http://bugs.eclipse.org/bugs/show_bug.cgi?id=18510
 		IDocumentProvider documentProvider= getDocumentProvider();
-		if (documentProvider instanceof ClassFileDocumentProvider)
+		if (documentProvider instanceof ClassFileDocumentProvider) {
 			((ClassFileDocumentProvider) documentProvider).removeInputChangeListener(this);
+		}
 		super.dispose();
 	}
 
@@ -972,8 +946,8 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	public void setFocus() {
 		super.setFocus();
 
-		if (fSourceAttachmentForm != null && !fSourceAttachmentForm.isDisposed())
+		if (fSourceAttachmentForm != null && !fSourceAttachmentForm.isDisposed()) {
 			fSourceAttachmentForm.setFocus();
+		}
 	}
-
 }
