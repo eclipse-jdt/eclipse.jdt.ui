@@ -1004,8 +1004,6 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	private final static String CLOSE_BRACKETS= PreferenceConstants.EDITOR_CLOSE_BRACKETS;
 
 
-	/** The editor's save policy */
-	protected ISavePolicy fSavePolicy;
 	/** Listener to annotation model changes that updates the error tick in the tab image */
 	private JavaEditorErrorTickUpdater fJavaEditorErrorTickUpdater;
 	/**
@@ -1054,7 +1052,6 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		setRulerContextMenuId("#CompilationUnitRulerContext"); //$NON-NLS-1$
 		setOutlinerContextMenuId("#CompilationUnitOutlinerContext"); //$NON-NLS-1$
 		// don't set help contextId, we install our own help context
-		fSavePolicy= null;
 
 		fJavaEditorErrorTickUpdater= new JavaEditorErrorTickUpdater(this);
 		fCorrectionCommands= null;
@@ -1261,7 +1258,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		IDocumentProvider p= getDocumentProvider();
 		if (p instanceof ICompilationUnitDocumentProvider) {
 			ICompilationUnitDocumentProvider cp= (ICompilationUnitDocumentProvider) p;
-			cp.setSavePolicy(fSavePolicy);
+			cp.setSavePolicy(null);
 		}
 		try {
 			super.performSave(overwrite, progressMonitor);
