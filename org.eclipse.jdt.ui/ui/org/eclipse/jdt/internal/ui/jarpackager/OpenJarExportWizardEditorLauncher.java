@@ -16,6 +16,7 @@ package org.eclipse.jdt.internal.ui.jarpackager;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import org.eclipse.swt.widgets.Shell;
 
@@ -60,8 +61,8 @@ public class OpenJarExportWizardEditorLauncher implements IEditorLauncher {
 			}
 
 			jarPackage= new JarPackageData();
-			try {
-				reader= jarPackage.createJarDescriptionReader(new FileInputStream(file));
+			try (InputStream is= new FileInputStream(file)){
+				reader= jarPackage.createJarDescriptionReader(is);
 				reader.read(jarPackage);
 			} finally {
 				if (reader != null)
