@@ -106,32 +106,17 @@ public final class JarImportWizard extends BinaryRefactoringHistoryWizard implem
 						if (uri != null) {
 							final File file= new File(uri);
 							if (file.exists()) {
-								ZipFile zip= null;
-								try {
-									zip= new ZipFile(file, ZipFile.OPEN_READ);
+								try (ZipFile zip= new ZipFile(file, ZipFile.OPEN_READ)) {
 									ZipEntry entry= zip.getEntry(JarPackagerUtil.getRefactoringsEntry());
 									if (entry != null) {
-										InputStream stream= null;
-										try {
-											stream= zip.getInputStream(entry);
+										try (InputStream stream= zip.getInputStream(entry)) {
 											final RefactoringHistory existing= RefactoringCore.getHistoryService().readRefactoringHistory(stream, JavaRefactoringDescriptor.JAR_MIGRATION | JavaRefactoringDescriptor.JAR_REFACTORING);
 											if (existing != null)
 												fHistoryDelta= incoming.removeAll(existing).getDescriptors();
-										} finally {
-											if (stream != null) {
-												try {
-													stream.close();
-												} catch (IOException exception) {
-													// Do nothing
-												}
-											}
 										}
 									}
 								} catch (IOException exception) {
-									try {
-										zip.close();
-									} catch(IOException e){
-									}
+									// Do nothing
 								}
 							}
 						}
