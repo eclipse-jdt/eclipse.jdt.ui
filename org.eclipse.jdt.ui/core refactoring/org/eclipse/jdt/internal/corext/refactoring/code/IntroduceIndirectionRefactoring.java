@@ -235,7 +235,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 	private Map<IMember, IncomingMemberVisibilityAdjustment> fIntermediaryAdjustments;
 
 
-	private class NoOverrideProgressMonitor extends SubProgressMonitor {
+	private static class NoOverrideProgressMonitor extends SubProgressMonitor {
 
 		public NoOverrideProgressMonitor(IProgressMonitor monitor, int ticks) {
 			super(monitor, ticks, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL);

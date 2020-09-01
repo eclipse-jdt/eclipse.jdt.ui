@@ -99,7 +99,7 @@ public class ChangeTypeWizard extends RefactoringWizard {
 	/**
 	 * A JavaElementLabelProvider that supports graying out of invalid types.
 	 */
-	private class ChangeTypeLabelProvider extends BindingLabelProvider
+	private static class ChangeTypeLabelProvider extends BindingLabelProvider
 										  implements IColorProvider {
 
 		private Color fGrayColor;

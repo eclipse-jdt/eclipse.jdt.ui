@@ -1046,7 +1046,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 		}
 	}
 
-	public class Images {
+	public static class Images {
 		private Map<ImageDescriptor, Image> imagesMap= new HashMap<>();
 
 		protected Images(Composite rootComposite) {

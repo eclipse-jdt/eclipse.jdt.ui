@@ -69,7 +69,7 @@ public class SourceContainerDialog extends ElementTreeSelectionDialog {
 	 * A TypedViewerFilter that accepts only PackageFragments and JavaProjects.
 	 * PackageFragments are only accepted if they are of the kind K_SOURCE.
 	 */
-	private class JavaTypedViewerFilter extends TypedViewerFilter {
+	private static class JavaTypedViewerFilter extends TypedViewerFilter {
 
 		public JavaTypedViewerFilter() {
 			super(new Class[]{IPackageFragmentRoot.class, IJavaProject.class});

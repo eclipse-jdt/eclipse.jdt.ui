@@ -66,7 +66,7 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
     private DeferredTreeContentManager fManager;
     private CallHierarchyViewPart fPart;
 
-    private class MethodWrapperRunnable implements IRunnableWithProgress {
+    private static class MethodWrapperRunnable implements IRunnableWithProgress {
         private MethodWrapper fMethodWrapper;
         private MethodWrapper[] fCalls= null;
 

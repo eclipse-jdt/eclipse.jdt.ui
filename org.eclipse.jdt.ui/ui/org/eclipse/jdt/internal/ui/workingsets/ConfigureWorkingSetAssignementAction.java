@@ -204,7 +204,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 	/**
 	 * Label provider for GrayedCheckedModelElements
 	 */
-	private class GrayedCheckedModelLabelProvider extends LabelProvider {
+	private static class GrayedCheckedModelLabelProvider extends LabelProvider {
 
 		private Map<ImageDescriptor, Image> fIcons;
 

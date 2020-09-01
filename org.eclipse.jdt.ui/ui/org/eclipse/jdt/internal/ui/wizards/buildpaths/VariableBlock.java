@@ -342,7 +342,7 @@ public class VariableBlock {
 		return false;
 	}
 
-	private class VariableBlockRunnable implements IRunnableWithProgress {
+	private static class VariableBlockRunnable implements IRunnableWithProgress {
 		private final List<String> fToRemove;
 		private final List<CPVariableElement> fToChange;
 

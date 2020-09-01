@@ -28,7 +28,7 @@ import org.eclipse.jdt.ui.JavaUI;
 
 public class InitializeAfterLoadJob extends UIJob {
 
-	private final class RealJob extends Job {
+	private final static class RealJob extends Job {
 		public RealJob(String name) {
 			super(name);
 		}

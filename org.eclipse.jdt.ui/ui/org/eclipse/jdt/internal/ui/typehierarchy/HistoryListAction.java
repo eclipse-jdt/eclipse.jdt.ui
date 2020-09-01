@@ -48,7 +48,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 
 public class HistoryListAction extends Action {
 
-	private class HistoryListDialog extends StatusDialog {
+	private static class HistoryListDialog extends StatusDialog {
 
 		private ListDialogField<IJavaElement[]> fHistoryList;
 		private IStatus fHistoryStatus;

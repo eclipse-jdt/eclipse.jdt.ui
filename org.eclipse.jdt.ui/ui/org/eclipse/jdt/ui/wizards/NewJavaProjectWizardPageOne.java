@@ -769,7 +769,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		}
 	}
 
-	private final class WorkingSetGroup {
+	private final static class WorkingSetGroup {
 
 		private WorkingSetConfigurationBlock fWorkingSetBlock;
 

@@ -88,7 +88,7 @@ public class GenerateToStringAction extends GenerateMethodAbstractAction {
 
 	private GenerateToStringOperation operation;
 
-	private class ToStringInfo {
+	private static class ToStringInfo {
 
 		public boolean foundToString= false;
 

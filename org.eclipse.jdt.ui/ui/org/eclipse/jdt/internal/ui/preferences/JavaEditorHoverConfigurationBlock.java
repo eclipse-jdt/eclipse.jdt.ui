@@ -138,7 +138,7 @@ class JavaEditorHoverConfigurationBlock implements IPreferenceConfigurationBlock
 	}
 
 
-	private class JavaEditorTextHoverDescriptorContentProvider implements IStructuredContentProvider {
+	private static class JavaEditorTextHoverDescriptorContentProvider implements IStructuredContentProvider {
 
 		@Override
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {

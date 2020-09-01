@@ -552,7 +552,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 		root.addChild(unitRewriter.rewriteAST());
 	}
 
-	private class SourceRangeComputer extends TargetSourceRangeComputer {
+	private static class SourceRangeComputer extends TargetSourceRangeComputer {
 		@Override
 		public SourceRange computeSourceRange(ASTNode node) {
 			return new SourceRange(node.getStartPosition(),node.getLength());

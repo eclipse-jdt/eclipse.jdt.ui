@@ -45,7 +45,7 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.IModifyDialogTabPage;
 
 public abstract class CleanUpSelectionDialog extends StatusDialog implements IModifyDialogTabPage.IModificationListener {
 
-	protected final class NamedCleanUpTabPage {
+	protected final static class NamedCleanUpTabPage {
 
 		private final String fName;
 		private final CleanUpTabPage fPage;

@@ -31,7 +31,7 @@ import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
  */
 public class SpellingPreferenceBlock implements ISpellingPreferenceBlock {
 
-	private class NullStatusChangeListener implements IStatusChangeListener {
+	private static class NullStatusChangeListener implements IStatusChangeListener {
 
 		/*
 		 * @see org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener#statusChanged(org.eclipse.core.runtime.IStatus)

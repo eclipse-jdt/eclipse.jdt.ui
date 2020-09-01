@@ -270,7 +270,7 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 		store.setValue(str, buf.toString());
 	}
 
-	private class MemberSortLabelProvider extends LabelProvider {
+	private static class MemberSortLabelProvider extends LabelProvider {
 
 		public MemberSortLabelProvider() {
 		}

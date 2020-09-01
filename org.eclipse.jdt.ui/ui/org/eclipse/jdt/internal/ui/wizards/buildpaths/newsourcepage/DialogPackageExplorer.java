@@ -245,7 +245,7 @@ public class DialogPackageExplorer implements IMenuListener, IPostSelectionProvi
      * folder (if any) as first child of a source folder. The other java elements
      * are sorted in the normal way.
      */
-    private final class ExtendedJavaElementSorter extends JavaElementComparator {
+    private final static class ExtendedJavaElementSorter extends JavaElementComparator {
         public ExtendedJavaElementSorter() {
             super();
         }

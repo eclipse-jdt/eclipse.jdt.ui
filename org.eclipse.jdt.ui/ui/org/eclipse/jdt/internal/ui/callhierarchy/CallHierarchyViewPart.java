@@ -136,7 +136,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyViewPart, ISelectionChangedListener {
 
 
-	private class CallHierarchySelectionProvider extends SelectionProviderMediator {
+	private static class CallHierarchySelectionProvider extends SelectionProviderMediator {
 
 		public CallHierarchySelectionProvider(StructuredViewer[] viewers) {
 			super(viewers, null);

@@ -134,7 +134,7 @@ public class ModuleDialog extends StatusDialog {
 
 	}
 
-	public class AddDetailsLabelProvider extends LabelProvider implements ITableLabelProvider {
+	public static class AddDetailsLabelProvider extends LabelProvider implements ITableLabelProvider {
 
 		@Override
 		public Image getColumnImage(Object element, int columnIndex) {

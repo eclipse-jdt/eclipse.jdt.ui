@@ -34,7 +34,7 @@ public class DeferredMethodWrapper extends MethodWrapperWorkbenchAdapter impleme
      * A simple job scheduling rule for serializing jobs that shouldn't be run
      * concurrently.
      */
-    private class BatchSimilarSchedulingRule implements ISchedulingRule {
+    private static class BatchSimilarSchedulingRule implements ISchedulingRule {
         public String id;
 
         public BatchSimilarSchedulingRule(String id) {

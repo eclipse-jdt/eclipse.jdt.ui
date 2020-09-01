@@ -94,7 +94,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 	 *
 	 * @since 3.0
 	 */
-	class FilterActionMenuContributionItem extends ContributionItem {
+	static class FilterActionMenuContributionItem extends ContributionItem {
 
 		private int fItemNumber;
 		private boolean fState;

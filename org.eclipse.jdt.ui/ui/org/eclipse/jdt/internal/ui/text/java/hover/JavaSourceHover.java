@@ -94,7 +94,7 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 	 */
 	private IJavaElement fJavaElement;
 
-	class JavaSourceInformationInput {
+	static class JavaSourceInformationInput {
 		private IJavaElement fElement;
 
 		private String fHoverInfo;

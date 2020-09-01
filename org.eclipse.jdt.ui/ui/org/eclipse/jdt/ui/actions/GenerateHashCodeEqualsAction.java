@@ -87,7 +87,7 @@ public final class GenerateHashCodeEqualsAction extends GenerateMethodAbstractAc
 		public boolean foundFinalEquals= false;
 	}
 
-	private class HashCodeEqualsGenerationSettings extends CodeGenerationSettings {
+	private static class HashCodeEqualsGenerationSettings extends CodeGenerationSettings {
 		public boolean useInstanceOf= false;
 		public boolean useBlocks= false;
 		public boolean useJ7HashEquals= false;

@@ -59,7 +59,7 @@ public class ModulePatchSourceSelectionDialog extends TrayDialog {
 	/**
 	 * Selective tree showing only java projects and their source folders.
 	 */
-	class SourcesContentProvider implements ITreeContentProvider {
+	static class SourcesContentProvider implements ITreeContentProvider {
 		@Override
 		public Object[] getElements(Object inputElement) {
 			if (inputElement instanceof List<?>)

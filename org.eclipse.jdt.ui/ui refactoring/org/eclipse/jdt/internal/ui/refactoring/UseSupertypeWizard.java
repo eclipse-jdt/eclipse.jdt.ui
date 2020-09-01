@@ -78,7 +78,7 @@ public class UseSupertypeWizard extends RefactoringWizard{
 
 	private static class UseSupertypeInputPage extends UserInputWizardPage{
 
-		private class UseSupertypeContentProvider implements ITreeContentProvider {
+		private static class UseSupertypeContentProvider implements ITreeContentProvider {
 
 			private ITypeHierarchy fHierarchy;
 

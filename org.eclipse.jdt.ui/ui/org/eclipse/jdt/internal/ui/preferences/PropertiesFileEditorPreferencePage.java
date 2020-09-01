@@ -254,7 +254,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 	/**
 	 * Color list content provider.
 	 */
-	private class ColorListContentProvider implements IStructuredContentProvider {
+	private static class ColorListContentProvider implements IStructuredContentProvider {
 
 		/*
 		 * @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(java.lang.Object)

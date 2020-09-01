@@ -98,7 +98,7 @@ public class CategoryFilterActionGroup extends ActionGroup {
 
 	}
 
-	private class CategoryFilterSelectionDialog extends SelectionStatusDialog implements IListAdapter<String> {
+	private static class CategoryFilterSelectionDialog extends SelectionStatusDialog implements IListAdapter<String> {
 
 		private static final int SELECT_ALL= 0;
 		private static final int DESELECT_ALL= 1;

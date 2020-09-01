@@ -102,7 +102,7 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 		};
 	}
 
-	private final class DefaultTableLabelProvider extends LabelProvider implements ITableLabelProvider {
+	private final static class DefaultTableLabelProvider extends LabelProvider implements ITableLabelProvider {
 
 		/*
 		 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnImage(java.lang.Object, int)

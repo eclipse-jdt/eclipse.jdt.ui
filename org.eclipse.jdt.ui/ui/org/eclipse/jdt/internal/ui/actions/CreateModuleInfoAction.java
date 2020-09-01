@@ -64,7 +64,7 @@ import org.eclipse.jdt.internal.ui.wizards.NewModuleInfoWizard;
 
 public class CreateModuleInfoAction implements IObjectActionDelegate {
 
-	private class ModuleInfoCreationDialog extends WizardDialog {
+	private static class ModuleInfoCreationDialog extends WizardDialog {
 
 		public ModuleInfoCreationDialog(Shell parentShell, IWizard newWizard) {
 			super(parentShell, newWizard);

@@ -334,7 +334,7 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 	/**
 	 * @since 3.0
 	 */
-	public class LinearLayouter {
+	public static class LinearLayouter {
 
 		private static final int ANNOTATION_SIZE= 14;
 		private static final int BORDER_WIDTH= 2;

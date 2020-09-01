@@ -202,7 +202,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		}
 	}
 
-	private final class CleanUpRefactoringProgressMonitor extends SubProgressMonitor {
+	private final static class CleanUpRefactoringProgressMonitor extends SubProgressMonitor {
 
 		private double fRealWork;
 		private int fFlushCount;

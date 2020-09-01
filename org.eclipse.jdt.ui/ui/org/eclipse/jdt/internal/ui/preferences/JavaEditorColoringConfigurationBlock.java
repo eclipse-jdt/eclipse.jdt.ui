@@ -215,7 +215,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 	 *
 	 * @since 3.0
 	 */
-	private class ColorListLabelProvider extends LabelProvider {
+	private static class ColorListLabelProvider extends LabelProvider {
 		/*
 		 * @see org.eclipse.jface.viewers.ILabelProvider#getText(java.lang.Object)
 		 */

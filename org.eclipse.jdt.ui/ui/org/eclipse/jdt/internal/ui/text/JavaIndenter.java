@@ -45,7 +45,7 @@ public final class JavaIndenter {
 	 * The JDT Core preferences.
 	 * @since 3.2
 	 */
-	private final class CorePrefs {
+	private final static class CorePrefs {
 		final boolean prefUseTabs;
 		final int prefTabSize;
 		final int prefIndentationSize;
