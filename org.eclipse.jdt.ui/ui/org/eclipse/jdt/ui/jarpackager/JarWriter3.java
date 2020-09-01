@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -12,6 +12,7 @@
  *     IBM Corporation - initial API and implementation
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 83258 [jar exporter] Deploy java application as executable jar
  *     Ferenc Hechler <ferenc_hechler@users.sourceforge.net> - [jar exporter] export directory entries in "Runnable JAR File" - https://bugs.eclipse.org/bugs/show_bug.cgi?id=243163
+ *     Microsoft Corporation - moved some methods to JarPackagerUtilCore for jdt.core.manipulation use
  *******************************************************************************/
 package org.eclipse.jdt.ui.jarpackager;
 
@@ -58,12 +59,13 @@ import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.jarpackager.JarPackagerUtilCore;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerMessages;
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 
 /**
@@ -82,6 +84,28 @@ public class JarWriter3 {
 	private JarOutputStream fJarOutputStream;
 
 	private JarPackageData fJarPackage;
+
+	/**
+	* Gets the fJarOutputStream of this JarWriter3
+	*
+	* @return the fJarOutputStream of this JarWriter3
+	*
+	* @since 3.22
+	*/
+	public JarOutputStream getJarOutputStream() {
+		return fJarOutputStream;
+	}
+
+	/**
+	* Gets the fDirectories of this JarWriter3
+	*
+	* @return the fDirectories of this JarWriter3
+	*
+	* @since 3.22
+	*/
+	public Set<String> getDirectories(){
+		return fDirectories;
+	}
 
 	/**
 	 * Creates an instance which is used to create a JAR based
@@ -263,24 +287,7 @@ public class JarWriter3 {
 	 * @since 3.4
 	 */
 	protected void addEntry(JarEntry entry, InputStream content) throws IOException {
-		byte[] readBuffer= new byte[4096];
-		try {
-			fJarOutputStream.putNextEntry(entry);
-			int count;
-			while ((count= content.read(readBuffer, 0, readBuffer.length)) != -1)
-				fJarOutputStream.write(readBuffer, 0, count);
-		} finally  {
-			if (content != null)
-				content.close();
-
-			/*
-			 * Commented out because some JREs throw an NPE if a stream
-			 * is closed twice. This works because
-			 * a) putNextEntry closes the previous entry
-			 * b) closing the stream closes the last entry
-			 */
-			// fJarOutputStream.closeEntry();
-		}
+		JarPackagerUtilCore.addEntry(entry, content, fJarOutputStream);
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,6 +11,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 83258 [jar exporter] Deploy java application as executable jar
+ *     Microsoft Corporation - moved some methods to JarPackagerUtilCore for jdt.core.manipulation uses
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.jarpackager;
 
@@ -39,6 +40,17 @@ public abstract class JarBuilder implements IJarBuilder {
 	@Override
 	public void open(JarPackageData jarPackage, Shell shell, MultiStatus status) throws CoreException {
 		fStatus= status;
+	}
+
+	/**
+	* Gets the fStatus of this JarBuilder
+	*
+	* @return the fStatus of this JarBuilder
+	*
+	* @since 3.22
+	*/
+	public MultiStatus getStatus() {
+		return fStatus;
 	}
 
 	//some methods for convenience

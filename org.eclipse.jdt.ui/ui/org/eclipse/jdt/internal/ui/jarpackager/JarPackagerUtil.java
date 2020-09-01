@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -12,6 +12,7 @@
  *     IBM Corporation - initial API and implementation
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 83258 [jar exporter] Deploy java application as executable jar
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 219530 [jar application] add Jar-in-Jar ClassLoader option
+ *     Microsoft Corporation - moved some methods to JarPackagerUtilCore for jdt.core.manipulation uses
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.jarpackager;
 
@@ -23,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.zip.CRC32;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -53,6 +53,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.jarpackager.JarPackagerUtilCore;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
@@ -256,25 +257,7 @@ public final class JarPackagerUtil {
 	 *             if an input/output error occurs
 	 */
 	public static void calculateCrcAndSize(final ZipEntry entry, final InputStream stream, final byte[] buffer) throws IOException {
-		int size= 0;
-		final CRC32 crc= new CRC32();
-		int count;
-		try {
-			while ((count= stream.read(buffer, 0, buffer.length)) != -1) {
-				crc.update(buffer, 0, count);
-				size+= count;
-			}
-		} finally {
-			if (stream != null) {
-				try {
-					stream.close();
-				} catch (IOException exception) {
-					// Do nothing
-				}
-			}
-		}
-		entry.setSize(size);
-		entry.setCrc(crc.getValue());
+		JarPackagerUtilCore.calculateCrcAndSize(entry, stream, buffer);
 	}
 
 	/**
