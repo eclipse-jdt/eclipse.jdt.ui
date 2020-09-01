@@ -47,7 +47,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 public class DefaultModulepathFixProcessor extends DefaultClasspathFixProcessor {
 
-	public static String MODULE_SEARCH= "Module/:"; //$NON-NLS-1$
+	public static final String MODULE_SEARCH= "Module/:"; //$NON-NLS-1$
 
 	@Override
 	public ClasspathFixProposal[] getFixImportProposals(IJavaProject project, String missingType) throws CoreException {

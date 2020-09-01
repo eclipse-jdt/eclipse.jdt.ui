@@ -34,7 +34,7 @@ import org.eclipse.jdt.internal.ui.workingsets.WorkingSetComparator;
 public class SearchUtil {
 
 	// LRU working sets
-	public static int LRU_WORKINGSET_LIST_SIZE= 3;
+	public static final int LRU_WORKINGSET_LIST_SIZE= 3;
 	private static LRUWorkingSetsList fgLRUWorkingSets;
 	// Settings store
 	private static final String DIALOG_SETTINGS_KEY= "CallHierarchySearchScope"; //$NON-NLS-1$
