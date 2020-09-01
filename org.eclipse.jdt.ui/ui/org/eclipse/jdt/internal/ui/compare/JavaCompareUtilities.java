@@ -18,8 +18,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
@@ -345,56 +343,6 @@ public class JavaCompareUtilities {
 			return s.getBytes(encoding);
 		} catch (UnsupportedEncodingException e) {
 			return s.getBytes();
-		}
-	}
-
-	/**
-	 * Breaks the contents of the given input stream into an array of strings.
-	 * The function assumes that the input stream uses the platform's default encoding
-	 * (<code>ResourcesPlugin.getEncoding()</code>).
-	 * Returns null if an error occurred.
-	 */
-	static String[] readLines(InputStream is2, String encoding) {
-
-		BufferedReader reader= null;
-		try {
-			reader= new BufferedReader(new InputStreamReader(is2, encoding));
-			StringBuilder sb= new StringBuilder();
-			List<String> list= new ArrayList<>();
-			while (true) {
-				int c= reader.read();
-				if (c == -1)
-					break;
-				sb.append((char)c);
-				if (c == '\r') {	// single CR or a CR followed by LF
-					c= reader.read();
-					if (c == -1)
-						break;
-					sb.append((char)c);
-					if (c == '\n') {
-						list.add(sb.toString());
-						sb= new StringBuilder();
-					}
-				} else if (c == '\n') {	// a single LF
-					list.add(sb.toString());
-					sb= new StringBuilder();
-				}
-			}
-			if (sb.length() > 0)
-				list.add(sb.toString());
-			return list.toArray(new String[list.size()]);
-
-		} catch (IOException ex) {
-			return null;
-
-		} finally {
-			if (reader != null) {
-				try {
-					reader.close();
-				} catch (IOException ex) {
-					// silently ignored
-				}
-			}
 		}
 	}
 
