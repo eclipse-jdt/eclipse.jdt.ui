@@ -18,8 +18,6 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -39,7 +37,6 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 
-@RunWith(JUnit4.class)
 public class WorkspaceScopeTest {
 	private IJavaProject fProject1;
 	private IJavaProject fProject2;

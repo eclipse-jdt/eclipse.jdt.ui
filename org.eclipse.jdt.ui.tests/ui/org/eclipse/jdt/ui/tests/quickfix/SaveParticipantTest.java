@@ -19,8 +19,6 @@ import java.util.Hashtable;
 
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
@@ -47,7 +45,6 @@ import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
-@RunWith(JUnit4.class)
 public class SaveParticipantTest extends CleanUpTestCase {
 
 	@Rule

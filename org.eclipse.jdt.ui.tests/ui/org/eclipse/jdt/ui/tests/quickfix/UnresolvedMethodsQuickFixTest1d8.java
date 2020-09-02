@@ -21,8 +21,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.NullTestUtils;
@@ -58,7 +56,6 @@ import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 /**
  * Those tests are made to run on Java Spider 1.8 .
  */
-@RunWith(JUnit4.class)
 public class UnresolvedMethodsQuickFixTest1d8 extends QuickFixTest {
 
 	@Rule

@@ -38,12 +38,14 @@ import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.manipulation.JavaManipulation;
 
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+import org.eclipse.jdt.internal.corext.refactoring.util.TightSourceRangeComputer;
 
 public abstract class ConvertLoopOperation extends CompilationUnitRewriteOperation {
 
@@ -154,6 +156,24 @@ public abstract class ConvertLoopOperation extends CompilationUnitRewriteOperati
 		results.addAll(Arrays.asList(fUsedNames));
 
 		return results.toArray(new String[results.size()]);
+	}
+
+	@Override
+	public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModelCore positionGroups) throws CoreException {
+		TextEditGroup group= createTextEditGroup(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description, cuRewrite);
+		ASTRewrite rewrite= cuRewrite.getASTRewrite();
+
+		TightSourceRangeComputer rangeComputer;
+		if (rewrite.getExtendedSourceRangeComputer() instanceof TightSourceRangeComputer) {
+			rangeComputer= (TightSourceRangeComputer)rewrite.getExtendedSourceRangeComputer();
+		} else {
+			rangeComputer= new TightSourceRangeComputer();
+		}
+		rangeComputer.addTightSourceNode(getForStatement());
+		rewrite.setTargetSourceRangeComputer(rangeComputer);
+
+		Statement statement= convert(cuRewrite, group, positionGroups);
+		rewrite.replace(getForStatement(), statement, group);
 	}
 
 	public static String modifybasename(String suggestedName) {

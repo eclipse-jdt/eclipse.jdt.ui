@@ -13,9 +13,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring.reorg;
 
-import junit.framework.Test;
+import org.junit.FixMethodOrder;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runners.MethodSorters;
 
-import org.eclipse.test.OrderedTestSuite;
 import org.eclipse.test.performance.Dimension;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -27,43 +29,32 @@ import org.eclipse.jdt.core.IPackageFragment;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameVirtualMethodProcessor;
 
-import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestSetup;
+import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringPerformanceTestSetup;
 
-public class RenameMethodWithOverloadPerfTests extends RepeatingRefactoringPerformanceTestCase {
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+public class RenameMethodWithOverloadPerfTests extends RepeatingRefactoringPerformanceTestCaseCommon {
 
-	public static Test suite() {
-		// we must make sure that cold is executed before warm
-		OrderedTestSuite suite= new OrderedTestSuite(RenameMethodWithOverloadPerfTests.class, new String[] {
-			"testCold_10_10",
-			"test_10_10",
-			"test_100_10",
-			"test_1000_10",
-		});
-		return new RefactoringPerformanceTestSetup(suite);
-	}
+	@Rule
+	public RefactoringPerformanceTestSetup rpts= new RefactoringPerformanceTestSetup();
 
-	public static Test setUpTest(Test someTest) {
-		return new RefactoringPerformanceTestSetup(someTest);
-	}
-
-	public RenameMethodWithOverloadPerfTests(String name) {
-		super(name);
-	}
-
-	public void testCold_10_10() throws Exception {
+	@Test
+	public void testACold_10_10() throws Exception {
 		executeRefactoring(10, 10, false, 10);
 	}
 
-	public void test_10_10() throws Exception {
+	@Test
+	public void testB_10_10() throws Exception {
 		executeRefactoring(10, 10, true, 10);
 	}
 
-	public void test_100_10() throws Exception {
+	@Test
+	public void testC_100_10() throws Exception {
 		tagAsSummary("Rename method with overloading", Dimension.ELAPSED_PROCESS);
 		executeRefactoring(100, 10, true, 10);
 	}
 
-	public void test_1000_10() throws Exception {
+	@Test
+	public void testD_1000_10() throws Exception {
 		executeRefactoring(1000, 10, true, 10);
 	}
 

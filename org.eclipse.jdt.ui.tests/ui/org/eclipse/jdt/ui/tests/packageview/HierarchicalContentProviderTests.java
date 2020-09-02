@@ -24,8 +24,6 @@ import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExternalResource;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
@@ -46,7 +44,6 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerContentProvider;
 
-@RunWith(JUnit4.class)
 public class HierarchicalContentProviderTests {
 
 	private static class MyTestSetup extends ExternalResource {

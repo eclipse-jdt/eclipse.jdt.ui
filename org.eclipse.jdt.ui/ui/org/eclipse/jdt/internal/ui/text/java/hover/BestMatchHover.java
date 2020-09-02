@@ -73,9 +73,9 @@ public class BestMatchHover extends AbstractJavaEditorTextHover {
 			return;
 
 		boolean done= true;
-		int i= -1;
-		for (JavaEditorTextHoverDescriptor spec : fTextHoverSpecifications) {
-			i++;
+
+		for (int i= 0; i < fTextHoverSpecifications.size(); i++) {
+			JavaEditorTextHoverDescriptor spec= fTextHoverSpecifications.get(i);
 			if (spec == null)
 				continue;
 

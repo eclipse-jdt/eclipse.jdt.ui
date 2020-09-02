@@ -92,8 +92,7 @@ public class JUnitStubUtility {
 			try {
 				edit.apply(doc);
 				return doc.get();
-			} catch (MalformedTreeException e) {
-			} catch (BadLocationException e) {
+			} catch (MalformedTreeException | BadLocationException e) {
 			}
 		}
 		return sourceString;

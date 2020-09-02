@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,16 +15,12 @@ package org.eclipse.jdt.ui.tests.refactoring.reorg;
 
 import org.eclipse.test.performance.Dimension;
 
-import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestCase;
+import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestCaseCommon;
 
 
-public abstract class RepeatingRefactoringPerformanceTestCase extends RefactoringPerformanceTestCase {
+public abstract class RepeatingRefactoringPerformanceTestCaseCommon extends RefactoringPerformanceTestCaseCommon {
 
 	protected TestProject fTestProject;
-
-	public RepeatingRefactoringPerformanceTestCase(String name) {
-		super(name);
-	}
 
 	public TestProject getTestProject() {
 		return fTestProject;

@@ -19,8 +19,6 @@ import java.util.Hashtable;
 
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import org.osgi.framework.Bundle;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -49,7 +47,6 @@ import org.eclipse.jdt.internal.ui.fix.NullAnnotationsCleanUp;
 /**
  * Those tests are made to run on Java Spider 1.8 .
  */
-@RunWith(JUnit4.class)
 public class NullAnnotationsCleanUpTest1d8 extends CleanUpTestCase {
 
 	@Rule

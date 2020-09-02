@@ -25,8 +25,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -55,7 +53,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 
-@RunWith(JUnit4.class)
 public class AnnotateAssistTest1d5 extends AbstractAnnotateAssistTests {
 	@Rule
 	public ProjectTestSetup projectSetup= new ProjectTestSetup();

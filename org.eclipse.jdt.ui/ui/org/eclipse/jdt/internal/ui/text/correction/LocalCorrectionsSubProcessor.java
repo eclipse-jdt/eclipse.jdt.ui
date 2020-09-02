@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1978,18 +1978,17 @@ public class LocalCorrectionsSubProcessor {
 		listRewrite.insertLast(newSwitchCase, null);
 
 		if (ASTHelper.isSwitchCaseExpressionsSupportedInAST(ast)) {
+			boolean isArrow= false;
 			if (statements.size() > 0) {
 				Statement firstStatement= statements.get(0);
 				SwitchCase switchCase= (SwitchCase) firstStatement;
-				boolean isArrow= switchCase.isSwitchLabeledRule();
+				isArrow= switchCase.isSwitchLabeledRule();
 				newSwitchCase.setSwitchLabeledRule(isArrow);
-				if (isArrow || parent instanceof SwitchExpression) {
-					ThrowStatement newThrowStatement= getThrowForUnexpectedDefault(expression, ast, astRewrite);
-					listRewrite.insertLast(newThrowStatement, null);
-					proposal.addLinkedPosition(astRewrite.track(newThrowStatement), true, null);
-				} else {
-					listRewrite.insertLast(ast.newBreakStatement(), null);
-				}
+			}
+			if (isArrow || parent instanceof SwitchExpression) {
+				ThrowStatement newThrowStatement= getThrowForUnexpectedDefault(expression, ast, astRewrite);
+				listRewrite.insertLast(newThrowStatement, null);
+				proposal.addLinkedPosition(astRewrite.track(newThrowStatement), true, null);
 			} else {
 				listRewrite.insertLast(ast.newBreakStatement(), null);
 			}

@@ -16,6 +16,7 @@ package org.eclipse.jdt.internal.ui.typehierarchy;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.help.IContextProvider;
@@ -371,9 +372,10 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	 * @param entry The new entry
 	 */
 	private void addHistoryEntry(IJavaElement[] entry) {
-		for (IJavaElement[] elem : fInputHistory) {
+		for (Iterator<IJavaElement[]> iter= fInputHistory.iterator(); iter.hasNext();) {
+			IJavaElement[] elem= iter.next();
 			if (Arrays.equals(elem, entry)) {
-				fInputHistory.remove(elem);
+				iter.remove();
 				break;
 			}
 		}

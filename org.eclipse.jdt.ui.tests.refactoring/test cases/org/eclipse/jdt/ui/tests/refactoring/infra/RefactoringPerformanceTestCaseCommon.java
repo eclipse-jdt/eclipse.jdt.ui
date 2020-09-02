@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -23,17 +23,9 @@ import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
-import org.eclipse.jdt.ui.tests.performance.JdtPerformanceTestCase;
+import org.eclipse.jdt.ui.tests.performance.JdtPerformanceTestCaseCommon;
 
-public abstract class RefactoringPerformanceTestCase extends JdtPerformanceTestCase {
-
-	public RefactoringPerformanceTestCase() {
-		super();
-	}
-
-	public RefactoringPerformanceTestCase(String name) {
-		super(name);
-	}
+public abstract class RefactoringPerformanceTestCaseCommon extends JdtPerformanceTestCaseCommon {
 
 	protected void executeRefactoring(Refactoring refactoring, boolean measure) throws Exception {
 		executeRefactoring(refactoring, measure, RefactoringStatus.WARNING);

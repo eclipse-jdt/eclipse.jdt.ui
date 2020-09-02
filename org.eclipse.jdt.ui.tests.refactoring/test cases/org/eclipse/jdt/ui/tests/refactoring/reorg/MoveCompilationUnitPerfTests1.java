@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,47 +13,38 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring.reorg;
 
-import junit.framework.Test;
+import org.junit.FixMethodOrder;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runners.MethodSorters;
 
-import org.eclipse.test.OrderedTestSuite;
 import org.eclipse.test.performance.Dimension;
 
-import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestSetup;
+import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringPerformanceTestSetup;
 
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class MoveCompilationUnitPerfTests1 extends AbstractMoveCompilationUnitPrefTest {
 
-	public static Test suite() {
-		// we must make sure that cold is executed before warm
-		OrderedTestSuite suite= new OrderedTestSuite(MoveCompilationUnitPerfTests1.class, new String[] {
-			"testCold_10_10",
-			"test_10_10",
-			"test_100_10",
-			"test_1000_10",
-		});
-		return new RefactoringPerformanceTestSetup(suite);
-	}
+	@Rule
+	public RefactoringPerformanceTestSetup rpts= new RefactoringPerformanceTestSetup();
 
-	public static Test setUpTest(Test someTest) {
-		return new RefactoringPerformanceTestSetup(someTest);
-	}
-
-	public MoveCompilationUnitPerfTests1(String name) {
-		super(name);
-	}
-
-	public void testCold_10_10() throws Exception {
+	@Test
+	public void testACold_10_10() throws Exception {
 		executeRefactoring(10, 10, false, 3);
 	}
 
-	public void test_10_10() throws Exception {
+	@Test
+	public void testB_10_10() throws Exception {
 		executeRefactoring(10, 10, true, 3);
 	}
 
-	public void test_100_10() throws Exception {
+	@Test
+	public void testC_100_10() throws Exception {
 		executeRefactoring(100, 10, true, 1);
 	}
 
-	public void test_1000_10() throws Exception {
+	@Test
+	public void testD_1000_10() throws Exception {
 		tagAsSummary("Move compilation units - 1000 CUs, 10 Refs", Dimension.ELAPSED_PROCESS);
 		executeRefactoring(1000, 10, true, 1);
 	}

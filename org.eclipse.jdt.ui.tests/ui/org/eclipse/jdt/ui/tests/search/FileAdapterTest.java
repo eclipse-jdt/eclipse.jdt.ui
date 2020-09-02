@@ -18,8 +18,6 @@ import static org.junit.Assert.assertNull;
 
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 import org.eclipse.core.resources.IResource;
 
@@ -28,12 +26,12 @@ import org.eclipse.search.ui.text.IFileMatchAdapter;
 import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.ui.tests.core.rules.JUnitSourceSetup;
+
 import org.eclipse.jdt.internal.ui.search.JavaSearchQuery;
 import org.eclipse.jdt.internal.ui.search.JavaSearchResult;
 
 /**
  */
-@RunWith(JUnit4.class)
 public class FileAdapterTest {
 
 	@Rule

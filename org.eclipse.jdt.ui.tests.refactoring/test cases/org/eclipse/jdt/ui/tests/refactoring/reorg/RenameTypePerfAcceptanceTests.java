@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,9 +13,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring.reorg;
 
-import junit.framework.Test;
+import org.junit.FixMethodOrder;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runners.MethodSorters;
 
-import org.eclipse.test.OrderedTestSuite;
 import org.eclipse.test.performance.Dimension;
 
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -29,32 +31,19 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeProcessor;
 
 import org.eclipse.jdt.ui.tests.performance.SWTTestProject;
-import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestCase;
-import org.eclipse.jdt.ui.tests.refactoring.infra.SWTProjectTestSetup;
+import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestCaseCommon;
+import org.eclipse.jdt.ui.tests.refactoring.rules.SWTProjectTestSetup;
 
-public class RenameTypePerfAcceptanceTests extends RefactoringPerformanceTestCase {
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+public class RenameTypePerfAcceptanceTests extends RefactoringPerformanceTestCaseCommon {
 
 	private IJavaProject fProject;
 
-	public static Test suite() {
-		// we must make sure that cold is executed before warm
-		OrderedTestSuite suite= new OrderedTestSuite(RenameTypePerfAcceptanceTests.class, new String[] {
-			"testCold",
-			"testWarm",
-		});
-        return new SWTProjectTestSetup(suite);
-	}
-
-	public static Test setUpTest(Test someTest) {
-		return new SWTProjectTestSetup(someTest);
-	}
-
-	public RenameTypePerfAcceptanceTests(String test) {
-		super(test);
-	}
+	@Rule
+	public SWTProjectTestSetup spts= new SWTProjectTestSetup();
 
 	@Override
-	protected void setUp() throws Exception {
+	public void setUp() throws Exception {
 		super.setUp();
 		fProject= (IJavaProject)JavaCore.create(
 			ResourcesPlugin.getWorkspace().getRoot().findMember(SWTTestProject.PROJECT));
@@ -67,6 +56,7 @@ public class RenameTypePerfAcceptanceTests extends RefactoringPerformanceTestCas
 		assertPerformanceInRelativeBand(Dimension.CPU_TIME, -100, +10);
 	}
 
+	@Test
 	public void testCold() throws Exception {
 		IType control= fProject.findType("org.eclipse.swt.widgets.Control");
 		RenameTypeProcessor processor= new RenameTypeProcessor(control);
@@ -74,6 +64,7 @@ public class RenameTypePerfAcceptanceTests extends RefactoringPerformanceTestCas
 		executeRefactoring(new RenameRefactoring(processor), false);
 	}
 
+	@Test
 	public void testWarm() throws Exception {
 		tagAsSummary("Rename of Control", Dimension.ELAPSED_PROCESS);
 		IType control= fProject.findType("org.eclipse.swt.widgets.Control2");

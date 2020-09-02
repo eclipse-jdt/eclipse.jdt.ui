@@ -19,8 +19,6 @@ import static org.junit.Assert.assertTrue;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -49,7 +47,6 @@ import org.eclipse.jdt.internal.ui.packageview.PackageExplorerContentProvider;
  *
  * @since 3.14
  */
-@RunWith(JUnit4.class)
 public class ContentProviderTests7 {
 
 	private static Object[] NO_CHILDREN= new Object[0];

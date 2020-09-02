@@ -341,9 +341,7 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 				rewrite.addStaticImport("org.junit.Assert", fMethodName, true); //$NON-NLS-1$
 				TextEdit edit= rewrite.rewriteImports(null);
 				edit.apply(document);
-			} catch (MalformedTreeException e) {
-			} catch (CoreException e) {
-			} catch (BadLocationException e) {
+			} catch (BadLocationException | MalformedTreeException | CoreException e) {
 			}
 		}
 

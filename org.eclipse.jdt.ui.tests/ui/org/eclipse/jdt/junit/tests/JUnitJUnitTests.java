@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Sandra Lions <sandra.lions-piron@oracle.com> - [JUnit] allow to sort by name and by execution time - https://bugs.eclipse.org/bugs/show_bug.cgi?id=219466
  *******************************************************************************/
 
 package org.eclipse.jdt.junit.tests;
@@ -39,6 +40,8 @@ TestRunSessionSerializationTests4.class,
 
 JUnit3TestFinderTest.class,
 JUnit4TestFinderTest.class,
+
+TestSorting.class
 /**
  * @param suite the suite
  * @deprecated to hide deprecation warning
@@ -46,4 +49,5 @@ JUnit4TestFinderTest.class,
 //LegacyTestRunListenerTest.class
 })
 public class JUnitJUnitTests {
+
 }
