@@ -621,7 +621,7 @@ public class LocalCorrectionsSubProcessor {
 				options1.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_SUBTYPE_ACCESS, CleanUpOptions.TRUE);
 				options1.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS, CleanUpOptions.TRUE);
 				IProposableFix fix2= fixes[1];
-				proposal= new FixCorrectionProposal(fix2, new CodeStyleCleanUp(options), IProposalRelevance.CREATE_NON_STATIC_ACCESS_USING_INSTANCE_TYPE, image, context);
+				proposal= new FixCorrectionProposal(fix2, new CodeStyleCleanUp(options1), IProposalRelevance.CREATE_NON_STATIC_ACCESS_USING_INSTANCE_TYPE, image, context);
 				proposals.add(proposal);
 			}
 		}
