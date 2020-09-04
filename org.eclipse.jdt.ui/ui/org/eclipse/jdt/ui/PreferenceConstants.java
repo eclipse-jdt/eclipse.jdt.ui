@@ -4115,7 +4115,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.CODEASSIST_SHOW_VISIBLE_PROPOSALS, true);
 		store.setDefault(PreferenceConstants.CODEASSIST_CASE_SENSITIVITY, false);
 		store.setDefault(PreferenceConstants.CODEASSIST_ADDIMPORT, true);
-		store.setDefault(PreferenceConstants.CODEASSIST_INSERT_COMPLETION, true);
+		store.setDefault(PreferenceConstants.CODEASSIST_INSERT_COMPLETION, false);
 		store.setDefault(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES, true);
 		store.setDefault(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS, true);
 		store.setDefault(PreferenceConstants.CODEASSIST_PREFIX_COMPLETION, false);
