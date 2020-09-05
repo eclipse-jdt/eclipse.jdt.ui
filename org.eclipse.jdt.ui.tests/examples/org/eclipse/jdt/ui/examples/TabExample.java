@@ -108,7 +108,7 @@ public class TabExample {
 	}
 
 
-	private class Adapter implements IStringButtonAdapter, IDialogFieldListener, IListAdapter<String> {
+	private static class Adapter implements IStringButtonAdapter, IDialogFieldListener, IListAdapter<String> {
 
 		// -------- IStringButtonAdapter
 		@Override

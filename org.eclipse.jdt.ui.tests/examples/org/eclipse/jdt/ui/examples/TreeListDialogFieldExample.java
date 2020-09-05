@@ -83,7 +83,7 @@ public class TreeListDialogFieldExample {
 
 	private static Random fgRandom= new Random();
 
-	private class Adapter implements ITreeListAdapter<String> {
+	private static class Adapter implements ITreeListAdapter<String> {
 
 		// -------- ITreeListAdapter
 		@Override

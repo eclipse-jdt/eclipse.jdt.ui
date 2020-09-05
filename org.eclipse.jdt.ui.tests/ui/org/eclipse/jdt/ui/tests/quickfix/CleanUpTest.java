@@ -88,7 +88,7 @@ public class CleanUpTest extends CleanUpTestCase {
 
 	IJavaProject fJProject1= getProject();
 
-	private class NoChangeRedundantModifiersCleanUp extends RedundantModifiersCleanUp {
+	private static class NoChangeRedundantModifiersCleanUp extends RedundantModifiersCleanUp {
 		private NoChangeRedundantModifiersCleanUp(Map<String, String> options) {
 			super(options);
 		}

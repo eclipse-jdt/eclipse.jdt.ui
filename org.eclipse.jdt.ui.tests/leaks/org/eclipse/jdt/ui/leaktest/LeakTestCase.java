@@ -33,7 +33,7 @@ import org.eclipse.jdt.ui.leaktest.reftracker.ReferencedObject;
  * Base class for leak test cases.
  */
 public class LeakTestCase {
-	public class MulipleCollectorVisitor extends ReferenceVisitor {
+	public static class MulipleCollectorVisitor extends ReferenceVisitor {
 		private ReferenceVisitor[] fVisitors;
 
 		public MulipleCollectorVisitor(ReferenceVisitor[] visitors) {

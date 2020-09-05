@@ -41,7 +41,7 @@ import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPage;
 
 public class NewJavaProjectWizardTest {
 
-	private class TestNewJavaProjectWizardPage extends NewJavaProjectWizardPage {
+	private static class TestNewJavaProjectWizardPage extends NewJavaProjectWizardPage {
 
 		private IProject fNewProject;
 

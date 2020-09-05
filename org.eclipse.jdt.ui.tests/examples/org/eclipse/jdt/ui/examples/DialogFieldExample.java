@@ -129,7 +129,7 @@ public class DialogFieldExample {
 
 	private static Random fgRandom= new Random();
 
-	private class Adapter implements IStringButtonAdapter, IDialogFieldListener, IListAdapter<String> {
+	private static class Adapter implements IStringButtonAdapter, IDialogFieldListener, IListAdapter<String> {
 
 		// -------- IStringButtonAdapter
 		@Override
