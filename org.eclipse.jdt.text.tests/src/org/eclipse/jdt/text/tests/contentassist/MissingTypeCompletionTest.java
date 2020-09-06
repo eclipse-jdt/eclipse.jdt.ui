@@ -14,7 +14,6 @@
 package org.eclipse.jdt.text.tests.contentassist;
 
 import org.junit.After;
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -28,8 +27,6 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 public class MissingTypeCompletionTest extends AbstractCompletionTest {
-	@Rule
-	public CompletionTestSetup cts= new CompletionTestSetup();
 
 	private ICompilationUnit missingType;
 
