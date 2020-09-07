@@ -100,19 +100,19 @@ public class PatternCleanUp extends AbstractMultiFix {
 	public String getPreview() {
 		if (isEnabled(CleanUpConstants.PRECOMPILE_REGEX)) {
 			return "" //$NON-NLS-1$
-					+ "Pattern dateValidation= Pattern.compile(\"\\d{4}\\-\\d{2}\\-\\d{2}\");\n" //$NON-NLS-1$
-					+ "dateValidation.matcher(\"2020-03-17\").matches();\n" //$NON-NLS-1$
-					+ "dateValidation.matcher(\"2020-03-17\").replaceFirst(\"0000-00-00\");\n" //$NON-NLS-1$
-					+ "dateValidation.matcher(\"2020-03-17\").replaceAll(\"0000-00-00\");\n" //$NON-NLS-1$
-					+ "dateValidation.split(\"A2020-03-17B\");\n"; //$NON-NLS-1$
-		} else {
-			return "" //$NON-NLS-1$
-					+ "String dateValidation= \"\\d{4}\\-\\d{2}\\-\\d{2}\";\n" //$NON-NLS-1$
-					+ "\"2020-03-17\".matches(dateValidation);\n" //$NON-NLS-1$
-					+ "\"2020-03-17\".replaceFirst(dateValidation, \"0000-00-00\");\n" //$NON-NLS-1$
-					+ "\"2020-03-17\".replaceAll(dateValidation, \"0000-00-00\");\n" //$NON-NLS-1$
-					+ "\"A2020-03-17B\".split(dateValidation);\n"; //$NON-NLS-1$
+					+ "Pattern dateCheck= Pattern.compile(\"\\\\d{4}-\\\\d{2}-\\\\d{2}\");\n" //$NON-NLS-1$
+					+ "dateCheck.matcher(\"2020-03-17\").matches();\n" //$NON-NLS-1$
+					+ "dateCheck.matcher(\"2020-03-17\").dateCheckplaceFirst(\"0000-00-00\");\n" //$NON-NLS-1$
+					+ "dateCheck.matcher(\"2020-03-17\").replaceAll(\"0000-00-00\");\n" //$NON-NLS-1$
+					+ "dateCheck.split(\"A2020-03-17B\");\n"; //$NON-NLS-1$
 		}
+
+		return "" //$NON-NLS-1$
+				+ "String dateCheck= \"\\\\d{4}-\\\\d{2}-\\\\d{2}\";\n" //$NON-NLS-1$
+				+ "\"2020-03-17\".matches(dateCheck);\n" //$NON-NLS-1$
+				+ "\"2020-03-17\".replaceFirst(dateCheck, \"0000-00-00\");\n" //$NON-NLS-1$
+				+ "\"2020-03-17\".replaceAll(dateCheck, \"0000-00-00\");\n" //$NON-NLS-1$
+				+ "\"A2020-03-17B\".split(dateCheck);\n"; //$NON-NLS-1$
 	}
 
 	@Override
