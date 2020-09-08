@@ -39,6 +39,13 @@
         </filter>
     </resource>
     <resource path="core refactoring/org/eclipse/jdt/internal/corext/refactoring/rename/RenameVirtualMethodProcessor.java" type="org.eclipse.jdt.internal.corext.refactoring.rename.RenameVirtualMethodProcessor">
+        <filter comment="This is a Java15 preview feature" id="640712815">
+            <message_arguments>
+                <message_argument value="IType"/>
+                <message_argument value="RenameVirtualMethodProcessor"/>
+                <message_argument value="getRecordComponents()"/>
+            </message_arguments>
+        </filter>
         <filter id="640712815">
             <message_arguments>
                 <message_argument value="IType"/>
