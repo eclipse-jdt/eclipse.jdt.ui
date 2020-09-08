@@ -366,7 +366,7 @@ public class CleanUpTest1d10 extends CleanUpTestCase {
 	}
 
 	@Test
-	public void testDoNotUseVarOnParameterizedMethod() throws Exception {
+	public void testDoNotUseVarOnGenericMethod() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
 				+ "package test1;\n" //
@@ -375,11 +375,72 @@ public class CleanUpTest1d10 extends CleanUpTestCase {
 				+ "\n" //
 				+ "public class E1 {\n" //
 				+ "    public void foo() {\n" //
-				+ "        ArrayList<Integer> doNotRefactorParameterizedMethod = null;\n" //
+				+ "        ArrayList<Integer> doNotRefactorGenericMethod = newInstance();\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public <D> ArrayList<D> newInstance() {\n" //
 				+ "        return new ArrayList<D>();\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.USE_VAR);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
+	public void testUseVarOnParameterizedMethod() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.ArrayList;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo() {\n" //
+				+ "        ArrayList<Integer> list = newParameterizedInstance();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public ArrayList<Integer> newParameterizedInstance() {\n" //
+				+ "        return new ArrayList<Integer>();\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.USE_VAR);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.ArrayList;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo() {\n" //
+				+ "        var list = newParameterizedInstance();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public ArrayList<Integer> newParameterizedInstance() {\n" //
+				+ "        return new ArrayList<Integer>();\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
+	@Test
+	public void testDoNotUseVarOnInferedMethod() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Collections;\n" //
+				+ "import java.util.List;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public void foo() {\n" //
+				+ "        List<Integer> doNotRefactorInferedMethod = Collections.emptyList();\n" //
 				+ "    }\n" //
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
@@ -448,6 +509,40 @@ public class CleanUpTest1d10 extends CleanUpTestCase {
 				+ "public class E {\n" //
 				+ "    public void foo(HashMap<Integer, String> m) {\n" //
 				+ "        var parameterizedTypeFromMethod = m.values();\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
+	@Test
+	public void testUseLocalVariableTypeInferenceParameterizedTypeFromSuperMethod() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Collection;\n" //
+				+ "import java.util.HashMap;\n" //
+				+ "\n" //
+				+ "public class E extends HashMap<Integer, String> {\n" //
+				+ "    public void foo() {\n" //
+				+ "        Collection<String> parameterizedTypeFromMethod = super.values();\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.USE_VAR);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.Collection;\n" //
+				+ "import java.util.HashMap;\n" //
+				+ "\n" //
+				+ "public class E extends HashMap<Integer, String> {\n" //
+				+ "    public void foo() {\n" //
+				+ "        var parameterizedTypeFromMethod = super.values();\n" //
 				+ "    }\n" //
 				+ "}\n";
 		String expected1= sample;

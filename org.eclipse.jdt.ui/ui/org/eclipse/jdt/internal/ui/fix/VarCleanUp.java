@@ -37,6 +37,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -88,18 +89,17 @@ public class VarCleanUp extends AbstractMultiFix {
 
 	@Override
 	public String getPreview() {
-		StringBuilder bld= new StringBuilder();
 		if (isEnabled(CleanUpConstants.USE_VAR)) {
-			bld.append("var number = 0;\n"); //$NON-NLS-1$
-			bld.append("var list = new ArrayList<String>();\n"); //$NON-NLS-1$
-			bld.append("var map = new HashMap<Integer, String>();\n"); //$NON-NLS-1$
-		} else {
-			bld.append("int number = 0;\n"); //$NON-NLS-1$
-			bld.append("ArrayList<String> list = new ArrayList<String>();\n"); //$NON-NLS-1$
-			bld.append("HashMap<Integer, String> map = new HashMap<>();\n"); //$NON-NLS-1$
+			return "" //$NON-NLS-1$
+					+ "var number = 0;\n" //$NON-NLS-1$
+					+ "var list = new ArrayList<String>();\n" //$NON-NLS-1$
+					+ "var map = new HashMap<Integer, String>();\n"; //$NON-NLS-1$
 		}
 
-		return bld.toString();
+		return "" //$NON-NLS-1$
+				+ "int number = 0;\n" //$NON-NLS-1$
+				+ "ArrayList<String> list = new ArrayList<String>();\n" //$NON-NLS-1$
+				+ "HashMap<Integer, String> map = new HashMap<>();\n"; //$NON-NLS-1$
 	}
 
 	@Override
@@ -153,6 +153,7 @@ public class VarCleanUp extends AbstractMultiFix {
 						ClassInstanceCreation classInstanceCreation= ASTNodes.as(initializer, ClassInstanceCreation.class);
 						CastExpression castExpression= ASTNodes.as(initializer, CastExpression.class);
 						MethodInvocation methodInvocation= ASTNodes.as(initializer, MethodInvocation.class);
+						SuperMethodInvocation superMethodInvocation= ASTNodes.as(initializer, SuperMethodInvocation.class);
 						LambdaExpression lambdaExpression= ASTNodes.as(initializer, LambdaExpression.class);
 						Expression expression= ASTNodes.as(initializer, Expression.class);
 
@@ -170,10 +171,17 @@ public class VarCleanUp extends AbstractMultiFix {
 								|| (methodInvocation != null
 										&& methodInvocation.resolveMethodBinding() != null
 										&& methodInvocation.resolveMethodBinding().getReturnType().isParameterizedType()
+										&& !methodInvocation.resolveMethodBinding().isParameterizedMethod()
 										&& Arrays.equals(variableType.getTypeArguments(), methodInvocation.resolveMethodBinding().getReturnType().getTypeArguments()))
+								|| (superMethodInvocation != null
+										&& superMethodInvocation.resolveMethodBinding() != null
+										&& superMethodInvocation.resolveMethodBinding().getReturnType().isParameterizedType()
+										&& !superMethodInvocation.resolveMethodBinding().isParameterizedMethod()
+										&& Arrays.equals(variableType.getTypeArguments(), superMethodInvocation.resolveMethodBinding().getReturnType().getTypeArguments()))
 								|| (classInstanceCreation == null
 										&& castExpression == null
 										&& methodInvocation == null
+										&& superMethodInvocation == null
 										&& lambdaExpression == null
 										&& expression != null
 										&& expression.resolveTypeBinding() != null
@@ -219,7 +227,7 @@ public class VarCleanUp extends AbstractMultiFix {
 		}
 
 		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.VarCleanUp_description, unit,
-				rewriteOperations.toArray(new CompilationUnitRewriteOperation[rewriteOperations.size()]));
+				rewriteOperations.toArray(new CompilationUnitRewriteOperation[0]));
 	}
 
 	@Override
