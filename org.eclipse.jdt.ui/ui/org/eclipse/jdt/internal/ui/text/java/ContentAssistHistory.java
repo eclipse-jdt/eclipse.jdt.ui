@@ -398,7 +398,7 @@ public final class ContentAssistHistory {
 			int rank= 1;
 			for (Iterator<String> it= rhsCache.iterator(); it.hasNext(); rank++) {
 				String type= it.next();
-				history.put(type, Integer.valueOf(rank));
+				history.put(type, rank);
 			}
 			return new RHSHistory(history);
 		}

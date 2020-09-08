@@ -215,7 +215,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 						substitution.setValue(string);
 					}
 					if (PROPERTIES[STATE_PROP].equals(property)) {
-						substitution.setState(((Integer) value).intValue());
+						substitution.setState(((Integer) value));
 						if ((substitution.getState() == NLSSubstitution.EXTERNALIZED) && substitution.hasStateChanged()) {
 							substitution.generateKey(fSubstitutions, getProperties(fNLSRefactoring.getPropertyFileHandle()));
 						}
@@ -733,7 +733,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 								return;
 							NLSSubstitution substitution= (NLSSubstitution) widgetSel.get(0);
 							Integer value= (Integer) getCellModifier().getValue(substitution, PROPERTIES[STATE_PROP]);
-							int newValue= MultiStateCellEditor.getNextValue(NLSSubstitution.STATE_COUNT, value.intValue());
+							int newValue= MultiStateCellEditor.getNextValue(NLSSubstitution.STATE_COUNT, value);
 							getCellModifier().modify(item, PROPERTIES[STATE_PROP], Integer.valueOf(newValue));
 						}
 					}

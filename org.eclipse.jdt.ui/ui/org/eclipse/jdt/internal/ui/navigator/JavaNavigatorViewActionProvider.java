@@ -150,7 +150,7 @@ public class JavaNavigatorViewActionProvider extends CommonActionProvider {
 		// If no memento try an restore from preference store
 		if (state == null) {
 			IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-			state= Integer.valueOf(store.getInt(TAG_LAYOUT));
+			state= store.getInt(TAG_LAYOUT);
 		}
 
 		if (state.intValue() == FLAT_LAYOUT)
@@ -170,10 +170,10 @@ public class JavaNavigatorViewActionProvider extends CommonActionProvider {
 		// If no memento try to restore from preference store
 		if (showLibrariesNodeState == null) {
 			IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-			showLibrariesNodeState= Boolean.valueOf(store.getString(TAG_LIBRARIES_NODE).equals(IPreferenceStore.STRING_DEFAULT_DEFAULT) || store.getBoolean((TAG_LIBRARIES_NODE)));
+			showLibrariesNodeState= store.getString(TAG_LIBRARIES_NODE).equals(IPreferenceStore.STRING_DEFAULT_DEFAULT) || store.getBoolean((TAG_LIBRARIES_NODE));
 		}
 
-		boolean showLibrariesNode = showLibrariesNodeState.booleanValue();
+		boolean showLibrariesNode = showLibrariesNodeState;
 		fStateModel.setBooleanProperty(Values.IS_LIBRARIES_NODE_SHOWN, showLibrariesNode);
 		fShowLibrariesNodeActionGroup.setShowLibrariesNode(showLibrariesNode);
 	}

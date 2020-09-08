@@ -19,9 +19,9 @@ import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
 
-import junit.framework.TestCase;
-
 import org.eclipse.test.performance.Performance;
+
+import junit.framework.TestCase;
 
 
 /**
@@ -39,10 +39,10 @@ public class InvocationCountExampleTest extends TestCase {
 		try {
 			Set<Double> set= new HashSet<>();
 			performanceMeter.start();
-			set.add(Double.valueOf(10));
-			set.add(Double.valueOf(9));
-			set.add(Double.valueOf(11));
-			set.add(Double.valueOf(10));
+			set.add(10.0);
+			set.add(9.0);
+			set.add(11.0);
+			set.add(10.0);
 			performanceMeter.stop();
 			performanceMeter.commit();
 		} finally {

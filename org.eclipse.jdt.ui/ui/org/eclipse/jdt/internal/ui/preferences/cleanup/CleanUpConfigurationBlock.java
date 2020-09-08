@@ -114,7 +114,7 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 		cleanUpListBlock.setText(getSelectedCleanUpsInfo(cleanUps));
 
 		profileManager.addObserver((o, arg) -> {
-			final int value= ((Integer)arg).intValue();
+			final int value= ((Integer)arg);
 			switch (value) {
 			case ProfileManager.PROFILE_CREATED_EVENT:
 			case ProfileManager.PROFILE_DELETED_EVENT:

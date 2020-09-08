@@ -74,7 +74,7 @@ public final class RenamePackageChange extends AbstractJavaElementRenameChange {
 			IResource resource= unit.getResource();
 			long stamp= IResource.NULL_STAMP;
 			if (resource != null && (stamp= resource.getModificationStamp()) != IResource.NULL_STAMP) {
-				stamps.put(resource, Long.valueOf(stamp));
+				stamps.put(resource, stamp);
 			}
 		}
 	}
@@ -216,7 +216,7 @@ public final class RenamePackageChange extends AbstractJavaElementRenameChange {
 					if (resource != null) {
 						Long stamp= fCompilationUnitStamps.get(resource);
 						if (stamp != null) {
-							resource.revertModificationStamp(stamp.longValue());
+							resource.revertModificationStamp(stamp);
 						}
 					}
 				}

@@ -124,7 +124,7 @@ public class SpellCheckIterator implements ISpellCheckIterator {
 		int offset= iterator.current();
 		while (offset != BreakIterator.DONE) {
 
-			fSentenceBreaks.add(Integer.valueOf(offset));
+			fSentenceBreaks.add(offset);
 			offset= iterator.next();
 		}
 	}
@@ -307,7 +307,7 @@ public class SpellCheckIterator implements ISpellCheckIterator {
 	 * @return the next sentence break
 	 */
 	protected final int nextSentence() {
-		return fSentenceBreaks.getFirst().intValue();
+		return fSentenceBreaks.getFirst();
 	}
 
 	/**

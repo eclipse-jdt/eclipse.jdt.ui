@@ -180,9 +180,9 @@ public class PackagesView extends JavaBrowsingPart{
 		} else {
 			//restore from memento
 			Integer integer= memento.getInteger(this.getViewSite().getId() + TAG_VIEW_STATE);
-			if ((integer == null) || !isValidState(integer.intValue())) {
+			if ((integer == null) || !isValidState(integer)) {
 				fCurrViewState= LIST_VIEW_STATE;
-			} else fCurrViewState= integer.intValue();
+			} else fCurrViewState= integer;
 		}
 	}
 

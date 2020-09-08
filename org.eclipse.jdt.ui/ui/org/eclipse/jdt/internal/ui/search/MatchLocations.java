@@ -234,7 +234,7 @@ public class MatchLocations {
 		private int getIntValue(Button button) {
 			Integer bData= (Integer) button.getData();
 			if (bData != null) {
-				return bData.intValue();
+				return bData;
 			}
 			return 0;
 		}

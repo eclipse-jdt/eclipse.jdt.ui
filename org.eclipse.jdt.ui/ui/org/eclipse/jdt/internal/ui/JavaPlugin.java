@@ -351,10 +351,10 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 		long now= System.currentTimeMillis();
 		boolean writeToLog= true;
 		if (fgRepeatedMessages.containsKey(message)) {
-			long last= fgRepeatedMessages.get(message).longValue();
+			long last= fgRepeatedMessages.get(message);
 			writeToLog= now - last > 5000;
 		}
-		fgRepeatedMessages.put(message, Long.valueOf(now));
+		fgRepeatedMessages.put(message, now);
 		if (writeToLog)
 			log(new Exception(message + detail).fillInStackTrace());
 	}

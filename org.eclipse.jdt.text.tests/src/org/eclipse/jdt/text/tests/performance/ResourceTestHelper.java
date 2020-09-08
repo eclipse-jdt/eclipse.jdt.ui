@@ -172,7 +172,7 @@ public class ResourceTestHelper {
 	private static void replacePositions(StringBuffer c, int origLength, String string, List<Integer> positions) {
 		int offset= 0;
 		for (Integer integer : positions) {
-			int position= integer.intValue();
+			int position= integer;
 			c.replace(offset + position, offset + position + origLength, string);
 			offset += string.length() - origLength;
 		}
@@ -189,7 +189,7 @@ public class ResourceTestHelper {
 				continue;
 			if (i < buffer.length() - 1 && Character.isJavaIdentifierPart(buffer.charAt(i + identifier.length())))
 				continue;
-			positions.add(Integer.valueOf(i));
+			positions.add(i);
 		}
 		return positions;
 	}

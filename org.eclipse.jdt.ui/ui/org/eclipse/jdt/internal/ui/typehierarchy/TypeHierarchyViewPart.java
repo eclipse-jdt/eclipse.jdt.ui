@@ -1719,11 +1719,11 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 
 		Integer viewerIndex= memento.getInteger(TAG_VIEW);
 		if (viewerIndex != null) {
-			setHierarchyMode(viewerIndex.intValue());
+			setHierarchyMode(viewerIndex);
 		}
 		Integer layout= memento.getInteger(TAG_LAYOUT);
 		if (layout != null) {
-			setViewLayout(layout.intValue());
+			setViewLayout(layout);
 		}
 
 		Integer val= memento.getInteger(TAG_EDITOR_LINKING);
@@ -1740,13 +1740,13 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 
 		Integer ratio= memento.getInteger(TAG_RATIO);
 		if (ratio != null) {
-			fTypeMethodsSplitter.setWeights(new int[] { ratio.intValue(), 1000 - ratio.intValue() });
+			fTypeMethodsSplitter.setWeights(new int[] { ratio, 1000 - ratio.intValue() });
 		}
 		ScrollBar bar= getCurrentViewer().getTree().getVerticalBar();
 		if (bar != null) {
 			Integer vScroll= memento.getInteger(TAG_VERTICAL_SCROLL);
 			if (vScroll != null) {
-				bar.setSelection(vScroll.intValue());
+				bar.setSelection(vScroll);
 			}
 		}
 		fMethodsViewer.restoreState(memento);

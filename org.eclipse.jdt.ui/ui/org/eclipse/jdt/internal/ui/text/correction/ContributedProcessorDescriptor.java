@@ -103,7 +103,7 @@ public final class ContributedProcessorDescriptor {
 		}
 
 		if (fStatus != null) {
-			return fStatus.booleanValue();
+			return fStatus;
 		}
 
 		IConfigurationElement[] children= fConfigurationElement.getChildren(ExpressionTagNames.ENABLEMENT);

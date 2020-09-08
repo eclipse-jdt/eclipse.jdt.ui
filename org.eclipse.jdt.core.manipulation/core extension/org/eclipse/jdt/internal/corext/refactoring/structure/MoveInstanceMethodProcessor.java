@@ -2886,27 +2886,27 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME));
 		final String deprecate= extended.getAttribute(ATTRIBUTE_DEPRECATE);
 		if (deprecate != null) {
-			fDelegateDeprecation= Boolean.valueOf(deprecate).booleanValue();
+			fDelegateDeprecation= Boolean.parseBoolean(deprecate);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DEPRECATE));
 		final String remove= extended.getAttribute(ATTRIBUTE_REMOVE);
 		if (remove != null) {
-			fRemove= Boolean.valueOf(remove).booleanValue();
+			fRemove= Boolean.parseBoolean(remove);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_REMOVE));
 		final String inline= extended.getAttribute(ATTRIBUTE_INLINE);
 		if (inline != null) {
-			fInline= Boolean.valueOf(inline).booleanValue();
+			fInline= Boolean.parseBoolean(inline);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_INLINE));
 		final String getter= extended.getAttribute(ATTRIBUTE_USE_GETTER);
 		if (getter != null)
-			fUseGetters= Boolean.valueOf(getter).booleanValue();
+			fUseGetters= Boolean.parseBoolean(getter);
 		else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_USE_GETTER));
 		final String setter= extended.getAttribute(ATTRIBUTE_USE_SETTER);
 		if (setter != null)
-			fUseSetters= Boolean.valueOf(setter).booleanValue();
+			fUseSetters= Boolean.parseBoolean(setter);
 		else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_USE_SETTER));
 		final String target= extended.getAttribute(ATTRIBUTE_TARGET_NAME);
@@ -2919,7 +2919,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		final String value= extended.getAttribute(ATTRIBUTE_TARGET_INDEX);
 		if (value != null) {
 			try {
-				final int index= Integer.valueOf(value).intValue();
+				final int index= Integer.parseInt(value);
 				if (index >= 0) {
 					final MethodDeclaration declaration= ASTNodeSearchUtil.getMethodDeclarationNode(fMethod, fSourceRewrite.getRoot());
 					if (declaration != null) {

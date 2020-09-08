@@ -17,9 +17,9 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.core.resources.IStorage;
 
+import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StyledString;
-import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.StorageLabelProvider;
@@ -134,7 +134,7 @@ public class JavaElementLabelProvider extends LabelProvider implements IStyledLa
 	 * Currently the default is equivalent to
 	 * <code>SHOW_PARAMETERS | SHOW_OVERLAY_ICONS</code>.
 	 */
-	public final static int SHOW_DEFAULT= Integer.valueOf(SHOW_PARAMETERS | SHOW_OVERLAY_ICONS).intValue();
+	public final static int SHOW_DEFAULT= SHOW_PARAMETERS | SHOW_OVERLAY_ICONS;
 
 	private JavaElementImageProvider fImageLabelProvider;
 

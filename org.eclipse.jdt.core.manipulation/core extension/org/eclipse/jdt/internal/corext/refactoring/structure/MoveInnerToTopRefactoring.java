@@ -1578,22 +1578,22 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 			fNameForEnclosingInstanceConstructorParameter= parameterName;
 		final String createField= arguments.getAttribute(ATTRIBUTE_FIELD);
 		if (createField != null) {
-			fCreateInstanceField= Boolean.valueOf(createField).booleanValue();
+			fCreateInstanceField= Boolean.parseBoolean(createField);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_FIELD));
 		final String markFinal= arguments.getAttribute(ATTRIBUTE_FINAL);
 		if (markFinal != null) {
-			fMarkInstanceFieldAsFinal= Boolean.valueOf(markFinal).booleanValue();
+			fMarkInstanceFieldAsFinal= Boolean.parseBoolean(markFinal);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_FINAL));
 		final String possible= arguments.getAttribute(ATTRIBUTE_POSSIBLE);
 		if (possible != null) {
-			fIsInstanceFieldCreationPossible= Boolean.valueOf(possible).booleanValue();
+			fIsInstanceFieldCreationPossible= Boolean.parseBoolean(possible);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_POSSIBLE));
 		final String mandatory= arguments.getAttribute(ATTRIBUTE_MANDATORY);
 		if (mandatory != null)
-			fIsInstanceFieldCreationMandatory= Boolean.valueOf(mandatory).booleanValue();
+			fIsInstanceFieldCreationMandatory= Boolean.parseBoolean(mandatory);
 		else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_MANDATORY));
 		return new RefactoringStatus();

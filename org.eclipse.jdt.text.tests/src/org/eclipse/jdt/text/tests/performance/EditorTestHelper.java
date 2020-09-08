@@ -397,15 +397,15 @@ public class EditorTestHelper {
 	}
 
 	private static boolean isInitialProcessDone(Accessor javaReconcilerAccessor) {
-		return ((Boolean) javaReconcilerAccessor.get("fIninitalProcessDone")).booleanValue();
+		return ((Boolean) javaReconcilerAccessor.get("fIninitalProcessDone"));
 	}
 
 	private static boolean isDirty(Accessor backgroundThreadAccessor) {
-		return ((Boolean) backgroundThreadAccessor.invoke("isDirty", new Object[0])).booleanValue();
+		return ((Boolean) backgroundThreadAccessor.invoke("isDirty", new Object[0]));
 	}
 
 	private static boolean isActive(Accessor backgroundThreadAccessor) {
-		return ((Boolean) backgroundThreadAccessor.invoke("isActive", new Object[0])).booleanValue();
+		return ((Boolean) backgroundThreadAccessor.invoke("isActive", new Object[0]));
 	}
 
 	public static String showPerspective(String perspective) throws WorkbenchException {

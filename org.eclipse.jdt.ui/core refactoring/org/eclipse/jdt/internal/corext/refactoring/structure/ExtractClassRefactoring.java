@@ -249,12 +249,12 @@ public class ExtractClassRefactoring extends Refactoring {
 				if (initializer != null) {
 					FieldReferenceFinder frf= new FieldReferenceFinder();
 					initializer.accept(frf);
-					hasFieldReferences= Boolean.valueOf(frf.fFieldRefFound);
+					hasFieldReferences= frf.fFieldRefFound;
 				} else {
 					hasFieldReferences= Boolean.FALSE;
 				}
 			}
-			return hasFieldReferences.booleanValue();
+			return hasFieldReferences;
 		}
 
 		private FieldInfo(ParameterInfo parameterInfo, IField ifield) {

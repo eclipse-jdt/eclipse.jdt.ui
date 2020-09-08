@@ -338,7 +338,7 @@ public abstract class AbstractJavaScanner extends BufferedRuleBasedScanner {
 		boolean eventValue= false;
 		Object value= event.getNewValue();
 		if (value instanceof Boolean)
-			eventValue= ((Boolean) value).booleanValue();
+			eventValue= ((Boolean) value);
 		else if (IPreferenceStore.TRUE.equals(value))
 			eventValue= true;
 

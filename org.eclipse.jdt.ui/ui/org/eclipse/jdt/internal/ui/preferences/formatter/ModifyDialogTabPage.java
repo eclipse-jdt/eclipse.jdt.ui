@@ -637,13 +637,13 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 
 		@Override
 		public void focusGained(FocusEvent e) {
-			fDialogSettings.put(PREF_LAST_FOCUS_INDEX, fItemMap.get(e.widget).intValue());
+			fDialogSettings.put(PREF_LAST_FOCUS_INDEX, fItemMap.get(e.widget));
 		}
 
 		public void add(Control control) {
 			control.addFocusListener(this);
 			fItemList.add(fIndex, control);
-			fItemMap.put(control, Integer.valueOf(fIndex++));
+			fItemMap.put(control, fIndex++);
 		}
 
 		public void add(Preference preference) {

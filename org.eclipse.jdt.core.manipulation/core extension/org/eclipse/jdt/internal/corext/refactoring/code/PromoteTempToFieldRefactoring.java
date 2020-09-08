@@ -939,9 +939,9 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 			int length= -1;
 			final StringTokenizer tokenizer= new StringTokenizer(selection);
 			if (tokenizer.hasMoreTokens())
-				offset= Integer.valueOf(tokenizer.nextToken()).intValue();
+				offset= Integer.parseInt(tokenizer.nextToken());
 			if (tokenizer.hasMoreTokens())
-				length= Integer.valueOf(tokenizer.nextToken()).intValue();
+				length= Integer.parseInt(tokenizer.nextToken());
 			if (offset >= 0 && length >= 0) {
 				fSelectionStart= offset;
 				fSelectionLength= length;
@@ -985,12 +985,12 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME));
 		final String declareStatic= arguments.getAttribute(ATTRIBUTE_STATIC);
 		if (declareStatic != null) {
-			fDeclareStatic= Boolean.valueOf(declareStatic).booleanValue();
+			fDeclareStatic= Boolean.parseBoolean(declareStatic);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_STATIC));
 		final String declareFinal= arguments.getAttribute(ATTRIBUTE_FINAL);
 		if (declareFinal != null) {
-			fDeclareFinal= Boolean.valueOf(declareFinal).booleanValue();
+			fDeclareFinal= Boolean.parseBoolean(declareFinal);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_FINAL));
 		return new RefactoringStatus();

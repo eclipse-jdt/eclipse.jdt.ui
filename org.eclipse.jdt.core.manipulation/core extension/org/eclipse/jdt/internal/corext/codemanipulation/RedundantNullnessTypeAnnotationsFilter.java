@@ -180,12 +180,10 @@ public class RedundantNullnessTypeAnnotationsFilter {
 			} catch (IllegalArgumentException e) {
 				// ignore
 			}
-		} else if (value instanceof Boolean) {
-			if (((Boolean) value).booleanValue()) {
-				result.add(TypeLocation.RETURN_TYPE);
-				result.add(TypeLocation.PARAMETER);
-				result.add(TypeLocation.FIELD);
-			}
+		} else if (Boolean.TRUE.equals(value)) {
+			result.add(TypeLocation.RETURN_TYPE);
+			result.add(TypeLocation.PARAMETER);
+			result.add(TypeLocation.FIELD);
 		}
 	}
 

@@ -171,12 +171,12 @@ public class DialogsTest extends TestCase {
 
 	public void testElementListSelectionDialog2() throws Exception {
 		Object[] elements= new Integer[] {
-			Integer.valueOf(0),
-			Integer.valueOf(1),
-			Integer.valueOf(2),
-			Integer.valueOf(7),
-			Integer.valueOf(12),
-			Integer.valueOf(42)
+			0,
+			1,
+			2,
+			7,
+			12,
+			42
 		};
 
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), new TestLabelProvider());

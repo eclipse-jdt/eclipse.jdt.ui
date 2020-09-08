@@ -153,7 +153,7 @@ public class JavadocProblemsPreferencePage extends PropertyAndPreferencePage {
 			if (isProjectPreferencePage()) {
 				Boolean useProjectSpecific= (Boolean) map.get(DATA_USE_PROJECT_SPECIFIC_OPTIONS);
 				if (useProjectSpecific != null) {
-					enableProjectSpecificSettings(useProjectSpecific.booleanValue());
+					enableProjectSpecificSettings(useProjectSpecific);
 				}
 			}
 

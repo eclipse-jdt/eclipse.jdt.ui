@@ -171,7 +171,7 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 				try {
 					if (fIsAutobuild == null) {
-						fIsAutobuild= Boolean.valueOf(CoreUtility.setAutoBuilding(false));
+						fIsAutobuild= CoreUtility.setAutoBuilding(false);
 					}
 					infoStatus= updateProject(monitor);
 				} catch (CoreException e) {
@@ -498,7 +498,7 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 			monitor.done();
 			fCurrProject= null;
 			if (fIsAutobuild != null) {
-				CoreUtility.setAutoBuilding(fIsAutobuild.booleanValue());
+				CoreUtility.setAutoBuilding(fIsAutobuild);
 				fIsAutobuild= null;
 			}
 		}
@@ -559,7 +559,7 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 
 				restoreExistingFiles(projLoc, new SubProgressMonitor(monitor, 1));
 			} finally {
-				CoreUtility.setAutoBuilding(fIsAutobuild.booleanValue()); // fIsAutobuild must be set
+				CoreUtility.setAutoBuilding(fIsAutobuild); // fIsAutobuild must be set
 				fIsAutobuild= null;
 			}
 		} catch (CoreException e) {

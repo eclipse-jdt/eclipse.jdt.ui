@@ -221,7 +221,7 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 		Set<Object> children= fChildrenMap.get(parentElement);
 		if (children == null)
 			return EMPTY_ARR;
-		int limit= getPage().getElementLimit().intValue();
+		int limit= getPage().getElementLimit();
 		if (limit != -1 && limit < children.size()) {
 			Object[] limitedArray= new Object[limit];
 			Iterator<Object> iterator= children.iterator();

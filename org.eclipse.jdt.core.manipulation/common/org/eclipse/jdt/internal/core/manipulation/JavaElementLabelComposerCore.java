@@ -542,7 +542,7 @@ public class JavaElementLabelComposerCore {
 					fBuffer.append(ASTNodes.getEscapedStringLiteral((String) value));
 					break;
 				case IMemberValuePair.K_CHAR:
-					fBuffer.append(ASTNodes.getEscapedCharacterLiteral(((Character) value).charValue()));
+					fBuffer.append(ASTNodes.getEscapedCharacterLiteral(((Character) value)));
 					break;
 				default:
 					fBuffer.append(String.valueOf(value));

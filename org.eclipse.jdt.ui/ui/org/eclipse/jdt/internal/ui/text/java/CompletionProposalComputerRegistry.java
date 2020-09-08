@@ -347,7 +347,7 @@ public final class CompletionProposalComputerRegistry {
 			StringTokenizer inner= new StringTokenizer(tok.nextToken(), ":"); //$NON-NLS-1$
 			String id= inner.nextToken();
 			int rank= Integer.parseInt(inner.nextToken());
-			ordered.put(id, Integer.valueOf(rank));
+			ordered.put(id, rank);
 		}
 
 		CompletionProposalCategory allProposals= null;
@@ -366,7 +366,7 @@ public final class CompletionProposalComputerRegistry {
 					category.setIncluded(!disabled.contains(category.getId()));
 					Integer rank= ordered.get(category.getId());
 					if (rank != null) {
-						int r= rank.intValue();
+						int r= rank;
 						boolean separate= r < 0xffff;
 						if (!separate) {
 							r= r - 0xffff;

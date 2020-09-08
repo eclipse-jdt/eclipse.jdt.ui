@@ -306,13 +306,13 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 			Button radio= new Button(group, SWT.RADIO);
 			radio.setText(labels[i]);
 			radio.setData(data[i]);
-			int iData= data[i].intValue();
+			int iData= data[i];
 			if (iData == visibility)
 				radio.setSelection(true);
 			radio.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent event) {
-					fRefactoring.setVisibility(((Integer)event.widget.getData()).intValue());
+					fRefactoring.setVisibility(((Integer)event.widget.getData()));
 				}
 			});
 			fEnablements.add(radio);
@@ -364,13 +364,13 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		Integer[] data= null;
 		if (Flags.isPrivate(visibility)) {
 			labels= new String[] { pub, pro, def, priv };
-			data= new Integer[] {Integer.valueOf(Flags.AccPublic), Integer.valueOf(Flags.AccProtected), Integer.valueOf(0), Integer.valueOf(Flags.AccPrivate) };
+			data= new Integer[] {Flags.AccPublic, Flags.AccProtected, 0, Flags.AccPrivate };
 		} else if (Flags.isProtected(visibility)) {
 			labels= new String[] { pub, pro };
-			data= new Integer[] {Integer.valueOf(Flags.AccPublic), Integer.valueOf(Flags.AccProtected)};
+			data= new Integer[] {Flags.AccPublic, Flags.AccProtected};
 		} else {
 			labels= new String[] { pub, def };
-			data= new Integer[] {Integer.valueOf(Flags.AccPublic), Integer.valueOf(0)};
+			data= new Integer[] {Flags.AccPublic, 0};
 		}
 		return new Object[] {labels, data};
 	}

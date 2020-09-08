@@ -66,11 +66,11 @@ public final class InputPageUtil {
 			"pri&vate" //$NON-NLS-1$
 		};
 		Integer[] data= new Integer[] {
-					Integer.valueOf(Modifier.PUBLIC),
-					Integer.valueOf(Modifier.PROTECTED),
-					Integer.valueOf(Modifier.NONE),
-					Integer.valueOf(Modifier.PRIVATE)};
-		Integer initialVisibility= Integer.valueOf(correctVisibility);
+					Modifier.PUBLIC,
+					Modifier.PROTECTED,
+					Modifier.NONE,
+					Modifier.PRIVATE};
+		Integer initialVisibility= correctVisibility;
 		for (int i= 0; i < labels.length; i++) {
 			Button radio= new Button(group, SWT.RADIO);
 			Integer visibilityCode= data[i];
@@ -81,7 +81,7 @@ public final class InputPageUtil {
 			radio.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent event) {
-					visibilityChangeListener.visibilityChanged(((Integer)event.widget.getData()).intValue());
+					visibilityChangeListener.visibilityChanged(((Integer)event.widget.getData()));
 				}
 			});
 		}
@@ -92,7 +92,7 @@ public final class InputPageUtil {
 	private static List<Integer> convertToIntegerList(int[] array) {
 		List<Integer> result= new ArrayList<>(array.length);
 		for (int element : array) {
-			result.add(Integer.valueOf(element));
+			result.add(element);
 		}
 		return result;
 	}

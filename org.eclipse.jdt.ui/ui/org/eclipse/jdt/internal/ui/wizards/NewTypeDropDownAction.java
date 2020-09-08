@@ -184,12 +184,12 @@ public class NewTypeDropDownAction extends Action implements IMenuCreator, IWork
 		for (IConfigurationElement classElement : element.getChildren(TAG_CLASS)) {
 			for (IConfigurationElement curr : classElement.getChildren(TAG_PARAMETER)) {
 				if (ATT_JAVATYPE.equals(curr.getAttribute(TAG_NAME))) {
-					return Boolean.valueOf(curr.getAttribute(TAG_VALUE)).booleanValue();
+					return Boolean.parseBoolean(curr.getAttribute(TAG_VALUE));
 				}
 			}
 		}
 		// old way, deprecated
-		if (Boolean.valueOf(element.getAttribute(ATT_JAVATYPE)).booleanValue()) {
+		if (Boolean.parseBoolean(element.getAttribute(ATT_JAVATYPE))) {
 			return true;
 		}
 		return false;

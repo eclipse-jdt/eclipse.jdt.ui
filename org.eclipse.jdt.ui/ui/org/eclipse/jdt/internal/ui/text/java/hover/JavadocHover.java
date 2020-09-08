@@ -1289,7 +1289,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			buf.append(ASTNodes.getEscapedStringLiteral((String)value));
 
 		} else if (value instanceof Character) {
-			buf.append(ASTNodes.getEscapedCharacterLiteral(((Character)value).charValue()));
+			buf.append(ASTNodes.getEscapedCharacterLiteral(((Character)value)));
 
 		} else if (value instanceof Object[]) {
 			Object[] values= (Object[])value;
@@ -1315,7 +1315,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		if (constantValue instanceof Character) {
 			String constantResult= '\'' + constantValue.toString() + '\'';
 
-			char charValue= ((Character) constantValue).charValue();
+			char charValue= ((Character) constantValue);
 			String hexString= Integer.toHexString(charValue);
 			StringBuilder hexResult= new StringBuilder("\\u"); //$NON-NLS-1$
 			for (int i= hexString.length(); i < 4; i++) {
@@ -1333,11 +1333,11 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			return formatWithHexValue(constantValue, "0x" + Integer.toHexString(shortValue)); //$NON-NLS-1$
 
 		} else if (constantValue instanceof Integer) {
-			int intValue= ((Integer) constantValue).intValue();
+			int intValue= ((Integer) constantValue);
 			return formatWithHexValue(constantValue, "0x" + Integer.toHexString(intValue)); //$NON-NLS-1$
 
 		} else if (constantValue instanceof Long) {
-			long longValue= ((Long) constantValue).longValue();
+			long longValue= ((Long) constantValue);
 			return formatWithHexValue(constantValue, "0x" + Long.toHexString(longValue)); //$NON-NLS-1$
 
 		} else {

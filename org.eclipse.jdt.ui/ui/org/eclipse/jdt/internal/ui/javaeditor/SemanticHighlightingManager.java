@@ -544,7 +544,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 		Object value= event.getNewValue();
 		boolean eventValue;
 		if (value instanceof Boolean)
-			eventValue= ((Boolean) value).booleanValue();
+			eventValue= ((Boolean) value);
 		else if (IPreferenceStore.TRUE.equals(value))
 			eventValue= true;
 		else
@@ -582,7 +582,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 		boolean eventValue= false;
 		Object value= event.getNewValue();
 		if (value instanceof Boolean)
-			eventValue= ((Boolean) value).booleanValue();
+			eventValue= ((Boolean) value);
 		else if (IPreferenceStore.TRUE.equals(value))
 			eventValue= true;
 

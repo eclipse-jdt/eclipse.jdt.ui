@@ -147,7 +147,7 @@ public class JavaBuildPreferencePage extends PropertyAndPreferencePage {
 			if (isProjectPreferencePage()) {
 				Boolean useProjectOptions= (Boolean) map.get(USE_PROJECT_SPECIFIC_OPTIONS);
 				if (useProjectOptions != null) {
-					enableProjectSpecificSettings(useProjectOptions.booleanValue());
+					enableProjectSpecificSettings(useProjectOptions);
 				}
 			}
 

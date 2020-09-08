@@ -164,7 +164,7 @@ public final class PushDownWizard extends RefactoringWizard {
 				if (!ACTION_PROPERTY.equals(property))
 					return;
 
-				final int action= ((Integer) value).intValue();
+				final int action= ((Integer) value);
 				MemberActionInfo info;
 				if (element instanceof Item) {
 					info= (MemberActionInfo) ((Item) element).getData();
@@ -405,9 +405,9 @@ public final class PushDownWizard extends RefactoringWizard {
 		private Map<String, Integer> createStringMappingForSelectedElements() {
 			final Map<String, Integer> result= new HashMap<>();
 			int action= MemberActionInfo.PUSH_DOWN_ACTION;
-			result.put(MemberActionInfoLabelProvider.getActionLabel(action), Integer.valueOf(action));
+			result.put(MemberActionInfoLabelProvider.getActionLabel(action), action);
 			int action1= MemberActionInfo.PUSH_ABSTRACT_ACTION;
-			result.put(MemberActionInfoLabelProvider.getActionLabel(action1), Integer.valueOf(action1));
+			result.put(MemberActionInfoLabelProvider.getActionLabel(action1), action1);
 			return result;
 		}
 
@@ -429,7 +429,7 @@ public final class PushDownWizard extends RefactoringWizard {
 				dialog.setBlockOnOpen(true);
 				if (dialog.open() == Window.CANCEL)
 					return;
-				final int action= stringMapping.get(dialog.getSelectedString()).intValue();
+				final int action= stringMapping.get(dialog.getSelectedString());
 				setInfoAction(selectedMembers, action);
 			} finally {
 				updateWizardPage(preserved, true);
@@ -471,7 +471,7 @@ public final class PushDownWizard extends RefactoringWizard {
 			if (commonActionCode == -1)
 				return 0;
 			for (String key : mapping.keySet()) {
-				final int action= mapping.get(key).intValue();
+				final int action= mapping.get(key);
 				if (commonActionCode == action) {
 					for (int index= 0; index < keys.length; index++) {
 						if (key.equals(keys[index]))

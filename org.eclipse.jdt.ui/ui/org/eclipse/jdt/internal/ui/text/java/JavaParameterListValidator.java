@@ -308,13 +308,13 @@ public class JavaParameterListValidator implements IContextInformationValidator,
 	    int pos= 0;
 	    int angleLevel= 0;
 		List<Integer> positions= new ArrayList<>();
-		positions.add(Integer.valueOf(-1));
+		positions.add(-1);
 		while (pos < length && pos != -1) {
 			char ch= code.charAt(pos);
 			switch (ch) {
 	            case ',':
 	            	if (angleLevel == 0)
-	            		positions.add(Integer.valueOf(pos));
+	            		positions.add(pos);
 		            break;
 	            case '<':
 	            	angleLevel++;
@@ -331,11 +331,11 @@ public class JavaParameterListValidator implements IContextInformationValidator,
 			if (pos != -1)
 				pos++;
 		}
-		positions.add(Integer.valueOf(length));
+		positions.add(length);
 
 		int[] fields= new int[positions.size()];
 		for (int i= 0; i < fields.length; i++)
-	        fields[i]= positions.get(i).intValue();
+	        fields[i]= positions.get(i);
 	    return fields;
     }
 

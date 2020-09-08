@@ -102,6 +102,6 @@ public class ToggleMarkOccurrencesAction extends TextEditorAction implements IPr
 	@Override
 	public void propertyChange(PropertyChangeEvent event) {
 		if (event.getProperty().equals(PreferenceConstants.EDITOR_MARK_OCCURRENCES))
-			setChecked(Boolean.valueOf(event.getNewValue().toString()).booleanValue());
+			setChecked(Boolean.parseBoolean(event.getNewValue().toString()));
 	}
 }

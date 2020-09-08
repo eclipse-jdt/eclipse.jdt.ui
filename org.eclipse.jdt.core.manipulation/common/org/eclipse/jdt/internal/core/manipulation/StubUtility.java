@@ -493,7 +493,7 @@ public class StubUtility {
 				IRegion lineInfo= doc.getLineInformation(line);
 				int offset= lineInfo.getOffset();
 				String str= doc.get(offset, lineInfo.getLength());
-				if (Strings.containsOnlyWhitespaces(str) && nLines > line + 1 && removedLines.add(Integer.valueOf(line))) {
+				if (Strings.containsOnlyWhitespaces(str) && nLines > line + 1 && removedLines.add(line)) {
 					int nextStart= doc.getLineOffset(line + 1);
 					edit.addChild(new DeleteEdit(offset, nextStart - offset));
 				}
@@ -1496,11 +1496,11 @@ public class StubUtility {
 	// -------------------- preference access -----------------------
 
 	public static boolean useThisForFieldAccess(IJavaProject project) {
-		return Boolean.valueOf(JavaManipulation.getPreference(CODEGEN_KEYWORD_THIS, project)).booleanValue();
+		return Boolean.parseBoolean(JavaManipulation.getPreference(CODEGEN_KEYWORD_THIS, project));
 	}
 
 	public static boolean useIsForBooleanGetters(IJavaProject project) {
-		return Boolean.valueOf(JavaManipulation.getPreference(CODEGEN_IS_FOR_GETTERS, project)).booleanValue();
+		return Boolean.parseBoolean(JavaManipulation.getPreference(CODEGEN_IS_FOR_GETTERS, project));
 	}
 
 	public static String getExceptionVariableName(IJavaProject project) {
@@ -1508,7 +1508,7 @@ public class StubUtility {
 	}
 
 	public static boolean doAddComments(IJavaProject project) {
-		return Boolean.valueOf(JavaManipulation.getPreference(CODEGEN_ADD_COMMENTS, project)).booleanValue();
+		return Boolean.parseBoolean(JavaManipulation.getPreference(CODEGEN_ADD_COMMENTS, project));
 	}
 
 	/**

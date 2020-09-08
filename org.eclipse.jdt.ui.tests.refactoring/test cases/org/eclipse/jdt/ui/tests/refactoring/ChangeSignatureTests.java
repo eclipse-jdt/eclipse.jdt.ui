@@ -291,7 +291,7 @@ public class ChangeSignatureTests extends GenericRefactoringTest {
 			if (infos.get(i).isAdded())
 				continue;
 			if (! swapped.contains(Integer.valueOf(i))){
-				swapped.add(Integer.valueOf(permutation[i]));
+				swapped.add(permutation[i]);
 
 				ParameterInfo infoI= infos.get(i);
 				infoI.setNewName(newNameList.get(oldNameList.indexOf(infoI.getOldName())));
@@ -324,7 +324,7 @@ public class ChangeSignatureTests extends GenericRefactoringTest {
 			List<String> newNameList= Arrays.asList(newNames);
 			for (int i= 0; i < permutation.length; i++) {
 				if (! swapped.contains(Integer.valueOf(i))){
-					swapped.add(Integer.valueOf(permutation[i]));
+					swapped.add(permutation[i]);
 					ParameterInfo infoI= infos.get(i);
 					infoI.setNewName(newNameList.get(oldNameList.indexOf(infoI.getOldName())));
 					ParameterInfo infoI1= infos.get(permutation[i]);

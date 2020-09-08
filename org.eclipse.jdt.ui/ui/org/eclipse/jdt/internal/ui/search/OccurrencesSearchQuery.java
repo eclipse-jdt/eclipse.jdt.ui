@@ -108,7 +108,7 @@ public class OccurrencesSearchQuery implements ISearchQuery {
 		}
 		JavaElementLine lineElement= null;
 		try {
-			Integer key= Integer.valueOf(lineNumber);
+			Integer key= lineNumber;
 			lineElement= lineToGroup.get(key);
 			if (lineElement == null) {
 				int lineStartOffset= astRoot.getPosition(lineNumber, 0);

@@ -90,7 +90,7 @@ public class MultiStateCellEditor extends CellEditor {
 	@Override
 	protected void doSetValue(Object value) {
 		Assert.isTrue(value instanceof Integer, "value must be Integer"); //$NON-NLS-1$
-		fValue = ((Integer) value).intValue();
+		fValue = ((Integer) value);
 		Assert.isTrue(fValue >= 0 && fValue < fStateCount, "invalid value"); //$NON-NLS-1$
 	}
 }

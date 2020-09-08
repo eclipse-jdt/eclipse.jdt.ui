@@ -166,7 +166,7 @@ public class FailureTrace implements IMenuListener {
 
 			String lineNumber= traceLine;
 			lineNumber= lineNumber.substring(lineNumber.indexOf(':') + 1, lineNumber.lastIndexOf(')'));
-			int line= Integer.valueOf(lineNumber).intValue();
+			int line= Integer.parseInt(lineNumber);
 			return new OpenEditorAtLineAction(fTestRunner, testName, line);
 		} catch(NumberFormatException | IndexOutOfBoundsException e) {
 		}

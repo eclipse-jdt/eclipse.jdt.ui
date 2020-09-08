@@ -79,7 +79,7 @@ public class JEViewLabelProvider extends LabelProvider /*implements IColorProvid
 			Object severity= marker.getMarkerAttribute(IMarker.SEVERITY);
 			if (severity instanceof Integer) {
 				Integer sev= (Integer) severity;
-				switch (sev.intValue()) {
+				switch (sev) {
 					case IMarker.SEVERITY_INFO:
 						return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJS_INFO_TSK);
 					case IMarker.SEVERITY_WARNING:

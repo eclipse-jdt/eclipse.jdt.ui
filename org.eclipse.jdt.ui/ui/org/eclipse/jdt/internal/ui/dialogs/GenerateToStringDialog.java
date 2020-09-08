@@ -394,7 +394,7 @@ public class GenerateToStringDialog extends SourceActionDialog {
 				//Ctrl+Enter should execute the default button, workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=145959
 				template.addTraverseListener(e -> {
 					if (e.detail == SWT.TRAVERSE_RETURN && (e.stateMask & SWT.MODIFIER_MASK) != 0) {
-						buttonPressed(((Integer)getShell().getDefaultButton().getData()).intValue());
+						buttonPressed(((Integer)getShell().getDefaultButton().getData()));
 					}
 				});
 

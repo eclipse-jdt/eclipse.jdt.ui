@@ -354,9 +354,9 @@ public class IntroduceParameterObjectProcessor extends ChangeSignatureProcessor 
 			parameters= IntroduceParameterObjectDescriptor.createParameters(getMethod());
 		Map<Integer, ParameterInfo> paramIndex= new HashMap<>();
 		for (ParameterInfo pi : pis) {
-			paramIndex.put(Integer.valueOf(pi.getOldIndex()), pi);
+			paramIndex.put(pi.getOldIndex(), pi);
 		}
-		paramIndex.put(Integer.valueOf(ParameterInfo.INDEX_FOR_ADDED), fParameterObjectReference);
+		paramIndex.put(ParameterInfo.INDEX_FOR_ADDED, fParameterObjectReference);
 		pis.clear();
 		for (Parameter param : parameters) {
 			ParameterInfo pi= paramIndex.get(Integer.valueOf(param.getIndex()));

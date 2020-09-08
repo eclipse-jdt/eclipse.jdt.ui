@@ -133,7 +133,7 @@ public class JavaParameterListValidatorTest {
 			switch (ch) {
 	            case ',':
 	            	if (angleLevel == 0)
-	            		positions.add(Integer.valueOf(pos));
+	            		positions.add(pos);
 		            break;
 	            case '<':
 	        	    angleLevel++;
@@ -169,7 +169,7 @@ public class JavaParameterListValidatorTest {
 
 		int[] fields= new int[positions.size()];
 		for (int i= 0; i < fields.length; i++)
-	        fields[i]= positions.get(i).intValue();
+	        fields[i]= positions.get(i);
 	    return fields;
     }
 

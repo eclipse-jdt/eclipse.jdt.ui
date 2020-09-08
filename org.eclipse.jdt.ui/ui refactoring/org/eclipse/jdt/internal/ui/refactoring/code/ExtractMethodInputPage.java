@@ -148,8 +148,8 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 			RefactoringMessages.ExtractMethodInputPage_default,
 			RefactoringMessages.ExtractMethodInputPage_private
 		};
-		Integer[] data= new Integer[] {Integer.valueOf(Modifier.PUBLIC), Integer.valueOf(Modifier.PROTECTED), Integer.valueOf(Modifier.NONE), Integer.valueOf(Modifier.PRIVATE)};
-		Integer visibility= Integer.valueOf(fRefactoring.getVisibility());
+		Integer[] data= new Integer[] {Modifier.PUBLIC, Modifier.PROTECTED, Modifier.NONE, Modifier.PRIVATE};
+		int visibility= fRefactoring.getVisibility();
 		for (int i= 0; i < labels.length; i++) {
 			Button radio= new Button(accessModifiersGroup, SWT.RADIO);
 			radio.setText(labels[i]);
@@ -160,7 +160,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 				@Override
 				public void widgetSelected(SelectionEvent event) {
 					final Integer selectedModifier= (Integer)event.widget.getData();
-					fSettings.put(ACCESS_MODIFIER, selectedModifier.intValue());
+					fSettings.put(ACCESS_MODIFIER, selectedModifier);
 					setVisibility(selectedModifier);
 				}
 			});
@@ -254,8 +254,8 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 	private void updateAccessModifiers() {
 		final Control[] radioButtons= accessModifiersGroup.getChildren();
 		if (fRefactoring.isDestinationInterface()) {
-			Integer visibility= Integer.valueOf(Modifier.PUBLIC);
-			fRefactoring.setVisibility(visibility.intValue());
+			int visibility= Modifier.PUBLIC;
+			fRefactoring.setVisibility(visibility);
 			for (Control radioButton : radioButtons) {
 				radioButton.setEnabled(false);
 				if (radioButton.getData().equals(visibility)) {
@@ -266,8 +266,8 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 			}
 		} else {
 			final String accessModifier= fSettings.get(ACCESS_MODIFIER);
-			Integer visibility= accessModifier != null ? Integer.valueOf(accessModifier) : Integer.valueOf(fRefactoring.getVisibility());
-			fRefactoring.setVisibility(visibility.intValue());
+			int visibility= accessModifier != null ? Integer.valueOf(accessModifier) : fRefactoring.getVisibility();
+			fRefactoring.setVisibility(visibility);
 			for (Control radioButton : radioButtons) {
 				radioButton.setEnabled(true);
 				if (radioButton.getData().equals(visibility)) {
@@ -314,7 +314,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 	}
 
 	private void setVisibility(Integer visibility) {
-		fRefactoring.setVisibility(visibility.intValue());
+		fRefactoring.setVisibility(visibility);
 		updatePreview(getText());
 	}
 

@@ -294,7 +294,7 @@ public class RenameAnalyzeUtil {
 			SearchMatch[] oldMatches, SearchMatch[] newMatches, String newElementName, RefactoringStatus result) {
 		Map<Integer, SearchMatch> updatedOldOffsets= getUpdatedChangeOffsets(change, oldMatches);
 		for (SearchMatch newMatch : newMatches) {
-			Integer offsetInNew= Integer.valueOf(newMatch.getOffset());
+			Integer offsetInNew= newMatch.getOffset();
 			SearchMatch oldMatch= updatedOldOffsets.remove(offsetInNew);
 			if (oldMatch == null) {
 				addReferenceShadowedError(cu, newMatch, newElementName, result);
@@ -317,7 +317,7 @@ public class RenameAnalyzeUtil {
 		for (SearchMatch oldMatch : oldMatches) {
 			Integer updatedOffset= oldToUpdatedOffsets.get(Integer.valueOf(oldMatch.getOffset()));
 			if (updatedOffset == null)
-				updatedOffset= Integer.valueOf(-1); //match not updated
+				updatedOffset= -1; //match not updated
 			updatedOffsets.put(updatedOffset, oldMatch);
 		}
 		return updatedOffsets;
@@ -339,7 +339,7 @@ public class RenameAnalyzeUtil {
 			if (updatedRegion == null)
 				continue;
 
-			offsetUpdates.put(Integer.valueOf(oldRegion.getOffset()), Integer.valueOf(updatedRegion.getOffset()));
+			offsetUpdates.put(oldRegion.getOffset(), updatedRegion.getOffset());
 		}
 		return offsetUpdates;
 	}

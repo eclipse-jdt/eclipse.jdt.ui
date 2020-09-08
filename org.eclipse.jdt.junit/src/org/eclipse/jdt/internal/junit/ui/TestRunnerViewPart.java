@@ -1279,10 +1279,10 @@ public class TestRunnerViewPart extends ViewPart {
 //		}
 		Integer ratio= memento.getInteger(TAG_RATIO);
 		if (ratio != null)
-			fSashForm.setWeights(new int[] { ratio.intValue(), 1000 - ratio.intValue()} );
+			fSashForm.setWeights(new int[] { ratio, 1000 - ratio} );
 		Integer orientation= memento.getInteger(TAG_ORIENTATION);
 		if (orientation != null)
-			fOrientation= orientation.intValue();
+			fOrientation= orientation;
 		computeOrientation();
 		String scrollLock= memento.getString(TAG_SCROLL);
 		if (scrollLock != null) {
@@ -1293,7 +1293,7 @@ public class TestRunnerViewPart extends ViewPart {
 		Integer layout= memento.getInteger(TAG_LAYOUT);
 		int layoutValue= LAYOUT_HIERARCHICAL;
 		if (layout != null)
-			layoutValue= layout.intValue();
+			layoutValue= layout;
 
 		String failuresOnly= memento.getString(TAG_FAILURES_ONLY);
 		boolean showFailuresOnly= false;
@@ -1313,7 +1313,7 @@ public class TestRunnerViewPart extends ViewPart {
 		SortingCriterion sortingCriterion= SortingCriterion.SORT_BY_EXECUTION_ORDER;
 		Integer tagSortingCriterion= memento.getInteger(TAG_SORTING_CRITERION);
 		if (tagSortingCriterion != null) {
-			sortingCriterion= SortingCriterion.values() [tagSortingCriterion.intValue()];
+			sortingCriterion= SortingCriterion.values() [tagSortingCriterion];
 		}
 		setSortingCriterion(sortingCriterion);
 		for (int i= 0; i < fToggleSortingActions.length; i++) {

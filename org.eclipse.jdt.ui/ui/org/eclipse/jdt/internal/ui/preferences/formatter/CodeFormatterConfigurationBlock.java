@@ -69,7 +69,7 @@ public class CodeFormatterConfigurationBlock extends ProfileConfigurationBlock {
 		@Override
 		public void update(Observable o, Object arg) {
 			if (o instanceof ProfileManager) {
-				final int value= ((Integer) arg).intValue();
+				final int value= ((Integer) arg);
 				switch (value) {
 					case ProfileManager.PROFILE_CREATED_EVENT:
 					case ProfileManager.PROFILE_DELETED_EVENT:

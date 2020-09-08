@@ -83,8 +83,7 @@ public class JavaNavigatorLabelProvider implements ICommonLabelProvider, IStyled
 		fLayoutPropertyListener = event -> {
 			if (Values.IS_LAYOUT_FLAT.equals(event.getProperty())) {
 				if (event.getNewValue() != null) {
-					boolean newValue = ((Boolean) event.getNewValue())
-							.booleanValue() ? true : false;
+					boolean newValue = ((Boolean) event.getNewValue()) ? true : false;
 					delegeteLabelProvider.setIsFlatLayout(newValue);
 				}
 			}

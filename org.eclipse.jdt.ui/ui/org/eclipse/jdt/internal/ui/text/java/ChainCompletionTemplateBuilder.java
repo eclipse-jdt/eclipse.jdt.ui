@@ -119,7 +119,7 @@ public final class ChainCompletionTemplateBuilder {
 
 	private static void appendTemplateVariable(final StringBuilder sb, final String varname,
 			final Map<String, Integer> varNames) {
-		int val= varNames.containsKey(varname) ? varNames.get(varname).intValue() : 0;
+		int val= varNames.containsKey(varname) ? varNames.get(varname) : 0;
 		varNames.put(varname, val + 1);
 		sb.append("${").append(varname); //$NON-NLS-1$
 		final int count= varNames.get(varname);

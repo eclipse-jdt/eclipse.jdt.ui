@@ -30,7 +30,7 @@ public class JavaSearchTableContentProvider extends JavaSearchContentProvider {
 	public Object[] getElements(Object inputElement) {
 		if (inputElement instanceof AbstractTextSearchResult) {
 			Set<Object> filteredElements= new HashSet<>();
-			int limit= getPage().getElementLimit().intValue();
+			int limit= getPage().getElementLimit();
 			for (Object rawElement : ((AbstractTextSearchResult)inputElement).getElements()) {
 				if (getPage().getDisplayedMatchCount(rawElement) > 0) {
 					filteredElements.add(rawElement);
@@ -76,7 +76,7 @@ public class JavaSearchTableContentProvider extends JavaSearchContentProvider {
 	}
 
 	private int getAddLimit() {
-		int limit= getPage().getElementLimit().intValue();
+		int limit= getPage().getElementLimit();
 		if (limit != -1) {
 			Table table= (Table) getPage().getViewer().getControl();
 			int itemCount= table.getItemCount();

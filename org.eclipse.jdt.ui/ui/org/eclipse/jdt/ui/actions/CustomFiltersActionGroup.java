@@ -721,7 +721,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 				Boolean isEnabled= Boolean.valueOf(child.getString(TAG_IS_ENABLED));
 				FilterItem item= fFilterItems.get(id);
 				if (item != null) {
-					item.enabled= isEnabled.booleanValue();
+					item.enabled= isEnabled;
 				}
 			}
 		}

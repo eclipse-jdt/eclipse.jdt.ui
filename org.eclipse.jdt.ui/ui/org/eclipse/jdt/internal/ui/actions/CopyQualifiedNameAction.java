@@ -91,9 +91,9 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 public class CopyQualifiedNameAction extends SelectionDispatchAction {
 
-	private static final long LABEL_FLAGS= Long.valueOf(JavaElementLabels.F_FULLY_QUALIFIED | JavaElementLabels.M_FULLY_QUALIFIED | JavaElementLabels.I_FULLY_QUALIFIED
+	private static final long LABEL_FLAGS= JavaElementLabels.F_FULLY_QUALIFIED | JavaElementLabels.M_FULLY_QUALIFIED | JavaElementLabels.I_FULLY_QUALIFIED
 			| JavaElementLabels.T_FULLY_QUALIFIED | JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.USE_RESOLVED | JavaElementLabels.T_TYPE_PARAMETERS | JavaElementLabels.CU_QUALIFIED
-			| JavaElementLabels.CF_QUALIFIED).longValue();
+			| JavaElementLabels.CF_QUALIFIED;
 
 	//TODO: Make API
 	public static final String ACTION_DEFINITION_ID= "org.eclipse.jdt.ui.edit.text.java.copy.qualified.name"; //$NON-NLS-1$

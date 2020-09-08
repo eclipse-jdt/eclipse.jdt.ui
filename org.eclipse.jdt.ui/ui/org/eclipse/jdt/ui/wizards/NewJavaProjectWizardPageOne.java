@@ -427,7 +427,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 
 			CompletableFuture.supplyAsync(this::getLastSelectedJREKind)
 				.thenAcceptAsync(kind -> {
-					switch (kind.intValue()) {
+					switch (kind) {
 						case DEFAULT_JRE:
 							fUseDefaultJRE.setSelection(true);
 							break;

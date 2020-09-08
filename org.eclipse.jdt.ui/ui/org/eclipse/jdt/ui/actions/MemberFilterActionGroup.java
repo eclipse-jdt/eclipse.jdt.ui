@@ -291,10 +291,10 @@ public class MemberFilterActionGroup extends ActionGroup {
 		setMemberFilters(
 			new int[] {FILTER_FIELDS, FILTER_STATIC, FILTER_NONPUBLIC, FILTER_LOCALTYPES},
 			new boolean[] {
-				Boolean.valueOf(memento.getString(TAG_HIDEFIELDS)).booleanValue(),
-				Boolean.valueOf(memento.getString(TAG_HIDESTATIC)).booleanValue(),
-				Boolean.valueOf(memento.getString(TAG_HIDENONPUBLIC)).booleanValue(),
-				Boolean.valueOf(memento.getString(TAG_HIDELOCALTYPES)).booleanValue()
+				Boolean.parseBoolean(memento.getString(TAG_HIDEFIELDS)),
+				Boolean.parseBoolean(memento.getString(TAG_HIDESTATIC)),
+				Boolean.parseBoolean(memento.getString(TAG_HIDENONPUBLIC)),
+				Boolean.parseBoolean(memento.getString(TAG_HIDELOCALTYPES))
 			}, false);
 	}
 

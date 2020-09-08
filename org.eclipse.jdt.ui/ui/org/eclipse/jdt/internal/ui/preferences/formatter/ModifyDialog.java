@@ -1094,7 +1094,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 		private void add(Control control) {
 			control.addFocusListener(this);
 			fItemList.add(fIndex, control);
-			fItemMap.put(control, Integer.valueOf(fIndex++));
+			fItemMap.put(control, fIndex++);
 		}
 
 		@Override
@@ -1107,7 +1107,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 				updatePreviewCode();
 			}
 
-			fDialogSettings.put(fKeyLastFocusIndex, fItemMap.get(e.widget).intValue());
+			fDialogSettings.put(fKeyLastFocusIndex, fItemMap.get(e.widget));
 		}
 
 		private void highlightCurrent(boolean focus) {

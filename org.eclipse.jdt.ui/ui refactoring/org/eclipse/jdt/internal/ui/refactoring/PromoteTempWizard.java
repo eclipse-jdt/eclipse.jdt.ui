@@ -66,9 +66,9 @@ public class PromoteTempWizard extends RefactoringWizard {
 							RefactoringMessages.PromoteTempInputPage_Current_method,
 							RefactoringMessages.PromoteTempInputPage_constructors};
 		private static final Integer[] RADIO_BUTTON_DATA= {
-							Integer.valueOf(PromoteTempToFieldRefactoring.INITIALIZE_IN_FIELD),
-							Integer.valueOf(PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD),
-							Integer.valueOf(PromoteTempToFieldRefactoring.INITIALIZE_IN_CONSTRUCTOR)};
+							PromoteTempToFieldRefactoring.INITIALIZE_IN_FIELD,
+							PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD,
+							PromoteTempToFieldRefactoring.INITIALIZE_IN_CONSTRUCTOR};
 		private Button fDeclareStaticCheckbox;
 		private Button fDeclareFinalCheckbox;
 		private Button[] fInitializeInRadioButtons;
@@ -140,7 +140,7 @@ public class PromoteTempWizard extends RefactoringWizard {
 			for (int i= 0; i < RADIO_BUTTON_LABELS.length; i++) {
 				Integer dataItem= RADIO_BUTTON_DATA[i];
 				fInitializeInRadioButtons[i]= new Button(initializeIn, SWT.RADIO);
-				fInitializeInRadioButtons[i].setEnabled(canEnable(dataItem.intValue()));
+				fInitializeInRadioButtons[i].setEnabled(canEnable(dataItem));
 				fInitializeInRadioButtons[i].setText(RADIO_BUTTON_LABELS[i]);
 				fInitializeInRadioButtons[i].setSelection(dataItem.intValue() == getPromoteTempRefactoring().getInitializeIn());
 				fInitializeInRadioButtons[i].setLayoutData(new GridData());
@@ -165,7 +165,7 @@ public class PromoteTempWizard extends RefactoringWizard {
 		}
 
 		private static int getDataAsInt(Button button){
-			return ((Integer)button.getData()).intValue();
+			return ((Integer)button.getData());
 		}
 
 		private boolean canEnable(int initializeIn){

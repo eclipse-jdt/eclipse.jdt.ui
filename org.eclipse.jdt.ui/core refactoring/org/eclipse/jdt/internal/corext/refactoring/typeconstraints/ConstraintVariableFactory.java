@@ -70,7 +70,7 @@ public class ConstraintVariableFactory implements IConstraintVariableFactory {
 		}
 
 		if (ASTNodes.isLiteral(expression)){
-			Integer nodeType= Integer.valueOf(expression.getNodeType());
+			Integer nodeType= expression.getNodeType();
 			if (! fLiteralMap.containsKey(nodeType)){
 				fLiteralMap.put(nodeType, new ExpressionVariable(expression));
 				if (REPORT) nrCreated++;

@@ -382,7 +382,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 
 	private void doWorkingSetChanged(PropertyChangeEvent event) {
 		if (ViewActionGroup.MODE_CHANGED.equals(event.getProperty())) {
-			fPart.rootModeChanged(((Integer)event.getNewValue()).intValue());
+			fPart.rootModeChanged(((Integer)event.getNewValue()));
 			Object oldInput= null;
 			Object newInput= null;
 			if (fPart.getRootMode() == PackageExplorerPart.PROJECTS_AS_ROOTS) {

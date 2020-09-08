@@ -166,7 +166,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 
 		initSortActions();
 		initGroupingActions();
-		setElementLimit(Integer.valueOf(DEFAULT_ELEMENT_LIMIT));
+		setElementLimit(DEFAULT_ELEMENT_LIMIT);
 	}
 
 	private void initSortActions() {
@@ -219,8 +219,8 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		try {
 			IMarker marker= file.createMarker(NewSearchUI.SEARCH_MARKER);
 			HashMap<String, Integer> attributes= new HashMap<>(4);
-			attributes.put(IMarker.CHAR_START, Integer.valueOf(offset));
-			attributes.put(IMarker.CHAR_END, Integer.valueOf(offset + length));
+			attributes.put(IMarker.CHAR_START, offset);
+			attributes.put(IMarker.CHAR_END, offset + length);
 			marker.setAttributes(attributes);
 			IDE.gotoMarker(editor, marker);
 			marker.delete();
@@ -437,19 +437,19 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		if (memento != null) {
 			Integer value= memento.getInteger(KEY_GROUPING);
 			if (value != null)
-				grouping= value.intValue();
+				grouping= value;
 			value= memento.getInteger(KEY_SORTING);
 			if (value != null)
-				sortOrder= value.intValue();
+				sortOrder= value;
 			boolean limitElements= !FALSE.equals(memento.getString(KEY_LIMIT_ENABLED));
 			value= memento.getInteger(KEY_LIMIT);
 			if (value != null)
-				elementLimit= limitElements ? value.intValue() : -1;
+				elementLimit= limitElements ? value : -1;
 		}
 
 		fCurrentGrouping= grouping;
 		fCurrentSortOrder= sortOrder;
-		setElementLimit(Integer.valueOf(elementLimit));
+		setElementLimit(elementLimit);
 	}
 
 	@Override
@@ -457,7 +457,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		super.saveState(memento);
 		memento.putInteger(KEY_GROUPING, fCurrentGrouping);
 		memento.putInteger(KEY_SORTING, fCurrentSortOrder);
-		int limit= getElementLimit().intValue();
+		int limit= getElementLimit();
 		if (limit != -1)
 			memento.putString(KEY_LIMIT_ENABLED, TRUE);
 		else
@@ -570,7 +570,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	@Override
 	public void setElementLimit(Integer elementLimit) {
 		super.setElementLimit(elementLimit);
-		int limit= elementLimit.intValue();
+		int limit= elementLimit;
 		getSettings().put(KEY_LIMIT, limit);
 		getSettings().put(KEY_LIMIT_ENABLED, limit != -1 ? TRUE : FALSE);
 	}

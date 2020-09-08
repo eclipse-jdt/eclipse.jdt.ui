@@ -408,7 +408,7 @@ public class PackageExplorerPart extends ViewPart
 
 	private void restoreRootMode(IMemento memento) {
 		Integer value= memento.getInteger(TAG_ROOT_MODE);
-		fRootMode= value == null ? PROJECTS_AS_ROOTS : value.intValue();
+		fRootMode= value == null ? PROJECTS_AS_ROOTS : value;
 		if (fRootMode != PROJECTS_AS_ROOTS && fRootMode != WORKING_SETS_AS_ROOTS)
 			fRootMode= PROJECTS_AS_ROOTS;
 	}

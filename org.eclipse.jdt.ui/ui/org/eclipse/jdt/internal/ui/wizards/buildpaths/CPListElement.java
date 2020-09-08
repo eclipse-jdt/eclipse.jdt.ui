@@ -292,7 +292,7 @@ public class CPListElement {
 			}
 			case IClasspathEntry.CPE_PROJECT: {
 				IAccessRule[] accesRules= (IAccessRule[]) getAttribute(ACCESSRULES);
-				boolean combineAccessRules= ((Boolean) getAttribute(COMBINE_ACCESSRULES)).booleanValue();
+				boolean combineAccessRules= ((Boolean) getAttribute(COMBINE_ACCESSRULES));
 				return JavaCore.newProjectEntry(fPath, accesRules, combineAccessRules, extraAttributes, isExported());
 			}
 			case IClasspathEntry.CPE_CONTAINER: {
@@ -898,7 +898,7 @@ public class CPListElement {
 								appendEncodedAccessRules((IAccessRule[]) elem.getValue(), buf).append(';');
 								break;
 							case COMBINE_ACCESSRULES:
-								buf.append(((Boolean) elem.getValue()).booleanValue()).append(';');
+								buf.append(elem.getValue()).append(';');
 								break;
 							case MODULE:
 								Object value= elem.getValue();

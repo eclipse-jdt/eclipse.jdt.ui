@@ -97,7 +97,7 @@ public final class ClasspathFixProcessorDescriptor {
 
 	public boolean matches(IJavaProject javaProject) {
 		if (fStatus != null) {
-			return fStatus.booleanValue();
+			return fStatus;
 		}
 
 		IConfigurationElement[] children= fConfigurationElement.getChildren(ExpressionTagNames.ENABLEMENT);

@@ -68,14 +68,14 @@ public class FilterTextControl {
 			Text testText= null;
 			try {
 				testText= new Text(composite, SWT.SEARCH | SWT.ICON_CANCEL);
-				fgUseNativeSearchField= Boolean.valueOf((testText.getStyle() & SWT.ICON_CANCEL) != 0);
+				fgUseNativeSearchField= (testText.getStyle() & SWT.ICON_CANCEL) != 0;
 			} finally {
 				if (testText != null) {
 					testText.dispose();
 				}
 			}
 		}
-		return fgUseNativeSearchField.booleanValue();
+		return fgUseNativeSearchField;
 	}
 
 	/**
@@ -284,7 +284,7 @@ public class FilterTextControl {
 		if (fClearButton != null) {
 			fClearButton.setEnabled(enabled);
 		}
-		boolean nativeField= fgUseNativeSearchField.booleanValue();
+		boolean nativeField= fgUseNativeSearchField;
 		if (!nativeField) {
 			// in the case of native field, composite is initialized with blank, we need to manage background to avoid having a blank square on the right when the control is disabled.
 			fComposite.setBackground(enabled ? fComposite.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND) : null);

@@ -62,7 +62,7 @@ public class TextPerformanceTestCase2 extends PerformanceTestCase2 {
 	private static int intValueOf(String stringValue, int defaultValue) {
 		try {
 			if (stringValue != null)
-				return Integer.valueOf(stringValue).intValue();
+				return Integer.valueOf(stringValue);
 		} catch (NumberFormatException e) {
 			// use default
 		}

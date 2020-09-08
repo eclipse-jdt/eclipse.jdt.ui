@@ -765,7 +765,7 @@ public class ASTNodes {
 	public static Boolean getBooleanLiteral(Expression expression) {
 		final BooleanLiteral bl= as(expression, BooleanLiteral.class);
 		if (bl != null) {
-			return Boolean.valueOf(bl.booleanValue());
+			return bl.booleanValue();
 		}
 		final QualifiedName qn= as(expression, QualifiedName.class);
 		if (hasType(qn, Boolean.class.getCanonicalName())) {

@@ -193,17 +193,17 @@ public class VarCleanUp extends AbstractMultiFix {
 
 				        if (literal != null && (literal.getToken().matches(".*[^lLdDfF]") || literal.getToken().matches("0x.*[^lL]"))) { //$NON-NLS-1$ //$NON-NLS-2$
 				            if (ASTNodes.hasType(variableType, long.class.getSimpleName())) {
-				            	rewriteOperations.add(new VarOperation(type, literal, Character.valueOf('L')));
+				            	rewriteOperations.add(new VarOperation(type, literal, 'L'));
 				                return false;
 				            }
 
 				            if (ASTNodes.hasType(variableType, float.class.getSimpleName())) {
-				            	rewriteOperations.add(new VarOperation(type, literal, Character.valueOf('F')));
+				            	rewriteOperations.add(new VarOperation(type, literal, 'F'));
 				                return false;
 				            }
 
 				            if (ASTNodes.hasType(variableType, double.class.getSimpleName())) {
-				            	rewriteOperations.add(new VarOperation(type, literal, Character.valueOf('D')));
+				            	rewriteOperations.add(new VarOperation(type, literal, 'D'));
 				                return false;
 				            }
 				        }

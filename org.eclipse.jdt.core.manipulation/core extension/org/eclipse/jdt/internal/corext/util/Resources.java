@@ -138,7 +138,7 @@ public class Resources {
 		Map<IFile, Long> map= new HashMap<>();
 		for (IResource iResource : files) {
 			IFile file= (IFile)iResource;
-			map.put(file, Long.valueOf(file.getModificationStamp()));
+			map.put(file, file.getModificationStamp());
 		}
 		return map;
 	}

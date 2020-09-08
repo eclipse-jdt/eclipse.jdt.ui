@@ -441,7 +441,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 	}
 
 	private int getIntData(Button button) {
-		return ((Integer) button.getData()).intValue();
+		return ((Integer) button.getData());
 	}
 
 	private String getPattern() {

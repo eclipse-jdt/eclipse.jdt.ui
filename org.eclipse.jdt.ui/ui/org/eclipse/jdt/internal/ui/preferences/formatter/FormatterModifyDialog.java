@@ -289,7 +289,7 @@ public class FormatterModifyDialog extends ModifyDialog {
 		}
 
 		private static MenuItem updateMenuItem(List<MenuItem> items, int currentData) {
-			Integer data= Integer.valueOf(currentData);
+			Integer data= currentData;
 			MenuItem selected= null;
 			for (MenuItem item : items) {
 				item.setSelection(false);
@@ -305,7 +305,7 @@ public class FormatterModifyDialog extends ModifyDialog {
 		private static int getSelection(List<MenuItem> items) {
 			for (MenuItem item : items) {
 				if (item.getSelection())
-					return ((Integer) item.getData()).intValue();
+					return ((Integer) item.getData());
 			}
 			throw new AssertionError("No item selected"); //$NON-NLS-1$
 		}

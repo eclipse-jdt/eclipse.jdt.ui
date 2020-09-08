@@ -287,7 +287,7 @@ public class PotentialProgrammingProblemsFixCore extends CompilationUnitRewriteO
 			fCurrentContext= new ISerialVersionFixContext() {
 				@Override
 				public Long getSerialVersionId(ITypeBinding binding) {
-					return Long.valueOf(1);
+					return 1L;
 				}
 				@Override
 				public RefactoringStatus initialize(IProgressMonitor pm) throws CoreException {
@@ -300,7 +300,7 @@ public class PotentialProgrammingProblemsFixCore extends CompilationUnitRewriteO
 				private Random rng;
 				@Override
 				public Long getSerialVersionId(ITypeBinding binding) {
-					return Long.valueOf(rng.nextLong());
+					return rng.nextLong();
 				}
 				@Override
 				public RefactoringStatus initialize(IProgressMonitor pm) throws CoreException {

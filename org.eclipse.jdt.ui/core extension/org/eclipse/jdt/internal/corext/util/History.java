@@ -161,7 +161,7 @@ public abstract class History<K, V> {
 		if (!containsKey(key))
 			return -1;
 
-		return fPositions.get(key).intValue();
+		return fPositions.get(key);
 	}
 
 	public synchronized void load() {
@@ -243,7 +243,7 @@ public abstract class History<K, V> {
 		fPositions.clear();
 		int pos=0;
 		for (V element : fHistory.values()) {
-			fPositions.put(getKey(element), Integer.valueOf(pos));
+			fPositions.put(getKey(element), pos);
 			pos++;
 		}
 	}

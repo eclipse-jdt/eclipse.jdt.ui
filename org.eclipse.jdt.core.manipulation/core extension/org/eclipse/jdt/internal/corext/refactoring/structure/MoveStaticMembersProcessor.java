@@ -1098,12 +1098,12 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
 		final String delegate= extended.getAttribute(ATTRIBUTE_DELEGATE);
 		if (delegate != null) {
-			fDelegateUpdating= Boolean.valueOf(delegate).booleanValue();
+			fDelegateUpdating= Boolean.parseBoolean(delegate);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DELEGATE));
 		final String deprecate= extended.getAttribute(ATTRIBUTE_DEPRECATE);
 		if (deprecate != null) {
-			fDelegateDeprecation= Boolean.valueOf(deprecate).booleanValue();
+			fDelegateDeprecation= Boolean.parseBoolean(deprecate);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DEPRECATE));
 		int count= 1;

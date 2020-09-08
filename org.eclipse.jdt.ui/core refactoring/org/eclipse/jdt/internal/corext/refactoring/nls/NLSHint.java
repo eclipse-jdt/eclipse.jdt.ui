@@ -145,13 +145,13 @@ public class NLSHint {
 					if (superType != null && NLS.class.getName().equals(superType.getQualifiedName())) {
 						Integer line;
 						try {
-							line = Integer.valueOf(document.getLineOfOffset(node.getStartPosition()));
+							line = document.getLineOfOffset(node.getStartPosition());
 						} catch (BadLocationException e) {
 							return true; // ignore and continue
 						}
 						NLSLine nlsLine= lineToNLSLine.get(line);
 						if (nlsLine == null) {
-							nlsLine=  new NLSLine(line.intValue());
+							nlsLine=  new NLSLine(line);
 							lineToNLSLine.put(line, nlsLine);
 						}
 						SimpleName name= node.getName();

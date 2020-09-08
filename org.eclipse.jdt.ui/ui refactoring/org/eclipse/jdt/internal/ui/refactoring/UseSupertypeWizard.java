@@ -268,7 +268,7 @@ public class UseSupertypeWizard extends RefactoringWizard{
 		private void updateUpdateLabels() {
 			IType selectedType= getSelectedSupertype();
 			final int count= getUseSupertypeProcessor().getChanges();
-			fFileCount.put(selectedType, Integer.valueOf(count));
+			fFileCount.put(selectedType, count);
 			if (count == 0) {
 				setMessage(RefactoringMessages.UseSupertypeInputPage_No_updates, IMessageProvider.INFORMATION);
 				setPageComplete(false);
@@ -335,7 +335,7 @@ public class UseSupertypeWizard extends RefactoringWizard{
 				String superText= super.getText(element);
 				if  (! fFileCount.containsKey(element))
 					return superText;
-				int count= fFileCount.get(element).intValue();
+				int count= fFileCount.get(element);
 				switch (count) {
 				case 0:
 				{

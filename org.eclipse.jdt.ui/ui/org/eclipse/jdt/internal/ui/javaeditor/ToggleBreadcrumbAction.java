@@ -98,7 +98,7 @@ public class ToggleBreadcrumbAction extends ResourceAction implements IPropertyC
 	@Override
 	public void propertyChange(PropertyChangeEvent event) {
 		if (event.getProperty().equals(getPreferenceKey()))
-			setChecked(Boolean.valueOf(event.getNewValue().toString()).booleanValue());
+			setChecked(Boolean.parseBoolean(event.getNewValue().toString()));
 	}
 
 	/**
@@ -134,7 +134,7 @@ public class ToggleBreadcrumbAction extends ResourceAction implements IPropertyC
 	public void perspectiveActivated(IWorkbenchPage page, IPerspectiveDescriptor perspective) {
 		boolean isChecked= fStore.getBoolean(getPreferenceKey());
 		if (isChecked != isChecked()) {
-			Boolean value= Boolean.valueOf(isChecked);
+			Boolean value= isChecked;
 			fStore.firePropertyChangeEvent(getPreferenceKey(), value, value);
 		}
 	}

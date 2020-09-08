@@ -218,7 +218,7 @@ public class CPListLabelProvider extends LabelProvider implements IStyledLabelPr
 			if (parentKind == IClasspathEntry.CPE_PROJECT) {
 				Boolean combined= (Boolean) attrib.getParent().getAttribute(CPListElement.COMBINE_ACCESSRULES);
 				if (nRules > 0) {
-					if (combined.booleanValue()) {
+					if (combined) {
 						if (nRules == 1) {
 							return NewWizardMessages.CPListLabelProvider_project_access_rules_combined_singular;
 						} else {

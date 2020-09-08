@@ -176,7 +176,7 @@ public final class SerialVersionHashOperationCore extends AbstractSerialVersionO
 				for (int i= 7; i >= 0; i--) {
 					hash= (hash << 8) | (sha[i] & 0xFF);
 				}
-				return Long.valueOf(hash);
+				return hash;
 			}
 		} catch (NoSuchAlgorithmException e) {
 			JavaManipulationPlugin.log(e);
@@ -347,7 +347,7 @@ public final class SerialVersionHashOperationCore extends AbstractSerialVersionO
 			if (typeBinding != null) {
 				Long id= calculateSerialVersionId(typeBinding, new SubProgressMonitor(monitor, 100));
 				if (id != null)
-					serialVersionID= id.longValue();
+					serialVersionID= id;
 			}
 		} catch (CoreException | IOException exception) {
 			displayErrorMessage(exception);

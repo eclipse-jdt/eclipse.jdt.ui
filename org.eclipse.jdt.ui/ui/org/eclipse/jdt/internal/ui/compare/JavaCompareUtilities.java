@@ -250,7 +250,7 @@ public class JavaCompareUtilities {
 		if (cc != null) {
 			Object value= cc.getProperty(key);
 			if (value instanceof Boolean)
-				return ((Boolean) value).booleanValue();
+				return (Boolean) value;
 		}
 		return dflt;
 	}

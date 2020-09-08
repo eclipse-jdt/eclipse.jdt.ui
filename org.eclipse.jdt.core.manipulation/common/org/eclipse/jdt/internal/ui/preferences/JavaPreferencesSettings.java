@@ -25,10 +25,10 @@ public class JavaPreferencesSettings  {
 
 	public static CodeGenerationSettings getCodeGenerationSettings(IJavaProject project) {
 		CodeGenerationSettings res= new CodeGenerationSettings();
-		res.createComments= Boolean.valueOf(JavaManipulation.getPreference(CodeGenerationSettingsConstants.CODEGEN_ADD_COMMENTS, project)).booleanValue();
-		res.useKeywordThis= Boolean.valueOf(JavaManipulation.getPreference(CodeGenerationSettingsConstants.CODEGEN_KEYWORD_THIS, project)).booleanValue();
-		res.overrideAnnotation= Boolean.valueOf(JavaManipulation.getPreference(CodeGenerationSettingsConstants.CODEGEN_USE_OVERRIDE_ANNOTATION, project)).booleanValue();
-		res.importIgnoreLowercase= Boolean.valueOf(JavaManipulation.getPreference(CodeGenerationSettingsConstants.ORGIMPORTS_IGNORELOWERCASE, project)).booleanValue();
+		res.createComments= Boolean.parseBoolean(JavaManipulation.getPreference(CodeGenerationSettingsConstants.CODEGEN_ADD_COMMENTS, project));
+		res.useKeywordThis= Boolean.parseBoolean(JavaManipulation.getPreference(CodeGenerationSettingsConstants.CODEGEN_KEYWORD_THIS, project));
+		res.overrideAnnotation= Boolean.parseBoolean(JavaManipulation.getPreference(CodeGenerationSettingsConstants.CODEGEN_USE_OVERRIDE_ANNOTATION, project));
+		res.importIgnoreLowercase= Boolean.parseBoolean(JavaManipulation.getPreference(CodeGenerationSettingsConstants.ORGIMPORTS_IGNORELOWERCASE, project));
 		res.tabWidth= CodeFormatterUtil.getTabWidth(project);
 		res.indentWidth= CodeFormatterUtil.getIndentWidth(project);
 		return res;

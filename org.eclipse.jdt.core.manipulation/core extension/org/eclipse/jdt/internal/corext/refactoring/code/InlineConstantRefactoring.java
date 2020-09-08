@@ -989,9 +989,9 @@ public class InlineConstantRefactoring extends Refactoring {
 			int length= -1;
 			final StringTokenizer tokenizer= new StringTokenizer(selection);
 			if (tokenizer.hasMoreTokens())
-				offset= Integer.valueOf(tokenizer.nextToken()).intValue();
+				offset= Integer.parseInt(tokenizer.nextToken());
 			if (tokenizer.hasMoreTokens())
-				length= Integer.valueOf(tokenizer.nextToken()).intValue();
+				length= Integer.parseInt(tokenizer.nextToken());
 			if (offset >= 0 && length >= 0) {
 				fSelectionStart= offset;
 				fSelectionLength= length;
@@ -1035,12 +1035,12 @@ public class InlineConstantRefactoring extends Refactoring {
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
 		final String replace= arguments.getAttribute(ATTRIBUTE_REPLACE);
 		if (replace != null) {
-			fReplaceAllReferences= Boolean.valueOf(replace).booleanValue();
+			fReplaceAllReferences= Boolean.parseBoolean(replace);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_REPLACE));
 		final String remove= arguments.getAttribute(ATTRIBUTE_REMOVE);
 		if (remove != null)
-			fRemoveDeclaration= Boolean.valueOf(remove).booleanValue();
+			fRemoveDeclaration= Boolean.parseBoolean(remove);
 		else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_REMOVE));
 		return new RefactoringStatus();

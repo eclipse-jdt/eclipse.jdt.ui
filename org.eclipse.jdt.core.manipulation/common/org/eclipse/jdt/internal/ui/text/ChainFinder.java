@@ -139,7 +139,7 @@ public class ChainFinder {
 			isAssignable= ChainElementAnalyzer.isAssignable(edge, expectedType.getType(), expectedDimension);
 			assignableCache.put(edge.toString() + expectedType.toString(), isAssignable);
 		}
-		return isAssignable.booleanValue();
+		return isAssignable;
 	}
 
 	private void searchDeeper(final LinkedList<ChainElement> chain,

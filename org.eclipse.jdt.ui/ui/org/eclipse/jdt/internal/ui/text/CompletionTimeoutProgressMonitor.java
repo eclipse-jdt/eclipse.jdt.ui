@@ -17,7 +17,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 public class CompletionTimeoutProgressMonitor implements IProgressMonitor {
 
-	private static final long JAVA_CODE_ASSIST_TIMEOUT= Long.getLong("org.eclipse.jdt.ui.codeAssistTimeout", 5000).longValue(); // ms //$NON-NLS-1$
+	private static final long JAVA_CODE_ASSIST_TIMEOUT= Long.getLong("org.eclipse.jdt.ui.codeAssistTimeout", 5000); // ms //$NON-NLS-1$
 
 	private final long fTimeout;
 

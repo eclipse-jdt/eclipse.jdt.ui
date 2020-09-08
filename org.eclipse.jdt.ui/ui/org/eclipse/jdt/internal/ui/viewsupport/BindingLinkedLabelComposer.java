@@ -573,7 +573,7 @@ public class BindingLinkedLabelComposer extends JavaElementLinkedLabelComposer {
 			} else if (value instanceof IAnnotationBinding) {
 				appendAnnotationLabel((IAnnotationBinding) value, flags);
 			} else if (value instanceof Character) {
-				fBuffer.append(ASTNodes.getEscapedCharacterLiteral(((Character) value).charValue()));
+				fBuffer.append(ASTNodes.getEscapedCharacterLiteral(((Character) value)));
 			} else { // other primitive literals
 				fBuffer.append(String.valueOf(value));
 			}

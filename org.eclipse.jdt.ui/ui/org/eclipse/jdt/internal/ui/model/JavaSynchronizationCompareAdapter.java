@@ -93,7 +93,7 @@ public final class JavaSynchronizationCompareAdapter extends AbstractSynchroniza
 			IResource resource= null;
 			final IPath path= new Path(pathString);
 			final IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
-			switch (typeInt.intValue()) {
+			switch (typeInt) {
 				case IResource.ROOT:
 					resource= root;
 					break;

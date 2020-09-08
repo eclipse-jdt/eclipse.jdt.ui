@@ -179,7 +179,7 @@ public class JavaEditorTextHoverDescriptor {
 
 
 	public boolean canActivatePlugIn() {
-		return Boolean.valueOf(fElement.getAttribute(ACTIVATE_PLUG_IN_ATTRIBUTE)).booleanValue();
+		return Boolean.parseBoolean(fElement.getAttribute(ACTIVATE_PLUG_IN_ATTRIBUTE));
 	}
 
 	@Override

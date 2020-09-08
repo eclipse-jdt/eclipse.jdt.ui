@@ -147,7 +147,7 @@ public class GoToNextPreviousMemberAction extends Action implements IUpdate {
 			if (offsetArray.length == 0)
 				return oldSourceRange;
 			Arrays.sort(offsetArray);
-			Integer oldOffset= Integer.valueOf(oldSourceRange.getOffset());
+			int oldOffset= oldSourceRange.getOffset();
 			int index= Arrays.binarySearch(offsetArray, oldOffset);
 
 			if (fIsGotoNext)
@@ -161,7 +161,7 @@ public class GoToNextPreviousMemberAction extends Action implements IUpdate {
 	 	}
 	}
 
-	private static Integer getPreviousOffset(int index, Integer[] offsetArray, Integer oldOffset) {
+	private static Integer getPreviousOffset(int index, Integer[] offsetArray, int oldOffset) {
 		if (index == -1)
 			return oldOffset;
 		if (index == 0)
@@ -173,7 +173,7 @@ public class GoToNextPreviousMemberAction extends Action implements IUpdate {
 		return offsetArray[absIndex - 2];
 	}
 
-	private static Integer getNextOffset(int index, Integer[] offsetArray, Integer oldOffset) {
+	private static Integer getNextOffset(int index, Integer[] offsetArray, int oldOffset) {
 		if (index == -1)
 			return offsetArray[0];
 
@@ -197,7 +197,7 @@ public class GoToNextPreviousMemberAction extends Action implements IUpdate {
 	}
 
 	private static ISourceRange createNewSourceRange(Integer offset){
-		return new SourceRange(offset.intValue(), 0);
+		return new SourceRange(offset, 0);
 	}
 
 	private static Integer[] createOffsetArray(IType[] types) throws JavaModelException {
@@ -251,6 +251,6 @@ public class GoToNextPreviousMemberAction extends Action implements IUpdate {
 
 	private static void addOffset(List<Integer> result, int offset) {
 		if (offset >= 0)
-			result.add(Integer.valueOf(offset));
+			result.add(offset);
 	}
 }

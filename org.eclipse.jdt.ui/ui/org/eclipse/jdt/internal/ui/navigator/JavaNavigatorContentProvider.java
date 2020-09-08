@@ -81,13 +81,12 @@ public class JavaNavigatorContentProvider extends
 		fLayoutPropertyListener = event -> {
 			if (Values.IS_LAYOUT_FLAT.equals(event.getProperty())) {
 				if (event.getNewValue() != null) {
-					boolean newValue1 = ((Boolean) event.getNewValue())
-							.booleanValue() ? true : false;
+					boolean newValue1 = ((Boolean) event.getNewValue()) ? true : false;
 					setIsFlatLayout(newValue1);
 				}
 			} else if (Values.IS_LIBRARIES_NODE_SHOWN.equals(event.getProperty())) {
 				if (event.getNewValue() != null) {
-					boolean newValue2 = ((Boolean) event.getNewValue()).booleanValue();
+					boolean newValue2 = ((Boolean) event.getNewValue());
 					setShowLibrariesNode(newValue2);
 				}
 			}

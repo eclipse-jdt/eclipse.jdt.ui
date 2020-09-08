@@ -197,17 +197,17 @@ public class MethodsViewer extends ProblemTableViewer {
 		refresh();
 		getControl().setRedraw(true);
 
-		boolean showInherited= Boolean.valueOf(memento.getString(TAG_SHOWINHERITED)).booleanValue();
+		boolean showInherited= Boolean.parseBoolean(memento.getString(TAG_SHOWINHERITED));
 		showInheritedMethods(showInherited);
 
-		boolean showDefiningTypes= Boolean.valueOf(memento.getString(TAG_SORTBYDEFININGTYPE)).booleanValue();
+		boolean showDefiningTypes= Boolean.parseBoolean(memento.getString(TAG_SORTBYDEFININGTYPE));
 		sortByDefiningType(showDefiningTypes);
 
 		ScrollBar bar= getTable().getVerticalBar();
 		if (bar != null) {
 			Integer vScroll= memento.getInteger(TAG_VERTICAL_SCROLL);
 			if (vScroll != null) {
-				bar.setSelection(vScroll.intValue());
+				bar.setSelection(vScroll);
 			}
 		}
 	}

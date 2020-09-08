@@ -71,11 +71,11 @@ public class RefactoringScannerTests extends GenericRefactoringTest {
 
 		ArrayList<Integer> expectedMatchesList= new ArrayList<>(expectedMatches.length);
 		for (Position expectedMatch : expectedMatches) {
-			expectedMatchesList.add(Integer.valueOf(TextRangeUtil.getOffset(text, expectedMatch.fLine, expectedMatch.fColumn)));
+			expectedMatchesList.add(TextRangeUtil.getOffset(text, expectedMatch.fLine, expectedMatch.fColumn));
 		}
 		ArrayList<Integer> matchesList= new ArrayList<>();
 		for (TextMatch element : fScanner.getMatches()) {
-			matchesList.add(Integer.valueOf(element.getStartPosition()));
+			matchesList.add(element.getStartPosition());
 		}
 		Collections.sort(matchesList);
 		assertEquals("results", expectedMatchesList.toString(), matchesList.toString());

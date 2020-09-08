@@ -996,7 +996,7 @@ public class IndentAction extends TextEditorAction {
 		if (textBlockIndentationOption != null) {
 			Integer iVal= Integer.valueOf(textBlockIndentationOption);
 			if (iVal != null) {
-				val= iVal.intValue();
+				val= iVal;
 			}
 		}
 		return val;
@@ -1006,7 +1006,7 @@ public class IndentAction extends TextEditorAction {
 		boolean val= false;
 		String useTabsOnlyForLeadingIndentations= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_USE_TABS_ONLY_FOR_LEADING_INDENTATIONS, javaProject);
 		if (useTabsOnlyForLeadingIndentations != null) {
-			val= (Boolean.valueOf(useTabsOnlyForLeadingIndentations)).booleanValue();
+			val= Boolean.parseBoolean(useTabsOnlyForLeadingIndentations);
 		}
 		return val;
 	}

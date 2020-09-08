@@ -233,7 +233,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 			if (fResultsMap.containsKey(key1)) {
 				results= fResultsMap.get(key1);
 				if (results.containsKey(key2))
-					value= results.get(key2).intValue();
+					value= results.get(key2);
 				else
 					value= 0;
 			} else {
@@ -241,7 +241,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 				fResultsMap.put(key1, results);
 				value= 0;
 			}
-			results.put(key2, Integer.valueOf(value + 1));
+			results.put(key2, value + 1);
 		}
 
 		/**
@@ -662,7 +662,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	private static int intValueOf(String stringValue, int defaultValue) {
 		try {
 			if (stringValue != null)
-				return Integer.valueOf(stringValue).intValue();
+				return Integer.valueOf(stringValue);
 		} catch (NumberFormatException e) {
 			// use default
 		}

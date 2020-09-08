@@ -193,7 +193,7 @@ class SearchInDialog extends TrayDialog {
 	 * @return the value of the button
 	 */
 	private int getIntData(Button button) {
-		return ((Integer)button.getData()).intValue();
+		return ((Integer)button.getData());
 	}
 
 	/**

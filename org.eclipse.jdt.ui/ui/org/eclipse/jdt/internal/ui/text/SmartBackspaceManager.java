@@ -186,12 +186,12 @@ public class SmartBackspaceManager {
 	}
 
 	private void addEdit(UndoSpec spec) {
-		Integer i= Integer.valueOf(spec.triggerOffset);
+		Integer i= spec.triggerOffset;
 		fSpecs.put(i, spec);
 	}
 
 	private UndoSpec removeEdit(int offset) {
-		Integer i= Integer.valueOf(offset);
+		Integer i= offset;
 		UndoSpec spec= fSpecs.remove(i);
 		return spec;
 	}
