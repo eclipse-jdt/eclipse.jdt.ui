@@ -353,12 +353,12 @@ public class HierarchicalASTVisitorTest {
 		private static void checkRequiredMethodsForNonLeaf(Class<? extends ASTNode> clazz, boolean isEndVisit) {
 			Assert.isTrue(ASTNode.class.isAssignableFrom(clazz));
 			try {
-				TestHierarchicalASTVisitor.class.getDeclaredMethod(getVisitMethodName(isEndVisit), new Class[] { clazz });
+				TestHierarchicalASTVisitor.class.getDeclaredMethod(getVisitMethodName(isEndVisit), clazz);
 			} catch (NoSuchMethodException e) {
 				fail("Test must be updated since TestHierarchicalASTVisitor (declared within test class), is missing a method corresponding to non-leaf node class '" + getSimpleName(clazz) + "'");
 			}
 			try {
-				TestHierarchicalASTVisitor.class.getDeclaredMethod(getSuperVisitName(isEndVisit), new Class[] { clazz });
+				TestHierarchicalASTVisitor.class.getDeclaredMethod(getSuperVisitName(isEndVisit), clazz);
 			} catch (NoSuchMethodException e) {
 				fail("Test must be updated since TestHierarchicalASTVisitor (declared within test class), is missing a method corresponding to non-leaf node class '" + getSimpleName(clazz) + "'");
 			}
@@ -382,7 +382,7 @@ public class HierarchicalASTVisitorTest {
 			 * to reflectively instantiate an appropriately typed node.
 			 */
 			try {
-				Method method= TestHierarchicalASTVisitor.class.getMethod(isLeaf ? getVisitMethodName(isEndVisit) : "superVisit", new Class[] { clazz });
+				Method method= TestHierarchicalASTVisitor.class.getMethod(isLeaf ? getVisitMethodName(isEndVisit) : "superVisit", clazz);
 				method.invoke(this, new Object[] { null });
 			} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
 				/* NoSuchMethodException should have already been discovered by
@@ -479,7 +479,7 @@ public class HierarchicalASTVisitorTest {
 	private void checkHierarchicalASTVisitorMethodExistsFor(Class<? extends ASTNode> nodeClass, boolean isEndVisit) {
 		Assert.isTrue(ASTNode.class.isAssignableFrom(nodeClass));
 		try {
-			HierarchicalASTVisitor.class.getDeclaredMethod(getVisitMethodName(isEndVisit), new Class[] { nodeClass });
+			HierarchicalASTVisitor.class.getDeclaredMethod(getVisitMethodName(isEndVisit), nodeClass);
 		} catch (NoSuchMethodException e) {
 			String signature= getVisitMethodName(isEndVisit) + "(" + getSimpleName(nodeClass) + ")";
 			fail("HierarchicalASTVisitor must be updated to reflect a change in the ASTNode hierarchy.  No method " + signature + " was found in HierarchicalASTVisitor.");

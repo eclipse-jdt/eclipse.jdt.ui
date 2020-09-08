@@ -107,7 +107,7 @@ public class JUnit4TestLoader implements ITestLoader {
 			if (testMethod.getAnnotation(org.junit.Test.class) != null)
 				return false;
 
-			Method setup= clazz.getMethod(JUnit3TestLoader.SET_UP_TEST_METHOD_NAME, new Class[] { Test.class });
+			Method setup= clazz.getMethod(JUnit3TestLoader.SET_UP_TEST_METHOD_NAME, Test.class);
 			int modifiers= setup.getModifiers();
 			if (setup.getReturnType() == Test.class && Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers))
 				return true;

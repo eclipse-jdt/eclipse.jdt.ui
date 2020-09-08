@@ -66,7 +66,7 @@ public class JUnit3TestLoader implements ITestLoader {
 		try {
 			try {
 				constructor= testClass.getConstructor(classArgs);
-				test= (Test) constructor.newInstance(new Object[] { testName });
+				test= (Test) constructor.newInstance(testName);
 			} catch (NoSuchMethodException e) {
 				// try the no arg constructor supported in 3.8.1
 				constructor= testClass.getConstructor(new Class[0]);
@@ -135,7 +135,7 @@ public class JUnit3TestLoader implements ITestLoader {
 
 		Method setup= null;
 		try {
-			setup= reloadedTestClass.getMethod(SET_UP_TEST_METHOD_NAME, new Class[] { Test.class });
+			setup= reloadedTestClass.getMethod(SET_UP_TEST_METHOD_NAME, Test.class);
 		} catch (SecurityException e1) {
 			return reloadedTest;
 		} catch (NoSuchMethodException e) {
@@ -148,7 +148,7 @@ public class JUnit3TestLoader implements ITestLoader {
 		if (!Modifier.isStatic(setup.getModifiers()))
 			return error(testName, JUnitMessages.getString("RemoteTestRunner.error.shouldbestatic")); //$NON-NLS-1$
 		try {
-			Test test= (Test) setup.invoke(null, new Object[] { reloadedTest });
+			Test test= (Test) setup.invoke(null, reloadedTest);
 			if (test == null)
 				return error(testName, JUnitMessages.getString("RemoteTestRunner.error.nullreturn")); //$NON-NLS-1$
 			return test;

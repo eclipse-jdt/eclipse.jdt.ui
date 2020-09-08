@@ -85,12 +85,11 @@ public class JUnit3TestReference implements ITestReference {
 	public String getName() {
 		if (isJUnit4TestCaseAdapter(fTest)) {
 			Method method= (Method) callJUnit4GetterMethod(fTest, "getTestMethod"); //$NON-NLS-1$
-			return MessageFormat.format(
-					MessageIds.TEST_IDENTIFIER_MESSAGE_FORMAT, new Object[] { method.getName(), method.getDeclaringClass().getName() });
+			return MessageFormat.format(MessageIds.TEST_IDENTIFIER_MESSAGE_FORMAT, method.getName(), method.getDeclaringClass().getName());
 		}
 		if (fTest instanceof TestCase) {
 			TestCase testCase= (TestCase) fTest;
-			return MessageFormat.format(MessageIds.TEST_IDENTIFIER_MESSAGE_FORMAT, new Object[] { testCase.getName(), fTest.getClass().getName() });
+			return MessageFormat.format(MessageIds.TEST_IDENTIFIER_MESSAGE_FORMAT, testCase.getName(), fTest.getClass().getName());
 		}
 		if (fTest instanceof TestSuite) {
 			TestSuite suite= (TestSuite) fTest;
