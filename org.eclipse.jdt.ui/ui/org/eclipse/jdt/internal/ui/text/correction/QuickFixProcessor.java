@@ -133,6 +133,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.IndirectAccessToStaticField:
 			case IProblem.IndirectAccessToStaticMethod:
 			case IProblem.SealedMissingClassModifier:
+			case IProblem.SealedMissingInterfaceModifier:
 			case IProblem.Task:
 			case IProblem.UnusedMethodDeclaredThrownException:
 			case IProblem.UnusedConstructorDeclaredThrownException:
@@ -469,7 +470,8 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				LocalCorrectionsSubProcessor.addCorrectAccessToStaticProposals(context, problem, proposals);
 				break;
 			case IProblem.SealedMissingClassModifier:
-				ModifierCorrectionSubProcessor.addSealedMissingClassModifierProposal(context, problem, proposals);
+			case IProblem.SealedMissingInterfaceModifier:
+				ModifierCorrectionSubProcessor.addSealedMissingModifierProposal(context, problem, proposals);
 				break;
 			case IProblem.StaticMethodRequested:
 			case IProblem.NonStaticFieldFromStaticInvocation:

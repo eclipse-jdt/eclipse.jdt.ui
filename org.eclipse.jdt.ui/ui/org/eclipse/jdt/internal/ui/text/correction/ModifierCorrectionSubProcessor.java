@@ -948,7 +948,7 @@ public class ModifierCorrectionSubProcessor {
 		}
 	}
 
-	public static void addSealedMissingClassModifierProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
+	public static void addSealedMissingModifierProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		if (proposals == null) {
 			return;
 		}
@@ -960,18 +960,19 @@ public class ModifierCorrectionSubProcessor {
 			return;
 		}
 		TypeDeclaration typeDecl= (TypeDeclaration) ((SimpleName) selectedNode).getParent();
-		if (typeDecl.isInterface()) {
-			return;
-		}
+		boolean isInterface= typeDecl.isInterface();
 
 		ICompilationUnit cu= context.getCompilationUnit();
 		ITypeBinding typeDeclBinding= typeDecl.resolveBinding();
 		int relevance= IProposalRelevance.CHANGE_MODIFIER_TO_FINAL;
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		String label;
 
-		// Add final modifier
-		String label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemodifierto_final_description, typeDecl.getName());
-		proposals.add(new ModifierChangeCorrectionProposal(label, cu, typeDeclBinding, typeDecl, Modifier.FINAL, 0, relevance, image));
+		if (!isInterface) {
+			// Add final modifier
+			label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemodifierto_final_description, typeDecl.getName());
+			proposals.add(new ModifierChangeCorrectionProposal(label, cu, typeDeclBinding, typeDecl, Modifier.FINAL, 0, relevance, image));
+		}
 
 		// Add sealed modifier
 		label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemodifierto_sealed_description, typeDecl.getName());
