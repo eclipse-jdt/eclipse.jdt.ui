@@ -49,29 +49,27 @@ import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 @RunWith(JUnit4.class)
 public class QuickFixTest15 extends QuickFixTest {
 
-//	private static final Class<QuickFixTest14> THIS= QuickFixTest14.class;
+	@Rule
+	public ProjectTestSetup projectsetup= new Java14ProjectTestSetup(true);
 
-    @Rule
-    public ProjectTestSetup projectsetup = new Java14ProjectTestSetup(true);
+	private IJavaProject fJProject;
 
-    private IJavaProject fJProject1;
-
-    private IPackageFragmentRoot fSourceFolder;
+	private IPackageFragmentRoot fSourceFolder;
 
 	@After
 	public void tearDown() throws Exception {
-		if (fJProject1 != null) {
-			JavaProjectHelper.delete(fJProject1);
+		if (fJProject != null) {
+			JavaProjectHelper.delete(fJProject);
 		}
 	}
 
 	@Test
 	public void testEnablePreviewsAndOpenCompilerPropertiesProposals() throws Exception {
-		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
-		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
+		fJProject= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject.setRawClasspath(projectsetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set15CompilerOptions(fJProject, false);
 
-		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject, "src");
 
 
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
@@ -79,9 +77,9 @@ public class QuickFixTest15 extends QuickFixTest {
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
 		String test= ""
-					+ "package test;\n"
-					+ "public record Rec1() {\n"
-					+ "}\n";
+				+ "package test;\n"
+				+ "public record Rec1() {\n"
+				+ "}\n";
 		ICompilationUnit cu= pack.createCompilationUnit("Rec1.java", test, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
@@ -125,11 +123,11 @@ public class QuickFixTest15 extends QuickFixTest {
 
 	@Test
 	public void testTextBlockGetNeedHigherComplianceProposal() throws Exception {
-		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
-		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
+		fJProject= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject.setRawClasspath(projectsetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set14CompilerOptions(fJProject, false);
 
-		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject, "src");
 
 
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
@@ -137,16 +135,16 @@ public class QuickFixTest15 extends QuickFixTest {
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
 		String test= ""
-					+ "package test;\n"
-					+ "public class Cls1 {\n"
-					+ "	public static void main(String[] args) {\n"
-					+ "		String str= \"\"\"\n"
-					+ "					Hello\n"
-					+ "					World\n"
-					+ "					\"\"\";\n"
-					+ "		System.out.println(str);\n"
-					+ "	}\n"
-					+ "}\n";
+				+ "package test;\n"
+				+ "public class Cls1 {\n"
+				+ "	public static void main(String[] args) {\n"
+				+ "		String str= \"\"\"\n"
+				+ "					Hello\n"
+				+ "					World\n"
+				+ "					\"\"\";\n"
+				+ "		System.out.println(str);\n"
+				+ "	}\n"
+				+ "}\n";
 		ICompilationUnit cu= pack.createCompilationUnit("Cls1.java", test, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
@@ -159,11 +157,11 @@ public class QuickFixTest15 extends QuickFixTest {
 
 	@Test
 	public void testNoEnablePreviewProposal() throws Exception {
-		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
-		JavaProjectHelper.set15CompilerOptions(fJProject1, true);
+		fJProject= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject.setRawClasspath(projectsetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set15CompilerOptions(fJProject, true);
 
-		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject, "src");
 
 
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
@@ -171,9 +169,9 @@ public class QuickFixTest15 extends QuickFixTest {
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
 		String test= ""
-					+ "package test;\n"
-					+ "public record Rec() {\n"
-					+ "}\n";
+				+ "package test;\n"
+				+ "public record Rec() {\n"
+				+ "}\n";
 		ICompilationUnit cu= pack.createCompilationUnit("Rec.java", test, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
@@ -184,15 +182,15 @@ public class QuickFixTest15 extends QuickFixTest {
 
 	@Test
 	public void testRecordSuppressWarningsProposals() throws Exception {
-		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
-		JavaProjectHelper.set15CompilerOptions(fJProject1, true);
+		fJProject= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject.setRawClasspath(projectsetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set15CompilerOptions(fJProject, true);
 
-		Map<String, String> options= fJProject1.getOptions(false);
+		Map<String, String> options= fJProject.getOptions(false);
 		options.put(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.WARNING);
-		fJProject1.setOptions(options);
+		fJProject.setOptions(options);
 
-		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject, "src");
 
 
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
@@ -200,9 +198,9 @@ public class QuickFixTest15 extends QuickFixTest {
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
 		String test= ""
-					+ "package test;\n"
-					+ "public record Rec1() {\n"
-					+ "}\n";
+				+ "package test;\n"
+				+ "public record Rec1() {\n"
+				+ "}\n";
 		ICompilationUnit cu= pack.createCompilationUnit("Rec1.java", test, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
@@ -216,11 +214,75 @@ public class QuickFixTest15 extends QuickFixTest {
 		String preview= getPreviewContent(proposal);
 
 		String expected= ""
-						+ "package test;\n"
-						+ "@SuppressWarnings(\"preview\")\n"
-						+ "public record Rec1() {\n"
-						+ "}\n";
+				+ "package test;\n"
+				+ "@SuppressWarnings(\"preview\")\n"
+				+ "public record Rec1() {\n"
+				+ "}\n";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
+	}
+
+	@Test
+	public void testAddSealedMissingClassModifierProposal() throws Exception {
+		fJProject= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject.setRawClasspath(projectsetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set15CompilerOptions(fJProject, true);
+
+		Map<String, String> options= fJProject.getOptions(false);
+		options.put(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
+		fJProject.setOptions(options);
+
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject, "src");
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+
+		StringBuffer buf= new StringBuffer();
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("\n");
+		buf.append("public sealed class Shape permits Square {}\n");
+		buf.append("\n");
+		buf.append("class Square extends Shape {}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Shape.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("\n");
+		buf.append("public sealed class Shape permits Square {}\n");
+		buf.append("\n");
+		buf.append("final class Square extends Shape {}\n");
+		String expected1= buf.toString();
+
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("\n");
+		buf.append("public sealed class Shape permits Square {}\n");
+		buf.append("\n");
+		buf.append("non-sealed class Square extends Shape {}\n");
+		String expected2= buf.toString();
+
+		proposal= (CUCorrectionProposal) proposals.get(2);
+		String preview3= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("\n");
+		buf.append("public sealed class Shape permits Square {}\n");
+		buf.append("\n");
+		buf.append("sealed class Square extends Shape {}\n");
+		String expected3= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2, expected3 });
+
 	}
 }
