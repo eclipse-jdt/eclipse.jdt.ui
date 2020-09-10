@@ -89,7 +89,7 @@ public class SurroundWithTemplateProposal extends TemplateProposal {
 		@Override
 		protected boolean isNewContext() {
 
-			final String templateVariableRegEx= "\\$\\{[^\\}]*\\}"; //$NON-NLS-1$
+			final Pattern templateVariableRegEx= Pattern.compile("\\$\\{[^\\}]*\\}"); //$NON-NLS-1$
 
 			String template= fTemplate.getPattern();
 			Matcher lineSelectionMatcher= $_LINE_SELECTION_PATTERN.matcher(template);
@@ -97,11 +97,11 @@ public class SurroundWithTemplateProposal extends TemplateProposal {
 			int insertionPosition= -1;
 			while (currentPosition != -1) {
 				insertionPosition= currentPosition;
-				template= template.replaceFirst(templateVariableRegEx, ""); //$NON-NLS-1$
+				template= templateVariableRegEx.matcher(template).replaceFirst(""); //$NON-NLS-1$
 				lineSelectionMatcher= $_LINE_SELECTION_PATTERN.matcher(template);
 				currentPosition= lineSelectionMatcher.find() ? lineSelectionMatcher.start() : -1;
 			}
-			template= template.replaceAll(templateVariableRegEx, ""); //$NON-NLS-1$
+			template= templateVariableRegEx.matcher(template).replaceAll(""); //$NON-NLS-1$
 
 			AST ast= getAst();
 			ASTParser parser= ASTParser.newParser(ast.apiLevel());

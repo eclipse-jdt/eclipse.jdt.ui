@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.StringTokenizer;
+import java.util.regex.Pattern;
 
 import org.eclipse.jdt.junit.JUnitCore;
 import org.eclipse.jdt.junit.TestRunListener;
@@ -130,22 +131,22 @@ public class AbstractTestRunSessionSerializationTests {
 		/*
 		 * Strips &#13; and &#10;
 		 */
-		String regex0= "&#1[03];";
+		Pattern regex0= Pattern.compile("&#1[03];");
 		/*
 		 * Avoid comparing stack traces (which are VM-dependent)
 		 */
-		String regex= "(?m)^\\s*at\\s+[/\\w\\.\\:\\;\\$\\(\\)\\[ \\t]+$\r?\n?";
+		Pattern regex= Pattern.compile("(?m)^\\s*at\\s+[/\\w\\.\\:\\;\\$\\(\\)\\[ \\t]+$\r?\n?");
 		/*
 		 * Strips lines like " ... 18 more"
 		 */
-		String regex2= "(?m)^\\s*\\.{3}\\s+\\d+\\s+more\\s+$\r?\n?";
+		Pattern regex2= Pattern.compile("(?m)^\\s*\\.{3}\\s+\\d+\\s+more\\s+$\r?\n?");
 		/*
 		 * Strips running times
 		 */
-		String regex3= "(?<=time=\\\")\\d+\\.\\d+(?=\\\")";
+		Pattern regex3= Pattern.compile("(?<=time=\\\")\\d+\\.\\d+(?=\\\")");
 		String replacement= "";
-		expected= expected.replaceAll(regex0, replacement).replaceAll(regex, replacement).replaceAll(regex2, replacement).replaceAll(regex3, replacement);
-		actual= actual.replaceAll(regex0, replacement).replaceAll(regex, replacement).replaceAll(regex2, replacement).replaceAll(regex3, replacement);
+		expected= regex3.matcher(regex2.matcher(regex.matcher(regex0.matcher(expected).replaceAll(replacement)).replaceAll(replacement)).replaceAll(replacement)).replaceAll(replacement);
+		actual= regex3.matcher(regex2.matcher(regex.matcher(regex0.matcher(actual).replaceAll(replacement)).replaceAll(replacement)).replaceAll(replacement)).replaceAll(replacement);
 		int ibmJava6BugOffset= actual.indexOf("><");
 		if (ibmJava6BugOffset > 0) // https://bugs.eclipse.org/bugs/show_bug.cgi?id=197842
 			actual= new StringBuffer(actual).insert(ibmJava6BugOffset + 1, " ").toString();
