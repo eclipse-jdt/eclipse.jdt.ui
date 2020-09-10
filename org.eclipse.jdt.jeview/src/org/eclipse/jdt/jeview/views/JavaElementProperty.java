@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.jeview.views;
 
+import java.util.Objects;
 
 public class JavaElementProperty extends JEAttribute {
 
@@ -57,17 +58,11 @@ public class JavaElementProperty extends JEAttribute {
 		}
 
 		JavaElementProperty other= (JavaElementProperty) obj;
-		if (fParent == null) {
-			if (other.fParent != null)
-				return false;
-		} else if (! fParent.equals(other.fParent)) {
+		if (!Objects.equals(fParent, other.fParent)) {
 			return false;
 		}
 
-		if (fName == null) {
-			if (other.fName != null)
-				return false;
-		} else if (! fName.equals(other.fName)) {
+		if (!Objects.equals(fName, other.fName)) {
 			return false;
 		}
 

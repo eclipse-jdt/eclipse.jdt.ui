@@ -15,6 +15,7 @@ package org.eclipse.jdt.astview.views;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Objects;
 
 import org.eclipse.swt.graphics.Image;
 
@@ -223,17 +224,11 @@ public class ProblemNode extends ASTAttribute {
 		}
 
 		ProblemNode other= (ProblemNode) obj;
-		if (fParent == null) {
-			if (other.fParent != null)
-				return false;
-		} else if (! fParent.equals(other.fParent)) {
+		if (!Objects.equals(fParent, other.fParent)) {
 			return false;
 		}
 
-		if (fProblem== null) {
-			if (other.fProblem != null)
-				return false;
-		} else if (! fProblem.equals(other.fProblem)) {
+		if (!Objects.equals(fProblem, other.fProblem)) {
 			return false;
 		}
 

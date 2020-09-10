@@ -16,6 +16,7 @@ package org.eclipse.jdt.internal.ui.packageview;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
@@ -130,21 +131,15 @@ public class ClassPathContainer extends PackageFragmentRootContainer {
 			if (getClass() != obj.getClass())
 				return false;
 			RequiredProjectWrapper other= (RequiredProjectWrapper) obj;
-			if (fClasspathEntry == null) {
-				if (other.fClasspathEntry != null)
-					return false;
-			} else if (!fClasspathEntry.equals(other.fClasspathEntry))
+			if (!Objects.equals(fClasspathEntry, other.fClasspathEntry)) {
 				return false;
-			if (fParent == null) {
-				if (other.fParent != null)
-					return false;
-			} else if (!fParent.equals(other.fParent))
+			}
+			if (!Objects.equals(fParent, other.fParent)) {
 				return false;
-			if (fProject == null) {
-				if (other.fProject != null)
-					return false;
-			} else if (!fProject.equals(other.fProject))
+			}
+			if (!Objects.equals(fProject, other.fProject)) {
 				return false;
+			}
 			return true;
 		}
 

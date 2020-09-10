@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -130,16 +131,12 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 			if (getClass() != obj.getClass())
 				return false;
 			DecoratedImageDescriptor other= (DecoratedImageDescriptor) obj;
-			if (fBaseImage == null) {
-				if (other.fBaseImage != null)
-					return false;
-			} else if (!fBaseImage.equals(other.fBaseImage))
+			if (!Objects.equals(fBaseImage, other.fBaseImage)) {
 				return false;
-			if (fOverlay == null) {
-				if (other.fOverlay != null)
-					return false;
-			} else if (!fOverlay.equals(other.fOverlay))
+			}
+			if (!Objects.equals(fOverlay, other.fOverlay)) {
 				return false;
+			}
 			return true;
 		}
 	}

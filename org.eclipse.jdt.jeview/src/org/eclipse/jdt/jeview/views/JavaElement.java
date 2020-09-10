@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 
 import org.eclipse.core.resources.IResource;
@@ -83,24 +84,15 @@ public class JavaElement extends JEAttribute {
 		}
 
 		JavaElement other= (JavaElement) obj;
-		if (fParent == null) {
-			if (other.fParent != null)
-				return false;
-		} else if (! fParent.equals(other.fParent)) {
+		if (!Objects.equals(fParent, other.fParent)) {
 			return false;
 		}
 
-		if (fName == null) {
-			if (other.fName != null)
-				return false;
-		} else if (! fName.equals(other.fName)) {
+		if (!Objects.equals(fName, other.fName)) {
 			return false;
 		}
 
-		if (fJavaElement == null) {
-			if (other.fJavaElement != null)
-				return false;
-		} else if (! fJavaElement.equals(other.fJavaElement)) {
+		if (!Objects.equals(fJavaElement, other.fJavaElement)) {
 			return false;
 		}
 

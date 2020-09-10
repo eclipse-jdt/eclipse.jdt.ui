@@ -13,7 +13,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.jeview.views;
 
-
+import java.util.Objects;
 
 public class Error extends JEAttribute {
 	public static final String ERROR= "ERROR";
@@ -42,24 +42,15 @@ public class Error extends JEAttribute {
 		}
 
 		Error other= (Error) obj;
-		if (fParent == null) {
-			if (other.fParent != null)
-				return false;
-		} else if (! fParent.equals(other.fParent)) {
+		if (!Objects.equals(fParent, other.fParent)) {
 			return false;
 		}
 
-		if (fName == null) {
-			if (other.fName != null)
-				return false;
-		} else if (! fName.equals(other.fName)) {
+		if (!Objects.equals(fName, other.fName)) {
 			return false;
 		}
 
-		if (fException == null) {
-			if (other.fException != null)
-				return false;
-		} else if (! fException.equals(other.fException)) {
+		if (!Objects.equals(fException, other.fException)) {
 			return false;
 		}
 

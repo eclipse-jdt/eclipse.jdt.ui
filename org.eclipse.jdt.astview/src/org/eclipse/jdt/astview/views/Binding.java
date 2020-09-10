@@ -14,6 +14,7 @@
 package org.eclipse.jdt.astview.views;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.function.Function;
 
 import org.eclipse.jdt.astview.ASTViewPlugin;
@@ -434,24 +435,15 @@ public class Binding extends ASTAttribute {
 		}
 
 		Binding other= (Binding) obj;
-		if (fParent == null) {
-			if (other.fParent != null)
-				return false;
-		} else if (! fParent.equals(other.fParent)) {
+		if (!Objects.equals(fParent, other.fParent)) {
 			return false;
 		}
 
-		if (fBinding == null) {
-			if (other.fBinding != null)
-				return false;
-		} else if (! fBinding.equals(other.fBinding)) {
+		if (!Objects.equals(fBinding, other.fBinding)) {
 			return false;
 		}
 
-		if (fLabel == null) {
-			if (other.fLabel != null)
-				return false;
-		} else if (! fLabel.equals(other.fLabel)) {
+		if (!Objects.equals(fLabel, other.fLabel)) {
 			return false;
 		}
 

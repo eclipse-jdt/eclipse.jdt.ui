@@ -14,6 +14,8 @@
 
 package org.eclipse.jdt.astview.views;
 
+import java.util.Objects;
+
 import org.eclipse.swt.graphics.Image;
 
 
@@ -60,17 +62,11 @@ public class Error extends ExceptionAttribute {
 		}
 
 		Error other= (Error) obj;
-		if (fParent == null) {
-			if (other.fParent != null)
-				return false;
-		} else if (! fParent.equals(other.fParent)) {
+		if (!Objects.equals(fParent, other.fParent)) {
 			return false;
 		}
 
-		if (fLabel == null) {
-			if (other.fLabel != null)
-				return false;
-		} else if (! fLabel.equals(other.fLabel)) {
+		if (!Objects.equals(fLabel, other.fLabel)) {
 			return false;
 		}
 

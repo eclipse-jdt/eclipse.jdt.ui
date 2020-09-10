@@ -16,6 +16,8 @@ package org.eclipse.jdt.astview.views;
 
 import org.eclipse.jdt.core.IJavaElement;
 
+import java.util.Objects;
+
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -82,17 +84,11 @@ public class JavaElement extends ASTAttribute {
 		}
 
 		JavaElement other= (JavaElement) obj;
-		if (fParent == null) {
-			if (other.fParent != null)
-				return false;
-		} else if (! fParent.equals(other.fParent)) {
+		if (!Objects.equals(fParent, other.fParent)) {
 			return false;
 		}
 
-		if (fJavaElement == null) {
-			if (other.fJavaElement != null)
-				return false;
-		} else if (! fJavaElement.equals(other.fJavaElement)) {
+		if (!Objects.equals(fJavaElement, other.fJavaElement)) {
 			return false;
 		}
 

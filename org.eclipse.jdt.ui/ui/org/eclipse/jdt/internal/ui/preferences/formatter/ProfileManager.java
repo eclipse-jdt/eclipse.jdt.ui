@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Observable;
 
 import org.osgi.service.prefs.BackingStoreException;
@@ -88,11 +89,7 @@ public abstract class ProfileManager extends Observable {
 			for (String key : allKeys) {
 				Object other= otherMap.get(key);
 				Object curr= settings.get(key);
-				if (other == null) {
-					if (curr != null) {
-						return false;
-					}
-				} else if (!other.equals(curr)) {
+				if (!Objects.equals(other, curr)) {
 					return false;
 				}
 			}

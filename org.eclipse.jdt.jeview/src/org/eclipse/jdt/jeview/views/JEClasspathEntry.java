@@ -15,6 +15,7 @@
 package org.eclipse.jdt.jeview.views;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 
 import org.eclipse.core.runtime.Assert;
@@ -56,17 +57,11 @@ public class JEClasspathEntry extends JEAttribute {
 		}
 
 		JEClasspathEntry other= (JEClasspathEntry) obj;
-		if (fParent == null) {
-			if (other.fParent != null)
-				return false;
-		} else if (! fParent.equals(other.fParent)) {
+		if (!Objects.equals(fParent, other.fParent)) {
 			return false;
 		}
 
-		if (fName == null) {
-			if (other.fName != null)
-				return false;
-		} else if (! fName.equals(other.fName)) {
+		if (!Objects.equals(fName, other.fName)) {
 			return false;
 		}
 
