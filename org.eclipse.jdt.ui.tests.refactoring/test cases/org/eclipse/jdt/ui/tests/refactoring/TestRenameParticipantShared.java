@@ -113,7 +113,7 @@ public class TestRenameParticipantShared extends RenameParticipant implements IS
 
 	public static void testNumberOfElements(int expected) {
 		if (expected == 0) {
-			Assert.assertTrue(fgInstance == null);
+			Assert.assertNull(fgInstance);
 		} else {
 			Assert.assertEquals(expected, fgInstance.fElements.size());
 			Assert.assertEquals(expected, fgInstance.fArguments.size());
@@ -136,7 +136,7 @@ public class TestRenameParticipantShared extends RenameParticipant implements IS
 
 	public static void testNumberOfSimilarElements(int expected) {
 		if (expected == 0)
-			Assert.assertTrue(fgInstance == null);
+			Assert.assertNull(fgInstance);
 		else
 			Assert.assertEquals(expected, fgInstance.fSimilarToHandle.size());
 	}

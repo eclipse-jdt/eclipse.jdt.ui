@@ -54,9 +54,9 @@ public class StringAsserts {
 				return;
 			}
 			if (actual == null) {
-				Assert.assertTrue("Content not as expected: is 'null' expected: " + expected, false);
+				Assert.fail("Content not as expected: is 'null' expected: " + expected);
 			} else {
-				Assert.assertTrue("Content not as expected: expected 'null' is: " + actual, false);
+				Assert.fail("Content not as expected: expected 'null' is: " + actual);
 			}
 		}
 
@@ -80,9 +80,9 @@ public class StringAsserts {
 				return;
 			}
 			if (actual == null) {
-				Assert.assertTrue("Content not as expected: is 'null' expected: " + expected, false);
+				Assert.fail("Content not as expected: is 'null' expected: " + expected);
 			} else {
-				Assert.assertTrue("Content not as expected: expected 'null' is: " + actual, false);
+				Assert.fail("Content not as expected: expected 'null' is: " + actual);
 			}
 		}
 

@@ -15,6 +15,7 @@
 package org.eclipse.jdt.ui.tests.search;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.util.List;
 
@@ -167,19 +168,19 @@ public class TreeContentProviderTest {
 
 		fProvider.setLevel(LevelTreeContentProvider.LEVEL_TYPE);
 		assertEquals(type, fProvider.getParent(method));
-		assertEquals(fProvider.getParent(type), null);
+		assertNull(fProvider.getParent(type));
 
 		fProvider.setLevel(LevelTreeContentProvider.LEVEL_PACKAGE);
 		assertEquals(type, fProvider.getParent(method));
 		assertEquals(fProvider.getParent(type), pkg);
-		assertEquals(fProvider.getParent(pkg), null);
+		assertNull(fProvider.getParent(pkg));
 
 		fProvider.setLevel(LevelTreeContentProvider.LEVEL_PROJECT);
 		assertEquals(type, fProvider.getParent(method));
 		assertEquals(fProvider.getParent(type), pkg);
 		assertEquals(fProvider.getParent(pkg), root);
 		assertEquals(fProvider.getParent(root), project);
-		assertEquals(fProvider.getParent(project), null);
+		assertNull(fProvider.getParent(project));
 	}
 
 	@Test

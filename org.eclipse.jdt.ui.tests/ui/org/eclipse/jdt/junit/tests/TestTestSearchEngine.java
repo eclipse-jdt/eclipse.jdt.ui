@@ -15,8 +15,7 @@ package org.eclipse.jdt.junit.tests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.fail;
-
+import static org.junit.Assert.assertTrue;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -250,9 +249,7 @@ public class TestTestSearchEngine {
 		assertEquals("Wrong number of found tests", expected.length, actual.length);
 		List<IType> list= Arrays.asList(expected);
 		for (int i= 0; i < actual.length; i++) {
-			if (!list.contains(expected[i])) {
-				fail(message + expected[i].getFullyQualifiedName());
-			}
+			assertTrue(message + expected[i].getFullyQualifiedName(), list.contains(expected[i]));
 		}
 	}
 }

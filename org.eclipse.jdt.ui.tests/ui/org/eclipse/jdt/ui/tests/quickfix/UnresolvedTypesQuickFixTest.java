@@ -1641,6 +1641,6 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu1);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu1, astRoot, 2, 1);
-		assertFalse(proposals.stream().anyMatch(p -> p.getDisplayString().equals("Import 'Tests' (pt)")));
+		assertFalse(proposals.stream().anyMatch(p -> "Import 'Tests' (pt)".equals(p.getDisplayString())));
 	}
 }

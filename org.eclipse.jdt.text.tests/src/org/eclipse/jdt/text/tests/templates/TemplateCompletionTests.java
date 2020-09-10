@@ -101,7 +101,7 @@ public class TemplateCompletionTests {
 		ICompilationUnit cu= getCompilationUnit(pkg, buf, "ExpectNoProposals.java");
 		List<ICompletionProposal> proposals= computeCompletionProposals(cu, completionIndex);
 
-		boolean fail= proposals.stream().anyMatch(p -> p.getDisplayString().equals("new_class - create new class"));
+		boolean fail= proposals.stream().anyMatch(p -> "new_class - create new class".equals(p.getDisplayString()));
 		if (fail) {
 			fail("Proposal '" + propDisplay + "' should not exist");
 		}

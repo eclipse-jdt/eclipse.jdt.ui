@@ -202,7 +202,7 @@ public class WrappingSystemTest implements ILaunchesListener2 {
 		LaunchShortcutExtension ext = null;
 		for (Iterator<LaunchShortcutExtension> iter = launchShortcuts.iterator(); iter.hasNext();) {
 			ext = iter.next();
-			if (ext.getLabel().equals("JUnit Test"))
+			if ("JUnit Test".equals(ext.getLabel()))
 				break;
 		}
 		ext.launch(new StructuredSelection(type), ILaunchManager.RUN_MODE);

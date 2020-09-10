@@ -14,6 +14,7 @@
 package org.eclipse.jdt.ui.tests.leaks;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -118,7 +119,7 @@ public class UndoManagerLeakTest extends LeakTestCase {
 			document.replace(1, 2, "\n");
 			document.replace(3, 2, "\n");
 		} catch (BadLocationException e) {
-			assertTrue(false);
+			fail();
 		}
 
 		assertTrue(fUndoManager.undoable());
@@ -164,7 +165,7 @@ public class UndoManagerLeakTest extends LeakTestCase {
 				document.replace(position.getOffset(), position.getLength(), string);
 			}
 		} catch (BadLocationException e) {
-			assertTrue(false);
+			fail();
 		}
 	}
 
@@ -186,7 +187,7 @@ public class UndoManagerLeakTest extends LeakTestCase {
 		assertTrue(fUndoManager.undoable());
 		while (fUndoManager.undoable())
 			fUndoManager.undo();
-		assertTrue(!fUndoManager.undoable());
+		assertFalse(fUndoManager.undoable());
 
 		final String reverted= document.get();
 

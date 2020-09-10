@@ -87,7 +87,7 @@ public class TypeEnvironmentTests extends AbstractJunit4CUTestCase {
 		}
 		private void checkTypeBinding(IBinding binding) {
 			ITypeBinding type= (ITypeBinding)binding;
-			if (!(type.isPrimitive() && type.getName().equals("void"))) {
+			if (!(type.isPrimitive() && "void".equals(type.getName()))) {
 				TType refType= fTypeEnvironment.create(type);
 				assertNotNull("Refactoring type is null", refType);
 				assertEquals("Not same name", type.getName(), refType.getName());
@@ -109,7 +109,7 @@ public class TypeEnvironmentTests extends AbstractJunit4CUTestCase {
 		public boolean visit(FieldDeclaration node) {
 			List<VariableDeclarationFragment> fragments= node.fragments();
 			VariableDeclarationFragment fragment= fragments.get(0);
-			if (fragment.getName().getIdentifier().equals("NullType")) {
+			if ("NullType".equals(fragment.getName().getIdentifier())) {
 				fResult.add(fragment.getInitializer().resolveTypeBinding());
 			} else {
 				fResult.add(fragment.resolveBinding().getType());

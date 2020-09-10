@@ -224,8 +224,9 @@ public abstract class ScrollEditorTest extends TextPerformanceTestCase {
 		try {
 			for (int i= 0; i < runs; i++) {
 				// 0: assert that we are at the top and the selection at 0
-				assertTrue("editor must be scrolled to the top before starting", text.getTopIndex() == 0);
-				assertTrue("selection must be at (0,0) before starting", text.getSelection().x == 0 && text.getSelection().y == 0);
+				assertEquals("editor must be scrolled to the top before starting", 0, text.getTopIndex());
+				assertTrue("selection must be at (0,0) before starting", text.getSelection().x == 0);
+				assertTrue("selection must be at (0,0) before starting", text.getSelection().y == 0);
 				// 1: post scroll events
 				long delay= 6000;
 				Timeout timeout= waiter.restart(delay);
@@ -277,8 +278,9 @@ public abstract class ScrollEditorTest extends TextPerformanceTestCase {
 		try {
 			for (int i= 0; i < runs; i++) {
 				// 0: assert that we are at the top and the selection at 0
-				assertTrue("editor must be scrolled to the top before starting", text.getTopIndex() == 0);
-				assertTrue("selection must be at (0,0) before starting", text.getSelection().x == 0 && text.getSelection().y == 0);
+				assertEquals("editor must be scrolled to the top before starting", 0, text.getTopIndex());
+				assertTrue("selection must be at (0,0) before starting", text.getSelection().x == 0);
+				assertTrue("selection must be at (0,0) before starting", text.getSelection().y == 0);
 
 				// 1: post scroll events
 				long delay= 3000;

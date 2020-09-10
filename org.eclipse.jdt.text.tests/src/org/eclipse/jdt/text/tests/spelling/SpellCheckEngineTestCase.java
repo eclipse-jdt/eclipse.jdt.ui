@@ -118,7 +118,7 @@ public class SpellCheckEngineTestCase {
 
 	@Test
 	public void testDefaultLocale() {
-		assertTrue(SpellCheckEngine.getDefaultLocale().equals(Locale.getDefault()));
+		assertEquals(SpellCheckEngine.getDefaultLocale(), Locale.getDefault());
 	}
 
 	@Test
@@ -202,7 +202,7 @@ public class SpellCheckEngineTestCase {
 
 		System.out.println(System.getProperty("file.encoding"));
 
-		assertTrue(Locale.US.equals(checker.getLocale()));
+		assertEquals(Locale.US, checker.getLocale());
 
 		assertTrue(fUSDictionary.isLoaded());
 		assertTrue(fGlobalDictionary.isLoaded());
@@ -239,24 +239,24 @@ public class SpellCheckEngineTestCase {
 
 		assertTrue(contains(proposals, SENTENCESTART));
 		assertFalse(contains(proposals, SENTENCECONTENT));
-		assertTrue(proposals.iterator().next().getRank() == - DefaultPhoneticDistanceAlgorithm.COST_CASE);
+		assertEquals(- DefaultPhoneticDistanceAlgorithm.COST_CASE, proposals.iterator().next().getRank());
 
 		fDEDictionary.addWord(SENTENCESTART);
 
 		proposals= checker.getProposals(SENTENCESTART, false);
 		assertTrue(proposals.size() >= 1);
-		assertTrue(proposals.iterator().next().getRank() == 0);
+		assertEquals(0, proposals.iterator().next().getRank());
 
 		proposals= checker.getProposals(SENTENCESTART, true);
 		assertTrue(proposals.size() >= 1);
-		assertTrue(proposals.iterator().next().getRank() == 0);
+		assertEquals(0, proposals.iterator().next().getRank());
 
 		proposals= checker.getProposals(SENTENCECONTENT, true);
 		assertTrue(proposals.size() >= 1);
-		assertTrue(proposals.iterator().next().getRank() == - DefaultPhoneticDistanceAlgorithm.COST_CASE);
+		assertEquals(- DefaultPhoneticDistanceAlgorithm.COST_CASE, proposals.iterator().next().getRank());
 
 		proposals= checker.getProposals(SENTENCECONTENT, false);
 		assertTrue(proposals.size() >= 1);
-		assertTrue(proposals.iterator().next().getRank() == - DefaultPhoneticDistanceAlgorithm.COST_CASE);
+		assertEquals(- DefaultPhoneticDistanceAlgorithm.COST_CASE, proposals.iterator().next().getRank());
 	}
 }

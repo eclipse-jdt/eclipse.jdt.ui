@@ -35,7 +35,7 @@ public class TestProject {
 		fTestProject= JavaProjectHelper.createJavaProject(name, "bin");
 		// was: we must make sure that the performance test are compatible to 2.1.3 & 3.0 so use rt13
 		// rt13 is deprecated, use rt15
-		Assert.assertTrue("rt not found", JavaProjectHelper.addRTJar15(fTestProject) != null);
+		Assert.assertNotNull("rt not found", JavaProjectHelper.addRTJar15(fTestProject));
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fTestProject, "src");
 	}
 

@@ -184,7 +184,7 @@ public class TestModelProvider extends ModelProvider {
 			Assert.assertEquals("Same path length", expectedPath.segmentCount(), actualPath.segmentCount());
 			for(int i= 0; i < expectedPath.segmentCount(); i++) {
 				String expectedSegment= expectedPath.segment(i);
-				if (expectedSegment.startsWith("UnusedName") || expectedSegment.equals("unusedName"))
+				if (expectedSegment.startsWith("UnusedName") || "unusedName".equals(expectedSegment))
 					continue;
 				Assert.assertEquals("Different path segment", expectedSegment, actualPath.segment(i));
 			}
@@ -259,7 +259,7 @@ public class TestModelProvider extends ModelProvider {
 			return false;
 		for(int i= 0; i < expectedPath.segmentCount(); i++) {
 			String expectedSegment= expectedPath.segment(i);
-			if (expectedSegment.startsWith("UnusedName") || expectedSegment.equals("unusedName"))
+			if (expectedSegment.startsWith("UnusedName") || "unusedName".equals(expectedSegment))
 				continue;
 			if (!expectedSegment.equals(actualPath.segment(i)))
 				return false;
@@ -270,11 +270,11 @@ public class TestModelProvider extends ModelProvider {
 	private static void assertCopySource(IResourceDelta delta) {
 		try {
 			delta.accept(d -> {
-				Assert.assertTrue("Not a copy delta", (d.getKind() & ~IResourceDelta.CHANGED) == 0);
+				Assert.assertEquals("Not a copy delta", 0, (d.getKind() & ~IResourceDelta.CHANGED));
 				return true;
 			});
 		} catch (CoreException e) {
-			Assert.assertTrue("Shouldn't happen", false);
+			Assert.fail("Shouldn't happen");
 		}
 	}
 }

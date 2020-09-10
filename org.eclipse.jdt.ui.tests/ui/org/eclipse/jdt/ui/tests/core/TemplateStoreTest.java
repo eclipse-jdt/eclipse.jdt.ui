@@ -15,6 +15,7 @@ package org.eclipse.jdt.ui.tests.core;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -97,11 +98,11 @@ public class TemplateStoreTest extends CoreTests {
 		currData.setTemplate(new Template(oldTemplate.getName(), oldTemplate.getDescription(), oldTemplate.getContextTypeId(), newComment, oldTemplate.isAutoInsertable()));
 
 		Template currTempl= store.findTemplateById(templateId);
-		assertTrue(currTempl.getPattern().equals(newComment));
+		assertEquals(currTempl.getPattern(), newComment);
 
 		store.restoreDefaults(); // restore
 		currTempl= store.findTemplateById(templateId);
-		assertFalse(currTempl.getPattern().equals(newComment));
+		assertNotEquals(currTempl.getPattern(), newComment);
 	}
 
 
@@ -145,18 +146,18 @@ public class TemplateStoreTest extends CoreTests {
 			currData.setTemplate(new Template(oldTemplate.getName(), oldTemplate.getDescription(), oldTemplate.getContextTypeId(), newComment, oldTemplate.isAutoInsertable()));
 
 			Template currTempl= projectStore.findTemplateById(templateId);
-			assertTrue(currTempl.getPattern().equals(newComment));
+			assertEquals(currTempl.getPattern(), newComment);
 
 			Template instanceElem= instanceStore.findTemplateById(templateId);
-			assertFalse(instanceElem.getPattern().equals(currTempl.getPattern()));
+			assertNotEquals(instanceElem.getPattern(), currTempl.getPattern());
 
 			// remove project specific
 			projectStore.setProjectSpecific(templateId, false);
 			assertFalse(projectStore.isProjectSpecific(templateId));
 
 			currTempl= projectStore.findTemplateById(templateId);
-			assertFalse(currTempl.getPattern().equals(newComment));
-			assertTrue(instanceElem.getPattern().equals(currTempl.getPattern()));
+			assertNotEquals(currTempl.getPattern(), newComment);
+			assertEquals(instanceElem.getPattern(), currTempl.getPattern());
 
 			// make project specific again and restore defaults
 			projectStore.setProjectSpecific(templateId, true);
@@ -165,8 +166,8 @@ public class TemplateStoreTest extends CoreTests {
 			projectStore.restoreDefaults(); // restore
 
 			currTempl= projectStore.findTemplateById(templateId);
-			assertFalse(currTempl.getPattern().equals(newComment));
-			assertTrue(currTempl.getPattern().equals(instanceElem.getPattern()));
+			assertNotEquals(currTempl.getPattern(), newComment);
+			assertEquals(currTempl.getPattern(), instanceElem.getPattern());
 		} finally {
 			JavaProjectHelper.delete(fJProject1);
 		}
@@ -198,7 +199,7 @@ public class TemplateStoreTest extends CoreTests {
 			projectStore.load();
 
 			Template currTempl= projectStore.findTemplateById(templateId);
-			assertTrue(currTempl.getPattern().equals(newComment));
+			assertEquals(currTempl.getPattern(), newComment);
 
 			// remove project specific
 			projectStore.setProjectSpecific(templateId, false);
@@ -207,7 +208,7 @@ public class TemplateStoreTest extends CoreTests {
 			projectStore= new ProjectTemplateStore(fJProject1.getProject());
 			projectStore.load();
 			currTempl= projectStore.findTemplateById(templateId);
-			assertFalse(currTempl.getPattern().equals(newComment));
+			assertNotEquals(currTempl.getPattern(), newComment);
 
 
 		} finally {

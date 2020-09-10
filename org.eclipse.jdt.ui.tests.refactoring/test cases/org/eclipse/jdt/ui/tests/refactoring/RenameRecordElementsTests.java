@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -102,7 +103,7 @@ public class RenameRecordElementsTests extends GenericRefactoringTest {
 		if (isGetterPresent) {
 			assertNull("Getter rename should be enabled", processor.canEnableGetterRenaming());
 		} else {
-			assertTrue("Getter rename should not be enabled", "".equals(processor.canEnableGetterRenaming()));
+			assertEquals("Getter rename should not be enabled", "", processor.canEnableGetterRenaming());
 		}
 
 		List<IAnnotatable> elements= new ArrayList<>();
@@ -167,7 +168,7 @@ public class RenameRecordElementsTests extends GenericRefactoringTest {
 		if (isGetterPresent) {
 			assertNull("Getter rename should be enabled", processor.canEnableGetterRenaming());
 		} else {
-			assertTrue("Getter rename should not be enabled", "".equals(processor.canEnableGetterRenaming()));
+			assertEquals("Getter rename should not be enabled", "", processor.canEnableGetterRenaming());
 		}
 
 		List<IAnnotatable> elements= new ArrayList<>();
