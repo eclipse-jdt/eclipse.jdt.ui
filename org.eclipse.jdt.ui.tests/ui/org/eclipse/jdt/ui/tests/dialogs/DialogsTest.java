@@ -13,10 +13,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.dialogs;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.util.DialogCheck;
 
@@ -35,6 +31,10 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.ui.JavaElementComparator;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
+
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 public class DialogsTest extends TestCase {
 
@@ -140,7 +140,7 @@ public class DialogsTest extends TestCase {
 	public void testElementListSelectionDialog() throws Exception {
 		IJavaProject jproject= JavaProjectHelper.createJavaProject(PROJECT_NAME, "bin");
 		IPackageFragmentRoot root=  JavaProjectHelper.addRTJar(jproject);
-		assertTrue(root != null);
+		assertNotNull(root);
 		Object[] elements= root.getChildren();
 
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT));
@@ -190,7 +190,7 @@ public class DialogsTest extends TestCase {
 		DialogCheck.assertDialog(dialog);
 
 		Object[] results= dialog.getResult();
-		assertTrue(results.length == 1);
+		assertEquals(1, results.length);
 		assertEquals(Integer.valueOf(7), results[0]);
 	}
 

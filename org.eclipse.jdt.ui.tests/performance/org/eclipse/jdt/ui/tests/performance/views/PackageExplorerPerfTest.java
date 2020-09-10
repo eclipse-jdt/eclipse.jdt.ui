@@ -14,7 +14,7 @@
 
 package org.eclipse.jdt.ui.tests.performance.views;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
 
 import java.io.File;
 import java.util.zip.ZipFile;
@@ -63,7 +63,7 @@ public class PackageExplorerPerfTest extends JdtPerformanceTestCaseCommon {
 		public void before() throws Throwable {
 			fJProject1= JavaProjectHelper.createJavaProject("Testing", "bin");
 			// we must make sure that the performance test are compatible to 2.1.3 & 3.0 so use rt13
-			assertTrue("rt not found", JavaProjectHelper.addRTJar13(fJProject1) != null);
+			assertNotNull("rt not found", JavaProjectHelper.addRTJar13(fJProject1));
 			File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
 			JavaProjectHelper.addSourceContainerWithImport(fJProject1, SRC_CONTAINER, junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
 		}

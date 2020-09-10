@@ -2581,7 +2581,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 		boolean finallyTemplateFound= false;
 		for (Template template : templates) {
-			if (template.getName().equals("finally")) {
+			if ("finally".equals(template.getName())) {
 				finallyTemplateFound= true;
 				break;
 			}
@@ -2637,7 +2637,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 			for (ICompletionProposal curr : proposals) {
 				if (curr instanceof AbstractJavaCompletionProposal) {
 					AbstractJavaCompletionProposal javaProposal= (AbstractJavaCompletionProposal) curr;
-					if (javaProposal.getReplacementString().equals("ARRAY_CONTENTS")) {
+					if ("ARRAY_CONTENTS".equals(javaProposal.getReplacementString())) {
 						proposal= curr;
 						break;
 					}

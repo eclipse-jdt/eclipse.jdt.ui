@@ -27,15 +27,12 @@ import org.eclipse.test.performance.PerformanceMeter;
 
 import junit.framework.TestCase;
 
-
 /**
  * @since 3.3
  */
 public class PerformanceTestCase2 extends TestCase {
-
 	private String fBaseScenarioId;
 	private List<PerformanceMeter> fPerformanceMeters;
-
 
 	public PerformanceTestCase2() {
 		super();
@@ -66,9 +63,7 @@ public class PerformanceTestCase2 extends TestCase {
 		} catch (NoSuchMethodException e) {
 			fail("Method \""+getName()+"\" not found");  //$NON-NLS-1$//$NON-NLS-2$
 		}
-		if (!Modifier.isPublic(runMethod.getModifiers())) {
-			fail("Method \""+getName()+"\" should be public");  //$NON-NLS-1$//$NON-NLS-2$
-		}
+		assertTrue("Method \"" + getName() + "\" should be public", Modifier.isPublic(runMethod.getModifiers())); //$NON-NLS-1$ //$NON-NLS-2$
 
 		try {
 			int warmUpRuns= getWarmUpRuns();

@@ -13,8 +13,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.packageview;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 
@@ -87,7 +90,7 @@ public class ContentProviderTests6 {
 		while (fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch()) {
 		}
 
-		assertTrue("No add happened", !fMyPart.hasAddHappened()); //$NON-NLS-1$
+		assertFalse("No add happened", fMyPart.hasAddHappened()); //$NON-NLS-1$
 		assertions();
 	}
 
@@ -108,7 +111,7 @@ public class ContentProviderTests6 {
 		while (fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch()) {
 		}
 
-		assertTrue("No add happened", !fMyPart.hasAddHappened()); //$NON-NLS-1$
+		assertFalse("No add happened", fMyPart.hasAddHappened()); //$NON-NLS-1$
 		assertions();
 	}
 
@@ -130,7 +133,7 @@ public class ContentProviderTests6 {
 		while (fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch()) {
 		}
 
-		assertTrue("No remove happened", !fMyPart.hasRemoveHappened()); //$NON-NLS-1$
+		assertFalse("No remove happened", fMyPart.hasRemoveHappened()); //$NON-NLS-1$
 		assertions();
 	}
 
@@ -152,7 +155,7 @@ public class ContentProviderTests6 {
 		while (fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch()) {
 		}
 
-		assertTrue("No remove happened", !fMyPart.hasRemoveHappened()); //$NON-NLS-1$
+		assertFalse("No remove happened", fMyPart.hasRemoveHappened()); //$NON-NLS-1$
 		assertions();
 	}
 
@@ -173,14 +176,14 @@ public class ContentProviderTests6 {
 		}
 
 		assertTrue("Refresh happened", fMyPart.hasRefreshHappened()); //$NON-NLS-1$
-		assertTrue("Project not refreshed", !fMyPart.wasObjectRefreshed(fJProject)); //$NON-NLS-1$
+		assertFalse("Project not refreshed", fMyPart.wasObjectRefreshed(fJProject)); //$NON-NLS-1$
 	}
 
 	private void assertions() {
 		assertTrue("Refresh happened", fMyPart.hasRefreshHappened()); //$NON-NLS-1$
 		assertTrue("LibraryContainer Refreshed", fMyPart.wasObjectRefreshed(new LibraryContainer(fJProject))); //$NON-NLS-1$
 		assertTrue("Resource Refreshed", fMyPart.wasObjectRefreshed(classFolder.getResource())); //$NON-NLS-1$
-		assertTrue("Number of refreshed objects", fMyPart.getRefreshedObject().size() == 2); //$NON-NLS-1$
+		assertEquals("Number of refreshed objects", 2, fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
 	}
 
 	/*
@@ -215,7 +218,7 @@ public class ContentProviderTests6 {
 			fProvider= (ITreeContentProvider)fMyPart.getTreeViewer().getContentProvider();
 			((PackageExplorerContentProvider)fProvider).setShowLibrariesNode(true);
 		} else {
-			assertTrue("Unable to get view", false);//$NON-NLS-1$
+			fail("Unable to get view");//$NON-NLS-1$
 		}
 		assertNotNull(fProvider);
 	}

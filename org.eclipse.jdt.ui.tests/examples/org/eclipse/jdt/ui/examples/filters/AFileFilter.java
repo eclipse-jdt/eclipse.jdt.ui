@@ -27,7 +27,7 @@ public class AFileFilter extends ViewerFilter {
 	@Override
 	public boolean select(Viewer viewer, Object parentElement, Object element) {
 		if (element instanceof ICompilationUnit) {
-			return !((ICompilationUnit) element).getElementName().equals("A.java");
+			return !"A.java".equals(((ICompilationUnit) element).getElementName());
 		}
 		return true;
 	}

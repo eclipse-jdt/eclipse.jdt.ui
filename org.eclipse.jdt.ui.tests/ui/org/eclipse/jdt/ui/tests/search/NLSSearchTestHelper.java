@@ -63,7 +63,7 @@ public class NLSSearchTestHelper {
 
 	private static void assertNumberResults(NLSSearchResult result, int expected) {
 		int is= result.getElements().length;
-		Assert.assertTrue("Expected number of results is " + expected + " but was " + is, is == expected);
+		Assert.assertEquals("Expected number of results is " + expected + " but was " + is, expected, is);
 	}
 
 	private static void assertResultHasUndefinedKey(String key, IFile file, boolean isAccessor, NLSSearchResult result) throws CoreException {
@@ -76,7 +76,7 @@ public class NLSSearchTestHelper {
 			}
 		}
 
-		Assert.assertTrue("No undefined key problem found for " + key + " in " + file.getName(), false);
+		Assert.fail("No undefined key problem found for " + key + " in " + file.getName());
 	}
 
 	private static void assertResultHasUnusedKey(String key, IFile file, boolean isAccessor, NLSSearchResult result) throws IOException, CoreException {
@@ -95,7 +95,7 @@ public class NLSSearchTestHelper {
 			}
 		}
 
-		Assert.assertTrue("No unused key problem found for " + key + " in " + file.getName(), false);
+		Assert.fail("No unused key problem found for " + key + " in " + file.getName());
 	}
 
 	private static String getContent(IFile entry) throws CoreException, IOException {
@@ -123,6 +123,6 @@ public class NLSSearchTestHelper {
 			}
 		}
 
-		Assert.assertTrue("No duplicate key problem found for " + key + " in " + file.getName(), false);
+		Assert.fail("No duplicate key problem found for " + key + " in " + file.getName());
 	}
 }

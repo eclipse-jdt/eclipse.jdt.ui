@@ -13,7 +13,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.performance.views;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -53,7 +53,7 @@ public class OrganizeImportsPerfTest extends JdtPerformanceTestCaseCommon {
 		@Override
 		public void before() throws Throwable {
 			fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-			assertTrue("rt not found", JavaProjectHelper.addRTJar(fJProject1) != null);
+			assertNotNull("rt not found", JavaProjectHelper.addRTJar(fJProject1));
 			File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
 			JavaProjectHelper.addSourceContainerWithImport(fJProject1, SRC_CONTAINER, junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
 		}

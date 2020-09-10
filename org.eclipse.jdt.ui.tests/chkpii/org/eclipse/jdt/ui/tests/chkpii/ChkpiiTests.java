@@ -204,7 +204,7 @@ public class ChkpiiTests {
 
 		while (tokenizer.hasMoreTokens()) {
 			String token= tokenizer.nextToken();
-			if (token.equals("org.eclipse.jdt.ui.tests"))
+			if ("org.eclipse.jdt.ui.tests".equals(token))
 				break;
 
 			path= path + File.separator + token;
@@ -254,7 +254,7 @@ public class ChkpiiTests {
 
 		String fileName;
 
-		if (Platform.getOS().equals(Constants.OS_WIN32))
+		if (Constants.OS_WIN32.equals(Platform.getOS()))
 			fileName= "ignoreErrorsWindows.txt"; //$NON-NLS-1$
 		else
 			fileName= "ignoreErrorsUnix.txt"; //$NON-NLS-1$

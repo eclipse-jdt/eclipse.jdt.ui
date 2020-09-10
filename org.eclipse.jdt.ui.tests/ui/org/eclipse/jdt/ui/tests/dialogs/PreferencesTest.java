@@ -13,10 +13,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.dialogs;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.util.DialogCheck;
 
@@ -37,6 +33,10 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 public class PreferencesTest extends TestCase {
 
@@ -155,7 +155,7 @@ public class PreferencesTest extends TestCase {
 	public void testJARSourceAttachmentPropPage() throws Exception {
 		IJavaProject jproject= JavaProjectHelper.createJavaProject(PROJECT_NAME, "bin");
 		IPackageFragmentRoot root= JavaProjectHelper.addRTJar(jproject);
-		assertTrue(root != null);
+		assertNotNull(root);
 
 		Dialog dialog = getPropertyDialog("org.eclipse.jdt.ui.propertyPages.SourceAttachmentPage1", root);
 		assertDialog(dialog);
@@ -166,7 +166,7 @@ public class PreferencesTest extends TestCase {
 	public void testVariableSourceAttachmentPropPage() throws Exception {
 		IJavaProject jproject= JavaProjectHelper.createJavaProject(PROJECT_NAME, "bin");
 		IPackageFragmentRoot root= JavaProjectHelper.addVariableRTJar(jproject, "VAR_LIB", "VAR_SRC", "VAR_SRCROOT");
-		assertTrue(root != null);
+		assertNotNull(root);
 
 		Dialog dialog = getPropertyDialog("org.eclipse.jdt.ui.propertyPages.SourceAttachmentPage1", root);
 		assertDialog(dialog);

@@ -13,9 +13,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.performance;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.test.performance.Performance;
 import org.eclipse.test.performance.PerformanceMeter;
 
@@ -34,6 +31,9 @@ import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.internal.IWorkbenchHelpContextIds;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 
 /**
@@ -65,7 +65,7 @@ public class OpenPreferencePageTest extends TextPerformanceTestCase {
 		tree.forceFocus();
 
 		TreeItem javaNode= findTreeItem(tree.getItems(), "Java"); //$NON-NLS-1$
-		assertTrue(javaNode != null);
+		assertNotNull(javaNode);
 		tree.setSelection(new TreeItem[] {javaNode});
 		EditorTestHelper.runEventQueue();
 

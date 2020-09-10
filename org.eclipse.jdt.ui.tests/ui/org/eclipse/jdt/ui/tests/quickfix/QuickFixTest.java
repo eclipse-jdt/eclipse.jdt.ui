@@ -15,6 +15,7 @@
 package org.eclipse.jdt.ui.tests.quickfix;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -100,9 +101,7 @@ public class QuickFixTest {
 
 	public static void assertCorrectContext(IInvocationContext context, ProblemLocation problem) {
 		if (problem.getProblemId() != 0) {
-			if (!JavaCorrectionProcessor.hasCorrections(context.getCompilationUnit(), problem.getProblemId(), problem.getMarkerType())) {
-				fail("Problem type not marked with light bulb: " + problem);
-			}
+			assertTrue("Problem type not marked with light bulb: " + problem, JavaCorrectionProcessor.hasCorrections(context.getCompilationUnit(), problem.getProblemId(), problem.getMarkerType()));
 		}
 	}
 
@@ -506,9 +505,7 @@ public class QuickFixTest {
 
 	protected static void assertNoErrors(IInvocationContext context) {
 		for (IProblem problem : context.getASTRoot().getProblems()) {
-			if (problem.isError()) {
-				fail("source has error: " + problem.getMessage());
-			}
+			assertFalse("source has error: " + problem.getMessage(), problem.isError());
 		}
 	}
 

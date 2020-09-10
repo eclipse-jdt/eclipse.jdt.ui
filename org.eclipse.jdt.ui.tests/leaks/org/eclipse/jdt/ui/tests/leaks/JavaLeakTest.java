@@ -14,8 +14,9 @@
 package org.eclipse.jdt.ui.tests.leaks;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 
@@ -276,7 +277,7 @@ public class JavaLeakTest extends LeakTestCase {
 	public void setUp() throws Exception {
 		super.setUp();
 		fJProject= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		assertTrue("RT not found", JavaProjectHelper.addRTJar(fJProject) != null);
+		assertNotNull("RT not found", JavaProjectHelper.addRTJar(fJProject));
 		assertTrue(JavaPlugin.getActivePage().closeAllEditors(false));
 	}
 
@@ -364,8 +365,7 @@ public class JavaLeakTest extends LeakTestCase {
 
 			message= "\n" + listener;
 		}
-		if (message != null)
-			fail("Property listeners leaked:" + message);
+		assertNull("Property listeners leaked:" + message, message);
 	}
 
 	private void activateBreadcrumb(JavaEditor editor) {

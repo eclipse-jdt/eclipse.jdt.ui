@@ -594,7 +594,7 @@ public class FatJarExportTests {
 			boolean found= false;
 			if (libName.isEmpty()) {
 				libName= ((Element)xmlZipfilesets.item(i)).getAttribute("src"); //$NON-NLS-1$
-				found= libName.equals(FatJarRsrcUrlBuilder.JAR_RSRC_LOADER_ZIP);
+				found= FatJarRsrcUrlBuilder.JAR_RSRC_LOADER_ZIP.equals(libName);
 			}
 			for (String zipfileset : zipfilesets) {
 				if (libName.equals(zipfileset)) {

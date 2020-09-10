@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -52,7 +53,6 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestPlugin;
  * /*[*&#47; and /*]*&#47; (including comments).
  */
 public abstract class AbstractJunit4SelectionTestCase extends AbstractJunit4CUTestCase {
-
 	public static final String SQUARE_BRACKET_OPEN= "/*[*/";
 	public static final int    SQUARE_BRACKET_OPEN_LENGTH= SQUARE_BRACKET_OPEN.length();
 	public static final String SQUARE_BRACKET_CLOSE=   "/*]*/";
@@ -109,7 +109,7 @@ public abstract class AbstractJunit4SelectionTestCase extends AbstractJunit4CUTe
 				assertTrue(checkPreconditions(refactoring, pm).isOK());
 				break;
 			case INVALID_SELECTION:
-				assertTrue(!checkPreconditions(refactoring, pm).isOK());
+				assertFalse(checkPreconditions(refactoring, pm).isOK());
 				break;
 			case COMPARE_WITH_OUTPUT:
 				IUndoManager undoManager= RefactoringCore.getUndoManager();
@@ -132,8 +132,8 @@ public abstract class AbstractJunit4SelectionTestCase extends AbstractJunit4CUTe
 				} else {
 					JavaCore.run(op, new NullProgressMonitor());
 				}
-				assertTrue("Precondition check failed: " + op.getConditionStatus().toString(), !op.getConditionStatus().hasFatalError());
-				assertTrue("Validation check failed: " + op.getConditionStatus().toString(), !op.getValidationStatus().hasFatalError());
+				assertFalse("Precondition check failed: " + op.getConditionStatus().toString(), op.getConditionStatus().hasFatalError());
+				assertFalse("Validation check failed: " + op.getConditionStatus().toString(), op.getValidationStatus().hasFatalError());
 				assertNotNull("No Undo", op.getUndoChange());
 				compareSource(unit.getSource(), out);
 				Change undo= op.getUndoChange();
@@ -142,7 +142,7 @@ public abstract class AbstractJunit4SelectionTestCase extends AbstractJunit4CUTe
 
 				if (doUndo) {
 					undoManager.performUndo(null, new NullProgressMonitor());
-					assertTrue("Undo manager still has undo", !undoManager.anythingToUndo());
+					assertFalse("Undo manager still has undo", undoManager.anythingToUndo());
 					assertTrue("Undo manager is empty", undoManager.anythingToRedo());
 					compareSource(original, unit.getSource());
 				}
@@ -198,7 +198,9 @@ public abstract class AbstractJunit4SelectionTestCase extends AbstractJunit4CUTe
 			end= includingEnd + SQUARE_BRACKET_CLOSE_LENGTH;
 		}
 
-		assertTrue("Selection invalid", start >= 0 && end >= 0 && end >= start);
+		assertTrue("Selection invalid", start >= 0);
+		assertTrue("Selection invalid", end >= 0);
+		assertTrue("Selection invalid", end >= start);
 
 		fSelection= new int[] {
 			start - (fIgnoreSelectionMarker ? SQUARE_BRACKET_CLOSE_LENGTH : 0),

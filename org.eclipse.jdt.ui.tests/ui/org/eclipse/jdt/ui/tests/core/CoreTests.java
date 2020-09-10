@@ -13,7 +13,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 
@@ -43,7 +43,7 @@ public class CoreTests {
 	}
 
 	public static void assertNumberOf(String name, int is, int expected) {
-		assertTrue("Wrong number of " + name + ", is: " + is + ", expected: " + expected, is == expected);
+		assertEquals("Wrong number of " + name + ", is: " + is + ", expected: " + expected, expected, is);
 	}
 
 	protected ImportRewrite newImportsRewrite(ICompilationUnit cu, String[] order, int normalThreshold, int staticThreshold, boolean restoreExistingImports) throws CoreException {

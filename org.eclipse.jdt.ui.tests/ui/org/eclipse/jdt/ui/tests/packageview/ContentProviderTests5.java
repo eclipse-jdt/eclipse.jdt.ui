@@ -15,7 +15,6 @@ package org.eclipse.jdt.ui.tests.packageview;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
@@ -106,7 +105,7 @@ public class ContentProviderTests5{
 
 		//add rt.jar
 		jdk= JavaProjectHelper.addVariableRTJar(fJProject, "JRE_LIB_TEST", null, null);
-		assertTrue("jdk not found", jdk != null);
+		assertNotNull("jdk not found", jdk);
 
 		setUpView();
 	}
@@ -125,7 +124,7 @@ public class ContentProviderTests5{
 			fProvider= (ITreeContentProvider) packageExplorerPart.getTreeViewer().getContentProvider();
 			setFolding(false);
 		} else {
-			assertTrue("Unable to get view", false);
+			fail("Unable to get view");
 		}
 		assertNotNull(fProvider);
 	}

@@ -14,6 +14,7 @@
 package org.eclipse.jdt.junit.tests;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
@@ -198,8 +199,7 @@ public class AbstractTestRunListenerTest {
 			lm.removeLaunches(lm.getLaunches());
 			configuration.delete();
 		}
-		if (! fLaunchHasTerminated)
-			fail("Launch has not terminated");
+		assertTrue("Launch has not terminated", fLaunchHasTerminated);
 	}
 
 	protected String[] launchJUnit(IJavaElement aTest, final TestRunLog log) throws CoreException {

@@ -15,8 +15,6 @@ package org.eclipse.jdt.text.tests.performance;
 
 import java.io.File;
 
-import junit.framework.Test;
-
 import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.core.runtime.CoreException;
@@ -32,6 +30,8 @@ import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
 import org.eclipse.core.filebuffers.LocationKind;
 import org.eclipse.core.filebuffers.tests.ResourceHelper;
+
+import junit.framework.Test;
 
 
 /**
@@ -68,7 +68,7 @@ public class FileBufferPerformanceTest extends TextPerformanceTestCase2 {
 		ITextFileBuffer buffer= fManager.getTextFileBuffer(fPath, LocationKind.NORMALIZE);
 		fTempFile= File.createTempFile("measureGetOldExternal", "txt");
 		fTempFilePath= new Path(fTempFile.getAbsolutePath());
-		assertTrue(buffer == null);
+		assertNull(buffer);
 	}
 
 	@Override

@@ -119,7 +119,7 @@ public class ExtractMethodTests extends AbstractJunit4SelectionTestCase {
 			}
 		}
 		if (newOrder != null && newOrder.length > 0) {
-			assertTrue(newOrder.length == parameters.size());
+			assertEquals(newOrder.length, parameters.size());
 			List<ParameterInfo> current= new ArrayList<>(parameters);
 			for (int i= 0; i < newOrder.length; i++) {
 				parameters.set(newOrder[i], current.get(i));

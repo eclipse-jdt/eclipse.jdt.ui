@@ -13,7 +13,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.leaktest;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.fail;
 
 import org.junit.Before;
 
@@ -28,12 +29,10 @@ import org.eclipse.jdt.ui.leaktest.reftracker.ReferenceTracker;
 import org.eclipse.jdt.ui.leaktest.reftracker.ReferenceVisitor;
 import org.eclipse.jdt.ui.leaktest.reftracker.ReferencedObject;
 
-
 /**
  * Base class for leak test cases.
  */
 public class LeakTestCase {
-
 	public class MulipleCollectorVisitor extends ReferenceVisitor {
 		private ReferenceVisitor[] fVisitors;
 
@@ -127,9 +126,7 @@ public class LeakTestCase {
 				return;
 			}
 			numTries--;
-			if (numTries == 0) {
-				assertTrue("Expected instance count: " + expected + ", actual: " + actual + "\n" + requestor.getResultString(), false);
-			}
+			assertNotEquals("Expected instance count: " + expected + ", actual: " + actual + "\n" + requestor.getResultString(), 0, numTries);
   		}
 	}
 
@@ -163,7 +160,7 @@ public class LeakTestCase {
 						buf.append("Expected instance count: " + expected[k] + ", actual: " + actual + "\n" + requestors[k].getResultString()).append("\n---------------------\n");
 					}
 				}
-  				assertTrue(buf.toString(), false);
+  				fail(buf.toString());
 			}
   		}
 	}
@@ -202,7 +199,7 @@ public class LeakTestCase {
 	protected void assertDifferentCount(String message, int startCount, int endCount) {
 		if (startCount == endCount) {
 			String str= message != null ? message + ": " : "";
-			assertTrue(str + "instance count is not different: (" + startCount + " / " + endCount + " )", false);
+			fail(str + "instance count is not different: (" + startCount + " / " + endCount + " )");
 		}
 	}
 
@@ -229,7 +226,7 @@ public class LeakTestCase {
 		if (startCount != endCount) {
 			// only compare if connection could be established
 			String str= message != null ? message + ": " : "";
-			assertTrue(str + "instance count is not the same: (" + startCount + " / " + endCount + " )", false);
+			fail(str + "instance count is not the same: (" + startCount + " / " + endCount + " )");
 		}
 	}
 }

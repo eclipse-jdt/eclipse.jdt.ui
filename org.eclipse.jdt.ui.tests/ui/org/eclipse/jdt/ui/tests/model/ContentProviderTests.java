@@ -15,7 +15,7 @@ package org.eclipse.jdt.ui.tests.model;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.util.Arrays;
@@ -124,7 +124,7 @@ public class ContentProviderTests {
 			fMyPart= (MockPluginView) myPart;
 			fProvider= fMyPart.getContentProvider();
 			fMyPart.setProject(fJProject1);
-		}else assertTrue("Unable to get view",false);//$NON-NLS-1$
+		}else fail("Unable to get view");//$NON-NLS-1$
 
 		assertNotNull(fProvider);
 	}

@@ -80,7 +80,7 @@ public class ImporterTest{
 				Object current = toProcess.pop();
 				String path = importStructureProvider.getFullPath(current);
 				File toCreate = null;
-				if (path.equals("/")) { //$NON-NLS-1$
+				if ("/".equals(path)) { //$NON-NLS-1$
 					toCreate = target;
 				} else {
 					toCreate = new File(target, path);

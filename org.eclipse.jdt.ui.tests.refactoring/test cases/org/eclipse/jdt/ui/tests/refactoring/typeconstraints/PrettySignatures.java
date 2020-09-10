@@ -104,7 +104,7 @@ public class PrettySignatures {
 
 	private static String getTypeVariable(ITypeBinding binding) {
 		ITypeBinding[] bounds= binding.getTypeBounds();
-		if (bounds.length == 1 && bounds[0].getQualifiedName().equals("java.lang.Object"))
+		if (bounds.length == 1 && "java.lang.Object".equals(bounds[0].getQualifiedName()))
 			return binding.getName();
 
 		StringBuilder result= new StringBuilder(binding.getName());

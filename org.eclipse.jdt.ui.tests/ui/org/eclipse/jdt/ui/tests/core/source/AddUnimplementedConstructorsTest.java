@@ -91,7 +91,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 	private void checkMethods(String[] expected, IMethod[] methods) {
 		int nMethods= methods.length;
 		int nExpected= expected.length;
-		assertTrue("" + nExpected + " methods expected, is " + nMethods, nMethods == nExpected);
+		assertEquals("" + nExpected + " methods expected, is " + nMethods, nExpected, nMethods);
 		for (int i= 0; i < nExpected; i++) {
 			String methName= expected[i];
 			assertTrue("method " + methName + " expected", nameContained(methName, methods));

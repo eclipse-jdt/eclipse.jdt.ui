@@ -14,6 +14,7 @@
 package org.eclipse.jdt.ui.tests.preferences;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Field;
@@ -130,9 +131,7 @@ public class OptionsConfigurationBlockTest {
 				boolean keyWasInKeySet= keySet.remove(key);
 				if (JavaCore.PLUGIN_ID.equals(key.getQualifier())) {
 					Object fieldName= coreFieldLookup.remove(key.getName());
-					assertTrue(
-						"No core constant for key " + key.getName() + " in class " + configurationBlock.getName(),
-						fieldName != null);
+					assertNotNull("No core constant for key " + key.getName() + " in class " + configurationBlock.getName(), fieldName);
 					assertTrue(configurationBlock.getName() + "#getKeys() is missing key '" + key.getName() + "'", keyWasInKeySet);
 				}
 			}

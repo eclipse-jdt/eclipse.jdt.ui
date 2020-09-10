@@ -13,7 +13,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.buildpath;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.List;
 
@@ -70,7 +75,7 @@ public class BuildpathModifierActionTest {
 				return;
 			}
 		}
-		assertTrue("Element with location " + path + " is not on buildpath", false);
+		fail("Element with location " + path + " is not on buildpath");
     }
 
     private static void assertDeltaResources(BuildpathDelta delta, IPath[] createdFolders, IPath[] removedFolders, IPath[] createdFiles, IPath[] removedFiles) {
@@ -87,7 +92,7 @@ public class BuildpathModifierActionTest {
 	        } else if (createdResources[i] instanceof IFolder) {
 	        	assertTrue("Folder " + createdResources[i] + " is unexpected created", contains(createdFolders, path));
 	        } else {
-	        	assertTrue("Resource " + createdResources[i] + " is nor file nor folder.", false);
+	        	fail("Resource " + createdResources[i] + " is nor file nor folder.");
 	        }
         }
 		for (IPath createdFolder : createdFolders) {
@@ -110,7 +115,7 @@ public class BuildpathModifierActionTest {
 	        } else if (deletedResources[i] instanceof IFolder) {
 	        	assertTrue("Folder " + deletedResources[i] + " is unexpected removed", contains(removedFolders, path));
 	        } else {
-	        	assertTrue("Resource " + deletedResources[i] + " is nor file nor folder.", false);
+	        	fail("Resource " + deletedResources[i] + " is nor file nor folder.");
 	        }
         }
 		for (IPath removedFolder : removedFolders) {
@@ -123,7 +128,7 @@ public class BuildpathModifierActionTest {
 
     private static void assertDeltaRemovedEntries(BuildpathDelta delta, IPath[] paths) {
     	List<CPListElement> removedEntries= delta.getRemovedEntries();
-    	assertTrue("Expected " + paths.length + " is " + removedEntries.size(), removedEntries.size() == paths.length);
+    	assertEquals("Expected " + paths.length + " is " + removedEntries.size(), removedEntries.size(), paths.length);
     	IPath[] removed= new IPath[removedEntries.size()];
     	int i= 0;
     	for (CPListElement element : removedEntries) {
@@ -140,7 +145,7 @@ public class BuildpathModifierActionTest {
 
     private static void assertDeltaAddedEntries(BuildpathDelta delta, IPath[] paths) {
     	List<CPListElement> addedEntries= delta.getAddedEntries();
-    	assertTrue("Expected " + paths.length + " is " + addedEntries.size(), addedEntries.size() == paths.length);
+    	assertEquals("Expected " + paths.length + " is " + addedEntries.size(), addedEntries.size(), paths.length);
     	IPath[] added= new IPath[addedEntries.size()];
     	int i= 0;
     	for (CPListElement element : addedEntries) {
@@ -170,7 +175,7 @@ public class BuildpathModifierActionTest {
     }
 
     private static void assertNumberOfEntries(IClasspathEntry[] entries, int expected) {
-    	assertTrue("Expected count was " + expected + " is " + entries.length, expected == entries.length);
+    	assertEquals("Expected count was " + expected + " is " + entries.length, expected, entries.length);
     }
 
     @Test
@@ -240,7 +245,7 @@ public class BuildpathModifierActionTest {
 
 		cpProject= CPJavaProject.createFromExisting(fJavaProject);
 		IStatus status= ClasspathModifier.checkAddExternalJarsPrecondition(jarPaths, cpProject);
-		assertTrue(status.getMessage(), status.getSeverity() == IStatus.INFO);
+		assertEquals(status.getMessage(), IStatus.INFO, status.getSeverity());
 
 		BuildpathDelta delta= ClasspathModifier.addExternalJars(jarPaths, cpProject);
 		assertDeltaResources(delta, new IPath[0], new IPath[0], new IPath[0], new IPath[0]);
@@ -268,7 +273,7 @@ public class BuildpathModifierActionTest {
 
 		cpProject= CPJavaProject.createFromExisting(fJavaProject);
 		IStatus status= ClasspathModifier.checkAddExternalJarsPrecondition(jarPaths, cpProject);
-		assertTrue(status.getSeverity() == IStatus.INFO);
+		assertEquals(IStatus.INFO, status.getSeverity());
 
 		BuildpathDelta delta= ClasspathModifier.addExternalJars(jarPaths, cpProject);
 		assertDeltaResources(delta, new IPath[0], new IPath[0], new IPath[0], new IPath[0]);
@@ -294,7 +299,7 @@ public class BuildpathModifierActionTest {
 		CPJavaProject cpProject= CPJavaProject.createFromExisting(fJavaProject);
 		CPListElement element= cpProject.getCPElement(CPListElement.createFromExisting(src.getRawClasspathEntry(), fJavaProject));
 		IStatus status= ClasspathModifier.checkSetOutputLocationPrecondition(element, outputPath, false, cpProject);
-		assertTrue(status.getMessage(), status.getSeverity() != IStatus.ERROR);
+		assertNotEquals(status.getMessage(), IStatus.ERROR, status.getSeverity());
 
 		BuildpathDelta delta= ClasspathModifier.setOutputLocation(element, outputPath, false, cpProject);
 		assertDeltaResources(delta, new IPath[] {outputPath}, new IPath[0], new IPath[0], new IPath[0]);
@@ -307,7 +312,7 @@ public class BuildpathModifierActionTest {
 		IClasspathEntry[] classpathEntries= fJavaProject.getRawClasspath();
 		assertNumberOfEntries(classpathEntries, 2);
 		IClasspathEntry entry= classpathEntries[1];
-		assertTrue(src.getRawClasspathEntry() == entry);
+		assertSame(src.getRawClasspathEntry(), entry);
 		IPath location= entry.getOutputLocation();
 		assertTrue("Output path is " + location + " expected was " + outputPath, outputPath.equals(location));
 	}
@@ -328,7 +333,7 @@ public class BuildpathModifierActionTest {
 		CPJavaProject cpProject= CPJavaProject.createFromExisting(fJavaProject);
 		CPListElement element= cpProject.getCPElement(CPListElement.createFromExisting(src.getRawClasspathEntry(), fJavaProject));
 		IStatus status= ClasspathModifier.checkSetOutputLocationPrecondition(element, outputPath, false, cpProject);
-		assertTrue(status.getMessage(), status.getSeverity() == IStatus.INFO);
+		assertEquals(status.getMessage(), IStatus.INFO, status.getSeverity());
 
 		BuildpathDelta delta= ClasspathModifier.setOutputLocation(element, outputPath, false, cpProject);
 		assertDeltaResources(delta, new IPath[] {outputPath}, new IPath[0], new IPath[0], new IPath[0]);
@@ -343,7 +348,7 @@ public class BuildpathModifierActionTest {
 		IClasspathEntry[] classpathEntries= fJavaProject.getRawClasspath();
 		assertNumberOfEntries(classpathEntries, 2);
 		IClasspathEntry entry= classpathEntries[1];
-		assertTrue(src.getRawClasspathEntry() == entry);
+		assertSame(src.getRawClasspathEntry(), entry);
 		IPath location= entry.getOutputLocation();
 		assertTrue("Output path is " + location + " expected was " + outputPath, outputPath.equals(location));
 	}
@@ -359,7 +364,7 @@ public class BuildpathModifierActionTest {
 		CPJavaProject cpProject= CPJavaProject.createFromExisting(fJavaProject);
 		CPListElement element= cpProject.getCPElement(CPListElement.createFromExisting(src1.getRawClasspathEntry(), fJavaProject));
 		IStatus status= ClasspathModifier.checkSetOutputLocationPrecondition(element, outputPath, false, cpProject);
-		assertTrue(status.getMessage(), status.getSeverity() != IStatus.ERROR);
+		assertNotEquals(status.getMessage(), IStatus.ERROR, status.getSeverity());
 
 		BuildpathDelta delta= ClasspathModifier.setOutputLocation(element, outputPath, false, cpProject);
 		assertDeltaResources(delta, new IPath[] {outputPath}, new IPath[0], new IPath[0], new IPath[0]);
@@ -372,12 +377,12 @@ public class BuildpathModifierActionTest {
 		IClasspathEntry[] classpathEntries= fJavaProject.getRawClasspath();
 		assertNumberOfEntries(classpathEntries, 2);
 		IClasspathEntry entry= classpathEntries[1];
-		assertTrue(src1.getRawClasspathEntry() == entry);
+		assertSame(src1.getRawClasspathEntry(), entry);
 		IPath location= entry.getOutputLocation();
 		assertTrue("Output path is " + location + " expected was " + outputPath, outputPath.equals(location));
 		IPath[] exclusionPatterns= entry.getExclusionPatterns();
-		assertTrue(exclusionPatterns.length == 1);
-		assertTrue(exclusionPatterns[0].toString().equals("bin/"));
+		assertEquals(1, exclusionPatterns.length);
+		assertEquals("bin/", exclusionPatterns[0].toString());
 	}
 
     @Test
@@ -392,7 +397,7 @@ public class BuildpathModifierActionTest {
 		CPJavaProject cpProject= CPJavaProject.createFromExisting(fJavaProject);
 		CPListElement element= cpProject.getCPElement(CPListElement.createFromExisting(src1.getRawClasspathEntry(), fJavaProject));
 		IStatus status= ClasspathModifier.checkSetOutputLocationPrecondition(element, outputPath, false, cpProject);
-		assertTrue(status.getMessage(), status.getSeverity() != IStatus.ERROR);
+		assertNotEquals(status.getMessage(), IStatus.ERROR, status.getSeverity());
 
 		BuildpathDelta delta= ClasspathModifier.setOutputLocation(element, outputPath, false, cpProject);
 		assertDeltaResources(delta, new IPath[] {outputPath}, new IPath[0], new IPath[0], new IPath[0]);
@@ -405,15 +410,15 @@ public class BuildpathModifierActionTest {
 		IClasspathEntry[] classpathEntries= fJavaProject.getRawClasspath();
 		assertNumberOfEntries(classpathEntries, 3);
 		IClasspathEntry entry= classpathEntries[1];
-		assertTrue(src1.getRawClasspathEntry() == entry);
+		assertSame(src1.getRawClasspathEntry(), entry);
 		IPath location= entry.getOutputLocation();
 		assertTrue("Output path is " + location + " expected was " + outputPath, outputPath.equals(location));
 
 		entry= classpathEntries[2];
-		assertTrue(src2.getRawClasspathEntry() == entry);
+		assertSame(src2.getRawClasspathEntry(), entry);
 		IPath[] exclusionPatterns= entry.getExclusionPatterns();
-		assertTrue(exclusionPatterns.length == 1);
-		assertTrue(exclusionPatterns[0].toString().equals("bin/"));
+		assertEquals(1, exclusionPatterns.length);
+		assertEquals("bin/", exclusionPatterns[0].toString());
 	}
 
     @Test
@@ -433,7 +438,7 @@ public class BuildpathModifierActionTest {
 		CPJavaProject cpProject= CPJavaProject.createFromExisting(fJavaProject);
 		CPListElement element= cpProject.getCPElement(CPListElement.createFromExisting(src1.getRawClasspathEntry(), fJavaProject));
 		IStatus status= ClasspathModifier.checkSetOutputLocationPrecondition(element, outputPath, false, cpProject);
-		assertTrue(status.getMessage(), status.getSeverity() == IStatus.INFO);
+		assertEquals(status.getMessage(), IStatus.INFO, status.getSeverity());
 
 		BuildpathDelta delta= ClasspathModifier.setOutputLocation(element, outputPath, false, cpProject);
 		assertDeltaResources(delta, new IPath[] {outputPath}, new IPath[0], new IPath[0], new IPath[0]);
@@ -448,15 +453,15 @@ public class BuildpathModifierActionTest {
 		IClasspathEntry[] classpathEntries= fJavaProject.getRawClasspath();
 		assertNumberOfEntries(classpathEntries, 3);
 		IClasspathEntry entry= classpathEntries[1];
-		assertTrue(src1.getRawClasspathEntry() == entry);
+		assertSame(src1.getRawClasspathEntry(), entry);
 		IPath location= entry.getOutputLocation();
 		assertTrue("Output path is " + location + " expected was " + outputPath, outputPath.equals(location));
 
 		entry= classpathEntries[2];
-		assertTrue(src2.getRawClasspathEntry() == entry);
+		assertSame(src2.getRawClasspathEntry(), entry);
 		IPath[] exclusionPatterns= entry.getExclusionPatterns();
-		assertTrue(exclusionPatterns.length == 1);
-		assertTrue(exclusionPatterns[0].toString().equals("bin/"));
+		assertEquals(1, exclusionPatterns.length);
+		assertEquals("bin/", exclusionPatterns[0].toString());
 	}
 
     @Test
@@ -471,7 +476,7 @@ public class BuildpathModifierActionTest {
 		CPJavaProject cpProject= CPJavaProject.createFromExisting(fJavaProject);
 		CPListElement element= cpProject.getCPElement(CPListElement.createFromExisting(src1.getRawClasspathEntry(), fJavaProject));
 		IStatus status= ClasspathModifier.checkSetOutputLocationPrecondition(element, outputPath, false, cpProject);
-		assertTrue(status.getMessage(), status.getSeverity() == IStatus.ERROR);
+		assertEquals(status.getMessage(), IStatus.ERROR, status.getSeverity());
 	}
 
     @Test
@@ -485,7 +490,7 @@ public class BuildpathModifierActionTest {
 		CPJavaProject cpProject= CPJavaProject.createFromExisting(fJavaProject);
 		CPListElement element= cpProject.getCPElement(CPListElement.createFromExisting(src.getRawClasspathEntry(), fJavaProject));
 		IStatus status= ClasspathModifier.checkSetOutputLocationPrecondition(element, outputPath, false, cpProject);
-		assertTrue(status.getMessage(), status.getSeverity() == IStatus.ERROR);
+		assertEquals(status.getMessage(), IStatus.ERROR, status.getSeverity());
 	}
 
     @Test
@@ -519,12 +524,12 @@ public class BuildpathModifierActionTest {
 		IClasspathEntry[] classpathEntries= fJavaProject.getRawClasspath();
 		assertNumberOfEntries(classpathEntries, 2);
 		IClasspathEntry entry= classpathEntries[1];
-		assertTrue(src1.getRawClasspathEntry() == entry);
+		assertSame(src1.getRawClasspathEntry(), entry);
 		IPath location= entry.getOutputLocation();
 		assertTrue("Output path is " + location + " expected was " + outputPath, outputPath.equals(location));
 		IPath[] exclusionPatterns= entry.getExclusionPatterns();
-		assertTrue(exclusionPatterns.length == 1);
-		assertTrue(exclusionPatterns[0].toString(), exclusionPatterns[0].toString().equals("sub/newBin/"));
+		assertEquals(1, exclusionPatterns.length);
+		assertEquals(exclusionPatterns[0].toString(), "sub/newBin/", exclusionPatterns[0].toString());
 	}
 
     @Test
@@ -557,12 +562,12 @@ public class BuildpathModifierActionTest {
 		IClasspathEntry[] classpathEntries= fJavaProject.getRawClasspath();
 		assertNumberOfEntries(classpathEntries, 2);
 		IClasspathEntry entry= classpathEntries[1];
-		assertTrue(p01.getRawClasspathEntry() == entry);
+		assertSame(p01.getRawClasspathEntry(), entry);
 		IPath location= entry.getOutputLocation();
 		assertTrue("Output path is " + location + " expected was " + outputPath, outputPath.equals(location));
 		IPath[] exclusionPatterns= entry.getExclusionPatterns();
-		assertTrue(exclusionPatterns.length == 1);
-		assertTrue(exclusionPatterns[0].toString(), exclusionPatterns[0].toString().equals("bin/"));
+		assertEquals(1, exclusionPatterns.length);
+		assertEquals(exclusionPatterns[0].toString(), "bin/", exclusionPatterns[0].toString());
 	}
 
     @Test
@@ -596,11 +601,11 @@ public class BuildpathModifierActionTest {
 		IClasspathEntry[] classpathEntries= fJavaProject.getRawClasspath();
 		assertNumberOfEntries(classpathEntries, 2);
 		IClasspathEntry entry= classpathEntries[1];
-		assertTrue(src1.getRawClasspathEntry() == entry);
+		assertSame(src1.getRawClasspathEntry(), entry);
 		IPath location= entry.getOutputLocation();
 		assertTrue("Output path is " + location + " expected was " + outputPath, outputPath.equals(location));
 		IPath[] exclusionPatterns= entry.getExclusionPatterns();
-		assertTrue(exclusionPatterns.length == 0);
+		assertEquals(0, exclusionPatterns.length);
 	}
 
     @Test
@@ -632,11 +637,11 @@ public class BuildpathModifierActionTest {
 		IClasspathEntry[] classpathEntries= fJavaProject.getRawClasspath();
 		assertNumberOfEntries(classpathEntries, 2);
 		IClasspathEntry entry= classpathEntries[1];
-		assertTrue(src1.getRawClasspathEntry() == entry);
+		assertSame(src1.getRawClasspathEntry(), entry);
 		IPath location= entry.getOutputLocation();
-		assertTrue(location == null);
+		assertNull(location);
 		IPath[] exclusionPatterns= entry.getExclusionPatterns();
-		assertTrue(exclusionPatterns.length == 0);
+		assertEquals(0, exclusionPatterns.length);
 	}
 
     @Test

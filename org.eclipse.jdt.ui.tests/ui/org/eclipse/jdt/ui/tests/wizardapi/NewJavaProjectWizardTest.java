@@ -15,7 +15,6 @@ package org.eclipse.jdt.ui.tests.wizardapi;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 import org.junit.After;
 import org.junit.Before;
@@ -114,7 +113,7 @@ public class NewJavaProjectWizardTest {
 	private void assertBasicBuildPath(IProject project, IPath outputLocation, IClasspathEntry[] classpath) {
 		assertNotNull("a", outputLocation);
 		assertNotNull("b", classpath);
-		assertTrue("c", classpath.length == 2);
+		assertEquals("c", 2, classpath.length);
 
 		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.SRCBIN_FOLDERS_IN_NEWPROJ)) {
 			assertEquals("d", outputLocation, project.getFolder("bin").getFullPath());
@@ -182,7 +181,7 @@ public class NewJavaProjectWizardTest {
 	private void assertUserBuildPath(IProject project, IPath outputLocation, IClasspathEntry[] classpath) {
 		assertNotNull("a", outputLocation);
 		assertNotNull("b", classpath);
-		assertTrue("c", classpath.length == 3);
+		assertEquals("c", 3, classpath.length);
 
 		assertEquals("d", outputLocation, project.getFolder("dbin").getFullPath());
 		assertEquals("e", classpath[0].getPath(), project.getFolder("dsrc1").getFullPath());

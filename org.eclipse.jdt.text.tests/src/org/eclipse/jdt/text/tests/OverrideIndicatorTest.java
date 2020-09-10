@@ -53,9 +53,8 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
  * @since 3.1
  */
 public class OverrideIndicatorTest {
-
 	@Rule
-	public JUnitProjectTestSetup jpts=new JUnitProjectTestSetup();
+	public JUnitProjectTestSetup jpts= new JUnitProjectTestSetup();
 
 	private static final String OVERRIDE_INDICATOR_ANNOTATION= "org.eclipse.jdt.ui.overrideIndicator";
 
@@ -135,11 +134,10 @@ public class OverrideIndicatorTest {
 		countOverrideIndicators();
 		for (Annotation overrideAnnotation : fOverrideAnnotations) {
 			String text= overrideAnnotation.getText();
-			assertTrue(text != null
-				&& (text.equals("overrides java.lang.Object.toString")
-					|| text.equals("implements junit.framework.Test.run")
-					|| text.equals("implements junit.framework.Test.countTestCases")
-					));
+			assertNotNull(text);
+			assertTrue("overrides java.lang.Object.toString".equals(text)
+						|| "implements junit.framework.Test.run".equals(text)
+						|| "implements junit.framework.Test.countTestCases".equals(text));
 		}
 	}
 
