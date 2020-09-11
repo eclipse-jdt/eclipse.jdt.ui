@@ -390,11 +390,11 @@ public class JavaElementLinks {
 		String refModuleName= null;
 		// replace '[' manually, since URI confuses it for an IPv6 address as per RFC 2732:
 		IJavaElement element= JavaCore.create(segments[1].replace(LINK_BRACKET_REPLACEMENT, '['));
-
+		boolean canReferModuleName= canReferModuleName(element);
 		if (segments.length > 2) {
 			String refTypeName= segments[2];
 			int index= refTypeName.indexOf('/');
-			if (index != -1) {
+			if (index != -1 && canReferModuleName) {
 				refModuleName= refTypeName.substring(0, index);
 				refTypeName= refTypeName.substring(index+1);
 			}
@@ -503,6 +503,7 @@ public class JavaElementLinks {
 					}
 					if (type == null &&
 							refModuleName == null &&
+							canReferModuleName &&
 							segments.length <= 3) {
 						return getModule(element, refTypeName);
 					}
@@ -528,6 +529,18 @@ public class JavaElementLinks {
 		}
 		return null;
 	}
+
+	private static boolean canReferModuleName(IJavaElement element) {
+		boolean canRefer= false;
+		if (element != null) {
+			IJavaProject javaProject= element.getJavaProject();
+			if (javaProject != null) {
+				canRefer = JavaModelUtil.is15OrHigher(javaProject);
+			}
+		}
+		return canRefer;
+	}
+
 	private static IType resolvePackageInfoType(IPackageFragment pack, String refTypeName) throws JavaModelException {
 		// Note: The scoping rules of JLS7 6.3 are broken for package-info.java, see https://bugs.eclipse.org/216451#c4
 		// We follow the javadoc tool's implementation and only support fully-qualified type references:
