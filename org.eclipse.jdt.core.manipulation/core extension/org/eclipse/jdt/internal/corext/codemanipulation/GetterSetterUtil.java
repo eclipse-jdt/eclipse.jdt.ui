@@ -304,7 +304,7 @@ public class GetterSetterUtil {
 		ASTNode block= statement.getParent();
 		boolean isBlock= block.getNodeType() == ASTNode.BLOCK || block.getNodeType() == ASTNode.SWITCH_STATEMENT;
 		boolean isControlStatemenBody= ASTNodes.isControlStatementBody(statement.getLocationInParent());
-		return isStatement || !(isBlock || isControlStatemenBody);
+		return isStatement || (!isBlock && !isControlStatemenBody);
 	}
 
 	private static Expression createInfixInvocationFromPostPrefixExpression(InfixExpression.Operator operator, Expression getterExpression, AST ast, ITypeBinding variableType, boolean is50OrHigher) {

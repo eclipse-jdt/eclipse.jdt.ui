@@ -64,7 +64,7 @@ public class VerifyDialog extends TitleAreaDialog {
 	 */
 	public VerifyDialog(Shell parent) {
 		super(parent);
-		if ( !(TEST_TYPE <= 2) && !(TEST_TYPE >= 0) ) {
+		if ( (TEST_TYPE > 2) && (TEST_TYPE < 0) ) {
 			TEST_TYPE = TEST_SIZING;
 		}
 		_failureText = "";

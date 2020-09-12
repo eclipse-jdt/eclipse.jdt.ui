@@ -253,7 +253,7 @@ public class TrayContentProvider implements ITreeContentProvider {
 	 */
 	@Override
 	public boolean hasChildren(Object element) {
-		return ! (element instanceof DynamicAttributeProperty || element instanceof DynamicBindingProperty);
+		return !(element instanceof DynamicAttributeProperty) && !(element instanceof DynamicBindingProperty);
 	}
 
 	/*

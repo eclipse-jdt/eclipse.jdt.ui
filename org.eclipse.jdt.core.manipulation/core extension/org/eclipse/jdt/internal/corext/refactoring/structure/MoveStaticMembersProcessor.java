@@ -455,7 +455,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 
 		// no checking required for moving interface fields to classes
 
-		if (! (JdtFlags.isStatic(fDestinationType) || fDestinationType.getDeclaringType() == null)){
+		if (!JdtFlags.isStatic(fDestinationType) && fDestinationType.getDeclaringType() != null) {
 			String message= RefactoringCoreMessages.MoveMembersRefactoring_static_declaration;
 			result.addError(message);
 		}
@@ -504,7 +504,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		int flags= member.getFlags();
 		switch (member.getElementType()) {
 			case IJavaElement.FIELD:
-				if (!(Flags.isStatic(flags) && Flags.isFinal(flags)))
+				if (!Flags.isStatic(flags) || !Flags.isFinal(flags))
 					return false;
 				if (Flags.isEnum(flags))
 					return false;
@@ -808,7 +808,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 					fChange= null;
 					return;
 				}
-				if (!(fSource.getCu().equals(unit) || fTarget.getCu().equals(unit)))
+				if (!fSource.getCu().equals(unit) && !fTarget.getCu().equals(unit))
 					fChange.add(rewrite.createChange(true));
 			}
 			status.merge(moveMembers(fMemberDeclarations, memberSources));

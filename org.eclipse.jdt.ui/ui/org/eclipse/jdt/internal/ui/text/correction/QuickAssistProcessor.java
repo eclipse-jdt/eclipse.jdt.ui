@@ -1823,8 +1823,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (isTypeReferenceToInstanceMethod(methodReferenceNode)) {
 			String methodReferenceQualifiedName= ((Name) methodReferenceNode.getExpression()).getFullyQualifiedName();
 			String typeDeclarationName= astRoot.getPackage().getName().getFullyQualifiedName() + '.' + typeDeclaration.getName().getFullyQualifiedName();
-			if (!(methodReferenceQualifiedName.equals(typeDeclarationName)
-					|| methodReferenceQualifiedName.equals(typeDeclaration.getName().getFullyQualifiedName()))) {
+			if (!methodReferenceQualifiedName.equals(typeDeclarationName)
+					&& !methodReferenceQualifiedName.equals(typeDeclaration.getName().getFullyQualifiedName())) {
 				// only propose for references in same class
 				return false;
 			}

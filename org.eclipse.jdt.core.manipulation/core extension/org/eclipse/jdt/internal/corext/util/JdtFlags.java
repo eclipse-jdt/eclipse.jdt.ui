@@ -84,8 +84,9 @@ public class JdtFlags {
 		if (isNestedInterfaceOrAnnotation(bodyDeclaration))
 			return true;
 		int nodeType= bodyDeclaration.getNodeType();
-		if (!(nodeType == ASTNode.METHOD_DECLARATION || nodeType == ASTNode.ANNOTATION_TYPE_MEMBER_DECLARATION) &&
-				isInterfaceOrAnnotationMember(bodyDeclaration))
+		if (nodeType != ASTNode.METHOD_DECLARATION
+				&& nodeType != ASTNode.ANNOTATION_TYPE_MEMBER_DECLARATION
+				&& isInterfaceOrAnnotationMember(bodyDeclaration))
 			return true;
 		if (bodyDeclaration instanceof EnumConstantDeclaration)
 			return true;
@@ -124,7 +125,7 @@ public class JdtFlags {
 	}
 
 	private static boolean isEnumTypeFinal(IMember member) throws JavaModelException {
-		if (!(isEnum(member) && member.getElementType() == IJavaElement.TYPE))
+		if ((!isEnum(member) || (member.getElementType() != IJavaElement.TYPE)))
 			return false;
 		// An enum type is implicitly final unless it contains at least one enum constant that has a class body.
 		IJavaElement[] children= member.getChildren();

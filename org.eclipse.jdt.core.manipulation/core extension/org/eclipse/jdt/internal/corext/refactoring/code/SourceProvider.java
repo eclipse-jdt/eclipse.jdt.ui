@@ -121,7 +121,7 @@ public class SourceProvider {
 		@Override
 		public boolean visit(ReturnStatement node) {
 			Expression expression= node.getExpression();
-			if (!(ASTNodes.isLiteral(expression) || expression instanceof Name)) {
+			if (!ASTNodes.isLiteral(expression) && !(expression instanceof Name)) {
 				fMustEvalReturnedExpression= true;
 			}
 			if (Invocations.isInvocation(expression) || expression instanceof ClassInstanceCreation) {

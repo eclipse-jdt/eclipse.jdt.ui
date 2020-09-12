@@ -151,7 +151,7 @@ public final class CoreASTProvider {
 			}
 		}
 
-		final boolean canReturnNull= waitFlag == CoreASTProvider.WAIT_NO || (waitFlag == CoreASTProvider.WAIT_ACTIVE_ONLY && !(isActiveElement && fAST == null));
+		final boolean canReturnNull= waitFlag == CoreASTProvider.WAIT_NO || (waitFlag == CoreASTProvider.WAIT_ACTIVE_ONLY && (!isActiveElement || fAST != null));
 		boolean isReconciling= false;
 		final ITypeRoot activeElement;
 		if (isActiveElement) {

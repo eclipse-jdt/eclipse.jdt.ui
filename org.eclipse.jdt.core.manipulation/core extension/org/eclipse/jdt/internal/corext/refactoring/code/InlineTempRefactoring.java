@@ -380,9 +380,9 @@ public class InlineTempRefactoring extends Refactoring {
 
 		ASTNode referenceContext= reference.getParent();
 		if (Invocations.isResolvedTypeInferredFromExpectedType(initializer)) {
-			if (! (referenceContext instanceof VariableDeclarationFragment
-					|| referenceContext instanceof SingleVariableDeclaration
-					|| referenceContext instanceof Assignment)) {
+			if (!(referenceContext instanceof VariableDeclarationFragment)
+					&& !(referenceContext instanceof SingleVariableDeclaration)
+					&& !(referenceContext instanceof Assignment)) {
 				ITypeBinding[] typeArguments= Invocations.getInferredTypeArguments(initializer);
 				if (typeArguments != null) {
 					String newSource= createParameterizedInvocation(initializer, typeArguments, rewrite);

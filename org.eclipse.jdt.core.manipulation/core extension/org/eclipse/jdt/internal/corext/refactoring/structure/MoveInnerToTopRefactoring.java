@@ -535,7 +535,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 		fQualifiedTypeName= JavaModelUtil.concatenateName(fType.getPackageFragment().getElementName(), fType.getElementName());
 		fEnclosingInstanceFieldName= getInitialNameForEnclosingInstanceField();
 		fSourceRewrite= new CompilationUnitRewrite(fType.getCompilationUnit());
-		fIsInstanceFieldCreationPossible= !(JdtFlags.isStatic(fType) || fType.isAnnotation() || fType.isEnum() || (fType.getDeclaringType() == null && !JavaElementUtil.isMainType(fType)));
+		fIsInstanceFieldCreationPossible= !JdtFlags.isStatic(fType) && !fType.isAnnotation() && !fType.isEnum() && (fType.getDeclaringType() != null || JavaElementUtil.isMainType(fType));
 		fIsInstanceFieldCreationMandatory= fIsInstanceFieldCreationPossible && isInstanceFieldCreationMandatory();
 		fCreateInstanceField= fIsInstanceFieldCreationMandatory;
 	}
@@ -1350,7 +1350,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 					final Expression expression= createAccessExpressionToEnclosingInstanceFieldText(invocation, binding, declaration);
 					targetRewrite.getASTRewrite().set(invocation, MethodInvocation.EXPRESSION_PROPERTY, expression, null);
 				} else {
-					if (!(invocation.getExpression() instanceof ThisExpression) || !(((ThisExpression) invocation.getExpression()).getQualifier() != null))
+					if (!(invocation.getExpression() instanceof ThisExpression) || (((ThisExpression) invocation.getExpression()).getQualifier() == null))
 						continue;
 					targetRewrite.getASTRewrite().replace(target, createAccessExpressionToEnclosingInstanceFieldText(invocation, binding, declaration), null);
 					targetRewrite.getImportRemover().registerRemovedNode(target);

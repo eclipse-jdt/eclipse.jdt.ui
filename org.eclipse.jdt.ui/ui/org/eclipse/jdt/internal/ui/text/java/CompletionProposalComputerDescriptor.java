@@ -354,7 +354,8 @@ final class CompletionProposalComputerDescriptor {
 				}
 			} finally {
 				// If computers are using non-ui thread, don't report delays.
-				fIsReportingDelay= !((context.getViewer() instanceof JavaSourceViewer) && ((JavaSourceViewer) context.getViewer()).isAsyncCompletionActive());
+				fIsReportingDelay= !(context.getViewer() instanceof JavaSourceViewer)
+						|| !((JavaSourceViewer) context.getViewer()).isAsyncCompletionActive();
 			}
 			status= createAPIViolationStatus(COMPUTE_COMPLETION_PROPOSALS);
 		} catch (InvalidRegistryObjectException x) {

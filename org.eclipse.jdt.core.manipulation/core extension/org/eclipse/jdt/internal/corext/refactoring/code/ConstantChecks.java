@@ -171,7 +171,7 @@ public class ConstantChecks {
 
 			int modifiers= binding.getModifiers();
 			if(binding instanceof IVariableBinding) {
-				if (!(Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers))) {
+				if (!Modifier.isStatic(modifiers) || !Modifier.isFinal(modifiers)) {
 					fResult= false;
 					return false;
 				}

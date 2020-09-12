@@ -174,7 +174,7 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 				break;
 			}
 			IJavaProject javaProject= unit.getJavaProject();
-			if (!(foundInProjectClasspath(javaProject, qualifiedName) && foundInProjectClasspath(javaProject, qualifiedName1))) {
+			if (!foundInProjectClasspath(javaProject, qualifiedName) || !foundInProjectClasspath(javaProject, qualifiedName1)) {
 				if (qualifiedName != null) {
 					proposals= addProposal(context, proposals, qualifiedName, javaProject);
 				}

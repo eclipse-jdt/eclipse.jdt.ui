@@ -87,7 +87,7 @@ public class TypeEnvironmentTests extends AbstractJunit4CUTestCase {
 		}
 		private void checkTypeBinding(IBinding binding) {
 			ITypeBinding type= (ITypeBinding)binding;
-			if (!(type.isPrimitive() && "void".equals(type.getName()))) {
+			if (!type.isPrimitive() || !"void".equals(type.getName())) {
 				TType refType= fTypeEnvironment.create(type);
 				assertNotNull("Refactoring type is null", refType);
 				assertEquals("Not same name", type.getName(), refType.getName());

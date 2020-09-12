@@ -238,7 +238,7 @@ public class TestRunSessionSerializer implements XMLReader {
 		StringBuffer buf= null;
 		for (int i= 0; i < string.length(); i++) {
 			char ch= string.charAt(i);
-			if (!(ch == 9 || ch == 10 || ch == 13 || ch >= 32)) {
+			if (ch != 9 && ch != 10 && ch != 13 && ch < 32) {
 				if (buf == null) {
 					buf= new StringBuffer(string.substring(0, i));
 				}

@@ -90,7 +90,7 @@ public class LambdaExpressionsCleanUpCore extends AbstractCleanUpCore {
 		boolean useAnonymous= isEnabled(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
 
 		boolean firstLambda= convert && useLambda;
-		boolean secondLambda= !(convert && useAnonymous);
+		boolean secondLambda= !convert || !useAnonymous;
 
 		if (firstLambda) {
 			buf.append("IntConsumer c = i -> {\n"); //$NON-NLS-1$

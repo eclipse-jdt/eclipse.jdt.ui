@@ -268,9 +268,9 @@ public class InlineConstantRefactoring extends Refactoring {
 			private void addExplicitTypeArgumentsIfNecessary(Expression invocation) {
 				if (Invocations.isResolvedTypeInferredFromExpectedType(invocation)) {
 					ASTNode referenceContext= fNewLocation.getParent();
-					if (! (referenceContext instanceof VariableDeclarationFragment
-							|| referenceContext instanceof SingleVariableDeclaration
-							|| referenceContext instanceof Assignment)) {
+					if (!(referenceContext instanceof VariableDeclarationFragment)
+							&& !(referenceContext instanceof SingleVariableDeclaration)
+							&& !(referenceContext instanceof Assignment)) {
 						ListRewrite typeArgsRewrite= Invocations.getInferredTypeArgumentsRewrite(fInitializerRewrite, invocation);
 						for (ITypeBinding typeArgument2 : Invocations.getInferredTypeArguments(invocation)) {
 							Type typeArgument= fNewLocationCuRewrite.getImportRewrite().addImport(typeArgument2, fNewLocationCuRewrite.getAST(), fNewLocationContext, TypeLocation.TYPE_ARGUMENT);
@@ -689,7 +689,7 @@ public class InlineConstantRefactoring extends Refactoring {
 		if (!variableBinding.isField() || variableBinding.isEnumConstant())
 			return null;
 		int modifiers= binding.getModifiers();
-		if (! (Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers)))
+		if (!Modifier.isStatic(modifiers) || !Modifier.isFinal(modifiers))
 			return null;
 
 		return name;

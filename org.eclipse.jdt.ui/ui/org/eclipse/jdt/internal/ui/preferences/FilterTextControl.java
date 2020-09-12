@@ -140,7 +140,7 @@ public class FilterTextControl {
 			gridData.horizontalSpan= 2;
 		fTextControl.setLayoutData(gridData);
 
-		fTextControl.addModifyListener(e -> updateClearButtonVisibility(!(fTextControl.getText().length() == 0)));
+		fTextControl.addModifyListener(e -> updateClearButtonVisibility(fTextControl.getText().length() != 0));
 	}
 
 	/**

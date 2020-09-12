@@ -362,7 +362,7 @@ public final class JUnitModel {
 				List<TestRunSession> excess= fTestRunSessions.subList(maxCount, size);
 				for (Iterator<TestRunSession> iter= excess.iterator(); iter.hasNext();) {
 					TestRunSession oldSession= iter.next();
-					if (!(oldSession.isStarting() || oldSession.isRunning() || oldSession.isKeptAlive())) {
+					if (!oldSession.isStarting() && !oldSession.isRunning() && !oldSession.isKeptAlive()) {
 						toRemove.add(oldSession);
 						iter.remove();
 					}

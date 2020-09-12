@@ -691,7 +691,7 @@ public class JavaElementLabelComposerCore {
 		if (typeParameter.exists()) {
 			String[] bounds= typeParameter.getBoundsSignatures();
 			if (bounds.length > 0 &&
-					! (bounds.length == 1 && "Ljava.lang.Object;".equals(bounds[0]))) { //$NON-NLS-1$
+					(bounds.length != 1 || !"Ljava.lang.Object;".equals(bounds[0]))) { //$NON-NLS-1$
 				fBuffer.append(" extends "); //$NON-NLS-1$
 				for (int j= 0; j < bounds.length; j++) {
 					if (j > 0) {

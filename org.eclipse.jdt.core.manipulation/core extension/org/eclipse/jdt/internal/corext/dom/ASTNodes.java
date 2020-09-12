@@ -1210,7 +1210,8 @@ public class ASTNodes {
 			if (invocationTargetType != null) {
 				TypeBindingVisitor visitor= new FunctionalInterfaceAmbiguousMethodAnalyzer(invocationTargetType, targetSummary.methodBinding, targetSummary.argumentIndex,
 						targetSummary.argumentCount, expressionIsExplicitlyTyped);
-				return !(visitor.visit(invocationTargetType) && Bindings.visitHierarchy(invocationTargetType, visitor));
+				return !visitor.visit(invocationTargetType)
+						|| !Bindings.visitHierarchy(invocationTargetType, visitor);
 			}
 		}
 
