@@ -723,10 +723,10 @@ public class ExtractClassRefactoring extends Refactoring {
 			if (isCreateField(pi)) {
 				VariableDeclarationFragment vdf= pi.declaration;
 				FieldDeclaration parent= (FieldDeclaration) vdf.getParent();
-				if (lastField == null)
+				if (lastField == null
+						|| lastField.getStartPosition() < parent.getStartPosition()) {
 					lastField= parent;
-				else if (lastField.getStartPosition() < parent.getStartPosition())
-					lastField= parent;
+				}
 
 				ListRewrite listRewrite= rewrite.getListRewrite(parent, FieldDeclaration.FRAGMENTS_PROPERTY);
 				removeNode(vdf, removeFieldGroup, fBaseCURewrite);

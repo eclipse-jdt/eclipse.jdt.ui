@@ -477,11 +477,9 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 		while (parent instanceof Type)
 			parent= parent.getParent();
 
-		if (parent instanceof ClassInstanceCreation) {
-			return false;
-		} else if (parent instanceof AbstractTypeDeclaration) {
-			return false;
-		} else if (parent instanceof TypeLiteral) {
+		if (parent instanceof ClassInstanceCreation
+				|| parent instanceof AbstractTypeDeclaration
+				|| (parent instanceof TypeLiteral)) {
 			return false;
 		}
 		return true;
@@ -494,12 +492,11 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 		ConstraintVariable2 methodReceiverCv= tCModel.getMethodReceiverCv(expressionVariable);
 		if (methodReceiverCv != null) {
 			TType chosenReceiverType= InferTypeArgumentsConstraintsSolver.getChosenType(methodReceiverCv);
-			if (chosenReceiverType == null)
+			if (chosenReceiverType == null
+					|| !InferTypeArgumentsTCModel.isAGenericType(chosenReceiverType)
+					|| hasUnboundElement(methodReceiverCv, tCModel)) {
 				return null;
-			else if (! InferTypeArgumentsTCModel.isAGenericType(chosenReceiverType))
-				return null;
-			else if (hasUnboundElement(methodReceiverCv, tCModel))
-				return null;
+			}
 		}
 
 		CastExpression castExpression= (CastExpression) node;

@@ -266,9 +266,8 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 		} else if (field == fProjectField) {
 			updateProjectStatus();
 			updateRootStatus();
-		} else if (field == fExcludeInOthersFields) {
-			updateRootStatus();
-		} else if (field == fIgnoreOptionalProblemsField) {
+		} else if (field == fExcludeInOthersFields
+				|| field == fIgnoreOptionalProblemsField) {
 			updateRootStatus();
 		}
 		updateStatus(new IStatus[] { fProjectStatus, fRootStatus });

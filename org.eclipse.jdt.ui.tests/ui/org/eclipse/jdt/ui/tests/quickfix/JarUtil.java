@@ -439,11 +439,9 @@ private static File getParentChildFile(File file) {
     int length = files==null ? 0 : files.length;
     if (length > 0) {
         for (int i=0; i<length; i++) {
-            if (files[i] == file) {
-                return files[i];
-            } else if (files[i].equals(file)) {
-                return files[i];
-            } else if (files[i].getPath().equals(file.getPath())) {
+            if (files[i] == file
+                    || files[i].equals(file)
+                    || files[i].getPath().equals(file.getPath())) {
                 return files[i];
             }
         }

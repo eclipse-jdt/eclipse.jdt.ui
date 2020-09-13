@@ -104,9 +104,11 @@ public class ConvertingSelectionProvider implements ISelectionProvider {
 		List<Object> result= new ArrayList<>(selection.size());
 		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
 			Object element= iter.next();
-			if (element instanceof IResource || element instanceof IJavaElement) {
+			if (element instanceof IResource
+					|| element instanceof IJavaElement
+					|| !(element instanceof IAdaptable)) {
 				result.add(element);
-			} else if (element instanceof IAdaptable) {
+			} else {
 				IAdaptable adaptable= (IAdaptable)element;
 				IJavaElement jElement= adaptable.getAdapter(IJavaElement.class);
 				if (jElement != null) {
@@ -119,8 +121,6 @@ public class ConvertingSelectionProvider implements ISelectionProvider {
 						result.add(element);
 					}
 				}
-			} else {
-				result.add(element);
 			}
 		}
 		return new StructuredSelection(result);

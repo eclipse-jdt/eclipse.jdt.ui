@@ -77,17 +77,13 @@ public class OperatorPrecedence {
 			return RELATIONAL;
 		} else if (expression instanceof CastExpression) {
 			return TYPEGENERATION;
-		} else if (expression instanceof ClassInstanceCreation) {
-			return POSTFIX;
 		} else if (expression instanceof PrefixExpression) {
 			return PREFIX;
-		} else if (expression instanceof FieldAccess) {
-			return POSTFIX;
-		} else if (expression instanceof MethodInvocation) {
-			return POSTFIX;
-		} else if (expression instanceof ArrayAccess) {
-			return POSTFIX;
-		} else if (expression instanceof PostfixExpression) {
+		} else if ((expression instanceof ClassInstanceCreation)
+				|| (expression instanceof FieldAccess)
+				|| (expression instanceof MethodInvocation)
+				|| (expression instanceof ArrayAccess)
+				|| (expression instanceof PostfixExpression)) {
 			return POSTFIX;
 		}
 		return Integer.MAX_VALUE;

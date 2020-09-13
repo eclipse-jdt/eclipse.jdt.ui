@@ -368,10 +368,10 @@ public class ParametricStructureComputer {
 			return false;
 
 		for (ParametricStructure parameter : containingStructure.getParameters()) {
-			if (parameter == subStructure)
+			if (parameter == subStructure
+					|| containsSubStructure(parameter, subStructure)) {
 				return true;
-			else if (containsSubStructure(parameter, subStructure))
-				return true;
+			}
 		}
 		return false;
 	}

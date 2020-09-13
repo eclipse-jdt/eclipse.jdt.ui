@@ -445,12 +445,9 @@ public final class DefaultPhoneticHashProvider implements IPhoneticHashProvider 
 						if (hasVowel(hashable, offset - 1, hashable.length) && !has95 && ((hashable[offset + 1] == 'A') || hashable[offset + 1] == 'O')) {
 							buffer.append('J');
 						} else {
-							if (offset == (hashable.length - 1)) {
+							if ((offset == (hashable.length - 1))
+									|| (!hasOneOf(meta54, hashable, offset + 1, 1) && !hasOneOf(meta55, hashable, offset - 1, 1))) {
 								buffer.append('J');
-							} else {
-								if (!hasOneOf(meta54, hashable, offset + 1, 1) && !hasOneOf(meta55, hashable, offset - 1, 1)) {
-									buffer.append('J');
-								}
 							}
 						}
 					}

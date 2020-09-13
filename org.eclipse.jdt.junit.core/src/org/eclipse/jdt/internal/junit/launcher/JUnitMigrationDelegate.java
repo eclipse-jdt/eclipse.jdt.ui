@@ -46,14 +46,10 @@ public class JUnitMigrationDelegate implements ILaunchConfigurationMigrationDele
 		if (target == null) {
 			return mapped == null;
 		} else {
-			if (mapped == null) {
+			if (mapped == null || mapped.length != 1) {
 				return true;
 			} else {
-				if (mapped.length != 1) {
-					return true;
-				} else {
-					return !target.equals(mapped[0]);
-				}
+				return !target.equals(mapped[0]);
 			}
 		}
 	}

@@ -94,11 +94,10 @@ public abstract class TestElement implements ITestElement {
 		private static Status combineProgress(Status one, Status two) {
 			if (one.isNotRun() && two.isNotRun())
 				return NOT_RUN;
-			else if (one.isDone() && two.isDone())
+			else if ((one.isDone() && two.isDone())
+					|| (!one.isRunning() && !two.isRunning())) { // One done, one not-run -> a parent failed and its children are not run
 				return OK;
-			else if (!one.isRunning() && !two.isRunning())
-				return OK; // one done, one not-run -> a parent failed and its children are not run
-			else
+			} else
 				return RUNNING;
 		}
 

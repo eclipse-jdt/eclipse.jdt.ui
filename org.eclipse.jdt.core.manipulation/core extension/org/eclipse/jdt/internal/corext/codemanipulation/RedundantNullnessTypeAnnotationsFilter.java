@@ -314,14 +314,9 @@ public class RedundantNullnessTypeAnnotationsFilter {
 			ArrayList<IAnnotationBinding> list= new ArrayList<>(annotations.length);
 			for (IAnnotationBinding annotation : annotations) {
 				ITypeBinding annotationType= annotation.getAnnotationType();
-				if (annotationType != null) {
-					if (annotationType.getQualifiedName().equals(fNonNullAnnotationName)) {
-						// ignore @NonNull
-					} else if (excludeAllNullAnnotations && annotationType.getQualifiedName().equals(fNullableAnnotationName)) {
-						// also ignore @Nullable
-					} else {
-						list.add(annotation);
-					}
+				if (annotationType != null
+						&& (annotationType.getQualifiedName().equals(fNonNullAnnotationName) || (excludeAllNullAnnotations && annotationType.getQualifiedName().equals(fNullableAnnotationName)))) {
+					// Ignore @NonNull
 				} else {
 					list.add(annotation);
 				}

@@ -520,11 +520,8 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 				CPListElementAttribute attrib= (CPListElementAttribute) elem;
 				String key= attrib.getKey();
 				if (attrib.isBuiltIn()) {
-					if (CPListElement.INCLUSION.equals(key)) {
-						if (((IPath[]) attrib.getValue()).length == 0) {
-							return false;
-						}
-					} else if (CPListElement.EXCLUSION.equals(key)) {
+					if (CPListElement.INCLUSION.equals(key)
+							|| CPListElement.EXCLUSION.equals(key)) {
 						if (((IPath[]) attrib.getValue()).length == 0) {
 							return false;
 						}
@@ -560,9 +557,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		}
 		if (elem instanceof CPListElementAttribute) {
 			CPListElementAttribute attrib= (CPListElementAttribute) elem;
-			if (attrib.isBuiltIn()) {
-				return true;
-			} else if (CPListElement.IGNORE_OPTIONAL_PROBLEMS.equals(attrib.getKey())) {
+			if (attrib.isBuiltIn() || CPListElement.IGNORE_OPTIONAL_PROBLEMS.equals(attrib.getKey())) {
 				return true;
 			} else {
 				return canEditCustomAttribute(attrib);

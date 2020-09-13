@@ -485,11 +485,10 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 		IPackageFragment pack= root.getPackageFragment(newName);
 		if (! pack.exists())
 			return true;
-		else if (pack.containsJavaResources())
+		else if (pack.containsJavaResources()
+				|| pack.getNonJavaResources().length != 0) {
 			return false;
-		else if (pack.getNonJavaResources().length != 0)
-			return false;
-		else
+		} else
 			return true;
 	}
 

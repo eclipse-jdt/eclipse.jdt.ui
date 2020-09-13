@@ -188,13 +188,10 @@ public class NLSSubstitution {
 			return true;
 		}
 		if (fState == EXTERNALIZED) {
-			if (fInitialValue == null) {
-				return true; // recreate entry in property file
-			} else if (!fInitialValue.equals(fValue)) {
-				return true; // change of value
-			}
-			if (!fInitialKey.equals(fKey)) {
-				return true; // change of key
+			if (fInitialValue == null // Recreate entry in property file
+					|| !fInitialValue.equals(fValue) // Change of value
+					|| !fInitialKey.equals(fKey)) { // Change of key
+				return true;
 			}
 		}
 		return false;

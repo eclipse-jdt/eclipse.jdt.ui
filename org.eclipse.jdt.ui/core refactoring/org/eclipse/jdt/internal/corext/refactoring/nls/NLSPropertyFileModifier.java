@@ -231,12 +231,9 @@ public class NLSPropertyFileModifier {
 		if (oldKeyToSubstMap.get(substitution.getInitialKey()) != substitution) {
 			return false; // not the owner of this key
 		}
-		if (substitution.hasStateChanged()) {
-			return true; // was externalized, but not anymore
-		} else {
-			if (substitution.hasPropertyFileChange() && newKeyToSubstMap.get(substitution.getKey()) != substitution) {
-				return true; // has been changed to an already existing
-			}
+		if (substitution.hasStateChanged() // was externalized, but not anymore
+		        || (substitution.hasPropertyFileChange() && newKeyToSubstMap.get(substitution.getKey()) != substitution)) { // has been changed to an already existing
+			return true;
 		}
 		return false;
 	}

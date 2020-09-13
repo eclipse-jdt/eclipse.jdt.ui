@@ -511,9 +511,8 @@ public class VariableDeclarationFixCore extends CompilationUnitRewriteOperations
 		if (!canAddFinal(binding, decl))
 			return null;
 
-		if (decl instanceof SingleVariableDeclaration) {
-			return new ModifierChangeOperation(decl, new ArrayList<VariableDeclarationFragment>(), Modifier.FINAL, Modifier.NONE);
-		} else if (decl instanceof VariableDeclarationExpression) {
+		if (decl instanceof SingleVariableDeclaration
+				|| decl instanceof VariableDeclarationExpression) {
 			return new ModifierChangeOperation(decl, new ArrayList<VariableDeclarationFragment>(), Modifier.FINAL, Modifier.NONE);
 		} else if (decl instanceof VariableDeclarationFragment){
 			VariableDeclarationFragment frag= (VariableDeclarationFragment)decl;

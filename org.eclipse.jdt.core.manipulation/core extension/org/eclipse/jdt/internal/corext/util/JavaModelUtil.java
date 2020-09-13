@@ -1019,11 +1019,9 @@ public final class JavaModelUtil {
 			return JavaCore.VERSION_1_5;
 		} else if (version.startsWith(JavaCore.VERSION_1_4)) {
 			return JavaCore.VERSION_1_4;
-		} else if (version.startsWith(JavaCore.VERSION_1_3)) {
-			return JavaCore.VERSION_1_3;
-		} else if (version.startsWith(JavaCore.VERSION_1_2)) {
-			return JavaCore.VERSION_1_3;
-		} else if (version.startsWith(JavaCore.VERSION_1_1)) {
+		} else if (version.startsWith(JavaCore.VERSION_1_3)
+				|| version.startsWith(JavaCore.VERSION_1_2)
+				|| version.startsWith(JavaCore.VERSION_1_1)) {
 			return JavaCore.VERSION_1_3;
 		}
 		return JavaCore.isSupportedJavaVersion(version) ? defaultCompliance : JavaModelUtil.VERSION_LATEST;

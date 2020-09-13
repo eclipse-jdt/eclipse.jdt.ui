@@ -696,9 +696,9 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 				IMethod foundMethod= Checks.findMethod(newName, parameterCount, false, new IMethod[]{m});
 				if (foundMethod == null)
 					continue;
-				if (isSubclass || type.equals(clazz)) {
-					result.add(foundMethod);
-				} else if ((! isMethodPrivate) && (!JdtFlags.isPrivate(m))) {
+				if (isSubclass
+						|| type.equals(clazz)
+						|| (!isMethodPrivate && !JdtFlags.isPrivate(m))) {
 					result.add(foundMethod);
 				}
 			}

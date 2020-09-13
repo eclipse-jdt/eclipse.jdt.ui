@@ -1006,10 +1006,9 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 
         for (IBinding iBinding : localsUsed) {
 			IVariableBinding curr= (IVariableBinding) iBinding;
-			if (isBindingToTemp(curr)) { // reference a local from outside
+			if (isBindingToTemp(curr) // Reference a local from outside
+					|| (curr.isField() && curr.getDeclaringClass() == anonType && fieldsToInitialize.contains(fCompilationUnitNode.findDeclaringNode(curr)))) { // References a field that references a local from outside
 				return true;
-			} else if (curr.isField() && (curr.getDeclaringClass() == anonType) && fieldsToInitialize.contains(fCompilationUnitNode.findDeclaringNode(curr))) {
-				return true; // references a field that references a local from outside
 			}
 		}
         return false;

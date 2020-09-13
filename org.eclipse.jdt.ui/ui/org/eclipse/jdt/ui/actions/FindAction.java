@@ -234,9 +234,8 @@ public abstract class FindAction extends SelectionDispatchAction {
 			if (element == null || !element.exists()) {
 				showOperationUnavailableDialog();
 				return;
-			} else if (element == RETURN_WITHOUT_BEEP) {
-				return;
-			} else if (!ActionUtil.isProcessable(getShell(), element)) {
+			} else if ((element == RETURN_WITHOUT_BEEP)
+					|| !ActionUtil.isProcessable(getShell(), element)) {
 				return;
 			}
 		}

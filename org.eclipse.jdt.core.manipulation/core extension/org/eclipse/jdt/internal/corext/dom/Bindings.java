@@ -1204,9 +1204,8 @@ public class Bindings {
 			if (node instanceof AbstractTypeDeclaration) {
 				AbstractTypeDeclaration decl= (AbstractTypeDeclaration) node;
 				if (lastLocation == decl.getBodyDeclarationsProperty()
-						|| lastLocation == decl.getJavadocProperty()) {
-					return decl.resolveBinding();
-				} else if (decl instanceof EnumDeclaration && lastLocation == EnumDeclaration.ENUM_CONSTANTS_PROPERTY) {
+						|| lastLocation == decl.getJavadocProperty()
+						|| (decl instanceof EnumDeclaration && lastLocation == EnumDeclaration.ENUM_CONSTANTS_PROPERTY)) {
 					return decl.resolveBinding();
 				}
 			} else if (node instanceof AnonymousClassDeclaration) {

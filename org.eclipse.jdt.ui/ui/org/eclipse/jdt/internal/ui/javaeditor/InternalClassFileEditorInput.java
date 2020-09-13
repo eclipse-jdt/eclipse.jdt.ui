@@ -139,10 +139,10 @@ public class InternalClassFileEditorInput implements IClassFileEditorInput, IPer
 	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T getAdapter(Class<T> adapter) {
-		if (adapter == IClassFile.class)
+		if (adapter == IClassFile.class
+				|| adapter == IJavaElement.class) {
 			return (T) fClassFile;
-		else if (adapter == IJavaElement.class)
-			return (T) fClassFile;
+		}
 		return null;
 	}
 

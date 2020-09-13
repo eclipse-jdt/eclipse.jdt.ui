@@ -464,12 +464,14 @@ public class TypeContextChecker {
 	}
 
 	private static ITypeBinding handleBug84585(ITypeBinding typeBinding) {
-		if (typeBinding == null)
+		if (typeBinding != null
+				&& typeBinding.isGenericType()
+				&& !typeBinding.isRawType()
+				&& !typeBinding.isParameterizedType()) {
 			return null;
-		else if (typeBinding.isGenericType() && ! typeBinding.isRawType() && ! typeBinding.isParameterizedType())
-			return null; //see bug 84585
-		else
-			return typeBinding;
+		}
+
+		return typeBinding;
 	}
 
 	public static RefactoringStatus[] checkAndResolveMethodTypes(IMethod method, StubTypeContext stubTypeContext, List<ParameterInfo> parameterInfos, ReturnTypeInfo returnTypeInfo) throws CoreException {

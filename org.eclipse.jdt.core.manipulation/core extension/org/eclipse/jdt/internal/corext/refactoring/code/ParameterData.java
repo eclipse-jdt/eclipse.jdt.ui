@@ -97,9 +97,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowInfo;
 	}
 
 	public void setOperatorPrecedence(int newValue) {
-		if (newValue == -1) {
-			fOperatorPrecedence= newValue;
-		} else if (fOperatorPrecedence == -1) {
+		if (newValue == -1 || fOperatorPrecedence == -1) {
 			fOperatorPrecedence= newValue;
 		} else {
 			fOperatorPrecedence= Math.min(fOperatorPrecedence, newValue);

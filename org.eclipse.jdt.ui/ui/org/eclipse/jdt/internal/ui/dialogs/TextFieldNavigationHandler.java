@@ -93,10 +93,9 @@ public class TextFieldNavigationHandler {
 			Point selection= getSelection();
 			if (selection.equals(fLastSelection)) {
 				// leave caret position
-			} else if (selection.x == selection.y) { //empty range
+			} else if (selection.x == selection.y //empty range
+					|| fLastSelection.y == selection.y) { //same end -> assume caret at start
 				fCaretPosition= selection.x;
-			} else if (fLastSelection.y == selection.y) {
-				fCaretPosition= selection.x; //same end -> assume caret at start
 			} else {
 				fCaretPosition= selection.y;
 			}

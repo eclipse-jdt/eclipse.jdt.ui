@@ -773,11 +773,10 @@ public final class MemberVisibilityAdjustor {
 						case IJavaElement.FIELD:
 						case IJavaElement.METHOD: {
 							final IMember member= (IMember) referencing;
-							if (typeReferenced.equals(member.getDeclaringType()))
+							if (typeReferenced.equals(member.getDeclaringType())
+									|| (referencedUnit != null && referencedUnit.equals(member.getCompilationUnit()))) {
 								keyword= ModifierKeyword.PRIVATE_KEYWORD;
-							else if (referencedUnit != null && referencedUnit.equals(member.getCompilationUnit()))
-								keyword= ModifierKeyword.PRIVATE_KEYWORD;
-							else if (typeReferenced.getPackageFragment().equals(member.getDeclaringType().getPackageFragment()))
+							} else if (typeReferenced.getPackageFragment().equals(member.getDeclaringType().getPackageFragment()))
 								keyword= null;
 							break;
 						}
@@ -803,11 +802,10 @@ public final class MemberVisibilityAdjustor {
 						case IJavaElement.FIELD:
 						case IJavaElement.METHOD: {
 							final IMember member= (IMember) referencing;
-							if (fieldReferenced.getDeclaringType().equals(member.getDeclaringType()))
+							if (fieldReferenced.getDeclaringType().equals(member.getDeclaringType())
+									|| (referencedUnit != null && referencedUnit.equals(member.getCompilationUnit()))) {
 								keyword= ModifierKeyword.PRIVATE_KEYWORD;
-							else if (referencedUnit != null && referencedUnit.equals(member.getCompilationUnit()))
-								keyword= ModifierKeyword.PRIVATE_KEYWORD;
-							else if (fieldReferenced.getDeclaringType().getPackageFragment().equals(member.getDeclaringType().getPackageFragment()))
+							} else if (fieldReferenced.getDeclaringType().getPackageFragment().equals(member.getDeclaringType().getPackageFragment()))
 								keyword= null;
 							break;
 						}
@@ -833,11 +831,10 @@ public final class MemberVisibilityAdjustor {
 						case IJavaElement.FIELD:
 						case IJavaElement.METHOD: {
 							final IMember member= (IMember) referencing;
-							if (methodReferenced.getDeclaringType().equals(member.getDeclaringType()))
+							if (methodReferenced.getDeclaringType().equals(member.getDeclaringType())
+									|| (referencedUnit != null && referencedUnit.equals(member.getCompilationUnit()))) {
 								keyword= ModifierKeyword.PRIVATE_KEYWORD;
-							else if (referencedUnit != null && referencedUnit.equals(member.getCompilationUnit()))
-								keyword= ModifierKeyword.PRIVATE_KEYWORD;
-							else if (methodReferenced.getDeclaringType().getPackageFragment().equals(member.getDeclaringType().getPackageFragment()))
+							} else if (methodReferenced.getDeclaringType().getPackageFragment().equals(member.getDeclaringType().getPackageFragment()))
 								keyword= null;
 							break;
 						}

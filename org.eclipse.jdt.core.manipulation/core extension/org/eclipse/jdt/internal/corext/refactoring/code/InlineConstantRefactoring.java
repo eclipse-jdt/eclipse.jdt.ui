@@ -382,10 +382,8 @@ public class InlineConstantRefactoring extends Refactoring {
 					IBinding memberBinding= memberName.resolveBinding();
 
 					if (memberBinding instanceof IVariableBinding || memberBinding instanceof IMethodBinding) {
-						if (fStaticImportsInReference.contains(fNewLocation)) { // use static import if reference location used static import
-							importStatically(memberName, memberBinding);
-							return;
-						} else if (fStaticImportsInInitializer2.contains(memberName)) { // use static import if already imported statically in initializer
+						if (fStaticImportsInReference.contains(fNewLocation) // Use static import if reference location used static import
+								|| fStaticImportsInInitializer2.contains(memberName)) { // Use static import if already imported statically in initializer
 							importStatically(memberName, memberBinding);
 							return;
 						}

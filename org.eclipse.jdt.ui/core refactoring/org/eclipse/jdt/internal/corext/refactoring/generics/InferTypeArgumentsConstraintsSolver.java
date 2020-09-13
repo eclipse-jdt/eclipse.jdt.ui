@@ -160,10 +160,9 @@ public class InferTypeArgumentsConstraintsSolver {
 //		}
 
 		TType type= cv.getType();
-		if (type == null) {
-			return fTypeSetEnvironment.getUniverseTypeSet();
-
-		} else if (cv instanceof IndependentTypeVariable2) {
+		if (type == null
+				|| cv instanceof IndependentTypeVariable2
+				|| cv instanceof ArrayTypeVariable2) {
 			return fTypeSetEnvironment.getUniverseTypeSet();
 			//TODO: solve problem with recursive bounds
 //			TypeVariable tv= (TypeVariable) type;
@@ -174,8 +173,6 @@ public class InferTypeArgumentsConstraintsSolver {
 //			}
 //			return result;
 
-		} else if (cv instanceof ArrayTypeVariable2) {
-			return fTypeSetEnvironment.getUniverseTypeSet();
 		} else if (cv instanceof ArrayElementVariable2) {
 			if (cv.getType() != null && cv.getType().isTypeVariable()) {
 				return fTypeSetEnvironment.getUniverseTypeSet();

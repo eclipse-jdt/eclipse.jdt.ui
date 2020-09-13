@@ -270,13 +270,11 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 	}
 
 	protected static String createLabel(final IMember member) {
-		if (member instanceof IType)
+		if (member instanceof IType
+				|| member instanceof IMethod
+				|| member instanceof IField) {
 			return JavaElementLabels.getTextLabel(member, JavaElementLabels.ALL_FULLY_QUALIFIED);
-		else if (member instanceof IMethod)
-			return JavaElementLabels.getTextLabel(member, JavaElementLabels.ALL_FULLY_QUALIFIED);
-		else if (member instanceof IField)
-			return JavaElementLabels.getTextLabel(member, JavaElementLabels.ALL_FULLY_QUALIFIED);
-		else if (member instanceof IInitializer)
+		} else if (member instanceof IInitializer)
 			return RefactoringCoreMessages.HierarchyRefactoring_initializer;
 		Assert.isTrue(false);
 		return null;

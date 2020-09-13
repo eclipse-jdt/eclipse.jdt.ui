@@ -555,13 +555,10 @@ public class CPListLabelProvider extends LabelProvider implements IStyledLabelPr
 		} else if (element instanceof IAccessRule) {
 			IAccessRule rule= (IAccessRule) element;
 			return AccessRulesLabelProvider.getResolutionImage(rule.getKind());
-		} else if (element instanceof ModulePatch) {
-			return fRegistry.get(JavaPluginImages.DESC_OBJS_MODULE_ATTRIB);
-		} else if (element instanceof ModuleAddExport) {
-			return fRegistry.get(JavaPluginImages.DESC_OBJS_MODULE_ATTRIB);
-		} else if (element instanceof ModuleAddReads) {
-			return fRegistry.get(JavaPluginImages.DESC_OBJS_MODULE_ATTRIB);
-		} else if (element instanceof LimitModules) {
+		} else if (element instanceof ModulePatch
+				|| element instanceof ModuleAddExport
+				|| element instanceof ModuleAddReads
+				|| element instanceof LimitModules) {
 			return fRegistry.get(JavaPluginImages.DESC_OBJS_MODULE_ATTRIB);
 		}
 		return null;

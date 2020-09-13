@@ -809,12 +809,9 @@ public class BuildPathsBlock {
 			} else if (!outputLocation.equals(oldOutputLocation)) {
 				IFolder folder= ResourcesPlugin.getWorkspace().getRoot().getFolder(oldOutputLocation);
 				if (folder.exists()) {
-					if (folder.members().length == 0) {
+					if (folder.members().length == 0
+							|| BuildPathsBlock.getRemoveOldBinariesQuery(JavaPlugin.getActiveWorkbenchShell()).doQuery(folder.isDerived(), oldOutputLocation)) {
 						BuildPathsBlock.removeOldClassfiles(folder);
-					} else {
-						if (BuildPathsBlock.getRemoveOldBinariesQuery(JavaPlugin.getActiveWorkbenchShell()).doQuery(folder.isDerived(), oldOutputLocation)) {
-							BuildPathsBlock.removeOldClassfiles(folder);
-						}
 					}
 				}
 			}

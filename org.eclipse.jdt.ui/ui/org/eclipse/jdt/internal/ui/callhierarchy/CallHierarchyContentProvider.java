@@ -178,9 +178,8 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
 					boolean withConstructors= false;
 					if (type != null) {
 						boolean anonymousPref= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.PREF_ANONYMOUS_EXPAND_WITH_CONSTRUCTORS);
-						if (anonymousPref && type.isAnonymous()) {
-							withConstructors= true;
-						} else if (isInTheDefaultExpandWithConstructorList(method)) {
+						if ((anonymousPref && type.isAnonymous())
+								|| isInTheDefaultExpandWithConstructorList(method)) {
 							withConstructors= true;
 						}
 					}
@@ -415,9 +414,8 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
 				return false;
 			}
 			return true;
-		} else if (element instanceof TreeRoot) {
-			return true;
-		} else if (element instanceof DeferredMethodWrapper) {
+		} else if (element instanceof TreeRoot
+				|| element instanceof DeferredMethodWrapper) {
 			// Err on the safe side by returning true even though
 			// we don't know for sure that there are children.
 			return true;

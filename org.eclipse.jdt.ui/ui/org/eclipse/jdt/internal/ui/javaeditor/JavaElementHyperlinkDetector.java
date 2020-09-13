@@ -268,9 +268,8 @@ public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 
 		ASTNode parent= caseNode.getParent();
 		ASTNode switchNode;
-		if (parent instanceof SwitchStatement) {
-			switchNode= parent;
-		} else if (parent instanceof SwitchExpression) {
+		if (parent instanceof SwitchStatement
+				|| parent instanceof SwitchExpression) {
 			switchNode= parent;
 		} else {
 			return null;

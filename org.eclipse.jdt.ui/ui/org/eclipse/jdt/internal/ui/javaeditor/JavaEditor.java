@@ -3329,10 +3329,10 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		}
 
 		if (locations == null) {
-			if (!fStickyOccurrenceAnnotations)
+			if (!fStickyOccurrenceAnnotations
+					|| hasChanged) { // check consistency of current annotations
 				removeOccurrenceAnnotations();
-			else if (hasChanged) // check consistency of current annotations
-				removeOccurrenceAnnotations();
+			}
 			return;
 		}
 
