@@ -158,7 +158,7 @@ public abstract class ProfileManager extends Observable {
 		}
 
 		@Override
-		public final int compareTo(Profile o) {
+		public int compareTo(Profile o) {
 			if (o instanceof BuiltInProfile) {
 				return fOrder - ((BuiltInProfile)o).fOrder;
 			}
@@ -296,7 +296,7 @@ public abstract class ProfileManager extends Observable {
 		}
 
 		@Override
-		public final int compareTo(Profile o) {
+		public int compareTo(Profile o) {
 			return 1;
 		}
 

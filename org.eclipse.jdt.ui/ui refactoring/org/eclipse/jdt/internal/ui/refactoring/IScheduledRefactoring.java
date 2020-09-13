@@ -23,6 +23,6 @@ public interface IScheduledRefactoring {
 	 *
 	 * @return {@link ISchedulingRule} not null
 	 */
-	public ISchedulingRule getSchedulingRule();
+	ISchedulingRule getSchedulingRule();
 
 }

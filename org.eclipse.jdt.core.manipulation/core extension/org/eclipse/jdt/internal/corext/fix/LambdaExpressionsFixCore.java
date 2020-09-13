@@ -729,9 +729,9 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 		}
 	}
 
-	public static interface IAnonymousClassCreationOperation {
+	public interface IAnonymousClassCreationOperation {
 
-		public MethodDeclaration getMethodDeclaration(ICompilationUnit cu, ASTRewrite rewrite, ImportRewrite rewrites,
+		MethodDeclaration getMethodDeclaration(ICompilationUnit cu, ASTRewrite rewrite, ImportRewrite rewrites,
 				ImportRewriteContext context, IMethodBinding binding, String[] parameterNames, ITypeBinding targetType,
 				boolean inInterface, ASTNode astNode) throws CoreException;
 

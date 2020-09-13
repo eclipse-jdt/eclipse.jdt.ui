@@ -135,7 +135,7 @@ public interface ITestElement {
 	 * @return returns one of {@link ITestElement.ProgressState#NOT_STARTED}, {@link ITestElement.ProgressState#RUNNING},
 	 * {@link ITestElement.ProgressState#STOPPED} or {@link ITestElement.ProgressState#COMPLETED}.
 	 */
-	public ProgressState getProgressState();
+	ProgressState getProgressState();
 
 	/**
 	 * Returns the result of the test element.
@@ -153,28 +153,28 @@ public interface ITestElement {
 	 * @return returns one of {@link ITestElement.Result#UNDEFINED}, {@link ITestElement.Result#OK}, {@link ITestElement.Result#ERROR},
 	 * {@link ITestElement.Result#FAILURE} or {@link ITestElement.Result#IGNORED}. Clients should also prepare for other, new values.
 	 */
-	public Result getTestResult(boolean includeChildren);
+	Result getTestResult(boolean includeChildren);
 
 	/**
 	 * Returns the failure trace of this test element or <code>null</code> if the test has not resulted in an error or failure.
 	 *
 	 * @return the failure trace of this test or <code>null</code>.
 	 */
-	public FailureTrace getFailureTrace();
+	FailureTrace getFailureTrace();
 
 	/**
 	 * Returns the parent test element container or <code>null</code> if the test element is the test run session.
 	 *
 	 * @return the parent test suite
 	 */
-	public ITestElementContainer getParentContainer();
+	ITestElementContainer getParentContainer();
 
 	/**
 	 * Returns the test run session.
 	 *
 	 * @return the parent test run session.
 	 */
-	public ITestRunSession getTestRunSession();
+	ITestRunSession getTestRunSession();
 
 	/**
 	 * Returns the estimated total time elapsed in seconds while executing this test element. The
@@ -190,6 +190,6 @@ public interface ITestElement {
 	 *
 	 * @since 3.4
 	 */
-	public double getElapsedTimeInSeconds();
+	double getElapsedTimeInSeconds();
 
 }

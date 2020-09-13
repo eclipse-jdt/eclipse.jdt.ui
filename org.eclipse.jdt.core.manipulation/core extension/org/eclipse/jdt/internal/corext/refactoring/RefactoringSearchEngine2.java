@@ -263,7 +263,7 @@ public final class RefactoringSearchEngine2 {
 	/**
 	 * Clears all results found so far, and sets resets the status to {@link RefactoringStatus#OK}.
 	 */
-	public final void clearResults() {
+	public void clearResults() {
 		getCollector().clearResults();
 		fStatus= new RefactoringStatus();
 	}
@@ -275,7 +275,7 @@ public final class RefactoringSearchEngine2 {
 	 *
 	 * @return the compilation units of the previous queries
 	 */
-	public final ICompilationUnit[] getAffectedCompilationUnits() {
+	public ICompilationUnit[] getAffectedCompilationUnits() {
 		if (fGranularity == GRANULARITY_COMPILATION_UNIT) {
 			final Collection<?> collection= getCollector().getCollectedMatches();
 			final ICompilationUnit[] units= new ICompilationUnit[collection.size()];
@@ -301,7 +301,7 @@ public final class RefactoringSearchEngine2 {
 	 * <code>&lt;IJavaProject, Collection&lt;SearchResultGroup&gt;&gt;</code> if granularity is {@link #GRANULARITY_SEARCH_MATCH} or
 	 * <code>&lt;IJavaProject, Collection&lt;ICompilationUnit&gt;&gt;</code> if it is {@link #GRANULARITY_COMPILATION_UNIT}).
 	 */
-	public final Map<IJavaProject, ? extends Set<?>> getAffectedProjects() {
+	public Map<IJavaProject, ? extends Set<?>> getAffectedProjects() {
 		if (fGranularity == GRANULARITY_COMPILATION_UNIT) {
 			final Map<IJavaProject, Set<ICompilationUnit>> map= new HashMap<>();
 			for (ICompilationUnit unit : getAffectedCompilationUnits()) {
@@ -394,7 +394,7 @@ public final class RefactoringSearchEngine2 {
 	 *
 	 * @return the search pattern
 	 */
-	public final SearchPattern getPattern() {
+	public SearchPattern getPattern() {
 		return fPattern;
 	}
 
@@ -409,7 +409,7 @@ public final class RefactoringSearchEngine2 {
 	 *
 	 * @return the results of the previous queries
 	 */
-	public final Object[] getResults() {
+	public Object[] getResults() {
 		if (fGranularity == GRANULARITY_COMPILATION_UNIT)
 			return getAffectedCompilationUnits();
 		else {
@@ -446,7 +446,7 @@ public final class RefactoringSearchEngine2 {
 	 *
 	 * @return the refactoring status
 	 */
-	public final RefactoringStatus getStatus() {
+	public RefactoringStatus getStatus() {
 		return fStatus;
 	}
 
@@ -479,7 +479,7 @@ public final class RefactoringSearchEngine2 {
 	 * @param monitor the progress monitor, or <code>null</code>
 	 * @throws JavaModelException if an error occurs during search
 	 */
-	public final void searchPattern(IProgressMonitor monitor) throws JavaModelException {
+	public void searchPattern(IProgressMonitor monitor) throws JavaModelException {
 		Assert.isNotNull(fPattern);
 		if (monitor == null)
 			monitor=  new NullProgressMonitor();
@@ -508,7 +508,7 @@ public final class RefactoringSearchEngine2 {
 	 * @param monitor the progress monitor, or <code>null</code>
 	 * @throws JavaModelException if an error occurs during search
 	 */
-	public final void searchReferencedFields(final IJavaElement element, IProgressMonitor monitor) throws JavaModelException {
+	public void searchReferencedFields(final IJavaElement element, IProgressMonitor monitor) throws JavaModelException {
 		Assert.isNotNull(element);
 		if (monitor == null)
 			monitor=  new NullProgressMonitor();
@@ -537,7 +537,7 @@ public final class RefactoringSearchEngine2 {
 	 * @param monitor the progress monitor, or <code>null</code>
 	 * @throws JavaModelException if an error occurs during search
 	 */
-	public final void searchReferencedMethods(final IJavaElement element, IProgressMonitor monitor) throws JavaModelException {
+	public void searchReferencedMethods(final IJavaElement element, IProgressMonitor monitor) throws JavaModelException {
 		Assert.isNotNull(element);
 		if (monitor == null)
 			monitor=  new NullProgressMonitor();
@@ -566,7 +566,7 @@ public final class RefactoringSearchEngine2 {
 	 * @param monitor the progress monitor, or <code>null</code>
 	 * @throws JavaModelException if an error occurs during search
 	 */
-	public final void searchReferencedTypes(final IJavaElement element, IProgressMonitor monitor) throws JavaModelException {
+	public void searchReferencedTypes(final IJavaElement element, IProgressMonitor monitor) throws JavaModelException {
 		Assert.isNotNull(element);
 		if (monitor == null)
 			monitor=  new NullProgressMonitor();
@@ -596,7 +596,7 @@ public final class RefactoringSearchEngine2 {
 	 * @param inaccurate <code>true</code> to filter inaccurate matches, <code>false</code> otherwise
 	 * @param binary <code>true</code> to filter binary matches, <code>false</code> otherwise
 	 */
-	public final void setFiltering(final boolean inaccurate, final boolean binary) {
+	public void setFiltering(final boolean inaccurate, final boolean binary) {
 		fInaccurate= inaccurate;
 		fBinary= binary;
 	}
@@ -608,7 +608,7 @@ public final class RefactoringSearchEngine2 {
 	 *
 	 * @param granularity The granularity to use. Must be one of the <code>GRANULARITY_XXX</code> constants.
 	 */
-	public final void setGranularity(final int granularity) {
+	public void setGranularity(final int granularity) {
 		Assert.isTrue(granularity == GRANULARITY_COMPILATION_UNIT || granularity == GRANULARITY_SEARCH_MATCH);
 		fGranularity= granularity;
 	}
@@ -620,7 +620,7 @@ public final class RefactoringSearchEngine2 {
 	 *
 	 * @param copies the working copies to use
 	 */
-	public final void setWorkingCopies(final ICompilationUnit[] copies) {
+	public void setWorkingCopies(final ICompilationUnit[] copies) {
 		Assert.isNotNull(copies);
 		fWorkingCopies= new ICompilationUnit[copies.length];
 		System.arraycopy(copies, 0, fWorkingCopies, 0, copies.length);
@@ -633,7 +633,7 @@ public final class RefactoringSearchEngine2 {
 	 *
 	 * @param grouping <code>true</code> to group matches by their containing resource, <code>false</code> otherwise
 	 */
-	public final void setGrouping(final boolean grouping) {
+	public void setGrouping(final boolean grouping) {
 		fGrouping= grouping;
 	}
 
@@ -645,7 +645,7 @@ public final class RefactoringSearchEngine2 {
 	 * @param first the first search pattern to set
 	 * @param second the second search pattern to set
 	 */
-	public final void setOrPattern(final SearchPattern first, final SearchPattern second) {
+	public void setOrPattern(final SearchPattern first, final SearchPattern second) {
 		Assert.isNotNull(first);
 		Assert.isNotNull(second);
 		fPattern= SearchPattern.createOrPattern(first, second);
@@ -658,7 +658,7 @@ public final class RefactoringSearchEngine2 {
 	 *
 	 * @param owner the working copy owner to use, or <code>null</code> to use none
 	 */
-	public final void setOwner(final WorkingCopyOwner owner) {
+	public void setOwner(final WorkingCopyOwner owner) {
 		fOwner= owner;
 	}
 
@@ -670,7 +670,7 @@ public final class RefactoringSearchEngine2 {
 	 * @param elements the set of elements
 	 * @param limitTo determines the nature of the expected matches. This is a combination of {@link org.eclipse.jdt.core.search.IJavaSearchConstants}.
 	 */
-	public final void setPattern(final IJavaElement[] elements, final int limitTo) {
+	public void setPattern(final IJavaElement[] elements, final int limitTo) {
 		Assert.isNotNull(elements);
 		Assert.isTrue(elements.length > 0);
 		SearchPattern pattern= SearchPattern.createPattern(elements[0], limitTo, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
@@ -689,7 +689,7 @@ public final class RefactoringSearchEngine2 {
 	 *
 	 * @param pattern the search pattern to set
 	 */
-	public final void setPattern(final SearchPattern pattern) {
+	public void setPattern(final SearchPattern pattern) {
 		Assert.isNotNull(pattern);
 		fPattern= pattern;
 	}
@@ -701,7 +701,7 @@ public final class RefactoringSearchEngine2 {
 	 *
 	 * @param requestor the search requestor to set
 	 */
-	public final void setRequestor(final IRefactoringSearchRequestor requestor) {
+	public void setRequestor(final IRefactoringSearchRequestor requestor) {
 		Assert.isNotNull(requestor);
 		fRequestor= requestor;
 	}
@@ -713,7 +713,7 @@ public final class RefactoringSearchEngine2 {
 	 *
 	 * @param scope the search scope to set
 	 */
-	public final void setScope(final IJavaSearchScope scope) {
+	public void setScope(final IJavaSearchScope scope) {
 		Assert.isNotNull(scope);
 		fScope= scope;
 	}
@@ -725,7 +725,7 @@ public final class RefactoringSearchEngine2 {
 	 *
 	 * @param severity the severity to set
 	 */
-	public final void setSeverity(final int severity) {
+	public void setSeverity(final int severity) {
 		Assert.isTrue(severity == RefactoringStatus.WARNING || severity == RefactoringStatus.INFO || severity == RefactoringStatus.FATAL || severity == RefactoringStatus.ERROR);
 		fSeverity= severity;
 	}
@@ -737,7 +737,7 @@ public final class RefactoringSearchEngine2 {
 	 *
 	 * @param status the refactoring status to set
 	 */
-	public final void setStatus(final RefactoringStatus status) {
+	public void setStatus(final RefactoringStatus status) {
 		Assert.isNotNull(status);
 		fStatus= status;
 	}

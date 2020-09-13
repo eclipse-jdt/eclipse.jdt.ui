@@ -46,32 +46,32 @@ public interface ITestKind {
 
 	}
 
-	public static final TestKind NULL = new NullTestKind();
+	TestKind NULL = new NullTestKind();
 
-	public static final String ID = "id"; //$NON-NLS-1$
-	public static final String DISPLAY_NAME = "displayName"; //$NON-NLS-1$
-	public static final String FINDER_CLASS_NAME = "finderClass"; //$NON-NLS-1$
-	public static final String LOADER_PLUGIN_ID = "loaderPluginId"; //$NON-NLS-1$
-	public static final String LOADER_CLASS_NAME = "loaderClass"; //$NON-NLS-1$
-	public static final String PRECEDES = "precedesTestKind"; //$NON-NLS-1$
+	String ID = "id"; //$NON-NLS-1$
+	String DISPLAY_NAME = "displayName"; //$NON-NLS-1$
+	String FINDER_CLASS_NAME = "finderClass"; //$NON-NLS-1$
+	String LOADER_PLUGIN_ID = "loaderPluginId"; //$NON-NLS-1$
+	String LOADER_CLASS_NAME = "loaderClass"; //$NON-NLS-1$
+	String PRECEDES = "precedesTestKind"; //$NON-NLS-1$
 
-	public static final String RUNTIME_CLASSPATH_ENTRY = "runtimeClasspathEntry"; //$NON-NLS-1$
+	String RUNTIME_CLASSPATH_ENTRY = "runtimeClasspathEntry"; //$NON-NLS-1$
 
-	public static final String CLASSPATH_PLUGIN_ID = "pluginId"; //$NON-NLS-1$
-	public static final String CLASSPATH_PATH_TO_JAR = "pathToJar"; //$NON-NLS-1$
+	String CLASSPATH_PLUGIN_ID = "pluginId"; //$NON-NLS-1$
+	String CLASSPATH_PATH_TO_JAR = "pathToJar"; //$NON-NLS-1$
 
-	public abstract ITestFinder getFinder();
+	ITestFinder getFinder();
 
-	public abstract String getId();
-	public abstract String getDisplayName();
-	public abstract String getFinderClassName();
-	public abstract String getLoaderPluginId();
-	public abstract String getLoaderClassName();
-	public abstract String getPrecededKindId();
+	String getId();
+	String getDisplayName();
+	String getFinderClassName();
+	String getLoaderPluginId();
+	String getLoaderClassName();
+	String getPrecededKindId();
 
 
-	public abstract boolean isNull();
+	boolean isNull();
 
-	public abstract JUnitRuntimeClasspathEntry[] getClasspathEntries();
+	JUnitRuntimeClasspathEntry[] getClasspathEntries();
 
 }

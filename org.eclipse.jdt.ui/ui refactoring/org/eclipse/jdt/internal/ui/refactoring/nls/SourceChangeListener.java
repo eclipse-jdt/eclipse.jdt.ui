@@ -17,5 +17,5 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 public interface SourceChangeListener {
 
-	public void sourceRootChanged(IPackageFragmentRoot newRoot);
+	void sourceRootChanged(IPackageFragmentRoot newRoot);
 }

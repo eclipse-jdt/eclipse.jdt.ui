@@ -21,6 +21,6 @@ public interface IStatusConstants {
 	// Java Manipulation status constants start at 10000 to make sure that we don't
 	// collide with resource and java model constants.
 
-	public static final int INTERNAL_ERROR= 10001;
+	int INTERNAL_ERROR= 10001;
 
  }

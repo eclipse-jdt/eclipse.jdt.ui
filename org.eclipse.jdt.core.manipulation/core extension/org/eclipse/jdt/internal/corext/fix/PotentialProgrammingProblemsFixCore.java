@@ -81,8 +81,8 @@ public class PotentialProgrammingProblemsFixCore extends CompilationUnitRewriteO
 	private static final String NAME_FIELD= "serialVersionUID"; //$NON-NLS-1$
 
 	public interface ISerialVersionFixContext {
-		public RefactoringStatus initialize(IProgressMonitor monitor) throws CoreException;
-		public Long getSerialVersionId(ITypeBinding binding);
+		RefactoringStatus initialize(IProgressMonitor monitor) throws CoreException;
+		Long getSerialVersionId(ITypeBinding binding);
 	}
 
 	public static class SerialVersionHashContext implements ISerialVersionFixContext {

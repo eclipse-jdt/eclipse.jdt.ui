@@ -17,5 +17,5 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUn
 
 public interface ITypeConstraintVariable extends ISourceConstraintVariable {
 
-	public CompilationUnitRange getRange();
+	CompilationUnitRange getRange();
 }

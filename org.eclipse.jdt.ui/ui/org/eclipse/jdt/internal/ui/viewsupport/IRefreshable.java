@@ -22,6 +22,6 @@ public interface IRefreshable {
 	 *
 	 * @param selection the elements to refresh
 	 */
-	public void refresh(IStructuredSelection selection);
+	void refresh(IStructuredSelection selection);
 
 }

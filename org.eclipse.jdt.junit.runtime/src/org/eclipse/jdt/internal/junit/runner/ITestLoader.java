@@ -27,6 +27,6 @@ public interface ITestLoader {
 	 * @param listener to be notified if tests could not be loaded
 	 * @return the loaded test references
 	 */
-	public abstract ITestReference[] loadTests(Class<?>[] testClasses, String testName, String[] failureNames, String[] packages, String[][] includeExcludeTags, String uniqueId, RemoteTestRunner listener);
+	ITestReference[] loadTests(Class<?>[] testClasses, String testName, String[] failureNames, String[] packages, String[][] includeExcludeTags, String uniqueId, RemoteTestRunner listener);
 }
 

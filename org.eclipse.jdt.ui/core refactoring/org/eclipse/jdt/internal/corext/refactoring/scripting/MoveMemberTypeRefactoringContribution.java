@@ -35,7 +35,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInnerToTopRefac
 public final class MoveMemberTypeRefactoringContribution extends JavaUIRefactoringContribution {
 
 	@Override
-	public final Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
+	public Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
 		JavaRefactoringArguments arguments= new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor));
 		return new MoveInnerToTopRefactoring(arguments, status);
 	}

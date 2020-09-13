@@ -85,7 +85,7 @@ public final class SerialVersionSubProcessor {
 	 * @param proposals
 	 *        the proposal collection to extend
 	 */
-	public static final void getSerialVersionProposals(final IInvocationContext context, final IProblemLocation location, final Collection<ICommandAccess> proposals) {
+	public static void getSerialVersionProposals(final IInvocationContext context, final IProblemLocation location, final Collection<ICommandAccess> proposals) {
 
 		Assert.isNotNull(context);
 		Assert.isNotNull(location);

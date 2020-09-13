@@ -92,7 +92,7 @@ public class ScopeAnalyzer {
 	 */
 	public static final int CHECK_VISIBILITY= 16;
 
-	private static interface IBindingRequestor {
+	private interface IBindingRequestor {
 		boolean acceptBinding(IBinding binding);
 	}
 

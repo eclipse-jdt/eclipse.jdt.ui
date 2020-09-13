@@ -83,7 +83,7 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
  * @since 1.10
  */
 public class OrganizeImportsOperation implements IWorkspaceRunnable {
-	public static interface IChooseImportQuery {
+	public interface IChooseImportQuery {
 		/**
 		 * Selects imports from a list of choices.
 		 * @param openChoices From each array, a type reference has to be selected

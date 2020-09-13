@@ -19,6 +19,6 @@ package org.eclipse.jdt.internal.junit.runner;
 
 public interface ITestRunner {
 
-	public abstract void runTests(TestExecution execution);
+	void runTests(TestExecution execution);
 
 }

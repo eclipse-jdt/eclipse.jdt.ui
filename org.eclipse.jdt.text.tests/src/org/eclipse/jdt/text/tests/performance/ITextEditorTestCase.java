@@ -21,5 +21,5 @@ import org.eclipse.ui.texteditor.AbstractTextEditor;
  */
 public interface ITextEditorTestCase {
 
-	public void setEditor(AbstractTextEditor editor);
+	void setEditor(AbstractTextEditor editor);
 }

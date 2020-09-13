@@ -47,7 +47,7 @@ public abstract class JavadocExportWizardPage {
 	 * This interface is not intended to be implemented by clients.
 	 * </p>
 	 */
-	public static interface IJavadocExportWizardPageContainer {
+	public interface IJavadocExportWizardPageContainer {
 
 		/**
 		 * Returns a runnable context top be used inside this wizard for long running
@@ -55,32 +55,32 @@ public abstract class JavadocExportWizardPage {
 		 *
 		 * @return a runnable context
 		 */
-		public IRunnableContext getRunnableContext();
+		IRunnableContext getRunnableContext();
 
 		/**
 		 * Calling this method will update status lines and button enablement in the
 		 * wizard page container
 		 */
-		public void statusUpdated();
+		void statusUpdated();
 
 		/**
 		 * Returns the currently configured VM options.
 		 * @return the VM Options
 		 */
-		public String[] getConfiguredVMOptions();
+		String[] getConfiguredVMOptions();
 
 		/**
 		 * Returns the currently configured Javadoc command options.
 		 * @return the Javadoc command options
 		 */
-		public String[] getConfiguredJavadocOptions();
+		String[] getConfiguredJavadocOptions();
 
 		/**
 		 * Returns the Java elements selected for Javadoc generation
 		 *
 		 * @return the Java elements selected for Javadoc generation
 		 */
-		public IJavaElement[] getSelectedJavaElements();
+		IJavaElement[] getSelectedJavaElements();
 	}
 
 

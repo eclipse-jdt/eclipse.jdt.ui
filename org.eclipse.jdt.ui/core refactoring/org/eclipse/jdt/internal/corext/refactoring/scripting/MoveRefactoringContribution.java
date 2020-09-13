@@ -36,7 +36,7 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
 public final class MoveRefactoringContribution extends JavaUIRefactoringContribution {
 
 	@Override
-	public final Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
+	public Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
 		JavaRefactoringArguments arguments= new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor));
 		JavaMoveProcessor processor= new JavaMoveProcessor(arguments, status);
 		return new MoveRefactoring(processor);

@@ -262,7 +262,7 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 		/**
 		 * Handles the status changed event.
 		 */
-		protected final void handleStatusChanged() {
+		protected void handleStatusChanged() {
 			final RefactoringStatus status= new RefactoringStatus();
 			status.merge(fMethodNameStatus);
 			status.merge(fTargetNameStatus);
@@ -278,7 +278,7 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 		 *
 		 * @param target the changed target
 		 */
-		protected final void handleTargetChanged(final IVariableBinding target) {
+		protected void handleTargetChanged(final IVariableBinding target) {
 			Assert.isNotNull(target);
 			fProcessor.setTarget(target);
 			fTargetNameField.setEnabled(fProcessor.needsTargetNode());

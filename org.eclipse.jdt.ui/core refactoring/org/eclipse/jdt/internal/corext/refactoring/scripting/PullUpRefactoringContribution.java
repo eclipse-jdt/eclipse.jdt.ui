@@ -36,7 +36,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoringPr
 public final class PullUpRefactoringContribution extends JavaUIRefactoringContribution {
 
 	@Override
-	public final Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
+	public Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
 		JavaRefactoringArguments arguments= new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor));
 		PullUpRefactoringProcessor processor= new PullUpRefactoringProcessor(arguments, status);
 		return new ProcessorBasedRefactoring(processor);

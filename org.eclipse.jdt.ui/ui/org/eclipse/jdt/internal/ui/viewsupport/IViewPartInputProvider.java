@@ -23,6 +23,6 @@ public interface IViewPartInputProvider {
 	 *
 	 * @return the input object
 	 */
-	public Object getViewPartInput();
+	Object getViewPartInput();
 
 }

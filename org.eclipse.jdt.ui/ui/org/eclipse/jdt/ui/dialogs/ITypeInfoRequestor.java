@@ -37,21 +37,21 @@ public interface ITypeInfoRequestor {
 	 *
 	 * @return the type's modifiers
 	 */
-	public int getModifiers();
+	int getModifiers();
 
 	/**
 	 * Returns the type name.
 	 *
 	 * @return the info's type name.
 	 */
-	public String getTypeName();
+	String getTypeName();
 
 	/**
 	 * Returns the package name.
 	 *
 	 * @return the info's package name.
 	 */
-	public String getPackageName();
+	String getPackageName();
 
 	/**
 	 * Returns a dot separated string of the enclosing types or an
@@ -59,5 +59,5 @@ public interface ITypeInfoRequestor {
 	 *
 	 * @return a dot separated string of the enclosing types
 	 */
-	public String getEnclosingName();
+	String getEnclosingName();
 }

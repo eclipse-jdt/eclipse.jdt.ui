@@ -278,7 +278,7 @@ public class JavadocContentAccess2 {
 			}
 		};
 
-		private static interface DescriptionGetter {
+		private interface DescriptionGetter {
 			/**
 			 * Returns a Javadoc tag description or <code>null</code>.
 			 *

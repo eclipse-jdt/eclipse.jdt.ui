@@ -33,6 +33,6 @@ public interface ITestElementContainer extends ITestElement {
 	 *
 	 * @return returns all tests (and test suites) contained in the suite.
 	 */
-	public ITestElement[] getChildren();
+	ITestElement[] getChildren();
 
 }

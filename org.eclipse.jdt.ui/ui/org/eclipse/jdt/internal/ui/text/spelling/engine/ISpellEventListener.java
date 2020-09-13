@@ -28,5 +28,5 @@ public interface ISpellEventListener {
 	 * @param event
 	 *                  Event to handle
 	 */
-	public void handle(ISpellEvent event);
+	void handle(ISpellEvent event);
 }

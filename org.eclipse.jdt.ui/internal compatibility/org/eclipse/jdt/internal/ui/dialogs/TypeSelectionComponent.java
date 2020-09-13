@@ -145,7 +145,7 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 		 *
 		 * @param text the title text
 		 */
-		public void setText(String text);
+		void setText(String text);
 	}
 
 	public TypeSelectionComponent(Composite parent, int style, String message, boolean multi,

@@ -227,7 +227,7 @@ public final class MemberVisibilityAdjustor {
 		 * @param monitor the progress monitor to use
 		 * @throws JavaModelException if an error occurs
 		 */
-		public void rewriteVisibility(MemberVisibilityAdjustor adjustor, IProgressMonitor monitor) throws JavaModelException;
+		void rewriteVisibility(MemberVisibilityAdjustor adjustor, IProgressMonitor monitor) throws JavaModelException;
 	}
 
 	/** Description of an outgoing member visibility adjustment */
@@ -704,7 +704,7 @@ public final class MemberVisibilityAdjustor {
 	 * @param monitor the progress monitor to use
 	 * @throws JavaModelException if an error occurs during search
 	 */
-	public final void adjustVisibility(final IProgressMonitor monitor) throws JavaModelException {
+	public void adjustVisibility(final IProgressMonitor monitor) throws JavaModelException {
 		try {
 			monitor.beginTask("", 7); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.MemberVisibilityAdjustor_checking);
@@ -972,7 +972,7 @@ public final class MemberVisibilityAdjustor {
 	 *
 	 * @return the visibility adjustments
 	 */
-	public final Map<IMember, IncomingMemberVisibilityAdjustment> getAdjustments() {
+	public Map<IMember, IncomingMemberVisibilityAdjustment> getAdjustments() {
 		return fAdjustments;
 	}
 
@@ -1045,7 +1045,7 @@ public final class MemberVisibilityAdjustor {
 	 * @param monitor the progress monitor to use
 	 * @throws JavaModelException if an error occurs during search
 	 */
-	public final void rewriteVisibility(final ICompilationUnit unit, final IProgressMonitor monitor) throws JavaModelException {
+	public void rewriteVisibility(final ICompilationUnit unit, final IProgressMonitor monitor) throws JavaModelException {
 		try {
 			monitor.beginTask("", fAdjustments.size()); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.MemberVisibilityAdjustor_adjusting);
@@ -1071,7 +1071,7 @@ public final class MemberVisibilityAdjustor {
 	 * @param monitor the progress monitor to use
 	 * @throws JavaModelException if an error occurs during search
 	 */
-	public final void rewriteVisibility(final IProgressMonitor monitor) throws JavaModelException {
+	public void rewriteVisibility(final IProgressMonitor monitor) throws JavaModelException {
 		try {
 			monitor.beginTask("", fAdjustments.size()); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.MemberVisibilityAdjustor_adjusting);
@@ -1098,7 +1098,7 @@ public final class MemberVisibilityAdjustor {
 	 *
 	 * @param adjustments the existing adjustments to set
 	 */
-	public final void setAdjustments(final Map<IMember, IncomingMemberVisibilityAdjustment> adjustments) {
+	public void setAdjustments(final Map<IMember, IncomingMemberVisibilityAdjustment> adjustments) {
 		Assert.isNotNull(adjustments);
 		fAdjustments= adjustments;
 	}
@@ -1110,7 +1110,7 @@ public final class MemberVisibilityAdjustor {
 	 *
 	 * @param severity the severity of failure messages
 	 */
-	public final void setFailureSeverity(final int severity) {
+	public void setFailureSeverity(final int severity) {
 		Assert.isTrue(isStatusSeverity(severity));
 	}
 
@@ -1121,7 +1121,7 @@ public final class MemberVisibilityAdjustor {
 	 *
 	 * @param incoming <code>true</code> if incoming references should be adjusted, <code>false</code> otherwise
 	 */
-	public final void setIncoming(final boolean incoming) {
+	public void setIncoming(final boolean incoming) {
 		fIncoming= incoming;
 	}
 
@@ -1132,7 +1132,7 @@ public final class MemberVisibilityAdjustor {
 	 *
 	 * @param outgoing <code>true</code> if outgoing references should be adjusted, <code>false</code> otherwise
 	 */
-	public final void setOutgoing(final boolean outgoing) {
+	public void setOutgoing(final boolean outgoing) {
 		fOutgoing= outgoing;
 	}
 
@@ -1144,7 +1144,7 @@ public final class MemberVisibilityAdjustor {
 	 * @param rewrite the AST rewrite to set
 	 * @param root the root of the AST used in the rewrite
 	 */
-	public final void setRewrite(final ASTRewrite rewrite, final CompilationUnit root) {
+	public void setRewrite(final ASTRewrite rewrite, final CompilationUnit root) {
 		Assert.isTrue(rewrite == null || root != null);
 		fRewrite= rewrite;
 		fRoot= root;
@@ -1157,7 +1157,7 @@ public final class MemberVisibilityAdjustor {
 	 *
 	 * @param rewrites the map of compilation units to compilation unit rewrites to set
 	 */
-	public final void setRewrites(final Map<ICompilationUnit, CompilationUnitRewrite> rewrites) {
+	public void setRewrites(final Map<ICompilationUnit, CompilationUnitRewrite> rewrites) {
 		Assert.isNotNull(rewrites);
 		fRewrites= rewrites;
 	}
@@ -1169,7 +1169,7 @@ public final class MemberVisibilityAdjustor {
 	 *
 	 * @param scope the search scope to set
 	 */
-	public final void setScope(final IJavaSearchScope scope) {
+	public void setScope(final IJavaSearchScope scope) {
 		Assert.isNotNull(scope);
 		fScope= scope;
 	}
@@ -1181,7 +1181,7 @@ public final class MemberVisibilityAdjustor {
 	 *
 	 * @param owner the working copy owner, or <code>null</code> to use none
 	 */
-	public final void setOwner(final WorkingCopyOwner owner) {
+	public void setOwner(final WorkingCopyOwner owner) {
 		fOwner= owner;
 	}
 
@@ -1192,7 +1192,7 @@ public final class MemberVisibilityAdjustor {
 	 *
 	 * @param status the refactoring status to set
 	 */
-	public final void setStatus(final RefactoringStatus status) {
+	public void setStatus(final RefactoringStatus status) {
 		Assert.isNotNull(status);
 		fStatus= status;
 	}
@@ -1204,7 +1204,7 @@ public final class MemberVisibilityAdjustor {
 	 *
 	 * @param severity the severity of visibility messages
 	 */
-	public final void setVisibilitySeverity(final int severity) {
+	public void setVisibilitySeverity(final int severity) {
 		Assert.isTrue(isStatusSeverity(severity));
 		fVisibilitySeverity= severity;
 	}

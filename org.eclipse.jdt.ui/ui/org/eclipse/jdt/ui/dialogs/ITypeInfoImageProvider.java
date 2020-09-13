@@ -39,6 +39,6 @@ public interface ITypeInfoImageProvider {
 	 * @return the image descriptor or <code>null</code> to use the default
 	 *  image
 	 */
-	public ImageDescriptor getImageDescriptor(ITypeInfoRequestor typeInfoRequestor);
+	ImageDescriptor getImageDescriptor(ITypeInfoRequestor typeInfoRequestor);
 
 }

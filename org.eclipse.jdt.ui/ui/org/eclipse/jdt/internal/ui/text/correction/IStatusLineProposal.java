@@ -28,6 +28,6 @@ public interface IStatusLineProposal {
 	 *
 	 * @return The message to show, or null for no message.
 	 */
-	public String getStatusMessage();
+	String getStatusMessage();
 
 }

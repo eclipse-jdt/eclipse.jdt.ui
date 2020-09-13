@@ -17,13 +17,13 @@ import org.eclipse.jdt.core.ICompilationUnit;
 
 public interface ISourceConstraintVariable {
 
-	public ICompilationUnit getCompilationUnit();
+	ICompilationUnit getCompilationUnit();
 
-	public Object getData(String name);
+	Object getData(String name);
 
-	public ITypeSet getTypeEstimate();
+	ITypeSet getTypeEstimate();
 
-	public void setCompilationUnit(ICompilationUnit cu);
+	void setCompilationUnit(ICompilationUnit cu);
 
-	public void setData(String name, Object data);
+	void setData(String name, Object data);
 }

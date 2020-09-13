@@ -241,7 +241,7 @@ public final class SuperTypeConstraintsModel {
 	/**
 	 * Gets called when the creation of the model begins.
 	 */
-	public final void beginCreation() {
+	public void beginCreation() {
 		// Do nothing right now
 	}
 
@@ -252,7 +252,7 @@ public final class SuperTypeConstraintsModel {
 	 * @param variable the associated constraint variable
 	 * @return the created cast variable, or <code>null</code>
 	 */
-	public final ConstraintVariable2 createCastVariable(final CastExpression expression, final ConstraintVariable2 variable) {
+	public ConstraintVariable2 createCastVariable(final CastExpression expression, final ConstraintVariable2 variable) {
 		ITypeBinding binding= expression.resolveTypeBinding();
 		if (binding.isArray())
 			binding= binding.getElementType();
@@ -271,7 +271,7 @@ public final class SuperTypeConstraintsModel {
 	 * @param thenVariable the then type constraint variable
 	 * @param elseVariable the else type constraint variable
 	 */
-	public final void createConditionalTypeConstraint(final ConstraintVariable2 expressionVariable, final ConstraintVariable2 thenVariable, final ConstraintVariable2 elseVariable) {
+	public void createConditionalTypeConstraint(final ConstraintVariable2 expressionVariable, final ConstraintVariable2 thenVariable, final ConstraintVariable2 elseVariable) {
 		final ITypeConstraint2 constraint= new ConditionalTypeConstraint(expressionVariable, thenVariable, elseVariable);
 		if (!fTypeConstraints.contains(constraint)) {
 			fTypeConstraints.add(constraint);
@@ -287,7 +287,7 @@ public final class SuperTypeConstraintsModel {
 	 * @param descendant the descendant type constraint variable
 	 * @param ancestor the ancestor type constraint variable
 	 */
-	public final void createCovariantTypeConstraint(final ConstraintVariable2 descendant, final ConstraintVariable2 ancestor) {
+	public void createCovariantTypeConstraint(final ConstraintVariable2 descendant, final ConstraintVariable2 ancestor) {
 		final ITypeConstraint2 constraint= new CovariantTypeConstraint(descendant, ancestor);
 		if (!fTypeConstraints.contains(constraint)) {
 			fTypeConstraints.add(constraint);
@@ -306,7 +306,7 @@ public final class SuperTypeConstraintsModel {
 	 * @param type the type binding
 	 * @return the created declaring type variable
 	 */
-	public final ConstraintVariable2 createDeclaringTypeVariable(ITypeBinding type) {
+	public ConstraintVariable2 createDeclaringTypeVariable(ITypeBinding type) {
 		if (type.isArray())
 			type= type.getElementType();
 		type= type.getTypeDeclaration();
@@ -319,7 +319,7 @@ public final class SuperTypeConstraintsModel {
 	 * @param left the left typeconstraint variable
 	 * @param right the right typeconstraint variable
 	 */
-	public final void createEqualityConstraint(final ConstraintVariable2 left, final ConstraintVariable2 right) {
+	public void createEqualityConstraint(final ConstraintVariable2 left, final ConstraintVariable2 right) {
 		if (left != null && right != null) {
 			final TypeEquivalenceSet first= left.getTypeEquivalenceSet();
 			final TypeEquivalenceSet second= right.getTypeEquivalenceSet();
@@ -355,7 +355,7 @@ public final class SuperTypeConstraintsModel {
 	 * @param name the name of the thrown exception
 	 * @return the created exception variable, or <code>null</code>
 	 */
-	public final ConstraintVariable2 createExceptionVariable(final Name name) {
+	public ConstraintVariable2 createExceptionVariable(final Name name) {
 		final ITypeBinding binding= name.resolveTypeBinding();
 		if (isConstrainedType(binding))
 			return fConstraintVariables.addExisting(new TypeVariable2(createTType(binding), new CompilationUnitRange(RefactoringASTParser.getCompilationUnit(name), name)));
@@ -368,7 +368,7 @@ public final class SuperTypeConstraintsModel {
 	 * @param type the type binding
 	 * @return the created plain type variable, or <code>null</code>
 	 */
-	public final ConstraintVariable2 createImmutableTypeVariable(ITypeBinding type) {
+	public ConstraintVariable2 createImmutableTypeVariable(ITypeBinding type) {
 		if (type.isArray())
 			type= type.getElementType();
 		if (isConstrainedType(type))
@@ -385,7 +385,7 @@ public final class SuperTypeConstraintsModel {
 	 * @param type the type binding
 	 * @return the created independant type variable, or <code>null</code>
 	 */
-	public final ConstraintVariable2 createIndependentTypeVariable(ITypeBinding type) {
+	public ConstraintVariable2 createIndependentTypeVariable(ITypeBinding type) {
 		if (type.isArray())
 			type= type.getElementType();
 		if (isConstrainedType(type))
@@ -400,7 +400,7 @@ public final class SuperTypeConstraintsModel {
 	 * @param index the index of the parameter
 	 * @return the created method parameter variable, or <code>null</code>
 	 */
-	public final ConstraintVariable2 createMethodParameterVariable(final IMethodBinding method, final int index) {
+	public ConstraintVariable2 createMethodParameterVariable(final IMethodBinding method, final int index) {
 		final ITypeBinding[] parameters= method.getParameterTypes();
 		if (parameters.length < 1)
 			return null;
@@ -425,7 +425,7 @@ public final class SuperTypeConstraintsModel {
 	 * @param method the method binding
 	 * @return the created return type variable, or <code>null</code>
 	 */
-	public final ConstraintVariable2 createReturnTypeVariable(final IMethodBinding method) {
+	public ConstraintVariable2 createReturnTypeVariable(final IMethodBinding method) {
 		if (!method.isConstructor()) {
 			ITypeBinding binding= method.getReturnType();
 			if (binding != null && binding.isArray())
@@ -449,7 +449,7 @@ public final class SuperTypeConstraintsModel {
 	 * @param descendant the descendant type constraint variable
 	 * @param ancestor the ancestor type constraint variable
 	 */
-	public final void createSubtypeConstraint(final ConstraintVariable2 descendant, final ConstraintVariable2 ancestor) {
+	public void createSubtypeConstraint(final ConstraintVariable2 descendant, final ConstraintVariable2 ancestor) {
 		final ITypeConstraint2 constraint= new SubTypeConstraint2(descendant, ancestor);
 		if (!fTypeConstraints.contains(constraint)) {
 			fTypeConstraints.add(constraint);
@@ -464,7 +464,7 @@ public final class SuperTypeConstraintsModel {
 	 * @param binding The type binding
 	 * @return The corresponding TType
 	 */
-	public final TType createTType(final ITypeBinding binding) {
+	public TType createTType(final ITypeBinding binding) {
 		final String key= binding.getKey();
 		final TType cached= fTTypeCache.get(key);
 		if (cached != null)
@@ -481,7 +481,7 @@ public final class SuperTypeConstraintsModel {
 	 * @param range the compilation unit range
 	 * @return the created type variable, or <code>null</code>
 	 */
-	public final ConstraintVariable2 createTypeVariable(ITypeBinding type, final CompilationUnitRange range) {
+	public ConstraintVariable2 createTypeVariable(ITypeBinding type, final CompilationUnitRange range) {
 		if (type.isArray())
 			type= type.getElementType();
 		if (isConstrainedType(type))
@@ -495,7 +495,7 @@ public final class SuperTypeConstraintsModel {
 	 * @param type the type
 	 * @return the created type variable, or <code>null</code>
 	 */
-	public final ConstraintVariable2 createTypeVariable(final Type type) {
+	public ConstraintVariable2 createTypeVariable(final Type type) {
 		ITypeBinding binding= type.resolveBinding();
 		if (binding != null) {
 			if (binding.isArray())
@@ -512,7 +512,7 @@ public final class SuperTypeConstraintsModel {
 	 * @param binding the variable binding
 	 * @return the created variable variable, or <code>null</code>
 	 */
-	public final ConstraintVariable2 createVariableVariable(final IVariableBinding binding) {
+	public ConstraintVariable2 createVariableVariable(final IVariableBinding binding) {
 		ITypeBinding type= binding.getType();
 		if (type.isArray())
 			type= type.getElementType();
@@ -538,7 +538,7 @@ public final class SuperTypeConstraintsModel {
 	/**
 	 * Gets called when the creation of the model ends.
 	 */
-	public final void endCreation() {
+	public void endCreation() {
 		fEnvironment= null;
 		fTTypeCache= null;
 	}
@@ -548,7 +548,7 @@ public final class SuperTypeConstraintsModel {
 	 *
 	 * @return the cast variables (element type: <code>CastVariable2</code>)
 	 */
-	public final Collection<CastVariable2> getCastVariables() {
+	public Collection<CastVariable2> getCastVariables() {
 		return Collections.unmodifiableCollection(fCastVariables);
 	}
 
@@ -557,7 +557,7 @@ public final class SuperTypeConstraintsModel {
 	 *
 	 * @return the compliance level
 	 */
-	public final int getCompliance() {
+	public int getCompliance() {
 		return fCompliance;
 	}
 
@@ -566,7 +566,7 @@ public final class SuperTypeConstraintsModel {
 	 *
 	 * @return the constraint variables (element type: <code>ConstraintVariable2</code>)
 	 */
-	public final Collection<ConstraintVariable2> getConstraintVariables() {
+	public Collection<ConstraintVariable2> getConstraintVariables() {
 		return Collections.unmodifiableCollection(fConstraintVariables);
 	}
 
@@ -575,7 +575,7 @@ public final class SuperTypeConstraintsModel {
 	 *
 	 * @return the subtype to be replaced
 	 */
-	public final TType getSubType() {
+	public TType getSubType() {
 		return fSubType;
 	}
 
@@ -584,7 +584,7 @@ public final class SuperTypeConstraintsModel {
 	 *
 	 * @return the supertype as replacement
 	 */
-	public final TType getSuperType() {
+	public TType getSuperType() {
 		return fSuperType;
 	}
 
@@ -593,7 +593,7 @@ public final class SuperTypeConstraintsModel {
 	 *
 	 * @return the type constraints (element type: <code>ITypeConstraint2</code>)
 	 */
-	public final Collection<ITypeConstraint2> getTypeConstraints() {
+	public Collection<ITypeConstraint2> getTypeConstraints() {
 		return Collections.unmodifiableCollection(fTypeConstraints);
 	}
 
@@ -602,7 +602,7 @@ public final class SuperTypeConstraintsModel {
 	 *
 	 * @param level the compliance level to use. The argument must be one of the <code>AST.JLSx</code> constants.
 	 */
-	public final void setCompliance(final int level) {
+	public void setCompliance(final int level) {
 		fCompliance= level;
 	}
 }

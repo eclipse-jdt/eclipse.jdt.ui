@@ -15,7 +15,7 @@ package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
 
 public interface ITypeConstraint2 {
 
-	public ConstraintVariable2 getLeft();
+	ConstraintVariable2 getLeft();
 
-	public ConstraintVariable2 getRight();
+	ConstraintVariable2 getRight();
 }

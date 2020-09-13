@@ -28,40 +28,40 @@ public interface ISpellEvent {
 	 *
 	 * @return The begin index of the word
 	 */
-	public int getBegin();
+	int getBegin();
 
 	/**
 	 * Returns the end index of the incorrectly spelled word.
 	 *
 	 * @return The end index of the word
 	 */
-	public int getEnd();
+	int getEnd();
 
 	/**
 	 * Returns the proposals for the incorrectly spelled word.
 	 *
 	 * @return Array of proposals for the word
 	 */
-	public Set<RankedWordProposal> getProposals();
+	Set<RankedWordProposal> getProposals();
 
 	/**
 	 * Returns the incorrectly spelled word.
 	 *
 	 * @return The incorrect word
 	 */
-	public String getWord();
+	String getWord();
 
 	/**
 	 * Was the incorrectly spelled word found in the dictionary?
 	 *
 	 * @return <code>true</code> iff the word was found, <code>false</code> otherwise
 	 */
-	public boolean isMatch();
+	boolean isMatch();
 
 	/**
 	 * Does the incorrectly spelled word start a new sentence?
 	 *
 	 * @return <code>true<code> iff the word starts a new sentence, <code>false</code> otherwise
 	 */
-	public boolean isStart();
+	boolean isStart();
 }

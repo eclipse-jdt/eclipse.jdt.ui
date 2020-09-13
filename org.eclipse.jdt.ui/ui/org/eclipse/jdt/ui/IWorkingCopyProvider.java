@@ -37,5 +37,5 @@ public interface IWorkingCopyProvider {
 	 *
 	 * @return whether working copy elements are provided.
 	 */
-	public boolean providesWorkingCopies();
+	boolean providesWorkingCopies();
 }

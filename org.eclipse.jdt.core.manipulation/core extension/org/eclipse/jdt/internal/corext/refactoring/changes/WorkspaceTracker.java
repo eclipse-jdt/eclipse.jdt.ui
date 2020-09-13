@@ -26,7 +26,7 @@ public class WorkspaceTracker {
 	public final static WorkspaceTracker INSTANCE= new WorkspaceTracker();
 
 	public interface Listener {
-		public void workspaceChanged();
+		void workspaceChanged();
 	}
 
 	private ListenerList<Listener> fListeners;

@@ -23,10 +23,10 @@ import org.eclipse.jdt.core.IMember;
 public interface IRequestQuery {
 
 	// return codes
-	public static final int CANCEL= 0;
-	public static final int NO= 1;
-	public static final int YES= 2;
-	public static final int YES_ALL= 3;
+	int CANCEL= 0;
+	int NO= 1;
+	int YES= 2;
+	int YES_ALL= 3;
 
 	/**
 	 * Do the callback. Returns YES, NO, YES_ALL or CANCEL

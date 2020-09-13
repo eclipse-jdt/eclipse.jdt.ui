@@ -64,7 +64,7 @@ public final class MultiStateCompilationUnitChange extends MultiStateTextFileCha
 	 *
 	 * @return the compilation unit
 	 */
-	public final ICompilationUnit getCompilationUnit() {
+	public ICompilationUnit getCompilationUnit() {
 		return fUnit;
 	}
 

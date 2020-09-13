@@ -31,13 +31,13 @@ public interface ITestCaseElement extends ITestElement {
 	 *
 	 * @return returns the name of the test method.
 	 */
-	public String getTestMethodName();
+	String getTestMethodName();
 
 	/**
 	 * Returns the qualified type name of the class the test is contained in.
 	 *
 	 * @return the qualified type name of the class the test is contained in.
 	 */
-	public String getTestClassName();
+	String getTestClassName();
 
 }

@@ -34,8 +34,8 @@ import org.eclipse.jdt.core.IJavaElement;
  */
 public class ResourceToItemsMapper {
 
-	public static interface IContentViewerAccessor {
-		public void doUpdateItem(Widget item);
+	public interface IContentViewerAccessor {
+		void doUpdateItem(Widget item);
 	}
 
 

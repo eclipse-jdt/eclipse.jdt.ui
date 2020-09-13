@@ -44,7 +44,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.SaveParticipantReg
 class SaveParticipantConfigurationBlock implements IPreferenceAndPropertyConfigurationBlock {
 
 	private interface IDelegateOperation {
-		public void run(ISaveParticipantPreferenceConfiguration block);
+		void run(ISaveParticipantPreferenceConfiguration block);
 	}
 
 	private final PreferencePage fPreferencePage;

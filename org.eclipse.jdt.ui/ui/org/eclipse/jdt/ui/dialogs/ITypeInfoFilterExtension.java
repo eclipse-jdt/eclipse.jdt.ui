@@ -33,6 +33,6 @@ public interface ITypeInfoFilterExtension {
 	 *
 	 * @return whether the type is selected or not
 	 */
-	public boolean select(ITypeInfoRequestor typeInfoRequestor);
+	boolean select(ITypeInfoRequestor typeInfoRequestor);
 
 }

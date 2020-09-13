@@ -80,7 +80,7 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 			beforeClosingBracket= getCoreOption(project, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_ANGLE_BRACKET_IN_PARAMETERIZED_TYPE_REFERENCE, false);
 		}
 
-		protected final boolean getCoreOption(IJavaProject project, String key, boolean def) {
+		protected boolean getCoreOption(IJavaProject project, String key, boolean def) {
 			String option= getCoreOption(project, key);
 			if (JavaCore.INSERT.equals(option))
 				return true;
@@ -89,7 +89,7 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 			return def;
 		}
 
-		protected final String getCoreOption(IJavaProject project, String key) {
+		protected String getCoreOption(IJavaProject project, String key) {
 			if (project == null)
 				return JavaCore.getOption(key);
 			return project.getOption(key, true);

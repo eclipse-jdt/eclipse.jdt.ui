@@ -28,21 +28,21 @@ public interface ISpellCheckIterator extends Iterator<String> {
 	 *
 	 * @return The begin index of the current word
 	 */
-	public int getBegin();
+	int getBegin();
 
 	/**
 	 * Returns the end index (exclusive) of the current word.
 	 *
 	 * @return The end index of the current word
 	 */
-	public int getEnd();
+	int getEnd();
 
 	/**
 	 * Does the current word start a new sentence?
 	 *
 	 * @return <code>true<code> iff the current word starts a new sentence, <code>false</code> otherwise
 	 */
-	public boolean startsSentence();
+	boolean startsSentence();
 
 	/**
 	 * Tells whether to ignore single letters
@@ -51,5 +51,5 @@ public interface ISpellCheckIterator extends Iterator<String> {
 	 * @since 3.3
 	 * @param state <code>true</code> if single letters should be ignored
 	 */
-	public void setIgnoreSingleLetters(boolean state);
+	void setIgnoreSingleLetters(boolean state);
 }

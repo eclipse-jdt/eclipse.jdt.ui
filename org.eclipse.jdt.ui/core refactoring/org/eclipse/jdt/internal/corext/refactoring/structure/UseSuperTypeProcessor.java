@@ -169,7 +169,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#checkFinalConditions(org.eclipse.core.runtime.IProgressMonitor,org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext)
 	 */
 	@Override
-	public final RefactoringStatus checkFinalConditions(final IProgressMonitor monitor, final CheckConditionsContext context) throws CoreException, OperationCanceledException {
+	public RefactoringStatus checkFinalConditions(final IProgressMonitor monitor, final CheckConditionsContext context) throws CoreException, OperationCanceledException {
 		Assert.isNotNull(monitor);
 		Assert.isNotNull(context);
 		final RefactoringStatus status= new RefactoringStatus();
@@ -191,7 +191,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#checkInitialConditions(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	@Override
-	public final RefactoringStatus checkInitialConditions(final IProgressMonitor monitor) throws CoreException, OperationCanceledException {
+	public RefactoringStatus checkInitialConditions(final IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 		Assert.isNotNull(monitor);
 		final RefactoringStatus status= new RefactoringStatus();
 		try {
@@ -209,7 +209,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#createChange(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	@Override
-	public final Change createChange(final IProgressMonitor monitor) throws CoreException, OperationCanceledException {
+	public Change createChange(final IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 		Assert.isNotNull(monitor);
 		try {
 			fChanges= 0;
@@ -264,7 +264,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 	 * @throws CoreException
 	 *             if the changes could not be generated
 	 */
-	protected final TextEditBasedChangeManager createChangeManager(final IProgressMonitor monitor, final RefactoringStatus status) throws JavaModelException, CoreException {
+	protected TextEditBasedChangeManager createChangeManager(final IProgressMonitor monitor, final RefactoringStatus status) throws JavaModelException, CoreException {
 		Assert.isNotNull(status);
 		Assert.isNotNull(monitor);
 		try {
@@ -329,7 +329,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeRefactoringProcessor#createContraintSolver(org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeConstraintsModel)
 	 */
 	@Override
-	protected final SuperTypeConstraintsSolver createContraintSolver(final SuperTypeConstraintsModel model) {
+	protected SuperTypeConstraintsSolver createContraintSolver(final SuperTypeConstraintsModel model) {
 		return new SuperTypeConstraintsSolver(model);
 	}
 
@@ -339,7 +339,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 	 *
 	 * @return The number of files which are affected
 	 */
-	public final int getChanges() {
+	public int getChanges() {
 		return fChanges;
 	}
 
@@ -347,7 +347,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#getElements()
 	 */
 	@Override
-	public final Object[] getElements() {
+	public Object[] getElements() {
 		return new Object[] { fSubType };
 	}
 
@@ -355,7 +355,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#getIdentifier()
 	 */
 	@Override
-	public final String getIdentifier() {
+	public String getIdentifier() {
 		return IDENTIFIER;
 	}
 
@@ -363,7 +363,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#getProcessorName()
 	 */
 	@Override
-	public final String getProcessorName() {
+	public String getProcessorName() {
 		return RefactoringCoreMessages.UseSuperTypeProcessor_name;
 	}
 
@@ -372,7 +372,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 	 *
 	 * @return The subtype to be replaced
 	 */
-	public final IType getSubType() {
+	public IType getSubType() {
 		return fSubType;
 	}
 
@@ -381,11 +381,11 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 	 *
 	 * @return The supertype as replacement
 	 */
-	public final IType getSuperType() {
+	public IType getSuperType() {
 		return fSuperType;
 	}
 
-	private final RefactoringStatus initialize(JavaRefactoringArguments extended) {
+	private RefactoringStatus initialize(JavaRefactoringArguments extended) {
 		String handle= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
 		if (handle != null) {
 			final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
@@ -416,7 +416,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#isApplicable()
 	 */
 	@Override
-	public final boolean isApplicable() throws CoreException {
+	public boolean isApplicable() throws CoreException {
 		return Checks.isAvailable(fSubType) && Checks.isAvailable(fSuperType) && !fSubType.isAnonymous() && !fSubType.isAnnotation() && !fSuperType.isAnonymous() && !fSuperType.isAnnotation() && !fSuperType.isEnum();
 	}
 
@@ -424,12 +424,12 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#loadParticipants(org.eclipse.ltk.core.refactoring.RefactoringStatus,org.eclipse.ltk.core.refactoring.participants.SharableParticipants)
 	 */
 	@Override
-	public final RefactoringParticipant[] loadParticipants(final RefactoringStatus status, final SharableParticipants sharedParticipants) throws CoreException {
+	public RefactoringParticipant[] loadParticipants(final RefactoringStatus status, final SharableParticipants sharedParticipants) throws CoreException {
 		return new RefactoringParticipant[0];
 	}
 
 	@Override
-	protected final void rewriteTypeOccurrences(final TextEditBasedChangeManager manager, final ASTRequestor requestor, final CompilationUnitRewrite rewrite, final ICompilationUnit unit, final CompilationUnit node, final Set<String> replacements, final IProgressMonitor monitor) throws CoreException {
+	protected void rewriteTypeOccurrences(final TextEditBasedChangeManager manager, final ASTRequestor requestor, final CompilationUnitRewrite rewrite, final ICompilationUnit unit, final CompilationUnit node, final Set<String> replacements, final IProgressMonitor monitor) throws CoreException {
 		try {
 			monitor.beginTask("", 100); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.ExtractInterfaceProcessor_creating);
@@ -477,7 +477,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 	 * @param type
 	 *            The supertype to set
 	 */
-	public final void setSuperType(final IType type) {
+	public void setSuperType(final IType type) {
 		Assert.isNotNull(type);
 
 		fSuperType= type;

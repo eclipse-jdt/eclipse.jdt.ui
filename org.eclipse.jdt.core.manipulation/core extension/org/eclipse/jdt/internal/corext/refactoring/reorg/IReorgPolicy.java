@@ -40,30 +40,30 @@ public interface IReorgPolicy extends IReorgDestinationValidator {
 	/**
 	 * @return the unique id of this policy
 	 */
-	public String getPolicyId();
+	String getPolicyId();
 
 	/**
 	 * @return the source resources to reorg
 	 */
-	public IResource[] getResources();
+	IResource[] getResources();
 
 	/**
 	 * @return the source java elements to reorg
 	 */
-	public IJavaElement[] getJavaElements();
+	IJavaElement[] getJavaElements();
 
 	/**
 	 * @return true if this policy can handle the source elements
 	 * @throws JavaModelException in unexpected cases
 	 */
-	public boolean canEnable() throws JavaModelException;
+	boolean canEnable() throws JavaModelException;
 
 	/**
 	 * @return the save mode required for this reorg policy
 	 *
 	 * see RefactoringSaveHelper
 	 */
-	public int getSaveMode();
+	int getSaveMode();
 
 	/**
 	 * Can destination be a target for the given source elements?
@@ -72,27 +72,27 @@ public interface IReorgPolicy extends IReorgDestinationValidator {
 	 * @return OK status if valid destination
 	 * @throws JavaModelException in unexpected cases
 	 */
-	public RefactoringStatus verifyDestination(IReorgDestination destination) throws JavaModelException;
+	RefactoringStatus verifyDestination(IReorgDestination destination) throws JavaModelException;
 
 	/**
 	 * @param destination the destination for this reorg
 	 */
-	public void setDestination(IReorgDestination destination);
+	void setDestination(IReorgDestination destination);
 
 	/**
 	 * @return the destination of this reorg or null if not a resource
 	 */
-	public IResource getResourceDestination();
+	IResource getResourceDestination();
 
 	/**
 	 * @return the destination of this reorg or null if not a java element
 	 */
-	public IJavaElement getJavaElementDestination();
+	IJavaElement getJavaElementDestination();
 
 	/**
 	 * @return a descriptor describing a reorg from source to target
 	 */
-	public ChangeDescriptor getDescriptor();
+	ChangeDescriptor getDescriptor();
 
 
 	/**
@@ -104,25 +104,25 @@ public interface IReorgPolicy extends IReorgDestinationValidator {
 	 *         status has severity <code>FATAL_ERROR</code>, the refactoring
 	 *         will not be executed.
 	 */
-	public RefactoringStatus initialize(JavaRefactoringArguments arguments);
+	RefactoringStatus initialize(JavaRefactoringArguments arguments);
 
-	public RefactoringStatus checkFinalConditions(IProgressMonitor monitor, CheckConditionsContext context, IReorgQueries queries) throws CoreException;
+	RefactoringStatus checkFinalConditions(IProgressMonitor monitor, CheckConditionsContext context, IReorgQueries queries) throws CoreException;
 
-	public RefactoringParticipant[] loadParticipants(RefactoringStatus status, RefactoringProcessor processor, String[] natures, SharableParticipants shared) throws CoreException;
+	RefactoringParticipant[] loadParticipants(RefactoringStatus status, RefactoringProcessor processor, String[] natures, SharableParticipants shared) throws CoreException;
 
-	public static interface ICopyPolicy extends IReorgPolicy{
-		public Change createChange(IProgressMonitor monitor, INewNameQueries queries) throws JavaModelException;
-		public ReorgExecutionLog getReorgExecutionLog();
+	public interface ICopyPolicy extends IReorgPolicy{
+		Change createChange(IProgressMonitor monitor, INewNameQueries queries) throws JavaModelException;
+		ReorgExecutionLog getReorgExecutionLog();
 	}
 
-	public static interface IMovePolicy extends IReferenceUpdating, IQualifiedNameUpdating, IReorgPolicy{
-		public Change createChange(IProgressMonitor monitor) throws JavaModelException;
-		public Change postCreateChange(Change[] participantChanges, IProgressMonitor monitor) throws CoreException;
-		public ICreateTargetQuery getCreateTargetQuery(ICreateTargetQueries createQueries);
-		public boolean isTextualMove();
-		public CreateTargetExecutionLog getCreateTargetExecutionLog();
-		public void setDestinationCheck(boolean check);
-		public boolean hasAllInputSet();
+	public interface IMovePolicy extends IReferenceUpdating, IQualifiedNameUpdating, IReorgPolicy{
+		Change createChange(IProgressMonitor monitor) throws JavaModelException;
+		Change postCreateChange(Change[] participantChanges, IProgressMonitor monitor) throws CoreException;
+		ICreateTargetQuery getCreateTargetQuery(ICreateTargetQueries createQueries);
+		boolean isTextualMove();
+		CreateTargetExecutionLog getCreateTargetExecutionLog();
+		void setDestinationCheck(boolean check);
+		boolean hasAllInputSet();
 		/**
 		 * Checks if <b>Java</b> references to the selected element(s) can be updated if moved to
 		 * the selected destination. Even if <code>false</code>, participants could still update
@@ -131,7 +131,7 @@ public interface IReorgPolicy extends IReorgDestinationValidator {
 		 * @return <code>true</code> iff <b>Java</b> references to the moved element can be updated
 		 * @since 3.5
 		 */
-		public boolean canUpdateJavaReferences();
-		public boolean canUpdateQualifiedNames();
+		boolean canUpdateJavaReferences();
+		boolean canUpdateQualifiedNames();
 	}
 }

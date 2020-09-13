@@ -52,7 +52,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
  */
 public class TableTextCellEditor extends CellEditor {
 	public interface IActivationListener {
-		public void activate();
+		void activate();
 	}
 
 	private final TableViewer fTableViewer;

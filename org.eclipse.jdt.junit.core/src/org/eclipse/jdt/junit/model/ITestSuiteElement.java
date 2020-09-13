@@ -32,6 +32,6 @@ public interface ITestSuiteElement extends ITestElementContainer {
 	 *
 	 * @return the name of the suite
 	 */
-	public String getSuiteTypeName();
+	String getSuiteTypeName();
 
 }

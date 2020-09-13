@@ -21,11 +21,11 @@ public interface ITypeConstraint {
 	 *
 	 * This method is provided for debugging purposes only.
 	 */
-	public abstract String toResolvedString();
+	String toResolvedString();
 
 	/**
 	 * Returns whether this is a simple constraint. If so, it can be safely downcast to
 	 * <code>SimpleTypeConstraint</code>.
 	 */
-	public boolean isSimpleTypeConstraint();
+	boolean isSimpleTypeConstraint();
 }

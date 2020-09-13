@@ -31,5 +31,5 @@ public interface ITypeSelectionComponent {
 	 * Triggers a search inside the type component with the
 	 * current settings.
 	 */
-	public void triggerSearch();
+	void triggerSearch();
 }

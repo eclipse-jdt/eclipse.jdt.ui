@@ -196,7 +196,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		}
 
 		@Override
-		public final void endVisit(final AnonymousClassDeclaration node) {
+		public void endVisit(final AnonymousClassDeclaration node) {
 			Assert.isNotNull(node);
 			if (fAnonymousClass > 0)
 				fAnonymousClass--;
@@ -204,14 +204,14 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		}
 
 		@Override
-		public final boolean visit(final AnonymousClassDeclaration node) {
+		public boolean visit(final AnonymousClassDeclaration node) {
 			Assert.isNotNull(node);
 			fAnonymousClass++;
 			return super.visit(node);
 		}
 
 		@Override
-		public final boolean visit(final MethodInvocation node) {
+		public boolean visit(final MethodInvocation node) {
 			Assert.isNotNull(node);
 			if (fAnonymousClass > 0) {
 				final IMethodBinding binding= node.resolveMethodBinding();
@@ -327,7 +327,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		}
 
 		@Override
-		public final boolean visit(final SimpleName node) {
+		public boolean visit(final SimpleName node) {
 			Assert.isNotNull(node);
 			final IBinding binding= node.resolveBinding();
 			ITypeBinding declaring= null;
@@ -358,7 +358,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		}
 
 		@Override
-		public final boolean visit(final ThisExpression node) {
+		public boolean visit(final ThisExpression node) {
 			Assert.isNotNull(node);
 			if (node.getQualifier() != null) {
 				fStatus.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MoveInstanceMethodProcessor_refers_enclosing_instances, JavaStatusContext.create(fMethod.getCompilationUnit(), node)));
@@ -398,7 +398,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.SimpleName)
 		 */
 		@Override
-		public final boolean visit(final SimpleName node) {
+		public boolean visit(final SimpleName node) {
 			Assert.isNotNull(node);
 			final IBinding binding= node.resolveBinding();
 			if (binding instanceof ITypeBinding) {
@@ -416,7 +416,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	/**
 	 * Factory for method argument declaration or expression nodes.
 	 */
-	protected static interface IArgumentFactory {
+	protected interface IArgumentFactory {
 
 		/**
 		 * Returns a argument node for the specified variable binding.
@@ -430,7 +430,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		 * @throws JavaModelException
 		 *             if an error occurs
 		 */
-		public ASTNode getArgumentNode(IVariableBinding binding, boolean last) throws JavaModelException;
+		ASTNode getArgumentNode(IVariableBinding binding, boolean last) throws JavaModelException;
 
 		/**
 		 * Returns a target node for the current target.
@@ -439,7 +439,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		 * @throws JavaModelException
 		 *             if an error occurs
 		 */
-		public ASTNode getTargetNode() throws JavaModelException;
+		ASTNode getTargetNode() throws JavaModelException;
 	}
 
 	/**
@@ -498,7 +498,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		}
 
 		@Override
-		public final void endVisit(final AnonymousClassDeclaration node) {
+		public void endVisit(final AnonymousClassDeclaration node) {
 			Assert.isNotNull(node);
 			if (fAnonymousClass > 0)
 				fAnonymousClass--;
@@ -506,14 +506,14 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		}
 
 		@Override
-		public final boolean visit(final AnonymousClassDeclaration node) {
+		public boolean visit(final AnonymousClassDeclaration node) {
 			Assert.isNotNull(node);
 			fAnonymousClass++;
 			return super.visit(node);
 		}
 
 		@Override
-		public final boolean visit(final ClassInstanceCreation node) {
+		public boolean visit(final ClassInstanceCreation node) {
 			Assert.isNotNull(node);
 			if (node.getParent() instanceof ClassInstanceCreation) {
 				final AnonymousClassDeclaration declaration= node.getAnonymousClassDeclaration();
@@ -537,7 +537,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		}
 
 		@Override
-		public final boolean visit(final FieldAccess node) {
+		public boolean visit(final FieldAccess node) {
 			Assert.isNotNull(node);
 			final Expression expression= node.getExpression();
 			final IVariableBinding variable= node.resolveFieldBinding();
@@ -570,7 +570,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			return true;
 		}
 
-		public final void visit(final List<ASTNode> nodes) {
+		public void visit(final List<ASTNode> nodes) {
 			Assert.isNotNull(nodes);
 			ASTNode node= null;
 			for (final Iterator<ASTNode> iterator= nodes.iterator(); iterator.hasNext();) {
@@ -580,7 +580,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		}
 
 		@Override
-		public final boolean visit(final MethodInvocation node) {
+		public boolean visit(final MethodInvocation node) {
 			Assert.isNotNull(node);
 			final Expression expression= node.getExpression();
 			final IMethodBinding method= node.resolveMethodBinding();
@@ -627,7 +627,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		}
 
 		@Override
-		public final boolean visit(final QualifiedName node) {
+		public boolean visit(final QualifiedName node) {
 			Assert.isNotNull(node);
 			IBinding binding= node.resolveBinding();
 			if (binding instanceof ITypeBinding) {
@@ -648,7 +648,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		}
 
 		@Override
-		public final boolean visit(final SimpleName node) {
+		public boolean visit(final SimpleName node) {
 			Assert.isNotNull(node);
 			final AST ast= node.getAST();
 			final ASTRewrite rewrite= fRewrite;
@@ -701,7 +701,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		}
 
 		@Override
-		public final boolean visit(final ThisExpression node) {
+		public boolean visit(final ThisExpression node) {
 			Assert.isNotNull(node);
 			fRewrite.replace(node, node.getAST().newSimpleName(fTargetName), null);
 			return false;
@@ -892,7 +892,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		}
 
 		@Override
-		public final boolean visit(final MethodInvocation node) {
+		public boolean visit(final MethodInvocation node) {
 			Assert.isNotNull(node);
 			final Expression expression= node.getExpression();
 			final IMethodBinding binding= node.resolveMethodBinding();
@@ -911,22 +911,22 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	public final class SuperReferenceFinder extends AstNodeFinder {
 
 		@Override
-		public final boolean visit(final AnnotationTypeDeclaration node) {
+		public boolean visit(final AnnotationTypeDeclaration node) {
 			return false;
 		}
 
 		@Override
-		public final boolean visit(final AnonymousClassDeclaration node) {
+		public boolean visit(final AnonymousClassDeclaration node) {
 			return false;
 		}
 
 		@Override
-		public final boolean visit(final EnumDeclaration node) {
+		public boolean visit(final EnumDeclaration node) {
 			return false;
 		}
 
 		@Override
-		public final boolean visit(final SuperFieldAccess node) {
+		public boolean visit(final SuperFieldAccess node) {
 			Assert.isNotNull(node);
 			fStatus.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MoveInstanceMethodProcessor_uses_super, JavaStatusContext.create(fMethod.getCompilationUnit(), node)));
 			fResult.add(node);
@@ -934,7 +934,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		}
 
 		@Override
-		public final boolean visit(final SuperMethodInvocation node) {
+		public boolean visit(final SuperMethodInvocation node) {
 			Assert.isNotNull(node);
 			fStatus.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MoveInstanceMethodProcessor_uses_super, JavaStatusContext.create(fMethod.getCompilationUnit(), node)));
 			fResult.add(node);
@@ -942,7 +942,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		}
 
 		@Override
-		public final boolean visit(final TypeDeclaration node) {
+		public boolean visit(final TypeDeclaration node) {
 			return false;
 		}
 	}
@@ -953,7 +953,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	public final class ThisReferenceFinder extends AstNodeFinder {
 
 		@Override
-		public final boolean visit(final MethodInvocation node) {
+		public boolean visit(final MethodInvocation node) {
 			Assert.isNotNull(node);
 			final IMethodBinding binding= node.resolveMethodBinding();
 			if (binding != null && !JdtFlags.isStatic(binding) && node.getExpression() == null) {
@@ -964,7 +964,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		}
 
 		@Override
-		public final boolean visit(final SimpleName node) {
+		public boolean visit(final SimpleName node) {
 			Assert.isNotNull(node);
 			if (isFieldAccess(node) && !isTargetAccess(node)) {
 				fResult.add(node);
@@ -974,7 +974,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		}
 
 		@Override
-		public final boolean visit(final ThisExpression node) {
+		public boolean visit(final ThisExpression node) {
 			Assert.isNotNull(node);
 			fResult.add(node);
 			fStatus.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MoveInstanceMethodProcessor_this_reference, JavaStatusContext.create(fMethod.getCompilationUnit(), node)));
@@ -1213,7 +1213,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	}
 
 	@Override
-	public final boolean canEnableDelegateUpdating() {
+	public boolean canEnableDelegateUpdating() {
 		return true;
 	}
 
@@ -1292,7 +1292,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 *      org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext)
 	 */
 	@Override
-	public final RefactoringStatus checkFinalConditions(final IProgressMonitor monitor, final CheckConditionsContext context) throws CoreException, OperationCanceledException {
+	public RefactoringStatus checkFinalConditions(final IProgressMonitor monitor, final CheckConditionsContext context) throws CoreException, OperationCanceledException {
 		Assert.isNotNull(monitor);
 		Assert.isNotNull(context);
 		Assert.isNotNull(fTarget);
@@ -1387,7 +1387,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#checkInitialConditions(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	@Override
-	public final RefactoringStatus checkInitialConditions(final IProgressMonitor monitor) throws CoreException, OperationCanceledException {
+	public RefactoringStatus checkInitialConditions(final IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 		Assert.isNotNull(monitor);
 		final RefactoringStatus status= new RefactoringStatus();
 		try {
@@ -1741,7 +1741,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#createChange(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	@Override
-	public final Change createChange(final IProgressMonitor monitor) throws CoreException, OperationCanceledException {
+	public Change createChange(final IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 		Assert.isNotNull(monitor);
 		try {
 			monitor.beginTask("", 6); //$NON-NLS-1$
@@ -2715,7 +2715,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 * @return the candidate targets as variable bindings of fields and
 	 *         parameters
 	 */
-	public final IVariableBinding[] getCandidateTargets() {
+	public IVariableBinding[] getCandidateTargets() {
 		Assert.isNotNull(fCandidateTargets);
 		return fCandidateTargets;
 	}
@@ -2741,7 +2741,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	}
 
 	@Override
-	public final boolean getDelegateUpdating() {
+	public boolean getDelegateUpdating() {
 		return fDelegatingUpdating;
 	}
 
@@ -2754,17 +2754,17 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	}
 
 	@Override
-	public final boolean getDeprecateDelegates() {
+	public boolean getDeprecateDelegates() {
 		return fDelegateDeprecation;
 	}
 
 	@Override
-	public final Object[] getElements() {
+	public Object[] getElements() {
 		return new Object[] { fMethod };
 	}
 
 	@Override
-	public final String getIdentifier() {
+	public String getIdentifier() {
 		return IDENTIFIER;
 	}
 
@@ -2773,7 +2773,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 *
 	 * @return the method to be moved
 	 */
-	public final IMethod getMethod() {
+	public IMethod getMethod() {
 		return fMethod;
 	}
 
@@ -2782,7 +2782,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 *
 	 * @return the name of the new method
 	 */
-	public final String getMethodName() {
+	public String getMethodName() {
 		return fMethodName;
 	}
 
@@ -2792,7 +2792,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 * @return the possible targets as variable bindings of read-only fields and
 	 *         parameters
 	 */
-	public final IVariableBinding[] getPossibleTargets() {
+	public IVariableBinding[] getPossibleTargets() {
 		Assert.isNotNull(fPossibleTargets);
 		return fPossibleTargets;
 	}
@@ -2801,7 +2801,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#getProcessorName()
 	 */
 	@Override
-	public final String getProcessorName() {
+	public String getProcessorName() {
 		return RefactoringCoreMessages.MoveInstanceMethodProcessor_name;
 	}
 
@@ -2810,7 +2810,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 *
 	 * @return the target index
 	 */
-	protected final int getTargetIndex() {
+	protected int getTargetIndex() {
 		final IVariableBinding[] targets= getPossibleTargets();
 		int result= -1;
 		for (int index= 0; index < targets.length; index++) {
@@ -2827,7 +2827,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 *
 	 * @return the name of the new target
 	 */
-	public final String getTargetName() {
+	public String getTargetName() {
 		return fTargetName;
 	}
 
@@ -2940,7 +2940,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#isApplicable()
 	 */
 	@Override
-	public final boolean isApplicable() throws CoreException {
+	public boolean isApplicable() throws CoreException {
 		return fMethod.exists() && !fMethod.isConstructor() && !fMethod.isBinary() && !fMethod.isReadOnly() && fMethod.getCompilationUnit() != null && !JdtFlags.isStatic(fMethod);
 	}
 
@@ -2975,7 +2975,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 *      org.eclipse.ltk.core.refactoring.participants.SharableParticipants)
 	 */
 	@Override
-	public final RefactoringParticipant[] loadParticipants(final RefactoringStatus status, final SharableParticipants participants) throws CoreException {
+	public RefactoringParticipant[] loadParticipants(final RefactoringStatus status, final SharableParticipants participants) throws CoreException {
 		return new RefactoringParticipant[0];
 	}
 
@@ -2985,19 +2985,19 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 * @return <code>true</code> if it needs a target node, <code>false</code>
 	 *         otherwise
 	 */
-	public final boolean needsTargetNode() {
+	public boolean needsTargetNode() {
 		return fTargetNode;
 	}
 
 	@Override
-	public final void setDelegateUpdating(final boolean updating) {
+	public void setDelegateUpdating(final boolean updating) {
 		fDelegatingUpdating= updating;
 		setInlineDelegator(!updating);
 		setRemoveDelegator(!updating);
 	}
 
 	@Override
-	public final void setDeprecateDelegates(final boolean deprecate) {
+	public void setDeprecateDelegates(final boolean deprecate) {
 		fDelegateDeprecation= deprecate;
 	}
 
@@ -3008,7 +3008,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 *            <code>true</code> to inline the delegator,
 	 *            <code>false</code> otherwise
 	 */
-	public final void setInlineDelegator(final boolean inline) {
+	public void setInlineDelegator(final boolean inline) {
 		fInline= inline;
 	}
 
@@ -3019,7 +3019,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 *            the name to set
 	 * @return the status of the operation
 	 */
-	public final RefactoringStatus setMethodName(final String name) {
+	public RefactoringStatus setMethodName(final String name) {
 		Assert.isNotNull(name);
 		RefactoringStatus status= Checks.checkMethodName(name, fTargetType);
 		if (status.hasFatalError())
@@ -3037,7 +3037,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 *            <code>true</code> if it should be removed,
 	 *            <code>false</code> otherwise
 	 */
-	public final void setRemoveDelegator(final boolean remove) {
+	public void setRemoveDelegator(final boolean remove) {
 		Assert.isTrue(!remove || fInline);
 		fRemove= remove;
 	}
@@ -3048,7 +3048,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 * @param target
 	 *            the target to set
 	 */
-	public final void setTarget(final IVariableBinding target) {
+	public void setTarget(final IVariableBinding target) {
 		Assert.isNotNull(target);
 		fTarget= target;
 		fTargetType= null;
@@ -3073,7 +3073,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 *            the name to set
 	 * @return the status of the operation
 	 */
-	public final RefactoringStatus setTargetName(final String name) {
+	public RefactoringStatus setTargetName(final String name) {
 		Assert.isNotNull(name);
 		final RefactoringStatus status= Checks.checkTempName(name, fMethod);
 		if (status.hasFatalError())
@@ -3090,7 +3090,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 *            <code>true</code> if getter methods should be used,
 	 *            <code>false</code> otherwise
 	 */
-	public final void setUseGetters(final boolean use) {
+	public void setUseGetters(final boolean use) {
 		fUseGetters= use;
 	}
 
@@ -3102,7 +3102,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 *            <code>true</code> if setter methods should be used,
 	 *            <code>false</code> otherwise
 	 */
-	public final void setUseSetters(final boolean use) {
+	public void setUseSetters(final boolean use) {
 		fUseSetters= use;
 	}
 
@@ -3112,7 +3112,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 * @return <code>true</code> if getter methods should be used,
 	 *         <code>false</code> otherwise
 	 */
-	public final boolean shouldUseGetters() {
+	public boolean shouldUseGetters() {
 		return fUseGetters;
 	}
 
@@ -3122,7 +3122,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 * @return <code>true</code> if setter methods should be used,
 	 *         <code>false</code> otherwise
 	 */
-	public final boolean shouldUseSetters() {
+	public boolean shouldUseSetters() {
 		return fUseSetters;
 	}
 

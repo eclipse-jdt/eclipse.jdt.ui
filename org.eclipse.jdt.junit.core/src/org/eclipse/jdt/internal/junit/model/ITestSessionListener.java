@@ -23,48 +23,48 @@ public interface ITestSessionListener {
  	/**
  	 * A test run has started.
  	 */
-	public void sessionStarted();
+	void sessionStarted();
 	/**
  	 * A test run has ended.
 	 *
 	 * @param elapsedTime the total elapsed time of the test run
 	 */
-	public void sessionEnded(long elapsedTime);
+	void sessionEnded(long elapsedTime);
 	/**
 	 * A test run has been stopped prematurely.
 	 *
  	 * @param elapsedTime the time elapsed before the test run was stopped
 	 */
-	public void sessionStopped(long elapsedTime);
+	void sessionStopped(long elapsedTime);
 	/**
 	 * The VM instance performing the tests has terminated.
 	 */
-	public void sessionTerminated();
+	void sessionTerminated();
 
 	/**
 	 * A test has been added to the plan.
 	 *
 	 * @param testElement the test
 	 */
-	public void testAdded(TestElement testElement);
+	void testAdded(TestElement testElement);
 
 	/**
 	 * All test have been added and running begins
 	 */
-	public void runningBegins();
+	void runningBegins();
 
 	/**
 	 * An individual test has started.
 	 *
 	 * @param testCaseElement the test
 	 */
-	public void testStarted(TestCaseElement testCaseElement);
+	void testStarted(TestCaseElement testCaseElement);
 	/**
 	 * An individual test has ended.
 	 *
 	 * @param testCaseElement the test
 	 */
-	public void testEnded(TestCaseElement testCaseElement);
+	void testEnded(TestCaseElement testCaseElement);
 	/**
 	 * An individual test has failed with a stack trace.
 	 *
@@ -76,7 +76,7 @@ public interface ITestSessionListener {
 	 * @param expected expected value
 	 * @param actual actual value
 	 */
-	public void testFailed(TestElement testElement, Status status, String trace, String expected, String actual);
+	void testFailed(TestElement testElement, Status status, String trace, String expected, String actual);
 	/**
  	 * An individual test has been rerun.
 	 *
@@ -88,12 +88,12 @@ public interface ITestSessionListener {
 	 * @param expectedResult expected value
 	 * @param actualResult actual value
 	 */
-	public void testReran(TestCaseElement testCaseElement, Status status, String trace, String expectedResult, String actualResult);
+	void testReran(TestCaseElement testCaseElement, Status status, String trace, String expectedResult, String actualResult);
 
 	/**
 	 * @return <code>true</code> if the test run session can be swapped to disk although
 	 * this listener is still installed
 	 */
-	public boolean acceptsSwapToDisk();
+	boolean acceptsSwapToDisk();
 
 }

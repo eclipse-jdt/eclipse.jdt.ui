@@ -18,8 +18,8 @@ package org.eclipse.jdt.internal.junit.runner;
 
 public interface MessageSender {
 
-	public abstract void sendMessage(String msg);
+	void sendMessage(String msg);
 
-	public abstract void flush();
+	void flush();
 
 }

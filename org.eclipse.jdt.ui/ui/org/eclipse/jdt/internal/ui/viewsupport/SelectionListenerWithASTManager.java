@@ -158,7 +158,7 @@ public class SelectionListenerWithASTManager {
 			fCurrentJob.schedule();
 		}
 
-		protected final IStatus calculateASTandInform(ITypeRoot input, ITextSelection selection, IProgressMonitor monitor) {
+		protected IStatus calculateASTandInform(ITypeRoot input, ITextSelection selection, IProgressMonitor monitor) {
 			if (monitor.isCanceled()) {
 				return Status.CANCEL_STATUS;
 			}

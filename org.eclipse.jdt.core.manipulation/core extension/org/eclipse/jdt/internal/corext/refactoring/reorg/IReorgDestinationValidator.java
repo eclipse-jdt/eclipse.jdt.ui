@@ -22,7 +22,7 @@ public interface IReorgDestinationValidator {
 	 * @param destination the destination to verify
 	 * @return true if destination can have valid destinations
 	 */
-	public boolean canChildrenBeDestinations(IReorgDestination destination);
+	boolean canChildrenBeDestinations(IReorgDestination destination);
 
 	/**
 	 * Is it possible, that the given kind of destination is a target for
@@ -31,5 +31,5 @@ public interface IReorgDestinationValidator {
 	 * @param destination the destination to verify
 	 * @return true if possible
 	 */
-	public boolean canElementBeDestination(IReorgDestination destination);
+	boolean canElementBeDestination(IReorgDestination destination);
 }

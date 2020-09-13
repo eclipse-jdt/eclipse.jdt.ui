@@ -58,7 +58,7 @@ public final class TypeVariableMaplet {
 	}
 
 	@Override
-	public final boolean equals(final Object object) {
+	public boolean equals(final Object object) {
 		if (object instanceof TypeVariableMaplet) {
 			final TypeVariableMaplet mapping= (TypeVariableMaplet) object;
 			return mapping.getSourceName().equals(fSourceName) && mapping.getTargetName().equals(fTargetName) && mapping.getSourceIndex() == fSourceIndex && mapping.getTargetIndex() == fTargetIndex;
@@ -71,7 +71,7 @@ public final class TypeVariableMaplet {
 	 *
 	 * @return the source index of this maplet
 	 */
-	public final int getSourceIndex() {
+	public int getSourceIndex() {
 		return fSourceIndex;
 	}
 
@@ -80,7 +80,7 @@ public final class TypeVariableMaplet {
 	 *
 	 * @return the source of this maplet
 	 */
-	public final String getSourceName() {
+	public String getSourceName() {
 		return fSourceName;
 	}
 
@@ -89,7 +89,7 @@ public final class TypeVariableMaplet {
 	 *
 	 * @return the target index of this maplet
 	 */
-	public final int getTargetIndex() {
+	public int getTargetIndex() {
 		return fTargetIndex;
 	}
 
@@ -98,12 +98,12 @@ public final class TypeVariableMaplet {
 	 *
 	 * @return the target of this maplet
 	 */
-	public final String getTargetName() {
+	public String getTargetName() {
 		return fTargetName;
 	}
 
 	@Override
-	public final int hashCode() {
+	public int hashCode() {
 		return fSourceIndex | fTargetIndex | fSourceName.hashCode() | fTargetName.hashCode();
 	}
 }

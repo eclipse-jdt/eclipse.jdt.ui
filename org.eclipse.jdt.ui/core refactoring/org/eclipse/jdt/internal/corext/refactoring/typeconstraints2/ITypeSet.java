@@ -17,12 +17,12 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 
 public interface ITypeSet {
 
-	public TType chooseSingleType();
+	TType chooseSingleType();
 
-	public ITypeSet restrictedTo(ITypeSet restrictionSet);
+	ITypeSet restrictedTo(ITypeSet restrictionSet);
 
 	@Override
-	public String toString();
+	String toString();
 
-	public boolean isEmpty();
+	boolean isEmpty();
 }

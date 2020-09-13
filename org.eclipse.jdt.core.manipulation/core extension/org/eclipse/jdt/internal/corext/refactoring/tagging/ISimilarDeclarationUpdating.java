@@ -27,7 +27,7 @@ public interface ISimilarDeclarationUpdating {
 	 * This can be disabled globally by setting the product configuration property
 	 * "org.eclipse.jdt.ui.refactoring.handlesSimilarDeclarations" to "false".
 	 */
-	public boolean canEnableSimilarDeclarationUpdating();
+	boolean canEnableSimilarDeclarationUpdating();
 
 	/**
 	 * If <code>canEnableSimilarElementUpdating</code> returns
@@ -36,7 +36,7 @@ public interface ISimilarDeclarationUpdating {
 	 * ignored if <code>canEnableSimilarElementUpdating</code> returns
 	 * <code>false</code>.
 	 */
-	public void setUpdateSimilarDeclarations(boolean update);
+	void setUpdateSimilarDeclarations(boolean update);
 
 	/**
 	 * If <code>canEnableSimilarElementUpdating</code> returns
@@ -45,7 +45,7 @@ public interface ISimilarDeclarationUpdating {
 	 * ignored if <code>canEnableSimilarElementUpdating</code> returns
 	 * <code>false</code>.
 	 */
-	public boolean getUpdateSimilarDeclarations();
+	boolean getUpdateSimilarDeclarations();
 
 	/**
 	 * If <code>canEnableSimilarElementUpdating</code> returns
@@ -54,7 +54,7 @@ public interface ISimilarDeclarationUpdating {
 	 *
 	 * @param selectedStrategy one of the STRATEGY_* constants in {@link org.eclipse.jdt.internal.corext.refactoring.rename.RenamingNameSuggestor}
 	 */
-	public void setMatchStrategy(int selectedStrategy);
+	void setMatchStrategy(int selectedStrategy);
 
 	/**
 	 * If <code>canEnableSimilarElementUpdating</code> returns
@@ -63,6 +63,6 @@ public interface ISimilarDeclarationUpdating {
 	 *
 	 * @return one of the STRATEGY_* constants in {@link org.eclipse.jdt.internal.corext.refactoring.rename.RenamingNameSuggestor}
 	 */
-	public int getMatchStrategy();
+	int getMatchStrategy();
 
 }

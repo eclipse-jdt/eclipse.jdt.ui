@@ -21,11 +21,11 @@ import org.eclipse.jdt.internal.ui.JdtViewerDropAdapterConstants;
  */
 public interface IReorgDestination {
 
-    public static final int LOCATION_BEFORE = JdtViewerDropAdapterConstants.LOCATION_BEFORE;
-    public static final int LOCATION_AFTER = JdtViewerDropAdapterConstants.LOCATION_AFTER;
-    public static final int LOCATION_ON = JdtViewerDropAdapterConstants.LOCATION_ON;
+    int LOCATION_BEFORE = JdtViewerDropAdapterConstants.LOCATION_BEFORE;
+    int LOCATION_AFTER = JdtViewerDropAdapterConstants.LOCATION_AFTER;
+    int LOCATION_ON = JdtViewerDropAdapterConstants.LOCATION_ON;
 
-	public Object getDestination();
+	Object getDestination();
 
-	public int getLocation();
+	int getLocation();
 }

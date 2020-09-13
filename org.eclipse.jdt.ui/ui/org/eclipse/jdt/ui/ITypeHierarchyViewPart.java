@@ -38,43 +38,43 @@ public interface ITypeHierarchyViewPart extends IViewPart {
 	 * Constant used for the vertical view layout.
 	 * @since 3.3
 	 */
-	public static final int VIEW_LAYOUT_VERTICAL= 0;
+	int VIEW_LAYOUT_VERTICAL= 0;
 
 	/**
 	 * Constant used for the horizontal view layout.
 	 * @since 3.3
 	 */
-	public static final int VIEW_LAYOUT_HORIZONTAL= 1;
+	int VIEW_LAYOUT_HORIZONTAL= 1;
 
 	/**
 	 * Constant used for the single view layout (no members view)
 	 * @since 3.3
 	 */
-	public static final int VIEW_LAYOUT_SINGLE= 2;
+	int VIEW_LAYOUT_SINGLE= 2;
 
 	/**
 	 * Constant used for the automatic view layout.
 	 * @since 3.3
 	 */
-	public static final int VIEW_LAYOUT_AUTOMATIC= 3;
+	int VIEW_LAYOUT_AUTOMATIC= 3;
 
 	/**
 	 * Constant used for the 'classic' type hierarchy mode.
 	 * @since 3.3
 	 */
-	public static final int HIERARCHY_MODE_CLASSIC= 2;
+	int HIERARCHY_MODE_CLASSIC= 2;
 
 	/**
 	 * Constant used for the super types hierarchy mode.
 	 * @since 3.3
 	 */
-	public static final int HIERARCHY_MODE_SUPERTYPES= 0;
+	int HIERARCHY_MODE_SUPERTYPES= 0;
 
 	/**
 	 * Constant used for the sub types hierarchy mode.
 	 * @since 3.3
 	 */
-	public static final int HIERARCHY_MODE_SUBTYPES= 1;
+	int HIERARCHY_MODE_SUBTYPES= 1;
 
 	/**
 	 * Sets the input element of this type hierarchy view to a type.
@@ -84,7 +84,7 @@ public interface ITypeHierarchyViewPart extends IViewPart {
 	 * @deprecated use setInputElement instead
 	 */
 	@Deprecated
-	public void setInput(IType type);
+	void setInput(IType type);
 
 	/**
 	 * Sets the input element of this type hierarchy view. The following input types are possible
@@ -96,7 +96,7 @@ public interface ITypeHierarchyViewPart extends IViewPart {
 	 *
 	 * @since 2.0
 	 */
-	public void setInputElement(IJavaElement element);
+	void setInputElement(IJavaElement element);
 
 	/**
 	 * Returns the input element of this type hierarchy view.
@@ -106,7 +106,7 @@ public interface ITypeHierarchyViewPart extends IViewPart {
 	 * @deprecated use getInputElement instead
 	 */
 	@Deprecated
-	public IType getInput();
+	IType getInput();
 
 
 	/**
@@ -117,7 +117,7 @@ public interface ITypeHierarchyViewPart extends IViewPart {
 	 *
 	 * @since 2.0
 	 */
-	public IJavaElement getInputElement();
+	IJavaElement getInputElement();
 
 	/**
 	 * Locks the the members view and shows the selected members in the hierarchy.
@@ -126,7 +126,7 @@ public interface ITypeHierarchyViewPart extends IViewPart {
 	 *
 	 * @since 3.3
 	 */
-	public void showMembersInHierarchy(boolean enabled);
+	void showMembersInHierarchy(boolean enabled);
 
 	/**
 	 * If set, the lock mode is enabled.
@@ -135,7 +135,7 @@ public interface ITypeHierarchyViewPart extends IViewPart {
 	 *
 	 * @since 3.3
 	 */
-	public boolean isShowMembersInHierarchy();
+	boolean isShowMembersInHierarchy();
 
 	/**
 	 * Specifies if type names are shown with the parent container's name.
@@ -144,7 +144,7 @@ public interface ITypeHierarchyViewPart extends IViewPart {
 	 *
 	 * @since 3.3
 	 */
-	public void showQualifiedTypeNames(boolean enabled);
+	void showQualifiedTypeNames(boolean enabled);
 
 	/**
 	 * If set, type names are shown with the parent container's name.
@@ -153,7 +153,7 @@ public interface ITypeHierarchyViewPart extends IViewPart {
 	 *
 	 * @since 3.3
 	 */
-	public boolean isQualifiedTypeNamesEnabled();
+	boolean isQualifiedTypeNamesEnabled();
 
     /**
      * Returns whether this type hierarchy view's selection automatically tracks the active editor.
@@ -162,7 +162,7 @@ public interface ITypeHierarchyViewPart extends IViewPart {
      *
      * @since 3.3
      */
-	public boolean isLinkingEnabled();
+	boolean isLinkingEnabled();
 
     /**
      * Sets whether this type hierarchy view's selection automatically tracks the active editor.
@@ -171,7 +171,7 @@ public interface ITypeHierarchyViewPart extends IViewPart {
      *
      * @since 3.3
      */
-	public void setLinkingEnabled(boolean enabled);
+	void setLinkingEnabled(boolean enabled);
 
 	/**
 	 * Sets the view layout. Valid inputs are {@link #VIEW_LAYOUT_VERTICAL}, {@link #VIEW_LAYOUT_HORIZONTAL}
@@ -181,7 +181,7 @@ public interface ITypeHierarchyViewPart extends IViewPart {
 	 *
 	 * @since 3.3
 	 */
-	public void setViewLayout(int layout);
+	void setViewLayout(int layout);
 
 	/**
 	 * Returns the currently configured view layout. Possible layouts are {@link #VIEW_LAYOUT_VERTICAL}, {@link #VIEW_LAYOUT_HORIZONTAL}
@@ -192,7 +192,7 @@ public interface ITypeHierarchyViewPart extends IViewPart {
 	 *
 	 * @since 3.3
 	 */
-	public int getViewLayout();
+	int getViewLayout();
 
 	/**
 	 * Sets the hierarchy mode. Valid modes are {@link #HIERARCHY_MODE_SUBTYPES}, {@link #HIERARCHY_MODE_SUPERTYPES}
@@ -202,7 +202,7 @@ public interface ITypeHierarchyViewPart extends IViewPart {
 	 *
 	 * @since 3.3
 	 */
-	public void setHierarchyMode(int mode);
+	void setHierarchyMode(int mode);
 
 	/**
 	 * Returns the currently configured hierarchy mode. Possible modes are {@link #HIERARCHY_MODE_SUBTYPES}, {@link #HIERARCHY_MODE_SUPERTYPES}
@@ -212,6 +212,6 @@ public interface ITypeHierarchyViewPart extends IViewPart {
 	 *
 	 * @since 3.3
 	 */
-	public int getHierarchyMode();
+	int getHierarchyMode();
 
 }

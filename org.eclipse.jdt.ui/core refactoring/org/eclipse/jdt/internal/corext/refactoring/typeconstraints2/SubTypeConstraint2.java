@@ -32,7 +32,7 @@ public final class SubTypeConstraint2 implements ITypeConstraint2 {
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
-	public final boolean equals(Object other) {
+	public boolean equals(Object other) {
 		// can use object identity on ConstraintVariables, since we have the stored (or to be stored) objects
 		if (other.getClass() != SubTypeConstraint2.class)
 			return false;
@@ -42,12 +42,12 @@ public final class SubTypeConstraint2 implements ITypeConstraint2 {
 	}
 
 	@Override
-	public final ConstraintVariable2 getLeft() {
+	public ConstraintVariable2 getLeft() {
 		return fDescendant;
 	}
 
 	@Override
-	public final ConstraintVariable2 getRight() {
+	public ConstraintVariable2 getRight() {
 		return fAncestor;
 	}
 
@@ -55,7 +55,7 @@ public final class SubTypeConstraint2 implements ITypeConstraint2 {
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
-	public final int hashCode() {
+	public int hashCode() {
 		return fDescendant.hashCode() ^ 37 * fAncestor.hashCode();
 	}
 
@@ -63,7 +63,7 @@ public final class SubTypeConstraint2 implements ITypeConstraint2 {
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
-	public final String toString() {
+	public String toString() {
 		return fDescendant.toString() + " <= " + fAncestor.toString(); //$NON-NLS-1$
 	}
 }

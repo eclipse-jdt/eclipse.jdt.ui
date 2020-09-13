@@ -18,11 +18,11 @@ package org.eclipse.jdt.internal.junit.runner;
 
 
 public interface ITestReference {
-	public abstract int countTestCases();
+	int countTestCases();
 
-	public abstract void sendTree(IVisitsTestTrees notified);
+	void sendTree(IVisitsTestTrees notified);
 
-	public abstract void run(TestExecution execution);
+	void run(TestExecution execution);
 
-	public abstract ITestIdentifier getIdentifier();
+	ITestIdentifier getIdentifier();
 }
