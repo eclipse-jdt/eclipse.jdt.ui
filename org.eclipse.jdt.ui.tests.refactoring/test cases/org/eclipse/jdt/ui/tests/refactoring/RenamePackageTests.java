@@ -596,7 +596,7 @@ public class RenamePackageTests extends GenericRefactoringTest {
 		fragment.createCompilationUnit("MyClass.java", buf.toString(), true, null);
 
 		IFile file= ((IFolder) getRoot().getResource()).getFile("x.properties");
-		byte[] content= "This is about 'org.test' and more".getBytes();
+		byte[] content= "This is about 'org.test' and more".getBytes(ENCODING);
 		file.create(new ByteArrayInputStream(content), true, null);
 		file.refreshLocal(IResource.DEPTH_ONE, null);
 
@@ -633,7 +633,7 @@ public class RenamePackageTests extends GenericRefactoringTest {
 		fragment.createCompilationUnit("MyClass.java", buf.toString(), true, null);
 
 		IFile file= ((IFolder) fragment.getResource()).getFile("x.properties");
-		byte[] content= "This is about 'org.test' and more".getBytes();
+		byte[] content= "This is about 'org.test' and more".getBytes(ENCODING);
 		file.create(new ByteArrayInputStream(content), true, null);
 		file.refreshLocal(IResource.DEPTH_ONE, null);
 
@@ -673,18 +673,16 @@ public class RenamePackageTests extends GenericRefactoringTest {
 		IFolder myPackFolder= getRoot().getJavaProject().getProject().getFolder("my").getFolder("pack");
 		CoreUtility.createFolder(myPackFolder, true, true, null);
 		IFile textfile= myPackFolder.getFile(textFileName);
-		textfile.create(new ByteArrayInputStream(textfileContent.getBytes()), true, null);
+		textfile.create(new ByteArrayInputStream(textfileContent.getBytes(ENCODING)), true, null);
 
 		helper2(new String[]{"my.pack", "my"}, new String[][]{{}, {}}, "my");
 
-		InputStreamReader reader= new InputStreamReader(textfile.getContents(true));
+
 		StringBuilder newContent= new StringBuilder();
-		try {
+		try (InputStreamReader reader= new InputStreamReader(textfile.getContents(true), ENCODING)){
 			int ch;
 			while((ch= reader.read()) != -1)
 				newContent.append((char)ch);
-		} finally {
-			reader.close();
 		}
 		String definedContent= getFileContents(getTestPath() + getName() + TEST_OUTPUT_INFIX + "my/" + textFileName);
 		assertEqualLines("invalid updating", definedContent, newContent.toString());
@@ -1163,18 +1161,15 @@ public class RenamePackageTests extends GenericRefactoringTest {
 
 		String textfileContent= getFileContents(getTestPath() + getName() + TEST_INPUT_INFIX + textFileName);
 		IFile textfile= getRoot().getJavaProject().getProject().getFile(textFileName);
-		textfile.create(new ByteArrayInputStream(textfileContent.getBytes()), true, null);
+		textfile.create(new ByteArrayInputStream(textfileContent.getBytes(ENCODING)), true, null);
 
 		helper2(new String[]{"r.p1", "r"}, new String[][]{{"A"}, {"A"}}, "q");
 
-		InputStreamReader reader= new InputStreamReader(textfile.getContents(true));
 		StringBuilder newContent= new StringBuilder();
-		try {
+		try (InputStreamReader reader= new InputStreamReader(textfile.getContents(true), ENCODING)){
 			int ch;
 			while((ch= reader.read()) != -1)
 				newContent.append((char)ch);
-		} finally {
-			reader.close();
 		}
 		String definedContent= getFileContents(getTestPath() + getName() + TEST_OUTPUT_INFIX + textFileName);
 		assertEqualLines("invalid updating", definedContent, newContent.toString());
