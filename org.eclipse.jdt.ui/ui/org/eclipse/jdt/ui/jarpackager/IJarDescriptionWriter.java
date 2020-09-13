@@ -50,7 +50,7 @@ public interface IJarDescriptionWriter {
      *
 	 * @throws CoreException	if closing fails, e.g. I/O error during close operation
      */
-    public void close() throws CoreException;
+    void close() throws CoreException;
 
 	/**
 	 * Returns the status of this reader.
@@ -60,5 +60,5 @@ public interface IJarDescriptionWriter {
 	 *
 	 * @return the status of this operation
 	 */
-	public IStatus getStatus();
+	IStatus getStatus();
 }

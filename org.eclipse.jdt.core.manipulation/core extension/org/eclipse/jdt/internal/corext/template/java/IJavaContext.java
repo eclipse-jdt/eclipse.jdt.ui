@@ -29,7 +29,7 @@ public interface IJavaContext {
 	 *
 	 * @param contextTypeId the context type to accept
 	 */
-	public void addCompatibleContextType(String contextTypeId);
+	void addCompatibleContextType(String contextTypeId);
 
 	/**
 	 * Returns the compilation unit if one is associated with this context,

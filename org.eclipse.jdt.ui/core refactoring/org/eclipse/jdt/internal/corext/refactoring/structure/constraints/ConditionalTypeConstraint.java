@@ -52,7 +52,7 @@ public final class ConditionalTypeConstraint implements ITypeConstraint2 {
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
-	public final boolean equals(final Object object) {
+	public boolean equals(final Object object) {
 		if (object.getClass() != ConditionalTypeConstraint.class)
 			return false;
 		final ITypeConstraint2 other= (ITypeConstraint2) object;
@@ -64,7 +64,7 @@ public final class ConditionalTypeConstraint implements ITypeConstraint2 {
 	 *
 	 * @return the expression type constraint variable
 	 */
-	public final ConstraintVariable2 getExpression() {
+	public ConstraintVariable2 getExpression() {
 		return fExpressionVariable;
 	}
 
@@ -72,7 +72,7 @@ public final class ConditionalTypeConstraint implements ITypeConstraint2 {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstraint2#getLeft()
 	 */
 	@Override
-	public final ConstraintVariable2 getLeft() {
+	public ConstraintVariable2 getLeft() {
 		return fThenVariable;
 	}
 
@@ -80,7 +80,7 @@ public final class ConditionalTypeConstraint implements ITypeConstraint2 {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstraint2#getRight()
 	 */
 	@Override
-	public final ConstraintVariable2 getRight() {
+	public ConstraintVariable2 getRight() {
 		return fElseVariable;
 	}
 
@@ -88,7 +88,7 @@ public final class ConditionalTypeConstraint implements ITypeConstraint2 {
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
-	public final int hashCode() {
+	public int hashCode() {
 		return fThenVariable.hashCode() ^ 33 * fElseVariable.hashCode();
 	}
 
@@ -96,7 +96,7 @@ public final class ConditionalTypeConstraint implements ITypeConstraint2 {
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
-	public final String toString() {
+	public String toString() {
 		return fThenVariable.toString() + " <?= " + fElseVariable.toString(); //$NON-NLS-1$
 	}
 }

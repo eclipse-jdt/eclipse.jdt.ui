@@ -36,7 +36,7 @@ public interface IRefactoringProcessorIds {
 	 * The Change Method Signature processor loads {@link ChangeMethodSignatureParticipant}s registered for the
 	 * <code>IMethod</code> whose signature is changed.
 	 */
-	public static String CHANGE_METHOD_SIGNATURE_PROCESSOR= "org.eclipse.jdt.ui.changeMethodSignatureRefactoring"; //$NON-NLS-1$
+	String CHANGE_METHOD_SIGNATURE_PROCESSOR= "org.eclipse.jdt.ui.changeMethodSignatureRefactoring"; //$NON-NLS-1$
 
 	/**
 	 * Processor ID of the Introduce Parameter Object processor
@@ -45,7 +45,7 @@ public interface IRefactoringProcessorIds {
 	 * The Introduce Parameter Object processor loads {@link ChangeMethodSignatureParticipant}s registered for the
 	 * <code>IMethod</code> whose signature is changed.
 	 */
-	public static String INTRODUCE_PARAMETER_OBJECT_PROCESSOR= "org.eclipse.jdt.ui.introduceParameterObjectRefactoring"; //$NON-NLS-1$
+	String INTRODUCE_PARAMETER_OBJECT_PROCESSOR= "org.eclipse.jdt.ui.introduceParameterObjectRefactoring"; //$NON-NLS-1$
 
 	/**
 	 * Processor ID of the move static member processor
@@ -57,5 +57,5 @@ public interface IRefactoringProcessorIds {
 	 *
 	 * @since 1.12
 	 */
-	public static String MOVE_STATIC_MEMBERS_PROCESSOR= "org.eclipse.jdt.ui.MoveStaticMemberProcessor"; //$NON-NLS-1$
+	String MOVE_STATIC_MEMBERS_PROCESSOR= "org.eclipse.jdt.ui.MoveStaticMemberProcessor"; //$NON-NLS-1$
 }

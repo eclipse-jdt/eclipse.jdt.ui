@@ -22,10 +22,10 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 public interface INewNameQueries {
-	public INewNameQuery createNewCompilationUnitNameQuery(ICompilationUnit cu, String initialSuggestedName) throws OperationCanceledException;
-	public INewNameQuery createNewResourceNameQuery(IResource res, String initialSuggestedName) throws OperationCanceledException;
-	public INewNameQuery createNewPackageNameQuery(IPackageFragment pack, String initialSuggestedName) throws OperationCanceledException;
-	public INewNameQuery createNewPackageFragmentRootNameQuery(IPackageFragmentRoot root, String initialSuggestedName) throws OperationCanceledException;
-	public INewNameQuery createNullQuery();
-	public INewNameQuery createStaticQuery(String newName) throws OperationCanceledException;
+	INewNameQuery createNewCompilationUnitNameQuery(ICompilationUnit cu, String initialSuggestedName) throws OperationCanceledException;
+	INewNameQuery createNewResourceNameQuery(IResource res, String initialSuggestedName) throws OperationCanceledException;
+	INewNameQuery createNewPackageNameQuery(IPackageFragment pack, String initialSuggestedName) throws OperationCanceledException;
+	INewNameQuery createNewPackageFragmentRootNameQuery(IPackageFragmentRoot root, String initialSuggestedName) throws OperationCanceledException;
+	INewNameQuery createNullQuery();
+	INewNameQuery createStaticQuery(String newName) throws OperationCanceledException;
 }

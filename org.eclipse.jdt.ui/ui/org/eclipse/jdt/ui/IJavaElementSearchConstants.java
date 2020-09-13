@@ -30,13 +30,13 @@ public interface IJavaElementSearchConstants {
 	 * Search scope constant indicating that classes should be considered.
 	 * Used when opening certain kinds of selection dialogs.
 	 */
-	public static final int CONSIDER_CLASSES= 1 << 1;
+	int CONSIDER_CLASSES= 1 << 1;
 
 	/**
 	 * Search scope constant indicating that interfaces should be considered.
 	 * Used when opening certain kinds of selection dialogs.
 	 */
-	public static final int CONSIDER_INTERFACES= 1 << 2;
+	int CONSIDER_INTERFACES= 1 << 2;
 
 	/**
 	 * Search scope constant indicating that both classes and interfaces
@@ -46,19 +46,19 @@ public interface IJavaElementSearchConstants {
 	 * @deprecated use CONSIDER_ALL_TYPES or CONSIDER_CLASSES_AND_INTERFACES instead
 	 */
 	@Deprecated
-	public static final int CONSIDER_TYPES= CONSIDER_CLASSES | CONSIDER_INTERFACES;
+	int CONSIDER_TYPES= CONSIDER_CLASSES | CONSIDER_INTERFACES;
 
 	/**
 	 * Search scope constant (bit mask) indicating that binaries should be considered.
 	 * Used when opening certain kinds of selection dialogs.
 	 */
-	public static final int CONSIDER_BINARIES= 1 << 3;
+	int CONSIDER_BINARIES= 1 << 3;
 
 	/**
 	 * Search scope constant (bit mask) indicating that external JARs should be considered.
 	 * Used when opening certain kinds of selection dialogs.
 	 */
-	public static final int CONSIDER_EXTERNAL_JARS= 1 << 4;
+	int CONSIDER_EXTERNAL_JARS= 1 << 4;
 
 	/**
 	 * Search scope constant (bit mask) indicating that required projects should be considered.
@@ -66,7 +66,7 @@ public interface IJavaElementSearchConstants {
 	 *
 	 * @since 2.0
 	 */
-	public static final int CONSIDER_REQUIRED_PROJECTS= 1 << 5;
+	int CONSIDER_REQUIRED_PROJECTS= 1 << 5;
 
 	/**
 	 * Search scope constant indicating that annotation types should be considered.
@@ -74,7 +74,7 @@ public interface IJavaElementSearchConstants {
 	 *
 	 * @since 3.1
 	 */
-	public static final int CONSIDER_ANNOTATION_TYPES= 1 << 6;
+	int CONSIDER_ANNOTATION_TYPES= 1 << 6;
 
 	/**
 	 * Search scope constant indicating that enums should be considered.
@@ -82,7 +82,7 @@ public interface IJavaElementSearchConstants {
 	 *
 	 * @since 3.1
 	 */
-	public static final int CONSIDER_ENUMS= 1 << 7;
+	int CONSIDER_ENUMS= 1 << 7;
 
 	/**
 	 * Search scope constant indicating that classes, interfaces, annotations
@@ -90,7 +90,7 @@ public interface IJavaElementSearchConstants {
 	 *
 	 * @since 3.1
 	 */
-	public static final int CONSIDER_ALL_TYPES= 1 << 8;
+	int CONSIDER_ALL_TYPES= 1 << 8;
 
 	/**
 	 * Search scope constant indicating that only classes and interfaces
@@ -98,7 +98,7 @@ public interface IJavaElementSearchConstants {
 	 *
 	 * @since 3.1
 	 */
-	public static final int CONSIDER_CLASSES_AND_INTERFACES= 1 << 9;
+	int CONSIDER_CLASSES_AND_INTERFACES= 1 << 9;
 
 	/**
 	 * Search scope constant indicating that only classes and enumeration types
@@ -106,7 +106,7 @@ public interface IJavaElementSearchConstants {
 	 *
 	 * @since 3.1
 	 */
-	public static final int CONSIDER_CLASSES_AND_ENUMS= 1 << 10;
+	int CONSIDER_CLASSES_AND_ENUMS= 1 << 10;
 
 	/**
 	 * Search scope constant indicating that interfaces and annotation types
@@ -114,5 +114,5 @@ public interface IJavaElementSearchConstants {
 	 *
 	 * @since 3.8
 	 */
-	public static final int CONSIDER_INTERFACES_AND_ANNOTATIONS= 1 << 11;
+	int CONSIDER_INTERFACES_AND_ANNOTATIONS= 1 << 11;
 }

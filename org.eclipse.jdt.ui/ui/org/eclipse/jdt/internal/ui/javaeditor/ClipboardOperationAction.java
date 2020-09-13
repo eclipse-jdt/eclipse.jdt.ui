@@ -318,7 +318,7 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		return false;
 	}
 
-	protected final void internalDoOperation() {
+	protected void internalDoOperation() {
 		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_IMPORTS_ON_PASTE) && isSmartInsertMode()) {
 			if (fOperationCode == ITextOperationTarget.PASTE) {
 				doPasteWithImportsOperation();

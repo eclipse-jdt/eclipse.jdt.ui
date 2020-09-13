@@ -227,7 +227,7 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 	 *
 	 * @return the resulting text edit
 	 */
-	public final TextEdit getResultingEdit() {
+	public TextEdit getResultingEdit() {
 		return fEdit;
 	}
 
@@ -236,7 +236,7 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 	 *
 	 * @return the scheduling rule
 	 */
-	public final ISchedulingRule getSchedulingRule() {
+	public ISchedulingRule getSchedulingRule() {
 		return ResourcesPlugin.getWorkspace().getRoot();
 	}
 
@@ -245,7 +245,7 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 	 *
 	 * @return the visibility modifier
 	 */
-	public final int getVisibility() {
+	public int getVisibility() {
 		return fVisibility;
 	}
 
@@ -254,7 +254,7 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 	 *
 	 * @return <code>true</code> if they should be skipped, <code>false</code> otherwise
 	 */
-	public final boolean isSkipAllExisting() {
+	public boolean isSkipAllExisting() {
 		return fSkipAllExisting;
 	}
 
@@ -296,7 +296,7 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 	 * @see org.eclipse.core.resources.IWorkspaceRunnable#run(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	@Override
-	public final void run(IProgressMonitor monitor) throws CoreException {
+	public void run(IProgressMonitor monitor) throws CoreException {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
@@ -383,7 +383,7 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 	 *
 	 * @param skip <code>true</code> to skip existing members, <code>false</code> otherwise
 	 */
-	public final void setSkipAllExisting(final boolean skip) {
+	public void setSkipAllExisting(final boolean skip) {
 		fSkipAllExisting= skip;
 	}
 
@@ -396,7 +396,7 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 	 *
 	 * @param visibility the visibility modifier
 	 */
-	public final void setVisibility(final int visibility) {
+	public void setVisibility(final int visibility) {
 		fVisibility= visibility;
 	}
 }

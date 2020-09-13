@@ -50,7 +50,7 @@ public interface IRefactoringProcessorIds {
 	 *   <li>participants registered for renaming <code>IProject</code>.</li>
 	 * </ul>
 	 */
-	public static String RENAME_JAVA_PROJECT_PROCESSOR= "org.eclipse.jdt.ui.renameJavaProjectProcessor"; //$NON-NLS-1$
+	String RENAME_JAVA_PROJECT_PROCESSOR= "org.eclipse.jdt.ui.renameJavaProjectProcessor"; //$NON-NLS-1$
 
 	/**
 	 * Processor ID of the rename source folder
@@ -62,7 +62,7 @@ public interface IRefactoringProcessorIds {
 	 *   <li>participants registered for renaming <code>IFolder</code>.</li>
 	 * </ul>
 	 */
-	public static String RENAME_SOURCE_FOLDER_PROCESSOR= "org.eclipse.jdt.ui.renameSourceFolderProcessor"; //$NON-NLS-1$
+	String RENAME_SOURCE_FOLDER_PROCESSOR= "org.eclipse.jdt.ui.renameSourceFolderProcessor"; //$NON-NLS-1$
 
 	/**
 	 * Processor ID of the rename package fragment processor
@@ -88,7 +88,7 @@ public interface IRefactoringProcessorIds {
 	 * {@link IJavaElementMapper} and {@link IResourceMapper}, which can be
 	 * retrieved from the processor using the getAdapter() method.</p>
 	 */
-	public static String RENAME_PACKAGE_FRAGMENT_PROCESSOR= "org.eclipse.jdt.ui.renamePackageProcessor"; //$NON-NLS-1$
+	String RENAME_PACKAGE_FRAGMENT_PROCESSOR= "org.eclipse.jdt.ui.renamePackageProcessor"; //$NON-NLS-1$
 
 	/**
 	 * Processor ID of the rename compilation unit processor
@@ -102,7 +102,7 @@ public interface IRefactoringProcessorIds {
 	 *       compilation unit contains a top level type.</li>
 	 * </ul>
 	 */
-	public static String RENAME_COMPILATION_UNIT_PROCESSOR= "org.eclipse.jdt.ui.renameCompilationUnitProcessor"; //$NON-NLS-1$
+	String RENAME_COMPILATION_UNIT_PROCESSOR= "org.eclipse.jdt.ui.renameCompilationUnitProcessor"; //$NON-NLS-1$
 
 	/**
 	 * Processor ID of the rename type processor
@@ -130,7 +130,7 @@ public interface IRefactoringProcessorIds {
 	 * processor using the getAdapter() method.</p>
 	 *
 	 */
-	public static String RENAME_TYPE_PROCESSOR= "org.eclipse.jdt.ui.renameTypeProcessor"; //$NON-NLS-1$
+	String RENAME_TYPE_PROCESSOR= "org.eclipse.jdt.ui.renameTypeProcessor"; //$NON-NLS-1$
 
 	/**
 	 * Processor ID of the rename method processor
@@ -144,7 +144,7 @@ public interface IRefactoringProcessorIds {
 	 *       For those derived methods participants will be loaded as well.</li>
 	 * </ul>
 	 */
-	public static String RENAME_METHOD_PROCESSOR= "org.eclipse.jdt.ui.renameMethodProcessor"; //$NON-NLS-1$
+	String RENAME_METHOD_PROCESSOR= "org.eclipse.jdt.ui.renameMethodProcessor"; //$NON-NLS-1$
 
 	/**
 	 * Processor ID of the rename field processor
@@ -157,7 +157,7 @@ public interface IRefactoringProcessorIds {
 	 *       corresponding setter and getter methods are renamed as well.</li>
 	 * </ul>
 	 */
-	public static String RENAME_FIELD_PROCESSOR= "org.eclipse.jdt.ui.renameFieldProcessor"; //$NON-NLS-1$
+	String RENAME_FIELD_PROCESSOR= "org.eclipse.jdt.ui.renameFieldProcessor"; //$NON-NLS-1$
 
 	/**
 	 * Processor ID of the rename enum constant processor
@@ -169,7 +169,7 @@ public interface IRefactoringProcessorIds {
 	 * </ul>
 	 * @since 3.1
 	 */
-	public static String RENAME_ENUM_CONSTANT_PROCESSOR= "org.eclipse.jdt.ui.renameEnumConstProcessor"; //$NON-NLS-1$
+	String RENAME_ENUM_CONSTANT_PROCESSOR= "org.eclipse.jdt.ui.renameEnumConstProcessor"; //$NON-NLS-1$
 
 	/**
 	 * Processor ID of the rename resource processor
@@ -180,7 +180,7 @@ public interface IRefactoringProcessorIds {
 	 *   <li>participants registered for renaming <code>IResource</code>.</li>
 	 * </ul>
 	 */
-	public static String RENAME_RESOURCE_PROCESSOR= "org.eclipse.jdt.ui.renameResourceProcessor"; //$NON-NLS-1$
+	String RENAME_RESOURCE_PROCESSOR= "org.eclipse.jdt.ui.renameResourceProcessor"; //$NON-NLS-1$
 
 	/**
 	 * Processor ID of the move resource processor
@@ -203,7 +203,7 @@ public interface IRefactoringProcessorIds {
 	 *   <li><code>IResource</code>: participants registered for moving resources.</li>
 	 * </ul>
 	 */
-	public static String MOVE_PROCESSOR= "org.eclipse.jdt.ui.MoveProcessor"; //$NON-NLS-1$
+	String MOVE_PROCESSOR= "org.eclipse.jdt.ui.MoveProcessor"; //$NON-NLS-1$
 
 	/**
 	 * Processor ID of the move static member processor
@@ -213,7 +213,7 @@ public interface IRefactoringProcessorIds {
 	 * static Java element that gets moved. No support is available to participate
 	 * in non static member moves.
 	 */
-	public static String MOVE_STATIC_MEMBERS_PROCESSOR= "org.eclipse.jdt.ui.MoveStaticMemberProcessor"; //$NON-NLS-1$
+	String MOVE_STATIC_MEMBERS_PROCESSOR= "org.eclipse.jdt.ui.MoveStaticMemberProcessor"; //$NON-NLS-1$
 
 	/**
 	 * Processor ID of the delete resource processor
@@ -240,7 +240,7 @@ public interface IRefactoringProcessorIds {
 	 *   <li><code>IResource</code>: participants registered for deleting resources.</li>
 	 * </ul>
 	 */
-	public static String DELETE_PROCESSOR= "org.eclipse.jdt.ui.DeleteProcessor"; //$NON-NLS-1$
+	String DELETE_PROCESSOR= "org.eclipse.jdt.ui.DeleteProcessor"; //$NON-NLS-1$
 
 	/**
 	 * Processor ID of the copy processor (value <code>"org.eclipse.jdt.ui.CopyProcessor"</code>).
@@ -270,5 +270,5 @@ public interface IRefactoringProcessorIds {
 	 * @see org.eclipse.core.resources.mapping.ResourceMapping
 	 * @since 3.3
 	 */
-	public static String COPY_PROCESSOR= "org.eclipse.jdt.ui.CopyProcessor"; //$NON-NLS-1$
+	String COPY_PROCESSOR= "org.eclipse.jdt.ui.CopyProcessor"; //$NON-NLS-1$
 }

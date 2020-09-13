@@ -19,7 +19,7 @@ public interface IExceptionListChangeListener {
 	/**
 	* Gets fired if the exception list got modified by adding or removing exceptions
 	*/
-	public void exceptionListChanged();
+	void exceptionListChanged();
 
 
 //	/**

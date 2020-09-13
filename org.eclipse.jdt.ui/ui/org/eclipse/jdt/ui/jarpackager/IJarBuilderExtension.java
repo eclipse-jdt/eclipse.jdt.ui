@@ -39,6 +39,6 @@ public interface IJarBuilderExtension {
 	 * @throws CoreException
 	 *        thrown when the file could not be written
 	 */
-	public void writeFile(File file, IPath destinationPath) throws CoreException;
+	void writeFile(File file, IPath destinationPath) throws CoreException;
 
 }

@@ -54,7 +54,7 @@ public interface IASTFragment {
 	 * @param other the element to test with
 	 * @return return <code> true if the passed element matches the current element.
 	 */
-	public boolean matches(IASTFragment other);
+	boolean matches(IASTFragment other);
 
 	/**
 	 * Returns (at least some approximation of) a maximal set of
@@ -62,7 +62,7 @@ public interface IASTFragment {
 	 * @param toMatch the fragment to match
 	 * @return set of sub fragments that match
 	 */
-	public IASTFragment[] getSubFragmentsMatching(IASTFragment toMatch);
+	IASTFragment[] getSubFragmentsMatching(IASTFragment toMatch);
 
 	/**
 	 * Every fragment maps to a node.
@@ -70,21 +70,21 @@ public interface IASTFragment {
 	 *
 	 * @return ASTNode The node to which this fragment maps.
 	 */
-	public ASTNode getAssociatedNode();
+	ASTNode getAssociatedNode();
 
 	/**
 	 * Every fragment has a source start position.
 	 *
 	 * @return int		The source start position.
 	 */
-	public int getStartPosition();
+	int getStartPosition();
 
 	/**
 	 * Every fragment has a source length.
 	 *
 	 * @return int		The source length.
 	 */
-	public int getLength();
+	int getLength();
 
 	/**
 	 * Replaces this fragment with the given replacement node.
@@ -93,5 +93,5 @@ public interface IASTFragment {
 	 * @param replacement replacement for this fragment
 	 * @param textEditGroup a description or <code>null</code>
 	 */
-	public void replace(ASTRewrite rewrite, ASTNode replacement, TextEditGroup textEditGroup);
+	void replace(ASTRewrite rewrite, ASTNode replacement, TextEditGroup textEditGroup);
 }

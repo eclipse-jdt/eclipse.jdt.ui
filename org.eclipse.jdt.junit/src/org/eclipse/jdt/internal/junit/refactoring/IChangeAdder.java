@@ -19,6 +19,6 @@ import org.eclipse.jdt.internal.junit.refactoring.JUnitRenameParticipant.ChangeL
 
 public interface IChangeAdder {
 
-	public abstract void createChangeForConfig(ChangeList list, LaunchConfigurationContainer config) throws CoreException;
+	void createChangeForConfig(ChangeList list, LaunchConfigurationContainer config) throws CoreException;
 
 }

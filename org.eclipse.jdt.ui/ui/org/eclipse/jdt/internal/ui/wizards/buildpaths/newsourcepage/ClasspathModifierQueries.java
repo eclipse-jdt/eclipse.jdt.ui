@@ -178,7 +178,7 @@ public class ClasspathModifierQueries {
      * Query to get information about the inclusion and exclusion filters of
      * an element.
      */
-    public static interface IInclusionExclusionQuery {
+    public interface IInclusionExclusionQuery {
         /**
          * Query to get information about the
          * inclusion and exclusion filters of
@@ -200,7 +200,7 @@ public class ClasspathModifierQueries {
          * or <code>getExclusionPattern</code> can
          * be called.
          */
-        public boolean doQuery(CPListElement element, boolean focusOnExcluded);
+        boolean doQuery(CPListElement element, boolean focusOnExcluded);
 
         /**
          * Can only be called after <code>
@@ -209,7 +209,7 @@ public class ClasspathModifierQueries {
          *
          * @return the new inclusion filters
          */
-        public IPath[] getInclusionPattern();
+        IPath[] getInclusionPattern();
 
         /**
          * Can only be called after <code>
@@ -218,14 +218,14 @@ public class ClasspathModifierQueries {
          *
          * @return the new exclusion filters
          */
-        public IPath[] getExclusionPattern();
+        IPath[] getExclusionPattern();
     }
 
     /**
      * Query to get information about the output location that should be used for a
      * given element.
      */
-    public static interface IOutputLocationQuery {
+    public interface IOutputLocationQuery {
         /**
          * Query to get information about the output
          * location that should be used for a
@@ -237,7 +237,7 @@ public class ClasspathModifierQueries {
          * location has changed, <code>false</code>
          * otherwise.
          */
-        public boolean doQuery(CPListElement element);
+        boolean doQuery(CPListElement element);
 
         /**
          * Gets the new output location.
@@ -248,7 +248,7 @@ public class ClasspathModifierQueries {
          *
          * @return the new output location, can be <code>null</code>
          */
-        public IPath getOutputLocation();
+        IPath getOutputLocation();
 
         /**
          * Get a query for information about whether the project should be removed as
@@ -260,22 +260,22 @@ public class ClasspathModifierQueries {
          * @throws JavaModelException
          *
          */
-        public OutputFolderQuery getOutputFolderQuery(IPath outputLocation) throws JavaModelException;
+        OutputFolderQuery getOutputFolderQuery(IPath outputLocation) throws JavaModelException;
     }
 
     /**
 	 * Query to determine whether a linked folder should be removed.
 	 */
-	public static interface IRemoveLinkedFolderQuery {
+	public interface IRemoveLinkedFolderQuery {
 
 		/** Remove status indicating that the removal should be cancelled */
-		public static final int REMOVE_CANCEL= 0;
+		int REMOVE_CANCEL= 0;
 
 		/** Remove status indicating that the folder should be removed from the build path only */
-		public static final int REMOVE_BUILD_PATH= 1;
+		int REMOVE_BUILD_PATH= 1;
 
 		/** Remove status indicating that the folder should be removed from the build path and deleted */
-		public static final int REMOVE_BUILD_PATH_AND_FOLDER= 2;
+		int REMOVE_BUILD_PATH_AND_FOLDER= 2;
 
 		/**
 		 * Query to determined whether the linked folder should be removed as well.
@@ -283,13 +283,13 @@ public class ClasspathModifierQueries {
 		 * @param folder the linked folder to remove
 		 * @return a status code corresponding to one of the IRemoveLinkedFolderQuery#REMOVE_XXX constants
 		 */
-		public int doQuery(IFolder folder);
+		int doQuery(IFolder folder);
 	}
 
     /**
 	 * Query to create a folder.
 	 */
-    public static interface ICreateFolderQuery {
+    public interface ICreateFolderQuery {
         /**
          * Query to create a folder.
          *
@@ -297,7 +297,7 @@ public class ClasspathModifierQueries {
          * was successful (e.g. no cancelled), <code>
          * false</code> otherwise
          */
-        public boolean doQuery();
+        boolean doQuery();
 
         /**
          * Find out whether a source folder is about
@@ -314,7 +314,7 @@ public class ClasspathModifierQueries {
          * folder should be created, <code>false
          * </code> otherwise
          */
-        public boolean isSourceFolder();
+        boolean isSourceFolder();
 
         /**
          * Get the newly created folder.
@@ -324,26 +324,26 @@ public class ClasspathModifierQueries {
          * @return the created folder of type
          * <code>IFolder</code>
          */
-        public IFolder getCreatedFolder();
+        IFolder getCreatedFolder();
     }
 
     /**
      * Query to add archives (.jar or .zip files) to the buildpath.
      */
-    public static interface IAddArchivesQuery {
+    public interface IAddArchivesQuery {
         /**
          * Get the paths to the new archive entries that should be added to the buildpath.
          *
          * @return Returns the new classpath container entry paths or an empty array if the query has
          * been cancelled by the user.
          */
-        public IPath[] doQuery();
+        IPath[] doQuery();
     }
 
     /**
      * Query to add libraries to the buildpath.
      */
-    public static interface IAddLibrariesQuery {
+    public interface IAddLibrariesQuery {
         /**
          * Get the new classpath entries for libraries to be added to the buildpath.
          *
@@ -352,7 +352,7 @@ public class ClasspathModifierQueries {
          * @return Returns the selected classpath container entries or an empty if the query has
          * been cancelled by the user.
          */
-        public IClasspathEntry[] doQuery(final IJavaProject project, final IClasspathEntry[] entries);
+        IClasspathEntry[] doQuery(final IJavaProject project, final IClasspathEntry[] entries);
     }
 
     /**

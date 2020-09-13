@@ -38,7 +38,7 @@ public interface IModifyDialogTabPage {
 	 *
 	 * @param workingValues the values to work with
 	 */
-	public void setWorkingValues(Map<String, String> workingValues);
+	void setWorkingValues(Map<String, String> workingValues);
 
 	/**
 	 * A modify listener which must be informed whenever
@@ -48,7 +48,7 @@ public interface IModifyDialogTabPage {
 	 *
 	 * @param modifyListener the listener to inform
 	 */
-	public void setModifyListener(IModificationListener modifyListener);
+	void setModifyListener(IModificationListener modifyListener);
 
 	/**
 	 * Create the contents of this tab page.
@@ -56,7 +56,7 @@ public interface IModifyDialogTabPage {
 	 * @param parent the parent composite
 	 * @return created content control
 	 */
-	public Composite createContents(Composite parent);
+	Composite createContents(Composite parent);
 
 	/**
 	 * This is called when the page becomes visible.
@@ -65,7 +65,7 @@ public interface IModifyDialogTabPage {
 	 * <li>Setting the focus</li>
 	 * </ul>
 	 */
-	public void makeVisible();
+	void makeVisible();
 
 	/**
 	 * Each tab page should remember where its last focus was, and reset it
@@ -73,6 +73,6 @@ public interface IModifyDialogTabPage {
 	 * initialization on the first tab page to be displayed in order to restore
 	 * the focus of the last session.
 	 */
-	public void setInitialFocus();
+	void setInitialFocus();
 
 }

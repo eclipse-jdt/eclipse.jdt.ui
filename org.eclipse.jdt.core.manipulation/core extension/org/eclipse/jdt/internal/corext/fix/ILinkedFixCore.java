@@ -27,5 +27,5 @@ public interface ILinkedFixCore extends ICleanUpFixCore {
 	/**
 	 * @return the linked proposal model to use to set up linked positions or <b>null</b>
 	 */
-	public LinkedProposalModelCore getLinkedPositionsCore();
+	LinkedProposalModelCore getLinkedPositionsCore();
 }

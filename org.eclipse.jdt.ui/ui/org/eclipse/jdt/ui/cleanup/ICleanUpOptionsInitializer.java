@@ -26,5 +26,5 @@ public interface ICleanUpOptionsInitializer {
 	 *
 	 * @param options the clean up options
 	 */
-	public void setDefaultOptions(CleanUpOptions options);
+	void setDefaultOptions(CleanUpOptions options);
 }

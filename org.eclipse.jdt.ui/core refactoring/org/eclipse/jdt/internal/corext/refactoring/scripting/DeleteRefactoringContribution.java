@@ -36,7 +36,7 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaDeleteProcessor;
 public final class DeleteRefactoringContribution extends JavaUIRefactoringContribution {
 
 	@Override
-	public final Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
+	public Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
 		JavaRefactoringArguments arguments= new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor));
 		JavaDeleteProcessor processor= new JavaDeleteProcessor(arguments, status);
 		return new DeleteRefactoring(processor);

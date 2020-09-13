@@ -31,7 +31,7 @@ public interface IJavaPartitionerManager {
 	 *
 	 * @return a Java partition scanner
 	 */
-	public IPartitionTokenScanner getPartitionScanner();
+	IPartitionTokenScanner getPartitionScanner();
 
 	/**
 	 * Factory method for creating a Java-specific document partitioner
@@ -40,5 +40,5 @@ public interface IJavaPartitionerManager {
 	 *
 	 * @return a newly created Java document partitioner
 	 */
-	public IDocumentPartitioner createDocumentPartitioner();
+	IDocumentPartitioner createDocumentPartitioner();
 }

@@ -55,7 +55,7 @@ public interface IMultiFixCore extends ICleanUpCore {
 	 *            The location of the problem to fix
 	 * @return True if problem can be fixed
 	 */
-	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocationCore problem);
+	boolean canFix(ICompilationUnit compilationUnit, IProblemLocationCore problem);
 
 	/**
 	 * Maximal number of problems this clean up will fix in compilation unit.
@@ -65,6 +65,6 @@ public interface IMultiFixCore extends ICleanUpCore {
 	 *            The compilation unit to fix, not null
 	 * @return The maximal number of fixes or -1 if unknown.
 	 */
-	public abstract int computeNumberOfFixes(CompilationUnit compilationUnit);
+	int computeNumberOfFixes(CompilationUnit compilationUnit);
 
 }

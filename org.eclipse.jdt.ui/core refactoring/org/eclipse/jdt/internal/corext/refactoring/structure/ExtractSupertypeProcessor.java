@@ -193,7 +193,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	}
 
 	@Override
-	protected final RefactoringStatus checkDeclaringSuperTypes(final IProgressMonitor monitor) throws JavaModelException {
+	protected RefactoringStatus checkDeclaringSuperTypes(final IProgressMonitor monitor) throws JavaModelException {
 		return new RefactoringStatus();
 	}
 
@@ -345,7 +345,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	 * @throws CoreException
 	 *             if an error occurs
 	 */
-	protected final RefactoringStatus createExtractedSuperType(final IType superType, final IProgressMonitor monitor) throws CoreException {
+	protected RefactoringStatus createExtractedSuperType(final IType superType, final IProgressMonitor monitor) throws CoreException {
 		Assert.isNotNull(monitor);
 		fSuperSource= null;
 		final RefactoringStatus status= new RefactoringStatus();
@@ -386,7 +386,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	 * @param status
 	 *            the refactoring status
 	 */
-	protected final void createModifiedSubType(final ICompilationUnit unit, final CompilationUnit root, final IType extractedType, final ITypeBinding extractedBinding, final AbstractTypeDeclaration subDeclaration, final RefactoringStatus status) {
+	protected void createModifiedSubType(final ICompilationUnit unit, final CompilationUnit root, final IType extractedType, final ITypeBinding extractedBinding, final AbstractTypeDeclaration subDeclaration, final RefactoringStatus status) {
 		Assert.isNotNull(unit);
 		Assert.isNotNull(subDeclaration);
 		Assert.isNotNull(extractedType);
@@ -426,7 +426,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	 * @param status
 	 *            the refactoring status
 	 */
-	protected final void createNecessaryConstructors(final CompilationUnitRewrite targetRewrite, final IType superType, final AbstractTypeDeclaration targetDeclaration, final RefactoringStatus status) {
+	protected void createNecessaryConstructors(final CompilationUnitRewrite targetRewrite, final IType superType, final AbstractTypeDeclaration targetDeclaration, final RefactoringStatus status) {
 		Assert.isNotNull(targetRewrite);
 		Assert.isNotNull(targetDeclaration);
 		if (superType != null) {
@@ -480,7 +480,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	 * @throws CoreException
 	 *             if an error occurs
 	 */
-	protected final String createSuperTypeSource(final ICompilationUnit extractedWorkingCopy, final IType superType, final AbstractTypeDeclaration declaringDeclaration, final RefactoringStatus status, final IProgressMonitor monitor) throws CoreException {
+	protected String createSuperTypeSource(final ICompilationUnit extractedWorkingCopy, final IType superType, final AbstractTypeDeclaration declaringDeclaration, final RefactoringStatus status, final IProgressMonitor monitor) throws CoreException {
 		Assert.isNotNull(extractedWorkingCopy);
 		Assert.isNotNull(declaringDeclaration);
 		Assert.isNotNull(status);
@@ -565,7 +565,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	 * @throws CoreException
 	 *             if an error occurs
 	 */
-	protected final void createTypeDeclaration(final ICompilationUnit extractedWorkingCopy, final IType superType, final AbstractTypeDeclaration declaringDeclaration, final String comment, final StringBuffer buffer, final RefactoringStatus status, final IProgressMonitor monitor) throws CoreException {
+	protected void createTypeDeclaration(final ICompilationUnit extractedWorkingCopy, final IType superType, final AbstractTypeDeclaration declaringDeclaration, final String comment, final StringBuffer buffer, final RefactoringStatus status, final IProgressMonitor monitor) throws CoreException {
 		Assert.isNotNull(extractedWorkingCopy);
 		Assert.isNotNull(declaringDeclaration);
 		Assert.isNotNull(buffer);
@@ -634,7 +634,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	 * @param targetDeclaration
 	 *            the type declaration of the target type
 	 */
-	protected final void createTypeParameters(final CompilationUnitRewrite targetRewrite, final IType subType, final AbstractTypeDeclaration sourceDeclaration, final AbstractTypeDeclaration targetDeclaration) {
+	protected void createTypeParameters(final CompilationUnitRewrite targetRewrite, final IType subType, final AbstractTypeDeclaration sourceDeclaration, final AbstractTypeDeclaration targetDeclaration) {
 		Assert.isNotNull(targetRewrite);
 		Assert.isNotNull(sourceDeclaration);
 		Assert.isNotNull(targetDeclaration);
@@ -665,7 +665,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	 * @throws JavaModelException
 	 *             if the type parameters cannot be retrieved
 	 */
-	protected final void createTypeSignature(final CompilationUnitRewrite subRewrite, final AbstractTypeDeclaration declaration, final IType extractedType, final ITypeBinding extractedBinding, final IProgressMonitor monitor) throws JavaModelException {
+	protected void createTypeSignature(final CompilationUnitRewrite subRewrite, final AbstractTypeDeclaration declaration, final IType extractedType, final ITypeBinding extractedBinding, final IProgressMonitor monitor) throws JavaModelException {
 		Assert.isNotNull(subRewrite);
 		Assert.isNotNull(declaration);
 		Assert.isNotNull(extractedType);
@@ -719,7 +719,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	 * @param targetDeclaration
 	 *            the type declaration of the target type
 	 */
-	protected final void createTypeSignature(final CompilationUnitRewrite targetRewrite, final IType superType, final AbstractTypeDeclaration declaringDeclaration, final AbstractTypeDeclaration targetDeclaration) {
+	protected void createTypeSignature(final CompilationUnitRewrite targetRewrite, final IType superType, final AbstractTypeDeclaration declaringDeclaration, final AbstractTypeDeclaration targetDeclaration) {
 		Assert.isNotNull(targetRewrite);
 		Assert.isNotNull(declaringDeclaration);
 		Assert.isNotNull(targetDeclaration);
@@ -747,7 +747,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	}
 
 	@Override
-	public final RefactoringStatus createWorkingCopyLayer(final IProgressMonitor monitor) {
+	public RefactoringStatus createWorkingCopyLayer(final IProgressMonitor monitor) {
 		Assert.isNotNull(monitor);
 		final RefactoringStatus status= new RefactoringStatus();
 		try {

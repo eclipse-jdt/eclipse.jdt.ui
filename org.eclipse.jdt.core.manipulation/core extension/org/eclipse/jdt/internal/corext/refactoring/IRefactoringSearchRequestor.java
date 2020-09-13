@@ -29,5 +29,5 @@ public interface IRefactoringSearchRequestor {
 	 * @param match the search match to test
 	 * @return The accepted match, or <code>null</code> if not accepted
 	 */
-	public SearchMatch acceptSearchMatch(SearchMatch match);
+	SearchMatch acceptSearchMatch(SearchMatch match);
 }

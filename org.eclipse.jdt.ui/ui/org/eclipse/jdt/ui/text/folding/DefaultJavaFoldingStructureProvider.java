@@ -290,7 +290,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	/**
 	 * Filter for annotations.
 	 */
-	private static interface Filter {
+	private interface Filter {
 		boolean match(JavaProjectionAnnotation annotation);
 	}
 

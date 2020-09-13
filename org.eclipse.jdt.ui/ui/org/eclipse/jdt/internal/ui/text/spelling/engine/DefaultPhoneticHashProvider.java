@@ -144,7 +144,7 @@ public final class DefaultPhoneticHashProvider implements IPhoneticHashProvider 
 	 * @return <code>true</code> iff the string contains one of the
 	 *               candidates, <code>false</code> otherwise.
 	 */
-	protected static final boolean hasOneOf(final String[] candidates, final char[] token, final int offset, final int length) {
+	protected static boolean hasOneOf(final String[] candidates, final char[] token, final int offset, final int length) {
 
 		if (offset < 0 || offset >= token.length || candidates.length == 0)
 			return false;
@@ -164,7 +164,7 @@ public final class DefaultPhoneticHashProvider implements IPhoneticHashProvider 
 	 * @return <code>true</code> iff the string contains one of the
 	 *               candidates, <code>false</code> otherwise.
 	 */
-	protected static final boolean hasOneOf(final String[] candidates, final String token) {
+	protected static boolean hasOneOf(final String[] candidates, final String token) {
 		return Arrays.asList(candidates).contains(token);
 	}
 
@@ -181,7 +181,7 @@ public final class DefaultPhoneticHashProvider implements IPhoneticHashProvider 
 	 * @return <code>true</code> iff the token contains a vowel, <code>false</code>
 	 *               otherwise.
 	 */
-	protected static final boolean hasVowel(final char[] token, final int offset, final int length) {
+	protected static boolean hasVowel(final char[] token, final int offset, final int length) {
 
 		if (offset >= 0 && offset < length) {
 
@@ -196,7 +196,7 @@ public final class DefaultPhoneticHashProvider implements IPhoneticHashProvider 
 	}
 
 	@Override
-	public final String getHash(final String word) {
+	public String getHash(final String word) {
 
 		final String input= word.toUpperCase() + "     "; //$NON-NLS-1$
 		final char[] hashable= input.toCharArray();
@@ -668,7 +668,7 @@ public final class DefaultPhoneticHashProvider implements IPhoneticHashProvider 
 	}
 
 	@Override
-	public final char[] getMutators() {
+	public char[] getMutators() {
 		return MUTATOR_CHARACTERS;
 	}
 }

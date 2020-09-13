@@ -29,93 +29,93 @@ public interface IJavaThemeConstants {
 	/**
 	 * Theme constant for the color used to highlight matching brackets.
 	 */
-	public final String EDITOR_MATCHING_BRACKETS_COLOR= ID_PREFIX + PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR;
+	String EDITOR_MATCHING_BRACKETS_COLOR= ID_PREFIX + PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR;
 
 	/**
 	 * Theme constant for the color used to render multi-line comments.
 	 */
-	public final String EDITOR_MULTI_LINE_COMMENT_COLOR= ID_PREFIX + PreferenceConstants.EDITOR_MULTI_LINE_COMMENT_COLOR;
+	String EDITOR_MULTI_LINE_COMMENT_COLOR= ID_PREFIX + PreferenceConstants.EDITOR_MULTI_LINE_COMMENT_COLOR;
 
 	/**
 	 * Theme constant for the color used to render java keywords.
 	 */
-	public final String EDITOR_JAVA_KEYWORD_COLOR= ID_PREFIX + PreferenceConstants.EDITOR_JAVA_KEYWORD_COLOR;
+	String EDITOR_JAVA_KEYWORD_COLOR= ID_PREFIX + PreferenceConstants.EDITOR_JAVA_KEYWORD_COLOR;
 
 	/**
 	 * A theme constant that holds the color used to render string constants.
 	 */
-	public final String EDITOR_STRING_COLOR= ID_PREFIX + PreferenceConstants.EDITOR_STRING_COLOR;
+	String EDITOR_STRING_COLOR= ID_PREFIX + PreferenceConstants.EDITOR_STRING_COLOR;
 
 	/**
 	 * A theme constant that holds the color used to render single line comments.
 	 */
-	public final String EDITOR_SINGLE_LINE_COMMENT_COLOR= ID_PREFIX + PreferenceConstants.EDITOR_SINGLE_LINE_COMMENT_COLOR;
+	String EDITOR_SINGLE_LINE_COMMENT_COLOR= ID_PREFIX + PreferenceConstants.EDITOR_SINGLE_LINE_COMMENT_COLOR;
 
 	/**
 	 * A theme constant that holds the color used to render operators.
 	 */
-	public final String EDITOR_JAVA_OPERATOR_COLOR= ID_PREFIX + PreferenceConstants.EDITOR_JAVA_OPERATOR_COLOR;
+	String EDITOR_JAVA_OPERATOR_COLOR= ID_PREFIX + PreferenceConstants.EDITOR_JAVA_OPERATOR_COLOR;
 
 	/**
 	 * A theme constant that holds the color used to render java default text.
 	 */
-	public final String EDITOR_JAVA_DEFAULT_COLOR= ID_PREFIX + PreferenceConstants.EDITOR_JAVA_DEFAULT_COLOR;
+	String EDITOR_JAVA_DEFAULT_COLOR= ID_PREFIX + PreferenceConstants.EDITOR_JAVA_DEFAULT_COLOR;
 
 	/**
 	 * A theme constant that holds the color used to render the 'return' keyword.
 	 */
-	public final String EDITOR_JAVA_KEYWORD_RETURN_COLOR= ID_PREFIX + PreferenceConstants.EDITOR_JAVA_KEYWORD_RETURN_COLOR;
+	String EDITOR_JAVA_KEYWORD_RETURN_COLOR= ID_PREFIX + PreferenceConstants.EDITOR_JAVA_KEYWORD_RETURN_COLOR;
 
 	/**
 	 * A theme constant that holds the color used to render javadoc keywords.
 	 */
-	public final String EDITOR_JAVADOC_KEYWORD_COLOR= ID_PREFIX + PreferenceConstants.EDITOR_JAVADOC_KEYWORD_COLOR;
+	String EDITOR_JAVADOC_KEYWORD_COLOR= ID_PREFIX + PreferenceConstants.EDITOR_JAVADOC_KEYWORD_COLOR;
 
 	/**
 	 * A theme constant that holds the color used to render javadoc tags.
 	 */
-	public final String EDITOR_JAVADOC_TAG_COLOR= ID_PREFIX + PreferenceConstants.EDITOR_JAVADOC_TAG_COLOR;
+	String EDITOR_JAVADOC_TAG_COLOR= ID_PREFIX + PreferenceConstants.EDITOR_JAVADOC_TAG_COLOR;
 
 	/**
 	 * A theme constant that holds the color used to render brackets.
 	 */
-	public final String EDITOR_JAVA_BRACKET_COLOR= ID_PREFIX + PreferenceConstants.EDITOR_JAVA_BRACKET_COLOR;
+	String EDITOR_JAVA_BRACKET_COLOR= ID_PREFIX + PreferenceConstants.EDITOR_JAVA_BRACKET_COLOR;
 
 	/**
 	 * A theme constant that holds the color used to render task tags.
 	 */
-	public final String EDITOR_TASK_TAG_COLOR= ID_PREFIX + PreferenceConstants.EDITOR_TASK_TAG_COLOR;
+	String EDITOR_TASK_TAG_COLOR= ID_PREFIX + PreferenceConstants.EDITOR_TASK_TAG_COLOR;
 
 	/**
 	 * A theme constant that holds the color used to render javadoc links.
 	 */
-	public final String EDITOR_JAVADOC_LINKS_COLOR= ID_PREFIX + PreferenceConstants.EDITOR_JAVADOC_LINKS_COLOR;
+	String EDITOR_JAVADOC_LINKS_COLOR= ID_PREFIX + PreferenceConstants.EDITOR_JAVADOC_LINKS_COLOR;
 
 	/**
 	 * A theme constant that holds the color used to render javadoc default text.
 	 */
-	public final String EDITOR_JAVADOC_DEFAULT_COLOR= ID_PREFIX + PreferenceConstants.EDITOR_JAVADOC_DEFAULT_COLOR;
+	String EDITOR_JAVADOC_DEFAULT_COLOR= ID_PREFIX + PreferenceConstants.EDITOR_JAVADOC_DEFAULT_COLOR;
 
 	/**
 	 * A theme constant that holds the background color used for parameter hints.
 	 */
-	public final String CODEASSIST_PARAMETERS_BACKGROUND= ID_PREFIX + PreferenceConstants.CODEASSIST_PARAMETERS_BACKGROUND;
+	String CODEASSIST_PARAMETERS_BACKGROUND= ID_PREFIX + PreferenceConstants.CODEASSIST_PARAMETERS_BACKGROUND;
 
 	/**
 	 * A theme constant that holds the foreground color used in the code assist selection dialog.
 	 */
-	public final String CODEASSIST_PARAMETERS_FOREGROUND= ID_PREFIX + PreferenceConstants.CODEASSIST_PARAMETERS_FOREGROUND;
+	String CODEASSIST_PARAMETERS_FOREGROUND= ID_PREFIX + PreferenceConstants.CODEASSIST_PARAMETERS_FOREGROUND;
 
 	/**
 	 * Theme constant for the background color used in the code assist selection dialog to mark replaced code.
 	 */
-	public final String CODEASSIST_REPLACEMENT_BACKGROUND= ID_PREFIX + PreferenceConstants.CODEASSIST_REPLACEMENT_BACKGROUND;
+	String CODEASSIST_REPLACEMENT_BACKGROUND= ID_PREFIX + PreferenceConstants.CODEASSIST_REPLACEMENT_BACKGROUND;
 
 	/**
 	 * Theme constant for the foreground color used in the code
 	 * assist selection dialog to mark replaced code.
 	 */
-	public final String CODEASSIST_REPLACEMENT_FOREGROUND= ID_PREFIX + PreferenceConstants.CODEASSIST_REPLACEMENT_FOREGROUND;
+	String CODEASSIST_REPLACEMENT_FOREGROUND= ID_PREFIX + PreferenceConstants.CODEASSIST_REPLACEMENT_FOREGROUND;
 
 	/**
 	 * Theme constant for the color used to render values in a properties file.

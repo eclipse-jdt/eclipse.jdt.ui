@@ -33,7 +33,7 @@ public interface IContextMenuConstants {
 	 *
 	 * @since 2.0
 	 */
-	public static final String TARGET_ID_HIERARCHY_VIEW= JavaUI.ID_TYPE_HIERARCHY + ".typehierarchy"; //$NON-NLS-1$
+	String TARGET_ID_HIERARCHY_VIEW= JavaUI.ID_TYPE_HIERARCHY + ".typehierarchy"; //$NON-NLS-1$
 
 	/**
 	 * Type hierarchy view part: pop-up menu target ID for supertype hierarchy viewer
@@ -41,7 +41,7 @@ public interface IContextMenuConstants {
 	 *
 	 * @since 2.0
 	 */
-	public static final String TARGET_ID_SUPERTYPES_VIEW= JavaUI.ID_TYPE_HIERARCHY + ".supertypes"; //$NON-NLS-1$
+	String TARGET_ID_SUPERTYPES_VIEW= JavaUI.ID_TYPE_HIERARCHY + ".supertypes"; //$NON-NLS-1$
 
 	/**
 	 * Type hierarchy view part: Pop-up menu target ID for the subtype hierarchy viewer
@@ -49,7 +49,7 @@ public interface IContextMenuConstants {
 	 *
 	 * @since 2.0
 	 */
-	public static final String TARGET_ID_SUBTYPES_VIEW= JavaUI.ID_TYPE_HIERARCHY + ".subtypes"; //$NON-NLS-1$
+	String TARGET_ID_SUBTYPES_VIEW= JavaUI.ID_TYPE_HIERARCHY + ".subtypes"; //$NON-NLS-1$
 
 	/**
 	 * Type hierarchy view part: pop-up menu target ID for the member viewer
@@ -57,7 +57,7 @@ public interface IContextMenuConstants {
 	 *
 	 * @since 2.0
 	 */
-	public static final String TARGET_ID_MEMBERS_VIEW= JavaUI.ID_TYPE_HIERARCHY + ".members"; //$NON-NLS-1$
+	String TARGET_ID_MEMBERS_VIEW= JavaUI.ID_TYPE_HIERARCHY + ".members"; //$NON-NLS-1$
 
 
 	/**
@@ -70,7 +70,7 @@ public interface IContextMenuConstants {
 	 *  <li>Go To</li>
 	 * </ul>
 	 */
-	public static final String GROUP_GOTO=		ICommonMenuConstants.GROUP_GOTO;
+	String GROUP_GOTO=		ICommonMenuConstants.GROUP_GOTO;
 	/**
 	 * Pop-up menu: name of group for open actions (value <code>"group.open"</code>).
 	 * <p>
@@ -81,7 +81,7 @@ public interface IContextMenuConstants {
 	 *  <li>Open With</li>
 	 * </ul>
 	 */
-	public static final String GROUP_OPEN=		ICommonMenuConstants.GROUP_OPEN;
+	String GROUP_OPEN=		ICommonMenuConstants.GROUP_OPEN;
 
 	/**
 	 * Pop-up menu: name of group for show actions (value <code>"group.show"</code>).
@@ -93,7 +93,7 @@ public interface IContextMenuConstants {
 	 *  <li>Show in Type Hierarchy</li>
 	 * </ul>
 	 */
-	public static final String GROUP_SHOW=		ICommonMenuConstants.GROUP_SHOW;
+	String GROUP_SHOW=		ICommonMenuConstants.GROUP_SHOW;
 
 	/**
 	 * Pop-up menu: name of group for new actions (value <code>"group.new"</code>).
@@ -105,23 +105,23 @@ public interface IContextMenuConstants {
 	 *  <li>Create new interface</li>
 	 * </ul>
 	 */
-	public static final String GROUP_NEW=		ICommonMenuConstants.GROUP_NEW;
+	String GROUP_NEW=		ICommonMenuConstants.GROUP_NEW;
 
 	/**
 	 * Pop-up menu: name of group for build actions (value <code>"group.build"</code>).
 	 */
-	public static final String GROUP_BUILD=		ICommonMenuConstants.GROUP_BUILD;
+	String GROUP_BUILD=		ICommonMenuConstants.GROUP_BUILD;
 
 	/**
 	 * Pop-up menu: name of group for reorganize actions (value <code>"group.reorganize"</code>).
 	 */
-	public static final String GROUP_REORGANIZE=	ICommonMenuConstants.GROUP_REORGANIZE;
+	String GROUP_REORGANIZE=	ICommonMenuConstants.GROUP_REORGANIZE;
 
 	/**
 	 * Pop-up menu: name of group for code generation actions (
 	 * value <code>"group.generate"</code>).
 	 */
-	public static final String GROUP_GENERATE=	ICommonMenuConstants.GROUP_GENERATE;
+	String GROUP_GENERATE=	ICommonMenuConstants.GROUP_GENERATE;
 
 	/**
 	 * Pop-up menu: name of group for source actions. This is an alias for
@@ -130,25 +130,25 @@ public interface IContextMenuConstants {
 	 *
 	 * @since 2.0
 	 */
-	public static final String GROUP_SOURCE=		ICommonMenuConstants.GROUP_SOURCE;
+	String GROUP_SOURCE=		ICommonMenuConstants.GROUP_SOURCE;
 
 	/**
 	 * Pop-up menu: name of group for search actions (value <code>"group.search"</code>).
 	 */
-	public static final String GROUP_SEARCH=		ICommonMenuConstants.GROUP_SEARCH;
+	String GROUP_SEARCH=		ICommonMenuConstants.GROUP_SEARCH;
 
 	/**
 	 * Pop-up menu: name of group for additional actions (value <code>"additions"</code>).
 	 */
-	public static final String GROUP_ADDITIONS=	ICommonMenuConstants.GROUP_ADDITIONS;
+	String GROUP_ADDITIONS=	ICommonMenuConstants.GROUP_ADDITIONS;
 
 	/**
 	 * Pop-up menu: name of group for viewer setup actions (value <code>"group.viewerSetup"</code>).
 	 */
-	public static final String GROUP_VIEWER_SETUP=	ICommonMenuConstants.GROUP_VIEWER_SETUP;
+	String GROUP_VIEWER_SETUP=	ICommonMenuConstants.GROUP_VIEWER_SETUP;
 
 	/**
 	 * Pop-up menu: name of group for properties actions (value <code>"group.properties"</code>).
 	 */
-	public static final String GROUP_PROPERTIES=	ICommonMenuConstants.GROUP_PROPERTIES;
+	String GROUP_PROPERTIES=	ICommonMenuConstants.GROUP_PROPERTIES;
 }

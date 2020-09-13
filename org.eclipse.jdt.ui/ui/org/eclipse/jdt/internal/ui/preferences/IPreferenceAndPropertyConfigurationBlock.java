@@ -28,11 +28,11 @@ public interface IPreferenceAndPropertyConfigurationBlock extends IPreferenceCon
 	/**
 	 * Disable project specific settings for the settings configured by this block.
 	 */
-	public abstract void disableProjectSettings();
+	void disableProjectSettings();
 
 	/**
 	 * Enabled project specific settings for the settings configured by this block.
 	 */
-	public abstract void enableProjectSettings();
+	void enableProjectSettings();
 
 }

@@ -26,5 +26,5 @@ public interface ILinkedFix extends ICleanUpFix {
 	/**
 	 * @return the linked proposal model to use to set up linked positions or <b>null</b>
 	 */
-	public LinkedProposalModel getLinkedPositions();
+	LinkedProposalModel getLinkedPositions();
 }

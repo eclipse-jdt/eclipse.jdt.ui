@@ -13,5 +13,5 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 public interface IMemberActionInfo {
-	public boolean isActive();
+	boolean isActive();
 }

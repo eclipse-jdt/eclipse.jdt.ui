@@ -86,19 +86,19 @@ public final class ConstraintOperator {
 		return fOperatorString.hashCode();
 	}
 
-	public final boolean isSubtypeOperator() {
+	public boolean isSubtypeOperator() {
 		return fOperatorCode == CODE_SUBTYPE;
 	}
 
-	public final boolean isStrictSubtypeOperator() {
+	public boolean isStrictSubtypeOperator() {
 		return fOperatorCode == CODE_STRICT_SUBTYPE;
 	}
 
-	public final boolean isEqualsOperator() {
+	public boolean isEqualsOperator() {
 		return fOperatorCode == CODE_EQUALS;
 	}
 
-	public final boolean isDefinesOperator() {
+	public boolean isDefinesOperator() {
 		return fOperatorCode == CODE_DEFINES;
 	}
 }

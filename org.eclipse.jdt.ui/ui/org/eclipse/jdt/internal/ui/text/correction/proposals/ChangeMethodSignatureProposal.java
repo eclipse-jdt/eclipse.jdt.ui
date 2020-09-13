@@ -59,7 +59,7 @@ import org.eclipse.jdt.internal.ui.text.correction.JavadocTagsSubProcessor;
 
 public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 
-	public static interface ChangeDescription {
+	public interface ChangeDescription {
 	}
 
 	public static class SwapDescription implements ChangeDescription {

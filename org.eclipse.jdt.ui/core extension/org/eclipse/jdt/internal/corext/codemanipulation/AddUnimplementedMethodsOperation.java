@@ -134,7 +134,7 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 	 *
 	 * @return the generated imports
 	 */
-	public final String[] getCreatedImports() {
+	public String[] getCreatedImports() {
 		if (fCreatedImports != null) {
 			return fCreatedImports;
 		}
@@ -146,7 +146,7 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 	 *
 	 * @return the method binding keys
 	 */
-	public final String[] getCreatedMethods() {
+	public String[] getCreatedMethods() {
 		final String[] keys= new String[fCreatedMethods.size()];
 		fCreatedMethods.toArray(keys);
 		return keys;
@@ -157,7 +157,7 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 	 *
 	 * @return the scheduling rule
 	 */
-	public final ISchedulingRule getSchedulingRule() {
+	public ISchedulingRule getSchedulingRule() {
 		return ResourcesPlugin.getWorkspace().getRoot();
 	}
 
@@ -165,7 +165,7 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 	 * @see org.eclipse.core.resources.IWorkspaceRunnable#run(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	@Override
-	public final void run(IProgressMonitor monitor) throws CoreException {
+	public void run(IProgressMonitor monitor) throws CoreException {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {

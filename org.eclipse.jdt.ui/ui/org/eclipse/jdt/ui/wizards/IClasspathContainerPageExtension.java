@@ -36,6 +36,6 @@ public interface IClasspathContainerPageExtension {
 	 * @param currentEntries The class path entries currently selected to be set as the projects classpath. This can also
 	 * include the entry to be edited.
 	 */
-	public void initialize(IJavaProject project, IClasspathEntry[] currentEntries);
+	void initialize(IJavaProject project, IClasspathEntry[] currentEntries);
 
 }

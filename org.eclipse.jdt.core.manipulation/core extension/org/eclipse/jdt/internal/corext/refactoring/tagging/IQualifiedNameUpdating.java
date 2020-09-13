@@ -20,7 +20,7 @@ public interface IQualifiedNameUpdating {
 	 * updating qualified names in non Java files. The return value of this
 	 * method may change according to the state of the refactoring.
 	 */
-	public boolean canEnableQualifiedNameUpdating();
+	boolean canEnableQualifiedNameUpdating();
 
 	/**
 	 * If <code>canEnableQualifiedNameUpdating</code> returns <code>true</code>,
@@ -28,7 +28,7 @@ public interface IQualifiedNameUpdating {
 	 * in non Java files should be updated. This call can be ignored if
 	 * <code>canEnableQualifiedNameUpdating</code> returns <code>false</code>.
 	 */
-	public boolean getUpdateQualifiedNames();
+	boolean getUpdateQualifiedNames();
 
 	/**
 	 * If <code>canEnableQualifiedNameUpdating</code> returns <code>true</code>,
@@ -36,11 +36,11 @@ public interface IQualifiedNameUpdating {
 	 * references in non Java files should be updated. This call can be ignored
 	 * if <code>canEnableQualifiedNameUpdating</code> returns <code>false</code>.
 	 */
-	public void setUpdateQualifiedNames(boolean update);
+	void setUpdateQualifiedNames(boolean update);
 
-	public String getFilePatterns();
+	String getFilePatterns();
 
-	public void setFilePatterns(String patterns);
+	void setFilePatterns(String patterns);
 }
 
 

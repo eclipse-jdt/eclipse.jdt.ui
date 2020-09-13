@@ -39,5 +39,5 @@ public interface IJarExportRunnable extends IRunnableWithProgress {
 	 *
 	 * @return the status of this operation
 	 */
-	public IStatus getStatus();
+	IStatus getStatus();
 }

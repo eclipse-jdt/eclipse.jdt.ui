@@ -19,5 +19,5 @@ package org.eclipse.jdt.internal.corext.buildpath;
  */
 public interface IBuildpathModifierListener {
 
-	public void buildpathChanged(BuildpathDelta delta);
+	void buildpathChanged(BuildpathDelta delta);
 }

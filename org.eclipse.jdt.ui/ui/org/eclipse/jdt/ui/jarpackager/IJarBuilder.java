@@ -68,14 +68,14 @@ public interface IJarBuilder {
 	 *
 	 * @return the unique id of this builder
 	 */
-	public String getId();
+	String getId();
 
 	/**
 	 * Returns the manifest provider to build the manifest
 	 *
 	 * @return the manifest provider to build the manifest
 	 */
-	public IManifestProvider getManifestProvider();
+	IManifestProvider getManifestProvider();
 
 	/**
 	 * Called when building of the JAR starts
@@ -88,7 +88,7 @@ public interface IJarBuilder {
 	 *        a status to use to report status to the user
 	 * @throws CoreException thrown when the JAR could not be opened
 	 */
-	public void open(JarPackageData jarPackage, Shell shell, MultiStatus status) throws CoreException;
+	void open(JarPackageData jarPackage, Shell shell, MultiStatus status) throws CoreException;
 
 	/**
 	 * Add the given resource to the archive at the given path
@@ -100,7 +100,7 @@ public interface IJarBuilder {
 	 * @throws CoreException
 	 *        thrown when the file could not be written
 	 */
-	public void writeFile(IFile resource, IPath destinationPath) throws CoreException;
+	void writeFile(IFile resource, IPath destinationPath) throws CoreException;
 
 	/**
 	 * Add the given archive to the archive which is about to be build
@@ -110,7 +110,7 @@ public interface IJarBuilder {
 	 * @param monitor
 	 *        a monitor to report progress to
 	 */
-	public void writeArchive(ZipFile archive, IProgressMonitor monitor);
+	void writeArchive(ZipFile archive, IProgressMonitor monitor);
 
 	/**
 	 * Called when building of the JAR finished.
@@ -118,6 +118,6 @@ public interface IJarBuilder {
 	 * @throws CoreException
 	 *        thrown when the JAR could not be closed
 	 */
-	public void close() throws CoreException;
+	void close() throws CoreException;
 
 }

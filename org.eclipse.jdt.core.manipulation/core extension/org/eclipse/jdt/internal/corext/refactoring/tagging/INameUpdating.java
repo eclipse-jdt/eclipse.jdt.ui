@@ -26,19 +26,19 @@ public interface INameUpdating {
 	 * Sets new name for the entity that this refactoring is working on.
 	 * @param newName the new name
 	 */
-	public void setNewElementName(String newName);
+	void setNewElementName(String newName);
 
 	/**
 	 * Get the name for the entity that this refactoring is working on.
 	 * @return returns the new name
 	 */
-	public String getNewElementName();
+	String getNewElementName();
 
 	/**
 	 * Gets the current name of the entity that this refactoring is working on.
 	 * @return returns the current name
 	 */
-	public String getCurrentElementName();
+	String getCurrentElementName();
 
 	/**
 	 * Gets the original elements. Since an <code>INameUpdating</code> only renames one element,
@@ -46,7 +46,7 @@ public interface INameUpdating {
 	 * @return an array containing exactly one element
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#getElements()
 	 */
-	public Object[] getElements();
+	Object[] getElements();
 
 	/**
 	 * Gets the element after renaming, or <code>null</code> if not available.
@@ -54,7 +54,7 @@ public interface INameUpdating {
 	 *
 	 * @throws CoreException thrown when the new element could not be evaluated
 	 */
-	public Object getNewElement() throws CoreException;
+	Object getNewElement() throws CoreException;
 
 	/**
 	 * Checks if the new name is valid for the entity that this refactoring renames.
@@ -62,5 +62,5 @@ public interface INameUpdating {
 	 * @return returns the resulting status
 	 * @throws CoreException Core exception is thrown when the validation could not be performed
 	 */
-	public RefactoringStatus checkNewElementName(String newName) throws CoreException;
+	RefactoringStatus checkNewElementName(String newName) throws CoreException;
 }

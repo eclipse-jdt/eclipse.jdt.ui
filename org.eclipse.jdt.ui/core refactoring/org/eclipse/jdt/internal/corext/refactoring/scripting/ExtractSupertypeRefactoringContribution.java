@@ -36,7 +36,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractSupertypePro
 public final class ExtractSupertypeRefactoringContribution extends JavaUIRefactoringContribution {
 
 	@Override
-	public final Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
+	public Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
 		JavaRefactoringArguments arguments= new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor));
 		ExtractSupertypeProcessor processor= new ExtractSupertypeProcessor(arguments, status);
 		return new ProcessorBasedRefactoring(processor);

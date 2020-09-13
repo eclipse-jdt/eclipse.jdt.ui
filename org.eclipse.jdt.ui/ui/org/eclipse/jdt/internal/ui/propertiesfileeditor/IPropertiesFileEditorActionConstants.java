@@ -28,17 +28,17 @@ public interface IPropertiesFileEditorActionConstants {
 	 * Value: <code>"smartTyping"</code>
 	 * @since 3.0
 	 */
-	public static final String TOGGLE_SMART_TYPING= "smartTyping"; //$NON-NLS-1$
+	String TOGGLE_SMART_TYPING= "smartTyping"; //$NON-NLS-1$
 
 	/**
 	 * ID of the smart typing status item
 	 * Value: <code>"SmartTyping"</code>
 	 * @since 3.0
 	 */
-	public static final String STATUS_CATEGORY_SMART_TYPING= "SmartTyping"; //$NON-NLS-1$
+	String STATUS_CATEGORY_SMART_TYPING= "SmartTyping"; //$NON-NLS-1$
 
 	/**
 	 * ID of the action to toggle the style of the presentation.
 	 */
-	public static final String TOGGLE_PRESENTATION= "togglePresentation"; //$NON-NLS-1$
+	String TOGGLE_PRESENTATION= "togglePresentation"; //$NON-NLS-1$
 }

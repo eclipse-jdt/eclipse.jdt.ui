@@ -241,7 +241,7 @@ public class CategoryFilterActionGroup extends ActionGroup {
 	}
 
 	private interface IResultCollector {
-		public boolean accept(String[] category);
+		boolean accept(String[] category);
 	}
 
 	private static int COUNTER= 0;//WORKAROUND for Bug 132669 https://bugs.eclipse.org/bugs/show_bug.cgi?id=132669

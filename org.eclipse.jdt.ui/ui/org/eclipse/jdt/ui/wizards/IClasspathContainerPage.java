@@ -47,7 +47,7 @@ public interface IClasspathContainerPage extends IWizardPage {
 	 * @return if the operation was successful. Only when returned
 	 * <code>true</code>, the wizard will close.
 	 */
-	public boolean finish();
+	boolean finish();
 
 	/**
 	 * Returns the edited or created classpath container entry. This method
@@ -57,7 +57,7 @@ public interface IClasspathContainerPage extends IWizardPage {
 	 *
 	 * @return the classpath entry edited or created on the page.
 	 */
-	public IClasspathEntry getSelection();
+	IClasspathEntry getSelection();
 
 	/**
 	 * Sets the classpath container entry to be edited or <code>null</code>
@@ -67,6 +67,6 @@ public interface IClasspathContainerPage extends IWizardPage {
 	 * If not <code>null</code> then the classpath entry must be of
 	 * kind <code>IClasspathEntry.CPE_CONTAINER</code>
 	 */
-	public void setSelection(IClasspathEntry containerEntry);
+	void setSelection(IClasspathEntry containerEntry);
 
 }

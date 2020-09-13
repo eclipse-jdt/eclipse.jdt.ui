@@ -30,5 +30,5 @@ public interface IPhoneticDistanceAlgorithm {
 	 *                  The second word
 	 * @return The non-negative phonetic distance between the words.
 	 */
-	public int getDistance(String from, String to);
+	int getDistance(String from, String to);
 }

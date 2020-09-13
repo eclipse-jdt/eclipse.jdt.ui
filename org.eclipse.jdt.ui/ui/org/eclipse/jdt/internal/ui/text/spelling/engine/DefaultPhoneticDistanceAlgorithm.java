@@ -40,7 +40,7 @@ public final class DefaultPhoneticDistanceAlgorithm implements IPhoneticDistance
 	public static final int COST_SWAP= 90;
 
 	@Override
-	public final int getDistance(final String from, final String to) {
+	public int getDistance(final String from, final String to) {
 
 		final char[] first= (" " + from).toCharArray(); //$NON-NLS-1$
 		final char[] second= (" " + to).toCharArray(); //$NON-NLS-1$

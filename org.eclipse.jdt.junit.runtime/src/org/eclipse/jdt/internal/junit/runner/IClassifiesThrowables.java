@@ -18,12 +18,12 @@ package org.eclipse.jdt.internal.junit.runner;
 
 public interface IClassifiesThrowables {
 
-	public abstract boolean isComparisonFailure(Throwable throwable);
+	boolean isComparisonFailure(Throwable throwable);
 
 	/**
 	 * @param t a {@link Throwable}
 	 * @return the stack trace for the given {@link Throwable}.
 	 */
-	public abstract String getTrace(Throwable t);
+	String getTrace(Throwable t);
 
 }

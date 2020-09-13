@@ -34,6 +34,6 @@ public interface IClasspathContainerPageExtension2 {
 	 * @return the classpath entries created on the page. All returned entries must be on kind
 	 * {@link IClasspathEntry#CPE_CONTAINER}
 	 */
-	public IClasspathEntry[] getNewContainers();
+	IClasspathEntry[] getNewContainers();
 
 }

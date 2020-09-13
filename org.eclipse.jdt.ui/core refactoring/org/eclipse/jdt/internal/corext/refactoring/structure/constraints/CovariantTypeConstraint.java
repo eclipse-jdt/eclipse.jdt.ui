@@ -46,7 +46,7 @@ public final class CovariantTypeConstraint implements ITypeConstraint2 {
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
-	public final boolean equals(final Object object) {
+	public boolean equals(final Object object) {
 		if (object.getClass() != CovariantTypeConstraint.class)
 			return false;
 		final ITypeConstraint2 other= (ITypeConstraint2) object;
@@ -57,7 +57,7 @@ public final class CovariantTypeConstraint implements ITypeConstraint2 {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstraint2#getLeft()
 	 */
 	@Override
-	public final ConstraintVariable2 getLeft() {
+	public ConstraintVariable2 getLeft() {
 		return fDescendant;
 	}
 
@@ -65,7 +65,7 @@ public final class CovariantTypeConstraint implements ITypeConstraint2 {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstraint2#getRight()
 	 */
 	@Override
-	public final ConstraintVariable2 getRight() {
+	public ConstraintVariable2 getRight() {
 		return fAncestor;
 	}
 
@@ -73,7 +73,7 @@ public final class CovariantTypeConstraint implements ITypeConstraint2 {
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
-	public final int hashCode() {
+	public int hashCode() {
 		return fDescendant.hashCode() ^ 35 * fAncestor.hashCode();
 	}
 
@@ -81,7 +81,7 @@ public final class CovariantTypeConstraint implements ITypeConstraint2 {
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
-	public final String toString() {
+	public String toString() {
 		return fDescendant.toString() + " <<= " + fAncestor.toString(); //$NON-NLS-1$
 	}
 }

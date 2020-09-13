@@ -87,7 +87,7 @@ import org.eclipse.jdt.internal.ui.JavaUIStatus;
  */
 public class AddImportsOperation implements IWorkspaceRunnable {
 
-	public static interface IChooseImportQuery {
+	public interface IChooseImportQuery {
 		/**
 		 * Selects an import from a list of choices.
 		 * @param openChoices Array of found types

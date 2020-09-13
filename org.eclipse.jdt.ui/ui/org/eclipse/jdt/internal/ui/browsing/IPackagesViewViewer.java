@@ -25,21 +25,21 @@ import org.eclipse.swt.widgets.Widget;
  */
 interface IPackagesViewViewer {
 
-	public void mapElement(Object element, Widget item);
+	void mapElement(Object element, Widget item);
 
-	public void unmapElement(Object element, Widget item);
+	void unmapElement(Object element, Widget item);
 
-	public Widget doFindInputItem(Object element);
+	Widget doFindInputItem(Object element);
 
-	public Widget doFindItem(Object element);
+	Widget doFindItem(Object element);
 
-	public void doUpdateItem(Widget item, Object element, boolean fullMap);
-
-	@SuppressWarnings("rawtypes")
-	public List getSelectionFromWidget();
-
-	public void internalRefresh(Object element);
+	void doUpdateItem(Widget item, Object element, boolean fullMap);
 
 	@SuppressWarnings("rawtypes")
-	public void setSelectionToWidget(List l, boolean reveal);
+	List getSelectionFromWidget();
+
+	void internalRefresh(Object element);
+
+	@SuppressWarnings("rawtypes")
+	void setSelectionToWidget(List l, boolean reveal);
 }

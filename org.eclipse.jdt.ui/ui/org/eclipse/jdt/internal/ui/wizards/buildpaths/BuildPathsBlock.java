@@ -105,7 +105,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 
 public class BuildPathsBlock {
 
-	public static interface IRemoveOldBinariesQuery {
+	public interface IRemoveOldBinariesQuery {
 
 		/**
 		 * Do the callback. Returns <code>true</code> if .class files should be removed from the

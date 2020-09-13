@@ -17,16 +17,16 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomPr
 
 public interface IProfileVersioner {
 
-	public int getFirstVersion();
+	int getFirstVersion();
 
-	public int getCurrentVersion();
+	int getCurrentVersion();
 
-    public String getProfileKind();
+    String getProfileKind();
 
 	/**
 	 * Update the <code>profile</code> to the
 	 * current version number
 	 */
-	public void update(CustomProfile profile);
+	void update(CustomProfile profile);
 
 }

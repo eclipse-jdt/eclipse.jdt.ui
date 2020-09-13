@@ -33,7 +33,7 @@ public interface IProposableFix extends ICleanUpFixCore {
 	 *
 	 * @return the string to be displayed
 	 */
-	public String getDisplayString();
+	String getDisplayString();
 
 	/**
 	 * Returns optional additional information about the proposal. The additional information will
@@ -44,7 +44,7 @@ public interface IProposableFix extends ICleanUpFixCore {
 	 *
 	 * @return the additional information or <code>null</code>
 	 */
-	public String getAdditionalProposalInfo();
+	String getAdditionalProposalInfo();
 
 	/**
 	 * A status informing about issues with this fix
@@ -52,5 +52,5 @@ public interface IProposableFix extends ICleanUpFixCore {
 	 *
 	 * @return status to inform the user
 	 */
-	public IStatus getStatus();
+	IStatus getStatus();
 }

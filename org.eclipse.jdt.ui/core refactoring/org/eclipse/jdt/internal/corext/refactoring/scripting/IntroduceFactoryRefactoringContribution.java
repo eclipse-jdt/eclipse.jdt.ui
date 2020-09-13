@@ -35,7 +35,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceFactoryRefactor
 public final class IntroduceFactoryRefactoringContribution extends JavaUIRefactoringContribution {
 
 	@Override
-	public final Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
+	public Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
 		JavaRefactoringArguments arguments= new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor));
 		return new IntroduceFactoryRefactoring(arguments, status);
 	}

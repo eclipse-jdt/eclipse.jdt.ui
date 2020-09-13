@@ -357,7 +357,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 		}
 
 		@Override
-		protected final Control createDialogArea(Composite parent) {
+		protected Control createDialogArea(Composite parent) {
 			Composite composite= (Composite)super.createDialogArea(parent);
 
 			createMessageArea(composite);

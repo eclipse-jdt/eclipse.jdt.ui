@@ -24,5 +24,5 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
  */
 public interface IPackageFragmentRootManipulationQuery {
 
-	public boolean confirmManipulation(IPackageFragmentRoot root, IJavaProject[] referencingProjects);
+	boolean confirmManipulation(IPackageFragmentRoot root, IJavaProject[] referencingProjects);
 }

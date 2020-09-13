@@ -27,7 +27,7 @@ public interface IMethodWrapperDynamic {
 	 * @param o2 - Object to compare to
 	 * @return true if equal, false otherwise
 	 */
-	public boolean equals (MethodWrapper o1, Object o2);
+	boolean equals (MethodWrapper o1, Object o2);
 
 	/**
 	 * Dynamic adaptor method for MethodWrapper
@@ -35,6 +35,6 @@ public interface IMethodWrapperDynamic {
 	 * @param adapter - class to adapt
 	 * @return adapted class
 	 */
-	public <T> T getAdapter(MethodWrapper o1, Class<T> adapter);
+	<T> T getAdapter(MethodWrapper o1, Class<T> adapter);
 
 }

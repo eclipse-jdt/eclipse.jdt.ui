@@ -18,16 +18,16 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 
 public interface IOccurrencesFinder {
 
-	public static final int K_OCCURRENCE= 5;
+	int K_OCCURRENCE= 5;
 
-	public static final int K_EXCEPTION_OCCURRENCE= 6;
-	public static final int K_EXIT_POINT_OCCURRENCE= 7;
-	public static final int K_IMPLEMENTS_OCCURRENCE= 8;
-	public static final int K_BREAK_TARGET_OCCURRENCE= 9;
+	int K_EXCEPTION_OCCURRENCE= 6;
+	int K_EXIT_POINT_OCCURRENCE= 7;
+	int K_IMPLEMENTS_OCCURRENCE= 8;
+	int K_BREAK_TARGET_OCCURRENCE= 9;
 
-	public static final int F_WRITE_OCCURRENCE= 1;
-	public static final int F_READ_OCCURRENCE= 2;
-	public static final int F_EXCEPTION_DECLARATION= 8;
+	int F_WRITE_OCCURRENCE= 1;
+	int F_READ_OCCURRENCE= 2;
+	int F_EXCEPTION_DECLARATION= 8;
 
 
 	/**
@@ -70,11 +70,11 @@ public interface IOccurrencesFinder {
 	}
 
 
-	public String initialize(CompilationUnit root, int offset, int length);
+	String initialize(CompilationUnit root, int offset, int length);
 
-	public String initialize(CompilationUnit root, ASTNode node);
+	String initialize(CompilationUnit root, ASTNode node);
 
-	public String getJobLabel();
+	String getJobLabel();
 
 	/**
 	 * Returns the plural label for this finder with 3 placeholders:
@@ -85,7 +85,7 @@ public interface IOccurrencesFinder {
 	 *  </ul>
 	 * @return the unformatted label
 	 */
-	public String getUnformattedPluralLabel();
+	String getUnformattedPluralLabel();
 
 	/**
 	 * Returns the singular label for this finder with 2 placeholders:
@@ -95,14 +95,14 @@ public interface IOccurrencesFinder {
 	 *  </ul>
 	 * @return the unformatted label
 	 */
-	public String getUnformattedSingularLabel();
+	String getUnformattedSingularLabel();
 
 	/**
 	 * Returns the name of the element to look for or <code>null</code> if the finder hasn't
 	 * been initialized yet.
 	 * @return the name of the element
 	 */
-	public String getElementName();
+	String getElementName();
 
 
 	/**
@@ -110,22 +110,22 @@ public interface IOccurrencesFinder {
 	 *
 	 * @return the AST root
 	 */
-	public CompilationUnit getASTRoot();
+	CompilationUnit getASTRoot();
 
 	/**
 	 * Returns the occurrences
 	 *
 	 * @return the occurrences
 	 */
-	public OccurrenceLocation[] getOccurrences();
+	OccurrenceLocation[] getOccurrences();
 
 
-	public int getSearchKind();
+	int getSearchKind();
 
 	/**
 	 * Returns the id of this finder.
 	 * @return returns the id of this finder.
 	 */
-	public String getID();
+	String getID();
 
 }

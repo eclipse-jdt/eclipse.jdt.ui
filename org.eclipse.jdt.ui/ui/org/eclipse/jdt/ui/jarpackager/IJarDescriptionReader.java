@@ -40,7 +40,7 @@ public interface IJarDescriptionReader {
 	 * @param jarPackageData	the object into which data is filled
 	 * @throws CoreException	if read failed, e.g. I/O error during read operation
 	 */
-	public void read(JarPackageData jarPackageData) throws CoreException;
+	void read(JarPackageData jarPackageData) throws CoreException;
 
 	/**
      * Closes this reader.
@@ -50,7 +50,7 @@ public interface IJarDescriptionReader {
      *
 	 * @throws CoreException	if closing fails, e.g. I/O error during close operation
      */
-    public void close() throws CoreException;
+    void close() throws CoreException;
 
 	/**
 	 * Returns the status of this reader.
@@ -60,5 +60,5 @@ public interface IJarDescriptionReader {
 	 *
 	 * @return the status of this operation
 	 */
-	public IStatus getStatus();
+	IStatus getStatus();
 }

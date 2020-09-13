@@ -32,7 +32,7 @@ public interface IExpressionFragment extends IASTFragment {
 	 *
 	 * @return Expression	The node to which this fragment maps.
 	 */
-	public Expression getAssociatedExpression();
+	Expression getAssociatedExpression();
 
 	/**
 	 * Creates a copy of this IExpressionFragment.
@@ -44,5 +44,5 @@ public interface IExpressionFragment extends IASTFragment {
 	 *         rewrite
 	 * @throws JavaModelException
 	 */
-	public Expression createCopyTarget(ASTRewrite rewrite, boolean removeSurroundingParenthesis) throws JavaModelException;
+	Expression createCopyTarget(ASTRewrite rewrite, boolean removeSurroundingParenthesis) throws JavaModelException;
 }

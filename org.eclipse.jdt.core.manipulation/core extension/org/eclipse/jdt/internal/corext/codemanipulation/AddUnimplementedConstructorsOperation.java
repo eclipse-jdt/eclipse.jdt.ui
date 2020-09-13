@@ -174,7 +174,7 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 	 *
 	 * @return the resulting text edit
 	 */
-	public final TextEdit getResultingEdit() {
+	public TextEdit getResultingEdit() {
 		return fResultingEdit;
 	}
 

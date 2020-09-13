@@ -118,7 +118,7 @@ public final class FillArgumentNamesCompletionProposalCollector extends Completi
 	 * @return <code>true</code> if the generic proposals should be allowed,
 	 *         <code>false</code> if not
 	 */
-	private final boolean shouldProposeGenerics(IJavaProject project) {
+	private boolean shouldProposeGenerics(IJavaProject project) {
 		String sourceVersion;
 		if (project != null)
 			sourceVersion= project.getOption(JavaCore.COMPILER_SOURCE, true);

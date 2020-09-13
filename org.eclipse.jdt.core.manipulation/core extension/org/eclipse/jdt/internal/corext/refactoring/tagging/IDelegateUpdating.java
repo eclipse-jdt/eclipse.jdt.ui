@@ -28,7 +28,7 @@ public interface IDelegateUpdating {
 	 * return value of this method may change according to the state of the
 	 * refactoring.
 	 */
-	public boolean canEnableDelegateUpdating();
+	boolean canEnableDelegateUpdating();
 
 	/**
 	 * If <code>canEnableDelegateUpdating</code> returns
@@ -37,7 +37,7 @@ public interface IDelegateUpdating {
 	 * This call can be ignored if <code>canEnableDelegateUpdating</code>
 	 * returns <code>false</code>.
 	 */
-	public boolean getDelegateUpdating();
+	boolean getDelegateUpdating();
 
 	/**
 	 * Returns the title of the preference to update delegates in the user
@@ -48,7 +48,7 @@ public interface IDelegateUpdating {
 	 *            <code>false</code> otherwise
 	 * @return the non-null string denoting the title
 	 */
-	public String getDelegateUpdatingTitle(boolean plural);
+	String getDelegateUpdatingTitle(boolean plural);
 
 	/**
 	 * If <code>canEnableDelegateUpdating</code> returns
@@ -57,7 +57,7 @@ public interface IDelegateUpdating {
 	 * This call can be ignored if <code>canEnableDelegateUpdating</code>
 	 * returns <code>false</code>.
 	 */
-	public boolean getDeprecateDelegates();
+	boolean getDeprecateDelegates();
 
 	/**
 	 * If <code>canEnableDelegateUpdating</code> returns
@@ -66,7 +66,7 @@ public interface IDelegateUpdating {
 	 * This call can be ignored if <code>canEnableDelegateUpdating</code>
 	 * returns <code>false</code>.
 	 */
-	public void setDelegateUpdating(boolean updating);
+	void setDelegateUpdating(boolean updating);
 
 	/**
 	 * If <code>canEnableDelegateUpdating</code> returns
@@ -75,5 +75,5 @@ public interface IDelegateUpdating {
 	 * This call can be ignored if <code>canEnableDelegateUpdating</code>
 	 * returns <code>false</code>.
 	 */
-	public void setDeprecateDelegates(boolean deprecate);
+	void setDeprecateDelegates(boolean deprecate);
 }

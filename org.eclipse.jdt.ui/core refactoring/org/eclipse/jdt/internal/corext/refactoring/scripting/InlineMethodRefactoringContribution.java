@@ -52,7 +52,7 @@ import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 public final class InlineMethodRefactoringContribution extends JavaUIRefactoringContribution {
 
 	@Override
-	public final Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
+	public Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
 		int selectionStart= -1;
 		int selectionLength= -1;
 		ICompilationUnit unit= null;
@@ -118,7 +118,7 @@ public final class InlineMethodRefactoringContribution extends JavaUIRefactoring
 	}
 
 	@Override
-	public final RefactoringDescriptor createDescriptor(final String id, final String project, final String description, final String comment, final Map<String, String> arguments, final int flags) {
+	public RefactoringDescriptor createDescriptor(final String id, final String project, final String description, final String comment, final Map<String, String> arguments, final int flags) {
 		return RefactoringSignatureDescriptorFactory.createInlineMethodDescriptor(project, description, comment, arguments, flags);
 	}
 }

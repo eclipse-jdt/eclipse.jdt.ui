@@ -120,7 +120,7 @@ public final class AddCustomConstructorOperation implements IWorkspaceRunnable {
 	 *
 	 * @return the resulting text edit
 	 */
-	public final TextEdit getResultingEdit() {
+	public TextEdit getResultingEdit() {
 		return fResultingEdit;
 	}
 
@@ -129,7 +129,7 @@ public final class AddCustomConstructorOperation implements IWorkspaceRunnable {
 	 *
 	 * @return the scheduling rule
 	 */
-	public final ISchedulingRule getSchedulingRule() {
+	public ISchedulingRule getSchedulingRule() {
 		return ResourcesPlugin.getWorkspace().getRoot();
 	}
 
@@ -138,7 +138,7 @@ public final class AddCustomConstructorOperation implements IWorkspaceRunnable {
 	 *
 	 * @return the visibility modifier
 	 */
-	public final int getVisibility() {
+	public int getVisibility() {
 		return fVisibility;
 	}
 
@@ -147,7 +147,7 @@ public final class AddCustomConstructorOperation implements IWorkspaceRunnable {
 	 *
 	 * @return <code>true</code> to omit the call, <code>false</code> otherwise
 	 */
-	public final boolean isOmitSuper() {
+	public boolean isOmitSuper() {
 		return fOmitSuper;
 	}
 
@@ -155,7 +155,7 @@ public final class AddCustomConstructorOperation implements IWorkspaceRunnable {
 	 * @see org.eclipse.core.resources.IWorkspaceRunnable#run(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	@Override
-	public final void run(IProgressMonitor monitor) throws CoreException {
+	public void run(IProgressMonitor monitor) throws CoreException {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
@@ -205,7 +205,7 @@ public final class AddCustomConstructorOperation implements IWorkspaceRunnable {
 	 *
 	 * @param omit <code>true</code> to omit the call, <code>false</code> otherwise
 	 */
-	public final void setOmitSuper(final boolean omit) {
+	public void setOmitSuper(final boolean omit) {
 		fOmitSuper= omit;
 	}
 
@@ -214,7 +214,7 @@ public final class AddCustomConstructorOperation implements IWorkspaceRunnable {
 	 *
 	 * @param visibility the visibility modifier
 	 */
-	public final void setVisibility(final int visibility) {
+	public void setVisibility(final int visibility) {
 		fVisibility= visibility;
 	}
 }

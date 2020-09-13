@@ -29,6 +29,6 @@ public interface ICUCorrectionProposal {
 	 * @return the text change that is invoked when the change is applied
 	 * @throws CoreException if accessing the change failed
 	 */
-	public TextChange getTextChange() throws CoreException;
+	TextChange getTextChange() throws CoreException;
 
 }
