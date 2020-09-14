@@ -926,13 +926,23 @@ public class ASTNodes {
 	 * @return a List of expressions
 	 */
 	public static List<Expression> allOperands(InfixExpression node) {
-		final List<Expression> extOps= node.extendedOperands();
-		final List<Expression> results= new ArrayList<>(2 + extOps.size());
-		results.add(node.getLeftOperand());
-		results.add(node.getRightOperand());
-		results.addAll(extOps);
+		List<Expression> extOps= node.extendedOperands();
+		List<Expression> operands= new ArrayList<>(2 + extOps.size());
+		operands.add(node.getLeftOperand());
+		operands.add(node.getRightOperand());
+		operands.addAll(extOps);
 
-		return results;
+		List<Expression> optimizedOperands= new ArrayList<>();
+
+		for (Expression expression : operands) {
+			if (expression instanceof InfixExpression && hasOperator((InfixExpression) expression, node.getOperator())) {
+				optimizedOperands.addAll(allOperands((InfixExpression) expression));
+			} else {
+				optimizedOperands.add(expression);
+			}
+		}
+
+		return optimizedOperands;
 	}
 
 	/**

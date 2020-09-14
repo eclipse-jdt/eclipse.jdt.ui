@@ -4464,6 +4464,12 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        boolean newBoolean2 = (i1 == i2) | (i3 != i4);\n" //
 				+ "    }\n" //
 				+ "\n" //
+				+ "    public void replaceOperatorWithUnparentherizedExpressions(int i1, int i2, int i3, int i4, int i5, int i6) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = i1 == i2 & i3 != i4 & i5 != i6;\n" //
+				+ "        boolean newBoolean2 = i1 == i2 | i3 != i4 | i5 != i6;\n" //
+				+ "    }\n" //
+				+ "\n" //
 				+ "    public void doNotReplaceOperatorWithMethods(List<String> myList) {\n" //
 				+ "        boolean newBoolean1 = myList.remove(\"lorem\") & myList.remove(\"ipsum\");\n" //
 				+ "        boolean newBoolean2 = myList.remove(\"lorem\") | myList.remove(\"ipsum\");\n" //
@@ -4553,6 +4559,12 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        // Keep this comment\n" //
 				+ "        boolean newBoolean1 = (i1 == i2) && (i3 != i4);\n" //
 				+ "        boolean newBoolean2 = (i1 == i2) || (i3 != i4);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void replaceOperatorWithUnparentherizedExpressions(int i1, int i2, int i3, int i4, int i5, int i6) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        boolean newBoolean1 = i1 == i2 && i3 != i4 && i5 != i6;\n" //
+				+ "        boolean newBoolean2 = i1 == i2 || i3 != i4 || i5 != i6;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public void doNotReplaceOperatorWithMethods(List<String> myList) {\n" //
