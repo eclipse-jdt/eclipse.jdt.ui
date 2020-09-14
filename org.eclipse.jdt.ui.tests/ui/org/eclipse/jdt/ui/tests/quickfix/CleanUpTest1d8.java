@@ -1106,7 +1106,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "public class C1 {\n"
 				+ "    static final String previousField = \"abc\";\n"
 				+ "\n"
-				+ "    Runnable run1 = () -> System.out.println(C1.previousField + C1.this.instanceField + C1.classField + C1.this.getString());\n"
+				+ "    Runnable run1 = () -> System.out.println(C1.previousField + this.instanceField + C1.classField + this.getString());\n"
 				+ "\n"
 				+ "    static final String classField = \"def\";\n"
 				+ "    final String instanceField = \"abc\";\n"

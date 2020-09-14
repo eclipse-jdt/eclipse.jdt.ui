@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -89,9 +90,7 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFixCore {
-
 	public static final class FunctionalAnonymousClassesFinder extends ASTVisitor {
-
 		private final ArrayList<ClassInstanceCreation> fNodes= new ArrayList<>();
 
 		public static ArrayList<ClassInstanceCreation> perform(ASTNode node) {
@@ -212,8 +211,6 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 		static boolean hasReference(MethodDeclaration node) {
 			try {
 				FinalFieldAccessInFieldDeclarationFinder finder= new FinalFieldAccessInFieldDeclarationFinder();
-				ClassInstanceCreation cic= (ClassInstanceCreation) node.getParent().getParent();
-				cic.getType().resolveBinding();
 				finder.fMethodDeclaration= node;
 				finder.fFieldDeclaration= finder.findFieldDeclaration(node);
 				if (finder.fFieldDeclaration == null) {
@@ -399,8 +396,6 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 		private static boolean isRecursiveLocal(MethodDeclaration node) {
 			try {
 				MethodRecursionFinder finder= new MethodRecursionFinder();
-				ClassInstanceCreation cic= (ClassInstanceCreation) node.getParent().getParent();
-				cic.getType().resolveBinding();
 				finder.fMethodDeclaration= node;
 				finder.fFieldDeclaration= finder.findFieldDeclaration(node);
 				if (finder.fFieldDeclaration != null) {
@@ -607,6 +602,20 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 												return false;
 											}
 										}
+									}
+
+									return true;
+								}
+
+								@Override
+								public boolean visit(final ThisExpression node) {
+									Name qualifier= node.getQualifier();
+
+									if (qualifier != null
+											&& qualifier.resolveBinding() != null
+											&& qualifier.resolveBinding().getKind() == IBinding.TYPE
+											&& Objects.equals(qualifier.resolveBinding(), typeDeclaration.resolveBinding())) {
+										rewrite.remove(qualifier, group);
 									}
 
 									return true;
