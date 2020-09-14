@@ -155,7 +155,7 @@ public class JavaTextTools {
 		if (fCorePreferenceStore != null)
 			fCorePreferenceStore.addPropertyChangeListener(fPreferenceListener);
 
-		fColorManager= new JavaColorManager(autoDisposeOnDisplayDispose);
+		fColorManager= new JavaColorManager();
 		fCodeScanner= new JavaCodeScanner(fColorManager, store);
 		fMultilineCommentScanner= new JavaCommentScanner(fColorManager, store, coreStore, IJavaColorConstants.JAVA_MULTI_LINE_COMMENT);
 		fSinglelineCommentScanner= new JavaCommentScanner(fColorManager, store, coreStore, IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT);

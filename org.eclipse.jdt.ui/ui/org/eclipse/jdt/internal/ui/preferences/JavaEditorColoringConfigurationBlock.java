@@ -393,7 +393,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 	public JavaEditorColoringConfigurationBlock(OverlayPreferenceStore store) {
 		super(store);
 
-		fColorManager= new JavaColorManager(false);
+		fColorManager= new JavaColorManager();
 
 		for (String[] syntaxColor : fSyntaxColorListModel)
 			fListModel.add(new HighlightingColorListItem (syntaxColor[0], syntaxColor[1], syntaxColor[1] + BOLD, syntaxColor[1] + ITALIC, syntaxColor[1] + STRIKETHROUGH, syntaxColor[1] + UNDERLINE));

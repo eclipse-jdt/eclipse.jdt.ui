@@ -546,7 +546,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 
 		IPreferenceStore store= new ChainedPreferenceStore(new IPreferenceStore[] { fOverlayStore, JavaPlugin.getDefault().getCombinedPreferenceStore()});
 		fPreviewViewer= new JavaSourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER, store);
-		fColorManager= new JavaColorManager(false);
+		fColorManager= new JavaColorManager();
 		PropertiesFileSourceViewerConfiguration configuration= new PropertiesFileSourceViewerConfiguration(fColorManager, store, null, IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING);
 		fPreviewViewer.configure(configuration);
 		Font font= JFaceResources.getFont(PreferenceConstants.PROPERTIES_FILE_EDITOR_TEXT_FONT);

@@ -32,25 +32,6 @@ public class JavaColorManager implements IColorManager, IColorManagerExtension {
 	protected Map<String, RGB> fKeyTable= new HashMap<>(10);
 	protected Map<Display, Map<RGB, Color>> fDisplayTable= new HashMap<>(2);
 
-	/**
-	 * Creates a new Java color manager which automatically
-	 * disposes the allocated colors when the current display
-	 * gets disposed.
-	 */
-	public JavaColorManager() {
-		this(true);
-	}
-
-	/**
-	 * Creates a new Java color manager.
-	 *
-	 * @param autoDisposeOnDisplayDispose ignored.
-	 *
-	 * @since 2.1
-	 */
-	public JavaColorManager(boolean autoDisposeOnDisplayDispose) {
-	}
-
 	/*
 	 * @see IColorManager#getColor(RGB)
 	 */
