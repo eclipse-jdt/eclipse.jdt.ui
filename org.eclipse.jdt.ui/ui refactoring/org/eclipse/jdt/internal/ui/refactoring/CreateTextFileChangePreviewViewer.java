@@ -120,11 +120,6 @@ public final class CreateTextFileChangePreviewViewer implements IChangePreviewVi
 
 		@Override
 		protected void handleDispose() {
-			for (Color color : customColors.values()) {
-				if (color != null) {
-					color.dispose();
-				}
-			}
 			customColors.clear();
 			super.handleDispose();
 		}
@@ -171,10 +166,7 @@ public final class CreateTextFileChangePreviewViewer implements IChangePreviewVi
 				default:
 					return;
 			}
-			Color oldColor= customColors.remove(key);
-			if (oldColor != null) {
-				oldColor.dispose();
-			}
+			customColors.remove(key);
 			customColors.put(key, newColor);
 		}
 
