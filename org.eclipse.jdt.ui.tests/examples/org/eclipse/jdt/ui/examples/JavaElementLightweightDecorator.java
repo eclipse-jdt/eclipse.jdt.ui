@@ -16,7 +16,6 @@ package org.eclipse.jdt.ui.examples;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.widgets.Display;
 
@@ -97,7 +96,6 @@ public class JavaElementLightweightDecorator extends LabelProvider implements IL
 		public void stateChangeFailed(IFileBuffer buffer) {}
 	}
 
-	private Color fColor;
 	private Font fBold;
 	private FileBufferListener fListener;
 
@@ -108,7 +106,6 @@ public class JavaElementLightweightDecorator extends LabelProvider implements IL
 	public JavaElementLightweightDecorator() {
 		final FontRegistry fontRegistry= PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getFontRegistry();
 		Display.getDefault().syncExec(() -> {
-			fColor= new Color(Display.getDefault(), 100, 100, 100);
 			fBold= fontRegistry.getBold(JFaceResources.DEFAULT_FONT);
 		});
 		fListener= new FileBufferListener();
@@ -170,7 +167,6 @@ public class JavaElementLightweightDecorator extends LabelProvider implements IL
 
 	@Override
 	public void dispose() {
-		fColor.dispose();
 		FileBuffers.getTextFileBufferManager().removeFileBufferListener(fListener);
 	}
 
