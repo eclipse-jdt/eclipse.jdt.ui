@@ -266,6 +266,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 					for (HighlightingColorListItem listItem : subList) {
 						if (!listItem.getDisplayName().equals(PreferencesMessages.JavaEditorPreferencePage_varKeyword) &&
 								!listItem.getDisplayName().equals(PreferencesMessages.JavaEditorPreferencePage_yieldKeyword) &&
+								!listItem.getDisplayName().equals(PreferencesMessages.JavaEditorPreferencePage_sealedKeywords) &&
 								!listItem.getDisplayName().equals(PreferencesMessages.JavaEditorPreferencePage_recordKeyword)) {
 							visibleChildren.add(listItem);
 						}
@@ -718,6 +719,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 					for (HighlightingColorListItem listItem : fListModel) {
 						if (listItem.getDisplayName().equals(PreferencesMessages.JavaEditorPreferencePage_varKeyword) ||
 								listItem.getDisplayName().equals(PreferencesMessages.JavaEditorPreferencePage_yieldKeyword) ||
+								listItem.getDisplayName().equals(PreferencesMessages.JavaEditorPreferencePage_sealedKeywords) ||
 								listItem.getDisplayName().equals(PreferencesMessages.JavaEditorPreferencePage_recordKeyword)) {
 							PreferenceConverter.setValue(getPreferenceStore(), listItem.getColorKey(), fSyntaxForegroundColorEditor.getColorValue());
 						}
@@ -739,6 +741,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 					for (HighlightingColorListItem listItem : fListModel) {
 						if (listItem.getDisplayName().equals(PreferencesMessages.JavaEditorPreferencePage_varKeyword) ||
 								listItem.getDisplayName().equals(PreferencesMessages.JavaEditorPreferencePage_yieldKeyword) ||
+								listItem.getDisplayName().equals(PreferencesMessages.JavaEditorPreferencePage_sealedKeywords) ||
 								listItem.getDisplayName().equals(PreferencesMessages.JavaEditorPreferencePage_recordKeyword)) {
 							getPreferenceStore().setValue(listItem.getBoldKey(), fBoldCheckBox.getSelection());
 						}
@@ -760,6 +763,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 					for (HighlightingColorListItem listItem : fListModel) {
 						if (listItem.getDisplayName().equals(PreferencesMessages.JavaEditorPreferencePage_varKeyword) ||
 								listItem.getDisplayName().equals(PreferencesMessages.JavaEditorPreferencePage_yieldKeyword) ||
+								listItem.getDisplayName().equals(PreferencesMessages.JavaEditorPreferencePage_sealedKeywords) ||
 								listItem.getDisplayName().equals(PreferencesMessages.JavaEditorPreferencePage_recordKeyword)) {
 							getPreferenceStore().setValue(listItem.getItalicKey(), fItalicCheckBox.getSelection());
 						}
@@ -780,6 +784,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 					for (HighlightingColorListItem listItem : fListModel) {
 						if (listItem.getDisplayName().equals(PreferencesMessages.JavaEditorPreferencePage_varKeyword) ||
 								listItem.getDisplayName().equals(PreferencesMessages.JavaEditorPreferencePage_yieldKeyword) ||
+								listItem.getDisplayName().equals(PreferencesMessages.JavaEditorPreferencePage_sealedKeywords) ||
 								listItem.getDisplayName().equals(PreferencesMessages.JavaEditorPreferencePage_recordKeyword)) {
 							getPreferenceStore().setValue(listItem.getStrikethroughKey(), fStrikethroughCheckBox.getSelection());
 						}
@@ -801,6 +806,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 					for (HighlightingColorListItem listItem : fListModel) {
 						if (listItem.getDisplayName().equals(PreferencesMessages.JavaEditorPreferencePage_varKeyword) ||
 								listItem.getDisplayName().equals(PreferencesMessages.JavaEditorPreferencePage_yieldKeyword) ||
+								listItem.getDisplayName().equals(PreferencesMessages.JavaEditorPreferencePage_sealedKeywords) ||
 								listItem.getDisplayName().equals(PreferencesMessages.JavaEditorPreferencePage_recordKeyword)) {
 							getPreferenceStore().setValue(listItem.getUnderlineKey(), fUnderlineCheckBox.getSelection());
 						}

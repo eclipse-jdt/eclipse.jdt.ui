@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.ModuleQualifiedName;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NameQualifiedType;
 import org.eclipse.jdt.core.dom.NodeFinder;
@@ -158,6 +159,12 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 			}
 		}
 		return !addUsage(node, binding);
+	}
+
+	@Override
+	public boolean visit(ModuleQualifiedName node) {
+		node.resolveBinding();
+		return true;
 	}
 
 	private static boolean isStaticImport(ASTNode node) {

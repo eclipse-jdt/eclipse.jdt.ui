@@ -1828,6 +1828,17 @@ public class ASTFlattener extends GenericVisitor {
 				this.fBuffer.append(" ");//$NON-NLS-1$
 			}
 		}
+		if (ASTHelper.isSealedTypeSupportedInAST(node.getAST()) && !node.permittedTypes().isEmpty()) {
+			this.fBuffer.append("permits ");//$NON-NLS-1$
+			for (Iterator<Type> it = node.permittedTypes().iterator(); it.hasNext(); ) {
+				Type t = it.next();
+				t.accept(this);
+				if (it.hasNext()) {
+					this.fBuffer.append(", ");//$NON-NLS-1$
+				}
+			}
+			this.fBuffer.append(" ");//$NON-NLS-1$
+		}
 		this.fBuffer.append("{");//$NON-NLS-1$
 		BodyDeclaration prev= null;
 		for (Iterator<BodyDeclaration> it= node.bodyDeclarations().iterator(); it.hasNext();) {

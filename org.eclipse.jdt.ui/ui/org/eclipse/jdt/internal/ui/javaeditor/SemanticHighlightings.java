@@ -218,6 +218,11 @@ public class SemanticHighlightings {
 	public static final String RECORD_KEYWORD= SemanticHighlightingsCore.RECORD_KEYWORD;
 
 	/**
+	 * A named preference part that controls the highlighting of 'sealed' and 'non-sealed' keywords.
+	 */
+	public static final String SEALED_KEYWORDS= SemanticHighlightingsCore.SEALED_KEYWORDS;
+
+	/**
 	 * Semantic highlightings
 	 */
 	private static SemanticHighlighting[] fgSemanticHighlightings;
@@ -2019,6 +2024,47 @@ public class SemanticHighlightings {
 	}
 
 	/**
+	 * Semantic highlighting for 'permits' keyword.
+	 */
+	static final class PermitsKeywordHighlighting extends SemanticHighlighting {
+
+		@Override
+		public String getPreferenceKey() {
+			return RECORD_KEYWORD;
+		}
+
+		@Override
+		public RGB getDefaultDefaultTextColor() {
+			return new RGB(127, 0, 85);
+		}
+
+		@Override
+		public boolean isBoldByDefault() {
+			return true;
+		}
+
+		@Override
+		public boolean isItalicByDefault() {
+			return false;
+		}
+
+		@Override
+		public boolean isEnabledByDefault() {
+			return true;
+		}
+
+		@Override
+		public String getDisplayName() {
+			return PreferencesMessages.JavaEditorPreferencePage_recordKeyword;
+		}
+
+		@Override
+		public boolean consumes(SemanticToken token) {
+			return false;
+		}
+	}
+
+	/**
 	 * Semantic highlighting for 'yield' keyword.
 	 */
 	static final class YieldKeywordHighlighting extends SemanticHighlighting {
@@ -2051,6 +2097,47 @@ public class SemanticHighlightings {
 		@Override
 		public String getDisplayName() {
 			return PreferencesMessages.JavaEditorPreferencePage_yieldKeyword;
+		}
+
+		@Override
+		public boolean consumes(SemanticToken token) {
+			return false;
+		}
+	}
+
+	/**
+	 * Semantic highlighting for 'sealed' and 'non-sealed' keywords.
+	 */
+	static final class SealedKeywordsHighlighting extends SemanticHighlighting {
+
+		@Override
+		public String getPreferenceKey() {
+			return SEALED_KEYWORDS;
+		}
+
+		@Override
+		public RGB getDefaultDefaultTextColor() {
+			return new RGB(127, 0, 85);
+		}
+
+		@Override
+		public boolean isBoldByDefault() {
+			return true;
+		}
+
+		@Override
+		public boolean isItalicByDefault() {
+			return false;
+		}
+
+		@Override
+		public boolean isEnabledByDefault() {
+			return true;
+		}
+
+		@Override
+		public String getDisplayName() {
+			return PreferencesMessages.JavaEditorPreferencePage_sealedKeywords;
 		}
 
 		@Override
@@ -2152,7 +2239,9 @@ public class SemanticHighlightings {
 				new NumberHighlighting(),
 				new VarKeywordHighlighting(),
 				new YieldKeywordHighlighting(),
-				new RecordKeywordHighlighting()
+				new RecordKeywordHighlighting(),
+				new SealedKeywordsHighlighting(),
+				new PermitsKeywordHighlighting()
 			};
 		return fgSemanticHighlightings;
 	}

@@ -106,7 +106,7 @@ public class SourceTestCase14 {
 	public void setUp() throws CoreException {
 
 		fJavaProject= JavaProjectHelper.createJavaProject("DummyProject", "bin");
-		assertNotNull(JavaProjectHelper.addRTJar_14(fJavaProject, true));
+		assertNotNull(JavaProjectHelper.addRTJar_15(fJavaProject, true));
 
 		fRoot= JavaProjectHelper.addSourceContainer(fJavaProject, "src");
 		fPackageP= fRoot.createPackageFragment("p", true, null);

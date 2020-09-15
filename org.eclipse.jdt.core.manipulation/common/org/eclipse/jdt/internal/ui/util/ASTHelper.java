@@ -15,9 +15,11 @@ package org.eclipse.jdt.internal.ui.util;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Modifier;
 
 public class ASTHelper {
 
+	@SuppressWarnings("deprecation")
 	private static boolean isNodeTypeSupportedInAST(AST ast, int nodeType) {
 		switch (nodeType) {
 			case ASTNode.SWITCH_CASE:
@@ -25,8 +27,23 @@ public class ASTHelper {
 			case ASTNode.YIELD_STATEMENT:
 				return ast.apiLevel() >= AST.JLS14;
 			case ASTNode.TEXT_BLOCK:
+				return ast.apiLevel() >= AST.JLS15;
 			case ASTNode.RECORD_DECLARATION:
+			case ASTNode.INSTANCEOF_EXPRESSION:
 				return ast.isPreviewEnabled();
+			default:
+				break;
+		}
+		return true;
+	}
+
+	private static boolean isModifierSupportedInAST(AST ast, int modifier) {
+		switch (modifier) {
+			case Modifier.SEALED:
+			case Modifier.NON_SEALED:
+				return ast.isPreviewEnabled();
+			default:
+				break;
 		}
 		return true;
 	}
@@ -50,4 +67,9 @@ public class ASTHelper {
 	public static boolean isRecordDeclarationNodeSupportedInAST(AST ast) {
 		return isNodeTypeSupportedInAST(ast, ASTNode.RECORD_DECLARATION);
 	}
+
+	public static boolean isSealedTypeSupportedInAST(AST ast) {
+		return isModifierSupportedInAST(ast, Modifier.SEALED);
+	}
+
 }

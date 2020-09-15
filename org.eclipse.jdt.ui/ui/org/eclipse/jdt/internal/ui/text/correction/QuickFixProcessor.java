@@ -128,6 +128,8 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.UnnecessaryInstanceof:
 			case IProblem.IndirectAccessToStaticField:
 			case IProblem.IndirectAccessToStaticMethod:
+			case IProblem.SealedMissingClassModifier:
+			case IProblem.SealedMissingInterfaceModifier:
 			case IProblem.Task:
 			case IProblem.UnusedMethodDeclaredThrownException:
 			case IProblem.UnusedConstructorDeclaredThrownException:
@@ -310,6 +312,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.SwitchExpressionsYieldMissingDefaultCase:
 			case IProblem.PreviewFeaturesNotAllowed:
 			case IProblem.UninitializedBlankFinalField:
+			case IProblem.FeatureNotSupported:
 			case IProblem.SwitchExpressionsReturnWithinSwitchExpression:
 			case IProblem.DanglingReference:
 				return true;
@@ -461,6 +464,10 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.IndirectAccessToStaticField:
 			case IProblem.IndirectAccessToStaticMethod:
 				LocalCorrectionsSubProcessor.addCorrectAccessToStaticProposals(context, problem, proposals);
+				break;
+			case IProblem.SealedMissingClassModifier:
+			case IProblem.SealedMissingInterfaceModifier:
+				ModifierCorrectionSubProcessor.addSealedMissingModifierProposal(context, problem, proposals);
 				break;
 			case IProblem.StaticMethodRequested:
 			case IProblem.NonStaticFieldFromStaticInvocation:
@@ -870,6 +877,8 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.PreviewFeaturesNotAllowed:
 				PreviewFeaturesSubProcessor.getNeedHigherComplianceProposals(context, problem, proposals);
 				break;
+			case IProblem.FeatureNotSupported:
+				ReorgCorrectionsSubProcessor.getNeedHigherComplianceProposals(context, problem, proposals);
 			case IProblem.SwitchExpressionsReturnWithinSwitchExpression:
 				ReturnTypeSubProcessor.replaceReturnWithYieldStatementProposals(context, problem, proposals);
 				break;

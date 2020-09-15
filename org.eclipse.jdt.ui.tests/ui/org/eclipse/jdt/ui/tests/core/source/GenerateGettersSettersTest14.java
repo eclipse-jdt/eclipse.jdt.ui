@@ -87,7 +87,7 @@ public class GenerateGettersSettersTest14 extends SourceTestCase14 {
 	@Test
 	public void testBug561413() throws Exception {
 
-		runOperation(fRecordA.getFields(), NOFIELDS, NOFIELDS);
+		runOperation(fRecordA.getRecordComponents(), NOFIELDS, NOFIELDS);
 
 		String expected= "public record A(int x, String y) {\r\n" +
 				"\r\n" +

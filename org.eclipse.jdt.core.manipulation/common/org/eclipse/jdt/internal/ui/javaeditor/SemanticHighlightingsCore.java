@@ -176,6 +176,11 @@ public class SemanticHighlightingsCore {
 	public static final String RECORD_KEYWORD= "recordKeyword"; //$NON-NLS-1$
 
 	/**
+	 * A named preference part that controls the highlighting of 'sealed' and 'non-sealed' keywords.
+	 */
+	public static final String SEALED_KEYWORDS= "sealedKeywords"; //$NON-NLS-1$
+
+	/**
 	 * Do not instantiate
 	 */
 	private SemanticHighlightingsCore() {

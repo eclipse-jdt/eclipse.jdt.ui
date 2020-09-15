@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 IBM Corporation and others.
+ * Copyright (c) 2019, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -37,13 +37,14 @@ import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.ITypeRoot;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jdt.internal.ui.text.correction.PreviewFeaturesSubProcessor;
 import org.eclipse.jdt.internal.ui.text.java.JavaMultiLineStringAutoIndentStrategy;
 
 public class AddTextBlockAction extends SelectionDispatchAction {
@@ -176,7 +177,7 @@ public class AddTextBlockAction extends SelectionDispatchAction {
 		if (fEditor == null) {
 			return false;
 		}
-		if (!PreviewFeaturesSubProcessor.isPreviewFeatureEnabled(javaProject)) {
+		if (!JavaModelUtil.is15OrHigher(javaProject)) {
 			return false;
 		}
 		boolean addTextBlock= true;

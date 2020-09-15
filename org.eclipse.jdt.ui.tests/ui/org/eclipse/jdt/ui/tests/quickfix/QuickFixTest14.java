@@ -40,7 +40,8 @@ public class QuickFixTest14 extends QuickFixTest {
 
     private IPackageFragmentRoot fSourceFolder;
 
-	private static String MODULE_INFO_FILE_CONTENT = ""
+    public static String MODULE_INFO_FILE = "module-info.java";
+    public static String MODULE_INFO_FILE_CONTENT = ""
 										+ "module test {\n"
 										+ "}\n";
 
@@ -59,7 +60,7 @@ public class QuickFixTest14 extends QuickFixTest {
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", MODULE_INFO_FILE_CONTENT, false, null);
+		def.createCompilationUnit(MODULE_INFO_FILE, MODULE_INFO_FILE_CONTENT, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
 		String test= ""
@@ -113,7 +114,7 @@ public class QuickFixTest14 extends QuickFixTest {
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", MODULE_INFO_FILE_CONTENT, false, null);
+		def.createCompilationUnit(MODULE_INFO_FILE, MODULE_INFO_FILE_CONTENT, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
 		String test= ""
@@ -168,7 +169,7 @@ public class QuickFixTest14 extends QuickFixTest {
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", MODULE_INFO_FILE_CONTENT, false, null);
+		def.createCompilationUnit(MODULE_INFO_FILE, MODULE_INFO_FILE_CONTENT, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
 		String test= ""
@@ -219,7 +220,7 @@ public class QuickFixTest14 extends QuickFixTest {
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", MODULE_INFO_FILE_CONTENT, false, null);
+		def.createCompilationUnit(MODULE_INFO_FILE, MODULE_INFO_FILE_CONTENT, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
 		String test= ""
@@ -275,7 +276,7 @@ public class QuickFixTest14 extends QuickFixTest {
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", MODULE_INFO_FILE_CONTENT, false, null);
+		def.createCompilationUnit(MODULE_INFO_FILE, MODULE_INFO_FILE_CONTENT, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
 		String test= ""
@@ -329,7 +330,7 @@ public class QuickFixTest14 extends QuickFixTest {
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", MODULE_INFO_FILE_CONTENT, false, null);
+		def.createCompilationUnit(MODULE_INFO_FILE, MODULE_INFO_FILE_CONTENT, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
 		String test= ""
@@ -433,7 +434,7 @@ public class QuickFixTest14 extends QuickFixTest {
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", MODULE_INFO_FILE_CONTENT, false, null);
+		def.createCompilationUnit(MODULE_INFO_FILE, MODULE_INFO_FILE_CONTENT, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
 		String test= ""
@@ -501,7 +502,7 @@ public class QuickFixTest14 extends QuickFixTest {
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", MODULE_INFO_FILE_CONTENT, false, null);
+		def.createCompilationUnit(MODULE_INFO_FILE, MODULE_INFO_FILE_CONTENT, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
 		String test= ""

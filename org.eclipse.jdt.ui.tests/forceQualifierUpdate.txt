@@ -2,3 +2,4 @@
 Bug 545576: [12] Push Java 12 work to master
 Bug 509973 - Comparator errors in I20170105-0320
 Bug 534597 - Unanticipated comparator errors in I20180511-2000
+Bug 564399 - [Comparator] Comparator Errors in Y-build Y20200617-2350

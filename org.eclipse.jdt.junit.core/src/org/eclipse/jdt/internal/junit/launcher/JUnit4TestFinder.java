@@ -205,7 +205,7 @@ public class JUnit4TestFinder implements ITestFinder {
 			if (CoreTestSearchEngine.hasSuiteMethod(type)) { // since JUnit 4.3.1
 				return true;
 			}
-			ASTParser parser= ASTParser.newParser(AST.JLS14);
+			ASTParser parser= ASTParser.newParser(AST.JLS15);
 			/* TODO: When bug 156352 is fixed:
 			parser.setProject(type.getJavaProject());
 			IBinding[] bindings= parser.createBindings(new IJavaElement[] { type }, monitor);

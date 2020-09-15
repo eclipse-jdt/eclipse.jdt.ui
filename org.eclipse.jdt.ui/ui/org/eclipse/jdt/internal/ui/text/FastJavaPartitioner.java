@@ -22,7 +22,7 @@ import org.eclipse.jface.text.rules.IPartitionTokenScanner;
 public class FastJavaPartitioner extends FastPartitioner {
 
 
-	private boolean fIsPreviewEnabled= false;
+	private boolean fIsTextBlockSupported= false;
 
 	public FastJavaPartitioner(IPartitionTokenScanner scanner, String[] legalContentTypes) {
 		super(scanner, legalContentTypes);
@@ -31,7 +31,7 @@ public class FastJavaPartitioner extends FastPartitioner {
 	@Override
 	protected void initialize() {
 		super.initialize();
-		fIsPreviewEnabled= isEnablePreviewsAllowed();
+		fIsTextBlockSupported= isTextBlockSupported();
 	}
 
 	public void resetPositionCache() {
@@ -41,7 +41,7 @@ public class FastJavaPartitioner extends FastPartitioner {
 	@Override
 	public void documentAboutToBeChanged(DocumentEvent e) {
 		super.documentAboutToBeChanged(e);
-		if (hasPreviewEnabledValueChanged()) {
+		if (hasTextBlockSupportedValueChanged()) {
 			clearManagingPositionCategory();
 			connect(fDocument, false);
 		}
@@ -49,7 +49,7 @@ public class FastJavaPartitioner extends FastPartitioner {
 
 	@Override
 	public ITypedRegion[] computePartitioning(int offset, int length, boolean includeZeroLengthPartitions) {
-		if (hasPreviewEnabledValueChanged()) {
+		if (hasTextBlockSupportedValueChanged()) {
 			clearManagingPositionCategory();
 			connect(fDocument, false);
 		}
@@ -57,29 +57,29 @@ public class FastJavaPartitioner extends FastPartitioner {
 	}
 
 	public void cleanAndReConnectDocumentIfNecessary() {
-		if (hasPreviewEnabledValueChanged()) {
+		if (hasTextBlockSupportedValueChanged()) {
 			clearManagingPositionCategory();
 			connect(fDocument, false);
 		}
 	}
 
-	public boolean hasPreviewEnabledValueChanged() {
-		boolean previewEnabledFlagChanged= false;
-		boolean enablePreviewsAllowed= isEnablePreviewsAllowed();
-		if (enablePreviewsAllowed != fIsPreviewEnabled) {
-			previewEnabledFlagChanged= true;
+	public boolean hasTextBlockSupportedValueChanged() {
+		boolean textBlockSupportedValueChanged= false;
+		boolean textBlockSupported= isTextBlockSupported();
+		if (textBlockSupported != fIsTextBlockSupported) {
+			textBlockSupportedValueChanged= true;
 		}
-		return previewEnabledFlagChanged;
+		return textBlockSupportedValueChanged;
 	}
 
-	private boolean isEnablePreviewsAllowed() {
-		boolean isEnablePreviewsAllowed= false;
+	private boolean isTextBlockSupported() {
+		boolean isTextBlockSupported= false;
 		if (fScanner instanceof FastJavaPartitionScanner) {
-			isEnablePreviewsAllowed= ((FastJavaPartitionScanner) fScanner).isEnablePreviewsAllowed();
+			isTextBlockSupported= ((FastJavaPartitionScanner) fScanner).isTextBlockSupported();
 		} else {
-			isEnablePreviewsAllowed= false;
+			isTextBlockSupported= false;
 		}
-		return isEnablePreviewsAllowed;
+		return isTextBlockSupported;
 	}
 
 	private void clearManagingPositionCategory() {

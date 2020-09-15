@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -560,6 +560,13 @@ public class ReorgCorrectionsSubProcessor {
 	 */
 	public static void getNeedHigherComplianceProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals, String requiredVersion) {
 		getNeedHigherComplianceProposals(context, problem, proposals, false, requiredVersion);
+	}
+
+	public static void getNeedHigherComplianceProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
+		String[] args= problem.getProblemArguments();
+		if (args != null && args.length == 2) {
+			ReorgCorrectionsSubProcessor.getNeedHigherComplianceProposals(context, problem, proposals, false, args[1]);
+		}
 	}
 
 	/**

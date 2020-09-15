@@ -436,6 +436,8 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OVR_VOLATILE= createUnManagedCached(T_OVR, "volatile_co.png"); 						//$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_TRANSIENT= createUnManagedCached(T_OVR, "transient_co.png"); 						//$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_NATIVE= createUnManagedCached(T_OVR, "native_co.png"); 						//$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_SEALED= createUnManagedCached(T_OVR, "sealed_co.png"); 						//$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_NON_SEALED= createUnManagedCached(T_OVR, "non-sealed_co.png"); 						//$NON-NLS-1$
 
 	public static final ImageDescriptor DESC_OVR_INFO= createUnManagedCached(T_OVR, "info_co.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_RUN= createUnManagedCached(T_OVR, "run_co.png"); 							//$NON-NLS-1$

@@ -38,12 +38,12 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.IndentAction;
-import org.eclipse.jdt.internal.ui.text.correction.PreviewFeaturesSubProcessor;
 
 
 /**
@@ -201,7 +201,7 @@ public class JavaStringAutoIndentStrategy extends DefaultIndentLineAutoEditStrat
 		IRegion line= document.getLineInformationOfOffset(offset);
 		String string= document.get(line.getOffset(), offset - line.getOffset()).trim();
 		boolean isLineDelimiter= isLineDelimiter(document, command.text);
-		boolean isTextBlock= PreviewFeaturesSubProcessor.isPreviewFeatureEnabled(fProject) && string.endsWith(IndentAction.POTENTIAL_TEXT_BLOCK_STR) && isLineDelimiter;
+		boolean isTextBlock= JavaModelUtil.is15OrHigher(fProject) && string.endsWith(IndentAction.POTENTIAL_TEXT_BLOCK_STR) && isLineDelimiter;
 		if (isTextBlock) {
 			JavaMultiLineStringAutoIndentStrategy mlsStrategy= getMultiLineStringAutoIndentStrategy();
 			mlsStrategy.customizeDocumentCommand(document, command);

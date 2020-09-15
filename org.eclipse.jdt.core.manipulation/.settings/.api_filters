@@ -1,48 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <component id="org.eclipse.jdt.core.manipulation" version="2">
-    <resource path="META-INF/MANIFEST.MF">
-        <filter id="924844039">
-            <message_arguments>
-                <message_argument value="1.13.100"/>
-                <message_argument value="1.13.0"/>
-            </message_arguments>
-        </filter>
-        <filter comment="This is for Java14 work" id="924844039">
-            <message_arguments>
-                <message_argument value="1.13.150"/>
-                <message_argument value="1.13.100"/>
-            </message_arguments>
-        </filter>
-    </resource>
     <resource path="common/org/eclipse/jdt/core/manipulation/ImportReferencesCollector.java" type="org.eclipse.jdt.core.manipulation.ImportReferencesCollector">
-        <filter comment="For Java 13 Enable Preview support" id="640712815">
+        <filter id="576720909">
             <message_arguments>
-                <message_argument value="ASTNode"/>
+                <message_argument value="GenericVisitor"/>
                 <message_argument value="ImportReferencesCollector"/>
-                <message_argument value="getAST()"/>
-            </message_arguments>
-        </filter>
-        <filter comment="For Java 13 Enable Preview support" id="640712815">
-            <message_arguments>
-                <message_argument value="YieldStatement"/>
-                <message_argument value="ImportReferencesCollector"/>
-                <message_argument value="getExpression()"/>
             </message_arguments>
         </filter>
     </resource>
-    <resource path="core extension/org/eclipse/jdt/internal/core/manipulation/dom/ASTResolving.java" type="org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving">
-        <filter comment="For Java 13 Enable Preview support" id="640712815">
+    <resource path="core extension/org/eclipse/jdt/internal/corext/codemanipulation/GetterSetterUtil.java" type="org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil">
+        <filter comment="This is a Java 15 preview feature" id="640712815">
             <message_arguments>
-                <message_argument value="SwitchCase"/>
-                <message_argument value="ASTResolving"/>
-                <message_argument value="expressions()"/>
-            </message_arguments>
-        </filter>
-        <filter comment="For Java 13 Enable Preview support" id="640712815">
-            <message_arguments>
-                <message_argument value="SwitchExpression"/>
-                <message_argument value="ASTResolving"/>
-                <message_argument value="getExpression()"/>
+                <message_argument value="IType"/>
+                <message_argument value="GetterSetterUtil"/>
+                <message_argument value="isRecord()"/>
             </message_arguments>
         </filter>
     </resource>
@@ -94,13 +65,6 @@
                 <message_argument value="RecordDeclaration"/>
                 <message_argument value="ASTFlattener"/>
                 <message_argument value="typeParameters()"/>
-            </message_arguments>
-        </filter>
-        <filter comment="For Java 13 Enable Preview support" id="640712815">
-            <message_arguments>
-                <message_argument value="TextBlock"/>
-                <message_argument value="ASTFlattener"/>
-                <message_argument value="getEscapedValue()"/>
             </message_arguments>
         </filter>
     </resource>
@@ -207,49 +171,6 @@
                 <message_argument value="RecordDeclaration"/>
                 <message_argument value="ModifierRewrite"/>
                 <message_argument value="MODIFIERS2_PROPERTY"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="core extension/org/eclipse/jdt/internal/corext/dom/ScopeAnalyzer.java" type="org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer">
-        <filter comment="For Java 13 Enable Preview feature" id="640712815">
-            <message_arguments>
-                <message_argument value="SwitchExpression"/>
-                <message_argument value="ScopeAnalyzer"/>
-                <message_argument value="getExpression()"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="core extension/org/eclipse/jdt/internal/corext/dom/ScopeAnalyzer.java" type="org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer$ScopeAnalyzerVisitor">
-        <filter comment="For Java 13 Enable Preview feature" id="640712815">
-            <message_arguments>
-                <message_argument value="SwitchCase"/>
-                <message_argument value="ScopeAnalyzerVisitor"/>
-                <message_argument value="expressions()"/>
-            </message_arguments>
-        </filter>
-        <filter comment="For Java 13 Enable Preview feature" id="640712815">
-            <message_arguments>
-                <message_argument value="SwitchExpression"/>
-                <message_argument value="ScopeAnalyzerVisitor"/>
-                <message_argument value="getExpression()"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="core extension/org/eclipse/jdt/internal/corext/refactoring/Checks.java" type="org.eclipse.jdt.internal.corext.refactoring.Checks">
-        <filter comment="For Java 13 Enable Preview support" id="640712815">
-            <message_arguments>
-                <message_argument value="SwitchCase"/>
-                <message_argument value="Checks"/>
-                <message_argument value="expressions()"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="core extension/org/eclipse/jdt/internal/corext/refactoring/util/StatementAnalyzer.java" type="org.eclipse.jdt.internal.corext.refactoring.util.StatementAnalyzer">
-        <filter comment="For Java 13 Enable Preview feature" id="640712815">
-            <message_arguments>
-                <message_argument value="SwitchExpression"/>
-                <message_argument value="StatementAnalyzer"/>
-                <message_argument value="statements()"/>
             </message_arguments>
         </filter>
     </resource>

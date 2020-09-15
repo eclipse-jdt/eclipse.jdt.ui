@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  Copyright (c) 2012, 2019 Eclipse Foundation and others.
+  Copyright (c) 2012, 2020 Eclipse Foundation and others.
   All rights reserved. This program and the accompanying materials
   are made available under the terms of the Eclipse Distribution License v1.0
   which accompanies this distribution, and is available at
@@ -47,6 +47,26 @@
           <url>https://repo.eclipse.org/content/repositories/eclipse/</url>
         </repository>
       </repositories>
+      <build>
+      	<plugins>
+      		<plugin>
+      			<groupId>org.eclipse.tycho.extras</groupId>
+      			<artifactId>tycho-p2-extras-plugin</artifactId>
+      			<version>${tycho.version}</version>
+      			<executions>
+      				<execution> <!-- Checks versions are properly bumped from one stream to the other -->
+      					<id>compare-attached-artifacts-with-release</id>
+      					<goals>
+      						<goal>compare-version-with-baselines</goal>
+      					</goals>
+      					<configuration>
+      						<skip>true</skip>
+      					</configuration>
+      				</execution>
+      			</executions>
+      		</plugin>
+      	</plugins>
+      </build>
     </profile>
   </profiles>
 

@@ -42,6 +42,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
@@ -51,7 +52,6 @@ import org.eclipse.jdt.internal.corext.refactoring.CuCollectingSearchRequestor;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaStatusContext;
@@ -296,7 +296,7 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 						&& ((IType)parent).isRecord()
 						&& !Flags.isStatic(sMethod.getFlags())) {
 					IType record= (IType) parent;
-					IField[] fields= record.getFields();
+					IField[] fields= record.getRecordComponents();
 					for (IField field: fields) {
 						if (!Flags.isStatic(field.getFlags()) && sMethod.getElementName().equals(field.getElementName())) {
 							fRecordComponent= field;
@@ -314,7 +314,7 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 	private void addRecordComponentOccurrences(IProgressMonitor pm, TextChangeManager changeManager, RefactoringStatus status) throws CoreException {
 		Assert.isTrue(fRecordComponent.exists());
 
-		IJavaSearchScope scope= RefactoringScopeFactory.create(fRecordComponent.getDeclaringType());
+		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[] { fRecordComponent.getDeclaringType()});
 		SearchPattern pattern= SearchPattern.createPattern(fRecordComponent.getElementName(), IJavaSearchConstants.FIELD,
 				IJavaSearchConstants.REFERENCES,SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE | SearchPattern.R_ERASURE_MATCH);
 		SearchResultGroup[] groupedResults= RefactoringSearchEngine.search(

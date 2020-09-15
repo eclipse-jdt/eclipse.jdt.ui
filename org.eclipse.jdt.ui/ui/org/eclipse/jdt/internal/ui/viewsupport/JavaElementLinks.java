@@ -46,9 +46,9 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.IBinding;
 
+import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
-import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -387,19 +387,30 @@ public class JavaElementLinks {
 	public static IJavaElement parseURI(URI uri) {
 		String ssp= uri.getSchemeSpecificPart();
 		String[] segments= ssp.split(String.valueOf(LINK_SEPARATOR), -1);
-
+		String refModuleName= null;
 		// replace '[' manually, since URI confuses it for an IPv6 address as per RFC 2732:
 		IJavaElement element= JavaCore.create(segments[1].replace(LINK_BRACKET_REPLACEMENT, '['));
-
+		boolean canReferModuleName= canReferModuleName(element);
 		if (segments.length > 2) {
 			String refTypeName= segments[2];
-			if (refTypeName.indexOf('.') == -1) {
-				try {
-					ITypeParameter resolvedTypeVariable= resolveTypeVariable(element, refTypeName);
-					if (resolvedTypeVariable != null)
-						return resolvedTypeVariable;
-				} catch (JavaModelException e) {
-					JavaPlugin.log(e);
+			int index= refTypeName.indexOf('/');
+			if (index != -1 && canReferModuleName) {
+				refModuleName= refTypeName.substring(0, index);
+				refTypeName= refTypeName.substring(index+1);
+			}
+			if ((refTypeName== null || refTypeName.isEmpty()) &&
+					(refModuleName != null && !refModuleName.isEmpty())) {
+				return getModule(element, refModuleName);
+			}
+			if (refTypeName.indexOf('/') == -1) {
+				if (refTypeName.indexOf('.') == -1) {
+					try {
+						ITypeParameter resolvedTypeVariable= resolveTypeVariable(element, refTypeName);
+						if (resolvedTypeVariable != null)
+							return resolvedTypeVariable;
+					} catch (JavaModelException e) {
+						JavaPlugin.log(e);
+					}
 				}
 			}
 			if (element instanceof IAnnotation) {
@@ -490,6 +501,12 @@ public class JavaElementLinks {
 						// FIXME: either remove or show dialog
 //						JavaPlugin.logErrorMessage("JavaElementLinks could not resolve " + uri); //$NON-NLS-1$
 					}
+					if (type == null &&
+							refModuleName == null &&
+							canReferModuleName &&
+							segments.length <= 3) {
+						return getModule(element, refTypeName);
+					}
 					return type;
 				} catch (JavaModelException e) {
 					JavaPlugin.log(e);
@@ -497,6 +514,31 @@ public class JavaElementLinks {
 			}
 		}
 		return element;
+	}
+
+
+	private static IJavaElement getModule(IJavaElement element, String moduleName) {
+		if (element == null || moduleName == null) {
+			return null;
+		}
+		IJavaProject javaProject= element.getJavaProject();
+		try {
+			return javaProject.findModule(moduleName, null);
+		} catch (JavaModelException e1) {
+			// do nothing
+		}
+		return null;
+	}
+
+	private static boolean canReferModuleName(IJavaElement element) {
+		boolean canRefer= false;
+		if (element != null) {
+			IJavaProject javaProject= element.getJavaProject();
+			if (javaProject != null) {
+				canRefer = JavaModelUtil.is15OrHigher(javaProject);
+			}
+		}
+		return canRefer;
 	}
 
 	private static IType resolvePackageInfoType(IPackageFragment pack, String refTypeName) throws JavaModelException {

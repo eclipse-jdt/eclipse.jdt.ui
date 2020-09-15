@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2014 IBM Corporation and others.
+ * Copyright (c) 2007, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -155,6 +155,7 @@ public class MatchLocations {
 
 			createButton(group, SearchMessages.MatchLocations_imports_label, IJavaSearchConstants.IMPORT_DECLARATION_TYPE_REFERENCE);
 			createButton(group, SearchMessages.MatchLocations_super_types_label, IJavaSearchConstants.SUPERTYPE_TYPE_REFERENCE);
+			createButton(group, SearchMessages.MatchLocations_permitted_types_label, IJavaSearchConstants.PERMITTYPE_TYPE_REFERENCE);
 			addSeparator(group);
 
 			createButton(group, SearchMessages.MatchLocations_annotations_label , IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE);
@@ -271,6 +272,9 @@ public class MatchLocations {
 		if (isSet(locations, IJavaSearchConstants.SUPERTYPE_TYPE_REFERENCE)) {
 			args.add(SearchMessages.MatchLocations_super_types_description);
 		}
+		if (isSet(locations, IJavaSearchConstants.PERMITTYPE_TYPE_REFERENCE)) {
+			args.add(SearchMessages.MatchLocations_permitted_types_description);
+		}
 		if (isSet(locations, IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE)) {
 			args.add(SearchMessages.MatchLocations_annotations_description);
 		}
@@ -345,7 +349,7 @@ public class MatchLocations {
 	public static int getTotalNumberOfSettings(int searchFor) {
 		switch (searchFor) {
 			case IJavaSearchConstants.TYPE:
-				return 15;
+				return 16;
 			case IJavaSearchConstants.CONSTRUCTOR:
 				return 1;
 			case IJavaSearchConstants.METHOD:
@@ -365,6 +369,9 @@ public class MatchLocations {
 				count++;
 			}
 			if (isSet(locations, IJavaSearchConstants.SUPERTYPE_TYPE_REFERENCE)) {
+				count++;
+			}
+			if (isSet(locations, IJavaSearchConstants.PERMITTYPE_TYPE_REFERENCE)) {
 				count++;
 			}
 			if (isSet(locations, IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE)) {

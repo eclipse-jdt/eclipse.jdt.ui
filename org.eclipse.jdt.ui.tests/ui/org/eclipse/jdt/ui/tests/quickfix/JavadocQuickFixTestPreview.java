@@ -36,7 +36,7 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 
-import org.eclipse.jdt.ui.tests.core.rules.Java14ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.Java15ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
@@ -44,7 +44,7 @@ import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 public class JavadocQuickFixTestPreview extends QuickFixTest {
 
 	@Rule
-    public ProjectTestSetup projectSetup = new Java14ProjectTestSetup(true);
+    public ProjectTestSetup projectsetup = new Java15ProjectTestSetup(true);
 
 	private IJavaProject fJProject1;
 
@@ -63,35 +63,34 @@ public class JavadocQuickFixTestPreview extends QuickFixTest {
 		options.put(JavaCore.COMPILER_PB_MISSING_JAVADOC_COMMENTS_OVERRIDING, JavaCore.ENABLED);
 		JavaCore.setOptions(options);
 
-		StringBuilder comment= new StringBuilder();
-		comment.append("/**\n");
-		comment.append(" * A record comment.\n");
-		comment.append(" *\n");
-		comment.append(" * ${tags}\n");
-		comment.append(" */");
-		String res= comment.toString();
+		String res= ""
+					+ "/**\n"
+					+ " * A record comment.\n"
+					+ " *\n"
+					+ " * ${tags}\n"
+					+ " */";
 		StubUtility.setCodeTemplate(CodeTemplateContextType.TYPECOMMENT_ID, res, null);
 
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		JavaProjectHelper.set14CompilerOptions(fJProject1, true);
-		JavaProjectHelper.addRequiredModularProject(fJProject1, projectSetup.getProject());
+		JavaProjectHelper.set15CompilerOptions(fJProject1, true);
+		JavaProjectHelper.addRequiredModularProject(fJProject1, projectsetup.getProject());
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}
 
 	@After
 	public void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJProject1, projectSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject1, projectsetup.getDefaultClasspath());
 	}
 
 	@Test
 	public void testMissingRecordComment() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n\n");
-		buf.append("public record Rec1(int a, int b) {\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Rec1.java", buf.toString(), false, null);
+		String test= ""
+					+ "package test;\n\n"
+					+ "public record Rec1(int a, int b) {\n"
+					+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("Rec1.java", test, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -102,29 +101,28 @@ public class JavadocQuickFixTestPreview extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test;\n\n");
-		buf.append("/**\n");
-		buf.append(" * A record comment.\n");
-		buf.append(" *\n");
-		buf.append(" * @param a\n");
-		buf.append(" * @param b\n");
-		buf.append(" */\n");
-		buf.append("public record Rec1(int a, int b) {\n");
-		buf.append("}\n");
+		String expected= ""
+						+ "package test;\n\n"
+						+ "/**\n"
+						+ " * A record comment.\n"
+						+ " *\n"
+						+ " * @param a\n"
+						+ " * @param b\n"
+						+ " */\n"
+						+ "public record Rec1(int a, int b) {\n"
+						+ "}\n";
 
-		String expected= buf.toString();
 		assertEqualString(preview1, expected);
 	}
 
 	@Test
 	public void testMissingRecordCommentWithTypeParam() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n\n");
-		buf.append("public record Rec1<N>(int a, int b) {\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Rec1.java", buf.toString(), false, null);
+		String test= ""
+					+ "package test;\n\n"
+					+ "public record Rec1<N>(int a, int b) {\n"
+					+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("Rec1.java", test, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -135,35 +133,34 @@ public class JavadocQuickFixTestPreview extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test;\n\n");
-		buf.append("/**\n");
-		buf.append(" * A record comment.\n");
-		buf.append(" *\n");
-		buf.append(" * @param <N>\n");
-		buf.append(" * @param a\n");
-		buf.append(" * @param b\n");
-		buf.append(" */\n");
-		buf.append("public record Rec1<N>(int a, int b) {\n");
-		buf.append("}\n");
+		String expected= ""
+						+ "package test;\n\n"
+						+ "/**\n"
+						+ " * A record comment.\n"
+						+ " *\n"
+						+ " * @param <N>\n"
+						+ " * @param a\n"
+						+ " * @param b\n"
+						+ " */\n"
+						+ "public record Rec1<N>(int a, int b) {\n"
+						+ "}\n";
 
-		String expected= buf.toString();
 		assertEqualString(preview1, expected);
 	}
 
 	@Test
 	public void testMissingRecordCommentTag() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n\n");
-		buf.append("/**\n");
-		buf.append(" * A record comment.\n");
-		buf.append(" *\n");
-		buf.append(" * @param a\n");
-		buf.append(" */\n");
-		buf.append("public record Rec1(int a, int b) {\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Rec1.java", buf.toString(), false, null);
+		String test= ""
+					+ "package test;\n\n"
+					+ "/**\n"
+					+ " * A record comment.\n"
+					+ " *\n"
+					+ " * @param a\n"
+					+ " */\n"
+					+ "public record Rec1(int a, int b) {\n"
+					+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("Rec1.java", test, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -174,18 +171,17 @@ public class JavadocQuickFixTestPreview extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test;\n\n");
-		buf.append("/**\n");
-		buf.append(" * A record comment.\n");
-		buf.append(" *\n");
-		buf.append(" * @param a\n");
-		buf.append(" * @param b \n");
-		buf.append(" */\n");
-		buf.append("public record Rec1(int a, int b) {\n");
-		buf.append("}\n");
+		String expected= ""
+						+ "package test;\n\n"
+						+ "/**\n"
+						+ " * A record comment.\n"
+						+ " *\n"
+						+ " * @param a\n"
+						+ " * @param b \n"
+						+ " */\n"
+						+ "public record Rec1(int a, int b) {\n"
+						+ "}\n";
 
-		String expected= buf.toString();
 		assertEqualString(preview1, expected);
 	}
 
@@ -193,15 +189,15 @@ public class JavadocQuickFixTestPreview extends QuickFixTest {
 	@Test
 	public void testMissingAllRecordCommentTags() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n\n");
-		buf.append("/**\n");
-		buf.append(" * A record comment.\n");
-		buf.append(" *\n");
-		buf.append(" */\n");
-		buf.append("public record Rec1(int a, int b) {\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Rec1.java", buf.toString(), false, null);
+		String test= ""
+					+ "package test;\n\n"
+					+ "/**\n"
+					+ " * A record comment.\n"
+					+ " *\n"
+					+ " */\n"
+					+ "public record Rec1(int a, int b) {\n"
+					+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("Rec1.java", test, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
@@ -212,35 +208,34 @@ public class JavadocQuickFixTestPreview extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test;\n\n");
-		buf.append("/**\n");
-		buf.append(" * A record comment.\n");
-		buf.append(" * @param a \n");
-		buf.append(" * @param b \n");
-		buf.append(" *\n");
-		buf.append(" */\n");
-		buf.append("public record Rec1(int a, int b) {\n");
-		buf.append("}\n");
+		String expected= ""
+						+ "package test;\n\n"
+						+ "/**\n"
+						+ " * A record comment.\n"
+						+ " * @param a \n"
+						+ " * @param b \n"
+						+ " *\n"
+						+ " */\n"
+						+ "public record Rec1(int a, int b) {\n"
+						+ "}\n";
 
-		String expected= buf.toString();
 		assertEqualString(preview1, expected);
 	}
 
 	@Test
 	public void testMissingTypeParamTag() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n\n");
-		buf.append("/**\n");
-		buf.append(" * A record comment.\n");
-		buf.append(" * @param a \n");
-		buf.append(" * @param b \n");
-		buf.append(" *\n");
-		buf.append(" */\n");
-		buf.append("public record Rec1<N>(int a, int b) {\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Rec1.java", buf.toString(), false, null);
+		String test= ""
+					+ "package test;\n\n"
+					+ "/**\n"
+					+ " * A record comment.\n"
+					+ " * @param a \n"
+					+ " * @param b \n"
+					+ " *\n"
+					+ " */\n"
+					+ "public record Rec1<N>(int a, int b) {\n"
+					+ "}\n";
+		ICompilationUnit cu= pack.createCompilationUnit("Rec1.java", test, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -251,19 +246,18 @@ public class JavadocQuickFixTestPreview extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test;\n\n");
-		buf.append("/**\n");
-		buf.append(" * A record comment.\n");
-		buf.append(" * @param <N> \n");
-		buf.append(" * @param a \n");
-		buf.append(" * @param b \n");
-		buf.append(" *\n");
-		buf.append(" */\n");
-		buf.append("public record Rec1<N>(int a, int b) {\n");
-		buf.append("}\n");
+		String expected= ""
+						+ "package test;\n\n"
+						+ "/**\n"
+						+ " * A record comment.\n"
+						+ " * @param <N> \n"
+						+ " * @param a \n"
+						+ " * @param b \n"
+						+ " *\n"
+						+ " */\n"
+						+ "public record Rec1<N>(int a, int b) {\n"
+						+ "}\n";
 
-		String expected= buf.toString();
 		assertEqualString(preview1, expected);
 	}
 }

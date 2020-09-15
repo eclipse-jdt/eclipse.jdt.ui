@@ -32,7 +32,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
  * <p>Clients can make the following assumptions about the AST:</p>
  * <ul>
  *    <li>the AST has a {@link ITypeRoot} as source: {@link CompilationUnit#getTypeRoot()} is not null.</li>
- *    <li>the {@link AST#apiLevel() AST API level} is {@link AST#JLS14 API level 14} or higher</li>
+ *    <li>the {@link AST#apiLevel() AST API level} is {@link AST#JLS15 API level 15} or higher</li>
  *    <li>the AST has bindings resolved ({@link AST#hasResolvedBindings()})</li>
  *    <li>{@link AST#hasStatementsRecovery() statement} and {@link AST#hasBindingsRecovery() bindings}
  *           recovery are enabled

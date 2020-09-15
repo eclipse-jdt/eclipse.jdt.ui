@@ -464,7 +464,7 @@ public class BindingLabels18Test extends AbstractBindingLabelsTest {
 					this.ast= unit;
 				}
 			}
-			ASTParser parser= ASTParser.newParser(AST.JLS14);
+			ASTParser parser= ASTParser.newParser(AST.JLS15);
 			parser.setResolveBindings(true);
 			parser.setBindingsRecovery(true);
 			parser.setProject(javaProject);
