@@ -9037,6 +9037,63 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testRemoveStringCreation() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public String replaceNewString() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return new String(\"\");\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String replaceNewStringInMethodInvocation(String s, int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return new String(s + i).toLowerCase();\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.NO_STRING_CREATION);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public String replaceNewString() {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return \"\";\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public String replaceNewStringInMethodInvocation(String s, int i) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        return (s + i).toLowerCase();\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+	}
+
+	@Test
+	public void testDoNotRemoveStringCreation() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public String doNotReplaceNullableString(String s) {\n" //
+				+ "        return new String(s);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.NO_STRING_CREATION);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
 	public void testRemoveBlockReturnThrows01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();

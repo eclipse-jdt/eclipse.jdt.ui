@@ -7096,9 +7096,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.lazy_logical">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.NoStringCreationCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.no_string_creation"
+            runAfter="org.eclipse.jdt.ui.cleanup.precompile_regex">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp"
             id="org.eclipse.jdt.ui.cleanup.unused_code"
-            runAfter="org.eclipse.jdt.ui.cleanup.precompile_regex">
+            runAfter="org.eclipse.jdt.ui.cleanup.no_string_creation">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.Java50CleanUp"
