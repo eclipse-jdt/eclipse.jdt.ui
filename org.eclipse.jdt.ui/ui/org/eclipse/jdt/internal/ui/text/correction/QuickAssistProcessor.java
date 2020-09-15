@@ -166,6 +166,7 @@ import org.eclipse.jdt.internal.corext.fix.ConvertLoopFix;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.fix.LambdaExpressionsFix;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
+import org.eclipse.jdt.internal.corext.fix.SwitchExpressionsFix;
 import org.eclipse.jdt.internal.corext.fix.TypeParametersFix;
 import org.eclipse.jdt.internal.corext.fix.UnnecessaryArrayCreationFix;
 import org.eclipse.jdt.internal.corext.fix.VariableDeclarationFix;
@@ -197,6 +198,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUp;
 import org.eclipse.jdt.internal.ui.fix.LambdaExpressionsCleanUp;
+import org.eclipse.jdt.internal.ui.fix.SwitchExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.TypeParametersCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnnecessaryArrayCreationCleanUp;
 import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
@@ -302,6 +304,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					|| getRemoveVarOrInferredLambdaParameterTypes(context, coveringNode, null)
 					|| getConvertMethodReferenceToLambdaProposal(context, coveringNode, null)
 					|| getConvertLambdaToMethodReferenceProposal(context, coveringNode, null)
+					|| getConvertToSwitchExpressionProposals(context, coveringNode, null)
 					|| getFixParenthesesInLambdaExpression(context, coveringNode, null)
 					|| getRemoveBlockProposals(context, coveringNode, null)
 					|| getMakeVariableDeclarationFinalProposals(context, null)
@@ -379,6 +382,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getConvertVarTypeToResolvedTypeProposal(context, coveringNode, resultingCollections);
 				getConvertResolvedTypeToVarTypeProposal(context, coveringNode, resultingCollections);
 				getAddStaticImportProposals(context, coveringNode, resultingCollections);
+				getConvertToSwitchExpressionProposals(context, coveringNode, resultingCollections);
 			}
 			return resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
 		}
@@ -677,7 +681,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		Map<String, String> options= new Hashtable<>();
 		options.put(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES, CleanUpOptions.TRUE);
 		options.put(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION, CleanUpOptions.TRUE);
-		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new LambdaExpressionsCleanUp(options), IProposalRelevance.CONVERT_TO_ANONYMOUS_CLASS_CREATION, image, context);
+		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new LambdaExpressionsCleanUp(options), IProposalRelevance.CONVERT_TO_SWITCH_EXPRESSION, image, context);
 		resultingCollections.add(proposal);
 		return true;
 	}
@@ -711,6 +715,35 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.CONVERT_METHOD_REFERENCE_TO_LAMBDA, image);
 		proposal.setLinkedProposalModel(linkedProposalModel);
 		proposal.setEndPosition(rewrite.track(lambda));
+		resultingCollections.add(proposal);
+		return true;
+	}
+
+	private static boolean getConvertToSwitchExpressionProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
+		while (covering instanceof SwitchCase
+				|| covering instanceof SwitchExpression) {
+			covering= covering.getParent();
+		}
+
+		SwitchStatement switchStatement;
+		if (covering instanceof SwitchStatement) {
+			switchStatement= (SwitchStatement) covering;
+		} else {
+			return false;
+		}
+
+		IProposableFix fix= SwitchExpressionsFix.createConvertToSwitchExpressionFix(switchStatement);
+		if (fix == null)
+			return false;
+
+		if (resultingCollections == null)
+			return true;
+
+		// add correction proposal
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		Map<String, String> options= new Hashtable<>();
+		options.put(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS, CleanUpOptions.TRUE);
+		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new SwitchExpressionsCleanUp(options), IProposalRelevance.CONVERT_TO_SWITCH_EXPRESSION, image, context);
 		resultingCollections.add(proposal);
 		return true;
 	}

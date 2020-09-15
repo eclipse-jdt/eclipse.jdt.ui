@@ -529,6 +529,25 @@ public class CleanUpConstants {
 	public static String CONTROL_STATMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED= "cleanup.convert_to_enhanced_for_loop_if_loop_var_used"; //$NON-NLS-1$
 
 	/**
+	 * Convert switch statements to switch expressions.IF_LOOP_VAR_USED}<br>
+	 * <p>
+	 * Example:
+	 *
+	 * <pre>
+	 *                   int i; switch(j) {case 1: i = 2; break; default: i = 3;}  -&gt; int i = switch(j) {case 1 -> 2; default -> 3;};
+	 * </pre>
+	 *
+	 * Possible values: {TRUE, FALSE}<br>
+	 *
+	 * <br>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.18
+	 */
+	public static final String CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS= "cleanup.convert_to_switch_expressions"; //$NON-NLS-1$
+
+	/**
 	 * Controls the usage of parentheses in expressions. For detailed settings use<br>
 	 * {@link #EXPRESSIONS_USE_PARENTHESES_ALWAYS}<br> {@link #EXPRESSIONS_USE_PARENTHESES_NEVER}<br>
 	 * <br>

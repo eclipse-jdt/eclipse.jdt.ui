@@ -52,6 +52,8 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED, CleanUpOptions.FALSE);
 		options.setOption(CONTROL_STATMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED, CleanUpOptions.FALSE);
 
+		options.setOption(CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS, CleanUpOptions.FALSE);
+
 		//Expressions
 		options.setOption(EXPRESSIONS_USE_PARENTHESES, CleanUpOptions.FALSE);
 		options.setOption(EXPRESSIONS_USE_PARENTHESES_NEVER, CleanUpOptions.TRUE);
@@ -161,6 +163,8 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 
 		options.setOption(CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED, CleanUpOptions.FALSE);
 		options.setOption(CONTROL_STATMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED, CleanUpOptions.FALSE);
+
+		options.setOption(CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS, CleanUpOptions.FALSE);
 
 		//Expressions
 		options.setOption(EXPRESSIONS_USE_PARENTHESES, CleanUpOptions.FALSE);

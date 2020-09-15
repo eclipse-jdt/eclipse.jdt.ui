@@ -91,6 +91,8 @@ public class MultiFixMessages extends NLS {
 	public static String ControlStatementsCleanUp_RemoveUnnecessaryBlocks_description;
 	public static String ControlStatementsCleanUp_RemoveUnnecessaryBlocksWithReturnOrThrow_description;
 
+	public static String SwitchExpressionsCleanUp_ConvertToSwitchExpressions_description;
+
 	public static String UnimplementedCodeCleanUp_AddUnimplementedMethods_description;
 	public static String UnimplementedCodeCleanUp_MakeAbstract_description;
 

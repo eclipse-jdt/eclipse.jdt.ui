@@ -73,6 +73,7 @@ import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CharacterLiteral;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
@@ -3269,4 +3270,45 @@ public class ASTNodes {
 
 		return type == null ? false : type.isVar();
 	}
+
+	/**
+	 * Return a list of leading comments for a specified node
+	 *
+	 * @param node - ASTNode in a CompilationUnit
+	 * @return list of Comment nodes
+	 */
+	public static List<Comment> getLeadingComments(ASTNode node) {
+		List<Comment> comments= new ArrayList<>();
+		CompilationUnit cu= (CompilationUnit)node.getRoot();
+		List<Comment> commentList= cu.getCommentList();
+		for (Comment comment : commentList) {
+			if (comment.getStartPosition() >= cu.getExtendedStartPosition(node)
+					&& comment.getStartPosition() + comment.getLength() < node.getStartPosition()) {
+				comments.add(comment);
+			}
+		}
+		return comments;
+	}
+
+	/**
+	 * Return a list of trailing comments for a specified node
+	 *
+	 * @param node - ASTNode in a CompilationUnit
+	 * @return list of Comment nodes
+	 */
+	public static List<Comment> getTrailingComments(ASTNode node) {
+		List<Comment> comments= new ArrayList<>();
+		CompilationUnit cu= (CompilationUnit)node.getRoot();
+		List<Comment> commentList= cu.getCommentList();
+		int extendedStart= cu.getExtendedStartPosition(node);
+		int extendedLength= cu.getExtendedLength(node);
+		for (Comment comment : commentList) {
+			if (comment.getStartPosition() > node.getStartPosition()
+					&& comment.getStartPosition() < extendedStart + extendedLength) {
+				comments.add(comment);
+			}
+		}
+		return comments;
+	}
+
 }

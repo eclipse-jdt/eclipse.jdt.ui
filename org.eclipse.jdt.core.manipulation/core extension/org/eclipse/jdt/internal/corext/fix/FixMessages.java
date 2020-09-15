@@ -149,6 +149,7 @@ public final class FixMessages extends NLS {
 	public static String LambdaExpressionsFix_convert_to_anonymous_class_creation;
 	public static String LambdaExpressionsFix_convert_to_lambda_expression;
 	public static String LambdaExpressionsFix_convert_to_lambda_expression_removes_annotations;
+	public static String SwitchExpressionsFix_convert_to_switch_expression;
 
 	public static String TypeParametersFix_insert_inferred_type_arguments_description;
 	public static String TypeParametersFix_insert_inferred_type_arguments_name;

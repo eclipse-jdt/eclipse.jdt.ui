@@ -28,6 +28,7 @@ import org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.LambdaExpressionAndMethodRefCleanUp;
 import org.eclipse.jdt.internal.ui.fix.LambdaExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.NumberSuffixCleanUp;
+import org.eclipse.jdt.internal.ui.fix.SwitchExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.VarCleanUp;
 import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
 
@@ -44,6 +45,7 @@ public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
 				new BitwiseConditionalExpressionCleanup(values),
 				new VariableDeclarationCleanUp(values),
 				new VarCleanUp(values),
+				new SwitchExpressionsCleanUp(values),
 				new LambdaExpressionsCleanUp(values),
 				new LambdaExpressionAndMethodRefCleanUp(values)
 		};
@@ -61,6 +63,9 @@ public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
 		intent(controlGroup);
 		final RadioPreference useBlockNeverPref= createRadioPref(controlGroup, numColumns - 1, CleanUpMessages.CodeStyleTabPage_RadioName_NeverUseBlocks, CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NEVER, CleanUpModifyDialog.FALSE_TRUE);
 		registerSlavePreference(useBlockPref, new RadioPreference[] {useBlockAlwaysPref, useBlockJDTStylePref, useBlockNeverPref});
+
+		CheckboxPreference convertToSwitchExpressions= createCheckboxPref(controlGroup, numColumns, CleanUpMessages.CodeStyleTabPage_CheckboxName_ConvertToSwitchExpressions, CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(convertToSwitchExpressions);
 
 		CheckboxPreference convertLoop= createCheckboxPref(controlGroup, numColumns, CleanUpMessages.CodeStyleTabPage_CheckboxName_ConvertForLoopToEnhanced, CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(convertLoop);

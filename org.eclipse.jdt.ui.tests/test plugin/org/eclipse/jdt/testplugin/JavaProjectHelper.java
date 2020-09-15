@@ -264,7 +264,7 @@ public class JavaProjectHelper {
 	}
 
 	/**
-	 * Sets the compiler options to 13 for the given project.
+	 * Sets the compiler options to 14 for the given project.
 	 *
 	 * @param project the java project
 	 * @param enable_preview_feature sets enable-preview compliance project option based on the
@@ -282,7 +282,7 @@ public class JavaProjectHelper {
 	}
 
 	/**
-	 * Sets the compiler options to 13 for the given project.
+	 * Sets the compiler options to 15 for the given project.
 	 *
 	 * @param project the java project
 	 * @param enable_preview_feature sets enable-preview compliance project option based on the
