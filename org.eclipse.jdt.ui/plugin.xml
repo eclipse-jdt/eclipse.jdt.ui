@@ -7195,6 +7195,11 @@
             id="org.eclipse.jdt.ui.cleanup.use_directly_map_method"
             runAfter="org.eclipse.jdt.ui.cleanup.merge_conditional_blocks">
       </cleanUp>
+      <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.CollectionCloningCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.collection_cloning"
+            runAfter="org.eclipse.jdt.ui.cleanup.use_directly_map_method">
+      </cleanUp>
    </extension>
 
   <extension

@@ -72,7 +72,6 @@ import org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUp;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 
 public class CleanUpTest extends CleanUpTestCase {
-
 	@Rule
 	public ProjectTestSetup projectSetup = new ProjectTestSetup();
 
@@ -5680,6 +5679,144 @@ public class CleanUpTest extends CleanUpTestCase {
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.USE_DIRECTLY_MAP_METHOD);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
+	public void testCloneCollection() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.ArrayList;\n" //
+				+ "import java.util.Date;\n" //
+				+ "import java.util.List;\n" //
+				+ "import java.util.Map;\n" //
+				+ "import java.util.Map.Entry;\n" //
+				+ "import java.util.Stack;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public void replaceNewNoArgsAssignmentThenAddAll(List<String> col, List<String> output) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        output = new ArrayList<String>();\n" //
+				+ "        output.addAll(col);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<String> replaceNewNoArgsThenAddAll(List<String> col) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        final List<String> output = new ArrayList<String>();\n" //
+				+ "        output.addAll(col);\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> replaceNewOneArgThenAddAll(List<Date> col) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        final List<Date> output = new ArrayList<Date>(0);\n" //
+				+ "        output.addAll(col);\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Integer> replaceNewCollectionSizeThenAddAll(List<Integer> col, List<List<Integer>> listOfCol) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        final List<Integer> output = new ArrayList<Integer>(col.size());\n" //
+				+ "        output.addAll(col);\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Object replaceNewThenAddAllParameterizedType(Map<String, String> map) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        List<Entry<String, String>> output = new ArrayList<Entry<String, String>>();\n" //
+				+ "        output.addAll(map.entrySet());\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.COLLECTION_CLONING);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.ArrayList;\n" //
+				+ "import java.util.Date;\n" //
+				+ "import java.util.List;\n" //
+				+ "import java.util.Map;\n" //
+				+ "import java.util.Map.Entry;\n" //
+				+ "import java.util.Stack;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public void replaceNewNoArgsAssignmentThenAddAll(List<String> col, List<String> output) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        output = new ArrayList<String>(col);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<String> replaceNewNoArgsThenAddAll(List<String> col) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        final List<String> output = new ArrayList<String>(col);\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Date> replaceNewOneArgThenAddAll(List<Date> col) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        final List<Date> output = new ArrayList<Date>(col);\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Integer> replaceNewCollectionSizeThenAddAll(List<Integer> col, List<List<Integer>> listOfCol) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        final List<Integer> output = new ArrayList<Integer>(col);\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public Object replaceNewThenAddAllParameterizedType(Map<String, String> map) {\n" //
+				+ "        // Keep this comment\n" //
+				+ "        List<Entry<String, String>> output = new ArrayList<Entry<String, String>>(map.entrySet());\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "}\n";
+
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] { MultiFixMessages.CollectionCloningCleanUp_description });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+	}
+
+	@Test
+	public void testDoNotCloneCollection() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.util.ArrayList;\n" //
+				+ "import java.util.List;\n" //
+				+ "import java.util.Stack;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    public void doNotReplaceStackCtor(List<String> col, List<String> output) {\n" //
+				+ "        output = new Stack<String>();\n" //
+				+ "        output.addAll(col);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<String> doNotReplaceAlreadyInitedCol(List<String> col1, List<String> col2) {\n" //
+				+ "        final List<String> output = new ArrayList<String>(col1);\n" //
+				+ "        output.addAll(col2);\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<String> doNotReplaceWithSpecificSize(List<String> col) {\n" //
+				+ "        final List<String> output = new ArrayList<String>(10);\n" //
+				+ "        output.addAll(col);\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public List<Object> doNotReplaceNewThenAddAllIncompatibleTypes(List<String> col) {\n" //
+				+ "        final List<Object> output = new ArrayList<Object>();\n" //
+				+ "        output.addAll(col);\n" //
+				+ "        return output;\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.COLLECTION_CLONING);
 
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
 	}

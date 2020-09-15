@@ -91,6 +91,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.Message;
@@ -118,6 +119,7 @@ import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.SwitchStatement;
+import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.UnionType;
@@ -564,6 +566,183 @@ public class ASTNodes {
 		return false;
 	}
 
+	/**
+	 * Returns whether the provided expression represents an array.
+	 *
+	 * @param expression the expression to analyze
+	 * @return true the provided expression represents an array, false otherwise
+	 */
+	public static boolean isArray(final Expression expression) {
+		if (expression != null) {
+			ITypeBinding typeBinding= expression.resolveTypeBinding();
+			return typeBinding != null && typeBinding.isArray();
+		}
+
+		return false;
+	}
+
+	private static boolean isEnumConstant(final Expression expression) {
+		if (expression instanceof Name) {
+			IBinding binding= ((Name) expression).resolveBinding();
+			if (binding instanceof IVariableBinding) {
+				return ((IVariableBinding) binding).isEnumConstant();
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Returns whether the provided expression is hard-coded as a literal in the
+	 * byte code ignoring parentheses.
+	 *
+	 * @param expression the expression to check
+	 * @return true if the provided expression is hard-coded as a literal in the
+	 *         byte code ignoring parentheses, false otherwise
+	 */
+	public static boolean isHardCoded(final Expression expression) {
+		if (expression == null) {
+			return false;
+		}
+
+		switch (expression.getNodeType()) {
+		case ASTNode.BOOLEAN_LITERAL:
+		case ASTNode.CHARACTER_LITERAL:
+		case ASTNode.NUMBER_LITERAL:
+		case ASTNode.STRING_LITERAL:
+		case ASTNode.NULL_LITERAL:
+			return true;
+
+		case ASTNode.INFIX_EXPRESSION:
+			for (Expression operand : allOperands((InfixExpression) expression)) {
+				if (!isHardCoded(operand)) {
+					return false;
+				}
+			}
+
+			return true;
+
+		case ASTNode.PREFIX_EXPRESSION:
+			PrefixExpression prefixExpression= (PrefixExpression) expression;
+			return isHardCoded(prefixExpression.getOperand());
+
+		case ASTNode.POSTFIX_EXPRESSION:
+			PostfixExpression postfixExpression= (PostfixExpression) expression;
+			return isHardCoded(postfixExpression.getOperand());
+
+		case ASTNode.CAST_EXPRESSION:
+			return isHardCoded(((CastExpression) expression).getExpression());
+
+		case ASTNode.PARENTHESIZED_EXPRESSION:
+			return isHardCoded(((ParenthesizedExpression) expression).getExpression());
+
+		default:
+			return expression.resolveConstantExpressionValue() != null || isEnumConstant(expression);
+		}
+	}
+
+	/**
+	 * Integer literal.
+	 *
+	 * @param input The input
+	 * @return Integer literal.
+	 */
+	public static Long getIntegerLiteral(final Expression input) {
+		if (input == null) {
+			return null;
+		}
+
+		Object number= input.resolveConstantExpressionValue();
+
+		if (number instanceof Short) {
+			return Long.valueOf(((Short) number).intValue());
+		}
+
+		if (number instanceof Integer) {
+			return Long.valueOf(((Integer) number).intValue());
+		}
+
+		if (number instanceof Long) {
+			return (Long) number;
+		}
+
+		InfixExpression operation= as(input, InfixExpression.class);
+
+		if (operation != null
+				&& hasOperator(operation,
+						// All numerical operators
+						InfixExpression.Operator.AND,
+						InfixExpression.Operator.DIVIDE,
+						InfixExpression.Operator.LEFT_SHIFT,
+						InfixExpression.Operator.MINUS,
+						InfixExpression.Operator.OR,
+						InfixExpression.Operator.PLUS,
+						InfixExpression.Operator.REMAINDER,
+						InfixExpression.Operator.RIGHT_SHIFT_SIGNED,
+						InfixExpression.Operator.RIGHT_SHIFT_UNSIGNED,
+						InfixExpression.Operator.TIMES,
+						InfixExpression.Operator.XOR)) {
+			List<Expression> operands= allOperands(operation);
+			Long leftValue= getIntegerLiteral(operands.remove(0));
+
+			if (leftValue == null) {
+				return null;
+			}
+
+			long result= leftValue;
+
+			for (Expression operand : operands) {
+				Long newObject= getIntegerLiteral(operand);
+
+				if (newObject == null) {
+					return null;
+				}
+
+				long newValue= newObject;
+
+				if (hasOperator(operation, InfixExpression.Operator.PLUS)) {
+					result= result + newValue;
+				} else if (hasOperator(operation, InfixExpression.Operator.MINUS)) {
+					result= result - newValue;
+				} else if (hasOperator(operation, InfixExpression.Operator.TIMES)) {
+					result= result * newValue;
+				} else if (hasOperator(operation, InfixExpression.Operator.AND)) {
+					result= result & newValue;
+				} else if (hasOperator(operation, InfixExpression.Operator.OR)) {
+					result= result | newValue;
+				} else if (hasOperator(operation, InfixExpression.Operator.XOR)) {
+					result= result ^ newValue;
+				} else if (hasOperator(operation, InfixExpression.Operator.LEFT_SHIFT)) {
+					result= result << newValue;
+				} else if (hasOperator(operation, InfixExpression.Operator.REMAINDER)) {
+					result= result % newValue;
+				} else if (hasOperator(operation, InfixExpression.Operator.RIGHT_SHIFT_SIGNED)) {
+					result= result >> newValue;
+				} else if (hasOperator(operation, InfixExpression.Operator.RIGHT_SHIFT_UNSIGNED)) {
+					result= result >>> newValue;
+				} else if (hasOperator(operation, InfixExpression.Operator.DIVIDE) && result % newValue == 0) {
+					result= result / newValue;
+				} else {
+					return null;
+				}
+			}
+
+			return result;
+		}
+
+		PrefixExpression negativeContant= as(input, PrefixExpression.class);
+
+		if (negativeContant != null && hasOperator(negativeContant, PrefixExpression.Operator.MINUS)) {
+			Long value= getIntegerLiteral(negativeContant.getOperand());
+
+			if (value != null) {
+				return -value.longValue();
+			}
+		}
+
+		return null;
+	}
+
 	public static boolean isLiteral(Expression expression) {
 		int type= expression.getNodeType();
 		return type == ASTNode.BOOLEAN_LITERAL || type == ASTNode.CHARACTER_LITERAL || type == ASTNode.NULL_LITERAL ||
@@ -825,6 +1004,27 @@ public class ASTNodes {
 	}
 
 	/**
+	 * Returns the {@link Expression} of a specified type out of the provided
+	 * {@link Statement}. Note the provided statement is first converted to an
+	 * {@link ExpressionStatement} if possible.
+	 *
+	 * @param <T>       the required expression type
+	 * @param statement the statement
+	 * @param exprClass the class representing the required expression type
+	 * @return the {@link Expression} of a specified type out of an
+	 *         {@link ExpressionStatement}
+	 */
+	public static <T extends Expression> T asExpression(final Statement statement, final Class<T> exprClass) {
+		ExpressionStatement es= as(statement, ExpressionStatement.class);
+
+		if (es != null) {
+			return as(es.getExpression(), exprClass);
+		}
+
+		return null;
+	}
+
+	/**
 	 * Returns the provided statement as a non null list of statements:
 	 * <ul>
 	 * <li>if the statement is null, then an empty list is returned</li>
@@ -920,6 +1120,21 @@ public class ASTNodes {
 	}
 
 	/**
+	 * Returns whether the two provided expressions are cast compatible.
+	 *
+	 * @param expr1 the first expression
+	 * @param expr2 the second expression
+	 * @return {@code true} if the two provided expressions are cast compatible,
+	 *         {@code false} otherwise
+	 * @see ITypeBinding#isCastCompatible(ITypeBinding)
+	 */
+	public static boolean isCastCompatible(final Expression expr1, final Expression expr2) {
+		ITypeBinding tb1= expr1.resolveTypeBinding();
+		ITypeBinding tb2= expr2.resolveTypeBinding();
+		return tb1 != null && tb2 != null && tb1.isCastCompatible(tb2);
+	}
+
+	/**
 	 * Returns all the operands from the provided infix expressions.
 	 *
 	 * @param node the infix expression
@@ -992,28 +1207,40 @@ public class ASTNodes {
 	 * Returns whether the provided operator is the same as the one of provided node.
 	 *
 	 * @param node the node for which to test the operator
-	 * @param anOperator the first operator to test
-	 * @param operators the other operators to test
+	 * @param expectedOperator the first operator to test
+	 * @param additionalExpectedOperators the other operators to test too
 	 * @return true if the provided node has the provided operator, false otherwise.
 	 */
-	public static boolean hasOperator(InfixExpression node, InfixExpression.Operator anOperator, InfixExpression.Operator... operators) {
-		return node != null && isOperatorInList(node.getOperator(), anOperator, operators);
+	public static boolean hasOperator(Assignment node, Assignment.Operator expectedOperator, Assignment.Operator... additionalExpectedOperators) {
+		return node != null && isOperatorInList(node.getOperator(), expectedOperator, additionalExpectedOperators);
 	}
 
 	/**
 	 * Returns whether the provided operator is the same as the one of provided node.
 	 *
 	 * @param node the node for which to test the operator
-	 * @param anOperator the first operator to test
-	 * @param operators the other operators to test
+	 * @param expectedOperator the first operator to test
+	 * @param additionalExpectedOperators the other operators to test too
 	 * @return true if the provided node has the provided operator, false otherwise.
 	 */
-	public static boolean hasOperator(PrefixExpression node, PrefixExpression.Operator anOperator, PrefixExpression.Operator... operators) {
-		return node != null && isOperatorInList(node.getOperator(), anOperator, operators);
+	public static boolean hasOperator(InfixExpression node, InfixExpression.Operator expectedOperator, InfixExpression.Operator... additionalExpectedOperators) {
+		return node != null && isOperatorInList(node.getOperator(), expectedOperator, additionalExpectedOperators);
 	}
 
-	private static boolean isOperatorInList(Object realOperator, Object anOperator, Object[] operators) {
-		return realOperator != null && (realOperator.equals(anOperator) || Arrays.asList(operators).contains(realOperator));
+	/**
+	 * Returns whether the provided operator is the same as the one of provided node.
+	 *
+	 * @param node the node for which to test the operator
+	 * @param expectedOperator the first operator to test
+	 * @param additionalExpectedOperators the other operators to test too
+	 * @return true if the provided node has the provided operator, false otherwise.
+	 */
+	public static boolean hasOperator(PrefixExpression node, PrefixExpression.Operator expectedOperator, PrefixExpression.Operator... additionalExpectedOperators) {
+		return node != null && isOperatorInList(node.getOperator(), expectedOperator, additionalExpectedOperators);
+	}
+
+	private static <O> boolean isOperatorInList(O actualOperator, O expectedOperator, O[] additionalExpectedOperators) {
+		return actualOperator != null && (actualOperator.equals(expectedOperator) || Arrays.asList(additionalExpectedOperators).contains(actualOperator));
 	}
 
 	/**
@@ -1664,6 +1891,78 @@ public class ASTNodes {
 	}
 
 	/**
+	 * Returns the statement at the same level as its siblings.
+	 *
+	 * @param node the start node
+	 * @return the statement at the same level
+	 */
+	private static Statement statementAtLevel(final Statement node) {
+		ASTNode parent= node.getParent();
+
+		if (parent instanceof LabeledStatement) {
+			return statementAtLevel((LabeledStatement) parent);
+		}
+
+		return node;
+	}
+
+	/**
+	 * Returns true if a sibling may exist.
+	 *
+	 * @param node the start node
+	 * @return true if a sibling may exist
+	 */
+	private static boolean canHaveSiblings(final Statement node) {
+		ASTNode statementAtLevel= statementAtLevel(node);
+		ASTNode parent= statementAtLevel.getParent();
+
+		return parent instanceof Block
+				|| parent instanceof SwitchStatement && statementAtLevel.getLocationInParent() == SwitchStatement.STATEMENTS_PROPERTY;
+	}
+
+	/**
+	 * Returns the previous statement in the same block if it exists.
+	 *
+	 * @param startNode the start node
+	 * @return the previous statement in the same block if it exists, null otherwise
+	 */
+	public static Statement getPreviousSibling(final Statement startNode) {
+		List<Statement> siblings= getSiblings(startNode, false);
+
+		if (siblings.isEmpty()) {
+			return null;
+		}
+
+		return siblings.get(siblings.size() - 1);
+	}
+
+	private static List<Statement> getSiblings(final Statement startNode, final boolean isForward) {
+		Statement statementAtLevel= statementAtLevel(startNode);
+
+		if (canHaveSiblings(statementAtLevel)) {
+			List<Statement> statements;
+			if (statementAtLevel.getParent() instanceof SwitchStatement) {
+				statements= ((SwitchStatement) statementAtLevel.getParent()).statements();
+			} else {
+				statements= asList((Statement) statementAtLevel.getParent());
+			}
+
+			int indexOfNode= statements.indexOf(statementAtLevel);
+			int siblingIndex= indexOfNode + (isForward ? 1 : -1);
+
+			if (0 <= siblingIndex && siblingIndex < statements.size()) {
+				if (isForward) {
+					return statements.subList(siblingIndex, statements.size());
+				}
+
+				return statements.subList(0, siblingIndex + 1);
+			}
+		}
+
+		return Collections.emptyList();
+	}
+
+	/**
 	 * Returns whether an expression at the given location needs explicit boxing.
 	 *
 	 * @param expression the expression
@@ -1855,6 +2154,223 @@ public class ASTNodes {
 		return false;
 	}
 
+	/**
+	 * Returns whether the provided binding represents a local variable.
+	 *
+	 * @param binding the binding to analyze
+	 * @return {@code true} if the provided binding represents a local variable,
+	 *         {@code false} otherwise
+	 */
+	public static boolean isLocalVariable(final IBinding binding) {
+		if (binding != null && binding.getKind() == IBinding.VARIABLE) {
+			IVariableBinding bnd= (IVariableBinding) binding;
+			return !bnd.isField() && !bnd.isEnumConstant();
+		}
+
+		return false;
+	}
+
+	/**
+	 * Returns whether the provided binding and expression represent the same local
+	 * variable.
+	 *
+	 * @param binding    the binding to analyze
+	 * @param expression the expression to analyze
+	 * @return {@code true} if the provided binding and expression represent the
+	 *         same local variable, {@code false} otherwise
+	 */
+	public static boolean isSameLocalVariable(final IBinding binding, final Expression expression) {
+		return isLocalVariable(binding) && expression != null && expression.getNodeType() == ASTNode.SIMPLE_NAME
+				// No need to use IVariableBinding.isEqualTo(IBinding) since we are looking for
+				// a *local* variable
+				&& binding.equals(((SimpleName) expression).resolveBinding());
+	}
+
+	/**
+	 * Returns whether the provided expressions represent the same local variable.
+	 *
+	 * @param expr1 the first expression to analyze
+	 * @param expr2 the second expression to analyze
+	 * @return {@code true} if the provided expressions represent the same local
+	 *         variable, {@code false} otherwise
+	 */
+	public static boolean isSameLocalVariable(final Expression expr1, final Expression expr2) {
+		return expr1 != null && expr1.getNodeType() == ASTNode.SIMPLE_NAME
+				&& isSameLocalVariable(((SimpleName) expr1).resolveBinding(), expr2);
+	}
+
+	/**
+	 * Returns whether the provided variable declaration and expression represent
+	 * the same local variable.
+	 *
+	 * @param varDecl    the variable declaration to analyze
+	 * @param expression the expression to analyze
+	 * @return {@code true} if the provided nodes represent the same local variable,
+	 *         {@code false} otherwise
+	 */
+	public static boolean isSameLocalVariable(final VariableDeclaration varDecl, final Expression expression) {
+		return varDecl != null && isSameLocalVariable(varDecl.resolveBinding(), expression);
+	}
+
+	private static boolean areVariableBindingsEqual(final ASTNode node1, final ASTNode node2) {
+		return areBindingsEqual(varBinding(node1), varBinding(node2));
+	}
+
+	/**
+	 * Returns whether to bindings are equal.
+	 *
+	 * @param ast1 the first binding
+	 * @param ast2 the second binding
+	 * @return {@code true} when bindings are equal, {@code false} otherwise
+	 */
+	public static boolean areBindingsEqual(final IBinding ast1, final IBinding ast2) {
+		return ast1 != null && ast2 != null && ast1.isEqualTo(ast2);
+	}
+
+	private static IBinding varBinding(final ASTNode node) {
+		switch (node.getNodeType()) {
+		case ASTNode.THIS_EXPRESSION:
+			return ((ThisExpression) node).resolveTypeBinding();
+
+		case ASTNode.FIELD_ACCESS:
+			return ((FieldAccess) node).resolveFieldBinding();
+
+		case ASTNode.QUALIFIED_NAME:
+		case ASTNode.SIMPLE_NAME:
+			return ((Name) node).resolveBinding();
+
+		case ASTNode.SINGLE_VARIABLE_DECLARATION:
+		case ASTNode.VARIABLE_DECLARATION_FRAGMENT:
+			return ((VariableDeclaration) node).resolveBinding();
+
+		default:
+			return null;
+		}
+	}
+
+	/**
+	 * Returns whether the two provided names represent the same variable.
+	 *
+	 * @param name1 the first name to compare
+	 * @param name2 the second name to compare
+	 * @return true if the two provided names represent the same variable, false
+	 *         otherwise
+	 */
+	public static boolean isSameVariable(final SimpleName name1, final QualifiedName name2) {
+		return false;
+	}
+
+	/**
+	 * Returns whether the two provided expressions represent the same variable.
+	 *
+	 * @param name1  the first expression to compare
+	 * @param field2 the second expression to compare
+	 * @return true if the two provided expressions represent the same variable,
+	 *         false otherwise
+	 */
+	public static boolean isSameVariable(final SimpleName name1, final FieldAccess field2) {
+		return as(field2.getExpression(), ThisExpression.class) != null && areVariableBindingsEqual(field2, name1);
+	}
+
+	/**
+	 * Returns whether the two provided qualified names represent the same variable.
+	 *
+	 * @param name1 the first qualified name to compare
+	 * @param name2 the second qualified name to compare
+	 * @return true if the two provided qualified names represent the same variable,
+	 *         false otherwise
+	 */
+	public static boolean isSameVariable(final QualifiedName name1, final QualifiedName name2) {
+		return areVariableBindingsEqual(name1, name2) && isSameVariable(name1.getQualifier(), name2.getQualifier());
+	}
+
+	/**
+	 * Returns whether the two provided expressions represent the same variable.
+	 *
+	 * @param name1  the first expression to compare
+	 * @param field2 the second expression to compare
+	 * @return true if the two provided expressions represent the same variable,
+	 *         false otherwise
+	 */
+	public static boolean isSameVariable(final QualifiedName name1, final FieldAccess field2) {
+		return areVariableBindingsEqual(name1, field2) && isSameVariable(field2.getExpression(), name1.getQualifier());
+	}
+
+	/**
+	 * Returns whether the two provided field accesses represent the same variable.
+	 *
+	 * @param field1 the first field access to compare
+	 * @param field2 the second field access to compare
+	 * @return true if the two provided field accesses represent the same variable,
+	 *         false otherwise
+	 */
+	public static boolean isSameVariable(final FieldAccess field1, final FieldAccess field2) {
+		return areVariableBindingsEqual(field1, field2)
+				&& isSameVariable(field1.getExpression(), field2.getExpression());
+	}
+
+	/**
+	 * Returns whether the two provided nodes represent the same variable.
+	 *
+	 * @param node1 the first node to compare
+	 * @param node2 the second node to compare
+	 * @return true if the two provided nodes represent the same variable, false
+	 *         otherwise
+	 */
+	public static boolean isSameVariable(ASTNode node1, ASTNode node2) {
+		node1= getUnparenthesedExpression(node1);
+		node2= getUnparenthesedExpression(node2);
+
+		if (node1 == null || node2 == null) {
+			return false;
+		}
+
+		switch (node1.getNodeType()) {
+		case ASTNode.THIS_EXPRESSION:
+			return node2.getNodeType() == ASTNode.THIS_EXPRESSION;
+
+		case ASTNode.SIMPLE_NAME:
+			SimpleName sn= (SimpleName) node1;
+			switch (node2.getNodeType()) {
+			case ASTNode.QUALIFIED_NAME:
+				return isSameVariable(sn, (QualifiedName) node2);
+
+			case ASTNode.FIELD_ACCESS:
+				return isSameVariable(sn, (FieldAccess) node2);
+			}
+			break;
+
+		case ASTNode.QUALIFIED_NAME:
+			QualifiedName qn= (QualifiedName) node1;
+			switch (node2.getNodeType()) {
+			case ASTNode.SIMPLE_NAME:
+				return isSameVariable((SimpleName) node2, qn);
+
+			case ASTNode.QUALIFIED_NAME:
+				return isSameVariable(qn, (QualifiedName) node2);
+
+			case ASTNode.FIELD_ACCESS:
+				return isSameVariable(qn, (FieldAccess) node2);
+			}
+			break;
+
+		case ASTNode.FIELD_ACCESS:
+			FieldAccess fa= (FieldAccess) node1;
+			switch (node2.getNodeType()) {
+			case ASTNode.SIMPLE_NAME:
+				return isSameVariable((SimpleName) node2, fa);
+
+			case ASTNode.QUALIFIED_NAME:
+				return isSameVariable((QualifiedName) node2, fa);
+
+			case ASTNode.FIELD_ACCESS:
+				return isSameVariable(fa, (FieldAccess) node2);
+			}
+		}
+
+		return areVariableBindingsEqual(node1, node2);
+	}
+
 	public static int getExclusiveEnd(ASTNode node){
 		return node.getStartPosition() + node.getLength();
 	}
@@ -1898,6 +2414,32 @@ public class ASTNodes {
 		if (binding instanceof ITypeBinding)
 			return (ITypeBinding)binding;
 		return null;
+	}
+
+	/**
+	 * Returns whether the provided expression evaluates to a primitive type.
+	 *
+	 * @param expression        the expression to analyze
+	 * @param primitiveTypeName the primitive type name
+	 * @return true if the provided expression evaluates to a primitive type, false
+	 *         otherwise
+	 */
+	public static boolean isPrimitive(final Expression expression, final String primitiveTypeName) {
+		return expression != null && isPrimitive(expression.resolveTypeBinding(), primitiveTypeName);
+	}
+
+	/**
+	 * Returns whether the provided type binding represents the provided primitive
+	 * type.
+	 *
+	 * @param typeBinding       the type binding to analyze
+	 * @param primitiveTypeName the primitive type name
+	 * @return true if the provided type binding represents the provided primitive
+	 *         type, false otherwise
+	 */
+	private static boolean isPrimitive(final ITypeBinding typeBinding, final String primitiveTypeName) {
+		return typeBinding != null && typeBinding.isPrimitive()
+				&& typeBinding.getQualifiedName().equals(primitiveTypeName);
 	}
 
 	/**

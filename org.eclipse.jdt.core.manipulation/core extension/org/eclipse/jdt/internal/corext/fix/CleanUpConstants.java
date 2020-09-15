@@ -1006,6 +1006,17 @@ public class CleanUpConstants {
 	 */
 	public static final String USE_DIRECTLY_MAP_METHOD= "cleanup.use_directly_map_method"; //$NON-NLS-1$
 
+	/**
+	 * Replaces creating a new Collection, then invoking Collection.addAll() on it, by creating the new Collection with the other Collection as parameter.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.18
+	 */
+	public static final String COLLECTION_CLONING= "cleanup.collection_cloning"; //$NON-NLS-1$
 
 	/**
 	 * Removes redundant semicolons.<br>
