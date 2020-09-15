@@ -138,6 +138,9 @@ public class JUnit5TestListener implements TestExecutionListener {
 		for (Throwable assertionError : failures) {
 			if (assertionError instanceof MultipleFailuresError) {
 				FailedComparison failedComparison= getComparisonForMultipleFailures(assertionError);
+				if(failedComparison == null) {
+					return null;
+				}
 				String expected= failedComparison.getExpected();
 				String actual= failedComparison.getActual();
 				if (expected == null || actual == null) {
