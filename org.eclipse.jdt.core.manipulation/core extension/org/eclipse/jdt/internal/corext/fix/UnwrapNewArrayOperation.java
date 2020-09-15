@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
@@ -41,6 +42,11 @@ public class UnwrapNewArrayOperation extends CompilationUnitRewriteOperation {
 
 	private final ASTNode call;
 
+	public UnwrapNewArrayOperation(ArrayCreation node, ClassInstanceCreation method) {
+		this.node= node;
+		this.call= method;
+	}
+
 	public UnwrapNewArrayOperation(ArrayCreation node, MethodInvocation method) {
 		this.node= node;
 		this.call= method;
@@ -57,7 +63,29 @@ public class UnwrapNewArrayOperation extends CompilationUnitRewriteOperation {
 		AST ast= cuRewrite.getRoot().getAST();
 		TextEditGroup group= createTextEditGroup(FixMessages.UnusedCodeFix_RemoveUnnecessaryArrayCreation_description, cuRewrite);
 
-		if (call instanceof MethodInvocation) {
+		if (call instanceof ClassInstanceCreation) {
+			ClassInstanceCreation classInstanceCreation= (ClassInstanceCreation) call;
+			ClassInstanceCreation newClassInstanceCreation= ast.newClassInstanceCreation();
+			newClassInstanceCreation.setSourceRange(classInstanceCreation.getStartPosition(), classInstanceCreation.getLength());
+			newClassInstanceCreation.setType(ASTNodes.createMoveTarget(rewrite, classInstanceCreation.getType()));
+			newClassInstanceCreation.setExpression(ASTNodes.copySubtree(ast, classInstanceCreation.getExpression()));
+			newClassInstanceCreation.setAnonymousClassDeclaration(ASTNodes.copySubtree(ast, classInstanceCreation.getAnonymousClassDeclaration()));
+			if (classInstanceCreation.typeArguments() != null) {
+				@SuppressWarnings("unchecked")
+				List<?> createMoveTarget= ASTNodes.createMoveTarget(rewrite, classInstanceCreation.typeArguments());
+				newClassInstanceCreation.typeArguments().addAll(createMoveTarget);
+			}
+			for (int i= 0; i < classInstanceCreation.arguments().size() - 1; ++i) {
+				newClassInstanceCreation.arguments().add(ASTNodes.createMoveTarget(rewrite, (Expression) classInstanceCreation.arguments().get(i)));
+			}
+			ArrayInitializer initializer= node.getInitializer();
+			if (initializer != null && initializer.expressions() != null) {
+				for (Object exp : initializer.expressions()) {
+					newClassInstanceCreation.arguments().add(ASTNodes.createMoveTarget(rewrite, (Expression) exp));
+				}
+			}
+			rewrite.replace(classInstanceCreation, newClassInstanceCreation, group);
+		} else if (call instanceof MethodInvocation) {
 			MethodInvocation method= (MethodInvocation)call;
 			MethodInvocation newMethod= ast.newMethodInvocation();
 			newMethod.setSourceRange(method.getStartPosition(), method.getLength());

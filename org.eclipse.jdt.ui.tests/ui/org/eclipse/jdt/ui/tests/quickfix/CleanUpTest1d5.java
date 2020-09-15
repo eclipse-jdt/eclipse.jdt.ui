@@ -36,7 +36,6 @@ import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
  * Tests the cleanup features related to Java 5.
  */
 public class CleanUpTest1d5 extends CleanUpTestCase {
-
 	@Rule
     public ProjectTestSetup projectSetup = new Java1d5ProjectTestSetup();
 
@@ -2501,6 +2500,40 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
+	@Test
+	public void testUnnecessaryArrayOnConstructor() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class A {\n" //
+				+ "    public A(Object... elements) {\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static A foo() {\n" //
+				+ "        return new A(new Object[] {\"a\", \"b\"});\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", sample, false, null);
+
+		enable(CleanUpConstants.REMOVE_UNNECESSARY_ARRAY_CREATION);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class A {\n" //
+				+ "    public A(Object... elements) {\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static A foo() {\n" //
+				+ "        return new A(\"a\", \"b\");\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected });
 	}
 
 	@Test

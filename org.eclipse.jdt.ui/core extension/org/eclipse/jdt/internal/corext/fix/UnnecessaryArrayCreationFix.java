@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -64,7 +65,14 @@ public class UnnecessaryArrayCreationFix extends CompilationUnitRewriteOperation
 
 				ASTNode parent= node.getParent();
 
-				if (parent instanceof MethodInvocation) {
+				if (parent instanceof ClassInstanceCreation) {
+					ClassInstanceCreation m= (ClassInstanceCreation) parent;
+
+					if (isUselessArrayCreation(node, m.arguments(), m.resolveConstructorBinding()) &&
+							!hasEquivalentMethod(node, m.arguments(), m.resolveConstructorBinding())) {
+						fResult.add(new UnwrapNewArrayOperation(node, m));
+					}
+				} else if (parent instanceof MethodInvocation) {
 					MethodInvocation m= (MethodInvocation) parent;
 
 					if (isUselessArrayCreation(node, m.arguments(), m.resolveMethodBinding()) &&
