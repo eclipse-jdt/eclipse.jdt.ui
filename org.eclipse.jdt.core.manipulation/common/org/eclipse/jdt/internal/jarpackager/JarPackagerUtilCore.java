@@ -276,8 +276,6 @@ public class JarPackagerUtilCore {
 						new Object[] { BasicElementLabels.getPathLabel(path, false), ex.getLocalizedMessage() });
 			else
 				message= Messages.format(JarPackagerMessagesCore.JarWriter_writeProblem, BasicElementLabels.getPathLabel(path, false));
-			if (message == null)
-				message= ""; //$NON-NLS-1$
 			throw new CoreException(new Status(IStatus.ERROR, JavaManipulation.ID_PLUGIN, IJavaStatusConstants.INTERNAL_ERROR, message, ex));
 		}
 	}
