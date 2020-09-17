@@ -570,6 +570,16 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
 	}
 
 	@Override
+	public boolean visit(ModuleQualifiedName node) {
+		return visit((Name)node);
+	}
+
+	@Override
+	public void endVisit(ModuleQualifiedName node) {
+		endVisit((Name)node);
+	}
+
+	@Override
 	public boolean visit(SimpleName node) {
 		return visit((Name)node);
 	}

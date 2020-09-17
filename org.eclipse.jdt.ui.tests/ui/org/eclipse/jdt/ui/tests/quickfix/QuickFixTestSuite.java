@@ -22,6 +22,7 @@ import org.junit.runners.Suite;
 	QuickFixTest9.class,
 	QuickFixTest1d8.class,
 	QuickFixTest14.class,
+	QuickFixTest15.class,
 	QuickFixTestPreview.class,
 	SerialVersionQuickFixTest.class,
 	UtilitiesTest.class,
