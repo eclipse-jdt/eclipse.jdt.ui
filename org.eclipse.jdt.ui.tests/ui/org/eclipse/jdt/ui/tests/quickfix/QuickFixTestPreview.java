@@ -187,4 +187,121 @@ public class QuickFixTestPreview extends QuickFixTest {
 
 		assertNumberOfProposals(proposals, 0);
 	}
+
+	@Test
+	public void testAddSealedMissingClassModifierProposal() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set15CompilerOptions(fJProject1, true);
+
+		Map<String, String> options= fJProject1.getOptions(false);
+		options.put(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
+		fJProject1.setOptions(options);
+
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+
+		StringBuffer buf= new StringBuffer();
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("\n");
+		buf.append("public sealed class Shape permits Square {}\n");
+		buf.append("\n");
+		buf.append("class Square extends Shape {}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Shape.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("\n");
+		buf.append("public sealed class Shape permits Square {}\n");
+		buf.append("\n");
+		buf.append("final class Square extends Shape {}\n");
+		String expected1= buf.toString();
+
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("\n");
+		buf.append("public sealed class Shape permits Square {}\n");
+		buf.append("\n");
+		buf.append("non-sealed class Square extends Shape {}\n");
+		String expected2= buf.toString();
+
+		proposal= (CUCorrectionProposal) proposals.get(2);
+		String preview3= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("\n");
+		buf.append("public sealed class Shape permits Square {}\n");
+		buf.append("\n");
+		buf.append("sealed class Square extends Shape {}\n");
+		String expected3= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2, expected3 });
+
+	}
+
+	@Test
+	public void testAddSealedMissingInterfaceModifierProposal() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set15CompilerOptions(fJProject1, true);
+
+		Map<String, String> options= fJProject1.getOptions(false);
+		options.put(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
+		fJProject1.setOptions(options);
+
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+
+		StringBuffer buf= new StringBuffer();
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("\n");
+		buf.append("public sealed interface Shape permits Square {}\n");
+		buf.append("\n");
+		buf.append("interface Square extends Shape {}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Shape.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("\n");
+		buf.append("public sealed interface Shape permits Square {}\n");
+		buf.append("\n");
+		buf.append("sealed interface Square extends Shape {}\n");
+		String expected1= buf.toString();
+
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("\n");
+		buf.append("public sealed interface Shape permits Square {}\n");
+		buf.append("\n");
+		buf.append("non-sealed interface Square extends Shape {}\n");
+		String expected2= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
+
+	}
 }

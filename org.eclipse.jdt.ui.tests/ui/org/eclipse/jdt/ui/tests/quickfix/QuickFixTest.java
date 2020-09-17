@@ -29,9 +29,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.StringAsserts;
 
@@ -89,55 +86,6 @@ import org.eclipse.jdt.internal.ui.text.template.contentassist.SurroundWithTempl
 
 /**
  */
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-	QuickFixTest9.class,
-	QuickFixTest1d8.class,
-	QuickFixTest14.class,
-	QuickFixTest15.class,
-	SerialVersionQuickFixTest.class,
-	UtilitiesTest.class,
-	UnresolvedTypesQuickFixTest.class,
-	UnresolvedVariablesQuickFixTest.class,
-	UnresolvedMethodsQuickFixTest.class,
-	UnresolvedMethodsQuickFixTest1d8.class,
-	ReturnTypeQuickFixTest.class,
-	LocalCorrectionsQuickFixTest.class,
-	LocalCorrectionsQuickFixTest1d7.class,
-	LocalCorrectionsQuickFixTest1d8.class,
-	TypeMismatchQuickFixTests.class,
-	ReorgQuickFixTest.class,
-	ModifierCorrectionsQuickFixTest.class,
-	ModifierCorrectionsQuickFixTest1d7.class,
-	ModifierCorrectionsQuickFixTest9.class,
-	GetterSetterQuickFixTest.class,
-	AssistQuickFixTest.class,
-	AssistQuickFixTest1d7.class,
-	AssistQuickFixTest1d8.class,
-	AssistQuickFixTest12.class,
-	ChangeNonStaticToStaticTest.class,
-	MarkerResolutionTest.class,
-	JavadocQuickFixTest.class,
-	JavadocQuickFixTest9.class,
-	JavadocQuickFixTestPreview.class,
-	ConvertForLoopQuickFixTest.class,
-	ConvertIterableLoopQuickFixTest.class,
-	AdvancedQuickAssistTest.class,
-	AdvancedQuickAssistTest1d7.class,
-	AdvancedQuickAssistTest1d8.class,
-	CleanUpTestCase.class,
-	QuickFixEnablementTest.class,
-	SurroundWithTemplateTest.class,
-	TypeParameterMismatchTest.class,
-	PropertiesFileQuickAssistTest.class,
-	NullAnnotationsQuickFixTest.class,
-	NullAnnotationsQuickFixTest1d8.class,
-	NullAnnotationsQuickFixTest1d8Mix.class,
-	AnnotateAssistTest1d5.class,
-	AnnotateAssistTest1d8.class,
-	TypeAnnotationQuickFixTest.class
-})
-
 public class QuickFixTest {
 	public static void assertCorrectLabels(List<? extends ICompletionProposal> proposals) {
 		for (int i= 0; i < proposals.size(); i++) {
