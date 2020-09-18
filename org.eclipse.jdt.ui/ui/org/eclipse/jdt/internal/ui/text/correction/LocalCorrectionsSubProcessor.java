@@ -328,26 +328,59 @@ public class LocalCorrectionsSubProcessor {
 					ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(decl, imports);
 
 					CatchClause catchClause= catchClauses.get(0);
-					Type type= catchClause.getException().getType();
-					List<Type> addedTypes= new ArrayList<>();
+					Type originalType= catchClause.getException().getType();
 
-					addNewExceptions(ast, filteredExceptions, rewrite, proposal, imports, importRewriteContext, addedTypes);
-
-					if (type instanceof UnionType) {
-						UnionType unionType= (UnionType) type;
+					if (originalType instanceof UnionType) {
+						UnionType unionType= (UnionType) originalType;
 						ListRewrite listRewrite= rewrite.getListRewrite(unionType, UnionType.TYPES_PROPERTY);
+						@SuppressWarnings("unchecked")
+						List<Type> existingTypes= new ArrayList<>(unionType.types());
 
-						for (Type addedType : addedTypes) {
-							listRewrite.insertLast(addedType, null);
+						for (int i= 0; i < filteredExceptions.size(); i++) {
+							Type addedType= addNewException(ast, filteredExceptions, rewrite, proposal, imports, importRewriteContext, i);
+							boolean isReplaced= false;
+
+							for (Type existingType : existingTypes) {
+								if (existingType.resolveBinding().isSubTypeCompatible(filteredExceptions.get(i))) {
+									listRewrite.replace(existingType, addedType, null);
+									isReplaced= true;
+									break;
+								}
+							}
+
+							if (!isReplaced) {
+								listRewrite.insertLast(addedType, null);
+							}
 						}
 					} else {
-						UnionType newUnionType= ast.newUnionType();
-						List<Type> types= newUnionType.types();
+						Type firstType= null;
+						List<Type> typesToAdd= new ArrayList<>();
 
-						types.add((Type) rewrite.createCopyTarget(type));
-						types.addAll(addedTypes);
+						for (int i= 0; i < filteredExceptions.size(); i++) {
+							Type addedType= addNewException(ast, filteredExceptions, rewrite, proposal, imports, importRewriteContext, i);
 
-						rewrite.replace(type, newUnionType, null);
+							if (originalType.resolveBinding().isSubTypeCompatible(filteredExceptions.get(i))) {
+								firstType= addedType;
+							} else {
+								typesToAdd.add(addedType);
+							}
+						}
+
+						if (!typesToAdd.isEmpty()) {
+							UnionType newUnionType= ast.newUnionType();
+							List<Type> types= newUnionType.types();
+
+							if (firstType == null) {
+								types.add(ASTNodes.createMoveTarget(rewrite, originalType));
+							} else {
+								types.add(firstType);
+							}
+							types.addAll(typesToAdd);
+
+							rewrite.replace(originalType, newUnionType, null);
+						} else if (firstType != null) {
+							rewrite.replace(originalType, firstType, null);
+						}
 					}
 
 					proposals.add(proposal);
@@ -369,7 +402,9 @@ public class LocalCorrectionsSubProcessor {
 					UnionType newUnionType= ast.newUnionType();
 					List<Type> types= newUnionType.types();
 
-					addNewExceptions(ast, filteredExceptions, rewrite, proposal, imports, importRewriteContext, types);
+					for (int i= 0; i < filteredExceptions.size(); i++) {
+						types.add(addNewException(ast, filteredExceptions, rewrite, proposal, imports, importRewriteContext, i));
+					}
 
 					String nameKey= "name"; //$NON-NLS-1$
 					proposal.addLinkedPosition(rewrite.track(var.getName()), false, nameKey);
@@ -460,17 +495,16 @@ public class LocalCorrectionsSubProcessor {
 		}
 	}
 
-	private static void addNewExceptions(AST ast, List<ITypeBinding> filteredExceptions, ASTRewrite rewrite, LinkedCorrectionProposal proposal, ImportRewrite imports,
-			ImportRewriteContext importRewriteContext, List<Type> types) {
-		for (int i= 0; i < filteredExceptions.size(); i++) {
-			ITypeBinding excBinding= filteredExceptions.get(i);
-			Type type2= imports.addImport(excBinding, ast, importRewriteContext, TypeLocation.EXCEPTION);
-			types.add(type2);
+	private static Type addNewException(AST ast, List<ITypeBinding> filteredExceptions, ASTRewrite rewrite, LinkedCorrectionProposal proposal, ImportRewrite imports,
+			ImportRewriteContext importRewriteContext, int i) {
+		ITypeBinding excBinding= filteredExceptions.get(i);
+		Type type= imports.addImport(excBinding, ast, importRewriteContext, TypeLocation.EXCEPTION);
 
-			String typeKey= "type" + i; //$NON-NLS-1$
-			proposal.addLinkedPosition(rewrite.track(type2), false, typeKey);
-			addExceptionTypeLinkProposals(proposal, excBinding, typeKey);
-		}
+		String typeKey= "type" + i; //$NON-NLS-1$
+		proposal.addLinkedPosition(rewrite.track(type), false, typeKey);
+		addExceptionTypeLinkProposals(proposal, excBinding, typeKey);
+
+		return type;
 	}
 
 	private static void addAdditionalCatchProposal(IInvocationContext context, Collection<ICommandAccess> proposals, ICompilationUnit cu, ASTNode selectedNode, int offset, int length, BodyDeclaration decl,

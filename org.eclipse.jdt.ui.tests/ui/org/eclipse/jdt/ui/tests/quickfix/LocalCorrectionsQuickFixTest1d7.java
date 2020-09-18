@@ -49,9 +49,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * Those tests should run on Java Dolphin 1.7 .
  */
 public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
-
 	@Rule
-    public ProjectTestSetup projectSetup= new Java1d7ProjectTestSetup();
+	public ProjectTestSetup projectSetup= new Java1d7ProjectTestSetup();
 
 	private IJavaProject fJProject1;
 
@@ -93,9 +92,11 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
+		buf.append("\n");
 		buf.append("import java.io.FileNotFoundException;\n");
-		buf.append("import java.io.IOException;\n");
 		buf.append("import java.io.InterruptedIOException;\n");
+		buf.append("import java.text.ParseException;\n");
+		buf.append("\n");
 		buf.append("public class E {\n");
 		buf.append("    void foo(int a) {\n");
 		buf.append("        try {\n");
@@ -104,7 +105,7 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 		buf.append("            else if (a < 20)\n");
 		buf.append("                throw new InterruptedIOException();\n");
 		buf.append("            else\n");
-		buf.append("                throw new IOException();\n");
+		buf.append("                throw new ParseException(\"bar\", 0);\n");
 		buf.append("        } catch (FileNotFoundException | InterruptedIOException ex) {\n");
 		buf.append("            ex.printStackTrace();\n");
 		buf.append("        } \n");
@@ -119,18 +120,20 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
+		buf.append("\n");
 		buf.append("import java.io.FileNotFoundException;\n");
-		buf.append("import java.io.IOException;\n");
 		buf.append("import java.io.InterruptedIOException;\n");
+		buf.append("import java.text.ParseException;\n");
+		buf.append("\n");
 		buf.append("public class E {\n");
-		buf.append("    void foo(int a) throws IOException {\n");
+		buf.append("    void foo(int a) throws ParseException {\n");
 		buf.append("        try {\n");
 		buf.append("            if (a < 10)\n");
 		buf.append("                throw new FileNotFoundException();\n");
 		buf.append("            else if (a < 20)\n");
 		buf.append("                throw new InterruptedIOException();\n");
 		buf.append("            else\n");
-		buf.append("                throw new IOException();\n");
+		buf.append("                throw new ParseException(\"bar\", 0);\n");
 		buf.append("        } catch (FileNotFoundException | InterruptedIOException ex) {\n");
 		buf.append("            ex.printStackTrace();\n");
 		buf.append("        } \n");
@@ -140,9 +143,11 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
+		buf.append("\n");
 		buf.append("import java.io.FileNotFoundException;\n");
-		buf.append("import java.io.IOException;\n");
 		buf.append("import java.io.InterruptedIOException;\n");
+		buf.append("import java.text.ParseException;\n");
+		buf.append("\n");
 		buf.append("public class E {\n");
 		buf.append("    void foo(int a) {\n");
 		buf.append("        try {\n");
@@ -151,10 +156,10 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 		buf.append("            else if (a < 20)\n");
 		buf.append("                throw new InterruptedIOException();\n");
 		buf.append("            else\n");
-		buf.append("                throw new IOException();\n");
+		buf.append("                throw new ParseException(\"bar\", 0);\n");
 		buf.append("        } catch (FileNotFoundException | InterruptedIOException ex) {\n");
 		buf.append("            ex.printStackTrace();\n");
-		buf.append("        } catch (IOException e) {\n");
+		buf.append("        } catch (ParseException e) {\n");
 		buf.append("        } \n");
 		buf.append("    }\n");
 		buf.append("}\n");
@@ -162,9 +167,11 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
+		buf.append("\n");
 		buf.append("import java.io.FileNotFoundException;\n");
-		buf.append("import java.io.IOException;\n");
 		buf.append("import java.io.InterruptedIOException;\n");
+		buf.append("import java.text.ParseException;\n");
+		buf.append("\n");
 		buf.append("public class E {\n");
 		buf.append("    void foo(int a) {\n");
 		buf.append("        try {\n");
@@ -173,13 +180,209 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 		buf.append("            else if (a < 20)\n");
 		buf.append("                throw new InterruptedIOException();\n");
 		buf.append("            else\n");
-		buf.append("                throw new IOException();\n");
-		buf.append("        } catch (FileNotFoundException | InterruptedIOException | IOException ex) {\n");
+		buf.append("                throw new ParseException(\"bar\", 0);\n");
+		buf.append("        } catch (FileNotFoundException | InterruptedIOException | ParseException ex) {\n");
 		buf.append("            ex.printStackTrace();\n");
 		buf.append("        } \n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected3= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2, expected3 });
+	}
+
+	@Test
+	public void testUncaughtSuperException() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.io.FileNotFoundException;\n" //
+				+ "import java.io.IOException;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    void foo(int a) {\n" //
+				+ "        try {\n" //
+				+ "            if (a < 10)\n" //
+				+ "                throw new FileNotFoundException();\n" //
+				+ "            else\n" //
+				+ "                throw new IOException();\n" //
+				+ "        } catch (FileNotFoundException ex) {\n" //
+				+ "            ex.printStackTrace();\n" //
+				+ "        } \n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", sample, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.io.FileNotFoundException;\n" //
+				+ "import java.io.IOException;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    void foo(int a) throws IOException {\n" //
+				+ "        try {\n" //
+				+ "            if (a < 10)\n" //
+				+ "                throw new FileNotFoundException();\n" //
+				+ "            else\n" //
+				+ "                throw new IOException();\n" //
+				+ "        } catch (FileNotFoundException ex) {\n" //
+				+ "            ex.printStackTrace();\n" //
+				+ "        } \n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.io.FileNotFoundException;\n" //
+				+ "import java.io.IOException;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    void foo(int a) {\n" //
+				+ "        try {\n" //
+				+ "            if (a < 10)\n" //
+				+ "                throw new FileNotFoundException();\n" //
+				+ "            else\n" //
+				+ "                throw new IOException();\n" //
+				+ "        } catch (FileNotFoundException ex) {\n" //
+				+ "            ex.printStackTrace();\n" //
+				+ "        } catch (IOException e) {\n" //
+				+ "        } \n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected2= sample;
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.io.FileNotFoundException;\n" //
+				+ "import java.io.IOException;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    void foo(int a) {\n" //
+				+ "        try {\n" //
+				+ "            if (a < 10)\n" //
+				+ "                throw new FileNotFoundException();\n" //
+				+ "            else\n" //
+				+ "                throw new IOException();\n" //
+				+ "        } catch (IOException ex) {\n" //
+				+ "            ex.printStackTrace();\n" //
+				+ "        } \n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected3= sample;
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2, expected3 });
+	}
+
+	@Test
+	public void testUncaughtSuperExceptionUnionType() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.io.FileNotFoundException;\n" //
+				+ "import java.io.IOException;\n" //
+				+ "import java.io.InterruptedIOException;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    void foo(int a) {\n" //
+				+ "        try {\n" //
+				+ "            if (a < 10)\n" //
+				+ "                throw new FileNotFoundException();\n" //
+				+ "            else if (a < 20)\n" //
+				+ "                throw new InterruptedIOException();\n" //
+				+ "            else\n" //
+				+ "                throw new IOException();\n" //
+				+ "        } catch (FileNotFoundException | InterruptedIOException ex) {\n" //
+				+ "            ex.printStackTrace();\n" //
+				+ "        } \n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", sample, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.io.FileNotFoundException;\n" //
+				+ "import java.io.IOException;\n" //
+				+ "import java.io.InterruptedIOException;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    void foo(int a) throws IOException {\n" //
+				+ "        try {\n" //
+				+ "            if (a < 10)\n" //
+				+ "                throw new FileNotFoundException();\n" //
+				+ "            else if (a < 20)\n" //
+				+ "                throw new InterruptedIOException();\n" //
+				+ "            else\n" //
+				+ "                throw new IOException();\n" //
+				+ "        } catch (FileNotFoundException | InterruptedIOException ex) {\n" //
+				+ "            ex.printStackTrace();\n" //
+				+ "        } \n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.io.FileNotFoundException;\n" //
+				+ "import java.io.IOException;\n" //
+				+ "import java.io.InterruptedIOException;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    void foo(int a) {\n" //
+				+ "        try {\n" //
+				+ "            if (a < 10)\n" //
+				+ "                throw new FileNotFoundException();\n" //
+				+ "            else if (a < 20)\n" //
+				+ "                throw new InterruptedIOException();\n" //
+				+ "            else\n" //
+				+ "                throw new IOException();\n" //
+				+ "        } catch (FileNotFoundException | InterruptedIOException ex) {\n" //
+				+ "            ex.printStackTrace();\n" //
+				+ "        } catch (IOException e) {\n" //
+				+ "        } \n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected2= sample;
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "import java.io.FileNotFoundException;\n" //
+				+ "import java.io.IOException;\n" //
+				+ "import java.io.InterruptedIOException;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "    void foo(int a) {\n" //
+				+ "        try {\n" //
+				+ "            if (a < 10)\n" //
+				+ "                throw new FileNotFoundException();\n" //
+				+ "            else if (a < 20)\n" //
+				+ "                throw new InterruptedIOException();\n" //
+				+ "            else\n" //
+				+ "                throw new IOException();\n" //
+				+ "        } catch (IOException | InterruptedIOException ex) {\n" //
+				+ "            ex.printStackTrace();\n" //
+				+ "        } \n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected3= sample;
 
 		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2, expected3 });
 	}
