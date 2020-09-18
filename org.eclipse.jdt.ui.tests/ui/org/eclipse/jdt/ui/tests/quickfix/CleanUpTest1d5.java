@@ -2351,7 +2351,8 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "public class X {\n" //
 				+ "  public int foo(String x, String ...y) { return y.length + 1; }\n" //
 				+ "  public int bar() {\n" //
-				+ "      return foo(\"a\", new String[] {\"b\", \"c\", \"d\"});\n" //
+				+ "      return foo\n" //
+				+ "          (/* first */ \"a\", new String[] {\"b\", \"c\", \"d\"});\n" //
 				+ "  };\n" //
 				+ "  public int bar2() {\n" //
 				+ "      return foo(\"a\", \"b\", new String[] {\"c\", \"d\"});\n" //
@@ -2369,7 +2370,8 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				+ "public class X {\n" //
 				+ "  public int foo(String x, String ...y) { return y.length + 1; }\n" //
 				+ "  public int bar() {\n" //
-				+ "      return foo(\"a\", \"b\", \"c\", \"d\");\n" //
+				+ "      return foo\n" //
+				+ "          (/* first */ \"a\", \"b\", \"c\", \"d\");\n" //
 				+ "  };\n" //
 				+ "  public int bar2() {\n" //
 				+ "      return foo(\"a\", \"b\", new String[] {\"c\", \"d\"});\n" //
@@ -2430,8 +2432,6 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
 				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.lang.reflect.Method;\n" //
 				+ "\n" //
 				+ "public class A {\n" //
 				+ "    public void foo(Object... elementsOrTreePaths) {\n" //
