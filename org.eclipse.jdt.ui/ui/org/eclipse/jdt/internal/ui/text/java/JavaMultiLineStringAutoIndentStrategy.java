@@ -60,20 +60,16 @@ public class JavaMultiLineStringAutoIndentStrategy extends JavaStringAutoIndentS
 		boolean isTextBlock= JavaModelUtil.is15OrHigher(fProject) && fullStr.endsWith(IndentAction.TEXT_BLOCK_STR);
 		boolean isLineDelimiter= isLineDelimiter(document, command.text);
 		if (isEditorWrapStrings() && isLineDelimiter && isTextBlock) {
-			if (isTextBlock) {
-				indentation= IndentAction.getTextBlockIndentationString(document, command.offset, command.offset, fProject);
-				if (hasTextBlockEnded) {
-					command.text= command.text + indentation;
-				} else {
-					command.text= command.text + indentation;
-					if (isCloseStringsPreferenceSet(fProject)) {
-						command.caretOffset= command.offset + command.text.length();
-						command.shiftsCaret= false;
-						command.text= command.text + System.lineSeparator() + IndentAction.getTextBlockIndentationString(document, offset, command.offset, fProject) + IndentAction.TEXT_BLOCK_STR;
-					}
-				}
+			indentation= IndentAction.getTextBlockIndentationString(document, command.offset, command.offset, fProject);
+			if (hasTextBlockEnded) {
+				command.text= command.text + indentation;
 			} else {
 				command.text= command.text + indentation;
+				if (isCloseStringsPreferenceSet(fProject)) {
+					command.caretOffset= command.offset + command.text.length();
+					command.shiftsCaret= false;
+					command.text= command.text + System.lineSeparator() + IndentAction.getTextBlockIndentationString(document, offset, command.offset, fProject) + IndentAction.TEXT_BLOCK_STR;
+				}
 			}
 		} else if (command.text.length() > 1 && !isLineDelimiter && isEditorEscapeStrings()) {
 			command.text= getModifiedText(command.text, indentation, delimiter, isEditorEscapeStringsNonAscii());
