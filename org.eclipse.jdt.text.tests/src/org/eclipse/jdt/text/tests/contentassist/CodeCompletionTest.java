@@ -19,6 +19,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeFalse;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -1683,9 +1684,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 	@Test
 	public void testOverrideCompletion5() throws Exception {
-		if (BUG_80782) {
-			return;
-		}
+		assumeFalse(BUG_80782);
 
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
