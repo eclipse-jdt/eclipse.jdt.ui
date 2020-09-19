@@ -16,7 +16,6 @@ package org.eclipse.jdt.internal.ui.fix;
 
 import org.eclipse.osgi.util.NLS;
 
-
 /**
  * @since 1.11
  */
@@ -125,8 +124,8 @@ public class MultiFixMessages extends NLS {
 	public static String AutoboxingCleanup_description;
 	public static String UnboxingCleanup_description;
 	public static String PushDownNegationCleanup_description;
+	public static String RedundantSuperCallCleanup_description;
 	public static String MergeConditionalBlocksCleanup_description;
-
 	public static String UseDirectlyMapMethodCleanup_description;
 	public static String CollectionCloningCleanUp_description;
 	public static String MapCloningCleanUp_description;

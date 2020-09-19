@@ -994,6 +994,18 @@ public class CleanUpConstants {
 	public static final String PUSH_DOWN_NEGATION= "cleanup.push_down_negation"; //$NON-NLS-1$
 
 	/**
+	 * Remove super() call in constructor.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 * <p>
+	 *
+	 * @see CleanUpOptionsCore#TRUE
+	 * @see CleanUpOptionsCore#FALSE
+	 * @since 4.18
+	 */
+	public static final String REDUNDANT_SUPER_CALL= "cleanup.no_super"; //$NON-NLS-1$
+
+	/**
 	 * Merge conditions of if/else if/else that have the same blocks.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}

@@ -38,6 +38,7 @@ import org.eclipse.jdt.internal.ui.fix.UnboxingCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnnecessaryArrayCreationCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnnecessaryCodeCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
+import org.eclipse.jdt.internal.ui.fix.RedundantSuperCallCleanUp;
 
 public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 	public static final String ID= "org.eclipse.jdt.ui.cleanup.tabpage.unnecessary_code"; //$NON-NLS-1$
@@ -53,6 +54,7 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 				new AutoboxingCleanUp(values),
 				new UnboxingCleanUp(values),
 				new PushDownNegationCleanUp(values),
+				new RedundantSuperCallCleanUp(values),
 				new MergeConditionalBlocksCleanUp(values),
 				new MapMethodCleanUp(values),
 				new CollectionCloningCleanUp(values),
@@ -105,6 +107,9 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 		CheckboxPreference pushDownNegation= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_PushDownNegation, CleanUpConstants.PUSH_DOWN_NEGATION,
 				CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(pushDownNegation);
+
+		CheckboxPreference embededIf= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_RedundantSuperCall, CleanUpConstants.REDUNDANT_SUPER_CALL, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(embededIf);
 
 		CheckboxPreference mergeConditionalBlocks= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_MergeConditionalBlocks, CleanUpConstants.MERGE_CONDITIONAL_BLOCKS, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(mergeConditionalBlocks);

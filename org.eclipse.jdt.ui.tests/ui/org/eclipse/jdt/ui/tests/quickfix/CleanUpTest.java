@@ -5402,6 +5402,86 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testUselessSuperCall() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    class A {\n" //
+				+ "        A(int a) {}\n" //
+				+ "\n" //
+				+ "        A() {\n" //
+				+ "            super();\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    class B extends A {\n" //
+				+ "        B(int b) {\n" //
+				+ "            super(b);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        B() {\n" //
+				+ "            super();\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.REDUNDANT_SUPER_CALL);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    class A {\n" //
+				+ "        A(int a) {}\n" //
+				+ "\n" //
+				+ "        A() {\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    class B extends A {\n" //
+				+ "        B(int b) {\n" //
+				+ "            super(b);\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        B() {\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		assertGroupCategoryUsed(new ICompilationUnit[] { cu1 }, new String[] { MultiFixMessages.RedundantSuperCallCleanup_description });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { sample });
+	}
+
+	@Test
+	public void testKeepSuperCall() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "    class A {\n" //
+				+ "        A(int a) {}\n" //
+				+ "\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    class B extends A {\n" //
+				+ "        B(int b) {\n" //
+				+ "            super(b);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.REDUNDANT_SUPER_CALL);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
 	public void testMergeConditionalBlocks() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
