@@ -536,7 +536,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 			if (delta.getKind() != IJavaElementDelta.CHANGED)
 				return true;
 
-			return (delta.getFlags() & IJavaElementDelta.F_CONTENT | IJavaElementDelta.F_FINE_GRAINED) == IJavaElementDelta.F_CONTENT;
+			return (delta.getFlags() & (IJavaElementDelta.F_CONTENT | IJavaElementDelta.F_FINE_GRAINED)) == IJavaElementDelta.F_CONTENT;
 		}
 
 		private boolean onlyChildrenChanged(IJavaElementDelta delta) {
